@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Package Version="4">
+    <Name Value="fbintf"/>
+    <CompilerOptions>
+      <Version Value="11"/>
+      <SearchPaths>
+        <IncludeFiles Value="3.0/firebird"/>
+        <OtherUnitFiles Value="3.0/firebird;2.5"/>
+        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
+    </CompilerOptions>
+    <Files Count="16">
+      <Item1>
+        <Filename Value="3.0/firebird/fb_get_master_interface.pas"/>
+        <Type Value="Include"/>
+      </Item1>
+      <Item2>
+        <Filename Value="3.0/firebird/Firebird.pas"/>
+        <UnitName Value="Firebird"/>
+      </Item2>
+      <Item3>
+        <Filename Value="IB.pas"/>
+        <UnitName Value="IB"/>
+      </Item3>
+      <Item4>
+        <Filename Value="FBLibrary.pas"/>
+        <UnitName Value="FBLibrary"/>
+      </Item4>
+      <Item5>
+        <Filename Value="2.5/IBHeader.pas"/>
+        <UnitName Value="IBHeader"/>
+      </Item5>
+      <Item6>
+        <Filename Value="2.5/FB25ClientAPI.pas"/>
+        <UnitName Value="FB25ClientAPI"/>
+      </Item6>
+      <Item7>
+        <Filename Value="2.5/FB25Provider.pas"/>
+        <UnitName Value="FB25Provider"/>
+      </Item7>
+      <Item8>
+        <Filename Value="2.5/FBStatus.pas"/>
+        <UnitName Value="FBStatus"/>
+      </Item8>
+      <Item9>
+        <Filename Value="FBErrorMessages.pas"/>
+        <UnitName Value="FBErrorMessages"/>
+      </Item9>
+      <Item10>
+        <Filename Value="2.5/FB25Transaction.pas"/>
+        <UnitName Value="FB25Transaction"/>
+      </Item10>
+      <Item11>
+        <Filename Value="2.5/FB25Attachment.pas"/>
+        <UnitName Value="FB25Attachment"/>
+      </Item11>
+      <Item12>
+        <Filename Value="2.5/FB25Blob.pas"/>
+        <UnitName Value="FB25Blob"/>
+      </Item12>
+      <Item13>
+        <Filename Value="IBExternals.pas"/>
+        <UnitName Value="IBExternals"/>
+      </Item13>
+      <Item14>
+        <Filename Value="IBErrorCodes.pas"/>
+        <UnitName Value="IBErrorCodes"/>
+      </Item14>
+      <Item15>
+        <Filename Value="2.5/FB25Events.pas"/>
+        <UnitName Value="FB25Events"/>
+      </Item15>
+      <Item16>
+        <Filename Value="IBUtils.pas"/>
+        <UnitName Value="IBUtils"/>
+      </Item16>
+    </Files>
+    <RequiredPkgs Count="1">
+      <Item1>
+        <PackageName Value="FCL"/>
+      </Item1>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>
