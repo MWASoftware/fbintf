@@ -7,6 +7,11 @@ interface
 uses
   Classes, SysUtils, IB, IBExternals, FBErrorMessages;
 
+const
+  IBLocalBufferLength = 512;
+  IBBigLocalBufferLength = IBLocalBufferLength * 2;
+  IBHugeLocalBufferLength = IBBigLocalBufferLength * 20;
+
 type
 
   TStatusVector              = array[0..19] of ISC_STATUS;
@@ -34,12 +39,7 @@ type
 
 implementation
 
-uses FB25ClientAPI;
-
-const
-  IBLocalBufferLength = 512;
-  IBBigLocalBufferLength = IBLocalBufferLength * 2;
-  IBHugeLocalBufferLength = IBBigLocalBufferLength * 20;
+uses FB25ClientAPI, IBUtils;
 
 threadvar
   FStatusVector: TStatusVector;
@@ -56,7 +56,7 @@ end;
 
 function TFBStatus.GetIBErrorCode: Long;
 begin
-  Result := @FStatusVector[1];
+  Result := FStatusVector[1];
 end;
 
 function TFBStatus.Getsqlcode: Long;

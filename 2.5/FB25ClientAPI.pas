@@ -1,17 +1,17 @@
 unit FB25ClientAPI;
 
-{$mode objfpc}{$H+}
+{$mode delphi}
 
 interface
 
 uses
-  Classes, SysUtils, FBLibrary, IBHeader, IBExternals,FBStatus;
+  Classes, SysUtils, FBLibrary, IBHeader, IBExternals,FBStatus, IB;
 
 type
 
   { TFBClientAPI }
 
-  TFBClientAPI = class(TFBLibrary)
+  TFBClientAPI = class(TFBLibrary,IFirebirdAPI)
   private
     FIBServiceAPIPresent: boolean;
     FStatus: TFBStatus;
@@ -69,6 +69,7 @@ type
     isc_que_events: Tisc_que_events;
     isc_event_counts: Tisc_event_counts;
     isc_event_block: Tisc_event_block;
+    isc_wait_for_event: Tisc_wait_for_event;
     isc_free: Tisc_free;
     isc_add_user   : Tisc_add_user;
     isc_delete_user: Tisc_delete_user;
@@ -77,13 +78,27 @@ type
     destructor Destroy; override;
     function Call(ErrCode: ISC_STATUS; RaiseError: Boolean = true): ISC_STATUS;
     function StatusVector: PISC_STATUS;
+    procedure IBDataBaseError;
     property IBServiceAPIPresent: boolean read FIBServiceAPIPresent;
     property Status: TFBStatus read FStatus;
+
+  public
+    {IFirebirdAPI}
+    function GetStatus: IStatus;
+    function OpenDatabase(DatabaseName: string; Params: TStrings): IAttachment;
+    procedure CreateDatabase(DatabaseName: string; SQLDialect: integer;
+                                          Params: TStrings);
+    function GetServiceManager(Service: string; Params: TStrings): IService;
+    {Start Transaction against multiple databases}
+    function StartTransaction(Databases: array of IAttachment; Params: TStrings): ITransaction;
+    function GetIsEmbeddedServer: boolean;
+    function GetLibraryName: string;
+    function HasServiceAPI: boolean;
   end;
 
 implementation
 
-uses FB25Provider;
+uses FBErrorMessages, dynlibs, FB25Attachment, FB25Transaction;
 
 { Stubs for 6.0 only functions }
 function isc_rollback_retaining_stub(status_vector   : PISC_STATUS;
@@ -228,6 +243,7 @@ begin
   isc_que_events := GetProcAddr('isc_que_events'); {do not localize}
   isc_event_counts := GetProcAddr('isc_event_counts'); {do not localize}
   isc_event_block := GetProcAddr('isc_event_block'); {do not localize}
+  isc_wait_for_event := GetProcAddr('isc_wait_for_event'); {do not localize}
   isc_free := GetProcAddr('isc_free'); {do not localize}
   isc_add_user := GetProcAddr('isc_add_user'); {do not localize}
   isc_delete_user := GetProcAddr('isc_delete_user'); {do not localize}
@@ -269,8 +285,7 @@ begin
   inherited;
   if (IBLibrary <> NilHandle) then
     LoadInterface;
-  FStatus := TFBStatus.Create(FClientAPI);
-  FProvider := TFBProvider.Create(self);
+  FStatus := TFBStatus.Create(self);
 end;
 
 destructor TFBClientAPI.Destroy;
@@ -292,6 +307,63 @@ end;
 function TFBClientAPI.StatusVector: PISC_STATUS;
 begin
   Result := FStatus.StatusVector;
+end;
+
+procedure TFBClientAPI.IBDataBaseError;
+begin
+  raise EIBInterBaseError.Create(FStatus);
+end;
+
+function TFBClientAPI.GetStatus: IStatus;
+begin
+  Result := FStatus;
+end;
+
+function TFBClientAPI.OpenDatabase(DatabaseName: string; Params: TStrings
+  ): IAttachment;
+begin
+   Result := TFBAttachment.Create(self,DatabaseName,Params)
+end;
+
+procedure TFBClientAPI.CreateDatabase(DatabaseName: string;
+  SQLDialect: integer; Params: TStrings);
+var
+  tr_handle: TISC_TR_HANDLE;
+  db_Handle: TISC_DB_HANDLE;
+begin
+  tr_handle := nil;
+  db_Handle := nil;
+  Call(
+      isc_dsql_execute_immediate(StatusVector, @db_Handle, @tr_handle, 0,
+                                 PChar('CREATE DATABASE ''' + DatabaseName + ''' ' + {do not localize}
+                                 Params.Text), SQLDialect, nil));
+end;
+
+function TFBClientAPI.GetServiceManager(Service: string; Params: TStrings
+  ): IService;
+begin
+
+end;
+
+function TFBClientAPI.StartTransaction(Databases: array of IAttachment;
+  Params: TStrings): ITransaction;
+begin
+  Result := TFBTransaction.Create(self,Databases,Params);
+end;
+
+function TFBClientAPI.GetIsEmbeddedServer: boolean;
+begin
+  Result := IsEmbeddedServer;
+end;
+
+function TFBClientAPI.GetLibraryName: string;
+begin
+  Result := FBLibraryName;
+end;
+
+function TFBClientAPI.HasServiceAPI: boolean;
+begin
+  Result := IBServiceAPIPresent;
 end;
 
 end.

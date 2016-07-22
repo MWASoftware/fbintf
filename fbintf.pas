@@ -4,13 +4,12 @@
 
 unit fbintf;
 
-{$warn 5023 off : no warning about unused units}
 interface
 
 uses
-  Firebird, IB, FBLibrary, IBHeader, FB25ClientAPI, FB25Provider, FBStatus, 
-  FBErrorMessages, FB25Transaction, FB25Attachment, FB25Blob, IBExternals, 
-  IBErrorCodes, FB25Events, IBUtils;
+  Firebird, IB, FBLibrary, IBHeader, FB25ClientAPI, FBStatus, FBErrorMessages, 
+  FB25Transaction, FB25Attachment, FB25Blob, IBExternals, IBErrorCodes, 
+  FB25Events, IBUtils, FB25Statement;
 
 implementation
 

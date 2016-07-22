@@ -9,18 +9,30 @@ unit FBLibrary;
 interface
 
 uses
-  Classes, SysUtils, Dynlibs, DB, IB;
+  Classes, SysUtils, Dynlibs,  IB;
 
 type
+
+  { TObjectOwner }
+
+  TObjectOwner = class(TInterfacedObject)
+  private
+    FOwnedObjects: TList;
+  public
+    constructor Create;
+    destructor Destroy; override;
+    procedure RegisterObj(AObj: TObject);
+    procedure UnRegisterObj(AObj: TObject);
+  end;
+
   { TFBLibrary }
 
-  TFBLibrary = class
+  TFBLibrary = class(TObjectOwner)
   private
     FFBLibraryName: string;
     procedure LoadIBLibrary;
   protected
     IBLibrary: TLibHandle; static;
-    FProvider: IFirebird;
     function GetProcAddr(ProcName: PChar): Pointer;
   public
     constructor Create;
@@ -28,16 +40,12 @@ type
     procedure IBAlloc(var P; OldSize, NewSize: Integer);
     function IsEmbeddedServer: boolean; virtual;
     property FBLibraryName: string read FFBLibraryName;
-    property Provider: IFirebird read FProvider;
   end;
 
 implementation
 
-uses
 {$IFDEF WINDOWS }
-  Windows;
-{$ELSE}
-  unix;
+uses Windows,Registry, WinDirs;
 {$ENDIF}
 
 const
@@ -61,6 +69,38 @@ FIREBIRD_EMBEDDED = 'fbembed.dll';
 {$I wloadlibrary.inc}
 {$ENDIF}
 
+{ TObjectOwner }
+
+constructor TObjectOwner.Create;
+begin
+  inherited Create;
+  FOwnedObjects := TList.Create;
+end;
+
+destructor TObjectOwner.Destroy;
+var i: integer;
+begin
+  if assigned(FOwnedObjects) then
+  begin
+    for i := 0 to FOwnedObjects.Count - 1 do
+      TObject(FOwnedObjects[I]).Free;
+    FOwnedObjects.Free;
+  end;
+  inherited Destroy;
+end;
+
+procedure TObjectOwner.RegisterObj(AObj: TObject);
+var index: integer;
+begin
+  index := FOwnedObjects.IndexOf(AObj);
+  if index = -1 then
+    FOwnedObjects.Add(AObj);
+end;
+
+procedure TObjectOwner.UnRegisterObj(AObj: TObject);
+begin
+  FOwnedObjects.Remove(AObj);
+end;
 { TFBLibrary }
 
 constructor TFBLibrary.Create;
@@ -71,12 +111,12 @@ end;
 
 destructor TFBLibrary.Destroy;
 begin
+  inherited Destroy;  {Free owned objects first}
   if IBLibrary <> NilHandle then
   begin
     FreeLibrary(IBLibrary);
     IBLibrary := NilHandle;
   end;
-  inherited Destroy;
 end;
 
 procedure TFBLibrary.IBAlloc(var P; OldSize, NewSize: Integer);

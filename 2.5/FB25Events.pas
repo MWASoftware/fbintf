@@ -5,42 +5,42 @@ unit FB25Events;
 interface
 
 uses
-  Classes, SysUtils, IB;
+  Classes, SysUtils, IB, FBLibrary, FB25ClientAPI, FB25Attachment, IBExternals,
+  IBHeader, syncobjs;
 
 type
-
   { TFBEvents }
 
   TFBEvents = class(TInterfacedObject,IEvents)
   private
     FClientAPI: TFBClientAPI;
+    FOwner: TObjectOwner;
     FEventBuffer: PChar;
     FEventBufferLen: integer;
     FEventID: ISC_LONG;
     FResultBuffer: PChar;
-    FEventBufferLen: integer;
     FEvents: TStringList;
     FDBHandle: TISC_DB_HANDLE;
     FCriticalSection: TCriticalSection;
     FEventHandlerThread: TObject;
     FEventHandler: TEventHandler;
-    procedure ExtractEventCounts(var EventCounts: array of TEventInfo);
+    function ExtractEventCounts: TEventCounts;
     procedure CancelEvents;
     procedure EventSignaled;
   public
-    constructor Create(ClientAPI: TFBClientAPI; DBHandle: TISC_DB_HANDLE; Events: TStrings);
+    constructor Create(DBAttachment: TFBAttachment; Events: TStrings);
     destructor Destroy; override;
 
     {IEvents}
     function GetStatus: IStatus;
     procedure Cancel;
-    procedure WaitForEvent(var EventCounts: array of TEventInfo);
+    procedure WaitForEvent(var EventCounts: TEventCounts);
     procedure AsyncWaitForEvent(EventHandler: TEventHandler);
   end;
 
 implementation
 
-uses FBStatus;
+uses FBStatus, FBErrorMessages;
 
 const
   MaxEvents = 15;
@@ -48,6 +48,8 @@ const
 type
 
   { v }
+
+  { TEventHandlerThread }
 
   TEventHandlerThread = class(TThread)
   private
@@ -64,7 +66,7 @@ type
   protected
     procedure Execute; override;
   public
-    constructor Create(Owner: TIBEvents);
+    constructor Create(Owner: TFBEvents);
     destructor Destroy; override;
     procedure Terminate;
   end;
@@ -112,11 +114,11 @@ begin
     {$ENDIF}
 
     if not Terminated  then
-      Synchronize(DoEventSignalled)
+      Synchronize(@DoEventSignalled)
   end;
 end;
 
-constructor TEventHandlerThread.Create(Owner: TIBEvents);
+constructor TEventHandlerThread.Create(Owner: TFBEvents);
 var
   PSa : PSecurityAttributes;
 {$IFDEF WINDOWS}
@@ -130,6 +132,7 @@ begin
   Sa.bInheritHandle := true;
   PSa := @Sa;
 {$ELSE}
+  GUID : TGUID;
 begin
   PSa:= nil;
 {$ENDIF}
@@ -138,10 +141,11 @@ begin
   {$IFDEF WINDOWS}
   FEventHandler := CreateEvent(PSa,false,true,nil);
   {$ELSE}
-  FEventWaiting := TEventObject.Create(PSa,false,true,FOwner.Name+'.Events');
+  CreateGuid(GUID);
+  FEventWaiting := TEventObject.Create(PSa,false,true,GUIDToString(GUID));
   {$ENDIF}
   FreeOnTerminate := true;
-  Resume
+  Start;
 end;
 
 destructor TEventHandlerThread.Destroy;
@@ -166,23 +170,23 @@ end;
 
   { TFBEvents }
 
-procedure TFBEvents.ExtractEventCounts(var EventCounts: array of TEventInfo);
+function TFBEvents.ExtractEventCounts: TEventCounts;
 var EventCountList: TStatusVector;
     i: integer;
     j: integer;
 begin
   with FClientAPI do
      isc_event_counts( @EventCountList, FEventBufferLen, FEventBuffer, FResultBuffer);
-  SetLength(EventsCounts,0);
+  SetLength(Result,0);
   j := 0;
   for i := 0 to FEvents.Count - 1 do
   begin
     if EventCountList[i] > 0 then
     begin
       Inc(j);
-      SetLength(EventsCounts,j);
-      EventsCounts[j].EventName := FEvents[i];
-      EventsCounts[j].Count := EventCountList[i];
+      SetLength(Result,j);
+      Result[j].EventName := FEvents[i];
+      Result[j].Count := EventCountList[i];
     end;
   end;
 end;
@@ -200,29 +204,30 @@ begin
 end;
 
 procedure TFBEvents.EventSignaled;
-var EventCounts: array of TEventInfo;
 begin
   if assigned(FEventHandler)  then
   begin
-    ExtractEventCounts(EventCounts);
-    FEventHandler(EventCounts);
+    FEventHandler(ExtractEventCounts);
   end;
   FEventHandler := nil;
 end;
 
-constructor TFBEvents.Create(ClientAPI: TFBClientAPI; DBHandle: TISC_DB_HANDLE;
-  Events: TStrings);
+constructor TFBEvents.Create(DBAttachment: TFBAttachment; Events: TStrings);
 var
   i: integer;
   EventNames: array of PChar;
 begin
-  FClientAPI := ClientAPI;
+  inherited Create;
+  FOwner := DBAttachment;
+  DBAttachment.RegisterObj(self);
+  FOwner := DBAttachment.ClientAPI;
   if Events.Count > MaxEvents then
     IBError(ibxeMaximumEvents, [nil]);
 
+
   FCriticalSection := TCriticalSection.Create;
   FEvents := TStringList.Create;
-  FDBHandle := DBHandle;
+  FDBHandle := DBAttachment.Handle;
   FEventHandlerThread := TEventHandlerThread.Create(self);
   setlength(EventNames,MaxEvents);
   try
@@ -249,10 +254,15 @@ begin
     TEventHandlerThread(FEventHandlerThread).Terminate;
   if assigned(FCriticalSection) then FCriticalSection.Free;
   if assigned(FEvents) then FEvents.Free;
-  if FEventBuffer <> nil then
-    isc_free( FEventBuffer);
-  if FResultBuffer <> nil then
-    isc_free( FResultBuffer);
+  with FClientAPI do
+  begin
+    if FEventBuffer <> nil then
+      isc_free( FEventBuffer);
+    if FResultBuffer <> nil then
+      isc_free( FResultBuffer);
+  end;
+  if assigned(FOwner) then
+    FOwner.UnRegisterObj(self);
   inherited Destroy;
 end;
 
@@ -280,18 +290,18 @@ begin
     callback := @IBEventCallback;
     with FClientAPI do
       Call(isc_que_events( StatusVector, @FDBHandle, @FEventID, FEventBufferLen,
-                     FEventBuffer, TISC_CALLBACK(callback), PVoid(FEventHandlerThread));
+                     FEventBuffer, TISC_CALLBACK(callback), PVoid(FEventHandlerThread)));
   finally
     FCriticalSection.Leave
   end;
 end;
 
 
-procedure TFBEvents.WaitForEvent(var EventCounts: array of TEventInfo);
+procedure TFBEvents.WaitForEvent(var EventCounts: TEventCounts);
 begin
   with FClientAPI do
      Call(isc_wait_for_event(StatusVector,@FDBHandle, FEventBufferlen,@FEventBuffer,@FResultBuffer));
-  ExtractEventCounts(EventCounts);
+  EventCounts := ExtractEventCounts
 end;
 
 end.

@@ -73,6 +73,7 @@ type
   IMetaData = interface
     function getCount: integer;
     function getFieldMetaData(index: integer): IFieldMetaData;
+    function ByName(Idx: String): IFieldMetaData;
   end;
 
   ISQLData = interface(IFieldMetaData)
@@ -111,6 +112,7 @@ type
     function getCount: integer;
     function getSQLData(index: integer): ISQLData;
     function FetchNext: boolean;
+    function ByName(Idx: String): ISQLData;
     procedure Close;
   end;
 
@@ -154,15 +156,20 @@ type
 
   ISQLParams = interface
     function getCount: integer;
-    function getSQLParam(index: integer): integer;
+    function getSQLParam(index: integer): ISQLParam;
+    function ByName(Idx: String): ISQLParam ;
   end;
+
 
   IStatement = interface
     function GetStatus: IStatus;
-    function GetInMetaData: IMetaData;
+    function GetSQLParams: ISQLParams;
     function GetOutMetaData: IMetaData;
+    function GetPlan: String;
+    function GetRowsAffected: Integer;
     function Execute: ISQLData;
     function OpenCursor: IResultSet;
+    property SQLParams: ISQLParams read GetSQLParams;
   end;
 
 type
@@ -171,12 +178,14 @@ type
     Count: integer;
   end;
 
-  TEventHandler = procedure(EventCounts: array of TEventInfo) of object;
+  TEventCounts = array of TEventInfo;
+
+  TEventHandler = procedure(EventCounts: TEventCounts) of object;
 
   IEvents = interface
     function GetStatus: IStatus;
     procedure Cancel;
-    procedure WaitForEvent(var EventCounts: array of TEventInfo);
+    procedure WaitForEvent(var EventCounts: TEventCounts);
     procedure AsyncWaitForEvent(EventHandler: TEventHandler);
   end;
 
@@ -186,9 +195,9 @@ type
     procedure DropDatabase;
     function StartTransaction(Params: TStrings): ITransaction;
     function CreateBlob(transaction: ITransaction): IBlob;
-    function OpenBlob(transaction: ITransaction): IBlob;
-    procedure ExecImmediate(transaction: ITransaction; sql: string);
-    function Prepare(transaction: ITransaction; sql: string): IStatement;
+    function OpenBlob(transaction: ITransaction; BlobID: TISC_QUAD): IBlob;
+    procedure ExecImmediate(transaction: ITransaction; sql: string; SQLDialect: integer);
+    function Prepare(transaction: ITransaction; sql: string; SQLDialect: integer): IStatement;
 
     {Events}
     function GetEventHandler(Events: TStrings): IEvents;
@@ -231,7 +240,7 @@ type
   IService = interface
   end;
 
-  IFirebird = interface
+  IFirebirdAPI = interface
     function GetStatus: IStatus;
     function OpenDatabase(DatabaseName: string; Params: TStrings): IAttachment;
     procedure CreateDatabase(DatabaseName: string; SQLDialect: integer;
@@ -239,6 +248,9 @@ type
     function GetServiceManager(Service: string; Params: TStrings): IService;
     {Start Transaction against multiple databases}
     function StartTransaction(Databases: array of IAttachment; Params: TStrings): ITransaction;
+    function GetIsEmbeddedServer: boolean;
+    function GetLibraryName: string;
+    function HasServiceAPI: boolean;
   end;
 
 type
@@ -248,12 +260,6 @@ const
   OnGetLibraryName: TOnGetLibraryName = nil;
 
 type
-  TTraceFlag = (tfQPrepare, tfQExecute, tfQFetch, tfError, tfStmt, tfConnect,
-     tfTransact, tfBlob, tfService, tfMisc);
-  TTraceFlags = set of TTraceFlag;
-
-   { EIBInterBaseError }
-
    { EIBError }
 
    EIBError = class(EDatabaseError)
@@ -263,6 +269,8 @@ type
      constructor Create(ASQLCode: Long; Msg: string);
      property SQLCode: Long read FSQLCode;
    end;
+
+   { EIBInterBaseError }
 
    EIBInterBaseError = class(EIBError)
    private
@@ -276,17 +284,32 @@ type
 
 procedure IBError(ErrMess: TIBClientError; const Args: array of const);
 
-var Master: IFirebird;
+var FirebirdAPI: IFirebirdAPI;
 
 function TryIBLoad: Boolean;
+procedure CheckIBLoaded;
 
 implementation
 
-uses FBLibrary;
+uses FBLibrary, FB25ClientAPI;
+
+const FBLibraryObj: TFBLibrary = nil;
 
 function TryIBLoad: Boolean;
 begin
+  Result := false;
+  if FBLibraryObj = nil then
+  begin
+    FBLibraryObj := TFBClientAPI.Create;
+    FirebirdAPI := TFBClientAPI(FBLibraryObj);
+    Result := true;
+  end;
+end;
 
+procedure CheckIBLoaded;
+begin
+  if not TryIBLoad then
+    IBError(ibxeInterBaseMissing, [nil]);
 end;
 
 { EIBError }
@@ -312,7 +335,11 @@ begin
 end;
 
 initialization
-  Master := nil;
+  FirebirdAPI := nil;
+
+finalization
+  if FBLibraryObj <> nil then
+    FBLibraryObj.Free;
 
 end.
 

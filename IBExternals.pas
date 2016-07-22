@@ -44,6 +44,8 @@ uses
   unix
 {$ENDIF}
 ;
+const
+  MaxuShort            = 65535;
 type
   Int                  = LongInt; { 32 bit signed }
   UInt                 = DWord;   { 32 bit unsigned }
