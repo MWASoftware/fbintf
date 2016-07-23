@@ -381,13 +381,13 @@ end;
 
 function TFBAttachment.CreateBlob(transaction: ITransaction): IBlob;
 begin
-  Result := TFBBLob.Create(FClientAPI,self,transaction);
+  Result := TFBBLob.Create(self,transaction);
 end;
 
 function TFBAttachment.OpenBlob(transaction: ITransaction; BlobID: TISC_QUAD
   ): IBlob;
 begin
-  Result := TFBBLob.Create(FClientAPI,self,transaction,BlobID);
+  Result := TFBBLob.Create(self,transaction,BlobID);
 end;
 
 procedure TFBAttachment.ExecImmediate(transaction: ITransaction; sql: string;
@@ -402,7 +402,7 @@ end;
 function TFBAttachment.Prepare(transaction: ITransaction; sql: string;
   SQLDialect: integer): IStatement;
 begin
-  Result := TFBStatement.Create(self,transaction,sql,SQLDialect);
+  Result := TFBStatement.Create(self,transaction as TFBTransaction,sql,SQLDialect);
 end;
 
 function TFBAttachment.GetEventHandler(Events: TStrings): IEvents;

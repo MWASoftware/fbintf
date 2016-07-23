@@ -15,6 +15,7 @@ type
   TFBBlob = class(TInterfacedObject,IBlob)
   private
     FClientAPI: TFBClientAPI;
+    FAttachment: TFBAttachment;
     FHandle: TISC_BLOB_HANDLE;
     FBlobID: TISC_QUAD;
     FOwner: TObjectOwner;
@@ -22,9 +23,11 @@ type
     FCreating: boolean;
     procedure InternalCancel;
     procedure InternalClose;
+    procedure CheckReadable;
+    procedure CheckWritable;
   public
-    constructor Create(ClientAPI: TFBClientAPI; Attachment: IAttachment; Transaction: ITransaction); overload;
-    constructor Create(ClientAPI: TFBClientAPI; Attachment: IAttachment; Transaction: ITransaction;
+    constructor Create(Attachment: TFBAttachment; Transaction: ITransaction); overload;
+    constructor Create(Attachment: TFBAttachment; Transaction: ITransaction;
                        BlobID: TISC_QUAD); overload;
     destructor Destroy; override;
   {IBlob}
@@ -37,12 +40,17 @@ type
                        TotalSize: Int64; var BlobType: Short) :boolean;
     function Read(var Buffer; Count: Longint): Longint;
     function Write(const Buffer; Count: Longint): Longint;
+    procedure LoadFromFile(Filename: string);
+    procedure LoadFromStream(S: TStream);
+    procedure SaveToFile(Filename: string);
+    procedure SaveToStream(S: TStream);
     property Handle: TISC_BLOB_HANDLE read FHandle;
+    property Attachment: TFBAttachment read FAttachment;
   end;
 
 implementation
 
-uses IBErrorCodes;
+uses IBErrorCodes, FBErrorMessages;
 
 { TFBBlob }
 
@@ -64,36 +72,48 @@ begin
   FHandle := nil;
 end;
 
-constructor TFBBlob.Create(ClientAPI: TFBClientAPI; Attachment: IAttachment;
-  Transaction: ITransaction);
-var DBHandle: TISC_DB_HANDLE;
-    TRHandle: TISC_TR_HANDLE;
+procedure TFBBlob.CheckReadable;
 begin
-  inherited Create;
-  FClientAPI := ClientAPI;
-  FOwner := Transaction as TFBAttachment;
-  FOwner.RegisterObj(self);
-  DBHandle := (Attachment as TFBAttachment).Handle;
-  TRHandle := (Transaction as TFBTransaction).Handle;
-  FCreating := true;
-  with ClientAPI do
-    Call(isc_create_blob2(StatusVector, @DBHandle, @TRHandle, @FHandle, @FBlobID,
-                         0, nil));
+  if FCreating then IBError(ibxeBlobCannotBeRead, [nil]);
 end;
 
-constructor TFBBlob.Create(ClientAPI: TFBClientAPI; Attachment: IAttachment;
+procedure TFBBlob.CheckWritable;
+begin
+  if not FCreating then IBError(ibxeBlobCannotBeWritten, [nil]);
+end;
+
+constructor TFBBlob.Create(Attachment: TFBAttachment; Transaction: ITransaction
+  );
+var DBHandle: TISC_DB_HANDLE;
+      TRHandle: TISC_TR_HANDLE;
+begin
+    inherited Create;
+    FClientAPI := Attachment.ClientAPI;
+    FAttachment := Attachment;
+    FOwner := Transaction as TFBTransaction;
+    FOwner.RegisterObj(self);
+    DBHandle := (Attachment as TFBAttachment).Handle;
+    TRHandle := (Transaction as TFBTransaction).Handle;
+    FCreating := true;
+    with FClientAPI do
+      Call(isc_create_blob2(StatusVector, @DBHandle, @TRHandle, @FHandle, @FBlobID,
+                           0, nil));
+end;
+
+constructor TFBBlob.Create(Attachment: TFBAttachment;
   Transaction: ITransaction; BlobID: TISC_QUAD);
 var DBHandle: TISC_DB_HANDLE;
     TRHandle: TISC_TR_HANDLE;
 begin
   inherited Create;
-  FClientAPI := ClientAPI;
-  FOwner := Transaction as TFBAttachment;
+  FClientAPI := Attachment.ClientAPI;
+  FAttachment := Attachment;
+  FOwner := Transaction as TFBTransaction;
   FOwner.RegisterObj(self);
   DBHandle := (Attachment as TFBAttachment).Handle;
   TRHandle := (Transaction as TFBTransaction).Handle;
   FBlobID := BlobID;
-  with ClientAPI do
+  with FClientAPI do
     Call(isc_open_blob2(StatusVector,  @DBHandle, @TRHandle, @FHandle,
                      @FBlobID, 0, nil));
 end;
@@ -175,6 +195,7 @@ var
   returnCode: long;
   localCount: uShort;
 begin
+  CheckReadable;
   Result := 0;
   if FEOB then
     Exit;
@@ -203,8 +224,11 @@ var
   LocalBuffer: PChar;
   localCount: uShort;
 begin
+  CheckWritable;
   LocalBuffer := PChar(Buffer);
   Result := 0;
+  if Count = 0 then Exit;
+
   repeat
     if Count > MaxuShort then
       localCount := MaxuShort
@@ -216,6 +240,56 @@ begin
     Inc(LocalBuffer,localCount);
     Inc(Result,localCount);
   until Count = 0;
+end;
+
+procedure TFBBlob.LoadFromFile(Filename: string);
+var
+  Stream: TStream;
+begin
+  Stream := TFileStream.Create(FileName, fmOpenRead);
+  try
+    LoadFromStream(Stream);
+  finally
+    Stream.Free;
+  end;
+end;
+
+const BufSize = 8 * 1024;
+
+procedure TFBBlob.LoadFromStream(S: TStream);
+var Buffer: array [0..BufSize-1] of char;
+    BytesRead: integer;
+begin
+  CheckWritable;
+  S.Position := 0;
+  repeat
+    BytesRead := S.Read(Buffer,BufSize);
+    Write(Buffer,BytesRead);
+  until BytesRead = 0;
+  InternalClose;
+end;
+
+procedure TFBBlob.SaveToFile(Filename: string);
+var
+  Stream: TStream;
+begin
+  Stream := TFileStream.Create(FileName, fmCreate);
+  try
+    SaveToStream(Stream);
+  finally
+    Stream.Free;
+  end;
+end;
+
+procedure TFBBlob.SaveToStream(S: TStream);
+var Buffer: array [0..BufSize-1] of char;
+    BytesRead: integer;
+begin
+  CheckReadable;
+  repeat
+    BytesRead := Read(Buffer,BufSize);
+    S.Write(Buffer,BytesRead);
+  until BytesRead = 0;
 end;
 
 end.
