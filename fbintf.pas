@@ -9,7 +9,7 @@ interface
 uses
   Firebird, IB, FBLibrary, IBHeader, FB25ClientAPI, FBStatus, FBErrorMessages, 
   FB25Transaction, FB25Attachment, FB25Blob, IBExternals, IBErrorCodes, 
-  FB25Events, IBUtils, FB25Statement;
+  FB25Events, IBUtils, FB25Statement, FB25Services, FB25ResultBuffer;
 
 implementation
 

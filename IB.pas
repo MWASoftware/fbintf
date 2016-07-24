@@ -117,7 +117,8 @@ type
     property IsNull: Boolean read GetIsNull;
   end;
 
-  IResults = interface(IMetaData)
+  IResults = interface
+   function getCount: integer;
    function ByName(Idx: String): ISQLData;
    function getSQLData(index: integer): ISQLData;
   end;
@@ -204,9 +205,10 @@ type
     function GetSQLParams: ISQLParams;
     function GetOutMetaData: IMetaData;
     function GetPlan: String;
-    function GetRowsAffected: Integer;
+    function GetRowsAffected(var InsertCount, UpdateCount, DeleteCount: integer): boolean;
     function GetSQLType: TIBSQLTypes;
-    function Execute: IResults;
+    function Execute: IResults; overload;
+    function Execute(aTransaction: ITransaction): IResults; overload;
     function OpenCursor: IResultSet;
     property SQLParams: ISQLParams read GetSQLParams;
     property SQLType: TIBSQLTypes read GetSQLType;
@@ -278,6 +280,8 @@ type
   end;
 
   IService = interface
+//    procedure Attach(ServerName: string; Protocol: TProtocol; Params: TStrings);
+//    procedure Detach;
   end;
 
   IFirebirdAPI = interface
