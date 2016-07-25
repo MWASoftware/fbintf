@@ -5,7 +5,7 @@ unit FB25ResultBuffer;
 interface
 
 uses
-  Classes, SysUtils, IB, FB25ClientAPI, IBExternals, IBHeader;
+  Classes, SysUtils, IB, FB25ClientAPI, IBExternals, IBHeader, FB25Statement;
 
 type
   {TInfoBuffer inspired by IBPP RB class}
@@ -18,7 +18,7 @@ type
     function FindToken(token: char): PChar; overload;
     function FindToken(token: char; subtoken: char): PChar; overload;
   public
-    constructor Create(ClientAPI: TFBClientAPI; aSize: integer = 1024);
+    constructor Create(ClientAPI: TFBClientAPI; aSize: integer);
     destructor Destroy; override;
     function Size: short;
     procedure Reset;
@@ -30,12 +30,20 @@ type
 
   { TResultBuffer }
 
-  {Used for access to a isc_dsql_sql_info result buffer}
 
   TResultBuffer = class(TInfoBuffer)
   public
     function GetValue(token: char): integer; overload;
     function GetValue(token: char; subtoken: char): integer; overload;
+  end;
+
+  {Used for access to a isc_dsql_sql_info result buffer}
+
+  { TSQLResultBuffer }
+
+  TSQLResultBuffer = class(TResultBuffer)
+  public
+    constructor Create(aStatement: TFBStatement; info_request:char; aSize: integer = 128);
   end;
 
   {Used for access to a isc_query_service result buffer}
@@ -51,6 +59,17 @@ type
 implementation
 
 uses FBErrorMessages;
+
+{ TSQLResultBuffer }
+
+constructor TSQLResultBuffer.Create(aStatement: TFBStatement;
+  info_request: char; aSize: integer);
+begin
+  inherited Create(aStatement.ClientAPI,aSize);
+  with FClientAPI do
+    Call(isc_dsql_sql_info(StatusVector, @(aStatement.Handle), 2, @info_request,
+                           Size, Buffer));
+end;
 
   { TServiceQueryBuffer }
 

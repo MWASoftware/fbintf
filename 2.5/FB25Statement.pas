@@ -174,6 +174,7 @@ type
     function GetXSQLDA: PXSQLDA;
     procedure SetCount(Value: Integer);
   protected
+    FClientAPI: TFBClientAPI;
     FStatement: TFBStatement;
     function CreateSQLVAR: TIBXSQLVAR; virtual; abstract;
     function GetXSQLVARByName(Idx: String): TIBXSQLVAR; virtual; abstract;
@@ -199,6 +200,7 @@ type
     function GetXSQLVARByName(Idx: String): TIBXSQLVAR; override;
   public
     constructor Create(aOwner: TFBStatement);
+    procedure Bind;
     property Modified: Boolean read GetModified;
     property Vars[Idx: Integer]: TIBXSQLParam read GetXSQLParam; default;
 
@@ -219,6 +221,7 @@ type
     function GetXSQLVARByName(Idx: String): TIBXSQLVAR; override;
   public
     constructor Create(aOwner: TFBStatement);
+    procedure Bind;
     function MetaByName(Idx: String): IFieldMetaData;
     property Vars[Idx: Integer]: TIBXSQLVAR read GetXSQLVAR; default;
 
@@ -289,6 +292,8 @@ type
     function Execute: IResults; overload;
     function Execute(aTransaction: ITransaction): IResults; overload;
     function OpenCursor: IResultSet;
+    property ClientAPI: TFBClientAPI read FClientAPI;
+    property Handle: TISC_STMT_HANDLE read FHandle;
     property SQLParams: ISQLParams read GetSQLParams;
     property SQLType: TIBSQLTypes read GetSQLType;
 
@@ -380,6 +385,28 @@ begin
   inherited Create(aOwner,daInput);
 end;
 
+procedure TIBXINPUTSQLDA.Bind;
+begin
+  Count := 1;
+  with FClientAPI do
+  begin
+    if (FXSQLDA <> nil) then
+       Call(isc_dsql_describe_bind(StatusVector, @(FStatement.Handle), FStatement.SQLDialect,
+                                    FXSQLDA), true);
+
+    if FXSQLDA^.sqld > FXSQLDA^.sqln then
+    begin
+      Count := FXSQLDA^.sqld;
+      Call(isc_dsql_describe_bind(StatusVector, @(FStatement.Handle), FStatement.SQLDialect,
+                                   FXSQLDA), true);
+    end
+    else
+    if FXSQLDA^.sqld = 0 then
+      Count := 0;
+  end;
+  Initialize;
+end;
+
 function TIBXINPUTSQLDA.getCount: integer;
 begin
   Result := Count;
@@ -431,6 +458,26 @@ end;
 constructor TIBXOUTPUTSQLDA.Create(aOwner: TFBStatement);
 begin
   inherited Create(aOwner,daOutput);
+end;
+
+procedure TIBXOUTPUTSQLDA.Bind;
+begin
+  { Allocate an initial output descriptor (with one column) }
+  Count := 1;
+  with FClientAPI do
+  begin
+    { Using isc_dsql_describe, get the right size for the columns... }
+    Call(isc_dsql_describe(StatusVector, @(FStatement.Handle), FStatement.SQLDialect, FXSQLDA), True);
+    if FXSQLDA^.sqld > FXSQLDA^.sqln then
+    begin
+      Count := FXSQLDA^.sqld;
+      Call(isc_dsql_describe(StatusVector, @(FStatement.Handle), FStatement.SQLDialect, FXSQLDA), True);
+    end
+    else
+    if FXSQLDA^.sqld = 0 then
+      Count := 0;
+  end;
+  Initialize;
 end;
 
 function TIBXOUTPUTSQLDA.MetaByName(Idx: String): IFieldMetaData;
@@ -1535,6 +1582,7 @@ constructor TIBXSQLDA.Create(aStatement: TFBStatement; sqldaType: TIBXSQLDAType)
 begin
   inherited Create;
   FStatement := aStatement;
+  FClientAPI := aStatement.ClientAPI;
   FSize := 0;
   FUniqueRelationName := '';
   FInputSQLDA := sqldaType = daInput;
@@ -1726,25 +1774,23 @@ end;
 
 procedure TFBStatement.InternalPrepare(DBHandle: TISC_DB_HANDLE; sql: string);
 var
-  RB: TResultBuffer;
-  type_item: Char;
+  RB: TSQLResultBuffer;
 begin
   if (sql = '') then
     IBError(ibxeEmptyQuery, [nil]);
-  with FClientAPI do
   try
-    Call(isc_dsql_alloc_statement2(StatusVector, @DBHandle,
-                                    @FHandle), True);
-    Call(isc_dsql_prepare(StatusVector, @FTRHandle, @FHandle, 0,
-               PChar(sql), FSQLDialect, nil), True);
+    with FClientAPI do
+    begin
+      Call(isc_dsql_alloc_statement2(StatusVector, @DBHandle,
+                                      @FHandle), True);
+      Call(isc_dsql_prepare(StatusVector, @FTRHandle, @FHandle, 0,
+                 PChar(sql), FSQLDialect, nil), True);
+    end;
     { After preparing the statement, query the stmt type and possibly
       create a FSQLRecord "holder" }
     { Get the type of the statement }
-    RB := TResultBuffer.Create(FClientAPI);
+    RB := TSQLResultBuffer.Create(self,isc_info_sql_stmt_type);
     try
-      type_item := isc_info_sql_stmt_type;
-      Call(isc_dsql_sql_info(StatusVector, @FHandle, 1, @type_item,
-                         RB.Size, RB.buffer), True);
       FSQLType := TIBSQLTypes(RB.GetValue(isc_info_sql_stmt_type));
 
     finally
@@ -1766,40 +1812,12 @@ begin
       SQLExecProcedure:
       begin
         {set up input sqlda}
-        FSQLParams.Count := 1;
-        if (FSQLParams.FXSQLDA <> nil) then
-           Call(isc_dsql_describe_bind(StatusVector, @FHandle, SQLDialect,
-                                        FSQLParams.FXSQLDA), true);
-
-        if FSQLParams.FXSQLDA^.sqld > FSQLParams.FXSQLDA^.sqln then
-        begin
-          FSQLParams.Count := FSQLParams.FXSQLDA^.sqld;
-          Call(isc_dsql_describe_bind(StatusVector, @FHandle, SQLDialect,
-                                       FSQLParams.FXSQLDA), true);
-        end
-        else
-        if FSQLParams.FXSQLDA^.sqld = 0 then
-          FSQLParams.Count := 0;
-        FSQLParams.Initialize;
+        FSQLParams.Bind;
 
         {setup output sqlda}
         if FSQLType in [SQLSelect, SQLSelectForUpdate,
                         SQLExecProcedure] then
-        begin
-          { Allocate an initial output descriptor (with one column) }
-          FSQLRecord.Count := 1;
-          { Using isc_dsql_describe, get the right size for the columns... }
-          Call(isc_dsql_describe(StatusVector, @FHandle, SQLDialect, FSQLRecord.FXSQLDA), True);
-          if FSQLRecord.FXSQLDA^.sqld > FSQLRecord.FXSQLDA^.sqln then
-          begin
-            FSQLRecord.Count := FSQLRecord.FXSQLDA^.sqld;
-            Call(isc_dsql_describe(StatusVector, @FHandle, SQLDialect, FSQLRecord.FXSQLDA), True);
-          end
-          else
-          if FSQLRecord.FXSQLDA^.sqld = 0 then
-            FSQLRecord.Count := 0;
-          FSQLRecord.Initialize;
-        end;
+          FSQLRecord.Bind;
       end;
     end;
   except
@@ -1968,22 +1986,16 @@ end;
 
 function TFBStatement.GetPlan: String;
 var
-  RB: TResultBuffer;
-  info_request: Char;
+  RB: TSQLResultBuffer;
 begin
   if (not (FSQLType in [SQLSelect, SQLSelectForUpdate,
        {TODO: SQLExecProcedure, }
        SQLUpdate, SQLDelete])) then
     result := ''
   else
-  with FClientAPI do
   begin
-    RB := TResultBuffer.Create(FClientAPI,16384);
+    RB := TSQLResultBuffer.Create(self,isc_info_sql_get_plan,16384);
     try
-      info_request := isc_info_sql_get_plan;
-      Call(isc_dsql_sql_info(StatusVector, @FHandle, 2, @info_request,
-                           RB.Size, RB.buffer), True);
-
       RB.GetString(isc_info_sql_get_plan,Result);
     finally
       RB.Free;
@@ -1994,20 +2006,15 @@ end;
 function TFBStatement.GetRowsAffected(var InsertCount, UpdateCount,
   DeleteCount: integer): boolean;
 var
-  info_request: Char;
-  RB: TResultBuffer;
+  RB: TSQLResultBuffer;
 begin
   InsertCount := 0;
   UpdateCount := 0;
   DeleteCount := 0;
   Result := true;
-  with FClientAPI do
   begin
-    RB := TResultBuffer.Create(FClientAPI);
+    RB := TSQLResultBuffer.Create(self,isc_info_sql_records);
     try
-      info_request := isc_info_sql_records;
-      Call(isc_dsql_sql_info(StatusVector, @FHandle, 1, @info_request,
-                         RB.Size, RB.buffer));
       case SQLType of
       SQLInsert, SQLUpdate: {Covers "Insert or Update" as well as individual update}
       begin
