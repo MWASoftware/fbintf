@@ -139,7 +139,8 @@ type
       ibxeFieldSizeError,
       ibxeTransactionNotEnding,
       ibxeDscInfoTokenMissing,
-      ibxeNoLoginDialog
+      ibxeNoLoginDialog,
+      ibxEmptyAttachmentsList
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;
@@ -298,6 +299,7 @@ resourcestring
   SDscInfoTokenMissing = '%s token not found';
   SNoLoginDialog = 'Default Login Dlalog not found. Have you included ibexpress ' +
                    'in your program uses list?';
+  SEmptyAttachmentsList = 'The list of database attachments cannot be empty';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -422,7 +424,8 @@ const
     SFieldSizeError,
     STransactionNotEnding,
     SDscInfoTokenMissing,
-    SNoLoginDialog
+    SNoLoginDialog,
+    SEmptyAttachmentsList
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;

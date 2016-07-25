@@ -18,6 +18,8 @@ type
   TObjectOwner = class(TInterfacedObject)
   private
     FOwnedObjects: TList;
+  protected
+    property OwnedObjects: TList read FOwnedObjects;
   public
     constructor Create;
     destructor Destroy; override;
@@ -82,7 +84,7 @@ var i: integer;
 begin
   if assigned(FOwnedObjects) then
   begin
-    for i := 0 to FOwnedObjects.Count - 1 do
+    for i := FOwnedObjects.Count - 1 downto 0 do
       TObject(FOwnedObjects[I]).Free;
     FOwnedObjects.Free;
   end;

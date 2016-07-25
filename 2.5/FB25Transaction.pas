@@ -5,7 +5,8 @@ unit FB25Transaction;
 interface
 
 uses
-  Classes, SysUtils, IB, FBLibrary, FB25ClientAPI, IBHeader, IBExternals;
+  Classes, SysUtils, IB, FBLibrary, FB25ClientAPI, IBHeader, IBExternals,
+  FB25Attachment;
 
 type
 
@@ -14,29 +15,34 @@ type
   TFBTransaction = class(TObjectOwner,ITransaction)
   private
     FClientAPI: TFBClientAPI;
-    FOwners: array of TObjectOwner;
+    FOwners: array of TFBAttachment;
     FHandle: TISC_TR_HANDLE;
+    FTPB: String;
+    FTPBLength: short;
     procedure GenerateTPB(sl: TStrings; var TPB: string; var TPBLength: Short);
-    procedure InternalRollback;
+    procedure CloseAll;
   public
-    constructor Create(ClientAPI: TFBClientAPI;
-               Databases: array of IAttachment; Params: TStrings); overload;
-    constructor Create(ClientAPI: TFBClientAPI;
-                Database: IAttachment; Params: TStrings); overload;
+    constructor Create(Attachments: array of TFBAttachment; Params: TStrings); overload;
+    constructor Create(Attachment: TFBAttachment; Params: TStrings); overload;
     destructor Destroy; override;
+    property Handle: TISC_TR_HANDLE read FHandle;
 
+  public
     {ITransaction}
     function GetStatus: IStatus;
+    function GetInTransaction: boolean;
     procedure Commit;
     procedure CommitRetaining;
+    procedure Start;
+    procedure Release;
     procedure Rollback;
     procedure RollbackRetaining;
-    property Handle: TISC_TR_HANDLE read FHandle;
+    property InTransaction: boolean read GetInTransaction;
   end;
 
 implementation
 
-uses FBErrorMessages, FB25Attachment;
+uses FBErrorMessages, FB25Blob, FB25Statement;
 
 const
   TPBPrefix = 'isc_tpb_';
@@ -137,48 +143,115 @@ begin
   end;
 end;
 
-procedure TFBTransaction.InternalRollback;
+procedure TFBTransaction.CloseAll;
+var i: integer;
 begin
-  if FHandle = nil then
-    Exit;
-  with FClientAPI do
-    Call(isc_rollback_transaction(StatusVector, @FHandle));
-  FHandle := nil;
+  for i := 0 to OwnedObjects.Count - 1 do
+    if TObject(OwnedObjects[i]) is TFBBlob then
+      TFBBlob(OwnedObjects[i]).Cancel
+    else
+    if TObject(OwnedObjects[i]) is TFBStatement then
+      TFBStatement(OwnedObjects[i]).Close;
 end;
 
-constructor TFBTransaction.Create(ClientAPI: TFBClientAPI;
-  Databases: array of IAttachment; Params: TStrings);
+constructor TFBTransaction.Create(Attachments: array of TFBAttachment;
+  Params: TStrings);
 var
-  pteb: PISC_TEB_ARRAY;
   TPB: String;
   TPBLength: short;
   i: Integer;
 begin
   inherited Create;
-  FClientAPI := ClientAPI;
-  setLength(FOwners,Length(Databases));
-  for i := 0 to Length(Databases) - 1 do
+  if Length(Attachments) = 0 then
+    IBError(ibxEmptyAttachmentsList,[nil]);
+
+  FClientAPI := Attachments[0].ClientAPI;
+  setLength(FOwners,Length(Attachments));
+  for i := 0 to Length(Attachments) - 1 do
   begin
-    FOwners[i] := (Databases[i]  as TFBAttachment);
+    FOwners[i] := Attachments[i];
     FOwners[i].RegisterObj(self);
   end;
-  GenerateTPB(Params, TPB, TPBLength);
+  GenerateTPB(Params, FTPB, FTPBLength);
+  Start;
+end;
 
+constructor TFBTransaction.Create(Attachment: TFBAttachment; Params: TStrings);
+begin
+  inherited Create;
+  FClientAPI := Attachment.ClientAPI;
+  setLength(FOwners,1);
+  FOwners[0] := Attachment;
+  FOwners[0].RegisterObj(self);
+  GenerateTPB(Params, FTPB, FTPBLength);
+  Start;
+end;
+
+destructor TFBTransaction.Destroy;
+var i: integer;
+begin
+  Rollback;
+  for i := 0 to Length(FOwners) - 1 do
+    FOwners[i].UnRegisterObj(self);
+  inherited Destroy;
+end;
+
+function TFBTransaction.GetStatus: IStatus;
+begin
+  Result := FClientAPI.Status;
+end;
+
+function TFBTransaction.GetInTransaction: boolean;
+begin
+  Result := FHandle <> nil;
+end;
+
+procedure TFBTransaction.Commit;
+begin
+  if FHandle = nil then
+    Exit;
+  CloseAll;
+  with FClientAPI do
+    Call(isc_commit_transaction(StatusVector, @FHandle));
+  FHandle := nil;
+end;
+
+procedure TFBTransaction.CommitRetaining;
+begin
+  if FHandle = nil then
+    Exit;
+  with FClientAPI do
+    Call(isc_commit_retaining(StatusVector, @FHandle));
+end;
+
+procedure TFBTransaction.Start;
+var pteb: PISC_TEB_ARRAY;
+    i: integer;
+begin
   pteb := nil;
   with FClientAPI do
+  if Length(FOwners) = 1 then
+  try
+    Call(isc_start_transaction(StatusVector, @FHandle,1,
+              @(FOwners[0].Handle),FTPBLength,@FTPB));
+  except
+    FHandle := nil;
+    raise;
+  end
+  else
   begin
-    IBAlloc(pteb, 0, Length(Databases) * SizeOf(TISC_TEB));
+    IBAlloc(pteb, 0, Length(FOwners) * SizeOf(TISC_TEB));
      try
-        for i := 0 to Length(Databases) - 1 do
-        if Databases[i] <> nil then
+        for i := 0 to Length(FOwners) - 1 do
+        if FOwners[i] <> nil then
         begin
-          pteb^[i].db_handle := @((Databases[i] as TFBAttachment).Handle);
-          pteb^[i].tpb_length := TPBLength;
-          pteb^[i].tpb_address := @TPB;
+          pteb^[i].db_handle := @(FOwners[i].Handle);
+          pteb^[i].tpb_length := FTPBLength;
+          pteb^[i].tpb_address := @FTPB;
         end;
         try
           Call(isc_start_multiple(StatusVector, @FHandle,
-                                   Length(Databases), PISC_TEB(pteb)));
+                                   Length(FOwners), PISC_TEB(pteb)));
         except
           FHandle := nil;
           raise;
@@ -189,64 +262,26 @@ begin
   end;
 end;
 
-constructor TFBTransaction.Create(ClientAPI: TFBClientAPI;
-  Database: IAttachment; Params: TStrings);
-var
-  TPB: String;
-  TPBLength: short;
+procedure TFBTransaction.Release;
 begin
-  inherited Create;
-  FClientAPI := ClientAPI;
-  setLength(FOwners,1);
-  FOwners[0] := (Database as TFBAttachment);
-  FOwners[0].RegisterObj(self);
-  GenerateTPB(Params, TPB, TPBLength);
-
-  with FClientAPI do
-  try
-    Call(isc_start_transaction(StatusVector, @FHandle,1,
-              @((Database as TFBAttachment).Handle),TPBLength,@TPB));
-  except
-    FHandle := nil;
-    raise;
-  end;
-end;
-
-destructor TFBTransaction.Destroy;
-var i: integer;
-begin
-  inherited Destroy;
-  InternalRollback;
-  for i := 0 to Length(FOwners) - 1 do
-    FOwners[i].UnRegisterObj(self);
-end;
-
-function TFBTransaction.GetStatus: IStatus;
-begin
-  Result := FClientAPI.Status;
-end;
-
-procedure TFBTransaction.Commit;
-begin
-  with FClientAPI do
-    Call(isc_commit_transaction(StatusVector, @FHandle));
+  Rollback;
   Free;
-end;
-
-procedure TFBTransaction.CommitRetaining;
-begin
-  with FClientAPI do
-    Call(isc_commit_retaining(StatusVector, @FHandle));
 end;
 
 procedure TFBTransaction.Rollback;
 begin
-  InternalRollback;
-  Free;
+  if FHandle = nil then
+    Exit;
+  CloseAll;
+  with FClientAPI do
+    Call(isc_rollback_transaction(StatusVector, @FHandle));
+  FHandle := nil;
 end;
 
 procedure TFBTransaction.RollbackRetaining;
 begin
+  if FHandle = nil then
+    Exit;
   with FClientAPI do
     Call(isc_rollback_retaining(StatusVector, @FHandle));
 end;

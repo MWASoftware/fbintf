@@ -141,7 +141,7 @@ type
    PGDS__QUAD           = ^TGDS__QUAD;
    PISC_QUAD            = ^TISC_QUAD;
 
-   TFBStatusCode = cardinal;
+  TFBStatusCode = cardinal;
 
   IStatus = interface
     function GetIBErrorCode: Long;
@@ -154,10 +154,14 @@ type
 
   ITransaction = interface
     function GetStatus: IStatus;
+    function GetInTransaction: boolean;
     procedure Commit;
     procedure CommitRetaining;
+    procedure Start;
+    procedure Release;
     procedure Rollback;
     procedure RollbackRetaining;
+    property InTransaction: boolean read GetInTransaction;
   end;
 
   IBlob = interface
@@ -345,10 +349,12 @@ type
     procedure Cancel;
     procedure WaitForEvent(var EventCounts: TEventCounts);
     procedure AsyncWaitForEvent(EventHandler: TEventHandler);
+    procedure Release;
   end;
 
   IAttachment = interface
     function GetStatus: IStatus;
+    procedure Connect;
     procedure Disconnect(Force: boolean);
     procedure DropDatabase;
     function StartTransaction(Params: TStrings): ITransaction;
@@ -356,6 +362,7 @@ type
     function OpenBlob(transaction: ITransaction; BlobID: TISC_QUAD): IBlob;
     procedure ExecImmediate(transaction: ITransaction; sql: string; SQLDialect: integer);
     function Prepare(transaction: ITransaction; sql: string; SQLDialect: integer): IStatement;
+    procedure Release;
 
     {Events}
     function GetEventHandler(Events: TStrings): IEvents;
@@ -368,9 +375,12 @@ type
     function GetInfoBuffer(DBInfoCommand: char; var Buffer: PChar): integer;
   end;
 
+  TProtocol = (TCP, SPX, NamedPipe, Local);
   IService = interface
-//    procedure Attach(ServerName: string; Protocol: TProtocol; Params: TStrings);
-//    procedure Detach;
+    function GetStatus: IStatus;
+    procedure Attach(ServerName: string; Protocol: TProtocol; Params: TStrings);
+    procedure Detach;
+    procedure Release;
   end;
 
   IFirebirdAPI = interface
@@ -379,8 +389,8 @@ type
     procedure CreateDatabase(DatabaseName: string; SQLDialect: integer;
                                           Params: TStrings);
     function GetServiceManager(Service: string; Params: TStrings): IService;
-    {Start Transaction against multiple databases}
-    function StartTransaction(Databases: array of IAttachment; Params: TStrings): ITransaction;
+    function StartTransaction(Attachments: array of IAttachment;
+             Params: TStrings): ITransaction; {Start Transaction against multiple databases}
     function GetIsEmbeddedServer: boolean;
     function GetLibraryName: string;
     function HasServiceAPI: boolean;

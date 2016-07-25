@@ -90,7 +90,8 @@ type
                                           Params: TStrings);
     function GetServiceManager(Service: string; Params: TStrings): IService;
     {Start Transaction against multiple databases}
-    function StartTransaction(Databases: array of IAttachment; Params: TStrings): ITransaction;
+    function StartTransaction(Attachments: array of IAttachment; Params: TStrings
+      ): ITransaction;
     function GetIsEmbeddedServer: boolean;
     function GetLibraryName: string;
     function HasServiceAPI: boolean;
@@ -345,10 +346,15 @@ begin
 
 end;
 
-function TFBClientAPI.StartTransaction(Databases: array of IAttachment;
+function TFBClientAPI.StartTransaction(Attachments: array of IAttachment;
   Params: TStrings): ITransaction;
+var FBAttachments: array of TFBAttachment;
+    i: integer;
 begin
-  Result := TFBTransaction.Create(self,Databases,Params);
+  SetLength(FBAttachments,Length(Attachments));
+  for i := 0 to Length(Attachments) - 1 do
+    FBAttachments[i] := Attachments[i] as TFBAttachment;
+  Result := TFBTransaction.Create(FBAttachments,Params);
 end;
 
 function TFBClientAPI.GetIsEmbeddedServer: boolean;

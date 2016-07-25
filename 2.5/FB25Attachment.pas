@@ -15,17 +15,10 @@ type
   private
     FClientAPI: TFBClientAPI;
     FHandle: TISC_DB_HANDLE;
-    FUserNames   : TStringList;
-    FBackoutCount: TStringList;
-    FDeleteCount: TStringList;
-    FExpungeCount: TStringList;
-    FInsertCount: TStringList;
-    FPurgeCount: TStringList;
-    FReadIdxCount: TStringList;
-    FReadSeqCount: TStringList;
-    FUpdateCount: TStringList;
+    FDatabaseName: string;
+    FDPB: string;
+    FDPBLength: short;
     procedure GenerateDPB(sl: TStrings; var DPB: string; var DPBLength: Short);
-    procedure InternalDisconnect(Force: boolean);
   public
     constructor Create(ClientAPI: TFBClientAPI; DatabaseName: string; Params: TStrings);
     destructor Destroy; override;
@@ -35,6 +28,7 @@ type
   public
     {IAttachment}
     function GetStatus: IStatus;
+    procedure Connect;
     procedure Disconnect(Force: boolean);
     procedure DropDatabase;
     function StartTransaction(Params: TStrings): ITransaction;
@@ -44,6 +38,7 @@ type
     function Prepare(transaction: ITransaction; sql: string; SQLDialect: integer
       ): IStatement;
     function GetEventHandler(Events: TStrings): IEvents;
+    procedure Release;
 
     {Database Information}
     function GetBlobCharSetID(transaction: ITransaction; tableName, columnName: string): short;
@@ -281,43 +276,20 @@ begin
   end;
 end;
 
-procedure TFBAttachment.InternalDisconnect(Force: boolean);
-begin
-  if FHandle = nil then
-    Exit;
-  with FClientAPI do
-    Call(isc_detach_database(StatusVector, @FHandle),not Force);
-  FHandle := nil;
-end;
-
 constructor TFBAttachment.Create(ClientAPI: TFBClientAPI; DatabaseName: string;
   Params: TStrings);
-var DPB: string;
-    DPBLength: short;
 begin
   inherited Create;
   FClientAPI := ClientAPI;
   ClientAPI.RegisterObj(self);
-  FUserNames := TStringList.Create;
-  GenerateDPB(Params, DPB, DPBLength);
-  with FClientAPI do
-   Call(isc_attach_database(StatusVector, Length(DatabaseName),
-                         PChar(DatabaseName), @FHandle,
-                         DPBLength, @DPB));
+  FDatabaseName := DatabaseName;
+  GenerateDPB(Params, FDPB, FDPBLength);
+  Connect;
 end;
 
 destructor TFBAttachment.Destroy;
 begin
-  InternalDisconnect(true);
-  if assigned (FUserNames) then FUserNames.Free;
-  if assigned (FBackoutCount) then FBackoutCount.Free;
-  if assigned (FDeleteCount) then FDeleteCount.Free;
-  if assigned (FExpungeCount) then FExpungeCount.Free;
-  if assigned (FInsertCount) then FInsertCount.Free;
-  if assigned (FPurgeCount) then FPurgeCount.Free;
-  if assigned (FReadIdxCount) then FReadIdxCount.Free;
-  if assigned (FReadSeqCount) then FReadSeqCount.Free;
-  if assigned (FUpdateCount) then FUpdateCount.Free;
+  Disconnect(true);
   FClientAPI.UnRegisterObj(self);
   inherited Destroy;
 end;
@@ -327,10 +299,32 @@ begin
   Result := FClientAPI.Status;
 end;
 
-procedure TFBAttachment.Disconnect(Force: boolean);
+procedure TFBAttachment.Connect;
 begin
-  InternalDisconnect(Force);
-  Free;
+  with FClientAPI do
+   Call(isc_attach_database(StatusVector, Length(FDatabaseName),
+                         PChar(FDatabaseName), @FHandle,
+                         FDPBLength, @FDPB));
+end;
+
+procedure TFBAttachment.Disconnect(Force: boolean);
+var i: integer;
+begin
+  if FHandle = nil then
+    Exit;
+
+  {Rollback or Cancel dependent objects}
+  for i := 0 to OwnedObjects.Count - 1 do
+    if (TObject(OwnedObjects[i]) is TFBTransaction) then
+          TFBTransaction(OwnedObjects[i]).Rollback
+    else
+    if TObject(OwnedObjects[i]) is TFBEvents then
+      TFBEvents(OwnedObjects[i]).Cancel;
+
+  {Disconnect}
+  with FClientAPI do
+    Call(isc_detach_database(StatusVector, @FHandle),not Force);
+  FHandle := nil;
 end;
 
 procedure TFBAttachment.DropDatabase;
@@ -342,7 +336,7 @@ end;
 
 function TFBAttachment.StartTransaction(Params: TStrings): ITransaction;
 begin
-  Result := TFBTransaction.Create(FClientAPI,self,Params);
+  Result := TFBTransaction.Create(self,Params);
 end;
 
 function TFBAttachment.CreateBlob(transaction: ITransaction): IBlob;
@@ -374,6 +368,11 @@ end;
 function TFBAttachment.GetEventHandler(Events: TStrings): IEvents;
 begin
   Result := TFBEvents.Create(self,Events);
+end;
+
+procedure TFBAttachment.Release;
+begin
+  Free;
 end;
 
 function TFBAttachment.GetBlobCharSetID(transaction: ITransaction; tableName,

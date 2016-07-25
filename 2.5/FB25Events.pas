@@ -36,6 +36,7 @@ type
     procedure Cancel;
     procedure WaitForEvent(var EventCounts: TEventCounts);
     procedure AsyncWaitForEvent(EventHandler: TEventHandler);
+    procedure Release;
   end;
 
 implementation
@@ -275,7 +276,6 @@ procedure TFBEvents.Cancel;
 begin
   if assigned(FEventHandler) then
     CancelEvents;
-  Free;
 end;
 
 procedure TFBEvents.AsyncWaitForEvent(EventHandler: TEventHandler);
@@ -294,6 +294,12 @@ begin
   finally
     FCriticalSection.Leave
   end;
+end;
+
+procedure TFBEvents.Release;
+begin
+  Cancel;
+  Free;
 end;
 
 
