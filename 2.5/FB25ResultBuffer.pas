@@ -5,7 +5,8 @@ unit FB25ResultBuffer;
 interface
 
 uses
-  Classes, SysUtils, IB, FB25ClientAPI, IBExternals, IBHeader, FB25Statement;
+  Classes, SysUtils, IB, FB25ClientAPI, IBExternals, IBHeader, FB25Statement,
+  FB25Attachment, FBStatus;
 
 type
   {TInfoBuffer inspired by IBPP RB class}
@@ -24,15 +25,16 @@ type
     procedure Reset;
     function GetCountValue(token: char): integer;
     function GetBool(token: char): boolean;
-    function GetString(token: char; var data: string): integer;
+    function GetString(token: char; var data: string): integer; overload;
+    function GetString(var data: string): integer; overload; {gets first}
     function buffer: PChar;
   end;
 
   { TResultBuffer }
 
-
   TResultBuffer = class(TInfoBuffer)
   public
+    function GetValue: integer; overload; {gets first value}
     function GetValue(token: char): integer; overload;
     function GetValue(token: char; subtoken: char): integer; overload;
   end;
@@ -43,7 +45,16 @@ type
 
   TSQLResultBuffer = class(TResultBuffer)
   public
-    constructor Create(aStatement: TFBStatement; info_request:char; aSize: integer = 128);
+    constructor Create(aStatement: TFBStatement; info_request:char; aSize: integer = IBLocalBufferLength);
+  end;
+
+  { TDBInfoResultBuffer }
+
+  TDBInfoResultBuffer = class(TResultBuffer)
+  public
+    constructor Create(aAttachment: TFBAttachment; info_request: char;
+      aSize: integer=IBLocalBufferLength);
+    function GetInfoBuffer(var p: PChar): integer;
   end;
 
   {Used for access to a isc_query_service result buffer}
@@ -59,6 +70,25 @@ type
 implementation
 
 uses FBErrorMessages;
+
+{ TDBInfoResultBuffer }
+
+constructor TDBInfoResultBuffer.Create(aAttachment: TFBAttachment;
+  info_request: char; aSize: integer);
+begin
+  inherited Create(aAttachment.ClientAPI,aSize);
+  with FClientAPI do
+    Call(isc_database_info(StatusVector, @(aAttachment.Handle), 2, @info_request,
+                           Size, Buffer));
+end;
+
+function TDBInfoResultBuffer.GetInfoBuffer(var p: PChar): integer;
+begin
+  p := buffer + 1;
+  with FClientAPI do
+    Result := isc_vax_integer(p, 2);
+  Inc(p,2);
+end;
 
 { TSQLResultBuffer }
 
@@ -87,6 +117,19 @@ begin
 end;
 
   { TResultBuffer }
+
+function TResultBuffer.GetValue: integer;
+var len: integer;
+    p: PChar;
+begin
+  p := buffer;
+  with FClientAPI do
+  begin
+    len := isc_vax_integer(p+1, 2);
+    if (len <> 0) then
+      Result := isc_vax_integer(p+3, len);
+  end;
+end;
 
 function TResultBuffer.GetValue(token: char): integer;
 var len: integer;
@@ -253,6 +296,17 @@ begin
   if p = nil then
     IBError(ibxeDscInfoTokenMissing,[token]);
 
+  with FClientAPI do
+    Result := isc_vax_integer(p+1, 2);
+  SetString(data,p+3,Result);
+  data := Trim(data);
+end;
+
+function TInfoBuffer.GetString(var data: string): integer;
+var p: PChar;
+begin
+  Result := 0;
+  p := buffer;
   with FClientAPI do
     Result := isc_vax_integer(p+1, 2);
   SetString(data,p+3,Result);
