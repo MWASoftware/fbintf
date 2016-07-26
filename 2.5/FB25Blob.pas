@@ -30,6 +30,8 @@ type
     constructor Create(Attachment: TFBAttachment; Transaction: ITransaction;
                        BlobID: TISC_QUAD); overload;
     destructor Destroy; override;
+    procedure TransactionEnding(aTransaction: TFBTransaction);
+
   {IBlob}
   public
     function GetStatus: IStatus;
@@ -127,6 +129,14 @@ begin
   if assigned(FOwner) then
     FOwner.UnRegisterObj(self);
   inherited Destroy;
+end;
+
+procedure TFBBlob.TransactionEnding(aTransaction: TFBTransaction);
+begin
+  if FCreating then
+    InternalCancel
+  else
+    InternalClose;
 end;
 
 function TFBBlob.GetStatus: IStatus;

@@ -235,19 +235,25 @@ type
   { TIBXResults }
 
   TIBXResults = class(TIBXOUTPUTSQLDA,IResults)
+  private
+    FBOF: boolean;
+    FEOF: boolean;
   public
-    function ByName(Idx: String): ISQLData;
     {IResults}
+    function ByName(Idx: String): ISQLData;
     function getSQLData(index: integer): ISQLData;
-//    function IResults.ByName = SQLDataByName;
-  end;
+    property Data[index: integer]: ISQLData read getSQLData; default;
+ end;
 
   { TIBXResultSet }
 
   TIBXResultSet = class(TIBXResults,IResultSet)
-  public
+  private
+    FTransaction: TFBTransaction; {transaction used to execute the statement}
+   public
     {IResultSet}
     function FetchNext: boolean;
+    function GetCursorName: string;
     procedure Close;
   end;
 
@@ -261,15 +267,17 @@ type
     FTransaction: TFBTransaction;
     FOwner: TObjectOwner;
     FHandle: TISC_STMT_HANDLE;
-    FTRHandle: TISC_TR_HANDLE;
     FSQLType: TIBSQLTypes;         { Select, update, delete, insert, create, alter, etc...}
     FSQLDialect: integer;
     FSQLParams: TIBXINPUTSQLDA;
     FSQLRecord: TIBXResultSet;
     FOpen: boolean;
     FCursor: String;               { Cursor name...}
-    procedure InternalPrepare(DBHandle: TISC_DB_HANDLE; sql: string);
-    function InternalExecute(TRHandle: TISC_TR_HANDLE): IResults;
+    procedure CheckTransaction(aTransaction: TFBTransaction);
+    procedure CheckHandle;
+    procedure InternalPrepare(sql: string);
+    function InternalExecute(aTransaction: TFBTransaction): IResults;
+    function InternalOpenCursor(aTransaction: TFBTransaction): IResultSet;
     procedure FreeHandle;
   public
     constructor Create(Attachment: TFBAttachment; Transaction: TFBTransaction;
@@ -277,6 +285,7 @@ type
     destructor Destroy; override;
     procedure Close;
     function FetchNext: boolean;
+    procedure TransactionEnding(aTransaction: TFBTransaction);
     property SQLDialect: integer read FSQLDialect;
     property Attachment: TFBAttachment read FAttachment;
     property Transaction: TFBTransaction read FTransaction;
@@ -291,7 +300,9 @@ type
     function GetSQLType: TIBSQLTypes;
     function Execute: IResults; overload;
     function Execute(aTransaction: ITransaction): IResults; overload;
-    function OpenCursor: IResultSet;
+    function OpenCursor: IResultSet; overload;
+    function OpenCursor(aTransaction: ITransaction): IResultSet; overload;
+    procedure Release;
     property ClientAPI: TFBClientAPI read FClientAPI;
     property Handle: TISC_STMT_HANDLE read FHandle;
     property SQLParams: ISQLParams read GetSQLParams;
@@ -310,11 +321,20 @@ const
 
 function TIBXResults.getSQLData(index: integer): ISQLData;
 begin
+  if FBOF then
+    IBError(ibxeBOF,[nil]);
+  if FEOF then
+    IBError(ibxeEOF,[nil]);
   Result := Vars[index];
 end;
 
 function TIBXResults.ByName(Idx: String): ISQLData;
 begin
+  if FBOF then
+    IBError(ibxeBOF,[nil]);
+  if FEOF then
+    IBError(ibxeEOF,[nil]);
+
   if Count = 0 then
     Result := nil
   else
@@ -327,6 +347,11 @@ end;
 function TIBXResultSet.FetchNext: boolean;
 begin
   Result := FStatement.FetchNext;
+end;
+
+function TIBXResultSet.GetCursorName: string;
+begin
+  Result := FStatement.FCursor;
 end;
 
 procedure TIBXResultSet.Close;
@@ -1772,18 +1797,35 @@ end;
 
 { TFBStatement }
 
-procedure TFBStatement.InternalPrepare(DBHandle: TISC_DB_HANDLE; sql: string);
+procedure TFBStatement.CheckTransaction(aTransaction: TFBTransaction);
+begin
+  if (aTransaction = nil) then
+    IBError(ibxeTransactionNotAssigned,[]);
+
+  if not aTransaction.InTransaction then
+    IBError(ibxeNotInTransaction,[]);
+
+end;
+
+procedure TFBStatement.CheckHandle;
+begin
+  if FHandle = nil then
+    IBError(ibxeInvalidStatementHandle,[nil]);
+end;
+
+procedure TFBStatement.InternalPrepare(sql: string);
 var
   RB: TSQLResultBuffer;
 begin
   if (sql = '') then
     IBError(ibxeEmptyQuery, [nil]);
   try
+    CheckTransaction(FTransaction);
     with FClientAPI do
     begin
-      Call(isc_dsql_alloc_statement2(StatusVector, @DBHandle,
+      Call(isc_dsql_alloc_statement2(StatusVector, @(FAttachment.Handle),
                                       @FHandle), True);
-      Call(isc_dsql_prepare(StatusVector, @FTRHandle, @FHandle, 0,
+      Call(isc_dsql_prepare(StatusVector, @(FTransaction.Handle), @FHandle, 0,
                  PChar(sql), FSQLDialect, nil), True);
     end;
     { After preparing the statement, query the stmt type and possibly
@@ -1835,9 +1877,13 @@ begin
   end;
 end;
 
-function TFBStatement.InternalExecute(TRHandle: TISC_TR_HANDLE): IResults;
+function TFBStatement.InternalExecute(aTransaction: TFBTransaction): IResults;
 begin
   Result := nil;
+  FSQLRecord.FBOF := false;
+  FSQLRecord.FEOF := false;
+  CheckTransaction(aTransaction);
+  CheckHandle;
   with FClientAPI do
   case FSQLType of
   SQLSelect:
@@ -1846,7 +1892,7 @@ begin
   SQLExecProcedure:
   begin
     Call(isc_dsql_execute2(StatusVector,
-                        @TRHandle,
+                        @(aTransaction.Handle),
                         @FHandle,
                         SQLDialect,
                         FSQLParams.AsXSQLDA,
@@ -1855,12 +1901,39 @@ begin
   end
   else
     Call(isc_dsql_execute(StatusVector,
-                         @TRHandle,
+                         @(aTransaction.Handle),
                          @FHandle,
                          SQLDialect,
                          FSQLParams.AsXSQLDA), True);
 
   end;
+end;
+
+function TFBStatement.InternalOpenCursor(aTransaction: TFBTransaction
+  ): IResultSet;
+begin
+  if FSQLType <> SQLSelect then
+   IBError(ibxeIsASelectStatement,[]);
+
+ CheckTransaction(aTransaction);
+ CheckHandle;
+ with FClientAPI do
+ begin
+   Call(isc_dsql_execute2(StatusVector,
+                       @(aTransaction.Handle),
+                       @FHandle,
+                       SQLDialect,
+                       FSQLParams.AsXSQLDA,
+                       nil), True);
+   Call(
+     isc_dsql_set_cursor_name(StatusVector, @FHandle, PChar(FCursor), 0),
+     True);
+ end;
+ FSQLRecord.FTransaction := aTransaction;
+ FOpen := True;
+ FSQLRecord.FBOF := true;
+ FSQLRecord.FEOF := false;
+ Result := FSQLRecord;
 end;
 
 procedure TFBStatement.FreeHandle;
@@ -1887,8 +1960,7 @@ end;
 
 constructor TFBStatement.Create(Attachment: TFBAttachment;
   Transaction: TFBTransaction; sql: string; SQLDialect: integer);
-var DBHandle: TISC_DB_HANDLE;
-    GUID : TGUID;
+var GUID : TGUID;
 begin
   inherited Create;
   FClientAPI := Attachment.ClientAPI;
@@ -1896,18 +1968,18 @@ begin
   FTransaction := transaction;
   FOwner := Transaction;
   FOwner.RegisterObj(self);
-  DBHandle := (Attachment as TFBAttachment).Handle;
-  FTRHandle := (Transaction as TFBTransaction).Handle;
   FSQLDialect := SQLDialect;
   CreateGuid(GUID);
   FCursor := GUIDToString(GUID);
   FSQLParams := TIBXINPUTSQLDA.Create(self);
   FSQLRecord := TIBXResultSet.Create(self);
-  InternalPrepare(DBHandle,sql);
+  InternalPrepare(sql);
 end;
 
 destructor TFBStatement.Destroy;
 begin
+  Close;
+  FreeHandle;
   if assigned(FSQLParams) then
     FSQLParams.Free;
   if assigned(FSQLRecord) then
@@ -1935,6 +2007,7 @@ begin
     end;
   finally
     FOpen := False;
+    FSQLRecord.FTransaction := nil;
   end;
 end;
 
@@ -1945,6 +2018,9 @@ begin
   result := false;
   if not FOpen then
     IBError(ibxeSQLClosed, [nil]);
+  if FSQLRecord.FEOF then
+    IBError(ibxeEOF,[nil]);
+
   with FClientAPI do
   begin
     { Go to the next record... }
@@ -1952,6 +2028,7 @@ begin
       Call(isc_dsql_fetch(StatusVector, @FHandle, SQLDialect, FSQLRecord.AsXSQLDA), False);
     if (fetch_res = 100) or (getStatus.CheckStatusVector([isc_dsql_cursor_err])) then
     begin
+      FSQLRecord.FEOF := true;
       Exit; {End of File}
     end
     else
@@ -1965,8 +2042,20 @@ begin
       end;
     end
     else
+    begin
+      FSQLRecord.FBOF := false;
       result := true;
+    end;
   end;
+end;
+
+procedure TFBStatement.TransactionEnding(aTransaction: TFBTransaction);
+begin
+  if FOpen and (FSQLRecord.FTransaction = aTransaction) then
+    Close;
+
+  if FTransaction = aTransaction then
+    FreeHandle;
 end;
 
 function TFBStatement.GetStatus: IStatus;
@@ -1976,11 +2065,13 @@ end;
 
 function TFBStatement.GetSQLParams: ISQLParams;
 begin
+  CheckHandle;
   Result := FSQLParams;
 end;
 
 function TFBStatement.GetOutMetaData: IMetaData;
 begin
+  CheckHandle;
   Result := TIBXOUTPUTSQLDA(FSQLRecord);
 end;
 
@@ -2047,33 +2138,27 @@ end;
 
 function TFBStatement.Execute: IResults;
 begin
-  Result := InternalExecute(FTRHandle);
+  Result := InternalExecute(FTransaction);
 end;
 
 function TFBStatement.Execute(aTransaction: ITransaction): IResults;
 begin
-  Result := InternalExecute((aTransaction as TFBTransaction).Handle);
+  Result := InternalExecute(aTransaction as TFBTransaction);
 end;
 
 function TFBStatement.OpenCursor: IResultSet;
 begin
-  if FSQLType <> SQLSelect then
-    IBError(ibxeIsASelectStatement,[]);
+  Result := InternalOpenCursor(FTransaction);
+end;
 
-  with FClientAPI do
-  begin
-    Call(isc_dsql_execute2(StatusVector,
-                        @FTRHandle,
-                        @FHandle,
-                        SQLDialect,
-                        FSQLParams.AsXSQLDA,
-                        nil), True);
-    Call(
-      isc_dsql_set_cursor_name(StatusVector, @FHandle, PChar(FCursor), 0),
-      True);
-  end;
-  FOpen := True;
-  Result := FSQLRecord;
+function TFBStatement.OpenCursor(aTransaction: ITransaction): IResultSet;
+begin
+  Result := InternalOpenCursor(aTransaction as TFBTransaction);
+end;
+
+procedure TFBStatement.Release;
+begin
+  Free;
 end;
 
 end.

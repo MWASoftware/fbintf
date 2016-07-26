@@ -133,7 +133,7 @@ function TFBLibrary.GetProcAddr(ProcName: PChar): Pointer;
 begin
   Result := GetProcAddress(IBLibrary, ProcName);
   if not Assigned(Result) then
-    raise Exception.Create('Unable to load Firebird Client Library');
+    raise Exception.CreateFmt('Unable to load Firebird Client Library Function "%s"',[ProcName]);
 end;
 
 initialization

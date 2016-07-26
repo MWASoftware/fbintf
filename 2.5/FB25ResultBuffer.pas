@@ -96,6 +96,9 @@ constructor TSQLResultBuffer.Create(aStatement: TFBStatement;
   info_request: char; aSize: integer);
 begin
   inherited Create(aStatement.ClientAPI,aSize);
+  if aStatement.Handle = nil then
+    IBError(ibxeInvalidStatementHandle,[nil]);
+
   with FClientAPI do
     Call(isc_dsql_sql_info(StatusVector, @(aStatement.Handle), 2, @info_request,
                            Size, Buffer));

@@ -140,7 +140,9 @@ type
       ibxeTransactionNotEnding,
       ibxeDscInfoTokenMissing,
       ibxeNoLoginDialog,
-      ibxEmptyAttachmentsList
+      ibxEmptyAttachmentsList,
+      ibxAttachementReleaseFails,
+      ibxTransactionReleaseFails
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;
@@ -300,6 +302,8 @@ resourcestring
   SNoLoginDialog = 'Default Login Dlalog not found. Have you included ibexpress ' +
                    'in your program uses list?';
   SEmptyAttachmentsList = 'The list of database attachments cannot be empty';
+  SAttachementReleaseFails = 'Release Failed; there are %d open transactions or events';
+  STransactionReleaseFails = 'Release Failed: there are %d open statements or blobs';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -425,7 +429,9 @@ const
     STransactionNotEnding,
     SDscInfoTokenMissing,
     SNoLoginDialog,
-    SEmptyAttachmentsList
+    SEmptyAttachmentsList,
+    SAttachementReleaseFails,
+    STransactionReleaseFails
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;

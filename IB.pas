@@ -241,10 +241,12 @@ type
    function getCount: integer;
    function ByName(Idx: String): ISQLData;
    function getSQLData(index: integer): ISQLData;
+   property Data[index: integer]: ISQLData read getSQLData; default;
   end;
 
   IResultSet = interface(IResults)
     function FetchNext: boolean;
+    function GetCursorName: string;
     procedure Close;
   end;
 
@@ -329,7 +331,9 @@ type
     function GetSQLType: TIBSQLTypes;
     function Execute: IResults; overload;
     function Execute(aTransaction: ITransaction): IResults; overload;
-    function OpenCursor: IResultSet;
+    function OpenCursor: IResultSet; overload;
+    function OpenCursor(aTransaction: ITransaction): IResultSet; overload;
+    procedure Release;
     property SQLParams: ISQLParams read GetSQLParams;
     property SQLType: TIBSQLTypes read GetSQLType;
   end;

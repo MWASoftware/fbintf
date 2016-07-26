@@ -148,10 +148,10 @@ var i: integer;
 begin
   for i := 0 to OwnedObjects.Count - 1 do
     if TObject(OwnedObjects[i]) is TFBBlob then
-      TFBBlob(OwnedObjects[i]).Cancel
+      TFBBlob(OwnedObjects[i]).TransactionEnding(self)
     else
     if TObject(OwnedObjects[i]) is TFBStatement then
-      TFBStatement(OwnedObjects[i]).Close;
+      TFBStatement(OwnedObjects[i]).TransactionEnding(self);
 end;
 
 constructor TFBTransaction.Create(Attachments: array of TFBAttachment;
@@ -264,6 +264,8 @@ end;
 
 procedure TFBTransaction.Release;
 begin
+  if OwnedObjects.Count > 0 then
+    IBError(ibxTransactionReleaseFails,[OwnedObjects.Count]);
   Rollback;
   Free;
 end;
