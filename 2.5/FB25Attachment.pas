@@ -249,11 +249,7 @@ begin
         pval := StrToInt(ParamValue);
         DPB := DPB +
                Char(DPBVal) +
-               #4 +
-               PChar(@pval)[0] +
-               PChar(@pval)[1] +
-               PChar(@pval)[2] +
-               PChar(@pval)[3];
+               #4 + EncodeLsbf(pval,4);
         Inc(DPBLength, 6);
       end;
       isc_dpb_activate_shadow, isc_dpb_delete_shadow, isc_dpb_begin_log,

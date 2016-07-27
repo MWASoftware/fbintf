@@ -17,6 +17,19 @@ type
     FStatus: TFBStatus;
     procedure LoadInterface;
   public
+    constructor Create;
+    destructor Destroy; override;
+    function Call(ErrCode: ISC_STATUS; RaiseError: Boolean = true): ISC_STATUS;
+    function StatusVector: PISC_STATUS;
+    procedure IBDataBaseError;
+    procedure EncodeLsbf(aValue: integer; len: integer; var buffer: PChar); overload;
+    function EncodeLsbf(aValue: integer; len: integer): string; overload;
+    property IBServiceAPIPresent: boolean read FIBServiceAPIPresent;
+    property Status: TFBStatus read FStatus;
+
+  public
+
+    {fbclient API}
     BLOB_get: TBLOB_get;
     BLOB_put: TBLOB_put;
     isc_sqlcode: Tisc_sqlcode;
@@ -74,13 +87,6 @@ type
     isc_add_user   : Tisc_add_user;
     isc_delete_user: Tisc_delete_user;
     isc_modify_user: Tisc_modify_user;
-    constructor Create;
-    destructor Destroy; override;
-    function Call(ErrCode: ISC_STATUS; RaiseError: Boolean = true): ISC_STATUS;
-    function StatusVector: PISC_STATUS;
-    procedure IBDataBaseError;
-    property IBServiceAPIPresent: boolean read FIBServiceAPIPresent;
-    property Status: TFBStatus read FStatus;
 
   public
     {IFirebirdAPI}
@@ -88,7 +94,7 @@ type
     function OpenDatabase(DatabaseName: string; Params: TStrings): IAttachment;
     procedure CreateDatabase(DatabaseName: string; SQLDialect: integer;
                                           Params: TStrings);
-    function GetServiceManager(Service: string; Params: TStrings): IService;
+    function GetServiceManager(ServerName: string; Protocol: TProtocol; Params: TStrings): IServiceManager;
     {Start Transaction against multiple databases}
     function StartTransaction(Attachments: array of IAttachment; Params: TStrings
       ): ITransaction;
@@ -99,7 +105,7 @@ type
 
 implementation
 
-uses FBErrorMessages, dynlibs, FB25Attachment, FB25Transaction;
+uses FBErrorMessages, dynlibs, FB25Attachment, FB25Transaction, FB25Services;
 
 { Stubs for 6.0 only functions }
 function isc_rollback_retaining_stub(status_vector   : PISC_STATUS;
@@ -315,6 +321,29 @@ begin
   raise EIBInterBaseError.Create(FStatus);
 end;
 
+procedure TFBClientAPI.EncodeLsbf(aValue: integer; len: integer;
+  var buffer: PChar);
+begin
+  while len > 0 do
+  begin
+    buffer^ := char(aValue mod 256);
+    Inc(buffer);
+    Dec(len);
+    aValue := aValue shr 8;
+  end;
+end;
+
+function TFBClientAPI.EncodeLsbf(aValue: integer; len: integer): string;
+begin
+  Result := '';
+  while len > 0 do
+  begin
+    Result += char(aValue mod 256);
+    Dec(len);
+    aValue := aValue shr 8;
+  end;
+end;
+
 function TFBClientAPI.GetStatus: IStatus;
 begin
   Result := FStatus;
@@ -340,10 +369,10 @@ begin
                                  Params.Text), SQLDialect, nil));
 end;
 
-function TFBClientAPI.GetServiceManager(Service: string; Params: TStrings
-  ): IService;
+function TFBClientAPI.GetServiceManager(ServerName: string;
+  Protocol: TProtocol; Params: TStrings): IServiceManager;
 begin
-
+  Result := TFBServiceManager.Create(self,ServerName,Protocol,Params);
 end;
 
 function TFBClientAPI.StartTransaction(Attachments: array of IAttachment;
