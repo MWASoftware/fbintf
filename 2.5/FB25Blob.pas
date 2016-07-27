@@ -14,7 +14,6 @@ type
 
   TFBBlob = class(TInterfacedObject,IBlob)
   private
-    FClientAPI: TFBClientAPI;
     FAttachment: TFBAttachment;
     FHandle: TISC_BLOB_HANDLE;
     FBlobID: TISC_QUAD;
@@ -60,7 +59,7 @@ procedure TFBBlob.InternalCancel;
 begin
   if FHandle = nil then
     Exit;
-  with FClientAPI do
+  with Firebird25ClientAPI do
     Call(isc_cancel_blob(StatusVector,@FHandle));
   FHandle := nil;
 end;
@@ -69,7 +68,7 @@ procedure TFBBlob.InternalClose;
 begin
   if FHandle = nil then
     Exit;
-  with FClientAPI do
+  with Firebird25ClientAPI do
     Call(isc_close_blob(StatusVector, @FHandle), True);
   FHandle := nil;
 end;
@@ -90,14 +89,13 @@ var DBHandle: TISC_DB_HANDLE;
       TRHandle: TISC_TR_HANDLE;
 begin
     inherited Create;
-    FClientAPI := Attachment.ClientAPI;
     FAttachment := Attachment;
     FOwner := Transaction as TFBTransaction;
     FOwner.RegisterObj(self);
     DBHandle := (Attachment as TFBAttachment).Handle;
     TRHandle := (Transaction as TFBTransaction).Handle;
     FCreating := true;
-    with FClientAPI do
+    with Firebird25ClientAPI do
       Call(isc_create_blob2(StatusVector, @DBHandle, @TRHandle, @FHandle, @FBlobID,
                            0, nil));
 end;
@@ -108,14 +106,13 @@ var DBHandle: TISC_DB_HANDLE;
     TRHandle: TISC_TR_HANDLE;
 begin
   inherited Create;
-  FClientAPI := Attachment.ClientAPI;
   FAttachment := Attachment;
   FOwner := Transaction as TFBTransaction;
   FOwner.RegisterObj(self);
   DBHandle := (Attachment as TFBAttachment).Handle;
   TRHandle := (Transaction as TFBTransaction).Handle;
   FBlobID := BlobID;
-  with FClientAPI do
+  with Firebird25ClientAPI do
     Call(isc_open_blob2(StatusVector,  @DBHandle, @TRHandle, @FHandle,
                      @FBlobID, 0, nil));
 end;
@@ -141,7 +138,7 @@ end;
 
 function TFBBlob.GetStatus: IStatus;
 begin
-  Result := FClientAPI.Status;
+  Result := Firebird25ClientAPI.Status;
 end;
 
 procedure TFBBlob.Cancel;
@@ -174,7 +171,7 @@ begin
   items[2] := Char(isc_info_blob_total_length);
   items[3] := Char(isc_info_blob_type);
 
-  with FClientAPI do
+  with Firebird25ClientAPI do
   begin
     Result := Call(isc_blob_info(StatusVector, @FHandle, 4, @items[0], SizeOf(results),
                     @results[0]),false) = 0;
@@ -216,7 +213,7 @@ begin
       localCount := MaxuShort
     else
       localCount := Count;
-    with FClientAPI do
+    with Firebird25ClientAPI do
       returnCode := isc_get_segment(StatusVector, @FHandle, @BytesRead, localCount,
                            LocalBuffer);
     Inc(LocalBuffer,BytesRead);
@@ -244,7 +241,7 @@ begin
       localCount := MaxuShort
     else
       localCount := Count;
-    with FClientAPI do
+    with Firebird25ClientAPI do
       Call(isc_put_segment(StatusVector,@FHandle,localCount,LocalBuffer));
     Dec(Count,localCount);
     Inc(LocalBuffer,localCount);

@@ -1,4 +1,4 @@
-unit FBStatus;
+unit FB25Status;
 
 {$mode objfpc}{$H+}
 
@@ -21,11 +21,10 @@ type
 
   TFBStatus = class(TInterfacedObject,IStatus)
   private
-    FClientAPI: TObject;
     FIBCS: TRTLCriticalSection; static;
     FIBDataBaseErrorMessages: TIBDataBaseErrorMessages;
   public
-    constructor Create(ClientAPI: TObject);
+    constructor Create;
     function StatusVector: PISC_STATUS;
 
     {IStatus}
@@ -47,10 +46,9 @@ threadvar
 
 { TFBStatus }
 
-constructor TFBStatus.Create(ClientAPI: TObject);
+constructor TFBStatus.Create;
 begin
   inherited Create;
-  FClientAPI := ClientAPI;
   FIBDataBaseErrorMessages := [ShowSQLMessage, ShowIBMessage];
 end;
 
@@ -61,7 +59,8 @@ end;
 
 function TFBStatus.Getsqlcode: Long;
 begin
-  Result := (FClientAPI as TFBClientAPI).isc_sqlcode(@FStatusVector);
+  with Firebird25ClientAPI do
+    Result := isc_sqlcode(@FStatusVector);
 end;
 
 function TFBStatus.GetMessage: string;
@@ -78,7 +77,8 @@ begin
   Exclude(IBDataBaseErrorMessages, ShowSQLMessage);
   if (ShowSQLMessage in IBDataBaseErrorMessages) then
   begin
-    (FClientAPI as TFBClientAPI).isc_sql_interprete(sqlcode, local_buffer, IBLocalBufferLength);
+    with Firebird25ClientAPI do
+      isc_sql_interprete(sqlcode, local_buffer, IBLocalBufferLength);
     if (ShowSQLCode in FIBDataBaseErrorMessages) then
       Result := Result + CRLF;
     Result := Result + strpas(local_buffer);
@@ -89,7 +89,8 @@ begin
     if (ShowSQLCode in IBDataBaseErrorMessages) or
        (ShowSQLMessage in IBDataBaseErrorMessages) then
       Result := Result + CRLF;
-    while ((FClientAPI as TFBClientAPI).isc_interprete(local_buffer, @FStatusVector) > 0) do
+    with Firebird25ClientAPI do
+    while (isc_interprete(local_buffer, @FStatusVector) > 0) do
     begin
       if (Result <> '') and (Result[Length(Result)] <> LF) then
         Result := Result + CRLF;

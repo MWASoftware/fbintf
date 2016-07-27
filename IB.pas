@@ -661,8 +661,8 @@ begin
   Result := false;
   if FBLibraryObj = nil then
   begin
-    FBLibraryObj := TFBClientAPI.Create;
-    FirebirdAPI := TFBClientAPI(FBLibraryObj);
+    FBLibraryObj := TFB25ClientAPI.Create;
+    FirebirdAPI := TFB25ClientAPI(FBLibraryObj);
     Result := true;
   end;
 end;

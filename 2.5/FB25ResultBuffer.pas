@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, IB, FB25ClientAPI, IBExternals, IBHeader, FB25Statement,
-  FB25Attachment, FBStatus;
+  FB25Attachment, FB25Status;
 
 type
   {TInfoBuffer inspired by IBPP RB class}
@@ -15,11 +15,10 @@ type
   private
     mBuffer: PChar;
     mSize: short;
-    FClientAPI: TFBClientAPI;
     function FindToken(token: char): PChar; overload;
     function FindToken(token: char; subtoken: char): PChar; overload;
   public
-    constructor Create(ClientAPI: TFBClientAPI; aSize: integer);
+    constructor Create(aSize: integer);
     destructor Destroy; override;
     function Size: short;
     procedure Reset;
@@ -76,8 +75,8 @@ uses FBErrorMessages;
 constructor TDBInfoResultBuffer.Create(aAttachment: TFBAttachment;
   info_request: char; aSize: integer);
 begin
-  inherited Create(aAttachment.ClientAPI,aSize);
-  with FClientAPI do
+  inherited Create(aSize);
+  with Firebird25ClientAPI do
     Call(isc_database_info(StatusVector, @(aAttachment.Handle), 2, @info_request,
                            Size, Buffer));
 end;
@@ -85,7 +84,7 @@ end;
 function TDBInfoResultBuffer.GetInfoBuffer(var p: PChar): integer;
 begin
   p := buffer + 1;
-  with FClientAPI do
+  with Firebird25ClientAPI do
     Result := isc_vax_integer(p, 2);
   Inc(p,2);
 end;
@@ -95,11 +94,11 @@ end;
 constructor TSQLResultBuffer.Create(aStatement: TFBStatement;
   info_request: char; aSize: integer);
 begin
-  inherited Create(aStatement.ClientAPI,aSize);
+  inherited Create(aSize);
   if aStatement.Handle = nil then
     IBError(ibxeInvalidStatementHandle,[nil]);
 
-  with FClientAPI do
+  with Firebird25ClientAPI do
     Call(isc_dsql_sql_info(StatusVector, @(aStatement.Handle), 2, @info_request,
                            Size, Buffer));
 end;
@@ -115,7 +114,7 @@ begin
   if p = nil then
     IBError(ibxeDscInfoTokenMissing,[token]);
 
-  with FClientAPI do
+  with Firebird25ClientAPI do
     Result := isc_vax_integer(p+1, 4);
 end;
 
@@ -126,7 +125,7 @@ var len: integer;
     p: PChar;
 begin
   p := buffer;
-  with FClientAPI do
+  with Firebird25ClientAPI do
   begin
     len := isc_vax_integer(p+1, 2);
     if (len <> 0) then
@@ -144,7 +143,7 @@ begin
   if p = nil then
     IBError(ibxeDscInfoTokenMissing,[token]);
 
-  with FClientAPI do
+  with Firebird25ClientAPI do
   begin
     len := isc_vax_integer(p+1, 2);
     if (len <> 0) then
@@ -162,7 +161,7 @@ begin
   if p = nil then
     IBError(ibxeDscInfoTokenMissing,[token]);
 
-  with FClientAPI do
+  with Firebird25ClientAPI do
   begin
     len := isc_vax_integer(p+1, 2);
     if (len <> 0) then
@@ -172,10 +171,9 @@ end;
 
 { TInfoBuffer }
 
-constructor TInfoBuffer.Create(ClientAPI: TFBClientAPI; aSize: integer);
+constructor TInfoBuffer.Create(aSize: integer);
 begin
   inherited Create;
-  FClientAPI := ClientAPI;
   mSize := aSize;
   GetMem(mBuffer,aSize);
   FillChar(mBuffer^,mSize,255);
@@ -200,7 +198,7 @@ begin
   p := mBuffer;
 
   while p^ <> char(isc_info_end) do
-  with FClientAPI do
+  with Firebird25ClientAPI do
   begin
     if p^ = token then
     begin
@@ -220,7 +218,7 @@ begin
   p := mBuffer;
 
   while p^ <> char(isc_info_end) do
-  with FClientAPI do
+  with Firebird25ClientAPI do
   begin
     if p^ = token then
     begin
@@ -254,7 +252,7 @@ begin
   if p = nil then
     IBError(ibxeDscInfoTokenMissing,[token]);
 
-  with FClientAPI do
+  with Firebird25ClientAPI do
     aValue := isc_vax_integer(p+1, 4);
   Result := aValue <> 0;
 end;
@@ -273,7 +271,7 @@ begin
 
   {len is the number of bytes in the following array}
 
-  with FClientAPI do
+  with Firebird25ClientAPI do
     len := isc_vax_integer(p+1, 2);
   Inc(p,3);
   Result := 0;
@@ -283,7 +281,7 @@ begin
      we skip, and 4 bytes for the count value which we sum up across
      all tables.}
 
-    with FClientAPI do
+    with Firebird25ClientAPI do
        Inc(Result,isc_vax_integer(p+2, 4));
      Inc(p,6);
      Dec(len,6);
@@ -299,7 +297,7 @@ begin
   if p = nil then
     IBError(ibxeDscInfoTokenMissing,[token]);
 
-  with FClientAPI do
+  with Firebird25ClientAPI do
     Result := isc_vax_integer(p+1, 2);
   SetString(data,p+3,Result);
   data := Trim(data);
@@ -310,7 +308,7 @@ var p: PChar;
 begin
   Result := 0;
   p := buffer;
-  with FClientAPI do
+  with Firebird25ClientAPI do
     Result := isc_vax_integer(p+1, 2);
   SetString(data,p+3,Result);
   data := Trim(data);

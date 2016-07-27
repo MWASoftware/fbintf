@@ -13,17 +13,15 @@ type
 
   TFBAttachment = class(TObjectOwner,IAttachment)
   private
-    FClientAPI: TFBClientAPI;
     FHandle: TISC_DB_HANDLE;
     FDatabaseName: string;
     FDPB: string;
     FDPBLength: short;
     procedure GenerateDPB(sl: TStrings; var DPB: string; var DPBLength: Short);
   public
-    constructor Create(ClientAPI: TFBClientAPI; DatabaseName: string; Params: TStrings);
+    constructor Create(DatabaseName: string; Params: TStrings);
     destructor Destroy; override;
     property Handle: TISC_DB_HANDLE read FHandle;
-    property ClientAPI: TFBClientAPI read FClientAPI;
 
   public
     {IAttachment}
@@ -50,7 +48,7 @@ type
 
 implementation
 
-uses FB25Events, FBStatus, FB25Transaction, FBErrorMessages, FB25Blob,
+uses FB25Events, FB25Status, FB25Transaction, FBErrorMessages, FB25Blob,
   FB25Statement, FB25ResultBuffer;
 
 const
@@ -137,7 +135,7 @@ begin
   aOperation.Clear;
   Result := aOperation;
 
-  with TDBInfoResultBuffer.Create(self,DBInfoCommand,IBHugeLocalBufferLength), FClientAPI do
+  with TDBInfoResultBuffer.Create(self,DBInfoCommand,IBHugeLocalBufferLength), Firebird25ClientAPI do
   try
     p := buffer;
     { 1. 1 byte specifying the item type requested (e.g., isc_info_insert_count).
@@ -186,7 +184,7 @@ begin
   {Iterate through the textual database parameters, constructing
    a DPB on-the-fly }
   for i := 0 to sl.Count - 1 do
-  with FClientAPI do
+  with Firebird25ClientAPI do
   begin
     { Get the parameter's name and value from the list,
       and make sure that the name is all lowercase with
@@ -272,12 +270,10 @@ begin
   end;
 end;
 
-constructor TFBAttachment.Create(ClientAPI: TFBClientAPI; DatabaseName: string;
-  Params: TStrings);
+constructor TFBAttachment.Create(DatabaseName: string; Params: TStrings);
 begin
   inherited Create;
-  FClientAPI := ClientAPI;
-  ClientAPI.RegisterObj(self);
+  Firebird25ClientAPI.RegisterObj(self);
   FDatabaseName := DatabaseName;
   GenerateDPB(Params, FDPB, FDPBLength);
   Connect;
@@ -286,18 +282,18 @@ end;
 destructor TFBAttachment.Destroy;
 begin
   Disconnect(true);
-  FClientAPI.UnRegisterObj(self);
+  Firebird25ClientAPI.UnRegisterObj(self);
   inherited Destroy;
 end;
 
 function TFBAttachment.GetStatus: IStatus;
 begin
-  Result := FClientAPI.Status;
+  Result := Firebird25ClientAPI.Status;
 end;
 
 procedure TFBAttachment.Connect;
 begin
-  with FClientAPI do
+  with Firebird25ClientAPI do
    Call(isc_attach_database(StatusVector, Length(FDatabaseName),
                          PChar(FDatabaseName), @FHandle,
                          FDPBLength, @FDPB));
@@ -318,14 +314,14 @@ begin
       TFBEvents(OwnedObjects[i]).Cancel;
 
   {Disconnect}
-  with FClientAPI do
+  with Firebird25ClientAPI do
     Call(isc_detach_database(StatusVector, @FHandle),not Force);
   FHandle := nil;
 end;
 
 procedure TFBAttachment.DropDatabase;
 begin
-  with FClientAPI do
+  with Firebird25ClientAPI do
     Call(isc_drop_database(StatusVector, @FHandle));
   Free;
 end;
@@ -351,7 +347,7 @@ procedure TFBAttachment.ExecImmediate(transaction: ITransaction; sql: string;
 var TRHandle: TISC_TR_HANDLE;
 begin
   TRHandle := (Transaction as TFBTransaction).Handle;
-  with FClientAPI do
+  with Firebird25ClientAPI do
     Call(isc_dsql_execute_immediate(StatusVector, @fHandle, @TRHandle, 0,PChar(sql), SQLDialect, nil));
 end;
 
@@ -380,7 +376,7 @@ var desc: TISC_BLOB_DESC;
     trHandle: TISC_TR_HANDLE;
 begin
   trHandle := (transaction as TFBTransaction).Handle;
-  with FClientAPI do
+  with Firebird25ClientAPI do
     Call(isc_blob_lookup_desc(StatusVector,@FHandle,@trHandle,
                 PChar(tableName),PChar(columnName),@desc,@uGlobal));
   Result := desc.blob_desc_charset;

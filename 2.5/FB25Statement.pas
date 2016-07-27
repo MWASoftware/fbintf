@@ -174,7 +174,6 @@ type
     function GetXSQLDA: PXSQLDA;
     procedure SetCount(Value: Integer);
   protected
-    FClientAPI: TFBClientAPI;
     FStatement: TFBStatement;
     function CreateSQLVAR: TIBXSQLVAR; virtual; abstract;
     function GetXSQLVARByName(Idx: String): TIBXSQLVAR; virtual; abstract;
@@ -262,7 +261,6 @@ type
 
   TFBStatement = class(TInterfacedObject,IStatement)
   private
-    FClientAPI: TFBClientAPI;
     FAttachment: TFBAttachment;
     FTransaction: TFBTransaction;
     FOwner: TObjectOwner;
@@ -303,7 +301,6 @@ type
     function OpenCursor: IResultSet; overload;
     function OpenCursor(aTransaction: ITransaction): IResultSet; overload;
     procedure Release;
-    property ClientAPI: TFBClientAPI read FClientAPI;
     property Handle: TISC_STMT_HANDLE read FHandle;
     property SQLParams: ISQLParams read GetSQLParams;
     property SQLType: TIBSQLTypes read GetSQLType;
@@ -413,7 +410,7 @@ end;
 procedure TIBXINPUTSQLDA.Bind;
 begin
   Count := 1;
-  with FClientAPI do
+  with Firebird25ClientAPI do
   begin
     if (FXSQLDA <> nil) then
        Call(isc_dsql_describe_bind(StatusVector, @(FStatement.Handle), FStatement.SQLDialect,
@@ -489,7 +486,7 @@ procedure TIBXOUTPUTSQLDA.Bind;
 begin
   { Allocate an initial output descriptor (with one column) }
   Count := 1;
-  with FClientAPI do
+  with Firebird25ClientAPI do
   begin
     { Using isc_dsql_describe, get the right size for the columns... }
     Call(isc_dsql_describe(StatusVector, @(FStatement.Handle), FStatement.SQLDialect, FXSQLDA), True);
@@ -754,7 +751,7 @@ var
 begin
   result := 0;
   if not IsNull then
-    with FStatement.FClientAPI do
+    with Firebird25ClientAPI do
     case FXSQLVAR^.sqltype and (not 1) of
       SQL_TEXT, SQL_VARYING: begin
         try
@@ -924,7 +921,7 @@ begin
   result := '';
   { Check null, if so return a default string }
   if not IsNull then
-  with FStatement.FClientAPI do
+  with Firebird25ClientAPI do
     case FXSQLVar^.sqltype and (not 1) of
       SQL_ARRAY:
         result := '(Array)'; {do not localize}
@@ -1047,7 +1044,7 @@ begin
   FXSQLVAR^.sqltype := SQL_INT64 or (FXSQLVAR^.sqltype and 1);
   FXSQLVAR^.sqlscale := -4;
   FXSQLVAR^.sqllen := SizeOf(Int64);
-  FStatement.FClientAPI.IBAlloc(FXSQLVAR^.sqldata, 0, FXSQLVAR^.sqllen);
+  Firebird25ClientAPI.IBAlloc(FXSQLVAR^.sqldata, 0, FXSQLVAR^.sqllen);
   PCurrency(FXSQLVAR^.sqldata)^ := Value;
   FModified := True;
 end;
@@ -1078,7 +1075,7 @@ begin
   FXSQLVAR^.sqltype := SQL_INT64 or (FXSQLVAR^.sqltype and 1);
   FXSQLVAR^.sqlscale := 0;
   FXSQLVAR^.sqllen := SizeOf(Int64);
-  FStatement.FClientAPI.IBAlloc(FXSQLVAR^.sqldata, 0, FXSQLVAR^.sqllen);
+  Firebird25ClientAPI.IBAlloc(FXSQLVAR^.sqldata, 0, FXSQLVAR^.sqllen);
   PInt64(FXSQLVAR^.sqldata)^ := Value;
   FModified := True;
 end;
@@ -1114,7 +1111,7 @@ begin
     tm_year := Yr - 1900;
   end;
   FXSQLVAR^.sqllen := SizeOf(ISC_DATE);
-  with FStatement.FClientAPI do
+  with Firebird25ClientAPI do
   begin
     IBAlloc(FXSQLVAR^.sqldata, 0, FXSQLVAR^.sqllen);
     isc_encode_sql_date(@tm_date, PISC_DATE(FXSQLVAR^.sqldata));
@@ -1159,7 +1156,7 @@ begin
     tm_year := 0;
   end;
   FXSQLVAR^.sqllen := SizeOf(ISC_TIME);
-  with FStatement.FClientAPI do
+  with Firebird25ClientAPI do
   begin
     IBAlloc(FXSQLVAR^.sqldata, 0, FXSQLVAR^.sqllen);
     isc_encode_sql_time(@tm_date, PISC_TIME(FXSQLVAR^.sqldata));
@@ -1207,7 +1204,7 @@ begin
     tm_year := Yr - 1900;
   end;
   FXSQLVAR^.sqllen := SizeOf(TISC_QUAD);
-  with FStatement.FClientAPI do
+  with Firebird25ClientAPI do
   begin
     IBAlloc(FXSQLVAR^.sqldata, 0, FXSQLVAR^.sqllen);
     isc_encode_date(@tm_date, PISC_QUAD(FXSQLVAR^.sqldata));
@@ -1237,7 +1234,7 @@ begin
   FXSQLVAR^.sqltype := SQL_DOUBLE or (FXSQLVAR^.sqltype and 1);
   FXSQLVAR^.sqllen := SizeOf(Double);
   FXSQLVAR^.sqlscale := 0;
-  with FStatement.FClientAPI do
+  with Firebird25ClientAPI do
     IBAlloc(FXSQLVAR^.sqldata, 0, FXSQLVAR^.sqllen);
   PDouble(FXSQLVAR^.sqldata)^ := Value;
   FModified := True;
@@ -1263,7 +1260,7 @@ begin
   FXSQLVAR^.sqltype := SQL_FLOAT or (FXSQLVAR^.sqltype and 1);
   FXSQLVAR^.sqllen := SizeOf(Float);
   FXSQLVAR^.sqlscale := 0;
-  with FStatement.FClientAPI do
+  with Firebird25ClientAPI do
     IBAlloc(FXSQLVAR^.sqldata, 0, FXSQLVAR^.sqllen);
   PSingle(FXSQLVAR^.sqldata)^ := Value;
   FModified := True;
@@ -1289,7 +1286,7 @@ begin
   FXSQLVAR^.sqltype := SQL_LONG or (FXSQLVAR^.sqltype and 1);
   FXSQLVAR^.sqllen := SizeOf(Long);
   FXSQLVAR^.sqlscale := 0;
-  with FStatement.FClientAPI do
+  with Firebird25ClientAPI do
     IBAlloc(FXSQLVAR^.sqldata, 0, FXSQLVAR^.sqllen);
   PLong(FXSQLVAR^.sqldata)^ := Value;
   FModified := True;
@@ -1339,7 +1336,7 @@ begin
      (FXSQLVAR^.sqltype and (not 1) <> SQL_ARRAY) then
     IBError(ibxeInvalidDataConversion, [nil]);
   FXSQLVAR^.sqllen := SizeOf(TISC_QUAD);
-  with FStatement.FClientAPI do
+  with Firebird25ClientAPI do
     IBAlloc(FXSQLVAR^.sqldata, 0, FXSQLVAR^.sqllen);
   PISC_QUAD(FXSQLVAR^.sqldata)^ := Value;
   FModified := True;
@@ -1365,7 +1362,7 @@ begin
   FXSQLVAR^.sqltype := SQL_SHORT or (FXSQLVAR^.sqltype and 1);
   FXSQLVAR^.sqllen := SizeOf(Short);
   FXSQLVAR^.sqlscale := 0;
-  with FStatement.FClientAPI do
+  with Firebird25ClientAPI do
     IBAlloc(FXSQLVAR^.sqldata, 0, FXSQLVAR^.sqllen);
   PShort(FXSQLVAR^.sqldata)^ := Value;
   FModified := True;
@@ -1397,7 +1394,7 @@ var
       else begin
         FXSQLVAR^.sqltype := SQL_TEXT or (FXSQLVAR^.sqltype and 1);
         FXSQLVAR^.sqllen := Length(Value);
-        with FStatement.FClientAPI do
+        with Firebird25ClientAPI do
           IBAlloc(FXSQLVAR^.sqldata, 0, FXSQLVAR^.sqllen + 1);
         if (Length(Value) > 0) then
           Move(Value[1], FXSQLVAR^.sqldata^, FXSQLVAR^.sqllen);
@@ -1529,7 +1526,7 @@ begin
     if Value then
     begin
       FXSQLVAR^.sqltype := FXSQLVAR^.sqltype or 1;
-      with FStatement.FClientAPI do
+      with Firebird25ClientAPI do
         IBAlloc(FXSQLVAR^.sqlind, 0, SizeOf(Short));
     end
     else
@@ -1571,7 +1568,7 @@ begin
   FXSQLVAR^.sqltype := SQL_BOOLEAN;
   FXSQLVAR^.sqllen := 1;
   FXSQLVAR^.sqlscale := 0;
-  with FStatement.FClientAPI do
+  with Firebird25ClientAPI do
     IBAlloc(FXSQLVAR^.sqldata, 0, FXSQLVAR^.sqllen);
   if AValue then
     PByte(FXSQLVAR^.sqldata)^ := ISC_TRUE
@@ -1607,7 +1604,6 @@ constructor TIBXSQLDA.Create(aStatement: TFBStatement; sqldaType: TIBXSQLDAType)
 begin
   inherited Create;
   FStatement := aStatement;
-  FClientAPI := aStatement.ClientAPI;
   FSize := 0;
   FUniqueRelationName := '';
   FInputSQLDA := sqldaType = daInput;
@@ -1675,7 +1671,7 @@ begin
   begin
     for i := 0 to FCount - 1 do
     begin
-      with FStatement.FClientAPI, FXSQLVARs[i].Data^ do
+      with Firebird25ClientAPI, FXSQLVARs[i].Data^ do
       begin
 
         {First get the unique relation name, if any}
@@ -1774,7 +1770,7 @@ begin
       OldSize := 0;
     if FCount > FSize then
     begin
-      FStatement.FClientAPI.IBAlloc(FXSQLDA, OldSize, XSQLDA_LENGTH(FCount));
+      Firebird25ClientAPI.IBAlloc(FXSQLDA, OldSize, XSQLDA_LENGTH(FCount));
       SetLength(FXSQLVARs, FCount);
       FXSQLDA^.version := SQLDA_VERSION1;
       p := @FXSQLDA^.sqlvar[0];
@@ -1821,7 +1817,7 @@ begin
     IBError(ibxeEmptyQuery, [nil]);
   try
     CheckTransaction(FTransaction);
-    with FClientAPI do
+    with Firebird25ClientAPI do
     begin
       Call(isc_dsql_alloc_statement2(StatusVector, @(FAttachment.Handle),
                                       @FHandle), True);
@@ -1884,7 +1880,7 @@ begin
   FSQLRecord.FEOF := false;
   CheckTransaction(aTransaction);
   CheckHandle;
-  with FClientAPI do
+  with Firebird25ClientAPI do
   case FSQLType of
   SQLSelect:
     IBError(ibxeIsAExecuteProcedure,[]);
@@ -1917,7 +1913,7 @@ begin
 
  CheckTransaction(aTransaction);
  CheckHandle;
- with FClientAPI do
+ with Firebird25ClientAPI do
  begin
    Call(isc_dsql_execute2(StatusVector,
                        @(aTransaction.Handle),
@@ -1946,7 +1942,7 @@ begin
      That way the allocations can be reused for
      a new query sring in the same SQL instance }
     if FHandle <> nil then
-    with FClientAPI do
+    with Firebird25ClientAPI do
     begin
       isc_res :=
         Call(isc_dsql_free_statement(StatusVector, @FHandle, DSQL_drop), False);
@@ -1963,7 +1959,6 @@ constructor TFBStatement.Create(Attachment: TFBAttachment;
 var GUID : TGUID;
 begin
   inherited Create;
-  FClientAPI := Attachment.ClientAPI;
   FAttachment := Attachment;
   FTransaction := transaction;
   FOwner := Transaction;
@@ -1995,7 +1990,7 @@ var
 begin
   try
     if (FHandle <> nil) and (SQLType = SQLSelect) and FOpen then
-    with FClientAPI do
+    with Firebird25ClientAPI do
     begin
       isc_res := Call(
                    isc_dsql_free_statement(StatusVector, @FHandle, DSQL_close),
@@ -2021,7 +2016,7 @@ begin
   if FSQLRecord.FEOF then
     IBError(ibxeEOF,[nil]);
 
-  with FClientAPI do
+  with Firebird25ClientAPI do
   begin
     { Go to the next record... }
     fetch_res :=
@@ -2060,7 +2055,7 @@ end;
 
 function TFBStatement.GetStatus: IStatus;
 begin
-  Result := FClientAPI.Status;
+  Result := Firebird25ClientAPI.Status;
 end;
 
 function TFBStatement.GetSQLParams: ISQLParams;

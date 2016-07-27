@@ -13,7 +13,6 @@ type
 
   TFBServiceManager = class(TInterfacedObject,IServiceManager)
   private
-    FClientAPI: TFBClientAPI;
     FServerName: string;
     FSPB: PChar;
     FSPBLength: Short;
@@ -24,8 +23,7 @@ type
     procedure CheckServerName;
     procedure GenerateSPB(sl: TStrings; var SPB: String; var SPBLength: Short);
   public
-    constructor Create(ClientAPI: TFBClientAPI; ServerName: string;
-      Protocol: TProtocol; Params: TStrings);
+    constructor Create(ServerName: string; Protocol: TProtocol; Params: TStrings);
     destructor Destroy; override;
     property Handle: TISC_SVC_HANDLE read FHandle;
 
@@ -89,10 +87,9 @@ type
     FSize: integer;
     FBufPtr: PChar;
     FDataSize: integer;
-    FClientAPI: TFBClientAPI;
     procedure CheckBuffer(BytesNeeded: integer);
   public
-    constructor Create(ClientAPI: TFBClientAPI; command:char; aSize: integer = 1024);
+    constructor Create(command:char; aSize: integer = 1024);
     destructor Destroy; override;
     procedure AddVar(ServiceVar: TServiceParam);
     function Buffer: PChar;
@@ -106,9 +103,8 @@ type
   private
     FBuffer: PChar;
     FSize: integer;
-    FClientAPI: TFBClientAPI;
   public
-    constructor Create(ClientAPI: TFBClientAPI; aSize: integer = DefaultBufferSize);
+    constructor Create(aSize: integer = DefaultBufferSize);
     destructor Destroy; override;
     function Buffer: PChar;
     function ParseBuffer: TServiceQueryResponse;
@@ -117,11 +113,9 @@ type
 
 { TServiceResponseBuffer }
 
-constructor TServiceResponseBuffer.Create(ClientAPI: TFBClientAPI;
-  aSize: integer);
+constructor TServiceResponseBuffer.Create(aSize: integer);
 begin
   inherited Create;
-  FClientAPI := ClientAPI;
   FSize := aSize;
   GetMem(FBuffer,aSize);
   FillChar(FBuffer^,aSize,255);
@@ -145,7 +139,7 @@ var P: PChar;
   procedure ParseString(var resp: TServiceResponse);
   var len: ISC_LONG;
   begin
-    with FClientAPI do
+    with Firebird25ClientAPI do
       len := isc_vax_integer(P + 1, 2);
     resp.dr := drString;
     SetString(resp.StringValue,P+3,len);
@@ -155,7 +149,7 @@ var P: PChar;
   procedure ParseInteger(var resp: TServiceResponse);
   begin
     resp.dr := drInteger;
-    with FClientAPI do
+    with Firebird25ClientAPI do
       resp.IntValue := isc_vax_integer(P+1,4);
     Inc(P,5);
   end;
@@ -355,11 +349,9 @@ begin
   end;
 end;
 
-constructor TServiceBuffer.Create(ClientAPI: TFBClientAPI; command: char;
-  aSize: integer);
+constructor TServiceBuffer.Create(command: char; aSize: integer);
 begin
   inherited Create;
-  FClientAPI := ClientAPI;
   FSize := aSize;
   GetMem(FBuffer,aSize);
   FillChar(FBuffer^,aSize,255);
@@ -378,7 +370,7 @@ end;
 procedure TServiceBuffer.AddVar(ServiceVar: TServiceParam);
 var Len: UShort;
 begin
-  with FClientAPI do
+  with Firebird25ClientAPI do
   case ServiceVar.dt of
     dtInteger:
       begin
@@ -496,15 +488,14 @@ begin
   end;
 end;
 
-constructor TFBServiceManager.Create(ClientAPI: TFBClientAPI; ServerName: string;
-  Protocol: TProtocol; Params: TStrings);
+constructor TFBServiceManager.Create(ServerName: string; Protocol: TProtocol;
+  Params: TStrings);
 var SPB: String;
 begin
   inherited Create;
-  FClientAPI := ClientAPI;
   FProtocol := Protocol;
   GenerateSPB(Params, SPB, FSPBLength);
-  with FClientAPI do
+  with Firebird25ClientAPI do
     IBAlloc(FSPB, 0, FsPBLength);
   Move(SPB[1], FSPB[0], FSPBLength);
   FServerName := ServerName;
@@ -518,7 +509,7 @@ end;
 
 function TFBServiceManager.GetStatus: IStatus;
 begin
-
+  Result := Firebird25ClientAPI.Status;
 end;
 
 procedure TFBServiceManager.Attach;
@@ -530,7 +521,7 @@ begin
     NamedPipe: ConnectString := '\\' + FServerName + '\service_mgr'; {do not localize}
     Local: ConnectString := 'service_mgr'; {do not localize}
   end;
-  with FClientAPI do
+  with Firebird25ClientAPI do
     Call(isc_service_attach(StatusVector, Length(ConnectString),
                            PChar(ConnectString), @FHandle,
                            FSPBLength, FSPB));
@@ -539,7 +530,7 @@ end;
 procedure TFBServiceManager.Detach;
 begin
   CheckActive;
-  with FClientAPI do
+  with Firebird25ClientAPI do
   if (Call(isc_service_detach(StatusVector, @FHandle), False) > 0) then
   begin
     FHandle := nil;
@@ -557,12 +548,12 @@ end;
 procedure TFBServiceManager.Start(Command: char; Params: TServiceCommandParams);
 var i: integer;
 begin
-  with TServiceBuffer.Create(FClientAPI,Command) do
+  with TServiceBuffer.Create(Command) do
   try
     for i := 0 to Length(Params) - 1 do
       AddVar(Params[i]);
 
-    with FClientAPI do
+    with Firebird25ClientAPI do
       Call(isc_service_start(StatusVector, @FHandle, nil,
                            DataSize, Buffer));
   finally
@@ -574,14 +565,14 @@ function TFBServiceManager.Query(Command: char; Params: TServiceQueryParams): TS
 var i: integer;
     response: TServiceResponseBuffer;
 begin
-  with TServiceBuffer.Create(FClientAPI,Command) do
+  with TServiceBuffer.Create(Command) do
   try
     for i := 0 to Length(Params) - 1 do
       AddVar(Params[i]);
 
-    response := TServiceResponseBuffer.Create(FClientAPI);
+    response := TServiceResponseBuffer.Create;
     try
-      with FClientAPI do
+      with Firebird25ClientAPI do
         Call(isc_service_query(StatusVector, @FHandle, nil, 0, nil,
                            DataSize, Buffer,
                            response.Size, response.Buffer));
@@ -605,9 +596,9 @@ begin
   CommandBuffer := '';
   for i := 0 to Length(Commands) - 1 do
     CommandBuffer += Commands[i];
-  response := TServiceResponseBuffer.Create(FClientAPI);
+  response := TServiceResponseBuffer.Create;
   try
-    with FClientAPI do
+    with Firebird25ClientAPI do
       Call(isc_service_query(StatusVector, @FHandle, nil, 0, nil,
                          Length(CommandBuffer), PChar(CommandBuffer),
                          response.Size, response.Buffer));

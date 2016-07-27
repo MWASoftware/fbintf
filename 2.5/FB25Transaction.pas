@@ -14,7 +14,6 @@ type
 
   TFBTransaction = class(TObjectOwner,ITransaction)
   private
-    FClientAPI: TFBClientAPI;
     FOwners: array of TFBAttachment;
     FHandle: TISC_TR_HANDLE;
     FTPB: String;
@@ -165,7 +164,6 @@ begin
   if Length(Attachments) = 0 then
     IBError(ibxEmptyAttachmentsList,[nil]);
 
-  FClientAPI := Attachments[0].ClientAPI;
   setLength(FOwners,Length(Attachments));
   for i := 0 to Length(Attachments) - 1 do
   begin
@@ -179,7 +177,6 @@ end;
 constructor TFBTransaction.Create(Attachment: TFBAttachment; Params: TStrings);
 begin
   inherited Create;
-  FClientAPI := Attachment.ClientAPI;
   setLength(FOwners,1);
   FOwners[0] := Attachment;
   FOwners[0].RegisterObj(self);
@@ -198,7 +195,7 @@ end;
 
 function TFBTransaction.GetStatus: IStatus;
 begin
-  Result := FClientAPI.Status;
+  Result := Firebird25ClientAPI.Status;
 end;
 
 function TFBTransaction.GetInTransaction: boolean;
@@ -211,7 +208,7 @@ begin
   if FHandle = nil then
     Exit;
   CloseAll;
-  with FClientAPI do
+  with Firebird25ClientAPI do
     Call(isc_commit_transaction(StatusVector, @FHandle));
   FHandle := nil;
 end;
@@ -220,7 +217,7 @@ procedure TFBTransaction.CommitRetaining;
 begin
   if FHandle = nil then
     Exit;
-  with FClientAPI do
+  with Firebird25ClientAPI do
     Call(isc_commit_retaining(StatusVector, @FHandle));
 end;
 
@@ -229,7 +226,7 @@ var pteb: PISC_TEB_ARRAY;
     i: integer;
 begin
   pteb := nil;
-  with FClientAPI do
+  with Firebird25ClientAPI do
   if Length(FOwners) = 1 then
   try
     Call(isc_start_transaction(StatusVector, @FHandle,1,
@@ -275,7 +272,7 @@ begin
   if FHandle = nil then
     Exit;
   CloseAll;
-  with FClientAPI do
+  with Firebird25ClientAPI do
     Call(isc_rollback_transaction(StatusVector, @FHandle));
   FHandle := nil;
 end;
@@ -284,7 +281,7 @@ procedure TFBTransaction.RollbackRetaining;
 begin
   if FHandle = nil then
     Exit;
-  with FClientAPI do
+  with Firebird25ClientAPI do
     Call(isc_rollback_retaining(StatusVector, @FHandle));
 end;
 

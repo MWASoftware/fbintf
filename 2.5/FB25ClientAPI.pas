@@ -5,13 +5,13 @@ unit FB25ClientAPI;
 interface
 
 uses
-  Classes, SysUtils, FBLibrary, IBHeader, IBExternals,FBStatus, IB;
+  Classes, SysUtils, FBLibrary, IBHeader, IBExternals,FB25Status, IB;
 
 type
 
-  { TFBClientAPI }
+  { TFB25ClientAPI }
 
-  TFBClientAPI = class(TFBLibrary,IFirebirdAPI)
+  TFB25ClientAPI = class(TFBLibrary,IFirebirdAPI)
   private
     FIBServiceAPIPresent: boolean;
     FStatus: TFBStatus;
@@ -102,6 +102,9 @@ type
     function GetLibraryName: string;
     function HasServiceAPI: boolean;
   end;
+
+const
+  Firebird25ClientAPI: TFB25ClientAPI = nil;
 
 implementation
 
@@ -205,9 +208,9 @@ begin
 end;
 
 
-{ TFBClientAPI }
+{ TFB25ClientAPI }
 
-procedure TFBClientAPI.LoadInterface;
+procedure TFB25ClientAPI.LoadInterface;
 begin
   BLOB_get := GetProcAddr('BLOB_get'); {do not localize}
   BLOB_put := GetProcAddr('BLOB_put'); {do not localize}
@@ -287,23 +290,25 @@ begin
   end;
 end;
 
-constructor TFBClientAPI.Create;
+constructor TFB25ClientAPI.Create;
 begin
   inherited;
   if (IBLibrary <> NilHandle) then
     LoadInterface;
-  FStatus := TFBStatus.Create(self);
+  FStatus := TFBStatus.Create;
+  Firebird25ClientAPI := self;
 end;
 
-destructor TFBClientAPI.Destroy;
+destructor TFB25ClientAPI.Destroy;
 begin
   if assigned(FStatus) then
     FStatus.Free;
+  Firebird25ClientAPI := nil;
   inherited Destroy;
 end;
 
 
-function TFBClientAPI.Call(ErrCode: ISC_STATUS; RaiseError: Boolean
+function TFB25ClientAPI.Call(ErrCode: ISC_STATUS; RaiseError: Boolean
   ): ISC_STATUS;
 begin
   result := ErrCode;
@@ -311,17 +316,17 @@ begin
     raise EIBInterBaseError.Create(FStatus);
 end;
 
-function TFBClientAPI.StatusVector: PISC_STATUS;
+function TFB25ClientAPI.StatusVector: PISC_STATUS;
 begin
   Result := FStatus.StatusVector;
 end;
 
-procedure TFBClientAPI.IBDataBaseError;
+procedure TFB25ClientAPI.IBDataBaseError;
 begin
   raise EIBInterBaseError.Create(FStatus);
 end;
 
-procedure TFBClientAPI.EncodeLsbf(aValue: integer; len: integer;
+procedure TFB25ClientAPI.EncodeLsbf(aValue: integer; len: integer;
   var buffer: PChar);
 begin
   while len > 0 do
@@ -333,7 +338,7 @@ begin
   end;
 end;
 
-function TFBClientAPI.EncodeLsbf(aValue: integer; len: integer): string;
+function TFB25ClientAPI.EncodeLsbf(aValue: integer; len: integer): string;
 begin
   Result := '';
   while len > 0 do
@@ -344,18 +349,18 @@ begin
   end;
 end;
 
-function TFBClientAPI.GetStatus: IStatus;
+function TFB25ClientAPI.GetStatus: IStatus;
 begin
   Result := FStatus;
 end;
 
-function TFBClientAPI.OpenDatabase(DatabaseName: string; Params: TStrings
+function TFB25ClientAPI.OpenDatabase(DatabaseName: string; Params: TStrings
   ): IAttachment;
 begin
-   Result := TFBAttachment.Create(self,DatabaseName,Params)
+   Result := TFBAttachment.Create(DatabaseName,Params)
 end;
 
-procedure TFBClientAPI.CreateDatabase(DatabaseName: string;
+procedure TFB25ClientAPI.CreateDatabase(DatabaseName: string;
   SQLDialect: integer; Params: TStrings);
 var
   tr_handle: TISC_TR_HANDLE;
@@ -369,13 +374,13 @@ begin
                                  Params.Text), SQLDialect, nil));
 end;
 
-function TFBClientAPI.GetServiceManager(ServerName: string;
+function TFB25ClientAPI.GetServiceManager(ServerName: string;
   Protocol: TProtocol; Params: TStrings): IServiceManager;
 begin
-  Result := TFBServiceManager.Create(self,ServerName,Protocol,Params);
+  Result := TFBServiceManager.Create(ServerName,Protocol,Params);
 end;
 
-function TFBClientAPI.StartTransaction(Attachments: array of IAttachment;
+function TFB25ClientAPI.StartTransaction(Attachments: array of IAttachment;
   Params: TStrings): ITransaction;
 var FBAttachments: array of TFBAttachment;
     i: integer;
@@ -386,17 +391,17 @@ begin
   Result := TFBTransaction.Create(FBAttachments,Params);
 end;
 
-function TFBClientAPI.GetIsEmbeddedServer: boolean;
+function TFB25ClientAPI.GetIsEmbeddedServer: boolean;
 begin
   Result := IsEmbeddedServer;
 end;
 
-function TFBClientAPI.GetLibraryName: string;
+function TFB25ClientAPI.GetLibraryName: string;
 begin
   Result := FBLibraryName;
 end;
 
-function TFBClientAPI.HasServiceAPI: boolean;
+function TFB25ClientAPI.HasServiceAPI: boolean;
 begin
   Result := IBServiceAPIPresent;
 end;
