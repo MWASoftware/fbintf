@@ -494,7 +494,7 @@ begin
   if FHandle = nil then
     Exit;
   with Firebird25ClientAPI do
-  if (Call(isc_service_detach(StatusVector, @FHandle), False) > 0) then
+  if isc_service_detach(StatusVector, @FHandle) > 0 then
   begin
     FHandle := nil;
     IBDataBaseError;
@@ -540,9 +540,10 @@ begin
     Local: ConnectString := 'service_mgr'; {do not localize}
   end;
   with Firebird25ClientAPI do
-    Call(isc_service_attach(StatusVector, Length(ConnectString),
+    if isc_service_attach(StatusVector, Length(ConnectString),
                            PChar(ConnectString), @FHandle,
-                           FSPBLength, FSPB));
+                           FSPBLength, FSPB) > 0 then
+      IBDataBaseError;
 end;
 
 procedure TFBServiceManager.Detach;
@@ -565,8 +566,9 @@ begin
       AddVar(Params[i]);
 
     with Firebird25ClientAPI do
-      Call(isc_service_start(StatusVector, @FHandle, nil,
-                           DataSize, Buffer));
+      if isc_service_start(StatusVector, @FHandle, nil,
+                           DataSize, Buffer) > 0 then
+        IBDataBaseError;
   finally
     Free;
   end;
@@ -584,9 +586,10 @@ begin
     response := TServiceResponseBuffer.Create;
     try
       with Firebird25ClientAPI do
-        Call(isc_service_query(StatusVector, @FHandle, nil, 0, nil,
+        if isc_service_query(StatusVector, @FHandle, nil, 0, nil,
                            DataSize, Buffer,
-                           response.Size, response.Buffer));
+                           response.Size, response.Buffer) > 0 then
+          IBDataBaseError;
 
       Result := response.ParseBuffer;
 
@@ -610,9 +613,10 @@ begin
   response := TServiceResponseBuffer.Create;
   try
     with Firebird25ClientAPI do
-      Call(isc_service_query(StatusVector, @FHandle, nil, 0, nil,
+      if isc_service_query(StatusVector, @FHandle, nil, 0, nil,
                          Length(CommandBuffer), PChar(CommandBuffer),
-                         response.Size, response.Buffer));
+                         response.Size, response.Buffer) > 0 then
+        IBDataBaseError;
 
     Result := response.ParseBuffer;
 

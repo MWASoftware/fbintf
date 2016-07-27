@@ -77,8 +77,9 @@ constructor TDBInfoResultBuffer.Create(aAttachment: TFBAttachment;
 begin
   inherited Create(aSize);
   with Firebird25ClientAPI do
-    Call(isc_database_info(StatusVector, @(aAttachment.Handle), 2, @info_request,
-                           Size, Buffer));
+    if isc_database_info(StatusVector, @(aAttachment.Handle), 2, @info_request,
+                           Size, Buffer) > 0 then
+      IBDataBaseError;
 end;
 
 function TDBInfoResultBuffer.GetInfoBuffer(var p: PChar): integer;
@@ -99,8 +100,9 @@ begin
     IBError(ibxeInvalidStatementHandle,[nil]);
 
   with Firebird25ClientAPI do
-    Call(isc_dsql_sql_info(StatusVector, @(aStatement.Handle), 2, @info_request,
-                           Size, Buffer));
+    if isc_dsql_sql_info(StatusVector, @(aStatement.Handle), 2, @info_request,
+                           Size, Buffer) > 0 then
+      IBDataBaseError;
 end;
 
   { TServiceQueryBuffer }

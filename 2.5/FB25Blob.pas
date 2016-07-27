@@ -6,18 +6,17 @@ interface
 
 uses
   Classes, SysUtils, IB, IBHeader,IBExternals, FBLibrary, FB25ClientAPI, FB25Attachment,
-  FB25Transaction;
+  FB25Transaction, FB25APIObject;
 
 type
 
   { TFBBlob }
 
-  TFBBlob = class(TInterfacedObject,IBlob)
+  TFBBlob = class(TAPIObject,IBlob)
   private
     FAttachment: TFBAttachment;
     FHandle: TISC_BLOB_HANDLE;
     FBlobID: TISC_QUAD;
-    FOwner: TObjectOwner;
     FEOB: boolean;
     FCreating: boolean;
     procedure InternalCancel;
@@ -90,8 +89,7 @@ var DBHandle: TISC_DB_HANDLE;
 begin
     inherited Create;
     FAttachment := Attachment;
-    FOwner := Transaction as TFBTransaction;
-    FOwner.RegisterObj(self);
+    AddOwner(Transaction as TFBTransaction);
     DBHandle := (Attachment as TFBAttachment).Handle;
     TRHandle := (Transaction as TFBTransaction).Handle;
     FCreating := true;
@@ -107,8 +105,7 @@ var DBHandle: TISC_DB_HANDLE;
 begin
   inherited Create;
   FAttachment := Attachment;
-  FOwner := Transaction as TFBTransaction;
-  FOwner.RegisterObj(self);
+  AddOwner(Transaction as TFBTransaction);
   DBHandle := (Attachment as TFBAttachment).Handle;
   TRHandle := (Transaction as TFBTransaction).Handle;
   FBlobID := BlobID;
@@ -123,8 +120,6 @@ begin
     InternalCancel
   else
     InternalClose;
-  if assigned(FOwner) then
-    FOwner.UnRegisterObj(self);
   inherited Destroy;
 end;
 

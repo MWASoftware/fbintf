@@ -19,7 +19,6 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-    function Call(ErrCode: ISC_STATUS; RaiseError: Boolean = true): ISC_STATUS;
     function StatusVector: PISC_STATUS;
     procedure IBDataBaseError;
     procedure EncodeLsbf(aValue: integer; len: integer; var buffer: PChar); overload;
@@ -308,14 +307,6 @@ begin
 end;
 
 
-function TFB25ClientAPI.Call(ErrCode: ISC_STATUS; RaiseError: Boolean
-  ): ISC_STATUS;
-begin
-  result := ErrCode;
-  if RaiseError and (ErrCode > 0) then
-    raise EIBInterBaseError.Create(FStatus);
-end;
-
 function TFB25ClientAPI.StatusVector: PISC_STATUS;
 begin
   Result := FStatus.StatusVector;
@@ -368,10 +359,10 @@ var
 begin
   tr_handle := nil;
   db_Handle := nil;
-  Call(
-      isc_dsql_execute_immediate(StatusVector, @db_Handle, @tr_handle, 0,
+  if isc_dsql_execute_immediate(StatusVector, @db_Handle, @tr_handle, 0,
                                  PChar('CREATE DATABASE ''' + DatabaseName + ''' ' + {do not localize}
-                                 Params.Text), SQLDialect, nil));
+                                 Params.Text), SQLDialect, nil) > 0 then
+    IBDataBaseError;
 end;
 
 function TFB25ClientAPI.GetServiceManager(ServerName: string;

@@ -28,9 +28,9 @@ type
     function StatusVector: PISC_STATUS;
 
     {IStatus}
-    function GetIBErrorCode: Long; virtual;
-    function Getsqlcode: Long; virtual;
-    function GetMessage: string; virtual;
+    function GetIBErrorCode: Long;
+    function Getsqlcode: Long;
+    function GetMessage: string;
     function CheckStatusVector(ErrorCodes: array of TFBStatusCode): Boolean;
     function GetIBDataBaseErrorMessages: TIBDataBaseErrorMessages;
     procedure SetIBDataBaseErrorMessages(Value: TIBDataBaseErrorMessages);

@@ -6,14 +6,13 @@ interface
 
 uses
   Classes, SysUtils, IB, FBLibrary, FB25ClientAPI, FB25Attachment, IBExternals,
-  IBHeader, syncobjs;
+  IBHeader, syncobjs, FB25APIObject;
 
 type
   { TFBEvents }
 
-  TFBEvents = class(TInterfacedObject,IEvents)
+  TFBEvents = class(TAPIObject,IEvents)
   private
-    FOwner: TObjectOwner;
     FEventBuffer: PChar;
     FEventBufferLen: integer;
     FEventID: ISC_LONG;
@@ -218,8 +217,7 @@ var
   EventNames: array of PChar;
 begin
   inherited Create;
-  FOwner := DBAttachment;
-  DBAttachment.RegisterObj(self);
+  AddOwner(DBAttachment);
   if Events.Count > MaxEvents then
     IBError(ibxeMaximumEvents, [nil]);
 
@@ -260,8 +258,6 @@ begin
     if FResultBuffer <> nil then
       isc_free( FResultBuffer);
   end;
-  if assigned(FOwner) then
-    FOwner.UnRegisterObj(self);
   inherited Destroy;
 end;
 

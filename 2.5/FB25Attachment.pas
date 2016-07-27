@@ -5,13 +5,13 @@ unit FB25Attachment;
 interface
 
 uses
-  Classes, SysUtils, IB, FBLibrary, FB25ClientAPI, IBHeader, IBExternals;
+  Classes, SysUtils, IB, FBLibrary, FB25ClientAPI, IBHeader, IBExternals, FB25APIObject;
 
 type
 
   { TFBAttachment }
 
-  TFBAttachment = class(TObjectOwner,IAttachment)
+  TFBAttachment = class(TAPIObject,IAttachment)
   private
     FHandle: TISC_DB_HANDLE;
     FDatabaseName: string;

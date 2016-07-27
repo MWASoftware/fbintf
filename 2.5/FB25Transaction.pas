@@ -6,15 +6,14 @@ interface
 
 uses
   Classes, SysUtils, IB, FBLibrary, FB25ClientAPI, IBHeader, IBExternals,
-  FB25Attachment;
+  FB25Attachment, FB25APIObject;
 
 type
 
   { TFBTransaction }
 
-  TFBTransaction = class(TObjectOwner,ITransaction)
+  TFBTransaction = class(TAPIObject,ITransaction)
   private
-    FOwners: array of TFBAttachment;
     FHandle: TISC_TR_HANDLE;
     FTPB: String;
     FTPBLength: short;
@@ -164,12 +163,8 @@ begin
   if Length(Attachments) = 0 then
     IBError(ibxeEmptyAttachmentsList,[nil]);
 
-  setLength(FOwners,Length(Attachments));
   for i := 0 to Length(Attachments) - 1 do
-  begin
-    FOwners[i] := Attachments[i];
-    FOwners[i].RegisterObj(self);
-  end;
+    AddOwner(Attachments[i]);
   GenerateTPB(Params, FTPB, FTPBLength);
   Start;
 end;
@@ -177,9 +172,7 @@ end;
 constructor TFBTransaction.Create(Attachment: TFBAttachment; Params: TStrings);
 begin
   inherited Create;
-  setLength(FOwners,1);
-  FOwners[0] := Attachment;
-  FOwners[0].RegisterObj(self);
+  AddOwner(Attachment);
   GenerateTPB(Params, FTPB, FTPBLength);
   Start;
 end;
@@ -188,8 +181,6 @@ destructor TFBTransaction.Destroy;
 var i: integer;
 begin
   Rollback;
-  for i := 0 to Length(FOwners) - 1 do
-    FOwners[i].UnRegisterObj(self);
   inherited Destroy;
 end;
 
@@ -227,28 +218,28 @@ var pteb: PISC_TEB_ARRAY;
 begin
   pteb := nil;
   with Firebird25ClientAPI do
-  if Length(FOwners) = 1 then
+  if (Owners.Count = 1) and (TObject(Owners[0]) is TFBAttachment) then
   try
     Call(isc_start_transaction(StatusVector, @FHandle,1,
-              @(FOwners[0].Handle),FTPBLength,@FTPB));
+              @(TFBAttachment(Owners[0]).Handle),FTPBLength,@FTPB));
   except
     FHandle := nil;
     raise;
   end
   else
   begin
-    IBAlloc(pteb, 0, Length(FOwners) * SizeOf(TISC_TEB));
+    IBAlloc(pteb, 0, Owners.Count * SizeOf(TISC_TEB));
      try
-        for i := 0 to Length(FOwners) - 1 do
-        if FOwners[i] <> nil then
+        for i := 0 to Owners.Count - 1 do
+        if (Owners[i] <> nil) and (TObject(Owners[i]) is TFBAttachment) then
         begin
-          pteb^[i].db_handle := @(FOwners[i].Handle);
+          pteb^[i].db_handle := @(TFBAttachment(Owners[i]).Handle);
           pteb^[i].tpb_length := FTPBLength;
           pteb^[i].tpb_address := @FTPB;
         end;
         try
           Call(isc_start_multiple(StatusVector, @FHandle,
-                                   Length(FOwners), PISC_TEB(pteb)));
+                                   Owners.Count, PISC_TEB(pteb)));
         except
           FHandle := nil;
           raise;

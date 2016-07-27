@@ -345,6 +345,7 @@ type
     function GetInTransaction: boolean;
     procedure Commit;
     procedure CommitRetaining;
+    function HasActivity: boolean;
     procedure Start;
     procedure Release;
     procedure Rollback;
@@ -565,6 +566,7 @@ type
     function GetInfoValue(DBInfoCommand: char): integer;
     function GetInfoString(DBInfoCommand: char): string;
     function GetInfoBuffer(DBInfoCommand: char; var Buffer: PChar): integer;
+    function HasActivity: boolean;
   end;
 
   TProtocol = (TCP, SPX, NamedPipe, Local);

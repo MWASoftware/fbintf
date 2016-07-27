@@ -8,7 +8,7 @@ interface
 
 uses
   Classes, SysUtils, IB, FBLibrary, FB25ClientAPI, FB25Transaction, FB25Attachment,
-  IBHeader, IBExternals;
+  IBHeader, IBExternals, FB25APIObject;
 
 type
 
@@ -259,11 +259,10 @@ type
 
   { TFBStatement }
 
-  TFBStatement = class(TInterfacedObject,IStatement)
+  TFBStatement = class(TAPIObject,IStatement)
   private
     FAttachment: TFBAttachment;
     FTransaction: TFBTransaction;
-    FOwner: TObjectOwner;
     FHandle: TISC_STMT_HANDLE;
     FSQLType: TIBSQLTypes;         { Select, update, delete, insert, create, alter, etc...}
     FSQLDialect: integer;
@@ -413,14 +412,16 @@ begin
   with Firebird25ClientAPI do
   begin
     if (FXSQLDA <> nil) then
-       Call(isc_dsql_describe_bind(StatusVector, @(FStatement.Handle), FStatement.SQLDialect,
-                                    FXSQLDA), true);
+       if isc_dsql_describe_bind(StatusVector, @(FStatement.Handle), FStatement.SQLDialect,
+                                    FXSQLDA) > 0 then
+         IBDataBaseError;
 
     if FXSQLDA^.sqld > FXSQLDA^.sqln then
     begin
       Count := FXSQLDA^.sqld;
-      Call(isc_dsql_describe_bind(StatusVector, @(FStatement.Handle), FStatement.SQLDialect,
-                                   FXSQLDA), true);
+      if isc_dsql_describe_bind(StatusVector, @(FStatement.Handle), FStatement.SQLDialect,
+                                   FXSQLDA) > 0 then
+        IBDataBaseError;
     end
     else
     if FXSQLDA^.sqld = 0 then
@@ -489,11 +490,14 @@ begin
   with Firebird25ClientAPI do
   begin
     { Using isc_dsql_describe, get the right size for the columns... }
-    Call(isc_dsql_describe(StatusVector, @(FStatement.Handle), FStatement.SQLDialect, FXSQLDA), True);
+    if isc_dsql_describe(StatusVector, @(FStatement.Handle), FStatement.SQLDialect, FXSQLDA) > 0 then
+      IBDataBaseError;
+
     if FXSQLDA^.sqld > FXSQLDA^.sqln then
     begin
       Count := FXSQLDA^.sqld;
-      Call(isc_dsql_describe(StatusVector, @(FStatement.Handle), FStatement.SQLDialect, FXSQLDA), True);
+      if isc_dsql_describe(StatusVector, @(FStatement.Handle), FStatement.SQLDialect, FXSQLDA) > 0 then
+        IBDataBaseError;
     end
     else
     if FXSQLDA^.sqld = 0 then
@@ -1961,8 +1965,7 @@ begin
   inherited Create;
   FAttachment := Attachment;
   FTransaction := transaction;
-  FOwner := Transaction;
-  FOwner.RegisterObj(self);
+  AddOwner(Transaction);
   FSQLDialect := SQLDialect;
   CreateGuid(GUID);
   FCursor := GUIDToString(GUID);
@@ -1979,8 +1982,6 @@ begin
     FSQLParams.Free;
   if assigned(FSQLRecord) then
     FSQLRecord.Free;
-  if assigned(FOwner) then
-    FOwner.UnRegisterObj(self);
   inherited Destroy;
 end;
 

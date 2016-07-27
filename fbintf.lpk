@@ -10,7 +10,7 @@
         <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
     </CompilerOptions>
-    <Files Count="18">
+    <Files Count="19">
       <Item1>
         <Filename Value="3.0/firebird/fb_get_master_interface.pas"/>
         <Type Value="Include"/>
@@ -83,6 +83,10 @@
         <Filename Value="2.5/FB25Status.pas"/>
         <UnitName Value="FB25Status"/>
       </Item18>
+      <Item19>
+        <Filename Value="2.5/FB25APIObject.pas"/>
+        <UnitName Value="FB25APIObject"/>
+      </Item19>
     </Files>
     <RequiredPkgs Count="1">
       <Item1>
