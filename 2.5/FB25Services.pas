@@ -22,6 +22,7 @@ type
     procedure CheckInactive;
     procedure CheckServerName;
     procedure GenerateSPB(sl: TStrings; var SPB: String; var SPBLength: Short);
+    procedure InternalDetach;
   public
     constructor Create(ServerName: string; Protocol: TProtocol; Params: TStrings);
     destructor Destroy; override;
@@ -488,12 +489,27 @@ begin
   end;
 end;
 
+procedure TFBServiceManager.InternalDetach;
+begin
+  if FHandle = nil then
+    Exit;
+  with Firebird25ClientAPI do
+  if (Call(isc_service_detach(StatusVector, @FHandle), False) > 0) then
+  begin
+    FHandle := nil;
+    IBDataBaseError;
+  end
+  else
+    FHandle := nil;
+end;
+
 constructor TFBServiceManager.Create(ServerName: string; Protocol: TProtocol;
   Params: TStrings);
 var SPB: String;
 begin
   inherited Create;
   FProtocol := Protocol;
+  Firebird25ClientAPI.RegisterObj(self);
   GenerateSPB(Params, SPB, FSPBLength);
   with Firebird25ClientAPI do
     IBAlloc(FSPB, 0, FsPBLength);
@@ -504,6 +520,8 @@ end;
 
 destructor TFBServiceManager.Destroy;
 begin
+  InternalDetach;
+  Firebird25ClientAPI.UnRegisterObj(self);
   inherited Destroy;
 end;
 
@@ -530,14 +548,7 @@ end;
 procedure TFBServiceManager.Detach;
 begin
   CheckActive;
-  with Firebird25ClientAPI do
-  if (Call(isc_service_detach(StatusVector, @FHandle), False) > 0) then
-  begin
-    FHandle := nil;
-    IBDataBaseError;
-  end
-  else
-    FHandle := nil;
+  InternalDetach;
 end;
 
 function TFBServiceManager.IsAttached: boolean;

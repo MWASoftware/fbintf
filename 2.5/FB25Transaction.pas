@@ -162,7 +162,7 @@ var
 begin
   inherited Create;
   if Length(Attachments) = 0 then
-    IBError(ibxEmptyAttachmentsList,[nil]);
+    IBError(ibxeEmptyAttachmentsList,[nil]);
 
   setLength(FOwners,Length(Attachments));
   for i := 0 to Length(Attachments) - 1 do
@@ -262,7 +262,7 @@ end;
 procedure TFBTransaction.Release;
 begin
   if OwnedObjects.Count > 0 then
-    IBError(ibxTransactionReleaseFails,[OwnedObjects.Count]);
+    IBError(ibxeTransactionReleaseFails,[OwnedObjects.Count]);
   Rollback;
   Free;
 end;

@@ -365,7 +365,7 @@ end;
 procedure TFBAttachment.Release;
 begin
   if OwnedObjects.Count > 0 then
-    IBError(ibxAttachementReleaseFails,[OwnedObjects.Count]);
+    IBError(ibxeAttachementReleaseFails,[OwnedObjects.Count]);
   Free;
 end;
 

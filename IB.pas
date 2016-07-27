@@ -608,7 +608,7 @@ type
     function GetServiceManager(ServerName: string; Protocol: TProtocol; Params: TStrings): IServiceManager;
     function StartTransaction(Attachments: array of IAttachment;
              Params: TStrings): ITransaction; {Start Transaction against multiple databases}
-    function GetIsEmbeddedServer: boolean;
+    function IsEmbeddedServer: boolean;
     function GetLibraryName: string;
     function HasServiceAPI: boolean;
   end;

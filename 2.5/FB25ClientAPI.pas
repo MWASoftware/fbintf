@@ -98,7 +98,7 @@ type
     {Start Transaction against multiple databases}
     function StartTransaction(Attachments: array of IAttachment; Params: TStrings
       ): ITransaction;
-    function GetIsEmbeddedServer: boolean;
+    function IsEmbeddedServer: boolean;
     function GetLibraryName: string;
     function HasServiceAPI: boolean;
   end;
@@ -391,7 +391,7 @@ begin
   Result := TFBTransaction.Create(FBAttachments,Params);
 end;
 
-function TFB25ClientAPI.GetIsEmbeddedServer: boolean;
+function TFB25ClientAPI.IsEmbeddedServer: boolean;
 begin
   Result := IsEmbeddedServer;
 end;

@@ -140,9 +140,10 @@ type
       ibxeTransactionNotEnding,
       ibxeDscInfoTokenMissing,
       ibxeNoLoginDialog,
-      ibxEmptyAttachmentsList,
-      ibxAttachementReleaseFails,
-      ibxTransactionReleaseFails
+      ibxeEmptyAttachmentsList,
+      ibxeAttachementReleaseFails,
+      ibxeTransactionReleaseFails,
+      ibxeFirebirdLibraryLoaded
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;
@@ -304,6 +305,7 @@ resourcestring
   SEmptyAttachmentsList = 'The list of database attachments cannot be empty';
   SAttachementReleaseFails = 'Release Failed; there are %d open transactions or events';
   STransactionReleaseFails = 'Release Failed: there are %d open statements or blobs';
+  SFirebirdLibraryLoaded = 'The Firebird Library is already loaded';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -431,7 +433,8 @@ const
     SNoLoginDialog,
     SEmptyAttachmentsList,
     SAttachementReleaseFails,
-    STransactionReleaseFails
+    STransactionReleaseFails,
+    SFirebirdLibraryLoaded
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;

@@ -46,9 +46,12 @@ type
 
 implementation
 
+uses FBErrorMessages
+
 {$IFDEF WINDOWS }
-uses Windows,Registry, WinDirs;
+, Windows,Registry, WinDirs
 {$ENDIF}
+;
 
 const
 {$IFDEF LINUX}
@@ -107,7 +110,9 @@ end;
 
 constructor TFBLibrary.Create;
 begin
-  IBLibrary := NilHandle;
+  inherited Create;
+  if IBLibrary <> NilHandle then
+    IBError(ibxeFirebirdLibraryLoaded,[nil]);
   LoadIBLibrary;
 end;
 
