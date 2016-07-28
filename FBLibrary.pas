@@ -79,18 +79,15 @@ FIREBIRD_EMBEDDED = 'fbembed.dll';
 constructor TObjectOwner.Create;
 begin
   inherited Create;
+  writeln('Creating ' + ClassName);
   FOwnedObjects := TList.Create;
 end;
 
 destructor TObjectOwner.Destroy;
-var i: integer;
 begin
+  writeln('Destroying ' + ClassName);
   if assigned(FOwnedObjects) then
-  begin
-    for i := FOwnedObjects.Count - 1 downto 0 do
-      TObject(FOwnedObjects[I]).Free;
     FOwnedObjects.Free;
-  end;
   inherited Destroy;
 end;
 

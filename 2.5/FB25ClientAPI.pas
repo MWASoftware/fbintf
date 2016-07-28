@@ -15,6 +15,9 @@ type
   private
     FIBServiceAPIPresent: boolean;
     FStatus: TFBStatus;
+    FStatusIntf: IStatus;   {Keep a reference to the interface - automatic destroy
+                             when this class is freed and last reference to IStatus
+                             goes out of scope.}
     procedure LoadInterface;
   public
     constructor Create;
@@ -292,16 +295,15 @@ end;
 constructor TFB25ClientAPI.Create;
 begin
   inherited;
+  FStatus := TFBStatus.Create;
+  FStatusIntf := FStatus;
   if (IBLibrary <> NilHandle) then
     LoadInterface;
-  FStatus := TFBStatus.Create;
   Firebird25ClientAPI := self;
 end;
 
 destructor TFB25ClientAPI.Destroy;
 begin
-  if assigned(FStatus) then
-    FStatus.Free;
   Firebird25ClientAPI := nil;
   inherited Destroy;
 end;
@@ -378,7 +380,7 @@ var FBAttachments: array of TFBAttachment;
 begin
   SetLength(FBAttachments,Length(Attachments));
   for i := 0 to Length(Attachments) - 1 do
-    FBAttachments[i] := Attachments[i] as TFBAttachment;
+    FBAttachments[i] := TFBAttachment(Attachments[i]);
   Result := TFBTransaction.Create(FBAttachments,Params);
 end;
 

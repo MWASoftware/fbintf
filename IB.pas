@@ -656,12 +656,11 @@ implementation
 
 uses FBLibrary, FB25ClientAPI;
 
-const FBLibraryObj: TFBLibrary = nil;
-
 function TryIBLoad: Boolean;
+var FBLibraryObj: TFBLibrary;
 begin
-  Result := false;
-  if FBLibraryObj = nil then
+  Result := FirebirdAPI <> nil;
+  if not Result then
   begin
     FBLibraryObj := TFB25ClientAPI.Create;
     FirebirdAPI := TFB25ClientAPI(FBLibraryObj);
@@ -707,9 +706,6 @@ end;
 initialization
   FirebirdAPI := nil;
 
-finalization
-  if FBLibraryObj <> nil then
-    FBLibraryObj.Free;
 
 end.
 

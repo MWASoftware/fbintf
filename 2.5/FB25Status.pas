@@ -67,6 +67,7 @@ function TFBStatus.GetMessage: string;
 var local_buffer: array[0..IBHugeLocalBufferLength - 1] of char;
     IBDataBaseErrorMessages: TIBDataBaseErrorMessages;
     sqlcode: Long;
+    sb: PISC_STATUS;
 begin
   Result := '';
   IBDataBaseErrorMessages := FIBDataBaseErrorMessages;
@@ -89,8 +90,9 @@ begin
     if (ShowSQLCode in IBDataBaseErrorMessages) or
        (ShowSQLMessage in IBDataBaseErrorMessages) then
       Result := Result + CRLF;
+    sb := @FStatusVector;
     with Firebird25ClientAPI do
-    while (isc_interprete(local_buffer, @FStatusVector) > 0) do
+    while (isc_interprete(@local_buffer, @sb) > 0) do
     begin
       if (Result <> '') and (Result[Length(Result)] <> LF) then
         Result := Result + CRLF;

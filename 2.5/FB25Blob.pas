@@ -89,9 +89,9 @@ var DBHandle: TISC_DB_HANDLE;
 begin
     inherited Create;
     FAttachment := Attachment;
-    AddOwner(Transaction as TFBTransaction);
-    DBHandle := (Attachment as TFBAttachment).Handle;
-    TRHandle := (Transaction as TFBTransaction).Handle;
+    AddOwner(TFBTransaction(Transaction));
+    DBHandle := Attachment.Handle;
+    TRHandle := TFBTransaction(Transaction).Handle;
     FCreating := true;
     with Firebird25ClientAPI do
       Call(isc_create_blob2(StatusVector, @DBHandle, @TRHandle, @FHandle, @FBlobID,
@@ -105,8 +105,8 @@ var DBHandle: TISC_DB_HANDLE;
 begin
   inherited Create;
   FAttachment := Attachment;
-  AddOwner(Transaction as TFBTransaction);
-  DBHandle := (Attachment as TFBAttachment).Handle;
+  AddOwner(TFBTransaction(Transaction));
+  DBHandle := Attachment.Handle;
   TRHandle := (Transaction as TFBTransaction).Handle;
   FBlobID := BlobID;
   with Firebird25ClientAPI do
