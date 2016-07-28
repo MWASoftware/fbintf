@@ -45,7 +45,7 @@ procedure TAPIObject.AddOwner(aOwner: TObject);
 begin
   if (aOwner is TObjectOwner) and (FOwners.IndexOf(aOwner) = -1) then
   begin
-    FOwners.Add(self);
+    FOwners.Add(aOwner);
     TObjectOwner(aOwner).RegisterObj(self);
   end;
 end;
@@ -54,9 +54,6 @@ procedure TAPIObject.ResetActivity;
 var i: integer;
 begin
   FActivity := false;
-{  for i := 0 to OwnedObjects.Count - 1 do
-    if TObject(OwnedObjects[i]) is TAPIObject then
-      TAPIObject(OwnedObjects[i]).ResetActivity; }
 end;
 
 procedure TAPIObject.SignalActivity;

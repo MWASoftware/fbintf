@@ -94,8 +94,8 @@ type
     {IFirebirdAPI}
     function GetStatus: IStatus;
     function OpenDatabase(DatabaseName: string; Params: TStrings): IAttachment;
-    procedure CreateDatabase(DatabaseName: string; SQLDialect: integer;
-                                          Params: TStrings);
+    function CreateDatabase(DatabaseName: string;
+      SQLDialect: integer; CreateParams: string; Params: TStrings): IAttachment;
     function GetServiceManager(ServerName: string; Protocol: TProtocol; Params: TStrings): IServiceManager;
     {Start Transaction against multiple databases}
     function StartTransaction(Attachments: array of IAttachment; Params: TStrings;
@@ -357,18 +357,10 @@ begin
    Result := TFBAttachment.Create(DatabaseName,Params)
 end;
 
-procedure TFB25ClientAPI.CreateDatabase(DatabaseName: string;
-  SQLDialect: integer; Params: TStrings);
-var
-  tr_handle: TISC_TR_HANDLE;
-  db_Handle: TISC_DB_HANDLE;
+function TFB25ClientAPI.CreateDatabase(DatabaseName: string; SQLDialect: integer;
+      CreateParams: string; Params: TStrings): IAttachment;
 begin
-  tr_handle := nil;
-  db_Handle := nil;
-  if isc_dsql_execute_immediate(StatusVector, @db_Handle, @tr_handle, 0,
-                                 PChar('CREATE DATABASE ''' + DatabaseName + ''' ' + {do not localize}
-                                 Params.Text), SQLDialect, nil) > 0 then
-    IBDataBaseError;
+  Result := TFBAttachment.CreateDatabase(DatabaseName, SQLDialect, CreateParams, Params );
 end;
 
 function TFB25ClientAPI.GetServiceManager(ServerName: string;

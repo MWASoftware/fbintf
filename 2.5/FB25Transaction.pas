@@ -229,32 +229,34 @@ end;
 procedure TFBTransaction.Start(DefaultCompletion: TTransactionCompletion);
 var pteb: PISC_TEB_ARRAY;
     i: integer;
+    db_handle: TISC_DB_HANDLE;
 begin
   pteb := nil;
   FDefaultCompletion := DefaultCompletion;
   with Firebird25ClientAPI do
-  if (Owners.Count = 1) and (TObject(Owners[0]) is TFBAttachment) then
+  if (Length(FAttachments) = 1)  then
   try
+    db_handle := (FAttachments[0] as TFBAttachment).Handle;
     Call(isc_start_transaction(StatusVector, @FHandle,1,
-              @(TFBAttachment(Owners[0]).Handle),FTPBLength,@FTPB));
+              @db_handle,FTPBLength,PChar(FTPB)));
   except
     FHandle := nil;
     raise;
   end
   else
   begin
-    IBAlloc(pteb, 0, Owners.Count * SizeOf(TISC_TEB));
+    IBAlloc(pteb, 0, Length(FAttachments) * SizeOf(TISC_TEB));
      try
-        for i := 0 to Owners.Count - 1 do
-        if (Owners[i] <> nil) and (TObject(Owners[i]) is TFBAttachment) then
+        for i := 0 to Length(FAttachments) - 1 do
+        if (FAttachments[i] <> nil)  then
         begin
-          pteb^[i].db_handle := @(TFBAttachment(Owners[i]).Handle);
+          pteb^[i].db_handle := @((FAttachments[i] as TFBAttachment).Handle);
           pteb^[i].tpb_length := FTPBLength;
-          pteb^[i].tpb_address := @FTPB;
+          pteb^[i].tpb_address := PChar(FTPB);
         end;
         try
           Call(isc_start_multiple(StatusVector, @FHandle,
-                                   Owners.Count, PISC_TEB(pteb)));
+                                   Length(FAttachments), PISC_TEB(pteb)));
         except
           FHandle := nil;
           raise;

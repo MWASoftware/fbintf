@@ -20,6 +20,8 @@ type
     procedure GenerateDPB(sl: TStrings; var DPB: string; var DPBLength: Short);
   public
     constructor Create(DatabaseName: string; Params: TStrings);
+    constructor CreateDatabase(DatabaseName: string; SQLDialect: integer;
+      CreateParams: string; Params: TStrings);
     destructor Destroy; override;
     property Handle: TISC_DB_HANDLE read FHandle;
 
@@ -27,7 +29,7 @@ type
     {IAttachment}
     function GetStatus: IStatus;
     procedure Connect;
-    procedure Disconnect(Force: boolean);
+    procedure Disconnect(Force: boolean=false);
     procedure DropDatabase;
     function StartTransaction(Params: TStrings; DefaultCompletion: TTransactionCompletion): ITransaction;
     function CreateBlob(transaction: ITransaction): IBlob;
@@ -278,6 +280,31 @@ begin
   Connect;
 end;
 
+constructor TFBAttachment.CreateDatabase(DatabaseName: string; SQLDialect: integer;
+  CreateParams: string;  Params: TStrings);
+var sql: string;
+    tr_handle: TISC_TR_HANDLE;
+begin
+  inherited Create;
+  Firebird25ClientAPI.RegisterObj(self);
+  FDatabaseName := DatabaseName;
+  tr_handle := nil;
+  sql := 'CREATE DATABASE ''' + DatabaseName + ''' ' + CreateParams; {do not localize}
+  with Firebird25ClientAPI do
+  if isc_dsql_execute_immediate(StatusVector, @FHandle, @tr_handle, 0, PChar(sql),
+                                  SQLDialect, nil) > 0 then
+    IBDataBaseError;
+
+  if assigned(Params) and (Params.Count > 0) then
+  begin
+    {If connect params specified then detach and connect properly}
+    GenerateDPB(Params, FDPB, FDPBLength);
+    with Firebird25ClientAPI do
+      Call(isc_detach_database(StatusVector, @FHandle));
+    Connect;
+  end
+end;
+
 destructor TFBAttachment.Destroy;
 begin
   Disconnect(true);
@@ -295,7 +322,7 @@ begin
   with Firebird25ClientAPI do
    Call(isc_attach_database(StatusVector, Length(FDatabaseName),
                          PChar(FDatabaseName), @FHandle,
-                         FDPBLength, @FDPB));
+                         FDPBLength, PChar(FDPB)));
 end;
 
 procedure TFBAttachment.Disconnect(Force: boolean);
@@ -322,7 +349,7 @@ procedure TFBAttachment.DropDatabase;
 begin
   with Firebird25ClientAPI do
     Call(isc_drop_database(StatusVector, @FHandle));
-  Free;
+  FHandle := nil;
 end;
 
 function TFBAttachment.StartTransaction(Params: TStrings;

@@ -547,7 +547,7 @@ type
   IAttachment = interface
     function GetStatus: IStatus;
     procedure Connect;
-    procedure Disconnect(Force: boolean);
+    procedure Disconnect(Force: boolean=false);
     procedure DropDatabase;
     function StartTransaction(Params: TStrings; DefaultCompletion: TTransactionCompletion): ITransaction;
     function CreateBlob(transaction: ITransaction): IBlob;
@@ -602,8 +602,10 @@ type
   IFirebirdAPI = interface
     function GetStatus: IStatus;
     function OpenDatabase(DatabaseName: string; Params: TStrings): IAttachment;
-    procedure CreateDatabase(DatabaseName: string; SQLDialect: integer;
-                                          Params: TStrings);
+ {   procedure CreateDatabase(DatabaseName: string;
+      SQLDialect: integer; Params: TStrings);}
+    function CreateDatabase(DatabaseName: string; SQLDialect: integer;
+      CreateParams: string; Params: TStrings): IAttachment;
     function GetServiceManager(ServerName: string; Protocol: TProtocol; Params: TStrings): IServiceManager;
     function StartTransaction(Attachments: array of IAttachment;
              Params: TStrings; DefaultCompletion: TTransactionCompletion): ITransaction; {Start Transaction against multiple databases}
