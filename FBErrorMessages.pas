@@ -141,8 +141,6 @@ type
       ibxeDscInfoTokenMissing,
       ibxeNoLoginDialog,
       ibxeEmptyAttachmentsList,
-      ibxeAttachementReleaseFails,
-      ibxeTransactionReleaseFails,
       ibxeFirebirdLibraryLoaded
       );
 
@@ -303,8 +301,6 @@ resourcestring
   SNoLoginDialog = 'Default Login Dlalog not found. Have you included ibexpress ' +
                    'in your program uses list?';
   SEmptyAttachmentsList = 'The list of database attachments cannot be empty';
-  SAttachementReleaseFails = 'Release Failed; there are %d open transactions or events';
-  STransactionReleaseFails = 'Release Failed: there are %d open statements or blobs';
   SFirebirdLibraryLoaded = 'The Firebird Library is already loaded';
 
 const
@@ -432,8 +428,6 @@ const
     SDscInfoTokenMissing,
     SNoLoginDialog,
     SEmptyAttachmentsList,
-    SAttachementReleaseFails,
-    STransactionReleaseFails,
     SFirebirdLibraryLoaded
   );
 

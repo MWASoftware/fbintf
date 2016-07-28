@@ -19,6 +19,7 @@ type
     FResultBuffer: PChar;
     FEvents: TStringList;
     FDBHandle: TISC_DB_HANDLE;
+    FAttachment: IAttachment;
     FCriticalSection: TCriticalSection;
     FEventHandlerThread: TObject;
     FEventHandler: TEventHandler;
@@ -34,7 +35,6 @@ type
     procedure Cancel;
     procedure WaitForEvent(var EventCounts: TEventCounts);
     procedure AsyncWaitForEvent(EventHandler: TEventHandler);
-    procedure Release;
   end;
 
 implementation
@@ -218,6 +218,7 @@ var
 begin
   inherited Create;
   AddOwner(DBAttachment);
+  FAttachment := DBAttachment;
   if Events.Count > MaxEvents then
     IBError(ibxeMaximumEvents, [nil]);
 
@@ -289,13 +290,6 @@ begin
     FCriticalSection.Leave
   end;
 end;
-
-procedure TFBEvents.Release;
-begin
-  Cancel;
-  Free;
-end;
-
 
 procedure TFBEvents.WaitForEvent(var EventCounts: TEventCounts);
 begin

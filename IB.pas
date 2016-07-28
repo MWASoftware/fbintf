@@ -340,14 +340,15 @@ type
     procedure SetIBDataBaseErrorMessages(Value: TIBDataBaseErrorMessages);
   end;
 
+  TTransactionCompletion = (tcCommit,tcRollback);
+
   ITransaction = interface
     function GetStatus: IStatus;
     function GetInTransaction: boolean;
     procedure Commit;
     procedure CommitRetaining;
     function HasActivity: boolean;
-    procedure Start;
-    procedure Release;
+    procedure Start(DefaultCompletion: TTransactionCompletion);
     procedure Rollback;
     procedure RollbackRetaining;
     property InTransaction: boolean read GetInTransaction;
@@ -522,7 +523,6 @@ type
     function Execute(aTransaction: ITransaction): IResults; overload;
     function OpenCursor: IResultSet; overload;
     function OpenCursor(aTransaction: ITransaction): IResultSet; overload;
-    procedure Release;
     property SQLParams: ISQLParams read GetSQLParams;
     property SQLType: TIBSQLTypes read GetSQLType;
   end;
@@ -542,7 +542,6 @@ type
     procedure Cancel;
     procedure WaitForEvent(var EventCounts: TEventCounts);
     procedure AsyncWaitForEvent(EventHandler: TEventHandler);
-    procedure Release;
   end;
 
   IAttachment = interface
@@ -550,12 +549,11 @@ type
     procedure Connect;
     procedure Disconnect(Force: boolean);
     procedure DropDatabase;
-    function StartTransaction(Params: TStrings): ITransaction;
+    function StartTransaction(Params: TStrings; DefaultCompletion: TTransactionCompletion): ITransaction;
     function CreateBlob(transaction: ITransaction): IBlob;
     function OpenBlob(transaction: ITransaction; BlobID: TISC_QUAD): IBlob;
     procedure ExecImmediate(transaction: ITransaction; sql: string; SQLDialect: integer);
     function Prepare(transaction: ITransaction; sql: string; SQLDialect: integer): IStatement;
-    procedure Release;
 
     {Events}
     function GetEventHandler(Events: TStrings): IEvents;
@@ -599,7 +597,6 @@ type
     procedure Start(Command: char; Params: TServiceCommandParams);
     function Query(Command: char; Params: TServiceQueryParams) :TServiceQueryResponse; overload;
     function Query(Commands: array of char):TServiceQueryResponse; overload;
-    procedure Release;
   end;
 
   IFirebirdAPI = interface
@@ -609,7 +606,7 @@ type
                                           Params: TStrings);
     function GetServiceManager(ServerName: string; Protocol: TProtocol; Params: TStrings): IServiceManager;
     function StartTransaction(Attachments: array of IAttachment;
-             Params: TStrings): ITransaction; {Start Transaction against multiple databases}
+             Params: TStrings; DefaultCompletion: TTransactionCompletion): ITransaction; {Start Transaction against multiple databases}
     function IsEmbeddedServer: boolean;
     function GetLibraryName: string;
     function HasServiceAPI: boolean;

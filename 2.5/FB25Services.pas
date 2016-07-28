@@ -22,7 +22,7 @@ type
     procedure CheckInactive;
     procedure CheckServerName;
     procedure GenerateSPB(sl: TStrings; var SPB: String; var SPBLength: Short);
-    procedure InternalDetach;
+    procedure InternalDetach(Force: boolean=false);
   public
     constructor Create(ServerName: string; Protocol: TProtocol; Params: TStrings);
     destructor Destroy; override;
@@ -37,7 +37,6 @@ type
     procedure Start(Command: char; Params: TServiceCommandParams);
     function Query(Command: char; Params: TServiceQueryParams): TServiceQueryResponse; overload;
     function Query(Commands: array of char):TServiceQueryResponse; overload;
-    procedure Release;
   end;
 
 implementation
@@ -489,7 +488,7 @@ begin
   end;
 end;
 
-procedure TFBServiceManager.InternalDetach;
+procedure TFBServiceManager.InternalDetach(Force: boolean);
 begin
   if FHandle = nil then
     Exit;
@@ -497,7 +496,8 @@ begin
   if isc_service_detach(StatusVector, @FHandle) > 0 then
   begin
     FHandle := nil;
-    IBDataBaseError;
+    if not Force then
+     IBDataBaseError;
   end
   else
     FHandle := nil;
@@ -520,7 +520,7 @@ end;
 
 destructor TFBServiceManager.Destroy;
 begin
-  InternalDetach;
+  InternalDetach(true);
   Firebird25ClientAPI.UnRegisterObj(self);
   inherited Destroy;
 end;
@@ -623,12 +623,6 @@ begin
   finally
     response.Free;
   end;
-end;
-
-procedure TFBServiceManager.Release;
-begin
-  if IsAttached then Detach;
-  Free;
 end;
 
 end.

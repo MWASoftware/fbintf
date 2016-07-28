@@ -29,14 +29,13 @@ type
     procedure Connect;
     procedure Disconnect(Force: boolean);
     procedure DropDatabase;
-    function StartTransaction(Params: TStrings): ITransaction;
+    function StartTransaction(Params: TStrings; DefaultCompletion: TTransactionCompletion): ITransaction;
     function CreateBlob(transaction: ITransaction): IBlob;
     function OpenBlob(transaction: ITransaction; BlobID: TISC_QUAD): IBlob;
     procedure ExecImmediate(transaction: ITransaction; sql: string; SQLDialect: integer);
     function Prepare(transaction: ITransaction; sql: string; SQLDialect: integer
       ): IStatement;
     function GetEventHandler(Events: TStrings): IEvents;
-    procedure Release;
 
     {Database Information}
     function GetBlobCharSetID(transaction: ITransaction; tableName, columnName: string): short;
@@ -326,9 +325,10 @@ begin
   Free;
 end;
 
-function TFBAttachment.StartTransaction(Params: TStrings): ITransaction;
+function TFBAttachment.StartTransaction(Params: TStrings;
+  DefaultCompletion: TTransactionCompletion): ITransaction;
 begin
-  Result := TFBTransaction.Create(self,Params);
+  Result := TFBTransaction.Create(self,Params,DefaultCompletion);
 end;
 
 function TFBAttachment.CreateBlob(transaction: ITransaction): IBlob;
@@ -354,19 +354,12 @@ end;
 function TFBAttachment.Prepare(transaction: ITransaction; sql: string;
   SQLDialect: integer): IStatement;
 begin
-  Result := TFBStatement.Create(self,transaction as TFBTransaction,sql,SQLDialect);
+  Result := TFBStatement.Create(self,transaction,sql,SQLDialect);
 end;
 
 function TFBAttachment.GetEventHandler(Events: TStrings): IEvents;
 begin
   Result := TFBEvents.Create(self,Events);
-end;
-
-procedure TFBAttachment.Release;
-begin
-  if OwnedObjects.Count > 0 then
-    IBError(ibxeAttachementReleaseFails,[OwnedObjects.Count]);
-  Free;
 end;
 
 function TFBAttachment.GetBlobCharSetID(transaction: ITransaction; tableName,

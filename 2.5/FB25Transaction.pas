@@ -17,11 +17,14 @@ type
     FHandle: TISC_TR_HANDLE;
     FTPB: String;
     FTPBLength: short;
+    FDefaultCompletion: TTransactionCompletion;
+    FAttachments: array of IAttachment; {Keep reference to attachment - ensures
+                                          attachment cannot be freed before transaction}
     procedure GenerateTPB(sl: TStrings; var TPB: string; var TPBLength: Short);
     procedure CloseAll;
   public
-    constructor Create(Attachments: array of TFBAttachment; Params: TStrings); overload;
-    constructor Create(Attachment: TFBAttachment; Params: TStrings); overload;
+    constructor Create(Attachments: array of IAttachment; Params: TStrings; DefaultCompletion: TTransactionCompletion); overload;
+    constructor Create(Attachment: TFBAttachment; Params: TStrings; DefaultCompletion: TTransactionCompletion); overload;
     destructor Destroy; override;
     property Handle: TISC_TR_HANDLE read FHandle;
 
@@ -31,8 +34,7 @@ type
     function GetInTransaction: boolean;
     procedure Commit;
     procedure CommitRetaining;
-    procedure Start;
-    procedure Release;
+    procedure Start(DefaultCompletion: TTransactionCompletion);
     procedure Rollback;
     procedure RollbackRetaining;
     property InTransaction: boolean read GetInTransaction;
@@ -152,8 +154,8 @@ begin
       TFBStatement(OwnedObjects[i]).TransactionEnding(self);
 end;
 
-constructor TFBTransaction.Create(Attachments: array of TFBAttachment;
-  Params: TStrings);
+constructor TFBTransaction.Create(Attachments: array of IAttachment;
+  Params: TStrings; DefaultCompletion: TTransactionCompletion);
 var
   TPB: String;
   TPBLength: short;
@@ -163,24 +165,36 @@ begin
   if Length(Attachments) = 0 then
     IBError(ibxeEmptyAttachmentsList,[nil]);
 
+  SetLength(FAttachments,Length(Attachments));
   for i := 0 to Length(Attachments) - 1 do
-    AddOwner(Attachments[i]);
+  begin
+    AddOwner(Attachments[i] as TFBAttachment);
+    FAttachments[i] := Attachments[i];
+  end;
   GenerateTPB(Params, FTPB, FTPBLength);
-  Start;
+  Start(DefaultCompletion);
 end;
 
-constructor TFBTransaction.Create(Attachment: TFBAttachment; Params: TStrings);
+constructor TFBTransaction.Create(Attachment: TFBAttachment; Params: TStrings;
+   DefaultCompletion: TTransactionCompletion);
 begin
   inherited Create;
   AddOwner(Attachment);
+  SetLength(FAttachments,1);
+  FAttachments[0] := Attachment;
   GenerateTPB(Params, FTPB, FTPBLength);
-  Start;
+  Start(DefaultCompletion);
 end;
 
 destructor TFBTransaction.Destroy;
 var i: integer;
 begin
-  Rollback;
+  case FDefaultCompletion of
+  tcRollback:
+    Rollback;
+  tcCommit:
+    Commit;
+  end;
   inherited Destroy;
 end;
 
@@ -212,11 +226,12 @@ begin
     Call(isc_commit_retaining(StatusVector, @FHandle));
 end;
 
-procedure TFBTransaction.Start;
+procedure TFBTransaction.Start(DefaultCompletion: TTransactionCompletion);
 var pteb: PISC_TEB_ARRAY;
     i: integer;
 begin
   pteb := nil;
+  FDefaultCompletion := DefaultCompletion;
   with Firebird25ClientAPI do
   if (Owners.Count = 1) and (TObject(Owners[0]) is TFBAttachment) then
   try
@@ -248,14 +263,6 @@ begin
         FreeMem(pteb);
      end;
   end;
-end;
-
-procedure TFBTransaction.Release;
-begin
-  if OwnedObjects.Count > 0 then
-    IBError(ibxeTransactionReleaseFails,[OwnedObjects.Count]);
-  Rollback;
-  Free;
 end;
 
 procedure TFBTransaction.Rollback;

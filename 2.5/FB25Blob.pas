@@ -19,8 +19,7 @@ type
     FBlobID: TISC_QUAD;
     FEOB: boolean;
     FCreating: boolean;
-    procedure InternalCancel;
-    procedure InternalClose;
+    FTransaction: ITransaction;
     procedure CheckReadable;
     procedure CheckWritable;
   public
@@ -54,24 +53,6 @@ uses IBErrorCodes, FBErrorMessages;
 
 { TFBBlob }
 
-procedure TFBBlob.InternalCancel;
-begin
-  if FHandle = nil then
-    Exit;
-  with Firebird25ClientAPI do
-    Call(isc_cancel_blob(StatusVector,@FHandle));
-  FHandle := nil;
-end;
-
-procedure TFBBlob.InternalClose;
-begin
-  if FHandle = nil then
-    Exit;
-  with Firebird25ClientAPI do
-    Call(isc_close_blob(StatusVector, @FHandle), True);
-  FHandle := nil;
-end;
-
 procedure TFBBlob.CheckReadable;
 begin
   if FCreating then IBError(ibxeBlobCannotBeRead, [nil]);
@@ -89,6 +70,7 @@ var DBHandle: TISC_DB_HANDLE;
 begin
     inherited Create;
     FAttachment := Attachment;
+    FTransaction := Transaction;
     AddOwner(TFBTransaction(Transaction));
     DBHandle := Attachment.Handle;
     TRHandle := TFBTransaction(Transaction).Handle;
@@ -105,6 +87,7 @@ var DBHandle: TISC_DB_HANDLE;
 begin
   inherited Create;
   FAttachment := Attachment;
+  FTransaction := Transaction;
   AddOwner(TFBTransaction(Transaction));
   DBHandle := Attachment.Handle;
   TRHandle := (Transaction as TFBTransaction).Handle;
@@ -117,18 +100,18 @@ end;
 destructor TFBBlob.Destroy;
 begin
   if FCreating then
-    InternalCancel
+    Cancel
   else
-    InternalClose;
+    Close;
   inherited Destroy;
 end;
 
 procedure TFBBlob.TransactionEnding(aTransaction: TFBTransaction);
 begin
   if FCreating then
-    InternalCancel
+    Cancel
   else
-    InternalClose;
+    Close;
 end;
 
 function TFBBlob.GetStatus: IStatus;
@@ -138,14 +121,20 @@ end;
 
 procedure TFBBlob.Cancel;
 begin
-  InternalCancel;
-  Free;
+  if FHandle = nil then
+    Exit;
+  with Firebird25ClientAPI do
+    Call(isc_cancel_blob(StatusVector,@FHandle));
+  FHandle := nil;
 end;
 
 procedure TFBBlob.Close;
 begin
-  InternalClose;
-  Free;
+  if FHandle = nil then
+    Exit;
+  with Firebird25ClientAPI do
+    Call(isc_close_blob(StatusVector, @FHandle), True);
+  FHandle := nil;
 end;
 
 function TFBBlob.GetBlobID: TISC_QUAD;
@@ -268,7 +257,7 @@ begin
     BytesRead := S.Read(Buffer,BufSize);
     Write(Buffer,BytesRead);
   until BytesRead = 0;
-  InternalClose;
+  Close;
 end;
 
 procedure TFBBlob.SaveToFile(Filename: string);
@@ -292,6 +281,7 @@ begin
     BytesRead := Read(Buffer,BufSize);
     S.Write(Buffer,BytesRead);
   until BytesRead = 0;
+  Close;
 end;
 
 end.

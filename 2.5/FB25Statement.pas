@@ -262,7 +262,10 @@ type
   TFBStatement = class(TAPIObject,IStatement)
   private
     FAttachment: TFBAttachment;
+    FAttachmentIntf: IAttachment;
     FTransaction: TFBTransaction;
+    FTransactionIntf: ITransaction;
+    FExecTransactionIntf: ITransaction;
     FHandle: TISC_STMT_HANDLE;
     FSQLType: TIBSQLTypes;         { Select, update, delete, insert, create, alter, etc...}
     FSQLDialect: integer;
@@ -277,7 +280,7 @@ type
     function InternalOpenCursor(aTransaction: TFBTransaction): IResultSet;
     procedure FreeHandle;
   public
-    constructor Create(Attachment: TFBAttachment; Transaction: TFBTransaction;
+    constructor Create(Attachment: TFBAttachment; Transaction: ITransaction;
       sql: string; SQLDialect: integer);
     destructor Destroy; override;
     procedure Close;
@@ -299,7 +302,6 @@ type
     function Execute(aTransaction: ITransaction): IResults; overload;
     function OpenCursor: IResultSet; overload;
     function OpenCursor(aTransaction: ITransaction): IResultSet; overload;
-    procedure Release;
     property Handle: TISC_STMT_HANDLE read FHandle;
     property SQLParams: ISQLParams read GetSQLParams;
     property SQLType: TIBSQLTypes read GetSQLType;
@@ -1931,6 +1933,7 @@ begin
  end;
  FSQLRecord.FTransaction := aTransaction;
  FOpen := True;
+ FExecTransactionIntf := aTransaction;
  FSQLRecord.FBOF := true;
  FSQLRecord.FEOF := false;
  Result := FSQLRecord;
@@ -1959,13 +1962,15 @@ begin
 end;
 
 constructor TFBStatement.Create(Attachment: TFBAttachment;
-  Transaction: TFBTransaction; sql: string; SQLDialect: integer);
+  Transaction: ITransaction; sql: string; SQLDialect: integer);
 var GUID : TGUID;
 begin
   inherited Create;
   FAttachment := Attachment;
-  FTransaction := transaction;
-  AddOwner(Transaction);
+  FAttachmentIntf := Attachment;
+  FTransaction := transaction as TFBTransaction;
+  FTransactionIntf := Transaction;
+  AddOwner(FTransaction);
   FSQLDialect := SQLDialect;
   CreateGuid(GUID);
   FCursor := GUIDToString(GUID);
@@ -2003,6 +2008,7 @@ begin
     end;
   finally
     FOpen := False;
+    FExecTransactionIntf := nil;
     FSQLRecord.FTransaction := nil;
   end;
 end;
@@ -2150,11 +2156,6 @@ end;
 function TFBStatement.OpenCursor(aTransaction: ITransaction): IResultSet;
 begin
   Result := InternalOpenCursor(aTransaction as TFBTransaction);
-end;
-
-procedure TFBStatement.Release;
-begin
-  Free;
 end;
 
 end.

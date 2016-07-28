@@ -98,8 +98,8 @@ type
                                           Params: TStrings);
     function GetServiceManager(ServerName: string; Protocol: TProtocol; Params: TStrings): IServiceManager;
     {Start Transaction against multiple databases}
-    function StartTransaction(Attachments: array of IAttachment; Params: TStrings
-      ): ITransaction;
+    function StartTransaction(Attachments: array of IAttachment; Params: TStrings;
+      DefaultCompletion: TTransactionCompletion): ITransaction;
     function IsEmbeddedServer: boolean;
     function GetLibraryName: string;
     function HasServiceAPI: boolean;
@@ -303,7 +303,11 @@ begin
 end;
 
 destructor TFB25ClientAPI.Destroy;
+var i: integer;
 begin
+  for i := 0 to OwnedObjects.Count - 1 do
+    if TObject(OwnedObjects[i]) is TFBAttachment then
+      TFBAttachment(OwnedObjects[i]).Disconnect(true);
   Firebird25ClientAPI := nil;
   inherited Destroy;
 end;
@@ -374,14 +378,9 @@ begin
 end;
 
 function TFB25ClientAPI.StartTransaction(Attachments: array of IAttachment;
-  Params: TStrings): ITransaction;
-var FBAttachments: array of TFBAttachment;
-    i: integer;
+  Params: TStrings; DefaultCompletion: TTransactionCompletion): ITransaction;
 begin
-  SetLength(FBAttachments,Length(Attachments));
-  for i := 0 to Length(Attachments) - 1 do
-    FBAttachments[i] := TFBAttachment(Attachments[i]);
-  Result := TFBTransaction.Create(FBAttachments,Params);
+  Result := TFBTransaction.Create(Attachments,Params,DefaultCompletion);
 end;
 
 function TFB25ClientAPI.IsEmbeddedServer: boolean;
