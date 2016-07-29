@@ -6,6 +6,10 @@ unit IB;
 {$codepage UTF8}
 {$ENDIF}
 
+{$IF FPC_FULLVERSION < 20700 }
+ RawByteString = AnsiString; {Needed for backwards compatibility}
+ {$ENDIF}
+
 interface
 
 uses
@@ -544,27 +548,32 @@ type
     procedure AsyncWaitForEvent(EventHandler: TEventHandler);
   end;
 
-  TDBOperationCounts = record
+  TDBOperationCount = record
     TableID: UShort;
     Count: cardinal;
   end;
 
-  IIDBInfoItem = interface
+  TByteArray = array of byte;
+  TDBOperationCounts = array of TDBOperationCount;
+
+  IDBInfoItem = interface
     function getItemType: char;
     function getSize: integer;
     procedure getRawBytes(var Buffer);
     function getAsString: string;
     function getAsInteger: integer;
     procedure DecodeIDCluster(var ConnectionType: integer; var DBFileName, DBSiteName: string);
-    function getAsBytes: array of byte;
+    function getAsBytes: TByteArray;
     procedure DecodeVersionString(var Version: byte; var VersionString: string);
     procedure DecodeUserNames(var UserNames: TStrings);
-    function getOperationCounts: array of TDBOperationCounts;
+    function getOperationCounts: TDBOperationCounts;
   end;
+
+  { IDBInformation }
 
   IDBInformation = interface
     function getCount: integer;
-    function getItem(index: integer): IIDBInfoItem;
+    function getItem(index: integer): IDBInfoItem;
     property Items[index: integer]: IDBInfoItem read getItem; default;
   end;
 
@@ -584,10 +593,7 @@ type
 
     {Database Information}
     function GetBlobCharSetID(transaction: ITransaction; tableName, columnName: string): short;
-    function GetOperationCounts(DBInfoCommand: char; aOperation: TStringList): TStringList;
-    function GetInfoValue(DBInfoCommand: char): integer;
-    function GetInfoString(DBInfoCommand: char): string;
-    function GetInfoBuffer(DBInfoCommand: char; var Buffer: PChar): integer;
+    function GetDBInformation(DBInfoCommand: char): IDBInformation;
     function HasActivity: boolean;
   end;
 

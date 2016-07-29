@@ -1824,7 +1824,7 @@ end;
 
 procedure TFBStatement.InternalPrepare(sql: string);
 var
-  RB: TSQLResultBuffer;
+  DBInfo: IDBInformation;
 begin
   if (sql = '') then
     IBError(ibxeEmptyQuery, [nil]);
@@ -1840,13 +1840,9 @@ begin
     { After preparing the statement, query the stmt type and possibly
       create a FSQLRecord "holder" }
     { Get the type of the statement }
-    RB := TSQLResultBuffer.Create(self,isc_info_sql_stmt_type);
-    try
-      FSQLType := TIBSQLTypes(RB.GetValue(isc_info_sql_stmt_type));
-
-    finally
-      RB.Free;
-    end;
+    DBInfo := TDBInformation.Create(self,isc_info_sql_stmt_type);
+    if (DBInfo.getCount > 0) and (DBInfo[0].getItemType = char(isc_info_sql_stmt_type)) then
+      FSQLType := TIBSQLTypes(DBInfo[0].GetAsInteger);
 
     { Done getting the type }
     case FSQLType of
@@ -2085,56 +2081,45 @@ end;
 
 function TFBStatement.GetPlan: String;
 var
-  RB: TSQLResultBuffer;
+  DBInfo: IDBInformation;
 begin
+//  Prepare;
   if (not (FSQLType in [SQLSelect, SQLSelectForUpdate,
        {TODO: SQLExecProcedure, }
        SQLUpdate, SQLDelete])) then
     result := ''
   else
   begin
-    RB := TSQLResultBuffer.Create(self,isc_info_sql_get_plan,16384);
-    try
-      RB.GetString(isc_info_sql_get_plan,Result);
-    finally
-      RB.Free;
-    end;
+     DBInfo := TDBInformation.Create(self,char(isc_info_sql_get_plan),16384);
+     if (DBInfo.getCount > 0) and (DBInfo[0].getItemType = char(isc_info_sql_get_plan)) then
+       Result := DBInfo[0].GetAsString;
   end;
 end;
 
 function TFBStatement.GetRowsAffected(var InsertCount, UpdateCount,
   DeleteCount: integer): boolean;
 var
-  RB: TSQLResultBuffer;
+  DBInfo: IDBInformation;
+  i: integer;
 begin
   InsertCount := 0;
   UpdateCount := 0;
   DeleteCount := 0;
   Result := true;
   begin
-    RB := TSQLResultBuffer.Create(self,isc_info_sql_records);
-    try
-      case SQLType of
-      SQLInsert, SQLUpdate: {Covers "Insert or Update" as well as individual update}
-      begin
-        InsertCount := RB.GetValue(isc_info_sql_records, isc_info_req_insert_count);
-        UpdateCount := RB.GetValue(isc_info_sql_records, isc_info_req_update_count);
-      end;
+    DBInfo := TDBInformation.Create(self,char(isc_info_sql_records));
+    for i := 0 to DBInfo.getCount - 1 do
+    begin
+      case DBInfo[i].getItemType of
+      isc_info_req_insert_count:
+        InsertCount := DBInfo[i].GetAsInteger;
 
-      SQLDelete:
-        DeleteCount := RB.GetValue(isc_info_sql_records, isc_info_req_delete_count);
+      isc_info_req_update_count:
+        UpdateCount := DBInfo[i].GetAsInteger;
 
-      SQLExecProcedure:
-      begin
-        InsertCount :=  RB.GetValue(isc_info_sql_records, isc_info_req_insert_count);
-        UpdateCount :=  RB.GetValue(isc_info_sql_records, isc_info_req_update_count);
-        DeleteCount :=  RB.GetValue(isc_info_sql_records, isc_info_req_delete_count);
-      end
-      else
-        Result := false;
+      isc_info_req_delete_count:
+        DeleteCount := DBInfo[i].GetAsInteger;
       end;
-    finally
-      RB.Free;
     end;
   end;
 end;

@@ -141,7 +141,10 @@ type
       ibxeDscInfoTokenMissing,
       ibxeNoLoginDialog,
       ibxeEmptyAttachmentsList,
-      ibxeFirebirdLibraryLoaded
+      ibxeFirebirdLibraryLoaded,
+      ibxeInfoBufferIndexError,
+      ibxeInfoBufferTypeError,
+      ibxeInfoBufferOverflow
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;
@@ -302,6 +305,9 @@ resourcestring
                    'in your program uses list?';
   SEmptyAttachmentsList = 'The list of database attachments cannot be empty';
   SFirebirdLibraryLoaded = 'The Firebird Library is already loaded';
+  SInfoBufferIndexError = 'Info Buffer Index Out of Range (%d)';
+  SInfoBufferTypeError = 'Invalid operation for Info Buffer Type (%d)';
+  SInfoBufferOverflow = 'Info Buffer overlow';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -428,7 +434,10 @@ const
     SDscInfoTokenMissing,
     SNoLoginDialog,
     SEmptyAttachmentsList,
-    SFirebirdLibraryLoaded
+    SFirebirdLibraryLoaded,
+    SInfoBufferIndexError,
+    SInfoBufferTypeError,
+    SInfoBufferOverflow
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;

@@ -64,9 +64,9 @@ end;
 constructor TTest1.Create;
 begin
   inherited Create;
-  FDatabaseName := 'localhost:/home/firebird/test1.fdb';
+  FDatabaseName := 'localhost:/tmp/test1.fdb';
   FUser := 'SYSDBA';
-  FPassword := 'celebr8';
+  FPassword := 'Pears';
   FCharSet := 'UTF8';
 end;
 
@@ -79,6 +79,10 @@ procedure TTest1.RunTest;
 var Params: TStringList;
     CreateParams: string;
     Attachment: IAttachment;
+    DBInfo: IDBInformation;
+    ConType: integer;
+    DBFileName: string;
+    DBSiteName: string;
 begin
   writeln('Creating a Database');
   CreateParams := 'USER ''' + FUser + ''' PASSWORD ''' + FPassword + ''' ' +
@@ -92,9 +96,13 @@ begin
     Params.Add('sql_dialect='+IntToStr(FSQLDialect));
     Attachment := FirebirdAPI.CreateDatabase(FDatabaseName,FSQLDialect,CreateParams,Params);
     writeln('Database Created without error');
-    writeln('Database ID = ',Attachment.GetInfoString(Char(isc_info_db_id)));
-    writeln('ODS major = ',Attachment.GetInfoValue(char(isc_info_ods_version)),' minor = ',
-       Attachment.GetInfoValue(char(isc_info_ods_minor_version)));
+    DBInfo := Attachment.GetDBInformation(Char(isc_info_db_id));
+    DBInfo[0].DecodeIDCluster(ConType,DBFileName,DBSiteName);
+    writeln('Database ID = ', ConType,' FB = ', DBFileName, ' SN = ',DBSiteName);
+    DBInfo := Attachment.GetDBInformation(Char(isc_info_ods_version));
+    write('ODS major = ',DBInfo[0].getAsInteger);
+    DBInfo := Attachment.GetDBInformation(Char(isc_info_ods_minor_version));
+    writeln(' minor = ', DBInfo[0].getAsInteger );
 
     {Querying Database}
     DoQuery(Attachment);

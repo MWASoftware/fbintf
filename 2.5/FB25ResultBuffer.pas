@@ -1,6 +1,10 @@
 unit FB25ResultBuffer;
 
 {$mode objfpc}{$H+}
+{$IF FPC_FULLVERSION >= 20700 }
+{$codepage UTF8}
+{$DEFINE HAS_ANSISTRING_CODEPAGE}
+{$ENDIF}
 
 interface
 
@@ -9,367 +13,281 @@ uses
   FB25Attachment, FB25Status;
 
 type
-  {TInfoBuffer inspired by IBPP RB class}
+    { TIDBInfoItem }
 
-  TInfoBuffer = class
-  private
-    mBuffer: PChar;
-    mSize: short;
-    function FindToken(token: char): PChar; overload;
-    function FindToken(token: char; subtoken: char): PChar; overload;
-  public
-    constructor Create(aSize: integer);
-    destructor Destroy; override;
-    function Size: short;
-    procedure Reset;
-    function GetCountValue(token: char): integer;
-    function GetBool(token: char): boolean;
-    function GetString(token: char; var data: string): integer; overload;
-    function GetString(var data: string): integer; overload; {gets first}
-    function buffer: PChar;
-  end;
-
-  { TResultBuffer }
-
-  TResultBuffer = class(TInfoBuffer)
-  public
-    function GetValue: integer; overload; {gets first value}
-    function GetValue(token: char): integer; overload;
-    function GetValue(token: char; subtoken: char): integer; overload;
-  end;
-
-  {Used for access to a isc_dsql_sql_info result buffer}
-
-  { TSQLResultBuffer }
-
-  TSQLResultBuffer = class(TResultBuffer)
-  public
-    constructor Create(aStatement: TFBStatement; info_request:char; aSize: integer = IBLocalBufferLength);
-  end;
-
-  { TDBInfoResultBuffer }
-
-  TDBInfoResultBuffer = class(TResultBuffer)
-  public
-    constructor Create(aAttachment: TFBAttachment; info_request: char;
-      aSize: integer=IBLocalBufferLength);
-    function GetInfoBuffer(var p: PChar): integer;
-  end;
-
-  TIDBInfoItem = class(TInterfacedObject,IDBInformation)
+  TIDBInfoItem = class(TInterfacedObject,IDBInfoItem)
   private
     FItemType: char;
     FBufPtr: PChar;
     FItemlength: UShort;
+    function GetString(var P: PChar): string;
   public
     constructor Create(ItemType: char; BufPtr: PChar; Itemlength: UShort);
 
   public
-    {IIDBInfoItem}
+    {IDBInfoItem}
     function getItemType: char;
     function getSize: integer;
     procedure getRawBytes(var Buffer);
     function getAsString: string;
     function getAsInteger: integer;
     procedure DecodeIDCluster(var ConnectionType: integer; var DBFileName, DBSiteName: string);
-    function getAsBytes: array of byte;
+    function getAsBytes: TByteArray;
     procedure DecodeVersionString(var Version: byte; var VersionString: string);
     procedure DecodeUserNames(var UserNames: TStrings);
-    function getOperationCounts: array of TDBOperationCounts;
+    function getOperationCounts: TDBOperationCounts;
  end;
+
+  { TDBInformation }
 
   TDBInformation = class(TInterfacedObject,IDBInformation)
    private
     FBuffer: PChar;
     FBufSize: integer;
-    FItems: array of IDBInformation;
+    FItems: array of IDBInfoItem;
     procedure ParseBuffer;
   public
     constructor Create(aAttachment: TFBAttachment; info_request: char;
       aSize: integer=IBLocalBufferLength); overload;
     constructor Create(aAttachment: TFBAttachment; info_requests: array of char;
       aSize: integer=IBLocalBufferLength); overload;
+    constructor Create(aStatement: TFBStatement; info_request: char;
+      aSize: integer=IBLocalBufferLength
+      ); overload;
     destructor Destroy; override;
 
   public
     {IDBInformation}
     function getCount: integer;
-    function getItem(index: integer): IIDBInfoItem;
+    function getItem(index: integer): IDBInfoItem;
     property Items[index: integer]: IDBInfoItem read getItem; default;
   end;
-
-  {Used for access to a isc_query_service result buffer}
-
-  { TServiceQueryBuffer }
-
-  TServiceQueryBuffer = class(TInfoBuffer)
-  public
-    function GetValue(token: char): integer;
-  end;
-
 
 implementation
 
 uses FBErrorMessages;
 
-{ TDBInfoResultBuffer }
+{ TIDBInfoItem }
 
-constructor TDBInfoResultBuffer.Create(aAttachment: TFBAttachment;
-  info_request: char; aSize: integer);
+function TIDBInfoItem.GetString(var P: PChar): string;
+var s: RawByteString;
+    len: byte;
 begin
-  inherited Create(aSize);
-  with Firebird25ClientAPI do
-    if isc_database_info(StatusVector, @(aAttachment.Handle), 2, @info_request,
-                           Size, Buffer) > 0 then
-      IBDataBaseError;
+  len := integer(P^);
+  if P + len >= FBufPtr + FItemLength then
+    IBError(ibxeInfoBufferOverflow,[nil]);
+  SetString(s,P+1,len);
+  {$IFDEF HAS_ANSISTRING_CODEPAGE}
+  SetCodePage(s,CP_UTF8,false);
+  {$ENDIF}
+  Inc(P,len+1);
+
+  Result := s;
 end;
 
-function TDBInfoResultBuffer.GetInfoBuffer(var p: PChar): integer;
-begin
-  p := buffer + 1;
-  with Firebird25ClientAPI do
-    Result := isc_vax_integer(p, 2);
-  Inc(p,2);
-end;
-
-{ TSQLResultBuffer }
-
-constructor TSQLResultBuffer.Create(aStatement: TFBStatement;
-  info_request: char; aSize: integer);
-begin
-  inherited Create(aSize);
-  if aStatement.Handle = nil then
-    IBError(ibxeInvalidStatementHandle,[nil]);
-
-  with Firebird25ClientAPI do
-    if isc_dsql_sql_info(StatusVector, @(aStatement.Handle), 2, @info_request,
-                           Size, Buffer) > 0 then
-      IBDataBaseError;
-end;
-
-  { TServiceQueryBuffer }
-
-function TServiceQueryBuffer.GetValue(token: char): integer;
-var p: PChar;
-begin
-  Result := 0;
-  p := FindToken(token);
-
-  if p = nil then
-    IBError(ibxeDscInfoTokenMissing,[token]);
-
-  with Firebird25ClientAPI do
-    Result := isc_vax_integer(p+1, 4);
-end;
-
-  { TResultBuffer }
-
-function TResultBuffer.GetValue: integer;
-var len: integer;
-    p: PChar;
-begin
-  p := buffer;
-  with Firebird25ClientAPI do
-  begin
-    len := isc_vax_integer(p+1, 2);
-    if (len <> 0) then
-      Result := isc_vax_integer(p+3, len);
-  end;
-end;
-
-function TResultBuffer.GetValue(token: char): integer;
-var len: integer;
-    p: PChar;
-begin
-  Result := 0;
-  p := FindToken(token);
-
-  if p = nil then
-    IBError(ibxeDscInfoTokenMissing,[token]);
-
-  with Firebird25ClientAPI do
-  begin
-    len := isc_vax_integer(p+1, 2);
-    if (len <> 0) then
-      Result := isc_vax_integer(p+3, len);
-  end;
-end;
-
-function TResultBuffer.GetValue(token: char; subtoken: char): integer;
-var len: integer;
-    p: PChar;
-begin
-  Result := 0;
-  p := FindToken(token, subtoken);
-
-  if p = nil then
-    IBError(ibxeDscInfoTokenMissing,[token]);
-
-  with Firebird25ClientAPI do
-  begin
-    len := isc_vax_integer(p+1, 2);
-    if (len <> 0) then
-      Result := isc_vax_integer(p+3, len);
-  end;
-end;
-
-{ TInfoBuffer }
-
-constructor TInfoBuffer.Create(aSize: integer);
+constructor TIDBInfoItem.Create(ItemType: char; BufPtr: PChar;
+  Itemlength: UShort);
 begin
   inherited Create;
-  mSize := aSize;
-  GetMem(mBuffer,aSize);
-  FillChar(mBuffer^,mSize,255);
+  FItemType := ItemType;
+  FBufPtr := BufPtr;
+  FItemlength := Itemlength;
 end;
 
-destructor TInfoBuffer.Destroy;
+function TIDBInfoItem.getItemType: char;
 begin
-  if mBuffer <> nil then FreeMem(mBuffer);
-  inherited;
+  Result := FItemType;
 end;
 
-function TInfoBuffer.buffer: PChar;
+function TIDBInfoItem.getSize: integer;
 begin
-  Result := mBuffer;
+  Result := FItemlength;
 end;
 
-function TInfoBuffer.FindToken(token: char): PChar;
-var p: PChar;
+procedure TIDBInfoItem.getRawBytes(var Buffer);
+begin
+  Move(FBufPtr^,Buffer,FItemlength);
+end;
+
+function TIDBInfoItem.getAsString: string;
+var s: RawByteString;
+begin
+  SetString(s,FBufPtr,FItemlength);
+  {$IFDEF HAS_ANSISTRING_CODEPAGE}
+  SetCodePage(s,CP_UTF8,false);
+  {$ENDIF}
+  Result := s;
+end;
+
+function TIDBInfoItem.getAsInteger: integer;
+begin
+  with Firebird25ClientAPI do
+    Result := isc_vax_integer(FBufPtr, FItemLength);
+end;
+
+procedure TIDBInfoItem.DecodeIDCluster(var ConnectionType: integer;
+  var DBFileName, DBSiteName: string);
+var  P: PChar;
+begin
+  if FItemType = char(isc_info_db_id) then
+  begin
+    P := FBufPtr;
+    if FItemLength > 0 then
+      ConnectionType := integer(P^);
+    Inc(P);
+    DBFileName := GetString(P);
+    DBSiteName := GetString(P);
+  end
+  else
+    IBError(ibxeInfoBufferTypeError,[integer(FItemType)]);
+end;
+
+function TIDBInfoItem.getAsBytes: TByteArray;
+var i: integer;
+    P: PChar;
+begin
+  SetLength(Result,FItemLength);
+  P := FBufPtr;
+  for i := 0 to FItemLength - 1 do
+  begin
+    Result[i] := byte(P^);
+    Inc(P);
+  end
+end;
+
+procedure TIDBInfoItem.DecodeVersionString(var Version: byte;
+  var VersionString: string);
+var  P: PChar;
+begin
+  if FItemType = char(isc_info_version) then
+  begin
+   P := FBufPtr;
+   VersionString := '';
+   Version := integer(P^);
+   Inc(P);
+   VersionString := GetString(P);
+  end
+  else
+    IBError(ibxeInfoBufferTypeError,[integer(FItemType)]);
+
+end;
+
+procedure TIDBInfoItem.DecodeUserNames(var UserNames: TStrings);
+var P: PChar;
+    s: string;
+begin
+  P := FBufPtr;
+  while (P < FBufPtr + FItemLength) and (P^ = Char(isc_info_user_names)) do
+  begin
+    s := GetString(P);
+    UserNames.Add(s);
+  end;
+end;
+
+function TIDBInfoItem.getOperationCounts: TDBOperationCounts;
+var tableCounts: integer;
+    P: PChar;
+    i: integer;
+begin
+  tableCounts := FItemLength div 6;
+  SetLength(Result,TableCounts);
+  P := FBufPtr;
+  for i := 0 to TableCounts -1 do
+  with Firebird25ClientAPI do
+  begin
+    Result[i].TableID := isc_vax_integer(P,2);
+    Inc(P,2);
+    Result[i].Count := isc_vax_integer(P,4);
+    Inc(P,4);
+  end;
+end;
+
+{ TDBInformation }
+
+procedure TDBInformation.ParseBuffer;
+var P: PChar;
+    index: integer;
     len: integer;
 begin
-  Result := nil;
-  p := mBuffer;
-
-  while p^ <> char(isc_info_end) do
+  P := FBuffer;
+  index := 0;
+  SetLength(FItems,0);
+  while (P^ <> char(isc_info_end)) and (P < FBuffer + FBufSize) do
   with Firebird25ClientAPI do
   begin
-    if p^ = token then
-    begin
-      Result := p;
-      Exit;
-    end;
-    len := isc_vax_integer(p+1,2);
-    Inc(p,len+3);
+    SetLength(FItems,index+1);
+    len := isc_vax_integer(P+1,2);
+    FItems[index] := TIDBInfoItem.Create(P^,P+3,len);
+    Inc(index);
+    Inc(P,3+len);
   end;
 end;
 
-function TInfoBuffer.FindToken(token: char; subtoken: char): PChar;
-var p: PChar;
-    len, inlen: integer;
+constructor TDBInformation.Create(aAttachment: TFBAttachment;
+  info_request: char; aSize: integer);
 begin
-  Result := nil;
-  p := mBuffer;
-
-  while p^ <> char(isc_info_end) do
+  inherited Create;
+  FBufSize := aSize;
+  GetMem(FBuffer,FBufSize);
+  FillChar(FBuffer^,FBufSize,255);
   with Firebird25ClientAPI do
-  begin
-    if p^ = token then
-    begin
-      {Found token, now find subtoken}
-      inlen := isc_vax_integer(p+1, 2);
-      Inc(p,3);
-      while inlen > 0 do
-      begin
-	if p^ = subtoken then
-        begin
-          Result := p;
-          Exit;
-        end;
-  	len := isc_vax_integer(p+1, 2);
-        Inc(p,len + 3);
-        Dec(inlen,len + 3);
-      end;
-      Exit;
-    end;
-    len := isc_vax_integer(p+1, 2);
-    inc(p,len+3);
-  end;
+    if isc_database_info(StatusVector, @(aAttachment.Handle), 1, @info_request,
+                           FBufSize, FBuffer) > 0 then
+      IBDataBaseError;
+  ParseBuffer;
 end;
 
-function TInfoBuffer.GetBool(token: char): boolean;
-var aValue: integer;
-    p: PChar;
+constructor TDBInformation.Create(aAttachment: TFBAttachment;
+  info_requests: array of char; aSize: integer);
+var ReqBuffer: string;
+    i: integer;
 begin
-  p := FindToken(token);
-
-  if p = nil then
-    IBError(ibxeDscInfoTokenMissing,[token]);
-
+  inherited Create;
+  FBufSize := aSize;
+  GetMem(FBuffer,FBufSize);
+  FillChar(FBuffer^,FBufSize,255);
+  SetLength(ReqBuffer,Length(info_requests));
+  for i := 0 to Length(info_requests) - 1 do
+    ReqBuffer[i] := info_requests[i];
   with Firebird25ClientAPI do
-    aValue := isc_vax_integer(p+1, 4);
-  Result := aValue <> 0;
+    if isc_database_info(StatusVector, @(aAttachment.Handle), Length(ReqBuffer), PChar(ReqBuffer),
+                           FBufSize, FBuffer) > 0 then
+      IBDataBaseError;
+  ParseBuffer;
 end;
 
-function TInfoBuffer.GetCountValue(token: char): integer;
-var len: integer;
-    p: PChar;
+constructor TDBInformation.Create(aStatement: TFBStatement; info_request: char;
+  aSize: integer);
 begin
-  {Specifically used on tokens like isc_info_insert_count and the like
-   which return detailed counts per relation. We sum up the values.}
-
-  p := FindToken(token);
-
-  if p = nil then
-    IBError(ibxeDscInfoTokenMissing,[token]);
-
-  {len is the number of bytes in the following array}
-
+  inherited Create;
+  FBufSize := aSize;
+  GetMem(FBuffer,FBufSize);
+  FillChar(FBuffer^,FBufSize,255);
   with Firebird25ClientAPI do
-    len := isc_vax_integer(p+1, 2);
-  Inc(p,3);
-  Result := 0;
-  while len > 0 do
-  begin
-    {Each array item is 6 bytes : 2 bytes for the relation_id which
-     we skip, and 4 bytes for the count value which we sum up across
-     all tables.}
-
-    with Firebird25ClientAPI do
-       Inc(Result,isc_vax_integer(p+2, 4));
-     Inc(p,6);
-     Dec(len,6);
-  end;
+    if isc_dsql_sql_info(StatusVector, @(aStatement.Handle), 1, @info_request,
+                           FBufSize, FBuffer) > 0 then
+      IBDataBaseError;
+  ParseBuffer;
 end;
 
-function TInfoBuffer.GetString(token: char; var data: string): integer;
-var p: PChar;
+destructor TDBInformation.Destroy;
 begin
-  Result := 0;
-  p := FindToken(token);
-
-  if p = nil then
-    IBError(ibxeDscInfoTokenMissing,[token]);
-
-  with Firebird25ClientAPI do
-    Result := isc_vax_integer(p+1, 2);
-  SetString(data,p+3,Result);
-  data := Trim(data);
+  FreeMem(FBuffer);
+  inherited Destroy;
 end;
 
-function TInfoBuffer.GetString(var data: string): integer;
-var p: PChar;
+function TDBInformation.getCount: integer;
 begin
-  Result := 0;
-  p := buffer;
-  with Firebird25ClientAPI do
-    Result := isc_vax_integer(p+1, 2);
-  SetString(data,p+3,Result);
-  data := Trim(data);
+  Result := Length(FItems);
 end;
 
-function TInfoBuffer.Size: short;
+function TDBInformation.getItem(index: integer): IDBInfoItem;
 begin
-  Result := mSize;
+  if (Index >= 0) and (Index < Length(FItems)) then
+    Result := FItems[index]
+  else
+    IBError(ibxeInfoBufferIndexError,[index]);
 end;
-
-procedure TInfoBuffer.Reset;
-begin
-  if mBuffer <> nil then FreeMem(mBuffer);
-  GetMem(mBuffer,mSize);
-  FillChar(mBuffer^,mSize,255);
-end;
-
 
 
 end.

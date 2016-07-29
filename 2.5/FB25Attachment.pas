@@ -41,10 +41,7 @@ type
 
     {Database Information}
     function GetBlobCharSetID(transaction: ITransaction; tableName, columnName: string): short;
-    function GetInfoValue(DBInfoCommand: char): integer;
-    function GetInfoString(DBInfoCommand: char): string;
-    function GetOperationCounts(DBInfoCommand: char; aOperation: TStringList): TStringList;
-    function GetInfoBuffer(DBInfoCommand: char; var p: PChar): integer;
+    function GetDBInformation(DBInfoCommand: char): IDBInformation;
   end;
 
 implementation
@@ -126,49 +123,6 @@ const
 
   { TFBAttachment }
 
-function TFBAttachment.GetOperationCounts(DBInfoCommand: char;
-  aOperation: TStringList): TStringList;
-var
-  i, qtd_tables, id_table, qtd_operations: Integer;
-  p: PChar;
-begin
-  if aOperation = nil then aOperation := TStringList.Create;
-  aOperation.Clear;
-  Result := aOperation;
-
-  with TDBInfoResultBuffer.Create(self,DBInfoCommand,IBHugeLocalBufferLength), Firebird25ClientAPI do
-  try
-    p := buffer;
-    { 1. 1 byte specifying the item type requested (e.g., isc_info_insert_count).
-      2. 2 bytes telling how many bytes compose the subsequent value pairs.
-      3. A pair of values for each table in the database on wich the requested
-        type of operation has occurred since the database was last attached.
-      Each pair consists of:
-      1. 2 bytes specifying the table ID.
-      2. 4 bytes listing the number of operations (e.g., inserts) done on that table.
-    }
-    qtd_tables := trunc(isc_vax_integer(p+1,2)/6);
-    for i := 0 to qtd_tables - 1 do
-    begin
-      id_table := isc_vax_integer(p+3+(i*6),2);
-      qtd_operations := isc_vax_integer(p+5+(i*6),4);
-      aOperation.Add(IntToStr(id_table)+'='+IntToStr(qtd_operations));
-    end;
-  finally
-    Free;
-  end;
-end;
-
-function TFBAttachment.GetInfoBuffer(DBInfoCommand: char; var p: PChar
-  ): integer;
-begin
-  with TDBInfoResultBuffer.Create(self,DBInfoCommand,IBHugeLocalBufferLength) do
-  try
-    Result := GetInfoBuffer(p);
-  finally
-    Free
-  end;
-end;
 
 procedure TFBAttachment.GenerateDPB(sl: TStrings; var DPB: string;
   var DPBLength: Short);
@@ -402,24 +356,9 @@ begin
   Result := desc.blob_desc_charset;
 end;
 
-function TFBAttachment.GetInfoValue(DBInfoCommand: char): integer;
+function TFBAttachment.GetDBInformation(DBInfoCommand: char): IDBInformation;
 begin
-  with TDBInfoResultBuffer.Create(self, DBInfoCommand) do
-  try
-    Result := GetValue;
-  finally
-    Free
-  end;
-end;
-
-function TFBAttachment.GetInfoString(DBInfoCommand: char): string;
-begin
-  with TDBInfoResultBuffer.Create(self, DBInfoCommand) do
-  try
-    GetString(Result);
-  finally
-    Free
-  end;
+  Result := TDBInformation.Create(self,DBInfoCommand);
 end;
 
 end.
