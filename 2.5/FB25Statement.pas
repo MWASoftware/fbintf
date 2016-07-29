@@ -2,7 +2,7 @@ unit FB25Statement;
 
 {$mode objfpc}{$H+}
 
-{$define UseCaseSensitiveFieldName}
+{ $define UseCaseSensitiveFieldName}
 
 interface
 
@@ -192,6 +192,7 @@ type
 
   TIBXINPUTSQLDA = class(TIBXSQLDA,ISQLParams)
   private
+    FSQLParamIntf: array of ISQLParam;
     function GetModified: Boolean;
     function GetXSQLParam(Idx: Integer): TIBXSQLParam;
   protected
@@ -214,7 +215,8 @@ type
 
   TIBXOUTPUTSQLDA = class(TIBXSQLDA, IMetaData)
   private
-     function GetXSQLVAR(Idx: Integer): TIBXSQLVAR;
+    FSQLDataIntf: array of ISQLData;
+    function GetXSQLVAR(Idx: Integer): TIBXSQLVAR;
   protected
     function CreateSQLVAR: TIBXSQLVAR; override;
     function GetXSQLVARByName(Idx: String): TIBXSQLVAR; override;
@@ -266,6 +268,8 @@ type
     FTransaction: TFBTransaction;
     FTransactionIntf: ITransaction;
     FExecTransactionIntf: ITransaction;
+    FParamSet: ISQLParams;
+    FResultSet: IResultSet;
     FHandle: TISC_STMT_HANDLE;
     FSQLType: TIBSQLTypes;         { Select, update, delete, insert, create, alter, etc...}
     FSQLDialect: integer;
@@ -382,6 +386,8 @@ end;
 function TIBXINPUTSQLDA.CreateSQLVAR: TIBXSQLVAR;
 begin
   Result := TIBXSQLParam.Create(self,FStatement);
+  SetLength(FSQLParamIntf,Length(FSQLParamIntf)+1);
+  FSQLParamIntf[Length(FSQLParamIntf) - 1] := TIBXSQLParam(Result);
 end;
 
 function TIBXINPUTSQLDA.GetXSQLVARByName(Idx: String): TIBXSQLVAR;
@@ -459,6 +465,8 @@ end;
 function TIBXOUTPUTSQLDA.CreateSQLVAR: TIBXSQLVAR;
 begin
   Result := TIBXSQLVAR.Create(FStatement);
+  SetLength(FSQLDataIntf,Length(FSQLDataIntf) + 1);
+  FSQLDataIntf[Length(FSQLDataIntf)-1] := Result;
 end;
 
 function TIBXOUTPUTSQLDA.GetXSQLVARByName(Idx: String): TIBXSQLVAR;
@@ -1625,7 +1633,6 @@ begin
     begin
       FreeMem(FXSQLVARs[i].FXSQLVAR^.sqldata);
       FreeMem(FXSQLVARs[i].FXSQLVAR^.sqlind);
-      FXSQLVARs[i].Free ;
     end;
     FreeMem(FXSQLDA);
     FXSQLDA := nil;
@@ -1975,7 +1982,9 @@ begin
   CreateGuid(GUID);
   FCursor := GUIDToString(GUID);
   FSQLParams := TIBXINPUTSQLDA.Create(self);
+  FParamSet := FSQLParams;
   FSQLRecord := TIBXResultSet.Create(self);
+  FResultSet := FSQLRecord;
   InternalPrepare(sql);
 end;
 
@@ -1983,10 +1992,7 @@ destructor TFBStatement.Destroy;
 begin
   Close;
   FreeHandle;
-  if assigned(FSQLParams) then
-    FSQLParams.Free;
-  if assigned(FSQLRecord) then
-    FSQLRecord.Free;
+  {Note no need to free reference counted interfaces}
   inherited Destroy;
 end;
 

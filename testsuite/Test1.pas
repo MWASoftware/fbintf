@@ -64,9 +64,9 @@ end;
 constructor TTest1.Create;
 begin
   inherited Create;
-  FDatabaseName := 'localhost:/tmp/test1.fdb';
+  FDatabaseName := 'localhost:/home/firebird/test1.fdb';
   FUser := 'SYSDBA';
-  FPassword := 'Pears';
+  FPassword := 'celebr8';
   FCharSet := 'UTF8';
 end;
 

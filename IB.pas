@@ -544,6 +544,30 @@ type
     procedure AsyncWaitForEvent(EventHandler: TEventHandler);
   end;
 
+  TDBOperationCounts = record
+    TableID: UShort;
+    Count: cardinal;
+  end;
+
+  IIDBInfoItem = interface
+    function getItemType: char;
+    function getSize: integer;
+    procedure getRawBytes(var Buffer);
+    function getAsString: string;
+    function getAsInteger: integer;
+    procedure DecodeIDCluster(var ConnectionType: integer; var DBFileName, DBSiteName: string);
+    function getAsBytes: array of byte;
+    procedure DecodeVersionString(var Version: byte; var VersionString: string);
+    procedure DecodeUserNames(var UserNames: TStrings);
+    function getOperationCounts: array of TDBOperationCounts;
+  end;
+
+  IDBInformation = interface
+    function getCount: integer;
+    function getItem(index: integer): IIDBInfoItem;
+    property Items[index: integer]: IDBInfoItem read getItem; default;
+  end;
+
   IAttachment = interface
     function GetStatus: IStatus;
     procedure Connect;

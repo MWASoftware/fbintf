@@ -56,6 +56,48 @@ type
     function GetInfoBuffer(var p: PChar): integer;
   end;
 
+  TIDBInfoItem = class(TInterfacedObject,IDBInformation)
+  private
+    FItemType: char;
+    FBufPtr: PChar;
+    FItemlength: UShort;
+  public
+    constructor Create(ItemType: char; BufPtr: PChar; Itemlength: UShort);
+
+  public
+    {IIDBInfoItem}
+    function getItemType: char;
+    function getSize: integer;
+    procedure getRawBytes(var Buffer);
+    function getAsString: string;
+    function getAsInteger: integer;
+    procedure DecodeIDCluster(var ConnectionType: integer; var DBFileName, DBSiteName: string);
+    function getAsBytes: array of byte;
+    procedure DecodeVersionString(var Version: byte; var VersionString: string);
+    procedure DecodeUserNames(var UserNames: TStrings);
+    function getOperationCounts: array of TDBOperationCounts;
+ end;
+
+  TDBInformation = class(TInterfacedObject,IDBInformation)
+   private
+    FBuffer: PChar;
+    FBufSize: integer;
+    FItems: array of IDBInformation;
+    procedure ParseBuffer;
+  public
+    constructor Create(aAttachment: TFBAttachment; info_request: char;
+      aSize: integer=IBLocalBufferLength); overload;
+    constructor Create(aAttachment: TFBAttachment; info_requests: array of char;
+      aSize: integer=IBLocalBufferLength); overload;
+    destructor Destroy; override;
+
+  public
+    {IDBInformation}
+    function getCount: integer;
+    function getItem(index: integer): IIDBInfoItem;
+    property Items[index: integer]: IDBInfoItem read getItem; default;
+  end;
+
   {Used for access to a isc_query_service result buffer}
 
   { TServiceQueryBuffer }
