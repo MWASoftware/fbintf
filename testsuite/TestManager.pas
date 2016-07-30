@@ -8,14 +8,18 @@ uses
   Classes, SysUtils;
 
 type
+  TTestManager = class;
 
   { TTestBase }
 
   TTestBase = class
+  private
+    FOwner: TTestManager;
   public
-    constructor Create;  virtual;
+    constructor Create(aOwner: TTestManager);  virtual;
     function TestTitle: string; virtual; abstract;
-    procedure RunTest; virtual; abstract;
+    procedure RunTest(CharSet: string; SQLDialect: integer); virtual; abstract;
+    property Owner: TTestManager read FOwner;
   end;
 
   TTest = class of TTestBase;
@@ -25,9 +29,17 @@ type
   TTestManager = class
   private
     FTests: TList;
-  public
+    FEmployeeDatabaseName: string;
+    FNewDatabaseName: string;
+    FUserName: string;
+    FPassword: string;
+ public
     constructor Create;
     destructor Destroy; override;
+    function GetUserName: string;
+    function GetPassword: string;
+    function GetEmployeeDatabaseName: string;
+    function GetNewDatabaseName: string;
     procedure RunAll;
   end;
 
@@ -44,14 +56,15 @@ procedure RegisterTest(aTest: TTest);
 begin
   if TestMgr = nil then
     TestMgr := TTestManager.Create;
-  TestMgr.FTests.Add(aTest.Create);
+  TestMgr.FTests.Add(aTest.Create(TestMgr));
 end;
 
 { TTestBase }
 
-constructor TTestBase.Create;
+constructor TTestBase.Create(aOwner: TTestManager);
 begin
   inherited Create;
+  FOwner := aOwner;
 end;
 
 { TTestManager }
@@ -60,6 +73,10 @@ constructor TTestManager.Create;
 begin
   inherited Create;
   FTests := TList.Create;
+  FNewDatabaseName := 'localhost:/tmp/test1.fdb';
+  FUserName := 'SYSDBA';
+  FPassword := 'Pears';
+  FEmployeeDatabaseName := 'localhost:employee';
 end;
 
 destructor TTestManager.Destroy;
@@ -72,6 +89,26 @@ begin
     FTests.Free;
   end;
   inherited Destroy;
+end;
+
+function TTestManager.GetUserName: string;
+begin
+  Result := FUserName;
+end;
+
+function TTestManager.GetPassword: string;
+begin
+  Result := FPassword;
+end;
+
+function TTestManager.GetEmployeeDatabaseName: string;
+begin
+  Result := FEmployeeDatabaseName;
+end;
+
+function TTestManager.GetNewDatabaseName: string;
+begin
+  Result := FNewDatabaseName;
 end;
 
 procedure TTestManager.RunAll;
@@ -88,7 +125,7 @@ begin
   begin
     writeln('Running ' + TestTitle);
     try
-      RunTest;
+      RunTest('UTF8',3);
     except on E:Exception do
       begin
         writeln('Test Completed with Error: ' + E.Message);

@@ -516,6 +516,8 @@ type
                   SQLCommit, SQLRollback,
                   SQLSelectForUpdate, SQLSetGenerator);
 
+  IDBInformation = interface;
+
   IStatement = interface
     function GetStatus: IStatus;
     function GetSQLParams: ISQLParams;
@@ -527,6 +529,7 @@ type
     function Execute(aTransaction: ITransaction): IResults; overload;
     function OpenCursor: IResultSet; overload;
     function OpenCursor(aTransaction: ITransaction): IResultSet; overload;
+    function GetSQLInfo(InfoRequest: byte): IDBInformation;
     property SQLParams: ISQLParams read GetSQLParams;
     property SQLType: TIBSQLTypes read GetSQLType;
   end;
@@ -557,7 +560,7 @@ type
   TDBOperationCounts = array of TDBOperationCount;
 
   IDBInfoItem = interface
-    function getItemType: char;
+    function getItemType: byte;
     function getSize: integer;
     procedure getRawBytes(var Buffer);
     function getAsString: string;
@@ -593,29 +596,50 @@ type
 
     {Database Information}
     function GetBlobCharSetID(transaction: ITransaction; tableName, columnName: string): short;
-    function GetDBInformation(DBInfoCommand: char): IDBInformation;
+    function GetDBInformation(DBInfoCommand: byte): IDBInformation;
     function HasActivity: boolean;
   end;
 
   TProtocol = (TCP, SPX, NamedPipe, Local);
 
-  TServiceParam = record
-    Identifier: char;
-    case dt: (dtInteger,dtString,dtNone) of
-    dtInteger: (IntValue: integer);
-    dtString:  (StringValue: shortstring);
+  IServiceRequestItem = interface
+    function getItemType: byte;
+    function getAsString: string;
+    function getAsInteger: integer;
+    procedure setAsString(aValue: string);
+    procedure setAsInteger(aValue: integer);
+    property AsString: string read getAsString write setAsString;
+    property AsInteger: integer read getAsInteger write setAsInteger;
   end;
 
-  TServiceResponse = record
-    Identifier: char;
-    dr: (drInteger,drString,drNone);
-    IntValue: integer;
-    StringValue: string;
+  IServiceRequest = interface
+    function getAction: byte;
+    function Add(Param: byte): IServiceRequestItem;
+    function getCount: integer;
+    function getItem(index: integer): IServiceRequestItem;
+    property Items[index: integer]: IServiceRequestItem read getItem; default;
   end;
 
-  TServiceCommandParams = array of TServiceParam;
-  TServiceQueryParams = array of TServiceParam;
-  TServiceQueryResponse = array of TServiceResponse;
+  IServiceQueryResultSubItem = interface
+    function getItemType: byte;
+    function getDataSize: integer;
+    procedure getRawBytes(var Buffer);
+    function getAsString: string;
+    function getAsInteger: integer;
+    function getIsTruncated: boolean;
+  end;
+
+  IServiceQueryResultItem = interface(IServiceQueryResultSubItem)
+    function getSubItemCount: integer;
+    function getSubItem(index: integer): IServiceQueryResultSubItem;
+    property Items[index: integer]: IServiceQueryResultSubItem read getSubItem; default;
+  end;
+
+  IServiceQueryResults = interface
+    function getCount: integer;
+    function getItem(index: integer): IServiceQueryResultItem;
+    property Items[index: integer]: IServiceQueryResultItem read getItem; default;
+  end;
 
   { IServiceManager }
 
@@ -624,16 +648,16 @@ type
     procedure Attach;
     procedure Detach;
     function IsAttached: boolean;
-    procedure Start(Command: char; Params: TServiceCommandParams);
-    function Query(Command: char; Params: TServiceQueryParams) :TServiceQueryResponse; overload;
-    function Query(Commands: array of char):TServiceQueryResponse; overload;
+    function AllocateRequestBuffer(action: byte): IServiceRequest;
+    procedure Start(Request: IServiceRequest);
+    procedure StartMultiple(Requests: array of IServiceRequest);
+    function Query(Request: IServiceRequest) :IServiceQueryResults;
+    function QueryMultiple(Requests: array of IServiceRequest) :IServiceQueryResults;
   end;
 
   IFirebirdAPI = interface
     function GetStatus: IStatus;
     function OpenDatabase(DatabaseName: string; Params: TStrings): IAttachment;
- {   procedure CreateDatabase(DatabaseName: string;
-      SQLDialect: integer; Params: TStrings);}
     function CreateDatabase(DatabaseName: string; SQLDialect: integer;
       CreateParams: string; Params: TStrings): IAttachment;
     function GetServiceManager(ServerName: string; Protocol: TProtocol; Params: TStrings): IServiceManager;

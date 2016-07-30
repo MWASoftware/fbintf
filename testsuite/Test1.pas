@@ -15,17 +15,10 @@ type
 
   TTest1 = class(TTestBase)
   private
-    FDatabaseName: string;
-    FUser: string;
-    FPassword: string;
-    FCharSet: string;
-    FSQLDialect: integer;
-  private
     procedure DoQuery(Attachment: IAttachment);
   public
-    constructor Create; override;
     function TestTitle: string; override;
-    procedure RunTest; override;
+    procedure RunTest(CharSet: string; SQLDialect: integer); override;
   end;
 
 implementation
@@ -61,21 +54,12 @@ begin
   end;
 end;
 
-constructor TTest1.Create;
-begin
-  inherited Create;
-  FDatabaseName := 'localhost:/tmp/test1.fdb';
-  FUser := 'SYSDBA';
-  FPassword := 'Pears';
-  FCharSet := 'UTF8';
-end;
-
 function TTest1.TestTitle: string;
 begin
   Result := 'Create and Drop a Database';
 end;
 
-procedure TTest1.RunTest;
+procedure TTest1.RunTest(CharSet: string; SQLDialect: integer);
 var Params: TStringList;
     CreateParams: string;
     Attachment: IAttachment;
@@ -85,23 +69,23 @@ var Params: TStringList;
     DBSiteName: string;
 begin
   writeln('Creating a Database');
-  CreateParams := 'USER ''' + FUser + ''' PASSWORD ''' + FPassword + ''' ' +
-      'DEFAULT CHARACTER SET ' + FCharSet;
+  CreateParams := 'USER ''' + Owner.GetUserName + ''' PASSWORD ''' + Owner.GetPassword + ''' ' +
+      'DEFAULT CHARACTER SET ' + CharSet;
   {Open Database}
   Params := TStringList.Create;
   try
-    Params.Add('user_name='+ FUser);
-    Params.Add('password='+ FPassword);
-    Params.Add('lc_ctype='+ FCharSet);
-    Params.Add('sql_dialect='+IntToStr(FSQLDialect));
-    Attachment := FirebirdAPI.CreateDatabase(FDatabaseName,FSQLDialect,CreateParams,Params);
+    Params.Add('user_name='+ Owner.GetUserName);
+    Params.Add('password='+ Owner.GetPassword);
+    Params.Add('lc_ctype='+ CharSet);
+    Params.Add('sql_dialect='+IntToStr(SQLDialect));
+    Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,SQLDialect,CreateParams,Params);
     writeln('Database Created without error');
-    DBInfo := Attachment.GetDBInformation(Char(isc_info_db_id));
+    DBInfo := Attachment.GetDBInformation(byte(isc_info_db_id));
     DBInfo[0].DecodeIDCluster(ConType,DBFileName,DBSiteName);
     writeln('Database ID = ', ConType,' FB = ', DBFileName, ' SN = ',DBSiteName);
-    DBInfo := Attachment.GetDBInformation(Char(isc_info_ods_version));
+    DBInfo := Attachment.GetDBInformation(byte(isc_info_ods_version));
     write('ODS major = ',DBInfo[0].getAsInteger);
-    DBInfo := Attachment.GetDBInformation(Char(isc_info_ods_minor_version));
+    DBInfo := Attachment.GetDBInformation(byte(isc_info_ods_minor_version));
     writeln(' minor = ', DBInfo[0].getAsInteger );
 
     {Querying Database}

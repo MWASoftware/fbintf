@@ -277,6 +277,7 @@ type
     FSQLRecord: TIBXResultSet;
     FOpen: boolean;
     FCursor: String;               { Cursor name...}
+    FPrepared: boolean;
     procedure CheckTransaction(aTransaction: TFBTransaction);
     procedure CheckHandle;
     procedure InternalPrepare(sql: string);
@@ -306,6 +307,7 @@ type
     function Execute(aTransaction: ITransaction): IResults; overload;
     function OpenCursor: IResultSet; overload;
     function OpenCursor(aTransaction: ITransaction): IResultSet; overload;
+    function GetSQLInfo(InfoRequest: byte): IDBInformation;
     property Handle: TISC_STMT_HANDLE read FHandle;
     property SQLParams: ISQLParams read GetSQLParams;
     property SQLType: TIBSQLTypes read GetSQLType;
@@ -1826,6 +1828,8 @@ procedure TFBStatement.InternalPrepare(sql: string);
 var
   DBInfo: IDBInformation;
 begin
+  if FPrepared then
+    Exit;
   if (sql = '') then
     IBError(ibxeEmptyQuery, [nil]);
   try
@@ -1840,8 +1844,8 @@ begin
     { After preparing the statement, query the stmt type and possibly
       create a FSQLRecord "holder" }
     { Get the type of the statement }
-    DBInfo := TDBInformation.Create(self,isc_info_sql_stmt_type);
-    if (DBInfo.getCount > 0) and (DBInfo[0].getItemType = char(isc_info_sql_stmt_type)) then
+    DBInfo := TDBInformation.Create(self,byte(isc_info_sql_stmt_type));
+    if (DBInfo.getCount > 0) and (DBInfo[0].getItemType = byte(isc_info_sql_stmt_type)) then
       FSQLType := TIBSQLTypes(DBInfo[0].GetAsInteger);
 
     { Done getting the type }
@@ -1880,6 +1884,7 @@ begin
         raise;
     end;
   end;
+  FPrepared := true;
 end;
 
 function TFBStatement.InternalExecute(aTransaction: TFBTransaction): IResults;
@@ -2059,7 +2064,10 @@ begin
     Close;
 
   if FTransaction = aTransaction then
+  begin
     FreeHandle;
+    FPrepared := false;
+  end;
 end;
 
 function TFBStatement.GetStatus: IStatus;
@@ -2090,8 +2098,8 @@ begin
     result := ''
   else
   begin
-     DBInfo := TDBInformation.Create(self,char(isc_info_sql_get_plan),16384);
-     if (DBInfo.getCount > 0) and (DBInfo[0].getItemType = char(isc_info_sql_get_plan)) then
+     DBInfo := TDBInformation.Create(self,byte(isc_info_sql_get_plan),16384);
+     if (DBInfo.getCount > 0) and (DBInfo[0].getItemType = byte(isc_info_sql_get_plan)) then
        Result := DBInfo[0].GetAsString;
   end;
 end;
@@ -2107,10 +2115,10 @@ begin
   DeleteCount := 0;
   Result := true;
   begin
-    DBInfo := TDBInformation.Create(self,char(isc_info_sql_records));
+    DBInfo := TDBInformation.Create(self,byte(isc_info_sql_records));
     for i := 0 to DBInfo.getCount - 1 do
     begin
-      case DBInfo[i].getItemType of
+      case char(DBInfo[i].getItemType) of
       isc_info_req_insert_count:
         InsertCount := DBInfo[i].GetAsInteger;
 
@@ -2147,6 +2155,11 @@ end;
 function TFBStatement.OpenCursor(aTransaction: ITransaction): IResultSet;
 begin
   Result := InternalOpenCursor(aTransaction as TFBTransaction);
+end;
+
+function TFBStatement.GetSQLInfo(InfoRequest: byte): IDBInformation;
+begin
+  Result := TDBInformation.Create(self,InfoRequest)
 end;
 
 end.

@@ -144,7 +144,11 @@ type
       ibxeFirebirdLibraryLoaded,
       ibxeInfoBufferIndexError,
       ibxeInfoBufferTypeError,
-      ibxeInfoBufferOverflow
+      ibxeInfoBufferOverflow,
+      ibxServiceRequestIndexError,
+      ibxServiceParamTypeError,
+      ibxeServiceResponseIndexError,
+      ibxeServiceResponseTypeError
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;
@@ -308,6 +312,10 @@ resourcestring
   SInfoBufferIndexError = 'Info Buffer Index Out of Range (%d)';
   SInfoBufferTypeError = 'Invalid operation for Info Buffer Type (%d)';
   SInfoBufferOverflow = 'Info Buffer overlow';
+  SServiceRequestIndexError = 'Service Request Index Out of Range (%d)';
+  SServiceParamTypeError = 'Invalid Request for Service Param Type';
+  SServiceResponseIndexError = 'Service Response Index Out of Range (%d)';
+  SServiceResponseTypeError = 'Invalid Request for Service Response Type';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -437,7 +445,11 @@ const
     SFirebirdLibraryLoaded,
     SInfoBufferIndexError,
     SInfoBufferTypeError,
-    SInfoBufferOverflow
+    SInfoBufferOverflow,
+    SServiceRequestIndexError,
+    SServiceParamTypeError,
+    SServiceResponseIndexError,
+    SServiceResponseTypeError
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;

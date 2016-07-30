@@ -24,7 +24,7 @@ type
     destructor Destroy; override;
     function StatusVector: PISC_STATUS;
     procedure IBDataBaseError;
-    procedure EncodeLsbf(aValue: integer; len: integer; var buffer: PChar); overload;
+    procedure EncodeLsbf(aValue: integer; len: integer; buffer: PChar); overload;
     function EncodeLsbf(aValue: integer; len: integer): string; overload;
     property IBServiceAPIPresent: boolean read FIBServiceAPIPresent;
     property Status: TFBStatus read FStatus;
@@ -323,8 +323,8 @@ begin
   raise EIBInterBaseError.Create(FStatus);
 end;
 
-procedure TFB25ClientAPI.EncodeLsbf(aValue: integer; len: integer;
-  var buffer: PChar);
+procedure TFB25ClientAPI.EncodeLsbf(aValue: integer; len: integer; buffer: PChar
+  );
 begin
   while len > 0 do
   begin
@@ -366,7 +366,10 @@ end;
 function TFB25ClientAPI.GetServiceManager(ServerName: string;
   Protocol: TProtocol; Params: TStrings): IServiceManager;
 begin
-  Result := TFBServiceManager.Create(ServerName,Protocol,Params);
+  if HasServiceAPI then
+    Result := TFBServiceManager.Create(ServerName,Protocol,Params)
+  else
+    Result := nil;
 end;
 
 function TFB25ClientAPI.StartTransaction(Attachments: array of IAttachment;

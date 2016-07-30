@@ -41,7 +41,7 @@ type
 
     {Database Information}
     function GetBlobCharSetID(transaction: ITransaction; tableName, columnName: string): short;
-    function GetDBInformation(DBInfoCommand: char): IDBInformation;
+    function GetDBInformation(DBInfoCommand: byte): IDBInformation;
   end;
 
 implementation
@@ -356,7 +356,7 @@ begin
   Result := desc.blob_desc_charset;
 end;
 
-function TFBAttachment.GetDBInformation(DBInfoCommand: char): IDBInformation;
+function TFBAttachment.GetDBInformation(DBInfoCommand: byte): IDBInformation;
 begin
   Result := TDBInformation.Create(self,DBInfoCommand);
 end;

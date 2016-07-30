@@ -17,16 +17,16 @@ type
 
   TIDBInfoItem = class(TInterfacedObject,IDBInfoItem)
   private
-    FItemType: char;
+    FItemType: byte;
     FBufPtr: PChar;
     FItemlength: UShort;
     function GetString(var P: PChar): string;
   public
-    constructor Create(ItemType: char; BufPtr: PChar; Itemlength: UShort);
+    constructor Create(ItemType: byte; BufPtr: PChar; Itemlength: UShort);
 
   public
     {IDBInfoItem}
-    function getItemType: char;
+    function getItemType: byte;
     function getSize: integer;
     procedure getRawBytes(var Buffer);
     function getAsString: string;
@@ -47,11 +47,11 @@ type
     FItems: array of IDBInfoItem;
     procedure ParseBuffer;
   public
-    constructor Create(aAttachment: TFBAttachment; info_request: char;
+    constructor Create(aAttachment: TFBAttachment; info_request: byte;
       aSize: integer=IBLocalBufferLength); overload;
-    constructor Create(aAttachment: TFBAttachment; info_requests: array of char;
+    constructor Create(aAttachment: TFBAttachment; info_requests: array of byte;
       aSize: integer=IBLocalBufferLength); overload;
-    constructor Create(aStatement: TFBStatement; info_request: char;
+    constructor Create(aStatement: TFBStatement; info_request: byte;
       aSize: integer=IBLocalBufferLength
       ); overload;
     destructor Destroy; override;
@@ -85,7 +85,7 @@ begin
   Result := s;
 end;
 
-constructor TIDBInfoItem.Create(ItemType: char; BufPtr: PChar;
+constructor TIDBInfoItem.Create(ItemType: byte; BufPtr: PChar;
   Itemlength: UShort);
 begin
   inherited Create;
@@ -94,7 +94,7 @@ begin
   FItemlength := Itemlength;
 end;
 
-function TIDBInfoItem.getItemType: char;
+function TIDBInfoItem.getItemType: byte;
 begin
   Result := FItemType;
 end;
@@ -129,7 +129,7 @@ procedure TIDBInfoItem.DecodeIDCluster(var ConnectionType: integer;
   var DBFileName, DBSiteName: string);
 var  P: PChar;
 begin
-  if FItemType = char(isc_info_db_id) then
+  if FItemType = isc_info_db_id then
   begin
     P := FBufPtr;
     if FItemLength > 0 then
@@ -159,7 +159,7 @@ procedure TIDBInfoItem.DecodeVersionString(var Version: byte;
   var VersionString: string);
 var  P: PChar;
 begin
-  if FItemType = char(isc_info_version) then
+  if FItemType = isc_info_version then
   begin
    P := FBufPtr;
    VersionString := '';
@@ -217,18 +217,21 @@ begin
   begin
     SetLength(FItems,index+1);
     len := isc_vax_integer(P+1,2);
-    FItems[index] := TIDBInfoItem.Create(P^,P+3,len);
+    FItems[index] := TIDBInfoItem.Create(byte(P^),P+3,len);
     Inc(index);
     Inc(P,3+len);
   end;
 end;
 
+
 constructor TDBInformation.Create(aAttachment: TFBAttachment;
-  info_request: char; aSize: integer);
+  info_request: byte; aSize: integer);
 begin
   inherited Create;
   FBufSize := aSize;
   GetMem(FBuffer,FBufSize);
+  if FBuffer = nil then
+    OutOfMemoryError;
   FillChar(FBuffer^,FBufSize,255);
   with Firebird25ClientAPI do
     if isc_database_info(StatusVector, @(aAttachment.Handle), 1, @info_request,
@@ -238,17 +241,19 @@ begin
 end;
 
 constructor TDBInformation.Create(aAttachment: TFBAttachment;
-  info_requests: array of char; aSize: integer);
+  info_requests: array of byte; aSize: integer);
 var ReqBuffer: string;
     i: integer;
 begin
   inherited Create;
   FBufSize := aSize;
   GetMem(FBuffer,FBufSize);
+  if FBuffer = nil then
+    OutOfMemoryError;
   FillChar(FBuffer^,FBufSize,255);
   SetLength(ReqBuffer,Length(info_requests));
   for i := 0 to Length(info_requests) - 1 do
-    ReqBuffer[i] := info_requests[i];
+    ReqBuffer[i] := char(info_requests[i]);
   with Firebird25ClientAPI do
     if isc_database_info(StatusVector, @(aAttachment.Handle), Length(ReqBuffer), PChar(ReqBuffer),
                            FBufSize, FBuffer) > 0 then
@@ -256,12 +261,14 @@ begin
   ParseBuffer;
 end;
 
-constructor TDBInformation.Create(aStatement: TFBStatement; info_request: char;
+constructor TDBInformation.Create(aStatement: TFBStatement; info_request: byte;
   aSize: integer);
 begin
   inherited Create;
   FBufSize := aSize;
   GetMem(FBuffer,FBufSize);
+  if FBuffer = nil then
+    OutOfMemoryError;
   FillChar(FBuffer^,FBufSize,255);
   with Firebird25ClientAPI do
     if isc_dsql_sql_info(StatusVector, @(aStatement.Handle), 1, @info_request,
