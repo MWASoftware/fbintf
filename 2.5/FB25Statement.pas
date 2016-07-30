@@ -209,7 +209,8 @@ type
     function getCount: integer;
     function getSQLParam(index: integer): ISQLParam;
     function ByName(Idx: String): ISQLParam ;
-  end;
+    property Params[index: integer]: ISQLParam read getSQLParam;
+ end;
 
   { TIBXOUTPUTSQLDA }
 
@@ -309,6 +310,7 @@ type
     function OpenCursor: IResultSet; overload;
     function OpenCursor(aTransaction: ITransaction): IResultSet; overload;
     function GetSQLInfo(InfoRequest: byte): IDBInformation;
+    function GetSQLText: string;
     property Handle: TISC_STMT_HANDLE read FHandle;
     property SQLParams: ISQLParams read GetSQLParams;
     property SQLType: TIBSQLTypes read GetSQLType;
@@ -2166,6 +2168,11 @@ end;
 function TFBStatement.GetSQLInfo(InfoRequest: byte): IDBInformation;
 begin
   Result := TDBInformation.Create(self,InfoRequest)
+end;
+
+function TFBStatement.GetSQLText: string;
+begin
+  Result := FSQL;
 end;
 
 end.

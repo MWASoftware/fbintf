@@ -506,6 +506,7 @@ type
     function getCount: integer;
     function getSQLParam(index: integer): ISQLParam;
     function ByName(Idx: String): ISQLParam ;
+    property Params[index: integer]: ISQLParam read getSQLParam; default;
   end;
 
 
@@ -530,6 +531,7 @@ type
     function OpenCursor: IResultSet; overload;
     function OpenCursor(aTransaction: ITransaction): IResultSet; overload;
     function GetSQLInfo(InfoRequest: byte): IDBInformation;
+    function GetSQLText: string;
     property SQLParams: ISQLParams read GetSQLParams;
     property SQLType: TIBSQLTypes read GetSQLType;
   end;

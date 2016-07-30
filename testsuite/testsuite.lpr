@@ -6,7 +6,7 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes, SysUtils, CustApp, TestManager, Test1
+  Classes, SysUtils, CustApp, TestManager, Test1, test2
   { you can add units after this };
 
 type
