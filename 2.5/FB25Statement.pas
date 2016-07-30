@@ -278,9 +278,10 @@ type
     FOpen: boolean;
     FCursor: String;               { Cursor name...}
     FPrepared: boolean;
+    FSQL: string;
     procedure CheckTransaction(aTransaction: TFBTransaction);
     procedure CheckHandle;
-    procedure InternalPrepare(sql: string);
+    procedure InternalPrepare;
     function InternalExecute(aTransaction: TFBTransaction): IResults;
     function InternalOpenCursor(aTransaction: TFBTransaction): IResultSet;
     procedure FreeHandle;
@@ -1824,13 +1825,13 @@ begin
     IBError(ibxeInvalidStatementHandle,[nil]);
 end;
 
-procedure TFBStatement.InternalPrepare(sql: string);
+procedure TFBStatement.InternalPrepare;
 var
   DBInfo: IDBInformation;
 begin
   if FPrepared then
     Exit;
-  if (sql = '') then
+  if (FSQL = '') then
     IBError(ibxeEmptyQuery, [nil]);
   try
     CheckTransaction(FTransaction);
@@ -1839,7 +1840,7 @@ begin
       Call(isc_dsql_alloc_statement2(StatusVector, @(FAttachment.Handle),
                                       @FHandle), True);
       Call(isc_dsql_prepare(StatusVector, @(FTransaction.Handle), @FHandle, 0,
-                 PChar(sql), FSQLDialect, nil), True);
+                 PChar(FSQL), FSQLDialect, nil), True);
     end;
     { After preparing the statement, query the stmt type and possibly
       create a FSQLRecord "holder" }
@@ -1879,7 +1880,7 @@ begin
         raise EIBInterBaseError.Create(EIBInterBaseError(E).SQLCode,
                                        EIBInterBaseError(E).IBErrorCode,
                                        EIBInterBaseError(E).Message +
-                                       sSQLErrorSeparator + sql)
+                                       sSQLErrorSeparator + FSQL)
       else
         raise;
     end;
@@ -1893,6 +1894,8 @@ begin
   FSQLRecord.FBOF := false;
   FSQLRecord.FEOF := false;
   CheckTransaction(aTransaction);
+  if not FPrepared then
+    InternalPrepare;
   CheckHandle;
   with Firebird25ClientAPI do
   case FSQLType of
@@ -1926,6 +1929,8 @@ begin
    IBError(ibxeIsASelectStatement,[]);
 
  CheckTransaction(aTransaction);
+  if not FPrepared then
+    InternalPrepare;
  CheckHandle;
  with Firebird25ClientAPI do
  begin
@@ -1986,7 +1991,8 @@ begin
   FParamSet := FSQLParams;
   FSQLRecord := TIBXResultSet.Create(self);
   FResultSet := FSQLRecord;
-  InternalPrepare(sql);
+  FSQL := sql;
+  InternalPrepare;
 end;
 
 destructor TFBStatement.Destroy;
