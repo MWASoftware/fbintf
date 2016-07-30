@@ -114,12 +114,6 @@ end;
 procedure TTestManager.RunAll;
 var i: integer;
 begin
-  if not TryIBLoad then
-  begin
-    writeln('Firebird Client Library not found');
-    Exit;
-  end;
-
   for i := 0 to FTests.Count - 1 do
     with TTestBase(FTests[i]) do
   begin

@@ -700,7 +700,7 @@ type
 
 procedure IBError(ErrMess: TIBClientError; const Args: array of const);
 
-var FirebirdAPI: IFirebirdAPI;
+function FirebirdAPI: IFirebirdAPI;
 
 function TryIBLoad: Boolean;
 procedure CheckIBLoaded;
@@ -709,14 +709,23 @@ implementation
 
 uses FBLibrary, FB25ClientAPI;
 
+var FFirebirdAPI: IFirebirdAPI;
+
+function FirebirdAPI: IFirebirdAPI;
+begin
+  if FFirebirdAPI = nil then
+    CheckIBLoaded;
+  Result := FFirebirdAPI;
+end;
+
 function TryIBLoad: Boolean;
 var FBLibraryObj: TFBLibrary;
 begin
-  Result := FirebirdAPI <> nil;
+  Result := FFirebirdAPI <> nil;
   if not Result then
   begin
     FBLibraryObj := TFB25ClientAPI.Create;
-    FirebirdAPI := TFB25ClientAPI(FBLibraryObj);
+    FFirebirdAPI := TFB25ClientAPI(FBLibraryObj);
     Result := true;
   end;
 end;
@@ -757,7 +766,7 @@ begin
 end;
 
 initialization
-  FirebirdAPI := nil;
+  FFirebirdAPI := nil;
 
 
 end.
