@@ -97,8 +97,9 @@ type
     function OpenDatabase(DatabaseName: string; DPB: IDPB): IAttachment;
     function CreateDatabase(DatabaseName: string;
       SQLDialect: integer; CreateParams: string; DPB: IDPB): IAttachment;
-    function GetServiceManager(ServerName: string; Protocol: TProtocol; Params: TStrings): IServiceManager;
-    {Start Transaction against multiple databases}
+    function AllocateSPB: ISPB;
+    function GetServiceManager(ServerName: string; Protocol: TProtocol; SPB: ISPB
+      ): IServiceManager;
     function StartTransaction(Attachments: array of IAttachment;
       Params: array of byte; DefaultCompletion: TTransactionCompletion
   ): ITransaction;
@@ -370,11 +371,16 @@ begin
   Result := TFBAttachment.CreateDatabase(DatabaseName, SQLDialect, CreateParams, DPB );
 end;
 
+function TFB25ClientAPI.AllocateSPB: ISPB;
+begin
+  Result := TSPB.Create;
+end;
+
 function TFB25ClientAPI.GetServiceManager(ServerName: string;
-  Protocol: TProtocol; Params: TStrings): IServiceManager;
+  Protocol: TProtocol; SPB: ISPB): IServiceManager;
 begin
   if HasServiceAPI then
-    Result := TFBServiceManager.Create(ServerName,Protocol,Params)
+    Result := TFBServiceManager.Create(ServerName,Protocol,SPB)
   else
     Result := nil;
 end;

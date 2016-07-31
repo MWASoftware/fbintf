@@ -785,6 +785,23 @@ type
     property Items[index: integer]: IServiceQueryResultItem read getItem; default;
   end;
 
+  ISPBItem = interface
+    function getParamType: byte;
+    function getAsString: string;
+    function getAsByte: byte;
+    procedure setAsString(aValue: string);
+    procedure setAsByte(aValue: byte);
+    property AsString: string read getAsString write setAsString;
+    property AsByte: byte read getAsByte write setAsByte;
+  end;
+
+  ISPB = interface
+    function getCount: integer;
+    function Add(ParamType: byte): ISPBItem;
+    function getItems(index: integer): ISPBItem;
+    property Items[index: integer]: ISPBItem read getItems; default;
+  end;
+
   { IServiceManager }
 
   IServiceManager = interface
@@ -805,7 +822,8 @@ type
     function OpenDatabase(DatabaseName: string; DPB: IDPB): IAttachment;
     function CreateDatabase(DatabaseName: string; SQLDialect: integer;
       CreateParams: string; DPB: IDPB): IAttachment;
-    function GetServiceManager(ServerName: string; Protocol: TProtocol; Params: TStrings): IServiceManager;
+    function AllocateSPB: ISPB;
+    function GetServiceManager(ServerName: string; Protocol: TProtocol; SPB: ISPB): IServiceManager;
     function StartTransaction(Attachments: array of IAttachment;
              Params: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction; {Start Transaction against multiple databases}
     function IsEmbeddedServer: boolean;

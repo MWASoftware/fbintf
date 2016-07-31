@@ -127,23 +127,69 @@ type
     property Items[index: integer]: IServiceQueryResultItem read getItem; default;
  end;
 
+  TSPB = class;
+
+  { TSPBItem }
+
+  TSPBItem = class(TInterfacedObject,ISPBItem)
+  private
+    FOwner: TSPB;
+    FBufPtr: PChar;
+    FBuflength: integer;
+    FIsByte: boolean;
+    procedure MoveBy(delta: integer);
+  public
+    constructor Create(AOwner: TSPB; Param: byte; BufPtr: PChar;
+       Buflength: integer);
+
+  public
+    {ISPBItem}
+    function getParamType: byte;
+    function getAsString: string;
+    function getAsByte: byte;
+    procedure setAsString(aValue: string);
+    procedure setAsByte(aValue: byte);
+  end;
+
+  { TSPB }
+
+  TSPB = class(TInterfacedObject, ISPB)
+  private
+    FItems: array of ISPBItem;
+    FBuffer: PChar;
+    FDataLength: integer;
+    FBufferSize: integer;
+    procedure AdjustBuffer;
+    procedure UpdateRequestItemSize(Item: TSPBItem; NewSize: integer);
+  public
+    constructor Create;
+    destructor Destroy; override;
+    function getBuffer: PChar;
+    function getBufferLength: integer;
+
+  public
+    {ISPB}
+    function getCount: integer;
+    function Add(ParamType: byte): ISPBItem;
+    function getItems(index: integer): ISPBItem;
+  end;
+
   { TFBServiceManager }
 
   TFBServiceManager = class(TInterfacedObject,IServiceManager)
   private
     FServerName: string;
-    FSPB: PChar;
+    FSPB: ISPB;
     FSPBLength: Short;
     FHandle: TISC_SVC_HANDLE;
     FProtocol: TProtocol;
     procedure CheckActive;
     procedure CheckInactive;
     procedure CheckServerName;
-    procedure GenerateSPB(sl: TStrings; var SPB: String; var SPBLength: Short);
     procedure InternalDetach(Force: boolean=false);
     procedure MergeBuffers(Requests: array of IServiceRequest; var buffer: PChar; var size: integer);
   public
-    constructor Create(ServerName: string; Protocol: TProtocol; Params: TStrings);
+    constructor Create(ServerName: string; Protocol: TProtocol; SPB: ISPB);
     destructor Destroy; override;
     property Handle: TISC_SVC_HANDLE read FHandle;
 
@@ -164,40 +210,188 @@ implementation
 
 uses FBErrorMessages;
 
-const
+  { TSPBItem }
 
-  SPBPrefix = 'isc_spb_';
-  SPBConstantNames: array[1..isc_spb_last_spb_constant] of String = (
-    'user_name',
-    'sys_user_name',
-    'sys_user_name_enc',
-    'password',
-    'password_enc',
-    'command_line',
-    'db_name',
-    'verbose',
-    'options',
-    'connect_timeout',
-    'dummy_packet_interval',
-    'sql_role_name'
-  );
+  procedure TSPBItem.MoveBy(delta: integer);
+  var src, dest: PChar;
+      i: integer;
+  begin
+    src := FBufptr;
+    dest := FBufptr + delta ;
+    if delta > 0 then
+    begin
+      for i := FBufLength - 1 downto 0 do
+        (dest +i)^ := (src+i)^;
+    end
+    else
+    begin
+      for i := 0 to FBufLength - 1 do
+      (dest +i)^ := (src+i)^;
+    end;
 
-  SPBConstantValues: array[1..isc_spb_last_spb_constant] of Integer = (
-    isc_spb_user_name_mapped_to_server,
-    isc_spb_sys_user_name_mapped_to_server,
-    isc_spb_sys_user_name_enc_mapped_to_server,
-    isc_spb_password_mapped_to_server,
-    isc_spb_password_enc_mapped_to_server,
-    isc_spb_command_line_mapped_to_server,
-    isc_spb_dbname_mapped_to_server,
-    isc_spb_verbose_mapped_to_server,
-    isc_spb_options_mapped_to_server,
-    isc_spb_connect_timeout_mapped_to_server,
-    isc_spb_dummy_packet_interval_mapped_to_server,
-    isc_spb_sql_role_name_mapped_to_server
-  );
+    FBufPtr += delta;
+  end;
 
-{ TServiceQueryResultItem }
+  constructor TSPBItem.Create(AOwner: TSPB; Param: byte; BufPtr: PChar;
+    Buflength: integer);
+  begin
+    inherited Create;
+    FOwner := AOwner;
+    FBufPtr := BufPtr;
+    FBufLength := BufLength;
+    FBufPtr^ := char(Param);
+    (FBufPtr+1)^ := #1;
+    (FBufPtr+2)^ := #0;
+    FIsByte := true; {default}
+  end;
+
+  function TSPBItem.getParamType: byte;
+  begin
+    Result := byte(FBufPtr^);
+  end;
+
+  function TSPBItem.getAsString: string;
+  var len: byte;
+  begin
+    if FIsByte then
+      Result := IntToStr(getAsByte)
+    else
+    begin
+      len := byte((FBufPtr+1)^);
+      SetString(Result,FBufPtr+2,len);
+    end;
+  end;
+
+  function TSPBItem.getAsByte: byte;
+  begin
+    if FIsByte then
+      Result := byte((FBufPtr+2)^)
+    else
+      IBError(ibxeSPBParamTypeError,[nil]);
+  end;
+
+  procedure TSPBItem.setAsString(aValue: string);
+  var len: integer;
+  begin
+    len := Length(aValue);
+    if len <> FBufLength - 2 then
+      FOwner.UpdateRequestItemSize(self,len+2);
+    (FBufPtr+1)^ := char(len);
+    Move(aValue[1],(FBufPtr+2)^,len);
+    FIsByte := false;
+  end;
+
+  procedure TSPBItem.setAsByte(aValue: byte);
+  begin
+    if FBufLength <> 3 then
+    FOwner.UpdateRequestItemSize(self,3);
+    FIsByte := true;
+    (FBufPtr+1)^ := #1;
+    (FBufPtr+2)^ := char(aValue);
+  end;
+
+  { TSPB }
+
+  procedure TSPB.AdjustBuffer;
+  begin
+    if FDataLength > FBufferSize then
+    begin
+      FBufferSize := FDataLength;
+      ReallocMem(FBuffer,FBufferSize);
+    end;
+  end;
+
+  procedure TSPB.UpdateRequestItemSize(Item: TSPBItem; NewSize: integer
+    );
+  var i, delta: integer;
+  begin
+    delta := NewSize - Item.FBufLength;
+    if delta > 0 then
+    begin
+      FDataLength += delta;
+      AdjustBuffer;
+      i := Length(FItems) - 1;
+      while i >= 0  do
+      begin
+        if (FItems[i] as TSPBItem) = Item then
+          break; {we're done}
+        (FItems[i] as TSPBItem).Moveby(delta);
+        Dec(i);
+      end;
+    end
+    else
+    begin
+      i := 0;
+      while i < Length(FItems) do
+      begin
+        if (FItems[i] as TSPBItem) = Item then
+          break; {we're done}
+        Inc(i);
+      end;
+      Inc(i);
+      while i < Length(FItems) do
+      begin
+        (FItems[i] as TSPBItem).Moveby(delta);
+        Inc(i);
+      end;
+      FDataLength += delta;
+    end;
+    Item.FBufLength := NewSize;
+  end;
+
+  constructor TSPB.Create;
+  begin
+    inherited Create;
+    GetMem(FBuffer,128);
+    if FBuffer = nil then
+      OutOfMemoryError;
+    FBufferSize := 128;
+    FDataLength := 2;
+    FBuffer^ := char(isc_spb_version);
+    (FBuffer+1)^ := char(isc_spb_current_version);
+  end;
+
+  destructor TSPB.Destroy;
+  begin
+    Freemem(FBuffer);
+    inherited Destroy;
+  end;
+
+  function TSPB.getBuffer: PChar;
+  begin
+    Result := FBuffer;
+  end;
+
+  function TSPB.getBufferLength: integer;
+  begin
+    Result :=  FDataLength
+  end;
+
+  function TSPB.getCount: integer;
+  begin
+    Result := Length(FItems);
+  end;
+
+  function TSPB.Add(ParamType: byte): ISPBItem;
+  var P: PChar;
+  begin
+    P := FBuffer + FDataLength;
+    Inc(FDataLength,3); {assume byte}
+    AdjustBuffer;
+    Result := TSPBItem.Create(self,ParamType,P,3);
+    SetLength(FItems,Length(FItems)+1);
+    FItems[Length(FItems) - 1 ] := Result;
+  end;
+
+  function TSPB.getItems(index: integer): ISPBItem;
+  begin
+     if (index >= 0 ) and (index < Length(FItems)) then
+      Result := FItems[index]
+    else
+      IBError(ibxeSPBIndexError,[index]);
+  end;
+
+  { TServiceQueryResultItem }
 
 procedure TServiceQueryResultItem.ParseBuffer;
 var P: PChar;
@@ -709,66 +903,6 @@ begin
     IBError(ibxeServerNameMissing, [nil]);
 end;
 
-procedure TFBServiceManager.GenerateSPB(sl: TStrings; var SPB: String;
-  var SPBLength: Short);
-var
-  i, j, SPBVal, SPBServerVal: UShort;
-  param_name, param_value: String;
-begin
-  { The SPB is initially empty, with the exception that
-   the SPB version must be the first byte of the string.
-  }
-  SPBLength := 2;
-  SPB := Char(isc_spb_version);
-  SPB := SPB + Char(isc_spb_current_version);
-  { Iterate through the textual service parameters, constructing
-   a SPB on-the-fly }
-  if sl.Count > 0 then
-  for i := 0 to sl.Count - 1 do
-  begin
-   { Get the parameter's name and value from the list,
-     and make sure that the name is all lowercase with
-     no leading 'isc_spb_' prefix }
-    if (Trim(sl.Names[i]) = '') then continue;
-    param_name := LowerCase(sl.Names[i]); {mbcs ok}
-    param_value := Copy(sl[i], Pos('=', sl[i]) + 1, Length(sl[i])); {mbcs ok}
-    if (Pos(SPBPrefix, param_name) = 1) then {mbcs ok}
-      Delete(param_name, 1, Length(SPBPrefix));
-    { We want to translate the parameter name to some integer
-      value. We do this by scanning through a list of known
-      service parameter names (SPBConstantNames, defined above). }
-    SPBVal := 0;
-    SPBServerVal := 0;
-    { Find the parameter }
-    for j := 1 to isc_spb_last_spb_constant do
-      if (param_name = SPBConstantNames[j]) then
-      begin
-        SPBVal := j;
-        SPBServerVal := SPBConstantValues[j];
-        break;
-      end;
-    case SPBVal of
-      isc_spb_user_name, isc_spb_password:
-      begin
-        SPB := SPB +
-               Char(SPBServerVal) +
-               Char(Length(param_value)) +
-               param_value;
-        Inc(SPBLength, 2 + Length(param_value));
-      end;
-      else
-      begin
-        if (SPBVal > 0) and
-           (SPBVal <= isc_dpb_last_dpb_constant) then
-          IBError(ibxeSPBConstantNotSupported,
-                   [SPBConstantNames[SPBVal]])
-        else
-          IBError(ibxeSPBConstantUnknown, [SPBVal]);
-      end;
-    end;
-  end;
-end;
-
 procedure TFBServiceManager.InternalDetach(Force: boolean);
 begin
   if FHandle = nil then
@@ -808,16 +942,12 @@ begin
 end;
 
 constructor TFBServiceManager.Create(ServerName: string; Protocol: TProtocol;
-  Params: TStrings);
-var SPB: String;
+  SPB: ISPB);
 begin
   inherited Create;
   FProtocol := Protocol;
   Firebird25ClientAPI.RegisterObj(self);
-  GenerateSPB(Params, SPB, FSPBLength);
-  with Firebird25ClientAPI do
-    IBAlloc(FSPB, 0, FsPBLength);
-  Move(SPB[1], FSPB[0], FSPBLength);
+  FSPB := SPB;
   FServerName := ServerName;
   Attach;
 end;
@@ -844,10 +974,20 @@ begin
     Local: ConnectString := 'service_mgr'; {do not localize}
   end;
   with Firebird25ClientAPI do
+  if FSPB = nil then
+  begin
+    if isc_service_attach(StatusVector, Length(ConnectString),
+                         PChar(ConnectString), @FHandle, 0, nil) > 0 then
+      IBDataBaseError;
+  end
+  else
+  begin
     if isc_service_attach(StatusVector, Length(ConnectString),
                            PChar(ConnectString), @FHandle,
-                           FSPBLength, FSPB) > 0 then
+                           (FSPB as TSPB).getBufferLength,
+                           (FSPB as TSPB).getBuffer) > 0 then
       IBDataBaseError;
+  end;
 end;
 
 procedure TFBServiceManager.Detach;

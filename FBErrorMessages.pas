@@ -150,7 +150,9 @@ type
       ibxeServiceResponseIndexError,
       ibxeServiceResponseTypeError,
       ibxeDPBIndexError,
-      ibxeDPBParamTypeError
+      ibxeDPBParamTypeError,
+      ibxeSPBIndexError,
+      ibxeSPBParamTypeError
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;
@@ -320,6 +322,8 @@ resourcestring
   SServiceResponseTypeError = 'Invalid Request for Service Response Type';
   SDPBIndexError = 'DPB Index out of range (%d)';
   SDPBParamTypeError = 'Invalid Request for DPB Param Type';
+  SSPBIndexError =  'SPB Index out of range (%d)';
+  SSPBParamTypeError = 'Invalid Request for SPB Param Type';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -455,7 +459,9 @@ const
     SServiceResponseIndexError,
     SServiceResponseTypeError,
     SDPBIndexError,
-    SDPBParamTypeError
+    SDPBParamTypeError,
+    SSPBIndexError,
+    SSPBParamTypeError
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;
