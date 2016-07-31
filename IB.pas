@@ -667,13 +667,15 @@ type
   end;
 
   TEventCounts = array of TEventInfo;
+  IEvents = interface;
+  TEventHandler = procedure(Sender: IEvents) of object;
 
   IEvents = interface
     function GetStatus: IStatus;
     procedure Cancel;
     function ExtractEventCounts: TEventCounts;
     procedure WaitForEvent;
-    procedure AsyncWaitForEvent(EventHandler: TNotifyEvent);
+    procedure AsyncWaitForEvent(EventHandler: TEventHandler);
   end;
 
   TDBOperationCount = record

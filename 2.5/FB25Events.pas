@@ -22,7 +22,7 @@ type
     FAttachment: IAttachment;
     FCriticalSection: TCriticalSection;
     FEventHandlerThread: TObject;
-    FEventHandler: TNotifyEvent;
+    FEventHandler: TEventHandler;
     procedure CancelEvents;
     procedure EventSignaled;
   public
@@ -34,7 +34,7 @@ type
     procedure Cancel;
     function ExtractEventCounts: TEventCounts;
     procedure WaitForEvent;
-    procedure AsyncWaitForEvent(EventHandler: TNotifyEvent);
+    procedure AsyncWaitForEvent(EventHandler: TEventHandler);
   end;
 
 implementation
@@ -267,7 +267,7 @@ begin
     CancelEvents;
 end;
 
-procedure TFBEvents.AsyncWaitForEvent(EventHandler: TNotifyEvent);
+procedure TFBEvents.AsyncWaitForEvent(EventHandler: TEventHandler);
 var callback: pointer;
 begin
   if assigned(FEventHandler) then

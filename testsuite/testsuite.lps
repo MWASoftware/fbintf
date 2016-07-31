@@ -47,10 +47,9 @@
       </Unit4>
       <Unit5>
         <Filename Value="../IB.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
-        <TopLine Value="659"/>
-        <CursorPos X="27" Y="675"/>
+        <TopLine Value="657"/>
+        <CursorPos X="16" Y="671"/>
         <UsageCount Value="33"/>
         <Loaded Value="True"/>
       </Unit5>
@@ -173,9 +172,10 @@
       </Unit20>
       <Unit21>
         <Filename Value="../2.5/FB25Events.pas"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="4"/>
-        <TopLine Value="44"/>
-        <CursorPos X="32" Y="53"/>
+        <TopLine Value="256"/>
+        <CursorPos X="66" Y="270"/>
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
       </Unit21>
@@ -284,7 +284,7 @@
         <UsageCount Value="10"/>
       </Unit36>
     </Units>
-    <JumpHistory Count="24" HistoryIndex="23">
+    <JumpHistory Count="27" HistoryIndex="26">
       <Position1>
         <Filename Value="../2.5/FB25Services.pas"/>
         <Caret Line="201" TopLine="189"/>
@@ -381,6 +381,18 @@
         <Filename Value="../2.5/FB25Events.pas"/>
         <Caret Line="53" Column="32" TopLine="44"/>
       </Position24>
+      <Position25>
+        <Filename Value="../IB.pas"/>
+        <Caret Line="677" Column="60" TopLine="659"/>
+      </Position25>
+      <Position26>
+        <Filename Value="../IB.pas"/>
+        <Caret Line="670" Column="22" TopLine="656"/>
+      </Position26>
+      <Position27>
+        <Filename Value="../2.5/FB25Events.pas"/>
+        <Caret Line="25" Column="33" TopLine="14"/>
+      </Position27>
     </JumpHistory>
   </ProjectSession>
 </CONFIG>
