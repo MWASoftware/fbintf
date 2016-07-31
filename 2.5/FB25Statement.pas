@@ -319,7 +319,7 @@ end;
 
 implementation
 
-uses IBUtils, FBErrorMessages, FB25Blob, variants, IBErrorCodes, FB25ResultBuffer;
+uses IBUtils, FBErrorMessages, FB25Blob, variants, IBErrorCodes, FB25DBInfo;
 
 const
    sSQLErrorSeparator = ' When Executing: ';

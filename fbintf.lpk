@@ -10,7 +10,7 @@
         <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
     </CompilerOptions>
-    <Files Count="19">
+    <Files Count="20">
       <Item1>
         <Filename Value="3.0/firebird/fb_get_master_interface.pas"/>
         <Type Value="Include"/>
@@ -76,8 +76,8 @@
         <UnitName Value="FB25Services"/>
       </Item16>
       <Item17>
-        <Filename Value="2.5/FB25ResultBuffer.pas"/>
-        <UnitName Value="FB25ResultBuffer"/>
+        <Filename Value="2.5/FB25DBInfo.pas"/>
+        <UnitName Value="FB25DBInfo"/>
       </Item17>
       <Item18>
         <Filename Value="2.5/FB25Status.pas"/>
@@ -87,6 +87,10 @@
         <Filename Value="2.5/FB25APIObject.pas"/>
         <UnitName Value="FB25APIObject"/>
       </Item19>
+      <Item20>
+        <Filename Value="2.5/FB25SQLData.pas"/>
+        <UnitName Value="FB25SQLData"/>
+      </Item20>
     </Files>
     <RequiredPkgs Count="1">
       <Item1>

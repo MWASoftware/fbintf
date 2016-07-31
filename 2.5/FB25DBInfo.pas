@@ -1,4 +1,4 @@
-unit FB25ResultBuffer;
+unit FB25DBInfo;
 
 {$mode objfpc}{$H+}
 {$IF FPC_FULLVERSION >= 20700 }

@@ -93,7 +93,7 @@ type
 implementation
 
 uses FB25Events, FB25Status, FB25Transaction, FBErrorMessages, FB25Blob,
-  FB25Statement, FB25ResultBuffer;
+  FB25Statement, FB25DBInfo;
 
 { TDPBItem }
 
