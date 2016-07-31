@@ -22,8 +22,7 @@ type
     FAttachment: IAttachment;
     FCriticalSection: TCriticalSection;
     FEventHandlerThread: TObject;
-    FEventHandler: TEventHandler;
-    function ExtractEventCounts: TEventCounts;
+    FEventHandler: TNotifyEvent;
     procedure CancelEvents;
     procedure EventSignaled;
   public
@@ -33,8 +32,9 @@ type
     {IEvents}
     function GetStatus: IStatus;
     procedure Cancel;
-    procedure WaitForEvent(var EventCounts: TEventCounts);
-    procedure AsyncWaitForEvent(EventHandler: TEventHandler);
+    function ExtractEventCounts: TEventCounts;
+    procedure WaitForEvent;
+    procedure AsyncWaitForEvent(EventHandler: TNotifyEvent);
   end;
 
 implementation
@@ -61,7 +61,6 @@ type
     FEventWaiting: TEventObject;
     {$ENDIF}
     procedure HandleEventSignalled(length: short; updated: PChar);
-    procedure DoEventSignalled;
   protected
     procedure Execute; override;
   public
@@ -97,11 +96,6 @@ begin
   end;
 end;
 
-procedure TEventHandlerThread.DoEventSignalled;
-begin
-  FOwner.EventSignaled;
-end;
-
 procedure TEventHandlerThread.Execute;
 begin
   while not Terminated do
@@ -113,7 +107,7 @@ begin
     {$ENDIF}
 
     if not Terminated  then
-      Synchronize(@DoEventSignalled)
+      FOwner.EventSignaled;
   end;
 end;
 
@@ -206,7 +200,7 @@ procedure TFBEvents.EventSignaled;
 begin
   if assigned(FEventHandler)  then
   begin
-    FEventHandler(ExtractEventCounts);
+    FEventHandler(self);
   end;
   FEventHandler := nil;
 end;
@@ -273,7 +267,7 @@ begin
     CancelEvents;
 end;
 
-procedure TFBEvents.AsyncWaitForEvent(EventHandler: TEventHandler);
+procedure TFBEvents.AsyncWaitForEvent(EventHandler: TNotifyEvent);
 var callback: pointer;
 begin
   if assigned(FEventHandler) then
@@ -291,11 +285,10 @@ begin
   end;
 end;
 
-procedure TFBEvents.WaitForEvent(var EventCounts: TEventCounts);
+procedure TFBEvents.WaitForEvent;
 begin
   with Firebird25ClientAPI do
      Call(isc_wait_for_event(StatusVector,@FDBHandle, FEventBufferlen,@FEventBuffer,@FResultBuffer));
-  EventCounts := ExtractEventCounts
 end;
 
 end.
