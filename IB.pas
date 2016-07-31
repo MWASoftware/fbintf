@@ -703,6 +703,7 @@ type
   IDBInformation = interface
     function getCount: integer;
     function getItem(index: integer): IDBInfoItem;
+    function Find(ItemType: byte): IDBInfoItem;
     property Items[index: integer]: IDBInfoItem read getItem; default;
   end;
 
@@ -720,6 +721,7 @@ type
     function getCount: integer;
     function Add(ParamType: byte): IDPBItem;
     function getItems(index: integer): IDPBItem;
+    function Find(ParamType: byte): IDPBItem;
     property Items[index: integer]: IDPBItem read getItems; default;
   end;
 
@@ -758,9 +760,10 @@ type
 
   IServiceRequest = interface
     function getAction: byte;
-    function Add(Param: byte): IServiceRequestItem;
+    function Add(ItemType: byte): IServiceRequestItem;
     function getCount: integer;
     function getItem(index: integer): IServiceRequestItem;
+    function find(ItemType: byte): IServiceRequestItem;
     property Items[index: integer]: IServiceRequestItem read getItem; default;
   end;
 
@@ -774,14 +777,16 @@ type
   end;
 
   IServiceQueryResultItem = interface(IServiceQueryResultSubItem)
-    function getSubItemCount: integer;
-    function getSubItem(index: integer): IServiceQueryResultSubItem;
-    property Items[index: integer]: IServiceQueryResultSubItem read getSubItem; default;
+    function getCount: integer;
+    function getItem(index: integer): IServiceQueryResultSubItem;
+    function find(ItemType: byte): IServiceQueryResultSubItem;
+    property Items[index: integer]: IServiceQueryResultSubItem read getItem; default;
   end;
 
   IServiceQueryResults = interface
     function getCount: integer;
     function getItem(index: integer): IServiceQueryResultItem;
+    function find(ItemType: byte): IServiceQueryResultItem;
     property Items[index: integer]: IServiceQueryResultItem read getItem; default;
   end;
 
@@ -799,6 +804,7 @@ type
     function getCount: integer;
     function Add(ParamType: byte): ISPBItem;
     function getItems(index: integer): ISPBItem;
+    function Find(ParamType: byte): ISPBItem;
     property Items[index: integer]: ISPBItem read getItems; default;
   end;
 
@@ -806,6 +812,7 @@ type
 
   IServiceManager = interface
     function GetStatus: IStatus;
+    function getSPB: ISPB;
     procedure Attach;
     procedure Detach;
     function IsAttached: boolean;

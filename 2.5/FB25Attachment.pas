@@ -52,6 +52,7 @@ type
     {IDPB}
     function getCount: integer;
     function Add(ParamType: byte): IDPBItem;
+    function Find(ParamType: byte): IDPBItem;
     function getItems(index: integer): IDPBItem;
   end;
 
@@ -264,6 +265,18 @@ begin
   Result := TDPBItem.Create(self,ParamType,P,3);
   SetLength(FItems,Length(FItems)+1);
   FItems[Length(FItems) - 1 ] := Result;
+end;
+
+function TDPB.Find(ParamType: byte): IDPBItem;
+var i: integer;
+begin
+  Result := nil;
+  for i := 0 to getCount - 1 do
+    if FItems[i].getParamType = ParamType then
+    begin
+      Result := FItems[i];
+      Exit;
+    end;
 end;
 
 function TDPB.getItems(index: integer): IDPBItem;

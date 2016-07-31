@@ -60,6 +60,7 @@ type
     {IDBInformation}
     function getCount: integer;
     function getItem(index: integer): IDBInfoItem;
+    function Find(ItemType: byte): IDBInfoItem;
     property Items[index: integer]: IDBInfoItem read getItem; default;
   end;
 
@@ -294,6 +295,18 @@ begin
     Result := FItems[index]
   else
     IBError(ibxeInfoBufferIndexError,[index]);
+end;
+
+function TDBInformation.Find(ItemType: byte): IDBInfoItem;
+var i: integer;
+begin
+  Result := nil;
+  for i := 0 to getCount - 1 do
+    if FItems[i].getItemType = ItemType then
+    begin
+      Result := FItems[i];
+      Exit;
+    end;
 end;
 
 

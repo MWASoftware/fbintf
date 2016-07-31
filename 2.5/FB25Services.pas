@@ -41,7 +41,7 @@ type
 
   TServiceRequest = class(TInterfacedObject,IServiceRequest)
   private
-    FRequestItems: array of IServiceRequestItem;
+    FItems: array of IServiceRequestItem;
     FBuffer: PChar;
     FDataLength: integer;
     FBufferSize: integer;
@@ -56,9 +56,10 @@ type
   public
     {IServiceRequest}
     function getAction: byte;
-    function Add(Param: byte): IServiceRequestItem;
+    function Add(ItemType: byte): IServiceRequestItem;
     function getCount: integer;
     function getItem(index: integer): IServiceRequestItem;
+    function find(ItemType: byte): IServiceRequestItem;
     property Items[index: integer]: IServiceRequestItem read getItem; default;
   end;
 
@@ -100,9 +101,10 @@ type
 
   public
     {IServiceQueryResultItem}
-    function getSubItemCount: integer;
-    function getSubItem(index: integer): IServiceQueryResultSubItem;
-    property Items[index: integer]: IServiceQueryResultSubItem read getSubItem; default;
+    function getCount: integer;
+    function getItem(index: integer): IServiceQueryResultSubItem;
+    function find(ItemType: byte): IServiceQueryResultSubItem;
+    property Items[index: integer]: IServiceQueryResultSubItem read getItem; default;
   end;
 
   { TServiceQueryResults }
@@ -124,6 +126,7 @@ type
     {IServiceQueryResults}
     function getCount: integer;
     function getItem(index: integer): IServiceQueryResultItem;
+    function find(ItemType: byte): IServiceQueryResultItem;
     property Items[index: integer]: IServiceQueryResultItem read getItem; default;
  end;
 
@@ -171,6 +174,7 @@ type
     {ISPB}
     function getCount: integer;
     function Add(ParamType: byte): ISPBItem;
+    function Find(ParamType: byte): ISPBItem;
     function getItems(index: integer): ISPBItem;
   end;
 
@@ -196,6 +200,7 @@ type
   public
     {IServiceManager}
     function GetStatus: IStatus;
+    function getSPB: ISPB;
     procedure Attach;
     procedure Detach;
     function IsAttached: boolean;
@@ -383,6 +388,18 @@ uses FBErrorMessages;
     FItems[Length(FItems) - 1 ] := Result;
   end;
 
+  function TSPB.Find(ParamType: byte): ISPBItem;
+  var i: integer;
+  begin
+    Result := nil;
+    for i := 0 to getCount - 1 do
+      if FItems[i].getParamType = ParamType then
+      begin
+        Result := FItems[i];
+        Exit;
+      end;
+  end;
+
   function TSPB.getItems(index: integer): ISPBItem;
   begin
      if (index >= 0 ) and (index < Length(FItems)) then
@@ -503,18 +520,31 @@ begin
   ParseConfigItems;
 end;
 
-function TServiceQueryResultItem.getSubItemCount: integer;
+function TServiceQueryResultItem.getCount: integer;
 begin
   Result := Length(FSubItems);
 end;
 
-function TServiceQueryResultItem.getSubItem(index: integer
+function TServiceQueryResultItem.getItem(index: integer
   ): IServiceQueryResultSubItem;
 begin
   if (index >= 0) and (index < Length(FSubItems)) then
     Result := FSubItems[index]
   else
     IBError(ibxeServiceResponseIndexError,[index]);
+end;
+
+function TServiceQueryResultItem.find(ItemType: byte
+  ): IServiceQueryResultSubItem;
+var i: integer;
+begin
+  Result := nil;
+  for i := 0 to getCount - 1 do
+    if FSubItems[i].getItemType = ItemType then
+    begin
+      Result := FSubItems[i];
+      Exit;
+    end;
 end;
 
 { TServiceQueryResultSubItem }
@@ -687,6 +717,18 @@ begin
     IBError(ibxeServiceResponseIndexError,[index]);
 end;
 
+function TServiceQueryResults.find(ItemType: byte): IServiceQueryResultItem;
+var i: integer;
+begin
+  Result := nil;
+  for i := 0 to getCount - 1 do
+    if FItems[i].getItemType = ItemType then
+    begin
+      Result := FItems[i];
+      Exit;
+    end;
+end;
+
 { TServiceRequestItem }
 
 procedure TServiceRequestItem.MoveBy(delta: integer);
@@ -788,28 +830,28 @@ begin
   begin
     FDataLength += delta;
     AdjustBuffer;
-    i := Length(FRequestItems) - 1;
+    i := Length(FItems) - 1;
     while i >= 0  do
     begin
-      if (FRequestItems[i] as TServiceRequestItem) = Item then
+      if (FItems[i] as TServiceRequestItem) = Item then
         break; {we're done}
-      (FRequestItems[i] as TServiceRequestItem).Moveby(delta);
+      (FItems[i] as TServiceRequestItem).Moveby(delta);
       Dec(i);
     end;
   end
   else
   begin
     i := 0;
-    while i < Length(FRequestItems) do
+    while i < Length(FItems) do
     begin
-      if (FRequestItems[i] as TServiceRequestItem) = Item then
+      if (FItems[i] as TServiceRequestItem) = Item then
         break; {we're done}
       Inc(i);
     end;
     Inc(i);
-    while i < Length(FRequestItems) do
+    while i < Length(FItems) do
     begin
-      (FRequestItems[i] as TServiceRequestItem).Moveby(delta);
+      (FItems[i] as TServiceRequestItem).Moveby(delta);
       Inc(i);
     end;
     FDataLength += delta;
@@ -849,28 +891,40 @@ begin
   Result := byte(FBuffer^);
 end;
 
-function TServiceRequest.Add(Param: byte): IServiceRequestItem;
+function TServiceRequest.Add(ItemType: byte): IServiceRequestItem;
 var P: PChar;
 begin
   P := FBuffer + FDataLength;
   Inc(FDataLength,5); {assume integer}
   AdjustBuffer;
-  Result := TServiceRequestItem.Create(self,Param,P,5);
-  SetLength(FRequestItems,Length(FRequestItems)+1);
-  FRequestItems[Length(FRequestItems) - 1 ] := Result;
+  Result := TServiceRequestItem.Create(self,ItemType,P,5);
+  SetLength(FItems,Length(FItems)+1);
+  FItems[Length(FItems) - 1 ] := Result;
 end;
 
 function TServiceRequest.getCount: integer;
 begin
-  Result := Length(FRequestItems);
+  Result := Length(FItems);
 end;
 
 function TServiceRequest.getItem(index: integer): IServiceRequestItem;
 begin
-  if (index >= 0 ) and (index < Length(FRequestItems)) then
-    Result := FRequestItems[index]
+  if (index >= 0 ) and (index < Length(FItems)) then
+    Result := FItems[index]
   else
     IBError(ibxServiceRequestIndexError,[index]);
+end;
+
+function TServiceRequest.find(ItemType: byte): IServiceRequestItem;
+var i: integer;
+begin
+  Result := nil;
+  for i := 0 to getCount - 1 do
+    if FItems[i].getItemType = ItemType then
+    begin
+      Result := FItems[i];
+      Exit;
+    end;
 end;
 
 
@@ -962,6 +1016,11 @@ end;
 function TFBServiceManager.GetStatus: IStatus;
 begin
   Result := Firebird25ClientAPI.Status;
+end;
+
+function TFBServiceManager.getSPB: ISPB;
+begin
+  Result := FSPB;
 end;
 
 procedure TFBServiceManager.Attach;
