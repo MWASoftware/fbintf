@@ -28,16 +28,10 @@ implementation
 procedure TTest1.DoQuery(Attachment: IAttachment);
 var Transaction: ITransaction;
     Statement: IStatement;
-    Params: TStringList;
     ResultSet: IResultSet;
     i: integer;
 begin
-  Params := TStringList.Create;
-  try
-    Params.Add('read');
-    Params.Add('nowait');
-    Params.Add('concurrency');
-    Transaction := Attachment.StartTransaction(Params,tcCommit);
+    Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],tcCommit);
     Statement := Attachment.Prepare(Transaction,'Select * from RDB$Database',3);
     ResultSet := Statement.OpenCursor;
     try
@@ -49,9 +43,6 @@ begin
     finally
       ResultSet.Close;
     end;
-  finally
-    Params.Free;
-  end;
 end;
 
 function TTest1.TestTitle: string;
@@ -60,75 +51,46 @@ begin
 end;
 
 procedure TTest1.RunTest(CharSet: string; SQLDialect: integer);
-var Params: TStringList;
+var DPB: IDPB;
     CreateParams: string;
     Attachment: IAttachment;
     DBInfo: IDBInformation;
     ConType: integer;
     DBFileName: string;
     DBSiteName: string;
+    i: integer;
 begin
   writeln('Creating a Database');
   CreateParams := 'USER ''' + Owner.GetUserName + ''' PASSWORD ''' + Owner.GetPassword + ''' ' +
       'DEFAULT CHARACTER SET ' + CharSet;
   {Open Database}
-  Params := TStringList.Create;
-  try
-    Params.Add('user_name='+ Owner.GetUserName);
-    Params.Add('password='+ Owner.GetPassword);
-    Params.Add('lc_ctype='+ CharSet);
-    Params.Add('sql_dialect='+IntToStr(SQLDialect));
-    Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,SQLDialect,CreateParams,Params);
-    writeln('Database Created without error');
-    DBInfo := Attachment.GetDBInformation(byte(isc_info_db_id));
-    DBInfo[0].DecodeIDCluster(ConType,DBFileName,DBSiteName);
-    writeln('Database ID = ', ConType,' FB = ', DBFileName, ' SN = ',DBSiteName);
-    DBInfo := Attachment.GetDBInformation(byte(isc_info_ods_version));
-    write('ODS major = ',DBInfo[0].getAsInteger);
-    DBInfo := Attachment.GetDBInformation(byte(isc_info_ods_minor_version));
-    writeln(' minor = ', DBInfo[0].getAsInteger );
+  DPB := FirebirdAPI.AllocateDPB;
+  DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
+  DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);
+  DPB.Add(isc_dpb_lc_ctype).setAsString(CharSet);
+  DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
 
-    {Querying Database}
-    DoQuery(Attachment);
-
-    writeln('Dropping Database');
-    Attachment.DropDatabase;
-  finally
-    Params.Free;
-  end;
-end;
-
-
-(*procedure TTest1.RunTest;
-var Params: TStringList;
-    CreateParams: string;
-    Attachment: IAttachment;
-begin
-  writeln('Creating a Database');
-  CreateParams := 'USER ''' + FUser + ''' PASSWORD ''' + FPassword + ''' ' +
-    'DEFAULT CHARACTER SET ' + FCharSet;
-  Attachment := FirebirdAPI.CreateDatabase(FDatabaseName,FSQLDialect,CreateParams,nil);
+  writeln('DPB');
+  writeln('Count = ', DPB.getCount);
+  for i := 0 to DPB.getCount - 1 do
+    writeln(DPB.Items[i].getParamType,' = ', DPB.Items[i].AsString);
+  Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,SQLDialect,CreateParams,DPB);
   writeln('Database Created without error');
+  DBInfo := Attachment.GetDBInformation(byte(isc_info_db_id));
+  DBInfo[0].DecodeIDCluster(ConType,DBFileName,DBSiteName);
+  writeln('Database ID = ', ConType,' FB = ', DBFileName, ' SN = ',DBSiteName);
+  DBInfo := Attachment.GetDBInformation(byte(isc_info_ods_version));
+  write('ODS major = ',DBInfo[0].getAsInteger);
+  DBInfo := Attachment.GetDBInformation(byte(isc_info_ods_minor_version));
+  writeln(' minor = ', DBInfo[0].getAsInteger );
+
+  {Querying Database}
+  DoQuery(Attachment);
+
   writeln('Dropping Database');
   Attachment.DropDatabase;
+end;
 
-
-{  Params := TStringList.Create;
-  try
-    {Open Database}
-    Params.Add('user_name='+ FUser);
-    Params.Add('password='+ FPassword);
-    Params.Add('lc_ctype='+ FCharSet);
-    Params.Add('sql_dialect='+IntToStr(FSQLDialect));
-    writeln('Opening Database ' + FDatabaseName);
-    Attachment := FirebirdAPI.OpenDatabase(FDatabaseName,Params);
-    writeln('Database Opened');
-    writeln('Dropping Database');
-    Attachment.DropDatabase;
-  finally
-    Params.Free;
-  end; }
-end; *)
 
 initialization
   RegisterTest(TTest1);

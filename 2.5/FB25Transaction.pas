@@ -20,11 +20,11 @@ type
     FDefaultCompletion: TTransactionCompletion;
     FAttachments: array of IAttachment; {Keep reference to attachment - ensures
                                           attachment cannot be freed before transaction}
-    procedure GenerateTPB(sl: TStrings; var TPB: string; var TPBLength: Short);
+    procedure GenerateTPB(sl: array of byte; var TPB: string; var TPBLength: Short);
     procedure CloseAll;
   public
-    constructor Create(Attachments: array of IAttachment; Params: TStrings; DefaultCompletion: TTransactionCompletion); overload;
-    constructor Create(Attachment: TFBAttachment; Params: TStrings; DefaultCompletion: TTransactionCompletion); overload;
+    constructor Create(Attachments: array of IAttachment; Params: array of byte; DefaultCompletion: TTransactionCompletion); overload;
+    constructor Create(Attachment: TFBAttachment; Params: array of byte; DefaultCompletion: TTransactionCompletion); overload;
     destructor Destroy; override;
     property Handle: TISC_TR_HANDLE read FHandle;
 
@@ -78,68 +78,21 @@ const
   TPB and TPBLength, respectively. }
 
 
-procedure TFBTransaction.GenerateTPB(sl: TStrings; var TPB: string;
+procedure TFBTransaction.GenerateTPB(sl: array of byte; var TPB: string;
   var TPBLength: Short);
 var
-  i, j, TPBVal, ParamLength: Integer;
-  ParamName, ParamValue: string;
+  i: Integer;
 begin
   TPB := '';
-  if (sl.Count = 0) then
+  if (Length(sl) = 0) then
     TPBLength := 0
   else
   begin
-    TPBLength := sl.Count + 1;
-    TPB := TPB + Char(isc_tpb_version3);
-  end;
-  for i := 0 to sl.Count - 1 do
-  begin
-    if (Trim(sl[i]) =  '') then
-    begin
-      Dec(TPBLength);
-      Continue;
-    end;
-    if (Pos('=', sl[i]) = 0) then {mbcs ok}
-      ParamName := LowerCase(sl[i]) {mbcs ok}
-    else
-    begin
-      ParamName := LowerCase(sl.Names[i]); {mbcs ok}
-      ParamValue := Copy(sl[i], Pos('=', sl[i]) + 1, Length(sl[i])); {mbcs ok}
-    end;
-    if (Pos(TPBPrefix, ParamName) = 1) then {mbcs ok}
-      Delete(ParamName, 1, Length(TPBPrefix));
-    TPBVal := 0;
-    { Find the parameter }
-    for j := 1 to isc_tpb_last_tpb_constant do
-      if (ParamName = TPBConstantNames[j]) then
-      begin
-        TPBVal := j;
-        break;
-      end;
-    { Now act on it }
-    case TPBVal of
-      isc_tpb_consistency, isc_tpb_exclusive, isc_tpb_protected,
-      isc_tpb_concurrency, isc_tpb_shared, isc_tpb_wait, isc_tpb_nowait,
-      isc_tpb_read, isc_tpb_write, isc_tpb_ignore_limbo,
-      isc_tpb_read_committed, isc_tpb_rec_version, isc_tpb_no_rec_version:
-        TPB := TPB + Char(TPBVal);
-      isc_tpb_lock_read, isc_tpb_lock_write:
-      begin
-        TPB := TPB + Char(TPBVal);
-        { Now set the string parameter }
-        ParamLength := Length(ParamValue);
-        Inc(TPBLength, ParamLength + 1);
-        TPB := TPB + Char(ParamLength) + ParamValue;
-      end;
-      else
-      begin
-        if (TPBVal > 0) and
-           (TPBVal <= isc_tpb_last_tpb_constant) then
-          IBError(ibxeTPBConstantNotSupported, [TPBConstantNames[TPBVal]])
-        else
-          IBError(ibxeTPBConstantUnknownEx, [sl.Names[i]]);
-      end;
-    end;
+    SetLength(TPB,Length(sl) + 1);
+    TPB[1] :=  Char(isc_tpb_version3);
+    for i := 0 to Length(sl) -1 do
+       TPB[i+2] := char(sl[i]);
+    TPBLength := Length(sl) +1;
   end;
 end;
 
@@ -155,7 +108,7 @@ begin
 end;
 
 constructor TFBTransaction.Create(Attachments: array of IAttachment;
-  Params: TStrings; DefaultCompletion: TTransactionCompletion);
+  Params: array of byte; DefaultCompletion: TTransactionCompletion);
 var
   TPB: String;
   TPBLength: short;
@@ -175,7 +128,7 @@ begin
   Start(DefaultCompletion);
 end;
 
-constructor TFBTransaction.Create(Attachment: TFBAttachment; Params: TStrings;
+constructor TFBTransaction.Create(Attachment: TFBAttachment; Params: array of byte;
    DefaultCompletion: TTransactionCompletion);
 begin
   inherited Create;

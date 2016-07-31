@@ -93,13 +93,15 @@ type
   public
     {IFirebirdAPI}
     function GetStatus: IStatus;
-    function OpenDatabase(DatabaseName: string; Params: TStrings): IAttachment;
+    function AllocateDPB: IDPB;
+    function OpenDatabase(DatabaseName: string; DPB: IDPB): IAttachment;
     function CreateDatabase(DatabaseName: string;
-      SQLDialect: integer; CreateParams: string; Params: TStrings): IAttachment;
+      SQLDialect: integer; CreateParams: string; DPB: IDPB): IAttachment;
     function GetServiceManager(ServerName: string; Protocol: TProtocol; Params: TStrings): IServiceManager;
     {Start Transaction against multiple databases}
-    function StartTransaction(Attachments: array of IAttachment; Params: TStrings;
-      DefaultCompletion: TTransactionCompletion): ITransaction;
+    function StartTransaction(Attachments: array of IAttachment;
+      Params: array of byte; DefaultCompletion: TTransactionCompletion
+  ): ITransaction;
     function IsEmbeddedServer: boolean;
     function GetLibraryName: string;
     function HasServiceAPI: boolean;
@@ -351,16 +353,21 @@ begin
   Result := FStatus;
 end;
 
-function TFB25ClientAPI.OpenDatabase(DatabaseName: string; Params: TStrings
-  ): IAttachment;
+function TFB25ClientAPI.AllocateDPB: IDPB;
 begin
-   Result := TFBAttachment.Create(DatabaseName,Params)
+  Result := TDPB.Create;
 end;
 
-function TFB25ClientAPI.CreateDatabase(DatabaseName: string; SQLDialect: integer;
-      CreateParams: string; Params: TStrings): IAttachment;
+function TFB25ClientAPI.OpenDatabase(DatabaseName: string; DPB: IDPB
+  ): IAttachment;
 begin
-  Result := TFBAttachment.CreateDatabase(DatabaseName, SQLDialect, CreateParams, Params );
+   Result := TFBAttachment.Create(DatabaseName,DPB)
+end;
+
+function TFB25ClientAPI.CreateDatabase(DatabaseName: string;
+  SQLDialect: integer; CreateParams: string; DPB: IDPB): IAttachment;
+begin
+  Result := TFBAttachment.CreateDatabase(DatabaseName, SQLDialect, CreateParams, DPB );
 end;
 
 function TFB25ClientAPI.GetServiceManager(ServerName: string;
@@ -373,7 +380,7 @@ begin
 end;
 
 function TFB25ClientAPI.StartTransaction(Attachments: array of IAttachment;
-  Params: TStrings; DefaultCompletion: TTransactionCompletion): ITransaction;
+  Params: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction;
 begin
   Result := TFBTransaction.Create(Attachments,Params,DefaultCompletion);
 end;

@@ -28,15 +28,9 @@ implementation
 procedure TTest2.DoQuery(Attachment: IAttachment);
 var Transaction: ITransaction;
     Statement: IStatement;
-    Params: TStringList;
     ResultSet: IResultSet;
 begin
-  Params := TStringList.Create;
-  try
-    Params.Add('read');
-    Params.Add('nowait');
-    Params.Add('concurrency');
-    Transaction := Attachment.StartTransaction(Params,tcCommit);
+    Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],tcCommit);
     Statement := Attachment.Prepare(Transaction,'Select First 3 * from EMPLOYEE',3);
     writeln(Statement.GetSQLText);
     ReportResults(Statement);
@@ -44,9 +38,6 @@ begin
     writeln(Statement.GetSQLText);
     Statement.GetSQLParams[0].AsInteger := 9;
     ReportResults(Statement);
-  finally
-    Params.Free;
-  end;
 end;
 
 procedure TTest2.ReportResults(Statement: IStatement);
@@ -72,20 +63,16 @@ end;
 
 procedure TTest2.RunTest(CharSet: string; SQLDialect: integer);
 var Attachment: IAttachment;
-    Params: TStringList;
+    DPB: IDPB;
 begin
-  Params := TStringList.Create;
-  try
-    Params.Add('user_name='+ Owner.GetUserName);
-    Params.Add('password='+ Owner.GetPassword);
-    Params.Add('lc_ctype='+ CharSet);
-    Params.Add('sql_dialect='+IntToStr(SQLDialect));
-    writeln('Opening ',Owner.GetEmployeeDatabaseName);
-    Attachment := FirebirdAPI.OpenDatabase(Owner.GetEmployeeDatabaseName,Params);
-    writeln('Database Open');
-  finally
-    Params.Free;
-  end;
+  DPB := FirebirdAPI.AllocateDPB;
+  DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
+  DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);
+  DPB.Add(isc_dpb_lc_ctype).setAsString(CharSet);
+  DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
+  writeln('Opening ',Owner.GetEmployeeDatabaseName);
+  Attachment := FirebirdAPI.OpenDatabase(Owner.GetEmployeeDatabaseName,DPB);
+  writeln('Database Open');
   DoQuery(Attachment);
 end;
 

@@ -1717,102 +1717,6 @@ const
   blr_gen_id2		    = 172;
   blr_set_generator2        = 173;
 
-(************************************)
-(** Database parameter block stuff **)
-(************************************)
-
-  isc_dpb_version1               =          1;
-  isc_dpb_cdd_pathname           =          1;
-  isc_dpb_allocation             =          2;
-  isc_dpb_journal                =          3;
-  isc_dpb_page_size              =          4;
-  isc_dpb_num_buffers            =          5;
-  isc_dpb_buffer_length          =          6;
-  isc_dpb_debug                  =          7;
-  isc_dpb_garbage_collect        =          8;
-  isc_dpb_verify                 =          9;
-  isc_dpb_sweep                  =         10;
-  isc_dpb_enable_journal         =         11;
-  isc_dpb_disable_journal        =         12;
-  isc_dpb_dbkey_scope            =         13;
-  isc_dpb_number_of_users        =         14;
-  isc_dpb_trace                  =         15;
-  isc_dpb_no_garbage_collect     =         16;
-  isc_dpb_damaged                =         17;
-  isc_dpb_license                =         18;
-  isc_dpb_sys_user_name          =         19;
-  isc_dpb_encrypt_key            =         20;
-  isc_dpb_activate_shadow        =         21;
-  isc_dpb_sweep_interval         =         22;
-  isc_dpb_delete_shadow          =         23;
-  isc_dpb_force_write            =         24;
-  isc_dpb_begin_log              =         25;
-  isc_dpb_quit_log               =         26;
-  isc_dpb_no_reserve             =         27;
-  isc_dpb_user_name              =         28;
-  isc_dpb_password               =         29;
-  isc_dpb_password_enc           =         30;
-  isc_dpb_sys_user_name_enc      =         31;
-  isc_dpb_interp                 =         32;
-  isc_dpb_online_dump            =         33;
-  isc_dpb_old_file_size          =         34;
-  isc_dpb_old_num_files          =         35;
-  isc_dpb_old_file               =         36;
-  isc_dpb_old_start_page         =         37;
-  isc_dpb_old_start_seqno        =         38;
-  isc_dpb_old_start_file         =         39;
-  isc_dpb_drop_walfile           =         40;
-  isc_dpb_old_dump_id            =         41;
-  isc_dpb_wal_backup_dir         =         42;
-  isc_dpb_wal_chkptlen           =         43;
-  isc_dpb_wal_numbufs            =         44;
-  isc_dpb_wal_bufsize            =         45;
-  isc_dpb_wal_grp_cmt_wait       =         46;
-  isc_dpb_lc_messages            =         47;
-  isc_dpb_lc_ctype               =         48;
-  isc_dpb_cache_manager          =         49;
-  isc_dpb_shutdown               =         50;
-  isc_dpb_online                 =         51;
-  isc_dpb_shutdown_delay         =         52;
-  isc_dpb_reserved               =         53;
-  isc_dpb_overwrite              =         54;
-  isc_dpb_sec_attach             =         55;
-  isc_dpb_disable_wal            =         56;
-  isc_dpb_connect_timeout        =         57;
-  isc_dpb_dummy_packet_interval  =         58;
-  isc_dpb_gbak_attach            =         59;
-  isc_dpb_sql_role_name          =         60;
-  isc_dpb_set_page_buffers       =         61;
-  isc_dpb_working_directory      =         62;
-  isc_dpb_SQL_dialect            =         63;
-  isc_dpb_set_db_readonly        =         64;
-  isc_dpb_set_db_SQL_dialect     =         65;
-  isc_dpb_gfix_attach		 =         66;
-  isc_dpb_gstat_attach		 =         67;
-  isc_dpb_last_dpb_constant      =         isc_dpb_gstat_attach;
-
-
-(***********************************)
-(** isc_dpb_verify specific flags **)
-(***********************************)
-
-  isc_dpb_pages                  =          1;
-  isc_dpb_records                =          2;
-  isc_dpb_indices                =          4;
-  isc_dpb_transactions           =          8;
-  isc_dpb_no_update              =         16;
-  isc_dpb_repair                 =         32;
-  isc_dpb_ignore                 =         64;
-
-(*************************************)
-(** isc_dpb_shutdown specific flags **)
-(*************************************)
-
-  isc_dpb_shut_cache             =          1;
-  isc_dpb_shut_attachment        =          2;
-  isc_dpb_shut_transaction       =          4;
-  isc_dpb_shut_force             =          8;
-
 (****************************************)
 (** Bit assignments in RDB$SYSTEM_FLAG **)
 (****************************************)
@@ -1820,34 +1724,6 @@ const
   RDB_system                     =          1;
   RDB_id_assigned                =          2;
 
-
-(***************************************)
-(** Transaction parameter block stuff **)
-(***************************************)
-
-  isc_tpb_version1               =          1;
-  isc_tpb_version3               =          3;
-  isc_tpb_consistency            =          1;
-  isc_tpb_concurrency            =          2;
-  isc_tpb_shared                 =          3;
-  isc_tpb_protected              =          4;
-  isc_tpb_exclusive              =          5;
-  isc_tpb_wait                   =          6;
-  isc_tpb_nowait                 =          7;
-  isc_tpb_read                   =          8;
-  isc_tpb_write                  =          9;
-  isc_tpb_lock_read              =         10;
-  isc_tpb_lock_write             =         11;
-  isc_tpb_verb_time              =         12;
-  isc_tpb_commit_time            =         13;
-  isc_tpb_ignore_limbo           =         14;
-  isc_tpb_read_committed         =         15;
-  isc_tpb_autocommit             =         16;
-  isc_tpb_rec_version            =         17;
-  isc_tpb_no_rec_version         =         18;
-  isc_tpb_restart_requests       =         19;
-  isc_tpb_no_auto_undo           =         20;
-  isc_tpb_last_tpb_constant      =         isc_tpb_no_auto_undo;
 
 
 (**************************)

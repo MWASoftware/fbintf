@@ -8,6 +8,52 @@ uses
   Classes, SysUtils, IB, FBLibrary, FB25ClientAPI, IBHeader, IBExternals, FB25APIObject;
 
 type
+  TDPB = class;
+
+  { TDPBItem }
+
+  TDPBItem = class(TInterfacedObject,IDPBItem)
+  private
+    FOwner: TDPB;
+    FBufPtr: PChar;
+    FBuflength: integer;
+    FIsByte: boolean;
+    procedure MoveBy(delta: integer);
+  public
+    constructor Create(AOwner: TDPB; Param: byte; BufPtr: PChar;
+       Buflength: integer);
+
+  public
+    {IDPBItem}
+    function getParamType: byte;
+    function getAsString: string;
+    function getAsByte: byte;
+    procedure setAsString(aValue: string);
+    procedure setAsByte(aValue: byte);
+  end;
+
+  { TDPB }
+
+  TDPB = class(TInterfacedObject, IDPB)
+  private
+    FItems: array of IDPBItem;
+    FBuffer: PChar;
+    FDataLength: integer;
+    FBufferSize: integer;
+    procedure AdjustBuffer;
+    procedure UpdateRequestItemSize(Item: TDPBItem; NewSize: integer);
+  public
+    constructor Create;
+    destructor Destroy; override;
+    function getBuffer: PChar;
+    function getBufferLength: integer;
+
+  public
+    {IDPB}
+    function getCount: integer;
+    function Add(ParamType: byte): IDPBItem;
+    function getItems(index: integer): IDPBItem;
+  end;
 
   { TFBAttachment }
 
@@ -15,23 +61,22 @@ type
   private
     FHandle: TISC_DB_HANDLE;
     FDatabaseName: string;
-    FDPB: string;
-    FDPBLength: short;
-    procedure GenerateDPB(sl: TStrings; var DPB: string; var DPBLength: Short);
+    FDPB: IDPB;
   public
-    constructor Create(DatabaseName: string; Params: TStrings);
+    constructor Create(DatabaseName: string; DPB: IDPB);
     constructor CreateDatabase(DatabaseName: string; SQLDialect: integer;
-      CreateParams: string; Params: TStrings);
+      CreateParams: string; DPB: IDPB);
     destructor Destroy; override;
     property Handle: TISC_DB_HANDLE read FHandle;
 
   public
     {IAttachment}
     function GetStatus: IStatus;
+    function getDPB: IDPB;
     procedure Connect;
     procedure Disconnect(Force: boolean=false);
     procedure DropDatabase;
-    function StartTransaction(Params: TStrings; DefaultCompletion: TTransactionCompletion): ITransaction;
+    function StartTransaction(Params: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction;
     function CreateBlob(transaction: ITransaction): IBlob;
     function OpenBlob(transaction: ITransaction; BlobID: TISC_QUAD): IBlob;
     procedure ExecImmediate(transaction: ITransaction; sql: string; SQLDialect: integer);
@@ -49,199 +94,206 @@ implementation
 uses FB25Events, FB25Status, FB25Transaction, FBErrorMessages, FB25Blob,
   FB25Statement, FB25ResultBuffer;
 
-const
-  DPBPrefix = 'isc_dpb_';
-  DPBConstantNames: array[1..isc_dpb_last_dpb_constant] of string = (
-    'cdd_pathname',
-    'allocation',
-    'journal',
-    'page_size',
-    'num_buffers',
-    'buffer_length',
-    'debug',
-    'garbage_collect',
-    'verify',
-    'sweep',
-    'enable_journal',
-    'disable_journal',
-    'dbkey_scope',
-    'number_of_users',
-    'trace',
-    'no_garbage_collect',
-    'damaged',
-    'license',
-    'sys_user_name',
-    'encrypt_key',
-    'activate_shadow',
-    'sweep_interval',
-    'delete_shadow',
-    'force_write',
-    'begin_log',
-    'quit_log',
-    'no_reserve',
-    'user_name',
-    'password',
-    'password_enc',
-    'sys_user_name_enc',
-    'interp',
-    'online_dump',
-    'old_file_size',
-    'old_num_files',
-    'old_file',
-    'old_start_page',
-    'old_start_seqno',
-    'old_start_file',
-    'drop_walfile',
-    'old_dump_id',
-    'wal_backup_dir',
-    'wal_chkptlen',
-    'wal_numbufs',
-    'wal_bufsize',
-    'wal_grp_cmt_wait',
-    'lc_messages',
-    'lc_ctype',
-    'cache_manager',
-    'shutdown',
-    'online',
-    'shutdown_delay',
-    'reserved',
-    'overwrite',
-    'sec_attach',
-    'disable_wal',
-    'connect_timeout',
-    'dummy_packet_interval',
-    'gbak_attach',
-    'sql_role_name',
-    'set_page_buffers',
-    'working_directory',
-    'sql_dialect',
-    'set_db_readonly',
-    'set_db_sql_dialect',
-    'gfix_attach',
-    'gstat_attach'
-  );
+{ TDPBItem }
 
-  { TFBAttachment }
-
-
-procedure TFBAttachment.GenerateDPB(sl: TStrings; var DPB: string;
-  var DPBLength: Short);
-var
-  i, j, pval: Integer;
-  DPBVal: UShort;
-  ParamName, ParamValue: string;
+procedure TDPBItem.MoveBy(delta: integer);
+var src, dest: PChar;
+    i: integer;
 begin
-  { The DPB is initially empty, with the exception that
-    the DPB version must be the first byte of the string. }
-  DPBLength := 1;
-  DPB := Char(isc_dpb_version1);
-
-  {Iterate through the textual database parameters, constructing
-   a DPB on-the-fly }
-  for i := 0 to sl.Count - 1 do
-  with Firebird25ClientAPI do
+  src := FBufptr;
+  dest := FBufptr + delta ;
+  if delta > 0 then
   begin
-    { Get the parameter's name and value from the list,
-      and make sure that the name is all lowercase with
-      no leading 'isc_dpb_' prefix
-    }
-    if (Trim(sl.Names[i]) = '') then
-      continue;
-    ParamName := LowerCase(sl.Names[i]); {mbcs ok}
-    ParamValue := Copy(sl[i], Pos('=', sl[i]) + 1, Length(sl[i])); {mbcs ok}
-    if (Pos(DPBPrefix, ParamName) = 1) then {mbcs ok}
-      Delete(ParamName, 1, Length(DPBPrefix));
-     { We want to translate the parameter name to some Integer
-       value. We do this by scanning through a list of known
-       database parameter names (DPBConstantNames, defined above) }
-    DPBVal := 0;
-    { Find the parameter }
-    for j := 1 to isc_dpb_last_dpb_constant do
-      if (ParamName = DPBConstantNames[j]) then
-      begin
-        DPBVal := j;
-        break;
-      end;
-     {  A database parameter either contains a string value (case 1)
-       or an Integer value (case 2)
-       or no value at all (case 3)
-       or an error needs to be generated (case else)  }
-    case DPBVal of
-      isc_dpb_user_name, isc_dpb_password, isc_dpb_password_enc,
-      isc_dpb_sys_user_name, isc_dpb_license, isc_dpb_encrypt_key,
-      isc_dpb_lc_messages, isc_dpb_lc_ctype,
-      isc_dpb_sql_role_name, isc_dpb_sql_dialect:
-      begin
-        if DPBVal = isc_dpb_sql_dialect then
-          ParamValue[1] := Char(Ord(ParamValue[1]) - 48);
-        DPB := DPB +
-               Char(DPBVal) +
-               Char(Length(ParamValue)) +
-               ParamValue;
-        Inc(DPBLength, 2 + Length(ParamValue));
-      end;
-      isc_dpb_num_buffers, isc_dpb_dbkey_scope, isc_dpb_force_write,
-      isc_dpb_no_reserve, isc_dpb_damaged, isc_dpb_verify:
-      begin
-        DPB := DPB +
-               Char(DPBVal) +
-               #1 +
-               Char(StrToInt(ParamValue));
-        Inc(DPBLength, 3);
-      end;
-      isc_dpb_sweep:
-      begin
-        DPB := DPB +
-               Char(DPBVal) +
-               #1 +
-               Char(isc_dpb_records);
-        Inc(DPBLength, 3);
-      end;
-      isc_dpb_sweep_interval:
-      begin
-        pval := StrToInt(ParamValue);
-        DPB := DPB +
-               Char(DPBVal) +
-               #4 + EncodeLsbf(pval,4);
-        Inc(DPBLength, 6);
-      end;
-      isc_dpb_activate_shadow, isc_dpb_delete_shadow, isc_dpb_begin_log,
-      isc_dpb_quit_log:
-      begin
-        DPB := DPB +
-               Char(DPBVal) +
-               #1 + #0;
-        Inc(DPBLength, 3);
-      end;
-      else
-      begin
-        if (DPBVal > 0) and
-           (DPBVal <= isc_dpb_last_dpb_constant) then
-          IBError(ibxeDPBConstantNotSupported, [DPBConstantNames[DPBVal]])
-        else
-          IBError(ibxeDPBConstantUnknownEx, [sl.Names[i]]);
-      end;
-    end;
+    for i := FBufLength - 1 downto 0 do
+      (dest +i)^ := (src+i)^;
+  end
+  else
+  begin
+    for i := 0 to FBufLength - 1 do
+    (dest +i)^ := (src+i)^;
+  end;
+
+  FBufPtr += delta;
+end;
+
+constructor TDPBItem.Create(AOwner: TDPB; Param: byte; BufPtr: PChar;
+  Buflength: integer);
+begin
+  inherited Create;
+  FOwner := AOwner;
+  FBufPtr := BufPtr;
+  FBufLength := BufLength;
+  FBufPtr^ := char(Param);
+  (FBufPtr+1)^ := #1;
+  (FBufPtr+2)^ := #0;
+  FIsByte := true; {default}
+end;
+
+function TDPBItem.getParamType: byte;
+begin
+  Result := byte(FBufPtr^);
+end;
+
+function TDPBItem.getAsString: string;
+var len: byte;
+begin
+  if FIsByte then
+    Result := IntToStr(getAsByte)
+  else
+  begin
+    len := byte((FBufPtr+1)^);
+    SetString(Result,FBufPtr+2,len);
   end;
 end;
 
-constructor TFBAttachment.Create(DatabaseName: string; Params: TStrings);
+function TDPBItem.getAsByte: byte;
+begin
+  if FIsByte then
+    Result := byte((FBufPtr+2)^)
+  else
+    IBError(ibxeDPBParamTypeError,[nil]);
+end;
+
+procedure TDPBItem.setAsString(aValue: string);
+var len: integer;
+begin
+  len := Length(aValue);
+  if len <> FBufLength - 2 then
+    FOwner.UpdateRequestItemSize(self,len+2);
+  (FBufPtr+1)^ := char(len);
+  Move(aValue[1],(FBufPtr+2)^,len);
+  FIsByte := false;
+end;
+
+procedure TDPBItem.setAsByte(aValue: byte);
+begin
+  if FBufLength <> 3 then
+  FOwner.UpdateRequestItemSize(self,3);
+  FIsByte := true;
+  (FBufPtr+1)^ := #1;
+  (FBufPtr+2)^ := char(aValue);
+end;
+
+{ TDPB }
+
+procedure TDPB.AdjustBuffer;
+begin
+  if FDataLength > FBufferSize then
+  begin
+    FBufferSize := FDataLength;
+    ReallocMem(FBuffer,FBufferSize);
+  end;
+end;
+
+procedure TDPB.UpdateRequestItemSize(Item: TDPBItem; NewSize: integer
+  );
+var i, delta: integer;
+begin
+  delta := NewSize - Item.FBufLength;
+  if delta > 0 then
+  begin
+    FDataLength += delta;
+    AdjustBuffer;
+    i := Length(FItems) - 1;
+    while i >= 0  do
+    begin
+      if (FItems[i] as TDPBItem) = Item then
+        break; {we're done}
+      (FItems[i] as TDPBItem).Moveby(delta);
+      Dec(i);
+    end;
+  end
+  else
+  begin
+    i := 0;
+    while i < Length(FItems) do
+    begin
+      if (FItems[i] as TDPBItem) = Item then
+        break; {we're done}
+      Inc(i);
+    end;
+    Inc(i);
+    while i < Length(FItems) do
+    begin
+      (FItems[i] as TDPBItem).Moveby(delta);
+      Inc(i);
+    end;
+    FDataLength += delta;
+  end;
+  Item.FBufLength := NewSize;
+end;
+
+constructor TDPB.Create;
+begin
+  inherited Create;
+  GetMem(FBuffer,128);
+  if FBuffer = nil then
+    OutOfMemoryError;
+  FBufferSize := 128;
+  FDataLength := 1;
+  FBuffer^ := char(isc_dpb_version1);
+end;
+
+destructor TDPB.Destroy;
+begin
+  Freemem(FBuffer);
+  inherited Destroy;
+end;
+
+function TDPB.getBuffer: PChar;
+begin
+  Result := FBuffer;
+end;
+
+function TDPB.getBufferLength: integer;
+begin
+  Result :=  FDataLength
+end;
+
+function TDPB.getCount: integer;
+begin
+  Result := Length(FItems);
+end;
+
+function TDPB.Add(ParamType: byte): IDPBItem;
+var P: PChar;
+begin
+  P := FBuffer + FDataLength;
+  Inc(FDataLength,3); {assume byte}
+  AdjustBuffer;
+  Result := TDPBItem.Create(self,ParamType,P,3);
+  SetLength(FItems,Length(FItems)+1);
+  FItems[Length(FItems) - 1 ] := Result;
+end;
+
+function TDPB.getItems(index: integer): IDPBItem;
+begin
+   if (index >= 0 ) and (index < Length(FItems)) then
+    Result := FItems[index]
+  else
+    IBError(ibxeDPBIndexError,[index]);
+end;
+
+  { TFBAttachment }
+
+constructor TFBAttachment.Create(DatabaseName: string; DPB: IDPB);
 begin
   inherited Create;
   Firebird25ClientAPI.RegisterObj(self);
   FDatabaseName := DatabaseName;
-  GenerateDPB(Params, FDPB, FDPBLength);
+  FDPB := DPB;
   Connect;
 end;
 
-constructor TFBAttachment.CreateDatabase(DatabaseName: string; SQLDialect: integer;
-  CreateParams: string;  Params: TStrings);
+constructor TFBAttachment.CreateDatabase(DatabaseName: string;
+  SQLDialect: integer; CreateParams: string; DPB: IDPB);
 var sql: string;
     tr_handle: TISC_TR_HANDLE;
 begin
   inherited Create;
   Firebird25ClientAPI.RegisterObj(self);
   FDatabaseName := DatabaseName;
+  FDPB := DPB;
   tr_handle := nil;
   sql := 'CREATE DATABASE ''' + DatabaseName + ''' ' + CreateParams; {do not localize}
   with Firebird25ClientAPI do
@@ -249,10 +301,9 @@ begin
                                   SQLDialect, nil) > 0 then
     IBDataBaseError;
 
-  if assigned(Params) and (Params.Count > 0) then
+  if assigned(FDPB) and (FDPB.getCount > 0) then
   begin
     {If connect params specified then detach and connect properly}
-    GenerateDPB(Params, FDPB, FDPBLength);
     with Firebird25ClientAPI do
       Call(isc_detach_database(StatusVector, @FHandle));
     Connect;
@@ -271,12 +322,22 @@ begin
   Result := Firebird25ClientAPI.Status;
 end;
 
+function TFBAttachment.getDPB: IDPB;
+begin
+  Result := FDPB;
+end;
+
 procedure TFBAttachment.Connect;
 begin
   with Firebird25ClientAPI do
+  if FDPB = nil then
+  Call(isc_attach_database(StatusVector, Length(FDatabaseName),
+                        PChar(FDatabaseName), @FHandle, 0, nil))
+  else
    Call(isc_attach_database(StatusVector, Length(FDatabaseName),
                          PChar(FDatabaseName), @FHandle,
-                         FDPBLength, PChar(FDPB)));
+                         (FDPB as TDPB).getBufferLength,
+                         (FDPB as TDPB).getBuffer));
 end;
 
 procedure TFBAttachment.Disconnect(Force: boolean);
@@ -306,7 +367,7 @@ begin
   FHandle := nil;
 end;
 
-function TFBAttachment.StartTransaction(Params: TStrings;
+function TFBAttachment.StartTransaction(Params: array of byte;
   DefaultCompletion: TTransactionCompletion): ITransaction;
 begin
   Result := TFBTransaction.Create(self,Params,DefaultCompletion);
