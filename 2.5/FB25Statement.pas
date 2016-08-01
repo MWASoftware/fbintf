@@ -309,6 +309,7 @@ type
     function Execute(aTransaction: ITransaction): IResults; overload;
     function OpenCursor: IResultSet; overload;
     function OpenCursor(aTransaction: ITransaction): IResultSet; overload;
+    function CreateBlob: IBlob;
     function GetSQLInfo(InfoRequest: byte): IDBInformation;
     function GetSQLText: string;
     property Handle: TISC_STMT_HANDLE read FHandle;
@@ -2163,6 +2164,11 @@ end;
 function TFBStatement.OpenCursor(aTransaction: ITransaction): IResultSet;
 begin
   Result := InternalOpenCursor(aTransaction as TFBTransaction);
+end;
+
+function TFBStatement.CreateBlob: IBlob;
+begin
+  Result := TFBBlob.Create(FAttachment,FTransaction);
 end;
 
 function TFBStatement.GetSQLInfo(InfoRequest: byte): IDBInformation;

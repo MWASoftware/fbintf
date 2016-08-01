@@ -654,6 +654,7 @@ type
     function Execute(aTransaction: ITransaction): IResults; overload;
     function OpenCursor: IResultSet; overload;
     function OpenCursor(aTransaction: ITransaction): IResultSet; overload;
+    function CreateBlob: IBlob;
     function GetSQLInfo(InfoRequest: byte): IDBInformation;
     function GetSQLText: string;
     property SQLParams: ISQLParams read GetSQLParams;

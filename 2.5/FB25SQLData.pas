@@ -27,15 +27,16 @@ type
      function GetSQLDialect: integer;
      procedure SetAsInteger(AValue: Integer);
   protected
-     function GetData: PChar; virtual; abstract;
-     function GetDataLength: integer; virtual; abstract;
+     procedure Changed; virtual;
+     function SQLData: PChar; virtual; abstract;
+     function SQLDataLength: integer; virtual; abstract;
      function GetName: string; virtual; abstract;
      function GetScale: short; virtual; abstract;
      procedure SetScale(aValue: short); virtual; abstract;
      procedure SetDataLength(len: integer); virtual; abstract;
      function GetSQLType: short; virtual; abstract;
      procedure SetSQLType(aValue: short); virtual; abstract;
-     property DataLength: integer read GetDataLength write SetDataLength;
+     property DataLength: integer read SQLDataLength write SetDataLength;
      property Scale: short read GetScale write SetScale;
      property SQLType: short read GetSQLType write SetSQLType;
   public
@@ -56,6 +57,7 @@ type
      function GetIsNull: Boolean; virtual;
      function getIsNullable: boolean; virtual;
      function GetAsVariant: Variant;
+     function GetAsBlob: IBlob;
      function GetModified: boolean;
      procedure SetAsBoolean(AValue: boolean);
      procedure SetAsCurrency(Value: Currency);
@@ -71,6 +73,7 @@ type
      procedure SetAsShort(Value: Short);
      procedure SetAsString(Value: String);
      procedure SetAsVariant(Value: Variant);
+     procedure SetAsBlob(Value: IBlob);
      procedure SetIsNull(Value: Boolean);  virtual;
      procedure SetIsNullable(Value: Boolean);  virtual;
      property AsDate: TDateTime read GetAsDateTime write SetAsDate;
@@ -88,6 +91,7 @@ type
      property AsShort: Short read GetAsShort write SetAsShort;
      property AsString: String read GetAsString write SetAsString;
      property AsVariant: Variant read GetAsVariant write SetAsVariant;
+     property AsBlob: IBlob read GetAsBlob write SetAsBlob;
      property Modified: Boolean read getModified;
      property IsNull: Boolean read GetIsNull write SetIsNull;
      property IsNullable: Boolean read GetIsNullable write SetIsNullable;
@@ -181,6 +185,11 @@ begin
   SetAsLong(aValue);
 end;
 
+procedure TSQLDataItem.Changed;
+begin
+  FModified := true;
+end;
+
 function TSQLDataItem.GetSQLDialect: integer;
 begin
   Result := FStatement.SQLDialect;
@@ -198,7 +207,7 @@ begin
   if not IsNull then
   begin
     if SQLType  = SQL_BOOLEAN then
-      result := PByte(GetData)^ = ISC_TRUE
+      result := PByte(SQLData)^ = ISC_TRUE
     else
       IBError(ibxeInvalidDataConversion, [nil]);
   end
@@ -220,13 +229,13 @@ begin
           end;
         end;
         SQL_SHORT:
-          result := AdjustScaleToCurrency(Int64(PShort(GetData)^),
+          result := AdjustScaleToCurrency(Int64(PShort(SQLData)^),
                                       Scale);
         SQL_LONG:
-          result := AdjustScaleToCurrency(Int64(PLong(GetData)^),
+          result := AdjustScaleToCurrency(Int64(PLong(SQLData)^),
                                       Scale);
         SQL_INT64:
-          result := AdjustScaleToCurrency(PInt64(GetData)^,
+          result := AdjustScaleToCurrency(PInt64(SQLData)^,
                                       Scale);
         SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT:
           result := Trunc(AsDouble);
@@ -249,13 +258,13 @@ begin
         end;
       end;
       SQL_SHORT:
-        result := AdjustScaleToInt64(Int64(PShort(GetData)^),
+        result := AdjustScaleToInt64(Int64(PShort(SQLData)^),
                                     Scale);
       SQL_LONG:
-        result := AdjustScaleToInt64(Int64(PLong(GetData)^),
+        result := AdjustScaleToInt64(Int64(PLong(SQLData)^),
                                     Scale);
       SQL_INT64:
-        result := AdjustScaleToInt64(PInt64(GetData)^,
+        result := AdjustScaleToInt64(PInt64(SQLData)^,
                                     Scale);
       SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT:
         result := Trunc(AsDouble);
@@ -282,7 +291,7 @@ begin
       end;
       SQL_TYPE_DATE:
       begin
-        isc_decode_sql_date(PISC_DATE(GetData), @tm_date);
+        isc_decode_sql_date(PISC_DATE(SQLData), @tm_date);
         try
           result := EncodeDate(Word(tm_date.tm_year + 1900), Word(tm_date.tm_mon + 1),
                                Word(tm_date.tm_mday));
@@ -293,9 +302,9 @@ begin
         end;
       end;
       SQL_TYPE_TIME: begin
-        isc_decode_sql_time(PISC_TIME(GetData), @tm_date);
+        isc_decode_sql_time(PISC_TIME(SQLData), @tm_date);
         try
-          msecs :=  (PISC_TIME(GetData)^ mod 10000) div 10;
+          msecs :=  (PISC_TIME(SQLData)^ mod 10000) div 10;
           result := EncodeTime(Word(tm_date.tm_hour), Word(tm_date.tm_min),
                                Word(tm_date.tm_sec), msecs)
         except
@@ -305,11 +314,11 @@ begin
         end;
       end;
       SQL_TIMESTAMP: begin
-        isc_decode_date(PISC_QUAD(GetData), @tm_date);
+        isc_decode_date(PISC_QUAD(SQLData), @tm_date);
         try
           result := EncodeDate(Word(tm_date.tm_year + 1900), Word(tm_date.tm_mon + 1),
                               Word(tm_date.tm_mday));
-          msecs := (PISC_TIMESTAMP(GetData)^.timestamp_time mod 10000) div 10;
+          msecs := (PISC_TIMESTAMP(SQLData)^.timestamp_time mod 10000) div 10;
           if result >= 0 then
             result := result + EncodeTime(Word(tm_date.tm_hour), Word(tm_date.tm_min),
                                           Word(tm_date.tm_sec), msecs)
@@ -340,17 +349,17 @@ begin
         end;
       end;
       SQL_SHORT:
-        result := AdjustScale(Int64(PShort(GetData)^),
+        result := AdjustScale(Int64(PShort(SQLData)^),
                               Scale);
       SQL_LONG:
-        result := AdjustScale(Int64(PLong(GetData)^),
+        result := AdjustScale(Int64(PLong(SQLData)^),
                               Scale);
       SQL_INT64:
-        result := AdjustScale(PInt64(GetData)^, Scale);
+        result := AdjustScale(PInt64(SQLData)^, Scale);
       SQL_FLOAT:
-        result := PFloat(GetData)^;
+        result := PFloat(SQLData)^;
       SQL_DOUBLE, SQL_D_FLOAT:
-        result := PDouble(GetData)^;
+        result := PDouble(SQLData)^;
       else
         IBError(ibxeInvalidDataConversion, [nil]);
     end;
@@ -385,13 +394,13 @@ begin
         end;
       end;
       SQL_SHORT:
-        result := Trunc(AdjustScale(Int64(PShort(GetData)^),
+        result := Trunc(AdjustScale(Int64(PShort(SQLData)^),
                                     Scale));
       SQL_LONG:
-        result := Trunc(AdjustScale(Int64(PLong(GetData)^),
+        result := Trunc(AdjustScale(Int64(PLong(SQLData)^),
                                     Scale));
       SQL_INT64:
-        result := Trunc(AdjustScale(PInt64(GetData)^, Scale));
+        result := Trunc(AdjustScale(PInt64(SQLData)^, Scale));
       SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT:
         result := Trunc(AsDouble);
       else
@@ -402,7 +411,7 @@ end;
 function TSQLDataItem.GetAsPointer: Pointer;
 begin
   if not IsNull then
-    result := GetData
+    result := SQLData
   else
     result := nil;
 end;
@@ -414,7 +423,7 @@ begin
   if not IsNull then
     case SQLType of
       SQL_BLOB, SQL_ARRAY, SQL_QUAD:
-        result := PISC_QUAD(GetData)^;
+        result := PISC_QUAD(SQLData)^;
       else
         IBError(ibxeInvalidDataConversion, [nil]);
     end;
@@ -460,11 +469,11 @@ begin
         end;
       end;
       SQL_TEXT, SQL_VARYING: begin
-        sz := GetData;
+        sz := SQLData;
         if (SQLType = SQL_TEXT) then
           str_len := DataLength
         else begin
-          str_len := isc_vax_integer(GetData, 2);
+          str_len := isc_vax_integer(SQLData, 2);
           Inc(sz, 2);
         end;
         SetString(result, sz, str_len);
@@ -472,7 +481,7 @@ begin
           result := TrimRight(result);
       end;
       SQL_TYPE_DATE:
-        case FStatement.SQLDialect of
+        case GetSQLDialect of
           1 : result := DateTimeToStr(AsDateTime);
           3 : result := DateToStr(AsDateTime);
         end;
@@ -548,6 +557,13 @@ begin
     end;
 end;
 
+function TSQLDataItem.GetAsBlob: IBlob;
+begin
+  if SQLType <>  SQL_BLOB then
+      IBError(ibxeInvalidDataConversion, [nil]);
+  Result := TFBBlob.Create(FStatement.Attachment,FStatement.Transaction,AsQuad);
+end;
+
 function TSQLDataItem.GetModified: boolean;
 begin
   Result := FModified;
@@ -566,7 +582,7 @@ end;
 
 procedure TSQLDataItem.SetAsCurrency(Value: Currency);
 begin
-  if FStatement.SQLDialect < 3 then
+  if GetSQLDialect < 3 then
     AsDouble := Value
   else
   begin
@@ -575,8 +591,8 @@ begin
     SQLType := SQL_INT64;
     Scale := -4;
     DataLength := SizeOf(Int64);
-    PCurrency(GetData)^ := Value;
-    FModified := True;
+    PCurrency(SQLData)^ := Value;
+    Changed;
   end;
 end;
 
@@ -588,8 +604,8 @@ begin
   SQLType := SQL_INT64;
   Scale := 0;
   DataLength := SizeOf(Int64);
-  PInt64(GetData)^ := Value;
-  FModified := True;
+  PInt64(SQLData)^ := Value;
+  Changed;
 end;
 
 procedure TSQLDataItem.SetAsDate(Value: TDateTime);
@@ -597,7 +613,7 @@ var
    tm_date: TCTimeStructure;
    Yr, Mn, Dy: Word;
 begin
-  if FStatement.SQLDialect < 3 then
+  if GetSQLDialect < 3 then
   begin
     AsDateTime := Value;
     exit;
@@ -618,8 +634,8 @@ begin
   end;
   DataLength := SizeOf(ISC_DATE);
   with Firebird25ClientAPI do
-    isc_encode_sql_date(@tm_date, PISC_DATE(GetData));
-  FModified := True;
+    isc_encode_sql_date(@tm_date, PISC_DATE(SQLData));
+  Changed;
 end;
 
 procedure TSQLDataItem.SetAsTime(Value: TDateTime);
@@ -627,7 +643,7 @@ var
   tm_date: TCTimeStructure;
   Hr, Mt, S, Ms: Word;
 begin
-  if FStatement.SQLDialect < 3 then
+  if GetSQLDialect < 3 then
   begin
     AsDateTime := Value;
     exit;
@@ -648,10 +664,10 @@ begin
   end;
   DataLength := SizeOf(ISC_TIME);
   with Firebird25ClientAPI do
-    isc_encode_sql_time(@tm_date, PISC_TIME(GetData));
+    isc_encode_sql_time(@tm_date, PISC_TIME(SQLData));
   if Ms > 0 then
-    Inc(PISC_TIME(GetData)^,Ms*10);
-  FModified := True;
+    Inc(PISC_TIME(SQLData)^,Ms*10);
+  Changed;
 end;
 
 procedure TSQLDataItem.SetAsDateTime(Value: TDateTime);
@@ -675,10 +691,10 @@ begin
   end;
   DataLength := SizeOf(TISC_QUAD);
   with Firebird25ClientAPI do
-    isc_encode_date(@tm_date, PISC_QUAD(GetData));
+    isc_encode_date(@tm_date, PISC_QUAD(SQLData));
   if Ms > 0 then
-    Inc(PISC_TIMESTAMP(GetData)^.timestamp_time,Ms*10);
-  FModified := True;
+    Inc(PISC_TIMESTAMP(SQLData)^.timestamp_time,Ms*10);
+  Changed;
 end;
 
 procedure TSQLDataItem.SetAsDouble(Value: Double);
@@ -689,8 +705,8 @@ begin
   SQLType := SQL_DOUBLE;
   DataLength := SizeOf(Double);
   Scale := 0;
-  PDouble(GetData)^ := Value;
-  FModified := True;
+  PDouble(SQLData)^ := Value;
+  Changed;
 end;
 
 procedure TSQLDataItem.SetAsFloat(Value: Float);
@@ -701,8 +717,8 @@ begin
   SQLType := SQL_FLOAT;
   DataLength := SizeOf(Float);
   Scale := 0;
-  PSingle(GetData)^ := Value;
-  FModified := True;
+  PSingle(SQLData)^ := Value;
+  Changed;
 end;
 
 procedure TSQLDataItem.SetAsLong(Value: Long);
@@ -713,8 +729,8 @@ begin
   SQLType := SQL_LONG;
   DataLength := SizeOf(Long);
   Scale := 0;
-  PLong(GetData)^ := Value;
-  FModified := True;
+  PLong(SQLData)^ := Value;
+  Changed;
 end;
 
 procedure TSQLDataItem.SetAsPointer(Value: Pointer);
@@ -724,9 +740,9 @@ begin
   else begin
     IsNull := False;
     SQLType := SQL_TEXT;
-    Move(Value^, GetData^, DataLength);
+    Move(Value^, SQLData^, DataLength);
   end;
-  FModified := True;
+  Changed;
 end;
 
 procedure TSQLDataItem.SetAsQuad(Value: TISC_QUAD);
@@ -737,8 +753,8 @@ begin
      (SQLType <> SQL_ARRAY) then
     IBError(ibxeInvalidDataConversion, [nil]);
   DataLength := SizeOf(TISC_QUAD);
-  PISC_QUAD(GetData)^ := Value;
-  FModified := True;
+  PISC_QUAD(SQLData)^ := Value;
+  Changed;
 end;
 
 procedure TSQLDataItem.SetAsShort(Value: Short);
@@ -749,8 +765,8 @@ begin
   SQLType := SQL_SHORT;
   DataLength := SizeOf(Short);
   Scale := 0;
-  PShort(GetData)^ := Value;
-  FModified := True;
+  PShort(SQLData)^ := Value;
+  Changed;
 end;
 
 procedure TSQLDataItem.SetAsString(Value: String);
@@ -763,14 +779,14 @@ var
    begin
       if (GetName = 'DB_KEY') or {do not localize}
          (GetName = 'RDB$DB_KEY') then {do not localize}
-        Move(Value[1], GetData^, DataLength)
+        Move(Value[1], SQLData^, DataLength)
       else begin
         SQLType := SQL_TEXT;
         DataLength := Length(Value);
         if (Length(Value) > 0) then
-          Move(Value[1], GetData^, DataLength);
+          Move(Value[1], SQLData^, DataLength);
       end;
-      FModified := True;
+      Changed;
    end;
 
 begin
@@ -834,6 +850,13 @@ begin
   end;
 end;
 
+procedure TSQLDataItem.SetAsBlob(Value: IBlob);
+begin
+  Value.Close;
+  AsQuad := Value.GetBlobID;
+  Changed;
+end;
+
 procedure TSQLDataItem.SetAsBoolean(AValue: boolean);
 begin
   if IsNullable then
@@ -843,10 +866,10 @@ begin
   DataLength := 1;
   Scale := 0;
   if AValue then
-    PByte(GetData)^ := ISC_TRUE
+    PByte(SQLData)^ := ISC_TRUE
   else
-    PByte(GetData)^ := ISC_FALSE;
-  FModified := True;
+    PByte(SQLData)^ := ISC_FALSE;
+  Changed;
 end;
 
 
