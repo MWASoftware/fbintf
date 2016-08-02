@@ -6,10 +6,6 @@ unit IB;
 {$codepage UTF8}
 {$ENDIF}
 
-{$IF FPC_FULLVERSION < 20700 }
- RawByteString = AnsiString; {Needed for backwards compatibility}
- {$ENDIF}
-
 interface
 
 uses
@@ -457,7 +453,12 @@ type
    PGDS__QUAD           = ^TGDS__QUAD;
    PISC_QUAD            = ^TISC_QUAD;
 
+  {$IF FPC_FULLVERSION < 20700 }
+  RawByteString = AnsiString; {Needed for backwards compatibility}
+  {$ENDIF}
+
   TFBStatusCode = cardinal;
+  TByteArray = array of byte;
 
   IStatus = interface
     function GetIBErrorCode: Long;
@@ -467,8 +468,6 @@ type
     function GetIBDataBaseErrorMessages: TIBDataBaseErrorMessages;
     procedure SetIBDataBaseErrorMessages(Value: TIBDataBaseErrorMessages);
   end;
-
-  ISQLElement = interface;
 
   TArrayBound = record
     UpperBound: short;
@@ -485,6 +484,8 @@ type
     function GetBounds: TArrayBounds;
   end;
 
+  ISQLElement = interface;
+
   IArray = interface(IArrayMetaData)
     function GetElement(x: integer): ISQLElement; overload;
     function GetElement(x, y: integer): ISQLElement; overload;
@@ -494,11 +495,12 @@ type
   TTransactionCompletion = (tcCommit,tcRollback);
 
   ITransaction = interface
+    procedure Start(DefaultCompletion: TTransactionCompletion);
     function GetInTransaction: boolean;
+    procedure PrepareForCommit;
     procedure Commit;
     procedure CommitRetaining;
     function HasActivity: boolean;
-    procedure Start(DefaultCompletion: TTransactionCompletion);
     procedure Rollback;
     procedure RollbackRetaining;
     property InTransaction: boolean read GetInTransaction;
@@ -521,9 +523,9 @@ type
     procedure SaveToStream(S: TStream);
  end;
 
-  { IFieldMetaData }
+  { IColumnMetaData }
 
-  IFieldMetaData = interface
+  IColumnMetaData = interface
     function GetSQLType: short;
     function getSubtype: short;
     function getRelationName: string;
@@ -535,7 +537,7 @@ type
     function getCharSetID: cardinal;
     function getIsNullable: boolean;
     function GetSize: integer;
-    function GetArrayMetaData: IArrayMetaData;
+    function GetArrayMetaData: IArrayMetaData; {Valid only for Array SQL Type}
     property Name: string read GetName;
     property Size: Integer read GetSize;
     property CharSetID: cardinal read getCharSetID;
@@ -544,14 +546,16 @@ type
     property IsNullable: Boolean read GetIsNullable;
   end;
 
+  { IMetaData }
+
   IMetaData = interface
     function getCount: integer;
-    function getFieldMetaData(index: integer): IFieldMetaData;
+    function getColumnMetaData(index: integer): IColumnMetaData;
     function GetUniqueRelationName: string;
-    function ByName(Idx: String): IFieldMetaData;
+    function ByName(Idx: String): IColumnMetaData;
   end;
 
-  ISQLData = interface(IFieldMetaData)
+  ISQLData = interface(IColumnMetaData)
     function GetAsBoolean: boolean;
     function GetAsCurrency: Currency;
     function GetAsInt64: Int64;
@@ -687,7 +691,7 @@ type
 
   IStatement = interface
     function GetSQLParams: ISQLParams;
-    function GetOutMetaData: IMetaData;
+    function GetMetaData: IMetaData;
     function GetPlan: String;
     function GetRowsAffected(var InsertCount, UpdateCount, DeleteCount: integer): boolean;
     function GetSQLType: TIBSQLTypes;
@@ -698,7 +702,7 @@ type
     function Execute(aTransaction: ITransaction=nil): IResults;
     function OpenCursor(aTransaction: ITransaction=nil): IResultSet;
     function CreateBlob: IBlob;
-    function CreateArray(aField: IArrayMetaData): IArray;
+    function CreateArray(column: IColumnMetaData): IArray;
     property SQLParams: ISQLParams read GetSQLParams;
     property SQLType: TIBSQLTypes read GetSQLType;
   end;
@@ -725,7 +729,6 @@ type
     Count: cardinal;
   end;
 
-  TByteArray = array of byte;
   TDBOperationCounts = array of TDBOperationCount;
 
   IDBInfoItem = interface
@@ -774,7 +777,7 @@ type
     procedure Connect;
     procedure Disconnect(Force: boolean=false);
     procedure DropDatabase;
-    function StartTransaction(Params: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction;
+    function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction;
     function CreateBlob(transaction: ITransaction): IBlob;
     procedure ExecImmediate(transaction: ITransaction; sql: string; SQLDialect: integer);
     function OpenCursorAtStart(transaction: ITransaction; sql: string; SQLDialect: integer): IResultSet;

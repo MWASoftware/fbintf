@@ -32,6 +32,7 @@ type
   public
     {ITransaction}
     function GetInTransaction: boolean;
+    procedure PrepareForCommit;
     procedure Commit;
     procedure CommitRetaining;
     procedure Start(DefaultCompletion: TTransactionCompletion);
@@ -130,6 +131,17 @@ end;
 function TFBTransaction.GetInTransaction: boolean;
 begin
   Result := FHandle <> nil;
+end;
+
+procedure TFBTransaction.PrepareForCommit;
+begin
+  if Length(FAttachments) < 2 then
+    IBError(ibxeNotAMultiDatabaseTransaction,[nil]);
+  if FHandle = nil then
+    Exit;
+  CloseAll;
+  with Firebird25ClientAPI do
+    Call(isc_prepare_transaction(StatusVector, @FHandle));
 end;
 
 procedure TFBTransaction.Commit;

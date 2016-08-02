@@ -92,6 +92,7 @@ type
     isc_array_lookup_bounds: Tisc_array_lookup_bounds;
     isc_array_get_slice: Tisc_array_get_slice;
     isc_array_put_slice: Tisc_array_put_slice;
+    isc_prepare_transaction: Tisc_prepare_transaction;
 
   public
     {IFirebirdAPI}
@@ -103,9 +104,8 @@ type
     function AllocateSPB: ISPB;
     function GetServiceManager(ServerName: string; Protocol: TProtocol; SPB: ISPB
       ): IServiceManager;
-    function StartTransaction(Attachments: array of IAttachment;
-      Params: array of byte; DefaultCompletion: TTransactionCompletion
-  ): ITransaction;
+    function StartTransaction(Attachments: array of IAttachment;  TPB: array of byte;
+      DefaultCompletion: TTransactionCompletion): ITransaction;
     function IsEmbeddedServer: boolean;
     function GetLibraryName: string;
     function HasServiceAPI: boolean;
@@ -270,6 +270,7 @@ begin
   isc_array_lookup_bounds := GetProcAddr('isc_array_lookup_bounds'); {do not localize}
   isc_array_get_slice := GetProcAddr('isc_array_get_slice'); {do not localize}
   isc_array_put_slice := GetProcAddr('isc_array_put_slice'); {do not localize}
+  isc_prepare_transaction  := GetProcAddr('isc_prepare_transaction'); {do not localize}
 
   FIBServiceAPIPresent := true;
   isc_rollback_retaining := GetProcAddress(IBLibrary, 'isc_rollback_retaining'); {do not localize}
@@ -398,9 +399,9 @@ begin
 end;
 
 function TFB25ClientAPI.StartTransaction(Attachments: array of IAttachment;
-  Params: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction;
+  TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction;
 begin
-  Result := TFBTransaction.Create(Attachments,Params,DefaultCompletion);
+  Result := TFBTransaction.Create(Attachments,TPB,DefaultCompletion);
 end;
 
 function TFB25ClientAPI.IsEmbeddedServer: boolean;

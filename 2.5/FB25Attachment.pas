@@ -79,7 +79,7 @@ type
     procedure Connect;
     procedure Disconnect(Force: boolean=false);
     procedure DropDatabase;
-    function StartTransaction(Params: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction;
+    function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction;
     function CreateBlob(transaction: ITransaction): IBlob;
     procedure ExecImmediate(transaction: ITransaction; sql: string; aSQLDialect: integer); overload;
     procedure ExecImmediate(transaction: ITransaction; sql: string); overload;
@@ -414,10 +414,10 @@ begin
   FHandle := nil;
 end;
 
-function TFBAttachment.StartTransaction(Params: array of byte;
+function TFBAttachment.StartTransaction(TPB: array of byte;
   DefaultCompletion: TTransactionCompletion): ITransaction;
 begin
-  Result := TFBTransaction.Create(self,Params,DefaultCompletion);
+  Result := TFBTransaction.Create(self,TPB,DefaultCompletion);
 end;
 
 function TFBAttachment.CreateBlob(transaction: ITransaction): IBlob;

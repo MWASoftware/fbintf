@@ -53,7 +53,7 @@ type
 
   { TIBXSQLVAR }
 
-  TIBXSQLVAR = class(TSQLDataItem,IFieldMetaData)
+  TIBXSQLVAR = class(TSQLDataItem,IColumnMetaData)
   private
     FIndex: Integer;
     FName: String;
@@ -199,8 +199,8 @@ type
   public
     {IMetaData}
     function getCount: integer;
-    function getFieldMetaData(index: integer): IFieldMetaData;
-    function ByName(Idx: String): IFieldMetaData;
+    function getColumnMetaData(index: integer): IColumnMetaData;
+    function ByName(Idx: String): IColumnMetaData;
   end;
 
   { TIBXResults }
@@ -277,7 +277,7 @@ type
   public
     {IStatement}
     function GetSQLParams: ISQLParams;
-    function GetOutMetaData: IMetaData;
+    function GetMetaData: IMetaData;
     function GetPlan: String;
     function GetRowsAffected(var InsertCount, UpdateCount, DeleteCount: integer): boolean;
     function GetSQLType: TIBSQLTypes;
@@ -288,7 +288,7 @@ type
     function Execute(aTransaction: ITransaction=nil): IResults;
     function OpenCursor(aTransaction: ITransaction=nil): IResultSet;
     function CreateBlob: IBlob;
-    function CreateArray(aField: IArrayMetaData): IArray;
+    function CreateArray(column: IColumnMetaData): IArray;
     property Handle: TISC_STMT_HANDLE read FHandle;
     property SQLParams: ISQLParams read GetSQLParams;
     property SQLType: TIBSQLTypes read GetSQLType;
@@ -620,7 +620,7 @@ begin
   Initialize;
 end;
 
-function TIBXOUTPUTSQLDA.ByName(Idx: String): IFieldMetaData;
+function TIBXOUTPUTSQLDA.ByName(Idx: String): IColumnMetaData;
 begin
   if Count = 0 then
     Result := nil
@@ -633,7 +633,7 @@ begin
   Result := Count;
 end;
 
-function TIBXOUTPUTSQLDA.getFieldMetaData(index: integer): IFieldMetaData;
+function TIBXOUTPUTSQLDA.getColumnMetaData(index: integer): IColumnMetaData;
 begin
   if Count = 0 then
     Result := nil
@@ -1422,7 +1422,7 @@ begin
   Result := FSQLParams;
 end;
 
-function TFBStatement.GetOutMetaData: IMetaData;
+function TFBStatement.GetMetaData: IMetaData;
 begin
   CheckHandle;
   Result := TIBXOUTPUTSQLDA.Copy(FSQLRecord);
@@ -1498,9 +1498,9 @@ begin
   Result := TFBBlob.Create(FAttachment,FTransaction);
 end;
 
-function TFBStatement.CreateArray(aField: IArrayMetaData): IArray;
+function TFBStatement.CreateArray(column: IColumnMetaData): IArray;
 begin
-  Result := TFBArray.Create(aField);
+  Result := TFBArray.Create(column.GetArrayMetaData);
 end;
 
 function TFBStatement.GetSQLInfo(InfoRequest: byte): IDBInformation;
