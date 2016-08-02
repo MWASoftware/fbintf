@@ -30,7 +30,6 @@ type
     destructor Destroy; override;
 
     {IEvents}
-    function GetStatus: IStatus;
     procedure Cancel;
     function ExtractEventCounts: TEventCounts;
     procedure WaitForEvent;
@@ -254,11 +253,6 @@ begin
       isc_free( FResultBuffer);
   end;
   inherited Destroy;
-end;
-
-function TFBEvents.GetStatus: IStatus;
-begin
-  Result := Firebird25ClientAPI.Status;
 end;
 
 procedure TFBEvents.Cancel;

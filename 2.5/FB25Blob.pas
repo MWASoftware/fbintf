@@ -28,10 +28,11 @@ type
                        BlobID: TISC_QUAD); overload;
     destructor Destroy; override;
     procedure TransactionEnding(aTransaction: TFBTransaction);
+    property Handle: TISC_BLOB_HANDLE read FHandle;
+    property Attachment: TFBAttachment read FAttachment;
 
   {IBlob}
   public
-    function GetStatus: IStatus;
     procedure Cancel;
     procedure Close;
     function GetBlobID: TISC_QUAD;
@@ -43,8 +44,6 @@ type
     procedure LoadFromStream(S: TStream);
     procedure SaveToFile(Filename: string);
     procedure SaveToStream(S: TStream);
-    property Handle: TISC_BLOB_HANDLE read FHandle;
-    property Attachment: TFBAttachment read FAttachment;
   end;
 
 implementation
@@ -112,11 +111,6 @@ begin
     Cancel
   else
     Close;
-end;
-
-function TFBBlob.GetStatus: IStatus;
-begin
-  Result := Firebird25ClientAPI.Status;
 end;
 
 procedure TFBBlob.Cancel;
@@ -207,7 +201,7 @@ begin
 
   FEOB := returnCode = isc_segstr_eof;
   if (returnCode <> isc_segment) and (returnCode <> isc_segstr_eof) then
-    raise EIBInterBaseError.Create(GetStatus);
+    Firebird25ClientAPI.IBDataBaseError
 end;
 
 function TFBBlob.Write(const Buffer; Count: Longint): Longint;

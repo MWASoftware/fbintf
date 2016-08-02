@@ -175,6 +175,7 @@ type
     function getCount: integer;
     function Add(ParamType: byte): ISPBItem;
     function Find(ParamType: byte): ISPBItem;
+    procedure Remove(ParamType: byte);
     function getItems(index: integer): ISPBItem;
   end;
 
@@ -199,7 +200,6 @@ type
 
   public
     {IServiceManager}
-    function GetStatus: IStatus;
     function getSPB: ISPB;
     procedure Attach;
     procedure Detach;
@@ -398,6 +398,27 @@ uses FBErrorMessages;
         Result := FItems[i];
         Exit;
       end;
+  end;
+
+  procedure TSPB.Remove(ParamType: byte);
+  var i: integer;
+      len: integer;
+  begin
+    i := 0;
+    while (i < Length(FItems)) and  (FItems[i].getParamType <> ParamType) do
+      inc(i);
+
+    if i < Length(FItems) then
+    begin
+      len := (FItems[i] as TSPBItem).FBuflength;
+      inc(i);
+      while i < Length(FItems) do
+      begin
+         (FItems[i] as TSPBItem).MoveBy(-len);
+         Inc(i);
+      end;
+      Dec(FDataLength,len);
+    end;
   end;
 
   function TSPB.getItems(index: integer): ISPBItem;
@@ -1011,11 +1032,6 @@ begin
   InternalDetach(true);
   Firebird25ClientAPI.UnRegisterObj(self);
   inherited Destroy;
-end;
-
-function TFBServiceManager.GetStatus: IStatus;
-begin
-  Result := Firebird25ClientAPI.Status;
 end;
 
 function TFBServiceManager.getSPB: ISPB;

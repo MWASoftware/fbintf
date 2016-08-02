@@ -53,6 +53,7 @@ type
     function getCount: integer;
     function Add(ParamType: byte): IDPBItem;
     function Find(ParamType: byte): IDPBItem;
+    procedure Remove(ParamType: byte);
     function getItems(index: integer): IDPBItem;
   end;
 
@@ -63,6 +64,7 @@ type
     FHandle: TISC_DB_HANDLE;
     FDatabaseName: string;
     FDPB: IDPB;
+    FSQLDialect: integer;
   public
     constructor Create(DatabaseName: string; DPB: IDPB);
     constructor CreateDatabase(DatabaseName: string; SQLDialect: integer;
@@ -72,7 +74,6 @@ type
 
   public
     {IAttachment}
-    function GetStatus: IStatus;
     function getDPB: IDPB;
     procedure Connect;
     procedure Disconnect(Force: boolean=false);
@@ -80,9 +81,12 @@ type
     function StartTransaction(Params: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction;
     function CreateBlob(transaction: ITransaction): IBlob;
     function OpenBlob(transaction: ITransaction; BlobID: TISC_QUAD): IBlob;
-    procedure ExecImmediate(transaction: ITransaction; sql: string; SQLDialect: integer);
-    function Prepare(transaction: ITransaction; sql: string; SQLDialect: integer
-      ): IStatement;
+    procedure ExecImmediate(transaction: ITransaction; sql: string; SQLDialect: integer); overload;
+    procedure ExecImmediate(transaction: ITransaction; sql: string); overload;
+    function OpenCursorAtStart(transaction: ITransaction; sql: string; SQLDialect: integer): IResultSet; overload;
+    function OpenCursorAtStart(transaction: ITransaction; sql: string): IResultSet; overload;
+    function Prepare(transaction: ITransaction; sql: string; SQLDialect: integer): IStatement; overload;
+    function Prepare(transaction: ITransaction; sql: string): IStatement; overload;
     function GetEventHandler(Events: TStrings): IEvents;
 
     {Database Information}
@@ -279,6 +283,27 @@ begin
     end;
 end;
 
+procedure TDPB.Remove(ParamType: byte);
+var i: integer;
+    len: integer;
+begin
+  i := 0;
+  while (i < Length(FItems)) and  (FItems[i].getParamType <> ParamType) do
+    inc(i);
+
+  if i < Length(FItems) then
+  begin
+    len := (FItems[i] as TDPBItem).FBuflength;
+    inc(i);
+    while i < Length(FItems) do
+    begin
+       (FItems[i] as TDPBItem).MoveBy(-len);
+       Inc(i);
+    end;
+    Dec(FDataLength,len);
+  end;
+end;
+
 function TDPB.getItems(index: integer): IDPBItem;
 begin
    if (index >= 0 ) and (index < Length(FItems)) then
@@ -292,6 +317,7 @@ end;
 constructor TFBAttachment.Create(DatabaseName: string; DPB: IDPB);
 begin
   inherited Create;
+  FSQLDialect := 3;
   Firebird25ClientAPI.RegisterObj(self);
   FDatabaseName := DatabaseName;
   FDPB := DPB;
@@ -304,6 +330,7 @@ var sql: string;
     tr_handle: TISC_TR_HANDLE;
 begin
   inherited Create;
+  FSQLDialect := 3;
   Firebird25ClientAPI.RegisterObj(self);
   FDatabaseName := DatabaseName;
   FDPB := DPB;
@@ -330,27 +357,31 @@ begin
   inherited Destroy;
 end;
 
-function TFBAttachment.GetStatus: IStatus;
-begin
-  Result := Firebird25ClientAPI.Status;
-end;
-
 function TFBAttachment.getDPB: IDPB;
 begin
   Result := FDPB;
 end;
 
 procedure TFBAttachment.Connect;
+var Param: IDPBItem;
 begin
+  FSQLDialect := 3;
+
   with Firebird25ClientAPI do
   if FDPB = nil then
   Call(isc_attach_database(StatusVector, Length(FDatabaseName),
                         PChar(FDatabaseName), @FHandle, 0, nil))
   else
+  begin
    Call(isc_attach_database(StatusVector, Length(FDatabaseName),
                          PChar(FDatabaseName), @FHandle,
                          (FDPB as TDPB).getBufferLength,
                          (FDPB as TDPB).getBuffer));
+
+     Param := FDPB.Find(isc_dpb_set_db_SQL_dialect);
+     if Param <> nil then
+       FSQLDialect := Param.AsByte;
+  end;
 end;
 
 procedure TFBAttachment.Disconnect(Force: boolean);
@@ -406,10 +437,36 @@ begin
     Call(isc_dsql_execute_immediate(StatusVector, @fHandle, @TRHandle, 0,PChar(sql), SQLDialect, nil));
 end;
 
+procedure TFBAttachment.ExecImmediate(transaction: ITransaction; sql: string);
+begin
+  ExecImmediate(transaction,sql,FSQLDialect);
+end;
+
+function TFBAttachment.OpenCursorAtStart(transaction: ITransaction;
+  sql: string; SQLDialect: integer): IResultSet;
+var Statement: IStatement;
+begin
+  Statement := Prepare(transaction,sql,SQLDialect);
+  Result := Statement.OpenCursor;
+  Result.FetchNext;
+end;
+
+function TFBAttachment.OpenCursorAtStart(transaction: ITransaction; sql: string
+  ): IResultSet;
+begin
+  Result := OpenCursorAtStart(transaction,sql,FSQLDialect);
+end;
+
 function TFBAttachment.Prepare(transaction: ITransaction; sql: string;
   SQLDialect: integer): IStatement;
 begin
   Result := TFBStatement.Create(self,transaction,sql,SQLDialect);
+end;
+
+function TFBAttachment.Prepare(transaction: ITransaction; sql: string
+  ): IStatement;
+begin
+  Result := Prepare(transaction,sql,FSQLDialect);
 end;
 
 function TFBAttachment.GetEventHandler(Events: TStrings): IEvents;

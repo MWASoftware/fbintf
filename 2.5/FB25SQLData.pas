@@ -5,44 +5,36 @@ unit FB25SQLData;
 interface
 
 uses
-  Classes, SysUtils, IBExternals, IBHeader, IB, FB25Statement;
-
-{
-  Notes: SetSQLType should preserve nullable bit
-         SetDataLength should realloc memory
-
-}
+  Classes, SysUtils, IBExternals, IBHeader, IB;
 
 type
 
   { TSQLDataItem }
 
-  TSQLDataItem = class
+  TSQLDataItem = class(TInterfacedObject)
   private
      FModified: boolean;
-     FStatement: TFBStatement;
      function AdjustScale(Value: Int64; aScale: Integer): Double;
      function AdjustScaleToInt64(Value: Int64; aScale: Integer): Int64;
      function AdjustScaleToCurrency(Value: Int64; aScale: Integer): Currency;
      function GetSQLDialect: integer;
      procedure SetAsInteger(AValue: Integer);
   protected
+     FStatement: TObject;
      procedure Changed; virtual;
      function SQLData: PChar; virtual; abstract;
-     function SQLDataLength: integer; virtual; abstract;
-     function GetName: string; virtual; abstract;
-     function GetScale: short; virtual; abstract;
-     procedure SetScale(aValue: short); virtual; abstract;
-     procedure SetDataLength(len: integer); virtual; abstract;
-     function GetSQLType: short; virtual; abstract;
-     procedure SetSQLType(aValue: short); virtual; abstract;
-     property DataLength: integer read SQLDataLength write SetDataLength;
-     property Scale: short read GetScale write SetScale;
-     property SQLType: short read GetSQLType write SetSQLType;
+     function GetDataLength: short; virtual; abstract;
+     procedure SetScale(aValue: short); virtual;
+     procedure SetDataLength(len: short); virtual;
+     procedure SetSQLType(aValue: short); virtual;
+     property DataLength: short read GetDataLength write SetDataLength;
   public
-     constructor Create(aStatement: TFBStatement);
+     constructor Create(aStatement: TObject);
 
   public
+     function GetSQLType: short; virtual; abstract;
+     function GetName: string; virtual; abstract;
+     function GetScale: short; virtual; abstract;
      function GetAsBoolean: boolean;
      function GetAsCurrency: Currency;
      function GetAsInt64: Int64;
@@ -76,6 +68,7 @@ type
      procedure SetAsBlob(Value: IBlob);
      procedure SetIsNull(Value: Boolean);  virtual;
      procedure SetIsNullable(Value: Boolean);  virtual;
+     procedure SetName(aValue: string); virtual;
      property AsDate: TDateTime read GetAsDateTime write SetAsDate;
      property AsBoolean:boolean read GetAsBoolean write SetAsBoolean;
      property AsTime: TDateTime read GetAsDateTime write SetAsTime;
@@ -95,11 +88,13 @@ type
      property Modified: Boolean read getModified;
      property IsNull: Boolean read GetIsNull write SetIsNull;
      property IsNullable: Boolean read GetIsNullable write SetIsNullable;
+     property Scale: short read GetScale write SetScale;
+     property SQLType: short read GetSQLType write SetSQLType;
   end;
 
 implementation
 
-uses FBErrorMessages, FB25Blob, FB25ClientAPI, variants;
+uses FBErrorMessages, FB25Blob, FB25ClientAPI, variants, FB25Statement;
 
 function TSQLDataItem.AdjustScale(Value: Int64; aScale: Integer): Double;
 var
@@ -190,12 +185,27 @@ begin
   FModified := true;
 end;
 
-function TSQLDataItem.GetSQLDialect: integer;
+procedure TSQLDataItem.SetScale(aValue: short);
 begin
-  Result := FStatement.SQLDialect;
+
 end;
 
-constructor TSQLDataItem.Create(aStatement: TFBStatement);
+procedure TSQLDataItem.SetDataLength(len: short);
+begin
+
+end;
+
+procedure TSQLDataItem.SetSQLType(aValue: short);
+begin
+
+end;
+
+function TSQLDataItem.GetSQLDialect: integer;
+begin
+  Result := TFBStatement(FStatement).SQLDialect;
+end;
+
+constructor TSQLDataItem.Create(aStatement: TObject);
 begin
   inherited Create;
   FStatement := aStatement;
@@ -457,7 +467,7 @@ begin
       SQL_BLOB: begin
         ss := TStringStream.Create('');
         try
-          b := TFBBlob.Create(FStatement.Attachment,FStatement.Transaction,AsQuad);
+          b := TFBBlob.Create(TFBStatement(FStatement).Attachment,TFBStatement(FStatement).Transaction,AsQuad);
           try
             b.SaveToStream(ss);
           finally
@@ -561,7 +571,7 @@ function TSQLDataItem.GetAsBlob: IBlob;
 begin
   if SQLType <>  SQL_BLOB then
       IBError(ibxeInvalidDataConversion, [nil]);
-  Result := TFBBlob.Create(FStatement.Attachment,FStatement.Transaction,AsQuad);
+  Result := TFBBlob.Create(TFBStatement(FStatement).Attachment,TFBStatement(FStatement).Transaction,AsQuad);
 end;
 
 function TSQLDataItem.GetModified: boolean;
@@ -578,6 +588,11 @@ end;
 procedure TSQLDataItem.SetIsNullable(Value: Boolean);
 begin
   //ignore unless overridden
+end;
+
+procedure TSQLDataItem.SetName(aValue: string);
+begin
+
 end;
 
 procedure TSQLDataItem.SetAsCurrency(Value: Currency);
@@ -801,7 +816,7 @@ begin
     begin
       ss := TStringStream.Create(Value);
       try
-        b := TFBBlob.Create(FStatement.Attachment,FStatement.Transaction);
+        b := TFBBlob.Create(TFBStatement(FStatement).Attachment,TFBStatement(FStatement).Transaction);
         try
           b.LoadFromStream(ss);
         finally

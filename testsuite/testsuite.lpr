@@ -3,10 +3,10 @@ program testsuite;
 {$mode objfpc}{$H+}
 
 uses
-  {$IFDEF UNIX}{$IFDEF UseCThreads}
+  {$IFDEF UNIX}
   cthreads,
-  {$ENDIF}{$ENDIF}
-  Classes, SysUtils, CustApp, TestManager, Test1, test2, unit1
+  {$ENDIF}
+  Classes, SysUtils, CustApp, TestManager, Test1, test2
   { you can add units after this };
 
 type

@@ -30,7 +30,6 @@ type
 
   public
     {ITransaction}
-    function GetStatus: IStatus;
     function GetInTransaction: boolean;
     procedure Commit;
     procedure CommitRetaining;
@@ -44,38 +43,8 @@ implementation
 
 uses FBErrorMessages, FB25Blob, FB25Statement;
 
-const
-  TPBPrefix = 'isc_tpb_';
-  TPBConstantNames: array[1..isc_tpb_last_tpb_constant] of string = (
-    'consistency',
-    'concurrency',
-    'shared',
-    'protected',
-    'exclusive',
-    'wait',
-    'nowait',
-    'read',
-    'write',
-    'lock_read',
-    'lock_write',
-    'verb_time',
-    'commit_time',
-    'ignore_limbo',
-    'read_committed',
-    'autocommit',
-    'rec_version',
-    'no_rec_version',
-    'restart_requests',
-    'no_auto_undo'
-  );
 
 { TFBTransaction }
-
-{ GenerateTPB -
-  Given a string containing a textual representation
-  of the transaction parameters, generate a transaction
-  parameter buffer, and return it and its length in
-  TPB and TPBLength, respectively. }
 
 
 procedure TFBTransaction.GenerateTPB(sl: array of byte; var TPB: string;
@@ -110,8 +79,6 @@ end;
 constructor TFBTransaction.Create(Attachments: array of IAttachment;
   Params: array of byte; DefaultCompletion: TTransactionCompletion);
 var
-  TPB: String;
-  TPBLength: short;
   i: Integer;
 begin
   inherited Create;
@@ -140,7 +107,6 @@ begin
 end;
 
 destructor TFBTransaction.Destroy;
-var i: integer;
 begin
   case FDefaultCompletion of
   tcRollback:
@@ -149,11 +115,6 @@ begin
     Commit;
   end;
   inherited Destroy;
-end;
-
-function TFBTransaction.GetStatus: IStatus;
-begin
-  Result := Firebird25ClientAPI.Status;
 end;
 
 function TFBTransaction.GetInTransaction: boolean;

@@ -471,7 +471,6 @@ type
   TTransactionCompletion = (tcCommit,tcRollback);
 
   ITransaction = interface
-    function GetStatus: IStatus;
     function GetInTransaction: boolean;
     procedure Commit;
     procedure CommitRetaining;
@@ -483,7 +482,6 @@ type
   end;
 
   IBlob = interface
-    function GetStatus: IStatus;
     procedure Cancel;
     procedure Close;
     function GetBlobID: TISC_QUAD;
@@ -497,29 +495,32 @@ type
     procedure SaveToStream(S: TStream);
  end;
 
+  { IFieldMetaData }
+
   IFieldMetaData = interface
-    function GetSQLType: cardinal;
-    function getSubtype: integer;
+    function GetSQLType: short;
+    function getSubtype: short;
     function getRelationName: string;
     function getOwnerName: string;
     function getSQLName: string;    {Name of the column}
     function getAliasName: string;  {Alias Name of column or Column Name if not alias}
     function getName: string;       {Disambiguated uppercase Field Name}
-    function getScale: integer;
+    function getScale: short;
     function getCharSetID: cardinal;
     function getIsNullable: boolean;
     function GetSize: integer;
     property Name: string read GetName;
     property Size: Integer read GetSize;
     property CharSetID: cardinal read getCharSetID;
-    property SQLType: cardinal read GetSQLType;
-    property SQLSubtype: integer read getSubtype;
+    property SQLType: short read GetSQLType;
+    property SQLSubtype: short read getSubtype;
     property IsNullable: Boolean read GetIsNullable;
   end;
 
   IMetaData = interface
     function getCount: integer;
     function getFieldMetaData(index: integer): IFieldMetaData;
+    function GetUniqueRelationName: string;
     function ByName(Idx: String): IFieldMetaData;
   end;
 
@@ -537,6 +538,7 @@ type
     function GetAsString: String;
     function GetIsNull: Boolean;
     function GetAsVariant: Variant;
+    function GetAsBlob: IBlob;
     property AsDate: TDateTime read GetAsDateTime;
     property AsBoolean:boolean read GetAsBoolean;
     property AsTime: TDateTime read GetAsDateTime;
@@ -552,6 +554,7 @@ type
     property AsShort: Short read GetAsShort;
     property AsString: String read GetAsString;
     property AsVariant: Variant read GetAsVariant ;
+    property AsBlob: IBlob read GetAsBlob;
     property IsNull: Boolean read GetIsNull;
   end;
 
@@ -569,9 +572,9 @@ type
   end;
 
   ISQLParam = interface
-    function GetSQLType: cardinal;
-    function getSubtype: integer;
-    function getScale: integer;
+    function GetSQLType: short;
+    function getSubtype: short;
+    function getScale: short;
     function getCharSetID: cardinal;
     function GetSize: integer;
     function GetAsBoolean: boolean;
@@ -587,6 +590,7 @@ type
     function GetAsString: String;
     function GetIsNull: Boolean;
     function GetAsVariant: Variant;
+    function GetAsBlob: IBlob;
     function getName: string;
     procedure SetAsBoolean(AValue: boolean);
     procedure SetAsCurrency(Value: Currency);
@@ -603,6 +607,7 @@ type
     procedure SetAsString(Value: String);
     procedure SetAsVariant(Value: Variant);
     procedure SetIsNull(Value: Boolean);
+    procedure SetAsBlob(Value: IBlob);
     function getModified: boolean;
     procedure Clear;
     procedure SetName(Value: string);
@@ -622,6 +627,7 @@ type
     property AsString: String read GetAsString write SetAsString;
     property AsVariant: Variant read GetAsVariant write SetAsVariant;
     property IsNull: Boolean read GetIsNull write SetIsNull;
+    property AsBlob: IBlob read GetAsBlob write SetAsBlob;
     property Modified: Boolean read getModified;
     property Name: string read GetName write SetName;
  end;
@@ -630,6 +636,8 @@ type
     function getCount: integer;
     function getSQLParam(index: integer): ISQLParam;
     function ByName(Idx: String): ISQLParam ;
+    function GetModified: Boolean;
+    property Modified: Boolean read GetModified;
     property Params[index: integer]: ISQLParam read getSQLParam; default;
   end;
 
@@ -644,7 +652,6 @@ type
   IDBInformation = interface;
 
   IStatement = interface
-    function GetStatus: IStatus;
     function GetSQLParams: ISQLParams;
     function GetOutMetaData: IMetaData;
     function GetPlan: String;
@@ -672,7 +679,6 @@ type
   TEventHandler = procedure(Sender: IEvents) of object;
 
   IEvents = interface
-    function GetStatus: IStatus;
     procedure Cancel;
     function ExtractEventCounts: TEventCounts;
     procedure WaitForEvent;
@@ -724,11 +730,11 @@ type
     function Add(ParamType: byte): IDPBItem;
     function getItems(index: integer): IDPBItem;
     function Find(ParamType: byte): IDPBItem;
+    procedure Remove(ParamType: byte);
     property Items[index: integer]: IDPBItem read getItems; default;
   end;
 
   IAttachment = interface
-    function GetStatus: IStatus;
     function getDPB: IDPB;
     procedure Connect;
     procedure Disconnect(Force: boolean=false);
@@ -737,6 +743,7 @@ type
     function CreateBlob(transaction: ITransaction): IBlob;
     function OpenBlob(transaction: ITransaction; BlobID: TISC_QUAD): IBlob;
     procedure ExecImmediate(transaction: ITransaction; sql: string; SQLDialect: integer);
+    function OpenCursorAtStart(transaction: ITransaction; sql: string; SQLDialect: integer): IResultSet;
     function Prepare(transaction: ITransaction; sql: string; SQLDialect: integer): IStatement;
 
     {Events}
@@ -807,13 +814,13 @@ type
     function Add(ParamType: byte): ISPBItem;
     function getItems(index: integer): ISPBItem;
     function Find(ParamType: byte): ISPBItem;
+    procedure Remove(ParamType: byte);
     property Items[index: integer]: ISPBItem read getItems; default;
   end;
 
   { IServiceManager }
 
   IServiceManager = interface
-    function GetStatus: IStatus;
     function getSPB: ISPB;
     procedure Attach;
     procedure Detach;
