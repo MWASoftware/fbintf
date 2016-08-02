@@ -71,6 +71,7 @@ type
       CreateParams: string; DPB: IDPB);
     destructor Destroy; override;
     property Handle: TISC_DB_HANDLE read FHandle;
+    property SQLDialect: integer read FSQLDialect;
 
   public
     {IAttachment}
@@ -80,14 +81,14 @@ type
     procedure DropDatabase;
     function StartTransaction(Params: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction;
     function CreateBlob(transaction: ITransaction): IBlob;
-    procedure ExecImmediate(transaction: ITransaction; sql: string; SQLDialect: integer); overload;
+    procedure ExecImmediate(transaction: ITransaction; sql: string; aSQLDialect: integer); overload;
     procedure ExecImmediate(transaction: ITransaction; sql: string); overload;
-    function OpenCursorAtStart(transaction: ITransaction; sql: string; SQLDialect: integer): IResultSet; overload;
+    function OpenCursorAtStart(transaction: ITransaction; sql: string; aSQLDialect: integer): IResultSet; overload;
     function OpenCursorAtStart(transaction: ITransaction; sql: string): IResultSet; overload;
-    function Prepare(transaction: ITransaction; sql: string; SQLDialect: integer): IStatement; overload;
+    function Prepare(transaction: ITransaction; sql: string; aSQLDialect: integer): IStatement; overload;
     function Prepare(transaction: ITransaction; sql: string): IStatement; overload;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: string;
-                       SQLDialect: integer; GenerateParamNames: boolean=false;
+                       aSQLDialect: integer; GenerateParamNames: boolean=false;
                        UniqueParamNames: boolean=false): IStatement;
     function GetEventHandler(Events: TStrings): IEvents;
 
@@ -425,12 +426,12 @@ begin
 end;
 
 procedure TFBAttachment.ExecImmediate(transaction: ITransaction; sql: string;
-  SQLDialect: integer);
+  aSQLDialect: integer);
 var TRHandle: TISC_TR_HANDLE;
 begin
   TRHandle := (Transaction as TFBTransaction).Handle;
   with Firebird25ClientAPI do
-    Call(isc_dsql_execute_immediate(StatusVector, @fHandle, @TRHandle, 0,PChar(sql), SQLDialect, nil));
+    Call(isc_dsql_execute_immediate(StatusVector, @fHandle, @TRHandle, 0,PChar(sql), aSQLDialect, nil));
 end;
 
 procedure TFBAttachment.ExecImmediate(transaction: ITransaction; sql: string);
@@ -439,10 +440,10 @@ begin
 end;
 
 function TFBAttachment.OpenCursorAtStart(transaction: ITransaction;
-  sql: string; SQLDialect: integer): IResultSet;
+  sql: string; aSQLDialect: integer): IResultSet;
 var Statement: IStatement;
 begin
-  Statement := Prepare(transaction,sql,SQLDialect);
+  Statement := Prepare(transaction,sql,aSQLDialect);
   Result := Statement.OpenCursor;
   Result.FetchNext;
 end;
@@ -454,9 +455,9 @@ begin
 end;
 
 function TFBAttachment.Prepare(transaction: ITransaction; sql: string;
-  SQLDialect: integer): IStatement;
+  aSQLDialect: integer): IStatement;
 begin
-  Result := TFBStatement.Create(self,transaction,sql,SQLDialect);
+  Result := TFBStatement.Create(self,transaction,sql,aSQLDialect);
 end;
 
 function TFBAttachment.Prepare(transaction: ITransaction; sql: string
@@ -466,10 +467,10 @@ begin
 end;
 
 function TFBAttachment.PrepareWithNamedParameters(transaction: ITransaction;
-  sql: string; SQLDialect: integer; GenerateParamNames: boolean;
+  sql: string; aSQLDialect: integer; GenerateParamNames: boolean;
   UniqueParamNames: boolean): IStatement;
 begin
-  Result := TFBStatement.CreateWithParameterNames(self,transaction,sql,SQLDialect,
+  Result := TFBStatement.CreateWithParameterNames(self,transaction,sql,aSQLDialect,
          GenerateParamNames,UniqueParamNames);
 end;
 

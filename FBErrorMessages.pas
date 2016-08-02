@@ -153,7 +153,8 @@ type
       ibxeDPBParamTypeError,
       ibxeSPBIndexError,
       ibxeSPBParamTypeError,
-      ibxeDuplicateParamName
+      ibxeDuplicateParamName,
+      ibxeInvalidArrayDimensions
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;
@@ -328,6 +329,7 @@ resourcestring
   SSPBIndexError =  'SPB Index out of range (%d)';
   SSPBParamTypeError = 'Invalid Request for SPB Param Type';
   SDuplicateParamName = 'Blob or array parameter name must be unique (%s)';
+  SInvalidArrayDimensions = 'Invalid number of array dimensions {%d)';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -466,7 +468,8 @@ const
     SDPBParamTypeError,
     SSPBIndexError,
     SSPBParamTypeError,
-    SDuplicateParamName
+    SDuplicateParamName,
+    SInvalidArrayDimensions
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;

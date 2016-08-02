@@ -468,6 +468,29 @@ type
     procedure SetIBDataBaseErrorMessages(Value: TIBDataBaseErrorMessages);
   end;
 
+  ISQLElement = interface;
+
+  TArrayBound = record
+    UpperBound: short;
+    LowerBound: short;
+  end;
+  TArrayBounds = array of TArrayBound;
+  TArrayCoords = array of integer;
+
+  IArrayMetaData = interface
+    function GetSQLType: short;
+    function GetTableName: string;
+    function GetColumnName: string;
+    function GetDimensions: integer;
+    function GetBounds: TArrayBounds;
+  end;
+
+  IArray = interface(IArrayMetaData)
+    function GetElement(x: integer): ISQLElement; overload;
+    function GetElement(x, y: integer): ISQLElement; overload;
+    function GetElement(coords: TArrayCoords): ISQLElement; overload;
+  end;
+
   TTransactionCompletion = (tcCommit,tcRollback);
 
   ITransaction = interface
@@ -512,6 +535,7 @@ type
     function getCharSetID: cardinal;
     function getIsNullable: boolean;
     function GetSize: integer;
+    function GetArrayMetaData: IArrayMetaData;
     property Name: string read GetName;
     property Size: Integer read GetSize;
     property CharSetID: cardinal read getCharSetID;
@@ -542,6 +566,7 @@ type
     function GetIsNull: Boolean;
     function GetAsVariant: Variant;
     function GetAsBlob: IBlob;
+    function GetAsArray: IArray;
     property AsDate: TDateTime read GetAsDateTime;
     property AsBoolean:boolean read GetAsBoolean;
     property AsTime: TDateTime read GetAsDateTime;
@@ -558,6 +583,7 @@ type
     property AsString: String read GetAsString;
     property AsVariant: Variant read GetAsVariant ;
     property AsBlob: IBlob read GetAsBlob;
+    property AsArray: IArray read GetAsArray;
     property IsNull: Boolean read GetIsNull;
   end;
 
@@ -574,11 +600,8 @@ type
     procedure Close;
   end;
 
-  ISQLParam = interface
-    function GetSQLType: short;
-    function getSubtype: short;
+  ISQLElement = interface
     function getScale: short;
-    function getCharSetID: cardinal;
     function GetSize: integer;
     function GetAsBoolean: boolean;
     function GetAsCurrency: Currency;
@@ -591,10 +614,7 @@ type
     function GetAsQuad: TISC_QUAD;
     function GetAsShort: Short;
     function GetAsString: String;
-    function GetIsNull: Boolean;
     function GetAsVariant: Variant;
-    function GetAsBlob: IBlob;
-    function getName: string;
     procedure SetAsBoolean(AValue: boolean);
     procedure SetAsCurrency(Value: Currency);
     procedure SetAsInt64(Value: Int64);
@@ -609,10 +629,7 @@ type
     procedure SetAsShort(Value: Short);
     procedure SetAsString(Value: String);
     procedure SetAsVariant(Value: Variant);
-    procedure SetIsNull(Value: Boolean);
-    procedure SetAsBlob(Value: IBlob);
-    function getModified: boolean;
-    procedure Clear;
+    function GetModified: boolean;
     property AsDate: TDateTime read GetAsDateTime write SetAsDate;
     property AsBoolean:boolean read GetAsBoolean write SetAsBoolean;
     property AsTime: TDateTime read GetAsDateTime write SetAsTime;
@@ -628,8 +645,23 @@ type
     property AsShort: Short read GetAsShort write SetAsShort;
     property AsString: String read GetAsString write SetAsString;
     property AsVariant: Variant read GetAsVariant write SetAsVariant;
-    property IsNull: Boolean read GetIsNull write SetIsNull;
+  end;
+
+  ISQLParam = interface(ISQLElement)
+    procedure Clear;
+    function getCharSetID: cardinal;
+    function GetIsNull: Boolean;
+    function GetAsBlob: IBlob;
+    function GetAsArray: IArray;
+    function GetName: string;
+    function GetSQLType: short;
+    function GetSubtype: short;
+    procedure SetIsNull(Value: Boolean);
+    procedure SetAsBlob(Value: IBlob);
+    procedure SetAsArray(anArray: IArray);
     property AsBlob: IBlob read GetAsBlob write SetAsBlob;
+    property AsArray: IArray read GetAsArray write SetAsArray;
+    property IsNull: Boolean read GetIsNull write SetIsNull;
     property Modified: Boolean read getModified;
     property Name: string read GetName;
  end;
@@ -666,6 +698,7 @@ type
     function Execute(aTransaction: ITransaction=nil): IResults;
     function OpenCursor(aTransaction: ITransaction=nil): IResultSet;
     function CreateBlob: IBlob;
+    function CreateArray(aField: IArrayMetaData): IArray;
     property SQLParams: ISQLParams read GetSQLParams;
     property SQLType: TIBSQLTypes read GetSQLType;
   end;

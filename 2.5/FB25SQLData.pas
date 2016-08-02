@@ -5,7 +5,7 @@ unit FB25SQLData;
 interface
 
 uses
-  Classes, SysUtils, IBExternals, IBHeader, IB;
+  Classes, SysUtils, IBExternals, IBHeader, IB, FB25Attachment, FB25Transaction;
 
 type
 
@@ -14,13 +14,14 @@ type
   TSQLDataItem = class(TInterfacedObject)
   private
      FModified: boolean;
+     FSQLDialect: integer;
      function AdjustScale(Value: Int64; aScale: Integer): Double;
      function AdjustScaleToInt64(Value: Int64; aScale: Integer): Int64;
      function AdjustScaleToCurrency(Value: Int64; aScale: Integer): Currency;
-     function GetSQLDialect: integer;
      procedure SetAsInteger(AValue: Integer);
   protected
-     FStatement: TObject;
+     FAttachment: TFBAttachment;
+     FTransaction: TFBTransaction;
      procedure Changed; virtual;
      function SQLData: PChar; virtual; abstract;
      function GetDataLength: short; virtual; abstract;
@@ -29,7 +30,7 @@ type
      procedure SetSQLType(aValue: short); virtual;
      property DataLength: short read GetDataLength write SetDataLength;
   public
-     constructor Create(aStatement: TObject);
+     constructor Create(Attachment: TFBAttachment; Transaction: TFBTransaction; SQLDialect: integer);
 
   public
      function GetSQLType: short; virtual; abstract;
@@ -200,15 +201,13 @@ begin
 
 end;
 
-function TSQLDataItem.GetSQLDialect: integer;
-begin
-  Result := TFBStatement(FStatement).SQLDialect;
-end;
-
-constructor TSQLDataItem.Create(aStatement: TObject);
+constructor TSQLDataItem.Create(Attachment: TFBAttachment;
+  Transaction: TFBTransaction; SQLDialect: integer);
 begin
   inherited Create;
-  FStatement := aStatement;
+  FAttachment := Attachment;
+  FTransaction := Transaction;
+  FSQLDialect := SQLDialect;
 end;
 
 function TSQLDataItem.GetAsBoolean: boolean;
@@ -226,7 +225,7 @@ end;
 function TSQLDataItem.GetAsCurrency: Currency;
 begin
   result := 0;
-  if GetSQLDialect < 3 then
+  if FSQLDialect < 3 then
     result := GetAsDouble
   else begin
     if not IsNull then
@@ -467,7 +466,7 @@ begin
       SQL_BLOB: begin
         ss := TStringStream.Create('');
         try
-          b := TFBBlob.Create(TFBStatement(FStatement).Attachment,TFBStatement(FStatement).Transaction,AsQuad);
+          b := TFBBlob.Create(FAttachment,FTransaction,AsQuad);
           try
             b.SaveToStream(ss);
           finally
@@ -491,7 +490,7 @@ begin
           result := TrimRight(result);
       end;
       SQL_TYPE_DATE:
-        case GetSQLDialect of
+        case FSQLDialect of
           1 : result := DateTimeToStr(AsDateTime);
           3 : result := DateToStr(AsDateTime);
         end;
@@ -571,7 +570,7 @@ function TSQLDataItem.GetAsBlob: IBlob;
 begin
   if SQLType <>  SQL_BLOB then
       IBError(ibxeInvalidDataConversion, [nil]);
-  Result := TFBBlob.Create(TFBStatement(FStatement).Attachment,TFBStatement(FStatement).Transaction,AsQuad);
+  Result := TFBBlob.Create(FAttachment,FTransaction,AsQuad);
 end;
 
 function TSQLDataItem.GetModified: boolean;
@@ -597,7 +596,7 @@ end;
 
 procedure TSQLDataItem.SetAsCurrency(Value: Currency);
 begin
-  if GetSQLDialect < 3 then
+  if FSQLDialect < 3 then
     AsDouble := Value
   else
   begin
@@ -628,7 +627,7 @@ var
    tm_date: TCTimeStructure;
    Yr, Mn, Dy: Word;
 begin
-  if GetSQLDialect < 3 then
+  if FSQLDialect < 3 then
   begin
     AsDateTime := Value;
     exit;
@@ -658,7 +657,7 @@ var
   tm_date: TCTimeStructure;
   Hr, Mt, S, Ms: Word;
 begin
-  if GetSQLDialect < 3 then
+  if FSQLDialect < 3 then
   begin
     AsDateTime := Value;
     exit;
@@ -816,7 +815,7 @@ begin
     begin
       ss := TStringStream.Create(Value);
       try
-        b := TFBBlob.Create(TFBStatement(FStatement).Attachment,TFBStatement(FStatement).Transaction);
+        b := TFBBlob.Create(FAttachment,FTransaction);
         try
           b.LoadFromStream(ss);
         finally

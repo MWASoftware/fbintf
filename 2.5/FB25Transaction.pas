@@ -42,7 +42,7 @@ type
 
 implementation
 
-uses FBErrorMessages, FB25Blob, FB25Statement;
+uses FBErrorMessages, FB25Blob, FB25Statement, FB25Array;
 
 
 { TFBTransaction }
@@ -74,7 +74,10 @@ begin
       TFBBlob(OwnedObjects[i]).TransactionEnding(self)
     else
     if TObject(OwnedObjects[i]) is TFBStatement then
-      TFBStatement(OwnedObjects[i]).TransactionEnding(self);
+      TFBStatement(OwnedObjects[i]).TransactionEnding(self)
+  else
+  if TObject(OwnedObjects[i]) is TFBArray then
+    TFBArray(OwnedObjects[i]).TransactionEnding(self);
 end;
 
 constructor TFBTransaction.Create(Attachments: array of IAttachment;

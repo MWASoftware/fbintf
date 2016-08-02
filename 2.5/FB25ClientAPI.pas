@@ -89,6 +89,9 @@ type
     isc_add_user   : Tisc_add_user;
     isc_delete_user: Tisc_delete_user;
     isc_modify_user: Tisc_modify_user;
+    isc_array_lookup_bounds: Tisc_array_lookup_bounds;
+    isc_array_get_slice: Tisc_array_get_slice;
+    isc_array_put_slice: Tisc_array_put_slice;
 
   public
     {IFirebirdAPI}
@@ -264,6 +267,9 @@ begin
   isc_add_user := GetProcAddr('isc_add_user'); {do not localize}
   isc_delete_user := GetProcAddr('isc_delete_user'); {do not localize}
   isc_modify_user := GetProcAddr('isc_modify_user'); {do not localize}
+  isc_array_lookup_bounds := GetProcAddr('isc_array_lookup_bounds'); {do not localize}
+  isc_array_get_slice := GetProcAddr('isc_array_get_slice'); {do not localize}
+  isc_array_put_slice := GetProcAddr('isc_array_put_slice'); {do not localize}
 
   FIBServiceAPIPresent := true;
   isc_rollback_retaining := GetProcAddress(IBLibrary, 'isc_rollback_retaining'); {do not localize}

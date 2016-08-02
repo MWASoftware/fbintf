@@ -57,12 +57,18 @@ type
   private
     FIndex: Integer;
     FName: String;
+    FParent: TIBXSQLDA;
     FXSQLVAR: PXSQLVAR;       { Point to the PXSQLVAR in the owner object }
   protected
     function SQLData: PChar; override;
     function GetDataLength: short; override;
 
   public
+    constructor Create(aParent: TIBXSQLDA; aStatement: TFBStatement);
+    property Parent: TIBXSQLDA read FParent;
+
+  public
+    {IFieldMetaData}
     function GetSQLType: short; override;
     function getSubtype: short;
     function getRelationName: string;
@@ -75,6 +81,7 @@ type
     function GetIsNull: Boolean; override;
     function GetIsNullable: boolean; override;
     function GetSize: integer;
+    function GetArrayMetaData: IArrayMetaData;
     property Name: string read GetName;
     property Size: Integer read GetSize;
     property CharSetID: cardinal read getCharSetID;
@@ -83,15 +90,19 @@ type
     property IsNullable: Boolean read GetIsNullable;
   end;
 
-  TIBSQLData = class(TIBXSQLVAR,ISQLData);
+  { TIBSQLData }
+
+  TIBSQLData = class(TIBXSQLVAR,ISQLData)
+  public
+    function GetAsArray: IArray;
+  end;
 
   TIBXINPUTSQLDA = class;
 
   { TIBXSQLParam }
 
-  TIBXSQLParam = class(TIBXSQLVAR,ISQLParam)
+  TIBXSQLParam = class(TIBSQLData,ISQLParam)
   private
-    FParent: TIBXINPUTSQLDA;
     FChanging: boolean;
     FUniqueName: boolean;
   protected
@@ -100,13 +111,12 @@ type
     procedure SetDataLength(len: short); override;
     procedure SetSQLType(aValue: short); override;
   public
-    constructor Create(Parent: TIBXSQLDA; aStatement: TFBStatement);
-  public
 
     procedure Clear;
     procedure SetName(Value: string); override;
     procedure SetIsNull(Value: Boolean);  override;
     procedure SetIsNullable(Value: Boolean);  override;
+    procedure SetAsArray(anArray: IArray);
     property IsNullable: Boolean read GetIsNullable write SetIsNullable;
   end;
 
@@ -139,9 +149,12 @@ type
     function VarByName(Idx: String): TIBXSQLVAR;
     function GetUniqueRelationName: string;
     procedure Initialize;
+    function GetAttachment: TFBAttachment;
+    function GetTransaction: TFBTransaction; virtual;
     property AsXSQLDA: PXSQLDA read GetXSQLDA;
     property Count: Integer read FCount write SetCount;
     property RecordSize: Integer read GetRecordSize;
+    property Statement: TFBStatement read FStatement;
   end;
 
   { TIBXINPUTSQLDA }
@@ -208,6 +221,7 @@ type
     {IResultSet}
     function FetchNext: boolean;
     function GetCursorName: string;
+    function GetTransaction: TFBTransaction; override;
     procedure Close;
   end;
 
@@ -274,6 +288,7 @@ type
     function Execute(aTransaction: ITransaction=nil): IResults;
     function OpenCursor(aTransaction: ITransaction=nil): IResultSet;
     function CreateBlob: IBlob;
+    function CreateArray(aField: IArrayMetaData): IArray;
     property Handle: TISC_STMT_HANDLE read FHandle;
     property SQLParams: ISQLParams read GetSQLParams;
     property SQLType: TIBSQLTypes read GetSQLType;
@@ -282,10 +297,20 @@ end;
 
 implementation
 
-uses IBUtils, FBErrorMessages, FB25Blob, variants, IBErrorCodes, FB25DBInfo;
+uses IBUtils, FBErrorMessages, FB25Blob, variants, IBErrorCodes, FB25DBInfo, FB25Array;
 
 const
    sSQLErrorSeparator = ' When Executing: ';
+
+{ TIBSQLData }
+
+function TIBSQLData.GetAsArray: IArray;
+begin
+  if GetSQLType <> SQL_ARRAY then
+    IBError(ibxeInvalidDataConversion,[nil]);
+
+  Result := TFBArray.Create(self);
+end;
 
 { TIBXSQLParam }
 
@@ -298,13 +323,13 @@ begin
     IBError(ibxeDuplicateParamName,[FName]);
 
   for i := 0 to FParent.FCount - 1 do
-    if FParent[i].FName = FName then
+    if (FParent as TIBXINPUTSQLDA)[i].FName = FName then
     begin
-      FParent[i].FChanging := true;
+      (FParent as TIBXINPUTSQLDA)[i].FChanging := true;
       try
-        FParent[i].AsVariant := AsVariant;
+        (FParent as TIBXINPUTSQLDA)[i].AsVariant := AsVariant;
       finally
-        FParent[i].FChanging := false;
+        (FParent as TIBXINPUTSQLDA)[i].FChanging := false;
       end;
     end;
 end;
@@ -324,12 +349,6 @@ end;
 procedure TIBXSQLParam.SetSQLType(aValue: short);
 begin
   FXSQLVAR^.sqltype := aValue or (FXSQLVAR^.sqltype and 1);
-end;
-
-constructor TIBXSQLParam.Create(Parent: TIBXSQLDA; aStatement: TFBStatement);
-begin
-  inherited Create(aStatement);
-  FParent := TIBXINPUTSQLDA(Parent);
 end;
 
 procedure TIBXSQLParam.Clear;
@@ -380,6 +399,14 @@ begin
   end;
 end;
 
+procedure TIBXSQLParam.SetAsArray(anArray: IArray);
+begin
+  if GetSQLType <> SQL_ARRAY then
+    IBError(ibxeInvalidDataConversion,[nil]);
+
+  SetAsQuad((AnArray as TFBArray).GetArrayID);
+end;
+
 { TIBXResults }
 
 function TIBXResults.getSQLData(index: integer): ISQLData;
@@ -415,6 +442,11 @@ end;
 function TIBXResultSet.GetCursorName: string;
 begin
   Result := FStatement.FCursor;
+end;
+
+function TIBXResultSet.GetTransaction: TFBTransaction;
+begin
+  Result := FTransaction;
 end;
 
 procedure TIBXResultSet.Close;
@@ -538,7 +570,7 @@ end;
 
 function TIBXOUTPUTSQLDA.CreateSQLVAR: TIBXSQLVAR;
 begin
-  Result := TIBSQLData.Create(FStatement);
+  Result := TIBSQLData.Create(self,FStatement);
   SetLength(FSQLDataIntf,Length(FSQLDataIntf) + 1);
   FSQLDataIntf[Length(FSQLDataIntf)-1] := TIBSQLData(Result);
 end;
@@ -619,6 +651,13 @@ begin
   Result := FXSQLVAR^.sqllen;
 end;
 
+constructor TIBXSQLVAR.Create(aParent: TIBXSQLDA; aStatement: TFBStatement);
+begin
+  with aParent do
+    inherited Create(GetAttachment,GetTransaction,Statement.SQLDialect);
+  FParent := aParent;
+end;
+
 function TIBXSQLVAR.GetSQLType: short;
 begin
   result := FXSQLVAR^.sqltype and (not 1);
@@ -683,6 +722,16 @@ end;
 function TIBXSQLVAR.GetSize: integer;
 begin
   result := FXSQLVAR^.sqllen;
+end;
+
+function TIBXSQLVAR.GetArrayMetaData: IArrayMetaData;
+begin
+  if GetSQLType <> SQL_ARRAY then
+    IBError(ibxeInvalidDataConversion,[nil]);
+
+  Result := TFBArrayMetaData.Create(Parent.Statement.FAttachment,
+                Parent.Statement.FTransaction,
+                GetRelationName,GetSQLName,Parent.Statement.SQLDialect);
 end;
 
 { TIBXSQLDA }
@@ -838,6 +887,16 @@ begin
       end;
     end;
   end;
+end;
+
+function TIBXSQLDA.GetAttachment: TFBAttachment;
+begin
+  Result := FStatement.FAttachment;
+end;
+
+function TIBXSQLDA.GetTransaction: TFBTransaction;
+begin
+  Result := FStatement.FTransaction;
 end;
 
 procedure TIBXSQLDA.SetCount(Value: Integer);
@@ -1437,6 +1496,11 @@ end;
 function TFBStatement.CreateBlob: IBlob;
 begin
   Result := TFBBlob.Create(FAttachment,FTransaction);
+end;
+
+function TFBStatement.CreateArray(aField: IArrayMetaData): IArray;
+begin
+  Result := TFBArray.Create(aField);
 end;
 
 function TFBStatement.GetSQLInfo(InfoRequest: byte): IDBInformation;
