@@ -4,6 +4,30 @@ unit FB25Statement;
 
 { $define UseCaseSensitiveParamName}
 
+{
+  Note on reference counted interfaces.
+  ------------------------------------
+
+  TFBStatement manages both an input and an output SQLDA through the TIBXINPUTSQLDA
+  and TIBXResultSet objects. Each of these are also reference counted interfaces.
+  When TFBStatement is destroyed, its reference to TIBXINPUTSQLDA
+  and TIBXResultSet objects is lost and they are also destroyed.
+
+  However, for example, IResultSet is returned when a cursor is opened and the
+  user may discard their reference to the IStatement while still using the
+  IResultSet. This would be a problem if the underlying TFBStatement object is
+  destroyed while still leaving the TIBXResultSet object in place. Calls to (e.g.)
+  FetchNext would fail.
+
+  To avoid this problem, copies of TIBXINPUTSQLDA and TIBXResultSet objects are
+  returned as interfaces and not the original objects. These copies (but not the
+  original have a reference to the IStatement interface of the TFBStatement object.
+  Thus, as long as these "copies" exist, the owning statement is not destroyed
+  even if the user discards their reference to the statement. Note: the TFBStatement
+  does not have a reference to the copy, only to the original. This way circular
+  references are avoided.
+}
+
 interface
 
 uses
