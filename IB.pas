@@ -611,7 +611,6 @@ type
     function GetAsFloat: Float;
     function GetAsLong: Long;
     function GetAsPointer: Pointer;
-    function GetAsQuad: TISC_QUAD;
     function GetAsShort: Short;
     function GetAsString: String;
     function GetAsVariant: Variant;
@@ -625,7 +624,6 @@ type
     procedure SetAsDouble(Value: Double);
     procedure SetAsFloat(Value: Float);
     procedure SetAsPointer(Value: Pointer);
-    procedure SetAsQuad(Value: TISC_QUAD);
     procedure SetAsShort(Value: Short);
     procedure SetAsString(Value: String);
     procedure SetAsVariant(Value: Variant);
@@ -641,7 +639,6 @@ type
     property AsInteger: Integer read GetAsLong write SetAsLong;
     property AsLong: Long read GetAsLong write SetAsLong;
     property AsPointer: Pointer read GetAsPointer write SetAsPointer;
-    property AsQuad: TISC_QUAD read GetAsQuad write SetAsQuad;
     property AsShort: Short read GetAsShort write SetAsShort;
     property AsString: String read GetAsString write SetAsString;
     property AsVariant: Variant read GetAsVariant write SetAsVariant;
@@ -656,11 +653,14 @@ type
     function GetName: string;
     function GetSQLType: short;
     function GetSubtype: short;
+    function GetAsQuad: TISC_QUAD;
     procedure SetIsNull(Value: Boolean);
     procedure SetAsBlob(Value: IBlob);
     procedure SetAsArray(anArray: IArray);
+    procedure SetAsQuad(Value: TISC_QUAD);
     property AsBlob: IBlob read GetAsBlob write SetAsBlob;
     property AsArray: IArray read GetAsArray write SetAsArray;
+    property AsQuad: TISC_QUAD read GetAsQuad write SetAsQuad;
     property IsNull: Boolean read GetIsNull write SetIsNull;
     property Modified: Boolean read getModified;
     property Name: string read GetName;
