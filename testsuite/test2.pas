@@ -38,6 +38,11 @@ begin
     writeln(Statement.GetSQLText);
     Statement.GetSQLParams[0].AsInteger := 9;
     ReportResults(Statement);
+    writeln('With param names');
+    Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
+    writeln(Statement.GetSQLText);
+    Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 9;
+    ReportResults(Statement);
 end;
 
 procedure TTest2.ReportResults(Statement: IStatement);

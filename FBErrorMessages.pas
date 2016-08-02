@@ -158,6 +158,12 @@ type
 
 function GetErrorMessage(ErrMess: TIBClientError): string;
 
+resourcestring
+  SEOFReached = 'SEOFReached';
+  SEOFInComment = 'EOF in comment detected';
+  SEOFInString = 'EOF in string detected';
+  SParamNameExpected = 'Parameter name expected';
+
 implementation
 
 uses IBUtils;
@@ -283,10 +289,6 @@ resourcestring
   SUseSpecificProcedures = 'Generic ServiceStart not applicable: Use Specific Procedures to set configuration params';
   SSQLMonitorAlreadyPresent = 'SQL Monitor Instance is already present';
   SCantPrintValue = 'Cannot print value';
-  SEOFReached = 'SEOFReached';
-  SEOFInComment = 'EOF in comment detected';
-  SEOFInString = 'EOF in string detected';
-  SParamNameExpected = 'Parameter name expected';
   SSuccess = 'Successful execution';
   SDelphiException = 'DelphiException %s';
   SNoOptionsSet = 'No Install Options selected';

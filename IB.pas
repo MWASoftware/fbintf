@@ -481,10 +481,13 @@ type
     property InTransaction: boolean read GetInTransaction;
   end;
 
+  TFBBlobMode = (fbmRead,fbmWrite);
+
   IBlob = interface
     procedure Cancel;
     procedure Close;
     function GetBlobID: TISC_QUAD;
+    function GetBlobMode: TFBBlobMode;
     function GetInfo(var NumSegments: Int64; var MaxSegmentSize,
                       TotalSize: Int64; var BlobType: Short) :boolean;
     function Read(var Buffer; Count: Longint): Longint;
@@ -610,7 +613,6 @@ type
     procedure SetAsBlob(Value: IBlob);
     function getModified: boolean;
     procedure Clear;
-    procedure SetName(Value: string);
     property AsDate: TDateTime read GetAsDateTime write SetAsDate;
     property AsBoolean:boolean read GetAsBoolean write SetAsBoolean;
     property AsTime: TDateTime read GetAsDateTime write SetAsTime;
@@ -629,7 +631,7 @@ type
     property IsNull: Boolean read GetIsNull write SetIsNull;
     property AsBlob: IBlob read GetAsBlob write SetAsBlob;
     property Modified: Boolean read getModified;
-    property Name: string read GetName write SetName;
+    property Name: string read GetName;
  end;
 
   ISQLParams = interface
@@ -657,13 +659,13 @@ type
     function GetPlan: String;
     function GetRowsAffected(var InsertCount, UpdateCount, DeleteCount: integer): boolean;
     function GetSQLType: TIBSQLTypes;
-    function Execute: IResults; overload;
-    function Execute(aTransaction: ITransaction): IResults; overload;
-    function OpenCursor: IResultSet; overload;
-    function OpenCursor(aTransaction: ITransaction): IResultSet; overload;
-    function CreateBlob: IBlob;
     function GetSQLInfo(InfoRequest: byte): IDBInformation;
     function GetSQLText: string;
+    function IsPrepared: boolean;
+    procedure Prepare(aTransaction: ITransaction=nil);
+    function Execute(aTransaction: ITransaction=nil): IResults;
+    function OpenCursor(aTransaction: ITransaction=nil): IResultSet;
+    function CreateBlob: IBlob;
     property SQLParams: ISQLParams read GetSQLParams;
     property SQLType: TIBSQLTypes read GetSQLType;
   end;
@@ -741,10 +743,12 @@ type
     procedure DropDatabase;
     function StartTransaction(Params: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction;
     function CreateBlob(transaction: ITransaction): IBlob;
-    function OpenBlob(transaction: ITransaction; BlobID: TISC_QUAD): IBlob;
     procedure ExecImmediate(transaction: ITransaction; sql: string; SQLDialect: integer);
     function OpenCursorAtStart(transaction: ITransaction; sql: string; SQLDialect: integer): IResultSet;
     function Prepare(transaction: ITransaction; sql: string; SQLDialect: integer): IStatement;
+    function PrepareWithNamedParameters(transaction: ITransaction; sql: string;
+                       SQLDialect: integer; GenerateParamNames: boolean=false;
+                       UniqueParamNames: boolean=false): IStatement;
 
     {Events}
     function GetEventHandler(Events: TStrings): IEvents;
@@ -823,7 +827,7 @@ type
   IServiceManager = interface
     function getSPB: ISPB;
     procedure Attach;
-    procedure Detach;
+    procedure Detach(Force: boolean=false);
     function IsAttached: boolean;
     function AllocateRequestBuffer(action: byte): IServiceRequest;
     procedure Start(Request: IServiceRequest);
@@ -835,16 +839,23 @@ type
   IFirebirdAPI = interface
     function GetStatus: IStatus;
     function AllocateDPB: IDPB;
+
+    {Database connections}
     function OpenDatabase(DatabaseName: string; DPB: IDPB): IAttachment;
     function CreateDatabase(DatabaseName: string; SQLDialect: integer;
       CreateParams: string; DPB: IDPB): IAttachment;
-    function AllocateSPB: ISPB;
-    function GetServiceManager(ServerName: string; Protocol: TProtocol; SPB: ISPB): IServiceManager;
     function StartTransaction(Attachments: array of IAttachment;
              Params: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction; {Start Transaction against multiple databases}
+
+    {Service Manager}
+    function AllocateSPB: ISPB;
+    function GetServiceManager(ServerName: string; Protocol: TProtocol; SPB: ISPB): IServiceManager;
+
+    {Information}
     function IsEmbeddedServer: boolean;
     function GetLibraryName: string;
     function HasServiceAPI: boolean;
+    function GetImplementationVersion: string;
   end;
 
 type

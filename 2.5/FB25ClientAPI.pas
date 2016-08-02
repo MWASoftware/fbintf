@@ -106,6 +106,7 @@ type
     function IsEmbeddedServer: boolean;
     function GetLibraryName: string;
     function HasServiceAPI: boolean;
+    function GetImplementationVersion: string;
   end;
 
 const
@@ -309,8 +310,13 @@ destructor TFB25ClientAPI.Destroy;
 var i: integer;
 begin
   for i := 0 to OwnedObjects.Count - 1 do
+  begin
     if TObject(OwnedObjects[i]) is TFBAttachment then
       TFBAttachment(OwnedObjects[i]).Disconnect(true);
+
+    if TObject(OwnedObjects[i]) is TFBServiceManager then
+      TFBServiceManager(OwnedObjects[i]).Detach(true);
+  end;
   Firebird25ClientAPI := nil;
   inherited Destroy;
 end;
@@ -404,6 +410,11 @@ end;
 function TFB25ClientAPI.HasServiceAPI: boolean;
 begin
   Result := IBServiceAPIPresent;
+end;
+
+function TFB25ClientAPI.GetImplementationVersion: string;
+begin
+  Result := '2.5';
 end;
 
 end.

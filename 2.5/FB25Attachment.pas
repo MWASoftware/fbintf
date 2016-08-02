@@ -80,13 +80,15 @@ type
     procedure DropDatabase;
     function StartTransaction(Params: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction;
     function CreateBlob(transaction: ITransaction): IBlob;
-    function OpenBlob(transaction: ITransaction; BlobID: TISC_QUAD): IBlob;
     procedure ExecImmediate(transaction: ITransaction; sql: string; SQLDialect: integer); overload;
     procedure ExecImmediate(transaction: ITransaction; sql: string); overload;
     function OpenCursorAtStart(transaction: ITransaction; sql: string; SQLDialect: integer): IResultSet; overload;
     function OpenCursorAtStart(transaction: ITransaction; sql: string): IResultSet; overload;
     function Prepare(transaction: ITransaction; sql: string; SQLDialect: integer): IStatement; overload;
     function Prepare(transaction: ITransaction; sql: string): IStatement; overload;
+    function PrepareWithNamedParameters(transaction: ITransaction; sql: string;
+                       SQLDialect: integer; GenerateParamNames: boolean=false;
+                       UniqueParamNames: boolean=false): IStatement;
     function GetEventHandler(Events: TStrings): IEvents;
 
     {Database Information}
@@ -393,7 +395,7 @@ begin
   {Rollback or Cancel dependent objects}
   for i := 0 to OwnedObjects.Count - 1 do
     if (TObject(OwnedObjects[i]) is TFBTransaction) then
-          TFBTransaction(OwnedObjects[i]).Rollback
+          TFBTransaction(OwnedObjects[i]).DoDefaultTransactionEnd
     else
     if TObject(OwnedObjects[i]) is TFBEvents then
       TFBEvents(OwnedObjects[i]).Cancel;
@@ -420,12 +422,6 @@ end;
 function TFBAttachment.CreateBlob(transaction: ITransaction): IBlob;
 begin
   Result := TFBBLob.Create(self,transaction);
-end;
-
-function TFBAttachment.OpenBlob(transaction: ITransaction; BlobID: TISC_QUAD
-  ): IBlob;
-begin
-  Result := TFBBLob.Create(self,transaction,BlobID);
 end;
 
 procedure TFBAttachment.ExecImmediate(transaction: ITransaction; sql: string;
@@ -467,6 +463,14 @@ function TFBAttachment.Prepare(transaction: ITransaction; sql: string
   ): IStatement;
 begin
   Result := Prepare(transaction,sql,FSQLDialect);
+end;
+
+function TFBAttachment.PrepareWithNamedParameters(transaction: ITransaction;
+  sql: string; SQLDialect: integer; GenerateParamNames: boolean;
+  UniqueParamNames: boolean): IStatement;
+begin
+  Result := TFBStatement.CreateWithParameterNames(self,transaction,sql,SQLDialect,
+         GenerateParamNames,UniqueParamNames);
 end;
 
 function TFBAttachment.GetEventHandler(Events: TStrings): IEvents;

@@ -2,8 +2,20 @@ unit FB25Statement;
 
 {$mode objfpc}{$H+}
 
-{ $define UseCaseSensitiveParamName}
+{ $define ALLOWDIALECT3PARAMNAMES}
 
+{$ifndef ALLOWDIALECT3PARAMNAMES}
+
+{ Even when dialect 3 quoted format parameter names are not supported, IBX still processes
+  parameter names case insensitive. This does result in some additional overhead
+  due to a call to "AnsiUpperCase". This can be avoided by undefining
+  "UseCaseSensitiveParamName" below.
+
+  Note: do not define "UseCaseSensitiveParamName" when "ALLOWDIALECT3PARAMNAMES"
+  is defined. This will not give a useful result.
+}
+{ $define UseCaseSensitiveParamName}
+{$endif}
 {
   Note on reference counted interfaces.
   ------------------------------------
@@ -81,6 +93,7 @@ type
   private
     FParent: TIBXINPUTSQLDA;
     FChanging: boolean;
+    FUniqueName: boolean;
   protected
     procedure Changed; override;
     procedure SetScale(aValue: short); override;
@@ -144,6 +157,7 @@ type
     constructor Copy(aIBXSQLDA: TIBXINPUTSQLDA);
     destructor Destroy; override;
     procedure Bind;
+    procedure SetParamName(FieldName: String; Idx: Integer; UniqueName: boolean = false);
     property Vars[Idx: Integer]: TIBXSQLParam read GetXSQLParam; default;
 
   public
@@ -220,17 +234,24 @@ type
     FCursor: String;               { Cursor name...}
     FPrepared: boolean;
     FSQL: string;
+    FProcessedSQL: string;
+    FHasParamNames: boolean;
     FBOF: boolean;
     FEOF: boolean;
+    FGenerateParamNames: boolean;
+    FUniqueParamNames: boolean;
     procedure CheckTransaction(aTransaction: TFBTransaction);
     procedure CheckHandle;
     procedure InternalPrepare;
     function InternalExecute(aTransaction: TFBTransaction): IResults;
     function InternalOpenCursor(aTransaction: TFBTransaction): IResultSet;
     procedure FreeHandle;
+    procedure PreprocessSQL;
   public
     constructor Create(Attachment: TFBAttachment; Transaction: ITransaction;
       sql: string; SQLDialect: integer);
+    constructor CreateWithParameterNames(Attachment: TFBAttachment; Transaction: ITransaction;
+      sql: string;  SQLDialect: integer; GenerateParamNames: boolean =false; UniqueParamNames: boolean=false);
     destructor Destroy; override;
     procedure Close;
     function FetchNext: boolean;
@@ -246,13 +267,13 @@ type
     function GetPlan: String;
     function GetRowsAffected(var InsertCount, UpdateCount, DeleteCount: integer): boolean;
     function GetSQLType: TIBSQLTypes;
-    function Execute: IResults; overload;
-    function Execute(aTransaction: ITransaction): IResults; overload;
-    function OpenCursor: IResultSet; overload;
-    function OpenCursor(aTransaction: ITransaction): IResultSet; overload;
-    function CreateBlob: IBlob;
     function GetSQLInfo(InfoRequest: byte): IDBInformation;
     function GetSQLText: string;
+    function IsPrepared: boolean;
+    procedure Prepare(aTransaction: ITransaction=nil);
+    function Execute(aTransaction: ITransaction=nil): IResults;
+    function OpenCursor(aTransaction: ITransaction=nil): IResultSet;
+    function CreateBlob: IBlob;
     property Handle: TISC_STMT_HANDLE read FHandle;
     property SQLParams: ISQLParams read GetSQLParams;
     property SQLType: TIBSQLTypes read GetSQLType;
@@ -272,7 +293,7 @@ procedure TIBXSQLParam.Changed;
 var i: integer;
 begin
   inherited Changed;
-  if FChanging or (FName = '') then Exit;
+  if FChanging or (FName = '') or FUniqueName then Exit;
   if (SQLType = SQL_BLOB) or (SQLTYPE = SQL_ARRAY) then
     IBError(ibxeDuplicateParamName,[FName]);
 
@@ -454,7 +475,8 @@ end;
 
 procedure TIBXINPUTSQLDA.Bind;
 begin
-  Count := 1;
+  if Count = 0 then
+    Count := 1;
   with Firebird25ClientAPI do
   begin
     if (FXSQLDA <> nil) then
@@ -474,6 +496,20 @@ begin
       Count := 0;
   end;
   Initialize;
+end;
+
+procedure TIBXINPUTSQLDA.SetParamName(FieldName: String; Idx: Integer;
+  UniqueName: boolean);
+var
+  fn: string;
+begin
+  {$ifdef UseCaseSensitiveParamName}
+  FXSQLVARs[Idx].FName := AnsiUpperCase(FieldName);
+  {$else}
+  FXSQLVARs[Idx].FName := FieldName;
+  {$endif}
+  FXSQLVARs[Idx].FIndex := Idx;
+  TIBXSQLParam(FXSQLVARs[Idx]).FUniqueName :=  UniqueName
 end;
 
 function TIBXINPUTSQLDA.getCount: integer;
@@ -909,7 +945,15 @@ begin
     begin
       Call(isc_dsql_alloc_statement2(StatusVector, @(FAttachment.Handle),
                                       @FHandle), True);
-      Call(isc_dsql_prepare(StatusVector, @(FTransaction.Handle), @FHandle, 0,
+      if FHasParamNames then
+      begin
+        if FProcessedSQL = '' then
+          PreprocessSQL;
+        Call(isc_dsql_prepare(StatusVector, @(FTransaction.Handle), @FHandle, 0,
+                 PChar(FProcessedSQL), FSQLDialect, nil), True);
+      end
+      else
+        Call(isc_dsql_prepare(StatusVector, @(FTransaction.Handle), @FHandle, 0,
                  PChar(FSQL), FSQLDialect, nil), True);
     end;
     { After preparing the statement, query the stmt type and possibly
@@ -1046,6 +1090,161 @@ begin
   end;
 end;
 
+procedure TFBStatement.PreprocessSQL;
+var
+  cCurChar, cNextChar, cQuoteChar: Char;
+  sSQL, sProcessedSQL, sParamName: String;
+  i, iLenSQL, iSQLPos: Integer;
+  iCurState {$ifdef ALLOWDIALECT3PARAMNAMES}, iCurParamState {$endif}: Integer;
+  iParamSuffix: Integer;
+  slNames: TStrings;
+
+const
+  DefaultState = 0;
+  CommentState = 1;
+  QuoteState = 2;
+  ParamState = 3;
+ {$ifdef ALLOWDIALECT3PARAMNAMES}
+  ParamDefaultState = 0;
+  ParamQuoteState = 1;
+  {$endif}
+
+  procedure AddToProcessedSQL(cChar: Char);
+  begin
+    sProcessedSQL[iSQLPos] := cChar;
+    Inc(iSQLPos);
+  end;
+
+begin
+  sParamName := '';
+  slNames := TStringList.Create;
+  try
+    { Do some initializations of variables }
+    iParamSuffix := 0;
+    cQuoteChar := '''';
+    sSQL := FSQL;
+    iLenSQL := Length(sSQL);
+    SetString(sProcessedSQL, nil, iLenSQL + 1);
+    i := 1;
+    iSQLPos := 1;
+    iCurState := DefaultState;
+    {$ifdef ALLOWDIALECT3PARAMNAMES}
+    iCurParamState := ParamDefaultState;
+    {$endif}
+    { Now, traverse through the SQL string, character by character,
+     picking out the parameters and formatting correctly for InterBase }
+    while (i <= iLenSQL) do begin
+      { Get the current token and a look-ahead }
+      cCurChar := sSQL[i];
+      if i = iLenSQL then
+        cNextChar := #0
+      else
+        cNextChar := sSQL[i + 1];
+      { Now act based on the current state }
+      case iCurState of
+        DefaultState: begin
+          case cCurChar of
+            '''', '"': begin
+              cQuoteChar := cCurChar;
+              iCurState := QuoteState;
+            end;
+            '?', ':': begin
+              iCurState := ParamState;
+              AddToProcessedSQL('?');
+            end;
+            '/': if (cNextChar = '*') then begin
+              AddToProcessedSQL(cCurChar);
+              Inc(i);
+              iCurState := CommentState;
+            end;
+          end;
+        end;
+        CommentState: begin
+          if (cNextChar = #0) then
+            IBError(ibxeSQLParseError, [SEOFInComment])
+          else if (cCurChar = '*') then begin
+            if (cNextChar = '/') then
+              iCurState := DefaultState;
+          end;
+        end;
+        QuoteState: begin
+          if cNextChar = #0 then
+            IBError(ibxeSQLParseError, [SEOFInString])
+          else if (cCurChar = cQuoteChar) then begin
+            if (cNextChar = cQuoteChar) then begin
+              AddToProcessedSQL(cCurChar);
+              Inc(i);
+            end else
+              iCurState := DefaultState;
+          end;
+        end;
+        ParamState:
+        begin
+          { collect the name of the parameter }
+          {$ifdef ALLOWDIALECT3PARAMNAMES}
+          if iCurParamState = ParamDefaultState then
+          begin
+            if cCurChar = '"' then
+              iCurParamState := ParamQuoteState
+            else
+            {$endif}
+            if (cCurChar in ['A'..'Z', 'a'..'z', '0'..'9', '_', '$']) then
+                sParamName := sParamName + cCurChar
+            else if FGenerateParamNames then
+            begin
+              sParamName := 'IBXParam' + IntToStr(iParamSuffix); {do not localize}
+              Inc(iParamSuffix);
+              iCurState := DefaultState;
+              slNames.AddObject(sParamName,self); //Note local convention
+                                                  //add pointer to self to mark entry
+              sParamName := '';
+            end
+            else
+              IBError(ibxeSQLParseError, [SParamNameExpected]);
+          {$ifdef ALLOWDIALECT3PARAMNAMES}
+          end
+          else begin
+            { determine if Quoted parameter name is finished }
+            if cCurChar = '"' then
+            begin
+              Inc(i);
+              slNames.Add(sParamName);
+              SParamName := '';
+              iCurParamState := ParamDefaultState;
+              iCurState := DefaultState;
+            end
+            else
+              sParamName := sParamName + cCurChar
+          end;
+          {$endif}
+          { determine if the unquoted parameter name is finished }
+          if {$ifdef ALLOWDIALECT3PARAMNAMES}(iCurParamState <> ParamQuoteState) and {$endif}
+            (iCurState <> DefaultState) then
+          begin
+            if not (cNextChar in ['A'..'Z', 'a'..'z',
+                                  '0'..'9', '_', '$']) then begin
+              Inc(i);
+              iCurState := DefaultState;
+              slNames.Add(sParamName);
+              sParamName := '';
+            end;
+          end;
+        end;
+      end;
+      if iCurState <> ParamState then
+        AddToProcessedSQL(sSQL[i]);
+      Inc(i);
+    end;
+    AddToProcessedSQL(#0);
+    FSQLParams.Count := slNames.Count;
+    for i := 0 to slNames.Count - 1 do
+      FSQLParams.SetParamName(slNames[i], i,FUniqueParamNames or (slNames.Objects[i] <> nil));
+    FProcessedSQL := sProcessedSQL;
+  finally
+    slNames.Free;
+  end;
+end;
+
 constructor TFBStatement.Create(Attachment: TFBAttachment;
   Transaction: ITransaction; sql: string; SQLDialect: integer);
 var GUID : TGUID;
@@ -1065,6 +1264,16 @@ begin
   FResultSet := FSQLRecord;
   FSQL := sql;
   InternalPrepare;
+end;
+
+constructor TFBStatement.CreateWithParameterNames(Attachment: TFBAttachment;
+  Transaction: ITransaction; sql: string; SQLDialect: integer;
+  GenerateParamNames: boolean; UniqueParamNames: boolean);
+begin
+  FHasParamNames := true;
+  FGenerateParamNames := GenerateParamNames;
+  FUniqueParamNames := UniqueParamNames;
+  Create(Attachment,Transaction,sql,SQLDialect);
 end;
 
 destructor TFBStatement.Destroy;
@@ -1164,7 +1373,6 @@ function TFBStatement.GetPlan: String;
 var
   DBInfo: IDBInformation;
 begin
-//  Prepare;
   if (not (FSQLType in [SQLSelect, SQLSelectForUpdate,
        {TODO: SQLExecProcedure, }
        SQLUpdate, SQLDelete])) then
@@ -1210,24 +1418,20 @@ begin
   Result := FSQLType;
 end;
 
-function TFBStatement.Execute: IResults;
-begin
-  Result := InternalExecute(FTransaction);
-end;
-
 function TFBStatement.Execute(aTransaction: ITransaction): IResults;
 begin
-  Result := InternalExecute(aTransaction as TFBTransaction);
-end;
-
-function TFBStatement.OpenCursor: IResultSet;
-begin
-  Result := InternalOpenCursor(FTransaction);
+  if aTransaction = nil then
+    Result :=  InternalExecute(FTransaction)
+  else
+    Result := InternalExecute(aTransaction as TFBTransaction);
 end;
 
 function TFBStatement.OpenCursor(aTransaction: ITransaction): IResultSet;
 begin
-  Result := InternalOpenCursor(aTransaction as TFBTransaction);
+  if aTransaction = nil then
+    Result := InternalOpenCursor(FTransaction)
+  else
+    Result := InternalOpenCursor(aTransaction as TFBTransaction);
 end;
 
 function TFBStatement.CreateBlob: IBlob;
@@ -1243,6 +1447,24 @@ end;
 function TFBStatement.GetSQLText: string;
 begin
   Result := FSQL;
+end;
+
+function TFBStatement.IsPrepared: boolean;
+begin
+  Result := FHandle <> nil;
+end;
+
+procedure TFBStatement.Prepare(aTransaction: ITransaction);
+begin
+  if FPrepared then FreeHandle;
+  if aTransaction <> nil then
+  begin
+    RemoveOwner(FTransaction);
+    FTransaction := transaction as TFBTransaction;
+    FTransactionIntf := Transaction;
+    AddOwner(FTransaction);
+  end;
+  InternalPrepare;
 end;
 
 end.

@@ -191,7 +191,6 @@ type
     procedure CheckActive;
     procedure CheckInactive;
     procedure CheckServerName;
-    procedure InternalDetach(Force: boolean=false);
     procedure MergeBuffers(Requests: array of IServiceRequest; var buffer: PChar; var size: integer);
   public
     constructor Create(ServerName: string; Protocol: TProtocol; SPB: ISPB);
@@ -202,7 +201,7 @@ type
     {IServiceManager}
     function getSPB: ISPB;
     procedure Attach;
-    procedure Detach;
+    procedure Detach(Force: boolean=false);
     function IsAttached: boolean;
     function AllocateRequestBuffer(action: byte): IServiceRequest;
     procedure Start(Request: IServiceRequest);
@@ -978,21 +977,6 @@ begin
     IBError(ibxeServerNameMissing, [nil]);
 end;
 
-procedure TFBServiceManager.InternalDetach(Force: boolean);
-begin
-  if FHandle = nil then
-    Exit;
-  with Firebird25ClientAPI do
-  if isc_service_detach(StatusVector, @FHandle) > 0 then
-  begin
-    FHandle := nil;
-    if not Force then
-     IBDataBaseError;
-  end
-  else
-    FHandle := nil;
-end;
-
 procedure TFBServiceManager.MergeBuffers(Requests: array of IServiceRequest;
   var buffer: PChar; var size: integer);
 var i: integer;
@@ -1029,7 +1013,7 @@ end;
 
 destructor TFBServiceManager.Destroy;
 begin
-  InternalDetach(true);
+  Detach(true);
   Firebird25ClientAPI.UnRegisterObj(self);
   inherited Destroy;
 end;
@@ -1065,10 +1049,19 @@ begin
   end;
 end;
 
-procedure TFBServiceManager.Detach;
+procedure TFBServiceManager.Detach(Force: boolean);
 begin
-  CheckActive;
-  InternalDetach;
+  if FHandle = nil then
+    Exit;
+  with Firebird25ClientAPI do
+  if isc_service_detach(StatusVector, @FHandle) > 0 then
+  begin
+    FHandle := nil;
+    if not Force then
+     IBDataBaseError;
+  end
+  else
+    FHandle := nil;
 end;
 
 function TFBServiceManager.IsAttached: boolean;

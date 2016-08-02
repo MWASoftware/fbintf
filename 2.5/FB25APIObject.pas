@@ -18,6 +18,7 @@ type
   protected
     function Call(ErrCode: ISC_STATUS; RaiseError: Boolean = true): ISC_STATUS;
     procedure AddOwner(aOwner: TObject);
+    procedure RemoveOwner(aOwner: TObject);
     procedure ResetActivity;
     procedure SignalActivity;
     property Owners: TList read FOwners;
@@ -48,6 +49,17 @@ begin
     FOwners.Add(aOwner);
     TObjectOwner(aOwner).RegisterObj(self);
   end;
+end;
+
+procedure TAPIObject.RemoveOwner(aOwner: TObject);
+var i: integer;
+begin
+  for i := 0 to FOwners.Count - 1 do
+    if TObject(FOwners[i]) is TAPIObject then
+    begin
+      TObjectOwner(FOwners[i]).UnRegisterObj(self);
+      FOwners.Delete(i);
+    end;
 end;
 
 procedure TAPIObject.ResetActivity;

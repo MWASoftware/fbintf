@@ -233,6 +233,8 @@ begin
   GetMem(FBuffer,FBufSize);
   if FBuffer = nil then
     OutOfMemoryError;
+  if aAttachment.Handle = nil then
+    IBError(ibxeInvalidStatementHandle,[nil]);
   FillChar(FBuffer^,FBufSize,255);
   with Firebird25ClientAPI do
     if isc_database_info(StatusVector, @(aAttachment.Handle), 1, @info_request,
@@ -251,6 +253,8 @@ begin
   GetMem(FBuffer,FBufSize);
   if FBuffer = nil then
     OutOfMemoryError;
+  if aAttachment.Handle = nil then
+    IBError(ibxeInvalidStatementHandle,[nil]);
   FillChar(FBuffer^,FBufSize,255);
   SetLength(ReqBuffer,Length(info_requests));
   for i := 0 to Length(info_requests) - 1 do
@@ -270,6 +274,8 @@ begin
   GetMem(FBuffer,FBufSize);
   if FBuffer = nil then
     OutOfMemoryError;
+  if aStatement.Handle = nil then
+    IBError(ibxeInvalidStatementHandle,[nil]);
   FillChar(FBuffer^,FBufSize,255);
   with Firebird25ClientAPI do
     if isc_dsql_sql_info(StatusVector, @(aStatement.Handle), 1, @info_request,

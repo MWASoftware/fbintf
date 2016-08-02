@@ -36,6 +36,7 @@ type
     procedure Cancel;
     procedure Close;
     function GetBlobID: TISC_QUAD;
+    function GetBlobMode: TFBBlobMode;
     function GetInfo(var NumSegments: Int64; var MaxSegmentSize,
                        TotalSize: Int64; var BlobType: Short) :boolean;
     function Read(var Buffer; Count: Longint): Longint;
@@ -70,9 +71,9 @@ begin
     inherited Create;
     FAttachment := Attachment;
     FTransaction := Transaction;
-    AddOwner(TFBTransaction(Transaction));
+    AddOwner(Transaction as TFBTransaction);
     DBHandle := Attachment.Handle;
-    TRHandle := TFBTransaction(Transaction).Handle;
+    TRHandle := (Transaction as TFBTransaction).Handle;
     FCreating := true;
     with Firebird25ClientAPI do
       Call(isc_create_blob2(StatusVector, @DBHandle, @TRHandle, @FHandle, @FBlobID,
@@ -87,7 +88,7 @@ begin
   inherited Create;
   FAttachment := Attachment;
   FTransaction := Transaction;
-  AddOwner(TFBTransaction(Transaction));
+  AddOwner(Transaction as TFBTransaction);
   DBHandle := Attachment.Handle;
   TRHandle := (Transaction as TFBTransaction).Handle;
   FBlobID := BlobID;
@@ -107,6 +108,8 @@ end;
 
 procedure TFBBlob.TransactionEnding(aTransaction: TFBTransaction);
 begin
+  if aTransaction <> FTransaction then
+    Exit;
   if FCreating then
     Cancel
   else
@@ -134,6 +137,14 @@ end;
 function TFBBlob.GetBlobID: TISC_QUAD;
 begin
   Result := FBlobID;
+end;
+
+function TFBBlob.GetBlobMode: TFBBlobMode;
+begin
+  if FCreating then
+    Result := fbmWrite
+  else
+    Result := fbmRead;
 end;
 
 function TFBBlob.GetInfo(var NumSegments: Int64; var MaxSegmentSize,

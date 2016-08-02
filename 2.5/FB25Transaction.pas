@@ -26,6 +26,7 @@ type
     constructor Create(Attachments: array of IAttachment; Params: array of byte; DefaultCompletion: TTransactionCompletion); overload;
     constructor Create(Attachment: TFBAttachment; Params: array of byte; DefaultCompletion: TTransactionCompletion); overload;
     destructor Destroy; override;
+    procedure DoDefaultTransactionEnd;
     property Handle: TISC_TR_HANDLE read FHandle;
 
   public
@@ -108,13 +109,19 @@ end;
 
 destructor TFBTransaction.Destroy;
 begin
+  DoDefaultTransactionEnd;
+  inherited Destroy;
+end;
+
+procedure TFBTransaction.DoDefaultTransactionEnd;
+begin
+  if FHandle <> nil then
   case FDefaultCompletion of
   tcRollback:
     Rollback;
   tcCommit:
     Commit;
   end;
-  inherited Destroy;
 end;
 
 function TFBTransaction.GetInTransaction: boolean;
