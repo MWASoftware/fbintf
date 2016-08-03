@@ -298,6 +298,29 @@ type
 
 end;
 
+  {TSQLInfoResultsBuffer inspired by IBPP RB class - access a isc_dsql_sql_info result buffer}
+
+  TSQLInfoResultsBuffer = class
+  private
+    mBuffer: PChar;
+    mSize: short;
+    FStatement: TFBStatement;
+    function FindToken(token: char): PChar; overload;
+    function FindToken(token: char; subtoken: char): PChar; overload;
+  public
+    constructor Create(aStatement: TFBStatement; aSize: integer = 1024);
+    destructor Destroy; override;
+    function Size: short;
+    procedure Reset;
+    procedure Exec(info_request: char);
+    function GetValue(token: char): integer; overload;
+    function GetValue(token: char; subtoken: char): integer; overload;
+    function GetCountValue(token: char): integer;
+    function GetBool(token: char): boolean;
+    function GetString(token: char; var data: string): integer;
+    function buffer: PChar;
+  end;
+
 implementation
 
 uses IBUtils, FBErrorMessages, FB25Blob, variants, IBErrorCodes, FB25DBInfo, FB25Array;
@@ -504,7 +527,7 @@ begin
   Dec(FStatement.FSQLParamsRefCount);
   if FStatement.FSQLParamsRefCount = 0 then
     FreeXSQLDA;
-  writeln('Destroying ',ClassName,',',FStatement.FSQLParamsRefCount);
+//  writeln('Destroying ',ClassName,',',FStatement.FSQLParamsRefCount);
   inherited Destroy;
 end;
 
@@ -596,7 +619,7 @@ begin
   Dec(FStatement.FSQLRecordRefCount);
   if FStatement.FSQLRecordRefCount = 0 then
     FreeXSQLDA;
-  writeln('Destroying ',ClassName,',',FStatement.FSQLRecordRefCount);
+//  writeln('Destroying ',ClassName,',',FStatement.FSQLRecordRefCount);
   inherited Destroy;
 end;
 
@@ -755,7 +778,7 @@ begin
   FSize := 0;
   FUniqueRelationName := '';
   FInputSQLDA := sqldaType = daInput;
-  writeln('Creating ',ClassName);
+//  writeln('Creating ',ClassName);
 end;
 
 constructor TIBXSQLDA.Copy(aIBXSQLDA: TIBXSQLDA);
@@ -954,7 +977,7 @@ var i: integer;
 begin
   if FXSQLDA <> nil then
   begin
-    writeln('SQLDA Cleanup');
+//    writeln('SQLDA Cleanup');
     for i := 0 to FSize - 1 do
     begin
       FreeMem(FXSQLVARs[i].FXSQLVAR^.sqldata);
@@ -1005,7 +1028,7 @@ end;
 
 procedure TFBStatement.InternalPrepare;
 var
-  DBInfo: IDBInformation;
+  RB: TSQLInfoResultsBuffer;
 begin
   if FPrepared then
     Exit;
@@ -1031,9 +1054,13 @@ begin
     { After preparing the statement, query the stmt type and possibly
       create a FSQLRecord "holder" }
     { Get the type of the statement }
-    DBInfo := TDBInformation.Create(self,byte(isc_info_sql_stmt_type));
-    if (DBInfo.getCount > 0) and (DBInfo[0].getItemType = byte(isc_info_sql_stmt_type)) then
-      FSQLType := TIBSQLTypes(DBInfo[0].GetAsInteger);
+    RB := TSQLInfoResultsBuffer.Create(self);
+    try
+      RB.Exec(isc_info_sql_stmt_type);
+      FSQLType := TIBSQLTypes(RB.GetValue(isc_info_sql_stmt_type));
+    finally
+      RB.Free;
+    end;
 
     { Done getting the type }
     case FSQLType of
@@ -1443,7 +1470,7 @@ end;
 
 function TFBStatement.GetPlan: String;
 var
-  DBInfo: IDBInformation;
+    RB: TSQLInfoResultsBuffer;
 begin
   if (not (FSQLType in [SQLSelect, SQLSelectForUpdate,
        {TODO: SQLExecProcedure, }
@@ -1451,37 +1478,51 @@ begin
     result := ''
   else
   begin
-     DBInfo := TDBInformation.Create(self,byte(isc_info_sql_get_plan),16384);
-     if (DBInfo.getCount > 0) and (DBInfo[0].getItemType = byte(isc_info_sql_get_plan)) then
-       Result := DBInfo[0].GetAsString;
+    RB := TSQLInfoResultsBuffer.Create(self);
+    try
+      RB.Exec(isc_info_sql_get_plan);
+      RB.GetString(isc_info_sql_get_plan, Result);
+    finally
+      RB.Free;
+    end;
   end;
 end;
 
 function TFBStatement.GetRowsAffected(var InsertCount, UpdateCount,
   DeleteCount: integer): boolean;
 var
-  DBInfo: IDBInformation;
   i: integer;
+  RB: TSQLInfoResultsBuffer;
 begin
   InsertCount := 0;
   UpdateCount := 0;
   DeleteCount := 0;
-  Result := true;
-  begin
-    DBInfo := TDBInformation.Create(self,byte(isc_info_sql_records));
-    for i := 0 to DBInfo.getCount - 1 do
+  Result := FHandle <> nil;
+  if not Result then Exit;
+
+  RB := TSQLInfoResultsBuffer.Create(self);
+  try
+    RB.Exec(isc_info_sql_records);
+
+    case SQLType of
+    SQLInsert, SQLUpdate: {Covers Insert or Update as well as individual update}
     begin
-      case char(DBInfo[i].getItemType) of
-      isc_info_req_insert_count:
-        InsertCount := DBInfo[i].GetAsInteger;
-
-      isc_info_req_update_count:
-        UpdateCount := DBInfo[i].GetAsInteger;
-
-      isc_info_req_delete_count:
-        DeleteCount := DBInfo[i].GetAsInteger;
-      end;
+      InsertCount := RB.GetValue(isc_info_sql_records, isc_info_req_insert_count);
+      UpdateCount := RB.GetValue(isc_info_sql_records, isc_info_req_update_count);
     end;
+
+    SQLDelete:
+      DeleteCount := RB.GetValue(isc_info_sql_records, isc_info_req_delete_count);
+
+    SQLExecProcedure:
+    begin
+      InsertCount := RB.GetValue(isc_info_sql_records, isc_info_req_insert_count);
+      UpdateCount := RB.GetValue(isc_info_sql_records, isc_info_req_update_count);
+      DeleteCount := RB.GetValue(isc_info_sql_records, isc_info_req_delete_count);
+    end;
+    end;
+  finally
+    RB.Free;
   end;
 end;
 
@@ -1552,6 +1593,197 @@ begin
     AddOwner(FTransaction);
   end;
   InternalPrepare;
+end;
+
+{ TSQLInfoResultsBuffer }
+
+constructor TSQLInfoResultsBuffer.Create(aStatement: TFBStatement;
+  aSize: integer);
+begin
+  inherited Create;
+  FStatement := aStatement;
+  mSize := aSize;
+  GetMem(mBuffer,aSize);
+  FillChar(mBuffer^,mSize,255);
+end;
+
+destructor TSQLInfoResultsBuffer.Destroy;
+begin
+  if mBuffer <> nil then FreeMem(mBuffer);
+  inherited;
+end;
+
+function TSQLInfoResultsBuffer.buffer: PChar;
+begin
+  Result := mBuffer;
+end;
+
+function TSQLInfoResultsBuffer.FindToken(token: char): PChar;
+var p: PChar;
+    len: integer;
+begin
+  Result := nil;
+  p := mBuffer;
+
+  while p^ <> char(isc_info_end) do
+  begin
+    if p^ = token then
+    begin
+      Result := p;
+      Exit;
+    end;
+    with Firebird25ClientAPI do
+      len := isc_vax_integer(p+1,2);
+    Inc(p,len+3);
+  end;
+end;
+
+function TSQLInfoResultsBuffer.FindToken(token: char; subtoken: char): PChar;
+var p: PChar;
+    len, inlen: integer;
+begin
+  Result := nil;
+  p := mBuffer;
+
+  while p^ <> char(isc_info_end) do
+  with Firebird25ClientAPI do
+  begin
+    if p^ = token then
+    begin
+      {Found token, now find subtoken}
+      inlen := isc_vax_integer(p+1, 2);
+      Inc(p,3);
+      while inlen > 0 do
+      begin
+	if p^ = subtoken then
+        begin
+          Result := p;
+          Exit;
+        end;
+  	len := isc_vax_integer(p+1, 2);
+        Inc(p,len + 3);
+        Dec(inlen,len + 3);
+      end;
+      Exit;
+    end;
+    len := isc_vax_integer(p+1, 2);
+    inc(p,len+3);
+  end;
+end;
+
+function TSQLInfoResultsBuffer.GetBool(token: char): boolean;
+var aValue: integer;
+    p: PChar;
+begin
+  p := FindToken(token);
+
+  if p = nil then
+    IBError(ibxeDscInfoTokenMissing,[token]);
+
+  with Firebird25ClientAPI do
+    aValue := isc_vax_integer(p+1, 4);
+  Result := aValue <> 0;
+end;
+
+function TSQLInfoResultsBuffer.GetCountValue(token: char): integer;
+var len: integer;
+    p: PChar;
+begin
+  {Specifically used on tokens like isc_info_insert_count and the like
+   which return detailed counts per relation. We sum up the values.}
+
+  p := FindToken(token);
+
+  if p = nil then
+    IBError(ibxeDscInfoTokenMissing,[token]);
+
+  {len is the number of bytes in the following array}
+
+  with Firebird25ClientAPI do
+    len := isc_vax_integer(p+1, 2);
+  Inc(p,3);
+  Result := 0;
+  while len > 0 do
+  begin
+    {Each array item is 6 bytes : 2 bytes for the relation_id which
+     we skip, and 4 bytes for the count value which we sum up across
+     all tables.}
+
+    with Firebird25ClientAPI do
+       Inc(Result,isc_vax_integer(p+2, 4));
+     Inc(p,6);
+     Dec(len,6);
+  end;
+end;
+
+function TSQLInfoResultsBuffer.GetString(token: char; var data: string): integer;
+var p: PChar;
+begin
+  Result := 0;
+  p := FindToken(token);
+
+  if p = nil then
+    IBError(ibxeDscInfoTokenMissing,[token]);
+
+  with Firebird25ClientAPI do
+    Result := isc_vax_integer(p+1, 2);
+  SetString(data,p+3,Result);
+end;
+
+function TSQLInfoResultsBuffer.GetValue(token: char): integer;
+var len: integer;
+    p: PChar;
+begin
+  Result := 0;
+  p := FindToken(token);
+
+  if p = nil then
+    IBError(ibxeDscInfoTokenMissing,[token]);
+
+  with Firebird25ClientAPI do
+  begin
+    len := isc_vax_integer(p+1, 2);
+    if (len <> 0) then
+      Result := isc_vax_integer(p+3, len);
+  end;
+end;
+
+function TSQLInfoResultsBuffer.GetValue(token: char; subtoken: char): integer;
+var len: integer;
+    p: PChar;
+begin
+  Result := 0;
+  p := FindToken(token, subtoken);
+
+  if p = nil then
+    IBError(ibxeDscInfoTokenMissing,[token]);
+
+  with Firebird25ClientAPI do
+  begin
+    len := isc_vax_integer(p+1, 2);
+    if (len <> 0) then
+      Result := isc_vax_integer(p+3, len);
+  end;
+end;
+
+function TSQLInfoResultsBuffer.Size: short;
+begin
+  Result := mSize;
+end;
+
+procedure TSQLInfoResultsBuffer.Reset;
+begin
+  if mBuffer <> nil then FreeMem(mBuffer);
+  GetMem(mBuffer,mSize);
+  FillChar(mBuffer^,mSize,255);
+end;
+
+procedure TSQLInfoResultsBuffer.Exec(info_request: char);
+begin
+  with Firebird25ClientAPI do
+  if isc_dsql_sql_info(StatusVector, @(FStatement.Handle), 1, @info_request,
+                     Size, buffer) > 0 then
+    IBDatabaseError;
 end;
 
 end.

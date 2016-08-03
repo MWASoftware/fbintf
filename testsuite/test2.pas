@@ -14,7 +14,6 @@ type
 TTest2 = class(TTestBase)
 private
   procedure DoQuery(Attachment: IAttachment);
-  procedure ReportResults(Statement: IStatement);
 public
   function TestTitle: string; override;
   procedure RunTest(CharSet: string; SQLDialect: integer); override;
@@ -32,6 +31,7 @@ var Transaction: ITransaction;
 begin
     Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],tcCommit);
     Statement := Attachment.Prepare(Transaction,'Select First 3 * from EMPLOYEE',3);
+    writeln('Plan = ' ,Statement.GetPlan);
     writeln(Statement.GetSQLText);
     ReportResults(Statement);
     Statement := Attachment.Prepare(Transaction,'Select * from EMPLOYEE Where EMP_NO = ?',3);
@@ -43,22 +43,6 @@ begin
     writeln(Statement.GetSQLText);
     Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 9;
     ReportResults(Statement);
-end;
-
-procedure TTest2.ReportResults(Statement: IStatement);
-var ResultSet: IResultSet;
-    i: integer;
-begin
-  ResultSet := Statement.OpenCursor;
-  try
-    while ResultSet.FetchNext do
-    begin
-      for i := 0 to ResultSet.getCount - 1 do
-        writeln(ResultSet[i].Name,' = ',ResultSet[i].AsString);
-    end;
-  finally
-    ResultSet.Close;
-  end;
 end;
 
 function TTest2.TestTitle: string;
@@ -77,10 +61,16 @@ begin
   DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
   DPB.Remove(isc_dpb_password);
   DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);
+  try
+    Attachment := FirebirdAPI.OpenDatabase(Owner.GetEmployeeDatabaseName,DPB);
+  except on e: Exception do
+    writeln('Create Database fails ',E.Message);
+  end;
   writeln('Opening ',Owner.GetEmployeeDatabaseName);
   Attachment := FirebirdAPI.OpenDatabase(Owner.GetEmployeeDatabaseName,DPB);
   writeln('Database Open');
   DoQuery(Attachment);
+  Attachment.Disconnect;
 end;
 
 initialization

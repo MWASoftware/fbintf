@@ -47,7 +47,7 @@ end;
 
 function TTest1.TestTitle: string;
 begin
-  Result := 'Create and Drop a Database';
+  Result := 'Test 1: Create and Drop a Database';
 end;
 
 procedure TTest1.RunTest(CharSet: string; SQLDialect: integer);
@@ -58,11 +58,24 @@ var DPB: IDPB;
     ConType: integer;
     DBFileName: string;
     DBSiteName: string;
-    i: integer;
 begin
-  writeln('Creating a Database');
+  writeln('Creating a Database with empty parameters');
+  try
+    Attachment := FirebirdAPI.CreateDatabase('',SQLDialect,'',nil);
+  except on e: Exception do
+    writeln('Create Database fails: ',E.Message);
+  end;
+
+  writeln('Last Status Message: ' + FirebirdAPI.GetStatus.Getmessage);
+
+  writeln('Creating a Database with no DPD');
   CreateParams := 'USER ''' + Owner.GetUserName + ''' PASSWORD ''' + Owner.GetPassword + ''' ' +
       'DEFAULT CHARACTER SET ' + CharSet;
+  Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,SQLDialect,CreateParams,DPB);
+
+  writeln('Dropping Database');
+  Attachment.DropDatabase;
+
   {Open Database}
   DPB := FirebirdAPI.AllocateDPB;
   DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
@@ -70,12 +83,9 @@ begin
   DPB.Add(isc_dpb_lc_ctype).setAsString(CharSet);
   DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
 
-  writeln('DPB');
-  writeln('Count = ', DPB.getCount);
-  for i := 0 to DPB.getCount - 1 do
-    writeln(DPB.Items[i].getParamType,' = ', DPB.Items[i].AsString);
+  PrintDPB(DPB);
+  writeln('Creating a Database with a DPD');
   Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,SQLDialect,CreateParams,DPB);
-  writeln('Database Created without error');
   DBInfo := Attachment.GetDBInformation(byte(isc_info_db_id));
   DBInfo[0].DecodeIDCluster(ConType,DBFileName,DBSiteName);
   writeln('Database ID = ', ConType,' FB = ', DBFileName, ' SN = ',DBSiteName);

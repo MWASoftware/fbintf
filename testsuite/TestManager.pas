@@ -5,7 +5,7 @@ unit TestManager;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils, IB;
 
 type
   TTestManager = class;
@@ -15,6 +15,9 @@ type
   TTestBase = class
   private
     FOwner: TTestManager;
+  protected
+    procedure ReportResults(Statement: IStatement);
+    procedure PrintDPB(DPB: IDPB);
   public
     constructor Create(aOwner: TTestManager);  virtual;
     function TestTitle: string; virtual; abstract;
@@ -33,7 +36,7 @@ type
     FNewDatabaseName: string;
     FUserName: string;
     FPassword: string;
- public
+  public
     constructor Create;
     destructor Destroy; override;
     function GetUserName: string;
@@ -50,8 +53,6 @@ procedure RegisterTest(aTest: TTest);
 
 implementation
 
-uses IB;
-
 procedure RegisterTest(aTest: TTest);
 begin
   if TestMgr = nil then
@@ -65,6 +66,31 @@ constructor TTestBase.Create(aOwner: TTestManager);
 begin
   inherited Create;
   FOwner := aOwner;
+end;
+
+procedure TTestBase.ReportResults(Statement: IStatement);
+var ResultSet: IResultSet;
+    i: integer;
+begin
+  ResultSet := Statement.OpenCursor;
+  try
+    while ResultSet.FetchNext do
+    begin
+      for i := 0 to ResultSet.getCount - 1 do
+        writeln(ResultSet[i].Name,' = ',ResultSet[i].AsString);
+    end;
+  finally
+    ResultSet.Close;
+  end;
+end;
+
+procedure TTestBase.PrintDPB(DPB: IDPB);
+var i: integer;
+begin
+  writeln('DPB');
+  writeln('Count = ', DPB.getCount);
+  for i := 0 to DPB.getCount - 1 do
+    writeln(DPB.Items[i].getParamType,' = ', DPB.Items[i].AsString);
 end;
 
 { TTestManager }
@@ -126,6 +152,8 @@ begin
         Exit;
       end;
     end;
+    writeln;
+    writeln;
   end;
 end;
 
