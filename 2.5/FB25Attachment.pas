@@ -91,6 +91,7 @@ type
                        aSQLDialect: integer; GenerateParamNames: boolean=false;
                        UniqueParamNames: boolean=false): IStatement;
     function GetEventHandler(Events: TStrings): IEvents;
+    function OpenBlob(Transaction: ITransaction; BlobID: TISC_QUAD): IBlob;
 
     {Database Information}
     function GetBlobCharSetID(transaction: ITransaction; tableName, columnName: string): short;
@@ -477,6 +478,12 @@ end;
 function TFBAttachment.GetEventHandler(Events: TStrings): IEvents;
 begin
   Result := TFBEvents.Create(self,Events);
+end;
+
+function TFBAttachment.OpenBlob(Transaction: ITransaction; BlobID: TISC_QUAD
+  ): IBlob;
+begin
+  Result := TFBBlob.Create(self,Transaction,BlobID);
 end;
 
 function TFBAttachment.GetBlobCharSetID(transaction: ITransaction; tableName,

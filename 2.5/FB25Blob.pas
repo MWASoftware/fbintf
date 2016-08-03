@@ -45,6 +45,8 @@ type
     procedure LoadFromStream(S: TStream);
     procedure SaveToFile(Filename: string);
     procedure SaveToStream(S: TStream);
+    function GetAttachment: IAttachment;
+    function GetTransaction: ITransaction;
   end;
 
 implementation
@@ -287,6 +289,16 @@ begin
     S.Write(Buffer,BytesRead);
   until BytesRead = 0;
   Close;
+end;
+
+function TFBBlob.GetAttachment: IAttachment;
+begin
+  Result := FAttachment;
+end;
+
+function TFBBlob.GetTransaction: ITransaction;
+begin
+  Result := FTransaction;
 end;
 
 end.

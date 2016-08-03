@@ -155,7 +155,8 @@ type
       ibxeSPBParamTypeError,
       ibxeDuplicateParamName,
       ibxeInvalidArrayDimensions,
-      ibxeNotAMultiDatabaseTransaction
+      ibxeNotAMultiDatabaseTransaction,
+      ibxeAttachmentListIndexError
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;
@@ -332,6 +333,7 @@ resourcestring
   SDuplicateParamName = 'Blob or array parameter name must be unique (%s)';
   SInvalidArrayDimensions = 'Invalid number of array dimensions {%d)';
   SNotAMultiDatabaseTransaction = 'This is not a multi-database transaction';
+  SAttachmentListIndexError = 'Attachment List index out of range (%d)';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -472,7 +474,8 @@ const
     SSPBParamTypeError,
     SDuplicateParamName,
     SInvalidArrayDimensions,
-    SNotAMultiDatabaseTransaction
+    SNotAMultiDatabaseTransaction,
+    SAttachmentListIndexError
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;

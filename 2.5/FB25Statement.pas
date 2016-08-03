@@ -289,6 +289,8 @@ type
     function OpenCursor(aTransaction: ITransaction=nil): IResultSet;
     function CreateBlob: IBlob;
     function CreateArray(column: IColumnMetaData): IArray;
+    function GetAttachment: IAttachment;
+    function GetTransaction: ITransaction;
     property Handle: TISC_STMT_HANDLE read FHandle;
     property SQLParams: ISQLParams read GetSQLParams;
     property SQLType: TIBSQLTypes read GetSQLType;
@@ -1501,6 +1503,16 @@ end;
 function TFBStatement.CreateArray(column: IColumnMetaData): IArray;
 begin
   Result := TFBArray.Create(column.GetArrayMetaData);
+end;
+
+function TFBStatement.GetAttachment: IAttachment;
+begin
+  Result := FAttachment;
+end;
+
+function TFBStatement.GetTransaction: ITransaction;
+begin
+  Result := FTransaction;
 end;
 
 function TFBStatement.GetSQLInfo(InfoRequest: byte): IDBInformation;

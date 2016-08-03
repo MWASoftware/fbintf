@@ -34,6 +34,7 @@ type
     function ExtractEventCounts: TEventCounts;
     procedure WaitForEvent;
     procedure AsyncWaitForEvent(EventHandler: TEventHandler);
+    function GetAttachment: IAttachment;
   end;
 
 implementation
@@ -277,6 +278,11 @@ begin
   finally
     FCriticalSection.Leave
   end;
+end;
+
+function TFBEvents.GetAttachment: IAttachment;
+begin
+  Result := FAttachment;
 end;
 
 procedure TFBEvents.WaitForEvent;

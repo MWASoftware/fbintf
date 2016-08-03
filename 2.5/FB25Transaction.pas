@@ -38,6 +38,8 @@ type
     procedure Start(DefaultCompletion: TTransactionCompletion);
     procedure Rollback;
     procedure RollbackRetaining;
+    function GetAttachmentCount: integer;
+    function GetAttachment(index: integer): IAttachment;
     property InTransaction: boolean read GetInTransaction;
   end;
 
@@ -219,6 +221,19 @@ begin
     Exit;
   with Firebird25ClientAPI do
     Call(isc_rollback_retaining(StatusVector, @FHandle));
+end;
+
+function TFBTransaction.GetAttachmentCount: integer;
+begin
+  Result := Length(FAttachments);
+end;
+
+function TFBTransaction.GetAttachment(index: integer): IAttachment;
+begin
+  if (index >= 0) and (index < Length(FAttachments)) then
+    Result := FAttachments[index]
+  else
+    IBError(ibxeAttachmentListIndexError,[index]);
 end;
 
 end.

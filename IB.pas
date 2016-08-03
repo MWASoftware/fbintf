@@ -460,6 +460,9 @@ type
   TFBStatusCode = cardinal;
   TByteArray = array of byte;
 
+  IAttachment = interface;
+  ITransaction = interface;
+
   IStatus = interface
     function GetIBErrorCode: Long;
     function Getsqlcode: Long;
@@ -490,20 +493,8 @@ type
     function GetElement(x: integer): ISQLElement; overload;
     function GetElement(x, y: integer): ISQLElement; overload;
     function GetElement(coords: TArrayCoords): ISQLElement; overload;
-  end;
-
-  TTransactionCompletion = (tcCommit,tcRollback);
-
-  ITransaction = interface
-    procedure Start(DefaultCompletion: TTransactionCompletion);
-    function GetInTransaction: boolean;
-    procedure PrepareForCommit;
-    procedure Commit;
-    procedure CommitRetaining;
-    function HasActivity: boolean;
-    procedure Rollback;
-    procedure RollbackRetaining;
-    property InTransaction: boolean read GetInTransaction;
+    function GetAttachment: IAttachment;
+    function GetTransaction: ITransaction;
   end;
 
   TFBBlobMode = (fbmRead,fbmWrite);
@@ -521,6 +512,8 @@ type
     procedure LoadFromStream(S: TStream);
     procedure SaveToFile(Filename: string);
     procedure SaveToStream(S: TStream);
+    function GetAttachment: IAttachment;
+    function GetTransaction: ITransaction;
  end;
 
   { IColumnMetaData }
@@ -703,11 +696,28 @@ type
     function OpenCursor(aTransaction: ITransaction=nil): IResultSet;
     function CreateBlob: IBlob;
     function CreateArray(column: IColumnMetaData): IArray;
+    function GetAttachment: IAttachment;
+    function GetTransaction: ITransaction;
     property SQLParams: ISQLParams read GetSQLParams;
     property SQLType: TIBSQLTypes read GetSQLType;
   end;
 
-type
+  TTransactionCompletion = (tcCommit,tcRollback);
+
+  ITransaction = interface
+    procedure Start(DefaultCompletion: TTransactionCompletion);
+    function GetInTransaction: boolean;
+    procedure PrepareForCommit;
+    procedure Commit;
+    procedure CommitRetaining;
+    function HasActivity: boolean;
+    procedure Rollback;
+    procedure RollbackRetaining;
+    function GetAttachmentCount: integer;
+    function GetAttachment(index: integer): IAttachment;
+    property InTransaction: boolean read GetInTransaction;
+  end;
+
   TEventInfo = record
     EventName: string;
     Count: integer;
@@ -722,6 +732,7 @@ type
     function ExtractEventCounts: TEventCounts;
     procedure WaitForEvent;
     procedure AsyncWaitForEvent(EventHandler: TEventHandler);
+    function GetAttachment: IAttachment;
   end;
 
   TDBOperationCount = record
@@ -772,6 +783,8 @@ type
     property Items[index: integer]: IDPBItem read getItems; default;
   end;
 
+  { IAttachment }
+
   IAttachment = interface
     function getDPB: IDPB;
     procedure Connect;
@@ -788,6 +801,10 @@ type
 
     {Events}
     function GetEventHandler(Events: TStrings): IEvents;
+
+    {Blob - may use to open existing Blobs. However, ISQLData.AsBlob is preferred}
+
+    function OpenBlob(Transaction: ITransaction; BlobID: TISC_QUAD): IBlob;
 
     {Database Information}
     function GetBlobCharSetID(transaction: ITransaction; tableName, columnName: string): short;
