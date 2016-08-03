@@ -1478,7 +1478,7 @@ begin
     result := ''
   else
   begin
-    RB := TSQLInfoResultsBuffer.Create(self);
+    RB := TSQLInfoResultsBuffer.Create(self,4*4096);
     try
       RB.Exec(isc_info_sql_get_plan);
       RB.GetString(isc_info_sql_get_plan, Result);
