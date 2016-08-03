@@ -67,7 +67,8 @@
       </Unit6>
       <Unit7>
         <Filename Value="../IB.pas"/>
-        <CursorPos X="29" Y="698"/>
+        <TopLine Value="689"/>
+        <CursorPos Y="700"/>
         <UsageCount Value="53"/>
         <Loaded Value="True"/>
       </Unit7>
@@ -131,8 +132,8 @@
         <Filename Value="../2.5/FB25Statement.pas"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="6"/>
-        <TopLine Value="1471"/>
-        <CursorPos X="51" Y="1481"/>
+        <TopLine Value="308"/>
+        <CursorPos X="66" Y="325"/>
         <UsageCount Value="47"/>
         <Loaded Value="True"/>
       </Unit16>

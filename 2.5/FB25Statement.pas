@@ -282,7 +282,6 @@ type
     function GetPlan: String;
     function GetRowsAffected(var InsertCount, UpdateCount, DeleteCount: integer): boolean;
     function GetSQLType: TIBSQLTypes;
-    function GetSQLInfo(InfoRequest: byte): IDBInformation;
     function GetSQLText: string;
     function IsPrepared: boolean;
     procedure Prepare(aTransaction: ITransaction=nil);
@@ -323,7 +322,7 @@ end;
 
 implementation
 
-uses IBUtils, FBErrorMessages, FB25Blob, variants, IBErrorCodes, FB25DBInfo, FB25Array;
+uses IBUtils, FBErrorMessages, FB25Blob, variants, IBErrorCodes, FB25Array;
 
 const
    sSQLErrorSeparator = ' When Executing: ';
@@ -1565,11 +1564,6 @@ end;
 function TFBStatement.GetTransaction: ITransaction;
 begin
   Result := FTransaction;
-end;
-
-function TFBStatement.GetSQLInfo(InfoRequest: byte): IDBInformation;
-begin
-  Result := TDBInformation.Create(self,InfoRequest)
 end;
 
 function TFBStatement.GetSQLText: string;
