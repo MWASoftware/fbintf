@@ -555,6 +555,7 @@ type
     function getColumnMetaData(index: integer): IColumnMetaData;
     function GetUniqueRelationName: string;
     function ByName(Idx: String): IColumnMetaData;
+    property ColMetaData[index: integer]: IColumnMetaData read getColumnMetaData; default;
   end;
 
   ISQLData = interface(IColumnMetaData)

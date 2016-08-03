@@ -5,7 +5,7 @@ unit TestManager;
 interface
 
 uses
-  Classes, SysUtils, IB;
+  Classes, SysUtils, IB, IBExternals, IBHeader;
 
 type
   TTestManager = class;
@@ -18,6 +18,8 @@ type
   protected
     procedure ReportResults(Statement: IStatement);
     procedure PrintDPB(DPB: IDPB);
+    procedure PrintMetaData(meta: IMetaData);
+    function SQLType2Text(sqltype: short): string;
   public
     constructor Create(aOwner: TTestManager);  virtual;
     function TestTitle: string; virtual; abstract;
@@ -77,7 +79,12 @@ begin
     while ResultSet.FetchNext do
     begin
       for i := 0 to ResultSet.getCount - 1 do
-        writeln(ResultSet[i].Name,' = ',ResultSet[i].AsString);
+      begin
+        if ResultSet[i].GetScale <> 0 then
+          writeln( ResultSet[i].Name,' = ',FormatFloat('#,##0.00',ResultSet[i].AsFloat))
+        else
+          writeln(ResultSet[i].Name,' = ',ResultSet[i].AsString);
+      end;
     end;
   finally
     ResultSet.Close;
@@ -91,6 +98,49 @@ begin
   writeln('Count = ', DPB.getCount);
   for i := 0 to DPB.getCount - 1 do
     writeln(DPB.Items[i].getParamType,' = ', DPB.Items[i].AsString);
+end;
+
+procedure TTestBase.PrintMetaData(meta: IMetaData);
+var i: integer;
+begin
+  writeln('Metadata');
+  for i := 0 to meta.GetCount - 1 do
+  with meta[i] do
+  begin
+    writeln('SQLType =',SQLType2Text(getSQLType));
+    writeln('sub type = ',getSubType);
+    writeln('Table = ',getRelationName);
+    writeln('Owner = ',getOwnerName);
+    writeln('Column Name = ',getSQLName);
+    writeln('Alias Name = ',getAliasName);
+    writeln('Field Name = ',getName);
+    writeln('Scale = ',getScale);
+    writeln('Charset id = ',getCharSetID);
+    if getIsNullable then writeln('Nullable') else writeln('Not Null');
+    writeln('Size = ',GetSize);
+    writeln;
+  end;
+end;
+
+function TTestBase.SQLType2Text(sqltype: short): string;
+begin
+  Result := '';
+  case sqltype of
+  SQL_VARYING:	Result := 'SQL_VARYING';
+  SQL_TEXT:		Result := 'SQL_TEXT';
+  SQL_DOUBLE:		Result := 'SQL_DOUBLE';
+  SQL_FLOAT:		Result := 'SQL_FLOAT';
+  SQL_LONG:		Result := 'SQL_LONG';
+  SQL_SHORT:		Result := 'SQL_SHORT';
+  SQL_TIMESTAMP:	Result := 'SQL_TIMESTAMP';
+  SQL_BLOB:		Result := 'SQL_BLOB';
+  SQL_D_FLOAT:	Result := 'SQL_D_FLOAT';
+  SQL_ARRAY:		Result := 'SQL_ARRAY';
+  SQL_QUAD:		Result := 'SQL_QUAD';
+  SQL_TYPE_TIME:	Result := 'SQL_TYPE_TIME';
+  SQL_TYPE_DATE:	Result := 'SQL_TYPE_DATE';
+  SQL_INT64:		Result := 'SQL_INT64';
+  end;
 end;
 
 { TTestManager }

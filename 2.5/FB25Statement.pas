@@ -68,7 +68,7 @@ type
     property Parent: TIBXSQLDA read FParent;
 
   public
-    {IFieldMetaData}
+    {IColumnMetaData}
     function GetSQLType: short; override;
     function getSubtype: short;
     function getRelationName: string;
@@ -314,8 +314,6 @@ end;
     procedure Exec(info_request: char);
     function GetValue(token: char): integer; overload;
     function GetValue(token: char; subtoken: char): integer; overload;
-    function GetCountValue(token: char): integer;
-    function GetBool(token: char): boolean;
     function GetString(token: char; var data: string): integer;
     function buffer: PChar;
   end;
@@ -690,7 +688,7 @@ end;
 
 function TIBXSQLVAR.getSubtype: short;
 begin
-  result := FXSQLVAR^.sqltype and (not 1);
+  result := FXSQLVAR^.sqlsubtype and (not 1);
 end;
 
 function TIBXSQLVAR.getRelationName: string;
@@ -1503,23 +1501,9 @@ begin
   try
     RB.Exec(isc_info_sql_records);
 
-    case SQLType of
-    SQLInsert, SQLUpdate: {Covers Insert or Update as well as individual update}
-    begin
-      InsertCount := RB.GetValue(isc_info_sql_records, isc_info_req_insert_count);
-      UpdateCount := RB.GetValue(isc_info_sql_records, isc_info_req_update_count);
-    end;
-
-    SQLDelete:
-      DeleteCount := RB.GetValue(isc_info_sql_records, isc_info_req_delete_count);
-
-    SQLExecProcedure:
-    begin
-      InsertCount := RB.GetValue(isc_info_sql_records, isc_info_req_insert_count);
-      UpdateCount := RB.GetValue(isc_info_sql_records, isc_info_req_update_count);
-      DeleteCount := RB.GetValue(isc_info_sql_records, isc_info_req_delete_count);
-    end;
-    end;
+    InsertCount := RB.GetValue(isc_info_sql_records, isc_info_req_insert_count);
+    UpdateCount := RB.GetValue(isc_info_sql_records, isc_info_req_update_count);
+    DeleteCount := RB.GetValue(isc_info_sql_records, isc_info_req_delete_count);
   finally
     RB.Free;
   end;
@@ -1662,51 +1646,6 @@ begin
     end;
     len := isc_vax_integer(p+1, 2);
     inc(p,len+3);
-  end;
-end;
-
-function TSQLInfoResultsBuffer.GetBool(token: char): boolean;
-var aValue: integer;
-    p: PChar;
-begin
-  p := FindToken(token);
-
-  if p = nil then
-    IBError(ibxeDscInfoTokenMissing,[token]);
-
-  with Firebird25ClientAPI do
-    aValue := isc_vax_integer(p+1, 4);
-  Result := aValue <> 0;
-end;
-
-function TSQLInfoResultsBuffer.GetCountValue(token: char): integer;
-var len: integer;
-    p: PChar;
-begin
-  {Specifically used on tokens like isc_info_insert_count and the like
-   which return detailed counts per relation. We sum up the values.}
-
-  p := FindToken(token);
-
-  if p = nil then
-    IBError(ibxeDscInfoTokenMissing,[token]);
-
-  {len is the number of bytes in the following array}
-
-  with Firebird25ClientAPI do
-    len := isc_vax_integer(p+1, 2);
-  Inc(p,3);
-  Result := 0;
-  while len > 0 do
-  begin
-    {Each array item is 6 bytes : 2 bytes for the relation_id which
-     we skip, and 4 bytes for the count value which we sum up across
-     all tables.}
-
-    with Firebird25ClientAPI do
-       Inc(Result,isc_vax_integer(p+2, 4));
-     Inc(p,6);
-     Dec(len,6);
   end;
 end;
 

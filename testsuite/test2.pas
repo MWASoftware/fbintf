@@ -31,6 +31,7 @@ var Transaction: ITransaction;
 begin
     Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],tcCommit);
     Statement := Attachment.Prepare(Transaction,'Select First 3 * from EMPLOYEE',3);
+    PrintMetaData(Statement.GetMetaData);
     writeln('Plan = ' ,Statement.GetPlan);
     writeln(Statement.GetSQLText);
     ReportResults(Statement);

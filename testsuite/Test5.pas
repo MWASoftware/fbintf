@@ -1,4 +1,4 @@
-unit Test4;
+unit Test5;
 
 {$mode objfpc}{$H+}
 
@@ -9,9 +9,9 @@ uses
 
 type
 
-  { TTest4 }
+  { TTest5 }
 
-  TTest4 = class(TTestBase)
+  TTest5 = class(TTestBase)
   private
     procedure DoQuery(Attachment: IAttachment);
   public
@@ -19,23 +19,24 @@ type
     procedure RunTest(CharSet: string; SQLDialect: integer); override;
   end;
 
-
 implementation
 
-{ TTest4 }
+{ TTest5 }
 
-procedure TTest4.DoQuery(Attachment: IAttachment);
+procedure TTest5.DoQuery(Attachment: IAttachment);
 var Transaction: ITransaction;
     Statement: IStatement;
     InsertCount, UpdateCount, DeleteCount: integer;
+    Results: IResults;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],tcRollback);
-  Statement := Attachment.Prepare(Transaction,'Update Employee Set Hire_Date = ? Where EMP_NO = ?',3);
+  Statement := Attachment.Prepare(Transaction,'Update Employee Set Hire_Date = ? Where EMP_NO = ? Returning LAST_NAME',3);
   Statement.GetSQLParams[0].AsDAteTime := EncodeDate(2016,1,31);;
   Statement.GetSQLParams[1].AsInteger := 9;
-  Statement.Execute;
+  Results := Statement.Execute;
   Statement.GetRowsAffected(InsertCount, UpdateCount, DeleteCount);
   writeln('InsertCount = ',InsertCount,' UpdateCount = ', UpdateCount, ' DeleteCount = ',DeleteCount);
+  writeln('Last Name = ',Results[0].AsString);
 
   Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
   Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 9;
@@ -44,7 +45,7 @@ begin
   Statement := Attachment.PrepareWithNamedParameters(Transaction,'INSERT INTO EMPLOYEE (EMP_NO, FIRST_NAME, LAST_NAME, PHONE_EXT, HIRE_DATE,' +
       'DEPT_NO, JOB_CODE, JOB_GRADE, JOB_COUNTRY, SALARY) '+
       'VALUES (:EMP_NO, :FIRST_NAME, :LAST_NAME, :PHONE_EXT, :HIRE_DATE,' +
-      ':DEPT_NO, :JOB_CODE, :JOB_GRADE, :JOB_COUNTRY, :SALARY)',3);
+      ':DEPT_NO, :JOB_CODE, :JOB_GRADE, :JOB_COUNTRY, :SALARY) Returning FULL_NAME',3);
   with Statement.GetSQLParams do
   begin
     ByName('EMP_NO').AsInteger := 150;
@@ -58,32 +59,22 @@ begin
     ByName('JOB_COUNTRY').AsString := 'England';
     ByName('SALARY').AsFloat := 41000.89;
   end;
-  Statement.Execute;
-  Statement.GetRowsAffected(InsertCount, UpdateCount, DeleteCount);
-  writeln('InsertCount = ',InsertCount,' UpdateCount = ', UpdateCount, ' DeleteCount = ',DeleteCount);
-
-  Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
-  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 150;
-  ReportResults(Statement);
-
-  writeln('Now Delete the row');
-  Statement := Attachment.Prepare(Transaction,'Delete From Employee Where EMP_NO = ?',3);
-  Statement.GetSQLParams[0].AsInteger := 150;
-  Statement.Execute;
+  writeln('Inserting');
+  Results := Statement.Execute;
+  writeln('Full Name = ',Results[0].AsString);
   Statement.GetRowsAffected(InsertCount, UpdateCount, DeleteCount);
   writeln('InsertCount = ',InsertCount,' UpdateCount = ', UpdateCount, ' DeleteCount = ',DeleteCount);
 
   writeln('Employee Count = ', Attachment.OpenCursorAtStart(Transaction,
          'Select count(*) from EMPLOYEE',3)[0].AsInteger);
-
 end;
 
-function TTest4.TestTitle: string;
+function TTest5.TestTitle: string;
 begin
-  Result := 'Test 4: Update Queries';
+  Result := 'Test 5: Update Returning';
 end;
 
-procedure TTest4.RunTest(CharSet: string; SQLDialect: integer);
+procedure TTest5.RunTest(CharSet: string; SQLDialect: integer);
 var Attachment: IAttachment;
     DPB: IDPB;
 begin
@@ -96,11 +87,16 @@ begin
   writeln('Opening ',Owner.GetEmployeeDatabaseName);
   Attachment := FirebirdAPI.OpenDatabase(Owner.GetEmployeeDatabaseName,DPB);
   writeln('Database Open');
+  Attachment.Disconnect;
+  writeln('Database Closed');
+  Attachment.Connect;
+  writeln('Database Open');
   DoQuery(Attachment);
 end;
 
 initialization
-  RegisterTest(TTest4);
+  RegisterTest(TTest5);
+
 
 end.
 
