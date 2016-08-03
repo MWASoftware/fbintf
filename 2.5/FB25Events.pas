@@ -11,7 +11,7 @@ uses
 type
   { TFBEvents }
 
-  TFBEvents = class(TAPIObject,IEvents)
+  TFBEvents = class(TInterfacedObject,IEvents)
   private
     FEventBuffer: PChar;
     FEventBufferLen: integer;
@@ -25,11 +25,14 @@ type
     FEventHandler: TEventHandler;
     procedure CancelEvents;
     procedure EventSignaled;
+    procedure CreateEventBlock;
   public
     constructor Create(DBAttachment: TFBAttachment; Events: TStrings);
     destructor Destroy; override;
 
     {IEvents}
+    procedure GetEvents(EventNames: TStrings);
+    procedure SetEvents(EventNames: TStrings);
     procedure Cancel;
     function ExtractEventCounts: TEventCounts;
     procedure WaitForEvent;
@@ -189,7 +192,9 @@ begin
   FCriticalSection.Enter;
   try
     with Firebird25ClientAPI do
-      Call(isc_Cancel_events( StatusVector, @FDBHandle, @FEventID));
+      if isc_Cancel_events( StatusVector, @FDBHandle, @FEventID) > 0 then
+        IBDatabaseError;
+
     FEventHandler := nil;
   finally
     FCriticalSection.Leave
@@ -205,13 +210,43 @@ begin
   FEventHandler := nil;
 end;
 
-constructor TFBEvents.Create(DBAttachment: TFBAttachment; Events: TStrings);
+procedure TFBEvents.CreateEventBlock;
 var
   i: integer;
   EventNames: array of PChar;
 begin
+  with Firebird25ClientAPI do
+  begin
+    if FEventBuffer <> nil then
+      isc_free( FEventBuffer);
+    FEventBuffer := nil;
+    if FResultBuffer <> nil then
+      isc_free( FResultBuffer);
+    FResultBuffer := nil;
+
+    setlength(EventNames,MaxEvents);
+    try
+      for i := 0 to FEvents.Count-1 do
+        EventNames[i] := PChar(FEvents[i]);
+
+      FEventBufferlen := isc_event_block(@FEventBuffer,@FResultBuffer,
+                          FEvents.Count,
+                          EventNames[0],EventNames[1],EventNames[2],
+                          EventNames[3],EventNames[4],EventNames[5],
+                          EventNames[6],EventNames[7],EventNames[8],
+                          EventNames[9],EventNames[10],EventNames[11],
+                          EventNames[12],EventNames[13],EventNames[14]
+                          );
+    finally
+      SetLength(EventNames,0)
+    end;
+  end;
+end;
+
+constructor TFBEvents.Create(DBAttachment: TFBAttachment; Events: TStrings);
+begin
   inherited Create;
-  AddOwner(DBAttachment);
+  DBAttachment.RegisterObj(self);
   FAttachment := DBAttachment;
   if Events.Count > MaxEvents then
     IBError(ibxeMaximumEvents, [nil]);
@@ -221,27 +256,13 @@ begin
   FEvents := TStringList.Create;
   FDBHandle := DBAttachment.Handle;
   FEventHandlerThread := TEventHandlerThread.Create(self);
-  setlength(EventNames,MaxEvents);
-  try
-    for i := 0 to Events.Count-1 do
-      EventNames[i] := PChar(Events[i]);
-    FEvents.Assign(Events);
-    with Firebird25ClientAPI do
-       FEventBufferlen := isc_event_block(@FEventBuffer,@FResultBuffer,
-                        Events.Count,
-                        EventNames[0],EventNames[1],EventNames[2],
-                        EventNames[3],EventNames[4],EventNames[5],
-                        EventNames[6],EventNames[7],EventNames[8],
-                        EventNames[9],EventNames[10],EventNames[11],
-                        EventNames[12],EventNames[13],EventNames[14]
-                        );
-  finally
-    SetLength(EventNames,0)
-  end;
+  FEvents.Assign(Events);
+  CreateEventBlock;
 end;
 
 destructor TFBEvents.Destroy;
 begin
+  (FAttachment as TFBAttachment).UnRegisterObj(self);
   if assigned(FEventHandlerThread) then
     TEventHandlerThread(FEventHandlerThread).Terminate;
   if assigned(FCriticalSection) then FCriticalSection.Free;
@@ -254,6 +275,21 @@ begin
       isc_free( FResultBuffer);
   end;
   inherited Destroy;
+end;
+
+procedure TFBEvents.GetEvents(EventNames: TStrings);
+begin
+  EventNames.Assign(FEvents);
+end;
+
+procedure TFBEvents.SetEvents(EventNames: TStrings);
+begin
+  if EventNames.Text <> FEvents.Text then
+  begin
+    Cancel;
+    FEvents.Assign(EventNames);
+    CreateEventBlock;
+  end;
 end;
 
 procedure TFBEvents.Cancel;
@@ -273,8 +309,9 @@ begin
   try
     callback := @IBEventCallback;
     with Firebird25ClientAPI do
-      Call(isc_que_events( StatusVector, @FDBHandle, @FEventID, FEventBufferLen,
-                     FEventBuffer, TISC_CALLBACK(callback), PVoid(FEventHandlerThread)));
+      if isc_que_events( StatusVector, @FDBHandle, @FEventID, FEventBufferLen,
+                     FEventBuffer, TISC_CALLBACK(callback), PVoid(FEventHandlerThread)) > 0 then
+        IBDatabaseError;
   finally
     FCriticalSection.Leave
   end;
@@ -288,7 +325,8 @@ end;
 procedure TFBEvents.WaitForEvent;
 begin
   with Firebird25ClientAPI do
-     Call(isc_wait_for_event(StatusVector,@FDBHandle, FEventBufferlen,@FEventBuffer,@FResultBuffer));
+     if isc_wait_for_event(StatusVector,@FDBHandle, FEventBufferlen,@FEventBuffer,@FResultBuffer) > 0 then
+       IBDatabaseError;
 end;
 
 end.

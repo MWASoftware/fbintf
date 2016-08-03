@@ -497,6 +497,14 @@ type
     function GetTransaction: ITransaction;
   end;
 
+  IBlobMetaData = interface
+    function GetSubType: short;
+    function GetCharSetID: short;
+    function GetSegmentSize: short;
+    function GetTableName: string;
+    function GetColumnName: string;
+  end;
+
   TFBBlobMode = (fbmRead,fbmWrite);
 
   IBlob = interface
@@ -531,6 +539,7 @@ type
     function getIsNullable: boolean;
     function GetSize: integer;
     function GetArrayMetaData: IArrayMetaData; {Valid only for Array SQL Type}
+    function GetBlobMetaData: IBlobMetaData; {Valid only for Blob SQL Type}
     property Name: string read GetName;
     property Size: Integer read GetSize;
     property CharSetID: cardinal read getCharSetID;
@@ -728,6 +737,8 @@ type
   TEventHandler = procedure(Sender: IEvents) of object;
 
   IEvents = interface
+    procedure GetEvents(EventNames: TStrings);
+    procedure SetEvents(EventNames: TStrings);
     procedure Cancel;
     function ExtractEventCounts: TEventCounts;
     procedure WaitForEvent;
@@ -807,7 +818,8 @@ type
     function OpenBlob(Transaction: ITransaction; BlobID: TISC_QUAD): IBlob;
 
     {Database Information}
-    function GetBlobCharSetID(transaction: ITransaction; tableName, columnName: string): short;
+    function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: string): IBlobMetaData;
+    function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: string): IArrayMetaData;
     function GetDBInformation(DBInfoCommand: byte): IDBInformation;
     function HasActivity: boolean;
   end;
@@ -898,7 +910,7 @@ type
     function CreateDatabase(DatabaseName: string; SQLDialect: integer;
       CreateParams: string; DPB: IDPB): IAttachment;
     function StartTransaction(Attachments: array of IAttachment;
-             Params: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction; {Start Transaction against multiple databases}
+             TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction; {Start Transaction against multiple databases}
 
     {Service Manager}
     function AllocateSPB: ISPB;

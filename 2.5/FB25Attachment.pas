@@ -94,14 +94,15 @@ type
     function OpenBlob(Transaction: ITransaction; BlobID: TISC_QUAD): IBlob;
 
     {Database Information}
-    function GetBlobCharSetID(transaction: ITransaction; tableName, columnName: string): short;
+    function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: string): IBlobMetaData;
+    function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: string): IArrayMetaData;
     function GetDBInformation(DBInfoCommand: byte): IDBInformation;
   end;
 
 implementation
 
 uses FB25Events, FB25Status, FB25Transaction, FBErrorMessages, FB25Blob,
-  FB25Statement, FB25DBInfo;
+  FB25Statement, FB25DBInfo, FB25Array;
 
 { TDPBItem }
 
@@ -486,17 +487,16 @@ begin
   Result := TFBBlob.Create(self,Transaction,BlobID);
 end;
 
-function TFBAttachment.GetBlobCharSetID(transaction: ITransaction; tableName,
-  columnName: string): short;
-var desc: TISC_BLOB_DESC;
-    uGlobal: array [0..31] of char;
-    trHandle: TISC_TR_HANDLE;
+function TFBAttachment.GetBlobMetaData(Transaction: ITransaction; tableName,
+  columnName: string): IBlobMetaData;
 begin
-  trHandle := (transaction as TFBTransaction).Handle;
-  with Firebird25ClientAPI do
-    Call(isc_blob_lookup_desc(StatusVector,@FHandle,@trHandle,
-                PChar(tableName),PChar(columnName),@desc,@uGlobal));
-  Result := desc.blob_desc_charset;
+  Result := TFBBlobMetaData.Create(self,Transaction as TFBTransaction,tableName,columnName);
+end;
+
+function TFBAttachment.GetArrayMetaData(Transaction: ITransaction; tableName,
+  columnName: string): IArrayMetaData;
+begin
+  Result := TFBArrayMetaData.Create(self,Transaction as TFBTransaction,tableName,columnName);
 end;
 
 function TFBAttachment.GetDBInformation(DBInfoCommand: byte): IDBInformation;

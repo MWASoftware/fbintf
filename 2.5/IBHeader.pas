@@ -126,8 +126,8 @@ type
     blob_desc_subtype           : Short;
     blob_desc_charset           : Short;
     blob_desc_segment_size      : Short;
-    blob_desc_field_name        : array[0..31] of UChar;
-    blob_desc_relation_name     : array[0..31] of UChar;
+    blob_desc_field_name        : array[0..31] of Char;
+    blob_desc_relation_name     : array[0..31] of Char;
   end; // TISC_BLOB_DESC
   PISC_BLOB_DESC = ^TISC_BLOB_DESC;
 

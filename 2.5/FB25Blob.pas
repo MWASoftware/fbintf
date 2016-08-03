@@ -10,6 +10,26 @@ uses
 
 type
 
+   { TFBBlobMetaData }
+
+   TFBBlobMetaData  = class(TAPIObject, IBlobMetaData)
+   private
+     FBlobDesc: TISC_BLOB_DESC;
+     FGlobal: array [0..31] of char;
+   public
+     constructor Create(Attachment: TFBAttachment; Transaction: TFBTransaction;
+       RelationName, ColumnName: string);
+
+   public
+     {IBlobMetaData}
+    function GetSubType: short;
+    function GetCharSetID: short;
+    function GetSegmentSize: short;
+    function GetTableName: string;
+    function GetColumnName: string;
+  end;
+
+
   { TFBBlob }
 
   TFBBlob = class(TAPIObject,IBlob)
@@ -52,6 +72,43 @@ type
 implementation
 
 uses IBErrorCodes, FBErrorMessages;
+
+{ TFBBlobMetaData }
+
+constructor TFBBlobMetaData.Create(Attachment: TFBAttachment;
+  Transaction: TFBTransaction; RelationName, ColumnName: string);
+begin
+  inherited Create;
+  with Firebird25ClientAPI do
+    Call(isc_blob_lookup_desc(StatusVector,@(Attachment.Handle),
+                                           @(Transaction.Handle),
+                PChar(RelationName),PChar(ColumnName),@FBlobDesc,@FGlobal));
+end;
+
+function TFBBlobMetaData.GetSubType: short;
+begin
+  Result := FBlobDesc.blob_desc_subtype;
+end;
+
+function TFBBlobMetaData.GetCharSetID: short;
+begin
+  Result := FBlobDesc.blob_desc_charset;
+end;
+
+function TFBBlobMetaData.GetSegmentSize: short;
+begin
+  Result := FBlobDesc.blob_desc_segment_size;
+end;
+
+function TFBBlobMetaData.GetTableName: string;
+begin
+  Result := strpas(FBlobDesc.blob_desc_relation_name);
+end;
+
+function TFBBlobMetaData.GetColumnName: string;
+begin
+  Result := strpas(FBlobDesc.blob_desc_field_name);
+end;
 
 { TFBBlob }
 

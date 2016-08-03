@@ -82,6 +82,7 @@ type
     function GetIsNullable: boolean; override;
     function GetSize: integer;
     function GetArrayMetaData: IArrayMetaData;
+    function GetBlobMetaData: IBlobMetaData;
     property Name: string read GetName;
     property Size: Integer read GetSize;
     property CharSetID: cardinal read getCharSetID;
@@ -733,7 +734,17 @@ begin
 
   Result := TFBArrayMetaData.Create(Parent.Statement.FAttachment,
                 Parent.Statement.FTransaction,
-                GetRelationName,GetSQLName,Parent.Statement.SQLDialect);
+                GetRelationName,GetSQLName);
+end;
+
+function TIBXSQLVAR.GetBlobMetaData: IBlobMetaData;
+begin
+  if GetSQLType <> SQL_BLOB then
+    IBError(ibxeInvalidDataConversion,[nil]);
+
+  Result := TFBBlobMetaData.Create(Parent.Statement.FAttachment,
+                Parent.Statement.FTransaction,
+                GetRelationName,GetSQLName);
 end;
 
 { TIBXSQLDA }
