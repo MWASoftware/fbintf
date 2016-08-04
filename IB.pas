@@ -506,6 +506,7 @@ type
   end;
 
   TFBBlobMode = (fbmRead,fbmWrite);
+  TBlobType = (btSegmented,btStream);
 
   IBlob = interface
     procedure Cancel;
@@ -513,7 +514,7 @@ type
     function GetBlobID: TISC_QUAD;
     function GetBlobMode: TFBBlobMode;
     function GetInfo(var NumSegments: Int64; var MaxSegmentSize,
-                      TotalSize: Int64; var BlobType: Short) :boolean;
+                      TotalSize: Int64; var BlobType: TBlobType) :boolean;
     function Read(var Buffer; Count: Longint): Longint;
     function Write(const Buffer; Count: Longint): Longint;
     procedure LoadFromFile(Filename: string);

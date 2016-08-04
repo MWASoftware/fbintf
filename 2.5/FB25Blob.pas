@@ -57,8 +57,8 @@ type
     procedure Close;
     function GetBlobID: TISC_QUAD;
     function GetBlobMode: TFBBlobMode;
-    function GetInfo(var NumSegments: Int64; var MaxSegmentSize,
-                       TotalSize: Int64; var BlobType: Short) :boolean;
+    function GetInfo(var NumSegments: Int64; var MaxSegmentSize, TotalSize: Int64;
+      var BlobType: TBlobType): boolean;
     function Read(var Buffer; Count: Longint): Longint;
     function Write(const Buffer; Count: Longint): Longint;
     procedure LoadFromFile(Filename: string);
@@ -207,7 +207,7 @@ begin
 end;
 
 function TFBBlob.GetInfo(var NumSegments: Int64; var MaxSegmentSize,
-  TotalSize: Int64; var BlobType: Short): boolean;
+  TotalSize: Int64; var BlobType: TBlobType): boolean;
 var
   items: array[0..3] of Char;
   results: array[0..99] of Char;
@@ -236,7 +236,10 @@ begin
         isc_info_blob_total_length:
           TotalSize := isc_portable_integer(@results[i], item_length);
         isc_info_blob_type:
-          BlobType := isc_portable_integer(@results[i], item_length);
+          if isc_portable_integer(@results[i], item_length) = 0 then
+            BlobType := btSegmented
+          else
+            BlobType := btStream;
       end;
       Inc(i, item_length);
     end;

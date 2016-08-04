@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, IB, FBLibrary, FB25ClientAPI, FB25Attachment, IBExternals,
-  IBHeader, syncobjs, FB25APIObject;
+  IBHeader, syncobjs;
 
 type
   { TFBEvents }

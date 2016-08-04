@@ -297,33 +297,34 @@ type
 
 end;
 
-  {TSQLInfoResultsBuffer inspired by IBPP RB class - access a isc_dsql_sql_info result buffer}
-
-  TSQLInfoResultsBuffer = class
-  private
-    mBuffer: PChar;
-    mSize: short;
-    FStatement: TFBStatement;
-    function FindToken(token: char): PChar; overload;
-    function FindToken(token: char; subtoken: char): PChar; overload;
-  public
-    constructor Create(aStatement: TFBStatement; aSize: integer = 1024);
-    destructor Destroy; override;
-    function Size: short;
-    procedure Reset;
-    procedure Exec(info_request: char);
-    function GetValue(token: char): integer; overload;
-    function GetValue(token: char; subtoken: char): integer; overload;
-    function GetString(token: char; var data: string): integer;
-    function buffer: PChar;
-  end;
-
 implementation
 
 uses IBUtils, FBErrorMessages, FB25Blob, variants, IBErrorCodes, FB25Array;
 
 const
    sSQLErrorSeparator = ' When Executing: ';
+
+type
+   {TSQLInfoResultsBuffer inspired by IBPP RB class - access a isc_dsql_sql_info result buffer}
+
+   TSQLInfoResultsBuffer = class
+   private
+     mBuffer: PChar;
+     mSize: short;
+     FStatement: TFBStatement;
+     function FindToken(token: char): PChar; overload;
+     function FindToken(token: char; subtoken: char): PChar; overload;
+   public
+     constructor Create(aStatement: TFBStatement; aSize: integer = 1024);
+     destructor Destroy; override;
+     function Size: short;
+     procedure Reset;
+     procedure Exec(info_request: char);
+     function GetValue(token: char): integer; overload;
+     function GetValue(token: char; subtoken: char): integer; overload;
+     function GetString(token: char; var data: string): integer;
+     function buffer: PChar;
+   end;
 
 { TIBSQLData }
 
@@ -555,8 +556,6 @@ end;
 
 procedure TIBXINPUTSQLDA.SetParamName(FieldName: String; Idx: Integer;
   UniqueName: boolean);
-var
-  fn: string;
 begin
   {$ifdef UseCaseSensitiveParamName}
   FXSQLVARs[Idx].FName := AnsiUpperCase(FieldName);
@@ -1488,7 +1487,6 @@ end;
 function TFBStatement.GetRowsAffected(var InsertCount, UpdateCount,
   DeleteCount: integer): boolean;
 var
-  i: integer;
   RB: TSQLInfoResultsBuffer;
 begin
   InsertCount := 0;

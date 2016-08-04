@@ -95,7 +95,7 @@ type
 
 implementation
 
-uses FBErrorMessages, FB25Blob, FB25ClientAPI, variants, FB25Statement;
+uses FBErrorMessages, FB25Blob, FB25ClientAPI, variants;
 
 function TSQLDataItem.AdjustScale(Value: Int64; aScale: Integer): Double;
 var
