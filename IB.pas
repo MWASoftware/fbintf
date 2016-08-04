@@ -495,6 +495,7 @@ type
     function GetElement(coords: TArrayCoords): ISQLElement; overload;
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
+    property Elements[index: integer]: ISQLElement read GetElement; default;
   end;
 
   IBlobMetaData = interface

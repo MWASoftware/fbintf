@@ -1566,6 +1566,8 @@ end;
 
 function TFBStatement.CreateArray(column: IColumnMetaData): IArray;
 begin
+  if column.SQLType <> SQL_ARRAY then
+    IBError(ibxeNotAnArray,[nil]);
   Result := TFBArray.Create(column.GetArrayMetaData);
 end;
 

@@ -156,7 +156,9 @@ type
       ibxeDuplicateParamName,
       ibxeInvalidArrayDimensions,
       ibxeNotAMultiDatabaseTransaction,
-      ibxeAttachmentListIndexError
+      ibxeAttachmentListIndexError,
+      ibxeNotAnArray,
+      ibxeInvalidSubscript
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;
@@ -334,6 +336,8 @@ resourcestring
   SInvalidArrayDimensions = 'Invalid number of array dimensions {%d)';
   SNotAMultiDatabaseTransaction = 'This is not a multi-database transaction';
   SAttachmentListIndexError = 'Attachment List index out of range (%d)';
+  SNotAnArray = 'Table Column must be an array';
+  SInvalidSubscript = 'Invalid Subscript (%d)';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -475,7 +479,9 @@ const
     SDuplicateParamName,
     SInvalidArrayDimensions,
     SNotAMultiDatabaseTransaction,
-    SAttachmentListIndexError
+    SAttachmentListIndexError,
+    SNotAnArray,
+    SInvalidSubscript
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;

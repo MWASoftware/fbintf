@@ -20,6 +20,7 @@ type
     procedure PrintDPB(DPB: IDPB);
     procedure PrintMetaData(meta: IMetaData);
     function SQLType2Text(sqltype: short): string;
+    procedure WriteArray(ar: IArray);
   public
     constructor Create(aOwner: TTestManager);  virtual;
     function TestTitle: string; virtual; abstract;
@@ -81,6 +82,11 @@ begin
       for i := 0 to ResultSet.getCount - 1 do
       begin
         case ResultSet[i].SQLType of
+        SQL_ARRAY:
+          begin
+            writeln('Array: ');
+            WriteArray(ResultSet[i].AsArray);
+          end;
         SQL_FLOAT,SQL_DOUBLE,
         SQL_D_FLOAT:
           writeln( ResultSet[i].Name,' = ',FormatFloat('#,##0.00',ResultSet[i].AsFloat))
@@ -105,8 +111,10 @@ begin
 end;
 
 procedure TTestBase.PrintMetaData(meta: IMetaData);
-var i: integer;
+var i, j: integer;
     b: IBlobMetaData;
+    ar: IArrayMetaData;
+    Bounds: TArrayBounds;
 begin
   writeln('Metadata');
   for i := 0 to meta.GetCount - 1 do
@@ -133,6 +141,19 @@ begin
           writeln('Table = ',b.GetTableName);
           writeln('Column = ',b.GetColumnName);
         end;
+      SQL_ARRAY:
+        begin
+          ar := GetArrayMetaData;
+          writeln('SQLType =',SQLType2Text(ar.getSQLType));
+          writeln('Table = ',ar.GetTableName);
+          writeln('Column = ',ar.GetColumnName);
+          writeln('Dimensions = ',ar.GetDimensions);
+          write('Bounds: ');
+          Bounds := ar.GetBounds;
+          for j := 0 to Length(Bounds) - 1 do
+            writeln('(',Bounds[j].LowerBound,':',Bounds[j].UpperBound,') ');
+          writeln;
+        end;
     end;
     writeln;
   end;
@@ -156,6 +177,18 @@ begin
   SQL_TYPE_TIME:	Result := 'SQL_TYPE_TIME';
   SQL_TYPE_DATE:	Result := 'SQL_TYPE_DATE';
   SQL_INT64:		Result := 'SQL_INT64';
+  end;
+end;
+
+procedure TTestBase.WriteArray(ar: IArray);
+var Bounds: TArrayBounds;
+    i: integer;
+begin
+  if ar.GetDimensions = 1 then
+  begin
+    Bounds := ar.GetBounds;
+    for i := Bounds[0].LowerBound to Bounds[0].UpperBound do
+      write('(',i,': ',ar[i].AsVariant,') ');
   end;
 end;
 
