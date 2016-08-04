@@ -536,7 +536,7 @@ begin
   FIsInteger := false;
   FBufPtr := BufPtr;
   with Firebird25ClientAPI do
-    FDataLength := isc_vax_integer(FBufPtr+1, 2);
+    FDataLength := isc_portable_integer(FBufPtr+1, 2);
   ParseConfigItems;
 end;
 
@@ -584,7 +584,7 @@ begin
   FIsInteger := false;
   FBufPtr := BufPtr;
   with Firebird25ClientAPI do
-    FDataLength := 3 + isc_vax_integer(FBufPtr+1, 2);
+    FDataLength := 3 + isc_portable_integer(FBufPtr+1, 2);
   FSize := FDataLength + 1;
 end;
 
@@ -633,7 +633,7 @@ begin
       Result := byte((FBufPtr+1)^)
     else
     with Firebird25ClientAPI do
-      Result := isc_vax_integer(FBufPtr+1, 4)
+      Result := isc_portable_integer(FBufPtr+1, 4)
   end
   else
     IBError(ibxeServiceResponseTypeError,[nil]);
@@ -795,7 +795,7 @@ begin
   else
   begin
     with Firebird25ClientAPI do
-      len := isc_vax_integer(FBufPtr+1, 2);
+      len := isc_portable_integer(FBufPtr+1, 2);
     SetString(Result,FBufPtr+3,len);
   end;
 end;
@@ -804,7 +804,7 @@ function TServiceRequestItem.getAsInteger: integer;
 begin
   if FIsInteger then
     with Firebird25ClientAPI do
-      Result := isc_vax_integer(FBufPtr+1, 4)
+      Result := isc_portable_integer(FBufPtr+1, 4)
   else
     IBError(ibxServiceParamTypeError,[nil]);
 end;

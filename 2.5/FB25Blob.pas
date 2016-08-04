@@ -227,7 +227,7 @@ begin
     while (i < SizeOf(results)) and (results[i] <> Char(isc_info_end)) do
     begin
       item := Integer(results[i]); Inc(i);
-      item_length := isc_vax_integer(@results[i], 2); Inc(i, 2);
+      item_length := isc_portable_integer(@results[i], 2); Inc(i, 2);
       case item of
         isc_info_blob_num_segments:
           NumSegments := isc_portable_integer(@results[i], item_length);
@@ -258,7 +258,7 @@ begin
   if FEOB then
     Exit;
 
-  LocalBuffer := PChar(Buffer);
+  LocalBuffer := PChar(@Buffer);
   repeat
     if Count > MaxuShort then
       localCount := MaxuShort
@@ -273,7 +273,7 @@ begin
   until (returnCode <> isc_segment) or (Count = 0);
 
   FEOB := returnCode = isc_segstr_eof;
-  if (returnCode <> isc_segment) and (returnCode <> isc_segstr_eof) then
+  if (returnCode <> 0) and (returnCode <> isc_segment) and (returnCode <> isc_segstr_eof) then
     Firebird25ClientAPI.IBDataBaseError
 end;
 
@@ -283,7 +283,7 @@ var
   localCount: uShort;
 begin
   CheckWritable;
-  LocalBuffer := PChar(Buffer);
+  LocalBuffer := PChar(@Buffer);
   Result := 0;
   if Count = 0 then Exit;
 

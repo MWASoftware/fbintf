@@ -123,7 +123,7 @@ end;
 function TIDBInfoItem.getAsInteger: integer;
 begin
   with Firebird25ClientAPI do
-    Result := isc_vax_integer(FBufPtr, FItemLength);
+    Result := isc_portable_integer(FBufPtr, FItemLength);
 end;
 
 procedure TIDBInfoItem.DecodeIDCluster(var ConnectionType: integer;
@@ -196,9 +196,9 @@ begin
   for i := 0 to TableCounts -1 do
   with Firebird25ClientAPI do
   begin
-    Result[i].TableID := isc_vax_integer(P,2);
+    Result[i].TableID := isc_portable_integer(P,2);
     Inc(P,2);
-    Result[i].Count := isc_vax_integer(P,4);
+    Result[i].Count := isc_portable_integer(P,4);
     Inc(P,4);
   end;
 end;
@@ -217,7 +217,7 @@ begin
   with Firebird25ClientAPI do
   begin
     SetLength(FItems,index+1);
-    len := isc_vax_integer(P+1,2);
+    len := isc_portable_integer(P+1,2);
     FItems[index] := TIDBInfoItem.Create(byte(P^),P+3,len);
     Inc(index);
     Inc(P,3+len);

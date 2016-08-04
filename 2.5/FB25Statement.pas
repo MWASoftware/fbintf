@@ -9,12 +9,12 @@ unit FB25Statement;
 { Even when dialect 3 quoted format parameter names are not supported, IBX still processes
   parameter names case insensitive. This does result in some additional overhead
   due to a call to "AnsiUpperCase". This can be avoided by undefining
-  "UseCaseSensitiveParamName" below.
+  "UseCaseInSensitiveParamName" below.
 
   Note: do not define "UseCaseSensitiveParamName" when "ALLOWDIALECT3PARAMNAMES"
   is defined. This will not give a useful result.
 }
-{ $define UseCaseSensitiveParamName}
+{$define UseCaseInSensitiveParamName}
 {$endif}
 {
   Note on reference counted interfaces.
@@ -64,7 +64,10 @@ type
     function GetDataLength: short; override;
 
   public
-    constructor Create(aParent: TIBXSQLDA; aStatement: TFBStatement);
+    constructor Create(aParent: TIBXSQLDA);
+    function GetAttachment: TFBAttachment; override;
+    function GetTransaction: TFBTransaction; override;
+    function GetSQLDialect: integer; override;
     property Parent: TIBXSQLDA read FParent;
 
   public
@@ -141,6 +144,9 @@ type
     procedure SetCount(Value: Integer);
   protected
     FStatement: TFBStatement;
+    function GetAttachment: TFBAttachment;
+    function GetSQLDialect: integer;
+    function GetTransaction: TFBTransaction; virtual;
     procedure FreeXSQLDA;
     function CreateSQLVAR: TIBXSQLVAR; virtual; abstract;
     function GetXSQLVARByName(Idx: String): TIBXSQLVAR;
@@ -150,8 +156,6 @@ type
     function VarByName(Idx: String): TIBXSQLVAR;
     function GetUniqueRelationName: string;
     procedure Initialize;
-    function GetAttachment: TFBAttachment;
-    function GetTransaction: TFBTransaction; virtual;
     property AsXSQLDA: PXSQLDA read GetXSQLDA;
     property Count: Integer read FCount write SetCount;
     property RecordSize: Integer read GetRecordSize;
@@ -218,6 +222,8 @@ type
   TIBXResultSet = class(TIBXResults,IResultSet)
   private
     FTransaction: TFBTransaction; {transaction used to execute the statement}
+  public
+    constructor Copy(aResultSet: TIBXResultSet);
   public
     {IResultSet}
     function FetchNext: boolean;
@@ -458,6 +464,12 @@ end;
 
 { TIBXResultSet }
 
+constructor TIBXResultSet.Copy(aResultSet: TIBXResultSet);
+begin
+  inherited Copy(aResultSet);
+  FTransaction := aResultSet.FTransaction;
+end;
+
 function TIBXResultSet.FetchNext: boolean;
 begin
   Result := FStatement.FetchNext;
@@ -502,7 +514,7 @@ end;
 
 function TIBXINPUTSQLDA.CreateSQLVAR: TIBXSQLVAR;
 begin
-  Result := TIBXSQLParam.Create(self,FStatement);
+  Result := TIBXSQLParam.Create(self);
   SetLength(FSQLParamIntf,Length(FSQLParamIntf)+1);
   FSQLParamIntf[Length(FSQLParamIntf) - 1] := TIBXSQLParam(Result);
 end;
@@ -557,7 +569,7 @@ end;
 procedure TIBXINPUTSQLDA.SetParamName(FieldName: String; Idx: Integer;
   UniqueName: boolean);
 begin
-  {$ifdef UseCaseSensitiveParamName}
+  {$ifdef UseCaseInSensitiveParamName}
   FXSQLVARs[Idx].FName := AnsiUpperCase(FieldName);
   {$else}
   FXSQLVARs[Idx].FName := FieldName;
@@ -592,7 +604,7 @@ end;
 
 function TIBXOUTPUTSQLDA.CreateSQLVAR: TIBXSQLVAR;
 begin
-  Result := TIBSQLData.Create(self,FStatement);
+  Result := TIBSQLData.Create(self);
   SetLength(FSQLDataIntf,Length(FSQLDataIntf) + 1);
   FSQLDataIntf[Length(FSQLDataIntf)-1] := TIBSQLData(Result);
 end;
@@ -673,10 +685,24 @@ begin
   Result := FXSQLVAR^.sqllen;
 end;
 
-constructor TIBXSQLVAR.Create(aParent: TIBXSQLDA; aStatement: TFBStatement);
+function TIBXSQLVAR.GetAttachment: TFBAttachment;
 begin
-  with aParent do
-    inherited Create(GetAttachment,GetTransaction,Statement.SQLDialect);
+  Result := FParent.GetAttachment;
+end;
+
+function TIBXSQLVAR.GetTransaction: TFBTransaction;
+begin
+  Result := FParent.GetTransaction;
+end;
+
+function TIBXSQLVAR.GetSQLDialect: integer;
+begin
+  Result := FParent.GetSQLDialect;
+end;
+
+constructor TIBXSQLVAR.Create(aParent: TIBXSQLDA);
+begin
+  inherited Create;
   FParent := aParent;
 end;
 
@@ -687,7 +713,7 @@ end;
 
 function TIBXSQLVAR.getSubtype: short;
 begin
-  result := FXSQLVAR^.sqlsubtype and (not 1);
+  result := FXSQLVAR^.sqlsubtype;
 end;
 
 function TIBXSQLVAR.getRelationName: string;
@@ -724,7 +750,7 @@ function TIBXSQLVAR.getCharSetID: cardinal;
 begin
   case SQLType of
   SQL_VARYING, SQL_TEXT:
-    result := SQLSubtype and $FF;
+    result := FXSQLVAR^.sqlsubtype and $FF;
 
   else
     result := 0;
@@ -926,6 +952,11 @@ begin
   Result := FStatement.FAttachment;
 end;
 
+function TIBXSQLDA.GetSQLDialect: integer;
+begin
+  Result := FStatement.SQLDialect;
+end;
+
 function TIBXSQLDA.GetTransaction: TFBTransaction;
 begin
   Result := FStatement.FTransaction;
@@ -990,7 +1021,7 @@ var
   s: String;
   i: Integer;
 begin
-  {$ifndef UseCaseSensitiveParamName}
+  {$ifdef UseCaseInSensitiveParamName}
    s := AnsiUpperCase(Idx);
   {$else}
    s := Idx;
@@ -1158,8 +1189,8 @@ begin
  FExecTransactionIntf := aTransaction;
  FBOF := true;
  FEOF := false;
+ FSQLRecord.FTransaction := aTransaction;
  ResultSet := TIBXResultSet.Copy(FSQLRecord);
- ResultSet.FTransaction := aTransaction;
  Result := ResultSet;
 end;
 
@@ -1609,7 +1640,7 @@ begin
       Exit;
     end;
     with Firebird25ClientAPI do
-      len := isc_vax_integer(p+1,2);
+      len := isc_portable_integer(p+1,2);
     Inc(p,len+3);
   end;
 end;
@@ -1627,7 +1658,7 @@ begin
     if p^ = token then
     begin
       {Found token, now find subtoken}
-      inlen := isc_vax_integer(p+1, 2);
+      inlen := isc_portable_integer(p+1, 2);
       Inc(p,3);
       while inlen > 0 do
       begin
@@ -1636,13 +1667,13 @@ begin
           Result := p;
           Exit;
         end;
-  	len := isc_vax_integer(p+1, 2);
+  	len := isc_portable_integer(p+1, 2);
         Inc(p,len + 3);
         Dec(inlen,len + 3);
       end;
       Exit;
     end;
-    len := isc_vax_integer(p+1, 2);
+    len := isc_portable_integer(p+1, 2);
     inc(p,len+3);
   end;
 end;
@@ -1657,7 +1688,7 @@ begin
     IBError(ibxeDscInfoTokenMissing,[token]);
 
   with Firebird25ClientAPI do
-    Result := isc_vax_integer(p+1, 2);
+    Result := isc_portable_integer(p+1, 2);
   SetString(data,p+3,Result);
 end;
 
@@ -1673,9 +1704,9 @@ begin
 
   with Firebird25ClientAPI do
   begin
-    len := isc_vax_integer(p+1, 2);
+    len := isc_portable_integer(p+1, 2);
     if (len <> 0) then
-      Result := isc_vax_integer(p+3, len);
+      Result := isc_portable_integer(p+3, len);
   end;
 end;
 
@@ -1691,9 +1722,9 @@ begin
 
   with Firebird25ClientAPI do
   begin
-    len := isc_vax_integer(p+1, 2);
+    len := isc_portable_integer(p+1, 2);
     if (len <> 0) then
-      Result := isc_vax_integer(p+3, len);
+      Result := isc_portable_integer(p+3, len);
   end;
 end;
 

@@ -14,14 +14,14 @@ type
   TSQLDataItem = class(TInterfacedObject)
   private
      FModified: boolean;
-     FSQLDialect: integer;
      function AdjustScale(Value: Int64; aScale: Integer): Double;
      function AdjustScaleToInt64(Value: Int64; aScale: Integer): Int64;
      function AdjustScaleToCurrency(Value: Int64; aScale: Integer): Currency;
      procedure SetAsInteger(AValue: Integer);
   protected
-     FAttachment: TFBAttachment;
-     FTransaction: TFBTransaction;
+     function GetAttachment: TFBAttachment; virtual; abstract;
+     function GetTransaction: TFBTransaction; virtual; abstract;
+     function GetSQLDialect: integer; virtual; abstract;
      procedure Changed; virtual;
      function SQLData: PChar; virtual; abstract;
      function GetDataLength: short; virtual; abstract;
@@ -29,8 +29,6 @@ type
      procedure SetDataLength(len: short); virtual;
      procedure SetSQLType(aValue: short); virtual;
      property DataLength: short read GetDataLength write SetDataLength;
-  public
-     constructor Create(Attachment: TFBAttachment; Transaction: TFBTransaction; SQLDialect: integer);
 
   public
      function GetSQLType: short; virtual; abstract;
@@ -201,15 +199,6 @@ begin
 
 end;
 
-constructor TSQLDataItem.Create(Attachment: TFBAttachment;
-  Transaction: TFBTransaction; SQLDialect: integer);
-begin
-  inherited Create;
-  FAttachment := Attachment;
-  FTransaction := Transaction;
-  FSQLDialect := SQLDialect;
-end;
-
 function TSQLDataItem.GetAsBoolean: boolean;
 begin
   result := false;
@@ -225,7 +214,7 @@ end;
 function TSQLDataItem.GetAsCurrency: Currency;
 begin
   result := 0;
-  if FSQLDialect < 3 then
+  if GetSQLDialect < 3 then
     result := GetAsDouble
   else begin
     if not IsNull then
@@ -466,7 +455,7 @@ begin
       SQL_BLOB: begin
         ss := TStringStream.Create('');
         try
-          b := TFBBlob.Create(FAttachment,FTransaction,AsQuad);
+          b := TFBBlob.Create(GetAttachment,GetTransaction,AsQuad);
           try
             b.SaveToStream(ss);
           finally
@@ -482,7 +471,7 @@ begin
         if (SQLType = SQL_TEXT) then
           str_len := DataLength
         else begin
-          str_len := isc_vax_integer(SQLData, 2);
+          str_len := isc_portable_integer(SQLData, 2);
           Inc(sz, 2);
         end;
         SetString(result, sz, str_len);
@@ -490,7 +479,7 @@ begin
           result := TrimRight(result);
       end;
       SQL_TYPE_DATE:
-        case FSQLDialect of
+        case GetSQLDialect of
           1 : result := DateTimeToStr(AsDateTime);
           3 : result := DateToStr(AsDateTime);
         end;
@@ -570,7 +559,7 @@ function TSQLDataItem.GetAsBlob: IBlob;
 begin
   if SQLType <>  SQL_BLOB then
       IBError(ibxeInvalidDataConversion, [nil]);
-  Result := TFBBlob.Create(FAttachment,FTransaction,AsQuad);
+  Result := TFBBlob.Create(GetAttachment,GetTransaction,AsQuad);
 end;
 
 function TSQLDataItem.GetModified: boolean;
@@ -596,7 +585,7 @@ end;
 
 procedure TSQLDataItem.SetAsCurrency(Value: Currency);
 begin
-  if FSQLDialect < 3 then
+  if GetSQLDialect < 3 then
     AsDouble := Value
   else
   begin
@@ -627,7 +616,7 @@ var
    tm_date: TCTimeStructure;
    Yr, Mn, Dy: Word;
 begin
-  if FSQLDialect < 3 then
+  if GetSQLDialect < 3 then
   begin
     AsDateTime := Value;
     exit;
@@ -657,7 +646,7 @@ var
   tm_date: TCTimeStructure;
   Hr, Mt, S, Ms: Word;
 begin
-  if FSQLDialect < 3 then
+  if GetSQLDialect < 3 then
   begin
     AsDateTime := Value;
     exit;
@@ -815,7 +804,7 @@ begin
     begin
       ss := TStringStream.Create(Value);
       try
-        b := TFBBlob.Create(FAttachment,FTransaction);
+        b := TFBBlob.Create(GetAttachment,GetTransaction);
         try
           b.LoadFromStream(ss);
         finally

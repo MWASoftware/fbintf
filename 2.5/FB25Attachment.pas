@@ -82,14 +82,19 @@ type
     function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction;
     function CreateBlob(transaction: ITransaction): IBlob;
     procedure ExecImmediate(transaction: ITransaction; sql: string; aSQLDialect: integer); overload;
+    procedure ExecImmediate(TPB: array of byte; sql: string; aSQLDialect: integer); overload;
     procedure ExecImmediate(transaction: ITransaction; sql: string); overload;
+    procedure ExecImmediate(TPB: array of byte; sql: string); overload;
     function OpenCursorAtStart(transaction: ITransaction; sql: string; aSQLDialect: integer): IResultSet; overload;
     function OpenCursorAtStart(transaction: ITransaction; sql: string): IResultSet; overload;
     function Prepare(transaction: ITransaction; sql: string; aSQLDialect: integer): IStatement; overload;
     function Prepare(transaction: ITransaction; sql: string): IStatement; overload;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: string;
                        aSQLDialect: integer; GenerateParamNames: boolean=false;
-                       UniqueParamNames: boolean=false): IStatement;
+                       UniqueParamNames: boolean=false): IStatement; overload;
+    function PrepareWithNamedParameters(transaction: ITransaction; sql: string;
+                       GenerateParamNames: boolean=false;
+                       UniqueParamNames: boolean=false): IStatement; overload;
     function GetEventHandler(Events: TStrings): IEvents;
     function OpenBlob(Transaction: ITransaction; BlobID: TISC_QUAD): IBlob;
 
@@ -436,9 +441,20 @@ begin
     Call(isc_dsql_execute_immediate(StatusVector, @fHandle, @TRHandle, 0,PChar(sql), aSQLDialect, nil));
 end;
 
+procedure TFBAttachment.ExecImmediate(TPB: array of byte; sql: string;
+  aSQLDialect: integer);
+begin
+  ExecImmediate(StartTransaction(TPB,tcCommit),sql,aSQLDialect);
+end;
+
 procedure TFBAttachment.ExecImmediate(transaction: ITransaction; sql: string);
 begin
   ExecImmediate(transaction,sql,FSQLDialect);
+end;
+
+procedure TFBAttachment.ExecImmediate(TPB: array of byte; sql: string);
+begin
+  ExecImmediate(StartTransaction(TPB,tcCommit),sql,FSQLDialect);
 end;
 
 function TFBAttachment.OpenCursorAtStart(transaction: ITransaction;
@@ -473,6 +489,14 @@ function TFBAttachment.PrepareWithNamedParameters(transaction: ITransaction;
   UniqueParamNames: boolean): IStatement;
 begin
   Result := TFBStatement.CreateWithParameterNames(self,transaction,sql,aSQLDialect,
+         GenerateParamNames,UniqueParamNames);
+end;
+
+function TFBAttachment.PrepareWithNamedParameters(transaction: ITransaction;
+  sql: string; GenerateParamNames: boolean; UniqueParamNames: boolean
+  ): IStatement;
+begin
+  Result := TFBStatement.CreateWithParameterNames(self,transaction,sql,FSQLDialect,
          GenerateParamNames,UniqueParamNames);
 end;
 

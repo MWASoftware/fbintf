@@ -91,7 +91,7 @@ const
     isc_info_db_impl_isc_v         =         27;
     isc_info_db_impl_isc_s         =         28;
     isc_info_db_impl_isc_apl_68K   =         25;
-    isc_info_db_impl_isc_vax_ultr  =         26;
+    isc_info_db_impl_isc_portable_ultr  =         26;
     isc_info_db_impl_isc_vms       =         27;
     isc_info_db_impl_isc_sun_68k   =         28;
     isc_info_db_impl_isc_os2       =         29;
@@ -652,6 +652,7 @@ type
     property AsVariant: Variant read GetAsVariant write SetAsVariant;
   end;
 
+
   ISQLParam = interface(ISQLElement)
     procedure Clear;
     function getCharSetID: cardinal;
@@ -804,12 +805,20 @@ type
     procedure DropDatabase;
     function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction;
     function CreateBlob(transaction: ITransaction): IBlob;
-    procedure ExecImmediate(transaction: ITransaction; sql: string; SQLDialect: integer);
-    function OpenCursorAtStart(transaction: ITransaction; sql: string; SQLDialect: integer): IResultSet;
-    function Prepare(transaction: ITransaction; sql: string; SQLDialect: integer): IStatement;
+    procedure ExecImmediate(transaction: ITransaction; sql: string; SQLDialect: integer); overload;
+    procedure ExecImmediate(TPB: array of byte; sql: string; SQLDialect: integer); overload;
+    procedure ExecImmediate(transaction: ITransaction; sql: string); overload;
+    procedure ExecImmediate(TPB: array of byte; sql: string); overload;
+    function OpenCursorAtStart(transaction: ITransaction; sql: string; aSQLDialect: integer): IResultSet; overload;
+    function OpenCursorAtStart(transaction: ITransaction; sql: string): IResultSet; overload;
+    function Prepare(transaction: ITransaction; sql: string; aSQLDialect: integer): IStatement; overload;
+    function Prepare(transaction: ITransaction; sql: string): IStatement; overload;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: string;
-                       SQLDialect: integer; GenerateParamNames: boolean=false;
-                       UniqueParamNames: boolean=false): IStatement;
+                       aSQLDialect: integer; GenerateParamNames: boolean=false;
+                       UniqueParamNames: boolean=false): IStatement; overload;
+    function PrepareWithNamedParameters(transaction: ITransaction; sql: string;
+                       GenerateParamNames: boolean=false;
+                       UniqueParamNames: boolean=false): IStatement; overload;
 
     {Events}
     function GetEventHandler(Events: TStrings): IEvents;

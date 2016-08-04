@@ -80,10 +80,14 @@ begin
     begin
       for i := 0 to ResultSet.getCount - 1 do
       begin
-        if ResultSet[i].GetScale <> 0 then
+        case ResultSet[i].SQLType of
+        SQL_FLOAT,SQL_DOUBLE,
+        SQL_D_FLOAT:
           writeln( ResultSet[i].Name,' = ',FormatFloat('#,##0.00',ResultSet[i].AsFloat))
         else
           writeln(ResultSet[i].Name,' = ',ResultSet[i].AsString);
+
+        end;
       end;
     end;
   finally
@@ -102,6 +106,7 @@ end;
 
 procedure TTestBase.PrintMetaData(meta: IMetaData);
 var i: integer;
+    b: IBlobMetaData;
 begin
   writeln('Metadata');
   for i := 0 to meta.GetCount - 1 do
@@ -118,6 +123,17 @@ begin
     writeln('Charset id = ',getCharSetID);
     if getIsNullable then writeln('Nullable') else writeln('Not Null');
     writeln('Size = ',GetSize);
+    case getSQLType of
+      SQL_BLOB:
+        begin
+          b := GetBlobMetaData;
+          writeln('Sub Type = ',b.GetSubType);
+          writeln('CharSetID = ',b.GetCharSetID);
+          writeln('Segment Size = ',b.GetSegmentSize);
+          writeln('Table = ',b.GetTableName);
+          writeln('Column = ',b.GetColumnName);
+        end;
+    end;
     writeln;
   end;
 end;
