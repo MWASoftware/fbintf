@@ -294,7 +294,8 @@ type
     function Execute(aTransaction: ITransaction=nil): IResults;
     function OpenCursor(aTransaction: ITransaction=nil): IResultSet;
     function CreateBlob: IBlob;
-    function CreateArray(column: IColumnMetaData): IArray;
+    function CreateArray(column: IColumnMetaData): IArray; overload;
+    function CreateArray(columnName: string): IArray; overload;
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
     property Handle: TISC_STMT_HANDLE read FHandle;
@@ -339,7 +340,10 @@ begin
   if GetSQLType <> SQL_ARRAY then
     IBError(ibxeInvalidDataConversion,[nil]);
 
-  Result := TFBArray.Create(self);
+  if IsNull then
+    Result := nil
+  else
+    Result := TFBArray.Create(self);
 end;
 
 { TIBXSQLParam }
@@ -1569,6 +1573,13 @@ begin
   if column.SQLType <> SQL_ARRAY then
     IBError(ibxeNotAnArray,[nil]);
   Result := TFBArray.Create(column.GetArrayMetaData);
+end;
+
+function TFBStatement.CreateArray(columnName: string): IArray;
+var col: IColumnMetaData;
+begin
+  col := GetMetaData.ByName('MyArray');
+  Result := CreateArray(col);
 end;
 
 function TFBStatement.GetAttachment: IAttachment;

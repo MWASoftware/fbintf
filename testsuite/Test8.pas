@@ -1,4 +1,4 @@
-unit Test7;
+unit Test8;
 
 {$mode objfpc}{$H+}
 
@@ -9,9 +9,9 @@ uses
 
 type
 
-  { TTest7 }
+  { TTest8 }
 
-  TTest7 = class(TTestBase)
+  TTest8 = class(TTestBase)
   private
     procedure UpdateDatabase(Attachment: IAttachment);
   public
@@ -26,24 +26,22 @@ const
     'Create Table TestData ('+
     'RowID Integer not null,'+
     'Title VarChar(32) Character Set UTF8,'+
-    'Notes VarChar(64) Character Set ISO8859_1,'+
-    'MyArray Integer [0:16],'+
+    'MyArray VarChar(16) [0:16, -1:7],'+
     'Primary Key(RowID)'+
     ')';
 
-  sqlInsert = 'Insert into TestData(RowID,Title,Notes) Values(:RowID,:Title,:Notes)';
+  sqlInsert = 'Insert into TestData(RowID,Title) Values(:RowID,:Title)';
 
   sqlUpdate = 'Update TestData Set MyArray = ? Where RowID = 1';
 
-{ TTest7 }
+{ TTest8 }
 
-procedure TTest7.UpdateDatabase(Attachment: IAttachment);
+procedure TTest8.UpdateDatabase(Attachment: IAttachment);
 var Transaction: ITransaction;
     Statement: IStatement;
     ResultSet: IResultSet;
-    i,j: integer;
+    i,j,k : integer;
     ar: IArray;
-    col: IColumnMetaData;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],tcCommit);
   Statement := Attachment.Prepare(Transaction,'Select * from TestData');
@@ -54,34 +52,36 @@ begin
     for i := 0 to GetCount - 1 do
       writeln('Param Name = ',Params[i].getName);
     ByName('rowid').AsInteger := 1;
-    ByName('title').AsString := 'Blob Test ©€';
-    ByName('Notes').AsString := 'Écoute moi';
+    ByName('title').AsString := '2D Array';
   end;
   Statement.Execute;
   Statement := Attachment.Prepare(Transaction,'Select * from TestData');
   ReportResults(Statement);
 
-  col := Statement.GetMetaData.ByName('MyArray');
-  ar := Statement.CreateArray(col);
-  j := 100;
-  for i := 0 to 16 do
+  ar := Statement.CreateArray('MyArray');
+  if ar <> nil then
   begin
-    ar[i].AsInteger := j;
-    dec(j);
+    k := 50;
+    for i := 0 to 16 do
+      for j := -1 to 7 do
+      begin
+        ar.GetElement(i,j).AsString := 'A' + IntToStr(k);
+        Inc(k);
+      end;
+    Statement := Attachment.Prepare(Transaction,sqlUpdate);
+    Statement.SQLParams[0].AsArray := ar;
+    Statement.Execute;
   end;
-  Statement := Attachment.Prepare(Transaction,sqlUpdate);
-  Statement.SQLParams[0].AsArray := ar;
-  Statement.Execute;
   Statement := Attachment.Prepare(Transaction,'Select * from TestData');
   ReportResults(Statement);
 end;
 
-function TTest7.TestTitle: string;
+function TTest8.TestTitle: string;
 begin
-  Result := 'Test 7: Create and read back an Array';
+  Result := 'Test 8: Create and read back an Array with 2 dimensions';
 end;
 
-procedure TTest7.RunTest(CharSet: string; SQLDialect: integer);
+procedure TTest8.RunTest(CharSet: string; SQLDialect: integer);
 var DPB: IDPB;
     CreateParams: string;
     Attachment: IAttachment;
@@ -101,7 +101,7 @@ begin
 end;
 
 initialization
-  RegisterTest(TTest7);
+  RegisterTest(TTest8);
 
 end.
 

@@ -707,7 +707,8 @@ type
     function Execute(aTransaction: ITransaction=nil): IResults;
     function OpenCursor(aTransaction: ITransaction=nil): IResultSet;
     function CreateBlob: IBlob;
-    function CreateArray(column: IColumnMetaData): IArray;
+    function CreateArray(column: IColumnMetaData): IArray; overload;
+    function CreateArray(columnName: string): IArray;  overload;
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
     property SQLParams: ISQLParams read GetSQLParams;

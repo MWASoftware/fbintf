@@ -559,7 +559,10 @@ function TSQLDataItem.GetAsBlob: IBlob;
 begin
   if SQLType <>  SQL_BLOB then
       IBError(ibxeInvalidDataConversion, [nil]);
-  Result := TFBBlob.Create(GetAttachment,GetTransaction,AsQuad);
+  if IsNull then
+    Result := nil
+  else
+    Result := TFBBlob.Create(GetAttachment,GetTransaction,AsQuad);
 end;
 
 function TSQLDataItem.GetModified: boolean;
@@ -779,15 +782,17 @@ var
    b: TFBBlob;
 
    procedure SetStringValue;
+   var len: integer;
    begin
+     len :=  Length(Value);
       if (GetName = 'DB_KEY') or {do not localize}
          (GetName = 'RDB$DB_KEY') then {do not localize}
-        Move(Value[1], SQLData^, DataLength)
+        Move(Value[1], SQLData^,len)
       else begin
         SQLType := SQL_TEXT;
-        DataLength := Length(Value);
+        DataLength := len;
         if (Length(Value) > 0) then
-          Move(Value[1], SQLData^, DataLength);
+          Move(Value[1], SQLData^, len);
       end;
       Changed;
    end;

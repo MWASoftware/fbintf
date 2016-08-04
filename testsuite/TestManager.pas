@@ -84,8 +84,8 @@ begin
         case ResultSet[i].SQLType of
         SQL_ARRAY:
           begin
-            writeln('Array: ');
-            WriteArray(ResultSet[i].AsArray);
+            if not ResultSet[i].IsNull then
+              WriteArray(ResultSet[i].AsArray);
           end;
         SQL_FLOAT,SQL_DOUBLE,
         SQL_D_FLOAT:
@@ -151,7 +151,7 @@ begin
           write('Bounds: ');
           Bounds := ar.GetBounds;
           for j := 0 to Length(Bounds) - 1 do
-            writeln('(',Bounds[j].LowerBound,':',Bounds[j].UpperBound,') ');
+            write('(',Bounds[j].LowerBound,':',Bounds[j].UpperBound,') ');
           writeln;
         end;
     end;
@@ -182,13 +182,23 @@ end;
 
 procedure TTestBase.WriteArray(ar: IArray);
 var Bounds: TArrayBounds;
-    i: integer;
+    i,j: integer;
 begin
-  if ar.GetDimensions = 1 then
-  begin
-    Bounds := ar.GetBounds;
-    for i := Bounds[0].LowerBound to Bounds[0].UpperBound do
-      write('(',i,': ',ar[i].AsVariant,') ');
+  write('Array: ');
+  Bounds := ar.GetBounds;
+  case ar.GetDimensions of
+  1:
+    begin
+      for i := Bounds[0].LowerBound to Bounds[0].UpperBound do
+        write('(',i,': ',ar[i].AsVariant,') ');
+    end;
+
+  2:
+    begin
+      for i := Bounds[0].LowerBound to Bounds[0].UpperBound do
+        for j := Bounds[1].LowerBound to Bounds[1].UpperBound do
+          write('(',i,',',j,': ',ar.GetElement(i,j).AsVariant,') ');
+    end;
   end;
 end;
 
