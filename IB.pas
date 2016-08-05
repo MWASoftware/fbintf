@@ -490,12 +490,32 @@ type
   ISQLElement = interface;
 
   IArray = interface(IArrayMetaData)
-    function GetElement(x: integer): ISQLElement; overload;
-    function GetElement(x, y: integer): ISQLElement; overload;
-    function GetElement(coords: array of integer): ISQLElement; overload;
+    function GetAsInteger(index: array of integer): integer;
+    function GetAsBoolean(index: array of integer): boolean;
+    function GetAsCurrency(index: array of integer): Currency;
+    function GetAsInt64(index: array of integer): Int64;
+    function GetAsDateTime(index: array of integer): TDateTime;
+    function GetAsDouble(index: array of integer): Double;
+    function GetAsFloat(index: array of integer): Float;
+    function GetAsLong(index: array of integer): Long;
+    function GetAsShort(index: array of integer): Short;
+    function GetAsString(index: array of integer): String;
+    function GetAsVariant(index: array of integer): Variant;
+    procedure SetAsInteger(index: array of integer; AValue: integer);
+    procedure SetAsBoolean(index: array of integer; AValue: boolean);
+    procedure SetAsCurrency(index: array of integer; Value: Currency);
+    procedure SetAsInt64(index: array of integer; Value: Int64);
+    procedure SetAsDate(index: array of integer; Value: TDateTime);
+    procedure SetAsLong(index: array of integer; Value: Long);
+    procedure SetAsTime(index: array of integer; Value: TDateTime);
+    procedure SetAsDateTime(index: array of integer; Value: TDateTime);
+    procedure SetAsDouble(index: array of integer; Value: Double);
+    procedure SetAsFloat(index: array of integer; Value: Float);
+    procedure SetAsShort(index: array of integer; Value: Short);
+    procedure SetAsString(index: array of integer; Value: String);
+    procedure SetAsVariant(index: array of integer; Value: Variant);
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
-    property Elements[index: integer]: ISQLElement read GetElement; default;
   end;
 
   IBlobMetaData = interface

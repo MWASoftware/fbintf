@@ -13,7 +13,7 @@ type
 
   { TFBArrayElement }
 
-  TFBArrayElement = class(TSQLDataItem,ISQLElement)
+  TFBArrayElement = class(TSQLDataItem)
   private
    FBufPtr: PChar;
    FArray: TFBArray;
@@ -28,7 +28,6 @@ type
    procedure SetDataLength(len: short); override;
   public
    constructor Create(anArray: TFBArray; P: PChar);
-   constructor Copy(aElement: TFBArrayElement);
    function GetSQLType: short; override;
    function GetName: string; override;
    function GetScale: short; override;
@@ -68,14 +67,15 @@ type
     FLoaded: boolean;
     FArrayID: TISC_QUAD;
     FModified: boolean;
-    FArrayElements: array of ISQLElement;
     FTransactionIntf: ITransaction;
     FSQLDialect: integer;
     FOffsets: array of integer;
+    FElement: TFBArrayElement;
+    FElementSize: integer;
     procedure AllocateBuffer;
     procedure GetArraySlice;
     procedure PutArraySlice;
-    function GetIndex(coords: array of integer): integer;
+    function GetOffset(index: array of integer): PChar;
     function GetDataLength: short;
   public
     constructor Create(aField: TIBSQLData); overload;
@@ -87,9 +87,30 @@ type
 
    public
     {IArray}
-    function GetElement(x: integer): ISQLElement; overload;
-    function GetElement(x, y: integer): ISQLElement; overload;
-    function GetElement(coords: TArrayCoords): ISQLElement; overload;
+    function GetAsInteger(index: array of integer): integer;
+    function GetAsBoolean(index: array of integer): boolean;
+    function GetAsCurrency(index: array of integer): Currency;
+    function GetAsInt64(index: array of integer): Int64;
+    function GetAsDateTime(index: array of integer): TDateTime;
+    function GetAsDouble(index: array of integer): Double;
+    function GetAsFloat(index: array of integer): Float;
+    function GetAsLong(index: array of integer): Long;
+    function GetAsShort(index: array of integer): Short;
+    function GetAsString(index: array of integer): String;
+    function GetAsVariant(index: array of integer): Variant;
+    procedure SetAsInteger(index: array of integer; AValue: integer);
+    procedure SetAsBoolean(index: array of integer; AValue: boolean);
+    procedure SetAsCurrency(index: array of integer; Value: Currency);
+    procedure SetAsInt64(index: array of integer; Value: Int64);
+    procedure SetAsDate(index: array of integer; Value: TDateTime);
+    procedure SetAsLong(index: array of integer; Value: Long);
+    procedure SetAsTime(index: array of integer; Value: TDateTime);
+    procedure SetAsDateTime(index: array of integer; Value: TDateTime);
+    procedure SetAsDouble(index: array of integer; Value: Double);
+    procedure SetAsFloat(index: array of integer; Value: Float);
+    procedure SetAsShort(index: array of integer; Value: Short);
+    procedure SetAsString(index: array of integer; Value: String);
+    procedure SetAsVariant(index: array of integer; Value: Variant);
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
   end;
@@ -142,14 +163,6 @@ begin
   inherited Create;
   FArray := anArray;
   FBufPtr := P;
-end;
-
-constructor TFBArrayElement.Copy(aElement: TFBArrayElement);
-begin
-  inherited Create;
-  FArray := aElement.FArray;
-  FBufPtr := aElement.FBufPtr;
-  FArrayIntf := FArray;
 end;
 
 function TFBArrayElement.GetSQLType: short;
@@ -263,21 +276,17 @@ var i: integer;
     Dims: integer;
 begin
   l := NumOfElements;
+  FElementSize := FArrayDesc.array_desc_length;
   case GetSQLType of
   SQL_VARYING:
-    FBufSize := (GetDataLength + 2) * l;
+    FElementSize += 2;
   SQL_TEXT:
-    FBufSize := (GetDataLength + 1) * l;
-  else
-    FBufSize := GetDataLength * l;
+    FElementSize += 1;
   end;
+  FBufSize := FElementSize * l;
 
   with Firebird25ClientAPI do
     IBAlloc(FBuffer,0,FBufSize);
-
-  SetLength(FArrayElements, l);
-  for i := 0 to l -1 do
-    FArrayElements[i] := nil;
 
   Dims := GetDimensions;
   SetLength(FOffsets,GetDimensions);
@@ -323,22 +332,24 @@ begin
   FLoaded := true;
 end;
 
-function TFBArray.GetIndex(coords: array of integer): integer;
+function TFBArray.GetOffset(index: array of integer): PChar;
 var i: integer;
     Bounds: TArrayBounds;
+    FlatIndex: integer;
 begin
-  if GetDimensions <> Length(coords) then
-    IBError(ibxeInvalidArrayDimensions,[Length(coords)]);
+  if GetDimensions <> Length(index) then
+    IBError(ibxeInvalidArrayDimensions,[Length(index)]);
 
-  Result := 0;
+  FlatIndex := 0;
   Bounds := GetBounds;
-  for i := 0 to Length(coords) - 1  do
-    Result += FOffsets[i]*(coords[i] - Bounds[i].LowerBound);
+  for i := 0 to Length(index) - 1  do
+    FlatIndex += FOffsets[i]*(index[i] - Bounds[i].LowerBound);
+  Result := FBuffer + FlatIndex*FElementSize;
 end;
 
 function TFBArray.GetDataLength: short;
 begin
-  Result :=  FArrayDesc.array_desc_length;
+  Result :=  FElementSize;
 end;
 
 constructor TFBArray.Create(aField: TIBSQLData);
@@ -352,6 +363,7 @@ begin
   FModified := false;
   FSQLDialect := aField.Parent.Statement.SQLDialect;
   AllocateBuffer;
+  FElement := TFBArrayElement.Create(self,FBuffer);
 end;
 
 constructor TFBArray.Create(aField: IArrayMetaData);
@@ -364,12 +376,15 @@ begin
   FModified := true;
   FSQLDialect := FAttachment.SQLDialect;
   AllocateBuffer;
+  FElement := TFBArrayElement.Create(self,FBuffer);
 end;
 
 destructor TFBArray.Destroy;
 begin
   if assigned(FTransaction) then
     FTransaction.UnRegisterObj(self);
+  if assigned(FElement) then
+    FElement.Free;
   FreeMem(FBuffer);
   inherited Destroy;
 end;
@@ -391,73 +406,216 @@ begin
     PutArraySlice;
 end;
 
-function TFBArray.GetElement(x: integer): ISQLElement;
+function TFBArray.GetAsInteger(index: array of integer): integer;
+begin
+  GetArraySlice;
+  FElement.FBufPtr := GetOffset(index);
+  Result := FElement.GetAsLong;
+end;
+
+function TFBArray.GetAsBoolean(index: array of integer): boolean;
+begin
+  GetArraySlice;
+  FElement.FBufPtr := GetOffset(index);
+  Result := FElement.GetAsBoolean;
+end;
+
+function TFBArray.GetAsCurrency(index: array of integer): Currency;
+begin
+  GetArraySlice;
+  FElement.FBufPtr := GetOffset(index);
+  Result := FElement.GetAsCurrency;
+end;
+
+function TFBArray.GetAsInt64(index: array of integer): Int64;
+begin
+  GetArraySlice;
+  FElement.FBufPtr := GetOffset(index);
+  Result := FElement.GetAsInt64;
+end;
+
+function TFBArray.GetAsDateTime(index: array of integer): TDateTime;
+begin
+  GetArraySlice;
+  FElement.FBufPtr := GetOffset(index);
+  Result := FElement.GetAsDateTime;
+end;
+
+function TFBArray.GetAsDouble(index: array of integer): Double;
+begin
+  GetArraySlice;
+  FElement.FBufPtr := GetOffset(index);
+  Result := FElement.GetAsDouble;
+end;
+
+function TFBArray.GetAsFloat(index: array of integer): Float;
+begin
+  GetArraySlice;
+  FElement.FBufPtr := GetOffset(index);
+  Result := FElement.GetAsFloat;
+end;
+
+function TFBArray.GetAsLong(index: array of integer): Long;
+begin
+  GetArraySlice;
+  FElement.FBufPtr := GetOffset(index);
+  Result := FElement.GetAsLong;
+end;
+
+function TFBArray.GetAsShort(index: array of integer): Short;
+begin
+  GetArraySlice;
+  FElement.FBufPtr := GetOffset(index);
+  Result := FElement.GetAsShort;
+end;
+
+function TFBArray.GetAsString(index: array of integer): String;
 var P: PChar;
-    ArrayElement: TFBArrayElement;
 begin
-   if GetDimensions <> 1 then
-     IBError(ibxeInvalidArrayDimensions,[GetDimensions]);
-
-   if (x < GetBounds[0].LowerBound) or (x > GetBounds[0].UpperBound) then
-     IBError(ibxeInvalidSubscript,[x]);
-   GetArraySlice;
-   if FArrayElements[x] = nil then
-   begin
-     P := FBuffer + x*GetDataLength;
-     ArrayElement := TFBArrayElement.Create(self,P);
-     FArrayElements[x] := ArrayElement;
-   end
-   else
-     ArrayElement := FArrayElements[x] as TFBArrayElement;
-   Result := TFBArrayElement.Copy(ArrayElement);
+  GetArraySlice;
+  P := GetOffset(index);
+  case GetSQLType of
+  SQL_VARYING:
+      Result := strpas(P);
+  SQL_TEXT:
+      SetString(Result,P,FElementSize);
+  else
+    begin
+      FElement.FBufPtr := P;
+      Result := FElement.GetAsString;
+    end;
+  end;
 end;
 
-function TFBArray.GetElement(x, y: integer): ISQLElement;
-var index: integer;
-    coords: TArrayCoords;
-    P: PChar;
-    ArrayElement: TFBArrayElement;
+function TFBArray.GetAsVariant(index: array of integer): Variant;
 begin
-   if GetDimensions <> 2 then
-     IBError(ibxeInvalidArrayDimensions,[GetDimensions]);
-
-   GetArraySlice;
-   SetLength(coords,2);
-   coords[0] := x;
-   coords[1] := y;
-   index := GetIndex(coords);
-   if FArrayElements[index] = nil then
-   begin
-     P := FBuffer + index*GetDataLength;
-     ArrayElement := TFBArrayElement.Create(self,P);
-     FArrayElements[index] := ArrayElement;
-   end
-   else
-     ArrayElement := FArrayElements[index] as TFBArrayElement;
-   Result := TFBArrayElement.Copy(ArrayElement);
+  GetArraySlice;
+  FElement.FBufPtr := GetOffset(index);
+  Result := FElement.GetAsVariant;
 end;
 
-function TFBArray.GetElement(coords: TArrayCoords): ISQLElement;
-var dims: integer;
-    index: integer;
-    P: PChar;
-    ArrayElement: TFBArrayElement;
+procedure TFBArray.SetAsInteger(index: array of integer; AValue: integer);
 begin
-  dims := Length(coords);
-   if GetDimensions <> dims then
-     IBError(ibxeInvalidArrayDimensions,[GetDimensions]);
+  FElement.FBufPtr := GetOffset(index);
+  FElement.SetAsLong(AValue);
+end;
 
-   GetArraySlice;
-   index := GetIndex(coords);
-   if FArrayElements[index] = nil then
-   begin
-     P := FBuffer + index*GetDataLength;
-     ArrayElement := TFBArrayElement.Create(self,P);
-     FArrayElements[index] := ArrayElement;
-   end
-   else
-     ArrayElement := FArrayElements[index] as TFBArrayElement;
-   Result := TFBArrayElement.Copy(ArrayElement);
+procedure TFBArray.SetAsBoolean(index: array of integer; AValue: boolean);
+begin
+  FElement.FBufPtr := GetOffset(index);
+  FElement.SetAsBoolean(AValue);
+end;
+
+procedure TFBArray.SetAsCurrency(index: array of integer; Value: Currency);
+begin
+  FElement.FBufPtr := GetOffset(index);
+  FElement.SetAsCurrency(Value);
+end;
+
+procedure TFBArray.SetAsInt64(index: array of integer; Value: Int64);
+begin
+  FElement.FBufPtr := GetOffset(index);
+  FElement.SetAsInt64(Value);
+end;
+
+procedure TFBArray.SetAsDate(index: array of integer; Value: TDateTime);
+begin
+  FElement.FBufPtr := GetOffset(index);
+  FElement.SetAsDate(Value);
+end;
+
+procedure TFBArray.SetAsLong(index: array of integer; Value: Long);
+begin
+  FElement.FBufPtr := GetOffset(index);
+  FElement.SetAsLong(Value);
+end;
+
+procedure TFBArray.SetAsTime(index: array of integer; Value: TDateTime);
+begin
+  FElement.FBufPtr := GetOffset(index);
+  FElement.SetAsTime(Value);
+end;
+
+procedure TFBArray.SetAsDateTime(index: array of integer; Value: TDateTime);
+begin
+  FElement.FBufPtr := GetOffset(index);
+  FElement.SetAsDateTime(Value);
+end;
+
+procedure TFBArray.SetAsDouble(index: array of integer; Value: Double);
+begin
+  FElement.FBufPtr := GetOffset(index);
+  FElement.SetAsDouble(Value);
+end;
+
+procedure TFBArray.SetAsFloat(index: array of integer; Value: Float);
+begin
+  FElement.FBufPtr := GetOffset(index);
+  FElement.SetAsFloat(Value);
+end;
+
+procedure TFBArray.SetAsShort(index: array of integer; Value: Short);
+begin
+  FElement.FBufPtr := GetOffset(index);
+  FElement.SetAsShort(Value);
+end;
+
+(*
+
+COMMENTS (copied from IBPP)
+
+1)
+For an array column of type CHAR(X), the internal type returned or expected is blr_text.
+In such case, the byte array received or submitted to get/put_slice is formatted in
+elements of X bytes, which correspond to what is reported in array_desc_length.
+The elements are not '\0' terminated but are right-padded with spaces ' '.
+
+2)
+For an array column of type VARCHAR(X), the internal type is blr_varying.
+The underlying format is rather curious and different than what is used in XSQLDA.
+The element size is reported in array_desc_length as X.
+Yet each element of the byte array is expected to be of size X+2 (just as if we were
+to stuff a short in the first 2 bytes to store the length (as is done with XSQLDA).
+No. The string of X characters maximum has to be stored in the chunks of X+2 bytes as
+a zero-terminated c-string. Note that the buffer is indeed one byte too large.
+Internally, the API probably convert in-place in these chunks the zero-terminated string
+to a variable-size string with a short in front and the string data non zero-terminated
+behind.
+
+*)
+
+procedure TFBArray.SetAsString(index: array of integer; Value: String);
+var P: PChar;
+    len: integer;
+begin
+  P := GetOffset(index);
+  case GetSQLType of
+  SQL_VARYING:
+    begin
+      FillChar(P,FElementSize,0);
+      len := Length(Value);
+      if len > FElementSize - 2 then len := FElementSize - 2;
+      Move(Value[1],P^,len);
+    end;
+  SQL_TEXT:
+    begin
+      FillChar(P,FElementSize,' ');
+      len := Length(Value);
+      if len > FElementSize - 1 then len := FElementSize - 1;
+      Move(Value[1],P^,len);
+    end;
+  else
+    begin
+      FElement.FBufPtr := P;
+      FElement.SetAsString(Value);
+    end;
+  end;
+end;
+
+procedure TFBArray.SetAsVariant(index: array of integer; Value: Variant);
+begin
+  FElement.FBufPtr := GetOffset(index);
+  FElement.SetAsVariant(Value);
 end;
 
 function TFBArray.GetAttachment: IAttachment;

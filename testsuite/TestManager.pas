@@ -192,14 +192,14 @@ begin
   1:
     begin
       for i := Bounds[0].LowerBound to Bounds[0].UpperBound do
-        write('(',i,': ',ar[i].AsVariant,') ');
+        write('(',i,': ',ar.GetAsVariant([i]),') ');
     end;
 
   2:
     begin
       for i := Bounds[0].LowerBound to Bounds[0].UpperBound do
         for j := Bounds[1].LowerBound to Bounds[1].UpperBound do
-          write('(',i,',',j,': ',ar.GetElement(i,j).AsVariant,') ');
+          write('(',i,',',j,': ',ar.GetAsVariant([i,j]),') ');
     end;
   end;
 end;

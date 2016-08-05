@@ -787,7 +787,7 @@ var
      len :=  Length(Value);
       if (GetName = 'DB_KEY') or {do not localize}
          (GetName = 'RDB$DB_KEY') then {do not localize}
-        Move(Value[1], SQLData^,len)
+          Move(Value[1], SQLData^,len)
       else begin
         SQLType := SQL_TEXT;
         DataLength := len;

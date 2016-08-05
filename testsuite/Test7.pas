@@ -66,7 +66,7 @@ begin
   j := 100;
   for i := 0 to 16 do
   begin
-    ar[i].AsInteger := j;
+    ar.SetAsInteger([i],j);
     dec(j);
   end;
   Statement := Attachment.Prepare(Transaction,sqlUpdate);
