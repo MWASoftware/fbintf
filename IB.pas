@@ -492,7 +492,7 @@ type
   IArray = interface(IArrayMetaData)
     function GetElement(x: integer): ISQLElement; overload;
     function GetElement(x, y: integer): ISQLElement; overload;
-    function GetElement(coords: TArrayCoords): ISQLElement; overload;
+    function GetElement(coords: array of integer): ISQLElement; overload;
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
     property Elements[index: integer]: ISQLElement read GetElement; default;

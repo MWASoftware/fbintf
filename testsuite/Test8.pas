@@ -65,7 +65,7 @@ begin
     for i := 0 to 16 do
       for j := -1 to 7 do
       begin
-        ar.GetElement(i,j).AsString := 'A' + IntToStr(k);
+        ar.GetElement([i,j]).AsString := 'A' + IntToStr(k);
         Inc(k);
       end;
     Statement := Attachment.Prepare(Transaction,sqlUpdate);

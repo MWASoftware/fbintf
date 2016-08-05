@@ -134,6 +134,7 @@ begin
     case getSQLType of
       SQL_BLOB:
         begin
+          writeln('Blob Meta Data:');
           b := GetBlobMetaData;
           writeln('Sub Type = ',b.GetSubType);
           writeln('CharSetID = ',b.GetCharSetID);
@@ -143,6 +144,7 @@ begin
         end;
       SQL_ARRAY:
         begin
+          writeln('Array Meta Data:');
           ar := GetArrayMetaData;
           writeln('SQLType =',SQLType2Text(ar.getSQLType));
           writeln('Table = ',ar.GetTableName);

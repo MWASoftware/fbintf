@@ -158,7 +158,8 @@ type
       ibxeNotAMultiDatabaseTransaction,
       ibxeAttachmentListIndexError,
       ibxeNotAnArray,
-      ibxeInvalidSubscript
+      ibxeInvalidSubscript,
+      ibxeArrayElementOverFlow
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;
@@ -338,6 +339,7 @@ resourcestring
   SAttachmentListIndexError = 'Attachment List index out of range (%d)';
   SNotAnArray = 'Table Column must be an array';
   SInvalidSubscript = 'Invalid Subscript (%d)';
+  SArrayElementOverFlow = 'Array Element too big';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -481,7 +483,8 @@ const
     SNotAMultiDatabaseTransaction,
     SAttachmentListIndexError,
     SNotAnArray,
-    SInvalidSubscript
+    SInvalidSubscript,
+    SArrayElementOverFlow
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;

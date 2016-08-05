@@ -25,6 +25,7 @@ type
    procedure Changed; override;
    function SQLData: PChar; override;
    function GetDataLength: short; override;
+   procedure SetDataLength(len: short); override;
   public
    constructor Create(anArray: TFBArray; P: PChar);
    constructor Copy(aElement: TFBArrayElement);
@@ -70,6 +71,7 @@ type
     FArrayElements: array of ISQLElement;
     FTransactionIntf: ITransaction;
     FSQLDialect: integer;
+    FOffsets: array of integer;
     procedure AllocateBuffer;
     procedure GetArraySlice;
     procedure PutArraySlice;
@@ -127,6 +129,12 @@ end;
 function TFBArrayElement.GetDataLength: short;
 begin
   Result :=  FArray.GetDataLength
+end;
+
+procedure TFBArrayElement.SetDataLength(len: short);
+begin
+  if len > GetDataLength then
+    IBError(ibxeArrayElementOverFlow,[nil]);
 end;
 
 constructor TFBArrayElement.Create(anArray: TFBArray; P: PChar);
@@ -251,15 +259,43 @@ end;
 procedure TFBArray.AllocateBuffer;
 var i: integer;
     l: integer;
+    Bounds: TArrayBounds;
+    Dims: integer;
 begin
   l := NumOfElements;
-  FBufSize := GetDataLength * l;
+  case GetSQLType of
+  SQL_VARYING:
+    FBufSize := (GetDataLength + 2) * l;
+  SQL_TEXT:
+    FBufSize := (GetDataLength + 1) * l;
+  else
+    FBufSize := GetDataLength * l;
+  end;
+
   with Firebird25ClientAPI do
     IBAlloc(FBuffer,0,FBufSize);
 
   SetLength(FArrayElements, l);
   for i := 0 to l -1 do
     FArrayElements[i] := nil;
+
+  Dims := GetDimensions;
+  SetLength(FOffsets,GetDimensions);
+  Bounds := GetBounds;
+  if FArrayDesc.array_desc_flags = 0 {row major} then
+  begin
+    FOffsets[0] := 1;
+    for i := 0 to Dims - 2  do
+      FOffsets[i+1] := FOffsets[i] * (Bounds[i].UpperBound - Bounds[i].LowerBound + 1);
+  end
+  else
+  begin
+    {column major}
+    FOffsets[Dims-1] := 1;
+    for i := Dims - 1  downto 1 do
+      FOffsets[i-1] := FOffsets[i] * (Bounds[i].UpperBound - Bounds[i].LowerBound + 1);
+  end;
+
 end;
 
 procedure TFBArray.GetArraySlice;
@@ -290,34 +326,19 @@ end;
 function TFBArray.GetIndex(coords: array of integer): integer;
 var i: integer;
     Bounds: TArrayBounds;
-    dimsize: array of integer; {no of elements in each dimension}
 begin
+  if GetDimensions <> Length(coords) then
+    IBError(ibxeInvalidArrayDimensions,[Length(coords)]);
+
   Result := 0;
   Bounds := GetBounds;
-  SetLength(dimSize,Length(coords));
-  if FArrayDesc.array_desc_flags = 0 {row major} then
-  begin
-    dimsize[0] := 1;
-    for i := 0 to Length(coords) - 1  do
-      dimsize[i+1] := dimsize[i] * (Bounds[i].UpperBound - Bounds[i].LowerBound + 1);
-  end
-  else
-  begin
-    {column major}
-    dimsize[Length(coords)-1] := 1;
-    for i := Length(coords) - 1  downto 0 do
-      dimsize[i-1] := dimsize[i] * (Bounds[i].UpperBound - Bounds[i].LowerBound + 1);
-  end;
-
   for i := 0 to Length(coords) - 1  do
-    Result += dimsize[i]*(coords[i] - Bounds[i].LowerBound);
+    Result += FOffsets[i]*(coords[i] - Bounds[i].LowerBound);
 end;
 
 function TFBArray.GetDataLength: short;
 begin
   Result :=  FArrayDesc.array_desc_length;
-  if GetSQLType = SQL_VARYING then
-    Inc(Result);
 end;
 
 constructor TFBArray.Create(aField: TIBSQLData);
