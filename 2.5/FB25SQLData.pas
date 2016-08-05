@@ -44,7 +44,7 @@ type
      function GetAsPointer: Pointer;
      function GetAsQuad: TISC_QUAD;
      function GetAsShort: Short;
-     function GetAsString: String;
+     function GetAsString: String; virtual;
      function GetIsNull: Boolean; virtual;
      function getIsNullable: boolean; virtual;
      function GetAsVariant: Variant;

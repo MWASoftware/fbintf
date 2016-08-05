@@ -82,7 +82,7 @@
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="2"/>
         <TopLine Value="55"/>
-        <CursorPos X="48" Y="68"/>
+        <CursorPos Y="68"/>
         <UsageCount Value="32"/>
         <Loaded Value="True"/>
       </Unit9>
@@ -326,8 +326,8 @@
       <Unit43>
         <Filename Value="../2.5/FB25SQLData.pas"/>
         <EditorIndex Value="5"/>
-        <TopLine Value="453"/>
-        <CursorPos X="3" Y="448"/>
+        <TopLine Value="38"/>
+        <CursorPos X="44" Y="47"/>
         <UsageCount Value="29"/>
         <Loaded Value="True"/>
       </Unit43>
@@ -356,11 +356,11 @@
         <Filename Value="../2.5/FB25Array.pas"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="4"/>
-        <TopLine Value="467"/>
-        <CursorPos X="38" Y="481"/>
+        <TopLine Value="311"/>
+        <CursorPos Y="325"/>
         <UsageCount Value="26"/>
         <Bookmarks Count="1">
-          <Item0 Y="621"/>
+          <Item0 Y="625"/>
         </Bookmarks>
         <Loaded Value="True"/>
       </Unit47>
@@ -443,135 +443,124 @@
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="../2.5/FB25Array.pas"/>
-        <Caret Line="327" Column="67" TopLine="318"/>
+        <Caret Line="345" TopLine="329"/>
       </Position1>
       <Position2>
         <Filename Value="../2.5/FB25Array.pas"/>
-        <Caret Line="312" TopLine="303"/>
+        <Caret Line="347" TopLine="329"/>
       </Position2>
       <Position3>
         <Filename Value="../2.5/FB25Array.pas"/>
-        <Caret Line="319" TopLine="303"/>
+        <Caret Line="348" TopLine="329"/>
       </Position3>
       <Position4>
         <Filename Value="../2.5/FB25Array.pas"/>
-        <Caret Line="482" TopLine="468"/>
+        <Caret Line="592" TopLine="578"/>
       </Position4>
       <Position5>
         <Filename Value="../2.5/FB25Array.pas"/>
-        <Caret Line="339" TopLine="325"/>
+        <Caret Line="595" TopLine="578"/>
       </Position5>
       <Position6>
         <Filename Value="../2.5/FB25Array.pas"/>
-        <Caret Line="340" TopLine="325"/>
+        <Caret Line="596" TopLine="578"/>
       </Position6>
       <Position7>
         <Filename Value="../2.5/FB25Array.pas"/>
-        <Caret Line="343" TopLine="325"/>
+        <Caret Line="603" Column="18" TopLine="581"/>
       </Position7>
       <Position8>
         <Filename Value="../2.5/FB25Array.pas"/>
-        <Caret Line="344" TopLine="325"/>
+        <Caret Line="331" Column="56" TopLine="318"/>
       </Position8>
       <Position9>
         <Filename Value="../2.5/FB25Array.pas"/>
-        <Caret Line="345" TopLine="325"/>
+        <Caret Line="312" TopLine="306"/>
       </Position9>
       <Position10>
         <Filename Value="../2.5/FB25Array.pas"/>
-        <Caret Line="346" TopLine="325"/>
+        <Caret Line="316" TopLine="306"/>
       </Position10>
       <Position11>
         <Filename Value="../2.5/FB25Array.pas"/>
-        <Caret Line="345" TopLine="325"/>
+        <Caret Line="315" TopLine="306"/>
       </Position11>
       <Position12>
         <Filename Value="../2.5/FB25Array.pas"/>
-        <Caret Line="346" TopLine="325"/>
+        <Caret Line="316" TopLine="306"/>
       </Position12>
       <Position13>
         <Filename Value="../2.5/FB25Array.pas"/>
-        <Caret Line="345" TopLine="325"/>
+        <Caret Line="315" TopLine="306"/>
       </Position13>
       <Position14>
         <Filename Value="../2.5/FB25Array.pas"/>
-        <Caret Line="347" TopLine="325"/>
+        <Caret Line="316" TopLine="306"/>
       </Position14>
       <Position15>
         <Filename Value="../2.5/FB25Array.pas"/>
-        <Caret Line="348" TopLine="325"/>
+        <Caret Line="318" TopLine="306"/>
       </Position15>
       <Position16>
         <Filename Value="../2.5/FB25Array.pas"/>
-        <Caret Line="483" TopLine="469"/>
+        <Caret Line="319" TopLine="306"/>
       </Position16>
       <Position17>
-        <Filename Value="../2.5/FB25SQLData.pas"/>
-        <Caret Line="523" TopLine="509"/>
+        <Filename Value="../2.5/FB25Array.pas"/>
+        <Caret Line="493" TopLine="479"/>
       </Position17>
       <Position18>
-        <Filename Value="../2.5/FB25SQLData.pas"/>
-        <Caret Line="524" TopLine="509"/>
+        <Filename Value="../2.5/FB25Array.pas"/>
+        <Caret Line="494" TopLine="479"/>
       </Position18>
       <Position19>
         <Filename Value="../2.5/FB25SQLData.pas"/>
-        <Caret Line="527" TopLine="509"/>
+        <Caret Line="522" TopLine="511"/>
       </Position19>
       <Position20>
         <Filename Value="../2.5/FB25SQLData.pas"/>
-        <Caret Line="533" TopLine="510"/>
+        <Caret Line="523" TopLine="511"/>
       </Position20>
       <Position21>
         <Filename Value="../2.5/FB25SQLData.pas"/>
-        <Caret Line="448" TopLine="434"/>
+        <Caret Line="526" TopLine="511"/>
       </Position21>
       <Position22>
         <Filename Value="../2.5/FB25SQLData.pas"/>
-        <Caret Line="449" TopLine="434"/>
+        <Caret Line="532" TopLine="511"/>
       </Position22>
       <Position23>
-        <Filename Value="../2.5/FB25SQLData.pas"/>
-        <Caret Line="451" TopLine="434"/>
+        <Filename Value="../2.5/FB25Array.pas"/>
+        <Caret Line="87" Column="44" TopLine="80"/>
       </Position23>
       <Position24>
-        <Filename Value="../2.5/FB25SQLData.pas"/>
-        <Caret Line="453" TopLine="434"/>
+        <Filename Value="../2.5/FB25Array.pas"/>
+        <Caret Line="484" TopLine="470"/>
       </Position24>
       <Position25>
-        <Filename Value="../2.5/FB25SQLData.pas"/>
-        <Caret Line="452" TopLine="434"/>
+        <Filename Value="../2.5/FB25Array.pas"/>
+        <Caret Line="420" TopLine="401"/>
       </Position25>
       <Position26>
-        <Filename Value="../2.5/FB25SQLData.pas"/>
-        <Caret Line="471" TopLine="458"/>
+        <Filename Value="../2.5/FB25Array.pas"/>
+        <Caret Line="35" Column="18" TopLine="13"/>
       </Position26>
       <Position27>
-        <Filename Value="../2.5/FB25SQLData.pas"/>
-        <Caret Line="472" TopLine="458"/>
+        <Filename Value="../2.5/FB25Array.pas"/>
+        <Caret Line="195" Column="14" TopLine="189"/>
       </Position27>
       <Position28>
-        <Filename Value="../2.5/FB25SQLData.pas"/>
-        <Caret Line="475" TopLine="458"/>
+        <Filename Value="../2.5/FB25Array.pas"/>
+        <Caret Line="198" TopLine="181"/>
       </Position28>
       <Position29>
         <Filename Value="../2.5/FB25Array.pas"/>
-        <Caret Line="486" TopLine="472"/>
+        <Caret Line="193" Column="31" TopLine="179"/>
       </Position29>
       <Position30>
         <Filename Value="../2.5/FB25Array.pas"/>
-        <Caret Line="481" Column="23" TopLine="467"/>
+        <Caret Line="195" Column="45" TopLine="181"/>
       </Position30>
     </JumpHistory>
   </ProjectSession>
-  <Debugging>
-    <BreakPoints Count="1">
-      <Item1>
-        <Kind Value="bpkSource"/>
-        <WatchScope Value="wpsLocal"/>
-        <WatchKind Value="wpkWrite"/>
-        <Source Value="../2.5/FB25Array.pas"/>
-        <Line Value="312"/>
-      </Item1>
-    </BreakPoints>
-  </Debugging>
 </CONFIG>

@@ -32,6 +32,7 @@ type
    function GetName: string; override;
    function GetScale: short; override;
    function GetSize: integer;
+   function GetAsString: string; override;
   end;
 
   { TFBArrayMetaData }
@@ -183,6 +184,18 @@ end;
 function TFBArrayElement.GetSize: integer;
 begin
   Result := GetDataLength;
+end;
+
+function TFBArrayElement.GetAsString: string;
+begin
+  case GetSQLType of
+  SQL_VARYING:
+      Result := strpas(FBufPtr);
+  SQL_TEXT:
+      SetString(Result,FBufPtr,GetDataLength);
+  else
+    Result := inherited GetAsString;
+  end;
 end;
 
 {TFBArrayMetaData}
@@ -473,18 +486,8 @@ function TFBArray.GetAsString(index: array of integer): String;
 var P: PChar;
 begin
   GetArraySlice;
-  P := GetOffset(index);
-  case GetSQLType of
-  SQL_VARYING:
-      Result := strpas(P);
-  SQL_TEXT:
-      SetString(Result,P,FElementSize);
-  else
-    begin
-      FElement.FBufPtr := P;
-      Result := FElement.GetAsString;
-    end;
-  end;
+  FElement.FBufPtr := P;
+  Result := FElement.GetAsString;
 end;
 
 function TFBArray.GetAsVariant(index: array of integer): Variant;
@@ -592,14 +595,15 @@ begin
   case GetSQLType of
   SQL_VARYING:
     begin
-      FillChar(P,FElementSize,0);
       len := Length(Value);
       if len > FElementSize - 2 then len := FElementSize - 2;
       Move(Value[1],P^,len);
+      if Len < FElementSize - 2 then
+        (P+len)^ := #0
     end;
   SQL_TEXT:
     begin
-      FillChar(P,FElementSize,' ');
+      FillChar(P^,FElementSize,' ');
       len := Length(Value);
       if len > FElementSize - 1 then len := FElementSize - 1;
       Move(Value[1],P^,len);
