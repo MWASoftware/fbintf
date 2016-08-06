@@ -60,6 +60,7 @@ type
     FParent: TIBXSQLDA;
     FXSQLVAR: PXSQLVAR;       { Point to the PXSQLVAR in the owner object }
   protected
+    procedure CheckActive; override;
     function SQLData: PChar; override;
     function GetDataLength: short; override;
 
@@ -936,6 +937,15 @@ begin
     Result := TIBXSQLVAR(Vars[index]);
 end;
 
+procedure TIBXSQLVAR.CheckActive;
+begin
+  if FParent.FStatement.FEOF then
+    IBError(ibxeEOF,[nil]);
+
+  if FParent.FStatement.FBOF then
+    IBError(ibxeBOF,[nil]);
+end;
+
 function TIBXSQLVAR.SQLData: PChar;
 begin
   Result := FXSQLVAR^.sqldata;
@@ -1020,6 +1030,7 @@ end;
 
 function TIBXSQLVAR.GetIsNull: Boolean;
 begin
+  CheckActive;
   result := IsNullable and (FXSQLVAR^.sqlind^ = -1);
 end;
 

@@ -20,6 +20,7 @@ type
      function AdjustScaleToCurrency(Value: Int64; aScale: Integer): Currency;
      procedure SetAsInteger(AValue: Integer);
   protected
+     procedure CheckActive; virtual;
      function GetAttachment: TFBAttachment; virtual; abstract;
      function GetTransaction: TFBTransaction; virtual; abstract;
      function GetSQLDialect: integer; virtual; abstract;
@@ -181,6 +182,11 @@ begin
   SetAsLong(aValue);
 end;
 
+procedure TSQLDataItem.CheckActive;
+begin
+  //Do nothing by default
+end;
+
 procedure TSQLDataItem.Changed;
 begin
   FModified := true;
@@ -208,6 +214,7 @@ end;
 
 function TSQLDataItem.GetAsBoolean: boolean;
 begin
+  CheckActive;
   result := false;
   if not IsNull then
   begin
@@ -220,6 +227,7 @@ end;
 
 function TSQLDataItem.GetAsCurrency: Currency;
 begin
+  CheckActive;
   result := 0;
   if GetSQLDialect < 3 then
     result := GetAsDouble
@@ -252,6 +260,7 @@ end;
 
 function TSQLDataItem.GetAsInt64: Int64;
 begin
+  CheckActive;
   result := 0;
   if not IsNull then
     case SQLType  of
@@ -283,6 +292,7 @@ var
   tm_date: TCTimeStructure;
   msecs: word;
 begin
+  CheckActive;
   result := 0;
   if not IsNull then
     with Firebird25ClientAPI do
@@ -343,6 +353,7 @@ end;
 
 function TSQLDataItem.GetAsDouble: Double;
 begin
+  CheckActive;
   result := 0;
   if not IsNull then begin
     case SQLType of
@@ -377,6 +388,7 @@ end;
 
 function TSQLDataItem.GetAsFloat: Float;
 begin
+  CheckActive;
   result := 0;
   try
     result := AsDouble;
@@ -388,6 +400,7 @@ end;
 
 function TSQLDataItem.GetAsLong: Long;
 begin
+  CheckActive;
   result := 0;
   if not IsNull then
     case SQLType of
@@ -415,6 +428,7 @@ end;
 
 function TSQLDataItem.GetAsPointer: Pointer;
 begin
+  CheckActive;
   if not IsNull then
     result := SQLData
   else
@@ -423,6 +437,7 @@ end;
 
 function TSQLDataItem.GetAsQuad: TISC_QUAD;
 begin
+  CheckActive;
   result.gds_quad_high := 0;
   result.gds_quad_low := 0;
   if not IsNull then
@@ -436,6 +451,7 @@ end;
 
 function TSQLDataItem.GetAsShort: Short;
 begin
+  CheckActive;
   result := 0;
   try
     result := AsLong;
@@ -452,6 +468,7 @@ var
   ss: TStringStream;
   b: TFBBlob;
 begin
+  CheckActive;
   result := '';
   { Check null, if so return a default string }
   if not IsNull then
@@ -517,16 +534,19 @@ end;
 
 function TSQLDataItem.GetIsNull: Boolean;
 begin
+  CheckActive;
   Result := false;
 end;
 
 function TSQLDataItem.getIsNullable: boolean;
 begin
+  CheckActive;
   Result := false;
 end;
 
 function TSQLDataItem.GetAsVariant: Variant;
 begin
+  CheckActive;
   if IsNull then
     result := NULL
   { Check null, if so return a default string }
@@ -564,6 +584,7 @@ end;
 
 function TSQLDataItem.GetAsBlob: IBlob;
 begin
+  CheckActive;
   if SQLType <>  SQL_BLOB then
       IBError(ibxeInvalidDataConversion, [nil]);
   if IsNull then

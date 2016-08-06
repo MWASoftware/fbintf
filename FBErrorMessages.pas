@@ -60,6 +60,7 @@ type
       ibxeColumnIsNotNullable,
       ibxeBlobCannotBeRead,
       ibxeBlobCannotBeWritten,
+      ibxeBlobNotOpen,
       ibxeEmptyQuery,
       ibxeCannotOpenNonSQLSelect,
       ibxeNoFieldAccess,
@@ -234,6 +235,7 @@ resourcestring
   SColumnIsNotNullable = 'Column cannot be set to null (%s)';
   SBlobCannotBeRead = 'Blob stream cannot be read';
   SBlobCannotBeWritten = 'Blob stream cannot be written';
+  SBlobNotOpen = 'The Blob is not open';
   SEmptyQuery = 'Empty query';
   SCannotOpenNonSQLSelect = 'Cannot "open" a non-select statement. Use ExecQuery';
   SNoFieldAccess = 'No access to field "%s"';
@@ -387,6 +389,7 @@ const
     SColumnIsNotNullable,
     SBlobCannotBeRead,
     SBlobCannotBeWritten,
+    SBlobNotOpen,
     SEmptyQuery,
     SCannotOpenNonSQLSelect,
     SNoFieldAccess,

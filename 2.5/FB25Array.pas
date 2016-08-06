@@ -417,6 +417,7 @@ begin
   begin
     if (index[i] < Bounds[i].LowerBound) or (index[i] > Bounds[i].UpperBound) then
       IBError(ibxeInvalidSubscript,[index[i],i]);
+
     FlatIndex += FOffsets[i]*(index[i] - Bounds[i].LowerBound);
   end;
   Result := FBuffer + FlatIndex*FElementSize;

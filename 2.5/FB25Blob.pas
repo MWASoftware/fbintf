@@ -114,12 +114,14 @@ end;
 
 procedure TFBBlob.CheckReadable;
 begin
-  if FCreating then IBError(ibxeBlobCannotBeRead, [nil]);
+  if FCreating or (FHandle = nil) then
+    IBError(ibxeBlobCannotBeRead, [nil]);
 end;
 
 procedure TFBBlob.CheckWritable;
 begin
-  if not FCreating then IBError(ibxeBlobCannotBeWritten, [nil]);
+  if not FCreating or (FHandle = nil) then
+    IBError(ibxeBlobCannotBeWritten, [nil]);
 end;
 
 constructor TFBBlob.Create(Attachment: TFBAttachment; Transaction: ITransaction
@@ -214,6 +216,9 @@ var
   i, item_length: Integer;
   item: Integer;
 begin
+  if FHandle = nil then
+    IBError(ibxeBlobNotOpen,[nil]);
+
   items[0] := Char(isc_info_blob_num_segments);
   items[1] := Char(isc_info_blob_max_segment);
   items[2] := Char(isc_info_blob_total_length);
