@@ -514,6 +514,7 @@ type
     procedure SetAsShort(index: array of integer; Value: Short);
     procedure SetAsString(index: array of integer; Value: String);
     procedure SetAsVariant(index: array of integer; Value: Variant);
+    procedure SetBounds(dim, UpperBound, LowerBound: integer);
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
   end;

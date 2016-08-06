@@ -8,6 +8,30 @@ uses
   Classes, SysUtils, IB, FB25Statement, FB25Attachment, FB25Transaction,
   FB25SQLData, IBHeader, FB25ClientAPI, IBExternals;
 
+(*
+
+COMMENTS (copied from IBPP)
+
+1)
+For an array column of type CHAR(X), the internal type returned or expected is blr_text.
+In such case, the byte array received or submitted to get/put_slice is formatted in
+elements of X bytes, which correspond to what is reported in array_desc_length.
+The elements are not '\0' terminated but are right-padded with spaces ' '.
+
+2)
+For an array column of type VARCHAR(X), the internal type is blr_varying.
+The underlying format is rather curious and different than what is used in XSQLDA.
+The element size is reported in array_desc_length as X.
+Yet each element of the byte array is expected to be of size X+2 (just as if we were
+to stuff a short in the first 2 bytes to store the length (as is done with XSQLDA).
+No. The string of X characters maximum has to be stored in the chunks of X+2 bytes as
+a zero-terminated c-string. Note that the buffer is indeed one byte too large.
+Internally, the API probably convert in-place in these chunks the zero-terminated string
+to a variable-size string with a short in front and the string data non zero-terminated
+behind.
+
+*)
+
 type
   TFBArray = class;
 
@@ -17,7 +41,6 @@ type
   private
    FBufPtr: PChar;
    FArray: TFBArray;
-   FArrayIntf: IArray;
   protected
    function GetAttachment: TFBAttachment; override;
    function GetTransaction: TFBTransaction; override;
@@ -33,6 +56,7 @@ type
    function GetScale: short; override;
    function GetSize: integer;
    function GetAsString: string; override;
+   procedure SetAsString(Value: String); override;
   end;
 
   { TFBArrayMetaData }
@@ -112,6 +136,7 @@ type
     procedure SetAsShort(index: array of integer; Value: Short);
     procedure SetAsString(index: array of integer; Value: String);
     procedure SetAsVariant(index: array of integer; Value: Variant);
+    procedure SetBounds(dim, UpperBound, LowerBound: integer);
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
   end;
@@ -195,6 +220,33 @@ begin
       SetString(Result,FBufPtr,GetDataLength);
   else
     Result := inherited GetAsString;
+  end;
+end;
+
+procedure TFBArrayElement.SetAsString(Value: String);
+var len: integer;
+    ElementSize: integer;
+begin
+  case GetSQLType of
+  SQL_VARYING:
+    begin
+      len := Length(Value);
+      ElementSize := GetDataLength;
+      if len > ElementSize - 2 then len := ElementSize - 2;
+      Move(Value[1],FBufPtr^,len);
+      if Len < ElementSize - 2 then
+        (FBufPtr+len)^ := #0
+    end;
+  SQL_TEXT:
+    begin
+      ElementSize := GetDataLength;
+      FillChar(FBufPtr^,ElementSize,' ');
+      len := Length(Value);
+      if len > ElementSize - 1 then len := ElementSize - 1;
+      Move(Value[1],FBufPtr^,len);
+    end;
+  else
+    inherited SetAsString(Value);
   end;
 end;
 
@@ -288,6 +340,10 @@ var i: integer;
     Bounds: TArrayBounds;
     Dims: integer;
 begin
+  SetLength(FOffsets,0);
+  FreeMem(FBuffer);
+  FLoaded := false;
+
   l := NumOfElements;
   FElementSize := FArrayDesc.array_desc_length;
   case GetSQLType of
@@ -356,7 +412,11 @@ begin
   FlatIndex := 0;
   Bounds := GetBounds;
   for i := 0 to Length(index) - 1  do
+  begin
+    if (index[i] < Bounds[i].LowerBound) or (index[i] > Bounds[i].UpperBound) then
+      IBError(ibxeInvalidSubscript,[index[i],i]);
     FlatIndex += FOffsets[i]*(index[i] - Bounds[i].LowerBound);
+  end;
   Result := FBuffer + FlatIndex*FElementSize;
 end;
 
@@ -563,63 +623,34 @@ begin
   FElement.SetAsShort(Value);
 end;
 
-(*
-
-COMMENTS (copied from IBPP)
-
-1)
-For an array column of type CHAR(X), the internal type returned or expected is blr_text.
-In such case, the byte array received or submitted to get/put_slice is formatted in
-elements of X bytes, which correspond to what is reported in array_desc_length.
-The elements are not '\0' terminated but are right-padded with spaces ' '.
-
-2)
-For an array column of type VARCHAR(X), the internal type is blr_varying.
-The underlying format is rather curious and different than what is used in XSQLDA.
-The element size is reported in array_desc_length as X.
-Yet each element of the byte array is expected to be of size X+2 (just as if we were
-to stuff a short in the first 2 bytes to store the length (as is done with XSQLDA).
-No. The string of X characters maximum has to be stored in the chunks of X+2 bytes as
-a zero-terminated c-string. Note that the buffer is indeed one byte too large.
-Internally, the API probably convert in-place in these chunks the zero-terminated string
-to a variable-size string with a short in front and the string data non zero-terminated
-behind.
-
-*)
-
 procedure TFBArray.SetAsString(index: array of integer; Value: String);
-var P: PChar;
-    len: integer;
 begin
-  P := GetOffset(index);
-  case GetSQLType of
-  SQL_VARYING:
-    begin
-      len := Length(Value);
-      if len > FElementSize - 2 then len := FElementSize - 2;
-      Move(Value[1],P^,len);
-      if Len < FElementSize - 2 then
-        (P+len)^ := #0
-    end;
-  SQL_TEXT:
-    begin
-      FillChar(P^,FElementSize,' ');
-      len := Length(Value);
-      if len > FElementSize - 1 then len := FElementSize - 1;
-      Move(Value[1],P^,len);
-    end;
-  else
-    begin
-      FElement.FBufPtr := P;
-      FElement.SetAsString(Value);
-    end;
-  end;
+  FElement.FBufPtr := GetOffset(index);
+  FElement.SetAsString(Value);
 end;
 
 procedure TFBArray.SetAsVariant(index: array of integer; Value: Variant);
 begin
   FElement.FBufPtr := GetOffset(index);
   FElement.SetAsVariant(Value);
+end;
+
+procedure TFBArray.SetBounds(dim, UpperBound, LowerBound: integer);
+begin
+  if (dim < 0) or (dim > GetDimensions) then
+    IBError(ibxeInvalidArrayDimensions,[dim]);
+
+  if (UpperBound > FArrayDesc.array_desc_bounds[dim].array_bound_upper) or
+     (LowerBound < FArrayDesc.array_desc_bounds[dim].array_bound_lower) or
+     (UpperBound < FArrayDesc.array_desc_bounds[dim].array_bound_lower) or
+     (LowerBound > FArrayDesc.array_desc_bounds[dim].array_bound_upper) then
+    IBError(ibxArrayBoundsCantIncrease,[nil]);
+
+  PutArraySlice;  {Save any changes}
+
+  FArrayDesc.array_desc_bounds[dim].array_bound_upper := UpperBound;
+  FArrayDesc.array_desc_bounds[dim].array_bound_lower := LowerBound;
+  AllocateBuffer;
 end;
 
 function TFBArray.GetAttachment: IAttachment;

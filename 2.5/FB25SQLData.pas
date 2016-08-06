@@ -62,7 +62,7 @@ type
      procedure SetAsPointer(Value: Pointer);
      procedure SetAsQuad(Value: TISC_QUAD);
      procedure SetAsShort(Value: Short);
-     procedure SetAsString(Value: String);
+     procedure SetAsString(Value: String); virtual;
      procedure SetAsVariant(Value: Variant);
      procedure SetAsBlob(Value: IBlob);
      procedure SetIsNull(Value: Boolean);  virtual;

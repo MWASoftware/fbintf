@@ -16,7 +16,7 @@ type
   private
     FOwner: TTestManager;
   protected
-    procedure ReportResults(Statement: IStatement);
+    function ReportResults(Statement: IStatement): IResultSet;
     procedure PrintDPB(DPB: IDPB);
     procedure PrintMetaData(meta: IMetaData);
     function SQLType2Text(sqltype: short): string;
@@ -71,33 +71,32 @@ begin
   FOwner := aOwner;
 end;
 
-procedure TTestBase.ReportResults(Statement: IStatement);
-var ResultSet: IResultSet;
-    i: integer;
+function TTestBase.ReportResults(Statement: IStatement): IResultSet;
+var i: integer;
 begin
-  ResultSet := Statement.OpenCursor;
+  Result := Statement.OpenCursor;
   try
-    while ResultSet.FetchNext do
+    while Result.FetchNext do
     begin
-      for i := 0 to ResultSet.getCount - 1 do
+      for i := 0 to Result.getCount - 1 do
       begin
-        case ResultSet[i].SQLType of
+        case Result[i].SQLType of
         SQL_ARRAY:
           begin
-            if not ResultSet[i].IsNull then
-              WriteArray(ResultSet[i].AsArray);
+            if not Result[i].IsNull then
+              WriteArray(Result[i].AsArray);
           end;
         SQL_FLOAT,SQL_DOUBLE,
         SQL_D_FLOAT:
-          writeln( ResultSet[i].Name,' = ',FormatFloat('#,##0.00',ResultSet[i].AsFloat))
+          writeln( Result[i].Name,' = ',FormatFloat('#,##0.00',Result[i].AsFloat))
         else
-          writeln(ResultSet[i].Name,' = ',ResultSet[i].AsString);
+          writeln(Result[i].Name,' = ',Result[i].AsString);
 
         end;
       end;
     end;
   finally
-    ResultSet.Close;
+    Result.Close;
   end;
 end;
 
@@ -202,6 +201,7 @@ begin
           write('(',i,',',j,': ',ar.GetAsVariant([i,j]),') ');
     end;
   end;
+  writeln;
 end;
 
 { TTestManager }

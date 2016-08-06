@@ -74,6 +74,17 @@ begin
   Statement.Execute;
   Statement := Attachment.Prepare(Transaction,'Select * from TestData');
   ReportResults(Statement);
+
+  Resultset := Statement.OpenCursor;
+  if Resultset.FetchNext then
+  begin
+    ar := ResultSet.ByName('MyArray').AsArray;
+    ar.SetBounds(0,10,2);
+    writeln('Shrink to 2:10');
+    WriteArray(ar);
+  end
+  else
+    writeln('Unable to reopen cursor');
 end;
 
 function TTest7.TestTitle: string;
