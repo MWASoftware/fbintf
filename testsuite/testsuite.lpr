@@ -30,6 +30,8 @@ var
   ErrorMsg: String;
 begin
   writeln(Title);
+  writeln('Copyright MWA Software 2016');
+  writeln;
   // quick check parameters
   ErrorMsg := CheckOptions('h', 'help');
   if ErrorMsg <> '' then begin

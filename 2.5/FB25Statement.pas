@@ -113,18 +113,37 @@ type
   private
     FChanging: boolean;
     FUniqueName: boolean;
+    procedure InternalSetIsNull(Value: Boolean);
+    procedure InternalSetIsNullable(Value: Boolean);
   protected
-    procedure Changed; override;
     procedure SetScale(aValue: short); override;
     procedure SetDataLength(len: short); override;
     procedure SetSQLType(aValue: short); override;
   public
-
+    constructor Create(aParent: TIBXSQLDA);
     procedure Clear;
     procedure SetName(Value: string); override;
     procedure SetIsNull(Value: Boolean);  override;
     procedure SetIsNullable(Value: Boolean);  override;
     procedure SetAsArray(anArray: IArray);
+
+    {overrides}
+    procedure SetAsBoolean(AValue: boolean);
+    procedure SetAsCurrency(Value: Currency);
+    procedure SetAsInt64(Value: Int64);
+    procedure SetAsDate(Value: TDateTime);
+    procedure SetAsLong(Value: Long);
+    procedure SetAsTime(Value: TDateTime);
+    procedure SetAsDateTime(Value: TDateTime);
+    procedure SetAsDouble(Value: Double);
+    procedure SetAsFloat(Value: Float);
+    procedure SetAsPointer(Value: Pointer);
+    procedure SetAsShort(Value: Short);
+    procedure SetAsString(Value: String);
+    procedure SetAsVariant(Value: Variant);
+    procedure SetAsBlob(Value: IBlob);
+    procedure SetAsQuad(Value: TISC_QUAD);
+
     property IsNullable: Boolean read GetIsNullable write SetIsNullable;
   end;
 
@@ -179,7 +198,7 @@ type
     constructor Copy(aIBXSQLDA: TIBXINPUTSQLDA);
     destructor Destroy; override;
     procedure Bind;
-    procedure SetParamName(FieldName: String; Idx: Integer; UniqueName: boolean = false);
+    procedure SetParamName(FieldName: String; Idx: Integer; UniqueName: boolean );
     property Vars[Idx: Integer]: TIBXSQLParam read GetXSQLParam; default;
 
   public
@@ -362,54 +381,7 @@ end;
 
 { TIBXSQLParam }
 
-procedure TIBXSQLParam.Changed;
-var i: integer;
-begin
-  inherited Changed;
-  if FChanging or (FName = '') or FUniqueName then Exit;
-  if (SQLType = SQL_BLOB) or (SQLTYPE = SQL_ARRAY) then
-    IBError(ibxeDuplicateParamName,[FName]);
-
-  for i := 0 to FParent.FCount - 1 do
-    if (FParent as TIBXINPUTSQLDA)[i].FName = FName then
-    begin
-      (FParent as TIBXINPUTSQLDA)[i].FChanging := true;
-      try
-        (FParent as TIBXINPUTSQLDA)[i].AsVariant := AsVariant;
-      finally
-        (FParent as TIBXINPUTSQLDA)[i].FChanging := false;
-      end;
-    end;
-end;
-
-procedure TIBXSQLParam.SetScale(aValue: short);
-begin
-  FXSQLVAR^.sqlscale := aValue;
-end;
-
-procedure TIBXSQLParam.SetDataLength(len: short);
-begin
-  FXSQLVAR^.sqllen := len;
-  with Firebird25ClientAPI do
-    IBAlloc(FXSQLVAR^.sqldata, 0, FXSQLVAR^.sqllen);
-end;
-
-procedure TIBXSQLParam.SetSQLType(aValue: short);
-begin
-  FXSQLVAR^.sqltype := aValue or (FXSQLVAR^.sqltype and 1);
-end;
-
-procedure TIBXSQLParam.Clear;
-begin
-  IsNull := true;
-end;
-
-procedure TIBXSQLParam.SetName(Value: string);
-begin
-  FName := Value;
-end;
-
-procedure TIBXSQLParam.SetIsNull(Value: Boolean);
+procedure TIBXSQLParam.InternalSetIsNull(Value: Boolean);
 begin
   if Value then
   begin
@@ -429,7 +401,7 @@ begin
     end;
 end;
 
-procedure TIBXSQLParam.SetIsNullable(Value: Boolean);
+procedure TIBXSQLParam.InternalSetIsNullable(Value: Boolean);
 begin
   if (Value <> IsNullable) then
   begin
@@ -447,12 +419,279 @@ begin
   end;
 end;
 
+procedure TIBXSQLParam.SetScale(aValue: short);
+begin
+  FXSQLVAR^.sqlscale := aValue;
+end;
+
+procedure TIBXSQLParam.SetDataLength(len: short);
+begin
+  FXSQLVAR^.sqllen := len;
+  with Firebird25ClientAPI do
+    IBAlloc(FXSQLVAR^.sqldata, 0, FXSQLVAR^.sqllen);
+end;
+
+procedure TIBXSQLParam.SetSQLType(aValue: short);
+begin
+  FXSQLVAR^.sqltype := aValue or (FXSQLVAR^.sqltype and 1);
+end;
+
+constructor TIBXSQLParam.Create(aParent: TIBXSQLDA);
+begin
+  inherited Create(aParent);
+  FUniqueName := true;
+end;
+
+procedure TIBXSQLParam.Clear;
+begin
+  IsNull := true;
+end;
+
+procedure TIBXSQLParam.SetName(Value: string);
+begin
+  FName := Value;
+end;
+
+procedure TIBXSQLParam.SetIsNull(Value: Boolean);
+var i: integer;
+begin
+  if FUniqueName then
+    InternalSetIsNull(Value)
+  else
+  begin
+    for i := 0 to FParent.FCount - 1 do
+      with (FParent as TIBXINPUTSQLDA)[i] do
+      if FName = self.FName then
+        InternalSetIsNull(Value);
+  end
+end;
+
+procedure TIBXSQLParam.SetIsNullable(Value: Boolean);
+var i: integer;
+begin
+  if FUniqueName then
+    InternalSetIsNullable(Value)
+  else
+  begin
+    for i := 0 to FParent.FCount - 1 do
+      with (FParent as TIBXINPUTSQLDA)[i] do
+      if FName = self.FName then
+        InternalSetIsNullable(Value);
+  end
+end;
+
 procedure TIBXSQLParam.SetAsArray(anArray: IArray);
 begin
   if GetSQLType <> SQL_ARRAY then
     IBError(ibxeInvalidDataConversion,[nil]);
 
+  if not FUniqueName then
+    IBError(ibxeDuplicateParamName,[FName]);
+
   SetAsQuad((AnArray as TFBArray).GetArrayID);
+end;
+
+procedure TIBXSQLParam.SetAsBoolean(AValue: boolean);
+var i: integer;
+begin
+  if FUniqueName then
+    inherited SetAsBoolean(AValue)
+  else
+  begin
+    for i := 0 to FParent.FCount - 1 do
+      with (FParent as TIBXINPUTSQLDA)[i] do
+      if FName = self.FName then
+        inherited SetAsBoolean(AValue);
+  end;
+end;
+
+procedure TIBXSQLParam.SetAsCurrency(Value: Currency);
+var i: integer;
+begin
+  if FUniqueName then
+    inherited SetAsCurrency(Value)
+  else
+  begin
+    for i := 0 to FParent.FCount - 1 do
+      with (FParent as TIBXINPUTSQLDA)[i] do
+      if FName = self.FName then
+        inherited SetAsCurrency(Value);
+  end;
+end;
+
+procedure TIBXSQLParam.SetAsInt64(Value: Int64);
+var i: integer;
+begin
+  if FUniqueName then
+    inherited SetAsInt64(Value)
+  else
+  begin
+    for i := 0 to FParent.FCount - 1 do
+      with (FParent as TIBXINPUTSQLDA)[i] do
+      if FName = self.FName then
+        inherited SetAsInt64(Value);
+  end;
+end;
+
+procedure TIBXSQLParam.SetAsDate(Value: TDateTime);
+var i: integer;
+begin
+  if FUniqueName then
+    inherited SetAsDate(Value)
+  else
+  begin
+    for i := 0 to FParent.FCount - 1 do
+      with (FParent as TIBXINPUTSQLDA)[i] do
+      if FName = self.FName then
+        inherited SetAsDate(Value);
+  end;
+end;
+
+procedure TIBXSQLParam.SetAsLong(Value: Long);
+var i: integer;
+begin
+  if FUniqueName then
+    inherited SetAsLong(Value)
+  else
+  begin
+    for i := 0 to FParent.FCount - 1 do
+      with (FParent as TIBXINPUTSQLDA)[i] do
+      if FName = self.FName then
+        inherited SetAsLong(Value);
+  end;
+end;
+
+procedure TIBXSQLParam.SetAsTime(Value: TDateTime);
+var i: integer;
+begin
+  if FUniqueName then
+    inherited SetAsTime(Value)
+  else
+  begin
+    for i := 0 to FParent.FCount - 1 do
+      with (FParent as TIBXINPUTSQLDA)[i] do
+      if FName = self.FName then
+        inherited SetAsTime(Value);
+  end;
+end;
+
+procedure TIBXSQLParam.SetAsDateTime(Value: TDateTime);
+var i: integer;
+begin
+  if FUniqueName then
+    inherited SetAsDateTime(Value)
+  else
+  begin
+    for i := 0 to FParent.FCount - 1 do
+      with (FParent as TIBXINPUTSQLDA)[i] do
+      if FName = self.FName then
+        inherited SetAsDateTime(Value);
+  end;
+end;
+
+procedure TIBXSQLParam.SetAsDouble(Value: Double);
+var i: integer;
+begin
+  if FUniqueName then
+    inherited SetAsDouble(Value)
+  else
+  begin
+    for i := 0 to FParent.FCount - 1 do
+      with (FParent as TIBXINPUTSQLDA)[i] do
+      if FName = self.FName then
+        inherited SetAsDouble(Value);
+  end;
+end;
+
+procedure TIBXSQLParam.SetAsFloat(Value: Float);
+var i: integer;
+begin
+  if FUniqueName then
+    inherited SetAsFloat(Value)
+  else
+  begin
+    for i := 0 to FParent.FCount - 1 do
+      with (FParent as TIBXINPUTSQLDA)[i] do
+      if FName = self.FName then
+        inherited SetAsFloat(Value);
+  end;
+end;
+
+procedure TIBXSQLParam.SetAsPointer(Value: Pointer);
+var i: integer;
+begin
+  if FUniqueName then
+    inherited SetAsPointer(Value)
+  else
+  begin
+    for i := 0 to FParent.FCount - 1 do
+      with (FParent as TIBXINPUTSQLDA)[i] do
+      if FName = self.FName then
+        inherited SetAsPointer(Value);
+  end;
+end;
+
+procedure TIBXSQLParam.SetAsShort(Value: Short);
+var i: integer;
+begin
+  if FUniqueName then
+    inherited SetAsShort(Value)
+  else
+  begin
+    for i := 0 to FParent.FCount - 1 do
+      with (FParent as TIBXINPUTSQLDA)[i] do
+      if FName = self.FName then
+        inherited SetAsShort(Value);
+  end;
+end;
+
+procedure TIBXSQLParam.SetAsString(Value: String);
+var i: integer;
+begin
+  if FUniqueName then
+    inherited SetAsString(Value)
+  else
+  begin
+    for i := 0 to FParent.FCount - 1 do
+      with (FParent as TIBXINPUTSQLDA)[i] do
+      if FName = self.FName then
+        inherited SetAsString(Value);
+  end;
+end;
+
+procedure TIBXSQLParam.SetAsVariant(Value: Variant);
+var i: integer;
+begin
+  if FUniqueName then
+    inherited SetAsVariant(Value)
+  else
+  begin
+    for i := 0 to FParent.FCount - 1 do
+      with (FParent as TIBXINPUTSQLDA)[i] do
+      if FName = self.FName then
+        inherited SetAsVariant(Value);
+  end;
+end;
+
+procedure TIBXSQLParam.SetAsBlob(Value: IBlob);
+begin
+  if not FUniqueName then
+    IBError(ibxeDuplicateParamName,[FName]);
+  inherited SetAsBlob(Value);
+end;
+
+procedure TIBXSQLParam.SetAsQuad(Value: TISC_QUAD);
+var i: integer;
+begin
+  if FUniqueName then
+    inherited SetAsQuad(Value)
+  else
+  begin
+    for i := 0 to FParent.FCount - 1 do
+      with (FParent as TIBXINPUTSQLDA)[i] do
+      if FName = self.FName then
+        inherited SetAsQuad(Value);
+  end;
 end;
 
 { TIBXResults }
