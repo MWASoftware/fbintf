@@ -75,7 +75,7 @@ begin
   Statement := Attachment.Prepare(Transaction,'Select * from TestData');
   ReportResults(Statement);
 
-  Resultset := Statement.OpenCursor;
+  ResultSet := Statement.OpenCursor;
   if Resultset.FetchNext then
   begin
     ar := ResultSet.ByName('MyArray').AsArray;

@@ -97,6 +97,10 @@ type
   { TIBSQLData }
 
   TIBSQLData = class(TIBXSQLVAR,ISQLData)
+  private
+    FArray: IArray;
+  protected
+    procedure RowChange; override;
   public
     function GetAsArray: IArray;
   end;
@@ -335,6 +339,12 @@ type
 
 { TIBSQLData }
 
+procedure TIBSQLData.RowChange;
+begin
+  inherited RowChange;
+  FArray := nil;
+end;
+
 function TIBSQLData.GetAsArray: IArray;
 begin
   if GetSQLType <> SQL_ARRAY then
@@ -343,7 +353,11 @@ begin
   if IsNull then
     Result := nil
   else
-    Result := TFBArray.Create(self);
+  begin
+    if FArray = nil then
+      FArray := TFBArray.Create(self);
+    Result := FArray;
+  end;
 end;
 
 { TIBXSQLParam }
@@ -475,8 +489,12 @@ begin
 end;
 
 function TIBXResultSet.FetchNext: boolean;
+var i: integer;
 begin
   Result := FStatement.FetchNext;
+  if Result then
+    for i := 0 to getCount - 1 do
+      vars[i].RowChange;
 end;
 
 function TIBXResultSet.GetCursorName: string;
@@ -868,6 +886,7 @@ begin
   begin
     for i := 0 to FCount - 1 do
     begin
+      FXSQLVARs[i].RowChange;
       with Firebird25ClientAPI, FXSQLVARs[i].FXSQLVAR^ do
       begin
 

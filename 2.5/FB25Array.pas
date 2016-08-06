@@ -96,6 +96,7 @@ type
     FSQLDialect: integer;
     FOffsets: array of integer;
     FElement: TFBArrayElement;
+    FElementIntf: IUnknown;
     FElementSize: integer;
     procedure AllocateBuffer;
     procedure GetArraySlice;
@@ -342,6 +343,7 @@ var i: integer;
 begin
   SetLength(FOffsets,0);
   FreeMem(FBuffer);
+  FBuffer := nil;
   FLoaded := false;
 
   l := NumOfElements;
@@ -437,6 +439,7 @@ begin
   FSQLDialect := aField.Parent.Statement.SQLDialect;
   AllocateBuffer;
   FElement := TFBArrayElement.Create(self,FBuffer);
+  FElementIntf := FElement;
 end;
 
 constructor TFBArray.Create(aField: IArrayMetaData);
@@ -450,14 +453,13 @@ begin
   FSQLDialect := FAttachment.SQLDialect;
   AllocateBuffer;
   FElement := TFBArrayElement.Create(self,FBuffer);
+  FElementIntf := FElement;
 end;
 
 destructor TFBArray.Destroy;
 begin
   if assigned(FTransaction) then
     FTransaction.UnRegisterObj(self);
-  if assigned(FElement) then
-    FElement.Free;
   FreeMem(FBuffer);
   inherited Destroy;
 end;
