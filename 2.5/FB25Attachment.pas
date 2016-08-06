@@ -95,7 +95,8 @@ type
     function PrepareWithNamedParameters(transaction: ITransaction; sql: string;
                        GenerateParamNames: boolean=false;
                        UniqueParamNames: boolean=false): IStatement; overload;
-    function GetEventHandler(Events: TStrings): IEvents;
+    function GetEventHandler(Events: TStrings): IEvents; overload;
+    function GetEventHandler(Event: string): IEvents; overload;
     function OpenBlob(Transaction: ITransaction; BlobID: TISC_QUAD): IBlob;
 
     {Database Information}
@@ -503,6 +504,18 @@ end;
 function TFBAttachment.GetEventHandler(Events: TStrings): IEvents;
 begin
   Result := TFBEvents.Create(self,Events);
+end;
+
+function TFBAttachment.GetEventHandler(Event: string): IEvents;
+var S: TStringList;
+begin
+  S := TStringList.Create;
+  try
+    S.Add(Event);
+    Result := GetEventHandler(S);
+  finally
+    S.Free;
+  end;
 end;
 
 function TFBAttachment.OpenBlob(Transaction: ITransaction; BlobID: TISC_QUAD

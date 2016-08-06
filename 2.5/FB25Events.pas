@@ -32,7 +32,8 @@ type
 
     {IEvents}
     procedure GetEvents(EventNames: TStrings);
-    procedure SetEvents(EventNames: TStrings);
+    procedure SetEvents(EventNames: TStrings); overload;
+    procedure SetEvents(Event: string); overload;
     procedure Cancel;
     function ExtractEventCounts: TEventCounts;
     procedure WaitForEvent;
@@ -181,8 +182,8 @@ begin
     begin
       Inc(j);
       SetLength(Result,j);
-      Result[j].EventName := FEvents[i];
-      Result[j].Count := EventCountList[i];
+      Result[j-1].EventName := FEvents[i];
+      Result[j-1].Count := EventCountList[i];
     end;
   end;
 end;
@@ -292,6 +293,18 @@ begin
   end;
 end;
 
+procedure TFBEvents.SetEvents(Event: string);
+var S: TStringList;
+begin
+  S := TStringList.Create;
+  try
+    S.Add(Event);
+    SetEvents(S);
+  finally
+    S.Free;
+  end;
+end;
+
 procedure TFBEvents.Cancel;
 begin
   if assigned(FEventHandler) then
@@ -325,7 +338,7 @@ end;
 procedure TFBEvents.WaitForEvent;
 begin
   with Firebird25ClientAPI do
-     if isc_wait_for_event(StatusVector,@FDBHandle, FEventBufferlen,@FEventBuffer,@FResultBuffer) > 0 then
+     if isc_wait_for_event(StatusVector,@FDBHandle, FEventBufferlen,FEventBuffer,FResultBuffer) > 0 then
        IBDatabaseError;
 end;
 

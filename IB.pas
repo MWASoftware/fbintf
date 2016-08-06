@@ -761,9 +761,12 @@ type
   IEvents = interface;
   TEventHandler = procedure(Sender: IEvents) of object;
 
+  { IEvents }
+
   IEvents = interface
     procedure GetEvents(EventNames: TStrings);
-    procedure SetEvents(EventNames: TStrings);
+    procedure SetEvents(EventNames: TStrings); overload;
+    procedure SetEvents(Event: string); overload;
     procedure Cancel;
     function ExtractEventCounts: TEventCounts;
     procedure WaitForEvent;
@@ -844,7 +847,8 @@ type
                        UniqueParamNames: boolean=false): IStatement; overload;
 
     {Events}
-    function GetEventHandler(Events: TStrings): IEvents;
+    function GetEventHandler(Events: TStrings): IEvents; overload;
+    function GetEventHandler(Event: string): IEvents; overload;
 
     {Blob - may use to open existing Blobs. However, ISQLData.AsBlob is preferred}
 

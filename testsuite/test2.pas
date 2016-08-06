@@ -65,7 +65,7 @@ begin
   try
     Attachment := FirebirdAPI.OpenDatabase(Owner.GetEmployeeDatabaseName,DPB);
   except on e: Exception do
-    writeln('Create Database fails ',E.Message);
+    writeln('Open Database fails ',E.Message);
   end;
   writeln('Opening ',Owner.GetEmployeeDatabaseName);
   Attachment := FirebirdAPI.OpenDatabase(Owner.GetEmployeeDatabaseName,DPB);
