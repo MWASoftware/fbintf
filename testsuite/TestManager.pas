@@ -22,6 +22,8 @@ type
     function SQLType2Text(sqltype: short): string;
     procedure WriteArray(ar: IArray);
     procedure WriteAffectedRows(Statement: IStatement);
+    procedure WriteServiceQueryResult(QueryResult: IServiceQueryResults);
+    procedure writeLicence(Item: IServiceQueryResultItem);
   public
     constructor Create(aOwner: TTestManager);  virtual;
     function TestTitle: string; virtual; abstract;
@@ -212,6 +214,52 @@ var  InsertCount, UpdateCount, DeleteCount: integer;
 begin
   Statement.GetRowsAffected(InsertCount, UpdateCount, DeleteCount);
   writeln('InsertCount = ',InsertCount,' UpdateCount = ', UpdateCount, ' DeleteCount = ',DeleteCount);
+end;
+
+procedure TTestBase.WriteServiceQueryResult(QueryResult: IServiceQueryResults);
+var i: integer;
+begin
+  for i := 0 to QueryResult.GetCount - 1 do
+  with QueryResult[i] do
+  case getItemType of
+  isc_info_svc_version:
+    writeln('Service Manager Version = ',getAsInteger);
+  isc_info_svc_server_version:
+    writeln('Server Version = ',getAsString);
+  isc_info_svc_implementation:
+    writeln('Implementation = ',getAsString);
+  isc_info_svc_get_license:
+    writeLicence(QueryResult[i]);
+  isc_info_svc_get_license_mask:
+    writeln('Licence Mask = ',getAsInteger);
+  isc_info_svc_capabilities:
+    writeln('Capabilities = ',getAsInteger);
+  isc_info_svc_get_config:
+    WriteConfig(QueryResult[i]);
+  isc_info_svc_get_env:
+    writeln('Root Directory = ',getAsString);
+  isc_info_svc_get_env_lock:
+    writeln('Lock Directory = ',getAsString);
+  isc_info_svc_get_env_msg:
+    writeln('Message File = ',getAsString);
+  isc_info_svc_user_dbpath:
+    writeln('Security File = ',getAsString);
+  else
+    writeln('Unknown');
+  end
+end;
+
+procedure TTestBase.writeLicence(Item: IServiceQueryResultItem);
+var i: integer;
+begin
+  for i := 0 to Item.getCount - 1 do
+  with Item[i] do
+  case getItemType of
+    isc_spb_lic_id:
+      writeln('Licence ID = ',GetAsString);
+    isc_spb_lic_key:
+      writeln('Licence Key = ',GetAsString);
+  end;
 end;
 
 { TTestManager }

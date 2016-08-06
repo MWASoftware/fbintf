@@ -141,6 +141,8 @@ begin
      WriteOperationCounts('Sequential Table Scans',getOperationCounts);
    isc_info_update_count:
      WriteOperationCounts('Update Count',getOperationCounts);
+   else
+     writeln('Unknown Response');
   end;
 end;
 
