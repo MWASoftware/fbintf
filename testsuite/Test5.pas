@@ -26,7 +26,6 @@ implementation
 procedure TTest5.DoQuery(Attachment: IAttachment);
 var Transaction: ITransaction;
     Statement: IStatement;
-    InsertCount, UpdateCount, DeleteCount: integer;
     Results: IResults;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],tcRollback);
@@ -34,8 +33,7 @@ begin
   Statement.GetSQLParams[0].AsDAteTime := EncodeDate(2016,1,31);;
   Statement.GetSQLParams[1].AsInteger := 9;
   Results := Statement.Execute;
-  Statement.GetRowsAffected(InsertCount, UpdateCount, DeleteCount);
-  writeln('InsertCount = ',InsertCount,' UpdateCount = ', UpdateCount, ' DeleteCount = ',DeleteCount);
+  WriteAffectedRows(Statement);
   writeln('Last Name = ',Results[0].AsString);
 
   Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
@@ -62,8 +60,7 @@ begin
   writeln('Inserting');
   Results := Statement.Execute;
   writeln('Full Name = ',Results[0].AsString);
-  Statement.GetRowsAffected(InsertCount, UpdateCount, DeleteCount);
-  writeln('InsertCount = ',InsertCount,' UpdateCount = ', UpdateCount, ' DeleteCount = ',DeleteCount);
+  WriteAffectedRows(Statement);
 
   writeln('Employee Count = ', Attachment.OpenCursorAtStart(Transaction,
          'Select count(*) from EMPLOYEE',3)[0].AsInteger);

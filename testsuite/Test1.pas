@@ -89,9 +89,9 @@ begin
   DBInfo := Attachment.GetDBInformation(byte(isc_info_db_id));
   DBInfo[0].DecodeIDCluster(ConType,DBFileName,DBSiteName);
   writeln('Database ID = ', ConType,' FB = ', DBFileName, ' SN = ',DBSiteName);
-  DBInfo := Attachment.GetDBInformation(byte(isc_info_ods_version));
+  DBInfo := Attachment.GetDBInformation([isc_info_ods_version]);
   write('ODS major = ',DBInfo[0].getAsInteger);
-  DBInfo := Attachment.GetDBInformation(byte(isc_info_ods_minor_version));
+  DBInfo := Attachment.GetDBInformation([isc_info_ods_minor_version]);
   writeln(' minor = ', DBInfo[0].getAsInteger );
 
   {Querying Database}

@@ -101,7 +101,7 @@ type
     {Database Information}
     function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: string): IBlobMetaData;
     function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: string): IArrayMetaData;
-    function GetDBInformation(DBInfoCommand: byte): IDBInformation;
+    function GetDBInformation(Requests: array of byte): IDBInformation;
   end;
 
 implementation
@@ -523,9 +523,10 @@ begin
   Result := TFBArrayMetaData.Create(self,Transaction as TFBTransaction,tableName,columnName);
 end;
 
-function TFBAttachment.GetDBInformation(DBInfoCommand: byte): IDBInformation;
+function TFBAttachment.GetDBInformation(Requests: array of byte
+  ): IDBInformation;
 begin
-  Result := TDBInformation.Create(self,DBInfoCommand);
+  Result := TDBInformation.Create(self,Requests);
 end;
 
 end.

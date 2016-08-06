@@ -787,15 +787,15 @@ type
     procedure DecodeIDCluster(var ConnectionType: integer; var DBFileName, DBSiteName: string);
     function getAsBytes: TByteArray;
     procedure DecodeVersionString(var Version: byte; var VersionString: string);
-    procedure DecodeUserNames(var UserNames: TStrings);
+    procedure DecodeUserNames(UserNames: TStrings);
     function getOperationCounts: TDBOperationCounts;
   end;
 
   { IDBInformation }
 
   IDBInformation = interface
-    function getCount: integer;
-    function getItem(index: integer): IDBInfoItem;
+    function GetCount: integer;
+    function GetItem(index: integer): IDBInfoItem;
     function Find(ItemType: byte): IDBInfoItem;
     property Items[index: integer]: IDBInfoItem read getItem; default;
   end;
@@ -853,7 +853,7 @@ type
     {Database Information}
     function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: string): IBlobMetaData;
     function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: string): IArrayMetaData;
-    function GetDBInformation(DBInfoCommand: byte): IDBInformation;
+    function GetDBInformation(Requests: array of byte): IDBInformation;
     function HasActivity: boolean;
   end;
 

@@ -283,6 +283,7 @@ type
     FHasParamNames: boolean;
     FBOF: boolean;
     FEOF: boolean;
+    FSingleResults: boolean;
     FGenerateParamNames: boolean;
     FUniqueParamNames: boolean;
     procedure CheckTransaction(aTransaction: TFBTransaction);
@@ -939,6 +940,9 @@ end;
 
 procedure TIBXSQLVAR.CheckActive;
 begin
+  if not FParent.FStatement.FOpen and not FParent.FStatement.FSingleResults then
+    IBError(ibxeSQLClosed, [nil]);
+
   if FParent.FStatement.FEOF then
     IBError(ibxeEOF,[nil]);
 
@@ -1399,6 +1403,7 @@ begin
     end;
   end;
   FPrepared := true;
+  FSingleResults := false;
 end;
 
 function TFBStatement.InternalExecute(aTransaction: TFBTransaction): IResults;
@@ -1406,6 +1411,7 @@ begin
   Result := nil;
   FBOF := false;
   FEOF := false;
+  FSingleResults := false;
   CheckTransaction(aTransaction);
   if not FPrepared then
     InternalPrepare;
@@ -1424,6 +1430,7 @@ begin
                         FSQLParams.AsXSQLDA,
                         FSQLRecord.AsXSQLDA), True);
     Result := TIBXResults.Copy(FSQLRecord);
+    FSingleResults := true;
   end
   else
     Call(isc_dsql_execute(StatusVector,
@@ -1458,6 +1465,7 @@ begin
      isc_dsql_set_cursor_name(StatusVector, @FHandle, PChar(FCursor), 0),
      True);
  end;
+ FSingleResults := false;
  FOpen := True;
  FExecTransactionIntf := aTransaction;
  FBOF := true;

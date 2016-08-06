@@ -27,15 +27,13 @@ implementation
 procedure TTest4.DoQuery(Attachment: IAttachment);
 var Transaction: ITransaction;
     Statement: IStatement;
-    InsertCount, UpdateCount, DeleteCount: integer;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],tcRollback);
   Statement := Attachment.Prepare(Transaction,'Update Employee Set Hire_Date = ? Where EMP_NO = ?',3);
   Statement.GetSQLParams[0].AsDAteTime := EncodeDate(2016,1,31);;
   Statement.GetSQLParams[1].AsInteger := 9;
   Statement.Execute;
-  Statement.GetRowsAffected(InsertCount, UpdateCount, DeleteCount);
-  writeln('InsertCount = ',InsertCount,' UpdateCount = ', UpdateCount, ' DeleteCount = ',DeleteCount);
+  WriteAffectedRows(Statement);
 
   Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
   Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 9;
@@ -59,8 +57,7 @@ begin
     ByName('SALARY').AsFloat := 41000.89;
   end;
   Statement.Execute;
-  Statement.GetRowsAffected(InsertCount, UpdateCount, DeleteCount);
-  writeln('InsertCount = ',InsertCount,' UpdateCount = ', UpdateCount, ' DeleteCount = ',DeleteCount);
+  WriteAffectedRows(Statement);
 
   Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
   Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 150;
@@ -70,8 +67,7 @@ begin
   Statement := Attachment.Prepare(Transaction,'Delete From Employee Where EMP_NO = ?',3);
   Statement.GetSQLParams[0].AsInteger := 150;
   Statement.Execute;
-  Statement.GetRowsAffected(InsertCount, UpdateCount, DeleteCount);
-  writeln('InsertCount = ',InsertCount,' UpdateCount = ', UpdateCount, ' DeleteCount = ',DeleteCount);
+  WriteAffectedRows(Statement);
 
   writeln('Employee Count = ', Attachment.OpenCursorAtStart(Transaction,
          'Select count(*) from EMPLOYEE',3)[0].AsInteger);

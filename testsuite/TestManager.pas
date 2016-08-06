@@ -21,6 +21,7 @@ type
     procedure PrintMetaData(meta: IMetaData);
     function SQLType2Text(sqltype: short): string;
     procedure WriteArray(ar: IArray);
+    procedure WriteAffectedRows(Statement: IStatement);
   public
     constructor Create(aOwner: TTestManager);  virtual;
     function TestTitle: string; virtual; abstract;
@@ -98,6 +99,7 @@ begin
   finally
     Result.Close;
   end;
+  writeln;
 end;
 
 procedure TTestBase.PrintDPB(DPB: IDPB);
@@ -107,6 +109,7 @@ begin
   writeln('Count = ', DPB.getCount);
   for i := 0 to DPB.getCount - 1 do
     writeln(DPB.Items[i].getParamType,' = ', DPB.Items[i].AsString);
+  writeln;
 end;
 
 procedure TTestBase.PrintMetaData(meta: IMetaData);
@@ -202,6 +205,13 @@ begin
     end;
   end;
   writeln;
+end;
+
+procedure TTestBase.WriteAffectedRows(Statement: IStatement);
+var  InsertCount, UpdateCount, DeleteCount: integer;
+begin
+  Statement.GetRowsAffected(InsertCount, UpdateCount, DeleteCount);
+  writeln('InsertCount = ',InsertCount,' UpdateCount = ', UpdateCount, ' DeleteCount = ',DeleteCount);
 end;
 
 { TTestManager }

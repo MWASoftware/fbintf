@@ -34,7 +34,7 @@ type
     procedure DecodeIDCluster(var ConnectionType: integer; var DBFileName, DBSiteName: string);
     function getAsBytes: TByteArray;
     procedure DecodeVersionString(var Version: byte; var VersionString: string);
-    procedure DecodeUserNames(var UserNames: TStrings);
+    procedure DecodeUserNames(UserNames: TStrings);
     function getOperationCounts: TDBOperationCounts;
  end;
 
@@ -58,8 +58,8 @@ type
 
   public
     {IDBInformation}
-    function getCount: integer;
-    function getItem(index: integer): IDBInfoItem;
+    function GetCount: integer;
+    function GetItem(index: integer): IDBInfoItem;
     function Find(ItemType: byte): IDBInfoItem;
     property Items[index: integer]: IDBInfoItem read getItem; default;
   end;
@@ -173,16 +173,21 @@ begin
 
 end;
 
-procedure TIDBInfoItem.DecodeUserNames(var UserNames: TStrings);
+procedure TIDBInfoItem.DecodeUserNames(UserNames: TStrings);
 var P: PChar;
     s: string;
 begin
-  P := FBufPtr;
-  while (P < FBufPtr + FItemLength) and (P^ = Char(isc_info_user_names)) do
+  if FItemType = isc_info_user_names then
   begin
-    s := GetString(P);
-    UserNames.Add(s);
-  end;
+    P := FBufPtr;
+    while (P < FBufPtr + FItemLength) and (P^ = Char(isc_info_user_names)) do
+    begin
+      s := GetString(P);
+      UserNames.Add(s);
+    end;
+  end
+  else
+    IBError(ibxeInfoBufferTypeError,[integer(FItemType)]);
 end;
 
 function TIDBInfoItem.getOperationCounts: TDBOperationCounts;
@@ -190,17 +195,24 @@ var tableCounts: integer;
     P: PChar;
     i: integer;
 begin
-  tableCounts := FItemLength div 6;
-  SetLength(Result,TableCounts);
-  P := FBufPtr;
-  for i := 0 to TableCounts -1 do
-  with Firebird25ClientAPI do
+  if FItemType in [isc_info_backout_count, isc_info_delete_count,
+                              isc_info_expunge_count,isc_info_insert_count, isc_info_purge_count,
+                              isc_info_read_idx_count, isc_info_read_seq_count, isc_info_update_count] then
   begin
-    Result[i].TableID := isc_portable_integer(P,2);
-    Inc(P,2);
-    Result[i].Count := isc_portable_integer(P,4);
-    Inc(P,4);
-  end;
+    tableCounts := FItemLength div 6;
+    SetLength(Result,TableCounts);
+    P := FBufPtr;
+    for i := 0 to TableCounts -1 do
+    with Firebird25ClientAPI do
+    begin
+      Result[i].TableID := isc_portable_integer(P,2);
+      Inc(P,2);
+      Result[i].Count := isc_portable_integer(P,4);
+      Inc(P,4);
+    end;
+  end
+  else
+    IBError(ibxeInfoBufferTypeError,[integer(FItemType)]);
 end;
 
 { TDBInformation }
@@ -245,25 +257,35 @@ end;
 
 constructor TDBInformation.Create(aAttachment: TFBAttachment;
   info_requests: array of byte; aSize: integer);
-var ReqBuffer: string;
+var ReqBuffer: PByte;
     i: integer;
 begin
-  inherited Create;
-  FBufSize := aSize;
-  GetMem(FBuffer,FBufSize);
-  if FBuffer = nil then
-    OutOfMemoryError;
-  if aAttachment.Handle = nil then
-    IBError(ibxeInvalidStatementHandle,[nil]);
-  FillChar(FBuffer^,FBufSize,255);
-  SetLength(ReqBuffer,Length(info_requests));
-  for i := 0 to Length(info_requests) - 1 do
-    ReqBuffer[i] := char(info_requests[i]);
-  with Firebird25ClientAPI do
-    if isc_database_info(StatusVector, @(aAttachment.Handle), Length(ReqBuffer), PChar(ReqBuffer),
-                           FBufSize, FBuffer) > 0 then
-      IBDataBaseError;
-  ParseBuffer;
+  if Length(info_requests) = 1 then
+    Create(aAttachment,info_requests[0],aSize)
+  else
+  begin
+    inherited Create;
+    GetMem(ReqBuffer,Length(info_requests));
+    try
+      FBufSize := aSize;
+      GetMem(FBuffer,FBufSize);
+      if FBuffer = nil then
+        OutOfMemoryError;
+      if aAttachment.Handle = nil then
+        IBError(ibxeInvalidStatementHandle,[nil]);
+      FillChar(FBuffer^,FBufSize,255);
+      for i := 0 to Length(info_requests) - 1 do
+        ReqBuffer[i] := info_requests[i];
+      with Firebird25ClientAPI do
+        if isc_database_info(StatusVector, @(aAttachment.Handle), Length(info_requests), PChar(ReqBuffer),
+                               FBufSize, FBuffer) > 0 then
+          IBDataBaseError;
+
+    finally
+      FreeMem(ReqBuffer);
+    end;
+    ParseBuffer;
+  end;
 end;
 
 constructor TDBInformation.Create(aStatement: TFBStatement; info_request: byte;
