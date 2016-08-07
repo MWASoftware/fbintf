@@ -25,6 +25,12 @@ type
     procedure WriteServiceQueryResult(QueryResult: IServiceQueryResults);
     procedure writeLicence(Item: IServiceQueryResultItem);
     procedure WriteConfig(config: IServiceQueryResultItem);
+    procedure WriteUsers(users: IServiceQueryResultItem);
+    procedure WriteDBAttachments(att: IServiceQueryResultItem);
+    procedure WriteLimboTransactions(limbo: IServiceQueryResultItem);
+    procedure WriteDBInfo(DBInfo: IDBInformation);
+    procedure WriteBytes(Bytes: TByteArray);
+    procedure WriteOperationCounts(Category: string; ops: TDBOperationCounts);
   public
     constructor Create(aOwner: TTestManager);  virtual;
     function TestTitle: string; virtual; abstract;
@@ -245,8 +251,22 @@ begin
     writeln('Message File = ',getAsString);
   isc_info_svc_user_dbpath:
     writeln('Security File = ',getAsString);
+  isc_info_svc_get_licensed_users:
+    writeln('Max Licenced Users = ',getAsInteger);
+  isc_info_svc_get_users:
+    WriteUsers(QueryResult[i]);
+  isc_info_svc_svr_db_info:
+    WriteDBAttachments(QueryResult[i]);
+  isc_info_svc_line:
+    writeln('Line = ',getAsString);
+  isc_info_svc_to_eof:
+     writeln('Lines = ',getAsString);
+  isc_info_svc_running:
+    writeln('Is Running = ',getAsInteger);
+  isc_info_svc_limbo_trans:
+    WriteLimboTransactions(QueryResult[i]);
   else
-    writeln('Unknown');
+    writeln('Unknown Service Response Item', getItemType);
   end
 end;
 
@@ -264,8 +284,207 @@ begin
 end;
 
 procedure TTestBase.WriteConfig(config: IServiceQueryResultItem);
+var i: integer;
 begin
+  writeln('Firebird Configuration File');
+  for i := 0 to config.getCount - 1 do
+    writeln('Key = ',config.getItemType,', Value = ',config.getAsInteger);
+  writeln;
+end;
 
+procedure TTestBase.WriteUsers(users: IServiceQueryResultItem);
+var i: integer;
+begin
+  writeln('Sec. Database User');
+  for i := 0 to users.getCount - 1 do
+  with users[i] do
+  case getItemType of
+    isc_spb_sec_username:
+      writeln('User Name = ',getAsString);
+    isc_spb_sec_firstname:
+      writeln('First Name = ',getAsString);
+    isc_spb_sec_middlename:
+      writeln('Middle Name = ',getAsString);
+    isc_spb_sec_lastname:
+      writeln('Last Name = ',getAsString);
+    isc_spb_sec_userid:
+      writeln('User ID = ',getAsInteger);
+    isc_spb_sec_groupid:
+      writeln('Group ID = ',getAsInteger);
+    else
+      writeln('Unknown user info ', getItemType);
+  end;
+  writeln;
+end;
+
+procedure TTestBase.WriteDBAttachments(att: IServiceQueryResultItem);
+var i: integer;
+begin
+  writeln('DB Attachments');
+  for i := 0 to att.getCount - 1 do
+  with att[i] do
+  case getItemType of
+  isc_spb_num_att:
+    writeln('No. of Attachments = ',getAsInteger);
+  isc_spb_num_db:
+    writeln('Databases In Use = ',getAsInteger);
+  isc_spb_dbname:
+    writeln('DB Name = ',getAsString);
+  end;
+end;
+
+procedure TTestBase.WriteLimboTransactions(limbo: IServiceQueryResultItem);
+var i: integer;
+begin
+  writeln('Limbo Transactions');
+  for i := 0 to limbo.getCount - 1 do
+  with limbo[i] do
+  case getItemType of
+  isc_spb_single_tra_id:
+    writeln('Single DB Transaction = ',getAsInteger);
+  isc_spb_multi_tra_id:
+    writeln('Multi DB Transaction = ',getAsInteger);
+  isc_spb_tra_host_site:
+    writeln('Host Name = ',getAsString);
+  isc_spb_tra_advise:
+    writeln('Resolution Advisory = ',getAsInteger);
+  isc_spb_tra_remote_site:
+    writeln('Server Name = ',getAsString);
+  isc_spb_tra_db_path:
+    writeln('DB Primary File Name = ',getAsString);
+  isc_spb_tra_state:
+    begin
+      write('State = ');
+      case getAsInteger of
+        isc_spb_tra_state_limbo:
+          writeln('limbo');
+        isc_spb_tra_state_commit:
+          writeln('commit');
+        isc_spb_tra_state_rollback:
+          writeln('rollback');
+        isc_spb_tra_state_unknown:
+          writeln('Unknown');
+      end;
+    end;
+  end;
+end;
+
+procedure TTestBase.WriteDBInfo(DBInfo: IDBInformation);
+var i, j: integer;
+    bytes: TByteArray;
+    ConType: integer;
+    DBFileName: string;
+    DBSiteName: string;
+    Version: byte;
+    VersionString: string;
+    Users: TStrings;
+begin
+  for i := 0 to DBInfo.GetCount - 1 do
+  with DBInfo[i] do
+  case getItemType of
+  isc_info_allocation:
+    writeln('Pages =',getAsInteger);
+  isc_info_base_level:
+    begin
+      bytes := getAsBytes;
+      write('Base Level = ');
+      WriteBytes(Bytes);
+    end;
+   isc_info_db_id:
+     begin
+       DecodeIDCluster(ConType,DBFileName,DBSiteName);
+       writeln('Database ID = ', ConType,' FB = ', DBFileName, ' SN = ',DBSiteName);
+     end;
+   isc_info_implementation:
+     begin
+       bytes := getAsBytes;
+       write('Implementation = ');
+       WriteBytes(Bytes);
+     end;
+   isc_info_no_reserve:
+     writeln('Reserved = ',getAsInteger);
+   isc_info_ods_minor_version:
+     writeln('ODS minor = ',getAsInteger);
+   isc_info_ods_version:
+     writeln('ODS major = ',getAsInteger);
+   isc_info_page_size:
+     writeln('Page Size = ',getAsInteger);
+   isc_info_version:
+     begin
+       DecodeVersionString(Version,VersionString);
+       writeln('Version = ',Version,': ',VersionString);
+     end;
+   isc_info_current_memory:
+     writeln('Server Memory = ',getAsInteger);
+   isc_info_forced_writes:
+     writeln('Forced Writes  = ',getAsInteger);
+   isc_info_max_memory:
+     writeln('Max Memory  = ',getAsInteger);
+   isc_info_num_buffers:
+     writeln('Num Buffers  = ',getAsInteger);
+   isc_info_sweep_interval:
+     writeln('Sweep Interval  = ',getAsInteger);
+   isc_info_user_names:
+     begin
+       Users := TStringList.Create;
+       try
+        DecodeUserNames(Users);
+        write('Logged in Users: ');
+        for j := 0 to Users.Count - 1 do
+          write(Users[j],',');
+       finally
+         Users.Free;
+       end;
+       writeln;
+     end;
+   isc_info_fetches:
+     writeln('Fetches  = ',getAsInteger);
+   isc_info_marks:
+     writeln('Writes  = ',getAsInteger);
+   isc_info_reads:
+     writeln('Reads  = ',getAsInteger);
+   isc_info_writes:
+     writeln('Page Writes  = ',getAsInteger);
+   isc_info_backout_count:
+     WriteOperationCounts('Record Version Removals',getOperationCounts);
+   isc_info_delete_count:
+     WriteOperationCounts('Deletes',getOperationCounts);
+   isc_info_expunge_count:
+     WriteOperationCounts('Expunge Count',getOperationCounts);
+   isc_info_insert_count:
+     WriteOperationCounts('Insert Count',getOperationCounts);
+   isc_info_purge_count:
+     WriteOperationCounts('Purge Count Countites',getOperationCounts);
+   isc_info_read_idx_count:
+     WriteOperationCounts('Indexed Reads Count',getOperationCounts);
+   isc_info_read_seq_count:
+     WriteOperationCounts('Sequential Table Scans',getOperationCounts);
+   isc_info_update_count:
+     WriteOperationCounts('Update Count',getOperationCounts);
+   else
+     writeln('Unknown Response');
+  end;
+end;
+
+procedure TTestBase.WriteBytes(Bytes: TByteArray);
+var i: integer;
+begin
+  for i := 0 to length(Bytes) - 1 do
+    write(Bytes[i],',');
+  writeln;
+end;
+
+procedure TTestBase.WriteOperationCounts(Category: string;
+  ops: TDBOperationCounts);
+var i: integer;
+begin
+  writeln(Category,' Operation Counts');
+  for i := 0 to Length(ops) - 1 do
+  begin
+    writeln('Table ID = ',ops[i].TableID);
+    writeln('Count = ',ops[i].Count);
+  end;
+  writeln;
 end;
 
 { TTestManager }

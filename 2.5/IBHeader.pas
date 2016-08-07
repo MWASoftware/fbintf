@@ -1743,40 +1743,6 @@ const
 
 
 (***********************************)
-(** Service parameter block stuff **)
-(***********************************)
-
-  isc_spb_user_name              =          1;
-  isc_spb_sys_user_name          =          2;
-  isc_spb_sys_user_name_enc      =          3;
-  isc_spb_password               =          4;
-  isc_spb_password_enc           =          5;
-  isc_spb_command_line           =          6;
-  isc_spb_dbname                 =          7;
-  isc_spb_verbose                =          8;
-  isc_spb_options                =          9;
-  isc_spb_connect_timeout        =          10;
-  isc_spb_dummy_packet_interval  =          11;
-  isc_spb_sql_role_name          =          12;
-  isc_spb_last_spb_constant      =          isc_spb_sql_role_name;
-
-  isc_spb_version1                                = 1;
-  isc_spb_current_version                         = 2;
-  isc_spb_version		                  = isc_spb_current_version;
-  isc_spb_user_name_mapped_to_server              = isc_dpb_user_name;
-  isc_spb_sys_user_name_mapped_to_server          = isc_dpb_sys_user_name;
-  isc_spb_sys_user_name_enc_mapped_to_server      = isc_dpb_sys_user_name_enc;
-  isc_spb_password_mapped_to_server               = isc_dpb_password;
-  isc_spb_password_enc_mapped_to_server           = isc_dpb_password_enc;
-  isc_spb_command_line_mapped_to_server           = 105;
-  isc_spb_dbname_mapped_to_server                 = 106;
-  isc_spb_verbose_mapped_to_server                = 107;
-  isc_spb_options_mapped_to_server                = 108;
-  isc_spb_connect_timeout_mapped_to_server        = isc_dpb_connect_timeout;
-  isc_spb_dummy_packet_interval_mapped_to_server  = isc_dpb_dummy_packet_interval;
-  isc_spb_sql_role_name_mapped_to_server          = isc_dpb_sql_role_name;
-
-(***********************************)
 (** Information call declarations **)
 (***********************************)
 
