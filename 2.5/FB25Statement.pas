@@ -293,6 +293,7 @@ type
     function InternalOpenCursor(aTransaction: TFBTransaction): IResultSet;
     procedure FreeHandle;
     procedure PreprocessSQL;
+    procedure InternalClose(Force: boolean);
   public
     constructor Create(Attachment: TFBAttachment; Transaction: ITransaction;
       sql: string; SQLDialect: integer);
@@ -301,7 +302,7 @@ type
     destructor Destroy; override;
     procedure Close;
     function FetchNext: boolean;
-    procedure TransactionEnding(aTransaction: TFBTransaction);
+    procedure TransactionEnding(aTransaction: TFBTransaction; Force: boolean);
     property SQLDialect: integer read FSQLDialect;
     property Attachment: TFBAttachment read FAttachment;
     property Transaction: TFBTransaction read FTransaction;
@@ -1652,6 +1653,29 @@ begin
   end;
 end;
 
+procedure TFBStatement.InternalClose(Force: boolean);
+var
+  isc_res: ISC_STATUS;
+begin
+  try
+    if (FHandle <> nil) and (SQLType = SQLSelect) and FOpen then
+    with Firebird25ClientAPI do
+    begin
+      isc_res := Call(
+                   isc_dsql_free_statement(StatusVector, @FHandle, DSQL_close),
+                   False);
+      if not Force and (StatusVector^ = 1) and (isc_res > 0) and
+        not getStatus.CheckStatusVector(
+              [isc_bad_stmt_handle, isc_dsql_cursor_close_err]) then
+        IBDatabaseError;
+    end;
+  finally
+    FOpen := False;
+    FExecTransactionIntf := nil;
+    FSQLRecord.FTransaction := nil;
+  end;
+end;
+
 constructor TFBStatement.Create(Attachment: TFBAttachment;
   Transaction: ITransaction; sql: string; SQLDialect: integer);
 var GUID : TGUID;
@@ -1692,26 +1716,8 @@ begin
 end;
 
 procedure TFBStatement.Close;
-var
-  isc_res: ISC_STATUS;
 begin
-  try
-    if (FHandle <> nil) and (SQLType = SQLSelect) and FOpen then
-    with Firebird25ClientAPI do
-    begin
-      isc_res := Call(
-                   isc_dsql_free_statement(StatusVector, @FHandle, DSQL_close),
-                   False);
-      if (StatusVector^ = 1) and (isc_res > 0) and
-        not getStatus.CheckStatusVector(
-              [isc_bad_stmt_handle, isc_dsql_cursor_close_err]) then
-        IBDatabaseError;
-    end;
-  finally
-    FOpen := False;
-    FExecTransactionIntf := nil;
-    FSQLRecord.FTransaction := nil;
-  end;
+   InternalClose(false);
 end;
 
 function TFBStatement.FetchNext: boolean;
@@ -1752,10 +1758,11 @@ begin
   end;
 end;
 
-procedure TFBStatement.TransactionEnding(aTransaction: TFBTransaction);
+procedure TFBStatement.TransactionEnding(aTransaction: TFBTransaction;
+  Force: boolean);
 begin
   if FOpen and (FSQLRecord.FTransaction = aTransaction) then
-    Close;
+    InternalClose(Force);
 
   if FTransaction = aTransaction then
   begin

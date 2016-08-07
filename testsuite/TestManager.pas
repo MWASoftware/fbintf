@@ -24,6 +24,7 @@ type
     procedure WriteAffectedRows(Statement: IStatement);
     procedure WriteServiceQueryResult(QueryResult: IServiceQueryResults);
     procedure writeLicence(Item: IServiceQueryResultItem);
+    procedure WriteConfig(config: IServiceQueryResultItem);
   public
     constructor Create(aOwner: TTestManager);  virtual;
     function TestTitle: string; virtual; abstract;
@@ -260,6 +261,11 @@ begin
     isc_spb_lic_key:
       writeln('Licence Key = ',GetAsString);
   end;
+end;
+
+procedure TTestBase.WriteConfig(config: IServiceQueryResultItem);
+begin
+
 end;
 
 { TTestManager }

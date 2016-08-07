@@ -85,6 +85,8 @@ type
     procedure ExecImmediate(TPB: array of byte; sql: string; aSQLDialect: integer); overload;
     procedure ExecImmediate(transaction: ITransaction; sql: string); overload;
     procedure ExecImmediate(TPB: array of byte; sql: string); overload;
+    function OpenCursor(transaction: ITransaction; sql: string; aSQLDialect: integer): IResultSet; overload;
+    function OpenCursor(transaction: ITransaction; sql: string): IResultSet; overload;
     function OpenCursorAtStart(transaction: ITransaction; sql: string; aSQLDialect: integer): IResultSet; overload;
     function OpenCursorAtStart(transaction: ITransaction; sql: string): IResultSet; overload;
     function Prepare(transaction: ITransaction; sql: string; aSQLDialect: integer): IStatement; overload;
@@ -404,10 +406,10 @@ begin
   {Rollback or Cancel dependent objects}
   for i := 0 to OwnedObjects.Count - 1 do
     if (TObject(OwnedObjects[i]) is TFBTransaction) then
-          TFBTransaction(OwnedObjects[i]).DoDefaultTransactionEnd
+          TFBTransaction(OwnedObjects[i]).DoDefaultTransactionEnd(Force)
     else
     if TObject(OwnedObjects[i]) is TFBEvents then
-      TFBEvents(OwnedObjects[i]).Cancel;
+      TFBEvents(OwnedObjects[i]).EndAttachment(self,Force);
 
   {Disconnect}
   with Firebird25ClientAPI do
@@ -458,12 +460,24 @@ begin
   ExecImmediate(StartTransaction(TPB,tcCommit),sql,FSQLDialect);
 end;
 
-function TFBAttachment.OpenCursorAtStart(transaction: ITransaction;
-  sql: string; aSQLDialect: integer): IResultSet;
+function TFBAttachment.OpenCursor(transaction: ITransaction; sql: string;
+  aSQLDialect: integer): IResultSet;
 var Statement: IStatement;
 begin
   Statement := Prepare(transaction,sql,aSQLDialect);
   Result := Statement.OpenCursor;
+end;
+
+function TFBAttachment.OpenCursor(transaction: ITransaction; sql: string
+  ): IResultSet;
+begin
+  Result := OpenCursor(transaction,sql,FSQLDialect);
+end;
+
+function TFBAttachment.OpenCursorAtStart(transaction: ITransaction;
+  sql: string; aSQLDialect: integer): IResultSet;
+begin
+  Result := OpenCursor(transaction,sql,aSQLDialect);
   Result.FetchNext;
 end;
 

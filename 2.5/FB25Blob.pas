@@ -42,12 +42,14 @@ type
     FTransaction: ITransaction;
     procedure CheckReadable;
     procedure CheckWritable;
+    procedure InternalClose(Force: boolean);
+    procedure InternalCancel(Force: boolean);
   public
     constructor Create(Attachment: TFBAttachment; Transaction: ITransaction); overload;
     constructor Create(Attachment: TFBAttachment; Transaction: ITransaction;
                        BlobID: TISC_QUAD); overload;
     destructor Destroy; override;
-    procedure TransactionEnding(aTransaction: TFBTransaction);
+    procedure TransactionEnding(aTransaction: TFBTransaction; Force: boolean);
     property Handle: TISC_BLOB_HANDLE read FHandle;
     property Attachment: TFBAttachment read FAttachment;
 
@@ -61,8 +63,8 @@ type
       var BlobType: TBlobType): boolean;
     function Read(var Buffer; Count: Longint): Longint;
     function Write(const Buffer; Count: Longint): Longint;
-    procedure LoadFromFile(Filename: string);
-    procedure LoadFromStream(S: TStream);
+    function LoadFromFile(Filename: string): IBlob;
+    function LoadFromStream(S: TStream) : IBlob;
     procedure SaveToFile(Filename: string);
     procedure SaveToStream(S: TStream);
     function GetAttachment: IAttachment;
@@ -124,6 +126,24 @@ begin
     IBError(ibxeBlobCannotBeWritten, [nil]);
 end;
 
+procedure TFBBlob.InternalClose(Force: boolean);
+begin
+  if FHandle = nil then
+    Exit;
+  with Firebird25ClientAPI do
+    Call(isc_close_blob(StatusVector, @FHandle), not Force);
+  FHandle := nil;
+end;
+
+procedure TFBBlob.InternalCancel(Force: boolean);
+begin
+  if FHandle = nil then
+    Exit;
+  with Firebird25ClientAPI do
+    Call(isc_cancel_blob(StatusVector,@FHandle),not Force);
+  FHandle := nil;
+end;
+
 constructor TFBBlob.Create(Attachment: TFBAttachment; Transaction: ITransaction
   );
 var DBHandle: TISC_DB_HANDLE;
@@ -167,7 +187,8 @@ begin
   inherited Destroy;
 end;
 
-procedure TFBBlob.TransactionEnding(aTransaction: TFBTransaction);
+procedure TFBBlob.TransactionEnding(aTransaction: TFBTransaction; Force: boolean
+  );
 begin
   if aTransaction <> FTransaction then
     Exit;
@@ -179,20 +200,12 @@ end;
 
 procedure TFBBlob.Cancel;
 begin
-  if FHandle = nil then
-    Exit;
-  with Firebird25ClientAPI do
-    Call(isc_cancel_blob(StatusVector,@FHandle));
-  FHandle := nil;
+  InternalCancel(false);
 end;
 
 procedure TFBBlob.Close;
 begin
-  if FHandle = nil then
-    Exit;
-  with Firebird25ClientAPI do
-    Call(isc_close_blob(StatusVector, @FHandle), True);
-  FHandle := nil;
+  InternalClose(false);
 end;
 
 function TFBBlob.GetBlobID: TISC_QUAD;
@@ -305,13 +318,13 @@ begin
   until Count = 0;
 end;
 
-procedure TFBBlob.LoadFromFile(Filename: string);
+function TFBBlob.LoadFromFile(Filename: string): IBlob;
 var
   Stream: TStream;
 begin
   Stream := TFileStream.Create(FileName, fmOpenRead);
   try
-    LoadFromStream(Stream);
+    Result := LoadFromStream(Stream);
   finally
     Stream.Free;
   end;
@@ -319,7 +332,7 @@ end;
 
 const BufSize = 8 * 1024;
 
-procedure TFBBlob.LoadFromStream(S: TStream);
+function TFBBlob.LoadFromStream(S: TStream): IBlob;
 var Buffer: array [0..BufSize-1] of char;
     BytesRead: integer;
 begin
@@ -330,6 +343,7 @@ begin
     Write(Buffer,BytesRead);
   until BytesRead = 0;
   Close;
+  Result := self;
 end;
 
 procedure TFBBlob.SaveToFile(Filename: string);

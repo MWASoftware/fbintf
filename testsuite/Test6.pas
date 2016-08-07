@@ -43,7 +43,6 @@ procedure TTest6.UpdateDatabase(Attachment: IAttachment);
 var Transaction: ITransaction;
     Statement: IStatement;
     ResultSet: IResultSet;
-    B: IBlob;
     i: integer;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],tcCommit);
@@ -65,9 +64,7 @@ begin
   ReportResults(Statement);
 
   Statement := Attachment.Prepare(Transaction,sqlUpdate);
-  B := Statement.CreateBlob;
-  B.LoadFromFile('testtext.txt');
-  Statement.SQLParams[0].AsBlob := B;
+  Statement.SQLParams[0].AsBlob := Statement.CreateBlob.LoadFromFile('testtext.txt');
   Statement.Execute;
   Statement := Attachment.Prepare(Transaction,'Select * from TestData');
   ReportResults(Statement);

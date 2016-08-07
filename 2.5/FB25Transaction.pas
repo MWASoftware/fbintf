@@ -21,22 +21,22 @@ type
     FAttachments: array of IAttachment; {Keep reference to attachment - ensures
                                           attachment cannot be freed before transaction}
     procedure GenerateTPB(sl: array of byte; var TPB: string; var TPBLength: Short);
-    procedure CloseAll;
+    procedure CloseAll(Force: boolean);
   public
     constructor Create(Attachments: array of IAttachment; Params: array of byte; DefaultCompletion: TTransactionCompletion); overload;
     constructor Create(Attachment: TFBAttachment; Params: array of byte; DefaultCompletion: TTransactionCompletion); overload;
     destructor Destroy; override;
-    procedure DoDefaultTransactionEnd;
+    procedure DoDefaultTransactionEnd(Force: boolean);
     property Handle: TISC_TR_HANDLE read FHandle;
 
   public
     {ITransaction}
     function GetInTransaction: boolean;
     procedure PrepareForCommit;
-    procedure Commit;
+    procedure Commit(Force: boolean=false);
     procedure CommitRetaining;
-    procedure Start(DefaultCompletion: TTransactionCompletion);
-    procedure Rollback;
+    function Start(DefaultCompletion: TTransactionCompletion=tcCommit): ITransaction;
+    procedure Rollback(Force: boolean=false);
     procedure RollbackRetaining;
     function GetAttachmentCount: integer;
     function GetAttachment(index: integer): IAttachment;
@@ -69,18 +69,18 @@ begin
   end;
 end;
 
-procedure TFBTransaction.CloseAll;
+procedure TFBTransaction.CloseAll(Force: boolean);
 var i: integer;
 begin
   for i := 0 to OwnedObjects.Count - 1 do
     if TObject(OwnedObjects[i]) is TFBBlob then
-      TFBBlob(OwnedObjects[i]).TransactionEnding(self)
+      TFBBlob(OwnedObjects[i]).TransactionEnding(self,Force)
     else
     if TObject(OwnedObjects[i]) is TFBStatement then
-      TFBStatement(OwnedObjects[i]).TransactionEnding(self)
+      TFBStatement(OwnedObjects[i]).TransactionEnding(self,Force)
   else
   if TObject(OwnedObjects[i]) is TFBArray then
-    TFBArray(OwnedObjects[i]).TransactionEnding(self);
+    TFBArray(OwnedObjects[i]).TransactionEnding(self,Force);
 end;
 
 constructor TFBTransaction.Create(Attachments: array of IAttachment;
@@ -115,18 +115,18 @@ end;
 
 destructor TFBTransaction.Destroy;
 begin
-  DoDefaultTransactionEnd;
+  DoDefaultTransactionEnd(false);
   inherited Destroy;
 end;
 
-procedure TFBTransaction.DoDefaultTransactionEnd;
+procedure TFBTransaction.DoDefaultTransactionEnd(Force: boolean);
 begin
   if FHandle <> nil then
   case FDefaultCompletion of
   tcRollback:
-    Rollback;
+    Rollback(Force);
   tcCommit:
-    Commit;
+    Commit(Force);
   end;
 end;
 
@@ -141,18 +141,18 @@ begin
     IBError(ibxeNotAMultiDatabaseTransaction,[nil]);
   if FHandle = nil then
     Exit;
-  CloseAll;
+  CloseAll(false);
   with Firebird25ClientAPI do
     Call(isc_prepare_transaction(StatusVector, @FHandle));
 end;
 
-procedure TFBTransaction.Commit;
+procedure TFBTransaction.Commit(Force: boolean);
 begin
   if FHandle = nil then
     Exit;
-  CloseAll;
+  CloseAll(Force);
   with Firebird25ClientAPI do
-    Call(isc_commit_transaction(StatusVector, @FHandle));
+    Call(isc_commit_transaction(StatusVector, @FHandle),not Force);
   FHandle := nil;
 end;
 
@@ -164,11 +164,15 @@ begin
     Call(isc_commit_retaining(StatusVector, @FHandle));
 end;
 
-procedure TFBTransaction.Start(DefaultCompletion: TTransactionCompletion);
+function TFBTransaction.Start(DefaultCompletion: TTransactionCompletion
+  ): ITransaction;
 var pteb: PISC_TEB_ARRAY;
     i: integer;
     db_handle: TISC_DB_HANDLE;
 begin
+  Result := self;
+  if FHandle <> nil then
+    Exit;
   pteb := nil;
   FDefaultCompletion := DefaultCompletion;
   with Firebird25ClientAPI do
@@ -205,13 +209,13 @@ begin
   end;
 end;
 
-procedure TFBTransaction.Rollback;
+procedure TFBTransaction.Rollback(Force: boolean);
 begin
   if FHandle = nil then
     Exit;
-  CloseAll;
+  CloseAll(Force);
   with Firebird25ClientAPI do
-    Call(isc_rollback_transaction(StatusVector, @FHandle));
+    Call(isc_rollback_transaction(StatusVector, @FHandle),not Force);
   FHandle := nil;
 end;
 

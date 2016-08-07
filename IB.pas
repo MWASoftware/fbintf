@@ -539,8 +539,8 @@ type
                       TotalSize: Int64; var BlobType: TBlobType) :boolean;
     function Read(var Buffer; Count: Longint): Longint;
     function Write(const Buffer; Count: Longint): Longint;
-    procedure LoadFromFile(Filename: string);
-    procedure LoadFromStream(S: TStream);
+    function LoadFromFile(Filename: string): IBlob;
+    function LoadFromStream(S: TStream) : IBlob;
     procedure SaveToFile(Filename: string);
     procedure SaveToStream(S: TStream);
     function GetAttachment: IAttachment;
@@ -732,6 +732,7 @@ type
     function CreateArray(columnName: string): IArray;  overload;
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
+    property MetaData: IMetaData read GetMetaData;
     property SQLParams: ISQLParams read GetSQLParams;
     property SQLType: TIBSQLTypes read GetSQLType;
   end;
@@ -739,13 +740,13 @@ type
   TTransactionCompletion = (tcCommit,tcRollback);
 
   ITransaction = interface
-    procedure Start(DefaultCompletion: TTransactionCompletion);
+    function Start(DefaultCompletion: TTransactionCompletion=tcCommit): ITransaction;
     function GetInTransaction: boolean;
-    procedure PrepareForCommit;
-    procedure Commit;
+    procedure PrepareForCommit; {Two phase commit - stage 1}
+    procedure Commit(Force: boolean=false);
     procedure CommitRetaining;
     function HasActivity: boolean;
-    procedure Rollback;
+    procedure Rollback(Force: boolean=false);
     procedure RollbackRetaining;
     function GetAttachmentCount: integer;
     function GetAttachment(index: integer): IAttachment;
@@ -835,6 +836,8 @@ type
     procedure ExecImmediate(TPB: array of byte; sql: string; SQLDialect: integer); overload;
     procedure ExecImmediate(transaction: ITransaction; sql: string); overload;
     procedure ExecImmediate(TPB: array of byte; sql: string); overload;
+    function OpenCursor(transaction: ITransaction; sql: string; aSQLDialect: integer): IResultSet; overload;
+    function OpenCursor(transaction: ITransaction; sql: string): IResultSet; overload;
     function OpenCursorAtStart(transaction: ITransaction; sql: string; aSQLDialect: integer): IResultSet; overload;
     function OpenCursorAtStart(transaction: ITransaction; sql: string): IResultSet; overload;
     function Prepare(transaction: ITransaction; sql: string; aSQLDialect: integer): IStatement; overload;

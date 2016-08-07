@@ -100,7 +100,7 @@ type
     FElementSize: integer;
     procedure AllocateBuffer;
     procedure GetArraySlice;
-    procedure PutArraySlice;
+    procedure PutArraySlice(Force: boolean=false);
     function GetOffset(index: array of integer): PChar;
     function GetDataLength: short;
   public
@@ -109,7 +109,7 @@ type
     destructor Destroy; override;
     function GetArrayID: TISC_QUAD;
     function GetSQLDialect: integer;
-    procedure TransactionEnding(aTransaction: TFBTransaction);
+    procedure TransactionEnding(aTransaction: TFBTransaction; Force: boolean);
 
    public
     {IArray}
@@ -389,13 +389,13 @@ begin
   FLoaded := true;
 end;
 
-procedure TFBArray.PutArraySlice;
+procedure TFBArray.PutArraySlice(Force: boolean);
 begin
   if not FModified then Exit;
 
   with Firebird25ClientAPI do
-    if isc_array_put_slice(StatusVector, @(FAttachment.Handle),@(FTransaction.Handle),
-                               @FArrayID, @FArrayDesc,Pointer(FBuffer),@FBufSize) > 0 then
+    if (isc_array_put_slice(StatusVector, @(FAttachment.Handle),@(FTransaction.Handle),
+                               @FArrayID, @FArrayDesc,Pointer(FBuffer),@FBufSize) > 0) and not Force then
       IBDatabaseError;
 
   FIsNew := false;
@@ -476,10 +476,10 @@ begin
   Result := FSQLDialect;
 end;
 
-procedure TFBArray.TransactionEnding(aTransaction: TFBTransaction);
+procedure TFBArray.TransactionEnding(aTransaction: TFBTransaction; Force: boolean);
 begin
   if (aTransaction = FTransaction) and FModified and not FIsNew then
-    PutArraySlice;
+    PutArraySlice(Force);
 end;
 
 function TFBArray.GetAsInteger(index: array of integer): integer;

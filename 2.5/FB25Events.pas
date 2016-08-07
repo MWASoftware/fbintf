@@ -23,12 +23,13 @@ type
     FCriticalSection: TCriticalSection;
     FEventHandlerThread: TObject;
     FEventHandler: TEventHandler;
-    procedure CancelEvents;
+    procedure CancelEvents(Force: boolean = false);
     procedure EventSignaled;
     procedure CreateEventBlock;
   public
     constructor Create(DBAttachment: TFBAttachment; Events: TStrings);
     destructor Destroy; override;
+    procedure EndAttachment(Sender: TFBAttachment; Force: boolean);
 
     {IEvents}
     procedure GetEvents(EventNames: TStrings);
@@ -188,12 +189,12 @@ begin
   end;
 end;
 
-procedure TFBEvents.CancelEvents;
+procedure TFBEvents.CancelEvents(Force: boolean);
 begin
   FCriticalSection.Enter;
   try
     with Firebird25ClientAPI do
-      if isc_Cancel_events( StatusVector, @FDBHandle, @FEventID) > 0 then
+      if (isc_Cancel_events( StatusVector, @FDBHandle, @FEventID) > 0) and not Force then
         IBDatabaseError;
 
     FEventHandler := nil;
@@ -276,6 +277,13 @@ begin
       isc_free( FResultBuffer);
   end;
   inherited Destroy;
+end;
+
+procedure TFBEvents.EndAttachment(Sender: TFBAttachment; Force: boolean);
+begin
+  if Sender <> FAttachment then Exit;
+
+  CancelEvents(Force);
 end;
 
 procedure TFBEvents.GetEvents(EventNames: TStrings);
