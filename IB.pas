@@ -900,25 +900,6 @@ type
 
   TProtocol = (TCP, SPX, NamedPipe, Local);
 
-  IServiceRequestItem = interface
-    function getItemType: byte;
-    function getAsString: string;
-    function getAsInteger: integer;
-    procedure setAsString(aValue: string);
-    procedure setAsInteger(aValue: integer);
-    property AsString: string read getAsString write setAsString;
-    property AsInteger: integer read getAsInteger write setAsInteger;
-  end;
-
-  IServiceRequest = interface
-    function getAction: byte;
-    function Add(ItemType: byte): IServiceRequestItem;
-    function getCount: integer;
-    function getItem(index: integer): IServiceRequestItem;
-    function find(ItemType: byte): IServiceRequestItem;
-    property Items[index: integer]: IServiceRequestItem read getItem; default;
-  end;
-
   IServiceQueryResultSubItem = interface
     function getItemType: byte;
     function getDataSize: integer;
@@ -940,6 +921,25 @@ type
     function getItem(index: integer): IServiceQueryResultItem;
     function find(ItemType: byte): IServiceQueryResultItem;
     property Items[index: integer]: IServiceQueryResultItem read getItem; default;
+  end;
+
+  ISRBItem = interface
+    function getParamType: byte;
+    function getAsString: string;
+    function getAsInteger: integer;
+    procedure setAsString(aValue: string);
+    procedure SetAsInteger(aValue: integer);
+    property AsString: string read getAsString write setAsString;
+    property AsInteger: integer read getAsInteger write SetAsInteger;
+  end;
+
+  ISRB = interface
+    function getCount: integer;
+    function Add(ParamType: byte): ISRBItem;
+    function getItems(index: integer): ISRBItem;
+    function Find(ParamType: byte): ISRBItem;
+    procedure Remove(ParamType: byte);
+    property Items[index: integer]: ISRBItem read getItems; default;
   end;
 
   ISPBItem = interface
@@ -968,11 +968,9 @@ type
     procedure Attach;
     procedure Detach(Force: boolean=false);
     function IsAttached: boolean;
-    function AllocateRequestBuffer(action: byte): IServiceRequest;
-    procedure Start(Request: IServiceRequest);
-    procedure StartMultiple(Requests: array of IServiceRequest);
-    function Query(Request: IServiceRequest) :IServiceQueryResults;
-    function QueryMultiple(Requests: array of IServiceRequest) :IServiceQueryResults;
+    function AllocateRequestBuffer: ISRB;
+    procedure Start(Request: ISRB);
+    function Query(Request: ISRB) :IServiceQueryResults;
   end;
 
   IFirebirdAPI = interface
