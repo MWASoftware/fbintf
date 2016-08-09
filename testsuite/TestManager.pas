@@ -22,7 +22,7 @@ type
     function SQLType2Text(sqltype: short): string;
     procedure WriteArray(ar: IArray);
     procedure WriteAffectedRows(Statement: IStatement);
-    procedure WriteServiceQueryResult(QueryResult: IServiceQueryResults);
+    function WriteServiceQueryResult(QueryResult: IServiceQueryResults): boolean;
     procedure writeLicence(Item: IServiceQueryResultItem);
     procedure WriteConfig(config: IServiceQueryResultItem);
     procedure WriteUsers(users: IServiceQueryResultItem);
@@ -223,9 +223,11 @@ begin
   writeln('InsertCount = ',InsertCount,' UpdateCount = ', UpdateCount, ' DeleteCount = ',DeleteCount);
 end;
 
-procedure TTestBase.WriteServiceQueryResult(QueryResult: IServiceQueryResults);
+function TTestBase.WriteServiceQueryResult(QueryResult: IServiceQueryResults): boolean;
 var i: integer;
+    line: string;
 begin
+  Result := true;
   for i := 0 to QueryResult.GetCount - 1 do
   with QueryResult[i] do
   case getItemType of
@@ -257,17 +259,21 @@ begin
     WriteUsers(QueryResult[i]);
   isc_info_svc_svr_db_info:
     WriteDBAttachments(QueryResult[i]);
-  isc_info_svc_line:
-    writeln('Line = ',getAsString);
+  isc_info_svc_line,
   isc_info_svc_to_eof:
-     writeln('Lines = ',getAsString);
+    begin
+      line := getAsString;
+      writeln(line);
+      Result := line <> '';
+    end;
   isc_info_svc_running:
     writeln('Is Running = ',getAsInteger);
   isc_info_svc_limbo_trans:
     WriteLimboTransactions(QueryResult[i]);
   else
     writeln('Unknown Service Response Item', getItemType);
-  end
+  end;
+  writeln;
 end;
 
 procedure TTestBase.writeLicence(Item: IServiceQueryResultItem);

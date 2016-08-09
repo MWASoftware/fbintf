@@ -43,7 +43,7 @@ unit FB25Statement;
 interface
 
 uses
-  Classes, SysUtils, IB, FBLibrary, FB25ClientAPI, FB25Transaction, FB25Attachment,
+  Classes, SysUtils, IB, FBTypes, FBLibrary, FB25ClientAPI, FB25Transaction, FB25Attachment,
   IBHeader, IBExternals, FB25APIObject, FB25SQLData;
 
 type
@@ -345,17 +345,17 @@ type
      mBuffer: PChar;
      mSize: short;
      FStatement: TFBStatement;
-     function FindToken(token: char): PChar; overload;
-     function FindToken(token: char; subtoken: char): PChar; overload;
+     function FindToken(token: byte): PChar; overload;
+     function FindToken(token: byte; subtoken: byte): PChar; overload;
    public
      constructor Create(aStatement: TFBStatement; aSize: integer = 1024);
      destructor Destroy; override;
      function Size: short;
      procedure Reset;
-     procedure Exec(info_request: char);
-     function GetValue(token: char): integer; overload;
-     function GetValue(token: char; subtoken: char): integer; overload;
-     function GetString(token: char; var data: string): integer;
+     procedure Exec(info_request: byte);
+     function GetValue(token: byte): integer; overload;
+     function GetValue(token: byte; subtoken: byte): integer; overload;
+     function GetString(token: byte; var data: string): integer;
      function buffer: PChar;
    end;
 
@@ -1922,7 +1922,7 @@ begin
   Result := mBuffer;
 end;
 
-function TSQLInfoResultsBuffer.FindToken(token: char): PChar;
+function TSQLInfoResultsBuffer.FindToken(token: byte): PChar;
 var p: PChar;
     len: integer;
 begin
@@ -1931,7 +1931,7 @@ begin
 
   while p^ <> char(isc_info_end) do
   begin
-    if p^ = token then
+    if p^ = char(token) then
     begin
       Result := p;
       Exit;
@@ -1942,7 +1942,7 @@ begin
   end;
 end;
 
-function TSQLInfoResultsBuffer.FindToken(token: char; subtoken: char): PChar;
+function TSQLInfoResultsBuffer.FindToken(token: byte; subtoken: byte): PChar;
 var p: PChar;
     len, inlen: integer;
 begin
@@ -1952,14 +1952,14 @@ begin
   while p^ <> char(isc_info_end) do
   with Firebird25ClientAPI do
   begin
-    if p^ = token then
+    if p^ = char(token) then
     begin
       {Found token, now find subtoken}
       inlen := isc_portable_integer(p+1, 2);
       Inc(p,3);
       while inlen > 0 do
       begin
-	if p^ = subtoken then
+	if p^ = char(subtoken) then
         begin
           Result := p;
           Exit;
@@ -1975,7 +1975,8 @@ begin
   end;
 end;
 
-function TSQLInfoResultsBuffer.GetString(token: char; var data: string): integer;
+function TSQLInfoResultsBuffer.GetString(token: byte; var data: string
+  ): integer;
 var p: PChar;
 begin
   Result := 0;
@@ -1989,7 +1990,7 @@ begin
   SetString(data,p+3,Result);
 end;
 
-function TSQLInfoResultsBuffer.GetValue(token: char): integer;
+function TSQLInfoResultsBuffer.GetValue(token: byte): integer;
 var len: integer;
     p: PChar;
 begin
@@ -2007,7 +2008,7 @@ begin
   end;
 end;
 
-function TSQLInfoResultsBuffer.GetValue(token: char; subtoken: char): integer;
+function TSQLInfoResultsBuffer.GetValue(token: byte; subtoken: byte): integer;
 var len: integer;
     p: PChar;
 begin
@@ -2037,7 +2038,7 @@ begin
   FillChar(mBuffer^,mSize,255);
 end;
 
-procedure TSQLInfoResultsBuffer.Exec(info_request: char);
+procedure TSQLInfoResultsBuffer.Exec(info_request: byte);
 begin
   with Firebird25ClientAPI do
   if isc_dsql_sql_info(StatusVector, @(FStatement.Handle), 1, @info_request,

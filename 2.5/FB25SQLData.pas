@@ -5,7 +5,7 @@ unit FB25SQLData;
 interface
 
 uses
-  Classes, SysUtils, IBExternals, IBHeader, IB, FB25Attachment, FB25Transaction;
+  Classes, SysUtils, IBExternals, IBHeader, IB, FBTypes, FB25Attachment, FB25Transaction;
 
 type
 

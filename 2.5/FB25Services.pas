@@ -44,7 +44,7 @@ type
     procedure ParseBuffer;
     procedure ParseConfigItems;
   public
-    constructor CreateAsList(BufPtr: PChar);
+    constructor CreateAsList(BufPtr: PChar; aSize: integer);
     constructor CreateAsConfigItems(BufPtr: PChar);
 
   public
@@ -109,23 +109,38 @@ type
      FBufPtr: PChar;
      FBuflength: integer;
      FDataType: (dtString, dtString2, dtByte,dtInteger,dtnone);
-     FLongStrings: boolean;
      procedure MoveBy(delta: integer);
    public
-     constructor Create(AOwner: TParamBlock; Param: byte; BufPtr: PChar; LongStrings: boolean);
-
+     constructor Create(AOwner: TParamBlock; Param: byte; BufPtr: PChar);
+     constructor Copy(source: TParamBlockItem);
    public
      function getAsInteger: integer;
      function getParamType: byte;
      function getAsString: string;
      function getAsByte: byte;
-     procedure setAsString(aValue: string);
      procedure setAsByte(aValue: byte);
      procedure SetAsInteger(aValue: integer);
   end;
 
-  TSPBItem = class(TParamBlockItem,ISPBItem);
-  TSRBItem = class(TParamBlockItem,ISRBItem);
+  { TSPBItem }
+
+  TSPBItem = class(TParamBlockItem,ISPBItem)
+  private
+    FSPB: ISPB;
+  public
+    constructor Copy(source: TSPBItem);
+    procedure setAsString(aValue: string);
+  end;
+
+  { TSRBItem }
+
+  TSRBItem = class(TParamBlockItem,ISRBItem)
+  private
+    FSRB: ISRB;
+  public
+    constructor Copy(source: TSRBItem);
+    procedure setAsString(aValue: string);
+  end;
 
   { TSPB }
 
@@ -183,6 +198,43 @@ implementation
 
 uses FBErrorMessages;
 
+{ TSRBItem }
+
+constructor TSRBItem.Copy(source: TSRBItem);
+begin
+  inherited Copy(Source);
+  FSRB := source.FOwner as TSRB;
+end;
+
+procedure TSRBItem.setAsString(aValue: string);
+var len: integer;
+begin
+  len := Length(aValue);
+  FOwner.UpdateRequestItemSize(self,len + 3);
+  with Firebird25ClientAPI do
+    EncodeLsbf(len,2,FBufPtr+1);
+  Move(aValue[1],(FBufPtr+3)^,len);
+  FDataType := dtString2;
+end;
+
+{ TSPBItem }
+
+constructor TSPBItem.Copy(source: TSPBItem);
+begin
+  inherited Copy(source);
+  FSPB := source.FOwner as TSPB;
+end;
+
+procedure TSPBItem.setAsString(aValue: string);
+var len: integer;
+begin
+  len := Length(aValue);
+  FOwner.UpdateRequestItemSize(self,len+2);
+  (FBufPtr+1)^ := char(len);
+  Move(aValue[1],(FBufPtr+2)^,len);
+  FDataType := dtString;
+end;
+
 { TSRB }
 
 function TSRB.Add(ParamType: byte): ISRBItem;
@@ -192,12 +244,12 @@ begin
   P := FBuffer + FDataLength;
   Inc(FDataLength,1); {assume nothing}
   AdjustBuffer;
-  NewItem := TSRBItem.Create(self,ParamType,P,true);
+  NewItem := TSRBItem.Create(self,ParamType,P);
   SetLength(FItems,Length(FItems)+1);
   FItems[Length(FItems) - 1 ] := NewItem;
-  Result := NewItem;
   SetLength(FSRBItems,Length(FSRBItems)+1);
   FSRBItems[Length(FSRBItems)-1] := NewItem;
+  Result := TSRBItem.Copy(NewItem);
 end;
 
 function TSRB.Find(ParamType: byte): ISRBItem;
@@ -207,7 +259,7 @@ begin
   for i := 0 to getCount - 1 do
     if FItems[i].getParamType = ParamType then
     begin
-      Result := FSRBItems[i];
+      Result := TSRBItem.Copy(FSRBItems[i] as TSRBItem);
       Exit;
     end;
 end;
@@ -215,7 +267,7 @@ end;
 function TSRB.getItems(index: integer): ISRBItem;
 begin
   if (index >= 0 ) and (index < Length(FItems)) then
-   Result := FSRBItems[index]
+   Result := TSRBItem.Copy(FSRBItems[index] as TSRBItem)
  else
    IBError(ibxeSPBIndexError,[index]);
 end;
@@ -237,12 +289,12 @@ begin
   P := FBuffer + FDataLength;
   Inc(FDataLength,1); {assume nothing}
   AdjustBuffer;
-  NewItem := TSPBItem.Create(self,ParamType,P,false);
+  NewItem := TSPBItem.Create(self,ParamType,P);
   SetLength(FItems,Length(FItems)+1);
   FItems[Length(FItems) - 1 ] := NewItem;
   SetLength(FSPBItems,Length(FSPBItems)+1);
   FSPBItems[Length(FSPBItems)-1] := NewItem;
-  Result := NewItem;
+  Result := TSPBItem.Copy(NewItem);
 end;
 
 function TSPB.Find(ParamType: byte): ISPBItem;
@@ -252,7 +304,7 @@ begin
   for i := 0 to getCount - 1 do
     if FItems[i].getParamType = ParamType then
     begin
-      Result := FSPBItems[i];
+      Result := TSPBItem.Copy(FSPBItems[i] as TSPBItem);
       Exit;
     end;
 end;
@@ -260,7 +312,7 @@ end;
 function TSPB.getItems(index: integer): ISPBItem;
 begin
   if (index >= 0 ) and (index < Length(FItems)) then
-   Result := FSPBItems[index]
+   Result := TSPBItem.Copy((FSPBItems[index] as TSPBItem))
  else
    IBError(ibxeSPBIndexError,[index]);
 end;
@@ -287,7 +339,7 @@ begin
 end;
 
 constructor TParamBlockItem.Create(AOwner: TParamBlock; Param: byte;
-  BufPtr: PChar; LongStrings: boolean);
+  BufPtr: PChar);
 begin
   inherited Create;
   FOwner := AOwner;
@@ -295,7 +347,15 @@ begin
   FBufLength := 1;
   FBufPtr^ := char(Param);
   FDataType := dtnone; {default}
-  FLongStrings := LongStrings;
+end;
+
+constructor TParamBlockItem.Copy(source: TParamBlockItem);
+begin
+  inherited Create;
+  FOwner := source.FOwner;
+  FBufPtr := source.FBufPtr;
+  FBufLength := source.FBufLength;
+  FDataType := source.FDataType;
 end;
 
 function TParamBlockItem.getAsInteger: integer;
@@ -341,27 +401,6 @@ begin
     Result := byte((FBufPtr+2)^)
   else
     IBError(ibxeSPBParamTypeError,[nil]);
-end;
-
-procedure TParamBlockItem.setAsString(aValue: string);
-var len: integer;
-begin
-  len := Length(aValue);
-  if FLongStrings then
-  begin
-    if len + 3 <> FBufLength  then
-      FOwner.UpdateRequestItemSize(self,len + 3);
-    with Firebird25ClientAPI do
-      EncodeLsbf(len,2,FBufPtr+1);
-    FDataType := dtString2;
-  end
-  else
-  begin
-    (FBufPtr+1)^ := char(len);
-    FOwner.UpdateRequestItemSize(self,len+2);
-    Move(aValue[1],(FBufPtr+2)^,len);
-    FDataType := dtString;
-  end;
 end;
 
 procedure TParamBlockItem.setAsByte(aValue: byte);
@@ -492,12 +531,19 @@ var P: PChar;
 begin
   P := FBufPtr + 1;
   i := 0;
-  group := byte(P^);
-  while (P < FBufPtr + FDataLength) and (P^ <> char(isc_info_flag_end)) do
+  group := byte(FBufPtr^);
+  if group in [isc_info_svc_get_users,isc_info_svc_limbo_trans] then
   begin
+    with Firebird25ClientAPI do
+       FSize := isc_portable_integer(P,2) + 3;
+    Inc(P,2);
+  end;
+  while (P < FBufPtr + FSize) and (P^ <> char(isc_info_flag_end)) do
+  begin
+    SetLength(FSubItems,i+1);
     case group of
     isc_info_svc_svr_db_info:
-        case integer(P^) of
+      case integer(P^) of
         isc_spb_num_att,
         isc_spb_num_db:
           FSubItems[i] := TServiceQueryResultSubItem.CreateAsInteger(P);
@@ -506,7 +552,7 @@ begin
           FSubItems[i] := TServiceQueryResultSubItem.CreateAsString(P);
 
         else
-          IBError(ibxeOutputParsingError, [nil]);
+          IBError(ibxeOutputParsingError, [integer(P^)]);
         end;
 
     isc_info_svc_get_license:
@@ -515,7 +561,7 @@ begin
       isc_spb_lic_key:
         FSubItems[i] := TServiceQueryResultSubItem.CreateAsInteger(P);
       else
-        IBError(ibxeOutputParsingError, [nil]);
+        IBError(ibxeOutputParsingError, [integer(P^)]);
       end;
 
     isc_info_svc_limbo_trans:
@@ -533,7 +579,7 @@ begin
      isc_spb_tra_state:
        FSubItems[i] := TServiceQueryResultSubItem.CreateAsByte(P);
      else
-       IBError(ibxeOutputParsingError, [nil]);
+       IBError(ibxeOutputParsingError, [integer(P^)]);
      end;
 
     isc_info_svc_get_users:
@@ -550,7 +596,7 @@ begin
         FSubItems[i] := TServiceQueryResultSubItem.CreateAsString(P);
 
       else
-        IBError(ibxeOutputParsingError, [nil]);
+        IBError(ibxeOutputParsingError, [integer(P^)]);
       end;
 
     end;
@@ -560,6 +606,13 @@ begin
   FDataLength := 0;
   for i := 0 to Length(FSubItems) - 1 do
     FDataLength += (FSubItems[i] as TServiceQueryResultSubItem).getSize;
+  if group in [isc_info_svc_get_users,isc_info_svc_limbo_trans] then
+    Exit;
+
+  if (P < FBufPtr + FSize) and (P^ = char(isc_info_flag_end)) then
+    FSize := FDataLength + 2 {include start and end flag}
+  else
+    FSize := FDataLength + 1; {start flag only}
 end;
 
 procedure TServiceQueryResultItem.ParseConfigItems;
@@ -577,11 +630,12 @@ begin
   end;
 end;
 
-constructor TServiceQueryResultItem.CreateAsList(BufPtr: PChar);
+constructor TServiceQueryResultItem.CreateAsList(BufPtr: PChar; aSize: integer);
 begin
   inherited Create;
   FIsInteger := false;
   FBufPtr := BufPtr;
+  FSize := aSize;
   ParseBuffer;
 end;
 
@@ -741,9 +795,9 @@ begin
     isc_info_svc_get_license,
     isc_info_svc_limbo_trans,
     isc_info_svc_get_users:
-      FItems[i] := TServiceQueryResultItem.CreateAsList(P);
+      FItems[i] := TServiceQueryResultItem.CreateAsList(P, FSize - (P - FBuffer));
     else
-       IBError(ibxeOutputParsingError, [nil]);
+       IBError(ibxeOutputParsingError, [integer(P^)]);
     end;
     P += (FItems[i] as TServiceQueryResultItem).getSize;
     Inc(i);

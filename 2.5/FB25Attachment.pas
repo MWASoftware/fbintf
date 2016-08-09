@@ -5,7 +5,7 @@ unit FB25Attachment;
 interface
 
 uses
-  Classes, SysUtils, IB, FBLibrary, FB25ClientAPI, IBHeader, FB25APIObject;
+  Classes, SysUtils, IB, FBTypes, FBLibrary, FB25ClientAPI, IBHeader, FB25APIObject;
 
 type
   TDPB = class;

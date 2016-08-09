@@ -10,7 +10,7 @@ uses
   Firebird, IB, FBLibrary, IBHeader, FB25ClientAPI, FBErrorMessages, 
   FB25Transaction, FB25Attachment, FB25Blob, IBExternals, IBErrorCodes, 
   FB25Events, IBUtils, FB25Statement, FB25Services, FB25DBInfo, FB25Status, 
-  FB25APIObject, FB25SQLData, FB25Array;
+  FB25APIObject, FB25SQLData, FB25Array, FBTypes;
 
 implementation
 

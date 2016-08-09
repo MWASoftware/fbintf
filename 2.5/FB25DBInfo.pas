@@ -13,17 +13,21 @@ uses
   FB25Attachment, FB25Status;
 
 type
+  TDBInformation = class;
+
     { TIDBInfoItem }
 
-  TIDBInfoItem = class(TInterfacedObject,IDBInfoItem)
+  TDBInfoItem = class(TInterfacedObject,IDBInfoItem)
   private
+    FOwner: TDBInformation;
     FItemType: byte;
     FBufPtr: PChar;
     FItemlength: UShort;
+    FOwnerIntf: IDBInformation; {after copy only}
     function GetString(var P: PChar): string;
   public
-    constructor Create(ItemType: byte; BufPtr: PChar; Itemlength: UShort);
-
+    constructor Create(aOwner: TDBInformation; ItemType: byte; BufPtr: PChar; Itemlength: UShort);
+    constructor Copy(source: TDBInfoItem);
   public
     {IDBInfoItem}
     function getItemType: byte;
@@ -68,9 +72,9 @@ implementation
 
 uses FBErrorMessages;
 
-{ TIDBInfoItem }
+{ TDBInfoItem }
 
-function TIDBInfoItem.GetString(var P: PChar): string;
+function TDBInfoItem.GetString(var P: PChar): string;
 var s: RawByteString;
     len: byte;
 begin
@@ -86,31 +90,42 @@ begin
   Result := s;
 end;
 
-constructor TIDBInfoItem.Create(ItemType: byte; BufPtr: PChar;
-  Itemlength: UShort);
+constructor TDBInfoItem.Create(aOwner: TDBInformation; ItemType: byte;
+  BufPtr: PChar; Itemlength: UShort);
 begin
   inherited Create;
+  FOwner := aOwner;
   FItemType := ItemType;
   FBufPtr := BufPtr;
   FItemlength := Itemlength;
 end;
 
-function TIDBInfoItem.getItemType: byte;
+constructor TDBInfoItem.Copy(source: TDBInfoItem);
+begin
+  inherited Create;
+  FOwner := source.FOwner;
+  FItemType := source.FItemType;
+  FBufPtr := source.FBufPtr;
+  FItemlength := source.FItemlength;
+  FOwnerIntf := FOwner;
+end;
+
+function TDBInfoItem.getItemType: byte;
 begin
   Result := FItemType;
 end;
 
-function TIDBInfoItem.getSize: integer;
+function TDBInfoItem.getSize: integer;
 begin
   Result := FItemlength;
 end;
 
-procedure TIDBInfoItem.getRawBytes(var Buffer);
+procedure TDBInfoItem.getRawBytes(var Buffer);
 begin
   Move(FBufPtr^,Buffer,FItemlength);
 end;
 
-function TIDBInfoItem.getAsString: string;
+function TDBInfoItem.getAsString: string;
 var s: RawByteString;
 begin
   SetString(s,FBufPtr,FItemlength);
@@ -120,13 +135,13 @@ begin
   Result := s;
 end;
 
-function TIDBInfoItem.getAsInteger: integer;
+function TDBInfoItem.getAsInteger: integer;
 begin
   with Firebird25ClientAPI do
     Result := isc_portable_integer(FBufPtr, FItemLength);
 end;
 
-procedure TIDBInfoItem.DecodeIDCluster(var ConnectionType: integer;
+procedure TDBInfoItem.DecodeIDCluster(var ConnectionType: integer;
   var DBFileName, DBSiteName: string);
 var  P: PChar;
 begin
@@ -143,7 +158,7 @@ begin
     IBError(ibxeInfoBufferTypeError,[integer(FItemType)]);
 end;
 
-function TIDBInfoItem.getAsBytes: TByteArray;
+function TDBInfoItem.getAsBytes: TByteArray;
 var i: integer;
     P: PChar;
 begin
@@ -156,7 +171,7 @@ begin
   end
 end;
 
-procedure TIDBInfoItem.DecodeVersionString(var Version: byte;
+procedure TDBInfoItem.DecodeVersionString(var Version: byte;
   var VersionString: string);
 var  P: PChar;
 begin
@@ -173,7 +188,7 @@ begin
 
 end;
 
-procedure TIDBInfoItem.DecodeUserNames(UserNames: TStrings);
+procedure TDBInfoItem.DecodeUserNames(UserNames: TStrings);
 var P: PChar;
     s: string;
 begin
@@ -190,7 +205,7 @@ begin
     IBError(ibxeInfoBufferTypeError,[integer(FItemType)]);
 end;
 
-function TIDBInfoItem.getOperationCounts: TDBOperationCounts;
+function TDBInfoItem.getOperationCounts: TDBOperationCounts;
 var tableCounts: integer;
     P: PChar;
     i: integer;
@@ -230,7 +245,7 @@ begin
   begin
     SetLength(FItems,index+1);
     len := isc_portable_integer(P+1,2);
-    FItems[index] := TIDBInfoItem.Create(byte(P^),P+3,len);
+    FItems[index] := TDBInfoItem.Create(self,byte(P^),P+3,len);
     Inc(index);
     Inc(P,3+len);
   end;
@@ -320,7 +335,7 @@ end;
 function TDBInformation.getItem(index: integer): IDBInfoItem;
 begin
   if (Index >= 0) and (Index < Length(FItems)) then
-    Result := FItems[index]
+    Result := TDBInfoItem.Copy(FItems[index] as TDBInfoItem)
   else
     IBError(ibxeInfoBufferIndexError,[index]);
 end;
@@ -332,7 +347,7 @@ begin
   for i := 0 to getCount - 1 do
     if FItems[i].getItemType = ItemType then
     begin
-      Result := FItems[i];
+      Result := TDBInfoItem.Copy(FItems[i] as TDBInfoItem);
       Exit;
     end;
 end;
