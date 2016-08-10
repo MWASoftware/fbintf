@@ -51,8 +51,6 @@ type
     function GetBounds: TArrayBounds;
   end;
 
-  ISQLElement = interface;
-
   IArray = interface(IArrayMetaData)
     function GetAsInteger(index: array of integer): integer;
     function GetAsBoolean(index: array of integer): boolean;

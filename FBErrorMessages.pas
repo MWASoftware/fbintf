@@ -159,7 +159,9 @@ type
       ibxeNotAnArray,
       ibxeInvalidSubscript,
       ibxeArrayElementOverFlow,
-      ibxArrayBoundsCantIncrease
+      ibxArrayBoundsCantIncrease ,
+      ibxeStatementNotPrepared,
+      ibxeInterfaceOutofDate
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;
@@ -340,6 +342,8 @@ resourcestring
   SInvalidSubscript = 'Invalid Subscript (%d) for Array Dimension %d';
   SArrayElementOverFlow = 'Array Element too big';
   SArrayBoundsCantIncrease = 'Array Bounds can only be narrowed';
+  SStatementNotPrepared = 'The Statement has not been prepared';
+  SInterfaceOutofDate = 'This interface is no longer up-to-date';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -484,7 +488,9 @@ const
     SNotAnArray,
     SInvalidSubscript,
     SArrayElementOverFlow,
-    SArrayBoundsCantIncrease
+    SArrayBoundsCantIncrease,
+    SStatementNotPrepared,
+    SInterfaceOutofDate
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;

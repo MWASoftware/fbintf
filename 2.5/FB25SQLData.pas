@@ -13,8 +13,6 @@ type
 
   TSQLDataItem = class(TInterfacedObject)
   private
-     FModified: boolean;
-     FBlob: IBlob;
      function AdjustScale(Value: Int64; aScale: Integer): Double;
      function AdjustScaleToInt64(Value: Int64; aScale: Integer): Int64;
      function AdjustScaleToCurrency(Value: Int64; aScale: Integer): Currency;
@@ -27,8 +25,7 @@ type
      procedure Changed; virtual;
      function SQLData: PChar; virtual; abstract;
      function GetDataLength: short; virtual; abstract;
-     procedure RowChange; virtual;
-    procedure SetScale(aValue: short); virtual;
+     procedure SetScale(aValue: short); virtual;
      procedure SetDataLength(len: short); virtual;
      procedure SetSQLType(aValue: short); virtual;
      property DataLength: short read GetDataLength write SetDataLength;
@@ -51,8 +48,8 @@ type
      function GetIsNull: Boolean; virtual;
      function getIsNullable: boolean; virtual;
      function GetAsVariant: Variant;
-     function GetAsBlob: IBlob;
-     function GetModified: boolean;
+     function GetAsBlob: IBlob; virtual;
+     function GetModified: boolean; virtual;
      procedure SetAsBoolean(AValue: boolean);
      procedure SetAsCurrency(Value: Currency);
      procedure SetAsInt64(Value: Int64);
@@ -61,7 +58,7 @@ type
      procedure SetAsTime(Value: TDateTime);
      procedure SetAsDateTime(Value: TDateTime);
      procedure SetAsDouble(Value: Double);
-     procedure SetAsFloat(Value: Float);
+     procedure SetAsFlo1at(Value: Float);
      procedure SetAsPointer(Value: Pointer);
      procedure SetAsQuad(Value: TISC_QUAD);
      procedure SetAsShort(Value: Short);
@@ -189,12 +186,7 @@ end;
 
 procedure TSQLDataItem.Changed;
 begin
-  FModified := true;
-end;
-
-procedure TSQLDataItem.RowChange;
-begin
-  FBlob := nil;
+  //
 end;
 
 procedure TSQLDataItem.SetScale(aValue: short);
@@ -590,16 +582,12 @@ begin
   if IsNull then
     Result := nil
   else
-  begin
-    if FBlob = nil then
-      FBlob := TFBBlob.Create(GetAttachment,GetTransaction,AsQuad);
-    Result := FBlob;
-  end;
+    Result := TFBBlob.Create(GetAttachment,GetTransaction,AsQuad);
 end;
 
 function TSQLDataItem.GetModified: boolean;
 begin
-  Result := FModified;
+  Result := false;
 end;
 
 

@@ -9,7 +9,7 @@ unit FB25DBInfo;
 interface
 
 uses
-  Classes, SysUtils, IB, FB25ClientAPI, IBExternals, IBHeader, FB25Statement,
+  Classes, SysUtils, IB, FB25ClientAPI, IBExternals, FB25Statement,
   FB25Attachment, FB25Status;
 
 type
