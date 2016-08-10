@@ -435,7 +435,6 @@ type
     procedure getRawBytes(var Buffer);
     function getAsString: string;
     function getAsInteger: integer;
-    function getIsTruncated: boolean;
   end;
 
   IServiceQueryResultItem = interface(IServiceQueryResultSubItem)

@@ -4,6 +4,8 @@ unit FB25ParamBlock;
 
 interface
 
+{Provides common handling for the DPB, SPB and Service Request Block}
+
 uses
   Classes, SysUtils, IB, FB25ClientAPI;
 
@@ -12,6 +14,9 @@ type
 
   PParamBlockItemData = ^TParamBlockItemData;
   TParamBlockItemData = record
+    {Describes a Clumplet in the buffer. FBufPtr always points to the clumplet id
+     the rest of the clumplet up to the FBufLength is data. The data format is
+     given by FDataType}
     FBufPtr: PChar;
     FBuflength: integer;
     FDataType: TParamDataType;

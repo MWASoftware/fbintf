@@ -18,9 +18,9 @@ type
     FBufPtr: PChar;
     FDataLength: integer;
     FSize: integer;
-    FIsInteger: boolean;
-    FTruncated: boolean;
+    FDataType: TParamDataType;
   public
+    constructor Create(BufPtr: PChar); overload;
     constructor CreateAsInteger(BufPtr: PChar);
     constructor CreateAsString(BufPtr: PChar);
     constructor CreateAsByte(BufPtr: PChar);
@@ -33,7 +33,6 @@ type
     procedure getRawBytes(var Buffer);
     function getAsString: string;
     function getAsInteger: integer;
-    function getIsTruncated: boolean;
  end;
 
   { TServiceQueryResultItem }
@@ -335,7 +334,7 @@ end;
 constructor TServiceQueryResultItem.CreateAsList(BufPtr: PChar; aSize: integer);
 begin
   inherited Create;
-  FIsInteger := false;
+  FDataType := dtInteger;
   FBufPtr := BufPtr;
   FSize := aSize;
   ParseBuffer;
@@ -344,7 +343,7 @@ end;
 constructor TServiceQueryResultItem.CreateAsConfigItems(BufPtr: PChar);
 begin
   inherited Create;
-  FIsInteger := false;
+  FDataType := dtNone;
   FBufPtr := BufPtr;
   with Firebird25ClientAPI do
     FDataLength := isc_portable_integer(FBufPtr+1, 2);
@@ -380,10 +379,19 @@ end;
 
 { TServiceQueryResultSubItem }
 
+constructor TServiceQueryResultSubItem.Create(BufPtr: PChar);
+begin
+  inherited Create;
+  FDataType := dtNone;
+  FBufPtr := BufPtr;
+  FDataLength := 0;
+  FSize := 1;
+end;
+
 constructor TServiceQueryResultSubItem.CreateAsInteger(BufPtr: PChar);
 begin
   inherited Create;
-  FIsInteger := true;
+  FDataType := dtInteger;
   FBufPtr := BufPtr;
   FDataLength := 4;
   FSize := 5;
@@ -392,7 +400,7 @@ end;
 constructor TServiceQueryResultSubItem.CreateAsString(BufPtr: PChar);
 begin
   inherited Create;
-  FIsInteger := false;
+  FDataType := dtString2;
   FBufPtr := BufPtr;
   with Firebird25ClientAPI do
     FDataLength := isc_portable_integer(FBufPtr+1, 2);
@@ -402,7 +410,7 @@ end;
 constructor TServiceQueryResultSubItem.CreateAsByte(BufPtr: PChar);
 begin
   inherited Create;
-  FIsInteger := true;
+  FDataType := dtByte;
   FBufPtr := BufPtr;
   FDataLength := 1;
   FSize := 2;
@@ -430,7 +438,7 @@ end;
 
 function TServiceQueryResultSubItem.getAsString: string;
 begin
-  if FIsInteger then
+  if FDataType = dtInteger then
     Result := IntToStr(getAsInteger)
   else
     SetString(Result,FBufPtr+3,FDataLength);
@@ -438,21 +446,15 @@ end;
 
 function TServiceQueryResultSubItem.getAsInteger: integer;
 begin
-  if FIsInteger then
-  begin
-    if FDataLength = 1 then
-      Result := byte((FBufPtr+1)^)
-    else
+  case FDataType of
+  dtByte:
+      Result := byte((FBufPtr+1)^);
+  dtInteger:
     with Firebird25ClientAPI do
-      Result := isc_portable_integer(FBufPtr+1, 4)
-  end
+      Result := isc_portable_integer(FBufPtr+1, 4);
   else
     IBError(ibxeServiceResponseTypeError,[nil]);
-end;
-
-function TServiceQueryResultSubItem.getIsTruncated: boolean;
-begin
-  Result := FTruncated;
+  end;
 end;
 
 { TServiceQueryResults }
@@ -468,28 +470,29 @@ begin
   begin
     SetLength(FItems,i+1);
     case integer(P^) of
-      isc_info_svc_line,
-      isc_info_svc_get_env,
-      isc_info_svc_get_env_lock,
-      isc_info_svc_get_env_msg,
-      isc_info_svc_user_dbpath,
-      isc_info_svc_server_version,
-      isc_info_svc_implementation:
-        FItems[i] := TServiceQueryResultItem.CreateAsString(P);
+    isc_info_svc_line,
+    isc_info_svc_get_env,
+    isc_info_svc_get_env_lock,
+    isc_info_svc_get_env_msg,
+    isc_info_svc_user_dbpath,
+    isc_info_svc_server_version,
+    isc_info_svc_implementation:
+      FItems[i] := TServiceQueryResultItem.CreateAsString(P);
 
-      isc_info_svc_get_license_mask,
-      isc_info_svc_capabilities,
-      isc_info_svc_version,
-      isc_info_svc_running,
-      isc_info_svc_stdin:
-        FItems[i] := TServiceQueryResultItem.CreateAsInteger(P);
+    isc_info_svc_get_license_mask,
+    isc_info_svc_capabilities,
+    isc_info_svc_version,
+    isc_info_svc_running,
+    isc_info_svc_stdin:
+      FItems[i] := TServiceQueryResultItem.CreateAsInteger(P);
 
-      isc_info_svc_to_eof:
-      begin
-        FItems[i] := TServiceQueryResultItem.CreateAsString(P);
-        with FItems[i] as TServiceQueryResultItem do
-          FTruncated := (P + FSize < FBuffer + self.FSize) and ((P + FSize)^ <> char(isc_info_truncated));
-      end;
+    isc_info_svc_to_eof:
+      FItems[i] := TServiceQueryResultItem.CreateAsString(P);
+
+    isc_info_svc_timeout,
+    isc_info_data_not_ready,
+    isc_info_truncated:
+      FItems[i] := TServiceQueryResultItem.Create(P);
 
     isc_info_svc_get_config:
       FItems[i] := TServiceQueryResultItem.CreateAsConfigItems(P);
