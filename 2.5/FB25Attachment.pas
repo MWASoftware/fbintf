@@ -5,56 +5,31 @@ unit FB25Attachment;
 interface
 
 uses
-  Classes, SysUtils, IB, FBTypes, FBLibrary, FB25ClientAPI, IBHeader, FB25APIObject;
+  Classes, SysUtils, IB, FBTypes, FBLibrary, FB25ClientAPI, IBHeader,
+  FB25APIObject, FB25ParamBlock;
 
 type
   TDPB = class;
 
   { TDPBItem }
 
-  TDPBItem = class(TInterfacedObject,IDPBItem)
+  TDPBItem = class(TParamBlockItem,IDPBItem)
   private
-    FOwner: TDPB;
-    FBufPtr: PChar;
-    FBuflength: integer;
-    FIsByte: boolean;
-    procedure MoveBy(delta: integer);
+    FDPB: IDPB;
   public
-    constructor Create(AOwner: TDPB; Param: byte; BufPtr: PChar;
-       Buflength: integer);
-
-  public
-    {IDPBItem}
-    function getParamType: byte;
-    function getAsString: string;
-    function getAsByte: byte;
-    procedure setAsString(aValue: string);
-    procedure setAsByte(aValue: byte);
+    constructor Create(AOwner: TDPB; Data: PParamBlockItemData);
   end;
 
   { TDPB }
 
-  TDPB = class(TInterfacedObject, IDPB)
-  private
-    FItems: array of IDPBItem;
-    FBuffer: PChar;
-    FDataLength: integer;
-    FBufferSize: integer;
-    procedure AdjustBuffer;
-    procedure UpdateRequestItemSize(Item: TDPBItem; NewSize: integer);
-  public
+  TDPB = class(TParamBlock, IDPB)
     constructor Create;
-    destructor Destroy; override;
-    function getBuffer: PChar;
-    function getBufferLength: integer;
 
   public
     {IDPB}
-    function getCount: integer;
     function Add(ParamType: byte): IDPBItem;
     function Find(ParamType: byte): IDPBItem;
-    procedure Remove(ParamType: byte);
-    function getItems(index: integer): IDPBItem;
+    function GetItems(index: integer): IDPBItem;
   end;
 
   { TFBAttachment }
@@ -114,215 +89,43 @@ uses FB25Events, FB25Status, FB25Transaction, FBErrorMessages, FB25Blob,
 
 { TDPBItem }
 
-procedure TDPBItem.MoveBy(delta: integer);
-var src, dest: PChar;
-    i: integer;
+constructor TDPBItem.Create(AOwner: TDPB; Data: PParamBlockItemData);
 begin
-  src := FBufptr;
-  dest := FBufptr + delta ;
-  if delta > 0 then
-  begin
-    for i := FBufLength - 1 downto 0 do
-      (dest +i)^ := (src+i)^;
-  end
-  else
-  begin
-    for i := 0 to FBufLength - 1 do
-    (dest +i)^ := (src+i)^;
-  end;
-
-  FBufPtr += delta;
+  inherited Create(AOwner,Data);
+  FDPB := AOwner;
 end;
 
-constructor TDPBItem.Create(AOwner: TDPB; Param: byte; BufPtr: PChar;
-  Buflength: integer);
-begin
-  inherited Create;
-  FOwner := AOwner;
-  FBufPtr := BufPtr;
-  FBufLength := BufLength;
-  FBufPtr^ := char(Param);
-  (FBufPtr+1)^ := #1;
-  (FBufPtr+2)^ := #0;
-  FIsByte := true; {default}
-end;
-
-function TDPBItem.getParamType: byte;
-begin
-  Result := byte(FBufPtr^);
-end;
-
-function TDPBItem.getAsString: string;
-var len: byte;
-begin
-  if FIsByte then
-    Result := IntToStr(getAsByte)
-  else
-  begin
-    len := byte((FBufPtr+1)^);
-    SetString(Result,FBufPtr+2,len);
-  end;
-end;
-
-function TDPBItem.getAsByte: byte;
-begin
-  if FIsByte then
-    Result := byte((FBufPtr+2)^)
-  else
-    IBError(ibxeDPBParamTypeError,[nil]);
-end;
-
-procedure TDPBItem.setAsString(aValue: string);
-var len: integer;
-begin
-  len := Length(aValue);
-  if len <> FBufLength - 2 then
-    FOwner.UpdateRequestItemSize(self,len+2);
-  (FBufPtr+1)^ := char(len);
-  Move(aValue[1],(FBufPtr+2)^,len);
-  FIsByte := false;
-end;
-
-procedure TDPBItem.setAsByte(aValue: byte);
-begin
-  if FBufLength <> 3 then
-  FOwner.UpdateRequestItemSize(self,3);
-  FIsByte := true;
-  (FBufPtr+1)^ := #1;
-  (FBufPtr+2)^ := char(aValue);
-end;
 
 { TDPB }
-
-procedure TDPB.AdjustBuffer;
-begin
-  if FDataLength > FBufferSize then
-  begin
-    FBufferSize := FDataLength;
-    ReallocMem(FBuffer,FBufferSize);
-  end;
-end;
-
-procedure TDPB.UpdateRequestItemSize(Item: TDPBItem; NewSize: integer
-  );
-var i, delta: integer;
-begin
-  delta := NewSize - Item.FBufLength;
-  if delta > 0 then
-  begin
-    FDataLength += delta;
-    AdjustBuffer;
-    i := Length(FItems) - 1;
-    while i >= 0  do
-    begin
-      if (FItems[i] as TDPBItem) = Item then
-        break; {we're done}
-      (FItems[i] as TDPBItem).Moveby(delta);
-      Dec(i);
-    end;
-  end
-  else
-  begin
-    i := 0;
-    while i < Length(FItems) do
-    begin
-      if (FItems[i] as TDPBItem) = Item then
-        break; {we're done}
-      Inc(i);
-    end;
-    Inc(i);
-    while i < Length(FItems) do
-    begin
-      (FItems[i] as TDPBItem).Moveby(delta);
-      Inc(i);
-    end;
-    FDataLength += delta;
-  end;
-  Item.FBufLength := NewSize;
-end;
 
 constructor TDPB.Create;
 begin
   inherited Create;
-  GetMem(FBuffer,128);
-  if FBuffer = nil then
-    OutOfMemoryError;
-  FBufferSize := 128;
   FDataLength := 1;
   FBuffer^ := char(isc_dpb_version1);
 end;
 
-destructor TDPB.Destroy;
-begin
-  Freemem(FBuffer);
-  inherited Destroy;
-end;
-
-function TDPB.getBuffer: PChar;
-begin
-  Result := FBuffer;
-end;
-
-function TDPB.getBufferLength: integer;
-begin
-  Result :=  FDataLength
-end;
-
-function TDPB.getCount: integer;
-begin
-  Result := Length(FItems);
-end;
-
 function TDPB.Add(ParamType: byte): IDPBItem;
-var P: PChar;
+var Item: PParamBlockItemData;
 begin
-  P := FBuffer + FDataLength;
-  Inc(FDataLength,3); {assume byte}
-  AdjustBuffer;
-  Result := TDPBItem.Create(self,ParamType,P,3);
-  SetLength(FItems,Length(FItems)+1);
-  FItems[Length(FItems) - 1 ] := Result;
+  Item := inherited Add(ParamType);
+  Result := TDPBItem.Create(self,Item);
 end;
 
 function TDPB.Find(ParamType: byte): IDPBItem;
-var i: integer;
+var Item: PParamBlockItemData;
 begin
   Result := nil;
-  for i := 0 to getCount - 1 do
-    if FItems[i].getParamType = ParamType then
-    begin
-      Result := FItems[i];
-      Exit;
-    end;
-end;
-
-procedure TDPB.Remove(ParamType: byte);
-var i: integer;
-    len: integer;
-begin
-  i := 0;
-  while (i < Length(FItems)) and  (FItems[i].getParamType <> ParamType) do
-    inc(i);
-
-  if i < Length(FItems) then
-  begin
-    len := (FItems[i] as TDPBItem).FBuflength;
-    inc(i);
-    while i < Length(FItems) do
-    begin
-       (FItems[i] as TDPBItem).MoveBy(-len);
-       Inc(i);
-    end;
-    Dec(FDataLength,len);
-  end;
+  Item := inherited Find(ParamType);
+  if Item <> nil then
+    Result := TDPBItem.Create(self,Item);
 end;
 
 function TDPB.getItems(index: integer): IDPBItem;
+var Item: PParamBlockItemData;
 begin
-   if (index >= 0 ) and (index < Length(FItems)) then
-    Result := FItems[index]
-  else
-    IBError(ibxeDPBIndexError,[index]);
+  Item := inherited getItems(index);
+  Result := TDPBItem.Create(self,Item);
 end;
 
   { TFBAttachment }
@@ -388,7 +191,7 @@ begin
   begin
    Call(isc_attach_database(StatusVector, Length(FDatabaseName),
                          PChar(FDatabaseName), @FHandle,
-                         (FDPB as TDPB).getBufferLength,
+                         (FDPB as TDPB).getDataLength,
                          (FDPB as TDPB).getBuffer));
 
      Param := FDPB.Find(isc_dpb_set_db_SQL_dialect);

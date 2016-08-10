@@ -150,10 +150,8 @@ type
       ibxServiceParamTypeError,
       ibxeServiceResponseIndexError,
       ibxeServiceResponseTypeError,
-      ibxeDPBIndexError,
-      ibxeDPBParamTypeError,
-      ibxeSPBIndexError,
-      ibxeSPBParamTypeError,
+      ibxePBIndexError,
+      ibxePBParamTypeError,
       ibxeDuplicateParamName,
       ibxeInvalidArrayDimensions,
       ibxeNotAMultiDatabaseTransaction,
@@ -332,10 +330,8 @@ resourcestring
   SServiceParamTypeError = 'Invalid Request for Service Param Type';
   SServiceResponseIndexError = 'Service Response Index Out of Range (%d)';
   SServiceResponseTypeError = 'Invalid Request for Service Response Type';
-  SDPBIndexError = 'DPB Index out of range (%d)';
-  SDPBParamTypeError = 'Invalid Request for DPB Param Type';
-  SSPBIndexError =  'SPB Index out of range (%d)';
-  SSPBParamTypeError = 'Invalid Request for SPB Param Type';
+  SPBIndexError = 'DPB Index out of range (%d)';
+  SPBParamTypeError = 'Invalid Request for DPB Param Type';
   SDuplicateParamName = 'Blob or array parameter name must be unique (%s)';
   SInvalidArrayDimensions = 'Invalid number of array dimensions {%d)';
   SNotAMultiDatabaseTransaction = 'This is not a multi-database transaction';
@@ -479,10 +475,8 @@ const
     SServiceParamTypeError,
     SServiceResponseIndexError,
     SServiceResponseTypeError,
-    SDPBIndexError,
-    SDPBParamTypeError,
-    SSPBIndexError,
-    SSPBParamTypeError,
+    SPBIndexError,
+    SPBParamTypeError,
     SDuplicateParamName,
     SInvalidArrayDimensions,
     SNotAMultiDatabaseTransaction,

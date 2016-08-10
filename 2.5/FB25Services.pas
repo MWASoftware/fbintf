@@ -5,7 +5,7 @@ unit FB25Services;
 interface
 
 uses
-  Classes, SysUtils, IB, FB25ClientAPI, IBExternals, IBHeader;
+  Classes, SysUtils, IB, FB25ClientAPI, IBExternals, IBHeader, FB25ParamBlock;
 
 const
   DefaultBufferSize = 32000;
@@ -78,75 +78,9 @@ type
     property Items[index: integer]: IServiceQueryResultItem read getItem; default;
  end;
 
-  TParamBlockItem = class;
-
-  { TParamBlock }
-
-  TParamBlock = class(TInterfacedObject)
-  private
-    FItems: array of TParamBlockItem;
-    FBuffer: PChar;
-    FDataLength: integer;
-    FBufferSize: integer;
-    procedure AdjustBuffer;
-    procedure UpdateRequestItemSize(Item: TParamBlockItem; NewSize: integer);
-  public
-    constructor Create;
-    destructor Destroy; override;
-    function getBuffer: PChar;
-    function getBufferLength: integer;
-
-  public
-    function getCount: integer;
-    procedure Remove(ParamType: byte);
-  end;
-
-  { TParamBlockItem }
-
-  TParamBlockItem = class(TInterfacedObject)
-  private
-     FOwner: TParamBlock;
-     FBufPtr: PChar;
-     FBuflength: integer;
-     FDataType: (dtString, dtString2, dtByte,dtInteger,dtnone);
-     procedure MoveBy(delta: integer);
-   public
-     constructor Create(AOwner: TParamBlock; Param: byte; BufPtr: PChar);
-     constructor Copy(source: TParamBlockItem);
-   public
-     function getAsInteger: integer;
-     function getParamType: byte;
-     function getAsString: string;
-     function getAsByte: byte;
-     procedure setAsByte(aValue: byte);
-     procedure SetAsInteger(aValue: integer);
-  end;
-
-  { TSPBItem }
-
-  TSPBItem = class(TParamBlockItem,ISPBItem)
-  private
-    FSPB: ISPB;
-  public
-    constructor Copy(source: TSPBItem);
-    procedure setAsString(aValue: string);
-  end;
-
-  { TSRBItem }
-
-  TSRBItem = class(TParamBlockItem,ISRBItem)
-  private
-    FSRB: ISRB;
-  public
-    constructor Copy(source: TSRBItem);
-    procedure setAsString(aValue: string);
-  end;
-
   { TSPB }
 
   TSPB = class(TParamBlock,ISPB)
-  private
-    FSPBItems: array of ISPBItem;
   public
    constructor Create;
 
@@ -158,12 +92,29 @@ type
   { TSRB }
 
   TSRB = class(TParamBlock,ISRB)
-  private
-    FSRBItems: array of ISRBItem;
   public
    function Add(ParamType: byte): ISRBItem;
    function Find(ParamType: byte): ISRBItem;
    function getItems(index: integer): ISRBItem;
+  end;
+
+  { TSPBItem }
+
+  TSPBItem = class(TParamBlockItem,ISPBItem)
+  private
+    FSPB: ISPB;
+  public
+    constructor Create(AOwner: TSPB; Data: PParamBlockItemData);
+  end;
+
+  { TSRBItem }
+
+  TSRBItem = class(TParamBlockItem,ISRBItem)
+  private
+    FSRB: ISRB;
+  public
+    constructor Create(AOwner: TSRB; Data: PParamBlockItemData);
+    function ISRBItem.SetAsString = SetAsString2;
   end;
 
   { TFBServiceManager }
@@ -200,76 +151,43 @@ uses FBErrorMessages;
 
 { TSRBItem }
 
-constructor TSRBItem.Copy(source: TSRBItem);
+constructor TSRBItem.Create(AOwner: TSRB; Data: PParamBlockItemData);
 begin
-  inherited Copy(Source);
-  FSRB := source.FOwner as TSRB;
-end;
-
-procedure TSRBItem.setAsString(aValue: string);
-var len: integer;
-begin
-  len := Length(aValue);
-  FOwner.UpdateRequestItemSize(self,len + 3);
-  with Firebird25ClientAPI do
-    EncodeLsbf(len,2,FBufPtr+1);
-  Move(aValue[1],(FBufPtr+3)^,len);
-  FDataType := dtString2;
+  inherited Create(AOwner,Data);
+  FSRB := AOwner;
 end;
 
 { TSPBItem }
 
-constructor TSPBItem.Copy(source: TSPBItem);
+constructor TSPBItem.Create(AOwner: TSPB; Data: PParamBlockItemData);
 begin
-  inherited Copy(source);
-  FSPB := source.FOwner as TSPB;
-end;
-
-procedure TSPBItem.setAsString(aValue: string);
-var len: integer;
-begin
-  len := Length(aValue);
-  FOwner.UpdateRequestItemSize(self,len+2);
-  (FBufPtr+1)^ := char(len);
-  Move(aValue[1],(FBufPtr+2)^,len);
-  FDataType := dtString;
+  inherited Create(AOwner,Data);
+  FSPB := AOwner;
 end;
 
 { TSRB }
 
 function TSRB.Add(ParamType: byte): ISRBItem;
-var P: PChar;
-    NewItem: TSRBItem;
+var Item: PParamBlockItemData;
 begin
-  P := FBuffer + FDataLength;
-  Inc(FDataLength,1); {assume nothing}
-  AdjustBuffer;
-  NewItem := TSRBItem.Create(self,ParamType,P);
-  SetLength(FItems,Length(FItems)+1);
-  FItems[Length(FItems) - 1 ] := NewItem;
-  SetLength(FSRBItems,Length(FSRBItems)+1);
-  FSRBItems[Length(FSRBItems)-1] := NewItem;
-  Result := TSRBItem.Copy(NewItem);
+  Item := inherited Add(ParamType);
+  Result := TSRBItem.Create(self,Item);
 end;
 
 function TSRB.Find(ParamType: byte): ISRBItem;
-var i: integer;
+var Item: PParamBlockItemData;
 begin
   Result := nil;
-  for i := 0 to getCount - 1 do
-    if FItems[i].getParamType = ParamType then
-    begin
-      Result := TSRBItem.Copy(FSRBItems[i] as TSRBItem);
-      Exit;
-    end;
+  Item := inherited Find(ParamType);
+  if Item <> nil then
+    Result := TSRBItem.Create(self,Item);
 end;
 
 function TSRB.getItems(index: integer): ISRBItem;
+var Item: PParamBlockItemData;
 begin
-  if (index >= 0 ) and (index < Length(FItems)) then
-   Result := TSRBItem.Copy(FSRBItems[index] as TSRBItem)
- else
-   IBError(ibxeSPBIndexError,[index]);
+  Item := inherited getItems(index);
+  Result := TSRBItem.Create(self,Item);
 end;
 
 { TSPB }
@@ -283,243 +201,26 @@ begin
 end;
 
 function TSPB.Add(ParamType: byte): ISPBItem;
-var P: PChar;
-    NewItem: TSPBItem;
+var Item: PParamBlockItemData;
 begin
-  P := FBuffer + FDataLength;
-  Inc(FDataLength,1); {assume nothing}
-  AdjustBuffer;
-  NewItem := TSPBItem.Create(self,ParamType,P);
-  SetLength(FItems,Length(FItems)+1);
-  FItems[Length(FItems) - 1 ] := NewItem;
-  SetLength(FSPBItems,Length(FSPBItems)+1);
-  FSPBItems[Length(FSPBItems)-1] := NewItem;
-  Result := TSPBItem.Copy(NewItem);
+  Item := inherited Add(ParamType);
+  Result := TSPBItem.Create(self,Item);
 end;
 
 function TSPB.Find(ParamType: byte): ISPBItem;
-var i: integer;
+var Item: PParamBlockItemData;
 begin
   Result := nil;
-  for i := 0 to getCount - 1 do
-    if FItems[i].getParamType = ParamType then
-    begin
-      Result := TSPBItem.Copy(FSPBItems[i] as TSPBItem);
-      Exit;
-    end;
+  Item := inherited Find(ParamType);
+  if Item <> nil then
+    Result := TSPBItem.Create(self,Item);
 end;
 
 function TSPB.getItems(index: integer): ISPBItem;
+var Item: PParamBlockItemData;
 begin
-  if (index >= 0 ) and (index < Length(FItems)) then
-   Result := TSPBItem.Copy((FSPBItems[index] as TSPBItem))
- else
-   IBError(ibxeSPBIndexError,[index]);
-end;
-
-{ TParamBlockItem }
-
-procedure TParamBlockItem.MoveBy(delta: integer);
-var src, dest: PChar;
-  i: integer;
-begin
-  src := FBufptr;
-  dest := FBufptr + delta ;
-  if delta > 0 then
-  begin
-    for i := FBufLength - 1 downto 0 do
-      (dest +i)^ := (src+i)^;
-  end
-  else
-  begin
-    for i := 0 to FBufLength - 1 do
-    (dest +i)^ := (src+i)^;
-  end;
-  FBufPtr += delta;
-end;
-
-constructor TParamBlockItem.Create(AOwner: TParamBlock; Param: byte;
-  BufPtr: PChar);
-begin
-  inherited Create;
-  FOwner := AOwner;
-  FBufPtr := BufPtr;
-  FBufLength := 1;
-  FBufPtr^ := char(Param);
-  FDataType := dtnone; {default}
-end;
-
-constructor TParamBlockItem.Copy(source: TParamBlockItem);
-begin
-  inherited Create;
-  FOwner := source.FOwner;
-  FBufPtr := source.FBufPtr;
-  FBufLength := source.FBufLength;
-  FDataType := source.FDataType;
-end;
-
-function TParamBlockItem.getAsInteger: integer;
-begin
-  if FDataType =  dtInteger then
-  with Firebird25ClientAPI do
-    Result := isc_portable_integer(FBufPtr+1,4)
-  else
-    IBError(ibxeSPBParamTypeError,[nil]);
-end;
-
-function TParamBlockItem.getParamType: byte;
-begin
-  Result := byte(FBufPtr^);
-end;
-
-function TParamBlockItem.getAsString: string;
-var len: byte;
-begin
-  Result := '';
-  case FDataType of
-  dtInteger:
-    Result := IntToStr(getAsInteger);
-  dtByte:
-    Result := IntToStr(getAsByte);
-  dtString:
-    begin
-      len := byte((FBufPtr+1)^);
-      SetString(Result,FBufPtr+2,len);
-    end;
-  dtString2:
-    begin
-      with Firebird25ClientAPI do
-        len := isc_portable_integer(FBufPtr+1,2);
-      SetString(Result,FBufPtr+3,len);
-    end;
-  end;
-end;
-
-function TParamBlockItem.getAsByte: byte;
-begin
-  if FDataType = dtByte then
-    Result := byte((FBufPtr+2)^)
-  else
-    IBError(ibxeSPBParamTypeError,[nil]);
-end;
-
-procedure TParamBlockItem.setAsByte(aValue: byte);
-begin
-  if FBufLength <> 3 then
-  FOwner.UpdateRequestItemSize(self,3);
-  FDataType := dtByte;
-  (FBufPtr+1)^ := #1;
-  (FBufPtr+2)^ := char(aValue);
-end;
-
-procedure TParamBlockItem.SetAsInteger(aValue: integer);
-begin
-  if FBufLength <> 5 then
-  FOwner.UpdateRequestItemSize(self,5);
-  with Firebird25ClientAPI do
-    EncodeLsbf(aValue,4,FBufPtr+1);
-  FDataType := dtInteger;
-end;
-
-{ TParamBlock }
-
-procedure TParamBlock.AdjustBuffer;
-begin
-  if FDataLength > FBufferSize then
-  begin
-    FBufferSize := FDataLength;
-    ReallocMem(FBuffer,FBufferSize);
-  end;
-end;
-
-procedure TParamBlock.UpdateRequestItemSize(Item: TParamBlockItem;
-  NewSize: integer);
-var i, delta: integer;
-begin
-  delta := NewSize - Item.FBufLength;
-  if delta > 0 then
-  begin
-    FDataLength += delta;
-    AdjustBuffer;
-    i := Length(FItems) - 1;
-    while i >= 0  do
-    begin
-      if FItems[i]  = Item then
-        break; {we're done}
-      FItems[i].Moveby(delta);
-      Dec(i);
-    end;
-  end
-  else
-  begin
-    i := 0;
-    while i < Length(FItems) do
-    begin
-      if FItems[i] = Item then
-        break; {we're done}
-      Inc(i);
-    end;
-    Inc(i);
-    while i < Length(FItems) do
-    begin
-      FItems[i].Moveby(delta);
-      Inc(i);
-    end;
-    FDataLength += delta;
-  end;
-  Item.FBufLength := NewSize;
-end;
-
-constructor TParamBlock.Create;
-begin
-  inherited Create;
-  GetMem(FBuffer,128);
-  if FBuffer = nil then
-    OutOfMemoryError;
-  FBufferSize := 128;
-  FDataLength := 0;
-end;
-
-destructor TParamBlock.Destroy;
-begin
-  Freemem(FBuffer);
-  inherited Destroy;
-end;
-
-function TParamBlock.getBuffer: PChar;
-begin
-  Result := FBuffer;
-end;
-
-function TParamBlock.getBufferLength: integer;
-begin
-  Result :=  FDataLength
-end;
-
-function TParamBlock.getCount: integer;
-begin
-  Result := Length(FItems);
-end;
-
-procedure TParamBlock.Remove(ParamType: byte);
-var i: integer;
-    len: integer;
-begin
-  i := 0;
-  while (i < Length(FItems)) and  (FItems[i].getParamType <> ParamType) do
-    inc(i);
-
-  if i < Length(FItems) then
-  begin
-    len := FItems[i].FBuflength;
-    inc(i);
-    while i < Length(FItems) do
-    begin
-       FItems[i].MoveBy(-len);
-       Inc(i);
-    end;
-    Dec(FDataLength,len);
-  end;
+  Item := inherited getItems(index);
+  Result := TSPBItem.Create(self,Item);
 end;
 
   { TServiceQueryResultItem }
@@ -566,6 +267,7 @@ begin
 
     isc_info_svc_limbo_trans:
      case integer(P^) of
+     isc_spb_tra_id,
      isc_spb_single_tra_id,
      isc_spb_multi_tra_id:
        FSubItems[i] := TServiceQueryResultSubItem.CreateAsInteger(P);
@@ -778,7 +480,8 @@ begin
       isc_info_svc_get_license_mask,
       isc_info_svc_capabilities,
       isc_info_svc_version,
-      isc_info_svc_running:
+      isc_info_svc_running,
+      isc_info_svc_stdin:
         FItems[i] := TServiceQueryResultItem.CreateAsInteger(P);
 
       isc_info_svc_to_eof:
@@ -931,7 +634,7 @@ begin
   begin
     if isc_service_attach(StatusVector, Length(ConnectString),
                            PChar(ConnectString), @FHandle,
-                           (FSPB as TSPB).getBufferLength,
+                           (FSPB as TSPB).getDataLength,
                            (FSPB as TSPB).getBuffer) > 0 then
       IBDataBaseError;
   end;
@@ -966,7 +669,7 @@ procedure TFBServiceManager.Start(Request: ISRB);
 begin
     with Firebird25ClientAPI do
       if isc_service_start(StatusVector, @FHandle, nil,
-                           (Request as TSRB).getBufferLength,
+                           (Request as TSRB).getDataLength,
                            (Request as TSRB).getBuffer) > 0 then
         IBDataBaseError;
 end;
@@ -978,7 +681,7 @@ begin
   Result := QueryResults;
   with Firebird25ClientAPI do
     if isc_service_query(StatusVector, @FHandle, nil, 0, nil,
-                       (Request as TSRB).getBufferLength,
+                       (Request as TSRB).getDataLength,
                        (Request as TSRB).getBuffer,
                        QueryResults.getBufSize,
                        QueryResults.Buffer) > 0 then

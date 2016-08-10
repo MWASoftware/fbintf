@@ -42,7 +42,7 @@
         <PackageName Value="fbintf"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="14">
+    <Units Count="13">
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -95,10 +95,6 @@
         <Filename Value="Test11.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit12>
-      <Unit13>
-        <Filename Value="../include/configkeys.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit13>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

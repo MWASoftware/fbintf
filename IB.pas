@@ -383,7 +383,6 @@ type
     function Add(ParamType: byte): IDPBItem;
     function getItems(index: integer): IDPBItem;
     function Find(ParamType: byte): IDPBItem;
-    procedure Remove(ParamType: byte);
     property Items[index: integer]: IDPBItem read getItems; default;
   end;
 
@@ -468,7 +467,6 @@ type
     function Add(ParamType: byte): ISRBItem;
     function getItems(index: integer): ISRBItem;
     function Find(ParamType: byte): ISRBItem;
-    procedure Remove(ParamType: byte);
     property Items[index: integer]: ISRBItem read getItems; default;
   end;
 
@@ -487,7 +485,6 @@ type
     function Add(ParamType: byte): ISPBItem;
     function getItems(index: integer): ISPBItem;
     function Find(ParamType: byte): ISPBItem;
-    procedure Remove(ParamType: byte);
     property Items[index: integer]: ISPBItem read getItems; default;
   end;
 

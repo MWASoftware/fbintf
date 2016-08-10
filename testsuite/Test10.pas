@@ -92,8 +92,7 @@ begin
   DPB.Add(isc_dpb_password).setAsString(' ');
   DPB.Add(isc_dpb_lc_ctype).setAsString(CharSet);
   DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
-  DPB.Remove(isc_dpb_password);
-  DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);
+  DPB.Find(isc_dpb_password).setAsString(Owner.GetPassword);
   Attachment := FirebirdAPI.OpenDatabase(Owner.GetEmployeeDatabaseName,DPB);
   EventsTest(Attachment);
   Attachment.Disconnect;
