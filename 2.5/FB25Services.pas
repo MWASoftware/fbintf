@@ -5,7 +5,7 @@ unit FB25Services;
 interface
 
 uses
-  Classes, SysUtils, IB, FB25ClientAPI, IBExternals, IBHeader, FB25ParamBlock;
+  Classes, SysUtils, IB, FB25ClientAPI, IBHeader, FB25ParamBlock;
 
 const
   DefaultBufferSize = 32000;
@@ -122,7 +122,6 @@ type
   private
     FServerName: string;
     FSPB: ISPB;
-    FSPBLength: Short;
     FHandle: TISC_SVC_HANDLE;
     FProtocol: TProtocol;
     procedure CheckActive;
@@ -319,7 +318,6 @@ end;
 procedure TServiceQueryResultItem.ParseConfigItems;
 var P: PChar;
     i: integer;
-    group: char;
 begin
   P := FBufPtr + 3; {skip length bytes}
   i := 0;

@@ -45,6 +45,7 @@ type
 
   IArrayMetaData = interface
     function GetSQLType: short;
+    function GetSQLTypeName: string;
     function GetTableName: string;
     function GetColumnName: string;
     function GetDimensions: integer;
@@ -113,6 +114,7 @@ type
 
   IColumnMetaData = interface
     function GetSQLType: short;
+    function GetSQLTypeName: string;
     function getSubtype: short;
     function getRelationName: string;
     function getOwnerName: string;
@@ -245,6 +247,7 @@ type
     function GetAsArray: IArray;
     function GetName: string;
     function GetSQLType: short;
+    function GetSQLTypeName: string;
     function GetSubtype: short;
     function GetAsQuad: TISC_QUAD;
     procedure SetIsNull(Value: Boolean);

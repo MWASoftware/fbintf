@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, IB, FBTypes, FBLibrary, FB25ClientAPI, IBHeader,
-  FB25APIObject, FB25ParamBlock;
+  FB25ParamBlock;
 
 type
   TDPB = class;
@@ -84,7 +84,7 @@ type
 
 implementation
 
-uses FB25Events, FB25Status, FB25Transaction, FBErrorMessages, FB25Blob,
+uses FB25Events,FB25Transaction, FBErrorMessages, FB25Blob,
   FB25Statement, FB25DBInfo, FB25Array;
 
 { TDPBItem }

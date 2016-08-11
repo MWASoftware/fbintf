@@ -75,6 +75,7 @@ type
   public
    {IArrayMetaData}
    function GetSQLType: short;
+   function GetSQLTypeName: string;
    function GetTableName: string;
    function GetColumnName: string;
    function GetDimensions: integer;
@@ -294,6 +295,11 @@ begin
   blr_int64:
     Result := SQL_INT64;
   end;
+end;
+
+function TFBArrayMetaData.GetSQLTypeName: string;
+begin
+  Result := TSQLDataItem.GetSQLTypeName(GetSQLType);
 end;
 
 function TFBArrayMetaData.GetTableName: string;
@@ -546,10 +552,9 @@ begin
 end;
 
 function TFBArray.GetAsString(index: array of integer): String;
-var P: PChar;
 begin
   GetArraySlice;
-  FElement.FBufPtr := P;
+  FElement.FBufPtr := GetOffset(index);
   Result := FElement.GetAsString;
 end;
 

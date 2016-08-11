@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, IB, FBTypes, IBHeader,IBExternals, FBLibrary, FB25ClientAPI, FB25Attachment,
-  FB25Transaction, FB25APIObject;
+  FB25Transaction;
 
 type
 
@@ -193,9 +193,9 @@ begin
   if aTransaction <> FTransaction then
     Exit;
   if FCreating then
-    Cancel
+    InternalCancel(Force)
   else
-    Close;
+    InternalClose(Force);
 end;
 
 procedure TFBBlob.Cancel;

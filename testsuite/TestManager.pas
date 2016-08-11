@@ -19,7 +19,6 @@ type
     function ReportResults(Statement: IStatement): IResultSet;
     procedure PrintDPB(DPB: IDPB);
     procedure PrintMetaData(meta: IMetaData);
-    function SQLType2Text(sqltype: short): string;
     procedure WriteArray(ar: IArray);
     procedure WriteAffectedRows(Statement: IStatement);
     function WriteServiceQueryResult(QueryResult: IServiceQueryResults): boolean;
@@ -131,7 +130,7 @@ begin
   for i := 0 to meta.GetCount - 1 do
   with meta[i] do
   begin
-    writeln('SQLType =',SQLType2Text(getSQLType));
+    writeln('SQLType =',GetSQLTypeName);
     writeln('sub type = ',getSubType);
     writeln('Table = ',getRelationName);
     writeln('Owner = ',getOwnerName);
@@ -157,7 +156,7 @@ begin
         begin
           writeln('Array Meta Data:');
           ar := GetArrayMetaData;
-          writeln('SQLType =',SQLType2Text(ar.getSQLType));
+          writeln('SQLType =',ar.GetSQLTypeName);
           writeln('Table = ',ar.GetTableName);
           writeln('Column = ',ar.GetColumnName);
           writeln('Dimensions = ',ar.GetDimensions);
@@ -169,27 +168,6 @@ begin
         end;
     end;
     writeln;
-  end;
-end;
-
-function TTestBase.SQLType2Text(sqltype: short): string;
-begin
-  Result := '';
-  case sqltype of
-  SQL_VARYING:	Result := 'SQL_VARYING';
-  SQL_TEXT:		Result := 'SQL_TEXT';
-  SQL_DOUBLE:		Result := 'SQL_DOUBLE';
-  SQL_FLOAT:		Result := 'SQL_FLOAT';
-  SQL_LONG:		Result := 'SQL_LONG';
-  SQL_SHORT:		Result := 'SQL_SHORT';
-  SQL_TIMESTAMP:	Result := 'SQL_TIMESTAMP';
-  SQL_BLOB:		Result := 'SQL_BLOB';
-  SQL_D_FLOAT:	Result := 'SQL_D_FLOAT';
-  SQL_ARRAY:		Result := 'SQL_ARRAY';
-  SQL_QUAD:		Result := 'SQL_QUAD';
-  SQL_TYPE_TIME:	Result := 'SQL_TYPE_TIME';
-  SQL_TYPE_DATE:	Result := 'SQL_TYPE_DATE';
-  SQL_INT64:		Result := 'SQL_INT64';
   end;
 end;
 

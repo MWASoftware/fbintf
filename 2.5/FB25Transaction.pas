@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, IB, FBLibrary, FB25ClientAPI, IBHeader, IBExternals,
-  FB25Attachment, FB25APIObject;
+  FB25Attachment;
 
 type
 

@@ -2,6 +2,12 @@ unit FB25SQLData;
 
 {$mode objfpc}{$H+}
 
+{ This Unit was hacked out of the IBSQL unit and defines a class used as the
+  base for interfaces accessing SQLDAVar data and Array Elements. The abstract
+  methods are used to customise for an SQLDAVar or Array Element. The empty
+  methods are needed for SQL parameters only. The string getters and setters
+  are virtual as SQLVar and Array encodings of string data is different.}
+
 interface
 
 uses
@@ -32,6 +38,8 @@ type
 
   public
      function GetSQLType: short; virtual; abstract;
+     function GetSQLTypeName: string; overload;
+     class function GetSQLTypeName(SQLType: short): string; overload;
      function GetName: string; virtual; abstract;
      function GetScale: short; virtual; abstract;
      function GetAsBoolean: boolean;
@@ -58,7 +66,7 @@ type
      procedure SetAsTime(Value: TDateTime);
      procedure SetAsDateTime(Value: TDateTime);
      procedure SetAsDouble(Value: Double);
-     procedure SetAsFlo1at(Value: Float);
+     procedure SetAsFloat(Value: Float);
      procedure SetAsPointer(Value: Pointer);
      procedure SetAsQuad(Value: TISC_QUAD);
      procedure SetAsShort(Value: Short);
@@ -186,22 +194,48 @@ end;
 
 procedure TSQLDataItem.Changed;
 begin
-  //
+  //Do nothing by default
 end;
 
 procedure TSQLDataItem.SetScale(aValue: short);
 begin
-
+  //Do nothing by default
 end;
 
 procedure TSQLDataItem.SetDataLength(len: short);
 begin
-
+  //Do nothing by default
 end;
 
 procedure TSQLDataItem.SetSQLType(aValue: short);
 begin
+   //Do nothing by default
+end;
 
+function TSQLDataItem.GetSQLTypeName: string;
+begin
+  Result := GetSQLTypeName(GetSQLType);
+end;
+
+class function TSQLDataItem.GetSQLTypeName(SQLType: short): string;
+begin
+  Result := 'Unknown';
+  case SQLType of
+  SQL_VARYING:	        Result := 'SQL_VARYING';
+  SQL_TEXT:		Result := 'SQL_TEXT';
+  SQL_DOUBLE:		Result := 'SQL_DOUBLE';
+  SQL_FLOAT:		Result := 'SQL_FLOAT';
+  SQL_LONG:		Result := 'SQL_LONG';
+  SQL_SHORT:		Result := 'SQL_SHORT';
+  SQL_TIMESTAMP:	Result := 'SQL_TIMESTAMP';
+  SQL_BLOB:		Result := 'SQL_BLOB';
+  SQL_D_FLOAT:          Result := 'SQL_D_FLOAT';
+  SQL_ARRAY:		Result := 'SQL_ARRAY';
+  SQL_QUAD:		Result := 'SQL_QUAD';
+  SQL_TYPE_TIME:	Result := 'SQL_TYPE_TIME';
+  SQL_TYPE_DATE:	Result := 'SQL_TYPE_DATE';
+  SQL_INT64:		Result := 'SQL_INT64';
+  end;
 end;
 
 function TSQLDataItem.GetAsBoolean: boolean;
@@ -603,11 +637,12 @@ end;
 
 procedure TSQLDataItem.SetName(aValue: string);
 begin
-
+  //ignore unless overridden
 end;
 
 procedure TSQLDataItem.SetAsCurrency(Value: Currency);
 begin
+  CheckActive;
   if GetSQLDialect < 3 then
     AsDouble := Value
   else
@@ -624,6 +659,7 @@ end;
 
 procedure TSQLDataItem.SetAsInt64(Value: Int64);
 begin
+  CheckActive;
   if IsNullable then
     IsNull := False;
 
@@ -639,6 +675,7 @@ var
    tm_date: TCTimeStructure;
    Yr, Mn, Dy: Word;
 begin
+  CheckActive;
   if GetSQLDialect < 3 then
   begin
     AsDateTime := Value;
@@ -669,6 +706,7 @@ var
   tm_date: TCTimeStructure;
   Hr, Mt, S, Ms: Word;
 begin
+  CheckActive;
   if GetSQLDialect < 3 then
   begin
     AsDateTime := Value;
@@ -701,6 +739,7 @@ var
   tm_date: TCTimeStructure;
   Yr, Mn, Dy, Hr, Mt, S, Ms: Word;
 begin
+  CheckActive;
   if IsNullable then
     IsNull := False;
 
@@ -725,6 +764,7 @@ end;
 
 procedure TSQLDataItem.SetAsDouble(Value: Double);
 begin
+  CheckActive;
   if IsNullable then
     IsNull := False;
 
@@ -737,6 +777,7 @@ end;
 
 procedure TSQLDataItem.SetAsFloat(Value: Float);
 begin
+  CheckActive;
   if IsNullable then
     IsNull := False;
 
@@ -749,6 +790,7 @@ end;
 
 procedure TSQLDataItem.SetAsLong(Value: Long);
 begin
+  CheckActive;
   if IsNullable then
     IsNull := False;
 
@@ -761,6 +803,7 @@ end;
 
 procedure TSQLDataItem.SetAsPointer(Value: Pointer);
 begin
+  CheckActive;
   if IsNullable and (Value = nil) then
     IsNull := True
   else begin
@@ -773,6 +816,7 @@ end;
 
 procedure TSQLDataItem.SetAsQuad(Value: TISC_QUAD);
 begin
+  CheckActive;
   if IsNullable then
       IsNull := False;
   if (SQLType <> SQL_BLOB) and
@@ -785,6 +829,7 @@ end;
 
 procedure TSQLDataItem.SetAsShort(Value: Short);
 begin
+  CheckActive;
   if IsNullable then
     IsNull := False;
 
@@ -818,6 +863,7 @@ var
    end;
 
 begin
+  CheckActive;
   if IsNullable then
     IsNull := False;
 
@@ -851,6 +897,7 @@ end;
 
 procedure TSQLDataItem.SetAsVariant(Value: Variant);
 begin
+  CheckActive;
   if VarIsNull(Value) then
     IsNull := True
   else case VarType(Value) of
@@ -880,6 +927,7 @@ end;
 
 procedure TSQLDataItem.SetAsBlob(Value: IBlob);
 begin
+  CheckActive;
   Value.Close;
   AsQuad := Value.GetBlobID;
   Changed;
@@ -887,6 +935,7 @@ end;
 
 procedure TSQLDataItem.SetAsBoolean(AValue: boolean);
 begin
+  CheckActive;
   if IsNullable then
     IsNull := False;
 
