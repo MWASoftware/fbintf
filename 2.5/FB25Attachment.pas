@@ -54,7 +54,8 @@ type
     procedure Connect;
     procedure Disconnect(Force: boolean=false);
     procedure DropDatabase;
-    function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction;
+    function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionAction): ITransaction; overload;
+    function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionAction): ITransaction; overload;
     function CreateBlob(transaction: ITransaction): IBlob;
     procedure ExecImmediate(transaction: ITransaction; sql: string; aSQLDialect: integer); overload;
     procedure ExecImmediate(TPB: array of byte; sql: string; aSQLDialect: integer); overload;
@@ -228,7 +229,13 @@ begin
 end;
 
 function TFBAttachment.StartTransaction(TPB: array of byte;
-  DefaultCompletion: TTransactionCompletion): ITransaction;
+  DefaultCompletion: TTransactionAction): ITransaction;
+begin
+  Result := TFBTransaction.Create(self,TPB,DefaultCompletion);
+end;
+
+function TFBAttachment.StartTransaction(TPB: ITPB;
+  DefaultCompletion: TTransactionAction): ITransaction;
 begin
   Result := TFBTransaction.Create(self,TPB,DefaultCompletion);
 end;
@@ -250,7 +257,7 @@ end;
 procedure TFBAttachment.ExecImmediate(TPB: array of byte; sql: string;
   aSQLDialect: integer);
 begin
-  ExecImmediate(StartTransaction(TPB,tcCommit),sql,aSQLDialect);
+  ExecImmediate(StartTransaction(TPB,taCommit),sql,aSQLDialect);
 end;
 
 procedure TFBAttachment.ExecImmediate(transaction: ITransaction; sql: string);
@@ -260,7 +267,7 @@ end;
 
 procedure TFBAttachment.ExecImmediate(TPB: array of byte; sql: string);
 begin
-  ExecImmediate(StartTransaction(TPB,tcCommit),sql,FSQLDialect);
+  ExecImmediate(StartTransaction(TPB,taCommit),sql,FSQLDialect);
 end;
 
 function TFBAttachment.OpenCursor(transaction: ITransaction; sql: string;

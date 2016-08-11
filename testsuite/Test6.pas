@@ -45,7 +45,7 @@ var Transaction: ITransaction;
     ResultSet: IResultSet;
     i: integer;
 begin
-  Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],tcCommit);
+  Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   Statement := Attachment.Prepare(Transaction,sqlGetCharSets);
   ReportResults(Statement);
   Statement := Attachment.Prepare(Transaction,'Select * from TestData');

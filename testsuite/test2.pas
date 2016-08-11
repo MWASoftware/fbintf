@@ -29,7 +29,7 @@ var Transaction: ITransaction;
     Statement: IStatement;
     ResultSet: IResultSet;
 begin
-    Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],tcCommit);
+    Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
     Statement := Attachment.Prepare(Transaction,'Select First 3 * from EMPLOYEE',3);
     PrintMetaData(Statement.GetMetaData);
     writeln('Plan = ' ,Statement.GetPlan);

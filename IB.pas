@@ -302,10 +302,32 @@ type
     property SQLType: TIBSQLTypes read GetSQLType;
   end;
 
-  TTransactionCompletion = (tcCommit,tcRollback);
+  ITPBItem = interface
+    function getParamType: byte;
+    function getAsInteger: integer;
+    function getAsString: string;
+    function getAsByte: byte;
+    procedure setAsString(aValue: string);
+    procedure setAsByte(aValue: byte);
+    procedure SetAsInteger(aValue: integer);
+    property AsString: string read getAsString write setAsString;
+    property AsByte: byte read getAsByte write setAsByte;
+    property AsInteger: integer read getAsInteger write SetAsInteger;
+  end;
+
+  ITPB = interface
+    function getCount: integer;
+    function Add(ParamType: byte): ITPBItem;
+    function getItems(index: integer): ITPBItem;
+    function Find(ParamType: byte): ITPBItem;
+    property Items[index: integer]: ITPBItem read getItems; default;
+  end;
+
+  TTransactionAction  = (TARollback, TACommit);
 
   ITransaction = interface
-    function Start(DefaultCompletion: TTransactionCompletion=tcCommit): ITransaction;
+    function getTPB: ITPB;
+    function Start(DefaultCompletion: TTransactionAction=taCommit): ITransaction;
     function GetInTransaction: boolean;
     procedure PrepareForCommit; {Two phase commit - stage 1}
     procedure Commit(Force: boolean=false);
@@ -371,12 +393,15 @@ type
 
   IDPBItem = interface
     function getParamType: byte;
+    function getAsInteger: integer;
     function getAsString: string;
     function getAsByte: byte;
     procedure setAsString(aValue: string);
     procedure setAsByte(aValue: byte);
+    procedure SetAsInteger(aValue: integer);
     property AsString: string read getAsString write setAsString;
     property AsByte: byte read getAsByte write setAsByte;
+    property AsInteger: integer read getAsInteger write SetAsInteger;
   end;
 
   IDPB = interface
@@ -394,7 +419,8 @@ type
     procedure Connect;
     procedure Disconnect(Force: boolean=false);
     procedure DropDatabase;
-    function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction;
+    function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionAction): ITransaction; overload;
+    function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionAction): ITransaction; overload;
     function CreateBlob(transaction: ITransaction): IBlob;
     procedure ExecImmediate(transaction: ITransaction; sql: string; SQLDialect: integer); overload;
     procedure ExecImmediate(TPB: array of byte; sql: string; SQLDialect: integer); overload;
@@ -503,13 +529,18 @@ type
   IFirebirdAPI = interface
     function GetStatus: IStatus;
     function AllocateDPB: IDPB;
+    function AllocateTPB: ITPB;
 
     {Database connections}
     function OpenDatabase(DatabaseName: string; DPB: IDPB): IAttachment;
     function CreateDatabase(DatabaseName: string; SQLDialect: integer;
       CreateParams: string; DPB: IDPB): IAttachment;
+
+    {Start Transaction against multiple databases}
     function StartTransaction(Attachments: array of IAttachment;
-             TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction; {Start Transaction against multiple databases}
+             TPB: array of byte; DefaultCompletion: TTransactionAction): ITransaction; overload;
+    function StartTransaction(Attachments: array of IAttachment;
+             TPB: ITPB; DefaultCompletion: TTransactionAction): ITransaction; overload;
 
     {Service Manager}
     function AllocateSPB: ISPB;

@@ -54,6 +54,7 @@ type
   TParamBlockItem = class(TInterfacedObject)
   private
      FOwner: TParamBlock;
+     FOwnerIntf: IUnknown;
      FParamData: PParamBlockItemData;
   protected
     property ParamData: PParamBlockItemData read FParamData;
@@ -81,6 +82,7 @@ constructor TParamBlockItem.Create(AOwner: TParamBlock;
 begin
   inherited Create;
   FOwner := AOwner;
+  FOwnerIntf := AOwner;
   FParamData := Data;
 end;
 

@@ -119,10 +119,13 @@ type
     function CreateDatabase(DatabaseName: string;
       SQLDialect: integer; CreateParams: string; DPB: IDPB): IAttachment;
     function AllocateSPB: ISPB;
+    function AllocateTPB: ITPB;
     function GetServiceManager(ServerName: string; Protocol: TProtocol; SPB: ISPB
       ): IServiceManager;
     function StartTransaction(Attachments: array of IAttachment;  TPB: array of byte;
-      DefaultCompletion: TTransactionCompletion): ITransaction;
+      DefaultCompletion: TTransactionAction): ITransaction; overload;
+    function StartTransaction(Attachments: array of IAttachment;
+             TPB: ITPB; DefaultCompletion: TTransactionAction): ITransaction; overload;
     function IsEmbeddedServer: boolean; override;
     function GetLibraryName: string;
     function HasServiceAPI: boolean;
@@ -474,6 +477,11 @@ begin
   Result := TSPB.Create;
 end;
 
+function TFB25ClientAPI.AllocateTPB: ITPB;
+begin
+  Result := TTPB.Create;
+end;
+
 function TFB25ClientAPI.GetServiceManager(ServerName: string;
   Protocol: TProtocol; SPB: ISPB): IServiceManager;
 begin
@@ -484,7 +492,13 @@ begin
 end;
 
 function TFB25ClientAPI.StartTransaction(Attachments: array of IAttachment;
-  TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction;
+  TPB: array of byte; DefaultCompletion: TTransactionAction): ITransaction;
+begin
+  Result := TFBTransaction.Create(Attachments,TPB,DefaultCompletion);
+end;
+
+function TFB25ClientAPI.StartTransaction(Attachments: array of IAttachment;
+  TPB: ITPB; DefaultCompletion: TTransactionAction): ITransaction;
 begin
   Result := TFBTransaction.Create(Attachments,TPB,DefaultCompletion);
 end;

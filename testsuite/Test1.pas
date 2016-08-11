@@ -31,7 +31,7 @@ var Transaction: ITransaction;
     ResultSet: IResultSet;
     i: integer;
 begin
-    Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],tcCommit);
+    Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
     Statement := Attachment.Prepare(Transaction,'Select * from RDB$Database',3);
     ResultSet := Statement.OpenCursor;
     try

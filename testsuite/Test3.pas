@@ -29,12 +29,12 @@ var Transaction: ITransaction;
     Statement: IStatement;
 begin
   ResultSet := Attachment.OpenCursorAtStart(
-         Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],tcCommit),
+         Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit),
          'Select count(*) from EMPLOYEE',3);
 
   writeln('Employee Count = ',ResultSet[0].AsInteger);
 
-  Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],tcCommit);
+  Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   Statement := Attachment.Prepare(Transaction,'Execute Procedure DELETE_EMPLOYEE ?',3);
   Statement.GetSQLParams[0].AsInteger := 9;
   Statement.Execute;
@@ -47,7 +47,7 @@ begin
 
   Transaction.Rollback;
 
-  Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],tcCommit);
+  Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   Statement := Attachment.PrepareWithNamedParameters(Transaction,'Execute Procedure DELETE_EMPLOYEE :EMP_NO',3);
   Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 9;
   Statement.Execute;
@@ -62,7 +62,7 @@ begin
 
 
   ResultSet := Attachment.OpenCursorAtStart(
-         Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],tcCommit),
+         Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit),
          'Select count(*) As Counter from EMPLOYEE',3);
 
   writeln('Employee Count = ',ResultSet.ByName('COUNTER').AsInteger);

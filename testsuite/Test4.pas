@@ -28,7 +28,7 @@ procedure TTest4.DoQuery(Attachment: IAttachment);
 var Transaction: ITransaction;
     Statement: IStatement;
 begin
-  Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],tcRollback);
+  Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taRollback);
   Statement := Attachment.Prepare(Transaction,'Update Employee Set Hire_Date = ? Where EMP_NO = ?',3);
   Statement.GetSQLParams[0].AsDAteTime := EncodeDate(2016,1,31);;
   Statement.GetSQLParams[1].AsInteger := 9;

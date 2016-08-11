@@ -6,36 +6,61 @@ interface
 
 uses
   Classes, SysUtils, IB, FBLibrary, FB25ClientAPI, IBHeader, IBExternals,
-  FB25Attachment;
+  FB25Attachment, FB25ParamBlock;
 
 type
+  TTPB = class;
+
+  { TTPBItem }
+
+  TTPBItem = class(TParamBlockItem,ITPBItem)
+  private
+    FTPB: ITPB;
+  public
+    constructor Create(AOwner: TTPB; Data: PParamBlockItemData);
+  end;
+
+  { TTPB }
+
+  TTPB = class(TParamBlock, ITPB)
+    constructor Create;
+
+  public
+    {ITPB}
+    function Add(ParamType: byte): ITPBItem;
+    function Find(ParamType: byte): ITPBItem;
+    function GetItems(index: integer): ITPBItem;
+  end;
 
   { TFBTransaction }
 
   TFBTransaction = class(TAPIObject,ITransaction)
   private
     FHandle: TISC_TR_HANDLE;
-    FTPB: String;
+    FTPB: ITPB;
     FTPBLength: short;
-    FDefaultCompletion: TTransactionCompletion;
+    FDefaultCompletion: TTransactionAction;
     FAttachments: array of IAttachment; {Keep reference to attachment - ensures
                                           attachment cannot be freed before transaction}
-    procedure GenerateTPB(sl: array of byte; var TPB: string; var TPBLength: Short);
+    function GenerateTPB(sl: array of byte): ITPB;
     procedure CloseAll(Force: boolean);
   public
-    constructor Create(Attachments: array of IAttachment; Params: array of byte; DefaultCompletion: TTransactionCompletion); overload;
-    constructor Create(Attachment: TFBAttachment; Params: array of byte; DefaultCompletion: TTransactionCompletion); overload;
+    constructor Create(Attachments: array of IAttachment; Params: array of byte; DefaultCompletion: TTransactionAction); overload;
+    constructor Create(Attachments: array of IAttachment; TPB: ITPB; DefaultCompletion: TTransactionAction); overload;
+    constructor Create(Attachment: TFBAttachment; Params: array of byte; DefaultCompletion: TTransactionAction); overload;
+    constructor Create(Attachment: TFBAttachment; TPB: ITPB; DefaultCompletion: TTransactionAction); overload;
     destructor Destroy; override;
     procedure DoDefaultTransactionEnd(Force: boolean);
     property Handle: TISC_TR_HANDLE read FHandle;
 
   public
     {ITransaction}
+    function getTPB: ITPB;
     function GetInTransaction: boolean;
     procedure PrepareForCommit;
     procedure Commit(Force: boolean=false);
     procedure CommitRetaining;
-    function Start(DefaultCompletion: TTransactionCompletion=tcCommit): ITransaction;
+    function Start(DefaultCompletion: TTransactionAction=taCommit): ITransaction;
     procedure Rollback(Force: boolean=false);
     procedure RollbackRetaining;
     function GetAttachmentCount: integer;
@@ -47,26 +72,56 @@ implementation
 
 uses FBErrorMessages, FB25Blob, FB25Statement, FB25Array;
 
+{ TTPBItem }
+
+constructor TTPBItem.Create(AOwner: TTPB; Data: PParamBlockItemData);
+begin
+  inherited Create(AOwner,Data);
+  FTPB := AOwner;
+end;
+
+{ TTPB }
+
+constructor TTPB.Create;
+begin
+  inherited Create;
+  FDataLength := 1;
+  FBuffer^ := char(isc_tpb_version3);
+end;
+
+function TTPB.Add(ParamType: byte): ITPBItem;
+var Item: PParamBlockItemData;
+begin
+  Item := inherited Add(ParamType);
+  Result := TTPBItem.Create(self,Item);
+end;
+
+function TTPB.Find(ParamType: byte): ITPBItem;
+var Item: PParamBlockItemData;
+begin
+  Result := nil;
+  Item := inherited Find(ParamType);
+  if Item <> nil then
+    Result := TTPBItem.Create(self,Item);
+end;
+
+function TTPB.getItems(index: integer): ITPBItem;
+var Item: PParamBlockItemData;
+begin
+  Item := inherited getItems(index);
+  Result := TTPBItem.Create(self,Item);
+end;
 
 { TFBTransaction }
 
 
-procedure TFBTransaction.GenerateTPB(sl: array of byte; var TPB: string;
-  var TPBLength: Short);
+function TFBTransaction.GenerateTPB(sl: array of byte): ITPB;
 var
   i: Integer;
 begin
-  TPB := '';
-  if (Length(sl) = 0) then
-    TPBLength := 0
-  else
-  begin
-    SetLength(TPB,Length(sl) + 1);
-    TPB[1] :=  Char(isc_tpb_version3);
-    for i := 0 to Length(sl) -1 do
-       TPB[i+2] := char(sl[i]);
-    TPBLength := Length(sl) +1;
-  end;
+  Result := TTPB.Create;
+  for i := 0 to Length(sl) - 1 do
+    Result.Add(sl[i]);
 end;
 
 procedure TFBTransaction.CloseAll(Force: boolean);
@@ -84,7 +139,13 @@ begin
 end;
 
 constructor TFBTransaction.Create(Attachments: array of IAttachment;
-  Params: array of byte; DefaultCompletion: TTransactionCompletion);
+  Params: array of byte; DefaultCompletion: TTransactionAction);
+begin
+  Create(Attachments,GenerateTPB(Params), DefaultCompletion);
+end;
+
+constructor TFBTransaction.Create(Attachments: array of IAttachment; TPB: ITPB;
+  DefaultCompletion: TTransactionAction);
 var
   i: Integer;
 begin
@@ -98,18 +159,24 @@ begin
     AddOwner(Attachments[i] as TFBAttachment);
     FAttachments[i] := Attachments[i];
   end;
-  GenerateTPB(Params, FTPB, FTPBLength);
+  FTPB := TPB;
   Start(DefaultCompletion);
 end;
 
 constructor TFBTransaction.Create(Attachment: TFBAttachment; Params: array of byte;
-   DefaultCompletion: TTransactionCompletion);
+   DefaultCompletion: TTransactionAction);
+begin
+  Create(Attachment,GenerateTPB(Params),DefaultCompletion);
+end;
+
+constructor TFBTransaction.Create(Attachment: TFBAttachment; TPB: ITPB;
+  DefaultCompletion: TTransactionAction);
 begin
   inherited Create;
   AddOwner(Attachment);
   SetLength(FAttachments,1);
   FAttachments[0] := Attachment;
-  GenerateTPB(Params, FTPB, FTPBLength);
+  FTPB := TPB;
   Start(DefaultCompletion);
 end;
 
@@ -123,11 +190,16 @@ procedure TFBTransaction.DoDefaultTransactionEnd(Force: boolean);
 begin
   if FHandle <> nil then
   case FDefaultCompletion of
-  tcRollback:
+  taRollback:
     Rollback(Force);
-  tcCommit:
+  taCommit:
     Commit(Force);
   end;
+end;
+
+function TFBTransaction.getTPB: ITPB;
+begin
+  Result := FTPB;
 end;
 
 function TFBTransaction.GetInTransaction: boolean;
@@ -164,7 +236,7 @@ begin
     Call(isc_commit_retaining(StatusVector, @FHandle));
 end;
 
-function TFBTransaction.Start(DefaultCompletion: TTransactionCompletion
+function TFBTransaction.Start(DefaultCompletion: TTransactionAction
   ): ITransaction;
 var pteb: PISC_TEB_ARRAY;
     i: integer;
@@ -180,7 +252,7 @@ begin
   try
     db_handle := (FAttachments[0] as TFBAttachment).Handle;
     Call(isc_start_transaction(StatusVector, @FHandle,1,
-              @db_handle,FTPBLength,PChar(FTPB)));
+              @db_handle,(FTPB as TTPB).getDataLength,(FTPB as TTPB).getBuffer));
   except
     FHandle := nil;
     raise;
@@ -193,8 +265,8 @@ begin
         if (FAttachments[i] <> nil)  then
         begin
           pteb^[i].db_handle := @((FAttachments[i] as TFBAttachment).Handle);
-          pteb^[i].tpb_length := FTPBLength;
-          pteb^[i].tpb_address := PChar(FTPB);
+          pteb^[i].tpb_length := (FTPB as TTPB).getDataLength;
+          pteb^[i].tpb_address := (FTPB as TTPB).getBuffer;
         end;
         try
           Call(isc_start_multiple(StatusVector, @FHandle,
