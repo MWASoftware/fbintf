@@ -103,6 +103,7 @@ type
 
   public
     {IColumnMetaData}
+    function GetIndex: integer;
     function GetSQLType: short; override;
     function getSubtype: short;
     function getRelationName: string;
@@ -296,6 +297,7 @@ end;
 
   TResultSet = class(TResults,IResultSet)
   public
+    destructor Destroy; override;
     {IResultSet}
     function FetchNext: boolean;
     function GetCursorName: string;
@@ -418,6 +420,12 @@ begin
 end;
 
 { TResultSet }
+
+destructor TResultSet.Destroy;
+begin
+  Close;
+  inherited Destroy;
+end;
 
 function TResultSet.FetchNext: boolean;
 var i: integer;
@@ -1149,6 +1157,11 @@ end;
 function TColumnMetaData.GetSQLDialect: integer;
 begin
   Result := FIBXSQLVAR.FParent.GetSQLDialect;
+end;
+
+function TColumnMetaData.GetIndex: integer;
+begin
+  Result := FIBXSQLVAR.FIndex;
 end;
 
 function TColumnMetaData.GetSQLType: short;

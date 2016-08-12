@@ -107,6 +107,8 @@ type
   public
     constructor Create(aField: TIBSQLData); overload;
     constructor Create(aField: IArrayMetaData); overload;
+    constructor Create(aAttachment: TFBAttachment; aTransaction: TFBTransaction;
+      relationName, columnName: string; ArrayID: TISC_QUAD); overload;
     destructor Destroy; override;
     function GetArrayID: TISC_QUAD;
     function GetSQLDialect: integer;
@@ -453,6 +455,23 @@ constructor TFBArray.Create(aField: IArrayMetaData);
 begin
   with aField as TFBArrayMetaData do
     inherited Create(FAttachment,FTransaction,GetTableName,GetColumnName);
+  FTransaction.RegisterObj(self);
+  FTransactionIntf :=  (aField as TFBArrayMetaData).FTransaction;
+  FIsNew := true;
+  FModified := true;
+  FSQLDialect := FAttachment.SQLDialect;
+  AllocateBuffer;
+  FElement := TFBArrayElement.Create(self,FBuffer);
+  FElementIntf := FElement;
+end;
+
+constructor TFBArray.Create(aAttachment: TFBAttachment;
+  aTransaction: TFBTransaction; relationName, columnName: string;
+  ArrayID: TISC_QUAD);
+begin
+  inherited Create(aField.GetAttachment,aField.GetTransaction,
+                                 aField.getRelationName,aField.getSQLName);
+  FArrayID := ArrayID;
   FTransaction.RegisterObj(self);
   FTransactionIntf :=  (aField as TFBArrayMetaData).FTransaction;
   FIsNew := true;

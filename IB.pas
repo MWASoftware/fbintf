@@ -15,11 +15,38 @@ uses
 {$I inf_pub.inc}
 {$I configkeys.inc}
 
+(*********************)
+(** SQL definitions **)
+(*********************)
+  SQL_VARYING                    =        448;
+  SQL_TEXT                       =        452;
+  SQL_DOUBLE                     =        480;
+  SQL_FLOAT                      =        482;
+  SQL_LONG                       =        496;
+  SQL_SHORT                      =        500;
+  SQL_TIMESTAMP                  =        510;
+  SQL_BLOB                       =        520;
+  SQL_D_FLOAT                    =        530;
+  SQL_ARRAY                      =        540;
+  SQL_QUAD                       =        550;
+  SQL_TYPE_TIME                  =        560;
+  SQL_TYPE_DATE                  =        570;
+  SQL_INT64                      =        580;
+  SQL_BOOLEAN                    =        32764;
+  SQL_DATE                       =        SQL_TIMESTAMP;
+
 type
 
   {$IF FPC_FULLVERSION < 20700 }
   RawByteString = AnsiString; {Needed for backwards compatibility}
   {$ENDIF}
+
+  TIBSQLTypes = (SQLUnknown, SQLSelect, SQLInsert,
+                  SQLUpdate, SQLDelete, SQLDDL,
+                  SQLGetSegment, SQLPutSegment,
+                  SQLExecProcedure, SQLStartTransaction,
+                  SQLCommit, SQLRollback,
+                  SQLSelectForUpdate, SQLSetGenerator);
 
   TFBStatusCode = cardinal;
   TByteArray = array of byte;
@@ -113,6 +140,7 @@ type
   { IColumnMetaData }
 
   IColumnMetaData = interface
+    function GetIndex: integer;
     function GetSQLType: short;
     function GetSQLTypeName: string;
     function getSubtype: short;
@@ -241,6 +269,7 @@ type
 
   ISQLParam = interface(ISQLElement)
     procedure Clear;
+    function GetSize: integer;
     function getCharSetID: cardinal;
     function GetIsNull: Boolean;
     function GetAsBlob: IBlob;
@@ -271,13 +300,6 @@ type
     property Params[index: integer]: ISQLParam read getSQLParam; default;
   end;
 
-
-  TIBSQLTypes = (SQLUnknown, SQLSelect, SQLInsert,
-                  SQLUpdate, SQLDelete, SQLDDL,
-                  SQLGetSegment, SQLPutSegment,
-                  SQLExecProcedure, SQLStartTransaction,
-                  SQLCommit, SQLRollback,
-                  SQLSelectForUpdate, SQLSetGenerator);
 
   IDBInformation = interface;
 
@@ -418,6 +440,7 @@ type
     function getDPB: IDPB;
     procedure Connect;
     procedure Disconnect(Force: boolean=false);
+    function IsConnected: boolean;
     procedure DropDatabase;
     function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionAction): ITransaction; overload;
     function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionAction): ITransaction; overload;

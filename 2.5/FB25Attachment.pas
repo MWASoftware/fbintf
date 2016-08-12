@@ -53,6 +53,7 @@ type
     function getDPB: IDPB;
     procedure Connect;
     procedure Disconnect(Force: boolean=false);
+    function IsConnected: boolean;
     procedure DropDatabase;
     function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionAction): ITransaction; overload;
     function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionAction): ITransaction; overload;
@@ -219,6 +220,11 @@ begin
   with Firebird25ClientAPI do
     Call(isc_detach_database(StatusVector, @FHandle),not Force);
   FHandle := nil;
+end;
+
+function TFBAttachment.IsConnected: boolean;
+begin
+  Result := FHandle <> nil;
 end;
 
 procedure TFBAttachment.DropDatabase;

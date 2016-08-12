@@ -1799,25 +1799,7 @@ const
   isc_fetch_absolute             =          4;
   isc_fetch_relative             =          5;
 
-(*********************)
-(** SQL definitions **)
-(*********************)
-  SQL_VARYING                    =        448;
-  SQL_TEXT                       =        452;
-  SQL_DOUBLE                     =        480;
-  SQL_FLOAT                      =        482;
-  SQL_LONG                       =        496;
-  SQL_SHORT                      =        500;
-  SQL_TIMESTAMP                  =        510;
-  SQL_BLOB                       =        520;
-  SQL_D_FLOAT                    =        530;
-  SQL_ARRAY                      =        540;
-  SQL_QUAD                       =        550;
-  SQL_TYPE_TIME                  =        560;
-  SQL_TYPE_DATE                  =        570;
-  SQL_INT64                      =        580;
-  SQL_BOOLEAN                    =        32764;
-  SQL_DATE                       =        SQL_TIMESTAMP;
+
 
 {$IFDEF IB5_ONLY}
 (** SQLDA_LENGTH is defined in C as a macro, but in Pascal we must defined it
