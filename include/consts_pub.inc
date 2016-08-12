@@ -108,6 +108,8 @@ const
   isc_dpb_utf8_filename	= 77;
   isc_dpb_ext_call_depth	= 78;
 
+  isc_dpb_last_dpb_constant =  isc_dpb_ext_call_depth;
+
 (**************************************************)
 (* clumplet tags used inside isc_dpb_address_path *)
 (*						 and isc_spb_address_path *)
@@ -216,6 +218,8 @@ const
   isc_tpb_restart_requests	= 19;
   isc_tpb_no_auto_undo	= 20;
   isc_tpb_lock_timeout	= 21;
+
+  isc_tpb_last_tpb_constant =  isc_tpb_lock_timeout;
 
 
 (************************)

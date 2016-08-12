@@ -109,13 +109,15 @@ type
     constructor Create(aField: IArrayMetaData); overload;
     constructor Create(aAttachment: TFBAttachment; aTransaction: TFBTransaction;
       relationName, columnName: string; ArrayID: TISC_QUAD); overload;
+    constructor Create(aAttachment: TFBAttachment; aTransaction: TFBTransaction;
+      relationName, columnName: string); overload;
     destructor Destroy; override;
-    function GetArrayID: TISC_QUAD;
     function GetSQLDialect: integer;
     procedure TransactionEnding(aTransaction: TFBTransaction; Force: boolean);
 
    public
     {IArray}
+    function GetArrayID: TISC_QUAD;
     function GetAsInteger(index: array of integer): integer;
     function GetAsBoolean(index: array of integer): boolean;
     function GetAsCurrency(index: array of integer): Currency;
@@ -469,14 +471,27 @@ constructor TFBArray.Create(aAttachment: TFBAttachment;
   aTransaction: TFBTransaction; relationName, columnName: string;
   ArrayID: TISC_QUAD);
 begin
-  inherited Create(aField.GetAttachment,aField.GetTransaction,
-                                 aField.getRelationName,aField.getSQLName);
+  inherited Create(aAttachment,aTransaction, relationName,columnName);
   FArrayID := ArrayID;
   FTransaction.RegisterObj(self);
-  FTransactionIntf :=  (aField as TFBArrayMetaData).FTransaction;
+  FTransactionIntf :=  aTransaction;
+  FIsNew := false;
+  FModified := false;
+  FSQLDialect := aAttachment.SQLDialect;
+  AllocateBuffer;
+  FElement := TFBArrayElement.Create(self,FBuffer);
+  FElementIntf := FElement;
+end;
+
+constructor TFBArray.Create(aAttachment: TFBAttachment;
+  aTransaction: TFBTransaction; relationName, columnName: string);
+begin
+  inherited Create(aAttachment,aTransaction,relationName,columnName);
+  FTransaction.RegisterObj(self);
+  FTransactionIntf :=  aTransaction;
   FIsNew := true;
   FModified := true;
-  FSQLDialect := FAttachment.SQLDialect;
+  FSQLDialect := aAttachment.SQLDialect;
   AllocateBuffer;
   FElement := TFBArrayElement.Create(self,FBuffer);
   FElementIntf := FElement;

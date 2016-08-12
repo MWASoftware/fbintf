@@ -80,6 +80,7 @@ type
   end;
 
   IArray = interface(IArrayMetaData)
+    function GetArrayID: TISC_QUAD;
     function GetAsInteger(index: array of integer): integer;
     function GetAsBoolean(index: array of integer): boolean;
     function GetAsCurrency(index: array of integer): Currency;
@@ -444,7 +445,6 @@ type
     procedure DropDatabase;
     function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionAction): ITransaction; overload;
     function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionAction): ITransaction; overload;
-    function CreateBlob(transaction: ITransaction): IBlob;
     procedure ExecImmediate(transaction: ITransaction; sql: string; SQLDialect: integer); overload;
     procedure ExecImmediate(TPB: array of byte; sql: string; SQLDialect: integer); overload;
     procedure ExecImmediate(transaction: ITransaction; sql: string); overload;
@@ -468,7 +468,12 @@ type
 
     {Blob - may use to open existing Blobs. However, ISQLData.AsBlob is preferred}
 
+    function CreateBlob(transaction: ITransaction): IBlob;
     function OpenBlob(Transaction: ITransaction; BlobID: TISC_QUAD): IBlob;
+
+    {Array}
+    function OpenArray(transaction: ITransaction; RelationName, ColumnName: string; ArrayID: TISC_QUAD): IArray;
+    function CreateArray(transaction: ITransaction; RelationName, ColumnName: string): IArray;
 
     {Database Information}
     function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: string): IBlobMetaData;
