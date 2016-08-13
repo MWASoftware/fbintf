@@ -35,13 +35,14 @@ const
 
   sqlInsert = 'Insert into TestData(RowID,Title,Notes) Values(:RowID,:Title,:Notes)';
 
-  sqlUpdate = 'Update TestData Set BlobData = ? Where RowID = 1';
+  sqlUpdate = 'Update TestData Set BlobData = ? Where RowID = ?';
 
 { TTest6 }
 
 procedure TTest6.UpdateDatabase(Attachment: IAttachment);
 var Transaction: ITransaction;
-    Statement: IStatement;
+    Statement,
+    Statement2: IStatement;
     ResultSet: IResultSet;
     i: integer;
 begin
@@ -65,9 +66,33 @@ begin
 
   Statement := Attachment.Prepare(Transaction,sqlUpdate);
   Statement.SQLParams[0].AsBlob := Statement.CreateBlob.LoadFromFile('testtext.txt');
+  Statement.SQLParams[1].AsInteger := 1;
   Statement.Execute;
   Statement := Attachment.Prepare(Transaction,'Select * from TestData');
   ReportResults(Statement);
+
+  {second row}
+  Statement := Attachment.PrepareWithNamedParameters(Transaction,sqlInsert);
+  with Statement.GetSQLParams do
+  begin
+    for i := 0 to GetCount - 1 do
+      writeln('Param Name = ',Params[i].getName);
+    ByName('rowid').AsInteger := 2;
+    ByName('title').AsString := 'Blob Test ©€';
+    ByName('Notes').AsString := 'Écoute moi';
+  end;
+  Statement.Execute;
+  Statement := Attachment.Prepare(Transaction,'Select * from TestData Where rowid = 1');
+  ResultSet := Statement.OpenCursor;
+  if ResultSet.FetchNext then
+  begin
+    Statement2 := Attachment.Prepare(Transaction,sqlUpdate);
+    Statement2.SQLParams[0].AsBlob := ResultSet.ByName('BlobData').AsBlob; {test duplication of blob}
+    Statement2.SQLParams[1].AsInteger := 2;
+    Statement2.Execute;
+    Statement := Attachment.Prepare(Transaction,'Select * from TestData');
+    ReportResults(Statement);
+  end;
 end;
 
 function TTest6.TestTitle: string;

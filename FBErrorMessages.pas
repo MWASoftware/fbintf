@@ -171,6 +171,8 @@ resourcestring
   SEOFInComment = 'EOF in comment detected';
   SEOFInString = 'EOF in string detected';
   SParamNameExpected = 'Parameter name expected';
+  SCantPrintValue = 'Cannot print value';
+  SSuccess = 'Successful execution';
 
 implementation
 
@@ -297,8 +299,6 @@ resourcestring
   SOutputParsingError = 'Unexpected Output buffer value (%d)';
   SUseSpecificProcedures = 'Generic ServiceStart not applicable: Use Specific Procedures to set configuration params';
   SSQLMonitorAlreadyPresent = 'SQL Monitor Instance is already present';
-  SCantPrintValue = 'Cannot print value';
-  SSuccess = 'Successful execution';
   SDelphiException = 'DelphiException %s';
   SNoOptionsSet = 'No Install Options selected';
   SNoDestinationDirectory = 'DestinationDirectory is not set';

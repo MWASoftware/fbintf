@@ -263,16 +263,6 @@ const
   isc_spb_process_name	= 112;
   isc_spb_trusted_role	= 113;
 
-  isc_spb_user_name_mapped_to_server              = isc_dpb_user_name;
-  isc_spb_sys_user_name_mapped_to_server          = isc_dpb_sys_user_name;
-  isc_spb_sys_user_name_enc_mapped_to_server      = isc_dpb_sys_user_name_enc;
-  isc_spb_password_mapped_to_server               = isc_dpb_password;
-  isc_spb_password_enc_mapped_to_server           = isc_dpb_password_enc;
-  isc_spb_command_line_mapped_to_server           = isc_spb_command_line;
-  isc_spb_dbname_mapped_to_server                 = isc_spb_dbname;
-  isc_spb_verbose_mapped_to_server                = isc_spb_verbose;
-  isc_spb_options_mapped_to_server                = isc_spb_options;
-
   isc_spb_connect_timeout	= isc_dpb_connect_timeout;
   isc_spb_dummy_packet_interval	= isc_dpb_dummy_packet_interval;
   isc_spb_sql_role_name	= isc_dpb_sql_role_name;

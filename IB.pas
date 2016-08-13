@@ -158,7 +158,6 @@ type
     function GetBlobMetaData: IBlobMetaData; {Valid only for Blob SQL Type}
     property Name: string read GetName;
     property Size: Integer read GetSize;
-    property CharSetID: cardinal read getCharSetID;
     property SQLType: short read GetSQLType;
     property SQLSubtype: short read getSubtype;
     property IsNullable: Boolean read GetIsNullable;
@@ -172,6 +171,7 @@ type
     function GetUniqueRelationName: string;
     function ByName(Idx: String): IColumnMetaData;
     property ColMetaData[index: integer]: IColumnMetaData read getColumnMetaData; default;
+    property Count: integer read getCount;
   end;
 
   ISQLData = interface(IColumnMetaData)
@@ -215,6 +215,7 @@ type
    function ByName(Idx: String): ISQLData;
    function getSQLData(index: integer): ISQLData;
    property Data[index: integer]: ISQLData read getSQLData; default;
+   property Count: integer read getCount;
   end;
 
   IResultSet = interface(IResults)
@@ -299,6 +300,7 @@ type
     function GetModified: Boolean;
     property Modified: Boolean read GetModified;
     property Params[index: integer]: ISQLParam read getSQLParam; default;
+    property Count: integer read getCount;
   end;
 
 
@@ -490,6 +492,8 @@ type
     procedure getRawBytes(var Buffer);
     function getAsString: string;
     function getAsInteger: integer;
+    property AsString: string read getAsString;
+    property AsInteger: integer read getAsInteger;
   end;
 
   IServiceQueryResultItem = interface(IServiceQueryResultSubItem)
@@ -497,6 +501,7 @@ type
     function getItem(index: integer): IServiceQueryResultSubItem;
     function find(ItemType: byte): IServiceQueryResultSubItem;
     property Items[index: integer]: IServiceQueryResultSubItem read getItem; default;
+    property Count: integer read getCount;
   end;
 
   IServiceQueryResults = interface
@@ -504,6 +509,7 @@ type
     function getItem(index: integer): IServiceQueryResultItem;
     function find(ItemType: byte): IServiceQueryResultItem;
     property Items[index: integer]: IServiceQueryResultItem read getItem; default;
+    property Count: integer read getCount;
   end;
 
   ISRBItem = interface

@@ -131,8 +131,8 @@ begin
   system.Delete(ServerName,i,Length(ServerName)-i+1);
 
   SPB := FirebirdAPI.AllocateSPB;
-  SPB.Add(isc_spb_user_name_mapped_to_server).setAsString(Owner.GetUserName);
-  SPB.Add(isc_spb_password_mapped_to_server).setAsString(Owner.GetPassword);
+  SPB.Add(isc_spb_user_name).setAsString(Owner.GetUserName);
+  SPB.Add(isc_spb_password).setAsString(Owner.GetPassword);
   Service := FirebirdAPI.GetServiceManager(ServerName,TCP,SPB);
 
   GetStatistics(Service,DBName);
