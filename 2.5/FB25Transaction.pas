@@ -38,7 +38,6 @@ type
   private
     FHandle: TISC_TR_HANDLE;
     FTPB: ITPB;
-    FTPBLength: short;
     FDefaultCompletion: TTransactionAction;
     FAttachments: array of IAttachment; {Keep reference to attachment - ensures
                                           attachment cannot be freed before transaction}

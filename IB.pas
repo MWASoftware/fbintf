@@ -488,7 +488,7 @@ type
 
   IServiceQueryResultSubItem = interface
     function getItemType: byte;
-    function getDataSize: integer;
+    function getSize: integer;
     procedure getRawBytes(var Buffer);
     function getAsString: string;
     function getAsInteger: integer;

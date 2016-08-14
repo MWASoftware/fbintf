@@ -6,8 +6,8 @@ uses
   {$IFDEF UNIX}
   cthreads,
   {$ENDIF}
-  Classes, SysUtils, CustApp, TestManager, Test1, test2, Test3, Test4, Test5,
-  Test6, Test7, Test8, Test9, Test10, Test11;
+  Classes, SysUtils, CustApp, TestManager, Test11, Test1, test2, Test3, Test4, Test5,
+  Test6, Test7, Test8, Test9, Test10;
 
 type
 

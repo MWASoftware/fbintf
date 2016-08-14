@@ -37,8 +37,8 @@ begin
 
   {Config Params}
   Req := Service.AllocateRequestBuffer;
-  Req.Add(isc_info_svc_get_config);
   Req.Add(isc_info_svc_get_env_lock);
+  Req.Add(isc_info_svc_get_config);
   Req.Add(isc_info_svc_get_env_msg);
   Req.Add(isc_info_svc_user_dbpath);
   Results := Service.Query(Req);

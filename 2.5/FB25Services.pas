@@ -5,78 +5,9 @@ unit FB25Services;
 interface
 
 uses
-  Classes, SysUtils, IB, FB25ClientAPI, IBHeader, FB25ParamBlock;
-
-const
-  DefaultBufferSize = 32000;
+  Classes, SysUtils, IB, FB25ClientAPI, IBHeader, FB25ParamBlock, FB25OutputBlock;
 
 type
-  { TServiceQueryResultSubItem }
-
-  TServiceQueryResultSubItem = class(TInterfacedObject,IServiceQueryResultSubItem)
-  private
-    FBufPtr: PChar;
-    FDataLength: integer;
-    FSize: integer;
-    FDataType: TParamDataType;
-  public
-    constructor Create(BufPtr: PChar); overload;
-    constructor CreateAsInteger(BufPtr: PChar);
-    constructor CreateAsString(BufPtr: PChar);
-    constructor CreateAsByte(BufPtr: PChar);
-    function getSize: integer;
-
-  public
-    {IServiceQueryResultSubItem}
-    function getItemType: byte;
-    function getDataSize: integer;
-    procedure getRawBytes(var Buffer);
-    function getAsString: string;
-    function getAsInteger: integer;
- end;
-
-  { TServiceQueryResultItem }
-
-  TServiceQueryResultItem = class(TServiceQueryResultSubItem,IServiceQueryResultItem)
-  private
-    FSubItems: array of IServiceQueryResultSubItem;
-    procedure ParseBuffer;
-    procedure ParseConfigItems;
-  public
-    constructor CreateAsList(BufPtr: PChar; aSize: integer);
-    constructor CreateAsConfigItems(BufPtr: PChar);
-
-  public
-    {IServiceQueryResultItem}
-    function getCount: integer;
-    function getItem(index: integer): IServiceQueryResultSubItem;
-    function find(ItemType: byte): IServiceQueryResultSubItem;
-    property Items[index: integer]: IServiceQueryResultSubItem read getItem; default;
-  end;
-
-  { TServiceQueryResults }
-
-  TServiceQueryResults = class(TInterfacedObject,IServiceQueryResults)
-  private
-    FBuffer: PChar;
-    FSize: integer;
-    FBufferParsed: boolean;
-    FItems: array of IServiceQueryResultItem;
-    procedure ParseBuffer;
-  public
-    constructor Create(aSize: integer = DefaultBufferSize);
-    destructor Destroy; override;
-    function Buffer: PChar;
-    function getBufSize: integer;
-
-  public
-    {IServiceQueryResults}
-    function getCount: integer;
-    function getItem(index: integer): IServiceQueryResultItem;
-    function find(ItemType: byte): IServiceQueryResultItem;
-    property Items[index: integer]: IServiceQueryResultItem read getItem; default;
- end;
-
   { TSPB }
 
   TSPB = class(TParamBlock,ISPB)
@@ -114,6 +45,30 @@ type
   public
     constructor Create(AOwner: TSRB; Data: PParamBlockItemData);
     function ISRBItem.SetAsString = SetAsString2;
+  end;
+
+  TServiceQueryResultSubItem = class(TOutputBlockItem,IServiceQueryResultSubItem);
+
+  { TServiceQueryResultItem }
+
+  TServiceQueryResultItem = class(TOutputBlockItemGroup,IServiceQueryResultItem)
+  public
+    function getItem(index: integer): IServiceQueryResultSubItem;
+    function find(ItemType: byte): IServiceQueryResultSubItem;
+  end;
+
+  { TServiceQueryResults }
+
+  TServiceQueryResults = class(TOutputBlock,IServiceQueryResults)
+  protected
+    function AddListItem(BufPtr: PChar): POutputBlockItemData; override;
+    function AddSpecialItem(BufPtr: PChar): POutputBlockItemData; override;
+    procedure DoParseBuffer; override;
+  public
+    {IServiceQueryResults}
+    function getItem(index: integer): IServiceQueryResultItem;
+    function find(ItemType: byte): IServiceQueryResultItem;
+    property Items[index: integer]: IServiceQueryResultItem read getItem; default;
   end;
 
   { TFBServiceManager }
@@ -221,250 +176,151 @@ begin
   Result := TSPBItem.Create(self,Item);
 end;
 
-  { TServiceQueryResultItem }
+{ TServiceQueryResultItem }
 
-procedure TServiceQueryResultItem.ParseBuffer;
+function TServiceQueryResultItem.getItem(index: integer
+  ): IServiceQueryResultSubItem;
+var P: POutputBlockItemData;
+begin
+  P := inherited getItem(index);
+  Result := TServiceQueryResultSubItem.Create(self.Owner,P);
+end;
+
+function TServiceQueryResultItem.find(ItemType: byte
+  ): IServiceQueryResultSubItem;
+var P: POutputBlockItemData;
+begin
+  P := inherited Find(ItemType);
+  Result := TServiceQueryResultSubItem.Create(self.Owner,P);
+end;
+
+{ TServiceQueryResults }
+
+function TServiceQueryResults.AddListItem(BufPtr: PChar): POutputBlockItemData;
 var P: PChar;
     i: integer;
     group: byte;
 begin
-  P := FBufPtr + 1;
+  Result := inherited AddListItem(BufPtr);
+  P := BufPtr + 1;
   i := 0;
-  group := byte(FBufPtr^);
+  group := byte(BufPtr^);
   if group in [isc_info_svc_get_users,isc_info_svc_limbo_trans] then
   begin
     with Firebird25ClientAPI do
-       FSize := isc_portable_integer(P,2) + 3;
+       Result^.FSize := isc_portable_integer(P,2) + 3;
     Inc(P,2);
   end;
-  while (P < FBufPtr + FSize) and (P^ <> char(isc_info_flag_end)) do
+  with Result^ do
   begin
-    SetLength(FSubItems,i+1);
-    case group of
-    isc_info_svc_svr_db_info:
-      case integer(P^) of
-        isc_spb_num_att,
-        isc_spb_num_db:
-          FSubItems[i] := TServiceQueryResultSubItem.CreateAsInteger(P);
+    while (P < FBufPtr + FSize) and (P^ <> char(isc_info_flag_end)) do
+    begin
+      SetLength(FSubItems,i+1);
+      case group of
+      isc_info_svc_svr_db_info:
+        case integer(P^) of
+          isc_spb_num_att,
+          isc_spb_num_db:
+            FSubItems[i] := AddIntegerItem(P);
 
-        isc_spb_dbname:
-          FSubItems[i] := TServiceQueryResultSubItem.CreateAsString(P);
+          isc_spb_dbname:
+            FSubItems[i] := AddStringItem(P);
+
+          else
+            IBError(ibxeOutputParsingError, [integer(P^)]);
+          end;
+
+      isc_info_svc_get_license:
+        case integer(P^) of
+        isc_spb_lic_id,
+        isc_spb_lic_key:
+          FSubItems[i] := AddIntegerItem(P);
+        else
+          IBError(ibxeOutputParsingError, [integer(P^)]);
+        end;
+
+      isc_info_svc_limbo_trans:
+       case integer(P^) of
+       isc_spb_tra_id,
+       isc_spb_single_tra_id,
+       isc_spb_multi_tra_id:
+         FSubItems[i] := AddIntegerItem(P);
+
+       isc_spb_tra_host_site,
+       isc_spb_tra_remote_site,
+       isc_spb_tra_db_path:
+         FSubItems[i] := AddStringItem(P);
+
+       isc_spb_tra_advise,
+       isc_spb_tra_state:
+         FSubItems[i] := AddByteItem(P);
+       else
+         IBError(ibxeOutputParsingError, [integer(P^)]);
+       end;
+
+      isc_info_svc_get_users:
+        case integer(P^) of
+        isc_spb_sec_userid,
+        isc_spb_sec_groupid:
+          FSubItems[i] := AddIntegerItem(P);
+
+        isc_spb_sec_username,
+        isc_spb_sec_password,
+        isc_spb_sec_firstname,
+        isc_spb_sec_middlename,
+        isc_spb_sec_lastname:
+          FSubItems[i] := AddStringItem(P);
 
         else
           IBError(ibxeOutputParsingError, [integer(P^)]);
         end;
 
-    isc_info_svc_get_license:
-      case integer(P^) of
-      isc_spb_lic_id,
-      isc_spb_lic_key:
-        FSubItems[i] := TServiceQueryResultSubItem.CreateAsInteger(P);
-      else
-        IBError(ibxeOutputParsingError, [integer(P^)]);
       end;
-
-    isc_info_svc_limbo_trans:
-     case integer(P^) of
-     isc_spb_tra_id,
-     isc_spb_single_tra_id,
-     isc_spb_multi_tra_id:
-       FSubItems[i] := TServiceQueryResultSubItem.CreateAsInteger(P);
-
-     isc_spb_tra_host_site,
-     isc_spb_tra_remote_site,
-     isc_spb_tra_db_path:
-       FSubItems[i] := TServiceQueryResultSubItem.CreateAsString(P);
-
-     isc_spb_tra_advise,
-     isc_spb_tra_state:
-       FSubItems[i] := TServiceQueryResultSubItem.CreateAsByte(P);
-     else
-       IBError(ibxeOutputParsingError, [integer(P^)]);
-     end;
-
-    isc_info_svc_get_users:
-      case integer(P^) of
-      isc_spb_sec_userid,
-      isc_spb_sec_groupid:
-        FSubItems[i] := TServiceQueryResultSubItem.CreateAsInteger(P);
-
-      isc_spb_sec_username,
-      isc_spb_sec_password,
-      isc_spb_sec_firstname,
-      isc_spb_sec_middlename,
-      isc_spb_sec_lastname:
-        FSubItems[i] := TServiceQueryResultSubItem.CreateAsString(P);
-
-      else
-        IBError(ibxeOutputParsingError, [integer(P^)]);
-      end;
-
+      P +=  FSubItems[i]^.FSize;
+      Inc(i);
     end;
-    P +=  (FSubItems[i] as TServiceQueryResultSubItem).getSize;
-    Inc(i);
-  end;
-  FDataLength := 0;
-  for i := 0 to Length(FSubItems) - 1 do
-    FDataLength += (FSubItems[i] as TServiceQueryResultSubItem).getSize;
-  if group in [isc_info_svc_get_users,isc_info_svc_limbo_trans] then
-    Exit;
-
-  if (P < FBufPtr + FSize) and (P^ = char(isc_info_flag_end)) then
-    FSize := FDataLength + 2 {include start and end flag}
-  else
-    FSize := FDataLength + 1; {start flag only}
-end;
-
-procedure TServiceQueryResultItem.ParseConfigItems;
-var P: PChar;
-    i: integer;
-begin
-  P := FBufPtr + 3; {skip length bytes}
-  i := 0;
-  while P < FBufPtr + FDataLength do
-  begin
-    FSubItems[i] := TServiceQueryResultSubItem.CreateAsInteger(P);
-    P +=  (FSubItems[i] as TServiceQueryResultSubItem).getSize;
-    Inc(i);
-  end;
-end;
-
-constructor TServiceQueryResultItem.CreateAsList(BufPtr: PChar; aSize: integer);
-begin
-  inherited Create;
-  FDataType := dtInteger;
-  FBufPtr := BufPtr;
-  FSize := aSize;
-  ParseBuffer;
-end;
-
-constructor TServiceQueryResultItem.CreateAsConfigItems(BufPtr: PChar);
-begin
-  inherited Create;
-  FDataType := dtNone;
-  FBufPtr := BufPtr;
-  with Firebird25ClientAPI do
-    FDataLength := isc_portable_integer(FBufPtr+1, 2);
-  ParseConfigItems;
-end;
-
-function TServiceQueryResultItem.getCount: integer;
-begin
-  Result := Length(FSubItems);
-end;
-
-function TServiceQueryResultItem.getItem(index: integer
-  ): IServiceQueryResultSubItem;
-begin
-  if (index >= 0) and (index < Length(FSubItems)) then
-    Result := FSubItems[index]
-  else
-    IBError(ibxeServiceResponseIndexError,[index]);
-end;
-
-function TServiceQueryResultItem.find(ItemType: byte
-  ): IServiceQueryResultSubItem;
-var i: integer;
-begin
-  Result := nil;
-  for i := 0 to getCount - 1 do
-    if FSubItems[i].getItemType = ItemType then
-    begin
-      Result := FSubItems[i];
+    FDataLength := 0;
+    for i := 0 to Length(FSubItems) - 1 do
+      FDataLength += FSubItems[i]^.FSize;
+    if group in [isc_info_svc_get_users,isc_info_svc_limbo_trans] then
       Exit;
-    end;
-end;
 
-{ TServiceQueryResultSubItem }
-
-constructor TServiceQueryResultSubItem.Create(BufPtr: PChar);
-begin
-  inherited Create;
-  FDataType := dtNone;
-  FBufPtr := BufPtr;
-  FDataLength := 0;
-  FSize := 1;
-end;
-
-constructor TServiceQueryResultSubItem.CreateAsInteger(BufPtr: PChar);
-begin
-  inherited Create;
-  FDataType := dtInteger;
-  FBufPtr := BufPtr;
-  FDataLength := 4;
-  FSize := 5;
-end;
-
-constructor TServiceQueryResultSubItem.CreateAsString(BufPtr: PChar);
-begin
-  inherited Create;
-  FDataType := dtString2;
-  FBufPtr := BufPtr;
-  with Firebird25ClientAPI do
-    FDataLength := isc_portable_integer(FBufPtr+1, 2);
-  FSize := FDataLength + 3;
-end;
-
-constructor TServiceQueryResultSubItem.CreateAsByte(BufPtr: PChar);
-begin
-  inherited Create;
-  FDataType := dtByte;
-  FBufPtr := BufPtr;
-  FDataLength := 1;
-  FSize := 2;
-end;
-
-function TServiceQueryResultSubItem.getSize: integer;
-begin
-  Result := FSize;
-end;
-
-function TServiceQueryResultSubItem.getItemType: byte;
-begin
-  Result := byte(FBufPtr^);
-end;
-
-function TServiceQueryResultSubItem.getDataSize: integer;
-begin
-  Result := FDataLength;
-end;
-
-procedure TServiceQueryResultSubItem.getRawBytes(var Buffer);
-begin
-  Move((FBufPtr+1)^,Buffer,FDataLength);
-end;
-
-function TServiceQueryResultSubItem.getAsString: string;
-begin
-  if FDataType = dtInteger then
-    Result := IntToStr(getAsInteger)
-  else
-    SetString(Result,FBufPtr+3,FDataLength);
-end;
-
-function TServiceQueryResultSubItem.getAsInteger: integer;
-begin
-  case FDataType of
-  dtByte:
-      Result := byte((FBufPtr+1)^);
-  dtInteger:
-    with Firebird25ClientAPI do
-      Result := isc_portable_integer(FBufPtr+1, 4);
-  else
-    IBError(ibxeServiceResponseTypeError,[nil]);
+    if (P < FBufPtr + FSize) and (P^ = char(isc_info_flag_end)) then
+      FSize := FDataLength + 2 {include start and end flag}
+    else
+      FSize := FDataLength + 1; {start flag only}
   end;
 end;
 
-{ TServiceQueryResults }
-
-procedure TServiceQueryResults.ParseBuffer;
+function TServiceQueryResults.AddSpecialItem(BufPtr: PChar
+  ): POutputBlockItemData;
 var P: PChar;
     i: integer;
 begin
-  if FBufferParsed then Exit;
-  P := FBuffer;
+  Result := inherited AddSpecialItem(BufPtr);
+  with Result^ do
+  begin
+    with Firebird25ClientAPI do
+      FDataLength := isc_portable_integer(FBufPtr+1, 2);
+
+    P := FBufPtr + 3; {skip length bytes}
+    i := 0;
+    while P < FBufPtr + FDataLength do
+    begin
+      FSubItems[i] := AddIntegerItem(P);
+      P +=  FSubItems[i]^.FSize;
+      Inc(i);
+    end;
+  end;
+end;
+
+procedure TServiceQueryResults.DoParseBuffer;
+var P: PChar;
+    i: integer;
+begin
+  P := Buffer;
   i := 0;
-  while  (P < FBuffer + FSize) and (P^ <> char(isc_info_end)) do
+  while  (P < Buffer + getBufSize) and (P^ <> char(isc_info_end)) do
   begin
     SetLength(FItems,i+1);
     case integer(P^) of
@@ -474,95 +330,56 @@ begin
     isc_info_svc_get_env_msg,
     isc_info_svc_user_dbpath,
     isc_info_svc_server_version,
-    isc_info_svc_implementation:
-      FItems[i] := TServiceQueryResultItem.CreateAsString(P);
+    isc_info_svc_implementation,
+    isc_info_svc_to_eof:
+      FItems[i] := AddStringItem(P);
 
     isc_info_svc_get_license_mask,
     isc_info_svc_capabilities,
     isc_info_svc_version,
     isc_info_svc_running,
     isc_info_svc_stdin:
-      FItems[i] := TServiceQueryResultItem.CreateAsInteger(P);
-
-    isc_info_svc_to_eof:
-      FItems[i] := TServiceQueryResultItem.CreateAsString(P);
+      FItems[i] := AddIntegerItem(P);
 
     isc_info_svc_timeout,
     isc_info_data_not_ready,
     isc_info_truncated:
-      FItems[i] := TServiceQueryResultItem.Create(P);
-
-    isc_info_svc_get_config:
-      FItems[i] := TServiceQueryResultItem.CreateAsConfigItems(P);
+      FItems[i] := AddItem(P);
 
     isc_info_svc_svr_db_info,
     isc_info_svc_get_license,
     isc_info_svc_limbo_trans,
     isc_info_svc_get_users:
-      FItems[i] := TServiceQueryResultItem.CreateAsList(P, FSize - (P - FBuffer));
+      FItems[i] := AddListItem(P);
+
+    isc_info_svc_get_config:
+      FItems[i] := AddSpecialItem(P);
+
+
     else
        IBError(ibxeOutputParsingError, [integer(P^)]);
     end;
-    P += (FItems[i] as TServiceQueryResultItem).getSize;
+    P += FItems[i]^.FSize;
     Inc(i);
   end;
-  FBufferParsed := true;
-end;
-
-constructor TServiceQueryResults.Create(aSize: integer);
-begin
-  inherited Create;
-  FSize := aSize;
-  GetMem(FBuffer,aSize);
-  if FBuffer = nil then
-    OutOfMemoryError;
-  FillChar(FBuffer^,aSize,255);
-  FBufferParsed := false;
-end;
-
-destructor TServiceQueryResults.Destroy;
-begin
-  FreeMem(FBuffer);
-  inherited Destroy;
-end;
-
-function TServiceQueryResults.Buffer: PChar;
-begin
-  Result := FBuffer;
-end;
-
-function TServiceQueryResults.getBufSize: integer;
-begin
-  Result := FSize;
-end;
-
-function TServiceQueryResults.getCount: integer;
-begin
-  ParseBuffer;
-  Result := length(FItems);
 end;
 
 function TServiceQueryResults.getItem(index: integer): IServiceQueryResultItem;
+var P: POutputBlockItemData;
 begin
-  ParseBuffer;
-  if (index >= 0) and (index < Length(FItems)) then
-    Result := FItems[index]
-  else
-    IBError(ibxeServiceResponseIndexError,[index]);
+  P := inherited getItem(index);
+  Result := TServiceQueryResultItem.Create(self,P)
 end;
 
 function TServiceQueryResults.find(ItemType: byte): IServiceQueryResultItem;
-var i: integer;
+var P: POutputBlockItemData;
 begin
-  Result := nil;
-  for i := 0 to getCount - 1 do
-    if FItems[i].getItemType = ItemType then
-    begin
-      Result := FItems[i];
-      Exit;
-    end;
+  P := inherited find(ItemType);
+  if P = nil then
+    Result := nil
+  else
+    Result := TServiceQueryResultItem.Create(self,P);
 end;
-
 
 { TFBServiceManager }
 

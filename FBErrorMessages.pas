@@ -148,8 +148,8 @@ type
       ibxeInfoBufferOverflow,
       ibxServiceRequestIndexError,
       ibxServiceParamTypeError,
-      ibxeServiceResponseIndexError,
-      ibxeServiceResponseTypeError,
+      ibxeOutputBlockIndexError,
+      ibxeOutputBlockTypeError,
       ibxePBIndexError,
       ibxePBParamTypeError,
       ibxeDuplicateParamName,
@@ -330,8 +330,8 @@ resourcestring
   SInfoBufferOverflow = 'Info Buffer overlow';
   SServiceRequestIndexError = 'Service Request Index Out of Range (%d)';
   SServiceParamTypeError = 'Invalid Request for Service Param Type';
-  SServiceResponseIndexError = 'Service Response Index Out of Range (%d)';
-  SServiceResponseTypeError = 'Invalid Request for Service Response Type';
+  SOutputBlockIndexError = 'Output Block Index Out of Range (%d)';
+  SOutputBlockTypeError = 'Invalid Request for Output Block Type';
   SPBIndexError = 'DPB Index out of range (%d)';
   SPBParamTypeError = 'Invalid Request for DPB Param Type';
   SDuplicateParamName = 'Blob or array parameter name must be unique (%s)';
@@ -477,8 +477,8 @@ const
     SInfoBufferOverflow,
     SServiceRequestIndexError,
     SServiceParamTypeError,
-    SServiceResponseIndexError,
-    SServiceResponseTypeError,
+    SOutputBlockIndexError,
+    SOutputBlockTypeError,
     SPBIndexError,
     SPBParamTypeError,
     SDuplicateParamName,

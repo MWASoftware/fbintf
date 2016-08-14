@@ -4,7 +4,7 @@ unit FB25ParamBlock;
 
 interface
 
-{Provides common handling for the DPB, SPB and Service Request Block}
+{Provides common handling for the DPB, TPB, SPB and Service Request Block (SRB)}
 
 uses
   Classes, SysUtils, IB, FB25ClientAPI;
@@ -122,6 +122,8 @@ begin
         len := isc_portable_integer(FBufPtr+1,2);
       SetString(Result,FBufPtr+3,len);
     end;
+    else
+      IBError(ibxeOutputBlockTypeError,[nil]);
   end;
 end;
 
