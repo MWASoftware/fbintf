@@ -410,6 +410,8 @@ type
     function GetCount: integer;
     function GetItem(index: integer): IDBInfoItem;
     function Find(ItemType: byte): IDBInfoItem;
+    property AsInteger: integer read getAsInteger;
+    property AsString: integer read GetAsString;
     property Count: integer read GetCount;
     property Items[index: integer]: IDBInfoItem read getItem; default;
   end;
