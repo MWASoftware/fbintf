@@ -310,7 +310,7 @@ type
     function GetSQLParams: ISQLParams;
     function GetMetaData: IMetaData;
     function GetPlan: String;
-    function GetRowsAffected(var InsertCount, UpdateCount, DeleteCount: integer): boolean;
+    function GetRowsAffected(var SelectCount, InsertCount, UpdateCount, DeleteCount: integer): boolean;
     function GetSQLType: TIBSQLTypes;
     function GetSQLText: string;
     function IsPrepared: boolean;

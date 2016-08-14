@@ -195,10 +195,10 @@ begin
 end;
 
 procedure TTestBase.WriteAffectedRows(Statement: IStatement);
-var  InsertCount, UpdateCount, DeleteCount: integer;
+var  SelectCount, InsertCount, UpdateCount, DeleteCount: integer;
 begin
-  Statement.GetRowsAffected(InsertCount, UpdateCount, DeleteCount);
-  writeln('InsertCount = ',InsertCount,' UpdateCount = ', UpdateCount, ' DeleteCount = ',DeleteCount);
+  Statement.GetRowsAffected(SelectCount, InsertCount, UpdateCount, DeleteCount);
+  writeln('Select Count = ', SelectCount,' InsertCount = ',InsertCount,' UpdateCount = ', UpdateCount, ' DeleteCount = ',DeleteCount);
 end;
 
 function TTestBase.WriteServiceQueryResult(QueryResult: IServiceQueryResults): boolean;

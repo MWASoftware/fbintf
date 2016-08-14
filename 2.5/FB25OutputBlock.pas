@@ -8,7 +8,7 @@ unit FB25OutputBlock;
 
 interface
 
-{Provides common handling for the DB Info results and Service Response Block}
+{Provides common handling for the DB Info results, SQL Info and Service Response Block}
 
 uses
   Classes, SysUtils,  FB25ClientAPI, IB;
