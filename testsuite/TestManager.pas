@@ -361,7 +361,7 @@ var i, j: integer;
     DBSiteName: string;
     Version: byte;
     VersionString: string;
-    Users: TStrings;
+    Users: TStringList;
 begin
   for i := 0 to DBInfo.GetCount - 1 do
   with DBInfo[i] do
@@ -412,10 +412,11 @@ begin
      begin
        Users := TStringList.Create;
        try
-        DecodeUserNames(Users);
         write('Logged in Users: ');
+        DecodeUserNames(Users);
         for j := 0 to Users.Count - 1 do
           write(Users[j],',');
+
        finally
          Users.Free;
        end;
@@ -446,7 +447,7 @@ begin
    isc_info_update_count:
      WriteOperationCounts('Update Count',getOperationCounts);
    else
-     writeln('Unknown Response');
+     writeln('Unknown Response ',getItemType);
   end;
 end;
 

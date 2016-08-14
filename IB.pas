@@ -403,8 +403,15 @@ type
     procedure DecodeIDCluster(var ConnectionType: integer; var DBFileName, DBSiteName: string);
     function getAsBytes: TByteArray;
     procedure DecodeVersionString(var Version: byte; var VersionString: string);
-    procedure DecodeUserNames(UserNames: TStrings);
     function getOperationCounts: TDBOperationCounts;
+    procedure DecodeUserNames(UserNames: TStrings);
+
+    {user names only}
+    function GetCount: integer;
+    function GetItem(index: integer): IDBInfoItem;
+    function Find(ItemType: byte): IDBInfoItem;
+    property Count: integer read GetCount;
+    property Items[index: integer]: IDBInfoItem read getItem; default;
   end;
 
   { IDBInformation }
@@ -413,6 +420,7 @@ type
     function GetCount: integer;
     function GetItem(index: integer): IDBInfoItem;
     function Find(ItemType: byte): IDBInfoItem;
+    property Count: integer read GetCount;
     property Items[index: integer]: IDBInfoItem read getItem; default;
   end;
 

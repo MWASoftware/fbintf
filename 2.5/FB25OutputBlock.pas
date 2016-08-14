@@ -1,6 +1,10 @@
 unit FB25OutputBlock;
 
 {$mode objfpc}{$H+}
+{$IF FPC_FULLVERSION >= 20700 }
+{$codepage UTF8}
+{$DEFINE HAS_ANSISTRING_CODEPAGE}
+{$ENDIF}
 
 interface
 
@@ -13,7 +17,7 @@ const
   DefaultBufferSize = 32000;
 
 type
-  TItemDataType = (dtString, dtString2, dtByte, dtBytes, dtInteger, dtnone,dtList,dtSpecial);
+  TItemDataType = (dtString, dtString2, dtByte, dtBytes, dtInteger, dtIntegerFixed, dtnone,dtList,dtSpecial);
 
   POutputBlockItemData = ^TOutputBlockItemData;
   TOutputBlockItemData = record
@@ -36,12 +40,15 @@ type
     FBufferParsed: boolean;
     procedure ParseBuffer;
   protected
+    FIntegerType: TItemDataType;
     FItems: array of POutputBlockItemData;
     procedure DoParseBuffer; virtual; abstract;
     function AddItem(BufPtr: PChar): POutputBlockItemData;
     function AddIntegerItem(BufPtr: PChar): POutputBlockItemData;
     function AddStringItem(BufPtr: PChar): POutputBlockItemData;
+    function AddShortStringItem(BufPtr: PChar): POutputBlockItemData;
     function AddByteItem(BufPtr: PChar): POutputBlockItemData;
+    function AddBytesItem(BufPtr: PChar): POutputBlockItemData;
     function AddListItem(BufPtr: PChar): POutputBlockItemData; virtual;
     function AddSpecialItem(BufPtr: PChar): POutputBlockItemData; virtual;
   public
@@ -65,6 +72,8 @@ type
     FOwnerIntf: IUnknown;
     FItemData: POutputBlockItemData;
   protected
+    procedure SetString(out S: AnsiString; Buf: PAnsiChar; Len: SizeInt;
+                                           CodePage: TSystemCodePage);
     property ItemData: POutputBlockItemData read FItemData;
     property Owner: TOutputBlock read FOwner;
   public
@@ -125,6 +134,17 @@ end;
 
 { TOutputBlockItem }
 
+procedure TOutputBlockItem.SetString(out S: AnsiString; Buf: PAnsiChar;
+  Len: SizeInt; CodePage: TSystemCodePage);
+var rs: RawByteString;
+begin
+  system.SetString(rs,Buf,len);
+  {$IFDEF HAS_ANSISTRING_CODEPAGE}
+  SetCodePage(rs,CodePage,false);
+  {$ENDIF}
+  S := rs;
+end;
+
 constructor TOutputBlockItem.Create(AOwner: TOutputBlock;
   Data: POutputBlockItemData);
 begin
@@ -151,13 +171,24 @@ begin
 end;
 
 function TOutputBlockItem.getAsInteger: integer;
+var len: integer;
 begin
   with FItemData^ do
-  if FDataType =  dtInteger then
-  with Firebird25ClientAPI do
-    Result := isc_portable_integer(FBufPtr+1,4)
+  case FDataType of
+  dtIntegerFixed:
+    with Firebird25ClientAPI do
+      Result := isc_portable_integer(FBufPtr+1,4);
+
+  dtByte,
+  dtInteger:
+    with Firebird25ClientAPI do
+    begin
+      len := isc_portable_integer(FBufPtr+1,2);
+      Result := isc_portable_integer(FBufPtr+3,len);
+    end;
   else
     IBError(ibxeOutputBlockTypeError,[nil]);
+  end;
 end;
 
 function TOutputBlockItem.getParamType: byte;
@@ -178,13 +209,13 @@ begin
   dtString:
     begin
       len := byte((FBufPtr+1)^);
-      SetString(Result,FBufPtr+2,len);
+      SetString(Result,FBufPtr+2,len,CP_ACP);
     end;
   dtString2:
     begin
       with Firebird25ClientAPI do
         len := isc_portable_integer(FBufPtr+1,2);
-      SetString(Result,FBufPtr+3,len);
+      SetString(Result,FBufPtr+3,len,CP_ACP);
     end;
   else
     IBError(ibxeOutputBlockTypeError,[nil]);
@@ -246,10 +277,19 @@ begin
   new(Result);
   with Result^ do
   begin
-    FDataType := dtInteger;
+    FDataType := FIntegerType;
     FBufPtr := BufPtr;
-    FDataLength := 4;
-    FSize := 5;
+    if FDataType = dtIntegerFixed then
+    begin
+      FDataLength := 4;
+      FSize := 5;
+    end
+    else
+    begin
+      with Firebird25ClientAPI do
+        FDataLength := isc_portable_integer(FBufPtr+1, 2);
+      FSize := FDataLength + 3;
+    end;
     SetLength(FSubItems,0);
   end;
 end;
@@ -268,6 +308,19 @@ begin
   end;
 end;
 
+function TOutputBlock.AddShortStringItem(BufPtr: PChar): POutputBlockItemData;
+begin
+  new(Result);
+  with Result^ do
+  begin
+    FDataType := dtString;
+    FBufPtr := BufPtr;
+    FDataLength := byte((FBufPtr+1)^);
+    FSize := FDataLength + 2;
+    SetLength(FSubItems,0);
+  end;
+end;
+
 function TOutputBlock.AddByteItem(BufPtr: PChar): POutputBlockItemData;
 begin
   new(Result);
@@ -277,6 +330,20 @@ begin
     FBufPtr := BufPtr;
     FDataLength := 1;
     FSize := 2;
+    SetLength(FSubItems,0);
+  end;
+end;
+
+function TOutputBlock.AddBytesItem(BufPtr: PChar): POutputBlockItemData;
+begin
+  new(Result);
+  with Result^ do
+  begin
+    FDataType := dtBytes;
+    FBufPtr := BufPtr;
+    with Firebird25ClientAPI do
+      FDataLength := isc_portable_integer(FBufPtr+1, 2);
+    FSize := FDataLength + 3;
     SetLength(FSubItems,0);
   end;
 end;
@@ -315,6 +382,7 @@ begin
     OutOfMemoryError;
   FillChar(FBuffer^,aSize,255);
   FBufferParsed := false;
+  FIntegerType := dtIntegerFixed;
 end;
 
 destructor TOutputBlock.Destroy;

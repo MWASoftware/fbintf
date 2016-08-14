@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, IB, FBTypes, FBLibrary, FB25ClientAPI, IBHeader,
-  FB25ParamBlock;
+  FB25ParamBlock, FB25OutputBlock, FB25Status;
 
 type
   TDPB = class;
@@ -30,6 +30,38 @@ type
     function Add(ParamType: byte): IDPBItem;
     function Find(ParamType: byte): IDPBItem;
     function GetItems(index: integer): IDPBItem;
+  end;
+
+  { TDBInfoItem }
+
+  TDBInfoItem = class(TOutputBlockItemGroup,IDBInfoItem)
+  public
+    procedure DecodeIDCluster(var ConnectionType: integer; var DBFileName, DBSiteName: string);
+    procedure DecodeVersionString(var Version: byte; var VersionString: string);
+    procedure DecodeUserNames(UserNames: TStrings);
+    function getOperationCounts: TDBOperationCounts;
+    function GetItem(index: integer): IDBInfoItem;
+    function Find(ItemType: byte): IDBInfoItem;
+ end;
+
+  TFBAttachment = class;
+
+  { TDBInformation }
+
+  TDBInformation = class(TOutputBlock,IDBInformation)
+  protected
+    function AddSpecialItem(BufPtr: PChar): POutputBlockItemData; override;
+    procedure DoParseBuffer; override;
+  public
+    constructor Create(aAttachment: TFBAttachment; info_request: byte;
+      aSize: integer=IBLocalBufferLength); overload;
+    constructor Create(aAttachment: TFBAttachment; info_requests: array of byte;
+      aSize: integer=IBLocalBufferLength); overload;
+
+  public
+    {IDBInformation}
+    function GetItem(index: integer): IDBInfoItem;
+    function Find(ItemType: byte): IDBInfoItem;
   end;
 
   { TFBAttachment }
@@ -93,7 +125,226 @@ type
 implementation
 
 uses FB25Events,FB25Transaction, FBErrorMessages, FB25Blob,
-  FB25Statement, FB25DBInfo, FB25Array;
+  FB25Statement, FB25Array;
+
+{ TDBInfoItem }
+
+procedure TDBInfoItem.DecodeIDCluster(var ConnectionType: integer;
+  var DBFileName, DBSiteName: string);
+var  P: PChar;
+begin
+  with ItemData^ do
+  if FBufPtr^ = char(isc_info_db_id) then
+  begin
+    P := FBufPtr + 3;
+    if FDataLength > 0 then
+      ConnectionType := integer(P^);
+    Inc(P);
+    SetString(DBFileName,P+1,byte(P^),CP_ACP);
+    P += Length(DBFileName) + 1;
+    SetString(DBSiteName,P+1,byte(P^),CP_ACP);
+  end
+  else
+    IBError(ibxeInfoBufferTypeError,[integer(FBufPtr^)]);
+end;
+
+procedure TDBInfoItem.DecodeVersionString(var Version: byte;
+  var VersionString: string);
+var  P: PChar;
+begin
+  with ItemData^ do
+  if FBufPtr^ = char(isc_info_version) then
+  begin
+   P := FBufPtr+3;
+   VersionString := '';
+   Version := byte(P^);
+   Inc(P);
+   SetString(VersionString,P+1,byte(P^),CP_ACP);
+  end
+  else
+    IBError(ibxeInfoBufferTypeError,[integer(FBufPtr^)]);
+end;
+
+procedure TDBInfoItem.DecodeUserNames(UserNames: TStrings);
+var P: PChar;
+    s: string;
+begin
+  with ItemData^ do
+  if FBufPtr^ = char(isc_info_user_names) then
+  begin
+    P := FBufPtr+3;
+    while (P < FBufPtr + FSize) do
+    begin
+      SetString(s,P+1,byte(P^),CP_ACP);
+      UserNames.Add(s);
+      P += Length(s) + 1;
+    end;
+  end
+  else
+    IBError(ibxeInfoBufferTypeError,[integer(FBufPtr^)]);
+end;
+
+function TDBInfoItem.getOperationCounts: TDBOperationCounts;
+var tableCounts: integer;
+    P: PChar;
+    i: integer;
+begin
+  with ItemData^ do
+  if byte(FBufPtr^) in [isc_info_backout_count, isc_info_delete_count,
+                              isc_info_expunge_count,isc_info_insert_count, isc_info_purge_count,
+                              isc_info_read_idx_count, isc_info_read_seq_count, isc_info_update_count] then
+  begin
+    tableCounts := FDataLength div 6;
+    SetLength(Result,TableCounts);
+    P := FBufPtr + 3;
+    for i := 0 to TableCounts -1 do
+    with Firebird25ClientAPI do
+    begin
+      Result[i].TableID := isc_portable_integer(P,2);
+      Inc(P,2);
+      Result[i].Count := isc_portable_integer(P,4);
+      Inc(P,4);
+    end;
+  end
+  else
+    IBError(ibxeInfoBufferTypeError,[integer(FBufPtr^)]);
+end;
+
+function TDBInfoItem.GetItem(index: integer): IDBInfoItem;
+var P: POutputBlockItemData;
+begin
+  P := inherited getItem(index);
+  Result := TDBInfoItem.Create(self.Owner,P);
+end;
+
+function TDBInfoItem.Find(ItemType: byte): IDBInfoItem;
+var P: POutputBlockItemData;
+begin
+  P := inherited Find(ItemType);
+  Result := TDBInfoItem.Create(self.Owner,P);
+end;
+
+{ TDBInformation }
+
+function TDBInformation.AddSpecialItem(BufPtr: PChar): POutputBlockItemData;
+begin
+  Result := inherited AddSpecialItem(BufPtr);
+  with Result^ do
+  begin
+    with Firebird25ClientAPI do
+      FDataLength := isc_portable_integer(FBufPtr+1,2);
+    FSize := FDataLength + 3;
+  end;
+end;
+
+procedure TDBInformation.DoParseBuffer;
+var P: PChar;
+    index: integer;
+    len: integer;
+begin
+  P := Buffer;
+  index := 0;
+  SetLength(FItems,0);
+  while (P^ <> char(isc_info_end)) and (P < Buffer + getBufSize) do
+  begin
+    SetLength(FItems,index+1);
+    case byte(P^) of
+    isc_info_no_reserve,
+    isc_info_allocation,
+    isc_info_ods_minor_version,
+    isc_info_ods_version,
+    isc_info_page_size,
+    isc_info_current_memory,
+    isc_info_forced_writes,
+    isc_info_max_memory,
+    isc_info_num_buffers,
+    isc_info_sweep_interval,
+    isc_info_fetches,
+    isc_info_marks,
+    isc_info_reads,
+    isc_info_writes:
+      FItems[index] := AddIntegerItem(P);
+
+    isc_info_implementation,
+    isc_info_base_level:
+      FItems[index] := AddBytesItem(P);
+
+    isc_info_db_id,
+    isc_info_version,
+    isc_info_backout_count,
+    isc_info_delete_count,
+    isc_info_expunge_count,
+    isc_info_insert_count,
+    isc_info_purge_count,
+    isc_info_read_idx_count,
+    isc_info_read_seq_count,
+    isc_info_update_count,
+    isc_info_user_names:
+      FItems[index] := AddSpecialItem(P);
+
+    else
+      FItems[index] := AddSpecialItem(P);
+     end;
+    P += FItems[index]^.FSize;
+    Inc(index);
+  end;
+end;
+
+constructor TDBInformation.Create(aAttachment: TFBAttachment;
+  info_request: byte; aSize: integer);
+begin
+  inherited Create(aSize);
+  FIntegerType := dtInteger;
+  if aAttachment.Handle = nil then
+    IBError(ibxeInvalidStatementHandle,[nil]);
+  with Firebird25ClientAPI do
+    if isc_database_info(StatusVector, @(aAttachment.Handle), 1, @info_request,
+                           getBufSize, Buffer) > 0 then
+      IBDataBaseError;
+end;
+
+constructor TDBInformation.Create(aAttachment: TFBAttachment;
+  info_requests: array of byte; aSize: integer);
+var ReqBuffer: PByte;
+    i: integer;
+begin
+  if Length(info_requests) = 1 then
+    Create(aAttachment,info_requests[0],aSize)
+  else
+  begin
+    inherited Create(aSize);
+    if aAttachment.Handle = nil then
+      IBError(ibxeInvalidStatementHandle,[nil]);
+    GetMem(ReqBuffer,Length(info_requests));
+    try
+      for i := 0 to Length(info_requests) - 1 do
+        ReqBuffer[i] := info_requests[i];
+
+      with Firebird25ClientAPI do
+          if isc_database_info(StatusVector, @(aAttachment.Handle), Length(info_requests), PChar(ReqBuffer),
+                                 getBufSize, Buffer) > 0 then
+            IBDataBaseError;
+
+    finally
+      FreeMem(ReqBuffer);
+    end;
+  end;
+  FIntegerType := dtInteger;
+end;
+
+function TDBInformation.GetItem(index: integer): IDBInfoItem;
+var P: POutputBlockItemData;
+begin
+  P := inherited getItem(index);
+  Result := TDBInfoItem.Create(self,P)
+end;
+
+function TDBInformation.Find(ItemType: byte): IDBInfoItem;
+var P: POutputBlockItemData;
+begin
+  P := inherited Find(ItemType);
+  Result := TDBInfoItem.Create(self,P)
+end;
 
 { TDPBItem }
 
