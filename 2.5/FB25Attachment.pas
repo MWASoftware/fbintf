@@ -253,6 +253,7 @@ begin
     isc_info_allocation,
     isc_info_ods_minor_version,
     isc_info_ods_version,
+    isc_info_db_SQL_dialect,
     isc_info_page_size,
     isc_info_current_memory,
     isc_info_forced_writes,

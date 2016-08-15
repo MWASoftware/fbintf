@@ -505,7 +505,13 @@ end;
 
 function TFB25ClientAPI.IsEmbeddedServer: boolean;
 begin
-  Result := IsEmbeddedServer;
+  Result := false;
+  {$IFDEF UNIX}
+  Result := Pos('libfbembed',FBLibraryName) = 1;
+  {$ENDIF}
+  {$IFDEF WINDOWS}
+  Result := CompareText(FBLibraryName,FIREBIRD_EMBEDDED) = 0
+  {$ENDIF}
 end;
 
 function TFB25ClientAPI.GetLibraryName: string;

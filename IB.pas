@@ -208,6 +208,7 @@ type
     property AsBlob: IBlob read GetAsBlob;
     property AsArray: IArray read GetAsArray;
     property IsNull: Boolean read GetIsNull;
+    property Value: Variant read GetAsVariant;
   end;
 
   IResults = interface
@@ -266,6 +267,7 @@ type
     property AsShort: Short read GetAsShort write SetAsShort;
     property AsString: String read GetAsString write SetAsString;
     property AsVariant: Variant read GetAsVariant write SetAsVariant;
+    property Value: Variant read GetAsVariant write SetAsVariant;
   end;
 
 
@@ -281,16 +283,17 @@ type
     function GetSQLTypeName: string;
     function GetSubtype: short;
     function GetAsQuad: TISC_QUAD;
-    procedure SetIsNull(Value: Boolean);
-    procedure SetAsBlob(Value: IBlob);
+    procedure SetIsNull(aValue: Boolean);
+    procedure SetAsBlob(aValue: IBlob);
     procedure SetAsArray(anArray: IArray);
-    procedure SetAsQuad(Value: TISC_QUAD);
+    procedure SetAsQuad(aValue: TISC_QUAD);
     property AsBlob: IBlob read GetAsBlob write SetAsBlob;
     property AsArray: IArray read GetAsArray write SetAsArray;
     property AsQuad: TISC_QUAD read GetAsQuad write SetAsQuad;
     property IsNull: Boolean read GetIsNull write SetIsNull;
     property Modified: Boolean read getModified;
     property Name: string read GetName;
+    property SQLType: short read GetSQLType;
  end;
 
   ISQLParams = interface
@@ -348,7 +351,7 @@ type
     property Items[index: integer]: ITPBItem read getItems; default;
   end;
 
-  TTransactionAction  = (TARollback, TACommit);
+  TTransactionAction  = (TARollback, TACommit, TACommitRetaining, TARollbackRetaining);
 
   ITransaction = interface
     function getTPB: ITPB;
@@ -411,7 +414,7 @@ type
     function GetItem(index: integer): IDBInfoItem;
     function Find(ItemType: byte): IDBInfoItem;
     property AsInteger: integer read getAsInteger;
-    property AsString: integer read GetAsString;
+    property AsString: string read GetAsString;
     property Count: integer read GetCount;
     property Items[index: integer]: IDBInfoItem read getItem; default;
   end;
@@ -502,8 +505,10 @@ type
     procedure getRawBytes(var Buffer);
     function getAsString: string;
     function getAsInteger: integer;
+    function getAsByte: byte;
     property AsString: string read getAsString;
     property AsInteger: integer read getAsInteger;
+    property AsByte: byte read getAsByte;
   end;
 
   IServiceQueryResultItem = interface(IServiceQueryResultSubItem)

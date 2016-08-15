@@ -380,9 +380,6 @@ implementation
 
 uses IBUtils, FBErrorMessages, FB25Blob, variants, IBErrorCodes, FB25Array;
 
-const
-   sSQLErrorSeparator = ' When Executing: ';
-
 type
 
   { ISQLInfoResultsItem }

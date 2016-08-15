@@ -161,38 +161,44 @@ type
       ibxeArrayElementOverFlow,
       ibxArrayBoundsCantIncrease ,
       ibxeStatementNotPrepared,
-      ibxeInterfaceOutofDate
+      ibxeInterfaceOutofDate,
+      ibxeUnexpectedDatabaseInfoResp
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;
 
 resourcestring
+  { generic strings used in code }
   SEOFReached = 'SEOFReached';
   SEOFInComment = 'EOF in comment detected';
   SEOFInString = 'EOF in string detected';
   SParamNameExpected = 'Parameter name expected';
   SCantPrintValue = 'Cannot print value';
   SSuccess = 'Successful execution';
+  SIBDatabaseEditor = 'Da&tabase Editor...';
+  SIBTransactionEditor = '&Transaction Editor...';
+  SDatabaseFilter = 'Database Files (*.fdb; *.gdb)|*.gdb; *.fdb|All files (*.*)|*.*';
+  SDisconnectDatabase = 'Database is currently connected. Disconnect and continue?';
+  SCommitTransaction = 'Transaction is currently Active. Rollback and continue?';
+  sSQLErrorSeparator = ' When Executing: ';
+  SInterbaseExpressVersion = 'Firebird Express for Lazarus 1.4.2';
+  SEditSQL = 'Edit SQL';
+  SIBSQLEditor = 'IBSQL Editor';
+  SIBServiceEditor = 'Edit IB Service';
+  SIBUpdateSQLEditor = '&UpdateSQL Editor...';
+  SIBDataSetEditor = '&Dataset Editor...';
+  SExecute = 'E&xecute';
+  SNoDataSet = 'No dataset association';
+  SSQLGenSelect = 'Must select at least one key field and one update field';
+  SSQLNotGenerated = 'Update SQL statements not generated, exit anyway?';
+  SSQLDataSetOpen = 'Unable to determine field names for %s';
+  SDefaultTransaction = '%s, Default';
 
 implementation
 
 uses IBUtils;
 
 resourcestring
-{ generic strings used in code }
-  SIBDatabaseEditor = 'Da&tabase Editor...';
-  SIBTransactionEditor = '&Transaction Editor...';
-  SDatabaseFilter = 'Database Files (*.fdb; *.gdb)|*.gdb; *.fdb|All files (*.*)|*.*';
-  SDisconnectDatabase = 'Database is currently connected. Disconnect and continue?';
-  SCommitTransaction = 'Transaction is currently Active. Rollback and continue?';
-  SExecute = 'E&xecute';
-  SNoDataSet = 'No dataset association';
-  SSQLGenSelect = 'Must select at least one key field and one update field';
-  SSQLNotGenerated = 'Update SQL statements not generated, exit anyway?';
-  SIBUpdateSQLEditor = '&UpdateSQL Editor...';
-  SIBDataSetEditor = '&Dataset Editor...';
-  SSQLDataSetOpen = 'Unable to determine field names for %s';
-  SDefaultTransaction = '%s, Default';
 
 { strings used in error messages}
   SUnknownError = 'Unknown error';
@@ -310,10 +316,6 @@ resourcestring
   SInvalidOnErrorResult = 'Unexpected onError return value';
   SInvalidOnStatusResult = 'Unexpected onStatus return value';
 
-  SInterbaseExpressVersion = 'Firebird Express for Lazarus 1.4.2';
-  SEditSQL = 'Edit SQL';
-  SIBSQLEditor = 'IBSQL Editor';
-  SIBServiceEditor = 'Edit IB Service';
   SDPBConstantUnknownEx = 'DPB Constant (%s) is unknown';
   STPBConstantUnknownEx = 'TPB Constant (%s) is unknown';
   SSV5APIError = 'SV5 API API Error - %s';
@@ -344,6 +346,7 @@ resourcestring
   SArrayBoundsCantIncrease = 'Array Bounds can only be narrowed';
   SStatementNotPrepared = 'The Statement has not been prepared';
   SInterfaceOutofDate = 'This interface is no longer up-to-date';
+  SUnexpectedDatabaseInfoResp = 'Unexpected Database Information Response';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -490,7 +493,8 @@ const
     SArrayElementOverFlow,
     SArrayBoundsCantIncrease,
     SStatementNotPrepared,
-    SInterfaceOutofDate
+    SInterfaceOutofDate,
+    SUnexpectedDatabaseInfoResp
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;

@@ -106,7 +106,6 @@
       </Item1>
     </RequiredPkgs>
     <UsageOptions>
-      <IncludePath Value="include"/>
       <UnitPath Value="$(PkgOutDir)"/>
     </UsageOptions>
     <PublishOptions>
