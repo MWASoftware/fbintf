@@ -853,7 +853,8 @@ var
       if (GetName = 'DB_KEY') or {do not localize}
          (GetName = 'RDB$DB_KEY') then {do not localize}
           Move(Value[1], SQLData^,len)
-      else begin
+      else
+      begin
         SQLType := SQL_TEXT;
         DataLength := len;
         if (Length(Value) > 0) then

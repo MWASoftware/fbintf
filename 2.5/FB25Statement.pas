@@ -855,7 +855,7 @@ begin
   begin
     FXSQLVAR^.sqllen := len;
     with Firebird25ClientAPI do
-      IBAlloc(FXSQLVAR^.sqldata, 0, FXSQLVAR^.sqllen);
+      IBAlloc(FXSQLVAR^.sqldata, 0, FXSQLVAR^.sqllen+1);
   end;
 end;
 
