@@ -115,7 +115,8 @@ type
     {IFirebirdAPI}
     function GetStatus: IStatus;
     function AllocateDPB: IDPB;
-    function OpenDatabase(DatabaseName: string; DPB: IDPB): IAttachment;
+    function OpenDatabase(DatabaseName: string; DPB: IDPB;
+      RaiseExceptionOnConnectError: boolean): IAttachment;
     function CreateDatabase(DatabaseName: string;
       SQLDialect: integer; CreateParams: string; DPB: IDPB): IAttachment;
     function AllocateSPB: ISPB;
@@ -460,10 +461,12 @@ begin
   Result := TDPB.Create;
 end;
 
-function TFB25ClientAPI.OpenDatabase(DatabaseName: string; DPB: IDPB
-  ): IAttachment;
+function TFB25ClientAPI.OpenDatabase(DatabaseName: string; DPB: IDPB;
+                                    RaiseExceptionOnConnectError: boolean): IAttachment;
 begin
-   Result := TFBAttachment.Create(DatabaseName,DPB)
+   Result := TFBAttachment.Create(DatabaseName,DPB,RaiseExceptionOnConnectError);
+   if not Result.IsConnected then
+     Result := nil;
 end;
 
 function TFB25ClientAPI.CreateDatabase(DatabaseName: string;

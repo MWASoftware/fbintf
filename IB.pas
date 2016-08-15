@@ -581,7 +581,7 @@ type
     function AllocateTPB: ITPB;
 
     {Database connections}
-    function OpenDatabase(DatabaseName: string; DPB: IDPB): IAttachment;
+    function OpenDatabase(DatabaseName: string; DPB: IDPB; RaiseExceptionOnConnectError: boolean=true): IAttachment;
     function CreateDatabase(DatabaseName: string; SQLDialect: integer;
       CreateParams: string; DPB: IDPB): IAttachment;
 

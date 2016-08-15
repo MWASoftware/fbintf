@@ -85,7 +85,9 @@ end;
 
 destructor TObjectOwner.Destroy;
 begin
-//  writeln('Destroying ' + ClassName);
+//  writeln('Destroying ' + ClassName,' ',RefCount);
+  if assigned(FOwnedObjects) then
+    FOwnedObjects.Free;
   inherited Destroy;
 end;
 

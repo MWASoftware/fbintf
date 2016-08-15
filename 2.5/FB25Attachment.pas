@@ -72,8 +72,10 @@ type
     FDatabaseName: string;
     FDPB: IDPB;
     FSQLDialect: integer;
+    FRaiseExceptionOnConnectError: boolean;
   public
-    constructor Create(DatabaseName: string; DPB: IDPB);
+    constructor Create(DatabaseName: string; DPB: IDPB;
+      RaiseExceptionOnConnectError: boolean);
     constructor CreateDatabase(DatabaseName: string; SQLDialect: integer;
       CreateParams: string; DPB: IDPB);
     destructor Destroy; override;
@@ -390,13 +392,15 @@ end;
 
   { TFBAttachment }
 
-constructor TFBAttachment.Create(DatabaseName: string; DPB: IDPB);
+constructor TFBAttachment.Create(DatabaseName: string; DPB: IDPB;
+  RaiseExceptionOnConnectError: boolean);
 begin
   inherited Create;
   FSQLDialect := 3;
   Firebird25ClientAPI.RegisterObj(self);
   FDatabaseName := DatabaseName;
   FDPB := DPB;
+  FRaiseExceptionOnConnectError := RaiseExceptionOnConnectError;
   Connect;
 end;
 
@@ -446,13 +450,15 @@ begin
   with Firebird25ClientAPI do
   if FDPB = nil then
   Call(isc_attach_database(StatusVector, Length(FDatabaseName),
-                        PChar(FDatabaseName), @FHandle, 0, nil))
+                        PChar(FDatabaseName), @FHandle, 0, nil),
+                        FRaiseExceptionOnConnectError)
   else
   begin
    Call(isc_attach_database(StatusVector, Length(FDatabaseName),
                          PChar(FDatabaseName), @FHandle,
                          (FDPB as TDPB).getDataLength,
-                         (FDPB as TDPB).getBuffer));
+                         (FDPB as TDPB).getBuffer),
+                         FRaiseExceptionOnConnectError);
 
      Param := FDPB.Find(isc_dpb_set_db_SQL_dialect);
      if Param <> nil then

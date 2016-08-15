@@ -237,7 +237,6 @@ type
    procedure CheckActive;
  public
    constructor Create(aSQLParams: TIBXINPUTSQLDA);
-
  public
    {ISQLParams}
    function getCount: integer;
@@ -625,8 +624,8 @@ end;
 function TResults.ByName(Idx: String): ISQLData;
 begin
   CheckActive;
-  if FResults.FStatement.FBOF then
-    IBError(ibxeBOF,[nil]);
+{  if FResults.FStatement.FBOF then
+    IBError(ibxeBOF,[nil]);}
   if FResults.FStatement.FEOF then
     IBError(ibxeEOF,[nil]);
 
@@ -639,8 +638,8 @@ end;
 function TResults.getSQLData(index: integer): ISQLData;
 begin
   CheckActive;
-  if FResults.FStatement.FBOF then
-    IBError(ibxeBOF,[nil]);
+{  if FResults.FStatement.FBOF then
+    IBError(ibxeBOF,[nil]);}
   if FResults.FStatement.FEOF then
     IBError(ibxeEOF,[nil]);
   Result := GetISQLData(FResults.Vars[index]);
@@ -759,8 +758,8 @@ begin
   if Parent.FStatement.FEOF then
     IBError(ibxeEOF,[nil]);
 
-  if Parent.FStatement.FBOF then
-    IBError(ibxeBOF,[nil]);
+{  if Parent.FStatement.FBOF then
+    IBError(ibxeBOF,[nil]);  }
 end;
 
 function TIBSQLData.GetAsArray: IArray;
