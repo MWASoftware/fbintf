@@ -130,6 +130,7 @@ type
     function IsEmbeddedServer: boolean; override;
     function GetLibraryName: string;
     function HasServiceAPI: boolean;
+    function HasRollbackRetaining: boolean;
     function GetImplementationVersion: string;
   end;
 
@@ -525,6 +526,11 @@ end;
 function TFB25ClientAPI.HasServiceAPI: boolean;
 begin
   Result := IBServiceAPIPresent;
+end;
+
+function TFB25ClientAPI.HasRollbackRetaining: boolean;
+begin
+  Result := assigned(isc_rollback_retaining);
 end;
 
 function TFB25ClientAPI.GetImplementationVersion: string;

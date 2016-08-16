@@ -600,6 +600,7 @@ type
     function IsEmbeddedServer: boolean;
     function GetLibraryName: string;
     function HasServiceAPI: boolean;
+    function HasRollbackRetaining: boolean;
     function GetImplementationVersion: string;
   end;
 
