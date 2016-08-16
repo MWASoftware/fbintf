@@ -59,7 +59,8 @@ type
     procedure PrepareForCommit;
     procedure Commit(Force: boolean=false);
     procedure CommitRetaining;
-    function Start(DefaultCompletion: TTransactionAction=taCommit): ITransaction;
+    procedure Start(DefaultCompletion: TTransactionAction=taCommit); overload;
+    procedure Start(TPB: ITPB; DefaultCompletion: TTransactionAction=taCommit); overload;
     procedure Rollback(Force: boolean=false);
     procedure RollbackRetaining;
     function GetAttachmentCount: integer;
@@ -235,13 +236,11 @@ begin
     Call(isc_commit_retaining(StatusVector, @FHandle));
 end;
 
-function TFBTransaction.Start(DefaultCompletion: TTransactionAction
-  ): ITransaction;
+procedure TFBTransaction.Start(DefaultCompletion: TTransactionAction);
 var pteb: PISC_TEB_ARRAY;
     i: integer;
     db_handle: TISC_DB_HANDLE;
 begin
-  Result := self;
   if FHandle <> nil then
     Exit;
   pteb := nil;
@@ -278,6 +277,13 @@ begin
         FreeMem(pteb);
      end;
   end;
+end;
+
+procedure TFBTransaction.Start(TPB: ITPB; DefaultCompletion: TTransactionAction
+  );
+begin
+  FTPB := TPB;
+  Start(DefaultCompletion);
 end;
 
 procedure TFBTransaction.Rollback(Force: boolean);

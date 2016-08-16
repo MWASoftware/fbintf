@@ -355,7 +355,8 @@ type
 
   ITransaction = interface
     function getTPB: ITPB;
-    function Start(DefaultCompletion: TTransactionAction=taCommit): ITransaction;
+    procedure Start(DefaultCompletion: TTransactionAction=taCommit); overload;
+    procedure Start(TPB: ITPB; DefaultCompletion: TTransactionAction=taCommit); overload;
     function GetInTransaction: boolean;
     procedure PrepareForCommit; {Two phase commit - stage 1}
     procedure Commit(Force: boolean=false);

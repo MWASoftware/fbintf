@@ -288,7 +288,7 @@ begin
     Inc(LocalBuffer,BytesRead);
     Inc(Result,BytesRead);
     Dec(Count,BytesRead);
-  until (returnCode <> isc_segment) or (Count = 0);
+  until ((returncode <> 0) and (returnCode <> isc_segment)) or (Count = 0);
 
   FEOB := returnCode = isc_segstr_eof;
   if (returnCode <> 0) and (returnCode <> isc_segment) and (returnCode <> isc_segstr_eof) then

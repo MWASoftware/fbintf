@@ -51,8 +51,6 @@ const
 
 type
 
-  { v }
-
   { TEventHandlerThread }
 
   TEventHandlerThread = class(TThread)
@@ -204,12 +202,14 @@ begin
 end;
 
 procedure TFBEvents.EventSignaled;
+var Handler: TEventHandler;
 begin
   if assigned(FEventHandler)  then
   begin
-    FEventHandler(self);
+    Handler := FEventHandler;
+    FEventHandler := nil;
+    Handler(self);
   end;
-  FEventHandler := nil;
 end;
 
 procedure TFBEvents.CreateEventBlock;
@@ -325,6 +325,7 @@ begin
   if assigned(FEventHandler) then
     CancelEvents;
 
+  CreateEventBlock;
   FEventHandler := EventHandler;
   FCriticalSection.Enter;
   try
@@ -345,6 +346,7 @@ end;
 
 procedure TFBEvents.WaitForEvent;
 begin
+  CreateEventBlock;
   with Firebird25ClientAPI do
      if isc_wait_for_event(StatusVector,@FDBHandle, FEventBufferlen,FEventBuffer,FResultBuffer) > 0 then
        IBDatabaseError;
