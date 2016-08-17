@@ -13,23 +13,9 @@ uses
 
 type
 
-  { TObjectOwner }
-
-  TObjectOwner = class(TInterfacedObject)
-  private
-    FOwnedObjects: TList;
-  protected
-    property OwnedObjects: TList read FOwnedObjects;
-  public
-    constructor Create;
-    destructor Destroy; override;
-    procedure RegisterObj(AObj: TObject);
-    procedure UnRegisterObj(AObj: TObject);
-  end;
-
   { TFBLibrary }
 
-  TFBLibrary = class(TObjectOwner)
+  TFBLibrary = class(TInterfacedObject)
   private
     FFBLibraryName: string;
     procedure LoadIBLibrary;
@@ -74,35 +60,6 @@ FIREBIRD_EMBEDDED = 'fbembed.dll';
 {$I wloadlibrary.inc}
 {$ENDIF}
 
-{ TObjectOwner }
-
-constructor TObjectOwner.Create;
-begin
-  inherited Create;
-//  writeln('Creating ' + ClassName);
-  FOwnedObjects := TList.Create;
-end;
-
-destructor TObjectOwner.Destroy;
-begin
-//  writeln('Destroying ' + ClassName,' ',RefCount);
-  if assigned(FOwnedObjects) then
-    FOwnedObjects.Free;
-  inherited Destroy;
-end;
-
-procedure TObjectOwner.RegisterObj(AObj: TObject);
-var index: integer;
-begin
-  index := FOwnedObjects.IndexOf(AObj);
-  if index = -1 then
-    FOwnedObjects.Add(AObj);
-end;
-
-procedure TObjectOwner.UnRegisterObj(AObj: TObject);
-begin
-  FOwnedObjects.Remove(AObj);
-end;
 { TFBLibrary }
 
 constructor TFBLibrary.Create;
@@ -115,12 +72,12 @@ end;
 
 destructor TFBLibrary.Destroy;
 begin
-  inherited Destroy;  {Free owned objects first}
   if IBLibrary <> NilHandle then
   begin
     FreeLibrary(IBLibrary);
     IBLibrary := NilHandle;
   end;
+  inherited Destroy;
 end;
 
 procedure TFBLibrary.IBAlloc(var P; OldSize, NewSize: Integer);

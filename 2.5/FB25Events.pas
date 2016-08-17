@@ -6,12 +6,12 @@ interface
 
 uses
   Classes, SysUtils, IB, FBLibrary, FB25ClientAPI, FB25Attachment, IBExternals,
-  IBHeader, syncobjs;
+  IBHeader, syncobjs, FB25ActivityMonitor;
 
 type
   { TFBEvents }
 
-  TFBEvents = class(TInterfacedObject,IEvents)
+  TFBEvents = class(TActivityReporter,IEvents)
   private
     FEventBuffer: PChar;
     FEventBufferLen: integer;
@@ -192,7 +192,7 @@ begin
   FCriticalSection.Enter;
   try
     with Firebird25ClientAPI do
-      if (isc_Cancel_events( StatusVector, @FDBHandle, @FEventID) > 0) and not Force then
+      if (Call(isc_Cancel_events( StatusVector, @FDBHandle, @FEventID),false) > 0) and not Force then
         IBDatabaseError;
 
     FEventHandler := nil;
@@ -248,7 +248,7 @@ end;
 constructor TFBEvents.Create(DBAttachment: TFBAttachment; Events: TStrings);
 begin
   inherited Create;
-  DBAttachment.RegisterObj(self);
+  AddMonitor(DBAttachment);
   FAttachment := DBAttachment;
   if Events.Count > MaxEvents then
     IBError(ibxeMaximumEvents, [nil]);
@@ -264,7 +264,6 @@ end;
 
 destructor TFBEvents.Destroy;
 begin
-  (FAttachment as TFBAttachment).UnRegisterObj(self);
   if assigned(FEventHandlerThread) then
     TEventHandlerThread(FEventHandlerThread).Terminate;
   if assigned(FCriticalSection) then FCriticalSection.Free;
@@ -331,9 +330,8 @@ begin
   try
     callback := @IBEventCallback;
     with Firebird25ClientAPI do
-      if isc_que_events( StatusVector, @FDBHandle, @FEventID, FEventBufferLen,
-                     FEventBuffer, TISC_CALLBACK(callback), PVoid(FEventHandlerThread)) > 0 then
-        IBDatabaseError;
+      Call(isc_que_events( StatusVector, @FDBHandle, @FEventID, FEventBufferLen,
+                     FEventBuffer, TISC_CALLBACK(callback), PVoid(FEventHandlerThread)));
   finally
     FCriticalSection.Leave
   end;
@@ -348,8 +346,7 @@ procedure TFBEvents.WaitForEvent;
 begin
   CreateEventBlock;
   with Firebird25ClientAPI do
-     if isc_wait_for_event(StatusVector,@FDBHandle, FEventBufferlen,FEventBuffer,FResultBuffer) > 0 then
-       IBDatabaseError;
+     Call(isc_wait_for_event(StatusVector,@FDBHandle, FEventBufferlen,FEventBuffer,FResultBuffer));
 end;
 
 end.

@@ -14,6 +14,8 @@ type
   { TFBIntTestbed }
 
   TFBIntTestbed = class(TCustomApplication)
+  private
+    FTestID: integer;
   protected
     procedure DoRun; override;
   public
@@ -32,7 +34,7 @@ begin
   writeln('Copyright MWA Software 2016');
   writeln;
   // quick check parameters
-  ErrorMsg := CheckOptions('h', 'help');
+  ErrorMsg := CheckOptions('ht', 'help');
   if ErrorMsg <> '' then begin
     ShowException(Exception.Create(ErrorMsg));
     Terminate;
@@ -46,13 +48,19 @@ begin
     Exit;
   end;
 
+  if HasOption('t') then
+    FTestID := StrToInt(GetOptionValue('t'));
+
   { add your program here }
 
   writeln('Starting Tests');
 
   if TestMgr <> nil then
   begin
-    TestMgr.RunAll;
+    if FTestID = 0 then
+      TestMgr.RunAll
+    else
+      TestMgr.Run(FTestID);
     TestMgr.Free;
   end;
 

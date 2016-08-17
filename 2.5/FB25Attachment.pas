@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, IB, FBTypes, FBLibrary, FB25ClientAPI, IBHeader,
-  FB25ParamBlock, FB25OutputBlock, FB25Status;
+  FB25ParamBlock, FB25OutputBlock, FB25Status, FB25ActivityMonitor;
 
 type
   TDPB = class;
@@ -66,13 +66,15 @@ type
 
   { TFBAttachment }
 
-  TFBAttachment = class(TAPIObject,IAttachment)
+  TFBAttachment = class(TInterfaceParent, IAttachment, IActivityMonitor)
   private
     FHandle: TISC_DB_HANDLE;
     FDatabaseName: string;
     FDPB: IDPB;
     FSQLDialect: integer;
+    FFirebirdAPI: IFirebirdAPI;
     FRaiseExceptionOnConnectError: boolean;
+    FActivityMonitor: IActivityMonitor;
   public
     constructor Create(DatabaseName: string; DPB: IDPB;
       RaiseExceptionOnConnectError: boolean);
@@ -81,12 +83,15 @@ type
     destructor Destroy; override;
     property Handle: TISC_DB_HANDLE read FHandle;
     property SQLDialect: integer read FSQLDialect;
+    property ActivityMonitor: IActivityMonitor
+              read FActivityMonitor implements IActivityMonitor;
 
   public
     {IAttachment}
     function getDPB: IDPB;
     procedure Connect;
     procedure Disconnect(Force: boolean=false);
+    function HasActivity: boolean;
     function IsConnected: boolean;
     procedure DropDatabase;
     function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionAction): ITransaction; overload;
@@ -396,8 +401,9 @@ constructor TFBAttachment.Create(DatabaseName: string; DPB: IDPB;
   RaiseExceptionOnConnectError: boolean);
 begin
   inherited Create;
+  FActivityMonitor := TActivityMonitor.Create;
+  FFirebirdAPI := Firebird25ClientAPI; {Keep reference to interface}
   FSQLDialect := 3;
-  Firebird25ClientAPI.RegisterObj(self);
   FDatabaseName := DatabaseName;
   FDPB := DPB;
   FRaiseExceptionOnConnectError := RaiseExceptionOnConnectError;
@@ -410,8 +416,9 @@ var sql: string;
     tr_handle: TISC_TR_HANDLE;
 begin
   inherited Create;
+  FActivityMonitor := TActivityMonitor.Create;
+  FFirebirdAPI := Firebird25ClientAPI; {Keep reference to interface}
   FSQLDialect := 3;
-  Firebird25ClientAPI.RegisterObj(self);
   FDatabaseName := DatabaseName;
   FDPB := DPB;
   tr_handle := nil;
@@ -425,7 +432,8 @@ begin
   begin
     {If connect params specified then detach and connect properly}
     with Firebird25ClientAPI do
-      Call(isc_detach_database(StatusVector, @FHandle));
+      if isc_detach_database(StatusVector, @FHandle) > 0 then
+        IBDatabaseError;
     Connect;
   end
 end;
@@ -433,7 +441,6 @@ end;
 destructor TFBAttachment.Destroy;
 begin
   Disconnect(true);
-  Firebird25ClientAPI.UnRegisterObj(self);
   inherited Destroy;
 end;
 
@@ -449,16 +456,18 @@ begin
 
   with Firebird25ClientAPI do
   if FDPB = nil then
-  Call(isc_attach_database(StatusVector, Length(FDatabaseName),
-                        PChar(FDatabaseName), @FHandle, 0, nil),
-                        FRaiseExceptionOnConnectError)
+  begin
+    if (isc_attach_database(StatusVector, Length(FDatabaseName),
+                        PChar(FDatabaseName), @FHandle, 0, nil) > 0) and FRaiseExceptionOnConnectError then
+      IBDatabaseError;
+  end
   else
   begin
-   Call(isc_attach_database(StatusVector, Length(FDatabaseName),
+    if (isc_attach_database(StatusVector, Length(FDatabaseName),
                          PChar(FDatabaseName), @FHandle,
                          (FDPB as TDPB).getDataLength,
-                         (FDPB as TDPB).getBuffer),
-                         FRaiseExceptionOnConnectError);
+                         (FDPB as TDPB).getBuffer) > 0 ) and FRaiseExceptionOnConnectError then
+      IBDatabaseError;
 
      Param := FDPB.Find(isc_dpb_set_db_SQL_dialect);
      if Param <> nil then
@@ -467,23 +476,20 @@ begin
 end;
 
 procedure TFBAttachment.Disconnect(Force: boolean);
-var i: integer;
 begin
   if FHandle = nil then
     Exit;
 
-  {Rollback or Cancel dependent objects}
-  for i := 0 to OwnedObjects.Count - 1 do
-    if (TObject(OwnedObjects[i]) is TFBTransaction) then
-          TFBTransaction(OwnedObjects[i]).DoDefaultTransactionEnd(Force)
-    else
-    if TObject(OwnedObjects[i]) is TFBEvents then
-      TFBEvents(OwnedObjects[i]).EndAttachment(self,Force);
-
   {Disconnect}
   with Firebird25ClientAPI do
-    Call(isc_detach_database(StatusVector, @FHandle),not Force);
+    if (isc_detach_database(StatusVector, @FHandle) > 0) and not Force then
+      IBDatabaseError;
   FHandle := nil;
+end;
+
+function TFBAttachment.HasActivity: boolean;
+begin
+  Result := FActivityMonitor.HasActivity;
 end;
 
 function TFBAttachment.IsConnected: boolean;
@@ -494,7 +500,8 @@ end;
 procedure TFBAttachment.DropDatabase;
 begin
   with Firebird25ClientAPI do
-    Call(isc_drop_database(StatusVector, @FHandle));
+    if isc_drop_database(StatusVector, @FHandle) > 0 then
+      IBDatabaseError;
   FHandle := nil;
 end;
 
@@ -521,7 +528,9 @@ var TRHandle: TISC_TR_HANDLE;
 begin
   TRHandle := (Transaction as TFBTransaction).Handle;
   with Firebird25ClientAPI do
-    Call(isc_dsql_execute_immediate(StatusVector, @fHandle, @TRHandle, 0,PChar(sql), aSQLDialect, nil));
+    if isc_dsql_execute_immediate(StatusVector, @fHandle, @TRHandle, 0,PChar(sql), aSQLDialect, nil) > 0 then
+      IBDatabaseError;
+  FActivityMonitor.ResetActivity;
 end;
 
 procedure TFBAttachment.ExecImmediate(TPB: array of byte; sql: string;

@@ -11,7 +11,7 @@ interface
 {Provides common handling for the DB Info results, SQL Info and Service Response Block}
 
 uses
-  Classes, SysUtils,  FB25ClientAPI, IB;
+  Classes, SysUtils,  FB25ClientAPI, IB, FB25ActivityMonitor;
 
 const
   DefaultBufferSize = 32000;
@@ -33,7 +33,7 @@ type
 
   { TOutputBlock }
 
-  TOutputBlock = class(TInterfacedObject)
+  TOutputBlock = class(TInterfaceParent)
   private
     FBuffer: PChar;
     FBufSize: integer;
@@ -66,7 +66,7 @@ type
 
   { TOutputBlockItem }
 
-  TOutputBlockItem = class(TInterfacedObject)
+  TOutputBlockItem = class(TInterfaceParent)
   private
     FOwner: TOutputBlock;
     FOwnerIntf: IUnknown;

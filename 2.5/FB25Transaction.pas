@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, IB, FBLibrary, FB25ClientAPI, IBHeader, IBExternals,
-  FB25Attachment, FB25ParamBlock;
+  FB25Attachment, FB25ParamBlock, FB25ActivityMonitor;
 
 type
   TTPB = class;
@@ -34,15 +34,15 @@ type
 
   { TFBTransaction }
 
-  TFBTransaction = class(TAPIObject,ITransaction)
+  TFBTransaction = class(TActivityReporter,ITransaction, IActivityMonitor)
   private
     FHandle: TISC_TR_HANDLE;
+    FActivityMonitor: IActivityMonitor;
     FTPB: ITPB;
     FDefaultCompletion: TTransactionAction;
     FAttachments: array of IAttachment; {Keep reference to attachment - ensures
                                           attachment cannot be freed before transaction}
     function GenerateTPB(sl: array of byte): ITPB;
-    procedure CloseAll(Force: boolean);
   public
     constructor Create(Attachments: array of IAttachment; Params: array of byte; DefaultCompletion: TTransactionAction); overload;
     constructor Create(Attachments: array of IAttachment; TPB: ITPB; DefaultCompletion: TTransactionAction); overload;
@@ -51,11 +51,14 @@ type
     destructor Destroy; override;
     procedure DoDefaultTransactionEnd(Force: boolean);
     property Handle: TISC_TR_HANDLE read FHandle;
+    property ActivityMonitor: IActivityMonitor
+              read FActivityMonitor implements IActivityMonitor;
 
   public
     {ITransaction}
     function getTPB: ITPB;
     function GetInTransaction: boolean;
+    function HasActivity: boolean;
     procedure PrepareForCommit;
     procedure Commit(Force: boolean=false);
     procedure CommitRetaining;
@@ -70,7 +73,7 @@ type
 
 implementation
 
-uses FBErrorMessages, FB25Blob, FB25Statement, FB25Array;
+uses FBErrorMessages;
 
 { TTPBItem }
 
@@ -124,20 +127,6 @@ begin
     Result.Add(sl[i]);
 end;
 
-procedure TFBTransaction.CloseAll(Force: boolean);
-var i: integer;
-begin
-  for i := 0 to OwnedObjects.Count - 1 do
-    if TObject(OwnedObjects[i]) is TFBBlob then
-      TFBBlob(OwnedObjects[i]).TransactionEnding(self,Force)
-    else
-    if TObject(OwnedObjects[i]) is TFBStatement then
-      TFBStatement(OwnedObjects[i]).TransactionEnding(self,Force)
-  else
-  if TObject(OwnedObjects[i]) is TFBArray then
-    TFBArray(OwnedObjects[i]).TransactionEnding(self,Force);
-end;
-
 constructor TFBTransaction.Create(Attachments: array of IAttachment;
   Params: array of byte; DefaultCompletion: TTransactionAction);
 begin
@@ -153,10 +142,12 @@ begin
   if Length(Attachments) = 0 then
     IBError(ibxeEmptyAttachmentsList,[nil]);
 
+  FActivityMonitor := TActivityMonitor.Create;
+
   SetLength(FAttachments,Length(Attachments));
   for i := 0 to Length(Attachments) - 1 do
   begin
-    AddOwner(Attachments[i] as TFBAttachment);
+    AddMonitor(Attachments[i] as TFBAttachment);
     FAttachments[i] := Attachments[i];
   end;
   FTPB := TPB;
@@ -173,7 +164,8 @@ constructor TFBTransaction.Create(Attachment: TFBAttachment; TPB: ITPB;
   DefaultCompletion: TTransactionAction);
 begin
   inherited Create;
-  AddOwner(Attachment);
+  FActivityMonitor := TActivityMonitor.Create;
+  AddMonitor(Attachment);
   SetLength(FAttachments,1);
   FAttachments[0] := Attachment;
   FTPB := TPB;
@@ -207,13 +199,17 @@ begin
   Result := FHandle <> nil;
 end;
 
+function TFBTransaction.HasActivity: boolean;
+begin
+  Result := FActivityMonitor.HasActivity;
+end;
+
 procedure TFBTransaction.PrepareForCommit;
 begin
   if Length(FAttachments) < 2 then
     IBError(ibxeNotAMultiDatabaseTransaction,[nil]);
   if FHandle = nil then
     Exit;
-  CloseAll(false);
   with Firebird25ClientAPI do
     Call(isc_prepare_transaction(StatusVector, @FHandle));
 end;
@@ -222,7 +218,6 @@ procedure TFBTransaction.Commit(Force: boolean);
 begin
   if FHandle = nil then
     Exit;
-  CloseAll(Force);
   with Firebird25ClientAPI do
     Call(isc_commit_transaction(StatusVector, @FHandle),not Force);
   FHandle := nil;
@@ -290,7 +285,6 @@ procedure TFBTransaction.Rollback(Force: boolean);
 begin
   if FHandle = nil then
     Exit;
-  CloseAll(Force);
   with Firebird25ClientAPI do
     Call(isc_rollback_transaction(StatusVector, @FHandle),not Force);
   FHandle := nil;

@@ -6,13 +6,13 @@ interface
 
 uses
   Classes, SysUtils, IB, FBTypes, IBHeader,IBExternals, FBLibrary, FB25ClientAPI, FB25Attachment,
-  FB25Transaction;
+  FB25Transaction, FB25ActivityMonitor;
 
 type
 
    { TFBBlobMetaData }
 
-   TFBBlobMetaData  = class(TAPIObject, IBlobMetaData)
+   TFBBlobMetaData  = class(TActivityReporter, IBlobMetaData)
    private
      FBlobDesc: TISC_BLOB_DESC;
      FGlobal: array [0..31] of char;
@@ -32,7 +32,7 @@ type
 
   { TFBBlob }
 
-  TFBBlob = class(TAPIObject,IBlob)
+  TFBBlob = class(TActivityReporter,IBlob)
   private
     FAttachment: TFBAttachment;
     FHandle: TISC_BLOB_HANDLE;
@@ -81,6 +81,7 @@ constructor TFBBlobMetaData.Create(Attachment: TFBAttachment;
   Transaction: TFBTransaction; RelationName, ColumnName: string);
 begin
   inherited Create;
+  AddMonitor(Transaction);
   with Firebird25ClientAPI do
     Call(isc_blob_lookup_desc(StatusVector,@(Attachment.Handle),
                                            @(Transaction.Handle),
@@ -152,7 +153,7 @@ begin
     inherited Create;
     FAttachment := Attachment;
     FTransaction := Transaction;
-    AddOwner(Transaction as TFBTransaction);
+    AddMonitor(Transaction as TFBTransaction);
     DBHandle := Attachment.Handle;
     TRHandle := (Transaction as TFBTransaction).Handle;
     FCreating := true;
@@ -169,7 +170,7 @@ begin
   inherited Create;
   FAttachment := Attachment;
   FTransaction := Transaction;
-  AddOwner(Transaction as TFBTransaction);
+  AddMonitor(Transaction as TFBTransaction);
   DBHandle := Attachment.Handle;
   TRHandle := (Transaction as TFBTransaction).Handle;
   FBlobID := BlobID;

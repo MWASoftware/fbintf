@@ -59,7 +59,7 @@ interface
 
 uses
   Classes, SysUtils, IB, FBTypes, FBLibrary, FB25ClientAPI, FB25Transaction, FB25Attachment,
-  IBHeader, IBExternals, FB25SQLData, FB25OutputBlock;
+  IBHeader, IBExternals, FB25SQLData, FB25OutputBlock, FB25ActivityMonitor;
 
 type
   TFBStatement = class;
@@ -229,7 +229,7 @@ type
 
  { TSQLParams }
 
- TSQLParams = class(TInterfacedObject,ISQLParams)
+ TSQLParams = class(TInterfaceParent,ISQLParams)
  private
    FPrepareSeqNo: integer;
    FSQLParams: TIBXINPUTSQLDA;
@@ -258,7 +258,7 @@ type
 
   { TMetaData }
 
-  TMetaData = class(TInterfacedObject,IMetaData)
+  TMetaData = class(TInterfaceParent,IMetaData)
   private
     FPrepareSeqNo: integer;
     FMetaData: TIBXOUTPUTSQLDA;
@@ -276,7 +276,7 @@ type
 
  { TResults }
 
-  TResults = class(TInterfacedObject,IResults)
+  TResults = class(TInterfaceParent,IResults)
   private
     FPrepareSeqNo: integer;
     FResults: TIBXOUTPUTSQLDA;
@@ -306,7 +306,7 @@ end;
 
   { TFBStatement }
 
-  TFBStatement = class(TAPIObject,IStatement)
+  TFBStatement = class(TActivityReporter,IStatement,IActivityMonitor)
   private
     FAttachment: TFBAttachment;
     FAttachmentIntf: IAttachment;
@@ -314,6 +314,7 @@ end;
     FTransactionIntf: ITransaction;
     FExecTransactionIntf: ITransaction;
     FHandle: TISC_STMT_HANDLE;
+    FActivityMonitor: IActivityMonitor;
     FSQLType: TIBSQLTypes;         { Select, update, delete, insert, create, alter, etc...}
     FSQLDialect: integer;
     FSQLParams: TIBXINPUTSQLDA;
@@ -350,6 +351,8 @@ end;
     property SQLDialect: integer read FSQLDialect;
     property Attachment: TFBAttachment read FAttachment;
     property Transaction: TFBTransaction read FTransaction;
+    property ActivityMonitor: IActivityMonitor
+              read FActivityMonitor implements IActivityMonitor;
 
   public
     {IStatement}
@@ -2011,11 +2014,12 @@ constructor TFBStatement.Create(Attachment: TFBAttachment;
 var GUID : TGUID;
 begin
   inherited Create;
+  FActivityMonitor := TActivityMonitor.Create;
   FAttachment := Attachment;
   FAttachmentIntf := Attachment;
   FTransaction := transaction as TFBTransaction;
   FTransactionIntf := Transaction;
-  AddOwner(FTransaction);
+  AddMonitor(FTransaction);
   FSQLDialect := SQLDialect;
   CreateGuid(GUID);
   FCursor := GUIDToString(GUID);
@@ -2228,10 +2232,10 @@ begin
   if FPrepared then FreeHandle;
   if aTransaction <> nil then
   begin
-    RemoveOwner(FTransaction);
+    RemoveMonitor(FTransaction);
     FTransaction := transaction as TFBTransaction;
     FTransactionIntf := Transaction;
-    AddOwner(FTransaction);
+    AddMonitor(FTransaction);
   end;
   InternalPrepare;
 end;

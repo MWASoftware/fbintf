@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, IB, FBTypes, FB25Statement, FB25Attachment, FB25Transaction,
-  FB25SQLData, IBHeader, FB25ClientAPI, IBExternals;
+  FB25SQLData, IBHeader, FB25ClientAPI, IBExternals, FB25ActivityMonitor;
 
 (*
 
@@ -61,7 +61,7 @@ type
 
   { TFBArrayMetaData }
 
-  TFBArrayMetaData = class(TInterfacedObject,IArrayMetaData)
+  TFBArrayMetaData = class(TActivityReporter,IArrayMetaData)
   private
     FAttachment: TFBAttachment;
     FTransaction: TFBTransaction;
@@ -262,6 +262,7 @@ constructor TFBArrayMetaData.Create(aAttachment: TFBAttachment;
   aTransaction: TFBTransaction; relationName, columnName: string);
 begin
   inherited Create;
+  AddMonitor(aTransaction);
   FAttachment := aAttachment;
   FTransaction := aTransaction;
 
@@ -442,7 +443,6 @@ constructor TFBArray.Create(aField: TIBSQLData);
 begin
   inherited Create(aField.GetAttachment,aField.GetTransaction,
                                  aField.getRelationName,aField.getSQLName);
-  FTransaction.RegisterObj(self);
   FTransactionIntf := aField.GetTransaction;
   FIsNew := false;
   FArrayID := aField.AsQuad;
@@ -457,7 +457,6 @@ constructor TFBArray.Create(aField: IArrayMetaData);
 begin
   with aField as TFBArrayMetaData do
     inherited Create(FAttachment,FTransaction,GetTableName,GetColumnName);
-  FTransaction.RegisterObj(self);
   FTransactionIntf :=  (aField as TFBArrayMetaData).FTransaction;
   FIsNew := true;
   FModified := true;
@@ -473,7 +472,6 @@ constructor TFBArray.Create(aAttachment: TFBAttachment;
 begin
   inherited Create(aAttachment,aTransaction, relationName,columnName);
   FArrayID := ArrayID;
-  FTransaction.RegisterObj(self);
   FTransactionIntf :=  aTransaction;
   FIsNew := false;
   FModified := false;
@@ -487,7 +485,6 @@ constructor TFBArray.Create(aAttachment: TFBAttachment;
   aTransaction: TFBTransaction; relationName, columnName: string);
 begin
   inherited Create(aAttachment,aTransaction,relationName,columnName);
-  FTransaction.RegisterObj(self);
   FTransactionIntf :=  aTransaction;
   FIsNew := true;
   FModified := true;
@@ -499,8 +496,6 @@ end;
 
 destructor TFBArray.Destroy;
 begin
-  if assigned(FTransaction) then
-    FTransaction.UnRegisterObj(self);
   FreeMem(FBuffer);
   inherited Destroy;
 end;

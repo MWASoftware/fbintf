@@ -7,7 +7,7 @@ interface
 {Provides common handling for the DPB, TPB, SPB and Service Request Block (SRB)}
 
 uses
-  Classes, SysUtils, IB, FB25ClientAPI;
+  Classes, SysUtils, IB, FB25ClientAPI, FB25ActivityMonitor;
 
 type
   TParamDataType = (dtString, dtString2, dtByte,dtInteger,dtnone);
@@ -26,7 +26,7 @@ type
 
   { TParamBlock }
 
-  TParamBlock = class(TInterfacedObject)
+  TParamBlock = class(TInterfaceParent)
   private
     FItems: array of PParamBlockItemData;
     FBufferSize: integer;
@@ -51,7 +51,7 @@ type
 
   { TParamBlockItem }
 
-  TParamBlockItem = class(TInterfacedObject)
+  TParamBlockItem = class(TInterfaceParent)
   private
      FOwner: TParamBlock;
      FOwnerIntf: IUnknown;

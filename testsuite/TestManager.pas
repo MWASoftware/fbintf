@@ -56,6 +56,7 @@ type
     function GetEmployeeDatabaseName: string;
     function GetNewDatabaseName: string;
     procedure RunAll;
+    procedure Run(TestID: integer);
   end;
 
 const
@@ -521,6 +522,24 @@ var i: integer;
 begin
   for i := 0 to FTests.Count - 1 do
     with TTestBase(FTests[i]) do
+  begin
+    writeln('Running ' + TestTitle);
+    try
+      RunTest('UTF8',3);
+    except on E:Exception do
+      begin
+        writeln('Test Completed with Error: ' + E.Message);
+        Exit;
+      end;
+    end;
+    writeln;
+    writeln;
+  end;
+end;
+
+procedure TTestManager.Run(TestID: integer);
+begin
+  with TTestBase(FTests[TestID-1]) do
   begin
     writeln('Running ' + TestTitle);
     try

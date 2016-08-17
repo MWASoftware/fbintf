@@ -11,13 +11,14 @@ unit FB25SQLData;
 interface
 
 uses
-  Classes, SysUtils, IBExternals, IBHeader, IB, FBTypes, FB25Attachment, FB25Transaction;
+  Classes, SysUtils, IBExternals, IBHeader, IB, FBTypes, FB25Attachment, FB25Transaction,
+  FB25ActivityMonitor;
 
 type
 
   { TSQLDataItem }
 
-  TSQLDataItem = class(TInterfacedObject)
+  TSQLDataItem = class(TInterfaceParent)
   private
      function AdjustScale(Value: Int64; aScale: Integer): Double;
      function AdjustScaleToInt64(Value: Int64; aScale: Integer): Int64;

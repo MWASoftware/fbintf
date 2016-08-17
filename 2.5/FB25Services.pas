@@ -5,7 +5,8 @@ unit FB25Services;
 interface
 
 uses
-  Classes, SysUtils, IB, FB25ClientAPI, IBHeader, FB25ParamBlock, FB25OutputBlock;
+  Classes, SysUtils, IB, FB25ClientAPI, IBHeader, FB25ParamBlock, FB25OutputBlock,
+    FB25ActivityMonitor;
 
 type
   { TSPB }
@@ -73,8 +74,9 @@ type
 
   { TFBServiceManager }
 
-  TFBServiceManager = class(TInterfacedObject,IServiceManager)
+  TFBServiceManager = class(TInterfaceParent,IServiceManager)
   private
+    FFirebirdAPI: IFirebirdAPI;
     FServerName: string;
     FSPB: ISPB;
     FHandle: TISC_SVC_HANDLE;
@@ -413,8 +415,8 @@ constructor TFBServiceManager.Create(ServerName: string; Protocol: TProtocol;
   SPB: ISPB);
 begin
   inherited Create;
+  FFirebirdAPI := Firebird25ClientAPI; {Keep reference to interface}
   FProtocol := Protocol;
-  Firebird25ClientAPI.RegisterObj(self);
   FSPB := SPB;
   FServerName := ServerName;
   Attach;
@@ -423,7 +425,6 @@ end;
 destructor TFBServiceManager.Destroy;
 begin
   Detach(true);
-  Firebird25ClientAPI.UnRegisterObj(self);
   inherited Destroy;
 end;
 
