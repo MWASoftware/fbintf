@@ -406,7 +406,6 @@ begin
   FSQLDialect := 3;
   FDatabaseName := DatabaseName;
   FDPB := DPB;
-  FRaiseExceptionOnConnectError := RaiseExceptionOnConnectError;
   Connect;
 end;
 

@@ -47,6 +47,7 @@ type
 
   public
     function getCount: integer;
+    procedure Remove(ParamType: byte);
   end;
 
   { TParamBlockItem }
@@ -105,6 +106,9 @@ function TParamBlockItem.getAsString: string;
 var len: byte;
 begin
   Result := '';
+  if FParamData^.FBufPtr^ = char(isc_dpb_password) then
+    Exit; {no password access}
+
   with FParamData^ do
   case FDataType of
   dtInteger:
@@ -323,6 +327,27 @@ end;
 function TParamBlock.getCount: integer;
 begin
   Result := Length(FItems);
+end;
+
+procedure TParamBlock.Remove(ParamType: byte);
+var P: PParamBlockItemData;
+    i, j: integer;
+begin
+  P := nil;
+  for i := 0 to getCount - 1 do
+    if FItems[i]^.FBufPtr^ = char(ParamType) then
+    begin
+      P := FItems[i];
+      for j := i + 1 to getCount - 1 do
+      begin
+        MoveBy(FItems[j],-P^.FBufLength);
+        FItems[j - 1] := FItems[j];
+      end;
+      FDataLength -= P^.FBufLength;
+      dispose(P);
+      SetLength(FItems,Length(FItems)-1);
+      Exit;
+    end;
 end;
 
 end.
