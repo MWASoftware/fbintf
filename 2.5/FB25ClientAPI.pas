@@ -17,7 +17,8 @@ type
     FStatusIntf: IStatus;   {Keep a reference to the interface - automatic destroy
                              when this class is freed and last reference to IStatus
                              goes out of scope.}
-    procedure LoadInterface;
+  protected
+    procedure LoadInterface; override;
   public
     constructor Create;
     destructor Destroy; override;
@@ -109,8 +110,6 @@ type
       DefaultCompletion: TTransactionAction): ITransaction; overload;
     function StartTransaction(Attachments: array of IAttachment;
              TPB: ITPB; DefaultCompletion: TTransactionAction): ITransaction; overload;
-    function IsEmbeddedServer: boolean; override;
-    function GetLibraryName: string;
     function HasServiceAPI: boolean;
     function HasRollbackRetaining: boolean;
     function GetImplementationVersion: string;
@@ -225,6 +224,7 @@ end;
 
 procedure TFB25ClientAPI.LoadInterface;
 begin
+  inherited LoadInterface;
   BLOB_get := GetProcAddr('BLOB_get'); {do not localize}
   BLOB_put := GetProcAddr('BLOB_put'); {do not localize}
   isc_sqlcode := GetProcAddr('isc_sqlcode'); {do not localize}
@@ -312,8 +312,6 @@ begin
   inherited;
   FStatus := TFBStatus.Create;
   FStatusIntf := FStatus;
-  if (IBLibrary <> NilHandle) then
-    LoadInterface;
   Firebird25ClientAPI := self;
 end;
 
@@ -411,22 +409,6 @@ function TFB25ClientAPI.StartTransaction(Attachments: array of IAttachment;
   TPB: ITPB; DefaultCompletion: TTransactionAction): ITransaction;
 begin
   Result := TFBTransaction.Create(Attachments,TPB,DefaultCompletion);
-end;
-
-function TFB25ClientAPI.IsEmbeddedServer: boolean;
-begin
-  Result := false;
-  {$IFDEF UNIX}
-  Result := Pos('libfbembed',FBLibraryName) = 1;
-  {$ENDIF}
-  {$IFDEF WINDOWS}
-  Result := CompareText(FBLibraryName,FIREBIRD_EMBEDDED) = 0
-  {$ENDIF}
-end;
-
-function TFB25ClientAPI.GetLibraryName: string;
-begin
-  Result := FBLibraryName;
 end;
 
 function TFB25ClientAPI.HasServiceAPI: boolean;

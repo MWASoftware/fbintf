@@ -57,7 +57,8 @@ end;
 
 function TFBLibrary.IsEmbeddedServer: boolean;
 begin
-  Result := Pos('libfbembed',FBLibraryName) = 1;
+  Result := Pos('libfbembed',FFBLibraryName) = 1;
 end;
+
 
 

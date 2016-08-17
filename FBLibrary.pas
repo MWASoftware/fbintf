@@ -1,6 +1,6 @@
 unit FBLibrary;
 
-{$mode objfpc}{$H+}
+{$mode delphi}
 
 {$IF FPC_FULLVERSION >= 20700 }
 {$codepage UTF8}
@@ -9,25 +9,33 @@ unit FBLibrary;
 interface
 
 uses
-  Classes, SysUtils, Dynlibs,  IB;
+  Classes, SysUtils, Dynlibs,  Firebird, IB;
 
 type
+  Tfb_get_master_interface = function: IMaster;
+                              {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
   { TFBLibrary }
 
   TFBLibrary = class(TInterfacedObject)
   private
     FFBLibraryName: string;
+    fb_get_master_interface: Tfb_get_master_interface;
+    FMaster: IMaster;
     procedure LoadIBLibrary;
   protected
     IBLibrary: TLibHandle; static;
     function GetProcAddr(ProcName: PChar): Pointer;
+    procedure LoadInterface; virtual;
   public
     constructor Create;
     destructor Destroy; override;
     procedure IBAlloc(var P; OldSize, NewSize: Integer);
-    function IsEmbeddedServer: boolean; virtual;
-    property FBLibraryName: string read FFBLibraryName;
+    property MasterIntf: IMaster read FMaster;
+
+    {IFirebirdAPI}
+    function IsEmbeddedServer: boolean;
+    function GetLibraryName: string;
   end;
 
 implementation
@@ -68,6 +76,8 @@ begin
   if IBLibrary <> NilHandle then
     IBError(ibxeFirebirdLibraryLoaded,[nil]);
   LoadIBLibrary;
+  if (IBLibrary <> NilHandle) then
+    LoadInterface;
 end;
 
 destructor TFBLibrary.Destroy;
@@ -92,7 +102,19 @@ function TFBLibrary.GetProcAddr(ProcName: PChar): Pointer;
 begin
   Result := GetProcAddress(IBLibrary, ProcName);
   if not Assigned(Result) then
-    raise Exception.CreateFmt('Unable to load Firebird Client Library Function "%s"',[ProcName]);
+    raise Exception.CreateFmt(SFirebirdAPIFuncNotFound,[ProcName]);
+end;
+
+procedure TFBLibrary.LoadInterface;
+begin
+  fb_get_master_interface := GetProcAddress(IBLibrary, 'fb_get_master_interface'); {do not localize}
+  if assigned(fb_get_master_interface) then
+    FMaster := fb_get_master_interface;
+end;
+
+function TFBLibrary.GetLibraryName: string;
+begin
+  Result := FFBLibraryName;
 end;
 
 initialization

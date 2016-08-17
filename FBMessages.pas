@@ -193,6 +193,7 @@ resourcestring
   SSQLNotGenerated = 'Update SQL statements not generated, exit anyway?';
   SSQLDataSetOpen = 'Unable to determine field names for %s';
   SDefaultTransaction = '%s, Default';
+  SFirebirdAPIFuncNotFound = 'Unable to load Firebird Client Library Function "%s"';
 
 implementation
 

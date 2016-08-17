@@ -10,95 +10,91 @@
         <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
     </CompilerOptions>
-    <Files Count="22">
+    <Files Count="21">
       <Item1>
-        <Filename Value="3.0/firebird/fb_get_master_interface.pas"/>
-        <Type Value="Include"/>
-      </Item1>
-      <Item2>
         <Filename Value="3.0/firebird/Firebird.pas"/>
         <UnitName Value="Firebird"/>
-      </Item2>
-      <Item3>
+      </Item1>
+      <Item2>
         <Filename Value="IB.pas"/>
         <UnitName Value="IB"/>
-      </Item3>
-      <Item4>
+      </Item2>
+      <Item3>
         <Filename Value="FBLibrary.pas"/>
         <UnitName Value="FBLibrary"/>
-      </Item4>
-      <Item5>
+      </Item3>
+      <Item4>
         <Filename Value="2.5/IBHeader.pas"/>
         <UnitName Value="IBHeader"/>
-      </Item5>
-      <Item6>
+      </Item4>
+      <Item5>
         <Filename Value="2.5/FB25ClientAPI.pas"/>
         <UnitName Value="FB25ClientAPI"/>
+      </Item5>
+      <Item6>
+        <Filename Value="FBMessages.pas"/>
+        <UnitName Value="FBMessages"/>
       </Item6>
       <Item7>
-        <Filename Value="FBErrorMessages.pas"/>
-        <UnitName Value="FBErrorMessages"/>
-      </Item7>
-      <Item8>
         <Filename Value="2.5/FB25Transaction.pas"/>
         <UnitName Value="FB25Transaction"/>
-      </Item8>
-      <Item9>
+      </Item7>
+      <Item8>
         <Filename Value="2.5/FB25Attachment.pas"/>
         <UnitName Value="FB25Attachment"/>
-      </Item9>
-      <Item10>
+      </Item8>
+      <Item9>
         <Filename Value="2.5/FB25Blob.pas"/>
         <UnitName Value="FB25Blob"/>
-      </Item10>
-      <Item11>
+      </Item9>
+      <Item10>
         <Filename Value="IBExternals.pas"/>
         <UnitName Value="IBExternals"/>
-      </Item11>
-      <Item12>
+      </Item10>
+      <Item11>
         <Filename Value="IBErrorCodes.pas"/>
         <UnitName Value="IBErrorCodes"/>
-      </Item12>
-      <Item13>
+      </Item11>
+      <Item12>
         <Filename Value="2.5/FB25Events.pas"/>
         <UnitName Value="FB25Events"/>
-      </Item13>
-      <Item14>
+      </Item12>
+      <Item13>
         <Filename Value="IBUtils.pas"/>
         <UnitName Value="IBUtils"/>
-      </Item14>
-      <Item15>
+      </Item13>
+      <Item14>
         <Filename Value="2.5/FB25Statement.pas"/>
         <UnitName Value="FB25Statement"/>
-      </Item15>
-      <Item16>
+      </Item14>
+      <Item15>
         <Filename Value="2.5/FB25Services.pas"/>
         <UnitName Value="FB25Services"/>
-      </Item16>
-      <Item17>
+      </Item15>
+      <Item16>
         <Filename Value="2.5/FB25Status.pas"/>
         <UnitName Value="FB25Status"/>
-      </Item17>
-      <Item18>
+      </Item16>
+      <Item17>
         <Filename Value="2.5/FB25SQLData.pas"/>
         <UnitName Value="FB25SQLData"/>
-      </Item18>
-      <Item19>
+      </Item17>
+      <Item18>
         <Filename Value="2.5/FB25Array.pas"/>
         <UnitName Value="FB25Array"/>
-      </Item19>
-      <Item20>
+      </Item18>
+      <Item19>
         <Filename Value="2.5/FB25ParamBlock.pas"/>
         <UnitName Value="FB25ParamBlock"/>
-      </Item20>
-      <Item21>
+      </Item19>
+      <Item20>
         <Filename Value="2.5/FB25OutputBlock.pas"/>
         <UnitName Value="FB25OutputBlock"/>
-      </Item21>
-      <Item22>
+      </Item20>
+      <Item21>
         <Filename Value="FBActivityMonitor.pas"/>
         <UnitName Value="FBActivityMonitor"/>
-      </Item22>
+      </Item21>
     </Files>
     <RequiredPkgs Count="1">
       <Item1>
