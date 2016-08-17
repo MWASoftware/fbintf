@@ -7,7 +7,7 @@ interface
 {Provides common handling for the DPB, TPB, SPB and Service Request Block (SRB)}
 
 uses
-  Classes, SysUtils, IB, FB25ClientAPI, FB25ActivityMonitor;
+  Classes, SysUtils, IB, FB25ClientAPI, FBActivityMonitor;
 
 type
   TParamDataType = (dtString, dtString2, dtByte,dtInteger,dtnone);
@@ -74,7 +74,7 @@ type
 
 implementation
 
-uses FBErrorMessages;
+uses FBMessages;
 
 { TParamBlockItem }
 

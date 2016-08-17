@@ -5,8 +5,8 @@ unit FB25Array;
 interface
 
 uses
-  Classes, SysUtils, IB, FBTypes, FB25Statement, FB25Attachment, FB25Transaction,
-  FB25SQLData, IBHeader, FB25ClientAPI, IBExternals, FB25ActivityMonitor;
+  Classes, SysUtils, IB,  FB25Statement, FB25Attachment, FB25Transaction,
+  FB25SQLData, IBHeader, FB25ClientAPI, IBExternals, FBActivityMonitor;
 
 (*
 
@@ -149,7 +149,7 @@ type
 
 implementation
 
-uses FBErrorMessages;
+uses FBMessages;
 
 { TFBArrayElement }
 
@@ -261,7 +261,7 @@ end;
 constructor TFBArrayMetaData.Create(aAttachment: TFBAttachment;
   aTransaction: TFBTransaction; relationName, columnName: string);
 begin
-  inherited Create;
+  inherited Create(aTransaction);
   AddMonitor(aTransaction);
   FAttachment := aAttachment;
   FTransaction := aTransaction;

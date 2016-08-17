@@ -5,7 +5,7 @@ unit FB25Status;
 interface
 
 uses
-  Classes, SysUtils, IB, IBExternals, FBErrorMessages;
+  Classes, SysUtils, IB, IBExternals, FBMessages;
 
 const
   IBLocalBufferLength = 512;

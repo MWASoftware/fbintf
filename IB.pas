@@ -9,7 +9,7 @@ unit IB;
 interface
 
 uses
-  Classes, SysUtils, DB, FBErrorMessages, IBExternals, FBTypes;
+  Classes, SysUtils, DB, FBMessages, IBExternals;
 
 {$I consts_pub.inc}
 {$I inf_pub.inc}
@@ -36,10 +36,15 @@ uses
   SQL_DATE                       =        SQL_TIMESTAMP;
 
 type
-
-  {$IF FPC_FULLVERSION < 20700 }
-  RawByteString = AnsiString; {Needed for backwards compatibility}
-  {$ENDIF}
+   TGDS_QUAD = record
+     gds_quad_high      : ISC_LONG;
+     gds_quad_low       : UISC_LONG;
+   end;
+   TGDS__QUAD           = TGDS_QUAD;
+   TISC_QUAD            = TGDS_QUAD;
+   PGDS_QUAD            = ^TGDS_QUAD;
+   PGDS__QUAD           = ^TGDS__QUAD;
+   PISC_QUAD            = ^TISC_QUAD;
 
   TIBSQLTypes = (SQLUnknown, SQLSelect, SQLInsert,
                   SQLUpdate, SQLDelete, SQLDDL,

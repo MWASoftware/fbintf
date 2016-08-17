@@ -1,4 +1,4 @@
-unit FBErrorMessages;
+unit FBMessages;
 
 {$mode objfpc}{$H+}
 

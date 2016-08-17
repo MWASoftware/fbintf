@@ -5,8 +5,8 @@ unit FB25Blob;
 interface
 
 uses
-  Classes, SysUtils, IB, FBTypes, IBHeader,IBExternals, FBLibrary, FB25ClientAPI, FB25Attachment,
-  FB25Transaction, FB25ActivityMonitor;
+  Classes, SysUtils, IB,  IBHeader,IBExternals, FBLibrary, FB25ClientAPI, FB25Attachment,
+  FB25Transaction, FBActivityMonitor;
 
 type
 
@@ -73,15 +73,14 @@ type
 
 implementation
 
-uses IBErrorCodes, FBErrorMessages;
+uses IBErrorCodes, FBMessages;
 
 { TFBBlobMetaData }
 
 constructor TFBBlobMetaData.Create(Attachment: TFBAttachment;
   Transaction: TFBTransaction; RelationName, ColumnName: string);
 begin
-  inherited Create;
-  AddMonitor(Transaction);
+  inherited Create(Transaction);
   with Firebird25ClientAPI do
     Call(isc_blob_lookup_desc(StatusVector,@(Attachment.Handle),
                                            @(Transaction.Handle),
@@ -150,7 +149,7 @@ constructor TFBBlob.Create(Attachment: TFBAttachment; Transaction: ITransaction
 var DBHandle: TISC_DB_HANDLE;
       TRHandle: TISC_TR_HANDLE;
 begin
-    inherited Create;
+    inherited Create(Transaction as TFBTransaction);
     FAttachment := Attachment;
     FTransaction := Transaction;
     AddMonitor(Transaction as TFBTransaction);
@@ -167,7 +166,7 @@ constructor TFBBlob.Create(Attachment: TFBAttachment;
 var DBHandle: TISC_DB_HANDLE;
     TRHandle: TISC_TR_HANDLE;
 begin
-  inherited Create;
+  inherited Create(Transaction as TFBTransaction);
   FAttachment := Attachment;
   FTransaction := Transaction;
   AddMonitor(Transaction as TFBTransaction);

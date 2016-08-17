@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, IB, FB25ClientAPI, IBHeader, FB25ParamBlock, FB25OutputBlock,
-    FB25ActivityMonitor;
+    FBActivityMonitor;
 
 type
   { TSPB }
@@ -102,7 +102,7 @@ type
 
 implementation
 
-uses FBErrorMessages;
+uses FBMessages;
 
 { TSRBItem }
 

@@ -5,8 +5,8 @@ unit FB25Attachment;
 interface
 
 uses
-  Classes, SysUtils, IB, FBTypes, FBLibrary, FB25ClientAPI, IBHeader,
-  FB25ParamBlock, FB25OutputBlock, FB25Status, FB25ActivityMonitor;
+  Classes, SysUtils, IB,  FBLibrary, FB25ClientAPI, IBHeader,
+  FB25ParamBlock, FB25OutputBlock, FB25Status, FBActivityMonitor;
 
 type
   TDPB = class;
@@ -131,7 +131,7 @@ type
 
 implementation
 
-uses FB25Events,FB25Transaction, FBErrorMessages, FB25Blob,
+uses FB25Events,FB25Transaction, FBMessages, FB25Blob,
   FB25Statement, FB25Array;
 
 { TDBInfoItem }

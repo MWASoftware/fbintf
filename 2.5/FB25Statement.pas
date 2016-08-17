@@ -58,8 +58,8 @@ unit FB25Statement;
 interface
 
 uses
-  Classes, SysUtils, IB, FBTypes, FBLibrary, FB25ClientAPI, FB25Transaction, FB25Attachment,
-  IBHeader, IBExternals, FB25SQLData, FB25OutputBlock, FB25ActivityMonitor;
+  Classes, SysUtils, IB,  FBLibrary, FB25ClientAPI, FB25Transaction, FB25Attachment,
+  IBHeader, IBExternals, FB25SQLData, FB25OutputBlock, FBActivityMonitor;
 
 type
   TFBStatement = class;
@@ -380,7 +380,7 @@ end;
 
 implementation
 
-uses IBUtils, FBErrorMessages, FB25Blob, variants, IBErrorCodes, FB25Array;
+uses IBUtils, FBMessages, FB25Blob, variants, IBErrorCodes, FB25Array;
 
 type
 
@@ -1752,29 +1752,37 @@ begin
   if not FPrepared then
     InternalPrepare;
   CheckHandle;
-  with Firebird25ClientAPI do
-  case FSQLType of
-  SQLSelect:
-    IBError(ibxeIsAExecuteProcedure,[]);
+  if aTransaction <> FTransaction then
+    AddMonitor(aTransaction);
 
-  SQLExecProcedure:
-  begin
-    Call(isc_dsql_execute2(StatusVector,
-                        @(aTransaction.Handle),
-                        @FHandle,
-                        SQLDialect,
-                        FSQLParams.AsXSQLDA,
-                        FSQLRecord.AsXSQLDA), True);
-    Result := TResults.Create(FSQLRecord);
-    FSingleResults := true;
-  end
-  else
-    Call(isc_dsql_execute(StatusVector,
-                         @(aTransaction.Handle),
-                         @FHandle,
-                         SQLDialect,
-                         FSQLParams.AsXSQLDA), True);
+  try
+    with Firebird25ClientAPI do
+    case FSQLType of
+    SQLSelect:
+      IBError(ibxeIsAExecuteProcedure,[]);
 
+    SQLExecProcedure:
+    begin
+      Call(isc_dsql_execute2(StatusVector,
+                          @(aTransaction.Handle),
+                          @FHandle,
+                          SQLDialect,
+                          FSQLParams.AsXSQLDA,
+                          FSQLRecord.AsXSQLDA), True);
+      Result := TResults.Create(FSQLRecord);
+      FSingleResults := true;
+    end
+    else
+      Call(isc_dsql_execute(StatusVector,
+                           @(aTransaction.Handle),
+                           @FHandle,
+                           SQLDialect,
+                           FSQLParams.AsXSQLDA), True);
+
+    end;
+  finally
+    if aTransaction <> FTransaction then
+       RemoveMonitor(aTransaction);
   end;
 end;
 
@@ -1787,6 +1795,8 @@ begin
  CheckTransaction(aTransaction);
   if not FPrepared then
     InternalPrepare;
+ if aTransaction <> FTransaction then
+   AddMonitor(aTransaction);
  CheckHandle;
  with Firebird25ClientAPI do
  begin
@@ -2003,6 +2013,8 @@ begin
         IBDatabaseError;
     end;
   finally
+    if (FSQLRecord.FTransaction <> nil) and (FSQLRecord.FTransaction <> FTransaction) then
+      RemoveMonitor(FSQLRecord.FTransaction);
     FOpen := False;
     FExecTransactionIntf := nil;
     FSQLRecord.FTransaction := nil;
@@ -2013,7 +2025,7 @@ constructor TFBStatement.Create(Attachment: TFBAttachment;
   Transaction: ITransaction; sql: string; SQLDialect: integer);
 var GUID : TGUID;
 begin
-  inherited Create;
+  inherited Create(Transaction as TFBTransaction);
   FActivityMonitor := TActivityMonitor.Create;
   FAttachment := Attachment;
   FAttachmentIntf := Attachment;

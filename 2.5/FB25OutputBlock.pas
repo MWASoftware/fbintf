@@ -6,12 +6,16 @@ unit FB25OutputBlock;
 {$DEFINE HAS_ANSISTRING_CODEPAGE}
 {$ENDIF}
 
+{$IF FPC_FULLVERSION < 20700 }
+RawByteString = AnsiString; {Needed for backwards compatibility}
+{$ENDIF}
+
 interface
 
 {Provides common handling for the DB Info results, SQL Info and Service Response Block}
 
 uses
-  Classes, SysUtils,  FB25ClientAPI, IB, FB25ActivityMonitor;
+  Classes, SysUtils,  FB25ClientAPI, IB, FBActivityMonitor;
 
 const
   DefaultBufferSize = 32000;
@@ -102,7 +106,7 @@ type
 
 implementation
 
-uses FBErrorMessages;
+uses FBMessages;
 
 { TOutputBlockItemGroup }
 

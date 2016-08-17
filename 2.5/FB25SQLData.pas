@@ -2,6 +2,11 @@ unit FB25SQLData;
 
 {$mode objfpc}{$H+}
 
+{$IF FPC_FULLVERSION >= 20700 }
+{$codepage UTF8}
+{$DEFINE HAS_ANSISTRING_CODEPAGE}
+{$ENDIF}
+
 { This Unit was hacked out of the IBSQL unit and defines a class used as the
   base for interfaces accessing SQLDAVar data and Array Elements. The abstract
   methods are used to customise for an SQLDAVar or Array Element. The empty
@@ -11,8 +16,8 @@ unit FB25SQLData;
 interface
 
 uses
-  Classes, SysUtils, IBExternals, IBHeader, IB, FBTypes, FB25Attachment, FB25Transaction,
-  FB25ActivityMonitor;
+  Classes, SysUtils, IBExternals, IBHeader, IB,  FB25Attachment, FB25Transaction,
+  FBActivityMonitor;
 
 type
 
@@ -102,7 +107,7 @@ type
 
 implementation
 
-uses FBErrorMessages, FB25Blob, FB25ClientAPI, variants;
+uses FBMessages, FB25Blob, FB25ClientAPI, variants;
 
 function TSQLDataItem.AdjustScale(Value: Int64; aScale: Integer): Double;
 var
@@ -494,6 +499,9 @@ var
   str_len: Integer;
   ss: TStringStream;
   b: TFBBlob;
+  {$IFDEF HAS_ANSISTRING_CODEPAGE}
+  rs: RawByteString;
+  {$ENDIF}
 begin
   CheckActive;
   result := '';
@@ -525,7 +533,13 @@ begin
           str_len := isc_portable_integer(SQLData, 2);
           Inc(sz, 2);
         end;
-        SetString(result, sz, str_len);
+        {$IFDEF HAS_ANSISTRING_CODEPAGE}
+        SetString(rs, sz, str_len);
+        SetCodePage(rs,CP_NONE,false);
+        Result := rs;
+        {$ELSE}
+        SetString(Result, sz, str_len);
+        {$ENDIF}
         if SQLType = SQL_TEXT then
           result := TrimRight(result);
       end;

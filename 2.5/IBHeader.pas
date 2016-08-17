@@ -38,7 +38,7 @@ unit IBHeader;
 interface
 
 uses
-  IBExternals, FBTypes;
+  IBExternals, IB;
 
 
 const

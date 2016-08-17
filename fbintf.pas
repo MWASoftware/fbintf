@@ -7,10 +7,10 @@ unit fbintf;
 interface
 
 uses
-  Firebird, IB, FBLibrary, IBHeader, FB25ClientAPI, FBErrorMessages, 
+  Firebird, IB, FBLibrary, IBHeader, FB25ClientAPI, FBMessages, 
   FB25Transaction, FB25Attachment, FB25Blob, IBExternals, IBErrorCodes, 
   FB25Events, IBUtils, FB25Statement, FB25Services, FB25Status, FB25SQLData, 
-  FB25Array, FBTypes, FB25ParamBlock, FB25OutputBlock, FB25ActivityMonitor;
+  FB25Array, FB25ParamBlock, FB25OutputBlock, FBActivityMonitor;
 
 implementation
 

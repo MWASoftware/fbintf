@@ -121,7 +121,7 @@ const
 
 implementation
 
-uses FBErrorMessages, dynlibs, FB25Attachment, FB25Transaction, FB25Services;
+uses FBMessages, dynlibs, FB25Attachment, FB25Transaction, FB25Services;
 
 { Stubs for 6.0 only functions }
 function isc_rollback_retaining_stub(status_vector   : PISC_STATUS;

@@ -32,7 +32,7 @@ type
 
 implementation
 
-uses FBErrorMessages
+uses FBMessages
 
 {$IFDEF WINDOWS }
 , Windows,Registry, WinDirs

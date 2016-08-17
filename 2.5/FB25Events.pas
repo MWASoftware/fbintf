@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, IB, FBLibrary, FB25ClientAPI, FB25Attachment, IBExternals,
-  IBHeader, syncobjs, FB25ActivityMonitor;
+  IBHeader, syncobjs, FBActivityMonitor;
 
 type
   { TFBEvents }
@@ -44,7 +44,7 @@ type
 
 implementation
 
-uses FB25Status, FBErrorMessages;
+uses FB25Status, FBMessages;
 
 const
   MaxEvents = 15;
@@ -247,8 +247,7 @@ end;
 
 constructor TFBEvents.Create(DBAttachment: TFBAttachment; Events: TStrings);
 begin
-  inherited Create;
-  AddMonitor(DBAttachment);
+  inherited Create(DBAttachment);
   FAttachment := DBAttachment;
   if Events.Count > MaxEvents then
     IBError(ibxeMaximumEvents, [nil]);

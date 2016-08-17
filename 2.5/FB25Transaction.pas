@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, IB, FBLibrary, FB25ClientAPI, IBHeader, IBExternals,
-  FB25Attachment, FB25ParamBlock, FB25ActivityMonitor;
+  FB25Attachment, FB25ParamBlock, FBActivityMonitor;
 
 type
   TTPB = class;
@@ -73,7 +73,7 @@ type
 
 implementation
 
-uses FBErrorMessages;
+uses FBMessages;
 
 { TTPBItem }
 
@@ -138,7 +138,7 @@ constructor TFBTransaction.Create(Attachments: array of IAttachment; TPB: ITPB;
 var
   i: Integer;
 begin
-  inherited Create;
+  inherited Create(nil);
   if Length(Attachments) = 0 then
     IBError(ibxeEmptyAttachmentsList,[nil]);
 
@@ -163,9 +163,8 @@ end;
 constructor TFBTransaction.Create(Attachment: TFBAttachment; TPB: ITPB;
   DefaultCompletion: TTransactionAction);
 begin
-  inherited Create;
+  inherited Create(Attachment);
   FActivityMonitor := TActivityMonitor.Create;
-  AddMonitor(Attachment);
   SetLength(FAttachments,1);
   FAttachments[0] := Attachment;
   FTPB := TPB;

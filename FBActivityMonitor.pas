@@ -1,4 +1,4 @@
-unit FB25ActivityMonitor;
+unit FBActivityMonitor;
 
 {$mode objfpc}{$H+}
 
@@ -38,24 +38,23 @@ type
     TInterfaceParent = TInterfacedObject;
   {$ENDIF}
 
-  TActivityReporter = class(TInterfaceParent)
-  private
-    FMonitors: TList;
-  protected
-    function Call(ErrCode: ISC_STATUS; RaiseError: Boolean = true): ISC_STATUS;
-    procedure AddMonitor(aMonitor: TObject);
-    procedure RemoveMonitor(aMonitor: TObject);
-    procedure SignalActivity;
-    property Monitors: TList read FMonitors;
-  public
-    constructor Create;
-    destructor Destroy; override;
-  end;
-
   IActivityMonitor = interface ['{6943f656-6e51-4f9b-aede-3c9e5556f288}']
     function HasActivity: boolean;  {One shot - reset on read}
     procedure ResetActivity;
     procedure SignalActivity;
+  end;
+
+  TActivityReporter = class(TInterfaceParent)
+  private
+    FMonitors: array of IActivityMonitor;
+    function FindMonitor(aMonitor: IActivityMonitor): integer;
+  protected
+    function Call(ErrCode: ISC_STATUS; RaiseError: Boolean = true): ISC_STATUS;
+    procedure AddMonitor(aMonitor: IActivityMonitor);
+    procedure RemoveMonitor(aMonitor: IActivityMonitor);
+    procedure SignalActivity;
+  public
+    constructor Create(aMonitor: IActivityMonitor);
   end;
 
   { TActivityMonitor }
@@ -110,6 +109,18 @@ end;
 
 { TActivityReporter}
 
+function TActivityReporter.FindMonitor(aMonitor: IActivityMonitor): integer;
+var i: integer;
+begin
+  Result := -1;
+  for i := 0 to Length(FMonitors) - 1 do
+    if FMonitors[i] = aMonitor then
+    begin
+      Result := i;
+      Exit;
+    end;
+end;
+
 function TActivityReporter.Call(ErrCode: ISC_STATUS; RaiseError: Boolean): ISC_STATUS;
 begin
   result := ErrCode;
@@ -118,39 +129,49 @@ begin
     Firebird25ClientAPI.IBDataBaseError;
 end;
 
-procedure TActivityReporter.AddMonitor(aMonitor: TObject);
-begin
-  if (aMonitor is IActivityMonitor) and (FMonitors.IndexOf(aMonitor) = -1) then
-    FMonitors.Add(aMonitor);
-end;
-
-procedure TActivityReporter.RemoveMonitor(aMonitor: TObject);
+procedure TActivityReporter.AddMonitor(aMonitor: IActivityMonitor);
 var i: integer;
 begin
-  for i := 0 to FMonitors.Count - 1 do
-    if TObject(FMonitors[i]) = aMonitor then
-      FMonitors.Delete(i);
+  if FindMonitor(aMonitor) = -1 then
+  begin
+    i := Length(FMonitors);
+    Setlength(FMonitors,i+1);
+    FMonitors[i] := aMonitor;
+  end;
+end;
+
+procedure TActivityReporter.RemoveMonitor(aMonitor: IActivityMonitor);
+var i,j: integer;
+begin
+  i := FindMonitor(aMonitor);
+  if i <> -1 then
+  begin
+    if Length(FMonitors) = 1 then
+      SetLength(FMonitors,0)
+    else
+    begin
+      for j := i + 1 to Length(FMonitors) - 1 do
+        FMonitors[j-1] := FMonitors[j];
+      SetLength(FMonitors,Length(FMonitors)-1);
+    end;
+  end;
 end;
 
 procedure TActivityReporter.SignalActivity;
 var i: integer;
 begin
-  for i := 0 to FMonitors.Count - 1 do
-    if TObject(FMonitors[i]) is IActivityMonitor then
-      (TObject(FMonitors[i]) as IActivityMonitor).SignalActivity;
+  for i := 0 to Length(FMonitors) - 1 do
+      FMonitors[i].SignalActivity;
 end;
 
-constructor TActivityReporter.Create;
+constructor TActivityReporter.Create(aMonitor: IActivityMonitor);
 begin
   inherited Create;
-  FMonitors := TList.Create;
-end;
-
-destructor TActivityReporter.Destroy;
-begin
-  if assigned(FMonitors) then
-    FMonitors.Free;
-  inherited Destroy;
+  if aMonitor <> nil then
+  begin
+    SetLength(FMonitors,1);
+    FMonitors[0] := aMonitor;
+  end;
 end;
 
 end.
