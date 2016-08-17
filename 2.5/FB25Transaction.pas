@@ -37,8 +37,8 @@ type
   TFBTransaction = class(TActivityReporter,ITransaction, IActivityMonitor)
   private
     FHandle: TISC_TR_HANDLE;
-    FActivityMonitor: IActivityMonitor;
     FTPB: ITPB;
+    FActivity: boolean;
     FDefaultCompletion: TTransactionAction;
     FAttachments: array of IAttachment; {Keep reference to attachment - ensures
                                           attachment cannot be freed before transaction}
@@ -51,14 +51,11 @@ type
     destructor Destroy; override;
     procedure DoDefaultTransactionEnd(Force: boolean);
     property Handle: TISC_TR_HANDLE read FHandle;
-    property ActivityMonitor: IActivityMonitor
-              read FActivityMonitor implements IActivityMonitor;
 
   public
     {ITransaction}
     function getTPB: ITPB;
     function GetInTransaction: boolean;
-    function HasActivity: boolean;
     procedure PrepareForCommit;
     procedure Commit(Force: boolean=false);
     procedure CommitRetaining;
@@ -69,7 +66,11 @@ type
     function GetAttachmentCount: integer;
     function GetAttachment(index: integer): IAttachment;
     property InTransaction: boolean read GetInTransaction;
-  end;
+    function HasActivity: boolean; {one shot - reset after call}
+
+    {IActivityMonitor}
+    procedure SignalActivity; override;
+ end;
 
 implementation
 
@@ -142,8 +143,6 @@ begin
   if Length(Attachments) = 0 then
     IBError(ibxeEmptyAttachmentsList,[nil]);
 
-  FActivityMonitor := TActivityMonitor.Create;
-
   SetLength(FAttachments,Length(Attachments));
   for i := 0 to Length(Attachments) - 1 do
   begin
@@ -164,7 +163,6 @@ constructor TFBTransaction.Create(Attachment: TFBAttachment; TPB: ITPB;
   DefaultCompletion: TTransactionAction);
 begin
   inherited Create(Attachment);
-  FActivityMonitor := TActivityMonitor.Create;
   SetLength(FAttachments,1);
   FAttachments[0] := Attachment;
   FTPB := TPB;
@@ -200,7 +198,14 @@ end;
 
 function TFBTransaction.HasActivity: boolean;
 begin
-  Result := FActivityMonitor.HasActivity;
+  Result := FActivity;
+  FActivity := false;
+end;
+
+procedure TFBTransaction.SignalActivity;
+begin
+  FActivity := true;
+  inherited SignalActivity;
 end;
 
 procedure TFBTransaction.PrepareForCommit;

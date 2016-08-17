@@ -39,8 +39,6 @@ type
   {$ENDIF}
 
   IActivityMonitor = interface
-    function HasActivity: boolean;  {One shot - reset on read}
-    procedure ResetActivity;
     procedure SignalActivity;
   end;
 
@@ -52,22 +50,10 @@ type
     function Call(ErrCode: ISC_STATUS; RaiseError: Boolean = true): ISC_STATUS;
     procedure AddMonitor(aMonitor: IActivityMonitor);
     procedure RemoveMonitor(aMonitor: IActivityMonitor);
-    procedure SignalActivity;
+    procedure SignalActivity; virtual;
   public
     constructor Create(aMonitor: IActivityMonitor);
   end;
-
-  { TActivityMonitor }
-
-  TActivityMonitor = class(TInterfaceParent, IActivityMonitor)
-  private
-    FActivity: boolean;
-  public
-    function HasActivity: boolean;  {One shot - reset on read}
-    procedure ResetActivity;
-    procedure SignalActivity;
-  end;
-
 
 implementation
 
@@ -88,24 +74,6 @@ begin
   inherited Destroy;
 end;
 {$ENDIF}
-
-{ TActivityMonitor }
-
-function TActivityMonitor.HasActivity: boolean;
-begin
-  Result := FActivity;
-  FActivity := false;
-end;
-
-procedure TActivityMonitor.ResetActivity;
-begin
-  FActivity := false;
-end;
-
-procedure TActivityMonitor.SignalActivity;
-begin
-  FActivity := true;
-end;
 
 { TActivityReporter}
 

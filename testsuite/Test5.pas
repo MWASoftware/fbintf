@@ -61,9 +61,15 @@ begin
   Results := Statement.Execute;
   writeln('Full Name = ',Results[0].AsString);
   WriteAffectedRows(Statement);
+  CheckActivity(Statement.GetAttachment);
+  CheckActivity(Transaction);
+  CheckActivity(Statement.GetAttachment);
+  CheckActivity(Transaction);
 
   writeln('Employee Count = ', Attachment.OpenCursorAtStart(Transaction,
          'Select count(*) from EMPLOYEE',3)[0].AsInteger);
+  CheckActivity(Statement.GetAttachment);
+  CheckActivity(Transaction);
 end;
 
 function TTest5.TestTitle: string;

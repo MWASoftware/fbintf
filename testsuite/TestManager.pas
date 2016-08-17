@@ -30,6 +30,8 @@ type
     procedure WriteDBInfo(DBInfo: IDBInformation);
     procedure WriteBytes(Bytes: TByteArray);
     procedure WriteOperationCounts(Category: string; ops: TDBOperationCounts);
+    procedure CheckActivity(Attachment: IAttachment); overload;
+    procedure CheckActivity(Transaction: ITransaction); overload;
   public
     constructor Create(aOwner: TTestManager);  virtual;
     function TestTitle: string; virtual; abstract;
@@ -471,6 +473,16 @@ begin
     writeln('Count = ',ops[i].Count);
   end;
   writeln;
+end;
+
+procedure TTestBase.CheckActivity(Attachment: IAttachment);
+begin
+    writeln('Database Activity = ',Attachment.HasActivity)
+end;
+
+procedure TTestBase.CheckActivity(Transaction: ITransaction);
+begin
+  writeln('Transaction Activity = ',Transaction.HasActivity)
 end;
 
 { TTestManager }

@@ -306,7 +306,7 @@ end;
 
   { TFBStatement }
 
-  TFBStatement = class(TActivityReporter,IStatement,IActivityMonitor)
+  TFBStatement = class(TActivityReporter,IStatement)
   private
     FAttachment: TFBAttachment;
     FAttachmentIntf: IAttachment;
@@ -314,7 +314,6 @@ end;
     FTransactionIntf: ITransaction;
     FExecTransactionIntf: ITransaction;
     FHandle: TISC_STMT_HANDLE;
-    FActivityMonitor: IActivityMonitor;
     FSQLType: TIBSQLTypes;         { Select, update, delete, insert, create, alter, etc...}
     FSQLDialect: integer;
     FSQLParams: TIBXINPUTSQLDA;
@@ -351,8 +350,6 @@ end;
     property SQLDialect: integer read FSQLDialect;
     property Attachment: TFBAttachment read FAttachment;
     property Transaction: TFBTransaction read FTransaction;
-    property ActivityMonitor: IActivityMonitor
-              read FActivityMonitor implements IActivityMonitor;
 
   public
     {IStatement}
@@ -2023,7 +2020,6 @@ constructor TFBStatement.Create(Attachment: TFBAttachment;
 var GUID : TGUID;
 begin
   inherited Create(Transaction as TFBTransaction);
-  FActivityMonitor := TActivityMonitor.Create;
   FAttachment := Attachment;
   FAttachmentIntf := Attachment;
   FTransaction := transaction as TFBTransaction;

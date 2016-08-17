@@ -75,7 +75,7 @@ type
     FSQLDialect: integer;
     FFirebirdAPI: IFirebirdAPI;
     FRaiseExceptionOnConnectError: boolean;
-    FActivityMonitor: IActivityMonitor;
+    FActivity: boolean;
   public
     constructor Create(DatabaseName: string; DPB: IDPB;
       RaiseExceptionOnConnectError: boolean);
@@ -84,15 +84,12 @@ type
     destructor Destroy; override;
     property Handle: TISC_DB_HANDLE read FHandle;
     property SQLDialect: integer read FSQLDialect;
-    property ActivityMonitor: IActivityMonitor
-              read FActivityMonitor implements IActivityMonitor;
 
   public
     {IAttachment}
     function getDPB: IDPB;
     procedure Connect;
     procedure Disconnect(Force: boolean=false);
-    function HasActivity: boolean;
     function IsConnected: boolean;
     procedure DropDatabase;
     function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionAction): ITransaction; overload;
@@ -128,6 +125,10 @@ type
     function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: string): IBlobMetaData;
     function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: string): IArrayMetaData;
     function GetDBInformation(Requests: array of byte): IDBInformation;
+    function HasActivity: boolean; {one shot - reset after call}
+
+    {IActivityMonitor}
+    procedure SignalActivity;
   end;
 
 implementation
@@ -402,7 +403,6 @@ constructor TFBAttachment.Create(DatabaseName: string; DPB: IDPB;
   RaiseExceptionOnConnectError: boolean);
 begin
   inherited Create;
-  FActivityMonitor := TActivityMonitor.Create;
   FFirebirdAPI := Firebird25ClientAPI; {Keep reference to interface}
   FSQLDialect := 3;
   FDatabaseName := DatabaseName;
@@ -416,7 +416,6 @@ var sql: string;
     tr_handle: TISC_TR_HANDLE;
 begin
   inherited Create;
-  FActivityMonitor := TActivityMonitor.Create;
   FFirebirdAPI := Firebird25ClientAPI; {Keep reference to interface}
   FSQLDialect := 3;
   FDatabaseName := DatabaseName;
@@ -489,7 +488,13 @@ end;
 
 function TFBAttachment.HasActivity: boolean;
 begin
-  Result := FActivityMonitor.HasActivity;
+  Result := FActivity;
+  FActivity := false;
+end;
+
+procedure TFBAttachment.SignalActivity;
+begin
+  FActivity := true;
 end;
 
 function TFBAttachment.IsConnected: boolean;
@@ -530,7 +535,7 @@ begin
   with Firebird25ClientAPI do
     if isc_dsql_execute_immediate(StatusVector, @fHandle, @TRHandle, 0,PChar(sql), aSQLDialect, nil) > 0 then
       IBDatabaseError;
-  FActivityMonitor.ResetActivity;
+  SignalActivity;
 end;
 
 procedure TFBAttachment.ExecImmediate(TPB: array of byte; sql: string;
