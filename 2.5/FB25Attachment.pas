@@ -23,6 +23,7 @@ type
   { TDPB }
 
   TDPB = class(TParamBlock, IDPB)
+  public
     constructor Create;
 
   public

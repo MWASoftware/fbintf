@@ -38,7 +38,7 @@ type
     TInterfaceParent = TInterfacedObject;
   {$ENDIF}
 
-  IActivityMonitor = interface ['{6943f656-6e51-4f9b-aede-3c9e5556f288}']
+  IActivityMonitor = interface
     function HasActivity: boolean;  {One shot - reset on read}
     procedure ResetActivity;
     procedure SignalActivity;

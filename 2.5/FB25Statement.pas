@@ -1823,11 +1823,8 @@ procedure TFBStatement.FreeHandle;
 var
   isc_res: ISC_STATUS;
 begin
+  Close;
   try
-    { The following two lines merely set the SQLDA count
-     variable FCount to 0, but do not deallocate
-     That way the allocations can be reused for
-     a new query sring in the same SQL instance }
     if FHandle <> nil then
     with Firebird25ClientAPI do
     begin
