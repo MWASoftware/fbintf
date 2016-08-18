@@ -96,8 +96,6 @@ implementation
 
 uses FBMessages;
 
-{ TSRBItem }
-
 { TSRB }
 
 function TSRB.Add(ParamType: byte): ISRBItem;
@@ -362,14 +360,6 @@ begin
 end;
 
 { TFBServiceManager }
-
-{
- * GenerateSPB -
- *  Given a string containing a textual representation
- *  of the Service parameters, generate a service
- *  parameter buffer, and return it and its length
- *  in SPB and SPBLength, respectively.
-}
 
 procedure TFBServiceManager.CheckActive;
 begin
