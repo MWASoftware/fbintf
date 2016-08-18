@@ -5,7 +5,7 @@ unit FB25Status;
 interface
 
 uses
-  Classes, SysUtils, IB, IBExternals, FBMessages;
+  Classes, SysUtils, IB, IBExternals, FBMessages, FBActivityMonitor;
 
 const
   IBLocalBufferLength = 512;
@@ -19,7 +19,7 @@ type
 
   { TFBStatus }
 
-  TFBStatus = class(TInterfacedObject,IStatus)
+  TFBStatus = class(TInterfaceParent,IStatus)
   private
     FIBCS: TRTLCriticalSection; static;
     FIBDataBaseErrorMessages: TIBDataBaseErrorMessages;

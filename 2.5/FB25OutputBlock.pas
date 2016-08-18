@@ -380,6 +380,7 @@ end;
 
 constructor TOutputBlock.Create(aSize: integer);
 begin
+  inherited Create;
   FBufSize := aSize;
   GetMem(FBuffer,aSize);
   if FBuffer = nil then

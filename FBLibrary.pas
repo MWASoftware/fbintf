@@ -9,7 +9,7 @@ unit FBLibrary;
 interface
 
 uses
-  Classes, SysUtils, Dynlibs,  Firebird, IB;
+  Classes, SysUtils, Dynlibs,  Firebird, IB, FBActivityMonitor;
 
 type
   Tfb_get_master_interface = function: IMaster;
@@ -17,7 +17,7 @@ type
 
   { TFBLibrary }
 
-  TFBLibrary = class(TInterfacedObject)
+  TFBLibrary = class(TInterfaceParent)
   private
     FFBLibraryName: string;
     fb_get_master_interface: Tfb_get_master_interface;

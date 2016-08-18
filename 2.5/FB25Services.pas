@@ -31,20 +31,12 @@ type
 
   { TSPBItem }
 
-  TSPBItem = class(TParamBlockItem,ISPBItem)
-  private
-    FSPB: ISPB;
-  public
-    constructor Create(AOwner: TSPB; Data: PParamBlockItemData);
-  end;
+  TSPBItem = class(TParamBlockItem,ISPBItem);
 
   { TSRBItem }
 
   TSRBItem = class(TParamBlockItem,ISRBItem)
-  private
-    FSRB: ISRB;
   public
-    constructor Create(AOwner: TSRB; Data: PParamBlockItemData);
     function ISRBItem.SetAsString = SetAsString2;
   end;
 
@@ -105,20 +97,6 @@ implementation
 uses FBMessages;
 
 { TSRBItem }
-
-constructor TSRBItem.Create(AOwner: TSRB; Data: PParamBlockItemData);
-begin
-  inherited Create(AOwner,Data);
-  FSRB := AOwner;
-end;
-
-{ TSPBItem }
-
-constructor TSPBItem.Create(AOwner: TSPB; Data: PParamBlockItemData);
-begin
-  inherited Create(AOwner,Data);
-  FSPB := AOwner;
-end;
 
 { TSRB }
 

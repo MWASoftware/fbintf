@@ -5,7 +5,7 @@ unit FBActivityMonitor;
 interface
 
 uses
-  Classes, SysUtils, FB25ClientAPI, IBExternals, FBLibrary;
+  Classes, SysUtils, IBExternals;
 
   { TActivityReporter is a base class for objects that need to report their activity
     to an activity monitor, where activity is defined as use of a Firebird API call.
@@ -56,6 +56,8 @@ type
   end;
 
 implementation
+
+uses FB25ClientAPI;
 
 { TMonitoredObject }
 

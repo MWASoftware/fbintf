@@ -13,12 +13,7 @@ type
 
   { TDPBItem }
 
-  TDPBItem = class(TParamBlockItem,IDPBItem)
-  private
-    FDPB: IDPB;
-  public
-    constructor Create(AOwner: TDPB; Data: PParamBlockItemData);
-  end;
+  TDPBItem = class(TParamBlockItem,IDPBItem);
 
   { TDPB }
 
@@ -357,12 +352,6 @@ begin
 end;
 
 { TDPBItem }
-
-constructor TDPBItem.Create(AOwner: TDPB; Data: PParamBlockItemData);
-begin
-  inherited Create(AOwner,Data);
-  FDPB := AOwner;
-end;
 
 
 { TDPB }

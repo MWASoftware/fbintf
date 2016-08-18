@@ -7,6 +7,9 @@ interface
 uses
   Classes, SysUtils, FBLibrary, IBHeader, IBExternals,FB25Status, IB;
 
+const
+  FBClientInterfaceVersion = '2.5';
+
 type
   { TFB25ClientAPI }
 
@@ -24,8 +27,7 @@ type
     destructor Destroy; override;
     function StatusVector: PISC_STATUS;
     procedure IBDataBaseError;
-    procedure EncodeLsbf(aValue: integer; len: integer; buffer: PChar); overload;
-    function EncodeLsbf(aValue: integer; len: integer): string; overload;
+    procedure EncodeLsbf(aValue: integer; len: integer; buffer: PChar);
     property IBServiceAPIPresent: boolean read FIBServiceAPIPresent;
     property Status: TFBStatus read FStatus;
 
@@ -317,8 +319,8 @@ end;
 
 destructor TFB25ClientAPI.Destroy;
 begin
+  FStatusIntf := nil;
   Firebird25ClientAPI := nil;
-//  writeln('Unloading Firebird API');
   inherited Destroy;
 end;
 
@@ -338,19 +340,8 @@ procedure TFB25ClientAPI.EncodeLsbf(aValue: integer; len: integer; buffer: PChar
 begin
   while len > 0 do
   begin
-    buffer^ := char(aValue mod 256);
+    buffer^ := char(aValue and $FF);
     Inc(buffer);
-    Dec(len);
-    aValue := aValue shr 8;
-  end;
-end;
-
-function TFB25ClientAPI.EncodeLsbf(aValue: integer; len: integer): string;
-begin
-  Result := '';
-  while len > 0 do
-  begin
-    Result += char(aValue mod 256);
     Dec(len);
     aValue := aValue shr 8;
   end;
@@ -423,7 +414,7 @@ end;
 
 function TFB25ClientAPI.GetImplementationVersion: string;
 begin
-  Result := '2.5';
+  Result := FBClientInterfaceVersion;
 end;
 
 end.

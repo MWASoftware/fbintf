@@ -13,12 +13,7 @@ type
 
   { TTPBItem }
 
-  TTPBItem = class(TParamBlockItem,ITPBItem)
-  private
-    FTPB: ITPB;
-  public
-    constructor Create(AOwner: TTPB; Data: PParamBlockItemData);
-  end;
+  TTPBItem = class(TParamBlockItem,ITPBItem);
 
   { TTPB }
 
@@ -77,12 +72,6 @@ implementation
 uses FBMessages;
 
 { TTPBItem }
-
-constructor TTPBItem.Create(AOwner: TTPB; Data: PParamBlockItemData);
-begin
-  inherited Create(AOwner,Data);
-  FTPB := AOwner;
-end;
 
 { TTPB }
 
