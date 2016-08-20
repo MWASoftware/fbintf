@@ -5,7 +5,7 @@ unit FB25Blob;
 interface
 
 uses
-  Classes, SysUtils, IB,  IBHeader,IBExternals, FBLibrary, FB25ClientAPI, FB25Attachment,
+  Classes, SysUtils, IB,  IBHeader,IBExternals, FBClientAPI, FB25ClientAPI, FB25Attachment,
   FB25Transaction, FBActivityMonitor;
 
 type

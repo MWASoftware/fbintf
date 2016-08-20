@@ -5,7 +5,7 @@ unit FB25Transaction;
 interface
 
 uses
-  Classes, SysUtils, IB, FBLibrary, FB25ClientAPI, IBHeader, IBExternals,
+  Classes, SysUtils, IB, FBClientAPI, FB25ClientAPI, IBHeader, IBExternals,
   FB25Attachment, FB25ParamBlock, FBActivityMonitor;
 
 type

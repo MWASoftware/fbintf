@@ -1,4 +1,4 @@
-unit FBLibrary;
+unit FBClientAPI;
 
 {$mode delphi}
 

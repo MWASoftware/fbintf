@@ -58,7 +58,7 @@ unit FB25Statement;
 interface
 
 uses
-  Classes, SysUtils, IB,  FBLibrary, FB25ClientAPI, FB25Transaction, FB25Attachment,
+  Classes, SysUtils, IB,  FBClientAPI, FB25ClientAPI, FB25Transaction, FB25Attachment,
   IBHeader, IBExternals, FB25SQLData, FB25OutputBlock, FBActivityMonitor;
 
 type

@@ -5,7 +5,7 @@ unit FB25Attachment;
 interface
 
 uses
-  Classes, SysUtils, IB,  FBLibrary, FB25ClientAPI, IBHeader,
+  Classes, SysUtils, IB,  FBClientAPI, FB25ClientAPI, IBHeader,
   FB25ParamBlock, FB25OutputBlock, FB25Status, FBActivityMonitor;
 
 type

@@ -3,7 +3,7 @@
   <ProjectSession>
     <Version Value="9"/>
     <BuildModes Active="Default"/>
-    <Units Count="88">
+    <Units Count="106">
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -117,8 +117,7 @@
       </Unit13>
       <Unit14>
         <Filename Value="../IB.pas"/>
-        <TopLine Value="292"/>
-        <CursorPos X="72" Y="18"/>
+        <CursorPos X="26" Y="12"/>
         <UsageCount Value="104"/>
         <Loaded Value="True"/>
       </Unit14>
@@ -227,8 +226,8 @@
       <Unit29>
         <Filename Value="../../ibx/runtime/IBDatabase.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="1750"/>
-        <CursorPos X="3" Y="1775"/>
+        <TopLine Value="35"/>
+        <CursorPos X="61" Y="51"/>
         <UsageCount Value="17"/>
       </Unit29>
       <Unit30>
@@ -351,12 +350,10 @@
       </Unit45>
       <Unit46>
         <Filename Value="../3.0/firebird/Firebird.pas"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="1100"/>
         <CursorPos X="9" Y="1109"/>
         <UsageCount Value="17"/>
-        <Loaded Value="True"/>
       </Unit46>
       <Unit47>
         <Filename Value="/usr/share/fpcsrc/rtl/objpas/sysutils/sysunih.inc"/>
@@ -655,32 +652,161 @@
         <CursorPos X="28" Y="61"/>
         <UsageCount Value="9"/>
       </Unit87>
+      <Unit88>
+        <Filename Value="../../ibx/iblocaldb/IBXCustomIBLocalDBSupport.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="18"/>
+        <CursorPos X="67" Y="33"/>
+        <UsageCount Value="10"/>
+      </Unit88>
+      <Unit89>
+        <Filename Value="../../ibx/design/IBDBReg.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="162"/>
+        <CursorPos X="27" Y="177"/>
+        <UsageCount Value="10"/>
+      </Unit89>
+      <Unit90>
+        <Filename Value="../../ibx/design/IBDSDialogs.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="35"/>
+        <CursorPos Y="50"/>
+        <UsageCount Value="10"/>
+      </Unit90>
+      <Unit91>
+        <Filename Value="../../ibx/iblocaldb/IBXCreateDatabaseDlg.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="35"/>
+        <CursorPos X="25" Y="51"/>
+        <UsageCount Value="10"/>
+      </Unit91>
+      <Unit92>
+        <Filename Value="../../ibx/iblocaldb/IBXUpgradeDatabaseDlg.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="19"/>
+        <CursorPos X="44" Y="34"/>
+        <UsageCount Value="10"/>
+      </Unit92>
+      <Unit93>
+        <Filename Value="../../ibx/design/IBEventsEditor.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="21"/>
+        <CursorPos X="24" Y="36"/>
+        <UsageCount Value="10"/>
+      </Unit93>
+      <Unit94>
+        <Filename Value="../../ibx/design/dbFieldLinkPropEditor.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="256"/>
+        <CursorPos Y="271"/>
+        <UsageCount Value="10"/>
+      </Unit94>
+      <Unit95>
+        <Filename Value="../../ibx/design/IBDatabaseEdit.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="36"/>
+        <CursorPos X="3" Y="51"/>
+        <UsageCount Value="10"/>
+      </Unit95>
+      <Unit96>
+        <Filename Value="../../ibx/design/IBTransactionEdit.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="20"/>
+        <CursorPos X="14" Y="36"/>
+        <UsageCount Value="10"/>
+      </Unit96>
+      <Unit97>
+        <Filename Value="../../ibx/design/ibselectsqleditor.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="77"/>
+        <CursorPos Y="92"/>
+        <UsageCount Value="10"/>
+      </Unit97>
+      <Unit98>
+        <Filename Value="../../ibx/design/ibmodifysqleditor.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="78"/>
+        <CursorPos Y="94"/>
+        <UsageCount Value="10"/>
+      </Unit98>
+      <Unit99>
+        <Filename Value="../client/FBClientAPI.pas"/>
+        <EditorIndex Value="1"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit99>
+      <Unit100>
+        <Filename Value="../client/2.5/FB25ClientAPI.pas"/>
+        <EditorIndex Value="2"/>
+        <CursorPos X="33" Y="8"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit100>
+      <Unit101>
+        <Filename Value="../client/2.5/FB25Attachment.pas"/>
+        <EditorIndex Value="3"/>
+        <CursorPos X="38" Y="8"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit101>
+      <Unit102>
+        <Filename Value="../client/2.5/FB25Events.pas"/>
+        <EditorIndex Value="4"/>
+        <CursorPos X="37" Y="8"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit102>
+      <Unit103>
+        <Filename Value="../client/2.5/FB25Transaction.pas"/>
+        <EditorIndex Value="5"/>
+        <CursorPos X="37" Y="8"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit103>
+      <Unit104>
+        <Filename Value="../client/2.5/FB25Blob.pas"/>
+        <EditorIndex Value="6"/>
+        <CursorPos X="60" Y="8"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit104>
+      <Unit105>
+        <Filename Value="../client/2.5/FB25Statement.pas"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="7"/>
+        <TopLine Value="45"/>
+        <CursorPos X="38" Y="61"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit105>
     </Units>
-    <JumpHistory Count="6" HistoryIndex="5">
+    <JumpHistory Count="8" HistoryIndex="7">
       <Position1>
         <Filename Value="../IB.pas"/>
         <Caret Line="12" Column="49"/>
       </Position1>
       <Position2>
-        <Filename Value="../3.0/firebird/Firebird.pas"/>
-        <Caret Line="2370" Column="2" TopLine="2274"/>
+        <Filename Value="../IB.pas"/>
+        <Caret Line="18" Column="72" TopLine="18"/>
       </Position2>
       <Position3>
-        <Filename Value="../3.0/firebird/Firebird.pas"/>
-        <Caret Line="1380" Column="2" TopLine="1377"/>
+        <Filename Value="../client/2.5/FB25ClientAPI.pas"/>
       </Position3>
       <Position4>
-        <Filename Value="../3.0/firebird/Firebird.pas"/>
-        <Caret Line="654" Column="2" TopLine="639"/>
+        <Filename Value="../client/2.5/FB25Attachment.pas"/>
       </Position4>
       <Position5>
-        <Filename Value="../3.0/firebird/Firebird.pas"/>
-        <Caret Line="1460" Column="2" TopLine="1445"/>
+        <Filename Value="../client/2.5/FB25Events.pas"/>
       </Position5>
       <Position6>
-        <Filename Value="../3.0/firebird/Firebird.pas"/>
-        <Caret Line="1258" Column="2" TopLine="1258"/>
+        <Filename Value="../client/2.5/FB25Transaction.pas"/>
       </Position6>
+      <Position7>
+        <Filename Value="../client/2.5/FB25Blob.pas"/>
+      </Position7>
+      <Position8>
+        <Filename Value="../client/2.5/FB25Statement.pas"/>
+      </Position8>
     </JumpHistory>
   </ProjectSession>
 </CONFIG>

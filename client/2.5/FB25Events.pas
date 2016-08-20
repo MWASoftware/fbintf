@@ -5,7 +5,7 @@ unit FB25Events;
 interface
 
 uses
-  Classes, SysUtils, IB, FBLibrary, FB25ClientAPI, FB25Attachment, IBExternals,
+  Classes, SysUtils, IB, FBClientAPI, FB25ClientAPI, FB25Attachment, IBExternals,
   IBHeader, syncobjs, FBActivityMonitor;
 
 type

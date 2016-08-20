@@ -648,7 +648,7 @@ procedure CheckIBLoaded;
 
 implementation
 
-uses FBLibrary, FB25ClientAPI;
+uses FBClientAPI, FB25ClientAPI;
 
 var FFirebirdAPI: IFirebirdAPI;
 

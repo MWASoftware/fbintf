@@ -5,7 +5,7 @@ unit FB25ClientAPI;
 interface
 
 uses
-  Classes, SysUtils, FBLibrary, IBHeader, IBExternals,FB25Status, IB;
+  Classes, SysUtils, FBClientAPI, IBHeader, IBExternals,FB25Status, IB;
 
 const
   FBClientInterfaceVersion = '2.5';
