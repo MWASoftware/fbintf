@@ -5,28 +5,10 @@ unit FB25Transaction;
 interface
 
 uses
-  Classes, SysUtils, IB, FBClientAPI, FB25ClientAPI, IBHeader, IBExternals,
+  Classes, SysUtils, IB, FBClientAPI, FB25ClientAPI, IBHeader,
   FB25Attachment, FB25ParamBlock, FBActivityMonitor;
 
 type
-  TTPB = class;
-
-  { TTPBItem }
-
-  TTPBItem = class(TParamBlockItem,ITPBItem);
-
-  { TTPB }
-
-  TTPB = class(TParamBlock, ITPB)
-    constructor Create;
-
-  public
-    {ITPB}
-    function Add(ParamType: byte): ITPBItem;
-    function Find(ParamType: byte): ITPBItem;
-    function GetItems(index: integer): ITPBItem;
-  end;
-
   { TFBTransaction }
 
   TFBTransaction = class(TActivityReporter,ITransaction, IActivityMonitor)
@@ -70,40 +52,6 @@ type
 implementation
 
 uses FBMessages;
-
-{ TTPBItem }
-
-{ TTPB }
-
-constructor TTPB.Create;
-begin
-  inherited Create;
-  FDataLength := 1;
-  FBuffer^ := char(isc_tpb_version3);
-end;
-
-function TTPB.Add(ParamType: byte): ITPBItem;
-var Item: PParamBlockItemData;
-begin
-  Item := inherited Add(ParamType);
-  Result := TTPBItem.Create(self,Item);
-end;
-
-function TTPB.Find(ParamType: byte): ITPBItem;
-var Item: PParamBlockItemData;
-begin
-  Result := nil;
-  Item := inherited Find(ParamType);
-  if Item <> nil then
-    Result := TTPBItem.Create(self,Item);
-end;
-
-function TTPB.getItems(index: integer): ITPBItem;
-var Item: PParamBlockItemData;
-begin
-  Item := inherited getItems(index);
-  Result := TTPBItem.Create(self,Item);
-end;
 
 { TFBTransaction }
 
