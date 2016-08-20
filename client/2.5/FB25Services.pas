@@ -5,7 +5,7 @@ unit FB25Services;
 interface
 
 uses
-  Classes, SysUtils, IB, FB25ClientAPI, IBHeader, FB25ParamBlock, FB25OutputBlock,
+  Classes, SysUtils, IB, FB25ClientAPI, IBHeader, FBParamBlock, FBOutputBlock,
     FBActivityMonitor;
 
 type

@@ -1,4 +1,4 @@
-unit FB25SQLData;
+unit FBSQLData;
 
 {$mode objfpc}{$H+}
 

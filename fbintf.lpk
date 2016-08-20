@@ -76,24 +76,24 @@
         <UnitName Value="FB25Status"/>
       </Item16>
       <Item17>
-        <Filename Value="client/2.5/FB25SQLData.pas"/>
-        <UnitName Value="FB25SQLData"/>
-      </Item17>
-      <Item18>
         <Filename Value="client/2.5/FB25Array.pas"/>
         <UnitName Value="FB25Array"/>
-      </Item18>
-      <Item19>
-        <Filename Value="client/2.5/FB25ParamBlock.pas"/>
-        <UnitName Value="FB25ParamBlock"/>
-      </Item19>
-      <Item20>
-        <Filename Value="client/2.5/FB25OutputBlock.pas"/>
-        <UnitName Value="FB25OutputBlock"/>
-      </Item20>
-      <Item21>
+      </Item17>
+      <Item18>
         <Filename Value="client/FBActivityMonitor.pas"/>
         <UnitName Value="FBActivityMonitor"/>
+      </Item18>
+      <Item19>
+        <Filename Value="client/FBOutputBlock.pas"/>
+        <UnitName Value="FBOutputBlock"/>
+      </Item19>
+      <Item20>
+        <Filename Value="client/FBParamBlock.pas"/>
+        <UnitName Value="FBParamBlock"/>
+      </Item20>
+      <Item21>
+        <Filename Value="client/FBSQLData.pas"/>
+        <UnitName Value="FBSQLData"/>
       </Item21>
     </Files>
     <RequiredPkgs Count="1">

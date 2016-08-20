@@ -4,7 +4,7 @@ unit FB25Statement;
 
 {This unit is hacked from IBSQL and contains the code for managing an XSQLDA and
  SQLVars, along with statement preparation, execution and cursor management.
- Most of the SQLVar code has been moved to unit FB25SQLData. Client access is
+ Most of the SQLVar code has been moved to unit FBSQLData. Client access is
  provided through interface rather than direct access to the XSQLDA and XSQLVar
  objects.}
 
@@ -59,7 +59,7 @@ interface
 
 uses
   Classes, SysUtils, IB,  FBClientAPI, FB25ClientAPI, FB25Transaction, FB25Attachment,
-  IBHeader, IBExternals, FB25SQLData, FB25OutputBlock, FBActivityMonitor;
+  IBHeader, IBExternals, FBSQLData, FBOutputBlock, FBActivityMonitor;
 
 type
   TFBStatement = class;

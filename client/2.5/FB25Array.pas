@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, IB,  FB25Statement, FB25Attachment, FB25Transaction,
-  FB25SQLData, IBHeader, FB25ClientAPI, IBExternals, FBActivityMonitor;
+  FBSQLData, IBHeader, FB25ClientAPI, IBExternals, FBActivityMonitor;
 
 (*
 

@@ -1,4 +1,4 @@
-unit FB25OutputBlock;
+unit FBOutputBlock;
 
 {$mode objfpc}{$H+}
 {$IF FPC_FULLVERSION >= 20700 }

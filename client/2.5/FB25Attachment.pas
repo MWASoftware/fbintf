@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, IB,  FBClientAPI, FB25ClientAPI, IBHeader,
-  FB25ParamBlock, FB25OutputBlock, FB25Status, FBActivityMonitor;
+  FBParamBlock, FBOutputBlock, FB25Status, FBActivityMonitor;
 
 type
   { TFBAttachment }

@@ -1,4 +1,4 @@
-unit FB25ParamBlock;
+unit FBParamBlock;
 
 {$mode objfpc}{$H+}
 
