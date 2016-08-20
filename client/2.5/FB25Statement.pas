@@ -97,7 +97,7 @@ type
   public
     constructor Create(aIBXSQLVAR: TIBXSQLVAR);
     function GetAttachment: TFBAttachment; override;
-    function GetTransaction: TFBTransaction; override;
+    function GetTransaction: TFB25Transaction; override;
     function GetSQLDialect: integer; override;
     property Parent: TIBXSQLDA read GetParent;
 
@@ -200,7 +200,7 @@ type
     FStatement: TFBStatement;
     function GetAttachment: TFBAttachment;
     function GetSQLDialect: integer;
-    function GetTransaction: TFBTransaction; virtual;
+    function GetTransaction: TFB25Transaction; virtual;
     procedure FreeXSQLDA;
     function GetXSQLVARByName(Idx: String): TIBXSQLVAR;
   public
@@ -250,7 +250,7 @@ type
 
   TIBXOUTPUTSQLDA = class(TIBXSQLDA)
   private
-     FTransaction: TFBTransaction; {transaction used to execute the statement}
+     FTransaction: TFB25Transaction; {transaction used to execute the statement}
   public
     constructor Create(aOwner: TFBStatement);
     procedure Bind;
@@ -300,7 +300,7 @@ end;
     {IResultSet}
     function FetchNext: boolean;
     function GetCursorName: string;
-    function GetTransaction: TFBTransaction;
+    function GetTransaction: TFB25Transaction;
     procedure Close;
   end;
 
@@ -310,7 +310,7 @@ end;
   private
     FAttachment: TFBAttachment;
     FAttachmentIntf: IAttachment;
-    FTransaction: TFBTransaction;
+    FTransaction: TFB25Transaction;
     FTransactionIntf: ITransaction;
     FExecTransactionIntf: ITransaction;
     FHandle: TISC_STMT_HANDLE;
@@ -330,11 +330,11 @@ end;
     FSingleResults: boolean;
     FGenerateParamNames: boolean;
     FUniqueParamNames: boolean;
-    procedure CheckTransaction(aTransaction: TFBTransaction);
+    procedure CheckTransaction(aTransaction: TFB25Transaction);
     procedure CheckHandle;
     procedure InternalPrepare;
-    function InternalExecute(aTransaction: TFBTransaction): IResults;
-    function InternalOpenCursor(aTransaction: TFBTransaction): IResultSet;
+    function InternalExecute(aTransaction: TFB25Transaction): IResults;
+    function InternalOpenCursor(aTransaction: TFB25Transaction): IResultSet;
     procedure FreeHandle;
     procedure PreprocessSQL;
     procedure InternalClose(Force: boolean);
@@ -346,10 +346,10 @@ end;
     destructor Destroy; override;
     procedure Close;
     function FetchNext: boolean;
-    procedure TransactionEnding(aTransaction: TFBTransaction; Force: boolean);
+    procedure TransactionEnding(aTransaction: TFB25Transaction; Force: boolean);
     property SQLDialect: integer read FSQLDialect;
     property Attachment: TFBAttachment read FAttachment;
-    property Transaction: TFBTransaction read FTransaction;
+    property Transaction: TFB25Transaction read FTransaction;
 
   public
     {IStatement}
@@ -574,7 +574,7 @@ begin
   Result := FResults.FStatement.FCursor;
 end;
 
-function TResultSet.GetTransaction: TFBTransaction;
+function TResultSet.GetTransaction: TFB25Transaction;
 begin
   Result := FResults.FTransaction;
 end;
@@ -1282,7 +1282,7 @@ begin
   Result := Parent.GetAttachment;
 end;
 
-function TColumnMetaData.GetTransaction: TFBTransaction;
+function TColumnMetaData.GetTransaction: TFB25Transaction;
 begin
   Result := Parent.GetTransaction;
 end;
@@ -1567,7 +1567,7 @@ begin
   Result := FStatement.SQLDialect;
 end;
 
-function TIBXSQLDA.GetTransaction: TFBTransaction;
+function TIBXSQLDA.GetTransaction: TFB25Transaction;
 begin
   Result := FStatement.FTransaction;
 end;
@@ -1647,7 +1647,7 @@ end;
 
 { TFBStatement }
 
-procedure TFBStatement.CheckTransaction(aTransaction: TFBTransaction);
+procedure TFBStatement.CheckTransaction(aTransaction: TFB25Transaction);
 begin
   if (aTransaction = nil) then
     IBError(ibxeTransactionNotAssigned,[]);
@@ -1739,7 +1739,7 @@ begin
   Inc(FPrepareSeqNo);
 end;
 
-function TFBStatement.InternalExecute(aTransaction: TFBTransaction): IResults;
+function TFBStatement.InternalExecute(aTransaction: TFB25Transaction): IResults;
 begin
   Result := nil;
   FBOF := false;
@@ -1783,7 +1783,7 @@ begin
   end;
 end;
 
-function TFBStatement.InternalOpenCursor(aTransaction: TFBTransaction
+function TFBStatement.InternalOpenCursor(aTransaction: TFB25Transaction
   ): IResultSet;
 begin
   if FSQLType <> SQLSelect then
@@ -2019,10 +2019,10 @@ constructor TFBStatement.Create(Attachment: TFBAttachment;
   Transaction: ITransaction; sql: string; SQLDialect: integer);
 var GUID : TGUID;
 begin
-  inherited Create(Transaction as TFBTransaction);
+  inherited Create(Transaction as TFB25Transaction);
   FAttachment := Attachment;
   FAttachmentIntf := Attachment;
-  FTransaction := transaction as TFBTransaction;
+  FTransaction := transaction as TFB25Transaction;
   FTransactionIntf := Transaction;
   AddMonitor(FTransaction);
   FSQLDialect := SQLDialect;
@@ -2096,7 +2096,7 @@ begin
   end;
 end;
 
-procedure TFBStatement.TransactionEnding(aTransaction: TFBTransaction;
+procedure TFBStatement.TransactionEnding(aTransaction: TFB25Transaction;
   Force: boolean);
 begin
   if FOpen and (FSQLRecord.FTransaction = aTransaction) then
@@ -2182,7 +2182,7 @@ begin
   if aTransaction = nil then
     Result :=  InternalExecute(FTransaction)
   else
-    Result := InternalExecute(aTransaction as TFBTransaction);
+    Result := InternalExecute(aTransaction as TFB25Transaction);
 end;
 
 function TFBStatement.OpenCursor(aTransaction: ITransaction): IResultSet;
@@ -2190,7 +2190,7 @@ begin
   if aTransaction = nil then
     Result := InternalOpenCursor(FTransaction)
   else
-    Result := InternalOpenCursor(aTransaction as TFBTransaction);
+    Result := InternalOpenCursor(aTransaction as TFB25Transaction);
 end;
 
 function TFBStatement.CreateBlob: IBlob;
@@ -2238,7 +2238,7 @@ begin
   if aTransaction <> nil then
   begin
     RemoveMonitor(FTransaction);
-    FTransaction := transaction as TFBTransaction;
+    FTransaction := transaction as TFB25Transaction;
     FTransactionIntf := Transaction;
     AddMonitor(FTransaction);
   end;

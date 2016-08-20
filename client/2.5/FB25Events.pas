@@ -44,7 +44,7 @@ type
 
 implementation
 
-uses FB25Status, FBMessages;
+uses  FBMessages;
 
 const
   MaxEvents = 15;

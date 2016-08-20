@@ -5,18 +5,26 @@ unit FB25ClientAPI;
 interface
 
 uses
-  Classes, SysUtils, FBClientAPI, IBHeader, IBExternals,FB25Status, IB;
+  Classes, SysUtils, FBClientAPI, IBHeader, IBExternals, IB;
 
 const
   FBClientInterfaceVersion = '2.5';
 
 type
+
+  { TFB25Status }
+
+  TFB25Status = class(TFBStatus,IStatus)
+  public
+    function StatusVector: PStatusVector; override;
+  end;
+
   { TFB25ClientAPI }
 
   TFB25ClientAPI = class(TFBClientAPI,IFirebirdAPI)
   private
     FIBServiceAPIPresent: boolean;
-    FStatus: TFBStatus;
+    FStatus: TFB25Status;
     FStatusIntf: IStatus;   {Keep a reference to the interface - automatic destroy
                              when this class is freed and last reference to IStatus
                              goes out of scope.}
@@ -26,21 +34,14 @@ type
     constructor Create;
     destructor Destroy; override;
     function StatusVector: PISC_STATUS;
-    procedure IBDataBaseError;
-    procedure EncodeLsbf(aValue: integer; len: integer; buffer: PChar);
     property IBServiceAPIPresent: boolean read FIBServiceAPIPresent;
-    property Status: TFBStatus read FStatus;
+    property Status: TFB25Status read FStatus;
 
   public
 
     {fbclient API}
     BLOB_get: TBLOB_get;
     BLOB_put: TBLOB_put;
-    isc_sqlcode: Tisc_sqlcode;
-    isc_sql_interprete: Tisc_sql_interprete;
-    isc_interprete: Tisc_interprete;
-    isc_vax_integer: Tisc_vax_integer;
-    isc_portable_integer: Tisc_portable_integer;
     isc_blob_info: Tisc_blob_info;
     isc_blob_lookup_desc: Tisc_blob_lookup_desc;
     isc_open_blob2: Tisc_open_blob2;
@@ -98,7 +99,7 @@ type
 
   public
     {IFirebirdAPI}
-    function GetStatus: IStatus;
+    function GetStatus: IStatus; override;
     function AllocateDPB: IDPB;
     function OpenDatabase(DatabaseName: string; DPB: IDPB;
       RaiseExceptionOnConnectError: boolean): IAttachment;
@@ -121,7 +122,8 @@ const
 
 implementation
 
-uses FBMessages, dynlibs, FB25Attachment, FB25Transaction, FB25Services, FBParamBlock;
+uses FBMessages, dynlibs, FB25Attachment, FB25Transaction, FB25Services, FBParamBlock,
+  IBUtils;
 
 { Stubs for 6.0 only functions }
 function isc_rollback_retaining_stub(status_vector   : PISC_STATUS;
@@ -220,6 +222,16 @@ begin
   IBError(ibxeIB60feature, ['isc_decode_timestamp']); {do not localize}
 end;
 
+{ TFB25Status }
+
+threadvar
+  FStatusVector: TStatusVector;
+
+function TFB25Status.StatusVector: PStatusVector;
+begin
+  Result := @FStatusVector;
+end;
+
 
 { TFB25ClientAPI }
 
@@ -228,11 +240,6 @@ begin
   inherited LoadInterface;
   BLOB_get := GetProcAddr('BLOB_get'); {do not localize}
   BLOB_put := GetProcAddr('BLOB_put'); {do not localize}
-  isc_sqlcode := GetProcAddr('isc_sqlcode'); {do not localize}
-  isc_sql_interprete := GetProcAddr('isc_sql_interprete'); {do not localize}
-  isc_interprete := GetProcAddr('isc_interprete'); {do not localize}
-  isc_vax_integer := GetProcAddr('isc_vax_integer'); {do not localize}
-  isc_portable_integer := GetProcAddr('isc_portable_integer'); {do not localize}
   isc_blob_info := GetProcAddr('isc_blob_info'); {do not localize}
   isc_blob_lookup_desc := GetProcAddr('isc_blob_lookup_desc');  {do not localize}
   isc_open_blob2 := GetProcAddr('isc_open_blob2'); {do not localize}
@@ -311,7 +318,7 @@ end;
 constructor TFB25ClientAPI.Create;
 begin
   inherited;
-  FStatus := TFBStatus.Create;
+  FStatus := TFB25Status.Create(self);
   FStatusIntf := FStatus;
   Firebird25ClientAPI := self;
 end;
@@ -326,24 +333,7 @@ end;
 
 function TFB25ClientAPI.StatusVector: PISC_STATUS;
 begin
-  Result := FStatus.StatusVector;
-end;
-
-procedure TFB25ClientAPI.IBDataBaseError;
-begin
-  raise EIBInterBaseError.Create(FStatus);
-end;
-
-procedure TFB25ClientAPI.EncodeLsbf(aValue: integer; len: integer; buffer: PChar
-  );
-begin
-  while len > 0 do
-  begin
-    buffer^ := char(aValue and $FF);
-    Inc(buffer);
-    Dec(len);
-    aValue := aValue shr 8;
-  end;
+  Result := PISC_STATUS(FStatus.StatusVector);
 end;
 
 function TFB25ClientAPI.GetStatus: IStatus;
@@ -394,13 +384,13 @@ end;
 function TFB25ClientAPI.StartTransaction(Attachments: array of IAttachment;
   TPB: array of byte; DefaultCompletion: TTransactionAction): ITransaction;
 begin
-  Result := TFBTransaction.Create(Attachments,TPB,DefaultCompletion);
+  Result := TFB25Transaction.Create(Attachments,TPB,DefaultCompletion);
 end;
 
 function TFB25ClientAPI.StartTransaction(Attachments: array of IAttachment;
   TPB: ITPB; DefaultCompletion: TTransactionAction): ITransaction;
 begin
-  Result := TFBTransaction.Create(Attachments,TPB,DefaultCompletion);
+  Result := TFB25Transaction.Create(Attachments,TPB,DefaultCompletion);
 end;
 
 function TFB25ClientAPI.HasServiceAPI: boolean;

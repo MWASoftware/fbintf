@@ -6,12 +6,12 @@ interface
 
 uses
   Classes, SysUtils, IB,  FBClientAPI, FB25ClientAPI, IBHeader,
-  FBParamBlock, FBOutputBlock, FB25Status, FBActivityMonitor;
+  FBParamBlock, FBOutputBlock, FBActivityMonitor;
 
 type
   { TFBAttachment }
 
-  TFBAttachment = class(TInterfaceParent, IAttachment, IActivityMonitor)
+  TFBAttachment = class(TActivityHandler, IAttachment, IActivityMonitor)
   private
     FHandle: TISC_DB_HANDLE;
     FDatabaseName: string;
@@ -19,7 +19,6 @@ type
     FSQLDialect: integer;
     FFirebirdAPI: IFirebirdAPI;
     FRaiseExceptionOnConnectError: boolean;
-    FActivity: boolean;
   public
     constructor Create(DatabaseName: string; DPB: IDPB;
       RaiseExceptionOnConnectError: boolean);
@@ -69,10 +68,6 @@ type
     function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: string): IArrayMetaData;
     function GetDBInformation(Requests: array of byte): IDBInformation; overload;
     function GetDBInformation(Request: byte): IDBInformation; overload;
-    function HasActivity: boolean; {one shot - reset after call}
-
-    {IActivityMonitor}
-    procedure SignalActivity;
   end;
 
 implementation
@@ -187,17 +182,6 @@ begin
   FHandle := nil;
 end;
 
-function TFBAttachment.HasActivity: boolean;
-begin
-  Result := FActivity;
-  FActivity := false;
-end;
-
-procedure TFBAttachment.SignalActivity;
-begin
-  FActivity := true;
-end;
-
 function TFBAttachment.IsConnected: boolean;
 begin
   Result := FHandle <> nil;
@@ -214,13 +198,13 @@ end;
 function TFBAttachment.StartTransaction(TPB: array of byte;
   DefaultCompletion: TTransactionAction): ITransaction;
 begin
-  Result := TFBTransaction.Create(self,TPB,DefaultCompletion);
+  Result := TFB25Transaction.Create(self,TPB,DefaultCompletion);
 end;
 
 function TFBAttachment.StartTransaction(TPB: ITPB;
   DefaultCompletion: TTransactionAction): ITransaction;
 begin
-  Result := TFBTransaction.Create(self,TPB,DefaultCompletion);
+  Result := TFB25Transaction.Create(self,TPB,DefaultCompletion);
 end;
 
 function TFBAttachment.CreateBlob(transaction: ITransaction): IBlob;
@@ -232,7 +216,7 @@ procedure TFBAttachment.ExecImmediate(transaction: ITransaction; sql: string;
   aSQLDialect: integer);
 var TRHandle: TISC_TR_HANDLE;
 begin
-  TRHandle := (Transaction as TFBTransaction).Handle;
+  TRHandle := (Transaction as TFB25Transaction).Handle;
   with Firebird25ClientAPI do
     if isc_dsql_execute_immediate(StatusVector, @fHandle, @TRHandle, 0,PChar(sql), aSQLDialect, nil) > 0 then
       IBDatabaseError;
@@ -336,24 +320,24 @@ end;
 function TFBAttachment.OpenArray(transaction: ITransaction; RelationName, ColumnName: string;
   ArrayID: TISC_QUAD): IArray;
 begin
-  Result := TFBArray.Create(self,transaction as TFBTransaction,RelationName,ColumnName,ArrayID);
+  Result := TFBArray.Create(self,transaction as TFB25Transaction,RelationName,ColumnName,ArrayID);
 end;
 
 function TFBAttachment.CreateArray(transaction: ITransaction; RelationName, ColumnName: string): IArray;
 begin
-  Result := TFBArray.Create(self,transaction as TFBTransaction,RelationName,ColumnName);
+  Result := TFBArray.Create(self,transaction as TFB25Transaction,RelationName,ColumnName);
 end;
 
 function TFBAttachment.GetBlobMetaData(Transaction: ITransaction; tableName,
   columnName: string): IBlobMetaData;
 begin
-  Result := TFBBlobMetaData.Create(self,Transaction as TFBTransaction,tableName,columnName);
+  Result := TFBBlobMetaData.Create(self,Transaction as TFB25Transaction,tableName,columnName);
 end;
 
 function TFBAttachment.GetArrayMetaData(Transaction: ITransaction; tableName,
   columnName: string): IArrayMetaData;
 begin
-  Result := TFBArrayMetaData.Create(self,Transaction as TFBTransaction,tableName,columnName);
+  Result := TFBArrayMetaData.Create(self,Transaction as TFB25Transaction,tableName,columnName);
 end;
 
 function TFBAttachment.GetDBInformation(Requests: array of byte

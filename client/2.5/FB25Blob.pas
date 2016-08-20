@@ -17,7 +17,7 @@ type
      FBlobDesc: TISC_BLOB_DESC;
      FGlobal: array [0..31] of char;
    public
-     constructor Create(Attachment: TFBAttachment; Transaction: TFBTransaction;
+     constructor Create(Attachment: TFBAttachment; Transaction: TFB25Transaction;
        RelationName, ColumnName: string);
 
    public
@@ -49,7 +49,7 @@ type
     constructor Create(Attachment: TFBAttachment; Transaction: ITransaction;
                        BlobID: TISC_QUAD); overload;
     destructor Destroy; override;
-    procedure TransactionEnding(aTransaction: TFBTransaction; Force: boolean);
+    procedure TransactionEnding(aTransaction: TFB25Transaction; Force: boolean);
     property Handle: TISC_BLOB_HANDLE read FHandle;
     property Attachment: TFBAttachment read FAttachment;
 
@@ -78,7 +78,7 @@ uses IBErrorCodes, FBMessages;
 { TFBBlobMetaData }
 
 constructor TFBBlobMetaData.Create(Attachment: TFBAttachment;
-  Transaction: TFBTransaction; RelationName, ColumnName: string);
+  Transaction: TFB25Transaction; RelationName, ColumnName: string);
 begin
   inherited Create(Transaction);
   with Firebird25ClientAPI do
@@ -149,12 +149,12 @@ constructor TFBBlob.Create(Attachment: TFBAttachment; Transaction: ITransaction
 var DBHandle: TISC_DB_HANDLE;
       TRHandle: TISC_TR_HANDLE;
 begin
-    inherited Create(Transaction as TFBTransaction);
+    inherited Create(Transaction as TFB25Transaction);
     FAttachment := Attachment;
     FTransaction := Transaction;
-    AddMonitor(Transaction as TFBTransaction);
+    AddMonitor(Transaction as TFB25Transaction);
     DBHandle := Attachment.Handle;
-    TRHandle := (Transaction as TFBTransaction).Handle;
+    TRHandle := (Transaction as TFB25Transaction).Handle;
     FCreating := true;
     with Firebird25ClientAPI do
       Call(isc_create_blob2(StatusVector, @DBHandle, @TRHandle, @FHandle, @FBlobID,
@@ -166,12 +166,12 @@ constructor TFBBlob.Create(Attachment: TFBAttachment;
 var DBHandle: TISC_DB_HANDLE;
     TRHandle: TISC_TR_HANDLE;
 begin
-  inherited Create(Transaction as TFBTransaction);
+  inherited Create(Transaction as TFB25Transaction);
   FAttachment := Attachment;
   FTransaction := Transaction;
-  AddMonitor(Transaction as TFBTransaction);
+  AddMonitor(Transaction as TFB25Transaction);
   DBHandle := Attachment.Handle;
-  TRHandle := (Transaction as TFBTransaction).Handle;
+  TRHandle := (Transaction as TFB25Transaction).Handle;
   FBlobID := BlobID;
   with Firebird25ClientAPI do
     Call(isc_open_blob2(StatusVector,  @DBHandle, @TRHandle, @FHandle,
@@ -187,8 +187,8 @@ begin
   inherited Destroy;
 end;
 
-procedure TFBBlob.TransactionEnding(aTransaction: TFBTransaction; Force: boolean
-  );
+procedure TFBBlob.TransactionEnding(aTransaction: TFB25Transaction;
+  Force: boolean);
 begin
   if aTransaction <> FTransaction then
     Exit;

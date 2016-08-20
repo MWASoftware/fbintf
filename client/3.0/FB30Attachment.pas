@@ -5,22 +5,28 @@ unit FB30Attachment;
 interface
 
 uses
-  Classes, SysUtils, FB30ClientAPI, IB, FBActivityMonitor;
+  Classes, SysUtils, FB30ClientAPI, Firebird, IB, FBActivityMonitor, FBParamBlock;
 
 type
 
   { TFBAttachment }
 
-  TFBAttachment = class(TInterfaceParent,IAttachment)
+  TFBAttachment = class(TInterfaceParent,IAttachment, IActivityMonitor)
   private
     FAttachment: Firebird.IAttachment;
     FSQLDialect: integer;
+    FFirebirdAPI: IFirebirdAPI;
+    FDatabaseName: string;
+    FDPB: IDPB;
+    FRaiseExceptionOnConnectError: boolean;
+    FActivity: boolean;
   public
     constructor Create(DatabaseName: string; DPB: IDPB;
           RaiseExceptionOnConnectError: boolean);
     constructor CreateDatabase(DatabaseName: string; DPB: IDPB; RaiseExceptionOnError: boolean);
     destructor Destroy; override;
     property SQLDialect: integer read FSQLDialect;
+    property AttachmentIntf: Firebird.IAttachment read FAttachment;
 
   public
     {IAttachment}
@@ -31,8 +37,8 @@ type
     procedure DropDatabase;
     function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionAction): ITransaction; overload;
     function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionAction): ITransaction; overload;
-    procedure ExecImmediate(transaction: ITransaction; sql: string; SQLDialect: integer); overload;
-    procedure ExecImmediate(TPB: array of byte; sql: string; SQLDialect: integer); overload;
+    procedure ExecImmediate(transaction: ITransaction; sql: string; aSQLDialect: integer); overload;
+    procedure ExecImmediate(TPB: array of byte; sql: string; aSQLDialect: integer); overload;
     procedure ExecImmediate(transaction: ITransaction; sql: string); overload;
     procedure ExecImmediate(TPB: array of byte; sql: string); overload;
     function OpenCursor(transaction: ITransaction; sql: string; aSQLDialect: integer): IResultSet; overload;
@@ -67,6 +73,9 @@ type
     function GetDBInformation(Requests: array of byte): IDBInformation; overload;
     function GetDBInformation(Request: byte): IDBInformation; overload;
     function HasActivity: boolean;
+
+    {IActivityMonitor}
+    procedure SignalActivity;
   end;
 
 implementation
@@ -77,10 +86,11 @@ constructor TFBAttachment.Create(DatabaseName: string; DPB: IDPB;
   RaiseExceptionOnConnectError: boolean);
 begin
   inherited Create;
-  FFirebirdAPI := Firebird25ClientAPI; {Keep reference to interface}
+  FFirebirdAPI := Firebird30ClientAPI; {Keep reference to interface}
   FSQLDialect := 3;
   FDatabaseName := DatabaseName;
   FDPB := DPB;
+  FRaiseExceptionOnConnectError := RaiseExceptionOnConnectError;
   Connect;
 end;
 
@@ -104,24 +114,42 @@ end;
 procedure TFBAttachment.Connect;
 begin
   with Firebird30ClientAPI do
-    FAttachment := MasterIntf.getDispatcher.attachDatabase(GetStatus,PAnsiChar(FDatabaseName),
+  begin
+    FAttachment := MasterIntf.getDispatcher.attachDatabase(StatusIntf,PAnsiChar(FDatabaseName),
                          (FDPB as TDPB).getDataLength,
-                         (FDPB as TDPB).getBuffer);
+                         BytePtr((FDPB as TDPB).getBuffer));
+    if FRaiseExceptionOnConnectError then Check4DataBaseError;
+    if InErrorState then
+      FAttachment := nil;
+  end;
 end;
 
 procedure TFBAttachment.Disconnect(Force: boolean);
 begin
-
+  if IsConnected then
+    with Firebird30ClientAPI do
+    begin
+      FAttachment.Detach(StatusIntf);
+      if not Force and InErrorState then
+        IBDataBaseError;
+      FAttachment := nil;
+    end;
 end;
 
 function TFBAttachment.IsConnected: boolean;
 begin
-
+  Result := FAttachment <> nil;
 end;
 
 procedure TFBAttachment.DropDatabase;
 begin
-
+  if IsConnected then
+    with Firebird30ClientAPI do
+    begin
+      FAttachment.dropDatabase(StatusIntf);
+      Check4DataBaseError;
+      FAttachment := nil;
+    end;
 end;
 
 function TFBAttachment.StartTransaction(TPB: array of byte;
@@ -137,13 +165,13 @@ begin
 end;
 
 procedure TFBAttachment.ExecImmediate(transaction: ITransaction; sql: string;
-  SQLDialect: integer);
+  aSQLDialect: integer);
 begin
 
 end;
 
 procedure TFBAttachment.ExecImmediate(TPB: array of byte; sql: string;
-  SQLDialect: integer);
+  aSQLDialect: integer);
 begin
 
 end;
@@ -266,7 +294,13 @@ end;
 
 function TFBAttachment.HasActivity: boolean;
 begin
+  Result := FActivity;
+  FActivity := false;
+end;
 
+procedure TFBAttachment.SignalActivity;
+begin
+  FActivity := true;
 end;
 
 end.

@@ -44,20 +44,45 @@ type
 
   TActivityReporter = class(TInterfaceParent)
   private
+    FHasActivity: boolean;
     FMonitors: array of IActivityMonitor;
     function FindMonitor(aMonitor: IActivityMonitor): integer;
   protected
     function Call(ErrCode: ISC_STATUS; RaiseError: Boolean = true): ISC_STATUS;
     procedure AddMonitor(aMonitor: IActivityMonitor);
     procedure RemoveMonitor(aMonitor: IActivityMonitor);
-    procedure SignalActivity; virtual;
   public
     constructor Create(aMonitor: IActivityMonitor);
+    function HasActivity: boolean;
+    procedure SignalActivity;
+  end;
+
+  { TActivityHandler }
+
+  TActivityHandler = class(TInterfaceParent,IActivityMonitor)
+  private
+    FHasActivity: boolean;
+  public
+    function HasActivity: boolean;
+    procedure SignalActivity;
   end;
 
 implementation
 
 uses FB25ClientAPI;
+
+{ TActivityHandler }
+
+function TActivityHandler.HasActivity: boolean;
+begin
+  Result := FHasActivity;
+  FHasActivity := false;
+end;
+
+procedure TActivityHandler.SignalActivity;
+begin
+  FHasActivity := true;
+end;
 
 { TMonitoredObject }
 
@@ -130,6 +155,7 @@ end;
 procedure TActivityReporter.SignalActivity;
 var i: integer;
 begin
+  FHasActivity := true;
   for i := 0 to Length(FMonitors) - 1 do
       FMonitors[i].SignalActivity;
 end;
@@ -142,6 +168,12 @@ begin
     SetLength(FMonitors,1);
     FMonitors[0] := aMonitor;
   end;
+end;
+
+function TActivityReporter.HasActivity: boolean;
+begin
+  Result := FHasActivity;
+  FHasActivity := false;
 end;
 
 end.

@@ -43,7 +43,7 @@ type
    FArray: TFBArray;
   protected
    function GetAttachment: TFBAttachment; override;
-   function GetTransaction: TFBTransaction; override;
+   function GetTransaction: TFB25Transaction; override;
    function GetSQLDialect: integer; override;
    procedure Changed; override;
    function SQLData: PChar; override;
@@ -64,12 +64,12 @@ type
   TFBArrayMetaData = class(TActivityReporter,IArrayMetaData)
   private
     FAttachment: TFBAttachment;
-    FTransaction: TFBTransaction;
+    FTransaction: TFB25Transaction;
   protected
    FArrayDesc: TISC_ARRAY_DESC;
    function NumOfElements: integer;
   public
-   constructor Create(aAttachment: TFBAttachment; aTransaction: TFBTransaction;
+   constructor Create(aAttachment: TFBAttachment; aTransaction: TFB25Transaction;
      relationName, columnName: string);
 
   public
@@ -107,13 +107,13 @@ type
   public
     constructor Create(aField: TIBSQLData); overload;
     constructor Create(aField: IArrayMetaData); overload;
-    constructor Create(aAttachment: TFBAttachment; aTransaction: TFBTransaction;
+    constructor Create(aAttachment: TFBAttachment; aTransaction: TFB25Transaction;
       relationName, columnName: string; ArrayID: TISC_QUAD); overload;
-    constructor Create(aAttachment: TFBAttachment; aTransaction: TFBTransaction;
+    constructor Create(aAttachment: TFBAttachment; aTransaction: TFB25Transaction;
       relationName, columnName: string); overload;
     destructor Destroy; override;
     function GetSQLDialect: integer;
-    procedure TransactionEnding(aTransaction: TFBTransaction; Force: boolean);
+    procedure TransactionEnding(aTransaction: TFB25Transaction; Force: boolean);
 
    public
     {IArray}
@@ -158,9 +158,9 @@ begin
   Result := FArray.GetAttachment as TFBAttachment;
 end;
 
-function TFBArrayElement.GetTransaction: TFBTransaction;
+function TFBArrayElement.GetTransaction: TFB25Transaction;
 begin
-  Result := FArray.GetTransaction as TFBTransaction;
+  Result := FArray.GetTransaction as TFB25Transaction;
 end;
 
 function TFBArrayElement.GetSQLDialect: integer;
@@ -259,7 +259,7 @@ end;
 {TFBArrayMetaData}
 
 constructor TFBArrayMetaData.Create(aAttachment: TFBAttachment;
-  aTransaction: TFBTransaction; relationName, columnName: string);
+  aTransaction: TFB25Transaction; relationName, columnName: string);
 begin
   inherited Create(aTransaction);
   AddMonitor(aTransaction);
@@ -467,7 +467,7 @@ begin
 end;
 
 constructor TFBArray.Create(aAttachment: TFBAttachment;
-  aTransaction: TFBTransaction; relationName, columnName: string;
+  aTransaction: TFB25Transaction; relationName, columnName: string;
   ArrayID: TISC_QUAD);
 begin
   inherited Create(aAttachment,aTransaction, relationName,columnName);
@@ -482,7 +482,7 @@ begin
 end;
 
 constructor TFBArray.Create(aAttachment: TFBAttachment;
-  aTransaction: TFBTransaction; relationName, columnName: string);
+  aTransaction: TFB25Transaction; relationName, columnName: string);
 begin
   inherited Create(aAttachment,aTransaction,relationName,columnName);
   FTransactionIntf :=  aTransaction;
@@ -511,7 +511,7 @@ begin
   Result := FSQLDialect;
 end;
 
-procedure TFBArray.TransactionEnding(aTransaction: TFBTransaction; Force: boolean);
+procedure TFBArray.TransactionEnding(aTransaction: TFB25Transaction; Force: boolean);
 begin
   if (aTransaction = FTransaction) and FModified and not FIsNew then
     PutArraySlice(Force);

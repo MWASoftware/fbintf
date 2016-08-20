@@ -6,11 +6,11 @@
       <Version Value="11"/>
       <SearchPaths>
         <IncludeFiles Value="client/3.0/firebird;client/include;include"/>
-        <OtherUnitFiles Value="client;client/3.0/firebird;client/2.5;."/>
+        <OtherUnitFiles Value="client;client/3.0/firebird;client/2.5;.;client/3.0"/>
         <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
     </CompilerOptions>
-    <Files Count="21">
+    <Files Count="24">
       <Item1>
         <Filename Value="client/3.0/firebird/Firebird.pas"/>
         <UnitName Value="Firebird"/>
@@ -72,29 +72,41 @@
         <UnitName Value="FB25Services"/>
       </Item15>
       <Item16>
-        <Filename Value="client/2.5/FB25Status.pas"/>
-        <UnitName Value="FB25Status"/>
-      </Item16>
-      <Item17>
         <Filename Value="client/2.5/FB25Array.pas"/>
         <UnitName Value="FB25Array"/>
-      </Item17>
-      <Item18>
+      </Item16>
+      <Item17>
         <Filename Value="client/FBActivityMonitor.pas"/>
         <UnitName Value="FBActivityMonitor"/>
-      </Item18>
-      <Item19>
+      </Item17>
+      <Item18>
         <Filename Value="client/FBOutputBlock.pas"/>
         <UnitName Value="FBOutputBlock"/>
-      </Item19>
-      <Item20>
+      </Item18>
+      <Item19>
         <Filename Value="client/FBParamBlock.pas"/>
         <UnitName Value="FBParamBlock"/>
-      </Item20>
-      <Item21>
+      </Item19>
+      <Item20>
         <Filename Value="client/FBSQLData.pas"/>
         <UnitName Value="FBSQLData"/>
+      </Item20>
+      <Item21>
+        <Filename Value="client/3.0/FB30ClientAPI.pas"/>
+        <UnitName Value="FB30ClientAPI"/>
       </Item21>
+      <Item22>
+        <Filename Value="client/3.0/FB30Attachment.pas"/>
+        <UnitName Value="FB30Attachment"/>
+      </Item22>
+      <Item23>
+        <Filename Value="client/3.0/FB30Transaction.pas"/>
+        <UnitName Value="FB30Transaction"/>
+      </Item23>
+      <Item24>
+        <Filename Value="client/FBTransaction.pas"/>
+        <UnitName Value="FBTransaction"/>
+      </Item24>
     </Files>
     <RequiredPkgs Count="1">
       <Item1>

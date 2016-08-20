@@ -6,146 +6,47 @@ interface
 
 uses
   Classes, SysUtils, IB, FBClientAPI, FB25ClientAPI, IBHeader,
-  FB25Attachment, FBParamBlock, FBActivityMonitor;
+  FB25Attachment, FBActivityMonitor, FBTransaction;
 
 type
-  { TFBTransaction }
+  { TFB25Transaction }
 
-  TFBTransaction = class(TActivityReporter,ITransaction, IActivityMonitor)
+  TFB25Transaction = class(TFBTransaction,ITransaction, IActivityMonitor)
   private
     FHandle: TISC_TR_HANDLE;
-    FTPB: ITPB;
-    FActivity: boolean;
-    FDefaultCompletion: TTransactionAction;
-    FAttachments: array of IAttachment; {Keep reference to attachment - ensures
-                                          attachment cannot be freed before transaction}
-    function GenerateTPB(sl: array of byte): ITPB;
+  protected
+    function GetActivityIntf(att: IAttachment): IActivityMonitor; override;
   public
-    constructor Create(Attachments: array of IAttachment; Params: array of byte; DefaultCompletion: TTransactionAction); overload;
-    constructor Create(Attachments: array of IAttachment; TPB: ITPB; DefaultCompletion: TTransactionAction); overload;
-    constructor Create(Attachment: TFBAttachment; Params: array of byte; DefaultCompletion: TTransactionAction); overload;
-    constructor Create(Attachment: TFBAttachment; TPB: ITPB; DefaultCompletion: TTransactionAction); overload;
-    destructor Destroy; override;
-    procedure DoDefaultTransactionEnd(Force: boolean);
     property Handle: TISC_TR_HANDLE read FHandle;
 
   public
     {ITransaction}
-    function getTPB: ITPB;
-    function GetInTransaction: boolean;
-    procedure PrepareForCommit;
-    procedure Commit(Force: boolean=false);
-    procedure CommitRetaining;
-    procedure Start(DefaultCompletion: TTransactionAction=taCommit); overload;
-    procedure Start(TPB: ITPB; DefaultCompletion: TTransactionAction=taCommit); overload;
-    procedure Rollback(Force: boolean=false);
-    procedure RollbackRetaining;
-    function GetAttachmentCount: integer;
-    function GetAttachment(index: integer): IAttachment;
-    property InTransaction: boolean read GetInTransaction;
-    function HasActivity: boolean; {one shot - reset after call}
-
-    {IActivityMonitor}
-    procedure SignalActivity; override;
+    function GetInTransaction: boolean; override;
+    procedure PrepareForCommit; override;
+    procedure Commit(Force: boolean=false); override;
+    procedure CommitRetaining; override;
+    procedure Start(DefaultCompletion: TTransactionAction=taCommit); overload; override;
+    procedure Rollback(Force: boolean=false); override;
+    procedure RollbackRetaining; override;
  end;
 
 implementation
 
-uses FBMessages;
+uses FBMessages, FBParamBlock;
 
-{ TFBTransaction }
+{ TFB25Transaction }
 
-
-function TFBTransaction.GenerateTPB(sl: array of byte): ITPB;
-var
-  i: Integer;
+function TFB25Transaction.GetActivityIntf(att: IAttachment): IActivityMonitor;
 begin
-  Result := TTPB.Create;
-  for i := 0 to Length(sl) - 1 do
-    Result.Add(sl[i]);
+  Result := (att as TFBAttachment);
 end;
 
-constructor TFBTransaction.Create(Attachments: array of IAttachment;
-  Params: array of byte; DefaultCompletion: TTransactionAction);
-begin
-  Create(Attachments,GenerateTPB(Params), DefaultCompletion);
-end;
-
-constructor TFBTransaction.Create(Attachments: array of IAttachment; TPB: ITPB;
-  DefaultCompletion: TTransactionAction);
-var
-  i: Integer;
-begin
-  inherited Create(nil);
-  if Length(Attachments) = 0 then
-    IBError(ibxeEmptyAttachmentsList,[nil]);
-
-  SetLength(FAttachments,Length(Attachments));
-  for i := 0 to Length(Attachments) - 1 do
-  begin
-    AddMonitor(Attachments[i] as TFBAttachment);
-    FAttachments[i] := Attachments[i];
-  end;
-  FTPB := TPB;
-  Start(DefaultCompletion);
-end;
-
-constructor TFBTransaction.Create(Attachment: TFBAttachment; Params: array of byte;
-   DefaultCompletion: TTransactionAction);
-begin
-  Create(Attachment,GenerateTPB(Params),DefaultCompletion);
-end;
-
-constructor TFBTransaction.Create(Attachment: TFBAttachment; TPB: ITPB;
-  DefaultCompletion: TTransactionAction);
-begin
-  inherited Create(Attachment);
-  SetLength(FAttachments,1);
-  FAttachments[0] := Attachment;
-  FTPB := TPB;
-  Start(DefaultCompletion);
-end;
-
-destructor TFBTransaction.Destroy;
-begin
-  DoDefaultTransactionEnd(false);
-  inherited Destroy;
-end;
-
-procedure TFBTransaction.DoDefaultTransactionEnd(Force: boolean);
-begin
-  if FHandle <> nil then
-  case FDefaultCompletion of
-  taRollback:
-    Rollback(Force);
-  taCommit:
-    Commit(Force);
-  end;
-end;
-
-function TFBTransaction.getTPB: ITPB;
-begin
-  Result := FTPB;
-end;
-
-function TFBTransaction.GetInTransaction: boolean;
+function TFB25Transaction.GetInTransaction: boolean;
 begin
   Result := FHandle <> nil;
 end;
 
-function TFBTransaction.HasActivity: boolean;
-begin
-  Result := FActivity;
-  FActivity := false;
-end;
-
-procedure TFBTransaction.SignalActivity;
-begin
-  FActivity := true;
-  inherited SignalActivity;
-end;
-
-procedure TFBTransaction.PrepareForCommit;
+procedure TFB25Transaction.PrepareForCommit;
 begin
   if Length(FAttachments) < 2 then
     IBError(ibxeNotAMultiDatabaseTransaction,[nil]);
@@ -155,7 +56,7 @@ begin
     Call(isc_prepare_transaction(StatusVector, @FHandle));
 end;
 
-procedure TFBTransaction.Commit(Force: boolean);
+procedure TFB25Transaction.Commit(Force: boolean);
 begin
   if FHandle = nil then
     Exit;
@@ -164,7 +65,7 @@ begin
   FHandle := nil;
 end;
 
-procedure TFBTransaction.CommitRetaining;
+procedure TFB25Transaction.CommitRetaining;
 begin
   if FHandle = nil then
     Exit;
@@ -172,7 +73,7 @@ begin
     Call(isc_commit_retaining(StatusVector, @FHandle));
 end;
 
-procedure TFBTransaction.Start(DefaultCompletion: TTransactionAction);
+procedure TFB25Transaction.Start(DefaultCompletion: TTransactionAction);
 var pteb: PISC_TEB_ARRAY;
     i: integer;
     db_handle: TISC_DB_HANDLE;
@@ -215,14 +116,7 @@ begin
   end;
 end;
 
-procedure TFBTransaction.Start(TPB: ITPB; DefaultCompletion: TTransactionAction
-  );
-begin
-  FTPB := TPB;
-  Start(DefaultCompletion);
-end;
-
-procedure TFBTransaction.Rollback(Force: boolean);
+procedure TFB25Transaction.Rollback(Force: boolean);
 begin
   if FHandle = nil then
     Exit;
@@ -231,25 +125,12 @@ begin
   FHandle := nil;
 end;
 
-procedure TFBTransaction.RollbackRetaining;
+procedure TFB25Transaction.RollbackRetaining;
 begin
   if FHandle = nil then
     Exit;
   with Firebird25ClientAPI do
     Call(isc_rollback_retaining(StatusVector, @FHandle));
-end;
-
-function TFBTransaction.GetAttachmentCount: integer;
-begin
-  Result := Length(FAttachments);
-end;
-
-function TFBTransaction.GetAttachment(index: integer): IAttachment;
-begin
-  if (index >= 0) and (index < Length(FAttachments)) then
-    Result := FAttachments[index]
-  else
-    IBError(ibxeAttachmentListIndexError,[index]);
 end;
 
 end.

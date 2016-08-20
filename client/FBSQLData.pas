@@ -32,7 +32,7 @@ type
   protected
      procedure CheckActive; virtual;
      function GetAttachment: TFBAttachment; virtual; abstract;
-     function GetTransaction: TFBTransaction; virtual; abstract;
+     function GetTransaction: TFB25Transaction; virtual; abstract;
      function GetSQLDialect: integer; virtual; abstract;
      procedure Changed; virtual;
      function SQLData: PChar; virtual; abstract;
