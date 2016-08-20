@@ -13,11 +13,7 @@ type
 
   { TDPBItem }
 
-  TDPBItem = class(TParamBlockItem,IDPBItem)
-  public
-    function getAsString: string; override;
-    function GetStringUnprotected: string; {Not available via interface}
-  end;
+  TDPBItem = class(TParamBlockItem,IDPBItem);
 
   { TDPB }
 
@@ -53,10 +49,7 @@ type
     function AddSpecialItem(BufPtr: PChar): POutputBlockItemData; override;
     procedure DoParseBuffer; override;
   public
-    constructor Create(aAttachment: TFBAttachment; info_request: byte;
-      aSize: integer=IBLocalBufferLength); overload;
-    constructor Create(aAttachment: TFBAttachment; info_requests: array of byte;
-      aSize: integer=IBLocalBufferLength); overload;
+    constructor Create(aSize: integer=IBLocalBufferLength);
 
   public
     {IDBInformation}
@@ -122,7 +115,8 @@ type
 
     function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: string): IBlobMetaData;
     function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: string): IArrayMetaData;
-    function GetDBInformation(Requests: array of byte): IDBInformation;
+    function GetDBInformation(Requests: array of byte): IDBInformation; overload;
+    function GetDBInformation(Request: byte): IDBInformation; overload;
     function HasActivity: boolean; {one shot - reset after call}
 
     {IActivityMonitor}
@@ -135,19 +129,6 @@ uses FB25Events,FB25Transaction, FBMessages, FB25Blob,
   FB25Statement, FB25Array;
 
 { TDPBItem }
-
-function TDPBItem.getAsString: string;
-begin
-  if getParamType = isc_dpb_password then
-    Result := '' {no password access}
-  else
-    Result := inherited getAsString;
-end;
-
-function TDPBItem.GetStringUnprotected: string;
-begin
-   Result := inherited getAsString;
-end;
 
 { TDBInfoItem }
 
@@ -313,45 +294,9 @@ begin
   end;
 end;
 
-constructor TDBInformation.Create(aAttachment: TFBAttachment;
-  info_request: byte; aSize: integer);
+constructor TDBInformation.Create(aSize: integer);
 begin
   inherited Create(aSize);
-  FIntegerType := dtInteger;
-  if aAttachment.Handle = nil then
-    IBError(ibxeInvalidStatementHandle,[nil]);
-  with Firebird25ClientAPI do
-    if isc_database_info(StatusVector, @(aAttachment.Handle), 1, @info_request,
-                           getBufSize, Buffer) > 0 then
-      IBDataBaseError;
-end;
-
-constructor TDBInformation.Create(aAttachment: TFBAttachment;
-  info_requests: array of byte; aSize: integer);
-var ReqBuffer: PByte;
-    i: integer;
-begin
-  if Length(info_requests) = 1 then
-    Create(aAttachment,info_requests[0],aSize)
-  else
-  begin
-    inherited Create(aSize);
-    if aAttachment.Handle = nil then
-      IBError(ibxeInvalidStatementHandle,[nil]);
-    GetMem(ReqBuffer,Length(info_requests));
-    try
-      for i := 0 to Length(info_requests) - 1 do
-        ReqBuffer[i] := info_requests[i];
-
-      with Firebird25ClientAPI do
-          if isc_database_info(StatusVector, @(aAttachment.Handle), Length(info_requests), PChar(ReqBuffer),
-                                 getBufSize, Buffer) > 0 then
-            IBDataBaseError;
-
-    finally
-      FreeMem(ReqBuffer);
-    end;
-  end;
   FIntegerType := dtInteger;
 end;
 
@@ -437,7 +382,7 @@ begin
 
     DPBItem :=  DPB.Find(isc_dpb_password);
     if DPBItem <> nil then
-      CreateParams += ' Password ''' + (DPBItem as TDPBItem).GetStringUnprotected + '''';
+      CreateParams += ' Password ''' + DPBItem.AsString + '''';
 
     DPBItem :=  DPB.Find(isc_dpb_page_size);
     if DPBItem <> nil then
@@ -682,8 +627,37 @@ end;
 
 function TFBAttachment.GetDBInformation(Requests: array of byte
   ): IDBInformation;
+var ReqBuffer: PByte;
+    i: integer;
 begin
-  Result := TDBInformation.Create(self,Requests);
+  if Length(Requests) = 1 then
+    Result := GetDBInformation(Requests[0])
+  else
+  begin
+    Result := TDBInformation.Create;
+    GetMem(ReqBuffer,Length(Requests));
+    try
+      for i := 0 to Length(Requests) - 1 do
+        ReqBuffer[i] := Requests[i];
+
+      with Firebird25ClientAPI, Result as TDBInformation do
+          if isc_database_info(StatusVector, @(FHandle), Length(Requests), PChar(ReqBuffer),
+                                 getBufSize, Buffer) > 0 then
+            IBDataBaseError;
+
+    finally
+      FreeMem(ReqBuffer);
+    end;
+  end;
+end;
+
+function TFBAttachment.GetDBInformation(Request: byte): IDBInformation;
+begin
+  Result := TDBInformation.Create;
+  with Firebird25ClientAPI, Result as TDBInformation do
+    if isc_database_info(StatusVector, @(FHandle), 1, @Request,
+                           getBufSize, Buffer) > 0 then
+      IBDataBaseError;
 end;
 
 end.

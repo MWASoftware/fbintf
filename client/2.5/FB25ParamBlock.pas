@@ -64,7 +64,7 @@ type
   public
      function getAsInteger: integer;
      function getParamType: byte;
-     function getAsString: string; virtual;
+     function getAsString: string;
      function getAsByte: byte;
      procedure setAsByte(aValue: byte);
      procedure SetAsInteger(aValue: integer);

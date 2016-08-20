@@ -499,7 +499,8 @@ type
     {Database Information}
     function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: string): IBlobMetaData;
     function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: string): IArrayMetaData;
-    function GetDBInformation(Requests: array of byte): IDBInformation;
+    function GetDBInformation(Requests: array of byte): IDBInformation; overload;
+    function GetDBInformation(Request: byte): IDBInformation; overload;
     function HasActivity: boolean;
   end;
 
