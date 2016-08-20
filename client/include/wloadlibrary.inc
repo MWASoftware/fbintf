@@ -1,4 +1,4 @@
-procedure TFBLibrary.LoadIBLibrary;
+procedure TFBClientAPI.LoadIBLibrary;
 
   function DoLoadLibrary(LibName: string): TLibHandle;
   begin
@@ -98,7 +98,7 @@ begin
   end
 end;
 
-function TFBLibrary.IsEmbeddedServer: boolean;
+function TFBClientAPI.IsEmbeddedServer: boolean;
 begin
  Result := CompareText(FBLibraryName,FIREBIRD_EMBEDDED) = 0;
 end;

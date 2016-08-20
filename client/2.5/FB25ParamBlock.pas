@@ -64,7 +64,7 @@ type
   public
      function getAsInteger: integer;
      function getParamType: byte;
-     function getAsString: string;
+     function getAsString: string; virtual;
      function getAsByte: byte;
      procedure setAsByte(aValue: byte);
      procedure SetAsInteger(aValue: integer);
@@ -106,8 +106,6 @@ function TParamBlockItem.getAsString: string;
 var len: byte;
 begin
   Result := '';
-  if FParamData^.FBufPtr^ = char(isc_dpb_password) then
-    Exit; {no password access}
 
   with FParamData^ do
   case FDataType of

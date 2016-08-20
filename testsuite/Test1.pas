@@ -60,33 +60,30 @@ var DPB: IDPB;
     DBSiteName: string;
 begin
   writeln('Creating a Database with empty parameters');
-  try
-    Attachment := FirebirdAPI.CreateDatabase('',SQLDialect,'',nil);
-  except on e: Exception do
-    writeln('Create Database fails: ',E.Message);
-  end;
+  Attachment := FirebirdAPI.CreateDatabase('',nil,false);
+  if Attachment = nil then
+    writeln('Create Database fails: ',FirebirdAPI.GetStatus.GetMessage)
+  else
+    Attachment.DropDatabase;
 
-  writeln('Last Status Message: ' + FirebirdAPI.GetStatus.Getmessage);
-
-  writeln('Creating a Database with no DPD');
-  CreateParams := 'USER ''' + Owner.GetUserName + ''' PASSWORD ''' + Owner.GetPassword + ''' ' +
-      'DEFAULT CHARACTER SET ' + CharSet;
-  Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,SQLDialect,CreateParams,DPB);
-
-  writeln('Dropping Database');
-  Attachment.DropDatabase;
-
-  {Open Database}
+  writeln('Creating a Database with a DPD');
   DPB := FirebirdAPI.AllocateDPB;
   DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
   DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);
   DPB.Add(isc_dpb_lc_ctype).setAsString(CharSet);
   DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
 
+  Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
+
+  writeln('Dropping Database');
+  Attachment.DropDatabase;
+
+  {Open Database}
+
   PrintDPB(DPB);
   writeln('Creating a Database with a DPD');
-  Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,SQLDialect,CreateParams,DPB);
-  DBInfo := Attachment.GetDBInformation(byte(isc_info_db_id));
+  Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
+  DBInfo := Attachment.GetDBInformation([isc_info_db_id]);
   DBInfo[0].DecodeIDCluster(ConType,DBFileName,DBSiteName);
   writeln('Database ID = ', ConType,' FB = ', DBFileName, ' SN = ',DBSiteName);
   DBInfo := Attachment.GetDBInformation([isc_info_ods_version]);

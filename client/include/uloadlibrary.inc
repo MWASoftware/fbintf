@@ -1,4 +1,4 @@
-procedure TFBLibrary.LoadIBLibrary;
+procedure TFBClientAPI.LoadIBLibrary;
 
   function FindLibrary(LibNameList: string): TLibHandle;
   var LibNames: TStringList;
@@ -55,7 +55,7 @@ begin
   {$ENDIF}
 end;
 
-function TFBLibrary.IsEmbeddedServer: boolean;
+function TFBClientAPI.IsEmbeddedServer: boolean;
 begin
   Result := Pos('libfbembed',FFBLibraryName) = 1;
 end;

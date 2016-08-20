@@ -13,7 +13,7 @@ const
 type
   { TFB25ClientAPI }
 
-  TFB25ClientAPI = class(TFBLibrary,IFirebirdAPI)
+  TFB25ClientAPI = class(TFBClientAPI,IFirebirdAPI)
   private
     FIBServiceAPIPresent: boolean;
     FStatus: TFBStatus;
@@ -102,8 +102,7 @@ type
     function AllocateDPB: IDPB;
     function OpenDatabase(DatabaseName: string; DPB: IDPB;
       RaiseExceptionOnConnectError: boolean): IAttachment;
-    function CreateDatabase(DatabaseName: string;
-      SQLDialect: integer; CreateParams: string; DPB: IDPB): IAttachment;
+    function CreateDatabase(DatabaseName: string; DPB: IDPB; RaiseExceptionOnError: boolean=true): IAttachment;
     function AllocateSPB: ISPB;
     function AllocateTPB: ITPB;
     function GetServiceManager(ServerName: string; Protocol: TProtocol; SPB: ISPB
@@ -365,10 +364,12 @@ begin
      Result := nil;
 end;
 
-function TFB25ClientAPI.CreateDatabase(DatabaseName: string;
-  SQLDialect: integer; CreateParams: string; DPB: IDPB): IAttachment;
+function TFB25ClientAPI.CreateDatabase(DatabaseName: string; DPB: IDPB;
+  RaiseExceptionOnError: boolean): IAttachment;
 begin
-  Result := TFBAttachment.CreateDatabase(DatabaseName, SQLDialect, CreateParams, DPB );
+  Result := TFBAttachment.CreateDatabase(DatabaseName, DPB, RaiseExceptionOnError );
+   if not Result.IsConnected then
+     Result := nil;
 end;
 
 function TFB25ClientAPI.AllocateSPB: ISPB;

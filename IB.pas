@@ -588,8 +588,7 @@ type
 
     {Database connections}
     function OpenDatabase(DatabaseName: string; DPB: IDPB; RaiseExceptionOnConnectError: boolean=true): IAttachment;
-    function CreateDatabase(DatabaseName: string; SQLDialect: integer;
-      CreateParams: string; DPB: IDPB): IAttachment;
+    function CreateDatabase(DatabaseName: string; DPB: IDPB; RaiseExceptionOnError: boolean=true): IAttachment;
 
     {Start Transaction against multiple databases}
     function StartTransaction(Attachments: array of IAttachment;
@@ -660,7 +659,7 @@ begin
 end;
 
 function TryIBLoad: Boolean;
-var FBLibraryObj: TFBLibrary;
+var FBLibraryObj: TFBClientAPI;
 begin
   Result := FFirebirdAPI <> nil;
   if not Result then

@@ -83,7 +83,6 @@ end;
 
 procedure TTest8.RunTest(CharSet: string; SQLDialect: integer);
 var DPB: IDPB;
-    CreateParams: string;
     Attachment: IAttachment;
 begin
   DPB := FirebirdAPI.AllocateDPB;
@@ -91,9 +90,7 @@ begin
   DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);
   DPB.Add(isc_dpb_lc_ctype).setAsString(CharSet);
   DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
-  CreateParams := 'USER ''' + Owner.GetUserName + ''' PASSWORD ''' + Owner.GetPassword + ''' ' +
-      'DEFAULT CHARACTER SET ' + CharSet;
-  Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,SQLDialect,CreateParams,DPB);
+  Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable);
   UpdateDatabase(Attachment);
 

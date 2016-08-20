@@ -15,9 +15,9 @@ type
   Tfb_get_master_interface = function: IMaster;
                               {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
-  { TFBLibrary }
+  { TFBClientAPI }
 
-  TFBLibrary = class(TInterfaceParent)
+  TFBClientAPI = class(TInterfaceParent)
   private
     FFBLibraryName: string;
     fb_get_master_interface: Tfb_get_master_interface;
@@ -68,9 +68,9 @@ FIREBIRD_EMBEDDED = 'fbembed.dll';
 {$I wloadlibrary.inc}
 {$ENDIF}
 
-{ TFBLibrary }
+{ TFBClientAPI }
 
-constructor TFBLibrary.Create;
+constructor TFBClientAPI.Create;
 begin
   inherited Create;
   if IBLibrary <> NilHandle then
@@ -80,7 +80,7 @@ begin
     LoadInterface;
 end;
 
-destructor TFBLibrary.Destroy;
+destructor TFBClientAPI.Destroy;
 begin
   if IBLibrary <> NilHandle then
   begin
@@ -90,7 +90,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TFBLibrary.IBAlloc(var P; OldSize, NewSize: Integer);
+procedure TFBClientAPI.IBAlloc(var P; OldSize, NewSize: Integer);
 var
   i: Integer;
 begin
@@ -98,26 +98,26 @@ begin
   for i := OldSize to NewSize - 1 do PChar(P)[i] := #0;
 end;
 
-function TFBLibrary.GetProcAddr(ProcName: PChar): Pointer;
+function TFBClientAPI.GetProcAddr(ProcName: PChar): Pointer;
 begin
   Result := GetProcAddress(IBLibrary, ProcName);
   if not Assigned(Result) then
     raise Exception.CreateFmt(SFirebirdAPIFuncNotFound,[ProcName]);
 end;
 
-procedure TFBLibrary.LoadInterface;
+procedure TFBClientAPI.LoadInterface;
 begin
   fb_get_master_interface := GetProcAddress(IBLibrary, 'fb_get_master_interface'); {do not localize}
   if assigned(fb_get_master_interface) then
     FMaster := fb_get_master_interface;
 end;
 
-function TFBLibrary.GetLibraryName: string;
+function TFBClientAPI.GetLibraryName: string;
 begin
   Result := FFBLibraryName;
 end;
 
 initialization
-   TFBLibrary.IBLibrary := NilHandle;
+   TFBClientAPI.IBLibrary := NilHandle;
 end.
 
