@@ -88,6 +88,7 @@ type
     FIBXSQLVAR: TIBXSQLVAR;
     FStatement: IStatement;         {Keep reference to ensure statement not discarded}
     FPrepareSeqNo: integer;
+    FBlobMetaData: IBlobMetaData;
     function GetParent: TIBXSQLDA;
   protected
     procedure CheckActive; override;
@@ -1352,6 +1353,12 @@ begin
   SQL_VARYING, SQL_TEXT:
     result := FIBXSQLVAR.FXSQLVAR^.sqlsubtype and $FF;
 
+  SQL_BLOB:
+    begin
+      if FBlobMetaData = nil then
+        FBlobMetaData := GetBlobMetaData;
+      result := FBlobMetaData.GetCharSetID;
+    end
   else
     result := 0;
   end;

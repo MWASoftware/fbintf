@@ -125,7 +125,6 @@ end;
 
 procedure TTestBase.PrintMetaData(meta: IMetaData);
 var i, j: integer;
-    b: IBlobMetaData;
     ar: IArrayMetaData;
     Bounds: TArrayBounds;
 begin
@@ -145,16 +144,6 @@ begin
     if getIsNullable then writeln('Nullable') else writeln('Not Null');
     writeln('Size = ',GetSize);
     case getSQLType of
-      SQL_BLOB:
-        begin
-          writeln('Blob Meta Data:');
-          b := GetBlobMetaData;
-          writeln('Sub Type = ',b.GetSubType);
-          writeln('CharSetID = ',b.GetCharSetID);
-          writeln('Segment Size = ',b.GetSegmentSize);
-          writeln('Table = ',b.GetTableName);
-          writeln('Column = ',b.GetColumnName);
-        end;
       SQL_ARRAY:
         begin
           writeln('Array Meta Data:');

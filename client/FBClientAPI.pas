@@ -39,16 +39,11 @@ type
     procedure SetIBDataBaseErrorMessages(Value: TIBDataBaseErrorMessages);
   end;
 
-  Tfb_get_master_interface = function: IMaster;
-                              {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
-
   { TFBClientAPI }
 
   TFBClientAPI = class(TInterfaceParent)
   private
     FFBLibraryName: string;
-    fb_get_master_interface: Tfb_get_master_interface;
-    FMaster: IMaster;
     procedure LoadIBLibrary;
   protected
     IBLibrary: TLibHandle; static;
@@ -66,15 +61,15 @@ type
     destructor Destroy; override;
     procedure IBAlloc(var P; OldSize, NewSize: Integer);
     procedure IBDataBaseError;
-    procedure EncodeLsbf(aValue: integer; len: integer; buffer: PChar);
-
-    property MasterIntf: IMaster read FMaster;
+    procedure EncodeInteger(aValue: integer; len: integer; buffer: PChar);
 
     {IFirebirdAPI}
     function GetStatus: IStatus; virtual; abstract;
     function IsEmbeddedServer: boolean;
     function GetLibraryName: string;
   end;
+
+var FirebirdClientAPI: TFBClient;
 
 implementation
 
@@ -114,6 +109,7 @@ begin
   LoadIBLibrary;
   if (IBLibrary <> NilHandle) then
     LoadInterface;
+  FirebirdClientAPI := self;
 end;
 
 destructor TFBClientAPI.Destroy;
@@ -123,6 +119,7 @@ begin
     FreeLibrary(IBLibrary);
     IBLibrary := NilHandle;
   end;
+  FirebirdClientAPI := nil;
   inherited Destroy;
 end;
 
@@ -139,7 +136,7 @@ begin
   raise EIBInterBaseError.Create(GetStatus);
 end;
 
-procedure TFBClientAPI.EncodeLsbf(aValue: integer; len: integer; buffer: PChar);
+procedure TFBClientAPI.EncodeInteger(aValue: integer; len: integer; buffer: PChar);
 begin
   while len > 0 do
   begin
@@ -165,9 +162,6 @@ begin
   isc_vax_integer := GetProcAddr('isc_vax_integer'); {do not localize}
   isc_portable_integer := GetProcAddr('isc_portable_integer'); {do not localize}
 
-  fb_get_master_interface := GetProcAddress(IBLibrary, 'fb_get_master_interface'); {do not localize}
-  if assigned(fb_get_master_interface) then
-    FMaster := fb_get_master_interface;
 end;
 
 function TFBClientAPI.GetLibraryName: string;

@@ -160,7 +160,6 @@ type
     function getIsNullable: boolean;
     function GetSize: integer;
     function GetArrayMetaData: IArrayMetaData; {Valid only for Array SQL Type}
-    function GetBlobMetaData: IBlobMetaData; {Valid only for Blob SQL Type}
     property Name: string read GetName;
     property Size: Integer read GetSize;
     property SQLType: short read GetSQLType;

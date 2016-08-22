@@ -14,11 +14,19 @@ type
   TFB30Status = class(TFBStatus,IStatus)
   private
     FStatus: Firebird.IStatus;
+    fb_get_master_interface: Tfb_get_master_interface;
+    FMaster: IMaster;
+  protected
+    procedure LoadInterface; override;
   public
     function InErrorState: boolean;
     function GetStatus: Firebird.IStatus;
     function StatusVector: PStatusVector; override;
+    property MasterIntf: IMaster read FMaster;
   end;
+
+  Tfb_get_master_interface = function: IMaster;
+                              {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
   { TFB30ClientAPI }
 
@@ -70,6 +78,14 @@ implementation
 uses FBParamBlock, FB30Attachment;
 
 { TFB30Status }
+
+procedure TFB30Status.LoadInterface;
+begin
+  inherited;
+  fb_get_master_interface := GetProcAddress(IBLibrary, 'fb_get_master_interface'); {do not localize}
+  if assigned(fb_get_master_interface) then
+    FMaster := fb_get_master_interface;
+end;
 
 function TFB30Status.InErrorState: boolean;
 begin

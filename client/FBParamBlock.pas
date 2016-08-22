@@ -221,7 +221,7 @@ begin
     if FBufLength <> 5 then
       FOwner.UpdateRequestItemSize(self,5);
     with Firebird25ClientAPI do
-      EncodeLsbf(aValue,4,FBufPtr+1);
+      EncodeInteger(aValue,4,FBufPtr+1);
     FDataType := dtInteger;
   end;
 end;
@@ -247,7 +247,7 @@ begin
     len := Length(aValue);
     FOwner.UpdateRequestItemSize(self,len + 3);
     with Firebird25ClientAPI do
-      EncodeLsbf(len,2,FBufPtr+1);
+      EncodeInteger(len,2,FBufPtr+1);
     Move(aValue[1],(FBufPtr+3)^,len);
     FDataType := dtString2;
   end;
