@@ -42,6 +42,8 @@ type
     {fbclient API}
     BLOB_get: TBLOB_get;
     BLOB_put: TBLOB_put;
+    isc_vax_integer: Tisc_vax_integer;
+    isc_portable_integer: Tisc_portable_integer;
     isc_blob_info: Tisc_blob_info;
     isc_blob_lookup_desc: Tisc_blob_lookup_desc;
     isc_open_blob2: Tisc_open_blob2;
@@ -115,6 +117,13 @@ type
     function HasServiceAPI: boolean;
     function HasRollbackRetaining: boolean;
     function GetImplementationVersion: string;
+    function DecodeInteger(bufptr: PChar; len: short): integer; override;
+    procedure SQLEncodeDate(aDate: TDateTime; bufptr: PChar); override;
+    function SQLDecodeDate(bufptr: PChar): TDateTime; override;
+    procedure SQLEncodeTime(aTime: TDateTime; bufptr: PChar); override;
+    function SQLDecodeTime(bufptr: PChar): TDateTime;  override;
+    procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PChar); override;
+    function SQLDecodeDateTime(bufptr: PChar): TDateTime; override;
   end;
 
 const
@@ -124,6 +133,25 @@ implementation
 
 uses FBMessages, dynlibs, FB25Attachment, FB25Transaction, FB25Services, FBParamBlock,
   IBUtils;
+
+type
+  { C Date/Time Structure }
+  TCTimeStructure = record
+    tm_sec : integer;   { Seconds }
+    tm_min : integer;   { Minutes }
+    tm_hour : integer;  { Hour (0--23) }
+    tm_mday : integer;  { Day of month (1--31) }
+    tm_mon : integer;   { Month (0--11) }
+    tm_year : integer;  { Year (calendar year minus 1900) }
+    tm_wday : integer;  { Weekday (0--6) Sunday = 0) }
+    tm_yday : integer;  { Day of year (0--365) }
+    tm_isdst : integer; { 0 if daylight savings time is not in effect) }
+    tm_gmtoff: longint;
+    tm_zone: PChar;
+  end;
+  PCTimeStructure = ^TCTimeStructure;
+  TM              = TCTimeStructure;
+  PTM             = ^TM;
 
 { Stubs for 6.0 only functions }
 function isc_rollback_retaining_stub(status_vector   : PISC_STATUS;
@@ -240,6 +268,8 @@ begin
   inherited LoadInterface;
   BLOB_get := GetProcAddr('BLOB_get'); {do not localize}
   BLOB_put := GetProcAddr('BLOB_put'); {do not localize}
+  isc_vax_integer := GetProcAddr('isc_vax_integer'); {do not localize}
+  isc_portable_integer := GetProcAddr('isc_portable_integer'); {do not localize}
   isc_blob_info := GetProcAddr('isc_blob_info'); {do not localize}
   isc_blob_lookup_desc := GetProcAddr('isc_blob_lookup_desc');  {do not localize}
   isc_open_blob2 := GetProcAddr('isc_open_blob2'); {do not localize}
@@ -406,6 +436,120 @@ end;
 function TFB25ClientAPI.GetImplementationVersion: string;
 begin
   Result := FBClientInterfaceVersion;
+end;
+
+function TFB25ClientAPI.DecodeInteger(bufptr: PChar; len: short): integer;
+begin
+  Result := isc_portable_integer(bufptr,len);
+end;
+
+procedure TFB25ClientAPI.SQLEncodeDate(aDate: TDateTime; bufptr: PChar);
+var
+  tm_date: TCTimeStructure;
+  Yr, Mn, Dy: Word;
+begin
+  DecodeDate(aDate, Yr, Mn, Dy);
+  with tm_date do begin
+    tm_sec := 0;
+    tm_min := 0;
+    tm_hour := 0;
+    tm_mday := Dy;
+    tm_mon := Mn - 1;
+    tm_year := Yr - 1900;
+  end;
+  isc_encode_sql_date(@tm_date, PISC_DATE(bufptr));
+end;
+
+function TFB25ClientAPI.SQLDecodeDate(bufptr: PChar): TDateTime;
+var
+  tm_date: TCTimeStructure;
+begin
+  isc_decode_sql_date(PISC_DATE(bufptr), @tm_date);
+  try
+    result := EncodeDate(Word(tm_date.tm_year + 1900), Word(tm_date.tm_mon + 1),
+                         Word(tm_date.tm_mday));
+  except
+    on E: EConvertError do begin
+      IBError(ibxeInvalidDataConversion, [nil]);
+    end;
+  end;
+end;
+
+procedure TFB25ClientAPI.SQLEncodeTime(aTime: TDateTime; bufptr: PChar);
+var
+  tm_date: TCTimeStructure;
+  Hr, Mt, S, Ms: Word;
+begin
+  DecodeTime(aTime, Hr, Mt, S, Ms);
+  with tm_date do begin
+    tm_sec := S;
+    tm_min := Mt;
+    tm_hour := Hr;
+    tm_mday := 0;
+    tm_mon := 0;
+    tm_year := 0;
+  end;
+  with Firebird25ClientAPI do
+    isc_encode_sql_time(@tm_date, PISC_TIME(bufptr));
+  if Ms > 0 then
+    Inc(PISC_TIME(bufptr)^,Ms*10);
+end;
+
+function TFB25ClientAPI.SQLDecodeTime(bufptr: PChar): TDateTime;
+var
+  tm_date: TCTimeStructure;
+begin
+  isc_decode_sql_time(PISC_TIME(bufptr), @tm_date);
+  try
+    msecs :=  (PISC_TIME(bufptr)^ mod 10000) div 10;
+    result := EncodeTime(Word(tm_date.tm_hour), Word(tm_date.tm_min),
+                         Word(tm_date.tm_sec), msecs)
+  except
+    on E: EConvertError do begin
+      IBError(ibxeInvalidDataConversion, [nil]);
+    end;
+  end;
+end;
+
+procedure TFB25ClientAPI.SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PChar);
+var
+  tm_date: TCTimeStructure;
+  Yr, Mn, Dy, Hr, Mt, S, Ms: Word;
+begin
+  DecodeDate(aDateTime, Yr, Mn, Dy);
+  DecodeTime(aDateTime, Hr, Mt, S, Ms);
+  with tm_date do begin
+    tm_sec := S;
+    tm_min := Mt;
+    tm_hour := Hr;
+    tm_mday := Dy;
+    tm_mon := Mn - 1;
+    tm_year := Yr - 1900;
+  end;
+  isc_encode_date(@tm_date, PISC_QUAD(bufptr));
+  if Ms > 0 then
+    Inc(PISC_TIMESTAMP(bufptr)^.timestamp_time,Ms*10);
+end;
+
+function TFB25ClientAPI.SQLDecodeDateTime(bufptr: PChar): TDateTime;
+var
+  tm_date: TCTimeStructure;
+begin
+  isc_decode_date(PISC_QUAD(bufptr), @tm_date);
+  try
+    result := EncodeDate(Word(tm_date.tm_year + 1900), Word(tm_date.tm_mon + 1),
+                        Word(tm_date.tm_mday));
+    msecs := (PISC_TIMESTAMP(bufptr)^.timestamp_time mod 10000) div 10;
+    if result >= 0 then
+      result := result + EncodeTime(Word(tm_date.tm_hour), Word(tm_date.tm_min),
+                                    Word(tm_date.tm_sec), msecs)
+    else
+      result := result - EncodeTime(Word(tm_date.tm_hour), Word(tm_date.tm_min),
+                                    Word(tm_date.tm_sec), msecs)
+  except
+    on E: EConvertError do begin
+      IBError(ibxeInvalidDataConversion, [nil]);
+    end;
 end;
 
 end.

@@ -14,15 +14,10 @@ type
   TFB30Status = class(TFBStatus,IStatus)
   private
     FStatus: Firebird.IStatus;
-    fb_get_master_interface: Tfb_get_master_interface;
-    FMaster: IMaster;
-  protected
-    procedure LoadInterface; override;
   public
     function InErrorState: boolean;
     function GetStatus: Firebird.IStatus;
     function StatusVector: PStatusVector; override;
-    property MasterIntf: IMaster read FMaster;
   end;
 
   Tfb_get_master_interface = function: IMaster;
@@ -32,10 +27,15 @@ type
 
   TFB30ClientAPI = class(TFBClientAPI,IFirebirdAPI)
   private
+    fb_get_master_interface: Tfb_get_master_interface;
+    FMaster: Firebird.IMaster;
+    FUtil: Firebird.IUtil;
     FStatus: TFB30Status;
     FStatusIntf: IStatus;   {Keep a reference to the interface - automatic destroy
                              when this class is freed and last reference to IStatus
                              goes out of scope.}
+  protected
+    procedure LoadInterface; override;
   public
     constructor Create;
 
@@ -69,6 +69,19 @@ type
     function HasServiceAPI: boolean;
     function HasRollbackRetaining: boolean;
     function GetImplementationVersion: string;
+
+    {Encode/Decode}
+    function DecodeInteger(bufptr: PChar; len: integer): short; override;
+    procedure SQLEncodeDate(aDate: TDateTime; bufptr: PChar); override;
+    function SQLDecodeDate(byfptr: PChar): TDateTime; override;
+    procedure SQLEncodeTime(aTime: TDateTime; bufptr: PChar); override;
+    function SQLDecodeTime(bufptr: PChar): TDateTime;  override;
+    procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PChar); override;
+    function SQLDecodeDateTime(bufptr: PChar): TDateTime; override;
+
+    {Firebird Interfaces}
+    property MasterIntf: Firebird.IMaster read FMaster;
+    property UtilIntf: Firebird.IUtil read FUtil;
   end;
 
 var Firebird30ClientAPI: TFB30ClientAPI;
@@ -79,15 +92,7 @@ uses FBParamBlock, FB30Attachment;
 
 { TFB30Status }
 
-procedure TFB30Status.LoadInterface;
-begin
-  inherited;
-  fb_get_master_interface := GetProcAddress(IBLibrary, 'fb_get_master_interface'); {do not localize}
-  if assigned(fb_get_master_interface) then
-    FMaster := fb_get_master_interface;
-end;
-
-function TFB30Status.InErrorState: boolean;
+#function TFB30Status.InErrorState: boolean;
 begin
   with GetStatus do
     Result := ((getState and STATE_ERRORS) <> 0);
@@ -107,6 +112,17 @@ begin
 end;
 
 { TFB30ClientAPI }
+
+procedure TFB30ClientAPI.LoadInterface;
+begin
+  inherited LoadInterface;
+  fb_get_master_interface := GetProcAddress(IBLibrary, 'fb_get_master_interface'); {do not localize}
+  if assigned(fb_get_master_interface) then
+  begin
+    FMaster := fb_get_master_interface;
+    FUtil := FMaster.getUtilInterface;
+  end;
+end;
 
 constructor TFB30ClientAPI.Create;
 begin
@@ -205,6 +221,62 @@ begin
 end;
 
 function TFB30ClientAPI.GetImplementationVersion: string;
+begin
+
+end;
+
+function TFB30ClientAPI.DecodeInteger(bufptr: PChar; len: integer): short;
+var P: PChar;
+begin
+  Result := 0;
+  P := Bufptr + len - 1;
+  while P >= bufptr do
+  begin
+    Result := (Result shr 8 ) and byte(P^);
+    Dec(P);
+  end;
+end;
+
+procedure TFB30ClientAPI.SQLEncodeDate(aDate: TDateTime; bufptr: PChar);
+var
+  Yr, Mn, Dy: Word;
+begin
+   DecodeDate(aDate, Yr, Mn, Dy);
+   PISC_Date(Bufptr)^ := UtilIntf.encodeDate(Yr, Mn, Dy);
+end;
+
+function TFB30ClientAPI.SQLDecodeDate(byfptr: PChar): TDateTime;
+var
+  Yr, Mn, Dy: Word;
+begin
+  UtilIntf.decodeDate(PISC_DATE(bufptr)^,Yr, Mn, Dy);
+  try
+    result := EncodeDate(Word(Yr + 1900), Mn,Dy);
+  except
+    on E: EConvertError do begin
+      IBError(ibxeInvalidDataConversion, [nil]);
+    end;
+  end;
+eend;
+
+procedure TFB30ClientAPI.SQLEncodeTime(aTime: TDateTime; bufptr: PChar);
+var
+  Hr, Mt, S, Ms: Word;
+begin
+
+end;
+
+function TFB30ClientAPI.SQLDecodeTime(bufptr: PChar): TDateTime;
+begin
+
+end;
+
+procedure TFB30ClientAPI.SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PChar);
+begin
+
+end;
+
+function TFB30ClientAPI.SQLDecodeDateTime(bufptr: PChar): TDateTime;
 begin
 
 end;

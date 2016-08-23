@@ -54,14 +54,22 @@ type
     isc_sqlcode: Tisc_sqlcode;
     isc_sql_interprete: Tisc_sql_interprete;
     isc_interprete: Tisc_interprete;
-    isc_vax_integer: Tisc_vax_integer;
-    isc_portable_integer: Tisc_portable_integer;
 
     constructor Create;
     destructor Destroy; override;
     procedure IBAlloc(var P; OldSize, NewSize: Integer);
     procedure IBDataBaseError;
+
+    {Encode/Decode}
     procedure EncodeInteger(aValue: integer; len: integer; buffer: PChar);
+    function DecodeInteger(bufptr: PChar; len: integer): short; virtual; abstract;
+    procedure SQLEncodeDate(aDate: TDateTime; bufptr: PChar); virtual; abstract;
+    function SQLDecodeDate(byfptr: PChar): TDateTime; virtual; abstract;
+    procedure SQLEncodeTime(aTime: TDateTime; bufptr: PChar); virtual; abstract;
+    function SQLDecodeTime(bufptr: PChar): TDateTime;  virtual; abstract;
+    procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PChar); virtual; abstract;
+    function SQLDecodeDateTime(bufptr: PChar): TDateTime; virtual; abstract;
+
 
     {IFirebirdAPI}
     function GetStatus: IStatus; virtual; abstract;
@@ -159,8 +167,6 @@ begin
   isc_sqlcode := GetProcAddr('isc_sqlcode'); {do not localize}
   isc_sql_interprete := GetProcAddr('isc_sql_interprete'); {do not localize}
   isc_interprete := GetProcAddr('isc_interprete'); {do not localize}
-  isc_vax_integer := GetProcAddr('isc_vax_integer'); {do not localize}
-  isc_portable_integer := GetProcAddr('isc_portable_integer'); {do not localize}
 
 end;
 
