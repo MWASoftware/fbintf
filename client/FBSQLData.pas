@@ -491,7 +491,8 @@ begin
       SQL_TYPE_TIME :
         result := TimeToStr(AsDateTime);
       SQL_TIMESTAMP:
-        result := DateTimeToStr(AsDateTime);
+        result := FormatDateTime(FormatSettings.ShortDateFormat + ' ' +
+                            FormatSettings.LongTimeFormat+'.zzz',AsDateTime);
       SQL_SHORT, SQL_LONG:
         if Scale = 0 then
           result := IntToStr(AsLong)

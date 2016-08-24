@@ -78,14 +78,16 @@ type
   IArrayMetaData = interface
     function GetSQLType: short;
     function GetSQLTypeName: string;
+    function GetScale: integer;
     function GetTableName: string;
     function GetColumnName: string;
     function GetDimensions: integer;
     function GetBounds: TArrayBounds;
   end;
 
-  IArray = interface(IArrayMetaData)
+  IArray = interface
     function GetArrayID: TISC_QUAD;
+    function GetMetaData: IArrayMetaData;
     function GetAsInteger(index: array of integer): integer;
     function GetAsBoolean(index: array of integer): boolean;
     function GetAsCurrency(index: array of integer): Currency;
@@ -496,6 +498,7 @@ type
     function CreateArray(transaction: ITransaction; RelationName, ColumnName: string): IArray;
 
     {Database Information}
+    function GetSQLDialect: integer;
     function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: string): IBlobMetaData;
     function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: string): IArrayMetaData;
     function GetDBInformation(Requests: array of byte): IDBInformation; overload;

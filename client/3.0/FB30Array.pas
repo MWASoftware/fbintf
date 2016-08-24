@@ -1,26 +1,26 @@
-unit FB25Array;
+unit FB30Array;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  Classes, SysUtils, IB, FBArray, IBHeader, FB25Statement, FB25Attachment,
-  FB25Transaction;
+  Classes, SysUtils, IB, FBArray, IBHeader, FB30Attachment,
+  FB30Transaction;
 
-type
+(*type
 
-  { TFB25ArrayMetaData }
+  { TFB30ArrayMetaData }
 
-  TFB25ArrayMetaData = class(TFBArrayMetaData,IArrayMetaData)
+  TFB30ArrayMetaData = class(TFBArrayMetaData,IArrayMetaData)
   protected
     procedure LoadMetaData(aAttachment: IAttachment; aTransaction: ITransaction;
                    relationName, columnName: string); override;
   end;
 
-  { TFB25Array }
+  { TFB30Array }
 
-  TFB25Array = class(TFBArray,IArray)
+  TFB30Array = class(TFBArray,IArray)
   private
     FDBHandle: TISC_DB_HANDLE;
     FTRHandle: TISC_TR_HANDLE;
@@ -28,33 +28,33 @@ type
     procedure InternalGetSlice; override;
     procedure InternalPutSlice(Force: boolean); override;
   public
-    constructor Create(aAttachment: TFBAttachment; aTransaction: TFB25Transaction; aField: IArrayMetaData); overload;
-    constructor Create(aAttachment: TFBAttachment; aTransaction: TFB25Transaction; aField: IArrayMetaData; ArrayID: TISC_QUAD); overload;
- end;
+    constructor Create(aAttachment: TFBAttachment; aTransaction: TFB30Transaction; aField: IArrayMetaData); overload;
+    constructor Create(aAttachment: TFBAttachment; aTransaction: TFB30Transaction; aField: IArrayMetaData; ArrayID: TISC_QUAD); overload;
+ end;  *)
 
 implementation
 
-uses FB25ClientAPI;
+(*uses FB30ClientAPI;
 
-{ TFB25ArrayMetaData }
+{ TFB30ArrayMetaData }
 
-procedure TFB25ArrayMetaData.LoadMetaData(aAttachment: IAttachment;
+procedure TFB30ArrayMetaData.LoadMetaData(aAttachment: IAttachment;
   aTransaction: ITransaction; relationName, columnName: string);
 var
   DBHandle: TISC_DB_HANDLE;
   TRHandle: TISC_TR_HANDLE;
 begin
   DBHandle := (aAttachment as TFBAttachment).Handle;
-  TRHandle := (aTransaction as TFB25Transaction).Handle;
+  TRHandle := (aTransaction as TFB30Transaction).Handle;
   with Firebird25ClientAPI do
     if isc_array_lookup_bounds(StatusVector,@(DBHandle),@(TRHandle),
         PChar(relationName),PChar(columnName),@FArrayDesc) > 0 then
           IBDatabaseError;
 end;
 
-{ TFB25Array }
+{ TFB30Array }
 
-procedure TFB25Array.InternalGetSlice;
+procedure TFB30Array.InternalGetSlice;
 begin
   with Firebird25ClientAPI do
      Call(isc_array_get_slice(StatusVector,@(FDBHandle),@(FTRHandle),
@@ -62,7 +62,7 @@ begin
                                 Pointer(FBuffer), @FBufSize));
 end;
 
-procedure TFB25Array.InternalPutSlice(Force: boolean);
+procedure TFB30Array.InternalPutSlice(Force: boolean);
 begin
   with Firebird25ClientAPI do
      if (isc_array_put_slice(StatusVector, @(FDBHandle),@(FTRHandle),
@@ -72,21 +72,21 @@ begin
   SignalActivity;
 end;
 
-constructor TFB25Array.Create(aAttachment: TFBAttachment;
-  aTransaction: TFB25Transaction; aField: IArrayMetaData);
+constructor TFB30Array.Create(aAttachment: TFBAttachment;
+  aTransaction: TFB30Transaction; aField: IArrayMetaData);
 begin
   inherited Create(aAttachment,aTransaction,aField);
   FDBHandle := aAttachment.Handle;
   FTRHandle := aTransaction.Handle;
 end;
 
-constructor TFB25Array.Create(aAttachment: TFBAttachment;
-  aTransaction: TFB25Transaction; aField: IArrayMetaData; ArrayID: TISC_QUAD);
+constructor TFB30Array.Create(aAttachment: TFBAttachment;
+  aTransaction: TFB30Transaction; aField: IArrayMetaData; ArrayID: TISC_QUAD);
 begin
   inherited Create(aAttachment,aTransaction,aField,ArrayID);
   FDBHandle := aAttachment.Handle;
   FTRHandle := aTransaction.Handle;
-end;
+end;  *)
 
 end.
 

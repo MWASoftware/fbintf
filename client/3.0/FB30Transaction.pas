@@ -19,6 +19,7 @@ type
   protected
     function GetActivityIntf(att: IAttachment): IActivityMonitor; override;
   public
+    property TransactionIntf: Firebird.ITransaction read FTransaction;
     {ITransaction}
     function GetInTransaction: boolean; override;
     procedure PrepareForCommit; override;

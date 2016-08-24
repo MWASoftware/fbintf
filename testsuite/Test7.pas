@@ -26,12 +26,13 @@ const
     'Create Table TestData ('+
     'RowID Integer not null,'+
     'Title VarChar(32) Character Set UTF8,'+
+    'Dated TIMESTAMP, '+
     'Notes VarChar(64) Character Set ISO8859_1,'+
     'MyArray Integer [0:16],'+
     'Primary Key(RowID)'+
     ')';
 
-  sqlInsert = 'Insert into TestData(RowID,Title,Notes) Values(:RowID,:Title,:Notes)';
+  sqlInsert = 'Insert into TestData(RowID,Title,Dated,Notes) Values(:RowID,:Title,:Dated,:Notes)';
 
   sqlUpdate = 'Update TestData Set MyArray = ? Where RowID = 1';
 
@@ -56,6 +57,7 @@ begin
     ByName('rowid').AsInteger := 1;
     ByName('title').AsString := 'Blob Test ©€';
     ByName('Notes').AsString := 'Écoute moi';
+    ByName('Dated').AsDateTime := EncodeDate(2016,4,1) + EncodeTime(9,30,0,100);
   end;
   Statement.Execute;
   Statement := Attachment.Prepare(Transaction,'Select * from TestData');

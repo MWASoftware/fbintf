@@ -168,8 +168,8 @@ var Bounds: TArrayBounds;
     i,j: integer;
 begin
   write('Array: ');
-  Bounds := ar.GetBounds;
-  case ar.GetDimensions of
+  Bounds := ar.GetMetaData.GetBounds;
+  case ar.GetMetaData.GetDimensions of
   1:
     begin
       for i := Bounds[0].LowerBound to Bounds[0].UpperBound do

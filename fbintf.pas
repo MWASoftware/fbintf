@@ -11,7 +11,7 @@ uses
   FB25Transaction, FB25Attachment, FB25Blob, IBExternals, IBErrorCodes, 
   FB25Events, IBUtils, FB25Statement, FB25Services, FB25Array, 
   FBActivityMonitor, FBOutputBlock, FBParamBlock, FBSQLData, FB30ClientAPI, 
-  FB30Attachment, FB30Transaction, FBTransaction;
+  FB30Attachment, FB30Transaction, FBTransaction, FB30Blob, FB30Array;
 
 implementation
 

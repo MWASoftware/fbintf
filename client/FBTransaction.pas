@@ -10,7 +10,7 @@ uses
 type
   { TFBTransaction }
 
-  TFBTransaction = class(TActivityReporter)
+  TFBTransaction = class(TActivityReporter, IActivityMonitor,ITransaction)
   private
     function GenerateTPB(sl: array of byte): ITPB;
   protected

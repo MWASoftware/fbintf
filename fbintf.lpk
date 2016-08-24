@@ -10,7 +10,7 @@
         <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
     </CompilerOptions>
-    <Files Count="24">
+    <Files Count="27">
       <Item1>
         <Filename Value="client/3.0/firebird/Firebird.pas"/>
         <UnitName Value="Firebird"/>
@@ -107,6 +107,19 @@
         <Filename Value="client/FBTransaction.pas"/>
         <UnitName Value="FBTransaction"/>
       </Item24>
+      <Item25>
+        <Filename Value="client/3.0/FB30Blob.pas"/>
+        <UnitName Value="FB30Blob"/>
+      </Item25>
+      <Item26>
+        <Filename Value="client/3.0/FB30Array.pas"/>
+        <UnitName Value="FB30Array"/>
+      </Item26>
+      <Item27>
+        <Filename Value="client/FBArray.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="FB25Array"/>
+      </Item27>
     </Files>
     <RequiredPkgs Count="1">
       <Item1>

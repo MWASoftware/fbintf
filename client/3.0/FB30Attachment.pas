@@ -11,7 +11,7 @@ type
 
   { TFBAttachment }
 
-  TFBAttachment = class(TInterfaceParent,IAttachment, IActivityMonitor)
+  TFBAttachment = class(TActivityHandler,IAttachment, IActivityMonitor)
   private
     FAttachment: Firebird.IAttachment;
     FSQLDialect: integer;
@@ -19,7 +19,6 @@ type
     FDatabaseName: string;
     FDPB: IDPB;
     FRaiseExceptionOnConnectError: boolean;
-    FActivity: boolean;
   public
     constructor Create(DatabaseName: string; DPB: IDPB;
           RaiseExceptionOnConnectError: boolean);
@@ -68,14 +67,11 @@ type
     function CreateArray(transaction: ITransaction; RelationName, ColumnName: string): IArray;
 
     {Database Information}
+    function GetSQLDialect: integer;
     function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: string): IBlobMetaData;
     function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: string): IArrayMetaData;
     function GetDBInformation(Requests: array of byte): IDBInformation; overload;
     function GetDBInformation(Request: byte): IDBInformation; overload;
-    function HasActivity: boolean;
-
-    {IActivityMonitor}
-    procedure SignalActivity;
   end;
 
 implementation
@@ -269,6 +265,11 @@ begin
 
 end;
 
+function TFBAttachment.GetSQLDialect: integer;
+begin
+  Result := FSQLDialect;
+end;
+
 function TFBAttachment.GetBlobMetaData(Transaction: ITransaction; tableName,
   columnName: string): IBlobMetaData;
 begin
@@ -290,17 +291,6 @@ end;
 function TFBAttachment.GetDBInformation(Request: byte): IDBInformation;
 begin
 
-end;
-
-function TFBAttachment.HasActivity: boolean;
-begin
-  Result := FActivity;
-  FActivity := false;
-end;
-
-procedure TFBAttachment.SignalActivity;
-begin
-  FActivity := true;
 end;
 
 end.

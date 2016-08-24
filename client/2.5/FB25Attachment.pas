@@ -64,6 +64,7 @@ type
 
     {Database Information}
 
+    function GetSQLDialect: integer;
     function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: string): IBlobMetaData;
     function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: string): IArrayMetaData;
     function GetDBInformation(Requests: array of byte): IDBInformation; overload;
@@ -320,12 +321,19 @@ end;
 function TFBAttachment.OpenArray(transaction: ITransaction; RelationName, ColumnName: string;
   ArrayID: TISC_QUAD): IArray;
 begin
-  Result := TFBArray.Create(self,transaction as TFB25Transaction,RelationName,ColumnName,ArrayID);
+  Result := TFB25Array.Create(self,transaction as TFB25Transaction,
+                    GetArrayMetaData(transaction,RelationName,ColumnName),ArrayID);
 end;
 
 function TFBAttachment.CreateArray(transaction: ITransaction; RelationName, ColumnName: string): IArray;
 begin
-  Result := TFBArray.Create(self,transaction as TFB25Transaction,RelationName,ColumnName);
+  Result := TFB25Array.Create(self,transaction as TFB25Transaction,
+                    GetArrayMetaData(transaction,RelationName,ColumnName));
+end;
+
+function TFBAttachment.GetSQLDialect: integer;
+begin
+  Result := FSQLDialect;
 end;
 
 function TFBAttachment.GetBlobMetaData(Transaction: ITransaction; tableName,
@@ -337,7 +345,7 @@ end;
 function TFBAttachment.GetArrayMetaData(Transaction: ITransaction; tableName,
   columnName: string): IArrayMetaData;
 begin
-  Result := TFBArrayMetaData.Create(self,Transaction as TFB25Transaction,tableName,columnName);
+  Result := TFB25ArrayMetaData.Create(self,Transaction as TFB25Transaction,tableName,columnName);
 end;
 
 function TFBAttachment.GetDBInformation(Requests: array of byte

@@ -162,7 +162,8 @@ type
       ibxArrayBoundsCantIncrease ,
       ibxeStatementNotPrepared,
       ibxeInterfaceOutofDate,
-      ibxeUnexpectedDatabaseInfoResp
+      ibxeUnexpectedDatabaseInfoResp,
+      ibxeInvalidBlobMetaData
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;
@@ -348,6 +349,7 @@ resourcestring
   SStatementNotPrepared = 'The Statement has not been prepared';
   SInterfaceOutofDate = 'This interface is no longer up-to-date';
   SUnexpectedDatabaseInfoResp = 'Unexpected Database Information Response';
+  SInvalidBlobMetaData = 'Unable to Access Blob Meta Data';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -495,7 +497,8 @@ const
     SArrayBoundsCantIncrease,
     SStatementNotPrepared,
     SInterfaceOutofDate,
-    SUnexpectedDatabaseInfoResp
+    SUnexpectedDatabaseInfoResp,
+    SInvalidBlobMetaData
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;

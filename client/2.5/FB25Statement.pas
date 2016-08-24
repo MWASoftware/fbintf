@@ -89,6 +89,7 @@ type
     FStatement: IStatement;         {Keep reference to ensure statement not discarded}
     FPrepareSeqNo: integer;
     FBlobMetaData: IBlobMetaData;
+    FArrayMetaData: IArrayMetaData;
     function GetParent: TIBXSQLDA;
   protected
     procedure CheckActive; override;
@@ -382,7 +383,7 @@ end;
 
 implementation
 
-uses IBUtils, FBMessages, FB25Blob, variants, IBErrorCodes, FB25Array;
+uses IBUtils, FBMessages, FB25Blob, variants, IBErrorCodes, FBArray, FB25Array;
 
 type
 
@@ -778,7 +779,7 @@ begin
   else
   begin
     if FIBXSQLVAR.FArray = nil then
-      FIBXSQLVAR.FArray := TFBArray.Create(self);
+      FIBXSQLVAR.FArray := TFB25Array.Create(GetAttachment,GetTransaction,GetArrayMetaData,AsQuad);
     Result := FIBXSQLVAR.FArray;
   end;
 end;
@@ -997,7 +998,7 @@ begin
   if not FIBXSQLVAR.FUniqueName then
     IBError(ibxeDuplicateParamName,[FIBXSQLVAR.FName]);
 
-  SetAsQuad((AnArray as TFBArray).GetArrayID);
+  SetAsQuad((AnArray as TFB25Array).GetArrayID);
 end;
 
 procedure TSQLParam.Changed;
@@ -1457,15 +1458,17 @@ begin
   if GetSQLType <> SQL_ARRAY then
     IBError(ibxeInvalidDataConversion,[nil]);
 
-  Result := TFBArrayMetaData.Create(Parent.Statement.FAttachment,
-                Parent.Statement.FTransaction,
-                GetRelationName,GetSQLName);
+  if FArrayMetaData = nil then
+    FArrayMetaData := TFB25ArrayMetaData.Create(Parent.Statement.FAttachment,
+                  Parent.Statement.FTransaction,
+                  GetRelationName,GetSQLName);
+  Result := FArrayMetaData;
 end;
 
 function TColumnMetaData.GetBlobMetaData: IBlobMetaData;
 begin
-   CheckActive;
- if GetSQLType <> SQL_BLOB then
+  CheckActive;
+  if GetSQLType <> SQL_BLOB then
     IBError(ibxeInvalidDataConversion,[nil]);
 
   Result := TFBBlobMetaData.Create(Parent.Statement.FAttachment,
@@ -2278,7 +2281,7 @@ function TFBStatement.CreateArray(column: IColumnMetaData): IArray;
 begin
   if column.SQLType <> SQL_ARRAY then
     IBError(ibxeNotAnArray,[nil]);
-  Result := TFBArray.Create(column.GetArrayMetaData);
+  Result := TFB25Array.Create(FAttachment,FTransaction,column.GetArrayMetaData);
 end;
 
 function TFBStatement.CreateArray(columnName: string): IArray;
