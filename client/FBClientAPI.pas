@@ -62,7 +62,7 @@ type
 
     {Encode/Decode}
     procedure EncodeInteger(aValue: integer; len: integer; buffer: PChar);
-    function DecodeInteger(bufptr: PChar; len: integer): short; virtual; abstract;
+    function DecodeInteger(bufptr: PChar; len: short): integer; virtual; abstract;
     procedure SQLEncodeDate(aDate: TDateTime; bufptr: PChar); virtual; abstract;
     function SQLDecodeDate(byfptr: PChar): TDateTime; virtual; abstract;
     procedure SQLEncodeTime(aTime: TDateTime; bufptr: PChar); virtual; abstract;
@@ -77,7 +77,7 @@ type
     function GetLibraryName: string;
   end;
 
-var FirebirdClientAPI: TFBClient;
+const FirebirdClientAPI: TFBClientAPI = nil;
 
 implementation
 

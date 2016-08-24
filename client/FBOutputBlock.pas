@@ -15,7 +15,7 @@ interface
 {Provides common handling for the DB Info results, SQL Info and Service Response Block}
 
 uses
-  Classes, SysUtils,  FB25ClientAPI, IB, FBActivityMonitor;
+  Classes, SysUtils,  FBClientAPI, IB, FBActivityMonitor;
 
 const
   DefaultBufferSize = 32000;
@@ -172,7 +172,7 @@ begin
   if (index >= 0) and (index < Length(FItemData^.FSubItems)) then
     Result := FItemData^.FSubItems[index]
   else
-  with Firebird25ClientAPI do
+  with FirebirdClientAPI do
     IBError(ibxeOutputBlockIndexError,[index]);
 end;
 
@@ -232,15 +232,15 @@ begin
   with FItemData^ do
   case FDataType of
   dtIntegerFixed:
-    with Firebird25ClientAPI do
-      Result := isc_portable_integer(FBufPtr+1,4);
+    with FirebirdClientAPI do
+      Result := DecodeInteger(FBufPtr+1,4);
 
   dtByte,
   dtInteger:
-    with Firebird25ClientAPI do
+    with FirebirdClientAPI do
     begin
-      len := isc_portable_integer(FBufPtr+1,2);
-      Result := isc_portable_integer(FBufPtr+3,len);
+      len := DecodeInteger(FBufPtr+1,2);
+      Result := DecodeInteger(FBufPtr+3,len);
     end;
   else
     IBError(ibxeOutputBlockTypeError,[nil]);
@@ -269,8 +269,8 @@ begin
     end;
   dtString2:
     begin
-      with Firebird25ClientAPI do
-        len := isc_portable_integer(FBufPtr+1,2);
+      with FirebirdClientAPI do
+        len := DecodeInteger(FBufPtr+1,2);
       SetString(Result,FBufPtr+3,len,CP_ACP);
     end;
   else
@@ -342,8 +342,8 @@ begin
     end
     else
     begin
-      with Firebird25ClientAPI do
-        FDataLength := isc_portable_integer(FBufPtr+1, 2);
+      with FirebirdClientAPI do
+        FDataLength := DecodeInteger(FBufPtr+1, 2);
       FSize := FDataLength + 3;
     end;
     SetLength(FSubItems,0);
@@ -357,8 +357,8 @@ begin
   begin
     FDataType := dtString2;
     FBufPtr := BufPtr;
-    with Firebird25ClientAPI do
-      FDataLength := isc_portable_integer(FBufPtr+1, 2);
+    with FirebirdClientAPI do
+      FDataLength := DecodeInteger(FBufPtr+1, 2);
     FSize := FDataLength + 3;
     SetLength(FSubItems,0);
   end;
@@ -397,8 +397,8 @@ begin
   begin
     FDataType := dtBytes;
     FBufPtr := BufPtr;
-    with Firebird25ClientAPI do
-      FDataLength := isc_portable_integer(FBufPtr+1, 2);
+    with FirebirdClientAPI do
+      FDataLength := DecodeInteger(FBufPtr+1, 2);
     FSize := FDataLength + 3;
     SetLength(FSubItems,0);
   end;
@@ -563,11 +563,11 @@ begin
     SetLength(Result,TableCounts);
     P := FBufPtr + 3;
     for i := 0 to TableCounts -1 do
-    with Firebird25ClientAPI do
+    with FirebirdClientAPI do
     begin
-      Result[i].TableID := isc_portable_integer(P,2);
+      Result[i].TableID := DecodeInteger(P,2);
       Inc(P,2);
-      Result[i].Count := isc_portable_integer(P,4);
+      Result[i].Count := DecodeInteger(P,4);
       Inc(P,4);
     end;
   end
@@ -596,8 +596,8 @@ begin
   Result := inherited AddSpecialItem(BufPtr);
   with Result^ do
   begin
-    with Firebird25ClientAPI do
-      FDataLength := isc_portable_integer(FBufPtr+1,2);
+    with FirebirdClientAPI do
+      FDataLength := DecodeInteger(FBufPtr+1,2);
     FSize := FDataLength + 3;
   end;
 end;
@@ -707,8 +707,8 @@ begin
   group := byte(BufPtr^);
   if group in [isc_info_svc_get_users,isc_info_svc_limbo_trans] then
   begin
-    with Firebird25ClientAPI do
-       Result^.FSize := isc_portable_integer(P,2) + 3;
+    with FirebirdClientAPI do
+       Result^.FSize := DecodeInteger(P,2) + 3;
     Inc(P,2);
   end;
   with Result^ do
@@ -800,8 +800,8 @@ begin
   Result := inherited AddSpecialItem(BufPtr);
   with Result^ do
   begin
-    with Firebird25ClientAPI do
-      FDataLength := isc_portable_integer(FBufPtr+1, 2);
+    with FirebirdClientAPI do
+      FDataLength := DecodeInteger(FBufPtr+1, 2);
 
     P := FBufPtr + 3; {skip length bytes}
     i := 0;

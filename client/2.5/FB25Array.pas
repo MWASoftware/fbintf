@@ -42,8 +42,6 @@ type
    FBufPtr: PChar;
    FArray: TFBArray;
   protected
-   function GetAttachment: TFBAttachment; override;
-   function GetTransaction: TFB25Transaction; override;
    function GetSQLDialect: integer; override;
    procedure Changed; override;
    function SQLData: PChar; override;
@@ -152,16 +150,6 @@ implementation
 uses FBMessages;
 
 { TFBArrayElement }
-
-function TFBArrayElement.GetAttachment: TFBAttachment;
-begin
-  Result := FArray.GetAttachment as TFBAttachment;
-end;
-
-function TFBArrayElement.GetTransaction: TFB25Transaction;
-begin
-  Result := FArray.GetTransaction as TFB25Transaction;
-end;
 
 function TFBArrayElement.GetSQLDialect: integer;
 begin

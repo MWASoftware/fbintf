@@ -134,25 +134,6 @@ implementation
 uses FBMessages, dynlibs, FB25Attachment, FB25Transaction, FB25Services, FBParamBlock,
   IBUtils;
 
-type
-  { C Date/Time Structure }
-  TCTimeStructure = record
-    tm_sec : integer;   { Seconds }
-    tm_min : integer;   { Minutes }
-    tm_hour : integer;  { Hour (0--23) }
-    tm_mday : integer;  { Day of month (1--31) }
-    tm_mon : integer;   { Month (0--11) }
-    tm_year : integer;  { Year (calendar year minus 1900) }
-    tm_wday : integer;  { Weekday (0--6) Sunday = 0) }
-    tm_yday : integer;  { Day of year (0--365) }
-    tm_isdst : integer; { 0 if daylight savings time is not in effect) }
-    tm_gmtoff: longint;
-    tm_zone: PChar;
-  end;
-  PCTimeStructure = ^TCTimeStructure;
-  TM              = TCTimeStructure;
-  PTM             = ^TM;
-
 { Stubs for 6.0 only functions }
 function isc_rollback_retaining_stub(status_vector   : PISC_STATUS;
               tran_handle     : PISC_TR_HANDLE):
@@ -498,6 +479,7 @@ end;
 function TFB25ClientAPI.SQLDecodeTime(bufptr: PChar): TDateTime;
 var
   tm_date: TCTimeStructure;
+  msecs: Word;
 begin
   isc_decode_sql_time(PISC_TIME(bufptr), @tm_date);
   try
@@ -534,6 +516,7 @@ end;
 function TFB25ClientAPI.SQLDecodeDateTime(bufptr: PChar): TDateTime;
 var
   tm_date: TCTimeStructure;
+  msecs: Word;
 begin
   isc_decode_date(PISC_QUAD(bufptr), @tm_date);
   try
@@ -550,6 +533,7 @@ begin
     on E: EConvertError do begin
       IBError(ibxeInvalidDataConversion, [nil]);
     end;
+  end;
 end;
 
 end.

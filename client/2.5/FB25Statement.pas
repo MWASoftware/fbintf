@@ -97,8 +97,8 @@ type
 
   public
     constructor Create(aIBXSQLVAR: TIBXSQLVAR);
-    function GetAttachment: TFBAttachment; override;
-    function GetTransaction: TFB25Transaction; override;
+    function GetAttachment: TFBAttachment;
+    function GetTransaction: TFB25Transaction; virtual;
     function GetSQLDialect: integer; override;
     property Parent: TIBXSQLDA read GetParent;
 
@@ -133,8 +133,10 @@ type
     procedure CheckActive; override;
   public
     function GetAsArray: IArray;
-    function GetAsBlob: IBlob; override;
-  end;
+    function GetAsBlob: IBlob;
+    function GetAsString: String; override;
+    property AsBlob: IBlob read GetAsBlob;
+ end;
 
   TIBXINPUTSQLDA = class;
 
@@ -146,6 +148,7 @@ type
   private
     procedure InternalSetIsNull(Value: Boolean);
     procedure InternalSetIsNullable(Value: Boolean);
+    procedure InternalSetAsString(Value: String);
   protected
     procedure CheckActive; override;
     procedure Changed; override;
@@ -175,9 +178,10 @@ type
     procedure SetAsShort(Value: Short);
     procedure SetAsString(Value: String);  override;
     procedure SetAsVariant(Value: Variant);
-    procedure SetAsBlob(Value: IBlob);
+    procedure SetAsBlob(aValue: IBlob);
     procedure SetAsQuad(Value: TISC_QUAD);
 
+    property AsBlob: IBlob read GetAsBlob write SetAsBlob;
     property IsNullable: Boolean read GetIsNullable write SetIsNullable;
   end;
 
@@ -786,8 +790,44 @@ begin
     Result := FIBXSQLVAR.FBlob
   else
   begin
-    Result := inherited GetAsBlob;
+    if SQLType <>  SQL_BLOB then
+        IBError(ibxeInvalidDataConversion, [nil]);
+    if IsNull then
+      Result := nil
+    else
+      Result := TFBBlob.Create(GetAttachment,GetTransaction,AsQuad);
     FIBXSQLVAR.FBlob := Result;
+  end;
+end;
+
+function TIBSQLData.GetAsString: String;
+var
+  ss: TStringStream;
+  b: TFBBlob;
+begin
+  CheckActive;
+  Result := '';
+  { Check null, if so return a default string }
+  if not IsNull then
+  case SQLType of
+    SQL_ARRAY:
+      result := '(Array)'; {do not localize}
+    SQL_BLOB: begin
+      ss := TStringStream.Create('');
+      try
+        b := TFBBlob.Create(GetAttachment,GetTransaction,AsQuad);
+        try
+          b.SaveToStream(ss);
+        finally
+          b.Free;
+        end;
+        Result := ss.DataString;
+      finally
+        ss.Free;
+      end;
+    end;
+    else
+      Result := inherited GetAsString;
   end;
 end;
 
@@ -831,6 +871,32 @@ begin
       ReallocMem(FXSQLVAR^.sqlind, 0);
     end;
   end;
+end;
+
+procedure TSQLParam.InternalSetAsString(Value: String);
+var
+  ss: TStringStream;
+  b: TFBBlob;
+begin
+  CheckActive;
+  if IsNullable then
+    IsNull := False;
+  if (SQLTYPE = SQL_BLOB) then
+  begin
+    ss := TStringStream.Create(Value);
+    try
+      b := TFBBlob.Create(GetAttachment,GetTransaction);
+      try
+        b.LoadFromStream(ss);
+      finally
+        b.Close;
+      end;
+    finally
+      ss.Free;
+    end;
+  end
+  else
+    inherited SetAsString(Value);
 end;
 
 procedure TSQLParam.CheckActive;
@@ -1109,13 +1175,13 @@ var i: integer;
 begin
   with FIBXSQLVAR do
   if FUniqueName then
-    inherited SetAsString(Value)
+    InternalSetAsString(Value)
   else
   begin
     for i := 0 to FParent.FCount - 1 do
       with (FParent as TIBXINPUTSQLDA)[i] do
       if FName = self.FIBXSQLVAR.FName then
-        inherited SetAsString(Value);
+        InternalSetAsString(Value);
   end;
 end;
 
@@ -1134,12 +1200,15 @@ begin
   end;
 end;
 
-procedure TSQLParam.SetAsBlob(Value: IBlob);
+procedure TSQLParam.SetAsBlob(aValue: IBlob);
 begin
   with FIBXSQLVAR do
   if not FUniqueName then
     IBError(ibxeDuplicateParamName,[FName]);
-  inherited SetAsBlob(Value);
+  CheckActive;
+  aValue.Close;
+  AsQuad := aValue.GetBlobID;
+  Changed;
 end;
 
 procedure TSQLParam.SetAsQuad(Value: TISC_QUAD);

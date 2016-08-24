@@ -1,11 +1,11 @@
 unit FB30ClientAPI;
 
-{$mode objfpc}{$H+}
+{$mode delphi}
 
 interface
 
 uses
-  Classes, SysUtils, FBClientAPI, Firebird, IB;
+  Classes, SysUtils, FBClientAPI, Firebird, IB, IBExternals;
 
 type
 
@@ -64,16 +64,14 @@ type
     function GetServiceManager(ServerName: string; Protocol: TProtocol; SPB: ISPB): IServiceManager;
 
     {Information}
-    function IsEmbeddedServer: boolean;
-    function GetLibraryName: string;
     function HasServiceAPI: boolean;
     function HasRollbackRetaining: boolean;
     function GetImplementationVersion: string;
 
     {Encode/Decode}
-    function DecodeInteger(bufptr: PChar; len: integer): short; override;
+    function DecodeInteger(bufptr: PChar; len: short): integer; override;
     procedure SQLEncodeDate(aDate: TDateTime; bufptr: PChar); override;
-    function SQLDecodeDate(byfptr: PChar): TDateTime; override;
+    function SQLDecodeDate(bufptr: PChar): TDateTime; override;
     procedure SQLEncodeTime(aTime: TDateTime; bufptr: PChar); override;
     function SQLDecodeTime(bufptr: PChar): TDateTime;  override;
     procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PChar); override;
@@ -88,11 +86,15 @@ var Firebird30ClientAPI: TFB30ClientAPI;
 
 implementation
 
-uses FBParamBlock, FB30Attachment;
+uses FBParamBlock, FB30Attachment, dynlibs, FBMessages;
+
+type
+  PISC_DATE = ^ISC_DATE;
+  PISC_TIME = ^ISC_TIME;
 
 { TFB30Status }
 
-#function TFB30Status.InErrorState: boolean;
+function TFB30Status.InErrorState: boolean;
 begin
   with GetStatus do
     Result := ((getState and STATE_ERRORS) <> 0);
@@ -102,7 +104,7 @@ function TFB30Status.GetStatus: Firebird.IStatus;
 begin
   if FStatus = nil then
   with FOwner do
-    FStatus := MasterIntf.GetStatus;
+    FStatus := (FOwner as TFB30ClientAPI).MasterIntf.GetStatus;
   Result := FStatus;
 end;
 
@@ -200,32 +202,22 @@ begin
 
 end;
 
-function TFB30ClientAPI.IsEmbeddedServer: boolean;
-begin
-
-end;
-
-function TFB30ClientAPI.GetLibraryName: string;
-begin
-
-end;
-
 function TFB30ClientAPI.HasServiceAPI: boolean;
 begin
-
+  Result := true;
 end;
 
 function TFB30ClientAPI.HasRollbackRetaining: boolean;
 begin
-
+  Result := true;
 end;
 
 function TFB30ClientAPI.GetImplementationVersion: string;
 begin
-
+  Result := Format('3.%d',[UtilIntf.GetClientVersion]);
 end;
 
-function TFB30ClientAPI.DecodeInteger(bufptr: PChar; len: integer): short;
+function TFB30ClientAPI.DecodeInteger(bufptr: PChar; len: short): integer;
 var P: PChar;
 begin
   Result := 0;
@@ -245,11 +237,11 @@ begin
    PISC_Date(Bufptr)^ := UtilIntf.encodeDate(Yr, Mn, Dy);
 end;
 
-function TFB30ClientAPI.SQLDecodeDate(byfptr: PChar): TDateTime;
+function TFB30ClientAPI.SQLDecodeDate(bufptr: PChar): TDateTime;
 var
   Yr, Mn, Dy: Word;
 begin
-  UtilIntf.decodeDate(PISC_DATE(bufptr)^,Yr, Mn, Dy);
+  UtilIntf.decodeDate(PISC_DATE(bufptr)^,@Yr, @Mn, @Dy);
   try
     result := EncodeDate(Word(Yr + 1900), Mn,Dy);
   except
@@ -257,28 +249,42 @@ begin
       IBError(ibxeInvalidDataConversion, [nil]);
     end;
   end;
-eend;
+end;
 
 procedure TFB30ClientAPI.SQLEncodeTime(aTime: TDateTime; bufptr: PChar);
 var
   Hr, Mt, S, Ms: Word;
 begin
-
+  DecodeTime(aTime, Hr, Mt, S, Ms);
+  PISC_TIME(bufptr)^ :=  UtilIntf.encodeTime(Hr, Mt, S, Ms*10);
 end;
 
 function TFB30ClientAPI.SQLDecodeTime(bufptr: PChar): TDateTime;
+var
+  Hr, Mt, S, Ms: Word;
 begin
-
+  UtilIntf.decodeTime(PISC_TIME(bufptr)^,@Hr, @Mt, @S, @Ms);
+  try
+    Result := EncodeTime(Hr, Mt, S, Ms div 10);
+  except
+    on E: EConvertError do begin
+      IBError(ibxeInvalidDataConversion, [nil]);
+    end;
+  end;
 end;
 
 procedure TFB30ClientAPI.SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PChar);
 begin
-
+  SQLEncodeDate(aDateTime,bufPtr);
+  Inc(bufptr,sizeof(ISC_DATE));
+  SQLEncodeTime(aDateTime,bufPtr);
 end;
 
 function TFB30ClientAPI.SQLDecodeDateTime(bufptr: PChar): TDateTime;
 begin
-
+  Result := SQLDecodeDate(bufPtr);
+  Inc(bufptr,sizeof(ISC_DATE));
+  Result += SQLDecodeTime(bufPtr);
 end;
 
 end.

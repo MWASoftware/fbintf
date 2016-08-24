@@ -7,7 +7,7 @@ interface
 {Provides common handling for the DPB, TPB, SPB and Service Request Block (SRB)}
 
 uses
-  Classes, SysUtils, IB, FB25ClientAPI, FBActivityMonitor;
+  Classes, SysUtils, IB, FBClientAPI, FBActivityMonitor;
 
 type
   TParamDataType = (dtString, dtString2, dtByte,dtInteger,dtnone);
@@ -155,8 +155,8 @@ function TParamBlockItem.getAsInteger: integer;
 begin
   with FParamData^ do
   if FDataType =  dtInteger then
-  with Firebird25ClientAPI do
-    Result := isc_portable_integer(FBufPtr+1,4)
+  with FirebirdClientAPI do
+    Result := DecodeInteger(FBufPtr+1,4)
   else
     IBError(ibxePBParamTypeError,[nil]);
 end;
@@ -184,8 +184,8 @@ begin
     end;
   dtString2:
     begin
-      with Firebird25ClientAPI do
-        len := isc_portable_integer(FBufPtr+1,2);
+      with FirebirdClientAPI do
+        len := DecodeInteger(FBufPtr+1,2);
       SetString(Result,FBufPtr+3,len);
     end;
     else
@@ -220,7 +220,7 @@ begin
   begin
     if FBufLength <> 5 then
       FOwner.UpdateRequestItemSize(self,5);
-    with Firebird25ClientAPI do
+    with FirebirdClientAPI do
       EncodeInteger(aValue,4,FBufPtr+1);
     FDataType := dtInteger;
   end;
@@ -246,7 +246,7 @@ begin
   begin
     len := Length(aValue);
     FOwner.UpdateRequestItemSize(self,len + 3);
-    with Firebird25ClientAPI do
+    with FirebirdClientAPI do
       EncodeInteger(len,2,FBufPtr+1);
     Move(aValue[1],(FBufPtr+3)^,len);
     FDataType := dtString2;

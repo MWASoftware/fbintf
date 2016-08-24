@@ -16,8 +16,7 @@ unit FBSQLData;
 interface
 
 uses
-  Classes, SysUtils, IBExternals, IBHeader, IB,  FB25Attachment, FB25Transaction,
-  FBActivityMonitor;
+  Classes, SysUtils, IBExternals, IBHeader, IB,  FBActivityMonitor;
 
 type
 
@@ -31,8 +30,6 @@ type
      procedure SetAsInteger(AValue: Integer);
   protected
      procedure CheckActive; virtual;
-     function GetAttachment: TFBAttachment; virtual; abstract;
-     function GetTransaction: TFB25Transaction; virtual; abstract;
      function GetSQLDialect: integer; virtual; abstract;
      procedure Changed; virtual;
      function SQLData: PChar; virtual; abstract;
@@ -62,7 +59,6 @@ type
      function GetIsNull: Boolean; virtual;
      function getIsNullable: boolean; virtual;
      function GetAsVariant: Variant;
-     function GetAsBlob: IBlob; virtual;
      function GetModified: boolean; virtual;
      procedure SetAsBoolean(AValue: boolean);
      procedure SetAsCurrency(Value: Currency);
@@ -78,7 +74,6 @@ type
      procedure SetAsShort(Value: Short);
      procedure SetAsString(Value: String); virtual;
      procedure SetAsVariant(Value: Variant);
-     procedure SetAsBlob(Value: IBlob);
      procedure SetIsNull(Value: Boolean);  virtual;
      procedure SetIsNullable(Value: Boolean);  virtual;
      procedure SetName(aValue: string); virtual;
@@ -97,7 +92,6 @@ type
      property AsShort: Short read GetAsShort write SetAsShort;
      property AsString: String read GetAsString write SetAsString;
      property AsVariant: Variant read GetAsVariant write SetAsVariant;
-     property AsBlob: IBlob read GetAsBlob write SetAsBlob;
      property Modified: Boolean read getModified;
      property IsNull: Boolean read GetIsNull write SetIsNull;
      property IsNullable: Boolean read GetIsNullable write SetIsNullable;
@@ -107,7 +101,7 @@ type
 
 implementation
 
-uses FBMessages, FB25Blob, FB25ClientAPI, variants;
+uses FBMessages, FBClientAPI, variants;
 
 function TSQLDataItem.AdjustScale(Value: Int64; aScale: Integer): Double;
 var
@@ -327,7 +321,7 @@ begin
   CheckActive;
   result := 0;
   if not IsNull then
-    with Firebird25ClientAPI do
+    with FirebirdClientAPI do
     case SQLType of
       SQL_TEXT, SQL_VARYING: begin
         try
@@ -337,47 +331,11 @@ begin
         end;
       end;
       SQL_TYPE_DATE:
-      begin
-        isc_decode_sql_date(PISC_DATE(SQLData), @tm_date);
-        try
-          result := EncodeDate(Word(tm_date.tm_year + 1900), Word(tm_date.tm_mon + 1),
-                               Word(tm_date.tm_mday));
-        except
-          on E: EConvertError do begin
-            IBError(ibxeInvalidDataConversion, [nil]);
-          end;
-        end;
-      end;
-      SQL_TYPE_TIME: begin
-        isc_decode_sql_time(PISC_TIME(SQLData), @tm_date);
-        try
-          msecs :=  (PISC_TIME(SQLData)^ mod 10000) div 10;
-          result := EncodeTime(Word(tm_date.tm_hour), Word(tm_date.tm_min),
-                               Word(tm_date.tm_sec), msecs)
-        except
-          on E: EConvertError do begin
-            IBError(ibxeInvalidDataConversion, [nil]);
-          end;
-        end;
-      end;
-      SQL_TIMESTAMP: begin
-        isc_decode_date(PISC_QUAD(SQLData), @tm_date);
-        try
-          result := EncodeDate(Word(tm_date.tm_year + 1900), Word(tm_date.tm_mon + 1),
-                              Word(tm_date.tm_mday));
-          msecs := (PISC_TIMESTAMP(SQLData)^.timestamp_time mod 10000) div 10;
-          if result >= 0 then
-            result := result + EncodeTime(Word(tm_date.tm_hour), Word(tm_date.tm_min),
-                                          Word(tm_date.tm_sec), msecs)
-          else
-            result := result - EncodeTime(Word(tm_date.tm_hour), Word(tm_date.tm_min),
-                                          Word(tm_date.tm_sec), msecs)
-        except
-          on E: EConvertError do begin
-            IBError(ibxeInvalidDataConversion, [nil]);
-          end;
-        end;
-      end;
+        result := SQLDecodeDate(SQLData);
+      SQL_TYPE_TIME:
+        result := SQLDecodeTime(SQLData);
+      SQL_TIMESTAMP:
+        result := SQLDecodeDateTime(SQLData);
       else
         IBError(ibxeInvalidDataConversion, [nil]);
     end;
@@ -497,8 +455,6 @@ function TSQLDataItem.GetAsString: String;
 var
   sz: PChar;
   str_len: Integer;
-  ss: TStringStream;
-  b: TFBBlob;
   {$IFDEF HAS_ANSISTRING_CODEPAGE}
   rs: RawByteString;
   {$ENDIF}
@@ -507,30 +463,14 @@ begin
   result := '';
   { Check null, if so return a default string }
   if not IsNull then
-  with Firebird25ClientAPI do
+  with FirebirdClientAPI do
     case SQLType of
-      SQL_ARRAY:
-        result := '(Array)'; {do not localize}
-      SQL_BLOB: begin
-        ss := TStringStream.Create('');
-        try
-          b := TFBBlob.Create(GetAttachment,GetTransaction,AsQuad);
-          try
-            b.SaveToStream(ss);
-          finally
-            b.Free;
-          end;
-          result := ss.DataString;
-        finally
-          ss.Free;
-        end;
-      end;
       SQL_TEXT, SQL_VARYING: begin
         sz := SQLData;
         if (SQLType = SQL_TEXT) then
           str_len := DataLength
         else begin
-          str_len := isc_portable_integer(SQLData, 2);
+          str_len := DecodeInteger(SQLData, 2);
           Inc(sz, 2);
         end;
         {$IFDEF HAS_ANSISTRING_CODEPAGE}
@@ -623,17 +563,6 @@ begin
     end;
 end;
 
-function TSQLDataItem.GetAsBlob: IBlob;
-begin
-  CheckActive;
-  if SQLType <>  SQL_BLOB then
-      IBError(ibxeInvalidDataConversion, [nil]);
-  if IsNull then
-    Result := nil
-  else
-    Result := TFBBlob.Create(GetAttachment,GetTransaction,AsQuad);
-end;
-
 function TSQLDataItem.GetModified: boolean;
 begin
   Result := false;
@@ -686,9 +615,6 @@ begin
 end;
 
 procedure TSQLDataItem.SetAsDate(Value: TDateTime);
-var
-   tm_date: TCTimeStructure;
-   Yr, Mn, Dy: Word;
 begin
   CheckActive;
   if GetSQLDialect < 3 then
@@ -701,25 +627,13 @@ begin
     IsNull := False;
 
   SQLType := SQL_TYPE_DATE;
-  DecodeDate(Value, Yr, Mn, Dy);
-  with tm_date do begin
-    tm_sec := 0;
-    tm_min := 0;
-    tm_hour := 0;
-    tm_mday := Dy;
-    tm_mon := Mn - 1;
-    tm_year := Yr - 1900;
-  end;
   DataLength := SizeOf(ISC_DATE);
-  with Firebird25ClientAPI do
-    isc_encode_sql_date(@tm_date, PISC_DATE(SQLData));
+  with FirebirdClientAPI do
+    SQLEncodeDate(Value,SQLData);
   Changed;
 end;
 
 procedure TSQLDataItem.SetAsTime(Value: TDateTime);
-var
-  tm_date: TCTimeStructure;
-  Hr, Mt, S, Ms: Word;
 begin
   CheckActive;
   if GetSQLDialect < 3 then
@@ -732,48 +646,22 @@ begin
     IsNull := False;
 
   SQLType := SQL_TYPE_TIME;
-  DecodeTime(Value, Hr, Mt, S, Ms);
-  with tm_date do begin
-    tm_sec := S;
-    tm_min := Mt;
-    tm_hour := Hr;
-    tm_mday := 0;
-    tm_mon := 0;
-    tm_year := 0;
-  end;
   DataLength := SizeOf(ISC_TIME);
-  with Firebird25ClientAPI do
-    isc_encode_sql_time(@tm_date, PISC_TIME(SQLData));
-  if Ms > 0 then
-    Inc(PISC_TIME(SQLData)^,Ms*10);
+  with FirebirdClientAPI do
+    SQLEncodeTime(Value,SQLData);
   Changed;
 end;
 
 procedure TSQLDataItem.SetAsDateTime(Value: TDateTime);
-var
-  tm_date: TCTimeStructure;
-  Yr, Mn, Dy, Hr, Mt, S, Ms: Word;
 begin
   CheckActive;
   if IsNullable then
     IsNull := False;
 
   SQLType := SQL_TIMESTAMP;
-  DecodeDate(Value, Yr, Mn, Dy);
-  DecodeTime(Value, Hr, Mt, S, Ms);
-  with tm_date do begin
-    tm_sec := S;
-    tm_min := Mt;
-    tm_hour := Hr;
-    tm_mday := Dy;
-    tm_mon := Mn - 1;
-    tm_year := Yr - 1900;
-  end;
   DataLength := SizeOf(TISC_QUAD);
-  with Firebird25ClientAPI do
-    isc_encode_date(@tm_date, PISC_QUAD(SQLData));
-  if Ms > 0 then
-    Inc(PISC_TIMESTAMP(SQLData)^.timestamp_time,Ms*10);
+  with FirebirdClientAPI do
+    SQLEncodeDateTime(Value,SQLData);
   Changed;
 end;
 
@@ -858,8 +746,6 @@ end;
 procedure TSQLDataItem.SetAsString(Value: String);
 var
    stype: Integer;
-   ss: TStringStream;
-   b: TFBBlob;
 
    procedure SetStringValue;
    var len: integer;
@@ -886,22 +772,9 @@ begin
   stype := SQLType;
   if (stype = SQL_TEXT) or (stype = SQL_VARYING) then
     SetStringValue
-  else begin
-    if (stype = SQL_BLOB) then
-    begin
-      ss := TStringStream.Create(Value);
-      try
-        b := TFBBlob.Create(GetAttachment,GetTransaction);
-        try
-          b.LoadFromStream(ss);
-        finally
-          b.Close;
-        end;
-      finally
-        ss.Free;
-      end;
-    end
-    else if Value = '' then
+  else
+  begin
+    if Value = '' then
       IsNull := True
     else if (stype = SQL_TIMESTAMP) or (stype = SQL_TYPE_DATE) or
       (stype = SQL_TYPE_TIME) then
@@ -939,14 +812,6 @@ begin
     varByRef, varDispatch, varError, varUnknown, varVariant:
       IBError(ibxeNotPermitted, [nil]);
   end;
-end;
-
-procedure TSQLDataItem.SetAsBlob(Value: IBlob);
-begin
-  CheckActive;
-  Value.Close;
-  AsQuad := Value.GetBlobID;
-  Changed;
 end;
 
 procedure TSQLDataItem.SetAsBoolean(AValue: boolean);
