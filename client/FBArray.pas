@@ -96,7 +96,6 @@ type
     FElement: TFBArrayElement;
     FElementIntf: IUnknown;
     FElementSize: integer;
-    procedure AllocateBuffer;
     procedure GetArraySlice;
     procedure PutArraySlice(Force: boolean=false);
     function GetOffset(index: array of integer): PChar;
@@ -105,6 +104,7 @@ type
     FBuffer: PChar;
     FBufSize: ISC_LONG;
     FArrayID: TISC_QUAD;
+    procedure AllocateBuffer; virtual;
     function GetArrayDesc: PISC_ARRAY_DESC;
     procedure InternalGetSlice; virtual; abstract;
     procedure InternalPutSlice(Force: boolean); virtual; abstract;

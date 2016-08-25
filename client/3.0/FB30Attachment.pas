@@ -13,7 +13,7 @@ type
 
   TFBAttachment = class(TActivityHandler,IAttachment, IActivityMonitor)
   private
-    FAttachment: Firebird.IAttachment;
+    FAttachmentIntf: Firebird.IAttachment;
     FSQLDialect: integer;
     FFirebirdAPI: IFirebirdAPI;
     FDatabaseName: string;
@@ -99,6 +99,8 @@ end;
 destructor TFBAttachment.Destroy;
 begin
   Disconnect(true);
+  if assigned(FAttachmentIntf) then
+    FAttachmentIntf.release;
   inherited Destroy;
 end;
 
@@ -111,7 +113,7 @@ procedure TFBAttachment.Connect;
 begin
   with Firebird30ClientAPI do
   begin
-    FAttachment := MasterIntf.getDispatcher.attachDatabase(StatusIntf,PAnsiChar(FDatabaseName),
+    FAttachmentIntf := MasterIntf.getDispatcher.attachDatabase(StatusIntf,PAnsiChar(FDatabaseName),
                          (FDPB as TDPB).getDataLength,
                          BytePtr((FDPB as TDPB).getBuffer));
     if FRaiseExceptionOnConnectError then Check4DataBaseError;
@@ -125,7 +127,7 @@ begin
   if IsConnected then
     with Firebird30ClientAPI do
     begin
-      FAttachment.Detach(StatusIntf);
+      FAttachmentIntf.Detach(StatusIntf);
       if not Force and InErrorState then
         IBDataBaseError;
       FAttachment := nil;
@@ -134,7 +136,7 @@ end;
 
 function TFBAttachment.IsConnected: boolean;
 begin
-  Result := FAttachment <> nil;
+  Result := FAttachmentIntf <> nil;
 end;
 
 procedure TFBAttachment.DropDatabase;
@@ -142,7 +144,7 @@ begin
   if IsConnected then
     with Firebird30ClientAPI do
     begin
-      FAttachment.dropDatabase(StatusIntf);
+      FAttachmentIntf.dropDatabase(StatusIntf);
       Check4DataBaseError;
       FAttachment := nil;
     end;

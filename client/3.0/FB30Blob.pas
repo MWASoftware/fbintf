@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, Firebird, IB, IBExternals, FBClientAPI, FB30ClientAPI, FB30Attachment,
   FB30Transaction, FBActivityMonitor;
 
-(*type
+type
 
    { TFBBlobMetaData }
 
@@ -72,11 +72,11 @@ uses
     procedure SaveToStream(S: TStream);
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
-  end;       *)
+  end;
 
 implementation
 
-(*uses IBErrorCodes, FBMessages, FB30Statement;
+uses FBMessages, FB30Statement;
 
 const
   sLookupBlobMetaData = 'Select F.RDB$FIELD_SUB_TYPE, F.RDB$SEGMENT_LENGTH, RDB$CHARACTER_SET_ID, F.RDB$FIELD_TYPE '+
@@ -87,11 +87,13 @@ const
 
 constructor TFBBlobMetaData.Create(Attachment: TFBAttachment;
   Transaction: TFB30Transaction; RelationName, ColumnName: string);
+var stmt: IStatement;
 begin
   inherited Create(Transaction);
   FRelationName := RelationName;
   FColumnName := ColumnName;
-  with TFBStatement.Create(Attachment,Transaction, sLookupBlobMetaData ,Attachment.SQLDialect) do
+  stmt := TFBStatement.Create(Attachment,Transaction, sLookupBlobMetaData ,Attachment.SQLDialect);
+  with stmt do
   begin
     SQLParams[0].AsString := RelationName;
     SQLParams[1].AsString := ColumnName;
@@ -398,7 +400,7 @@ end;
 function TFBBlob.GetTransaction: ITransaction;
 begin
   Result := FTransaction;
-end;*)
+end;
 
 end.
 

@@ -30,6 +30,7 @@ type
     fb_get_master_interface: Tfb_get_master_interface;
     FMaster: Firebird.IMaster;
     FUtil: Firebird.IUtil;
+    FProvider: Firebird.IProvider;
     FStatus: TFB30Status;
     FStatusIntf: IStatus;   {Keep a reference to the interface - automatic destroy
                              when this class is freed and last reference to IStatus
@@ -38,6 +39,7 @@ type
     procedure LoadInterface; override;
   public
     constructor Create;
+    destructor Destroy; override;
 
     function StatusIntf: Firebird.IStatus;
     procedure Check4DataBaseError;
@@ -123,6 +125,7 @@ begin
   begin
     FMaster := fb_get_master_interface;
     FUtil := FMaster.getUtilInterface;
+    FProvider := FMaster.getDispatcher;
   end;
 end;
 
@@ -132,6 +135,13 @@ begin
   FStatus := TFB30Status.Create(self);
   FStatusIntf := FStatus;
   Firebird30ClientAPI := self;
+end;
+
+destructor TFB30ClientAPI.Destroy;
+begin
+  if assigned(FProvider) then
+    FProvider.release;
+  inherited Destroy;
 end;
 
 function TFB30ClientAPI.StatusIntf: Firebird.IStatus;

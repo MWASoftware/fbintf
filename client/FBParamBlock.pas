@@ -10,7 +10,8 @@ uses
   Classes, SysUtils, IB, FBClientAPI, FBActivityMonitor;
 
 type
-  TParamDataType = (dtString, dtString2, dtByte,dtInteger,dtnone);
+  TParamDataType = (dtString, dtString2, dtByte, dtInteger,
+                    dtShortInteger,dtTinyInteger,dtnone);
 
   PParamBlockItemData = ^TParamBlockItemData;
   TParamBlockItemData = record
@@ -66,8 +67,12 @@ type
      function getParamType: byte;
      function getAsString: string;
      function getAsByte: byte;
+     procedure addByte(aValue: byte);
+     procedure addShortInteger(aValue: integer);
      procedure setAsByte(aValue: byte);
      procedure SetAsInteger(aValue: integer);
+     procedure SetAsShortInteger(aValue: integer);
+     procedure SetAsTinyInteger(aValue: integer);
      procedure SetAsString(aValue: string);
      procedure SetAsString2(aValue: string);
   end;
@@ -153,12 +158,17 @@ end;
 
 function TParamBlockItem.getAsInteger: integer;
 begin
-  with FParamData^ do
-  if FDataType =  dtInteger then
-  with FirebirdClientAPI do
-    Result := DecodeInteger(FBufPtr+1,4)
+  with FirebirdClientAPI, FParamData^ do
+  case FDataType of
+  dtInteger:
+    Result := DecodeInteger(FBufPtr+1,4);
+  dtShortInteger;
+    Result := DecodeInteger(FBufPtr+1,2);
+  dtTinyInteger:
+    Result := DecodeInteger(FBufPtr+1,1);
   else
     IBError(ibxePBParamTypeError,[nil]);
+  end;
 end;
 
 function TParamBlockItem.getParamType: byte;
@@ -202,6 +212,33 @@ begin
     IBError(ibxePBParamTypeError,[nil]);
 end;
 
+procedure TParamBlockItem.addByte(aValue: byte);
+var len: integer;
+    P: PChar;
+begin
+  with FParamData^ do
+  begin
+    P := FBufPtr + FBufLength;
+    len := FBufLength + 1;
+    FOwner.UpdateRequestItemSize(self,len);
+    P^ := char(aValue)
+  end;
+end;
+
+procedure TParamBlockItem.addShortInteger(aValue: integer);
+var len: integer;
+    P: PChar;
+begin
+  with FParamData^ do
+  begin
+    P := FBufPtr + FBufLength;
+    len := FBufLength + 2;
+    FOwner.UpdateRequestItemSize(self,len);
+    with FirebirdClientAPI do
+      EncodeInteger(aValue,2,P);
+  end;
+end;
+
 procedure TParamBlockItem.setAsByte(aValue: byte);
 begin
   with FParamData^ do
@@ -223,6 +260,30 @@ begin
     with FirebirdClientAPI do
       EncodeInteger(aValue,4,FBufPtr+1);
     FDataType := dtInteger;
+  end;
+end;
+
+procedure TParamBlockItem.SetAsShortInteger(aValue: integer);
+begin
+  with FParamData^ do
+  begin
+    if FBufLength <> 3 then
+      FOwner.UpdateRequestItemSize(self,3);
+    with FirebirdClientAPI do
+      EncodeInteger(aValue,2,FBufPtr+1);
+    FDataType := dtShortInteger;
+  end;
+end;
+
+procedure TParamBlockItem.SetAsTinyInteger(aValue: integer);
+begin
+  with FParamData^ do
+  begin
+    if FBufLength <> 2 then
+      FOwner.UpdateRequestItemSize(self,2);
+    with FirebirdClientAPI do
+      EncodeInteger(aValue,1,FBufPtr+1);
+    FDataType := dtTinyInteger;
   end;
 end;
 
