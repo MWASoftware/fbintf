@@ -1,4 +1,4 @@
-unit FB25Statement;
+unit FB30Statement;
 
 {$mode objfpc}{$H+}
 
@@ -58,8 +58,8 @@ unit FB25Statement;
 interface
 
 uses
-  Classes, SysUtils, IB,  FBClientAPI, FB25ClientAPI, FB25Transaction, FB25Attachment,
-  IBHeader, IBExternals, FBSQLData, FBOutputBlock, FBActivityMonitor;
+  Classes, SysUtils, Firebird, IB,  FBClientAPI, FB30ClientAPI, FB30Transaction,
+  FB30Attachment,IBExternals, FBSQLData, FBOutputBlock, FBActivityMonitor;
 
 type
   TFBStatement = class;
@@ -76,7 +76,9 @@ type
     FModified: boolean;
     FBlob: IBlob;             {Cache references}
     FArray: IArray;
-    FXSQLVAR: PXSQLVAR;       { Point to the PXSQLVAR in the owner object }
+    FSQLData: PChar; {Address of SQL Data in Message Buffer}
+    FNullIndicator: PShort; {Address of null indicator}
+    FDataLength: integer;
     constructor Create(aParent: TIBXSQLDA);
     procedure RowChange;
   end;
@@ -85,6 +87,7 @@ type
 
   TColumnMetaData = class(TSQLDataItem,IColumnMetaData)
   private
+    FIndex: integer;
     FIBXSQLVAR: TIBXSQLVAR;
     FStatement: IStatement;         {Keep reference to ensure statement not discarded}
     FPrepareSeqNo: integer;
@@ -99,7 +102,7 @@ type
   public
     constructor Create(aIBXSQLVAR: TIBXSQLVAR);
     function GetAttachment: TFBAttachment;
-    function GetTransaction: TFB25Transaction; virtual;
+    function GetTransaction: TFB30Transaction; virtual;
     function GetSQLDialect: integer; override;
     property Parent: TIBXSQLDA read GetParent;
 
@@ -141,28 +144,22 @@ type
 
   TIBXINPUTSQLDA = class;
 
-  { TIBXSQLParam }
-
   { TSQLParam }
 
   TSQLParam = class(TIBSQLData,ISQLParam)
   private
     procedure InternalSetIsNull(Value: Boolean);
-    procedure InternalSetIsNullable(Value: Boolean);
     procedure InternalSetAsString(Value: String);
   protected
     procedure CheckActive; override;
     procedure Changed; override;
-    procedure SetScale(aValue: short); override;
     procedure SetDataLength(len: short); override;
-    procedure SetSQLType(aValue: short); override;
   public
     constructor Create(aIBXSQLVAR: TIBXSQLVAR);
     procedure Clear;
     function GetModified: boolean; override;
     procedure SetName(Value: string); override;
     procedure SetIsNull(Value: Boolean);  override;
-    procedure SetIsNullable(Value: Boolean);  override;
     procedure SetAsArray(anArray: IArray);
 
     {overrides}
@@ -193,32 +190,34 @@ type
   TIBXSQLDA = class
   private
     FCount: Integer;
-    FSize: Integer;
+    FSize: integer;
     FInputSQLDA: boolean;
-    FXSQLDA: PXSQLDA;
+    FMetaData: Firebird.IMessageMetadata;
+    FMessageBuffer: PChar; {Message Buffer}
+    FMsgLength: integer; {Message Buffer length}
     FXSQLVars: array of TIBXSQLVAR;
     FUniqueRelationName: String;
-    function GetRecordSize: Integer;
-    function GetXSQLDA: PXSQLDA;
     function GetXSQLVAR(Idx: Integer): TIBXSQLVAR;
     procedure SetCount(Value: Integer);
   protected
     FStatement: TFBStatement;
     function GetAttachment: TFBAttachment;
     function GetSQLDialect: integer;
-    function GetTransaction: TFB25Transaction; virtual;
+    function GetTransaction: TFB30Transaction; virtual;
     procedure FreeXSQLDA;
     function GetXSQLVARByName(Idx: String): TIBXSQLVAR;
   public
     constructor Create(aStatement: TFBStatement; sqldaType: TIBXSQLDAType);
     destructor Destroy; override;
+    procedure Bind(metaData: Firebird.IMessageMetadata);
     function VarByName(Idx: String): TIBXSQLVAR;
     function GetUniqueRelationName: string;
     procedure Initialize;
+    property MetaData: Firebird.IMessageMetadata read FMetaData;
+    property MessageBuffer: PChar read FMessageBuffer;
+    property MsgLength: integer read FMsgLength;
     property Vars[Idx: Integer]: TIBXSQLVAR read GetXSQLVAR; default;
-    property AsXSQLDA: PXSQLDA read GetXSQLDA;
     property Count: Integer read FCount write SetCount;
-    property RecordSize: Integer read GetRecordSize;
     property Statement: TFBStatement read FStatement;
   end;
 
@@ -229,7 +228,6 @@ type
     function GetModified: Boolean;
   public
     constructor Create(aOwner: TFBStatement);
-    procedure Bind;
     procedure SetParamName(FieldName: String; Idx: Integer; UniqueName: boolean );
   end;
 
@@ -256,7 +254,7 @@ type
 
   TIBXOUTPUTSQLDA = class(TIBXSQLDA)
   private
-     FTransaction: TFB25Transaction; {transaction used to execute the statement}
+     FTransaction: TFB30Transaction; {transaction used to execute the statement}
   public
     constructor Create(aOwner: TFBStatement);
     procedure Bind;
@@ -291,7 +289,7 @@ type
     procedure CheckActive;
     function GetISQLData(aIBXSQLVAR: TIBXSQLVAR): ISQLData;
    public
-    constructor Create(aResults: TIBXOUTPUTSQLDA);
+    constructor Create(aResults: TIBXOUTPUTSQLDA; ResultSet: Firebird.IResultSet);
      {IResults}
     function getCount: integer;
     function ByName(Idx: String): ISQLData;
@@ -301,12 +299,15 @@ end;
   { TResultSet }
 
   TResultSet = class(TResults,IResultSet)
+  private
+    FResultSet: Firebird.IResultSet;
   public
+    constructor Create(aResults: TIBXOUTPUTSQLDA; ResultSet: Firebird.IResultSet);
     destructor Destroy; override;
     {IResultSet}
     function FetchNext: boolean;
     function GetCursorName: string;
-    function GetTransaction: TFB25Transaction;
+    function GetTransaction: TFB30Transaction;
     procedure Close;
   end;
 
@@ -316,10 +317,10 @@ end;
   private
     FAttachment: TFBAttachment;
     FAttachmentIntf: IAttachment;
-    FTransaction: TFB25Transaction;
+    FTransaction: TFB30Transaction;
     FTransactionIntf: ITransaction;
     FExecTransactionIntf: ITransaction;
-    FHandle: TISC_STMT_HANDLE;
+    FStatementIntf: Firebird.IStatement;
     FSQLType: TIBSQLTypes;         { Select, update, delete, insert, create, alter, etc...}
     FSQLDialect: integer;
     FSQLParams: TIBXINPUTSQLDA;
@@ -336,11 +337,11 @@ end;
     FSingleResults: boolean;
     FGenerateParamNames: boolean;
     FUniqueParamNames: boolean;
-    procedure CheckTransaction(aTransaction: TFB25Transaction);
+    procedure CheckTransaction(aTransaction: TFB30Transaction);
     procedure CheckHandle;
     procedure InternalPrepare;
-    function InternalExecute(aTransaction: TFB25Transaction): IResults;
-    function InternalOpenCursor(aTransaction: TFB25Transaction): IResultSet;
+    function InternalExecute(aTransaction: TFB30Transaction): IResults;
+    function InternalOpenCursor(aTransaction: TFB30Transaction): IResultSet;
     procedure FreeHandle;
     procedure PreprocessSQL;
     procedure InternalClose(Force: boolean);
@@ -352,10 +353,13 @@ end;
     destructor Destroy; override;
     procedure Close;
     function FetchNext: boolean;
-    procedure TransactionEnding(aTransaction: TFB25Transaction; Force: boolean);
+    procedure TransactionEnding(aTransaction: TFB30Transaction; Force: boolean);
     property SQLDialect: integer read FSQLDialect;
     property Attachment: TFBAttachment read FAttachment;
-    property Transaction: TFB25Transaction read FTransaction;
+    property Transaction: TFB30Transaction read FTransaction;
+    property SQLParams: ISQLParams read GetSQLParams;
+    property SQLType: TIBSQLTypes read GetSQLType;
+    property StatementIntf: Firebird.IStatement read FStatementIntf;
 
   public
     {IStatement}
@@ -375,15 +379,12 @@ end;
     function CreateArray(columnName: string): IArray; overload;
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
-    property Handle: TISC_STMT_HANDLE read FHandle;
-    property SQLParams: ISQLParams read GetSQLParams;
-    property SQLType: TIBSQLTypes read GetSQLType;
 
 end;
 
 implementation
 
-uses IBUtils, FBMessages, FB25Blob, variants, IBErrorCodes, FBArray, FB25Array;
+uses IBUtils, FBMessages, FB30Blob, variants, IBErrorCodes, FBArray, FB30Array;
 
 type
 
@@ -459,8 +460,8 @@ begin
   Result := inherited AddListItem(BufPtr);
   P := BufPtr + 1;
   i := 0;
-  with Firebird25ClientAPI do
-     Result^.FSize := isc_portable_integer(P,2) + 3;
+  with FirebirdClientAPI do
+     Result^.FSize := DEcodeInteger(P,2) + 3;
   Inc(P,2);
 
   with Result^ do
@@ -523,7 +524,7 @@ end;
 
 procedure TSQLInfoResultsBuffer.Exec(info_request: byte);
 begin
-  with Firebird25ClientAPI do
+  with Firebird30ClientAPI do
   if isc_dsql_sql_info(StatusVector, @(FStatement.Handle), 1, @info_request,
                      GetBufSize, Buffer) > 0 then
     IBDatabaseError;
@@ -560,6 +561,13 @@ end;
 
 { TResultSet }
 
+constructor TResultSet.Create(aResults: TIBXOUTPUTSQLDA;
+  ResultSet: Firebird.IResultSet);
+begin
+  inherited Create(aResults);
+  FResultSet := ResultSet;
+end;
+
 destructor TResultSet.Destroy;
 begin
   Close;
@@ -580,7 +588,7 @@ begin
   Result := FResults.FStatement.FCursor;
 end;
 
-function TResultSet.GetTransaction: TFB25Transaction;
+function TResultSet.GetTransaction: TFB30Transaction;
 begin
   Result := FResults.FTransaction;
 end;
@@ -779,7 +787,7 @@ begin
   else
   begin
     if FIBXSQLVAR.FArray = nil then
-      FIBXSQLVAR.FArray := TFB25Array.Create(GetAttachment,GetTransaction,GetArrayMetaData,AsQuad);
+      FIBXSQLVAR.FArray := TFB30Array.Create(GetAttachment,GetTransaction,GetArrayMetaData,AsQuad);
     Result := FIBXSQLVAR.FArray;
   end;
 end;
@@ -842,36 +850,17 @@ begin
     if not IsNullable then
       IsNullable := True;
 
-    if Assigned(FXSQLVAR^.sqlind) then
-      FXSQLVAR^.sqlind^ := -1;
+    if Assigned(FNullIndicator) then
+      FNullIndicator^ := -1;
     Changed;
   end
   else
     if ((not Value) and IsNullable) then
     begin
-      if Assigned(FXSQLVAR^.sqlind) then
-        FXSQLVAR^.sqlind^ := 0;
+      if Assigned(FNullIndicator) then
+        FNullIndicator^.sqlind^ := 0;
       Changed;
     end;
-end;
-
-procedure TSQLParam.InternalSetIsNullable(Value: Boolean);
-begin
-  with FIBXSQLVAR do
-  if (Value <> IsNullable) then
-  begin
-    if Value then
-    begin
-      FXSQLVAR^.sqltype := FXSQLVAR^.sqltype or 1;
-      with Firebird25ClientAPI do
-        IBAlloc(FXSQLVAR^.sqlind, 0, SizeOf(Short));
-    end
-    else
-    begin
-      FXSQLVAR^.sqltype := FXSQLVAR^.sqltype and (not 1);
-      ReallocMem(FXSQLVAR^.sqlind, 0);
-    end;
-  end;
 end;
 
 procedure TSQLParam.InternalSetAsString(Value: String);
@@ -909,29 +898,12 @@ begin
     IBError(ibxeStatementNotPrepared, [nil]);
 end;
 
-procedure TSQLParam.SetScale(aValue: short);
-begin
-  CheckActive;
-  with FIBXSQLVAR do
-    FXSQLVAR^.sqlscale := aValue;
-end;
-
 procedure TSQLParam.SetDataLength(len: short);
 begin
   CheckActive;
   with FIBXSQLVAR do
-  begin
-    FXSQLVAR^.sqllen := len;
-    with Firebird25ClientAPI do
-      IBAlloc(FXSQLVAR^.sqldata, 0, FXSQLVAR^.sqllen+1);
-  end;
-end;
-
-procedure TSQLParam.SetSQLType(aValue: short);
-begin
-  CheckActive;
-  with FIBXSQLVAR do
-    FXSQLVAR^.sqltype := aValue or (FXSQLVAR^.sqltype and 1);
+    if len > FDataLength then
+      IBError(ibxeInvalidDataLength,[nil]);
 end;
 
 constructor TSQLParam.Create(aIBXSQLVAR: TIBXSQLVAR);
@@ -973,22 +945,6 @@ begin
   end
 end;
 
-procedure TSQLParam.SetIsNullable(Value: Boolean);
-var i: integer;
-begin
-  CheckActive;
-  with FIBXSQLVAR do
-  if FUniqueName then
-    InternalSetIsNullable(Value)
-  else
-  begin
-    for i := 0 to FParent.FCount - 1 do
-      with (FParent as TIBXINPUTSQLDA)[i] do
-      if FName = self.FIBXSQLVAR.FName then
-        InternalSetIsNullable(Value);
-  end
-end;
-
 procedure TSQLParam.SetAsArray(anArray: IArray);
 begin
   CheckActive;
@@ -998,7 +954,7 @@ begin
   if not FIBXSQLVAR.FUniqueName then
     IBError(ibxeDuplicateParamName,[FIBXSQLVAR.FName]);
 
-  SetAsQuad((AnArray as TFB25Array).GetArrayID);
+  SetAsQuad((AnArray as TFB30Array).GetArrayID);
 end;
 
 procedure TSQLParam.Changed;
@@ -1247,31 +1203,6 @@ begin
   inherited Create(aOwner,daInput);
 end;
 
-procedure TIBXINPUTSQLDA.Bind;
-begin
-  if Count = 0 then
-    Count := 1;
-  with Firebird25ClientAPI do
-  begin
-    if (FXSQLDA <> nil) then
-       if isc_dsql_describe_bind(StatusVector, @(FStatement.Handle), FStatement.SQLDialect,
-                                    FXSQLDA) > 0 then
-         IBDataBaseError;
-
-    if FXSQLDA^.sqld > FXSQLDA^.sqln then
-    begin
-      Count := FXSQLDA^.sqld;
-      if isc_dsql_describe_bind(StatusVector, @(FStatement.Handle), FStatement.SQLDialect,
-                                   FXSQLDA) > 0 then
-        IBDataBaseError;
-    end
-    else
-    if FXSQLDA^.sqld = 0 then
-      Count := 0;
-  end;
-  Initialize;
-end;
-
 procedure TIBXINPUTSQLDA.SetParamName(FieldName: String; Idx: Integer;
   UniqueName: boolean);
 begin
@@ -1295,7 +1226,7 @@ procedure TIBXOUTPUTSQLDA.Bind;
 begin
   { Allocate an initial output descriptor (with one column) }
   Count := 1;
-  with Firebird25ClientAPI do
+  with Firebird30ClientAPI do
   begin
     { Using isc_dsql_describe, get the right size for the columns... }
     if isc_dsql_describe(StatusVector, @(FStatement.Handle), FStatement.SQLDialect, FXSQLDA) > 0 then
@@ -1353,7 +1284,7 @@ begin
   Result := Parent.GetAttachment;
 end;
 
-function TColumnMetaData.GetTransaction: TFB25Transaction;
+function TColumnMetaData.GetTransaction: TFB30Transaction;
 begin
   Result := Parent.GetTransaction;
 end;
@@ -1459,7 +1390,7 @@ begin
     IBError(ibxeInvalidDataConversion,[nil]);
 
   if FArrayMetaData = nil then
-    FArrayMetaData := TFB25ArrayMetaData.Create(Parent.Statement.FAttachment,
+    FArrayMetaData := TFB30ArrayMetaData.Create(Parent.Statement.FAttachment,
                   Parent.Statement.FTransaction,
                   GetRelationName,GetSQLName);
   Result := FArrayMetaData;
@@ -1497,21 +1428,31 @@ begin
   inherited Destroy;
 end;
 
-function TIBXSQLDA.GetRecordSize: Integer;
+procedure TIBXSQLDA.Bind(metaData: Firebird.IMessageMetadata);
+var i: integer;
 begin
-  result := SizeOf(TIBXSQLDA) + XSQLDA_LENGTH(FSize);
-end;
+  FMetaData := metaData;
+  with Firebird30ClientAPI do
+  begin
+    Count := metadata.getCount(StatusIntf);
+    Check4DataBaseError;
 
-function TIBXSQLDA.GetXSQLDA: PXSQLDA;
-begin
-  result := FXSQLDA;
-end;
+    FMsgLength := metaData.getMessageLength(StatusIntf);
+    Check4DataBaseError;
+    IBAlloc(FMessageBuffer,0,FMsgLength);
 
-function TIBXSQLDA.GetXSQLVAR(Idx: Integer): TIBXSQLVAR;
-begin
-  if (Idx < 0) or (Idx >= FCount) then
-    IBError(ibxeXSQLDAIndexOutOfRange, [nil]);
-  result := FXSQLVARs[Idx];
+    for i := 0 to Count - 1 do
+    begin
+      Vars[i].FIndex := i;
+      Vars[i].FSQLData := FMessageBuffer + metaData.getOffset(StatusIntf,i);
+      Check4DataBaseError;
+      Vars[i].FDataLength := metaData.getLength(StatusIntf,i);
+      Check4DataBaseError;
+      Vars[i].FNullIndicator := PShort(FMessageBuffer + metaData.getNullOffset(StatusIntf,i));
+      Check4DataBaseError;
+    end;
+  end;
+  Initialize;
 end;
 
 function TIBXSQLDA.VarByName(Idx: String): TIBXSQLVAR;
@@ -1548,89 +1489,60 @@ var
   sBaseName: string;
 begin
   bUnique := True;
-  if FXSQLDA <> nil then
+  for i := 0 to FCount - 1 do
   begin
-    for i := 0 to FCount - 1 do
+    FXSQLVARs[i].RowChange;
+    with Firebird30ClientAPI, FXSQLVARs[i].FXSQLVAR^ do
     begin
-      FXSQLVARs[i].RowChange;
-      with Firebird25ClientAPI, FXSQLVARs[i].FXSQLVAR^ do
+
+      {First get the unique relation name, if any}
+
+      if bUnique and (strpas(relname) <> '') then
       begin
-
-        {First get the unique relation name, if any}
-
-        if bUnique and (strpas(relname) <> '') then
-        begin
-          if FUniqueRelationName = '' then
-            FUniqueRelationName := strpas(relname)
-          else
-            if strpas(relname) <> FUniqueRelationName then
-            begin
-              FUniqueRelationName := '';
-              bUnique := False;
-            end;
-        end;
-
-        {If an output SQLDA then copy the aliasnames to the FName list. Ensure
-         that they are all upper case only and disambiguated.
-        }
-
-        if not FInputSQLDA then
-        begin
-          st := Space2Underscore(AnsiUppercase(strpas(aliasname)));
-          if st = '' then
-          begin
-            sBaseName := 'F_'; {do not localize}
-            aliasname_length := 2;
-            j := 1; j_len := 1;
-            st := sBaseName + IntToStr(j);
-          end
-          else
-          begin
-            j := 0; j_len := 0;
-            sBaseName := st;
-          end;
-
-          {Look for other columns with the same name and make unique}
-
-          while FindVarByName(st,i-1) <> nil do
-          begin
-               Inc(j);
-               j_len := Length(IntToStr(j));
-               if j_len + Length(sBaseName) > 31 then
-                  st := system.Copy(sBaseName, 1, 31 - j_len) + IntToStr(j)
-               else
-                  st := sBaseName + IntToStr(j);
-          end;
-
-          FXSQLVARs[i].FName := st;
-        end;
-
-        {Finally initialise the XSQLVAR}
-
-        FXSQLVARs[i].FIndex := i;
-
-        case sqltype and (not 1) of
-          SQL_TEXT, SQL_TYPE_DATE, SQL_TYPE_TIME, SQL_TIMESTAMP,
-          SQL_BLOB, SQL_ARRAY, SQL_QUAD, SQL_SHORT, SQL_BOOLEAN,
-          SQL_LONG, SQL_INT64, SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT: begin
-            if (sqllen = 0) then
-              { Make sure you get a valid pointer anyway
-               select '' from foo }
-              IBAlloc(sqldata, 0, 1)
-            else
-              IBAlloc(sqldata, 0, sqllen)
-          end;
-          SQL_VARYING: begin
-            IBAlloc(sqldata, 0, sqllen + 2);
-          end;
-          else
-            IBError(ibxeUnknownSQLDataType, [sqltype and (not 1)])
-        end;
-        if (sqltype and 1 = 1) then
-          IBAlloc(sqlind, 0, SizeOf(Short))
+        if FUniqueRelationName = '' then
+          FUniqueRelationName := strpas(relname)
         else
-          if (sqlind <> nil) then
-            ReallocMem(sqlind, 0);
+          if strpas(relname) <> FUniqueRelationName then
+          begin
+            FUniqueRelationName := '';
+            bUnique := False;
+          end;
+      end;
+
+      {If an output SQLDA then copy the aliasnames to the FName list. Ensure
+       that they are all upper case only and disambiguated.
+      }
+
+      if not FInputSQLDA then
+      begin
+        st := Space2Underscore(AnsiUppercase(strpas(FMetaData.getAlias(StatusIntf,i)));
+        Check4DataBaseError;
+        if st = '' then
+        begin
+          sBaseName := 'F_'; {do not localize}
+          aliasname_length := 2;
+          j := 1; j_len := 1;
+          st := sBaseName + IntToStr(j);
+        end
+        else
+        begin
+          j := 0; j_len := 0;
+          sBaseName := st;
+        end;
+
+        {Look for other columns with the same name and make unique}
+
+        while FindVarByName(st,i-1) <> nil do
+        begin
+             Inc(j);
+             j_len := Length(IntToStr(j));
+             if j_len + Length(sBaseName) > 31 then
+                st := system.Copy(sBaseName, 1, 31 - j_len) + IntToStr(j)
+             else
+                st := sBaseName + IntToStr(j);
+        end;
+
+        FXSQLVARs[i].FName := st;
       end;
     end;
   end;
@@ -1646,9 +1558,16 @@ begin
   Result := FStatement.SQLDialect;
 end;
 
-function TIBXSQLDA.GetTransaction: TFB25Transaction;
+function TIBXSQLDA.GetTransaction: TFB30Transaction;
 begin
   Result := FStatement.FTransaction;
+end;
+
+function TIBXSQLDA.GetXSQLVAR(Idx: Integer): TIBXSQLVAR;
+begin
+  if (Idx < 0) or (Idx >= FCount) then
+    IBError(ibxeXSQLDAIndexOutOfRange, [nil]);
+  result := FXSQLVARs[Idx];
 end;
 
 procedure TIBXSQLDA.SetCount(Value: Integer);
@@ -1661,50 +1580,21 @@ begin
     FUniqueRelationName := ''
   else
   begin
-    if FSize > 0 then
-      OldSize := XSQLDA_LENGTH(FSize)
-    else
-      OldSize := 0;
-    if FCount > FSize then
-    begin
-      Firebird25ClientAPI.IBAlloc(FXSQLDA, OldSize, XSQLDA_LENGTH(FCount));
-      SetLength(FXSQLVARs, FCount);
-      FXSQLDA^.version := SQLDA_VERSION1;
-      p := @FXSQLDA^.sqlvar[0];
-      for i := 0 to FCount - 1 do
-      begin
-        if i >= FSize then
-          FXSQLVARs[i] := TIBXSQLVAR.Create(self);
-        FXSQLVARs[i].FXSQLVAR := p;
-        p := Pointer(PChar(p) + sizeof(FXSQLDA^.sqlvar));
-      end;
-      FSize := FCount;
-    end;
-    if FSize > 0 then
-    begin
-      FXSQLDA^.sqln := Value;
-      FXSQLDA^.sqld := Value;
-    end;
+    SetLength(FXSQLVARs, FCount);
+    for i := FSize to FCount - 1 do
+      FXSQLVARs[i] := TIBXSQLVAR.Create(self);
+    FSize := FCount;
   end;
 end;
 
 procedure TIBXSQLDA.FreeXSQLDA;
 var i: integer;
 begin
-  if FXSQLDA <> nil then
-  begin
-//    writeln('SQLDA Cleanup');
-    for i := 0 to FSize - 1 do
-    begin
-      FreeMem(FXSQLVARs[i].FXSQLVAR^.sqldata);
-      FreeMem(FXSQLVARs[i].FXSQLVAR^.sqlind);
-    end;
-    FreeMem(FXSQLDA);
-    FXSQLDA := nil;
-  end;
-  for i := 0 to Lenght(FXSQLVARs) - 1 do
+  for i := 0 to Length(FXSQLVARs) - 1 do
     FXSQLVARs[i].Free;
   SetLength(FXSQLVARs,0);
+  FreeMem(FMessageBuffer);
+  FMessageBuffer := nil;
 end;
 
 function TIBXSQLDA.GetXSQLVARByName(Idx: String): TIBXSQLVAR;
@@ -1728,7 +1618,7 @@ end;
 
 { TFBStatement }
 
-procedure TFBStatement.CheckTransaction(aTransaction: TFB25Transaction);
+procedure TFBStatement.CheckTransaction(aTransaction: TFB30Transaction);
 begin
   if (aTransaction = nil) then
     IBError(ibxeTransactionNotAssigned,[]);
@@ -1740,13 +1630,11 @@ end;
 
 procedure TFBStatement.CheckHandle;
 begin
-  if FHandle = nil then
+  if FStatementIntf = nil then
     IBError(ibxeInvalidStatementHandle,[nil]);
 end;
 
 procedure TFBStatement.InternalPrepare;
-var
-  RB: ISQLInfoResultsBuffer;
 begin
   if FPrepared then
     Exit;
@@ -1754,36 +1642,37 @@ begin
     IBError(ibxeEmptyQuery, [nil]);
   try
     CheckTransaction(FTransaction);
-    with Firebird25ClientAPI do
+    with Firebird30ClientAPI do
     begin
-      Call(isc_dsql_alloc_statement2(StatusVector, @(FAttachment.Handle),
-                                      @FHandle), True);
       if FHasParamNames then
       begin
         if FProcessedSQL = '' then
           PreprocessSQL;
-        Call(isc_dsql_prepare(StatusVector, @(FTransaction.Handle), @FHandle, 0,
-                 PChar(FProcessedSQL), FSQLDialect, nil), True);
+        FStatementIntf := FAttachment.AttachmentIntf.prepare(StatusIntf,
+                            FTransaction.TransactionIntf,
+                            Length(FProcessedSQL),
+                            PChar(FProcessedSQL),
+                            FSQLDialect,
+                            Firebird.IStatement.PREPARE_PREFETCH_METADATA);
       end
       else
-        Call(isc_dsql_prepare(StatusVector, @(FTransaction.Handle), @FHandle, 0,
-                 PChar(FSQL), FSQLDialect, nil), True);
+      FStatementIntf := FAttachment.AttachmentIntf.prepare(StatusIntf,
+                          FTransaction.TransactionIntf,
+                          Length(FSQL),
+                          PChar(FSQL),
+                          FSQLDialect,
+                          Firebird.IStatement.PREPARE_PREFETCH_METADATA);
+      Check4DataBaseError;
     end;
-    { After preparing the statement, query the stmt type and possibly
-      create a FSQLRecord "holder" }
-    { Get the type of the statement }
-    RB := TSQLInfoResultsBuffer.Create(self);
-    RB.Exec(isc_info_sql_stmt_type);
-    if RB.Count > 0 then
-      FSQLType := TIBSQLTypes(RB[0].GetAsInteger)
-    else
-      FSQLType := SQLUnknown;
+    FSQLType := FStatementIntf.getType(StatusIntf);
+    Check4DataBaseError;
 
     { Done getting the type }
     case FSQLType of
       SQLGetSegment,
       SQLPutSegment,
-      SQLStartTransaction: begin
+      SQLStartTransaction:
+      begin
         FreeHandle;
         IBError(ibxeNotPermitted, [nil]);
       end;
@@ -1794,12 +1683,14 @@ begin
       SQLExecProcedure:
       begin
         {set up input sqlda}
-        FSQLParams.Bind;
+        FSQLParams.Bind(FStatementIntf.getInputMetadata(StatusIntf));
+        Check4DataBaseError;
 
         {setup output sqlda}
         if FSQLType in [SQLSelect, SQLSelectForUpdate,
                         SQLExecProcedure] then
-          FSQLRecord.Bind;
+          FSQLRecord.BindFStatementIntf.getOutputMetadata(StatusIntf));
+        Check4DataBaseError;
       end;
     end;
   except
@@ -1820,7 +1711,7 @@ begin
   Inc(FPrepareSeqNo);
 end;
 
-function TFBStatement.InternalExecute(aTransaction: TFB25Transaction): IResults;
+function TFBStatement.InternalExecute(aTransaction: TFB30Transaction): IResults;
 begin
   Result := nil;
   FBOF := false;
@@ -1834,29 +1725,32 @@ begin
     AddMonitor(aTransaction);
 
   try
-    with Firebird25ClientAPI do
+    with Firebird30ClientAPI do
     case FSQLType of
     SQLSelect:
       IBError(ibxeIsAExecuteProcedure,[]);
 
     SQLExecProcedure:
     begin
-      Call(isc_dsql_execute2(StatusVector,
-                          @(aTransaction.Handle),
-                          @FHandle,
-                          SQLDialect,
-                          FSQLParams.AsXSQLDA,
-                          FSQLRecord.AsXSQLDA), True);
+      FStatementIntf.execute(StatusIntf,
+                             aTransaction.TransactionIntf,
+                             FSQLParams.MetaData,
+                             FSQLParams,MessageBuffer,
+                             FSQLRecord.MetaData,
+                             FSQLRecord.MessageBuffer);
+      Check4DataBaseError;
+
       Result := TResults.Create(FSQLRecord);
       FSingleResults := true;
     end
     else
-      Call(isc_dsql_execute(StatusVector,
-                           @(aTransaction.Handle),
-                           @FHandle,
-                           SQLDialect,
-                           FSQLParams.AsXSQLDA), True);
-
+      FStatementIntf.execute(StatusIntf,
+                             aTransaction.TransactionIntf,
+                             FSQLParams.MetaData,
+                             FSQLParams,MessageBuffer,
+                             nil,
+                             nil);
+      Check4DataBaseError;
     end;
   finally
     if aTransaction <> FTransaction then
@@ -1864,8 +1758,9 @@ begin
   end;
 end;
 
-function TFBStatement.InternalOpenCursor(aTransaction: TFB25Transaction
+function TFBStatement.InternalOpenCursor(aTransaction: TFB30Transaction
   ): IResultSet;
+var ResultSet: Firebird.IResultSet;
 begin
   if FSQLType <> SQLSelect then
    IBError(ibxeIsASelectStatement,[]);
@@ -1876,17 +1771,16 @@ begin
  if aTransaction <> FTransaction then
    AddMonitor(aTransaction);
  CheckHandle;
- with Firebird25ClientAPI do
+ with Firebird30ClientAPI do
  begin
-   Call(isc_dsql_execute2(StatusVector,
-                       @(aTransaction.Handle),
-                       @FHandle,
-                       SQLDialect,
-                       FSQLParams.AsXSQLDA,
-                       nil), True);
-   Call(
-     isc_dsql_set_cursor_name(StatusVector, @FHandle, PChar(FCursor), 0),
-     True);
+   ResultSet := FStatementIntf.openCursor(StatusIntf,
+                          aTransaction.TransactionIntf,
+                          FSQLParams.MetaData,
+                          FSQLParams,MessageBuffer,
+                          nil,
+                          nil,
+                          0);
+   Check4DataBaseError;
  end;
  FSingleResults := false;
  FOpen := True;
@@ -1894,25 +1788,16 @@ begin
  FBOF := true;
  FEOF := false;
  FSQLRecord.FTransaction := aTransaction;
- Result := TResultSet.Create(FSQLRecord);
+ Result := TResultSet.Create(FSQLRecord,ResultSet);
 end;
 
 procedure TFBStatement.FreeHandle;
-var
-  isc_res: ISC_STATUS;
 begin
   Close;
-  try
-    if FHandle <> nil then
-    with Firebird25ClientAPI do
-    begin
-      isc_res :=
-        Call(isc_dsql_free_statement(StatusVector, @FHandle, DSQL_drop), False);
-      if (StatusVector^ = 1) and (isc_res > 0) and (isc_res <> isc_bad_stmt_handle) then
-        IBDataBaseError;
-    end;
-  finally
-    FHandle := nil;
+  if FStatementIntf <> nil then
+  begin
+    FStatementIntf.release;
+    FStatementIntf := nil;
   end;
 end;
 
@@ -2077,7 +1962,7 @@ var
 begin
   try
     if (FHandle <> nil) and (SQLType = SQLSelect) and FOpen then
-    with Firebird25ClientAPI do
+    with Firebird30ClientAPI do
     begin
       isc_res := Call(
                    isc_dsql_free_statement(StatusVector, @FHandle, DSQL_close),
@@ -2100,10 +1985,10 @@ constructor TFBStatement.Create(Attachment: TFBAttachment;
   Transaction: ITransaction; sql: string; SQLDialect: integer);
 var GUID : TGUID;
 begin
-  inherited Create(Transaction as TFB25Transaction);
+  inherited Create(Transaction as TFB30Transaction);
   FAttachment := Attachment;
   FAttachmentIntf := Attachment;
-  FTransaction := transaction as TFB25Transaction;
+  FTransaction := transaction as TFB30Transaction;
   FTransactionIntf := Transaction;
   AddMonitor(FTransaction);
   FSQLDialect := SQLDialect;
@@ -2149,7 +2034,7 @@ begin
   if FEOF then
     IBError(ibxeEOF,[nil]);
 
-  with Firebird25ClientAPI do
+  with Firebird30ClientAPI do
   begin
     { Go to the next record... }
     fetch_res :=
@@ -2177,7 +2062,7 @@ begin
   end;
 end;
 
-procedure TFBStatement.TransactionEnding(aTransaction: TFB25Transaction;
+procedure TFBStatement.TransactionEnding(aTransaction: TFB30Transaction;
   Force: boolean);
 begin
   if FOpen and (FSQLRecord.FTransaction = aTransaction) then
@@ -2263,7 +2148,7 @@ begin
   if aTransaction = nil then
     Result :=  InternalExecute(FTransaction)
   else
-    Result := InternalExecute(aTransaction as TFB25Transaction);
+    Result := InternalExecute(aTransaction as TFB30Transaction);
 end;
 
 function TFBStatement.OpenCursor(aTransaction: ITransaction): IResultSet;
@@ -2271,7 +2156,7 @@ begin
   if aTransaction = nil then
     Result := InternalOpenCursor(FTransaction)
   else
-    Result := InternalOpenCursor(aTransaction as TFB25Transaction);
+    Result := InternalOpenCursor(aTransaction as TFB30Transaction);
 end;
 
 function TFBStatement.CreateBlob: IBlob;
@@ -2283,7 +2168,7 @@ function TFBStatement.CreateArray(column: IColumnMetaData): IArray;
 begin
   if column.SQLType <> SQL_ARRAY then
     IBError(ibxeNotAnArray,[nil]);
-  Result := TFB25Array.Create(FAttachment,FTransaction,column.GetArrayMetaData);
+  Result := TFB30Array.Create(FAttachment,FTransaction,column.GetArrayMetaData);
 end;
 
 function TFBStatement.CreateArray(columnName: string): IArray;
@@ -2319,7 +2204,7 @@ begin
   if aTransaction <> nil then
   begin
     RemoveMonitor(FTransaction);
-    FTransaction := transaction as TFB25Transaction;
+    FTransaction := transaction as TFB30Transaction;
     FTransactionIntf := Transaction;
     AddMonitor(FTransaction);
   end;
