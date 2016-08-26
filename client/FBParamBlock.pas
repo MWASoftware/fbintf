@@ -162,7 +162,7 @@ begin
   case FDataType of
   dtInteger:
     Result := DecodeInteger(FBufPtr+1,4);
-  dtShortInteger;
+  dtShortInteger:
     Result := DecodeInteger(FBufPtr+1,2);
   dtTinyInteger:
     Result := DecodeInteger(FBufPtr+1,1);

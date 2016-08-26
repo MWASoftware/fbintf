@@ -12,7 +12,7 @@ type
 
    { TFBBlobMetaData }
 
-   TFBBlobMetaData  = class(TInterfaceParent, IBlobMetaData)
+   TFBBlobMetaData  = class(TActivityReporter, IBlobMetaData)
    private
      FSubType: short;
      FCharSetID: short;
@@ -98,12 +98,12 @@ begin
     SQLParams[0].AsString := RelationName;
     SQLParams[1].AsString := ColumnName;
     with OpenCursor do
-    if Next then
+    if FetchNext then
     begin
       if Data[3].AsInteger <> SQL_BLOB then
         IBError(ibxeInvalidBlobMetaData,[nil]);
       FSubType := Data[0].AsInteger;
-      FSegmentLength := Data[1].AsInteger;
+      FSegmentSize := Data[1].AsInteger;
       FCharSetID := Data[2].AsInteger;
     end
     else
@@ -140,13 +140,13 @@ end;
 
 procedure TFBBlob.CheckReadable;
 begin
-  if FCreating or (FHandle = nil) then
+  if FCreating or (FBlobIntf = nil) then
     IBError(ibxeBlobCannotBeRead, [nil]);
 end;
 
 procedure TFBBlob.CheckWritable;
 begin
-  if not FCreating or (FHandle = nil) then
+  if not FCreating or (FBlobIntf = nil) then
     IBError(ibxeBlobCannotBeWritten, [nil]);
 end;
 
@@ -186,7 +186,7 @@ begin
     FCreating := true;
     with Firebird30ClientAPI do
     begin
-      FBlobIntf := FAttachment.AttachmentIntf.createBlob(StatusIntf,FTransaction.TransactionIntf,
+      FBlobIntf := FAttachment.AttachmentIntf.createBlob(StatusIntf,(Transaction as TFB30Transaction).TransactionIntf,
                         @FBlobID,0,nil);
       Check4DataBaseError;
     end;
@@ -202,7 +202,7 @@ begin
   FBlobID := BlobID;
   with Firebird30ClientAPI do
   begin
-    FBlobIntf ;= FAttachment.AttachmentIntf.openBlob((StatusIntf,FTransaction.TransactionIntf,
+    FBlobIntf := FAttachment.AttachmentIntf.openBlob(StatusIntf,(Transaction as TFB30Transaction).TransactionIntf,
                      @FBlobID, 0, nil);
     Check4DataBaseError;
   end;

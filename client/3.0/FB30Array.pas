@@ -19,7 +19,6 @@ type
     procedure addShortInteger(aValue: integer);
     procedure setAsString(aValue: string);
     procedure setAsByte(aValue: byte);
-    procedure SetAsSingleByte(aValue: byte);
     procedure SetAsInteger(aValue: integer);
     procedure SetAsShortInteger(aValue: integer);
     procedure SetAsTinyInteger(aValue: integer);
@@ -77,7 +76,7 @@ end;
 
 implementation
 
-uses FB30ClientAPI;
+uses FB30ClientAPI, FB30Statement;
 
 const
   sGetArrayMetaData = 'Select F.RDB$FIELD_LENGTH, F.RDB$FIELD_SCALE, F.RDB$FIELD_TYPE, '+
@@ -128,28 +127,28 @@ procedure TFB30ArrayMetaData.LoadMetaData(aAttachment: IAttachment;
   aTransaction: ITransaction; relationName, columnName: string);
 var stmt: IStatement;
 begin
-  stmt := TFBStatement.Create(aAttachment,aTransaction, sGetArrayMetaData ,aAttachment.SQLDialect);
+  stmt := TFBStatement.Create(aAttachment as TFBAttachment,aTransaction, sGetArrayMetaData ,aAttachment.GetSQLDialect);
   with stmt do
   begin
     SQLParams[0].AsString := RelationName;
     SQLParams[1].AsString := ColumnName;
     with OpenCursor do
-    if Next then
+    if FetchNext then
     begin
       FArrayDesc.array_desc_field_name := columnName;
       FArrayDesc.array_desc_relation_name := relationName;
-      FArrayDesc.array_desc_length := Fields[0].AsInteger;
-      FArrayDesc.array_desc_scale := Fields[1].AsInteger;
-      FArrayDesc.array_desc_dtype := Fields[2].AsInteger;
-      FArrayDesc.array_desc_dimensions := Fields[3].AsInteger;
+      FArrayDesc.array_desc_length := Data[0].AsInteger;
+      FArrayDesc.array_desc_scale := char(Data[1].AsInteger);
+      FArrayDesc.array_desc_dtype := Data[2].AsInteger;
+      FArrayDesc.array_desc_dimensions := Data[3].AsInteger;
       FArrayDesc.array_desc_flags := 0; {row major}
       repeat
-        with FArrayDesc.array_desc_bounds[Fields[4].AsInteger] do
+        with FArrayDesc.array_desc_bounds[Data[4].AsInteger] do
         begin
-          array_bound_lower := Fields[5].AsInteger;
-          array_bound_upper := Fields[6].AsInteger;
+          array_bound_lower := Data[5].AsInteger;
+          array_bound_upper := Data[6].AsInteger;
         end;
-      until not Next;
+      until not FetchNext;
     end;
   end;
 end;
@@ -164,9 +163,9 @@ procedure TFB30Array.AllocateBuffer;
       FSDL.Add(isc_sdl_tiny_integer).SetAsTinyInteger(aValue)
     else
     if (aValue >= -32768) and (aValue <= 32767) then
-      FDSL.Add(isc_sdl_short_integer).AsSetAsShortInteger(aValue)
+      FSDL.Add(isc_sdl_short_integer).SetAsShortInteger(aValue)
     else
-      FDSL.Add(isc_sdl_long_integer).SetAsInteger(aValue);
+      FSDL.Add(isc_sdl_long_integer).SetAsInteger(aValue);
   end;
 
 var i: integer;
@@ -175,16 +174,17 @@ begin
   inherited AllocateBuffer;
   {Now set up the SDL}
 
-  FSDL := TSDL.Create;
+  FSDL := TSDLBlock.Create;
   with GetArrayDesc^ do
   {The following is based on gen_SDL from Firebird src/dsql/array.cpp}
   begin
-    SDLItem := FSDL.Add(isc_sdl_struct).SetAsByte(array_desc_dtype);
+    SDLItem := FSDL.Add(isc_sdl_struct);
+    SDLItem.SetAsByte(array_desc_dtype);
 
-    case desc->array_desc_dtype of
+    case array_desc_dtype of
     blr_short,blr_long,
     blr_int64,blr_quad:
-        SDLItem.AddByte(array_desc_scale);
+        SDLItem.AddByte(byte(array_desc_scale));
 
     blr_text,blr_cstring, blr_varying:
         SDLItem.addShortInteger(array_desc_length);
@@ -196,10 +196,10 @@ begin
     for i := 0 to array_desc_dimensions - 1 do
     begin
       if array_desc_bounds[i].array_bound_lower = 1 then
-        FDSL.Add(isc_sdl_do1).SetAsTinyInteger(i)
+        FSDL.Add(isc_sdl_do1).SetAsTinyInteger(i)
       else
       begin
-        FDSL.Add(isc_sdl_do2).SetAsTinyInteger(i);
+        FSDL.Add(isc_sdl_do2).SetAsTinyInteger(i);
         AddVarInteger(array_desc_bounds[i].array_bound_lower);
       end;
       AddVarInteger(array_desc_bounds[i].array_bound_upper);
@@ -209,28 +209,32 @@ end;
 
 procedure TFB30Array.InternalGetSlice;
 begin
-  FAttachmentIntf.getSlice(StatusIntf,FTransactionIntf,
+  with Firebird30ClientAPI do
+  begin
+    FAttachmentIntf.getSlice(StatusIntf,FTransactionIntf,
                           @FArrayID,
-                          (FSDL as TSDL).getDataLength,
-                          BytePtr((FSDL as TSDL).getBuffer),
+                          (FSDL as TSDLBlock).getDataLength,
+                          BytePtr((FSDL as TSDLBlock).getBuffer),
                           0,nil,
                           FBufSize,BytePtr(FBuffer)
                           );
-  with Firebird30ClientAPI do
-   Check4DataBaseError;
+    Check4DataBaseError;
+  end;
   SignalActivity;
 end;
 
 procedure TFB30Array.InternalPutSlice(Force: boolean);
 begin
-  FAttachmentIntf.putSlice(StatusIntf,FTransactionIntf, @FArrayID,
-                          (FSDL as TSDL).getDataLength,
-                          BytePtr((FSDL as TSDL).getBuffer),
+  with Firebird30ClientAPI do
+  begin
+    FAttachmentIntf.putSlice(StatusIntf,FTransactionIntf, @FArrayID,
+                          (FSDL as TSDLBlock).getDataLength,
+                          BytePtr((FSDL as TSDLBlock).getBuffer),
                           0,nil,
                           FBufSize,BytePtr(FBuffer)
                           );
-  with Firebird30ClientAPI do
     Check4DataBaseError;
+  end;
   SignalActivity;
 end;
 
@@ -239,7 +243,7 @@ constructor TFB30Array.Create(aAttachment: TFBAttachment;
 begin
   inherited Create(aAttachment,aTransaction,aField);
   FAttachmentIntf := aAttachment.AttachmentIntf;
-  FTransactionIntf := aTransaction.FransactionIntf;
+  FTransactionIntf := aTransaction.TransactionIntf;
 end;
 
 constructor TFB30Array.Create(aAttachment: TFBAttachment;
@@ -247,7 +251,7 @@ constructor TFB30Array.Create(aAttachment: TFBAttachment;
 begin
   inherited Create(aAttachment,aTransaction,aField,ArrayID);
   FAttachmentIntf := aAttachment.AttachmentIntf;
-  FTransactionIntf := aTransaction.FransactionIntf;
+  FTransactionIntf := aTransaction.TransactionIntf;
 end;
 
 end.

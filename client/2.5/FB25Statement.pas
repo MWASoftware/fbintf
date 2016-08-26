@@ -65,6 +65,10 @@ type
   TFBStatement = class;
   TIBXSQLDA = class;
 
+  {$IF FPC_FULLVERSION < 20700 }
+  RawByteString = string;
+  {$ENDIF}
+
   { TIBXSQLVAR }
 
   TIBXSQLVAR = class
@@ -76,9 +80,13 @@ type
     FModified: boolean;
     FBlob: IBlob;             {Cache references}
     FArray: IArray;
+    FVarString: RawByteString;
+    FVarIsStringRef: boolean;
     FXSQLVAR: PXSQLVAR;       { Point to the PXSQLVAR in the owner object }
     constructor Create(aParent: TIBXSQLDA);
     procedure RowChange;
+    procedure SetString(aValue: string);
+    procedure ClearString;
   end;
 
   { TColumnMetaData }
@@ -115,7 +123,6 @@ type
     function GetName: string; override;      {Disambiguated uppercase Field Name}
     function GetScale: short; override;
     function getCharSetID: cardinal;
-    function GetIsNull: Boolean; override;
     function GetIsNullable: boolean; override;
     function GetSize: integer;
     function GetArrayMetaData: IArrayMetaData;
@@ -132,6 +139,7 @@ type
   TIBSQLData = class(TColumnMetaData,ISQLData)
   protected
     procedure CheckActive; override;
+    function GetIsNull: Boolean; override;
   public
     function GetAsArray: IArray;
     function GetAsBlob: IBlob;
@@ -558,6 +566,26 @@ begin
   FModified := false;
 end;
 
+procedure TIBXSQLVAR.SetString(aValue: string);
+begin
+  if not FVarIsStringRef then
+    FreeMem(FXSQLVar^.sqldata);
+  FVarString := aValue;
+  FXSQLVar^.sqltype := SQL_TEXT;
+  FXSQLVar^.sqldata := PChar(FVarString);
+  FXSQLVar^.sqllen := Length(aValue);
+  FVarIsStringRef := true;
+end;
+
+procedure TIBXSQLVAR.ClearString;
+begin
+  if not FVarIsStringRef then Exit;
+  FVarString := '';
+  FXSQLVar^.sqldata := nil;
+  FXSQLVar^.sqllen := 0;
+  FVarIsStringRef := false;
+end;
+
 { TResultSet }
 
 destructor TResultSet.Destroy;
@@ -768,6 +796,12 @@ begin
     IBError(ibxeBOF,[nil]);
 end;
 
+function TIBSQLData.GetIsNull: Boolean;
+begin
+  CheckActive;
+  result := IsNullable and (FIBXSQLVAR.FXSQLVAR^.sqlind^ = -1);
+end;
+
 function TIBSQLData.GetAsArray: IArray;
 begin
   CheckActive;
@@ -882,7 +916,8 @@ begin
   CheckActive;
   if IsNullable then
     IsNull := False;
-  if (SQLTYPE = SQL_BLOB) then
+  case SQLTYPE of
+  SQL_BLOB:
   begin
     ss := TStringStream.Create(Value);
     try
@@ -895,9 +930,14 @@ begin
     finally
       ss.Free;
     end;
-  end
+  end;
+
+  SQL_TEXT, SQL_VARYING:
+    FIBXSQLVar.SetString(Value);
+
   else
     inherited SetAsString(Value);
+  end;
 end;
 
 procedure TSQLParam.CheckActive;
@@ -921,9 +961,10 @@ begin
   CheckActive;
   with FIBXSQLVAR do
   begin
+    ClearString;
     FXSQLVAR^.sqllen := len;
     with Firebird25ClientAPI do
-      IBAlloc(FXSQLVAR^.sqldata, 0, FXSQLVAR^.sqllen+1);
+      IBAlloc(FXSQLVAR^.sqldata, 0, FXSQLVAR^.sqllen);
   end;
 end;
 
@@ -1434,12 +1475,6 @@ begin
   end;
 end;
 
-function TColumnMetaData.GetIsNull: Boolean;
-begin
-  CheckActive;
-  result := IsNullable and (FIBXSQLVAR.FXSQLVAR^.sqlind^ = -1);
-end;
-
 function TColumnMetaData.GetIsNullable: boolean;
 begin
   CheckActive;
@@ -1488,10 +1523,7 @@ begin
 end;
 
 destructor TIBXSQLDA.Destroy;
-var i: integer;
 begin
-  for i := 0 to Length(FXSQLVars) - 1 do
-    FXSQLVars[i].Free;
   FreeXSQLDA;
 //  writeln('Destroying ',ClassName);
   inherited Destroy;
@@ -1696,14 +1728,15 @@ begin
 //    writeln('SQLDA Cleanup');
     for i := 0 to FSize - 1 do
     begin
+      FXSQLVARs[i].ClearString;
       FreeMem(FXSQLVARs[i].FXSQLVAR^.sqldata);
       FreeMem(FXSQLVARs[i].FXSQLVAR^.sqlind);
     end;
     FreeMem(FXSQLDA);
     FXSQLDA := nil;
   end;
-  for i := 0 to Lenght(FXSQLVARs) - 1 do
-    FXSQLVARs[i].Free;
+  for i := 0 to Length(FXSQLVars) - 1 do
+    FXSQLVars[i].Free;
   SetLength(FXSQLVARs,0);
 end;
 

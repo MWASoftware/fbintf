@@ -25,7 +25,7 @@ type
     constructor CreateDatabase(DatabaseName: string; DPB: IDPB; RaiseExceptionOnError: boolean);
     destructor Destroy; override;
     property SQLDialect: integer read FSQLDialect;
-    property AttachmentIntf: Firebird.IAttachment read FAttachment;
+    property AttachmentIntf: Firebird.IAttachment read FAttachmentIntf;
 
   public
     {IAttachment}
@@ -118,7 +118,7 @@ begin
                          BytePtr((FDPB as TDPB).getBuffer));
     if FRaiseExceptionOnConnectError then Check4DataBaseError;
     if InErrorState then
-      FAttachment := nil;
+      FAttachmentIntf := nil;
   end;
 end;
 
@@ -130,7 +130,7 @@ begin
       FAttachmentIntf.Detach(StatusIntf);
       if not Force and InErrorState then
         IBDataBaseError;
-      FAttachment := nil;
+      FAttachmentIntf := nil;
     end;
 end;
 
@@ -146,7 +146,7 @@ begin
     begin
       FAttachmentIntf.dropDatabase(StatusIntf);
       Check4DataBaseError;
-      FAttachment := nil;
+      FAttachmentIntf := nil;
     end;
 end;
 
