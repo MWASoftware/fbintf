@@ -77,7 +77,8 @@ type
 
 implementation
 
-uses FB30Transaction, FB30Statement, FB30Array, FB30Blob, FBMessages, FBOutputBlock;
+uses FB30Transaction, FB30Statement, FB30Array, FB30Blob, FBMessages,
+  FBOutputBlock, FB30Events;
 
 { TFBAttachment }
 
@@ -274,12 +275,20 @@ end;
 
 function TFBAttachment.GetEventHandler(Events: TStrings): IEvents;
 begin
-
+  CheckHandle;
+  Result := TFBEvents.Create(self,Events);
 end;
 
 function TFBAttachment.GetEventHandler(Event: string): IEvents;
+var S: TStringList;
 begin
-
+  S := TStringList.Create;
+  try
+    S.Add(Event);
+    Result := GetEventHandler(S);
+  finally
+    S.Free;
+  end;
 end;
 
 function TFBAttachment.CreateBlob(transaction: ITransaction): IBlob;
