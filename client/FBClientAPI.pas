@@ -54,6 +54,10 @@ type
     isc_sqlcode: Tisc_sqlcode;
     isc_sql_interprete: Tisc_sql_interprete;
     isc_interprete: Tisc_interprete;
+    isc_event_counts: Tisc_event_counts;
+    isc_event_block: Tisc_event_block;
+    isc_wait_for_event: Tisc_wait_for_event;
+    isc_free: Tisc_free;
 
     constructor Create;
     destructor Destroy; override;
@@ -167,7 +171,10 @@ begin
   isc_sqlcode := GetProcAddr('isc_sqlcode'); {do not localize}
   isc_sql_interprete := GetProcAddr('isc_sql_interprete'); {do not localize}
   isc_interprete := GetProcAddr('isc_interprete'); {do not localize}
-
+  isc_event_counts := GetProcAddr('isc_event_counts'); {do not localize}
+  isc_event_block := GetProcAddr('isc_event_block'); {do not localize}
+  isc_wait_for_event := GetProcAddr('isc_wait_for_event'); {do not localize}
+  isc_free := GetProcAddr('isc_free'); {do not localize}
 end;
 
 function TFBClientAPI.GetLibraryName: string;

@@ -87,10 +87,6 @@ type
     isc_rollback_retaining: Tisc_rollback_retaining;
     isc_cancel_events: Tisc_cancel_events;
     isc_que_events: Tisc_que_events;
-    isc_event_counts: Tisc_event_counts;
-    isc_event_block: Tisc_event_block;
-    isc_wait_for_event: Tisc_wait_for_event;
-    isc_free: Tisc_free;
     isc_add_user   : Tisc_add_user;
     isc_delete_user: Tisc_delete_user;
     isc_modify_user: Tisc_modify_user;
@@ -283,10 +279,6 @@ begin
   isc_rollback_transaction := GetProcAddr('isc_rollback_transaction'); {do not localize}
   isc_cancel_events := GetProcAddr('isc_cancel_events'); {do not localize}
   isc_que_events := GetProcAddr('isc_que_events'); {do not localize}
-  isc_event_counts := GetProcAddr('isc_event_counts'); {do not localize}
-  isc_event_block := GetProcAddr('isc_event_block'); {do not localize}
-  isc_wait_for_event := GetProcAddr('isc_wait_for_event'); {do not localize}
-  isc_free := GetProcAddr('isc_free'); {do not localize}
   isc_add_user := GetProcAddr('isc_add_user'); {do not localize}
   isc_delete_user := GetProcAddr('isc_delete_user'); {do not localize}
   isc_modify_user := GetProcAddr('isc_modify_user'); {do not localize}

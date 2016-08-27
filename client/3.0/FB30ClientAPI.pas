@@ -82,6 +82,7 @@ type
     {Firebird Interfaces}
     property MasterIntf: Firebird.IMaster read FMaster;
     property UtilIntf: Firebird.IUtil read FUtil;
+    property ProviderIntf: Firebird.IProvider read FProvider;
   end;
 
 var Firebird30ClientAPI: TFB30ClientAPI;
