@@ -48,7 +48,7 @@ begin
     ByName('EMP_NO').AsInteger := 150;
     ByName('FIRST_NAME').AsString := 'John';
     ByName('LAST_NAME').AsString := 'Doe';
-    ByName('PHONE_EXT').AsString := '666';
+    ByName('PHONE_EXT').AsString := '';
     ByName('HIRE_DATE').AsDateTime := EncodeDate(2015,4,1);;
     ByName('DEPT_NO').AsString := '600';
     ByName('JOB_CODE').AsString := 'Eng';
