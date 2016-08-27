@@ -1,11 +1,11 @@
-unit FB25Services;
+unit FB30Services;
 
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  Classes, SysUtils, IB, FB25ClientAPI, IBHeader, FBParamBlock, FBOutputBlock,
+  Classes, SysUtils, Firebird, IB, FB30ClientAPI, FBParamBlock, FBOutputBlock,
     FBActivityMonitor;
 
 type
@@ -16,15 +16,15 @@ type
     FFirebirdAPI: IFirebirdAPI;
     FServerName: string;
     FSPB: ISPB;
-    FHandle: TISC_SVC_HANDLE;
     FProtocol: TProtocol;
+    FServiceIntf: Firebird.IService;
     procedure CheckActive;
     procedure CheckInactive;
     procedure CheckServerName;
   public
     constructor Create(ServerName: string; Protocol: TProtocol; SPB: ISPB);
     destructor Destroy; override;
-    property Handle: TISC_SVC_HANDLE read FHandle;
+    property ServiceIntf: Firebird.IService read FServiceIntf;
 
   public
     {IServiceManager}
@@ -45,13 +45,13 @@ uses FBMessages;
 
 procedure TFBServiceManager.CheckActive;
 begin
-  if FHandle = nil then
+  if FServiceIntf = nil then
     IBError(ibxeServiceActive, [nil]);
 end;
 
 procedure TFBServiceManager.CheckInactive;
 begin
-  if FHandle <> nil then
+  if FServiceIntf <> nil then
     IBError(ibxeServiceInActive, [nil]);
 end;
 
@@ -65,7 +65,7 @@ constructor TFBServiceManager.Create(ServerName: string; Protocol: TProtocol;
   SPB: ISPB);
 begin
   inherited Create;
-  FFirebirdAPI := Firebird25ClientAPI; {Keep reference to interface}
+  FFirebirdAPI := Firebird30ClientAPI; {Keep reference to interface}
   FProtocol := Protocol;
   FSPB := SPB;
   FServerName := ServerName;
@@ -92,41 +92,38 @@ begin
     NamedPipe: ConnectString := '\\' + FServerName + '\service_mgr'; {do not localize}
     Local: ConnectString := 'service_mgr'; {do not localize}
   end;
-  with Firebird25ClientAPI do
+  with Firebird30ClientAPI do
   if FSPB = nil then
   begin
-    if isc_service_attach(StatusVector, Length(ConnectString),
-                         PChar(ConnectString), @FHandle, 0, nil) > 0 then
-      IBDataBaseError;
+    FServiceIntf := ProviderIntf.attachServiceManager(StatusIntf, PChar(ConnectString), 0, nil);
+    Check4DataBaseError;
   end
   else
   begin
-    if isc_service_attach(StatusVector, Length(ConnectString),
-                           PChar(ConnectString), @FHandle,
-                           (FSPB as TSPB).getDataLength,
-                           (FSPB as TSPB).getBuffer) > 0 then
-      IBDataBaseError;
+    FServiceIntf := ProviderIntf.attachServiceManager(StatusIntf,
+                                               PChar(ConnectString),
+                                               (FSPB as TSPB).getDataLength,
+                                               BytePtr((FSPB as TSPB).getBuffer));
+    Check4DataBaseError;
   end;
 end;
 
 procedure TFBServiceManager.Detach(Force: boolean);
 begin
-  if FHandle = nil then
+  if FServiceIntf = nil then
     Exit;
-  with Firebird25ClientAPI do
-  if isc_service_detach(StatusVector, @FHandle) > 0 then
+  with Firebird30ClientAPI do
   begin
-    FHandle := nil;
-    if not Force then
-     IBDataBaseError;
-  end
-  else
-    FHandle := nil;
+    FServiceIntf.detach(StatusIntf);
+    if not Force and InErrorState then
+      IBDataBaseError;
+    FServiceIntf := nil;
+  end;
 end;
 
 function TFBServiceManager.IsAttached: boolean;
 begin
-  Result := FHandle <> nil;
+  Result := FServiceIntf <> nil;
 end;
 
 function TFBServiceManager.AllocateRequestBuffer: ISRB;
@@ -137,11 +134,13 @@ end;
 procedure TFBServiceManager.Start(Request: ISRB);
 begin
   CheckActive;
-  with Firebird25ClientAPI do
-    if isc_service_start(StatusVector, @FHandle, nil,
+  with Firebird30ClientAPI do
+    begin
+      FServiceIntf.Start(StatusIntf,
                            (Request as TSRB).getDataLength,
-                           (Request as TSRB).getBuffer) > 0 then
-        IBDataBaseError;
+                           BytePtr((Request as TSRB).getBuffer));
+      Check4DataBaseError;
+    end;
 end;
 
 function TFBServiceManager.Query(Request: ISRB): IServiceQueryResults;
@@ -150,14 +149,15 @@ begin
   CheckActive;
   QueryResults := TServiceQueryResults.Create;
   Result := QueryResults;
-  with Firebird25ClientAPI do
-    if isc_service_query(StatusVector, @FHandle, nil, 0, nil,
+  with Firebird30ClientAPI do
+  begin
+    FServiceIntf.query(StatusIntf, 0, nil,
                        (Request as TSRB).getDataLength,
-                       (Request as TSRB).getBuffer,
+                       BytePtr((Request as TSRB).getBuffer),
                        QueryResults.getBufSize,
-                       QueryResults.Buffer) > 0 then
-      IBDataBaseError;
-
+                       BytePtr(QueryResults.Buffer));
+      Check4DataBaseError;
+  end;
 end;
 
 end.

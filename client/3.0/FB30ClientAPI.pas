@@ -89,7 +89,7 @@ var Firebird30ClientAPI: TFB30ClientAPI;
 
 implementation
 
-uses FBParamBlock, FB30Attachment, dynlibs, FBMessages;
+uses FBParamBlock, FB30Attachment, dynlibs, FBMessages, FB30Services;
 
 type
   PISC_DATE = ^ISC_DATE;
@@ -210,7 +210,7 @@ end;
 function TFB30ClientAPI.GetServiceManager(ServerName: string;
   Protocol: TProtocol; SPB: ISPB): IServiceManager;
 begin
-
+  Result := TFBServiceManager.Create(ServerName,Protocol,SPB);
 end;
 
 function TFB30ClientAPI.HasServiceAPI: boolean;
