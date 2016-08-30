@@ -116,9 +116,8 @@ FIREBIRD_EMBEDDED = 'fbembed.dll';
 constructor TFBClientAPI.Create;
 begin
   inherited Create;
-  if IBLibrary <> NilHandle then
-    IBError(ibxeFirebirdLibraryLoaded,[nil]);
-  LoadIBLibrary;
+  if IBLibrary = NilHandle then
+    LoadIBLibrary;
   if (IBLibrary <> NilHandle) then
     LoadInterface;
   FirebirdClientAPI := self;
@@ -126,11 +125,6 @@ end;
 
 destructor TFBClientAPI.Destroy;
 begin
-  if IBLibrary <> NilHandle then
-  begin
-    FreeLibrary(IBLibrary);
-    IBLibrary := NilHandle;
-  end;
   FirebirdClientAPI := nil;
   inherited Destroy;
 end;
@@ -303,6 +297,11 @@ initialization
 
 finalization
   DoneCriticalSection(TFBStatus.FIBCS);
+  if TFBClientAPI.IBLibrary <> NilHandle then
+  begin
+    FreeLibrary(TFBClientAPI.IBLibrary);
+    TFBClientAPI.IBLibrary := NilHandle;
+  end;
 
 end.
 

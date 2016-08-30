@@ -112,6 +112,7 @@ type
              TPB: ITPB; DefaultCompletion: TTransactionAction): ITransaction; overload;
     function HasServiceAPI: boolean;
     function HasRollbackRetaining: boolean;
+    function HasMasterIntf: boolean;
     function GetImplementationVersion: string;
     function DecodeInteger(bufptr: PChar; len: short): integer; override;
     procedure SQLEncodeDate(aDate: TDateTime; bufptr: PChar); override;
@@ -404,6 +405,11 @@ end;
 function TFB25ClientAPI.HasRollbackRetaining: boolean;
 begin
   Result := assigned(isc_rollback_retaining);
+end;
+
+function TFB25ClientAPI.HasMasterIntf: boolean;
+begin
+  Result := false;
 end;
 
 function TFB25ClientAPI.GetImplementationVersion: string;

@@ -67,6 +67,7 @@ type
 
     {Information}
     function HasServiceAPI: boolean;
+    function HasMasterIntf: boolean;
     function HasRollbackRetaining: boolean;
     function GetImplementationVersion: string;
 
@@ -216,6 +217,11 @@ end;
 function TFB30ClientAPI.HasServiceAPI: boolean;
 begin
   Result := true;
+end;
+
+function TFB30ClientAPI.HasMasterIntf: boolean;
+begin
+  Result := MasterIntf <> nil;
 end;
 
 function TFB30ClientAPI.HasRollbackRetaining: boolean;

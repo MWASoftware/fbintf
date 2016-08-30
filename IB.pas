@@ -6,6 +6,9 @@ unit IB;
 {$codepage UTF8}
 {$ENDIF}
 
+{$DEFINE USEFIREBIRD3API}
+{$DEFINE USELEGACYFIREBIRDAPI}
+
 interface
 
 uses
@@ -607,6 +610,7 @@ type
     function IsEmbeddedServer: boolean;
     function GetLibraryName: string;
     function HasServiceAPI: boolean;
+    function HasMasterIntf: boolean;
     function HasRollbackRetaining: boolean;
     function GetImplementationVersion: string;
   end;
@@ -650,7 +654,7 @@ procedure CheckIBLoaded;
 
 implementation
 
-uses FBClientAPI, FB25ClientAPI;
+uses FBClientAPI, FB25ClientAPI, FB30ClientAPI;
 
 var FFirebirdAPI: IFirebirdAPI;
 
@@ -662,15 +666,23 @@ begin
 end;
 
 function TryIBLoad: Boolean;
-var FBLibraryObj: TFBClientAPI;
 begin
   Result := FFirebirdAPI <> nil;
+  {$IFDEF USEFIREBIRD3API}
   if not Result then
   begin
-    FBLibraryObj := TFB25ClientAPI.Create;
-    FFirebirdAPI := TFB25ClientAPI(FBLibraryObj);
+    FFirebirdAPI := TFB30ClientAPI.Create;
+    Result := FFirebirdAPI.HasMasterIntf;
+  end;
+  {$ENDIF}
+  {$IFDEF USELEGACYFIREBIRDAPI}
+  if not Result then
+  begin
+    FFirebirdAPI := nil;
+    FFirebirdAPI := TFB25ClientAPI.Create;
     Result := true;
   end;
+  {$ENDIF}
 end;
 
 procedure CheckIBLoaded;
