@@ -69,6 +69,32 @@ begin
   Statement.Execute;
   WriteAffectedRows(Statement);
 
+  {Now again but with a null}
+  Statement := Attachment.PrepareWithNamedParameters(Transaction,'INSERT INTO EMPLOYEE (EMP_NO, FIRST_NAME, LAST_NAME, PHONE_EXT, HIRE_DATE,' +
+      'DEPT_NO, JOB_CODE, JOB_GRADE, JOB_COUNTRY, SALARY) '+
+      'VALUES (:EMP_NO, :FIRST_NAME, :LAST_NAME, :PHONE_EXT, :HIRE_DATE,' +
+      ':DEPT_NO, :JOB_CODE, :JOB_GRADE, :JOB_COUNTRY, :SALARY)',3);
+  with Statement.GetSQLParams do
+  begin
+    ByName('EMP_NO').AsInteger := 150;
+    ByName('FIRST_NAME').AsString := 'Jane';
+    ByName('LAST_NAME').AsString := 'Doe';
+    ByName('PHONE_EXT').Clear;
+    ByName('HIRE_DATE').AsDateTime := EncodeDate(2015,4,1);;
+    ByName('DEPT_NO').AsString := '600';
+    ByName('JOB_CODE').AsString := 'Eng';
+    ByName('JOB_GRADE').AsInteger := 4;
+    ByName('JOB_COUNTRY').AsString := 'England';
+    ByName('SALARY').AsFloat := 41000.89;
+  end;
+  writeln('Inserting');
+  Statement.Execute;
+  WriteAffectedRows(Statement);
+
+  Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
+  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 150;
+  ReportResults(Statement);
+
   writeln('Employee Count = ', Attachment.OpenCursorAtStart(Transaction,
          'Select count(*) from EMPLOYEE',3)[0].AsInteger);
 

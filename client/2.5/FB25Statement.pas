@@ -65,11 +65,7 @@ type
   TFBStatement = class;
   TIBXSQLDA = class;
 
-  {$IF FPC_FULLVERSION < 20700 }
-  RawByteString = string;
-  {$ENDIF}
-
-  { TIBXSQLVAR }
+   { TIBXSQLVAR }
 
   TIBXSQLVAR = class
   public
@@ -82,6 +78,7 @@ type
     FArray: IArray;
     FVarString: RawByteString;
     FVarIsStringRef: boolean;
+    FNullIndicator: short;
     FXSQLVAR: PXSQLVAR;       { Point to the PXSQLVAR in the owner object }
     constructor Create(aParent: TIBXSQLDA);
     procedure RowChange;
@@ -804,7 +801,7 @@ end;
 function TIBSQLData.GetIsNull: Boolean;
 begin
   CheckActive;
-  result := IsNullable and (FIBXSQLVAR.FXSQLVAR^.sqlind^ = -1);
+  result := IsNullable and (FIBXSQLVAR.FNullIndicator = -1);
 end;
 
 function TIBSQLData.GetAsArray: IArray;
@@ -881,15 +878,13 @@ begin
     if not IsNullable then
       IsNullable := True;
 
-    if Assigned(FXSQLVAR^.sqlind) then
-      FXSQLVAR^.sqlind^ := -1;
+      FNullIndicator := -1;
     Changed;
   end
   else
     if ((not Value) and IsNullable) then
     begin
-      if Assigned(FXSQLVAR^.sqlind) then
-        FXSQLVAR^.sqlind^ := 0;
+      FNullIndicator := 0;
       Changed;
     end;
 end;
@@ -902,13 +897,13 @@ begin
     if Value then
     begin
       FXSQLVAR^.sqltype := FXSQLVAR^.sqltype or 1;
-      with Firebird25ClientAPI do
-        IBAlloc(FXSQLVAR^.sqlind, 0, SizeOf(Short));
+      FNullIndicator := 0;
+      FXSQLVAR^.sqlInd := @FNullIndicator;
     end
     else
     begin
       FXSQLVAR^.sqltype := FXSQLVAR^.sqltype and (not 1);
-      ReallocMem(FXSQLVAR^.sqlind, 0);
+      FXSQLVAR^.sqlind := nil;
     end;
   end;
 end;
@@ -1664,10 +1659,12 @@ begin
             IBError(ibxeUnknownSQLDataType, [sqltype and (not 1)])
         end;
         if (sqltype and 1 = 1) then
-          IBAlloc(sqlind, 0, SizeOf(Short))
+        begin
+          sqlInd := @(FXSQLVARs[i].FNullIndicator);
+          FXSQLVARs[i].FNullIndicator := 0;
+        end
         else
-          if (sqlind <> nil) then
-            ReallocMem(sqlind, 0);
+          sqlInd :=  nil;
       end;
     end;
   end;
@@ -1735,7 +1732,6 @@ begin
     begin
       FXSQLVARs[i].ClearString;
       FreeMem(FXSQLVARs[i].FXSQLVAR^.sqldata);
-      FreeMem(FXSQLVARs[i].FXSQLVAR^.sqlind);
     end;
     FreeMem(FXSQLDA);
     FXSQLDA := nil;

@@ -29,6 +29,8 @@ type
      function AdjustScaleToCurrency(Value: Int64; aScale: Integer): Currency;
      procedure SetAsInteger(AValue: Integer);
   protected
+     function AdjustScaleFromCurrency(Value: Currency; aScale: Integer): Int64;
+     function AdjustScaleFromDouble(Value: Double; aScale: Integer): Int64;
      procedure CheckActive; virtual;
      function GetSQLDialect: integer; virtual; abstract;
      procedure Changed; virtual;
@@ -60,18 +62,18 @@ type
      function getIsNullable: boolean; virtual;
      function GetAsVariant: Variant;
      function GetModified: boolean; virtual;
-     procedure SetAsBoolean(AValue: boolean);
-     procedure SetAsCurrency(Value: Currency);
-     procedure SetAsInt64(Value: Int64);
-     procedure SetAsDate(Value: TDateTime);
-     procedure SetAsLong(Value: Long);
-     procedure SetAsTime(Value: TDateTime);
+     procedure SetAsBoolean(AValue: boolean); virtual;
+     procedure SetAsCurrency(Value: Currency); virtual;
+     procedure SetAsInt64(Value: Int64); virtual;
+     procedure SetAsDate(Value: TDateTime); virtual;
+     procedure SetAsLong(Value: Long); virtual;
+     procedure SetAsTime(Value: TDateTime); virtual;
      procedure SetAsDateTime(Value: TDateTime);
-     procedure SetAsDouble(Value: Double);
-     procedure SetAsFloat(Value: Float);
+     procedure SetAsDouble(Value: Double); virtual;
+     procedure SetAsFloat(Value: Float); virtual;
      procedure SetAsPointer(Value: Pointer);
      procedure SetAsQuad(Value: TISC_QUAD);
-     procedure SetAsShort(Value: Short);
+     procedure SetAsShort(Value: Short); virtual;
      procedure SetAsString(Value: String); virtual;
      procedure SetAsVariant(Value: Variant);
      procedure SetIsNull(Value: Boolean);  virtual;
@@ -185,6 +187,56 @@ end;
 procedure TSQLDataItem.SetAsInteger(AValue: Integer);
 begin
   SetAsLong(aValue);
+end;
+
+function TSQLDataItem.AdjustScaleFromCurrency(Value: Currency; aScale: Integer
+  ): Int64;
+var
+  Scaling : Int64;
+  i : Integer;
+begin
+  Result := 0;
+  Scaling := 1;
+  if aScale < 0 then
+  begin
+    for i := -1 downto aScale do
+      Scaling := Scaling * 10;
+    result := trunc(Value * Scaling);
+  end
+  else
+  if aScale > 0 then
+  begin
+    for i := 1 to aScale do
+       Scaling := Scaling * 10;
+    result := trunc(Value / Scaling);
+  end
+  else
+    result := trunc(Value);
+end;
+
+function TSQLDataItem.AdjustScaleFromDouble(Value: Double; aScale: Integer
+  ): Int64;
+var
+  Scaling : Int64;
+  i : Integer;
+begin
+  Result := 0;
+  Scaling := 1;
+  if aScale < 0 then
+  begin
+    for i := -1 downto aScale do
+      Scaling := Scaling * 10;
+    result := trunc(Value * Scaling);
+  end
+  else
+  if aScale > 0 then
+  begin
+    for i := 1 to aScale do
+       Scaling := Scaling * 10;
+    result := trunc(Value / Scaling);
+  end
+  else
+    result := trunc(Value);
 end;
 
 procedure TSQLDataItem.CheckActive;

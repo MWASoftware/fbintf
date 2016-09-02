@@ -163,8 +163,7 @@ type
       ibxeStatementNotPrepared,
       ibxeInterfaceOutofDate,
       ibxeUnexpectedDatabaseInfoResp,
-      ibxeInvalidBlobMetaData,
-      ibxeInvalidDataLength
+      ibxeInvalidBlobMetaData
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;
@@ -351,7 +350,6 @@ resourcestring
   SInterfaceOutofDate = 'This interface is no longer up-to-date';
   SUnexpectedDatabaseInfoResp = 'Unexpected Database Information Response';
   SInvalidBlobMetaData = 'Unable to Access Blob Meta Data';
-  SInvalidDataLength = 'Data length requested does not match Metadata';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -500,8 +498,7 @@ const
     SStatementNotPrepared,
     SInterfaceOutofDate,
     SUnexpectedDatabaseInfoResp,
-    SInvalidBlobMetaData,
-    SInvalidDataLength
+    SInvalidBlobMetaData
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;

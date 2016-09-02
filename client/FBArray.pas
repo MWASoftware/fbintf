@@ -54,7 +54,14 @@ type
    function GetScale: short; override;
    function GetSize: integer;
    function GetAsString: string; override;
+   procedure SetAsLong(Value: Long); override;
+   procedure SetAsShort(Value: Short); override;
+   procedure SetAsInt64(Value: Int64); override;
    procedure SetAsString(Value: String); override;
+   procedure SetAsDouble(Value: Double); override;
+   procedure SetAsFloat(Value: Float); override;
+   procedure SetAsCurrency(Value: Currency); override;
+   procedure SetSQLType(aValue: short); override;
   end;
 
   { TFBArrayMetaData }
@@ -222,10 +229,44 @@ begin
   end;
 end;
 
+procedure TFBArrayElement.SetAsLong(Value: Long);
+begin
+  AsInt64 := Value;
+end;
+
+procedure TFBArrayElement.SetAsShort(Value: Short);
+begin
+  AsInt64 := Value;
+end;
+
+procedure TFBArrayElement.SetAsInt64(Value: Int64);
+begin
+  CheckActive;
+  case GetSQLType of
+  SQL_LONG:
+    PLong(SQLData)^ := Value;
+  SQL_SHORT:
+    PShort(SQLData)^ := Value;
+  SQL_INT64:
+    PInt64(SQLData)^ := Value;
+  SQL_TEXT, SQL_VARYING:
+    SetAsString(IntToStr(Value));
+  SQL_D_FLOAT,
+  SQL_DOUBLE:
+    PDouble(SQLData)^ := Value;
+  SQL_FLOAT:
+    PSingle(SQLData)^ := Value;
+  else
+    IBError(ibxeInvalidDataConversion, [nil]);
+  end;
+  Changed;
+end;
+
 procedure TFBArrayElement.SetAsString(Value: String);
 var len: integer;
     ElementSize: integer;
 begin
+  CheckActive;
   case GetSQLType of
   SQL_VARYING:
     begin
@@ -234,7 +275,8 @@ begin
       if len > ElementSize - 2 then len := ElementSize - 2;
       Move(Value[1],FBufPtr^,len);
       if Len < ElementSize - 2 then
-        (FBufPtr+len)^ := #0
+        (FBufPtr+len)^ := #0;
+      Changed;
     end;
   SQL_TEXT:
     begin
@@ -243,10 +285,71 @@ begin
       len := Length(Value);
       if len > ElementSize - 1 then len := ElementSize - 1;
       Move(Value[1],FBufPtr^,len);
+      Changed;
     end;
+  SQL_SHORT,SQL_LONG,SQL_INT64:
+    AsInt64 := StrToInt(Value);
   else
     inherited SetAsString(Value);
   end;
+end;
+
+procedure TFBArrayElement.SetAsDouble(Value: Double);
+begin
+  CheckActive;
+  case GetSQLType of
+  SQL_D_FLOAT,
+  SQL_DOUBLE:
+    PDouble(SQLData)^ := Value;
+  SQL_FLOAT:
+    PSingle(SQLData)^ := Value;
+  SQL_SHORT:
+    if Scale < 0 then
+      PShort(SQLData)^ := AdjustScaleFromDouble(Value,Scale)
+    else
+      IBError(ibxeInvalidDataConversion, [nil]);
+  SQL_LONG:
+    if Scale < 0 then
+      PLong(SQLData)^ := AdjustScaleFromDouble(Value,Scale)
+    else
+      IBError(ibxeInvalidDataConversion, [nil]);
+  SQL_INT64:
+    if Scale < 0 then
+      PInt64(SQLData)^ := AdjustScaleFromDouble(Value,Scale)
+    else
+      IBError(ibxeInvalidDataConversion, [nil]);
+  SQL_TEXT, SQL_VARYING:
+    AsString := FloatToStr(Value);
+  else
+    IBError(ibxeInvalidDataConversion, [nil]);
+  end;
+  Changed;
+end;
+
+procedure TFBArrayElement.SetAsFloat(Value: Float);
+begin
+  AsDouble := Value;
+end;
+
+procedure TFBArrayElement.SetAsCurrency(Value: Currency);
+begin
+  CheckActive;
+  if (GetSQLDialect < 3) or (SQLType <> SQL_INT64) then
+    AsDouble := Value
+  else
+  begin
+    if Scale = -4 then
+      PCurrency(SQLData)^ := Value
+    else
+      PInt64(SQLData)^ := AdjustScaleFromCurrency(Value,Scale);
+    Changed;
+  end
+end;
+
+procedure TFBArrayElement.SetSQLType(aValue: short);
+begin
+  if aValue = GetSQLType then
+    IBError(ibxeInvalidDataConversion, [nil]);
 end;
 
 {TFBArrayMetaData}

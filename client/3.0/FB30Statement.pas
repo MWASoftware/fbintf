@@ -62,6 +62,7 @@ uses
   FB30Attachment,IBExternals, FBSQLData, FBOutputBlock, FBActivityMonitor;
 
 type
+
   TFBStatement = class;
   TIBXSQLDA = class;
 
@@ -76,11 +77,21 @@ type
     FModified: boolean;
     FBlob: IBlob;             {Cache references}
     FArray: IArray;
+    FSQLType: short;
     FSQLData: PChar; {Address of SQL Data in Message Buffer}
-    FNullIndicator: PShort; {Address of null indicator}
+    FSQLNullIndicator: PShort; {Address of null indicator}
     FDataLength: integer;
+    FNullable: boolean;
+    FScale: short;
+
+    {input only}
+    FVarString: RawByteString;  {Reference counted copy of string value FSQLData contains a pointer to it}
+    FVarIsStringRef: boolean;   {true if FSQLData -> FVarString}
+    FNullIndicator: short;
     constructor Create(aParent: TIBXSQLDA);
     procedure RowChange;
+    procedure SetString(aValue: string);
+    procedure ClearString;
   end;
 
   { TColumnMetaData }
@@ -150,16 +161,20 @@ type
   private
     procedure InternalSetIsNull(Value: Boolean);
     procedure InternalSetAsString(Value: String);
+    procedure InternalSetIsNullable(Value: Boolean);
   protected
     procedure CheckActive; override;
     procedure Changed; override;
+    procedure SetScale(aValue: short); override;
     procedure SetDataLength(len: short); override;
-  public
+    procedure SetSQLType(aValue: short); override;
+ public
     constructor Create(aIBXSQLVAR: TIBXSQLVAR);
     procedure Clear;
     function GetModified: boolean; override;
     procedure SetName(Value: string); override;
     procedure SetIsNull(Value: Boolean);  override;
+    procedure SetIsNullable(Value: Boolean);  override;
     procedure SetAsArray(anArray: IArray);
 
     {overrides}
@@ -209,7 +224,7 @@ type
   public
     constructor Create(aStatement: TFBStatement; sqldaType: TIBXSQLDAType);
     destructor Destroy; override;
-    procedure Bind(metaData: Firebird.IMessageMetadata);
+    procedure Bind(metaData: Firebird.IMessageMetadata); virtual; abstract;
     function VarByName(Idx: String): TIBXSQLVAR;
     function GetUniqueRelationName: string;
     procedure Initialize;
@@ -228,6 +243,7 @@ type
     function GetModified: Boolean;
   public
     constructor Create(aOwner: TFBStatement);
+    procedure Bind(metaData: Firebird.IMessageMetadata); override;
     procedure SetParamName(FieldName: String; Idx: Integer; UniqueName: boolean );
   end;
 
@@ -257,6 +273,7 @@ type
      FTransaction: TFB30Transaction; {transaction used to execute the statement}
   public
     constructor Create(aOwner: TFBStatement);
+    procedure Bind(metaData: Firebird.IMessageMetadata); override;
   end;
 
   { TMetaData }
@@ -558,6 +575,31 @@ begin
   FModified := false;
 end;
 
+procedure TIBXSQLVAR.SetString(aValue: string);
+begin
+  {we take full advantage here of reference counted strings. When setting a string
+   value, a reference is kept in FVarString and a pointer to it placed in the
+   SQLVar. This avoids string copies. Note that PChar is guaranteed to point to
+   a zero byte when the string is empty, neatly avoiding a nil pointer error.}
+
+  if not FVarIsStringRef then
+    FreeMem(FSQLData);
+  FVarString := aValue;
+  FSQLType := SQL_TEXT;
+  FSQLData := PChar(FVarString);
+  FDataLength := Length(aValue);
+  FVarIsStringRef := true;
+end;
+
+procedure TIBXSQLVAR.ClearString;
+begin
+  if not FVarIsStringRef then Exit;
+  FVarString := '';
+  FSQLData := nil;
+  FDataLength := 0;
+  FVarIsStringRef := false;
+end;
+
 { TResultSet }
 
 destructor TResultSet.Destroy;
@@ -848,15 +890,15 @@ begin
     if not IsNullable then
       IsNullable := True;
 
-    if Assigned(FNullIndicator) then
-      FNullIndicator^ := -1;
+    if Assigned(FSQLNullIndicator) then
+      FSQLNullIndicator^ := -1;
     Changed;
   end
   else
     if ((not Value) and IsNullable) then
     begin
-      if Assigned(FNullIndicator) then
-        FNullIndicator^ := 0;
+      if Assigned(FSQLNullIndicator) then
+        FSQLNullIndicator^ := 0;
       Changed;
     end;
 end;
@@ -869,7 +911,8 @@ begin
   CheckActive;
   if IsNullable then
     IsNull := False;
-  if (SQLTYPE = SQL_BLOB) then
+  case SQLTYPE of
+  SQL_BLOB:
   begin
     ss := TStringStream.Create(Value);
     try
@@ -882,9 +925,30 @@ begin
     finally
       ss.Free;
     end;
-  end
+  end;
+
+  SQL_TEXT, SQL_VARYING:
+    FIBXSQLVar.SetString(Value);
+
   else
     inherited SetAsString(Value);
+  end;
+end;
+
+procedure TSQLParam.InternalSetIsNullable(Value: Boolean);
+begin
+  with FIBXSQLVAR do
+  if (Value <> IsNullable) then
+  begin
+    FNullable := Value;
+    if Value then
+    begin
+      FNullIndicator := 0;
+      FSQLNullIndicator := @FNullIndicator;
+    end
+    else
+      FSQLNullIndicator := nil;
+  end;
 end;
 
 procedure TSQLParam.CheckActive;
@@ -900,8 +964,18 @@ procedure TSQLParam.SetDataLength(len: short);
 begin
   CheckActive;
   with FIBXSQLVAR do
-    if len > FDataLength then
-      IBError(ibxeInvalidDataLength,[nil]);
+  begin
+    ClearString;
+    FDataLength := len;
+    with Firebird25ClientAPI do
+      IBAlloc(FSQLData, 0, FDataLength);
+  end;
+end;
+
+procedure TSQLParam.SetSQLType(aValue: short);
+begin
+  CheckActive;
+  FIBXSQLVAR.FSQLType := aValue;
 end;
 
 constructor TSQLParam.Create(aIBXSQLVAR: TIBXSQLVAR);
@@ -943,6 +1017,22 @@ begin
   end
 end;
 
+procedure TSQLParam.SetIsNullable(Value: Boolean);
+var i: integer;
+begin
+  CheckActive;
+  with FIBXSQLVAR do
+  if FUniqueName then
+    InternalSetIsNullable(Value)
+  else
+  begin
+    for i := 0 to FParent.FCount - 1 do
+      with (FParent as TIBXINPUTSQLDA)[i] do
+      if FName = self.FIBXSQLVAR.FName then
+        InternalSetIsNullable(Value);
+  end
+end;
+
 procedure TSQLParam.SetAsArray(anArray: IArray);
 begin
   CheckActive;
@@ -958,6 +1048,12 @@ end;
 procedure TSQLParam.Changed;
 begin
   FIBXSQLVAR.FModified := true;
+end;
+
+procedure TSQLParam.SetScale(aValue: short);
+begin
+  CheckActive;
+  FIBXSQLVAR.FScale := aValue;
 end;
 
 procedure TSQLParam.SetAsBoolean(AValue: boolean);
@@ -1201,6 +1297,33 @@ begin
   inherited Create(aOwner,daInput);
 end;
 
+procedure TIBXINPUTSQLDA.Bind(metaData: Firebird.IMessageMetadata);
+var i: integer;
+begin
+  FMetaData := metaData;
+  with Firebird30ClientAPI do
+  begin
+    Count := metadata.getCount(StatusIntf);
+    Check4DataBaseError;
+
+    FMsgLength := metaData.getMessageLength(StatusIntf);
+    Check4DataBaseError;
+    IBAlloc(FMessageBuffer,0,FMsgLength);
+
+    for i := 0 to Count - 1 do
+    begin
+      Vars[i].FIndex := i;
+      Vars[i].FSQLData := FMessageBuffer + metaData.getOffset(StatusIntf,i);
+      Check4DataBaseError;
+      Vars[i].FDataLength := metaData.getLength(StatusIntf,i);
+      Check4DataBaseError;
+      Vars[i].FNullIndicator := PShort(FMessageBuffer + metaData.getNullOffset(StatusIntf,i));
+      Check4DataBaseError;
+    end;
+  end;
+  Initialize;
+end;
+
 procedure TIBXINPUTSQLDA.SetParamName(FieldName: String; Idx: Integer;
   UniqueName: boolean);
 begin
@@ -1218,6 +1341,39 @@ end;
 constructor TIBXOUTPUTSQLDA.Create(aOwner: TFBStatement);
 begin
   inherited Create(aOwner,daOutput);
+end;
+
+procedure TIBXOUTPUTSQLDA.Bind(metaData: Firebird.IMessageMetadata);
+var i: integer;
+begin
+  FMetaData := metaData;
+  with Firebird30ClientAPI do
+  begin
+    Count := metadata.getCount(StatusIntf);
+    Check4DataBaseError;
+
+    FMsgLength := metaData.getMessageLength(StatusIntf);
+    Check4DataBaseError;
+    IBAlloc(FMessageBuffer,0,FMsgLength);
+
+    for i := 0 to Count - 1 do
+    begin
+      Vars[i].FIndex := i;
+      Vars[i].FSQLType := metaDatagetType(StatusIntf,i);
+      Check4DataBaseError;
+      Vars[i].FSQLData := FMessageBuffer + metaData.getOffset(StatusIntf,i);
+      Check4DataBaseError;
+      Vars[i].FDataLength := metaData.getLength(StatusIntf,i);
+      Check4DataBaseError;
+      Vars[i].FNullable := metaData.isNullable(StatusIntf,i);
+      Check4DataBaseError;
+      Vars[i].FSQLNullIndicator := PShort(FMessageBuffer + metaData.getNullOffset(StatusIntf,i));
+      Check4DataBaseError;
+      Vars[i].FScale := metaData.getScale(StatusIntf,i);
+      Check4DataBaseError;
+    end;
+  end;
+  Initialize;
 end;
 
 {TColumnMetaData}
@@ -1277,11 +1433,7 @@ end;
 function TColumnMetaData.GetSQLType: short;
 begin
   CheckActive;
-  with Firebird30ClientAPI do
-  begin
-    result := FIBXSQLVAR.FParent.MetaData.getType(StatusIntf,FIBXSQLVAR.FIndex);
-    Check4DataBaseError;
-  end;
+  result := FIBXSQLVAR.FSQLType;
 end;
 
 function TColumnMetaData.getSubtype: short;
@@ -1343,11 +1495,7 @@ end;
 function TColumnMetaData.GetScale: short;
 begin
   CheckActive;
-  with Firebird30ClientAPI do
-  begin
-    result := FIBXSQLVAR.FParent.MetaData.getScale(StatusIntf,FIBXSQLVAR.FIndex);
-    Check4DataBaseError;
-  end;
+  result := FIBXSQLVAR.FScale;
 end;
 
 function TColumnMetaData.getCharSetID: cardinal;
@@ -1362,21 +1510,14 @@ end;
 
 function TColumnMetaData.GetIsNullable: boolean;
 begin
-  with Firebird30ClientAPI do
-  begin
-    result := FIBXSQLVAR.FParent.MetaData.isNullable(StatusIntf,FIBXSQLVAR.FIndex);
-    Check4DataBaseError;
-  end;
+  CheckActive;
+  result := FIBXSQLVAR.FNullable;
 end;
 
 function TColumnMetaData.GetSize: integer;
 begin
   CheckActive;
-  with Firebird30ClientAPI do
-  begin
-    result := FIBXSQLVAR.FParent.MetaData.getLength(StatusIntf,FIBXSQLVAR.FIndex);
-    Check4DataBaseError;
-  end;
+  result := FIBXSQLVAR.FDataLength;
 end;
 
 function TColumnMetaData.GetArrayMetaData: IArrayMetaData;
@@ -1419,33 +1560,6 @@ begin
   FreeXSQLDA;
 //  writeln('Destroying ',ClassName);
   inherited Destroy;
-end;
-
-procedure TIBXSQLDA.Bind(metaData: Firebird.IMessageMetadata);
-var i: integer;
-begin
-  FMetaData := metaData;
-  with Firebird30ClientAPI do
-  begin
-    Count := metadata.getCount(StatusIntf);
-    Check4DataBaseError;
-
-    FMsgLength := metaData.getMessageLength(StatusIntf);
-    Check4DataBaseError;
-    IBAlloc(FMessageBuffer,0,FMsgLength);
-
-    for i := 0 to Count - 1 do
-    begin
-      Vars[i].FIndex := i;
-      Vars[i].FSQLData := FMessageBuffer + metaData.getOffset(StatusIntf,i);
-      Check4DataBaseError;
-      Vars[i].FDataLength := metaData.getLength(StatusIntf,i);
-      Check4DataBaseError;
-      Vars[i].FNullIndicator := PShort(FMessageBuffer + metaData.getNullOffset(StatusIntf,i));
-      Check4DataBaseError;
-    end;
-  end;
-  Initialize;
 end;
 
 function TIBXSQLDA.VarByName(Idx: String): TIBXSQLVAR;
