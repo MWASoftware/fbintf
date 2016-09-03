@@ -243,7 +243,7 @@ type
     function GetModified: Boolean;
   public
     constructor Create(aOwner: TFBStatement);
-    procedure Bind(metaData: Firebird.IMessageMetadata); override;
+    procedure Bind(aMetaData: Firebird.IMessageMetadata); override;
     procedure SetParamName(FieldName: String; Idx: Integer; UniqueName: boolean );
   end;
 
@@ -273,7 +273,7 @@ type
      FTransaction: TFB30Transaction; {transaction used to execute the statement}
   public
     constructor Create(aOwner: TFBStatement);
-    procedure Bind(metaData: Firebird.IMessageMetadata); override;
+    procedure Bind(aMetaData: Firebird.IMessageMetadata); override;
   end;
 
   { TMetaData }
@@ -967,7 +967,7 @@ begin
   begin
     ClearString;
     FDataLength := len;
-    with Firebird25ClientAPI do
+    with FirebirdClientAPI do
       IBAlloc(FSQLData, 0, FDataLength);
   end;
 end;
@@ -1297,10 +1297,10 @@ begin
   inherited Create(aOwner,daInput);
 end;
 
-procedure TIBXINPUTSQLDA.Bind(metaData: Firebird.IMessageMetadata);
+procedure TIBXINPUTSQLDA.Bind(aMetaData: Firebird.IMessageMetadata);
 var i: integer;
 begin
-  FMetaData := metaData;
+  FMetaData := aMetaData;
   with Firebird30ClientAPI do
   begin
     Count := metadata.getCount(StatusIntf);
@@ -1317,7 +1317,7 @@ begin
       Check4DataBaseError;
       Vars[i].FDataLength := metaData.getLength(StatusIntf,i);
       Check4DataBaseError;
-      Vars[i].FNullIndicator := PShort(FMessageBuffer + metaData.getNullOffset(StatusIntf,i));
+      Vars[i].FSQLNullIndicator := PShort(FMessageBuffer + metaData.getNullOffset(StatusIntf,i));
       Check4DataBaseError;
     end;
   end;
@@ -1343,10 +1343,10 @@ begin
   inherited Create(aOwner,daOutput);
 end;
 
-procedure TIBXOUTPUTSQLDA.Bind(metaData: Firebird.IMessageMetadata);
+procedure TIBXOUTPUTSQLDA.Bind(aMetaData: Firebird.IMessageMetadata);
 var i: integer;
 begin
-  FMetaData := metaData;
+  FMetaData := aMetaData;
   with Firebird30ClientAPI do
   begin
     Count := metadata.getCount(StatusIntf);
@@ -1359,17 +1359,17 @@ begin
     for i := 0 to Count - 1 do
     begin
       Vars[i].FIndex := i;
-      Vars[i].FSQLType := metaDatagetType(StatusIntf,i);
+      Vars[i].FSQLType := aMetaData.getType(StatusIntf,i);
       Check4DataBaseError;
       Vars[i].FSQLData := FMessageBuffer + metaData.getOffset(StatusIntf,i);
       Check4DataBaseError;
-      Vars[i].FDataLength := metaData.getLength(StatusIntf,i);
+      Vars[i].FDataLength := aMetaData.getLength(StatusIntf,i);
       Check4DataBaseError;
-      Vars[i].FNullable := metaData.isNullable(StatusIntf,i);
+      Vars[i].FNullable := aMetaData.isNullable(StatusIntf,i);
       Check4DataBaseError;
-      Vars[i].FSQLNullIndicator := PShort(FMessageBuffer + metaData.getNullOffset(StatusIntf,i));
+      Vars[i].FSQLNullIndicator := PShort(FMessageBuffer + aMetaData.getNullOffset(StatusIntf,i));
       Check4DataBaseError;
-      Vars[i].FScale := metaData.getScale(StatusIntf,i);
+      Vars[i].FScale := aMetaData.getScale(StatusIntf,i);
       Check4DataBaseError;
     end;
   end;
