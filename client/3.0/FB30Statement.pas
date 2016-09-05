@@ -8,23 +8,6 @@ unit FB30Statement;
  provided through interface rather than direct access to the XSQLDA and XSQLVar
  objects.}
 
-{ $define ALLOWDIALECT3PARAMNAMES}
-
-{$ifndef ALLOWDIALECT3PARAMNAMES}
-
-{ Note on SQL Dialects and SQL Parameter Names
-  --------------------------------------------
-
-  Even when dialect 3 quoted format parameter names are not supported, IBX still processes
-  parameter names case insensitive. This does result in some additional overhead
-  due to a call to "AnsiUpperCase". This can be avoided by undefining
-  "UseCaseInSensitiveParamName" below.
-
-  Note: do not define "UseCaseSensitiveParamName" when "ALLOWDIALECT3PARAMNAMES"
-  is defined. This will not give a useful result.
-}
-{$define UseCaseInSensitiveParamName}
-{$endif}
 {
   Note on reference counted interfaces.
   ------------------------------------
@@ -39,7 +22,7 @@ unit FB30Statement;
   he underlying TFB30Statement object and its TIBXOUTPUTSQLDA is destroyed while
   still leaving the TIBXResultSet object in place. Calls to (e.g.)   FetchNext would fail.
 
-  To avoid this problem, TIBXResultSet objects  have a reference to the IStatement
+  To avoid this problem, TResultsSet objects  have a reference to the IStatement
   interface of the TFB30Statement object. Thus, as long as these "copies" exist,
   the owning statement is not destroyed even if the user discards their reference
   to the statement. Note: the TFB30Statement does not have a reference to the TIBXResultSet
@@ -68,170 +51,79 @@ type
 
   { TIBXSQLVAR }
 
-  TIBXSQLVAR = class
-  public
-    FIndex: Integer;
-    FName: String;
-    FParent: TIBXSQLDA;
-    FUniqueName: boolean;
-    FModified: boolean;
+  TIBXSQLVAR = class(TSQLVarData)
+  private
+    FStatement: TFB30Statement;
     FBlob: IBlob;             {Cache references}
     FArray: IArray;
-    FSQLType: short;
+    FNullIndicator: short;
+    FOwnsSQLData: boolean;
+    FBlobMetaData: IBlobMetaData;
+    FArrayMetaData: IArrayMetaData;
+
+    {SQL Var Type Data}
+    FSQLType: cardinal;
+    FSQLSubType: cardinal;
     FSQLData: PChar; {Address of SQL Data in Message Buffer}
     FSQLNullIndicator: PShort; {Address of null indicator}
     FDataLength: integer;
     FNullable: boolean;
-    FScale: short;
+    FScale: cardinal;
+    FCharSetID: cardinal;
 
-    {input only}
-    FVarString: RawByteString;  {Reference counted copy of string value FSQLData contains a pointer to it}
-    FVarIsStringRef: boolean;   {true if FSQLData -> FVarString}
-    FNullIndicator: short;
-    constructor Create(aParent: TIBXSQLDA);
-    procedure RowChange;
-    procedure SetString(aValue: string);
-    procedure ClearString;
-  end;
-
-  { TColumnMetaData }
-
-  TColumnMetaData = class(TSQLDataItem,IColumnMetaData)
-  private
-    FIndex: integer;
-    FIBXSQLVAR: TIBXSQLVAR;
-    FStatement: IStatement;         {Keep reference to ensure statement not discarded}
-    FPrepareSeqNo: integer;
-    FBlobMetaData: IBlobMetaData;
-    FArrayMetaData: IArrayMetaData;
-    function GetParent: TIBXSQLDA;
-  protected
-    procedure CheckActive; override;
-    function SQLData: PChar; override;
-    function GetDataLength: cardinal; override;
+    protected
+     procedure Changed; override;
+     function GetSQLType: cardinal; override;
+     function GetSubtype: cardinal; override;
+     function GetAliasName: string;  override;
+     function GetFieldName: string; override;
+     function GetOwnerName: string;  override;
+     function GetRelationName: string;  override;
+     function GetScale: cardinal; override;
+     function GetCharSetID: cardinal; override;
+     function GetIsNull: Boolean;   override;
+     function GetIsNullable: boolean; override;
+     function GetSQLData: PChar;  override;
+     function GetDataLength: cardinal; override;
+     function GetArrayMetaData: IArrayMetaData; override;
+     function GetBlobMetaData: IBlobMetaData; override;
+     procedure SetIsNull(Value: Boolean); override;
+     procedure SetIsNullable(Value: Boolean);  override;
+     procedure SetSQLData(AValue: PChar; len: cardinal); override;
+     procedure SetScale(aValue: cardinal); override;
+     procedure SetDataLength(len: cardinal); override;
+     procedure SetSQLType(aValue: cardinal); override;
 
   public
-    constructor Create(aIBXSQLVAR: TIBXSQLVAR);
-    function GetAttachment: TFBAttachment;
-    function GetTransaction: TFB30Transaction; virtual;
-    function GetSQLDialect: integer; override;
-    property Parent: TIBXSQLDA read GetParent;
-
-  public
-    {IColumnMetaData}
-    function GetIndex: integer;
-    function GetSQLType: cardinal; override;
-    function getSubtype: cardinal;
-    function getRelationName: string;
-    function getOwnerName: string;
-    function getSQLName: string;    {Name of the column}
-    function getAliasName: string;  {Alias Name of column or Column Name if not alias}
-    function GetName: string; override;      {Disambiguated uppercase Field Name}
-    function GetScale: cardinal; override;
-    function getCharSetID: cardinal;
-    function GetIsNullable: boolean; override;
-    function GetSize: integer;
-    function GetArrayMetaData: IArrayMetaData;
-    function GetBlobMetaData: IBlobMetaData;
-    property Name: string read GetName;
-    property Size: Integer read GetSize;
-    property CharSetID: cardinal read getCharSetID;
-    property SQLSubtype: cardinal read getSubtype;
-    property IsNullable: Boolean read GetIsNullable;
+    constructor Create(aParent: TIBXSQLDA; aIndex: integer);
+    procedure RowChange; override;
+    function GetAsArray(Array_ID: TISC_QUAD): IArray; override;
+    function GetAsBlob(Blob_ID: TISC_QUAD): IBlob; override;
+    function CreateBlob: IBlob; override;
   end;
-
-  { TIBSQLData }
-
-  TIBSQLData = class(TColumnMetaData,ISQLData)
-  protected
-    procedure CheckActive; override;
-  public
-    function GetAsArray: IArray;
-    function GetAsBlob: IBlob;
-    function GetAsString: String; override;
-    function GetIsNull: Boolean; override;
-    property AsBlob: IBlob read GetAsBlob;
- end;
-
-  TIBXINPUTSQLDA = class;
-
-  { TSQLParam }
-
-  TSQLParam = class(TIBSQLData,ISQLParam)
-  private
-    procedure InternalSetIsNull(Value: Boolean);
-    procedure InternalSetAsString(Value: String);
-    procedure InternalSetIsNullable(Value: Boolean);
-  protected
-    procedure CheckActive; override;
-    procedure Changed; override;
-    procedure SetScale(aValue: cardinal); override;
-    procedure SetDataLength(len: cardinal); override;
-    procedure SetSQLType(aValue: cardinal); override;
- public
-    constructor Create(aIBXSQLVAR: TIBXSQLVAR);
-    procedure Clear;
-    function GetModified: boolean; override;
-    procedure SetName(Value: string); override;
-    procedure SetIsNull(Value: Boolean);
-    procedure SetIsNullable(Value: Boolean);
-    procedure SetAsArray(anArray: IArray);
-
-    {overrides}
-    procedure SetAsBoolean(AValue: boolean);
-    procedure SetAsCurrency(Value: Currency);
-    procedure SetAsInt64(Value: Int64);
-    procedure SetAsDate(Value: TDateTime);
-    procedure SetAsLong(Value: Long);
-    procedure SetAsTime(Value: TDateTime);
-    procedure SetAsDateTime(Value: TDateTime);
-    procedure SetAsDouble(Value: Double);
-    procedure SetAsFloat(Value: Float);
-    procedure SetAsPointer(Value: Pointer);
-    procedure SetAsShort(Value: Short);
-    procedure SetAsString(Value: String);  override;
-    procedure SetAsVariant(Value: Variant);
-    procedure SetAsBlob(aValue: IBlob);
-    procedure SetAsQuad(Value: TISC_QUAD);
-
-    property AsBlob: IBlob read GetAsBlob write SetAsBlob;
-    property IsNullable: Boolean read GetIsNullable write SetIsNullable;
-  end;
-
-  TIBXSQLDAType = (daInput,daOutput);
 
   { TIBXSQLDA }
 
-  TIBXSQLDA = class
+  TIBXSQLDA = class(TSQLDataArea)
   private
-    FCount: Integer;
-    FSize: integer;
-    FInputSQLDA: boolean;
+    FCount: Integer; {Columns in use - may be less than inherited columns}
+    FSize: Integer;  {Number of TIBXSQLVARs in column list}
     FMetaData: Firebird.IMessageMetadata;
-    FMessageBuffer: PChar; {Message Buffer}
-    FMsgLength: integer; {Message Buffer length}
-    FXSQLVars: array of TIBXSQLVAR;
-    FUniqueRelationName: String;
-    function GetXSQLVAR(Idx: Integer): TIBXSQLVAR;
-    procedure SetCount(Value: Integer);
   protected
     FStatement: TFB30Statement;
-    function GetAttachment: TFBAttachment;
-    function GetSQLDialect: integer;
-    function GetTransaction: TFB30Transaction; virtual;
-    procedure FreeXSQLDA;
-    function GetXSQLVARByName(Idx: String): TIBXSQLVAR;
+    procedure FreeXSQLDA; virtual;
+    function GetStatement: IStatement; override;
+    function GetPrepareSeqNo: integer; override;
+    procedure SetCount(Value: Integer); override;
   public
-    constructor Create(aStatement: TFB30Statement; sqldaType: TIBXSQLDAType);
+    constructor Create(aStatement: TFB30Statement);
     destructor Destroy; override;
-    procedure Bind(metaData: Firebird.IMessageMetadata); virtual; abstract;
-    function VarByName(Idx: String): TIBXSQLVAR;
-    function GetUniqueRelationName: string;
-    procedure Initialize;
+    procedure Changed; virtual;
+    function CheckStatementStatus(Request: TStatementStatus): boolean; override;
+    function ColumnsInUseCount: integer; override;
+    function GetTransaction: TFB30Transaction; virtual;
+    procedure Initialize; override;
     property MetaData: Firebird.IMessageMetadata read FMetaData;
-    property MessageBuffer: PChar read FMessageBuffer;
-    property MsgLength: integer read FMsgLength;
-    property Vars[Idx: Integer]: TIBXSQLVAR read GetXSQLVAR; default;
     property Count: Integer read FCount write SetCount;
     property Statement: TFB30Statement read FStatement;
   end;
@@ -240,82 +132,50 @@ type
 
   TIBXINPUTSQLDA = class(TIBXSQLDA)
   private
+    FMessageBuffer: PChar; {Message Buffer}
+    FMsgLength: integer; {Message Buffer length}
+    FCurMetaData: Firebird.IMessageMetadata;
+    procedure FreeMessageBuffer;
+    function GetMessageBuffer: PChar;
+    function GetMetaData: Firebird.IMessageMetadata;
     function GetModified: Boolean;
+    function GetMsgLength: integer;
+    procedure PackBuffer;
+  protected
+    procedure FreeXSQLDA; override;
   public
-    constructor Create(aOwner: TFB30Statement);
-    procedure Bind(aMetaData: Firebird.IMessageMetadata); override;
-    procedure SetParamName(FieldName: String; Idx: Integer; UniqueName: boolean );
+    destructor Destroy; override;
+    procedure Bind(aMetaData: Firebird.IMessageMetadata);
+    procedure Changed; override;
+    function IsInputDataArea: boolean; override;
+    property MetaData: Firebird.IMessageMetadata read GetMetaData;
+    property MessageBuffer: PChar read GetMessageBuffer;
+    property MsgLength: integer read GetMsgLength;
   end;
-
- { TSQLParams }
-
- TSQLParams = class(TInterfaceParent,ISQLParams)
- private
-   FPrepareSeqNo: integer;
-   FSQLParams: TIBXINPUTSQLDA;
-   FStatement: IStatement; {ensure FStatement not destroyed until no longer needed}
-   procedure CheckActive;
- public
-   constructor Create(aSQLParams: TIBXINPUTSQLDA);
- public
-   {ISQLParams}
-   function getCount: integer;
-   function getSQLParam(index: integer): ISQLParam;
-   function ByName(Idx: String): ISQLParam ;
-   function GetModified: Boolean;
- end;
-
 
   { TIBXOUTPUTSQLDA }
 
   TIBXOUTPUTSQLDA = class(TIBXSQLDA)
   private
-     FTransaction: TFB30Transaction; {transaction used to execute the statement}
+    FTransaction: TFB30Transaction; {transaction used to execute the statement}
+    FMessageBuffer: PChar; {Message Buffer}
+    FMsgLength: integer; {Message Buffer length}
+  protected
+    procedure FreeXSQLDA; override;
   public
-    constructor Create(aOwner: TFB30Statement);
-    procedure Bind(aMetaData: Firebird.IMessageMetadata); override;
+    procedure Bind(aMetaData: Firebird.IMessageMetadata);
+    function IsInputDataArea: boolean; override;
+    property MessageBuffer: PChar read FMessageBuffer;
+    property MsgLength: integer read FMsgLength;
   end;
-
-  { TMetaData }
-
-  TMetaData = class(TInterfaceParent,IMetaData)
-  private
-    FPrepareSeqNo: integer;
-    FMetaData: TIBXOUTPUTSQLDA;
-    FStatement: IStatement; {ensure FStatement not destroyed until no longer needed}
-    procedure CheckActive;
-  public
-    constructor Create(aMetaData: TIBXOUTPUTSQLDA);
-  public
-    {IMetaData}
-    function GetUniqueRelationName: string;
-    function getCount: integer;
-    function getColumnMetaData(index: integer): IColumnMetaData;
-    function ByName(Idx: String): IColumnMetaData;
-  end;
-
- { TResults }
-
-  TResults = class(TInterfaceParent,IResults)
-  private
-    FPrepareSeqNo: integer;
-    FResults: TIBXOUTPUTSQLDA;
-    FSQLDataCache: array of ISQLData;
-    FStatement: IStatement; {ensure FStatement not destroyed until no longer needed}
-    procedure CheckActive;
-    function GetISQLData(aIBXSQLVAR: TIBXSQLVAR): ISQLData;
-   public
-    constructor Create(aResults: TIBXOUTPUTSQLDA);
-     {IResults}
-    function getCount: integer;
-    function ByName(Idx: String): ISQLData;
-    function getSQLData(index: integer): ISQLData;
-end;
 
   { TResultSet }
 
   TResultSet = class(TResults,IResultSet)
+  private
+    FResults: TIBXOUTPUTSQLDA;
   public
+    constructor Create(aResults: TIBXOUTPUTSQLDA);
     destructor Destroy; override;
     {IResultSet}
     function FetchNext: boolean;
@@ -357,7 +217,6 @@ end;
     function InternalExecute(aTransaction: TFB30Transaction): IResults;
     function InternalOpenCursor(aTransaction: TFB30Transaction): IResultSet;
     procedure FreeHandle;
-    procedure PreprocessSQL;
     procedure InternalClose(Force: boolean);
   public
     constructor Create(Attachment: TFBAttachment; Transaction: ITransaction;
@@ -563,45 +422,225 @@ end;
 
 { TIBXSQLVAR }
 
-constructor TIBXSQLVAR.Create(aParent: TIBXSQLDA);
+procedure TIBXSQLVAR.Changed;
 begin
-  inherited Create;
-  FParent := aParent;
+  inherited Changed;
+  TIBXSQLDA(Parent).Changed;
+end;
+
+function TIBXSQLVAR.GetSQLType: cardinal;
+begin
+  Result := FSQLType;
+end;
+
+function TIBXSQLVAR.GetSubtype: cardinal;
+begin
+  Result := FSQLSubType;
+end;
+
+function TIBXSQLVAR.GetAliasName: string;
+begin
+  with Firebird30ClientAPI do
+  begin
+    result := strpas(TIBXSQLDA(Parent).MetaData.getAlias(StatusIntf,Index));
+    Check4DataBaseError;
+  end;
+end;
+
+function TIBXSQLVAR.GetFieldName: string;
+begin
+  with Firebird30ClientAPI do
+  begin
+    result := strpas(TIBXSQLDA(Parent).MetaData.getField(StatusIntf,Index));
+    Check4DataBaseError;
+  end;
+end;
+
+function TIBXSQLVAR.GetOwnerName: string;
+begin
+  with Firebird30ClientAPI do
+  begin
+    result := strpas(TIBXSQLDA(Parent).MetaData.getOwner(StatusIntf,Index));
+    Check4DataBaseError;
+  end;
+end;
+
+function TIBXSQLVAR.GetRelationName: string;
+begin
+  with Firebird30ClientAPI do
+  begin
+    result := strpas(TIBXSQLDA(Parent).MetaData.getRelation(StatusIntf,Index));
+    Check4DataBaseError;
+  end;
+end;
+
+function TIBXSQLVAR.GetScale: cardinal;
+begin
+  Result := FScale;
+end;
+
+function TIBXSQLVAR.GetCharSetID: cardinal;
+begin
+  Result := FCharSetID;
+end;
+
+function TIBXSQLVAR.GetIsNull: Boolean;
+begin
+  Result := IsNullable and (FNullIndicator = -1);
+end;
+
+function TIBXSQLVAR.GetIsNullable: boolean;
+begin
+  Result := FSQLNullIndicator <> nil;
+end;
+
+function TIBXSQLVAR.GetSQLData: PChar;
+begin
+  Result := FSQLData;
+end;
+
+function TIBXSQLVAR.GetDataLength: cardinal;
+begin
+  Result := FDataLength;
+end;
+
+function TIBXSQLVAR.GetArrayMetaData: IArrayMetaData;
+begin
+  if GetSQLType <> SQL_ARRAY then
+    IBError(ibxeInvalidDataConversion,[nil]);
+
+  if FArrayMetaData = nil then
+    FArrayMetaData := TFB30ArrayMetaData.Create(FStatement.FAttachment,
+                FStatement.FTransaction,
+                GetRelationName,GetFieldName);
+  Result := FArrayMetaData;
+end;
+
+function TIBXSQLVAR.GetBlobMetaData: IBlobMetaData;
+begin
+  if GetSQLType <> SQL_BLOB then
+    IBError(ibxeInvalidDataConversion,[nil]);
+
+  if FBlobMetaData = nil then
+    FBlobMetaData := TFBBlobMetaData.Create(FStatement.FAttachment,
+              FStatement.FTransaction,
+              GetRelationName,GetFieldName);
+  Result := FBlobMetaData;
+end;
+
+procedure TIBXSQLVAR.SetIsNull(Value: Boolean);
+begin
+  if Value then
+  begin
+    IsNullable := true;
+    FNullIndicator := -1;
+  end
+  else
+  if IsNullable then
+    FNullIndicator := 0;
+end;
+
+procedure TIBXSQLVAR.SetIsNullable(Value: Boolean);
+begin
+  if Value = IsNullable then Exit;
+  if Value then
+  begin
+    FSQLNullIndicator := @FNullIndicator;
+    FNullIndicator := 0;
+  end
+  else
+    FSQLNullIndicator := nil;
+end;
+
+procedure TIBXSQLVAR.SetSQLData(AValue: PChar; len: cardinal);
+begin
+  if FOwnsSQLData then
+    FreeMem(FSQLData);
+  FSQLData := AValue;
+  FDataLength := len;
+  FOwnsSQLData := false;
+end;
+
+procedure TIBXSQLVAR.SetScale(aValue: cardinal);
+begin
+  FScale := aValue;
+end;
+
+procedure TIBXSQLVAR.SetDataLength(len: cardinal);
+begin
+  if not FOwnsSQLData then
+    FSQLData := nil;
+  FDataLength := len;
+  with FirebirdClientAPI do
+    IBAlloc(FSQLData, 0, FDataLength);
+  FOwnsSQLData := true;
+end;
+
+procedure TIBXSQLVAR.SetSQLType(aValue: cardinal);
+begin
+  FSQLType := aValue;
+end;
+
+constructor TIBXSQLVAR.Create(aParent: TIBXSQLDA; aIndex: integer);
+begin
+  inherited Create(aParent,aIndex);
+  FStatement := aParent.Statement;
 end;
 
 procedure TIBXSQLVAR.RowChange;
 begin
+  inherited;
   FBlob := nil;
   FArray := nil;
-  FModified := false;
 end;
 
-procedure TIBXSQLVAR.SetString(aValue: string);
+function TIBXSQLVAR.GetAsArray(Array_ID: TISC_QUAD): IArray;
 begin
-  {we take full advantage here of reference counted strings. When setting a string
-   value, a reference is kept in FVarString and a pointer to it placed in the
-   SQLVar. This avoids string copies. Note that PChar is guaranteed to point to
-   a zero byte when the string is empty, neatly avoiding a nil pointer error.}
+  if SQLType <> SQL_ARRAY then
+    IBError(ibxeInvalidDataConversion,[nil]);
 
-  if not FVarIsStringRef then
-    FreeMem(FSQLData);
-  FVarString := aValue;
-  FSQLType := SQL_TEXT;
-  FSQLData := PChar(FVarString);
-  FDataLength := Length(aValue);
-  FVarIsStringRef := true;
+  if IsNull then
+    Result := nil
+  else
+  begin
+    if FArray = nil then
+      FArray := TFB30Array.Create(FStatement.Attachment,
+                                TIBXSQLDA(Parent).GetTransaction,
+                                GetArrayMetaData,Array_ID);
+    Result := FArray;
+  end;
 end;
 
-procedure TIBXSQLVAR.ClearString;
+function TIBXSQLVAR.GetAsBlob(Blob_ID: TISC_QUAD): IBlob;
 begin
-  if not FVarIsStringRef then Exit;
-  FVarString := '';
-  FSQLData := nil;
-  FDataLength := 0;
-  FVarIsStringRef := false;
+  if FBlob <> nil then
+    Result := FBlob
+  else
+  begin
+    if SQLType <>  SQL_BLOB then
+        IBError(ibxeInvalidDataConversion, [nil]);
+    if IsNull then
+      Result := nil
+    else
+      Result := TFBBlob.Create(FStatement.Attachment,
+                               TIBXSQLDA(Parent).GetTransaction,
+                               Blob_ID);
+    FBlob := Result;
+  end;
+end;
+
+function TIBXSQLVAR.CreateBlob: IBlob;
+begin
+  Result := TFBBlob.Create(FStatement.Attachment,FStatement.Transaction);
 end;
 
 { TResultSet }
+
+constructor TResultSet.Create(aResults: TIBXOUTPUTSQLDA);
+begin
+  inherited Create(aResults);
+  FResults := aResults;
+end;
 
 destructor TResultSet.Destroy;
 begin
@@ -615,7 +654,7 @@ begin
   Result := FResults.FStatement.FetchNext;
   if Result then
     for i := 0 to getCount - 1 do
-      FResults.vars[i].RowChange;
+      FResults.Column[i].RowChange;
 end;
 
 function TResultSet.GetCursorName: string;
@@ -633,651 +672,6 @@ begin
   FResults.FStatement.Close;
 end;
 
-{ TResults }
-
-procedure TResults.CheckActive;
-begin
-  if FPrepareSeqNo < FResults.FStatement.FPrepareSeqNo then
-    IBError(ibxeInterfaceOutofDate,[nil]);
-
-  if not FResults.FStatement.FPrepared  then
-    IBError(ibxeStatementNotPrepared, [nil]);
-end;
-
-function TResults.GetISQLData(aIBXSQLVAR: TIBXSQLVAR): ISQLData;
-begin
-  if FSQLDataCache[aIBXSQLVAR.FIndex] <> nil then
-    Result := FSQLDataCache[aIBXSQLVAR.FIndex]
-  else
-  begin
-    Result := TIBSQLData.Create(aIBXSQLVAR);
-    FSQLDataCache[aIBXSQLVAR.FIndex] := Result;
-  end;
-end;
-
-constructor TResults.Create(aResults: TIBXOUTPUTSQLDA);
-begin
-  inherited Create;
-  FResults := aResults;
-  FStatement := aResults.FStatement;
-  FPrepareSeqNo := aResults.FStatement.FPrepareSeqNo;
-  SetLength(FSQLDataCache,aResults.Count);
-end;
-
-function TResults.getCount: integer;
-begin
-  CheckActive;
-  Result := FResults.Count;
-end;
-
-function TResults.ByName(Idx: String): ISQLData;
-begin
-  CheckActive;
-  if FResults.FStatement.FBOF then
-    IBError(ibxeBOF,[nil]);
-  if FResults.FStatement.FEOF then
-    IBError(ibxeEOF,[nil]);
-
-  if FResults.Count = 0 then
-    Result := nil
-  else
-    Result := GetISQLData(FResults.VarByName(Idx));
-end;
-
-function TResults.getSQLData(index: integer): ISQLData;
-begin
-  CheckActive;
-  if FResults.FStatement.FBOF then
-    IBError(ibxeBOF,[nil]);
-  if FResults.FStatement.FEOF then
-    IBError(ibxeEOF,[nil]);
-  Result := GetISQLData(FResults.Vars[index]);
-end;
-
-{ TMetaData }
-
-procedure TMetaData.CheckActive;
-begin
-  if FPrepareSeqNo < FMetaData.FStatement.FPrepareSeqNo then
-    IBError(ibxeInterfaceOutofDate,[nil]);
-
-  if not FMetaData.FStatement.FPrepared  then
-    IBError(ibxeStatementNotPrepared, [nil]);
-end;
-
-constructor TMetaData.Create(aMetaData: TIBXOUTPUTSQLDA);
-begin
-  inherited Create;
-  FMetaData := aMetaData;
-  FStatement := aMetaData.FStatement;
-  FPrepareSeqNo := aMetaData.FStatement.FPrepareSeqNo;
-end;
-
-function TMetaData.GetUniqueRelationName: string;
-begin
-  CheckActive;
-  Result := FMetaData.GetUniqueRelationName;
-end;
-
-function TMetaData.getCount: integer;
-begin
-  CheckActive;
-  Result := FMetaData.Count;
-end;
-
-function TMetaData.getColumnMetaData(index: integer): IColumnMetaData;
-begin
-  CheckActive;
-  if FMetaData.Count = 0 then
-    Result := nil
-  else
-    Result := TColumnMetaData.Create(FMetaData.Vars[index]);
-end;
-
-function TMetaData.ByName(Idx: String): IColumnMetaData;
-begin
-  CheckActive;
-  if FMetaData.Count = 0 then
-    Result := nil
-  else
-    Result := TColumnMetaData.Create(FMetaData.VarByName(Idx));
-end;
-
-{ TSQLParams }
-
-procedure TSQLParams.CheckActive;
-begin
-  if FPrepareSeqNo < FSQLParams.FStatement.FPrepareSeqNo then
-    IBError(ibxeInterfaceOutofDate,[nil]);
-
-  if not FSQLParams.FStatement.FPrepared  then
-    IBError(ibxeStatementNotPrepared, [nil]);
-end;
-
-constructor TSQLParams.Create(aSQLParams: TIBXINPUTSQLDA);
-begin
-  inherited Create;
-  FSQLParams := aSQLParams;
-  FStatement := aSQLParams.FStatement;
-  FPrepareSeqNo := aSQLParams.FStatement.FPrepareSeqNo;
-end;
-
-function TSQLParams.getCount: integer;
-begin
-  CheckActive;
-  Result := FSQLParams.Count;
-end;
-
-function TSQLParams.getSQLParam(index: integer): ISQLParam;
-begin
-  CheckActive;
-  Result := TSQLParam.Create(FSQLParams.Vars[index]);
-end;
-
-function TSQLParams.ByName(Idx: String): ISQLParam;
-begin
-  CheckActive;
-  Result := TSQLParam.Create(FSQLParams.VarByName(Idx));
-end;
-
-function TSQLParams.GetModified: Boolean;
-var
-  i: Integer;
-begin
-  CheckActive;
-  result := False;
-  with FSQLParams do
-  for i := 0 to FCount - 1 do
-    if FXSQLVARs[i].FModified then
-    begin
-      result := True;
-      exit;
-    end;
-end;
-
-{ TIBSQLData }
-
-procedure TIBSQLData.CheckActive;
-begin
-  inherited CheckActive;
-
-  if not Parent.FStatement.FOpen and not Parent.FStatement.FSingleResults then
-    IBError(ibxeSQLClosed, [nil]);
-
-  if Parent.FStatement.FEOF then
-    IBError(ibxeEOF,[nil]);
-
-  if Parent.FStatement.FBOF then
-    IBError(ibxeBOF,[nil]);
-end;
-
-function TIBSQLData.GetAsArray: IArray;
-begin
-  CheckActive;
-  if GetSQLType <> SQL_ARRAY then
-    IBError(ibxeInvalidDataConversion,[nil]);
-
-  if IsNull then
-    Result := nil
-  else
-  begin
-    if FIBXSQLVAR.FArray = nil then
-      FIBXSQLVAR.FArray := TFB30Array.Create(GetAttachment,GetTransaction,GetArrayMetaData,AsQuad);
-    Result := FIBXSQLVAR.FArray;
-  end;
-end;
-
-function TIBSQLData.GetAsBlob: IBlob;
-begin
-  CheckActive;
-  if FIBXSQLVAR.FBlob <> nil then
-    Result := FIBXSQLVAR.FBlob
-  else
-  begin
-    if SQLType <>  SQL_BLOB then
-        IBError(ibxeInvalidDataConversion, [nil]);
-    if IsNull then
-      Result := nil
-    else
-      Result := TFBBlob.Create(GetAttachment,GetTransaction,AsQuad);
-    FIBXSQLVAR.FBlob := Result;
-  end;
-end;
-
-function TIBSQLData.GetAsString: String;
-var
-  ss: TStringStream;
-  b: TFBBlob;
-begin
-  CheckActive;
-  Result := '';
-  { Check null, if so return a default string }
-  if not IsNull then
-  case SQLType of
-    SQL_ARRAY:
-      result := '(Array)'; {do not localize}
-    SQL_BLOB: begin
-      ss := TStringStream.Create('');
-      try
-        b := TFBBlob.Create(GetAttachment,GetTransaction,AsQuad);
-        try
-          b.SaveToStream(ss);
-        finally
-          b.Free;
-        end;
-        Result := ss.DataString;
-      finally
-        ss.Free;
-      end;
-    end;
-    else
-      Result := inherited GetAsString;
-  end;
-end;
-
-function TIBSQLData.GetIsNull: Boolean;
-begin
-  CheckActive;
-  result := IsNullable and (PShort(FIBXSQLVAR.FNullIndicator)^ = -1);
-end;
-
-{ TSQLParam }
-
-procedure TSQLParam.InternalSetIsNull(Value: Boolean);
-begin
-  with FIBXSQLVAR do
-  if Value then
-  begin
-    if not IsNullable then
-      IsNullable := True;
-
-    if Assigned(FSQLNullIndicator) then
-      FSQLNullIndicator^ := -1;
-    Changed;
-  end
-  else
-    if ((not Value) and IsNullable) then
-    begin
-      if Assigned(FSQLNullIndicator) then
-        FSQLNullIndicator^ := 0;
-      Changed;
-    end;
-end;
-
-procedure TSQLParam.InternalSetAsString(Value: String);
-var
-  ss: TStringStream;
-  b: TFBBlob;
-begin
-  CheckActive;
-  if IsNullable then
-    IsNull := False;
-  case SQLTYPE of
-  SQL_BLOB:
-  begin
-    ss := TStringStream.Create(Value);
-    try
-      b := TFBBlob.Create(GetAttachment,GetTransaction);
-      try
-        b.LoadFromStream(ss);
-      finally
-        b.Close;
-      end;
-    finally
-      ss.Free;
-    end;
-  end;
-
-  SQL_TEXT, SQL_VARYING:
-    FIBXSQLVar.SetString(Value);
-
-  else
-    inherited SetAsString(Value);
-  end;
-end;
-
-procedure TSQLParam.InternalSetIsNullable(Value: Boolean);
-begin
-  with FIBXSQLVAR do
-  if (Value <> IsNullable) then
-  begin
-    FNullable := Value;
-    if Value then
-    begin
-      FNullIndicator := 0;
-      FSQLNullIndicator := @FNullIndicator;
-    end
-    else
-      FSQLNullIndicator := nil;
-  end;
-end;
-
-procedure TSQLParam.CheckActive;
-begin
-  if FPrepareSeqNo < (FStatement as TFB30Statement).FPrepareSeqNo then
-    IBError(ibxeInterfaceOutofDate,[nil]);
-
-  if not Parent.FStatement.FPrepared  then
-    IBError(ibxeStatementNotPrepared, [nil]);
-end;
-
-procedure TSQLParam.SetDataLength(len: cardinal);
-begin
-  CheckActive;
-  with FIBXSQLVAR do
-  begin
-    ClearString;
-    FDataLength := len;
-    with FirebirdClientAPI do
-      IBAlloc(FSQLData, 0, FDataLength);
-  end;
-end;
-
-procedure TSQLParam.SetSQLType(aValue: cardinal);
-begin
-  CheckActive;
-  FIBXSQLVAR.FSQLType := aValue;
-end;
-
-constructor TSQLParam.Create(aIBXSQLVAR: TIBXSQLVAR);
-begin
-  inherited Create(aIBXSQLVAR);
-  FIBXSQLVAR.FUniqueName := true;
-end;
-
-procedure TSQLParam.Clear;
-begin
-  IsNull := true;
-end;
-
-function TSQLParam.GetModified: boolean;
-begin
-  CheckActive;
-  Result := FIBXSQLVAR.FModified;
-end;
-
-procedure TSQLParam.SetName(Value: string);
-begin
-  CheckActive;
-  FIBXSQLVAR.FName := Value;
-end;
-
-procedure TSQLParam.SetIsNull(Value: Boolean);
-var i: integer;
-begin
-  CheckActive;
-  with FIBXSQLVAR do
-  if FUniqueName then
-    InternalSetIsNull(Value)
-  else
-  begin
-    for i := 0 to FParent.FCount - 1 do
-      with (FParent as TIBXINPUTSQLDA)[i] do
-      if FName = self.FIBXSQLVAR.FName then
-        InternalSetIsNull(Value);
-  end
-end;
-
-procedure TSQLParam.SetIsNullable(Value: Boolean);
-var i: integer;
-begin
-  CheckActive;
-  with FIBXSQLVAR do
-  if FUniqueName then
-    InternalSetIsNullable(Value)
-  else
-  begin
-    for i := 0 to FParent.FCount - 1 do
-      with (FParent as TIBXINPUTSQLDA)[i] do
-      if FName = self.FIBXSQLVAR.FName then
-        InternalSetIsNullable(Value);
-  end
-end;
-
-procedure TSQLParam.SetAsArray(anArray: IArray);
-begin
-  CheckActive;
-  if GetSQLType <> SQL_ARRAY then
-    IBError(ibxeInvalidDataConversion,[nil]);
-
-  if not FIBXSQLVAR.FUniqueName then
-    IBError(ibxeDuplicateParamName,[FIBXSQLVAR.FName]);
-
-  SetAsQuad((AnArray as TFB30Array).GetArrayID);
-end;
-
-procedure TSQLParam.Changed;
-begin
-  FIBXSQLVAR.FModified := true;
-end;
-
-procedure TSQLParam.SetScale(aValue: cardinal);
-begin
-  CheckActive;
-  FIBXSQLVAR.FScale := aValue;
-end;
-
-procedure TSQLParam.SetAsBoolean(AValue: boolean);
-var i: integer;
-begin
-  with FIBXSQLVAR do
-  if FUniqueName then
-    inherited SetAsBoolean(AValue)
-  else
-  begin
-    for i := 0 to FParent.FCount - 1 do
-      with (FParent as TIBXINPUTSQLDA)[i] do
-      if FName = self.FIBXSQLVAR.FName then
-        inherited SetAsBoolean(AValue);
-  end;
-end;
-
-procedure TSQLParam.SetAsCurrency(Value: Currency);
-var i: integer;
-begin
-  with FIBXSQLVAR do
-  if FUniqueName then
-    inherited SetAsCurrency(Value)
-  else
-  begin
-    for i := 0 to FParent.FCount - 1 do
-      with (FParent as TIBXINPUTSQLDA)[i] do
-      if FName = self.FIBXSQLVAR.FName then
-        inherited SetAsCurrency(Value);
-  end;
-end;
-
-procedure TSQLParam.SetAsInt64(Value: Int64);
-var i: integer;
-begin
-  with FIBXSQLVAR do
-  if FUniqueName then
-    inherited SetAsInt64(Value)
-  else
-  begin
-    for i := 0 to FParent.FCount - 1 do
-      with (FParent as TIBXINPUTSQLDA)[i] do
-      if FName = self.FIBXSQLVAR.FName then
-        inherited SetAsInt64(Value);
-  end;
-end;
-
-procedure TSQLParam.SetAsDate(Value: TDateTime);
-var i: integer;
-begin
-  with FIBXSQLVAR do
-  if FUniqueName then
-    inherited SetAsDate(Value)
-  else
-  begin
-    for i := 0 to FParent.FCount - 1 do
-      with (FParent as TIBXINPUTSQLDA)[i] do
-      if FName = self.FIBXSQLVAR.FName then
-        inherited SetAsDate(Value);
-  end;
-end;
-
-procedure TSQLParam.SetAsLong(Value: Long);
-var i: integer;
-begin
-  with FIBXSQLVAR do
-  if FUniqueName then
-    inherited SetAsLong(Value)
-  else
-  begin
-    for i := 0 to FParent.FCount - 1 do
-      with (FParent as TIBXINPUTSQLDA)[i] do
-      if FName = self.FIBXSQLVAR.FName then
-        inherited SetAsLong(Value);
-  end;
-end;
-
-procedure TSQLParam.SetAsTime(Value: TDateTime);
-var i: integer;
-begin
-  with FIBXSQLVAR do
-  if FUniqueName then
-    inherited SetAsTime(Value)
-  else
-  begin
-    for i := 0 to FParent.FCount - 1 do
-      with (FParent as TIBXINPUTSQLDA)[i] do
-      if FName = self.FIBXSQLVAR.FName then
-        inherited SetAsTime(Value);
-  end;
-end;
-
-procedure TSQLParam.SetAsDateTime(Value: TDateTime);
-var i: integer;
-begin
-  with FIBXSQLVAR do
-  if FUniqueName then
-    inherited SetAsDateTime(Value)
-  else
-  begin
-    for i := 0 to FParent.FCount - 1 do
-      with (FParent as TIBXINPUTSQLDA)[i] do
-      if FName = self.FIBXSQLVAR.FName then
-        inherited SetAsDateTime(Value);
-  end;
-end;
-
-procedure TSQLParam.SetAsDouble(Value: Double);
-var i: integer;
-begin
-  with FIBXSQLVAR do
-  if FUniqueName then
-    inherited SetAsDouble(Value)
-  else
-  begin
-    for i := 0 to FParent.FCount - 1 do
-      with (FParent as TIBXINPUTSQLDA)[i] do
-      if FName = self.FIBXSQLVAR.FName then
-        inherited SetAsDouble(Value);
-  end;
-end;
-
-procedure TSQLParam.SetAsFloat(Value: Float);
-var i: integer;
-begin
-  with FIBXSQLVAR do
-  if FUniqueName then
-    inherited SetAsFloat(Value)
-  else
-  begin
-    for i := 0 to FParent.FCount - 1 do
-      with (FParent as TIBXINPUTSQLDA)[i] do
-      if FName = self.FIBXSQLVAR.FName then
-        inherited SetAsFloat(Value);
-  end;
-end;
-
-procedure TSQLParam.SetAsPointer(Value: Pointer);
-var i: integer;
-begin
-  with FIBXSQLVAR do
-  if FUniqueName then
-    inherited SetAsPointer(Value)
-  else
-  begin
-    for i := 0 to FParent.FCount - 1 do
-      with (FParent as TIBXINPUTSQLDA)[i] do
-      if FName = self.FIBXSQLVAR.FName then
-        inherited SetAsPointer(Value);
-  end;
-end;
-
-procedure TSQLParam.SetAsShort(Value: Short);
-var i: integer;
-begin
-  with FIBXSQLVAR do
-  if FUniqueName then
-    inherited SetAsShort(Value)
-  else
-  begin
-    for i := 0 to FParent.FCount - 1 do
-      with (FParent as TIBXINPUTSQLDA)[i] do
-      if FName = self.FIBXSQLVAR.FName then
-        inherited SetAsShort(Value);
-  end;
-end;
-
-procedure TSQLParam.SetAsString(Value: String);
-var i: integer;
-begin
-  with FIBXSQLVAR do
-  if FUniqueName then
-    InternalSetAsString(Value)
-  else
-  begin
-    for i := 0 to FParent.FCount - 1 do
-      with (FParent as TIBXINPUTSQLDA)[i] do
-      if FName = self.FIBXSQLVAR.FName then
-        InternalSetAsString(Value);
-  end;
-end;
-
-procedure TSQLParam.SetAsVariant(Value: Variant);
-var i: integer;
-begin
-  with FIBXSQLVAR do
-  if FUniqueName then
-    inherited SetAsVariant(Value)
-  else
-  begin
-    for i := 0 to FParent.FCount - 1 do
-      with (FParent as TIBXINPUTSQLDA)[i] do
-      if FName = self.FIBXSQLVAR.FName then
-        inherited SetAsVariant(Value);
-  end;
-end;
-
-procedure TSQLParam.SetAsBlob(aValue: IBlob);
-begin
-  with FIBXSQLVAR do
-  if not FUniqueName then
-    IBError(ibxeDuplicateParamName,[FName]);
-  CheckActive;
-  aValue.Close;
-  AsQuad := aValue.GetBlobID;
-  Changed;
-end;
-
-procedure TSQLParam.SetAsQuad(Value: TISC_QUAD);
-var i: integer;
-begin
-  with FIBXSQLVAR do
-  if FUniqueName then
-    inherited SetAsQuad(Value)
-  else
-  begin
-    for i := 0 to FParent.FCount - 1 do
-      with (FParent as TIBXINPUTSQLDA)[i] do
-      if FName = self.FIBXSQLVAR.FName then
-        inherited SetAsQuad(Value);
-  end;
-end;
-
 { TIBXINPUTSQLDA }
 
 function TIBXINPUTSQLDA.GetModified: Boolean;
@@ -1286,16 +680,105 @@ var
 begin
   result := False;
   for i := 0 to FCount - 1 do
-    if FXSQLVARs[i].FModified then
+    if Column[i].Modified then
     begin
       result := True;
       exit;
     end;
 end;
 
-constructor TIBXINPUTSQLDA.Create(aOwner: TFB30Statement);
+procedure TIBXINPUTSQLDA.FreeMessageBuffer;
 begin
-  inherited Create(aOwner,daInput);
+  if FCurMetaData <> nil then
+  begin
+    FCurMetaData.release;
+    FCurMetaData := nil;
+  end;
+  if FMessageBuffer <> nil then
+  begin
+    FreeMem(FMessageBuffer);
+    FMessageBuffer := nil;
+  end;
+  FMsgLength := 0;
+end;
+
+function TIBXINPUTSQLDA.GetMessageBuffer: PChar;
+begin
+  PackBuffer;
+  Result := FMessageBuffer;
+end;
+
+function TIBXINPUTSQLDA.GetMetaData: Firebird.IMessageMetadata;
+begin
+  PackBuffer;
+  Result := FCurMetaData;
+end;
+
+function TIBXINPUTSQLDA.GetMsgLength: integer;
+begin
+  PackBuffer;
+  Result := FMsgLength;
+end;
+
+procedure TIBXINPUTSQLDA.PackBuffer;
+var Builder: Firebird.IMetadataBuilder;
+    i: integer;
+begin
+  if FMessageBuffer <> nil then Exit;
+
+  with Firebird30ClientAPI do
+  begin
+    Builder := MetaData.getBuilder(StatusIntf);
+    Check4DataBaseError;
+    try
+      for i := 0 to Count - 1 do
+      with TIBXSQLVar(Column[i]) do
+      begin
+        Builder.setType(StatusIntf,i,FSQLType);
+        Check4DataBaseError;
+        Builder.setSubType(StatusIntf,i,FSQLSubType);
+        Check4DataBaseError;
+        Builder.setLength(StatusIntf,i,FDataLength);
+        Check4DataBaseError;
+        Builder.setCharSet(StatusIntf,i,FCharSetID);
+        Check4DataBaseError;
+        Builder.setScale(StatusIntf,i,FScale);
+        Check4DataBaseError;
+        FCurMetaData := Builder.getMetadata(StatusIntf);
+        Check4DataBaseError;
+      end;
+    finally
+      Builder.release;
+    end;
+
+    FMsgLength := FCurMetaData.getMessageLength(StatusIntf);
+    Check4DataBaseError;
+    IBAlloc(FMessageBuffer,0,FMsgLength);
+
+    for i := 0 to Count - 1 do
+    with TIBXSQLVar(Column[i]) do
+    begin
+      Move(FSQLData^,(FMessageBuffer + FCurMetaData.getOffset(StatusIntf,i))^,FDataLength);
+      Check4DataBaseError;
+      if IsNullable then
+      begin
+        Move(FNullIndicator,(FMessageBuffer + FCurMetaData.getNullOffset(StatusIntf,i))^,sizeof(FNullIndicator));
+        Check4DataBaseError;
+      end;
+    end;
+  end;
+end;
+
+procedure TIBXINPUTSQLDA.FreeXSQLDA;
+begin
+  inherited FreeXSQLDA;
+  FreeMessageBuffer;
+end;
+
+destructor TIBXINPUTSQLDA.Destroy;
+begin
+  FreeMessageBuffer;
+  inherited Destroy;
 end;
 
 procedure TIBXINPUTSQLDA.Bind(aMetaData: Firebird.IMessageMetadata);
@@ -1306,42 +789,67 @@ begin
   begin
     Count := metadata.getCount(StatusIntf);
     Check4DataBaseError;
-
-    FMsgLength := metaData.getMessageLength(StatusIntf);
-    Check4DataBaseError;
-    IBAlloc(FMessageBuffer,0,FMsgLength);
+    Initialize;
 
     for i := 0 to Count - 1 do
+    with TIBXSQLVar(Column[i]) do
     begin
-      Vars[i].FIndex := i;
-      Vars[i].FSQLData := FMessageBuffer + metaData.getOffset(StatusIntf,i);
+      FSQLType := aMetaData.getType(StatusIntf,i);
       Check4DataBaseError;
-      Vars[i].FDataLength := metaData.getLength(StatusIntf,i);
+      FSQLSubType := aMetaData.getSubType(StatusIntf,i);
       Check4DataBaseError;
-      Vars[i].FSQLNullIndicator := PShort(FMessageBuffer + metaData.getNullOffset(StatusIntf,i));
+      FDataLength := aMetaData.getLength(StatusIntf,i);
+      Check4DataBaseError;
+      case SQLType of
+        SQL_TEXT, SQL_TYPE_DATE, SQL_TYPE_TIME, SQL_TIMESTAMP,
+        SQL_BLOB, SQL_ARRAY, SQL_QUAD, SQL_SHORT, SQL_BOOLEAN,
+        SQL_LONG, SQL_INT64, SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT: begin
+          if (FDataLength = 0) then
+            { Make sure you get a valid pointer anyway
+             select '' from foo }
+            IBAlloc(FSQLData, 0, 1)
+          else
+            IBAlloc(FSQLData, 0, FDataLength)
+        end;
+        SQL_VARYING: begin
+          IBAlloc(FSQLData, 0, FDataLength + 2);
+        end;
+       else
+          IBError(ibxeUnknownSQLDataType, [sqltype and (not 1)])
+      end;
+      FNullable := aMetaData.isNullable(StatusIntf,i);
+      Check4DataBaseError;
+      if FNullable then
+        FSQLNullIndicator := @FNullIndicator
+      else
+        FSQLNullIndicator := nil;
+      FScale := aMetaData.getScale(StatusIntf,i);
+      Check4DataBaseError;
+      FCharSetID :=  aMetaData.getCharSet(StatusIntf,i);
       Check4DataBaseError;
     end;
   end;
-  Initialize;
 end;
 
-procedure TIBXINPUTSQLDA.SetParamName(FieldName: String; Idx: Integer;
-  UniqueName: boolean);
+procedure TIBXINPUTSQLDA.Changed;
 begin
-  {$ifdef UseCaseInSensitiveParamName}
-  FXSQLVARs[Idx].FName := AnsiUpperCase(FieldName);
-  {$else}
-  FXSQLVARs[Idx].FName := FieldName;
-  {$endif}
-  FXSQLVARs[Idx].FIndex := Idx;
-  FXSQLVARs[Idx].FUniqueName :=  UniqueName
+  inherited Changed;
+  FreeMessageBuffer;
+end;
+
+function TIBXINPUTSQLDA.IsInputDataArea: boolean;
+begin
+  Result := true;
 end;
 
 { TIBXOUTPUTSQLDA }
 
-constructor TIBXOUTPUTSQLDA.Create(aOwner: TFB30Statement);
+procedure TIBXOUTPUTSQLDA.FreeXSQLDA;
 begin
-  inherited Create(aOwner,daOutput);
+  inherited FreeXSQLDA;
+  FreeMem(FMessageBuffer);
+  FMessageBuffer := nil;
+  FMsgLength := 0;
 end;
 
 procedure TIBXOUTPUTSQLDA.Bind(aMetaData: Firebird.IMessageMetadata);
@@ -1352,207 +860,51 @@ begin
   begin
     Count := metadata.getCount(StatusIntf);
     Check4DataBaseError;
+    Initialize;
 
     FMsgLength := metaData.getMessageLength(StatusIntf);
     Check4DataBaseError;
     IBAlloc(FMessageBuffer,0,FMsgLength);
 
     for i := 0 to Count - 1 do
+    with TIBXSQLVar(Column[i]) do
     begin
-      Vars[i].FIndex := i;
-      Vars[i].FSQLType := aMetaData.getType(StatusIntf,i);
+      FSQLType := aMetaData.getType(StatusIntf,i);
       Check4DataBaseError;
-      Vars[i].FSQLData := FMessageBuffer + metaData.getOffset(StatusIntf,i);
+      FSQLSubType := aMetaData.getSubType(StatusIntf,i);
       Check4DataBaseError;
-      Vars[i].FDataLength := aMetaData.getLength(StatusIntf,i);
+      FSQLData := FMessageBuffer + metaData.getOffset(StatusIntf,i);
       Check4DataBaseError;
-      Vars[i].FNullable := aMetaData.isNullable(StatusIntf,i);
+      FDataLength := aMetaData.getLength(StatusIntf,i);
       Check4DataBaseError;
-      Vars[i].FSQLNullIndicator := PShort(FMessageBuffer + aMetaData.getNullOffset(StatusIntf,i));
+      FNullable := aMetaData.isNullable(StatusIntf,i);
       Check4DataBaseError;
-      Vars[i].FScale := aMetaData.getScale(StatusIntf,i);
+      if FNullable then
+      begin
+        FSQLNullIndicator := PShort(FMessageBuffer + aMetaData.getNullOffset(StatusIntf,i));
+        Check4DataBaseError;
+      end
+      else
+        FSQLNullIndicator := nil;
+      FScale := aMetaData.getScale(StatusIntf,i);
+      Check4DataBaseError;
+      FCharSetID :=  aMetaData.getCharSet(StatusIntf,i);
       Check4DataBaseError;
     end;
   end;
-  Initialize;
 end;
 
-{TColumnMetaData}
-
-function TColumnMetaData.GetParent: TIBXSQLDA;
+function TIBXOUTPUTSQLDA.IsInputDataArea: boolean;
 begin
-  Result := FIBXSQLVAR.FParent;
-end;
-
-procedure TColumnMetaData.CheckActive;
-begin
-  if FPrepareSeqNo < (FStatement as TFB30Statement).FPrepareSeqNo then
-    IBError(ibxeInterfaceOutofDate,[nil]);
-
-  if not Parent.FStatement.FPrepared  then
-    IBError(ibxeStatementNotPrepared, [nil]);
-end;
-
-function TColumnMetaData.SQLData: PChar;
-begin
-  Result := FIBXSQLVAR.FSQLData;
-end;
-
-function TColumnMetaData.GetDataLength: cardinal;
-begin
-  Result := FIBXSQLVAR.FDataLength;
-end;
-
-constructor TColumnMetaData.Create(aIBXSQLVAR: TIBXSQLVAR);
-begin
-  inherited Create;
-  FIBXSQLVAR := aIBXSQLVAR;
-  FStatement := FIBXSQLVAR.FParent.FStatement;
-  FPrepareSeqNo := FIBXSQLVAR.FParent.FStatement.FPrepareSeqNo;
-end;
-
-function TColumnMetaData.GetAttachment: TFBAttachment;
-begin
-  Result := Parent.GetAttachment;
-end;
-
-function TColumnMetaData.GetTransaction: TFB30Transaction;
-begin
-  Result := Parent.GetTransaction;
-end;
-
-function TColumnMetaData.GetSQLDialect: integer;
-begin
-  Result := FIBXSQLVAR.FParent.GetSQLDialect;
-end;
-
-function TColumnMetaData.GetIndex: integer;
-begin
-  Result := FIBXSQLVAR.FIndex;
-end;
-
-function TColumnMetaData.GetSQLType: cardinal;
-begin
-  CheckActive;
-  result := FIBXSQLVAR.FSQLType;
-end;
-
-function TColumnMetaData.getSubtype: cardinal;
-begin
-  CheckActive;
-  with Firebird30ClientAPI do
-  begin
-    result := FIBXSQLVAR.FParent.MetaData.getSubType(StatusIntf,FIBXSQLVAR.FIndex);
-    Check4DataBaseError;
-  end;
-end;
-
-function TColumnMetaData.getRelationName: string;
-begin
-  CheckActive;
-  with Firebird30ClientAPI do
-  begin
-    result := strpas(FIBXSQLVAR.FParent.MetaData.getRelation(StatusIntf,FIBXSQLVAR.FIndex));
-    Check4DataBaseError;
-  end;
-end;
-
-function TColumnMetaData.getOwnerName: string;
-begin
-  CheckActive;
-  with Firebird30ClientAPI do
-  begin
-    result := strpas(FIBXSQLVAR.FParent.MetaData.getOwner(StatusIntf,FIBXSQLVAR.FIndex));
-    Check4DataBaseError;
-  end;
-end;
-
-function TColumnMetaData.getSQLName: string;
-begin
-  CheckActive;
-  with Firebird30ClientAPI do
-  begin
-    result := strpas(FIBXSQLVAR.FParent.MetaData.getField(StatusIntf,FIBXSQLVAR.FIndex));
-    Check4DataBaseError;
-  end;
-end;
-
-function TColumnMetaData.getAliasName: string;
-begin
-  CheckActive;
-  with Firebird30ClientAPI do
-  begin
-    result := strpas(FIBXSQLVAR.FParent.MetaData.getAlias(StatusIntf,FIBXSQLVAR.FIndex));
-    Check4DataBaseError;
-  end;
-end;
-
-function TColumnMetaData.GetName: string;
-begin
-  CheckActive;
-  Result :=FIBXSQLVAR. FName;
-end;
-
-function TColumnMetaData.GetScale: cardinal;
-begin
-  CheckActive;
-  result := FIBXSQLVAR.FScale;
-end;
-
-function TColumnMetaData.getCharSetID: cardinal;
-begin
-  CheckActive;
-  with Firebird30ClientAPI do
-  begin
-    result := FIBXSQLVAR.FParent.MetaData.getCharSet(StatusIntf,FIBXSQLVAR.FIndex);
-    Check4DataBaseError;
-  end;
-end;
-
-function TColumnMetaData.GetIsNullable: boolean;
-begin
-  CheckActive;
-  result := FIBXSQLVAR.FNullable;
-end;
-
-function TColumnMetaData.GetSize: integer;
-begin
-  CheckActive;
-  result := FIBXSQLVAR.FDataLength;
-end;
-
-function TColumnMetaData.GetArrayMetaData: IArrayMetaData;
-begin
-  CheckActive;
-  if GetSQLType <> SQL_ARRAY then
-    IBError(ibxeInvalidDataConversion,[nil]);
-
-  if FArrayMetaData = nil then
-    FArrayMetaData := TFB30ArrayMetaData.Create(Parent.Statement.FAttachment,
-                  Parent.Statement.FTransaction,
-                  GetRelationName,GetSQLName);
-  Result := FArrayMetaData;
-end;
-
-function TColumnMetaData.GetBlobMetaData: IBlobMetaData;
-begin
-  CheckActive;
-  if GetSQLType <> SQL_BLOB then
-    IBError(ibxeInvalidDataConversion,[nil]);
-
-  Result := TFBBlobMetaData.Create(Parent.Statement.FAttachment,
-                Parent.Statement.FTransaction,
-                GetRelationName,GetSQLName);
+  Result := false;
 end;
 
 { TIBXSQLDA }
-constructor TIBXSQLDA.Create(aStatement: TFB30Statement; sqldaType: TIBXSQLDAType);
+constructor TIBXSQLDA.Create(aStatement: TFB30Statement);
 begin
   inherited Create;
   FStatement := aStatement;
   FSize := 0;
-  FUniqueRelationName := '';
-  FInputSQLDA := sqldaType = daInput;
 //  writeln('Creating ',ClassName);
 end;
 
@@ -1563,114 +915,35 @@ begin
   inherited Destroy;
 end;
 
-function TIBXSQLDA.VarByName(Idx: String): TIBXSQLVAR;
+procedure TIBXSQLDA.Changed;
 begin
-  result := GetXSQLVARByName(Idx);
-  if result = nil then
-    IBError(ibxeFieldNotFound, [Idx]);
+
 end;
 
-function TIBXSQLDA.GetUniqueRelationName: string;
+function TIBXSQLDA.CheckStatementStatus(Request: TStatementStatus): boolean;
 begin
-  Result := FUniqueRelationName;
-end;
+  Result := false;
+  case Request of
+  ssPrepared:
+    Result := FStatement.IsPrepared;
 
-procedure TIBXSQLDA.Initialize;
+  ssExecuteResults:
+    Result :=FStatement.FSingleResults;
 
-    function FindVarByName(idx: string; limit: integer): TIBXSQLVAR;
-    var
-       k: integer;
-    begin
-         for k := 0 to limit do
-             if FXSQLVARs[k].FName = idx then
-             begin
-                  Result := FXSQLVARs[k];
-                  Exit;
-             end;
-         Result := nil;
-    end;
+  ssCursorOpen:
+    Result := FStatement.FOpen;
 
-var
-  i, j, j_len: Integer;
-  st: String;
-  bUnique: Boolean;
-  sBaseName: string;
-  relname: string;
-  aliasname: string;
-begin
-  bUnique := True;
-  for i := 0 to FCount - 1 do
-  begin
-    FXSQLVARs[i].RowChange;
-    with Firebird30ClientAPI do
-    begin
+  ssBOF:
+    Result := FStatement.FBOF;
 
-      {First get the unique relation name, if any}
-
-      relname :=  strpas(MetaData.getRelation(StatusIntf,i));
-      Check4DataBaseError;
-
-      if bUnique and (relname <> '') then
-      begin
-        if FUniqueRelationName = '' then
-          FUniqueRelationName := relname
-        else
-          if relname <> FUniqueRelationName then
-          begin
-            FUniqueRelationName := '';
-            bUnique := False;
-          end;
-      end;
-
-      {If an output SQLDA then copy the aliasnames to the FName list. Ensure
-       that they are all upper case only and disambiguated.
-      }
-
-      aliasname := strpas(MetaData.getAlias(StatusIntf,i));
-      Check4DataBaseError;
-
-      if not FInputSQLDA then
-      begin
-        st := Space2Underscore(AnsiUppercase(aliasname));
-        Check4DataBaseError;
-        if st = '' then
-        begin
-          sBaseName := 'F_'; {do not localize}
-          j := 1; j_len := 1;
-          st := sBaseName + IntToStr(j);
-        end
-        else
-        begin
-          j := 0; j_len := 0;
-          sBaseName := st;
-        end;
-
-        {Look for other columns with the same name and make unique}
-
-        while FindVarByName(st,i-1) <> nil do
-        begin
-             Inc(j);
-             j_len := Length(IntToStr(j));
-             if j_len + Length(sBaseName) > 31 then
-                st := system.Copy(sBaseName, 1, 31 - j_len) + IntToStr(j)
-             else
-                st := sBaseName + IntToStr(j);
-        end;
-
-        FXSQLVARs[i].FName := st;
-      end;
-    end;
+  ssEOF:
+    Result := FStatement.FEOF;
   end;
 end;
 
-function TIBXSQLDA.GetAttachment: TFBAttachment;
+function TIBXSQLDA.ColumnsInUseCount: integer;
 begin
-  Result := FStatement.FAttachment;
-end;
-
-function TIBXSQLDA.GetSQLDialect: integer;
-begin
-  Result := FStatement.SQLDialect;
+  Result := FCount;
 end;
 
 function TIBXSQLDA.GetTransaction: TFB30Transaction;
@@ -1678,11 +951,10 @@ begin
   Result := FStatement.FTransaction;
 end;
 
-function TIBXSQLDA.GetXSQLVAR(Idx: Integer): TIBXSQLVAR;
+procedure TIBXSQLDA.Initialize;
 begin
-  if (Idx < 0) or (Idx >= FCount) then
-    IBError(ibxeXSQLDAIndexOutOfRange, [nil]);
-  result := FXSQLVARs[Idx];
+  if FMetaData <> nil then
+    inherited Initialize;
 end;
 
 procedure TIBXSQLDA.SetCount(Value: Integer);
@@ -1694,9 +966,9 @@ begin
     FUniqueRelationName := ''
   else
   begin
-    SetLength(FXSQLVARs, FCount);
+    SetLength(FColumnList, FCount);
     for i := FSize to FCount - 1 do
-      FXSQLVARs[i] := TIBXSQLVAR.Create(self);
+      FColumnList[i] := TIBXSQLVAR.Create(self,i);
     FSize := FCount;
   end;
 end;
@@ -1704,30 +976,21 @@ end;
 procedure TIBXSQLDA.FreeXSQLDA;
 var i: integer;
 begin
-  for i := 0 to Length(FXSQLVARs) - 1 do
-    FXSQLVARs[i].Free;
-  SetLength(FXSQLVARs,0);
-  FreeMem(FMessageBuffer);
-  FMessageBuffer := nil;
+  FMetaData.release;
+  FMetaData := nil;
+  for i := 0 to Count - 1  do
+    TIBXSQLVAR(Column[i]).Free;
+  SetLength(FColumnList,0);
 end;
 
-function TIBXSQLDA.GetXSQLVARByName(Idx: String): TIBXSQLVAR;
-var
-  s: String;
-  i: Integer;
+function TIBXSQLDA.GetStatement: IStatement;
 begin
-  {$ifdef UseCaseInSensitiveParamName}
-   s := AnsiUpperCase(Idx);
-  {$else}
-   s := Idx;
-  {$endif}
-  for i := 0 to FCount - 1 do
-    if FXSQLVARs[i].FName = s then
-    begin
-         Result := FXSQLVARs[i];
-         Exit;
-    end;
-  Result := nil;
+  Result := FStatement;
+end;
+
+function TIBXSQLDA.GetPrepareSeqNo: integer;
+begin
+  Result := FStatement.FPrepareSeqNo;
 end;
 
 { TFB30Statement }
@@ -1761,7 +1024,7 @@ begin
       if FHasParamNames then
       begin
         if FProcessedSQL = '' then
-          PreprocessSQL;
+          FSQLParams.PreprocessSQL(FSQL,FGenerateParamNames,FUniqueParamNames,FProcessedSQL);
         FStatementIntf := FAttachment.AttachmentIntf.prepare(StatusIntf,
                             FTransaction.TransactionIntf,
                             Length(FProcessedSQL),
@@ -1910,161 +1173,6 @@ begin
   begin
     FStatementIntf.release;
     FStatementIntf := nil;
-  end;
-end;
-
-procedure TFB30Statement.PreprocessSQL;
-var
-  cCurChar, cNextChar, cQuoteChar: Char;
-  sSQL, sProcessedSQL, sParamName: String;
-  i, iLenSQL, iSQLPos: Integer;
-  iCurState {$ifdef ALLOWDIALECT3PARAMNAMES}, iCurParamState {$endif}: Integer;
-  iParamSuffix: Integer;
-  slNames: TStrings;
-
-const
-  DefaultState = 0;
-  CommentState = 1;
-  QuoteState = 2;
-  ParamState = 3;
- {$ifdef ALLOWDIALECT3PARAMNAMES}
-  ParamDefaultState = 0;
-  ParamQuoteState = 1;
-  {$endif}
-
-  procedure AddToProcessedSQL(cChar: Char);
-  begin
-    sProcessedSQL[iSQLPos] := cChar;
-    Inc(iSQLPos);
-  end;
-
-begin
-  sParamName := '';
-  slNames := TStringList.Create;
-  try
-    { Do some initializations of variables }
-    iParamSuffix := 0;
-    cQuoteChar := '''';
-    sSQL := FSQL;
-    iLenSQL := Length(sSQL);
-    SetString(sProcessedSQL, nil, iLenSQL + 1);
-    i := 1;
-    iSQLPos := 1;
-    iCurState := DefaultState;
-    {$ifdef ALLOWDIALECT3PARAMNAMES}
-    iCurParamState := ParamDefaultState;
-    {$endif}
-    { Now, traverse through the SQL string, character by character,
-     picking out the parameters and formatting correctly for InterBase }
-    while (i <= iLenSQL) do begin
-      { Get the current token and a look-ahead }
-      cCurChar := sSQL[i];
-      if i = iLenSQL then
-        cNextChar := #0
-      else
-        cNextChar := sSQL[i + 1];
-      { Now act based on the current state }
-      case iCurState of
-        DefaultState: begin
-          case cCurChar of
-            '''', '"': begin
-              cQuoteChar := cCurChar;
-              iCurState := QuoteState;
-            end;
-            '?', ':': begin
-              iCurState := ParamState;
-              AddToProcessedSQL('?');
-            end;
-            '/': if (cNextChar = '*') then begin
-              AddToProcessedSQL(cCurChar);
-              Inc(i);
-              iCurState := CommentState;
-            end;
-          end;
-        end;
-        CommentState: begin
-          if (cNextChar = #0) then
-            IBError(ibxeSQLParseError, [SEOFInComment])
-          else if (cCurChar = '*') then begin
-            if (cNextChar = '/') then
-              iCurState := DefaultState;
-          end;
-        end;
-        QuoteState: begin
-          if cNextChar = #0 then
-            IBError(ibxeSQLParseError, [SEOFInString])
-          else if (cCurChar = cQuoteChar) then begin
-            if (cNextChar = cQuoteChar) then begin
-              AddToProcessedSQL(cCurChar);
-              Inc(i);
-            end else
-              iCurState := DefaultState;
-          end;
-        end;
-        ParamState:
-        begin
-          { collect the name of the parameter }
-          {$ifdef ALLOWDIALECT3PARAMNAMES}
-          if iCurParamState = ParamDefaultState then
-          begin
-            if cCurChar = '"' then
-              iCurParamState := ParamQuoteState
-            else
-            {$endif}
-            if (cCurChar in ['A'..'Z', 'a'..'z', '0'..'9', '_', '$']) then
-                sParamName := sParamName + cCurChar
-            else if FGenerateParamNames then
-            begin
-              sParamName := 'IBXParam' + IntToStr(iParamSuffix); {do not localize}
-              Inc(iParamSuffix);
-              iCurState := DefaultState;
-              slNames.AddObject(sParamName,self); //Note local convention
-                                                  //add pointer to self to mark entry
-              sParamName := '';
-            end
-            else
-              IBError(ibxeSQLParseError, [SParamNameExpected]);
-          {$ifdef ALLOWDIALECT3PARAMNAMES}
-          end
-          else begin
-            { determine if Quoted parameter name is finished }
-            if cCurChar = '"' then
-            begin
-              Inc(i);
-              slNames.Add(sParamName);
-              SParamName := '';
-              iCurParamState := ParamDefaultState;
-              iCurState := DefaultState;
-            end
-            else
-              sParamName := sParamName + cCurChar
-          end;
-          {$endif}
-          { determine if the unquoted parameter name is finished }
-          if {$ifdef ALLOWDIALECT3PARAMNAMES}(iCurParamState <> ParamQuoteState) and {$endif}
-            (iCurState <> DefaultState) then
-          begin
-            if not (cNextChar in ['A'..'Z', 'a'..'z',
-                                  '0'..'9', '_', '$']) then begin
-              Inc(i);
-              iCurState := DefaultState;
-              slNames.Add(sParamName);
-              sParamName := '';
-            end;
-          end;
-        end;
-      end;
-      if iCurState <> ParamState then
-        AddToProcessedSQL(sSQL[i]);
-      Inc(i);
-    end;
-    AddToProcessedSQL(#0);
-    FSQLParams.Count := slNames.Count;
-    for i := 0 to slNames.Count - 1 do
-      FSQLParams.SetParamName(slNames[i], i,FUniqueParamNames or (slNames.Objects[i] <> nil));
-    FProcessedSQL := sProcessedSQL;
-  finally
-    slNames.Free;
   end;
 end;
 

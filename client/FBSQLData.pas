@@ -184,7 +184,7 @@ type
   public
     constructor Create(aParent: TSQLDataArea; aIndex: integer);
     procedure SetString(aValue: string);
-    procedure Changed;
+    procedure Changed; virtual;
     procedure RowChange; virtual;
     function GetAsArray(Array_ID: TISC_QUAD): IArray; virtual; abstract;
     function GetAsBlob(Blob_ID: TISC_QUAD): IBlob; virtual; abstract;

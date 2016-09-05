@@ -22,7 +22,7 @@ unit FB25Statement;
   he underlying TFB25Statement object and its TIBXOUTPUTSQLDA is destroyed while
   still leaving the TIBXResultSet object in place. Calls to (e.g.)   FetchNext would fail.
 
-  To avoid this problem, TIBXResultSet objects  have a reference to the IStatement
+  To avoid this problem, TResultsSet objects  have a reference to the IStatement
   interface of the TFB25Statement object. Thus, as long as these "copies" exist,
   the owning statement is not destroyed even if the user discards their reference
   to the statement. Note: the TFB25Statement does not have a reference to the TIBXResultSet
@@ -105,7 +105,6 @@ type
     FXSQLDA: PXSQLDA;
     function GetRecordSize: Integer;
     function GetXSQLDA: PXSQLDA;
-    function GetXSQLVAR(Idx: Integer): TIBXSQLVAR;
   protected
     FStatement: TFB25Statement;
     procedure FreeXSQLDA;
@@ -119,7 +118,6 @@ type
     function ColumnsInUseCount: integer; override;
     function GetTransaction: TFB25Transaction; virtual;
     procedure Initialize; override;
-    property Vars[Idx: Integer]: TIBXSQLVAR read GetXSQLVAR; default;
     property AsXSQLDA: PXSQLDA read GetXSQLDA;
     property Count: Integer read FCount write SetCount;
     property RecordSize: Integer read GetRecordSize;
@@ -804,13 +802,6 @@ end;
 function TIBXSQLDA.GetXSQLDA: PXSQLDA;
 begin
   result := FXSQLDA;
-end;
-
-function TIBXSQLDA.GetXSQLVAR(Idx: Integer): TIBXSQLVAR;
-begin
-  if (Idx < 0) or (Idx >= Count) then
-    IBError(ibxeXSQLDAIndexOutOfRange, [nil]);
-  result := TIBXSQLVAR(Column[Idx])
 end;
 
 procedure TIBXSQLDA.Initialize;
