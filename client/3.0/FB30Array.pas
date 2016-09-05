@@ -127,7 +127,7 @@ procedure TFB30ArrayMetaData.LoadMetaData(aAttachment: IAttachment;
   aTransaction: ITransaction; relationName, columnName: string);
 var stmt: IStatement;
 begin
-  stmt := TFBStatement.Create(aAttachment as TFBAttachment,aTransaction, sGetArrayMetaData ,aAttachment.GetSQLDialect);
+  stmt := TFB30Statement.Create(aAttachment as TFBAttachment,aTransaction, sGetArrayMetaData ,aAttachment.GetSQLDialect);
   with stmt do
   begin
     SQLParams[0].AsString := RelationName;

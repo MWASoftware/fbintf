@@ -152,23 +152,24 @@ type
 
   IColumnMetaData = interface
     function GetIndex: integer;
-    function GetSQLType: short;
+    function GetSQLType: cardinal;
     function GetSQLTypeName: string;
-    function getSubtype: short;
+    function getSubtype: cardinal;
     function getRelationName: string;
     function getOwnerName: string;
     function getSQLName: string;    {Name of the column}
     function getAliasName: string;  {Alias Name of column or Column Name if not alias}
     function getName: string;       {Disambiguated uppercase Field Name}
-    function getScale: short;
+    function getScale: cardinal;
     function getCharSetID: cardinal;
     function getIsNullable: boolean;
     function GetSize: integer;
     function GetArrayMetaData: IArrayMetaData; {Valid only for Array SQL Type}
     property Name: string read GetName;
     property Size: Integer read GetSize;
-    property SQLType: short read GetSQLType;
-    property SQLSubtype: short read getSubtype;
+    property SQLType: cardinal read GetSQLType;
+    property Scale: cardinal read getScale;
+    property SQLSubtype: cardinal read getSubtype;
     property IsNullable: Boolean read GetIsNullable;
   end;
 
@@ -193,7 +194,7 @@ type
     function GetAsLong: Long;
     function GetAsPointer: Pointer;
     function GetAsQuad: TISC_QUAD;
-    function GetAsShort: Short;
+    function GetAsShort: short;
     function GetAsString: String;
     function GetIsNull: Boolean;
     function GetAsVariant: Variant;
@@ -211,7 +212,7 @@ type
     property AsLong: Long read GetAsLong;
     property AsPointer: Pointer read GetAsPointer;
     property AsQuad: TISC_QUAD read GetAsQuad;
-    property AsShort: Short read GetAsShort;
+    property AsShort: short read GetAsShort;
     property AsString: String read GetAsString;
     property AsVariant: Variant read GetAsVariant ;
     property AsBlob: IBlob read GetAsBlob;
@@ -231,11 +232,12 @@ type
   IResultSet = interface(IResults)
     function FetchNext: boolean;
     function GetCursorName: string;
+    function GetTransaction: ITransaction;
     procedure Close;
   end;
 
   ISQLElement = interface
-    function getScale: short;
+    function getScale: cardinal;
     function GetSize: integer;
     function GetAsBoolean: boolean;
     function GetAsCurrency: Currency;
@@ -288,9 +290,9 @@ type
     function GetAsBlob: IBlob;
     function GetAsArray: IArray;
     function GetName: string;
-    function GetSQLType: short;
+    function GetSQLType: cardinal;
     function GetSQLTypeName: string;
-    function GetSubtype: short;
+    function GetSubtype: cardinal;
     function GetAsQuad: TISC_QUAD;
     procedure SetIsNull(aValue: Boolean);
     procedure SetAsBlob(aValue: IBlob);
@@ -302,7 +304,7 @@ type
     property IsNull: Boolean read GetIsNull write SetIsNull;
     property Modified: Boolean read getModified;
     property Name: string read GetName;
-    property SQLType: short read GetSQLType;
+    property SQLType: cardinal read GetSQLType;
  end;
 
   ISQLParams = interface
@@ -325,6 +327,7 @@ type
     function GetRowsAffected(var SelectCount, InsertCount, UpdateCount, DeleteCount: integer): boolean;
     function GetSQLType: TIBSQLTypes;
     function GetSQLText: string;
+    function GetSQLDialect: integer;
     function IsPrepared: boolean;
     procedure Prepare(aTransaction: ITransaction=nil);
     function Execute(aTransaction: ITransaction=nil): IResults;

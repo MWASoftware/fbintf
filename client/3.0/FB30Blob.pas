@@ -92,7 +92,7 @@ begin
   inherited Create(Transaction);
   FRelationName := RelationName;
   FColumnName := ColumnName;
-  stmt := TFBStatement.Create(Attachment,Transaction, sLookupBlobMetaData ,Attachment.SQLDialect);
+  stmt := TFB30Statement.Create(Attachment,Transaction, sLookupBlobMetaData ,Attachment.SQLDialect);
   with stmt do
   begin
     SQLParams[0].AsString := RelationName;

@@ -13,6 +13,24 @@ unit FBSQLData;
   methods are needed for SQL parameters only. The string getters and setters
   are virtual as SQLVar and Array encodings of string data is different.}
 
+{ $define ALLOWDIALECT3PARAMNAMES}
+
+{$ifndef ALLOWDIALECT3PARAMNAMES}
+
+{ Note on SQL Dialects and SQL Parameter Names
+  --------------------------------------------
+
+  Even when dialect 3 quoted format parameter names are not supported, IBX still processes
+  parameter names case insensitive. This does result in some additional overhead
+  due to a call to "AnsiUpperCase". This can be avoided by undefining
+  "UseCaseInSensitiveParamName" below.
+
+  Note: do not define "UseCaseSensitiveParamName" when "ALLOWDIALECT3PARAMNAMES"
+  is defined. This will not give a useful result.
+}
+{$define UseCaseInSensitiveParamName}
+{$endif}
+
 interface
 
 uses
@@ -35,18 +53,18 @@ type
      function GetSQLDialect: integer; virtual; abstract;
      procedure Changed; virtual;
      function SQLData: PChar; virtual; abstract;
-     function GetDataLength: short; virtual; abstract;
-     procedure SetScale(aValue: short); virtual;
-     procedure SetDataLength(len: short); virtual;
-     procedure SetSQLType(aValue: short); virtual;
-     property DataLength: short read GetDataLength write SetDataLength;
+     function GetDataLength: cardinal; virtual; abstract;
+     procedure SetScale(aValue: cardinal); virtual;
+     procedure SetDataLength(len: cardinal); virtual;
+     procedure SetSQLType(aValue: cardinal); virtual;
+     property DataLength: cardinal read GetDataLength write SetDataLength;
 
   public
-     function GetSQLType: short; virtual; abstract;
+     function GetSQLType: cardinal; virtual; abstract;
      function GetSQLTypeName: string; overload;
      class function GetSQLTypeName(SQLType: short): string; overload;
      function GetName: string; virtual; abstract;
-     function GetScale: short; virtual; abstract;
+     function GetScale: cardinal; virtual; abstract;
      function GetAsBoolean: boolean;
      function GetAsCurrency: Currency;
      function GetAsInt64: Int64;
@@ -56,7 +74,7 @@ type
      function GetAsLong: Long;
      function GetAsPointer: Pointer;
      function GetAsQuad: TISC_QUAD;
-     function GetAsShort: Short;
+     function GetAsShort: short;
      function GetAsString: String; virtual;
      function GetIsNull: Boolean; virtual;
      function getIsNullable: boolean; virtual;
@@ -73,11 +91,11 @@ type
      procedure SetAsFloat(Value: Float); virtual;
      procedure SetAsPointer(Value: Pointer);
      procedure SetAsQuad(Value: TISC_QUAD);
-     procedure SetAsShort(Value: Short); virtual;
+     procedure SetAsShort(Value: short); virtual;
      procedure SetAsString(Value: String); virtual;
      procedure SetAsVariant(Value: Variant);
-     procedure SetIsNull(Value: Boolean);  virtual;
-     procedure SetIsNullable(Value: Boolean);  virtual;
+     procedure SetIsNull(Value: Boolean);
+     procedure SetIsNullable(Value: Boolean);
      procedure SetName(aValue: string); virtual;
      property AsDate: TDateTime read GetAsDateTime write SetAsDate;
      property AsBoolean:boolean read GetAsBoolean write SetAsBoolean;
@@ -91,19 +109,597 @@ type
      property AsLong: Long read GetAsLong write SetAsLong;
      property AsPointer: Pointer read GetAsPointer write SetAsPointer;
      property AsQuad: TISC_QUAD read GetAsQuad write SetAsQuad;
-     property AsShort: Short read GetAsShort write SetAsShort;
+     property AsShort: short read GetAsShort write SetAsShort;
      property AsString: String read GetAsString write SetAsString;
      property AsVariant: Variant read GetAsVariant write SetAsVariant;
      property Modified: Boolean read getModified;
      property IsNull: Boolean read GetIsNull write SetIsNull;
      property IsNullable: Boolean read GetIsNullable write SetIsNullable;
-     property Scale: short read GetScale write SetScale;
-     property SQLType: short read GetSQLType write SetSQLType;
+     property Scale: cardinal read GetScale write SetScale;
+     property SQLType: cardinal read GetSQLType write SetSQLType;
   end;
+
+  TSQLVarData = class;
+
+  TStatementStatus = (ssPrepared, ssExecuteResults, ssCursorOpen, ssBOF, ssEOF);
+
+  { TSQLDataArea }
+
+  TSQLDataArea = class
+  private
+    function GetColumn(index: integer): TSQLVarData;
+    function GetCount: integer;
+  protected
+    FUniqueRelationName: string;
+    FColumnList: array of TSQLVarData;
+    function GetStatement: IStatement; virtual; abstract;
+    function GetPrepareSeqNo: integer; virtual; abstract;
+    procedure SetCount(aValue: integer); virtual; abstract;
+  public
+    procedure Initialize; virtual;
+    function IsInputDataArea: boolean; virtual; abstract; {Input to Database}
+    procedure PreprocessSQL(sSQL: string; GenerateParamNames,
+      UniqueParamNames: boolean; var sProcessedSQL: string);
+    function ColumnsInUseCount: integer; virtual;
+    function ColumnByName(Idx: string): TSQLVarData;
+    function CheckStatementStatus(Request: TStatementStatus): boolean; virtual; abstract;
+    property Count: integer read GetCount;
+    property Column[index: integer]: TSQLVarData read GetColumn;
+    property UniqueRelationName: string read FUniqueRelationName;
+    property Statement: IStatement read GetStatement;
+    property PrepareSeqNo: integer read GetPrepareSeqNo;
+  end;
+
+  { TSQLVarData }
+
+  TSQLVarData = class
+  private
+    FParent: TSQLDataArea;
+    FName: string;
+    FIndex: integer;
+    FModified: boolean;
+    FUniqueName: boolean;
+    FVarString: RawByteString;
+    function GetStatement: IStatement;
+    procedure SetName(AValue: string);
+  protected
+    function GetSQLType: cardinal; virtual; abstract;
+    function GetSubtype: cardinal; virtual; abstract;
+    function GetAliasName: string;  virtual; abstract;
+    function GetFieldName: string; virtual; abstract;
+    function GetOwnerName: string;  virtual; abstract;
+    function GetRelationName: string;  virtual; abstract;
+    function GetScale: cardinal; virtual; abstract;
+    function GetCharSetID: cardinal; virtual; abstract;
+    function GetIsNull: Boolean;   virtual; abstract;
+    function GetIsNullable: boolean; virtual; abstract;
+    function GetSQLData: PChar;  virtual; abstract;
+    function GetDataLength: cardinal; virtual; abstract;
+    procedure SetIsNull(Value: Boolean); virtual; abstract;
+    procedure SetIsNullable(Value: Boolean);  virtual; abstract;
+    procedure SetSQLData(AValue: PChar; len: cardinal); virtual; abstract;
+    procedure SetScale(aValue: cardinal); virtual; abstract;
+    procedure SetDataLength(len: cardinal); virtual; abstract;
+    procedure SetSQLType(aValue: cardinal); virtual; abstract;
+  public
+    constructor Create(aParent: TSQLDataArea; aIndex: integer);
+    procedure SetString(aValue: string);
+    procedure Changed;
+    procedure RowChange; virtual;
+    function GetAsArray(Array_ID: TISC_QUAD): IArray; virtual; abstract;
+    function GetAsBlob(Blob_ID: TISC_QUAD): IBlob; virtual; abstract;
+    function CreateBlob: IBlob; virtual; abstract;
+    function GetArrayMetaData: IArrayMetaData; virtual; abstract;
+    function GetBlobMetaData: IBlobMetaData; virtual; abstract;
+    procedure Initialize; virtual;
+
+  public
+    property AliasName: string read GetAliasName;
+    property FieldName: string read GetFieldName;
+    property OwnerName: string read GetOwnerName;
+    property RelationName: string read GetRelationName;
+    property Parent: TSQLDataArea read FParent;
+    property Index: integer read FIndex;
+    property Name: string read FName write SetName;
+    property CharSetID: cardinal read GetCharSetID;
+    property SQLType: cardinal read GetSQLType write SetSQLType;
+    property SQLSubtype: cardinal read GetSubtype;
+    property SQLData: PChar read GetSQLData;
+    property DataLength: cardinal read GetDataLength write SetDataLength;
+    property IsNull: Boolean read GetIsNull write SetIsNull;
+    property IsNullable: Boolean read GetIsNullable write SetIsNullable;
+    property Scale: cardinal read GetScale write SetScale;
+  public
+    property Modified: Boolean read FModified;
+    property Statement: IStatement read GetStatement;
+    property UniqueName: boolean read FUniqueName write FUniqueName;
+  end;
+
+  { TColumnMetaData }
+
+  TColumnMetaData = class(TSQLDataItem,IColumnMetaData)
+  private
+    FIBXSQLVAR: TSQLVarData;
+    FStatement: IStatement;         {Keep reference to ensure statement not discarded}
+    FPrepareSeqNo: integer;
+    FBlobMetaData: IBlobMetaData;
+    FArrayMetaData: IArrayMetaData;
+  protected
+    procedure CheckActive; override;
+    function SQLData: PChar; override;
+    function GetDataLength: cardinal; override;
+
+  public
+    constructor Create(aIBXSQLVAR: TSQLVarData);
+    function GetSQLDialect: integer; override;
+
+  public
+    {IColumnMetaData}
+    function GetIndex: integer;
+    function GetSQLType: cardinal; override;
+    function getSubtype: cardinal;
+    function getRelationName: string;
+    function getOwnerName: string;
+    function getSQLName: string;    {Name of the column}
+    function getAliasName: string;  {Alias Name of column or Column Name if not alias}
+    function GetName: string; override;      {Disambiguated uppercase Field Name}
+    function GetScale: cardinal; override;
+    function getCharSetID: cardinal;
+    function GetIsNullable: boolean; override;
+    function GetSize: integer;
+    function GetArrayMetaData: IArrayMetaData;
+    function GetBlobMetaData: IBlobMetaData;
+    property Name: string read GetName;
+    property Size: Integer read GetSize;
+    property CharSetID: cardinal read getCharSetID;
+    property SQLSubtype: cardinal read getSubtype;
+    property IsNullable: Boolean read GetIsNullable;
+  end;
+
+  { TIBSQLData }
+
+  TIBSQLData = class(TColumnMetaData,ISQLData)
+  protected
+    procedure CheckActive; override;
+    function GetIsNull: Boolean; override;
+  public
+    function GetAsArray: IArray;
+    function GetAsBlob: IBlob;
+    function GetAsString: String; override;
+    property AsBlob: IBlob read GetAsBlob;
+ end;
+
+  { TSQLParam }
+
+  TSQLParam = class(TIBSQLData,ISQLParam)
+  private
+    procedure InternalSetAsString(Value: String);
+  protected
+    procedure CheckActive; override;
+    procedure Changed; override;
+    procedure SetScale(aValue: cardinal); override;
+    procedure SetDataLength(len: cardinal); override;
+    procedure SetSQLType(aValue: cardinal); override;
+  public
+    constructor Create(aIBXSQLVAR: TSQLVarData);
+    procedure Clear;
+    function GetModified: boolean; override;
+    procedure SetName(Value: string); override;
+    procedure SetIsNull(Value: Boolean);
+    procedure SetIsNullable(Value: Boolean);
+    procedure SetAsArray(anArray: IArray);
+
+    {overrides}
+    procedure SetAsBoolean(AValue: boolean);
+    procedure SetAsCurrency(AValue: Currency);
+    procedure SetAsInt64(AValue: Int64);
+    procedure SetAsDate(AValue: TDateTime);
+    procedure SetAsLong(AValue: Long);
+    procedure SetAsTime(AValue: TDateTime);
+    procedure SetAsDateTime(AValue: TDateTime);
+    procedure SetAsDouble(AValue: Double);
+    procedure SetAsFloat(AValue: Float);
+    procedure SetAsPointer(AValue: Pointer);
+    procedure SetAsShort(AValue: Short);
+    procedure SetAsString(AValue: String);
+    procedure SetAsVariant(AValue: Variant);
+    procedure SetAsBlob(aValue: IBlob);
+    procedure SetAsQuad(AValue: TISC_QUAD);
+
+    property AsBlob: IBlob read GetAsBlob write SetAsBlob;
+    property IsNullable: Boolean read GetIsNullable write SetIsNullable;
+  end;
+
+  { TMetaData }
+
+  TMetaData = class(TInterfaceParent,IMetaData)
+  private
+    FPrepareSeqNo: integer;
+    FMetaData: TSQLDataArea;
+    FStatement: IStatement; {ensure FStatement not destroyed until no longer needed}
+    procedure CheckActive;
+  public
+    constructor Create(aMetaData: TSQLDataArea);
+  public
+    {IMetaData}
+    function GetUniqueRelationName: string;
+    function getCount: integer;
+    function getColumnMetaData(index: integer): IColumnMetaData;
+    function ByName(Idx: String): IColumnMetaData;
+  end;
+
+  { TSQLParams }
+
+  TSQLParams = class(TInterfaceParent,ISQLParams)
+  private
+    FPrepareSeqNo: integer;
+    FSQLParams: TSQLDataArea;
+    FStatement: IStatement; {ensure FStatement not destroyed until no longer needed}
+    procedure CheckActive;
+  public
+    constructor Create(aSQLParams: TSQLDataArea);
+  public
+    {ISQLParams}
+    function getCount: integer;
+    function getSQLParam(index: integer): ISQLParam;
+    function ByName(Idx: String): ISQLParam ;
+    function GetModified: Boolean;
+  end;
+
+  { TResults }
+
+   TResults = class(TInterfaceParent,IResults)
+   private
+     FPrepareSeqNo: integer;
+     FResults: TSQLDataArea;
+     FSQLDataCache: array of ISQLData;
+     FStatement: IStatement; {ensure FStatement not destroyed until no longer needed}
+     procedure CheckActive;
+     function GetISQLData(aIBXSQLVAR: TSQLVarData): ISQLData;
+    public
+     constructor Create(aResults: TSQLDataArea);
+      {IResults}
+     function getCount: integer;
+     function ByName(Idx: String): ISQLData;
+     function getSQLData(index: integer): ISQLData;
+ end;
 
 implementation
 
-uses FBMessages, FBClientAPI, variants;
+uses FBMessages, FBClientAPI, variants, IBUtils;
+
+{ TSQLDataArea }
+
+function TSQLDataArea.GetColumn(index: integer): TSQLVarData;
+begin
+  Result := FColumnList[index];
+end;
+
+function TSQLDataArea.GetCount: integer;
+begin
+  Result := Length(FColumnList);
+end;
+
+procedure TSQLDataArea.Initialize;
+var
+  i: Integer;
+  bUnique: Boolean;
+  RelationName: string;
+begin
+  bUnique := True;
+  for i := 0 to ColumnsInUseCount - 1 do
+  begin
+    RelationName := Column[i].RelationName;
+
+    {First get the unique relation name, if any}
+
+    if bUnique and (RelationName <> '') then
+    begin
+      if FUniqueRelationName = '' then
+        FUniqueRelationName := RelationName
+      else
+      if RelationName <> FUniqueRelationName then
+      begin
+        FUniqueRelationName := '';
+        bUnique := False;
+      end;
+    end;
+  end;
+
+  for i := 0 to ColumnsInUseCount - 1 do
+    Column[i].Initialize;
+end;
+
+procedure TSQLDataArea.PreprocessSQL(sSQL: string; GenerateParamNames, UniqueParamNames: boolean;
+  var sProcessedSQL: string);
+var
+  cCurChar, cNextChar, cQuoteChar: Char;
+  sParamName: String;
+  i, iLenSQL, iSQLPos: Integer;
+  iCurState {$ifdef ALLOWDIALECT3PARAMNAMES}, iCurParamState {$endif}: Integer;
+  iParamSuffix: Integer;
+  slNames: TStrings;
+
+const
+  DefaultState = 0;
+  CommentState = 1;
+  QuoteState = 2;
+  ParamState = 3;
+ {$ifdef ALLOWDIALECT3PARAMNAMES}
+  ParamDefaultState = 0;
+  ParamQuoteState = 1;
+  {$endif}
+
+  procedure AddToProcessedSQL(cChar: Char);
+  begin
+    sProcessedSQL[iSQLPos] := cChar;
+    Inc(iSQLPos);
+  end;
+
+begin
+  if not IsInputDataArea then
+    IBError(ibxeNotPermitted,[nil]);
+
+  sParamName := '';
+  slNames := TStringList.Create;
+  try
+    { Do some initializations of variables }
+    iParamSuffix := 0;
+    cQuoteChar := '''';
+    iLenSQL := Length(sSQL);
+    SetString(sProcessedSQL, nil, iLenSQL + 1);
+    i := 1;
+    iSQLPos := 1;
+    iCurState := DefaultState;
+    {$ifdef ALLOWDIALECT3PARAMNAMES}
+    iCurParamState := ParamDefaultState;
+    {$endif}
+    { Now, traverse through the SQL string, character by character,
+     picking out the parameters and formatting correctly for InterBase }
+    while (i <= iLenSQL) do begin
+      { Get the current token and a look-ahead }
+      cCurChar := sSQL[i];
+      if i = iLenSQL then
+        cNextChar := #0
+      else
+        cNextChar := sSQL[i + 1];
+      { Now act based on the current state }
+      case iCurState of
+        DefaultState: begin
+          case cCurChar of
+            '''', '"': begin
+              cQuoteChar := cCurChar;
+              iCurState := QuoteState;
+            end;
+            '?', ':': begin
+              iCurState := ParamState;
+              AddToProcessedSQL('?');
+            end;
+            '/': if (cNextChar = '*') then begin
+              AddToProcessedSQL(cCurChar);
+              Inc(i);
+              iCurState := CommentState;
+            end;
+          end;
+        end;
+        CommentState: begin
+          if (cNextChar = #0) then
+            IBError(ibxeSQLParseError, [SEOFInComment])
+          else if (cCurChar = '*') then begin
+            if (cNextChar = '/') then
+              iCurState := DefaultState;
+          end;
+        end;
+        QuoteState: begin
+          if cNextChar = #0 then
+            IBError(ibxeSQLParseError, [SEOFInString])
+          else if (cCurChar = cQuoteChar) then begin
+            if (cNextChar = cQuoteChar) then begin
+              AddToProcessedSQL(cCurChar);
+              Inc(i);
+            end else
+              iCurState := DefaultState;
+          end;
+        end;
+        ParamState:
+        begin
+          { collect the name of the parameter }
+          {$ifdef ALLOWDIALECT3PARAMNAMES}
+          if iCurParamState = ParamDefaultState then
+          begin
+            if cCurChar = '"' then
+              iCurParamState := ParamQuoteState
+            else
+            {$endif}
+            if (cCurChar in ['A'..'Z', 'a'..'z', '0'..'9', '_', '$']) then
+                sParamName := sParamName + cCurChar
+            else if GenerateParamNames then
+            begin
+              sParamName := 'IBXParam' + IntToStr(iParamSuffix); {do not localize}
+              Inc(iParamSuffix);
+              iCurState := DefaultState;
+              slNames.AddObject(sParamName,self); //Note local convention
+                                                  //add pointer to self to mark entry
+              sParamName := '';
+            end
+            else
+              IBError(ibxeSQLParseError, [SParamNameExpected]);
+          {$ifdef ALLOWDIALECT3PARAMNAMES}
+          end
+          else begin
+            { determine if Quoted parameter name is finished }
+            if cCurChar = '"' then
+            begin
+              Inc(i);
+              slNames.Add(sParamName);
+              SParamName := '';
+              iCurParamState := ParamDefaultState;
+              iCurState := DefaultState;
+            end
+            else
+              sParamName := sParamName + cCurChar
+          end;
+          {$endif}
+          { determine if the unquoted parameter name is finished }
+          if {$ifdef ALLOWDIALECT3PARAMNAMES}(iCurParamState <> ParamQuoteState) and {$endif}
+            (iCurState <> DefaultState) then
+          begin
+            if not (cNextChar in ['A'..'Z', 'a'..'z',
+                                  '0'..'9', '_', '$']) then begin
+              Inc(i);
+              iCurState := DefaultState;
+              slNames.Add(sParamName);
+              sParamName := '';
+            end;
+          end;
+        end;
+      end;
+      if iCurState <> ParamState then
+        AddToProcessedSQL(sSQL[i]);
+      Inc(i);
+    end;
+    AddToProcessedSQL(#0);
+    SetCount(slNames.Count);
+    for i := 0 to slNames.Count - 1 do
+    begin
+      Column[i].Name := slNames[i];
+      Column[i].UniqueName :=  UniqueParamNames or (slNames.Objects[i] <> nil);
+    end;
+  finally
+    slNames.Free;
+  end;
+end;
+
+function TSQLDataArea.ColumnsInUseCount: integer;
+begin
+  Result := Count;
+end;
+
+function TSQLDataArea.ColumnByName(Idx: string): TSQLVarData;
+var
+  s: String;
+  i: Integer;
+begin
+  {$ifdef UseCaseInSensitiveParamName}
+   s := AnsiUpperCase(Idx);
+  {$else}
+   s := Idx;
+  {$endif}
+  for i := 0 to Count - 1 do
+    if Column[i].Name = s then
+    begin
+         Result := Column[i];
+         Exit;
+    end;
+  Result := nil;
+end;
+
+{TSQLVarData}
+
+function TSQLVarData.GetStatement: IStatement;
+begin
+  Result := FParent.Statement;
+end;
+
+procedure TSQLVarData.SetName(AValue: string);
+begin
+  if FName = AValue then Exit;
+  {$ifdef UseCaseInSensitiveParamName}
+  if Parent.IsInputDataArea then
+    FName := AnsiUpperCase(AValue)
+  else
+  {$endif}
+    FName := AValue;
+end;
+
+constructor TSQLVarData.Create(aParent: TSQLDataArea; aIndex: integer);
+begin
+  inherited Create;
+  FParent := aParent;
+  FIndex := aIndex;
+end;
+
+procedure TSQLVarData.SetString(aValue: string);
+begin
+  {we take full advantage here of reference counted strings. When setting a string
+   value, a reference is kept in FVarString and a pointer to it placed in the
+   SQLVar. This avoids string copies. Note that PChar is guaranteed to point to
+   a zero byte when the string is empty, neatly avoiding a nil pointer error.}
+
+  FVarString := aValue;
+  SQLType := SQL_TEXT;
+  SetSQLData(PChar(FVarString),Length(aValue));
+end;
+
+procedure TSQLVarData.Changed;
+begin
+  FModified := true;
+end;
+
+procedure TSQLVarData.RowChange;
+begin
+  FModified := false;
+  FVarString := '';
+end;
+
+procedure TSQLVarData.Initialize;
+
+  function FindVarByName(idx: string; limit: integer): TSQLVarData;
+  var
+    k: integer;
+  begin
+      for k := 0 to limit do
+          if Parent.Column[k].Name = idx then
+          begin
+               Result := Parent.Column[k];
+               Exit;
+          end;
+      Result := nil;
+  end;
+
+var
+  j, j_len: Integer;
+  st: String;
+  sBaseName: string;
+begin
+  RowChange;
+
+  {If an output SQLDA then copy the aliasname to the FName. Ensure
+    that they are all upper case only and disambiguated.
+   }
+
+   if not Parent.IsInputDataArea then
+   begin
+     st := Space2Underscore(AnsiUppercase(AliasName));
+     if st = '' then
+     begin
+       sBaseName := 'F_'; {do not localize}
+       j := 1; j_len := 1;
+       st := sBaseName + IntToStr(j);
+     end
+     else
+     begin
+       j := 0; j_len := 0;
+       sBaseName := st;
+     end;
+
+     {Look for other columns with the same name and make unique}
+
+     while FindVarByName(st,Index-1) <> nil do
+     begin
+          Inc(j);
+          j_len := Length(IntToStr(j));
+          if j_len + Length(sBaseName) > 31 then
+             st := system.Copy(sBaseName, 1, 31 - j_len) + IntToStr(j)
+          else
+             st := sBaseName + IntToStr(j);
+     end;
+
+     Name := st;
+   end;
+end;
+
+{TSQLDataItem}
 
 function TSQLDataItem.AdjustScale(Value: Int64; aScale: Integer): Double;
 var
@@ -249,17 +845,17 @@ begin
   //Do nothing by default
 end;
 
-procedure TSQLDataItem.SetScale(aValue: short);
+procedure TSQLDataItem.SetScale(aValue: cardinal);
 begin
   //Do nothing by default
 end;
 
-procedure TSQLDataItem.SetDataLength(len: short);
+procedure TSQLDataItem.SetDataLength(len: cardinal);
 begin
   //Do nothing by default
 end;
 
-procedure TSQLDataItem.SetSQLType(aValue: short);
+procedure TSQLDataItem.SetSQLType(aValue: cardinal);
 begin
    //Do nothing by default
 end;
@@ -881,6 +1477,813 @@ begin
   else
     PByte(SQLData)^ := ISC_FALSE;
   Changed;
+end;
+
+{TColumnMetaData}
+
+procedure TColumnMetaData.CheckActive;
+begin
+  if FPrepareSeqNo < FIBXSQLVAR.Parent.GetPrepareSeqNo then
+    IBError(ibxeInterfaceOutofDate,[nil]);
+
+  if not FIBXSQLVAR.Parent.CheckStatementStatus(ssPrepared)  then
+    IBError(ibxeStatementNotPrepared, [nil]);
+end;
+
+function TColumnMetaData.SQLData: PChar;
+begin
+  Result := FIBXSQLVAR.SQLData;
+end;
+
+function TColumnMetaData.GetDataLength: cardinal;
+begin
+  Result := FIBXSQLVAR.DataLength;
+end;
+
+constructor TColumnMetaData.Create(aIBXSQLVAR: TSQLVarData);
+begin
+  inherited Create;
+  FIBXSQLVAR := aIBXSQLVAR;
+  FStatement := FIBXSQLVAR.Statement;
+  FPrepareSeqNo := FIBXSQLVAR.Parent.PrepareSeqNo;
+end;
+
+
+function TColumnMetaData.GetSQLDialect: integer;
+begin
+  Result := FIBXSQLVAR.Statement.GetSQLDialect;
+end;
+
+function TColumnMetaData.GetIndex: integer;
+begin
+  Result := FIBXSQLVAR.Index;
+end;
+
+function TColumnMetaData.GetSQLType: cardinal;
+begin
+  CheckActive;
+  result := FIBXSQLVAR.SQLType;
+end;
+
+function TColumnMetaData.getSubtype: cardinal;
+begin
+  CheckActive;
+  result := FIBXSQLVAR.SQLSubtype;
+end;
+
+function TColumnMetaData.getRelationName: string;
+begin
+  CheckActive;
+   result :=  FIBXSQLVAR.RelationName;
+end;
+
+function TColumnMetaData.getOwnerName: string;
+begin
+  CheckActive;
+  result :=  FIBXSQLVAR.OwnerName;
+end;
+
+function TColumnMetaData.getSQLName: string;
+begin
+  CheckActive;
+  result :=  FIBXSQLVAR.FieldName;
+end;
+
+function TColumnMetaData.getAliasName: string;
+begin
+  CheckActive;
+  result := FIBXSQLVAR.AliasName;
+end;
+
+function TColumnMetaData.GetName: string;
+begin
+  CheckActive;
+  Result := FIBXSQLVAR. Name;
+end;
+
+function TColumnMetaData.GetScale: cardinal;
+begin
+  CheckActive;
+  result := FIBXSQLVAR.Scale;
+end;
+
+function TColumnMetaData.getCharSetID: cardinal;
+begin
+  CheckActive;
+  Result := FIBXSQLVAR.CharSetID;
+end;
+
+function TColumnMetaData.GetIsNullable: boolean;
+begin
+  CheckActive;
+  result := FIBXSQLVAR.IsNullable;
+end;
+
+function TColumnMetaData.GetSize: integer;
+begin
+  CheckActive;
+  result := FIBXSQLVAR.DataLength;
+end;
+
+function TColumnMetaData.GetArrayMetaData: IArrayMetaData;
+begin
+  CheckActive;
+  result := FIBXSQLVAR.GetArrayMetaData;
+end;
+
+function TColumnMetaData.GetBlobMetaData: IBlobMetaData;
+begin
+  CheckActive;
+  result := FIBXSQLVAR.GetBlobMetaData;
+end;
+
+{ TIBSQLData }
+
+procedure TIBSQLData.CheckActive;
+begin
+  inherited CheckActive;
+
+  if not FIBXSQLVAR.Parent.CheckStatementStatus(ssCursorOpen) and
+                 not FIBXSQLVAR.Parent.CheckStatementStatus(ssExecuteResults) then
+    IBError(ibxeSQLClosed, [nil]);
+
+  if FIBXSQLVAR.Parent.CheckStatementStatus(ssEOF) then
+    IBError(ibxeEOF,[nil]);
+
+  if FIBXSQLVAR.Parent.CheckStatementStatus(ssBOF) then
+    IBError(ibxeBOF,[nil]);
+end;
+
+function TIBSQLData.GetIsNull: Boolean;
+begin
+  CheckActive;
+  result := FIBXSQLVAR.IsNull;
+end;
+
+function TIBSQLData.GetAsArray: IArray;
+begin
+  CheckActive;
+  result := FIBXSQLVAR.GetAsArray(AsQuad);
+end;
+
+function TIBSQLData.GetAsBlob: IBlob;
+begin
+  CheckActive;
+  result := FIBXSQLVAR.GetAsBlob(AsQuad);
+end;
+
+function TIBSQLData.GetAsString: String;
+var
+  ss: TStringStream;
+  b: IBlob;
+begin
+  CheckActive;
+  Result := '';
+  { Check null, if so return a default string }
+  if not IsNull then
+  case SQLType of
+    SQL_ARRAY:
+      result := '(Array)'; {do not localize}
+    SQL_BLOB: begin
+      ss := TStringStream.Create('');
+      try
+        b := FIBXSQLVAR.GetAsBlob(AsQuad);
+        b.SaveToStream(ss);
+        Result := ss.DataString;
+      finally
+        ss.Free;
+      end;
+    end;
+    else
+      Result := inherited GetAsString;
+  end;
+end;
+
+{ TSQLParam }
+
+procedure TSQLParam.InternalSetAsString(Value: String);
+var
+  ss: TStringStream;
+  b: IBlob;
+begin
+  CheckActive;
+  if IsNullable then
+    IsNull := False;
+  case SQLTYPE of
+  SQL_BLOB:
+  begin
+    ss := TStringStream.Create(Value);
+    try
+      b := FIBXSQLVAR.CreateBlob;
+      try
+        b.LoadFromStream(ss);
+        AsQuad := b.GetBlobID;
+      finally
+        b.Close;
+      end;
+    finally
+      ss.Free;
+    end;
+  end;
+
+  SQL_TEXT, SQL_VARYING:
+    FIBXSQLVar.SetString(Value);
+
+  else
+    inherited SetAsString(Value);
+  end;
+end;
+
+procedure TSQLParam.CheckActive;
+begin
+  if FPrepareSeqNo < FIBXSQLVAR.Parent.GetPrepareSeqNo then
+    IBError(ibxeInterfaceOutofDate,[nil]);
+
+  if not FIBXSQLVAR.Parent.CheckStatementStatus(ssPrepared)  then
+    IBError(ibxeStatementNotPrepared, [nil]);
+end;
+
+procedure TSQLParam.SetScale(aValue: cardinal);
+begin
+  CheckActive;
+  FIBXSQLVAR.Scale := aValue;
+end;
+
+procedure TSQLParam.SetDataLength(len: cardinal);
+begin
+  CheckActive;
+  FIBXSQLVAR.DataLength := len;
+end;
+
+procedure TSQLParam.SetSQLType(aValue: cardinal);
+begin
+  CheckActive;
+  FIBXSQLVAR.SQLType := aValue;
+end;
+
+constructor TSQLParam.Create(aIBXSQLVAR: TSQLVarData);
+begin
+  inherited Create(aIBXSQLVAR);
+  FIBXSQLVAR.UniqueName := true;
+end;
+
+procedure TSQLParam.Clear;
+begin
+  IsNull := true;
+end;
+
+function TSQLParam.GetModified: boolean;
+begin
+  CheckActive;
+  Result := FIBXSQLVAR.Modified;
+end;
+
+procedure TSQLParam.SetName(Value: string);
+begin
+  CheckActive;
+  FIBXSQLVAR.Name := Value;
+end;
+
+procedure TSQLParam.SetIsNull(Value: Boolean);
+var i: integer;
+begin
+  CheckActive;
+  if FIBXSQLVAR.UniqueName then
+    FIBXSQLVAR.IsNull := Value
+  else
+  with FIBXSQLVAR.Parent do
+  begin
+    for i := 0 to Count - 1 do
+      if Column[i].Name = Name then
+        Column[i].IsNull := Value;
+  end
+end;
+
+procedure TSQLParam.SetIsNullable(Value: Boolean);
+var i: integer;
+begin
+  CheckActive;
+  if FIBXSQLVAR.UniqueName then
+    FIBXSQLVAR.IsNullable := Value
+  else
+  with FIBXSQLVAR.Parent do
+  begin
+    for i := 0 to Count - 1 do
+      if Column[i].Name = Name then
+        Column[i].IsNullable := Value;
+  end
+end;
+
+procedure TSQLParam.SetAsArray(anArray: IArray);
+begin
+  CheckActive;
+  if GetSQLType <> SQL_ARRAY then
+    IBError(ibxeInvalidDataConversion,[nil]);
+
+  if not FIBXSQLVAR.UniqueName then
+    IBError(ibxeDuplicateParamName,[FIBXSQLVAR.Name]);
+
+  SetAsQuad(AnArray.GetArrayID);
+end;
+
+procedure TSQLParam.Changed;
+begin
+  FIBXSQLVAR.Changed;
+end;
+
+procedure TSQLParam.SetAsBoolean(AValue: boolean);
+var i: integer;
+    OldSQLVar: TSQLVarData;
+begin
+  if FIBXSQLVAR.UniqueName then
+    inherited SetAsBoolean(AValue)
+  else
+  with FIBXSQLVAR.Parent do
+  begin
+    for i := 0 to Count - 1 do
+      if Column[i].Name = Name then
+      begin
+        OldSQLVar := FIBXSQLVAR;
+        FIBXSQLVAR := Column[i];
+        try
+          inherited SetAsBoolean(AValue);
+        finally
+          FIBXSQLVAR := OldSQLVar;
+        end;
+      end;
+  end;
+end;
+
+procedure TSQLParam.SetAsCurrency(AValue: Currency);
+var i: integer;
+    OldSQLVar: TSQLVarData;
+begin
+  if FIBXSQLVAR.UniqueName then
+    inherited SetAsCurrency(AValue)
+  else
+  with FIBXSQLVAR.Parent do
+  begin
+    for i := 0 to Count - 1 do
+      if Column[i].Name = Name then
+      begin
+        OldSQLVar := FIBXSQLVAR;
+        FIBXSQLVAR := Column[i];
+        try
+          inherited SetAsCurrency(AValue);
+        finally
+          FIBXSQLVAR := OldSQLVar;
+        end;
+      end;
+  end;
+end;
+
+procedure TSQLParam.SetAsInt64(AValue: Int64);
+var i: integer;
+    OldSQLVar: TSQLVarData;
+begin
+  if FIBXSQLVAR.UniqueName then
+    inherited SetAsInt64(AValue)
+  else
+  with FIBXSQLVAR.Parent do
+  begin
+    for i := 0 to Count - 1 do
+      if Column[i].Name = Name then
+      begin
+        OldSQLVar := FIBXSQLVAR;
+        FIBXSQLVAR := Column[i];
+        try
+          inherited SetAsInt64(AValue);
+        finally
+          FIBXSQLVAR := OldSQLVar;
+        end;
+      end;
+  end;
+end;
+
+procedure TSQLParam.SetAsDate(AValue: TDateTime);
+var i: integer;
+    OldSQLVar: TSQLVarData;
+begin
+  if FIBXSQLVAR.UniqueName then
+    inherited SetAsDate(AValue)
+  else
+  with FIBXSQLVAR.Parent do
+  begin
+    for i := 0 to Count - 1 do
+      if Column[i].Name = Name then
+      begin
+        OldSQLVar := FIBXSQLVAR;
+        FIBXSQLVAR := Column[i];
+        try
+          inherited SetAsDate(AValue);
+        finally
+          FIBXSQLVAR := OldSQLVar;
+        end;
+      end;
+  end;
+end;
+
+procedure TSQLParam.SetAsLong(AValue: Long);
+var i: integer;
+    OldSQLVar: TSQLVarData;
+begin
+  if FIBXSQLVAR.UniqueName then
+    inherited SetAsLong(AValue)
+  else
+  with FIBXSQLVAR.Parent do
+  begin
+    for i := 0 to Count - 1 do
+      if Column[i].Name = Name then
+      begin
+        OldSQLVar := FIBXSQLVAR;
+        FIBXSQLVAR := Column[i];
+        try
+          inherited SetAsLong(AValue);
+        finally
+          FIBXSQLVAR := OldSQLVar;
+        end;
+      end;
+  end;
+end;
+
+procedure TSQLParam.SetAsTime(AValue: TDateTime);
+var i: integer;
+    OldSQLVar: TSQLVarData;
+begin
+  if FIBXSQLVAR.UniqueName then
+    inherited SetAsTime(AValue)
+  else
+  with FIBXSQLVAR.Parent do
+  begin
+    for i := 0 to Count - 1 do
+      if Column[i].Name = Name then
+      begin
+        OldSQLVar := FIBXSQLVAR;
+        FIBXSQLVAR := Column[i];
+        try
+          inherited SetAsTime(AValue);
+        finally
+          FIBXSQLVAR := OldSQLVar;
+        end;
+      end;
+  end;
+end;
+
+procedure TSQLParam.SetAsDateTime(AValue: TDateTime);
+var i: integer;
+    OldSQLVar: TSQLVarData;
+begin
+  if FIBXSQLVAR.UniqueName then
+    inherited SetAsDateTime(AValue)
+  else
+  with FIBXSQLVAR.Parent do
+  begin
+    for i := 0 to Count - 1 do
+      if Column[i].Name = Name then
+      begin
+        OldSQLVar := FIBXSQLVAR;
+        FIBXSQLVAR := Column[i];
+        try
+          inherited SetAsDateTime(AValue);
+        finally
+          FIBXSQLVAR := OldSQLVar;
+        end;
+      end;
+  end;
+end;
+
+procedure TSQLParam.SetAsDouble(AValue: Double);
+var i: integer;
+    OldSQLVar: TSQLVarData;
+begin
+  if FIBXSQLVAR.UniqueName then
+    inherited SetAsDouble(AValue)
+  else
+  with FIBXSQLVAR.Parent do
+  begin
+    for i := 0 to Count - 1 do
+      if Column[i].Name = Name then
+      begin
+        OldSQLVar := FIBXSQLVAR;
+        FIBXSQLVAR := Column[i];
+        try
+          inherited SetAsDouble(AValue);
+        finally
+          FIBXSQLVAR := OldSQLVar;
+        end;
+      end;
+  end;
+end;
+
+procedure TSQLParam.SetAsFloat(AValue: Float);
+var i: integer;
+    OldSQLVar: TSQLVarData;
+begin
+  if FIBXSQLVAR.UniqueName then
+    inherited SetAsFloat(AValue)
+  else
+  with FIBXSQLVAR.Parent do
+  begin
+    for i := 0 to Count - 1 do
+      if Column[i].Name = Name then
+      begin
+        OldSQLVar := FIBXSQLVAR;
+        FIBXSQLVAR := Column[i];
+        try
+          inherited SetAsFloat(AValue);
+        finally
+          FIBXSQLVAR := OldSQLVar;
+        end;
+      end;
+  end;
+end;
+
+procedure TSQLParam.SetAsPointer(AValue: Pointer);
+var i: integer;
+    OldSQLVar: TSQLVarData;
+begin
+  if FIBXSQLVAR.UniqueName then
+    inherited SetAsPointer(AValue)
+  else
+  with FIBXSQLVAR.Parent do
+  begin
+    for i := 0 to Count - 1 do
+      if Column[i].Name = Name then
+      begin
+        OldSQLVar := FIBXSQLVAR;
+        FIBXSQLVAR := Column[i];
+        try
+          inherited SetAsPointer(AValue);
+        finally
+          FIBXSQLVAR := OldSQLVar;
+        end;
+      end;
+  end;
+end;
+
+procedure TSQLParam.SetAsShort(AValue: Short);
+var i: integer;
+    OldSQLVar: TSQLVarData;
+begin
+  if FIBXSQLVAR.UniqueName then
+    inherited SetAsShort(AValue)
+  else
+  with FIBXSQLVAR.Parent do
+  begin
+    for i := 0 to Count - 1 do
+      if Column[i].Name = Name then
+      begin
+        OldSQLVar := FIBXSQLVAR;
+        FIBXSQLVAR := Column[i];
+        try
+          inherited SetAsShort(AValue);
+        finally
+          FIBXSQLVAR := OldSQLVar;
+        end;
+      end;
+  end;
+end;
+
+procedure TSQLParam.SetAsString(AValue: String);
+var i: integer;
+    OldSQLVar: TSQLVarData;
+begin
+  if FIBXSQLVAR.UniqueName then
+    InternalSetAsString(AValue)
+  else
+  with FIBXSQLVAR.Parent do
+  begin
+    for i := 0 to Count - 1 do
+      if Column[i].Name = Name then
+      begin
+        OldSQLVar := FIBXSQLVAR;
+        FIBXSQLVAR := Column[i];
+        try
+          InternalSetAsString(AValue);
+        finally
+          FIBXSQLVAR := OldSQLVar;
+        end;
+      end;
+  end;
+end;
+
+procedure TSQLParam.SetAsVariant(AValue: Variant);
+var i: integer;
+    OldSQLVar: TSQLVarData;
+begin
+  if FIBXSQLVAR.UniqueName then
+    inherited SetAsVariant(AValue)
+  else
+  with FIBXSQLVAR.Parent do
+  begin
+    for i := 0 to Count - 1 do
+      if Column[i].Name = Name then
+      begin
+        OldSQLVar := FIBXSQLVAR;
+        FIBXSQLVAR := Column[i];
+        try
+          inherited SetAsVariant(AValue);
+        finally
+          FIBXSQLVAR := OldSQLVar;
+        end;
+      end;
+  end;
+end;
+
+procedure TSQLParam.SetAsBlob(aValue: IBlob);
+begin
+  with FIBXSQLVAR do
+  if not UniqueName then
+    IBError(ibxeDuplicateParamName,[Name]);
+  CheckActive;
+  aValue.Close;
+  AsQuad := aValue.GetBlobID;
+  Changed;
+end;
+
+procedure TSQLParam.SetAsQuad(AValue: TISC_QUAD);
+var i: integer;
+    OldSQLVar: TSQLVarData;
+begin
+  if FIBXSQLVAR.UniqueName then
+    inherited SetAsQuad(AValue)
+  else
+  with FIBXSQLVAR.Parent do
+  begin
+    for i := 0 to Count - 1 do
+      if Column[i].Name = Name then
+      begin
+        OldSQLVar := FIBXSQLVAR;
+        FIBXSQLVAR := Column[i];
+        try
+          inherited SetAsQuad(AValue);
+        finally
+          FIBXSQLVAR := OldSQLVar;
+        end;
+      end;
+  end;
+end;
+
+{ TMetaData }
+
+procedure TMetaData.CheckActive;
+begin
+  if FPrepareSeqNo < FMetaData.PrepareSeqNo then
+    IBError(ibxeInterfaceOutofDate,[nil]);
+
+  if not FMetaData.CheckStatementStatus(ssPrepared)  then
+    IBError(ibxeStatementNotPrepared, [nil]);
+end;
+
+constructor TMetaData.Create(aMetaData: TSQLDataArea);
+begin
+  inherited Create;
+  FMetaData := aMetaData;
+  FStatement := aMetaData.Statement;
+  FPrepareSeqNo := aMetaData.PrepareSeqNo;
+end;
+
+function TMetaData.GetUniqueRelationName: string;
+begin
+  CheckActive;
+  Result := FMetaData.UniqueRelationName;
+end;
+
+function TMetaData.getCount: integer;
+begin
+  CheckActive;
+  Result := FMetaData.Count;
+end;
+
+function TMetaData.getColumnMetaData(index: integer): IColumnMetaData;
+begin
+  CheckActive;
+  if FMetaData.Count = 0 then
+    Result := nil
+  else
+    Result := TColumnMetaData.Create(FMetaData.Column[index]);
+end;
+
+function TMetaData.ByName(Idx: String): IColumnMetaData;
+begin
+  CheckActive;
+  if FMetaData.Count = 0 then
+    Result := nil
+  else
+    Result := TColumnMetaData.Create(FMetaData.ColumnByName(Idx));
+end;
+
+{ TSQLParams }
+
+procedure TSQLParams.CheckActive;
+begin
+  if FPrepareSeqNo < FSQLParams.PrepareSeqNo then
+    IBError(ibxeInterfaceOutofDate,[nil]);
+
+  if not FSQLParams.CheckStatementStatus(ssPrepared)  then
+    IBError(ibxeStatementNotPrepared, [nil]);
+end;
+
+constructor TSQLParams.Create(aSQLParams: TSQLDataArea);
+begin
+  inherited Create;
+  FSQLParams := aSQLParams;
+  FStatement := aSQLParams.Statement;
+  FPrepareSeqNo := aSQLParams.PrepareSeqNo;
+end;
+
+function TSQLParams.getCount: integer;
+begin
+  CheckActive;
+  Result := FSQLParams.Count;
+end;
+
+function TSQLParams.getSQLParam(index: integer): ISQLParam;
+begin
+  CheckActive;
+  Result := TSQLParam.Create(FSQLParams.Column[index]);
+end;
+
+function TSQLParams.ByName(Idx: String): ISQLParam;
+begin
+  CheckActive;
+  Result := TSQLParam.Create(FSQLParams.ColumnByName(Idx));
+end;
+
+function TSQLParams.GetModified: Boolean;
+var
+  i: Integer;
+begin
+  CheckActive;
+  result := False;
+  with FSQLParams do
+  for i := 0 to Count - 1 do
+    if Column[i].Modified then
+    begin
+      result := True;
+      exit;
+    end;
+end;
+
+{ TResults }
+
+procedure TResults.CheckActive;
+begin
+  if FPrepareSeqNo < FResults.PrepareSeqNo then
+    IBError(ibxeInterfaceOutofDate,[nil]);
+
+  if not FResults.CheckStatementStatus(ssPrepared)  then
+    IBError(ibxeStatementNotPrepared, [nil]);
+end;
+
+function TResults.GetISQLData(aIBXSQLVAR: TSQLVarData): ISQLData;
+begin
+  if FSQLDataCache[aIBXSQLVAR.Index] <> nil then
+    Result := FSQLDataCache[aIBXSQLVAR.Index]
+  else
+  begin
+    Result := TIBSQLData.Create(aIBXSQLVAR);
+    FSQLDataCache[aIBXSQLVAR.Index] := Result;
+  end;
+end;
+
+constructor TResults.Create(aResults: TSQLDataArea);
+begin
+  inherited Create;
+  FResults := aResults;
+  FStatement := aResults.Statement;
+  FPrepareSeqNo := aResults.PrepareSeqNo;
+  SetLength(FSQLDataCache,aResults.Count);
+end;
+
+function TResults.getCount: integer;
+begin
+  CheckActive;
+  Result := FResults.Count;
+end;
+
+function TResults.ByName(Idx: String): ISQLData;
+begin
+  CheckActive;
+  if FResults.CheckStatementStatus(ssBOF) then
+    IBError(ibxeBOF,[nil]);
+  if FResults.CheckStatementStatus(ssEOF) then
+    IBError(ibxeEOF,[nil]);
+
+  if FResults.Count = 0 then
+    Result := nil
+  else
+    Result := GetISQLData(FResults.ColumnByName(Idx));
+end;
+
+function TResults.getSQLData(index: integer): ISQLData;
+begin
+  CheckActive;
+  if FResults.CheckStatementStatus(ssBOF) then
+    IBError(ibxeBOF,[nil]);
+  if FResults.CheckStatementStatus(ssEOF) then
+    IBError(ibxeEOF,[nil]);
+  Result := GetISQLData(FResults.Column[index]);
 end;
 
 

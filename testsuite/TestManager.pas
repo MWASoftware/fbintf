@@ -100,10 +100,16 @@ begin
           end;
         SQL_FLOAT,SQL_DOUBLE,
         SQL_D_FLOAT:
-          writeln( Result[i].Name,' = ',FormatFloat('#,##0.00',Result[i].AsFloat))
+          writeln( Result[i].Name,' = ',FormatFloat('#,##0.00',Result[i].AsFloat));
+
+        SQL_INT64:
+          if Result[i].Scale <> 0 then
+            writeln( Result[i].Name,' = ',FormatFloat('#,##0.00',Result[i].AsFloat))
+          else
+            writeln(Result[i].Name,' = ',Result[i].AsString);
+
         else
           writeln(Result[i].Name,' = ',Result[i].AsString);
-
         end;
       end;
     end;

@@ -45,13 +45,14 @@ type
    function GetSQLDialect: integer; override;
    procedure Changed; override;
    function SQLData: PChar; override;
-   function GetDataLength: short; override;
-   procedure SetDataLength(len: short); override;
+   function GetDataLength: cardinal; override;
+   procedure SetDataLength(len: cardinal); override;
+   procedure SetSQLType(aValue: cardinal); override;
   public
    constructor Create(anArray: TFBArray; P: PChar);
-   function GetSQLType: short; override;
+   function GetSQLType: cardinal; override;
    function GetName: string; override;
-   function GetScale: short; override;
+   function GetScale: cardinal; override;
    function GetSize: integer;
    function GetAsString: string; override;
    procedure SetAsLong(Value: Long); override;
@@ -61,7 +62,6 @@ type
    procedure SetAsDouble(Value: Double); override;
    procedure SetAsFloat(Value: Float); override;
    procedure SetAsCurrency(Value: Currency); override;
-   procedure SetSQLType(aValue: short); override;
   end;
 
   { TFBArrayMetaData }
@@ -179,12 +179,12 @@ begin
   Result := FBufPtr;
 end;
 
-function TFBArrayElement.GetDataLength: short;
+function TFBArrayElement.GetDataLength: cardinal;
 begin
   Result :=  FArray.GetDataLength
 end;
 
-procedure TFBArrayElement.SetDataLength(len: short);
+procedure TFBArrayElement.SetDataLength(len: cardinal);
 begin
   if len > GetDataLength then
     IBError(ibxeArrayElementOverFlow,[nil]);
@@ -197,7 +197,7 @@ begin
   FBufPtr := P;
 end;
 
-function TFBArrayElement.GetSQLType: short;
+function TFBArrayElement.GetSQLType: cardinal;
 begin
   Result :=  FArray.FMetaData.GetSQLType;
 end;
@@ -207,7 +207,7 @@ begin
   Result := FArray.FMetaData.GetColumnName;
 end;
 
-function TFBArrayElement.GetScale: short;
+function TFBArrayElement.GetScale: cardinal;
 begin
   Result := FArray.FMetaData.GetScale;
 end;
@@ -346,7 +346,7 @@ begin
   end
 end;
 
-procedure TFBArrayElement.SetSQLType(aValue: short);
+procedure TFBArrayElement.SetSQLType(aValue: cardinal);
 begin
   if aValue = GetSQLType then
     IBError(ibxeInvalidDataConversion, [nil]);

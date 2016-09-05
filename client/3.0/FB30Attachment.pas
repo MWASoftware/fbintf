@@ -246,7 +246,7 @@ function TFBAttachment.Prepare(transaction: ITransaction; sql: string;
   aSQLDialect: integer): IStatement;
 begin
   CheckHandle;
-  Result := TFBStatement.Create(self,transaction,sql,aSQLDialect);
+  Result := TFB30Statement.Create(self,transaction,sql,aSQLDialect);
 end;
 
 function TFBAttachment.Prepare(transaction: ITransaction; sql: string
@@ -260,7 +260,7 @@ function TFBAttachment.PrepareWithNamedParameters(transaction: ITransaction;
   UniqueParamNames: boolean): IStatement;
 begin
   CheckHandle;
-  Result := TFBStatement.CreateWithParameterNames(self,transaction,sql,aSQLDialect,
+  Result := TFB30Statement.CreateWithParameterNames(self,transaction,sql,aSQLDialect,
          GenerateParamNames,UniqueParamNames);
 end;
 
@@ -269,7 +269,7 @@ function TFBAttachment.PrepareWithNamedParameters(transaction: ITransaction;
   ): IStatement;
 begin
   CheckHandle;
-  Result := TFBStatement.CreateWithParameterNames(self,transaction,sql,FSQLDialect,
+  Result := TFB30Statement.CreateWithParameterNames(self,transaction,sql,FSQLDialect,
          GenerateParamNames,UniqueParamNames);
 end;
 
