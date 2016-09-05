@@ -97,6 +97,7 @@ type
   public
     constructor Create(aParent: TIBXSQLDA; aIndex: integer);
     procedure RowChange; override;
+    procedure FreeSQLData;
     function GetAsArray(Array_ID: TISC_QUAD): IArray; override;
     function GetAsBlob(Blob_ID: TISC_QUAD): IBlob; override;
     function CreateBlob: IBlob; override;
@@ -594,6 +595,14 @@ begin
   FArray := nil;
 end;
 
+procedure TIBXSQLVAR.FreeSQLData;
+begin
+  if FOwnsSQLData then
+    FreeMem(FSQLData);
+  FSQLData := nil;
+  FOwnsSQLData := true;
+end;
+
 function TIBXSQLVAR.GetAsArray(Array_ID: TISC_QUAD): IArray;
 begin
   if SQLType <> SQL_ARRAY then
@@ -818,6 +827,7 @@ begin
           IBError(ibxeUnknownSQLDataType, [sqltype and (not 1)])
       end;
       FNullable := aMetaData.isNullable(StatusIntf,i);
+      FOwnsSQLData := true;
       Check4DataBaseError;
       if FNullable then
         FSQLNullIndicator := @FNullIndicator
@@ -976,11 +986,15 @@ end;
 procedure TIBXSQLDA.FreeXSQLDA;
 var i: integer;
 begin
-  FMetaData.release;
+  if FMetaData <> nil then
+    FMetaData.release;
   FMetaData := nil;
+  for i := 0 to Count - 1 do
+    TIBXSQLVAR(Column[i]).FreeSQLData;
   for i := 0 to Count - 1  do
     TIBXSQLVAR(Column[i]).Free;
   SetLength(FColumnList,0);
+  FSize := 0;
 end;
 
 function TIBXSQLDA.GetStatement: IStatement;

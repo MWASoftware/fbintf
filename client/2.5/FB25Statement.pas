@@ -858,7 +858,7 @@ begin
   if FXSQLDA <> nil then
   begin
 //    writeln('SQLDA Cleanup');
-    for i := 0 to FSize - 1 do
+    for i := 0 to Count - 1 do
       TIBXSQLVAR(Column[i]).FreeSQLData;
     FreeMem(FXSQLDA);
     FXSQLDA := nil;
@@ -866,6 +866,7 @@ begin
   for i := 0 to Count - 1  do
     TIBXSQLVAR(Column[i]).Free;
   SetLength(FColumnList,0);
+  FSize := 0;
 end;
 
 function TIBXSQLDA.GetStatement: IStatement;
