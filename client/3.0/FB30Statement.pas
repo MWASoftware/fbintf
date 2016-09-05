@@ -737,7 +737,7 @@ begin
 
   with Firebird30ClientAPI do
   begin
-    Builder := MetaData.getBuilder(StatusIntf);
+    Builder := inherited MetaData.getBuilder(StatusIntf);
     Check4DataBaseError;
     try
       for i := 0 to Count - 1 do
@@ -753,9 +753,9 @@ begin
         Check4DataBaseError;
         Builder.setScale(StatusIntf,i,FScale);
         Check4DataBaseError;
-        FCurMetaData := Builder.getMetadata(StatusIntf);
-        Check4DataBaseError;
       end;
+      FCurMetaData := Builder.getMetadata(StatusIntf);
+      Check4DataBaseError;
     finally
       Builder.release;
     end;

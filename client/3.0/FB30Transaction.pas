@@ -78,8 +78,8 @@ end;
 
 destructor TFB30Transaction.Destroy;
 begin
-  FreeHandle;
   inherited Destroy;
+  FreeHandle;
 end;
 
 function TFB30Transaction.GetInTransaction: boolean;

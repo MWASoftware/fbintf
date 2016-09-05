@@ -419,6 +419,7 @@ var
   iCurState {$ifdef ALLOWDIALECT3PARAMNAMES}, iCurParamState {$endif}: Integer;
   iParamSuffix: Integer;
   slNames: TStrings;
+  StrBuffer: PChar;
 
 const
   DefaultState = 0;
@@ -432,7 +433,7 @@ const
 
   procedure AddToProcessedSQL(cChar: Char);
   begin
-    sProcessedSQL[iSQLPos] := cChar;
+    StrBuffer[iSQLPos] := cChar;
     Inc(iSQLPos);
   end;
 
@@ -441,15 +442,15 @@ begin
     IBError(ibxeNotPermitted,[nil]);
 
   sParamName := '';
+  iLenSQL := Length(sSQL);
+  GetMem(StrBuffer,iLenSQL + 1);
   slNames := TStringList.Create;
   try
     { Do some initializations of variables }
     iParamSuffix := 0;
     cQuoteChar := '''';
-    iLenSQL := Length(sSQL);
-    SetString(sProcessedSQL, nil, iLenSQL + 1);
     i := 1;
-    iSQLPos := 1;
+    iSQLPos := 0;
     iCurState := DefaultState;
     {$ifdef ALLOWDIALECT3PARAMNAMES}
     iCurParamState := ParamDefaultState;
@@ -559,6 +560,7 @@ begin
       Inc(i);
     end;
     AddToProcessedSQL(#0);
+    sProcessedSQL := strpas(StrBuffer);
     SetCount(slNames.Count);
     for i := 0 to slNames.Count - 1 do
     begin
@@ -567,6 +569,7 @@ begin
     end;
   finally
     slNames.Free;
+    FreeMem(StrBuffer);
   end;
 end;
 
@@ -1113,7 +1116,8 @@ begin
   if not IsNull then
   with FirebirdClientAPI do
     case SQLType of
-      SQL_TEXT, SQL_VARYING: begin
+      SQL_TEXT, SQL_VARYING:
+      begin
         sz := SQLData;
         if (SQLType = SQL_TEXT) then
           str_len := DataLength

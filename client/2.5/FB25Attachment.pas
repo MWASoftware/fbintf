@@ -92,6 +92,12 @@ begin
   FFirebirdAPI := Firebird25ClientAPI; {Keep reference to interface}
   FSQLDialect := 3;
   FDatabaseName := DatabaseName;
+  if DPB = nil then
+  begin
+    if RaiseExceptionOnConnectError then
+       IBError(ibxeNoDPB,[nil]);
+    Exit;
+  end;
   FDPB := DPB;
   FRaiseExceptionOnConnectError := RaiseExceptionOnConnectError;
   Connect;

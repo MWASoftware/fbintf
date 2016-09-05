@@ -80,11 +80,11 @@ uses FB30ClientAPI, FB30Statement;
 
 const
   sGetArrayMetaData = 'Select F.RDB$FIELD_LENGTH, F.RDB$FIELD_SCALE, F.RDB$FIELD_TYPE, '+
-                      'F.RDB$DIMENSIONS, RD.RDB$DIMENSION, RD.RDB$LOWER_BOUND, RD.RDB$UPPER_BOUND '+
+                      'F.RDB$DIMENSIONS, FD.RDB$DIMENSION, FD.RDB$LOWER_BOUND, FD.RDB$UPPER_BOUND '+
                       'From RDB$FIELDS F JOIN RDB$RELATION_FIELDS RF '+
                       'On F.RDB$FIELD_NAME = RF.RDB$FIELD_SOURCE JOIN RDB$FIELD_DIMENSIONS FD '+
-                      'On FD.RDB$FIELD_NAME = F.RDB$FIELD_NAME' +
-                      'Where RF.RDB$RELATION_NAME = ? and RF.RDB$FIELD_NAME = ? Order by RD.RDB$DIMENSION asc';
+                      'On FD.RDB$FIELD_NAME = F.RDB$FIELD_NAME ' +
+                      'Where RF.RDB$RELATION_NAME = ? and RF.RDB$FIELD_NAME = ? Order by FD.RDB$DIMENSION asc';
 
 { TSDLBlock }
 
@@ -127,7 +127,8 @@ procedure TFB30ArrayMetaData.LoadMetaData(aAttachment: IAttachment;
   aTransaction: ITransaction; relationName, columnName: string);
 var stmt: IStatement;
 begin
-  stmt := TFB30Statement.Create(aAttachment as TFBAttachment,aTransaction, sGetArrayMetaData ,aAttachment.GetSQLDialect);
+  stmt := TFB30Statement.Create(aAttachment as TFBAttachment,aTransaction,
+                               sGetArrayMetaData ,aAttachment.GetSQLDialect);
   with stmt do
   begin
     SQLParams[0].AsString := RelationName;

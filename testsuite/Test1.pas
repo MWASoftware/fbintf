@@ -76,13 +76,19 @@ begin
   Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
 
   writeln('Dropping Database');
-  Attachment.DropDatabase;
+  if Attachment <> nil then
+    Attachment.DropDatabase;
 
   {Open Database}
 
   PrintDPB(DPB);
   writeln('Creating a Database with a DPD');
   Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
+  if Attachment = nil then
+  begin
+    writeln('Create Database Failed');
+    Exit;
+  end;
   DBInfo := Attachment.GetDBInformation([isc_info_db_id]);
   DBInfo[0].DecodeIDCluster(ConType,DBFileName,DBSiteName);
   writeln('Database ID = ', ConType,' FB = ', DBFileName, ' SN = ',DBSiteName);

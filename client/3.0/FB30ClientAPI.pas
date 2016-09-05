@@ -90,7 +90,8 @@ var Firebird30ClientAPI: TFB30ClientAPI;
 
 implementation
 
-uses FBParamBlock, FB30Attachment, dynlibs, FBMessages, FB30Services;
+uses FBParamBlock, FB30Attachment, dynlibs, FBMessages, FB30Services,
+  FB30Transaction;
 
 type
   PISC_DATE = ^ISC_DATE;
@@ -188,24 +189,26 @@ end;
 function TFB30ClientAPI.CreateDatabase(DatabaseName: string; DPB: IDPB;
   RaiseExceptionOnError: boolean): IAttachment;
 begin
-
+  Result := TFBAttachment.CreateDatabase(DatabaseName,DPB, RaiseExceptionOnError);
+  if not Result.IsConnected then
+    Result := nil;
 end;
 
 function TFB30ClientAPI.StartTransaction(Attachments: array of IAttachment;
   TPB: array of byte; DefaultCompletion: TTransactionAction): ITransaction;
 begin
-
+  Result := TFB30Transaction.Create(Attachments,TPB,DefaultCompletion);
 end;
 
 function TFB30ClientAPI.StartTransaction(Attachments: array of IAttachment;
   TPB: ITPB; DefaultCompletion: TTransactionAction): ITransaction;
 begin
-
+  Result := TFB30Transaction.Create(Attachments,TPB,DefaultCompletion);
 end;
 
 function TFB30ClientAPI.AllocateSPB: ISPB;
 begin
-
+  Result := TSPB.Create;
 end;
 
 function TFB30ClientAPI.GetServiceManager(ServerName: string;
@@ -241,7 +244,7 @@ begin
   P := Bufptr + len - 1;
   while P >= bufptr do
   begin
-    Result := (Result shr 8 ) and byte(P^);
+    Result := (Result shr 8 ) or byte(P^);
     Dec(P);
   end;
 end;

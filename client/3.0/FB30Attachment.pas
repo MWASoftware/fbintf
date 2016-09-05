@@ -95,6 +95,12 @@ begin
   FFirebirdAPI := Firebird30ClientAPI; {Keep reference to interface}
   FSQLDialect := 3;
   FDatabaseName := DatabaseName;
+  if DPB = nil then
+  begin
+    if RaiseExceptionOnConnectError then
+       IBError(ibxeNoDPB,[nil]);
+    Exit;
+  end;
   FDPB := DPB;
   FRaiseExceptionOnConnectError := RaiseExceptionOnConnectError;
   Connect;
@@ -106,6 +112,12 @@ begin
   FFirebirdAPI := Firebird30ClientAPI; {Keep reference to interface}
   FSQLDialect := 3;
   FDatabaseName := DatabaseName;
+  if DPB = nil then
+  begin
+    if RaiseExceptionOnError then
+       IBError(ibxeNoDPB,[nil]);
+    Exit;
+  end;
   FDPB := DPB;
   FRaiseExceptionOnConnectError := RaiseExceptionOnError;
   with Firebird30ClientAPI do
@@ -193,7 +205,8 @@ begin
   CheckHandle;
   with Firebird30ClientAPI do
   begin
-    FAttachmentIntf.executeDyn(StatusIntf,(transaction as TFB30Transaction).TransactionIntf,Length(sql),BytePtr(PChar(sql)));
+    FAttachmentIntf.execute(StatusIntf,(transaction as TFB30Transaction).TransactionIntf,
+                    Length(sql),PChar(sql),aSQLDialect,nil,nil,nil,nil);
     Check4DataBaseError;
   end;
 end;
