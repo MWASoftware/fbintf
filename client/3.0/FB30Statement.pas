@@ -1110,6 +1110,7 @@ begin
   Inc(FPrepareSeqNo);
   FSQLParams.FTransactionSeqNo := FTransaction.TransactionSeqNo;
   FSQLRecord.FTransactionSeqNo := FTransaction.TransactionSeqNo;
+  SignalActivity;
 end;
 
 function TFB30Statement.InternalExecute(aTransaction: TFB30Transaction): IResults;
@@ -1157,6 +1158,7 @@ begin
     if aTransaction <> FTransaction then
        RemoveMonitor(aTransaction);
   end;
+  SignalActivity;
 end;
 
 function TFB30Statement.InternalOpenCursor(aTransaction: TFB30Transaction
@@ -1189,6 +1191,7 @@ begin
  FSQLRecord.FTransaction := aTransaction;
  FSQLRecord.FTransactionSeqNo := aTransaction.TransactionSeqNo;
  Result := TResultSet.Create(FSQLRecord);
+ SignalActivity;
 end;
 
 procedure TFB30Statement.FreeHandle;
@@ -1220,6 +1223,7 @@ begin
     FExecTransactionIntf := nil;
     FSQLRecord.FTransaction := nil;
   end;
+  SignalActivity;
 end;
 
 constructor TFB30Statement.Create(Attachment: TFBAttachment;
@@ -1299,6 +1303,7 @@ begin
       result := true;
     end;
   end;
+  SignalActivity;
 end;
 
 procedure TFB30Statement.TransactionEnding(aTransaction: TFB30Transaction;
