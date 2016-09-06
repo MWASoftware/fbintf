@@ -244,7 +244,7 @@ begin
   P := Bufptr + len - 1;
   while P >= bufptr do
   begin
-    Result := (Result shr 8 ) or byte(P^);
+    Result := (Result shl 8 ) or byte(P^);
     Dec(P);
   end;
 end;
