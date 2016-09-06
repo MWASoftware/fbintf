@@ -15,6 +15,7 @@ type
     function GenerateTPB(sl: array of byte): ITPB;
   protected
     FTPB: ITPB;
+    FSeqNo: integer;
     FDefaultCompletion: TTransactionAction;
     FAttachments: array of IAttachment; {Keep reference to attachment - ensures
                                           attachment cannot be freed before transaction}
@@ -42,6 +43,7 @@ type
     procedure Start(TPB: ITPB; DefaultCompletion: TTransactionAction=taCommit); overload;
 
     property InTransaction: boolean read GetInTransaction;
+    property TransactionSeqNo: integer read FSeqNo;
   end;
 
 implementation

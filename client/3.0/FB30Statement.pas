@@ -110,8 +110,10 @@ type
     FCount: Integer; {Columns in use - may be less than inherited columns}
     FSize: Integer;  {Number of TIBXSQLVARs in column list}
     FMetaData: Firebird.IMessageMetadata;
+    FTransactionSeqNo: integer;
   protected
     FStatement: TFB30Statement;
+    function GetTransactionSeqNo: integer; override;
     procedure FreeXSQLDA; virtual;
     function GetStatement: IStatement; override;
     function GetPrepareSeqNo: integer; override;
@@ -181,7 +183,7 @@ type
     {IResultSet}
     function FetchNext: boolean;
     function GetCursorName: string;
-    function GetTransaction: ITransaction;
+    function GetTransaction: ITransaction; override;
     procedure Close;
   end;
 
@@ -259,7 +261,7 @@ end;
 
 implementation
 
-uses IBUtils, FBMessages, FB30Blob, variants, IBErrorCodes, FBArray, FB30Array;
+uses IBUtils, FBMessages, FB30Blob, variants,  FBArray, FB30Array;
 
 type
 
@@ -660,6 +662,7 @@ end;
 function TResultSet.FetchNext: boolean;
 var i: integer;
 begin
+  CheckActive;
   Result := FResults.FStatement.FetchNext;
   if Result then
     for i := 0 to getCount - 1 do
@@ -983,6 +986,11 @@ begin
   end;
 end;
 
+function TIBXSQLDA.GetTransactionSeqNo: integer;
+begin
+  Result := FTransactionSeqNo;
+end;
+
 procedure TIBXSQLDA.FreeXSQLDA;
 var i: integer;
 begin
@@ -1100,6 +1108,8 @@ begin
   FPrepared := true;
   FSingleResults := false;
   Inc(FPrepareSeqNo);
+  FSQLParams.FTransactionSeqNo := FTransaction.TransactionSeqNo;
+  FSQLRecord.FTransactionSeqNo := FTransaction.TransactionSeqNo;
 end;
 
 function TFB30Statement.InternalExecute(aTransaction: TFB30Transaction): IResults;
@@ -1177,6 +1187,7 @@ begin
  FBOF := true;
  FEOF := false;
  FSQLRecord.FTransaction := aTransaction;
+ FSQLRecord.FTransactionSeqNo := aTransaction.TransactionSeqNo;
  Result := TResultSet.Create(FSQLRecord);
 end;
 
@@ -1196,7 +1207,10 @@ begin
     if (FStatementIntf <> nil) and (SQLType = SQLSelect) and FOpen then
     with Firebird30ClientAPI do
     begin
-      FResultSet.close(StatusIntf);
+      if FSQLRecord.FTransaction.InTransaction and
+        (FSQLRecord.FTransactionSeqNo = FSQLRecord.FTransaction.TransactionSeqNo) then
+        FResultSet.close(StatusIntf);
+      FResultSet := nil;
       if not Force then Check4DataBaseError;
     end;
   finally

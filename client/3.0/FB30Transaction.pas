@@ -144,6 +144,7 @@ begin
       Check4DataBaseError;
     end;
   SignalActivity;
+  Inc(FSeqNo);
 end;
 
 procedure TFB30Transaction.Rollback(Force: boolean);

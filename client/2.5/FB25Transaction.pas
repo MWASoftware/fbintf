@@ -114,6 +114,7 @@ begin
         FreeMem(pteb);
      end;
   end;
+  Inc(FSeqNo);
 end;
 
 procedure TFB25Transaction.Rollback(Force: boolean);

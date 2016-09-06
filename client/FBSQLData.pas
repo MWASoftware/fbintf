@@ -134,6 +134,7 @@ type
     FColumnList: array of TSQLVarData;
     function GetStatement: IStatement; virtual; abstract;
     function GetPrepareSeqNo: integer; virtual; abstract;
+    function GetTransactionSeqNo: integer; virtual; abstract;
     procedure SetCount(aValue: integer); virtual; abstract;
   public
     procedure Initialize; virtual;
@@ -148,6 +149,7 @@ type
     property UniqueRelationName: string read FUniqueRelationName;
     property Statement: IStatement read GetStatement;
     property PrepareSeqNo: integer read GetPrepareSeqNo;
+    property TransactionSeqNo: integer read GetTransactionSeqNo;
   end;
 
   { TSQLVarData }
@@ -351,22 +353,25 @@ type
    TResults = class(TInterfaceParent,IResults)
    private
      FPrepareSeqNo: integer;
+     FTransactionSeqNo: integer;
      FResults: TSQLDataArea;
      FSQLDataCache: array of ISQLData;
      FStatement: IStatement; {ensure FStatement not destroyed until no longer needed}
-     procedure CheckActive;
      function GetISQLData(aIBXSQLVAR: TSQLVarData): ISQLData;
-    public
+   protected
+     procedure CheckActive;
+   public
      constructor Create(aResults: TSQLDataArea);
       {IResults}
      function getCount: integer;
      function ByName(Idx: String): ISQLData;
      function getSQLData(index: integer): ISQLData;
+     function GetTransaction: ITransaction; virtual;
  end;
 
 implementation
 
-uses FBMessages, FBClientAPI, variants, IBUtils;
+uses FBMessages, FBClientAPI, variants, IBUtils, FBTransaction;
 
 { TSQLDataArea }
 
@@ -2238,6 +2243,10 @@ begin
 
   if not FResults.CheckStatementStatus(ssPrepared)  then
     IBError(ibxeStatementNotPrepared, [nil]);
+
+  with GetTransaction as TFBTransaction do
+  if not InTransaction or (FResults.TransactionSeqNo <> FTransactionSeqNo) then
+    IBError(ibxeInterfaceOutofDate,[nil]);
 end;
 
 function TResults.GetISQLData(aIBXSQLVAR: TSQLVarData): ISQLData;
@@ -2257,6 +2266,7 @@ begin
   FResults := aResults;
   FStatement := aResults.Statement;
   FPrepareSeqNo := aResults.PrepareSeqNo;
+  FTransactionSeqNo := aResults.TransactionSeqNo;
   SetLength(FSQLDataCache,aResults.Count);
 end;
 
@@ -2288,6 +2298,11 @@ begin
   if FResults.CheckStatementStatus(ssEOF) then
     IBError(ibxeEOF,[nil]);
   Result := GetISQLData(FResults.Column[index]);
+end;
+
+function TResults.GetTransaction: ITransaction;
+begin
+  Result := FStatement.GetTransaction;
 end;
 
 
