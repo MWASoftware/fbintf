@@ -103,10 +103,12 @@ type
     FCount: Integer; {Columns in use - may be less than inherited columns}
     FSize: Integer;  {Number of TIBXSQLVARs in column list}
     FXSQLDA: PXSQLDA;
+    FTransactionSeqNo: integer;
     function GetRecordSize: Integer;
     function GetXSQLDA: PXSQLDA;
   protected
     FStatement: TFB25Statement;
+    function GetTransactionSeqNo: integer; override;
     procedure FreeXSQLDA;
     function GetStatement: IStatement; override;
     function GetPrepareSeqNo: integer; override;
@@ -155,7 +157,7 @@ type
     {IResultSet}
     function FetchNext: boolean;
     function GetCursorName: string;
-    function GetTransaction: ITransaction;
+    function GetTransaction: ITransaction; override;
     procedure Close;
   end;
 
@@ -664,6 +666,7 @@ end;
 function TResultSet.FetchNext: boolean;
 var i: integer;
 begin
+  CheckActive;
   Result := FResults.FStatement.FetchNext;
   if Result then
     for i := 0 to getCount - 1 do
@@ -802,6 +805,11 @@ end;
 function TIBXSQLDA.GetXSQLDA: PXSQLDA;
 begin
   result := FXSQLDA;
+end;
+
+function TIBXSQLDA.GetTransactionSeqNo: integer;
+begin
+  Result := FTransactionSeqNo;
 end;
 
 procedure TIBXSQLDA.Initialize;
@@ -971,6 +979,8 @@ begin
   FPrepared := true;
   FSingleResults := false;
   Inc(FPrepareSeqNo);
+  FSQLParams.FTransactionSeqNo := FTransaction.TransactionSeqNo;
+  FSQLRecord.FTransactionSeqNo := FTransaction.TransactionSeqNo;
 end;
 
 function TFB25Statement.InternalExecute(aTransaction: TFB25Transaction): IResults;
@@ -1047,6 +1057,7 @@ begin
  FBOF := true;
  FEOF := false;
  FSQLRecord.FTransaction := aTransaction;
+ FSQLRecord.FTransactionSeqNo := aTransaction.TransactionSeqNo;
  Result := TResultSet.Create(FSQLRecord);
 end;
 
