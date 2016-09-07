@@ -13,9 +13,12 @@ type
 
   TFBAttachment = class(TActivityHandler, IAttachment, IActivityMonitor)
   private
+    FCharSetID: integer;
+    FCodePage: TSystemCodePage;
     FHandle: TISC_DB_HANDLE;
     FDatabaseName: string;
     FDPB: IDPB;
+    FHasDefaultCharSet: boolean;
     FSQLDialect: integer;
     FFirebirdAPI: IFirebirdAPI;
     FRaiseExceptionOnConnectError: boolean;
@@ -27,6 +30,9 @@ type
     destructor Destroy; override;
     property Handle: TISC_DB_HANDLE read FHandle;
     property SQLDialect: integer read FSQLDialect;
+    property HasDefaultCharSet: boolean read FHasDefaultCharSet;
+    property CharSetID: integer read FCharSetID;
+    property CodePage: TSystemCodePage read FCodePage;
 
   public
     {IAttachment}
@@ -132,7 +138,12 @@ begin
 
     DPBItem :=  DPB.Find(isc_dpb_lc_ctype);
     if DPBItem <> nil then
+    with FirebirdClientAPI do
+    begin
       CreateParams += ' DEFAULT CHARACTER SET ' + DPBItem.AsString;
+      FHasDefaultCharSet :=   CharSetName2CharSetID(DPBItem.AsString,FCharSetID) and
+                              CharSetID2CodePage(FCharSetID,FCodePage);
+    end;
 
     DPBItem :=  DPB.Find(isc_dpb_sql_dialect);
     if DPBItem <> nil then
@@ -183,6 +194,10 @@ begin
      Param := FDPB.Find(isc_dpb_set_db_SQL_dialect);
      if Param <> nil then
        FSQLDialect := Param.AsByte;
+     Param :=  FDPB.Find(isc_dpb_lc_ctype);
+     FHasDefaultCharSet :=  (Param <> nil) and
+                             CharSetName2CharSetID(Param.AsString,FCharSetID) and
+                             CharSetID2CodePage(FCharSetID,FCodePage);
   end;
 end;
 

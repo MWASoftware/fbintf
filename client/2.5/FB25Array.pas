@@ -2,6 +2,11 @@ unit FB25Array;
 
 {$mode objfpc}{$H+}
 
+{$IF FPC_FULLVERSION >= 20700 }
+{$codepage UTF8}
+{$DEFINE HAS_ANSISTRING_CODEPAGE}
+{$ENDIF}
+
 interface
 
 uses
@@ -24,12 +29,18 @@ type
   private
     FDBHandle: TISC_DB_HANDLE;
     FTRHandle: TISC_TR_HANDLE;
+    {$IFDEF HAS_ANSISTRING_CODEPAGE}
+    FCodePage: TSystemCodePage;
+    {$ENDIF}
   protected
     procedure InternalGetSlice; override;
     procedure InternalPutSlice(Force: boolean); override;
   public
     constructor Create(aAttachment: TFBAttachment; aTransaction: TFB25Transaction; aField: IArrayMetaData); overload;
     constructor Create(aAttachment: TFBAttachment; aTransaction: TFB25Transaction; aField: IArrayMetaData; ArrayID: TISC_QUAD); overload;
+    {$IFDEF HAS_ANSISTRING_CODEPAGE}
+    function GetCodePage: TSystemCodePage; override;
+    {$ENDIF}
  end;
 
 implementation
@@ -78,6 +89,8 @@ begin
   inherited Create(aAttachment,aTransaction,aField);
   FDBHandle := aAttachment.Handle;
   FTRHandle := aTransaction.Handle;
+  if aAttachment.HasDefaultCharSet then
+    FCodePage := aAttachment.CodePage;
 end;
 
 constructor TFB25Array.Create(aAttachment: TFBAttachment;
@@ -86,6 +99,13 @@ begin
   inherited Create(aAttachment,aTransaction,aField,ArrayID);
   FDBHandle := aAttachment.Handle;
   FTRHandle := aTransaction.Handle;
+  if aAttachment.HasDefaultCharSet then
+    FCodePage := aAttachment.CodePage;
+end;
+
+function TFB25Array.GetCodePage: TSystemCodePage;
+begin
+  Result := FCodePage;
 end;
 
 end.

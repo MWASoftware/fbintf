@@ -2,6 +2,11 @@ unit FBArray;
 
 {$mode objfpc}{$H+}
 
+{$IF FPC_FULLVERSION >= 20700 }
+{$codepage UTF8}
+{$DEFINE HAS_ANSISTRING_CODEPAGE}
+{$ENDIF}
+
 interface
 
 uses
@@ -46,6 +51,9 @@ type
    procedure Changed; override;
    function SQLData: PChar; override;
    function GetDataLength: cardinal; override;
+   {$IFDEF HAS_ANSISTRING_CODEPAGE}
+   function GetCodePage: TSystemCodePage; override;
+   {$ENDIF}
    procedure SetDataLength(len: cardinal); override;
    procedure SetSQLType(aValue: cardinal); override;
   public
@@ -123,6 +131,9 @@ type
     destructor Destroy; override;
     function GetSQLDialect: integer;
     procedure TransactionEnding(aTransaction: ITransaction; Force: boolean);
+    {$IFDEF HAS_ANSISTRING_CODEPAGE}
+    function GetCodePage: TSystemCodePage; virtual; abstract;
+    {$ENDIF}
 
    public
     {IArray}
@@ -182,6 +193,11 @@ end;
 function TFBArrayElement.GetDataLength: cardinal;
 begin
   Result :=  FArray.GetDataLength
+end;
+
+function TFBArrayElement.GetCodePage: TSystemCodePage;
+begin
+  Result := FArray.GetCodePage;
 end;
 
 procedure TFBArrayElement.SetDataLength(len: cardinal);

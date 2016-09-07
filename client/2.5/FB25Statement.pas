@@ -2,6 +2,11 @@ unit FB25Statement;
 
 {$mode objfpc}{$H+}
 
+{$IF FPC_FULLVERSION >= 20700 }
+{$codepage UTF8}
+{$DEFINE HAS_ANSISTRING_CODEPAGE}
+{$ENDIF}
+
 {This unit is hacked from IBSQL and contains the code for managing an XSQLDA and
  SQLVars, along with statement preparation, execution and cursor management.
  Most of the SQLVar code has been moved to unit FBSQLData. Client access is
@@ -69,6 +74,9 @@ type
     function GetRelationName: string;  override;
     function GetScale: cardinal; override;
     function GetCharSetID: cardinal; override;
+    {$IFDEF HAS_ANSISTRING_CODEPAGE}
+    function GetCodePage: TSystemCodePage; override;
+    {$ENDIF}
     function GetIsNull: Boolean;   override;
     function GetIsNullable: boolean; override;
     function GetSQLData: PChar;  override;
@@ -433,17 +441,36 @@ end;
 
 function TIBXSQLVAR.GetCharSetID: cardinal;
 begin
+  result := 0;
   case SQLType of
   SQL_VARYING, SQL_TEXT:
-    result := FXSQLVAR^.sqlsubtype and $FF;
+    if FStatement.FAttachment.HasDefaultCharSet then
+      result := FStatement.FAttachment.CharSetID
+    else
+      result := FXSQLVAR^.sqlsubtype and $FF;
 
   SQL_BLOB:
-      result := GetBlobMetaData.GetCharSetID;
-
-  else
-    result := 0;
+    if SQLSubType = 1 then
+    begin
+      if FStatement.FAttachment.HasDefaultCharSet then
+        result := FStatement.FAttachment.CharSetID
+      else
+       result := GetBlobMetaData.GetCharSetID;
+    end
   end;
 end;
+
+{$IFDEF HAS_ANSISTRING_CODEPAGE}
+function TIBXSQLVAR.GetCodePage: TSystemCodePage;
+begin
+  result := CP_NONE;
+  if FStatement.FAttachment.HasDefaultCharSet then
+    result := FStatement.FAttachment.CodePage
+  else
+  with FirebirdClientAPI do
+     CharSetID2CodePage(GetCharSetID,result)
+end;
+{$ENDIF}
 
 function TIBXSQLVAR.GetIsNull: Boolean;
 begin

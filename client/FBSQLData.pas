@@ -54,6 +54,9 @@ type
      procedure Changed; virtual;
      function SQLData: PChar; virtual; abstract;
      function GetDataLength: cardinal; virtual; abstract;
+     {$IFDEF HAS_ANSISTRING_CODEPAGE}
+     function GetCodePage: TSystemCodePage; virtual; abstract;
+     {$ENDIF}
      procedure SetScale(aValue: cardinal); virtual;
      procedure SetDataLength(len: cardinal); virtual;
      procedure SetSQLType(aValue: cardinal); virtual;
@@ -173,6 +176,9 @@ type
     function GetRelationName: string;  virtual; abstract;
     function GetScale: cardinal; virtual; abstract;
     function GetCharSetID: cardinal; virtual; abstract;
+    {$IFDEF HAS_ANSISTRING_CODEPAGE}
+    function GetCodePage: TSystemCodePage; virtual; abstract;
+    {$ENDIF}
     function GetIsNull: Boolean;   virtual; abstract;
     function GetIsNullable: boolean; virtual; abstract;
     function GetSQLData: PChar;  virtual; abstract;
@@ -230,6 +236,9 @@ type
     procedure CheckActive; override;
     function SQLData: PChar; override;
     function GetDataLength: cardinal; override;
+    {$IFDEF HAS_ANSISTRING_CODEPAGE}
+    function GetCodePage: TSystemCodePage; override;
+    {$ENDIF}
 
   public
     constructor Create(aIBXSQLVAR: TSQLVarData);
@@ -1132,7 +1141,7 @@ begin
         end;
         {$IFDEF HAS_ANSISTRING_CODEPAGE}
         SetString(rs, sz, str_len);
-        SetCodePage(rs,CP_NONE,false);
+        SetCodePage(rs,GetCodePage,false);
         Result := rs;
         {$ELSE}
         SetString(Result, sz, str_len);
@@ -1509,6 +1518,11 @@ begin
   Result := FIBXSQLVAR.DataLength;
 end;
 
+function TColumnMetaData.GetCodePage: TSystemCodePage;
+begin
+   Result := FIBXSQLVAR.GetCodePage;
+end;
+
 constructor TColumnMetaData.Create(aIBXSQLVAR: TSQLVarData);
 begin
   inherited Create;
@@ -1645,6 +1659,9 @@ function TIBSQLData.GetAsString: String;
 var
   ss: TStringStream;
   b: IBlob;
+  {$IFDEF HAS_ANSISTRING_CODEPAGE}
+  rs: rawbytestring;
+  {$ENDIF}
 begin
   CheckActive;
   Result := '';
@@ -1658,7 +1675,13 @@ begin
       try
         b := FIBXSQLVAR.GetAsBlob(AsQuad);
         b.SaveToStream(ss);
+        {$IFDEF HAS_ANSISTRING_CODEPAGE}
+        rs :=  ss.DataString;
+        SetCodePage(rs,GetCodePage,false);
+        Result := rs;
+        {$ELSE}
         Result := ss.DataString;
+        {$ENDIF}
       finally
         ss.Free;
       end;

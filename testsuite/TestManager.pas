@@ -85,6 +85,7 @@ end;
 
 function TTestBase.ReportResults(Statement: IStatement): IResultSet;
 var i: integer;
+    s: string;
 begin
   Result := Statement.OpenCursor;
   try
@@ -109,9 +110,27 @@ begin
             writeln(Result[i].Name,' = ',Result[i].AsString);
 
         SQL_BLOB:
-          writeln(Result[i].Name,' = (blob) Charset Id = ',Result[i].GetCharSetID);
+          if Result[i].IsNull then
+            writeln(Result[i].Name,' = (null blob)')
+          else
+          if Result[i].SQLSubType = 1 then
+          begin
+            s := Result[i].AsString;
+            writeln(Result[i].Name,' Charset Id = ',Result[i].GetCharSetID, ' Codepage = ',StringCodePage(s));
+            writeln;
+            writeln(s);
+          end
+          else
+            writeln(Result[i].Name,' = (blob)');
+
+        SQL_TEXT,SQL_VARYING:
+        begin
+          s := Result[i].AsString;
+          writeln(Result[i].Name,' = ',s,' Charset Id = ',Result[i].GetCharSetID, ' Codepage = ',StringCodePage(s))
+        end;
+
         else
-          writeln(Result[i].Name,' = ',Result[i].AsString,' Charset Id = ',Result[i].GetCharSetID);
+          writeln(Result[i].Name,' = ',Result[i].AsString);
         end;
       end;
     end;

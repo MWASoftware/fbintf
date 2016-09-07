@@ -79,6 +79,10 @@ type
     function GetStatus: IStatus; virtual; abstract;
     function IsEmbeddedServer: boolean;
     function GetLibraryName: string;
+    function GetCharsetName(CharSetID: integer): string;
+    function CharSetID2CodePage(CharSetID: integer; var CodePage: TSystemCodePage): boolean;
+    function CodePage2CharSetID(CodePage: TSystemCodePage; var CharSetID: integer): boolean;
+    function CharSetName2CharSetID(CharSetName: string; var CharSetID: integer): boolean;
   end;
 
 const FirebirdClientAPI: TFBClientAPI = nil;
@@ -110,6 +114,88 @@ FIREBIRD_EMBEDDED = 'fbembed.dll';
 {$ELSE}
 {$I wloadlibrary.inc}
 {$ENDIF}
+
+type
+  TCharsetMap = record
+    CharsetID: integer;
+    CharSetName: string;
+    CharSetWidth: integer;
+    CodePage: TSystemCodePage;
+  end;
+
+const
+  CharSetMap: array [0..69] of TCharsetMap = (
+  (CharsetID: 0; CharSetName: 'NONE'; CharSetWidth: 1; CodePage: CP_NONE),
+  (CharsetID: 1; CharSetName: 'OCTETS'; CharSetWidth: 1; CodePage: CP_NONE),
+  (CharsetID: 2; CharSetName: 'ASCII'; CharSetWidth: 1; CodePage: CP_ASCII),
+  (CharsetID: 3; CharSetName: 'UNICODE_FSS'; CharSetWidth: 3; CodePage: CP_UTF16),
+  (CharsetID: 4; CharSetName: 'UTF8'; CharSetWidth: 4; CodePage: CP_UTF8),
+  (CharsetID: 5; CharSetName: 'SJIS_0208'; CharSetWidth: 2; CodePage: 20932),
+  (CharsetID: 6; CharSetName: 'EUCJ_0208'; CharSetWidth: 2; CodePage: 20932),
+  (CharsetID: 7; CharSetName: 'Unknown'; CharSetWidth: 0; CodePage: CP_NONE),
+  (CharsetID: 8; CharSetName: 'Unknown'; CharSetWidth: 0; CodePage: CP_NONE),
+  (CharsetID: 9; CharSetName: 'DOS737'; CharSetWidth: 1; CodePage: 737),
+  (CharsetID: 10; CharSetName: 'DOS437'; CharSetWidth: 1; CodePage: 437),
+  (CharsetID: 11; CharSetName: 'DOS850'; CharSetWidth: 1; CodePage: 850),
+  (CharsetID: 12; CharSetName: 'DOS865'; CharSetWidth: 1; CodePage: 865),
+  (CharsetID: 13; CharSetName: 'DOS860'; CharSetWidth: 1; CodePage: 860),
+  (CharsetID: 14; CharSetName: 'DOS863'; CharSetWidth: 1; CodePage: 863),
+  (CharsetID: 15; CharSetName: 'DOS775'; CharSetWidth: 1; CodePage: 775),
+  (CharsetID: 16; CharSetName: 'DOS858'; CharSetWidth: 1; CodePage: 858),
+  (CharsetID: 17; CharSetName: 'DOS862'; CharSetWidth: 1; CodePage: 862),
+  (CharsetID: 18; CharSetName: 'DOS864'; CharSetWidth: 1; CodePage: 864),
+  (CharsetID: 19; CharSetName: 'NEXT'; CharSetWidth: 1; CodePage: CP_NONE),
+  (CharsetID: 20; CharSetName: 'Unknown'; CharSetWidth: 0; CodePage: CP_NONE),
+  (CharsetID: 21; CharSetName: 'ISO8859_1'; CharSetWidth: 1; CodePage: 28591),
+  (CharsetID: 22; CharSetName: 'ISO8859_2'; CharSetWidth: 1; CodePage: 28592),
+  (CharsetID: 23; CharSetName: 'ISO8859_3'; CharSetWidth: 1; CodePage: 28593),
+  (CharsetID: 24; CharSetName: 'Unknown'; CharSetWidth: 0; CodePage: CP_NONE),
+  (CharsetID: 25; CharSetName: 'Unknown'; CharSetWidth: 0; CodePage: CP_NONE),
+  (CharsetID: 26; CharSetName: 'Unknown'; CharSetWidth: 0; CodePage: CP_NONE),
+  (CharsetID: 27; CharSetName: 'Unknown'; CharSetWidth: 0; CodePage: CP_NONE),
+  (CharsetID: 28; CharSetName: 'Unknown'; CharSetWidth: 0; CodePage: CP_NONE),
+  (CharsetID: 29; CharSetName: 'Unknown'; CharSetWidth: 0; CodePage: CP_NONE),
+  (CharsetID: 30; CharSetName: 'Unknown'; CharSetWidth: 0; CodePage: CP_NONE),
+  (CharsetID: 31; CharSetName: 'Unknown'; CharSetWidth: 0; CodePage: CP_NONE),
+  (CharsetID: 32; CharSetName: 'Unknown'; CharSetWidth: 0; CodePage: CP_NONE),
+  (CharsetID: 33; CharSetName: 'Unknown'; CharSetWidth: 0; CodePage: CP_NONE),
+  (CharsetID: 34; CharSetName: 'ISO8859_4'; CharSetWidth: 1; CodePage: 28594),
+  (CharsetID: 35; CharSetName: 'ISO8859_5'; CharSetWidth: 1; CodePage: 28595),
+  (CharsetID: 36; CharSetName: 'ISO8859_6'; CharSetWidth: 1; CodePage: 28596),
+  (CharsetID: 37; CharSetName: 'ISO8859_7'; CharSetWidth: 1; CodePage: 28597),
+  (CharsetID: 38; CharSetName: 'ISO8859_8'; CharSetWidth: 1; CodePage: 28598),
+  (CharsetID: 39; CharSetName: 'ISO8859_9'; CharSetWidth: 1; CodePage: 28599),
+  (CharsetID: 40; CharSetName: 'ISO8859_13'; CharSetWidth: 1; CodePage: 28603),
+  (CharsetID: 41; CharSetName: 'Unknown'; CharSetWidth: 0; CodePage: CP_NONE),
+  (CharsetID: 42; CharSetName: 'Unknown'; CharSetWidth: 0; CodePage: CP_NONE),
+  (CharsetID: 43; CharSetName: 'Unknown'; CharSetWidth: 0; CodePage: CP_NONE),
+  (CharsetID: 44; CharSetName: 'KSC_5601'; CharSetWidth: 2; CodePage: 949),
+  (CharsetID: 45; CharSetName: 'DOS852'; CharSetWidth: 1; CodePage: 852),
+  (CharsetID: 46; CharSetName: 'DOS857'; CharSetWidth: 1; CodePage: 857),
+  (CharsetID: 47; CharSetName: 'DOS861'; CharSetWidth: 1; CodePage: 861),
+  (CharsetID: 48; CharSetName: 'DOS866'; CharSetWidth: 1; CodePage: 866),
+  (CharsetID: 49; CharSetName: 'DOS869'; CharSetWidth: 1; CodePage: 869),
+  (CharsetID: 50; CharSetName: 'CYRL'; CharSetWidth: 1; CodePage: 1251),
+  (CharsetID: 51; CharSetName: 'WIN1250'; CharSetWidth: 1; CodePage: 1250),
+  (CharsetID: 52; CharSetName: 'WIN1251'; CharSetWidth: 1; CodePage: 1251),
+  (CharsetID: 53; CharSetName: 'WIN1252'; CharSetWidth: 1; CodePage: 1252),
+  (CharsetID: 54; CharSetName: 'WIN1253'; CharSetWidth: 1; CodePage: 1253),
+  (CharsetID: 55; CharSetName: 'WIN1254'; CharSetWidth: 1; CodePage: 1254),
+  (CharsetID: 56; CharSetName: 'BIG_5'; CharSetWidth: 2; CodePage: 950),
+  (CharsetID: 57; CharSetName: 'GB_2312'; CharSetWidth: 2; CodePage: 936),
+  (CharsetID: 58; CharSetName: 'WIN1255'; CharSetWidth: 1; CodePage: 1255),
+  (CharsetID: 59; CharSetName: 'WIN1256'; CharSetWidth: 1; CodePage: 1256),
+  (CharsetID: 60; CharSetName: 'WIN1257'; CharSetWidth: 1; CodePage: 1257),
+  (CharsetID: 61; CharSetName: 'Unknown'; CharSetWidth: 0; CodePage: CP_NONE),
+  (CharsetID: 62; CharSetName: 'Unknown'; CharSetWidth: 0; CodePage: CP_NONE),
+  (CharsetID: 63; CharSetName: 'KOI8R'; CharSetWidth: 1; CodePage: 20866),
+  (CharsetID: 64; CharSetName: 'KOI8U'; CharSetWidth: 1; CodePage: 21866),
+  (CharsetID: 65; CharSetName: 'WIN1258'; CharSetWidth: 1; CodePage: 1258),
+  (CharsetID: 66; CharSetName: 'TIS620'; CharSetWidth: 1; CodePage: 874),
+  (CharsetID: 67; CharSetName: 'GBK'; CharSetWidth: 2; CodePage: 936),
+  (CharsetID: 68; CharSetName: 'CP943C'; CharSetWidth: 2; CodePage: 943),
+  (CharsetID: 69; CharSetName: 'GB18030'; CharSetWidth: 4; CodePage: 54936)
+);
 
 { TFBClientAPI }
 
@@ -174,6 +260,58 @@ end;
 function TFBClientAPI.GetLibraryName: string;
 begin
   Result := FFBLibraryName;
+end;
+
+function TFBClientAPI.GetCharsetName(CharSetID: integer): string;
+begin
+  Result := '';
+  if (CharSetID >= Low(CharSetMap)) and (CharSetID <= High(CharSetMap)) and
+                                  (CharSetMap[CharSetID].CharSetID = CharSetID) then
+    begin
+      Result := CharSetMap[CharSetID].CharSetName;
+      Exit;
+    end;
+end;
+
+function TFBClientAPI.CharSetID2CodePage(CharSetID: integer;
+  var CodePage: TSystemCodePage): boolean;
+begin
+  Result := (CharSetID >= Low(CharSetMap)) and (CharSetID <= High(CharSetMap))
+               and (CharSetMap[CharSetID].CharSetID = CharSetID);
+  if Result then
+    begin
+      CodePage := CharSetMap[CharSetID].CodePage;
+      Result := true;
+      Exit;
+    end;
+end;
+
+function TFBClientAPI.CodePage2CharSetID(CodePage: TSystemCodePage;
+  var CharSetID: integer): boolean;
+var i: integer;
+begin
+  Result := false;
+  for i := Low(CharSetMap) to High(CharSetMap) do
+    if CharSetMap[i].CodePage = CodePage then
+    begin
+      CharSetID := CharSetMap[i].CharSetID;
+      Result := true;
+      Exit;
+    end;
+end;
+
+function TFBClientAPI.CharSetName2CharSetID(CharSetName: string;
+  var CharSetID: integer): boolean;
+var i: integer;
+begin
+  Result := false;
+  for i := Low(CharSetMap) to High(CharSetMap) do
+    if CompareStr(CharSetMap[i].CharSetName, CharSetName) = 0 then
+    begin
+      CharSetID := CharSetMap[i].CharSetID;
+      Result := true;
+      Exit;
+    end;
 end;
 
 const

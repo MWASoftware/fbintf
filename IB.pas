@@ -616,7 +616,11 @@ type
     function HasMasterIntf: boolean;
     function HasRollbackRetaining: boolean;
     function GetImplementationVersion: string;
-  end;
+    function GetCharsetName(CharSetID: integer): string;
+    function CharSetID2CodePage(CharSetID: integer; var CodePage: TSystemCodePage): boolean;
+    function CodePage2CharSetID(CodePage: TSystemCodePage; var CharSetID: integer): boolean;
+    function CharSetName2CharSetID(CharSetName: string; var CharSetID: integer): boolean;
+end;
 
 type
   TOnGetLibraryName = procedure(var libname: string);
