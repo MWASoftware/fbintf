@@ -108,8 +108,10 @@ begin
           else
             writeln(Result[i].Name,' = ',Result[i].AsString);
 
+        SQL_BLOB:
+          writeln(Result[i].Name,' = (blob) Charset Id = ',Result[i].GetCharSetID);
         else
-          writeln(Result[i].Name,' = ',Result[i].AsString);
+          writeln(Result[i].Name,' = ',Result[i].AsString,' Charset Id = ',Result[i].GetCharSetID);
         end;
       end;
     end;
@@ -488,7 +490,7 @@ begin
   FTests := TList.Create;
   FNewDatabaseName := 'localhost:/tmp/test1.fdb';
   FUserName := 'SYSDBA';
-  FPassword := 'masterkey';
+  FPassword := 'Pears';
   FEmployeeDatabaseName := 'localhost:employee';
 end;
 

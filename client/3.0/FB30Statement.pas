@@ -1125,6 +1125,8 @@ begin
   CheckHandle;
   if aTransaction <> FTransaction then
     AddMonitor(aTransaction);
+  if (FSQLParams.FTransactionSeqNo = FTransaction.TransactionSeqNo) then
+    IBError(ibxeInterfaceOutofDate,[nil]);
 
   try
     with Firebird30ClientAPI do
@@ -1173,6 +1175,9 @@ begin
  if aTransaction <> FTransaction then
    AddMonitor(aTransaction);
  CheckHandle;
+ if (FSQLParams.FTransactionSeqNo = FTransaction.TransactionSeqNo) then
+   IBError(ibxeInterfaceOutofDate,[nil]);
+
  with Firebird30ClientAPI do
  begin
    FResultSet := FStatementIntf.openCursor(StatusIntf,
@@ -1210,9 +1215,14 @@ begin
     if (FStatementIntf <> nil) and (SQLType = SQLSelect) and FOpen then
     with Firebird30ClientAPI do
     begin
-      if FSQLRecord.FTransaction.InTransaction and
-        (FSQLRecord.FTransactionSeqNo = FSQLRecord.FTransaction.TransactionSeqNo) then
-        FResultSet.close(StatusIntf);
+      if FResultSet <> nil then
+      begin
+        if FSQLRecord.FTransaction.InTransaction and
+          (FSQLRecord.FTransactionSeqNo = FSQLRecord.FTransaction.TransactionSeqNo) then
+          FResultSet.close(StatusIntf)
+        else
+          FResultSet.release;
+      end;
       FResultSet := nil;
       if not Force then Check4DataBaseError;
     end;
