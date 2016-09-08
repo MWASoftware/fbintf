@@ -2294,6 +2294,9 @@ end;
 
 function TResults.GetISQLData(aIBXSQLVAR: TSQLVarData): ISQLData;
 begin
+  if (aIBXSQLVAR.Index < 0) or (aIBXSQLVAR.Index >= Length(FSQLDataCache)) then
+    IBError(ibxeInvalidColumnIndex,[nil]);
+
   if FSQLDataCache[aIBXSQLVAR.Index] <> nil then
     Result := FSQLDataCache[aIBXSQLVAR.Index]
   else
@@ -2340,6 +2343,9 @@ begin
     IBError(ibxeBOF,[nil]);
   if FResults.CheckStatementStatus(ssEOF) then
     IBError(ibxeEOF,[nil]);
+  if (index < 0) or (index >= FResults.Count) then
+    IBError(ibxeInvalidColumnIndex,[nil]);
+
   Result := GetISQLData(FResults.Column[index]);
 end;
 

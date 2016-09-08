@@ -82,6 +82,7 @@ type
     function GetSQLType: short;
     function GetSQLTypeName: string;
     function GetScale: integer;
+    function GetCharSetID: cardinal;
     function GetTableName: string;
     function GetColumnName: string;
     function GetDimensions: integer;

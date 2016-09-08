@@ -83,12 +83,16 @@ type
   public
    constructor Create(aAttachment: IAttachment; aTransaction: ITransaction;
      relationName, columnName: string);
+   {$IFDEF HAS_ANSISTRING_CODEPAGE}
+   function GetCodePage: TSystemCodePage; virtual; abstract;
+   {$ENDIF}
 
   public
    {IArrayMetaData}
    function GetSQLType: short;
    function GetSQLTypeName: string;
    function GetScale: integer;
+   function GetCharSetID: cardinal; virtual; abstract;
    function GetTableName: string;
    function GetColumnName: string;
    function GetDimensions: integer;
@@ -131,9 +135,6 @@ type
     destructor Destroy; override;
     function GetSQLDialect: integer;
     procedure TransactionEnding(aTransaction: ITransaction; Force: boolean);
-    {$IFDEF HAS_ANSISTRING_CODEPAGE}
-    function GetCodePage: TSystemCodePage; virtual; abstract;
-    {$ENDIF}
 
    public
     {IArray}
@@ -197,7 +198,7 @@ end;
 
 function TFBArrayElement.GetCodePage: TSystemCodePage;
 begin
-  Result := FArray.GetCodePage;
+  Result := (FArray.FMetaData as TFBArrayMetaData).GetCodePage;
 end;
 
 procedure TFBArrayElement.SetDataLength(len: cardinal);
@@ -307,7 +308,7 @@ var len: integer;
 begin
   CheckActive;
   {$IFDEF HAS_ANSISTRING_CODEPAGE}
-  Value := Transliterate(Value,GetCodePage):
+  Value := Transliterate(Value,GetCodePage);
   {$ENDIF}
   case GetSQLType of
   SQL_VARYING:

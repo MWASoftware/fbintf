@@ -456,7 +456,10 @@ begin
         result := FStatement.FAttachment.CharSetID
       else
        result := GetBlobMetaData.GetCharSetID;
-    end
+    end;
+
+  SQL_ARRAY:
+    result := GetArrayMetaData.GetCharSetID;
   end;
 end;
 

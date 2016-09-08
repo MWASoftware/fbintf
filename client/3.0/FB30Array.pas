@@ -2,10 +2,15 @@ unit FB30Array;
 
 {$mode objfpc}{$H+}
 
+{$IF FPC_FULLVERSION >= 20700 }
+{$codepage UTF8}
+{$DEFINE HAS_ANSISTRING_CODEPAGE}
+{$ENDIF}
+
 interface
 
 uses
-  Classes, SysUtils, Firebird, IB, FBArray, IBHeader, FB30Attachment,
+  Classes, SysUtils, Firebird, IB, FBArray, IBHeader, FB30Attachment, FBClientAPI,
   FB30Transaction, FBParamBlock;
 
 type
@@ -53,6 +58,11 @@ end;
   { TFB30ArrayMetaData }
 
   TFB30ArrayMetaData = class(TFBArrayMetaData,IArrayMetaData)
+  private
+    FCharSetID: integer;
+    {$IFDEF HAS_ANSISTRING_CODEPAGE}
+    FCodePage: TSystemCodePage;
+    {$ENDIF}
   protected
     procedure LoadMetaData(aAttachment: IAttachment; aTransaction: ITransaction;
                    relationName, columnName: string); override;
@@ -80,7 +90,8 @@ uses FB30ClientAPI, FB30Statement;
 
 const
   sGetArrayMetaData = 'Select F.RDB$FIELD_LENGTH, F.RDB$FIELD_SCALE, F.RDB$FIELD_TYPE, '+
-                      'F.RDB$DIMENSIONS, FD.RDB$DIMENSION, FD.RDB$LOWER_BOUND, FD.RDB$UPPER_BOUND '+
+                      'F.RDB$DIMENSIONS, FD.RDB$DIMENSION, FD.RDB$LOWER_BOUND, FD.RDB$UPPER_BOUND, '+
+                      'F.RDB$CHARACTER_SET_ID '+
                       'From RDB$FIELDS F JOIN RDB$RELATION_FIELDS RF '+
                       'On F.RDB$FIELD_NAME = RF.RDB$FIELD_SOURCE JOIN RDB$FIELD_DIMENSIONS FD '+
                       'On FD.RDB$FIELD_NAME = F.RDB$FIELD_NAME ' +
@@ -143,6 +154,11 @@ begin
       FArrayDesc.array_desc_dtype := Data[2].AsInteger;
       FArrayDesc.array_desc_dimensions := Data[3].AsInteger;
       FArrayDesc.array_desc_flags := 0; {row major}
+      FCharSetID := Data[7].AsInteger;
+      {$IFDEF HAS_ANSISTRING_CODEPAGE}
+      FCodePage := CP_NONE;
+      FirebirdClientAPI.CharSetID2CodePage(FCharSetID,FCodePage);
+      {$ENDIF}
       repeat
         with FArrayDesc.array_desc_bounds[Data[4].AsInteger] do
         begin
