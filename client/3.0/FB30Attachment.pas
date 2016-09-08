@@ -13,6 +13,9 @@ type
 
   TFBAttachment = class(TActivityHandler,IAttachment, IActivityMonitor)
   private
+    FHasDefaultCharSet: boolean;
+    FCharSetID: integer;
+    FCodePage: TSystemCodePage;
     FAttachmentIntf: Firebird.IAttachment;
     FSQLDialect: integer;
     FFirebirdAPI: IFirebirdAPI;
@@ -108,6 +111,7 @@ end;
 
 constructor TFBAttachment.CreateDatabase(DatabaseName: string; DPB: IDPB;
   RaiseExceptionOnError: boolean);
+var Param: IDPBItem;
 begin
   FFirebirdAPI := Firebird30ClientAPI; {Keep reference to interface}
   FSQLDialect := 3;
@@ -127,7 +131,17 @@ begin
                                          BytePtr((FDPB as TDPB).getBuffer));
     if FRaiseExceptionOnConnectError then Check4DataBaseError;
     if InErrorState then
-      FAttachmentIntf := nil;
+      FAttachmentIntf := nil
+    else
+    begin
+     Param := FDPB.Find(isc_dpb_set_db_SQL_dialect);
+     if Param <> nil then
+       FSQLDialect := Param.AsByte;
+     Param :=  FDPB.Find(isc_dpb_lc_ctype);
+     FHasDefaultCharSet :=  (Param <> nil) and
+                             CharSetName2CharSetID(Param.AsString,FCharSetID) and
+                             CharSetID2CodePage(FCharSetID,FCodePage);
+    end;
   end;
 end;
 
@@ -145,6 +159,7 @@ begin
 end;
 
 procedure TFBAttachment.Connect;
+var Param: IDPBItem;
 begin
   with Firebird30ClientAPI do
   begin
@@ -153,7 +168,17 @@ begin
                          BytePtr((FDPB as TDPB).getBuffer));
     if FRaiseExceptionOnConnectError then Check4DataBaseError;
     if InErrorState then
-      FAttachmentIntf := nil;
+      FAttachmentIntf := nil
+    else
+    begin
+      Param := FDPB.Find(isc_dpb_set_db_SQL_dialect);
+      if Param <> nil then
+        FSQLDialect := Param.AsByte;
+      Param :=  FDPB.Find(isc_dpb_lc_ctype);
+      FHasDefaultCharSet :=  (Param <> nil) and
+                             CharSetName2CharSetID(Param.AsString,FCharSetID) and
+                             CharSetID2CodePage(FCharSetID,FCodePage);
+    end;
   end;
 end;
 
@@ -166,6 +191,9 @@ begin
       if not Force and InErrorState then
         IBDataBaseError;
       FAttachmentIntf := nil;
+      FHasDefaultCharSet := false;
+      FCodePage := CP_NONE;
+      FCharSetID := 0;
     end;
 end;
 

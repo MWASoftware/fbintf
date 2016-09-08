@@ -233,6 +233,28 @@ begin
   Result := GetDataLength;
 end;
 
+{$IFDEF HAS_ANSISTRING_CODEPAGE}
+function TFBArrayElement.GetAsString: string;
+var rs: RawByteString;
+begin
+  case GetSQLType of
+  SQL_VARYING:
+    begin
+      rs := strpas(FBufPtr);
+      SetCodePage(rs,GetCodePage,false);
+      Result := rs;
+    end;
+  SQL_TEXT:
+    begin
+      SetString(rs,FBufPtr,GetDataLength);
+      SetCodePage(rs,GetCodePage,false);
+      Result := rs;
+    end
+  else
+    Result := inherited GetAsString;
+  end;
+end;
+{$ELSE}
 function TFBArrayElement.GetAsString: string;
 begin
   case GetSQLType of
@@ -244,6 +266,7 @@ begin
     Result := inherited GetAsString;
   end;
 end;
+{$ENDIF}
 
 procedure TFBArrayElement.SetAsLong(Value: Long);
 begin
@@ -283,6 +306,9 @@ var len: integer;
     ElementSize: integer;
 begin
   CheckActive;
+  {$IFDEF HAS_ANSISTRING_CODEPAGE}
+  Value := Transliterate(Value,GetCodePage):
+  {$ENDIF}
   case GetSQLType of
   SQL_VARYING:
     begin

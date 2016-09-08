@@ -103,10 +103,12 @@ begin
     FCodePage := aAttachment.CodePage;
 end;
 
+{$IFDEF HAS_ANSISTRING_CODEPAGE}
 function TFB25Array.GetCodePage: TSystemCodePage;
 begin
   Result := FCodePage;
 end;
+{$ENDIF}
 
 end.
 

@@ -2,6 +2,11 @@ unit FB30Statement;
 
 {$mode objfpc}{$H+}
 
+{$IF FPC_FULLVERSION >= 20700 }
+{$codepage UTF8}
+{$DEFINE HAS_ANSISTRING_CODEPAGE}
+{$ENDIF}
+
 {This unit is hacked from IBSQL and contains the code for managing an XSQLDA and
  SQLVars, along with statement preparation, execution and cursor management.
  Most of the SQLVar code has been moved to unit FBSQLData. Client access is
@@ -70,6 +75,9 @@ type
     FNullable: boolean;
     FScale: cardinal;
     FCharSetID: cardinal;
+    {$IFDEF HAS_ANSISTRING_CODEPAGE}
+    FCodePage: TSystemCodePage;
+    {$ENDIF}
 
     protected
      procedure Changed; override;
@@ -81,6 +89,9 @@ type
      function GetRelationName: string;  override;
      function GetScale: cardinal; override;
      function GetCharSetID: cardinal; override;
+     {$IFDEF HAS_ANSISTRING_CODEPAGE}
+     function GetCodePage: TSystemCodePage; override;
+     {$ENDIF}
      function GetIsNull: Boolean;   override;
      function GetIsNullable: boolean; override;
      function GetSQLData: PChar;  override;
@@ -487,6 +498,11 @@ begin
   Result := FCharSetID;
 end;
 
+function TIBXSQLVAR.GetCodePage: TSystemCodePage;
+begin
+  Result := FCodePage;
+end;
+
 function TIBXSQLVAR.GetIsNull: Boolean;
 begin
   Result := IsNullable and (FNullIndicator = -1);
@@ -754,6 +770,7 @@ begin
         Check4DataBaseError;
         Builder.setCharSet(StatusIntf,i,FCharSetID);
         Check4DataBaseError;
+        CharSetID2CodePage(FCharSetID,FCodePage);
         Builder.setScale(StatusIntf,i,FScale);
         Check4DataBaseError;
       end;

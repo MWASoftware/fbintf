@@ -56,6 +56,7 @@ type
      function GetDataLength: cardinal; virtual; abstract;
      {$IFDEF HAS_ANSISTRING_CODEPAGE}
      function GetCodePage: TSystemCodePage; virtual; abstract;
+     function Transliterate(s: string; CodePage: TSystemCodePage): RawByteString;
      {$ENDIF}
      procedure SetScale(aValue: cardinal); virtual;
      procedure SetDataLength(len: cardinal); virtual;
@@ -862,6 +863,14 @@ begin
   //Do nothing by default
 end;
 
+function TSQLDataItem.Transliterate(s: string; CodePage: TSystemCodePage
+  ): RawByteString;
+begin
+  Result := s;
+  if StringCodePage(Result) <> CodePage then
+    SetCodePage(Result,CodePage,CodePage <> CP_NONE);
+end;
+
 procedure TSQLDataItem.SetScale(aValue: cardinal);
 begin
   //Do nothing by default
@@ -1104,7 +1113,7 @@ begin
     end;
 end;
 
-function TSQLDataItem.GetAsShort: Short;
+function TSQLDataItem.GetAsShort: short;
 begin
   CheckActive;
   result := 0;
@@ -1397,7 +1406,7 @@ begin
   Changed;
 end;
 
-procedure TSQLDataItem.SetAsShort(Value: Short);
+procedure TSQLDataItem.SetAsShort(Value: short);
 begin
   CheckActive;
   if IsNullable then
@@ -1417,6 +1426,9 @@ var
    procedure SetStringValue;
    var len: integer;
    begin
+     {$IFDEF HAS_ANSISTRING_CODEPAGE}
+     Value := Transliterate(Value,GetCodePage);
+     {$ENDIF}
      len :=  Length(Value);
       if (GetName = 'DB_KEY') or {do not localize}
          (GetName = 'RDB$DB_KEY') then {do not localize}
@@ -1704,7 +1716,11 @@ begin
   case SQLTYPE of
   SQL_BLOB:
   begin
+    {$IFDEF HAS_ANSISTRING_CODEPAGE}
+    ss := TStringStream.Create(Transliterate(Value,GetCodePage));
+    {$ELSE}
     ss := TStringStream.Create(Value);
+    {$ENDIF}
     try
       b := FIBXSQLVAR.CreateBlob;
       try
@@ -1719,7 +1735,11 @@ begin
   end;
 
   SQL_TEXT, SQL_VARYING:
+    {$IFDEF HAS_ANSISTRING_CODEPAGE}
+    FIBXSQLVar.SetString(Transliterate(Value,GetCodePage));
+    {$ELSE}
     FIBXSQLVar.SetString(Value);
+    {$ENDIF}
 
   else
     inherited SetAsString(Value);

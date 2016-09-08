@@ -6,10 +6,6 @@ unit FBOutputBlock;
 {$DEFINE HAS_ANSISTRING_CODEPAGE}
 {$ENDIF}
 
-{$IF FPC_FULLVERSION < 20700 }
-RawByteString = AnsiString; {Needed for backwards compatibility}
-{$ENDIF}
-
 interface
 
 {Provides common handling for the DB Info results, SQL Info and Service Response Block}

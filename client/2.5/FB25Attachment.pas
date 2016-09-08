@@ -13,12 +13,12 @@ type
 
   TFBAttachment = class(TActivityHandler, IAttachment, IActivityMonitor)
   private
+    FHasDefaultCharSet: boolean;
     FCharSetID: integer;
     FCodePage: TSystemCodePage;
     FHandle: TISC_DB_HANDLE;
     FDatabaseName: string;
     FDPB: IDPB;
-    FHasDefaultCharSet: boolean;
     FSQLDialect: integer;
     FFirebirdAPI: IFirebirdAPI;
     FRaiseExceptionOnConnectError: boolean;
@@ -191,6 +191,8 @@ begin
                          (FDPB as TDPB).getBuffer) > 0 ) and FRaiseExceptionOnConnectError then
       IBDatabaseError;
 
+    if IsConnected then
+    begin
      Param := FDPB.Find(isc_dpb_set_db_SQL_dialect);
      if Param <> nil then
        FSQLDialect := Param.AsByte;
@@ -198,6 +200,7 @@ begin
      FHasDefaultCharSet :=  (Param <> nil) and
                              CharSetName2CharSetID(Param.AsString,FCharSetID) and
                              CharSetID2CodePage(FCharSetID,FCodePage);
+    end;
   end;
 end;
 
@@ -211,6 +214,9 @@ begin
     if (isc_detach_database(StatusVector, @FHandle) > 0) and not Force then
       IBDatabaseError;
   FHandle := nil;
+  FHasDefaultCharSet := false;
+  FCodePage := CP_NONE;
+  FCharSetID := 0;
 end;
 
 function TFBAttachment.IsConnected: boolean;
