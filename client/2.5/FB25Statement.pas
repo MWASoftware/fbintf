@@ -444,18 +444,18 @@ begin
   result := 0;
   case SQLType of
   SQL_VARYING, SQL_TEXT:
-    if FStatement.FAttachment.HasDefaultCharSet then
-      result := FStatement.FAttachment.CharSetID
-    else
+    begin
       result := FXSQLVAR^.sqlsubtype and $FF;
+      if (result <> 0) and FStatement.FAttachment.HasDefaultCharSet then
+        result := FStatement.FAttachment.CharSetID;
+    end;
 
   SQL_BLOB:
     if SQLSubType = 1 then
     begin
-      if FStatement.FAttachment.HasDefaultCharSet then
+      result := GetBlobMetaData.GetCharSetID;
+      if (result <> 0) and FStatement.FAttachment.HasDefaultCharSet then
         result := FStatement.FAttachment.CharSetID
-      else
-       result := GetBlobMetaData.GetCharSetID;
     end;
 
   SQL_ARRAY:

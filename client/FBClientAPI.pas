@@ -85,6 +85,7 @@ type
     function CharSetID2CodePage(CharSetID: integer; var CodePage: TSystemCodePage): boolean;
     function CodePage2CharSetID(CodePage: TSystemCodePage; var CharSetID: integer): boolean;
     function CharSetName2CharSetID(CharSetName: string; var CharSetID: integer): boolean;
+    function CharSetWidth(CharSetID: integer; var Width: integer): boolean;
   end;
 
 const FirebirdClientAPI: TFBClientAPI = nil;
@@ -311,6 +312,19 @@ begin
     if CompareStr(CharSetMap[i].CharSetName, CharSetName) = 0 then
     begin
       CharSetID := CharSetMap[i].CharSetID;
+      Result := true;
+      Exit;
+    end;
+end;
+
+function TFBClientAPI.CharSetWidth(CharSetID: integer; var Width: integer
+  ): boolean;
+begin
+  Result := (CharSetID >= Low(CharSetMap)) and (CharSetID <= High(CharSetMap))
+               and (CharSetMap[CharSetID].CharSetID = CharSetID);
+  if Result then
+    begin
+      Width := CharSetMap[CharSetID].CharSetWidth;
       Result := true;
       Exit;
     end;

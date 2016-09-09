@@ -116,7 +116,7 @@ begin
           if Result[i].SQLSubType = 1 then
           begin
             s := Result[i].AsString;
-            writeln(Result[i].Name,' Charset Id = ',Result[i].GetCharSetID, ' Codepage = ',StringCodePage(s));
+            writeln(Result[i].Name,' (Charset Id = ',Result[i].GetCharSetID, ' Codepage = ',StringCodePage(s),')');
             writeln;
             writeln(s);
           end
@@ -126,7 +126,10 @@ begin
         SQL_TEXT,SQL_VARYING:
         begin
           s := Result[i].AsString;
-          writeln(Result[i].Name,' = ',s,' Charset Id = ',Result[i].GetCharSetID, ' Codepage = ',StringCodePage(s))
+          if Result[i].GetCharSetID > 0 then
+            writeln(Result[i].Name,' = ',s,' (Charset Id = ',Result[i].GetCharSetID, ' Codepage = ',StringCodePage(s),')')
+          else
+            writeln(Result[i].Name,' = ',s);
         end;
 
         else
@@ -509,7 +512,7 @@ begin
   FTests := TList.Create;
   FNewDatabaseName := 'localhost:/tmp/test1.fdb';
   FUserName := 'SYSDBA';
-  FPassword := 'Pears';
+  FPassword := 'masterkey';
   FEmployeeDatabaseName := 'localhost:employee';
 end;
 

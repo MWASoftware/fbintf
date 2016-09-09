@@ -1734,16 +1734,15 @@ begin
     end;
   end;
 
-  SQL_TEXT, SQL_VARYING:
+  else
     {$IFDEF HAS_ANSISTRING_CODEPAGE}
     FIBXSQLVar.SetString(Transliterate(Value,GetCodePage));
     {$ELSE}
     FIBXSQLVar.SetString(Value);
     {$ENDIF}
 
-  else
-    inherited SetAsString(Value);
   end;
+  Changed;
 end;
 
 procedure TSQLParam.CheckActive;

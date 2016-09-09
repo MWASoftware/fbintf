@@ -81,7 +81,7 @@ uses FBMessages, FB30Statement;
 const
   sLookupBlobMetaData = 'Select F.RDB$FIELD_SUB_TYPE, F.RDB$SEGMENT_LENGTH, RDB$CHARACTER_SET_ID, F.RDB$FIELD_TYPE '+
     'From RDB$FIELDS F JOIN RDB$RELATION_FIELDS R On R.RDB$FIELD_NAME = F.RDB$FIELD_NAME '+
-    'Where R.RELATION_NAME = ? and R.RDB$FIELD_NAME = ?';
+    'Where Trim(R.RDB$RELATION_NAME) = Upper(Trim(?)) and Trim(R.RDB$FIELD_NAME) = Upper(Trim(?))';
 
 { TFBBlobMetaData }
 

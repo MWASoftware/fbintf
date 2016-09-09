@@ -158,6 +158,7 @@ type
   protected
     procedure FreeXSQLDA; override;
   public
+    constructor Create(aStatement: TFB30Statement);
     destructor Destroy; override;
     procedure Bind(aMetaData: Firebird.IMessageMetadata);
     procedure Changed; override;
@@ -495,7 +496,26 @@ end;
 
 function TIBXSQLVAR.GetCharSetID: cardinal;
 begin
-  Result := FCharSetID;
+  result := 0;
+  case SQLType of
+  SQL_VARYING, SQL_TEXT:
+    begin
+      result := FCharSetID;
+      if (result <> 0) and FStatement.FAttachment.HasDefaultCharSet then
+        result := FStatement.FAttachment.CharSetID;
+    end;
+
+  SQL_BLOB:
+    if SQLSubType = 1 then
+    begin
+      result := GetBlobMetaData.GetCharSetID;
+      if (result <> 0) and FStatement.FAttachment.HasDefaultCharSet then
+        result := FStatement.FAttachment.CharSetID
+    end;
+
+  SQL_ARRAY:
+    result := GetArrayMetaData.GetCharSetID;
+  end;
 end;
 
 function TIBXSQLVAR.GetCodePage: TSystemCodePage;
@@ -752,7 +772,7 @@ procedure TIBXINPUTSQLDA.PackBuffer;
 var Builder: Firebird.IMetadataBuilder;
     i: integer;
 begin
-  if FMessageBuffer <> nil then Exit;
+  if FMsgLength > 0 then Exit;
 
   with Firebird30ClientAPI do
   begin
@@ -802,6 +822,12 @@ procedure TIBXINPUTSQLDA.FreeXSQLDA;
 begin
   inherited FreeXSQLDA;
   FreeMessageBuffer;
+end;
+
+constructor TIBXINPUTSQLDA.Create(aStatement: TFB30Statement);
+begin
+  inherited Create(aStatement);
+  FMessageBuffer := nil;
 end;
 
 destructor TIBXINPUTSQLDA.Destroy;
@@ -1142,7 +1168,7 @@ begin
   CheckHandle;
   if aTransaction <> FTransaction then
     AddMonitor(aTransaction);
-  if (FSQLParams.FTransactionSeqNo = FTransaction.TransactionSeqNo) then
+  if (FSQLParams.FTransactionSeqNo < FTransaction.TransactionSeqNo) then
     IBError(ibxeInterfaceOutofDate,[nil]);
 
   try
@@ -1192,7 +1218,7 @@ begin
  if aTransaction <> FTransaction then
    AddMonitor(aTransaction);
  CheckHandle;
- if (FSQLParams.FTransactionSeqNo = FTransaction.TransactionSeqNo) then
+ if (FSQLParams.FTransactionSeqNo < FTransaction.TransactionSeqNo) then
    IBError(ibxeInterfaceOutofDate,[nil]);
 
  with Firebird30ClientAPI do

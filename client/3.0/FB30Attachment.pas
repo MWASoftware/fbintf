@@ -30,6 +30,9 @@ type
     destructor Destroy; override;
     property SQLDialect: integer read FSQLDialect;
     property AttachmentIntf: Firebird.IAttachment read FAttachmentIntf;
+    property HasDefaultCharSet: boolean read FHasDefaultCharSet;
+    property CharSetID: integer read FCharSetID;
+    property CodePage: TSystemCodePage read FCodePage;
 
   public
     {IAttachment}
