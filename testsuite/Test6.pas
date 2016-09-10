@@ -37,12 +37,6 @@ const
 
   sqlUpdate = 'Update TestData Set BlobData = ? Where RowID = ?';
 
-  const
-  sLookupBlobMetaData = 'Select F.RDB$FIELD_SUB_TYPE, F.RDB$SEGMENT_LENGTH, RDB$CHARACTER_SET_ID, F.RDB$FIELD_TYPE '+
-    'From RDB$FIELDS F JOIN RDB$RELATION_FIELDS R On R.RDB$FIELD_NAME = F.RDB$FIELD_NAME '+
-    'Where Trim(R.RDB$RELATION_NAME) = ?';// and Trim(R.RDB$FIELD_NAME) = ?';
-
-
 
 { TTest6 }
 
@@ -54,11 +48,6 @@ var Transaction: ITransaction;
     i: integer;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
-
-  Statement := Attachment.Prepare(Transaction,sLookupBlobMetaData);
-  Statement.GetSQLParams[0].AsString := 'TESTDATA';
-//  Statement.GetSQLParams[1].AsString := 'BLOBDATA';
-  ReportResults(Statement);
 
   Statement := Attachment.Prepare(Transaction,sqlGetCharSets);
   ReportResults(Statement);

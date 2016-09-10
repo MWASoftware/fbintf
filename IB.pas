@@ -122,9 +122,9 @@ type
   end;
 
   IBlobMetaData = interface
-    function GetSubType: short;
-    function GetCharSetID: short;
-    function GetSegmentSize: short;
+    function GetSubType: cardinal;
+    function GetCharSetID: cardinal;
+    function GetSegmentSize: cardinal;
     function GetTableName: string;
     function GetColumnName: string;
   end;

@@ -16,15 +16,16 @@ type
    private
      FBlobDesc: TISC_BLOB_DESC;
      FGlobal: array [0..31] of char;
+     FCharSetID: cardinal;
    public
      constructor Create(Attachment: TFBAttachment; Transaction: TFB25Transaction;
        RelationName, ColumnName: string);
 
    public
      {IBlobMetaData}
-    function GetSubType: short;
-    function GetCharSetID: short;
-    function GetSegmentSize: short;
+    function GetSubType: cardinal;
+    function GetCharSetID: cardinal;
+    function GetSegmentSize: cardinal;
     function GetTableName: string;
     function GetColumnName: string;
   end;
@@ -85,19 +86,22 @@ begin
     Call(isc_blob_lookup_desc(StatusVector,@(Attachment.Handle),
                                            @(Transaction.Handle),
                 PChar(RelationName),PChar(ColumnName),@FBlobDesc,@FGlobal));
+  FCharSetID := FBlobDesc.blob_desc_charset;
+  if (FCharSetID <> 0) and Attachment.HasDefaultCharSet then
+    FCharSetID := Attachment.CharSetID
 end;
 
-function TFBBlobMetaData.GetSubType: short;
+function TFBBlobMetaData.GetSubType: cardinal;
 begin
   Result := FBlobDesc.blob_desc_subtype;
 end;
 
-function TFBBlobMetaData.GetCharSetID: short;
+function TFBBlobMetaData.GetCharSetID: cardinal;
 begin
-  Result := FBlobDesc.blob_desc_charset;
+  Result := FCharSetID;
 end;
 
-function TFBBlobMetaData.GetSegmentSize: short;
+function TFBBlobMetaData.GetSegmentSize: cardinal;
 begin
   Result := FBlobDesc.blob_desc_segment_size;
 end;

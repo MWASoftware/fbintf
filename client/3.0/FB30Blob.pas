@@ -14,9 +14,9 @@ type
 
    TFBBlobMetaData  = class(TActivityReporter, IBlobMetaData)
    private
-     FSubType: short;
-     FCharSetID: short;
-     FSegmentSize: short;
+     FSubType: cardinal;
+     FCharSetID: cardinal;
+     FSegmentSize: cardinal;
      FRelationName: string;
      FColumnName: string;
    public
@@ -25,9 +25,9 @@ type
 
    public
      {IBlobMetaData}
-    function GetSubType: short;
-    function GetCharSetID: short;
-    function GetSegmentSize: short;
+    function GetSubType: cardinal;
+    function GetCharSetID: cardinal;
+    function GetSegmentSize: cardinal;
     function GetTableName: string;
     function GetColumnName: string;
   end;
@@ -80,7 +80,7 @@ uses FBMessages, FB30Statement;
 
 const
   sLookupBlobMetaData = 'Select F.RDB$FIELD_SUB_TYPE, F.RDB$SEGMENT_LENGTH, RDB$CHARACTER_SET_ID, F.RDB$FIELD_TYPE '+
-    'From RDB$FIELDS F JOIN RDB$RELATION_FIELDS R On R.RDB$FIELD_NAME = F.RDB$FIELD_NAME '+
+    'From RDB$FIELDS F JOIN RDB$RELATION_FIELDS R On R.RDB$FIELD_SOURCE = F.RDB$FIELD_NAME '+
     'Where Trim(R.RDB$RELATION_NAME) = Upper(Trim(?)) and Trim(R.RDB$FIELD_NAME) = Upper(Trim(?))';
 
 { TFBBlobMetaData }
@@ -108,20 +108,23 @@ begin
     end
     else
       IBError(ibxeInvalidBlobMetaData,[nil]);
+
+    if (FCharSetID <> 0) and Attachment.HasDefaultCharSet then
+      FCharSetID := Attachment.CharSetID
   end;
 end;
 
-function TFBBlobMetaData.GetSubType: short;
+function TFBBlobMetaData.GetSubType: cardinal;
 begin
   Result := FSubType;
 end;
 
-function TFBBlobMetaData.GetCharSetID: short;
+function TFBBlobMetaData.GetCharSetID: cardinal;
 begin
   Result := FCharSetID;
 end;
 
-function TFBBlobMetaData.GetSegmentSize: short;
+function TFBBlobMetaData.GetSegmentSize: cardinal;
 begin
   Result := FSegmentSize;
 end;

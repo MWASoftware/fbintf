@@ -452,11 +452,7 @@ begin
 
   SQL_BLOB:
     if SQLSubType = 1 then
-    begin
       result := GetBlobMetaData.GetCharSetID;
-      if (result <> 0) and FStatement.FAttachment.HasDefaultCharSet then
-        result := FStatement.FAttachment.CharSetID
-    end;
 
   SQL_ARRAY:
     result := GetArrayMetaData.GetCharSetID;
