@@ -36,8 +36,11 @@ var EventHandler: IEvents;
     WaitCount: integer;
 begin
   EventHandler := Attachment.GetEventHandler('TESTEVENT');
+  writeln('Call Async Wait');
   EventHandler.AsyncWaitForEvent(@EventReport);
+  writeln('Async Wait Called');
 
+  writeln('Signal Event');
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],sqlEvent);
   while not FEventSignalled do;
   writeln('Event Signalled');
@@ -50,6 +53,7 @@ begin
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],sqlEvent);
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],sqlEvent);
   EventHandler.AsyncWaitForEvent(@EventReport);
+  writeln('Async Wait Called');
   while not FEventSignalled do;
   writeln('Event Signalled');
   EventCounts := EventHandler.ExtractEventCounts;
@@ -57,12 +61,16 @@ begin
     writeln('Event: ',EventCounts[i].EventName,', Count = ',EventCounts[i].Count);
 
   FEventSignalled := false;
+  writeln('Async Wait');
   EventHandler.AsyncWaitForEvent(@EventReport);
+  writeln('Async Wait Called');
   EventHandler.Cancel;
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],sqlEvent);
   WaitCount := 100000000;
   while not FEventSignalled and (WaitCount > 0) do Dec(WaitCount);
-  if WaitCount = 0 then writeln('Time Out - Cancel Worked!');
+  if WaitCount = 0 then writeln('Time Out - Cancel Worked!')
+  else
+    writeln('Event called - so Cancel failed');
 
   if FirebirdAPI.HasSynchronousEventWait then
   begin
@@ -73,7 +81,9 @@ begin
     EventCounts := EventHandler.ExtractEventCounts;
     for i := 0 to length(EventCounts) - 1 do
       writeln('Event: ',EventCounts[i].EventName,', Count = ',EventCounts[i].Count);
-  end;
+  end
+  else
+    writeln('WaitForEvent not supported');
 end;
 
 procedure TTest10.EventReport(Sender: IEvents);

@@ -238,8 +238,8 @@ var Handler: TEventHandler;
 begin
   if assigned(FEventHandler)  then
   begin
+    writeln('Event Signal Handler');
     Handler := FEventHandler;
-    FEventsIntf := nil;
     FEventHandler := nil;
     Handler(self);
   end;
@@ -347,7 +347,7 @@ end;
 
 procedure TFBEvents.Cancel;
 begin
-  if assigned(FEventHandler) then
+  if FEventHandler <> nil then
     CancelEvents;
 end;
 
@@ -356,6 +356,9 @@ begin
   if assigned(FEventHandler) then
     CancelEvents;
 
+  if assigned(FEventsIntf) then
+    FEventsIntf.release;
+  FEventsIntf := nil;
   CreateEventBlock;
   FEventHandler := EventHandler;
   FCriticalSection.Enter;
