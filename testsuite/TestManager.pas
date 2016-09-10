@@ -512,7 +512,7 @@ begin
   FTests := TList.Create;
   FNewDatabaseName := 'localhost:/tmp/test1.fdb';
   FUserName := 'SYSDBA';
-  FPassword := 'masterkey';
+  FPassword := 'Pears';
   FEmployeeDatabaseName := 'localhost:employee';
 end;
 

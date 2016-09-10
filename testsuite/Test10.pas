@@ -49,11 +49,14 @@ begin
     writeln('Event: ',EventCounts[i].EventName,', Count = ',EventCounts[i].Count);
   FEventSignalled := false;
 
-  writeln('Repeat');
+  writeln('Two more events');
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],sqlEvent);
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],sqlEvent);
+  writeln('Call Async Wait');
   EventHandler.AsyncWaitForEvent(@EventReport);
   writeln('Async Wait Called');
+  writeln('Signal Event');
+  Attachment.ExecImmediate([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],sqlEvent);
   while not FEventSignalled do;
   writeln('Event Signalled');
   EventCounts := EventHandler.ExtractEventCounts;

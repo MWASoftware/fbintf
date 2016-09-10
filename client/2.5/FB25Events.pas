@@ -23,6 +23,7 @@ type
     FCriticalSection: TCriticalSection;
     FEventHandlerThread: TObject;
     FEventHandler: TEventHandler;
+    FSignalFired: boolean;
     procedure CancelEvents(Force: boolean = false);
     procedure EventSignaled;
     procedure CreateEventBlock;
@@ -196,6 +197,7 @@ begin
         IBDatabaseError;
 
     FEventHandler := nil;
+    FSignalFired := false;
   finally
     FCriticalSection.Leave
   end;
@@ -204,6 +206,9 @@ end;
 procedure TFBEvents.EventSignaled;
 var Handler: TEventHandler;
 begin
+  if not FSignalFired then
+    FSignalFired := true   {ignore first event}
+  else
   if assigned(FEventHandler)  then
   begin
     Handler := FEventHandler;
