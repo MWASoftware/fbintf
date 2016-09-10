@@ -446,12 +446,16 @@ end;
 
 function TFBArrayMetaData.GetTableName: string;
 begin
-  Result := strpas(FArrayDesc.array_desc_relation_name);
+  with FArrayDesc do
+   SetString(Result,PChar(@array_desc_relation_name),sizeof(array_desc_relation_name));
+  Result := trim(Result);
 end;
 
 function TFBArrayMetaData.GetColumnName: string;
 begin
-  Result := strpas(FArrayDesc.array_desc_field_name);
+  with FArrayDesc do
+    SetString(Result,PChar(@FArrayDesc.array_desc_field_name),sizeof(array_desc_field_name));
+  Result := trim(Result);
 end;
 
 function TFBArrayMetaData.GetDimensions: integer;

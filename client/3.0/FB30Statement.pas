@@ -521,7 +521,7 @@ end;
 
 function TIBXSQLVAR.GetIsNull: Boolean;
 begin
-  Result := IsNullable and (FNullIndicator = -1);
+  Result := IsNullable and (FSQLNullIndicator^ = -1);
 end;
 
 function TIBXSQLVAR.GetIsNullable: boolean;

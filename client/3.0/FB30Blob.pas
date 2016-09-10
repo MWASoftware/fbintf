@@ -5,7 +5,7 @@ unit FB30Blob;
 interface
 
 uses
-  Classes, SysUtils, Firebird, IB, IBExternals, FBClientAPI, FB30ClientAPI, FB30Attachment,
+  Classes, SysUtils, Firebird, IB, IBHeader, IBExternals, FBClientAPI, FB30ClientAPI, FB30Attachment,
   FB30Transaction, FBActivityMonitor;
 
 type
@@ -81,7 +81,7 @@ uses FBMessages, FB30Statement;
 const
   sLookupBlobMetaData = 'Select F.RDB$FIELD_SUB_TYPE, F.RDB$SEGMENT_LENGTH, RDB$CHARACTER_SET_ID, F.RDB$FIELD_TYPE '+
     'From RDB$FIELDS F JOIN RDB$RELATION_FIELDS R On R.RDB$FIELD_SOURCE = F.RDB$FIELD_NAME '+
-    'Where Trim(R.RDB$RELATION_NAME) = Upper(Trim(?)) and Trim(R.RDB$FIELD_NAME) = Upper(Trim(?))';
+  'Where Trim(R.RDB$RELATION_NAME) = Upper(Trim(?)) and Trim(R.RDB$FIELD_NAME) = Upper(Trim(?))';
 
 { TFBBlobMetaData }
 
@@ -100,7 +100,7 @@ begin
     with OpenCursor do
     if FetchNext then
     begin
-      if Data[3].AsInteger <> SQL_BLOB then
+      if Data[3].AsInteger <> blr_blob then
         IBError(ibxeInvalidBlobMetaData,[nil]);
       FSubType := Data[0].AsInteger;
       FSegmentSize := Data[1].AsInteger;

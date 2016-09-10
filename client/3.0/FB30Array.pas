@@ -66,6 +66,10 @@ end;
   protected
     procedure LoadMetaData(aAttachment: IAttachment; aTransaction: ITransaction;
                    relationName, columnName: string); override;
+    function GetCharSetID: cardinal; override;
+    {$IFDEF HAS_ANSISTRING_CODEPAGE}
+    function GetCodePage: TSystemCodePage; override;
+    {$ENDIF}
   end;
 
   { TFB30Array }
@@ -147,8 +151,10 @@ begin
     with OpenCursor do
     if FetchNext then
     begin
-      FArrayDesc.array_desc_field_name := columnName;
-      FArrayDesc.array_desc_relation_name := relationName;
+      FillChar(FArrayDesc.array_desc_field_name,sizeof(FArrayDesc.array_desc_field_name),' ');
+      FillChar(FArrayDesc.array_desc_relation_name,sizeof(FArrayDesc.array_desc_field_name),' ');
+      Move(columnName[1],FArrayDesc.array_desc_field_name,Length(columnName));
+      Move(relationName[1],FArrayDesc.array_desc_relation_name,length(relationName));
       FArrayDesc.array_desc_length := Data[0].AsInteger;
       FArrayDesc.array_desc_scale := char(Data[1].AsInteger);
       FArrayDesc.array_desc_dtype := Data[2].AsInteger;
@@ -168,6 +174,16 @@ begin
       until not FetchNext;
     end;
   end;
+end;
+
+function TFB30ArrayMetaData.GetCharSetID: cardinal;
+begin
+  Result := FCharSetID;
+end;
+
+function TFB30ArrayMetaData.GetCodePage: TSystemCodePage;
+begin
+  Result := FCodePage;
 end;
 
 { TFB30Array }
@@ -207,8 +223,8 @@ begin
         SDLItem.addShortInteger(array_desc_length);
     end;
 
-    FSDL.Add(isc_sdl_relation).SetAsString(strpas(array_desc_relation_name));
-    FSDL.Add(isc_sdl_field).SetAsString(strpas(array_desc_field_name));
+    FSDL.Add(isc_sdl_relation).SetAsString(GetMetaData.GetTableName);
+    FSDL.Add(isc_sdl_field).SetAsString(GetMetaData.GetColumnName);
 
     for i := 0 to array_desc_dimensions - 1 do
     begin
@@ -221,6 +237,18 @@ begin
       end;
       AddVarInteger(array_desc_bounds[i].array_bound_upper);
     end;
+
+    SDLItem := FSDL.Add(isc_sdl_element);
+    SDLItem.AddByte(1);
+    SDLItem := FSDL.Add(isc_sdl_scalar);
+    SDLItem.AddByte(0);
+    SDLItem.AddByte(array_desc_dimensions);
+    for i := 0 to array_desc_dimensions - 1 do
+    begin
+      SDLItem := FSDL.Add(isc_sdl_variable);
+      SDLItem.AddByte(i);
+    end;
+    FSDL.Add(isc_sdl_eoc);
   end;
 end;
 

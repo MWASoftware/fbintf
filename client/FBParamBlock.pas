@@ -49,6 +49,7 @@ type
   public
     function getCount: integer;
     procedure Remove(ParamType: byte);
+    procedure PrintBuf;
   end;
 
   { TParamBlockItem }
@@ -471,6 +472,15 @@ begin
       SetLength(FItems,Length(FItems)-1);
       Exit;
     end;
+end;
+
+procedure TParamBlock.PrintBuf;
+var i: integer;
+begin
+  write(ClassName,': ');
+  for i := 0 to getDataLength - 1 do
+    write(Format('%x ',[byte(FBuffer[i])]));
+  writeln
 end;
 
 { TDPB }
