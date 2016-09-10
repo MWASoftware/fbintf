@@ -64,13 +64,16 @@ begin
   while not FEventSignalled and (WaitCount > 0) do Dec(WaitCount);
   if WaitCount = 0 then writeln('Time Out - Cancel Worked!');
 
-  writeln('Sync wait');
-  Attachment.ExecImmediate([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],sqlEvent);
-  EventHandler.WaitForEvent;
-  writeln('Event Signalled');
-  EventCounts := EventHandler.ExtractEventCounts;
-  for i := 0 to length(EventCounts) - 1 do
-    writeln('Event: ',EventCounts[i].EventName,', Count = ',EventCounts[i].Count);
+  if FirebirdAPI.HasSynchronousEventWait then
+  begin
+    writeln('Sync wait');
+    Attachment.ExecImmediate([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],sqlEvent);
+    EventHandler.WaitForEvent;
+    writeln('Event Signalled');
+    EventCounts := EventHandler.ExtractEventCounts;
+    for i := 0 to length(EventCounts) - 1 do
+      writeln('Event: ',EventCounts[i].EventName,', Count = ',EventCounts[i].Count);
+  end;
 end;
 
 procedure TTest10.EventReport(Sender: IEvents);

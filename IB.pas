@@ -616,6 +616,7 @@ type
     function HasServiceAPI: boolean;
     function HasMasterIntf: boolean;
     function HasRollbackRetaining: boolean;
+    function HasSynchronousEventWait: boolean;
     function GetImplementationVersion: string;
     function GetCharsetName(CharSetID: integer): string;
     function CharSetID2CodePage(CharSetID: integer; var CodePage: TSystemCodePage): boolean;

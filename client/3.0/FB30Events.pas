@@ -58,9 +58,13 @@ type
   TEventhandlerInterface = class(Firebird.IEventCallbackImpl)
   private
     FOwner: TEventHandlerThread;
+    FRef: integer;
   public
     constructor Create(aOwner: TEventHandlerThread);
-  end;
+    procedure addRef();  override;
+    function release(): Integer; override;
+    procedure eventCallbackFunction(length: Cardinal; events: BytePtr); override;
+ end;
 
   { TEventHandlerThread }
 
@@ -83,21 +87,27 @@ type
     procedure Terminate;
   end;
 
-  {This procedure is used for the event call back - note the cdecl }
-
- procedure IBEventCallback(this: IEventCallback; length: Cardinal; events: BytePtr); cdecl;
- begin
-   if (this = nil) or (length = 0) or (events = nil) then
-     Exit;
-   { Handle events asynchronously in second thread }
-   TEventhandlerInterface(this).FOwner.HandleEventSignalled(length,events);
- end;
-
 constructor TEventhandlerInterface.Create(aOwner: TEventHandlerThread);
 begin
   inherited Create;
   FOWner := aOwner;
-  EventCallbackVTable(vTable).eventCallbackFunction := @IBEventCallback;
+end;
+
+procedure TEventhandlerInterface.addRef;
+begin
+  Inc(FRef);
+end;
+
+function TEventhandlerInterface.release: Integer;
+begin
+  Dec(FRef);
+  if FRef = 0 then Free;
+end;
+
+procedure TEventhandlerInterface.eventCallbackFunction(length: Cardinal;
+  events: BytePtr);
+begin
+  FOwner.HandleEventSignalled(length,events);
 end;
 
  { TEventHandler }
@@ -290,7 +300,7 @@ begin
     TEventHandlerThread(FEventHandlerThread).Terminate;
   if assigned(FCriticalSection) then FCriticalSection.Free;
   if assigned(FEvents) then FEvents.Free;
-  if assigned(FEventCallback) then FEventCallback.Free;
+  if assigned(FEventCallback) then TEventhandlerInterface(FEventCallback).release;
   with Firebird30ClientAPI do
   begin
     if FEventBuffer <> nil then
