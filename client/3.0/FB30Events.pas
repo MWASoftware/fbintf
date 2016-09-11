@@ -225,9 +225,12 @@ begin
     with Firebird30ClientAPI do
     begin
       FEventsIntf.Cancel(StatusIntf);
-      Check4DataBaseError;
+      if not Force then
+        Check4DataBaseError;
     end;
 
+    FEventsIntf.release;
+    FEventsIntf := nil;
     FEventHandler := nil;
     FSignalFired := false;
   finally
@@ -244,6 +247,7 @@ begin
   if assigned(FEventHandler)  then
   begin
     Handler := FEventHandler;
+    FEventsIntf := nil;
     FEventHandler := nil;
     Handler(self);
   end;
@@ -300,6 +304,7 @@ end;
 
 destructor TFBEvents.Destroy;
 begin
+  CancelEvents(true);
   if assigned(FEventHandlerThread) then
     TEventHandlerThread(FEventHandlerThread).Terminate;
   if assigned(FCriticalSection) then FCriticalSection.Free;
@@ -360,13 +365,12 @@ begin
   if assigned(FEventHandler) then
     CancelEvents;
 
-  if assigned(FEventsIntf) then
-    FEventsIntf.release;
-  FEventsIntf := nil;
   CreateEventBlock;
   FEventHandler := EventHandler;
   FCriticalSection.Enter;
   try
+    if assigned(FEventsIntf) then
+      FEventsIntf.release;
     with Firebird30ClientAPI do
     begin
       FEventsIntf := (FAttachment as TFBAttachment).AttachmentIntf.queEvents(

@@ -75,9 +75,8 @@ type
     FNullable: boolean;
     FScale: cardinal;
     FCharSetID: cardinal;
-    {$IFDEF HAS_ANSISTRING_CODEPAGE}
-    FCodePage: TSystemCodePage;
-    {$ENDIF}
+    FRelationName: string;
+    FFieldName: string;
 
     protected
      procedure Changed; override;
@@ -464,11 +463,7 @@ end;
 
 function TIBXSQLVAR.GetFieldName: string;
 begin
-  with Firebird30ClientAPI do
-  begin
-    result := strpas(TIBXSQLDA(Parent).MetaData.getField(StatusIntf,Index));
-    Check4DataBaseError;
-  end;
+  Result := FFieldName;
 end;
 
 function TIBXSQLVAR.GetOwnerName: string;
@@ -482,11 +477,7 @@ end;
 
 function TIBXSQLVAR.GetRelationName: string;
 begin
-  with Firebird30ClientAPI do
-  begin
-    result := strpas(TIBXSQLDA(Parent).MetaData.getRelation(StatusIntf,Index));
-    Check4DataBaseError;
-  end;
+  Result := FRelationName;
 end;
 
 function TIBXSQLVAR.GetScale: cardinal;
@@ -506,18 +497,26 @@ begin
     end;
 
   SQL_BLOB:
-    if SQLSubType = 1 then
+    if (SQLSubType = 1) and (FRelationName <> '') and (FFieldName <> '') then
       result := GetBlobMetaData.GetCharSetID;
 
   SQL_ARRAY:
-    result := GetArrayMetaData.GetCharSetID;
+    if (FRelationName <> '') and (FFieldName <> '') then
+      result := GetArrayMetaData.GetCharSetID;
   end;
 end;
 
+{$IFDEF HAS_ANSISTRING_CODEPAGE}
 function TIBXSQLVAR.GetCodePage: TSystemCodePage;
 begin
-  Result := FCodePage;
+  result := CP_NONE;
+  if FStatement.FAttachment.HasDefaultCharSet then
+    result := FStatement.FAttachment.CodePage
+  else
+  with FirebirdClientAPI do
+     CharSetID2CodePage(GetCharSetID,result)
 end;
+{$ENDIF}
 
 function TIBXSQLVAR.GetIsNull: Boolean;
 begin
@@ -784,9 +783,8 @@ begin
         Check4DataBaseError;
         Builder.setLength(StatusIntf,i,FDataLength);
         Check4DataBaseError;
-        Builder.setCharSet(StatusIntf,i,FCharSetID);
+        Builder.setCharSet(StatusIntf,i,GetCharSetID);
         Check4DataBaseError;
-        CharSetID2CodePage(FCharSetID,FCodePage);
         Builder.setScale(StatusIntf,i,FScale);
         Check4DataBaseError;
       end;
@@ -928,6 +926,10 @@ begin
       FSQLData := FMessageBuffer + metaData.getOffset(StatusIntf,i);
       Check4DataBaseError;
       FDataLength := aMetaData.getLength(StatusIntf,i);
+      Check4DataBaseError;
+      FRelationName := strpas(aMetaData.getRelation(StatusIntf,i));
+      Check4DataBaseError;
+      FFieldName := strpas(aMetaData.getField(StatusIntf,i));
       Check4DataBaseError;
       FNullable := aMetaData.isNullable(StatusIntf,i);
       Check4DataBaseError;

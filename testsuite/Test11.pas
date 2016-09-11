@@ -60,6 +60,29 @@ begin
   WriteServiceQueryResult(Results);
 
 
+  {Statistics}
+
+  writeln('Get Statistics');
+  writeln;
+  Req := Service.AllocateRequestBuffer;
+  Req.Add(isc_action_svc_db_stats);
+  Req.Add(isc_spb_dbname).SetAsString(DBName);
+  Req.Add(isc_spb_options).SetAsInteger(isc_spb_sts_data_pages or {
+                                        isc_spb_sts_hdr_pages or} isc_spb_sts_idx_pages or
+                                        isc_spb_sts_sys_relations);
+
+  try
+    Service.Start(Req);
+    Req := Service.AllocateRequestBuffer;
+    Req.Add(isc_info_svc_line);
+    repeat
+      Results := Service.Query(Req);
+    until not WriteServiceQueryResult(Results);
+  except on E: Exception do
+    writeln('Statistics Service Start: ',E.Message);
+  end;
+  writeln;
+
   {Licence Info}
   Req := Service.AllocateRequestBuffer;
   Req.Add(isc_info_svc_get_license);
@@ -70,13 +93,9 @@ begin
   except on E: Exception do
     writeln('Licence Info: ',E.Message);
   end;
+  writeln;
 
   {Licence Mask Info}
-  Req := Service.AllocateRequestBuffer;
-  Req.Add(isc_info_svc_capabilities);
-  Results := Service.Query(Req);
-  WriteServiceQueryResult(Results);
-
   Req := Service.AllocateRequestBuffer;
   Req.Add(isc_info_svc_get_license_mask);
   try
@@ -85,29 +104,30 @@ begin
   except on E: Exception do
     writeln('Licence Mask Info: ',E.Message);
   end;
+  writeln;
 
-  {Statistics}
-
+  {Capabilities}
   Req := Service.AllocateRequestBuffer;
-  Req.Add(isc_action_svc_db_stats);
-  Req.Add(isc_spb_dbname).SetAsString(DBName);
-  Req.Add(isc_spb_options).SetAsInteger(isc_spb_sts_data_pages or {
-                                        isc_spb_sts_hdr_pages or} isc_spb_sts_idx_pages or
-                                        isc_spb_sts_sys_relations);
-
-  Service.Start(Req);
-  Req := Service.AllocateRequestBuffer;
-  Req.Add(isc_info_svc_line);
-  repeat
+  Req.Add(isc_info_svc_capabilities);
+  try
     Results := Service.Query(Req);
-  until not WriteServiceQueryResult(Results);
+    WriteServiceQueryResult(Results);
+  except on E: Exception do
+    writeln('Capabilities: ',E.Message);
+  end;
 
   {limbo transactions}
 
+  writeln('Get Limbo transactions');
+  writeln;
   Req := Service.AllocateRequestBuffer;
- Req.Add(isc_info_svc_limbo_trans);
- Results := Service.Query(Req);
- WriteServiceQueryResult(Results);
+  Req.Add(isc_info_svc_limbo_trans);
+  try
+    Results := Service.Query(Req);
+    WriteServiceQueryResult(Results);
+  except on E: Exception do
+    writeln('limbo transactions: ',E.Message);
+  end;
 end;
 
 function TTest11.TestTitle: string;

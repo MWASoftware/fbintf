@@ -15,6 +15,7 @@ type
   private
     FStatus: Firebird.IStatus;
   public
+    procedure Init;
     function InErrorState: boolean;
     function GetStatus: Firebird.IStatus;
     function StatusVector: PStatusVector; override;
@@ -100,6 +101,12 @@ type
 
 { TFB30Status }
 
+procedure TFB30Status.Init;
+begin
+  if assigned(FStatus) then
+    FStatus.Init;
+end;
+
 function TFB30Status.InErrorState: boolean;
 begin
   with GetStatus do
@@ -151,6 +158,7 @@ end;
 function TFB30ClientAPI.StatusIntf: Firebird.IStatus;
 begin
   Result := FStatus.GetStatus;
+  Result.Init;
 end;
 
 procedure TFB30ClientAPI.Check4DataBaseError;

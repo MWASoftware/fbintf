@@ -451,11 +451,12 @@ begin
     end;
 
   SQL_BLOB:
-    if SQLSubType = 1 then
+    if (SQLSubType = 1) and (GetRelationName <> '') and (GetFieldName <> '') then
       result := GetBlobMetaData.GetCharSetID;
 
   SQL_ARRAY:
-    result := GetArrayMetaData.GetCharSetID;
+    if (GetRelationName <> '') and (GetFieldName <> '') then
+      result := GetArrayMetaData.GetCharSetID;
   end;
 end;
 
