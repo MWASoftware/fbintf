@@ -4,6 +4,7 @@ unit IB;
 
 {$IF FPC_FULLVERSION >= 20700 }
 {$codepage UTF8}
+{$DEFINE HAS_ANSISTRING_CODEPAGE}
 {$ENDIF}
 
 {$DEFINE USEFIREBIRD3API}
@@ -251,6 +252,9 @@ type
     function getName: string;       {Disambiguated uppercase Field Name}
     function getScale: cardinal;
     function getCharSetID: cardinal;
+    {$IFDEF HAS_ANSISTRING_CODEPAGE}
+    function getCodePage: TSystemCodePage;
+    {$ENDIF}
     function getIsNullable: boolean;
     function GetSize: integer;
     function GetArrayMetaData: IArrayMetaData; {Valid only for Array SQL Type}
@@ -458,6 +462,17 @@ type
     property SQLStatementType: TIBSQLStatementTypes read GetSQLStatementType;
   end;
 
+  {Transaction Parameter Block: (TPB)
+
+   The TPB provides the parameters used when starting a transaction. It is allocated
+   empty by the FirebirdAPI and the parameters are then added to it. Each individual
+   parameter may be accessed by the ITPBItem interface which can be used to set the
+   value, if any, of the parameter.
+
+   The TPB parameters, and the associated symbolic codes and parameter values may be
+   found in the Interbase 6.0 API Guide.
+  }
+
   ITPBItem = interface
     function getParamType: byte;
     function getAsInteger: integer;
@@ -479,6 +494,14 @@ type
     property Items[index: integer]: ITPBItem read getItems; default;
   end;
 
+  {The ITransactionAction interface provides access to a Transaction once it
+   has been initially started. After a Commit or Rollback, a transaction
+   may be restarted, optinally with a new TPB.
+
+   A multi-database transaction is started from the FirebirdAPI. A single database
+   transaction is started from the IAttachment interface.
+  }
+
   TTransactionAction  = (TARollback, TACommit, TACommitRetaining, TARollbackRetaining);
 
   ITransaction = interface
@@ -497,6 +520,14 @@ type
     property InTransaction: boolean read GetInTransaction;
   end;
 
+  { The IEvents Interface is used to handle events from a single database. The
+    interface is allocated from the IAttachment Interface.
+
+    Note that the EventHandler called when an event occurs following AsynWaitForEvent
+    is called in a different thread to the calling program and TThread.Synchronize
+    may be needed to pass the event back to the main thread.
+  }
+
   TEventInfo = record
     EventName: string;
     Count: integer;
@@ -511,13 +542,28 @@ type
   IEvents = interface
     procedure GetEvents(EventNames: TStrings);
     procedure SetEvents(EventNames: TStrings); overload;
-    procedure SetEvents(Event: string); overload;
+    procedure SetEvents(EventName: string); overload;
     procedure Cancel;
     function ExtractEventCounts: TEventCounts;
     procedure WaitForEvent;
     procedure AsyncWaitForEvent(EventHandler: TEventHandler);
     function GetAttachment: IAttachment;
   end;
+
+  {The IDBInformation Interface.
+
+   An IDBInformation interface is returned by the  IAttachment GetDBInformation
+   method. The interface provides access to the information requested and
+   returned by the method.
+
+   IDBInformation itself gives access to a collection of IDBInfoItems. Each one
+   provides information requested, as indicated by the ItemType and the actual
+   value of the information. In some cases, the returned item is itself a
+   colletion of IDBInfoItems.
+
+   The IDBInformation items, and the associated symbolic codes and parameter values may be
+   found in the Interbase 6.0 API Guide.
+  }
 
   TDBOperationCount = record
     TableID: UShort;
@@ -558,6 +604,17 @@ type
     property Items[index: integer]: IDBInfoItem read getItem; default;
   end;
 
+  {The Database Parameter Block (DPB).
+
+   The DPB provides the parameters used when connecting to a database. It is allocated
+   empty by the FirebirdAPI and the parameters are then added to it. Each individual
+   parameter may be accessed by the IDPBItem interface which can be used to set the
+   value, if any, of the parameter.
+
+   The DPB parameters, and the associated symbolic codes and parameter values may be
+   found in the Interbase 6.0 API Guide.
+   }
+
   IDPBItem = interface
     function getParamType: byte;
     function getAsInteger: integer;
@@ -578,6 +635,31 @@ type
     function Find(ParamType: byte): IDPBItem;
     property Items[index: integer]: IDPBItem read getItems; default;
   end;
+
+  {The IAttachment interface provides access to a Database Connection. It may be
+   used to:
+
+   a. Disconnect and reconnect to the database.
+
+   b. Start a Transaction on the database
+
+   c. Execute directly SQL DDL Statements and others that return no information.
+
+   d. OpenCursors (i.e. execute SQL Select statements and return the results)
+
+   e. Prepare SQL Statements, returning an IStatement interface for further processing.
+
+   f. Provide access to an SQL Event Handler.
+
+   g. Access Database Information.
+
+   h. Support the handling of Array and Blob data.
+
+   Note that SQL statements can be prepared with named parameters (PSQL style).
+   This then allows the parameters to be accessed by name. The same name can
+   be used for more than one parameter, allowing a single operation to be used
+   to set all parameters with the same name.
+  }
 
   { IAttachment }
 
@@ -615,7 +697,8 @@ type
     function CreateBlob(transaction: ITransaction): IBlob;
     function OpenBlob(Transaction: ITransaction; BlobID: TISC_QUAD): IBlob;
 
-    {Array}
+    {Array - may use to open existing arrays. However, ISQLData.AsArray is preferred}
+
     function OpenArray(transaction: ITransaction; RelationName, ColumnName: string; ArrayID: TISC_QUAD): IArray;
     function CreateArray(transaction: ITransaction; RelationName, ColumnName: string): IArray;
 
@@ -629,6 +712,81 @@ type
   end;
 
   TProtocol = (TCP, SPX, NamedPipe, Local);
+
+  {Service Parameter Block (SPB).
+
+  The SPB provides the parameters used when connecting to a Service Manager. It is
+  allocated empty by the FirebirdAPI and the parameters are then added to it. Each
+  individual parameter may be accessed by the ISPBItem interface which can be used
+  to set the value, if any, of the parameter.
+
+  The SPB parameters, and the associated symbolic codes and parameter values may be
+  found in the Interbase 6.0 API Guide.
+
+  }
+
+  ISPBItem = interface
+    function getParamType: byte;
+    function getAsString: string;
+    function getAsByte: byte;
+    procedure setAsString(aValue: string);
+    procedure setAsByte(aValue: byte);
+    property AsString: string read getAsString write setAsString;
+    property AsByte: byte read getAsByte write setAsByte;
+  end;
+
+  ISPB = interface
+    function getCount: integer;
+    function Add(ParamType: byte): ISPBItem;
+    function getItems(index: integer): ISPBItem;
+    function Find(ParamType: byte): ISPBItem;
+    property Items[index: integer]: ISPBItem read getItems; default;
+  end;
+
+  {Service Request Block (SRB).
+
+   The SRB specifies what is requested from the Service Manager when starting a
+   service or querying a service. It is allocated  empty by the ServiceManager API and
+   the parameters are then added to it. Each individual parameter may be accessed
+   by the ISRBItem interface which can be used to set the  value, if any, of the parameter.
+
+   The SRB parameters, and the associated symbolic codes and parameter values may be
+   found in the Interbase 6.0 API Guide.
+
+  }
+
+  ISRBItem = interface
+    function getParamType: byte;
+    function getAsString: string;
+    function getAsInteger: integer;
+    procedure setAsString(aValue: string);
+    procedure SetAsInteger(aValue: integer);
+    property AsString: string read getAsString write setAsString;
+    property AsInteger: integer read getAsInteger write SetAsInteger;
+  end;
+
+  ISRB = interface
+    function getCount: integer;
+    function Add(ParamType: byte): ISRBItem;
+    function getItems(index: integer): ISRBItem;
+    function Find(ParamType: byte): ISRBItem;
+    property Items[index: integer]: ISRBItem read getItems; default;
+  end;
+
+  {The Service Query Results Interface.
+
+  An IServiceQueryResults interface is returned by the IServiceManager Query
+  method. The interface provides access to the information requested and
+  returned by the method.
+
+  IServiceQueryResults itself gives access to a collection of IServiceQueryResultItem.
+  Each one provides information requested, as indicated by the ItemType and the actual
+  value of the information. In some cases, the returned item is itself a
+  collection of IServiceQueryResultSubItem.
+
+  The IServiceQueryResultItem items, and the associated symbolic codes and parameter values may be
+  found in the Interbase 6.0 API Guide.
+  }
 
   IServiceQueryResultSubItem = interface
     function getItemType: byte;
@@ -658,41 +816,12 @@ type
     property Count: integer read getCount;
   end;
 
-  ISRBItem = interface
-    function getParamType: byte;
-    function getAsString: string;
-    function getAsInteger: integer;
-    procedure setAsString(aValue: string);
-    procedure SetAsInteger(aValue: integer);
-    property AsString: string read getAsString write setAsString;
-    property AsInteger: integer read getAsInteger write SetAsInteger;
-  end;
+  {The IServiceManager interface provides access to a service manager. It can
+   used to Detach and re-attach to Service Manager, to start services and to
+   query the service manager.
 
-  ISRB = interface
-    function getCount: integer;
-    function Add(ParamType: byte): ISRBItem;
-    function getItems(index: integer): ISRBItem;
-    function Find(ParamType: byte): ISRBItem;
-    property Items[index: integer]: ISRBItem read getItems; default;
-  end;
-
-  ISPBItem = interface
-    function getParamType: byte;
-    function getAsString: string;
-    function getAsByte: byte;
-    procedure setAsString(aValue: string);
-    procedure setAsByte(aValue: byte);
-    property AsString: string read getAsString write setAsString;
-    property AsByte: byte read getAsByte write setAsByte;
-  end;
-
-  ISPB = interface
-    function getCount: integer;
-    function Add(ParamType: byte): ISPBItem;
-    function getItems(index: integer): ISPBItem;
-    function Find(ParamType: byte): ISPBItem;
-    property Items[index: integer]: ISPBItem read getItems; default;
-  end;
+   The interface is returned by the FirebirdAPI GetService Manager method.
+  }
 
   { IServiceManager }
 
@@ -706,16 +835,22 @@ type
     function Query(Request: ISRB) :IServiceQueryResults;
   end;
 
-  IFirebirdAPI = interface
-    function GetStatus: IStatus;
-    function AllocateDPB: IDPB;
-    function AllocateTPB: ITPB;
+  {The Firebird API.
 
+   This is the base interface and is used to create/open a database connection, to
+   start a transaction on multiple databases and the access the service manager.
+
+   The interface is returned by the FirebirdAPI function.
+  }
+
+  IFirebirdAPI = interface
     {Database connections}
+    function AllocateDPB: IDPB;
     function OpenDatabase(DatabaseName: string; DPB: IDPB; RaiseExceptionOnConnectError: boolean=true): IAttachment;
     function CreateDatabase(DatabaseName: string; DPB: IDPB; RaiseExceptionOnError: boolean=true): IAttachment;
 
     {Start Transaction against multiple databases}
+    function AllocateTPB: ITPB;
     function StartTransaction(Attachments: array of IAttachment;
              TPB: array of byte; DefaultCompletion: TTransactionAction): ITransaction; overload;
     function StartTransaction(Attachments: array of IAttachment;
@@ -726,6 +861,7 @@ type
     function GetServiceManager(ServerName: string; Protocol: TProtocol; SPB: ISPB): IServiceManager;
 
     {Information}
+    function GetStatus: IStatus;
     function IsEmbeddedServer: boolean;
     function GetLibraryName: string;
     function HasServiceAPI: boolean;
@@ -733,10 +869,13 @@ type
     function HasRollbackRetaining: boolean;
     function HasSynchronousEventWait: boolean;
     function GetImplementationVersion: string;
+
+    {utility}
     function GetCharsetName(CharSetID: integer): string;
     function CharSetID2CodePage(CharSetID: integer; var CodePage: TSystemCodePage): boolean;
     function CodePage2CharSetID(CodePage: TSystemCodePage; var CharSetID: integer): boolean;
     function CharSetName2CharSetID(CharSetName: string; var CharSetID: integer): boolean;
+    function CharSetWidth(CharSetID: integer; var Width: integer): boolean;
 end;
 
 type
@@ -756,7 +895,7 @@ type
      property SQLCode: Long read FSQLCode;
    end;
 
-   { EIBInterBaseError }
+   { EIBInterBaseError - Firebird Engine errors}
 
    EIBInterBaseError = class(EIBError)
    private
@@ -767,18 +906,32 @@ type
      property IBErrorCode: Long read FIBErrorCode;
    end;
 
+   {IB Client Exceptions}
    EIBClientError = class(EIBError);
+
+{IBError is used internally and by IBX to throw an EIBClientError}
 
 procedure IBError(ErrMess: TIBClientError; const Args: array of const);
 
+{The Firebird API function is used to access the IFirebirdAPI interface.
+
+ It will load the Firebird Client Library if this is not already loaded and
+ select an implementation of the Firebird API (legacy 2.5 or 3.0.
+}
+
 function FirebirdAPI: IFirebirdAPI;
+
+{IBX support functions. Probably best ignored i.e. always used the FirebirdAPI
+ functino to load the library and check if it's loaded.}
 
 function TryIBLoad: Boolean;
 procedure CheckIBLoaded;
 
 implementation
 
-uses FBClientAPI, FB25ClientAPI, FB30ClientAPI;
+uses FBClientAPI
+  {$IFDEF USELEGACYFIREBIRDAPI}, FB25ClientAPI {$ENDIF}
+  {$IFDEF USEFIREBIRD3API}, FB30ClientAPI {$ENDIF};
 
 var FFirebirdAPI: IFirebirdAPI;
 

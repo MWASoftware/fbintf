@@ -45,7 +45,7 @@ type
 
   TFBClientAPI = class(TInterfaceParent)
   private
-    FFBLibraryName: string;
+    FFBLibraryName: string; static;
     procedure LoadIBLibrary;
   protected
     IBLibrary: TLibHandle; static;
@@ -455,6 +455,7 @@ finalization
   begin
     FreeLibrary(TFBClientAPI.IBLibrary);
     TFBClientAPI.IBLibrary := NilHandle;
+    TFBClientAPI.FFBLibraryName := '';
   end;
 
 end.

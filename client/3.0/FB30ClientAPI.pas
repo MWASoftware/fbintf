@@ -28,7 +28,6 @@ type
 
   TFB30ClientAPI = class(TFBClientAPI,IFirebirdAPI)
   private
-    fb_get_master_interface: Tfb_get_master_interface;
     FMaster: Firebird.IMaster;
     FUtil: Firebird.IUtil;
     FProvider: Firebird.IProvider;
@@ -129,6 +128,8 @@ end;
 { TFB30ClientAPI }
 
 procedure TFB30ClientAPI.LoadInterface;
+var
+  fb_get_master_interface: Tfb_get_master_interface;
 begin
   inherited LoadInterface;
   fb_get_master_interface := GetProcAddress(IBLibrary, 'fb_get_master_interface'); {do not localize}
