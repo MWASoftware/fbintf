@@ -307,12 +307,12 @@ var len: integer;
     ElementSize: integer;
 begin
   CheckActive;
-  {$IFDEF HAS_ANSISTRING_CODEPAGE}
-  Value := Transliterate(Value,GetCodePage);
-  {$ENDIF}
   case GetSQLType of
   SQL_VARYING:
     begin
+      {$IFDEF HAS_ANSISTRING_CODEPAGE}
+      Value := Transliterate(Value,GetCodePage);
+      {$ENDIF}
       len := Length(Value);
       ElementSize := GetDataLength;
       if len > ElementSize - 2 then len := ElementSize - 2;
@@ -321,8 +321,12 @@ begin
         (FBufPtr+len)^ := #0;
       Changed;
     end;
+
   SQL_TEXT:
     begin
+      {$IFDEF HAS_ANSISTRING_CODEPAGE}
+      Value := Transliterate(Value,GetCodePage);
+      {$ENDIF}
       ElementSize := GetDataLength;
       FillChar(FBufPtr^,ElementSize,' ');
       len := Length(Value);
@@ -330,10 +334,28 @@ begin
       Move(Value[1],FBufPtr^,len);
       Changed;
     end;
-  SQL_SHORT,SQL_LONG,SQL_INT64:
-    AsInt64 := StrToInt(Value);
+
+  SQL_SHORT,
+  SQL_LONG,
+  SQL_INT64:
+    SetAsInt64(StrToInt(Value));
+
+  SQL_D_FLOAT,
+  SQL_DOUBLE,
+  SQL_FLOAT:
+    SetAsDouble(StrToFloat(Value));
+
+  SQL_TIMESTAMP:
+    SetAsDateTime(StrToDateTime(Value));
+
+  SQL_TYPE_DATE:
+    SetAsDate(StrToDateTime(Value));
+
+  SQL_TYPE_TIME:
+    SetAsTime(StrToDateTime(Value));
+
   else
-    inherited SetAsString(Value);
+    IBError(ibxeInvalidDataConversion,[nil]);
   end;
 end;
 

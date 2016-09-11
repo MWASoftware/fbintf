@@ -190,6 +190,7 @@ type
     procedure SetScale(aValue: cardinal); virtual; abstract;
     procedure SetDataLength(len: cardinal); virtual; abstract;
     procedure SetSQLType(aValue: cardinal); virtual; abstract;
+    procedure SetCharSetID(aValue: cardinal); virtual; abstract;
   public
     constructor Create(aParent: TSQLDataArea; aIndex: integer);
     procedure SetString(aValue: string);
@@ -210,7 +211,7 @@ type
     property Parent: TSQLDataArea read FParent;
     property Index: integer read FIndex;
     property Name: string read FName write SetName;
-    property CharSetID: cardinal read GetCharSetID;
+    property CharSetID: cardinal read GetCharSetID write SetCharSetID;
     property SQLType: cardinal read GetSQLType write SetSQLType;
     property SQLSubtype: cardinal read GetSubtype;
     property SQLData: PChar read GetSQLData;
@@ -317,6 +318,7 @@ type
     procedure SetAsVariant(AValue: Variant);
     procedure SetAsBlob(aValue: IBlob);
     procedure SetAsQuad(AValue: TISC_QUAD);
+    procedure SetCharSetID(aValue: cardinal);
 
     property AsBlob: IBlob read GetAsBlob write SetAsBlob;
     property IsNullable: Boolean read GetIsNullable write SetIsNullable;
@@ -1420,47 +1422,8 @@ begin
 end;
 
 procedure TSQLDataItem.SetAsString(Value: String);
-var
-   stype: Integer;
-
-   procedure SetStringValue;
-   var len: integer;
-   begin
-     {$IFDEF HAS_ANSISTRING_CODEPAGE}
-     Value := Transliterate(Value,GetCodePage);
-     {$ENDIF}
-     len :=  Length(Value);
-      if (GetName = 'DB_KEY') or {do not localize}
-         (GetName = 'RDB$DB_KEY') then {do not localize}
-          Move(Value[1], SQLData^,len)
-      else
-      begin
-        SQLType := SQL_TEXT;
-        DataLength := len;
-        if (Length(Value) > 0) then
-          Move(Value[1], SQLData^, len);
-      end;
-      Changed;
-   end;
-
 begin
-  CheckActive;
-  if IsNullable then
-    IsNull := False;
 
-  stype := SQLType;
-  if (stype = SQL_TEXT) or (stype = SQL_VARYING) then
-    SetStringValue
-  else
-  begin
-    if Value = '' then
-      IsNull := True
-    else if (stype = SQL_TIMESTAMP) or (stype = SQL_TYPE_DATE) or
-      (stype = SQL_TYPE_TIME) then
-      SetAsDateTime(StrToDateTime(Value))
-    else
-      SetStringValue;
-  end;
 end;
 
 procedure TSQLDataItem.SetAsVariant(Value: Variant);
@@ -1732,17 +1695,42 @@ begin
     finally
       ss.Free;
     end;
+    Changed;
   end;
 
-  else
-    {$IFDEF HAS_ANSISTRING_CODEPAGE}
-    FIBXSQLVar.SetString(Transliterate(Value,GetCodePage));
-    {$ELSE}
-    FIBXSQLVar.SetString(Value);
-    {$ENDIF}
+  SQL_VARYING,
+  SQL_TEXT:
+    begin
+      {$IFDEF HAS_ANSISTRING_CODEPAGE}
+      FIBXSQLVar.SetString(Transliterate(Value,GetCodePage));
+      {$ELSE}
+      FIBXSQLVar.SetString(Value);
+      {$ENDIF}
+      Changed;
+    end;
 
+    SQL_SHORT,
+    SQL_LONG,
+    SQL_INT64:
+      SetAsInt64(StrToInt(Value));
+
+    SQL_D_FLOAT,
+    SQL_DOUBLE,
+    SQL_FLOAT:
+      SetAsDouble(StrToFloat(Value));
+
+    SQL_TIMESTAMP:
+      SetAsDateTime(StrToDateTime(Value));
+
+    SQL_TYPE_DATE:
+      SetAsDate(StrToDateTime(Value));
+
+    SQL_TYPE_TIME:
+      SetAsTime(StrToDateTime(Value));
+
+    else
+      IBError(ibxeInvalidDataConversion,[nil]);
   end;
-  Changed;
 end;
 
 procedure TSQLParam.CheckActive;
@@ -2173,6 +2161,11 @@ begin
         end;
       end;
   end;
+end;
+
+procedure TSQLParam.SetCharSetID(aValue: cardinal);
+begin
+  FIBXSQLVAR.SetCharSetID(aValue);
 end;
 
 { TMetaData }

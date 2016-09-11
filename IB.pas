@@ -286,7 +286,7 @@ type
   ISQLParam = interface(ISQLElement)
     procedure Clear;
     function GetSize: integer;
-    function getCharSetID: cardinal;
+    function GetCharSetID: cardinal;
     function GetIsNull: Boolean;
     function GetAsBlob: IBlob;
     function GetAsArray: IArray;
@@ -299,9 +299,11 @@ type
     procedure SetAsBlob(aValue: IBlob);
     procedure SetAsArray(anArray: IArray);
     procedure SetAsQuad(aValue: TISC_QUAD);
+    procedure SetCharSetID(aValue: cardinal);
     property AsBlob: IBlob read GetAsBlob write SetAsBlob;
     property AsArray: IArray read GetAsArray write SetAsArray;
     property AsQuad: TISC_QUAD read GetAsQuad write SetAsQuad;
+    property CharSetID: cardinal read GetCharSetID write SetCharSetID;
     property IsNull: Boolean read GetIsNull write SetIsNull;
     property Modified: Boolean read getModified;
     property Name: string read GetName;

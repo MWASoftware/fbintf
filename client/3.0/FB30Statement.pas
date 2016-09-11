@@ -103,6 +103,7 @@ type
      procedure SetScale(aValue: cardinal); override;
      procedure SetDataLength(len: cardinal); override;
      procedure SetSQLType(aValue: cardinal); override;
+     procedure SetCharSetID(aValue: cardinal); override;
 
   public
     constructor Create(aParent: TIBXSQLDA; aIndex: integer);
@@ -498,11 +499,15 @@ begin
 
   SQL_BLOB:
     if (SQLSubType = 1) and (FRelationName <> '') and (FFieldName <> '') then
-      result := GetBlobMetaData.GetCharSetID;
+      result := GetBlobMetaData.GetCharSetID
+    else
+      result := FCharSetID;
 
   SQL_ARRAY:
     if (FRelationName <> '') and (FFieldName <> '') then
-      result := GetArrayMetaData.GetCharSetID;
+      result := GetArrayMetaData.GetCharSetID
+    else
+      result := FCharSetID;
   end;
 end;
 
@@ -613,6 +618,11 @@ end;
 procedure TIBXSQLVAR.SetSQLType(aValue: cardinal);
 begin
   FSQLType := aValue;
+end;
+
+procedure TIBXSQLVAR.SetCharSetID(aValue: cardinal);
+begin
+  FCharSetID := aValue;
 end;
 
 constructor TIBXSQLVAR.Create(aParent: TIBXSQLDA; aIndex: integer);

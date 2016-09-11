@@ -89,7 +89,7 @@ type
     procedure SetScale(aValue: cardinal); override;
     procedure SetDataLength(len: cardinal); override;
     procedure SetSQLType(aValue: cardinal); override;
-
+    procedure SetCharSetID(aValue: cardinal); override;
   public
     constructor Create(aParent: TIBXSQLDA; aIndex: integer);
     procedure FreeSQLData;
@@ -652,6 +652,19 @@ end;
 procedure TIBXSQLVAR.SetSQLType(aValue: cardinal);
 begin
   FXSQLVAR^.sqltype := aValue or (FXSQLVAR^.sqltype and 1);
+end;
+
+procedure TIBXSQLVAR.SetCharSetID(aValue: cardinal);
+begin
+  if aValue <> GetCharSetID then
+  case SQLType of
+  SQL_VARYING, SQL_TEXT:
+      FXSQLVAR^.sqlsubtype := (aValue and $FF) or (FXSQLVAR^.sqlsubtype and not $FF);
+
+  SQL_BLOB,
+  SQL_ARRAY:
+    IBError(ibxeInvalidDataConversion,[nil]);
+  end;
 end;
 
 constructor TIBXSQLVAR.Create(aParent: TIBXSQLDA; aIndex: integer);
