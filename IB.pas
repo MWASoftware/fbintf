@@ -9,14 +9,61 @@ unit IB;
 {$DEFINE USEFIREBIRD3API}
 {$DEFINE USELEGACYFIREBIRDAPI}
 
+{
+  This unit defines the interfaces used to provide the Pascal Language
+  bindings for the Firebird API. These are COM style references counted interfaces
+  and are automatically freed when they go out of scope.
+
+  The interface definition is independent of the Firebird API version and two
+  implementations are provided. One is for the legacy API (2.5 and earlier) and the
+  other is for the new object orientated API (3.0 and later). By default, both are
+  available with the 3.0 API used if it is available. Otherwise the 2.5 API is used.
+  The above two defines can be used to force only one implementation by undefining
+  the symbol for the unwanted API.
+
+  Note that the FirebirdAPI function defined below is used for initial access to
+  the language bindings.
+
+  The goals of these Pascal Langauge bindings are to provide:
+
+  1. A set of reference counted interfaces providing complete access to the Firebird API.
+
+  2. Application Independence from the Firebird API version.
+
+  3. All data access through strongly typed variables and functions with no need for
+     the end user to manipulate untyped data in buffers such as the legacy API SQLDA
+     or the Firebird 3.0 message buffer.
+
+  4. A stable platform for LCL Packages (e.g. IBX) that implement the TDataSet model
+     with independence from the Firebird API version.
+
+  5. Straightforward progammatic access to the Firebird API from Pascal programs.
+
+  String Types
+  ============
+
+  From FPC 3.0 onwards, ANSISTRINGs include the codepage in their definition. All
+  strings used by the interface are sensitive to the codepage in that the codepage
+  for all strings returned by an interface are consistent with the SQL Character set
+  used for the database connection. Input strings will be transliterated, where possible
+  and if necessary, to the codepage consistent with the character set used for
+  the database connection.
+}
+
 interface
 
 uses
   Classes, SysUtils, DB, FBMessages, IBExternals;
 
+{These include files are converted from the 'C' originals in the Firebird API
+ and define the various constants used by the API}
+
 {$I consts_pub.inc}
 {$I inf_pub.inc}
 {$I configkeys.inc}
+
+{The following constants define the values return by calls to the GetSQLType
+ methods provided by several of the interfaces defined below.}
 
 (*********************)
 (** SQL definitions **)
@@ -49,7 +96,8 @@ type
    PGDS__QUAD           = ^TGDS__QUAD;
    PISC_QUAD            = ^TISC_QUAD;
 
-  TIBSQLTypes = (SQLUnknown, SQLSelect, SQLInsert,
+  TIBSQLStatementTypes =
+                 (SQLUnknown, SQLSelect, SQLInsert,
                   SQLUpdate, SQLDelete, SQLDDL,
                   SQLGetSegment, SQLPutSegment,
                   SQLExecProcedure, SQLStartTransaction,
@@ -62,6 +110,11 @@ type
   IAttachment = interface;
   ITransaction = interface;
 
+  {The IStatus interface provides access to error information, if any, returned
+   by the last API call. It can also be used to customise the error message
+   returned by a database engine exception - see EIBInterbaseError.
+   }
+
   IStatus = interface
     function GetIBErrorCode: Long;
     function Getsqlcode: Long;
@@ -71,6 +124,10 @@ type
     procedure SetIBDataBaseErrorMessages(Value: TIBDataBaseErrorMessages);
   end;
 
+  { The array metadata interface provides access to the metadata used to describe
+    an array column in a Firebird table.
+  }
+
   TArrayBound = record
     UpperBound: short;
     LowerBound: short;
@@ -79,7 +136,7 @@ type
   TArrayCoords = array of integer;
 
   IArrayMetaData = interface
-    function GetSQLType: short;
+    function GetSQLType: cardinal;
     function GetSQLTypeName: string;
     function GetScale: integer;
     function GetCharSetID: cardinal;
@@ -88,6 +145,21 @@ type
     function GetDimensions: integer;
     function GetBounds: TArrayBounds;
   end;
+
+  {The array interface provides access to and modification of the array data
+   contained in an array field of a Firebird Table. The array element is
+   selected by specifying its co-ordinates using an integer array. The
+   getter and setter methods used should be appropriate for the type of data
+   contained in the array. Automatic conversion is provided to and from strings.
+   That is GetAsString and SetAsString are safe to use for sql types other than
+   boolean.
+
+   The interface is returned by a GetAsArray getter method (see ISQLData). A new array
+   can be obtained from the IAttachment interface. The SetAsArray setter method
+   (See ISQLParam) is used to apply an updated or new array to the database using
+   an UPDATE or INSERT statement.
+
+  }
 
   IArray = interface
     function GetArrayID: TISC_QUAD;
@@ -121,6 +193,10 @@ type
     function GetTransaction: ITransaction;
   end;
 
+  { The Blob metadata interface provides access to the metadata used to describe
+    a blob column in a Firebird table.
+  }
+
   IBlobMetaData = interface
     function GetSubType: cardinal;
     function GetCharSetID: cardinal;
@@ -128,6 +204,14 @@ type
     function GetTableName: string;
     function GetColumnName: string;
   end;
+
+  { The Blob Interface provides access to a blob data item.
+
+  The interface is returned by a GetAsBlob getter method (see ISQLData). A new Blob
+  can be obtained from the IAttachment interface. The SetAsBlob setter method
+  (See ISQLParam) is used to apply an updated or new array to the database using
+  an UPDATE or INSERT statement.
+  }
 
   TFBBlobMode = (fbmRead,fbmWrite);
   TBlobType = (btSegmented,btStream);
@@ -149,6 +233,10 @@ type
     function GetTransaction: ITransaction;
  end;
 
+  { The IColumnMetaData interface provides access to the per column metadata for
+    the output of an SQL Statement.
+  }
+
   { IColumnMetaData }
 
   IColumnMetaData = interface
@@ -166,6 +254,7 @@ type
     function getIsNullable: boolean;
     function GetSize: integer;
     function GetArrayMetaData: IArrayMetaData; {Valid only for Array SQL Type}
+    function GetBlobMetaData: IBlobMetaData; {Valid only for Blob SQL Type}
     property Name: string read GetName;
     property Size: Integer read GetSize;
     property SQLType: cardinal read GetSQLType;
@@ -174,16 +263,35 @@ type
     property IsNullable: Boolean read GetIsNullable;
   end;
 
+  {
+   The IMetaData interface provides access to the set of column metadata
+   for the output of an SQL Statement
+  }
+
   { IMetaData }
 
   IMetaData = interface
     function getCount: integer;
     function getColumnMetaData(index: integer): IColumnMetaData;
-    function GetUniqueRelationName: string;
+    function GetUniqueRelationName: string; {True if all columns come from the same table}
     function ByName(Idx: String): IColumnMetaData;
     property ColMetaData[index: integer]: IColumnMetaData read getColumnMetaData; default;
     property Count: integer read getCount;
   end;
+
+  {
+    The ISQLData interface provides access to the data returned in a field in the
+    current row returned from a query or the result of an SQL Execute statement.
+
+    It subclasses IColumnMetaData and so also provides access to the metadata
+    associated with the column.
+
+    The getter and setter methods, and the corresponding properties, provide typed
+    access to the field data. The method/property used should be consistent
+    with the SQL Type. Automatic conversion is provided from strings.
+    That is GetAsString is safe to use for sql types other than  boolean.
+  }
+
 
   ISQLData = interface(IColumnMetaData)
     function GetAsBoolean: boolean;
@@ -222,6 +330,12 @@ type
     property Value: Variant read GetAsVariant;
   end;
 
+  { An IResults interface is returned as the result of an SQL Execute statement
+    and provides access to the fields returned, if any. It is a collection of
+    ISQLData interfaces which are, in turn, used to access the data returned by
+    each field of the result set.
+  }
+
   IResults = interface
    function getCount: integer;
    function ByName(Idx: String): ISQLData;
@@ -230,6 +344,11 @@ type
    property Count: integer read getCount;
   end;
 
+  { An IResultSet interface is returned as the result of an SQL Open Cursor statement
+    (e.g. Select Statement)  and provides access to the fields returned, if any
+    for the current row. It is a collection of ISQLData interfaces which are,
+    in turn, used to access the data returned by each field of the current row.
+  }
   IResultSet = interface(IResults)
     function FetchNext: boolean;
     function GetCursorName: string;
@@ -237,34 +356,41 @@ type
     procedure Close;
   end;
 
-  ISQLElement = interface
-    function getScale: cardinal;
-    function GetSize: integer;
-    function GetAsBoolean: boolean;
-    function GetAsCurrency: Currency;
-    function GetAsInt64: Int64;
-    function GetAsDateTime: TDateTime;
-    function GetAsDouble: Double;
-    function GetAsFloat: Float;
-    function GetAsLong: Long;
-    function GetAsPointer: Pointer;
-    function GetAsShort: Short;
-    function GetAsString: String;
-    function GetAsVariant: Variant;
-    procedure SetAsBoolean(AValue: boolean);
-    procedure SetAsCurrency(Value: Currency);
-    procedure SetAsInt64(Value: Int64);
-    procedure SetAsDate(Value: TDateTime);
-    procedure SetAsLong(Value: Long);
-    procedure SetAsTime(Value: TDateTime);
-    procedure SetAsDateTime(Value: TDateTime);
-    procedure SetAsDouble(Value: Double);
-    procedure SetAsFloat(Value: Float);
-    procedure SetAsPointer(Value: Pointer);
-    procedure SetAsShort(Value: Short);
-    procedure SetAsString(Value: String);
-    procedure SetAsVariant(Value: Variant);
+  {The ISQLParam interface is used to provide access to each parameter in a
+   parametised SQL Statement. It subclasses IColumnMetaData and this part of
+   the interface may be used to access information on the expected SQL Type, etc.
+
+   It also subclasses ISQLData and this part of the interface may be used to access
+   current values for each parameter.
+
+   Otherwise, the interface comprises the Setter Methods and properties used to
+   set the value of each parameter.
+
+   Automatic conversion is provided to and from strings. That is GetAsString and
+   SetAsString are safe to use for sql types other than boolean.
+  }
+
+  ISQLParam = interface(ISQLData)
+    procedure Clear;
     function GetModified: boolean;
+    procedure SetAsBoolean(AValue: boolean);
+    procedure SetAsCurrency(aValue: Currency);
+    procedure SetAsInt64(aValue: Int64);
+    procedure SetAsDate(aValue: TDateTime);
+    procedure SetAsLong(aValue: Long);
+    procedure SetAsTime(aValue: TDateTime);
+    procedure SetAsDateTime(aValue: TDateTime);
+    procedure SetAsDouble(aValue: Double);
+    procedure SetAsFloat(aValue: Float);
+    procedure SetAsPointer(aValue: Pointer);
+    procedure SetAsShort(aValue: Short);
+    procedure SetAsString(aValue: String);
+    procedure SetAsVariant(aValue: Variant);
+    procedure SetIsNull(aValue: Boolean);
+    procedure SetAsBlob(aValue: IBlob);
+    procedure SetAsArray(anArray: IArray);
+    procedure SetAsQuad(aValue: TISC_QUAD);
+    procedure SetCharSetID(aValue: cardinal);
     property AsDate: TDateTime read GetAsDateTime write SetAsDate;
     property AsBoolean:boolean read GetAsBoolean write SetAsBoolean;
     property AsTime: TDateTime read GetAsDateTime write SetAsTime;
@@ -279,36 +405,19 @@ type
     property AsShort: Short read GetAsShort write SetAsShort;
     property AsString: String read GetAsString write SetAsString;
     property AsVariant: Variant read GetAsVariant write SetAsVariant;
-    property Value: Variant read GetAsVariant write SetAsVariant;
-  end;
-
-
-  ISQLParam = interface(ISQLElement)
-    procedure Clear;
-    function GetSize: integer;
-    function GetCharSetID: cardinal;
-    function GetIsNull: Boolean;
-    function GetAsBlob: IBlob;
-    function GetAsArray: IArray;
-    function GetName: string;
-    function GetSQLType: cardinal;
-    function GetSQLTypeName: string;
-    function GetSubtype: cardinal;
-    function GetAsQuad: TISC_QUAD;
-    procedure SetIsNull(aValue: Boolean);
-    procedure SetAsBlob(aValue: IBlob);
-    procedure SetAsArray(anArray: IArray);
-    procedure SetAsQuad(aValue: TISC_QUAD);
-    procedure SetCharSetID(aValue: cardinal);
     property AsBlob: IBlob read GetAsBlob write SetAsBlob;
     property AsArray: IArray read GetAsArray write SetAsArray;
     property AsQuad: TISC_QUAD read GetAsQuad write SetAsQuad;
+    property Value: Variant read GetAsVariant write SetAsVariant;
     property CharSetID: cardinal read GetCharSetID write SetCharSetID;
     property IsNull: Boolean read GetIsNull write SetIsNull;
     property Modified: Boolean read getModified;
-    property Name: string read GetName;
-    property SQLType: cardinal read GetSQLType;
- end;
+  end;
+
+   {
+   The ISQLParams interface provides access to the collection of parameters used
+   for the input to an SQL Statement
+  }
 
   ISQLParams = interface
     function getCount: integer;
@@ -320,29 +429,33 @@ type
     property Count: integer read getCount;
   end;
 
+  {The IStatement interface provides access to an SQL Statement once it has been
+   initially prepared. The interface is returned from the IAttachment interface.
 
-  IDBInformation = interface;
+
+  }
 
   IStatement = interface
-    function GetSQLParams: ISQLParams;
-    function GetMetaData: IMetaData;
+    function GetMetaData: IMetaData;  {Output Metadata}
+    function GetSQLParams: ISQLParams;{Statement Parameters}
     function GetPlan: String;
     function GetRowsAffected(var SelectCount, InsertCount, UpdateCount, DeleteCount: integer): boolean;
-    function GetSQLType: TIBSQLTypes;
+    function GetSQLStatementType: TIBSQLStatementTypes;
     function GetSQLText: string;
     function GetSQLDialect: integer;
     function IsPrepared: boolean;
     procedure Prepare(aTransaction: ITransaction=nil);
     function Execute(aTransaction: ITransaction=nil): IResults;
     function OpenCursor(aTransaction: ITransaction=nil): IResultSet;
-    function CreateBlob: IBlob;
+    function CreateBlob: IBlob;   {Returns a new IBlob in the context of the statement transaction}
+      {Return a new Array in the context of the statement transaction using either the metadata or column name}
     function CreateArray(column: IColumnMetaData): IArray; overload;
     function CreateArray(columnName: string): IArray;  overload;
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
     property MetaData: IMetaData read GetMetaData;
     property SQLParams: ISQLParams read GetSQLParams;
-    property SQLType: TIBSQLTypes read GetSQLType;
+    property SQLStatementType: TIBSQLStatementTypes read GetSQLStatementType;
   end;
 
   ITPBItem = interface

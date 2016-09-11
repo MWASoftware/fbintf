@@ -67,7 +67,7 @@ type
     FArrayMetaData: IArrayMetaData;
 
     {SQL Var Type Data}
-    FSQLType: cardinal;
+    FSQLStatementType: cardinal;
     FSQLSubType: cardinal;
     FSQLData: PChar; {Address of SQL Data in Message Buffer}
     FSQLNullIndicator: PShort; {Address of null indicator}
@@ -209,7 +209,7 @@ type
     FTransactionIntf: ITransaction;
     FExecTransactionIntf: ITransaction;
     FStatementIntf: Firebird.IStatement;
-    FSQLType: TIBSQLTypes;         { Select, update, delete, insert, create, alter, etc...}
+    FSQLStatementType: TIBSQLStatementTypes;         { Select, update, delete, insert, create, alter, etc...}
     FSQLDialect: integer;
     FSQLParams: TIBXINPUTSQLDA;
     FSQLRecord: TIBXOUTPUTSQLDA;
@@ -254,7 +254,7 @@ type
     function GetPlan: String;
     function GetRowsAffected(var SelectCount, InsertCount, UpdateCount,
       DeleteCount: integer): boolean;
-    function GetSQLType: TIBSQLTypes;
+    function GetSQLStatementType: TIBSQLStatementTypes;
     function GetSQLText: string;
     function GetSQLDialect: integer;
     function IsPrepared: boolean;
@@ -268,7 +268,7 @@ type
     function GetTransaction: ITransaction;
 
     property SQLParams: ISQLParams read GetSQLParams;
-    property SQLType: TIBSQLTypes read GetSQLType;
+    property SQLStatementType: TIBSQLStatementTypes read GetSQLStatementType;
 end;
 
 implementation
@@ -445,7 +445,7 @@ end;
 
 function TIBXSQLVAR.GetSQLType: cardinal;
 begin
-  Result := FSQLType;
+  Result := FSQLStatementType;
 end;
 
 function TIBXSQLVAR.GetSubtype: cardinal;
@@ -617,7 +617,7 @@ end;
 
 procedure TIBXSQLVAR.SetSQLType(aValue: cardinal);
 begin
-  FSQLType := aValue;
+  FSQLStatementType := aValue;
 end;
 
 procedure TIBXSQLVAR.SetCharSetID(aValue: cardinal);
@@ -787,7 +787,7 @@ begin
       for i := 0 to Count - 1 do
       with TIBXSQLVar(Column[i]) do
       begin
-        Builder.setType(StatusIntf,i,FSQLType);
+        Builder.setType(StatusIntf,i,FSQLStatementType);
         Check4DataBaseError;
         Builder.setSubType(StatusIntf,i,FSQLSubType);
         Check4DataBaseError;
@@ -853,7 +853,7 @@ begin
     for i := 0 to Count - 1 do
     with TIBXSQLVar(Column[i]) do
     begin
-      FSQLType := aMetaData.getType(StatusIntf,i);
+      FSQLStatementType := aMetaData.getType(StatusIntf,i);
       Check4DataBaseError;
       FSQLSubType := aMetaData.getSubType(StatusIntf,i);
       Check4DataBaseError;
@@ -929,7 +929,7 @@ begin
     for i := 0 to Count - 1 do
     with TIBXSQLVar(Column[i]) do
     begin
-      FSQLType := aMetaData.getType(StatusIntf,i);
+      FSQLStatementType := aMetaData.getType(StatusIntf,i);
       Check4DataBaseError;
       FSQLSubType := aMetaData.getSubType(StatusIntf,i);
       Check4DataBaseError;
@@ -1113,11 +1113,11 @@ begin
                           FSQLDialect,
                           Firebird.IStatement.PREPARE_PREFETCH_METADATA);
       Check4DataBaseError;
-      FSQLType := TIBSQLTypes(FStatementIntf.getType(StatusIntf));
+      FSQLStatementType := TIBSQLStatementTypes(FStatementIntf.getType(StatusIntf));
       Check4DataBaseError;
 
       { Done getting the type }
-      case FSQLType of
+      case FSQLStatementType of
         SQLGetSegment,
         SQLPutSegment,
         SQLStartTransaction:
@@ -1136,7 +1136,7 @@ begin
           Check4DataBaseError;
 
           {setup output sqlda}
-          if FSQLType in [SQLSelect, SQLSelectForUpdate,
+          if FSQLStatementType in [SQLSelect, SQLSelectForUpdate,
                           SQLExecProcedure] then
             FSQLRecord.Bind(FStatementIntf.getOutputMetadata(StatusIntf));
           Check4DataBaseError;
@@ -1181,7 +1181,7 @@ begin
 
   try
     with Firebird30ClientAPI do
-    case FSQLType of
+    case FSQLStatementType of
     SQLSelect:
       IBError(ibxeIsAExecuteProcedure,[]);
 
@@ -1217,7 +1217,7 @@ end;
 function TFB30Statement.InternalOpenCursor(aTransaction: TFB30Transaction
   ): IResultSet;
 begin
-  if FSQLType <> SQLSelect then
+  if FSQLStatementType <> SQLSelect then
    IBError(ibxeIsASelectStatement,[]);
 
  CheckTransaction(aTransaction);
@@ -1263,7 +1263,7 @@ end;
 procedure TFB30Statement.InternalClose(Force: boolean);
 begin
   try
-    if (FStatementIntf <> nil) and (SQLType = SQLSelect) and FOpen then
+    if (FStatementIntf <> nil) and (SQLStatementType = SQLSelect) and FOpen then
     with Firebird30ClientAPI do
     begin
       if FResultSet <> nil then
@@ -1395,7 +1395,7 @@ end;
 function TFB30Statement.GetPlan: String;
 begin
   CheckHandle;
-  if (not (FSQLType in [SQLSelect, SQLSelectForUpdate,
+  if (not (FSQLStatementType in [SQLSelect, SQLSelectForUpdate,
        {TODO: SQLExecProcedure, }
        SQLUpdate, SQLDelete])) then
     result := ''
@@ -1441,9 +1441,9 @@ begin
   end;
 end;
 
-function TFB30Statement.GetSQLType: TIBSQLTypes;
+function TFB30Statement.GetSQLStatementType: TIBSQLStatementTypes;
 begin
-  Result := FSQLType;
+  Result := FSQLStatementType;
 end;
 
 function TFB30Statement.Execute(aTransaction: ITransaction): IResults;

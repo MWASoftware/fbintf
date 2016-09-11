@@ -179,7 +179,7 @@ type
     FTransactionIntf: ITransaction;
     FExecTransactionIntf: ITransaction;
     FHandle: TISC_STMT_HANDLE;
-    FSQLType: TIBSQLTypes;         { Select, update, delete, insert, create, alter, etc...}
+    FSQLStatementType: TIBSQLStatementTypes;         { Select, update, delete, insert, create, alter, etc...}
     FSQLDialect: integer;
     FSQLParams: TIBXINPUTSQLDA;
     FSQLRecord: TIBXOUTPUTSQLDA;
@@ -222,7 +222,7 @@ type
     function GetPlan: String;
     function GetRowsAffected(var SelectCount, InsertCount, UpdateCount,
       DeleteCount: integer): boolean;
-    function GetSQLType: TIBSQLTypes;
+    function GetSQLStatementType: TIBSQLStatementTypes;
     function GetSQLText: string;
     function GetSQLDialect: integer;
     function IsPrepared: boolean;
@@ -236,7 +236,7 @@ type
     function GetTransaction: ITransaction;
     property Handle: TISC_STMT_HANDLE read FHandle;
     property SQLParams: ISQLParams read GetSQLParams;
-    property SQLType: TIBSQLTypes read GetSQLType;
+    property SQLStatementType: TIBSQLStatementTypes read GetSQLStatementType;
 
 end;
 
@@ -976,12 +976,12 @@ begin
     RB := TSQLInfoResultsBuffer.Create(self);
     RB.Exec(isc_info_sql_stmt_type);
     if RB.Count > 0 then
-      FSQLType := TIBSQLTypes(RB[0].GetAsInteger)
+      FSQLStatementType := TIBSQLStatementTypes(RB[0].GetAsInteger)
     else
-      FSQLType := SQLUnknown;
+      FSQLStatementType := SQLUnknown;
 
     { Done getting the type }
-    case FSQLType of
+    case FSQLStatementType of
       SQLGetSegment,
       SQLPutSegment,
       SQLStartTransaction: begin
@@ -998,7 +998,7 @@ begin
         FSQLParams.Bind;
 
         {setup output sqlda}
-        if FSQLType in [SQLSelect, SQLSelectForUpdate,
+        if FSQLStatementType in [SQLSelect, SQLSelectForUpdate,
                         SQLExecProcedure] then
           FSQLRecord.Bind;
       end;
@@ -1038,7 +1038,7 @@ begin
 
   try
     with Firebird25ClientAPI do
-    case FSQLType of
+    case FSQLStatementType of
     SQLSelect:
       IBError(ibxeIsAExecuteProcedure,[]);
 
@@ -1070,7 +1070,7 @@ end;
 function TFB25Statement.InternalOpenCursor(aTransaction: TFB25Transaction
   ): IResultSet;
 begin
-  if FSQLType <> SQLSelect then
+  if FSQLStatementType <> SQLSelect then
    IBError(ibxeIsASelectStatement,[]);
 
  CheckTransaction(aTransaction);
@@ -1125,7 +1125,7 @@ var
   isc_res: ISC_STATUS;
 begin
   try
-    if (FHandle <> nil) and (SQLType = SQLSelect) and FOpen then
+    if (FHandle <> nil) and (SQLStatementType = SQLSelect) and FOpen then
     with Firebird25ClientAPI do
     begin
       isc_res := Call(
@@ -1255,7 +1255,7 @@ function TFB25Statement.GetPlan: String;
 var
     RB: TSQLInfoResultsBuffer;
 begin
-  if (not (FSQLType in [SQLSelect, SQLSelectForUpdate,
+  if (not (FSQLStatementType in [SQLSelect, SQLSelectForUpdate,
        {TODO: SQLExecProcedure, }
        SQLUpdate, SQLDelete])) then
     result := ''
@@ -1302,9 +1302,9 @@ begin
   end;
 end;
 
-function TFB25Statement.GetSQLType: TIBSQLTypes;
+function TFB25Statement.GetSQLStatementType: TIBSQLStatementTypes;
 begin
-  Result := FSQLType;
+  Result := FSQLStatementType;
 end;
 
 function TFB25Statement.Execute(aTransaction: ITransaction): IResults;

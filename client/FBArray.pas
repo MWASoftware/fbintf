@@ -89,7 +89,7 @@ type
 
   public
    {IArrayMetaData}
-   function GetSQLType: short;
+   function GetSQLType: cardinal;
    function GetSQLTypeName: string;
    function GetScale: integer;
    function GetCharSetID: cardinal; virtual; abstract;
@@ -426,7 +426,7 @@ begin
   LoadMetaData(aAttachment,aTransaction,relationName, columnName);
 end;
 
-function TFBArrayMetaData.GetSQLType: short;
+function TFBArrayMetaData.GetSQLType: cardinal;
 begin
   case  FArrayDesc.array_desc_dtype of
   blr_cstring,
