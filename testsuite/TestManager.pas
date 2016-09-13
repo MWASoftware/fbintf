@@ -510,9 +510,13 @@ constructor TTestManager.Create;
 begin
   inherited Create;
   FTests := TList.Create;
+  {$IFDEF WINDOWS}
+  FNewDatabaseName := 'localhost:C:\test1.fdb';
+  {$ELSE}
   FNewDatabaseName := 'localhost:/tmp/test1.fdb';
+  {$ENDIF}
   FUserName := 'SYSDBA';
-  FPassword := 'Pears';
+  FPassword := 'masterkey';
   FEmployeeDatabaseName := 'localhost:employee';
 end;
 

@@ -2,7 +2,7 @@ procedure TFBClientAPI.LoadIBLibrary;
 
   function DoLoadLibrary(LibName: string): TLibHandle;
   begin
-    Result := LoadLibrary(LibName);
+    Result := LoadLibrary(PChar(LibName));
     if Result <> NilHandle then
       FFBLibraryName := ExtractFileName(LibName);
   end;
@@ -56,7 +56,7 @@ begin
     end
   end;
 
-  if Result = NilHandle then
+  if IBLibrary = NilHandle then
   {Use Registry key if it exists to locate library}
   begin
     with TRegistry.Create do
@@ -83,7 +83,7 @@ begin
         DirectorySeparator + 'Firebird_2_5' +
         DirectorySeparator + 'bin' + DirectorySeparator;
       dllPathName := InstallDir + FIREBIRD_CLIENT;
-      Result := DoLoadLibrary(dllPathName)
+      IBLibrary := DoLoadLibrary(dllPathName)
     end;
 
     //Otherwise see if Firebird client is in path
@@ -100,6 +100,6 @@ end;
 
 function TFBClientAPI.IsEmbeddedServer: boolean;
 begin
- Result := CompareText(FBLibraryName,FIREBIRD_EMBEDDED) = 0;
+ Result := CompareText(FFBLibraryName,FIREBIRD_EMBEDDED) = 0;
 end;
 

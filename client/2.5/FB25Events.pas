@@ -5,7 +5,7 @@ unit FB25Events;
 interface
 
 uses
-  Classes, SysUtils, IB, FBClientAPI, FB25ClientAPI, FB25Attachment, IBExternals,
+  {$IFDEF WINDOWS}Windows, {$ENDIF}Classes, SysUtils, IB, FBClientAPI, FB25ClientAPI, FB25Attachment, IBExternals,
   IBHeader, syncobjs, FBActivityMonitor;
 
 type
@@ -91,7 +91,7 @@ begin
   try
     Move(Updated[0], FOwner.FResultBuffer[0], Length);
     {$IFDEF WINDOWS}
-    SetEVent(FEventHandler);
+    SetEvent(FEventHandler);
     {$ELSE}
     FEventWaiting.SetEvent;
     {$ENDIF}

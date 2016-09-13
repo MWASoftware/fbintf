@@ -11,7 +11,7 @@ RawByteString = AnsiString; {Needed for backwards compatibility}
 interface
 
 uses
-  Classes, SysUtils, Dynlibs,  Firebird, IB, IBHeader, FBActivityMonitor,
+  Classes,  Dynlibs,  Firebird, IB, IBHeader, FBActivityMonitor,
   FBMessages, IBExternals;
 
 type
@@ -92,10 +92,11 @@ const FirebirdClientAPI: TFBClientAPI = nil;
 
 implementation
 
-uses IBUtils
+uses IBUtils,
 {$IFDEF WINDOWS }
-,Windows,Registry, WinDirs;
-{$ENDIF};
+Windows,Registry, WinDirs,
+{$ENDIF}
+SysUtils;
 
 const
 {$IFDEF LINUX}

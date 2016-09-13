@@ -5,7 +5,7 @@ unit FB30Events;
 interface
 
 uses
-  Classes, SysUtils, Firebird, IB, FBClientAPI, FB30ClientAPI, FB30Attachment,
+  {$IFDEF WINDOWS}Windows, {$ENDIF} Classes, SysUtils, Firebird, IB, FBClientAPI, FB30ClientAPI, FB30Attachment,
   IBExternals, syncobjs, FBActivityMonitor;
 
 type
