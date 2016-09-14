@@ -24,7 +24,6 @@ type
     FEventHandler: TEventHandler;
     FEventsIntf: Firebird.IEvents;
     FEventCallback: TObject;
-    FSignalFired: boolean;
     procedure CancelEvents(Force: boolean = false);
     procedure EventSignaled;
     procedure CreateEventBlock;
@@ -168,7 +167,7 @@ begin
   FEventHandler := CreateEvent(PSa,false,true,nil);
   {$ELSE}
   CreateGuid(GUID);
-  FEventWaiting := TEventObject.Create(PSa,false,true,GUIDToString(GUID));
+  FEventWaiting := TEventObject.Create(PSa,false,false,GUIDToString(GUID));
   {$ENDIF}
   FreeOnTerminate := true;
   Start;
@@ -232,7 +231,6 @@ begin
     FEventsIntf.release;
     FEventsIntf := nil;
     FEventHandler := nil;
-    FSignalFired := false;
   finally
     FCriticalSection.Leave
   end;
@@ -241,9 +239,6 @@ end;
 procedure TFBEvents.EventSignaled;
 var Handler: TEventHandler;
 begin
-  if not FSignalFired then
-    FSignalFired := true {ignore first event}
-  else
   if assigned(FEventHandler)  then
   begin
     Handler := FEventHandler;

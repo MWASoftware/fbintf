@@ -23,7 +23,6 @@ type
     FCriticalSection: TCriticalSection;
     FEventHandlerThread: TObject;
     FEventHandler: TEventHandler;
-    FSignalFired: boolean;
     procedure CancelEvents(Force: boolean = false);
     procedure EventSignaled;
     procedure CreateEventBlock;
@@ -139,7 +138,7 @@ begin
   FEventHandler := CreateEvent(PSa,false,true,nil);
   {$ELSE}
   CreateGuid(GUID);
-  FEventWaiting := TEventObject.Create(PSa,false,true,GUIDToString(GUID));
+  FEventWaiting := TEventObject.Create(PSa,false,false,GUIDToString(GUID));
   {$ENDIF}
   FreeOnTerminate := true;
   Start;
@@ -197,7 +196,6 @@ begin
         IBDatabaseError;
 
     FEventHandler := nil;
-    FSignalFired := false;
   finally
     FCriticalSection.Leave
   end;
@@ -206,11 +204,6 @@ end;
 procedure TFBEvents.EventSignaled;
 var Handler: TEventHandler;
 begin
-  {$IFNDEF WINDOWS}
-  if not FSignalFired then
-    FSignalFired := true   {ignore first event}
-  else
-  {$ENDIF}
   if assigned(FEventHandler)  then
   begin
     Handler := FEventHandler;
