@@ -206,9 +206,11 @@ end;
 procedure TFBEvents.EventSignaled;
 var Handler: TEventHandler;
 begin
+  {$IFNDEF WINDOWS}
   if not FSignalFired then
     FSignalFired := true   {ignore first event}
   else
+  {$ENDIF}
   if assigned(FEventHandler)  then
   begin
     Handler := FEventHandler;

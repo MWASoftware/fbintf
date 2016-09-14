@@ -79,6 +79,7 @@ type
 
     {IFirebirdAPI}
     function GetStatus: IStatus; virtual; abstract;
+    function IsLibraryLoaded: boolean;
     function IsEmbeddedServer: boolean;
     function GetLibraryName: string;
     function GetCharsetName(CharSetID: integer): string;
@@ -241,6 +242,11 @@ begin
     Dec(len);
     aValue := aValue shr 8;
   end;
+end;
+
+function TFBClientAPI.IsLibraryLoaded: boolean;
+begin
+  Result := IBLibrary <> NilHandle;
 end;
 
 function TFBClientAPI.GetProcAddr(ProcName: PChar): Pointer;

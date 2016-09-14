@@ -2,6 +2,9 @@ unit Test6;
 
 {$mode objfpc}{$H+}
 
+{$IF FPC_FULLVERSION >= 20700 }
+{$codepage UTF8}
+{$ENDIF}
 interface
 
 uses
@@ -127,7 +130,6 @@ begin
   UpdateDatabase(Attachment);
 
   Attachment.DropDatabase;
-
 end;
 
 initialization

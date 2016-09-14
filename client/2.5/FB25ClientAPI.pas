@@ -363,7 +363,7 @@ function TFB25ClientAPI.CreateDatabase(DatabaseName: string; DPB: IDPB;
   RaiseExceptionOnError: boolean): IAttachment;
 begin
   Result := TFBAttachment.CreateDatabase(DatabaseName, DPB, RaiseExceptionOnError );
-   if not Result.IsConnected then
+   if (Result <> nil) and not Result.IsConnected then
      Result := nil;
 end;
 

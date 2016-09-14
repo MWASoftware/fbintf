@@ -16,7 +16,9 @@ type
   private
     FOwner: TTestManager;
   protected
+    FHexStrings: boolean;
     function ReportResults(Statement: IStatement): IResultSet;
+    procedure PrintHexString(s: string);
     procedure PrintDPB(DPB: IDPB);
     procedure PrintMetaData(meta: IMetaData);
     procedure WriteArray(ar: IArray);
@@ -126,6 +128,8 @@ begin
         SQL_TEXT,SQL_VARYING:
         begin
           s := Result[i].AsString;
+          if FHexStrings then
+            PrintHexString(s);
           if Result[i].GetCharSetID > 0 then
             writeln(Result[i].Name,' = ',s,' (Charset Id = ',Result[i].GetCharSetID, ' Codepage = ',StringCodePage(s),')')
           else
@@ -141,6 +145,13 @@ begin
     Result.Close;
   end;
   writeln;
+end;
+
+procedure TTestBase.PrintHexString(s: string);
+var i: integer;
+begin
+  for i := 1 to length(s) do
+    write(Format('%x ',[byte(s[i])]));
 end;
 
 procedure TTestBase.PrintDPB(DPB: IDPB);

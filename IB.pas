@@ -862,6 +862,7 @@ type
 
     {Information}
     function GetStatus: IStatus;
+    function IsLibraryLoaded: boolean;
     function IsEmbeddedServer: boolean;
     function GetLibraryName: string;
     function HasServiceAPI: boolean;
@@ -960,6 +961,11 @@ begin
     Result := true;
   end;
   {$ENDIF}
+  if not FFirebirdAPI.IsLibraryLoaded then
+  begin
+    Result := false;
+    FFirebirdAPI := nil;
+  end;
 end;
 
 procedure CheckIBLoaded;

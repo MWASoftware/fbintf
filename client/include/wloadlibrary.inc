@@ -38,10 +38,13 @@ begin
     IBLibrary := DoLoadLibrary(dllPathName)
   end;
 
+  writeln('Dir = ',InstallDir);
   {If FIREBIRD environment variable available then try this}
   if IBLibrary = NilHandle then
   begin
     InstallDir := GetEnvironmentVariable('FIREBIRD');
+    if (length(InstallDir) > 0) and (InstallDir[length(InstallDir)] <> DirectorySeparator) then
+      InstallDir += DirectorySeparator;
     if (InstallDir <> '') and FileExists(InstallDir + FIREBIRD_CLIENT) then
     begin
       //assume firebird.conf and firebird.msg in same dir
