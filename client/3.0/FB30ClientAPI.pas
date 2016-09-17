@@ -69,7 +69,6 @@ type
     function HasServiceAPI: boolean;
     function HasMasterIntf: boolean;
     function HasRollbackRetaining: boolean;
-    function HasSynchronousEventWait: boolean;
     function GetImplementationVersion: string;
 
     {Encode/Decode}
@@ -240,11 +239,6 @@ end;
 function TFB30ClientAPI.HasRollbackRetaining: boolean;
 begin
   Result := true;
-end;
-
-function TFB30ClientAPI.HasSynchronousEventWait: boolean;
-begin
-  Result := false;
 end;
 
 function TFB30ClientAPI.GetImplementationVersion: string;

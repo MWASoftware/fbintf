@@ -872,7 +872,6 @@ type
     function HasServiceAPI: boolean;
     function HasMasterIntf: boolean;
     function HasRollbackRetaining: boolean;
-    function HasSynchronousEventWait: boolean;
     function GetImplementationVersion: string;
 
     {utility}

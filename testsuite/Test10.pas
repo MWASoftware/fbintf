@@ -64,7 +64,7 @@ begin
     writeln('Event: ',EventCounts[i].EventName,', Count = ',EventCounts[i].Count);
 
   FEventSignalled := false;
-  writeln('Async Wait');
+  writeln('Async Wait: Test Cancel');
   EventHandler.AsyncWaitForEvent(@EventReport);
   writeln('Async Wait Called');
   EventHandler.Cancel;
@@ -75,18 +75,13 @@ begin
   else
     writeln('Event called - so Cancel failed');
 
-  if FirebirdAPI.HasSynchronousEventWait then
-  begin
-    writeln('Sync wait');
-    Attachment.ExecImmediate([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],sqlEvent);
-    EventHandler.WaitForEvent;
-    writeln('Event Signalled');
-    EventCounts := EventHandler.ExtractEventCounts;
-    for i := 0 to length(EventCounts) - 1 do
-      writeln('Event: ',EventCounts[i].EventName,', Count = ',EventCounts[i].Count);
-  end
-  else
-    writeln('WaitForEvent not supported');
+  writeln('Sync wait');
+  Attachment.ExecImmediate([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],sqlEvent);
+  EventHandler.WaitForEvent;
+  writeln('Event Signalled');
+  EventCounts := EventHandler.ExtractEventCounts;
+  for i := 0 to length(EventCounts) - 1 do
+    writeln('Event: ',EventCounts[i].EventName,', Count = ',EventCounts[i].Count);
 end;
 
 procedure TTest10.EventReport(Sender: IEvents);

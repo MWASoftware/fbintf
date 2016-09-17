@@ -113,7 +113,6 @@ type
     function HasServiceAPI: boolean;
     function HasRollbackRetaining: boolean;
     function HasMasterIntf: boolean;
-    function HasSynchronousEventWait: boolean;
     function GetImplementationVersion: string;
     function DecodeInteger(bufptr: PChar; len: short): integer; override;
     procedure SQLEncodeDate(aDate: TDateTime; bufptr: PChar); override;
@@ -411,11 +410,6 @@ end;
 function TFB25ClientAPI.HasMasterIntf: boolean;
 begin
   Result := false;
-end;
-
-function TFB25ClientAPI.HasSynchronousEventWait: boolean;
-begin
-  REsult := true;
 end;
 
 function TFB25ClientAPI.GetImplementationVersion: string;

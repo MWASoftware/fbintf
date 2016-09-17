@@ -16,6 +16,7 @@ type
   TEventhandlerInterface = class(Firebird.IEventCallbackImpl)
   private
     FOwner: TFBEvents;
+    FName: string;
     FRef: integer;
     {$IFDEF WINDOWS}
     {Make direct use of Windows API as TEventObject don't seem to work under
@@ -25,7 +26,7 @@ type
     FEventWaiting: TEventObject;
     {$ENDIF}
   public
-    constructor Create(aOwner: TFBEvents);
+    constructor Create(aOwner: TFBEvents; aName: string);
     destructor Destroy; override;
     procedure addRef();  override;
     function release(): Integer; override;
@@ -55,6 +56,7 @@ type
     procedure EventSignaled;
     procedure CreateEventBlock;
     procedure InternalAsyncWaitForEvent(EventHandler: TEventHandler; EventCallBack: TEventhandlerInterface);
+    procedure ReleaseIntf;
   public
     constructor Create(DBAttachment: TFBAttachment; Events: TStrings);
     destructor Destroy; override;
@@ -92,7 +94,7 @@ type
     procedure Terminate;
   end;
 
-constructor TEventhandlerInterface.Create(aOwner: TFBEvents);
+constructor TEventhandlerInterface.Create(aOwner: TFBEvents; aName: string);
 var
   PSa : PSecurityAttributes;
 {$IFDEF WINDOWS}
@@ -118,6 +120,8 @@ begin
   FEventWaiting := TEventObject.Create(PSa,false,false,GUIDToString(GUID));
 {$ENDIF}
   FOWner := aOwner;
+  FName := aName;
+  addRef;
 end;
 
 destructor TEventhandlerInterface.Destroy;
@@ -133,11 +137,13 @@ end;
 procedure TEventhandlerInterface.addRef;
 begin
   Inc(FRef);
+//  writeln(FName,': ref count = ',FRef);
 end;
 
 function TEventhandlerInterface.release: Integer;
 begin
   Dec(FRef);
+//  writeln(FName,': ref count = ',FRef);
   if FRef = 0 then Free;
 end;
 
@@ -232,20 +238,18 @@ end;
 
 procedure TFBEvents.CancelEvents(Force: boolean);
 begin
-  if FEventsIntf = nil then Exit;
   FCriticalSection.Enter;
   try
-    FInWaitState := false;
+    if not FInWaitState then Exit;
+    if FEventsIntf <> nil then
     with Firebird30ClientAPI do
     begin
       FEventsIntf.Cancel(StatusIntf);
       if not Force then
         Check4DataBaseError;
     end;
-
-    FEventsIntf.release;
-    FEventsIntf := nil;
-    FEventHandler := nil;
+    FInWaitState := false;
+    ReleaseIntf;
   finally
     FCriticalSection.Leave
   end;
@@ -254,13 +258,17 @@ end;
 procedure TFBEvents.EventSignaled;
 var Handler: TEventHandler;
 begin
-  FInWaitState := false;
-  if assigned(FEventHandler)  then
-  begin
-    Handler := FEventHandler;
-    FEventsIntf := nil;
-    FEventHandler := nil;
-    Handler(self);
+  FCriticalSection.Enter;
+  try
+    if not FInWaitState then Exit;
+    FInWaitState := false;
+    if assigned(FEventHandler)  then
+    begin
+      Handler := FEventHandler;
+      Handler(self);
+    end;
+  finally
+    FCriticalSection.Leave
   end;
 end;
 
@@ -300,9 +308,6 @@ end;
 procedure TFBEvents.InternalAsyncWaitForEvent(EventHandler: TEventHandler;
   EventCallBack: TEventhandlerInterface);
 begin
-  if assigned(FEventHandler) then
-    CancelEvents;
-
   FCriticalSection.Enter;
   try
     if FInWaitState then
@@ -310,10 +315,7 @@ begin
 
     CreateEventBlock;
     FEventHandler := EventHandler;
-    FInWaitState := true;
-
-    if assigned(FEventsIntf) then
-      FEventsIntf.release;
+    ReleaseIntf;
     with Firebird30ClientAPI do
     begin
       FEventsIntf := (FAttachment as TFBAttachment).AttachmentIntf.queEvents(
@@ -321,9 +323,18 @@ begin
                                 FEventBufferLen, BytePtr(FEventBuffer));
       Check4DataBaseError;
     end;
+    FInWaitState := true;
+
   finally
     FCriticalSection.Leave
   end;
+end;
+
+procedure TFBEvents.ReleaseIntf;
+begin
+  if FEventsIntf <> nil then
+    FEventsIntf.release;
+  FEventsIntf := nil;
 end;
 
 constructor TFBEvents.Create(DBAttachment: TFBAttachment; Events: TStrings);
@@ -336,9 +347,9 @@ begin
 
   FCriticalSection := TCriticalSection.Create;
   FEvents := TStringList.Create;
-  FAsyncEventCallback := TEventhandlerInterface.Create(self);
+  FAsyncEventCallback := TEventhandlerInterface.Create(self,'Async');
   FEventHandlerThread := TEventHandlerThread.Create(self,FAsyncEventCallback);
-  FSyncEventCallback := TEventhandlerInterface.Create(self);
+  FSyncEventCallback := TEventhandlerInterface.Create(self,'Sync');
   FEvents.Assign(Events);
   CreateEventBlock;
 end;
@@ -352,6 +363,7 @@ begin
   if assigned(FEvents) then FEvents.Free;
   if assigned(FAsyncEventCallback) then TEventhandlerInterface(FAsyncEventCallback).release;
   if assigned(FSyncEventCallback) then TEventhandlerInterface(FSyncEventCallback).release;
+  ReleaseIntf;
   with Firebird30ClientAPI do
   begin
     if FEventBuffer <> nil then
@@ -398,7 +410,7 @@ end;
 
 procedure TFBEvents.Cancel;
 begin
-  if FEventHandler <> nil then
+  if FInWaitState then
     CancelEvents;
 end;
 
