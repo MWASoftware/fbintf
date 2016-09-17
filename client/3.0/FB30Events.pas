@@ -9,6 +9,31 @@ uses
   IBExternals, syncobjs, FBActivityMonitor;
 
 type
+  TFBEvents = class;
+
+  { TEventhandlerInterface }
+
+  TEventhandlerInterface = class(Firebird.IEventCallbackImpl)
+  private
+    FOwner: TFBEvents;
+    FRef: integer;
+    {$IFDEF WINDOWS}
+    {Make direct use of Windows API as TEventObject don't seem to work under
+     Windows!}
+    FEventHandler: THandle;
+    {$ELSE}
+    FEventWaiting: TEventObject;
+    {$ENDIF}
+  public
+    constructor Create(aOwner: TFBEvents);
+    destructor Destroy; override;
+    procedure addRef();  override;
+    function release(): Integer; override;
+    procedure eventCallbackFunction(length: Cardinal; events: BytePtr); override;
+    procedure WaitForEvent;
+    procedure CancelWait;
+ end;
+
   { TFBEvents }
 
   TFBEvents = class(TActivityReporter,IEvents)
@@ -23,10 +48,13 @@ type
     FEventHandlerThread: TObject;
     FEventHandler: TEventHandler;
     FEventsIntf: Firebird.IEvents;
-    FEventCallback: TObject;
+    FAsyncEventCallback: TEventhandlerInterface;
+    FSyncEventCallback: TEventhandlerInterface;
+    FInWaitState: boolean;
     procedure CancelEvents(Force: boolean = false);
     procedure EventSignaled;
     procedure CreateEventBlock;
+    procedure InternalAsyncWaitForEvent(EventHandler: TEventHandler; EventCallBack: TEventhandlerInterface);
   public
     constructor Create(DBAttachment: TFBAttachment; Events: TStrings);
     destructor Destroy; override;
@@ -51,99 +79,20 @@ const
   MaxEvents = 15;
 
 type
-  TEventHandlerThread = class;
-
-  { TEventhandlerInterface }
-
-  TEventhandlerInterface = class(Firebird.IEventCallbackImpl)
-  private
-    FOwner: TEventHandlerThread;
-    FRef: integer;
-  public
-    constructor Create(aOwner: TEventHandlerThread);
-    procedure addRef();  override;
-    function release(): Integer; override;
-    procedure eventCallbackFunction(length: Cardinal; events: BytePtr); override;
- end;
-
   { TEventHandlerThread }
 
   TEventHandlerThread = class(TThread)
   private
     FOwner: TFBEvents;
-     {$IFDEF WINDOWS}
-    {Make direct use of Windows API as TEventObject don't seem to work under
-     Windows!}
-    FEventHandler: THandle;
-    {$ELSE}
-    FEventWaiting: TEventObject;
-    {$ENDIF}
-    procedure HandleEventSignalled(length: short; updated: BytePtr);
+    FEventHandler: TEventhandlerInterface;
   protected
     procedure Execute; override;
   public
-    constructor Create(Owner: TFBEvents);
-    destructor Destroy; override;
+    constructor Create(Owner: TFBEvents; EventHandler: TEventhandlerInterface);
     procedure Terminate;
   end;
 
-constructor TEventhandlerInterface.Create(aOwner: TEventHandlerThread);
-begin
-  inherited Create;
-  FOWner := aOwner;
-end;
-
-procedure TEventhandlerInterface.addRef;
-begin
-  Inc(FRef);
-end;
-
-function TEventhandlerInterface.release: Integer;
-begin
-  Dec(FRef);
-  if FRef = 0 then Free;
-end;
-
-procedure TEventhandlerInterface.eventCallbackFunction(length: Cardinal;
-  events: BytePtr);
-begin
-  FOwner.HandleEventSignalled(length,events);
-end;
-
- { TEventHandler }
-
-procedure TEventHandlerThread.HandleEventSignalled(length: short;
-  updated: BytePtr);
-begin
-  FOwner.FCriticalSection.Enter;
-  try
-    Move(Updated[0], FOwner.FResultBuffer[0], Length);
-    {$IFDEF WINDOWS}
-    SetEVent(FEventHandler);
-    {$ELSE}
-    FEventWaiting.SetEvent;
-    {$ENDIF}
-  finally
-    FOwner.FCriticalSection.Leave
-  end;
-end;
-
-procedure TEventHandlerThread.Execute;
-begin
-  while not Terminated do
-  begin
-    {$IFDEF WINDOWS}
-    WaitForSingleObject(FEventHandler,INFINITE);
-    {$ELSE}
-    FEventWaiting.WaitFor(INFINITE);
-    {$ENDIF}
-
-    if not Terminated  then
-      FOwner.EventSignaled;
-  end;
-end;
-
-constructor TEventHandlerThread.Create(Owner: TFBEvents);
+constructor TEventhandlerInterface.Create(aOwner: TFBEvents);
 var
   PSa : PSecurityAttributes;
 {$IFDEF WINDOWS}
@@ -161,19 +110,17 @@ begin
 begin
   PSa:= nil;
 {$ENDIF}
-  inherited Create(true);
-  FOwner := Owner;
-  {$IFDEF WINDOWS}
+  inherited Create;
+{$IFDEF WINDOWS}
   FEventHandler := CreateEvent(PSa,false,true,nil);
-  {$ELSE}
+{$ELSE}
   CreateGuid(GUID);
   FEventWaiting := TEventObject.Create(PSa,false,false,GUIDToString(GUID));
-  {$ENDIF}
-  FreeOnTerminate := true;
-  Start;
+{$ENDIF}
+  FOWner := aOwner;
 end;
 
-destructor TEventHandlerThread.Destroy;
+destructor TEventhandlerInterface.Destroy;
 begin
 {$IFDEF WINDOWS}
   CloseHandle(FEventHandler);
@@ -183,14 +130,79 @@ begin
   inherited Destroy;
 end;
 
+procedure TEventhandlerInterface.addRef;
+begin
+  Inc(FRef);
+end;
+
+function TEventhandlerInterface.release: Integer;
+begin
+  Dec(FRef);
+  if FRef = 0 then Free;
+end;
+
+procedure TEventhandlerInterface.eventCallbackFunction(length: Cardinal;
+  events: BytePtr);
+begin
+  FOwner.FCriticalSection.Enter;
+  try
+    if FOwner.FResultBuffer <> nil then
+      Move(events[0], FOwner.FResultBuffer[0], Length);
+    {$IFDEF WINDOWS}
+    SetEvent(FEventHandler);
+    {$ELSE}
+    FEventWaiting.SetEvent;
+    {$ENDIF}
+  finally
+    FOwner.FCriticalSection.Leave
+  end;
+end;
+
+procedure TEventhandlerInterface.WaitForEvent;
+begin
+  {$IFDEF WINDOWS}
+  WaitForSingleObject(FEventHandler,INFINITE);
+  {$ELSE}
+  FEventWaiting.WaitFor(INFINITE);
+  {$ENDIF}
+end;
+
+procedure TEventhandlerInterface.CancelWait;
+begin
+  {$IFDEF WINDOWS}
+    SetEvent(FEventHandler);
+  {$ELSE}
+    FEventWaiting.SetEvent;
+  {$ENDIF}
+end;
+
+ { TEventHandler }
+
+procedure TEventHandlerThread.Execute;
+begin
+  while not Terminated do
+  begin
+    FEventHandler.WaitForEvent;
+
+    if not Terminated  then
+      FOwner.EventSignaled;
+  end;
+end;
+
+constructor TEventHandlerThread.Create(Owner: TFBEvents;
+  EventHandler: TEventhandlerInterface);
+begin
+  inherited Create(true);
+  FOwner := Owner;
+  FEventHandler := EventHandler;
+  FreeOnTerminate := true;
+  Start;
+end;
+
 procedure TEventHandlerThread.Terminate;
 begin
   inherited Terminate;
-{$IFDEF WINDOWS}
-  SetEvent(FEventHandler);
-{$ELSE}
-  FEventWaiting.SetEvent;
-{$ENDIF}
+  FEventHandler.CancelWait;
 end;
 
   { TFBEvents }
@@ -200,9 +212,11 @@ var EventCountList: TStatusVector;
     i: integer;
     j: integer;
 begin
+  SetLength(Result,0);
+  if FResultBuffer = nil then Exit;
+
   with Firebird30ClientAPI do
      isc_event_counts( @EventCountList, FEventBufferLen, FEventBuffer, FResultBuffer);
-  SetLength(Result,0);
   j := 0;
   for i := 0 to FEvents.Count - 1 do
   begin
@@ -221,6 +235,7 @@ begin
   if FEventsIntf = nil then Exit;
   FCriticalSection.Enter;
   try
+    FInWaitState := false;
     with Firebird30ClientAPI do
     begin
       FEventsIntf.Cancel(StatusIntf);
@@ -239,6 +254,7 @@ end;
 procedure TFBEvents.EventSignaled;
 var Handler: TEventHandler;
 begin
+  FInWaitState := false;
   if assigned(FEventHandler)  then
   begin
     Handler := FEventHandler;
@@ -281,6 +297,35 @@ begin
   end;
 end;
 
+procedure TFBEvents.InternalAsyncWaitForEvent(EventHandler: TEventHandler;
+  EventCallBack: TEventhandlerInterface);
+begin
+  if assigned(FEventHandler) then
+    CancelEvents;
+
+  FCriticalSection.Enter;
+  try
+    if FInWaitState then
+      IBError(ibxeInEventWait,[nil]);
+
+    CreateEventBlock;
+    FEventHandler := EventHandler;
+    FInWaitState := true;
+
+    if assigned(FEventsIntf) then
+      FEventsIntf.release;
+    with Firebird30ClientAPI do
+    begin
+      FEventsIntf := (FAttachment as TFBAttachment).AttachmentIntf.queEvents(
+                                StatusIntf,EventCallBack,
+                                FEventBufferLen, BytePtr(FEventBuffer));
+      Check4DataBaseError;
+    end;
+  finally
+    FCriticalSection.Leave
+  end;
+end;
+
 constructor TFBEvents.Create(DBAttachment: TFBAttachment; Events: TStrings);
 begin
   inherited Create(DBAttachment);
@@ -291,9 +336,10 @@ begin
 
   FCriticalSection := TCriticalSection.Create;
   FEvents := TStringList.Create;
-  FEventHandlerThread := TEventHandlerThread.Create(self);
+  FAsyncEventCallback := TEventhandlerInterface.Create(self);
+  FEventHandlerThread := TEventHandlerThread.Create(self,FAsyncEventCallback);
+  FSyncEventCallback := TEventhandlerInterface.Create(self);
   FEvents.Assign(Events);
-  FEventCallback := TEventhandlerInterface.Create(TEventHandlerThread(FEventHandlerThread));
   CreateEventBlock;
 end;
 
@@ -304,7 +350,8 @@ begin
     TEventHandlerThread(FEventHandlerThread).Terminate;
   if assigned(FCriticalSection) then FCriticalSection.Free;
   if assigned(FEvents) then FEvents.Free;
-  if assigned(FEventCallback) then TEventhandlerInterface(FEventCallback).release;
+  if assigned(FAsyncEventCallback) then TEventhandlerInterface(FAsyncEventCallback).release;
+  if assigned(FSyncEventCallback) then TEventhandlerInterface(FSyncEventCallback).release;
   with Firebird30ClientAPI do
   begin
     if FEventBuffer <> nil then
@@ -357,25 +404,7 @@ end;
 
 procedure TFBEvents.AsyncWaitForEvent(EventHandler: TEventHandler);
 begin
-  if assigned(FEventHandler) then
-    CancelEvents;
-
-  CreateEventBlock;
-  FEventHandler := EventHandler;
-  FCriticalSection.Enter;
-  try
-    if assigned(FEventsIntf) then
-      FEventsIntf.release;
-    with Firebird30ClientAPI do
-    begin
-      FEventsIntf := (FAttachment as TFBAttachment).AttachmentIntf.queEvents(
-                                StatusIntf,TEventhandlerInterface(FEventCallback),
-                                FEventBufferLen, BytePtr(FEventBuffer));
-      Check4DataBaseError;
-    end;
-  finally
-    FCriticalSection.Leave
-  end;
+  InternalAsyncWaitForEvent(EventHandler,FAsyncEventCallback);
 end;
 
 function TFBEvents.GetAttachment: IAttachment;
@@ -385,7 +414,8 @@ end;
 
 procedure TFBEvents.WaitForEvent;
 begin
-  IBError(ibxeNotSupported,[nil]);
+  InternalAsyncWaitForEvent(nil,FSyncEventCallback);
+  FSyncEventCallback.WaitForEvent;
 end;
 
 end.

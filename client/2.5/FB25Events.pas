@@ -23,6 +23,7 @@ type
     FCriticalSection: TCriticalSection;
     FEventHandlerThread: TObject;
     FEventHandler: TEventHandler;
+    FInWaitState: boolean;
     procedure CancelEvents(Force: boolean = false);
     procedure EventSignaled;
     procedure CreateEventBlock;
@@ -171,9 +172,11 @@ var EventCountList: TStatusVector;
     i: integer;
     j: integer;
 begin
+  SetLength(Result,0);
+  if FResultBuffer = nil then Exit;
+
   with Firebird25ClientAPI do
      isc_event_counts( @EventCountList, FEventBufferLen, FEventBuffer, FResultBuffer);
-  SetLength(Result,0);
   j := 0;
   for i := 0 to FEvents.Count - 1 do
   begin
@@ -191,6 +194,7 @@ procedure TFBEvents.CancelEvents(Force: boolean);
 begin
   FCriticalSection.Enter;
   try
+    FInWaitState := false;
     with Firebird25ClientAPI do
       if (Call(isc_Cancel_events( StatusVector, @FDBHandle, @FEventID),false) > 0) and not Force then
         IBDatabaseError;
@@ -204,6 +208,7 @@ end;
 procedure TFBEvents.EventSignaled;
 var Handler: TEventHandler;
 begin
+  FInWaitState := false;
   if assigned(FEventHandler)  then
   begin
     Handler := FEventHandler;
@@ -323,10 +328,14 @@ begin
   if assigned(FEventHandler) then
     CancelEvents;
 
-  CreateEventBlock;
-  FEventHandler := EventHandler;
   FCriticalSection.Enter;
   try
+    if FInWaitState then
+      IBError(ibxeInEventWait,[nil]);
+
+    CreateEventBlock;
+    FEventHandler := EventHandler;
+    FInWaitState := true;
     callback := @IBEventCallback;
     with Firebird25ClientAPI do
       Call(isc_que_events( StatusVector, @FDBHandle, @FEventID, FEventBufferLen,
@@ -343,9 +352,17 @@ end;
 
 procedure TFBEvents.WaitForEvent;
 begin
-  CreateEventBlock;
-  with Firebird25ClientAPI do
-     Call(isc_wait_for_event(StatusVector,@FDBHandle, FEventBufferlen,FEventBuffer,FResultBuffer));
+  if FInWaitState then
+    IBError(ibxeInEventWait,[nil]);
+
+  FInWaitState := true;
+  try
+    CreateEventBlock;
+    with Firebird25ClientAPI do
+       Call(isc_wait_for_event(StatusVector,@FDBHandle, FEventBufferlen,FEventBuffer,FResultBuffer));
+  finally
+    FInWaitState := false;
+  end;
 end;
 
 end.

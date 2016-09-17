@@ -164,7 +164,8 @@ type
       ibxeInterfaceOutofDate,
       ibxeUnexpectedDatabaseInfoResp,
       ibxeInvalidBlobMetaData,
-      ibxeNoDPB
+      ibxeNoDPB,
+      ibxeInEventWait
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;
@@ -352,6 +353,7 @@ resourcestring
   SUnexpectedDatabaseInfoResp = 'Unexpected Database Information Response';
   SInvalidBlobMetaData = 'Unable to Access Blob Meta Data';
   SNoDPB = 'A DPB must be provided';
+  SInEventWait = 'Already in Event Wait State';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -501,7 +503,8 @@ const
     SInterfaceOutofDate,
     SUnexpectedDatabaseInfoResp,
     SInvalidBlobMetaData,
-    SNoDPB
+    SNoDPB,
+    SInEventWait
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;
