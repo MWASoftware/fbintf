@@ -526,6 +526,10 @@ type
     Note that the EventHandler called when an event occurs following AsynWaitForEvent
     is called in a different thread to the calling program and TThread.Synchronize
     may be needed to pass the event back to the main thread.
+
+    Neither AsyncWaitForEvent nor WaitForEvent is intended to be thread safe
+    in a multi-threaded environment and should always be called from the main
+    thread.
   }
 
   TEventInfo = record

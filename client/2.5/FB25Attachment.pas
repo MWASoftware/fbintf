@@ -158,6 +158,12 @@ begin
   if (isc_dsql_execute_immediate(StatusVector, @FHandle, @tr_handle, 0, PChar(sql),
                                   SQLDialect, nil) > 0) and RaiseExceptionOnError then
     IBDataBaseError;
+  if DPB <> nil then
+  {Connect using known parameters}
+  begin
+    Disconnect;
+    Connect;
+  end;
 end;
 
 destructor TFBAttachment.Destroy;

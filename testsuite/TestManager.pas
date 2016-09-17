@@ -129,7 +129,12 @@ begin
         begin
           s := Result[i].AsString;
           if FHexStrings then
+          begin
+            write(Result[i].Name,' = ');
             PrintHexString(s);
+            writeln(' (Charset Id = ',Result[i].GetCharSetID, ' Codepage = ',StringCodePage(s),')');
+          end
+          else
           if Result[i].GetCharSetID > 0 then
             writeln(Result[i].Name,' = ',s,' (Charset Id = ',Result[i].GetCharSetID, ' Codepage = ',StringCodePage(s),')')
           else
