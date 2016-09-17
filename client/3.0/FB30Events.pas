@@ -39,7 +39,7 @@ type
 
   TFB30Events = class(TFBEvents,IEvents)
   private
-    FAttachment: TFB30Attachment;
+    FAttachmentIntf: Firebird.IAttachment;
     FEventHandlerThread: TObject;
     FEventsIntf: Firebird.IEvents;
     FAsyncEventCallback: TEventhandlerInterface;
@@ -236,7 +236,7 @@ begin
     ReleaseIntf;
     with Firebird30ClientAPI do
     begin
-      FEventsIntf := FAttachment.AttachmentIntf.queEvents(
+      FEventsIntf := FAttachmentIntf.queEvents(
                                 StatusIntf,EventCallBack,
                                 FEventBufferLen, BytePtr(FEventBuffer));
       Check4DataBaseError;
@@ -258,7 +258,7 @@ end;
 constructor TFB30Events.Create(DBAttachment: TFB30Attachment; Events: TStrings);
 begin
   inherited Create(DBAttachment,DBAttachment,Events);
-  FAttachment := DBAttachment;
+  FAttachmentIntf := DBAttachment.AttachmentIntf;
   FAsyncEventCallback := TEventhandlerInterface.Create(self,'Async');
   FEventHandlerThread := TEventHandlerThread.Create(self,FAsyncEventCallback);
   FSyncEventCallback := TEventhandlerInterface.Create(self,'Sync');

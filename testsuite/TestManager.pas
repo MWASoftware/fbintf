@@ -5,7 +5,7 @@ unit TestManager;
 interface
 
 uses
-  Classes, SysUtils, IB, IBExternals, IBHeader;
+  Classes, SysUtils, IB;
 
 type
   TTestManager = class;
