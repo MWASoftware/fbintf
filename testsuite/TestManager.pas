@@ -118,9 +118,18 @@ begin
           if Result[i].SQLSubType = 1 then
           begin
             s := Result[i].AsString;
-            writeln(Result[i].Name,' (Charset Id = ',Result[i].GetCharSetID, ' Codepage = ',StringCodePage(s),')');
-            writeln;
-            writeln(s);
+            if FHexStrings then
+            begin
+              write(Result[i].Name,' = ');
+              PrintHexString(s);
+              writeln(' (Charset Id = ',Result[i].GetCharSetID, ' Codepage = ',StringCodePage(s),')');
+            end
+            else
+            begin
+              writeln(Result[i].Name,' (Charset Id = ',Result[i].GetCharSetID, ' Codepage = ',StringCodePage(s),')');
+              writeln;
+              writeln(s);
+            end
           end
           else
             writeln(Result[i].Name,' = (blob)');

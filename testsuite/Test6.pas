@@ -29,14 +29,13 @@ const
     'Create Table TestData ('+
     'RowID Integer not null,'+
     'Title VarChar(32) Character Set UTF8,'+
-    'Notes VarChar(64) Character Set ISO8859_1,'+
     'BlobData Blob sub_type 1 Character Set UTF8,'+
     'Primary Key(RowID)'+
     ')';
 
   sqlGetCharSets = 'Select RDB$CHARACTER_SET_NAME,RDB$CHARACTER_SET_ID from RDB$CHARACTER_SETS order by 2';
 
-  sqlInsert = 'Insert into TestData(RowID,Title,Notes) Values(:RowID,:Title,:Notes)';
+  sqlInsert = 'Insert into TestData(RowID,Title) Values(:RowID,:Title)';
 
   sqlUpdate = 'Update TestData Set BlobData = ? Where RowID = ?';
 
@@ -63,7 +62,6 @@ begin
       writeln('Param Name = ',Params[i].getName);
     ByName('rowid').AsInteger := 1;
     ByName('title').AsString := 'Blob Test ©€';
-    ByName('Notes').AsString := 'Écoute moi';
   end;
   Statement.Execute;
   Statement := Attachment.Prepare(Transaction,'Select * from TestData');
@@ -84,7 +82,6 @@ begin
       writeln('Param Name = ',Params[i].getName);
     ByName('rowid').AsInteger := 2;
     ByName('title').AsString := 'Blob Test ©€';
-    ByName('Notes').AsString := 'Écoute moi';
   end;
   Statement.Execute;
   Statement := Attachment.Prepare(Transaction,'Select * from TestData Where rowid = 1');
@@ -113,7 +110,6 @@ begin
   DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
   DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);
   DPB.Add(isc_dpb_lc_ctype).setAsString(CharSet);
-//  DPB.Add(isc_dpb_lc_ctype).setAsString('WIN1252');
   DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
   Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable);

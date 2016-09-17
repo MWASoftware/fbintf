@@ -389,6 +389,8 @@ uses FBMessages, FBClientAPI, variants, IBUtils, FBTransaction;
 
 function TSQLDataArea.GetColumn(index: integer): TSQLVarData;
 begin
+  if (index < 0) or (index >= Count) then
+    IBError(ibxeInvalidColumnIndex,[nil]);
   Result := FColumnList[index];
 end;
 
@@ -2249,9 +2251,13 @@ begin
 end;
 
 function TSQLParams.ByName(Idx: String): ISQLParam;
+var aIBXSQLVAR: TSQLVarData;
 begin
   CheckActive;
-  Result := TSQLParam.Create(FSQLParams.ColumnByName(Idx));
+  aIBXSQLVAR := FSQLParams.ColumnByName(Idx);
+  if aIBXSQLVAR = nil then
+    IBError(ibxeFieldNotFound,[Idx]);
+  Result := TSQLParam.Create(aIBXSQLVAR);
 end;
 
 function TSQLParams.GetModified: Boolean;
