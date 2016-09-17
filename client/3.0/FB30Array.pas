@@ -84,8 +84,8 @@ end;
     procedure InternalGetSlice; override;
     procedure InternalPutSlice(Force: boolean); override;
   public
-    constructor Create(aAttachment: TFBAttachment; aTransaction: TFB30Transaction; aField: IArrayMetaData); overload;
-    constructor Create(aAttachment: TFBAttachment; aTransaction: TFB30Transaction; aField: IArrayMetaData; ArrayID: TISC_QUAD); overload;
+    constructor Create(aAttachment: TFB30Attachment; aTransaction: TFB30Transaction; aField: IArrayMetaData); overload;
+    constructor Create(aAttachment: TFB30Attachment; aTransaction: TFB30Transaction; aField: IArrayMetaData; ArrayID: TISC_QUAD); overload;
  end;
 
 implementation
@@ -142,7 +142,7 @@ procedure TFB30ArrayMetaData.LoadMetaData(aAttachment: IAttachment;
   aTransaction: ITransaction; relationName, columnName: string);
 var stmt: IStatement;
 begin
-  stmt := TFB30Statement.Create(aAttachment as TFBAttachment,aTransaction,
+  stmt := TFB30Statement.Create(aAttachment as TFB30Attachment,aTransaction,
                                sGetArrayMetaData ,aAttachment.GetSQLDialect);
   with stmt do
   begin
@@ -283,7 +283,7 @@ begin
   SignalActivity;
 end;
 
-constructor TFB30Array.Create(aAttachment: TFBAttachment;
+constructor TFB30Array.Create(aAttachment: TFB30Attachment;
   aTransaction: TFB30Transaction; aField: IArrayMetaData);
 begin
   inherited Create(aAttachment,aTransaction,aField);
@@ -291,7 +291,7 @@ begin
   FTransactionIntf := aTransaction.TransactionIntf;
 end;
 
-constructor TFB30Array.Create(aAttachment: TFBAttachment;
+constructor TFB30Array.Create(aAttachment: TFB30Attachment;
   aTransaction: TFB30Transaction; aField: IArrayMetaData; ArrayID: TISC_QUAD);
 begin
   inherited Create(aAttachment,aTransaction,aField,ArrayID);

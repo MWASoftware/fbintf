@@ -203,7 +203,7 @@ type
 
   TFB30Statement = class(TActivityReporter,IStatement)
   private
-    FAttachment: TFBAttachment;
+    FAttachment: TFB30Attachment;
     FAttachmentIntf: IAttachment;
     FTransaction: TFB30Transaction;
     FTransactionIntf: ITransaction;
@@ -234,16 +234,16 @@ type
     procedure FreeHandle;
     procedure InternalClose(Force: boolean);
   public
-    constructor Create(Attachment: TFBAttachment; Transaction: ITransaction;
+    constructor Create(Attachment: TFB30Attachment; Transaction: ITransaction;
       sql: string; SQLDialect: integer);
-    constructor CreateWithParameterNames(Attachment: TFBAttachment; Transaction: ITransaction;
+    constructor CreateWithParameterNames(Attachment: TFB30Attachment; Transaction: ITransaction;
       sql: string;  SQLDialect: integer; GenerateParamNames: boolean =false; UniqueParamNames: boolean=false);
     destructor Destroy; override;
     procedure Close;
     function FetchNext: boolean;
     procedure TransactionEnding(aTransaction: TFB30Transaction; Force: boolean);
     property SQLDialect: integer read FSQLDialect;
-    property Attachment: TFBAttachment read FAttachment;
+    property Attachment: TFB30Attachment read FAttachment;
     property Transaction: TFB30Transaction read FTransaction;
     property StatementIntf: Firebird.IStatement read FStatementIntf;
 
@@ -1287,7 +1287,7 @@ begin
   SignalActivity;
 end;
 
-constructor TFB30Statement.Create(Attachment: TFBAttachment;
+constructor TFB30Statement.Create(Attachment: TFB30Attachment;
   Transaction: ITransaction; sql: string; SQLDialect: integer);
 var GUID : TGUID;
 begin
@@ -1306,7 +1306,7 @@ begin
   InternalPrepare;
 end;
 
-constructor TFB30Statement.CreateWithParameterNames(Attachment: TFBAttachment;
+constructor TFB30Statement.CreateWithParameterNames(Attachment: TFB30Attachment;
   Transaction: ITransaction; sql: string; SQLDialect: integer;
   GenerateParamNames: boolean; UniqueParamNames: boolean);
 begin

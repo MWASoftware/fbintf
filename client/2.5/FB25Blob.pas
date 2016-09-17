@@ -18,7 +18,7 @@ type
      FGlobal: array [0..31] of char;
      FCharSetID: cardinal;
    public
-     constructor Create(Attachment: TFBAttachment; Transaction: TFB25Transaction;
+     constructor Create(Attachment: TFB25Attachment; Transaction: TFB25Transaction;
        RelationName, ColumnName: string);
 
    public
@@ -35,7 +35,7 @@ type
 
   TFBBlob = class(TActivityReporter,IBlob)
   private
-    FAttachment: TFBAttachment;
+    FAttachment: TFB25Attachment;
     FHandle: TISC_BLOB_HANDLE;
     FBlobID: TISC_QUAD;
     FEOB: boolean;
@@ -46,13 +46,13 @@ type
     procedure InternalClose(Force: boolean);
     procedure InternalCancel(Force: boolean);
   public
-    constructor Create(Attachment: TFBAttachment; Transaction: ITransaction); overload;
-    constructor Create(Attachment: TFBAttachment; Transaction: ITransaction;
+    constructor Create(Attachment: TFB25Attachment; Transaction: ITransaction); overload;
+    constructor Create(Attachment: TFB25Attachment; Transaction: ITransaction;
                        BlobID: TISC_QUAD); overload;
     destructor Destroy; override;
     procedure TransactionEnding(aTransaction: TFB25Transaction; Force: boolean);
     property Handle: TISC_BLOB_HANDLE read FHandle;
-    property Attachment: TFBAttachment read FAttachment;
+    property Attachment: TFB25Attachment read FAttachment;
 
   {IBlob}
   public
@@ -78,7 +78,7 @@ uses IBErrorCodes, FBMessages;
 
 { TFBBlobMetaData }
 
-constructor TFBBlobMetaData.Create(Attachment: TFBAttachment;
+constructor TFBBlobMetaData.Create(Attachment: TFB25Attachment;
   Transaction: TFB25Transaction; RelationName, ColumnName: string);
 begin
   inherited Create(Transaction);
@@ -148,7 +148,7 @@ begin
   FHandle := nil;
 end;
 
-constructor TFBBlob.Create(Attachment: TFBAttachment; Transaction: ITransaction
+constructor TFBBlob.Create(Attachment: TFB25Attachment; Transaction: ITransaction
   );
 var DBHandle: TISC_DB_HANDLE;
       TRHandle: TISC_TR_HANDLE;
@@ -165,7 +165,7 @@ begin
                            0, nil));
 end;
 
-constructor TFBBlob.Create(Attachment: TFBAttachment;
+constructor TFBBlob.Create(Attachment: TFB25Attachment;
   Transaction: ITransaction; BlobID: TISC_QUAD);
 var DBHandle: TISC_DB_HANDLE;
     TRHandle: TISC_TR_HANDLE;

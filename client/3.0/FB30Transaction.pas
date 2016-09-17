@@ -54,7 +54,7 @@ begin
     if (FAttachments[i] <> nil)  then
     begin
       DTCStart.addWithTpb(StatusIntf,
-                          (FAttachments[i] as TFBAttachment).AttachmentIntf,
+                          (FAttachments[i] as TFB30Attachment).AttachmentIntf,
                           (FTPB as TTPB).getDataLength,
                           BytePtr((FTPB as TTPB).getBuffer));
       Check4DataBaseError;
@@ -73,7 +73,7 @@ end;
 
 function TFB30Transaction.GetActivityIntf(att: IAttachment): IActivityMonitor;
 begin
-  Result := att as TFBAttachment;
+  Result := att as TFB30Attachment;
 end;
 
 destructor TFB30Transaction.Destroy;
@@ -139,7 +139,7 @@ begin
   else
     with Firebird30ClientAPI do
     begin
-      FTransactionIntf  := (FAttachments[0] as TFBAttachment).AttachmentIntf.startTransaction(StatusIntf,
+      FTransactionIntf  := (FAttachments[0] as TFB30Attachment).AttachmentIntf.startTransaction(StatusIntf,
                (FTPB as TTPB).getDataLength,BytePtr((FTPB as TTPB).getBuffer));
       Check4DataBaseError;
     end;

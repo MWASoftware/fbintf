@@ -10,7 +10,7 @@
         <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
     </CompilerOptions>
-    <Files Count="30">
+    <Files Count="31">
       <Item1>
         <Filename Value="client/3.0/firebird/Firebird.pas"/>
         <UnitName Value="Firebird"/>
@@ -132,6 +132,10 @@
         <Filename Value="client/3.0/FB30Services.pas"/>
         <UnitName Value="FB30Services"/>
       </Item30>
+      <Item31>
+        <Filename Value="client/FBEvents.pas"/>
+        <UnitName Value="FBEvents"/>
+      </Item31>
     </Files>
     <RequiredPkgs Count="1">
       <Item1>

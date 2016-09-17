@@ -9,9 +9,9 @@ uses
   IBHeader, syncobjs, FBActivityMonitor;
 
 type
-  { TFBEvents }
+  { TFB25Events }
 
-  TFBEvents = class(TActivityReporter,IEvents)
+  TFB25Events = class(TActivityReporter,IEvents)
   private
     FEventBuffer: PChar;
     FEventBufferLen: integer;
@@ -28,9 +28,8 @@ type
     procedure EventSignaled;
     procedure CreateEventBlock;
   public
-    constructor Create(DBAttachment: TFBAttachment; Events: TStrings);
+    constructor Create(DBAttachment: TFB25Attachment; Events: TStrings);
     destructor Destroy; override;
-    procedure EndAttachment(Sender: TFBAttachment; Force: boolean);
 
     {IEvents}
     procedure GetEvents(EventNames: TStrings);
@@ -56,7 +55,7 @@ type
 
   TEventHandlerThread = class(TThread)
   private
-    FOwner: TFBEvents;
+    FOwner: TFB25Events;
      {$IFDEF WINDOWS}
     {Make direct use of Windows API as TEventObject don't seem to work under
      Windows!}
@@ -68,7 +67,7 @@ type
   protected
     procedure Execute; override;
   public
-    constructor Create(Owner: TFBEvents);
+    constructor Create(Owner: TFB25Events);
     destructor Destroy; override;
     procedure Terminate;
   end;
@@ -115,7 +114,7 @@ begin
   end;
 end;
 
-constructor TEventHandlerThread.Create(Owner: TFBEvents);
+constructor TEventHandlerThread.Create(Owner: TFB25Events);
 var
   PSa : PSecurityAttributes;
 {$IFDEF WINDOWS}
@@ -165,9 +164,9 @@ begin
 {$ENDIF}
 end;
 
-  { TFBEvents }
+  { TFB25Events }
 
-function TFBEvents.ExtractEventCounts: TEventCounts;
+function TFB25Events.ExtractEventCounts: TEventCounts;
 var EventCountList: TStatusVector;
     i: integer;
     j: integer;
@@ -190,7 +189,7 @@ begin
   end;
 end;
 
-procedure TFBEvents.CancelEvents(Force: boolean);
+procedure TFB25Events.CancelEvents(Force: boolean);
 begin
   FCriticalSection.Enter;
   try
@@ -205,19 +204,25 @@ begin
   end;
 end;
 
-procedure TFBEvents.EventSignaled;
+procedure TFB25Events.EventSignaled;
 var Handler: TEventHandler;
 begin
-  FInWaitState := false;
-  if assigned(FEventHandler)  then
-  begin
-    Handler := FEventHandler;
-    FEventHandler := nil;
-    Handler(self);
+  FCriticalSection.Enter;
+  try
+    if not FInWaitState then Exit;
+    FInWaitState := false;
+    if assigned(FEventHandler)  then
+    begin
+      Handler := FEventHandler;
+      FEventHandler := nil;
+      Handler(self);
+    end;
+  finally
+    FCriticalSection.Leave
   end;
 end;
 
-procedure TFBEvents.CreateEventBlock;
+procedure TFB25Events.CreateEventBlock;
 var
   i: integer;
   EventNames: array of PChar;
@@ -250,7 +255,7 @@ begin
   end;
 end;
 
-constructor TFBEvents.Create(DBAttachment: TFBAttachment; Events: TStrings);
+constructor TFB25Events.Create(DBAttachment: TFB25Attachment; Events: TStrings);
 begin
   inherited Create(DBAttachment);
   FAttachment := DBAttachment;
@@ -266,7 +271,7 @@ begin
   CreateEventBlock;
 end;
 
-destructor TFBEvents.Destroy;
+destructor TFB25Events.Destroy;
 begin
   if assigned(FEventHandlerThread) then
     TEventHandlerThread(FEventHandlerThread).Terminate;
@@ -282,19 +287,12 @@ begin
   inherited Destroy;
 end;
 
-procedure TFBEvents.EndAttachment(Sender: TFBAttachment; Force: boolean);
-begin
-  if Sender <> FAttachment then Exit;
-
-  CancelEvents(Force);
-end;
-
-procedure TFBEvents.GetEvents(EventNames: TStrings);
+procedure TFB25Events.GetEvents(EventNames: TStrings);
 begin
   EventNames.Assign(FEvents);
 end;
 
-procedure TFBEvents.SetEvents(EventNames: TStrings);
+procedure TFB25Events.SetEvents(EventNames: TStrings);
 begin
   if EventNames.Text <> FEvents.Text then
   begin
@@ -304,7 +302,7 @@ begin
   end;
 end;
 
-procedure TFBEvents.SetEvents(Event: string);
+procedure TFB25Events.SetEvents(Event: string);
 var S: TStringList;
 begin
   S := TStringList.Create;
@@ -316,18 +314,15 @@ begin
   end;
 end;
 
-procedure TFBEvents.Cancel;
+procedure TFB25Events.Cancel;
 begin
   if assigned(FEventHandler) then
     CancelEvents;
 end;
 
-procedure TFBEvents.AsyncWaitForEvent(EventHandler: TEventHandler);
+procedure TFB25Events.AsyncWaitForEvent(EventHandler: TEventHandler);
 var callback: pointer;
 begin
-  if assigned(FEventHandler) then
-    CancelEvents;
-
   FCriticalSection.Enter;
   try
     if FInWaitState then
@@ -335,22 +330,22 @@ begin
 
     CreateEventBlock;
     FEventHandler := EventHandler;
-    FInWaitState := true;
     callback := @IBEventCallback;
     with Firebird25ClientAPI do
       Call(isc_que_events( StatusVector, @FDBHandle, @FEventID, FEventBufferLen,
                      FEventBuffer, TISC_CALLBACK(callback), PVoid(FEventHandlerThread)));
+    FInWaitState := true;
   finally
     FCriticalSection.Leave
   end;
 end;
 
-function TFBEvents.GetAttachment: IAttachment;
+function TFB25Events.GetAttachment: IAttachment;
 begin
   Result := FAttachment;
 end;
 
-procedure TFBEvents.WaitForEvent;
+procedure TFB25Events.WaitForEvent;
 begin
   if FInWaitState then
     IBError(ibxeInEventWait,[nil]);

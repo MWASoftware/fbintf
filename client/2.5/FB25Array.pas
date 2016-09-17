@@ -43,8 +43,8 @@ type
     procedure InternalGetSlice; override;
     procedure InternalPutSlice(Force: boolean); override;
   public
-    constructor Create(aAttachment: TFBAttachment; aTransaction: TFB25Transaction; aField: IArrayMetaData); overload;
-    constructor Create(aAttachment: TFBAttachment; aTransaction: TFB25Transaction; aField: IArrayMetaData; ArrayID: TISC_QUAD); overload;
+    constructor Create(aAttachment: TFB25Attachment; aTransaction: TFB25Transaction; aField: IArrayMetaData); overload;
+    constructor Create(aAttachment: TFB25Attachment; aTransaction: TFB25Transaction; aField: IArrayMetaData; ArrayID: TISC_QUAD); overload;
  end;
 
 implementation
@@ -66,7 +66,7 @@ var
   TRHandle: TISC_TR_HANDLE;
   stmt: IStatement;
 begin
-  DBHandle := (aAttachment as TFBAttachment).Handle;
+  DBHandle := (aAttachment as TFB25Attachment).Handle;
   TRHandle := (aTransaction as TFB25Transaction).Handle;
   with Firebird25ClientAPI do
     if isc_array_lookup_bounds(StatusVector,@(DBHandle),@(TRHandle),
@@ -74,7 +74,7 @@ begin
           IBDatabaseError;
 
   if (GetSQLType = SQL_TEXT) or (GetSQLType = SQL_VARYING) then
-  with (aAttachment as TFBAttachment) do
+  with (aAttachment as TFB25Attachment) do
   if HasDefaultCharSet then
   begin
     FCharSetID := CharSetID;
@@ -84,7 +84,7 @@ begin
   end
   else
   begin
-    stmt := TFB25Statement.Create(aAttachment as TFBAttachment,aTransaction,
+    stmt := TFB25Statement.Create(aAttachment as TFB25Attachment,aTransaction,
                                  sGetArrayMetaData ,aAttachment.GetSQLDialect);
     with stmt do
     begin
@@ -133,7 +133,7 @@ begin
   SignalActivity;
 end;
 
-constructor TFB25Array.Create(aAttachment: TFBAttachment;
+constructor TFB25Array.Create(aAttachment: TFB25Attachment;
   aTransaction: TFB25Transaction; aField: IArrayMetaData);
 begin
   inherited Create(aAttachment,aTransaction,aField);
@@ -141,7 +141,7 @@ begin
   FTRHandle := aTransaction.Handle;
 end;
 
-constructor TFB25Array.Create(aAttachment: TFBAttachment;
+constructor TFB25Array.Create(aAttachment: TFB25Attachment;
   aTransaction: TFB25Transaction; aField: IArrayMetaData; ArrayID: TISC_QUAD);
 begin
   inherited Create(aAttachment,aTransaction,aField,ArrayID);

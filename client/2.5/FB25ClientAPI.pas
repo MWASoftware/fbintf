@@ -353,7 +353,7 @@ end;
 function TFB25ClientAPI.OpenDatabase(DatabaseName: string; DPB: IDPB;
                                     RaiseExceptionOnConnectError: boolean): IAttachment;
 begin
-   Result := TFBAttachment.Create(DatabaseName,DPB,RaiseExceptionOnConnectError);
+   Result := TFB25Attachment.Create(DatabaseName,DPB,RaiseExceptionOnConnectError);
    if not Result.IsConnected then
      Result := nil;
 end;
@@ -361,7 +361,7 @@ end;
 function TFB25ClientAPI.CreateDatabase(DatabaseName: string; DPB: IDPB;
   RaiseExceptionOnError: boolean): IAttachment;
 begin
-  Result := TFBAttachment.CreateDatabase(DatabaseName, DPB, RaiseExceptionOnError );
+  Result := TFB25Attachment.CreateDatabase(DatabaseName, DPB, RaiseExceptionOnError );
    if (Result <> nil) and not Result.IsConnected then
      Result := nil;
 end;

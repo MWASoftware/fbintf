@@ -9,13 +9,13 @@ uses
   IBExternals, syncobjs, FBActivityMonitor;
 
 type
-  TFBEvents = class;
+  TFB30Events = class;
 
   { TEventhandlerInterface }
 
   TEventhandlerInterface = class(Firebird.IEventCallbackImpl)
   private
-    FOwner: TFBEvents;
+    FOwner: TFB30Events;
     FName: string;
     FRef: integer;
     {$IFDEF WINDOWS}
@@ -26,7 +26,7 @@ type
     FEventWaiting: TEventObject;
     {$ENDIF}
   public
-    constructor Create(aOwner: TFBEvents; aName: string);
+    constructor Create(aOwner: TFB30Events; aName: string);
     destructor Destroy; override;
     procedure addRef();  override;
     function release(): Integer; override;
@@ -35,9 +35,9 @@ type
     procedure CancelWait;
  end;
 
-  { TFBEvents }
+  { TFB30Events }
 
-  TFBEvents = class(TActivityReporter,IEvents)
+  TFB30Events = class(TActivityReporter,IEvents)
   private
     FEventBuffer: PChar;
     FEventBufferLen: integer;
@@ -58,9 +58,8 @@ type
     procedure InternalAsyncWaitForEvent(EventHandler: TEventHandler; EventCallBack: TEventhandlerInterface);
     procedure ReleaseIntf;
   public
-    constructor Create(DBAttachment: TFBAttachment; Events: TStrings);
+    constructor Create(DBAttachment: TFB30Attachment; Events: TStrings);
     destructor Destroy; override;
-    procedure EndAttachment(Sender: TFBAttachment; Force: boolean);
 
     {IEvents}
     procedure GetEvents(EventNames: TStrings);
@@ -85,16 +84,16 @@ type
 
   TEventHandlerThread = class(TThread)
   private
-    FOwner: TFBEvents;
+    FOwner: TFB30Events;
     FEventHandler: TEventhandlerInterface;
   protected
     procedure Execute; override;
   public
-    constructor Create(Owner: TFBEvents; EventHandler: TEventhandlerInterface);
+    constructor Create(Owner: TFB30Events; EventHandler: TEventhandlerInterface);
     procedure Terminate;
   end;
 
-constructor TEventhandlerInterface.Create(aOwner: TFBEvents; aName: string);
+constructor TEventhandlerInterface.Create(aOwner: TFB30Events; aName: string);
 var
   PSa : PSecurityAttributes;
 {$IFDEF WINDOWS}
@@ -195,7 +194,7 @@ begin
   end;
 end;
 
-constructor TEventHandlerThread.Create(Owner: TFBEvents;
+constructor TEventHandlerThread.Create(Owner: TFB30Events;
   EventHandler: TEventhandlerInterface);
 begin
   inherited Create(true);
@@ -211,9 +210,9 @@ begin
   FEventHandler.CancelWait;
 end;
 
-  { TFBEvents }
+  { TFB30Events }
 
-function TFBEvents.ExtractEventCounts: TEventCounts;
+function TFB30Events.ExtractEventCounts: TEventCounts;
 var EventCountList: TStatusVector;
     i: integer;
     j: integer;
@@ -236,7 +235,7 @@ begin
   end;
 end;
 
-procedure TFBEvents.CancelEvents(Force: boolean);
+procedure TFB30Events.CancelEvents(Force: boolean);
 begin
   FCriticalSection.Enter;
   try
@@ -255,7 +254,7 @@ begin
   end;
 end;
 
-procedure TFBEvents.EventSignaled;
+procedure TFB30Events.EventSignaled;
 var Handler: TEventHandler;
 begin
   FCriticalSection.Enter;
@@ -265,6 +264,7 @@ begin
     if assigned(FEventHandler)  then
     begin
       Handler := FEventHandler;
+      FEventHandler := nil;
       Handler(self);
     end;
   finally
@@ -272,7 +272,7 @@ begin
   end;
 end;
 
-procedure TFBEvents.CreateEventBlock;
+procedure TFB30Events.CreateEventBlock;
 var
   i: integer;
   EventNames: array of PChar;
@@ -305,7 +305,7 @@ begin
   end;
 end;
 
-procedure TFBEvents.InternalAsyncWaitForEvent(EventHandler: TEventHandler;
+procedure TFB30Events.InternalAsyncWaitForEvent(EventHandler: TEventHandler;
   EventCallBack: TEventhandlerInterface);
 begin
   FCriticalSection.Enter;
@@ -318,7 +318,7 @@ begin
     ReleaseIntf;
     with Firebird30ClientAPI do
     begin
-      FEventsIntf := (FAttachment as TFBAttachment).AttachmentIntf.queEvents(
+      FEventsIntf := (FAttachment as TFB30Attachment).AttachmentIntf.queEvents(
                                 StatusIntf,EventCallBack,
                                 FEventBufferLen, BytePtr(FEventBuffer));
       Check4DataBaseError;
@@ -330,14 +330,14 @@ begin
   end;
 end;
 
-procedure TFBEvents.ReleaseIntf;
+procedure TFB30Events.ReleaseIntf;
 begin
   if FEventsIntf <> nil then
     FEventsIntf.release;
   FEventsIntf := nil;
 end;
 
-constructor TFBEvents.Create(DBAttachment: TFBAttachment; Events: TStrings);
+constructor TFB30Events.Create(DBAttachment: TFB30Attachment; Events: TStrings);
 begin
   inherited Create(DBAttachment);
   FAttachment := DBAttachment;
@@ -354,7 +354,7 @@ begin
   CreateEventBlock;
 end;
 
-destructor TFBEvents.Destroy;
+destructor TFB30Events.Destroy;
 begin
   CancelEvents(true);
   if assigned(FEventHandlerThread) then
@@ -374,19 +374,12 @@ begin
   inherited Destroy;
 end;
 
-procedure TFBEvents.EndAttachment(Sender: TFBAttachment; Force: boolean);
-begin
-  if Sender <> FAttachment then Exit;
-
-  CancelEvents(Force);
-end;
-
-procedure TFBEvents.GetEvents(EventNames: TStrings);
+procedure TFB30Events.GetEvents(EventNames: TStrings);
 begin
   EventNames.Assign(FEvents);
 end;
 
-procedure TFBEvents.SetEvents(EventNames: TStrings);
+procedure TFB30Events.SetEvents(EventNames: TStrings);
 begin
   if EventNames.Text <> FEvents.Text then
   begin
@@ -396,7 +389,7 @@ begin
   end;
 end;
 
-procedure TFBEvents.SetEvents(Event: string);
+procedure TFB30Events.SetEvents(Event: string);
 var S: TStringList;
 begin
   S := TStringList.Create;
@@ -408,23 +401,23 @@ begin
   end;
 end;
 
-procedure TFBEvents.Cancel;
+procedure TFB30Events.Cancel;
 begin
   if FInWaitState then
     CancelEvents;
 end;
 
-procedure TFBEvents.AsyncWaitForEvent(EventHandler: TEventHandler);
+procedure TFB30Events.AsyncWaitForEvent(EventHandler: TEventHandler);
 begin
   InternalAsyncWaitForEvent(EventHandler,FAsyncEventCallback);
 end;
 
-function TFBEvents.GetAttachment: IAttachment;
+function TFB30Events.GetAttachment: IAttachment;
 begin
   Result := FAttachment;
 end;
 
-procedure TFBEvents.WaitForEvent;
+procedure TFB30Events.WaitForEvent;
 begin
   InternalAsyncWaitForEvent(nil,FSyncEventCallback);
   FSyncEventCallback.WaitForEvent;

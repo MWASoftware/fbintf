@@ -173,7 +173,7 @@ type
 
   TFB25Statement = class(TActivityReporter,IStatement)
   private
-    FAttachment: TFBAttachment;
+    FAttachment: TFB25Attachment;
     FAttachmentIntf: IAttachment;
     FTransaction: TFB25Transaction;
     FTransactionIntf: ITransaction;
@@ -203,16 +203,16 @@ type
     procedure FreeHandle;
     procedure InternalClose(Force: boolean);
   public
-    constructor Create(Attachment: TFBAttachment; Transaction: ITransaction;
+    constructor Create(Attachment: TFB25Attachment; Transaction: ITransaction;
       sql: string; SQLDialect: integer);
-    constructor CreateWithParameterNames(Attachment: TFBAttachment; Transaction: ITransaction;
+    constructor CreateWithParameterNames(Attachment: TFB25Attachment; Transaction: ITransaction;
       sql: string;  SQLDialect: integer; GenerateParamNames: boolean =false; UniqueParamNames: boolean=false);
     destructor Destroy; override;
     procedure Close;
     function FetchNext: boolean;
     procedure TransactionEnding(aTransaction: TFB25Transaction; Force: boolean);
     property SQLDialect: integer read FSQLDialect;
-    property Attachment: TFBAttachment read FAttachment;
+    property Attachment: TFB25Attachment read FAttachment;
     property Transaction: TFB25Transaction read FTransaction;
 
   public
@@ -1145,7 +1145,7 @@ begin
   end;
 end;
 
-constructor TFB25Statement.Create(Attachment: TFBAttachment;
+constructor TFB25Statement.Create(Attachment: TFB25Attachment;
   Transaction: ITransaction; sql: string; SQLDialect: integer);
 var GUID : TGUID;
 begin
@@ -1164,7 +1164,7 @@ begin
   InternalPrepare;
 end;
 
-constructor TFB25Statement.CreateWithParameterNames(Attachment: TFBAttachment;
+constructor TFB25Statement.CreateWithParameterNames(Attachment: TFB25Attachment;
   Transaction: ITransaction; sql: string; SQLDialect: integer;
   GenerateParamNames: boolean; UniqueParamNames: boolean);
 begin

@@ -9,9 +9,9 @@ uses
   FBParamBlock, FBOutputBlock, FBActivityMonitor;
 
 type
-  { TFBAttachment }
+  { TFB25Attachment }
 
-  TFBAttachment = class(TActivityHandler, IAttachment, IActivityMonitor)
+  TFB25Attachment = class(TActivityHandler, IAttachment, IActivityMonitor)
   private
     FHasDefaultCharSet: boolean;
     FCharSetID: integer;
@@ -83,15 +83,15 @@ implementation
 uses FB25Events,FB25Transaction, FBMessages, FB25Blob,
   FB25Statement, FB25Array;
 
-  { TFBAttachment }
+  { TFB25Attachment }
 
-procedure TFBAttachment.CheckHandle;
+procedure TFB25Attachment.CheckHandle;
 begin
   if FHandle = nil then
     IBError(ibxeDatabaseClosed,[nil]);
 end;
 
-constructor TFBAttachment.Create(DatabaseName: string; DPB: IDPB;
+constructor TFB25Attachment.Create(DatabaseName: string; DPB: IDPB;
   RaiseExceptionOnConnectError: boolean);
 begin
   inherited Create;
@@ -109,7 +109,7 @@ begin
   Connect;
 end;
 
-constructor TFBAttachment.CreateDatabase(DatabaseName: string; DPB: IDPB;
+constructor TFB25Attachment.CreateDatabase(DatabaseName: string; DPB: IDPB;
   RaiseExceptionOnError: boolean);
 var sql: string;
     tr_handle: TISC_TR_HANDLE;
@@ -166,18 +166,18 @@ begin
   end;
 end;
 
-destructor TFBAttachment.Destroy;
+destructor TFB25Attachment.Destroy;
 begin
   Disconnect(true);
   inherited Destroy;
 end;
 
-function TFBAttachment.getDPB: IDPB;
+function TFB25Attachment.getDPB: IDPB;
 begin
   Result := FDPB;
 end;
 
-procedure TFBAttachment.Connect;
+procedure TFB25Attachment.Connect;
 var Param: IDPBItem;
 begin
   FSQLDialect := 3;
@@ -210,7 +210,7 @@ begin
   end;
 end;
 
-procedure TFBAttachment.Disconnect(Force: boolean);
+procedure TFB25Attachment.Disconnect(Force: boolean);
 begin
   if FHandle = nil then
     Exit;
@@ -225,12 +225,12 @@ begin
   FCharSetID := 0;
 end;
 
-function TFBAttachment.IsConnected: boolean;
+function TFB25Attachment.IsConnected: boolean;
 begin
   Result := FHandle <> nil;
 end;
 
-procedure TFBAttachment.DropDatabase;
+procedure TFB25Attachment.DropDatabase;
 begin
   CheckHandle;
   with Firebird25ClientAPI do
@@ -239,27 +239,27 @@ begin
   FHandle := nil;
 end;
 
-function TFBAttachment.StartTransaction(TPB: array of byte;
+function TFB25Attachment.StartTransaction(TPB: array of byte;
   DefaultCompletion: TTransactionAction): ITransaction;
 begin
   CheckHandle;
   Result := TFB25Transaction.Create(self,TPB,DefaultCompletion);
 end;
 
-function TFBAttachment.StartTransaction(TPB: ITPB;
+function TFB25Attachment.StartTransaction(TPB: ITPB;
   DefaultCompletion: TTransactionAction): ITransaction;
 begin
   CheckHandle;
   Result := TFB25Transaction.Create(self,TPB,DefaultCompletion);
 end;
 
-function TFBAttachment.CreateBlob(transaction: ITransaction): IBlob;
+function TFB25Attachment.CreateBlob(transaction: ITransaction): IBlob;
 begin
   CheckHandle;
   Result := TFBBLob.Create(self,transaction);
 end;
 
-procedure TFBAttachment.ExecImmediate(transaction: ITransaction; sql: string;
+procedure TFB25Attachment.ExecImmediate(transaction: ITransaction; sql: string;
   aSQLDialect: integer);
 var TRHandle: TISC_TR_HANDLE;
 begin
@@ -271,23 +271,23 @@ begin
   SignalActivity;
 end;
 
-procedure TFBAttachment.ExecImmediate(TPB: array of byte; sql: string;
+procedure TFB25Attachment.ExecImmediate(TPB: array of byte; sql: string;
   aSQLDialect: integer);
 begin
   ExecImmediate(StartTransaction(TPB,taCommit),sql,aSQLDialect);
 end;
 
-procedure TFBAttachment.ExecImmediate(transaction: ITransaction; sql: string);
+procedure TFB25Attachment.ExecImmediate(transaction: ITransaction; sql: string);
 begin
   ExecImmediate(transaction,sql,FSQLDialect);
 end;
 
-procedure TFBAttachment.ExecImmediate(TPB: array of byte; sql: string);
+procedure TFB25Attachment.ExecImmediate(TPB: array of byte; sql: string);
 begin
   ExecImmediate(StartTransaction(TPB,taCommit),sql,FSQLDialect);
 end;
 
-function TFBAttachment.OpenCursor(transaction: ITransaction; sql: string;
+function TFB25Attachment.OpenCursor(transaction: ITransaction; sql: string;
   aSQLDialect: integer): IResultSet;
 var Statement: IStatement;
 begin
@@ -296,39 +296,39 @@ begin
   Result := Statement.OpenCursor;
 end;
 
-function TFBAttachment.OpenCursor(transaction: ITransaction; sql: string
+function TFB25Attachment.OpenCursor(transaction: ITransaction; sql: string
   ): IResultSet;
 begin
   Result := OpenCursor(transaction,sql,FSQLDialect);
 end;
 
-function TFBAttachment.OpenCursorAtStart(transaction: ITransaction;
+function TFB25Attachment.OpenCursorAtStart(transaction: ITransaction;
   sql: string; aSQLDialect: integer): IResultSet;
 begin
   Result := OpenCursor(transaction,sql,aSQLDialect);
   Result.FetchNext;
 end;
 
-function TFBAttachment.OpenCursorAtStart(transaction: ITransaction; sql: string
+function TFB25Attachment.OpenCursorAtStart(transaction: ITransaction; sql: string
   ): IResultSet;
 begin
   Result := OpenCursorAtStart(transaction,sql,FSQLDialect);
 end;
 
-function TFBAttachment.Prepare(transaction: ITransaction; sql: string;
+function TFB25Attachment.Prepare(transaction: ITransaction; sql: string;
   aSQLDialect: integer): IStatement;
 begin
   CheckHandle;
   Result := TFB25Statement.Create(self,transaction,sql,aSQLDialect);
 end;
 
-function TFBAttachment.Prepare(transaction: ITransaction; sql: string
+function TFB25Attachment.Prepare(transaction: ITransaction; sql: string
   ): IStatement;
 begin
   Result := Prepare(transaction,sql,FSQLDialect);
 end;
 
-function TFBAttachment.PrepareWithNamedParameters(transaction: ITransaction;
+function TFB25Attachment.PrepareWithNamedParameters(transaction: ITransaction;
   sql: string; aSQLDialect: integer; GenerateParamNames: boolean;
   UniqueParamNames: boolean): IStatement;
 begin
@@ -337,7 +337,7 @@ begin
          GenerateParamNames,UniqueParamNames);
 end;
 
-function TFBAttachment.PrepareWithNamedParameters(transaction: ITransaction;
+function TFB25Attachment.PrepareWithNamedParameters(transaction: ITransaction;
   sql: string; GenerateParamNames: boolean; UniqueParamNames: boolean
   ): IStatement;
 begin
@@ -346,13 +346,13 @@ begin
          GenerateParamNames,UniqueParamNames);
 end;
 
-function TFBAttachment.GetEventHandler(Events: TStrings): IEvents;
+function TFB25Attachment.GetEventHandler(Events: TStrings): IEvents;
 begin
   CheckHandle;
-  Result := TFBEvents.Create(self,Events);
+  Result := TFB25Events.Create(self,Events);
 end;
 
-function TFBAttachment.GetEventHandler(Event: string): IEvents;
+function TFB25Attachment.GetEventHandler(Event: string): IEvents;
 var S: TStringList;
 begin
   S := TStringList.Create;
@@ -364,14 +364,14 @@ begin
   end;
 end;
 
-function TFBAttachment.OpenBlob(Transaction: ITransaction; BlobID: TISC_QUAD
+function TFB25Attachment.OpenBlob(Transaction: ITransaction; BlobID: TISC_QUAD
   ): IBlob;
 begin
   CheckHandle;
   Result := TFBBlob.Create(self,Transaction,BlobID);
 end;
 
-function TFBAttachment.OpenArray(transaction: ITransaction; RelationName, ColumnName: string;
+function TFB25Attachment.OpenArray(transaction: ITransaction; RelationName, ColumnName: string;
   ArrayID: TISC_QUAD): IArray;
 begin
   CheckHandle;
@@ -379,33 +379,33 @@ begin
                     GetArrayMetaData(transaction,RelationName,ColumnName),ArrayID);
 end;
 
-function TFBAttachment.CreateArray(transaction: ITransaction; RelationName, ColumnName: string): IArray;
+function TFB25Attachment.CreateArray(transaction: ITransaction; RelationName, ColumnName: string): IArray;
 begin
   CheckHandle;
   Result := TFB25Array.Create(self,transaction as TFB25Transaction,
                     GetArrayMetaData(transaction,RelationName,ColumnName));
 end;
 
-function TFBAttachment.GetSQLDialect: integer;
+function TFB25Attachment.GetSQLDialect: integer;
 begin
   Result := FSQLDialect;
 end;
 
-function TFBAttachment.GetBlobMetaData(Transaction: ITransaction; tableName,
+function TFB25Attachment.GetBlobMetaData(Transaction: ITransaction; tableName,
   columnName: string): IBlobMetaData;
 begin
   CheckHandle;
   Result := TFBBlobMetaData.Create(self,Transaction as TFB25Transaction,tableName,columnName);
 end;
 
-function TFBAttachment.GetArrayMetaData(Transaction: ITransaction; tableName,
+function TFB25Attachment.GetArrayMetaData(Transaction: ITransaction; tableName,
   columnName: string): IArrayMetaData;
 begin
   CheckHandle;
   Result := TFB25ArrayMetaData.Create(self,Transaction as TFB25Transaction,tableName,columnName);
 end;
 
-function TFBAttachment.GetDBInformation(Requests: array of byte
+function TFB25Attachment.GetDBInformation(Requests: array of byte
   ): IDBInformation;
 var ReqBuffer: PByte;
     i: integer;
@@ -432,7 +432,7 @@ begin
   end;
 end;
 
-function TFBAttachment.GetDBInformation(Request: byte): IDBInformation;
+function TFB25Attachment.GetDBInformation(Request: byte): IDBInformation;
 begin
   CheckHandle;
   Result := TDBInformation.Create;

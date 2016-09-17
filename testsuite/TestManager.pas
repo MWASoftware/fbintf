@@ -541,7 +541,7 @@ begin
   FNewDatabaseName := 'localhost:/tmp/test1.fdb';
   {$ENDIF}
   FUserName := 'SYSDBA';
-  FPassword := 'masterkey';
+  FPassword := 'Pears';
   FEmployeeDatabaseName := 'localhost:employee';
 end;
 

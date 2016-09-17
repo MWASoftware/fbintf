@@ -20,7 +20,7 @@ type
      FRelationName: string;
      FColumnName: string;
    public
-     constructor Create(Attachment: TFBAttachment; Transaction: TFB30Transaction;
+     constructor Create(Attachment: TFB30Attachment; Transaction: TFB30Transaction;
        RelationName, ColumnName: string);
 
    public
@@ -37,7 +37,7 @@ type
 
   TFBBlob = class(TActivityReporter,IBlob)
   private
-    FAttachment: TFBAttachment;
+    FAttachment: TFB30Attachment;
     FBlobIntf: Firebird.IBlob;
     FBlobID: TISC_QUAD;
     FEOB: boolean;
@@ -48,13 +48,13 @@ type
     procedure InternalClose(Force: boolean);
     procedure InternalCancel(Force: boolean);
   public
-    constructor Create(Attachment: TFBAttachment; Transaction: ITransaction); overload;
-    constructor Create(Attachment: TFBAttachment; Transaction: ITransaction;
+    constructor Create(Attachment: TFB30Attachment; Transaction: ITransaction); overload;
+    constructor Create(Attachment: TFB30Attachment; Transaction: ITransaction;
                        BlobID: TISC_QUAD); overload;
     destructor Destroy; override;
     procedure TransactionEnding(aTransaction: TFB30Transaction; Force: boolean);
     property BlobIntf: Firebird.IBlob read FBlobIntf;
-    property Attachment: TFBAttachment read FAttachment;
+    property Attachment: TFB30Attachment read FAttachment;
 
   {IBlob}
   public
@@ -85,7 +85,7 @@ const
 
 { TFBBlobMetaData }
 
-constructor TFBBlobMetaData.Create(Attachment: TFBAttachment;
+constructor TFBBlobMetaData.Create(Attachment: TFB30Attachment;
   Transaction: TFB30Transaction; RelationName, ColumnName: string);
 var stmt: IStatement;
 begin
@@ -179,7 +179,7 @@ begin
   FBlobIntf := nil;
 end;
 
-constructor TFBBlob.Create(Attachment: TFBAttachment; Transaction: ITransaction
+constructor TFBBlob.Create(Attachment: TFB30Attachment; Transaction: ITransaction
   );
 begin
     inherited Create(Transaction as TFB30Transaction);
@@ -195,7 +195,7 @@ begin
     end;
 end;
 
-constructor TFBBlob.Create(Attachment: TFBAttachment;
+constructor TFBBlob.Create(Attachment: TFB30Attachment;
   Transaction: ITransaction; BlobID: TISC_QUAD);
 begin
   inherited Create(Transaction as TFB30Transaction);

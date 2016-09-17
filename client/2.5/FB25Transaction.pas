@@ -38,7 +38,7 @@ uses FBMessages, FBParamBlock;
 
 function TFB25Transaction.GetActivityIntf(att: IAttachment): IActivityMonitor;
 begin
-  Result := (att as TFBAttachment);
+  Result := (att as TFB25Attachment);
 end;
 
 function TFB25Transaction.GetInTransaction: boolean;
@@ -85,7 +85,7 @@ begin
   with Firebird25ClientAPI do
   if (Length(FAttachments) = 1)  then
   try
-    db_handle := (FAttachments[0] as TFBAttachment).Handle;
+    db_handle := (FAttachments[0] as TFB25Attachment).Handle;
     Call(isc_start_transaction(StatusVector, @FHandle,1,
               @db_handle,(FTPB as TTPB).getDataLength,(FTPB as TTPB).getBuffer));
   except
@@ -99,7 +99,7 @@ begin
         for i := 0 to Length(FAttachments) - 1 do
         if (FAttachments[i] <> nil)  then
         begin
-          pteb^[i].db_handle := @((FAttachments[i] as TFBAttachment).Handle);
+          pteb^[i].db_handle := @((FAttachments[i] as TFB25Attachment).Handle);
           pteb^[i].tpb_length := (FTPB as TTPB).getDataLength;
           pteb^[i].tpb_address := (FTPB as TTPB).getBuffer;
         end;
