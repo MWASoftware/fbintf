@@ -5,49 +5,32 @@ unit FB25Events;
 interface
 
 uses
-  {$IFDEF WINDOWS}Windows, {$ENDIF}Classes, SysUtils, IB, FBClientAPI, FB25ClientAPI, FB25Attachment, IBExternals,
-  IBHeader, syncobjs, FBActivityMonitor;
+  {$IFDEF WINDOWS}Windows, {$ENDIF}Classes, SysUtils, IB, FB25ClientAPI, FB25Attachment,
+  IBExternals, IBHeader, syncobjs, FBEvents;
 
 type
   { TFB25Events }
 
-  TFB25Events = class(TActivityReporter,IEvents)
+  TFB25Events = class(TFBEvents,IEvents)
   private
-    FEventBuffer: PChar;
-    FEventBufferLen: integer;
     FEventID: ISC_LONG;
-    FResultBuffer: PChar;
-    FEvents: TStringList;
     FDBHandle: TISC_DB_HANDLE;
-    FAttachment: IAttachment;
-    FCriticalSection: TCriticalSection;
     FEventHandlerThread: TObject;
-    FEventHandler: TEventHandler;
-    FInWaitState: boolean;
-    procedure CancelEvents(Force: boolean = false);
-    procedure EventSignaled;
-    procedure CreateEventBlock;
+  protected
+    procedure CancelEvents(Force: boolean = false); override;
+    function GetIEvents: IEvents; override;
   public
     constructor Create(DBAttachment: TFB25Attachment; Events: TStrings);
     destructor Destroy; override;
 
     {IEvents}
-    procedure GetEvents(EventNames: TStrings);
-    procedure SetEvents(EventNames: TStrings); overload;
-    procedure SetEvents(Event: string); overload;
-    procedure Cancel;
-    function ExtractEventCounts: TEventCounts;
     procedure WaitForEvent;
     procedure AsyncWaitForEvent(EventHandler: TEventHandler);
-    function GetAttachment: IAttachment;
   end;
 
 implementation
 
 uses  FBMessages;
-
-const
-  MaxEvents = 15;
 
 type
 
@@ -166,158 +149,40 @@ end;
 
   { TFB25Events }
 
-function TFB25Events.ExtractEventCounts: TEventCounts;
-var EventCountList: TStatusVector;
-    i: integer;
-    j: integer;
-begin
-  SetLength(Result,0);
-  if FResultBuffer = nil then Exit;
-
-  with Firebird25ClientAPI do
-     isc_event_counts( @EventCountList, FEventBufferLen, FEventBuffer, FResultBuffer);
-  j := 0;
-  for i := 0 to FEvents.Count - 1 do
-  begin
-    if EventCountList[i] > 0 then
-    begin
-      Inc(j);
-      SetLength(Result,j);
-      Result[j-1].EventName := FEvents[i];
-      Result[j-1].Count := EventCountList[i];
-    end;
-  end;
-end;
-
 procedure TFB25Events.CancelEvents(Force: boolean);
 begin
   FCriticalSection.Enter;
   try
-    FInWaitState := false;
+    if not FInWaitState then Exit;
     with Firebird25ClientAPI do
       if (Call(isc_Cancel_events( StatusVector, @FDBHandle, @FEventID),false) > 0) and not Force then
         IBDatabaseError;
 
-    FEventHandler := nil;
-  finally
-    FCriticalSection.Leave
-  end;
-end;
-
-procedure TFB25Events.EventSignaled;
-var Handler: TEventHandler;
-begin
-  FCriticalSection.Enter;
-  try
-    if not FInWaitState then Exit;
     FInWaitState := false;
-    if assigned(FEventHandler)  then
-    begin
-      Handler := FEventHandler;
-      FEventHandler := nil;
-      Handler(self);
-    end;
+    inherited CancelEvents(Force);
   finally
     FCriticalSection.Leave
   end;
 end;
 
-procedure TFB25Events.CreateEventBlock;
-var
-  i: integer;
-  EventNames: array of PChar;
+function TFB25Events.GetIEvents: IEvents;
 begin
-  with Firebird25ClientAPI do
-  begin
-    if FEventBuffer <> nil then
-      isc_free( FEventBuffer);
-    FEventBuffer := nil;
-    if FResultBuffer <> nil then
-      isc_free( FResultBuffer);
-    FResultBuffer := nil;
-
-    setlength(EventNames,MaxEvents);
-    try
-      for i := 0 to FEvents.Count-1 do
-        EventNames[i] := PChar(FEvents[i]);
-
-      FEventBufferlen := isc_event_block(@FEventBuffer,@FResultBuffer,
-                          FEvents.Count,
-                          EventNames[0],EventNames[1],EventNames[2],
-                          EventNames[3],EventNames[4],EventNames[5],
-                          EventNames[6],EventNames[7],EventNames[8],
-                          EventNames[9],EventNames[10],EventNames[11],
-                          EventNames[12],EventNames[13],EventNames[14]
-                          );
-    finally
-      SetLength(EventNames,0)
-    end;
-  end;
+  Result := self;
 end;
 
 constructor TFB25Events.Create(DBAttachment: TFB25Attachment; Events: TStrings);
 begin
-  inherited Create(DBAttachment);
-  FAttachment := DBAttachment;
-  if Events.Count > MaxEvents then
-    IBError(ibxeMaximumEvents, [nil]);
-
-
-  FCriticalSection := TCriticalSection.Create;
-  FEvents := TStringList.Create;
+  inherited Create(DBAttachment,DBAttachment,Events);
   FDBHandle := DBAttachment.Handle;
   FEventHandlerThread := TEventHandlerThread.Create(self);
-  FEvents.Assign(Events);
-  CreateEventBlock;
 end;
 
 destructor TFB25Events.Destroy;
 begin
+  CancelEvents(true);
   if assigned(FEventHandlerThread) then
     TEventHandlerThread(FEventHandlerThread).Terminate;
-  if assigned(FCriticalSection) then FCriticalSection.Free;
-  if assigned(FEvents) then FEvents.Free;
-  with Firebird25ClientAPI do
-  begin
-    if FEventBuffer <> nil then
-      isc_free( FEventBuffer);
-    if FResultBuffer <> nil then
-      isc_free( FResultBuffer);
-  end;
   inherited Destroy;
-end;
-
-procedure TFB25Events.GetEvents(EventNames: TStrings);
-begin
-  EventNames.Assign(FEvents);
-end;
-
-procedure TFB25Events.SetEvents(EventNames: TStrings);
-begin
-  if EventNames.Text <> FEvents.Text then
-  begin
-    Cancel;
-    FEvents.Assign(EventNames);
-    CreateEventBlock;
-  end;
-end;
-
-procedure TFB25Events.SetEvents(Event: string);
-var S: TStringList;
-begin
-  S := TStringList.Create;
-  try
-    S.Add(Event);
-    SetEvents(S);
-  finally
-    S.Free;
-  end;
-end;
-
-procedure TFB25Events.Cancel;
-begin
-  if assigned(FEventHandler) then
-    CancelEvents;
 end;
 
 procedure TFB25Events.AsyncWaitForEvent(EventHandler: TEventHandler);
@@ -338,11 +203,6 @@ begin
   finally
     FCriticalSection.Leave
   end;
-end;
-
-function TFB25Events.GetAttachment: IAttachment;
-begin
-  Result := FAttachment;
 end;
 
 procedure TFB25Events.WaitForEvent;

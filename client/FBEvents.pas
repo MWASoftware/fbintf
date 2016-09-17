@@ -13,17 +13,17 @@ type
 
   TFBEvents = class(TActivityReporter)
   private
-    FEventBuffer: PChar;
-    FEventBufferLen: integer;
     FEvents: TStringList;
     FAttachment: IAttachment;
-    FEventHandler: TEventHandler;
-    procedure CreateEventBlock;
   protected
+    FEventBuffer: PChar;
+    FEventBufferLen: integer;
     FResultBuffer: PChar;
+    FEventHandler: TEventHandler;
     FCriticalSection: TCriticalSection;
     FInWaitState: boolean;
-    procedure CancelEvents(Force: boolean = false); virtual; abstract;
+    procedure CreateEventBlock;
+    procedure CancelEvents(Force: boolean = false); virtual;
     procedure EventSignaled;
     function GetIEvents: IEvents; virtual; abstract;
   public
@@ -80,6 +80,11 @@ begin
       SetLength(EventNames,0)
     end;
   end;
+end;
+
+procedure TFBEvents.CancelEvents(Force: boolean);
+begin
+  FEventHandler := nil;
 end;
 
 procedure TFBEvents.EventSignaled;
