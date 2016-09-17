@@ -39,6 +39,7 @@ type
 
   TFB30Events = class(TFBEvents,IEvents)
   private
+    FAttachment: TFB30Attachment;
     FEventHandlerThread: TObject;
     FEventsIntf: Firebird.IEvents;
     FAsyncEventCallback: TEventhandlerInterface;
@@ -53,14 +54,8 @@ type
     destructor Destroy; override;
 
     {IEvents}
-    procedure GetEvents(EventNames: TStrings);
-    procedure SetEvents(EventNames: TStrings); overload;
-    procedure SetEvents(Event: string); overload;
-    procedure Cancel;
-    function ExtractEventCounts: TEventCounts;
     procedure WaitForEvent;
     procedure AsyncWaitForEvent(EventHandler: TEventHandler);
-    function GetAttachment: IAttachment;
   end;
 
 implementation
@@ -241,7 +236,7 @@ begin
     ReleaseIntf;
     with Firebird30ClientAPI do
     begin
-      FEventsIntf := (GetAttachment as TFB30Attachment).AttachmentIntf.queEvents(
+      FEventsIntf := FAttachment.AttachmentIntf.queEvents(
                                 StatusIntf,EventCallBack,
                                 FEventBufferLen, BytePtr(FEventBuffer));
       Check4DataBaseError;
@@ -263,6 +258,7 @@ end;
 constructor TFB30Events.Create(DBAttachment: TFB30Attachment; Events: TStrings);
 begin
   inherited Create(DBAttachment,DBAttachment,Events);
+  FAttachment := DBAttachment;
   FAsyncEventCallback := TEventhandlerInterface.Create(self,'Async');
   FEventHandlerThread := TEventHandlerThread.Create(self,FAsyncEventCallback);
   FSyncEventCallback := TEventhandlerInterface.Create(self,'Sync');
@@ -279,39 +275,9 @@ begin
   inherited Destroy;
 end;
 
-procedure TFB30Events.GetEvents(EventNames: TStrings);
-begin
-
-end;
-
-procedure TFB30Events.SetEvents(EventNames: TStrings);
-begin
-
-end;
-
-procedure TFB30Events.SetEvents(Event: string);
-begin
-
-end;
-
-procedure TFB30Events.Cancel;
-begin
-
-end;
-
-function TFB30Events.ExtractEventCounts: TEventCounts;
-begin
-
-end;
-
 procedure TFB30Events.AsyncWaitForEvent(EventHandler: TEventHandler);
 begin
   InternalAsyncWaitForEvent(EventHandler,FAsyncEventCallback);
-end;
-
-function TFB30Events.GetAttachment: IAttachment;
-begin
-
 end;
 
 procedure TFB30Events.WaitForEvent;
