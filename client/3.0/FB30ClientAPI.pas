@@ -67,9 +67,12 @@ type
 
     {Information}
     function HasServiceAPI: boolean;
-    function HasMasterIntf: boolean;
     function HasRollbackRetaining: boolean;
     function GetImplementationVersion: string;
+
+    {Firebird 3 API}
+    function HasMasterIntf: boolean;
+    function GetIMaster: TObject;
 
     {Encode/Decode}
     function DecodeInteger(bufptr: PChar; len: short): integer; override;
@@ -234,6 +237,11 @@ end;
 function TFB30ClientAPI.HasMasterIntf: boolean;
 begin
   Result := MasterIntf <> nil;
+end;
+
+function TFB30ClientAPI.GetIMaster: TObject;
+begin
+  Result := FMaster;
 end;
 
 function TFB30ClientAPI.HasRollbackRetaining: boolean;

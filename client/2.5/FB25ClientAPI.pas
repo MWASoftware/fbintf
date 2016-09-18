@@ -96,24 +96,7 @@ type
     isc_prepare_transaction: Tisc_prepare_transaction;
 
   public
-    {IFirebirdAPI}
-    function GetStatus: IStatus; override;
-    function AllocateDPB: IDPB;
-    function OpenDatabase(DatabaseName: string; DPB: IDPB;
-      RaiseExceptionOnConnectError: boolean): IAttachment;
-    function CreateDatabase(DatabaseName: string; DPB: IDPB; RaiseExceptionOnError: boolean=true): IAttachment;
-    function AllocateSPB: ISPB;
-    function AllocateTPB: ITPB;
-    function GetServiceManager(ServerName: string; Protocol: TProtocol; SPB: ISPB
-      ): IServiceManager;
-    function StartTransaction(Attachments: array of IAttachment;  TPB: array of byte;
-      DefaultCompletion: TTransactionAction): ITransaction; overload;
-    function StartTransaction(Attachments: array of IAttachment;
-             TPB: ITPB; DefaultCompletion: TTransactionAction): ITransaction; overload;
-    function HasServiceAPI: boolean;
-    function HasRollbackRetaining: boolean;
-    function HasMasterIntf: boolean;
-    function GetImplementationVersion: string;
+    {Helper Functions}
     function DecodeInteger(bufptr: PChar; len: short): integer; override;
     procedure SQLEncodeDate(aDate: TDateTime; bufptr: PChar); override;
     function SQLDecodeDate(bufptr: PChar): TDateTime; override;
@@ -121,7 +104,37 @@ type
     function SQLDecodeTime(bufptr: PChar): TDateTime;  override;
     procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PChar); override;
     function SQLDecodeDateTime(bufptr: PChar): TDateTime; override;
-  end;
+
+  public
+    {IFirebirdAPI}
+
+    {Database connections}
+    function AllocateDPB: IDPB;
+    function OpenDatabase(DatabaseName: string; DPB: IDPB; RaiseExceptionOnConnectError: boolean=true): IAttachment;
+    function CreateDatabase(DatabaseName: string; DPB: IDPB; RaiseExceptionOnError: boolean=true): IAttachment;
+
+    {Start Transaction against multiple databases}
+    function AllocateTPB: ITPB;
+    function StartTransaction(Attachments: array of IAttachment;
+             TPB: array of byte; DefaultCompletion: TTransactionAction): ITransaction; overload;
+    function StartTransaction(Attachments: array of IAttachment;
+             TPB: ITPB; DefaultCompletion: TTransactionAction): ITransaction; overload;
+
+    {Service Manager}
+    function AllocateSPB: ISPB;
+    function HasServiceAPI: boolean;
+    function GetServiceManager(ServerName: string; Protocol: TProtocol; SPB: ISPB): IServiceManager;
+
+    {Information}
+    function GetStatus: IStatus; override;
+    function HasRollbackRetaining: boolean;
+    function GetImplementationVersion: string;
+
+    {Firebird 3 API}
+    function HasMasterIntf: boolean;
+    function GetIMaster: TObject;
+
+   end;
 
 const
   Firebird25ClientAPI: TFB25ClientAPI = nil;
@@ -410,6 +423,11 @@ end;
 function TFB25ClientAPI.HasMasterIntf: boolean;
 begin
   Result := false;
+end;
+
+function TFB25ClientAPI.GetIMaster: TObject;
+begin
+  Result := nil;
 end;
 
 function TFB25ClientAPI.GetImplementationVersion: string;

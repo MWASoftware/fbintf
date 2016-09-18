@@ -861,6 +861,7 @@ type
              TPB: ITPB; DefaultCompletion: TTransactionAction): ITransaction; overload;
 
     {Service Manager}
+    function HasServiceAPI: boolean;
     function AllocateSPB: ISPB;
     function GetServiceManager(ServerName: string; Protocol: TProtocol; SPB: ISPB): IServiceManager;
 
@@ -869,10 +870,12 @@ type
     function IsLibraryLoaded: boolean;
     function IsEmbeddedServer: boolean;
     function GetLibraryName: string;
-    function HasServiceAPI: boolean;
-    function HasMasterIntf: boolean;
     function HasRollbackRetaining: boolean;
     function GetImplementationVersion: string;
+
+    {Firebird 3 API}
+    function HasMasterIntf: boolean;
+    function GetIMaster: TObject;
 
     {utility}
     function GetCharsetName(CharSetID: integer): string;
