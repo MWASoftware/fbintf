@@ -464,11 +464,8 @@ end;
 function TIBXSQLVAR.GetCodePage: TSystemCodePage;
 begin
   result := CP_NONE;
-  if FStatement.FAttachment.HasDefaultCharSet then
-    result := FStatement.FAttachment.CodePage
-  else
   with FirebirdClientAPI do
-     CharSetID2CodePage(GetCharSetID,result)
+     CharSetID2CodePage(GetCharSetID,result);
 end;
 {$ENDIF}
 

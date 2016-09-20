@@ -38,12 +38,13 @@ const
     'Title VarChar(32) Character Set UTF8,'+
     'Notes VarChar(64) Character Set ISO8859_1,'+
     'BlobData Blob sub_type 1 Character Set WIN1252, '+
+    'InClear VarChar(16) Character Set NONE, '+
     'Primary Key(RowID)'+
     ')';
 
   sqlGetCharSets = 'Select RDB$CHARACTER_SET_NAME,RDB$CHARACTER_SET_ID from RDB$CHARACTER_SETS order by 2';
 
-  sqlInsert = 'Insert into TestData(RowID,Title,Notes, BlobData) Values(:RowID,:Title,:Notes,:BlobData)';
+  sqlInsert = 'Insert into TestData(RowID,Title,Notes, BlobData,InClear) Values(:RowID,:Title,:Notes,:BlobData,:InClear)';
 
 
 { TTest12 }
@@ -55,7 +56,6 @@ var Transaction: ITransaction;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
 
-  Statement := Attachment.Prepare(Transaction,'Select * from TestData');
   Statement := Attachment.PrepareWithNamedParameters(Transaction,sqlInsert);
   with Statement.GetSQLParams do
   begin
@@ -63,6 +63,7 @@ begin
     ByName('title').AsString := 'Blob Test ©€';
     ByName('Notes').AsString := 'Écoute moi';
     ByName('BlobData').AsString := 'Some German Special Characters like ÖÄÜöäüß';
+    ByName('InClear').AsString := #$01'Test'#$0D;
   end;
   Statement.Execute;
 end;
