@@ -114,9 +114,10 @@
       <Unit13>
         <Filename Value="Test12.pas"/>
         <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="6"/>
-        <TopLine Value="63"/>
-        <CursorPos Y="78"/>
+        <TopLine Value="55"/>
+        <CursorPos X="53" Y="66"/>
         <UsageCount Value="40"/>
         <Loaded Value="True"/>
       </Unit13>
@@ -809,7 +810,6 @@
       </Unit105>
       <Unit106>
         <Filename Value="../client/3.0/FB30Statement.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="8"/>
         <TopLine Value="500"/>
         <CursorPos Y="520"/>

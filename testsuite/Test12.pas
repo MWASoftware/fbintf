@@ -63,7 +63,7 @@ begin
     ByName('title').AsString := 'Blob Test ©€';
     ByName('Notes').AsString := 'Écoute moi';
     ByName('BlobData').AsString := 'Some German Special Characters like ÖÄÜöäüß';
-    ByName('InClear').AsString := #$01'Test'#$0D;
+    ByName('InClear').AsString := #$01'Test'#$0D#$C3;
   end;
   Statement.Execute;
 end;
