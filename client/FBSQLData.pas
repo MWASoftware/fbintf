@@ -1159,8 +1159,6 @@ begin
         {$ELSE}
         SetString(Result, sz, str_len);
         {$ENDIF}
-        if SQLType = SQL_TEXT then
-          result := TrimRight(result);
       end;
       SQL_TYPE_DATE:
         case GetSQLDialect of
