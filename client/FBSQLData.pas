@@ -1,3 +1,64 @@
+(*
+ *  Firebird Interface (fbintf). The fbintf components provide a set of
+ *  Pascal language bindings for the Firebird API. Although predominantly
+ *  a new development they include source code taken from IBX and may be
+ *  considered a derived product. This software thus also includes the copyright
+ *  notice and license conditions from IBX.
+ *
+ *  Except for those parts dervied from IBX, contents of this file are subject
+ *  to the Initial Developer's Public License Version 1.0 (the "License"); you
+ *  may not use this file except in compliance with the License. You may obtain a
+ *  copy of the License here:
+ *
+ *    http://www.firebirdsql.org/index.php?op=doc&id=idpl
+ *
+ *  Software distributed under the License is distributed on an "AS
+ *  IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+ *  implied. See the License for the specific language governing rights
+ *  and limitations under the License.
+ *
+ *  The Initial Developer of the Original Code is Tony Whyman.
+ *
+ *  The Original Code is (C) 2016 Tony Whyman, MWA Software
+ *  (http://www.mwasoftware.co.uk).
+ *
+ *  All Rights Reserved.
+ *
+ *  Contributor(s): ______________________________________.
+ *
+*)
+{************************************************************************}
+{                                                                        }
+{       Borland Delphi Visual Component Library                          }
+{       InterBase Express core components                                }
+{                                                                        }
+{       Copyright (c) 1998-2000 Inprise Corporation                      }
+{                                                                        }
+{    InterBase Express is based in part on the product                   }
+{    Free IB Components, written by Gregory H. Deatz for                 }
+{    Hoagland, Longo, Moran, Dunst & Doukas Company.                     }
+{    Free IB Components is used under license.                           }
+{                                                                        }
+{    The contents of this file are subject to the InterBase              }
+{    Public License Version 1.0 (the "License"); you may not             }
+{    use this file except in compliance with the License. You            }
+{    may obtain a copy of the License at http://www.Inprise.com/IPL.html }
+{    Software distributed under the License is distributed on            }
+{    an "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either              }
+{    express or implied. See the License for the specific language       }
+{    governing rights and limitations under the License.                 }
+{    The Original Code was created by InterBase Software Corporation     }
+{       and its successors.                                              }
+{    Portions created by Inprise Corporation are Copyright (C) Inprise   }
+{       Corporation. All Rights Reserved.                                }
+{    Contributor(s): Jeff Overcash                                       }
+{                                                                        }
+{    IBX For Lazarus (Firebird Express)                                  }
+{    Contributor: Tony Whyman, MWA Software http://www.mwasoftware.co.uk }
+{    Portions created by MWA Software are copyright McCallum Whyman      }
+{    Associates Ltd 2011 - 2015                                                }
+{                                                                        }
+{************************************************************************}
 unit FBSQLData;
 
 {$mode objfpc}{$H+}
@@ -52,6 +113,7 @@ type
      procedure CheckActive; virtual;
      function GetSQLDialect: integer; virtual; abstract;
      procedure Changed; virtual;
+     procedure InternalSetAsString(Value: String); virtual;
      function SQLData: PChar; virtual; abstract;
      function GetDataLength: cardinal; virtual; abstract;
      {$IFDEF HAS_ANSISTRING_CODEPAGE}
@@ -285,11 +347,10 @@ type
   { TSQLParam }
 
   TSQLParam = class(TIBSQLData,ISQLParam)
-  private
-    procedure InternalSetAsString(Value: String);
   protected
     procedure CheckActive; override;
     procedure Changed; override;
+    procedure InternalSetAsString(Value: String); override;
     procedure SetScale(aValue: cardinal); override;
     procedure SetDataLength(len: cardinal); override;
     procedure SetSQLType(aValue: cardinal); override;
@@ -867,6 +928,11 @@ begin
   //Do nothing by default
 end;
 
+procedure TSQLDataItem.InternalSetAsString(Value: String);
+begin
+
+end;
+
 function TSQLDataItem.Transliterate(s: string; CodePage: TSystemCodePage
   ): RawByteString;
 begin
@@ -1423,7 +1489,7 @@ end;
 
 procedure TSQLDataItem.SetAsString(Value: String);
 begin
-
+  InternalSetAsString(Value);
 end;
 
 procedure TSQLDataItem.SetAsVariant(Value: Variant);

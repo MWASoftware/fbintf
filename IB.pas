@@ -1,3 +1,64 @@
+(*
+ *  Firebird Interface (fbintf). The fbintf components provide a set of
+ *  Pascal language bindings for the Firebird API. Although predominantly
+ *  a new development they include source code taken from IBX and may be
+ *  considered a derived product. This software thus also includes the copyright
+ *  notice and license conditions from IBX.
+ *
+ *  Except for those parts dervied from IBX, contents of this file are subject
+ *  to the Initial Developer's Public License Version 1.0 (the "License"); you
+ *  may not use this file except in compliance with the License. You may obtain a
+ *  copy of the License here:
+ *
+ *    http://www.firebirdsql.org/index.php?op=doc&id=idpl
+ *
+ *  Software distributed under the License is distributed on an "AS
+ *  IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+ *  implied. See the License for the specific language governing rights
+ *  and limitations under the License.
+ *
+ *  The Initial Developer of the Original Code is Tony Whyman.
+ *
+ *  The Original Code is (C) 2016 Tony Whyman, MWA Software
+ *  (http://www.mwasoftware.co.uk).
+ *
+ *  All Rights Reserved.
+ *
+ *  Contributor(s): ______________________________________.
+ *
+*)
+{************************************************************************}
+{                                                                        }
+{       Borland Delphi Visual Component Library                          }
+{       InterBase Express core components                                }
+{                                                                        }
+{       Copyright (c) 1998-2000 Inprise Corporation                      }
+{                                                                        }
+{    InterBase Express is based in part on the product                   }
+{    Free IB Components, written by Gregory H. Deatz for                 }
+{    Hoagland, Longo, Moran, Dunst & Doukas Company.                     }
+{    Free IB Components is used under license.                           }
+{                                                                        }
+{    The contents of this file are subject to the InterBase              }
+{    Public License Version 1.0 (the "License"); you may not             }
+{    use this file except in compliance with the License. You            }
+{    may obtain a copy of the License at http://www.Inprise.com/IPL.html }
+{    Software distributed under the License is distributed on            }
+{    an "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either              }
+{    express or implied. See the License for the specific language       }
+{    governing rights and limitations under the License.                 }
+{    The Original Code was created by InterBase Software Corporation     }
+{       and its successors.                                              }
+{    Portions created by Inprise Corporation are Copyright (C) Inprise   }
+{       Corporation. All Rights Reserved.                                }
+{    Contributor(s): Jeff Overcash                                       }
+{                                                                        }
+{    IBX For Lazarus (Firebird Express)                                  }
+{    Contributor: Tony Whyman, MWA Software http://www.mwasoftware.co.uk }
+{    Portions created by MWA Software are copyright McCallum Whyman      }
+{    Associates Ltd 2011 - 2015                                                }
+{                                                                        }
+{************************************************************************}
 unit IB;
 
 {$mode objfpc}{$H+}
