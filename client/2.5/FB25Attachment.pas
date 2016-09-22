@@ -169,7 +169,7 @@ begin
       CreateParams += ' DEFAULT CHARACTER SET ' + DPBItem.AsString;
       FHasDefaultCharSet :=   CharSetName2CharSetID(DPBItem.AsString,FCharSetID) and
                               CharSetID2CodePage(FCharSetID,FCodePage) and
-                              (FCodePage <> CP_NONE);
+                              (FCharSetID > 1);
     end;
 
     DPBItem :=  DPB.Find(isc_dpb_sql_dialect);
@@ -232,7 +232,8 @@ begin
      Param :=  FDPB.Find(isc_dpb_lc_ctype);
      FHasDefaultCharSet :=  (Param <> nil) and
                              CharSetName2CharSetID(Param.AsString,FCharSetID) and
-                             CharSetID2CodePage(FCharSetID,FCodePage);
+                             CharSetID2CodePage(FCharSetID,FCodePage) and
+                             (FCharSetID > 1);
     end;
   end;
 end;

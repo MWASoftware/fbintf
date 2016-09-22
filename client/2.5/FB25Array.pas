@@ -100,15 +100,6 @@ begin
           IBDatabaseError;
 
   if (GetSQLType = SQL_TEXT) or (GetSQLType = SQL_VARYING) then
-  with (aAttachment as TFB25Attachment) do
-  if HasDefaultCharSet then
-  begin
-    FCharSetID := CharSetID;
-    {$IFDEF HAS_ANSISTRING_CODEPAGE}
-    FCodePage := CodePage;
-    {$ENDIF}
-  end
-  else
   begin
     stmt := TFB25Statement.Create(aAttachment as TFB25Attachment,aTransaction,
                                  sGetArrayMetaData ,aAttachment.GetSQLDialect);
@@ -120,10 +111,21 @@ begin
       if FetchNext then
       begin
         FCharSetID := Data[0].AsInteger;
+        with (aAttachment as TFB25Attachment) do
+        if (FCharSetID > 1) and HasDefaultCharSet then
+        begin
+          FCharSetID := CharSetID;
+          {$IFDEF HAS_ANSISTRING_CODEPAGE}
+          FCodePage := CodePage;
+          {$ENDIF}
+        end
+        else
+        begin
         {$IFDEF HAS_ANSISTRING_CODEPAGE}
-        FCodePage := CP_NONE;
-        FirebirdClientAPI.CharSetID2CodePage(FCharSetID,FCodePage);
+          FCodePage := CP_NONE;
+          FirebirdClientAPI.CharSetID2CodePage(FCharSetID,FCodePage);
         {$ENDIF}
+        end;
       end;
     end;
   end;

@@ -1028,7 +1028,7 @@ begin
     Result := true;
   end;
   {$ENDIF}
-  if not FFirebirdAPI.IsLibraryLoaded then
+  if Result and not FFirebirdAPI.IsLibraryLoaded then
   begin
     Result := false;
     FFirebirdAPI := nil;

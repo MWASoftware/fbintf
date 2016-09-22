@@ -507,7 +507,7 @@ begin
   SQL_VARYING, SQL_TEXT:
     begin
       result := FXSQLVAR^.sqlsubtype and $FF;
-      if (result <> 0) and FStatement.FAttachment.HasDefaultCharSet then
+      if (result > 1) and FStatement.FAttachment.HasDefaultCharSet then
         result := FStatement.FAttachment.CharSetID;
     end;
 

@@ -135,7 +135,7 @@ begin
     else
       IBError(ibxeInvalidBlobMetaData,[nil]);
 
-    if (FCharSetID <> 0) and Attachment.HasDefaultCharSet then
+    if (FCharSetID > 1) and Attachment.HasDefaultCharSet then
       FCharSetID := Attachment.CharSetID
   end;
 end;

@@ -169,7 +169,8 @@ begin
      Param :=  FDPB.Find(isc_dpb_lc_ctype);
      FHasDefaultCharSet :=  (Param <> nil) and
                              CharSetName2CharSetID(Param.AsString,FCharSetID) and
-                             CharSetID2CodePage(FCharSetID,FCodePage);
+                             CharSetID2CodePage(FCharSetID,FCodePage) and
+                             (FCharSetID > 1);
     end;
   end;
 end;
@@ -206,7 +207,8 @@ begin
       Param :=  FDPB.Find(isc_dpb_lc_ctype);
       FHasDefaultCharSet :=  (Param <> nil) and
                              CharSetName2CharSetID(Param.AsString,FCharSetID) and
-                             CharSetID2CodePage(FCharSetID,FCodePage);
+                             CharSetID2CodePage(FCharSetID,FCodePage) and
+                             (FCharSetID > 1);
     end;
   end;
 end;

@@ -148,7 +148,7 @@ begin
                                            @(Transaction.Handle),
                 PChar(RelationName),PChar(ColumnName),@FBlobDesc,@FGlobal));
   FCharSetID := FBlobDesc.blob_desc_charset;
-  if (FCharSetID <> 0) and Attachment.HasDefaultCharSet then
+  if (FCharSetID > 1) and Attachment.HasDefaultCharSet then
     FCharSetID := Attachment.CharSetID
 end;
 

@@ -7,10 +7,11 @@
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="55"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="66"/>
         <CursorPos Y="93"/>
         <UsageCount Value="208"/>
+        <Loaded Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="TestManager.pas"/>
@@ -113,7 +114,7 @@
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <CursorPos Y="98"/>
-        <UsageCount Value="45"/>
+        <UsageCount Value="46"/>
       </Unit13>
       <Unit14>
         <Filename Value="../include/configkeys.inc"/>
@@ -224,10 +225,12 @@
       </Unit27>
       <Unit28>
         <Filename Value="../../ibx/runtime/IBDatabase.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="943"/>
-        <CursorPos X="15" Y="961"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="249"/>
+        <CursorPos Y="270"/>
         <UsageCount Value="10"/>
+        <Loaded Value="True"/>
       </Unit28>
       <Unit29>
         <Filename Value="../2.5/FB25Events.pas"/>
@@ -589,12 +592,10 @@
       </Unit77>
       <Unit78>
         <Filename Value="../client/2.5/FB25Attachment.pas"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="31"/>
         <CursorPos X="31" Y="44"/>
         <UsageCount Value="45"/>
-        <Loaded Value="True"/>
       </Unit78>
       <Unit79>
         <Filename Value="../client/2.5/FB25Events.pas"/>
@@ -612,17 +613,16 @@
       </Unit80>
       <Unit81>
         <Filename Value="../client/2.5/FB25Statement.pas"/>
-        <EditorIndex Value="1"/>
-        <TopLine Value="503"/>
-        <CursorPos X="55" Y="510"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="32"/>
+        <CursorPos Y="62"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
-          <TopLine Value="32"/>
-          <CursorPos Y="62"/>
+          <TopLine Value="503"/>
+          <CursorPos X="55" Y="510"/>
         </ExtraEditor1>
         <UsageCount Value="63"/>
-        <Loaded Value="True"/>
       </Unit81>
       <Unit82>
         <Filename Value="../client/include/uloadlibrary.inc"/>
@@ -958,7 +958,7 @@
         <UsageCount Value="10"/>
       </Unit128>
     </Units>
-    <JumpHistory Count="10" HistoryIndex="9">
+    <JumpHistory Count="5" HistoryIndex="4">
       <Position1>
         <Filename Value="../IB.pas"/>
         <Caret Line="873" Column="30" TopLine="859"/>
@@ -979,26 +979,6 @@
         <Filename Value="../IB.pas"/>
         <Caret Line="523" Column="52" TopLine="497"/>
       </Position5>
-      <Position6>
-        <Filename Value="../client/2.5/FB25Statement.pas"/>
-        <Caret Line="97" Column="14" TopLine="74"/>
-      </Position6>
-      <Position7>
-        <Filename Value="../client/2.5/FB25Statement.pas"/>
-        <Caret Line="510" Column="55" TopLine="503"/>
-      </Position7>
-      <Position8>
-        <Filename Value="../client/2.5/FB25Attachment.pas"/>
-        <Caret Line="59" Column="51" TopLine="46"/>
-      </Position8>
-      <Position9>
-        <Filename Value="../client/2.5/FB25Attachment.pas"/>
-        <Caret Line="172" Column="53" TopLine="135"/>
-      </Position9>
-      <Position10>
-        <Filename Value="../client/2.5/FB25Attachment.pas"/>
-        <Caret TopLine="31"/>
-      </Position10>
     </JumpHistory>
   </ProjectSession>
 </CONFIG>

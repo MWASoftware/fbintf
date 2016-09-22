@@ -187,6 +187,8 @@ begin
       FArrayDesc.array_desc_dimensions := Data[3].AsInteger;
       FArrayDesc.array_desc_flags := 0; {row major}
       FCharSetID := Data[7].AsInteger;
+      if (FCharSetID > 1) and (aAttachment as TFB30Attachment).HasDefaultCharSet then
+        FCharSetID := (aAttachment as TFB30Attachment).CharSetID;
       {$IFDEF HAS_ANSISTRING_CODEPAGE}
       FCodePage := CP_NONE;
       FirebirdClientAPI.CharSetID2CodePage(FCharSetID,FCodePage);
