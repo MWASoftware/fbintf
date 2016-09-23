@@ -284,8 +284,8 @@ type
     procedure Close;
     function GetBlobID: TISC_QUAD;
     function GetBlobMode: TFBBlobMode;
-    function GetInfo(var NumSegments: Int64; var MaxSegmentSize,
-                      TotalSize: Int64; var BlobType: TBlobType) :boolean;
+    procedure GetInfo(var NumSegments: Int64; var MaxSegmentSize,
+                      TotalSize: Int64; var BlobType: TBlobType);
     function Read(var Buffer; Count: Longint): Longint;
     function Write(const Buffer; Count: Longint): Longint;
     function LoadFromFile(Filename: string): IBlob;

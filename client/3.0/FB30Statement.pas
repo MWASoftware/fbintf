@@ -105,7 +105,6 @@ type
     FFieldName: string;
 
     protected
-     procedure Changed; override;
      function GetSQLType: cardinal; override;
      function GetSubtype: integer; override;
      function GetAliasName: string;  override;
@@ -121,8 +120,6 @@ type
      function GetIsNullable: boolean; override;
      function GetSQLData: PChar;  override;
      function GetDataLength: cardinal; override;
-     function GetArrayMetaData: IArrayMetaData; override;
-     function GetBlobMetaData: IBlobMetaData; override;
      procedure SetIsNull(Value: Boolean); override;
      procedure SetIsNullable(Value: Boolean);  override;
      procedure SetSQLData(AValue: PChar; len: cardinal); override;
@@ -133,10 +130,13 @@ type
 
   public
     constructor Create(aParent: TIBXSQLDA; aIndex: integer);
+    procedure Changed; override;
     procedure RowChange; override;
     procedure FreeSQLData;
     function GetAsArray(Array_ID: TISC_QUAD): IArray; override;
     function GetAsBlob(Blob_ID: TISC_QUAD): IBlob; override;
+    function GetArrayMetaData: IArrayMetaData; override;
+    function GetBlobMetaData: IBlobMetaData; override;
     function CreateBlob: IBlob; override;
   end;
 
@@ -403,7 +403,6 @@ end;
 procedure TSQLInfoResultsBuffer.DoParseBuffer;
 var P: PChar;
     index: integer;
-    len: integer;
 begin
   P := Buffer;
   index := 0;

@@ -7,7 +7,7 @@
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="3"/>
         <TopLine Value="66"/>
         <CursorPos Y="93"/>
         <UsageCount Value="208"/>
@@ -124,8 +124,8 @@
       </Unit14>
       <Unit15>
         <Filename Value="../IB.pas"/>
-        <TopLine Value="726"/>
-        <CursorPos X="3" Y="731"/>
+        <TopLine Value="72"/>
+        <CursorPos X="31" Y="72"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
@@ -225,9 +225,9 @@
       </Unit27>
       <Unit28>
         <Filename Value="../../ibx/runtime/IBDatabase.pas"/>
-        <EditorIndex Value="2"/>
-        <TopLine Value="249"/>
-        <CursorPos Y="270"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="251"/>
+        <CursorPos X="14" Y="264"/>
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
       </Unit28>
@@ -281,7 +281,7 @@
       </Unit34>
       <Unit35>
         <Filename Value="/usr/share/fpcsrc/rtl/inc/systemh.inc"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="8"/>
         <TopLine Value="379"/>
         <CursorPos X="3" Y="393"/>
         <UsageCount Value="10"/>
@@ -407,10 +407,11 @@
       </Unit50>
       <Unit51>
         <Filename Value="../../ibx/runtime/IBCustomDataSet.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="1867"/>
-        <CursorPos Y="1879"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="4224"/>
+        <CursorPos X="3" Y="4228"/>
         <UsageCount Value="16"/>
+        <Loaded Value="True"/>
       </Unit51>
       <Unit52>
         <Filename Value="../2.5/FB25OutputBlock.pas"/>
@@ -462,10 +463,12 @@
       </Unit58>
       <Unit59>
         <Filename Value="../../ibx/runtime/IBStoredProc.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="429"/>
-        <CursorPos X="43" Y="444"/>
-        <UsageCount Value="1"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="271"/>
+        <CursorPos X="17" Y="149"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
       </Unit59>
       <Unit60>
         <Filename Value="../../ibx/runtime/IBDialogs.pas"/>
@@ -488,7 +491,7 @@
       </Unit62>
       <Unit63>
         <Filename Value="../IBExternals.pas"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="10"/>
         <TopLine Value="65"/>
         <CursorPos X="3" Y="79"/>
         <UsageCount Value="10"/>
@@ -581,7 +584,7 @@
       </Unit75>
       <Unit76>
         <Filename Value="../client/FBClientAPI.pas"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="7"/>
         <TopLine Value="65"/>
         <CursorPos X="51" Y="79"/>
         <UsageCount Value="63"/>
@@ -736,7 +739,7 @@
       </Unit97>
       <Unit98>
         <Filename Value="../client/FBSQLData.pas"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="632"/>
         <CursorPos X="54" Y="638"/>
         <ExtraEditorCount Value="1"/>
@@ -750,7 +753,7 @@
       </Unit98>
       <Unit99>
         <Filename Value="../client/2.5/IBHeader.pas"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="9"/>
         <TopLine Value="553"/>
         <CursorPos X="66" Y="567"/>
         <UsageCount Value="10"/>
@@ -922,8 +925,7 @@
       </Unit122>
       <Unit123>
         <Filename Value="../client/FBEvents.pas"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="232"/>
         <CursorPos X="26" Y="244"/>
         <UsageCount Value="10"/>
@@ -966,7 +968,7 @@
         <UsageCount Value="10"/>
       </Unit128>
     </Units>
-    <JumpHistory Count="23" HistoryIndex="22">
+    <JumpHistory Count="26" HistoryIndex="25">
       <Position1>
         <Filename Value="../IB.pas"/>
         <Caret Line="873" Column="30" TopLine="859"/>
@@ -1059,6 +1061,18 @@
         <Filename Value="../client/FBEvents.pas"/>
         <Caret Line="231" Column="24" TopLine="224"/>
       </Position23>
+      <Position24>
+        <Filename Value="../IB.pas"/>
+        <Caret Line="733" Column="13" TopLine="726"/>
+      </Position24>
+      <Position25>
+        <Filename Value="../../ibx/runtime/IBStoredProc.pas"/>
+        <Caret Line="243" Column="40" TopLine="234"/>
+      </Position25>
+      <Position26>
+        <Filename Value="../../ibx/runtime/IBStoredProc.pas"/>
+        <Caret Line="149" Column="17" TopLine="136"/>
+      </Position26>
     </JumpHistory>
   </ProjectSession>
 </CONFIG>

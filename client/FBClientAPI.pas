@@ -72,8 +72,7 @@ RawByteString = AnsiString; {Needed for backwards compatibility}
 interface
 
 uses
-  Classes,  Dynlibs,  Firebird, IB, IBHeader, FBActivityMonitor,
-  FBMessages, IBExternals;
+  Classes,  Dynlibs, IB, IBHeader, FBActivityMonitor, FBMessages, IBExternals;
 
 type
   TStatusVector              = array[0..19] of NativeInt;
@@ -119,7 +118,6 @@ type
     isc_interprete: Tisc_interprete;
     isc_event_counts: Tisc_event_counts;
     isc_event_block: Tisc_event_block;
-    isc_wait_for_event: Tisc_wait_for_event;
     isc_free: Tisc_free;
 
     constructor Create;
@@ -324,7 +322,6 @@ begin
   isc_interprete := GetProcAddr('isc_interprete'); {do not localize}
   isc_event_counts := GetProcAddr('isc_event_counts'); {do not localize}
   isc_event_block := GetProcAddr('isc_event_block'); {do not localize}
-  isc_wait_for_event := GetProcAddr('isc_wait_for_event'); {do not localize}
   isc_free := GetProcAddr('isc_free'); {do not localize}
 end;
 

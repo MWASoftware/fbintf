@@ -294,8 +294,6 @@ type
     FIBXSQLVAR: TSQLVarData;
     FStatement: IStatement;         {Keep reference to ensure statement not discarded}
     FPrepareSeqNo: integer;
-    FBlobMetaData: IBlobMetaData;
-    FArrayMetaData: IArrayMetaData;
   protected
     procedure CheckActive; override;
     function SQLData: PChar; override;
@@ -336,8 +334,8 @@ type
   TIBSQLData = class(TColumnMetaData,ISQLData)
   protected
     procedure CheckActive; override;
-    function GetIsNull: Boolean; override;
   public
+    function GetIsNull: Boolean; override;
     function GetAsArray: IArray;
     function GetAsBlob: IBlob;
     function GetAsString: String; override;

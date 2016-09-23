@@ -103,6 +103,7 @@ type
     {fbclient API}
     BLOB_get: TBLOB_get;
     BLOB_put: TBLOB_put;
+    isc_wait_for_event: Tisc_wait_for_event;
     isc_vax_integer: Tisc_vax_integer;
     isc_portable_integer: Tisc_portable_integer;
     isc_blob_info: Tisc_blob_info;
@@ -320,6 +321,7 @@ begin
   inherited LoadInterface;
   BLOB_get := GetProcAddr('BLOB_get'); {do not localize}
   BLOB_put := GetProcAddr('BLOB_put'); {do not localize}
+  isc_wait_for_event := GetProcAddr('isc_wait_for_event'); {do not localize}
   isc_vax_integer := GetProcAddr('isc_vax_integer'); {do not localize}
   isc_portable_integer := GetProcAddr('isc_portable_integer'); {do not localize}
   isc_blob_info := GetProcAddr('isc_blob_info'); {do not localize}

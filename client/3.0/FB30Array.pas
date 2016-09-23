@@ -92,6 +92,7 @@ end;
   protected
     procedure LoadMetaData(aAttachment: IAttachment; aTransaction: ITransaction;
                    relationName, columnName: string); override;
+  public
     function GetCharSetID: cardinal; override;
     {$IFDEF HAS_ANSISTRING_CODEPAGE}
     function GetCodePage: TSystemCodePage; override;

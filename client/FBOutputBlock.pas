@@ -627,7 +627,6 @@ end;
 procedure TDBInformation.DoParseBuffer;
 var P: PChar;
     index: integer;
-    len: integer;
 begin
   P := Buffer;
   index := 0;

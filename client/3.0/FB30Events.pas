@@ -32,7 +32,7 @@ interface
 
 uses
   {$IFDEF WINDOWS}Windows, {$ENDIF} Classes, SysUtils, Firebird, IB, FB30ClientAPI, FB30Attachment,
-  IBExternals, syncobjs, FBEvents;
+  syncobjs, FBEvents;
 
 type
   TFB30Events = class;
@@ -87,9 +87,6 @@ type
 implementation
 
 uses  FBMessages, FBClientAPI;
-
-const
-  MaxEvents = 15;
 
 type
   { TEventHandlerThread }
@@ -156,6 +153,7 @@ begin
   Dec(FRef);
 //  writeln(FName,': ref count = ',FRef);
   if FRef = 0 then Free;
+  Result := FRef;
 end;
 
 procedure TEventhandlerInterface.eventCallbackFunction(length: Cardinal;

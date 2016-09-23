@@ -121,8 +121,8 @@ type
     procedure Close;
     function GetBlobID: TISC_QUAD;
     function GetBlobMode: TFBBlobMode;
-    function GetInfo(var NumSegments: Int64; var MaxSegmentSize, TotalSize: Int64;
-      var BlobType: TBlobType): boolean;
+    procedure GetInfo(var NumSegments: Int64; var MaxSegmentSize, TotalSize: Int64;
+      var BlobType: TBlobType);
     function Read(var Buffer; Count: Longint): Longint;
     function Write(const Buffer; Count: Longint): Longint;
     function LoadFromFile(Filename: string): IBlob;
@@ -286,8 +286,8 @@ begin
     Result := fbmRead;
 end;
 
-function TFBBlob.GetInfo(var NumSegments: Int64; var MaxSegmentSize,
-  TotalSize: Int64; var BlobType: TBlobType): boolean;
+procedure TFBBlob.GetInfo(var NumSegments: Int64; var MaxSegmentSize,
+  TotalSize: Int64; var BlobType: TBlobType);
 var
   items: array[0..3] of Char;
   results: array[0..99] of Char;
@@ -304,8 +304,8 @@ begin
 
   with Firebird25ClientAPI do
   begin
-    Result := Call(isc_blob_info(StatusVector, @FHandle, 4, @items[0], SizeOf(results),
-                    @results[0]),false) = 0;
+    Call(isc_blob_info(StatusVector, @FHandle, 4, @items[0], SizeOf(results),
+                    @results[0]));
     i := 0;
     while (i < SizeOf(results)) and (results[i] <> Char(isc_info_end)) do
     begin

@@ -4,6 +4,8 @@
  sourced from unit IB
 
  Use of FBException is now condition and not used for IBX.
+
+ constants removed and imported separately into IB.pas
 }
 
 unit Firebird;
@@ -3029,7 +3031,7 @@ type
 //	function fb_get_master_interface : IMaster; cdecl; external 'fbclient';
 
 const
-	isc_dpb_version1 = byte(1);
+{	isc_dpb_version1 = byte(1);
 	isc_dpb_version2 = byte(2);
 	isc_dpb_cdd_pathname = byte(1);
 	isc_dpb_allocation = byte(2);
@@ -3418,7 +3420,7 @@ const
 	fb_dbg_subfunc = byte(6);
 	fb_dbg_map_curname = byte(7);
 	fb_dbg_arg_input = byte(0);
-	fb_dbg_arg_output = byte(1);
+	fb_dbg_arg_output = byte(1);}
 	isc_facility		= 20;
 	isc_err_base		= 335544320;
 	isc_err_factor		= 1;
@@ -3432,7 +3434,7 @@ const
 	isc_arg_unix		= 7;	(* UNIX error code *)
 	isc_arg_domain		= 8;	(* Apollo/Domain error code *)
 	isc_arg_dos		= 9;	(* MSDOS/OS2 error code *)
-	isc_arith_except                     = 335544321;
+{	isc_arith_except                     = 335544321;
 	isc_bad_dbkey                        = 335544322;
 	isc_bad_db_format                    = 335544323;
 	isc_bad_db_handle                    = 335544324;
@@ -4691,7 +4693,10 @@ const
 	isc_trace_switch_param_miss          = 337182758;
 	isc_trace_param_act_notcompat        = 337182759;
 	isc_trace_mandatory_switch_miss      = 337182760;
+        }
 implementation
+
+uses IBErrorCodes;
 
 procedure IReferenceCounted.addRef();
 begin
