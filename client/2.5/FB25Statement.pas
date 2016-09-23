@@ -128,12 +128,12 @@ type
     FXSQLVAR: PXSQLVAR;       { Point to the PXSQLVAR in the owner object }
   protected
     function GetSQLType: cardinal; override;
-    function GetSubtype: cardinal; override;
+    function GetSubtype: integer; override;
     function GetAliasName: string;  override;
     function GetFieldName: string; override;
     function GetOwnerName: string;  override;
     function GetRelationName: string;  override;
-    function GetScale: cardinal; override;
+    function GetScale: integer; override;
     function GetCharSetID: cardinal; override;
     {$IFDEF HAS_ANSISTRING_CODEPAGE}
     function GetCodePage: TSystemCodePage; override;
@@ -147,7 +147,7 @@ type
     procedure SetIsNull(Value: Boolean); override;
     procedure SetIsNullable(Value: Boolean);  override;
     procedure SetSQLData(AValue: PChar; len: cardinal); override;
-    procedure SetScale(aValue: cardinal); override;
+    procedure SetScale(aValue: integer); override;
     procedure SetDataLength(len: cardinal); override;
     procedure SetSQLType(aValue: cardinal); override;
     procedure SetCharSetID(aValue: cardinal); override;
@@ -470,7 +470,7 @@ begin
   result := FXSQLVAR^.sqltype and (not 1);
 end;
 
-function TIBXSQLVAR.GetSubtype: cardinal;
+function TIBXSQLVAR.GetSubtype: integer;
 begin
   result := FXSQLVAR^.sqlsubtype;
 end;
@@ -495,7 +495,7 @@ begin
   result := strpas(FXSQLVAR^.relname);
 end;
 
-function TIBXSQLVAR.GetScale: cardinal;
+function TIBXSQLVAR.GetScale: integer;
 begin
   result := FXSQLVAR^.sqlscale;
 end;
@@ -692,7 +692,7 @@ begin
   FOwnsSQLData := false;
 end;
 
-procedure TIBXSQLVAR.SetScale(aValue: cardinal);
+procedure TIBXSQLVAR.SetScale(aValue: integer);
 begin
   FXSQLVAR^.sqlscale := aValue;
 end;

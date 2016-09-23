@@ -84,7 +84,7 @@ type
 
    public
      {IBlobMetaData}
-    function GetSubType: cardinal;
+    function GetSubType: integer;
     function GetCharSetID: cardinal;
     function GetSegmentSize: cardinal;
     function GetTableName: string;
@@ -152,7 +152,7 @@ begin
     FCharSetID := Attachment.CharSetID
 end;
 
-function TFBBlobMetaData.GetSubType: cardinal;
+function TFBBlobMetaData.GetSubType: integer;
 begin
   Result := FBlobDesc.blob_desc_subtype;
 end;

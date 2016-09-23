@@ -103,7 +103,7 @@ type
 
 implementation
 
-uses FBMessages;
+uses FBMessages, IBExternals;
 
 const
   MaxEvents = 15;
@@ -228,25 +228,32 @@ begin
 end;
 
 function TFBEvents.ExtractEventCounts: TEventCounts;
-var EventCountList: TStatusVector;
+var EventCountList, P: PISC_LONG;
     i: integer;
     j: integer;
 begin
   SetLength(Result,0);
   if FResultBuffer = nil then Exit;
 
-  with FirebirdClientAPI do
-     isc_event_counts( @EventCountList, FEventBufferLen, FEventBuffer, FResultBuffer);
-  j := 0;
-  for i := 0 to FEvents.Count - 1 do
-  begin
-    if EventCountList[i] > 0 then
+  GetMem(EventCountList,sizeof(ISC_LONG)*FEvents.Count);
+  try
+    with FirebirdClientAPI do
+       isc_event_counts( EventCountList, FEventBufferLen, FEventBuffer, FResultBuffer);
+    j := 0;
+    P := EventCountList;
+    for i := 0 to FEvents.Count - 1 do
     begin
-      Inc(j);
-      SetLength(Result,j);
-      Result[j-1].EventName := FEvents[i];
-      Result[j-1].Count := EventCountList[i];
+      if EventCountList[i] > 0 then
+      begin
+        Inc(j);
+        SetLength(Result,j);
+        Result[j-1].EventName := FEvents[i];
+        Result[j-1].Count := P^;
+        Inc(P);
+      end;
     end;
+  finally
+    FreeMem(EventCountList);
   end;
 end;
 

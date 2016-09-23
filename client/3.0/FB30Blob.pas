@@ -40,7 +40,7 @@ type
 
    TFBBlobMetaData  = class(TActivityReporter, IBlobMetaData)
    private
-     FSubType: cardinal;
+     FSubType: integer;
      FCharSetID: cardinal;
      FSegmentSize: cardinal;
      FRelationName: string;
@@ -51,7 +51,7 @@ type
 
    public
      {IBlobMetaData}
-    function GetSubType: cardinal;
+    function GetSubType: integer;
     function GetCharSetID: cardinal;
     function GetSegmentSize: cardinal;
     function GetTableName: string;
@@ -140,7 +140,7 @@ begin
   end;
 end;
 
-function TFBBlobMetaData.GetSubType: cardinal;
+function TFBBlobMetaData.GetSubType: integer;
 begin
   Result := FSubType;
 end;

@@ -201,6 +201,7 @@ type
     function GetSQLType: cardinal;
     function GetSQLTypeName: string;
     function GetScale: integer;
+    function GetSize: cardinal;
     function GetCharSetID: cardinal;
     function GetTableName: string;
     function GetColumnName: string;
@@ -260,7 +261,7 @@ type
   }
 
   IBlobMetaData = interface
-    function GetSubType: cardinal;
+    function GetSubType: integer;
     function GetCharSetID: cardinal;
     function GetSegmentSize: cardinal;
     function GetTableName: string;
@@ -305,26 +306,26 @@ type
     function GetIndex: integer;
     function GetSQLType: cardinal;
     function GetSQLTypeName: string;
-    function getSubtype: cardinal;
+    function getSubtype: integer;
     function getRelationName: string;
     function getOwnerName: string;
     function getSQLName: string;    {Name of the column}
     function getAliasName: string;  {Alias Name of column or Column Name if not alias}
     function getName: string;       {Disambiguated uppercase Field Name}
-    function getScale: cardinal;
+    function getScale: integer;
     function getCharSetID: cardinal;
     {$IFDEF HAS_ANSISTRING_CODEPAGE}
     function getCodePage: TSystemCodePage;
     {$ENDIF}
     function getIsNullable: boolean;
-    function GetSize: integer;
+    function GetSize: cardinal;
     function GetArrayMetaData: IArrayMetaData; {Valid only for Array SQL Type}
     function GetBlobMetaData: IBlobMetaData; {Valid only for Blob SQL Type}
     property Name: string read GetName;
-    property Size: Integer read GetSize;
+    property Size: cardinal read GetSize;
     property SQLType: cardinal read GetSQLType;
-    property Scale: cardinal read getScale;
-    property SQLSubtype: cardinal read getSubtype;
+    property Scale: integer read getScale;
+    property SQLSubtype: integer read getSubtype;
     property IsNullable: Boolean read GetIsNullable;
   end;
 

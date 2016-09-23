@@ -120,7 +120,7 @@ type
      function GetCodePage: TSystemCodePage; virtual; abstract;
      function Transliterate(s: string; CodePage: TSystemCodePage): RawByteString;
      {$ENDIF}
-     procedure SetScale(aValue: cardinal); virtual;
+     procedure SetScale(aValue: integer); virtual;
      procedure SetDataLength(len: cardinal); virtual;
      procedure SetSQLType(aValue: cardinal); virtual;
      property DataLength: cardinal read GetDataLength write SetDataLength;
@@ -130,7 +130,7 @@ type
      function GetSQLTypeName: string; overload;
      class function GetSQLTypeName(SQLType: short): string; overload;
      function GetName: string; virtual; abstract;
-     function GetScale: cardinal; virtual; abstract;
+     function GetScale: integer; virtual; abstract;
      function GetAsBoolean: boolean;
      function GetAsCurrency: Currency;
      function GetAsInt64: Int64;
@@ -181,7 +181,7 @@ type
      property Modified: Boolean read getModified;
      property IsNull: Boolean read GetIsNull write SetIsNull;
      property IsNullable: Boolean read GetIsNullable write SetIsNullable;
-     property Scale: cardinal read GetScale write SetScale;
+     property Scale: integer read GetScale write SetScale;
      property SQLType: cardinal read GetSQLType write SetSQLType;
   end;
 
@@ -232,12 +232,12 @@ type
     procedure SetName(AValue: string);
   protected
     function GetSQLType: cardinal; virtual; abstract;
-    function GetSubtype: cardinal; virtual; abstract;
+    function GetSubtype: integer; virtual; abstract;
     function GetAliasName: string;  virtual; abstract;
     function GetFieldName: string; virtual; abstract;
     function GetOwnerName: string;  virtual; abstract;
     function GetRelationName: string;  virtual; abstract;
-    function GetScale: cardinal; virtual; abstract;
+    function GetScale: integer; virtual; abstract;
     function GetCharSetID: cardinal; virtual; abstract;
     {$IFDEF HAS_ANSISTRING_CODEPAGE}
     function GetCodePage: TSystemCodePage; virtual; abstract;
@@ -249,7 +249,7 @@ type
     procedure SetIsNull(Value: Boolean); virtual; abstract;
     procedure SetIsNullable(Value: Boolean);  virtual; abstract;
     procedure SetSQLData(AValue: PChar; len: cardinal); virtual; abstract;
-    procedure SetScale(aValue: cardinal); virtual; abstract;
+    procedure SetScale(aValue: integer); virtual; abstract;
     procedure SetDataLength(len: cardinal); virtual; abstract;
     procedure SetSQLType(aValue: cardinal); virtual; abstract;
     procedure SetCharSetID(aValue: cardinal); virtual; abstract;
@@ -275,12 +275,12 @@ type
     property Name: string read FName write SetName;
     property CharSetID: cardinal read GetCharSetID write SetCharSetID;
     property SQLType: cardinal read GetSQLType write SetSQLType;
-    property SQLSubtype: cardinal read GetSubtype;
+    property SQLSubtype: integer read GetSubtype;
     property SQLData: PChar read GetSQLData;
     property DataLength: cardinal read GetDataLength write SetDataLength;
     property IsNull: Boolean read GetIsNull write SetIsNull;
     property IsNullable: Boolean read GetIsNullable write SetIsNullable;
-    property Scale: cardinal read GetScale write SetScale;
+    property Scale: integer read GetScale write SetScale;
   public
     property Modified: Boolean read FModified;
     property Statement: IStatement read GetStatement;
@@ -312,22 +312,22 @@ type
     {IColumnMetaData}
     function GetIndex: integer;
     function GetSQLType: cardinal; override;
-    function getSubtype: cardinal;
+    function getSubtype: integer;
     function getRelationName: string;
     function getOwnerName: string;
     function getSQLName: string;    {Name of the column}
     function getAliasName: string;  {Alias Name of column or Column Name if not alias}
     function GetName: string; override;      {Disambiguated uppercase Field Name}
-    function GetScale: cardinal; override;
+    function GetScale: integer; override;
     function getCharSetID: cardinal;
     function GetIsNullable: boolean; override;
-    function GetSize: integer;
+    function GetSize: cardinal;
     function GetArrayMetaData: IArrayMetaData;
     function GetBlobMetaData: IBlobMetaData;
     property Name: string read GetName;
-    property Size: Integer read GetSize;
+    property Size: cardinal read GetSize;
     property CharSetID: cardinal read getCharSetID;
-    property SQLSubtype: cardinal read getSubtype;
+    property SQLSubtype: integer read getSubtype;
     property IsNullable: Boolean read GetIsNullable;
   end;
 
@@ -351,7 +351,7 @@ type
     procedure CheckActive; override;
     procedure Changed; override;
     procedure InternalSetAsString(Value: String); override;
-    procedure SetScale(aValue: cardinal); override;
+    procedure SetScale(aValue: integer); override;
     procedure SetDataLength(len: cardinal); override;
     procedure SetSQLType(aValue: cardinal); override;
   public
@@ -635,7 +635,7 @@ begin
           end;
         end;
       end;
-      if iCurState <> ParamState then
+      if (iCurState <> ParamState) and (i <= iLenSQL) then
         AddToProcessedSQL(sSQL[i]);
       Inc(i);
     end;
@@ -941,7 +941,7 @@ begin
     SetCodePage(Result,CodePage,CodePage <> CP_NONE);
 end;
 
-procedure TSQLDataItem.SetScale(aValue: cardinal);
+procedure TSQLDataItem.SetScale(aValue: integer);
 begin
   //Do nothing by default
 end;
@@ -1589,7 +1589,7 @@ begin
   result := FIBXSQLVAR.SQLType;
 end;
 
-function TColumnMetaData.getSubtype: cardinal;
+function TColumnMetaData.getSubtype: integer;
 begin
   CheckActive;
   result := FIBXSQLVAR.SQLSubtype;
@@ -1625,7 +1625,7 @@ begin
   Result := FIBXSQLVAR. Name;
 end;
 
-function TColumnMetaData.GetScale: cardinal;
+function TColumnMetaData.GetScale: integer;
 begin
   CheckActive;
   result := FIBXSQLVAR.Scale;
@@ -1643,7 +1643,7 @@ begin
   result := FIBXSQLVAR.IsNullable;
 end;
 
-function TColumnMetaData.GetSize: integer;
+function TColumnMetaData.GetSize: cardinal;
 begin
   CheckActive;
   result := FIBXSQLVAR.DataLength;
@@ -1808,7 +1808,7 @@ begin
     IBError(ibxeStatementNotPrepared, [nil]);
 end;
 
-procedure TSQLParam.SetScale(aValue: cardinal);
+procedure TSQLParam.SetScale(aValue: integer);
 begin
   CheckActive;
   FIBXSQLVAR.Scale := aValue;

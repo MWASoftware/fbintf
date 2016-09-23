@@ -94,12 +94,12 @@ type
 
     {SQL Var Type Data}
     FSQLStatementType: cardinal;
-    FSQLSubType: cardinal;
+    FSQLSubType: integer;
     FSQLData: PChar; {Address of SQL Data in Message Buffer}
     FSQLNullIndicator: PShort; {Address of null indicator}
     FDataLength: integer;
     FNullable: boolean;
-    FScale: cardinal;
+    FScale: integer;
     FCharSetID: cardinal;
     FRelationName: string;
     FFieldName: string;
@@ -107,12 +107,12 @@ type
     protected
      procedure Changed; override;
      function GetSQLType: cardinal; override;
-     function GetSubtype: cardinal; override;
+     function GetSubtype: integer; override;
      function GetAliasName: string;  override;
      function GetFieldName: string; override;
      function GetOwnerName: string;  override;
      function GetRelationName: string;  override;
-     function GetScale: cardinal; override;
+     function GetScale: integer; override;
      function GetCharSetID: cardinal; override;
      {$IFDEF HAS_ANSISTRING_CODEPAGE}
      function GetCodePage: TSystemCodePage; override;
@@ -126,7 +126,7 @@ type
      procedure SetIsNull(Value: Boolean); override;
      procedure SetIsNullable(Value: Boolean);  override;
      procedure SetSQLData(AValue: PChar; len: cardinal); override;
-     procedure SetScale(aValue: cardinal); override;
+     procedure SetScale(aValue: integer); override;
      procedure SetDataLength(len: cardinal); override;
      procedure SetSQLType(aValue: cardinal); override;
      procedure SetCharSetID(aValue: cardinal); override;
@@ -474,7 +474,7 @@ begin
   Result := FSQLStatementType;
 end;
 
-function TIBXSQLVAR.GetSubtype: cardinal;
+function TIBXSQLVAR.GetSubtype: integer;
 begin
   Result := FSQLSubType;
 end;
@@ -507,7 +507,7 @@ begin
   Result := FRelationName;
 end;
 
-function TIBXSQLVAR.GetScale: cardinal;
+function TIBXSQLVAR.GetScale: integer;
 begin
   Result := FScale;
 end;
@@ -623,7 +623,7 @@ begin
   FOwnsSQLData := false;
 end;
 
-procedure TIBXSQLVAR.SetScale(aValue: cardinal);
+procedure TIBXSQLVAR.SetScale(aValue: integer);
 begin
   FScale := aValue;
 end;

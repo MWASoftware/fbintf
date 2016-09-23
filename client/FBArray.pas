@@ -86,7 +86,7 @@ type
    constructor Create(anArray: TFBArray; P: PChar);
    function GetSQLType: cardinal; override;
    function GetName: string; override;
-   function GetScale: cardinal; override;
+   function GetScale: integer; override;
    function GetSize: integer;
    function GetAsString: string; override;
    procedure SetAsLong(Value: Long); override;
@@ -118,6 +118,7 @@ type
    function GetSQLType: cardinal;
    function GetSQLTypeName: string;
    function GetScale: integer;
+   function GetSize: cardinal;
    function GetCharSetID: cardinal; virtual; abstract;
    function GetTableName: string;
    function GetColumnName: string;
@@ -250,7 +251,7 @@ begin
   Result := FArray.FMetaData.GetColumnName;
 end;
 
-function TFBArrayElement.GetScale: cardinal;
+function TFBArrayElement.GetScale: integer;
 begin
   Result := FArray.FMetaData.GetScale;
 end;
@@ -490,6 +491,11 @@ end;
 function TFBArrayMetaData.GetScale: integer;
 begin
   Result := byte(FArrayDesc.array_desc_scale);
+end;
+
+function TFBArrayMetaData.GetSize: cardinal;
+begin
+  Result := FArrayDesc.array_desc_length;
 end;
 
 function TFBArrayMetaData.GetTableName: string;
