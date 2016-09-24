@@ -26,7 +26,9 @@
 *)
 unit FB30Blob;
 
+{$IFDEF FPC}
 {$mode objfpc}{$H+}
+{$ENDIF}
 
 interface
 

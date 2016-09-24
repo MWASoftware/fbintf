@@ -26,7 +26,9 @@
 *)
 unit FBParamBlock;
 
+{$IFDEF FPC}
 {$mode objfpc}{$H+}
+{$ENDIF}
 
 interface
 

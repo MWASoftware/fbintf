@@ -61,12 +61,9 @@
 {************************************************************************}
 unit FBClientAPI;
 
+{$IFDEF FPC}
 {$mode delphi}
-
-{$IF FPC_FULLVERSION >= 20700 }
 {$codepage UTF8}
-{$ELSE}
-RawByteString = AnsiString; {Needed for backwards compatibility}
 {$ENDIF}
 
 interface

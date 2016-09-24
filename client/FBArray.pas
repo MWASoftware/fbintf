@@ -26,11 +26,9 @@
 *)
 unit FBArray;
 
+{$IFDEF FPC}
 {$mode objfpc}{$H+}
-
-{$IF FPC_FULLVERSION >= 20700 }
 {$codepage UTF8}
-{$DEFINE HAS_ANSISTRING_CODEPAGE}
 {$ENDIF}
 
 interface
@@ -77,9 +75,7 @@ type
    procedure Changed; override;
    function SQLData: PChar; override;
    function GetDataLength: cardinal; override;
-   {$IFDEF HAS_ANSISTRING_CODEPAGE}
    function GetCodePage: TSystemCodePage; override;
-   {$ENDIF}
    procedure SetDataLength(len: cardinal); override;
    procedure SetSQLType(aValue: cardinal); override;
   public
@@ -109,9 +105,7 @@ type
   public
    constructor Create(aAttachment: IAttachment; aTransaction: ITransaction;
      relationName, columnName: string);
-   {$IFDEF HAS_ANSISTRING_CODEPAGE}
    function GetCodePage: TSystemCodePage; virtual; abstract;
-   {$ENDIF}
 
   public
    {IArrayMetaData}
@@ -261,7 +255,6 @@ begin
   Result := GetDataLength;
 end;
 
-{$IFDEF HAS_ANSISTRING_CODEPAGE}
 function TFBArrayElement.GetAsString: string;
 var rs: RawByteString;
 begin
@@ -282,19 +275,6 @@ begin
     Result := inherited GetAsString;
   end;
 end;
-{$ELSE}
-function TFBArrayElement.GetAsString: string;
-begin
-  case GetSQLType of
-  SQL_VARYING:
-      Result := strpas(FBufPtr);
-  SQL_TEXT:
-      SetString(Result,FBufPtr,GetDataLength);
-  else
-    Result := inherited GetAsString;
-  end;
-end;
-{$ENDIF}
 
 procedure TFBArrayElement.SetAsLong(Value: Long);
 begin
@@ -337,9 +317,7 @@ begin
   case GetSQLType of
   SQL_VARYING:
     begin
-      {$IFDEF HAS_ANSISTRING_CODEPAGE}
       Value := Transliterate(Value,GetCodePage);
-      {$ENDIF}
       len := Length(Value);
       ElementSize := GetDataLength;
       if len > ElementSize - 2 then len := ElementSize - 2;
@@ -351,9 +329,7 @@ begin
 
   SQL_TEXT:
     begin
-      {$IFDEF HAS_ANSISTRING_CODEPAGE}
       Value := Transliterate(Value,GetCodePage);
-      {$ENDIF}
       ElementSize := GetDataLength;
       FillChar(FBufPtr^,ElementSize,' ');
       len := Length(Value);

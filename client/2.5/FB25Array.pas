@@ -26,11 +26,9 @@
 *)
 unit FB25Array;
 
+{$IFDEF FPC}
 {$mode objfpc}{$H+}
-
-{$IF FPC_FULLVERSION >= 20700 }
 {$codepage UTF8}
-{$DEFINE HAS_ANSISTRING_CODEPAGE}
 {$ENDIF}
 
 interface
@@ -46,17 +44,13 @@ type
   TFB25ArrayMetaData = class(TFBArrayMetaData,IArrayMetaData)
   private
     FCharSetID: integer;
-    {$IFDEF HAS_ANSISTRING_CODEPAGE}
     FCodePage: TSystemCodePage;
-    {$ENDIF}
   protected
     procedure LoadMetaData(aAttachment: IAttachment; aTransaction: ITransaction;
                    relationName, columnName: string); override;
   public
     function GetCharSetID: cardinal; override;
-    {$IFDEF HAS_ANSISTRING_CODEPAGE}
     function GetCodePage: TSystemCodePage; override;
-    {$ENDIF}
   end;
 
   { TFB25Array }
@@ -115,16 +109,12 @@ begin
         if (FCharSetID > 1) and HasDefaultCharSet then
         begin
           FCharSetID := CharSetID;
-          {$IFDEF HAS_ANSISTRING_CODEPAGE}
           FCodePage := CodePage;
-          {$ENDIF}
         end
         else
         begin
-        {$IFDEF HAS_ANSISTRING_CODEPAGE}
           FCodePage := CP_NONE;
           FirebirdClientAPI.CharSetID2CodePage(FCharSetID,FCodePage);
-        {$ENDIF}
         end;
       end;
     end;

@@ -61,7 +61,9 @@
 {************************************************************************}
 unit FB25Transaction;
 
+{$IFDEF FPC}
 {$mode objfpc}{$H+}
+{$ENDIF}
 
 interface
 

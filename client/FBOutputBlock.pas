@@ -26,10 +26,9 @@
 *)
 unit FBOutputBlock;
 
+{$IFDEF FPC}
 {$mode objfpc}{$H+}
-{$IF FPC_FULLVERSION >= 20700 }
 {$codepage UTF8}
-{$DEFINE HAS_ANSISTRING_CODEPAGE}
 {$ENDIF}
 
 interface
@@ -217,9 +216,7 @@ procedure TOutputBlockItem.SetString(out S: AnsiString; Buf: PAnsiChar;
 var rs: RawByteString;
 begin
   system.SetString(rs,Buf,len);
-  {$IFDEF HAS_ANSISTRING_CODEPAGE}
   SetCodePage(rs,CodePage,false);
-  {$ENDIF}
   S := rs;
 end;
 

@@ -26,7 +26,9 @@
 *)
 unit FB30Events;
 
+{$IFDEF FPC}
 {$mode objfpc}{$H+}
+{$ENDIF}
 
 interface
 

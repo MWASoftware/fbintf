@@ -61,11 +61,9 @@
 {************************************************************************}
 unit FBSQLData;
 
+{$IFDEF FPC}
 {$mode objfpc}{$H+}
-
-{$IF FPC_FULLVERSION >= 20700 }
 {$codepage UTF8}
-{$DEFINE HAS_ANSISTRING_CODEPAGE}
 {$ENDIF}
 
 { This Unit was hacked out of the IBSQL unit and defines a class used as the
@@ -116,10 +114,8 @@ type
      procedure InternalSetAsString(Value: String); virtual;
      function SQLData: PChar; virtual; abstract;
      function GetDataLength: cardinal; virtual; abstract;
-     {$IFDEF HAS_ANSISTRING_CODEPAGE}
      function GetCodePage: TSystemCodePage; virtual; abstract;
      function Transliterate(s: string; CodePage: TSystemCodePage): RawByteString;
-     {$ENDIF}
      procedure SetScale(aValue: integer); virtual;
      procedure SetDataLength(len: cardinal); virtual;
      procedure SetSQLType(aValue: cardinal); virtual;
@@ -239,9 +235,7 @@ type
     function GetRelationName: string;  virtual; abstract;
     function GetScale: integer; virtual; abstract;
     function GetCharSetID: cardinal; virtual; abstract;
-    {$IFDEF HAS_ANSISTRING_CODEPAGE}
     function GetCodePage: TSystemCodePage; virtual; abstract;
-    {$ENDIF}
     function GetIsNull: Boolean;   virtual; abstract;
     function GetIsNullable: boolean; virtual; abstract;
     function GetSQLData: PChar;  virtual; abstract;
@@ -298,9 +292,7 @@ type
     procedure CheckActive; override;
     function SQLData: PChar; override;
     function GetDataLength: cardinal; override;
-    {$IFDEF HAS_ANSISTRING_CODEPAGE}
     function GetCodePage: TSystemCodePage; override;
-    {$ENDIF}
 
   public
     constructor Create(aIBXSQLVAR: TSQLVarData);
@@ -1056,9 +1048,6 @@ begin
 end;
 
 function TSQLDataItem.GetAsDateTime: TDateTime;
-var
-  tm_date: TCTimeStructure;
-  msecs: word;
 begin
   CheckActive;
   result := 0;
@@ -1197,9 +1186,7 @@ function TSQLDataItem.GetAsString: String;
 var
   sz: PChar;
   str_len: Integer;
-  {$IFDEF HAS_ANSISTRING_CODEPAGE}
   rs: RawByteString;
-  {$ENDIF}
 begin
   CheckActive;
   result := '';
@@ -1216,13 +1203,9 @@ begin
           str_len := DecodeInteger(SQLData, 2);
           Inc(sz, 2);
         end;
-        {$IFDEF HAS_ANSISTRING_CODEPAGE}
         SetString(rs, sz, str_len);
         SetCodePage(rs,GetCodePage,false);
         Result := rs;
-        {$ELSE}
-        SetString(Result, sz, str_len);
-        {$ENDIF}
       end;
       SQL_TYPE_DATE:
         case GetSQLDialect of
@@ -1698,9 +1681,7 @@ function TIBSQLData.GetAsString: String;
 var
   ss: TStringStream;
   b: IBlob;
-  {$IFDEF HAS_ANSISTRING_CODEPAGE}
   rs: rawbytestring;
-  {$ENDIF}
 begin
   CheckActive;
   Result := '';
@@ -1714,13 +1695,9 @@ begin
       try
         b := FIBXSQLVAR.GetAsBlob(AsQuad);
         b.SaveToStream(ss);
-        {$IFDEF HAS_ANSISTRING_CODEPAGE}
         rs :=  ss.DataString;
         SetCodePage(rs,GetCodePage,false);
         Result := rs;
-        {$ELSE}
-        Result := ss.DataString;
-        {$ENDIF}
       finally
         ss.Free;
       end;
@@ -1743,11 +1720,7 @@ begin
   case SQLTYPE of
   SQL_BLOB:
   begin
-    {$IFDEF HAS_ANSISTRING_CODEPAGE}
     ss := TStringStream.Create(Transliterate(Value,GetCodePage));
-    {$ELSE}
-    ss := TStringStream.Create(Value);
-    {$ENDIF}
     try
       b := FIBXSQLVAR.CreateBlob;
       try
@@ -1765,11 +1738,7 @@ begin
   SQL_VARYING,
   SQL_TEXT:
     begin
-      {$IFDEF HAS_ANSISTRING_CODEPAGE}
       FIBXSQLVar.SetString(Transliterate(Value,GetCodePage));
-      {$ELSE}
-      FIBXSQLVar.SetString(Value);
-      {$ENDIF}
       Changed;
     end;
 

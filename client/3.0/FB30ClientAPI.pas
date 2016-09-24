@@ -26,7 +26,9 @@
 *)
 unit FB30ClientAPI;
 
+{$IFDEF FPC}
 {$mode delphi}
+{$ENDIF}
 
 interface
 

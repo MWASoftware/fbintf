@@ -61,9 +61,8 @@
 {************************************************************************}
 unit FBMessages;
 
+{$IFDEF FPC}
 {$mode objfpc}{$H+}
-
-{$IF FPC_FULLVERSION >= 20700 }
 {$codepage UTF8}
 {$ENDIF}
 

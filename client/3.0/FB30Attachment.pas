@@ -26,7 +26,9 @@
 *)
 unit FB30Attachment;
 
+{$IFDEF FPC}
 {$mode objfpc}{$H+}
+{$ENDIF}
 
 interface
 

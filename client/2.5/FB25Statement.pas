@@ -61,11 +61,9 @@
 {************************************************************************}
 unit FB25Statement;
 
+{$IFDEF FPC}
 {$mode objfpc}{$H+}
-
-{$IF FPC_FULLVERSION >= 20700 }
 {$codepage UTF8}
-{$DEFINE HAS_ANSISTRING_CODEPAGE}
 {$ENDIF}
 
 {This unit is hacked from IBSQL and contains the code for managing an XSQLDA and
@@ -135,9 +133,7 @@ type
     function GetRelationName: string;  override;
     function GetScale: integer; override;
     function GetCharSetID: cardinal; override;
-    {$IFDEF HAS_ANSISTRING_CODEPAGE}
     function GetCodePage: TSystemCodePage; override;
-    {$ENDIF}
     function GetIsNull: Boolean;   override;
     function GetIsNullable: boolean; override;
     function GetSQLData: PChar;  override;
@@ -520,14 +516,12 @@ begin
   end;
 end;
 
-{$IFDEF HAS_ANSISTRING_CODEPAGE}
 function TIBXSQLVAR.GetCodePage: TSystemCodePage;
 begin
   result := CP_NONE;
   with FirebirdClientAPI do
      CharSetID2CodePage(GetCharSetID,result);
 end;
-{$ENDIF}
 
 function TIBXSQLVAR.GetIsNull: Boolean;
 begin

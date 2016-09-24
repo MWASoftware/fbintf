@@ -61,11 +61,12 @@
 {************************************************************************}
 unit IB;
 
+{$IFDEF FPC}
 {$mode objfpc}{$H+}
-
-{$IF FPC_FULLVERSION >= 20700 }
 {$codepage UTF8}
-{$DEFINE HAS_ANSISTRING_CODEPAGE}
+{$IF FPC_FULLVERSION < 30000 }
+{$ERROR FPC Version 3.0.0 or later is required}
+{$ENDIF}
 {$ENDIF}
 
 {$DEFINE USEFIREBIRD3API}
@@ -106,7 +107,7 @@ unit IB;
 
   From FPC 3.0 onwards, ANSISTRINGs include the codepage in their definition. All
   strings used by the interface are sensitive to the codepage in that the codepage
-  for all strings returned by an interface are consistent with the SQL Character set
+  for all strings returned by an interface is consistent with the SQL Character set
   used for the database connection. Input strings will be transliterated, where possible
   and if necessary, to the codepage consistent with the character set used for
   the database connection.
@@ -175,6 +176,8 @@ type
   {The IStatus interface provides access to error information, if any, returned
    by the last API call. It can also be used to customise the error message
    returned by a database engine exception - see EIBInterbaseError.
+
+   This interface can be accessed from IFirebirdAPI.
    }
 
   IStatus = interface
@@ -310,13 +313,11 @@ type
     function getRelationName: string;
     function getOwnerName: string;
     function getSQLName: string;    {Name of the column}
-    function getAliasName: string;  {Alias Name of column or Column Name if not alias}
+    function getAliasName: string;  {Alias Name of column or Column Name if no alias}
     function getName: string;       {Disambiguated uppercase Field Name}
     function getScale: integer;
     function getCharSetID: cardinal;
-    {$IFDEF HAS_ANSISTRING_CODEPAGE}
     function getCodePage: TSystemCodePage;
-    {$ENDIF}
     function getIsNullable: boolean;
     function GetSize: cardinal;
     function GetArrayMetaData: IArrayMetaData; {Valid only for Array SQL Type}
@@ -433,7 +434,8 @@ type
    set the value of each parameter.
 
    Automatic conversion is provided to and from strings. That is GetAsString and
-   SetAsString are safe to use for sql types other than boolean.
+   SetAsString are safe to use for sql types other than boolean - provided automatic
+   conversion is possible.
   }
 
   ISQLParam = interface(ISQLData)
