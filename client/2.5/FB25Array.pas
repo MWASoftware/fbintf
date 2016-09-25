@@ -90,7 +90,7 @@ begin
   TRHandle := (aTransaction as TFB25Transaction).Handle;
   with Firebird25ClientAPI do
     if isc_array_lookup_bounds(StatusVector,@(DBHandle),@(TRHandle),
-        PChar(relationName),PChar(columnName),@FArrayDesc) > 0 then
+        PChar(AnsiUpperCase(relationName)),PChar(AnsiUpperCase(columnName)),@FArrayDesc) > 0 then
           IBDatabaseError;
 
   if (GetSQLType = SQL_TEXT) or (GetSQLType = SQL_VARYING) then

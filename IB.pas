@@ -266,8 +266,9 @@ type
   IBlobMetaData = interface
     function GetSubType: integer;
     function GetCharSetID: cardinal;
+    function GetCodePage: TSystemCodePage;
     function GetSegmentSize: cardinal;
-    function GetTableName: string;
+    function GetRelationName: string;
     function GetColumnName: string;
   end;
 
@@ -282,7 +283,7 @@ type
   TFBBlobMode = (fbmRead,fbmWrite);
   TBlobType = (btSegmented,btStream);
 
-  IBlob = interface
+  IBlob = interface(IBlobMetaData)
     procedure Cancel;
     procedure Close;
     function GetBlobID: TISC_QUAD;
@@ -295,8 +296,11 @@ type
     function LoadFromStream(S: TStream) : IBlob;
     procedure SaveToFile(Filename: string);
     procedure SaveToStream(S: TStream);
+    function GetAsString: string;
+    procedure SetAsString(aValue: string);
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
+    property AsString: string read GetAsString write SetAsString;
  end;
 
   { The IColumnMetaData interface provides access to the per column metadata for
@@ -438,7 +442,32 @@ type
    conversion is possible.
   }
 
-  ISQLParam = interface(ISQLData)
+  ISQLParam = interface
+    function GetIndex: integer;
+    function GetSQLType: cardinal;
+    function GetSQLTypeName: string;
+    function getSubtype: integer;
+    function getName: string;
+    function getScale: integer;
+    function getCharSetID: cardinal;
+    function getCodePage: TSystemCodePage;
+    function getIsNullable: boolean;
+    function GetSize: cardinal;
+    function GetAsBoolean: boolean;
+    function GetAsCurrency: Currency;
+    function GetAsInt64: Int64;
+    function GetAsDateTime: TDateTime;
+    function GetAsDouble: Double;
+    function GetAsFloat: Float;
+    function GetAsLong: Long;
+    function GetAsPointer: Pointer;
+    function GetAsQuad: TISC_QUAD;
+    function GetAsShort: short;
+    function GetAsString: String;
+    function GetIsNull: Boolean;
+    function GetAsVariant: Variant;
+    function GetAsBlob: IBlob;
+    function GetAsArray: IArray;
     procedure Clear;
     function GetModified: boolean;
     procedure SetAsBoolean(AValue: boolean);
@@ -477,7 +506,6 @@ type
     property AsArray: IArray read GetAsArray write SetAsArray;
     property AsQuad: TISC_QUAD read GetAsQuad write SetAsQuad;
     property Value: Variant read GetAsVariant write SetAsVariant;
-    property CharSetID: cardinal read GetCharSetID write SetCharSetID;
     property IsNull: Boolean read GetIsNull write SetIsNull;
     property Modified: Boolean read getModified;
   end;
@@ -515,10 +543,9 @@ type
     procedure Prepare(aTransaction: ITransaction=nil);
     function Execute(aTransaction: ITransaction=nil): IResults;
     function OpenCursor(aTransaction: ITransaction=nil): IResultSet;
-    function CreateBlob: IBlob;   {Returns a new IBlob in the context of the statement transaction}
-      {Return a new Array in the context of the statement transaction using either the metadata or column name}
-    function CreateArray(column: IColumnMetaData): IArray; overload;
-    function CreateArray(columnName: string): IArray;  overload;
+      {Return a new Array in the context of the statement transaction using either the column index or name}
+    function CreateArray(paramName: string): IArray;  overload;
+    function CreateArray(index: integer): IArray;  overload;
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
     property MetaData: IMetaData read GetMetaData;
@@ -762,8 +789,8 @@ type
 
     {Blob - may use to open existing Blobs. However, ISQLData.AsBlob is preferred}
 
-    function CreateBlob(transaction: ITransaction): IBlob;
-    function OpenBlob(Transaction: ITransaction; BlobID: TISC_QUAD): IBlob;
+    function CreateBlob(transaction: ITransaction; RelationName, ColumnName: string): IBlob; overload;
+    function CreateBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData): IBlob; overload;
 
     {Array - may use to open existing arrays. However, ISQLData.AsArray is preferred}
 

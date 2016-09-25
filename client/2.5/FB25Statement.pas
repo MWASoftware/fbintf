@@ -286,9 +286,12 @@ type
     procedure Prepare(aTransaction: ITransaction=nil);
     function Execute(aTransaction: ITransaction=nil): IResults;
     function OpenCursor(aTransaction: ITransaction=nil): IResultSet;
-    function CreateBlob: IBlob;
-    function CreateArray(column: IColumnMetaData): IArray; overload;
-    function CreateArray(columnName: string): IArray; overload;
+    function CreateBlob(paramName: string): IBlob; overload;
+    function CreateBlob(index: integer): IBlob; overload;
+    function CreateBlob(column: TColumnMetaData): IBlob; overload;
+    function CreateArray(column: TColumnMetaData): IArray; overload;
+    function CreateArray(paramName: string): IArray; overload;
+    function CreateArray(index: integer): IArray;  overload;
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
     property Handle: TISC_STMT_HANDLE read FHandle;
@@ -561,9 +564,9 @@ begin
     IBError(ibxeInvalidDataConversion,[nil]);
 
   if FBlobMetaData = nil then
-    FBlobMetaData := TFBBlobMetaData.Create(FStatement.FAttachment,
+    FBlobMetaData := TFB25BlobMetaData.Create(FStatement.FAttachment,
                 FStatement.FTransaction,
-                GetRelationName,GetFieldName);
+                GetRelationName,GetFieldName,GetSubType);
   Result := FBlobMetaData;
 end;
 
@@ -595,8 +598,9 @@ begin
     if IsNull then
       Result := nil
     else
-      Result := TFBBlob.Create(FStatement.Attachment,
+      Result := TFB25Blob.Create(FStatement.Attachment,
                                TIBXSQLDA(Parent).GetTransaction,
+                               GetBlobMetaData,
                                Blob_ID);
     FBlob := Result;
   end;
@@ -604,7 +608,7 @@ end;
 
 function TIBXSQLVAR.CreateBlob: IBlob;
 begin
-  Result := TFBBlob.Create(FStatement.Attachment,FStatement.Transaction);
+  Result := TFB25Blob.Create(FStatement.Attachment,FStatement.Transaction,GetBlobMetaData);
 end;
 
 procedure TIBXSQLVAR.Initialize;
@@ -1374,23 +1378,50 @@ begin
     Result := InternalOpenCursor(aTransaction as TFB25Transaction);
 end;
 
-function TFB25Statement.CreateBlob: IBlob;
+function TFB25Statement.CreateBlob(paramName: string): IBlob;
+var column: TColumnMetaData;
 begin
-  Result := TFBBlob.Create(FAttachment,FTransaction);
+  InternalPrepare;
+  column := SQLParams.ByName(paramName) as TSQLParam;
+  if column = nil then
+    IBError(ibxeFieldNotFound,[paramName]);
+  Result := CreateBlob(column);
 end;
 
-function TFB25Statement.CreateArray(column: IColumnMetaData): IArray;
+function TFB25Statement.CreateBlob(index: integer): IBlob;
 begin
-  if column.SQLType <> SQL_ARRAY then
+  InternalPrepare;
+  Result := CreateBlob(SQLParams[index] as TSQLParam);
+end;
+
+function TFB25Statement.CreateBlob(column: TColumnMetaData): IBlob;
+begin
+  if assigned(column) and (column.SQLType <> SQL_Blob) then
+    IBError(ibxeNotABlob,[nil]);
+  Result := TFB25Blob.Create(FAttachment,FTransaction,column.GetBlobMetaData);
+end;
+
+function TFB25Statement.CreateArray(column: TColumnMetaData): IArray;
+begin
+  if assigned(column) and (column.SQLType <> SQL_ARRAY) then
     IBError(ibxeNotAnArray,[nil]);
   Result := TFB25Array.Create(FAttachment,FTransaction,column.GetArrayMetaData);
 end;
 
-function TFB25Statement.CreateArray(columnName: string): IArray;
-var col: IColumnMetaData;
+function TFB25Statement.CreateArray(paramName: string): IArray;
+var column: TColumnMetaData;
 begin
-  col := GetMetaData.ByName(columnName);
-  Result := CreateArray(col);
+  InternalPrepare;
+  column := SQLParams.ByName(paramName) as TSQLParam;
+  if column = nil then
+    IBError(ibxeFieldNotFound,[paramName]);
+  Result := CreateArray(column);
+end;
+
+function TFB25Statement.CreateArray(index: integer): IArray;
+begin
+  InternalPrepare;
+  Result := CreateArray(SQLParams[index] as TSQLParam);
 end;
 
 function TFB25Statement.GetAttachment: IAttachment;

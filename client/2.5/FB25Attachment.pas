@@ -89,8 +89,8 @@ type
                        UniqueParamNames: boolean=false): IStatement; overload;
     function GetEventHandler(Events: TStrings): IEvents; overload;
     function GetEventHandler(Event: string): IEvents; overload;
-    function CreateBlob(transaction: ITransaction): IBlob;
-    function OpenBlob(Transaction: ITransaction; BlobID: TISC_QUAD): IBlob;
+    function CreateBlob(transaction: ITransaction; RelationName, ColumnName: string): IBlob; overload;
+    function CreateBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData): IBlob; overload;
 
     function OpenArray(transaction: ITransaction; RelationName, ColumnName: string;
       ArrayID: TISC_QUAD): IArray;
@@ -283,10 +283,19 @@ begin
   Result := TFB25Transaction.Create(self,TPB,DefaultCompletion);
 end;
 
-function TFB25Attachment.CreateBlob(transaction: ITransaction): IBlob;
+function TFB25Attachment.CreateBlob(transaction: ITransaction; RelationName,
+  ColumnName: string): IBlob;
 begin
   CheckHandle;
-  Result := TFBBLob.Create(self,transaction);
+  Result := TFB25Blob.Create(self,transaction as TFB25transaction,
+                TFB25BlobMetaData.Create(self,Transaction as TFB25Transaction,RelationName,ColumnName));
+end;
+
+function TFB25Attachment.CreateBlob(transaction: ITransaction;
+  BlobMetaData: IBlobMetaData): IBlob;
+begin
+  CheckHandle;
+  Result := TFB25Blob.Create(self,transaction as TFB25transaction,BlobMetaData);
 end;
 
 procedure TFB25Attachment.ExecImmediate(transaction: ITransaction; sql: string;
@@ -394,13 +403,6 @@ begin
   end;
 end;
 
-function TFB25Attachment.OpenBlob(Transaction: ITransaction; BlobID: TISC_QUAD
-  ): IBlob;
-begin
-  CheckHandle;
-  Result := TFBBlob.Create(self,Transaction,BlobID);
-end;
-
 function TFB25Attachment.OpenArray(transaction: ITransaction; RelationName, ColumnName: string;
   ArrayID: TISC_QUAD): IArray;
 begin
@@ -425,7 +427,7 @@ function TFB25Attachment.GetBlobMetaData(Transaction: ITransaction; tableName,
   columnName: string): IBlobMetaData;
 begin
   CheckHandle;
-  Result := TFBBlobMetaData.Create(self,Transaction as TFB25Transaction,tableName,columnName);
+  Result := TFB25BlobMetaData.Create(self,Transaction as TFB25Transaction,tableName,columnName);
 end;
 
 function TFB25Attachment.GetArrayMetaData(Transaction: ITransaction; tableName,

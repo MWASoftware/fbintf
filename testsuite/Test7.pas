@@ -34,7 +34,7 @@ const
 
   sqlInsert = 'Insert into TestData(RowID,Title,Dated,Notes) Values(:RowID,:Title,:Dated,:Notes)';
 
-  sqlUpdate = 'Update TestData Set MyArray = ? Where RowID = 1';
+  sqlUpdate = 'Update TestData Set MyArray = :MyArray Where RowID = 1';
 
 { TTest7 }
 
@@ -44,7 +44,6 @@ var Transaction: ITransaction;
     ResultSet: IResultSet;
     i,j: integer;
     ar: IArray;
-    col: IColumnMetaData;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   Statement := Attachment.Prepare(Transaction,'Select * from TestData');
@@ -63,15 +62,14 @@ begin
   Statement := Attachment.Prepare(Transaction,'Select * from TestData');
   ReportResults(Statement);
 
-  col := Statement.GetMetaData.ByName('MyArray');
-  ar := Statement.CreateArray(col);
+  Statement := Attachment.PrepareWithNamedParameters(Transaction,sqlUpdate);
+  ar := Statement.CreateArray('MyArray');
   j := 100;
   for i := 0 to 16 do
   begin
     ar.SetAsInteger([i],j);
     dec(j);
   end;
-  Statement := Attachment.Prepare(Transaction,sqlUpdate);
   Statement.SQLParams[0].AsArray := ar;
   Statement.Execute;
   Statement := Attachment.Prepare(Transaction,'Select * from TestData');

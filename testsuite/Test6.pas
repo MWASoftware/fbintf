@@ -48,6 +48,7 @@ var Transaction: ITransaction;
     Statement2: IStatement;
     ResultSet: IResultSet;
     i: integer;
+    b: IBlob;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
 
@@ -65,10 +66,13 @@ begin
   end;
   Statement.Execute;
   Statement := Attachment.Prepare(Transaction,'Select * from TestData');
+  b := Attachment.CreateBlob(Transaction,Statement.MetaData.ByName('BlobData').GetBlobMetaData);
   ReportResults(Statement);
 
+
+  b.LoadFromFile('testtext.txt');
   Statement := Attachment.Prepare(Transaction,sqlUpdate);
-  Statement.SQLParams[0].AsBlob := Statement.CreateBlob.LoadFromFile('testtext.txt');
+  Statement.SQLParams[0].AsBlob := b;//Attachment.CreateBlob(Transaction,'TestData','BlobData').LoadFromFile('testtext.txt');
   Statement.SQLParams[1].AsInteger := 1;
   Statement.Execute;
   Statement := Attachment.Prepare(Transaction,'Select * from TestData');
@@ -79,7 +83,7 @@ begin
   with Statement.GetSQLParams do
   begin
     for i := 0 to GetCount - 1 do
-      writeln('Param Name = ',Params[i].getName);
+      writeln('Param Name = ',Params[i].getName,' Charset ID = ',Params[i].GetCharSetID);
     ByName('rowid').AsInteger := 2;
     ByName('title').AsString := 'Blob Test ©€';
   end;

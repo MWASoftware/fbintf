@@ -94,8 +94,8 @@ type
 
     {Blob - may use to open existing Blobs. However, ISQLData.AsBlob is preferred}
 
-    function CreateBlob(transaction: ITransaction): IBlob;
-    function OpenBlob(Transaction: ITransaction; BlobID: TISC_QUAD): IBlob;
+    function CreateBlob(transaction: ITransaction; RelationName, ColumnName: string): IBlob; overload;
+    function CreateBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData): IBlob; overload;
 
     {Array}
     function OpenArray(transaction: ITransaction; RelationName, ColumnName: string; ArrayID: TISC_QUAD): IArray;
@@ -365,17 +365,19 @@ begin
   end;
 end;
 
-function TFB30Attachment.CreateBlob(transaction: ITransaction): IBlob;
+function TFB30Attachment.CreateBlob(transaction: ITransaction; RelationName,
+  ColumnName: string): IBlob;
 begin
   CheckHandle;
-  Result := TFBBLob.Create(self,transaction);
+  Result := TFB30Blob.Create(self,transaction as TFB30Transaction,
+              TFB30BlobMetaData.Create(self,Transaction as TFB30Transaction,RelationName,ColumnName));
 end;
 
-function TFB30Attachment.OpenBlob(Transaction: ITransaction; BlobID: TISC_QUAD
-  ): IBlob;
+function TFB30Attachment.CreateBlob(transaction: ITransaction;
+  BlobMetaData: IBlobMetaData): IBlob;
 begin
   CheckHandle;
-  Result := TFBBlob.Create(self,Transaction,BlobID);
+  Result := TFB30Blob.Create(self,transaction as TFB30Transaction, BlobMetaData);
 end;
 
 function TFB30Attachment.OpenArray(transaction: ITransaction; RelationName,
@@ -403,7 +405,7 @@ function TFB30Attachment.GetBlobMetaData(Transaction: ITransaction; tableName,
   columnName: string): IBlobMetaData;
 begin
   CheckHandle;
-  Result := TFBBlobMetaData.Create(self,Transaction as TFB30Transaction,tableName,columnName);
+  Result := TFB30BlobMetaData.Create(self,Transaction as TFB30Transaction,tableName,columnName);
 end;
 
 function TFB30Attachment.GetArrayMetaData(Transaction: ITransaction; tableName,

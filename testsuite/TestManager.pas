@@ -181,6 +181,7 @@ end;
 procedure TTestBase.PrintMetaData(meta: IMetaData);
 var i, j: integer;
     ar: IArrayMetaData;
+    bm: IBlobMetaData;
     Bounds: TArrayBounds;
 begin
   writeln('Metadata');
@@ -211,6 +212,18 @@ begin
           Bounds := ar.GetBounds;
           for j := 0 to Length(Bounds) - 1 do
             write('(',Bounds[j].LowerBound,':',Bounds[j].UpperBound,') ');
+          writeln;
+        end;
+      SQL_BLOB:
+        begin
+          writeln;
+          writeln('Blob Meta Data');
+          bm := GetBlobMetaData;
+          writeln('SQL SubType =',bm.GetSubType);
+          writeln('Table = ',bm.GetRelationName);
+          writeln('Column = ',bm.GetColumnName);
+          writeln('CharSetID = ',bm.GetCharSetID);
+          writeln('Segment Size = ',bm.GetSegmentSize);
           writeln;
         end;
     end;

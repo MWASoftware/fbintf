@@ -34,72 +34,53 @@ interface
 
 uses
   Classes, SysUtils, Firebird, IB, IBHeader, IBExternals, FBClientAPI, FB30ClientAPI, FB30Attachment,
-  FB30Transaction, FBActivityMonitor;
+  FBTransaction, FB30Transaction,  FBBlob;
 
 type
 
-   { TFBBlobMetaData }
+   { TFB30BlobMetaData }
 
-   TFBBlobMetaData  = class(TActivityReporter, IBlobMetaData)
+   TFB30BlobMetaData  = class(TFBBlobMetaData, IBlobMetaData)
    private
-     FSubType: integer;
-     FCharSetID: cardinal;
-     FSegmentSize: cardinal;
-     FRelationName: string;
-     FColumnName: string;
+     FHasFullMetaData: boolean;
+     FAttachment: TFB30Attachment;
+     FTransaction: TFB30Transaction;
+   protected
+     procedure NeedFullMetadata; override;
    public
      constructor Create(Attachment: TFB30Attachment; Transaction: TFB30Transaction;
-       RelationName, ColumnName: string);
+       RelationName, ColumnName: string); overload;
+     constructor Create(Attachment: TFB30Attachment; Transaction: TFB30Transaction;
+       RelationName, ColumnName: string; SubType: integer); overload;
 
-   public
-     {IBlobMetaData}
-    function GetSubType: integer;
-    function GetCharSetID: cardinal;
-    function GetSegmentSize: cardinal;
-    function GetTableName: string;
-    function GetColumnName: string;
   end;
 
 
-  { TFBBlob }
+  { TFB30Blob }
 
-  TFBBlob = class(TActivityReporter,IBlob)
+  TFB30Blob = class(TFBBlob,IBlob)
   private
-    FAttachment: TFB30Attachment;
     FBlobIntf: Firebird.IBlob;
-    FBlobID: TISC_QUAD;
     FEOB: boolean;
-    FCreating: boolean;
-    FTransaction: ITransaction;
-    procedure CheckReadable;
-    procedure CheckWritable;
-    procedure InternalClose(Force: boolean);
-    procedure InternalCancel(Force: boolean);
+  protected
+    procedure CheckReadable; override;
+    procedure CheckWritable; override;
+    function GetIntf: IBlob; override;
+    procedure InternalClose(Force: boolean); override;
+    procedure InternalCancel(Force: boolean); override;
   public
-    constructor Create(Attachment: TFB30Attachment; Transaction: ITransaction); overload;
-    constructor Create(Attachment: TFB30Attachment; Transaction: ITransaction;
-                       BlobID: TISC_QUAD); overload;
-    destructor Destroy; override;
-    procedure TransactionEnding(aTransaction: TFB30Transaction; Force: boolean);
+    constructor Create(Attachment: TFB30Attachment; Transaction: TFB30Transaction;
+                       MetaData: IBlobMetaData); overload;
+    constructor Create(Attachment: TFB30Attachment; Transaction: TFBTransaction;
+                       MetaData: IBlobMetaData; BlobID: TISC_QUAD); overload;
     property BlobIntf: Firebird.IBlob read FBlobIntf;
-    property Attachment: TFB30Attachment read FAttachment;
 
   {IBlob}
   public
-    procedure Cancel;
-    procedure Close;
-    function GetBlobID: TISC_QUAD;
-    function GetBlobMode: TFBBlobMode;
     procedure GetInfo(var NumSegments: Int64; var MaxSegmentSize, TotalSize: Int64;
       var BlobType: TBlobType);
-    function Read(var Buffer; Count: Longint): Longint;
-    function Write(const Buffer; Count: Longint): Longint;
-    function LoadFromFile(Filename: string): IBlob;
-    function LoadFromStream(S: TStream) : IBlob;
-    procedure SaveToFile(Filename: string);
-    procedure SaveToStream(S: TStream);
-    function GetAttachment: IAttachment;
-    function GetTransaction: ITransaction;
+    function Read(var Buffer; Count: Longint): Longint; override;
+    function Write(const Buffer; Count: Longint): Longint; override;
   end;
 
 implementation
@@ -111,20 +92,18 @@ const
     'From RDB$FIELDS F JOIN RDB$RELATION_FIELDS R On R.RDB$FIELD_SOURCE = F.RDB$FIELD_NAME '+
   'Where Trim(R.RDB$RELATION_NAME) = Upper(Trim(?)) and Trim(R.RDB$FIELD_NAME) = Upper(Trim(?))';
 
-{ TFBBlobMetaData }
+{ TFB30BlobMetaData }
 
-constructor TFBBlobMetaData.Create(Attachment: TFB30Attachment;
-  Transaction: TFB30Transaction; RelationName, ColumnName: string);
+procedure TFB30BlobMetaData.NeedFullMetadata;
 var stmt: IStatement;
 begin
-  inherited Create(Transaction);
-  FRelationName := RelationName;
-  FColumnName := ColumnName;
-  stmt := TFB30Statement.Create(Attachment,Transaction, sLookupBlobMetaData ,Attachment.SQLDialect);
+  if FHasFullMetaData then Exit;
+
+  stmt := TFB30Statement.Create(FAttachment,FTransaction, sLookupBlobMetaData ,FAttachment.SQLDialect);
   with stmt do
   begin
-    SQLParams[0].AsString := RelationName;
-    SQLParams[1].AsString := ColumnName;
+    SQLParams[0].AsString := GetRelationName;
+    SQLParams[1].AsString := GetColumnName;
     with OpenCursor do
     if FetchNext then
     begin
@@ -137,51 +116,51 @@ begin
     else
       IBError(ibxeInvalidBlobMetaData,[nil]);
 
-    if (FCharSetID > 1) and Attachment.HasDefaultCharSet then
-      FCharSetID := Attachment.CharSetID
+    if (FCharSetID > 1) and FAttachment.HasDefaultCharSet then
+      FCharSetID := FAttachment.CharSetID;
   end;
+
+  FHasFullMetaData := true;
+  FHasSubType := true;
 end;
 
-function TFBBlobMetaData.GetSubType: integer;
+constructor TFB30BlobMetaData.Create(Attachment: TFB30Attachment;
+  Transaction: TFB30Transaction; RelationName, ColumnName: string);
 begin
-  Result := FSubType;
+  inherited Create(Transaction,RelationName,ColumnName);
+  FAttachment := Attachment;
+  FTransaction := Transaction;
 end;
 
-function TFBBlobMetaData.GetCharSetID: cardinal;
+constructor TFB30BlobMetaData.Create(Attachment: TFB30Attachment;
+  Transaction: TFB30Transaction; RelationName, ColumnName: string;
+  SubType: integer);
 begin
-  Result := FCharSetID;
+  Create(Attachment,Transaction,RelationName,ColumnName);
+  FSubType := SubType;
+  FHasSubType := true;
 end;
 
-function TFBBlobMetaData.GetSegmentSize: cardinal;
-begin
-  Result := FSegmentSize;
-end;
+{ TFB30Blob }
 
-function TFBBlobMetaData.GetTableName: string;
-begin
-  Result := FRelationName;
-end;
-
-function TFBBlobMetaData.GetColumnName: string;
-begin
-  Result := FColumnName;
-end;
-
-{ TFBBlob }
-
-procedure TFBBlob.CheckReadable;
+procedure TFB30Blob.CheckReadable;
 begin
   if FCreating or (FBlobIntf = nil) then
     IBError(ibxeBlobCannotBeRead, [nil]);
 end;
 
-procedure TFBBlob.CheckWritable;
+procedure TFB30Blob.CheckWritable;
 begin
   if not FCreating or (FBlobIntf = nil) then
     IBError(ibxeBlobCannotBeWritten, [nil]);
 end;
 
-procedure TFBBlob.InternalClose(Force: boolean);
+function TFB30Blob.GetIntf: IBlob;
+begin
+  Result := self;
+end;
+
+procedure TFB30Blob.InternalClose(Force: boolean);
 begin
   if FBlobIntf = nil then
     Exit;
@@ -194,7 +173,7 @@ begin
   FBlobIntf := nil;
 end;
 
-procedure TFBBlob.InternalCancel(Force: boolean);
+procedure TFB30Blob.InternalCancel(Force: boolean);
 begin
   if FBlobIntf = nil then
     Exit;
@@ -207,82 +186,31 @@ begin
   FBlobIntf := nil;
 end;
 
-constructor TFBBlob.Create(Attachment: TFB30Attachment; Transaction: ITransaction
-  );
+constructor TFB30Blob.Create(Attachment: TFB30Attachment; Transaction: TFB30Transaction;
+  MetaData: IBlobMetaData);
 begin
-    inherited Create(Transaction as TFB30Transaction);
-    FAttachment := Attachment;
-    FTransaction := Transaction;
-    AddMonitor(Transaction as TFB30Transaction);
-    FCreating := true;
+    inherited Create(Attachment,Transaction,MetaData);
     with Firebird30ClientAPI do
     begin
-      FBlobIntf := FAttachment.AttachmentIntf.createBlob(StatusIntf,(Transaction as TFB30Transaction).TransactionIntf,
+      FBlobIntf := Attachment.AttachmentIntf.createBlob(StatusIntf,Transaction.TransactionIntf,
                         @FBlobID,0,nil);
       Check4DataBaseError;
     end;
 end;
 
-constructor TFBBlob.Create(Attachment: TFB30Attachment;
-  Transaction: ITransaction; BlobID: TISC_QUAD);
+constructor TFB30Blob.Create(Attachment: TFB30Attachment;
+  Transaction: TFBTransaction; MetaData: IBlobMetaData; BlobID: TISC_QUAD);
 begin
-  inherited Create(Transaction as TFB30Transaction);
-  FAttachment := Attachment;
-  FTransaction := Transaction;
-  AddMonitor(Transaction as TFB30Transaction);
-  FBlobID := BlobID;
+  inherited Create(Attachment,Transaction,MetaData,BlobID);
   with Firebird30ClientAPI do
   begin
-    FBlobIntf := FAttachment.AttachmentIntf.openBlob(StatusIntf,(Transaction as TFB30Transaction).TransactionIntf,
+    FBlobIntf := Attachment.AttachmentIntf.openBlob(StatusIntf,(Transaction as TFB30Transaction).TransactionIntf,
                      @FBlobID, 0, nil);
     Check4DataBaseError;
   end;
 end;
 
-destructor TFBBlob.Destroy;
-begin
-  if FCreating then
-    Cancel
-  else
-    Close;
-  inherited Destroy;
-end;
-
-procedure TFBBlob.TransactionEnding(aTransaction: TFB30Transaction;
-  Force: boolean);
-begin
-  if aTransaction <> FTransaction then
-    Exit;
-  if FCreating then
-    InternalCancel(Force)
-  else
-    InternalClose(Force);
-end;
-
-procedure TFBBlob.Cancel;
-begin
-  InternalCancel(false);
-end;
-
-procedure TFBBlob.Close;
-begin
-  InternalClose(false);
-end;
-
-function TFBBlob.GetBlobID: TISC_QUAD;
-begin
-  Result := FBlobID;
-end;
-
-function TFBBlob.GetBlobMode: TFBBlobMode;
-begin
-  if FCreating then
-    Result := fbmWrite
-  else
-    Result := fbmRead;
-end;
-
-procedure TFBBlob.GetInfo(var NumSegments: Int64; var MaxSegmentSize,
+procedure TFB30Blob.GetInfo(var NumSegments: Int64; var MaxSegmentSize,
   TotalSize: Int64; var BlobType: TBlobType);
 var
   items: array[0..3] of Char;
@@ -326,7 +254,7 @@ begin
   end;
 end;
 
-function TFBBlob.Read(var Buffer; Count: Longint): Longint;
+function TFB30Blob.Read(var Buffer; Count: Longint): Longint;
 var
   BytesRead : cardinal;
   LocalBuffer: PChar;
@@ -356,7 +284,7 @@ begin
     Firebird30ClientAPI.IBDataBaseError
 end;
 
-function TFBBlob.Write(const Buffer; Count: Longint): Longint;
+function TFB30Blob.Write(const Buffer; Count: Longint): Longint;
 begin
   CheckWritable;
   Result := 0;
@@ -369,68 +297,6 @@ begin
   end;
   SignalActivity;
   Result := Count;
-end;
-
-function TFBBlob.LoadFromFile(Filename: string): IBlob;
-var
-  Stream: TStream;
-begin
-  Stream := TFileStream.Create(FileName, fmOpenRead);
-  try
-    Result := LoadFromStream(Stream);
-  finally
-    Stream.Free;
-  end;
-end;
-
-const BufSize = 8 * 1024;
-
-function TFBBlob.LoadFromStream(S: TStream): IBlob;
-var Buffer: array [0..BufSize-1] of char;
-    BytesRead: integer;
-begin
-  CheckWritable;
-  S.Position := 0;
-  repeat
-    BytesRead := S.Read(Buffer,BufSize);
-    Write(Buffer,BytesRead);
-  until BytesRead = 0;
-  Close;
-  Result := self;
-end;
-
-procedure TFBBlob.SaveToFile(Filename: string);
-var
-  Stream: TStream;
-begin
-  Stream := TFileStream.Create(FileName, fmCreate);
-  try
-    SaveToStream(Stream);
-  finally
-    Stream.Free;
-  end;
-end;
-
-procedure TFBBlob.SaveToStream(S: TStream);
-var Buffer: array [0..BufSize-1] of char;
-    BytesRead: integer;
-begin
-  CheckReadable;
-  repeat
-    BytesRead := Read(Buffer,BufSize);
-    S.Write(Buffer,BytesRead);
-  until BytesRead = 0;
-  Close;
-end;
-
-function TFBBlob.GetAttachment: IAttachment;
-begin
-  Result := FAttachment;
-end;
-
-function TFBBlob.GetTransaction: ITransaction;
-begin
-  Result := FTransaction;
 end;
 
 end.

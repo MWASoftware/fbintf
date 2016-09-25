@@ -58,7 +58,8 @@ begin
   Statement := Attachment.Prepare(Transaction,'Select * from TestData');
   ReportResults(Statement);
 
-  ar := Statement.CreateArray('MyArray');
+  Statement := Attachment.Prepare(Transaction,sqlUpdate);
+  ar := Statement.CreateArray(0);
   if ar <> nil then
   begin
     k := 50;
@@ -68,7 +69,6 @@ begin
         ar.SetAsString([i,j],'A' + IntToStr(k));
         Inc(k);
       end;
-    Statement := Attachment.Prepare(Transaction,sqlUpdate);
     Statement.SQLParams[0].AsArray := ar;
     Statement.Execute;
   end;

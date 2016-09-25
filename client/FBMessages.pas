@@ -217,6 +217,7 @@ type
       ibxeNotAMultiDatabaseTransaction,
       ibxeAttachmentListIndexError,
       ibxeNotAnArray,
+      ibxeNotABlob,
       ibxeInvalidSubscript,
       ibxeArrayElementOverFlow,
       ibxArrayBoundsCantIncrease ,
@@ -225,7 +226,9 @@ type
       ibxeUnexpectedDatabaseInfoResp,
       ibxeInvalidBlobMetaData,
       ibxeNoDPB,
-      ibxeInEventWait
+      ibxeInEventWait,
+      ibxeIncompatibleBlob,
+      ibxeMissingColumnName
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;
@@ -405,6 +408,7 @@ resourcestring
   SNotAMultiDatabaseTransaction = 'This is not a multi-database transaction';
   SAttachmentListIndexError = 'Attachment List index out of range (%d)';
   SNotAnArray = 'Table Column must be an array';
+  SNotABlob = 'Table Column must be a Blob';
   SInvalidSubscript = 'Invalid Subscript (%d) for Array Dimension %d';
   SArrayElementOverFlow = 'Array Element too big';
   SArrayBoundsCantIncrease = 'Array Bounds can only be narrowed';
@@ -414,6 +418,8 @@ resourcestring
   SInvalidBlobMetaData = 'Unable to Access Blob Meta Data';
   SNoDPB = 'A DPB must be provided';
   SInEventWait = 'Already in Event Wait State';
+  SIncompatibleBlob = 'Incompatible Blob SubTypes. %d expected, %d found';
+  SMissingColumnName = 'Relation or Column Name Missing';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -556,6 +562,7 @@ const
     SNotAMultiDatabaseTransaction,
     SAttachmentListIndexError,
     SNotAnArray,
+    SNotABlob,
     SInvalidSubscript,
     SArrayElementOverFlow,
     SArrayBoundsCantIncrease,
@@ -564,7 +571,9 @@ const
     SUnexpectedDatabaseInfoResp,
     SInvalidBlobMetaData,
     SNoDPB,
-    SInEventWait
+    SInEventWait,
+    SIncompatibleBlob,
+    SMissingColumnName
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;

@@ -297,6 +297,7 @@ type
   public
     constructor Create(aIBXSQLVAR: TSQLVarData);
     function GetSQLDialect: integer; override;
+    property Statement: IStatement read FStatement;
 
   public
     {IColumnMetaData}
@@ -1678,10 +1679,6 @@ begin
 end;
 
 function TIBSQLData.GetAsString: String;
-var
-  ss: TStringStream;
-  b: IBlob;
-  rs: rawbytestring;
 begin
   CheckActive;
   Result := '';
@@ -1690,18 +1687,8 @@ begin
   case SQLType of
     SQL_ARRAY:
       result := '(Array)'; {do not localize}
-    SQL_BLOB: begin
-      ss := TStringStream.Create('');
-      try
-        b := FIBXSQLVAR.GetAsBlob(AsQuad);
-        b.SaveToStream(ss);
-        rs :=  ss.DataString;
-        SetCodePage(rs,GetCodePage,false);
-        Result := rs;
-      finally
-        ss.Free;
-      end;
-    end;
+    SQL_BLOB:
+      Result := FIBXSQLVAR.GetAsBlob(AsQuad).GetAsString;
     else
       Result := inherited GetAsString;
   end;
@@ -1710,30 +1697,19 @@ end;
 { TSQLParam }
 
 procedure TSQLParam.InternalSetAsString(Value: String);
-var
-  ss: TStringStream;
-  b: IBlob;
+var b: IBlob;
 begin
   CheckActive;
   if IsNullable then
     IsNull := False;
   case SQLTYPE of
   SQL_BLOB:
-  begin
-    ss := TStringStream.Create(Transliterate(Value,GetCodePage));
-    try
+    begin
       b := FIBXSQLVAR.CreateBlob;
-      try
-        b.LoadFromStream(ss);
-        AsQuad := b.GetBlobID;
-      finally
-        b.Close;
-      end;
-    finally
-      ss.Free;
+      b.SetAsString(Value);
+      AsBlob := b;
+      Changed;
     end;
-    Changed;
-  end;
 
   SQL_VARYING,
   SQL_TEXT:
@@ -2169,6 +2145,8 @@ begin
     IBError(ibxeDuplicateParamName,[Name]);
   CheckActive;
   aValue.Close;
+  if aValue.GetSubType <> GetSubType then
+    IBError(ibxeIncompatibleBlob,[GetSubType,aValue.GetSubType]);
   AsQuad := aValue.GetBlobID;
   Changed;
 end;
@@ -2242,12 +2220,13 @@ begin
 end;
 
 function TMetaData.ByName(Idx: String): IColumnMetaData;
+var aIBXSQLVAR: TSQLVarData;
 begin
   CheckActive;
-  if FMetaData.Count = 0 then
-    Result := nil
-  else
-    Result := TColumnMetaData.Create(FMetaData.ColumnByName(Idx));
+  aIBXSQLVAR := FMetaData.ColumnByName(Idx);
+  if aIBXSQLVAR = nil then
+    IBError(ibxeFieldNotFound,[Idx]);
+  Result := TColumnMetaData.Create(aIBXSQLVAR);
 end;
 
 { TSQLParams }
