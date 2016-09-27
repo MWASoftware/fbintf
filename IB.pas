@@ -508,6 +508,8 @@ type
     property Value: Variant read GetAsVariant write SetAsVariant;
     property IsNull: Boolean read GetIsNull write SetIsNull;
     property Modified: Boolean read getModified;
+    property Name: string read GetName;
+    property SQLType: cardinal read GetSQLType;
   end;
 
    {
@@ -791,6 +793,7 @@ type
 
     function CreateBlob(transaction: ITransaction; RelationName, ColumnName: string): IBlob; overload;
     function CreateBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData): IBlob; overload;
+    function OpenBlob(transaction: ITransaction; RelationName, ColumnName: string; BlobID: TISC_QUAD): IBlob;
 
     {Array - may use to open existing arrays. However, ISQLData.AsArray is preferred}
 

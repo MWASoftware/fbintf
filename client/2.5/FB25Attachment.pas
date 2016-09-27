@@ -91,6 +91,8 @@ type
     function GetEventHandler(Event: string): IEvents; overload;
     function CreateBlob(transaction: ITransaction; RelationName, ColumnName: string): IBlob; overload;
     function CreateBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData): IBlob; overload;
+    function OpenBlob(transaction: ITransaction; RelationName, ColumnName: string; BlobID: TISC_QUAD): IBlob; overload;
+    function OpenBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BlobID: TISC_QUAD): IBlob; overload;
 
     function OpenArray(transaction: ITransaction; RelationName, ColumnName: string;
       ArrayID: TISC_QUAD): IArray;
@@ -296,6 +298,22 @@ function TFB25Attachment.CreateBlob(transaction: ITransaction;
 begin
   CheckHandle;
   Result := TFB25Blob.Create(self,transaction as TFB25transaction,BlobMetaData);
+end;
+
+function TFB25Attachment.OpenBlob(transaction: ITransaction; RelationName,
+  ColumnName: string; BlobID: TISC_QUAD): IBlob;
+begin
+  CheckHandle;
+  Result := TFB25Blob.Create(self,transaction as TFB25transaction,
+                TFB25BlobMetaData.Create(self,Transaction as TFB25Transaction,RelationName,ColumnName),
+                BlobID);
+end;
+
+function TFB25Attachment.OpenBlob(transaction: ITransaction;
+  BlobMetaData: IBlobMetaData; BlobID: TISC_QUAD): IBlob;
+begin
+  CheckHandle;
+  Result :=  TFB25Blob.Create(self,transaction as TFB25transaction,BlobMetaData,BlobID);
 end;
 
 procedure TFB25Attachment.ExecImmediate(transaction: ITransaction; sql: string;

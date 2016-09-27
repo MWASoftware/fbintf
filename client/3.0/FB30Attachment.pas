@@ -96,6 +96,8 @@ type
 
     function CreateBlob(transaction: ITransaction; RelationName, ColumnName: string): IBlob; overload;
     function CreateBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData): IBlob; overload;
+    function OpenBlob(transaction: ITransaction; RelationName, ColumnName: string; BlobID: TISC_QUAD): IBlob; overload;
+    function OpenBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BlobID: TISC_QUAD): IBlob; overload;
 
     {Array}
     function OpenArray(transaction: ITransaction; RelationName, ColumnName: string; ArrayID: TISC_QUAD): IArray;
@@ -378,6 +380,22 @@ function TFB30Attachment.CreateBlob(transaction: ITransaction;
 begin
   CheckHandle;
   Result := TFB30Blob.Create(self,transaction as TFB30Transaction, BlobMetaData);
+end;
+
+function TFB30Attachment.OpenBlob(transaction: ITransaction; RelationName,
+  ColumnName: string; BlobID: TISC_QUAD): IBlob;
+begin
+  CheckHandle;
+  Result := TFB30Blob.Create(self,transaction as TFB30transaction,
+                TFB30BlobMetaData.Create(self,Transaction as TFB30Transaction,RelationName,ColumnName),
+                BlobID);
+end;
+
+function TFB30Attachment.OpenBlob(transaction: ITransaction;
+  BlobMetaData: IBlobMetaData; BlobID: TISC_QUAD): IBlob;
+begin
+  CheckHandle;
+  Result :=  TFB30Blob.Create(self,transaction as TFB30transaction,BlobMetaData,BlobID);
 end;
 
 function TFB30Attachment.OpenArray(transaction: ITransaction; RelationName,
