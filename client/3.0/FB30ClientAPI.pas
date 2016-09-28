@@ -308,7 +308,7 @@ var
 begin
   UtilIntf.decodeDate(PISC_DATE(bufptr)^,@Yr, @Mn, @Dy);
   try
-    result := EncodeDate(Word(Yr + 1900), Mn,Dy);
+    result := EncodeDate(Yr, Mn,Dy);
   except
     on E: EConvertError do begin
       IBError(ibxeInvalidDataConversion, [nil]);
