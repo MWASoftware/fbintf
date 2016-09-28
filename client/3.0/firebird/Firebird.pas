@@ -255,7 +255,7 @@ type
 	IMetadataBuilder_setSubTypePtr = procedure(this: IMetadataBuilder; status: IStatus; index: Cardinal; subType: Integer); cdecl;
 	IMetadataBuilder_setLengthPtr = procedure(this: IMetadataBuilder; status: IStatus; index: Cardinal; length: Cardinal); cdecl;
 	IMetadataBuilder_setCharSetPtr = procedure(this: IMetadataBuilder; status: IStatus; index: Cardinal; charSet: Cardinal); cdecl;
-	IMetadataBuilder_setScalePtr = procedure(this: IMetadataBuilder; status: IStatus; index: Cardinal; scale: Cardinal); cdecl;
+	IMetadataBuilder_setScalePtr = procedure(this: IMetadataBuilder; status: IStatus; index: Cardinal; scale: integer); cdecl;
 	IMetadataBuilder_truncatePtr = procedure(this: IMetadataBuilder; status: IStatus; count: Cardinal); cdecl;
 	IMetadataBuilder_moveNameToIndexPtr = procedure(this: IMetadataBuilder; status: IStatus; name: PAnsiChar; index: Cardinal); cdecl;
 	IMetadataBuilder_removePtr = procedure(this: IMetadataBuilder; status: IStatus; index: Cardinal); cdecl;
@@ -1175,7 +1175,7 @@ type
 		procedure setSubType(status: IStatus; index: Cardinal; subType: Integer);
 		procedure setLength(status: IStatus; index: Cardinal; length: Cardinal);
 		procedure setCharSet(status: IStatus; index: Cardinal; charSet: Cardinal);
-		procedure setScale(status: IStatus; index: Cardinal; scale: Cardinal);
+		procedure setScale(status: IStatus; index: Cardinal; scale: integer);
 		procedure truncate(status: IStatus; count: Cardinal);
 		procedure moveNameToIndex(status: IStatus; name: PAnsiChar; index: Cardinal);
 		procedure remove(status: IStatus; index: Cardinal);
@@ -1192,7 +1192,7 @@ type
 		procedure setSubType(status: IStatus; index: Cardinal; subType: Integer); virtual; abstract;
 		procedure setLength(status: IStatus; index: Cardinal; length: Cardinal); virtual; abstract;
 		procedure setCharSet(status: IStatus; index: Cardinal; charSet: Cardinal); virtual; abstract;
-		procedure setScale(status: IStatus; index: Cardinal; scale: Cardinal); virtual; abstract;
+		procedure setScale(status: IStatus; index: Cardinal; scale: integer); virtual; abstract;
 		procedure truncate(status: IStatus; count: Cardinal); virtual; abstract;
 		procedure moveNameToIndex(status: IStatus; name: PAnsiChar; index: Cardinal); virtual; abstract;
 		procedure remove(status: IStatus; index: Cardinal); virtual; abstract;
@@ -5254,7 +5254,7 @@ begin
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status); {$ENDIF}
 end;
 
-procedure IMetadataBuilder.setScale(status: IStatus; index: Cardinal; scale: Cardinal);
+procedure IMetadataBuilder.setScale(status: IStatus; index: Cardinal; scale: integer);
 begin
 	MetadataBuilderVTable(vTable).setScale(Self, status, index, scale);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status); {$ENDIF}
@@ -8135,7 +8135,7 @@ begin
 	end
 end;
 
-procedure IMetadataBuilderImpl_setScaleDispatcher(this: IMetadataBuilder; status: IStatus; index: Cardinal; scale: Cardinal); cdecl;
+procedure IMetadataBuilderImpl_setScaleDispatcher(this: IMetadataBuilder; status: IStatus; index: Cardinal; scale: integer); cdecl;
 begin
 	try
 		IMetadataBuilderImpl(this).setScale(status, index, scale);
