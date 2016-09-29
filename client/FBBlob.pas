@@ -323,8 +323,8 @@ constructor TFBBlobMetaData.Create(Transaction: TFBTransaction; RelationName,
   ColumnName: string);
 begin
   inherited Create(Transaction);
-  if (RelationName = '') or (ColumnName = '') then
-    IBError(ibxeMissingColumnName,[]);
+//  if (RelationName = '') or (ColumnName = '') then
+ //   IBError(ibxeMissingColumnName,[]);
   FRelationName := RelationName;
   FColumnName := ColumnName;
 end;

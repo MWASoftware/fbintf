@@ -43,7 +43,8 @@ const
   DBInfoDefaultBufferSize = 512;
 
 type
-  TItemDataType = (dtString, dtString2, dtByte, dtBytes, dtInteger, dtIntegerFixed, dtnone,dtList,dtSpecial);
+  TItemDataType = (dtString, dtString2, dtByte, dtBytes, dtInteger, dtIntegerFixed, dtnone,
+    dtList,dtSpecial);
 
   POutputBlockItemData = ^TOutputBlockItemData;
   TOutputBlockItemData = record
@@ -176,6 +177,28 @@ type
     property Items[index: integer]: IServiceQueryResultItem read getItem; default;
   end;
 
+  { TSQLInfoResultsBuffer }
+
+  TSQLInfoResultsBuffer = class(TOutputBlock,ISQLInfoResults)
+  protected
+    function AddListItem(BufPtr: PChar): POutputBlockItemData; override;
+    function AddCountedListItem(BufPtr: PChar): POutputBlockItemData;
+    function AddSpecialItem(BufPtr: PChar): POutputBlockItemData; override;
+    procedure DoParseBuffer; override;
+  public
+    constructor Create(aSize: integer = 1024);
+    function GetItem(index: integer): ISQLInfoItem;
+    function Find(ItemType: byte): ISQLInfoItem;
+    property Count: integer read GetCount;
+    property Items[index: integer]: ISQLInfoItem read getItem; default;
+  end;
+
+  { TSQLInfoResultsItem }
+
+  TSQLInfoResultsItem = class(TOutputBlockItemGroup,ISQLInfoItem)
+    function GetItem(index: integer): ISQLInfoItem;
+    function Find(ItemType: byte): ISQLInfoItem;
+  end;
 
 implementation
 
@@ -897,6 +920,143 @@ begin
     Result := nil
   else
     Result := TServiceQueryResultItem.Create(self,P);
+end;
+
+{ TSQLInfoResultsItem }
+
+function TSQLInfoResultsItem.GetItem(index: integer): ISQLInfoItem;
+var P: POutputBlockItemData;
+begin
+  P := inherited getItem(index);
+  Result := TSQLInfoResultsItem.Create(self.Owner,P)
+end;
+
+function TSQLInfoResultsItem.Find(ItemType: byte): ISQLInfoItem;
+var P: POutputBlockItemData;
+begin
+  P := inherited Find(ItemType);
+  Result := TSQLInfoResultsItem.Create(self.Owner,P)
+end;
+
+{ TSQLInfoResultsBuffer }
+
+function TSQLInfoResultsBuffer.AddListItem(BufPtr: PChar): POutputBlockItemData;
+var P: PChar;
+    i: integer;
+begin
+  Result := inherited AddListItem(BufPtr);
+  P := BufPtr + 1;
+  i := 0;
+  with FirebirdClientAPI do
+     Result^.FSize := DecodeInteger(P,2) + 3;
+  Inc(P,2);
+
+  with Result^ do
+  begin
+    while P < FBufPtr + FSize do
+    begin
+      SetLength(FSubItems,i+1);
+      case integer(P^) of
+      isc_info_req_select_count,
+      isc_info_req_insert_count,
+      isc_info_req_update_count,
+      isc_info_req_delete_count:
+        FSubItems[i] := AddIntegerItem(P);
+
+      else
+        FSubItems[i] := AddSpecialItem(P);
+      end;
+      P +=  FSubItems[i]^.FSize;
+      Inc(i);
+    end;
+  end;
+end;
+
+function TSQLInfoResultsBuffer.AddCountedListItem(BufPtr: PChar
+  ): POutputBlockItemData;
+var P: PChar;
+    i: integer;
+    ItemCount: integer;
+begin
+  Result := inherited AddListItem(BufPtr);
+  P := BufPtr + 1;
+  i := 0;
+  with FirebirdClientAPI do
+     ItemCount := DecodeInteger(P,2);
+  Inc(P,2);
+  with Result^ do
+  begin
+  SetLength(FSubItems,ItemCount);
+
+  for i := 0 to ItemCount - 1 do
+  begin
+    case integer(P^) of
+    isc_info_end:
+      Exit;
+    else
+      FSubItems[i] := AddSpecialItem(P);
+    end;
+    P +=  FSubItems[i]^.FSize;
+  end;
+  end;
+end;
+
+function TSQLInfoResultsBuffer.AddSpecialItem(BufPtr: PChar
+  ): POutputBlockItemData;
+begin
+  Result := inherited AddSpecialItem(BufPtr);
+  writeln('Found unknown SQL Item = ',byte(BufPtr^), ' Length = ',Result^.FDataLength);
+end;
+
+procedure TSQLInfoResultsBuffer.DoParseBuffer;
+var P: PChar;
+    index: integer;
+begin
+  P := Buffer;
+  index := 0;
+  SetLength(FItems,0);
+  while (P^ <> char(isc_info_end)) and (P < Buffer + getBufSize) do
+  begin
+    SetLength(FItems,index+1);
+    case byte(P^) of
+    isc_info_sql_stmt_type:
+      FItems[index] := AddIntegerItem(P);
+
+    isc_info_sql_get_plan:
+      FItems[index] := AddStringItem(P);
+
+    isc_info_sql_records:
+      FItems[index] := AddListItem(P);
+
+    isc_info_sql_bind:
+      FItems[index] := AddCountedListItem(P);
+
+    else
+      FItems[index] := AddSpecialItem(P);
+    end;
+    P += FItems[index]^.FSize;
+    Inc(index);
+  end;
+end;
+
+constructor TSQLInfoResultsBuffer.Create(aSize: integer);
+begin
+  inherited Create(aSize);
+  FIntegerType := dtInteger;
+end;
+
+function TSQLInfoResultsBuffer.GetItem(index: integer): ISQLInfoItem;
+var P: POutputBlockItemData;
+begin
+  P := inherited getItem(index);
+  Result := TSQLInfoResultsItem.Create(self,P)
+end;
+
+function TSQLInfoResultsBuffer.Find(ItemType: byte): ISQLInfoItem;
+var P: POutputBlockItemData;
+begin
+  P := inherited Find(ItemType);
+  Result := TSQLInfoResultsItem.Create(self,P)
 end;
 
 end.

@@ -527,11 +527,31 @@ type
     property Count: integer read getCount;
   end;
 
+  { ISQLInfoResultsItem }
+
+  ISQLInfoItem = interface
+    function getItemType: byte;
+    function getSize: integer;
+    function getAsString: string;
+    function getAsInteger: integer;
+    function GetCount: integer;
+    function GetItem(index: integer): ISQLInfoItem;
+    function Find(ItemType: byte): ISQLInfoItem;
+    property Count: integer read GetCount;
+    property Items[index: integer]: ISQLInfoItem read getItem; default;
+  end;
+
+  ISQLInfoResults = interface
+    function GetCount: integer;
+    function GetItem(index: integer): ISQLInfoItem;
+    function Find(ItemType: byte): ISQLInfoItem;
+    property Count: integer read GetCount;
+    property Items[index: integer]: ISQLInfoItem read getItem; default;
+  end;
+
   {The IStatement interface provides access to an SQL Statement once it has been
    initially prepared. The interface is returned from the IAttachment interface.
-
-
-  }
+   }
 
   IStatement = interface
     function GetMetaData: IMetaData;  {Output Metadata}
@@ -541,6 +561,7 @@ type
     function GetSQLStatementType: TIBSQLStatementTypes;
     function GetSQLText: string;
     function GetSQLDialect: integer;
+    function GetDSQLInfo(Request: byte): ISQLInfoResults;
     function IsPrepared: boolean;
     procedure Prepare(aTransaction: ITransaction=nil);
     function Execute(aTransaction: ITransaction=nil): IResults;

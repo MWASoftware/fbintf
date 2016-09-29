@@ -254,6 +254,7 @@ type
     FUniqueParamNames: boolean;
     procedure CheckTransaction(aTransaction: TFB25Transaction);
     procedure CheckHandle;
+    procedure GetDsqlInfo(info_request: byte; buffer: ISQLInfoResults); overload;
     procedure InternalPrepare;
     function InternalExecute(aTransaction: TFB25Transaction): IResults;
     function InternalOpenCursor(aTransaction: TFB25Transaction): IResultSet;
@@ -282,6 +283,7 @@ type
     function GetSQLStatementType: TIBSQLStatementTypes;
     function GetSQLText: string;
     function GetSQLDialect: integer;
+    function GetDSQLInfo(Request: byte): ISQLInfoResults; overload;
     function IsPrepared: boolean;
     procedure Prepare(aTransaction: ITransaction=nil);
     function Execute(aTransaction: ITransaction=nil): IResults;
@@ -304,162 +306,6 @@ implementation
 
 uses IBUtils, FBMessages, FB25Blob, variants, IBErrorCodes, FBArray, FB25Array;
 
-type
-
-  { ISQLInfoResultsItem }
-
-  ISQLInfoResultsItem = interface
-    function getItemType: byte;
-    function getSize: integer;
-    function getAsString: string;
-    function getAsInteger: integer;
-    function GetCount: integer;
-    function GetItem(index: integer): ISQLInfoResultsItem;
-    function Find(ItemType: byte): ISQLInfoResultsItem;
-    property Count: integer read GetCount;
-    property Items[index: integer]: ISQLInfoResultsItem read getItem; default;
-  end;
-
-  ISQLInfoResultsBuffer = interface
-    function GetCount: integer;
-    procedure Exec(info_request: byte);
-    function GetItem(index: integer): ISQLInfoResultsItem;
-    function Find(ItemType: byte): ISQLInfoResultsItem;
-    property Count: integer read GetCount;
-    property Items[index: integer]: ISQLInfoResultsItem read getItem; default;
-  end;
-
-  { TSQLInfoResultsBuffer }
-
-  TSQLInfoResultsBuffer = class(TOutputBlock,ISQLInfoResultsBuffer)
-  private
-    FStatement: TFB25Statement;
-  protected
-    function AddListItem(BufPtr: PChar): POutputBlockItemData; override;
-    procedure DoParseBuffer; override;
-  public
-    constructor Create(aStatement: TFB25Statement; aSize: integer = 1024);
-    procedure Exec(info_request: byte);
-    function GetItem(index: integer): ISQLInfoResultsItem;
-    function Find(ItemType: byte): ISQLInfoResultsItem;
-    property Count: integer read GetCount;
-    property Items[index: integer]: ISQLInfoResultsItem read getItem; default;
-  end;
-
-  { TSQLInfoResultsItem }
-
-  TSQLInfoResultsItem = class(TOutputBlockItemGroup,ISQLInfoResultsItem)
-    function GetItem(index: integer): ISQLInfoResultsItem;
-    function Find(ItemType: byte): ISQLInfoResultsItem;
-  end;
-
-{ TSQLInfoResultsItem }
-
-function TSQLInfoResultsItem.GetItem(index: integer): ISQLInfoResultsItem;
-var P: POutputBlockItemData;
-begin
-  P := inherited getItem(index);
-  Result := TSQLInfoResultsItem.Create(self.Owner,P)
-end;
-
-function TSQLInfoResultsItem.Find(ItemType: byte): ISQLInfoResultsItem;
-var P: POutputBlockItemData;
-begin
-  P := inherited Find(ItemType);
-  Result := TSQLInfoResultsItem.Create(self.Owner,P)
-end;
-
-{ TSQLInfoResultsBuffer }
-
-function TSQLInfoResultsBuffer.AddListItem(BufPtr: PChar): POutputBlockItemData;
-var P: PChar;
-    i: integer;
-begin
-  Result := inherited AddListItem(BufPtr);
-  P := BufPtr + 1;
-  i := 0;
-  with Firebird25ClientAPI do
-     Result^.FSize := isc_portable_integer(P,2) + 3;
-  Inc(P,2);
-
-  with Result^ do
-  begin
-    while P < FBufPtr + FSize do
-    begin
-      SetLength(FSubItems,i+1);
-      case integer(P^) of
-      isc_info_req_select_count,
-      isc_info_req_insert_count,
-      isc_info_req_update_count,
-      isc_info_req_delete_count:
-        FSubItems[i] := AddIntegerItem(P);
-
-      else
-        FSubItems[i] := AddSpecialItem(P);
-      end;
-      P +=  FSubItems[i]^.FSize;
-      Inc(i);
-    end;
-  end;
-end;
-
-procedure TSQLInfoResultsBuffer.DoParseBuffer;
-var P: PChar;
-    index: integer;
-begin
-  P := Buffer;
-  index := 0;
-  SetLength(FItems,0);
-  while (P^ <> char(isc_info_end)) and (P < Buffer + getBufSize) do
-  begin
-    SetLength(FItems,index+1);
-    case byte(P^) of
-    isc_info_sql_stmt_type:
-      FItems[index] := AddIntegerItem(P);
-
-    isc_info_sql_get_plan:
-      FItems[index] := AddStringItem(P);
-
-    isc_info_sql_records:
-      FItems[index] := AddListItem(P);
-
-    else
-      FItems[index] := AddSpecialItem(P);
-    end;
-    P += FItems[index]^.FSize;
-    Inc(index);
-  end;
-end;
-
-constructor TSQLInfoResultsBuffer.Create(aStatement: TFB25Statement;
-  aSize: integer);
-begin
-  inherited Create(aSize);
-  FStatement := aStatement;
-  FIntegerType := dtInteger;
-end;
-
-procedure TSQLInfoResultsBuffer.Exec(info_request: byte);
-begin
-  with Firebird25ClientAPI do
-  if isc_dsql_sql_info(StatusVector, @(FStatement.Handle), 1, @info_request,
-                     GetBufSize, Buffer) > 0 then
-    IBDatabaseError;
-end;
-
-function TSQLInfoResultsBuffer.GetItem(index: integer): ISQLInfoResultsItem;
-var P: POutputBlockItemData;
-begin
-  P := inherited getItem(index);
-  Result := TSQLInfoResultsItem.Create(self,P)
-end;
-
-function TSQLInfoResultsBuffer.Find(ItemType: byte): ISQLInfoResultsItem;
-var P: POutputBlockItemData;
-begin
-  P := inherited Find(ItemType);
-  Result := TSQLInfoResultsItem.Create(self,P)
-end;
 
 { TIBXSQLVAR }
 
@@ -1000,9 +846,18 @@ begin
     IBError(ibxeInvalidStatementHandle,[nil]);
 end;
 
+procedure TFB25Statement.GetDsqlInfo(info_request: byte; buffer: ISQLInfoResults
+  );
+begin
+  with Firebird25ClientAPI, buffer as TSQLInfoResultsBuffer do
+  if isc_dsql_sql_info(StatusVector, @(FHandle), 1, @info_request,
+                     GetBufSize, Buffer) > 0 then
+    IBDatabaseError;
+end;
+
 procedure TFB25Statement.InternalPrepare;
 var
-  RB: ISQLInfoResultsBuffer;
+  RB: ISQLInfoResults;
 begin
   if FPrepared then
     Exit;
@@ -1028,8 +883,7 @@ begin
     { After preparing the statement, query the stmt type and possibly
       create a FSQLRecord "holder" }
     { Get the type of the statement }
-    RB := TSQLInfoResultsBuffer.Create(self);
-    RB.Exec(isc_info_sql_stmt_type);
+    RB := GetDsqlInfo(isc_info_sql_stmt_type);
     if RB.Count > 0 then
       FSQLStatementType := TIBSQLStatementTypes(RB[0].GetAsInteger)
     else
@@ -1308,7 +1162,7 @@ end;
 
 function TFB25Statement.GetPlan: String;
 var
-    RB: TSQLInfoResultsBuffer;
+    RB: ISQLInfoResults;
 begin
   if (not (FSQLStatementType in [SQLSelect, SQLSelectForUpdate,
        {TODO: SQLExecProcedure, }
@@ -1316,8 +1170,8 @@ begin
     result := ''
   else
   begin
-    RB := TSQLInfoResultsBuffer.Create(self,4*4096);
-    RB.Exec(isc_info_sql_get_plan);
+    RB := TSQLInfoResultsBuffer.Create(4*4096);
+    GetDsqlInfo(isc_info_sql_get_plan,RB);
      if RB.Count > 0 then
      Result := RB[0].GetAsString;
   end;
@@ -1326,7 +1180,7 @@ end;
 function TFB25Statement.GetRowsAffected(var SelectCount, InsertCount, UpdateCount,
   DeleteCount: integer): boolean;
 var
-  RB: TSQLInfoResultsBuffer;
+  RB: ISQLInfoResults;
   i, j: integer;
 begin
   InsertCount := 0;
@@ -1335,8 +1189,7 @@ begin
   Result := FHandle <> nil;
   if not Result then Exit;
 
-  RB := TSQLInfoResultsBuffer.Create(self);
-  RB.Exec(isc_info_sql_records);
+  RB := GetDsqlInfo(isc_info_sql_records);
 
   for i := 0 to RB.Count - 1 do
   with RB[i] do
@@ -1442,6 +1295,12 @@ end;
 function TFB25Statement.GetSQLDialect: integer;
 begin
   Result := FSQLDialect;
+end;
+
+function TFB25Statement.GetDSQLInfo(Request: byte): ISQLInfoResults;
+begin
+  Result := TSQLInfoResultsBuffer.Create;
+  GetDsqlInfo(Request,Result);
 end;
 
 function TFB25Statement.IsPrepared: boolean;

@@ -38,13 +38,14 @@ const
     'Title VarChar(32) Character Set UTF8,'+
     'Notes VarChar(64) Character Set ISO8859_1,'+
     'BlobData Blob sub_type 1 Character Set WIN1252, '+
+    'BlobData2 Blob sub_type 1 Character Set UTF8, '+
     'InClear VarChar(16) Character Set NONE, '+
     'Primary Key(RowID)'+
     ')';
 
   sqlGetCharSets = 'Select RDB$CHARACTER_SET_NAME,RDB$CHARACTER_SET_ID from RDB$CHARACTER_SETS order by 2';
 
-  sqlInsert = 'Insert into TestData(RowID,Title,Notes, BlobData,InClear) Values(:RowID,:Title,:Notes,:BlobData,:InClear)';
+  sqlInsert = 'Insert into TestData(RowID,Title,Notes, BlobData,BlobData2,InClear) Values(:RowID,:Title,:Notes,:BlobData,:BlobData2,:InClear)';
 
 
 { TTest12 }
@@ -54,18 +55,22 @@ var Transaction: ITransaction;
     Statement: IStatement;
     ResultSet: IResultSet;
     b: IBlob;
+    Info: ISQLInfoResults;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   b := Attachment.CreateBlob(Transaction,'TestData','BlobData');
 
   Statement := Attachment.PrepareWithNamedParameters(Transaction,sqlInsert);
+  Info := Statement.GetDSQLInfo(isc_info_sql_bind);
+  writeln('Info Count = ',Info.Count);
   with Statement.GetSQLParams do
   begin
     ByName('rowid').AsInteger := 1;
     ByName('title').AsString := 'Blob Test ©€';
     ByName('Notes').AsString := 'Écoute moi';
     b.AsString := 'Some German Special Characters like ÖÄÜöäüß';
-    ByName('BlobData').AsBlob := b;
+    ByName('BlobData').AsString := 'Some German Special Characters like ÖÄÜöäüß';
+    ByName('BlobData2').AsBlob := b;
     ByName('InClear').AsString := #$01'Test'#$0D#$C3;
   end;
   Statement.Execute;

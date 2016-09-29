@@ -99,26 +99,32 @@ var stmt: IStatement;
 begin
   if FHasFullMetaData then Exit;
 
-  stmt := TFB30Statement.Create(FAttachment,FTransaction, sLookupBlobMetaData ,FAttachment.SQLDialect);
-  with stmt do
+  FCharSetID := 0;
+  FSegmentSize := 80;
+  if (GetColumnName <> '') and (GetRelationName <> '') then
   begin
-    SQLParams[0].AsString := GetRelationName;
-    SQLParams[1].AsString := GetColumnName;
-    with OpenCursor do
-    if FetchNext then
+    stmt := TFB30Statement.Create(FAttachment,FTransaction, sLookupBlobMetaData ,FAttachment.SQLDialect);
+    with stmt do
     begin
-      if Data[3].AsInteger <> blr_blob then
+      SQLParams[0].AsString := GetRelationName;
+      SQLParams[1].AsString := GetColumnName;
+      with OpenCursor do
+      if FetchNext then
+      begin
+        if Data[3].AsInteger <> blr_blob then
+          IBError(ibxeInvalidBlobMetaData,[nil]);
+        FSubType := Data[0].AsInteger;
+        FSegmentSize := Data[1].AsInteger;
+        FCharSetID := Data[2].AsInteger;
+      end
+      else
         IBError(ibxeInvalidBlobMetaData,[nil]);
-      FSubType := Data[0].AsInteger;
-      FSegmentSize := Data[1].AsInteger;
-      FCharSetID := Data[2].AsInteger;
-    end
-    else
-      IBError(ibxeInvalidBlobMetaData,[nil]);
+
+    end;
+  end;
 
     if (FCharSetID > 1) and FAttachment.HasDefaultCharSet then
       FCharSetID := FAttachment.CharSetID;
-  end;
 
   FHasFullMetaData := true;
   FHasSubType := true;
