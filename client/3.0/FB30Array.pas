@@ -163,6 +163,8 @@ procedure TFB30ArrayMetaData.LoadMetaData(aAttachment: IAttachment;
   aTransaction: ITransaction; relationName, columnName: string);
 var stmt: IStatement;
 begin
+  RelationName := AnsiUpperCase(RelationName);
+  ColumnName := AnsiUpperCase(ColumnName);
   stmt := TFB30Statement.Create(aAttachment as TFB30Attachment,aTransaction,
                                sGetArrayMetaData ,aAttachment.GetSQLDialect);
   with stmt do

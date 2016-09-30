@@ -1362,7 +1362,7 @@ end;
 function TFB30Statement.CreateArray(index: integer): IArray;
 begin
   InternalPrepare;
- // Result := CreateArray(SQLParams[index]);
+  Result := CreateArray(SQLParams[index] as TSQLParam);
 end;
 
 function TFB30Statement.CreateArray(column: IColumnMetaData): IArray;
@@ -1376,8 +1376,8 @@ function TFB30Statement.CreateArray(paramName: string): IArray;
 var column: IColumnMetaData;
 begin
   InternalPrepare;
-//  column := SQLParams.ByName(paramName);
-//  if column = nil then
+  column := SQLParams.ByName(paramName) as TSQLParam;
+  if column = nil then
     IBError(ibxeFieldNotFound,[paramName]);
   Result := CreateArray(column);
 end;

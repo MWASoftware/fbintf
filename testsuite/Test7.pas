@@ -63,7 +63,8 @@ begin
   ReportResults(Statement);
 
   Statement := Attachment.PrepareWithNamedParameters(Transaction,sqlUpdate);
-  ar := Statement.CreateArray('MyArray');
+//  ar := Statement.CreateArray('MyArray');
+  ar := Attachment.CreateArray(Transaction,'TestData','MyArray');
   j := 100;
   for i := 0 to 16 do
   begin
