@@ -31,6 +31,8 @@ unit FBOutputBlock;
 {$codepage UTF8}
 {$ENDIF}
 
+{ $DEFINE DEBUGOUTPUTBLOCK}
+
 interface
 
 {Provides common handling for the DB Info results, SQL Info and Service Response Block}
@@ -55,6 +57,8 @@ type
     FDataLength: integer;
     FSize: integer;
     FDataType: TItemDataType;
+    FTruncated: boolean;
+    FError: boolean;
     FSubItems: array of POutputBlockItemData;
   end;
 
@@ -66,8 +70,15 @@ type
     FBufSize: integer;
     FBufferParsed: boolean;
     procedure ParseBuffer;
+    {$IFDEF DEBUGOUTPUTBLOCK}
+    procedure FormattedPrint(const aItems: array of POutputBlockItemData;
+      Indent: string);
+    procedure PrintBuf;
+    {$ENDIF}
   protected
     FIntegerType: TItemDataType;
+    FError: boolean;
+    FTruncated: boolean;
     FItems: array of POutputBlockItemData;
     procedure DoParseBuffer; virtual; abstract;
     function AddItem(BufPtr: PChar): POutputBlockItemData;
@@ -93,7 +104,7 @@ type
 
   { TOutputBlockItem }
 
-  TOutputBlockItem = class(TInterfaceParent)
+  TOutputBlockItem = class(TInterfaceParent,IUnknown)
   private
     FOwner: TOutputBlock;
     FOwnerIntf: IUnknown;
@@ -182,8 +193,6 @@ type
   TSQLInfoResultsBuffer = class(TOutputBlock,ISQLInfoResults)
   protected
     function AddListItem(BufPtr: PChar): POutputBlockItemData; override;
-    function AddCountedListItem(BufPtr: PChar): POutputBlockItemData;
-    function AddSpecialItem(BufPtr: PChar): POutputBlockItemData; override;
     procedure DoParseBuffer; override;
   public
     constructor Create(aSize: integer = 1024);
@@ -353,7 +362,17 @@ end;
 procedure TOutputBlock.ParseBuffer;
 begin
   if not FBufferParsed then
+  begin
+    {$IFDEF DEBUGOUTPUTBLOCK}
+    PrintBuf;
+    {$ENDIF}
     DoParseBuffer;
+    if FError or FTruncated then
+      SetLength(FItems,Length(FItems)-1);
+    {$IFDEF DEBUGOUTPUTBLOCK}
+    FormattedPrint(FItems,'');
+    {$ENDIF}
+  end;
   FBufferParsed := true;
 end;
 
@@ -533,6 +552,55 @@ begin
       Exit;
     end;
 end;
+
+{$IFDEF DEBUGOUTPUTBLOCK}
+procedure TOutputBlock.FormattedPrint(
+  const aItems: array of POutputBlockItemData; Indent: string);
+
+var i: integer;
+    item: TOutputBlockItem;
+begin
+  if FError then
+    writeln('Error')
+  else
+  if FTruncated then
+    writeln('Truncated')
+  else
+  for i := 0 to Length(aItems) - 1 do
+  with aItems[i]^ do
+  begin
+    if FError then
+      writeln('Error')
+    else
+    if FTruncated then
+      writeln('Truncated')
+    else
+    case FDataType of
+    dtList:
+    begin
+      writeln(Indent,'ItemType = ',byte(FBufPtr^));
+      FormattedPrint(FSubItems,Indent + '  ');
+    end;
+    dtSpecial:
+      writeln(Indent,'ItemType = ',byte(FBufPtr^),' Length = ',FSize);
+    else
+      begin
+        item := TOutputBlockItem.Create(self,(aItems[i]));
+        writeln(Indent,'ItemType = ',byte(FBufPtr^),' Value = ',(item as TOutputBlockItem).GetAsString);
+      end;
+    end;
+  end;
+end;
+
+procedure TOutputBlock.PrintBuf;
+var i: integer;
+begin
+  write(classname,': ');
+  for i := 0 to getBufSize - 1 do
+    write(Format('%x ',[byte(Buffer[i])]));
+  writeln;
+end;
+{$ENDIF}
 
 { TDBInfoItem }
 
@@ -947,65 +1015,88 @@ begin
   Result := inherited AddListItem(BufPtr);
   P := BufPtr + 1;
   i := 0;
-  with FirebirdClientAPI do
-     Result^.FSize := DecodeInteger(P,2) + 3;
-  Inc(P,2);
 
-  with Result^ do
+  if byte(BufPtr^) = isc_info_sql_records then
   begin
-    while P < FBufPtr + FSize do
+    with FirebirdClientAPI do
+      Result^.FSize := DecodeInteger(P,2) + 3;
+    Inc(P,2);
+    with Result^ do
     begin
-      SetLength(FSubItems,i+1);
-      case integer(P^) of
-      isc_info_req_select_count,
-      isc_info_req_insert_count,
-      isc_info_req_update_count,
-      isc_info_req_delete_count:
-        FSubItems[i] := AddIntegerItem(P);
+      while (P < FBufPtr + FSize) and (byte(P^) <> isc_info_end) do
+      begin
+        SetLength(FSubItems,i+1);
+        case integer(P^) of
+        isc_info_req_select_count,
+        isc_info_req_insert_count,
+        isc_info_req_update_count,
+        isc_info_req_delete_count:
+          FSubItems[i] := AddIntegerItem(P);
 
-      else
-        FSubItems[i] := AddSpecialItem(P);
+        isc_info_truncated:
+          begin
+            FTruncated := true;
+            Exit;
+          end;
+
+        isc_info_error:
+          begin
+            FError := true;
+            Exit;
+          end;
+        else
+          FSubItems[i] := AddSpecialItem(P);
+        end;
+        P +=  FSubItems[i]^.FSize;
+        Inc(i);
       end;
-      P +=  FSubItems[i]^.FSize;
-      Inc(i);
+    end;
+  end
+  else
+  begin
+    with Result^ do
+    begin
+      while (P < FBufPtr + FSize) and (byte(P^) <> isc_info_end) do
+      begin
+        SetLength(FSubItems,i+1);
+        case integer(P^) of
+        isc_info_sql_sqlda_seq,
+        isc_info_sql_type,
+        isc_info_sql_sub_type,
+        isc_info_sql_scale,
+        isc_info_sql_length,
+        isc_info_sql_null_ind:
+          FSubItems[i] := AddIntegerItem(P);
+
+        isc_info_sql_field,
+        isc_info_sql_relation,
+        isc_info_sql_owner,
+        isc_info_sql_relation_alias,
+        isc_info_sql_alias:
+          FSubItems[i] := AddStringItem(P);
+
+        isc_info_truncated:
+          begin
+            FTruncated := true;
+            Exit;
+          end;
+
+        isc_info_error:
+          begin
+            FError := true;
+            Exit;
+          end;
+        isc_info_sql_describe_end:
+          Exit;
+
+        else
+          FSubItems[i] := AddSpecialItem(P);
+        end;
+        P +=  FSubItems[i]^.FSize;
+        Inc(i);
+      end;
     end;
   end;
-end;
-
-function TSQLInfoResultsBuffer.AddCountedListItem(BufPtr: PChar
-  ): POutputBlockItemData;
-var P: PChar;
-    i: integer;
-    ItemCount: integer;
-begin
-  Result := inherited AddListItem(BufPtr);
-  P := BufPtr + 1;
-  i := 0;
-  with FirebirdClientAPI do
-     ItemCount := DecodeInteger(P,2);
-  Inc(P,2);
-  with Result^ do
-  begin
-  SetLength(FSubItems,ItemCount);
-
-  for i := 0 to ItemCount - 1 do
-  begin
-    case integer(P^) of
-    isc_info_end:
-      Exit;
-    else
-      FSubItems[i] := AddSpecialItem(P);
-    end;
-    P +=  FSubItems[i]^.FSize;
-  end;
-  end;
-end;
-
-function TSQLInfoResultsBuffer.AddSpecialItem(BufPtr: PChar
-  ): POutputBlockItemData;
-begin
-  Result := inherited AddSpecialItem(BufPtr);
-  writeln('Found unknown SQL Item = ',byte(BufPtr^), ' Length = ',Result^.FDataLength);
 end;
 
 procedure TSQLInfoResultsBuffer.DoParseBuffer;
@@ -1025,11 +1116,23 @@ begin
     isc_info_sql_get_plan:
       FItems[index] := AddStringItem(P);
 
-    isc_info_sql_records:
+    isc_info_sql_records,
+    isc_info_sql_bind,
+    isc_info_sql_describe_vars,
+    isc_info_sql_num_variables:
       FItems[index] := AddListItem(P);
 
-    isc_info_sql_bind:
-      FItems[index] := AddCountedListItem(P);
+    isc_info_truncated:
+      begin
+        FTruncated := true;
+        Exit;
+      end;
+
+    isc_info_error:
+      begin
+        FError := true;
+        Exit;
+      end;
 
     else
       FItems[index] := AddSpecialItem(P);

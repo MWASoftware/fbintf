@@ -659,7 +659,7 @@ begin
         Check4DataBaseError;
         Builder.setCharSet(StatusIntf,i,GetCharSetID);
         Check4DataBaseError;
-        Builder.setScale(StatusIntf,i,FScale);
+        Builder.setScale(StatusIntf,i,cardinal(FScale));
         Check4DataBaseError;
       end;
       FCurMetaData := Builder.getMetadata(StatusIntf);

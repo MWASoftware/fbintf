@@ -61,8 +61,6 @@ begin
   b := Attachment.CreateBlob(Transaction,'TestData','BlobData');
 
   Statement := Attachment.PrepareWithNamedParameters(Transaction,sqlInsert);
-  Info := Statement.GetDSQLInfo(isc_info_sql_bind);
-  writeln('Info Count = ',Info.Count);
   with Statement.GetSQLParams do
   begin
     ByName('rowid').AsInteger := 1;
