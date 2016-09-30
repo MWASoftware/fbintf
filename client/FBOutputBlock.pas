@@ -188,6 +188,30 @@ type
     property Items[index: integer]: IServiceQueryResultItem read getItem; default;
   end;
 
+  { ISQLInfoItem }
+
+  ISQLInfoItem = interface
+    function getItemType: byte;
+    function getSize: integer;
+    function getAsString: string;
+    function getAsInteger: integer;
+    function GetCount: integer;
+    function GetItem(index: integer): ISQLInfoItem;
+    function Find(ItemType: byte): ISQLInfoItem;
+    property Count: integer read GetCount;
+    property Items[index: integer]: ISQLInfoItem read getItem; default;
+  end;
+
+  {ISQLInfoResults}
+
+  ISQLInfoResults = interface
+    function GetCount: integer;
+    function GetItem(index: integer): ISQLInfoItem;
+    function Find(ItemType: byte): ISQLInfoItem;
+    property Count: integer read GetCount;
+    property Items[index: integer]: ISQLInfoItem read getItem; default;
+  end;
+
   { TSQLInfoResultsBuffer }
 
   TSQLInfoResultsBuffer = class(TOutputBlock,ISQLInfoResults)
@@ -1051,51 +1075,6 @@ begin
         Inc(i);
       end;
     end;
-  end
-  else
-  begin
-    with Result^ do
-    begin
-      while (P < FBufPtr + FSize) and (byte(P^) <> isc_info_end) do
-      begin
-        SetLength(FSubItems,i+1);
-        case integer(P^) of
-        isc_info_sql_sqlda_seq,
-        isc_info_sql_type,
-        isc_info_sql_sub_type,
-        isc_info_sql_scale,
-        isc_info_sql_length,
-        isc_info_sql_null_ind:
-          FSubItems[i] := AddIntegerItem(P);
-
-        isc_info_sql_field,
-        isc_info_sql_relation,
-        isc_info_sql_owner,
-        isc_info_sql_relation_alias,
-        isc_info_sql_alias:
-          FSubItems[i] := AddStringItem(P);
-
-        isc_info_truncated:
-          begin
-            FTruncated := true;
-            Exit;
-          end;
-
-        isc_info_error:
-          begin
-            FError := true;
-            Exit;
-          end;
-        isc_info_sql_describe_end:
-          Exit;
-
-        else
-          FSubItems[i] := AddSpecialItem(P);
-        end;
-        P +=  FSubItems[i]^.FSize;
-        Inc(i);
-      end;
-    end;
   end;
 end;
 
@@ -1116,10 +1095,7 @@ begin
     isc_info_sql_get_plan:
       FItems[index] := AddStringItem(P);
 
-    isc_info_sql_records,
-    isc_info_sql_bind,
-    isc_info_sql_describe_vars,
-    isc_info_sql_num_variables:
+    isc_info_sql_records:
       FItems[index] := AddListItem(P);
 
     isc_info_truncated:

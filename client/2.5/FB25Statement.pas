@@ -283,6 +283,7 @@ type
     function GetSQLStatementType: TIBSQLStatementTypes;
     function GetSQLText: string;
     function GetSQLDialect: integer;
+    {GetDSQLInfo only supports isc_info_sql_stmt_type, isc_info_sql_get_plan, isc_info_sql_records}
     function GetDSQLInfo(Request: byte): ISQLInfoResults; overload;
     function IsPrepared: boolean;
     procedure Prepare(aTransaction: ITransaction=nil);

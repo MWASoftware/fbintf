@@ -53,9 +53,7 @@ const
 procedure TTest12.UpdateDatabase(Attachment: IAttachment);
 var Transaction: ITransaction;
     Statement: IStatement;
-    ResultSet: IResultSet;
     b: IBlob;
-    Info: ISQLInfoResults;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   b := Attachment.CreateBlob(Transaction,'TestData','BlobData');
