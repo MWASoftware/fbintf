@@ -242,7 +242,6 @@ begin
     writeln('SQLType =',GetSQLTypeName);
     writeln('sub type = ',getSubType);
     writeln('Field Name = ',getName);
-    writeln('Relation Name = ',getRelationName);
     writeln('Scale = ',getScale);
     writeln('Charset id = ',getCharSetID);
     if getIsNullable then writeln('Nullable') else writeln('Not Null');

@@ -112,6 +112,7 @@ type
     function GetTransaction: ITransaction;
     function GetAsString: string;
     procedure SetAsString(aValue: string);
+    function SetString(aValue: string): IBlob;
   end;
 
 
@@ -306,6 +307,12 @@ begin
   finally
     ss.Free;
   end;
+end;
+
+function TFBBlob.SetString(aValue: string): IBlob;
+begin
+  SetAsString(aValue);
+  Result := GetIntf;
 end;
 
 {TFBBlobMetaData}

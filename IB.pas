@@ -298,6 +298,7 @@ type
     procedure SaveToStream(S: TStream);
     function GetAsString: string;
     procedure SetAsString(aValue: string);
+    function SetString(aValue: string): IBlob;
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
     property AsString: string read GetAsString write SetAsString;
@@ -443,7 +444,6 @@ type
   }
 
   ISQLParam = interface
-    function getRelationName: string;
     function GetIndex: integer;
     function GetSQLType: cardinal;
     function GetSQLTypeName: string;
@@ -544,9 +544,6 @@ type
     procedure Prepare(aTransaction: ITransaction=nil);
     function Execute(aTransaction: ITransaction=nil): IResults;
     function OpenCursor(aTransaction: ITransaction=nil): IResultSet;
-      {Return a new Array in the context of the statement transaction using either the column index or name}
-    function CreateArray(paramName: string): IArray;  overload;
-    function CreateArray(index: integer): IArray;  overload;
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
     property MetaData: IMetaData read GetMetaData;

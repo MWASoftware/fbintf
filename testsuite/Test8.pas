@@ -60,7 +60,6 @@ begin
 
   Statement := Attachment.Prepare(Transaction,sqlUpdate);
   ar := Attachment.CreateArray(Transaction,'TestData','MyArray');
-//  ar := Statement.CreateArray(0);
   if ar <> nil then
   begin
     k := 50;

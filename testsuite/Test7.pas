@@ -65,7 +65,6 @@ begin
 
   Statement := Attachment.PrepareWithNamedParameters(Transaction,sqlUpdate);
   ParamInfo(Statement.GetSQLParams);
-//  ar := Statement.CreateArray('MyArray');
   ar := Attachment.CreateArray(Transaction,'TestData','MyArray');
   j := 100;
   for i := 0 to 16 do

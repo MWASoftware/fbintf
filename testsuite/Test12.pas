@@ -53,10 +53,8 @@ const
 procedure TTest12.UpdateDatabase(Attachment: IAttachment);
 var Transaction: ITransaction;
     Statement: IStatement;
-    b: IBlob;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
-  b := Attachment.CreateBlob(Transaction,'TestData','BlobData');
 
   Statement := Attachment.PrepareWithNamedParameters(Transaction,sqlInsert);
   with Statement.GetSQLParams do
@@ -64,9 +62,8 @@ begin
     ByName('rowid').AsInteger := 1;
     ByName('title').AsString := 'Blob Test ©€';
     ByName('Notes').AsString := 'Écoute moi';
-    b.AsString := 'Some German Special Characters like ÖÄÜöäüß';
     ByName('BlobData').AsString := 'Some German Special Characters like ÖÄÜöäüß';
-    ByName('BlobData2').AsBlob := b;
+    ByName('BlobData2').AsBlob := Attachment.CreateBlob(Transaction,'TestData','BlobData').SetString('Some German Special Characters like ÖÄÜöäüß');
     ByName('InClear').AsString := #$01'Test'#$0D#$C3;
   end;
   Statement.Execute;
