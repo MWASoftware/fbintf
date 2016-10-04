@@ -443,6 +443,7 @@ type
   }
 
   ISQLParam = interface
+    function getRelationName: string;
     function GetIndex: integer;
     function GetSQLType: cardinal;
     function GetSQLTypeName: string;

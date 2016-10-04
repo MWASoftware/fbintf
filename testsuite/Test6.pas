@@ -72,6 +72,7 @@ begin
 
   b.LoadFromFile('testtext.txt');
   Statement := Attachment.Prepare(Transaction,sqlUpdate);
+  ParamInfo(Statement.SQLParams);
   Statement.SQLParams[0].AsBlob := b;//Attachment.CreateBlob(Transaction,'TestData','BlobData').LoadFromFile('testtext.txt');
   Statement.SQLParams[1].AsInteger := 1;
   Statement.Execute;

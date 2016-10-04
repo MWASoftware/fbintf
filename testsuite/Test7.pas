@@ -49,6 +49,7 @@ begin
   Statement := Attachment.Prepare(Transaction,'Select * from TestData');
   PrintMetaData(Statement.GetMetaData);
   Statement := Attachment.PrepareWithNamedParameters(Transaction,sqlInsert);
+  ParamInfo(Statement.GetSQLParams);
   with Statement.GetSQLParams do
   begin
     for i := 0 to GetCount - 1 do
@@ -63,6 +64,7 @@ begin
   ReportResults(Statement);
 
   Statement := Attachment.PrepareWithNamedParameters(Transaction,sqlUpdate);
+  ParamInfo(Statement.GetSQLParams);
 //  ar := Statement.CreateArray('MyArray');
   ar := Attachment.CreateArray(Transaction,'TestData','MyArray');
   j := 100;

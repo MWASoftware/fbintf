@@ -21,6 +21,7 @@ type
     procedure PrintHexString(s: string);
     procedure PrintDPB(DPB: IDPB);
     procedure PrintMetaData(meta: IMetaData);
+    procedure ParamInfo(SQLParams: ISQLParams);
     procedure WriteArray(ar: IArray);
     procedure WriteAffectedRows(Statement: IStatement);
     function WriteServiceQueryResult(QueryResult: IServiceQueryResults): boolean;
@@ -228,6 +229,24 @@ begin
         end;
     end;
     writeln;
+  end;
+end;
+
+procedure TTestBase.ParamInfo(SQLParams: ISQLParams);
+var i: integer;
+begin
+  writeln('SQL Params');
+  for i := 0 to SQLParams.Count - 1 do
+  with SQLParams[i] do
+  begin
+    writeln('SQLType =',GetSQLTypeName);
+    writeln('sub type = ',getSubType);
+    writeln('Field Name = ',getName);
+    writeln('Relation Name = ',getRelationName);
+    writeln('Scale = ',getScale);
+    writeln('Charset id = ',getCharSetID);
+    if getIsNullable then writeln('Nullable') else writeln('Not Null');
+    writeln('Size = ',GetSize);
   end;
 end;
 
