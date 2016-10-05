@@ -72,6 +72,7 @@ type
     FMetaData: IBlobMetaData;
     FAttachment: IAttachment;
     FTransaction: ITransaction;
+    FBPB: IBPB;
   protected
     FCreating: boolean;
     FBlobID: TISC_QUAD;
@@ -82,9 +83,9 @@ type
     procedure InternalCancel(Force: boolean); virtual; abstract;
   public
     constructor Create(Attachment: IAttachment; Transaction: TFBTransaction;
-                       MetaData: IBlobMetaData); overload;
+                       MetaData: IBlobMetaData; BPB: IBPB); overload;
     constructor Create(Attachment: IAttachment; Transaction: TFBTransaction;
-                       MetaData: IBlobMetaData; BlobID: TISC_QUAD); overload;
+                       MetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB); overload;
     destructor Destroy; override;
     procedure TransactionEnding(aTransaction: TFBTransaction; Force: boolean);
 
@@ -98,6 +99,7 @@ type
    function GetColumnName: string;
 
    {IBlob}
+    function GetBPB: IBPB;
     procedure Cancel;
     procedure Close;
     function GetBlobID: TISC_QUAD;
@@ -124,19 +126,20 @@ uses FBMessages;
 { TFBBlob }
 
 constructor TFBBlob.Create(Attachment: IAttachment;
-  Transaction: TFBTransaction; MetaData: IBlobMetaData);
+  Transaction: TFBTransaction; MetaData: IBlobMetaData; BPB: IBPB);
 begin
   inherited Create(Transaction);
   FAttachment := Attachment;
   FTransaction := Transaction;
   FMetaData := MetaData;
+  FBPB := BPB;
   FCreating := true;
 end;
 
 constructor TFBBlob.Create(Attachment: IAttachment;
-  Transaction: TFBTransaction; MetaData: IBlobMetaData; BlobID: TISC_QUAD);
+  Transaction: TFBTransaction; MetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB);
 begin
-  Create(Attachment,Transaction,MetaData);
+  Create(Attachment,Transaction,MetaData,BPB);
   FBlobID := BlobID;
   FCreating := false;
 end;
@@ -189,6 +192,11 @@ end;
 function TFBBlob.GetColumnName: string;
 begin
   Result := FMetaData.GetColumnName;
+end;
+
+function TFBBlob.GetBPB: IBPB;
+begin
+  Result := FBPB;
 end;
 
 procedure TFBBlob.Cancel;

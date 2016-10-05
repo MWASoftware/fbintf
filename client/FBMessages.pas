@@ -228,7 +228,8 @@ type
       ibxeNoDPB,
       ibxeInEventWait,
       ibxeIncompatibleBlob,
-      ibxeMissingColumnName
+      ibxeMissingColumnName,
+      ibxStringTooLong
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;
@@ -420,6 +421,7 @@ resourcestring
   SInEventWait = 'Already in Event Wait State';
   SIncompatibleBlob = 'Incompatible Blob SubTypes. %d expected, %d found';
   SMissingColumnName = 'Relation or Column Name Missing';
+  SStringTooLong = 'String "%s" is too long. Max %d characters';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -573,7 +575,8 @@ const
     SNoDPB,
     SInEventWait,
     SIncompatibleBlob,
-    SMissingColumnName
+    SMissingColumnName,
+    SStringTooLong
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;

@@ -272,6 +272,29 @@ type
     function GetColumnName: string;
   end;
 
+  {The Blob Parameter block is used to select a Blob Filter}
+
+  IBPBItem = interface
+    function getParamType: byte;
+    function getAsInteger: integer;
+    function getAsString: string;
+    function getAsByte: byte;
+    procedure setAsString(aValue: string);
+    procedure setAsByte(aValue: byte);
+    procedure SetAsInteger(aValue: integer);
+    property AsString: string read getAsString write setAsString;
+    property AsByte: byte read getAsByte write setAsByte;
+    property AsInteger: integer read getAsInteger write SetAsInteger;
+  end;
+
+  IBPB = interface
+    function getCount: integer;
+    function Add(ParamType: byte): IBPBItem;
+    function getItems(index: integer): IBPBItem;
+    function Find(ParamType: byte): IBPBItem;
+    property Items[index: integer]: IBPBItem read getItems; default;
+  end;
+
   { The Blob Interface provides access to a blob data item.
 
   The interface is returned by a GetAsBlob getter method (see ISQLData). A new Blob
@@ -284,6 +307,7 @@ type
   TBlobType = (btSegmented,btStream);
 
   IBlob = interface(IBlobMetaData)
+    function GetBPB: IBPB;
     procedure Cancel;
     procedure Close;
     function GetBlobID: TISC_QUAD;
@@ -787,9 +811,9 @@ type
 
     {Blob - may use to open existing Blobs. However, ISQLData.AsBlob is preferred}
 
-    function CreateBlob(transaction: ITransaction; RelationName, ColumnName: string): IBlob; overload;
-    function CreateBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData): IBlob; overload;
-    function OpenBlob(transaction: ITransaction; RelationName, ColumnName: string; BlobID: TISC_QUAD): IBlob;
+    function CreateBlob(transaction: ITransaction; RelationName, ColumnName: string; BPB: IBPB=nil): IBlob; overload;
+    function CreateBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BPB: IBPB=nil): IBlob; overload;
+    function OpenBlob(transaction: ITransaction; RelationName, ColumnName: string; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob;
 
     {Array - may use to open existing arrays. However, ISQLData.AsArray is preferred}
 

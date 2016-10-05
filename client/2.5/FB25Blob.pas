@@ -104,9 +104,9 @@ type
     procedure InternalCancel(Force: boolean); override;
   public
     constructor Create(Attachment: TFB25Attachment; Transaction: TFB25Transaction;
-                       MetaData: IBlobMetaData); overload;
+                       MetaData: IBlobMetaData; BPB: IBPB); overload;
     constructor Create(Attachment: TFB25Attachment; Transaction: TFB25Transaction;
-                       MetaData: IBlobMetaData; BlobID: TISC_QUAD); overload;
+                       MetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB); overload;
     property Handle: TISC_BLOB_HANDLE read FHandle;
 
   public
@@ -118,7 +118,7 @@ type
 
 implementation
 
-uses IBErrorCodes, FBMessages;
+uses IBErrorCodes, FBMessages, FBParamBlock;
 
 { TFB25BlobMetaData }
 
@@ -205,29 +205,39 @@ begin
 end;
 
 constructor TFB25Blob.Create(Attachment: TFB25Attachment; Transaction: TFB25Transaction;
-  MetaData: IBlobMetaData);
+  MetaData: IBlobMetaData; BPB: IBPB);
 var DBHandle: TISC_DB_HANDLE;
     TRHandle: TISC_TR_HANDLE;
 begin
-  inherited Create(Attachment,Transaction,MetaData);
+  inherited Create(Attachment,Transaction,MetaData,BPB);
   DBHandle := Attachment.Handle;
   TRHandle := Transaction.Handle;
   with Firebird25ClientAPI do
+  if BPB = nil then
     Call(isc_create_blob2(StatusVector, @DBHandle, @TRHandle, @FHandle, @FBlobID,
-                           0, nil));
+                           0, nil))
+  else
+  with BPB as TBPB do
+    Call(isc_create_blob2(StatusVector, @DBHandle, @TRHandle, @FHandle, @FBlobID,
+                         getDataLength, getBuffer));
 end;
 
 constructor TFB25Blob.Create(Attachment: TFB25Attachment;
-  Transaction: TFB25Transaction; MetaData: IBlobMetaData; BlobID: TISC_QUAD);
+  Transaction: TFB25Transaction; MetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB);
 var DBHandle: TISC_DB_HANDLE;
     TRHandle: TISC_TR_HANDLE;
 begin
-  inherited Create(Attachment,Transaction,MetaData,BlobID);
+  inherited Create(Attachment,Transaction,MetaData,BlobID,BPB);
   DBHandle := Attachment.Handle;
   TRHandle := Transaction.Handle;
   with Firebird25ClientAPI do
+  if BPB = nil then
     Call(isc_open_blob2(StatusVector,  @DBHandle, @TRHandle, @FHandle,
-                     @FBlobID, 0, nil));
+                     @FBlobID, 0, nil))
+  else
+  with BPB as TBPB do
+    Call(isc_open_blob2(StatusVector,  @DBHandle, @TRHandle, @FHandle,
+                   @FBlobID, getDataLength, getBuffer));
 end;
 
 procedure TFB25Blob.GetInfo(var NumSegments: Int64; var MaxSegmentSize,

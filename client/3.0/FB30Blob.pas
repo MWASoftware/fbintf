@@ -70,9 +70,9 @@ type
     procedure InternalCancel(Force: boolean); override;
   public
     constructor Create(Attachment: TFB30Attachment; Transaction: TFB30Transaction;
-                       MetaData: IBlobMetaData); overload;
+                       MetaData: IBlobMetaData; BPB: IBPB); overload;
     constructor Create(Attachment: TFB30Attachment; Transaction: TFBTransaction;
-                       MetaData: IBlobMetaData; BlobID: TISC_QUAD); overload;
+                       MetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB); overload;
     property BlobIntf: Firebird.IBlob read FBlobIntf;
 
   {IBlob}
@@ -85,7 +85,7 @@ type
 
 implementation
 
-uses FBMessages, FB30Statement;
+uses FBMessages, FB30Statement, FBParamBlock;
 
 const
   sLookupBlobMetaData = 'Select F.RDB$FIELD_SUB_TYPE, F.RDB$SEGMENT_LENGTH, RDB$CHARACTER_SET_ID, F.RDB$FIELD_TYPE '+
@@ -193,25 +193,35 @@ begin
 end;
 
 constructor TFB30Blob.Create(Attachment: TFB30Attachment; Transaction: TFB30Transaction;
-  MetaData: IBlobMetaData);
+  MetaData: IBlobMetaData; BPB: IBPB);
 begin
-    inherited Create(Attachment,Transaction,MetaData);
+    inherited Create(Attachment,Transaction,MetaData,BPB);
     with Firebird30ClientAPI do
     begin
-      FBlobIntf := Attachment.AttachmentIntf.createBlob(StatusIntf,Transaction.TransactionIntf,
-                        @FBlobID,0,nil);
+      if BPB = nil then
+        FBlobIntf := Attachment.AttachmentIntf.createBlob(StatusIntf,Transaction.TransactionIntf,
+                        @FBlobID,0,nil)
+      else
+      with BPB as TBPB do
+        FBlobIntf := Attachment.AttachmentIntf.createBlob(StatusIntf,Transaction.TransactionIntf,
+                      @FBlobID,getDataLength, BytePtr(getBuffer));
       Check4DataBaseError;
     end;
 end;
 
 constructor TFB30Blob.Create(Attachment: TFB30Attachment;
-  Transaction: TFBTransaction; MetaData: IBlobMetaData; BlobID: TISC_QUAD);
+  Transaction: TFBTransaction; MetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB);
 begin
-  inherited Create(Attachment,Transaction,MetaData,BlobID);
+  inherited Create(Attachment,Transaction,MetaData,BlobID,BPB);
   with Firebird30ClientAPI do
   begin
+    if BPB = nil then
+      FBlobIntf := Attachment.AttachmentIntf.openBlob(StatusIntf,(Transaction as TFB30Transaction).TransactionIntf,
+                     @FBlobID, 0, nil)
+    else
+    with BPB as TBPB do
     FBlobIntf := Attachment.AttachmentIntf.openBlob(StatusIntf,(Transaction as TFB30Transaction).TransactionIntf,
-                     @FBlobID, 0, nil);
+                   @FBlobID, getDataLength, BytePtr(getBuffer));
     Check4DataBaseError;
   end;
 end;

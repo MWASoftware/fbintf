@@ -130,6 +130,7 @@ type
   { TTPB }
 
   TTPB = class(TParamBlock, ITPB)
+  public
     constructor Create;
 
   public
@@ -170,9 +171,55 @@ type
     function ISRBItem.SetAsString = SetAsString2;
   end;
 
+  TBPBItem =  class(TParamBlockItem,IBPBItem);
+
+  { TBPB }
+
+  TBPB = class(TParamBlock,IBPB)
+  public
+   constructor Create;
+  public
+   {IBPB}
+   function Add(ParamType: byte): IBPBItem;
+   function Find(ParamType: byte): IBPBItem;
+   function getItems(index: integer): IBPBItem;
+  end;
+
 implementation
 
 uses FBMessages;
+
+{ TBPB }
+
+constructor TBPB.Create;
+begin
+  inherited Create;
+  FDataLength := 1;
+  FBuffer^ := char(isc_bpb_version1);
+end;
+
+function TBPB.Add(ParamType: byte): IBPBItem;
+var Item: PParamBlockItemData;
+begin
+  Item := inherited Add(ParamType);
+  Result := TBPBItem.Create(self,Item);
+end;
+
+function TBPB.Find(ParamType: byte): IBPBItem;
+var Item: PParamBlockItemData;
+begin
+  Result := nil;
+  Item := inherited Find(ParamType);
+  if Item <> nil then
+    Result := TBPBItem.Create(self,Item);
+end;
+
+function TBPB.getItems(index: integer): IBPBItem;
+var Item: PParamBlockItemData;
+begin
+  Item := inherited getItems(index);
+  Result := TBPBItem.Create(self,Item);
+end;
 
 { TParamBlockItem }
 
@@ -322,6 +369,8 @@ begin
   with FParamData^ do
   begin
     len := Length(aValue);
+    if len > 255 then
+      IBError(ibxStringTooLong,[aValue,255]);
     FOwner.UpdateRequestItemSize(self,len+2);
     (FBufPtr+1)^ := char(len);
     Move(aValue[1],(FBufPtr+2)^,len);
@@ -335,6 +384,8 @@ begin
   with FParamData^ do
   begin
     len := Length(aValue);
+    if len > 65535 then
+      IBError(ibxStringTooLong,[aValue,65535]);
     FOwner.UpdateRequestItemSize(self,len + 3);
     with FirebirdClientAPI do
       EncodeInteger(len,2,FBufPtr+1);

@@ -94,10 +94,10 @@ type
 
     {Blob - may use to open existing Blobs. However, ISQLData.AsBlob is preferred}
 
-    function CreateBlob(transaction: ITransaction; RelationName, ColumnName: string): IBlob; overload;
-    function CreateBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData): IBlob; overload;
-    function OpenBlob(transaction: ITransaction; RelationName, ColumnName: string; BlobID: TISC_QUAD): IBlob; overload;
-    function OpenBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BlobID: TISC_QUAD): IBlob; overload;
+    function CreateBlob(transaction: ITransaction; RelationName, ColumnName: string; BPB: IBPB=nil): IBlob; overload;
+    function CreateBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BPB: IBPB=nil): IBlob; overload;
+    function OpenBlob(transaction: ITransaction; RelationName, ColumnName: string; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob; overload;
+    function OpenBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob; overload;
 
     {Array}
     function OpenArray(transaction: ITransaction; RelationName, ColumnName: string; ArrayID: TISC_QUAD): IArray;
@@ -368,34 +368,34 @@ begin
 end;
 
 function TFB30Attachment.CreateBlob(transaction: ITransaction; RelationName,
-  ColumnName: string): IBlob;
+  ColumnName: string; BPB: IBPB): IBlob;
 begin
   CheckHandle;
   Result := TFB30Blob.Create(self,transaction as TFB30Transaction,
-              TFB30BlobMetaData.Create(self,Transaction as TFB30Transaction,RelationName,ColumnName));
+              TFB30BlobMetaData.Create(self,Transaction as TFB30Transaction,RelationName,ColumnName),BPB);
 end;
 
 function TFB30Attachment.CreateBlob(transaction: ITransaction;
-  BlobMetaData: IBlobMetaData): IBlob;
+  BlobMetaData: IBlobMetaData; BPB: IBPB): IBlob;
 begin
   CheckHandle;
-  Result := TFB30Blob.Create(self,transaction as TFB30Transaction, BlobMetaData);
+  Result := TFB30Blob.Create(self,transaction as TFB30Transaction, BlobMetaData,BPB);
 end;
 
 function TFB30Attachment.OpenBlob(transaction: ITransaction; RelationName,
-  ColumnName: string; BlobID: TISC_QUAD): IBlob;
+  ColumnName: string; BlobID: TISC_QUAD; BPB: IBPB): IBlob;
 begin
   CheckHandle;
   Result := TFB30Blob.Create(self,transaction as TFB30transaction,
                 TFB30BlobMetaData.Create(self,Transaction as TFB30Transaction,RelationName,ColumnName),
-                BlobID);
+                BlobID,BPB);
 end;
 
 function TFB30Attachment.OpenBlob(transaction: ITransaction;
-  BlobMetaData: IBlobMetaData; BlobID: TISC_QUAD): IBlob;
+  BlobMetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB): IBlob;
 begin
   CheckHandle;
-  Result :=  TFB30Blob.Create(self,transaction as TFB30transaction,BlobMetaData,BlobID);
+  Result :=  TFB30Blob.Create(self,transaction as TFB30transaction,BlobMetaData,BlobID,BPB);
 end;
 
 function TFB30Attachment.OpenArray(transaction: ITransaction; RelationName,

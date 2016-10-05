@@ -540,14 +540,14 @@ begin
       Result := TFB30Blob.Create(FStatement.Attachment,
                                TIBXSQLDA(Parent).GetTransaction,
                                GetBlobMetaData,
-                               Blob_ID);
+                               Blob_ID,nil);
     FBlob := Result;
   end;
 end;
 
 function TIBXSQLVAR.CreateBlob: IBlob;
 begin
-  Result := TFB30Blob.Create(FStatement.Attachment,FStatement.Transaction,GetBlobMetaData);
+  Result := TFB30Blob.Create(FStatement.Attachment,FStatement.Transaction,GetBlobMetaData,nil);
 end;
 
 { TResultSet }
@@ -1356,7 +1356,7 @@ function TFB30Statement.CreateBlob(column: TColumnMetaData): IBlob;
 begin
   if assigned(column) and (column.SQLType <> SQL_Blob) then
     IBError(ibxeNotABlob,[nil]);
-  Result := TFB30Blob.Create(FAttachment,FTransaction,column.GetBlobMetaData);
+  Result := TFB30Blob.Create(FAttachment,FTransaction,column.GetBlobMetaData,nil);
 end;
 
 function TFB30Statement.CreateArray(index: integer): IArray;

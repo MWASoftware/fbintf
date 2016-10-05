@@ -89,10 +89,10 @@ type
                        UniqueParamNames: boolean=false): IStatement; overload;
     function GetEventHandler(Events: TStrings): IEvents; overload;
     function GetEventHandler(Event: string): IEvents; overload;
-    function CreateBlob(transaction: ITransaction; RelationName, ColumnName: string): IBlob; overload;
-    function CreateBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData): IBlob; overload;
-    function OpenBlob(transaction: ITransaction; RelationName, ColumnName: string; BlobID: TISC_QUAD): IBlob; overload;
-    function OpenBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BlobID: TISC_QUAD): IBlob; overload;
+    function CreateBlob(transaction: ITransaction; RelationName, ColumnName: string; BPB: IBPB=nil): IBlob; overload;
+    function CreateBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BPB: IBPB=nil): IBlob; overload;
+    function OpenBlob(transaction: ITransaction; RelationName, ColumnName: string; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob; overload;
+    function OpenBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob; overload;
 
     function OpenArray(transaction: ITransaction; RelationName, ColumnName: string;
       ArrayID: TISC_QUAD): IArray;
@@ -286,34 +286,34 @@ begin
 end;
 
 function TFB25Attachment.CreateBlob(transaction: ITransaction; RelationName,
-  ColumnName: string): IBlob;
+  ColumnName: string; BPB: IBPB): IBlob;
 begin
   CheckHandle;
   Result := TFB25Blob.Create(self,transaction as TFB25transaction,
-                TFB25BlobMetaData.Create(self,Transaction as TFB25Transaction,RelationName,ColumnName));
+                TFB25BlobMetaData.Create(self,Transaction as TFB25Transaction,RelationName,ColumnName),BPB);
 end;
 
 function TFB25Attachment.CreateBlob(transaction: ITransaction;
-  BlobMetaData: IBlobMetaData): IBlob;
+  BlobMetaData: IBlobMetaData; BPB: IBPB): IBlob;
 begin
   CheckHandle;
-  Result := TFB25Blob.Create(self,transaction as TFB25transaction,BlobMetaData);
+  Result := TFB25Blob.Create(self,transaction as TFB25transaction,BlobMetaData,BPB);
 end;
 
 function TFB25Attachment.OpenBlob(transaction: ITransaction; RelationName,
-  ColumnName: string; BlobID: TISC_QUAD): IBlob;
+  ColumnName: string; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob;
 begin
   CheckHandle;
   Result := TFB25Blob.Create(self,transaction as TFB25transaction,
                 TFB25BlobMetaData.Create(self,Transaction as TFB25Transaction,RelationName,ColumnName),
-                BlobID);
+                BlobID,BPB);
 end;
 
 function TFB25Attachment.OpenBlob(transaction: ITransaction;
-  BlobMetaData: IBlobMetaData; BlobID: TISC_QUAD): IBlob;
+  BlobMetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob;
 begin
   CheckHandle;
-  Result :=  TFB25Blob.Create(self,transaction as TFB25transaction,BlobMetaData,BlobID);
+  Result :=  TFB25Blob.Create(self,transaction as TFB25transaction,BlobMetaData,BlobID,BPB);
 end;
 
 procedure TFB25Attachment.ExecImmediate(transaction: ITransaction; sql: string;
