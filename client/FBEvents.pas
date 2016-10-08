@@ -161,11 +161,11 @@ begin
     begin
       Handler := FEventHandler;
       FEventHandler := nil;
-      Handler(GetIEvents);
     end;
   finally
     FCriticalSection.Leave
   end;
+  Handler(GetIEvents);
 end;
 
 constructor TFBEvents.Create(DBAttachment: IAttachment;
