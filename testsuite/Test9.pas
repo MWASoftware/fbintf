@@ -1,6 +1,7 @@
 unit Test9;
 
 {$mode objfpc}{$H+}
+{$codepage utf8}
 
 interface
 

@@ -3,6 +3,7 @@ unit Test1;
 {Create and Drop a Database}
 
 {$mode objfpc}{$H+}
+{$codepage utf8}
 
 interface
 

@@ -2,9 +2,8 @@ unit Test12;
 
 {$mode objfpc}{$H+}
 
-{$IF FPC_FULLVERSION >= 20700 }
 {$codepage UTF8}
-{$ENDIF}
+
 interface
 
 { This test creates strings in a database with various code pages and then

@@ -65,6 +65,9 @@ begin
   end;
 
   writeln('Test Suite Ends');
+  {$IFDEF WINDOWS}
+  readln;
+  {$ENDIF}
 
   // stop program loop
   Terminate;
