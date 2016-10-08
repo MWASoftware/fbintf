@@ -1067,7 +1067,8 @@ end;
 
 function TryIBLoad: Boolean;
 begin
-  Result := FFirebirdAPI <> nil;
+ Result := FFirebirdAPI <> nil;
+ try
   {$IFDEF USEFIREBIRD3API}
   if not Result then
   begin
@@ -1088,6 +1089,10 @@ begin
     Result := false;
     FFirebirdAPI := nil;
   end;
+ except
+   SysUtils.showexception(ExceptObject,ExceptAddr);
+   Result := false;
+ end;
 end;
 
 procedure CheckIBLoaded;

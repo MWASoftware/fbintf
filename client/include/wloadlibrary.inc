@@ -38,7 +38,7 @@ begin
     IBLibrary := DoLoadLibrary(dllPathName)
   end;
 
-  writeln('Dir = ',InstallDir);
+//  writeln('Dir = ',InstallDir);
   {If FIREBIRD environment variable available then try this}
   if IBLibrary = NilHandle then
   begin
