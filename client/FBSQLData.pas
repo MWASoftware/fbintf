@@ -1260,8 +1260,7 @@ begin
   else case SQLType of
       SQL_ARRAY:
         result := '(Array)'; {do not localize}
-      SQL_BLOB:
-        result := '(Blob)'; {do not localize}
+      SQL_BLOB,
       SQL_TEXT, SQL_VARYING:
         result := AsString;
       SQL_TIMESTAMP, SQL_TYPE_DATE, SQL_TYPE_TIME:
