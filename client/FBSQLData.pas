@@ -1206,7 +1206,7 @@ begin
         end;
         SetString(rs, sz, str_len);
         SetCodePage(rs,GetCodePage,false);
-        Result := rs;
+        Result := Trim(rs);
       end;
       SQL_TYPE_DATE:
         case GetSQLDialect of
@@ -1688,7 +1688,7 @@ begin
     SQL_ARRAY:
       result := '(Array)'; {do not localize}
     SQL_BLOB:
-      Result := FIBXSQLVAR.GetAsBlob(AsQuad).GetAsString;
+      Result := Trim(FIBXSQLVAR.GetAsBlob(AsQuad).GetAsString);
     else
       Result := inherited GetAsString;
   end;

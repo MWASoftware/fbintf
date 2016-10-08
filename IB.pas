@@ -782,6 +782,7 @@ type
 
   IAttachment = interface
     function getDPB: IDPB;
+    function AllocateBPB: IBPB;
     procedure Connect;
     procedure Disconnect(Force: boolean=false);
     function IsConnected: boolean;
@@ -813,6 +814,7 @@ type
 
     function CreateBlob(transaction: ITransaction; RelationName, ColumnName: string; BPB: IBPB=nil): IBlob; overload;
     function CreateBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BPB: IBPB=nil): IBlob; overload;
+    function CreateBlob(transaction: ITransaction; SubType: integer; CharSetID: cardinal=0; BPB: IBPB=nil): IBlob; overload;
     function OpenBlob(transaction: ITransaction; RelationName, ColumnName: string; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob;
 
     {Array - may use to open existing arrays. However, ISQLData.AsArray is preferred}

@@ -106,6 +106,8 @@ type
     constructor Create(Attachment: TFB25Attachment; Transaction: TFB25Transaction;
                        MetaData: IBlobMetaData; BPB: IBPB); overload;
     constructor Create(Attachment: TFB25Attachment; Transaction: TFB25Transaction;
+                       SubType: integer; CharSetID: cardinal; BPB: IBPB); overload;
+    constructor Create(Attachment: TFB25Attachment; Transaction: TFB25Transaction;
                        MetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB); overload;
     property Handle: TISC_BLOB_HANDLE read FHandle;
 
@@ -209,6 +211,29 @@ constructor TFB25Blob.Create(Attachment: TFB25Attachment; Transaction: TFB25Tran
 var DBHandle: TISC_DB_HANDLE;
     TRHandle: TISC_TR_HANDLE;
 begin
+  inherited Create(Attachment,Transaction,MetaData,BPB);
+  DBHandle := Attachment.Handle;
+  TRHandle := Transaction.Handle;
+  with Firebird25ClientAPI do
+  if BPB = nil then
+    Call(isc_create_blob2(StatusVector, @DBHandle, @TRHandle, @FHandle, @FBlobID,
+                           0, nil))
+  else
+  with BPB as TBPB do
+    Call(isc_create_blob2(StatusVector, @DBHandle, @TRHandle, @FHandle, @FBlobID,
+                         getDataLength, getBuffer));
+end;
+
+constructor TFB25Blob.Create(Attachment: TFB25Attachment;
+  Transaction: TFB25Transaction; SubType: integer; CharSetID: cardinal;
+  BPB: IBPB);
+var DBHandle: TISC_DB_HANDLE;
+    TRHandle: TISC_TR_HANDLE;
+    MetaData: TFB25BlobMetaData;
+begin
+  MetaData := TFB25BlobMetaData.Create(Attachment,Transaction,'','',SubType);
+  MetaData.FCharSetID := CharSetID;
+  MetaData.FHasFullMetaData := true;
   inherited Create(Attachment,Transaction,MetaData,BPB);
   DBHandle := Attachment.Handle;
   TRHandle := Transaction.Handle;

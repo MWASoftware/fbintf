@@ -65,6 +65,7 @@ type
   public
     {IAttachment}
     function getDPB: IDPB;
+    function AllocateBPB: IBPB;
     procedure Connect;
     procedure Disconnect(Force: boolean=false);
     function IsConnected: boolean;
@@ -91,6 +92,7 @@ type
     function GetEventHandler(Event: string): IEvents; overload;
     function CreateBlob(transaction: ITransaction; RelationName, ColumnName: string; BPB: IBPB=nil): IBlob; overload;
     function CreateBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BPB: IBPB=nil): IBlob; overload;
+    function CreateBlob(transaction: ITransaction; SubType: integer; aCharSetID: cardinal=0; BPB: IBPB=nil): IBlob; overload;
     function OpenBlob(transaction: ITransaction; RelationName, ColumnName: string; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob; overload;
     function OpenBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob; overload;
 
@@ -208,6 +210,11 @@ begin
   Result := FDPB;
 end;
 
+function TFB25Attachment.AllocateBPB: IBPB;
+begin
+  Result := TBPB.Create;
+end;
+
 procedure TFB25Attachment.Connect;
 var Param: IDPBItem;
 begin
@@ -298,6 +305,13 @@ function TFB25Attachment.CreateBlob(transaction: ITransaction;
 begin
   CheckHandle;
   Result := TFB25Blob.Create(self,transaction as TFB25transaction,BlobMetaData,BPB);
+end;
+
+function TFB25Attachment.CreateBlob(transaction: ITransaction;
+  SubType: integer; aCharSetID: cardinal; BPB: IBPB): IBlob;
+begin
+  CheckHandle;
+  Result := TFB25Blob.Create(self,transaction as TFB25transaction,SubType,aCharSetID,BPB);
 end;
 
 function TFB25Attachment.OpenBlob(transaction: ITransaction; RelationName,

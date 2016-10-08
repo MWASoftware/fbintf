@@ -342,6 +342,7 @@ begin
  //   IBError(ibxeMissingColumnName,[]);
   FRelationName := RelationName;
   FColumnName := ColumnName;
+  FSegmentSize := 80;
 end;
 
 function TFBBlobMetaData.GetSubType: integer;
