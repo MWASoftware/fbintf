@@ -286,8 +286,9 @@ type
   TColumnMetaData = class(TSQLDataItem,IColumnMetaData)
   private
     FIBXSQLVAR: TSQLVarData;
-    FStatement: IStatement;         {Keep reference to ensure statement not discarded}
+    FOwner: IUnknown;         {Keep reference to ensure Metadata/statement not discarded}
     FPrepareSeqNo: integer;
+    FStatement: IStatement;
   protected
     procedure CheckActive; override;
     function SQLData: PChar; override;
@@ -295,7 +296,8 @@ type
     function GetCodePage: TSystemCodePage; override;
 
   public
-    constructor Create(aIBXSQLVAR: TSQLVarData);
+    constructor Create(aOwner: IUnknown; aIBXSQLVAR: TSQLVarData);
+    destructor Destroy; override;
     function GetSQLDialect: integer; override;
     property Statement: IStatement read FStatement;
 
@@ -346,7 +348,7 @@ type
     procedure SetDataLength(len: cardinal); override;
     procedure SetSQLType(aValue: cardinal); override;
   public
-    constructor Create(aIBXSQLVAR: TSQLVarData);
+    constructor Create(aOwner: IUnknown; aIBXSQLVAR: TSQLVarData);
     procedure Clear;
     function GetModified: boolean; override;
     procedure SetName(Value: string); override;
@@ -376,9 +378,19 @@ type
     property IsNullable: Boolean read GetIsNullable write SetIsNullable;
   end;
 
+  { TInterfaceOwner }
+
+  TInterfaceOwner = class(TInterfaceParent)
+  private
+    FColumns: array of TObject;
+  public
+    constructor Create(aSize: integer);
+    procedure Remove(col: TSQLDAtaItem);
+  end;
+
   { TMetaData }
 
-  TMetaData = class(TInterfaceParent,IMetaData)
+  TMetaData = class(TInterfaceOwner,IMetaData)
   private
     FPrepareSeqNo: integer;
     FMetaData: TSQLDataArea;
@@ -396,7 +408,7 @@ type
 
   { TSQLParams }
 
-  TSQLParams = class(TInterfaceParent,ISQLParams)
+  TSQLParams = class(TInterfaceOwner,ISQLParams)
   private
     FPrepareSeqNo: integer;
     FSQLParams: TSQLDataArea;
@@ -414,7 +426,7 @@ type
 
   { TResults }
 
-   TResults = class(TInterfaceParent,IResults)
+   TResults = class(TInterfaceOwner,IResults)
    private
      FPrepareSeqNo: integer;
      FTransactionSeqNo: integer;
@@ -436,6 +448,25 @@ type
 implementation
 
 uses FBMessages, FBClientAPI, variants, IBUtils, FBTransaction;
+
+{ TInterfaceOwner }
+
+constructor TInterfaceOwner.Create(aSize: integer);
+begin
+  inherited Create;
+  SetLength(FColumns,aSize);
+end;
+
+procedure TInterfaceOwner.Remove(col: TSQLDAtaItem);
+var i: integer;
+begin
+  for i := 0 to Length(FColumns) - 1 do
+    if FColumns[i] = col then
+    begin
+      FColumns[i] := nil;
+      Exit;
+    end;
+end;
 
 { TSQLDataArea }
 
@@ -1545,12 +1576,18 @@ begin
    Result := FIBXSQLVAR.GetCodePage;
 end;
 
-constructor TColumnMetaData.Create(aIBXSQLVAR: TSQLVarData);
+constructor TColumnMetaData.Create(aOwner: IUnknown; aIBXSQLVAR: TSQLVarData);
 begin
   inherited Create;
   FIBXSQLVAR := aIBXSQLVAR;
-  FStatement := FIBXSQLVAR.Statement;
+  FOwner := aOwner;
   FPrepareSeqNo := FIBXSQLVAR.Parent.PrepareSeqNo;
+end;
+
+destructor TColumnMetaData.Destroy;
+begin
+  (FOwner as TInterfaceOwner).Remove(self);
+  inherited Destroy;
 end;
 
 
@@ -1768,9 +1805,9 @@ begin
   FIBXSQLVAR.SQLType := aValue;
 end;
 
-constructor TSQLParam.Create(aIBXSQLVAR: TSQLVarData);
+constructor TSQLParam.Create(aOwner: IUnknown; aIBXSQLVAR: TSQLVarData);
 begin
-  inherited Create(aIBXSQLVAR);
+  inherited Create(aOwner, aIBXSQLVAR);
   FIBXSQLVAR.UniqueName := true;
 end;
 
@@ -2191,7 +2228,7 @@ end;
 
 constructor TMetaData.Create(aMetaData: TSQLDataArea);
 begin
-  inherited Create;
+  inherited Create(aMetaData.Count);
   FMetaData := aMetaData;
   FStatement := aMetaData.Statement;
   FPrepareSeqNo := aMetaData.PrepareSeqNo;
@@ -2212,10 +2249,17 @@ end;
 function TMetaData.getColumnMetaData(index: integer): IColumnMetaData;
 begin
   CheckActive;
+  if (index < 0) or (index >= getCount) then
+    IBError(ibxeInvalidColumnIndex,[nil]);
+
   if FMetaData.Count = 0 then
     Result := nil
   else
-    Result := TColumnMetaData.Create(FMetaData.Column[index]);
+  begin
+    if FColumns[index] = nil then
+      FColumns[index] := TColumnMetaData.Create(self,FMetaData.Column[index]);
+    Result := TColumnMetaData(FColumns[index]);
+  end;
 end;
 
 function TMetaData.ByName(Idx: String): IColumnMetaData;
@@ -2225,7 +2269,7 @@ begin
   aIBXSQLVAR := FMetaData.ColumnByName(Idx);
   if aIBXSQLVAR = nil then
     IBError(ibxeFieldNotFound,[Idx]);
-  Result := TColumnMetaData.Create(aIBXSQLVAR);
+  Result := getColumnMetaData(aIBXSQLVAR.index);
 end;
 
 { TSQLParams }
@@ -2241,7 +2285,7 @@ end;
 
 constructor TSQLParams.Create(aSQLParams: TSQLDataArea);
 begin
-  inherited Create;
+  inherited Create(aSQLParams.Count);
   FSQLParams := aSQLParams;
   FStatement := aSQLParams.Statement;
   FPrepareSeqNo := aSQLParams.PrepareSeqNo;
@@ -2256,7 +2300,17 @@ end;
 function TSQLParams.getSQLParam(index: integer): ISQLParam;
 begin
   CheckActive;
-  Result := TSQLParam.Create(FSQLParams.Column[index]);
+  if (index < 0) or (index >= getCount) then
+    IBError(ibxeInvalidColumnIndex,[nil]);
+
+  if getCount = 0 then
+    Result := nil
+  else
+  begin
+    if FColumns[index] = nil then
+      FColumns[index] := TSQLParam.Create(self,FSQLParams.Column[index]);
+    Result := TSQLParam(FColumns[index]);
+  end;
 end;
 
 function TSQLParams.ByName(Idx: String): ISQLParam;
@@ -2266,7 +2320,7 @@ begin
   aIBXSQLVAR := FSQLParams.ColumnByName(Idx);
   if aIBXSQLVAR = nil then
     IBError(ibxeFieldNotFound,[Idx]);
-  Result := TSQLParam.Create(aIBXSQLVAR);
+  Result := getSQLParam(aIBXSQLVAR.index);
 end;
 
 function TSQLParams.GetModified: Boolean;
@@ -2301,21 +2355,17 @@ end;
 
 function TResults.GetISQLData(aIBXSQLVAR: TSQLVarData): ISQLData;
 begin
-  if (aIBXSQLVAR.Index < 0) or (aIBXSQLVAR.Index >= Length(FSQLDataCache)) then
+  if (aIBXSQLVAR.Index < 0) or (aIBXSQLVAR.Index >= getCount) then
     IBError(ibxeInvalidColumnIndex,[nil]);
 
-  if FSQLDataCache[aIBXSQLVAR.Index] <> nil then
-    Result := FSQLDataCache[aIBXSQLVAR.Index]
-  else
-  begin
-    Result := TIBSQLData.Create(aIBXSQLVAR);
-    FSQLDataCache[aIBXSQLVAR.Index] := Result;
-  end;
+  if FColumns[aIBXSQLVAR.Index] = nil then
+    FColumns[aIBXSQLVAR.Index] :=  TIBSQLData.Create(self,aIBXSQLVAR);
+  Result := TIBSQLData(FColumns[aIBXSQLVAR.Index]);
 end;
 
 constructor TResults.Create(aResults: TSQLDataArea);
 begin
-  inherited Create;
+  inherited Create(aResults.Count);
   FResults := aResults;
   FStatement := aResults.Statement;
   FPrepareSeqNo := aResults.PrepareSeqNo;
