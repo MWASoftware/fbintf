@@ -378,16 +378,6 @@ type
     property IsNullable: Boolean read GetIsNullable write SetIsNullable;
   end;
 
-  { TInterfaceOwner }
-
-  TInterfaceOwner = class(TInterfaceParent)
-  private
-    FColumns: array of TObject;
-  public
-    constructor Create(aSize: integer);
-    procedure Remove(col: TSQLDAtaItem);
-  end;
-
   { TMetaData }
 
   TMetaData = class(TInterfaceOwner,IMetaData)
@@ -448,25 +438,6 @@ type
 implementation
 
 uses FBMessages, FBClientAPI, variants, IBUtils, FBTransaction;
-
-{ TInterfaceOwner }
-
-constructor TInterfaceOwner.Create(aSize: integer);
-begin
-  inherited Create;
-  SetLength(FColumns,aSize);
-end;
-
-procedure TInterfaceOwner.Remove(col: TSQLDAtaItem);
-var i: integer;
-begin
-  for i := 0 to Length(FColumns) - 1 do
-    if FColumns[i] = col then
-    begin
-      FColumns[i] := nil;
-      Exit;
-    end;
-end;
 
 { TSQLDataArea }
 
