@@ -64,7 +64,7 @@ type
 
   { TOutputBlock }
 
-  TOutputBlock = class(TInterfaceParent)
+  TOutputBlock = class(TFBInterfaceParent)
   private
     FBuffer: PChar;
     FBufSize: integer;
@@ -104,7 +104,7 @@ type
 
   { TOutputBlockItem }
 
-  TOutputBlockItem = class(TInterfaceParent,IUnknown)
+  TOutputBlockItem = class(TFBInterfaceParent,IUnknown)
   private
     FOwner: TOutputBlock;
     FOwnerIntf: IUnknown;

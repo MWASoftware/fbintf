@@ -1166,7 +1166,7 @@ constructor TFB30Statement.Create(Attachment: TFB30Attachment;
   Transaction: ITransaction; sql: string; SQLDialect: integer);
 var GUID : TGUID;
 begin
-  inherited Create(Transaction as TFB30Transaction);
+  inherited Create(Transaction as TFB30Transaction,2);
   FAttachment := Attachment;
   FAttachmentIntf := Attachment;
   FTransaction := transaction as TFB30Transaction;
@@ -1258,13 +1258,17 @@ end;
 function TFB30Statement.GetSQLParams: ISQLParams;
 begin
   CheckHandle;
-  Result := TSQLParams.Create(FSQLParams);
+  if FInterfaces[0] = nil then
+    FInterfaces[0] := TSQLParams.Create(FSQLParams);
+  Result := TSQLParams(FInterfaces[0]);
 end;
 
 function TFB30Statement.GetMetaData: IMetaData;
 begin
   CheckHandle;
-  Result := TMetaData.Create(FSQLRecord);
+  if FInterfaces[1] = nil then
+    FInterfaces[1] := TMetaData.Create(FSQLRecord);
+  Result := TMetaData(FInterfaces[1]);
 end;
 
 function TFB30Statement.GetPlan: String;

@@ -79,7 +79,7 @@ type
 
   { TFBStatus }
 
-  TFBStatus = class(TInterfaceParent)
+  TFBStatus = class(TFBInterfaceParent)
   private
     FIBCS: TRTLCriticalSection; static;
     FIBDataBaseErrorMessages: TIBDataBaseErrorMessages;
@@ -100,7 +100,7 @@ type
 
   { TFBClientAPI }
 
-  TFBClientAPI = class(TInterfaceParent)
+  TFBClientAPI = class(TFBInterfaceParent)
   private
     FFBLibraryName: string; static;
     procedure LoadIBLibrary;

@@ -99,7 +99,7 @@ type
 
   { TSQLDataItem }
 
-  TSQLDataItem = class(TInterfaceParent)
+  TSQLDataItem = class(TFBInterfaceParent)
   private
      function AdjustScale(Value: Int64; aScale: Integer): Double;
      function AdjustScaleToInt64(Value: Int64; aScale: Integer): Int64;
@@ -388,6 +388,7 @@ type
     procedure CheckActive;
   public
     constructor Create(aMetaData: TSQLDataArea);
+    destructor Destroy; override;
   public
     {IMetaData}
     function GetUniqueRelationName: string;
@@ -406,6 +407,7 @@ type
     procedure CheckActive;
   public
     constructor Create(aSQLParams: TSQLDataArea);
+    destructor Destroy; override;
   public
     {ISQLParams}
     function getCount: integer;
@@ -2205,6 +2207,12 @@ begin
   FPrepareSeqNo := aMetaData.PrepareSeqNo;
 end;
 
+destructor TMetaData.Destroy;
+begin
+  (FStatement as TInterfaceOwner).Remove(self);
+  inherited Destroy;
+end;
+
 function TMetaData.GetUniqueRelationName: string;
 begin
   CheckActive;
@@ -2227,9 +2235,9 @@ begin
     Result := nil
   else
   begin
-    if FColumns[index] = nil then
-      FColumns[index] := TColumnMetaData.Create(self,FMetaData.Column[index]);
-    Result := TColumnMetaData(FColumns[index]);
+    if FInterfaces[index] = nil then
+      FInterfaces[index] := TColumnMetaData.Create(self,FMetaData.Column[index]);
+    Result := TColumnMetaData(FInterfaces[index]);
   end;
 end;
 
@@ -2262,6 +2270,12 @@ begin
   FPrepareSeqNo := aSQLParams.PrepareSeqNo;
 end;
 
+destructor TSQLParams.Destroy;
+begin
+  (FStatement as TInterfaceOwner).Remove(self);
+  inherited Destroy;
+end;
+
 function TSQLParams.getCount: integer;
 begin
   CheckActive;
@@ -2278,9 +2292,9 @@ begin
     Result := nil
   else
   begin
-    if FColumns[index] = nil then
-      FColumns[index] := TSQLParam.Create(self,FSQLParams.Column[index]);
-    Result := TSQLParam(FColumns[index]);
+    if FInterfaces[index] = nil then
+      FInterfaces[index] := TSQLParam.Create(self,FSQLParams.Column[index]);
+    Result := TSQLParam(FInterfaces[index]);
   end;
 end;
 
@@ -2329,9 +2343,9 @@ begin
   if (aIBXSQLVAR.Index < 0) or (aIBXSQLVAR.Index >= getCount) then
     IBError(ibxeInvalidColumnIndex,[nil]);
 
-  if FColumns[aIBXSQLVAR.Index] = nil then
-    FColumns[aIBXSQLVAR.Index] :=  TIBSQLData.Create(self,aIBXSQLVAR);
-  Result := TIBSQLData(FColumns[aIBXSQLVAR.Index]);
+  if FInterfaces[aIBXSQLVAR.Index] = nil then
+    FInterfaces[aIBXSQLVAR.Index] :=  TIBSQLData.Create(self,aIBXSQLVAR);
+  Result := TIBSQLData(FInterfaces[aIBXSQLVAR.Index]);
 end;
 
 constructor TResults.Create(aResults: TSQLDataArea);

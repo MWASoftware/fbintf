@@ -74,7 +74,7 @@ uses
 type
   { TFBServiceManager }
 
-  TFBServiceManager = class(TInterfaceParent,IServiceManager)
+  TFBServiceManager = class(TFBInterfaceParent,IServiceManager)
   private
     FFirebirdAPI: IFirebirdAPI;
     FServerName: string;

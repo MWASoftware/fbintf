@@ -96,7 +96,7 @@ type
 
   { TFBArrayMetaData }
 
-  TFBArrayMetaData = class(TInterfaceParent,IArrayMetaData)
+  TFBArrayMetaData = class(TFBInterfaceParent,IArrayMetaData)
   protected
    FArrayDesc: TISC_ARRAY_DESC;
    procedure LoadMetaData(aAttachment: IAttachment; aTransaction: ITransaction;

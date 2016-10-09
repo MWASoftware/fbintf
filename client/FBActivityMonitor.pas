@@ -61,16 +61,26 @@ type
     destructor Destroy; override;
   end;
 
-    TInterfaceParent = TMonitoredObject;
+    TFBInterfaceParent = TMonitoredObject;
   {$ELSE}
-    TInterfaceParent = TInterfacedObject;
+    TFBInterfaceParent = TInterfacedObject;
   {$ENDIF}
 
   IActivityMonitor = interface
     procedure SignalActivity;
   end;
 
-  TActivityReporter = class(TInterfaceParent)
+  { TInterfaceOwner }
+
+  TInterfaceOwner = class(TFBInterfaceParent)
+  protected
+    FInterfaces: array of TObject;
+  public
+    constructor Create(aInterfaces: integer=0);
+    procedure Remove(col: TObject);
+  end;
+
+  TActivityReporter = class(TInterfaceOwner)
   private
     FHasActivity: boolean;
     FMonitors: array of IActivityMonitor;
@@ -80,29 +90,19 @@ type
     procedure AddMonitor(aMonitor: IActivityMonitor);
     procedure RemoveMonitor(aMonitor: IActivityMonitor);
   public
-    constructor Create(aMonitor: IActivityMonitor);
+    constructor Create(aMonitor: IActivityMonitor;aInterfaces: integer=0);
     function HasActivity: boolean;
     procedure SignalActivity;
   end;
 
   { TActivityHandler }
 
-  TActivityHandler = class(TInterfaceParent,IActivityMonitor)
+  TActivityHandler = class(TInterfaceOwner,IActivityMonitor)
   private
     FHasActivity: boolean;
   public
     function HasActivity: boolean;
     procedure SignalActivity;
-  end;
-
-  { TInterfaceOwner }
-
-  TInterfaceOwner = class(TInterfaceParent)
-  protected
-    FColumns: array of TObject;
-  public
-    constructor Create(aSize: integer);
-    procedure Remove(col: TObject);
   end;
 
 implementation
@@ -198,9 +198,10 @@ begin
       FMonitors[i].SignalActivity;
 end;
 
-constructor TActivityReporter.Create(aMonitor: IActivityMonitor);
+constructor TActivityReporter.Create(aMonitor: IActivityMonitor;
+  aInterfaces: integer);
 begin
-  inherited Create;
+  inherited Create(aInterfaces);
   if aMonitor <> nil then
   begin
     SetLength(FMonitors,1);
@@ -216,19 +217,19 @@ end;
 
 { TInterfaceOwner }
 
-constructor TInterfaceOwner.Create(aSize: integer);
+constructor TInterfaceOwner.Create(aInterfaces: integer);
 begin
   inherited Create;
-  SetLength(FColumns,aSize);
+  SetLength(FInterfaces,aInterfaces);
 end;
 
 procedure TInterfaceOwner.Remove(col: TObject);
 var i: integer;
 begin
-  for i := 0 to Length(FColumns) - 1 do
-    if FColumns[i] = col then
+  for i := 0 to Length(FInterfaces) - 1 do
+    if FInterfaces[i] = col then
     begin
-      FColumns[i] := nil;
+      FInterfaces[i] := nil;
       Exit;
     end;
 end;
