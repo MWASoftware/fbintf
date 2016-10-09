@@ -72,6 +72,28 @@ uses
   IBExternals, IBHeader, syncobjs, FBEvents;
 
 type
+  TFB25Events = class;
+
+  { TEventhandlerInterface }
+
+  TEventhandlerInterface = class
+  private
+    FOwner: TFB25Events;
+    {$IFDEF WINDOWS}
+    {Make direct use of Windows API as TEventObject don't seem to work under
+     Windows!}
+    FEventHandler: THandle;
+    {$ELSE}
+    FEventWaiting: TEventObject;
+    {$ENDIF}
+  public
+    constructor Create(aOwner: TFB25Events);
+    destructor Destroy; override;
+    procedure eventCallbackFunction(length: short; updated: PChar);
+    procedure WaitForEvent;
+    procedure CancelWait;
+ end;
+
   { TFB25Events }
 
   TFB25Events = class(TFBEvents,IEvents)
@@ -79,6 +101,7 @@ type
     FEventID: ISC_LONG;
     FDBHandle: TISC_DB_HANDLE;
     FEventHandlerThread: TObject;
+    FAsyncEventCallback: TEventhandlerInterface;
   protected
     procedure CancelEvents(Force: boolean = false); override;
     function GetIEvents: IEvents; override;
@@ -102,21 +125,42 @@ type
   TEventHandlerThread = class(TThread)
   private
     FOwner: TFB25Events;
-     {$IFDEF WINDOWS}
-    {Make direct use of Windows API as TEventObject don't seem to work under
-     Windows!}
-    FEventHandler: THandle;
-    {$ELSE}
-    FEventWaiting: TEventObject;
-    {$ENDIF}
-    procedure HandleEventSignalled(length: short; updated: PChar);
+    FEventHandler: TEventhandlerInterface;
   protected
     procedure Execute; override;
   public
-    constructor Create(Owner: TFB25Events);
-    destructor Destroy; override;
+    constructor Create(Owner: TFB25Events; EventHandler: TEventhandlerInterface);
     procedure Terminate;
   end;
+
+  { TEventHandlerThread }
+
+ procedure TEventHandlerThread.Execute;
+ begin
+   while not Terminated do
+   begin
+     FEventHandler.WaitForEvent;
+
+     if not Terminated  then
+       FOwner.EventSignaled;
+   end;
+ end;
+
+ constructor TEventHandlerThread.Create(Owner: TFB25Events;
+   EventHandler: TEventhandlerInterface);
+ begin
+   inherited Create(true);
+   FOwner := Owner;
+   FEventHandler := EventHandler;
+   FreeOnTerminate := true;
+   Start;
+ end;
+
+ procedure TEventHandlerThread.Terminate;
+ begin
+   inherited Terminate;
+   FEventHandler.CancelWait;
+ end;
 
   {This procedure is used for the event call back - note the cdecl }
 
@@ -125,42 +169,12 @@ type
    if (ptr = nil) or (length = 0) or (updated = nil) then
      Exit;
    { Handle events asynchronously in second thread }
-   TEventHandlerThread(ptr).HandleEventSignalled(length,updated);
+   TEventhandlerInterface(ptr).eventCallbackFunction(length,updated);
  end;
 
- { TEventHandler }
+{ TEventhandlerInterface }
 
-procedure TEventHandlerThread.HandleEventSignalled(length: short; updated: PChar);
-begin
-  FOwner.FCriticalSection.Enter;
-  try
-    Move(Updated[0], FOwner.FResultBuffer[0], Length);
-    {$IFDEF WINDOWS}
-    SetEvent(FEventHandler);
-    {$ELSE}
-    FEventWaiting.SetEvent;
-    {$ENDIF}
-  finally
-    FOwner.FCriticalSection.Leave
-  end;
-end;
-
-procedure TEventHandlerThread.Execute;
-begin
-  while not Terminated do
-  begin
-    {$IFDEF WINDOWS}
-    WaitForSingleObject(FEventHandler,INFINITE);
-    {$ELSE}
-    FEventWaiting.WaitFor(INFINITE);
-    {$ENDIF}
-
-    if not Terminated  then
-      FOwner.EventSignaled;
-  end;
-end;
-
-constructor TEventHandlerThread.Create(Owner: TFB25Events);
+constructor TEventhandlerInterface.Create(aOwner: TFB25Events);
 var
   PSa : PSecurityAttributes;
 {$IFDEF WINDOWS}
@@ -178,19 +192,17 @@ begin
 begin
   PSa:= nil;
 {$ENDIF}
-  inherited Create(true);
-  FOwner := Owner;
-  {$IFDEF WINDOWS}
+  inherited Create;
+{$IFDEF WINDOWS}
   FEventHandler := CreateEvent(PSa,false,true,nil);
-  {$ELSE}
+{$ELSE}
   CreateGuid(GUID);
   FEventWaiting := TEventObject.Create(PSa,false,false,GUIDToString(GUID));
-  {$ENDIF}
-  FreeOnTerminate := true;
-  Start;
+{$ENDIF}
+  FOWner := aOwner;
 end;
 
-destructor TEventHandlerThread.Destroy;
+destructor TEventhandlerInterface.Destroy;
 begin
 {$IFDEF WINDOWS}
   CloseHandle(FEventHandler);
@@ -200,15 +212,41 @@ begin
   inherited Destroy;
 end;
 
-procedure TEventHandlerThread.Terminate;
+procedure TEventhandlerInterface.eventCallbackFunction(length: short;
+  updated: PChar);
 begin
-  inherited Terminate;
-{$IFDEF WINDOWS}
-  SetEvent(FEventHandler);
-{$ELSE}
-  FEventWaiting.SetEvent;
-{$ENDIF}
+  FOwner.FCriticalSection.Enter;
+  try
+    if FOwner.FResultBuffer <> nil then
+      Move(updated[0], FOwner.FResultBuffer[0], length);
+    {$IFDEF WINDOWS}
+    SetEvent(FEventHandler);
+    {$ELSE}
+    FEventWaiting.SetEvent;
+    {$ENDIF}
+  finally
+    FOwner.FCriticalSection.Leave
+  end;
 end;
+
+procedure TEventhandlerInterface.WaitForEvent;
+begin
+  {$IFDEF WINDOWS}
+  WaitForSingleObject(FEventHandler,INFINITE);
+  {$ELSE}
+  FEventWaiting.WaitFor(INFINITE);
+  {$ENDIF}
+end;
+
+procedure TEventhandlerInterface.CancelWait;
+begin
+  {$IFDEF WINDOWS}
+  SetEvent(FEventHandler);
+  {$ELSE}
+  FEventWaiting.SetEvent;
+  {$ENDIF}
+end;
+
 
   { TFB25Events }
 
@@ -237,7 +275,8 @@ constructor TFB25Events.Create(DBAttachment: TFB25Attachment; Events: TStrings);
 begin
   inherited Create(DBAttachment,DBAttachment,Events);
   FDBHandle := DBAttachment.Handle;
-  FEventHandlerThread := TEventHandlerThread.Create(self);
+  FAsyncEventCallback := TEventhandlerInterface.Create(self);
+  FEventHandlerThread := TEventHandlerThread.Create(self,FAsyncEventCallback);
 end;
 
 destructor TFB25Events.Destroy;
@@ -245,6 +284,8 @@ begin
   CancelEvents(true);
   if assigned(FEventHandlerThread) then
     TEventHandlerThread(FEventHandlerThread).Terminate;
+  if assigned(FAsyncEventCallback) then
+    TEventhandlerInterface(FAsyncEventCallback).Free;
   inherited Destroy;
 end;
 
@@ -261,7 +302,7 @@ begin
     callback := @IBEventCallback;
     with Firebird25ClientAPI do
       Call(isc_que_events( StatusVector, @FDBHandle, @FEventID, FEventBufferLen,
-                     FEventBuffer, TISC_CALLBACK(callback), PVoid(FEventHandlerThread)));
+                     FEventBuffer, TISC_CALLBACK(callback), PVoid(FAsyncEventCallback)));
     FInWaitState := true;
   finally
     FCriticalSection.Leave

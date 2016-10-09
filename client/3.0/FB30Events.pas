@@ -193,7 +193,7 @@ begin
   {$ENDIF}
 end;
 
- { TEventHandler }
+ { TEventHandlerThread }
 
 procedure TEventHandlerThread.Execute;
 begin
