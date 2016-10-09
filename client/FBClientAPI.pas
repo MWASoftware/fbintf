@@ -64,6 +64,7 @@ unit FBClientAPI;
 {$IFDEF FPC}
 {$mode delphi}
 {$codepage UTF8}
+{$interfaces COM}
 {$ENDIF}
 
 interface

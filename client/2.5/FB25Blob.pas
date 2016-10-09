@@ -63,6 +63,7 @@ unit FB25Blob;
 
 {$IFDEF FPC}
 {$mode objfpc}{$H+}
+{$interfaces COM}
 {$ENDIF}
 
 interface

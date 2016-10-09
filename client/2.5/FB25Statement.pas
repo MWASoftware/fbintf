@@ -64,6 +64,7 @@ unit FB25Statement;
 {$IFDEF FPC}
 {$mode objfpc}{$H+}
 {$codepage UTF8}
+{$interfaces COM}
 {$ENDIF}
 
 {This unit is hacked from IBSQL and contains the code for managing an XSQLDA and

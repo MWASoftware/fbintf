@@ -31,6 +31,7 @@ unit FBBlob;
 
 {$IFDEF FPC}
 {$mode objfpc}{$H+}
+{$interfaces COM}
 {$ENDIF}
 
 interface
@@ -292,7 +293,7 @@ begin
   try
     SaveToStream(ss);
     rs :=  ss.DataString;
-    if GetSubType = 1 then
+    if (GetSubType = 1) and (FBPB = nil) then
       SetCodePage(rs,GetCodePage,false);
     Result := rs;
   finally
@@ -307,7 +308,7 @@ var
 begin
   rs := aValue;
   if (GetSubType = 1) and  (StringCodePage(aValue) <> GetCodePage) and
-           (GetCodePage <> CP_NONE) then
+           (GetCodePage <> CP_NONE) and (FBPB = nil) then
     SetCodePage(rs,GetCodePage,true);
   ss := TStringStream.Create(rs);
   try

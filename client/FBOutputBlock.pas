@@ -29,6 +29,7 @@ unit FBOutputBlock;
 {$IFDEF FPC}
 {$mode objfpc}{$H+}
 {$codepage UTF8}
+{$interfaces COM}
 {$ENDIF}
 
 { $DEFINE DEBUGOUTPUTBLOCK}

@@ -29,6 +29,7 @@ unit FB25Array;
 {$IFDEF FPC}
 {$mode objfpc}{$H+}
 {$codepage UTF8}
+{$interfaces COM}
 {$ENDIF}
 
 interface

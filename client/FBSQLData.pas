@@ -64,6 +64,7 @@ unit FBSQLData;
 {$IFDEF FPC}
 {$mode objfpc}{$H+}
 {$codepage UTF8}
+{$interfaces COM}
 {$ENDIF}
 
 { This Unit was hacked out of the IBSQL unit and defines a class used as the

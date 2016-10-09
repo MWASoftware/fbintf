@@ -63,6 +63,7 @@ unit FB25ClientAPI;
 
 {$IFDEF FPC}
 {$mode delphi}
+{$interfaces COM}
 {$ENDIF}
 
 interface

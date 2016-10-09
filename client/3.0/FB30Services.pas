@@ -28,6 +28,7 @@ unit FB30Services;
 
 {$IFDEF FPC}
 {$mode objfpc}{$H+}
+{$interfaces COM}
 {$ENDIF}
 
 interface

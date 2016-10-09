@@ -64,6 +64,7 @@ unit IB;
 {$IFDEF FPC}
 {$mode objfpc}{$H+}
 {$codepage UTF8}
+{$interfaces COM}
 {$IF FPC_FULLVERSION < 30000 }
 {$ERROR FPC Version 3.0.0 or later is required}
 {$ENDIF}

@@ -28,6 +28,7 @@ unit FB30Transaction;
 
 {$IFDEF FPC}
 {$mode objfpc}{$H+}
+{$interfaces COM}
 {$ENDIF}
 
 interface
