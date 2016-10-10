@@ -504,9 +504,8 @@
       </Unit65>
       <Unit66>
         <Filename Value="../client/2.5/FB25Statement.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="118"/>
+        <TopLine Value="68"/>
         <CursorPos Y="68"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
@@ -546,9 +545,9 @@
       </Unit70>
       <Unit71>
         <Filename Value="../client/3.0/firebird/Firebird.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="12330"/>
-        <CursorPos X="79" Y="12346"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="1165"/>
+        <CursorPos X="27" Y="1178"/>
         <UsageCount Value="95"/>
         <Loaded Value="True"/>
       </Unit71>
@@ -663,9 +662,10 @@
       </Unit85>
       <Unit86>
         <Filename Value="../client/3.0/FB30Statement.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="1258"/>
-        <CursorPos Y="1272"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="649"/>
+        <CursorPos X="33" Y="660"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
@@ -673,6 +673,7 @@
           <CursorPos Y="33"/>
         </ExtraEditor1>
         <UsageCount Value="69"/>
+        <Loaded Value="True"/>
       </Unit86>
       <Unit87>
         <Filename Value="../../old/fbintf/2.5/FB25Statement.pas"/>
@@ -885,6 +886,15 @@
         <UsageCount Value="9"/>
       </Unit116>
     </Units>
-    <JumpHistory HistoryIndex="-1"/>
+    <JumpHistory Count="2" HistoryIndex="1">
+      <Position1>
+        <Filename Value="../client/3.0/FB30Statement.pas"/>
+        <Caret Line="1274" Column="73" TopLine="1258"/>
+      </Position1>
+      <Position2>
+        <Filename Value="../client/3.0/FB30Statement.pas"/>
+        <Caret Line="663" Column="23" TopLine="649"/>
+      </Position2>
+    </JumpHistory>
   </ProjectSession>
 </CONFIG>
