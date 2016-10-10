@@ -27,6 +27,7 @@ const
   sqlCreateTable =
     'Create Table TestData ('+
     'RowID Integer not null,'+
+    'FixedPoint Decimal(8,2), '+
     'Title VarChar(32) Character Set UTF8,'+
     'BlobData Blob sub_type 1 Character Set UTF8,'+
     'Primary Key(RowID)'+
@@ -34,7 +35,7 @@ const
 
   sqlGetCharSets = 'Select RDB$CHARACTER_SET_NAME,RDB$CHARACTER_SET_ID from RDB$CHARACTER_SETS order by 2';
 
-  sqlInsert = 'Insert into TestData(RowID,Title) Values(:RowID,:Title)';
+  sqlInsert = 'Insert into TestData(RowID,Title,FixedPoint) Values(:RowID,:Title,:FP)';
 
   sqlUpdate = 'Update TestData Set BlobData = ? Where RowID = ?';
 
@@ -61,6 +62,7 @@ begin
       writeln('Param Name = ',Params[i].getName);
     ByName('rowid').AsInteger := 1;
     ByName('title').AsString := 'Blob Test ©€';
+    ByName('Fp').AsDouble := 20.28;
   end;
   Statement.Execute;
   Statement := Attachment.Prepare(Transaction,'Select * from TestData');
