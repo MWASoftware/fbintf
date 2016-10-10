@@ -40,7 +40,7 @@ uses
 type
   { TFBServiceManager }
 
-  TFBServiceManager = class(TFBInterfaceParent,IServiceManager)
+  TFBServiceManager = class(TFBInterfacedObject,IServiceManager)
   private
     FFirebirdAPI: IFirebirdAPI;
     FServerName: string;

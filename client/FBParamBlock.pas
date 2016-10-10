@@ -56,7 +56,7 @@ type
 
   { TParamBlock }
 
-  TParamBlock = class(TFBInterfaceParent)
+  TParamBlock = class(TFBInterfacedObject)
   private
     FItems: array of PParamBlockItemData;
     FBufferSize: integer;
@@ -83,7 +83,7 @@ type
 
   { TParamBlockItem }
 
-  TParamBlockItem = class(TFBInterfaceParent)
+  TParamBlockItem = class(TFBInterfacedObject)
   private
      FOwner: TParamBlock;
      FOwnerIntf: IUnknown;

@@ -238,7 +238,7 @@
           <TopLine Value="208"/>
           <CursorPos Y="231"/>
         </ExtraEditor1>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit29>
       <Unit30>
         <Filename Value="../IBUtils.pas"/>
@@ -505,13 +505,13 @@
       <Unit66>
         <Filename Value="../client/2.5/FB25Statement.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="348"/>
-        <CursorPos X="3" Y="350"/>
+        <TopLine Value="55"/>
+        <CursorPos Y="68"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
-          <TopLine Value="55"/>
-          <CursorPos Y="68"/>
+          <TopLine Value="163"/>
+          <CursorPos X="14" Y="174"/>
         </ExtraEditor1>
         <UsageCount Value="85"/>
       </Unit66>
@@ -526,7 +526,7 @@
         <Filename Value="../client/2.5/FB25Status.pas"/>
         <EditorIndex Value="-1"/>
         <CursorPos Y="12"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit68>
       <Unit69>
         <Filename Value="../client/2.5/FB25Services.pas"/>
@@ -559,17 +559,19 @@
       </Unit72>
       <Unit73>
         <Filename Value="../client/FBActivityMonitor.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="25"/>
-        <CursorPos Y="32"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="43"/>
+        <CursorPos X="93" Y="54"/>
         <UsageCount Value="14"/>
+        <Loaded Value="True"/>
       </Unit73>
       <Unit74>
         <Filename Value="../client/3.0/FB30Status.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="45"/>
         <CursorPos X="48" Y="55"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit74>
       <Unit75>
         <Filename Value="../client/FBMessages.pas"/>
@@ -580,12 +582,10 @@
       </Unit75>
       <Unit76>
         <Filename Value="../client/3.0/FB30Transaction.pas"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="10"/>
         <CursorPos Y="32"/>
         <UsageCount Value="11"/>
-        <Loaded Value="True"/>
       </Unit76>
       <Unit77>
         <Filename Value="../client/FBTransaction.pas"/>
@@ -597,13 +597,13 @@
       <Unit78>
         <Filename Value="../client/FBSQLData.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="2210"/>
-        <CursorPos Y="2213"/>
+        <TopLine Value="46"/>
+        <CursorPos Y="68"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
-          <TopLine Value="46"/>
-          <CursorPos Y="68"/>
+          <TopLine Value="78"/>
+          <CursorPos Y="2358"/>
         </ExtraEditor1>
         <UsageCount Value="84"/>
       </Unit78>
@@ -680,7 +680,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="1612"/>
         <CursorPos X="3" Y="1615"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit87>
       <Unit88>
         <Filename Value="../client/3.0/FB30Events.pas"/>

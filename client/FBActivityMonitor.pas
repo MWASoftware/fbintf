@@ -62,9 +62,9 @@ type
     destructor Destroy; override;
   end;
 
-    TFBInterfaceParent = TMonitoredObject;
+    TFBInterfacedObject = TMonitoredObject;
   {$ELSE}
-    TFBInterfaceParent = TInterfacedObject;
+    TFBInterfacedObject = TInterfacedObject;
   {$ENDIF}
 
   IActivityMonitor = interface
@@ -73,7 +73,7 @@ type
 
   { TInterfaceOwner }
 
-  TInterfaceOwner = class(TFBInterfaceParent)
+  TInterfaceOwner = class(TFBInterfacedObject)
   protected
     FInterfaces: array of TObject;
   public

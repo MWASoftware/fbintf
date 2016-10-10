@@ -100,7 +100,7 @@ type
 
   { TSQLDataItem }
 
-  TSQLDataItem = class(TFBInterfaceParent)
+  TSQLDataItem = class(TFBInterfacedObject)
   private
      function AdjustScale(Value: Int64; aScale: Integer): Double;
      function AdjustScaleToInt64(Value: Int64; aScale: Integer): Int64;
@@ -424,7 +424,6 @@ type
      FPrepareSeqNo: integer;
      FTransactionSeqNo: integer;
      FResults: TSQLDataArea;
-     FSQLDataCache: array of ISQLData;
      FStatement: IStatement; {ensure FStatement not destroyed until no longer needed}
      function GetISQLData(aIBXSQLVAR: TSQLVarData): ISQLData;
    protected
@@ -2356,7 +2355,6 @@ begin
   FStatement := aResults.Statement;
   FPrepareSeqNo := aResults.PrepareSeqNo;
   FTransactionSeqNo := aResults.TransactionSeqNo;
-  SetLength(FSQLDataCache,aResults.Count);
 end;
 
 function TResults.getCount: integer;
