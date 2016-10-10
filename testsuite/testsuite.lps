@@ -504,8 +504,9 @@
       </Unit65>
       <Unit66>
         <Filename Value="../client/2.5/FB25Statement.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="55"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="118"/>
         <CursorPos Y="68"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
@@ -514,6 +515,7 @@
           <CursorPos X="14" Y="174"/>
         </ExtraEditor1>
         <UsageCount Value="85"/>
+        <Loaded Value="True"/>
       </Unit66>
       <Unit67>
         <Filename Value="../client/include/wloadlibrary.inc"/>
@@ -559,12 +561,9 @@
       </Unit72>
       <Unit73>
         <Filename Value="../client/FBActivityMonitor.pas"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="1"/>
-        <TopLine Value="43"/>
-        <CursorPos X="93" Y="54"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="76" Y="58"/>
         <UsageCount Value="14"/>
-        <Loaded Value="True"/>
       </Unit73>
       <Unit74>
         <Filename Value="../client/3.0/FB30Status.pas"/>

@@ -36,22 +36,14 @@ interface
 uses
   Classes, SysUtils, IBExternals;
 
-  { TActivityReporter is a base class for objects that need to report their activity
-    to an activity monitor, where activity is defined as use of a Firebird API call.
-    Objects descending from this class always used the "Call" method as a wrapper
-    for calls to the Firebird API. Each such call is then classed as activity
-    and reported to one or more activity monitors.
-
-    In practice, a transaction monitors statements, blobs and arrays. A Database
-    monitors transactions and events. Transaction monitors use the ITransactionMonitor
-    interface, implemented through the helper object TTransactionMonitor.
-  }
-
   { $DEFINE DEBUGINTERFACES}   {Define this to check that all interfaces are
                                 being destroyed.}
 
 type
-  { TMonitoredObject }
+  { TMonitoredObject is an optional class used to journal all interface creatino
+   and deletion as well as keeping a count of how many monitored interfaces
+   exist at any one time. It is used at development to look for memory leaks
+   due to interfaces not being discarded when no longer used.}
 
   {$IFDEF DEBUGINTERFACES}
   TMonitoredObject = class(TInterfacedObject)
@@ -62,14 +54,13 @@ type
     destructor Destroy; override;
   end;
 
+  {TFBInterfacedObject is used as the base class for interfaces objects and can
+   be either a synonym for TInterfacedObject (default) or TMonitored object}
+
     TFBInterfacedObject = TMonitoredObject;
   {$ELSE}
     TFBInterfacedObject = TInterfacedObject;
   {$ENDIF}
-
-  IActivityMonitor = interface
-    procedure SignalActivity;
-  end;
 
   { TInterfaceOwner }
 
@@ -80,6 +71,24 @@ type
     constructor Create(aInterfaces: integer=0);
     procedure Remove(col: TObject);
   end;
+
+  {The IActivityMonitor interface is provided by classes that receive activity
+   reports.}
+
+  IActivityMonitor = interface
+    procedure SignalActivity;
+  end;
+
+  { TActivityReporter is a base class for objects that need to report their activity
+    to an activity monitor, where activity is defined as use of a Firebird API call.
+    Objects descending from this class always used the "Call" method as a wrapper
+    for calls to the Firebird API. Each such call is then classed as activity
+    and reported to one or more activity monitors.
+
+    In practice, a transaction monitors statements, blobs and arrays. A Database
+    monitors transactions and events. Transaction monitors use the ITransactionMonitor
+    interface, implemented through the helper object TTransactionMonitor.
+  }
 
   TActivityReporter = class(TInterfaceOwner)
   private
@@ -96,7 +105,7 @@ type
     procedure SignalActivity;
   end;
 
-  { TActivityHandler }
+  { TActivityHandler is a base class for classes that receive activity reports.}
 
   TActivityHandler = class(TInterfaceOwner,IActivityMonitor)
   private
