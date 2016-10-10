@@ -93,7 +93,7 @@ unit FB25Statement;
   to the statement. Note: the TFB25Statement does not have a reference to the TIBXResultSet
   interface. This way circular references are avoided.
 
-  To avoid and IResultSet interface being kept to long and no longer synchronised
+  To avoid an IResultSet interface being kept too long and no longer synchronised
   with the query, each statement includes a prepare sequence number, incremented
   each time the query is prepared. When the IResultSet interface is created, it
   noted the current prepare sequence number. Whe an IResult interface is accessed
@@ -124,7 +124,7 @@ type
     FOwnsSQLData: boolean;
     FBlobMetaData: IBlobMetaData;
     FArrayMetaData: IArrayMetaData;
-    FXSQLVAR: PXSQLVAR;       { Point to the PXSQLVAR in the owner object }
+    FXSQLVAR: PXSQLVAR;       { Points to the PXSQLVAR in the owner object }
   protected
     function GetSQLType: cardinal; override;
     function GetSubtype: integer; override;
@@ -814,7 +814,7 @@ begin
     FreeMem(FXSQLDA);
     FXSQLDA := nil;
   end;
-  for i := 0 to Count - 1  do
+  for i := 0 to FSize - 1  do
     TIBXSQLVAR(Column[i]).Free;
   SetLength(FColumnList,0);
   FSize := 0;

@@ -829,6 +829,7 @@ var
 begin
   Result := 0;
   Scaling := 1;
+  PadText := '';
   if aScale > 0 then
   begin
     for i := 1 to aScale do
