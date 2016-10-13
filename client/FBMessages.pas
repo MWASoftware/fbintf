@@ -242,25 +242,16 @@ resourcestring
   SParamNameExpected = 'Parameter name expected';
   SCantPrintValue = 'Cannot print value';
   SSuccess = 'Successful execution';
-  SIBDatabaseEditor = 'Da&tabase Editor...';
-  SIBTransactionEditor = '&Transaction Editor...';
-  SDatabaseFilter = 'Database Files (*.fdb; *.gdb)|*.gdb; *.fdb|All files (*.*)|*.*';
   SDisconnectDatabase = 'Database is currently connected. Disconnect and continue?';
   SCommitTransaction = 'Transaction is currently Active. Rollback and continue?';
   sSQLErrorSeparator = ' When Executing: ';
-  SInterbaseExpressVersion = 'Firebird Express for Lazarus 1.4.2';
-  SEditSQL = 'Edit SQL';
-  SIBSQLEditor = 'IBSQL Editor';
-  SIBServiceEditor = 'Edit IB Service';
-  SIBUpdateSQLEditor = '&UpdateSQL Editor...';
-  SIBDataSetEditor = '&Dataset Editor...';
-  SExecute = 'E&xecute';
   SNoDataSet = 'No dataset association';
   SSQLGenSelect = 'Must select at least one key field and one update field';
   SSQLNotGenerated = 'Update SQL statements not generated, exit anyway?';
   SSQLDataSetOpen = 'Unable to determine field names for %s';
   SDefaultTransaction = '%s, Default';
   SFirebirdAPIFuncNotFound = 'Unable to load Firebird Client Library Function "%s"';
+  SDatabaseFilter = 'Database Files (*.fdb; *.gdb)|*.gdb; *.fdb|All files (*.*)|*.*';
 
 implementation
 
