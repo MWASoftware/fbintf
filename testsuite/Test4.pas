@@ -3,6 +3,8 @@ unit Test4;
 {$mode objfpc}{$H+}
 {$codepage utf8}
 
+{Test 4: Update, Insert and Delete Queries}
+
 interface
 
 uses
@@ -104,7 +106,7 @@ end;
 
 function TTest4.TestTitle: string;
 begin
-  Result := 'Test 4: Update Queries';
+  Result := 'Test 4: Update, Insert and Delete Queries';
 end;
 
 procedure TTest4.RunTest(CharSet: string; SQLDialect: integer);

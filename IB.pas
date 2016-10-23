@@ -798,6 +798,7 @@ type
     function OpenCursor(transaction: ITransaction; sql: string): IResultSet; overload;
     function OpenCursorAtStart(transaction: ITransaction; sql: string; aSQLDialect: integer): IResultSet; overload;
     function OpenCursorAtStart(transaction: ITransaction; sql: string): IResultSet; overload;
+    function OpenCursorAtStart(sql: string): IResultSet; overload;
     function Prepare(transaction: ITransaction; sql: string; aSQLDialect: integer): IStatement; overload;
     function Prepare(transaction: ITransaction; sql: string): IStatement; overload;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: string;

@@ -246,6 +246,7 @@ begin
     writeln('Charset id = ',getCharSetID);
     if getIsNullable then writeln('Nullable') else writeln('Not Null');
     writeln('Size = ',GetSize);
+    writeln;
   end;
 end;
 

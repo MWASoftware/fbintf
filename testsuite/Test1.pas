@@ -1,6 +1,15 @@
 unit Test1;
 
 {Create and Drop a Database}
+{
+ This test first attempts to create a database without specifying any parameters
+ (should fail). It then goes on to create and drop a database, print out the
+ parameters and then creates it again (will fail if the dropdatabase failed silently.
+
+ Some basic database info is then accessed and printed.
+
+ A basic query is performed and finally the database dropped.
+}
 
 {$mode objfpc}{$H+}
 {$codepage utf8}

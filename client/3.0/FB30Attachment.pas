@@ -81,6 +81,7 @@ type
     function OpenCursor(transaction: ITransaction; sql: string): IResultSet; overload;
     function OpenCursorAtStart(transaction: ITransaction; sql: string; aSQLDialect: integer): IResultSet; overload;
     function OpenCursorAtStart(transaction: ITransaction; sql: string): IResultSet; overload;
+    function OpenCursorAtStart(sql: string): IResultSet; overload;
     function Prepare(transaction: ITransaction; sql: string; aSQLDialect: integer): IStatement; overload;
     function Prepare(transaction: ITransaction; sql: string): IStatement; overload;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: string;
@@ -324,6 +325,11 @@ function TFB30Attachment.OpenCursorAtStart(transaction: ITransaction; sql: strin
   ): IResultSet;
 begin
   Result := OpenCursorAtStart(transaction,sql,FSQLDialect);
+end;
+
+function TFB30Attachment.OpenCursorAtStart(sql: string): IResultSet;
+begin
+  Result := OpenCursorAtStart(StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit),sql,FSQLDialect);
 end;
 
 function TFB30Attachment.Prepare(transaction: ITransaction; sql: string;

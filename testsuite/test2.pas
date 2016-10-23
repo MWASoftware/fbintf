@@ -3,6 +3,21 @@ unit test2;
 {$mode objfpc}{$H+}
 {$codepage utf8}
 
+{Test 2: Open the employee database and run a query}
+
+{ This test opens the employee example databases with the supplied user name/password
+  and runs a simple query with no parameters. Note that the password parameter
+  is first supplied empty and then updated.
+
+  Both the output metadata and the query plan are printed out, followed by the results of the query.
+
+  A specific employee record is then queried, first using a positional parameter
+  and then a parameter by name. In each case, the SQL Parameter metadata is also
+  printed followed by the query results.
+
+  Finally, the database is explicitly disconnected.
+}
+
 interface
 
 uses
@@ -35,14 +50,17 @@ begin
     PrintMetaData(Statement.GetMetaData);
     writeln('Plan = ' ,Statement.GetPlan);
     writeln(Statement.GetSQLText);
+    writeln;
     ReportResults(Statement);
     Statement := Attachment.Prepare(Transaction,'Select * from EMPLOYEE Where EMP_NO = ?',3);
     writeln(Statement.GetSQLText);
+    ParamInfo(Statement.SQLParams);
     Statement.GetSQLParams[0].AsInteger := 9;
     ReportResults(Statement);
     writeln('With param names');
     Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
     writeln(Statement.GetSQLText);
+    ParamInfo(Statement.SQLParams);
     Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 9;
     ReportResults(Statement);
 end;
