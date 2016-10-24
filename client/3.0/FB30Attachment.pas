@@ -61,7 +61,7 @@ type
     function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionAction): ITransaction; override;
     function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionAction): ITransaction; override;
     procedure ExecImmediate(transaction: ITransaction; sql: string; aSQLDialect: integer); override;
-    function Prepare(transaction: ITransaction; sql: string; aSQLDialect: integer): IStatement; overload;
+    function Prepare(transaction: ITransaction; sql: string; aSQLDialect: integer): IStatement; override;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: string;
                        aSQLDialect: integer; GenerateParamNames: boolean=false;
                        UniqueParamNames: boolean=false): IStatement; override;
