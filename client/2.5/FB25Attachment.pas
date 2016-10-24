@@ -34,64 +34,37 @@ unit FB25Attachment;
 interface
 
 uses
-  Classes, SysUtils, IB,  FBClientAPI, FB25ClientAPI, IBHeader,
+  Classes, SysUtils, IB,  FBAttachment, FB25ClientAPI, IBHeader,
   FBParamBlock, FBOutputBlock, FBActivityMonitor;
 
 type
   { TFB25Attachment }
 
-  TFB25Attachment = class(TActivityHandler, IAttachment, IActivityMonitor)
+  TFB25Attachment = class(TFBAttachment, IAttachment, IActivityMonitor)
   private
-    FHasDefaultCharSet: boolean;
-    FCharSetID: integer;
-    FCodePage: TSystemCodePage;
     FHandle: TISC_DB_HANDLE;
-    FDatabaseName: string;
-    FDPB: IDPB;
-    FSQLDialect: integer;
-    FFirebirdAPI: IFirebirdAPI;
-    FRaiseExceptionOnConnectError: boolean;
-    procedure CheckHandle;
+  protected
+    procedure CheckHandle; override;
   public
-    constructor Create(DatabaseName: string; DPB: IDPB;
+    constructor Create(DatabaseName: string; aDPB: IDPB;
       RaiseExceptionOnConnectError: boolean);
-    constructor CreateDatabase(DatabaseName: string; DPB: IDPB; RaiseExceptionOnError: boolean);
-    destructor Destroy; override;
+    constructor CreateDatabase(DatabaseName: string; aDPB: IDPB; RaiseExceptionOnError: boolean);
     property Handle: TISC_DB_HANDLE read FHandle;
-    property SQLDialect: integer read FSQLDialect;
-    property HasDefaultCharSet: boolean read FHasDefaultCharSet;
-    property CharSetID: integer read FCharSetID;
-    property CodePage: TSystemCodePage read FCodePage;
 
   public
     {IAttachment}
-    function getDPB: IDPB;
-    function AllocateBPB: IBPB;
     procedure Connect;
-    procedure Disconnect(Force: boolean=false);
+    procedure Disconnect(Force: boolean=false); override;
     function IsConnected: boolean;
     procedure DropDatabase;
-    function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionAction): ITransaction; overload;
-    function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionAction): ITransaction; overload;
-    procedure ExecImmediate(transaction: ITransaction; sql: string; aSQLDialect: integer); overload;
-    procedure ExecImmediate(TPB: array of byte; sql: string; aSQLDialect: integer); overload;
-    procedure ExecImmediate(transaction: ITransaction; sql: string); overload;
-    procedure ExecImmediate(TPB: array of byte; sql: string); overload;
-    function OpenCursor(transaction: ITransaction; sql: string; aSQLDialect: integer): IResultSet; overload;
-    function OpenCursor(transaction: ITransaction; sql: string): IResultSet; overload;
-    function OpenCursorAtStart(transaction: ITransaction; sql: string; aSQLDialect: integer): IResultSet; overload;
-    function OpenCursorAtStart(transaction: ITransaction; sql: string): IResultSet; overload;
-    function OpenCursorAtStart(sql: string): IResultSet; overload;
-    function Prepare(transaction: ITransaction; sql: string; aSQLDialect: integer): IStatement; overload;
-    function Prepare(transaction: ITransaction; sql: string): IStatement; overload;
+    function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionAction): ITransaction; override;
+    function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionAction): ITransaction; override;
+    procedure ExecImmediate(transaction: ITransaction; sql: string; aSQLDialect: integer); override;
+    function Prepare(transaction: ITransaction; sql: string; aSQLDialect: integer): IStatement; override;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: string;
                        aSQLDialect: integer; GenerateParamNames: boolean=false;
-                       UniqueParamNames: boolean=false): IStatement; overload;
-    function PrepareWithNamedParameters(transaction: ITransaction; sql: string;
-                       GenerateParamNames: boolean=false;
-                       UniqueParamNames: boolean=false): IStatement; overload;
-    function GetEventHandler(Events: TStrings): IEvents; overload;
-    function GetEventHandler(Event: string): IEvents; overload;
+                       UniqueParamNames: boolean=false): IStatement; override;
+    function GetEventHandler(Events: TStrings): IEvents; override;
     function CreateBlob(transaction: ITransaction; RelationName, ColumnName: string; BPB: IBPB=nil): IBlob; overload;
     function CreateBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BPB: IBPB=nil): IBlob; overload;
     function CreateBlob(transaction: ITransaction; SubType: integer; aCharSetID: cardinal=0; BPB: IBPB=nil): IBlob; overload;
@@ -105,7 +78,6 @@ type
 
     {Database Information}
 
-    function GetSQLDialect: integer;
     function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: string): IBlobMetaData;
     function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: string): IArrayMetaData;
     function GetDBInformation(Requests: array of byte): IDBInformation; overload;
@@ -125,36 +97,28 @@ begin
     IBError(ibxeDatabaseClosed,[nil]);
 end;
 
-constructor TFB25Attachment.Create(DatabaseName: string; DPB: IDPB;
+constructor TFB25Attachment.Create(DatabaseName: string; aDPB: IDPB;
   RaiseExceptionOnConnectError: boolean);
 begin
-  inherited Create;
-  FFirebirdAPI := Firebird25ClientAPI; {Keep reference to interface}
-  FSQLDialect := 3;
-  FDatabaseName := DatabaseName;
-  if DPB = nil then
+  if aDPB = nil then
   begin
     if RaiseExceptionOnConnectError then
        IBError(ibxeNoDPB,[nil]);
     Exit;
   end;
-  FDPB := DPB;
-  FRaiseExceptionOnConnectError := RaiseExceptionOnConnectError;
+  inherited Create(DatabaseName,aDPB,RaiseExceptionOnConnectError);
   Connect;
 end;
 
-constructor TFB25Attachment.CreateDatabase(DatabaseName: string; DPB: IDPB;
+constructor TFB25Attachment.CreateDatabase(DatabaseName: string; aDPB: IDPB;
   RaiseExceptionOnError: boolean);
 var sql: string;
     tr_handle: TISC_TR_HANDLE;
     CreateParams: string;
     DPBItem: IDPBItem;
 begin
-  inherited Create;
-  FFirebirdAPI := Firebird25ClientAPI; {Keep reference to interface}
+  inherited Create(DatabaseName,aDPB,RaiseExceptionOnError);
   CreateParams := '';
-  FRaiseExceptionOnConnectError := RaiseExceptionOnError;
-  FSQLDialect := 3;
 
   if DPB <> nil then
   begin
@@ -172,7 +136,7 @@ begin
 
     DPBItem :=  DPB.Find(isc_dpb_lc_ctype);
     if DPBItem <> nil then
-    with FirebirdClientAPI do
+    with Firebird25ClientAPI do
     begin
       CreateParams += ' DEFAULT CHARACTER SET ' + DPBItem.AsString;
       FHasDefaultCharSet :=   CharSetName2CharSetID(DPBItem.AsString,FCharSetID) and
@@ -185,8 +149,6 @@ begin
       FSQLDialect := DPBItem.AsInteger;
   end;
 
-  FDatabaseName := DatabaseName;
-  FDPB := DPB;
   tr_handle := nil;
   sql := 'CREATE DATABASE ''' + DatabaseName + ''' ' + CreateParams; {do not localize}
   with Firebird25ClientAPI do
@@ -201,29 +163,13 @@ begin
   end;
 end;
 
-destructor TFB25Attachment.Destroy;
-begin
-  Disconnect(true);
-  inherited Destroy;
-end;
-
-function TFB25Attachment.getDPB: IDPB;
-begin
-  Result := FDPB;
-end;
-
-function TFB25Attachment.AllocateBPB: IBPB;
-begin
-  Result := TBPB.Create;
-end;
-
 procedure TFB25Attachment.Connect;
 var Param: IDPBItem;
 begin
   FSQLDialect := 3;
 
   with Firebird25ClientAPI do
-  if FDPB = nil then
+  if DPB = nil then
   begin
     if (isc_attach_database(StatusVector, Length(FDatabaseName),
                         PChar(FDatabaseName), @FHandle, 0, nil) > 0) and FRaiseExceptionOnConnectError then
@@ -233,16 +179,16 @@ begin
   begin
     if (isc_attach_database(StatusVector, Length(FDatabaseName),
                          PChar(FDatabaseName), @FHandle,
-                         (FDPB as TDPB).getDataLength,
-                         (FDPB as TDPB).getBuffer) > 0 ) and FRaiseExceptionOnConnectError then
+                         (DPB as TDPB).getDataLength,
+                         (DPB as TDPB).getBuffer) > 0 ) and FRaiseExceptionOnConnectError then
       IBDatabaseError;
 
     if IsConnected then
     begin
-     Param := FDPB.Find(isc_dpb_set_db_SQL_dialect);
+     Param := DPB.Find(isc_dpb_set_db_SQL_dialect);
      if Param <> nil then
        FSQLDialect := Param.AsByte;
-     Param :=  FDPB.Find(isc_dpb_lc_ctype);
+     Param :=  DPB.Find(isc_dpb_lc_ctype);
      FHasDefaultCharSet :=  (Param <> nil) and
                              CharSetName2CharSetID(Param.AsString,FCharSetID) and
                              CharSetID2CodePage(FCharSetID,FCodePage) and
@@ -344,66 +290,11 @@ begin
   SignalActivity;
 end;
 
-procedure TFB25Attachment.ExecImmediate(TPB: array of byte; sql: string;
-  aSQLDialect: integer);
-begin
-  ExecImmediate(StartTransaction(TPB,taCommit),sql,aSQLDialect);
-end;
-
-procedure TFB25Attachment.ExecImmediate(transaction: ITransaction; sql: string);
-begin
-  ExecImmediate(transaction,sql,FSQLDialect);
-end;
-
-procedure TFB25Attachment.ExecImmediate(TPB: array of byte; sql: string);
-begin
-  ExecImmediate(StartTransaction(TPB,taCommit),sql,FSQLDialect);
-end;
-
-function TFB25Attachment.OpenCursor(transaction: ITransaction; sql: string;
-  aSQLDialect: integer): IResultSet;
-var Statement: IStatement;
-begin
-  CheckHandle;
-  Statement := Prepare(transaction,sql,aSQLDialect);
-  Result := Statement.OpenCursor;
-end;
-
-function TFB25Attachment.OpenCursor(transaction: ITransaction; sql: string
-  ): IResultSet;
-begin
-  Result := OpenCursor(transaction,sql,FSQLDialect);
-end;
-
-function TFB25Attachment.OpenCursorAtStart(transaction: ITransaction;
-  sql: string; aSQLDialect: integer): IResultSet;
-begin
-  Result := OpenCursor(transaction,sql,aSQLDialect);
-  Result.FetchNext;
-end;
-
-function TFB25Attachment.OpenCursorAtStart(transaction: ITransaction; sql: string
-  ): IResultSet;
-begin
-  Result := OpenCursorAtStart(transaction,sql,FSQLDialect);
-end;
-
-function TFB25Attachment.OpenCursorAtStart(sql: string ): IResultSet;
-begin
-  Result := OpenCursorAtStart(StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit),sql,FSQLDialect);
-end;
-
 function TFB25Attachment.Prepare(transaction: ITransaction; sql: string;
   aSQLDialect: integer): IStatement;
 begin
   CheckHandle;
   Result := TFB25Statement.Create(self,transaction,sql,aSQLDialect);
-end;
-
-function TFB25Attachment.Prepare(transaction: ITransaction; sql: string
-  ): IStatement;
-begin
-  Result := Prepare(transaction,sql,FSQLDialect);
 end;
 
 function TFB25Attachment.PrepareWithNamedParameters(transaction: ITransaction;
@@ -415,31 +306,10 @@ begin
          GenerateParamNames,UniqueParamNames);
 end;
 
-function TFB25Attachment.PrepareWithNamedParameters(transaction: ITransaction;
-  sql: string; GenerateParamNames: boolean; UniqueParamNames: boolean
-  ): IStatement;
-begin
-  CheckHandle;
-  Result := TFB25Statement.CreateWithParameterNames(self,transaction,sql,FSQLDialect,
-         GenerateParamNames,UniqueParamNames);
-end;
-
 function TFB25Attachment.GetEventHandler(Events: TStrings): IEvents;
 begin
   CheckHandle;
   Result := TFB25Events.Create(self,Events);
-end;
-
-function TFB25Attachment.GetEventHandler(Event: string): IEvents;
-var S: TStringList;
-begin
-  S := TStringList.Create;
-  try
-    S.Add(Event);
-    Result := GetEventHandler(S);
-  finally
-    S.Free;
-  end;
 end;
 
 function TFB25Attachment.OpenArray(transaction: ITransaction; RelationName, ColumnName: string;
@@ -455,11 +325,6 @@ begin
   CheckHandle;
   Result := TFB25Array.Create(self,transaction as TFB25Transaction,
                     GetArrayMetaData(transaction,RelationName,ColumnName));
-end;
-
-function TFB25Attachment.GetSQLDialect: integer;
-begin
-  Result := FSQLDialect;
 end;
 
 function TFB25Attachment.GetBlobMetaData(Transaction: ITransaction; tableName,
