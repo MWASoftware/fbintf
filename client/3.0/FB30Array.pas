@@ -302,7 +302,8 @@ begin
                           0,nil,
                           FBufSize,BytePtr(FBuffer)
                           );
-    Check4DataBaseError;
+    if not Force then
+      Check4DataBaseError;
   end;
   SignalActivity;
 end;
