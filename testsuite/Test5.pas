@@ -3,6 +3,27 @@ unit Test5;
 {$mode objfpc}{$H+}
 {$codepage utf8}
 
+{Test 5: Update/Insert Returning and Activity Check}
+
+{ This test opens the employee example databases with the supplied user name/password,
+  reconnects, and runs several queries:
+
+  1. Update an employee record, return LAST_NAME,and report affected rows.
+
+  2. Show Changed Record
+
+  3. Insert new employee record, return FULL_NAME and report affected rows.
+
+  4. Show inserted record
+
+  5. Check attachment and transaction activity and ensure reset.
+
+  6. Show total records and confirm attachment and transaction activity
+
+  7. Implicit Rollback and disconnect.
+
+}
+
 interface
 
 uses
@@ -75,7 +96,7 @@ end;
 
 function TTest5.TestTitle: string;
 begin
-  Result := 'Test 5: Update Returning';
+  Result := 'Test 5: Update Returning and Activity Check';
 end;
 
 procedure TTest5.RunTest(CharSet: string; SQLDialect: integer);

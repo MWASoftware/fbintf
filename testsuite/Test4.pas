@@ -5,6 +5,25 @@ unit Test4;
 
 {Test 4: Update, Insert and Delete Queries}
 
+{ This test opens the employee example databases with the supplied user name/password
+  and runs several queries:
+
+  1. Update an employee record and report affected rows.
+
+  2. Show Changed Record
+
+  3. Insert new employee record and report affected rows.
+
+  4. Show inserted record and then delete it and report affected rows
+
+  5. Repeat insert with a null PHONE_EXT.
+
+  6. Show inserted record and total records
+
+  7. Implicit Rollback and disconnect.
+
+}
+
 interface
 
 uses

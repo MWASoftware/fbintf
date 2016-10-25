@@ -230,6 +230,7 @@ type
     FSQLParams: TIBXINPUTSQLDA;
     FSQLRecord: TIBXOUTPUTSQLDA;
     FResultSet: Firebird.IResultSet;
+  protected
     procedure CheckHandle; override;
     procedure GetDSQLInfo(info_request: byte; buffer: ISQLInfoResults); override;
     procedure InternalPrepare; override;

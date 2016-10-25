@@ -1,8 +1,33 @@
 unit Test6;
 
 {$mode objfpc}{$H+}
-
 {$codepage UTF8}
+
+{Test 6: Blob Handling}
+
+{
+  1. Create an empty database and populate with a single table.
+
+  2. Show the character sets available (List RDB$CHARACTER_SETS)
+
+  3. Select all from new table and show metadata.
+
+  4. Insert row and include WIN1252 characters known to be in two byte UTF8, plus Fixed point
+
+  5. Select all from new table
+
+  6. Use Update Query to set blob field with plain text loaded from file
+
+  7. Select all from new table
+
+  8. Add another row with a null blob
+
+  9. Update this row's blob field with a copy of the first row (demo of blob assignment)
+
+  10. Select all from new table.
+
+  11. Drop Database and repeat above but with no default connection character set.
+}
 
 interface
 
@@ -28,6 +53,7 @@ const
     'Create Table TestData ('+
     'RowID Integer not null,'+
     'FixedPoint Decimal(8,2), '+
+    'FloatingPoint Double Precision, '+
     'Title VarChar(32) Character Set UTF8,'+
     'BlobData Blob sub_type 1 Character Set UTF8,'+
     'Primary Key(RowID)'+
@@ -35,7 +61,7 @@ const
 
   sqlGetCharSets = 'Select RDB$CHARACTER_SET_NAME,RDB$CHARACTER_SET_ID from RDB$CHARACTER_SETS order by 2';
 
-  sqlInsert = 'Insert into TestData(RowID,Title,FixedPoint) Values(:RowID,:Title,:FP)';
+  sqlInsert = 'Insert into TestData(RowID,Title,FixedPoint,FloatingPoint) Values(:RowID,:Title,:FP, :DP)';
 
   sqlUpdate = 'Update TestData Set BlobData = ? Where RowID = ?';
 
@@ -52,6 +78,7 @@ begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
 
   Statement := Attachment.Prepare(Transaction,sqlGetCharSets);
+  PrintMetaData(Statement.GetMetaData);
   ReportResults(Statement);
   Statement := Attachment.Prepare(Transaction,'Select * from TestData');
   PrintMetaData(Statement.GetMetaData);
@@ -63,6 +90,7 @@ begin
     ByName('rowid').AsInteger := 1;
     ByName('title').AsString := 'Blob Test ©€';
     ByName('Fp').AsDouble := 20.28;
+    ByName('DP').AsDouble := 3.142;
   end;
   Statement.Execute;
   Statement := Attachment.Prepare(Transaction,'Select * from TestData');
@@ -79,10 +107,9 @@ begin
 
   {second row}
   Statement := Attachment.PrepareWithNamedParameters(Transaction,sqlInsert);
+  ParamInfo(Statement.SQLParams);
   with Statement.GetSQLParams do
   begin
-    for i := 0 to GetCount - 1 do
-      writeln('Param Name = ',Params[i].getName,' Charset ID = ',Params[i].GetCharSetID);
     ByName('rowid').AsInteger := 2;
     ByName('title').AsString := 'Blob Test ©€';
   end;
