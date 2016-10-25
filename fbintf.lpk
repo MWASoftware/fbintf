@@ -9,6 +9,11 @@
         <OtherUnitFiles Value="client;client/3.0/firebird;client/2.5;.;client/3.0"/>
         <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
+      <CodeGeneration>
+        <Checks>
+          <RangeChecks Value="True"/>
+        </Checks>
+      </CodeGeneration>
     </CompilerOptions>
     <Files Count="34">
       <Item1>

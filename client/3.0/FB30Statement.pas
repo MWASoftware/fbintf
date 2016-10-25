@@ -1184,12 +1184,18 @@ end;
 
 function TFB30Statement.GetSQLParams: ISQLParams;
 begin
-
+  CheckHandle;
+  if FInterfaces[0] = nil then
+    FInterfaces[0] := TSQLParams.Create(FSQLParams);
+  Result := TSQLParams(FInterfaces[0]);
 end;
 
 function TFB30Statement.GetMetaData: IMetaData;
 begin
-
+  CheckHandle;
+  if FInterfaces[1] = nil then
+    FInterfaces[1] := TMetaData.Create(FSQLRecord);
+  Result := TMetaData(FInterfaces[1]);
 end;
 
 function TFB30Statement.GetPlan: String;
