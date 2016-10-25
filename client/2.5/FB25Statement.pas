@@ -107,7 +107,7 @@ interface
 
 uses
   Classes, SysUtils, IB,  FBClientAPI, FB25ClientAPI, FB25Transaction, FB25Attachment,
-  IBHeader, IBExternals, FBSQLData, FBOutputBlock, FBActivityMonitor;
+  IBHeader, IBExternals, FBSQLData, FBOutputBlock, FBStatement, FBActivityMonitor;
 
 type
   TFB25Statement = class;
@@ -229,78 +229,39 @@ type
 
   { TFB25Statement }
 
-  TFB25Statement = class(TActivityReporter,IStatement)
+  TFB25Statement = class(TFBStatement,IStatement)
   private
-    FAttachment: TFB25Attachment;
-    FAttachmentIntf: IAttachment;
-    FTransaction: TFB25Transaction;
-    FTransactionIntf: ITransaction;
-    FExecTransactionIntf: ITransaction;
+    FDBHandle: TISC_DB_HANDLE;
     FHandle: TISC_STMT_HANDLE;
-    FSQLStatementType: TIBSQLStatementTypes;         { Select, update, delete, insert, create, alter, etc...}
-    FSQLDialect: integer;
     FSQLParams: TIBXINPUTSQLDA;
     FSQLRecord: TIBXOUTPUTSQLDA;
-    FOpen: boolean;
     FCursor: String;               { Cursor name...}
-    FPrepared: boolean;
-    FPrepareSeqNo: integer; {used to check for out of date references from interfaces}
-    FSQL: string;
-    FProcessedSQL: string;
-    FHasParamNames: boolean;
-    FBOF: boolean;
-    FEOF: boolean;
-    FSingleResults: boolean;
-    FGenerateParamNames: boolean;
-    FUniqueParamNames: boolean;
-    procedure CheckTransaction(aTransaction: TFB25Transaction);
-    procedure CheckHandle;
-    procedure GetDsqlInfo(info_request: byte; buffer: ISQLInfoResults); overload;
-    procedure InternalPrepare;
-    function InternalExecute(aTransaction: TFB25Transaction): IResults;
-    function InternalOpenCursor(aTransaction: TFB25Transaction): IResultSet;
-    procedure FreeHandle;
-    procedure InternalClose(Force: boolean);
+  protected
+    procedure CheckHandle; override;
+    procedure GetDsqlInfo(info_request: byte; buffer: ISQLInfoResults); override;
+    procedure InternalPrepare; override;
+    function InternalExecute(aTransaction: ITransaction): IResults; override;
+    function InternalOpenCursor(aTransaction: ITransaction): IResultSet; override;
+    procedure FreeHandle; override;
+    procedure InternalClose(Force: boolean); override;
   public
     constructor Create(Attachment: TFB25Attachment; Transaction: ITransaction;
-      sql: string; SQLDialect: integer);
-    constructor CreateWithParameterNames(Attachment: TFB25Attachment; Transaction: ITransaction;
-      sql: string;  SQLDialect: integer; GenerateParamNames: boolean =false; UniqueParamNames: boolean=false);
+      sql: string; aSQLDialect: integer);
+    constructor CreateWithParameterNames(Attachment: TFB25Attachment;
+      Transaction: ITransaction; sql: string; aSQLDialect: integer;
+  GenerateParamNames: boolean; UniqueParamNames: boolean);
     destructor Destroy; override;
-    procedure Close;
     function FetchNext: boolean;
-    procedure TransactionEnding(aTransaction: TFB25Transaction; Force: boolean);
-    property SQLDialect: integer read FSQLDialect;
-    property Attachment: TFB25Attachment read FAttachment;
-    property Transaction: TFB25Transaction read FTransaction;
 
   public
     {IStatement}
-    function GetSQLParams: ISQLParams;
-    function GetMetaData: IMetaData;
+    function GetSQLParams: ISQLParams; override;
+    function GetMetaData: IMetaData; override;
     function GetPlan: String;
-    function GetRowsAffected(var SelectCount, InsertCount, UpdateCount,
-      DeleteCount: integer): boolean;
-    function GetSQLStatementType: TIBSQLStatementTypes;
-    function GetSQLText: string;
-    function GetSQLDialect: integer;
-    {GetDSQLInfo only supports isc_info_sql_stmt_type, isc_info_sql_get_plan, isc_info_sql_records}
-    function GetDSQLInfo(Request: byte): ISQLInfoResults; overload;
     function IsPrepared: boolean;
-    procedure Prepare(aTransaction: ITransaction=nil);
-    function Execute(aTransaction: ITransaction=nil): IResults;
-    function OpenCursor(aTransaction: ITransaction=nil): IResultSet;
-    function CreateBlob(paramName: string): IBlob; overload;
-    function CreateBlob(index: integer): IBlob; overload;
-    function CreateBlob(column: TColumnMetaData): IBlob; overload;
-    function CreateArray(column: TColumnMetaData): IArray; overload;
-    function CreateArray(paramName: string): IArray; overload;
-    function CreateArray(index: integer): IArray;  overload;
-    function GetAttachment: IAttachment;
-    function GetTransaction: ITransaction;
+    function CreateBlob(column: TColumnMetaData): IBlob; override;
+    function CreateArray(column: TColumnMetaData): IArray; override;
     property Handle: TISC_STMT_HANDLE read FHandle;
-    property SQLParams: ISQLParams read GetSQLParams;
-    property SQLStatementType: TIBSQLStatementTypes read GetSQLStatementType;
 
 end;
 
@@ -353,8 +314,9 @@ begin
   SQL_VARYING, SQL_TEXT:
     begin
       result := FXSQLVAR^.sqlsubtype and $FF;
-      if (result > 1) and FStatement.FAttachment.HasDefaultCharSet then
-        result := FStatement.FAttachment.CharSetID;
+      with FStatement.GetAttachment as TFB25Attachment do
+      if (result > 1) and HasDefaultCharSet then
+        result := CharSetID;
     end;
 
   SQL_BLOB:
@@ -400,8 +362,8 @@ begin
     IBError(ibxeInvalidDataConversion,[nil]);
 
   if FArrayMetaData = nil then
-    FArrayMetaData := TFB25ArrayMetaData.Create(FStatement.FAttachment,
-                  FStatement.FTransaction,
+    FArrayMetaData := TFB25ArrayMetaData.Create(FStatement.GetAttachment as TFB25Attachment,
+                  FStatement.GetTransaction as TFB25Transaction,
                   GetRelationName,GetFieldName);
   Result := FArrayMetaData;
 end;
@@ -412,8 +374,8 @@ begin
     IBError(ibxeInvalidDataConversion,[nil]);
 
   if FBlobMetaData = nil then
-    FBlobMetaData := TFB25BlobMetaData.Create(FStatement.FAttachment,
-                FStatement.FTransaction,
+    FBlobMetaData := TFB25BlobMetaData.Create(FStatement.GetAttachment as TFB25Attachment,
+                FStatement.GetTransaction as TFB25Transaction,
                 GetRelationName,GetFieldName,GetSubType);
   Result := FBlobMetaData;
 end;
@@ -428,7 +390,7 @@ begin
   else
   begin
     if FArray = nil then
-      FArray := TFB25Array.Create(FStatement.Attachment,
+      FArray := TFB25Array.Create(FStatement.GetAttachment as TFB25Attachment,
                                   TIBXSQLDA(Parent).GetTransaction,
                                   GetArrayMetaData,Array_ID);
     Result := FArray;
@@ -446,7 +408,7 @@ begin
     if IsNull then
       Result := nil
     else
-      Result := TFB25Blob.Create(FStatement.Attachment,
+      Result := TFB25Blob.Create(FStatement.GetAttachment as TFB25Attachment,
                                TIBXSQLDA(Parent).GetTransaction,
                                GetBlobMetaData,
                                Blob_ID,nil);
@@ -456,7 +418,8 @@ end;
 
 function TIBXSQLVAR.CreateBlob: IBlob;
 begin
-  Result := TFB25Blob.Create(FStatement.Attachment,FStatement.Transaction,GetBlobMetaData,nil);
+  Result := TFB25Blob.Create(FStatement.GetAttachment as TFB25Attachment,
+                 FStatement.GetTransaction as TFB25Transaction,GetBlobMetaData,nil);
 end;
 
 procedure TIBXSQLVAR.Initialize;
@@ -763,7 +726,7 @@ end;
 
 function TIBXSQLDA.GetTransaction: TFB25Transaction;
 begin
-  Result := FStatement.FTransaction;
+  Result := FStatement.GetTransaction as TFB25Transaction;
 end;
 
 procedure TIBXSQLDA.SetCount(Value: Integer);
@@ -832,16 +795,6 @@ end;
 
 { TFB25Statement }
 
-procedure TFB25Statement.CheckTransaction(aTransaction: TFB25Transaction);
-begin
-  if (aTransaction = nil) then
-    IBError(ibxeTransactionNotAssigned,[]);
-
-  if not aTransaction.InTransaction then
-    IBError(ibxeNotInTransaction,[]);
-
-end;
-
 procedure TFB25Statement.CheckHandle;
 begin
   if FHandle = nil then
@@ -860,26 +813,28 @@ end;
 procedure TFB25Statement.InternalPrepare;
 var
   RB: ISQLInfoResults;
+  TRHandle: TISC_TR_HANDLE;
 begin
   if FPrepared then
     Exit;
   if (FSQL = '') then
     IBError(ibxeEmptyQuery, [nil]);
   try
-    CheckTransaction(FTransaction);
+    CheckTransaction(FTransactionIntf);
     with Firebird25ClientAPI do
     begin
-      Call(isc_dsql_alloc_statement2(StatusVector, @(FAttachment.Handle),
+      Call(isc_dsql_alloc_statement2(StatusVector, @(FDBHandle),
                                       @FHandle), True);
+      TRHandle := (FTransactionIntf as TFB25Transaction).Handle;
       if FHasParamNames then
       begin
         if FProcessedSQL = '' then
           FSQLParams.PreprocessSQL(FSQL,FGenerateParamNames,FUniqueParamNames,FProcessedSQL);
-        Call(isc_dsql_prepare(StatusVector, @(FTransaction.Handle), @FHandle, 0,
+        Call(isc_dsql_prepare(StatusVector, @(TRHandle), @FHandle, 0,
                  PChar(FProcessedSQL), FSQLDialect, nil), True);
       end
       else
-        Call(isc_dsql_prepare(StatusVector, @(FTransaction.Handle), @FHandle, 0,
+        Call(isc_dsql_prepare(StatusVector, @(TRHandle), @FHandle, 0,
                  PChar(FSQL), FSQLDialect, nil), True);
     end;
     { After preparing the statement, query the stmt type and possibly
@@ -930,11 +885,15 @@ begin
   FPrepared := true;
   FSingleResults := false;
   Inc(FPrepareSeqNo);
-  FSQLParams.FTransactionSeqNo := FTransaction.TransactionSeqNo;
-  FSQLRecord.FTransactionSeqNo := FTransaction.TransactionSeqNo;
+  with FTransactionIntf as TFB25Transaction do
+  begin
+    FSQLParams.FTransactionSeqNo := TransactionSeqNo;
+    FSQLRecord.FTransactionSeqNo := TransactionSeqNo;
+  end;
 end;
 
-function TFB25Statement.InternalExecute(aTransaction: TFB25Transaction): IResults;
+function TFB25Statement.InternalExecute(aTransaction: ITransaction): IResults;
+var TRHandle: TISC_TR_HANDLE;
 begin
   Result := nil;
   FBOF := false;
@@ -944,10 +903,13 @@ begin
   if not FPrepared then
     InternalPrepare;
   CheckHandle;
-  if aTransaction <> FTransaction then
-    AddMonitor(aTransaction);
+  if aTransaction <> FTransactionIntf then
+    AddMonitor(aTransaction as TFB25Transaction);
+  if (FSQLParams.FTransactionSeqNo < (FTransactionIntf as TFB25transaction).TransactionSeqNo) then
+    IBError(ibxeInterfaceOutofDate,[nil]);
 
   try
+    TRHandle := (aTransaction as TFB25Transaction).Handle;
     with Firebird25ClientAPI do
     case FSQLStatementType of
     SQLSelect:
@@ -956,7 +918,7 @@ begin
     SQLExecProcedure:
     begin
       Call(isc_dsql_execute2(StatusVector,
-                          @(aTransaction.Handle),
+                          @(TRHandle),
                           @FHandle,
                           SQLDialect,
                           FSQLParams.AsXSQLDA,
@@ -966,20 +928,22 @@ begin
     end
     else
       Call(isc_dsql_execute(StatusVector,
-                           @(aTransaction.Handle),
+                           @(TRHandle),
                            @FHandle,
                            SQLDialect,
                            FSQLParams.AsXSQLDA), True);
 
     end;
   finally
-    if aTransaction <> FTransaction then
-       RemoveMonitor(aTransaction);
+    if aTransaction <> FTransactionIntf then
+       RemoveMonitor(aTransaction as TFB25Transaction);
   end;
+  FExecTransactionIntf := aTransaction;
 end;
 
-function TFB25Statement.InternalOpenCursor(aTransaction: TFB25Transaction
+function TFB25Statement.InternalOpenCursor(aTransaction: ITransaction
   ): IResultSet;
+var TRHandle: TISC_TR_HANDLE;
 begin
   if FSQLStatementType <> SQLSelect then
    IBError(ibxeIsASelectStatement,[]);
@@ -987,13 +951,17 @@ begin
  CheckTransaction(aTransaction);
   if not FPrepared then
     InternalPrepare;
- if aTransaction <> FTransaction then
-   AddMonitor(aTransaction);
- CheckHandle;
+  CheckHandle;
+  if aTransaction <> FTransactionIntf then
+    AddMonitor(aTransaction as TFB25Transaction);
+  if (FSQLParams.FTransactionSeqNo < (FTransactionIntf as TFB25transaction).TransactionSeqNo) then
+    IBError(ibxeInterfaceOutofDate,[nil]);
+
  with Firebird25ClientAPI do
  begin
+   TRHandle := (aTransaction as TFB25Transaction).Handle;
    Call(isc_dsql_execute2(StatusVector,
-                       @(aTransaction.Handle),
+                       @(TRHandle),
                        @FHandle,
                        SQLDialect,
                        FSQLParams.AsXSQLDA,
@@ -1007,8 +975,8 @@ begin
  FExecTransactionIntf := aTransaction;
  FBOF := true;
  FEOF := false;
- FSQLRecord.FTransaction := aTransaction;
- FSQLRecord.FTransactionSeqNo := aTransaction.TransactionSeqNo;
+ FSQLRecord.FTransaction := aTransaction as TFB25Transaction;
+ FSQLRecord.FTransactionSeqNo := FSQLRecord.FTransaction.TransactionSeqNo;
  Result := TResultSet.Create(FSQLRecord);
 end;
 
@@ -1048,7 +1016,7 @@ begin
         IBDatabaseError;
     end;
   finally
-    if (FSQLRecord.FTransaction <> nil) and (FSQLRecord.FTransaction <> FTransaction) then
+    if (FSQLRecord.FTransaction <> nil) and (FSQLRecord.FTransaction <> FTransactionIntf) then
       RemoveMonitor(FSQLRecord.FTransaction);
     FOpen := False;
     FExecTransactionIntf := nil;
@@ -1057,46 +1025,37 @@ begin
 end;
 
 constructor TFB25Statement.Create(Attachment: TFB25Attachment;
-  Transaction: ITransaction; sql: string; SQLDialect: integer);
+  Transaction: ITransaction; sql: string; aSQLDialect: integer);
 var GUID : TGUID;
 begin
-  inherited Create(Transaction as TFB25Transaction,2);
-  FAttachment := Attachment;
-  FAttachmentIntf := Attachment;
-  FTransaction := transaction as TFB25Transaction;
-  FTransactionIntf := Transaction;
-  AddMonitor(FTransaction);
-  FSQLDialect := SQLDialect;
+  inherited Create(Attachment,Transaction,sql,aSQLDialect);
+  FDBHandle := Attachment.Handle;
   CreateGuid(GUID);
   FCursor := GUIDToString(GUID);
   FSQLParams := TIBXINPUTSQLDA.Create(self);
   FSQLRecord := TIBXOUTPUTSQLDA.Create(self);
-  FSQL := sql;
   InternalPrepare;
 end;
 
 constructor TFB25Statement.CreateWithParameterNames(Attachment: TFB25Attachment;
-  Transaction: ITransaction; sql: string; SQLDialect: integer;
+  Transaction: ITransaction; sql: string; aSQLDialect: integer;
   GenerateParamNames: boolean; UniqueParamNames: boolean);
+var GUID : TGUID;
 begin
-  FHasParamNames := true;
-  FGenerateParamNames := GenerateParamNames;
-  FUniqueParamNames := UniqueParamNames;
-  Create(Attachment,Transaction,sql,SQLDialect);
+  inherited CreateWithParameterNames(Attachment,Transaction,sql,aSQLDialect,GenerateParamNames,UniqueParamNames);
+  FDBHandle := Attachment.Handle;
+  CreateGuid(GUID);
+  FCursor := GUIDToString(GUID);
+  FSQLParams := TIBXINPUTSQLDA.Create(self);
+  FSQLRecord := TIBXOUTPUTSQLDA.Create(self);
+  InternalPrepare;
 end;
 
 destructor TFB25Statement.Destroy;
 begin
-  Close;
-  FreeHandle;
+  inherited Destroy;
   if assigned(FSQLParams) then FSQLParams.Free;
   if assigned(FSQLRecord) then FSQLRecord.Free;
-  inherited Destroy;
-end;
-
-procedure TFB25Statement.Close;
-begin
-   InternalClose(false);
 end;
 
 function TFB25Statement.FetchNext: boolean;
@@ -1137,19 +1096,6 @@ begin
   end;
 end;
 
-procedure TFB25Statement.TransactionEnding(aTransaction: TFB25Transaction;
-  Force: boolean);
-begin
-  if FOpen and (FSQLRecord.FTransaction = aTransaction) then
-    InternalClose(Force);
-
-  if FTransaction = aTransaction then
-  begin
-    FreeHandle;
-    FPrepared := false;
-  end;
-end;
-
 function TFB25Statement.GetSQLParams: ISQLParams;
 begin
   CheckHandle;
@@ -1183,148 +1129,25 @@ begin
   end;
 end;
 
-function TFB25Statement.GetRowsAffected(var SelectCount, InsertCount, UpdateCount,
-  DeleteCount: integer): boolean;
-var
-  RB: ISQLInfoResults;
-  i, j: integer;
-begin
-  InsertCount := 0;
-  UpdateCount := 0;
-  DeleteCount := 0;
-  Result := FHandle <> nil;
-  if not Result then Exit;
-
-  RB := GetDsqlInfo(isc_info_sql_records);
-
-  for i := 0 to RB.Count - 1 do
-  with RB[i] do
-  case getItemType of
-  isc_info_sql_records:
-    for j := 0 to Count -1 do
-    with Items[j] do
-    case getItemType of
-    isc_info_req_select_count:
-      SelectCount := GetAsInteger;
-    isc_info_req_insert_count:
-      InsertCount := GetAsInteger;
-    isc_info_req_update_count:
-      UpdateCount := GetAsInteger;
-    isc_info_req_delete_count:
-      DeleteCount := GetAsInteger;
-    end;
-  end;
-end;
-
-function TFB25Statement.GetSQLStatementType: TIBSQLStatementTypes;
-begin
-  Result := FSQLStatementType;
-end;
-
-function TFB25Statement.Execute(aTransaction: ITransaction): IResults;
-begin
-  if aTransaction = nil then
-    Result :=  InternalExecute(FTransaction)
-  else
-    Result := InternalExecute(aTransaction as TFB25Transaction);
-end;
-
-function TFB25Statement.OpenCursor(aTransaction: ITransaction): IResultSet;
-begin
-  if aTransaction = nil then
-    Result := InternalOpenCursor(FTransaction)
-  else
-    Result := InternalOpenCursor(aTransaction as TFB25Transaction);
-end;
-
-function TFB25Statement.CreateBlob(paramName: string): IBlob;
-var column: TColumnMetaData;
-begin
-  InternalPrepare;
-  column := SQLParams.ByName(paramName) as TSQLParam;
-  if column = nil then
-    IBError(ibxeFieldNotFound,[paramName]);
-  Result := CreateBlob(column);
-end;
-
-function TFB25Statement.CreateBlob(index: integer): IBlob;
-begin
-  InternalPrepare;
-  Result := CreateBlob(SQLParams[index] as TSQLParam);
-end;
-
 function TFB25Statement.CreateBlob(column: TColumnMetaData): IBlob;
 begin
   if assigned(column) and (column.SQLType <> SQL_Blob) then
     IBError(ibxeNotABlob,[nil]);
-  Result := TFB25Blob.Create(FAttachment,FTransaction,column.GetBlobMetaData,nil);
+  Result := TFB25Blob.Create(GetAttachment as TFB25Attachment,FExecTransactionIntf as TFB25Transaction,
+                                 column.GetBlobMetaData,nil);
 end;
 
 function TFB25Statement.CreateArray(column: TColumnMetaData): IArray;
 begin
   if assigned(column) and (column.SQLType <> SQL_ARRAY) then
     IBError(ibxeNotAnArray,[nil]);
-  Result := TFB25Array.Create(FAttachment,FTransaction,column.GetArrayMetaData);
-end;
-
-function TFB25Statement.CreateArray(paramName: string): IArray;
-var column: TColumnMetaData;
-begin
-  InternalPrepare;
-  column := SQLParams.ByName(paramName) as TSQLParam;
-  if column = nil then
-    IBError(ibxeFieldNotFound,[paramName]);
-  Result := CreateArray(column);
-end;
-
-function TFB25Statement.CreateArray(index: integer): IArray;
-begin
-  InternalPrepare;
-  Result := CreateArray(SQLParams[index] as TSQLParam);
-end;
-
-function TFB25Statement.GetAttachment: IAttachment;
-begin
-  Result := FAttachment;
-end;
-
-function TFB25Statement.GetTransaction: ITransaction;
-begin
-  Result := FTransaction;
-end;
-
-function TFB25Statement.GetSQLText: string;
-begin
-  Result := FSQL;
-end;
-
-function TFB25Statement.GetSQLDialect: integer;
-begin
-  Result := FSQLDialect;
-end;
-
-function TFB25Statement.GetDSQLInfo(Request: byte): ISQLInfoResults;
-begin
-  Result := TSQLInfoResultsBuffer.Create;
-  GetDsqlInfo(Request,Result);
+  Result := TFB25Array.Create(GetAttachment as TFB25Attachment,FExecTransactionIntf as TFB25Transaction,
+         column.GetArrayMetaData);
 end;
 
 function TFB25Statement.IsPrepared: boolean;
 begin
   Result := FHandle <> nil;
-end;
-
-procedure TFB25Statement.Prepare(aTransaction: ITransaction);
-begin
-  if FPrepared then FreeHandle;
-  if aTransaction <> nil then
-  begin
-    RemoveMonitor(FTransaction);
-    FTransaction := transaction as TFB25Transaction;
-    FTransactionIntf := Transaction;
-    AddMonitor(FTransaction);
-  end;
-  InternalPrepare;
 end;
 
 end.
