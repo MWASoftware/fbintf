@@ -575,6 +575,7 @@ begin
   if not FModified then Exit;
 
   InternalPutSlice(Force);
+  FModified := false;
 end;
 
 function TFBArray.GetOffset(index: array of integer): PChar;
