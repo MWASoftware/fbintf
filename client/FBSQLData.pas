@@ -349,7 +349,6 @@ type
     procedure SetDataLength(len: cardinal); override;
     procedure SetSQLType(aValue: cardinal); override;
   public
-    constructor Create(aOwner: IUnknown; aIBXSQLVAR: TSQLVarData);
     procedure Clear;
     function GetModified: boolean; override;
     procedure SetName(Value: string); override;
@@ -490,11 +489,12 @@ procedure TSQLDataArea.PreprocessSQL(sSQL: string; GenerateParamNames, UniquePar
 var
   cCurChar, cNextChar, cQuoteChar: Char;
   sParamName: String;
-  i, iLenSQL, iSQLPos: Integer;
+  j, i, iLenSQL, iSQLPos: Integer;
   iCurState {$ifdef ALLOWDIALECT3PARAMNAMES}, iCurParamState {$endif}: Integer;
   iParamSuffix: Integer;
   slNames: TStrings;
   StrBuffer: PChar;
+  found: boolean;
 
 const
   DefaultState = 0;
@@ -642,6 +642,20 @@ begin
       Column[i].Name := slNames[i];
       Column[i].UniqueName :=  UniqueParamNames or (slNames.Objects[i] <> nil);
     end;
+    for i := 0 to Count - 1 do
+    begin
+      if not Column[i].UniqueName then
+      begin
+        found := false;
+        for j := i + 1 to Count - 1 do
+           if Column[i].Name = Column[j].Name then
+           begin
+             found := true;
+             break;
+           end;
+        Column[i].UniqueName := not found;
+      end;
+    end;
   finally
     slNames.Free;
     FreeMem(StrBuffer);
@@ -695,6 +709,7 @@ begin
   inherited Create;
   FParent := aParent;
   FIndex := aIndex;
+  FUniqueName := true;
 end;
 
 procedure TSQLVarData.SetString(aValue: string);
@@ -1777,12 +1792,6 @@ procedure TSQLParam.SetSQLType(aValue: cardinal);
 begin
   CheckActive;
   FIBXSQLVAR.SQLType := aValue;
-end;
-
-constructor TSQLParam.Create(aOwner: IUnknown; aIBXSQLVAR: TSQLVarData);
-begin
-  inherited Create(aOwner, aIBXSQLVAR);
-//  FIBXSQLVAR.UniqueName := true;
 end;
 
 procedure TSQLParam.Clear;
