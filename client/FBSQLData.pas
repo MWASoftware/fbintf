@@ -1782,7 +1782,7 @@ end;
 constructor TSQLParam.Create(aOwner: IUnknown; aIBXSQLVAR: TSQLVarData);
 begin
   inherited Create(aOwner, aIBXSQLVAR);
-  FIBXSQLVAR.UniqueName := true;
+//  FIBXSQLVAR.UniqueName := true;
 end;
 
 procedure TSQLParam.Clear;
