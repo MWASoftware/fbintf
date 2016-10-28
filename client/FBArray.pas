@@ -132,6 +132,7 @@ type
     FModified: boolean;
     FAttachment: IAttachment;
     FTransactionIntf: ITransaction;
+    FTransactionSeqNo: integer;
     FSQLDialect: integer;
     FOffsets: array of integer;
     FElement: TFBArrayElement;
@@ -161,6 +162,9 @@ type
    public
     {IArray}
     function GetArrayID: TISC_QUAD;
+    procedure Clear;
+    function IsEmpty: boolean;
+    procedure PreLoad;
     function GetMetaData: IArrayMetaData;
     function GetAsInteger(index: array of integer): integer;
     function GetAsBoolean(index: array of integer): boolean;
@@ -572,7 +576,8 @@ end;
 
 procedure TFBArray.PutArraySlice(Force: boolean);
 begin
-  if not FModified then Exit;
+  if not FModified or not FTransactionIntf.InTransaction  or
+    (FTransactionSeqNo < (FTransactionIntf as TFBTransaction).TransactionSeqNo) then Exit;
 
   InternalPutSlice(Force);
   FModified := false;
@@ -614,8 +619,9 @@ begin
   FMetaData := aField;
   FAttachment := aAttachment;
   FTransactionIntf :=  aTransaction;
+  FTransactionSeqNo := aTransaction.TransactionSeqNo;
   FIsNew := true;
-  FModified := true;
+  FModified := false;
   FSQLDialect := aAttachment.GetSQLDialect;
   AllocateBuffer;
   FElement := TFBArrayElement.Create(self,FBuffer);
@@ -630,6 +636,7 @@ begin
   FArrayID := ArrayID;
   FAttachment := aAttachment;
   FTransactionIntf :=  aTransaction;
+  FTransactionSeqNo := aTransaction.TransactionSeqNo;
   FIsNew := false;
   FModified := false;
   FSQLDialect := aAttachment.GetSQLDialect;
@@ -640,6 +647,7 @@ end;
 
 destructor TFBArray.Destroy;
 begin
+  PutArraySlice;
   FreeMem(FBuffer);
   inherited Destroy;
 end;
@@ -648,6 +656,25 @@ function TFBArray.GetArrayID: TISC_QUAD;
 begin
   PutArraySlice;
   Result := FArrayID;
+end;
+
+procedure TFBArray.Clear;
+begin
+  FIsNew := true;
+  FModified := false;
+  FArrayID.gds_quad_high := 0;
+  FArrayID.gds_quad_low := 0;
+  AllocateBuffer;
+end;
+
+function TFBArray.IsEmpty: boolean;
+begin
+  Result := FIsNew and not FModified;
+end;
+
+procedure TFBArray.PreLoad;
+begin
+  GetArraySlice;
 end;
 
 function TFBArray.GetMetaData: IArrayMetaData;

@@ -229,7 +229,8 @@ type
       ibxeInEventWait,
       ibxeIncompatibleBlob,
       ibxeMissingColumnName,
-      ibxStringTooLong
+      ibxStringTooLong,
+      ibxFieldNotinDataSet
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;
@@ -413,6 +414,7 @@ resourcestring
   SIncompatibleBlob = 'Incompatible Blob SubTypes. %d expected, %d found';
   SMissingColumnName = 'Relation or Column Name Missing';
   SStringTooLong = 'String "%s" is too long. Max %d characters';
+  SFieldNotinDataSet = 'Field %s is not a member of DataSet %s';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -567,7 +569,8 @@ const
     SInEventWait,
     SIncompatibleBlob,
     SMissingColumnName,
-    SStringTooLong
+    SStringTooLong,
+    SFieldNotinDataSet
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;

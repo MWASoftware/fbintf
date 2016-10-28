@@ -230,6 +230,9 @@ type
 
   IArray = interface
     function GetArrayID: TISC_QUAD;
+    procedure Clear;
+    function IsEmpty: boolean;
+    procedure PreLoad;
     function GetMetaData: IArrayMetaData;
     function GetAsInteger(index: array of integer): integer;
     function GetAsBoolean(index: array of integer): boolean;
