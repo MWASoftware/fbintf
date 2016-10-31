@@ -2232,7 +2232,7 @@ end;
 function TMetaData.getCount: integer;
 begin
   CheckActive;
-  Result := FMetaData.Count;
+  Result := FMetaData.ColumnsInUseCount;
 end;
 
 function TMetaData.getColumnMetaData(index: integer): IColumnMetaData;
@@ -2289,7 +2289,7 @@ end;
 function TSQLParams.getCount: integer;
 begin
   CheckActive;
-  Result := FSQLParams.Count;
+  Result := FSQLParams.ColumnsInUseCount;
 end;
 
 function TSQLParams.getSQLParam(index: integer): ISQLParam;

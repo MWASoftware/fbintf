@@ -224,6 +224,7 @@ type
     function FetchNext: boolean;
     function GetCursorName: string;
     function GetTransaction: ITransaction; override;
+    function IsEof: boolean;
     procedure Close;
   end;
 
@@ -587,6 +588,11 @@ end;
 function TResultSet.GetTransaction: ITransaction;
 begin
   Result := FResults.GetTransaction;
+end;
+
+function TResultSet.IsEof: boolean;
+begin
+  Result := FResults.FStatement.FEof;
 end;
 
 procedure TResultSet.Close;

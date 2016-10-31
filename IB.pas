@@ -453,6 +453,7 @@ type
     function FetchNext: boolean;
     function GetCursorName: string;
     function GetTransaction: ITransaction;
+    function IsEof: boolean;
     procedure Close;
   end;
 
