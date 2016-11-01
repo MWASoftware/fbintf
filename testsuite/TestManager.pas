@@ -209,6 +209,9 @@ begin
           writeln('Array Meta Data:');
           ar := GetArrayMetaData;
           writeln('SQLType =',ar.GetSQLTypeName);
+          writeln('Scale = ',ar.getScale);
+          writeln('Charset id = ',ar.getCharSetID);
+          writeln('Size = ',ar.GetSize);
           writeln('Table = ',ar.GetTableName);
           writeln('Column = ',ar.GetColumnName);
           writeln('Dimensions = ',ar.GetDimensions);

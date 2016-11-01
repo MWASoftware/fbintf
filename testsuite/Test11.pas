@@ -3,6 +3,25 @@ unit Test11;
 {$mode objfpc}{$H+}
 {$codepage utf8}
 
+{Test 11: Services API}
+
+{
+  This test attaches to the Server Manager associated with the Employee Database
+  and then accesses and prints out:
+
+  Version Info
+  Config Params
+  Database Information
+  User Information
+  Statistics
+  Licence Info
+  Licence Mask Info
+  Capabilities
+  limbo transactions
+
+  Note that two exceptions are normal as Firebird does not provide licence info.
+}
+
 interface
 
 uses

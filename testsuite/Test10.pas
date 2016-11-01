@@ -3,6 +3,25 @@ unit Test10;
 {$mode objfpc}{$H+}
 {$codepage utf8}
 
+{Test 10: Event Handling}
+
+{
+  This test opens the employee example databases with the supplied user name/password
+  and then tests event handling.
+
+  1. Simple wait for async event.
+
+  2. Signal two more events to show that events counts are maintained.
+
+  3. Async Event wait followed by signal event. Event Counts should include all
+     previous events.
+
+  4. Demonstrate event cancel by waiting for event, cancelling it and then signalling
+     event. No change to signal flag after waiting in a tight loop implies event cancelled.
+
+  5. Wait for sync Event.
+}
+
 interface
 
 uses

@@ -3,6 +3,25 @@ unit Test7;
 {$mode objfpc}{$H+}
 {$codepage utf8}
 
+{Test 7: Create and read back an Array}
+
+{
+  1. Create an empty database and populate with a single table including an array of integer column.
+
+  2. Select all and show metadata including array metadata.
+
+  3. Insert a row but leave array null
+
+  4. Show result.
+
+  5. Update row with a populated array and show results.
+
+  7. Reopen cursor but before fetching array, shrink bounds
+
+  8. Fetch and print array with reduced bounds.
+
+}
+
 interface
 
 uses

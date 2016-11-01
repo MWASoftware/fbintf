@@ -3,6 +3,21 @@ unit Test8;
 {$mode objfpc}{$H+}
 {$codepage utf8}
 
+{Test 8: Create and read back an Array with 2 dimensions}
+
+{
+1. Create an empty database and populate with a single table including a two
+   dimensional array of varchar(16) column.
+
+2. Select all and show metadata including array metadata.
+
+3. Insert a row but leave array null
+
+4. Show result.
+
+5. Update row with a populated array and show results.
+}
+
 interface
 
 uses
@@ -48,10 +63,9 @@ begin
   Statement := Attachment.Prepare(Transaction,'Select * from TestData');
   PrintMetaData(Statement.GetMetaData);
   Statement := Attachment.PrepareWithNamedParameters(Transaction,sqlInsert);
+  ParamInfo(Statement.GetSQLParams);
   with Statement.GetSQLParams do
   begin
-    for i := 0 to GetCount - 1 do
-      writeln('Param Name = ',Params[i].getName);
     ByName('rowid').AsInteger := 1;
     ByName('title').AsString := '2D Array';
   end;

@@ -3,6 +3,13 @@ unit Test9;
 {$mode objfpc}{$H+}
 {$codepage utf8}
 
+{Test 9: Database Information tests}
+
+{
+  This test opens the employee example databases with the supplied user name/password
+  and then reads and prints all defined database information.
+}
+
 interface
 
 uses
