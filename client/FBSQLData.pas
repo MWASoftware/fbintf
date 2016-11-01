@@ -157,8 +157,8 @@ type
      procedure SetAsShort(Value: short); virtual;
      procedure SetAsString(Value: String); virtual;
      procedure SetAsVariant(Value: Variant);
-     procedure SetIsNull(Value: Boolean);
-     procedure SetIsNullable(Value: Boolean);
+     procedure SetIsNull(Value: Boolean); virtual;
+     procedure SetIsNullable(Value: Boolean); virtual;
      procedure SetName(aValue: string); virtual;
      property AsDate: TDateTime read GetAsDateTime write SetAsDate;
      property AsBoolean:boolean read GetAsBoolean write SetAsBoolean;
@@ -352,8 +352,8 @@ type
     procedure Clear;
     function GetModified: boolean; override;
     procedure SetName(Value: string); override;
-    procedure SetIsNull(Value: Boolean);
-    procedure SetIsNullable(Value: Boolean);
+    procedure SetIsNull(Value: Boolean);  override;
+    procedure SetIsNullable(Value: Boolean); override;
     procedure SetAsArray(anArray: IArray);
 
     {overrides}

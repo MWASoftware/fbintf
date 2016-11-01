@@ -494,7 +494,7 @@ type
     function GetAsQuad: TISC_QUAD;
     function GetAsShort: short;
     function GetAsString: String;
-    function GetIsNull: Boolean;
+    function GetIsNull: boolean;
     function GetAsVariant: Variant;
     function GetAsBlob: IBlob;
     function GetAsArray: IArray;
@@ -537,6 +537,7 @@ type
     property AsQuad: TISC_QUAD read GetAsQuad write SetAsQuad;
     property Value: Variant read GetAsVariant write SetAsVariant;
     property IsNull: Boolean read GetIsNull write SetIsNull;
+    property IsNullable: Boolean read GetIsNullable;
     property Modified: Boolean read getModified;
     property Name: string read GetName;
     property SQLType: cardinal read GetSQLType;

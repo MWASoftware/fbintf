@@ -96,6 +96,9 @@ begin
     begin
       for i := 0 to Result.getCount - 1 do
       begin
+        if Result[i].IsNull then
+          writeln(Result[i].Name,' = NULL')
+        else
         case Result[i].SQLType of
         SQL_ARRAY:
           begin
