@@ -256,6 +256,9 @@ begin
   inherited Create(Attachment,Transaction,MetaData,BlobID,BPB);
   DBHandle := Attachment.Handle;
   TRHandle := Transaction.Handle;
+  if (BlobID.gds_quad_high = 0) and (BlobID.gds_quad_low = 0) then
+    Exit;
+
   with Firebird25ClientAPI do
   if BPB = nil then
     Call(isc_open_blob2(StatusVector,  @DBHandle, @TRHandle, @FHandle,

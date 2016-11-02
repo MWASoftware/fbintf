@@ -449,7 +449,7 @@ begin
     if (sqltype and 1 = 1) then
     begin
       sqlInd := @FNullIndicator;
-      FNullIndicator := 0;
+      FNullIndicator := -1;
     end
     else
       sqlInd :=  nil;

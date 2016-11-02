@@ -238,6 +238,9 @@ constructor TFB30Blob.Create(Attachment: TFB30Attachment;
   Transaction: TFBTransaction; MetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB);
 begin
   inherited Create(Attachment,Transaction,MetaData,BlobID,BPB);
+  if (BlobID.gds_quad_high = 0) and (BlobID.gds_quad_low = 0) then
+    Exit;
+
   with Firebird30ClientAPI do
   begin
     if BPB = nil then
