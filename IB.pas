@@ -228,6 +228,10 @@ type
 
   }
 
+  TArrayEventReason = (arChanging,arChanged);
+  IArray = interface;
+  TArrayEventHandler = procedure(Sender: IArray; Reason: TArrayEventReason) of object;
+
   IArray = interface
     function GetArrayID: TISC_QUAD;
     procedure Clear;
@@ -261,6 +265,8 @@ type
     procedure SetBounds(dim, UpperBound, LowerBound: integer);
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
+    procedure AddEventHandler(Handler: TArrayEventHandler);
+    procedure RemoveEventHandler(Handler: TArrayEventHandler);
   end;
 
   { The Blob metadata interface provides access to the metadata used to describe

@@ -230,7 +230,8 @@ type
       ibxeIncompatibleBlob,
       ibxeMissingColumnName,
       ibxStringTooLong,
-      ibxFieldNotinDataSet
+      ibxFieldNotinDataSet,
+      ibxeNotCurrentArray
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;
@@ -415,6 +416,7 @@ resourcestring
   SMissingColumnName = 'Relation or Column Name Missing';
   SStringTooLong = 'String "%s" is too long. Max %d characters';
   SFieldNotinDataSet = 'Field %s is not a member of DataSet %s';
+  SNotCurrentArray = 'Cannot Edit an Array that is not part of the current record';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -570,7 +572,8 @@ const
     SIncompatibleBlob,
     SMissingColumnName,
     SStringTooLong,
-    SFieldNotinDataSet
+    SFieldNotinDataSet,
+    SNotCurrentArray
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;

@@ -112,6 +112,7 @@ type
      procedure CheckActive; virtual;
      function GetSQLDialect: integer; virtual; abstract;
      procedure Changed; virtual;
+     procedure Changing; virtual;
      procedure InternalSetAsString(Value: String); virtual;
      function SQLData: PChar; virtual; abstract;
      function GetDataLength: cardinal; virtual; abstract;
@@ -939,9 +940,14 @@ begin
   //Do nothing by default
 end;
 
+procedure TSQLDataItem.Changing;
+begin
+  //Do nothing by default
+end;
+
 procedure TSQLDataItem.InternalSetAsString(Value: String);
 begin
-
+  //Do nothing by default
 end;
 
 function TSQLDataItem.Transliterate(s: string; CodePage: TSystemCodePage
@@ -1336,6 +1342,7 @@ begin
     AsDouble := Value
   else
   begin
+    Changing;
     if IsNullable then
       IsNull := False;
     SQLType := SQL_INT64;
@@ -1349,6 +1356,7 @@ end;
 procedure TSQLDataItem.SetAsInt64(Value: Int64);
 begin
   CheckActive;
+  Changing;
   if IsNullable then
     IsNull := False;
 
@@ -1368,6 +1376,7 @@ begin
     exit;
   end;
 
+  Changing;
   if IsNullable then
     IsNull := False;
 
@@ -1387,6 +1396,7 @@ begin
     exit;
   end;
 
+  Changing;
   if IsNullable then
     IsNull := False;
 
@@ -1403,6 +1413,7 @@ begin
   if IsNullable then
     IsNull := False;
 
+  Changing;
   SQLType := SQL_TIMESTAMP;
   DataLength := SizeOf(TISC_QUAD);
   with FirebirdClientAPI do
@@ -1416,6 +1427,7 @@ begin
   if IsNullable then
     IsNull := False;
 
+  Changing;
   SQLType := SQL_DOUBLE;
   DataLength := SizeOf(Double);
   Scale := 0;
@@ -1429,6 +1441,7 @@ begin
   if IsNullable then
     IsNull := False;
 
+  Changing;
   SQLType := SQL_FLOAT;
   DataLength := SizeOf(Float);
   Scale := 0;
@@ -1442,6 +1455,7 @@ begin
   if IsNullable then
     IsNull := False;
 
+  Changing;
   SQLType := SQL_LONG;
   DataLength := SizeOf(Long);
   Scale := 0;
@@ -1452,9 +1466,11 @@ end;
 procedure TSQLDataItem.SetAsPointer(Value: Pointer);
 begin
   CheckActive;
+  Changing;
   if IsNullable and (Value = nil) then
     IsNull := True
-  else begin
+  else
+  begin
     IsNull := False;
     SQLType := SQL_TEXT;
     Move(Value^, SQLData^, DataLength);
@@ -1465,6 +1481,7 @@ end;
 procedure TSQLDataItem.SetAsQuad(Value: TISC_QUAD);
 begin
   CheckActive;
+  Changing;
   if IsNullable then
       IsNull := False;
   if (SQLType <> SQL_BLOB) and
@@ -1478,6 +1495,7 @@ end;
 procedure TSQLDataItem.SetAsShort(Value: short);
 begin
   CheckActive;
+  Changing;
   if IsNullable then
     IsNull := False;
 
@@ -1526,6 +1544,7 @@ end;
 procedure TSQLDataItem.SetAsBoolean(AValue: boolean);
 begin
   CheckActive;
+  Changing;
   if IsNullable then
     IsNull := False;
 
@@ -1730,6 +1749,7 @@ begin
   case SQLTYPE of
   SQL_BLOB:
     begin
+      Changing;
       b := FIBXSQLVAR.CreateBlob;
       b.SetAsString(Value);
       AsBlob := b;
@@ -1739,6 +1759,7 @@ begin
   SQL_VARYING,
   SQL_TEXT:
     begin
+      Changing;
       FIBXSQLVar.SetString(Transliterate(Value,GetCodePage));
       Changed;
     end;
@@ -2163,6 +2184,7 @@ begin
   if not UniqueName then
     IBError(ibxeDuplicateParamName,[Name]);
   CheckActive;
+  Changing;
   aValue.Close;
   if aValue.GetSubType <> GetSubType then
     IBError(ibxeIncompatibleBlob,[GetSubType,aValue.GetSubType]);

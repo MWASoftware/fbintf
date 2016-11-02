@@ -73,6 +73,7 @@ type
    FArray: TFBArray;
   protected
    function GetSQLDialect: integer; override;
+   procedure Changing; override;
    procedure Changed; override;
    function SQLData: PChar; override;
    function GetDataLength: cardinal; override;
@@ -138,6 +139,7 @@ type
     FElement: TFBArrayElement;
     FElementIntf: IUnknown;
     FElementSize: integer;
+    FEventHandlers: array of TArrayEventHandler;
     procedure GetArraySlice;
     procedure PutArraySlice(Force: boolean=false);
     function GetOffset(index: array of integer): PChar;
@@ -147,6 +149,8 @@ type
     FBufSize: ISC_LONG;
     FArrayID: TISC_QUAD;
     procedure AllocateBuffer; virtual;
+    procedure Changing;
+    procedure Changed;
     function GetArrayDesc: PISC_ARRAY_DESC;
     procedure InternalGetSlice; virtual; abstract;
     procedure InternalPutSlice(Force: boolean); virtual; abstract;
@@ -193,6 +197,8 @@ type
     procedure SetBounds(dim, UpperBound, LowerBound: integer);
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
+    procedure AddEventHandler(Handler: TArrayEventHandler);
+    procedure RemoveEventHandler(Handler: TArrayEventHandler);
   end;
 
 implementation
@@ -206,10 +212,16 @@ begin
   Result := FArray.GetSQLDialect;
 end;
 
+procedure TFBArrayElement.Changing;
+begin
+  inherited Changing;
+  FArray.Changing;
+end;
+
 procedure TFBArrayElement.Changed;
 begin
   inherited Changed;
-  FArray.FModified := true;
+  FArray.Changed;
 end;
 
 function TFBArrayElement.SQLData: PChar;
@@ -567,6 +579,21 @@ begin
   end;
 end;
 
+procedure TFBArray.Changing;
+var i: integer;
+begin
+  for i := 0 to Length(FEventHandlers) - 1 do
+    FEventHandlers[i](self,arChanging);
+end;
+
+procedure TFBArray.Changed;
+var i: integer;
+begin
+  FModified := true;
+  for i := 0 to Length(FEventHandlers) - 1 do
+    FEventHandlers[i](self,arChanged);
+end;
+
 procedure TFBArray.GetArraySlice;
 begin
   if FIsNew or FLoaded then Exit;
@@ -626,6 +653,7 @@ begin
   AllocateBuffer;
   FElement := TFBArrayElement.Create(self,FBuffer);
   FElementIntf := FElement;
+  Setlength(FEventHandlers,0);
 end;
 
 constructor TFBArray.Create(aAttachment: IAttachment; aTransaction: TFBTransaction;
@@ -643,6 +671,7 @@ begin
   AllocateBuffer;
   FElement := TFBArrayElement.Create(self,FBuffer);
   FElementIntf := FElement;
+  Setlength(FEventHandlers,0);
 end;
 
 destructor TFBArray.Destroy;
@@ -878,6 +907,24 @@ end;
 function TFBArray.GetTransaction: ITransaction;
 begin
   Result := FTransactionIntf;
+end;
+
+procedure TFBArray.AddEventHandler(Handler: TArrayEventHandler);
+begin
+  SetLength(FEventHandlers,Length(FEventHandlers)+1);
+  FEventHandlers[Length(FEventHandlers)-1] := Handler;
+end;
+
+procedure TFBArray.RemoveEventHandler(Handler: TArrayEventHandler);
+var i,j : integer;
+begin
+  for i := Length(FEventHandlers) - 1 downto 0 do
+    if FEventHandlers[i] = Handler then
+    begin
+      for j := i to Length(FEventHandlers) - 2 do
+        FEventHandlers[i] := FEventHandlers[i+1];
+      SetLength(FEventHandlers,Length(FEventHandlers) - 1);
+    end;
 end;
 
 end.
