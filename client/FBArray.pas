@@ -339,8 +339,10 @@ begin
       Value := Transliterate(Value,GetCodePage);
       len := Length(Value);
       ElementSize := GetDataLength;
-      if len > ElementSize - 2 then len := ElementSize - 2;
-      Move(Value[1],FBufPtr^,len);
+      if len > ElementSize - 2 then
+        len := ElementSize - 2;
+      if Len > 0 then
+        Move(Value[1],FBufPtr^,len);
       if Len < ElementSize - 2 then
         (FBufPtr+len)^ := #0;
       Changed;
