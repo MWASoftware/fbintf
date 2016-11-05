@@ -98,9 +98,10 @@
       <Unit9>
         <Filename Value="Test8.pas"/>
         <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
-        <TopLine Value="36"/>
-        <CursorPos X="12" Y="33"/>
+        <TopLine Value="87"/>
+        <CursorPos X="2" Y="112"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit9>
@@ -574,7 +575,6 @@
       </Unit67>
       <Unit68>
         <Filename Value="../client/FBSQLData.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="9"/>
         <TopLine Value="1496"/>
         <CursorPos X="7" Y="1524"/>

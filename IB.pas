@@ -199,7 +199,6 @@ type
     LowerBound: short;
   end;
   TArrayBounds = array of TArrayBound;
-  TArrayCoords = array of integer;
 
   IArrayMetaData = interface
     function GetSQLType: cardinal;
@@ -237,6 +236,8 @@ type
     procedure Clear;
     function IsEmpty: boolean;
     procedure PreLoad;
+    procedure CancelChanges;
+    procedure SaveChanges;
     function GetMetaData: IArrayMetaData;
     function GetAsInteger(index: array of integer): integer;
     function GetAsBoolean(index: array of integer): boolean;

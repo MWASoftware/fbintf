@@ -169,6 +169,8 @@ type
     procedure Clear;
     function IsEmpty: boolean;
     procedure PreLoad;
+    procedure CancelChanges;
+    procedure SaveChanges;
     function GetMetaData: IArrayMetaData;
     function GetAsInteger(index: array of integer): integer;
     function GetAsBoolean(index: array of integer): boolean;
@@ -676,7 +678,6 @@ end;
 
 destructor TFBArray.Destroy;
 begin
-  PutArraySlice;
   FreeMem(FBuffer);
   inherited Destroy;
 end;
@@ -704,6 +705,17 @@ end;
 procedure TFBArray.PreLoad;
 begin
   GetArraySlice;
+end;
+
+procedure TFBArray.CancelChanges;
+begin
+  FModified := false;
+  AllocateBuffer;
+end;
+
+procedure TFBArray.SaveChanges;
+begin
+  PutArraySlice;
 end;
 
 function TFBArray.GetMetaData: IArrayMetaData;
