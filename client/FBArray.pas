@@ -612,6 +612,7 @@ begin
 
   InternalPutSlice(Force);
   FModified := false;
+  FIsNew := false;
 end;
 
 function TFBArray.GetOffset(index: array of integer): PChar;
