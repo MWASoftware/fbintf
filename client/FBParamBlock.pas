@@ -398,11 +398,24 @@ end;
 { TParamBlock }
 
 procedure TParamBlock.AdjustBuffer;
+var P: PChar;
+    i: integer;
+    headerLen: integer;
 begin
   if FDataLength > FBufferSize then
   begin
-    FBufferSize := FDataLength;
+    if Length(FItems) > 0 then
+      headerLen := FItems[0]^.FBufPtr - FBuffer
+    else
+      headerLen := 0;
+    FBufferSize := 2*FDataLength;
     ReallocMem(FBuffer,FBufferSize);
+    P := FBuffer + headerLen;
+    for i := 0 to Length(FItems) - 1 do
+    begin
+      FItems[i]^.FBufPtr := P;
+      Inc(P,FItems[i]^.FBuflength);
+    end;
   end;
 end;
 
@@ -433,6 +446,7 @@ procedure TParamBlock.UpdateRequestItemSize(Item: TParamBlockItem;
 var i, delta: integer;
 begin
   delta := NewSize - Item.FParamData^.FBufLength;
+  Item.FParamData^.FBufLength := NewSize;
   if delta > 0 then
   begin
     FDataLength += delta;
@@ -463,7 +477,6 @@ begin
     end;
     FDataLength += delta;
   end;
-  Item.FParamData^.FBufLength := NewSize;
 end;
 
 constructor TParamBlock.Create;
