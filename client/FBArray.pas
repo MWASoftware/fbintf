@@ -362,11 +362,17 @@ begin
   SQL_SHORT,
   SQL_LONG,
   SQL_INT64:
-    SetAsInt64(StrToInt(Value));
+    if trim(Value) = '' then
+      SetAsInt64(0)
+    else
+      SetAsInt64(StrToInt(Value));
 
   SQL_D_FLOAT,
   SQL_DOUBLE,
   SQL_FLOAT:
+  if trim(Value) = '' then
+    SetAsDouble(0)
+  else
     SetAsDouble(StrToFloat(Value));
 
   SQL_TIMESTAMP:
