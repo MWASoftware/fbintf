@@ -65,6 +65,7 @@ unit FB25Transaction;
 {$mode objfpc}{$H+}
 {$interfaces COM}
 {$ENDIF}
+{$R-}
 
 interface
 

@@ -51,6 +51,7 @@ type
     FTests: TList;
     FEmployeeDatabaseName: string;
     FNewDatabaseName: string;
+    FSecondNewDatabaseName: string;
     FUserName: string;
     FPassword: string;
   public
@@ -60,6 +61,7 @@ type
     function GetPassword: string;
     function GetEmployeeDatabaseName: string;
     function GetNewDatabaseName: string;
+    function GetSecondNewDatabaseName: string;
     procedure RunAll;
     procedure Run(TestID: integer);
   end;
@@ -573,11 +575,8 @@ constructor TTestManager.Create;
 begin
   inherited Create;
   FTests := TList.Create;
-  {$IFDEF WINDOWS}
-  FNewDatabaseName := 'localhost:C:\test1.fdb';
-  {$ELSE}
-  FNewDatabaseName := 'localhost:/tmp/test1.fdb';
-  {$ENDIF}
+  FNewDatabaseName := 'localhost:' + GetTempDir + 'fbtestsuite.fdb';
+  FSecondNewDatabaseName :=  'localhost:' + GetTempDir + 'fbtestsuite2.fdb';
   FUserName := 'SYSDBA';
   FPassword := 'masterkey';
   FEmployeeDatabaseName := 'localhost:employee';
@@ -613,6 +612,11 @@ end;
 function TTestManager.GetNewDatabaseName: string;
 begin
   Result := FNewDatabaseName;
+end;
+
+function TTestManager.GetSecondNewDatabaseName: string;
+begin
+  Result := FSecondNewDatabaseName;
 end;
 
 procedure TTestManager.RunAll;

@@ -374,7 +374,8 @@ begin
       IBError(ibxStringTooLong,[aValue,255]);
     FOwner.UpdateRequestItemSize(self,len+2);
     (FBufPtr+1)^ := char(len);
-    Move(aValue[1],(FBufPtr+2)^,len);
+    if len > 0 then
+      Move(aValue[1],(FBufPtr+2)^,len);
     FDataType := dtString;
   end;
 end;
@@ -390,7 +391,8 @@ begin
     FOwner.UpdateRequestItemSize(self,len + 3);
     with FirebirdClientAPI do
       EncodeInteger(len,2,FBufPtr+1);
-    Move(aValue[1],(FBufPtr+3)^,len);
+    if len > 0 then
+      Move(aValue[1],(FBufPtr+3)^,len);
     FDataType := dtString2;
   end;
 end;

@@ -56,6 +56,8 @@ begin
   Statement.GetSQLParams[1].AsInteger := 9;
   Statement.Execute;
   WriteAffectedRows(Statement);
+  Transaction.Rollback;
+  Transaction.Start(TARollback);
 
   Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
   Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 9;

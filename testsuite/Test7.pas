@@ -85,6 +85,7 @@ begin
 
   Statement := Attachment.PrepareWithNamedParameters(Transaction,sqlUpdate);
   ParamInfo(Statement.GetSQLParams);
+  Transaction.CommitRetaining;
   ar := Attachment.CreateArray(Transaction,'TestData','MyArray');
   j := 100;
   for i := 0 to 16 do
@@ -107,6 +108,7 @@ begin
   end
   else
     writeln('Unable to reopen cursor');
+  Transaction.Commit;
 end;
 
 function TTest7.TestTitle: string;

@@ -66,6 +66,7 @@ begin
       'DEPT_NO, JOB_CODE, JOB_GRADE, JOB_COUNTRY, SALARY) '+
       'VALUES (:EMP_NO, :FIRST_NAME, :LAST_NAME, :PHONE_EXT, :HIRE_DATE,' +
       ':DEPT_NO, :JOB_CODE, :JOB_GRADE, :JOB_COUNTRY, :SALARY) Returning FULL_NAME',3);
+  Transaction.RollbackRetaining;
   with Statement.GetSQLParams do
   begin
     ByName('EMP_NO').AsInteger := 150;
@@ -92,6 +93,15 @@ begin
          'Select count(*) from EMPLOYEE',3)[0].AsInteger);
   CheckActivity(Statement.GetAttachment);
   CheckActivity(Transaction);
+  if Transaction.InTransaction then
+    writeln('Transaction Active')
+  else
+    writeln('Transaction inactive');
+  Transaction.Rollback;
+  if Transaction.InTransaction then
+    writeln('Transaction Active')
+  else
+    writeln('Transaction inactive');
 end;
 
 function TTest5.TestTitle: string;

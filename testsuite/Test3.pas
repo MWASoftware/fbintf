@@ -62,8 +62,6 @@ begin
 
   writeln('Employee Count = ',ResultSet[0].AsInteger);
 
-  Transaction.Rollback;
-
   ResultSet := Attachment.OpenCursorAtStart('Select count(*) from EMPLOYEE');
   writeln('Employee Count = ',ResultSet[0].AsInteger);
 
