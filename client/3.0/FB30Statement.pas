@@ -1096,6 +1096,7 @@ begin
   begin
     FStatementIntf.release;
     FStatementIntf := nil;
+    FPrepared := false;
   end;
 end;
 

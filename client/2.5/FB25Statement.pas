@@ -1002,6 +1002,7 @@ begin
     end;
   finally
     FHandle := nil;
+    FPrepared := false;
   end;
 end;
 

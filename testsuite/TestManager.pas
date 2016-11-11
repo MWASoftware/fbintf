@@ -18,6 +18,7 @@ type
   protected
     FHexStrings: boolean;
     function ReportResults(Statement: IStatement): IResultSet;
+    procedure ReportResult(aValue: IResults);
     procedure PrintHexString(s: string);
     procedure PrintDPB(DPB: IDPB);
     procedure PrintMetaData(meta: IMetaData);
@@ -89,82 +90,85 @@ begin
 end;
 
 function TTestBase.ReportResults(Statement: IStatement): IResultSet;
-var i: integer;
-    s: string;
 begin
   Result := Statement.OpenCursor;
   try
     while Result.FetchNext do
-    begin
-      for i := 0 to Result.getCount - 1 do
-      begin
-        if Result[i].IsNull then
-          writeln(Result[i].Name,' = NULL')
-        else
-        case Result[i].SQLType of
-        SQL_ARRAY:
-          begin
-            if not Result[i].IsNull then
-              WriteArray(Result[i].AsArray);
-          end;
-        SQL_FLOAT,SQL_DOUBLE,
-        SQL_D_FLOAT:
-          writeln( Result[i].Name,' = ',FormatFloat('#,##0.00',Result[i].AsFloat));
-
-        SQL_INT64:
-          if Result[i].Scale <> 0 then
-            writeln( Result[i].Name,' = ',FormatFloat('#,##0.00',Result[i].AsFloat))
-          else
-            writeln(Result[i].Name,' = ',Result[i].AsString);
-
-        SQL_BLOB:
-          if Result[i].IsNull then
-            writeln(Result[i].Name,' = (null blob)')
-          else
-          if Result[i].SQLSubType = 1 then
-          begin
-            s := Result[i].AsString;
-            if FHexStrings then
-            begin
-              write(Result[i].Name,' = ');
-              PrintHexString(s);
-              writeln(' (Charset Id = ',Result[i].GetCharSetID, ' Codepage = ',StringCodePage(s),')');
-            end
-            else
-            begin
-              writeln(Result[i].Name,' (Charset Id = ',Result[i].GetCharSetID, ' Codepage = ',StringCodePage(s),')');
-              writeln;
-              writeln(s);
-            end
-          end
-          else
-            writeln(Result[i].Name,' = (blob)');
-
-        SQL_TEXT,SQL_VARYING:
-        begin
-          s := Result[i].AsString;
-          if FHexStrings then
-          begin
-            write(Result[i].Name,' = ');
-            PrintHexString(s);
-            writeln(' (Charset Id = ',Result[i].GetCharSetID, ' Codepage = ',StringCodePage(s),')');
-          end
-          else
-          if Result[i].GetCharSetID > 0 then
-            writeln(Result[i].Name,' = ',s,' (Charset Id = ',Result[i].GetCharSetID, ' Codepage = ',StringCodePage(s),')')
-          else
-            writeln(Result[i].Name,' = ',s);
-        end;
-
-        else
-          writeln(Result[i].Name,' = ',Result[i].AsString);
-        end;
-      end;
-    end;
+      ReportResult(Result);
   finally
     Result.Close;
   end;
   writeln;
+end;
+
+procedure TTestBase.ReportResult(aValue: IResults);
+var i: integer;
+    s: string;
+begin
+  for i := 0 to aValue.getCount - 1 do
+  begin
+    if aValue[i].IsNull then
+      writeln(aValue[i].Name,' = NULL')
+    else
+    case aValue[i].SQLType of
+    SQL_ARRAY:
+      begin
+        if not aValue[i].IsNull then
+          WriteArray(aValue[i].AsArray);
+      end;
+    SQL_FLOAT,SQL_DOUBLE,
+    SQL_D_FLOAT:
+      writeln( aValue[i].Name,' = ',FormatFloat('#,##0.00',aValue[i].AsFloat));
+
+    SQL_INT64:
+      if aValue[i].Scale <> 0 then
+        writeln( aValue[i].Name,' = ',FormatFloat('#,##0.00',aValue[i].AsFloat))
+      else
+        writeln(aValue[i].Name,' = ',aValue[i].AsString);
+
+    SQL_BLOB:
+      if aValue[i].IsNull then
+        writeln(aValue[i].Name,' = (null blob)')
+      else
+      if aValue[i].SQLSubType = 1 then
+      begin
+        s := aValue[i].AsString;
+        if FHexStrings then
+        begin
+          write(aValue[i].Name,' = ');
+          PrintHexString(s);
+          writeln(' (Charset Id = ',aValue[i].GetCharSetID, ' Codepage = ',StringCodePage(s),')');
+        end
+        else
+        begin
+          writeln(aValue[i].Name,' (Charset Id = ',aValue[i].GetCharSetID, ' Codepage = ',StringCodePage(s),')');
+          writeln;
+          writeln(s);
+        end
+      end
+      else
+        writeln(aValue[i].Name,' = (blob), Length = ',aValue[i].AsBlob.GetBlobSize);
+
+    SQL_TEXT,SQL_VARYING:
+    begin
+      s := aValue[i].AsString;
+      if FHexStrings then
+      begin
+        write(aValue[i].Name,' = ');
+        PrintHexString(s);
+        writeln(' (Charset Id = ',aValue[i].GetCharSetID, ' Codepage = ',StringCodePage(s),')');
+      end
+      else
+      if aValue[i].GetCharSetID > 0 then
+        writeln(aValue[i].Name,' = ',s,' (Charset Id = ',aValue[i].GetCharSetID, ' Codepage = ',StringCodePage(s),')')
+      else
+        writeln(aValue[i].Name,' = ',s);
+    end;
+
+    else
+      writeln(aValue[i].Name,' = ',aValue[i].AsString);
+    end;
+  end;
 end;
 
 procedure TTestBase.PrintHexString(s: string);

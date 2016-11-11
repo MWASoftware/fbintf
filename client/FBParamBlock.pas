@@ -172,7 +172,13 @@ type
     function ISRBItem.SetAsString = SetAsString2;
   end;
 
-  TBPBItem =  class(TParamBlockItem,IBPBItem);
+  { TBPBItem }
+
+  TBPBItem =  class(TParamBlockItem,IBPBItem)
+  public
+    function getAsInteger: integer;
+    procedure SetAsInteger(aValue: integer);
+  end;
 
   { TBPB }
 
@@ -189,6 +195,36 @@ type
 implementation
 
 uses FBMessages;
+
+{ TBPBItem }
+
+function TBPBItem.getAsInteger: integer;
+var len: byte;
+begin
+  with FirebirdClientAPI, FParamData^ do
+  case FDataType of
+  dtInteger:
+    begin
+      len := byte((FBufPtr+1)^);
+      Result := DecodeInteger(FBufPtr+2,len);
+    end
+  else
+    IBError(ibxePBParamTypeError,[nil]);
+  end;
+end;
+
+procedure TBPBItem.SetAsInteger(aValue: integer);
+begin
+  with FParamData^ do
+  begin
+    if FBufLength <> 6 then
+      FOwner.UpdateRequestItemSize(self,6);
+    (FBufPtr+1)^ := chr(4);
+    with FirebirdClientAPI do
+      EncodeInteger(aValue,4,FBufPtr+2);
+    FDataType := dtInteger;
+  end;
+end;
 
 { TBPB }
 

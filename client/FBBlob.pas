@@ -103,6 +103,9 @@ type
     function GetBPB: IBPB;
     procedure Cancel;
     procedure Close;
+    function GetBlobSize: Int64;
+    procedure GetInfo(var NumSegments: Int64; var MaxSegmentSize, TotalSize: Int64;
+      var BlobType: TBlobType); virtual; abstract;
     function GetBlobID: TISC_QUAD;
     function GetBlobMode: TFBBlobMode;
     function Read(var Buffer; Count: Longint): Longint; virtual; abstract;
@@ -113,9 +116,9 @@ type
     procedure SaveToStream(S: TStream);
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
-    function GetAsString: string;
-    procedure SetAsString(aValue: string);
-    function SetString(aValue: string): IBlob;
+    function GetAsString: rawbytestring;
+    procedure SetAsString(aValue: rawbytestring);
+    function SetString(aValue: rawbytestring): IBlob;
   end;
 
 
@@ -210,6 +213,14 @@ begin
   InternalClose(false);
 end;
 
+function TFBBlob.GetBlobSize: Int64;
+var NumSegments: Int64;
+    MaxSegmentSize: Int64;
+    BlobType: TBlobType;
+begin
+  GetInfo(NumSegments,MaxSegmentSize,Result,BlobType);
+end;
+
 function TFBBlob.GetBlobID: TISC_QUAD;
 begin
   Result := FBlobID;
@@ -285,32 +296,28 @@ begin
    Result := FTransaction;
 end;
 
-function TFBBlob.GetAsString: string;
+function TFBBlob.GetAsString: rawbytestring;
 var ss: TStringStream;
-    rs: RawByteString;
 begin
   ss := TStringStream.Create('');
   try
     SaveToStream(ss);
-    rs :=  ss.DataString;
+    Result :=  ss.DataString;
     if (GetSubType = 1) and (FBPB = nil) then
-      SetCodePage(rs,GetCodePage,false);
-    Result := rs;
+      SetCodePage(Result,GetCodePage,false);
   finally
     ss.Free;
   end;
 end;
 
-procedure TFBBlob.SetAsString(aValue: string);
+procedure TFBBlob.SetAsString(aValue: rawbytestring);
 var
   ss: TStringStream;
-  rs: RawByteString;
 begin
-  rs := aValue;
   if (GetSubType = 1) and  (StringCodePage(aValue) <> GetCodePage) and
            (GetCodePage <> CP_NONE) and (FBPB = nil) then
-    SetCodePage(rs,GetCodePage,true);
-  ss := TStringStream.Create(rs);
+    SetCodePage(aValue,GetCodePage,true);
+  ss := TStringStream.Create(aValue);
   try
     LoadFromStream(ss);
   finally
@@ -318,7 +325,7 @@ begin
   end;
 end;
 
-function TFBBlob.SetString(aValue: string): IBlob;
+function TFBBlob.SetString(aValue: rawbytestring): IBlob;
 begin
   SetAsString(aValue);
   Result := GetIntf;

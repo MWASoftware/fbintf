@@ -108,6 +108,17 @@ begin
   end
   else
     writeln('Unable to reopen cursor');
+
+  {Now update the reduced slice}
+  writeln('Write updated reduced slice');
+  ar.SetAsInteger([2],1000);
+  Statement := Attachment.PrepareWithNamedParameters(Transaction,sqlUpdate);
+  Statement.SQLParams[0].AsArray := ar;
+  Statement.Execute;
+  writeln('Show update array');
+  Statement := Attachment.Prepare(Transaction,'Select * from TestData');
+  ReportResults(Statement);
+
   Transaction.Commit;
 end;
 

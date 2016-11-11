@@ -323,6 +323,7 @@ type
     procedure Close;
     function GetBlobID: TISC_QUAD;
     function GetBlobMode: TFBBlobMode;
+    function GetBlobSize: Int64;
     procedure GetInfo(var NumSegments: Int64; var MaxSegmentSize,
                       TotalSize: Int64; var BlobType: TBlobType);
     function Read(var Buffer; Count: Longint): Longint;
@@ -331,12 +332,12 @@ type
     function LoadFromStream(S: TStream) : IBlob;
     procedure SaveToFile(Filename: string);
     procedure SaveToStream(S: TStream);
-    function GetAsString: string;
-    procedure SetAsString(aValue: string);
-    function SetString(aValue: string): IBlob;
+    function GetAsString: rawbytestring;
+    procedure SetAsString(aValue: rawbytestring);
+    function SetString(aValue: rawbytestring): IBlob;
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
-    property AsString: string read GetAsString write SetAsString;
+    property AsString: rawbytestring read GetAsString write SetAsString;
  end;
 
   { The IColumnMetaData interface provides access to the per column metadata for

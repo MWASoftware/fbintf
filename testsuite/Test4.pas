@@ -12,7 +12,8 @@ unit Test4;
 
   2. Show Changed Record
 
-  3. Insert new employee record and report affected rows.
+  3. Insert new employee record and report affected rows Repeat with a duplicated
+     parameter name.
 
   4. Show inserted record and then delete it and report affected rows
 
@@ -20,7 +21,13 @@ unit Test4;
 
   6. Show inserted record and total records
 
-  7. Implicit Rollback and disconnect.
+  7. Prepare query again and report results
+
+  8. Prepare query with a different transaction and report results.
+
+  9. Open Cursor with a different transaction and report results.
+
+  10. Implicit Rollback and disconnect.
 
 }
 
@@ -47,8 +54,9 @@ implementation
 { TTest4 }
 
 procedure TTest4.DoQuery(Attachment: IAttachment);
-var Transaction: ITransaction;
+var Transaction, Transaction2, Transaction3: ITransaction;
     Statement: IStatement;
+    Rows: IResultSet;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taRollback);
   Statement := Attachment.Prepare(Transaction,'Update Employee Set Hire_Date = ? Where EMP_NO = ?',3);
@@ -88,9 +96,36 @@ begin
   Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 150;
   ReportResults(Statement);
 
-  writeln('Now Delete the row');
+  {Now repeat but with a non-unique parameter name}
+  Statement := Attachment.PrepareWithNamedParameters(Transaction,'INSERT INTO EMPLOYEE (EMP_NO, FIRST_NAME, LAST_NAME, PHONE_EXT, HIRE_DATE,' +
+      'DEPT_NO, JOB_CODE, JOB_GRADE, JOB_COUNTRY, SALARY) '+
+      'VALUES (:EMP_NO, :FIRST_NAME, :FIRST_NAME, :PHONE_EXT, :HIRE_DATE,' +
+      ':DEPT_NO, :JOB_CODE, :JOB_GRADE, :JOB_COUNTRY, :SALARY)',3);
+  with Statement.GetSQLParams do
+  begin
+    ByName('EMP_NO').AsInteger := 151;
+    ByName('FIRST_NAME').AsString := 'Major';
+    ByName('PHONE_EXT').AsString := '';
+    ByName('HIRE_DATE').AsDateTime := EncodeDate(2015,4,1);;
+    ByName('DEPT_NO').AsString := '600';
+    ByName('JOB_CODE').AsString := 'Eng';
+    ByName('JOB_GRADE').AsInteger := 4;
+    ByName('JOB_COUNTRY').AsString := 'England';
+    ByName('SALARY').AsFloat := 40000.59;
+  end;
+  Statement.Execute;
+  WriteAffectedRows(Statement);
+
+  Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
+  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 151;
+  ReportResults(Statement);
+
+  writeln('Now Delete the rows');
   Statement := Attachment.Prepare(Transaction,'Delete From Employee Where EMP_NO = ?',3);
   Statement.GetSQLParams[0].AsInteger := 150;
+  Statement.Execute;
+  WriteAffectedRows(Statement);
+  Statement.GetSQLParams[0].AsInteger := 151;
   Statement.Execute;
   WriteAffectedRows(Statement);
 
@@ -123,6 +158,29 @@ begin
   writeln('Employee Count = ', Attachment.OpenCursorAtStart(Transaction,
          'Select count(*) from EMPLOYEE',3)[0].AsInteger);
 
+  writeln('Prepare Query again');
+  writeln;
+  Statement.Prepare;
+  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 150;
+  ReportResults(Statement);
+
+  Transaction2 := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taRollback);
+  writeln('Prepare Query again with a different transaction');
+  writeln;
+  Statement.Prepare(Transaction2);
+  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 9;
+  ReportResults(Statement);
+
+  Transaction3 := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taRollback);
+  writeln('Open Cursor with a different transaction');
+  writeln;
+  Rows := Statement.OpenCursor(Transaction3);
+  try
+    while Rows.FetchNext do
+      ReportResult(Rows);
+  finally
+    Rows.Close;
+  end;
 end;
 
 function TTest4.TestTitle: string;

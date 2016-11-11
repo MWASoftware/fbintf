@@ -79,6 +79,8 @@ begin
   Results := Service.Query(Req);
   WriteServiceQueryResult(Results);
 
+  Service.Detach;
+  Service.Attach;
 
   {Statistics}
 
