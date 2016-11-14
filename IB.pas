@@ -630,11 +630,11 @@ type
   }
 
   TTransactionAction  = (TARollback, TACommit, TACommitRetaining, TARollbackRetaining);
+  TTransactionCompletion = TARollback.. TACommit;
 
   ITransaction = interface
     function getTPB: ITPB;
-    procedure Start(DefaultCompletion: TTransactionAction=taCommit); overload;
-    procedure Start(TPB: ITPB; DefaultCompletion: TTransactionAction=taCommit); overload;
+    procedure Start(DefaultCompletion: TTransactionCompletion=taCommit);
     function GetInTransaction: boolean;
     procedure PrepareForCommit; {Two phase commit - stage 1}
     procedure Commit(Force: boolean=false);
@@ -801,8 +801,8 @@ type
     procedure Disconnect(Force: boolean=false);
     function IsConnected: boolean;
     procedure DropDatabase;
-    function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionAction): ITransaction; overload;
-    function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionAction): ITransaction; overload;
+    function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction; overload;
+    function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionCompletion): ITransaction; overload;
     procedure ExecImmediate(transaction: ITransaction; sql: string; SQLDialect: integer); overload;
     procedure ExecImmediate(TPB: array of byte; sql: string; SQLDialect: integer); overload;
     procedure ExecImmediate(transaction: ITransaction; sql: string); overload;
@@ -987,9 +987,9 @@ type
     {Start Transaction against multiple databases}
     function AllocateTPB: ITPB;
     function StartTransaction(Attachments: array of IAttachment;
-             TPB: array of byte; DefaultCompletion: TTransactionAction): ITransaction; overload;
+             TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction; overload;
     function StartTransaction(Attachments: array of IAttachment;
-             TPB: ITPB; DefaultCompletion: TTransactionAction): ITransaction; overload;
+             TPB: ITPB; DefaultCompletion: TTransactionCompletion): ITransaction; overload;
 
     {Service Manager}
     function HasServiceAPI: boolean;
@@ -998,7 +998,6 @@ type
 
     {Information}
     function GetStatus: IStatus;
-    function IsLibraryLoaded: boolean;
     function GetLibraryName: string;
     function HasRollbackRetaining: boolean;
     function GetImplementationVersion: string;
@@ -1020,6 +1019,7 @@ type
 
 const
   OnGetLibraryName: TOnGetLibraryName = nil;
+  AllowUseOfFBLIB: boolean = false;
 
 type
    { EIBError }
@@ -1098,7 +1098,7 @@ begin
     Result := true;
   end;
   {$ENDIF}
-  if Result and not FFirebirdAPI.IsLibraryLoaded then
+  if Result and not (FFirebirdAPI as TFBClientAPI).IsLibraryLoaded then
   begin
     Result := false;
     FFirebirdAPI := nil;

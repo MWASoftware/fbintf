@@ -9,6 +9,7 @@ procedure TFBClientAPI.LoadIBLibrary;
 
 var InstallDir: string;
     dllPathName: string;
+    oldFirebirdEV: string;
 begin
   {First try any user override}
   dllPathName := GetOverrideLibName;
@@ -31,9 +32,15 @@ begin
   if FileExists(InstallDir + FIREBIRD_CLIENT) then
   begin
     //assume firebird.conf and firebird.msg in same dir
+    oldFirebirdEV := GetEnvironmentVariable('FIREBIRD');
     SetEnvironmentVariable('FIREBIRD',PChar(InstallDir));
-    dllPathName := InstallDir +FIREBIRD_CLIENT;
-    IBLibrary := DoLoadLibrary(dllPathName)
+    dllPathName := InstallDir + FIREBIRD_CLIENT;
+    try
+      IBLibrary := DoLoadLibrary(dllPathName)
+    finally
+      if IBLibrary = NILHandle then
+        SetEnvironmentVariable('FIREBIRD',PChar(oldFirebirdEV)); {restore}
+    end;
   end;
 
 //  writeln('Dir = ',InstallDir);

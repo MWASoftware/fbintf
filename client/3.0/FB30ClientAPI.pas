@@ -89,9 +89,9 @@ type
 
     {Start Transaction against multiple databases}
     function StartTransaction(Attachments: array of IAttachment;
-             TPB: array of byte; DefaultCompletion: TTransactionAction): ITransaction; overload;
+             TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction; overload;
     function StartTransaction(Attachments: array of IAttachment;
-             TPB: ITPB; DefaultCompletion: TTransactionAction): ITransaction; overload;
+             TPB: ITPB; DefaultCompletion: TTransactionCompletion): ITransaction; overload;
 
     {Service Manager}
     function AllocateSPB: ISPB;
@@ -244,13 +244,13 @@ begin
 end;
 
 function TFB30ClientAPI.StartTransaction(Attachments: array of IAttachment;
-  TPB: array of byte; DefaultCompletion: TTransactionAction): ITransaction;
+  TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction;
 begin
   Result := TFB30Transaction.Create(Attachments,TPB,DefaultCompletion);
 end;
 
 function TFB30ClientAPI.StartTransaction(Attachments: array of IAttachment;
-  TPB: ITPB; DefaultCompletion: TTransactionAction): ITransaction;
+  TPB: ITPB; DefaultCompletion: TTransactionCompletion): ITransaction;
 begin
   Result := TFB30Transaction.Create(Attachments,TPB,DefaultCompletion);
 end;

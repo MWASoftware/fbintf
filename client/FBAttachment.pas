@@ -58,8 +58,8 @@ type
     destructor Destroy; override;
     function getDPB: IDPB;
     function AllocateBPB: IBPB;
-    function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionAction): ITransaction; overload; virtual; abstract;
-    function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionAction): ITransaction; overload; virtual; abstract;
+    function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction; overload; virtual; abstract;
+    function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionCompletion): ITransaction; overload; virtual; abstract;
     procedure Disconnect(Force: boolean=false); virtual; abstract;
     procedure ExecImmediate(transaction: ITransaction; sql: string; aSQLDialect: integer); overload; virtual; abstract;
     procedure ExecImmediate(TPB: array of byte; sql: string; aSQLDialect: integer); overload;

@@ -57,8 +57,8 @@ type
     procedure Disconnect(Force: boolean=false); override;
     function IsConnected: boolean;
     procedure DropDatabase;
-    function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionAction): ITransaction; override;
-    function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionAction): ITransaction; override;
+    function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction; override;
+    function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionCompletion): ITransaction; override;
     procedure ExecImmediate(transaction: ITransaction; sql: string; aSQLDialect: integer); override;
     function Prepare(transaction: ITransaction; sql: string; aSQLDialect: integer): IStatement; override;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: string;
@@ -227,14 +227,14 @@ begin
 end;
 
 function TFB25Attachment.StartTransaction(TPB: array of byte;
-  DefaultCompletion: TTransactionAction): ITransaction;
+  DefaultCompletion: TTransactionCompletion): ITransaction;
 begin
   CheckHandle;
   Result := TFB25Transaction.Create(self,TPB,DefaultCompletion);
 end;
 
 function TFB25Attachment.StartTransaction(TPB: ITPB;
-  DefaultCompletion: TTransactionAction): ITransaction;
+  DefaultCompletion: TTransactionCompletion): ITransaction;
 begin
   CheckHandle;
   Result := TFB25Transaction.Create(self,TPB,DefaultCompletion);

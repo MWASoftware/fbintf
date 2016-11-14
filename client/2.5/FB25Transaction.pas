@@ -90,7 +90,7 @@ type
     procedure PrepareForCommit; override;
     procedure Commit(Force: boolean=false); override;
     procedure CommitRetaining; override;
-    procedure Start(DefaultCompletion: TTransactionAction=taCommit); overload; override;
+    procedure Start(DefaultCompletion: TTransactionCompletion=taCommit); overload; override;
     procedure Rollback(Force: boolean=false); override;
     procedure RollbackRetaining; override;
  end;
@@ -138,7 +138,7 @@ begin
     Call(isc_commit_retaining(StatusVector, @FHandle));
 end;
 
-procedure TFB25Transaction.Start(DefaultCompletion: TTransactionAction);
+procedure TFB25Transaction.Start(DefaultCompletion: TTransactionCompletion);
 var pteb: PISC_TEB_ARRAY;
     i: integer;
     db_handle: TISC_DB_HANDLE;

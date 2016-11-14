@@ -184,7 +184,7 @@ begin
   writeln('DPB');
   writeln('Count = ', DPB.getCount);
   for i := 0 to DPB.getCount - 1 do
-    writeln(DPB.Items[i].getParamType,' = ', DPB.Items[i].AsString);
+    writeln(DPB[i].getParamType,' = ', DPB[i].AsString);
   writeln;
 end;
 

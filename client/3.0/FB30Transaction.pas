@@ -56,7 +56,7 @@ type
     procedure PrepareForCommit; override;
     procedure Commit(Force: boolean=false); override;
     procedure CommitRetaining; override;
-    procedure Start(DefaultCompletion: TTransactionAction=taCommit); overload; override;
+    procedure Start(DefaultCompletion: TTransactionCompletion=taCommit); overload; override;
     procedure Rollback(Force: boolean=false); override;
     procedure RollbackRetaining; override;
   end;
@@ -156,7 +156,7 @@ begin
   SignalActivity;
 end;
 
-procedure TFB30Transaction.Start(DefaultCompletion: TTransactionAction);
+procedure TFB30Transaction.Start(DefaultCompletion: TTransactionCompletion);
 begin
   if FTransactionIntf <> nil then
     Exit;

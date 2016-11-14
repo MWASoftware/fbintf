@@ -103,8 +103,8 @@ type
     function GetAttachment(index: integer): IAttachment;
     procedure Rollback(Force: boolean=false);  virtual; abstract;
     procedure RollbackRetaining;  virtual; abstract;
-    procedure Start(DefaultCompletion: TTransactionAction=taCommit); overload; virtual; abstract;
-    procedure Start(TPB: ITPB; DefaultCompletion: TTransactionAction=taCommit); overload;
+    procedure Start(DefaultCompletion: TTransactionCompletion=taCommit); overload; virtual; abstract;
+    procedure Start(TPB: ITPB; DefaultCompletion: TTransactionCompletion=taCommit); overload;
 
     property InTransaction: boolean read GetInTransaction;
     property TransactionSeqNo: integer read FSeqNo;
@@ -202,7 +202,7 @@ begin
     IBError(ibxeAttachmentListIndexError,[index]);
 end;
 
-procedure TFBTransaction.Start(TPB: ITPB; DefaultCompletion: TTransactionAction
+procedure TFBTransaction.Start(TPB: ITPB; DefaultCompletion: TTransactionCompletion
   );
 begin
   FTPB := TPB;
