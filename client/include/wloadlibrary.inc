@@ -10,14 +10,12 @@ procedure TFBClientAPI.LoadIBLibrary;
 var InstallDir: string;
     dllPathName: string;
 begin
-  IBLibrary := NilHandle;
-  {If OnGetLibraryName given then use this}
-  if assigned(OnGetLibraryName) then
-  begin
-    OnGetLibraryName(dllPathName);
+  {First try any user override}
+  dllPathName := GetOverrideLibName;
+  if dllPathName <> '' then
     IBLibrary := DoLoadLibrary(dllPathName);
-    Exit
-  end;
+
+  if IBLibrary <> nil then Exit;
 
   {Then look in application installation directory}
   InstallDir := ExtractFilePath(Paramstr(0)); {Using ParamStr(0) assumes windows conventions}
@@ -84,6 +82,7 @@ begin
       InstallDir := GetWindowsSpecialDir(CSIDL_PROGRAM_FILES) +
         DirectorySeparator + 'Firebird' +
         DirectorySeparator + 'Firebird_2_5' +
+        DirectorySeparator + 'Firebird_3_0' +
         DirectorySeparator + 'bin' + DirectorySeparator;
       dllPathName := InstallDir + FIREBIRD_CLIENT;
       IBLibrary := DoLoadLibrary(dllPathName)
@@ -101,8 +100,4 @@ begin
   end
 end;
 
-function TFBClientAPI.IsEmbeddedServer: boolean;
-begin
- Result := CompareText(FFBLibraryName,FIREBIRD_EMBEDDED) = 0;
-end;
 

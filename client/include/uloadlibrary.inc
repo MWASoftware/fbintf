@@ -26,15 +26,9 @@ procedure TFBClientAPI.LoadIBLibrary;
 
 var LibName: string;
 begin
-  //Use default unless FBLIB overrides
-  LibName := GetEnvironmentVariable('FBLIB');
+  LibName := GetOverrideLibName;
   if LibName = '' then
-  begin
-    if assigned(OnGetLibraryName) then
-      OnGetLibraryName(LibName)
-    else
-      LibName := FIREBIRD_SO2;
-  end;
+    LibName := GetFirebirdLibList;
   IBLibrary := FindLibrary(LibName);
   {$IFDEF DARWIN}
   if Result = NilHandle then
@@ -55,10 +49,6 @@ begin
   {$ENDIF}
 end;
 
-function TFBClientAPI.IsEmbeddedServer: boolean;
-begin
-  Result := Pos('libfbembed',FFBLibraryName) = 1;
-end;
 
 
 

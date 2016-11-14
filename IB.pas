@@ -999,7 +999,6 @@ type
     {Information}
     function GetStatus: IStatus;
     function IsLibraryLoaded: boolean;
-    function IsEmbeddedServer: boolean;
     function GetLibraryName: string;
     function HasRollbackRetaining: boolean;
     function GetImplementationVersion: string;

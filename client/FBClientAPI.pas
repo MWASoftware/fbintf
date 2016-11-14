@@ -108,6 +108,10 @@ type
   protected
     IBLibrary: TLibHandle; static;
     function GetProcAddr(ProcName: PChar): Pointer;
+    function GetOverrideLibName: string;
+    {$IFDEF UNIX}
+    function GetFirebirdLibList: string; virtual; abstract;
+    {$ENDIF}
     procedure LoadInterface; virtual;
   public
     {Taken from legacy API}
@@ -137,7 +141,6 @@ type
     {IFirebirdAPI}
     function GetStatus: IStatus; virtual; abstract;
     function IsLibraryLoaded: boolean;
-    function IsEmbeddedServer: boolean;
     function GetLibraryName: string;
     function GetCharsetName(CharSetID: integer): string;
     function CharSetID2CodePage(CharSetID: integer; var CodePage: TSystemCodePage): boolean;
@@ -156,15 +159,13 @@ Windows,Registry, WinDirs,
 {$ENDIF}
 SysUtils;
 
-const
-{$IFDEF LINUX}
-FIREBIRD_SO2 = 'libfbembed.so.2.5:libfbembed.so.2.1:libfbclient.so.2';
-
-{$ENDIF}
+{For Linux see result of GetFirebirdLibList method}
 {$IFDEF DARWIN}
+const
 FIREBIRD_SO2 = 'libfbclient.dylib';
 {$ENDIF}
 {$IFDEF WINDOWS}
+const
 IBASE_DLL = 'gds32.dll';
 FIREBIRD_CLIENT = 'fbclient.dll'; {do not localize}
 FIREBIRD_EMBEDDED = 'fbembed.dll';
@@ -264,8 +265,8 @@ const
 constructor TFBClientAPI.Create;
 begin
   inherited Create;
-  if IBLibrary = NilHandle then
-    LoadIBLibrary;
+  IBLibrary := NilHandle;
+  LoadIBLibrary;
   if (IBLibrary <> NilHandle) then
     LoadInterface;
   FirebirdClientAPI := self;
@@ -274,6 +275,9 @@ end;
 destructor TFBClientAPI.Destroy;
 begin
   FirebirdClientAPI := nil;
+  if IBLibrary <> NilHandle then
+    UnloadLibrary(IBLibrary);
+  IBLibrary := NilHandle;
   inherited Destroy;
 end;
 
@@ -311,6 +315,16 @@ begin
   Result := GetProcAddress(IBLibrary, ProcName);
   if not Assigned(Result) then
     raise Exception.CreateFmt(SFirebirdAPIFuncNotFound,[ProcName]);
+end;
+
+function TFBClientAPI.GetOverrideLibName: string;
+begin
+  Result := GetEnvironmentVariable('FBLIB');
+  if Result = '' then
+  begin
+    if assigned(OnGetLibraryName) then
+      OnGetLibraryName(Result)
+  end;
 end;
 
 procedure TFBClientAPI.LoadInterface;

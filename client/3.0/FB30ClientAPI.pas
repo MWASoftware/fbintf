@@ -65,7 +65,10 @@ type
                              when this class is freed and last reference to IStatus
                              goes out of scope.}
   protected
-    procedure LoadInterface; override;
+    {$IFDEF UNIX}
+    function GetFirebirdLibList: string; override;
+    {$ENDIF}
+   procedure LoadInterface; override;
   public
     constructor Create;
     destructor Destroy; override;
@@ -157,6 +160,11 @@ begin
 end;
 
 { TFB30ClientAPI }
+
+function TFB30ClientAPI.GetFirebirdLibList: string;
+begin
+  Result := 'libfbclient.so:libfbclient.so.2';
+end;
 
 procedure TFB30ClientAPI.LoadInterface;
 var
