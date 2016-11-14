@@ -15,7 +15,7 @@
       <Unit1>
         <Filename Value="TestManager.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="11"/>
+        <EditorIndex Value="12"/>
         <TopLine Value="181"/>
         <CursorPos X="43" Y="187"/>
         <UsageCount Value="208"/>
@@ -106,7 +106,7 @@
       <Unit10>
         <Filename Value="Test9.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="11"/>
         <TopLine Value="28"/>
         <CursorPos X="102" Y="53"/>
         <UsageCount Value="201"/>
@@ -115,7 +115,7 @@
       <Unit11>
         <Filename Value="Test10.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="10"/>
         <CursorPos X="26" Y="22"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
@@ -146,7 +146,7 @@
       <Unit14>
         <Filename Value="Test13.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="13"/>
+        <EditorIndex Value="14"/>
         <TopLine Value="77"/>
         <CursorPos Y="143"/>
         <UsageCount Value="57"/>
@@ -155,7 +155,7 @@
       <Unit15>
         <Filename Value="Test14.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="12"/>
+        <EditorIndex Value="13"/>
         <TopLine Value="19"/>
         <CursorPos Y="105"/>
         <UsageCount Value="41"/>
@@ -180,15 +180,13 @@
       </Unit17>
       <Unit18>
         <Filename Value="../IB.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="6"/>
         <TopLine Value="791"/>
-        <CursorPos Y="810"/>
+        <CursorPos X="77" Y="793"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
-          <IsVisibleTab Value="True"/>
           <EditorIndex Value="-1"/>
-          <WindowIndex Value="1"/>
+          <WindowIndex Value="-1"/>
           <TopLine Value="823"/>
           <CursorPos X="25" Y="846"/>
         </ExtraEditor1>
@@ -438,14 +436,16 @@
       </Unit49>
       <Unit50>
         <Filename Value="../client/FBClientAPI.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="275"/>
-        <CursorPos Y="290"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="7"/>
+        <TopLine Value="320"/>
+        <CursorPos X="3" Y="324"/>
         <UsageCount Value="74"/>
+        <Loaded Value="True"/>
       </Unit50>
       <Unit51>
         <Filename Value="../client/2.5/FB25ClientAPI.pas"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="8"/>
         <TopLine Value="460"/>
         <CursorPos X="55" Y="482"/>
         <UsageCount Value="20"/>
@@ -500,7 +500,7 @@
       </Unit56>
       <Unit57>
         <Filename Value="../client/3.0/FB30ClientAPI.pas"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="9"/>
         <TopLine Value="231"/>
         <CursorPos X="55" Y="253"/>
         <UsageCount Value="35"/>

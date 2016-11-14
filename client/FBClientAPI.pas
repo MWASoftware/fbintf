@@ -320,9 +320,8 @@ end;
 function TFBClientAPI.GetOverrideLibName: string;
 begin
   Result := '';
-  if not AllowUseOfFBLIB then Exit;
-
-  Result := GetEnvironmentVariable('FBLIB');
+  if AllowUseOfFBLIB then
+    Result := GetEnvironmentVariable('FBLIB');
   if Result = '' then
   begin
     if assigned(OnGetLibraryName) then
