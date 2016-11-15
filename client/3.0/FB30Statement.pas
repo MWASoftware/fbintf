@@ -131,7 +131,7 @@ type
     procedure RowChange; override;
     procedure FreeSQLData;
     function GetAsArray(Array_ID: TISC_QUAD): IArray; override;
-    function GetAsBlob(Blob_ID: TISC_QUAD): IBlob; override;
+    function GetAsBlob(Blob_ID: TISC_QUAD; BPB: IBPB): IBlob; override;
     function GetArrayMetaData: IArrayMetaData; override;
     function GetBlobMetaData: IBlobMetaData; override;
     function CreateBlob: IBlob; override;
@@ -243,7 +243,7 @@ type
     constructor Create(Attachment: TFB30Attachment; Transaction: ITransaction;
       sql: string; aSQLDialect: integer);
     constructor CreateWithParameterNames(Attachment: TFB30Attachment; Transaction: ITransaction;
-      sql: string;  aSQLDialect: integer; GenerateParamNames: boolean =false; UniqueParamNames: boolean=false);
+      sql: string;  aSQLDialect: integer; GenerateParamNames: boolean =false);
     destructor Destroy; override;
     function FetchNext: boolean;
     property StatementIntf: Firebird.IStatement read FStatementIntf;
@@ -488,7 +488,7 @@ begin
   end;
 end;
 
-function TIBXSQLVAR.GetAsBlob(Blob_ID: TISC_QUAD): IBlob;
+function TIBXSQLVAR.GetAsBlob(Blob_ID: TISC_QUAD; BPB: IBPB): IBlob;
 begin
   if FBlob <> nil then
     Result := FBlob
@@ -502,7 +502,7 @@ begin
       Result := TFB30Blob.Create(FStatement.GetAttachment as TFB30Attachment,
                                TIBXSQLDA(Parent).GetTransaction,
                                GetBlobMetaData,
-                               Blob_ID,nil);
+                               Blob_ID,BPB);
     FBlob := Result;
   end;
 end;
@@ -932,7 +932,7 @@ begin
       if FHasParamNames then
       begin
         if FProcessedSQL = '' then
-          FSQLParams.PreprocessSQL(FSQL,FGenerateParamNames,FUniqueParamNames,FProcessedSQL);
+          FSQLParams.PreprocessSQL(FSQL,FGenerateParamNames,FProcessedSQL);
         FStatementIntf := (GetAttachment as TFB30Attachment).AttachmentIntf.prepare(StatusIntf,
                             (FTransactionIntf as TFB30Transaction).TransactionIntf,
                             Length(FProcessedSQL),
@@ -1138,9 +1138,9 @@ end;
 
 constructor TFB30Statement.CreateWithParameterNames(
   Attachment: TFB30Attachment; Transaction: ITransaction; sql: string;
-  aSQLDialect: integer; GenerateParamNames: boolean; UniqueParamNames: boolean);
+  aSQLDialect: integer; GenerateParamNames: boolean);
 begin
-  inherited CreateWithParameterNames(Attachment,Transaction,sql,aSQLDialect,GenerateParamNames,UniqueParamNames);
+  inherited CreateWithParameterNames(Attachment,Transaction,sql,aSQLDialect,GenerateParamNames);
   FSQLParams := TIBXINPUTSQLDA.Create(self);
   FSQLRecord := TIBXOUTPUTSQLDA.Create(self);
   InternalPrepare;

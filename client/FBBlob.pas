@@ -112,8 +112,8 @@ type
     function Write(const Buffer; Count: Longint): Longint;  virtual; abstract;
     function LoadFromFile(Filename: string): IBlob;
     function LoadFromStream(S: TStream) : IBlob;
-    procedure SaveToFile(Filename: string);
-    procedure SaveToStream(S: TStream);
+    function SaveToFile(Filename: string): IBlob;
+    function SaveToStream(S: TStream): IBlob;
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
     function GetAsString: rawbytestring;
@@ -262,19 +262,19 @@ begin
   Result := GetIntf;
 end;
 
-procedure TFBBlob.SaveToFile(Filename: string);
+function TFBBlob.SaveToFile(Filename: string): IBlob;
 var
   Stream: TStream;
 begin
   Stream := TFileStream.Create(FileName, fmCreate);
   try
-    SaveToStream(Stream);
+    Result := SaveToStream(Stream);
   finally
     Stream.Free;
   end;
 end;
 
-procedure TFBBlob.SaveToStream(S: TStream);
+function TFBBlob.SaveToStream(S: TStream): IBlob;
 var Buffer: array [0..BufSize-1] of char;
     BytesRead: integer;
 begin
@@ -284,6 +284,7 @@ begin
     S.Write(Buffer,BytesRead);
   until BytesRead = 0;
   Close;
+  Result := GetIntf;
 end;
 
 function TFBBlob.GetAttachment: IAttachment;

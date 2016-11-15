@@ -330,8 +330,8 @@ type
     function Write(const Buffer; Count: Longint): Longint;
     function LoadFromFile(Filename: string): IBlob;
     function LoadFromStream(S: TStream) : IBlob;
-    procedure SaveToFile(Filename: string);
-    procedure SaveToStream(S: TStream);
+    function SaveToFile(Filename: string): IBlob;
+    function SaveToStream(S: TStream): IBlob;
     function GetAsString: rawbytestring;
     procedure SetAsString(aValue: rawbytestring);
     function SetString(aValue: rawbytestring): IBlob;
@@ -415,7 +415,8 @@ type
     function GetAsString: String;
     function GetIsNull: Boolean;
     function GetAsVariant: Variant;
-    function GetAsBlob: IBlob;
+    function GetAsBlob: IBlob; overload;
+    function GetAsBlob(BPB: IBPB): IBlob; overload;
     function GetAsArray: IArray;
     property AsDate: TDateTime read GetAsDateTime;
     property AsBoolean:boolean read GetAsBoolean;
@@ -446,6 +447,7 @@ type
 
   IResults = interface
    function getCount: integer;
+   function GetTransaction: ITransaction;
    function ByName(Idx: String): ISQLData;
    function getSQLData(index: integer): ISQLData;
    property Data[index: integer]: ISQLData read getSQLData; default;
@@ -460,7 +462,6 @@ type
   IResultSet = interface(IResults)
     function FetchNext: boolean;
     function GetCursorName: string;
-    function GetTransaction: ITransaction;
     function IsEof: boolean;
     procedure Close;
   end;
@@ -801,8 +802,8 @@ type
     procedure Disconnect(Force: boolean=false);
     function IsConnected: boolean;
     procedure DropDatabase;
-    function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction; overload;
-    function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionCompletion): ITransaction; overload;
+    function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion=taCommit): ITransaction; overload;
+    function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionCompletion=taCommit): ITransaction; overload;
     procedure ExecImmediate(transaction: ITransaction; sql: string; SQLDialect: integer); overload;
     procedure ExecImmediate(TPB: array of byte; sql: string; SQLDialect: integer); overload;
     procedure ExecImmediate(transaction: ITransaction; sql: string); overload;
@@ -815,11 +816,9 @@ type
     function Prepare(transaction: ITransaction; sql: string; aSQLDialect: integer): IStatement; overload;
     function Prepare(transaction: ITransaction; sql: string): IStatement; overload;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: string;
-                       aSQLDialect: integer; GenerateParamNames: boolean=false;
-                       UniqueParamNames: boolean=false): IStatement; overload;
+                       aSQLDialect: integer; GenerateParamNames: boolean=false): IStatement; overload;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: string;
-                       GenerateParamNames: boolean=false;
-                       UniqueParamNames: boolean=false): IStatement; overload;
+                       GenerateParamNames: boolean=false): IStatement; overload;
 
     {Events}
     function GetEventHandler(Events: TStrings): IEvents; overload;
@@ -987,9 +986,9 @@ type
     {Start Transaction against multiple databases}
     function AllocateTPB: ITPB;
     function StartTransaction(Attachments: array of IAttachment;
-             TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction; overload;
+             TPB: array of byte; DefaultCompletion: TTransactionCompletion=taCommit): ITransaction; overload;
     function StartTransaction(Attachments: array of IAttachment;
-             TPB: ITPB; DefaultCompletion: TTransactionCompletion): ITransaction; overload;
+             TPB: ITPB; DefaultCompletion: TTransactionCompletion=taCommit): ITransaction; overload;
 
     {Service Manager}
     function HasServiceAPI: boolean;

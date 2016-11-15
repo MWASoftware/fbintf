@@ -63,7 +63,6 @@ type
     FEOF: boolean;
     FSingleResults: boolean;
     FGenerateParamNames: boolean;
-    FUniqueParamNames: boolean;
     procedure CheckHandle; virtual; abstract;
     procedure CheckTransaction(aTransaction: ITransaction);
     procedure GetDsqlInfo(info_request: byte; buffer: ISQLInfoResults); overload; virtual; abstract;
@@ -76,7 +75,7 @@ type
     constructor Create(Attachment: IAttachment; Transaction: ITransaction;
       sql: string; SQLDialect: integer);
     constructor CreateWithParameterNames(Attachment: IAttachment; Transaction: ITransaction;
-      sql: string;  SQLDialect: integer; GenerateParamNames: boolean =false; UniqueParamNames: boolean=false);
+      sql: string;  SQLDialect: integer; GenerateParamNames: boolean =false);
     destructor Destroy; override;
     procedure Close;
     procedure TransactionEnding(aTransaction: ITransaction; Force: boolean);
@@ -135,11 +134,10 @@ end;
 
 constructor TFBStatement.CreateWithParameterNames(Attachment: IAttachment;
   Transaction: ITransaction; sql: string; SQLDialect: integer;
-  GenerateParamNames: boolean; UniqueParamNames: boolean);
+  GenerateParamNames: boolean);
 begin
   FHasParamNames := true;
   FGenerateParamNames := GenerateParamNames;
-  FUniqueParamNames := UniqueParamNames;
   Create(Attachment,Transaction,sql,SQLDialect);
 end;
 

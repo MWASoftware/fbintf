@@ -73,15 +73,15 @@ type
     function Prepare(transaction: ITransaction; sql: string; aSQLDialect: integer): IStatement; overload; virtual; abstract;
     function Prepare(transaction: ITransaction; sql: string): IStatement; overload;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: string;
-                       aSQLDialect: integer; GenerateParamNames: boolean=false;
-                       UniqueParamNames: boolean=false): IStatement; overload; virtual; abstract;
+                       aSQLDialect: integer; GenerateParamNames: boolean=false): IStatement; overload; virtual; abstract;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: string;
-                       GenerateParamNames: boolean=false;
-                       UniqueParamNames: boolean=false): IStatement; overload;
+                       GenerateParamNames: boolean=false): IStatement; overload;
     function GetEventHandler(Events: TStrings): IEvents; overload; virtual; abstract;
     function GetEventHandler(Event: string): IEvents; overload;
 
     function GetSQLDialect: integer;
+    function OpenBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob; virtual; abstract; overload;
+    function OpenBlob(transaction: ITransaction; Field: ISQLData; BPB: IBPB=nil): IBlob; overload;
     property SQLDialect: integer read FSQLDialect;
     property HasDefaultCharSet: boolean read FHasDefaultCharSet;
     property CharSetID: integer read FCharSetID;
@@ -168,7 +168,7 @@ end;
 
 function TFBAttachment.OpenCursorAtStart(sql: string): IResultSet;
 begin
-  Result := OpenCursorAtStart(StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit),sql,FSQLDialect);
+  Result := OpenCursorAtStart(StartTransaction([isc_tpb_read,isc_tpb_wait,isc_tpb_concurrency],taCommit),sql,FSQLDialect);
 end;
 
 function TFBAttachment.Prepare(transaction: ITransaction; sql: string
@@ -178,10 +178,9 @@ begin
 end;
 
 function TFBAttachment.PrepareWithNamedParameters(transaction: ITransaction;
-  sql: string; GenerateParamNames: boolean; UniqueParamNames: boolean
-  ): IStatement;
+  sql: string; GenerateParamNames: boolean): IStatement;
 begin
-  Result := PrepareWithNamedParameters(transaction,sql,FSQLDialect,GenerateParamNames,UniqueParamNames);
+  Result := PrepareWithNamedParameters(transaction,sql,FSQLDialect,GenerateParamNames);
 end;
 
 function TFBAttachment.GetEventHandler(Event: string): IEvents;
@@ -199,6 +198,12 @@ end;
 function TFBAttachment.GetSQLDialect: integer;
 begin
   Result := FSQLDialect;
+end;
+
+function TFBAttachment.OpenBlob(transaction: ITransaction; Field: ISQLData;
+  BPB: IBPB): IBlob;
+begin
+  Result := OpenBlob(Transaction,Field.GetBlobMetadata, Field.AsQuad,BPB);
 end;
 
 end.

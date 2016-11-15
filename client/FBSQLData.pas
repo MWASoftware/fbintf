@@ -203,8 +203,8 @@ type
   public
     procedure Initialize; virtual;
     function IsInputDataArea: boolean; virtual; abstract; {Input to Database}
-    procedure PreprocessSQL(sSQL: string; GenerateParamNames,
-      UniqueParamNames: boolean; var sProcessedSQL: string);
+    procedure PreprocessSQL(sSQL: string; GenerateParamNames: boolean;
+      var sProcessedSQL: string);
     function ColumnsInUseCount: integer; virtual;
     function ColumnByName(Idx: string): TSQLVarData;
     function CheckStatementStatus(Request: TStatementStatus): boolean; virtual; abstract;
@@ -255,7 +255,7 @@ type
     procedure Changed; virtual;
     procedure RowChange; virtual;
     function GetAsArray(Array_ID: TISC_QUAD): IArray; virtual; abstract;
-    function GetAsBlob(Blob_ID: TISC_QUAD): IBlob; virtual; abstract;
+    function GetAsBlob(Blob_ID: TISC_QUAD; BPB: IBPB): IBlob; virtual; abstract;
     function CreateBlob: IBlob; virtual; abstract;
     function GetArrayMetaData: IArrayMetaData; virtual; abstract;
     function GetBlobMetaData: IBlobMetaData; virtual; abstract;
@@ -334,7 +334,8 @@ type
   public
     function GetIsNull: Boolean; override;
     function GetAsArray: IArray;
-    function GetAsBlob: IBlob;
+    function GetAsBlob: IBlob; overload;
+    function GetAsBlob(BPB: IBPB): IBlob; overload;
     function GetAsString: String; override;
     property AsBlob: IBlob read GetAsBlob;
  end;
@@ -485,7 +486,7 @@ begin
     Column[i].Initialize;
 end;
 
-procedure TSQLDataArea.PreprocessSQL(sSQL: string; GenerateParamNames, UniqueParamNames: boolean;
+procedure TSQLDataArea.PreprocessSQL(sSQL: string; GenerateParamNames: boolean;
   var sProcessedSQL: string);
 var
   cCurChar, cNextChar, cQuoteChar: Char;
@@ -641,7 +642,7 @@ begin
     for i := 0 to slNames.Count - 1 do
     begin
       Column[i].Name := slNames[i];
-      Column[i].UniqueName :=  UniqueParamNames or (slNames.Objects[i] <> nil);
+      Column[i].UniqueName :=  (slNames.Objects[i] <> nil);
     end;
     for i := 0 to Count - 1 do
     begin
@@ -1719,7 +1720,13 @@ end;
 function TIBSQLData.GetAsBlob: IBlob;
 begin
   CheckActive;
-  result := FIBXSQLVAR.GetAsBlob(AsQuad);
+  result := FIBXSQLVAR.GetAsBlob(AsQuad,nil);
+end;
+
+function TIBSQLData.GetAsBlob(BPB: IBPB): IBlob;
+begin
+  CheckActive;
+  result := FIBXSQLVAR.GetAsBlob(AsQuad,BPB);
 end;
 
 function TIBSQLData.GetAsString: String;
@@ -1732,7 +1739,7 @@ begin
     SQL_ARRAY:
       result := '(Array)'; {do not localize}
     SQL_BLOB:
-      Result := Trim(FIBXSQLVAR.GetAsBlob(AsQuad).GetAsString);
+      Result := Trim(FIBXSQLVAR.GetAsBlob(AsQuad,nil).GetAsString);
     else
       Result := inherited GetAsString;
   end;

@@ -151,7 +151,7 @@ type
     procedure FreeSQLData;
     procedure RowChange; override;
     function GetAsArray(Array_ID: TISC_QUAD): IArray; override;
-    function GetAsBlob(Blob_ID: TISC_QUAD): IBlob; override;
+    function GetAsBlob(Blob_ID: TISC_QUAD; BPB: IBPB): IBlob; override;
     function GetArrayMetaData: IArrayMetaData; override;
     function GetBlobMetaData: IBlobMetaData; override;
     function CreateBlob: IBlob; override;
@@ -249,8 +249,7 @@ type
     constructor Create(Attachment: TFB25Attachment; Transaction: ITransaction;
       sql: string; aSQLDialect: integer);
     constructor CreateWithParameterNames(Attachment: TFB25Attachment;
-      Transaction: ITransaction; sql: string; aSQLDialect: integer;
-  GenerateParamNames: boolean; UniqueParamNames: boolean);
+      Transaction: ITransaction; sql: string; aSQLDialect: integer; GenerateParamNames: boolean);
     destructor Destroy; override;
     function FetchNext: boolean;
 
@@ -398,7 +397,7 @@ begin
   end;
 end;
 
-function TIBXSQLVAR.GetAsBlob(Blob_ID: TISC_QUAD): IBlob;
+function TIBXSQLVAR.GetAsBlob(Blob_ID: TISC_QUAD; BPB: IBPB): IBlob;
 begin
   if FBlob <> nil then
     Result := FBlob
@@ -412,7 +411,7 @@ begin
       Result := TFB25Blob.Create(FStatement.GetAttachment as TFB25Attachment,
                                TIBXSQLDA(Parent).GetTransaction,
                                GetBlobMetaData,
-                               Blob_ID,nil);
+                               Blob_ID,BPB);
     FBlob := Result;
   end;
 end;
@@ -835,7 +834,7 @@ begin
       if FHasParamNames then
       begin
         if FProcessedSQL = '' then
-          FSQLParams.PreprocessSQL(FSQL,FGenerateParamNames,FUniqueParamNames,FProcessedSQL);
+          FSQLParams.PreprocessSQL(FSQL,FGenerateParamNames,FProcessedSQL);
         Call(isc_dsql_prepare(StatusVector, @(TRHandle), @FHandle, 0,
                  PChar(FProcessedSQL), FSQLDialect, nil), True);
       end
@@ -1046,10 +1045,10 @@ end;
 
 constructor TFB25Statement.CreateWithParameterNames(Attachment: TFB25Attachment;
   Transaction: ITransaction; sql: string; aSQLDialect: integer;
-  GenerateParamNames: boolean; UniqueParamNames: boolean);
+  GenerateParamNames: boolean);
 var GUID : TGUID;
 begin
-  inherited CreateWithParameterNames(Attachment,Transaction,sql,aSQLDialect,GenerateParamNames,UniqueParamNames);
+  inherited CreateWithParameterNames(Attachment,Transaction,sql,aSQLDialect,GenerateParamNames);
   FDBHandle := Attachment.Handle;
   CreateGuid(GUID);
   FCursor := GUIDToString(GUID);

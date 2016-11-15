@@ -48,10 +48,9 @@ var Transaction: ITransaction;
     ResultSet: IResultSet;
     Statement: IStatement;
 begin
-  ResultSet := Attachment.OpenCursorAtStart('Select count(*) from EMPLOYEE');
-  writeln('Employee Count = ',ResultSet[0].AsInteger);
+  writeln('Employee Count = ',Attachment.OpenCursorAtStart('Select count(*) from EMPLOYEE')[0].AsInteger);
 
-  Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
+  Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taRollback);
   Statement := Attachment.Prepare(Transaction,'Execute Procedure DELETE_EMPLOYEE ?',3);
   Statement.GetSQLParams[0].AsInteger := 9;
   Statement.Execute;
@@ -79,11 +78,10 @@ begin
   Transaction := nil; {implicit rollback}
 
 
-  ResultSet := Attachment.OpenCursorAtStart(
+  writeln('Employee Count = ',Attachment.OpenCursorAtStart(
          Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit),
-         'Select count(*) As Counter from EMPLOYEE',3);
+         'Select count(*) As Counter from EMPLOYEE',3)[0].AsInteger);
 
-  writeln('Employee Count = ',ResultSet.ByName('COUNTER').AsInteger);
 end;
 
 function TTest3.TestTitle: string;

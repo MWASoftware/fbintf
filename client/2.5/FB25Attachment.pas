@@ -62,14 +62,13 @@ type
     procedure ExecImmediate(transaction: ITransaction; sql: string; aSQLDialect: integer); override;
     function Prepare(transaction: ITransaction; sql: string; aSQLDialect: integer): IStatement; override;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: string;
-                       aSQLDialect: integer; GenerateParamNames: boolean=false;
-                       UniqueParamNames: boolean=false): IStatement; override;
+                       aSQLDialect: integer; GenerateParamNames: boolean=false): IStatement; override;
     function GetEventHandler(Events: TStrings): IEvents; override;
     function CreateBlob(transaction: ITransaction; RelationName, ColumnName: string; BPB: IBPB=nil): IBlob; overload;
     function CreateBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BPB: IBPB=nil): IBlob; overload;
     function CreateBlob(transaction: ITransaction; SubType: integer; aCharSetID: cardinal=0; BPB: IBPB=nil): IBlob; overload;
     function OpenBlob(transaction: ITransaction; RelationName, ColumnName: string; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob; overload;
-    function OpenBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob; overload;
+    function OpenBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob; override; overload;
 
     function OpenArray(transaction: ITransaction; RelationName, ColumnName: string;
       ArrayID: TISC_QUAD): IArray;
@@ -298,12 +297,11 @@ begin
 end;
 
 function TFB25Attachment.PrepareWithNamedParameters(transaction: ITransaction;
-  sql: string; aSQLDialect: integer; GenerateParamNames: boolean;
-  UniqueParamNames: boolean): IStatement;
+  sql: string; aSQLDialect: integer; GenerateParamNames: boolean): IStatement;
 begin
   CheckHandle;
   Result := TFB25Statement.CreateWithParameterNames(self,transaction,sql,aSQLDialect,
-         GenerateParamNames,UniqueParamNames);
+         GenerateParamNames);
 end;
 
 function TFB25Attachment.GetEventHandler(Events: TStrings): IEvents;
