@@ -26,6 +26,8 @@ procedure TFBClientAPI.LoadIBLibrary;
 
 var LibName: string;
 begin
+  if IBLibrary <> NilHandle then Exit;
+
   LibName := GetOverrideLibName;
   if LibName = '' then
     LibName := GetFirebirdLibList;
@@ -47,6 +49,7 @@ begin
        FBLibraryName := ExtractFileName(LibName);
   end
   {$ENDIF}
+  FOwnsIBLibrary := IBLibrary <> NilHandle;
 end;
 
 

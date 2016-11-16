@@ -4,13 +4,18 @@ procedure TFBClientAPI.LoadIBLibrary;
   begin
     Result := LoadLibrary(PChar(LibName));
     if Result <> NilHandle then
+    begin
       FFBLibraryName := ExtractFileName(LibName);
+      FFBLibraryPath := ExtractFileDir(LibName);
+    end;
   end;
 
 var InstallDir: string;
     dllPathName: string;
     oldFirebirdEV: string;
 begin
+  if IBLibrary <> NilHandle then Exit;
+
   {First try any user override}
   dllPathName := GetOverrideLibName;
   if dllPathName <> '' then
@@ -104,7 +109,8 @@ begin
        //well maybe InterBase is present...
        IBLibrary := DoLoadLibrary(IBASE_DLL);
     end;
-  end
+  end;
+  FOwnsIBLibrary := IBLibrary <> NilHandle;
 end;
 
 

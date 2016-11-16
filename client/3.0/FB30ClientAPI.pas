@@ -100,6 +100,7 @@ type
     {Information}
     function HasServiceAPI: boolean;
     function HasRollbackRetaining: boolean;
+    function IsEmbeddedServer: boolean;
     function GetImplementationVersion: string;
 
     {Firebird 3 API}
@@ -282,6 +283,11 @@ begin
 end;
 
 function TFB30ClientAPI.HasRollbackRetaining: boolean;
+begin
+  Result := true;
+end;
+
+function TFB30ClientAPI.IsEmbeddedServer: boolean;
 begin
   Result := true;
 end;

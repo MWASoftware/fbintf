@@ -196,6 +196,7 @@ type
     {Information}
     function GetStatus: IStatus; override;
     function HasRollbackRetaining: boolean;
+    function IsEmbeddedServer: boolean;
     function GetImplementationVersion: string;
 
     {Firebird 3 API}
@@ -492,6 +493,17 @@ end;
 function TFB25ClientAPI.HasRollbackRetaining: boolean;
 begin
   Result := assigned(isc_rollback_retaining);
+end;
+
+function TFB25ClientAPI.IsEmbeddedServer: boolean;
+begin
+  Result := false;
+{$IFDEF UNIX}
+  Result := Pos('libfbembed',FFBLibraryName) = 1;
+{$ENDIF}
+{$IFDEF WINDOWS}
+  Result := CompareText(FFBLibraryName,FIREBIRD_EMBEDDED) = 0;
+{$ENDIF}
 end;
 
 function TFB25ClientAPI.HasMasterIntf: boolean;

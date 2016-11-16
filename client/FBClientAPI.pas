@@ -103,9 +103,11 @@ type
 
   TFBClientAPI = class(TFBInterfacedObject)
   private
-    FFBLibraryName: string; static;
+    FOwnsIBLibrary: boolean;
     procedure LoadIBLibrary;
   protected
+    FFBLibraryName: string; static;
+    FFBLibraryPath: string; static;
     IBLibrary: TLibHandle; static;
     function GetProcAddr(ProcName: PChar): Pointer;
     function GetOverrideLibName: string;
@@ -265,7 +267,7 @@ const
 constructor TFBClientAPI.Create;
 begin
   inherited Create;
-  IBLibrary := NilHandle;
+  //IBLibrary := NilHandle;
   LoadIBLibrary;
   if (IBLibrary <> NilHandle) then
     LoadInterface;
@@ -275,7 +277,7 @@ end;
 destructor TFBClientAPI.Destroy;
 begin
   FirebirdClientAPI := nil;
-  if IBLibrary <> NilHandle then
+  if FOwnsIBLibrary and (IBLibrary <> NilHandle) then
     UnloadLibrary(IBLibrary);
   IBLibrary := NilHandle;
   inherited Destroy;

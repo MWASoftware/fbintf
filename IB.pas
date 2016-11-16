@@ -999,6 +999,7 @@ type
     function GetStatus: IStatus;
     function GetLibraryName: string;
     function HasRollbackRetaining: boolean;
+    function IsEmbeddedServer: boolean;
     function GetImplementationVersion: string;
 
     {Firebird 3 API}

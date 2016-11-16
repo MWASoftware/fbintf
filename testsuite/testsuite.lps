@@ -213,7 +213,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="146"/>
         <CursorPos X="50" Y="169"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit21>
       <Unit22>
         <Filename Value="../2.5/FB25Statement.pas"/>
@@ -234,7 +234,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="34"/>
         <CursorPos X="31" Y="60"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit24>
       <Unit25>
         <Filename Value="../2.5/FB25Services.pas"/>
@@ -288,7 +288,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="1100"/>
         <CursorPos X="9" Y="1109"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit31>
       <Unit32>
         <Filename Value="../include/consts_pub.inc"/>
@@ -316,7 +316,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="75"/>
         <CursorPos X="43" Y="103"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit34>
       <Unit35>
         <Filename Value="../2.5/FB25ParamBlock.pas"/>
@@ -329,7 +329,7 @@
           <TopLine Value="28"/>
           <CursorPos X="17" Y="43"/>
         </ExtraEditor1>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit35>
       <Unit36>
         <Filename Value="../../ibx/runtime/IBBatchMove.pas"/>
@@ -660,14 +660,14 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="222"/>
         <CursorPos X="26" Y="235"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit76>
       <Unit77>
         <Filename Value="/usr/share/fpcsrc/rtl/inc/objpas.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="861"/>
         <CursorPos X="11" Y="870"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit77>
       <Unit78>
         <Filename Value="../../ibxframwork/source/BaseFormUnit.pas"/>
@@ -712,14 +712,14 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="6"/>
         <CursorPos X="10" Y="29"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit83>
       <Unit84>
         <Filename Value="/usr/share/fpcsrc/rtl/objpas/sysutils/sysuintf.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="75"/>
         <CursorPos X="47" Y="77"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit84>
       <Unit85>
         <Filename Value="/usr/share/fpcsrc/rtl/inc/systemh.inc"/>
