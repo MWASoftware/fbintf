@@ -78,7 +78,8 @@ type
 
     {Array}
     function OpenArray(transaction: ITransaction; RelationName, ColumnName: string; ArrayID: TISC_QUAD): IArray;
-    function CreateArray(transaction: ITransaction; RelationName, ColumnName: string): IArray;
+    function CreateArray(transaction: ITransaction; RelationName, ColumnName: string): IArray; overload;
+    function CreateArray(transaction: ITransaction; ArrayMetaData: IArrayMetaData): IArray; overload;
 
     {Database Information}
     function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: string): IBlobMetaData;
@@ -308,6 +309,13 @@ begin
   CheckHandle;
   Result := TFB30Array.Create(self,transaction as TFB30Transaction,
                     GetArrayMetaData(transaction,RelationName,ColumnName));
+end;
+
+function TFB30Attachment.CreateArray(transaction: ITransaction;
+  ArrayMetaData: IArrayMetaData): IArray;
+begin
+  CheckHandle;
+  Result := TFB30Array.Create(self,transaction as TFB30Transaction,ArrayMetaData);
 end;
 
 function TFB30Attachment.GetBlobMetaData(Transaction: ITransaction; tableName,

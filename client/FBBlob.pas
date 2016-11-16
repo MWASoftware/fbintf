@@ -48,6 +48,7 @@ type
     FRelationName: string;
     FColumnName: string;
   protected
+    FUnconfirmedCharacterSet: boolean;
     FHasSubType: boolean;
     FSubType: integer;
     FCharSetID: cardinal;
@@ -66,6 +67,7 @@ type
    function GetSegmentSize: cardinal;
    function GetRelationName: string;
    function GetColumnName: string;
+   function GetUnconfirmedCharacterSet: boolean;
   end;
 
   TFBBlob = class(TActivityReporter)
@@ -98,6 +100,7 @@ type
    function GetSegmentSize: cardinal;
    function GetRelationName: string;
    function GetColumnName: string;
+   function GetUnconfirmedCharacterSet: boolean;
 
    {IBlob}
     function GetBPB: IBPB;
@@ -196,6 +199,11 @@ end;
 function TFBBlob.GetColumnName: string;
 begin
   Result := FMetaData.GetColumnName;
+end;
+
+function TFBBlob.GetUnconfirmedCharacterSet: boolean;
+begin
+  Result := (FMetadata as TFBBlobMetadata).GetUnconfirmedCharacterSet;
 end;
 
 function TFBBlob.GetBPB: IBPB;
@@ -315,6 +323,9 @@ procedure TFBBlob.SetAsString(aValue: rawbytestring);
 var
   ss: TStringStream;
 begin
+  {if GetUnconfirmedCharacterSet then
+    IBError(ibxeNoDefaultCharacterSet,[nil]);}
+
   if (GetSubType = 1) and  (StringCodePage(aValue) <> GetCodePage) and
            (GetCodePage <> CP_NONE) and (FBPB = nil) then
     SetCodePage(aValue,GetCodePage,true);
@@ -385,6 +396,12 @@ end;
 function TFBBlobMetaData.GetColumnName: string;
 begin
   Result := FColumnName;
+end;
+
+function TFBBlobMetaData.GetUnconfirmedCharacterSet: boolean;
+begin
+  NeedFullMetadata;
+  Result := FUnconfirmedCharacterSet;
 end;
 
 

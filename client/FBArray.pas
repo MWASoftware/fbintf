@@ -164,6 +164,16 @@ type
     procedure TransactionEnding(aTransaction: ITransaction; Force: boolean);
 
    public
+    {IArrayMetaData}
+    function GetSQLType: cardinal;
+    function GetSQLTypeName: string;
+    function GetScale: integer;
+    function GetSize: cardinal;
+    function GetCharSetID: cardinal;
+    function GetTableName: string;
+    function GetColumnName: string;
+    function GetDimensions: integer;
+    function GetBounds: TArrayBounds;
     {IArray}
     function GetArrayID: TISC_QUAD;
     procedure Clear;
@@ -171,7 +181,6 @@ type
     procedure PreLoad;
     procedure CancelChanges;
     procedure SaveChanges;
-    function GetMetaData: IArrayMetaData;
     function GetAsInteger(index: array of integer): integer;
     function GetAsBoolean(index: array of integer): boolean;
     function GetAsCurrency(index: array of integer): Currency;
@@ -334,6 +343,15 @@ var len: integer;
 begin
   CheckActive;
   case GetSQLType of
+  SQL_BOOLEAN:
+    if CompareText(Value,STrue) = 0 then
+      AsBoolean := true
+    else
+    if CompareText(Value,SFalse) = 0 then
+      AsBoolean := false
+    else
+      IBError(ibxeInvalidDataConversion,[nil]);
+
   SQL_VARYING:
     begin
       Value := Transliterate(Value,GetCodePage);
@@ -727,11 +745,6 @@ begin
   PutArraySlice;
 end;
 
-function TFBArray.GetMetaData: IArrayMetaData;
-begin
-  Result := FMetaData;
-end;
-
 function TFBArray.GetSQLDialect: integer;
 begin
   Result := FSQLDialect;
@@ -742,6 +755,51 @@ procedure TFBArray.TransactionEnding(aTransaction: ITransaction; Force: boolean
 begin
   if (aTransaction = FTransactionIntf) and FModified and not FIsNew then
     PutArraySlice(Force);
+end;
+
+function TFBArray.GetSQLType: cardinal;
+begin
+  Result := FMetaData.GetSQLType;
+end;
+
+function TFBArray.GetSQLTypeName: string;
+begin
+  Result := FMetaData.GetSQLTypeName;
+end;
+
+function TFBArray.GetScale: integer;
+begin
+  Result := FMetaData.GetScale;
+end;
+
+function TFBArray.GetSize: cardinal;
+begin
+  Result := FMetaData.GetSize;
+end;
+
+function TFBArray.GetCharSetID: cardinal;
+begin
+  Result := FMetaData.GetCharSetID;
+end;
+
+function TFBArray.GetTableName: string;
+begin
+  Result := FMetaData.GetTableName;
+end;
+
+function TFBArray.GetColumnName: string;
+begin
+  Result := FMetaData.GetColumnName;
+end;
+
+function TFBArray.GetDimensions: integer;
+begin
+  Result := FMetaData.GetDimensions;
+end;
+
+function TFBArray.GetBounds: TArrayBounds;
+begin
+  Result := FMetaData.GetBounds;
 end;
 
 function TFBArray.GetAsInteger(index: array of integer): integer;

@@ -134,6 +134,7 @@ begin
 
   FCharSetID := 0;
   FSegmentSize := 80;
+  FUnconfirmedCharacterSet := false;
   if (GetColumnName <> '') and (GetRelationName <> '') then
   begin
     with Firebird25ClientAPI do
@@ -143,10 +144,15 @@ begin
     FCharSetID := BlobDesc.blob_desc_charset;
     FSubType := BlobDesc.blob_desc_subtype;
     FSegmentSize := BlobDesc.blob_desc_segment_size ;
-  end;
+  end
+  else
+    FUnconfirmedCharacterSet := true;
 
   if (FCharSetID > 1) and FAttachment.HasDefaultCharSet then
+  begin
     FCharSetID := FAttachment.CharSetID;
+    FUnconfirmedCharacterSet := false;
+  end;
 
 
   FHasFullMetaData := true;

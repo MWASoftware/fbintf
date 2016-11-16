@@ -231,14 +231,13 @@ type
   IArray = interface;
   TArrayEventHandler = procedure(Sender: IArray; Reason: TArrayEventReason) of object;
 
-  IArray = interface
+  IArray = interface(IArrayMetaData)
     function GetArrayID: TISC_QUAD;
     procedure Clear;
     function IsEmpty: boolean;
     procedure PreLoad;
     procedure CancelChanges;
     procedure SaveChanges;
-    function GetMetaData: IArrayMetaData;
     function GetAsInteger(index: array of integer): integer;
     function GetAsBoolean(index: array of integer): boolean;
     function GetAsCurrency(index: array of integer): Currency;
@@ -834,7 +833,8 @@ type
     {Array - may use to open existing arrays. However, ISQLData.AsArray is preferred}
 
     function OpenArray(transaction: ITransaction; RelationName, ColumnName: string; ArrayID: TISC_QUAD): IArray;
-    function CreateArray(transaction: ITransaction; RelationName, ColumnName: string): IArray;
+    function CreateArray(transaction: ITransaction; RelationName, ColumnName: string): IArray; overload;
+    function CreateArray(transaction: ITransaction; ArrayMetaData: IArrayMetaData): IArray; overload;
 
     {Database Information}
     function GetSQLDialect: integer;

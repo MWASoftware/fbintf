@@ -247,8 +247,8 @@ begin
         SDLItem.addShortInteger(array_desc_length);
     end;
 
-    FSDL.Add(isc_sdl_relation).SetAsString(GetMetaData.GetTableName);
-    FSDL.Add(isc_sdl_field).SetAsString(GetMetaData.GetColumnName);
+    FSDL.Add(isc_sdl_relation).SetAsString(GetTableName);
+    FSDL.Add(isc_sdl_field).SetAsString(GetColumnName);
 
     for i := 0 to array_desc_dimensions - 1 do
     begin

@@ -370,7 +370,7 @@ type
     procedure SetAsFloat(AValue: Float);
     procedure SetAsPointer(AValue: Pointer);
     procedure SetAsShort(AValue: Short);
-    procedure SetAsString(AValue: String);
+    procedure SetAsString(AValue: String); override;
     procedure SetAsVariant(AValue: Variant);
     procedure SetAsBlob(aValue: IBlob);
     procedure SetAsQuad(AValue: TISC_QUAD);
@@ -1222,6 +1222,12 @@ begin
   if not IsNull then
   with FirebirdClientAPI do
     case SQLType of
+      SQL_BOOLEAN:
+        if AsBoolean then
+          Result := sTrue
+        else
+          Result := SFalse;
+
       SQL_TEXT, SQL_VARYING:
       begin
         sz := SQLData;
@@ -1754,6 +1760,15 @@ begin
   if IsNullable then
     IsNull := False;
   case SQLTYPE of
+  SQL_BOOLEAN:
+    if CompareText(Value,STrue) = 0 then
+      AsBoolean := true
+    else
+    if CompareText(Value,SFalse) = 0 then
+      AsBoolean := false
+    else
+      IBError(ibxeInvalidDataConversion,[nil]);
+
   SQL_BLOB:
     begin
       Changing;

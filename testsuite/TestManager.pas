@@ -267,8 +267,8 @@ var Bounds: TArrayBounds;
     i,j: integer;
 begin
   write('Array: ');
-  Bounds := ar.GetMetaData.GetBounds;
-  case ar.GetMetaData.GetDimensions of
+  Bounds := ar.GetBounds;
+  case ar.GetDimensions of
   1:
     begin
       for i := Bounds[0].LowerBound to Bounds[0].UpperBound do

@@ -328,9 +328,7 @@ begin
 
   SQL_BLOB:
     if (SQLSubType = 1) and (FRelationName <> '') and (FFieldName <> '') then
-      result := GetBlobMetaData.GetCharSetID
-    else
-      result := FCharSetID;
+      result := GetBlobMetaData.GetCharSetID;
 
   SQL_ARRAY:
     if (FRelationName <> '') and (FFieldName <> '') then

@@ -231,7 +231,8 @@ type
       ibxeMissingColumnName,
       ibxStringTooLong,
       ibxFieldNotinDataSet,
-      ibxeNotCurrentArray
+      ibxeNotCurrentArray,
+      ibxeNoDefaultCharacterSet
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;
@@ -254,6 +255,8 @@ resourcestring
   SDefaultTransaction = '%s, Default';
   SFirebirdAPIFuncNotFound = 'Unable to load Firebird Client Library Function "%s"';
   SDatabaseFilter = 'Database Files (*.fdb; *.gdb)|*.gdb; *.fdb|All files (*.*)|*.*';
+  STrue = 'true';
+  SFalse = 'false';
 
 implementation
 
@@ -417,6 +420,7 @@ resourcestring
   SStringTooLong = 'String "%s" is too long. Max %d characters';
   SFieldNotinDataSet = 'Field %s is not a member of DataSet %s';
   SNotCurrentArray = 'Cannot Edit an Array that is not part of the current record';
+  SNoDefaultCharacterSet = 'A connection default character set is required to perform this operation';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -573,7 +577,8 @@ const
     SMissingColumnName,
     SStringTooLong,
     SFieldNotinDataSet,
-    SNotCurrentArray
+    SNotCurrentArray,
+    SNoDefaultCharacterSet
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;
