@@ -60,6 +60,7 @@ type
     FMaster: Firebird.IMaster;
     FUtil: Firebird.IUtil;
     FProvider: Firebird.IProvider;
+    FConfigManager: Firebird.IConfigManager;
     FStatus: TFB30Status;
     FStatusIntf: IStatus;   {Keep a reference to the interface - automatic destroy
                              when this class is freed and last reference to IStatus
@@ -178,6 +179,7 @@ begin
     FMaster := fb_get_master_interface;
     FUtil := FMaster.getUtilInterface;
     FProvider := FMaster.getDispatcher;
+    FConfigManager := FMaster.getConfigManager;
   end;
 end;
 
@@ -288,8 +290,26 @@ begin
 end;
 
 function TFB30ClientAPI.IsEmbeddedServer: boolean;
+var FBConf: Firebird.IFirebirdConf;
+    Plugins: string;
+    PluginsList: TStringList;
 begin
-  Result := true;
+  Result := false;
+  FBConf := FConfigManager.getFirebirdConf;
+  try
+    Plugins := FBConf.asString(FBConf.getKey('Plugins'));
+  finally
+    FBConf.release;
+  end;
+  if Plugins = '' then Exit;
+
+  PluginsList := TStringList.Create;
+  try
+    PluginsList.CommaText := Plugins;
+    Result := PluginsList.IndexOf('Engine12') <> -1;
+  finally
+    PluginsList.Free;
+  end;
 end;
 
 function TFB30ClientAPI.GetImplementationVersion: string;
