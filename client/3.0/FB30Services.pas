@@ -62,8 +62,9 @@ type
     procedure Detach(Force: boolean=false);
     function IsAttached: boolean;
     function AllocateRequestBuffer: ISRB;
+    function AllocateSendBlock: ISendBlock;
     procedure Start(Request: ISRB);
-    function Query(Request: ISRB) :IServiceQueryResults;
+    function Query(SendBlock: ISendBlock; Request: ISRB): IServiceQueryResults;
   end;
 
 implementation
@@ -160,6 +161,11 @@ begin
   Result := TSRB.Create;
 end;
 
+function TFBServiceManager.AllocateSendBlock: ISendBlock;
+begin
+  Result := TSendBlock.Create;
+end;
+
 procedure TFBServiceManager.Start(Request: ISRB);
 begin
   CheckActive;
@@ -172,7 +178,8 @@ begin
     end;
 end;
 
-function TFBServiceManager.Query(Request: ISRB): IServiceQueryResults;
+function TFBServiceManager.Query(SendBlock: ISendBlock; Request: ISRB
+  ): IServiceQueryResults;
 var QueryResults: TServiceQueryResults;
 begin
   CheckActive;
@@ -180,7 +187,19 @@ begin
   Result := QueryResults;
   with Firebird30ClientAPI do
   begin
-    FServiceIntf.query(StatusIntf, 0, nil,
+    if SendBlock = nil then
+    begin
+      FServiceIntf.query(StatusIntf,
+                         (SendBlock as TSendBlock).getDataLength,
+                         BytePtr((SendBlock as TSendBlock).getBuffer),
+                         (Request as TSRB).getDataLength,
+                         BytePtr((Request as TSRB).getBuffer),
+                         QueryResults.getBufSize,
+                         BytePtr(QueryResults.Buffer));
+        Check4DataBaseError;
+    end
+    else
+     FServiceIntf.query(StatusIntf, 0, nil,
                        (Request as TSRB).getDataLength,
                        BytePtr((Request as TSRB).getBuffer),
                        QueryResults.getBufSize,

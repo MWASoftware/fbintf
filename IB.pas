@@ -877,6 +877,34 @@ type
     property Items[index: integer]: ISPBItem read getItems; default;
   end;
 
+  {Send Data Block.
+
+   This is a specialised parameter block used to send data to a service manager
+   in a Query Request.
+  }
+
+  ISendBlockItem = interface
+    function getParamType: byte;
+    function getAsString: string;
+    function getAsInteger: integer;
+    function getAsByte: byte;
+    procedure setAsString(aValue: string);
+    procedure SetAsInteger(aValue: integer);
+    procedure setAsByte(aValue: byte);
+    procedure SetData(source: TStream; count: integer; out bytesOut: integer);
+    property AsString: string read getAsString write setAsString;
+    property AsInteger: integer read getAsInteger write SetAsInteger;
+    property AsByte: byte read getAsByte write setAsByte;
+  end;
+
+  ISendBlock = interface
+    function getCount: integer;
+    function Add(ParamType: byte): ISendBlockItem;
+    function getItems(index: integer): ISendBlockItem;
+    function Find(ParamType: byte): ISendBlockItem;
+    property Items[index: integer]: ISendBlockItem read getItems; default;
+  end;
+
   {Service Request Block (SRB).
 
    The SRB specifies what is requested from the Service Manager when starting a
@@ -893,10 +921,13 @@ type
     function getParamType: byte;
     function getAsString: string;
     function getAsInteger: integer;
+    function getAsByte: byte;
     procedure setAsString(aValue: string);
     procedure SetAsInteger(aValue: integer);
+    procedure setAsByte(aValue: byte);
     property AsString: string read getAsString write setAsString;
     property AsInteger: integer read getAsInteger write SetAsInteger;
+    property AsByte: byte read getAsByte write setAsByte;
   end;
 
   ISRB = interface
@@ -965,8 +996,9 @@ type
     procedure Detach(Force: boolean=false);
     function IsAttached: boolean;
     function AllocateRequestBuffer: ISRB;
+    function AllocateSendBlock: ISendBlock;
     procedure Start(Request: ISRB);
-    function Query(Request: ISRB) :IServiceQueryResults;
+    function Query(SendBlock: ISendBlock; Request: ISRB) :IServiceQueryResults;
   end;
 
   {The Firebird API.

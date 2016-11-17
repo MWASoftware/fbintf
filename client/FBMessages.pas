@@ -232,7 +232,8 @@ type
       ibxStringTooLong,
       ibxFieldNotinDataSet,
       ibxeNotCurrentArray,
-      ibxeNoDefaultCharacterSet
+      ibxeNoDefaultCharacterSet,
+      ibxeParamBufferOverflow
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;
@@ -421,6 +422,7 @@ resourcestring
   SFieldNotinDataSet = 'Field %s is not a member of DataSet %s';
   SNotCurrentArray = 'Cannot Edit an Array that is not part of the current record';
   SNoDefaultCharacterSet = 'A connection default character set is required to perform this operation';
+  SParamBufferOverflow = 'Parameter Buffer Overflow';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -578,7 +580,8 @@ const
     SStringTooLong,
     SFieldNotinDataSet,
     SNotCurrentArray,
-    SNoDefaultCharacterSet
+    SNoDefaultCharacterSet,
+    SParamBufferOverflow
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;

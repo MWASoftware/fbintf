@@ -329,7 +329,7 @@ begin
 end;
 
 function TOutputBlockItem.getAsString: string;
-var len: byte;
+var len: integer;
 begin
   Result := '';
   with FItemData^ do

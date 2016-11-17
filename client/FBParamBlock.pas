@@ -39,7 +39,7 @@ uses
   Classes, SysUtils, IB, FBClientAPI, FBActivityMonitor;
 
 type
-  TParamDataType = (dtString, dtString2, dtByte, dtInteger,
+  TParamDataType = (dtString, dtString2, dtByte, dtByte2, dtInteger,
                     dtShortInteger,dtTinyInteger,dtnone);
 
   PParamBlockItemData = ^TParamBlockItemData;
@@ -74,6 +74,7 @@ type
     destructor Destroy; override;
     function getBuffer: PChar;
     function getDataLength: integer;
+    function AvailableBufferSpace: integer;
 
   public
     function getCount: integer;
@@ -100,6 +101,7 @@ type
      procedure addByte(aValue: byte);
      procedure addShortInteger(aValue: integer);
      procedure setAsByte(aValue: byte);
+     procedure setAsByte2(aValue: byte);
      procedure SetAsInteger(aValue: integer);
      procedure SetAsShortInteger(aValue: integer);
      procedure SetAsTinyInteger(aValue: integer);
@@ -161,6 +163,22 @@ type
    function getItems(index: integer): ISRBItem;
   end;
 
+  { TSendBlock }
+
+  TSendBlock = class(TParamBlock,ISendBlock)
+  public
+   function Add(ParamType: byte): ISendBlockItem;
+   function Find(ParamType: byte): ISendBlockItem;
+   function getItems(index: integer): ISendBlockItem;
+  end;
+
+  { TSendBlockItem }
+
+  TSendBlockItem = class(TParamBlockItem,ISendBlockItem)
+  public
+   procedure SetData(source: TStream; count: integer; out bytesOut: integer);
+  end;
+
   { TSPBItem }
 
   TSPBItem = class(TParamBlockItem,ISPBItem);
@@ -170,6 +188,7 @@ type
   TSRBItem = class(TParamBlockItem,ISRBItem)
   public
     function ISRBItem.SetAsString = SetAsString2;
+    function ISRBItem.SetAsByte = SetAsByte2;
   end;
 
   { TBPBItem }
@@ -195,6 +214,60 @@ type
 implementation
 
 uses FBMessages;
+
+const
+  MaxBufferSize = 65535;
+
+{ TSendBlockItem }
+
+procedure TSendBlockItem.SetData(source: TStream; count: integer; out
+  bytesOut: integer);
+var buff: pointer;
+begin
+  if count > (FOwner.AvailableBufferSpace - 4) then
+    count := FOwner.AvailableBufferSpace - 4;
+  GetMem(buff,count);
+  try
+    bytesOut := source.Read(buff^,count);
+    with FParamData^ do
+    begin
+      FOwner.UpdateRequestItemSize(self,bytesOut + 4);
+      with FirebirdClientAPI do
+        EncodeInteger(bytesOut,2,FBufPtr+1);
+      if bytesOut > 0 then
+        Move(buff^,(FBufPtr+3)^,bytesOut);
+      (FBufPtr+bytesOut + 3)^ := chr(isc_info_end);
+      FDataType := dtString2;
+    end;
+  finally
+    FreeMem(buff);
+  end;
+end;
+
+{ TSendBlock }
+
+function TSendBlock.Add(ParamType: byte): ISendBlockItem;
+var Item: PParamBlockItemData;
+begin
+  Item := inherited Add(ParamType);
+  Result := TSendBlockItem.Create(self,Item);
+end;
+
+function TSendBlock.Find(ParamType: byte): ISendBlockItem;
+var Item: PParamBlockItemData;
+begin
+  Result := nil;
+  Item := inherited Find(ParamType);
+  if Item <> nil then
+    Result := TSendBlockItem.Create(self,Item);
+end;
+
+function TSendBlock.getItems(index: integer): ISendBlockItem;
+var Item: PParamBlockItemData;
+begin
+  Item := inherited getItems(index);
+  Result := TSendBlockItem.Create(self,Item);
+end;
 
 { TBPBItem }
 
@@ -322,6 +395,9 @@ begin
   if FDataType = dtByte then
     Result := byte((FBufPtr+2)^)
   else
+  if FDataType = dtByte2 then
+    Result := byte((FBufPtr+1)^)
+  else
     IBError(ibxePBParamTypeError,[nil]);
 end;
 
@@ -360,7 +436,18 @@ begin
       FOwner.UpdateRequestItemSize(self,3);
     FDataType := dtByte;
     (FBufPtr+1)^ := #1;
-    (FBufPtr+2)^ := char(aValue);
+    (FBufPtr+2)^ := chr(aValue);
+  end;
+end;
+
+procedure TParamBlockItem.setAsByte2(aValue: byte);
+begin
+  with FParamData^ do
+  begin
+    if FBufLength <> 2 then
+      FOwner.UpdateRequestItemSize(self,2);
+    FDataType := dtByte2;
+    (FBufPtr+1)^ := chr(aValue);
   end;
 end;
 
@@ -487,6 +574,8 @@ begin
   Item.FParamData^.FBufLength := NewSize;
   if delta > 0 then
   begin
+    if FDataLength + delta > MaxBufferSize then
+      IBError(ibxeParamBufferOverflow,[nil]);
     FDataLength += delta;
     AdjustBuffer;
     i := Length(FItems) - 1;
@@ -544,6 +633,11 @@ end;
 function TParamBlock.getDataLength: integer;
 begin
   Result :=  FDataLength
+end;
+
+function TParamBlock.AvailableBufferSpace: integer;
+begin
+  Result := MaxBufferSize - FDataLength;
 end;
 
 function TParamBlock.Add(ParamType: byte): PParamBlockItemData;

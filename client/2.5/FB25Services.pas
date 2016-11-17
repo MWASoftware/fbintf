@@ -97,8 +97,9 @@ type
     procedure Detach(Force: boolean=false);
     function IsAttached: boolean;
     function AllocateRequestBuffer: ISRB;
+    function AllocateSendBlock: ISendBlock;
     procedure Start(Request: ISRB);
-    function Query(Request: ISRB) :IServiceQueryResults;
+    function Query(SendBlock: ISendBlock; Request: ISRB): IServiceQueryResults;
   end;
 
 implementation
@@ -198,6 +199,11 @@ begin
   Result := TSRB.Create;
 end;
 
+function TFBServiceManager.AllocateSendBlock: ISendBlock;
+begin
+  Result := TSendBlock.Create;
+end;
+
 procedure TFBServiceManager.Start(Request: ISRB);
 begin
   CheckActive;
@@ -208,14 +214,27 @@ begin
         IBDataBaseError;
 end;
 
-function TFBServiceManager.Query(Request: ISRB): IServiceQueryResults;
+function TFBServiceManager.Query(SendBlock: ISendBlock; Request: ISRB
+  ): IServiceQueryResults;
 var QueryResults: TServiceQueryResults;
 begin
   CheckActive;
   QueryResults := TServiceQueryResults.Create;
   Result := QueryResults;
   with Firebird25ClientAPI do
-    if isc_service_query(StatusVector, @FHandle, nil, 0, nil,
+    if SendBlock = nil then
+    begin
+      if isc_service_query(StatusVector, @FHandle, nil,0,nil,
+                         (Request as TSRB).getDataLength,
+                         (Request as TSRB).getBuffer,
+                         QueryResults.getBufSize,
+                         QueryResults.Buffer) > 0 then
+        IBDataBaseError;
+    end
+    else
+    if isc_service_query(StatusVector, @FHandle, nil,
+                       (SendBlock as TSendBlock).getDataLength,
+                       (SendBlock as TSendBlock).getBuffer,
                        (Request as TSRB).getDataLength,
                        (Request as TSRB).getBuffer,
                        QueryResults.getBufSize,

@@ -15,6 +15,7 @@ type
   TTestBase = class
   private
     FOwner: TTestManager;
+    FOutputFile: TFileStream;
   protected
     FHexStrings: boolean;
     function ReportResults(Statement: IStatement): IResultSet;
@@ -23,6 +24,7 @@ type
     procedure PrintDPB(DPB: IDPB);
     procedure PrintMetaData(meta: IMetaData);
     procedure ParamInfo(SQLParams: ISQLParams);
+    procedure SelectOutputFile(aFileName: string);
     procedure WriteArray(ar: IArray);
     procedure WriteAffectedRows(Statement: IStatement);
     function WriteServiceQueryResult(QueryResult: IServiceQueryResults): boolean;
@@ -55,6 +57,7 @@ type
     FSecondNewDatabaseName: string;
     FUserName: string;
     FPassword: string;
+    FBackupFileName: string;
   public
     constructor Create;
     destructor Destroy; override;
@@ -63,6 +66,7 @@ type
     function GetEmployeeDatabaseName: string;
     function GetNewDatabaseName: string;
     function GetSecondNewDatabaseName: string;
+    function GetBackupFileName: string;
     procedure RunAll;
     procedure Run(TestID: integer);
   end;
@@ -262,6 +266,11 @@ begin
   end;
 end;
 
+procedure TTestBase.SelectOutputFile(aFileName: string);
+begin
+  FOutputFile := TFileStream.Create(aFileName,fmCreate);
+end;
+
 procedure TTestBase.WriteArray(ar: IArray);
 var Bounds: TArrayBounds;
     i,j: integer;
@@ -328,19 +337,31 @@ begin
     WriteUsers(QueryResult[i]);
   isc_info_svc_svr_db_info:
     WriteDBAttachments(QueryResult[i]);
-  isc_info_svc_line,
-  isc_info_svc_to_eof:
+  isc_info_svc_line:
     begin
       line := getAsString;
       writeln(line);
       Result := line <> '';
     end;
+  isc_info_svc_to_eof:
+    begin
+      line := getAsString;
+      Result := line <> '';
+      if Result then
+        FOutputFile.Write(Line[1],Length(Line))
+      else
+        FreeAndNil(FOutputFile);
+    end;
   isc_info_svc_running:
     writeln('Is Running = ',getAsInteger);
   isc_info_svc_limbo_trans:
     WriteLimboTransactions(QueryResult[i]);
+  isc_info_truncated,
+  isc_info_data_not_ready,
+  isc_info_svc_stdin:
+    Exit; {ignore}
   else
-    writeln('Unknown Service Response Item', getItemType);
+    writeln('Unknown Service Response Item ', getItemType);
   end;
   writeln;
 end;
@@ -584,6 +605,7 @@ begin
   FUserName := 'SYSDBA';
   FPassword := 'masterkey';
   FEmployeeDatabaseName := 'localhost:employee';
+  FBackupFileName := GetTempDir + 'testbackup.gbk';
 end;
 
 destructor TTestManager.Destroy;
@@ -621,6 +643,11 @@ end;
 function TTestManager.GetSecondNewDatabaseName: string;
 begin
   Result := FSecondNewDatabaseName;
+end;
+
+function TTestManager.GetBackupFileName: string;
+begin
+  Result := FBackupFileName;
 end;
 
 procedure TTestManager.RunAll;
