@@ -877,13 +877,13 @@ type
     property Items[index: integer]: ISPBItem read getItems; default;
   end;
 
-  {Send Data Block.
+  {Service Query Parameter Block (SQPB).
 
    This is a specialised parameter block used to send data to a service manager
    in a Query Request.
   }
 
-  ISendBlockItem = interface
+  ISQPBItem = interface
     function getParamType: byte;
     function getAsString: string;
     function getAsInteger: integer;
@@ -891,18 +891,18 @@ type
     procedure setAsString(aValue: string);
     procedure SetAsInteger(aValue: integer);
     procedure setAsByte(aValue: byte);
-    procedure SetData(source: TStream; count: integer; out bytesOut: integer);
+    function CopyFrom(source: TStream; count: integer): integer;
     property AsString: string read getAsString write setAsString;
     property AsInteger: integer read getAsInteger write SetAsInteger;
     property AsByte: byte read getAsByte write setAsByte;
   end;
 
-  ISendBlock = interface
+  ISQPB = interface
     function getCount: integer;
-    function Add(ParamType: byte): ISendBlockItem;
-    function getItems(index: integer): ISendBlockItem;
-    function Find(ParamType: byte): ISendBlockItem;
-    property Items[index: integer]: ISendBlockItem read getItems; default;
+    function Add(ParamType: byte): ISQPBItem;
+    function getItems(index: integer): ISQPBItem;
+    function Find(ParamType: byte): ISQPBItem;
+    property Items[index: integer]: ISQPBItem read getItems; default;
   end;
 
   {Service Request Block (SRB).
@@ -996,9 +996,9 @@ type
     procedure Detach(Force: boolean=false);
     function IsAttached: boolean;
     function AllocateRequestBuffer: ISRB;
-    function AllocateSendBlock: ISendBlock;
+    function AllocateSQPB: ISQPB;
     procedure Start(Request: ISRB);
-    function Query(SendBlock: ISendBlock; Request: ISRB) :IServiceQueryResults;
+    function Query(SQPB: ISQPB; Request: ISRB) :IServiceQueryResults;
   end;
 
   {The Firebird API.

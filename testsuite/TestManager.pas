@@ -347,6 +347,9 @@ begin
     begin
       line := getAsString;
       Result := line <> '';
+      if FOutputFile = nil then
+        writeln(line)
+      else
       if Result then
         FOutputFile.Write(Line[1],Length(Line))
       else
@@ -356,10 +359,11 @@ begin
     writeln('Is Running = ',getAsInteger);
   isc_info_svc_limbo_trans:
     WriteLimboTransactions(QueryResult[i]);
+  isc_info_svc_timeout,
   isc_info_truncated,
   isc_info_data_not_ready,
   isc_info_svc_stdin:
-    Exit; {ignore}
+    {ignore};
   else
     writeln('Unknown Service Response Item ', getItemType);
   end;

@@ -161,7 +161,7 @@ var Req: ISRB;
     BakFile: TFileStream;
     QueryResultsItem: IServiceQueryResultItem;
     ReqLength: integer;
-    SendBlock: ISendBlock;
+    SQPB: ISQPB;
     bytesWritten: integer;
     bytesAvailable: integer;
     i: integer;
@@ -198,8 +198,8 @@ begin
     system.Delete(RestoreDBName,1,i);
   Req := Service.AllocateRequestBuffer;
   Req.Add(isc_action_svc_restore);
-  Req.Add(isc_spb_verbose);
   Req.Add(isc_spb_dbname).AsString := RestoreDBName;
+  Req.Add(isc_spb_verbose);
   Req.Add(isc_spb_bkp_file).AsString := 'stdin';
   Req.Add(isc_spb_res_access_mode).AsByte := isc_spb_prp_am_readwrite;
   Req.Add(isc_spb_options).SetAsInteger(isc_spb_res_create);
@@ -210,22 +210,20 @@ begin
       Service.Start(Req);
       ReqLength := 0;
       repeat
-        SendBlock := nil;
+        SQPB := Service.AllocateSQPB;
+        SQPB.Add(isc_info_svc_timeout).asInteger := 1;  {one second timeout}
         if ReqLength > 0 then
-          begin
-            SendBlock := Service.AllocateSendBlock;
-            SendBlock.Add(isc_info_svc_line).SetData(BakFile,ReqLength,bytesWritten);
-          end;
+            bytesWritten := SQPB.Add(isc_info_svc_line).CopyFrom(BakFile,ReqLength);
         bytesAvailable -= bytesWritten;
         Req := Service.AllocateRequestBuffer;
         Req.Add(isc_info_svc_stdin);
         Req.Add(isc_info_svc_line);
-        Results := Service.Query(SendBlock,Req);
+        Results := Service.Query(SQPB,Req);
         QueryResultsItem := Results.Find(isc_info_svc_stdin);
         if QueryResultsItem <> nil then
           ReqLength := QueryResultsItem.AsInteger;
         WriteServiceQueryResult(Results);
-      until (ReqLength = 0) or (bytesAvailable = 0);
+      until (ReqLength = 0) ;
       writeln('Local Restore Complete');
     except on E: Exception do
       writeln('Local Restore Service: ',E.Message);

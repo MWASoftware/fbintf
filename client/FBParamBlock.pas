@@ -39,7 +39,7 @@ uses
   Classes, SysUtils, IB, FBClientAPI, FBActivityMonitor;
 
 type
-  TParamDataType = (dtString, dtString2, dtByte, dtByte2, dtInteger,
+  TParamDataType = (dtString, dtString2, dtByte, dtByte2, dtInteger,  dtInteger2,
                     dtShortInteger,dtTinyInteger,dtnone);
 
   PParamBlockItemData = ^TParamBlockItemData;
@@ -103,6 +103,7 @@ type
      procedure setAsByte(aValue: byte);
      procedure setAsByte2(aValue: byte);
      procedure SetAsInteger(aValue: integer);
+     procedure SetAsInteger2(aValue: integer);
      procedure SetAsShortInteger(aValue: integer);
      procedure SetAsTinyInteger(aValue: integer);
      procedure SetAsString(aValue: string);
@@ -163,20 +164,21 @@ type
    function getItems(index: integer): ISRBItem;
   end;
 
-  { TSendBlock }
+  { TSQPB }
 
-  TSendBlock = class(TParamBlock,ISendBlock)
+  TSQPB = class(TParamBlock,ISQPB)
   public
-   function Add(ParamType: byte): ISendBlockItem;
-   function Find(ParamType: byte): ISendBlockItem;
-   function getItems(index: integer): ISendBlockItem;
+   function Add(ParamType: byte): ISQPBItem;
+   function Find(ParamType: byte): ISQPBItem;
+   function getItems(index: integer): ISQPBItem;
   end;
 
-  { TSendBlockItem }
+  { TSQPBItem }
 
-  TSendBlockItem = class(TParamBlockItem,ISendBlockItem)
+  TSQPBItem = class(TParamBlockItem,ISQPBItem)
   public
-   procedure SetData(source: TStream; count: integer; out bytesOut: integer);
+   function CopyFrom(source: TStream; count: integer): integer;
+   procedure ISQPBItem.SetAsInteger = SetAsInteger2;
   end;
 
   { TSPBItem }
@@ -218,55 +220,48 @@ uses FBMessages;
 const
   MaxBufferSize = 65535;
 
-{ TSendBlockItem }
+{ TSQPBItem }
 
-procedure TSendBlockItem.SetData(source: TStream; count: integer; out
-  bytesOut: integer);
-var buff: pointer;
+function TSQPBItem.CopyFrom(source: TStream; count: integer): integer;
 begin
   if count > (FOwner.AvailableBufferSpace - 4) then
     count := FOwner.AvailableBufferSpace - 4;
-  GetMem(buff,count);
-  try
-    bytesOut := source.Read(buff^,count);
     with FParamData^ do
     begin
-      FOwner.UpdateRequestItemSize(self,bytesOut + 4);
+      FOwner.UpdateRequestItemSize(self,count + 4);
+      Result := source.Read((FBufPtr+3)^,count);
       with FirebirdClientAPI do
-        EncodeInteger(bytesOut,2,FBufPtr+1);
-      if bytesOut > 0 then
-        Move(buff^,(FBufPtr+3)^,bytesOut);
-      (FBufPtr+bytesOut + 3)^ := chr(isc_info_end);
+        EncodeInteger(Result,2,FBufPtr+1);
+      (FBufPtr+Result + 3)^ := chr(isc_info_end);
+      if Result <> count then
+        FOwner.UpdateRequestItemSize(self,Result + 4);
       FDataType := dtString2;
     end;
-  finally
-    FreeMem(buff);
-  end;
 end;
 
-{ TSendBlock }
+{ TSQPB }
 
-function TSendBlock.Add(ParamType: byte): ISendBlockItem;
+function TSQPB.Add(ParamType: byte): ISQPBItem;
 var Item: PParamBlockItemData;
 begin
   Item := inherited Add(ParamType);
-  Result := TSendBlockItem.Create(self,Item);
+  Result := TSQPBItem.Create(self,Item);
 end;
 
-function TSendBlock.Find(ParamType: byte): ISendBlockItem;
+function TSQPB.Find(ParamType: byte): ISQPBItem;
 var Item: PParamBlockItemData;
 begin
   Result := nil;
   Item := inherited Find(ParamType);
   if Item <> nil then
-    Result := TSendBlockItem.Create(self,Item);
+    Result := TSQPBItem.Create(self,Item);
 end;
 
-function TSendBlock.getItems(index: integer): ISendBlockItem;
+function TSQPB.getItems(index: integer): ISQPBItem;
 var Item: PParamBlockItemData;
 begin
   Item := inherited getItems(index);
-  Result := TSendBlockItem.Create(self,Item);
+  Result := TSQPBItem.Create(self,Item);
 end;
 
 { TBPBItem }
@@ -352,6 +347,8 @@ begin
     Result := DecodeInteger(FBufPtr+1,2);
   dtTinyInteger:
     Result := DecodeInteger(FBufPtr+1,1);
+  dtInteger2:
+    Result := DecodeInteger(FBufPtr+2,4);
   else
     IBError(ibxePBParamTypeError,[nil]);
   end;
@@ -460,6 +457,21 @@ begin
     with FirebirdClientAPI do
       EncodeInteger(aValue,4,FBufPtr+1);
     FDataType := dtInteger;
+  end;
+end;
+
+procedure TParamBlockItem.SetAsInteger2(aValue: integer);
+begin
+  with FParamData^ do
+  begin
+    if FBufLength <> 6 then
+      FOwner.UpdateRequestItemSize(self,7);
+    with FirebirdClientAPI do
+    begin
+      EncodeInteger(4,2,FBufPtr+1); {Encode length as two bytes}
+      EncodeInteger(aValue,4,FBufPtr+3);
+    end;
+    FDataType := dtInteger2
   end;
 end;
 
