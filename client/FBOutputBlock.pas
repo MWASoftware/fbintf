@@ -100,6 +100,7 @@ type
     function GetCount: integer;
     function GetItem(index: integer): POutputBlockItemData;
     function Find(ItemType: byte): POutputBlockItemData;
+    property Count: integer read GetCount;
     property Items[index: integer]: POutputBlockItemData read getItem; default;
   end;
 
@@ -128,6 +129,15 @@ type
     function getAsBytes: TByteArray;
   end;
 
+  { TCustomOutputBlock }
+
+  generic TCustomOutputBlock<_TItem,_IItem> = class(TOutputBlock)
+  public
+    function getItem(index: integer): _IItem;
+    function find(ItemType: byte): _IItem;
+    property Items[index: integer]: _IItem read getItem; default;
+  end;
+
   { TOutputBlockItemGroup }
 
   TOutputBlockItemGroup = class(TOutputBlockItem)
@@ -152,17 +162,12 @@ type
 
   { TDBInformation }
 
-  TDBInformation = class(TOutputBlock,IDBInformation)
+  TDBInformation = class(specialize TCustomOutputBlock<TDBInfoItem,IDBInfoItem>, IDBInformation)
   protected
     function AddSpecialItem(BufPtr: PChar): POutputBlockItemData; override;
     procedure DoParseBuffer; override;
   public
     constructor Create(aSize: integer=DBInfoDefaultBufferSize);
-
-  public
-    {IDBInformation}
-    function GetItem(index: integer): IDBInfoItem;
-    function Find(ItemType: byte): IDBInfoItem;
   end;
 
   TServiceQueryResultSubItem = class(TOutputBlockItem,IServiceQueryResultSubItem);
@@ -177,16 +182,11 @@ type
 
   { TServiceQueryResults }
 
-  TServiceQueryResults = class(TOutputBlock,IServiceQueryResults)
+  TServiceQueryResults = class(specialize TCustomOutputBlock<TServiceQueryResultItem,IServiceQueryResultItem>, IServiceQueryResults)
   protected
     function AddListItem(BufPtr: PChar): POutputBlockItemData; override;
     function AddSpecialItem(BufPtr: PChar): POutputBlockItemData; override;
     procedure DoParseBuffer; override;
-  public
-    {IServiceQueryResults}
-    function getItem(index: integer): IServiceQueryResultItem;
-    function find(ItemType: byte): IServiceQueryResultItem;
-    property Items[index: integer]: IServiceQueryResultItem read getItem; default;
   end;
 
   { ISQLInfoItem }
@@ -213,20 +213,6 @@ type
     property Items[index: integer]: ISQLInfoItem read getItem; default;
   end;
 
-  { TSQLInfoResultsBuffer }
-
-  TSQLInfoResultsBuffer = class(TOutputBlock,ISQLInfoResults)
-  protected
-    function AddListItem(BufPtr: PChar): POutputBlockItemData; override;
-    procedure DoParseBuffer; override;
-  public
-    constructor Create(aSize: integer = 1024);
-    function GetItem(index: integer): ISQLInfoItem;
-    function Find(ItemType: byte): ISQLInfoItem;
-    property Count: integer read GetCount;
-    property Items[index: integer]: ISQLInfoItem read getItem; default;
-  end;
-
   { TSQLInfoResultsItem }
 
   TSQLInfoResultsItem = class(TOutputBlockItemGroup,ISQLInfoItem)
@@ -234,9 +220,35 @@ type
     function Find(ItemType: byte): ISQLInfoItem;
   end;
 
+  { TSQLInfoResultsBuffer }
+
+  TSQLInfoResultsBuffer = class(specialize TCustomOutputBlock<TSQLInfoResultsItem,ISQLInfoItem>, ISQLInfoResults)
+  protected
+    function AddListItem(BufPtr: PChar): POutputBlockItemData; override;
+    procedure DoParseBuffer; override;
+  public
+    constructor Create(aSize: integer = 1024);
+  end;
+
 implementation
 
 uses FBMessages;
+
+{ TCustomOutputBlock }
+
+function TCustomOutputBlock.getItem(index: integer): _IItem;
+var P: POutputBlockItemData;
+begin
+  P := inherited getItem(index);
+  Result := _TItem.Create(self,P)
+end;
+
+function TCustomOutputBlock.find(ItemType: byte): _IItem;
+var P: POutputBlockItemData;
+begin
+  P := inherited Find(ItemType);
+  Result := _TItem.Create(self,P)
+end;
 
 { TOutputBlockItemGroup }
 
@@ -796,20 +808,6 @@ begin
   FIntegerType := dtInteger;
 end;
 
-function TDBInformation.GetItem(index: integer): IDBInfoItem;
-var P: POutputBlockItemData;
-begin
-  P := inherited getItem(index);
-  Result := TDBInfoItem.Create(self,P)
-end;
-
-function TDBInformation.Find(ItemType: byte): IDBInfoItem;
-var P: POutputBlockItemData;
-begin
-  P := inherited Find(ItemType);
-  Result := TDBInfoItem.Create(self,P)
-end;
-
 { TServiceQueryResultItem }
 
 function TServiceQueryResultItem.getItem(index: integer
@@ -998,23 +996,6 @@ begin
   end;
 end;
 
-function TServiceQueryResults.getItem(index: integer): IServiceQueryResultItem;
-var P: POutputBlockItemData;
-begin
-  P := inherited getItem(index);
-  Result := TServiceQueryResultItem.Create(self,P)
-end;
-
-function TServiceQueryResults.find(ItemType: byte): IServiceQueryResultItem;
-var P: POutputBlockItemData;
-begin
-  P := inherited find(ItemType);
-  if P = nil then
-    Result := nil
-  else
-    Result := TServiceQueryResultItem.Create(self,P);
-end;
-
 { TSQLInfoResultsItem }
 
 function TSQLInfoResultsItem.GetItem(index: integer): ISQLInfoItem;
@@ -1123,20 +1104,6 @@ constructor TSQLInfoResultsBuffer.Create(aSize: integer);
 begin
   inherited Create(aSize);
   FIntegerType := dtInteger;
-end;
-
-function TSQLInfoResultsBuffer.GetItem(index: integer): ISQLInfoItem;
-var P: POutputBlockItemData;
-begin
-  P := inherited getItem(index);
-  Result := TSQLInfoResultsItem.Create(self,P)
-end;
-
-function TSQLInfoResultsBuffer.Find(ItemType: byte): ISQLInfoItem;
-var P: POutputBlockItemData;
-begin
-  P := inherited Find(ItemType);
-  Result := TSQLInfoResultsItem.Create(self,P)
 end;
 
 end.

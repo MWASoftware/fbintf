@@ -69,16 +69,10 @@ type
 
   { TSDLBlock }
 
-  TSDLBlock = class(TParamBlock,ISDL)
+  TSDLBlock = class (specialize TCustomParamBlock<TSDLItem,ISDLItem>, ISDL)
   public
     constructor Create;
-
-  public
-    {ISDL}
-    function Add(ParamType: byte): ISDLItem;
-    function getItems(index: integer): ISDLItem;
-    function Find(ParamType: byte): ISDLItem;
-end;
+  end;
 
   { TFB30ArrayMetaData }
 
@@ -130,29 +124,6 @@ begin
   inherited Create;
   FDataLength := 1;
   FBuffer^ := char(isc_sdl_version1);
-end;
-
-function TSDLBlock.Add(ParamType: byte): ISDLItem;
-var Item: PParamBlockItemData;
-begin
-  Item := inherited Add(ParamType);
-  Result := TSDLItem.Create(self,Item);
-end;
-
-function TSDLBlock.getItems(index: integer): ISDLItem;
-var Item: PParamBlockItemData;
-begin
-  Item := inherited getItems(index);
-  Result := TSDLItem.Create(self,Item);
-end;
-
-function TSDLBlock.Find(ParamType: byte): ISDLItem;
-var Item: PParamBlockItemData;
-begin
-  Result := nil;
-  Item := inherited Find(ParamType);
-  if Item <> nil then
-    Result := TSDLItem.Create(self,Item);
 end;
 
 
