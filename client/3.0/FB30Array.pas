@@ -117,15 +117,6 @@ const
                       'On FD.RDB$FIELD_NAME = F.RDB$FIELD_NAME ' +
                       'Where RF.RDB$RELATION_NAME = ? and RF.RDB$FIELD_NAME = ? Order by FD.RDB$DIMENSION asc';
 
-{ TSDLBlock }
-
-constructor TSDLBlock.Create;
-begin
-  inherited Create;
-  FDataLength := 1;
-  FBuffer^ := char(isc_sdl_version1);
-end;
-
 
 { TFB30ArrayMetaData }
 
@@ -293,6 +284,15 @@ begin
   inherited Create(aAttachment,aTransaction,aField,ArrayID);
   FAttachmentIntf := aAttachment.AttachmentIntf;
   FTransactionIntf := aTransaction.TransactionIntf;
+end;
+
+{ TSDLBlock }
+
+constructor TSDLBlock.Create;
+begin
+  inherited Create;
+  FDataLength := 1;
+  FBuffer^ := char(isc_sdl_version1);
 end;
 
 end.

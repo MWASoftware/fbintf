@@ -13,7 +13,7 @@ uses
   FBActivityMonitor, FBOutputBlock, FBParamBlock, FBSQLData, FB30ClientAPI, 
   FB30Attachment, FB30Transaction, FBTransaction, FB30Blob, FB30Array, 
   FB30Statement, FB30Events, FB30Services, FBEvents, FBBlob, FBAttachment, 
-  FBStatement;
+  FBStatement, FBServices;
 
 implementation
 

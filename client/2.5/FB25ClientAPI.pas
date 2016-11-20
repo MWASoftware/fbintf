@@ -468,7 +468,7 @@ function TFB25ClientAPI.GetServiceManager(ServerName: string;
   Protocol: TProtocol; SPB: ISPB): IServiceManager;
 begin
   if HasServiceAPI then
-    Result := TFBServiceManager.Create(ServerName,Protocol,SPB)
+    Result := TFB25ServiceManager.Create(ServerName,Protocol,SPB)
   else
     Result := nil;
 end;

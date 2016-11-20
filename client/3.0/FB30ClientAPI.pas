@@ -266,7 +266,7 @@ end;
 function TFB30ClientAPI.GetServiceManager(ServerName: string;
   Protocol: TProtocol; SPB: ISPB): IServiceManager;
 begin
-  Result := TFBServiceManager.Create(ServerName,Protocol,SPB);
+  Result := TFB30ServiceManager.Create(ServerName,Protocol,SPB);
 end;
 
 function TFB30ClientAPI.HasServiceAPI: boolean;

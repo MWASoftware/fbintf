@@ -585,7 +585,10 @@ end;
 
 function TParamBlock.getBuffer: PChar;
 begin
-  Result := FBuffer;
+  if FDataLength = 0 then
+    Result := nil
+  else
+    Result := FBuffer;
 end;
 
 function TParamBlock.getDataLength: integer;

@@ -15,7 +15,7 @@
         </Checks>
       </CodeGeneration>
     </CompilerOptions>
-    <Files Count="34">
+    <Files Count="35">
       <Item1>
         <Filename Value="client/3.0/firebird/Firebird.pas"/>
         <UnitName Value="Firebird"/>
@@ -153,6 +153,10 @@
         <Filename Value="client/FBStatement.pas"/>
         <UnitName Value="FBStatement"/>
       </Item34>
+      <Item35>
+        <Filename Value="client/FBServices.pas"/>
+        <UnitName Value="FBServices"/>
+      </Item35>
     </Files>
     <RequiredPkgs Count="1">
       <Item1>

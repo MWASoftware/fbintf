@@ -35,36 +35,27 @@ interface
 
 uses
   Classes, SysUtils, Firebird, IB, FB30ClientAPI, FBParamBlock, FBOutputBlock,
-    FBActivityMonitor;
+    FBServices;
 
 type
   { TFBServiceManager }
 
-  TFBServiceManager = class(TFBInterfacedObject,IServiceManager)
+  TFB30ServiceManager = class(TFBServiceManager,IServiceManager)
   private
-    FFirebirdAPI: IFirebirdAPI;
-    FServerName: string;
-    FSPB: ISPB;
-    FProtocol: TProtocol;
     FServiceIntf: Firebird.IService;
     procedure CheckActive;
     procedure CheckInactive;
-    procedure CheckServerName;
+  protected
+    procedure InternalAttach(ConnectString: string); override;
   public
-    constructor Create(ServerName: string; Protocol: TProtocol; SPB: ISPB);
-    destructor Destroy; override;
     property ServiceIntf: Firebird.IService read FServiceIntf;
 
   public
     {IServiceManager}
-    function getSPB: ISPB;
-    procedure Attach;
-    procedure Detach(Force: boolean=false);
+    procedure Detach(Force: boolean=false); override;
     function IsAttached: boolean;
-    function AllocateRequestBuffer: ISRB;
-    function AllocateSQPB: ISQPB;
     procedure Start(Request: ISRB);
-    function Query(SQPB: ISQPB; Request: ISRB): IServiceQueryResults;
+    function Query(SQPB: ISQPB; Request: ISRB): IServiceQueryResults; override;
   end;
 
 implementation
@@ -73,55 +64,20 @@ uses FBMessages;
 
 { TFBServiceManager }
 
-procedure TFBServiceManager.CheckActive;
+procedure TFB30ServiceManager.CheckActive;
 begin
   if FServiceIntf = nil then
     IBError(ibxeServiceActive, [nil]);
 end;
 
-procedure TFBServiceManager.CheckInactive;
+procedure TFB30ServiceManager.CheckInactive;
 begin
   if FServiceIntf <> nil then
     IBError(ibxeServiceInActive, [nil]);
 end;
 
-procedure TFBServiceManager.CheckServerName;
+procedure TFB30ServiceManager.InternalAttach(ConnectString: String);
 begin
-  if (FServerName = '') and (FProtocol <> Local) then
-    IBError(ibxeServerNameMissing, [nil]);
-end;
-
-constructor TFBServiceManager.Create(ServerName: string; Protocol: TProtocol;
-  SPB: ISPB);
-begin
-  inherited Create;
-  FFirebirdAPI := Firebird30ClientAPI; {Keep reference to interface}
-  FProtocol := Protocol;
-  FSPB := SPB;
-  FServerName := ServerName;
-  Attach;
-end;
-
-destructor TFBServiceManager.Destroy;
-begin
-  Detach(true);
-  inherited Destroy;
-end;
-
-function TFBServiceManager.getSPB: ISPB;
-begin
-  Result := FSPB;
-end;
-
-procedure TFBServiceManager.Attach;
-var ConnectString: String;
-begin
-  case FProtocol of
-    TCP: ConnectString := FServerName + ':service_mgr'; {do not localize}
-    SPX: ConnectString := FServerName + '@service_mgr'; {do not localize}
-    NamedPipe: ConnectString := '\\' + FServerName + '\service_mgr'; {do not localize}
-    Local: ConnectString := 'service_mgr'; {do not localize}
-  end;
   with Firebird30ClientAPI do
   if FSPB = nil then
   begin
@@ -138,7 +94,7 @@ begin
   end;
 end;
 
-procedure TFBServiceManager.Detach(Force: boolean);
+procedure TFB30ServiceManager.Detach(Force: boolean);
 begin
   if FServiceIntf = nil then
     Exit;
@@ -151,22 +107,12 @@ begin
   end;
 end;
 
-function TFBServiceManager.IsAttached: boolean;
+function TFB30ServiceManager.IsAttached: boolean;
 begin
   Result := FServiceIntf <> nil;
 end;
 
-function TFBServiceManager.AllocateRequestBuffer: ISRB;
-begin
-  Result := TSRB.Create;
-end;
-
-function TFBServiceManager.AllocateSQPB: ISQPB;
-begin
-  Result := TSQPB.Create;
-end;
-
-procedure TFBServiceManager.Start(Request: ISRB);
+procedure TFB30ServiceManager.Start(Request: ISRB);
 begin
   CheckActive;
   with Firebird30ClientAPI do
@@ -178,7 +124,7 @@ begin
     end;
 end;
 
-function TFBServiceManager.Query(SQPB: ISQPB; Request: ISRB
+function TFB30ServiceManager.Query(SQPB: ISQPB; Request: ISRB
   ): IServiceQueryResults;
 var QueryResults: TServiceQueryResults;
 begin
