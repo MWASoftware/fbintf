@@ -308,6 +308,7 @@ type
     function Add(ParamType: byte): IBPBItem;
     function getItems(index: integer): IBPBItem;
     function Find(ParamType: byte): IBPBItem;
+    property Count: integer read getCount;
     property Items[index: integer]: IBPBItem read getItems; default;
   end;
 
@@ -613,6 +614,7 @@ type
     function Add(ParamType: byte): ITPBItem;
     function getItems(index: integer): ITPBItem;
     function Find(ParamType: byte): ITPBItem;
+    property Count: integer read getCount;
     property Items[index: integer]: ITPBItem read getItems; default;
   end;
 
@@ -748,6 +750,7 @@ type
     function Add(ParamType: byte): IDPBItem;
     function getItems(index: integer): IDPBItem;
     function Find(ParamType: byte): IDPBItem;
+    property Count: integer read getCount;
     property Items[index: integer]: IDPBItem read getItems; default;
   end;
 
@@ -850,6 +853,7 @@ type
     function Add(ParamType: byte): ISPBItem;
     function getItems(index: integer): ISPBItem;
     function Find(ParamType: byte): ISPBItem;
+    property Count: integer read getCount;
     property Items[index: integer]: ISPBItem read getItems; default;
   end;
 
@@ -868,6 +872,7 @@ type
     function Add(ParamType: byte): ISQPBItem;
     function getItems(index: integer): ISQPBItem;
     function Find(ParamType: byte): ISQPBItem;
+    property Count: integer read getCount;
     property Items[index: integer]: ISQPBItem read getItems; default;
   end;
 
@@ -890,6 +895,7 @@ type
     function Add(ParamType: byte): ISRBItem;
     function getItems(index: integer): ISRBItem;
     function Find(ParamType: byte): ISRBItem;
+    property Count: integer read getCount;
     property Items[index: integer]: ISRBItem read getItems; default;
   end;
 
