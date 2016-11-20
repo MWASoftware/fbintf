@@ -49,7 +49,7 @@ var Req: ISRB;
     Results: IServiceQueryResults;
 begin
   {Version Info}
-  Req := Service.AllocateRequestBuffer;
+  Req := Service.AllocateSRB;
   Req.Add(isc_info_svc_version);
   Req.Add(isc_info_svc_server_version);
   Req.Add(isc_info_svc_implementation);
@@ -57,7 +57,7 @@ begin
   WriteServiceQueryResult(Results);
 
   {Config Params}
-  Req := Service.AllocateRequestBuffer;
+  Req := Service.AllocateSRB;
   Req.Add(isc_info_svc_get_env_lock);
   Req.Add(isc_info_svc_get_config);
   Req.Add(isc_info_svc_get_env_msg);
@@ -66,16 +66,16 @@ begin
   WriteServiceQueryResult(Results);
 
   {Database Information}
-  Req := Service.AllocateRequestBuffer;
+  Req := Service.AllocateSRB;
   Req.Add(isc_info_svc_svr_db_info);
   Results := Service.Query(nil,Req);
   WriteServiceQueryResult(Results);
 
   {User Information}
-  Req := Service.AllocateRequestBuffer;
+  Req := Service.AllocateSRB;
   Req.Add(isc_action_svc_display_user);
   Service.Start(Req);
-  Req := Service.AllocateRequestBuffer;
+  Req := Service.AllocateSRB;
   Req.Add(isc_info_svc_get_users);
   Results := Service.Query(nil,Req);
   WriteServiceQueryResult(Results);
@@ -87,7 +87,7 @@ begin
 
   writeln('Get Statistics');
   writeln;
-  Req := Service.AllocateRequestBuffer;
+  Req := Service.AllocateSRB;
   Req.Add(isc_action_svc_db_stats);
   Req.Add(isc_spb_dbname).SetAsString(DBName);
   Req.Add(isc_spb_options).SetAsInteger(isc_spb_sts_data_pages or {
@@ -96,7 +96,7 @@ begin
 
   try
     Service.Start(Req);
-    Req := Service.AllocateRequestBuffer;
+    Req := Service.AllocateSRB;
     Req.Add(isc_info_svc_line);
     repeat
       Results := Service.Query(nil,Req);
@@ -107,7 +107,7 @@ begin
   writeln;
 
   {Licence Info}
-  Req := Service.AllocateRequestBuffer;
+  Req := Service.AllocateSRB;
   Req.Add(isc_info_svc_get_license);
   Req.Add(isc_info_svc_get_licensed_users);
   try
@@ -119,7 +119,7 @@ begin
   writeln;
 
   {Licence Mask Info}
-  Req := Service.AllocateRequestBuffer;
+  Req := Service.AllocateSRB;
   Req.Add(isc_info_svc_get_license_mask);
   try
     Results := Service.Query(nil,Req);
@@ -130,7 +130,7 @@ begin
   writeln;
 
   {Capabilities}
-  Req := Service.AllocateRequestBuffer;
+  Req := Service.AllocateSRB;
   Req.Add(isc_info_svc_capabilities);
   try
     Results := Service.Query(nil,Req);
@@ -144,7 +144,7 @@ begin
 
   writeln('Get Limbo transactions');
   writeln;
-  Req := Service.AllocateRequestBuffer;
+  Req := Service.AllocateSRB;
   Req.Add(isc_info_svc_limbo_trans);
   try
     Results := Service.Query(nil,Req);
@@ -172,14 +172,14 @@ begin
   {Local Backup}
 
   writeln('Local Backup');
-  Req := Service.AllocateRequestBuffer;
+  Req := Service.AllocateSRB;
   Req.Add(isc_action_svc_backup);
   Req.Add(isc_spb_dbname).AsString := DBName;
   Req.Add(isc_spb_bkp_file).AsString := 'stdout';
   try
     SelectOutputFile(Owner.GetBackupFileName);
     Service.Start(Req);
-    Req := Service.AllocateRequestBuffer;
+    Req := Service.AllocateSRB;
     Req.Add(isc_info_svc_to_eof);
     repeat
       Results := Service.Query(nil,Req);
@@ -196,7 +196,7 @@ begin
   i := Pos(':',RestoreDBName);
   if i > 0 then
     system.Delete(RestoreDBName,1,i);
-  Req := Service.AllocateRequestBuffer;
+  Req := Service.AllocateSRB;
   Req.Add(isc_action_svc_restore);
   Req.Add(isc_spb_dbname).AsString := RestoreDBName;
   Req.Add(isc_spb_verbose);
@@ -215,7 +215,7 @@ begin
         if ReqLength > 0 then
             bytesWritten := SQPB.Add(isc_info_svc_line).CopyFrom(BakFile,ReqLength);
         bytesAvailable -= bytesWritten;
-        Req := Service.AllocateRequestBuffer;
+        Req := Service.AllocateSRB;
         Req.Add(isc_info_svc_stdin);
         Req.Add(isc_info_svc_line);
         Results := Service.Query(SQPB,Req);

@@ -174,6 +174,23 @@ type
   IAttachment = interface;
   ITransaction = interface;
 
+  {IParameterBlockItem is not used on its own but instead provides a base type for
+   different parameter block items }
+
+  IParameterBlockItem = interface
+    function getParamType: byte;
+    function getAsInteger: integer;
+    function getAsString: string;
+    function getAsByte: byte;
+    procedure setAsString(aValue: string);
+    procedure setAsByte(aValue: byte);
+    procedure SetAsInteger(aValue: integer);
+    property AsString: string read getAsString write setAsString;
+    property AsByte: byte read getAsByte write setAsByte;
+    property AsInteger: integer read getAsInteger write SetAsInteger;
+  end;
+
+
   {The IStatus interface provides access to error information, if any, returned
    by the last API call. It can also be used to customise the error message
    returned by a database engine exception - see EIBInterbaseError.
@@ -284,18 +301,7 @@ type
 
   {The Blob Parameter block is used to select a Blob Filter}
 
-  IBPBItem = interface
-    function getParamType: byte;
-    function getAsInteger: integer;
-    function getAsString: string;
-    function getAsByte: byte;
-    procedure setAsString(aValue: string);
-    procedure setAsByte(aValue: byte);
-    procedure SetAsInteger(aValue: integer);
-    property AsString: string read getAsString write setAsString;
-    property AsByte: byte read getAsByte write setAsByte;
-    property AsInteger: integer read getAsInteger write SetAsInteger;
-  end;
+  IBPBItem = interface (IParameterBlockItem) end;
 
   IBPB = interface
     function getCount: integer;
@@ -600,18 +606,7 @@ type
    found in the Interbase 6.0 API Guide.
   }
 
-  ITPBItem = interface
-    function getParamType: byte;
-    function getAsInteger: integer;
-    function getAsString: string;
-    function getAsByte: byte;
-    procedure setAsString(aValue: string);
-    procedure setAsByte(aValue: byte);
-    procedure SetAsInteger(aValue: integer);
-    property AsString: string read getAsString write setAsString;
-    property AsByte: byte read getAsByte write setAsByte;
-    property AsInteger: integer read getAsInteger write SetAsInteger;
-  end;
+  ITPBItem = interface(IParameterBlockItem) end;
 
   ITPB = interface
     function getCount: integer;
@@ -746,18 +741,7 @@ type
    found in the Interbase 6.0 API Guide.
    }
 
-  IDPBItem = interface
-    function getParamType: byte;
-    function getAsInteger: integer;
-    function getAsString: string;
-    function getAsByte: byte;
-    procedure setAsString(aValue: string);
-    procedure setAsByte(aValue: byte);
-    procedure SetAsInteger(aValue: integer);
-    property AsString: string read getAsString write setAsString;
-    property AsByte: byte read getAsByte write setAsByte;
-    property AsInteger: integer read getAsInteger write SetAsInteger;
-  end;
+  IDPBItem = interface(IParameterBlockItem) end;
 
   IDPB = interface
     function getCount: integer;
@@ -859,15 +843,7 @@ type
 
   }
 
-  ISPBItem = interface
-    function getParamType: byte;
-    function getAsString: string;
-    function getAsByte: byte;
-    procedure setAsString(aValue: string);
-    procedure setAsByte(aValue: byte);
-    property AsString: string read getAsString write setAsString;
-    property AsByte: byte read getAsByte write setAsByte;
-  end;
+  ISPBItem = interface(IParameterBlockItem) end;
 
   ISPB = interface
     function getCount: integer;
@@ -883,18 +859,8 @@ type
    in a Query Request.
   }
 
-  ISQPBItem = interface
-    function getParamType: byte;
-    function getAsString: string;
-    function getAsInteger: integer;
-    function getAsByte: byte;
-    procedure setAsString(aValue: string);
-    procedure SetAsInteger(aValue: integer);
-    procedure setAsByte(aValue: byte);
+  ISQPBItem = interface(IParameterBlockItem)
     function CopyFrom(source: TStream; count: integer): integer;
-    property AsString: string read getAsString write setAsString;
-    property AsInteger: integer read getAsInteger write SetAsInteger;
-    property AsByte: byte read getAsByte write setAsByte;
   end;
 
   ISQPB = interface
@@ -917,18 +883,7 @@ type
 
   }
 
-  ISRBItem = interface
-    function getParamType: byte;
-    function getAsString: string;
-    function getAsInteger: integer;
-    function getAsByte: byte;
-    procedure setAsString(aValue: string);
-    procedure SetAsInteger(aValue: integer);
-    procedure setAsByte(aValue: byte);
-    property AsString: string read getAsString write setAsString;
-    property AsInteger: integer read getAsInteger write SetAsInteger;
-    property AsByte: byte read getAsByte write setAsByte;
-  end;
+  ISRBItem = interface(IParameterBlockItem) end;
 
   ISRB = interface
     function getCount: integer;
@@ -995,7 +950,7 @@ type
     procedure Attach;
     procedure Detach(Force: boolean=false);
     function IsAttached: boolean;
-    function AllocateRequestBuffer: ISRB;
+    function AllocateSRB: ISRB;
     function AllocateSQPB: ISQPB;
     procedure Start(Request: ISRB);
     function Query(SQPB: ISQPB; Request: ISRB) :IServiceQueryResults; overload;

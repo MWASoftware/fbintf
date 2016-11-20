@@ -60,7 +60,7 @@ type
     function getSPB: ISPB;
     procedure Attach;
     procedure Detach(Force: boolean=false); virtual; abstract;
-    function AllocateRequestBuffer: ISRB;
+    function AllocateSRB: ISRB;
     function AllocateSQPB: ISQPB;
     function Query(SQPB: ISQPB; Request: ISRB): IServiceQueryResults; virtual; abstract; overload;
     function Query(Request: ISRB): IServiceQueryResults;  overload;
@@ -112,7 +112,7 @@ begin
   InternalAttach(ConnectString);
 end;
 
-function TFBServiceManager.AllocateRequestBuffer: ISRB;
+function TFBServiceManager.AllocateSRB: ISRB;
 begin
   Result := TSRB.Create;
 end;
