@@ -998,7 +998,8 @@ type
     function AllocateRequestBuffer: ISRB;
     function AllocateSQPB: ISQPB;
     procedure Start(Request: ISRB);
-    function Query(SQPB: ISQPB; Request: ISRB) :IServiceQueryResults;
+    function Query(SQPB: ISQPB; Request: ISRB) :IServiceQueryResults; overload;
+    function Query(Request: ISRB) :IServiceQueryResults; overload;
   end;
 
   {The Firebird API.

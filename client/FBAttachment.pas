@@ -44,6 +44,7 @@ type
   private
     FDPB: IDPB;
     FFirebirdAPI: IFirebirdAPI;
+    procedure SetupEnvironment;
   protected
     FDatabaseName: string;
     FRaiseExceptionOnConnectError: boolean;
@@ -91,9 +92,56 @@ type
 
 implementation
 
-uses FBMessages;
+uses FBMessages {$IFDEF Unix} ,initc{$ENDIF};
+
+{$IFDEF Unix}
+{SetEnvironmentVariable doesn't exist so we have to use C Library}
+function setenv(name:Pchar; value:Pchar; replace:integer):integer;cdecl;external clib name 'setenv';
+function unsetenv(name:Pchar):integer;cdecl;external clib name 'unsetenv';
+function SetEnvironmentVariable(name:PChar; value:PChar):boolean;
+// Set environment variable; if empty string given, remove it.
+begin
+  result:=false; //assume failure
+  if value = '' then
+  begin
+    // Assume user wants to remove variable.
+    if unsetenv(name)=0 then result:=true;
+  end
+  else
+  begin
+    // Non empty so set the variable
+    if setenv(name, value, 1)=0 then result:=true;
+  end;
+end;
+{$ENDIF}
 
 { TFBAttachment }
+
+{Under Unixes, if using an embedded server then set up local TMP and LOCK Directories}
+
+procedure TFBAttachment.SetupEnvironment;
+var TmpDir: string;
+begin
+  {$IFDEF UNIX}
+  if FFirebirdAPI.IsEmbeddedServer then
+  begin
+    TmpDir := GetTempDir +
+        DirectorySeparator + 'firebird_' + sysutils.GetEnvironmentVariable('USER');
+    if sysutils.GetEnvironmentVariable('FIREBIRD_TMP') = '' then
+    begin
+      if not DirectoryExists(tmpDir) then
+        mkdir(tmpDir);
+      SetEnvironmentVariable('FIREBIRD_TMP',PChar(TmpDir));
+    end;
+    if sysutils.GetEnvironmentVariable('FIREBIRD_LOCK') = '' then
+    begin
+      if not DirectoryExists(tmpDir) then
+        mkdir(tmpDir);
+      SetEnvironmentVariable('FIREBIRD_LOCK',PChar(TmpDir));
+    end;
+  end;
+  {$ENDIF}
+end;
 
 constructor TFBAttachment.Create(DatabaseName: string; DPB: IDPB;
   RaiseExceptionOnConnectError: boolean);
@@ -104,6 +152,7 @@ begin
   FDatabaseName := DatabaseName;
   FDPB := DPB;
   FRaiseExceptionOnConnectError := RaiseExceptionOnConnectError;
+  SetupEnvironment;
 end;
 
 destructor TFBAttachment.Destroy;
