@@ -133,7 +133,7 @@ begin
   Result := QueryResults;
   with Firebird30ClientAPI do
   begin
-    if SQPB = nil then
+    if SQPB <> nil then
     begin
       FServiceIntf.query(StatusIntf,
                          (SQPB as TSQPB).getDataLength,
