@@ -56,10 +56,7 @@ endif
 cleartarget:
         -$(DEL) $(COMPILER_UNITTARGETDIR)/fbintf$(PPUEXT)
 
-compiled:
-        $(CPPROG) -f Makefile.compiled $(COMPILER_UNITTARGETDIR)/fbintf.compiled
-
-all: cleartarget $(COMPILER_UNITTARGETDIR) fbintf$(PPUEXT) compiled
+all: cleartarget $(COMPILER_UNITTARGETDIR) fbintf$(PPUEXT)
 
 distclean: clean
         ${DELTREE} lib/*

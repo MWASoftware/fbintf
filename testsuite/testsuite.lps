@@ -188,6 +188,7 @@
       </Unit29>
       <Unit30>
         <Filename Value="../client/FBBlob.pas"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
         <TopLine Value="259"/>
         <CursorPos X="65" Y="270"/>
@@ -196,12 +197,10 @@
       </Unit30>
       <Unit31>
         <Filename Value="../Makefile.fpc"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="3"/>
-        <TopLine Value="35"/>
-        <CursorPos X="26" Y="15"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="32"/>
+        <CursorPos X="59" Y="59"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit31>
       <Unit32>
