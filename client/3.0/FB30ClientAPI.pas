@@ -297,7 +297,7 @@ begin
   Result := false;
   FBConf := FConfigManager.getFirebirdConf;
   try
-    Plugins := FBConf.asString(FBConf.getKey('Plugins'));
+    Plugins := FBConf.asString(FBConf.getKey('Providers'));
   finally
     FBConf.release;
   end;

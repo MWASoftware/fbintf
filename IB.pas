@@ -174,6 +174,18 @@ type
   IAttachment = interface;
   ITransaction = interface;
 
+  {The IParameterBlock generic interface provides the template for all parameter
+   block interfaces}
+
+  generic IParameterBlock<_IItem> = interface
+    function getCount: integer;
+    function Add(ParamType: byte): _IItem;
+    function getItems(index: integer): _IItem;
+    function Find(ParamType: byte): _IItem;
+    property Count: integer read getCount;
+    property Items[index: integer]: _IItem read getItems; default;
+  end;
+
   {IParameterBlockItem is not used on its own but instead provides a base type for
    different parameter block items }
 
@@ -303,14 +315,7 @@ type
 
   IBPBItem = interface (IParameterBlockItem) end;
 
-  IBPB = interface
-    function getCount: integer;
-    function Add(ParamType: byte): IBPBItem;
-    function getItems(index: integer): IBPBItem;
-    function Find(ParamType: byte): IBPBItem;
-    property Count: integer read getCount;
-    property Items[index: integer]: IBPBItem read getItems; default;
-  end;
+  IBPB = specialize IParameterBlock<IBPBItem>;
 
   { The Blob Interface provides access to a blob data item.
 
@@ -609,14 +614,7 @@ type
 
   ITPBItem = interface(IParameterBlockItem) end;
 
-  ITPB = interface
-    function getCount: integer;
-    function Add(ParamType: byte): ITPBItem;
-    function getItems(index: integer): ITPBItem;
-    function Find(ParamType: byte): ITPBItem;
-    property Count: integer read getCount;
-    property Items[index: integer]: ITPBItem read getItems; default;
-  end;
+  ITPB = specialize IParameterBlock<ITPBItem>;
 
   {The ITransactionAction interface provides access to a Transaction once it
    has been initially started. After a Commit or Rollback, a transaction
@@ -745,14 +743,7 @@ type
 
   IDPBItem = interface(IParameterBlockItem) end;
 
-  IDPB = interface
-    function getCount: integer;
-    function Add(ParamType: byte): IDPBItem;
-    function getItems(index: integer): IDPBItem;
-    function Find(ParamType: byte): IDPBItem;
-    property Count: integer read getCount;
-    property Items[index: integer]: IDPBItem read getItems; default;
-  end;
+  IDPB = specialize IParameterBlock<IDPBItem>;
 
   {The IAttachment interface provides access to a Database Connection. It may be
    used to:
@@ -848,14 +839,7 @@ type
 
   ISPBItem = interface(IParameterBlockItem) end;
 
-  ISPB = interface
-    function getCount: integer;
-    function Add(ParamType: byte): ISPBItem;
-    function getItems(index: integer): ISPBItem;
-    function Find(ParamType: byte): ISPBItem;
-    property Count: integer read getCount;
-    property Items[index: integer]: ISPBItem read getItems; default;
-  end;
+  ISPB = specialize IParameterBlock<ISPBItem>;
 
   {Service Query Parameter Block (SQPB).
 
@@ -867,14 +851,7 @@ type
     function CopyFrom(source: TStream; count: integer): integer;
   end;
 
-  ISQPB = interface
-    function getCount: integer;
-    function Add(ParamType: byte): ISQPBItem;
-    function getItems(index: integer): ISQPBItem;
-    function Find(ParamType: byte): ISQPBItem;
-    property Count: integer read getCount;
-    property Items[index: integer]: ISQPBItem read getItems; default;
-  end;
+  ISQPB = specialize IParameterBlock<ISQPBItem>;
 
   {Service Request Block (SRB).
 
@@ -890,14 +867,7 @@ type
 
   ISRBItem = interface(IParameterBlockItem) end;
 
-  ISRB = interface
-    function getCount: integer;
-    function Add(ParamType: byte): ISRBItem;
-    function getItems(index: integer): ISRBItem;
-    function Find(ParamType: byte): ISRBItem;
-    property Count: integer read getCount;
-    property Items[index: integer]: ISRBItem read getItems; default;
-  end;
+  ISRB = specialize IParameterBlock<ISRBItem>;
 
   {The Service Query Results Interface.
 

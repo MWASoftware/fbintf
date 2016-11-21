@@ -39,7 +39,7 @@ uses
   Classes, SysUtils, IB, FBClientAPI, FBActivityMonitor;
 
 type
-  TParamDataType = (dtString, dtString2, dtByte, dtByte2, dtInteger,  dtInteger1,
+  TParamDataType = (dtString, dtString2, dtString0, dtByte, dtByte2, dtInteger,  dtInteger1,
                     dtInteger2,  dtShortInteger,dtTinyInteger,dtnone);
 
   PParamBlockItemData = ^TParamBlockItemData;
@@ -109,6 +109,7 @@ type
      procedure SetAsTinyInteger(aValue: integer);
      procedure SetAsString(aValue: string);
      procedure SetAsString2(aValue: string);
+     procedure SetAsString0(aValue: string);
   end;
 
   { TCustomParamBlock }
@@ -133,7 +134,10 @@ type
 
   { TTPBItem }
 
-  TTPBItem = class(TParamBlockItem,ITPBItem);
+  TTPBItem = class(TParamBlockItem,ITPBItem)
+  public
+    procedure ITPBItem.SetAsString = SetAsString0;
+  end;
 
   { TTPB }
 
@@ -171,6 +175,7 @@ type
   public
    function CopyFrom(source: TStream; count: integer): integer;
    procedure ISQPBItem.SetAsInteger = SetAsInteger2;
+   procedure ISQPBItem.SetAsString = SetAsString2;
   end;
 
   { TSQPB }
@@ -308,6 +313,8 @@ begin
         len := DecodeInteger(FBufPtr+1,2);
       SetString(Result,FBufPtr+3,len);
     end;
+  dtString0:
+      Result := strpas(FBufPtr+1);
     else
       IBError(ibxeOutputBlockTypeError,[nil]);
   end;
@@ -445,6 +452,8 @@ begin
   end;
 end;
 
+{Short string encoding}
+
 procedure TParamBlockItem.SetAsString(aValue: string);
 var len: integer;
 begin
@@ -461,6 +470,8 @@ begin
   end;
 end;
 
+{Long string up to 65535 encoding}
+
 procedure TParamBlockItem.SetAsString2(aValue: string);
 var len: integer;
 begin
@@ -475,6 +486,22 @@ begin
     if len > 0 then
       Move(aValue[1],(FBufPtr+3)^,len);
     FDataType := dtString2;
+  end;
+end;
+
+{Zero byte terminated string encoding}
+
+procedure TParamBlockItem.SetAsString0(aValue: string);
+var len: integer;
+begin
+  with FParamData^ do
+  begin
+    len := Length(aValue);
+    FOwner.UpdateRequestItemSize(self,len+2);
+    if len > 0 then
+      Move(aValue[1],(FBufPtr+1)^,len);
+    (FBufPtr+len+1)^ := #0;
+    FDataType := dtString0;
   end;
 end;
 

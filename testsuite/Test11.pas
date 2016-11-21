@@ -182,7 +182,7 @@ begin
     Req := Service.AllocateSRB;
     Req.Add(isc_info_svc_to_eof);
     repeat
-      Results := Service.Query(nil,Req);
+      Results := Service.Query(Req);
     until not WriteServiceQueryResult(Results);
     writeln('Local Backup Complete');
   except on E: Exception do
@@ -211,7 +211,6 @@ begin
       ReqLength := 0;
       repeat
         SQPB := Service.AllocateSQPB;
-        SQPB.Add(isc_info_svc_timeout).asInteger := 1;  {one second timeout}
         if ReqLength > 0 then
             bytesWritten := SQPB.Add(isc_info_svc_line).CopyFrom(BakFile,ReqLength);
         bytesAvailable -= bytesWritten;
