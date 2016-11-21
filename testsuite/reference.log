@@ -1,0 +1,4474 @@
+Firebird API Test Suite
+Copyright MWA Software 2016
+
+Starting Tests
+Running Test 1: Create and Drop a Database
+Creating a Database with empty parameters
+Create Database fails (as expected): I/O error during "open O_CREAT" operation for file ""
+Error while trying to create file
+No such file or directory
+Creating a Database with a DPD
+Dropping Database
+DPB
+Count = 4
+28 = SYSDBA
+29 = masterkey
+48 = UTF8
+65 = 3
+
+Creating a Database with a DPD
+Database ID = 4 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = zeus
+ODS major = 11 minor = 2
+RDB$DESCRIPTION = 
+RDB$RELATION_ID = 128
+RDB$SECURITY_CLASS = 
+RDB$CHARACTER_SET_NAME = UTF8
+Dropping Database
+
+
+Running Test 2: Open the employee database and run a query
+Opening localhost:employee
+Database Open
+Metadata
+SQLType =SQL_SHORT
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = EMP_NO
+Alias Name = EMP_NO
+Field Name = EMP_NO
+Scale = 0
+Charset id = 0
+Not Null
+Size = 2
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = FIRST_NAME
+Alias Name = FIRST_NAME
+Field Name = FIRST_NAME
+Scale = 0
+Charset id = 0
+Not Null
+Size = 15
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = LAST_NAME
+Alias Name = LAST_NAME
+Field Name = LAST_NAME
+Scale = 0
+Charset id = 0
+Not Null
+Size = 20
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = PHONE_EXT
+Alias Name = PHONE_EXT
+Field Name = PHONE_EXT
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_TIMESTAMP
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = HIRE_DATE
+Alias Name = HIRE_DATE
+Field Name = HIRE_DATE
+Scale = 0
+Charset id = 0
+Not Null
+Size = 8
+
+SQLType =SQL_TEXT
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = DEPT_NO
+Alias Name = DEPT_NO
+Field Name = DEPT_NO
+Scale = 0
+Charset id = 0
+Not Null
+Size = 3
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = JOB_CODE
+Alias Name = JOB_CODE
+Field Name = JOB_CODE
+Scale = 0
+Charset id = 0
+Not Null
+Size = 5
+
+SQLType =SQL_SHORT
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = JOB_GRADE
+Alias Name = JOB_GRADE
+Field Name = JOB_GRADE
+Scale = 0
+Charset id = 0
+Not Null
+Size = 2
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = JOB_COUNTRY
+Alias Name = JOB_COUNTRY
+Field Name = JOB_COUNTRY
+Scale = 0
+Charset id = 0
+Not Null
+Size = 15
+
+SQLType =SQL_INT64
+sub type = 1
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = SALARY
+Alias Name = SALARY
+Field Name = SALARY
+Scale = -2
+Charset id = 0
+Not Null
+Size = 8
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = FULL_NAME
+Alias Name = FULL_NAME
+Field Name = FULL_NAME
+Scale = 0
+Charset id = 0
+Nullable
+Size = 37
+
+Plan = 
+PLAN (EMPLOYEE NATURAL)
+Select First 3 * from EMPLOYEE
+
+EMP_NO = 2
+FIRST_NAME = Robert
+LAST_NAME = Nelson
+PHONE_EXT = 250
+HIRE_DATE = 28-12-88 00:00:00.000
+DEPT_NO = 600
+JOB_CODE = VP
+JOB_GRADE = 2
+JOB_COUNTRY = USA
+SALARY = 105,900.00
+FULL_NAME = Nelson, Robert
+EMP_NO = 4
+FIRST_NAME = Bruce
+LAST_NAME = Young
+PHONE_EXT = 233
+HIRE_DATE = 28-12-88 00:00:00.000
+DEPT_NO = 621
+JOB_CODE = Eng
+JOB_GRADE = 2
+JOB_COUNTRY = USA
+SALARY = 97,500.00
+FULL_NAME = Young, Bruce
+EMP_NO = 5
+FIRST_NAME = Kim
+LAST_NAME = Lambert
+PHONE_EXT = 22
+HIRE_DATE = 6-2-89 00:00:00.000
+DEPT_NO = 130
+JOB_CODE = Eng
+JOB_GRADE = 2
+JOB_COUNTRY = USA
+SALARY = 102,750.00
+FULL_NAME = Lambert, Kim
+
+Select * from EMPLOYEE Where EMP_NO = ?
+SQL Params
+SQLType =SQL_SHORT
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Not Null
+Size = 2
+
+EMP_NO = 9
+FIRST_NAME = Phil
+LAST_NAME = Forest
+PHONE_EXT = 229
+HIRE_DATE = 17-4-89 00:00:00.000
+DEPT_NO = 622
+JOB_CODE = Mngr
+JOB_GRADE = 3
+JOB_COUNTRY = USA
+SALARY = 75,060.00
+FULL_NAME = Forest, Phil
+
+With param names
+Select * from EMPLOYEE Where EMP_NO = :EMP_NO
+SQL Params
+SQLType =SQL_SHORT
+sub type = 0
+Field Name = EMP_NO
+Scale = 0
+Charset id = 0
+Not Null
+Size = 2
+
+EMP_NO = 9
+FIRST_NAME = Phil
+LAST_NAME = Forest
+PHONE_EXT = 229
+HIRE_DATE = 17-4-89 00:00:00.000
+DEPT_NO = 622
+JOB_CODE = Mngr
+JOB_GRADE = 3
+JOB_COUNTRY = USA
+SALARY = 75,060.00
+FULL_NAME = Forest, Phil
+
+
+
+Running Test 3: ad hoc queries
+Opening localhost:employee
+Database Open
+Employee Count = 42
+Employee Count = 41
+Employee Count = 42
+Employee Count = 41
+Employee Count = 42
+
+
+Running Test 4: Update, Insert and Delete Queries
+Opening localhost:employee
+Database Open
+Select Count = 1 InsertCount = 0 UpdateCount = 1 DeleteCount = 0
+EMP_NO = 9
+FIRST_NAME = Phil
+LAST_NAME = Forest
+PHONE_EXT = 229
+HIRE_DATE = 17-4-89 00:00:00.000
+DEPT_NO = 622
+JOB_CODE = Mngr
+JOB_GRADE = 3
+JOB_COUNTRY = USA
+SALARY = 75,060.00
+FULL_NAME = Forest, Phil
+
+Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
+Metadata
+SQLType =SQL_SHORT
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = EMP_NO
+Alias Name = EMP_NO
+Field Name = EMP_NO
+Scale = 0
+Charset id = 0
+Not Null
+Size = 2
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = FIRST_NAME
+Alias Name = FIRST_NAME
+Field Name = FIRST_NAME
+Scale = 0
+Charset id = 0
+Not Null
+Size = 15
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = LAST_NAME
+Alias Name = LAST_NAME
+Field Name = LAST_NAME
+Scale = 0
+Charset id = 0
+Not Null
+Size = 20
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = PHONE_EXT
+Alias Name = PHONE_EXT
+Field Name = PHONE_EXT
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_TIMESTAMP
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = HIRE_DATE
+Alias Name = HIRE_DATE
+Field Name = HIRE_DATE
+Scale = 0
+Charset id = 0
+Not Null
+Size = 8
+
+SQLType =SQL_TEXT
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = DEPT_NO
+Alias Name = DEPT_NO
+Field Name = DEPT_NO
+Scale = 0
+Charset id = 0
+Not Null
+Size = 3
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = JOB_CODE
+Alias Name = JOB_CODE
+Field Name = JOB_CODE
+Scale = 0
+Charset id = 0
+Not Null
+Size = 5
+
+SQLType =SQL_SHORT
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = JOB_GRADE
+Alias Name = JOB_GRADE
+Field Name = JOB_GRADE
+Scale = 0
+Charset id = 0
+Not Null
+Size = 2
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = JOB_COUNTRY
+Alias Name = JOB_COUNTRY
+Field Name = JOB_COUNTRY
+Scale = 0
+Charset id = 0
+Not Null
+Size = 15
+
+SQLType =SQL_INT64
+sub type = 1
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = SALARY
+Alias Name = SALARY
+Field Name = SALARY
+Scale = -2
+Charset id = 0
+Not Null
+Size = 8
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = FULL_NAME
+Alias Name = FULL_NAME
+Field Name = FULL_NAME
+Scale = 0
+Charset id = 0
+Nullable
+Size = 37
+
+EMP_NO = 150
+FIRST_NAME = John
+LAST_NAME = Doe
+PHONE_EXT = 
+HIRE_DATE = 1-4-15 00:00:00.000
+DEPT_NO = 600
+JOB_CODE = Eng
+JOB_GRADE = 4
+JOB_COUNTRY = England
+SALARY = 41,000.89
+FULL_NAME = Doe, John
+
+Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
+EMP_NO = 151
+FIRST_NAME = Major
+LAST_NAME = Major
+PHONE_EXT = 
+HIRE_DATE = 1-4-15 00:00:00.000
+DEPT_NO = 600
+JOB_CODE = Eng
+JOB_GRADE = 4
+JOB_COUNTRY = England
+SALARY = 40,000.59
+FULL_NAME = Major, Major
+
+Now Delete the rows
+Select Count = 1 InsertCount = 0 UpdateCount = 0 DeleteCount = 1
+Select Count = 1 InsertCount = 0 UpdateCount = 0 DeleteCount = 1
+Inserting
+Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
+EMP_NO = 150
+FIRST_NAME = Jane
+LAST_NAME = Doe
+PHONE_EXT = NULL
+HIRE_DATE = 1-4-15 00:00:00.000
+DEPT_NO = 600
+JOB_CODE = Eng
+JOB_GRADE = 4
+JOB_COUNTRY = England
+SALARY = 41,000.89
+FULL_NAME = Doe, Jane
+
+Employee Count = 43
+Prepare Query again
+
+EMP_NO = 150
+FIRST_NAME = Jane
+LAST_NAME = Doe
+PHONE_EXT = NULL
+HIRE_DATE = 1-4-15 00:00:00.000
+DEPT_NO = 600
+JOB_CODE = Eng
+JOB_GRADE = 4
+JOB_COUNTRY = England
+SALARY = 41,000.89
+FULL_NAME = Doe, Jane
+
+Prepare Query again with a different transaction
+
+EMP_NO = 9
+FIRST_NAME = Phil
+LAST_NAME = Forest
+PHONE_EXT = 229
+HIRE_DATE = 17-4-89 00:00:00.000
+DEPT_NO = 622
+JOB_CODE = Mngr
+JOB_GRADE = 3
+JOB_COUNTRY = USA
+SALARY = 75,060.00
+FULL_NAME = Forest, Phil
+
+Open Cursor with a different transaction
+
+EMP_NO = 9
+FIRST_NAME = Phil
+LAST_NAME = Forest
+PHONE_EXT = 229
+HIRE_DATE = 17-4-89 00:00:00.000
+DEPT_NO = 622
+JOB_CODE = Mngr
+JOB_GRADE = 3
+JOB_COUNTRY = USA
+SALARY = 75,060.00
+FULL_NAME = Forest, Phil
+
+
+Running Test 5: Update Returning and Activity Check
+Opening localhost:employee
+Database Open
+Database Closed
+Database Open
+Select Count = 1 InsertCount = 0 UpdateCount = 1 DeleteCount = 0
+Last Name = Forest
+EMP_NO = 9
+FIRST_NAME = Phil
+LAST_NAME = Forest
+PHONE_EXT = 229
+HIRE_DATE = 31-1-16 00:00:00.000
+DEPT_NO = 622
+JOB_CODE = Mngr
+JOB_GRADE = 3
+JOB_COUNTRY = USA
+SALARY = 75,060.00
+FULL_NAME = Forest, Phil
+
+Inserting
+Full Name = Doe, John
+Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
+Database Activity = TRUE
+Transaction Activity = TRUE
+Database Activity = FALSE
+Transaction Activity = FALSE
+Employee Count = 43
+Database Activity = TRUE
+Transaction Activity = TRUE
+Transaction Active
+Transaction inactive
+
+
+Running Test 6: Blob Handling
+Metadata
+SQLType =SQL_TEXT
+sub type = 4
+Table = RDB$CHARACTER_SETS
+Owner = SYSDBA
+Column Name = RDB$CHARACTER_SET_NAME
+Alias Name = RDB$CHARACTER_SET_NAME
+Field Name = RDB$CHARACTER_SET_NAME
+Scale = 0
+Charset id = 4
+Nullable
+Size = 124
+
+SQLType =SQL_SHORT
+sub type = 0
+Table = RDB$CHARACTER_SETS
+Owner = SYSDBA
+Column Name = RDB$CHARACTER_SET_ID
+Alias Name = RDB$CHARACTER_SET_ID
+Field Name = RDB$CHARACTER_SET_ID
+Scale = 0
+Charset id = 0
+Nullable
+Size = 2
+
+RDB$CHARACTER_SET_NAME = NONE (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 0
+RDB$CHARACTER_SET_NAME = OCTETS (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 1
+RDB$CHARACTER_SET_NAME = ASCII (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 2
+RDB$CHARACTER_SET_NAME = UNICODE_FSS (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 3
+RDB$CHARACTER_SET_NAME = UTF8 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 4
+RDB$CHARACTER_SET_NAME = SJIS_0208 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 5
+RDB$CHARACTER_SET_NAME = EUCJ_0208 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 6
+RDB$CHARACTER_SET_NAME = DOS737 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 9
+RDB$CHARACTER_SET_NAME = DOS437 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 10
+RDB$CHARACTER_SET_NAME = DOS850 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 11
+RDB$CHARACTER_SET_NAME = DOS865 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 12
+RDB$CHARACTER_SET_NAME = DOS860 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 13
+RDB$CHARACTER_SET_NAME = DOS863 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 14
+RDB$CHARACTER_SET_NAME = DOS775 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 15
+RDB$CHARACTER_SET_NAME = DOS858 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 16
+RDB$CHARACTER_SET_NAME = DOS862 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 17
+RDB$CHARACTER_SET_NAME = DOS864 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 18
+RDB$CHARACTER_SET_NAME = NEXT (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 19
+RDB$CHARACTER_SET_NAME = ISO8859_1 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 21
+RDB$CHARACTER_SET_NAME = ISO8859_2 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 22
+RDB$CHARACTER_SET_NAME = ISO8859_3 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 23
+RDB$CHARACTER_SET_NAME = ISO8859_4 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 34
+RDB$CHARACTER_SET_NAME = ISO8859_5 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 35
+RDB$CHARACTER_SET_NAME = ISO8859_6 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 36
+RDB$CHARACTER_SET_NAME = ISO8859_7 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 37
+RDB$CHARACTER_SET_NAME = ISO8859_8 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 38
+RDB$CHARACTER_SET_NAME = ISO8859_9 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 39
+RDB$CHARACTER_SET_NAME = ISO8859_13 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 40
+RDB$CHARACTER_SET_NAME = KSC_5601 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 44
+RDB$CHARACTER_SET_NAME = DOS852 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 45
+RDB$CHARACTER_SET_NAME = DOS857 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 46
+RDB$CHARACTER_SET_NAME = DOS861 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 47
+RDB$CHARACTER_SET_NAME = DOS866 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 48
+RDB$CHARACTER_SET_NAME = DOS869 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 49
+RDB$CHARACTER_SET_NAME = CYRL (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 50
+RDB$CHARACTER_SET_NAME = WIN1250 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 51
+RDB$CHARACTER_SET_NAME = WIN1251 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 52
+RDB$CHARACTER_SET_NAME = WIN1252 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 53
+RDB$CHARACTER_SET_NAME = WIN1253 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 54
+RDB$CHARACTER_SET_NAME = WIN1254 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 55
+RDB$CHARACTER_SET_NAME = BIG_5 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 56
+RDB$CHARACTER_SET_NAME = GB_2312 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 57
+RDB$CHARACTER_SET_NAME = WIN1255 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 58
+RDB$CHARACTER_SET_NAME = WIN1256 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 59
+RDB$CHARACTER_SET_NAME = WIN1257 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 60
+RDB$CHARACTER_SET_NAME = KOI8R (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 63
+RDB$CHARACTER_SET_NAME = KOI8U (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 64
+RDB$CHARACTER_SET_NAME = WIN1258 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 65
+RDB$CHARACTER_SET_NAME = TIS620 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 66
+RDB$CHARACTER_SET_NAME = GBK (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 67
+RDB$CHARACTER_SET_NAME = CP943C (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 68
+RDB$CHARACTER_SET_NAME = GB18030 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 69
+
+Metadata
+SQLType =SQL_LONG
+sub type = 0
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = ROWID
+Alias Name = ROWID
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+
+SQLType =SQL_LONG
+sub type = 2
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = FIXEDPOINT
+Alias Name = FIXEDPOINT
+Field Name = FIXEDPOINT
+Scale = -2
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_DOUBLE
+sub type = 0
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = FLOATINGPOINT
+Alias Name = FLOATINGPOINT
+Field Name = FLOATINGPOINT
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+SQLType =SQL_VARYING
+sub type = 4
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = TITLE
+Alias Name = TITLE
+Field Name = TITLE
+Scale = 0
+Charset id = 4
+Nullable
+Size = 128
+
+SQLType =SQL_BLOB
+sub type = 1
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = BLOBDATA
+Alias Name = BLOBDATA
+Field Name = BLOBDATA
+Scale = 4
+Charset id = 4
+Nullable
+Size = 8
+
+Blob Meta Data
+SQL SubType =1
+Table = TESTDATA
+Column = BLOBDATA
+CharSetID = 4
+Segment Size = 80
+
+
+Param Name = ROWID
+Param Name = TITLE
+Param Name = FP
+Param Name = DP
+ROWID = 1
+FIXEDPOINT = 20.28
+FLOATINGPOINT = 3.14
+TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
+BLOBDATA = NULL
+
+SQL Params
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = 
+Scale = 4
+Charset id = 0
+Nullable
+Size = 8
+
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+
+ROWID = 1
+FIXEDPOINT = 20.28
+FLOATINGPOINT = 3.14
+TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
+BLOBDATA (Charset Id = 4 Codepage = 65001)
+
+To be or not to be-that is the question:
+Whether 'tis nobler in the mind to suffer
+The slings and arrows of outrageous fortune,
+Or to take arms against a sea of troubles,
+And, by opposing, end them. To die, to sleep-
+No more-and by a sleep to say we end
+The heartache and the thousand natural shocks
+That flesh is heir to-'tis a consummation
+Devoutly to be wished. To die, to sleep-
+To sleep, perchance to dream. Aye, there's the rub,
+For in that sleep of death what dreams may come,
+When we have shuffled off this mortal coil,
+Must give us pause. There's the respect
+That makes calamity of so long life.
+For who would bear the whips and scorns of time,
+Th' oppressor's wrong, the proud man's contumely, 
+The pangs of despised love, the law’s delay, 
+The insolence of office, and the spurns
+That patient merit of the unworthy takes,
+When he himself might his quietus make
+With a bare bodkin? Who would fardels bear, 
+To grunt and sweat under a weary life,
+But that the dread of something after death,
+The undiscovered country from whose bourn
+No traveler returns, puzzles the will
+And makes us rather bear those ills we have
+Than fly to others that we know not of?
+Thus conscience does make cowards of us all,
+And thus the native hue of resolution
+Is sicklied o'er with the pale cast of thought,
+And enterprises of great pitch and moment, 
+With this regard their currents turn awry, 
+And lose the name of action.-Soft you now,
+The fair Ophelia.-Nymph, in thy orisons
+Be all my sins remembered
+
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+
+SQLType =SQL_VARYING
+sub type = 4
+Field Name = TITLE
+Scale = 0
+Charset id = 4
+Nullable
+Size = 128
+
+SQLType =SQL_LONG
+sub type = 2
+Field Name = FP
+Scale = -2
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_DOUBLE
+sub type = 0
+Field Name = DP
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+ROWID = 1
+FIXEDPOINT = 20.28
+FLOATINGPOINT = 3.14
+TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
+BLOBDATA (Charset Id = 4 Codepage = 65001)
+
+To be or not to be-that is the question:
+Whether 'tis nobler in the mind to suffer
+The slings and arrows of outrageous fortune,
+Or to take arms against a sea of troubles,
+And, by opposing, end them. To die, to sleep-
+No more-and by a sleep to say we end
+The heartache and the thousand natural shocks
+That flesh is heir to-'tis a consummation
+Devoutly to be wished. To die, to sleep-
+To sleep, perchance to dream. Aye, there's the rub,
+For in that sleep of death what dreams may come,
+When we have shuffled off this mortal coil,
+Must give us pause. There's the respect
+That makes calamity of so long life.
+For who would bear the whips and scorns of time,
+Th' oppressor's wrong, the proud man's contumely, 
+The pangs of despised love, the law’s delay, 
+The insolence of office, and the spurns
+That patient merit of the unworthy takes,
+When he himself might his quietus make
+With a bare bodkin? Who would fardels bear, 
+To grunt and sweat under a weary life,
+But that the dread of something after death,
+The undiscovered country from whose bourn
+No traveler returns, puzzles the will
+And makes us rather bear those ills we have
+Than fly to others that we know not of?
+Thus conscience does make cowards of us all,
+And thus the native hue of resolution
+Is sicklied o'er with the pale cast of thought,
+And enterprises of great pitch and moment, 
+With this regard their currents turn awry, 
+And lose the name of action.-Soft you now,
+The fair Ophelia.-Nymph, in thy orisons
+Be all my sins remembered
+ROWID = 2
+FIXEDPOINT = NULL
+FLOATINGPOINT = NULL
+TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
+BLOBDATA (Charset Id = 4 Codepage = 65001)
+
+To be or not to be-that is the question:
+Whether 'tis nobler in the mind to suffer
+The slings and arrows of outrageous fortune,
+Or to take arms against a sea of troubles,
+And, by opposing, end them. To die, to sleep-
+No more-and by a sleep to say we end
+The heartache and the thousand natural shocks
+That flesh is heir to-'tis a consummation
+Devoutly to be wished. To die, to sleep-
+To sleep, perchance to dream. Aye, there's the rub,
+For in that sleep of death what dreams may come,
+When we have shuffled off this mortal coil,
+Must give us pause. There's the respect
+That makes calamity of so long life.
+For who would bear the whips and scorns of time,
+Th' oppressor's wrong, the proud man's contumely, 
+The pangs of despised love, the law’s delay, 
+The insolence of office, and the spurns
+That patient merit of the unworthy takes,
+When he himself might his quietus make
+With a bare bodkin? Who would fardels bear, 
+To grunt and sweat under a weary life,
+But that the dread of something after death,
+The undiscovered country from whose bourn
+No traveler returns, puzzles the will
+And makes us rather bear those ills we have
+Than fly to others that we know not of?
+Thus conscience does make cowards of us all,
+And thus the native hue of resolution
+Is sicklied o'er with the pale cast of thought,
+And enterprises of great pitch and moment, 
+With this regard their currents turn awry, 
+And lose the name of action.-Soft you now,
+The fair Ophelia.-Nymph, in thy orisons
+Be all my sins remembered
+
+Metadata
+SQLType =SQL_TEXT
+sub type = 3
+Table = RDB$CHARACTER_SETS
+Owner = SYSDBA
+Column Name = RDB$CHARACTER_SET_NAME
+Alias Name = RDB$CHARACTER_SET_NAME
+Field Name = RDB$CHARACTER_SET_NAME
+Scale = 0
+Charset id = 3
+Nullable
+Size = 93
+
+SQLType =SQL_SHORT
+sub type = 0
+Table = RDB$CHARACTER_SETS
+Owner = SYSDBA
+Column Name = RDB$CHARACTER_SET_ID
+Alias Name = RDB$CHARACTER_SET_ID
+Field Name = RDB$CHARACTER_SET_ID
+Scale = 0
+Charset id = 0
+Nullable
+Size = 2
+
+RDB$CHARACTER_SET_NAME = NONE (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 0
+RDB$CHARACTER_SET_NAME = OCTETS (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 1
+RDB$CHARACTER_SET_NAME = ASCII (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 2
+RDB$CHARACTER_SET_NAME = UNICODE_FSS (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 3
+RDB$CHARACTER_SET_NAME = UTF8 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 4
+RDB$CHARACTER_SET_NAME = SJIS_0208 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 5
+RDB$CHARACTER_SET_NAME = EUCJ_0208 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 6
+RDB$CHARACTER_SET_NAME = DOS737 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 9
+RDB$CHARACTER_SET_NAME = DOS437 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 10
+RDB$CHARACTER_SET_NAME = DOS850 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 11
+RDB$CHARACTER_SET_NAME = DOS865 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 12
+RDB$CHARACTER_SET_NAME = DOS860 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 13
+RDB$CHARACTER_SET_NAME = DOS863 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 14
+RDB$CHARACTER_SET_NAME = DOS775 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 15
+RDB$CHARACTER_SET_NAME = DOS858 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 16
+RDB$CHARACTER_SET_NAME = DOS862 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 17
+RDB$CHARACTER_SET_NAME = DOS864 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 18
+RDB$CHARACTER_SET_NAME = NEXT (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 19
+RDB$CHARACTER_SET_NAME = ISO8859_1 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 21
+RDB$CHARACTER_SET_NAME = ISO8859_2 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 22
+RDB$CHARACTER_SET_NAME = ISO8859_3 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 23
+RDB$CHARACTER_SET_NAME = ISO8859_4 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 34
+RDB$CHARACTER_SET_NAME = ISO8859_5 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 35
+RDB$CHARACTER_SET_NAME = ISO8859_6 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 36
+RDB$CHARACTER_SET_NAME = ISO8859_7 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 37
+RDB$CHARACTER_SET_NAME = ISO8859_8 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 38
+RDB$CHARACTER_SET_NAME = ISO8859_9 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 39
+RDB$CHARACTER_SET_NAME = ISO8859_13 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 40
+RDB$CHARACTER_SET_NAME = KSC_5601 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 44
+RDB$CHARACTER_SET_NAME = DOS852 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 45
+RDB$CHARACTER_SET_NAME = DOS857 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 46
+RDB$CHARACTER_SET_NAME = DOS861 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 47
+RDB$CHARACTER_SET_NAME = DOS866 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 48
+RDB$CHARACTER_SET_NAME = DOS869 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 49
+RDB$CHARACTER_SET_NAME = CYRL (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 50
+RDB$CHARACTER_SET_NAME = WIN1250 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 51
+RDB$CHARACTER_SET_NAME = WIN1251 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 52
+RDB$CHARACTER_SET_NAME = WIN1252 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 53
+RDB$CHARACTER_SET_NAME = WIN1253 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 54
+RDB$CHARACTER_SET_NAME = WIN1254 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 55
+RDB$CHARACTER_SET_NAME = BIG_5 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 56
+RDB$CHARACTER_SET_NAME = GB_2312 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 57
+RDB$CHARACTER_SET_NAME = WIN1255 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 58
+RDB$CHARACTER_SET_NAME = WIN1256 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 59
+RDB$CHARACTER_SET_NAME = WIN1257 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 60
+RDB$CHARACTER_SET_NAME = KOI8R (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 63
+RDB$CHARACTER_SET_NAME = KOI8U (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 64
+RDB$CHARACTER_SET_NAME = WIN1258 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 65
+RDB$CHARACTER_SET_NAME = TIS620 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 66
+RDB$CHARACTER_SET_NAME = GBK (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 67
+RDB$CHARACTER_SET_NAME = CP943C (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 68
+RDB$CHARACTER_SET_NAME = GB18030 (Charset Id = 3 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 69
+
+Metadata
+SQLType =SQL_LONG
+sub type = 0
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = ROWID
+Alias Name = ROWID
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+
+SQLType =SQL_LONG
+sub type = 2
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = FIXEDPOINT
+Alias Name = FIXEDPOINT
+Field Name = FIXEDPOINT
+Scale = -2
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_DOUBLE
+sub type = 0
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = FLOATINGPOINT
+Alias Name = FLOATINGPOINT
+Field Name = FLOATINGPOINT
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+SQLType =SQL_VARYING
+sub type = 4
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = TITLE
+Alias Name = TITLE
+Field Name = TITLE
+Scale = 0
+Charset id = 4
+Nullable
+Size = 128
+
+SQLType =SQL_BLOB
+sub type = 1
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = BLOBDATA
+Alias Name = BLOBDATA
+Field Name = BLOBDATA
+Scale = 4
+Charset id = 4
+Nullable
+Size = 8
+
+Blob Meta Data
+SQL SubType =1
+Table = TESTDATA
+Column = BLOBDATA
+CharSetID = 4
+Segment Size = 80
+
+
+Param Name = ROWID
+Param Name = TITLE
+Param Name = FP
+Param Name = DP
+ROWID = 1
+FIXEDPOINT = 20.28
+FLOATINGPOINT = 3.14
+TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
+BLOBDATA = NULL
+
+SQL Params
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = 
+Scale = 4
+Charset id = 0
+Nullable
+Size = 8
+
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+
+ROWID = 1
+FIXEDPOINT = 20.28
+FLOATINGPOINT = 3.14
+TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
+BLOBDATA (Charset Id = 4 Codepage = 65001)
+
+To be or not to be-that is the question:
+Whether 'tis nobler in the mind to suffer
+The slings and arrows of outrageous fortune,
+Or to take arms against a sea of troubles,
+And, by opposing, end them. To die, to sleep-
+No more-and by a sleep to say we end
+The heartache and the thousand natural shocks
+That flesh is heir to-'tis a consummation
+Devoutly to be wished. To die, to sleep-
+To sleep, perchance to dream. Aye, there's the rub,
+For in that sleep of death what dreams may come,
+When we have shuffled off this mortal coil,
+Must give us pause. There's the respect
+That makes calamity of so long life.
+For who would bear the whips and scorns of time,
+Th' oppressor's wrong, the proud man's contumely, 
+The pangs of despised love, the law’s delay, 
+The insolence of office, and the spurns
+That patient merit of the unworthy takes,
+When he himself might his quietus make
+With a bare bodkin? Who would fardels bear, 
+To grunt and sweat under a weary life,
+But that the dread of something after death,
+The undiscovered country from whose bourn
+No traveler returns, puzzles the will
+And makes us rather bear those ills we have
+Than fly to others that we know not of?
+Thus conscience does make cowards of us all,
+And thus the native hue of resolution
+Is sicklied o'er with the pale cast of thought,
+And enterprises of great pitch and moment, 
+With this regard their currents turn awry, 
+And lose the name of action.-Soft you now,
+The fair Ophelia.-Nymph, in thy orisons
+Be all my sins remembered
+
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+
+SQLType =SQL_VARYING
+sub type = 4
+Field Name = TITLE
+Scale = 0
+Charset id = 4
+Nullable
+Size = 128
+
+SQLType =SQL_LONG
+sub type = 2
+Field Name = FP
+Scale = -2
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_DOUBLE
+sub type = 0
+Field Name = DP
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+ROWID = 1
+FIXEDPOINT = 20.28
+FLOATINGPOINT = 3.14
+TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
+BLOBDATA (Charset Id = 4 Codepage = 65001)
+
+To be or not to be-that is the question:
+Whether 'tis nobler in the mind to suffer
+The slings and arrows of outrageous fortune,
+Or to take arms against a sea of troubles,
+And, by opposing, end them. To die, to sleep-
+No more-and by a sleep to say we end
+The heartache and the thousand natural shocks
+That flesh is heir to-'tis a consummation
+Devoutly to be wished. To die, to sleep-
+To sleep, perchance to dream. Aye, there's the rub,
+For in that sleep of death what dreams may come,
+When we have shuffled off this mortal coil,
+Must give us pause. There's the respect
+That makes calamity of so long life.
+For who would bear the whips and scorns of time,
+Th' oppressor's wrong, the proud man's contumely, 
+The pangs of despised love, the law’s delay, 
+The insolence of office, and the spurns
+That patient merit of the unworthy takes,
+When he himself might his quietus make
+With a bare bodkin? Who would fardels bear, 
+To grunt and sweat under a weary life,
+But that the dread of something after death,
+The undiscovered country from whose bourn
+No traveler returns, puzzles the will
+And makes us rather bear those ills we have
+Than fly to others that we know not of?
+Thus conscience does make cowards of us all,
+And thus the native hue of resolution
+Is sicklied o'er with the pale cast of thought,
+And enterprises of great pitch and moment, 
+With this regard their currents turn awry, 
+And lose the name of action.-Soft you now,
+The fair Ophelia.-Nymph, in thy orisons
+Be all my sins remembered
+ROWID = 2
+FIXEDPOINT = NULL
+FLOATINGPOINT = NULL
+TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
+BLOBDATA (Charset Id = 4 Codepage = 65001)
+
+To be or not to be-that is the question:
+Whether 'tis nobler in the mind to suffer
+The slings and arrows of outrageous fortune,
+Or to take arms against a sea of troubles,
+And, by opposing, end them. To die, to sleep-
+No more-and by a sleep to say we end
+The heartache and the thousand natural shocks
+That flesh is heir to-'tis a consummation
+Devoutly to be wished. To die, to sleep-
+To sleep, perchance to dream. Aye, there's the rub,
+For in that sleep of death what dreams may come,
+When we have shuffled off this mortal coil,
+Must give us pause. There's the respect
+That makes calamity of so long life.
+For who would bear the whips and scorns of time,
+Th' oppressor's wrong, the proud man's contumely, 
+The pangs of despised love, the law’s delay, 
+The insolence of office, and the spurns
+That patient merit of the unworthy takes,
+When he himself might his quietus make
+With a bare bodkin? Who would fardels bear, 
+To grunt and sweat under a weary life,
+But that the dread of something after death,
+The undiscovered country from whose bourn
+No traveler returns, puzzles the will
+And makes us rather bear those ills we have
+Than fly to others that we know not of?
+Thus conscience does make cowards of us all,
+And thus the native hue of resolution
+Is sicklied o'er with the pale cast of thought,
+And enterprises of great pitch and moment, 
+With this regard their currents turn awry, 
+And lose the name of action.-Soft you now,
+The fair Ophelia.-Nymph, in thy orisons
+Be all my sins remembered
+
+
+
+Running Test 7: Create and read back an Array
+Metadata
+SQLType =SQL_LONG
+sub type = 0
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = ROWID
+Alias Name = ROWID
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+
+SQLType =SQL_VARYING
+sub type = 4
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = TITLE
+Alias Name = TITLE
+Field Name = TITLE
+Scale = 0
+Charset id = 4
+Nullable
+Size = 128
+
+SQLType =SQL_TIMESTAMP
+sub type = 0
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = DATED
+Alias Name = DATED
+Field Name = DATED
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+SQLType =SQL_VARYING
+sub type = 4
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = NOTES
+Alias Name = NOTES
+Field Name = NOTES
+Scale = 0
+Charset id = 4
+Nullable
+Size = 256
+
+SQLType =SQL_ARRAY
+sub type = 0
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = MYARRAY
+Alias Name = MYARRAY
+Field Name = MYARRAY
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+Array Meta Data:
+SQLType =SQL_LONG
+Scale = 0
+Charset id = 0
+Size = 4
+Table = TESTDATA
+Column = MYARRAY
+Dimensions = 1
+Bounds: (0:16) 
+
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+
+SQLType =SQL_VARYING
+sub type = 4
+Field Name = TITLE
+Scale = 0
+Charset id = 4
+Nullable
+Size = 128
+
+SQLType =SQL_TIMESTAMP
+sub type = 0
+Field Name = DATED
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+SQLType =SQL_VARYING
+sub type = 4
+Field Name = NOTES
+Scale = 0
+Charset id = 4
+Nullable
+Size = 256
+
+Param Name = ROWID
+Param Name = TITLE
+Param Name = DATED
+Param Name = NOTES
+ROWID = 1
+TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
+DATED = 1-4-16 09:30:00.100
+NOTES = Écoute moi (Charset Id = 4 Codepage = 65001)
+MYARRAY = NULL
+
+SQL Params
+SQLType =SQL_ARRAY
+sub type = 0
+Field Name = MYARRAY
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+ROWID = 1
+TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
+DATED = 1-4-16 09:30:00.100
+NOTES = Écoute moi (Charset Id = 4 Codepage = 65001)
+Array: (0: 100) (1: 99) (2: 98) (3: 97) (4: 96) (5: 95) (6: 94) (7: 93) (8: 92) (9: 91) (10: 90) (11: 89) (12: 88) (13: 87) (14: 86) (15: 85) (16: 84) 
+
+Shrink to 2:10
+Array: (2: 98) (3: 97) (4: 96) (5: 95) (6: 94) (7: 93) (8: 92) (9: 91) (10: 90) 
+Write updated reduced slice
+Show update array
+ROWID = 1
+TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
+DATED = 1-4-16 09:30:00.100
+NOTES = Écoute moi (Charset Id = 4 Codepage = 65001)
+Array: (0: 100) (1: 99) (2: 1000) (3: 97) (4: 96) (5: 95) (6: 94) (7: 93) (8: 92) (9: 91) (10: 90) (11: 89) (12: 88) (13: 87) (14: 86) (15: 85) (16: 84) 
+
+
+
+Running Test 8: Create and read back an Array with 2 dimensions
+Metadata
+SQLType =SQL_LONG
+sub type = 0
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = ROWID
+Alias Name = ROWID
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+
+SQLType =SQL_VARYING
+sub type = 4
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = TITLE
+Alias Name = TITLE
+Field Name = TITLE
+Scale = 0
+Charset id = 4
+Nullable
+Size = 128
+
+SQLType =SQL_ARRAY
+sub type = 0
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = MYARRAY
+Alias Name = MYARRAY
+Field Name = MYARRAY
+Scale = 0
+Charset id = 4
+Nullable
+Size = 8
+Array Meta Data:
+SQLType =SQL_VARYING
+Scale = 0
+Charset id = 4
+Size = 16
+Table = TESTDATA
+Column = MYARRAY
+Dimensions = 2
+Bounds: (0:16) (-1:7) 
+
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+
+SQLType =SQL_VARYING
+sub type = 4
+Field Name = TITLE
+Scale = 0
+Charset id = 4
+Nullable
+Size = 128
+
+ROWID = 1
+TITLE = 2D Array (Charset Id = 4 Codepage = 65001)
+MYARRAY = NULL
+
+ROWID = 1
+TITLE = 2D Array (Charset Id = 4 Codepage = 65001)
+Array: (0,-1: A50) (0,0: A51) (0,1: A52) (0,2: A53) (0,3: A54) (0,4: A55) (0,5: A56) (0,6: A57) (0,7: A58) (1,-1: A59) (1,0: A60) (1,1: A61) (1,2: A62) (1,3: A63) (1,4: A64) (1,5: A65) (1,6: A66) (1,7: A67) (2,-1: A68) (2,0: A69) (2,1: A70) (2,2: A71) (2,3: A72) (2,4: A73) (2,5: A74) (2,6: A75) (2,7: A76) (3,-1: A77) (3,0: A78) (3,1: A79) (3,2: A80) (3,3: A81) (3,4: A82) (3,5: A83) (3,6: A84) (3,7: A85) (4,-1: A86) (4,0: A87) (4,1: A88) (4,2: A89) (4,3: A90) (4,4: A91) (4,5: A92) (4,6: A93) (4,7: A94) (5,-1: A95) (5,0: A96) (5,1: A97) (5,2: A98) (5,3: A99) (5,4: A100) (5,5: A101) (5,6: A102) (5,7: A103) (6,-1: A104) (6,0: A105) (6,1: A106) (6,2: A107) (6,3: A108) (6,4: A109) (6,5: A110) (6,6: A111) (6,7: A112) (7,-1: A113) (7,0: A114) (7,1: A115) (7,2: A116) (7,3: A117) (7,4: A118) (7,5: A119) (7,6: A120) (7,7: A121) (8,-1: A122) (8,0: A123) (8,1: A124) (8,2: A125) (8,3: A126) (8,4: A127) (8,5: A128) (8,6: A129) (8,7: A130) (9,-1: A131) (9,0: A132) (9,1: A133) (9,2: A134) (9,3: A135) (9,4: A136) (9,5: A137) (9,6: A138) (9,7: A139) (10,-1: A140) (10,0: A141) (10,1: A142) (10,2: A143) (10,3: A144) (10,4: A145) (10,5: A146) (10,6: A147) (10,7: A148) (11,-1: A149) (11,0: A150) (11,1: A151) (11,2: A152) (11,3: A153) (11,4: A154) (11,5: A155) (11,6: A156) (11,7: A157) (12,-1: A158) (12,0: A159) (12,1: A160) (12,2: A161) (12,3: A162) (12,4: A163) (12,5: A164) (12,6: A165) (12,7: A166) (13,-1: A167) (13,0: A168) (13,1: A169) (13,2: A170) (13,3: A171) (13,4: A172) (13,5: A173) (13,6: A174) (13,7: A175) (14,-1: A176) (14,0: A177) (14,1: A178) (14,2: A179) (14,3: A180) (14,4: A181) (14,5: A182) (14,6: A183) (14,7: A184) (15,-1: A185) (15,0: A186) (15,1: A187) (15,2: A188) (15,3: A189) (15,4: A190) (15,5: A191) (15,6: A192) (15,7: A193) (16,-1: A194) (16,0: A195) (16,1: A196) (16,2: A197) (16,3: A198) (16,4: A199) (16,5: A200) (16,6: A201) (16,7: A202) 
+
+
+
+Running Test 9: Database Information tests
+Database ID = 4 FB = /usr/share/doc/firebird2.5-common-doc/examples/empbuild/employee.fdb SN = zeus
+Pages =272
+Base Level = 13,4,0,3,
+Implementation = 11,7,0,3,66,1,66,
+Reserved = 0
+ODS minor = 2
+ODS major = 11
+Page Size = 4096
+Version = 1: LI-V6.3.2.26540 Firebird 2.5
+Server Memory = 9137296
+Forced Writes  = 1
+Max Memory  = 9274808
+Num Buffers  = 2048
+Sweep Interval  = 20000
+Logged in Users: SYSDBA,
+Fetches  = 503
+Writes  = 2
+Reads  = 47
+Page Writes  = 2
+Record Version Removals Operation Counts
+
+Deletes Operation Counts
+
+Expunge Count Operation Counts
+
+Insert Count Operation Counts
+
+Purge Count Countites Operation Counts
+
+Indexed Reads Count Operation Counts
+Table ID = 6
+Count = 11
+Table ID = 11
+Count = 1
+Table ID = 12
+Count = 24
+Table ID = 28
+Count = 4
+Table ID = 29
+Count = 4
+
+Sequential Table Scans Operation Counts
+Table ID = 0
+Count = 88
+Table ID = 1
+Count = 1
+
+Update Count Operation Counts
+
+
+
+Running Test 10: Event Handling
+Call Async Wait
+Async Wait Called
+Signal Event
+Event Signalled
+Event: TESTEVENT, Count = 1
+Two more events
+Call Async Wait
+Async Wait Called
+Signal Event
+Event Signalled
+Event: TESTEVENT, Count = 4
+Async Wait: Test Cancel
+Async Wait Called
+Time Out - Cancel Worked!
+Sync wait
+Event Signalled
+Event: TESTEVENT, Count = 7
+
+
+Running Test 11: Services API
+Service Manager Version = 2
+Server Version = LI-V2.5.2.26540 Firebird 2.5
+Implementation = Firebird/linux AMD64
+
+Lock Directory = /tmp/firebird/
+Message File = /usr/share/firebird/2.5/
+Security File = /var/lib/firebird/2.5/system/security2.fdb
+
+DB Attachments
+No. of Attachments = 0
+Databases In Use = 0
+
+Sec. Database User
+User Name = SYSDBA
+First Name = Sql
+Middle Name = Server
+Last Name = Administrator
+User ID = 0
+Group ID = 0
+User Name = TESTER
+First Name = 
+Middle Name = 
+Last Name = 
+User ID = 0
+Group ID = 0
+User Name = LISATT01
+First Name = 
+Middle Name = 
+Last Name = 
+User ID = 0
+Group ID = 0
+User Name = WEBSITE
+First Name = 
+Middle Name = 
+Last Name = 
+User ID = 0
+Group ID = 0
+User Name = LISATT02
+First Name = 
+Middle Name = 
+Last Name = 
+User ID = 0
+Group ID = 0
+User Name = MYLDBADMIN
+First Name = 
+Middle Name = 
+Last Name = 
+User ID = 0
+Group ID = 0
+User Name = LISATTEST
+First Name = 
+Middle Name = 
+Last Name = 
+User ID = 0
+Group ID = 0
+
+
+Get Statistics
+
+ 
+
+Database "/usr/share/doc/firebird2.5-common-doc/examples/empbuild/employee.fdb" 
+
+Database header page information: 
+
+	Flags			0 
+
+	Checksum		12345 
+
+	Generation		193 
+
+	Page size		4096 
+
+	ODS version		11.2 
+
+	Oldest transaction	169 
+
+	Oldest active		175 
+
+	Oldest snapshot		175 
+
+	Next transaction	176 
+
+	Bumped transaction	1 
+
+	Sequence number		0 
+
+	Next attachment ID	15 
+
+	Implementation ID	19 
+
+	Shadow count		0 
+
+	Page buffers		0 
+
+	Next header page	0 
+
+	Database dialect	3 
+
+	Creation date		Feb 28, 2014 10:45:05 
+
+	Attributes		force write 
+
+ 
+
+    Variable header data: 
+
+	*END* 
+
+ 
+
+ 
+
+Database file sequence: 
+
+File /usr/share/doc/firebird2.5-common-doc/examples/empbuild/employee.fdb is the only file 
+
+ 
+
+Analyzing database pages ... 
+
+COUNTRY (128) 
+
+    Primary pointer page: 169, Index root page: 170 
+
+    Data pages: 1, data page slots: 1, average fill: 15% 
+
+    Fill distribution: 
+
+	 0 - 19% = 1 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 0 
+
+	80 - 99% = 0 
+
+ 
+
+    Index RDB$PRIMARY1 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 14 
+
+	Average data length: 6.50, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+CUSTOMER (137) 
+
+    Primary pointer page: 228, Index root page: 229 
+
+    Data pages: 1, data page slots: 1, average fill: 52% 
+
+    Fill distribution: 
+
+	 0 - 19% = 0 
+
+	20 - 39% = 0 
+
+	40 - 59% = 1 
+
+	60 - 79% = 0 
+
+	80 - 99% = 0 
+
+ 
+
+    Index CUSTNAMEX (2) 
+
+	Depth: 1, leaf buckets: 1, nodes: 15 
+
+	Average data length: 15.87, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index CUSTREGION (3) 
+
+	Depth: 1, leaf buckets: 1, nodes: 15 
+
+	Average data length: 17.27, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$FOREIGN23 (1) 
+
+	Depth: 1, leaf buckets: 1, nodes: 15 
+
+	Average data length: 4.87, total dup: 4, max dup: 4 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$PRIMARY22 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 15 
+
+	Average data length: 1.13, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+DEPARTMENT (130) 
+
+    Primary pointer page: 184, Index root page: 185 
+
+    Data pages: 1, data page slots: 1, average fill: 47% 
+
+    Fill distribution: 
+
+	 0 - 19% = 0 
+
+	20 - 39% = 0 
+
+	40 - 59% = 1 
+
+	60 - 79% = 0 
+
+	80 - 99% = 0 
+
+ 
+
+    Index BUDGETX (3) 
+
+	Depth: 1, leaf buckets: 1, nodes: 21 
+
+	Average data length: 5.38, total dup: 7, max dup: 3 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$4 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 21 
+
+	Average data length: 13.95, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$FOREIGN10 (4) 
+
+	Depth: 1, leaf buckets: 1, nodes: 21 
+
+	Average data length: 1.14, total dup: 3, max dup: 3 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$FOREIGN6 (2) 
+
+	Depth: 1, leaf buckets: 1, nodes: 21 
+
+	Average data length: 0.81, total dup: 13, max dup: 4 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$PRIMARY5 (1) 
+
+	Depth: 1, leaf buckets: 1, nodes: 21 
+
+	Average data length: 1.71, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+EMPLOYEE (131) 
+
+    Primary pointer page: 190, Index root page: 191 
+
+    Data pages: 2, data page slots: 2, average fill: 45% 
+
+    Fill distribution: 
+
+	 0 - 19% = 1 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 1 
+
+	80 - 99% = 0 
+
+ 
+
+    Index NAMEX (3) 
+
+	Depth: 1, leaf buckets: 1, nodes: 43 
+
+	Average data length: 15.35, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 0 
+
+	    20 - 39% = 1 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$FOREIGN8 (1) 
+
+	Depth: 1, leaf buckets: 1, nodes: 43 
+
+	Average data length: 0.79, total dup: 24, max dup: 4 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$FOREIGN9 (2) 
+
+	Depth: 1, leaf buckets: 1, nodes: 43 
+
+	Average data length: 6.63, total dup: 16, max dup: 4 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$PRIMARY7 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 43 
+
+	Average data length: 1.30, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+EMPLOYEE_PROJECT (134) 
+
+    Primary pointer page: 207, Index root page: 208 
+
+    Data pages: 1, data page slots: 1, average fill: 20% 
+
+    Fill distribution: 
+
+	 0 - 19% = 1 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 0 
+
+	80 - 99% = 0 
+
+ 
+
+    Index RDB$FOREIGN15 (1) 
+
+	Depth: 1, leaf buckets: 1, nodes: 28 
+
+	Average data length: 1.04, total dup: 6, max dup: 2 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$FOREIGN16 (2) 
+
+	Depth: 1, leaf buckets: 1, nodes: 28 
+
+	Average data length: 0.86, total dup: 23, max dup: 9 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$PRIMARY14 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 28 
+
+	Average data length: 9.11, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+JOB (129) 
+
+    Primary pointer page: 175, Index root page: 176 
+
+    Data pages: 3, data page slots: 3, average fill: 80% 
+
+    Fill distribution: 
+
+	 0 - 19% = 0 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 1 
+
+	80 - 99% = 2 
+
+ 
+
+    Index MAXSALX (2) 
+
+	Depth: 1, leaf buckets: 1, nodes: 31 
+
+	Average data length: 10.90, total dup: 5, max dup: 1 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index MINSALX (3) 
+
+	Depth: 1, leaf buckets: 1, nodes: 31 
+
+	Average data length: 10.29, total dup: 7, max dup: 2 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$FOREIGN3 (1) 
+
+	Depth: 1, leaf buckets: 1, nodes: 31 
+
+	Average data length: 1.39, total dup: 24, max dup: 20 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$PRIMARY2 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 31 
+
+	Average data length: 10.45, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+PROJECT (133) 
+
+    Primary pointer page: 200, Index root page: 201 
+
+    Data pages: 1, data page slots: 1, average fill: 29% 
+
+    Fill distribution: 
+
+	 0 - 19% = 0 
+
+	20 - 39% = 1 
+
+	40 - 59% = 0 
+
+	60 - 79% = 0 
+
+	80 - 99% = 0 
+
+ 
+
+    Index PRODTYPEX (3) 
+
+	Depth: 1, leaf buckets: 1, nodes: 6 
+
+	Average data length: 22.50, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$11 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 6 
+
+	Average data length: 13.33, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$FOREIGN13 (2) 
+
+	Depth: 1, leaf buckets: 1, nodes: 6 
+
+	Average data length: 1.33, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$PRIMARY12 (1) 
+
+	Depth: 1, leaf buckets: 1, nodes: 6 
+
+	Average data length: 4.83, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+PROJ_DEPT_BUDGET (135) 
+
+    Primary pointer page: 213, Index root page: 214 
+
+    Data pages: 1, data page slots: 1, average fill: 82% 
+
+    Fill distribution: 
+
+	 0 - 19% = 0 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 0 
+
+	80 - 99% = 1 
+
+ 
+
+    Index RDB$FOREIGN18 (1) 
+
+	Depth: 1, leaf buckets: 1, nodes: 24 
+
+	Average data length: 0.71, total dup: 15, max dup: 5 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$FOREIGN19 (2) 
+
+	Depth: 1, leaf buckets: 1, nodes: 24 
+
+	Average data length: 1.00, total dup: 19, max dup: 8 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$PRIMARY17 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 24 
+
+	Average data length: 6.83, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+RDB$BACKUP_HISTORY (32) 
+
+    Primary pointer page: 68, Index root page: 69 
+
+    Data pages: 0, data page slots: 0, average fill: 0% 
+
+    Fill distribution: 
+
+	 0 - 19% = 0 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 0 
+
+	80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_44 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 0 
+
+	Average data length: 0.00, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+RDB$CHARACTER_SETS (28) 
+
+    Primary pointer page: 60, Index root page: 61 
+
+    Data pages: 1, data page slots: 1, average fill: 67% 
+
+    Fill distribution: 
+
+	 0 - 19% = 0 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 1 
+
+	80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_19 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 52 
+
+	Average data length: 2.98, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_25 (1) 
+
+	Depth: 1, leaf buckets: 1, nodes: 52 
+
+	Average data length: 1.04, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+RDB$CHECK_CONSTRAINTS (24) 
+
+    Primary pointer page: 52, Index root page: 53 
+
+    Data pages: 2, data page slots: 2, average fill: 36% 
+
+    Fill distribution: 
+
+	 0 - 19% = 1 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 1 
+
+	80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_14 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 68 
+
+	Average data length: 0.90, total dup: 14, max dup: 1 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_40 (1) 
+
+	Depth: 1, leaf buckets: 1, nodes: 68 
+
+	Average data length: 3.91, total dup: 10, max dup: 2 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+RDB$COLLATIONS (29) 
+
+    Primary pointer page: 62, Index root page: 63 
+
+    Data pages: 3, data page slots: 3, average fill: 55% 
+
+    Fill distribution: 
+
+	 0 - 19% = 0 
+
+	20 - 39% = 1 
+
+	40 - 59% = 0 
+
+	60 - 79% = 2 
+
+	80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_20 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 148 
+
+	Average data length: 3.72, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 0 
+
+	    20 - 39% = 1 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_26 (1) 
+
+	Depth: 1, leaf buckets: 1, nodes: 148 
+
+	Average data length: 1.76, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+RDB$DATABASE (1) 
+
+    Primary pointer page: 6, Index root page: 7 
+
+    Data pages: 1, data page slots: 1, average fill: 1% 
+
+    Fill distribution: 
+
+	 0 - 19% = 1 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 0 
+
+	80 - 99% = 0 
+
+ 
+
+RDB$DEPENDENCIES (13) 
+
+    Primary pointer page: 30, Index root page: 31 
+
+    Data pages: 7, data page slots: 7, average fill: 78% 
+
+    Fill distribution: 
+
+	 0 - 19% = 0 
+
+	20 - 39% = 0 
+
+	40 - 59% = 1 
+
+	60 - 79% = 1 
+
+	80 - 99% = 5 
+
+ 
+
+    Index RDB$INDEX_27 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 326 
+
+	Average data length: 0.59, total dup: 281, max dup: 27 
+
+	Fill distribution: 
+
+	     0 - 19% = 0 
+
+	    20 - 39% = 1 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_28 (1) 
+
+	Depth: 1, leaf buckets: 1, nodes: 326 
+
+	Average data length: 0.51, total dup: 308, max dup: 73 
+
+	Fill distribution: 
+
+	     0 - 19% = 0 
+
+	    20 - 39% = 1 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+RDB$EXCEPTIONS (30) 
+
+    Primary pointer page: 64, Index root page: 65 
+
+    Data pages: 1, data page slots: 1, average fill: 12% 
+
+    Fill distribution: 
+
+	 0 - 19% = 1 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 0 
+
+	80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_23 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 5 
+
+	Average data length: 14.00, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_24 (1) 
+
+	Depth: 1, leaf buckets: 1, nodes: 5 
+
+	Average data length: 1.20, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+RDB$FIELDS (2) 
+
+    Primary pointer page: 8, Index root page: 9 
+
+    Data pages: 5, data page slots: 5, average fill: 63% 
+
+    Fill distribution: 
+
+	 0 - 19% = 1 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 3 
+
+	80 - 99% = 1 
+
+ 
+
+    Index RDB$INDEX_2 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 199 
+
+	Average data length: 5.39, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 0 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 1 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+RDB$FIELD_DIMENSIONS (21) 
+
+    Primary pointer page: 46, Index root page: 47 
+
+    Data pages: 1, data page slots: 1, average fill: 2% 
+
+    Fill distribution: 
+
+	 0 - 19% = 1 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 0 
+
+	80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_36 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 2 
+
+	Average data length: 3.50, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+RDB$FILES (10) 
+
+    Primary pointer page: 24, Index root page: 25 
+
+    Data pages: 0, data page slots: 0, average fill: 0% 
+
+    Fill distribution: 
+
+	 0 - 19% = 0 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 0 
+
+	80 - 99% = 0 
+
+ 
+
+RDB$FILTERS (16) 
+
+    Primary pointer page: 36, Index root page: 37 
+
+    Data pages: 0, data page slots: 0, average fill: 0% 
+
+    Fill distribution: 
+
+	 0 - 19% = 0 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 0 
+
+	80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_17 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 0 
+
+	Average data length: 0.00, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_45 (1) 
+
+	Depth: 1, leaf buckets: 1, nodes: 0 
+
+	Average data length: 0.00, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+RDB$FORMATS (8) 
+
+    Primary pointer page: 20, Index root page: 21 
+
+    Data pages: 1, data page slots: 1, average fill: 41% 
+
+    Fill distribution: 
+
+	 0 - 19% = 0 
+
+	20 - 39% = 0 
+
+	40 - 59% = 1 
+
+	60 - 79% = 0 
+
+	80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_16 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 11 
+
+	Average data length: 5.36, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+RDB$FUNCTIONS (14) 
+
+    Primary pointer page: 32, Index root page: 33 
+
+    Data pages: 1, data page slots: 1, average fill: 4% 
+
+    Fill distribution: 
+
+	 0 - 19% = 1 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 0 
+
+	80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_9 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 2 
+
+	Average data length: 13.00, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+RDB$FUNCTION_ARGUMENTS (15) 
+
+    Primary pointer page: 34, Index root page: 35 
+
+    Data pages: 1, data page slots: 1, average fill: 9% 
+
+    Fill distribution: 
+
+	 0 - 19% = 1 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 0 
+
+	80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_10 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 7 
+
+	Average data length: 3.71, total dup: 5, max dup: 3 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+RDB$GENERATORS (20) 
+
+    Primary pointer page: 44, Index root page: 45 
+
+    Data pages: 1, data page slots: 1, average fill: 22% 
+
+    Fill distribution: 
+
+	 0 - 19% = 0 
+
+	20 - 39% = 1 
+
+	40 - 59% = 0 
+
+	60 - 79% = 0 
+
+	80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_11 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 11 
+
+	Average data length: 11.91, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_46 (1) 
+
+	Depth: 1, leaf buckets: 1, nodes: 11 
+
+	Average data length: 1.09, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+RDB$INDEX_SEGMENTS (3) 
+
+    Primary pointer page: 10, Index root page: 11 
+
+    Data pages: 3, data page slots: 3, average fill: 49% 
+
+    Fill distribution: 
+
+	 0 - 19% = 1 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 2 
+
+	80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_6 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 111 
+
+	Average data length: 1.64, total dup: 24, max dup: 2 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+RDB$INDICES (4) 
+
+    Primary pointer page: 12, Index root page: 13 
+
+    Data pages: 2, data page slots: 2, average fill: 71% 
+
+    Fill distribution: 
+
+	 0 - 19% = 0 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 2 
+
+	80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_31 (1) 
+
+	Depth: 1, leaf buckets: 1, nodes: 87 
+
+	Average data length: 4.26, total dup: 48, max dup: 5 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_41 (2) 
+
+	Depth: 1, leaf buckets: 1, nodes: 87 
+
+	Average data length: 0.20, total dup: 80, max dup: 72 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_5 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 87 
+
+	Average data length: 2.09, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+RDB$LOG_FILES (25) 
+
+    Primary pointer page: 54, Index root page: 55 
+
+    Data pages: 0, data page slots: 0, average fill: 0% 
+
+    Fill distribution: 
+
+	 0 - 19% = 0 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 0 
+
+	80 - 99% = 0 
+
+ 
+
+RDB$PAGES (0) 
+
+    Primary pointer page: 3, Index root page: 4 
+
+    Data pages: 2, data page slots: 2, average fill: 34% 
+
+    Fill distribution: 
+
+	 0 - 19% = 1 
+
+	20 - 39% = 0 
+
+	40 - 59% = 1 
+
+	60 - 79% = 0 
+
+	80 - 99% = 0 
+
+ 
+
+RDB$PROCEDURES (26) 
+
+    Primary pointer page: 56, Index root page: 57 
+
+    Data pages: 4, data page slots: 4, average fill: 85% 
+
+    Fill distribution: 
+
+	 0 - 19% = 0 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 2 
+
+	80 - 99% = 2 
+
+ 
+
+    Index RDB$INDEX_21 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 10 
+
+	Average data length: 10.60, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_22 (1) 
+
+	Depth: 1, leaf buckets: 1, nodes: 10 
+
+	Average data length: 1.10, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+RDB$PROCEDURE_PARAMETERS (27) 
+
+    Primary pointer page: 58, Index root page: 59 
+
+    Data pages: 1, data page slots: 1, average fill: 48% 
+
+    Fill distribution: 
+
+	 0 - 19% = 0 
+
+	20 - 39% = 0 
+
+	40 - 59% = 1 
+
+	60 - 79% = 0 
+
+	80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_18 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 33 
+
+	Average data length: 11.33, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_47 (1) 
+
+	Depth: 1, leaf buckets: 1, nodes: 33 
+
+	Average data length: 1.24, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_48 (2) 
+
+	Depth: 1, leaf buckets: 1, nodes: 33 
+
+	Average data length: 0.00, total dup: 32, max dup: 32 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+RDB$REF_CONSTRAINTS (23) 
+
+    Primary pointer page: 50, Index root page: 51 
+
+    Data pages: 1, data page slots: 1, average fill: 25% 
+
+    Fill distribution: 
+
+	 0 - 19% = 0 
+
+	20 - 39% = 1 
+
+	40 - 59% = 0 
+
+	60 - 79% = 0 
+
+	80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_13 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 14 
+
+	Average data length: 1.93, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+RDB$RELATIONS (6) 
+
+    Primary pointer page: 16, Index root page: 17 
+
+    Data pages: 4, data page slots: 4, average fill: 77% 
+
+    Fill distribution: 
+
+	 0 - 19% = 0 
+
+	20 - 39% = 0 
+
+	40 - 59% = 1 
+
+	60 - 79% = 1 
+
+	80 - 99% = 2 
+
+ 
+
+    Index RDB$INDEX_0 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 53 
+
+	Average data length: 9.53, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_1 (1) 
+
+	Depth: 1, leaf buckets: 1, nodes: 53 
+
+	Average data length: 1.02, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+RDB$RELATION_CONSTRAINTS (22) 
+
+    Primary pointer page: 48, Index root page: 49 
+
+    Data pages: 2, data page slots: 2, average fill: 66% 
+
+    Fill distribution: 
+
+	 0 - 19% = 0 
+
+	20 - 39% = 0 
+
+	40 - 59% = 1 
+
+	60 - 79% = 1 
+
+	80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_12 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 80 
+
+	Average data length: 1.07, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_42 (1) 
+
+	Depth: 1, leaf buckets: 1, nodes: 80 
+
+	Average data length: 6.25, total dup: 43, max dup: 8 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_43 (2) 
+
+	Depth: 1, leaf buckets: 1, nodes: 80 
+
+	Average data length: 0.59, total dup: 53, max dup: 53 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+RDB$RELATION_FIELDS (5) 
+
+    Primary pointer page: 14, Index root page: 15 
+
+    Data pages: 12, data page slots: 12, average fill: 78% 
+
+    Fill distribution: 
+
+	 0 - 19% = 0 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 10 
+
+	80 - 99% = 2 
+
+ 
+
+    Index RDB$INDEX_15 (2) 
+
+	Depth: 2, leaf buckets: 4, nodes: 420 
+
+	Average data length: 22.70, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 0 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 1 
+
+	    60 - 79% = 2 
+
+	    80 - 99% = 1 
+
+ 
+
+    Index RDB$INDEX_3 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 420 
+
+	Average data length: 2.45, total dup: 255, max dup: 31 
+
+	Fill distribution: 
+
+	     0 - 19% = 0 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 1 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_4 (1) 
+
+	Depth: 1, leaf buckets: 1, nodes: 420 
+
+	Average data length: 1.20, total dup: 367, max dup: 27 
+
+	Fill distribution: 
+
+	     0 - 19% = 0 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 1 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+RDB$ROLES (31) 
+
+    Primary pointer page: 66, Index root page: 67 
+
+    Data pages: 1, data page slots: 1, average fill: 1% 
+
+    Fill distribution: 
+
+	 0 - 19% = 1 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 0 
+
+	80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_39 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 1 
+
+	Average data length: 9.00, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+RDB$SECURITY_CLASSES (9) 
+
+    Primary pointer page: 22, Index root page: 23 
+
+    Data pages: 2, data page slots: 2, average fill: 50% 
+
+    Fill distribution: 
+
+	 0 - 19% = 0 
+
+	20 - 39% = 0 
+
+	40 - 59% = 2 
+
+	60 - 79% = 0 
+
+	80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_7 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 38 
+
+	Average data length: 1.29, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+RDB$TRANSACTIONS (19) 
+
+    Primary pointer page: 42, Index root page: 43 
+
+    Data pages: 0, data page slots: 0, average fill: 0% 
+
+    Fill distribution: 
+
+	 0 - 19% = 0 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 0 
+
+	80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_32 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 0 
+
+	Average data length: 0.00, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+RDB$TRIGGERS (12) 
+
+    Primary pointer page: 28, Index root page: 29 
+
+    Data pages: 7, data page slots: 7, average fill: 90% 
+
+    Fill distribution: 
+
+	 0 - 19% = 0 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 1 
+
+	80 - 99% = 6 
+
+ 
+
+    Index RDB$INDEX_38 (1) 
+
+	Depth: 1, leaf buckets: 1, nodes: 67 
+
+	Average data length: 2.82, total dup: 48, max dup: 18 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_8 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 67 
+
+	Average data length: 1.93, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+RDB$TRIGGER_MESSAGES (17) 
+
+    Primary pointer page: 38, Index root page: 39 
+
+    Data pages: 1, data page slots: 1, average fill: 68% 
+
+    Fill distribution: 
+
+	 0 - 19% = 0 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 1 
+
+	80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_35 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 36 
+
+	Average data length: 1.00, total dup: 12, max dup: 5 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+RDB$TYPES (11) 
+
+    Primary pointer page: 26, Index root page: 27 
+
+    Data pages: 5, data page slots: 5, average fill: 70% 
+
+    Fill distribution: 
+
+	 0 - 19% = 0 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 5 
+
+	80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_37 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 228 
+
+	Average data length: 4.22, total dup: 16, max dup: 1 
+
+	Fill distribution: 
+
+	     0 - 19% = 0 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 1 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+RDB$USER_PRIVILEGES (18) 
+
+    Primary pointer page: 40, Index root page: 41 
+
+    Data pages: 4, data page slots: 4, average fill: 58% 
+
+    Fill distribution: 
+
+	 0 - 19% = 1 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 3 
+
+	80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_29 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 148 
+
+	Average data length: 1.42, total dup: 124, max dup: 9 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_30 (1) 
+
+	Depth: 1, leaf buckets: 1, nodes: 148 
+
+	Average data length: 0.08, total dup: 146, max dup: 79 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+RDB$VIEW_RELATIONS (7) 
+
+    Primary pointer page: 18, Index root page: 19 
+
+    Data pages: 1, data page slots: 1, average fill: 3% 
+
+    Fill distribution: 
+
+	 0 - 19% = 1 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 0 
+
+	80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_33 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 2 
+
+	Average data length: 5.00, total dup: 1, max dup: 1 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$INDEX_34 (1) 
+
+	Depth: 1, leaf buckets: 1, nodes: 2 
+
+	Average data length: 9.00, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+SALARY_HISTORY (136) 
+
+    Primary pointer page: 221, Index root page: 222 
+
+    Data pages: 1, data page slots: 1, average fill: 61% 
+
+    Fill distribution: 
+
+	 0 - 19% = 0 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 1 
+
+	80 - 99% = 0 
+
+ 
+
+    Index CHANGEX (2) 
+
+	Depth: 1, leaf buckets: 1, nodes: 49 
+
+	Average data length: 0.31, total dup: 46, max dup: 21 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$FOREIGN21 (1) 
+
+	Depth: 1, leaf buckets: 1, nodes: 49 
+
+	Average data length: 0.90, total dup: 16, max dup: 2 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$PRIMARY20 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 49 
+
+	Average data length: 18.29, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 0 
+
+	    20 - 39% = 1 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index UPDATERX (3) 
+
+	Depth: 1, leaf buckets: 1, nodes: 49 
+
+	Average data length: 0.29, total dup: 46, max dup: 28 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+SALES (138) 
+
+    Primary pointer page: 237, Index root page: 238 
+
+    Data pages: 1, data page slots: 1, average fill: 70% 
+
+    Fill distribution: 
+
+	 0 - 19% = 0 
+
+	20 - 39% = 0 
+
+	40 - 59% = 0 
+
+	60 - 79% = 1 
+
+	80 - 99% = 0 
+
+ 
+
+    Index NEEDX (3) 
+
+	Depth: 1, leaf buckets: 1, nodes: 33 
+
+	Average data length: 2.55, total dup: 11, max dup: 6 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index QTYX (4) 
+
+	Depth: 1, leaf buckets: 1, nodes: 33 
+
+	Average data length: 1.85, total dup: 11, max dup: 3 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$FOREIGN25 (1) 
+
+	Depth: 1, leaf buckets: 1, nodes: 33 
+
+	Average data length: 0.52, total dup: 18, max dup: 4 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$FOREIGN26 (2) 
+
+	Depth: 1, leaf buckets: 1, nodes: 33 
+
+	Average data length: 0.45, total dup: 25, max dup: 7 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index RDB$PRIMARY24 (0) 
+
+	Depth: 1, leaf buckets: 1, nodes: 33 
+
+	Average data length: 4.48, total dup: 0, max dup: 0 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+    Index SALESTATX (5) 
+
+	Depth: 1, leaf buckets: 1, nodes: 33 
+
+	Average data length: 0.97, total dup: 27, max dup: 14 
+
+	Fill distribution: 
+
+	     0 - 19% = 1 
+
+	    20 - 39% = 0 
+
+	    40 - 59% = 0 
+
+	    60 - 79% = 0 
+
+	    80 - 99% = 0 
+
+ 
+
+
+
+
+Licence Info: feature is not supported
+feature is not supported
+
+Licence Mask Info: feature is not supported
+
+Capabilities = 774
+
+
+Get Limbo transactions
+
+Limbo Transactions
+
+
+Local Backup
+
+
+
+
+Local Backup Complete
+
+Local Restore
+
+
+
+
+
+
+Local Restore Complete
+
+Open Database Check
+Database OK
+Database Dropped
+
+
+Running Test 12: Character Sets
+Connection Character Set UTF8
+ROWID = 1
+TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage = 65001)
+NOTES = C3 89 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 4 Codepage = 65001)
+BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
+BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
+INCLEAR = 54 65 73 74 D C3  (Charset Id = 0 Codepage = 65535)
+
+Connection Character Set NONE
+ROWID = 1
+TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage = 65001)
+NOTES = C9 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 21 Codepage = 28591)
+BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 D6 C4 DC F6 E4 FC DF  (Charset Id = 53 Codepage = 1252)
+BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
+INCLEAR = 54 65 73 74 D C3  (Charset Id = 0 Codepage = 65535)
+
+Connection Character Set WIN1252
+ROWID = 1
+TITLE = 42 6C 6F 62 20 54 65 73 74 20 A9 80  (Charset Id = 53 Codepage = 1252)
+NOTES = C9 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 53 Codepage = 1252)
+BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 D6 C4 DC F6 E4 FC DF  (Charset Id = 53 Codepage = 1252)
+BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 D6 C4 DC F6 E4 FC DF  (Charset Id = 53 Codepage = 1252)
+INCLEAR = 54 65 73 74 D C3  (Charset Id = 0 Codepage = 65535)
+
+
+
+Running Test 13: Character Sets over two databases
+Init Database 1
+ROWID = 1
+TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage = 65001)
+NOTES = C3 89 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 4 Codepage = 65001)
+BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
+BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
+INCLEAR = 54 65 73 74 D C3  (Charset Id = 0 Codepage = 65535)
+
+Init Database 2
+ROWID = 1
+TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage = 65001)
+NOTES = C3 89 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 4 Codepage = 65001)
+BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
+BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
+INCLEAR = 54 65 73 74 D C3  (Charset Id = 0 Codepage = 65535)
+
+ROWID = 1
+TITLE = 44 61 74 61 62 61 73 65 31  (Charset Id = 4 Codepage = 65001)
+NOTES = C3 89 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 4 Codepage = 65001)
+BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
+BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
+INCLEAR = 54 65 73 74 D C3  (Charset Id = 0 Codepage = 65535)
+
+ROWID = 1
+TITLE = 44 61 74 61 62 61 73 65 32  (Charset Id = 4 Codepage = 65001)
+NOTES = C3 89 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 4 Codepage = 65001)
+BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
+BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
+INCLEAR = 54 65 73 74 D C3  (Charset Id = 0 Codepage = 65535)
+
+
+
+Running Test 14: Non select procedures
+ROWID = 1
+TITLE = Testing (Charset Id = 4 Codepage = 65001)
+
+Repeat with a different execute transaction
+
+ROWID = 1
+TITLE = Testing (Charset Id = 4 Codepage = 65001)
+
+Repeat with a original transaction
+
+ROWID = 1
+TITLE = Testing (Charset Id = 4 Codepage = 65001)
+
+
+Running Test 15: Blob Handling and BPBs
+
+Testdata
+
+ROWID = 1
+TITLE = Blob Test (Charset Id = 4 Codepage = 65001)
+BLOBDATA = (blob), Length = 92514
+
+
+Testdata 2
+
+ROWID = 1
+TITLE = Blob Test (Charset Id = 4 Codepage = 65001)
+BLOBDATA (Charset Id = 4 Codepage = 65001)
+
+Écoute moi
+
+
+
+Running Test 16: Error handling
+Invalid Database Name Test
+Error Handled: I/O error during "open" operation for file "Malformed Name"
+Error while trying to open file
+No such file or directory
+Invalid User Name Test
+Error Handled: Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Invalid password Test
+Error Handled: Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Invalid Prepare SQL Test
+Error Handled: Dynamic SQL Error
+SQL error code = -206
+Column unknown
+UNKNOWN_DATE
+At line 1, column 21 When Executing: Update Employee Set Unknown_Date = ? Where EMP_NO = ?
+Invalid Open Cursor SQL Test
+Error Handled: Dynamic SQL Error
+SQL error code = -206
+Column unknown
+X
+At line 1, column 8 When Executing: Select X,count(*) As Counter from EMPLOYEE
+Transaction not started Test
+Error Handled: Transaction is not active
+Invalid Param SQL Type Test
+Error Handled: Transaction is not active
+Invalid Server Name Test
+Error Handled: Unable to complete network request to host "unknown".
+Failed to locate host machine
+Invalid User Name Test
+Error Handled: Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Invalid password Test
+Error Handled: Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+
+
+Test Suite Ends
