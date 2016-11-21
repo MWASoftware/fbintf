@@ -35,7 +35,7 @@ begin
   writeln('Copyright MWA Software 2016');
   writeln;
   // quick check parameters
-  ErrorMsg := CheckOptions('ht', 'help');
+  ErrorMsg := CheckOptions('htupensb', 'help test user passwd employeedb newdbname secondnewdbname backupfile');
   if ErrorMsg <> '' then begin
     ShowException(Exception.Create(ErrorMsg));
     Terminate;
@@ -52,12 +52,28 @@ begin
   if HasOption('t') then
     FTestID := StrToInt(GetOptionValue('t'));
 
-  { add your program here }
-
-  writeln('Starting Tests');
-
   if TestMgr <> nil then
   begin
+    if HasOption('u','user') then
+      TestMgr.SetUserName(GetOptionValue('u'));
+
+    if HasOption('p','passwd') then
+      TestMgr.SetPassword(GetOptionValue('p'));
+
+    if HasOption('e','employeedb') then
+      TestMgr.SetEmployeeDatabaseName(GetOptionValue('e'));
+
+    if HasOption('n','newdbname') then
+      TestMgr.SetNewDatabaseName(GetOptionValue('n'));
+
+    if HasOption('s','secondnewdbname') then
+      TestMgr.SetSecondNewDatabaseName(GetOptionValue('s'));
+
+    if HasOption('b','backupfile') then
+      TestMgr.SetBackupFileName(GetOptionValue('b'));
+
+    writeln('Starting Tests');
+
     if FTestID = 0 then
       TestMgr.RunAll
     else
@@ -66,8 +82,9 @@ begin
   end;
 
   writeln('Test Suite Ends');
+  Flush(stdout);
   {$IFDEF WINDOWS}
-  readln;
+  //readln;
   {$ENDIF}
 
   // stop program loop

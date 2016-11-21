@@ -69,6 +69,12 @@ type
     function GetBackupFileName: string;
     procedure RunAll;
     procedure Run(TestID: integer);
+    procedure SetUserName(aValue: string);
+    procedure SetPassword(aValue: string);
+    procedure SetEmployeeDatabaseName(aValue: string);
+    procedure SetNewDatabaseName(aValue: string);
+    procedure SetSecondNewDatabaseName(aValue: string);
+    procedure SetBackupFileName(aValue: string);
   end;
 
 const
@@ -661,6 +667,7 @@ begin
     with TTestBase(FTests[i]) do
   begin
     writeln('Running ' + TestTitle);
+    writeln(stderr,'Running ' + TestTitle);
     try
       RunTest('UTF8',3);
     except on E:Exception do
@@ -679,6 +686,7 @@ begin
   with TTestBase(FTests[TestID-1]) do
   begin
     writeln('Running ' + TestTitle);
+    writeln(stderr,'Running ' + TestTitle);
     try
       RunTest('UTF8',3);
     except on E:Exception do
@@ -690,6 +698,36 @@ begin
     writeln;
     writeln;
   end;
+end;
+
+procedure TTestManager.SetUserName(aValue: string);
+begin
+  FUserName := aValue;
+end;
+
+procedure TTestManager.SetPassword(aValue: string);
+begin
+  FPassword := aValue;
+end;
+
+procedure TTestManager.SetEmployeeDatabaseName(aValue: string);
+begin
+  FEmployeeDatabaseName := aValue;
+end;
+
+procedure TTestManager.SetNewDatabaseName(aValue: string);
+begin
+  FNewDatabaseName := aValue;
+end;
+
+procedure TTestManager.SetSecondNewDatabaseName(aValue: string);
+begin
+  FSecondNewDatabaseName := aValue;
+end;
+
+procedure TTestManager.SetBackupFileName(aValue: string);
+begin
+  FBackupFileName := aValue;
 end;
 
 end.
