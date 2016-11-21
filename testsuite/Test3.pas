@@ -47,10 +47,17 @@ procedure TTest3.DoQuery(Attachment: IAttachment);
 var Transaction: ITransaction;
     ResultSet: IResultSet;
     Statement: IStatement;
+    TPB: ITPB;
 begin
   writeln('Employee Count = ',Attachment.OpenCursorAtStart('Select count(*) from EMPLOYEE')[0].AsInteger);
 
-  Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taRollback);
+  TPB := FirebirdAPI.AllocateTPB;
+  TPB.Add(isc_tpb_write);
+  TPB.Add(isc_tpb_nowait);
+  TPB.Add(isc_tpb_concurrency);
+  TPB.Add(isc_tpb_lock_read).AsString := 'EMPLOYEE';
+  TPB.Add(isc_tpb_protected);
+  Transaction := Attachment.StartTransaction(TPB,taRollback);
   Statement := Attachment.Prepare(Transaction,'Execute Procedure DELETE_EMPLOYEE ?',3);
   Statement.GetSQLParams[0].AsInteger := 9;
   Statement.Execute;

@@ -19,9 +19,10 @@ begin
   {First try any user override}
   dllPathName := GetOverrideLibName;
   if dllPathName <> '' then
+  begin
     IBLibrary := DoLoadLibrary(dllPathName);
-
-  if IBLibrary <> nil then Exit;
+    Exit;
+  end;
 
   {Then look in application installation directory}
   InstallDir := ExtractFilePath(Paramstr(0)); {Using ParamStr(0) assumes windows conventions}
@@ -93,8 +94,27 @@ begin
     begin
       InstallDir := GetWindowsSpecialDir(CSIDL_PROGRAM_FILES) +
         DirectorySeparator + 'Firebird' +
-        DirectorySeparator + 'Firebird_2_5' +
         DirectorySeparator + 'Firebird_3_0' +
+        DirectorySeparator + 'bin' + DirectorySeparator;
+      dllPathName := InstallDir + FIREBIRD_CLIENT;
+      IBLibrary := DoLoadLibrary(dllPathName)
+    end;
+
+    if IBLibrary = NilHandle then
+    begin
+      InstallDir := GetWindowsSpecialDir(CSIDL_PROGRAM_FILES) +
+        DirectorySeparator + 'Firebird' +
+        DirectorySeparator + 'Firebird_2_5' +
+        DirectorySeparator + 'bin' + DirectorySeparator;
+      dllPathName := InstallDir + FIREBIRD_CLIENT;
+      IBLibrary := DoLoadLibrary(dllPathName)
+    end;
+
+    if IBLibrary = NilHandle then
+    begin
+      InstallDir := GetWindowsSpecialDir(CSIDL_PROGRAM_FILES) +
+        DirectorySeparator + 'Firebird' +
+        DirectorySeparator + 'Firebird_2_1' +
         DirectorySeparator + 'bin' + DirectorySeparator;
       dllPathName := InstallDir + FIREBIRD_CLIENT;
       IBLibrary := DoLoadLibrary(dllPathName)

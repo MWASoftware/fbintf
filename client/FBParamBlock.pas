@@ -134,10 +134,7 @@ type
 
   { TTPBItem }
 
-  TTPBItem = class(TParamBlockItem,ITPBItem)
-  public
-    procedure ITPBItem.SetAsString = SetAsString0;
-  end;
+  TTPBItem = class(TParamBlockItem,ITPBItem);
 
   { TTPB }
 
@@ -298,9 +295,14 @@ begin
 
   with FParamData^ do
   case FDataType of
-  dtInteger:
+  dtInteger,
+  dtInteger1,
+  dtInteger2,
+  dtShortInteger,
+  dtTinyInteger:
     Result := IntToStr(getAsInteger);
-  dtByte:
+  dtByte,
+  dtByte2:
     Result := IntToStr(getAsByte);
   dtString:
     begin
