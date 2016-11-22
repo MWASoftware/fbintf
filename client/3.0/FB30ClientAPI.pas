@@ -289,7 +289,7 @@ begin
   Result := true;
 end;
 
-function TFB30ClientAPI.IsEmbeddedServer: boolean;
+(*function TFB30ClientAPI.IsEmbeddedServer: boolean;
 var FBConf: Firebird.IFirebirdConf;
     Plugins: string;
     PluginsList: TStringList;
@@ -309,6 +309,31 @@ begin
     Result := PluginsList.IndexOf('Engine12') <> -1;
   finally
     PluginsList.Free;
+  end;
+
+end; *)
+
+function TFB30ClientAPI.IsEmbeddedServer: boolean;
+var PluginMgr: Firebird.IPluginManager;
+    PluginSet: Firebird.IPluginSet;
+    Plugin: IPluginBase;
+begin
+  Result := false;
+  PluginMgr := FMaster.getPluginManager;
+  if PluginMgr = nil then Exit;
+
+  PluginSet := PluginMgr.getPlugins(StatusIntf,0,'Engine12',nil);
+  if PluginSet = nil then Exit;
+
+  try
+    Plugin := PluginSet.getPlugin(StatusIntf);
+    if Plugin <> nil then
+    begin
+      Result := true;
+      Plugin.release;
+    end;
+  finally
+    PluginSet.release;
   end;
 end;
 
