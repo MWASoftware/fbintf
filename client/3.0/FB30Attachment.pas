@@ -123,29 +123,26 @@ begin
   inherited Create(DatabaseName,aDPB,RaiseExceptionOnError);
   FSQLDialect := 3;
   IsCreateDB := true;
-{  if DPB = nil then
+  if aDPB <> nil then
   begin
-    if RaiseExceptionOnError then
-       IBError(ibxeNoDPB,[nil]);
-    Exit;
-  end;  }
-  if DPB <> nil then
-  begin
-    Param := DPB.Find(isc_dpb_set_db_SQL_dialect);
+    Param := aDPB.Find(isc_dpb_set_db_SQL_dialect);
     if Param <> nil then
       FSQLDialect := Param.AsByte;
   end;
   sql := GenerateCreateDatabaseSQL(DatabaseName,aDPB);
   with Firebird30ClientAPI do
   begin
-    FAttachmentIntf := UtilIntf.executeCreateDatabase(StatusIntf,Length(sql),PAnsiChar(SQL),FSQLDialect,@IsCreateDB);
+    FAttachmentIntf := UtilIntf.executeCreateDatabase(StatusIntf,Length(sql),
+                                       PAnsiChar(sql),FSQLDialect,@IsCreateDB);
     if FRaiseExceptionOnConnectError then Check4DataBaseError;
     if InErrorState then
       FAttachmentIntf := nil
     else
+    if aDPB <> nil then
+    {Connect using known parameters}
     begin
       Disconnect;
-      Connect
+      Connect;
     end;
   end;
 end;
