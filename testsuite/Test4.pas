@@ -61,14 +61,14 @@ begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taRollback);
   Statement := Attachment.Prepare(Transaction,'Update Employee Set Hire_Date = ? Where EMP_NO = ?',3);
   Statement.GetSQLParams[0].AsDAteTime := EncodeDate(2016,1,31);;
-  Statement.GetSQLParams[1].AsInteger := 9;
+  Statement.GetSQLParams[1].AsInteger := 8;
   Statement.Execute;
   WriteAffectedRows(Statement);
   Transaction.Rollback;
   Transaction.Start(TARollback);
 
   Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
-  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 9;
+  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 8;
   ReportResults(Statement);
 
   Statement := Attachment.PrepareWithNamedParameters(Transaction,'INSERT INTO EMPLOYEE (EMP_NO, FIRST_NAME, LAST_NAME, PHONE_EXT, HIRE_DATE,' +

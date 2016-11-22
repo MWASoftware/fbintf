@@ -139,7 +139,7 @@ Not Null
 Size = 15
 
 SQLType =SQL_INT64
-sub type = 1
+sub type = 0
 Table = EMPLOYEE
 Owner = SYSDBA
 Column Name = SALARY
@@ -210,17 +210,17 @@ Charset id = 0
 Not Null
 Size = 2
 
-EMP_NO = 9
-FIRST_NAME = Phil
-LAST_NAME = Forest
-PHONE_EXT = 229
-HIRE_DATE = 17-4-89 00:00:00.000
-DEPT_NO = 622
-JOB_CODE = Mngr
+EMP_NO = 8
+FIRST_NAME = Leslie
+LAST_NAME = Johnson
+PHONE_EXT = 410
+HIRE_DATE = 5-4-89 00:00:00.000
+DEPT_NO = 180
+JOB_CODE = Mktg
 JOB_GRADE = 3
 JOB_COUNTRY = USA
-SALARY = 75,060.00
-FULL_NAME = Forest, Phil
+SALARY = 64,635.00
+FULL_NAME = Johnson, Leslie
 
 With param names
 Select * from EMPLOYEE Where EMP_NO = :EMP_NO
@@ -233,17 +233,17 @@ Charset id = 0
 Not Null
 Size = 2
 
-EMP_NO = 9
-FIRST_NAME = Phil
-LAST_NAME = Forest
-PHONE_EXT = 229
-HIRE_DATE = 17-4-89 00:00:00.000
-DEPT_NO = 622
-JOB_CODE = Mngr
+EMP_NO = 8
+FIRST_NAME = Leslie
+LAST_NAME = Johnson
+PHONE_EXT = 410
+HIRE_DATE = 5-4-89 00:00:00.000
+DEPT_NO = 180
+JOB_CODE = Mktg
 JOB_GRADE = 3
 JOB_COUNTRY = USA
-SALARY = 75,060.00
-FULL_NAME = Forest, Phil
+SALARY = 64,635.00
+FULL_NAME = Johnson, Leslie
 
 
 
@@ -261,17 +261,17 @@ Running Test 4: Update, Insert and Delete Queries
 Opening localhost:employee
 Database Open
 Select Count = 1 InsertCount = 0 UpdateCount = 1 DeleteCount = 0
-EMP_NO = 9
-FIRST_NAME = Phil
-LAST_NAME = Forest
-PHONE_EXT = 229
-HIRE_DATE = 17-4-89 00:00:00.000
-DEPT_NO = 622
-JOB_CODE = Mngr
+EMP_NO = 8
+FIRST_NAME = Leslie
+LAST_NAME = Johnson
+PHONE_EXT = 410
+HIRE_DATE = 5-4-89 00:00:00.000
+DEPT_NO = 180
+JOB_CODE = Mktg
 JOB_GRADE = 3
 JOB_COUNTRY = USA
-SALARY = 75,060.00
-FULL_NAME = Forest, Phil
+SALARY = 64,635.00
+FULL_NAME = Johnson, Leslie
 
 Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
 Metadata
@@ -384,7 +384,7 @@ Not Null
 Size = 15
 
 SQLType =SQL_INT64
-sub type = 1
+sub type = 0
 Table = EMPLOYEE
 Owner = SYSDBA
 Column Name = SALARY
@@ -499,18 +499,18 @@ Database Open
 Database Closed
 Database Open
 Select Count = 1 InsertCount = 0 UpdateCount = 1 DeleteCount = 0
-Last Name = Forest
-EMP_NO = 9
-FIRST_NAME = Phil
-LAST_NAME = Forest
-PHONE_EXT = 229
+Last Name = Johnson
+EMP_NO = 8
+FIRST_NAME = Leslie
+LAST_NAME = Johnson
+PHONE_EXT = 410
 HIRE_DATE = 31-1-16 00:00:00.000
-DEPT_NO = 622
-JOB_CODE = Mngr
+DEPT_NO = 180
+JOB_CODE = Mktg
 JOB_GRADE = 3
 JOB_COUNTRY = USA
-SALARY = 75,060.00
-FULL_NAME = Forest, Phil
+SALARY = 64,635.00
+FULL_NAME = Johnson, Leslie
 
 Inserting
 Full Name = Doe, John
@@ -529,7 +529,7 @@ Transaction inactive
 Running Test 6: Blob Handling
 Metadata
 SQLType =SQL_TEXT
-sub type = 4
+sub type = 0
 Table = RDB$CHARACTER_SETS
 Owner = SYSDBA
 Column Name = RDB$CHARACTER_SET_NAME
@@ -671,7 +671,7 @@ Not Null
 Size = 4
 
 SQLType =SQL_LONG
-sub type = 2
+sub type = 0
 Table = TESTDATA
 Owner = SYSDBA
 Column Name = FIXEDPOINT
@@ -695,7 +695,7 @@ Nullable
 Size = 8
 
 SQLType =SQL_VARYING
-sub type = 4
+sub type = 0
 Table = TESTDATA
 Owner = SYSDBA
 Column Name = TITLE
@@ -713,7 +713,7 @@ Owner = SYSDBA
 Column Name = BLOBDATA
 Alias Name = BLOBDATA
 Field Name = BLOBDATA
-Scale = 4
+Scale = 0
 Charset id = 4
 Nullable
 Size = 8
@@ -726,10 +726,39 @@ CharSetID = 4
 Segment Size = 80
 
 
-Param Name = ROWID
-Param Name = TITLE
-Param Name = FP
-Param Name = DP
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = TITLE
+Scale = 0
+Charset id = 4
+Nullable
+Size = 128
+
+SQLType =SQL_LONG
+sub type = 0
+Field Name = FP
+Scale = -2
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_DOUBLE
+sub type = 0
+Field Name = DP
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
 ROWID = 1
 FIXEDPOINT = 20.28
 FLOATINGPOINT = 3.14
@@ -740,8 +769,8 @@ SQL Params
 SQLType =SQL_BLOB
 sub type = 1
 Field Name = 
-Scale = 4
-Charset id = 0
+Scale = 0
+Charset id = 4
 Nullable
 Size = 8
 
@@ -805,7 +834,7 @@ Not Null
 Size = 4
 
 SQLType =SQL_VARYING
-sub type = 4
+sub type = 0
 Field Name = TITLE
 Scale = 0
 Charset id = 4
@@ -813,7 +842,7 @@ Nullable
 Size = 128
 
 SQLType =SQL_LONG
-sub type = 2
+sub type = 0
 Field Name = FP
 Scale = -2
 Charset id = 0
@@ -913,7 +942,7 @@ Be all my sins remembered
 
 Metadata
 SQLType =SQL_TEXT
-sub type = 3
+sub type = 0
 Table = RDB$CHARACTER_SETS
 Owner = SYSDBA
 Column Name = RDB$CHARACTER_SET_NAME
@@ -1055,7 +1084,7 @@ Not Null
 Size = 4
 
 SQLType =SQL_LONG
-sub type = 2
+sub type = 0
 Table = TESTDATA
 Owner = SYSDBA
 Column Name = FIXEDPOINT
@@ -1079,7 +1108,7 @@ Nullable
 Size = 8
 
 SQLType =SQL_VARYING
-sub type = 4
+sub type = 0
 Table = TESTDATA
 Owner = SYSDBA
 Column Name = TITLE
@@ -1097,7 +1126,7 @@ Owner = SYSDBA
 Column Name = BLOBDATA
 Alias Name = BLOBDATA
 Field Name = BLOBDATA
-Scale = 4
+Scale = 0
 Charset id = 4
 Nullable
 Size = 8
@@ -1110,10 +1139,39 @@ CharSetID = 4
 Segment Size = 80
 
 
-Param Name = ROWID
-Param Name = TITLE
-Param Name = FP
-Param Name = DP
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = TITLE
+Scale = 0
+Charset id = 4
+Nullable
+Size = 128
+
+SQLType =SQL_LONG
+sub type = 0
+Field Name = FP
+Scale = -2
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_DOUBLE
+sub type = 0
+Field Name = DP
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
 ROWID = 1
 FIXEDPOINT = 20.28
 FLOATINGPOINT = 3.14
@@ -1124,8 +1182,8 @@ SQL Params
 SQLType =SQL_BLOB
 sub type = 1
 Field Name = 
-Scale = 4
-Charset id = 0
+Scale = 0
+Charset id = 4
 Nullable
 Size = 8
 
@@ -1189,7 +1247,7 @@ Not Null
 Size = 4
 
 SQLType =SQL_VARYING
-sub type = 4
+sub type = 0
 Field Name = TITLE
 Scale = 0
 Charset id = 4
@@ -1197,7 +1255,7 @@ Nullable
 Size = 128
 
 SQLType =SQL_LONG
-sub type = 2
+sub type = 0
 Field Name = FP
 Scale = -2
 Charset id = 0
@@ -1312,7 +1370,7 @@ Not Null
 Size = 4
 
 SQLType =SQL_VARYING
-sub type = 4
+sub type = 0
 Table = TESTDATA
 Owner = SYSDBA
 Column Name = TITLE
@@ -1336,7 +1394,7 @@ Nullable
 Size = 8
 
 SQLType =SQL_VARYING
-sub type = 4
+sub type = 0
 Table = TESTDATA
 Owner = SYSDBA
 Column Name = NOTES
@@ -1378,7 +1436,7 @@ Not Null
 Size = 4
 
 SQLType =SQL_VARYING
-sub type = 4
+sub type = 0
 Field Name = TITLE
 Scale = 0
 Charset id = 4
@@ -1394,7 +1452,7 @@ Nullable
 Size = 8
 
 SQLType =SQL_VARYING
-sub type = 4
+sub type = 0
 Field Name = NOTES
 Scale = 0
 Charset id = 4
@@ -1453,7 +1511,7 @@ Not Null
 Size = 4
 
 SQLType =SQL_VARYING
-sub type = 4
+sub type = 0
 Table = TESTDATA
 Owner = SYSDBA
 Column Name = TITLE
@@ -1495,7 +1553,7 @@ Not Null
 Size = 4
 
 SQLType =SQL_VARYING
-sub type = 4
+sub type = 0
 Field Name = TITLE
 Scale = 0
 Charset id = 4
@@ -1654,7 +1712,7 @@ Database header page information:
 
 	Checksum		12345 
 
-	Generation		193 
+	Generation		235 
 
 	Page size		4096 
 
@@ -1662,17 +1720,17 @@ Database header page information:
 
 	Oldest transaction	169 
 
-	Oldest active		175 
+	Oldest active		203 
 
-	Oldest snapshot		175 
+	Oldest snapshot		203 
 
-	Next transaction	176 
+	Next transaction	204 
 
 	Bumped transaction	1 
 
 	Sequence number		0 
 
-	Next attachment ID	15 
+	Next attachment ID	29 
 
 	Implementation ID	19 
 
@@ -4344,6 +4402,55 @@ Database Dropped
 
 
 Running Test 12: Character Sets
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = TITLE
+Scale = 0
+Charset id = 4
+Nullable
+Size = 128
+
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = NOTES
+Scale = 0
+Charset id = 4
+Nullable
+Size = 256
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = BLOBDATA
+Scale = 0
+Charset id = 4
+Nullable
+Size = 8
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = BLOBDATA2
+Scale = 0
+Charset id = 4
+Nullable
+Size = 8
+
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = INCLEAR
+Scale = 0
+Charset id = 0
+Nullable
+Size = 16
+
 Connection Character Set UTF8
 ROWID = 1
 TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage = 65001)

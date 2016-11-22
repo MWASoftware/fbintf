@@ -55,13 +55,13 @@ begin
     Statement := Attachment.Prepare(Transaction,'Select * from EMPLOYEE Where EMP_NO = ?',3);
     writeln(Statement.GetSQLText);
     ParamInfo(Statement.SQLParams);
-    Statement.GetSQLParams[0].AsInteger := 9;
+    Statement.GetSQLParams[0].AsInteger := 8;
     ReportResults(Statement);
     writeln('With param names');
     Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
     writeln(Statement.GetSQLText);
     ParamInfo(Statement.SQLParams);
-    Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 9;
+    Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 8;
     ReportResults(Statement);
 end;
 
