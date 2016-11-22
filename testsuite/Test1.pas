@@ -103,7 +103,7 @@ begin
   DBInfo[0].DecodeIDCluster(ConType,DBFileName,DBSiteName);
   writeln(OutFile,'Database ID = ', ConType,' FB = ', DBFileName, ' SN = ',DBSiteName);
   DBInfo := Attachment.GetDBInformation([isc_info_ods_version]);
-  write('ODS major = ',DBInfo[0].getAsInteger);
+  write(OutFile,'ODS major = ',DBInfo[0].getAsInteger);
   DBInfo := Attachment.GetDBInformation([isc_info_ods_minor_version]);
   writeln(OutFile,' minor = ', DBInfo[0].getAsInteger );
 

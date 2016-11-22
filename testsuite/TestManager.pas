@@ -150,7 +150,7 @@ begin
         s := aValue[i].AsString;
         if FHexStrings then
         begin
-          write(aValue[i].Name,' = ');
+          write(OutFile,aValue[i].Name,' = ');
           PrintHexString(s);
           writeln(OutFile,' (Charset Id = ',aValue[i].GetCharSetID, ' Codepage = ',StringCodePage(s),')');
         end
@@ -169,7 +169,7 @@ begin
       s := aValue[i].AsString;
       if FHexStrings then
       begin
-        write(aValue[i].Name,' = ');
+        write(OutFile,aValue[i].Name,' = ');
         PrintHexString(s);
         writeln(OutFile,' (Charset Id = ',aValue[i].GetCharSetID, ' Codepage = ',StringCodePage(s),')');
       end
@@ -190,7 +190,7 @@ procedure TTestBase.PrintHexString(s: string);
 var i: integer;
 begin
   for i := 1 to length(s) do
-    write(Format('%x ',[byte(s[i])]));
+    write(OutFile,Format('%x ',[byte(s[i])]));
 end;
 
 procedure TTestBase.PrintDPB(DPB: IDPB);
@@ -236,10 +236,10 @@ begin
           writeln(OutFile,'Table = ',ar.GetTableName);
           writeln(OutFile,'Column = ',ar.GetColumnName);
           writeln(OutFile,'Dimensions = ',ar.GetDimensions);
-          write('Bounds: ');
+          write(OutFile,'Bounds: ');
           Bounds := ar.GetBounds;
           for j := 0 to Length(Bounds) - 1 do
-            write('(',Bounds[j].LowerBound,':',Bounds[j].UpperBound,') ');
+            write(OutFile,'(',Bounds[j].LowerBound,':',Bounds[j].UpperBound,') ');
           writeln(OutFile);
         end;
       SQL_BLOB:
@@ -286,20 +286,20 @@ procedure TTestBase.WriteArray(ar: IArray);
 var Bounds: TArrayBounds;
     i,j: integer;
 begin
-  write('Array: ');
+  write(OutFile,'Array: ');
   Bounds := ar.GetBounds;
   case ar.GetDimensions of
   1:
     begin
       for i := Bounds[0].LowerBound to Bounds[0].UpperBound do
-        write('(',i,': ',ar.GetAsVariant([i]),') ');
+        write(OutFile,'(',i,': ',ar.GetAsVariant([i]),') ');
     end;
 
   2:
     begin
       for i := Bounds[0].LowerBound to Bounds[0].UpperBound do
         for j := Bounds[1].LowerBound to Bounds[1].UpperBound do
-          write('(',i,',',j,': ',ar.GetAsVariant([i,j]),') ');
+          write(OutFile,'(',i,',',j,': ',ar.GetAsVariant([i,j]),') ');
     end;
   end;
   writeln(OutFile);
@@ -465,7 +465,7 @@ begin
     writeln(OutFile,'DB Primary File Name = ',getAsString);
   isc_spb_tra_state:
     begin
-      write('State = ');
+      write(OutFile,'State = ');
       case getAsInteger of
         isc_spb_tra_state_limbo:
           writeln(OutFile,'limbo');
@@ -498,7 +498,7 @@ begin
   isc_info_base_level:
     begin
       bytes := getAsBytes;
-      write('Base Level = ');
+      write(OutFile,'Base Level = ');
       WriteBytes(Bytes);
     end;
    isc_info_db_id:
@@ -509,7 +509,7 @@ begin
    isc_info_implementation:
      begin
        bytes := getAsBytes;
-       write('Implementation = ');
+       write(OutFile,'Implementation = ');
        WriteBytes(Bytes);
      end;
    isc_info_no_reserve:
@@ -539,10 +539,10 @@ begin
      begin
        Users := TStringList.Create;
        try
-        write('Logged in Users: ');
+        write(OutFile,'Logged in Users: ');
         DecodeUserNames(Users);
         for j := 0 to Users.Count - 1 do
-          write(Users[j],',');
+          write(OutFile,Users[j],',');
 
        finally
          Users.Free;
@@ -582,7 +582,7 @@ procedure TTestBase.WriteBytes(Bytes: TByteArray);
 var i: integer;
 begin
   for i := 0 to length(Bytes) - 1 do
-    write(Bytes[i],',');
+    write(OutFile,Bytes[i],',');
   writeln(OutFile);
 end;
 
