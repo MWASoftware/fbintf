@@ -466,31 +466,31 @@ FULL_NAME = Doe, Jane
 
 Prepare Query again with a different transaction
 
-EMP_NO = 9
-FIRST_NAME = Phil
-LAST_NAME = Forest
-PHONE_EXT = 229
-HIRE_DATE = 17-4-89 00:00:00.000
-DEPT_NO = 622
-JOB_CODE = Mngr
+EMP_NO = 8
+FIRST_NAME = Leslie
+LAST_NAME = Johnson
+PHONE_EXT = 410
+HIRE_DATE = 5-4-89 00:00:00.000
+DEPT_NO = 180
+JOB_CODE = Mktg
 JOB_GRADE = 3
 JOB_COUNTRY = USA
-SALARY = 75,060.00
-FULL_NAME = Forest, Phil
+SALARY = 64,635.00
+FULL_NAME = Johnson, Leslie
 
 Open Cursor with a different transaction
 
-EMP_NO = 9
-FIRST_NAME = Phil
-LAST_NAME = Forest
-PHONE_EXT = 229
-HIRE_DATE = 17-4-89 00:00:00.000
-DEPT_NO = 622
-JOB_CODE = Mngr
+EMP_NO = 8
+FIRST_NAME = Leslie
+LAST_NAME = Johnson
+PHONE_EXT = 410
+HIRE_DATE = 5-4-89 00:00:00.000
+DEPT_NO = 180
+JOB_CODE = Mktg
 JOB_GRADE = 3
 JOB_COUNTRY = USA
-SALARY = 75,060.00
-FULL_NAME = Forest, Phil
+SALARY = 64,635.00
+FULL_NAME = Johnson, Leslie
 
 
 Running Test 5: Update Returning and Activity Check
@@ -1712,7 +1712,7 @@ Database header page information:
 
 	Checksum		12345 
 
-	Generation		235 
+	Generation		268 
 
 	Page size		4096 
 
@@ -1720,17 +1720,17 @@ Database header page information:
 
 	Oldest transaction	169 
 
-	Oldest active		203 
+	Oldest active		225 
 
-	Oldest snapshot		203 
+	Oldest snapshot		225 
 
-	Next transaction	204 
+	Next transaction	226 
 
 	Bumped transaction	1 
 
 	Sequence number		0 
 
-	Next attachment ID	29 
+	Next attachment ID	40 
 
 	Implementation ID	19 
 
