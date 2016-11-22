@@ -9,7 +9,7 @@ uses
   {$ENDIF}
   Classes, SysUtils, CustApp, TestManager, Test1, test2, Test3, Test4, Test5,
   Test6, Test7, Test8, Test9, Test10, Test11, Test12, Test13, Test14, Test15,
-  Test16;
+  Test16, IB;
 
 type
 
@@ -84,6 +84,7 @@ begin
     writeln(OutFile,'Copyright MWA Software 2016');
     writeln(OutFile);
     writeln(OutFile,'Starting Tests');
+    writeln(OutFile,'Client API Version = ',FirebirdAPI.GetImplementationVersion);
 
     if FTestID = 0 then
       TestMgr.RunAll
