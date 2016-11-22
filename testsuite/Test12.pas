@@ -56,6 +56,7 @@ begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
 
   Statement := Attachment.PrepareWithNamedParameters(Transaction,sqlInsert);
+  ParamInfo(Statement.SQLParams);
   with Statement.GetSQLParams do
   begin
     ByName('rowid').AsInteger := 1;

@@ -83,10 +83,9 @@ begin
   Statement := Attachment.Prepare(Transaction,'Select * from TestData');
   PrintMetaData(Statement.GetMetaData);
   Statement := Attachment.PrepareWithNamedParameters(Transaction,sqlInsert);
+  ParamInfo(Statement.SQLParams);
   with Statement.GetSQLParams do
   begin
-    for i := 0 to GetCount - 1 do
-      writeln('Param Name = ',Params[i].getName);
     ByName('rowid').AsInteger := 1;
     ByName('title').AsString := 'Blob Test ©€';
     ByName('Fp').AsDouble := 20.28;

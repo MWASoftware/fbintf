@@ -319,16 +319,11 @@ begin
   result := 0;
   case SQLType of
   SQL_VARYING, SQL_TEXT:
-    begin
       result := FCharSetID;
-      with FStatement.GetAttachment as TFB30Attachment do
-      if (result > 1) and HasDefaultCharSet then
-        result := CharSetID;
-    end;
 
   SQL_BLOB:
-    if (SQLSubType = 1) and (FRelationName <> '') and (FFieldName <> '') then
-      result := GetBlobMetaData.GetCharSetID;
+    if (SQLSubType = 1) then
+      result := FCharSetID;
 
   SQL_ARRAY:
     if (FRelationName <> '') and (FFieldName <> '') then
@@ -711,6 +706,7 @@ begin
       FNullable := aMetaData.isNullable(StatusIntf,i);
       FOwnsSQLData := true;
       Check4DataBaseError;
+      FNullIndicator := -1;
       if FNullable then
         FSQLNullIndicator := @FNullIndicator
       else

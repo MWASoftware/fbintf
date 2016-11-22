@@ -279,7 +279,10 @@ end;
 
 function TIBXSQLVAR.GetSubtype: integer;
 begin
-  result := FXSQLVAR^.sqlsubtype;
+  if GetSQLType = SQL_BLOB then
+    result := FXSQLVAR^.sqlsubtype
+  else
+    result := 0;
 end;
 
 function TIBXSQLVAR.GetAliasName: string;
@@ -304,7 +307,10 @@ end;
 
 function TIBXSQLVAR.GetScale: integer;
 begin
-  result := FXSQLVAR^.sqlscale;
+  if GetSQLType = SQL_BLOB then
+    result := 0
+  else
+    result := FXSQLVAR^.sqlscale;
 end;
 
 function TIBXSQLVAR.GetCharSetID: cardinal;
@@ -312,16 +318,13 @@ begin
   result := 0;
   case SQLType of
   SQL_VARYING, SQL_TEXT:
-    begin
+      {see http://firebirdsql.org/rlsnotesh/rlsnotes210.html}
       result := FXSQLVAR^.sqlsubtype and $FF;
-      with FStatement.GetAttachment as TFB25Attachment do
-      if (result > 1) and HasDefaultCharSet then
-        result := CharSetID;
-    end;
 
   SQL_BLOB:
-    if (SQLSubType = 1) and (GetRelationName <> '') and (GetFieldName <> '') then
-      result := GetBlobMetaData.GetCharSetID;
+    if (SQLSubType = 1)  then
+      {see http://firebirdsql.org/rlsnotesh/rlsnotes210.html}
+      result := FXSQLVAR^.sqlscale;
 
   SQL_ARRAY:
     if (GetRelationName <> '') and (GetFieldName <> '') then
