@@ -59,7 +59,7 @@ begin
   TPB.Add(isc_tpb_protected);
   Transaction := Attachment.StartTransaction(TPB,taRollback);
   Statement := Attachment.Prepare(Transaction,'Execute Procedure DELETE_EMPLOYEE ?',3);
-  Statement.GetSQLParams[0].AsInteger := 9;
+  Statement.GetSQLParams[0].AsInteger := 8;
   Statement.Execute;
 
   ResultSet := Attachment.OpenCursorAtStart(
