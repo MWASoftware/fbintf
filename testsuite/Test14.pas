@@ -46,6 +46,7 @@ var Transaction, Transaction2: ITransaction;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   Statement := Attachment.Prepare(Transaction,sqlCallQueryProc);
+  PrintMetaData(Statement.MetaData);
   ReportResult(Statement.Execute);
   writeln;
   writeln('Repeat with a different execute transaction');
