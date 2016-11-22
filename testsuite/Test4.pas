@@ -168,7 +168,7 @@ begin
   writeln('Prepare Query again with a different transaction');
   writeln;
   Statement.Prepare(Transaction2);
-  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 9;
+  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 8;
   ReportResults(Statement);
 
   Transaction3 := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taRollback);

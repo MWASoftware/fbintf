@@ -48,18 +48,18 @@
       <Unit5>
         <Filename Value="Test4.pas"/>
         <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="9"/>
-        <TopLine Value="124"/>
-        <CursorPos X="57" Y="71"/>
+        <TopLine Value="165"/>
+        <CursorPos X="57" Y="171"/>
         <UsageCount Value="55"/>
         <Loaded Value="True"/>
       </Unit5>
       <Unit6>
         <Filename Value="Test5.pas"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="10"/>
-        <TopLine Value="103"/>
+        <TopLine Value="62"/>
         <CursorPos X="57" Y="62"/>
         <UsageCount Value="55"/>
         <Loaded Value="True"/>
