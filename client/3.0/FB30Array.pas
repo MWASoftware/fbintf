@@ -65,15 +65,6 @@ type
     property Items[index: integer]: ISDLItem read getItems; default;
   end;
 
-  TSDLItem = class(TParamBlockItem,ISDLItem);
-
-  { TSDLBlock }
-
-  TSDLBlock = class (specialize TCustomParamBlock<TSDLItem,ISDLItem>, ISDL)
-  public
-    constructor Create;
-  end;
-
   { TFB30ArrayMetaData }
 
   TFB30ArrayMetaData = class(TFBArrayMetaData,IArrayMetaData)
@@ -103,6 +94,15 @@ type
     constructor Create(aAttachment: TFB30Attachment; aTransaction: TFB30Transaction; aField: IArrayMetaData); overload;
     constructor Create(aAttachment: TFB30Attachment; aTransaction: TFB30Transaction; aField: IArrayMetaData; ArrayID: TISC_QUAD); overload;
  end;
+
+  TSDLItem = class(TParamBlockItem,ISDLItem);
+
+  { TSDLBlock }
+
+  TSDLBlock = class (specialize TCustomParamBlock<TSDLItem,ISDLItem>, ISDL)
+  public
+    constructor Create;
+  end;
 
 implementation
 

@@ -92,7 +92,7 @@ type
     FArrayMetaData: IArrayMetaData;
 
     {SQL Var Type Data}
-    FSQLStatementType: cardinal;
+    FSQLType: cardinal;
     FSQLSubType: integer;
     FSQLData: PChar; {Address of SQL Data in Message Buffer}
     FSQLNullIndicator: PShort; {Address of null indicator}
@@ -273,7 +273,7 @@ end;
 
 function TIBXSQLVAR.GetSQLType: cardinal;
 begin
-  Result := FSQLStatementType;
+  Result := FSQLType;
 end;
 
 function TIBXSQLVAR.GetSubtype: integer;
@@ -435,7 +435,7 @@ end;
 
 procedure TIBXSQLVAR.SetSQLType(aValue: cardinal);
 begin
-  FSQLStatementType := aValue;
+  FSQLType := aValue;
 end;
 
 procedure TIBXSQLVAR.SetCharSetID(aValue: cardinal);
@@ -614,7 +614,7 @@ begin
       for i := 0 to Count - 1 do
       with TIBXSQLVar(Column[i]) do
       begin
-        Builder.setType(StatusIntf,i,FSQLStatementType);
+        Builder.setType(StatusIntf,i,FSQLType);
         Check4DataBaseError;
         Builder.setSubType(StatusIntf,i,FSQLSubType);
         Check4DataBaseError;
@@ -680,10 +680,15 @@ begin
     for i := 0 to Count - 1 do
     with TIBXSQLVar(Column[i]) do
     begin
-      FSQLStatementType := aMetaData.getType(StatusIntf,i);
+      FSQLType := aMetaData.getType(StatusIntf,i);
       Check4DataBaseError;
-      FSQLSubType := aMetaData.getSubType(StatusIntf,i);
-      Check4DataBaseError;
+      if FSQLType = SQL_BLOB then
+      begin
+        FSQLSubType := aMetaData.getSubType(StatusIntf,i);
+        Check4DataBaseError;
+      end
+      else
+        FSQLSubType := 0;
       FDataLength := aMetaData.getLength(StatusIntf,i);
       Check4DataBaseError;
       case SQLType of
@@ -757,10 +762,15 @@ begin
     for i := 0 to Count - 1 do
     with TIBXSQLVar(Column[i]) do
     begin
-      FSQLStatementType := aMetaData.getType(StatusIntf,i);
+      FSQLType := aMetaData.getType(StatusIntf,i);
       Check4DataBaseError;
-      FSQLSubType := aMetaData.getSubType(StatusIntf,i);
-      Check4DataBaseError;
+      if FSQLType = SQL_BLOB then
+      begin
+        FSQLSubType := aMetaData.getSubType(StatusIntf,i);
+        Check4DataBaseError;
+      end
+      else
+        FSQLSubType := 0;
       FSQLData := FMessageBuffer + metaData.getOffset(StatusIntf,i);
       Check4DataBaseError;
       FDataLength := aMetaData.getLength(StatusIntf,i);
