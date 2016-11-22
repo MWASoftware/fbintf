@@ -21,9 +21,9 @@ echo ""
 echo "Starting Testsuite"
 echo ""
 IF EXIST "testsuite.exe" (
-testsuite.exe -u %USERNAME% -p %PASSWORD% -e %EMPLOYEEDB% -n %NEWDBNAME% -s %NEWDBNAME2% -b %BAKFILE%>testout.log
+testsuite.exe -u %USERNAME% -p %PASSWORD% -e %EMPLOYEEDB% -n %NEWDBNAME% -s %NEWDBNAME2% -b %BAKFILE% -o testout.log
 echo "Comparing results with reference log"
 echo ""
 %FPCBIN%\diff reference.log testout.log >diff.log
-#type diff.log 
+type diff.log 
 )

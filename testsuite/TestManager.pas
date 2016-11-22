@@ -87,6 +87,7 @@ procedure RegisterTest(aTest: TTest);
 
 implementation
 
+
 procedure RegisterTest(aTest: TTest);
 begin
   if TestMgr = nil then
