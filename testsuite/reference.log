@@ -171,7 +171,7 @@ EMP_NO = 2
 FIRST_NAME = Robert
 LAST_NAME = Nelson
 PHONE_EXT = 250
-HIRE_DATE = 28-12-88 00:00:00.000
+HIRE_DATE = 28/12/1988 00:00:00.000
 DEPT_NO = 600
 JOB_CODE = VP
 JOB_GRADE = 2
@@ -182,7 +182,7 @@ EMP_NO = 4
 FIRST_NAME = Bruce
 LAST_NAME = Young
 PHONE_EXT = 233
-HIRE_DATE = 28-12-88 00:00:00.000
+HIRE_DATE = 28/12/1988 00:00:00.000
 DEPT_NO = 621
 JOB_CODE = Eng
 JOB_GRADE = 2
@@ -193,7 +193,7 @@ EMP_NO = 5
 FIRST_NAME = Kim
 LAST_NAME = Lambert
 PHONE_EXT = 22
-HIRE_DATE = 6-2-89 00:00:00.000
+HIRE_DATE = 6/2/1989 00:00:00.000
 DEPT_NO = 130
 JOB_CODE = Eng
 JOB_GRADE = 2
@@ -215,7 +215,7 @@ EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
 PHONE_EXT = 410
-HIRE_DATE = 5-4-89 00:00:00.000
+HIRE_DATE = 5/4/1989 00:00:00.000
 DEPT_NO = 180
 JOB_CODE = Mktg
 JOB_GRADE = 3
@@ -238,7 +238,7 @@ EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
 PHONE_EXT = 410
-HIRE_DATE = 5-4-89 00:00:00.000
+HIRE_DATE = 5/4/1989 00:00:00.000
 DEPT_NO = 180
 JOB_CODE = Mktg
 JOB_GRADE = 3
@@ -266,7 +266,7 @@ EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
 PHONE_EXT = 410
-HIRE_DATE = 5-4-89 00:00:00.000
+HIRE_DATE = 5/4/1989 00:00:00.000
 DEPT_NO = 180
 JOB_CODE = Mktg
 JOB_GRADE = 3
@@ -412,7 +412,7 @@ EMP_NO = 150
 FIRST_NAME = John
 LAST_NAME = Doe
 PHONE_EXT = 
-HIRE_DATE = 1-4-15 00:00:00.000
+HIRE_DATE = 1/4/2015 00:00:00.000
 DEPT_NO = 600
 JOB_CODE = Eng
 JOB_GRADE = 4
@@ -425,7 +425,7 @@ EMP_NO = 151
 FIRST_NAME = Major
 LAST_NAME = Major
 PHONE_EXT = 
-HIRE_DATE = 1-4-15 00:00:00.000
+HIRE_DATE = 1/4/2015 00:00:00.000
 DEPT_NO = 600
 JOB_CODE = Eng
 JOB_GRADE = 4
@@ -442,7 +442,7 @@ EMP_NO = 150
 FIRST_NAME = Jane
 LAST_NAME = Doe
 PHONE_EXT = NULL
-HIRE_DATE = 1-4-15 00:00:00.000
+HIRE_DATE = 1/4/2015 00:00:00.000
 DEPT_NO = 600
 JOB_CODE = Eng
 JOB_GRADE = 4
@@ -457,7 +457,7 @@ EMP_NO = 150
 FIRST_NAME = Jane
 LAST_NAME = Doe
 PHONE_EXT = NULL
-HIRE_DATE = 1-4-15 00:00:00.000
+HIRE_DATE = 1/4/2015 00:00:00.000
 DEPT_NO = 600
 JOB_CODE = Eng
 JOB_GRADE = 4
@@ -471,7 +471,7 @@ EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
 PHONE_EXT = 410
-HIRE_DATE = 5-4-89 00:00:00.000
+HIRE_DATE = 5/4/1989 00:00:00.000
 DEPT_NO = 180
 JOB_CODE = Mktg
 JOB_GRADE = 3
@@ -485,7 +485,7 @@ EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
 PHONE_EXT = 410
-HIRE_DATE = 5-4-89 00:00:00.000
+HIRE_DATE = 5/4/1989 00:00:00.000
 DEPT_NO = 180
 JOB_CODE = Mktg
 JOB_GRADE = 3
@@ -505,7 +505,7 @@ EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
 PHONE_EXT = 410
-HIRE_DATE = 31-1-16 00:00:00.000
+HIRE_DATE = 31/1/2016 00:00:00.000
 DEPT_NO = 180
 JOB_CODE = Mktg
 JOB_GRADE = 3
@@ -1466,7 +1466,7 @@ Param Name = DATED
 Param Name = NOTES
 ROWID = 1
 TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
-DATED = 1-4-16 09:30:00.100
+DATED = 1/4/2016 09:30:00.100
 NOTES = Écoute moi (Charset Id = 4 Codepage = 65001)
 MYARRAY = NULL
 
@@ -1481,7 +1481,7 @@ Size = 8
 
 ROWID = 1
 TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
-DATED = 1-4-16 09:30:00.100
+DATED = 1/4/2016 09:30:00.100
 NOTES = Écoute moi (Charset Id = 4 Codepage = 65001)
 Array: (0: 100) (1: 99) (2: 98) (3: 97) (4: 96) (5: 95) (6: 94) (7: 93) (8: 92) (9: 91) (10: 90) (11: 89) (12: 88) (13: 87) (14: 86) (15: 85) (16: 84) 
 
@@ -1491,7 +1491,7 @@ Write updated reduced slice
 Show update array
 ROWID = 1
 TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
-DATED = 1-4-16 09:30:00.100
+DATED = 1/4/2016 09:30:00.100
 NOTES = Écoute moi (Charset Id = 4 Codepage = 65001)
 Array: (0: 100) (1: 99) (2: 1000) (3: 97) (4: 96) (5: 95) (6: 94) (7: 93) (8: 92) (9: 91) (10: 90) (11: 89) (12: 88) (13: 87) (14: 86) (15: 85) (16: 84) 
 
@@ -1679,7 +1679,7 @@ Database header page information:
 
 	Flags			0 
 
-	Generation		204 
+	Generation		325 
 
 	System Change Number	0 
 
@@ -1689,15 +1689,15 @@ Database header page information:
 
 	Oldest transaction	174 
 
-	Oldest active		181 
+	Oldest active		249 
 
-	Oldest snapshot		181 
+	Oldest snapshot		249 
 
-	Next transaction	181 
+	Next transaction	249 
 
 	Sequence number		0 
 
-	Next attachment ID	48 
+	Next attachment ID	145 
 
 	Implementation		HW=AMD/Intel/x64 little-endian OS=Linux CC=gcc 
 
@@ -2569,7 +2569,7 @@ PROJ_DEPT_BUDGET (135)
 
     Pointer pages: 1, data page slots: 2 
 
-    Data pages: 2, average fill: 24% 
+    Data pages: 2, average fill: 20% 
 
     Primary pages: 1, secondary pages: 1, swept pages: 0 
 
@@ -2577,9 +2577,9 @@ PROJ_DEPT_BUDGET (135)
 
     Fill distribution: 
 
-	 0 - 19% = 0 
+	 0 - 19% = 1 
 
-	20 - 39% = 2 
+	20 - 39% = 1 
 
 	40 - 59% = 0 
 
@@ -3739,11 +3739,11 @@ RDB$INDEX_SEGMENTS (3)
 
     Pointer pages: 1, data page slots: 2 
 
-    Data pages: 2, average fill: 43% 
+    Data pages: 2, average fill: 40% 
 
     Primary pages: 2, secondary pages: 0, swept pages: 0 
 
-    Empty pages: 0, full pages: 1 
+    Empty pages: 0, full pages: 0 
 
     Fill distribution: 
 
@@ -3791,7 +3791,7 @@ RDB$INDICES (4)
 
     Pointer pages: 1, data page slots: 2 
 
-    Data pages: 2, average fill: 38% 
+    Data pages: 2, average fill: 37% 
 
     Primary pages: 2, secondary pages: 0, swept pages: 1 
 
