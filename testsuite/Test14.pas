@@ -69,7 +69,7 @@ const
   sqlCreateTable =
     'Create Table TestData( '+
     'RowID Integer not null,'+
-    'Title VarChar(32) Character Set UTF8,'+
+    'Title VarChar(32),'+
     'Primary Key(RowID)'+
     ')';
 
@@ -80,7 +80,7 @@ const
     'End';
 
   sqlCreateProc2 =
-    'Create Procedure ShowData Returns (RowID Integer, Title VarChar(32) Character Set UTF8) '+
+    'Create Procedure ShowData Returns (RowID Integer, Title VarChar(32)) '+
     'As Begin '+
     'Select First 1 RowID,Title From TestData Into :RowID,:Title; '+
     'End';

@@ -58,6 +58,7 @@ type
     FUserName: string;
     FPassword: string;
     FBackupFileName: string;
+    procedure CleanUp;
   public
     constructor Create;
     destructor Destroy; override;
@@ -98,6 +99,7 @@ begin
   inherited Create;
   FOwner := aOwner;
 end;
+
 
 function TTestBase.ReportResults(Statement: IStatement): IResultSet;
 begin
@@ -606,6 +608,21 @@ end;
 
 { TTestManager }
 
+procedure TTestManager.CleanUp;
+var DPB: IDPB;
+    Attachment: IAttachment;
+begin
+  DPB := FirebirdAPI.AllocateDPB;
+  DPB.Add(isc_dpb_user_name).setAsString(GetUserName);
+  DPB.Add(isc_dpb_password).setAsString(GetPassword);
+  Attachment := FirebirdAPI.OpenDatabase(GetNewDatabaseName,DPB,false);
+  if Attachment <> nil then
+    Attachment.DropDatabase;
+  Attachment := FirebirdAPI.OpenDatabase(GetSecondNewDatabaseName,DPB,false);
+  if Attachment <> nil then
+    Attachment.DropDatabase;
+end;
+
 constructor TTestManager.Create;
 begin
   inherited Create;
@@ -663,6 +680,7 @@ end;
 procedure TTestManager.RunAll;
 var i: integer;
 begin
+  CleanUP;
   for i := 0 to FTests.Count - 1 do
     with TTestBase(FTests[i]) do
   begin
@@ -683,6 +701,7 @@ end;
 
 procedure TTestManager.Run(TestID: integer);
 begin
+  CleanUp;
   with TTestBase(FTests[TestID-1]) do
   begin
     writeln('Running ' + TestTitle);
