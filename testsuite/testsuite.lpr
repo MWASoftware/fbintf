@@ -72,6 +72,10 @@ begin
     if HasOption('b','backupfile') then
       TestMgr.SetBackupFileName(GetOptionValue('b'));
 
+    {Ensure consistent date reporting across platforms}
+    DefaultFormatSettings.ShortDateFormat := 'd/m/yyyy';
+    DefaultFormatSettings.DateSeparator := '/';
+
     writeln('Starting Tests');
 
     if FTestID = 0 then

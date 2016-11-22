@@ -25,7 +25,8 @@ if [ -x testsuite ]; then
   ./testsuite -u $USERNAME -p $PASSWORD -e $EMPLOYEEDB -n $NEWDBNAME -s $NEWDBNAME2 -b $BAKFILE>testout.log
   echo "Comparing results with reference log"
   echo ""
-  diff reference.log testout.log 
+  diff reference.log testout.log >diff.log
+  cat diff.log 
 else
   echo "Unable to run test suite"
 fi
