@@ -323,10 +323,12 @@ end;
 
 { TFB25ClientAPI }
 
+{$IFDEF UNIX}
 function TFB25ClientAPI.GetFirebirdLibList: string;
 begin
   Result := 'libfbembed.so:libfbembed.so.2.5:libfbembed.so.2.1:libfbclient.so:libfbclient.so.2';
 end;
+{$ENDIF}
 
 procedure TFB25ClientAPI.LoadInterface;
 begin

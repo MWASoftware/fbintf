@@ -72,6 +72,18 @@ interface
 uses
   Classes,  Dynlibs, IB, IBHeader, FBActivityMonitor, FBMessages, IBExternals;
 
+{For Linux see result of GetFirebirdLibList method}
+{$IFDEF DARWIN}
+const
+FIREBIRD_SO2 = 'libfbclient.dylib';
+{$ENDIF}
+{$IFDEF WINDOWS}
+const
+IBASE_DLL = 'gds32.dll';
+FIREBIRD_CLIENT = 'fbclient.dll'; {do not localize}
+FIREBIRD_EMBEDDED = 'fbembed.dll';
+{$ENDIF}
+
 type
   TStatusVector              = array[0..19] of NativeInt;
   PStatusVector              = ^TStatusVector;
@@ -160,19 +172,6 @@ uses IBUtils,
 Windows,Registry, WinDirs,
 {$ENDIF}
 SysUtils;
-
-{For Linux see result of GetFirebirdLibList method}
-{$IFDEF DARWIN}
-const
-FIREBIRD_SO2 = 'libfbclient.dylib';
-{$ENDIF}
-{$IFDEF WINDOWS}
-const
-IBASE_DLL = 'gds32.dll';
-FIREBIRD_CLIENT = 'fbclient.dll'; {do not localize}
-FIREBIRD_EMBEDDED = 'fbembed.dll';
-{$ENDIF}
-
 
 {$IFDEF UNIX}
 {$I uloadlibrary.inc}

@@ -188,10 +188,12 @@ begin
   end;
 end;
 
+{$IFDEF UNIX}
 function TFB30ClientAPI.GetFirebirdLibList: string;
 begin
   Result := 'libfbclient.so:libfbclient.so.2';
 end;
+{$ENDIF}
 
 procedure TFB30ClientAPI.LoadInterface;
 var
