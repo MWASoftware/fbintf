@@ -251,11 +251,11 @@ FULL_NAME = Johnson, Leslie
 Running Test 3: ad hoc queries
 Opening localhost:employee
 Database Open
+Employee Count = 42
 Employee Count = 41
-Employee Count = 40
+Employee Count = 42
 Employee Count = 41
-Employee Count = 40
-Employee Count = 41
+Employee Count = 42
 
 
 Running Test 4: Update, Insert and Delete Queries
@@ -450,7 +450,7 @@ JOB_COUNTRY = England
 SALARY = 41,000.89
 FULL_NAME = Doe, Jane
 
-Employee Count = 42
+Employee Count = 43
 Prepare Query again
 
 EMP_NO = 150
@@ -520,7 +520,7 @@ Database Activity = TRUE
 Transaction Activity = TRUE
 Database Activity = FALSE
 Transaction Activity = FALSE
-Employee Count = 42
+Employee Count = 43
 Database Activity = TRUE
 Transaction Activity = TRUE
 Transaction Active
@@ -1679,7 +1679,7 @@ Database header page information:
 
 	Flags			0 
 
-	Generation		2699 
+	Generation		204 
 
 	System Change Number	0 
 
@@ -1687,17 +1687,17 @@ Database header page information:
 
 	ODS version		12.0 
 
-	Oldest transaction	245 
+	Oldest transaction	174 
 
-	Oldest active		1701 
+	Oldest active		181 
 
-	Oldest snapshot		1701 
+	Oldest snapshot		181 
 
-	Next transaction	1701 
+	Next transaction	181 
 
 	Sequence number		0 
 
-	Next attachment ID	1734 
+	Next attachment ID	48 
 
 	Implementation		HW=AMD/Intel/x64 little-endian OS=Linux CC=gcc 
 
@@ -1921,7 +1921,7 @@ DEPARTMENT (130)
 
     Data pages: 1, average fill: 24% 
 
-    Primary pages: 1, secondary pages: 0, swept pages: 0 
+    Primary pages: 1, secondary pages: 0, swept pages: 1 
 
     Empty pages: 0, full pages: 0 
 
@@ -1993,15 +1993,15 @@ DEPARTMENT (130)
 
     Index RDB$FOREIGN10 (4) 
 
-	Root page: 219, depth: 1, leaf buckets: 1, nodes: 116 
+	Root page: 219, depth: 1, leaf buckets: 1, nodes: 21 
 
-	Average node length: 2.40, total dup: 99, max dup: 99 
+	Average node length: 4.29, total dup: 3, max dup: 3 
 
-	Average key length: 1.39, compression ratio: 0.24 
+	Average key length: 3.24, compression ratio: 0.60 
 
-	Average prefix length: 0.14, average data length: 0.20 
+	Average prefix length: 0.81, average data length: 1.14 
 
-	Clustering factor: 1, ratio: 0.01 
+	Clustering factor: 1, ratio: 0.05 
 
 	Fill distribution: 
 
@@ -2075,7 +2075,7 @@ EMPLOYEE (131)
 
     Pointer pages: 1, data page slots: 1 
 
-    Data pages: 1, average fill: 44% 
+    Data pages: 1, average fill: 45% 
 
     Primary pages: 1, secondary pages: 0, swept pages: 0 
 
@@ -2097,13 +2097,13 @@ EMPLOYEE (131)
 
     Index NAMEX (3) 
 
-	Root page: 277, depth: 1, leaf buckets: 1, nodes: 42 
+	Root page: 277, depth: 1, leaf buckets: 1, nodes: 43 
 
-	Average node length: 19.40, total dup: 0, max dup: 0 
+	Average node length: 19.35, total dup: 0, max dup: 0 
 
-	Average key length: 18.38, compression ratio: 0.96 
+	Average key length: 18.33, compression ratio: 0.96 
 
-	Average prefix length: 2.17, average data length: 15.40 
+	Average prefix length: 2.16, average data length: 15.35 
 
 	Clustering factor: 1, ratio: 0.02 
 
@@ -2123,13 +2123,13 @@ EMPLOYEE (131)
 
     Index RDB$FOREIGN8 (1) 
 
-	Root page: 215, depth: 1, leaf buckets: 1, nodes: 42 
+	Root page: 215, depth: 1, leaf buckets: 1, nodes: 43 
 
-	Average node length: 4.07, total dup: 23, max dup: 4 
+	Average node length: 4.05, total dup: 24, max dup: 4 
 
-	Average key length: 2.98, compression ratio: 1.01 
+	Average key length: 2.95, compression ratio: 1.02 
 
-	Average prefix length: 2.19, average data length: 0.81 
+	Average prefix length: 2.21, average data length: 0.79 
 
 	Clustering factor: 1, ratio: 0.02 
 
@@ -2149,13 +2149,13 @@ EMPLOYEE (131)
 
     Index RDB$FOREIGN9 (2) 
 
-	Root page: 216, depth: 1, leaf buckets: 1, nodes: 42 
+	Root page: 216, depth: 1, leaf buckets: 1, nodes: 43 
 
-	Average node length: 10.43, total dup: 15, max dup: 4 
+	Average node length: 10.26, total dup: 16, max dup: 4 
 
-	Average key length: 9.40, compression ratio: 1.70 
+	Average key length: 9.23, compression ratio: 1.72 
 
-	Average prefix length: 9.17, average data length: 6.79 
+	Average prefix length: 9.28, average data length: 6.63 
 
 	Clustering factor: 1, ratio: 0.02 
 
@@ -2175,13 +2175,13 @@ EMPLOYEE (131)
 
     Index RDB$PRIMARY7 (0) 
 
-	Root page: 214, depth: 1, leaf buckets: 1, nodes: 42 
+	Root page: 214, depth: 1, leaf buckets: 1, nodes: 43 
 
-	Average node length: 4.62, total dup: 0, max dup: 0 
+	Average node length: 4.60, total dup: 0, max dup: 0 
 
-	Average key length: 3.60, compression ratio: 0.70 
+	Average key length: 3.58, compression ratio: 0.69 
 
-	Average prefix length: 1.19, average data length: 1.31 
+	Average prefix length: 1.19, average data length: 1.30 
 
 	Clustering factor: 1, ratio: 0.02 
 
@@ -2569,7 +2569,7 @@ PROJ_DEPT_BUDGET (135)
 
     Pointer pages: 1, data page slots: 2 
 
-    Data pages: 2, average fill: 20% 
+    Data pages: 2, average fill: 24% 
 
     Primary pages: 1, secondary pages: 1, swept pages: 0 
 
@@ -2577,9 +2577,9 @@ PROJ_DEPT_BUDGET (135)
 
     Fill distribution: 
 
-	 0 - 19% = 1 
+	 0 - 19% = 0 
 
-	20 - 39% = 1 
+	20 - 39% = 2 
 
 	40 - 59% = 0 
 
@@ -3739,11 +3739,11 @@ RDB$INDEX_SEGMENTS (3)
 
     Pointer pages: 1, data page slots: 2 
 
-    Data pages: 2, average fill: 40% 
+    Data pages: 2, average fill: 43% 
 
     Primary pages: 2, secondary pages: 0, swept pages: 0 
 
-    Empty pages: 0, full pages: 0 
+    Empty pages: 0, full pages: 1 
 
     Fill distribution: 
 
@@ -3791,9 +3791,9 @@ RDB$INDICES (4)
 
     Pointer pages: 1, data page slots: 2 
 
-    Data pages: 2, average fill: 37% 
+    Data pages: 2, average fill: 38% 
 
-    Primary pages: 2, secondary pages: 0, swept pages: 2 
+    Primary pages: 2, secondary pages: 0, swept pages: 1 
 
     Empty pages: 0, full pages: 1 
 
@@ -5035,11 +5035,11 @@ SALARY_HISTORY (136)
 
     Index CHANGEX (2) 
 
-	Root page: 289, depth: 1, leaf buckets: 1, nodes: 48 
+	Root page: 289, depth: 1, leaf buckets: 1, nodes: 49 
 
-	Average node length: 3.38, total dup: 45, max dup: 20 
+	Average node length: 3.37, total dup: 46, max dup: 21 
 
-	Average key length: 2.35, compression ratio: 2.97 
+	Average key length: 2.35, compression ratio: 2.98 
 
 	Average prefix length: 6.69, average data length: 0.31 
 
@@ -5061,13 +5061,13 @@ SALARY_HISTORY (136)
 
     Index RDB$FOREIGN21 (1) 
 
-	Root page: 248, depth: 1, leaf buckets: 1, nodes: 48 
+	Root page: 248, depth: 1, leaf buckets: 1, nodes: 49 
 
 	Average node length: 4.12, total dup: 16, max dup: 2 
 
 	Average key length: 3.10, compression ratio: 0.75 
 
-	Average prefix length: 1.44, average data length: 0.90 
+	Average prefix length: 1.43, average data length: 0.90 
 
 	Clustering factor: 1, ratio: 0.02 
 
@@ -5087,13 +5087,13 @@ SALARY_HISTORY (136)
 
     Index RDB$PRIMARY20 (0) 
 
-	Root page: 247, depth: 1, leaf buckets: 1, nodes: 48 
+	Root page: 247, depth: 1, leaf buckets: 1, nodes: 49 
 
-	Average node length: 22.23, total dup: 0, max dup: 0 
+	Average node length: 22.29, total dup: 0, max dup: 0 
 
-	Average key length: 21.21, compression ratio: 1.06 
+	Average key length: 21.27, compression ratio: 1.06 
 
-	Average prefix length: 4.35, average data length: 18.23 
+	Average prefix length: 4.31, average data length: 18.29 
 
 	Clustering factor: 1, ratio: 0.02 
 
@@ -5113,13 +5113,13 @@ SALARY_HISTORY (136)
 
     Index UPDATERX (3) 
 
-	Root page: 290, depth: 1, leaf buckets: 1, nodes: 48 
+	Root page: 290, depth: 1, leaf buckets: 1, nodes: 49 
 
-	Average node length: 3.35, total dup: 45, max dup: 27 
+	Average node length: 3.35, total dup: 46, max dup: 28 
 
-	Average key length: 2.29, compression ratio: 2.47 
+	Average key length: 2.29, compression ratio: 2.48 
 
-	Average prefix length: 5.38, average data length: 0.29 
+	Average prefix length: 5.39, average data length: 0.29 
 
 	Clustering factor: 1, ratio: 0.02 
 
