@@ -48,7 +48,7 @@ begin
       while ResultSet.FetchNext do
       begin
         for i := 0 to ResultSet.getCount - 1 do
-          writeln(ResultSet[i].Name,' = ',ResultSet[i].AsString);
+          writeln(OutFile,ResultSet[i].Name,' = ',ResultSet[i].AsString);
       end;
     finally
       ResultSet.Close;
@@ -69,14 +69,14 @@ var DPB: IDPB;
     DBFileName: string;
     DBSiteName: string;
 begin
-  writeln('Creating a Database with empty parameters');
+  writeln(OutFile,'Creating a Database with empty parameters');
   Attachment := FirebirdAPI.CreateDatabase('',nil,false);
   if Attachment = nil then
-    writeln('Create Database fails (as expected): ',FirebirdAPI.GetStatus.GetMessage)
+    writeln(OutFile,'Create Database fails (as expected): ',FirebirdAPI.GetStatus.GetMessage)
   else
     Attachment.DropDatabase;
 
-  writeln('Creating a Database with a DPD');
+  writeln(OutFile,'Creating a Database with a DPD');
   DPB := FirebirdAPI.AllocateDPB;
   DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
   DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);
@@ -85,32 +85,32 @@ begin
 
   Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
 
-  writeln('Dropping Database');
+  writeln(OutFile,'Dropping Database');
   if Attachment <> nil then
     Attachment.DropDatabase;
 
   {Open Database}
 
   PrintDPB(DPB);
-  writeln('Creating a Database with a DPD');
+  writeln(OutFile,'Creating a Database with a DPD');
   Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
   if Attachment = nil then
   begin
-    writeln('Create Database Failed');
+    writeln(OutFile,'Create Database Failed');
     Exit;
   end;
   DBInfo := Attachment.GetDBInformation([isc_info_db_id]);
   DBInfo[0].DecodeIDCluster(ConType,DBFileName,DBSiteName);
-  writeln('Database ID = ', ConType,' FB = ', DBFileName, ' SN = ',DBSiteName);
+  writeln(OutFile,'Database ID = ', ConType,' FB = ', DBFileName, ' SN = ',DBSiteName);
   DBInfo := Attachment.GetDBInformation([isc_info_ods_version]);
   write('ODS major = ',DBInfo[0].getAsInteger);
   DBInfo := Attachment.GetDBInformation([isc_info_ods_minor_version]);
-  writeln(' minor = ', DBInfo[0].getAsInteger );
+  writeln(OutFile,' minor = ', DBInfo[0].getAsInteger );
 
   {Querying Database}
   DoQuery(Attachment);
 
-  writeln('Dropping Database');
+  writeln(OutFile,'Dropping Database');
   Attachment.DropDatabase;
 end;
 

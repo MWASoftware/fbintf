@@ -107,7 +107,7 @@ begin
   Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable);
 
-  writeln('Init Database 1');
+  writeln(OutFile,'Init Database 1');
   UpdateDatabase(Attachment);
   QueryDatabase(Attachment);
 
@@ -116,7 +116,7 @@ begin
   Attachment2 := FirebirdAPI.CreateDatabase(Owner.GetSecondNewDatabaseName,DPB);
   Attachment2.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable);
 
-  writeln('Init Database 2');
+  writeln(OutFile,'Init Database 2');
   UpdateDatabase(Attachment2);
   QueryDatabase(Attachment2);
 

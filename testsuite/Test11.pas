@@ -85,8 +85,8 @@ begin
 
   {Statistics}
 
-  writeln('Get Statistics');
-  writeln;
+  writeln(OutFile,'Get Statistics');
+  writeln(OutFile);
   Req := Service.AllocateSRB;
   Req.Add(isc_action_svc_db_stats);
   Req.Add(isc_spb_dbname).SetAsString(DBName);
@@ -102,9 +102,9 @@ begin
       Results := Service.Query(nil,Req);
     until not WriteServiceQueryResult(Results);
   except on E: Exception do
-    writeln('Statistics Service Start: ',E.Message);
+    writeln(OutFile,'Statistics Service Start: ',E.Message);
   end;
-  writeln;
+  writeln(OutFile);
 
   {Licence Info}
   Req := Service.AllocateSRB;
@@ -114,9 +114,9 @@ begin
     Results := Service.Query(nil,Req);
     WriteServiceQueryResult(Results);
   except on E: Exception do
-    writeln('Licence Info: ',E.Message);
+    writeln(OutFile,'Licence Info: ',E.Message);
   end;
-  writeln;
+  writeln(OutFile);
 
   {Licence Mask Info}
   Req := Service.AllocateSRB;
@@ -125,9 +125,9 @@ begin
     Results := Service.Query(nil,Req);
     WriteServiceQueryResult(Results);
   except on E: Exception do
-    writeln('Licence Mask Info: ',E.Message);
+    writeln(OutFile,'Licence Mask Info: ',E.Message);
   end;
-  writeln;
+  writeln(OutFile);
 
   {Capabilities}
   Req := Service.AllocateSRB;
@@ -136,23 +136,23 @@ begin
     Results := Service.Query(nil,Req);
     WriteServiceQueryResult(Results);
   except on E: Exception do
-    writeln('Capabilities: ',E.Message);
+    writeln(OutFile,'Capabilities: ',E.Message);
   end;
-  writeln;
+  writeln(OutFile);
 
   {limbo transactions}
 
-  writeln('Get Limbo transactions');
-  writeln;
+  writeln(OutFile,'Get Limbo transactions');
+  writeln(OutFile);
   Req := Service.AllocateSRB;
   Req.Add(isc_info_svc_limbo_trans);
   try
     Results := Service.Query(nil,Req);
     WriteServiceQueryResult(Results);
   except on E: Exception do
-    writeln('limbo transactions: ',E.Message);
+    writeln(OutFile,'limbo transactions: ',E.Message);
   end;
-  writeln;
+  writeln(OutFile);
 end;
 
 procedure TTest11.BackupRestore(Service: IServiceManager; DBName: string);
@@ -171,7 +171,7 @@ var Req: ISRB;
 begin
   {Local Backup}
 
-  writeln('Local Backup');
+  writeln(OutFile,'Local Backup');
   Req := Service.AllocateSRB;
   Req.Add(isc_action_svc_backup);
   Req.Add(isc_spb_dbname).AsString := DBName;
@@ -184,14 +184,14 @@ begin
     repeat
       Results := Service.Query(Req);
     until not WriteServiceQueryResult(Results);
-    writeln('Local Backup Complete');
+    writeln(OutFile,'Local Backup Complete');
   except on E: Exception do
-    writeln('Local Backup Service: ',E.Message);
+    writeln(OutFile,'Local Backup Service: ',E.Message);
   end;
-  writeln;
+  writeln(OutFile);
 
   {Local Restore}
-  writeln('Local Restore');
+  writeln(OutFile,'Local Restore');
   RestoreDBName := Owner.GetNewDatabaseName;
   i := Pos(':',RestoreDBName);
   if i > 0 then
@@ -223,23 +223,23 @@ begin
           ReqLength := QueryResultsItem.AsInteger;
         WriteServiceQueryResult(Results);
       until (ReqLength = 0) ;
-      writeln('Local Restore Complete');
+      writeln(OutFile,'Local Restore Complete');
     except on E: Exception do
-      writeln('Local Restore Service: ',E.Message);
+      writeln(OutFile,'Local Restore Service: ',E.Message);
     end;
   finally
     BakFile.free;
   end;
-  writeln;
-  writeln('Open Database Check');
+  writeln(OutFile);
+  writeln(OutFile,'Open Database Check');
   DPB := FirebirdAPI.AllocateDPB;
   DPB.Add(isc_dpb_user_name).AsString := Owner.GetUserName;
   DPB.Add(isc_dpb_password).AsString := Owner.GetPassword;
   Attachment := FirebirdAPI.OpenDatabase(Owner.GetNewDatabaseName,DPB);
   if Attachment <> nil then
-    writeln('Database OK');
+    writeln(OutFile,'Database OK');
   Attachment.DropDatabase;
-  writeln('Database Dropped');
+  writeln(OutFile,'Database Dropped');
 end;
 
 function TTest11.TestTitle: string;

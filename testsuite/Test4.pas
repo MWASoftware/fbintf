@@ -120,7 +120,7 @@ begin
   Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 151;
   ReportResults(Statement);
 
-  writeln('Now Delete the rows');
+  writeln(OutFile,'Now Delete the rows');
   Statement := Attachment.Prepare(Transaction,'Delete From Employee Where EMP_NO = ?',3);
   Statement.GetSQLParams[0].AsInteger := 150;
   Statement.Execute;
@@ -147,7 +147,7 @@ begin
     ByName('JOB_COUNTRY').AsString := 'England';
     ByName('SALARY').AsFloat := 41000.89;
   end;
-  writeln('Inserting');
+  writeln(OutFile,'Inserting');
   Statement.Execute;
   WriteAffectedRows(Statement);
 
@@ -155,25 +155,25 @@ begin
   Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 150;
   ReportResults(Statement);
 
-  writeln('Employee Count = ', Attachment.OpenCursorAtStart(Transaction,
+  writeln(OutFile,'Employee Count = ', Attachment.OpenCursorAtStart(Transaction,
          'Select count(*) from EMPLOYEE',3)[0].AsInteger);
 
-  writeln('Prepare Query again');
-  writeln;
+  writeln(OutFile,'Prepare Query again');
+  writeln(OutFile);
   Statement.Prepare;
   Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 150;
   ReportResults(Statement);
 
   Transaction2 := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taRollback);
-  writeln('Prepare Query again with a different transaction');
-  writeln;
+  writeln(OutFile,'Prepare Query again with a different transaction');
+  writeln(OutFile);
   Statement.Prepare(Transaction2);
   Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 8;
   ReportResults(Statement);
 
   Transaction3 := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taRollback);
-  writeln('Open Cursor with a different transaction');
-  writeln;
+  writeln(OutFile,'Open Cursor with a different transaction');
+  writeln(OutFile);
   Rows := Statement.OpenCursor(Transaction3);
   try
     while Rows.FetchNext do
@@ -198,9 +198,9 @@ begin
   DPB.Add(isc_dpb_lc_ctype).setAsString(CharSet);
   DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
 
-  writeln('Opening ',Owner.GetEmployeeDatabaseName);
+  writeln(OutFile,'Opening ',Owner.GetEmployeeDatabaseName);
   Attachment := FirebirdAPI.OpenDatabase(Owner.GetEmployeeDatabaseName,DPB);
-  writeln('Database Open');
+  writeln(OutFile,'Database Open');
   DoQuery(Attachment);
 end;
 

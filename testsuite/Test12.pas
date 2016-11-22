@@ -99,12 +99,12 @@ begin
 
   UpdateDatabase(Attachment);
 
-  writeln('Connection Character Set UTF8');
+  writeln(OutFile,'Connection Character Set UTF8');
   {Query with UTF8}
   QueryDatabase(Attachment);
   Attachment.Disconnect;
 
-  writeln('Connection Character Set NONE');
+  writeln(OutFile,'Connection Character Set NONE');
   {Query with No character set}
   DPB := FirebirdAPI.AllocateDPB;
   DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
@@ -114,7 +114,7 @@ begin
   QueryDatabase(Attachment);
   Attachment.Disconnect;
 
-  writeln('Connection Character Set WIN1252');
+  writeln(OutFile,'Connection Character Set WIN1252');
   {Query with WIN1252}
   DPB := FirebirdAPI.AllocateDPB;
   DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);

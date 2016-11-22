@@ -81,6 +81,8 @@ type
 const
   TestMgr: TTestManager = nil;
 
+var OutFile: text;
+
 procedure RegisterTest(aTest: TTest);
 
 implementation
@@ -110,7 +112,7 @@ begin
   finally
     Result.Close;
   end;
-  writeln;
+  writeln(OutFile);
 end;
 
 procedure TTestBase.ReportResult(aValue: IResults);
@@ -120,7 +122,7 @@ begin
   for i := 0 to aValue.getCount - 1 do
   begin
     if aValue[i].IsNull then
-      writeln(aValue[i].Name,' = NULL')
+      writeln(OutFile,aValue[i].Name,' = NULL')
     else
     case aValue[i].SQLType of
     SQL_ARRAY:
@@ -130,17 +132,17 @@ begin
       end;
     SQL_FLOAT,SQL_DOUBLE,
     SQL_D_FLOAT:
-      writeln( aValue[i].Name,' = ',FormatFloat('#,##0.00',aValue[i].AsFloat));
+      writeln(OutFile, aValue[i].Name,' = ',FormatFloat('#,##0.00',aValue[i].AsFloat));
 
     SQL_INT64:
       if aValue[i].Scale <> 0 then
-        writeln( aValue[i].Name,' = ',FormatFloat('#,##0.00',aValue[i].AsFloat))
+        writeln(OutFile, aValue[i].Name,' = ',FormatFloat('#,##0.00',aValue[i].AsFloat))
       else
-        writeln(aValue[i].Name,' = ',aValue[i].AsString);
+        writeln(OutFile,aValue[i].Name,' = ',aValue[i].AsString);
 
     SQL_BLOB:
       if aValue[i].IsNull then
-        writeln(aValue[i].Name,' = (null blob)')
+        writeln(OutFile,aValue[i].Name,' = (null blob)')
       else
       if aValue[i].SQLSubType = 1 then
       begin
@@ -149,17 +151,17 @@ begin
         begin
           write(aValue[i].Name,' = ');
           PrintHexString(s);
-          writeln(' (Charset Id = ',aValue[i].GetCharSetID, ' Codepage = ',StringCodePage(s),')');
+          writeln(OutFile,' (Charset Id = ',aValue[i].GetCharSetID, ' Codepage = ',StringCodePage(s),')');
         end
         else
         begin
-          writeln(aValue[i].Name,' (Charset Id = ',aValue[i].GetCharSetID, ' Codepage = ',StringCodePage(s),')');
-          writeln;
-          writeln(s);
+          writeln(OutFile,aValue[i].Name,' (Charset Id = ',aValue[i].GetCharSetID, ' Codepage = ',StringCodePage(s),')');
+          writeln(OutFile);
+          writeln(OutFile,s);
         end
       end
       else
-        writeln(aValue[i].Name,' = (blob), Length = ',aValue[i].AsBlob.GetBlobSize);
+        writeln(OutFile,aValue[i].Name,' = (blob), Length = ',aValue[i].AsBlob.GetBlobSize);
 
     SQL_TEXT,SQL_VARYING:
     begin
@@ -168,17 +170,17 @@ begin
       begin
         write(aValue[i].Name,' = ');
         PrintHexString(s);
-        writeln(' (Charset Id = ',aValue[i].GetCharSetID, ' Codepage = ',StringCodePage(s),')');
+        writeln(OutFile,' (Charset Id = ',aValue[i].GetCharSetID, ' Codepage = ',StringCodePage(s),')');
       end
       else
       if aValue[i].GetCharSetID > 0 then
-        writeln(aValue[i].Name,' = ',s,' (Charset Id = ',aValue[i].GetCharSetID, ' Codepage = ',StringCodePage(s),')')
+        writeln(OutFile,aValue[i].Name,' = ',s,' (Charset Id = ',aValue[i].GetCharSetID, ' Codepage = ',StringCodePage(s),')')
       else
-        writeln(aValue[i].Name,' = ',s);
+        writeln(OutFile,aValue[i].Name,' = ',s);
     end;
 
     else
-      writeln(aValue[i].Name,' = ',aValue[i].AsString);
+      writeln(OutFile,aValue[i].Name,' = ',aValue[i].AsString);
     end;
   end;
 end;
@@ -193,11 +195,11 @@ end;
 procedure TTestBase.PrintDPB(DPB: IDPB);
 var i: integer;
 begin
-  writeln('DPB');
-  writeln('Count = ', DPB.getCount);
+  writeln(OutFile,'DPB');
+  writeln(OutFile,'Count = ', DPB.getCount);
   for i := 0 to DPB.getCount - 1 do
-    writeln(DPB[i].getParamType,' = ', DPB[i].AsString);
-  writeln;
+    writeln(OutFile,DPB[i].getParamType,' = ', DPB[i].AsString);
+  writeln(OutFile);
 end;
 
 procedure TTestBase.PrintMetaData(meta: IMetaData);
@@ -206,71 +208,71 @@ var i, j: integer;
     bm: IBlobMetaData;
     Bounds: TArrayBounds;
 begin
-  writeln('Metadata');
+  writeln(OutFile,'Metadata');
   for i := 0 to meta.GetCount - 1 do
   with meta[i] do
   begin
-    writeln('SQLType =',GetSQLTypeName);
-    writeln('sub type = ',getSubType);
-    writeln('Table = ',getRelationName);
-    writeln('Owner = ',getOwnerName);
-    writeln('Column Name = ',getSQLName);
-    writeln('Alias Name = ',getAliasName);
-    writeln('Field Name = ',getName);
-    writeln('Scale = ',getScale);
-    writeln('Charset id = ',getCharSetID);
-    if getIsNullable then writeln('Nullable') else writeln('Not Null');
-    writeln('Size = ',GetSize);
+    writeln(OutFile,'SQLType =',GetSQLTypeName);
+    writeln(OutFile,'sub type = ',getSubType);
+    writeln(OutFile,'Table = ',getRelationName);
+    writeln(OutFile,'Owner = ',getOwnerName);
+    writeln(OutFile,'Column Name = ',getSQLName);
+    writeln(OutFile,'Alias Name = ',getAliasName);
+    writeln(OutFile,'Field Name = ',getName);
+    writeln(OutFile,'Scale = ',getScale);
+    writeln(OutFile,'Charset id = ',getCharSetID);
+    if getIsNullable then writeln(OutFile,'Nullable') else writeln(OutFile,'Not Null');
+    writeln(OutFile,'Size = ',GetSize);
     case getSQLType of
       SQL_ARRAY:
         begin
-          writeln('Array Meta Data:');
+          writeln(OutFile,'Array Meta Data:');
           ar := GetArrayMetaData;
-          writeln('SQLType =',ar.GetSQLTypeName);
-          writeln('Scale = ',ar.getScale);
-          writeln('Charset id = ',ar.getCharSetID);
-          writeln('Size = ',ar.GetSize);
-          writeln('Table = ',ar.GetTableName);
-          writeln('Column = ',ar.GetColumnName);
-          writeln('Dimensions = ',ar.GetDimensions);
+          writeln(OutFile,'SQLType =',ar.GetSQLTypeName);
+          writeln(OutFile,'Scale = ',ar.getScale);
+          writeln(OutFile,'Charset id = ',ar.getCharSetID);
+          writeln(OutFile,'Size = ',ar.GetSize);
+          writeln(OutFile,'Table = ',ar.GetTableName);
+          writeln(OutFile,'Column = ',ar.GetColumnName);
+          writeln(OutFile,'Dimensions = ',ar.GetDimensions);
           write('Bounds: ');
           Bounds := ar.GetBounds;
           for j := 0 to Length(Bounds) - 1 do
             write('(',Bounds[j].LowerBound,':',Bounds[j].UpperBound,') ');
-          writeln;
+          writeln(OutFile);
         end;
       SQL_BLOB:
         begin
-          writeln;
-          writeln('Blob Meta Data');
+          writeln(OutFile);
+          writeln(OutFile,'Blob Meta Data');
           bm := GetBlobMetaData;
-          writeln('SQL SubType =',bm.GetSubType);
-          writeln('Table = ',bm.GetRelationName);
-          writeln('Column = ',bm.GetColumnName);
-          writeln('CharSetID = ',bm.GetCharSetID);
-          writeln('Segment Size = ',bm.GetSegmentSize);
-          writeln;
+          writeln(OutFile,'SQL SubType =',bm.GetSubType);
+          writeln(OutFile,'Table = ',bm.GetRelationName);
+          writeln(OutFile,'Column = ',bm.GetColumnName);
+          writeln(OutFile,'CharSetID = ',bm.GetCharSetID);
+          writeln(OutFile,'Segment Size = ',bm.GetSegmentSize);
+          writeln(OutFile);
         end;
     end;
-    writeln;
+    writeln(OutFile);
   end;
 end;
 
 procedure TTestBase.ParamInfo(SQLParams: ISQLParams);
 var i: integer;
 begin
-  writeln('SQL Params');
+  writeln(OutFile,'SQL Params');
   for i := 0 to SQLParams.Count - 1 do
   with SQLParams[i] do
   begin
-    writeln('SQLType =',GetSQLTypeName);
-    writeln('sub type = ',getSubType);
-    writeln('Field Name = ',getName);
-    writeln('Scale = ',getScale);
-    writeln('Charset id = ',getCharSetID);
-    if getIsNullable then writeln('Nullable') else writeln('Not Null');
-    writeln('Size = ',GetSize);
-    writeln;
+    writeln(OutFile,'SQLType =',GetSQLTypeName);
+    writeln(OutFile,'sub type = ',getSubType);
+    writeln(OutFile,'Field Name = ',getName);
+    writeln(OutFile,'Scale = ',getScale);
+    writeln(OutFile,'Charset id = ',getCharSetID);
+    if getIsNullable then writeln(OutFile,'Nullable') else writeln(OutFile,'Not Null');
+    writeln(OutFile,'Size = ',GetSize);
+    writeln(OutFile);
   end;
 end;
 
@@ -299,14 +301,14 @@ begin
           write('(',i,',',j,': ',ar.GetAsVariant([i,j]),') ');
     end;
   end;
-  writeln;
+  writeln(OutFile);
 end;
 
 procedure TTestBase.WriteAffectedRows(Statement: IStatement);
 var  SelectCount, InsertCount, UpdateCount, DeleteCount: integer;
 begin
   Statement.GetRowsAffected(SelectCount, InsertCount, UpdateCount, DeleteCount);
-  writeln('Select Count = ', SelectCount,' InsertCount = ',InsertCount,' UpdateCount = ', UpdateCount, ' DeleteCount = ',DeleteCount);
+  writeln(OutFile,'Select Count = ', SelectCount,' InsertCount = ',InsertCount,' UpdateCount = ', UpdateCount, ' DeleteCount = ',DeleteCount);
 end;
 
 function TTestBase.WriteServiceQueryResult(QueryResult: IServiceQueryResults): boolean;
@@ -318,29 +320,29 @@ begin
   with QueryResult[i] do
   case getItemType of
   isc_info_svc_version:
-    writeln('Service Manager Version = ',getAsInteger);
+    writeln(OutFile,'Service Manager Version = ',getAsInteger);
   isc_info_svc_server_version:
-    writeln('Server Version = ',getAsString);
+    writeln(OutFile,'Server Version = ',getAsString);
   isc_info_svc_implementation:
-    writeln('Implementation = ',getAsString);
+    writeln(OutFile,'Implementation = ',getAsString);
   isc_info_svc_get_license:
     writeLicence(QueryResult[i]);
   isc_info_svc_get_license_mask:
-    writeln('Licence Mask = ',getAsInteger);
+    writeln(OutFile,'Licence Mask = ',getAsInteger);
   isc_info_svc_capabilities:
-    writeln('Capabilities = ',getAsInteger);
+    writeln(OutFile,'Capabilities = ',getAsInteger);
   isc_info_svc_get_config:
     WriteConfig(QueryResult[i]);
   isc_info_svc_get_env:
-    writeln('Root Directory = ',getAsString);
+    writeln(OutFile,'Root Directory = ',getAsString);
   isc_info_svc_get_env_lock:
-    writeln('Lock Directory = ',getAsString);
+    writeln(OutFile,'Lock Directory = ',getAsString);
   isc_info_svc_get_env_msg:
-    writeln('Message File = ',getAsString);
+    writeln(OutFile,'Message File = ',getAsString);
   isc_info_svc_user_dbpath:
-    writeln('Security File = ',getAsString);
+    writeln(OutFile,'Security File = ',getAsString);
   isc_info_svc_get_licensed_users:
-    writeln('Max Licenced Users = ',getAsInteger);
+    writeln(OutFile,'Max Licenced Users = ',getAsInteger);
   isc_info_svc_get_users:
     WriteUsers(QueryResult[i]);
   isc_info_svc_svr_db_info:
@@ -348,7 +350,7 @@ begin
   isc_info_svc_line:
     begin
       line := getAsString;
-      writeln(line);
+      writeln(OutFile,line);
       Result := line <> '';
     end;
   isc_info_svc_to_eof:
@@ -356,7 +358,7 @@ begin
       line := getAsString;
       Result := line <> '';
       if FOutputFile = nil then
-        writeln(line)
+        writeln(OutFile,line)
       else
       if Result then
         FOutputFile.Write(Line[1],Length(Line))
@@ -364,7 +366,7 @@ begin
         FreeAndNil(FOutputFile);
     end;
   isc_info_svc_running:
-    writeln('Is Running = ',getAsInteger);
+    writeln(OutFile,'Is Running = ',getAsInteger);
   isc_info_svc_limbo_trans:
     WriteLimboTransactions(QueryResult[i]);
   isc_info_svc_timeout,
@@ -373,9 +375,9 @@ begin
   isc_info_svc_stdin:
     {ignore};
   else
-    writeln('Unknown Service Response Item ', getItemType);
+    writeln(OutFile,'Unknown Service Response Item ', getItemType);
   end;
-  writeln;
+  writeln(OutFile);
 end;
 
 procedure TTestBase.writeLicence(Item: IServiceQueryResultItem);
@@ -385,93 +387,93 @@ begin
   with Item[i] do
   case getItemType of
     isc_spb_lic_id:
-      writeln('Licence ID = ',GetAsString);
+      writeln(OutFile,'Licence ID = ',GetAsString);
     isc_spb_lic_key:
-      writeln('Licence Key = ',GetAsString);
+      writeln(OutFile,'Licence Key = ',GetAsString);
   end;
 end;
 
 procedure TTestBase.WriteConfig(config: IServiceQueryResultItem);
 var i: integer;
 begin
-  writeln('Firebird Configuration File');
+  writeln(OutFile,'Firebird Configuration File');
   for i := 0 to config.getCount - 1 do
-    writeln('Key = ',config.getItemType,', Value = ',config.getAsInteger);
-  writeln;
+    writeln(OutFile,'Key = ',config.getItemType,', Value = ',config.getAsInteger);
+  writeln(OutFile);
 end;
 
 procedure TTestBase.WriteUsers(users: IServiceQueryResultItem);
 var i: integer;
 begin
-  writeln('Sec. Database User');
+  writeln(OutFile,'Sec. Database User');
   for i := 0 to users.getCount - 1 do
   with users[i] do
   case getItemType of
     isc_spb_sec_username:
-      writeln('User Name = ',getAsString);
+      writeln(OutFile,'User Name = ',getAsString);
     isc_spb_sec_firstname:
-      writeln('First Name = ',getAsString);
+      writeln(OutFile,'First Name = ',getAsString);
     isc_spb_sec_middlename:
-      writeln('Middle Name = ',getAsString);
+      writeln(OutFile,'Middle Name = ',getAsString);
     isc_spb_sec_lastname:
-      writeln('Last Name = ',getAsString);
+      writeln(OutFile,'Last Name = ',getAsString);
     isc_spb_sec_userid:
-      writeln('User ID = ',getAsInteger);
+      writeln(OutFile,'User ID = ',getAsInteger);
     isc_spb_sec_groupid:
-      writeln('Group ID = ',getAsInteger);
+      writeln(OutFile,'Group ID = ',getAsInteger);
     else
-      writeln('Unknown user info ', getItemType);
+      writeln(OutFile,'Unknown user info ', getItemType);
   end;
-  writeln;
+  writeln(OutFile);
 end;
 
 procedure TTestBase.WriteDBAttachments(att: IServiceQueryResultItem);
 var i: integer;
 begin
-  writeln('DB Attachments');
+  writeln(OutFile,'DB Attachments');
   for i := 0 to att.getCount - 1 do
   with att[i] do
   case getItemType of
   isc_spb_num_att:
-    writeln('No. of Attachments = ',getAsInteger);
+    writeln(OutFile,'No. of Attachments = ',getAsInteger);
   isc_spb_num_db:
-    writeln('Databases In Use = ',getAsInteger);
+    writeln(OutFile,'Databases In Use = ',getAsInteger);
   isc_spb_dbname:
-    writeln('DB Name = ',getAsString);
+    writeln(OutFile,'DB Name = ',getAsString);
   end;
 end;
 
 procedure TTestBase.WriteLimboTransactions(limbo: IServiceQueryResultItem);
 var i: integer;
 begin
-  writeln('Limbo Transactions');
+  writeln(OutFile,'Limbo Transactions');
   for i := 0 to limbo.getCount - 1 do
   with limbo[i] do
   case getItemType of
   isc_spb_single_tra_id:
-    writeln('Single DB Transaction = ',getAsInteger);
+    writeln(OutFile,'Single DB Transaction = ',getAsInteger);
   isc_spb_multi_tra_id:
-    writeln('Multi DB Transaction = ',getAsInteger);
+    writeln(OutFile,'Multi DB Transaction = ',getAsInteger);
   isc_spb_tra_host_site:
-    writeln('Host Name = ',getAsString);
+    writeln(OutFile,'Host Name = ',getAsString);
   isc_spb_tra_advise:
-    writeln('Resolution Advisory = ',getAsInteger);
+    writeln(OutFile,'Resolution Advisory = ',getAsInteger);
   isc_spb_tra_remote_site:
-    writeln('Server Name = ',getAsString);
+    writeln(OutFile,'Server Name = ',getAsString);
   isc_spb_tra_db_path:
-    writeln('DB Primary File Name = ',getAsString);
+    writeln(OutFile,'DB Primary File Name = ',getAsString);
   isc_spb_tra_state:
     begin
       write('State = ');
       case getAsInteger of
         isc_spb_tra_state_limbo:
-          writeln('limbo');
+          writeln(OutFile,'limbo');
         isc_spb_tra_state_commit:
-          writeln('commit');
+          writeln(OutFile,'commit');
         isc_spb_tra_state_rollback:
-          writeln('rollback');
+          writeln(OutFile,'rollback');
         isc_spb_tra_state_unknown:
-          writeln('Unknown');
+          writeln(OutFile,'Unknown');
       end;
     end;
   end;
@@ -491,7 +493,7 @@ begin
   with DBInfo[i] do
   case getItemType of
   isc_info_allocation:
-    writeln('Pages =',getAsInteger);
+    writeln(OutFile,'Pages =',getAsInteger);
   isc_info_base_level:
     begin
       bytes := getAsBytes;
@@ -501,7 +503,7 @@ begin
    isc_info_db_id:
      begin
        DecodeIDCluster(ConType,DBFileName,DBSiteName);
-       writeln('Database ID = ', ConType,' FB = ', DBFileName, ' SN = ',DBSiteName);
+       writeln(OutFile,'Database ID = ', ConType,' FB = ', DBFileName, ' SN = ',DBSiteName);
      end;
    isc_info_implementation:
      begin
@@ -510,28 +512,28 @@ begin
        WriteBytes(Bytes);
      end;
    isc_info_no_reserve:
-     writeln('Reserved = ',getAsInteger);
+     writeln(OutFile,'Reserved = ',getAsInteger);
    isc_info_ods_minor_version:
-     writeln('ODS minor = ',getAsInteger);
+     writeln(OutFile,'ODS minor = ',getAsInteger);
    isc_info_ods_version:
-     writeln('ODS major = ',getAsInteger);
+     writeln(OutFile,'ODS major = ',getAsInteger);
    isc_info_page_size:
-     writeln('Page Size = ',getAsInteger);
+     writeln(OutFile,'Page Size = ',getAsInteger);
    isc_info_version:
      begin
        DecodeVersionString(Version,VersionString);
-       writeln('Version = ',Version,': ',VersionString);
+       writeln(OutFile,'Version = ',Version,': ',VersionString);
      end;
    isc_info_current_memory:
-     writeln('Server Memory = ',getAsInteger);
+     writeln(OutFile,'Server Memory = ',getAsInteger);
    isc_info_forced_writes:
-     writeln('Forced Writes  = ',getAsInteger);
+     writeln(OutFile,'Forced Writes  = ',getAsInteger);
    isc_info_max_memory:
-     writeln('Max Memory  = ',getAsInteger);
+     writeln(OutFile,'Max Memory  = ',getAsInteger);
    isc_info_num_buffers:
-     writeln('Num Buffers  = ',getAsInteger);
+     writeln(OutFile,'Num Buffers  = ',getAsInteger);
    isc_info_sweep_interval:
-     writeln('Sweep Interval  = ',getAsInteger);
+     writeln(OutFile,'Sweep Interval  = ',getAsInteger);
    isc_info_user_names:
      begin
        Users := TStringList.Create;
@@ -544,16 +546,16 @@ begin
        finally
          Users.Free;
        end;
-       writeln;
+       writeln(OutFile);
      end;
    isc_info_fetches:
-     writeln('Fetches  = ',getAsInteger);
+     writeln(OutFile,'Fetches  = ',getAsInteger);
    isc_info_marks:
-     writeln('Writes  = ',getAsInteger);
+     writeln(OutFile,'Writes  = ',getAsInteger);
    isc_info_reads:
-     writeln('Reads  = ',getAsInteger);
+     writeln(OutFile,'Reads  = ',getAsInteger);
    isc_info_writes:
-     writeln('Page Writes  = ',getAsInteger);
+     writeln(OutFile,'Page Writes  = ',getAsInteger);
    isc_info_backout_count:
      WriteOperationCounts('Record Version Removals',getOperationCounts);
    isc_info_delete_count:
@@ -571,7 +573,7 @@ begin
    isc_info_update_count:
      WriteOperationCounts('Update Count',getOperationCounts);
    else
-     writeln('Unknown Response ',getItemType);
+     writeln(OutFile,'Unknown Response ',getItemType);
   end;
 end;
 
@@ -580,30 +582,30 @@ var i: integer;
 begin
   for i := 0 to length(Bytes) - 1 do
     write(Bytes[i],',');
-  writeln;
+  writeln(OutFile);
 end;
 
 procedure TTestBase.WriteOperationCounts(Category: string;
   ops: TDBOperationCounts);
 var i: integer;
 begin
-  writeln(Category,' Operation Counts');
+  writeln(OutFile,Category,' Operation Counts');
   for i := 0 to Length(ops) - 1 do
   begin
-    writeln('Table ID = ',ops[i].TableID);
-    writeln('Count = ',ops[i].Count);
+    writeln(OutFile,'Table ID = ',ops[i].TableID);
+    writeln(OutFile,'Count = ',ops[i].Count);
   end;
-  writeln;
+  writeln(OutFile);
 end;
 
 procedure TTestBase.CheckActivity(Attachment: IAttachment);
 begin
-    writeln('Database Activity = ',Attachment.HasActivity)
+    writeln(OutFile,'Database Activity = ',Attachment.HasActivity)
 end;
 
 procedure TTestBase.CheckActivity(Transaction: ITransaction);
 begin
-  writeln('Transaction Activity = ',Transaction.HasActivity)
+  writeln(OutFile,'Transaction Activity = ',Transaction.HasActivity)
 end;
 
 { TTestManager }
@@ -684,18 +686,18 @@ begin
   for i := 0 to FTests.Count - 1 do
     with TTestBase(FTests[i]) do
   begin
-    writeln('Running ' + TestTitle);
+    writeln(OutFile,'Running ' + TestTitle);
     writeln(stderr,'Running ' + TestTitle);
     try
       RunTest('UTF8',3);
     except on E:Exception do
       begin
-        writeln('Test Completed with Error: ' + E.Message);
+        writeln(OutFile,'Test Completed with Error: ' + E.Message);
         Exit;
       end;
     end;
-    writeln;
-    writeln;
+    writeln(OutFile);
+    writeln(OutFile);
   end;
 end;
 
@@ -704,18 +706,18 @@ begin
   CleanUp;
   with TTestBase(FTests[TestID-1]) do
   begin
-    writeln('Running ' + TestTitle);
+    writeln(OutFile,'Running ' + TestTitle);
     writeln(stderr,'Running ' + TestTitle);
     try
       RunTest('UTF8',3);
     except on E:Exception do
       begin
-        writeln('Test Completed with Error: ' + E.Message);
+        writeln(OutFile,'Test Completed with Error: ' + E.Message);
         Exit;
       end;
     end;
-    writeln;
-    writeln;
+    writeln(OutFile);
+    writeln(OutFile);
   end;
 end;
 

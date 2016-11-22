@@ -56,7 +56,7 @@ begin
   Statement.GetSQLParams[1].AsInteger := 8;
   Results := Statement.Execute;
   WriteAffectedRows(Statement);
-  writeln('Last Name = ',Results[0].AsString);
+  writeln(OutFile,'Last Name = ',Results[0].AsString);
 
   Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
   Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 8;
@@ -80,28 +80,28 @@ begin
     ByName('JOB_COUNTRY').AsString := 'England';
     ByName('SALARY').AsFloat := 41000.89;
   end;
-  writeln('Inserting');
+  writeln(OutFile,'Inserting');
   Results := Statement.Execute;
-  writeln('Full Name = ',Results[0].AsString);
+  writeln(OutFile,'Full Name = ',Results[0].AsString);
   WriteAffectedRows(Statement);
   CheckActivity(Statement.GetAttachment);
   CheckActivity(Transaction);
   CheckActivity(Statement.GetAttachment);
   CheckActivity(Transaction);
 
-  writeln('Employee Count = ', Attachment.OpenCursorAtStart(Transaction,
+  writeln(OutFile,'Employee Count = ', Attachment.OpenCursorAtStart(Transaction,
          'Select count(*) from EMPLOYEE',3)[0].AsInteger);
   CheckActivity(Statement.GetAttachment);
   CheckActivity(Transaction);
   if Transaction.InTransaction then
-    writeln('Transaction Active')
+    writeln(OutFile,'Transaction Active')
   else
-    writeln('Transaction inactive');
+    writeln(OutFile,'Transaction inactive');
   Transaction.Rollback;
   if Transaction.InTransaction then
-    writeln('Transaction Active')
+    writeln(OutFile,'Transaction Active')
   else
-    writeln('Transaction inactive');
+    writeln(OutFile,'Transaction inactive');
 end;
 
 function TTest5.TestTitle: string;
@@ -119,13 +119,13 @@ begin
   DPB.Add(isc_dpb_lc_ctype).setAsString(CharSet);
   DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
 
-  writeln('Opening ',Owner.GetEmployeeDatabaseName);
+  writeln(OutFile,'Opening ',Owner.GetEmployeeDatabaseName);
   Attachment := FirebirdAPI.OpenDatabase(Owner.GetEmployeeDatabaseName,DPB);
-  writeln('Database Open');
+  writeln(OutFile,'Database Open');
   Attachment.Disconnect;
-  writeln('Database Closed');
+  writeln(OutFile,'Database Closed');
   Attachment.Connect;
-  writeln('Database Open');
+  writeln(OutFile,'Database Open');
   DoQuery(Attachment);
 end;
 

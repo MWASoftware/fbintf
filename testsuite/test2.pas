@@ -48,18 +48,18 @@ begin
     Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
     Statement := Attachment.Prepare(Transaction,'Select First 3 * from EMPLOYEE',3);
     PrintMetaData(Statement.GetMetaData);
-    writeln('Plan = ' ,Statement.GetPlan);
-    writeln(Statement.GetSQLText);
-    writeln;
+    writeln(OutFile,'Plan = ' ,Statement.GetPlan);
+    writeln(OutFile,Statement.GetSQLText);
+    writeln(OutFile);
     ReportResults(Statement);
     Statement := Attachment.Prepare(Transaction,'Select * from EMPLOYEE Where EMP_NO = ?',3);
-    writeln(Statement.GetSQLText);
+    writeln(OutFile,Statement.GetSQLText);
     ParamInfo(Statement.SQLParams);
     Statement.GetSQLParams[0].AsInteger := 8;
     ReportResults(Statement);
-    writeln('With param names');
+    writeln(OutFile,'With param names');
     Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
-    writeln(Statement.GetSQLText);
+    writeln(OutFile,Statement.GetSQLText);
     ParamInfo(Statement.SQLParams);
     Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 8;
     ReportResults(Statement);
@@ -83,11 +83,11 @@ begin
   try
     Attachment := FirebirdAPI.OpenDatabase(Owner.GetEmployeeDatabaseName,DPB);
   except on e: Exception do
-    writeln('Open Database fails ',E.Message);
+    writeln(OutFile,'Open Database fails ',E.Message);
   end;
-  writeln('Opening ',Owner.GetEmployeeDatabaseName);
+  writeln(OutFile,'Opening ',Owner.GetEmployeeDatabaseName);
   Attachment := FirebirdAPI.OpenDatabase(Owner.GetEmployeeDatabaseName,DPB);
-  writeln('Database Open');
+  writeln(OutFile,'Database Open');
   DoQuery(Attachment);
   Attachment.Disconnect;
 end;

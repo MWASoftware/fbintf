@@ -49,7 +49,7 @@ var Transaction: ITransaction;
     Statement: IStatement;
     TPB: ITPB;
 begin
-  writeln('Employee Count = ',Attachment.OpenCursorAtStart('Select count(*) from EMPLOYEE')[0].AsInteger);
+  writeln(OutFile,'Employee Count = ',Attachment.OpenCursorAtStart('Select count(*) from EMPLOYEE')[0].AsInteger);
 
   TPB := FirebirdAPI.AllocateTPB;
   TPB.Add(isc_tpb_write);
@@ -66,10 +66,10 @@ begin
          Transaction,
          'Select count(*) from EMPLOYEE',3);
 
-  writeln('Employee Count = ',ResultSet[0].AsInteger);
+  writeln(OutFile,'Employee Count = ',ResultSet[0].AsInteger);
 
   ResultSet := Attachment.OpenCursorAtStart('Select count(*) from EMPLOYEE');
-  writeln('Employee Count = ',ResultSet[0].AsInteger);
+  writeln(OutFile,'Employee Count = ',ResultSet[0].AsInteger);
 
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taRollback);
   Statement := Attachment.PrepareWithNamedParameters(Transaction,'Execute Procedure DELETE_EMPLOYEE :EMP_NO',3);
@@ -80,12 +80,12 @@ begin
          Transaction,
          'Select count(*) from EMPLOYEE',3);
 
-  writeln('Employee Count = ',ResultSet[0].AsInteger);
+  writeln(OutFile,'Employee Count = ',ResultSet[0].AsInteger);
 
   Transaction := nil; {implicit rollback}
 
 
-  writeln('Employee Count = ',Attachment.OpenCursorAtStart(
+  writeln(OutFile,'Employee Count = ',Attachment.OpenCursorAtStart(
          Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit),
          'Select count(*) As Counter from EMPLOYEE',3)[0].AsInteger);
 
@@ -106,9 +106,9 @@ begin
   DPB.Add(isc_dpb_lc_ctype).AsString := CharSet;
   DPB.Add(isc_dpb_set_db_SQL_dialect).AsByte := SQLDialect;
 
-  writeln('Opening ',Owner.GetEmployeeDatabaseName);
+  writeln(OutFile,'Opening ',Owner.GetEmployeeDatabaseName);
   Attachment := FirebirdAPI.OpenDatabase(Owner.GetEmployeeDatabaseName,DPB);
-  writeln('Database Open');
+  writeln(OutFile,'Database Open');
   DoQuery(Attachment);
 end;
 

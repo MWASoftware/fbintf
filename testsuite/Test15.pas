@@ -85,14 +85,14 @@ var Transaction: ITransaction;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   Statement := Attachment.Prepare(Transaction,'Select * from TestData ');
-  writeln;
-  writeln('Testdata');
-  writeln;
+  writeln(OutFile);
+  writeln(OutFile,'Testdata');
+  writeln(OutFile);
   ReportResults(Statement);
   Statement := Attachment.Prepare(Transaction,'Select * from TestData2 ');
-  writeln;
-  writeln('Testdata 2');
-  writeln;
+  writeln(OutFile);
+  writeln(OutFile,'Testdata 2');
+  writeln(OutFile);
   ReportResults(Statement);
 end;
 

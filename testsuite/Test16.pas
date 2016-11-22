@@ -37,56 +37,56 @@ begin
   DPB.Add(isc_dpb_lc_ctype).setAsString('UTF8');
   DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
   try
-    writeln('Invalid Database Name Test');
+    writeln(OutFile,'Invalid Database Name Test');
     Attachment := FirebirdAPI.OpenDatabase('localhost:Malformed Name',DPB);
   except on E: Exception do
-    writeln('Error Handled: ',E.Message);
+    writeln(OutFile,'Error Handled: ',E.Message);
   end;
   DPB.Find(isc_dpb_user_name).setAsString('Captain Nemo');
   try
-    writeln('Invalid User Name Test');
+    writeln(OutFile,'Invalid User Name Test');
     Attachment := FirebirdAPI.OpenDatabase(Owner.GetEmployeeDatabaseName,DPB);
   except on E: Exception do
-    writeln('Error Handled: ',E.Message);
+    writeln(OutFile,'Error Handled: ',E.Message);
   end;
   DPB.Find(isc_dpb_user_name).setAsString(Owner.GetUserName);
   DPB.Find(isc_dpb_password).setAsString('not a pwd');
   try
-    writeln('Invalid password Test');
+    writeln(OutFile,'Invalid password Test');
     Attachment := FirebirdAPI.OpenDatabase(Owner.GetEmployeeDatabaseName,DPB);
   except on E: Exception do
-    writeln('Error Handled: ',E.Message);
+    writeln(OutFile,'Error Handled: ',E.Message);
   end;
   DPB.Find(isc_dpb_password).setAsString(Owner.GetPassword);
   Attachment := FirebirdAPI.OpenDatabase(Owner.GetEmployeeDatabaseName,DPB);
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taRollback);
   try
-    writeln('Invalid Prepare SQL Test');
+    writeln(OutFile,'Invalid Prepare SQL Test');
     Statement := Attachment.Prepare(Transaction,'Update Employee Set Unknown_Date = ? Where EMP_NO = ?',3);
   except on E: Exception do
-    writeln('Error Handled: ',E.Message);
+    writeln(OutFile,'Error Handled: ',E.Message);
   end;
   try
-    writeln('Invalid Open Cursor SQL Test');
+    writeln(OutFile,'Invalid Open Cursor SQL Test');
     Attachment.OpenCursorAtStart(Transaction,
            'Select X,count(*) As Counter from EMPLOYEE',3);
   except on E: Exception do
-    writeln('Error Handled: ',E.Message);
+    writeln(OutFile,'Error Handled: ',E.Message);
   end;
   Transaction.Rollback;
   try
-    writeln('Transaction not started Test');
+    writeln(OutFile,'Transaction not started Test');
     Attachment.OpenCursorAtStart(Transaction,
            'Select count(*) As Counter from EMPLOYEE',3);
   except on E: Exception do
-    writeln('Error Handled: ',E.Message);
+    writeln(OutFile,'Error Handled: ',E.Message);
   end;
   try
-    writeln('Invalid Param SQL Type Test');
+    writeln(OutFile,'Invalid Param SQL Type Test');
     Statement := Attachment.Prepare(Transaction,'Update Employee Set Hire_Date = ? Where EMP_NO = ?',3);
     Statement.SQLParams.ByName('EMP_NO').AsDate := EncodeDate(2016,11,5);
   except on E: Exception do
-    writeln('Error Handled: ',E.Message);
+    writeln(OutFile,'Error Handled: ',E.Message);
   end;
 end;
 
@@ -109,26 +109,26 @@ begin
   SPB.Add(isc_spb_user_name).setAsString(Owner.GetUserName);
   SPB.Add(isc_spb_password).setAsString(Owner.GetPassword);
   try
-    writeln('Invalid Server Name Test');
+    writeln(OutFile,'Invalid Server Name Test');
     Service := FirebirdAPI.GetServiceManager('unknown',TCP,SPB);
   except on E: Exception do
-    writeln('Error Handled: ',E.Message);
+    writeln(OutFile,'Error Handled: ',E.Message);
   end;
 
   SPB.Find(isc_spb_user_name).setAsString('Captain Nemo');
   try
-    writeln('Invalid User Name Test');
+    writeln(OutFile,'Invalid User Name Test');
     Service := FirebirdAPI.GetServiceManager(ServerName,TCP,SPB);
   except on E: Exception do
-    writeln('Error Handled: ',E.Message);
+    writeln(OutFile,'Error Handled: ',E.Message);
   end;
   SPB.Find(isc_spb_user_name).setAsString(Owner.GetUserName);
   SPB.Find(isc_spb_password).setAsString('Bad pwd');
   try
-    writeln('Invalid password Test');
+    writeln(OutFile,'Invalid password Test');
     Service := FirebirdAPI.GetServiceManager(ServerName,TCP,SPB);
   except on E: Exception do
-    writeln('Error Handled: ',E.Message);
+    writeln(OutFile,'Error Handled: ',E.Message);
   end;
 end;
 

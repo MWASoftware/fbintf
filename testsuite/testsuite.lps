@@ -3,35 +3,35 @@
   <ProjectSession>
     <Version Value="9"/>
     <BuildModes Active="Default"/>
-    <Units Count="29">
+    <Units Count="30">
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="56"/>
-        <CursorPos X="55" Y="75"/>
-        <UsageCount Value="24"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="61"/>
+        <CursorPos X="14" Y="75"/>
+        <UsageCount Value="25"/>
+        <Loaded Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="TestManager.pas"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="160"/>
-        <CursorPos X="38" Y="175"/>
-        <UsageCount Value="24"/>
+        <TopLine Value="248"/>
+        <CursorPos X="76" Y="273"/>
+        <UsageCount Value="25"/>
         <Loaded Value="True"/>
       </Unit1>
       <Unit2>
         <Filename Value="Test1.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="25"/>
       </Unit2>
       <Unit3>
         <Filename Value="test2.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="25"/>
       </Unit3>
       <Unit4>
         <Filename Value="Test3.pas"/>
@@ -39,78 +39,78 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="59"/>
         <CursorPos X="43" Y="62"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="25"/>
       </Unit4>
       <Unit5>
         <Filename Value="Test4.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="25"/>
       </Unit5>
       <Unit6>
         <Filename Value="Test5.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="25"/>
       </Unit6>
       <Unit7>
         <Filename Value="Test6.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="25"/>
       </Unit7>
       <Unit8>
         <Filename Value="Test7.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="25"/>
       </Unit8>
       <Unit9>
         <Filename Value="Test8.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="25"/>
       </Unit9>
       <Unit10>
         <Filename Value="Test9.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="25"/>
       </Unit10>
       <Unit11>
         <Filename Value="Test10.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="25"/>
       </Unit11>
       <Unit12>
         <Filename Value="Test11.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="25"/>
       </Unit12>
       <Unit13>
         <Filename Value="Test12.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="25"/>
       </Unit13>
       <Unit14>
         <Filename Value="Test13.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="25"/>
       </Unit14>
       <Unit15>
         <Filename Value="Test14.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="25"/>
       </Unit15>
       <Unit16>
         <Filename Value="Test15.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="25"/>
       </Unit16>
       <Unit17>
         <Filename Value="Test16.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="25"/>
       </Unit17>
       <Unit18>
         <Filename Value="Makefile.fpc"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="25"/>
       </Unit18>
       <Unit19>
         <Filename Value="../client/3.0/FB30ClientAPI.pas"/>
@@ -178,12 +178,55 @@
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
       </Unit28>
+      <Unit29>
+        <Filename Value="runtest.sh"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="2"/>
+        <CursorPos X="100" Y="25"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="Bash"/>
+      </Unit29>
     </Units>
-    <JumpHistory Count="1">
+    <JumpHistory Count="10" HistoryIndex="9">
       <Position1>
         <Filename Value="TestManager.pas"/>
         <Caret Line="175" Column="45" TopLine="150"/>
       </Position1>
+      <Position2>
+        <Filename Value="TestManager.pas"/>
+        <Caret Line="75" Column="26" TopLine="70"/>
+      </Position2>
+      <Position3>
+        <Filename Value="TestManager.pas"/>
+      </Position3>
+      <Position4>
+        <Filename Value="TestManager.pas"/>
+        <Caret Line="690" Column="13" TopLine="671"/>
+      </Position4>
+      <Position5>
+        <Filename Value="testsuite.lpr"/>
+        <Caret Line="34" Column="20" TopLine="28"/>
+      </Position5>
+      <Position6>
+        <Filename Value="testsuite.lpr"/>
+        <Caret Line="76" Column="24" TopLine="76"/>
+      </Position6>
+      <Position7>
+        <Filename Value="TestManager.pas"/>
+        <Caret Line="704" Column="34" TopLine="695"/>
+      </Position7>
+      <Position8>
+        <Filename Value="TestManager.pas"/>
+      </Position8>
+      <Position9>
+        <Filename Value="TestManager.pas"/>
+        <Caret Line="214" Column="55" TopLine="199"/>
+      </Position9>
+      <Position10>
+        <Filename Value="TestManager.pas"/>
+        <Caret Line="224" Column="85" TopLine="199"/>
+      </Position10>
     </JumpHistory>
   </ProjectSession>
 </CONFIG>

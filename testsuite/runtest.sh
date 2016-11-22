@@ -22,7 +22,7 @@ if [ -x testsuite ]; then
   echo ""
   echo "Starting Testsuite"
   echo ""
-  ./testsuite -u $USERNAME -p $PASSWORD -e $EMPLOYEEDB -n $NEWDBNAME -s $NEWDBNAME2 -b $BAKFILE>testout.log
+  ./testsuite -u $USERNAME -p $PASSWORD -e $EMPLOYEEDB -n $NEWDBNAME -s $NEWDBNAME2 -b $BAKFILE -o testout.log
   echo "Comparing results with reference log"
   echo ""
   diff reference.log testout.log >diff.log

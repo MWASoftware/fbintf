@@ -31,11 +31,9 @@ procedure TFBIntTestbed.DoRun;
 var
   ErrorMsg: String;
 begin
-  writeln(Title);
-  writeln('Copyright MWA Software 2016');
-  writeln;
+  OutFile := stdout;
   // quick check parameters
-  ErrorMsg := CheckOptions('htupensb', 'help test user passwd employeedb newdbname secondnewdbname backupfile');
+  ErrorMsg := CheckOptions('htupensbo', 'help test user passwd employeedb newdbname secondnewdbname backupfile outfile');
   if ErrorMsg <> '' then begin
     ShowException(Exception.Create(ErrorMsg));
     Terminate;
@@ -72,11 +70,19 @@ begin
     if HasOption('b','backupfile') then
       TestMgr.SetBackupFileName(GetOptionValue('b'));
 
+    if HasOption('o','outfile') then
+    begin
+      system.Assign(outFile,GetOptionValue('o'));
+      ReWrite(outFile);
+    end;
     {Ensure consistent date reporting across platforms}
     DefaultFormatSettings.ShortDateFormat := 'd/m/yyyy';
     DefaultFormatSettings.DateSeparator := '/';
 
-    writeln('Starting Tests');
+    writeln(OutFile,Title);
+    writeln(OutFile,'Copyright MWA Software 2016');
+    writeln(OutFile);
+    writeln(OutFile,'Starting Tests');
 
     if FTestID = 0 then
       TestMgr.RunAll
@@ -85,8 +91,8 @@ begin
     TestMgr.Free;
   end;
 
-  writeln('Test Suite Ends');
-  Flush(stdout);
+  writeln(OutFile,'Test Suite Ends');
+  Flush(OutFile);
   {$IFDEF WINDOWS}
   //readln;
   {$ENDIF}
@@ -109,7 +115,7 @@ end;
 procedure TFBIntTestbed.WriteHelp;
 begin
   { add your help code here }
-  writeln('Usage: ', ExeName, ' -h');
+  writeln(OutFile,'Usage: ', ExeName, ' -h');
 end;
 
 var

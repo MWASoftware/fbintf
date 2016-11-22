@@ -44,19 +44,19 @@ var Transaction, Transaction2: ITransaction;
     Statement: IStatement;
     ResultSet: IResultSet;
 begin
-  writeln('Default Character set Name = ',Attachment.OpenCursorAtStart('Select RDB$CHARACTER_SET_NAME From RDB$Database')[0].AsString);
+  writeln(OutFile,'Default Character set Name = ',Attachment.OpenCursorAtStart('Select RDB$CHARACTER_SET_NAME From RDB$Database')[0].AsString);
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   Statement := Attachment.Prepare(Transaction,sqlCallQueryProc);
   PrintMetaData(Statement.MetaData);
   ReportResult(Statement.Execute);
-  writeln;
-  writeln('Repeat with a different execute transaction');
-  writeln;
+  writeln(OutFile);
+  writeln(OutFile,'Repeat with a different execute transaction');
+  writeln(OutFile);
   Transaction2 := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   ReportResult(Statement.Execute(Transaction2));
-  writeln;
-  writeln('Repeat with a original transaction');
-  writeln;
+  writeln(OutFile);
+  writeln(OutFile,'Repeat with a original transaction');
+  writeln(OutFile);
   ReportResult(Statement.Execute);
 end;
 

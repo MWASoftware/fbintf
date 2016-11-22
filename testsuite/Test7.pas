@@ -73,7 +73,7 @@ begin
   with Statement.GetSQLParams do
   begin
     for i := 0 to GetCount - 1 do
-      writeln('Param Name = ',Params[i].getName);
+      writeln(OutFile,'Param Name = ',Params[i].getName);
     ByName('rowid').AsInteger := 1;
     ByName('title').AsString := 'Blob Test ©€';
     ByName('Notes').AsString := 'Écoute moi';
@@ -103,19 +103,19 @@ begin
   begin
     ar := ResultSet.ByName('MyArray').AsArray;
     ar.SetBounds(0,10,2);
-    writeln('Shrink to 2:10');
+    writeln(OutFile,'Shrink to 2:10');
     WriteArray(ar);
   end
   else
-    writeln('Unable to reopen cursor');
+    writeln(OutFile,'Unable to reopen cursor');
 
   {Now update the reduced slice}
-  writeln('Write updated reduced slice');
+  writeln(OutFile,'Write updated reduced slice');
   ar.SetAsInteger([2],1000);
   Statement := Attachment.PrepareWithNamedParameters(Transaction,sqlUpdate);
   Statement.SQLParams[0].AsArray := ar;
   Statement.Execute;
-  writeln('Show update array');
+  writeln(OutFile,'Show update array');
   Statement := Attachment.Prepare(Transaction,'Select * from TestData');
   ReportResults(Statement);
 
