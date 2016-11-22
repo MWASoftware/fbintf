@@ -114,43 +114,10 @@ constructor TFB25Attachment.CreateDatabase(DatabaseName: string; aDPB: IDPB;
   RaiseExceptionOnError: boolean);
 var sql: string;
     tr_handle: TISC_TR_HANDLE;
-    CreateParams: string;
-    DPBItem: IDPBItem;
 begin
   inherited Create(DatabaseName,aDPB,RaiseExceptionOnError);
-  CreateParams := '';
-
-  if DPB <> nil then
-  begin
-    DPBItem :=  DPB.Find(isc_dpb_user_name);
-    if DPBItem <> nil then
-      CreateParams += ' USER ''' + DPBItem.AsString + '''';
-
-    DPBItem :=  DPB.Find(isc_dpb_password);
-    if DPBItem <> nil then
-      CreateParams += ' Password ''' + DPBItem.AsString + '''';
-
-    DPBItem :=  DPB.Find(isc_dpb_page_size);
-    if DPBItem <> nil then
-      CreateParams += ' PAGE_SIZE ' + DPBItem.AsString;
-
-    DPBItem :=  DPB.Find(isc_dpb_lc_ctype);
-    if DPBItem <> nil then
-    with Firebird25ClientAPI do
-    begin
-      CreateParams += ' DEFAULT CHARACTER SET ' + DPBItem.AsString;
-      FHasDefaultCharSet :=   CharSetName2CharSetID(DPBItem.AsString,FCharSetID) and
-                              CharSetID2CodePage(FCharSetID,FCodePage) and
-                              (FCharSetID > 1);
-    end;
-
-    DPBItem :=  DPB.Find(isc_dpb_sql_dialect);
-    if DPBItem <> nil then
-      FSQLDialect := DPBItem.AsInteger;
-  end;
-
+  sql := GenerateCreateDatabaseSQL(DatabaseName,aDPB);
   tr_handle := nil;
-  sql := 'CREATE DATABASE ''' + DatabaseName + ''' ' + CreateParams; {do not localize}
   with Firebird25ClientAPI do
   if (isc_dsql_execute_immediate(StatusVector, @FHandle, @tr_handle, 0, PChar(sql),
                                   SQLDialect, nil) > 0) and RaiseExceptionOnError then

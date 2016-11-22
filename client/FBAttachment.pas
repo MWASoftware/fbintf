@@ -55,6 +55,7 @@ type
     constructor Create(DatabaseName: string; DPB: IDPB;
       RaiseExceptionOnConnectError: boolean);
     procedure CheckHandle; virtual; abstract;
+    function GenerateCreateDatabaseSQL(DatabaseName: string; aDPB: IDPB): string;
   public
     destructor Destroy; override;
     function getDPB: IDPB;
@@ -153,6 +154,38 @@ begin
   FDPB := DPB;
   FRaiseExceptionOnConnectError := RaiseExceptionOnConnectError;
   SetupEnvironment;
+end;
+
+function TFBAttachment.GenerateCreateDatabaseSQL(DatabaseName: string;  aDPB: IDPB): string;
+var CreateParams: string;
+    DPBItem: IDPBItem;
+begin
+  CreateParams := '';
+
+  if aDPB <> nil then
+  begin
+    DPBItem :=  aDPB.Find(isc_dpb_user_name);
+    if DPBItem <> nil then
+      CreateParams += ' USER ''' + DPBItem.AsString + '''';
+
+    DPBItem :=  aDPB.Find(isc_dpb_password);
+    if DPBItem <> nil then
+      CreateParams += ' Password ''' + DPBItem.AsString + '''';
+
+    DPBItem :=  aDPB.Find(isc_dpb_page_size);
+    if DPBItem <> nil then
+      CreateParams += ' PAGE_SIZE ' + DPBItem.AsString;
+
+    DPBItem :=  aDPB.Find(isc_dpb_lc_ctype);
+    if DPBItem <> nil then
+      CreateParams += ' DEFAULT CHARACTER SET ' + DPBItem.AsString;
+
+    DPBItem :=  aDPB.Find(isc_dpb_sql_dialect);
+    if DPBItem <> nil then
+      FSQLDialect := DPBItem.AsInteger;
+  end;
+
+  Result := 'CREATE DATABASE ''' + DatabaseName + ''' ' + CreateParams; {do not localize}
 end;
 
 destructor TFBAttachment.Destroy;

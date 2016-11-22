@@ -117,32 +117,35 @@ end;
 constructor TFB30Attachment.CreateDatabase(DatabaseName: string; aDPB: IDPB;
   RaiseExceptionOnError: boolean);
 var Param: IDPBItem;
+    sql: string;
+    IsCreateDB: boolean;
 begin
   inherited Create(DatabaseName,aDPB,RaiseExceptionOnError);
-  if DPB = nil then
+  FSQLDialect := 3;
+  IsCreateDB := true;
+{  if DPB = nil then
   begin
     if RaiseExceptionOnError then
        IBError(ibxeNoDPB,[nil]);
     Exit;
+  end;  }
+  if DPB <> nil then
+  begin
+    Param := DPB.Find(isc_dpb_set_db_SQL_dialect);
+    if Param <> nil then
+      FSQLDialect := Param.AsByte;
   end;
+  sql := GenerateCreateDatabaseSQL(DatabaseName,aDPB);
   with Firebird30ClientAPI do
   begin
-    FAttachmentIntf := ProviderIntf.createDatabase(StatusIntf,PAnsiChar(DatabaseName),
-                                         (DPB as TDPB).getDataLength,
-                                         BytePtr((DPB as TDPB).getBuffer));
+    FAttachmentIntf := UtilIntf.executeCreateDatabase(StatusIntf,Length(sql),PAnsiChar(SQL),FSQLDialect,@IsCreateDB);
     if FRaiseExceptionOnConnectError then Check4DataBaseError;
     if InErrorState then
       FAttachmentIntf := nil
     else
     begin
-     Param := DPB.Find(isc_dpb_set_db_SQL_dialect);
-     if Param <> nil then
-       FSQLDialect := Param.AsByte;
-     Param :=  DPB.Find(isc_dpb_lc_ctype);
-     FHasDefaultCharSet :=  (Param <> nil) and
-                             CharSetName2CharSetID(Param.AsString,FCharSetID) and
-                             CharSetID2CodePage(FCharSetID,FCodePage) and
-                             (FCharSetID > 1);
+      Disconnect;
+      Connect
     end;
   end;
 end;
