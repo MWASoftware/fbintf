@@ -504,7 +504,7 @@ function TIBXSQLVAR.CreateBlob: IBlob;
 begin
   Result := TFB30Blob.Create(FStatement.GetAttachment as TFB30Attachment,
                              FStatement.GetTransaction as TFB30Transaction,
-                             GetBlobMetaData,nil);
+                             GetSubType,GetCharSetID,nil);
 end;
 
 { TResultSet }

@@ -422,7 +422,7 @@ end;
 function TIBXSQLVAR.CreateBlob: IBlob;
 begin
   Result := TFB25Blob.Create(FStatement.GetAttachment as TFB25Attachment,
-                 FStatement.GetTransaction as TFB25Transaction,GetBlobMetaData,nil);
+                 FStatement.GetTransaction as TFB25Transaction,GetSubType,GetCharSetID,nil);
 end;
 
 procedure TIBXSQLVAR.Initialize;
