@@ -10,7 +10,7 @@ includedir=../client/3.0/firebird ../client/include ../include
 unitdir=../client ../client/3.0/firebird ../client/2.5 . ../client/3.0 ..
 
 [target]
-programs=testsuite
+programs=testsuite 
 
 
 
