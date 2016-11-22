@@ -44,6 +44,7 @@ var Transaction, Transaction2: ITransaction;
     Statement: IStatement;
     ResultSet: IResultSet;
 begin
+  writeln('Default Character set Name = ',Attachment.OpenCursorAtStart('Select RDB$CHARACTER_SET_NAME From RDB$Database')[0].AsString);
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   Statement := Attachment.Prepare(Transaction,sqlCallQueryProc);
   PrintMetaData(Statement.MetaData);
@@ -68,7 +69,7 @@ const
   sqlCreateTable =
     'Create Table TestData( '+
     'RowID Integer not null,'+
-    'Title VarChar(32),'+
+    'Title VarChar(32) Character Set UTF8,'+
     'Primary Key(RowID)'+
     ')';
 
@@ -79,7 +80,7 @@ const
     'End';
 
   sqlCreateProc2 =
-    'Create Procedure ShowData Returns (RowID Integer, Title VarChar(32)) '+
+    'Create Procedure ShowData Returns (RowID Integer, Title VarChar(32) Character Set UTF8) '+
     'As Begin '+
     'Select First 1 RowID,Title From TestData Into :RowID,:Title; '+
     'End';
