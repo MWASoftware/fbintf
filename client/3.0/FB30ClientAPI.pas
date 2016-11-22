@@ -62,9 +62,11 @@ type
     FProvider: Firebird.IProvider;
     FConfigManager: Firebird.IConfigManager;
     FStatus: TFB30Status;
+    FIsEmbeddedServer: boolean;
     FStatusIntf: IStatus;   {Keep a reference to the interface - automatic destroy
                              when this class is freed and last reference to IStatus
                              goes out of scope.}
+    procedure CheckPlugins;
   protected
     {$IFDEF UNIX}
     function GetFirebirdLibList: string; override;
@@ -163,6 +165,29 @@ end;
 
 { TFB30ClientAPI }
 
+procedure TFB30ClientAPI.CheckPlugins;
+var FBConf: Firebird.IFirebirdConf;
+    Plugins: string;
+    PluginsList: TStringList;
+begin
+  FIsEmbeddedServer := false;
+  FBConf := FConfigManager.getFirebirdConf;
+  try
+    Plugins := FBConf.asString(FBConf.getKey('Providers'));
+  finally
+    FBConf.release;
+  end;
+  if Plugins = '' then Exit;
+
+  PluginsList := TStringList.Create;
+  try
+    PluginsList.CommaText := Plugins;
+    FIsEmbeddedServer := PluginsList.IndexOf('Engine12') <> -1;
+  finally
+    PluginsList.Free;
+  end;
+end;
+
 function TFB30ClientAPI.GetFirebirdLibList: string;
 begin
   Result := 'libfbclient.so:libfbclient.so.2';
@@ -180,6 +205,7 @@ begin
     FUtil := FMaster.getUtilInterface;
     FProvider := FMaster.getDispatcher;
     FConfigManager := FMaster.getConfigManager;
+    CheckPlugins;
   end;
 end;
 
@@ -289,52 +315,9 @@ begin
   Result := true;
 end;
 
-(*function TFB30ClientAPI.IsEmbeddedServer: boolean;
-var FBConf: Firebird.IFirebirdConf;
-    Plugins: string;
-    PluginsList: TStringList;
-begin
-  Result := false;
-  FBConf := FConfigManager.getFirebirdConf;
-  try
-    Plugins := FBConf.asString(FBConf.getKey('Providers'));
-  finally
-    FBConf.release;
-  end;
-  if Plugins = '' then Exit;
-
-  PluginsList := TStringList.Create;
-  try
-    PluginsList.CommaText := Plugins;
-    Result := PluginsList.IndexOf('Engine12') <> -1;
-  finally
-    PluginsList.Free;
-  end;
-
-end; *)
-
 function TFB30ClientAPI.IsEmbeddedServer: boolean;
-var PluginMgr: Firebird.IPluginManager;
-    PluginSet: Firebird.IPluginSet;
-    Plugin: IPluginBase;
 begin
-  Result := false;
-  PluginMgr := FMaster.getPluginManager;
-  if PluginMgr = nil then Exit;
-
-  PluginSet := PluginMgr.getPlugins(StatusIntf,0,'Engine12',nil);
-  if PluginSet = nil then Exit;
-
-  try
-    Plugin := PluginSet.getPlugin(StatusIntf);
-    if Plugin <> nil then
-    begin
-      Result := true;
-      Plugin.release;
-    end;
-  finally
-    PluginSet.release;
-  end;
+  Result := FIsEmbeddedServer;
 end;
 
 function TFB30ClientAPI.GetImplementationVersion: string;
