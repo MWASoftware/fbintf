@@ -252,7 +252,7 @@ Running Test 3: ad hoc queries
 Opening localhost:employee
 Database Open
 Employee Count = 41
-Employee Count = 41
+Employee Count = 40
 Employee Count = 41
 Employee Count = 40
 Employee Count = 41
@@ -1632,7 +1632,7 @@ Call Async Wait
 Async Wait Called
 Signal Event
 Event Signalled
-Event: TESTEVENT, Count = 1
+Event: TESTEVENT, Count = 2
 Two more events
 Call Async Wait
 Async Wait Called
@@ -1679,7 +1679,7 @@ Database header page information:
 
 	Flags			0 
 
-	Generation		2658 
+	Generation		2699 
 
 	System Change Number	0 
 
@@ -1689,15 +1689,15 @@ Database header page information:
 
 	Oldest transaction	245 
 
-	Oldest active		1678 
+	Oldest active		1701 
 
-	Oldest snapshot		1678 
+	Oldest snapshot		1701 
 
-	Next transaction	1678 
+	Next transaction	1701 
 
 	Sequence number		0 
 
-	Next attachment ID	1701 
+	Next attachment ID	1734 
 
 	Implementation		HW=AMD/Intel/x64 little-endian OS=Linux CC=gcc 
 
