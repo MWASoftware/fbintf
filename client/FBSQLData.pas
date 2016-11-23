@@ -208,7 +208,8 @@ type
     function ColumnsInUseCount: integer; virtual;
     function ColumnByName(Idx: string): TSQLVarData;
     function CheckStatementStatus(Request: TStatementStatus): boolean; virtual; abstract;
-    procedure GetColumnData(index: integer; var FieldData: PFieldData); virtual; abstract;
+    procedure GetData(index: integer; var IsNull: boolean; var len: short;
+      var data: PChar); virtual;
     function StateChanged(var ChangeSeqNo: integer): boolean; virtual; abstract;
     property Count: integer read GetCount;
     property Column[index: integer]: TSQLVarData read GetColumn;
@@ -400,7 +401,6 @@ type
     function getCount: integer;
     function getColumnMetaData(index: integer): IColumnMetaData;
     function ByName(Idx: String): IColumnMetaData;
-    procedure GetColumnData(index: integer; var FieldData: PFieldData);
   end;
 
   { TSQLParams }
@@ -441,7 +441,7 @@ type
      function getCount: integer;
      function ByName(Idx: String): ISQLData;
      function getSQLData(index: integer): ISQLData;
-     procedure GetColumnData(index: integer; var FieldData: PFieldData);
+     procedure GetData(index: integer; var IsNull:boolean; var len: short; var data: PChar);
      function GetTransaction: ITransaction; virtual;
      procedure SetRetainInterfaces(aValue: boolean);
  end;
@@ -694,6 +694,12 @@ begin
          Exit;
     end;
   Result := nil;
+end;
+
+procedure TSQLDataArea.GetData(index: integer; var IsNull: boolean;
+  var len: short; var data: PChar);
+begin
+  //Do Nothing
 end;
 
 {TSQLVarData}
@@ -2320,12 +2326,6 @@ begin
   Result := getColumnMetaData(aIBXSQLVAR.index);
 end;
 
-procedure TMetaData.GetColumnData(index: integer; var FieldData: PFieldData);
-begin
-  CheckActive;
-  FMetaData.GetColumnData(index,FieldData);
-end;
-
 { TSQLParams }
 
 procedure TSQLParams.CheckActive;
@@ -2471,10 +2471,11 @@ begin
   Result := GetISQLData(FResults.Column[index]);
 end;
 
-procedure TResults.GetColumnData(index: integer; var FieldData: PFieldData);
+procedure TResults.GetData(index: integer; var IsNull: boolean; var len: short;
+  var data: PChar);
 begin
   CheckActive;
-  FResults.GetColumnData(index,FieldData);
+  FResults.GetData(index,IsNull, len,data);
 end;
 
 function TResults.GetTransaction: ITransaction;

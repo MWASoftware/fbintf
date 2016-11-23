@@ -62,7 +62,6 @@ end;
 
 procedure TTest1.RunTest(CharSet: string; SQLDialect: integer);
 var DPB: IDPB;
-    CreateParams: string;
     Attachment: IAttachment;
     DBInfo: IDBInformation;
     ConType: integer;

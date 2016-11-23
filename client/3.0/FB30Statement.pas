@@ -158,7 +158,6 @@ type
     procedure Changed; virtual;
     function CheckStatementStatus(Request: TStatementStatus): boolean; override;
     function ColumnsInUseCount: integer; override;
-    procedure GetColumnData(index: integer; var FieldData: PFieldData); override;
     function GetTransaction: TFB30Transaction; virtual;
     procedure Initialize; override;
     function StateChanged(var ChangeSeqNo: integer): boolean; override;
@@ -204,7 +203,8 @@ type
     procedure FreeXSQLDA; override;
   public
     procedure Bind(aMetaData: Firebird.IMessageMetadata);
-    procedure GetColumnData(index: integer; var FieldData: PFieldData); override;
+    procedure GetData(index: integer; var aIsNull: boolean; var len: short;
+      var data: PChar); override;
     function IsInputDataArea: boolean; override;
     property MessageBuffer: PChar read FMessageBuffer;
     property MsgLength: integer read FMsgLength;
@@ -801,16 +801,20 @@ begin
   end;
 end;
 
-procedure TIBXOUTPUTSQLDA.GetColumnData(index: integer;
-  var FieldData: PFieldData);
+procedure TIBXOUTPUTSQLDA.GetData(index: integer; var aIsNull: boolean;
+  var len: short; var data: PChar);
 begin
-  inherited  GetColumnData(index, FieldData);
-  with TIBXSQLVAR(Column[index]), FieldData^ do
+  with TIBXSQLVAR(Column[index]) do
   begin
-    fdIsNull := fdNullable and (FSQLNullIndicator^ = -1);
-    if not fdIsNull and (fdDataType = SQL_VARYING) then
+    aIsNull := FNullable and (FSQLNullIndicator^ = -1);
+    data := FSQLData;
+    len := FDataLength;
+    if not IsNull and (FSQLType = SQL_VARYING) then
+    begin
       with Firebird30ClientAPI do
-        fdDataLength := DecodeInteger(GetSQLData,2);
+        len := DecodeInteger(data,2);
+      Inc(Data,2);
+    end;
   end;
 end;
 
@@ -864,23 +868,6 @@ end;
 function TIBXSQLDA.ColumnsInUseCount: integer;
 begin
   Result := FCount;
-end;
-
-procedure TIBXSQLDA.GetColumnData(index: integer; var FieldData: PFieldData);
-begin
-  with TIBXSQLVAR(Column[index]), FieldData^ do
-  begin
-    fdDataType := FSQLType;
-    fdDataScale := FScale;
-    fdNullable := FNullable;
-    fdIsNull := true;
-    fdDataSize := FDataLength;
-    if fdDataType = SQL_TEXT then
-      fdDataLength := fdDataSize;
-    fdCodePage := CP_NONE;
-    with Firebird30ClientAPI do
-       CharSetID2CodePage(GetCharSetID,fdCodePage);
-  end;
 end;
 
 function TIBXSQLDA.GetTransaction: TFB30Transaction;
