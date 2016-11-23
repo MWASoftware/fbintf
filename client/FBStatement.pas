@@ -103,6 +103,7 @@ type
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
     function GetDSQLInfo(Request: byte): ISQLInfoResults; overload;
+    procedure SetRetainInterfaces(aValue: boolean); virtual;
     property SQLParams: ISQLParams read GetSQLParams;
     property SQLStatementType: TIBSQLStatementTypes read GetSQLStatementType;
 end;
@@ -288,6 +289,11 @@ function TFBStatement.GetDSQLInfo(Request: byte): ISQLInfoResults;
 begin
   Result := TSQLInfoResultsBuffer.Create;
   GetDsqlInfo(Request,Result);
+end;
+
+procedure TFBStatement.SetRetainInterfaces(aValue: boolean);
+begin
+  RetainInterfaces := aValue;
 end;
 
 end.

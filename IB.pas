@@ -461,6 +461,7 @@ type
    function GetTransaction: ITransaction;
    function ByName(Idx: String): ISQLData;
    function getSQLData(index: integer): ISQLData;
+   procedure SetRetainInterfaces(aValue: boolean);
    property Data[index: integer]: ISQLData read getSQLData; default;
    property Count: integer read getCount;
   end;
@@ -596,6 +597,7 @@ type
     function OpenCursor(aTransaction: ITransaction=nil): IResultSet;
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
+    procedure SetRetainInterfaces(aValue: boolean);
     property MetaData: IMetaData read GetMetaData;
     property SQLParams: ISQLParams read GetSQLParams;
     property SQLStatementType: TIBSQLStatementTypes read GetSQLStatementType;

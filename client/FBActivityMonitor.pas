@@ -65,11 +65,21 @@ type
   { TInterfaceOwner }
 
   TInterfaceOwner = class(TFBInterfacedObject)
+  private
+    FInterfaces: array of TInterfacedObject;
+    FInterfaceRefs: array of IUnknown;
+    FRetainInterfaces: boolean;
+    procedure SetRetainInterfaces(AValue: boolean);
   protected
-    FInterfaces: array of TObject;
+    procedure AddInterface(index: integer; obj: TInterfacedObject);
+    function HasInterface(index: integer): boolean;
+    procedure ReleaseInterfaces;
   public
     constructor Create(aInterfaces: integer=0);
-    procedure Remove(col: TObject);
+    destructor Destroy; override;
+    function GetInterface(index: integer): TInterfacedObject;
+    procedure Remove(col: TInterfacedObject);
+    property RetainInterfaces: boolean read FRetainInterfaces write SetRetainInterfaces;
   end;
 
   {The IActivityMonitor interface is provided by classes that receive activity
@@ -231,17 +241,57 @@ constructor TInterfaceOwner.Create(aInterfaces: integer);
 begin
   inherited Create;
   SetLength(FInterfaces,aInterfaces);
+  SetLength(FInterfaceRefs,aInterfaces);
 end;
 
-procedure TInterfaceOwner.Remove(col: TObject);
+destructor TInterfaceOwner.Destroy;
+begin
+  ReleaseInterfaces;
+  inherited Destroy;
+end;
+
+function TInterfaceOwner.GetInterface(index: integer): TInterfacedObject;
+begin
+  Result := FInterfaces[index];
+end;
+
+procedure TInterfaceOwner.SetRetainInterfaces(AValue: boolean);
+begin
+  if FRetainInterfaces = AValue then Exit;
+  FRetainInterfaces := AValue;
+  if not FRetainInterfaces then
+    ReleaseInterfaces;
+end;
+
+procedure TInterfaceOwner.AddInterface(index: integer; obj: TInterfacedObject);
+begin
+  FInterfaces[index] := obj;
+  if RetainInterfaces then
+    FInterfaceRefs[index] := obj;
+end;
+
+function TInterfaceOwner.HasInterface(index: integer): boolean;
+begin
+  Result := FInterfaces[index] <> nil;
+end;
+
+procedure TInterfaceOwner.Remove(col: TInterfacedObject);
 var i: integer;
 begin
   for i := 0 to Length(FInterfaces) - 1 do
     if FInterfaces[i] = col then
     begin
+      FInterfaceRefs[i] := nil;
       FInterfaces[i] := nil;
       Exit;
     end;
+end;
+
+procedure TInterfaceOwner.ReleaseInterfaces;
+var i: integer;
+begin
+  for i := 0 to Length(FInterfaces) - 1 do
+    FInterfaceRefs[i] := nil;
 end;
 
 end.

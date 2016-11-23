@@ -436,6 +436,7 @@ type
      function ByName(Idx: String): ISQLData;
      function getSQLData(index: integer): ISQLData;
      function GetTransaction: ITransaction; virtual;
+     procedure SetRetainInterfaces(aValue: boolean);
  end;
 
 implementation
@@ -2289,9 +2290,9 @@ begin
     Result := nil
   else
   begin
-    if FInterfaces[index] = nil then
-      FInterfaces[index] := TColumnMetaData.Create(self,FMetaData.Column[index]);
-    Result := TColumnMetaData(FInterfaces[index]);
+    if not HasInterface(index) then
+      AddInterface(index,TColumnMetaData.Create(self,FMetaData.Column[index]));
+    Result := TColumnMetaData(GetInterface(index));
   end;
 end;
 
@@ -2346,9 +2347,9 @@ begin
     Result := nil
   else
   begin
-    if FInterfaces[index] = nil then
-      FInterfaces[index] := TSQLParam.Create(self,FSQLParams.Column[index]);
-    Result := TSQLParam(FInterfaces[index]);
+    if not HasInterface(index) then
+      AddInterface(index, TSQLParam.Create(self,FSQLParams.Column[index]));
+    Result := TSQLParam(GetInterface(index));
   end;
 end;
 
@@ -2397,9 +2398,9 @@ begin
   if (aIBXSQLVAR.Index < 0) or (aIBXSQLVAR.Index >= getCount) then
     IBError(ibxeInvalidColumnIndex,[nil]);
 
-  if FInterfaces[aIBXSQLVAR.Index] = nil then
-    FInterfaces[aIBXSQLVAR.Index] :=  TIBSQLData.Create(self,aIBXSQLVAR);
-  Result := TIBSQLData(FInterfaces[aIBXSQLVAR.Index]);
+  if not HasInterface(aIBXSQLVAR.Index) then
+    AddInterface(aIBXSQLVAR.Index, TIBSQLData.Create(self,aIBXSQLVAR));
+  Result := TIBSQLData(GetInterface(aIBXSQLVAR.Index));
 end;
 
 constructor TResults.Create(aResults: TSQLDataArea);
@@ -2447,6 +2448,11 @@ end;
 function TResults.GetTransaction: ITransaction;
 begin
   Result := FStatement.GetTransaction;
+end;
+
+procedure TResults.SetRetainInterfaces(aValue: boolean);
+begin
+  RetainInterfaces := aValue;
 end;
 
 

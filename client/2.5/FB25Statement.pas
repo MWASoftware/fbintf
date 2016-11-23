@@ -261,6 +261,7 @@ type
     function IsPrepared: boolean;
     function CreateBlob(column: TColumnMetaData): IBlob; override;
     function CreateArray(column: TColumnMetaData): IArray; override;
+    procedure SetRetainInterfaces(aValue: boolean); override;
     property Handle: TISC_STMT_HANDLE read FHandle;
 
 end;
@@ -599,6 +600,7 @@ end;
 
 procedure TResultSet.Close;
 begin
+  SetRetainInterfaces(false);
   FResults.FStatement.Close;
 end;
 
@@ -993,6 +995,7 @@ var
   isc_res: ISC_STATUS;
 begin
   Close;
+  ReleaseInterfaces;
   try
     if FHandle <> nil then
     with Firebird25ClientAPI do
@@ -1108,17 +1111,17 @@ end;
 function TFB25Statement.GetSQLParams: ISQLParams;
 begin
   CheckHandle;
-  if FInterfaces[0] = nil then
-    FInterfaces[0] := TSQLParams.Create(FSQLParams);
-  Result := TSQLParams(FInterfaces[0]);
+  if not HasInterface(0) then
+    AddInterface(0,TSQLParams.Create(FSQLParams));
+  Result := TSQLParams(GetInterface(0));
 end;
 
 function TFB25Statement.GetMetaData: IMetaData;
 begin
   CheckHandle;
-  if FInterfaces[1] = nil then
-    FInterfaces[1] := TMetaData.Create(FSQLRecord);
-  Result := TMetaData(FInterfaces[1]);
+  if not HasInterface(1) then
+    AddInterface(1, TMetaData.Create(FSQLRecord));
+  Result := TMetaData(GetInterface(1));
 end;
 
 function TFB25Statement.GetPlan: String;
@@ -1152,6 +1155,15 @@ begin
     IBError(ibxeNotAnArray,[nil]);
   Result := TFB25Array.Create(GetAttachment as TFB25Attachment,FExecTransactionIntf as TFB25Transaction,
          column.GetArrayMetaData);
+end;
+
+procedure TFB25Statement.SetRetainInterfaces(aValue: boolean);
+begin
+  inherited SetRetainInterfaces(aValue);
+  if HasInterface(1) then
+    TMetaData(GetInterface(1)).RetainInterfaces := aValue;
+  if HasInterface(0) then
+    TSQLParams(GetInterface(0)).RetainInterfaces := aValue;
 end;
 
 function TFB25Statement.IsPrepared: boolean;

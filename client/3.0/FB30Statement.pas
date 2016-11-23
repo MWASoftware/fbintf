@@ -256,6 +256,7 @@ type
     function IsPrepared: boolean;
     function CreateBlob(column: TColumnMetaData): IBlob; override;
     function CreateArray(column: TColumnMetaData): IArray; override;
+    procedure SetRetainInterfaces(aValue: boolean); override;
 
 end;
 
@@ -549,6 +550,7 @@ end;
 
 procedure TResultSet.Close;
 begin
+  SetRetainInterfaces(false);
   FResults.FStatement.Close;
 end;
 
@@ -1096,6 +1098,7 @@ end;
 procedure TFB30Statement.FreeHandle;
 begin
   Close;
+  ReleaseInterfaces;
   if FStatementIntf <> nil then
   begin
     FStatementIntf.release;
@@ -1197,17 +1200,17 @@ end;
 function TFB30Statement.GetSQLParams: ISQLParams;
 begin
   CheckHandle;
-  if FInterfaces[0] = nil then
-    FInterfaces[0] := TSQLParams.Create(FSQLParams);
-  Result := TSQLParams(FInterfaces[0]);
+  if not HasInterface(0) then
+    AddInterface(0,TSQLParams.Create(FSQLParams));
+  Result := TSQLParams(GetInterface(0));
 end;
 
 function TFB30Statement.GetMetaData: IMetaData;
 begin
   CheckHandle;
-  if FInterfaces[1] = nil then
-    FInterfaces[1] := TMetaData.Create(FSQLRecord);
-  Result := TMetaData(FInterfaces[1]);
+  if not HasInterface(1) then
+    AddInterface(1, TMetaData.Create(FSQLRecord));
+  Result := TMetaData(GetInterface(1));
 end;
 
 function TFB30Statement.GetPlan: String;
@@ -1241,6 +1244,15 @@ begin
   Result := TFB30Array.Create(GetAttachment as TFB30Attachment,
                              GetTransaction as TFB30Transaction,
                              column.GetArrayMetaData);
+end;
+
+procedure TFB30Statement.SetRetainInterfaces(aValue: boolean);
+begin
+  inherited SetRetainInterfaces(aValue);
+  if HasInterface(1) then
+    TMetaData(GetInterface(1)).RetainInterfaces := aValue;
+  if HasInterface(0) then
+    TSQLParams(GetInterface(0)).RetainInterfaces := aValue;
 end;
 
 function TFB30Statement.IsPrepared: boolean;
