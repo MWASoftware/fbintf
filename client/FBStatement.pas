@@ -63,6 +63,7 @@ type
     FEOF: boolean;
     FSingleResults: boolean;
     FGenerateParamNames: boolean;
+    FChangeSeqNo: integer;
     procedure CheckHandle; virtual; abstract;
     procedure CheckTransaction(aTransaction: ITransaction);
     procedure GetDsqlInfo(info_request: byte; buffer: ISQLInfoResults); overload; virtual; abstract;
@@ -104,6 +105,7 @@ type
     function GetTransaction: ITransaction;
     function GetDSQLInfo(Request: byte): ISQLInfoResults; overload;
     procedure SetRetainInterfaces(aValue: boolean); virtual;
+    property ChangeSeqNo: integer read FChangeSeqNo;
     property SQLParams: ISQLParams read GetSQLParams;
     property SQLStatementType: TIBSQLStatementTypes read GetSQLStatementType;
 end;

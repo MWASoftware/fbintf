@@ -158,8 +158,10 @@ type
     procedure Changed; virtual;
     function CheckStatementStatus(Request: TStatementStatus): boolean; override;
     function ColumnsInUseCount: integer; override;
+    procedure GetColumnData(index: integer; var FieldData: PFieldData); override;
     function GetTransaction: TFB30Transaction; virtual;
     procedure Initialize; override;
+    function StateChanged(var ChangeSeqNo: integer): boolean; override;
     property MetaData: Firebird.IMessageMetadata read FMetaData;
     property Count: Integer read FCount write SetCount;
     property Statement: TFB30Statement read FStatement;
@@ -202,6 +204,7 @@ type
     procedure FreeXSQLDA; override;
   public
     procedure Bind(aMetaData: Firebird.IMessageMetadata);
+    procedure GetColumnData(index: integer; var FieldData: PFieldData); override;
     function IsInputDataArea: boolean; override;
     property MessageBuffer: PChar read FMessageBuffer;
     property MsgLength: integer read FMsgLength;
@@ -798,6 +801,19 @@ begin
   end;
 end;
 
+procedure TIBXOUTPUTSQLDA.GetColumnData(index: integer;
+  var FieldData: PFieldData);
+begin
+  inherited  GetColumnData(index, FieldData);
+  with TIBXSQLVAR(Column[index]), FieldData^ do
+  begin
+    fdIsNull := fdNullable and (FSQLNullIndicator^ = -1);
+    if fdDataType = SQL_VARYING then
+      with Firebird30ClientAPI do
+        fdDataLength := DecodeInteger(GetSQLData,2);
+  end;
+end;
+
 function TIBXOUTPUTSQLDA.IsInputDataArea: boolean;
 begin
   Result := false;
@@ -850,6 +866,23 @@ begin
   Result := FCount;
 end;
 
+procedure TIBXSQLDA.GetColumnData(index: integer; var FieldData: PFieldData);
+begin
+  with TIBXSQLVAR(Column[index]), FieldData^ do
+  begin
+    fdDataType := FSQLType;
+    fdDataScale := FScale;
+    fdNullable := FNullable;
+    fdIsNull := true;
+    fdDataSize := FDataLength;
+    if fdDataType = SQL_TEXT then
+      fdDataLength := fdDataSize;
+    fdCodePage := CP_NONE;
+    with Firebird30ClientAPI do
+       CharSetID2CodePage(GetCharSetID,fdCodePage);
+  end;
+end;
+
 function TIBXSQLDA.GetTransaction: TFB30Transaction;
 begin
   Result := FStatement.GetTransaction as TFB30Transaction;
@@ -859,6 +892,13 @@ procedure TIBXSQLDA.Initialize;
 begin
   if FMetaData <> nil then
     inherited Initialize;
+end;
+
+function TIBXSQLDA.StateChanged(var ChangeSeqNo: integer): boolean;
+begin
+  Result := FStatement.ChangeSeqNo <> ChangeSeqNo;
+  if Result then
+    ChangeSeqNo := FStatement.ChangeSeqNo;
 end;
 
 procedure TIBXSQLDA.SetCount(Value: Integer);
@@ -1006,6 +1046,7 @@ begin
     FSQLRecord.FTransactionSeqNo := TransactionSeqNo;
   end;
   SignalActivity;
+  Inc(FChangeSeqNo);
 end;
 
 function TFB30Statement.InternalExecute(aTransaction: ITransaction): IResults;
@@ -1057,6 +1098,7 @@ begin
   end;
   FExecTransactionIntf := aTransaction;
   SignalActivity;
+  Inc(FChangeSeqNo);
 end;
 
 function TFB30Statement.InternalOpenCursor(aTransaction: ITransaction
@@ -1093,6 +1135,7 @@ begin
  FSQLRecord.FTransactionSeqNo := FSQLRecord.FTransaction.TransactionSeqNo;
  Result := TResultSet.Create(FSQLRecord);
  SignalActivity;
+ Inc(FChangeSeqNo);
 end;
 
 procedure TFB30Statement.FreeHandle;
@@ -1132,6 +1175,7 @@ begin
     FSQLRecord.FTransaction := nil;
   end;
   SignalActivity;
+  Inc(FChangeSeqNo);
 end;
 
 constructor TFB30Statement.Create(Attachment: TFB30Attachment;
@@ -1195,6 +1239,8 @@ begin
     end;
   end;
   SignalActivity;
+  if FEOF then
+    Inc(FChangeSeqNo);
 end;
 
 function TFB30Statement.GetSQLParams: ISQLParams;

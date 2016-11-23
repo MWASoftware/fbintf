@@ -387,6 +387,18 @@ type
    for the output of an SQL Statement
   }
 
+  PFieldData = ^TFieldData;
+   TFieldData = record
+    fdDataType: Short;
+    fdDataScale: Short;
+    fdNullable: Boolean;
+    fdIsNull: Boolean;
+    fdDataSize: Short;
+    fdDataLength: Short;
+    fdDataOfs: Integer;
+    fdCodePage: TSystemCodePage;
+  end;
+
   { IMetaData }
 
   IMetaData = interface
@@ -394,6 +406,7 @@ type
     function getColumnMetaData(index: integer): IColumnMetaData;
     function GetUniqueRelationName: string; {True if all columns come from the same table}
     function ByName(Idx: String): IColumnMetaData;
+    procedure GetColumnData(index: integer; var FieldData: PFieldData);
     property ColMetaData[index: integer]: IColumnMetaData read getColumnMetaData; default;
     property Count: integer read getCount;
   end;
@@ -461,6 +474,7 @@ type
    function GetTransaction: ITransaction;
    function ByName(Idx: String): ISQLData;
    function getSQLData(index: integer): ISQLData;
+   procedure GetColumnData(index: integer; var FieldData: PFieldData);
    procedure SetRetainInterfaces(aValue: boolean);
    property Data[index: integer]: ISQLData read getSQLData; default;
    property Count: integer read getCount;

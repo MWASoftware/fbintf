@@ -208,6 +208,8 @@ type
     function ColumnsInUseCount: integer; virtual;
     function ColumnByName(Idx: string): TSQLVarData;
     function CheckStatementStatus(Request: TStatementStatus): boolean; virtual; abstract;
+    procedure GetColumnData(index: integer; var FieldData: PFieldData); virtual; abstract;
+    function StateChanged(var ChangeSeqNo: integer): boolean; virtual; abstract;
     property Count: integer read GetCount;
     property Column[index: integer]: TSQLVarData read GetColumn;
     property UniqueRelationName: string read FUniqueRelationName;
@@ -291,6 +293,7 @@ type
     FOwner: IUnknown;         {Keep reference to ensure Metadata/statement not discarded}
     FPrepareSeqNo: integer;
     FStatement: IStatement;
+    FChangeSeqNo: integer;
   protected
     procedure CheckActive; override;
     function SQLData: PChar; override;
@@ -397,6 +400,7 @@ type
     function getCount: integer;
     function getColumnMetaData(index: integer): IColumnMetaData;
     function ByName(Idx: String): IColumnMetaData;
+    procedure GetColumnData(index: integer; var FieldData: PFieldData);
   end;
 
   { TSQLParams }
@@ -404,6 +408,7 @@ type
   TSQLParams = class(TInterfaceOwner,ISQLParams)
   private
     FPrepareSeqNo: integer;
+    FChangeSeqNo: integer;
     FSQLParams: TSQLDataArea;
     FStatement: IStatement; {ensure FStatement not destroyed until no longer needed}
     procedure CheckActive;
@@ -424,6 +429,7 @@ type
    private
      FPrepareSeqNo: integer;
      FTransactionSeqNo: integer;
+     FChangeSeqNo: integer;
      FResults: TSQLDataArea;
      FStatement: IStatement; {ensure FStatement not destroyed until no longer needed}
      function GetISQLData(aIBXSQLVAR: TSQLVarData): ISQLData;
@@ -435,6 +441,7 @@ type
      function getCount: integer;
      function ByName(Idx: String): ISQLData;
      function getSQLData(index: integer): ISQLData;
+     procedure GetColumnData(index: integer; var FieldData: PFieldData);
      function GetTransaction: ITransaction; virtual;
      procedure SetRetainInterfaces(aValue: boolean);
  end;
@@ -1570,6 +1577,8 @@ end;
 
 procedure TColumnMetaData.CheckActive;
 begin
+  if not FIBXSQLVAR.Parent.StateChanged(FChangeSeqNo) then Exit;
+
   if FPrepareSeqNo < FIBXSQLVAR.Parent.GetPrepareSeqNo then
     IBError(ibxeInterfaceOutofDate,[nil]);
 
@@ -1598,6 +1607,7 @@ begin
   FIBXSQLVAR := aIBXSQLVAR;
   FOwner := aOwner;
   FPrepareSeqNo := FIBXSQLVAR.Parent.PrepareSeqNo;
+  FIBXSQLVAR.Parent.StateChanged(FChangeSeqNo)
 end;
 
 destructor TColumnMetaData.Destroy;
@@ -1699,6 +1709,8 @@ end;
 
 procedure TIBSQLData.CheckActive;
 begin
+  if not FIBXSQLVAR.Parent.StateChanged(FChangeSeqNo) then Exit;
+
   inherited CheckActive;
 
   if not FIBXSQLVAR.Parent.CheckStatementStatus(ssCursorOpen) and
@@ -1813,6 +1825,8 @@ end;
 
 procedure TSQLParam.CheckActive;
 begin
+  if not FIBXSQLVAR.Parent.StateChanged(FChangeSeqNo) then Exit;
+
   if FPrepareSeqNo < FIBXSQLVAR.Parent.GetPrepareSeqNo then
     IBError(ibxeInterfaceOutofDate,[nil]);
 
@@ -2306,10 +2320,18 @@ begin
   Result := getColumnMetaData(aIBXSQLVAR.index);
 end;
 
+procedure TMetaData.GetColumnData(index: integer; var FieldData: PFieldData);
+begin
+  CheckActive;
+  FMetaData.GetColumnData(index,FieldData);
+end;
+
 { TSQLParams }
 
 procedure TSQLParams.CheckActive;
 begin
+  if not FSQLParams.StateChanged(FChangeSeqNo) then Exit;
+
   if FPrepareSeqNo < FSQLParams.PrepareSeqNo then
     IBError(ibxeInterfaceOutofDate,[nil]);
 
@@ -2323,6 +2345,7 @@ begin
   FSQLParams := aSQLParams;
   FStatement := aSQLParams.Statement;
   FPrepareSeqNo := aSQLParams.PrepareSeqNo;
+  FSQLParams.StateChanged(FChangeSeqNo);
 end;
 
 destructor TSQLParams.Destroy;
@@ -2382,6 +2405,8 @@ end;
 
 procedure TResults.CheckActive;
 begin
+  if not FResults.StateChanged(FChangeSeqNo) then Exit;
+
   if FPrepareSeqNo < FResults.PrepareSeqNo then
     IBError(ibxeInterfaceOutofDate,[nil]);
 
@@ -2410,6 +2435,7 @@ begin
   FStatement := aResults.Statement;
   FPrepareSeqNo := aResults.PrepareSeqNo;
   FTransactionSeqNo := aResults.TransactionSeqNo;
+  FResults.StateChanged(FChangeSeqNo);
 end;
 
 function TResults.getCount: integer;
@@ -2443,6 +2469,12 @@ begin
     IBError(ibxeInvalidColumnIndex,[nil]);
 
   Result := GetISQLData(FResults.Column[index]);
+end;
+
+procedure TResults.GetColumnData(index: integer; var FieldData: PFieldData);
+begin
+  CheckActive;
+  FResults.GetColumnData(index,FieldData);
 end;
 
 function TResults.GetTransaction: ITransaction;
