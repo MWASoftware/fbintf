@@ -808,7 +808,7 @@ begin
   with TIBXSQLVAR(Column[index]), FieldData^ do
   begin
     fdIsNull := fdNullable and (FSQLNullIndicator^ = -1);
-    if fdDataType = SQL_VARYING then
+    if not fdIsNull and (fdDataType = SQL_VARYING) then
       with Firebird30ClientAPI do
         fdDataLength := DecodeInteger(GetSQLData,2);
   end;

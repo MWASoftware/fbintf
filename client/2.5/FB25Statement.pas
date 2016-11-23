@@ -676,7 +676,7 @@ begin
   with TIBXSQLVAR(Column[index]), FieldData^ do
   begin
     fdIsNull := fdNullable and (FNullIndicator = -1);
-    if fdDataType = SQL_VARYING then
+    if not fdIsNull and (fdDataType = SQL_VARYING) then
       with FirebirdClientAPI do
         fdDataLength := DecodeInteger(GetSQLData,2);
   end;
