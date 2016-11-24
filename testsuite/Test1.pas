@@ -53,7 +53,7 @@ begin
       end;
     finally
       ResultSet.Close;
-//      ResultSet.SetRetainInterfaces(false);
+      ResultSet.SetRetainInterfaces(false);
     end;
 end;
 

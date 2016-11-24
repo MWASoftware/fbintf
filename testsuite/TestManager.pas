@@ -111,7 +111,6 @@ function TTestBase.ReportResults(Statement: IStatement): IResultSet;
 begin
   Result := Statement.OpenCursor;
   try
-    Result.SetRetainInterfaces(true);
     while Result.FetchNext do
       ReportResult(Result);
   finally
