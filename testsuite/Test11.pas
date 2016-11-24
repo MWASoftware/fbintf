@@ -85,26 +85,29 @@ begin
 
   {Statistics}
 
-  writeln(OutFile,'Get Statistics');
-  writeln(OutFile);
-  Req := Service.AllocateSRB;
-  Req.Add(isc_action_svc_db_stats);
-  Req.Add(isc_spb_dbname).SetAsString(DBName);
-  Req.Add(isc_spb_options).SetAsInteger(isc_spb_sts_data_pages or {
-                                        isc_spb_sts_hdr_pages or} isc_spb_sts_idx_pages or
-                                        isc_spb_sts_sys_relations);
-
-  try
-    Service.Start(Req);
+  if Owner.ShowStatistics then
+  begin
+    writeln(OutFile,'Get Statistics');
+    writeln(OutFile);
     Req := Service.AllocateSRB;
-    Req.Add(isc_info_svc_line);
-    repeat
-      Results := Service.Query(nil,Req);
-    until not WriteServiceQueryResult(Results);
-  except on E: Exception do
-    writeln(OutFile,'Statistics Service Start: ',E.Message);
+    Req.Add(isc_action_svc_db_stats);
+    Req.Add(isc_spb_dbname).SetAsString(DBName);
+    Req.Add(isc_spb_options).SetAsInteger(isc_spb_sts_data_pages or {
+                                          isc_spb_sts_hdr_pages or} isc_spb_sts_idx_pages or
+                                          isc_spb_sts_sys_relations);
+
+    try
+      Service.Start(Req);
+      Req := Service.AllocateSRB;
+      Req.Add(isc_info_svc_line);
+      repeat
+        Results := Service.Query(nil,Req);
+      until not WriteServiceQueryResult(Results);
+    except on E: Exception do
+      writeln(OutFile,'Statistics Service Start: ',E.Message);
+    end;
+    writeln(OutFile);
   end;
-  writeln(OutFile);
 
   {Licence Info}
   Req := Service.AllocateSRB;

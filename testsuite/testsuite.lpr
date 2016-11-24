@@ -34,7 +34,7 @@ var
 begin
   OutFile := stdout;
   // quick check parameters
-  ErrorMsg := CheckOptions('htupensbo', 'help test user passwd employeedb newdbname secondnewdbname backupfile outfile');
+  ErrorMsg := CheckOptions('htupensboS', 'help test user passwd employeedb newdbname secondnewdbname backupfile outfile stats');
   if ErrorMsg <> '' then begin
     ShowException(Exception.Create(ErrorMsg));
     Terminate;
@@ -76,6 +76,9 @@ begin
       system.Assign(outFile,GetOptionValue('o'));
       ReWrite(outFile);
     end;
+
+    TestMgr.ShowStatistics := HasOption('S','stats');
+
     {Ensure consistent date reporting across platforms}
     DefaultFormatSettings.ShortDateFormat := 'd/m/yyyy';
     DefaultFormatSettings.DateSeparator := '/';

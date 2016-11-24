@@ -69,6 +69,8 @@ type
     FInterfaces: array of TInterfacedObject;
     FInterfaceRefs: array of IUnknown;
     FRetainInterfaces: boolean;
+    FMinInterfaces: integer;
+    function GetCount: integer;
     procedure SetRetainInterfaces(AValue: boolean);
   protected
     procedure AddInterface(index: integer; obj: TInterfacedObject);
@@ -77,8 +79,10 @@ type
   public
     constructor Create(aInterfaces: integer=0);
     destructor Destroy; override;
+    procedure AddObject(obj: TInterfacedObject);
     function GetInterface(index: integer): TInterfacedObject;
-    procedure Remove(col: TInterfacedObject);
+    procedure Remove(intf: TInterfacedObject);
+    property InterfaceCount: integer read GetCount;
     property RetainInterfaces: boolean read FRetainInterfaces write SetRetainInterfaces;
   end;
 
@@ -86,6 +90,8 @@ type
    reports.}
 
   IActivityMonitor = interface
+    procedure AddObject(obj: TInterfacedObject);
+    procedure Remove(intf: TInterfacedObject);
     procedure SignalActivity;
   end;
 
@@ -111,6 +117,7 @@ type
     procedure RemoveMonitor(aMonitor: IActivityMonitor);
   public
     constructor Create(aMonitor: IActivityMonitor;aInterfaces: integer=0);
+    destructor Destroy; override;
     function HasActivity: boolean;
     procedure SignalActivity;
   end;
@@ -190,6 +197,7 @@ begin
     i := Length(FMonitors);
     Setlength(FMonitors,i+1);
     FMonitors[i] := aMonitor;
+    aMonitor.AddObject(self);
   end;
 end;
 
@@ -199,6 +207,7 @@ begin
   i := FindMonitor(aMonitor);
   if i <> -1 then
   begin
+    aMonitor.Remove(self);
     if Length(FMonitors) = 1 then
       SetLength(FMonitors,0)
     else
@@ -229,6 +238,14 @@ begin
   end;
 end;
 
+destructor TActivityReporter.Destroy;
+var i: integer;
+begin
+  for i := 0 to Length(FMonitors) - 1 do
+    FMonitors[i].Remove(self);
+  inherited Destroy;
+end;
+
 function TActivityReporter.HasActivity: boolean;
 begin
   Result := FHasActivity;
@@ -240,6 +257,7 @@ end;
 constructor TInterfaceOwner.Create(aInterfaces: integer);
 begin
   inherited Create;
+  FMinInterfaces := aInterfaces;
   SetLength(FInterfaces,aInterfaces);
   SetLength(FInterfaceRefs,aInterfaces);
 end;
@@ -248,6 +266,15 @@ destructor TInterfaceOwner.Destroy;
 begin
   ReleaseInterfaces;
   inherited Destroy;
+end;
+
+procedure TInterfaceOwner.AddObject(obj: TInterfacedObject);
+var index: integer;
+begin
+  index := Length(FInterfaces);
+  SetLength(FInterfaces,index+1);
+  SetLength(FInterfaceRefs,index+1);
+  AddInterface(index,obj);
 end;
 
 function TInterfaceOwner.GetInterface(index: integer): TInterfacedObject;
@@ -263,6 +290,11 @@ begin
     ReleaseInterfaces;
 end;
 
+function TInterfaceOwner.GetCount: integer;
+begin
+  Result := Length(FInterfaces);
+end;
+
 procedure TInterfaceOwner.AddInterface(index: integer; obj: TInterfacedObject);
 begin
   FInterfaces[index] := obj;
@@ -275,14 +307,27 @@ begin
   Result := FInterfaces[index] <> nil;
 end;
 
-procedure TInterfaceOwner.Remove(col: TInterfacedObject);
-var i: integer;
+procedure TInterfaceOwner.Remove(intf: TInterfacedObject);
+var i, j: integer;
 begin
   for i := 0 to Length(FInterfaces) - 1 do
-    if FInterfaces[i] = col then
+    if FInterfaces[i] = intf then
     begin
-      FInterfaceRefs[i] := nil;
-      FInterfaces[i] := nil;
+      if i < FMinInterfaces then
+      begin
+        FInterfaceRefs[i] := nil;
+        FInterfaces[i] := nil;
+      end
+      else
+      begin
+        for j := i to Length(FInterfaces) - 2 do
+        begin
+          FInterfaceRefs[j] := FInterfaceRefs[j+1];
+          FInterfaces[j] := FInterfaces[j+1];
+        end;
+        SetLength(FInterfaces,Length(FInterfaces)-1);
+        SetLength(FInterfaceRefs,Length(FInterfaceRefs)-1);
+      end;
       Exit;
     end;
 end;

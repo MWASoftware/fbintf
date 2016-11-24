@@ -44,7 +44,6 @@ var Transaction, Transaction2: ITransaction;
     Statement: IStatement;
     ResultSet: IResultSet;
 begin
-  writeln(OutFile,'Default Character set Name = ',Attachment.OpenCursorAtStart('Select RDB$CHARACTER_SET_NAME From RDB$Database')[0].AsString);
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   Statement := Attachment.Prepare(Transaction,sqlCallQueryProc);
   PrintMetaData(Statement.MetaData);
@@ -97,6 +96,7 @@ begin
   DPB.Add(isc_dpb_lc_ctype).setAsString('UTF8');
   DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
   Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
+  writeln(OutFile,'Default Character set Name = ',Attachment.OpenCursorAtStart('Select RDB$CHARACTER_SET_NAME From RDB$Database')[0].AsString);
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable);
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateProc1);
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateProc2);

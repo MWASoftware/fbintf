@@ -59,6 +59,7 @@ type
     FUserName: string;
     FPassword: string;
     FBackupFileName: string;
+    FShowStatistics: boolean;
     procedure CleanUp;
   public
     constructor Create;
@@ -77,6 +78,7 @@ type
     procedure SetNewDatabaseName(aValue: string);
     procedure SetSecondNewDatabaseName(aValue: string);
     procedure SetBackupFileName(aValue: string);
+    property ShowStatistics: boolean read FShowStatistics write FShowStatistics;
   end;
 
 const

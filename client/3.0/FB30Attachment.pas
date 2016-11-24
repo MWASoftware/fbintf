@@ -184,6 +184,7 @@ begin
   if IsConnected then
     with Firebird30ClientAPI do
     begin
+      EndAllTransactions;
       FAttachmentIntf.Detach(StatusIntf);
       if not Force and InErrorState then
         IBDataBaseError;
@@ -204,6 +205,7 @@ begin
   if IsConnected then
     with Firebird30ClientAPI do
     begin
+      EndAllTransactions;
       FAttachmentIntf.dropDatabase(StatusIntf);
       Check4DataBaseError;
       FAttachmentIntf := nil;

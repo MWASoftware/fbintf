@@ -56,6 +56,7 @@ type
       RaiseExceptionOnConnectError: boolean);
     procedure CheckHandle; virtual; abstract;
     function GenerateCreateDatabaseSQL(DatabaseName: string; aDPB: IDPB): string;
+    procedure EndAllTransactions;
   public
     destructor Destroy; override;
     function getDPB: IDPB;
@@ -93,7 +94,7 @@ type
 
 implementation
 
-uses FBMessages {$IFDEF Unix} ,initc{$ENDIF};
+uses FBMessages, FBTransaction {$IFDEF Unix} ,initc{$ENDIF};
 
 {$IFDEF Unix}
 {SetEnvironmentVariable doesn't exist so we have to use C Library}
@@ -186,6 +187,18 @@ begin
   end;
 
   Result := 'CREATE DATABASE ''' + DatabaseName + ''' ' + CreateParams; {do not localize}
+end;
+
+procedure TFBAttachment.EndAllTransactions;
+var i: integer;
+    intf: TInterfacedObject;
+begin
+  for i := 0 to InterfaceCount - 1 do
+  begin
+    intf := GetInterface(i);
+    if (intf <> nil) and  (intf is TFBTransaction) then
+      TFBTransaction(intf).DoDefaultTransactionEnd(true);
+  end;
 end;
 
 destructor TFBAttachment.Destroy;

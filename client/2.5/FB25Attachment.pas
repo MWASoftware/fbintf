@@ -169,6 +169,7 @@ begin
   if FHandle = nil then
     Exit;
 
+  EndAllTransactions;
   {Disconnect}
   with Firebird25ClientAPI do
     if (isc_detach_database(StatusVector, @FHandle) > 0) and not Force then
@@ -187,6 +188,7 @@ end;
 procedure TFB25Attachment.DropDatabase;
 begin
   CheckHandle;
+  EndAllTransactions;
   with Firebird25ClientAPI do
     if isc_drop_database(StatusVector, @FHandle) > 0 then
       IBDatabaseError;
