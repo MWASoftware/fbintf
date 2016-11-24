@@ -7,7 +7,6 @@
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
         <TopLine Value="68"/>
         <CursorPos X="54" Y="80"/>
@@ -85,7 +84,7 @@
       <Unit12>
         <Filename Value="Test11.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="89"/>
         <CursorPos Y="110"/>
         <UsageCount Value="29"/>
@@ -149,10 +148,11 @@
       </Unit21>
       <Unit22>
         <Filename Value="../client/FBAttachment.pas"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="4"/>
         <TopLine Value="183"/>
-        <CursorPos Y="199"/>
+        <CursorPos Y="202"/>
         <UsageCount Value="10"/>
+        <Loaded Value="True"/>
       </Unit22>
       <Unit23>
         <Filename Value="../client/FBClientAPI.pas"/>
@@ -250,17 +250,20 @@
       </Unit36>
       <Unit37>
         <Filename Value="../client/FBStatement.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="270"/>
-        <CursorPos Y="297"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="159"/>
+        <CursorPos X="41" Y="159"/>
         <UsageCount Value="10"/>
+        <Loaded Value="True"/>
       </Unit37>
       <Unit38>
         <Filename Value="../client/FBTransaction.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="149"/>
-        <CursorPos X="10" Y="163"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="94"/>
+        <CursorPos X="29" Y="115"/>
         <UsageCount Value="10"/>
+        <Loaded Value="True"/>
       </Unit38>
       <Unit39>
         <Filename Value="../client/2.5/FB25Attachment.pas"/>
@@ -270,11 +273,15 @@
         <UsageCount Value="10"/>
       </Unit39>
     </Units>
-    <JumpHistory Count="1">
+    <JumpHistory Count="2" HistoryIndex="1">
       <Position1>
         <Filename Value="testsuite.lpr"/>
         <Caret Line="81" Column="5" TopLine="56"/>
       </Position1>
+      <Position2>
+        <Filename Value="../client/FBTransaction.pas"/>
+        <Caret Line="186" Column="56" TopLine="174"/>
+      </Position2>
     </JumpHistory>
   </ProjectSession>
 </CONFIG>

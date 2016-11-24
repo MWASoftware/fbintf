@@ -112,7 +112,7 @@ type
 
 implementation
 
-uses FBMessages;
+uses FBMessages, FBStatement;
 
 { TFBTransaction }
 
@@ -174,13 +174,23 @@ begin
 end;
 
 procedure TFBTransaction.DoDefaultTransactionEnd(Force: boolean);
+var i: integer;
+    intf: TInterfacedObject;
 begin
   if InTransaction then
-  case FDefaultCompletion of
-  taRollback:
-    Rollback(Force);
-  taCommit:
-    Commit(Force);
+  begin
+    for i := 0 to InterfaceCount - 1 do
+    begin
+      intf := GetInterface(i);
+      if (intf <> nil) and  (intf is TFBStatement) then
+        TFBStatement(intf).TransactionEnding(self,Force);
+    end;
+    case FDefaultCompletion of
+    taRollback:
+      Rollback(Force);
+    taCommit:
+      Commit(Force);
+    end;
   end;
 end;
 
