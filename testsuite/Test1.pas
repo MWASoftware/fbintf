@@ -44,6 +44,7 @@ begin
     Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
     Statement := Attachment.Prepare(Transaction,'Select * from RDB$Database',3);
     ResultSet := Statement.OpenCursor;
+    ResultSet.SetRetainInterfaces(true);
     try
       while ResultSet.FetchNext do
       begin
@@ -52,6 +53,7 @@ begin
       end;
     finally
       ResultSet.Close;
+//      ResultSet.SetRetainInterfaces(false);
     end;
 end;
 

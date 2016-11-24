@@ -603,7 +603,6 @@ end;
 
 procedure TResultSet.Close;
 begin
-  SetRetainInterfaces(false);
   FResults.FStatement.Close;
 end;
 

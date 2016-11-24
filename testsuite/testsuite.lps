@@ -25,18 +25,21 @@
       <Unit2>
         <Filename Value="Test1.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="35"/>
-        <CursorPos Y="51"/>
+        <CursorPos X="3" Y="56"/>
         <UsageCount Value="29"/>
+        <Loaded Value="True"/>
       </Unit2>
       <Unit3>
         <Filename Value="test2.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="42"/>
-        <CursorPos X="15" Y="67"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="43"/>
+        <CursorPos X="108" Y="58"/>
         <UsageCount Value="29"/>
+        <Loaded Value="True"/>
       </Unit3>
       <Unit4>
         <Filename Value="Test3.pas"/>
@@ -84,7 +87,7 @@
       <Unit12>
         <Filename Value="Test11.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="13"/>
         <TopLine Value="89"/>
         <CursorPos Y="110"/>
         <UsageCount Value="29"/>
@@ -148,7 +151,7 @@
       </Unit21>
       <Unit22>
         <Filename Value="../client/FBAttachment.pas"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="11"/>
         <TopLine Value="183"/>
         <CursorPos Y="202"/>
         <UsageCount Value="10"/>
@@ -168,10 +171,11 @@
       </Unit24>
       <Unit25>
         <Filename Value="../client/FBSQLData.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="420"/>
-        <CursorPos X="16" Y="417"/>
+        <EditorIndex Value="7"/>
+        <TopLine Value="2445"/>
+        <CursorPos X="58" Y="2478"/>
         <UsageCount Value="10"/>
+        <Loaded Value="True"/>
       </Unit25>
       <Unit26>
         <Filename Value="/usr/share/fpcsrc/rtl/objpas/sysutils/datih.inc"/>
@@ -203,10 +207,11 @@
       </Unit29>
       <Unit30>
         <Filename Value="../../ibx/runtime/IBCustomDataSet.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="2004"/>
-        <CursorPos X="33" Y="2028"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="2664"/>
+        <CursorPos X="60" Y="2693"/>
         <UsageCount Value="10"/>
+        <Loaded Value="True"/>
       </Unit30>
       <Unit31>
         <Filename Value="../../cvs.old.versions/ibx/runtime/IBCustomDataSet.pas"/>
@@ -224,10 +229,11 @@
       </Unit32>
       <Unit33>
         <Filename Value="../client/2.5/FB25Statement.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="601"/>
-        <CursorPos Y="604"/>
+        <EditorIndex Value="8"/>
+        <TopLine Value="604"/>
+        <CursorPos Y="606"/>
         <UsageCount Value="10"/>
+        <Loaded Value="True"/>
       </Unit33>
       <Unit34>
         <Filename Value="../../cvs.old.versions/ibx/runtime/IBSQL.pas"/>
@@ -236,21 +242,23 @@
       </Unit34>
       <Unit35>
         <Filename Value="../client/FBActivityMonitor.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="260"/>
-        <CursorPos Y="275"/>
+        <EditorIndex Value="10"/>
+        <TopLine Value="266"/>
+        <CursorPos Y="291"/>
         <UsageCount Value="10"/>
+        <Loaded Value="True"/>
       </Unit35>
       <Unit36>
         <Filename Value="../client/3.0/FB30Statement.pas"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="9"/>
         <TopLine Value="551"/>
-        <CursorPos Y="553"/>
+        <CursorPos Y="556"/>
         <UsageCount Value="10"/>
+        <Loaded Value="True"/>
       </Unit36>
       <Unit37>
         <Filename Value="../client/FBStatement.pas"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="12"/>
         <TopLine Value="159"/>
         <CursorPos X="41" Y="159"/>
         <UsageCount Value="10"/>
@@ -258,7 +266,6 @@
       </Unit37>
       <Unit38>
         <Filename Value="../client/FBTransaction.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
         <TopLine Value="94"/>
         <CursorPos X="29" Y="115"/>
@@ -273,15 +280,127 @@
         <UsageCount Value="10"/>
       </Unit39>
     </Units>
-    <JumpHistory Count="2" HistoryIndex="1">
+    <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="testsuite.lpr"/>
-        <Caret Line="81" Column="5" TopLine="56"/>
+        <Filename Value="../../ibx/runtime/IBCustomDataSet.pas"/>
+        <Caret Line="2305" Column="52" TopLine="2280"/>
       </Position1>
       <Position2>
-        <Filename Value="../client/FBTransaction.pas"/>
-        <Caret Line="186" Column="56" TopLine="174"/>
+        <Filename Value="../../ibx/runtime/IBCustomDataSet.pas"/>
+        <Caret Line="2307" Column="36" TopLine="2282"/>
       </Position2>
+      <Position3>
+        <Filename Value="../../ibx/runtime/IBCustomDataSet.pas"/>
+        <Caret Line="2311" Column="36" TopLine="2286"/>
+      </Position3>
+      <Position4>
+        <Filename Value="../../ibx/runtime/IBCustomDataSet.pas"/>
+        <Caret Line="2312" Column="65" TopLine="2287"/>
+      </Position4>
+      <Position5>
+        <Filename Value="../../ibx/runtime/IBCustomDataSet.pas"/>
+        <Caret Line="2327" Column="52" TopLine="2303"/>
+      </Position5>
+      <Position6>
+        <Filename Value="../../ibx/runtime/IBCustomDataSet.pas"/>
+        <Caret Line="2328" Column="36" TopLine="2304"/>
+      </Position6>
+      <Position7>
+        <Filename Value="../client/FBSQLData.pas"/>
+        <Caret Line="417" Column="16" TopLine="417"/>
+      </Position7>
+      <Position8>
+        <Filename Value="../client/FBSQLData.pas"/>
+        <Caret Line="1804" Column="24" TopLine="1783"/>
+      </Position8>
+      <Position9>
+        <Filename Value="../../ibx/runtime/IBCustomDataSet.pas"/>
+        <Caret Line="2656" Column="19" TopLine="2641"/>
+      </Position9>
+      <Position10>
+        <Filename Value="../../ibx/runtime/IBCustomDataSet.pas"/>
+        <Caret Line="2658" Column="27" TopLine="2641"/>
+      </Position10>
+      <Position11>
+        <Filename Value="../../ibx/runtime/IBCustomDataSet.pas"/>
+        <Caret Line="2662" Column="18" TopLine="2641"/>
+      </Position11>
+      <Position12>
+        <Filename Value="../../ibx/runtime/IBCustomDataSet.pas"/>
+        <Caret Line="2664" Column="18" TopLine="2641"/>
+      </Position12>
+      <Position13>
+        <Filename Value="../../ibx/runtime/IBCustomDataSet.pas"/>
+        <Caret Line="2671" Column="22" TopLine="2647"/>
+      </Position13>
+      <Position14>
+        <Filename Value="../../ibx/runtime/IBCustomDataSet.pas"/>
+        <Caret Line="2674" Column="20" TopLine="2650"/>
+      </Position14>
+      <Position15>
+        <Filename Value="../../ibx/runtime/IBCustomDataSet.pas"/>
+        <Caret Line="2678" Column="22" TopLine="2654"/>
+      </Position15>
+      <Position16>
+        <Filename Value="../../ibx/runtime/IBCustomDataSet.pas"/>
+        <Caret Line="2680" Column="22" TopLine="2656"/>
+      </Position16>
+      <Position17>
+        <Filename Value="../../ibx/runtime/IBCustomDataSet.pas"/>
+        <Caret Line="2682" Column="22" TopLine="2658"/>
+      </Position17>
+      <Position18>
+        <Filename Value="../../ibx/runtime/IBCustomDataSet.pas"/>
+        <Caret Line="2687" Column="22" TopLine="2663"/>
+      </Position18>
+      <Position19>
+        <Filename Value="../../ibx/runtime/IBCustomDataSet.pas"/>
+        <Caret Line="2689" Column="22" TopLine="2665"/>
+      </Position19>
+      <Position20>
+        <Filename Value="../../ibx/runtime/IBCustomDataSet.pas"/>
+        <Caret Line="2691" Column="22" TopLine="2667"/>
+      </Position20>
+      <Position21>
+        <Filename Value="../../ibx/runtime/IBCustomDataSet.pas"/>
+        <Caret Line="2694" Column="20" TopLine="2670"/>
+      </Position21>
+      <Position22>
+        <Filename Value="../../ibx/runtime/IBCustomDataSet.pas"/>
+        <Caret Line="2699" Column="20" TopLine="2675"/>
+      </Position22>
+      <Position23>
+        <Filename Value="../../ibx/runtime/IBCustomDataSet.pas"/>
+        <Caret Line="2706" Column="20" TopLine="2682"/>
+      </Position23>
+      <Position24>
+        <Filename Value="../../ibx/runtime/IBCustomDataSet.pas"/>
+        <Caret Line="2710" Column="20" TopLine="2686"/>
+      </Position24>
+      <Position25>
+        <Filename Value="test2.pas"/>
+        <Caret Line="67" Column="15" TopLine="42"/>
+      </Position25>
+      <Position26>
+        <Filename Value="../client/FBSQLData.pas"/>
+        <Caret Line="739" Column="58" TopLine="731"/>
+      </Position26>
+      <Position27>
+        <Filename Value="../client/FBSQLData.pas"/>
+        <Caret Line="2488" TopLine="2463"/>
+      </Position27>
+      <Position28>
+        <Filename Value="../client/FBActivityMonitor.pas"/>
+        <Caret Line="287" TopLine="261"/>
+      </Position28>
+      <Position29>
+        <Filename Value="../client/FBActivityMonitor.pas"/>
+        <Caret Line="291" TopLine="266"/>
+      </Position29>
+      <Position30>
+        <Filename Value="../client/2.5/FB25Statement.pas"/>
+        <Caret Line="604" TopLine="601"/>
+      </Position30>
     </JumpHistory>
   </ProjectSession>
 </CONFIG>
