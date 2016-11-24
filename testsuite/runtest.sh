@@ -30,5 +30,7 @@ if [ -x testsuite ]; then
 else
   echo "Unable to run test suite"
 fi
+rm -r testunits
+rm testsuite
 exit 0
 
