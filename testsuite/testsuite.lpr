@@ -99,7 +99,8 @@ begin
   writeln(OutFile,'Test Suite Ends');
   Flush(OutFile);
   {$IFDEF WINDOWS}
-  //readln;
+  //readln; {uncomment if running from IDE and console window closes before you
+             can view results}
   {$ENDIF}
 
   // stop program loop

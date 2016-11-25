@@ -2,7 +2,7 @@
 #Test suite Configuration parameters
 #These may be modified if needed to suite local requirements
 
-set FPCDIR=C:\lazarus-win32\fpc\3.0.0
+set FPCDIR=C:\lazarus\fpc\3.0.0
 set FPCBIN=%FPCDIR%\bin\i386-win32
 set TESTOUTDIR=%TEMP%\fbintf-testsuite
 set USERNAME=SYSDBA
@@ -13,6 +13,7 @@ set NEWDBNAME2=localhost:%TESTOUTDIR%\testsuite2.fdb
 set BAKFILE=%TESTOUTDIR%\testsuite.gbk
 
 cd `dirname $0`
+rd /s /q testunits
 mkdir %TESTOUTDIR%
 %FPCBIN%\fpcmake
 %FPCBIN%\make clean
@@ -26,4 +27,6 @@ echo "Comparing results with reference log"
 echo ""
 %FPCBIN%\diff reference.log testout.log >diff.log
 type diff.log 
+rd /s /q testunits
+del testsuite.exe
 )
