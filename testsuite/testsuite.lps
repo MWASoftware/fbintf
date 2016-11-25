@@ -7,7 +7,6 @@
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <TopLine Value="80"/>
         <CursorPos X="30" Y="103"/>
         <UsageCount Value="37"/>
@@ -188,10 +187,12 @@
       </Unit27>
       <Unit28>
         <Filename Value="../IB.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="458"/>
-        <CursorPos X="33" Y="464"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="55"/>
+        <CursorPos Y="75"/>
         <UsageCount Value="15"/>
+        <Loaded Value="True"/>
       </Unit28>
       <Unit29>
         <Filename Value="runtest.sh"/>
@@ -276,6 +277,11 @@
         <UsageCount Value="10"/>
       </Unit40>
     </Units>
-    <JumpHistory HistoryIndex="-1"/>
+    <JumpHistory Count="1">
+      <Position1>
+        <Filename Value="../IB.pas"/>
+        <Caret Line="466" Column="106" TopLine="458"/>
+      </Position1>
+    </JumpHistory>
   </ProjectSession>
 </CONFIG>
