@@ -93,7 +93,7 @@ type
 
 implementation
 
-uses FBMessages, FBTransaction, FBClientAPI;
+uses FBMessages, FBTransaction;
 
 { TFBAttachment }
 
@@ -106,7 +106,6 @@ begin
   FDatabaseName := DatabaseName;
   FDPB := DPB;
   FRaiseExceptionOnConnectError := RaiseExceptionOnConnectError;
-  FirebirdClientAPI.SetupEnvironment;
 end;
 
 function TFBAttachment.GenerateCreateDatabaseSQL(DatabaseName: string;  aDPB: IDPB): string;

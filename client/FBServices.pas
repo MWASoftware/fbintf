@@ -37,7 +37,7 @@ unit FBServices;
 interface
 
 uses
-  Classes, SysUtils, IB,  FBParamBlock, FBOutputBlock, FBActivityMonitor;
+  Classes, SysUtils, IB,  FBParamBlock, FBActivityMonitor;
 
 type
 
@@ -86,7 +86,6 @@ begin
   FProtocol := Protocol;
   FSPB := SPB;
   FServerName := ServerName;
-  FirebirdClientAPI.SetupEnvironment;
   Attach;
 end;
 

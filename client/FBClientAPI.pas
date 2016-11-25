@@ -289,10 +289,12 @@ const
 constructor TFBClientAPI.Create;
 begin
   inherited Create;
-  //IBLibrary := NilHandle;
   LoadIBLibrary;
   if (IBLibrary <> NilHandle) then
+  begin
+    SetupEnvironment;
     LoadInterface;
+  end;
   FirebirdClientAPI := self;
 end;
 
@@ -324,8 +326,6 @@ procedure TFBClientAPI.SetupEnvironment;
 var TmpDir: string;
 begin
   {$IFDEF UNIX}
-  if IsEmbeddedServer then
-  begin
     TmpDir := GetTempDir +
         DirectorySeparator + 'firebird_' + sysutils.GetEnvironmentVariable('USER');
     if sysutils.GetEnvironmentVariable('FIREBIRD_TMP') = '' then
@@ -340,7 +340,6 @@ begin
         mkdir(tmpDir);
       SetEnvironmentVariable('FIREBIRD_LOCK',PChar(TmpDir));
     end;
-  end;
   {$ENDIF}
 end;
 
