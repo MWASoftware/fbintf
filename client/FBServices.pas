@@ -86,6 +86,7 @@ begin
   FProtocol := Protocol;
   FSPB := SPB;
   FServerName := ServerName;
+  FirebirdClientAPI.SetupEnvironment;
   Attach;
 end;
 

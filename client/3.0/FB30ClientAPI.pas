@@ -103,7 +103,7 @@ type
     {Information}
     function HasServiceAPI: boolean;
     function HasRollbackRetaining: boolean;
-    function IsEmbeddedServer: boolean;
+    function IsEmbeddedServer: boolean; override;
     function GetImplementationVersion: string;
 
     {Firebird 3 API}

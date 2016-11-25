@@ -140,6 +140,7 @@ type
     destructor Destroy; override;
     procedure IBAlloc(var P; OldSize, NewSize: Integer);
     procedure IBDataBaseError;
+    procedure SetupEnvironment;
 
     {Encode/Decode}
     procedure EncodeInteger(aValue: integer; len: integer; buffer: PChar);
@@ -155,6 +156,7 @@ type
     {IFirebirdAPI}
     function GetStatus: IStatus; virtual; abstract;
     function IsLibraryLoaded: boolean;
+    function IsEmbeddedServer: boolean; virtual; abstract;
     function GetLibraryName: string;
     function GetCharsetName(CharSetID: integer): string;
     function CharSetID2CodePage(CharSetID: integer; var CodePage: TSystemCodePage): boolean;
@@ -167,7 +169,7 @@ const FirebirdClientAPI: TFBClientAPI = nil;
 
 implementation
 
-uses IBUtils,
+uses IBUtils, {$IFDEF Unix} initc, {$ENDIF}
 {$IFDEF WINDOWS }
 Windows,Registry, WinDirs,
 {$ENDIF}
@@ -261,6 +263,27 @@ const
   (CharsetID: 69; CharSetName: 'GB18030'; CharSetWidth: 4; CodePage: 54936)
 );
 
+  {$IFDEF Unix}
+  {SetEnvironmentVariable doesn't exist so we have to use C Library}
+  function setenv(name:Pchar; value:Pchar; replace:integer):integer;cdecl;external clib name 'setenv';
+  function unsetenv(name:Pchar):integer;cdecl;external clib name 'unsetenv';
+  function SetEnvironmentVariable(name:PChar; value:PChar):boolean;
+  // Set environment variable; if empty string given, remove it.
+  begin
+    result:=false; //assume failure
+    if value = '' then
+    begin
+      // Assume user wants to remove variable.
+      if unsetenv(name)=0 then result:=true;
+    end
+    else
+    begin
+      // Non empty so set the variable
+      if setenv(name, value, 1)=0 then result:=true;
+    end;
+  end;
+  {$ENDIF}
+
 { TFBClientAPI }
 
 constructor TFBClientAPI.Create;
@@ -293,6 +316,32 @@ end;
 procedure TFBClientAPI.IBDataBaseError;
 begin
   raise EIBInterBaseError.Create(GetStatus);
+end;
+
+{Under Unixes, if using an embedded server then set up local TMP and LOCK Directories}
+
+procedure TFBClientAPI.SetupEnvironment;
+var TmpDir: string;
+begin
+  {$IFDEF UNIX}
+  if IsEmbeddedServer then
+  begin
+    TmpDir := GetTempDir +
+        DirectorySeparator + 'firebird_' + sysutils.GetEnvironmentVariable('USER');
+    if sysutils.GetEnvironmentVariable('FIREBIRD_TMP') = '' then
+    begin
+      if not DirectoryExists(tmpDir) then
+        mkdir(tmpDir);
+      SetEnvironmentVariable('FIREBIRD_TMP',PChar(TmpDir));
+    end;
+    if sysutils.GetEnvironmentVariable('FIREBIRD_LOCK') = '' then
+    begin
+      if not DirectoryExists(tmpDir) then
+        mkdir(tmpDir);
+      SetEnvironmentVariable('FIREBIRD_LOCK',PChar(TmpDir));
+    end;
+  end;
+  {$ENDIF}
 end;
 
 procedure TFBClientAPI.EncodeInteger(aValue: integer; len: integer; buffer: PChar);
