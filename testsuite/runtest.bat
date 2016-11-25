@@ -1,4 +1,4 @@
-
+@echo off
 #Test suite Configuration parameters
 #These may be modified if needed to suite local requirements
 
@@ -12,19 +12,18 @@ set NEWDBNAME=localhost:%TESTOUTDIR%\testsuite1.fdb
 set NEWDBNAME2=localhost:%TESTOUTDIR%\testsuite2.fdb
 set BAKFILE=%TESTOUTDIR%\testsuite.gbk
 
-cd `dirname $0`
 rd /s /q testunits
 mkdir %TESTOUTDIR%
 %FPCBIN%\fpcmake
 %FPCBIN%\make clean
 %FPCBIN%\make
-echo ""
-echo "Starting Testsuite"
-echo ""
+echo 
+echo Starting Testsuite
+echo 
 IF EXIST "testsuite.exe" (
 testsuite.exe -u %USERNAME% -p %PASSWORD% -e %EMPLOYEEDB% -n %NEWDBNAME% -s %NEWDBNAME2% -b %BAKFILE% -o testout.log
-echo "Comparing results with reference log"
-echo ""
+echo Comparing results with reference log
+echo 
 %FPCBIN%\diff reference.log testout.log >diff.log
 type diff.log 
 rd /s /q testunits
