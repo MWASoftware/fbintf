@@ -182,6 +182,7 @@ type
     function Add(ParamType: byte): _IItem;
     function getItems(index: integer): _IItem;
     function Find(ParamType: byte): _IItem;
+    procedure PrintBuf; {can be used to print buffer in hex for debugging}
     property Count: integer read getCount;
     property Items[index: integer]: _IItem read getItems; default;
   end;
@@ -729,6 +730,7 @@ type
     function GetCount: integer;
     function GetItem(index: integer): IDBInfoItem;
     function Find(ItemType: byte): IDBInfoItem;
+    procedure PrintBuf; {can be used to print buffer in hex for debugging}
     property Count: integer read GetCount;
     property Items[index: integer]: IDBInfoItem read getItem; default;
   end;
@@ -894,6 +896,7 @@ type
     function getAsString: string;
     function getAsInteger: integer;
     function getAsByte: byte;
+    function CopyTo(stream: TStream; count: integer): integer;
     property AsString: string read getAsString;
     property AsInteger: integer read getAsInteger;
     property AsByte: byte read getAsByte;
@@ -911,6 +914,7 @@ type
     function getCount: integer;
     function getItem(index: integer): IServiceQueryResultItem;
     function find(ItemType: byte): IServiceQueryResultItem;
+    procedure PrintBuf; {can be used to print buffer in hex for debugging}
     property Items[index: integer]: IServiceQueryResultItem read getItem; default;
     property Count: integer read getCount;
   end;
@@ -926,6 +930,7 @@ type
 
   IServiceManager = interface
     function getSPB: ISPB;
+    function getServerName: string;
     procedure Attach;
     procedure Detach(Force: boolean=false);
     function IsAttached: boolean;

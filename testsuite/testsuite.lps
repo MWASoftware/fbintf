@@ -3,30 +3,30 @@
   <ProjectSession>
     <Version Value="9"/>
     <BuildModes Active="Default"/>
-    <Units Count="41">
+    <Units Count="43">
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="80"/>
         <CursorPos X="30" Y="103"/>
-        <UsageCount Value="37"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="38"/>
       </Unit0>
       <Unit1>
         <Filename Value="TestManager.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="409"/>
-        <CursorPos X="3" Y="412"/>
-        <UsageCount Value="37"/>
+        <TopLine Value="392"/>
+        <CursorPos X="3" Y="395"/>
+        <UsageCount Value="38"/>
       </Unit1>
       <Unit2>
         <Filename Value="Test1.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="35"/>
-        <CursorPos Y="56"/>
-        <UsageCount Value="37"/>
+        <TopLine Value="81"/>
+        <CursorPos Y="104"/>
+        <UsageCount Value="38"/>
       </Unit2>
       <Unit3>
         <Filename Value="test2.pas"/>
@@ -34,7 +34,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="43"/>
         <CursorPos X="108" Y="58"/>
-        <UsageCount Value="37"/>
+        <UsageCount Value="38"/>
       </Unit3>
       <Unit4>
         <Filename Value="Test3.pas"/>
@@ -42,62 +42,62 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="59"/>
         <CursorPos X="43" Y="62"/>
-        <UsageCount Value="37"/>
+        <UsageCount Value="38"/>
       </Unit4>
       <Unit5>
         <Filename Value="Test4.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="37"/>
+        <UsageCount Value="38"/>
       </Unit5>
       <Unit6>
         <Filename Value="Test5.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="49"/>
-        <UsageCount Value="37"/>
+        <UsageCount Value="38"/>
       </Unit6>
       <Unit7>
         <Filename Value="Test6.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="37"/>
+        <UsageCount Value="38"/>
       </Unit7>
       <Unit8>
         <Filename Value="Test7.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="37"/>
+        <UsageCount Value="38"/>
       </Unit8>
       <Unit9>
         <Filename Value="Test8.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="37"/>
+        <UsageCount Value="38"/>
       </Unit9>
       <Unit10>
         <Filename Value="Test9.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="37"/>
+        <UsageCount Value="38"/>
       </Unit10>
       <Unit11>
         <Filename Value="Test10.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="37"/>
+        <UsageCount Value="38"/>
       </Unit11>
       <Unit12>
         <Filename Value="Test11.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="89"/>
-        <CursorPos Y="110"/>
-        <UsageCount Value="37"/>
+        <TopLine Value="21"/>
+        <CursorPos X="15" Y="36"/>
+        <UsageCount Value="38"/>
       </Unit12>
       <Unit13>
         <Filename Value="Test12.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="37"/>
+        <UsageCount Value="38"/>
       </Unit13>
       <Unit14>
         <Filename Value="Test13.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="37"/>
+        <UsageCount Value="38"/>
       </Unit14>
       <Unit15>
         <Filename Value="Test14.pas"/>
@@ -105,24 +105,24 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="79"/>
         <CursorPos Y="100"/>
-        <UsageCount Value="37"/>
+        <UsageCount Value="38"/>
       </Unit15>
       <Unit16>
         <Filename Value="Test15.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="95"/>
-        <UsageCount Value="37"/>
+        <UsageCount Value="38"/>
       </Unit16>
       <Unit17>
         <Filename Value="Test16.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="37"/>
+        <UsageCount Value="38"/>
       </Unit17>
       <Unit18>
         <Filename Value="Makefile.fpc"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="37"/>
+        <UsageCount Value="38"/>
       </Unit18>
       <Unit19>
         <Filename Value="../client/3.0/FB30ClientAPI.pas"/>
@@ -141,8 +141,8 @@
       <Unit21>
         <Filename Value="../client/FBOutputBlock.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="1018"/>
-        <CursorPos Y="1034"/>
+        <TopLine Value="411"/>
+        <CursorPos Y="429"/>
         <UsageCount Value="10"/>
       </Unit21>
       <Unit22>
@@ -188,10 +188,9 @@
       <Unit28>
         <Filename Value="../IB.pas"/>
         <IsVisibleTab Value="True"/>
-        <EditorIndex Value="1"/>
-        <TopLine Value="55"/>
-        <CursorPos Y="75"/>
-        <UsageCount Value="15"/>
+        <TopLine Value="884"/>
+        <CursorPos X="20" Y="889"/>
+        <UsageCount Value="16"/>
         <Loaded Value="True"/>
       </Unit28>
       <Unit29>
@@ -276,12 +275,31 @@
         <CursorPos X="3" Y="202"/>
         <UsageCount Value="10"/>
       </Unit40>
+      <Unit41>
+        <Filename Value="../client/FBMessages.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="110"/>
+        <CursorPos X="7" Y="212"/>
+        <UsageCount Value="10"/>
+      </Unit41>
+      <Unit42>
+        <Filename Value="../../ibx/runtime/IBServices.pas"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="334"/>
+        <CursorPos X="19" Y="349"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit42>
     </Units>
-    <JumpHistory Count="1">
+    <JumpHistory Count="2" HistoryIndex="1">
       <Position1>
-        <Filename Value="../IB.pas"/>
-        <Caret Line="466" Column="106" TopLine="458"/>
+        <Filename Value="../../ibx/runtime/IBServices.pas"/>
+        <Caret Line="12" Column="93"/>
       </Position1>
+      <Position2>
+        <Filename Value="../../ibx/runtime/IBServices.pas"/>
+        <Caret Line="282" Column="3" TopLine="273"/>
+      </Position2>
     </JumpHistory>
   </ProjectSession>
 </CONFIG>

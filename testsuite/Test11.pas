@@ -180,14 +180,22 @@ begin
   Req.Add(isc_spb_dbname).AsString := DBName;
   Req.Add(isc_spb_bkp_file).AsString := 'stdout';
   try
-    SelectOutputFile(Owner.GetBackupFileName);
-    Service.Start(Req);
-    Req := Service.AllocateSRB;
-    Req.Add(isc_info_svc_to_eof);
-    repeat
-      Results := Service.Query(Req);
-    until not WriteServiceQueryResult(Results);
-    writeln(OutFile,'Local Backup Complete');
+    BakFile := TFileStream.Create(Owner.GetBackupFileName,fmCreate);
+    try
+      Service.Start(Req);
+      Req := Service.AllocateSRB;
+      Req.Add(isc_info_svc_to_eof);
+      repeat
+        bytesWritten := 0;
+        Results := Service.Query(Req);
+        QueryResultsItem := Results.Find(isc_info_svc_to_eof);
+        if QueryResultsItem <> nil then
+          bytesWritten := QueryResultsItem.CopyTo(BakFile,0);
+      until (bytesWritten = 0) or not WriteServiceQueryResult(Results);
+      writeln(OutFile,'Local Backup Complete');
+    finally
+      BakFile.Free;
+    end;
   except on E: Exception do
     writeln(OutFile,'Local Backup Service: ',E.Message);
   end;

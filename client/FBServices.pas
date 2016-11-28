@@ -58,6 +58,7 @@ type
   public
     {IServiceManager}
     function getSPB: ISPB;
+    function getServerName: string;
     procedure Attach;
     procedure Detach(Force: boolean=false); virtual; abstract;
     function AllocateSRB: ISRB;
@@ -98,6 +99,11 @@ end;
 function TFBServiceManager.getSPB: ISPB;
 begin
   Result := FSPB;
+end;
+
+function TFBServiceManager.getServerName: string;
+begin
+  Result := FServerName;
 end;
 
 procedure TFBServiceManager.Attach;

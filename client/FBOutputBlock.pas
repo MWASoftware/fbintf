@@ -74,8 +74,8 @@ type
     {$IFDEF DEBUGOUTPUTBLOCK}
     procedure FormattedPrint(const aItems: array of POutputBlockItemData;
       Indent: string);
-    procedure PrintBuf;
     {$ENDIF}
+    procedure PrintBuf;
   protected
     FIntegerType: TItemDataType;
     FError: boolean;
@@ -130,6 +130,7 @@ type
     function getAsString: string;
     function getAsByte: byte;
     function getAsBytes: TByteArray;
+    function CopyTo(stream: TStream; count: integer): integer;
   end;
 
   { TCustomOutputBlock }
@@ -408,6 +409,32 @@ begin
     IBError(ibxeOutputBlockTypeError,[nil]);
 end;
 
+function TOutputBlockItem.CopyTo(stream: TStream; count: integer): integer;
+var len: integer;
+begin
+  if count < 0 then count := 0;
+  with FItemData^ do
+  begin
+    case FDataType of
+    dtString:
+      begin
+        len := byte((FBufPtr+1)^);
+        if (count > 0) and (count < len) then len := count;
+        Result := stream.Write((FBufPtr+2)^,len);
+      end;
+    dtString2:
+      begin
+        with FirebirdClientAPI do
+          len := DecodeInteger(FBufPtr+1,2);
+        if (count > 0) and (count < len) then len := count;
+        Result := stream.Write((FBufPtr+3)^,len);
+      end;
+    else
+      IBError(ibxeOutputBlockTypeError,[nil]);
+    end;
+  end;
+end;
+
 { TOutputBlock }
 
 procedure TOutputBlock.ParseBuffer;
@@ -642,16 +669,19 @@ begin
     end;
   end;
 end;
+{$ENDIF}
 
 procedure TOutputBlock.PrintBuf;
 var i: integer;
 begin
   write(classname,': ');
   for i := 0 to getBufSize - 1 do
+  begin
     write(Format('%x ',[byte(Buffer[i])]));
+    if byte(FBuffer[i]) = isc_info_end then break;
+  end;
   writeln;
 end;
-{$ENDIF}
 
 { TDBInfoItem }
 

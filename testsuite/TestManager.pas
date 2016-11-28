@@ -16,7 +16,7 @@ type
   TTestBase = class
   private
     FOwner: TTestManager;
-    FOutputFile: TFileStream;
+    FOutputFi: TFileStream;
   protected
     FHexStrings: boolean;
     function ReportResults(Statement: IStatement): IResultSet;
@@ -25,7 +25,6 @@ type
     procedure PrintDPB(DPB: IDPB);
     procedure PrintMetaData(meta: IMetaData);
     procedure ParamInfo(SQLParams: ISQLParams);
-    procedure SelectOutputFile(aFileName: string);
     procedure WriteArray(ar: IArray);
     procedure WriteAffectedRows(Statement: IStatement);
     function WriteServiceQueryResult(QueryResult: IServiceQueryResults): boolean;
@@ -280,11 +279,6 @@ begin
   end;
 end;
 
-procedure TTestBase.SelectOutputFile(aFileName: string);
-begin
-  FOutputFile := TFileStream.Create(aFileName,fmCreate);
-end;
-
 procedure TTestBase.WriteArray(ar: IArray);
 var Bounds: TArrayBounds;
     i,j: integer;
@@ -357,22 +351,11 @@ begin
       writeln(OutFile,line);
       Result := line <> '';
     end;
-  isc_info_svc_to_eof:
-    begin
-      line := getAsString;
-      Result := line <> '';
-      if FOutputFile = nil then
-        writeln(OutFile,line)
-      else
-      if Result then
-        FOutputFile.Write(Line[1],Length(Line))
-      else
-        FreeAndNil(FOutputFile);
-    end;
   isc_info_svc_running:
     writeln(OutFile,'Is Running = ',getAsInteger);
   isc_info_svc_limbo_trans:
     WriteLimboTransactions(QueryResult[i]);
+  isc_info_svc_to_eof,
   isc_info_svc_timeout,
   isc_info_truncated,
   isc_info_data_not_ready,
