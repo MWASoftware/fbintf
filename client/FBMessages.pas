@@ -233,7 +233,9 @@ type
       ibxFieldNotinDataSet,
       ibxeNotCurrentArray,
       ibxeNoDefaultCharacterSet,
-      ibxeParamBufferOverflow
+      ibxeParamBufferOverflow,
+      ibxeInvalidParamCount,
+      ibxeInvalidVariantType
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;
@@ -423,6 +425,8 @@ resourcestring
   SNotCurrentArray = 'Cannot Edit an Array that is not part of the current record';
   SNoDefaultCharacterSet = 'A connection default character set is required to perform this operation';
   SParamBufferOverflow = 'Parameter Buffer Overflow';
+  SInvalidParamCount = 'Invalid Parameter Count. %d expected, %d found';
+  SInvalidVariantType = 'Invalid variant type';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -581,7 +585,9 @@ const
     SFieldNotinDataSet,
     SNotCurrentArray,
     SNoDefaultCharacterSet,
-    SParamBufferOverflow
+    SParamBufferOverflow,
+    SInvalidParamCount,
+    SInvalidVariantType
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;

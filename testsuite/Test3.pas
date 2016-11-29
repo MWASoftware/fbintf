@@ -58,9 +58,7 @@ begin
   TPB.Add(isc_tpb_lock_read).AsString := 'EMPLOYEE';
   TPB.Add(isc_tpb_protected);
   Transaction := Attachment.StartTransaction(TPB,taRollback);
-  Statement := Attachment.Prepare(Transaction,'Execute Procedure DELETE_EMPLOYEE ?',3);
-  Statement.GetSQLParams[0].AsInteger := 8;
-  Statement.Execute;
+  Attachment.ExecuteSQL(Transaction, 'Execute Procedure DELETE_EMPLOYEE ?', [8]);
 
   ResultSet := Attachment.OpenCursorAtStart(
          Transaction,
@@ -88,6 +86,10 @@ begin
   writeln(OutFile,'Employee Count = ',Attachment.OpenCursorAtStart(
          Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit),
          'Select count(*) As Counter from EMPLOYEE',3)[0].AsInteger);
+
+  writeln(OutFile,'Constrained Employee Count = ',Attachment.OpenCursorAtStart(
+         Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit),
+         'Select count(*) As Counter from EMPLOYEE Where EMP_NO < ?',3,[8])[0].AsInteger);
 
 end;
 
