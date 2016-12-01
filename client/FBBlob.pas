@@ -76,11 +76,14 @@ type
     FAttachment: IAttachment;
     FTransaction: ITransaction;
     FBPB: IBPB;
+    FStringData: rawbytestring;
+    FStringCached: boolean;
   protected
     FCreating: boolean;
     FBlobID: TISC_QUAD;
     procedure CheckReadable; virtual; abstract;
     procedure CheckWritable; virtual; abstract;
+    procedure ClearStringCache;
     function GetIntf: IBlob; virtual; abstract;
     procedure InternalClose(Force: boolean); virtual; abstract;
     procedure InternalCancel(Force: boolean); virtual; abstract;
@@ -131,6 +134,12 @@ implementation
 uses FBMessages;
 
 { TFBBlob }
+
+procedure TFBBlob.ClearStringCache;
+begin
+  FStringData := '';
+  FStringCached := false;
+end;
 
 constructor TFBBlob.Create(Attachment: IAttachment;
   Transaction: TFBTransaction; MetaData: IBlobMetaData; BPB: IBPB);
@@ -308,6 +317,12 @@ end;
 function TFBBlob.GetAsString: rawbytestring;
 var ss: TStringStream;
 begin
+  if FStringCached then
+  begin
+    Result := FStringData;
+    Exit;
+  end;
+
   ss := TStringStream.Create('');
   try
     SaveToStream(ss);
@@ -317,6 +332,8 @@ begin
   finally
     ss.Free;
   end;
+  FStringData := Result;
+  FStringCached := true;
 end;
 
 procedure TFBBlob.SetAsString(aValue: rawbytestring);
@@ -335,6 +352,8 @@ begin
   finally
     ss.Free;
   end;
+  FStringData := aValue;
+  FStringCached := true;
 end;
 
 function TFBBlob.SetString(aValue: rawbytestring): IBlob;

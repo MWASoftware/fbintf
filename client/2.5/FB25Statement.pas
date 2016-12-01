@@ -220,6 +220,7 @@ type
   TResultSet = class(TResults,IResultSet)
   private
     FResults: TIBXOUTPUTSQLDA;
+    FCursorSeqNo: integer;
   public
     constructor Create(aResults: TIBXOUTPUTSQLDA);
     destructor Destroy; override;
@@ -240,6 +241,7 @@ type
     FSQLParams: TIBXINPUTSQLDA;
     FSQLRecord: TIBXOUTPUTSQLDA;
     FCursor: String;               { Cursor name...}
+    FCursorSeqNo: integer;
   protected
     procedure CheckHandle; override;
     procedure GetDsqlInfo(info_request: byte; buffer: ISQLInfoResults); override;
@@ -568,6 +570,7 @@ constructor TResultSet.Create(aResults: TIBXOUTPUTSQLDA);
 begin
   inherited Create(aResults);
   FResults := aResults;
+  FCursorSeqNo := aResults.FStatement.FCursorSeqNo;
 end;
 
 destructor TResultSet.Destroy;
@@ -603,7 +606,8 @@ end;
 
 procedure TResultSet.Close;
 begin
-  FResults.FStatement.Close;
+  if FCursorSeqNo = FResults.FStatement.FCursorSeqNo then
+    FResults.FStatement.Close;
 end;
 
 { TIBXINPUTSQLDA }
@@ -920,6 +924,11 @@ begin
   end;
   FPrepared := true;
   FSingleResults := false;
+  if RetainInterfaces then
+  begin
+    SetRetainInterfaces(false);
+    SetRetainInterfaces(true);
+  end;
   Inc(FPrepareSeqNo);
   Inc(FChangeSeqNo);
   with FTransactionIntf as TFB25Transaction do
@@ -982,6 +991,7 @@ end;
 function TFB25Statement.InternalOpenCursor(aTransaction: ITransaction
   ): IResultSet;
 var TRHandle: TISC_TR_HANDLE;
+    GUID : TGUID;
 begin
   if FSQLStatementType <> SQLSelect then
    IBError(ibxeIsASelectStatement,[]);
@@ -1004,10 +1014,16 @@ begin
                        SQLDialect,
                        FSQLParams.AsXSQLDA,
                        nil), True);
-   Call(
-     isc_dsql_set_cursor_name(StatusVector, @FHandle, PChar(FCursor), 0),
-     True);
+   if FCursor = '' then
+   begin
+     CreateGuid(GUID);
+     FCursor := GUIDToString(GUID);
+     Call(
+       isc_dsql_set_cursor_name(StatusVector, @FHandle, PChar(FCursor), 0),
+       True);
+   end;
  end;
+ Inc(FCursorSeqNo);
  FSingleResults := false;
  FOpen := True;
  FExecTransactionIntf := aTransaction;
@@ -1036,6 +1052,7 @@ begin
     end;
   finally
     FHandle := nil;
+    FCursor := '';
     FPrepared := false;
   end;
 end;
@@ -1044,8 +1061,8 @@ procedure TFB25Statement.InternalClose(Force: boolean);
 var
   isc_res: ISC_STATUS;
 begin
+  if (FHandle <> nil) and (SQLStatementType = SQLSelect) and FOpen then
   try
-    if (FHandle <> nil) and (SQLStatementType = SQLSelect) and FOpen then
     with Firebird25ClientAPI do
     begin
       isc_res := Call(
@@ -1068,12 +1085,9 @@ end;
 
 constructor TFB25Statement.Create(Attachment: TFB25Attachment;
   Transaction: ITransaction; sql: string; aSQLDialect: integer);
-var GUID : TGUID;
 begin
   inherited Create(Attachment,Transaction,sql,aSQLDialect);
   FDBHandle := Attachment.Handle;
-  CreateGuid(GUID);
-  FCursor := GUIDToString(GUID);
   FSQLParams := TIBXINPUTSQLDA.Create(self);
   FSQLRecord := TIBXOUTPUTSQLDA.Create(self);
   InternalPrepare;
@@ -1082,12 +1096,9 @@ end;
 constructor TFB25Statement.CreateWithParameterNames(Attachment: TFB25Attachment;
   Transaction: ITransaction; sql: string; aSQLDialect: integer;
   GenerateParamNames: boolean);
-var GUID : TGUID;
 begin
   inherited CreateWithParameterNames(Attachment,Transaction,sql,aSQLDialect,GenerateParamNames);
   FDBHandle := Attachment.Handle;
-  CreateGuid(GUID);
-  FCursor := GUIDToString(GUID);
   FSQLParams := TIBXINPUTSQLDA.Create(self);
   FSQLRecord := TIBXOUTPUTSQLDA.Create(self);
   InternalPrepare;
@@ -1117,6 +1128,7 @@ begin
       Call(isc_dsql_fetch(StatusVector, @FHandle, SQLDialect, FSQLRecord.AsXSQLDA), False);
     if (fetch_res = 100) or (getStatus.CheckStatusVector([isc_dsql_cursor_err])) then
     begin
+      FBOF := false;
       FEOF := true;
       Exit; {End of File}
     end
@@ -1136,6 +1148,7 @@ begin
       result := true;
     end;
   end;
+  FSQLRecord.RowChange;
   if FEOF then
     Inc(FChangeSeqNo);
 end;

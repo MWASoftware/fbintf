@@ -328,6 +328,7 @@ begin
   until ((returncode <> Firebird.IStatus.Result_OK) and (returnCode <> Firebird.IStatus.Result_SEGMENT)) or (Count = 0);
 
   FEOB := returnCode = Firebird.IStatus.RESULT_NO_DATA;
+  ClearStringCache;
   if (returnCode <> Firebird.IStatus.Result_OK) and
      (returnCode <> Firebird.IStatus.Result_SEGMENT) and
      (returnCode <> Firebird.IStatus.RESULT_NO_DATA) then
@@ -345,6 +346,7 @@ begin
     FBlobIntf.putSegment(StatusIntf,Count,@Buffer);
     Check4DataBaseError;
   end;
+  ClearStringCache;
   SignalActivity;
   Result := Count;
 end;

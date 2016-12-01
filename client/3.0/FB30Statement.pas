@@ -215,6 +215,7 @@ type
   TResultSet = class(TResults,IResultSet)
   private
     FResults: TIBXOUTPUTSQLDA;
+    FCursorSeqNo: integer;
   public
     constructor Create(aResults: TIBXOUTPUTSQLDA);
     destructor Destroy; override;
@@ -234,6 +235,7 @@ type
     FSQLParams: TIBXINPUTSQLDA;
     FSQLRecord: TIBXOUTPUTSQLDA;
     FResultSet: Firebird.IResultSet;
+    FCursorSeqNo: integer;
   protected
     procedure CheckHandle; override;
     procedure GetDSQLInfo(info_request: byte; buffer: ISQLInfoResults); override;
@@ -517,6 +519,7 @@ constructor TResultSet.Create(aResults: TIBXOUTPUTSQLDA);
 begin
   inherited Create(aResults);
   FResults := aResults;
+  FCursorSeqNo := aResults.FStatement.FCursorSeqNo;
 end;
 
 destructor TResultSet.Destroy;
@@ -553,7 +556,8 @@ end;
 
 procedure TResultSet.Close;
 begin
-  FResults.FStatement.Close;
+  if FCursorSeqNo = FResults.FStatement.FCursorSeqNo then
+    FResults.FStatement.Close;
 end;
 
 { TIBXINPUTSQLDA }
@@ -775,6 +779,8 @@ begin
       end
       else
         FSQLSubType := 0;
+      FBlob := nil;
+      FArray := nil;
       FSQLData := FMessageBuffer + metaData.getOffset(StatusIntf,i);
       Check4DataBaseError;
       FDataLength := aMetaData.getLength(StatusIntf,i);
@@ -1025,6 +1031,11 @@ begin
   end;
   FPrepared := true;
   FSingleResults := false;
+  if RetainInterfaces then
+  begin
+    SetRetainInterfaces(false);
+    SetRetainInterfaces(true);
+  end;
   Inc(FPrepareSeqNo);
   with GetTransaction as TFB30Transaction do
   begin
@@ -1112,6 +1123,7 @@ begin
                           0);
    Check4DataBaseError;
  end;
+ Inc(FCursorSeqNo);
  FSingleResults := false;
  FOpen := True;
  FExecTransactionIntf := aTransaction;
@@ -1138,8 +1150,8 @@ end;
 
 procedure TFB30Statement.InternalClose(Force: boolean);
 begin
+  if (FStatementIntf <> nil) and (SQLStatementType = SQLSelect) and FOpen then
   try
-    if (FStatementIntf <> nil) and (SQLStatementType = SQLSelect) and FOpen then
     with Firebird30ClientAPI do
     begin
       if FResultSet <> nil then
@@ -1205,6 +1217,7 @@ begin
     fetchResult := FResultSet.fetchNext(StatusIntf,FSQLRecord.MessageBuffer);
     if fetchResult = Firebird.IStatus.RESULT_NO_DATA then
     begin
+      FBOF := false;
       FEOF := true;
       Exit; {End of File}
     end
@@ -1224,6 +1237,7 @@ begin
       result := true;
     end;
   end;
+  FSQLRecord.RowChange;
   SignalActivity;
   if FEOF then
     Inc(FChangeSeqNo);

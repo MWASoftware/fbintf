@@ -1505,6 +1505,7 @@ const
   blr_sql_time                   =         13;
   blr_int64                      =         16;
   blr_date                       =         blr_timestamp;
+  blr_bool                       =         23;
 
 
   blr_inner                      =          0;

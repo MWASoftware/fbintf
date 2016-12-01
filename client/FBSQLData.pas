@@ -210,6 +210,7 @@ type
     function CheckStatementStatus(Request: TStatementStatus): boolean; virtual; abstract;
     procedure GetData(index: integer; var IsNull: boolean; var len: short;
       var data: PChar); virtual;
+    procedure RowChange;
     function StateChanged(var ChangeSeqNo: integer): boolean; virtual; abstract;
     property Count: integer read GetCount;
     property Column[index: integer]: TSQLVarData read GetColumn;
@@ -700,6 +701,13 @@ procedure TSQLDataArea.GetData(index: integer; var IsNull: boolean;
   var len: short; var data: PChar);
 begin
   //Do Nothing
+end;
+
+procedure TSQLDataArea.RowChange;
+var i: integer;
+begin
+  for i := 0 to Count - 1 do
+    Column[i].RowChange;
 end;
 
 {TSQLVarData}

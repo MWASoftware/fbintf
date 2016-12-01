@@ -239,6 +239,7 @@ end;
 
 function TFBStatement.OpenCursor(aTransaction: ITransaction): IResultSet;
 begin
+  Close;
   if aTransaction = nil then
     Result := InternalOpenCursor(FTransactionIntf)
   else

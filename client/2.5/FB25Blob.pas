@@ -345,6 +345,7 @@ begin
   until ((returncode <> 0) and (returnCode <> isc_segment)) or (Count = 0);
 
   FEOB := returnCode = isc_segstr_eof;
+  ClearStringCache;
   if (returnCode <> 0) and (returnCode <> isc_segment) and (returnCode <> isc_segstr_eof) then
     Firebird25ClientAPI.IBDataBaseError
 end;
@@ -370,6 +371,7 @@ begin
     Inc(LocalBuffer,localCount);
     Inc(Result,localCount);
   until Count = 0;
+  ClearStringCache;
 end;
 
 
