@@ -178,7 +178,7 @@ type
     function GetMetaData: Firebird.IMessageMetadata;
     function GetModified: Boolean;
     function GetMsgLength: integer;
-    procedure PackBuffer;
+    procedure PackBuffer(includeData: boolean);
   protected
     procedure FreeXSQLDA; override;
   public
@@ -592,23 +592,23 @@ end;
 
 function TIBXINPUTSQLDA.GetMessageBuffer: PChar;
 begin
-  PackBuffer;
+  PackBuffer(true);
   Result := FMessageBuffer;
 end;
 
 function TIBXINPUTSQLDA.GetMetaData: Firebird.IMessageMetadata;
 begin
-  PackBuffer;
+  PackBuffer(false);
   Result := FCurMetaData;
 end;
 
 function TIBXINPUTSQLDA.GetMsgLength: integer;
 begin
-  PackBuffer;
+  PackBuffer(false);
   Result := FMsgLength;
 end;
 
-procedure TIBXINPUTSQLDA.PackBuffer;
+procedure TIBXINPUTSQLDA.PackBuffer(includeData: boolean);
 var Builder: Firebird.IMetadataBuilder;
     i: integer;
 begin
@@ -641,6 +641,8 @@ begin
 
     FMsgLength := FCurMetaData.getMessageLength(StatusIntf);
     Check4DataBaseError;
+    if not includeData then Exit;
+
     IBAlloc(FMessageBuffer,0,FMsgLength);
 
     for i := 0 to Count - 1 do
@@ -702,7 +704,8 @@ begin
       case SQLType of
         SQL_TEXT, SQL_TYPE_DATE, SQL_TYPE_TIME, SQL_TIMESTAMP,
         SQL_BLOB, SQL_ARRAY, SQL_QUAD, SQL_SHORT, SQL_BOOLEAN,
-        SQL_LONG, SQL_INT64, SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT: begin
+        SQL_LONG, SQL_INT64, SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT:
+        begin
           if (FDataLength = 0) then
             { Make sure you get a valid pointer anyway
              select '' from foo }
