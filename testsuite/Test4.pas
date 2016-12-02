@@ -181,7 +181,7 @@ begin
   finally
     Rows.Close;
   end;
-  writeln('Same Statement - updated params');
+  writeln(OutFile,'Same Statement - updated params');
   Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 9;
   ReportResults(Statement);
 end;
