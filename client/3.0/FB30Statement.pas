@@ -185,7 +185,6 @@ type
     constructor Create(aStatement: TFB30Statement);
     destructor Destroy; override;
     procedure Bind(aMetaData: Firebird.IMessageMetadata);
-    procedure Clear;
     procedure Changed; override;
     function IsInputDataArea: boolean; override;
     property MetaData: Firebird.IMessageMetadata read GetMetaData;
@@ -583,7 +582,11 @@ begin
     FCurMetaData.release;
     FCurMetaData := nil;
   end;
-  Clear;
+  if FMessageBuffer <> nil then
+  begin
+    FreeMem(FMessageBuffer);
+    FMessageBuffer := nil;
+  end;
   FMsgLength := 0;
 end;
 
@@ -729,15 +732,6 @@ begin
       FCharSetID :=  aMetaData.getCharSet(StatusIntf,i);
       Check4DataBaseError;
     end;
-  end;
-end;
-
-procedure TIBXINPUTSQLDA.Clear;
-begin
-  if FMessageBuffer <> nil then
-  begin
-    FreeMem(FMessageBuffer);
-    FMessageBuffer := nil;
   end;
 end;
 
@@ -1097,7 +1091,6 @@ begin
                              nil,
                              nil);
       Check4DataBaseError;
-      FSQLParams.Clear;
     end;
   finally
     if aTransaction <> FTransactionIntf then
@@ -1132,7 +1125,6 @@ begin
                           FSQLRecord.MetaData,
                           0);
    Check4DataBaseError;
-   FSQLParams.Clear;
  end;
  Inc(FCursorSeqNo);
  FSingleResults := false;

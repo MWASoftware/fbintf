@@ -1881,6 +1881,7 @@ end;
 function TSQLParam.GetAsPointer: Pointer;
 begin
   IsNull := false; {Assume that we get the pointer in order to set a value}
+  Changed;
   Result := inherited GetAsPointer;
 end;
 
