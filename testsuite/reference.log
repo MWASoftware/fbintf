@@ -5,7 +5,9 @@ Starting Tests
 Client API Version = 3.768
 Running Test 1: Create and Drop a Database
 Creating a Database with empty parameters
-Create Database fails (as expected): Can not access lock files directory /tmp/firebird/
+Create Database fails (as expected): I/O error during "open O_CREAT" operation for file ""
+Error while trying to create file
+No such file or directory
 Creating a Database with a DPD
 Dropping Database
 DPB
@@ -257,6 +259,7 @@ Employee Count = 41
 Employee Count = 42
 Employee Count = 41
 Employee Count = 42
+Constrained Employee Count = 3
 
 
 Running Test 4: Update, Insert and Delete Queries
@@ -1684,7 +1687,6 @@ Limbo Transactions
 
 
 Local Backup
-
 
 
 
