@@ -496,6 +496,18 @@ JOB_GRADE = 3
 JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
+EMP_NO = 9
+FIRST_NAME = Phil
+LAST_NAME = Forest
+PHONE_EXT = 229
+HIRE_DATE = 17/4/1989 00:00:00.000
+DEPT_NO = 622
+JOB_CODE = Mngr
+JOB_GRADE = 3
+JOB_COUNTRY = USA
+SALARY = 75,060.00
+FULL_NAME = Forest, Phil
+
 
 
 Running Test 5: Update Returning and Activity Check
