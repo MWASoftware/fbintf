@@ -181,6 +181,9 @@ begin
   finally
     Rows.Close;
   end;
+  writeln('Same Statement - updated params');
+  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 9;
+  ReportResults(Statement);
 end;
 
 function TTest4.TestTitle: string;
