@@ -496,6 +496,7 @@ JOB_GRADE = 3
 JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
+Same Statement - updated params
 EMP_NO = 9
 FIRST_NAME = Phil
 LAST_NAME = Forest
