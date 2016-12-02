@@ -358,6 +358,7 @@ type
   public
     procedure Clear;
     function GetModified: boolean; override;
+    function GetAsPointer: Pointer;
     procedure SetName(Value: string); override;
     procedure SetIsNull(Value: Boolean);  override;
     procedure SetIsNullable(Value: Boolean); override;
@@ -1877,6 +1878,12 @@ begin
   Result := FIBXSQLVAR.Modified;
 end;
 
+function TSQLParam.GetAsPointer: Pointer;
+begin
+  IsNull := false; {Assume that we get the pointer in order to set a value}
+  Result := inherited GetAsPointer;
+end;
+
 procedure TSQLParam.SetName(Value: string);
 begin
   CheckActive;
@@ -2453,17 +2460,21 @@ begin
 end;
 
 function TResults.ByName(Idx: String): ISQLData;
+var col: TSQLVarData;
 begin
+  Result := nil;
   CheckActive;
   if FResults.CheckStatementStatus(ssBOF) then
     IBError(ibxeBOF,[nil]);
   if FResults.CheckStatementStatus(ssEOF) then
     IBError(ibxeEOF,[nil]);
 
-  if FResults.Count = 0 then
-    Result := nil
-  else
-    Result := GetISQLData(FResults.ColumnByName(Idx));
+  if FResults.Count > 0 then
+  begin
+    col := FResults.ColumnByName(Idx);
+    if col <> nil then
+      Result := GetISQLData(col);
+  end;
 end;
 
 function TResults.getSQLData(index: integer): ISQLData;
