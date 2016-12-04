@@ -178,7 +178,7 @@ type
     function GetMetaData: Firebird.IMessageMetadata;
     function GetModified: Boolean;
     function GetMsgLength: integer;
-    procedure PackBuffer(includeData: boolean);
+    procedure PackBuffer;
   protected
     procedure FreeXSQLDA; override;
   public
@@ -592,23 +592,23 @@ end;
 
 function TIBXINPUTSQLDA.GetMessageBuffer: PChar;
 begin
-  PackBuffer(true);
+  PackBuffer;
   Result := FMessageBuffer;
 end;
 
 function TIBXINPUTSQLDA.GetMetaData: Firebird.IMessageMetadata;
 begin
-  PackBuffer(false);
+  PackBuffer;
   Result := FCurMetaData;
 end;
 
 function TIBXINPUTSQLDA.GetMsgLength: integer;
 begin
-  PackBuffer(false);
+  PackBuffer;
   Result := FMsgLength;
 end;
 
-procedure TIBXINPUTSQLDA.PackBuffer(includeData: boolean);
+procedure TIBXINPUTSQLDA.PackBuffer;
 var Builder: Firebird.IMetadataBuilder;
     i: integer;
 begin
@@ -641,7 +641,6 @@ begin
 
     FMsgLength := FCurMetaData.getMessageLength(StatusIntf);
     Check4DataBaseError;
-    if not includeData then Exit;
 
     IBAlloc(FMessageBuffer,0,FMsgLength);
 
