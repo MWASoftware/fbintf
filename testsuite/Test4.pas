@@ -92,7 +92,7 @@ begin
   WriteAffectedRows(Statement);
 
   Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
-  writeln('Relation Name = ',Statement.Metadata.GetUniqueRelationName);
+  writeln(OutFile,'Relation Name = ',Statement.Metadata.GetUniqueRelationName);
   PrintMetaData(Statement.GetMetaData);
   Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 150;
   ReportResults(Statement);
