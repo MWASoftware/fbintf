@@ -99,7 +99,7 @@ end;
 
 function TTest13.TestTitle: string;
 begin
-  Result := 'Test 13: Transaction two databases';
+  Result := 'Test 13: Transaction over two databases';
 end;
 
 procedure TTest13.RunTest(CharSet: string; SQLDialect: integer);
