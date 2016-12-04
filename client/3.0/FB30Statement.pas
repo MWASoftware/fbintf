@@ -806,6 +806,7 @@ begin
       Check4DataBaseError;
     end;
   end;
+  SetUniqueRelationName;
 end;
 
 procedure TIBXOUTPUTSQLDA.GetData(index: integer; var aIsNull: boolean;
