@@ -1,6 +1,23 @@
 unit Test16;
 
 {$mode objfpc}{$H+}
+{$codepage UTF8}
+
+{Test 16: Error handling}
+
+{ This test tests for correct responses to various error conditions:
+
+  - Malformed database name.
+  - Invalid User Name
+  - Invalid password
+  - Invalid Update SQL Statement
+  - Invalid Select SQL
+  - Transaction not started
+  - Invalid parameter by name when should be positional
+  - Invalid server name
+  - invalid user name - logon to server
+  - invalid password
+}
 
 interface
 
@@ -81,6 +98,7 @@ begin
   except on E: Exception do
     writeln(OutFile,'Error Handled: ',E.Message);
   end;
+  Transaction.Start;
   try
     writeln(OutFile,'Invalid Param SQL Type Test');
     Statement := Attachment.Prepare(Transaction,'Update Employee Set Hire_Date = ? Where EMP_NO = ?',3);

@@ -6,7 +6,9 @@ unit Test12;
 
 interface
 
-{ This test creates strings in a database with various code pages and then
+{ Test 12: Character Sets
+
+  This test creates strings in a database with various code pages and then
   reads them back with different connection character sets. The result is
   displayed as hex strings so that the actual encoding can be checked in
   each case.

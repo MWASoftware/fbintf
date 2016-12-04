@@ -1,6 +1,16 @@
 unit Test14;
 
 {$mode objfpc}{$H+}
+{$codepage UTF8}
+
+{Test 14: Non select procedures}
+
+{ this test creates a new database with a table and two stored procedures.
+
+  1. The first stored procedure is run to populate the table
+
+  2. The second returns data from the table, which is written out.
+}
 
 interface
 
