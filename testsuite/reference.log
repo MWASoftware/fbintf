@@ -1796,7 +1796,7 @@ INCLEAR = 54 65 73 74 D C3  (Charset Id = 0 Codepage = 65535)
 
 
 
-Running Test 13: Character Sets over two databases
+Running Test 13: Transaction over two databases
 Init Database 1
 ROWID = 1
 TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage = 65001)
@@ -1913,7 +1913,7 @@ At line 1, column 8 When Executing: Select X,count(*) As Counter from EMPLOYEE
 Transaction not started Test
 Error Handled: Transaction is not active
 Invalid Param SQL Type Test
-Error Handled: Transaction is not active
+Error Handled: Field "EMP_NO" not found
 Invalid Server Name Test
 Error Handled: Unable to complete network request to host "unknown".
 Failed to locate host machine.
