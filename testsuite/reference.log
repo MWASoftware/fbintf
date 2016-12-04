@@ -279,6 +279,7 @@ SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
 Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
+Relation Name = EMPLOYEE
 Metadata
 SQLType =SQL_SHORT
 sub type = 0
