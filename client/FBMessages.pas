@@ -235,7 +235,8 @@ type
       ibxeNoDefaultCharacterSet,
       ibxeParamBufferOverflow,
       ibxeInvalidParamCount,
-      ibxeInvalidVariantType
+      ibxeInvalidVariantType,
+      ibxeServiceRunning
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;
@@ -427,6 +428,7 @@ resourcestring
   SParamBufferOverflow = 'Parameter Buffer Overflow';
   SInvalidParamCount = 'Invalid Parameter Count. %d expected, %d found';
   SInvalidVariantType = 'Invalid variant type';
+  SServiceRunning = 'Cannot start a new service while an existing service is running';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -587,7 +589,8 @@ const
     SNoDefaultCharacterSet,
     SParamBufferOverflow,
     SInvalidParamCount,
-    SInvalidVariantType
+    SInvalidVariantType,
+    SServiceRunning
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;
