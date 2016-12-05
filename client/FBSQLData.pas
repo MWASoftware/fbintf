@@ -200,6 +200,7 @@ type
     function GetPrepareSeqNo: integer; virtual; abstract;
     function GetTransactionSeqNo: integer; virtual; abstract;
     procedure SetCount(aValue: integer); virtual; abstract;
+    procedure SetUniqueRelationName;
   public
     procedure Initialize; virtual;
     function IsInputDataArea: boolean; virtual; abstract; {Input to Database}
@@ -466,7 +467,7 @@ begin
   Result := Length(FColumnList);
 end;
 
-procedure TSQLDataArea.Initialize;
+procedure TSQLDataArea.SetUniqueRelationName;
 var
   i: Integer;
   bUnique: Boolean;
@@ -491,7 +492,12 @@ begin
       end;
     end;
   end;
+end;
 
+procedure TSQLDataArea.Initialize;
+var
+  i: Integer;
+begin
   for i := 0 to ColumnsInUseCount - 1 do
     Column[i].Initialize;
 end;

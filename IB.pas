@@ -393,7 +393,7 @@ type
   IMetaData = interface
     function getCount: integer;
     function getColumnMetaData(index: integer): IColumnMetaData;
-    function GetUniqueRelationName: string; {True if all columns come from the same table}
+    function GetUniqueRelationName: string; {Non empty if all columns come from the same table}
     function ByName(Idx: String): IColumnMetaData;
     property ColMetaData[index: integer]: IColumnMetaData read getColumnMetaData; default;
     property Count: integer read getCount;

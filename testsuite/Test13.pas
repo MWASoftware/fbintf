@@ -3,6 +3,15 @@ unit Test13;
 {$mode objfpc}{$H+}
 {$codepage UTF8}
 
+{Test 13: Tranasction over two databases}
+
+{
+  The objective of this test is to test multi-database transactions. Two new
+  databases are created and both are populated with a table and data. The data
+  insert uses the same transaction. This is committed. Both are then read back
+  to ensure that the data has been written to both.
+}
+
 
 interface
 
@@ -90,7 +99,7 @@ end;
 
 function TTest13.TestTitle: string;
 begin
-  Result := 'Test 13: Character Sets over two databases';
+  Result := 'Test 13: Transaction over two databases';
 end;
 
 procedure TTest13.RunTest(CharSet: string; SQLDialect: integer);

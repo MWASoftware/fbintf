@@ -1,6 +1,20 @@
 unit Test15;
 
 {$mode objfpc}{$H+}
+{$codepage UTF8}
+
+{Test 15: Blob Handling and BPBs}
+
+{
+  1. A database is created with two tables. One has an untyped Blob. the other
+     is UTF8 text.
+
+  2. An image is inserted into the first.
+
+  3. Win1252 text into the second with a Blob Filter request to transform to UTF8.
+
+  4. The Data is read back and written out.
+}
 
 interface
 

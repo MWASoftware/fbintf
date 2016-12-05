@@ -665,6 +665,7 @@ begin
       Count := 0;
   end;
   Initialize;
+  SetUniqueRelationName;
 end;
 
 function TIBXOUTPUTSQLDA.GetTransaction: TFB25Transaction;
