@@ -62,7 +62,7 @@
 unit FB25Events;
 
 {$IFDEF FPC}
-{$mode delphi}
+{$mode objfpc}{$H+}
 {$interfaces COM}
 {$ENDIF}
 

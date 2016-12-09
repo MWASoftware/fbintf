@@ -27,7 +27,7 @@
 unit FB30Blob;
 
 {$IFDEF FPC}
-{$mode delphi}
+{$mode objfpc}{$H+}
 {$interfaces COM}
 {$ENDIF}
 

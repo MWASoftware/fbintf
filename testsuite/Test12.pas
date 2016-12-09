@@ -1,6 +1,6 @@
 unit Test12;
 
-{$mode delphi}
+{$mode objfpc}{$H+}
 
 {$codepage UTF8}
 

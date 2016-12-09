@@ -27,7 +27,7 @@
 unit FB30Attachment;
 
 {$IFDEF FPC}
-{$mode delphi}
+{$mode objfpc}{$H+}
 {$interfaces COM}
 {$ENDIF}
 

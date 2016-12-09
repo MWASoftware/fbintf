@@ -62,7 +62,7 @@
 unit IB;
 
 {$IFDEF FPC}
-{$mode delphi}
+{$mode objfpc}{$H+}
 {$codepage UTF8}
 {$interfaces COM}
 {$IF FPC_FULLVERSION < 30000 }
@@ -174,10 +174,10 @@ type
   IAttachment = interface;
   ITransaction = interface;
 
-  {The IParameterBlock interface provides the template for all parameter
+  {The IParameterBlock generic interface provides the template for all parameter
    block interfaces}
 
-  IParameterBlock<_IItem> = interface
+  generic IParameterBlock<_IItem> = interface
     function getCount: integer;
     function Add(ParamType: byte): _IItem;
     function getItems(index: integer): _IItem;
@@ -316,7 +316,7 @@ type
 
   IBPBItem = interface (IParameterBlockItem) end;
 
-  IBPB = IParameterBlock<IBPBItem>;
+  IBPB = specialize IParameterBlock<IBPBItem>;
 
   { The Blob Interface provides access to a blob data item.
 
@@ -618,7 +618,7 @@ type
 
   ITPBItem = interface(IParameterBlockItem) end;
 
-  ITPB = IParameterBlock<ITPBItem>;
+  ITPB = specialize IParameterBlock<ITPBItem>;
 
   {The ITransactionAction interface provides access to a Transaction once it
    has been initially started. After a Commit or Rollback, a transaction
@@ -748,7 +748,7 @@ type
 
   IDPBItem = interface(IParameterBlockItem) end;
 
-  IDPB = IParameterBlock<IDPBItem>;
+  IDPB = specialize IParameterBlock<IDPBItem>;
 
   {The IAttachment interface provides access to a Database Connection. It may be
    used to:
@@ -858,7 +858,7 @@ type
 
   ISPBItem = interface(IParameterBlockItem) end;
 
-  ISPB = IParameterBlock<ISPBItem>;
+  ISPB = specialize IParameterBlock<ISPBItem>;
 
   {Service Query Parameter Block (SQPB).
 
@@ -870,7 +870,7 @@ type
     function CopyFrom(source: TStream; count: integer): integer;
   end;
 
-  ISQPB = IParameterBlock<ISQPBItem>;
+  ISQPB = specialize IParameterBlock<ISQPBItem>;
 
   {Service Request Block (SRB).
 
@@ -886,7 +886,7 @@ type
 
   ISRBItem = interface(IParameterBlockItem) end;
 
-  ISRB = IParameterBlock<ISRBItem>;
+  ISRB = specialize IParameterBlock<ISRBItem>;
 
   {The Service Query Results Interface.
 

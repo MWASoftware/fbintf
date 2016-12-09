@@ -1,6 +1,6 @@
 unit test2;
 
-{$mode delphi}
+{$mode objfpc}{$H+}
 {$codepage utf8}
 
 {Test 2: Open the employee database and run a query}

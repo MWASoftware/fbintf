@@ -27,7 +27,7 @@
 unit FB30Services;
 
 {$IFDEF FPC}
-{$mode delphi}
+{$mode objfpc}{$H+}
 {$interfaces COM}
 {$ENDIF}
 

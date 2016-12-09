@@ -1,6 +1,6 @@
 unit Test9;
 
-{$mode delphi}
+{$mode objfpc}{$H+}
 {$codepage utf8}
 
 {Test 9: Database Information tests}

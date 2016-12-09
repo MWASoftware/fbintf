@@ -1,6 +1,6 @@
 unit Test13;
 
-{$mode delphi}
+{$mode objfpc}{$H+}
 {$codepage UTF8}
 
 {Test 13: Tranasction over two databases}

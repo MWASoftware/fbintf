@@ -11,7 +11,7 @@ unit Test1;
  A basic query is performed and finally the database dropped.
 }
 
-{$mode delphi}
+{$mode objfpc}{$H+}
 {$codepage utf8}
 
 interface

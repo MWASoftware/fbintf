@@ -1,6 +1,6 @@
 unit Test14;
 
-{$mode delphi}
+{$mode objfpc}{$H+}
 {$codepage UTF8}
 
 {Test 14: Non select procedures}

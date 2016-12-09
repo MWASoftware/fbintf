@@ -1,6 +1,6 @@
 unit Test3;
 
-{$mode delphi}
+{$mode objfpc}{$H+}
 {$codepage utf8}
 
 { Test 3: ad hoc queries}

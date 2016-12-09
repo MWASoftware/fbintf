@@ -27,7 +27,7 @@
 unit FBParamBlock;
 
 {$IFDEF FPC}
-{$mode delphi}
+{$mode objfpc}{$H+}
 {$interfaces COM}
 {$ENDIF}
 
@@ -114,7 +114,7 @@ type
 
   { TCustomParamBlock }
 
-  TCustomParamBlock<_TItem, _IItem> = class(TParamBlock)
+  generic TCustomParamBlock<_TItem; _IItem> = class(TParamBlock)
   public
     function Add(ParamType: byte): _IItem;
     function Find(ParamType: byte): _IItem;
@@ -127,7 +127,7 @@ type
 
   { TDPB }
 
-  TDPB = class (TCustomParamBlock<TDPBItem,IDPBItem>, IDPB)
+  TDPB = class (specialize TCustomParamBlock<TDPBItem,IDPBItem>, IDPB)
   public
     constructor Create;
   end;
@@ -138,7 +138,7 @@ type
 
   { TTPB }
 
-  TTPB = class (TCustomParamBlock<TTPBItem,ITPBItem>, ITPB)
+  TTPB = class (specialize TCustomParamBlock<TTPBItem,ITPBItem>, ITPB)
   public
     constructor Create;
   end;
@@ -149,7 +149,7 @@ type
 
   { TSPB }
 
-  TSPB = class (TCustomParamBlock<TSPBItem,ISPBItem>, ISPB)
+  TSPB = class (specialize TCustomParamBlock<TSPBItem,ISPBItem>, ISPB)
   public
    constructor Create;
   end;
@@ -164,7 +164,7 @@ type
 
   { TSRB }
 
-  TSRB = class (TCustomParamBlock<TSRBItem,ISRBItem>, ISRB);
+  TSRB = class (specialize TCustomParamBlock<TSRBItem,ISRBItem>, ISRB);
 
   { TSQPBItem }
 
@@ -177,7 +177,7 @@ type
 
   { TSQPB }
 
-  TSQPB = class (TCustomParamBlock<TSQPBItem,ISQPBItem>, ISQPB);
+  TSQPB = class (specialize TCustomParamBlock<TSQPBItem,ISQPBItem>, ISQPB);
 
   { TBPBItem }
 
@@ -188,7 +188,7 @@ type
 
   { TBPB }
 
-  TBPB = class (TCustomParamBlock<TBPBItem,IBPBItem>, IBPB)
+  TBPB = class (specialize TCustomParamBlock<TBPBItem,IBPBItem>, IBPB)
   public
    constructor Create;
   end;
@@ -202,14 +202,14 @@ const
 
 { TCustomParamBlock }
 
-function TCustomParamBlock<_TItem, _IItem>.Add(ParamType: byte): _IItem;
+function TCustomParamBlock.Add(ParamType: byte): _IItem;
 var Item: PParamBlockItemData;
 begin
   Item := inherited Add(ParamType);
   Result := _TItem.Create(self,Item);
 end;
 
-function TCustomParamBlock<_TItem, _IItem>.Find(ParamType: byte): _IItem;
+function TCustomParamBlock.Find(ParamType: byte): _IItem;
 var Item: PParamBlockItemData;
 begin
   Result := nil;
@@ -218,7 +218,7 @@ begin
     Result := _TItem.Create(self,Item);
 end;
 
-function TCustomParamBlock<_TItem, _IItem>.GetItems(index: integer): _IItem;
+function TCustomParamBlock.GetItems(index: integer): _IItem;
 var Item: PParamBlockItemData;
 begin
   Item := inherited getItems(index);

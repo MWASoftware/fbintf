@@ -1,6 +1,6 @@
 unit Test15;
 
-{$mode delphi}
+{$mode objfpc}{$H+}
 {$codepage UTF8}
 
 {Test 15: Blob Handling and BPBs}

@@ -27,7 +27,7 @@
 unit FBOutputBlock;
 
 {$IFDEF FPC}
-{$mode delphi}
+{$mode objfpc}{$H+}
 {$codepage UTF8}
 {$interfaces COM}
 {$ENDIF}
@@ -135,7 +135,7 @@ type
 
   { TCustomOutputBlock }
 
-  TCustomOutputBlock<_TItem,_IItem> = class(TOutputBlock)
+  generic TCustomOutputBlock<_TItem,_IItem> = class(TOutputBlock)
   public
     function getItem(index: integer): _IItem;
     function find(ItemType: byte): _IItem;
@@ -144,7 +144,7 @@ type
 
   { TOutputBlockItemGroup }
 
-  TOutputBlockItemGroup<_TItem,_IItem> = class(TOutputBlockItem)
+  generic TOutputBlockItemGroup<_TItem;_IItem> = class(TOutputBlockItem)
   public
     function GetItem(index: integer): _IItem;
     function Find(ItemType: byte): _IItem;
@@ -155,7 +155,7 @@ type
 
   { TDBInfoItem }
 
-  TDBInfoItem = class(TOutputBlockItemGroup<TDBInfoItem,IDBInfoItem>,IDBInfoItem)
+  TDBInfoItem = class(specialize TOutputBlockItemGroup<TDBInfoItem,IDBInfoItem>,IDBInfoItem)
   public
     procedure DecodeIDCluster(var ConnectionType: integer; var DBFileName, DBSiteName: string);
     procedure DecodeVersionString(var Version: byte; var VersionString: string);
@@ -165,7 +165,7 @@ type
 
   { TDBInformation }
 
-  TDBInformation = class(TCustomOutputBlock<TDBInfoItem,IDBInfoItem>, IDBInformation)
+  TDBInformation = class(specialize TCustomOutputBlock<TDBInfoItem,IDBInfoItem>, IDBInformation)
   protected
     function AddSpecialItem(BufPtr: PChar): POutputBlockItemData; override;
     procedure DoParseBuffer; override;
@@ -177,12 +177,12 @@ type
 
   { TServiceQueryResultItem }
 
-  TServiceQueryResultItem = class(TOutputBlockItemGroup<TServiceQueryResultSubItem,IServiceQueryResultSubItem>,
+  TServiceQueryResultItem = class(specialize TOutputBlockItemGroup<TServiceQueryResultSubItem,IServiceQueryResultSubItem>,
                       IServiceQueryResultItem);
 
   { TServiceQueryResults }
 
-  TServiceQueryResults = class(TCustomOutputBlock<TServiceQueryResultItem,IServiceQueryResultItem>, IServiceQueryResults)
+  TServiceQueryResults = class(specialize TCustomOutputBlock<TServiceQueryResultItem,IServiceQueryResultItem>, IServiceQueryResults)
   protected
     function AddListItem(BufPtr: PChar): POutputBlockItemData; override;
     function AddSpecialItem(BufPtr: PChar): POutputBlockItemData; override;
@@ -217,11 +217,11 @@ type
 
   { TSQLInfoResultsItem }
 
-  TSQLInfoResultsItem = class(TOutputBlockItemGroup<TSQLInfoResultsItem,ISQLInfoItem>,ISQLInfoItem);
+  TSQLInfoResultsItem = class(specialize TOutputBlockItemGroup<TSQLInfoResultsItem,ISQLInfoItem>,ISQLInfoItem);
 
   { TSQLInfoResultsBuffer }
 
-  TSQLInfoResultsBuffer = class(TCustomOutputBlock<TSQLInfoResultsItem,ISQLInfoItem>, ISQLInfoResults)
+  TSQLInfoResultsBuffer = class(specialize TCustomOutputBlock<TSQLInfoResultsItem,ISQLInfoItem>, ISQLInfoResults)
   protected
     function AddListItem(BufPtr: PChar): POutputBlockItemData; override;
     procedure DoParseBuffer; override;
@@ -235,14 +235,14 @@ uses FBMessages;
 
 { TOutputBlockItemGroup }
 
-function TOutputBlockItemGroup<_TItem,_IItem>.GetItem(index: integer): _IItem;
+function TOutputBlockItemGroup.GetItem(index: integer): _IItem;
 var P: POutputBlockItemData;
 begin
   P := inherited getItem(index);
   Result := _TItem.Create(self.Owner,P);
 end;
 
-function TOutputBlockItemGroup<_TItem,_IItem>.Find(ItemType: byte): _IItem;
+function TOutputBlockItemGroup.Find(ItemType: byte): _IItem;
 var P: POutputBlockItemData;
 begin
   P := inherited Find(ItemType);
@@ -251,14 +251,14 @@ end;
 
 { TCustomOutputBlock }
 
-function TCustomOutputBlock<_TItem,_IItem>.getItem(index: integer): _IItem;
+function TCustomOutputBlock.getItem(index: integer): _IItem;
 var P: POutputBlockItemData;
 begin
   P := inherited getItem(index);
   Result := _TItem.Create(self,P)
 end;
 
-function TCustomOutputBlock<_TItem,_IItem>.find(ItemType: byte): _IItem;
+function TCustomOutputBlock.find(ItemType: byte): _IItem;
 var P: POutputBlockItemData;
 begin
   P := inherited Find(ItemType);

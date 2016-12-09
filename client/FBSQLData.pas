@@ -62,7 +62,7 @@
 unit FBSQLData;
 
 {$IFDEF FPC}
-{$mode delphi}
+{$mode objfpc}{$H+}
 {$codepage UTF8}
 {$interfaces COM}
 {$ENDIF}

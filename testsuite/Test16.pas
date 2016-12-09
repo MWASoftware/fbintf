@@ -1,6 +1,6 @@
 unit Test16;
 
-{$mode delphi}
+{$mode objfpc}{$H+}
 {$codepage UTF8}
 
 {Test 16: Error handling}

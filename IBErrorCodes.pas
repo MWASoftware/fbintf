@@ -746,7 +746,7 @@ const
   isc_ss_out_of_bounds                 = 335545028;
   isc_missing_data_structures          = 335545029;
   isc_protect_sys_tab                  = 335545030;
-  isc_libtommath_              = 335545031;
+  isc_libtommath_generic               = 335545031;
   isc_wroblrver2                       = 335545032;
   isc_trunc_limits                     = 335545033;
   isc_info_access                      = 335545034;

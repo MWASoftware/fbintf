@@ -1,6 +1,6 @@
 unit Test5;
 
-{$mode delphi}
+{$mode objfpc}{$H+}
 {$codepage utf8}
 
 {Test 5: Update/Insert Returning and Activity Check}
