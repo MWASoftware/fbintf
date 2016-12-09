@@ -3425,7 +3425,7 @@ const
 	isc_err_base		= 335544320;
 	isc_err_factor		= 1;
 	isc_arg_end		= 0;	(* end of argument list *)
-	isc_arg_gds		= 1;	(* generic DSRI status value *)
+	isc_arg_gds		= 1;	(* DSRI status value *)
 	isc_arg_string		= 2;	(* string argument *)
 	isc_arg_cstring		= 3;	(* count & string argument *)
 	isc_arg_number		= 4;	(* numeric argument (long) *)
@@ -4144,7 +4144,7 @@ const
 	isc_ss_out_of_bounds                 = 335545028;
 	isc_missing_data_structures          = 335545029;
 	isc_protect_sys_tab                  = 335545030;
-	isc_libtommath_generic               = 335545031;
+	isc_libtommath_              = 335545031;
 	isc_wroblrver2                       = 335545032;
 	isc_trunc_limits                     = 335545033;
 	isc_info_access                      = 335545034;

@@ -27,7 +27,7 @@
 unit FB30Array;
 
 {$IFDEF FPC}
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$codepage UTF8}
 {$interfaces COM}
 {$ENDIF}
@@ -99,7 +99,7 @@ type
 
   { TSDLBlock }
 
-  TSDLBlock = class (specialize TCustomParamBlock<TSDLItem,ISDLItem>, ISDL)
+  TSDLBlock = class (TCustomParamBlock<TSDLItem,ISDLItem>, ISDL)
   public
     constructor Create;
   end;

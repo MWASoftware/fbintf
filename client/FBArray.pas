@@ -27,7 +27,7 @@
 unit FBArray;
 
 {$IFDEF FPC}
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$codepage UTF8}
 {$interfaces COM}
 {$ENDIF}
@@ -998,7 +998,8 @@ procedure TFBArray.RemoveEventHandler(Handler: TArrayEventHandler);
 var i,j : integer;
 begin
   for i := Length(FEventHandlers) - 1 downto 0 do
-    if FEventHandlers[i] = Handler then
+    if (TMethod(FEventHandlers[i]).Code = TMethod(Handler).Code) and
+        (TMethod(FEventHandlers[i]).Data = TMethod(Handler).Data) then
     begin
       for j := i to Length(FEventHandlers) - 2 do
         FEventHandlers[i] := FEventHandlers[i+1];

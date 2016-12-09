@@ -1,6 +1,6 @@
 unit Test11;
 
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$codepage utf8}
 
 {Test 11: Services API}

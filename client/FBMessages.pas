@@ -62,7 +62,7 @@
 unit FBMessages;
 
 {$IFDEF FPC}
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$codepage UTF8}
 {$ENDIF}
 
@@ -242,7 +242,7 @@ type
 function GetErrorMessage(ErrMess: TIBClientError): string;
 
 resourcestring
-  { generic strings used in code }
+  { strings used in code }
   SEOFReached = 'SEOFReached';
   SEOFInComment = 'EOF in comment detected';
   SEOFInString = 'EOF in string detected';

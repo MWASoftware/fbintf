@@ -1,6 +1,6 @@
 unit Test10;
 
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$codepage utf8}
 
 {Test 10: Event Handling}
@@ -57,7 +57,7 @@ var EventHandler: IEvents;
 begin
   EventHandler := Attachment.GetEventHandler('TESTEVENT');
   writeln(OutFile,'Call Async Wait');
-  EventHandler.AsyncWaitForEvent(@EventReport);
+  EventHandler.AsyncWaitForEvent(EventReport);
   writeln(OutFile,'Async Wait Called');
 
   writeln(OutFile,'Signal Event');
@@ -73,7 +73,7 @@ begin
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],sqlEvent);
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],sqlEvent);
   writeln(OutFile,'Call Async Wait');
-  EventHandler.AsyncWaitForEvent(@EventReport);
+  EventHandler.AsyncWaitForEvent(EventReport);
   writeln(OutFile,'Async Wait Called');
   writeln(OutFile,'Signal Event');
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],sqlEvent);
@@ -85,7 +85,7 @@ begin
 
   FEventSignalled := false;
   writeln(OutFile,'Async Wait: Test Cancel');
-  EventHandler.AsyncWaitForEvent(@EventReport);
+  EventHandler.AsyncWaitForEvent(EventReport);
   writeln(OutFile,'Async Wait Called');
   EventHandler.Cancel;
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],sqlEvent);
