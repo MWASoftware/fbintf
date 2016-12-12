@@ -21,6 +21,7 @@ begin
   if dllPathName <> '' then
   begin
     IBLibrary := DoLoadLibrary(dllPathName);
+    FOwnsIBLibrary := IBLibrary <> NilHandle;
     Exit;
   end;
 

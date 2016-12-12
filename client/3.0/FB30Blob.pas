@@ -88,7 +88,7 @@ type
 
 implementation
 
-uses FBMessages, FB30Statement, FBParamBlock;
+uses FBMessages, FB30Statement, FBParamBlock, Math;
 
 const
   sLookupBlobMetaData = 'Select F.RDB$FIELD_SUB_TYPE, F.RDB$SEGMENT_LENGTH, RDB$CHARACTER_SET_ID, F.RDB$FIELD_TYPE '+
@@ -318,7 +318,7 @@ begin
 
   LocalBuffer := PChar(@Buffer);
   repeat
-    localCount := Count;
+    localCount := Min(Count,MaxuShort);
     with Firebird30ClientAPI do
       returnCode := FBlobIntf.getSegment(StatusIntf,localCount, LocalBuffer, @BytesRead);
     SignalActivity;
@@ -336,19 +336,28 @@ begin
 end;
 
 function TFB30Blob.Write(const Buffer; Count: Longint): Longint;
+var
+  LocalBuffer: PChar;
+  localCount: uShort;
 begin
   CheckWritable;
   Result := 0;
   if Count = 0 then Exit;
 
-  with Firebird30ClientAPI do
-  begin
-    FBlobIntf.putSegment(StatusIntf,Count,@Buffer);
-    Check4DataBaseError;
-  end;
+  LocalBuffer := PChar(@Buffer);
+  repeat
+    localCount := Min(Count,MaxuShort);
+    with Firebird30ClientAPI do
+    begin
+      FBlobIntf.putSegment(StatusIntf,localCount,LocalBuffer);
+      Check4DataBaseError;
+    end;
+    Inc(LocalBuffer,localCount);
+    Inc(Result,localCount);
+    Dec(Count,localCount);
+  until Count = 0;
   ClearStringCache;
   SignalActivity;
-  Result := Count;
 end;
 
 end.
