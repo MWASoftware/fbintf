@@ -395,13 +395,13 @@ procedure TIBXSQLVAR.SetIsNull(Value: Boolean);
 begin
   if Value then
   begin
-    if not IsNullable then
-      IBError(ibxeColumnIsNotNullable,[Name]);
+    IsNullable := true;
     FNullIndicator := -1;
   end
   else
   if IsNullable then
     FNullIndicator := 0;
+  Changed;
 end;
 
 procedure TIBXSQLVAR.SetIsNullable(Value: Boolean);
@@ -648,7 +648,10 @@ begin
     for i := 0 to Count - 1 do
     with TIBXSQLVar(Column[i]) do
     begin
-      Move(FSQLData^,(FMessageBuffer + FCurMetaData.getOffset(StatusIntf,i))^,FDataLength);
+      if IsNull then
+        FillChar((FMessageBuffer + FCurMetaData.getOffset(StatusIntf,i))^,FDataLength,0)
+      else
+        Move(FSQLData^,(FMessageBuffer + FCurMetaData.getOffset(StatusIntf,i))^,FDataLength);
       Check4DataBaseError;
       if IsNullable then
       begin
@@ -713,9 +716,8 @@ begin
           else
             IBAlloc(FSQLData, 0, FDataLength)
         end;
-        SQL_VARYING: begin
+        SQL_VARYING:
           IBAlloc(FSQLData, 0, FDataLength + 2);
-        end;
        else
           IBError(ibxeUnknownSQLDataType, [sqltype and (not 1)])
       end;

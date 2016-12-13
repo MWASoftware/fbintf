@@ -468,10 +468,8 @@ procedure TIBXSQLVAR.SetIsNull(Value: Boolean);
 begin
   if Value then
   begin
-    if not IsNullable then
-      IBError(ibxeColumnIsNotNullable,[Name]);
-
-      FNullIndicator := -1;
+    IsNullable := true;
+    FNullIndicator := -1;
     Changed;
   end
   else

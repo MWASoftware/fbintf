@@ -5,6 +5,8 @@ FBINTF Change Log  version                                      (1.0-1) Tue, 06 
 2. Update Event Handling algorithm to avoid looping due to recreation of the
    event block.
 
+3. Avoid invalid XSQLDA error when the only parameter is updated to null
+
 FBINTF Change Log  version                                      (1.0-0) Tue, 06 Dec 2016 10:33:47 +0000
 
 1. Initial Release
