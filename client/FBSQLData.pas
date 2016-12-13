@@ -752,7 +752,7 @@ begin
 
   FVarString := aValue;
   SQLType := SQL_TEXT;
-  SetSQLData(PChar(FVarString),Length(aValue)+1);
+  SetSQLData(PChar(FVarString),Length(aValue));
 end;
 
 procedure TSQLVarData.Changed;
