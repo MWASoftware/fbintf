@@ -79,8 +79,8 @@ type
   private
     FEvents: TStringList;
     FAttachment: IAttachment;
+    FEventCounts: TEventCounts;
   protected
-    FFirstEvent: boolean;
     FEventBuffer: PChar;
     FEventBufferLen: integer;
     FResultBuffer: PChar;
@@ -91,6 +91,7 @@ type
     procedure CancelEvents(Force: boolean = false); virtual;
     procedure EventSignaled;
     function GetIEvents: IEvents; virtual; abstract;
+    procedure ProcessEventCounts;
   public
     constructor Create(DBAttachment: IAttachment; aMonitor: IActivityMonitor; Events: TStrings);
     destructor Destroy; override;
@@ -145,7 +146,6 @@ begin
     finally
       SetLength(EventNames,0)
     end;
-    FFirstEvent := true; {ignore first call}
   end;
 end;
 
@@ -157,25 +157,51 @@ end;
 procedure TFBEvents.EventSignaled;
 var Handler: TEventHandler;
 begin
+  Handler := nil;
   FCriticalSection.Enter;
   try
     if not FInWaitState then Exit;
     FInWaitState := false;
-    if FFirstEvent then
-    begin
-      FFirstEvent := false;
-      AsyncWaitForEvent(FEventHandler);
-      Exit; {ignore first event}
-    end;
+    ProcessEventCounts;
     if assigned(FEventHandler)  then
     begin
       Handler := FEventHandler;
       FEventHandler := nil;
     end;
   finally
-    FCriticalSection.Leave
+    FCriticalSection.Leave;
   end;
-  Handler(GetIEvents);
+  if assigned(Handler) then
+    Handler(GetIEvents);
+end;
+
+procedure TFBEvents.ProcessEventCounts;
+var P: PISC_LONG;
+    EventCountList: array[0..19] of ISC_LONG;
+    i: integer;
+    j: integer;
+begin
+  SetLength(FEventCounts,0);
+  if FResultBuffer = nil then Exit;
+
+  FillChar(EventCountList,sizeof(EventCountList),0);
+
+  with FirebirdClientAPI do
+     isc_event_counts( @EventCountList, FEventBufferLen, FEventBuffer, FResultBuffer);
+  j := 0;
+  P := EventCountList;
+  for i := 0 to FEvents.Count - 1 do
+  begin
+    if EventCountList[i] <> 0 then
+    begin
+      Inc(j);
+      SetLength(FEventCounts,j);
+      FEventCounts[j-1].EventName := FEvents[i];
+      FEventCounts[j-1].Count := P^;
+      Inc(P);
+//      writeln('Event: ',FEventCounts[j-1].EventName,' Count = ',FEventCounts[j-1].Count);
+    end;
+  end;
 end;
 
 constructor TFBEvents.Create(DBAttachment: IAttachment;
@@ -240,33 +266,8 @@ begin
 end;
 
 function TFBEvents.ExtractEventCounts: TEventCounts;
-var EventCountList, P: PISC_LONG;
-    i: integer;
-    j: integer;
 begin
-  SetLength(Result,0);
-  if FResultBuffer = nil then Exit;
-
-  GetMem(EventCountList,sizeof(ISC_LONG)*FEvents.Count);
-  try
-    with FirebirdClientAPI do
-       isc_event_counts( EventCountList, FEventBufferLen, FEventBuffer, FResultBuffer);
-    j := 0;
-    P := EventCountList;
-    for i := 0 to FEvents.Count - 1 do
-    begin
-      if EventCountList[i] <> 0 then
-      begin
-        Inc(j);
-        SetLength(Result,j);
-        Result[j-1].EventName := FEvents[i];
-        Result[j-1].Count := P^;
-        Inc(P);
-      end;
-    end;
-  finally
-    FreeMem(EventCountList);
-  end;
+  Result := FEventCounts;
 end;
 
 function TFBEvents.GetAttachment: IAttachment;

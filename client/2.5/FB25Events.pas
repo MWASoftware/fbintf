@@ -220,6 +220,7 @@ begin
   try
     if FOwner.FResultBuffer <> nil then
       Move(updated[0], FOwner.FResultBuffer[0], length);
+    writeln('Set Event');
     {$IFDEF WINDOWS}
     SetEvent(FEventHandler);
     {$ELSE}
@@ -237,6 +238,7 @@ begin
   {$ELSE}
   FEventWaiting.WaitFor(INFINITE);
   {$ENDIF}
+  writeln('Event Wait Ends');
 end;
 
 procedure TEventhandlerInterface.CancelWait;
@@ -316,7 +318,6 @@ begin
 
   FInWaitState := true;
   try
-    CreateEventBlock;
     with Firebird25ClientAPI do
        Call(isc_wait_for_event(StatusVector,@FDBHandle, FEventBufferlen,FEventBuffer,FResultBuffer));
   finally

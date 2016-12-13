@@ -285,8 +285,6 @@ constructor TFB30Events.Create(DBAttachment: TFB30Attachment; Events: TStrings);
 begin
   inherited Create(DBAttachment,DBAttachment,Events);
   FAttachmentIntf := DBAttachment.AttachmentIntf;
-  FAsyncEventCallback := TEventhandlerInterface.Create(self,'Async');
-  FEventHandlerThread := TEventHandlerThread.Create(self,FAsyncEventCallback);
   FSyncEventCallback := TEventhandlerInterface.Create(self,'Sync');
 end;
 
@@ -303,6 +301,12 @@ end;
 
 procedure TFB30Events.AsyncWaitForEvent(EventHandler: TEventHandler);
 begin
+  {Seems like we have to create a new callback object each time to avoid empty events}
+  if assigned(FEventHandlerThread) then
+    TEventHandlerThread(FEventHandlerThread).Terminate;
+  if assigned(FAsyncEventCallback) then TEventhandlerInterface(FAsyncEventCallback).release;
+  FAsyncEventCallback := TEventhandlerInterface.Create(self,'Async');
+  FEventHandlerThread := TEventHandlerThread.Create(self,FAsyncEventCallback);
   InternalAsyncWaitForEvent(EventHandler,FAsyncEventCallback);
 end;
 

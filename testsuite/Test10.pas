@@ -36,6 +36,7 @@ type
     FEventSignalled: boolean;
     procedure EventsTest(Attachment: IAttachment);
     procedure EventReport(Sender: IEvents);
+    procedure ShowEventCounts(Intf: IEvents);
   public
     function TestTitle: string; override;
     procedure RunTest(CharSet: string; SQLDialect: integer); override;
@@ -51,43 +52,67 @@ const
 
 procedure TTest10.EventsTest(Attachment: IAttachment);
 var EventHandler: IEvents;
-    EventCounts: TEventCounts;
     i: integer;
     WaitCount: integer;
 begin
+  FEventSignalled := false;
   EventHandler := Attachment.GetEventHandler('TESTEVENT');
   writeln(OutFile,'Call Async Wait');
   EventHandler.AsyncWaitForEvent(@EventReport);
   writeln(OutFile,'Async Wait Called');
-
+  sleep(500);
+  if FEventSignalled then
+  begin
+    writeln('First Event - usually ignored');
+    FEventSignalled := false;
+    EventHandler.AsyncWaitForEvent(@EventReport);
+    sleep(100);
+    if FEventSignalled then
+    begin
+      writeln(OutFile,'Unexpected Event 1');
+      Exit;
+    end;
+  end;
   writeln(OutFile,'Signal Event');
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],sqlEvent);
-  while not FEventSignalled do;
-  writeln(OutFile,'Event Signalled');
-  EventCounts := EventHandler.ExtractEventCounts;
-  for i := 0 to length(EventCounts) - 1 do
-    writeln(OutFile,'Event: ',EventCounts[i].EventName,', Count = ',EventCounts[i].Count);
+  while not FEventSignalled do Sleep(50);
+  ShowEventCounts(EventHandler);
   FEventSignalled := false;
 
   writeln(OutFile,'Two more events');
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],sqlEvent);
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],sqlEvent);
+  if FEventSignalled then
+  begin
+    writeln(OutFile,'Unexpected Event 2');
+    FEventSignalled := false
+  end;
   writeln(OutFile,'Call Async Wait');
   EventHandler.AsyncWaitForEvent(@EventReport);
   writeln(OutFile,'Async Wait Called');
+  sleep(500);
+  if FEventSignalled then
+  begin
+    writeln('Deferred Events Caught');
+    ShowEventCounts(EventHandler);
+    FEventSignalled := false;
+    EventHandler.AsyncWaitForEvent(@EventReport);
+    sleep(100);
+    if FEventSignalled then
+      writeln(OutFile,'Unexpected Event 3');
+  end;
   writeln(OutFile,'Signal Event');
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],sqlEvent);
   while not FEventSignalled do;
-  writeln(OutFile,'Event Signalled');
-  EventCounts := EventHandler.ExtractEventCounts;
-  for i := 0 to length(EventCounts) - 1 do
-    writeln(OutFile,'Event: ',EventCounts[i].EventName,', Count = ',EventCounts[i].Count);
+  ShowEventCounts(EventHandler);
 
   FEventSignalled := false;
   writeln(OutFile,'Async Wait: Test Cancel');
   EventHandler.AsyncWaitForEvent(@EventReport);
   writeln(OutFile,'Async Wait Called');
   EventHandler.Cancel;
+  writeln('Event Cancelled');
+  FEventSignalled := false;
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],sqlEvent);
   WaitCount := 100000000;
   while not FEventSignalled and (WaitCount > 0) do Dec(WaitCount);
@@ -99,15 +124,24 @@ begin
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],sqlEvent);
   EventHandler.WaitForEvent;
   writeln(OutFile,'Event Signalled');
-  EventCounts := EventHandler.ExtractEventCounts;
-  for i := 0 to length(EventCounts) - 1 do
-    writeln(OutFile,'Event: ',EventCounts[i].EventName,', Count = ',EventCounts[i].Count);
+  ShowEventCounts(EventHandler);
   EventHandler := nil;
 end;
 
 procedure TTest10.EventReport(Sender: IEvents);
 begin
   FEventSignalled := true;
+  writeln(OutFile,'Event Signalled');
+end;
+
+procedure TTest10.ShowEventCounts(Intf: IEvents);
+var
+  i: integer;
+  EventCounts: TEventCounts;
+begin
+  EventCounts := Intf.ExtractEventCounts;
+  for i := 0 to length(EventCounts) - 1 do
+    writeln(OutFile,'Event Counts: ',EventCounts[i].EventName,', Count = ',EventCounts[i].Count);
 end;
 
 function TTest10.TestTitle: string;
