@@ -1451,7 +1451,7 @@ begin
 
   Changing;
   SQLType := SQL_TIMESTAMP;
-  DataLength := SizeOf(TISC_QUAD);
+  DataLength := SizeOf(ISC_TIME) + sizeof(ISC_DATE);
   with FirebirdClientAPI do
     SQLEncodeDateTime(Value,SQLData);
   Changed;

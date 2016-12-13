@@ -102,6 +102,7 @@ begin
   EventCounts := EventHandler.ExtractEventCounts;
   for i := 0 to length(EventCounts) - 1 do
     writeln(OutFile,'Event: ',EventCounts[i].EventName,', Count = ',EventCounts[i].Count);
+  EventHandler := nil;
 end;
 
 procedure TTest10.EventReport(Sender: IEvents);

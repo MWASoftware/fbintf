@@ -84,7 +84,7 @@ type
 
     {IEvents}
     procedure WaitForEvent;
-    procedure AsyncWaitForEvent(EventHandler: TEventHandler);
+    procedure AsyncWaitForEvent(EventHandler: TEventHandler); override;
   end;
 
 implementation
@@ -258,7 +258,6 @@ begin
     if FInWaitState then
       IBError(ibxeInEventWait,[nil]);
 
-    CreateEventBlock;
     FEventHandler := EventHandler;
     ReleaseIntf;
     with Firebird30ClientAPI do

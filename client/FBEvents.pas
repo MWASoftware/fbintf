@@ -80,6 +80,7 @@ type
     FEvents: TStringList;
     FAttachment: IAttachment;
   protected
+    FFirstEvent: boolean;
     FEventBuffer: PChar;
     FEventBufferLen: integer;
     FResultBuffer: PChar;
@@ -101,6 +102,7 @@ type
     procedure Cancel;
     function ExtractEventCounts: TEventCounts;
     function GetAttachment: IAttachment;
+    procedure AsyncWaitForEvent(EventHandler: TEventHandler); virtual; abstract;
   end;
 
 
@@ -143,6 +145,7 @@ begin
     finally
       SetLength(EventNames,0)
     end;
+    FFirstEvent := true; {ignore first call}
   end;
 end;
 
@@ -158,6 +161,12 @@ begin
   try
     if not FInWaitState then Exit;
     FInWaitState := false;
+    if FFirstEvent then
+    begin
+      FFirstEvent := false;
+      AsyncWaitForEvent(FEventHandler);
+      Exit; {ignore first event}
+    end;
     if assigned(FEventHandler)  then
     begin
       Handler := FEventHandler;
@@ -246,7 +255,7 @@ begin
     P := EventCountList;
     for i := 0 to FEvents.Count - 1 do
     begin
-      if EventCountList[i] > 0 then
+      if EventCountList[i] <> 0 then
       begin
         Inc(j);
         SetLength(Result,j);

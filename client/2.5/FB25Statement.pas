@@ -469,7 +469,7 @@ begin
   if Value then
   begin
     if not IsNullable then
-      IsNullable := True;
+      IBError(ibxeColumnIsNotNullable,[Name]);
 
       FNullIndicator := -1;
     Changed;

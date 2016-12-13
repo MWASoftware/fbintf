@@ -395,7 +395,8 @@ procedure TIBXSQLVAR.SetIsNull(Value: Boolean);
 begin
   if Value then
   begin
-    IsNullable := true;
+    if not IsNullable then
+      IBError(ibxeColumnIsNotNullable,[Name]);
     FNullIndicator := -1;
   end
   else
