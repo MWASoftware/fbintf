@@ -63,7 +63,7 @@ begin
   sleep(500);
   if FEventSignalled then
   begin
-    writeln('First Event - usually ignored');
+    writeln(OutFile,'First Event - usually ignored');
     FEventSignalled := false;
     EventHandler.AsyncWaitForEvent(@EventReport);
     sleep(100);
@@ -93,7 +93,7 @@ begin
   sleep(500);
   if FEventSignalled then
   begin
-    writeln('Deferred Events Caught');
+    writeln(OutFile,'Deferred Events Caught');
     ShowEventCounts(EventHandler);
     FEventSignalled := false;
     EventHandler.AsyncWaitForEvent(@EventReport);
@@ -111,7 +111,7 @@ begin
   EventHandler.AsyncWaitForEvent(@EventReport);
   writeln(OutFile,'Async Wait Called');
   EventHandler.Cancel;
-  writeln('Event Cancelled');
+  writeln(OutFile,'Event Cancelled');
   FEventSignalled := false;
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],sqlEvent);
   WaitCount := 100000000;
