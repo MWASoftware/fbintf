@@ -1777,7 +1777,7 @@ begin
   if not IsNull then
   case SQLType of
     SQL_ARRAY:
-      result := '(Array)'; {do not localize}
+      result := SArray;
     SQL_BLOB:
       Result := Trim(FIBXSQLVAR.GetAsBlob(AsQuad,nil).GetAsString);
     else

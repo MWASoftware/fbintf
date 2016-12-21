@@ -70,7 +70,7 @@ type
 
 implementation
 
-uses FB25ClientAPI;
+uses FBAttachment, FB25ClientAPI;
 
 const
   sGetArrayMetaData = 'Select F.RDB$CHARACTER_SET_ID '+
@@ -86,6 +86,7 @@ var
   DBHandle: TISC_DB_HANDLE;
   TRHandle: TISC_TR_HANDLE;
   stmt: IStatement;
+  CharWidth: integer;
 begin
   DBHandle := (aAttachment as TFB25Attachment).Handle;
   TRHandle := (aTransaction as TFB25Transaction).Handle;
@@ -119,6 +120,13 @@ begin
         end;
       end;
     end;
+  end;
+  if (FArrayDesc.array_desc_dtype in [blr_text,blr_cstring, blr_varying]) and
+      (FCharSetID = 0) then {This really shouldn't be necessary - but it is :(}
+  with aAttachment as TFBAttachment do
+  begin
+    if HasDefaultCharSet  and FirebirdClientAPI.CharSetWidth(CharSetID,CharWidth) then
+      FArrayDesc.array_desc_length *= CharWidth;
   end;
 end;
 

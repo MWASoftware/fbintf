@@ -236,7 +236,8 @@ type
       ibxeParamBufferOverflow,
       ibxeInvalidParamCount,
       ibxeInvalidVariantType,
-      ibxeServiceRunning
+      ibxeServiceRunning,
+      ibxeUniqueRelationReqd
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;
@@ -261,6 +262,8 @@ resourcestring
   SDatabaseFilter = 'Database Files (*.fdb; *.gdb)|*.gdb; *.fdb|All files (*.*)|*.*';
   STrue = 'true';
   SFalse = 'false';
+  SArray = '(array)';
+  SBlob = '(blob)';
 
 implementation
 
@@ -429,6 +432,7 @@ resourcestring
   SInvalidParamCount = 'Invalid Parameter Count. %d expected, %d found';
   SInvalidVariantType = 'Invalid variant type';
   SServiceRunning = 'Cannot start a new service while an existing service is running';
+  SUniqueRelationReqd = 'All Output Fields must derived from the same table';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -590,7 +594,8 @@ const
     SParamBufferOverflow,
     SInvalidParamCount,
     SInvalidVariantType,
-    SServiceRunning
+    SServiceRunning,
+    SUniqueRelationReqd
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): string;

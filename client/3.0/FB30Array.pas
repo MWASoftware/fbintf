@@ -106,7 +106,7 @@ type
 
 implementation
 
-uses FB30ClientAPI, FB30Statement;
+uses FBAttachment, FB30ClientAPI, FB30Statement;
 
 const
   sGetArrayMetaData = 'Select F.RDB$FIELD_LENGTH, F.RDB$FIELD_SCALE, F.RDB$FIELD_TYPE, '+
@@ -125,6 +125,7 @@ const
 procedure TFB30ArrayMetaData.LoadMetaData(aAttachment: IAttachment;
   aTransaction: ITransaction; relationName, columnName: string);
 var stmt: IStatement;
+    CharWidth: integer;
 begin
   RelationName := AnsiUpperCase(RelationName);
   ColumnName := AnsiUpperCase(ColumnName);
@@ -151,6 +152,13 @@ begin
         FCharSetID := (aAttachment as TFB30Attachment).CharSetID;
       FCodePage := CP_NONE;
       FirebirdClientAPI.CharSetID2CodePage(FCharSetID,FCodePage);
+      if (FArrayDesc.array_desc_dtype in [blr_text,blr_cstring, blr_varying]) and
+        (FCharSetID = 0) then {This really shouldn't be necessary - but it is :(}
+      with aAttachment as TFBAttachment do
+      begin
+        if HasDefaultCharSet  and FirebirdClientAPI.CharSetWidth(CharSetID,CharWidth) then
+          FArrayDesc.array_desc_length *= CharWidth;
+      end;
       repeat
         with FArrayDesc.array_desc_bounds[Data[4].AsInteger] do
         begin

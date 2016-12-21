@@ -7,6 +7,11 @@ FBINTF Change Log  version                                      (1.0-1) Tue, 06 
 
 3. Avoid invalid XSQLDA error when the only parameter is updated to null
 
+4. Array Handling: fix problem with text arrays with character set none. When the
+   DB connection has a default character set (e.g. UTF8), an error is raised by
+   Firebird if the space allocated is not enough to allow for transliteration, even
+   though it is not required for character set none.
+
 FBINTF Change Log  version                                      (1.0-0) Tue, 06 Dec 2016 10:33:47 +0000
 
 1. Initial Release

@@ -112,7 +112,7 @@ type
     array_bound_upper  : short;
   end;
   PISC_ARRAY_BOUND     = ^TISC_ARRAY_BOUND;
-  TISC_ARRAY_DESC = record
+   TISC_ARRAY_DESC = record
     array_desc_dtype            : UChar;
     array_desc_scale            : Char;
     array_desc_length           : UShort;

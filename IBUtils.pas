@@ -84,6 +84,7 @@ function ExtractIdentifier(Dialect: Integer; Value: String): String;
 function QuoteIdentifier(Dialect: Integer; Value: String): String;
 function QuoteIdentifierIfNeeded(Dialect: Integer; Value: String): String;
 function Space2Underscore(s: string): string;
+function SQLSafeString(const s: string): string;
 
 implementation
 
@@ -236,5 +237,9 @@ begin
             Result[k] := '_';
 end;
 
+function SQLSafeString(const s: string): string;
+begin
+  Result := StringReplace(s,'''','''''',[rfReplaceAll]);
+end;
 
 end.
