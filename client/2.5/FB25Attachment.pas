@@ -35,7 +35,7 @@ interface
 
 uses
   Classes, SysUtils, IB,  FBAttachment, FB25ClientAPI, IBHeader,
-  FBParamBlock, FBOutputBlock, FBActivityMonitor;
+  FBParamBlock, FBOutputBlock, FBActivityMonitor, IBExternals;
 
 type
   { TFB25Attachment }
@@ -75,6 +75,9 @@ type
     function CreateArray(transaction: ITransaction; RelationName, ColumnName: string
       ): IArray; overload;
     function CreateArray(transaction: ITransaction; ArrayMetaData: IArrayMetaData): IArray; overload;
+    function CreateArrayMetaData(SQLType: cardinal; Scale: integer; size: cardinal;
+      acharSetID: cardinal; dimensions: cardinal; bounds: TArrayBounds
+  ): IArrayMetaData;
 
     {Database Information}
 
@@ -300,6 +303,13 @@ function TFB25Attachment.CreateArray(transaction: ITransaction;
 begin
   CheckHandle;
   Result := TFB25Array.Create(self,transaction as TFB25Transaction,ArrayMetaData);
+end;
+
+function TFB25Attachment.CreateArrayMetaData(SQLType: cardinal; Scale: integer;
+  size: cardinal; acharSetID: cardinal; dimensions: cardinal;
+  bounds: TArrayBounds): IArrayMetaData;
+begin
+  Result := TFB25ArrayMetaData.Create(SQLType,Scale,size,acharSetID,dimensions,bounds);
 end;
 
 function TFB25Attachment.GetBlobMetaData(Transaction: ITransaction; tableName,

@@ -44,7 +44,6 @@ type
 
   TFB25ArrayMetaData = class(TFBArrayMetaData,IArrayMetaData)
   private
-    FCharSetID: integer;
     FCodePage: TSystemCodePage;
   protected
     procedure LoadMetaData(aAttachment: IAttachment; aTransaction: ITransaction;

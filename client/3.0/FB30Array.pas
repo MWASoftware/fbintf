@@ -69,7 +69,6 @@ type
 
   TFB30ArrayMetaData = class(TFBArrayMetaData,IArrayMetaData)
   private
-    FCharSetID: integer;
     FCodePage: TSystemCodePage;
   protected
     procedure LoadMetaData(aAttachment: IAttachment; aTransaction: ITransaction;
@@ -139,7 +138,7 @@ begin
     if FetchNext then
     begin
       FillChar(FArrayDesc.array_desc_field_name,sizeof(FArrayDesc.array_desc_field_name),' ');
-      FillChar(FArrayDesc.array_desc_relation_name,sizeof(FArrayDesc.array_desc_field_name),' ');
+      FillChar(FArrayDesc.array_desc_relation_name,sizeof(FArrayDesc.array_desc_relation_name),' ');
       Move(columnName[1],FArrayDesc.array_desc_field_name,Length(columnName));
       Move(relationName[1],FArrayDesc.array_desc_relation_name,length(relationName));
       FArrayDesc.array_desc_length := Data[0].AsInteger;

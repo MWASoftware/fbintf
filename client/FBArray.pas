@@ -99,14 +99,19 @@ type
   { TFBArrayMetaData }
 
   TFBArrayMetaData = class(TFBInterfacedObject,IArrayMetaData)
+  private
+   function GetDType(SQLType: cardinal): UChar;
   protected
    FArrayDesc: TISC_ARRAY_DESC;
+   FCharSetID: integer;
    procedure LoadMetaData(aAttachment: IAttachment; aTransaction: ITransaction;
                relationName, columnName: string); virtual; abstract;
    function NumOfElements: integer;
   public
    constructor Create(aAttachment: IAttachment; aTransaction: ITransaction;
-     relationName, columnName: string);
+     relationName, columnName: string); overload;
+   constructor Create(SQLType: cardinal; Scale: integer; size: cardinal;
+     charSetID: cardinal; dimensions: cardinal; bounds: TArrayBounds); overload;
    function GetCodePage: TSystemCodePage; virtual; abstract;
 
   public
@@ -474,6 +479,29 @@ begin
   LoadMetaData(aAttachment,aTransaction,relationName, columnName);
 end;
 
+constructor TFBArrayMetaData.Create(SQLType: cardinal; Scale: integer;
+  size: cardinal; charSetID: cardinal; dimensions: cardinal; bounds: TArrayBounds);
+var i: integer;
+begin
+  inherited Create;
+  with FArrayDesc do
+  begin
+    array_desc_dtype := GetDType(SQLType);
+    array_desc_scale := char(Scale);
+    array_desc_length := UShort(size);
+    FillChar(array_desc_field_name,sizeof(array_desc_field_name),' ');
+    FillChar(array_desc_relation_name,sizeof(array_desc_relation_name),' ');
+    array_desc_dimensions := dimensions;
+    array_desc_flags := 0;
+    FCharSetID := charSetID;
+    for i := 0 to Length(bounds) - 1 do
+    begin
+     array_desc_bounds[i].array_bound_lower := bounds[i].LowerBound;
+     array_desc_bounds[i].array_bound_upper := bounds[i].UpperBound;
+    end;
+  end;
+end;
+
 function TFBArrayMetaData.GetSQLType: cardinal;
 begin
   case  FArrayDesc.array_desc_dtype of
@@ -546,6 +574,34 @@ begin
   begin
     Result[i].UpperBound := FArrayDesc.array_desc_bounds[i].array_bound_upper;
     Result[i].LowerBound := FArrayDesc.array_desc_bounds[i].array_bound_lower;
+  end;
+end;
+
+function TFBArrayMetaData.GetDType(SQLType: cardinal): UChar;
+begin
+  case  SQLType of
+  SQL_TEXT:
+    Result := blr_text;
+  SQL_SHORT:
+    Result :=  blr_short;
+  SQL_LONG:
+    Result := blr_long;
+  SQL_QUAD:
+    Result := blr_quad;
+  SQL_FLOAT:
+    Result := blr_float;
+  SQL_D_FLOAT:
+    Result := blr_double;
+  SQL_TIMESTAMP:
+    Result := blr_timestamp;
+  SQL_VARYING:
+    Result := blr_varying;
+  SQL_TYPE_DATE:
+    Result := blr_sql_date;
+  SQL_TYPE_TIME:
+    Result :=  blr_sql_time;
+  SQL_INT64:
+    Result := blr_int64;
   end;
 end;
 
