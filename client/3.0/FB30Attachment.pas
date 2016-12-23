@@ -48,7 +48,9 @@ type
   public
     constructor Create(DatabaseName: string; aDPB: IDPB;
           RaiseExceptionOnConnectError: boolean);
-    constructor CreateDatabase(DatabaseName: string; aDPB: IDPB; RaiseExceptionOnError: boolean);
+    constructor CreateDatabase(DatabaseName: string; aDPB: IDPB; RaiseExceptionOnError: boolean);  overload;
+    constructor CreateDatabase(sql: string; aSQLDialect: integer;
+      RaiseExceptionOnError: boolean); overload;
     destructor Destroy; override;
     property AttachmentIntf: Firebird.IAttachment read FAttachmentIntf;
 
@@ -124,7 +126,6 @@ var Param: IDPBItem;
     IsCreateDB: boolean;
 begin
   inherited Create(DatabaseName,aDPB,RaiseExceptionOnError);
-  FSQLDialect := 3;
   IsCreateDB := true;
   if aDPB <> nil then
   begin
@@ -147,6 +148,31 @@ begin
       Disconnect;
       Connect;
     end;
+  end;
+end;
+
+constructor TFB30Attachment.CreateDatabase(sql: string; aSQLDialect: integer;
+  RaiseExceptionOnError: boolean);
+var IsCreateDB: boolean;
+    info: IDBInformation;
+    ConnectionType: integer;
+    SiteName: string;
+begin
+  inherited Create('',nil,RaiseExceptionOnError);
+  FSQLDialect := aSQLDialect;
+  with Firebird30ClientAPI do
+  begin
+    FAttachmentIntf := UtilIntf.executeCreateDatabase(StatusIntf,Length(sql),
+                                       PAnsiChar(sql),aSQLDialect,@IsCreateDB);
+    if FRaiseExceptionOnConnectError then Check4DataBaseError;
+    if InErrorState then
+      FAttachmentIntf := nil;
+    info := GetDBInformation(isc_info_db_SQL_dialect);
+    FHasDefaultCharSet :=   CharSetName2CharSetID(info[0].AsString,FCharSetID) and
+                            CharSetID2CodePage(FCharSetID,FCodePage) and
+                            (FCharSetID > 1);
+    info := GetDBInformation(isc_info_db_id);
+    info[0].DecodeIDCluster(ConnectionType,FDatabaseName,SiteName);
   end;
 end;
 

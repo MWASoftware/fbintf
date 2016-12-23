@@ -48,7 +48,9 @@ type
   public
     constructor Create(DatabaseName: string; aDPB: IDPB;
       RaiseExceptionOnConnectError: boolean);
-    constructor CreateDatabase(DatabaseName: string; aDPB: IDPB; RaiseExceptionOnError: boolean);
+    constructor CreateDatabase(DatabaseName: string; aDPB: IDPB; RaiseExceptionOnError: boolean); overload;
+    constructor CreateDatabase(sql: string; aSQLDialect: integer;
+      RaiseExceptionOnError: boolean); overload;
     property Handle: TISC_DB_HANDLE read FHandle;
 
   public
@@ -130,6 +132,31 @@ begin
   begin
     Disconnect;
     Connect;
+  end;
+end;
+
+constructor TFB25Attachment.CreateDatabase(sql: string; aSQLDialect: integer;
+    RaiseExceptionOnError: boolean);
+var tr_handle: TISC_TR_HANDLE;
+    info: IDBInformation;
+    ConnectionType: integer;
+    SiteName: string;
+begin
+  inherited Create('',nil,RaiseExceptionOnError);
+  FSQLDialect := aSQLDialect;
+  tr_handle := nil;
+  with Firebird25ClientAPI do
+  begin
+    if (isc_dsql_execute_immediate(StatusVector, @FHandle, @tr_handle, 0, PChar(sql),
+                                  aSQLDialect, nil) > 0) and RaiseExceptionOnError then
+      IBDataBaseError;
+
+    info := GetDBInformation(isc_info_db_SQL_dialect);
+    FHasDefaultCharSet :=   CharSetName2CharSetID(info[0].AsString,FCharSetID) and
+                            CharSetID2CodePage(FCharSetID,FCodePage) and
+                            (FCharSetID > 1);
+    info := GetDBInformation(isc_info_db_id);
+    info[0].DecodeIDCluster(ConnectionType,FDatabaseName,SiteName);
   end;
 end;
 

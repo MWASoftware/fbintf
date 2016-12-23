@@ -88,8 +88,8 @@ type
 
     {Database connections}
     function OpenDatabase(DatabaseName: string; DPB: IDPB; RaiseExceptionOnConnectError: boolean=true): IAttachment;
-    function CreateDatabase(DatabaseName: string; DPB: IDPB; RaiseExceptionOnError: boolean=true): IAttachment;
-
+    function CreateDatabase(DatabaseName: string; DPB: IDPB; RaiseExceptionOnError: boolean=true): IAttachment; overload;
+    function CreateDatabase(sql: string; aSQLDialect: integer; RaiseExceptionOnError: boolean=true): IAttachment; overload;
     {Start Transaction against multiple databases}
     function StartTransaction(Attachments: array of IAttachment;
              TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction; overload;
@@ -270,6 +270,14 @@ function TFB30ClientAPI.CreateDatabase(DatabaseName: string; DPB: IDPB;
   RaiseExceptionOnError: boolean): IAttachment;
 begin
   Result := TFB30Attachment.CreateDatabase(DatabaseName,DPB, RaiseExceptionOnError);
+  if not Result.IsConnected then
+    Result := nil;
+end;
+
+function TFB30ClientAPI.CreateDatabase(sql: string; aSQLDialect: integer;
+  RaiseExceptionOnError: boolean): IAttachment;
+begin
+  Result := TFB30Attachment.CreateDatabase(sql,aSQLDialect, RaiseExceptionOnError);
   if not Result.IsConnected then
     Result := nil;
 end;

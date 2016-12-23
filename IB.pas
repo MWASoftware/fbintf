@@ -969,7 +969,8 @@ type
     {Database connections}
     function AllocateDPB: IDPB;
     function OpenDatabase(DatabaseName: string; DPB: IDPB; RaiseExceptionOnConnectError: boolean=true): IAttachment;
-    function CreateDatabase(DatabaseName: string; DPB: IDPB; RaiseExceptionOnError: boolean=true): IAttachment;
+    function CreateDatabase(DatabaseName: string; DPB: IDPB; RaiseExceptionOnError: boolean=true): IAttachment; overload;
+    function CreateDatabase(sql: string; aSQLDialect: integer; RaiseExceptionOnError: boolean=true): IAttachment; overload;
 
     {Start Transaction against multiple databases}
     function AllocateTPB: ITPB;
