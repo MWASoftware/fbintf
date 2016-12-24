@@ -57,6 +57,7 @@ procedure TTest4.DoQuery(Attachment: IAttachment);
 var Transaction, Transaction2, Transaction3: ITransaction;
     Statement: IStatement;
     Rows: IResultSet;
+    stats: TPerfCounters;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taRollback);
   Statement := Attachment.Prepare(Transaction,'Update Employee Set Hire_Date = ? Where EMP_NO = ?',3);
@@ -68,8 +69,11 @@ begin
   Transaction.Start(TARollback);
 
   Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
+  Statement.EnableStatistics(true);
   Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 8;
   ReportResults(Statement);
+  if Statement.GetPerfStatistics(stats) then
+    WritePerfStats(stats);
 
   Statement := Attachment.PrepareWithNamedParameters(Transaction,'INSERT INTO EMPLOYEE (EMP_NO, FIRST_NAME, LAST_NAME, PHONE_EXT, HIRE_DATE,' +
       'DEPT_NO, JOB_CODE, JOB_GRADE, JOB_COUNTRY, SALARY) '+

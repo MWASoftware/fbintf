@@ -269,6 +269,9 @@ implementation
 
 uses IBUtils, FBMessages, FB30Blob, variants,  FBArray, FB30Array;
 
+const
+  ISQL_COUNTERS = 'CurrentMemory, MaxMemory, RealTime, UserTime, Buffers, Reads, Writes, Fetches';
+
 { TIBXSQLVAR }
 
 procedure TIBXSQLVAR.Changed;
@@ -1069,31 +1072,49 @@ begin
 
   try
     with Firebird30ClientAPI do
-    case FSQLStatementType of
-    SQLSelect:
-      IBError(ibxeIsAExecuteProcedure,[]);
-
-    SQLExecProcedure:
     begin
-      FStatementIntf.execute(StatusIntf,
-                             (aTransaction as TFB30Transaction).TransactionIntf,
-                             FSQLParams.MetaData,
-                             FSQLParams.MessageBuffer,
-                             FSQLRecord.MetaData,
-                             FSQLRecord.MessageBuffer);
-      Check4DataBaseError;
+      if FCollectStatistics then
+      begin
+        UtilIntf.getPerfCounters(StatusIntf,
+                      (GetAttachment as TFB30Attachment).AttachmentIntf,
+                      ISQL_COUNTERS,@FBeforeStats);
+        Check4DataBaseError;
+      end;
 
-      Result := TResults.Create(FSQLRecord);
-      FSingleResults := true;
-    end
-    else
-      FStatementIntf.execute(StatusIntf,
-                             (aTransaction as TFB30Transaction).TransactionIntf,
-                             FSQLParams.MetaData,
-                             FSQLParams.MessageBuffer,
-                             nil,
-                             nil);
-      Check4DataBaseError;
+      case FSQLStatementType of
+      SQLSelect:
+        IBError(ibxeIsAExecuteProcedure,[]);
+
+      SQLExecProcedure:
+      begin
+        FStatementIntf.execute(StatusIntf,
+                               (aTransaction as TFB30Transaction).TransactionIntf,
+                               FSQLParams.MetaData,
+                               FSQLParams.MessageBuffer,
+                               FSQLRecord.MetaData,
+                               FSQLRecord.MessageBuffer);
+        Check4DataBaseError;
+
+        Result := TResults.Create(FSQLRecord);
+        FSingleResults := true;
+      end
+      else
+        FStatementIntf.execute(StatusIntf,
+                               (aTransaction as TFB30Transaction).TransactionIntf,
+                               FSQLParams.MetaData,
+                               FSQLParams.MessageBuffer,
+                               nil,
+                               nil);
+        Check4DataBaseError;
+      end;
+      if FCollectStatistics then
+      begin
+        UtilIntf.getPerfCounters(StatusIntf,
+                  (GetAttachment as TFB30Attachment).AttachmentIntf,
+                  ISQL_COUNTERS, @FAfterStats);
+        Check4DataBaseError;
+        FStatisticsAvailable := true;
+      end;
     end;
   finally
     if aTransaction <> FTransactionIntf then
@@ -1121,6 +1142,14 @@ begin
 
  with Firebird30ClientAPI do
  begin
+   if FCollectStatistics then
+   begin
+     UtilIntf.getPerfCounters(StatusIntf,
+                             (GetAttachment as TFB30Attachment).AttachmentIntf,
+                              ISQL_COUNTERS, @FBeforeStats);
+     Check4DataBaseError;
+   end;
+
    FResultSet := FStatementIntf.openCursor(StatusIntf,
                           (aTransaction as TFB30Transaction).TransactionIntf,
                           FSQLParams.MetaData,
@@ -1128,6 +1157,15 @@ begin
                           FSQLRecord.MetaData,
                           0);
    Check4DataBaseError;
+
+   if FCollectStatistics then
+   begin
+     UtilIntf.getPerfCounters(StatusIntf,
+                             (GetAttachment as TFB30Attachment).AttachmentIntf,
+                             ISQL_COUNTERS,@FAfterStats);
+     Check4DataBaseError;
+     FStatisticsAvailable := true;
+   end;
  end;
  Inc(FCursorSeqNo);
  FSingleResults := false;

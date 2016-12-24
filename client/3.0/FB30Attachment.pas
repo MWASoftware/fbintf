@@ -167,10 +167,9 @@ begin
     if FRaiseExceptionOnConnectError then Check4DataBaseError;
     if InErrorState then
       FAttachmentIntf := nil;
-    info := GetDBInformation(isc_info_db_SQL_dialect);
-    FHasDefaultCharSet :=   CharSetName2CharSetID(info[0].AsString,FCharSetID) and
-                            CharSetID2CodePage(FCharSetID,FCodePage) and
-                            (FCharSetID > 1);
+    FCharSetID := 0;
+    FCodePage := CP_NONE;
+    FHasDefaultCharSet := false;
     info := GetDBInformation(isc_info_db_id);
     info[0].DecodeIDCluster(ConnectionType,FDatabaseName,SiteName);
   end;

@@ -42,6 +42,7 @@ uses
   FBTransaction;
 
 type
+  TPerfStatistics = array[psCurrentMemory..psFetches] of Int64;
 
   { TFBStatement }
 
@@ -64,6 +65,10 @@ type
     FSingleResults: boolean;
     FGenerateParamNames: boolean;
     FChangeSeqNo: integer;
+    FCollectStatistics: boolean;
+    FStatisticsAvailable: boolean;
+    FBeforeStats: TPerfStatistics;
+    FAfterStats: TPerfStatistics;
     procedure CheckHandle; virtual; abstract;
     procedure CheckTransaction(aTransaction: ITransaction);
     procedure GetDsqlInfo(info_request: byte; buffer: ISQLInfoResults); overload; virtual; abstract;
@@ -105,6 +110,8 @@ type
     function GetTransaction: ITransaction;
     function GetDSQLInfo(Request: byte): ISQLInfoResults; overload;
     procedure SetRetainInterfaces(aValue: boolean); virtual;
+    procedure EnableStatistics(aValue: boolean);
+    function GetPerfStatistics(var stats: TPerfCounters): boolean;
     property ChangeSeqNo: integer read FChangeSeqNo;
     property SQLParams: ISQLParams read GetSQLParams;
     property SQLStatementType: TIBSQLStatementTypes read GetSQLStatementType;
@@ -297,6 +304,32 @@ end;
 procedure TFBStatement.SetRetainInterfaces(aValue: boolean);
 begin
   RetainInterfaces := aValue;
+end;
+
+procedure TFBStatement.EnableStatistics(aValue: boolean);
+begin
+  if FCollectStatistics <> aValue then
+  begin
+    FCollectStatistics := aValue;
+    FStatisticsAvailable := false;
+  end;
+end;
+
+function TFBStatement.GetPerfStatistics(var stats: TPerfCounters): boolean;
+begin
+  Result := FStatisticsAvailable;
+  if Result then
+  begin
+    stats[psCurrentMemory] := FAfterStats[psCurrentMemory];
+    stats[psDeltaMemory] := FAfterStats[psCurrentMemory] - FBeforeStats[psCurrentMemory];
+    stats[psMaxMemory] := FAfterStats[psMaxMemory];
+    stats[psRealTime] :=  FAfterStats[psRealTime] - FBeforeStats[psRealTime];
+    stats[psUserTime] :=  FAfterStats[psUserTime] - FBeforeStats[psUserTime];
+    stats[psReads] := FAfterStats[psReads] - FBeforeStats[psReads];
+    stats[psWrites] := FAfterStats[psWrites] - FBeforeStats[psWrites];
+    stats[psFetches] := FAfterStats[psFetches] - FBeforeStats[psFetches];
+    stats[psBuffers] :=  FAfterStats[psBuffers];
+  end;
 end;
 
 end.

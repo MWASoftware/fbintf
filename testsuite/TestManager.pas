@@ -36,6 +36,7 @@ type
     procedure WriteDBInfo(DBInfo: IDBInformation);
     procedure WriteBytes(Bytes: TByteArray);
     procedure WriteOperationCounts(Category: string; ops: TDBOperationCounts);
+    procedure WritePerfStats(stats: TPerfCounters);
     procedure CheckActivity(Attachment: IAttachment); overload;
     procedure CheckActivity(Transaction: ITransaction); overload;
   public
@@ -559,6 +560,8 @@ begin
      WriteOperationCounts('Sequential Table Scans',getOperationCounts);
    isc_info_update_count:
      WriteOperationCounts('Update Count',getOperationCounts);
+   isc_info_db_SQL_Dialect:
+     writeln('SQL Dialect = ',getAsInteger);
    else
      writeln(OutFile,'Unknown Response ',getItemType);
   end;
@@ -583,6 +586,19 @@ begin
     writeln(OutFile,'Count = ',ops[i].Count);
   end;
   writeln(OutFile);
+end;
+
+procedure TTestBase.WritePerfStats(stats: TPerfCounters);
+begin
+  writeln('Current memory = ', stats[psCurrentMemory]);
+  writeln('Delta memory = ', stats[psDeltaMemory]);
+  writeln('Max memory = ', stats[psMaxMemory]);
+  writeln('Elapsed time= ', FormatFloat('#0.000',stats[psRealTime]/1000),' sec');
+  writeln('Cpu = ', FormatFloat('#0.000',stats[psUserTime]/1000),' sec');
+  writeln('Buffers = ', stats[psBuffers]);
+  writeln('Reads = ', stats[psReads]);
+  writeln('Writes = ', stats[psWrites]);
+  writeln('Fetches = ', stats[psFetches]);
 end;
 
 procedure TTestBase.CheckActivity(Attachment: IAttachment);

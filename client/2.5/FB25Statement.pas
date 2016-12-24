@@ -242,6 +242,7 @@ type
     FSQLRecord: TIBXOUTPUTSQLDA;
     FCursor: String;               { Cursor name...}
     FCursorSeqNo: integer;
+    procedure GetPerfCounters(var counters: TPerfStatistics);
   protected
     procedure CheckHandle; override;
     procedure GetDsqlInfo(info_request: byte; buffer: ISQLInfoResults); override;
@@ -273,7 +274,8 @@ end;
 
 implementation
 
-uses IBUtils, FBMessages, FB25Blob, variants, IBErrorCodes, FBArray, FB25Array;
+uses IBUtils, FBMessages, FB25Blob, variants, IBErrorCodes, FBArray, FB25Array
+  {$IFDEF UNIX}, BaseUnix {$ENDIF};
 
 
 { TIBXSQLVAR }
@@ -834,6 +836,45 @@ end;
 
 { TFB25Statement }
 
+procedure TFB25Statement.GetPerfCounters(var counters: TPerfStatistics);
+var DBInfo: IDBInformation;
+    i: integer;
+{$IFDEF UNIX}
+  times: tms;
+{$ENDIF}
+begin
+  {$IFDEF UNIX}
+  FpTimes(times);
+  counters[psUserTime] := times.tms_utime;
+  {$ELSE}
+  counters[psUserTime] := 0;
+  {$ENDIF}
+  counters[psRealTime] := Int64(TimeStampToMSecs(DateTimeToTimeStamp(Now)));
+
+  DBInfo := GetAttachment.GetDBInformation([isc_info_reads,isc_info_writes,
+         isc_info_fetches, isc_info_num_buffers, isc_info_current_memory,
+         isc_info_max_memory]);
+  if DBInfo <> nil then
+  begin
+    for i := 0 to DBInfo.Count - 1 do
+    with DBInfo[i] do
+    case getItemType of
+    isc_info_reads:
+      counters[psReads] := AsInteger;
+    isc_info_writes:
+      counters[psWrites] := AsInteger;
+    isc_info_fetches:
+      counters[psFetches] := AsInteger;
+    isc_info_num_buffers:
+      counters[psBuffers] := AsInteger;
+    isc_info_current_memory:
+      counters[psCurrentMemory] := AsInteger;
+    isc_info_max_memory:
+      counters[psMaxMemory] := AsInteger;
+    end;
+  end;
+end;
+
 procedure TFB25Statement.CheckHandle;
 begin
   if FHandle = nil then
@@ -956,28 +997,38 @@ begin
   try
     TRHandle := (aTransaction as TFB25Transaction).Handle;
     with Firebird25ClientAPI do
-    case FSQLStatementType of
-    SQLSelect:
-      IBError(ibxeIsAExecuteProcedure,[]);
-
-    SQLExecProcedure:
     begin
-      Call(isc_dsql_execute2(StatusVector,
-                          @(TRHandle),
-                          @FHandle,
-                          SQLDialect,
-                          FSQLParams.AsXSQLDA,
-                          FSQLRecord.AsXSQLDA), True);
-      Result := TResults.Create(FSQLRecord);
-      FSingleResults := true;
-    end
-    else
-      Call(isc_dsql_execute(StatusVector,
-                           @(TRHandle),
-                           @FHandle,
-                           SQLDialect,
-                           FSQLParams.AsXSQLDA), True);
+      if FCollectStatistics then
+        GetPerfCounters(FBeforeStats);
 
+      case FSQLStatementType of
+      SQLSelect:
+        IBError(ibxeIsAExecuteProcedure,[]);
+
+      SQLExecProcedure:
+      begin
+        Call(isc_dsql_execute2(StatusVector,
+                            @(TRHandle),
+                            @FHandle,
+                            SQLDialect,
+                            FSQLParams.AsXSQLDA,
+                            FSQLRecord.AsXSQLDA), True);
+        Result := TResults.Create(FSQLRecord);
+        FSingleResults := true;
+      end
+      else
+        Call(isc_dsql_execute(StatusVector,
+                             @(TRHandle),
+                             @FHandle,
+                             SQLDialect,
+                             FSQLParams.AsXSQLDA), True);
+
+      end;
+      if FCollectStatistics then
+      begin
+        GetPerfCounters(FAfterStats);
+        FStatisticsAvailable := true;
+      end;
     end;
   finally
     if aTransaction <> FTransactionIntf then
@@ -1006,6 +1057,9 @@ begin
 
  with Firebird25ClientAPI do
  begin
+   if FCollectStatistics then
+     GetPerfCounters(FBeforeStats);
+
    TRHandle := (aTransaction as TFB25Transaction).Handle;
    Call(isc_dsql_execute2(StatusVector,
                        @(TRHandle),
@@ -1020,6 +1074,12 @@ begin
      Call(
        isc_dsql_set_cursor_name(StatusVector, @FHandle, PChar(FCursor), 0),
        True);
+   end;
+
+   if FCollectStatistics then
+   begin
+     GetPerfCounters(FAfterStats);
+     FStatisticsAvailable := true;
    end;
  end;
  Inc(FCursorSeqNo);

@@ -119,6 +119,13 @@ interface
 uses
   Classes, SysUtils, DB, FBMessages, IBExternals;
 
+const
+  {Interface version information}
+  FBIntf_Major = 1;
+  FBIntf_Minor = 0;
+  FBIntf_Release = 1;
+  FBIntf_Version = '1.0.1';
+
 {These include files are converted from the 'C' originals in the Firebird API
  and define the various constants used by the API}
 
@@ -581,6 +588,13 @@ type
     property Count: integer read getCount;
   end;
 
+
+  TPerfStats = (psCurrentMemory, psMaxMemory,
+                psRealTime, psUserTime, psBuffers,
+                psReads, psWrites, psFetches,psDeltaMemory);
+
+  TPerfCounters = array[TPerfStats] of Int64;
+
   {The IStatement interface provides access to an SQL Statement once it has been
    initially prepared. The interface is returned from the IAttachment interface.
    }
@@ -600,6 +614,8 @@ type
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
     procedure SetRetainInterfaces(aValue: boolean);
+    procedure EnableStatistics(aValue: boolean);
+    function GetPerfStatistics(var stats: TPerfCounters): boolean;
     property MetaData: IMetaData read GetMetaData;
     property SQLParams: ISQLParams read GetSQLParams;
     property SQLStatementType: TIBSQLStatementTypes read GetSQLStatementType;

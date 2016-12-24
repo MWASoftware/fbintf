@@ -65,16 +65,23 @@ end;
 procedure TTest1.RunTest(CharSet: string; SQLDialect: integer);
 var DPB: IDPB;
     Attachment: IAttachment;
-    DBInfo: IDBInformation;
-    ConType: integer;
-    DBFileName: string;
-    DBSiteName: string;
+    createSQL: string;
 begin
   writeln(OutFile,'Creating a Database with empty parameters');
   Attachment := FirebirdAPI.CreateDatabase('',nil,false);
   if Attachment = nil then
     writeln(OutFile,'Create Database fails (as expected): ',FirebirdAPI.GetStatus.GetMessage)
   else
+    Attachment.DropDatabase;
+
+  writeln(OutFile,'Creating a Database using an SQL Statement');
+  createSQL := Format('CREATE DATABASE ''%s'' USER ''%s'' PASSWORD ''%s'' DEFAULT CHARACTER SET %s',
+                      [Owner.GetNewDatabaseName, Owner.GetUserName, Owner.GetPassword, CharSet]);
+  Attachment := FirebirdAPI.CreateDatabase(createSQL,SQLDialect);
+  WriteDBInfo(Attachment.GetDBInformation([isc_info_db_id,isc_info_db_SQL_Dialect]));
+
+  writeln(OutFile,'Dropping Database');
+  if Attachment <> nil then
     Attachment.DropDatabase;
 
   writeln(OutFile,'Creating a Database with a DPD');
@@ -100,13 +107,7 @@ begin
     writeln(OutFile,'Create Database Failed');
     Exit;
   end;
-  DBInfo := Attachment.GetDBInformation([isc_info_db_id]);
-  DBInfo[0].DecodeIDCluster(ConType,DBFileName,DBSiteName);
-  writeln(OutFile,'Database ID = ', ConType,' FB = ', DBFileName, ' SN = ',DBSiteName);
-  DBInfo := Attachment.GetDBInformation([isc_info_ods_version]);
-  write(OutFile,'ODS major = ',DBInfo[0].getAsInteger);
-  DBInfo := Attachment.GetDBInformation([isc_info_ods_minor_version]);
-  writeln(OutFile,' minor = ', DBInfo[0].getAsInteger );
+  WriteDBInfo(Attachment.GetDBInformation([isc_info_db_id,isc_info_ods_version,isc_info_ods_minor_version]));
 
   {Querying Database}
   DoQuery(Attachment);
