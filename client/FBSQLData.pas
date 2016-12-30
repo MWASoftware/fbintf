@@ -519,6 +519,7 @@ const
   CommentState = 1;
   QuoteState = 2;
   ParamState = 3;
+  ArrayDimState = 4;
  {$ifdef ALLOWDIALECT3PARAMNAMES}
   ParamDefaultState = 0;
   ParamQuoteState = 1;
@@ -559,24 +560,53 @@ begin
         cNextChar := sSQL[i + 1];
       { Now act based on the current state }
       case iCurState of
-        DefaultState: begin
+        DefaultState:
+        begin
           case cCurChar of
-            '''', '"': begin
+            '''', '"':
+            begin
               cQuoteChar := cCurChar;
               iCurState := QuoteState;
             end;
-            '?', ':': begin
+            '?', ':':
+            begin
               iCurState := ParamState;
               AddToProcessedSQL('?');
             end;
-            '/': if (cNextChar = '*') then begin
+            '/': if (cNextChar = '*') then
+            begin
               AddToProcessedSQL(cCurChar);
               Inc(i);
               iCurState := CommentState;
             end;
+            '[':
+            begin
+              AddToProcessedSQL(cCurChar);
+              Inc(i);
+              iCurState := ArrayDimState;
+            end;
           end;
         end;
-        CommentState: begin
+
+        ArrayDimState:
+        begin
+          case cCurChar of
+          ':',',','0'..'9',' ',#9,#10,#13:
+            begin
+              AddToProcessedSQL(cCurChar);
+              Inc(i);
+            end;
+          else
+            begin
+              AddToProcessedSQL(cCurChar);
+              Inc(i);
+              iCurState := DefaultState;
+            end;
+          end;
+        end;
+
+        CommentState:
+        begin
           if (cNextChar = #0) then
             IBError(ibxeSQLParseError, [SEOFInComment])
           else if (cCurChar = '*') then begin

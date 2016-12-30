@@ -926,7 +926,6 @@ begin
     else
       FSQLStatementType := SQLUnknown;
 
-    { Done getting the type }
     case FSQLStatementType of
       SQLGetSegment,
       SQLPutSegment,

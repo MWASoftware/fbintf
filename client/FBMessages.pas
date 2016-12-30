@@ -408,7 +408,7 @@ resourcestring
   SPBIndexError = 'DPB Index out of range (%d)';
   SPBParamTypeError = 'Invalid Request for DPB Param Type';
   SDuplicateParamName = 'Blob or array parameter name must be unique (%s)';
-  SInvalidArrayDimensions = 'Invalid number of array dimensions {%d)';
+  SInvalidArrayDimensions = 'Invalid number of array dimensions (%d)';
   SNotAMultiDatabaseTransaction = 'This is not a multi-database transaction';
   SAttachmentListIndexError = 'Attachment List index out of range (%d)';
   SNotAnArray = 'Table Column must be an array';

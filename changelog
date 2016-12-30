@@ -19,6 +19,9 @@ FBINTF Change Log  version                                      (1.0-1) Tue, 06 
 7. Add IFirebirdAPI.CreateDatabase variant to allow execution of user provided
    CREATE DATABASE statement.
 
+8. Update SQL Statement parsing to allow for Array Dimensions. That is the ':' in
+   an array dimension is not mistaken for a named parameter prefix.
+
 FBINTF Change Log  version                                      (1.0-0) Tue, 06 Dec 2016 10:33:47 +0000
 
 1. Initial Release
