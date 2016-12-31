@@ -848,8 +848,9 @@ type
     function OpenArray(transaction: ITransaction; RelationName, ColumnName: string; ArrayID: TISC_QUAD): IArray;
     function CreateArray(transaction: ITransaction; RelationName, ColumnName: string): IArray; overload;
     function CreateArray(transaction: ITransaction; ArrayMetaData: IArrayMetaData): IArray; overload;
-    function CreateArrayMetaData(SQLType: cardinal; Scale: integer; size: cardinal;
-                  charSetID: cardinal; dimensions: cardinal; bounds: TArrayBounds): IArrayMetaData;
+    function CreateArrayMetaData(SQLType: cardinal; tableName: string; columnName: string;
+                  Scale: integer; size: cardinal; charSetID: cardinal; dimensions: cardinal;
+                  bounds: TArrayBounds): IArrayMetaData;
 
     {Database Information}
     function GetSQLDialect: integer;

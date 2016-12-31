@@ -82,8 +82,9 @@ type
     function OpenArray(transaction: ITransaction; RelationName, ColumnName: string; ArrayID: TISC_QUAD): IArray;
     function CreateArray(transaction: ITransaction; RelationName, ColumnName: string): IArray; overload;
     function CreateArray(transaction: ITransaction; ArrayMetaData: IArrayMetaData): IArray; overload;
-    function CreateArrayMetaData(SQLType: cardinal; Scale: integer; size: cardinal;
-                  aCharSetID: cardinal; dimensions: cardinal; bounds: TArrayBounds): IArrayMetaData;
+    function CreateArrayMetaData(SQLType: cardinal; tableName: string;
+      columnName: string; Scale: integer; size: cardinal; aCharSetID: cardinal;
+  dimensions: cardinal; bounds: TArrayBounds): IArrayMetaData;
 
 
     {Database Information}
@@ -348,11 +349,11 @@ begin
   Result := TFB30Array.Create(self,transaction as TFB30Transaction,ArrayMetaData);
 end;
 
-function TFB30Attachment.CreateArrayMetaData(SQLType: cardinal; Scale: integer;
-  size: cardinal; aCharSetID: cardinal; dimensions: cardinal;
+function TFB30Attachment.CreateArrayMetaData(SQLType: cardinal; tableName: string; columnName: string;
+  Scale: integer; size: cardinal; aCharSetID: cardinal; dimensions: cardinal;
   bounds: TArrayBounds): IArrayMetaData;
 begin
-  Result := TFB30ArrayMetaData.Create(SQLType,Scale,size,aCharSetID, dimensions,bounds);
+  Result := TFB30ArrayMetaData.Create(SQLType,tableName,ColumnName,Scale,size,aCharSetID, dimensions,bounds);
 end;
 
 function TFB30Attachment.GetBlobMetaData(Transaction: ITransaction; tableName,

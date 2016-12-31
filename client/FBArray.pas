@@ -110,8 +110,9 @@ type
   public
    constructor Create(aAttachment: IAttachment; aTransaction: ITransaction;
      relationName, columnName: string); overload;
-   constructor Create(SQLType: cardinal; Scale: integer; size: cardinal;
-     charSetID: cardinal; dimensions: cardinal; bounds: TArrayBounds); overload;
+   constructor Create(SQLType: cardinal; tableName: string; columnName: string;
+     Scale: integer; size: cardinal; charSetID: cardinal;
+     dimensions: cardinal; bounds: TArrayBounds); overload;
    function GetCodePage: TSystemCodePage; virtual; abstract;
 
   public
@@ -479,8 +480,9 @@ begin
   LoadMetaData(aAttachment,aTransaction,relationName, columnName);
 end;
 
-constructor TFBArrayMetaData.Create(SQLType: cardinal; Scale: integer;
-  size: cardinal; charSetID: cardinal; dimensions: cardinal; bounds: TArrayBounds);
+constructor TFBArrayMetaData.Create(SQLType: cardinal; tableName: string;
+  columnName: string; Scale: integer; size: cardinal; charSetID: cardinal;
+  dimensions: cardinal; bounds: TArrayBounds);
 var i: integer;
 begin
   inherited Create;
@@ -489,8 +491,8 @@ begin
     array_desc_dtype := GetDType(SQLType);
     array_desc_scale := char(Scale);
     array_desc_length := UShort(size);
-    FillChar(array_desc_field_name,sizeof(array_desc_field_name),' ');
-    FillChar(array_desc_relation_name,sizeof(array_desc_relation_name),' ');
+    StrPCopy(array_desc_field_name,columnName);
+    StrPCopy(array_desc_relation_name,tableName);
     array_desc_dimensions := dimensions;
     array_desc_flags := 0;
     FCharSetID := charSetID;

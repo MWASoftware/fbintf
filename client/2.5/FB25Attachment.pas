@@ -77,7 +77,8 @@ type
     function CreateArray(transaction: ITransaction; RelationName, ColumnName: string
       ): IArray; overload;
     function CreateArray(transaction: ITransaction; ArrayMetaData: IArrayMetaData): IArray; overload;
-    function CreateArrayMetaData(SQLType: cardinal; Scale: integer; size: cardinal;
+    function CreateArrayMetaData(SQLType: cardinal; tableName: string; columnName: string;
+      Scale: integer; size: cardinal;
       acharSetID: cardinal; dimensions: cardinal; bounds: TArrayBounds
   ): IArrayMetaData;
 
@@ -331,11 +332,12 @@ begin
   Result := TFB25Array.Create(self,transaction as TFB25Transaction,ArrayMetaData);
 end;
 
-function TFB25Attachment.CreateArrayMetaData(SQLType: cardinal; Scale: integer;
-  size: cardinal; acharSetID: cardinal; dimensions: cardinal;
-  bounds: TArrayBounds): IArrayMetaData;
+function TFB25Attachment.CreateArrayMetaData(SQLType: cardinal;
+  tableName: string; columnName: string; Scale: integer; size: cardinal;
+  acharSetID: cardinal; dimensions: cardinal; bounds: TArrayBounds
+  ): IArrayMetaData;
 begin
-  Result := TFB25ArrayMetaData.Create(SQLType,Scale,size,acharSetID,dimensions,bounds);
+  Result := TFB25ArrayMetaData.Create(SQLType,tableName,ColumnName,Scale,size,acharSetID,dimensions,bounds);
 end;
 
 function TFB25Attachment.GetBlobMetaData(Transaction: ITransaction; tableName,
