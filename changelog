@@ -22,6 +22,9 @@ FBINTF Change Log  version                                      (1.0-1) Tue, 06 
 8. Update SQL Statement parsing to allow for Array Dimensions. That is the ':' in
    an array dimension is not mistaken for a named parameter prefix.
 
+9. Trim function no longer applied to result of GetAsString when Character set is
+   octets.
+
 FBINTF Change Log  version                                      (1.0-0) Tue, 06 Dec 2016 10:33:47 +0000
 
 1. Initial Release

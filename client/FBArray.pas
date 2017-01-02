@@ -78,6 +78,7 @@ type
    function SQLData: PChar; override;
    function GetDataLength: cardinal; override;
    function GetCodePage: TSystemCodePage; override;
+   function getCharSetID: cardinal; override;
    procedure SetDataLength(len: cardinal); override;
    procedure SetSQLType(aValue: cardinal); override;
   public
@@ -254,6 +255,11 @@ end;
 function TFBArrayElement.GetCodePage: TSystemCodePage;
 begin
   Result := (FArray.FMetaData as TFBArrayMetaData).GetCodePage;
+end;
+
+function TFBArrayElement.getCharSetID: cardinal;
+begin
+  Result := (FArray.FMetaData as TFBArrayMetaData).GetCharSetID;
 end;
 
 procedure TFBArrayElement.SetDataLength(len: cardinal);
@@ -491,8 +497,8 @@ begin
     array_desc_dtype := GetDType(SQLType);
     array_desc_scale := char(Scale);
     array_desc_length := UShort(size);
-    StrPCopy(array_desc_field_name,columnName);
-    StrPCopy(array_desc_relation_name,tableName);
+    StrPLCopy(array_desc_field_name,columnName,sizeof(array_desc_field_name));
+    StrPLCopy(array_desc_relation_name,tableName,sizeof(array_desc_relation_name));
     array_desc_dimensions := dimensions;
     array_desc_flags := 0;
     FCharSetID := charSetID;

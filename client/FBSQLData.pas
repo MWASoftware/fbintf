@@ -117,6 +117,7 @@ type
      function SQLData: PChar; virtual; abstract;
      function GetDataLength: cardinal; virtual; abstract;
      function GetCodePage: TSystemCodePage; virtual; abstract;
+     function getCharSetID: cardinal; virtual; abstract;
      function Transliterate(s: string; CodePage: TSystemCodePage): RawByteString;
      procedure SetScale(aValue: integer); virtual;
      procedure SetDataLength(len: cardinal); virtual;
@@ -320,7 +321,7 @@ type
     function getAliasName: string;  {Alias Name of column or Column Name if not alias}
     function GetName: string; override;      {Disambiguated uppercase Field Name}
     function GetScale: integer; override;
-    function getCharSetID: cardinal;
+    function getCharSetID: cardinal; override;
     function GetIsNullable: boolean; override;
     function GetSize: cardinal;
     function GetArrayMetaData: IArrayMetaData;
@@ -1298,7 +1299,10 @@ begin
         end;
         SetString(rs, sz, str_len);
         SetCodePage(rs,GetCodePage,false);
-        Result := Trim(rs);
+        if GetCharSetID = 1 then
+          Result := rs
+        else
+          Result := TrimRight(rs);
       end;
       SQL_TYPE_DATE:
         case GetSQLDialect of
@@ -1809,7 +1813,12 @@ begin
     SQL_ARRAY:
       result := SArray;
     SQL_BLOB:
-      Result := Trim(FIBXSQLVAR.GetAsBlob(AsQuad,nil).GetAsString);
+      begin
+        if FIBXSQLVAR.CharSetID <> 1 then
+          Result := trim(FIBXSQLVAR.GetAsBlob(AsQuad,nil).GetAsString)
+        else
+          Result := FIBXSQLVAR.GetAsBlob(AsQuad,nil).GetAsString;
+      end;
     else
       Result := inherited GetAsString;
   end;
