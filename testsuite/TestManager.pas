@@ -561,7 +561,7 @@ begin
    isc_info_update_count:
      WriteOperationCounts('Update Count',getOperationCounts);
    isc_info_db_SQL_Dialect:
-     writeln('SQL Dialect = ',getAsInteger);
+     writeln(OutFile,'SQL Dialect = ',getAsInteger);
    else
      writeln(OutFile,'Unknown Response ',getItemType);
   end;
@@ -590,15 +590,15 @@ end;
 
 procedure TTestBase.WritePerfStats(stats: TPerfCounters);
 begin
-  writeln('Current memory = ', stats[psCurrentMemory]);
-  writeln('Delta memory = ', stats[psDeltaMemory]);
-  writeln('Max memory = ', stats[psMaxMemory]);
-  writeln('Elapsed time= ', FormatFloat('#0.000',stats[psRealTime]/1000),' sec');
-  writeln('Cpu = ', FormatFloat('#0.000',stats[psUserTime]/1000),' sec');
-  writeln('Buffers = ', stats[psBuffers]);
-  writeln('Reads = ', stats[psReads]);
-  writeln('Writes = ', stats[psWrites]);
-  writeln('Fetches = ', stats[psFetches]);
+  writeln(OutFile,'Current memory = ', stats[psCurrentMemory]);
+  writeln(OutFile,'Delta memory = ', stats[psDeltaMemory]);
+  writeln(OutFile,'Max memory = ', stats[psMaxMemory]);
+  writeln(OutFile,'Elapsed time= ', FormatFloat('#0.000',stats[psRealTime]/1000),' sec');
+  writeln(OutFile,'Cpu = ', FormatFloat('#0.000',stats[psUserTime]/1000),' sec');
+  writeln(OutFile,'Buffers = ', stats[psBuffers]);
+  writeln(OutFile,'Reads = ', stats[psReads]);
+  writeln(OutFile,'Writes = ', stats[psWrites]);
+  writeln(OutFile,'Fetches = ', stats[psFetches]);
 end;
 
 procedure TTestBase.CheckActivity(Attachment: IAttachment);
