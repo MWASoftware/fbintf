@@ -220,25 +220,26 @@ begin
   try
     if FOwner.FResultBuffer <> nil then
       Move(updated[0], FOwner.FResultBuffer[0], length);
-    writeln('Set Event');
-    {$IFDEF WINDOWS}
-    SetEvent(FEventHandler);
-    {$ELSE}
-    FEventWaiting.SetEvent;
-    {$ENDIF}
   finally
     FOwner.FCriticalSection.Leave
   end;
+//  writeln('Set Event');
+  {$IFDEF WINDOWS}
+  SetEvent(FEventHandler);
+  {$ELSE}
+  FEventWaiting.SetEvent;
+  {$ENDIF}
 end;
 
 procedure TEventhandlerInterface.WaitForEvent;
 begin
   {$IFDEF WINDOWS}
   WaitForSingleObject(FEventHandler,INFINITE);
+  ResetEvent(FEventHandler);
   {$ELSE}
   FEventWaiting.WaitFor(INFINITE);
   {$ENDIF}
-  writeln('Event Wait Ends');
+//  writeln('Event Wait Ends');
 end;
 
 procedure TEventhandlerInterface.CancelWait;
@@ -295,7 +296,6 @@ end;
 procedure TFB25Events.AsyncWaitForEvent(EventHandler: TEventHandler);
 var callback: pointer;
 begin
-  CreateEventBlock;
   FCriticalSection.Enter;
   try
     if FInWaitState then
