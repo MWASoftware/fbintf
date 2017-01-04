@@ -1299,10 +1299,10 @@ begin
         end;
         SetString(rs, sz, str_len);
         SetCodePage(rs,GetCodePage,false);
-        if GetCharSetID = 1 then
-          Result := rs
+        if (SQLType = SQL_TEXT) and (GetCharSetID <> 1) then
+          Result := TrimRight(rs)
         else
-          Result := TrimRight(rs);
+          Result := rs
       end;
       SQL_TYPE_DATE:
         case GetSQLDialect of
@@ -1813,12 +1813,7 @@ begin
     SQL_ARRAY:
       result := SArray;
     SQL_BLOB:
-      begin
-        if FIBXSQLVAR.CharSetID <> 1 then
-          Result := trim(FIBXSQLVAR.GetAsBlob(AsQuad,nil).GetAsString)
-        else
-          Result := FIBXSQLVAR.GetAsBlob(AsQuad,nil).GetAsString;
-      end;
+      Result := FIBXSQLVAR.GetAsBlob(AsQuad,nil).GetAsString;
     else
       Result := inherited GetAsString;
   end;
