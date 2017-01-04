@@ -195,7 +195,7 @@ begin
 {$ENDIF}
   inherited Create;
 {$IFDEF WINDOWS}
-  FEventHandler := CreateEvent(PSa,false,true,nil);
+  FEventHandler := CreateEvent(PSa,false,false,nil);
 {$ELSE}
   CreateGuid(GUID);
   FEventWaiting := TEventObject.Create(PSa,false,false,GUIDToString(GUID));
@@ -235,7 +235,6 @@ procedure TEventhandlerInterface.WaitForEvent;
 begin
   {$IFDEF WINDOWS}
   WaitForSingleObject(FEventHandler,INFINITE);
-  ResetEvent(FEventHandler);
   {$ELSE}
   FEventWaiting.WaitFor(INFINITE);
   {$ENDIF}

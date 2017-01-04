@@ -433,20 +433,20 @@
       </Unit50>
       <Unit51>
         <Filename Value="../client/3.0/FB30Events.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
         <WindowIndex Value="1"/>
         <TopLine Value="178"/>
-        <CursorPos Y="184"/>
+        <CursorPos X="52" Y="190"/>
         <UsageCount Value="16"/>
         <Loaded Value="True"/>
       </Unit51>
       <Unit52>
         <Filename Value="../client/2.5/FB25Events.pas"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <WindowIndex Value="1"/>
-        <TopLine Value="213"/>
-        <CursorPos Y="243"/>
+        <TopLine Value="216"/>
+        <CursorPos Y="238"/>
         <UsageCount Value="16"/>
         <Loaded Value="True"/>
       </Unit52>
