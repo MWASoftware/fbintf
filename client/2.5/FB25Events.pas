@@ -295,6 +295,7 @@ end;
 procedure TFB25Events.AsyncWaitForEvent(EventHandler: TEventHandler);
 var callback: pointer;
 begin
+  CreateEventBlock;
   FCriticalSection.Enter;
   try
     if FInWaitState then
