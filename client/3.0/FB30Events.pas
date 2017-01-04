@@ -180,6 +180,7 @@ procedure TEventhandlerInterface.WaitForEvent;
 begin
   {$IFDEF WINDOWS}
   WaitForSingleObject(FEventHandler,INFINITE);
+  ResetEvent(FEventHandler);
   {$ELSE}
   FEventWaiting.WaitFor(INFINITE);
   {$ENDIF}
