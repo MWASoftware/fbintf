@@ -195,7 +195,7 @@ begin
 {$ENDIF}
   inherited Create;
 {$IFDEF WINDOWS}
-  FEventHandler := CreateEvent(PSa,false,true,nil);
+  FEventHandler := CreateEvent(PSa,false,false,nil);
 {$ELSE}
   CreateGuid(GUID);
   FEventWaiting := TEventObject.Create(PSa,false,false,GUIDToString(GUID));
@@ -220,15 +220,15 @@ begin
   try
     if FOwner.FResultBuffer <> nil then
       Move(updated[0], FOwner.FResultBuffer[0], length);
-    writeln('Set Event');
-    {$IFDEF WINDOWS}
-    SetEvent(FEventHandler);
-    {$ELSE}
-    FEventWaiting.SetEvent;
-    {$ENDIF}
   finally
     FOwner.FCriticalSection.Leave
   end;
+//  writeln('Set Event');
+  {$IFDEF WINDOWS}
+  SetEvent(FEventHandler);
+  {$ELSE}
+  FEventWaiting.SetEvent;
+  {$ENDIF}
 end;
 
 procedure TEventhandlerInterface.WaitForEvent;
@@ -238,7 +238,7 @@ begin
   {$ELSE}
   FEventWaiting.WaitFor(INFINITE);
   {$ENDIF}
-  writeln('Event Wait Ends');
+//  writeln('Event Wait Ends');
 end;
 
 procedure TEventhandlerInterface.CancelWait;

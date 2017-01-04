@@ -1,6 +1,7 @@
-FBINTF Change Log  version                                       (1.0-1) Tue, 03 Jan 2017 11:45:08 +0000
+FBINTF Change Log  version                                        (1.0-1) Wed, 04 Jan 2017 16:22:57 +0000
 
-1. Limit maximum Blob segment read/write to MaxuShort
+1. Limit maximum Blob segment read/write to MaxuShort. Avoids data loss with
+   large blobs and the FB3 API.
 
 2. Update Event Handling algorithm to avoid looping due to recreation of the
    event block.
@@ -19,11 +20,17 @@ FBINTF Change Log  version                                       (1.0-1) Tue, 03
 7. Add IFirebirdAPI.CreateDatabase variant to allow execution of user provided
    CREATE DATABASE statement.
 
-8. Update SQL Statement parsing to allow for Array Dimensions. That is the ':' in
+8. Update SQL Statement parsing to allow for Array Dimensions. That is so that the ':' in
    an array dimension is not mistaken for a named parameter prefix.
 
-9. Trim function no longer applied to result of GetAsString when Character set is
-   octets.
+9. Trim function no longer applied to result of GetAsString for SQL_TEXT
+   when Character set is octets. Avoids loss of non printable characters at start of string.
+
+10. Add function GetPerfStatistics to IStatement. This returns ISQL like performance
+    statistics for the last action. Requires use of procedure IStatement.EnableStatistics
+    to enable stats gathering.
+
+11. API Version information added as constants to IB.pas
 
 FBINTF Change Log  version                                      (1.0-0) Tue, 06 Dec 2016 10:33:47 +0000
 
