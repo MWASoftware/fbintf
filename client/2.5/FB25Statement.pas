@@ -274,7 +274,7 @@ end;
 
 implementation
 
-uses IBUtils, FBMessages, FB25Blob, variants, IBErrorCodes, FBArray, FB25Array
+uses IBUtils, FBMessages, FBBlob, FB25Blob, variants, IBErrorCodes, FBArray, FB25Array
   {$IFDEF UNIX}, BaseUnix {$ENDIF};
 
 
@@ -388,6 +388,7 @@ begin
     FBlobMetaData := TFB25BlobMetaData.Create(FStatement.GetAttachment as TFB25Attachment,
                 FStatement.GetTransaction as TFB25Transaction,
                 GetRelationName,GetFieldName,GetSubType);
+  (FBlobMetaData as TFBBlobMetaData).SetCharSetID(GetCharSetID);
   Result := FBlobMetaData;
 end;
 

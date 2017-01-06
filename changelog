@@ -32,6 +32,8 @@ FBINTF Change Log  version                                          (1.0-1) Fri,
 
 11. API Version information added as constants to IB.pas
 
+12. BlobMetaData character set id should now be the same as that given by IColumnMetaData.GetCharSetID
+
 FBINTF Change Log  version                                      (1.0-0) Tue, 06 Dec 2016 10:33:47 +0000
 
 1. Initial Release
