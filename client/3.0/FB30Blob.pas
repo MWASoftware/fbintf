@@ -102,9 +102,7 @@ var stmt: IStatement;
 begin
   if FHasFullMetaData then Exit;
 
-  FCharSetID := 0;
   FSegmentSize := 80;
-  FUnconfirmedCharacterSet := false;
   if (GetColumnName <> '') and (GetRelationName <> '') then
   begin
     stmt := TFB30Statement.Create(FAttachment,FTransaction, sLookupBlobMetaData ,FAttachment.SQLDialect);
@@ -119,17 +117,16 @@ begin
           IBError(ibxeInvalidBlobMetaData,[nil]);
         FSubType := Data[0].AsInteger;
         FSegmentSize := Data[1].AsInteger;
-        FCharSetID := Data[2].AsInteger;
+        if FUnconfirmedCharacterSet then
+          FCharSetID := Data[2].AsInteger;
       end
       else
         IBError(ibxeInvalidBlobMetaData,[nil]);
 
     end;
-  end
-  else
-    FUnconfirmedCharacterSet := true;
+  end;
 
-    if (FCharSetID > 1) and FAttachment.HasDefaultCharSet then
+    if FUnconfirmedCharacterSet and (FCharSetID > 1) and FAttachment.HasDefaultCharSet then
     begin
       FCharSetID := FAttachment.CharSetID;
       FUnconfirmedCharacterSet := false;
