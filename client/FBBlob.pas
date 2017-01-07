@@ -383,11 +383,14 @@ begin
   FRelationName := RelationName;
   FColumnName := ColumnName;
   FSegmentSize := 80;
+  FUnconfirmedCharacterSet := true;
+  FCharSetID := 0;
 end;
 
 procedure TFBBlobMetaData.SetCharSetID(aValue: integer);
 begin
   FCharSetID := aValue;
+  FUnconfirmedCharacterSet := false;
 end;
 
 function TFBBlobMetaData.GetSubType: integer;

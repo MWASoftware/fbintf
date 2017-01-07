@@ -132,23 +132,20 @@ var
 begin
   if FHasFullMetaData then Exit;
 
-  FCharSetID := 0;
   FSegmentSize := 80;
-  FUnconfirmedCharacterSet := false;
   if (GetColumnName <> '') and (GetRelationName <> '') then
   begin
     with Firebird25ClientAPI do
       Call(isc_blob_lookup_desc(StatusVector,@(FAttachment.Handle),
                                             @(FTransaction.Handle),
                 PChar(AnsiUpperCase(GetRelationName)),PChar(AnsiUpperCase(GetColumnName)),@BlobDesc,@Global));
-    FCharSetID := BlobDesc.blob_desc_charset;
+    if FUnconfirmedCharacterSet then
+      FCharSetID := BlobDesc.blob_desc_charset;
     FSubType := BlobDesc.blob_desc_subtype;
     FSegmentSize := BlobDesc.blob_desc_segment_size ;
-  end
-  else
-    FUnconfirmedCharacterSet := true;
+  end;
 
-  if (FCharSetID > 1) and FAttachment.HasDefaultCharSet then
+  if FUnconfirmedCharacterSet and (FCharSetID > 1) and FAttachment.HasDefaultCharSet then
   begin
     FCharSetID := FAttachment.CharSetID;
     FUnconfirmedCharacterSet := false;
