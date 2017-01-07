@@ -267,7 +267,7 @@ end;
 
 implementation
 
-uses IBUtils, FBMessages, FB30Blob, variants,  FBArray, FB30Array;
+uses IBUtils, FBMessages, FBBLob, FB30Blob, variants,  FBArray, FB30Array;
 
 const
   ISQL_COUNTERS = 'CurrentMemory, MaxMemory, RealTime, UserTime, Buffers, Reads, Writes, Fetches';
@@ -391,6 +391,7 @@ begin
               FStatement.GetTransaction as TFB30Transaction,
               GetRelationName,GetFieldName,
               GetSubType);
+  (FBlobMetaData as TFBBlobMetaData).SetCharSetID(GetCharSetID);
   Result := FBlobMetaData;
 end;
 

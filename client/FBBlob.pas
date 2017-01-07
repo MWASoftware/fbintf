@@ -58,6 +58,7 @@ type
   public
     constructor Create(Transaction: TFBTransaction; RelationName, ColumnName: string
       );
+    procedure SetCharSetID(aValue: integer);
 
   public
     {IBlobMetaData}
@@ -382,6 +383,11 @@ begin
   FRelationName := RelationName;
   FColumnName := ColumnName;
   FSegmentSize := 80;
+end;
+
+procedure TFBBlobMetaData.SetCharSetID(aValue: integer);
+begin
+  FCharSetID := aValue;
 end;
 
 function TFBBlobMetaData.GetSubType: integer;
