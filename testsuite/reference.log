@@ -9,7 +9,7 @@ Create Database fails (as expected): I/O error during "open O_CREAT" operation f
 Error while trying to create file
 No such file or directory
 Creating a Database using an SQL Statement
-Database ID = 4 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = mint173
+Database ID = 4 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = mint18-FB3
 SQL Dialect = 3
 Dropping Database
 Creating a Database with a DPD
@@ -22,7 +22,7 @@ Count = 4
 65 = 3
 
 Creating a Database with a DPD
-Database ID = 4 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = mint173
+Database ID = 4 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = mint18-FB3
 ODS major = 12
 ODS minor = 0
 RDB$DESCRIPTION = 
@@ -283,9 +283,9 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 19710168
-Delta memory = 2656
-Max memory = 19776560
+Current memory = 19599984
+Delta memory = 2616
+Max memory = 19663560
 Elapsed time= 0.000 sec
 Cpu = 0.000 sec
 Buffers = 2048
@@ -1610,7 +1610,7 @@ Array: (0,-1: A50) (0,0: A51) (0,1: A52) (0,2: A53) (0,3: A54) (0,4: A55) (0,5: 
 
 
 Running Test 9: Database Information tests
-Database ID = 4 FB = /opt/firebird/examples/empbuild/employee.fdb SN = mint173
+Database ID = 4 FB = /opt/firebird/examples/empbuild/employee.fdb SN = mint18-FB3
 Pages =307
 Base Level = 13,4,0,3,
 Implementation = 11,7,0,3,66,1,66,
@@ -1618,10 +1618,10 @@ Reserved = 0
 ODS minor = 0
 ODS major = 12
 Page Size = 8192
-Version = 1: LI-V6.3.0.32483 Firebird 3.0
-Server Memory = 18984656
+Version = 1: LI-V6.3.1.32609 Firebird 3.0
+Server Memory = 18908760
 Forced Writes  = 1
-Max Memory  = 19023160
+Max Memory  = 18945880
 Num Buffers  = 2048
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
@@ -1693,7 +1693,7 @@ Event Counts: TESTEVENT, Count = 1
 
 Running Test 11: Services API
 Service Manager Version = 2
-Server Version = LI-V3.0.0.32483 Firebird 3.0
+Server Version = LI-V3.0.1.32609 Firebird 3.0
 Implementation = Firebird/Linux/AMD/Intel/x64
 
 Lock Directory = /tmp/firebird/
@@ -1802,7 +1802,7 @@ TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage =
 NOTES = C3 89 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 4 Codepage = 65001)
 BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
 BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
-INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 0 Codepage = 65535)
+INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 0 Codepage = 0)
 
 Connection Character Set NONE
 ROWID = 1
@@ -1810,7 +1810,7 @@ TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage =
 NOTES = C9 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 21 Codepage = 28591)
 BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 D6 C4 DC F6 E4 FC DF  (Charset Id = 53 Codepage = 1252)
 BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
-INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 0 Codepage = 65535)
+INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 0 Codepage = 0)
 
 Connection Character Set WIN1252
 ROWID = 1
@@ -1818,7 +1818,7 @@ TITLE = 42 6C 6F 62 20 54 65 73 74 20 A9 80  (Charset Id = 53 Codepage = 1252)
 NOTES = C9 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 53 Codepage = 1252)
 BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 D6 C4 DC F6 E4 FC DF  (Charset Id = 53 Codepage = 1252)
 BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 D6 C4 DC F6 E4 FC DF  (Charset Id = 53 Codepage = 1252)
-INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 0 Codepage = 65535)
+INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 0 Codepage = 0)
 
 
 
@@ -1829,7 +1829,7 @@ TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage =
 NOTES = C3 89 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 4 Codepage = 65001)
 BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
 BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
-INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 0 Codepage = 65535)
+INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 0 Codepage = 0)
 
 Init Database 2
 ROWID = 1
@@ -1837,21 +1837,21 @@ TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage =
 NOTES = C3 89 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 4 Codepage = 65001)
 BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
 BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
-INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 0 Codepage = 65535)
+INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 0 Codepage = 0)
 
 ROWID = 1
 TITLE = 44 61 74 61 62 61 73 65 31  (Charset Id = 4 Codepage = 65001)
 NOTES = C3 89 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 4 Codepage = 65001)
 BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
 BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
-INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 0 Codepage = 65535)
+INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 0 Codepage = 0)
 
 ROWID = 1
 TITLE = 44 61 74 61 62 61 73 65 32  (Charset Id = 4 Codepage = 65001)
 NOTES = C3 89 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 4 Codepage = 65001)
 BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
 BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
-INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 0 Codepage = 65535)
+INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 0 Codepage = 0)
 
 
 
