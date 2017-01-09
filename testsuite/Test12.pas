@@ -40,7 +40,7 @@ const
     'Notes VarChar(64) Character Set ISO8859_1,'+
     'BlobData Blob sub_type 1 Character Set WIN1252, '+
     'BlobData2 Blob sub_type 1 Character Set UTF8, '+
-    'InClear VarChar(16) Character Set NONE, '+
+    'InClear VarChar(16) Character Set OCTETS, '+
     'Primary Key(RowID)'+
     ')';
 

@@ -283,9 +283,9 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 19599984
+Current memory = 19598344
 Delta memory = 2616
-Max memory = 19663560
+Max memory = 19661920
 Elapsed time= 0.000 sec
 Cpu = 0.000 sec
 Buffers = 2048
@@ -1619,9 +1619,9 @@ ODS minor = 0
 ODS major = 12
 Page Size = 8192
 Version = 1: LI-V6.3.1.32609 Firebird 3.0
-Server Memory = 18908760
+Server Memory = 18908600
 Forced Writes  = 1
-Max Memory  = 18945880
+Max Memory  = 18945720
 Num Buffers  = 2048
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
@@ -1792,7 +1792,7 @@ SQLType =SQL_VARYING
 sub type = 0
 Field Name = INCLEAR
 Scale = 0
-Charset id = 0
+Charset id = 1
 Nullable
 Size = 16
 
@@ -1802,7 +1802,7 @@ TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage =
 NOTES = C3 89 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 4 Codepage = 65001)
 BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
 BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
-INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 0 Codepage = 0)
+INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
 
 Connection Character Set NONE
 ROWID = 1
@@ -1810,7 +1810,7 @@ TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage =
 NOTES = C9 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 21 Codepage = 28591)
 BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 D6 C4 DC F6 E4 FC DF  (Charset Id = 53 Codepage = 1252)
 BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
-INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 0 Codepage = 0)
+INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
 
 Connection Character Set WIN1252
 ROWID = 1
@@ -1818,7 +1818,7 @@ TITLE = 42 6C 6F 62 20 54 65 73 74 20 A9 80  (Charset Id = 53 Codepage = 1252)
 NOTES = C9 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 53 Codepage = 1252)
 BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 D6 C4 DC F6 E4 FC DF  (Charset Id = 53 Codepage = 1252)
 BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 D6 C4 DC F6 E4 FC DF  (Charset Id = 53 Codepage = 1252)
-INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 0 Codepage = 0)
+INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
 
 
 

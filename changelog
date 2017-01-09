@@ -1,4 +1,4 @@
-FBINTF Change Log  version                                               (1.0-1) Sun, 08 Jan 2017 19:23:19 +0000
+FBINTF Change Log  version                                                (1.0-1) Mon, 09 Jan 2017 11:01:57 +0000
 
 1. Limit maximum Blob segment read/write to MaxuShort. Avoids data loss with
    large blobs and the FB3 API.
