@@ -27,7 +27,7 @@
 unit FBOutputBlock;
 
 {$IFDEF FPC}
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$codepage UTF8}
 {$interfaces COM}
 {$ENDIF}
@@ -135,7 +135,7 @@ type
 
   { TCustomOutputBlock }
 
-  generic TCustomOutputBlock<_TItem,_IItem> = class(TOutputBlock)
+  TCustomOutputBlock<_TItem,_IItem> = class(TOutputBlock)
   public
     function getItem(index: integer): _IItem;
     function find(ItemType: byte): _IItem;
@@ -144,7 +144,7 @@ type
 
   { TOutputBlockItemGroup }
 
-  generic TOutputBlockItemGroup<_TItem;_IItem> = class(TOutputBlockItem)
+  TOutputBlockItemGroup<_TItem,_IItem> = class(TOutputBlockItem)
   public
     function GetItem(index: integer): _IItem;
     function Find(ItemType: byte): _IItem;
@@ -235,14 +235,14 @@ uses FBMessages;
 
 { TOutputBlockItemGroup }
 
-function TOutputBlockItemGroup.GetItem(index: integer): _IItem;
+function TOutputBlockItemGroup<_TItem,_IItem>.GetItem(index: integer): _IItem;
 var P: POutputBlockItemData;
 begin
   P := inherited getItem(index);
   Result := _TItem.Create(self.Owner,P);
 end;
 
-function TOutputBlockItemGroup.Find(ItemType: byte): _IItem;
+function TOutputBlockItemGroup<_TItem,_IItem>.Find(ItemType: byte): _IItem;
 var P: POutputBlockItemData;
 begin
   P := inherited Find(ItemType);
@@ -251,14 +251,14 @@ end;
 
 { TCustomOutputBlock }
 
-function TCustomOutputBlock.getItem(index: integer): _IItem;
+function TCustomOutputBlock<_TItem,_IItem>.getItem(index: integer): _IItem;
 var P: POutputBlockItemData;
 begin
   P := inherited getItem(index);
   Result := _TItem.Create(self,P)
 end;
 
-function TCustomOutputBlock.find(ItemType: byte): _IItem;
+function TCustomOutputBlock<_TItem,_IItem>.find(ItemType: byte): _IItem;
 var P: POutputBlockItemData;
 begin
   P := inherited Find(ItemType);

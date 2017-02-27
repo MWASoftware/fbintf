@@ -62,7 +62,7 @@
 unit FBMessages;
 
 {$IFDEF FPC}
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$codepage UTF8}
 {$ENDIF}
 

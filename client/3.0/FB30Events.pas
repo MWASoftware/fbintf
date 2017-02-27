@@ -27,7 +27,7 @@
 unit FB30Events;
 
 {$IFDEF FPC}
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$interfaces COM}
 {$ENDIF}
 
@@ -165,7 +165,7 @@ begin
   FOwner.FCriticalSection.Enter;
   try
     if FOwner.FResultBuffer <> nil then
-      Move(events[0], FOwner.FResultBuffer[0], Length);
+      Move(events^, FOwner.FResultBuffer^, Length);
   finally
     FOwner.FCriticalSection.Leave
   end;

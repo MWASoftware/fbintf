@@ -1,4 +1,8 @@
-FBINTF Change Log  version                                                    (1.0-1) Fri, 24 Feb 2017 12:17:57 +0000
+FBINTF Change Log  version            (1.0-2) tba, 24 Feb 2017 12:17:57 +0000
+
+1. Change syntax to Mode Delphi
+
+FBINTF Change Log  version            (1.0-1) Fri, 24 Feb 2017 12:17:57 +0000
 
 1. Limit maximum Blob segment read/write to MaxuShort. Avoids data loss with
    large blobs and the FB3 API.

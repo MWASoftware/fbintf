@@ -1,6 +1,6 @@
 unit Test7;
 
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$codepage utf8}
 
 {Test 7: Create and read back an Array}

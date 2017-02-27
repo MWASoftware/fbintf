@@ -1,6 +1,6 @@
 unit Test6;
 
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$codepage UTF8}
 
 {Test 6: Blob Handling}

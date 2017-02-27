@@ -34,7 +34,7 @@
 unit IBHeader;
 
 {$IFDEF FPC}
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$ENDIF}
 
 interface
@@ -1804,46 +1804,11 @@ const
 
 
 
-{$IFDEF IB5_ONLY}
-(** SQLDA_LENGTH is defined in C as a macro, but in Pascal we must defined it
-   as a function... **)
-function SQLDA_LENGTH(n: Long): Long;
-{$ENDIF}
-
 (** XSQLDA_LENGTH is defined in C as a macro, but in Pascal we must defined it
    as a function... **)
 function XSQLDA_LENGTH(n: Long): Long;
 
-(** getb, putb, putbx are all defined in C as macros.
-   Use functions and procedures for the functionality **)
-{function getb                   (p: PBSTREAM): Char;
-function putb                   (x: Char; p: PBSTREAM): Int;
-function putbx                  (x: Char; p: PBSTREAM): Int;}
-
-(*
-#define ADD_SPB_LENGTH(p, length)	{*(p)++ = (length); \
-    					 *(p)++ = (length) >> 8;}
-
-#define ADD_SPB_NUMERIC(p, data)	{*(p)++ = (data); \
-    					 *(p)++ = (data) >> 8; \
-					 *(p)++ = (data) >> 16; \
-					 *(p)++ = (data) >> 24;}
-*)
-procedure add_spb_length(var p: PChar; length: integer);
-procedure add_spb_numeric(var p: PChar; data: integer);
-
-
 implementation
-
-
-{$IFDEF IB5_ONLY}
-function SQLDA_LENGTH(n: Long): Long;
-(*  The C-macro reads like this:
-   SQLDA_LENGTH(n)         (sizeof (SQLDA) + (n-1) * sizeof (SQLVAR)) *)
-begin
-  result := sizeof(TSQLDA) + ((n - 1) * sizeof(TSQLVAR));
-end;
-{$ENDIF}
 
 
 function XSQLDA_LENGTH(n: Long): Long;
@@ -1853,49 +1818,6 @@ begin
   result := SizeOf(TXSQLDA) + ((n - 1) * SizeOf(TXSQLVAR));
 end;
 
-{function getb(p: PBSTREAM): Char;
-(*  The C-macro reads like this:
-   getb(p)	(--(p)->bstr_cnt >= 0 ? *(p)->bstr_ptr++ & 0377: BLOB_get (p)) *)
-begin
-  Dec(p^.bstr_cnt);
-  if (p^.bstr_cnt >= 0) then begin
-    result := Char(Int(p^.bstr_ptr^) and Int(0377));
-    Inc(p^.bstr_ptr);
-  end else
-    result := Char(BLOB_get(p));
-end;}
-
-//function putb(x: Char; p: PBSTREAM): Int;
-(*  The C-macro reads like this:
-   putb(x,p) ((x == '\n' || (!(--(p)->bstr_cnt))) ?      // then
-     BLOB_put (x,p) :                                    // else
-     ((int) (*(p)->bstr_ptr++ = (unsigned) (x)))) *)
-begin
-  Dec(p^.bstr_cnt);
-  if (x = Chr(Int('n') - Int('a'))) or (p^.bstr_cnt = 0) then
-    result := BLOB_put(x, p)
-  else begin
-    p^.bstr_ptr^ := Char(x);
-    result := UInt(x);
-    Inc(p^.bstr_ptr^);
-  end;
-end;
-
-function putbx(x: Char; p: PBSTREAM): Int;
-(*  The C-macro reads like this:
-   putbx(x,p) ((!(--(p)->bstr_cnt)) ?    // then
-     BLOB_put (x,p) :                    // else
-     ((int) (*(p)->bstr_ptr++ = (unsigned) (x)))) *)
-begin
-  Dec(p^.bstr_cnt);
-  if (p^.bstr_cnt = 0) then
-    result := BLOB_put(x, p)
-  else begin
-    p^.bstr_ptr^ := Char(x);
-    Inc(p^.bstr_ptr^);
-    result := UInt(x);
-  end;
-end;
 
 (*******************************************)
 (** Service manager functions             **)

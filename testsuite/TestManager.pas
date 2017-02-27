@@ -1,6 +1,6 @@
 unit TestManager;
 
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$codepage utf8}
 
 interface

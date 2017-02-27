@@ -1,6 +1,6 @@
 unit Test4;
 
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$codepage utf8}
 
 {Test 4: Update, Insert and Delete Queries}

@@ -1,6 +1,6 @@
 unit Test10;
 
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$codepage utf8}
 
 {Test 10: Event Handling}
@@ -58,14 +58,14 @@ begin
   FEventSignalled := false;
   EventHandler := Attachment.GetEventHandler('TESTEVENT');
   writeln(OutFile,'Call Async Wait');
-  EventHandler.AsyncWaitForEvent(@EventReport);
+  EventHandler.AsyncWaitForEvent(EventReport);
   writeln(OutFile,'Async Wait Called');
   sleep(500);
   if FEventSignalled then
   begin
     writeln(OutFile,'First Event - usually ignored');
     FEventSignalled := false;
-    EventHandler.AsyncWaitForEvent(@EventReport);
+    EventHandler.AsyncWaitForEvent(EventReport);
     sleep(100);
     if FEventSignalled then
     begin
@@ -88,7 +88,7 @@ begin
     FEventSignalled := false
   end;
   writeln(OutFile,'Call Async Wait');
-  EventHandler.AsyncWaitForEvent(@EventReport);
+  EventHandler.AsyncWaitForEvent(EventReport);
   writeln(OutFile,'Async Wait Called');
   sleep(500);
   if FEventSignalled then
@@ -96,7 +96,7 @@ begin
     writeln(OutFile,'Deferred Events Caught');
     ShowEventCounts(EventHandler);
     FEventSignalled := false;
-    EventHandler.AsyncWaitForEvent(@EventReport);
+    EventHandler.AsyncWaitForEvent(EventReport);
     sleep(100);
     if FEventSignalled then
       writeln(OutFile,'Unexpected Event 3');
@@ -108,7 +108,7 @@ begin
 
   FEventSignalled := false;
   writeln(OutFile,'Async Wait: Test Cancel');
-  EventHandler.AsyncWaitForEvent(@EventReport);
+  EventHandler.AsyncWaitForEvent(EventReport);
   writeln(OutFile,'Async Wait Called');
   EventHandler.Cancel;
   writeln(OutFile,'Event Cancelled');
