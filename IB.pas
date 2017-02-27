@@ -65,7 +65,7 @@ unit IB;
 {$mode delphi}
 {$codepage UTF8}
 {$interfaces COM}
-{$IF FPC_FULLVERSION < 30000 }
+{$IF defined(FPC) and (FPC_FULLVERSION < 30000) }
 {$ERROR FPC Version 3.0.0 or later is required}
 {$ENDIF}
 {$ENDIF}
@@ -166,6 +166,21 @@ type
    PGDS_QUAD            = ^TGDS_QUAD;
    PGDS__QUAD           = ^TGDS__QUAD;
    PISC_QUAD            = ^TISC_QUAD;
+
+{$IFNDEF FPC}
+const
+  CP_ACP     = 0;     // default to ANSI code page
+  CP_OEMCP   = 1;     // default to OEM (console) code page
+  CP_UTF16   = 1200;  // utf-16
+  CP_UTF16BE = 1201;  // unicodeFFFE
+  CP_UTF7    = 65000; // utf-7
+  CP_UTF8    = 65001; // utf-8
+  CP_ASCII   = 20127; // us-ascii
+  CP_NONE    = $FFFF; // rawbytestring encoding
+
+type
+  TSystemCodePage = word; {not defined in Delphi}
+{$ENDIF}
 
   TIBSQLStatementTypes =
                  (SQLUnknown, SQLSelect, SQLInsert,

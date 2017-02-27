@@ -130,7 +130,7 @@ type
   end;
   PBlob = ^TBlob;
 
-  {$IF FPC_FULLVERSION < 20700 }
+  {$IF defined(FPC) and (FPC_FULLVERSION < 20700) }
    RawByteString = string; {for backwards compatibility}
    {$ENDIF}
 

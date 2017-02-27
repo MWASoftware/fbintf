@@ -211,7 +211,10 @@ const
 
 implementation
 
-uses FBMessages, dynlibs, FB25Attachment, FB25Transaction, FB25Services, FBParamBlock,
+uses FBMessages,
+    {$IFDEF MSWINDOWS}Windows, {$ENDIF}
+    {$IFDEF FPC} Dynlibs, {$ENDIF}
+  FB25Attachment, FB25Transaction, FB25Services, FBParamBlock,
   IBUtils;
 
 { Stubs for 6.0 only functions }

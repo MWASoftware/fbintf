@@ -70,7 +70,10 @@ unit FBClientAPI;
 interface
 
 uses
-  Classes,  Dynlibs, IB, IBHeader, FBActivityMonitor, FBMessages, IBExternals;
+  Classes,
+    {$IFDEF MSWINDOWS}Windows, {$ENDIF}
+    {$IFDEF FPC} Dynlibs, {$ENDIF}
+  IB, IBHeader, FBActivityMonitor, FBMessages, IBExternals;
 
 {For Linux see result of GetFirebirdLibList method}
 {$IFDEF DARWIN}
@@ -94,7 +97,6 @@ type
 
   TFBStatus = class(TFBInterfacedObject)
   private
-    FIBCS: TRTLCriticalSection; static;
     FIBDataBaseErrorMessages: TIBDataBaseErrorMessages;
   protected
     FOwner: TFBClientAPI;
@@ -118,9 +120,6 @@ type
     FOwnsIBLibrary: boolean;
     procedure LoadIBLibrary;
   protected
-    FFBLibraryName: string; static;
-    FFBLibraryPath: string; static;
-    IBLibrary: TLibHandle; static;
     function GetProcAddr(ProcName: PChar): Pointer;
     function GetOverrideLibName: string;
     {$IFDEF UNIX}
@@ -165,15 +164,34 @@ type
     function CharSetWidth(CharSetID: integer; var Width: integer): boolean;
   end;
 
-const FirebirdClientAPI: TFBClientAPI = nil;
+var FirebirdClientAPI: TFBClientAPI = nil;
+
+{$IFNDEF FPC}
+type
+  TLibHandle = THandle;
+
+const
+  NilHandle = 0;
+  DirectorySeparator = '\';
+{$ENDIF}
+
+var
+  FFBLibraryName: string;
+  FFBLibraryPath: string;
+  IBLibrary: TLibHandle;
+  FIBCS: TRTLCriticalSection;
 
 implementation
 
 uses IBUtils, {$IFDEF Unix} initc, {$ENDIF}
+{$IFDEF FPC}
 {$IFDEF WINDOWS }
-Windows,Registry, WinDirs,
+Windows, WinDirs,
 {$ENDIF}
-SysUtils;
+{$ELSE}
+ ShlObj,
+{$ENDIF}
+Registry,SysUtils;
 
 {$IFDEF UNIX}
 {$I uloadlibrary.inc}
@@ -302,7 +320,7 @@ destructor TFBClientAPI.Destroy;
 begin
   FirebirdClientAPI := nil;
   if FOwnsIBLibrary and (IBLibrary <> NilHandle) then
-    UnloadLibrary(IBLibrary);
+    FreeLibrary(IBLibrary);
   IBLibrary := NilHandle;
   inherited Destroy;
 end;
@@ -574,16 +592,24 @@ begin
   end;
 end;
 initialization
-  TFBClientAPI.IBLibrary := NilHandle;
-  InitCriticalSection(TFBStatus.FIBCS);
+  IBLibrary := NilHandle;
+  {$IFDEF MSWINDOWS}
+  InitializeCriticalSection(FIBCS);
+  {$ELSE}
+  InitCriticalSection(FIBCS);
+  {$ENDIF}
 
 finalization
-  DoneCriticalSection(TFBStatus.FIBCS);
-  if TFBClientAPI.IBLibrary <> NilHandle then
+  {$IFDEF MSWINDOWS}
+  DeleteCriticalSection(FIBCS);
+  {$ELSE}
+  DoneCriticalSection(FIBCS);
+  {$ENDIF}
+  if IBLibrary <> NilHandle then
   begin
-    FreeLibrary(TFBClientAPI.IBLibrary);
-    TFBClientAPI.IBLibrary := NilHandle;
-    TFBClientAPI.FFBLibraryName := '';
+    FreeLibrary(IBLibrary);
+    IBLibrary := NilHandle;
+    FFBLibraryName := '';
   end;
 
 end.
