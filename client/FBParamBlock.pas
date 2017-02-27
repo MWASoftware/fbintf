@@ -158,8 +158,13 @@ type
 
   TSRBItem = class(TParamBlockItem,ISRBItem)
   public
-    function ISRBItem.SetAsString = SetAsString2;
-    function ISRBItem.SetAsByte = SetAsByte2;
+    {$IFDEF FPC}
+    procedure ISRBItem.SetAsString = SetAsString2;
+    procedure ISRBItem.SetAsByte = SetAsByte2;
+    {$ELSE}
+    procedure SetAsString(aValue: string) ;
+    procedure SetAsByte(aValue: byte);
+    {$ENDIF}
   end;
 
   { TSRB }
@@ -171,8 +176,13 @@ type
   TSQPBItem = class(TParamBlockItem,ISQPBItem)
   public
    function CopyFrom(source: TStream; count: integer): integer;
+   {$IFDEF FPC}
    procedure ISQPBItem.SetAsInteger = SetAsInteger2;
    procedure ISQPBItem.SetAsString = SetAsString2;
+   {$ELSE}
+   procedure SetAsString(aValue: string) ;
+   procedure SetAsInteger(aValue: integer);
+   {$ENDIF}
   end;
 
   { TSQPB }
@@ -183,7 +193,11 @@ type
 
   TBPBItem =  class(TParamBlockItem,IBPBItem)
   public
+   {$IFDEF FPC}
     procedure IBPBItem.SetAsInteger = SetAsInteger1;
+   {$ELSE}
+    procedure SetAsInteger(aValue: integer);
+   {$ENDIF}
   end;
 
   { TBPB }
@@ -225,6 +239,28 @@ begin
   Result := _TItem.Create(self,Item);
 end;
 
+{ TBPBItem }
+{$IFNDEF FPC}
+procedure TBPBItem.SetAsInteger(aValue: integer);
+begin
+  SetAsInteger1(aValue);
+end;
+{$ENDIF}
+
+{ TSRBItem }
+
+{$IFNDEF FPC}
+procedure TSRBItem.SetAsString(aValue: string);
+begin
+  SetAsString2(aValue);
+end;
+
+procedure TSRBItem.SetAsByte(aValue: byte);
+begin
+  SetAsByte2(aValue);
+end;
+{$ENDIF}
+
 { TSQPBItem }
 
 function TSQPBItem.CopyFrom(source: TStream; count: integer): integer;
@@ -243,6 +279,18 @@ begin
       FDataType := dtString2;
     end;
 end;
+
+{$IFNDEF FPC}
+procedure TSQPBItem.SetAsString(aValue: string);
+begin
+  SetAsString2(aValue);
+end;
+
+procedure TSQPBItem.SetAsInteger(aValue: integer);
+begin
+  SetAsInteger2(aValue);
+end;
+{$ENDIF}
 
 { TBPB }
 
