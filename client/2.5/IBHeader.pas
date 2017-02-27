@@ -564,7 +564,7 @@ Tisc_encode_timestamp = procedure (tm_date                  : PCTimeStructure;
 Tisc_event_block = function     (event_buffer               : PPChar;
 				 result_buffer              : PPChar;
 				 id_count                   : UShort;
-         event_list : array of PChar):ISC_LONG;
+                                 event_list : array of const):ISC_LONG;
                                  cdecl;
 
 Tisc_event_counts = procedure   (status_vector             : PISC_LONG;
