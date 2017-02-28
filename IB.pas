@@ -200,6 +200,7 @@ type
    block interfaces}
 
   IParameterBlock<_IItem> = interface
+    ['{ac603c57-d993-45da-bd15-56f29ba5af55}']
     function getCount: integer;
     function Add(ParamType: byte): _IItem;
     function getItems(index: integer): _IItem;
@@ -213,6 +214,7 @@ type
    different parameter block items }
 
   IParameterBlockItem = interface
+    ['{53b23f7b-abda-46a5-9aa5-07bd5e723266}']
     function getParamType: byte;
     function getAsInteger: integer;
     function getAsString: string;
@@ -234,6 +236,7 @@ type
    }
 
   IStatus = interface
+    ['{34167722-af38-4831-b08a-93162d58ede3}']
     function GetIBErrorCode: Long;
     function Getsqlcode: Long;
     function GetMessage: string;
@@ -253,6 +256,7 @@ type
   TArrayBounds = array of TArrayBound;
 
   IArrayMetaData = interface
+    ['{7dd0aea4-59af-4c2a-b958-565d5025c489}']
     function GetSQLType: cardinal;
     function GetSQLTypeName: string;
     function GetScale: integer;
@@ -284,6 +288,7 @@ type
   TArrayEventHandler = procedure(Sender: IArray; Reason: TArrayEventReason) of object;
 
   IArray = interface(IArrayMetaData)
+    ['{631c6bb1-fb49-44fb-a64a-c49859632b88}']
     function GetArrayID: TISC_QUAD;
     procedure Clear;
     function IsEmpty: boolean;
@@ -326,6 +331,7 @@ type
   }
 
   IBlobMetaData = interface
+    ['{575f3c61-bb33-46a5-8975-bb7d1b6e37cc}']
     function GetSubType: integer;
     function GetCharSetID: cardinal;
     function GetCodePage: TSystemCodePage;
@@ -336,9 +342,13 @@ type
 
   {The Blob Parameter block is used to select a Blob Filter}
 
-  IBPBItem = interface (IParameterBlockItem) end;
+  IBPBItem = interface (IParameterBlockItem)
+    ['{660822a5-3114-4c16-b6cb-c1a7b2aba70d}']
+  end;
 
-  IBPB = IParameterBlock<IBPBItem>;
+  IBPB = interface(IParameterBlock<IBPBItem>)
+    ['{e0cb9eb5-17f7-4416-b7d1-3cddd1dfca76}']
+  end;
 
   { The Blob Interface provides access to a blob data item.
 
@@ -352,6 +362,7 @@ type
   TBlobType = (btSegmented,btStream);
 
   IBlob = interface(IBlobMetaData)
+    ['{3090a145-7780-442b-b15b-efd4568b8611}']
     function GetBPB: IBPB;
     procedure Cancel;
     procedure Close;
@@ -381,6 +392,7 @@ type
   { IColumnMetaData }
 
   IColumnMetaData = interface
+    ['{c222e6c3-53c1-469f-9e05-0a5c3ef232d8}']
     function GetIndex: integer;
     function GetSQLType: cardinal;
     function GetSQLTypeName: string;
@@ -413,6 +425,7 @@ type
   { IMetaData }
 
   IMetaData = interface
+    ['{4dafdbb6-0d36-4f1f-9c95-8b132804b965}']
     function getCount: integer;
     function getColumnMetaData(index: integer): IColumnMetaData;
     function GetUniqueRelationName: string; {Non empty if all columns come from the same table}
@@ -436,6 +449,7 @@ type
 
 
   ISQLData = interface(IColumnMetaData)
+    ['{3f493e31-7e3f-4606-a07c-b210b9e3619d}']
     function GetAsBoolean: boolean;
     function GetAsCurrency: Currency;
     function GetAsInt64: Int64;
@@ -480,6 +494,7 @@ type
   }
 
   IResults = interface
+    ['{e836b2bb-93d1-4bbf-a8eb-7ce535de3bb5}']
    function getCount: integer;
    function GetTransaction: ITransaction;
    function ByName(Idx: String): ISQLData;
@@ -496,6 +511,7 @@ type
     in turn, used to access the data returned by each field of the current row.
   }
   IResultSet = interface(IResults)
+    ['{0ae4979b-7857-4e8c-8918-ec6f155b51a0}']
     function FetchNext: boolean;
     function GetCursorName: string;
     function IsEof: boolean;
@@ -518,6 +534,7 @@ type
   }
 
   ISQLParam = interface
+    ['{b22b4578-6d41-4807-a9a9-d2ec8d1d5a14}']
     function GetIndex: integer;
     function GetSQLType: cardinal;
     function GetSQLTypeName: string;
@@ -594,6 +611,7 @@ type
   }
 
   ISQLParams = interface
+    ['{c6d95ac7-b2b7-461b-b890-afef0acbb077}']
     function getCount: integer;
     function getSQLParam(index: integer): ISQLParam;
     function ByName(Idx: String): ISQLParam ;
@@ -615,6 +633,7 @@ type
    }
 
   IStatement = interface
+    ['{a260576d-a07d-4a66-b02d-1b72543fd7cf}']
     function GetMetaData: IMetaData;  {Output Metadata}
     function GetSQLParams: ISQLParams;{Statement Parameters}
     function GetPlan: String;
@@ -647,9 +666,13 @@ type
    found in the Interbase 6.0 API Guide.
   }
 
-  ITPBItem = interface(IParameterBlockItem) end;
+  ITPBItem = interface(IParameterBlockItem)
+    ['{544c1f2b-7c12-4a87-a4a5-face7ea72671}']
+  end;
 
-  ITPB = IParameterBlock<ITPBItem>;
+  ITPB = interface(IParameterBlock<ITPBItem>)
+    ['{7369b0ff-defe-437b-81fe-19b211d42d25}']
+  end;
 
   {The ITransactionAction interface provides access to a Transaction once it
    has been initially started. After a Commit or Rollback, a transaction
@@ -663,6 +686,7 @@ type
   TTransactionCompletion = TARollback.. TACommit;
 
   ITransaction = interface
+    ['{30928d0e-a9d7-4c61-b7cf-14f4f38abe2a}']
     function getTPB: ITPB;
     procedure Start(DefaultCompletion: TTransactionCompletion=taCommit);
     function GetInTransaction: boolean;
@@ -701,6 +725,7 @@ type
   { IEvents }
 
   IEvents = interface
+    ['{6a0be233-ed08-4524-889c-2e45d0c20e5f}']
     procedure GetEvents(EventNames: TStrings);
     procedure SetEvents(EventNames: TStrings); overload;
     procedure SetEvents(EventName: string); overload;
@@ -734,6 +759,7 @@ type
   TDBOperationCounts = array of TDBOperationCount;
 
   IDBInfoItem = interface
+    ['{eeb97b51-ec0f-473f-9f75-c1721f055fcb}']
     function getItemType: byte;
     function getSize: integer;
     procedure getRawBytes(var Buffer);
@@ -758,6 +784,7 @@ type
   { IDBInformation }
 
   IDBInformation = interface
+    ['{7ac6777f-f0a9-498a-9f5c-4a57a554df81}']
     function GetCount: integer;
     function GetItem(index: integer): IDBInfoItem;
     function Find(ItemType: byte): IDBInfoItem;
@@ -777,9 +804,13 @@ type
    found in the Interbase 6.0 API Guide.
    }
 
-  IDPBItem = interface(IParameterBlockItem) end;
+  IDPBItem = interface(IParameterBlockItem)
+    ['{123d4ad0-087a-4cd1-a344-1b3d03b30673}']
+  end;
 
-  IDPB = IParameterBlock<IDPBItem>;
+  IDPB = interface(IParameterBlock<IDPBItem>)
+    ['{e676067b-1cf4-4eba-9256-9724f57e0d16}']
+  end;
 
   {The IAttachment interface provides access to a Database Connection. It may be
    used to:
@@ -809,6 +840,7 @@ type
   { IAttachment }
 
   IAttachment = interface
+    ['{466e9b67-9def-4807-b3e7-e08a35e7185c}']
     function getDPB: IDPB;
     function AllocateBPB: IBPB;
     procedure Connect;
@@ -890,9 +922,13 @@ type
 
   }
 
-  ISPBItem = interface(IParameterBlockItem) end;
+  ISPBItem = interface(IParameterBlockItem)
+    ['{5d08ae2b-4519-41bd-8b40-97cd451c3f6a}']
+  end;
 
-  ISPB = IParameterBlock<ISPBItem>;
+  ISPB = interface(IParameterBlock<ISPBItem>)
+    ['{2c5836fd-41ed-4426-9b7d-5af580ec2659}']
+  end;
 
   {Service Query Parameter Block (SQPB).
 
@@ -901,10 +937,13 @@ type
   }
 
   ISQPBItem = interface(IParameterBlockItem)
+    ['{b07841a6-33b3-47f0-b5a2-028cbc86dc97}']
     function CopyFrom(source: TStream; count: integer): integer;
   end;
 
-  ISQPB = IParameterBlock<ISQPBItem>;
+  ISQPB = interface(IParameterBlock<ISQPBItem>)
+    ['{8553e66b-ee62-498b-8431-dff030211447}']
+  end;
 
   {Service Request Block (SRB).
 
@@ -918,9 +957,13 @@ type
 
   }
 
-  ISRBItem = interface(IParameterBlockItem) end;
+  ISRBItem = interface(IParameterBlockItem)
+    ['{47ec790e-f265-4b30-9dcd-261e51677245}']
+   end;
 
-  ISRB = IParameterBlock<ISRBItem>;
+  ISRB = interface(IParameterBlock<ISRBItem>)
+    ['{9f2e204f-3c33-4e44-90f9-9135e95dafb9}']
+  end;
 
   {The Service Query Results Interface.
 
@@ -938,6 +981,7 @@ type
   }
 
   IServiceQueryResultSubItem = interface
+    ['{8a4c381e-9923-4cc9-a96b-553729248640}']
     function getItemType: byte;
     function getSize: integer;
     procedure getRawBytes(var Buffer);
@@ -951,6 +995,7 @@ type
   end;
 
   IServiceQueryResultItem = interface(IServiceQueryResultSubItem)
+    ['{b2806886-206c-4024-8df9-5fe0a7630a5e}']
     function getCount: integer;
     function getItem(index: integer): IServiceQueryResultSubItem;
     function find(ItemType: byte): IServiceQueryResultSubItem;
@@ -959,6 +1004,7 @@ type
   end;
 
   IServiceQueryResults = interface
+    ['{8fbbef7d-fe03-4409-828a-a787d34ef531}']
     function getCount: integer;
     function getItem(index: integer): IServiceQueryResultItem;
     function find(ItemType: byte): IServiceQueryResultItem;
@@ -977,6 +1023,7 @@ type
   { IServiceManager }
 
   IServiceManager = interface
+    ['{905b587d-1e1f-4e40-a3f8-a3519f852e48}']
     function getSPB: ISPB;
     function getServerName: string;
     procedure Attach;
@@ -998,6 +1045,7 @@ type
   }
 
   IFirebirdAPI = interface
+    ['{edeee691-c8d3-4dcf-a780-cd7e432821d5}']
     {Database connections}
     function AllocateDPB: IDPB;
     function OpenDatabase(DatabaseName: string; DPB: IDPB; RaiseExceptionOnConnectError: boolean=true): IAttachment;
