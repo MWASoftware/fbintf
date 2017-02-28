@@ -97,7 +97,7 @@ type
     function GetEventHandler(Event: string): IEvents; overload;
 
     function GetSQLDialect: integer;
-    function OpenBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob; virtual; abstract; overload;
+    function OpenBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob; overload; virtual; abstract;
     function OpenBlob(transaction: ITransaction; Field: ISQLData; BPB: IBPB=nil): IBlob; overload;
     property SQLDialect: integer read FSQLDialect;
     property HasDefaultCharSet: boolean read FHasDefaultCharSet;
@@ -133,19 +133,19 @@ begin
   begin
     DPBItem :=  aDPB.Find(isc_dpb_user_name);
     if DPBItem <> nil then
-      CreateParams += ' USER ''' + DPBItem.AsString + '''';
+      CreateParams := CreateParams + ' USER ''' + DPBItem.AsString + '''';
 
     DPBItem :=  aDPB.Find(isc_dpb_password);
     if DPBItem <> nil then
-      CreateParams += ' Password ''' + DPBItem.AsString + '''';
+      CreateParams := CreateParams + ' Password ''' + DPBItem.AsString + '''';
 
     DPBItem :=  aDPB.Find(isc_dpb_page_size);
     if DPBItem <> nil then
-      CreateParams += ' PAGE_SIZE ' + DPBItem.AsString;
+      CreateParams := CreateParams + ' PAGE_SIZE ' + DPBItem.AsString;
 
     DPBItem :=  aDPB.Find(isc_dpb_lc_ctype);
     if DPBItem <> nil then
-      CreateParams += ' DEFAULT CHARACTER SET ' + DPBItem.AsString;
+      CreateParams := CreateParams + ' DEFAULT CHARACTER SET ' + DPBItem.AsString;
 
     DPBItem :=  aDPB.Find(isc_dpb_sql_dialect);
     if DPBItem <> nil then

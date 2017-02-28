@@ -921,10 +921,11 @@ begin
       FractionText := IntToStr(abs(Value mod Scaling));
       for i := Length(FractionText) to -aScale -1 do
         PadText := '0' + PadText;
+      with {$IFDEF FPC} DefaultFormatSettings {$ELSE} FormatSettings {$ENDIF} do
       if Value < 0 then
-        CurrText := '-' + IntToStr(Abs(Value div Scaling)) + DefaultFormatSettings.DecimalSeparator + PadText + FractionText
+        CurrText := '-' + IntToStr(Abs(Value div Scaling)) + DecimalSeparator + PadText + FractionText
       else
-        CurrText := IntToStr(Abs(Value div Scaling)) + DefaultFormatSettings.DecimalSeparator + PadText + FractionText;
+        CurrText := IntToStr(Abs(Value div Scaling)) + DecimalSeparator + PadText + FractionText;
       try
         result := StrToCurr(CurrText);
       except

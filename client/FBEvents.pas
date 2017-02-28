@@ -189,7 +189,7 @@ begin
   with FirebirdClientAPI do
      isc_event_counts( @EventCountList, FEventBufferLen, FEventBuffer, FResultBuffer);
   j := 0;
-  P := EventCountList;
+  P := @EventCountList;
   for i := 0 to FEvents.Count - 1 do
   begin
     if EventCountList[i] <> 0 then
