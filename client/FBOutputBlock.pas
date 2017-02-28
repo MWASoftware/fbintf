@@ -104,6 +104,13 @@ type
     property Items[index: integer]: POutputBlockItemData read getItem; default;
   end;
 
+  {$IFNDEF FPC}
+  {$IFDEF CPU32BITS}
+  SizeInt = integer;
+  {$ELSE}
+  SizeInt = Int64;
+  {$ENDIF}
+
   { TOutputBlockItem }
 
   TOutputBlockItem = class(TFBInterfacedObject,IUnknown)
@@ -114,10 +121,8 @@ type
   protected
     function GetItem(index: integer): POutputBlockItemData;
     function Find(ItemType: byte): POutputBlockItemData;
-    {$IFDEF FPC}
     procedure SetString(out S: AnsiString; Buf: PAnsiChar; Len: SizeInt;
                                            CodePage: TSystemCodePage);
-    {$ENDIF}
     property ItemData: POutputBlockItemData read FItemData;
     property Owner: TOutputBlock read FOwner;
   public
@@ -419,7 +424,6 @@ end;
 
 { TOutputBlockItem }
 
-{$IFDEF FPC}
 procedure TOutputBlockItem.SetString(out S: AnsiString; Buf: PAnsiChar;
   Len: SizeInt; CodePage: TSystemCodePage);
 var rs: RawByteString;
@@ -428,7 +432,6 @@ begin
   SetCodePage(rs,CodePage,false);
   S := rs;
 end;
-{$ENDIF}
 
 constructor TOutputBlockItem.Create(AOwner: TOutputBlock;
   Data: POutputBlockItemData);
