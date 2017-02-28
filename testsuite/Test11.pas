@@ -1,7 +1,9 @@
 unit Test11;
 
+{$IFDEF FPC}
 {$mode delphi}
 {$codepage utf8}
+{$ENDIF}
 
 {Test 11: Services API}
 

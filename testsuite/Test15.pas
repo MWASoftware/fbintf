@@ -1,7 +1,9 @@
 unit Test15;
 
+{$IFDEF FPC}
 {$mode delphi}
 {$codepage UTF8}
+{$ENDIF}
 
 {Test 15: Blob Handling and BPBs}
 

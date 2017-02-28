@@ -1,7 +1,9 @@
 program testsuite;
 
+{$IFDEF FPC}
 {$mode objfpc}{$H+}
 {$codepage utf8}
+{$ENDIF}
 
 uses
   {$IFDEF UNIX}

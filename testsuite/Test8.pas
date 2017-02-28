@@ -1,7 +1,9 @@
 unit Test8;
 
+{$IFDEF FPC}
 {$mode delphi}
 {$codepage utf8}
+{$ENDIF}
 
 {Test 8: Create and read back an Array with 2 dimensions}
 

@@ -1,7 +1,9 @@
 unit Test13;
 
+{$IFDEF FPC}
 {$mode delphi}
 {$codepage UTF8}
+{$ENDIF}
 
 {Test 13: Tranasction over two databases}
 

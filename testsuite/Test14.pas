@@ -1,7 +1,9 @@
 unit Test14;
 
+{$IFDEF FPC}
 {$mode delphi}
 {$codepage UTF8}
+{$ENDIF}
 
 {Test 14: Non select procedures}
 

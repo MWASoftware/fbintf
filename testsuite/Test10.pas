@@ -1,7 +1,9 @@
 unit Test10;
 
+{$IFDEF FPC}
 {$mode delphi}
 {$codepage utf8}
+{$ENDIF}
 
 {Test 10: Event Handling}
 

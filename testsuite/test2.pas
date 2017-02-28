@@ -1,7 +1,9 @@
 unit test2;
 
+{$IFDEF FPC}
 {$mode delphi}
 {$codepage utf8}
+{$ENDIF}
 
 {Test 2: Open the employee database and run a query}
 

@@ -1,7 +1,9 @@
 unit Test3;
 
+{$IFDEF FPC}
 {$mode delphi}
 {$codepage utf8}
+{$ENDIF}
 
 { Test 3: ad hoc queries}
 

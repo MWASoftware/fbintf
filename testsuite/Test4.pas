@@ -1,7 +1,9 @@
 unit Test4;
 
+{$IFDEF FPC}
 {$mode delphi}
 {$codepage utf8}
+{$ENDIF}
 
 {Test 4: Update, Insert and Delete Queries}
 

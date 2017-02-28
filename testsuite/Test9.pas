@@ -1,7 +1,9 @@
 unit Test9;
 
+{$IFDEF FPC}
 {$mode delphi}
 {$codepage utf8}
+{$ENDIF}
 
 {Test 9: Database Information tests}
 

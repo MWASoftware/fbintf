@@ -1,7 +1,9 @@
 unit Test5;
 
+{$IFDEF FPC}
 {$mode delphi}
 {$codepage utf8}
+{$ENDIF}
 
 {Test 5: Update/Insert Returning and Activity Check}
 

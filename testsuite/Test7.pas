@@ -1,7 +1,9 @@
 unit Test7;
 
+{$IFDEF FPC}
 {$mode delphi}
 {$codepage utf8}
+{$ENDIF}
 
 {Test 7: Create and read back an Array}
 

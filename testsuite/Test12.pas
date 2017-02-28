@@ -1,8 +1,10 @@
 unit Test12;
 
+{$IFDEF FPC}
 {$mode delphi}
 
 {$codepage UTF8}
+{$ENDIF}
 
 interface
 

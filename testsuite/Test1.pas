@@ -11,8 +11,10 @@ unit Test1;
  A basic query is performed and finally the database dropped.
 }
 
+{$IFDEF FPC}
 {$mode delphi}
 {$codepage utf8}
+{$ENDIF}
 
 interface
 

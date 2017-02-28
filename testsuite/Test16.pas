@@ -1,7 +1,9 @@
 unit Test16;
 
+{$IFDEF FPC}
 {$mode delphi}
 {$codepage UTF8}
+{$ENDIF}
 
 {Test 16: Error handling}
 

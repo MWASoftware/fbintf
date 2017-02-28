@@ -1,7 +1,9 @@
 unit TestManager;
 
+{$IFDEF FPC}
 {$mode delphi}
 {$codepage utf8}
+{$ENDIF}
 
 interface
 
