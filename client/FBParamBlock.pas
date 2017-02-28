@@ -112,6 +112,56 @@ type
      procedure SetAsString0(aValue: string);
   end;
 
+  { TDPBItem }
+
+  TDPBItem = class(TParamBlockItem,IDPBItem);
+
+  { TTPBItem }
+
+  TTPBItem = class(TParamBlockItem,ITPBItem);
+
+  { TSPBItem }
+
+  TSPBItem = class(TParamBlockItem,ISPBItem);
+
+  { TSRBItem }
+
+  TSRBItem = class(TParamBlockItem,ISRBItem)
+  public
+    {$IFDEF FPC}
+    procedure ISRBItem.SetAsString = SetAsString2;
+    procedure ISRBItem.SetAsByte = SetAsByte2;
+    {$ELSE}
+    procedure SetAsString(aValue: string) ;
+    procedure SetAsByte(aValue: byte);
+    {$ENDIF}
+  end;
+
+  { TSQPBItem }
+
+  TSQPBItem = class(TParamBlockItem,ISQPBItem)
+  public
+   function CopyFrom(source: TStream; count: integer): integer;
+   {$IFDEF FPC}
+   procedure ISQPBItem.SetAsInteger = SetAsInteger2;
+   procedure ISQPBItem.SetAsString = SetAsString2;
+   {$ELSE}
+   procedure SetAsString(aValue: string) ;
+   procedure SetAsInteger(aValue: integer);
+   {$ENDIF}
+  end;
+
+  { TBPBItem }
+
+  TBPBItem =  class(TParamBlockItem,IBPBItem)
+  public
+   {$IFDEF FPC}
+    procedure IBPBItem.SetAsInteger = SetAsInteger1;
+   {$ELSE}
+    procedure SetAsInteger(aValue: integer);
+   {$ENDIF}
+  end;
+
  {Delphi generic's don't really work as well as FPC. It's difficult enought to
    call a constructor with parameters, but just about impossible to extract
    an interface from a class when both are parameters to the generic class. So
@@ -235,56 +285,6 @@ type
   end;
 {$ENDIF}
 
-
-  { TDPBItem }
-
-  TDPBItem = class(TParamBlockItem,IDPBItem);
-
-  { TTPBItem }
-
-  TTPBItem = class(TParamBlockItem,ITPBItem);
-
-  { TSPBItem }
-
-  TSPBItem = class(TParamBlockItem,ISPBItem);
-
-  { TSRBItem }
-
-  TSRBItem = class(TParamBlockItem,ISRBItem)
-  public
-    {$IFDEF FPC}
-    procedure ISRBItem.SetAsString = SetAsString2;
-    procedure ISRBItem.SetAsByte = SetAsByte2;
-    {$ELSE}
-    procedure SetAsString(aValue: string) ;
-    procedure SetAsByte(aValue: byte);
-    {$ENDIF}
-  end;
-
-  { TSQPBItem }
-
-  TSQPBItem = class(TParamBlockItem,ISQPBItem)
-  public
-   function CopyFrom(source: TStream; count: integer): integer;
-   {$IFDEF FPC}
-   procedure ISQPBItem.SetAsInteger = SetAsInteger2;
-   procedure ISQPBItem.SetAsString = SetAsString2;
-   {$ELSE}
-   procedure SetAsString(aValue: string) ;
-   procedure SetAsInteger(aValue: integer);
-   {$ENDIF}
-  end;
-
-  { TBPBItem }
-
-  TBPBItem =  class(TParamBlockItem,IBPBItem)
-  public
-   {$IFDEF FPC}
-    procedure IBPBItem.SetAsInteger = SetAsInteger1;
-   {$ELSE}
-    procedure SetAsInteger(aValue: integer);
-   {$ENDIF}
-  end;
 
 implementation
 

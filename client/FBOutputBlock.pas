@@ -135,6 +135,8 @@ type
     function CopyTo(stream: TStream; count: integer): integer;
   end;
 
+  TServiceQueryResultSubItem = class(TOutputBlockItem,IServiceQueryResultSubItem);
+
  {Delphi generic's don't really work as well as FPC. It's difficult enought to
    call a constructor with parameters, but just about impossible to extract
    an interface from a class when both are parameters to the generic class. So
@@ -163,6 +165,8 @@ type
   end;
 
   { TDBInfoItem }
+
+  TDBInfoItem = class;
 
   TDBInfoItem = class(TOutputBlockItemGroup<TDBInfoItem,IDBInfoItem>,IDBInfoItem)
   public
@@ -257,8 +261,6 @@ type
   end;
 
 {$ENDIF}
-
-  TServiceQueryResultSubItem = class(TOutputBlockItem,IServiceQueryResultSubItem);
 
   { ISQLInfoItem }
 
