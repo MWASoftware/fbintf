@@ -12,8 +12,15 @@ procedure TFBClientAPI.LoadIBLibrary;
   {$ENDIF}
 
   function DoLoadLibrary(LibName: AnsiString): TLibHandle;
+  {$IFDEF MSWINDOWS}
+  var w: widestring;
+  begin
+    w := LibName;
+    Result := LoadLibrary(PChar(w));
+  {$ELSE}}
   begin
     Result := LoadLibrary(PChar(LibName));
+  {$ENDIF}
     if IsValidHandle(Result) then
     begin
       FFBLibraryName := ExtractFileName(LibName);

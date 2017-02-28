@@ -357,7 +357,7 @@ end;
 
 function TFB30ClientAPI.SQLDecodeDate(bufptr: PAnsiChar): TDateTime;
 var
-  Yr, Mn, Dy: Word;
+  Yr, Mn, Dy: cardinal;
 begin
   UtilIntf.decodeDate(PISC_DATE(bufptr)^,@Yr, @Mn, @Dy);
   try
@@ -379,7 +379,7 @@ end;
 
 function TFB30ClientAPI.SQLDecodeTime(bufptr: PAnsiChar): TDateTime;
 var
-  Hr, Mt, S, Ms: Word;
+  Hr, Mt, S, Ms: cardinal;
 begin
   UtilIntf.decodeTime(PISC_TIME(bufptr)^,@Hr, @Mt, @S, @Ms);
   try

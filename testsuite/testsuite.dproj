@@ -38,7 +38,7 @@
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;$(DCC_Namespace)</DCC_Namespace>
         <SanitizedProjectName>testsuite</SanitizedProjectName>
         <DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
-        <DCC_ExeOutput>.\$(Platform)\$(Config)</DCC_ExeOutput>
+        <DCC_ExeOutput>.</DCC_ExeOutput>
         <DCC_E>false</DCC_E>
         <DCC_N>false</DCC_N>
         <DCC_S>false</DCC_S>
@@ -61,7 +61,9 @@
         <DCC_RemoteDebug>true</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
-        <DCC_UnitSearchPath>..;..\client;..\client\2.5;..\client\3.0;..\include;..\client\include;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>..;..\client;..\client\2.5;..\client\3.0;..\include;..\client\include;..\client\3.0\firebird;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_RunTimeTypeInfo>true</DCC_RunTimeTypeInfo>
+        <Debugger_RunParams>-t 10</Debugger_RunParams>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <Manifest_File>(None)</Manifest_File>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>

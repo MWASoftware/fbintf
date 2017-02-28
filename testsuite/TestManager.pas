@@ -18,7 +18,6 @@ type
   TTestBase = class
   private
     FOwner: TTestManager;
-    FOutputFi: TFileStream;
   protected
     FHexStrings: boolean;
     function ReportResults(Statement: IStatement): IResultSet;
@@ -83,7 +82,7 @@ type
     property ShowStatistics: boolean read FShowStatistics write FShowStatistics;
   end;
 
-const
+var
   TestMgr: TTestManager = nil;
 
 var OutFile: text;
@@ -92,6 +91,17 @@ procedure RegisterTest(aTest: TTest);
 
 implementation
 
+{$IFDEF MSWINDOWS}
+uses windows;
+
+function GetTempDir: AnsiString;
+var
+  tempFolder: array[0..MAX_PATH] of Char;
+begin
+  GetTempPath(MAX_PATH, @tempFolder);
+  result := StrPas(tempFolder);
+end;
+{$ENDIF}
 
 procedure RegisterTest(aTest: TTest);
 begin
@@ -692,7 +702,7 @@ begin
     with TTestBase(FTests[i]) do
   begin
     writeln(OutFile,'Running ' + TestTitle);
-    writeln(stderr,'Running ' + TestTitle);
+    writeln(ErrOutput,'Running ' + TestTitle);
     try
       RunTest('UTF8',3);
     except on E:Exception do
@@ -712,7 +722,7 @@ begin
   with TTestBase(FTests[TestID-1]) do
   begin
     writeln(OutFile,'Running ' + TestTitle);
-    writeln(stderr,'Running ' + TestTitle);
+    writeln(ErrOutput,'Running ' + TestTitle);
     try
       RunTest('UTF8',3);
     except on E:Exception do

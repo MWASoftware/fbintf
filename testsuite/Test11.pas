@@ -226,7 +226,7 @@ begin
         SQPB := Service.AllocateSQPB;
         if ReqLength > 0 then
             bytesWritten := SQPB.Add(isc_info_svc_line).CopyFrom(BakFile,ReqLength);
-        bytesAvailable -= bytesWritten;
+        bytesAvailable := bytesAvailable - bytesWritten;
         Req := Service.AllocateSRB;
         Req.Add(isc_info_svc_stdin);
         Req.Add(isc_info_svc_line);

@@ -5,7 +5,7 @@ program testsuite;
 {$R *.res}
 
 uses
-  System.SysUtils,
+  System.SysUtils, IB,
   Test1 in 'Test1.pas',
   test2 in 'test2.pas',
   Test3 in 'Test3.pas',
@@ -27,68 +27,64 @@ uses
 procedure WriteHelp;
 begin
   { add your help code here }
-  writeln(OutFile,'Usage: ', ExeName, ' -h');
+  writeln(OutFile,'Usage: ', ParamStr(0), ' -h');
 end;
 
 
 var
   ErrorMsg: AnsiString;
   FTestID: integer;
+  aValue: string;
 begin
   try
 
-  OutFile := stdout;
-  // quick check parameters
-  ErrorMsg := CheckOptions('htupensboS', 'help test user passwd employeedb newdbname secondnewdbname backupfile outfile stats');
-  if ErrorMsg <> '' then begin
-    ShowException(Exception.Create(ErrorMsg));
-    Terminate;
-    Exit;
-  end;
+  AssignFile(OutFile,'');
+  ReWrite(outFile);
 
+  
   // parse parameters
-  if HasOption('h', 'help') then begin
+  if FindCmdLineSwitch('h') or FindCmdLineSwitch('help') then
+  begin
     WriteHelp;
-    Terminate;
     Exit;
   end;
 
-  if HasOption('t') then
-    FTestID := StrToInt(GetOptionValue('t'));
+  if FindCmdLineSwitch('t',aValue) then
+    FTestID := StrToInt(aValue);
 
   if TestMgr <> nil then
   begin
-    if HasOption('u','user') then
-      TestMgr.SetUserName(GetOptionValue('u'));
+    if FindCmdLineSwitch('u',aValue) or FindCmdLineSwitch('user',aValue) then
+      TestMgr.SetUserName(aValue);
 
-    if HasOption('p','passwd') then
-      TestMgr.SetPassword(GetOptionValue('p'));
+    if FindCmdLineSwitch('p',aValue) or FindCmdLineSwitch('passwd',aValue) then
+      TestMgr.SetPassword(aValue);
 
-    if HasOption('e','employeedb') then
-      TestMgr.SetEmployeeDatabaseName(GetOptionValue('e'));
+    if FindCmdLineSwitch('e',aValue) or FindCmdLineSwitch('employeedb',aValue) then
+      TestMgr.SetEmployeeDatabaseName(aValue);
 
-    if HasOption('n','newdbname') then
-      TestMgr.SetNewDatabaseName(GetOptionValue('n'));
+    if FindCmdLineSwitch('n',aValue) or FindCmdLineSwitch('newdbname',aValue) then
+      TestMgr.SetNewDatabaseName(aValue);
 
-    if HasOption('s','secondnewdbname') then
-      TestMgr.SetSecondNewDatabaseName(GetOptionValue('s'));
+    if FindCmdLineSwitch('s',aValue) or FindCmdLineSwitch('secondnewdbname',aValue) then
+      TestMgr.SetSecondNewDatabaseName(aValue);
 
-    if HasOption('b','backupfile') then
-      TestMgr.SetBackupFileName(GetOptionValue('b'));
+    if FindCmdLineSwitch('b',aValue) or FindCmdLineSwitch('backupfile',aValue) then
+      TestMgr.SetBackupFileName(aValue);
 
-    if HasOption('o','outfile') then
+    if FindCmdLineSwitch('o',aValue) or FindCmdLineSwitch('outfile',aValue) then
     begin
-      system.Assign(outFile,GetOptionValue('o'));
+      system.Assign(outFile,aValue);
       ReWrite(outFile);
     end;
 
-    TestMgr.ShowStatistics := HasOption('S','stats');
+    TestMgr.ShowStatistics := FindCmdLineSwitch('S') or FindCmdLineSwitch('stats');
 
     {Ensure consistent date reporting across platforms}
     FormatSettings.ShortDateFormat := 'd/m/yyyy';
     FormatSettings.DateSeparator := '/';
 
-    writeln(OutFile,Title);
+    writeln(OutFile,'Firebird Client API Test Suite');
     writeln(OutFile,'Copyright MWA Software 2017');
     writeln(OutFile);
     writeln(OutFile,'Starting Tests');
@@ -103,7 +99,7 @@ begin
 
   writeln(OutFile,'Test Suite Ends');
   Flush(OutFile);
-  //readln; {uncomment if running from IDE and console window closes before you can view results}
+  readln; {uncomment if running from IDE and console window closes before you can view results}
 
   except
     on E: Exception do
