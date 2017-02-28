@@ -35,8 +35,8 @@ type
   private
     procedure UpdateDatabase(Attachment: IAttachment);
   public
-    function TestTitle: string; override;
-    procedure RunTest(CharSet: string; SQLDialect: integer); override;
+    function TestTitle: AnsiString; override;
+    procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
   end;
 
 implementation
@@ -122,12 +122,12 @@ begin
   Transaction.Commit;
 end;
 
-function TTest7.TestTitle: string;
+function TTest7.TestTitle: AnsiString;
 begin
   Result := 'Test 7: Create and read back an Array';
 end;
 
-procedure TTest7.RunTest(CharSet: string; SQLDialect: integer);
+procedure TTest7.RunTest(CharSet: AnsiString; SQLDialect: integer);
 var DPB: IDPB;
     Attachment: IAttachment;
 begin

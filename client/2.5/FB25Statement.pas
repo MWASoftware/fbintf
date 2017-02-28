@@ -128,10 +128,10 @@ type
   protected
     function GetSQLType: cardinal; override;
     function GetSubtype: integer; override;
-    function GetAliasName: string;  override;
-    function GetFieldName: string; override;
-    function GetOwnerName: string;  override;
-    function GetRelationName: string;  override;
+    function GetAliasName: AnsiString;  override;
+    function GetFieldName: AnsiString; override;
+    function GetOwnerName: AnsiString;  override;
+    function GetRelationName: AnsiString;  override;
     function GetScale: integer; override;
     function GetCharSetID: cardinal; override;
     function GetCodePage: TSystemCodePage; override;
@@ -226,7 +226,7 @@ type
     destructor Destroy; override;
     {IResultSet}
     function FetchNext: boolean;
-    function GetCursorName: string;
+    function GetCursorName: AnsiString;
     function GetTransaction: ITransaction; override;
     function IsEof: boolean;
     procedure Close;
@@ -240,7 +240,7 @@ type
     FHandle: TISC_STMT_HANDLE;
     FSQLParams: TIBXINPUTSQLDA;
     FSQLRecord: TIBXOUTPUTSQLDA;
-    FCursor: String;               { Cursor name...}
+    FCursor: AnsiString;               { Cursor name...}
     FCursorSeqNo: integer;
     procedure GetPerfCounters(var counters: TPerfStatistics);
   protected
@@ -253,9 +253,9 @@ type
     procedure InternalClose(Force: boolean); override;
   public
     constructor Create(Attachment: TFB25Attachment; Transaction: ITransaction;
-      sql: string; aSQLDialect: integer);
+      sql: AnsiString; aSQLDialect: integer);
     constructor CreateWithParameterNames(Attachment: TFB25Attachment;
-      Transaction: ITransaction; sql: string; aSQLDialect: integer; GenerateParamNames: boolean);
+      Transaction: ITransaction; sql: AnsiString; aSQLDialect: integer; GenerateParamNames: boolean);
     destructor Destroy; override;
     function FetchNext: boolean;
 
@@ -263,7 +263,7 @@ type
     {IStatement}
     function GetSQLParams: ISQLParams; override;
     function GetMetaData: IMetaData; override;
-    function GetPlan: String;
+    function GetPlan: AnsiString;
     function IsPrepared: boolean;
     function CreateBlob(column: TColumnMetaData): IBlob; override;
     function CreateArray(column: TColumnMetaData): IArray; override;
@@ -293,22 +293,22 @@ begin
     result := 0;
 end;
 
-function TIBXSQLVAR.GetAliasName: string;
+function TIBXSQLVAR.GetAliasName: AnsiString;
 begin
   result := strpas(FXSQLVAR^.aliasname);
 end;
 
-function TIBXSQLVAR.GetFieldName: string;
+function TIBXSQLVAR.GetFieldName: AnsiString;
 begin
   result := strpas(FXSQLVAR^.sqlname);
 end;
 
-function TIBXSQLVAR.GetOwnerName: string;
+function TIBXSQLVAR.GetOwnerName: AnsiString;
 begin
   result := strpas(FXSQLVAR^.ownname);
 end;
 
-function TIBXSQLVAR.GetRelationName: string;
+function TIBXSQLVAR.GetRelationName: AnsiString;
 begin
   result := strpas(FXSQLVAR^.relname);
 end;
@@ -590,7 +590,7 @@ begin
       FResults.Column[i].RowChange;
 end;
 
-function TResultSet.GetCursorName: string;
+function TResultSet.GetCursorName: AnsiString;
 begin
   Result := FResults.FStatement.FCursor;
 end;
@@ -1143,7 +1143,7 @@ begin
 end;
 
 constructor TFB25Statement.Create(Attachment: TFB25Attachment;
-  Transaction: ITransaction; sql: string; aSQLDialect: integer);
+  Transaction: ITransaction; sql: AnsiString; aSQLDialect: integer);
 begin
   inherited Create(Attachment,Transaction,sql,aSQLDialect);
   FDBHandle := Attachment.Handle;
@@ -1153,7 +1153,7 @@ begin
 end;
 
 constructor TFB25Statement.CreateWithParameterNames(Attachment: TFB25Attachment;
-  Transaction: ITransaction; sql: string; aSQLDialect: integer;
+  Transaction: ITransaction; sql: AnsiString; aSQLDialect: integer;
   GenerateParamNames: boolean);
 begin
   inherited CreateWithParameterNames(Attachment,Transaction,sql,aSQLDialect,GenerateParamNames);
@@ -1228,7 +1228,7 @@ begin
   Result := TMetaData(GetInterface(1));
 end;
 
-function TFB25Statement.GetPlan: String;
+function TFB25Statement.GetPlan: AnsiString;
 var
     RB: ISQLInfoResults;
 begin

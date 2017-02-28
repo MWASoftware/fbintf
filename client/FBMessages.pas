@@ -240,7 +240,7 @@ type
       ibxeUniqueRelationReqd
       );
 
-function GetErrorMessage(ErrMess: TIBClientError): string;
+function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
 
 resourcestring
   { generic strings used in code }
@@ -598,7 +598,7 @@ const
     SUniqueRelationReqd
   );
 
-function GetErrorMessage(ErrMess: TIBClientError): string;
+function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
 begin
   Result := IBErrorMessages[ErrMess];
 end;

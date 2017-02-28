@@ -46,7 +46,7 @@ type
     procedure CheckActive;
     procedure CheckInactive;
   protected
-    procedure InternalAttach(ConnectString: string); override;
+    procedure InternalAttach(ConnectString: AnsiString); override;
   public
     property ServiceIntf: Firebird.IService read FServiceIntf;
 
@@ -76,7 +76,7 @@ begin
     IBError(ibxeServiceInActive, [nil]);
 end;
 
-procedure TFB30ServiceManager.InternalAttach(ConnectString: String);
+procedure TFB30ServiceManager.InternalAttach(ConnectString: AnsiString);
 begin
   with Firebird30ClientAPI do
   if FSPB = nil then

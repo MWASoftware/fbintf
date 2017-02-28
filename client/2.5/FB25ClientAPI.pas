@@ -94,7 +94,7 @@ type
                              goes out of scope.}
   protected
     {$IFDEF UNIX}
-    function GetFirebirdLibList: string; override;
+    function GetFirebirdLibList: AnsiString; override;
     {$ENDIF}
     procedure LoadInterface; override;
   public
@@ -178,9 +178,9 @@ type
 
     {Database connections}
     function AllocateDPB: IDPB;
-    function OpenDatabase(DatabaseName: string; DPB: IDPB; RaiseExceptionOnConnectError: boolean=true): IAttachment;
-    function CreateDatabase(DatabaseName: string; DPB: IDPB; RaiseExceptionOnError: boolean=true): IAttachment;  overload;
-    function CreateDatabase(sql: string; aSQLDialect: integer; RaiseExceptionOnError: boolean=true): IAttachment; overload;
+    function OpenDatabase(DatabaseName: AnsiString; DPB: IDPB; RaiseExceptionOnConnectError: boolean=true): IAttachment;
+    function CreateDatabase(DatabaseName: AnsiString; DPB: IDPB; RaiseExceptionOnError: boolean=true): IAttachment;  overload;
+    function CreateDatabase(sql: AnsiString; aSQLDialect: integer; RaiseExceptionOnError: boolean=true): IAttachment; overload;
 
     {Start Transaction against multiple databases}
     function AllocateTPB: ITPB;
@@ -192,13 +192,13 @@ type
     {Service Manager}
     function AllocateSPB: ISPB;
     function HasServiceAPI: boolean;
-    function GetServiceManager(ServerName: string; Protocol: TProtocol; SPB: ISPB): IServiceManager;
+    function GetServiceManager(ServerName: AnsiString; Protocol: TProtocol; SPB: ISPB): IServiceManager;
 
     {Information}
     function GetStatus: IStatus; override;
     function HasRollbackRetaining: boolean;
     function IsEmbeddedServer: boolean; override;
-    function GetImplementationVersion: string;
+    function GetImplementationVersion: AnsiString;
 
     {Firebird 3 API}
     function HasMasterIntf: boolean;
@@ -328,7 +328,7 @@ end;
 { TFB25ClientAPI }
 
 {$IFDEF UNIX}
-function TFB25ClientAPI.GetFirebirdLibList: string;
+function TFB25ClientAPI.GetFirebirdLibList: AnsiString;
 begin
   Result := 'libfbembed.so:libfbembed.so.2.5:libfbembed.so.2.1:libfbclient.so:libfbclient.so.2';
 end;
@@ -444,7 +444,7 @@ begin
   Result := TDPB.Create;
 end;
 
-function TFB25ClientAPI.OpenDatabase(DatabaseName: string; DPB: IDPB;
+function TFB25ClientAPI.OpenDatabase(DatabaseName: AnsiString; DPB: IDPB;
                                     RaiseExceptionOnConnectError: boolean): IAttachment;
 begin
    Result := TFB25Attachment.Create(DatabaseName,DPB,RaiseExceptionOnConnectError);
@@ -452,7 +452,7 @@ begin
      Result := nil;
 end;
 
-function TFB25ClientAPI.CreateDatabase(DatabaseName: string; DPB: IDPB;
+function TFB25ClientAPI.CreateDatabase(DatabaseName: AnsiString; DPB: IDPB;
   RaiseExceptionOnError: boolean): IAttachment;
 begin
   Result := TFB25Attachment.CreateDatabase(DatabaseName, DPB, RaiseExceptionOnError );
@@ -460,7 +460,7 @@ begin
      Result := nil;
 end;
 
-function TFB25ClientAPI.CreateDatabase(sql: string; aSQLDialect: integer;
+function TFB25ClientAPI.CreateDatabase(sql: AnsiString; aSQLDialect: integer;
   RaiseExceptionOnError: boolean): IAttachment;
 begin
   Result := TFB25Attachment.CreateDatabase(sql,aSQLDialect, RaiseExceptionOnError );
@@ -478,7 +478,7 @@ begin
   Result := TTPB.Create;
 end;
 
-function TFB25ClientAPI.GetServiceManager(ServerName: string;
+function TFB25ClientAPI.GetServiceManager(ServerName: AnsiString;
   Protocol: TProtocol; SPB: ISPB): IServiceManager;
 begin
   if HasServiceAPI then
@@ -530,7 +530,7 @@ begin
   Result := nil;
 end;
 
-function TFB25ClientAPI.GetImplementationVersion: string;
+function TFB25ClientAPI.GetImplementationVersion: AnsiString;
 begin
   Result := FBClientInterfaceVersion;
 end;

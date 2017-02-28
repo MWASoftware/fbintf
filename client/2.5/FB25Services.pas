@@ -81,7 +81,7 @@ type
     procedure CheckActive;
     procedure CheckInactive;
   protected
-    procedure InternalAttach(ConnectString: string); override;
+    procedure InternalAttach(ConnectString: AnsiString); override;
   public
     property Handle: TISC_SVC_HANDLE read FHandle;
 
@@ -111,7 +111,7 @@ begin
     IBError(ibxeServiceInActive, [nil]);
 end;
 
-procedure TFB25ServiceManager.InternalAttach(ConnectString: String);
+procedure TFB25ServiceManager.InternalAttach(ConnectString: AnsiString);
 begin
   with Firebird25ClientAPI do
   if FSPB = nil then

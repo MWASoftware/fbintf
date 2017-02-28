@@ -30,11 +30,11 @@ type
 
   TTest16 = class(TTestBase)
   private
-    procedure DBTests(CharSet: string; SQLDialect: integer);
-    procedure ServiceTests(CharSet: string; SQLDialect: integer);
+    procedure DBTests(CharSet: AnsiString; SQLDialect: integer);
+    procedure ServiceTests(CharSet: AnsiString; SQLDialect: integer);
   public
-    function TestTitle: string; override;
-    procedure RunTest(CharSet: string; SQLDialect: integer); override;
+    function TestTitle: AnsiString; override;
+    procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
   end;
 
 
@@ -42,7 +42,7 @@ implementation
 
 { TTest16 }
 
-procedure TTest16.DBTests(CharSet: string; SQLDialect: integer);
+procedure TTest16.DBTests(CharSet: AnsiString; SQLDialect: integer);
 var DPB: IDPB;
     Attachment: IAttachment;
     Transaction: ITransaction;
@@ -108,12 +108,12 @@ begin
   end;
 end;
 
-procedure TTest16.ServiceTests(CharSet: string; SQLDialect: integer);
+procedure TTest16.ServiceTests(CharSet: AnsiString; SQLDialect: integer);
 var SPB: ISPB;
     Service: IServiceManager;
     I: integer;
-    ServerName: string;
-    DBName: string;
+    ServerName: AnsiString;
+    DBName: AnsiString;
 begin
   if not FirebirdAPI.HasServiceAPI then Exit;
 
@@ -150,12 +150,12 @@ begin
   end;
 end;
 
-function TTest16.TestTitle: string;
+function TTest16.TestTitle: AnsiString;
 begin
   Result := 'Test 16: Error handling';
 end;
 
-procedure TTest16.RunTest(CharSet: string; SQLDialect: integer);
+procedure TTest16.RunTest(CharSet: AnsiString; SQLDialect: integer);
 begin
   DBTests(Charset,SQLDialect);
   ServiceTests(Charset,SQLDialect);

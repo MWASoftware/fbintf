@@ -73,7 +73,7 @@ type
     procedure ParseBuffer;
     {$IFDEF DEBUGOUTPUTBLOCK}
     procedure FormattedPrint(const aItems: array of POutputBlockItemData;
-      Indent: string);
+      Indent: AnsiString);
     {$ENDIF}
     procedure PrintBuf;
   protected
@@ -129,7 +129,7 @@ type
     procedure getRawBytes(var Buffer);
     function getAsInteger: integer;
     function getParamType: byte;
-    function getAsString: string;
+    function getAsString: AnsiString;
     function getAsByte: byte;
     function getAsBytes: TByteArray;
     function CopyTo(stream: TStream; count: integer): integer;
@@ -170,8 +170,8 @@ type
 
   TDBInfoItem = class(TOutputBlockItemGroup<TDBInfoItem,IDBInfoItem>,IDBInfoItem)
   public
-    procedure DecodeIDCluster(var ConnectionType: integer; var DBFileName, DBSiteName: string);
-    procedure DecodeVersionString(var Version: byte; var VersionString: string);
+    procedure DecodeIDCluster(var ConnectionType: integer; var DBFileName, DBSiteName: AnsiString);
+    procedure DecodeVersionString(var Version: byte; var VersionString: AnsiString);
     procedure DecodeUserNames(UserNames: TStrings);
     function getOperationCounts: TDBOperationCounts;
  end;
@@ -215,8 +215,8 @@ type
 
   TDBInfoItem = class(TOutputBlockItemGroup,IDBInfoItem)
   public
-    procedure DecodeIDCluster(var ConnectionType: integer; var DBFileName, DBSiteName: string);
-    procedure DecodeVersionString(var Version: byte; var VersionString: string);
+    procedure DecodeIDCluster(var ConnectionType: integer; var DBFileName, DBSiteName: AnsiString);
+    procedure DecodeVersionString(var Version: byte; var VersionString: AnsiString);
     procedure DecodeUserNames(UserNames: TStrings);
     function getOperationCounts: TDBOperationCounts;
     function GetItem(index: integer): IDBInfoItem;
@@ -267,7 +267,7 @@ type
   ISQLInfoItem = interface
     function getItemType: byte;
     function getSize: integer;
-    function getAsString: string;
+    function getAsString: AnsiString;
     function getAsInteger: integer;
     function GetCount: integer;
     function GetItem(index: integer): ISQLInfoItem;
@@ -481,7 +481,7 @@ begin
    Result := byte(FItemData^.FBufPtr^)
 end;
 
-function TOutputBlockItem.getAsString: string;
+function TOutputBlockItem.getAsString: AnsiString;
 var len: integer;
 begin
   Result := '';
@@ -759,7 +759,7 @@ end;
 
 {$IFDEF DEBUGOUTPUTBLOCK}
 procedure TOutputBlock.FormattedPrint(
-  const aItems: array of POutputBlockItemData; Indent: string);
+  const aItems: array of POutputBlockItemData; Indent: AnsiString);
 
 var i: integer;
     item: TOutputBlockItem;
@@ -812,7 +812,7 @@ end;
 { TDBInfoItem }
 
 procedure TDBInfoItem.DecodeIDCluster(var ConnectionType: integer;
-  var DBFileName, DBSiteName: string);
+  var DBFileName, DBSiteName: AnsiString);
 var  P: PChar;
 begin
   with ItemData^ do
@@ -831,7 +831,7 @@ begin
 end;
 
 procedure TDBInfoItem.DecodeVersionString(var Version: byte;
-  var VersionString: string);
+  var VersionString: AnsiString);
 var  P: PChar;
 begin
   with ItemData^ do
@@ -849,7 +849,7 @@ end;
 
 procedure TDBInfoItem.DecodeUserNames(UserNames: TStrings);
 var P: PChar;
-    s: string;
+    s: AnsiString;
 begin
   with ItemData^ do
   if FBufPtr^ = char(isc_info_user_names) then

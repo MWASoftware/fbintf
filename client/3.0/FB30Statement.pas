@@ -100,16 +100,16 @@ type
     FNullable: boolean;
     FScale: integer;
     FCharSetID: cardinal;
-    FRelationName: string;
-    FFieldName: string;
+    FRelationName: AnsiString;
+    FFieldName: AnsiString;
 
     protected
      function GetSQLType: cardinal; override;
      function GetSubtype: integer; override;
-     function GetAliasName: string;  override;
-     function GetFieldName: string; override;
-     function GetOwnerName: string;  override;
-     function GetRelationName: string;  override;
+     function GetAliasName: AnsiString;  override;
+     function GetFieldName: AnsiString; override;
+     function GetOwnerName: AnsiString;  override;
+     function GetRelationName: AnsiString;  override;
      function GetScale: integer; override;
      function GetCharSetID: cardinal; override;
      function GetCodePage: TSystemCodePage; override;
@@ -221,7 +221,7 @@ type
     destructor Destroy; override;
     {IResultSet}
     function FetchNext: boolean;
-    function GetCursorName: string;
+    function GetCursorName: AnsiString;
     function GetTransaction: ITransaction; override;
     function IsEof: boolean;
     procedure Close;
@@ -246,9 +246,9 @@ type
     procedure InternalClose(Force: boolean); override;
   public
     constructor Create(Attachment: TFB30Attachment; Transaction: ITransaction;
-      sql: string; aSQLDialect: integer);
+      sql: AnsiString; aSQLDialect: integer);
     constructor CreateWithParameterNames(Attachment: TFB30Attachment; Transaction: ITransaction;
-      sql: string;  aSQLDialect: integer; GenerateParamNames: boolean =false);
+      sql: AnsiString;  aSQLDialect: integer; GenerateParamNames: boolean =false);
     destructor Destroy; override;
     function FetchNext: boolean;
     property StatementIntf: Firebird.IStatement read FStatementIntf;
@@ -257,7 +257,7 @@ type
     {IStatement}
     function GetSQLParams: ISQLParams; override;
     function GetMetaData: IMetaData; override;
-    function GetPlan: String;
+    function GetPlan: AnsiString;
     function IsPrepared: boolean;
     function CreateBlob(column: TColumnMetaData): IBlob; override;
     function CreateArray(column: TColumnMetaData): IArray; override;
@@ -290,7 +290,7 @@ begin
   Result := FSQLSubType;
 end;
 
-function TIBXSQLVAR.GetAliasName: string;
+function TIBXSQLVAR.GetAliasName: AnsiString;
 begin
   with Firebird30ClientAPI do
   begin
@@ -299,12 +299,12 @@ begin
   end;
 end;
 
-function TIBXSQLVAR.GetFieldName: string;
+function TIBXSQLVAR.GetFieldName: AnsiString;
 begin
   Result := FFieldName;
 end;
 
-function TIBXSQLVAR.GetOwnerName: string;
+function TIBXSQLVAR.GetOwnerName: AnsiString;
 begin
   with Firebird30ClientAPI do
   begin
@@ -313,7 +313,7 @@ begin
   end;
 end;
 
-function TIBXSQLVAR.GetRelationName: string;
+function TIBXSQLVAR.GetRelationName: AnsiString;
 begin
   Result := FRelationName;
 end;
@@ -543,7 +543,7 @@ begin
       FResults.Column[i].RowChange;
 end;
 
-function TResultSet.GetCursorName: string;
+function TResultSet.GetCursorName: AnsiString;
 begin
   IBError(ibxeNotSupported,[nil]);
   Result := '';
@@ -1222,7 +1222,7 @@ begin
 end;
 
 constructor TFB30Statement.Create(Attachment: TFB30Attachment;
-  Transaction: ITransaction; sql: string; aSQLDialect: integer);
+  Transaction: ITransaction; sql: AnsiString; aSQLDialect: integer);
 begin
   inherited Create(Attachment,Transaction,sql,aSQLDialect);
   FSQLParams := TIBXINPUTSQLDA.Create(self);
@@ -1231,7 +1231,7 @@ begin
 end;
 
 constructor TFB30Statement.CreateWithParameterNames(
-  Attachment: TFB30Attachment; Transaction: ITransaction; sql: string;
+  Attachment: TFB30Attachment; Transaction: ITransaction; sql: AnsiString;
   aSQLDialect: integer; GenerateParamNames: boolean);
 begin
   inherited CreateWithParameterNames(Attachment,Transaction,sql,aSQLDialect,GenerateParamNames);
@@ -1304,7 +1304,7 @@ begin
   Result := TMetaData(GetInterface(1));
 end;
 
-function TFB30Statement.GetPlan: String;
+function TFB30Statement.GetPlan: AnsiString;
 begin
   CheckHandle;
   if (not (FSQLStatementType in [SQLSelect, SQLSelectForUpdate,

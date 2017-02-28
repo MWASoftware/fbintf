@@ -45,7 +45,7 @@ type
   TEventhandlerInterface = class(Firebird.IEventCallbackImpl)
   private
     FOwner: TFB30Events;
-    FName: string;
+    FName: AnsiString;
     FRef: integer;
     {$IFDEF WINDOWS}
     {Make direct use of Windows API as TEventObject don't seem to work under
@@ -55,7 +55,7 @@ type
     FEventWaiting: TEventObject;
     {$ENDIF}
   public
-    constructor Create(aOwner: TFB30Events; aName: string);
+    constructor Create(aOwner: TFB30Events; aName: AnsiString);
     destructor Destroy; override;
     procedure addRef();  override;
     function release(): Integer; override;
@@ -105,7 +105,7 @@ type
     procedure Terminate;
   end;
 
-constructor TEventhandlerInterface.Create(aOwner: TFB30Events; aName: string);
+constructor TEventhandlerInterface.Create(aOwner: TFB30Events; aName: AnsiString);
 var
   PSa : PSecurityAttributes;
 {$IFDEF WINDOWS}

@@ -84,14 +84,14 @@ type
   public
    constructor Create(anArray: TFBArray; P: PChar);
    function GetSQLType: cardinal; override;
-   function GetName: string; override;
+   function GetName: AnsiString; override;
    function GetScale: integer; override;
    function GetSize: integer;
-   function GetAsString: string; override;
+   function GetAsString: AnsiString; override;
    procedure SetAsLong(Value: Long); override;
    procedure SetAsShort(Value: Short); override;
    procedure SetAsInt64(Value: Int64); override;
-   procedure SetAsString(Value: String); override;
+   procedure SetAsString(Value: AnsiString); override;
    procedure SetAsDouble(Value: Double); override;
    procedure SetAsFloat(Value: Float); override;
    procedure SetAsCurrency(Value: Currency); override;
@@ -106,12 +106,12 @@ type
    FArrayDesc: TISC_ARRAY_DESC;
    FCharSetID: integer;
    procedure LoadMetaData(aAttachment: IAttachment; aTransaction: ITransaction;
-               relationName, columnName: string); virtual; abstract;
+               relationName, columnName: AnsiString); virtual; abstract;
    function NumOfElements: integer;
   public
    constructor Create(aAttachment: IAttachment; aTransaction: ITransaction;
-     relationName, columnName: string); overload;
-   constructor Create(SQLType: cardinal; tableName: string; columnName: string;
+     relationName, columnName: AnsiString); overload;
+   constructor Create(SQLType: cardinal; tableName: AnsiString; columnName: AnsiString;
      Scale: integer; size: cardinal; charSetID: cardinal;
      dimensions: cardinal; bounds: TArrayBounds); overload;
    function GetCodePage: TSystemCodePage; virtual; abstract;
@@ -119,12 +119,12 @@ type
   public
    {IArrayMetaData}
    function GetSQLType: cardinal;
-   function GetSQLTypeName: string;
+   function GetSQLTypeName: AnsiString;
    function GetScale: integer;
    function GetSize: cardinal;
    function GetCharSetID: cardinal; virtual; abstract;
-   function GetTableName: string;
-   function GetColumnName: string;
+   function GetTableName: AnsiString;
+   function GetColumnName: AnsiString;
    function GetDimensions: integer;
    function GetBounds: TArrayBounds;
   end;
@@ -173,12 +173,12 @@ type
    public
     {IArrayMetaData}
     function GetSQLType: cardinal;
-    function GetSQLTypeName: string;
+    function GetSQLTypeName: AnsiString;
     function GetScale: integer;
     function GetSize: cardinal;
     function GetCharSetID: cardinal;
-    function GetTableName: string;
-    function GetColumnName: string;
+    function GetTableName: AnsiString;
+    function GetColumnName: AnsiString;
     function GetDimensions: integer;
     function GetBounds: TArrayBounds;
     {IArray}
@@ -197,7 +197,7 @@ type
     function GetAsFloat(index: array of integer): Float;
     function GetAsLong(index: array of integer): Long;
     function GetAsShort(index: array of integer): Short;
-    function GetAsString(index: array of integer): String;
+    function GetAsString(index: array of integer): AnsiString;
     function GetAsVariant(index: array of integer): Variant;
     procedure SetAsInteger(index: array of integer; AValue: integer);
     procedure SetAsBoolean(index: array of integer; AValue: boolean);
@@ -210,7 +210,7 @@ type
     procedure SetAsDouble(index: array of integer; Value: Double);
     procedure SetAsFloat(index: array of integer; Value: Float);
     procedure SetAsShort(index: array of integer; Value: Short);
-    procedure SetAsString(index: array of integer; Value: String);
+    procedure SetAsString(index: array of integer; Value: AnsiString);
     procedure SetAsVariant(index: array of integer; Value: Variant);
     procedure SetBounds(dim, UpperBound, LowerBound: integer);
     function GetAttachment: IAttachment;
@@ -280,7 +280,7 @@ begin
   Result :=  FArray.FMetaData.GetSQLType;
 end;
 
-function TFBArrayElement.GetName: string;
+function TFBArrayElement.GetName: AnsiString;
 begin
   Result := FArray.FMetaData.GetColumnName;
 end;
@@ -295,7 +295,7 @@ begin
   Result := GetDataLength;
 end;
 
-function TFBArrayElement.GetAsString: string;
+function TFBArrayElement.GetAsString: AnsiString;
 var rs: RawByteString;
 begin
   case GetSQLType of
@@ -349,7 +349,7 @@ begin
   Changed;
 end;
 
-procedure TFBArrayElement.SetAsString(Value: String);
+procedure TFBArrayElement.SetAsString(Value: AnsiString);
 var len: integer;
     ElementSize: integer;
 begin
@@ -480,14 +480,14 @@ end;
 {TFBArrayMetaData}
 
 constructor TFBArrayMetaData.Create(aAttachment: IAttachment;
-  aTransaction: ITransaction; relationName, columnName: string);
+  aTransaction: ITransaction; relationName, columnName: AnsiString);
 begin
   inherited Create;
   LoadMetaData(aAttachment,aTransaction,relationName, columnName);
 end;
 
-constructor TFBArrayMetaData.Create(SQLType: cardinal; tableName: string;
-  columnName: string; Scale: integer; size: cardinal; charSetID: cardinal;
+constructor TFBArrayMetaData.Create(SQLType: cardinal; tableName: AnsiString;
+  columnName: AnsiString; Scale: integer; size: cardinal; charSetID: cardinal;
   dimensions: cardinal; bounds: TArrayBounds);
 var i: integer;
 begin
@@ -540,7 +540,7 @@ begin
   end;
 end;
 
-function TFBArrayMetaData.GetSQLTypeName: string;
+function TFBArrayMetaData.GetSQLTypeName: AnsiString;
 begin
   Result := TSQLDataItem.GetSQLTypeName(GetSQLType);
 end;
@@ -555,14 +555,14 @@ begin
   Result := FArrayDesc.array_desc_length;
 end;
 
-function TFBArrayMetaData.GetTableName: string;
+function TFBArrayMetaData.GetTableName: AnsiString;
 begin
   with FArrayDesc do
    SetString(Result,PChar(@array_desc_relation_name),sizeof(array_desc_relation_name));
   Result := trim(Result);
 end;
 
-function TFBArrayMetaData.GetColumnName: string;
+function TFBArrayMetaData.GetColumnName: AnsiString;
 begin
   with FArrayDesc do
     SetString(Result,PChar(@FArrayDesc.array_desc_field_name),sizeof(array_desc_field_name));
@@ -826,7 +826,7 @@ begin
   Result := FMetaData.GetSQLType;
 end;
 
-function TFBArray.GetSQLTypeName: string;
+function TFBArray.GetSQLTypeName: AnsiString;
 begin
   Result := FMetaData.GetSQLTypeName;
 end;
@@ -846,12 +846,12 @@ begin
   Result := FMetaData.GetCharSetID;
 end;
 
-function TFBArray.GetTableName: string;
+function TFBArray.GetTableName: AnsiString;
 begin
   Result := FMetaData.GetTableName;
 end;
 
-function TFBArray.GetColumnName: string;
+function TFBArray.GetColumnName: AnsiString;
 begin
   Result := FMetaData.GetColumnName;
 end;
@@ -929,7 +929,7 @@ begin
   Result := FElement.GetAsShort;
 end;
 
-function TFBArray.GetAsString(index: array of integer): String;
+function TFBArray.GetAsString(index: array of integer): AnsiString;
 begin
   GetArraySlice;
   FElement.FBufPtr := GetOffset(index);
@@ -1009,7 +1009,7 @@ begin
   FElement.SetAsShort(Value);
 end;
 
-procedure TFBArray.SetAsString(index: array of integer; Value: String);
+procedure TFBArray.SetAsString(index: array of integer; Value: AnsiString);
 begin
   FElement.FBufPtr := GetOffset(index);
   FElement.SetAsString(Value);

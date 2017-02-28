@@ -43,16 +43,16 @@ type
   ISDLItem = interface
     function getParamType: byte;
     function getAsInteger: integer;
-    function getAsString: string;
+    function getAsString: AnsiString;
     function getAsByte: byte;
     procedure addByte(aValue: byte);
     procedure addShortInteger(aValue: integer);
-    procedure setAsString(aValue: string);
+    procedure setAsString(aValue: AnsiString);
     procedure setAsByte(aValue: byte);
     procedure SetAsInteger(aValue: integer);
     procedure SetAsShortInteger(aValue: integer);
     procedure SetAsTinyInteger(aValue: integer);
-    property AsString: string read getAsString write setAsString;
+    property AsString: AnsiString read getAsString write setAsString;
     property AsByte: byte read getAsByte write setAsByte;
     property AsInteger: integer read getAsInteger write SetAsInteger;
   end;
@@ -72,7 +72,7 @@ type
     FCodePage: TSystemCodePage;
   protected
     procedure LoadMetaData(aAttachment: IAttachment; aTransaction: ITransaction;
-                   relationName, columnName: string); override;
+                   relationName, columnName: AnsiString); override;
   public
     function GetCharSetID: cardinal; override;
     function GetCodePage: TSystemCodePage; override;
@@ -135,7 +135,7 @@ const
 {Assemble the array descriptor from the System Tables}
 
 procedure TFB30ArrayMetaData.LoadMetaData(aAttachment: IAttachment;
-  aTransaction: ITransaction; relationName, columnName: string);
+  aTransaction: ITransaction; relationName, columnName: AnsiString);
 var stmt: IStatement;
     CharWidth: integer;
 begin

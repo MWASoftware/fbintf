@@ -37,8 +37,8 @@ type
   private
     procedure DoQuery(Attachment: IAttachment);
   public
-    function TestTitle: string; override;
-    procedure RunTest(CharSet: string; SQLDialect: integer); override;
+    function TestTitle: AnsiString; override;
+    procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
   end;
 
 implementation
@@ -104,12 +104,12 @@ begin
     writeln(OutFile,'Transaction inactive');
 end;
 
-function TTest5.TestTitle: string;
+function TTest5.TestTitle: AnsiString;
 begin
   Result := 'Test 5: Update Returning and Activity Check';
 end;
 
-procedure TTest5.RunTest(CharSet: string; SQLDialect: integer);
+procedure TTest5.RunTest(CharSet: AnsiString; SQLDialect: integer);
 var Attachment: IAttachment;
     DPB: IDPB;
 begin

@@ -28,8 +28,8 @@ type
     procedure ModifyDatabase1(Attachment: IAttachment; Transaction: ITransaction);
     procedure ModifyDatabase2(Attachment: IAttachment; Transaction: ITransaction);
   public
-    function TestTitle: string; override;
-    procedure RunTest(CharSet: string; SQLDialect: integer); override;
+    function TestTitle: AnsiString; override;
+    procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
   end;
 
 implementation
@@ -97,12 +97,12 @@ begin
   Statement.Execute;
 end;
 
-function TTest13.TestTitle: string;
+function TTest13.TestTitle: AnsiString;
 begin
   Result := 'Test 13: Transaction over two databases';
 end;
 
-procedure TTest13.RunTest(CharSet: string; SQLDialect: integer);
+procedure TTest13.RunTest(CharSet: AnsiString; SQLDialect: integer);
 var DPB: IDPB;
     Attachment, Attachment2: IAttachment;
     Transaction: ITransaction;

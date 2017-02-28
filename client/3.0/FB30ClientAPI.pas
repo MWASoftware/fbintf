@@ -69,7 +69,7 @@ type
     procedure CheckPlugins;
   protected
     {$IFDEF UNIX}
-    function GetFirebirdLibList: string; override;
+    function GetFirebirdLibList: AnsiString; override;
     {$ENDIF}
    procedure LoadInterface; override;
   public
@@ -87,9 +87,9 @@ type
     function AllocateTPB: ITPB;
 
     {Database connections}
-    function OpenDatabase(DatabaseName: string; DPB: IDPB; RaiseExceptionOnConnectError: boolean=true): IAttachment;
-    function CreateDatabase(DatabaseName: string; DPB: IDPB; RaiseExceptionOnError: boolean=true): IAttachment; overload;
-    function CreateDatabase(sql: string; aSQLDialect: integer; RaiseExceptionOnError: boolean=true): IAttachment; overload;
+    function OpenDatabase(DatabaseName: AnsiString; DPB: IDPB; RaiseExceptionOnConnectError: boolean=true): IAttachment;
+    function CreateDatabase(DatabaseName: AnsiString; DPB: IDPB; RaiseExceptionOnError: boolean=true): IAttachment; overload;
+    function CreateDatabase(sql: AnsiString; aSQLDialect: integer; RaiseExceptionOnError: boolean=true): IAttachment; overload;
     {Start Transaction against multiple databases}
     function StartTransaction(Attachments: array of IAttachment;
              TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction; overload;
@@ -98,13 +98,13 @@ type
 
     {Service Manager}
     function AllocateSPB: ISPB;
-    function GetServiceManager(ServerName: string; Protocol: TProtocol; SPB: ISPB): IServiceManager;
+    function GetServiceManager(ServerName: AnsiString; Protocol: TProtocol; SPB: ISPB): IServiceManager;
 
     {Information}
     function HasServiceAPI: boolean;
     function HasRollbackRetaining: boolean;
     function IsEmbeddedServer: boolean; override;
-    function GetImplementationVersion: string;
+    function GetImplementationVersion: AnsiString;
 
     {Firebird 3 API}
     function HasMasterIntf: boolean;
@@ -167,7 +167,7 @@ end;
 
 procedure TFB30ClientAPI.CheckPlugins;
 var FBConf: Firebird.IFirebirdConf;
-    Plugins: string;
+    Plugins: AnsiString;
     PluginsList: TStringList;
 begin
   FIsEmbeddedServer := false;
@@ -189,7 +189,7 @@ begin
 end;
 
 {$IFDEF UNIX}
-function TFB30ClientAPI.GetFirebirdLibList: string;
+function TFB30ClientAPI.GetFirebirdLibList: AnsiString;
 begin
   Result := 'libfbclient.so:libfbclient.so.2';
 end;
@@ -258,7 +258,7 @@ begin
   Result := TTPB.Create;
 end;
 
-function TFB30ClientAPI.OpenDatabase(DatabaseName: string; DPB: IDPB;
+function TFB30ClientAPI.OpenDatabase(DatabaseName: AnsiString; DPB: IDPB;
   RaiseExceptionOnConnectError: boolean): IAttachment;
 begin
   Result := TFB30Attachment.Create(DatabaseName, DPB, RaiseExceptionOnConnectError);
@@ -266,7 +266,7 @@ begin
     Result := nil;
 end;
 
-function TFB30ClientAPI.CreateDatabase(DatabaseName: string; DPB: IDPB;
+function TFB30ClientAPI.CreateDatabase(DatabaseName: AnsiString; DPB: IDPB;
   RaiseExceptionOnError: boolean): IAttachment;
 begin
   Result := TFB30Attachment.CreateDatabase(DatabaseName,DPB, RaiseExceptionOnError);
@@ -274,7 +274,7 @@ begin
     Result := nil;
 end;
 
-function TFB30ClientAPI.CreateDatabase(sql: string; aSQLDialect: integer;
+function TFB30ClientAPI.CreateDatabase(sql: AnsiString; aSQLDialect: integer;
   RaiseExceptionOnError: boolean): IAttachment;
 begin
   Result := TFB30Attachment.CreateDatabase(sql,aSQLDialect, RaiseExceptionOnError);
@@ -299,7 +299,7 @@ begin
   Result := TSPB.Create;
 end;
 
-function TFB30ClientAPI.GetServiceManager(ServerName: string;
+function TFB30ClientAPI.GetServiceManager(ServerName: AnsiString;
   Protocol: TProtocol; SPB: ISPB): IServiceManager;
 begin
   Result := TFB30ServiceManager.Create(ServerName,Protocol,SPB);
@@ -330,7 +330,7 @@ begin
   Result := FIsEmbeddedServer;
 end;
 
-function TFB30ClientAPI.GetImplementationVersion: string;
+function TFB30ClientAPI.GetImplementationVersion: AnsiString;
 begin
   Result := Format('3.%d',[UtilIntf.GetClientVersion]);
 end;

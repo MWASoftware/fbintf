@@ -113,12 +113,12 @@ type
      function GetSQLDialect: integer; virtual; abstract;
      procedure Changed; virtual;
      procedure Changing; virtual;
-     procedure InternalSetAsString(Value: String); virtual;
+     procedure InternalSetAsString(Value: AnsiString); virtual;
      function SQLData: PChar; virtual; abstract;
      function GetDataLength: cardinal; virtual; abstract;
      function GetCodePage: TSystemCodePage; virtual; abstract;
      function getCharSetID: cardinal; virtual; abstract;
-     function Transliterate(s: string; CodePage: TSystemCodePage): RawByteString;
+     function Transliterate(s: AnsiString; CodePage: TSystemCodePage): RawByteString;
      procedure SetScale(aValue: integer); virtual;
      procedure SetDataLength(len: cardinal); virtual;
      procedure SetSQLType(aValue: cardinal); virtual;
@@ -126,9 +126,9 @@ type
 
   public
      function GetSQLType: cardinal; virtual; abstract;
-     function GetSQLTypeName: string; overload;
-     class function GetSQLTypeName(SQLType: short): string; overload;
-     function GetName: string; virtual; abstract;
+     function GetSQLTypeName: AnsiString; overload;
+     class function GetSQLTypeName(SQLType: short): AnsiString; overload;
+     function GetName: AnsiString; virtual; abstract;
      function GetScale: integer; virtual; abstract;
      function GetAsBoolean: boolean;
      function GetAsCurrency: Currency;
@@ -140,7 +140,7 @@ type
      function GetAsPointer: Pointer;
      function GetAsQuad: TISC_QUAD;
      function GetAsShort: short;
-     function GetAsString: String; virtual;
+     function GetAsString: AnsiString; virtual;
      function GetIsNull: Boolean; virtual;
      function getIsNullable: boolean; virtual;
      function GetAsVariant: Variant;
@@ -157,11 +157,11 @@ type
      procedure SetAsPointer(Value: Pointer);
      procedure SetAsQuad(Value: TISC_QUAD);
      procedure SetAsShort(Value: short); virtual;
-     procedure SetAsString(Value: String); virtual;
+     procedure SetAsString(Value: AnsiString); virtual;
      procedure SetAsVariant(Value: Variant);
      procedure SetIsNull(Value: Boolean); virtual;
      procedure SetIsNullable(Value: Boolean); virtual;
-     procedure SetName(aValue: string); virtual;
+     procedure SetName(aValue: AnsiString); virtual;
      property AsDate: TDateTime read GetAsDateTime write SetAsDate;
      property AsBoolean:boolean read GetAsBoolean write SetAsBoolean;
      property AsTime: TDateTime read GetAsDateTime write SetAsTime;
@@ -175,7 +175,7 @@ type
      property AsPointer: Pointer read GetAsPointer write SetAsPointer;
      property AsQuad: TISC_QUAD read GetAsQuad write SetAsQuad;
      property AsShort: short read GetAsShort write SetAsShort;
-     property AsString: String read GetAsString write SetAsString;
+     property AsString: AnsiString read GetAsString write SetAsString;
      property AsVariant: Variant read GetAsVariant write SetAsVariant;
      property Modified: Boolean read getModified;
      property IsNull: Boolean read GetIsNull write SetIsNull;
@@ -195,7 +195,7 @@ type
     function GetColumn(index: integer): TSQLVarData;
     function GetCount: integer;
   protected
-    FUniqueRelationName: string;
+    FUniqueRelationName: AnsiString;
     FColumnList: array of TSQLVarData;
     function GetStatement: IStatement; virtual; abstract;
     function GetPrepareSeqNo: integer; virtual; abstract;
@@ -205,10 +205,10 @@ type
   public
     procedure Initialize; virtual;
     function IsInputDataArea: boolean; virtual; abstract; {Input to Database}
-    procedure PreprocessSQL(sSQL: string; GenerateParamNames: boolean;
-      var sProcessedSQL: string);
+    procedure PreprocessSQL(sSQL: AnsiString; GenerateParamNames: boolean;
+      var sProcessedSQL: AnsiString);
     function ColumnsInUseCount: integer; virtual;
-    function ColumnByName(Idx: string): TSQLVarData;
+    function ColumnByName(Idx: AnsiString): TSQLVarData;
     function CheckStatementStatus(Request: TStatementStatus): boolean; virtual; abstract;
     procedure GetData(index: integer; var IsNull: boolean; var len: short;
       var data: PChar); virtual;
@@ -216,7 +216,7 @@ type
     function StateChanged(var ChangeSeqNo: integer): boolean; virtual; abstract;
     property Count: integer read GetCount;
     property Column[index: integer]: TSQLVarData read GetColumn;
-    property UniqueRelationName: string read FUniqueRelationName;
+    property UniqueRelationName: AnsiString read FUniqueRelationName;
     property Statement: IStatement read GetStatement;
     property PrepareSeqNo: integer read GetPrepareSeqNo;
     property TransactionSeqNo: integer read GetTransactionSeqNo;
@@ -227,20 +227,20 @@ type
   TSQLVarData = class
   private
     FParent: TSQLDataArea;
-    FName: string;
+    FName: AnsiString;
     FIndex: integer;
     FModified: boolean;
     FUniqueName: boolean;
     FVarString: RawByteString;
     function GetStatement: IStatement;
-    procedure SetName(AValue: string);
+    procedure SetName(AValue: AnsiString);
   protected
     function GetSQLType: cardinal; virtual; abstract;
     function GetSubtype: integer; virtual; abstract;
-    function GetAliasName: string;  virtual; abstract;
-    function GetFieldName: string; virtual; abstract;
-    function GetOwnerName: string;  virtual; abstract;
-    function GetRelationName: string;  virtual; abstract;
+    function GetAliasName: AnsiString;  virtual; abstract;
+    function GetFieldName: AnsiString; virtual; abstract;
+    function GetOwnerName: AnsiString;  virtual; abstract;
+    function GetRelationName: AnsiString;  virtual; abstract;
     function GetScale: integer; virtual; abstract;
     function GetCharSetID: cardinal; virtual; abstract;
     function GetCodePage: TSystemCodePage; virtual; abstract;
@@ -257,7 +257,7 @@ type
     procedure SetCharSetID(aValue: cardinal); virtual; abstract;
   public
     constructor Create(aParent: TSQLDataArea; aIndex: integer);
-    procedure SetString(aValue: string);
+    procedure SetString(aValue: AnsiString);
     procedure Changed; virtual;
     procedure RowChange; virtual;
     function GetAsArray(Array_ID: TISC_QUAD): IArray; virtual; abstract;
@@ -268,13 +268,13 @@ type
     procedure Initialize; virtual;
 
   public
-    property AliasName: string read GetAliasName;
-    property FieldName: string read GetFieldName;
-    property OwnerName: string read GetOwnerName;
-    property RelationName: string read GetRelationName;
+    property AliasName: AnsiString read GetAliasName;
+    property FieldName: AnsiString read GetFieldName;
+    property OwnerName: AnsiString read GetOwnerName;
+    property RelationName: AnsiString read GetRelationName;
     property Parent: TSQLDataArea read FParent;
     property Index: integer read FIndex;
-    property Name: string read FName write SetName;
+    property Name: AnsiString read FName write SetName;
     property CharSetID: cardinal read GetCharSetID write SetCharSetID;
     property SQLType: cardinal read GetSQLType write SetSQLType;
     property SQLSubtype: integer read GetSubtype;
@@ -315,18 +315,18 @@ type
     function GetIndex: integer;
     function GetSQLType: cardinal; override;
     function getSubtype: integer;
-    function getRelationName: string;
-    function getOwnerName: string;
-    function getSQLName: string;    {Name of the column}
-    function getAliasName: string;  {Alias Name of column or Column Name if not alias}
-    function GetName: string; override;      {Disambiguated uppercase Field Name}
+    function getRelationName: AnsiString;
+    function getOwnerName: AnsiString;
+    function getSQLName: AnsiString;    {Name of the column}
+    function getAliasName: AnsiString;  {Alias Name of column or Column Name if not alias}
+    function GetName: AnsiString; override;      {Disambiguated uppercase Field Name}
     function GetScale: integer; override;
     function getCharSetID: cardinal; override;
     function GetIsNullable: boolean; override;
     function GetSize: cardinal;
     function GetArrayMetaData: IArrayMetaData;
     function GetBlobMetaData: IBlobMetaData;
-    property Name: string read GetName;
+    property Name: AnsiString read GetName;
     property Size: cardinal read GetSize;
     property CharSetID: cardinal read getCharSetID;
     property SQLSubtype: integer read getSubtype;
@@ -343,7 +343,7 @@ type
     function GetAsArray: IArray;
     function GetAsBlob: IBlob; overload;
     function GetAsBlob(BPB: IBPB): IBlob; overload;
-    function GetAsString: String; override;
+    function GetAsString: AnsiString; override;
     property AsBlob: IBlob read GetAsBlob;
  end;
 
@@ -353,7 +353,7 @@ type
   protected
     procedure CheckActive; override;
     procedure Changed; override;
-    procedure InternalSetAsString(Value: String); override;
+    procedure InternalSetAsString(Value: AnsiString); override;
     procedure SetScale(aValue: integer); override;
     procedure SetDataLength(len: cardinal); override;
     procedure SetSQLType(aValue: cardinal); override;
@@ -361,7 +361,7 @@ type
     procedure Clear;
     function GetModified: boolean; override;
     function GetAsPointer: Pointer;
-    procedure SetName(Value: string); override;
+    procedure SetName(Value: AnsiString); override;
     procedure SetIsNull(Value: Boolean);  override;
     procedure SetIsNullable(Value: Boolean); override;
     procedure SetAsArray(anArray: IArray);
@@ -378,7 +378,7 @@ type
     procedure SetAsFloat(AValue: Float);
     procedure SetAsPointer(AValue: Pointer);
     procedure SetAsShort(AValue: Short);
-    procedure SetAsString(AValue: String); override;
+    procedure SetAsString(AValue: AnsiString); override;
     procedure SetAsVariant(AValue: Variant);
     procedure SetAsBlob(aValue: IBlob);
     procedure SetAsQuad(AValue: TISC_QUAD);
@@ -401,10 +401,10 @@ type
     destructor Destroy; override;
   public
     {IMetaData}
-    function GetUniqueRelationName: string;
+    function GetUniqueRelationName: AnsiString;
     function getCount: integer;
     function getColumnMetaData(index: integer): IColumnMetaData;
-    function ByName(Idx: String): IColumnMetaData;
+    function ByName(Idx: AnsiString): IColumnMetaData;
   end;
 
   { TSQLParams }
@@ -423,7 +423,7 @@ type
     {ISQLParams}
     function getCount: integer;
     function getSQLParam(index: integer): ISQLParam;
-    function ByName(Idx: String): ISQLParam ;
+    function ByName(Idx: AnsiString): ISQLParam ;
     function GetModified: Boolean;
   end;
 
@@ -443,7 +443,7 @@ type
      constructor Create(aResults: TSQLDataArea);
       {IResults}
      function getCount: integer;
-     function ByName(Idx: String): ISQLData;
+     function ByName(Idx: AnsiString): ISQLData;
      function getSQLData(index: integer): ISQLData;
      procedure GetData(index: integer; var IsNull:boolean; var len: short; var data: PChar);
      function GetTransaction: ITransaction; virtual;
@@ -472,7 +472,7 @@ procedure TSQLDataArea.SetUniqueRelationName;
 var
   i: Integer;
   bUnique: Boolean;
-  RelationName: string;
+  RelationName: AnsiString;
 begin
   bUnique := True;
   for i := 0 to ColumnsInUseCount - 1 do
@@ -503,11 +503,11 @@ begin
     Column[i].Initialize;
 end;
 
-procedure TSQLDataArea.PreprocessSQL(sSQL: string; GenerateParamNames: boolean;
-  var sProcessedSQL: string);
+procedure TSQLDataArea.PreprocessSQL(sSQL: AnsiString; GenerateParamNames: boolean;
+  var sProcessedSQL: AnsiString);
 var
   cCurChar, cNextChar, cQuoteChar: Char;
-  sParamName: String;
+  sParamName: AnsiString;
   j, i, iLenSQL, iSQLPos: Integer;
   iCurState {$ifdef ALLOWDIALECT3PARAMNAMES}, iCurParamState {$endif}: Integer;
   iParamSuffix: Integer;
@@ -716,9 +716,9 @@ begin
   Result := Count;
 end;
 
-function TSQLDataArea.ColumnByName(Idx: string): TSQLVarData;
+function TSQLDataArea.ColumnByName(Idx: AnsiString): TSQLVarData;
 var
-  s: String;
+  s: AnsiString;
   i: Integer;
 begin
   {$ifdef UseCaseInSensitiveParamName}
@@ -755,7 +755,7 @@ begin
   Result := FParent.Statement;
 end;
 
-procedure TSQLVarData.SetName(AValue: string);
+procedure TSQLVarData.SetName(AValue: AnsiString);
 begin
   if FName = AValue then Exit;
   {$ifdef UseCaseInSensitiveParamName}
@@ -774,7 +774,7 @@ begin
   FUniqueName := true;
 end;
 
-procedure TSQLVarData.SetString(aValue: string);
+procedure TSQLVarData.SetString(aValue: AnsiString);
 begin
   {we take full advantage here of reference counted strings. When setting a string
    value, a reference is kept in FVarString and a pointer to it placed in the
@@ -799,7 +799,7 @@ end;
 
 procedure TSQLVarData.Initialize;
 
-  function FindVarByName(idx: string; limit: integer): TSQLVarData;
+  function FindVarByName(idx: AnsiString; limit: integer): TSQLVarData;
   var
     k: integer;
   begin
@@ -814,8 +814,8 @@ procedure TSQLVarData.Initialize;
 
 var
   j, j_len: Integer;
-  st: String;
-  sBaseName: string;
+  st: AnsiString;
+  sBaseName: AnsiString;
 begin
   RowChange;
 
@@ -902,7 +902,7 @@ function TSQLDataItem.AdjustScaleToCurrency(Value: Int64; aScale: Integer
 var
   Scaling : Int64;
   i : Integer;
-  FractionText, PadText, CurrText: string;
+  FractionText, PadText, CurrText: AnsiString;
 begin
   Result := 0;
   Scaling := 1;
@@ -1007,12 +1007,12 @@ begin
   //Do nothing by default
 end;
 
-procedure TSQLDataItem.InternalSetAsString(Value: String);
+procedure TSQLDataItem.InternalSetAsString(Value: AnsiString);
 begin
   //Do nothing by default
 end;
 
-function TSQLDataItem.Transliterate(s: string; CodePage: TSystemCodePage
+function TSQLDataItem.Transliterate(s: AnsiString; CodePage: TSystemCodePage
   ): RawByteString;
 begin
   Result := s;
@@ -1035,12 +1035,12 @@ begin
    //Do nothing by default
 end;
 
-function TSQLDataItem.GetSQLTypeName: string;
+function TSQLDataItem.GetSQLTypeName: AnsiString;
 begin
   Result := GetSQLTypeName(GetSQLType);
 end;
 
-class function TSQLDataItem.GetSQLTypeName(SQLType: short): string;
+class function TSQLDataItem.GetSQLTypeName(SQLType: short): AnsiString;
 begin
   Result := 'Unknown';
   case SQLType of
@@ -1271,7 +1271,7 @@ begin
 end;
 
 
-function TSQLDataItem.GetAsString: String;
+function TSQLDataItem.GetAsString: AnsiString;
 var
   sz: PChar;
   str_len: Integer;
@@ -1401,7 +1401,7 @@ begin
   //ignore unless overridden
 end;
 
-procedure TSQLDataItem.SetName(aValue: string);
+procedure TSQLDataItem.SetName(aValue: AnsiString);
 begin
   //ignore unless overridden
 end;
@@ -1577,7 +1577,7 @@ begin
   Changed;
 end;
 
-procedure TSQLDataItem.SetAsString(Value: String);
+procedure TSQLDataItem.SetAsString(Value: AnsiString);
 begin
   InternalSetAsString(Value);
 end;
@@ -1695,31 +1695,31 @@ begin
   result := FIBXSQLVAR.SQLSubtype;
 end;
 
-function TColumnMetaData.getRelationName: string;
+function TColumnMetaData.getRelationName: AnsiString;
 begin
   CheckActive;
    result :=  FIBXSQLVAR.RelationName;
 end;
 
-function TColumnMetaData.getOwnerName: string;
+function TColumnMetaData.getOwnerName: AnsiString;
 begin
   CheckActive;
   result :=  FIBXSQLVAR.OwnerName;
 end;
 
-function TColumnMetaData.getSQLName: string;
+function TColumnMetaData.getSQLName: AnsiString;
 begin
   CheckActive;
   result :=  FIBXSQLVAR.FieldName;
 end;
 
-function TColumnMetaData.getAliasName: string;
+function TColumnMetaData.getAliasName: AnsiString;
 begin
   CheckActive;
   result := FIBXSQLVAR.AliasName;
 end;
 
-function TColumnMetaData.GetName: string;
+function TColumnMetaData.GetName: AnsiString;
 begin
   CheckActive;
   Result := FIBXSQLVAR. Name;
@@ -1804,7 +1804,7 @@ begin
   result := FIBXSQLVAR.GetAsBlob(AsQuad,BPB);
 end;
 
-function TIBSQLData.GetAsString: String;
+function TIBSQLData.GetAsString: AnsiString;
 begin
   CheckActive;
   Result := '';
@@ -1822,7 +1822,7 @@ end;
 
 { TSQLParam }
 
-procedure TSQLParam.InternalSetAsString(Value: String);
+procedure TSQLParam.InternalSetAsString(Value: AnsiString);
 var b: IBlob;
 begin
   CheckActive;
@@ -1926,7 +1926,7 @@ begin
   Result := inherited GetAsPointer;
 end;
 
-procedure TSQLParam.SetName(Value: string);
+procedure TSQLParam.SetName(Value: AnsiString);
 begin
   CheckActive;
   FIBXSQLVAR.Name := Value;
@@ -2232,7 +2232,7 @@ begin
   end;
 end;
 
-procedure TSQLParam.SetAsString(AValue: String);
+procedure TSQLParam.SetAsString(AValue: AnsiString);
 var i: integer;
     OldSQLVar: TSQLVarData;
 begin
@@ -2345,7 +2345,7 @@ begin
   inherited Destroy;
 end;
 
-function TMetaData.GetUniqueRelationName: string;
+function TMetaData.GetUniqueRelationName: AnsiString;
 begin
   CheckActive;
   Result := FMetaData.UniqueRelationName;
@@ -2373,7 +2373,7 @@ begin
   end;
 end;
 
-function TMetaData.ByName(Idx: String): IColumnMetaData;
+function TMetaData.ByName(Idx: AnsiString): IColumnMetaData;
 var aIBXSQLVAR: TSQLVarData;
 begin
   CheckActive;
@@ -2433,7 +2433,7 @@ begin
   end;
 end;
 
-function TSQLParams.ByName(Idx: String): ISQLParam;
+function TSQLParams.ByName(Idx: AnsiString): ISQLParam;
 var aIBXSQLVAR: TSQLVarData;
 begin
   CheckActive;
@@ -2501,7 +2501,7 @@ begin
   Result := FResults.Count;
 end;
 
-function TResults.ByName(Idx: String): ISQLData;
+function TResults.ByName(Idx: AnsiString): ISQLData;
 var col: TSQLVarData;
 begin
   Result := nil;

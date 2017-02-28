@@ -99,7 +99,7 @@ type
     {IEvents}
     procedure GetEvents(EventNames: TStrings);
     procedure SetEvents(EventNames: TStrings); overload;
-    procedure SetEvents(Event: string); overload;
+    procedure SetEvents(Event: AnsiString); overload;
     procedure Cancel;
     function ExtractEventCounts: TEventCounts;
     function GetAttachment: IAttachment;
@@ -247,7 +247,7 @@ begin
   end;
 end;
 
-procedure TFBEvents.SetEvents(Event: string);
+procedure TFBEvents.SetEvents(Event: AnsiString);
 var S: TStringList;
 begin
   S := TStringList.Create;

@@ -44,8 +44,8 @@ type
   private
     procedure DoQuery(Attachment: IAttachment);
   public
-    function TestTitle: string; override;
-    procedure RunTest(CharSet: string; SQLDialect: integer); override;
+    function TestTitle: AnsiString; override;
+    procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
   end;
 
 
@@ -191,12 +191,12 @@ begin
   ReportResults(Statement);
 end;
 
-function TTest4.TestTitle: string;
+function TTest4.TestTitle: AnsiString;
 begin
   Result := 'Test 4: Update, Insert and Delete Queries';
 end;
 
-procedure TTest4.RunTest(CharSet: string; SQLDialect: integer);
+procedure TTest4.RunTest(CharSet: AnsiString; SQLDialect: integer);
 var Attachment: IAttachment;
     DPB: IDPB;
 begin

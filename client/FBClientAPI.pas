@@ -107,7 +107,7 @@ type
     {IStatus}
     function GetIBErrorCode: Long;
     function Getsqlcode: Long;
-    function GetMessage: string;
+    function GetMessage: AnsiString;
     function CheckStatusVector(ErrorCodes: array of TFBStatusCode): Boolean;
     function GetIBDataBaseErrorMessages: TIBDataBaseErrorMessages;
     procedure SetIBDataBaseErrorMessages(Value: TIBDataBaseErrorMessages);
@@ -121,9 +121,9 @@ type
     procedure LoadIBLibrary;
   protected
     function GetProcAddr(ProcName: PChar): Pointer;
-    function GetOverrideLibName: string;
+    function GetOverrideLibName: AnsiString;
     {$IFDEF UNIX}
-    function GetFirebirdLibList: string; virtual; abstract;
+    function GetFirebirdLibList: AnsiString; virtual; abstract;
     {$ENDIF}
     procedure LoadInterface; virtual;
   public
@@ -156,11 +156,11 @@ type
     function GetStatus: IStatus; virtual; abstract;
     function IsLibraryLoaded: boolean;
     function IsEmbeddedServer: boolean; virtual; abstract;
-    function GetLibraryName: string;
-    function GetCharsetName(CharSetID: integer): string;
+    function GetLibraryName: AnsiString;
+    function GetCharsetName(CharSetID: integer): AnsiString;
     function CharSetID2CodePage(CharSetID: integer; var CodePage: TSystemCodePage): boolean;
     function CodePage2CharSetID(CodePage: TSystemCodePage; var CharSetID: integer): boolean;
-    function CharSetName2CharSetID(CharSetName: string; var CharSetID: integer): boolean;
+    function CharSetName2CharSetID(CharSetName: AnsiString; var CharSetID: integer): boolean;
     function CharSetWidth(CharSetID: integer; var Width: integer): boolean;
   end;
 
@@ -176,8 +176,8 @@ const
 {$ENDIF}
 
 var
-  FFBLibraryName: string;
-  FFBLibraryPath: string;
+  FFBLibraryName: AnsiString;
+  FFBLibraryPath: AnsiString;
   IBLibrary: TLibHandle;
   FIBCS: TRTLCriticalSection;
 
@@ -202,7 +202,7 @@ Registry,SysUtils;
 type
   TCharsetMap = record
     CharsetID: integer;
-    CharSetName: string;
+    CharSetName: AnsiString;
     CharSetWidth: integer;
     CodePage: TSystemCodePage;
   end;
@@ -341,7 +341,7 @@ end;
 {Under Unixes, if using an embedded server then set up local TMP and LOCK Directories}
 
 procedure TFBClientAPI.SetupEnvironment;
-var TmpDir: string;
+var TmpDir: AnsiString;
 begin
   {$IFDEF UNIX}
     TmpDir := GetTempDir +
@@ -384,7 +384,7 @@ begin
     raise Exception.CreateFmt(SFirebirdAPIFuncNotFound,[ProcName]);
 end;
 
-function TFBClientAPI.GetOverrideLibName: string;
+function TFBClientAPI.GetOverrideLibName: AnsiString;
 begin
   Result := '';
   if AllowUseOfFBLIB then
@@ -406,12 +406,12 @@ begin
   isc_free := GetProcAddr('isc_free'); {do not localize}
 end;
 
-function TFBClientAPI.GetLibraryName: string;
+function TFBClientAPI.GetLibraryName: AnsiString;
 begin
   Result := FFBLibraryName;
 end;
 
-function TFBClientAPI.GetCharsetName(CharSetID: integer): string;
+function TFBClientAPI.GetCharsetName(CharSetID: integer): AnsiString;
 begin
   Result := '';
   if (CharSetID >= Low(CharSetMap)) and (CharSetID <= High(CharSetMap)) and
@@ -449,7 +449,7 @@ begin
     end;
 end;
 
-function TFBClientAPI.CharSetName2CharSetID(CharSetName: string;
+function TFBClientAPI.CharSetName2CharSetID(CharSetName: AnsiString;
   var CharSetID: integer): boolean;
 var i: integer;
 begin
@@ -501,7 +501,7 @@ begin
     Result := isc_sqlcode(PISC_STATUS(StatusVector));
 end;
 
-function TFBStatus.GetMessage: string;
+function TFBStatus.GetMessage: AnsiString;
 var local_buffer: array[0..IBHugeLocalBufferLength - 1] of char;
     IBDataBaseErrorMessages: TIBDataBaseErrorMessages;
     sqlcode: Long;

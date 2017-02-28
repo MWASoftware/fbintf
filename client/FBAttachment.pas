@@ -45,16 +45,16 @@ type
     FDPB: IDPB;
     FFirebirdAPI: IFirebirdAPI;
   protected
-    FDatabaseName: string;
+    FDatabaseName: AnsiString;
     FRaiseExceptionOnConnectError: boolean;
     FSQLDialect: integer;
     FHasDefaultCharSet: boolean;
     FCharSetID: integer;
     FCodePage: TSystemCodePage;
-    constructor Create(DatabaseName: string; DPB: IDPB;
+    constructor Create(DatabaseName: AnsiString; DPB: IDPB;
       RaiseExceptionOnConnectError: boolean);
     procedure CheckHandle; virtual; abstract;
-    function GenerateCreateDatabaseSQL(DatabaseName: string; aDPB: IDPB): string;
+    function GenerateCreateDatabaseSQL(DatabaseName: AnsiString; aDPB: IDPB): AnsiString;
     procedure EndAllTransactions;
     procedure SetParameters(SQLParams: ISQLParams; params: array of const);
   public
@@ -64,37 +64,37 @@ type
     function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction; overload; virtual; abstract;
     function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionCompletion): ITransaction; overload; virtual; abstract;
     procedure Disconnect(Force: boolean=false); virtual; abstract;
-    procedure ExecImmediate(transaction: ITransaction; sql: string; aSQLDialect: integer); overload; virtual; abstract;
-    procedure ExecImmediate(TPB: array of byte; sql: string; aSQLDialect: integer); overload;
-    procedure ExecImmediate(transaction: ITransaction; sql: string); overload;
-    procedure ExecImmediate(TPB: array of byte; sql: string); overload;
-    function ExecuteSQL(TPB: array of byte; sql: string; SQLDialect: integer; params: array of const): IResults; overload;
-    function ExecuteSQL(transaction: ITransaction; sql: string; SQLDialect: integer; params: array of const): IResults; overload;
-    function ExecuteSQL(TPB: array of byte; sql: string; params: array of const): IResults; overload;
-    function ExecuteSQL(transaction: ITransaction; sql: string; params: array of const): IResults; overload;
-    function OpenCursor(transaction: ITransaction; sql: string; aSQLDialect: integer): IResultSet; overload;
-    function OpenCursor(transaction: ITransaction; sql: string; aSQLDialect: integer;
+    procedure ExecImmediate(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer); overload; virtual; abstract;
+    procedure ExecImmediate(TPB: array of byte; sql: AnsiString; aSQLDialect: integer); overload;
+    procedure ExecImmediate(transaction: ITransaction; sql: AnsiString); overload;
+    procedure ExecImmediate(TPB: array of byte; sql: AnsiString); overload;
+    function ExecuteSQL(TPB: array of byte; sql: AnsiString; SQLDialect: integer; params: array of const): IResults; overload;
+    function ExecuteSQL(transaction: ITransaction; sql: AnsiString; SQLDialect: integer; params: array of const): IResults; overload;
+    function ExecuteSQL(TPB: array of byte; sql: AnsiString; params: array of const): IResults; overload;
+    function ExecuteSQL(transaction: ITransaction; sql: AnsiString; params: array of const): IResults; overload;
+    function OpenCursor(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer): IResultSet; overload;
+    function OpenCursor(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer;
                              params: array of const): IResultSet; overload;
-    function OpenCursor(transaction: ITransaction; sql: string): IResultSet; overload;
-    function OpenCursor(transaction: ITransaction; sql: string;
+    function OpenCursor(transaction: ITransaction; sql: AnsiString): IResultSet; overload;
+    function OpenCursor(transaction: ITransaction; sql: AnsiString;
                              params: array of const): IResultSet; overload;
-    function OpenCursorAtStart(transaction: ITransaction; sql: string; aSQLDialect: integer): IResultSet; overload;
-    function OpenCursorAtStart(transaction: ITransaction; sql: string; aSQLDialect: integer;
+    function OpenCursorAtStart(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer): IResultSet; overload;
+    function OpenCursorAtStart(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer;
                              params: array of const): IResultSet; overload;
-    function OpenCursorAtStart(transaction: ITransaction; sql: string): IResultSet; overload;
-    function OpenCursorAtStart(transaction: ITransaction; sql: string;
+    function OpenCursorAtStart(transaction: ITransaction; sql: AnsiString): IResultSet; overload;
+    function OpenCursorAtStart(transaction: ITransaction; sql: AnsiString;
                              params: array of const): IResultSet; overload;
-    function OpenCursorAtStart(sql: string): IResultSet; overload;
-    function OpenCursorAtStart(sql: string;
+    function OpenCursorAtStart(sql: AnsiString): IResultSet; overload;
+    function OpenCursorAtStart(sql: AnsiString;
                              params: array of const): IResultSet; overload;
-    function Prepare(transaction: ITransaction; sql: string; aSQLDialect: integer): IStatement; overload; virtual; abstract;
-    function Prepare(transaction: ITransaction; sql: string): IStatement; overload;
-    function PrepareWithNamedParameters(transaction: ITransaction; sql: string;
+    function Prepare(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer): IStatement; overload; virtual; abstract;
+    function Prepare(transaction: ITransaction; sql: AnsiString): IStatement; overload;
+    function PrepareWithNamedParameters(transaction: ITransaction; sql: AnsiString;
                        aSQLDialect: integer; GenerateParamNames: boolean=false): IStatement; overload; virtual; abstract;
-    function PrepareWithNamedParameters(transaction: ITransaction; sql: string;
+    function PrepareWithNamedParameters(transaction: ITransaction; sql: AnsiString;
                        GenerateParamNames: boolean=false): IStatement; overload;
     function GetEventHandler(Events: TStrings): IEvents; overload; virtual; abstract;
-    function GetEventHandler(Event: string): IEvents; overload;
+    function GetEventHandler(Event: AnsiString): IEvents; overload;
 
     function GetSQLDialect: integer;
     function OpenBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob; overload; virtual; abstract;
@@ -112,7 +112,7 @@ uses FBMessages, FBTransaction;
 
 { TFBAttachment }
 
-constructor TFBAttachment.Create(DatabaseName: string; DPB: IDPB;
+constructor TFBAttachment.Create(DatabaseName: AnsiString; DPB: IDPB;
   RaiseExceptionOnConnectError: boolean);
 begin
   inherited Create;
@@ -123,8 +123,8 @@ begin
   FRaiseExceptionOnConnectError := RaiseExceptionOnConnectError;
 end;
 
-function TFBAttachment.GenerateCreateDatabaseSQL(DatabaseName: string;  aDPB: IDPB): string;
-var CreateParams: string;
+function TFBAttachment.GenerateCreateDatabaseSQL(DatabaseName: AnsiString;  aDPB: IDPB): AnsiString;
+var CreateParams: AnsiString;
     DPBItem: IDPBItem;
 begin
   CreateParams := '';
@@ -217,29 +217,29 @@ begin
   Result := TBPB.Create;
 end;
 
-procedure TFBAttachment.ExecImmediate(TPB: array of byte; sql: string;
+procedure TFBAttachment.ExecImmediate(TPB: array of byte; sql: AnsiString;
   aSQLDialect: integer);
 begin
   ExecImmediate(StartTransaction(TPB,taCommit),sql,aSQLDialect);
 end;
 
-procedure TFBAttachment.ExecImmediate(transaction: ITransaction; sql: string);
+procedure TFBAttachment.ExecImmediate(transaction: ITransaction; sql: AnsiString);
 begin
   ExecImmediate(transaction,sql,FSQLDialect);
 end;
 
-procedure TFBAttachment.ExecImmediate(TPB: array of byte; sql: string);
+procedure TFBAttachment.ExecImmediate(TPB: array of byte; sql: AnsiString);
 begin
   ExecImmediate(StartTransaction(TPB,taCommit),sql,FSQLDialect);
 end;
 
-function TFBAttachment.ExecuteSQL(TPB: array of byte; sql: string;
+function TFBAttachment.ExecuteSQL(TPB: array of byte; sql: AnsiString;
   SQLDialect: integer; params: array of const): IResults;
 begin
   Result := ExecuteSQL(StartTransaction(TPB,taCommit),sql,FSQLDialect,params);
 end;
 
-function TFBAttachment.ExecuteSQL(transaction: ITransaction; sql: string;
+function TFBAttachment.ExecuteSQL(transaction: ITransaction; sql: AnsiString;
   SQLDialect: integer; params: array of const): IResults;
 begin
   with Prepare(transaction,sql,SQLDialect) do
@@ -249,13 +249,13 @@ begin
   end;
 end;
 
-function TFBAttachment.ExecuteSQL(TPB: array of byte; sql: string;
+function TFBAttachment.ExecuteSQL(TPB: array of byte; sql: AnsiString;
   params: array of const): IResults;
 begin
    Result := ExecuteSQL(StartTransaction(TPB,taCommit),sql,params);
 end;
 
-function TFBAttachment.ExecuteSQL(transaction: ITransaction; sql: string;
+function TFBAttachment.ExecuteSQL(transaction: ITransaction; sql: AnsiString;
   params: array of const): IResults;
 begin
   with Prepare(transaction,sql,FSQLDialect) do
@@ -265,13 +265,13 @@ begin
   end;
 end;
 
-function TFBAttachment.OpenCursor(transaction: ITransaction; sql: string;
+function TFBAttachment.OpenCursor(transaction: ITransaction; sql: AnsiString;
   aSQLDialect: integer): IResultSet;
 begin
   Result := OpenCursor(transaction,sql,aSQLDialect,[]);
 end;
 
-function TFBAttachment.OpenCursor(transaction: ITransaction; sql: string;
+function TFBAttachment.OpenCursor(transaction: ITransaction; sql: AnsiString;
   aSQLDialect: integer; params: array of const): IResultSet;
 var Statement: IStatement;
 begin
@@ -281,68 +281,68 @@ begin
   Result := Statement.OpenCursor;
 end;
 
-function TFBAttachment.OpenCursor(transaction: ITransaction; sql: string
+function TFBAttachment.OpenCursor(transaction: ITransaction; sql: AnsiString
   ): IResultSet;
 begin
   Result := OpenCursor(transaction,sql,FSQLDialect,[]);
 end;
 
-function TFBAttachment.OpenCursor(transaction: ITransaction; sql: string;
+function TFBAttachment.OpenCursor(transaction: ITransaction; sql: AnsiString;
   params: array of const): IResultSet;
 begin
   Result := OpenCursor(transaction,sql,FSQLDialect,params);
 end;
 
 function TFBAttachment.OpenCursorAtStart(transaction: ITransaction;
-  sql: string; aSQLDialect: integer): IResultSet;
+  sql: AnsiString; aSQLDialect: integer): IResultSet;
 begin
   Result := OpenCursor(transaction,sql,aSQLDialect,[]);
   Result.FetchNext;
 end;
 
 function TFBAttachment.OpenCursorAtStart(transaction: ITransaction;
-  sql: string; aSQLDialect: integer; params: array of const): IResultSet;
+  sql: AnsiString; aSQLDialect: integer; params: array of const): IResultSet;
 begin
   Result := OpenCursor(transaction,sql,aSQLDialect,params);
   Result.FetchNext;
 end;
 
-function TFBAttachment.OpenCursorAtStart(transaction: ITransaction; sql: string
+function TFBAttachment.OpenCursorAtStart(transaction: ITransaction; sql: AnsiString
   ): IResultSet;
 begin
   Result := OpenCursorAtStart(transaction,sql,FSQLDialect,[]);
 end;
 
 function TFBAttachment.OpenCursorAtStart(transaction: ITransaction;
-  sql: string; params: array of const): IResultSet;
+  sql: AnsiString; params: array of const): IResultSet;
 begin
   Result := OpenCursorAtStart(transaction,sql,FSQLDialect,params);
 end;
 
-function TFBAttachment.OpenCursorAtStart(sql: string): IResultSet;
+function TFBAttachment.OpenCursorAtStart(sql: AnsiString): IResultSet;
 begin
   Result := OpenCursorAtStart(sql,[]);
 end;
 
-function TFBAttachment.OpenCursorAtStart(sql: string;
+function TFBAttachment.OpenCursorAtStart(sql: AnsiString;
   params: array of const): IResultSet;
 begin
   Result := OpenCursorAtStart(StartTransaction([isc_tpb_read,isc_tpb_wait,isc_tpb_concurrency],taCommit),sql,FSQLDialect,params);
 end;
 
-function TFBAttachment.Prepare(transaction: ITransaction; sql: string
+function TFBAttachment.Prepare(transaction: ITransaction; sql: AnsiString
   ): IStatement;
 begin
   Result := Prepare(transaction,sql,FSQLDialect);
 end;
 
 function TFBAttachment.PrepareWithNamedParameters(transaction: ITransaction;
-  sql: string; GenerateParamNames: boolean): IStatement;
+  sql: AnsiString; GenerateParamNames: boolean): IStatement;
 begin
   Result := PrepareWithNamedParameters(transaction,sql,FSQLDialect,GenerateParamNames);
 end;
 
-function TFBAttachment.GetEventHandler(Event: string): IEvents;
+function TFBAttachment.GetEventHandler(Event: AnsiString): IEvents;
 var S: TStringList;
 begin
   S := TStringList.Create;

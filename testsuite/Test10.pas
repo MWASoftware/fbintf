@@ -38,8 +38,8 @@ type
     procedure EventReport(Sender: IEvents);
     procedure ShowEventCounts(Intf: IEvents);
   public
-    function TestTitle: string; override;
-    procedure RunTest(CharSet: string; SQLDialect: integer); override;
+    function TestTitle: AnsiString; override;
+    procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
   end;
 
 
@@ -144,12 +144,12 @@ begin
     writeln(OutFile,'Event Counts: ',EventCounts[i].EventName,', Count = ',EventCounts[i].Count);
 end;
 
-function TTest10.TestTitle: string;
+function TTest10.TestTitle: AnsiString;
 begin
   Result := 'Test 10: Event Handling';
 end;
 
-procedure TTest10.RunTest(CharSet: string; SQLDialect: integer);
+procedure TTest10.RunTest(CharSet: AnsiString; SQLDialect: integer);
 var Attachment: IAttachment;
     DPB: IDPB;
 begin

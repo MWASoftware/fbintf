@@ -47,7 +47,7 @@ type
     FCodePage: TSystemCodePage;
   protected
     procedure LoadMetaData(aAttachment: IAttachment; aTransaction: ITransaction;
-                   relationName, columnName: string); override;
+                   relationName, columnName: AnsiString); override;
   public
     function GetCharSetID: cardinal; override;
     function GetCodePage: TSystemCodePage; override;
@@ -80,7 +80,7 @@ const
   { TFB25ArrayMetaData }
 
 procedure TFB25ArrayMetaData.LoadMetaData(aAttachment: IAttachment;
-  aTransaction: ITransaction; relationName, columnName: string);
+  aTransaction: ITransaction; relationName, columnName: AnsiString);
 var
   DBHandle: TISC_DB_HANDLE;
   TRHandle: TISC_TR_HANDLE;

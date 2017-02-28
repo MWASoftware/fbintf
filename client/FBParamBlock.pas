@@ -96,7 +96,7 @@ type
   public
      function getAsInteger: integer;
      function getParamType: byte;
-     function getAsString: string;
+     function getAsString: AnsiString;
      function getAsByte: byte;
      procedure addByte(aValue: byte);
      procedure addShortInteger(aValue: integer);
@@ -107,9 +107,9 @@ type
      procedure SetAsInteger2(aValue: integer);
      procedure SetAsShortInteger(aValue: integer);
      procedure SetAsTinyInteger(aValue: integer);
-     procedure SetAsString(aValue: string);
-     procedure SetAsString2(aValue: string);
-     procedure SetAsString0(aValue: string);
+     procedure SetAsString(aValue: AnsiString);
+     procedure SetAsString2(aValue: AnsiString);
+     procedure SetAsString0(aValue: AnsiString);
   end;
 
   { TDPBItem }
@@ -132,7 +132,7 @@ type
     procedure ISRBItem.SetAsString = SetAsString2;
     procedure ISRBItem.SetAsByte = SetAsByte2;
     {$ELSE}
-    procedure SetAsString(aValue: string) ;
+    procedure SetAsString(aValue: AnsiString) ;
     procedure SetAsByte(aValue: byte);
     {$ENDIF}
   end;
@@ -146,7 +146,7 @@ type
    procedure ISQPBItem.SetAsInteger = SetAsInteger2;
    procedure ISQPBItem.SetAsString = SetAsString2;
    {$ELSE}
-   procedure SetAsString(aValue: string) ;
+   procedure SetAsString(aValue: AnsiString) ;
    procedure SetAsInteger(aValue: integer);
    {$ENDIF}
   end;
@@ -304,7 +304,7 @@ end;
 { TSRBItem }
 
 {$IFNDEF FPC}
-procedure TSRBItem.SetAsString(aValue: string);
+procedure TSRBItem.SetAsString(aValue: AnsiString);
 begin
   SetAsString2(aValue);
 end;
@@ -335,7 +335,7 @@ begin
 end;
 
 {$IFNDEF FPC}
-procedure TSQPBItem.SetAsString(aValue: string);
+procedure TSQPBItem.SetAsString(aValue: AnsiString);
 begin
   SetAsString2(aValue);
 end;
@@ -381,7 +381,7 @@ begin
   Result := byte(FParamData^.FBufPtr^);
 end;
 
-function TParamBlockItem.getAsString: string;
+function TParamBlockItem.getAsString: AnsiString;
 var len: byte;
 begin
   Result := '';
@@ -549,7 +549,7 @@ end;
 
 {Short string encoding}
 
-procedure TParamBlockItem.SetAsString(aValue: string);
+procedure TParamBlockItem.SetAsString(aValue: AnsiString);
 var len: integer;
 begin
   with FParamData^ do
@@ -567,7 +567,7 @@ end;
 
 {Long string up to 65535 encoding}
 
-procedure TParamBlockItem.SetAsString2(aValue: string);
+procedure TParamBlockItem.SetAsString2(aValue: AnsiString);
 var len: integer;
 begin
   with FParamData^ do
@@ -586,7 +586,7 @@ end;
 
 {Zero byte terminated string encoding}
 
-procedure TParamBlockItem.SetAsString0(aValue: string);
+procedure TParamBlockItem.SetAsString0(aValue: AnsiString);
 var len: integer;
 begin
   with FParamData^ do

@@ -57,8 +57,8 @@ type
     FOpen: boolean;
     FPrepared: boolean;
     FPrepareSeqNo: integer; {used to check for out of date references from interfaces}
-    FSQL: string;
-    FProcessedSQL: string;
+    FSQL: AnsiString;
+    FProcessedSQL: AnsiString;
     FHasParamNames: boolean;
     FBOF: boolean;
     FEOF: boolean;
@@ -79,9 +79,9 @@ type
     procedure InternalClose(Force: boolean); virtual; abstract;
   public
     constructor Create(Attachment: IAttachment; Transaction: ITransaction;
-      sql: string; SQLDialect: integer);
+      sql: AnsiString; SQLDialect: integer);
     constructor CreateWithParameterNames(Attachment: IAttachment; Transaction: ITransaction;
-      sql: string;  SQLDialect: integer; GenerateParamNames: boolean =false);
+      sql: AnsiString;  SQLDialect: integer; GenerateParamNames: boolean =false);
     destructor Destroy; override;
     procedure Close;
     procedure TransactionEnding(aTransaction: ITransaction; Force: boolean);
@@ -93,17 +93,17 @@ type
     function GetRowsAffected(var SelectCount, InsertCount, UpdateCount,
       DeleteCount: integer): boolean;
     function GetSQLStatementType: TIBSQLStatementTypes;
-    function GetSQLText: string;
+    function GetSQLText: AnsiString;
     function GetSQLDialect: integer;
 
     {GetDSQLInfo only supports isc_info_sql_stmt_type, isc_info_sql_get_plan, isc_info_sql_records}
     procedure Prepare(aTransaction: ITransaction=nil); virtual;
     function Execute(aTransaction: ITransaction=nil): IResults;
     function OpenCursor(aTransaction: ITransaction=nil): IResultSet;
-    function CreateBlob(paramName: string): IBlob; overload;
+    function CreateBlob(paramName: AnsiString): IBlob; overload;
     function CreateBlob(index: integer): IBlob; overload;
     function CreateBlob(column: TColumnMetaData): IBlob; overload; virtual; abstract;
-    function CreateArray(paramName: string): IArray; overload;
+    function CreateArray(paramName: AnsiString): IArray; overload;
     function CreateArray(index: integer): IArray;  overload;
     function CreateArray(column: TColumnMetaData): IArray; overload; virtual; abstract;
     function GetAttachment: IAttachment;
@@ -133,7 +133,7 @@ begin
 end;
 
 constructor TFBStatement.Create(Attachment: IAttachment;
-  Transaction: ITransaction; sql: string; SQLDialect: integer);
+  Transaction: ITransaction; sql: AnsiString; SQLDialect: integer);
 begin
   inherited Create(Transaction as TFBTransaction,2);
   FAttachmentIntf := Attachment;
@@ -143,7 +143,7 @@ begin
 end;
 
 constructor TFBStatement.CreateWithParameterNames(Attachment: IAttachment;
-  Transaction: ITransaction; sql: string; SQLDialect: integer;
+  Transaction: ITransaction; sql: AnsiString; SQLDialect: integer;
   GenerateParamNames: boolean);
 begin
   FHasParamNames := true;
@@ -214,7 +214,7 @@ begin
   Result := FSQLStatementType;
 end;
 
-function TFBStatement.GetSQLText: string;
+function TFBStatement.GetSQLText: AnsiString;
 begin
   Result := FSQL;
 end;
@@ -253,7 +253,7 @@ begin
     Result := InternalOpenCursor(aTransaction);
 end;
 
-function TFBStatement.CreateBlob(paramName: string): IBlob;
+function TFBStatement.CreateBlob(paramName: AnsiString): IBlob;
 var column: TColumnMetaData;
 begin
   InternalPrepare;
@@ -269,7 +269,7 @@ begin
   Result := CreateBlob(SQLParams[index] as TSQLParam);
 end;
 
-function TFBStatement.CreateArray(paramName: string): IArray;
+function TFBStatement.CreateArray(paramName: AnsiString): IArray;
 var column: TColumnMetaData;
 begin
   InternalPrepare;

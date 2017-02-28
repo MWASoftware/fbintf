@@ -31,8 +31,8 @@ TTest2 = class(TTestBase)
 private
   procedure DoQuery(Attachment: IAttachment);
 public
-  function TestTitle: string; override;
-  procedure RunTest(CharSet: string; SQLDialect: integer); override;
+  function TestTitle: AnsiString; override;
+  procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
 end;
 
 
@@ -70,12 +70,12 @@ begin
     end;
 end;
 
-function TTest2.TestTitle: string;
+function TTest2.TestTitle: AnsiString;
 begin
   Result := 'Test 2: Open the employee database and run a query';
 end;
 
-procedure TTest2.RunTest(CharSet: string; SQLDialect: integer);
+procedure TTest2.RunTest(CharSet: AnsiString; SQLDialect: integer);
 var Attachment: IAttachment;
     DPB: IDPB;
 begin

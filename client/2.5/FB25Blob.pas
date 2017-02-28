@@ -85,9 +85,9 @@ type
      procedure NeedFullMetadata; override;
    public
      constructor Create(Attachment: TFB25Attachment; Transaction: TFB25Transaction;
-       RelationName, ColumnName: string); overload;
+       RelationName, ColumnName: AnsiString); overload;
      constructor Create(Attachment: TFB25Attachment; Transaction: TFB25Transaction;
-       RelationName, ColumnName: string; SubType: integer); overload;
+       RelationName, ColumnName: AnsiString; SubType: integer); overload;
   end;
 
 
@@ -157,7 +157,7 @@ begin
 end;
 
 constructor TFB25BlobMetaData.Create(Attachment: TFB25Attachment;
-  Transaction: TFB25Transaction; RelationName, ColumnName: string);
+  Transaction: TFB25Transaction; RelationName, ColumnName: AnsiString);
 begin
   inherited Create(Transaction,RelationName,ColumnName);
   FAttachment := Attachment;
@@ -165,7 +165,7 @@ begin
 end;
 
 constructor TFB25BlobMetaData.Create(Attachment: TFB25Attachment;
-  Transaction: TFB25Transaction; RelationName, ColumnName: string;
+  Transaction: TFB25Transaction; RelationName, ColumnName: AnsiString;
   SubType: integer);
 begin
   Create(Attachment,Transaction,RelationName,ColumnName);

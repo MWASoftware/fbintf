@@ -26,8 +26,8 @@ type
     procedure UpdateDatabase(Attachment: IAttachment);
     procedure QueryDatabase(Attachment: IAttachment);
   public
-    function TestTitle: string; override;
-    procedure RunTest(CharSet: string; SQLDialect: integer); override;
+    function TestTitle: AnsiString; override;
+    procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
   end;
 
 implementation
@@ -81,12 +81,12 @@ begin
   ReportResults(Statement);
 end;
 
-function TTest12.TestTitle: string;
+function TTest12.TestTitle: AnsiString;
 begin
   Result := 'Test 12: Character Sets';
 end;
 
-procedure TTest12.RunTest(CharSet: string; SQLDialect: integer);
+procedure TTest12.RunTest(CharSet: AnsiString; SQLDialect: integer);
 var DPB: IDPB;
     Attachment: IAttachment;
 begin

@@ -34,8 +34,8 @@ type
   private
     procedure DoQuery(Attachment: IAttachment);
   public
-    function TestTitle: string; override;
-    procedure RunTest(CharSet: string; SQLDialect: integer); override;
+    function TestTitle: AnsiString; override;
+    procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
   end;
 
 
@@ -93,12 +93,12 @@ begin
 
 end;
 
-function TTest3.TestTitle: string;
+function TTest3.TestTitle: AnsiString;
 begin
   Result := 'Test 3: ad hoc queries';
 end;
 
-procedure TTest3.RunTest(CharSet: string; SQLDialect: integer);
+procedure TTest3.RunTest(CharSet: AnsiString; SQLDialect: integer);
 var Attachment: IAttachment;
     DPB: IDPB;
 begin

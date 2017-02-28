@@ -23,8 +23,8 @@ type
   private
     procedure GetDBInformation(Attachment: IAttachment);
   public
-    function TestTitle: string; override;
-    procedure RunTest(CharSet: string; SQLDialect: integer); override;
+    function TestTitle: AnsiString; override;
+    procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
   end;
 
 implementation
@@ -54,12 +54,12 @@ begin
     WriteDBInfo(DBInfo);
 end;
 
-function TTest9.TestTitle: string;
+function TTest9.TestTitle: AnsiString;
 begin
   Result := 'Test 9: Database Information tests';
 end;
 
-procedure TTest9.RunTest(CharSet: string; SQLDialect: integer);
+procedure TTest9.RunTest(CharSet: AnsiString; SQLDialect: integer);
 var DPB: IDPB;
     Attachment: IAttachment;
 begin
