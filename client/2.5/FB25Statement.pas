@@ -850,7 +850,7 @@ begin
   {$ELSE}
   counters[psUserTime] := 0;
   {$ENDIF}
-  counters[psRealTime] := Int64(TimeStampToMSecs(DateTimeToTimeStamp(Now)));
+  counters[psRealTime] := TimeStampToMSecs(DateTimeToTimeStamp(Now));
 
   DBInfo := GetAttachment.GetDBInformation([isc_info_reads,isc_info_writes,
          isc_info_fetches, isc_info_num_buffers, isc_info_current_memory,
@@ -1133,7 +1133,7 @@ begin
         IBDatabaseError;
     end;
   finally
-    if (FSQLRecord.FTransaction <> nil) and (FSQLRecord.FTransaction <> FTransactionIntf) then
+    if (FSQLRecord.FTransaction <> nil) and ((FSQLRecord.FTransaction as ITransaction) <> FTransactionIntf) then
       RemoveMonitor(FSQLRecord.FTransaction);
     FOpen := False;
     FExecTransactionIntf := nil;

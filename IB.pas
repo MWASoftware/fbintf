@@ -626,7 +626,7 @@ type
                 psRealTime, psUserTime, psBuffers,
                 psReads, psWrites, psFetches,psDeltaMemory);
 
-  TPerfCounters = array[TPerfStats] of Int64;
+  TPerfCounters = array[TPerfStats] of comp;
 
   {The IStatement interface provides access to an SQL Statement once it has been
    initially prepared. The interface is returned from the IAttachment interface.

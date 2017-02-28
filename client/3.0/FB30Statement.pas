@@ -984,7 +984,7 @@ begin
         FStatementIntf := (GetAttachment as TFB30Attachment).AttachmentIntf.prepare(StatusIntf,
                             (FTransactionIntf as TFB30Transaction).TransactionIntf,
                             Length(FProcessedSQL),
-                            PChar(FProcessedSQL),
+                            PAnsiChar(FProcessedSQL),
                             FSQLDialect,
                             Firebird.IStatement.PREPARE_PREFETCH_METADATA);
       end
@@ -992,7 +992,7 @@ begin
       FStatementIntf := (GetAttachment as TFB30Attachment).AttachmentIntf.prepare(StatusIntf,
                           (FTransactionIntf as TFB30Transaction).TransactionIntf,
                           Length(FSQL),
-                          PChar(FSQL),
+                          PAnsiChar(FSQL),
                           FSQLDialect,
                           Firebird.IStatement.PREPARE_PREFETCH_METADATA);
       Check4DataBaseError;
@@ -1211,7 +1211,7 @@ begin
       if not Force then Check4DataBaseError;
     end;
   finally
-    if (FSQLRecord.FTransaction <> nil) and (FSQLRecord.FTransaction <> FTransactionIntf) then
+    if (FSQLRecord.FTransaction <> nil) and ((FSQLRecord.FTransaction as ITransaction) <> FTransactionIntf) then
       RemoveMonitor(FSQLRecord.FTransaction);
     FOpen := False;
     FExecTransactionIntf := nil;

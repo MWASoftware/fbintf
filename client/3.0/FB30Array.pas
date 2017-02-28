@@ -98,10 +98,23 @@ type
 
   { TSDLBlock }
 
+{$IFDEF FPC}
   TSDLBlock = class (TCustomParamBlock<TSDLItem,ISDLItem>, ISDL)
   public
     constructor Create;
   end;
+{$ELSE}
+  TSDLBlock = class(TParamBlock,ISDL)
+  public
+    constructor Create;
+
+  public
+    {ISDL}
+    function Add(ParamType: byte): ISDLItem;
+    function getItems(index: integer): ISDLItem;
+    function Find(ParamType: byte): ISDLItem;
+end;
+{$ENDIF}
 
 implementation
 
@@ -156,7 +169,7 @@ begin
       with aAttachment as TFBAttachment do
       begin
         if HasDefaultCharSet  and FirebirdClientAPI.CharSetWidth(CharSetID,CharWidth) then
-          FArrayDesc.array_desc_length *= CharWidth;
+          FArrayDesc.array_desc_length := FArrayDesc.array_desc_length * CharWidth;
       end;
       repeat
         with FArrayDesc.array_desc_bounds[Data[4].AsInteger] do
@@ -301,6 +314,31 @@ begin
   FDataLength := 1;
   FBuffer^ := char(isc_sdl_version1);
 end;
+
+{$IFNDEF FPC}
+function TSDLBlock.Add(ParamType: byte): ISDLItem;
+var Item: PParamBlockItemData;
+begin
+  Item := inherited Add(ParamType);
+  Result := TSDLItem.Create(self,Item);
+end;
+
+function TSDLBlock.getItems(index: integer): ISDLItem;
+var Item: PParamBlockItemData;
+begin
+  Item := inherited getItems(index);
+  Result := TSDLItem.Create(self,Item);
+end;
+
+function TSDLBlock.Find(ParamType: byte): ISDLItem;
+var Item: PParamBlockItemData;
+begin
+  Result := nil;
+  Item := inherited Find(ParamType);
+  if Item <> nil then
+    Result := TSDLItem.Create(self,Item);
+end;
+{$ENDIF}
 
 end.
 

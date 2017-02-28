@@ -63,7 +63,7 @@ type
     procedure Detach(Force: boolean=false); virtual; abstract;
     function AllocateSRB: ISRB;
     function AllocateSQPB: ISQPB;
-    function Query(SQPB: ISQPB; Request: ISRB): IServiceQueryResults; virtual; abstract; overload;
+    function Query(SQPB: ISQPB; Request: ISRB): IServiceQueryResults; overload; virtual; abstract;
     function Query(Request: ISRB): IServiceQueryResults;  overload;
   end;
 

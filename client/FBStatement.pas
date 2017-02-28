@@ -42,7 +42,7 @@ uses
   FBTransaction;
 
 type
-  TPerfStatistics = array[psCurrentMemory..psFetches] of Int64;
+  TPerfStatistics = array[psCurrentMemory..psFetches] of comp;
 
   { TFBStatement }
 

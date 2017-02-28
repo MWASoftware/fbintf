@@ -125,7 +125,7 @@ begin
   with aAttachment as TFBAttachment do
   begin
     if HasDefaultCharSet  and FirebirdClientAPI.CharSetWidth(CharSetID,CharWidth) then
-      FArrayDesc.array_desc_length *= CharWidth;
+      FArrayDesc.array_desc_length := FArrayDesc.array_desc_length * CharWidth;
   end;
 end;
 

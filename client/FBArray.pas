@@ -620,7 +620,7 @@ begin
   Result := 1;
   Bounds := GetBounds;
   for i := 0 to Length(Bounds) - 1 do
-    Result *= (Bounds[i].UpperBound - Bounds[i].LowerBound + 1);
+    Result := Result * (Bounds[i].UpperBound - Bounds[i].LowerBound + 1);
 end;
 
 
@@ -643,9 +643,9 @@ begin
     FElementSize := FArrayDesc.array_desc_length;
     case GetSQLType of
     SQL_VARYING:
-      FElementSize += 2;
+      FElementSize := FElementSize + 2;
     SQL_TEXT:
-      FElementSize += 1;
+      FElementSize := FElementSize + 1;
     end;
     FBufSize := FElementSize * l;
 
@@ -718,7 +718,7 @@ begin
     if (index[i] < Bounds[i].LowerBound) or (index[i] > Bounds[i].UpperBound) then
       IBError(ibxeInvalidSubscript,[index[i],i]);
 
-    FlatIndex += FOffsets[i]*(index[i] - Bounds[i].LowerBound);
+    FlatIndex := FlatIndex + FOffsets[i]*(index[i] - Bounds[i].LowerBound);
   end;
   Result := FBuffer + FlatIndex*FElementSize;
 end;

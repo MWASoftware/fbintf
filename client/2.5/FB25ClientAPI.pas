@@ -206,7 +206,7 @@ type
 
    end;
 
-const
+var
   Firebird25ClientAPI: TFB25ClientAPI = nil;
 
 implementation
