@@ -365,7 +365,7 @@ procedure TFBClientAPI.EncodeInteger(aValue: integer; len: integer; buffer: PAns
 begin
   while len > 0 do
   begin
-    buffer^ := char(aValue and $FF);
+    buffer^ := AnsiChar(aValue and $FF);
     Inc(buffer);
     Dec(len);
     aValue := aValue shr 8;
@@ -502,7 +502,7 @@ begin
 end;
 
 function TFBStatus.GetMessage: AnsiString;
-var local_buffer: array[0..IBHugeLocalBufferLength - 1] of char;
+var local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
     IBDataBaseErrorMessages: TIBDataBaseErrorMessages;
     sqlcode: Long;
     psb: PStatusVector;

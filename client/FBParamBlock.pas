@@ -436,7 +436,7 @@ begin
     P := FBufPtr + FBufLength;
     len := FBufLength + 1;
     FOwner.UpdateRequestItemSize(self,len);
-    P^ := char(aValue)
+    P^ := AnsiChar(aValue)
   end;
 end;
 
@@ -462,7 +462,7 @@ begin
       FOwner.UpdateRequestItemSize(self,3);
     FDataType := dtByte;
     (FBufPtr+1)^ := #1;
-    (FBufPtr+2)^ := chr(aValue);
+    (FBufPtr+2)^ := AnsiChar(aValue);
   end;
 end;
 
@@ -473,7 +473,7 @@ begin
     if FBufLength <> 2 then
       FOwner.UpdateRequestItemSize(self,2);
     FDataType := dtByte2;
-    (FBufPtr+1)^ := chr(aValue);
+    (FBufPtr+1)^ := AnsiChar(aValue);
   end;
 end;
 
@@ -558,7 +558,7 @@ begin
     if len > 255 then
       IBError(ibxStringTooLong,[aValue,255]);
     FOwner.UpdateRequestItemSize(self,len+2);
-    (FBufPtr+1)^ := char(len);
+    (FBufPtr+1)^ := AnsiChar(len);
     if len > 0 then
       Move(aValue[1],(FBufPtr+2)^,len);
     FDataType := dtString;
@@ -728,7 +728,7 @@ begin
   new(Result);
   Result^.FBufPtr := FBuffer + FDataLength;
   Result^.FBufLength := 1;
-  Result^.FBufPtr^ := char(ParamType);
+  Result^.FBufPtr^ := AnsiChar(ParamType);
   Result^.FDataType := dtnone; {default}
   Inc(FDataLength,1);
   AdjustBuffer;
@@ -741,7 +741,7 @@ var i: integer;
 begin
   Result := nil;
   for i := 0 to getCount - 1 do
-    if FItems[i]^.FBufPtr^ = char(ParamType) then
+    if byte(FItems[i]^.FBufPtr^) = ParamType then
     begin
       Result := FItems[i];
       Exit;
@@ -767,7 +767,7 @@ var P: PParamBlockItemData;
 begin
   P := nil;
   for i := 0 to getCount - 1 do
-    if FItems[i]^.FBufPtr^ = char(ParamType) then
+    if byte(FItems[i]^.FBufPtr^) = ParamType then
     begin
       P := FItems[i];
       for j := i + 1 to getCount - 1 do

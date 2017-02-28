@@ -129,8 +129,8 @@ var Firebird30ClientAPI: TFB30ClientAPI;
 
 implementation
 
-uses FBParamBlock, FB30Attachment, dynlibs, FBMessages, FB30Services,
-  FB30Transaction;
+uses FBParamBlock, FB30Attachment, {$IFDEF FPC}dynlibs{$ELSE} windows{$ENDIF},
+     FBMessages, FB30Services, FB30Transaction;
 
 type
   PISC_DATE = ^ISC_DATE;
@@ -402,7 +402,7 @@ function TFB30ClientAPI.SQLDecodeDateTime(bufptr: PAnsiChar): TDateTime;
 begin
   Result := SQLDecodeDate(bufPtr);
   Inc(bufptr,sizeof(ISC_DATE));
-  Result += SQLDecodeTime(bufPtr);
+  Result := Result + SQLDecodeTime(bufPtr);
 end;
 
 end.

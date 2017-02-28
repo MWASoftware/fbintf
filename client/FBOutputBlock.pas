@@ -104,13 +104,6 @@ type
     property Items[index: integer]: POutputBlockItemData read getItem; default;
   end;
 
-  {$IFNDEF FPC}
-  {$IFDEF CPU32BITS}
-  SizeInt = integer;
-  {$ELSE}
-  SizeInt = Int64;
-  {$ENDIF}
-
   { TOutputBlockItem }
 
   TOutputBlockItem = class(TFBInterfacedObject,IUnknown)
@@ -121,7 +114,7 @@ type
   protected
     function GetItem(index: integer): POutputBlockItemData;
     function Find(ItemType: byte): POutputBlockItemData;
-    procedure SetString(out S: AnsiString; Buf: PAnsiChar; Len: SizeInt;
+    procedure SetString(out S: AnsiString; Buf: PAnsiChar; Len: integer;
                                            CodePage: TSystemCodePage);
     property ItemData: POutputBlockItemData read FItemData;
     property Owner: TOutputBlock read FOwner;
@@ -386,7 +379,7 @@ var i: integer;
 begin
   Result := nil;
   for i := 0 to GetCount - 1 do
-    if FItemData^.FSubItems[i]^.FBufPtr^ = char(ItemType) then
+    if byte(FItemData^.FSubItems[i]^.FBufPtr^) = ItemType then
     begin
       Result := FItemData^.FSubItems[i];
       Exit;
@@ -415,7 +408,7 @@ var i: integer;
 begin
   Result := nil;
   for i := 0 to GetCount - 1 do
-    if FItemData^.FSubItems[i]^.FBufPtr^ = char(ItemType) then
+    if byte(FItemData^.FSubItems[i]^.FBufPtr^) = ItemType then
     begin
       Result := FItemData^.FSubItems[i];
       Exit;
@@ -425,7 +418,7 @@ end;
 { TOutputBlockItem }
 
 procedure TOutputBlockItem.SetString(out S: AnsiString; Buf: PAnsiChar;
-  Len: SizeInt; CodePage: TSystemCodePage);
+  Len: integer; CodePage: TSystemCodePage);
 var rs: RawByteString;
 begin
   system.SetString(rs,Buf,len);
@@ -497,13 +490,13 @@ begin
   dtString:
     begin
       len := byte((FBufPtr+1)^);
-      SetString(Result,FBufPtr+2,len{$IFDEF FPC},CP_ACP{$ENDIF});
+      SetString(Result,FBufPtr+2,len,CP_ACP);
     end;
   dtString2:
     begin
       with FirebirdClientAPI do
         len := DecodeInteger(FBufPtr+1,2);
-      SetString(Result,FBufPtr+3,len{$IFDEF FPC},CP_ACP{$ENDIF});
+      SetString(Result,FBufPtr+3,len,CP_ACP);
     end;
   else
     IBError(ibxeOutputBlockTypeError,[nil]);
@@ -753,7 +746,7 @@ var i: integer;
 begin
   Result := nil;
   for i := 0 to getCount - 1 do
-    if FItems[i]^.FBufPtr^ = char(ItemType) then
+    if byte(FItems[i]^.FBufPtr^) = ItemType then
     begin
       Result := FItems[i];
       Exit;
@@ -825,9 +818,9 @@ begin
     if FDataLength > 0 then
       ConnectionType := integer(P^);
     Inc(P);
-    SetString(DBFileName,P+1,byte(P^){$IFDEF FPC},CP_ACP{$ENDIF});
+    SetString(DBFileName,P+1,byte(P^),CP_ACP);
     P := P + Length(DBFileName) + 1;
-    SetString(DBSiteName,P+1,byte(P^){$IFDEF FPC},CP_ACP{$ENDIF});
+    SetString(DBSiteName,P+1,byte(P^),CP_ACP);
   end
   else
     IBError(ibxeInfoBufferTypeError,[integer(FBufPtr^)]);
@@ -844,7 +837,7 @@ begin
    VersionString := '';
    Version := byte(P^);
    Inc(P);
-   SetString(VersionString,P+1,byte(P^){$IFDEF FPC},CP_ACP{$ENDIF});
+   SetString(VersionString,P+1,byte(P^),CP_ACP);
   end
   else
     IBError(ibxeInfoBufferTypeError,[integer(FBufPtr^)]);
@@ -860,7 +853,7 @@ begin
     P := FBufPtr+3;
     while (P < FBufPtr + FSize) do
     begin
-      SetString(s,P+1,byte(P^){$IFDEF FPC},CP_ACP{$ENDIF});
+      SetString(s,P+1,byte(P^),CP_ACP);
       UserNames.Add(s);
       P := P + Length(s) + 1;
     end;

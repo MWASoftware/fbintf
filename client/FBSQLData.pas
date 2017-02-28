@@ -506,7 +506,7 @@ end;
 procedure TSQLDataArea.PreprocessSQL(sSQL: AnsiString; GenerateParamNames: boolean;
   var sProcessedSQL: AnsiString);
 var
-  cCurChar, cNextChar, cQuoteChar: Char;
+  cCurChar, cNextChar, cQuoteChar: AnsiChar;
   sParamName: AnsiString;
   j, i, iLenSQL, iSQLPos: Integer;
   iCurState {$ifdef ALLOWDIALECT3PARAMNAMES}, iCurParamState {$endif}: Integer;
@@ -526,7 +526,7 @@ const
   ParamQuoteState = 1;
   {$endif}
 
-  procedure AddToProcessedSQL(cChar: Char);
+  procedure AddToProcessedSQL(cChar: AnsiChar);
   begin
     StrBuffer[iSQLPos] := cChar;
     Inc(iSQLPos);

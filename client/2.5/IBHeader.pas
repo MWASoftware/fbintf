@@ -1820,40 +1820,5 @@ begin
 end;
 
 
-(*******************************************)
-(** Service manager functions             **)
-(*******************************************)
-
-
-procedure add_spb_length(var p: PAnsiChar; length: integer);
-(*
-#define ADD_SPB_LENGTH(p, length)	{*(p)++ = (length); \
-    					 *(p)++ = (length) >> 8;}
-*)
-begin
-  p^ := char(length);
-  Inc (p);
-  p^ := char(length shr 8);
-  Inc (p);
-end;
-
-procedure add_spb_numeric(var p: PAnsiChar; data: integer);
-(*
-#define ADD_SPB_NUMERIC(p, data)	{*(p)++ = (data); \
-    					 *(p)++ = (data) >> 8; \
-					 *(p)++ = (data) >> 16; \
-					 *(p)++ = (data) >> 24;}
-*)
-begin
-  p^ := char(data);
-  Inc (p);
-  p^ := char(data shr 8);
-  Inc (p);
-  p^ := char(data shr 16);
-  Inc (p);
-  p^ := char(data shr 24);
-  Inc (p);
-end;
-
 end.
 
