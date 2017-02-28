@@ -2,6 +2,13 @@ FBINTF Change Log  version            (1.0-2) tba, 24 Feb 2017 12:17:57 +0000
 
 1. Change syntax to Mode Delphi
 
+2. Change all uses of string type to explicit AnsiString in order to ensure
+   compatibility between Delphi and FPC. 
+
+3. Various syntax changes to ensure Delphi and FPC compilation.
+
+4. Some generics expanded for Delphi
+
 FBINTF Change Log  version            (1.0-1) Fri, 24 Feb 2017 12:17:57 +0000
 
 1. Limit maximum Blob segment read/write to MaxuShort. Avoids data loss with
