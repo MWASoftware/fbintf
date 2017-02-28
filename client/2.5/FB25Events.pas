@@ -69,7 +69,7 @@ unit FB25Events;
 interface
 
 uses
-  {$IFDEF WINDOWS}Windows, {$ENDIF}Classes, SysUtils, IB, FB25ClientAPI, FB25Attachment,
+  {$IF defined(WINDOWS) or defined(MSWINDOWS)}Windows, {$ENDIF}Classes, SysUtils, IB, FB25ClientAPI, FB25Attachment,
   IBExternals, IBHeader, syncobjs, FBEvents;
 
 type
@@ -178,7 +178,7 @@ type
 constructor TEventhandlerInterface.Create(aOwner: TFB25Events);
 var
   PSa : PSecurityAttributes;
-{$IFDEF WINDOWS}
+{$IF defined(WINDOWS) or defined(MSWINDOWS)}
   Sd : TSecurityDescriptor;
   Sa : TSecurityAttributes;
 begin
@@ -194,7 +194,7 @@ begin
   PSa:= nil;
 {$ENDIF}
   inherited Create;
-{$IFDEF WINDOWS}
+{$IF defined(WINDOWS) or defined(MSWINDOWS)}
   FEventHandler := CreateEvent(PSa,false,false,nil);
 {$ELSE}
   CreateGuid(GUID);
@@ -205,7 +205,7 @@ end;
 
 destructor TEventhandlerInterface.Destroy;
 begin
-{$IFDEF WINDOWS}
+{$IF defined(WINDOWS) or defined(MSWINDOWS)}
   CloseHandle(FEventHandler);
 {$ELSE}
   if assigned(FEventWaiting) then FEventWaiting.Free;
@@ -224,7 +224,7 @@ begin
     FOwner.FCriticalSection.Leave
   end;
 //  writeln('Set Event');
-  {$IFDEF WINDOWS}
+  {$IF defined(WINDOWS) or defined(MSWINDOWS)}
   SetEvent(FEventHandler);
   {$ELSE}
   FEventWaiting.SetEvent;
@@ -233,7 +233,7 @@ end;
 
 procedure TEventhandlerInterface.WaitForEvent;
 begin
-  {$IFDEF WINDOWS}
+  {$IF defined(WINDOWS) or defined(MSWINDOWS)}
   WaitForSingleObject(FEventHandler,INFINITE);
   {$ELSE}
   FEventWaiting.WaitFor(INFINITE);
@@ -243,7 +243,7 @@ end;
 
 procedure TEventhandlerInterface.CancelWait;
 begin
-  {$IFDEF WINDOWS}
+  {$IF defined(WINDOWS) or defined(MSWINDOWS)}
   SetEvent(FEventHandler);
   {$ELSE}
   FEventWaiting.SetEvent;

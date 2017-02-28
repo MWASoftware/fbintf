@@ -34,7 +34,7 @@ unit FB30Events;
 interface
 
 uses
-  {$IFDEF WINDOWS}Windows, {$ENDIF} Classes, SysUtils, Firebird, IB, FB30ClientAPI, FB30Attachment,
+  {$IF defined(WINDOWS) or defined(MSWINDOWS)}Windows, {$ENDIF} Classes, SysUtils, Firebird, IB, FB30ClientAPI, FB30Attachment,
   syncobjs, FBEvents;
 
 type
@@ -47,7 +47,7 @@ type
     FOwner: TFB30Events;
     FName: AnsiString;
     FRef: integer;
-    {$IFDEF WINDOWS}
+    {$IF defined(WINDOWS) or defined(MSWINDOWS)}
     {Make direct use of Windows API as TEventObject don't seem to work under
      Windows!}
     FEventHandler: THandle;
@@ -108,7 +108,7 @@ type
 constructor TEventhandlerInterface.Create(aOwner: TFB30Events; aName: AnsiString);
 var
   PSa : PSecurityAttributes;
-{$IFDEF WINDOWS}
+{$IF defined(WINDOWS) or defined(MSWINDOWS)}
   Sd : TSecurityDescriptor;
   Sa : TSecurityAttributes;
 begin
@@ -124,7 +124,7 @@ begin
   PSa:= nil;
 {$ENDIF}
   inherited Create;
-{$IFDEF WINDOWS}
+{$IF defined(WINDOWS) or defined(MSWINDOWS)}
   FEventHandler := CreateEvent(PSa,false,false,nil);
 {$ELSE}
   CreateGuid(GUID);
@@ -137,7 +137,7 @@ end;
 
 destructor TEventhandlerInterface.Destroy;
 begin
-{$IFDEF WINDOWS}
+{$IF defined(WINDOWS) or defined(MSWINDOWS)}
   CloseHandle(FEventHandler);
 {$ELSE}
   if assigned(FEventWaiting) then FEventWaiting.Free;
@@ -170,7 +170,7 @@ begin
     FOwner.FCriticalSection.Leave
   end;
 //  writeln('Set Event');
-  {$IFDEF WINDOWS}
+  {$IF defined(WINDOWS) or defined(MSWINDOWS)}
   SetEvent(FEventHandler);
   {$ELSE}
   FEventWaiting.SetEvent;
@@ -179,7 +179,7 @@ end;
 
 procedure TEventhandlerInterface.WaitForEvent;
 begin
-  {$IFDEF WINDOWS}
+  {$IF defined(WINDOWS) or defined(MSWINDOWS)}
   WaitForSingleObject(FEventHandler,INFINITE);
   {$ELSE}
   FEventWaiting.WaitFor(INFINITE);
@@ -189,7 +189,7 @@ end;
 
 procedure TEventhandlerInterface.CancelWait;
 begin
-  {$IFDEF WINDOWS}
+  {$IF defined(WINDOWS) or defined(MSWINDOWS)}
     SetEvent(FEventHandler);
   {$ELSE}
     FEventWaiting.SetEvent;

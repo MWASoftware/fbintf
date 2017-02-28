@@ -51,7 +51,7 @@ type
   end;
 
   Tfb_get_master_interface = function: IMaster;
-                              {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
+                              {$IF defined(WINDOWS) or defined(MSWINDOWS)} stdcall; {$ELSE} cdecl; {$ENDIF}
 
   { TFB30ClientAPI }
 

@@ -220,7 +220,7 @@ uses FBMessages,
 { Stubs for 6.0 only functions }
 function isc_rollback_retaining_stub(status_vector   : PISC_STATUS;
               tran_handle     : PISC_TR_HANDLE):
-                                     ISC_STATUS; {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
+                                     ISC_STATUS; {$IF defined(WINDOWS) or defined(MSWINDOWS)} stdcall; {$ELSE} cdecl; {$ENDIF}
 begin
   Result := 0;
   IBError(ibxeIB60feature, ['isc_rollback_retaining']); {do not localize}
@@ -232,7 +232,7 @@ function isc_service_attach_stub(status_vector      : PISC_STATUS;
                                  service_handle     : PISC_SVC_HANDLE;
                                  isc_arg5           : UShort;
                                  isc_arg6           : PAnsiChar):
-                                 ISC_STATUS; {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
+                                 ISC_STATUS; {$IF defined(WINDOWS) or defined(MSWINDOWS)} stdcall; {$ELSE} cdecl; {$ENDIF}
 begin
   Result := 0;
   IBError(ibxeIB60feature, ['isc_service_attach']); {do not localize}
@@ -240,7 +240,7 @@ end;
 
 function isc_service_detach_stub(status_vector      : PISC_STATUS;
                                  service_handle     : PISC_SVC_HANDLE):
-                                 ISC_STATUS; {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
+                                 ISC_STATUS; {$IF defined(WINDOWS) or defined(MSWINDOWS)} stdcall; {$ELSE} cdecl; {$ENDIF}
 begin
   Result := 0;
   IBError(ibxeIB60feature, ['isc_service_detach']); {do not localize}
@@ -255,7 +255,7 @@ function isc_service_query_stub(status_vector        : PISC_STATUS;
                                 isc_arg7             : PAnsiChar;
                                 isc_arg8             : UShort;
                                 isc_arg9             : PAnsiChar):
-                                ISC_STATUS; {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
+                                ISC_STATUS; {$IF defined(WINDOWS) or defined(MSWINDOWS)} stdcall; {$ELSE} cdecl; {$ENDIF}
 begin
   Result := 0;
   IBError(ibxeIB60feature, ['isc_service_query']); {do not localize}
@@ -266,7 +266,7 @@ function isc_service_start_stub(status_vector        : PISC_STATUS;
                                 recv_handle          : PISC_SVC_HANDLE;
                                 isc_arg4             : UShort;
                                 isc_arg5             : PAnsiChar):
-                                ISC_STATUS; {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
+                                ISC_STATUS; {$IF defined(WINDOWS) or defined(MSWINDOWS)} stdcall; {$ELSE} cdecl; {$ENDIF}
 begin
   Result := 0;
   IBError(ibxeIB60feature, ['isc_service_start']); {do not localize}
@@ -274,42 +274,42 @@ end;
 
 procedure isc_encode_sql_date_stub(tm_date           : PCTimeStructure;
                  ib_date           : PISC_DATE);
-                                   {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
+                                   {$IF defined(WINDOWS) or defined(MSWINDOWS)} stdcall; {$ELSE} cdecl; {$ENDIF}
 begin
   IBError(ibxeIB60feature, ['isc_encode_sql_date']); {do not localize}
 end;
 
 procedure isc_encode_sql_time_stub(tm_date           : PCTimeStructure;
                    ib_time           : PISC_TIME);
-                                   {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
+                                   {$IF defined(WINDOWS) or defined(MSWINDOWS)} stdcall; {$ELSE} cdecl; {$ENDIF}
 begin
   IBError(ibxeIB60feature, ['isc_encode_sql_time']); {do not localize}
 end;
 
 procedure isc_encode_timestamp_stub(tm_date          : PCTimeStructure;
                   ib_timestamp     : PISC_TIMESTAMP);
-                                    {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
+                                    {$IF defined(WINDOWS) or defined(MSWINDOWS)} stdcall; {$ELSE} cdecl; {$ENDIF}
 begin
   IBError(ibxeIB60feature, ['isc_encode_sql_timestamp']); {do not localize}
 end;
 
 procedure isc_decode_sql_date_stub(ib_date           : PISC_DATE;
                                    tm_date           : PCTimeStructure);
-                                   {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
+                                   {$IF defined(WINDOWS) or defined(MSWINDOWS)} stdcall; {$ELSE} cdecl; {$ENDIF}
 begin
   IBError(ibxeIB60feature, ['isc_decode_sql_date']); {do not localize}
 end;
 
 procedure isc_decode_sql_time_stub(ib_time           : PISC_TIME;
                                    tm_date           : PCTimeStructure);
-                                   {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
+                                   {$IF defined(WINDOWS) or defined(MSWINDOWS)} stdcall; {$ELSE} cdecl; {$ENDIF}
 begin
   IBError(ibxeIB60feature, ['isc_decode_sql_time']); {do not localize}
 end;
 
 procedure isc_decode_timestamp_stub(ib_timestamp     : PISC_TIMESTAMP;
                                     tm_date          : PCTimeStructure);
-                                    {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
+                                    {$IF defined(WINDOWS) or defined(MSWINDOWS)} stdcall; {$ELSE} cdecl; {$ENDIF}
 begin
   IBError(ibxeIB60feature, ['isc_decode_timestamp']); {do not localize}
 end;
@@ -515,7 +515,7 @@ begin
 {$IFDEF UNIX}
   Result := Pos('libfbembed',FFBLibraryName) = 1;
 {$ENDIF}
-{$IFDEF WINDOWS}
+{$IF defined(WINDOWS) or defined(MSWINDOWS)}
   Result := CompareText(FFBLibraryName,FIREBIRD_EMBEDDED) = 0;
 {$ENDIF}
 end;
