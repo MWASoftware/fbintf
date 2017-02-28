@@ -95,7 +95,7 @@ type
     tm_yday : integer;  { Day of year (0--365) }
     tm_isdst : integer; { 0 if daylight savings time is not in effect) }
     tm_gmtoff: longint;
-    tm_zone: PChar;
+    tm_zone: PAnsiChar;
   end;
   PCTimeStructure = ^TCTimeStructure;
   TM              = TCTimeStructure;
@@ -114,11 +114,11 @@ type
   {*    in original ibase.h  *}
   {***************************}
   TISC_BlobGetSegment = function(BlobHandle: PInt;
-                                 Buffer: PChar;
+                                 Buffer: PAnsiChar;
                                  BufferSize: Long;
                                  var ResultLength: Long): Short; cdecl;
   TISC_BlobPutSegment = procedure(BlobHandle: PInt;
-                                  Buffer: PChar;
+                                  Buffer: PAnsiChar;
                                   BufferLength: Short); cdecl;
   TBlob = record
     GetSegment         : TISC_BlobGetSegment;

@@ -125,7 +125,7 @@ begin
   sql := GenerateCreateDatabaseSQL(DatabaseName,aDPB);
   tr_handle := nil;
   with Firebird25ClientAPI do
-  if (isc_dsql_execute_immediate(StatusVector, @FHandle, @tr_handle, 0, PChar(sql),
+  if (isc_dsql_execute_immediate(StatusVector, @FHandle, @tr_handle, 0, PAnsiChar(sql),
                                   SQLDialect, nil) > 0) and RaiseExceptionOnError then
     IBDataBaseError;
   if DPB <> nil then
@@ -148,7 +148,7 @@ begin
   tr_handle := nil;
   with Firebird25ClientAPI do
   begin
-    if (isc_dsql_execute_immediate(StatusVector, @FHandle, @tr_handle, 0, PChar(sql),
+    if (isc_dsql_execute_immediate(StatusVector, @FHandle, @tr_handle, 0, PAnsiChar(sql),
                                   aSQLDialect, nil) > 0) and RaiseExceptionOnError then
       IBDataBaseError;
 
@@ -169,13 +169,13 @@ begin
   if DPB = nil then
   begin
     if (isc_attach_database(StatusVector, Length(FDatabaseName),
-                        PChar(FDatabaseName), @FHandle, 0, nil) > 0) and FRaiseExceptionOnConnectError then
+                        PAnsiChar(FDatabaseName), @FHandle, 0, nil) > 0) and FRaiseExceptionOnConnectError then
       IBDatabaseError;
   end
   else
   begin
     if (isc_attach_database(StatusVector, Length(FDatabaseName),
-                         PChar(FDatabaseName), @FHandle,
+                         PAnsiChar(FDatabaseName), @FHandle,
                          (DPB as TDPB).getDataLength,
                          (DPB as TDPB).getBuffer) > 0 ) and FRaiseExceptionOnConnectError then
       IBDatabaseError;
@@ -284,7 +284,7 @@ begin
   CheckHandle;
   TRHandle := (Transaction as TFB25Transaction).Handle;
   with Firebird25ClientAPI do
-    if isc_dsql_execute_immediate(StatusVector, @fHandle, @TRHandle, 0,PChar(sql), aSQLDialect, nil) > 0 then
+    if isc_dsql_execute_immediate(StatusVector, @fHandle, @TRHandle, 0,PAnsiChar(sql), aSQLDialect, nil) > 0 then
       IBDatabaseError;
   SignalActivity;
 end;
@@ -371,7 +371,7 @@ begin
         ReqBuffer[i] := Requests[i];
 
       with Firebird25ClientAPI, Result as TDBInformation do
-          if isc_database_info(StatusVector, @(FHandle), Length(Requests), PChar(ReqBuffer),
+          if isc_database_info(StatusVector, @(FHandle), Length(Requests), PAnsiChar(ReqBuffer),
                                  getBufSize, Buffer) > 0 then
             IBDataBaseError;
 

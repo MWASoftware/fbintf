@@ -47,7 +47,7 @@ type
     {Describes a Clumplet in the buffer. FBufPtr always points to the clumplet id
      the rest of the clumplet up to the FBufLength is data. The data format is
      given by FDataType}
-    FBufPtr: PChar;
+    FBufPtr: PAnsiChar;
     FBuflength: integer;
     FDataType: TParamDataType;
   end;
@@ -64,7 +64,7 @@ type
     procedure MoveBy(Item: PParamBlockItemData; delta: integer);
     procedure UpdateRequestItemSize(Item: TParamBlockItem; NewSize: integer);
   protected
-    FBuffer: PChar;
+    FBuffer: PAnsiChar;
     FDataLength: integer;
     function Add(ParamType: byte): PParamBlockItemData;
     function Find(ParamType: byte): PParamBlockItemData;
@@ -72,7 +72,7 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-    function getBuffer: PChar;
+    function getBuffer: PAnsiChar;
     function getDataLength: integer;
     function AvailableBufferSpace: integer;
 
@@ -429,7 +429,7 @@ end;
 
 procedure TParamBlockItem.addByte(aValue: byte);
 var len: integer;
-    P: PChar;
+    P: PAnsiChar;
 begin
   with FParamData^ do
   begin
@@ -442,7 +442,7 @@ end;
 
 procedure TParamBlockItem.addShortInteger(aValue: integer);
 var len: integer;
-    P: PChar;
+    P: PAnsiChar;
 begin
   with FParamData^ do
   begin
@@ -603,7 +603,7 @@ end;
 { TParamBlock }
 
 procedure TParamBlock.AdjustBuffer;
-var P: PChar;
+var P: PAnsiChar;
     i: integer;
     headerLen: integer;
 begin
@@ -625,7 +625,7 @@ begin
 end;
 
 procedure TParamBlock.MoveBy(Item: PParamBlockItemData; delta: integer);
-var src, dest: PChar;
+var src, dest: PAnsiChar;
   i: integer;
 begin
   with Item^ do
@@ -705,7 +705,7 @@ begin
   inherited Destroy;
 end;
 
-function TParamBlock.getBuffer: PChar;
+function TParamBlock.getBuffer: PAnsiChar;
 begin
   if FDataLength = 0 then
     Result := nil

@@ -499,7 +499,7 @@ type
    function GetTransaction: ITransaction;
    function ByName(Idx: AnsiString): ISQLData;
    function getSQLData(index: integer): ISQLData;
-   procedure GetData(index: integer; var IsNull:boolean; var len: short; var data: PChar);
+   procedure GetData(index: integer; var IsNull:boolean; var len: short; var data: PAnsiChar);
    procedure SetRetainInterfaces(aValue: boolean);
    property Data[index: integer]: ISQLData read getSQLData; default;
    property Count: integer read getCount;

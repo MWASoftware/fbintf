@@ -117,13 +117,13 @@ begin
   if FSPB = nil then
   begin
     if isc_service_attach(StatusVector, Length(ConnectString),
-                         PChar(ConnectString), @FHandle, 0, nil) > 0 then
+                         PAnsiChar(ConnectString), @FHandle, 0, nil) > 0 then
       IBDataBaseError;
   end
   else
   begin
     if isc_service_attach(StatusVector, Length(ConnectString),
-                           PChar(ConnectString), @FHandle,
+                           PAnsiChar(ConnectString), @FHandle,
                            (FSPB as TSPB).getDataLength,
                            (FSPB as TSPB).getBuffer) > 0 then
       IBDataBaseError;

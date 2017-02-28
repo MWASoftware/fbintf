@@ -304,7 +304,7 @@ end;
 function TFB30Blob.Read(var Buffer; Count: Longint): Longint;
 var
   BytesRead : cardinal;
-  LocalBuffer: PChar;
+  LocalBuffer: PAnsiChar;
   returnCode: integer;
   localCount: uShort;
 begin
@@ -313,7 +313,7 @@ begin
   if FEOB then
     Exit;
 
-  LocalBuffer := PChar(@Buffer);
+  LocalBuffer := PAnsiChar(@Buffer);
   repeat
     localCount := Min(Count,MaxuShort);
     with Firebird30ClientAPI do
@@ -334,14 +334,14 @@ end;
 
 function TFB30Blob.Write(const Buffer; Count: Longint): Longint;
 var
-  LocalBuffer: PChar;
+  LocalBuffer: PAnsiChar;
   localCount: uShort;
 begin
   CheckWritable;
   Result := 0;
   if Count = 0 then Exit;
 
-  LocalBuffer := PChar(@Buffer);
+  LocalBuffer := PAnsiChar(@Buffer);
   repeat
     localCount := Min(Count,MaxuShort);
     with Firebird30ClientAPI do

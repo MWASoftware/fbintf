@@ -90,7 +90,7 @@ type
   public
     constructor Create(aOwner: TFB25Events);
     destructor Destroy; override;
-    procedure eventCallbackFunction(length: short; updated: PChar);
+    procedure eventCallbackFunction(length: short; updated: PAnsiChar);
     procedure WaitForEvent;
     procedure CancelWait;
  end;
@@ -165,7 +165,7 @@ type
 
   {This procedure is used for the event call back - note the cdecl }
 
- procedure IBEventCallback( ptr: pointer; length: short; updated: PChar); cdecl;
+ procedure IBEventCallback( ptr: pointer; length: short; updated: PAnsiChar); cdecl;
  begin
    if (ptr = nil) or (length = 0) or (updated = nil) then
      Exit;
@@ -214,7 +214,7 @@ begin
 end;
 
 procedure TEventhandlerInterface.eventCallbackFunction(length: short;
-  updated: PChar);
+  updated: PAnsiChar);
 begin
   FOwner.FCriticalSection.Enter;
   try

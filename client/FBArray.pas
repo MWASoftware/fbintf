@@ -69,20 +69,20 @@ type
 
   TFBArrayElement = class(TSQLDataItem)
   private
-   FBufPtr: PChar;
+   FBufPtr: PAnsiChar;
    FArray: TFBArray;
   protected
    function GetSQLDialect: integer; override;
    procedure Changing; override;
    procedure Changed; override;
-   function SQLData: PChar; override;
+   function SQLData: PAnsiChar; override;
    function GetDataLength: cardinal; override;
    function GetCodePage: TSystemCodePage; override;
    function getCharSetID: cardinal; override;
    procedure SetDataLength(len: cardinal); override;
    procedure SetSQLType(aValue: cardinal); override;
   public
-   constructor Create(anArray: TFBArray; P: PChar);
+   constructor Create(anArray: TFBArray; P: PAnsiChar);
    function GetSQLType: cardinal; override;
    function GetName: AnsiString; override;
    function GetScale: integer; override;
@@ -149,10 +149,10 @@ type
     FEventHandlers: array of TArrayEventHandler;
     procedure GetArraySlice;
     procedure PutArraySlice(Force: boolean=false);
-    function GetOffset(index: array of integer): PChar;
+    function GetOffset(index: array of integer): PAnsiChar;
     function GetDataLength: short;
   protected
-    FBuffer: PChar;
+    FBuffer: PAnsiChar;
     FBufSize: ISC_LONG;
     FArrayID: TISC_QUAD;
     procedure AllocateBuffer; virtual;
@@ -242,7 +242,7 @@ begin
   FArray.Changed;
 end;
 
-function TFBArrayElement.SQLData: PChar;
+function TFBArrayElement.SQLData: PAnsiChar;
 begin
   Result := FBufPtr;
 end;
@@ -268,7 +268,7 @@ begin
     IBError(ibxeArrayElementOverFlow,[nil]);
 end;
 
-constructor TFBArrayElement.Create(anArray: TFBArray; P: PChar);
+constructor TFBArrayElement.Create(anArray: TFBArray; P: PAnsiChar);
 begin
   inherited Create;
   FArray := anArray;
@@ -558,14 +558,14 @@ end;
 function TFBArrayMetaData.GetTableName: AnsiString;
 begin
   with FArrayDesc do
-   SetString(Result,PChar(@array_desc_relation_name),sizeof(array_desc_relation_name));
+   SetString(Result,PAnsiChar(@array_desc_relation_name),sizeof(array_desc_relation_name));
   Result := trim(Result);
 end;
 
 function TFBArrayMetaData.GetColumnName: AnsiString;
 begin
   with FArrayDesc do
-    SetString(Result,PChar(@FArrayDesc.array_desc_field_name),sizeof(array_desc_field_name));
+    SetString(Result,PAnsiChar(@FArrayDesc.array_desc_field_name),sizeof(array_desc_field_name));
   Result := trim(Result);
 end;
 
@@ -703,7 +703,7 @@ begin
   FIsNew := false;
 end;
 
-function TFBArray.GetOffset(index: array of integer): PChar;
+function TFBArray.GetOffset(index: array of integer): PAnsiChar;
 var i: integer;
     Bounds: TArrayBounds;
     FlatIndex: integer;

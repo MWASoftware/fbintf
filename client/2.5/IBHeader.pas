@@ -149,7 +149,7 @@ type
     ctl_segment_length          : UShort;  	(** Length of current segment **)
     ctl_bpb_length              : UShort;	(** Length of blob parameter **)
 					    	(** block **)
-    ctl_bpb                     : PChar;	(** Address of blob parameter **)
+    ctl_bpb                     : PAnsiChar;	(** Address of blob parameter **)
 						(** block **)
     ctl_buffer                  : PUChar;	(** Address of segment buffer **)
     ctl_max_segment             : ISC_LONG;	(** Length of longest segment **)
@@ -163,8 +163,8 @@ type
   (*****************************)
   TBSTREAM = record
     bstr_blob                   : PVoid;  	(** Blob handle **)
-    bstr_buffer                 : PChar;	(** Address of buffer **)
-    bstr_ptr                    : PChar;	(** Next character **)
+    bstr_buffer                 : PAnsiChar;	(** Address of buffer **)
+    bstr_ptr                    : PAnsiChar;	(** Next character **)
     bstr_length                 : Short;	(** Length of buffer **)
     bstr_cnt                    : Short;	(** Characters in buffer **)
     bstr_mode                   : Char;  	(** (mode) ? OUTPUT : INPUT **)
@@ -178,7 +178,7 @@ type
   TSQLVAR = record
     sqltype                     : Short;
     sqllen                      : Short;
-    sqldata                     : PChar;
+    sqldata                     : PAnsiChar;
     sqlind                      : PShort;
     sqlname_length              : Short;
     sqlname                     : array[0..29] of Char;
@@ -204,7 +204,7 @@ type
     sqlsubtype                  : Short;     (** datatype subtype - BLOBs **)
 					     (** & text types only **)
     sqllen                      : Short;     (** length of data area **)
-    sqldata                     : PChar;     (** address of data **)
+    sqldata                     : PAnsiChar;     (** address of data **)
     sqlind                      : PShort;    (** address of indicator **)
                                              (** variable **)
     sqlname_length              : Short;     (** length of sqlname field **)
@@ -241,7 +241,7 @@ type
   TISC_START_TRANS = record
     db_handle      : PISC_DB_HANDLE;
     tpb_length     : UShort;
-    tpb_address    : PChar;
+    tpb_address    : PAnsiChar;
   end;
 
 (********************************************************)
@@ -251,7 +251,7 @@ type
   TISC_TEB = record
     db_handle      : PISC_DB_HANDLE;
     tpb_length     : Long;
-    tpb_address    : PChar;
+    tpb_address    : PAnsiChar;
   end;
   PISC_TEB = ^TISC_TEB;
   TISC_TEB_ARRAY = array[0..0] of TISC_TEB;
@@ -263,16 +263,16 @@ type
 
 Tisc_attach_database = function (status_vector            : PISC_STATUS;
                                  db_name_length           : Short;
-                                 db_name                  : PChar;
+                                 db_name                  : PAnsiChar;
                                  db_handle                : PISC_DB_HANDLE;
 			         parm_buffer_length	  : Short;
-                                 parm_buffer              : PChar): ISC_STATUS;
+                                 parm_buffer              : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_array_gen_sdl = function   (status_vector            : PISC_STATUS;
                                  isc_array_desc           : PISC_ARRAY_DESC;
                                  isc_arg3                 : PShort;
-                                 isc_arg4                 : PChar;
+                                 isc_arg4                 : PAnsiChar;
                                  isc_arg5                 : PShort): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
@@ -289,7 +289,7 @@ Tisc_array_lookup_bounds = function (status_vector        : PISC_STATUS;
                                  db_handle                : PISC_DB_HANDLE;
                                  trans_handle             : PISC_TR_HANDLE;
 				 table_name,
-				 column_name              : PChar;
+				 column_name              : PAnsiChar;
 				 descriptor               : PISC_ARRAY_DESC): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
@@ -297,13 +297,13 @@ Tisc_array_lookup_desc = function (status_vector          : PISC_STATUS;
                                  db_handle                : PISC_DB_HANDLE;
                                  trans_handle             : PISC_TR_HANDLE;
 				 table_name,
-				 column_name              : PChar;
+				 column_name              : PAnsiChar;
 				 descriptor               : PISC_ARRAY_DESC): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_array_set_desc = function  (status_vector            : PISC_STATUS;
-				 table_name               : PChar;
-				 column_name              : PChar;
+				 table_name               : PAnsiChar;
+				 column_name              : PAnsiChar;
 				 sql_dtype,
                                  sql_length,
                                  sql_dimensions           : PShort;
@@ -335,23 +335,23 @@ Tisc_blob_gen_bpb = function    (status_vector            : PISC_STATUS;
 Tisc_blob_info = function       (status_vector            : PISC_STATUS;
 				 blob_handle              : PISC_BLOB_HANDLE;
 				 item_list_buffer_length  : Short;
- 				 item_list_buffer         : PChar;
+ 				 item_list_buffer         : PAnsiChar;
 				 result_buffer_length     : Short;
-				 result_buffer            : PChar): ISC_STATUS;
+				 result_buffer            : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_blob_lookup_desc = function (status_vector           : PISC_STATUS;
                                  db_handle                : PISC_DB_HANDLE;
                                  trans_handle             : PISC_TR_HANDLE;
                                  table_name,
-                                 column_name              : PChar;
+                                 column_name              : PAnsiChar;
                                  descriptor               : PISC_BLOB_DESC;
                                  global                   : PUChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_blob_set_desc = function   (status_vector            : PISC_STATUS;
                                  table_name,
-                                 column_name              : PChar;
+                                 column_name              : PAnsiChar;
                                  subtype,
                                  charset,
                                  segment_size             : Short;
@@ -392,24 +392,24 @@ Tisc_create_blob2 = function    (status_vector            : PISC_STATUS;
                                  blob_handle              : PISC_BLOB_HANDLE;
                                  blob_id                  : PISC_QUAD;
 				 bpb_length               : Short;
-				 bpb_address              : PChar): ISC_STATUS;
+				 bpb_address              : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_create_database = function (status_vector            : PISC_STATUS;
 				 isc_arg2                 : Short;
-				 isc_arg3                 : PChar;
+				 isc_arg3                 : PAnsiChar;
 				 db_handle                : PISC_DB_HANDLE;
 				 isc_arg5	          : Short;
-				 isc_arg6                 : PChar;
+				 isc_arg6                 : PAnsiChar;
 				 isc_arg7                 : Short): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_database_info = function   (status_vector            : PISC_STATUS;
 				 db_handle                : PISC_DB_HANDLE;
                                  item_list_buffer_length  : Short;
-				 item_list_buffer         : PChar;
+				 item_list_buffer         : PAnsiChar;
                                  result_buffer_length     : Short;
-                                 result_buffer            : PChar): ISC_STATUS;
+                                 result_buffer            : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_decode_date = procedure    (ib_date: PISC_QUAD;
@@ -462,7 +462,7 @@ Tisc_dsql_exec_immed2 = function (status_vector           : PISC_STATUS;
 				 db_handle                : PISC_DB_HANDLE;
 				 tran_handle              : PISC_TR_HANDLE;
 				 length                   : UShort;
-				 statement                : PChar;
+				 statement                : PAnsiChar;
 				 dialect                  : UShort;
                                  in_xsqlda,
 				 out_xsqlda               : PXSQLDA): ISC_STATUS;
@@ -487,7 +487,7 @@ Tisc_dsql_execute_immediate = function (status_vector     : PISC_STATUS;
 				 db_handle                : PISC_DB_HANDLE;
 				 tran_handle              : PISC_TR_HANDLE;
 				 length                   : UShort;
-				 statement                : PChar;
+				 statement                : PAnsiChar;
 				 dialect                  : UShort;
                                  xsqlda                   : PXSQLDA): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
@@ -526,23 +526,23 @@ Tisc_dsql_prepare = function    (status_vector            : PISC_STATUS;
                                  tran_handle              : PISC_TR_HANDLE;
                                  stmt_handle              : PISC_STMT_HANDLE;
                                  length                   : UShort;
-                                 statement                : PChar;
+                                 statement                : PAnsiChar;
                                  dialect                  : UShort;
                                  xsqlda                   : PXSQLDA): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_dsql_set_cursor_name = function (status_vector        : PISC_STATUS;
 				 stmt_handle               : PISC_STMT_HANDLE;
-                                 cursor_name               : PChar;
+                                 cursor_name               : PAnsiChar;
                                  _type                     : UShort): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_dsql_sql_info = function   (status_vector             : PISC_STATUS;
                                  stmt_handle               : PISC_STMT_HANDLE;
 				 item_length               : Short;
-                                 items                     : PChar;
+                                 items                     : PAnsiChar;
                                  buffer_length             : Short;
-                                 buffer                    : PChar): ISC_STATUS;
+                                 buffer                    : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_encode_date = procedure    (tm_date                    : PCTimeStructure;
@@ -561,39 +561,39 @@ Tisc_encode_timestamp = procedure (tm_date                  : PCTimeStructure;
 				 ib_timestamp               : PISC_TIMESTAMP);
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
-Tisc_event_block = function     (event_buffer               : PPChar;
-				 result_buffer              : PPChar;
+Tisc_event_block = function     (event_buffer               : PPAnsiChar;
+				 result_buffer              : PPAnsiChar;
 				 id_count                   : UShort;
          event_list : array of const):ISC_LONG;
                                  cdecl;
 
 Tisc_event_counts = procedure   (status_vector             : PISC_LONG;
 				 buffer_length             : Short;
-				 event_buffer              : PChar;
-				 result_buffer             : PChar);
+				 event_buffer              : PAnsiChar;
+				 result_buffer             : PAnsiChar);
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
-Tisc_expand_dpb = procedure     (dpb                       : PPChar;
+Tisc_expand_dpb = procedure     (dpb                       : PPAnsiChar;
 				 dpb_length                : PShort;
 				 item_list                 : array of Pointer);
                                 cdecl;
 
-Tisc_modify_dpb = function      (dpb                       : PPChar;
+Tisc_modify_dpb = function      (dpb                       : PPAnsiChar;
 				 isc_arg2,
                                  isc_arg3                  : PShort;
                                  isc_arg4                  : UShort;
-				 isc_arg5                  : PChar;
+				 isc_arg5                  : PAnsiChar;
                                  isc_arg6                  : Short): Int;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
-Tisc_free = function           (isc_arg1                  : PChar): ISC_LONG;
+Tisc_free = function           (isc_arg1                  : PAnsiChar): ISC_LONG;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_get_segment = function     (status_vector             : PISC_STATUS;
 				 blob_handle               : PISC_BLOB_HANDLE;
                                  actual_seg_length         : PUShort;
                                  seg_buffer_length         : UShort;
-				 seg_buffer                : PChar): ISC_STATUS;
+				 seg_buffer                : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_get_slice = function       (status_vector             : PISC_STATUS;
@@ -601,7 +601,7 @@ Tisc_get_slice = function       (status_vector             : PISC_STATUS;
                                  tran_handle               : PISC_TR_HANDLE;
                                  isc_arg4                  : PISC_QUAD;
                                  isc_arg5                  : Short;
-				 isc_arg6                  : PChar;
+				 isc_arg6                  : PAnsiChar;
 				 isc_arg7                  : Short;
 				 isc_arg8                  : PISC_LONG;
 				 isc_arg9                  : ISC_LONG;
@@ -609,7 +609,7 @@ Tisc_get_slice = function       (status_vector             : PISC_STATUS;
 				 isc_arg11                 : PISC_LONG): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
-Tisc_interprete = function      (buffer                    : PChar;
+Tisc_interprete = function      (buffer                    : PAnsiChar;
 				 status_vector             : PPISC_STATUS): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
@@ -626,13 +626,13 @@ Tisc_open_blob2 = function      (status_vector             : PISC_STATUS;
 				 blob_handle               : PISC_BLOB_HANDLE;
 				 blob_id                   : PISC_QUAD;
 				 bpb_length                : Short;
-				 bpb_buffer                : PChar): ISC_STATUS;
+				 bpb_buffer                : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_prepare_transaction2 = function (status_vector        : PISC_STATUS;
                                  tran_handle               : PISC_TR_HANDLE;
                                  msg_length                : Short;
-				 msg                       : PChar): ISC_STATUS;
+				 msg                       : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_print_sqlerror = procedure (sqlcode                   : Short;
@@ -645,7 +645,7 @@ Tisc_print_status = function   (status_vector              : PISC_STATUS): ISC_S
 Tisc_put_segment = function     (status_vector             : PISC_STATUS;
 				 blob_handle               : PISC_BLOB_HANDLE;
 				 seg_buffer_len            : UShort;
-				 seg_buffer                : PChar): ISC_STATUS;
+				 seg_buffer                : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_put_slice = function       (status_vector             : PISC_STATUS;
@@ -653,7 +653,7 @@ Tisc_put_slice = function       (status_vector             : PISC_STATUS;
                                  tran_handle               : PISC_TR_HANDLE;
 				 isc_arg4                  : PISC_QUAD;
 				 isc_arg5                  : Short;
-				 isc_arg6                  : PChar;
+				 isc_arg6                  : PAnsiChar;
 				 isc_arg7                  : Short;
 				 isc_arg8                  : PISC_LONG;
 				 isc_arg9                  : ISC_LONG;
@@ -664,7 +664,7 @@ Tisc_que_events = function      (status_vector             : PISC_STATUS;
                                  db_handle                 : PISC_DB_HANDLE;
 				 event_id                  : PISC_LONG;
 				 length                    : Short;
-				 event_buffer              : PChar;
+				 event_buffer              : PAnsiChar;
                                  event_function            : TISC_CALLBACK;
 				 event_function_arg        : PVoid): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
@@ -688,7 +688,7 @@ Tisc_start_transaction = function (status_vector           : PISC_STATUS;
                                  db_handle_count           : Short;
                                  db_handle                 : PISC_DB_HANDLE;
                                  tpb_length                : UShort;
-                                 tpb_address               : PChar): ISC_STATUS;
+                                 tpb_address               : PAnsiChar): ISC_STATUS;
                                 cdecl;
 
 Tisc_sqlcode = function        (status_vector             : PISC_STATUS): ISC_LONG;
@@ -696,34 +696,34 @@ Tisc_sqlcode = function        (status_vector             : PISC_STATUS): ISC_LO
 
 
 Tisc_sql_interprete = procedure (sqlcode                   : Short;
-				 buffer                    : PChar;
+				 buffer                    : PAnsiChar;
                                  buffer_length             : Short);
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_transaction_info = function (status_vector            : PISC_STATUS;
                                  tran_handle               : PISC_TR_HANDLE;
                                  item_list_buffer_length   : Short;
-                                 item_list_buffer          : PChar;
+                                 item_list_buffer          : PAnsiChar;
                                  result_buffer_length      : Short;
-                                 result_buffer             : PChar): ISC_STATUS;
+                                 result_buffer             : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_transact_request = function (status_vector            : PISC_STATUS;
                                  db_handle                 : PISC_DB_HANDLE;
                                  tran_handle               : PISC_TR_HANDLE;
 				 isc_arg4                  : UShort;
-                                 isc_arg5                  : PChar;
+                                 isc_arg5                  : PAnsiChar;
 				 isc_arg6	           : UShort;
-				 isc_arg7                  : PChar;
+				 isc_arg7                  : PAnsiChar;
                                  isc_arg8                  : UShort;
-				 isc_arg9                  : PChar): ISC_STATUS;
+				 isc_arg9                  : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
-Tisc_vax_integer = function     (buffer                    : PChar;
+Tisc_vax_integer = function     (buffer                    : PAnsiChar;
 				 length                    : Short): ISC_LONG;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
-Tisc_portable_integer = function (buffer                   : PChar;
+Tisc_portable_integer = function (buffer                   : PAnsiChar;
 				 length                    : Short): ISC_INT64;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
@@ -754,15 +754,15 @@ type
     uid: Int;			     (** the user's id **)
     gid: int;			     (** the user's group id **)
     protocol: Int;		     (** protocol to use for connection **)
-    server: PChar;                   (** server to administer **)
-    user_name: PChar;                (** the user's name **)
-    password: PChar;                 (** the user's password **)
-    group_name: PChar;               (** the group name **)
-    first_name: PChar;	             (** the user's first name **)
-    middle_name: PChar;              (** the user's middle name **)
-    last_name: PChar;	             (** the user's last name **)
-    dba_user_name: PChar;            (** the dba user name **)
-    dba_password: PChar;             (** the dba password **)
+    server: PAnsiChar;                   (** server to administer **)
+    user_name: PAnsiChar;                (** the user's name **)
+    password: PAnsiChar;                 (** the user's password **)
+    group_name: PAnsiChar;               (** the group name **)
+    first_name: PAnsiChar;	             (** the user's first name **)
+    middle_name: PAnsiChar;              (** the user's middle name **)
+    last_name: PAnsiChar;	             (** the user's last name **)
+    dba_user_name: PAnsiChar;            (** the dba user name **)
+    dba_password: PAnsiChar;             (** the dba password **)
   end;
   PUserSecData = ^TUserSecData;
 
@@ -786,21 +786,21 @@ Tisc_compile_request = function (status_vector             : PISC_STATUS;
                                  db_handle                 : PISC_DB_HANDLE;
                                  request_handle            : PISC_REQ_HANDLE;
 				 isc_arg4                  : Short;
-				 isc_arg5                  : PChar): ISC_STATUS;
+				 isc_arg5                  : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_compile_request2 = function (status_vector            : PISC_STATUS;
                                  db_handle                 : PISC_DB_HANDLE;
                                  request_handle            : PISC_REQ_HANDLE;
 				 isc_arg4                  : Short;
-				 isc_arg5                  : PChar): ISC_STATUS;
+				 isc_arg5                  : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_ddl = function             (status_vector             : PISC_STATUS;
 			         db_handle                 : PISC_DB_HANDLE;
 			         tran_handle               : PISC_TR_HANDLE;
 			         isc_arg4                  : Short;
-			         isc_arg5                  : PChar): ISC_STATUS;
+			         isc_arg5                  : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_prepare_transaction = function (status_vector         : PISC_STATUS;
@@ -830,7 +830,7 @@ Tisc_reconnect_transaction = function (status_vector       : PISC_STATUS;
                                  db_handle                 : PISC_DB_HANDLE;
                                  tran_handle               : PISC_TR_HANDLE;
                                  isc_arg4                  : Short;
-                                 isc_arg5                  : PChar): ISC_STATUS;
+                                 isc_arg5                  : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_release_request = function (status_vector             : PISC_STATUS;
@@ -841,9 +841,9 @@ Tisc_request_info = function    (status_vector             : PISC_STATUS;
                                  request_handle            : PISC_REQ_HANDLE;
                                  isc_arg3                  : Short;
                                  isc_arg4                  : Short;
-                                 isc_arg5                  : PChar;
+                                 isc_arg5                  : PAnsiChar;
                                  isc_arg6                  : Short;
-                                 isc_arg7                  : PChar): ISC_STATUS;
+                                 isc_arg7                  : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_seek_blob = function       (status_vector             : PISC_STATUS;
@@ -885,7 +885,7 @@ Tisc_wait_for_event = function  (status_vector             : PISC_STATUS;
                                  db_handle                 : PISC_DB_HANDLE;
                                  length                    : Short;
                                  event_buffer,
-                                 result_buffer             : PChar): ISC_STATUS;
+                                 result_buffer             : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 (*******************************)
@@ -893,27 +893,27 @@ Tisc_wait_for_event = function  (status_vector             : PISC_STATUS;
 (*******************************)
 {$IFDEF IB5_ONLY}
 Tisc_close = function           (status_vector             : PISC_STATUS;
-                                 isc_arg2                  : PChar): ISC_STATUS;
+                                 isc_arg2                  : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_declare = function         (status_vector             : PISC_STATUS;
                                  isc_arg2,
-                                 isc_arg3                  : PChar): ISC_STATUS;
+                                 isc_arg3                  : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_describe = function        (status_vector             : PISC_STATUS;
-                                 isc_arg2                  : PChar;
+                                 isc_arg2                  : PAnsiChar;
                                  isc_arg3                  : PSQLDA): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_describe_bind = function   (status_vector             : PISC_STATUS;
-                                 isc_arg2                  : PChar;
+                                 isc_arg2                  : PAnsiChar;
                                  isc_arg3                  : PSQLDA): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_execute = function         (status_vector             : PISC_STATUS;
                                  tran_handle               : PISC_TR_HANDLE;
-                                 isc_arg3                  : PChar;
+                                 isc_arg3                  : PAnsiChar;
                                  isc_arg4                  : PSQLDA): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
@@ -921,51 +921,51 @@ Tisc_execute_immediate = function (status_vector           : PISC_STATUS;
                                  db_handle                 : PISC_DB_HANDLE;
                                  tran_handle               : PISC_TR_HANDLE;
                                  isc_arg4                  : PShort;
-                                 isc_arg5                  : PChar): ISC_STATUS;
+                                 isc_arg5                  : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_fetch = function           (status_vector             : PISC_STATUS;
-				 isc_arg2                  : PChar;
+				 isc_arg2                  : PAnsiChar;
 				 isc_arg3                  : PSQLDA): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_open = function            (status_vector             : PISC_STATUS;
 				 tran_handle               : PISC_TR_HANDLE;
-				 isc_arg3                  : PChar;
+				 isc_arg3                  : PAnsiChar;
 				 isc_arg4                  : PSQLDA): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_prepare = function         (status_vector             : PISC_STATUS;
                                  db_handle                 : PISC_DB_HANDLE;
                                  tran_handle               : PISC_TR_HANDLE;
-                                 isc_arg4                  : PChar;
+                                 isc_arg4                  : PAnsiChar;
                                  isc_arg5                  : PShort;
-                                 isc_arg6                  : PChar;
+                                 isc_arg6                  : PAnsiChar;
                                  isc_arg7                  : PSQLDA): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 {$ELSE}
 Tisc_close = function           (status_vector             : PISC_STATUS;
-                                 isc_arg2                  : PChar): ISC_STATUS;
+                                 isc_arg2                  : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_declare = function         (status_vector             : PISC_STATUS;
                                  isc_arg2,
-                                 isc_arg3                  : PChar): ISC_STATUS;
+                                 isc_arg3                  : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_describe = function        (status_vector             : PISC_STATUS;
-                                 isc_arg2                  : PChar;
+                                 isc_arg2                  : PAnsiChar;
                                  isc_arg3                  : PXSQLDA): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_describe_bind = function   (status_vector             : PISC_STATUS;
-                                 isc_arg2                  : PChar;
+                                 isc_arg2                  : PAnsiChar;
                                  isc_arg3                  : PXSQLDA): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_execute = function         (status_vector             : PISC_STATUS;
                                  tran_handle               : PISC_TR_HANDLE;
-                                 isc_arg3                  : PChar;
+                                 isc_arg3                  : PAnsiChar;
                                  isc_arg4                  : PXSQLDA): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
@@ -973,26 +973,26 @@ Tisc_execute_immediate = function (status_vector           : PISC_STATUS;
                                  db_handle                 : PISC_DB_HANDLE;
                                  tran_handle               : PISC_TR_HANDLE;
                                  isc_arg4                  : PShort;
-                                 isc_arg5                  : PChar): ISC_STATUS;
+                                 isc_arg5                  : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_fetch = function           (status_vector             : PISC_STATUS;
-				 isc_arg2                  : PChar;
+				 isc_arg2                  : PAnsiChar;
 				 isc_arg3                  : PXSQLDA): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_open = function            (status_vector             : PISC_STATUS;
 				 tran_handle               : PISC_TR_HANDLE;
-				 isc_arg3                  : PChar;
+				 isc_arg3                  : PAnsiChar;
 				 isc_arg4                  : PXSQLDA): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_prepare = function         (status_vector             : PISC_STATUS;
                                  db_handle                 : PISC_DB_HANDLE;
                                  tran_handle               : PISC_TR_HANDLE;
-                                 isc_arg4                  : PChar;
+                                 isc_arg4                  : PAnsiChar;
                                  isc_arg5                  : PShort;
-                                 isc_arg6                  : PChar;
+                                 isc_arg6                  : PAnsiChar;
                                  isc_arg7                  : PXSQLDA): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 {$ENDIF}
@@ -1005,75 +1005,75 @@ Tisc_dsql_execute_m = function  (status_vector             : PISC_STATUS;
                                  tran_handle               : PISC_TR_HANDLE;
                                  statement_handle          : PISC_STMT_HANDLE;
                                  isc_arg4                  : UShort;
-                                 isc_arg5                  : PChar;
+                                 isc_arg5                  : PAnsiChar;
                                  isc_arg6                  : UShort;
                                  isc_arg7                  : UShort;
-                                 isc_arg8                  : PChar): ISC_STATUS;
+                                 isc_arg8                  : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_dsql_execute2_m = function (status_vector             : PISC_STATUS;
                                  tran_handle               : PISC_TR_HANDLE;
                                  statement_handle          : PISC_STMT_HANDLE;
                                  isc_arg4                  : UShort;
-                                 isc_arg5                  : PChar;
+                                 isc_arg5                  : PAnsiChar;
                                  isc_arg6                  : UShort;
                                  isc_arg7                  : UShort;
-                                 isc_arg8                  : PChar;
+                                 isc_arg8                  : PAnsiChar;
                                  isc_arg9                  : UShort;
-                                 isc_arg10                 : PChar;
+                                 isc_arg10                 : PAnsiChar;
                                  isc_arg11                 : UShort;
                                  isc_arg12                 : UShort;
-                                 isc_arg13                 : PChar): ISC_STATUS;
+                                 isc_arg13                 : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_dsql_execute_immediate_m = function (status_vector    : PISC_STATUS;
                                  db_handle                 : PISC_DB_HANDLE;
                                  tran_handle               : PISC_TR_HANDLE;
                                  isc_arg4                  : UShort;
-                                 isc_arg5                  : PChar;
+                                 isc_arg5                  : PAnsiChar;
                                  isc_arg6                  : UShort;
                                  isc_arg7                  : UShort;
-                                 isc_arg8                  : PChar;
+                                 isc_arg8                  : PAnsiChar;
                                  isc_arg9                  : UShort;
                                  isc_arg10                 : UShort;
-                                 isc_arg11                 : PChar): ISC_STATUS;
+                                 isc_arg11                 : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_dsql_exec_immed3_m = function  (status_vector         : PISC_STATUS;
                                  db_handle                 : PISC_DB_HANDLE;
                                  tran_handle               : PISC_TR_HANDLE;
                                  isc_arg4                  : UShort;
-                                 isc_arg5                  : PChar;
+                                 isc_arg5                  : PAnsiChar;
                                  isc_arg6                  : UShort;
                                  isc_arg7                  : UShort;
-                                 isc_arg8                  : PChar;
+                                 isc_arg8                  : PAnsiChar;
                                  isc_arg9                  : UShort;
                                  isc_arg10                 : UShort;
-                                 isc_arg11                 : PChar;
+                                 isc_arg11                 : PAnsiChar;
                                  isc_arg12                 : UShort;
-                                 isc_arg13                 : PChar;
+                                 isc_arg13                 : PAnsiChar;
                                  isc_arg14                 : UShort;
                                  isc_arg15                 : UShort;
-                                 isc_arg16                 : PChar): ISC_STATUS;
+                                 isc_arg16                 : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_dsql_fetch_m = function    (status_vector             : PISC_STATUS;
                                  statement_handle          : PISC_STMT_HANDLE;
                                  isc_arg3                  : UShort;
-                                 isc_arg4                  : PChar;
+                                 isc_arg4                  : PAnsiChar;
                                  isc_arg5                  : UShort;
                                  isc_arg6                  : UShort;
-                                 isc_arg7                  : PChar): ISC_STATUS;
+                                 isc_arg7                  : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 (*$ifdef SCROLLABLE_CURSORS*)
 Tisc_dsql_fetch2_m = function   (status_vector             : PISC_STATUS;
                                  statement_handle          : PISC_STMT_HANDLE;
                                  isc_arg3                  : UShort;
-                                 isc_arg4                  : PChar;
+                                 isc_arg4                  : PAnsiChar;
                                  isc_arg5                  : UShort;
                                  isc_arg6                  : UShort;
-                                 isc_arg7                  : PChar;
+                                 isc_arg7                  : PAnsiChar;
                                  isc_arg8                  : UShort;
                                  isc_arg9                  : Long): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
@@ -1082,59 +1082,59 @@ Tisc_dsql_fetch2_m = function   (status_vector             : PISC_STATUS;
 Tisc_dsql_insert_m = function   (status_vector             : PISC_STATUS;
                                  statement_handle          : PISC_STMT_HANDLE;
                                  isc_arg3                  : UShort;
-                                 isc_arg4                  : PChar;
+                                 isc_arg4                  : PAnsiChar;
                                  isc_arg5                  : UShort;
                                  isc_arg6                  : UShort;
-                                 isc_arg7                  : PChar): ISC_STATUS;
+                                 isc_arg7                  : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_dsql_prepare_m = function  (status_vector             : PISC_STATUS;
                                  tran_handle               : PISC_TR_HANDLE;
                                  statement_handle          : PISC_STMT_HANDLE;
                                  isc_arg4                  : UShort;
-                                 isc_arg5                  : PChar;
+                                 isc_arg5                  : PAnsiChar;
                                  isc_arg6                  : UShort;
                                  isc_arg7                  : UShort;
-                                 isc_arg8                  : PChar;
+                                 isc_arg8                  : PAnsiChar;
                                  isc_arg9                  : UShort;
-                                 isc_arg10                 : PChar): ISC_STATUS;
+                                 isc_arg10                 : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_dsql_release = function    (status_vector             : PISC_STATUS;
-                                 isc_arg2                  : PChar): ISC_STATUS;
+                                 isc_arg2                  : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_embed_dsql_close = function(status_vector             : PISC_STATUS;
-                                 isc_arg2                  : PChar): ISC_STATUS;
+                                 isc_arg2                  : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_embed_dsql_declare = function  (status_vector         : PISC_STATUS;
-                                 isc_arg2                  : PChar;
-                                 isc_arg3                  : PChar): ISC_STATUS;
+                                 isc_arg2                  : PAnsiChar;
+                                 isc_arg3                  : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_embed_dsql_describe = function (status_vector         : PISC_STATUS;
-                                 isc_arg2                  : PChar;
+                                 isc_arg2                  : PAnsiChar;
                                  isc_arg3                  : UShort;
                                  isc_arg4                  : PXSQLDA): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_embed_dsql_describe_bind = function (status_vector    : PISC_STATUS;
-				 isc_arg2                  : PChar;
+				 isc_arg2                  : PAnsiChar;
                                  isc_arg3                  : UShort;
                                  isc_arg4                  : PXSQLDA): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_embed_dsql_execute = function  (status_vector         : PISC_STATUS;
                                  tran_handle               : PISC_TR_HANDLE;
-                                 isc_arg3                  : PChar;
+                                 isc_arg3                  : PAnsiChar;
                                  isc_arg4                  : UShort;
                                  isc_arg5                  : PXSQLDA): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_embed_dsql_execute2 = function (status_vector         : PISC_STATUS;
 				 tran_handle               : PISC_TR_HANDLE;
-                                 isc_arg3                  : PChar;
+                                 isc_arg3                  : PAnsiChar;
                                  isc_arg4                  : UShort;
                                  isc_arg5                  : PXSQLDA;
                                  isc_arg6                  : PXSQLDA): ISC_STATUS;
@@ -1144,20 +1144,20 @@ Tisc_embed_dsql_execute_immed = function (status_vector    : PISC_STATUS;
 				 db_handle                 : PISC_DB_HANDLE;
                                  tran_handle               : PISC_TR_HANDLE;
                                  isc_arg4                  : UShort;
-                                 isc_arg5                  : PChar;
+                                 isc_arg5                  : PAnsiChar;
                                  isc_arg6                  : UShort;
                                  isc_arg7                  : PXSQLDA): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_embed_dsql_fetch = function(status_vector             : PISC_STATUS;
-                                 isc_arg2                  : PChar;
+                                 isc_arg2                  : PAnsiChar;
                                  isc_arg3                  : UShort;
                                  isc_arg4                  : PXSQLDA): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 (*$ifdef SCROLLABLE_CURSORS*)
 Tisc_embed_dsql_fetch2 = function  (status_vector         : PISC_STATUS;
-                                isc_arg2                  : PChar;
+                                isc_arg2                  : PAnsiChar;
                                 isc_arg3                  : UShort;
                                 isc_arg4                  : PXSQLDA;
                                 isc_arg5                  : UShort;
@@ -1167,21 +1167,21 @@ Tisc_embed_dsql_fetch2 = function  (status_vector         : PISC_STATUS;
 
 Tisc_embed_dsql_open = function (status_vector             : PISC_STATUS;
                                  tran_handle               : PISC_TR_HANDLE;
-                                 isc_arg3                  : PChar;
+                                 isc_arg3                  : PAnsiChar;
                                  isc_arg4                  : UShort;
                                  isc_arg5                  : PXSQLDA): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_embed_dsql_open2 = function (status_vector            : PISC_STATUS;
                                  tran_handle               : PISC_TR_HANDLE;
-                                 isc_arg3                  : PChar;
+                                 isc_arg3                  : PAnsiChar;
                                  isc_arg4                  : UShort;
                                  isc_arg5                  : PXSQLDA;
                                  isc_arg6                  : PXSQLDA): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_embed_dsql_insert = function (status_vector           : PISC_STATUS;
-                                 isc_arg2                  : PChar;
+                                 isc_arg2                  : PAnsiChar;
                                  isc_arg3                  : UShort;
                                  isc_arg4                  : PXSQLDA): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
@@ -1189,15 +1189,15 @@ Tisc_embed_dsql_insert = function (status_vector           : PISC_STATUS;
 Tisc_embed_dsql_prepare = function  (status_vector         : PISC_STATUS;
                                  db_handle                 : PISC_DB_HANDLE;
                                  tran_handle               : PISC_TR_HANDLE;
-                                 isc_arg4                  : PChar;
+                                 isc_arg4                  : PAnsiChar;
                                  isc_arg5                  : UShort;
-                                 isc_arg6                  : PChar;
+                                 isc_arg6                  : PAnsiChar;
                                  isc_arg7                  : UShort;
                                  isc_arg8                  : PXSQLDA): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_embed_dsql_release = function  (status_vector         : PISC_STATUS;
-                                 isc_arg2                  : PChar): ISC_STATUS;
+                                 isc_arg2                  : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 (********************************)
@@ -1205,7 +1205,7 @@ Tisc_embed_dsql_release = function  (status_vector         : PISC_STATUS;
 (********************************)
 
 TBLOB_open = function           (blob_handle               : TISC_BLOB_HANDLE;
-                                 isc_arg2                  : PChar;
+                                 isc_arg2                  : PAnsiChar;
                                  isc_arg3                  : int): PBSTREAM;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
@@ -1222,49 +1222,49 @@ TBLOB_get = function           (isc_arg1                  : PBSTREAM): Int;
 TBLOB_display = function        (isc_arg1                  : PISC_QUAD;
                                  db_handle                 : TISC_DB_HANDLE;
                                  tran_handle               : TISC_TR_HANDLE;
-                                 isc_arg4                  : PChar): Int;
+                                 isc_arg4                  : PAnsiChar): Int;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 TBLOB_dump = function           (isc_arg1                  : PISC_QUAD;
 				 db_handle                 : TISC_DB_HANDLE;
 				 tran_handle               : TISC_TR_HANDLE;
-                                 isc_arg4                  : PChar): Int;
+                                 isc_arg4                  : PAnsiChar): Int;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 TBLOB_edit = function           (isc_arg1                  : PISC_QUAD;
 				 db_handle                 : TISC_DB_HANDLE;
 				 tran_handle               : TISC_TR_HANDLE;
-                                 isc_arg4                  : PChar): Int;
+                                 isc_arg4                  : PAnsiChar): Int;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 TBLOB_load = function           (isc_arg1                  : PISC_QUAD;
 				 db_handle                 : TISC_DB_HANDLE;
 				 tran_handle               : TISC_TR_HANDLE;
-                                 isc_arg4                  : PChar): Int;
+                                 isc_arg4                  : PAnsiChar): Int;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 TBLOB_text_dump = function      (isc_arg1                  : PISC_QUAD;
 				 db_handle                 : TISC_DB_HANDLE;
 				 tran_handle               : TISC_TR_HANDLE;
-                                 isc_arg4                  : PChar): Int;
+                                 isc_arg4                  : PAnsiChar): Int;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 TBLOB_text_load = function      (isc_arg1                  : PISC_QUAD;
 				 db_handle                 : TISC_DB_HANDLE;
 				 tran_handle               : TISC_TR_HANDLE;
-                                 isc_arg4                  : PChar): Int;
+                                 isc_arg4                  : PAnsiChar): Int;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 TBopen = function               (isc_arg1                  : PISC_QUAD;
 				 db_handle                 : TISC_DB_HANDLE;
 				 tran_handle               : TISC_TR_HANDLE;
-                                 isc_arg4                  : PChar): Int;
+                                 isc_arg4                  : PAnsiChar): Int;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 TBopen2 = function              (isc_arg1                  : PISC_QUAD;
 				 db_handle                 : TISC_DB_HANDLE;
 				 tran_handle               : TISC_TR_HANDLE;
-                                 isc_arg4                  : PChar;
+                                 isc_arg4                  : PAnsiChar;
                                  isc_arg5                  : UShort): PBSTREAM;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
@@ -1272,13 +1272,13 @@ TBopen2 = function              (isc_arg1                  : PISC_QUAD;
 (** Other Misc functions       **)
 (********************************)
 
-Tisc_ftof = function            (isc_arg1                  : PChar;
+Tisc_ftof = function            (isc_arg1                  : PAnsiChar;
 				 isc_arg2                  : UShort;
-				 isc_arg3                  : PChar;
+				 isc_arg3                  : PAnsiChar;
 				 isc_arg4                  : UShort): ISC_LONG;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
-Tisc_print_blr = function       (isc_arg1                  : PChar;
+Tisc_print_blr = function       (isc_arg1                  : PAnsiChar;
                                  isc_arg2                  : TISC_CALLBACK;
                                  isc_arg3                  : PVoid;
                                  isc_arg4                  : Short): ISC_STATUS;
@@ -1291,13 +1291,13 @@ Tisc_qtoq = procedure           (isc_arg1                  : PISC_QUAD;
 				 isc_arg2                  : PISC_QUAD);
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
-Tisc_vtof = procedure           (isc_arg1                  : PChar;
-				 isc_arg2                  : PChar;
+Tisc_vtof = procedure           (isc_arg1                  : PAnsiChar;
+				 isc_arg2                  : PAnsiChar;
 				 isc_arg3                  : UShort);
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
-Tisc_vtov = procedure           (isc_arg1                  : PChar;
-				 isc_arg2                  : PChar;
+Tisc_vtov = procedure           (isc_arg1                  : PAnsiChar;
+				 isc_arg2                  : PAnsiChar;
 				 isc_arg3                  : Short);
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
@@ -1315,10 +1315,10 @@ Tisc_reset_fpe = function      (isc_arg1                  : UShort): ISC_LONG;
 
 Tisc_service_attach = function  (status_vector             : PISC_STATUS;
                                  isc_arg2                  : UShort;
-                                 isc_arg3                  : PChar;
+                                 isc_arg3                  : PAnsiChar;
                                  service_handle            : PISC_SVC_HANDLE;
                                  isc_arg5                  : UShort;
-                                 isc_arg6                  : PChar): ISC_STATUS;
+                                 isc_arg6                  : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_service_detach = function (status_vector             : PISC_STATUS;
@@ -1329,18 +1329,18 @@ Tisc_service_query = function   (status_vector             : PISC_STATUS;
                                  service_handle            : PISC_SVC_HANDLE;
                                  recv_handle               : PISC_SVC_HANDLE;
                                  isc_arg4                  : UShort;
-                                 isc_arg5                  : PChar;
+                                 isc_arg5                  : PAnsiChar;
                                  isc_arg6                  : UShort;
-                                 isc_arg7                  : PChar;
+                                 isc_arg7                  : PAnsiChar;
                                  isc_arg8                  : UShort;
-                                 isc_arg9                  : PChar): ISC_STATUS;
+                                 isc_arg9                  : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_service_start = function  (status_vector             : PISC_STATUS;
                                 service_handle            : PISC_SVC_HANDLE;
                                 recv_handle               : PISC_SVC_HANDLE;
                                 isc_arg4                  : UShort;
-                                isc_arg5                  : PChar): ISC_STATUS;
+                                isc_arg5                  : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 (*********************************)
@@ -1351,27 +1351,27 @@ Tisc_compile_map = function     (status_vector             : PISC_STATUS;
                                  form_handle               : PISC_FORM_HANDLE;
                                  request_handle            : PISC_REQ_HANDLE;
                                  isc_arg4                  : PShort;
-                                 isc_arg5                  : PChar): ISC_STATUS;
+                                 isc_arg5                  : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_compile_menu = function    (status_vector             : PISC_STATUS;
                                  form_handle               : PISC_FORM_HANDLE;
                                  request_handle            : PISC_REQ_HANDLE;
                                  isc_arg4                  : PShort;
-                                 isc_arg5                  : PChar): ISC_STATUS;
+                                 isc_arg5                  : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_compile_sub_map = function (status_vector             : PISC_STATUS;
                                  win_handle                : PISC_WIN_HANDLE;
                                  request_handle            : PISC_REQ_HANDLE;
                                  isc_arg4                  : PShort;
-                                 isc_arg5                  : PChar): ISC_STATUS;
+                                 isc_arg5                  : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_create_window = function   (status_vector             : PISC_STATUS;
                                  win_handle                : PISC_WIN_HANDLE;
                                  isc_arg3                  : PShort;
-                                 isc_arg4                  : PChar;
+                                 isc_arg4                  : PAnsiChar;
                                  isc_arg5                  : PShort;
                                  isc_arg6                  : PShort): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
@@ -1393,12 +1393,12 @@ Tisc_drive_menu = function      (status_vector             : PISC_STATUS;
                                  win_handle                : PISC_WIN_HANDLE;
                                  request_handle            : PISC_REQ_HANDLE;
                                  isc_arg4                  : PShort;
-                                 isc_arg5                  : PChar;
+                                 isc_arg5                  : PAnsiChar;
                                  isc_arg6                  : PShort;
-                                 isc_arg7                  : PChar;
+                                 isc_arg7                  : PAnsiChar;
                                  isc_arg8                  : PShort;
                                  isc_arg9                  : PShort;
-                                 isc_arg10                 : PChar;
+                                 isc_arg10                 : PAnsiChar;
                                  isc_arg11                 : PISC_LONG): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
@@ -1423,7 +1423,7 @@ Tisc_form_insert = function     (status_vector             : PISC_STATUS;
 Tisc_get_entree = function      (status_vector             : PISC_STATUS;
                                  request_handle            : PISC_REQ_HANDLE;
                                  isc_arg3                  : PShort;
-                                 isc_arg4                  : PChar;
+                                 isc_arg4                  : PAnsiChar;
                                  isc_arg5                  : PISC_LONG;
                                  isc_arg6                  : PShort): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
@@ -1436,7 +1436,7 @@ Tisc_menu = function            (status_vector             : PISC_STATUS;
 				 win_handle                : PISC_WIN_HANDLE;
 				 request_handle            : PISC_REQ_HANDLE;
 			 	 isc_arg4                  : PShort;
-				 isc_arg5                  : PChar): ISC_STATUS;
+				 isc_arg5                  : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_load_form = function       (status_vector             : PISC_STATUS;
@@ -1444,7 +1444,7 @@ Tisc_load_form = function       (status_vector             : PISC_STATUS;
                                  tran_handle               : PISC_TR_HANDLE;
                                  form_handle               : PISC_FORM_HANDLE;
                                  isc_arg5                  : PShort;
-                                 isc_arg6                  : PChar): ISC_STATUS;
+                                 isc_arg6                  : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_pop_window = function      (status_vector             : PISC_STATUS;
@@ -1454,7 +1454,7 @@ Tisc_pop_window = function      (status_vector             : PISC_STATUS;
 Tisc_put_entree = function      (status_vector             : PISC_STATUS;
                                  request_handle            : PISC_REQ_HANDLE;
                                  isc_arg3                  : PShort;
-                                 isc_arg4                  : PChar;
+                                 isc_arg4                  : PAnsiChar;
                                  isc_arg5                  : PISC_LONG): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
@@ -1825,7 +1825,7 @@ end;
 (*******************************************)
 
 
-procedure add_spb_length(var p: PChar; length: integer);
+procedure add_spb_length(var p: PAnsiChar; length: integer);
 (*
 #define ADD_SPB_LENGTH(p, length)	{*(p)++ = (length); \
     					 *(p)++ = (length) >> 8;}
@@ -1837,7 +1837,7 @@ begin
   Inc (p);
 end;
 
-procedure add_spb_numeric(var p: PChar; data: integer);
+procedure add_spb_numeric(var p: PAnsiChar; data: integer);
 (*
 #define ADD_SPB_NUMERIC(p, data)	{*(p)++ = (data); \
     					 *(p)++ = (data) >> 8; \

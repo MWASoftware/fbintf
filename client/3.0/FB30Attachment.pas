@@ -262,7 +262,7 @@ begin
   with Firebird30ClientAPI do
   begin
     FAttachmentIntf.execute(StatusIntf,(transaction as TFB30Transaction).TransactionIntf,
-                    Length(sql),PChar(sql),aSQLDialect,nil,nil,nil,nil);
+                    Length(sql),PAnsiChar(sql),aSQLDialect,nil,nil,nil,nil);
     Check4DataBaseError;
   end;
 end;

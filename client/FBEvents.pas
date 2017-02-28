@@ -81,9 +81,9 @@ type
     FAttachment: IAttachment;
     FEventCounts: TEventCounts;
   protected
-    FEventBuffer: PChar;
+    FEventBuffer: PAnsiChar;
     FEventBufferLen: integer;
-    FResultBuffer: PChar;
+    FResultBuffer: PAnsiChar;
     FEventHandler: TEventHandler;
     FCriticalSection: TCriticalSection;
     FInWaitState: boolean;
@@ -119,7 +119,7 @@ const
 procedure TFBEvents.CreateEventBlock;
 var
   i: integer;
-  EventNames: array of PChar;
+  EventNames: array of PAnsiChar;
 begin
   with FirebirdClientAPI do
   begin
@@ -133,7 +133,7 @@ begin
     setlength(EventNames,MaxEvents);
     try
       for i := 0 to FEvents.Count-1 do
-        EventNames[i] := PChar(FEvents[i]);
+        EventNames[i] := PAnsiChar(FEvents[i]);
 
       FEventBufferlen := isc_event_block(@FEventBuffer,@FResultBuffer,
                           FEvents.Count,

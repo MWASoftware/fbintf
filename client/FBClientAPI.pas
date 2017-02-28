@@ -120,7 +120,7 @@ type
     FOwnsIBLibrary: boolean;
     procedure LoadIBLibrary;
   protected
-    function GetProcAddr(ProcName: PChar): Pointer;
+    function GetProcAddr(ProcName: PAnsiChar): Pointer;
     function GetOverrideLibName: AnsiString;
     {$IFDEF UNIX}
     function GetFirebirdLibList: AnsiString; virtual; abstract;
@@ -142,14 +142,14 @@ type
     procedure SetupEnvironment;
 
     {Encode/Decode}
-    procedure EncodeInteger(aValue: integer; len: integer; buffer: PChar);
-    function DecodeInteger(bufptr: PChar; len: short): integer; virtual; abstract;
-    procedure SQLEncodeDate(aDate: TDateTime; bufptr: PChar); virtual; abstract;
-    function SQLDecodeDate(byfptr: PChar): TDateTime; virtual; abstract;
-    procedure SQLEncodeTime(aTime: TDateTime; bufptr: PChar); virtual; abstract;
-    function SQLDecodeTime(bufptr: PChar): TDateTime;  virtual; abstract;
-    procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PChar); virtual; abstract;
-    function SQLDecodeDateTime(bufptr: PChar): TDateTime; virtual; abstract;
+    procedure EncodeInteger(aValue: integer; len: integer; buffer: PAnsiChar);
+    function DecodeInteger(bufptr: PAnsiChar; len: short): integer; virtual; abstract;
+    procedure SQLEncodeDate(aDate: TDateTime; bufptr: PAnsiChar); virtual; abstract;
+    function SQLDecodeDate(byfptr: PAnsiChar): TDateTime; virtual; abstract;
+    procedure SQLEncodeTime(aTime: TDateTime; bufptr: PAnsiChar); virtual; abstract;
+    function SQLDecodeTime(bufptr: PAnsiChar): TDateTime;  virtual; abstract;
+    procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PAnsiChar); virtual; abstract;
+    function SQLDecodeDateTime(bufptr: PAnsiChar): TDateTime; virtual; abstract;
 
 
     {IFirebirdAPI}
@@ -285,7 +285,7 @@ const
   {SetEnvironmentVariable doesn't exist so we have to use C Library}
   function setenv(name:Pchar; value:Pchar; replace:integer):integer;cdecl;external clib name 'setenv';
   function unsetenv(name:Pchar):integer;cdecl;external clib name 'unsetenv';
-  function SetEnvironmentVariable(name:PChar; value:PChar):boolean;
+  function SetEnvironmentVariable(name:PAnsiChar; value:PAnsiChar):boolean;
   // Set environment variable; if empty string given, remove it.
   begin
     result:=false; //assume failure
@@ -330,7 +330,7 @@ var
   i: Integer;
 begin
   ReallocMem(Pointer(P), NewSize);
-  for i := OldSize to NewSize - 1 do PChar(P)[i] := #0;
+  for i := OldSize to NewSize - 1 do PAnsiChar(P)[i] := #0;
 end;
 
 procedure TFBClientAPI.IBDataBaseError;
@@ -350,18 +350,18 @@ begin
     begin
       if not DirectoryExists(tmpDir) then
         mkdir(tmpDir);
-      SetEnvironmentVariable('FIREBIRD_TMP',PChar(TmpDir));
+      SetEnvironmentVariable('FIREBIRD_TMP',PAnsiChar(TmpDir));
     end;
     if sysutils.GetEnvironmentVariable('FIREBIRD_LOCK') = '' then
     begin
       if not DirectoryExists(tmpDir) then
         mkdir(tmpDir);
-      SetEnvironmentVariable('FIREBIRD_LOCK',PChar(TmpDir));
+      SetEnvironmentVariable('FIREBIRD_LOCK',PAnsiChar(TmpDir));
     end;
   {$ENDIF}
 end;
 
-procedure TFBClientAPI.EncodeInteger(aValue: integer; len: integer; buffer: PChar);
+procedure TFBClientAPI.EncodeInteger(aValue: integer; len: integer; buffer: PAnsiChar);
 begin
   while len > 0 do
   begin
@@ -377,7 +377,7 @@ begin
   Result := IBLibrary <> NilHandle;
 end;
 
-function TFBClientAPI.GetProcAddr(ProcName: PChar): Pointer;
+function TFBClientAPI.GetProcAddr(ProcName: PAnsiChar): Pointer;
 begin
   Result := GetProcAddress(IBLibrary, ProcName);
   if not Assigned(Result) then
@@ -548,7 +548,7 @@ var
   i: Integer;
   procedure NextP(i: Integer);
   begin
-    p := PISC_STATUS(PChar(p) + (i * SizeOf(ISC_STATUS)));
+    p := PISC_STATUS(PAnsiChar(p) + (i * SizeOf(ISC_STATUS)));
   end;
 begin
   p := PISC_STATUS(StatusVector);

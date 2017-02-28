@@ -165,13 +165,13 @@ type
 
   public
     {Helper Functions}
-    function DecodeInteger(bufptr: PChar; len: short): integer; override;
-    procedure SQLEncodeDate(aDate: TDateTime; bufptr: PChar); override;
-    function SQLDecodeDate(bufptr: PChar): TDateTime; override;
-    procedure SQLEncodeTime(aTime: TDateTime; bufptr: PChar); override;
-    function SQLDecodeTime(bufptr: PChar): TDateTime;  override;
-    procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PChar); override;
-    function SQLDecodeDateTime(bufptr: PChar): TDateTime; override;
+    function DecodeInteger(bufptr: PAnsiChar; len: short): integer; override;
+    procedure SQLEncodeDate(aDate: TDateTime; bufptr: PAnsiChar); override;
+    function SQLDecodeDate(bufptr: PAnsiChar): TDateTime; override;
+    procedure SQLEncodeTime(aTime: TDateTime; bufptr: PAnsiChar); override;
+    function SQLDecodeTime(bufptr: PAnsiChar): TDateTime;  override;
+    procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PAnsiChar); override;
+    function SQLDecodeDateTime(bufptr: PAnsiChar): TDateTime; override;
 
   public
     {IFirebirdAPI}
@@ -228,10 +228,10 @@ end;
 
 function isc_service_attach_stub(status_vector      : PISC_STATUS;
                                  isc_arg2           : UShort;
-                                 isc_arg3           : PChar;
+                                 isc_arg3           : PAnsiChar;
                                  service_handle     : PISC_SVC_HANDLE;
                                  isc_arg5           : UShort;
-                                 isc_arg6           : PChar):
+                                 isc_arg6           : PAnsiChar):
                                  ISC_STATUS; {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 begin
   Result := 0;
@@ -250,11 +250,11 @@ function isc_service_query_stub(status_vector        : PISC_STATUS;
                                 service_handle       : PISC_SVC_HANDLE;
                                 recv_handle          : PISC_SVC_HANDLE;
                                 isc_arg4             : UShort;
-                                isc_arg5             : PChar;
+                                isc_arg5             : PAnsiChar;
                                 isc_arg6             : UShort;
-                                isc_arg7             : PChar;
+                                isc_arg7             : PAnsiChar;
                                 isc_arg8             : UShort;
-                                isc_arg9             : PChar):
+                                isc_arg9             : PAnsiChar):
                                 ISC_STATUS; {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 begin
   Result := 0;
@@ -265,7 +265,7 @@ function isc_service_start_stub(status_vector        : PISC_STATUS;
                                 service_handle       : PISC_SVC_HANDLE;
                                 recv_handle          : PISC_SVC_HANDLE;
                                 isc_arg4             : UShort;
-                                isc_arg5             : PChar):
+                                isc_arg5             : PAnsiChar):
                                 ISC_STATUS; {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 begin
   Result := 0;
@@ -535,12 +535,12 @@ begin
   Result := FBClientInterfaceVersion;
 end;
 
-function TFB25ClientAPI.DecodeInteger(bufptr: PChar; len: short): integer;
+function TFB25ClientAPI.DecodeInteger(bufptr: PAnsiChar; len: short): integer;
 begin
   Result := isc_portable_integer(bufptr,len);
 end;
 
-procedure TFB25ClientAPI.SQLEncodeDate(aDate: TDateTime; bufptr: PChar);
+procedure TFB25ClientAPI.SQLEncodeDate(aDate: TDateTime; bufptr: PAnsiChar);
 var
   tm_date: TCTimeStructure;
   Yr, Mn, Dy: Word;
@@ -557,7 +557,7 @@ begin
   isc_encode_sql_date(@tm_date, PISC_DATE(bufptr));
 end;
 
-function TFB25ClientAPI.SQLDecodeDate(bufptr: PChar): TDateTime;
+function TFB25ClientAPI.SQLDecodeDate(bufptr: PAnsiChar): TDateTime;
 var
   tm_date: TCTimeStructure;
 begin
@@ -572,7 +572,7 @@ begin
   end;
 end;
 
-procedure TFB25ClientAPI.SQLEncodeTime(aTime: TDateTime; bufptr: PChar);
+procedure TFB25ClientAPI.SQLEncodeTime(aTime: TDateTime; bufptr: PAnsiChar);
 var
   tm_date: TCTimeStructure;
   Hr, Mt, S, Ms: Word;
@@ -592,7 +592,7 @@ begin
     Inc(PISC_TIME(bufptr)^,Ms*10);
 end;
 
-function TFB25ClientAPI.SQLDecodeTime(bufptr: PChar): TDateTime;
+function TFB25ClientAPI.SQLDecodeTime(bufptr: PAnsiChar): TDateTime;
 var
   tm_date: TCTimeStructure;
   msecs: Word;
@@ -609,7 +609,7 @@ begin
   end;
 end;
 
-procedure TFB25ClientAPI.SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PChar);
+procedure TFB25ClientAPI.SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PAnsiChar);
 var
   tm_date: TCTimeStructure;
   Yr, Mn, Dy, Hr, Mt, S, Ms: Word;
@@ -629,7 +629,7 @@ begin
     Inc(PISC_TIMESTAMP(bufptr)^.timestamp_time,Ms*10);
 end;
 
-function TFB25ClientAPI.SQLDecodeDateTime(bufptr: PChar): TDateTime;
+function TFB25ClientAPI.SQLDecodeDateTime(bufptr: PAnsiChar): TDateTime;
 var
   tm_date: TCTimeStructure;
   msecs: Word;

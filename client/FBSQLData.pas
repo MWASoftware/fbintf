@@ -114,7 +114,7 @@ type
      procedure Changed; virtual;
      procedure Changing; virtual;
      procedure InternalSetAsString(Value: AnsiString); virtual;
-     function SQLData: PChar; virtual; abstract;
+     function SQLData: PAnsiChar; virtual; abstract;
      function GetDataLength: cardinal; virtual; abstract;
      function GetCodePage: TSystemCodePage; virtual; abstract;
      function getCharSetID: cardinal; virtual; abstract;
@@ -211,7 +211,7 @@ type
     function ColumnByName(Idx: AnsiString): TSQLVarData;
     function CheckStatementStatus(Request: TStatementStatus): boolean; virtual; abstract;
     procedure GetData(index: integer; var IsNull: boolean; var len: short;
-      var data: PChar); virtual;
+      var data: PAnsiChar); virtual;
     procedure RowChange;
     function StateChanged(var ChangeSeqNo: integer): boolean; virtual; abstract;
     property Count: integer read GetCount;
@@ -246,11 +246,11 @@ type
     function GetCodePage: TSystemCodePage; virtual; abstract;
     function GetIsNull: Boolean;   virtual; abstract;
     function GetIsNullable: boolean; virtual; abstract;
-    function GetSQLData: PChar;  virtual; abstract;
+    function GetSQLData: PAnsiChar;  virtual; abstract;
     function GetDataLength: cardinal; virtual; abstract;
     procedure SetIsNull(Value: Boolean); virtual; abstract;
     procedure SetIsNullable(Value: Boolean);  virtual; abstract;
-    procedure SetSQLData(AValue: PChar; len: cardinal); virtual; abstract;
+    procedure SetSQLData(AValue: PAnsiChar; len: cardinal); virtual; abstract;
     procedure SetScale(aValue: integer); virtual; abstract;
     procedure SetDataLength(len: cardinal); virtual; abstract;
     procedure SetSQLType(aValue: cardinal); virtual; abstract;
@@ -278,7 +278,7 @@ type
     property CharSetID: cardinal read GetCharSetID write SetCharSetID;
     property SQLType: cardinal read GetSQLType write SetSQLType;
     property SQLSubtype: integer read GetSubtype;
-    property SQLData: PChar read GetSQLData;
+    property SQLData: PAnsiChar read GetSQLData;
     property DataLength: cardinal read GetDataLength write SetDataLength;
     property IsNull: Boolean read GetIsNull write SetIsNull;
     property IsNullable: Boolean read GetIsNullable write SetIsNullable;
@@ -300,7 +300,7 @@ type
     FChangeSeqNo: integer;
   protected
     procedure CheckActive; override;
-    function SQLData: PChar; override;
+    function SQLData: PAnsiChar; override;
     function GetDataLength: cardinal; override;
     function GetCodePage: TSystemCodePage; override;
 
@@ -445,7 +445,7 @@ type
      function getCount: integer;
      function ByName(Idx: AnsiString): ISQLData;
      function getSQLData(index: integer): ISQLData;
-     procedure GetData(index: integer; var IsNull:boolean; var len: short; var data: PChar);
+     procedure GetData(index: integer; var IsNull:boolean; var len: short; var data: PAnsiChar);
      function GetTransaction: ITransaction; virtual;
      procedure SetRetainInterfaces(aValue: boolean);
  end;
@@ -512,7 +512,7 @@ var
   iCurState {$ifdef ALLOWDIALECT3PARAMNAMES}, iCurParamState {$endif}: Integer;
   iParamSuffix: Integer;
   slNames: TStrings;
-  StrBuffer: PChar;
+  StrBuffer: PAnsiChar;
   found: boolean;
 
 const
@@ -736,7 +736,7 @@ begin
 end;
 
 procedure TSQLDataArea.GetData(index: integer; var IsNull: boolean;
-  var len: short; var data: PChar);
+  var len: short; var data: PAnsiChar);
 begin
   //Do Nothing
 end;
@@ -778,12 +778,12 @@ procedure TSQLVarData.SetString(aValue: AnsiString);
 begin
   {we take full advantage here of reference counted strings. When setting a string
    value, a reference is kept in FVarString and a pointer to it placed in the
-   SQLVar. This avoids string copies. Note that PChar is guaranteed to point to
+   SQLVar. This avoids string copies. Note that PAnsiChar is guaranteed to point to
    a zero byte when the string is empty, neatly avoiding a nil pointer error.}
 
   FVarString := aValue;
   SQLType := SQL_TEXT;
-  SetSQLData(PChar(FVarString),Length(aValue));
+  SetSQLData(PAnsiChar(FVarString),Length(aValue));
 end;
 
 procedure TSQLVarData.Changed;
@@ -1273,7 +1273,7 @@ end;
 
 function TSQLDataItem.GetAsString: AnsiString;
 var
-  sz: PChar;
+  sz: PAnsiChar;
   str_len: Integer;
   rs: RawByteString;
 begin
@@ -1642,7 +1642,7 @@ begin
     IBError(ibxeStatementNotPrepared, [nil]);
 end;
 
-function TColumnMetaData.SQLData: PChar;
+function TColumnMetaData.SQLData: PAnsiChar;
 begin
   Result := FIBXSQLVAR.SQLData;
 end;
@@ -2533,7 +2533,7 @@ begin
 end;
 
 procedure TResults.GetData(index: integer; var IsNull: boolean; var len: short;
-  var data: PChar);
+  var data: PAnsiChar);
 begin
   CheckActive;
   FResults.GetData(index,IsNull, len,data);

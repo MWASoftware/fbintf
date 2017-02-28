@@ -138,7 +138,7 @@ begin
     with Firebird25ClientAPI do
       Call(isc_blob_lookup_desc(StatusVector,@(FAttachment.Handle),
                                             @(FTransaction.Handle),
-                PChar(AnsiUpperCase(GetRelationName)),PChar(AnsiUpperCase(GetColumnName)),@BlobDesc,@Global));
+                PAnsiChar(AnsiUpperCase(GetRelationName)),PAnsiChar(AnsiUpperCase(GetColumnName)),@BlobDesc,@Global));
     if FUnconfirmedCharacterSet then
       FCharSetID := BlobDesc.blob_desc_charset;
     FSubType := BlobDesc.blob_desc_subtype;
@@ -318,7 +318,7 @@ end;
 function TFB25Blob.Read(var Buffer; Count: Longint): Longint;
 var
   BytesRead : UShort;
-  LocalBuffer: PChar;
+  LocalBuffer: PAnsiChar;
   returnCode: long;
   localCount: uShort;
 begin
@@ -327,7 +327,7 @@ begin
   if FEOB then
     Exit;
 
-  LocalBuffer := PChar(@Buffer);
+  LocalBuffer := PAnsiChar(@Buffer);
   repeat
     if Count > MaxuShort then
       localCount := MaxuShort
@@ -349,11 +349,11 @@ end;
 
 function TFB25Blob.Write(const Buffer; Count: Longint): Longint;
 var
-  LocalBuffer: PChar;
+  LocalBuffer: PAnsiChar;
   localCount: uShort;
 begin
   CheckWritable;
-  LocalBuffer := PChar(@Buffer);
+  LocalBuffer := PAnsiChar(@Buffer);
   Result := 0;
   if Count = 0 then Exit;
 

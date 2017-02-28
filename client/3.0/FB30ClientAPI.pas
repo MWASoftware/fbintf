@@ -111,13 +111,13 @@ type
     function GetIMaster: TObject;
 
     {Encode/Decode}
-    function DecodeInteger(bufptr: PChar; len: short): integer; override;
-    procedure SQLEncodeDate(aDate: TDateTime; bufptr: PChar); override;
-    function SQLDecodeDate(bufptr: PChar): TDateTime; override;
-    procedure SQLEncodeTime(aTime: TDateTime; bufptr: PChar); override;
-    function SQLDecodeTime(bufptr: PChar): TDateTime;  override;
-    procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PChar); override;
-    function SQLDecodeDateTime(bufptr: PChar): TDateTime; override;
+    function DecodeInteger(bufptr: PAnsiChar; len: short): integer; override;
+    procedure SQLEncodeDate(aDate: TDateTime; bufptr: PAnsiChar); override;
+    function SQLDecodeDate(bufptr: PAnsiChar): TDateTime; override;
+    procedure SQLEncodeTime(aTime: TDateTime; bufptr: PAnsiChar); override;
+    function SQLDecodeTime(bufptr: PAnsiChar): TDateTime;  override;
+    procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PAnsiChar); override;
+    function SQLDecodeDateTime(bufptr: PAnsiChar): TDateTime; override;
 
     {Firebird Interfaces}
     property MasterIntf: Firebird.IMaster read FMaster;
@@ -335,8 +335,8 @@ begin
   Result := Format('3.%d',[UtilIntf.GetClientVersion]);
 end;
 
-function TFB30ClientAPI.DecodeInteger(bufptr: PChar; len: short): integer;
-var P: PChar;
+function TFB30ClientAPI.DecodeInteger(bufptr: PAnsiChar; len: short): integer;
+var P: PAnsiChar;
 begin
   Result := 0;
   P := Bufptr + len - 1;
@@ -347,7 +347,7 @@ begin
   end;
 end;
 
-procedure TFB30ClientAPI.SQLEncodeDate(aDate: TDateTime; bufptr: PChar);
+procedure TFB30ClientAPI.SQLEncodeDate(aDate: TDateTime; bufptr: PAnsiChar);
 var
   Yr, Mn, Dy: Word;
 begin
@@ -355,7 +355,7 @@ begin
    PISC_Date(Bufptr)^ := UtilIntf.encodeDate(Yr, Mn, Dy);
 end;
 
-function TFB30ClientAPI.SQLDecodeDate(bufptr: PChar): TDateTime;
+function TFB30ClientAPI.SQLDecodeDate(bufptr: PAnsiChar): TDateTime;
 var
   Yr, Mn, Dy: Word;
 begin
@@ -369,7 +369,7 @@ begin
   end;
 end;
 
-procedure TFB30ClientAPI.SQLEncodeTime(aTime: TDateTime; bufptr: PChar);
+procedure TFB30ClientAPI.SQLEncodeTime(aTime: TDateTime; bufptr: PAnsiChar);
 var
   Hr, Mt, S, Ms: Word;
 begin
@@ -377,7 +377,7 @@ begin
   PISC_TIME(bufptr)^ :=  UtilIntf.encodeTime(Hr, Mt, S, Ms*10);
 end;
 
-function TFB30ClientAPI.SQLDecodeTime(bufptr: PChar): TDateTime;
+function TFB30ClientAPI.SQLDecodeTime(bufptr: PAnsiChar): TDateTime;
 var
   Hr, Mt, S, Ms: Word;
 begin
@@ -391,14 +391,14 @@ begin
   end;
 end;
 
-procedure TFB30ClientAPI.SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PChar);
+procedure TFB30ClientAPI.SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PAnsiChar);
 begin
   SQLEncodeDate(aDateTime,bufPtr);
   Inc(bufptr,sizeof(ISC_DATE));
   SQLEncodeTime(aDateTime,bufPtr);
 end;
 
-function TFB30ClientAPI.SQLDecodeDateTime(bufptr: PChar): TDateTime;
+function TFB30ClientAPI.SQLDecodeDateTime(bufptr: PAnsiChar): TDateTime;
 begin
   Result := SQLDecodeDate(bufPtr);
   Inc(bufptr,sizeof(ISC_DATE));

@@ -137,11 +137,11 @@ type
     function GetCodePage: TSystemCodePage; override;
     function GetIsNull: Boolean;   override;
     function GetIsNullable: boolean; override;
-    function GetSQLData: PChar;  override;
+    function GetSQLData: PAnsiChar;  override;
     function GetDataLength: cardinal; override;
     procedure SetIsNull(Value: Boolean); override;
     procedure SetIsNullable(Value: Boolean);  override;
-    procedure SetSQLData(AValue: PChar; len: cardinal); override;
+    procedure SetSQLData(AValue: PAnsiChar; len: cardinal); override;
     procedure SetScale(aValue: integer); override;
     procedure SetDataLength(len: cardinal); override;
     procedure SetSQLType(aValue: cardinal); override;
@@ -211,7 +211,7 @@ type
     procedure Bind;
     function GetTransaction: TFB25Transaction; override;
     procedure GetData(index: integer; var aIsNull: boolean; var len: short;
-      var data: PChar); override;
+      var data: PAnsiChar); override;
     function IsInputDataArea: boolean; override;
   end;
 
@@ -357,7 +357,7 @@ begin
   result := (FXSQLVAR^.sqltype and 1 = 1);
 end;
 
-function TIBXSQLVAR.GetSQLData: PChar;
+function TIBXSQLVAR.GetSQLData: PAnsiChar;
 begin
   Result := FXSQLVAR^.sqldata;
 end;
@@ -501,7 +501,7 @@ begin
   end;
 end;
 
-procedure TIBXSQLVAR.SetSQLData(AValue: PChar; len: cardinal);
+procedure TIBXSQLVAR.SetSQLData(AValue: PAnsiChar; len: cardinal);
 begin
   if FOwnsSQLData then
     FreeMem(FXSQLVAR^.sqldata);
@@ -675,7 +675,7 @@ begin
 end;
 
 procedure TIBXOUTPUTSQLDA.GetData(index: integer; var aIsNull:boolean; var len: short;
-  var data: PChar);
+  var data: PAnsiChar);
 begin
   with TIBXSQLVAR(Column[index]), FXSQLVAR^ do
   begin
@@ -796,7 +796,7 @@ begin
         if i >= FSize then
           FColumnList[i] := TIBXSQLVAR.Create(self,i);
         TIBXSQLVAR(Column[i]).FXSQLVAR := p;
-        p := Pointer(PChar(p) + sizeof(FXSQLDA^.sqlvar));
+        p := Pointer(PAnsiChar(p) + sizeof(FXSQLDA^.sqlvar));
       end;
       FSize := inherited Count;
     end;
@@ -912,11 +912,11 @@ begin
         if FProcessedSQL = '' then
           FSQLParams.PreprocessSQL(FSQL,FGenerateParamNames,FProcessedSQL);
         Call(isc_dsql_prepare(StatusVector, @(TRHandle), @FHandle, 0,
-                 PChar(FProcessedSQL), FSQLDialect, nil), True);
+                 PAnsiChar(FProcessedSQL), FSQLDialect, nil), True);
       end
       else
         Call(isc_dsql_prepare(StatusVector, @(TRHandle), @FHandle, 0,
-                 PChar(FSQL), FSQLDialect, nil), True);
+                 PAnsiChar(FSQL), FSQLDialect, nil), True);
     end;
     { After preparing the statement, query the stmt type and possibly
       create a FSQLRecord "holder" }
@@ -1072,7 +1072,7 @@ begin
      CreateGuid(GUID);
      FCursor := GUIDToString(GUID);
      Call(
-       isc_dsql_set_cursor_name(StatusVector, @FHandle, PChar(FCursor), 0),
+       isc_dsql_set_cursor_name(StatusVector, @FHandle, PAnsiChar(FCursor), 0),
        True);
    end;
 
