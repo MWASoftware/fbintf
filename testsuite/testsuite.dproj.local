@@ -1,23 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <BorlandProject>
-  <Transactions>
-    <Transaction>2017/02/28 14:50:55.164,C:\Users\A User\projects\delphi\testsuite\testsuite.dproj=C:\Users\A User\Documents\Embarcadero\Studio\Projects\Project1.dproj</Transaction>
-    <Transaction>2017/02/28 14:51:23.841,=C:\Users\A User\projects\delphi\testsuite\Test1.pas</Transaction>
-    <Transaction>2017/02/28 14:51:23.907,=C:\Users\A User\projects\delphi\testsuite\test2.pas</Transaction>
-    <Transaction>2017/02/28 14:51:23.969,=C:\Users\A User\projects\delphi\testsuite\Test3.pas</Transaction>
-    <Transaction>2017/02/28 14:51:24.023,=C:\Users\A User\projects\delphi\testsuite\Test4.pas</Transaction>
-    <Transaction>2017/02/28 14:51:24.117,=C:\Users\A User\projects\delphi\testsuite\Test5.pas</Transaction>
-    <Transaction>2017/02/28 14:51:24.191,=C:\Users\A User\projects\delphi\testsuite\Test6.pas</Transaction>
-    <Transaction>2017/02/28 14:51:24.281,=C:\Users\A User\projects\delphi\testsuite\Test7.pas</Transaction>
-    <Transaction>2017/02/28 14:51:24.357,=C:\Users\A User\projects\delphi\testsuite\Test8.pas</Transaction>
-    <Transaction>2017/02/28 14:51:24.424,=C:\Users\A User\projects\delphi\testsuite\Test9.pas</Transaction>
-    <Transaction>2017/02/28 14:51:24.520,=C:\Users\A User\projects\delphi\testsuite\Test10.pas</Transaction>
-    <Transaction>2017/02/28 14:51:24.596,=C:\Users\A User\projects\delphi\testsuite\Test11.pas</Transaction>
-    <Transaction>2017/02/28 14:51:24.657,=C:\Users\A User\projects\delphi\testsuite\Test12.pas</Transaction>
-    <Transaction>2017/02/28 14:51:24.721,=C:\Users\A User\projects\delphi\testsuite\Test13.pas</Transaction>
-    <Transaction>2017/02/28 14:51:24.765,=C:\Users\A User\projects\delphi\testsuite\Test14.pas</Transaction>
-    <Transaction>2017/02/28 14:51:24.839,=C:\Users\A User\projects\delphi\testsuite\Test15.pas</Transaction>
-    <Transaction>2017/02/28 14:51:24.901,=C:\Users\A User\projects\delphi\testsuite\Test16.pas</Transaction>
-    <Transaction>2017/02/28 14:51:24.969,=C:\Users\A User\projects\delphi\testsuite\TestManager.pas</Transaction>
+	<Transactions>
+    <Transaction>2017/02/28 14:50:55.000.164,C:\Users\A User\Documents\Embarcadero\Studio\Projects\Project1.dproj=C:\Users\A User\projects\delphi\testsuite\testsuite.dproj</Transaction>
   </Transactions>
 </BorlandProject>

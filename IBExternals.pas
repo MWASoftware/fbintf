@@ -38,12 +38,12 @@ unit IBExternals;
 interface
 
 uses
-{$IFDEF WINDOWS }
-  Windows
+{$IF defined(WINDOWS) or defined(MSWINDOWS)}
+  Windows;
 {$ELSE}
-  unix
+  unix;
 {$ENDIF}
-;
+
 const
   MaxuShort            = 65535;
 type

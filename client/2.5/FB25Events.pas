@@ -80,7 +80,7 @@ type
   TEventhandlerInterface = class
   private
     FOwner: TFB25Events;
-    {$IFDEF WINDOWS}
+    {$IF defined(WINDOWS) or defined(MSWINDOWS)}
     {Make direct use of Windows API as TEventObject don't seem to work under
      Windows!}
     FEventHandler: THandle;
