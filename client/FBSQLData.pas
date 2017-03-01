@@ -783,7 +783,7 @@ begin
 
   FVarString := aValue;
   SQLType := SQL_TEXT;
-  SetSQLData(PByte(FVarString),Length(aValue));
+  SetSQLData(PByte(PAnsiChar(FVarString)),Length(aValue));
 end;
 
 procedure TSQLVarData.Changed;

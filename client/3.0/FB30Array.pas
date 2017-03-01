@@ -155,7 +155,7 @@ begin
       Move(columnName[1],FArrayDesc.array_desc_field_name,Length(columnName));
       Move(relationName[1],FArrayDesc.array_desc_relation_name,length(relationName));
       FArrayDesc.array_desc_length := Data[0].AsInteger;
-      FArrayDesc.array_desc_scale := char(Data[1].AsInteger);
+      FArrayDesc.array_desc_scale := AnsiChar(Data[1].AsInteger);
       FArrayDesc.array_desc_dtype := Data[2].AsInteger;
       FArrayDesc.array_desc_dimensions := Data[3].AsInteger;
       FArrayDesc.array_desc_flags := 0; {row major}

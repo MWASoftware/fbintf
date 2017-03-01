@@ -129,16 +129,20 @@ procedure TFB25BlobMetaData.NeedFullMetadata;
 var
   BlobDesc: TISC_BLOB_DESC;
   Global: array [0..31] of char;
+  RelName: AnsiString;
+  ColName: AnsiString;
 begin
   if FHasFullMetaData then Exit;
 
   FSegmentSize := 80;
-  if (GetColumnName <> '') and (GetRelationName <> '') then
+  RelName := AnsiUpperCase(GetRelationName);
+  ColName := AnsiUpperCase(GetColumnName);
+  if (ColName <> '') and (RelName <> '') then
   begin
     with Firebird25ClientAPI do
       Call(isc_blob_lookup_desc(StatusVector,@(FAttachment.Handle),
                                             @(FTransaction.Handle),
-                PAnsiChar(AnsiUpperCase(GetRelationName)),PAnsiChar(AnsiUpperCase(GetColumnName)),@BlobDesc,@Global));
+                PAnsiChar(RelName),PAnsiChar(ColName),@BlobDesc,@Global));
     if FUnconfirmedCharacterSet then
       FCharSetID := BlobDesc.blob_desc_charset;
     FSubType := BlobDesc.blob_desc_subtype;

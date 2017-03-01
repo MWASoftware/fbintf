@@ -47,10 +47,14 @@ uses
 const
   MaxuShort            = 65535;
 type
-  Int                  = LongInt; { 32 bit signed }
-  UInt                 = DWord;   { 32 bit unsigned }
-  Long                 = LongInt; { 32 bit signed }
-  ULong                = DWord;   { 32 bit unsigned }
+  {$IFDEF FPC}
+  FixedInt             = LongInt;
+  FixedUInt            = LongWord;
+  {$ENDIF}
+  Int                  = FixedInt; { 32 bit signed }
+  UInt                 = FixedUInt;   { 32 bit unsigned }
+  Long                 = FixedInt; { 32 bit signed }
+  ULong                = FixedUInt;   { 32 bit unsigned }
   Short                = SmallInt;{ 16 bit signed }
   UShort               = Word;    { 16 bit unsigned }
   Float                = Single;  { 32 bit }

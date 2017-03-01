@@ -86,12 +86,16 @@ var
   TRHandle: TISC_TR_HANDLE;
   stmt: IStatement;
   CharWidth: integer;
+  RelName: AnsiString;
+  ColName: AnsiString;
 begin
   DBHandle := (aAttachment as TFB25Attachment).Handle;
   TRHandle := (aTransaction as TFB25Transaction).Handle;
+  RelName := AnsiUpperCase(relationName);
+  ColName := AnsiUpperCase(columnName);
   with Firebird25ClientAPI do
     if isc_array_lookup_bounds(StatusVector,@(DBHandle),@(TRHandle),
-        PAnsiChar(AnsiUpperCase(relationName)),PAnsiChar(AnsiUpperCase(columnName)),@FArrayDesc) > 0 then
+        PAnsiChar(RelName),PAnsiChar(ColName),@FArrayDesc) > 0 then
           IBDatabaseError;
 
   if (GetSQLType = SQL_TEXT) or (GetSQLType = SQL_VARYING) then

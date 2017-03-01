@@ -150,11 +150,10 @@ type
  constructor TEventHandlerThread.Create(Owner: TFB25Events;
    EventHandler: TEventhandlerInterface);
  begin
-   inherited Create(true);
+   inherited Create(false);
    FOwner := Owner;
    FEventHandler := EventHandler;
    FreeOnTerminate := true;
-   Start;
  end;
 
  procedure TEventHandlerThread.Terminate;

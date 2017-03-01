@@ -212,11 +212,10 @@ end;
 constructor TEventHandlerThread.Create(Owner: TFB30Events;
   EventHandler: TEventhandlerInterface);
 begin
-  inherited Create(true);
+  inherited Create(false);
   FOwner := Owner;
   FEventHandler := EventHandler;
   FreeOnTerminate := true;
-  Start;
 end;
 
 procedure TEventHandlerThread.Terminate;

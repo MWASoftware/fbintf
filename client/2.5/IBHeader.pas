@@ -115,10 +115,10 @@ type
   PISC_ARRAY_BOUND     = ^TISC_ARRAY_BOUND;
    TISC_ARRAY_DESC = record
     array_desc_dtype            : UChar;
-    array_desc_scale            : Char;
+    array_desc_scale            : AnsiChar;
     array_desc_length           : UShort;
-    array_desc_field_name       : array[0..31] of Char;
-    array_desc_relation_name    : array[0..31] of Char;
+    array_desc_field_name       : array[0..31] of AnsiChar;
+    array_desc_relation_name    : array[0..31] of AnsiChar;
     array_desc_dimensions       : Short;
     array_desc_flags            : Short;
     array_desc_bounds           : array[0..15] of TISC_ARRAY_BOUND;
@@ -129,8 +129,8 @@ type
     blob_desc_subtype           : Short;
     blob_desc_charset           : Short;
     blob_desc_segment_size      : Short;
-    blob_desc_field_name        : array[0..31] of Char;
-    blob_desc_relation_name     : array[0..31] of Char;
+    blob_desc_field_name        : array[0..31] of AnsiChar;
+    blob_desc_relation_name     : array[0..31] of AnsiChar;
   end; // TISC_BLOB_DESC
   PISC_BLOB_DESC = ^TISC_BLOB_DESC;
 
@@ -182,12 +182,12 @@ type
     sqldata                     : PByte;
     sqlind                      : PShort;
     sqlname_length              : Short;
-    sqlname                     : array[0..29] of Char;
+    sqlname                     : array[0..29] of AnsiChar;
   end;
   PSQLVAR                       = ^TSQLVAR;
 
   TSQLDA = record
-    sqldaid                     : array[0..7] of Char;
+    sqldaid                     : array[0..7] of AnsiChar;
     sqldabc                     : ISC_LONG;
     sqln                        : Short;
     sqld                        : Short;
@@ -210,23 +210,23 @@ type
                                              (** variable **)
     sqlname_length              : Short;     (** length of sqlname field **)
     (** name of field, name length + space for NULL **)
-    sqlname                     : array[0..31] of Char;
+    sqlname                     : array[0..31] of AnsiChar;
     relname_length              : Short;     (** length of relation name **)
     (** field's relation name + space for NULL **)
-    relname                     : array[0..31] of Char;
+    relname                     : array[0..31] of AnsiChar;
     ownname_length              : Short;     (** length of owner name **)
     (** relation's owner name + space for NULL **)
-    ownname                     : array[0..31] of Char;
+    ownname                     : array[0..31] of AnsiChar;
     aliasname_length            : Short;     (** length of alias name **)
     (** relation's alias name + space for NULL **)
-    aliasname                   : array[0..31] of Char;
+    aliasname                   : array[0..31] of AnsiChar;
   end;  // TXSQLVAR
   PXSQLVAR                      = ^TXSQLVAR;
 
   TXSQLDA = record
     version                     : Short;     (** version of this XSQLDA **)
     (** XSQLDA name field **)
-    sqldaid                     : array[0..7] of Char;
+    sqldaid                     : array[0..7] of AnsiChar;
     sqldabc                     : ISC_LONG;  (** length in bytes of SQLDA **)
     sqln                        : Short;     (** number of fields allocated **)
     sqld                        : Short;     (** actual number of fields **)
