@@ -94,7 +94,7 @@ type
     {SQL Var Type Data}
     FSQLType: cardinal;
     FSQLSubType: integer;
-    FSQLData: PAnsiChar; {Address of SQL Data in Message Buffer}
+    FSQLData: PByte; {Address of SQL Data in Message Buffer}
     FSQLNullIndicator: PShort; {Address of null indicator}
     FDataLength: integer;
     FNullable: boolean;
@@ -115,11 +115,11 @@ type
      function GetCodePage: TSystemCodePage; override;
      function GetIsNull: Boolean;   override;
      function GetIsNullable: boolean; override;
-     function GetSQLData: PAnsiChar;  override;
+     function GetSQLData: PByte;  override;
      function GetDataLength: cardinal; override;
      procedure SetIsNull(Value: Boolean); override;
      procedure SetIsNullable(Value: Boolean);  override;
-     procedure SetSQLData(AValue: PAnsiChar; len: cardinal); override;
+     procedure SetSQLData(AValue: PByte; len: cardinal); override;
      procedure SetScale(aValue: integer); override;
      procedure SetDataLength(len: cardinal); override;
      procedure SetSQLType(aValue: cardinal); override;
@@ -170,11 +170,11 @@ type
 
   TIBXINPUTSQLDA = class(TIBXSQLDA)
   private
-    FMessageBuffer: PAnsiChar; {Message Buffer}
+    FMessageBuffer: PByte; {Message Buffer}
     FMsgLength: integer; {Message Buffer length}
     FCurMetaData: Firebird.IMessageMetadata;
     procedure FreeMessageBuffer;
-    function GetMessageBuffer: PAnsiChar;
+    function GetMessageBuffer: PByte;
     function GetMetaData: Firebird.IMessageMetadata;
     function GetModified: Boolean;
     function GetMsgLength: integer;
@@ -188,7 +188,7 @@ type
     procedure Changed; override;
     function IsInputDataArea: boolean; override;
     property MetaData: Firebird.IMessageMetadata read GetMetaData;
-    property MessageBuffer: PAnsiChar read GetMessageBuffer;
+    property MessageBuffer: PByte read GetMessageBuffer;
     property MsgLength: integer read GetMsgLength;
   end;
 
@@ -197,16 +197,16 @@ type
   TIBXOUTPUTSQLDA = class(TIBXSQLDA)
   private
     FTransaction: TFB30Transaction; {transaction used to execute the statement}
-    FMessageBuffer: PAnsiChar; {Message Buffer}
+    FMessageBuffer: PByte; {Message Buffer}
     FMsgLength: integer; {Message Buffer length}
   protected
     procedure FreeXSQLDA; override;
   public
     procedure Bind(aMetaData: Firebird.IMessageMetadata);
     procedure GetData(index: integer; var aIsNull: boolean; var len: short;
-      var data: PAnsiChar); override;
+      var data: PByte); override;
     function IsInputDataArea: boolean; override;
-    property MessageBuffer: PAnsiChar read FMessageBuffer;
+    property MessageBuffer: PByte read FMessageBuffer;
     property MsgLength: integer read FMsgLength;
   end;
 
@@ -359,7 +359,7 @@ begin
   Result := FSQLNullIndicator <> nil;
 end;
 
-function TIBXSQLVAR.GetSQLData: PAnsiChar;
+function TIBXSQLVAR.GetSQLData: PByte;
 begin
   Result := FSQLData;
 end;
@@ -420,7 +420,7 @@ begin
     FSQLNullIndicator := nil;
 end;
 
-procedure TIBXSQLVAR.SetSQLData(AValue: PAnsiChar; len: cardinal);
+procedure TIBXSQLVAR.SetSQLData(AValue: PByte; len: cardinal);
 begin
   if FOwnsSQLData then
     FreeMem(FSQLData);
@@ -595,7 +595,7 @@ begin
   FMsgLength := 0;
 end;
 
-function TIBXINPUTSQLDA.GetMessageBuffer: PAnsiChar;
+function TIBXINPUTSQLDA.GetMessageBuffer: PByte;
 begin
   PackBuffer;
   Result := FMessageBuffer;
@@ -817,7 +817,7 @@ begin
 end;
 
 procedure TIBXOUTPUTSQLDA.GetData(index: integer; var aIsNull: boolean;
-  var len: short; var data: PAnsiChar);
+  var len: short; var data: PByte);
 begin
   with TIBXSQLVAR(Column[index]) do
   begin

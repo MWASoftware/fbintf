@@ -69,20 +69,20 @@ type
 
   TFBArrayElement = class(TSQLDataItem)
   private
-   FBufPtr: PAnsiChar;
+   FBufPtr: PByte;
    FArray: TFBArray;
   protected
    function GetSQLDialect: integer; override;
    procedure Changing; override;
    procedure Changed; override;
-   function SQLData: PAnsiChar; override;
+   function SQLData: PByte; override;
    function GetDataLength: cardinal; override;
    function GetCodePage: TSystemCodePage; override;
    function getCharSetID: cardinal; override;
    procedure SetDataLength(len: cardinal); override;
    procedure SetSQLType(aValue: cardinal); override;
   public
-   constructor Create(anArray: TFBArray; P: PAnsiChar);
+   constructor Create(anArray: TFBArray; P: PByte);
    function GetSQLType: cardinal; override;
    function GetName: AnsiString; override;
    function GetScale: integer; override;
@@ -149,10 +149,10 @@ type
     FEventHandlers: array of TArrayEventHandler;
     procedure GetArraySlice;
     procedure PutArraySlice(Force: boolean=false);
-    function GetOffset(index: array of integer): PAnsiChar;
+    function GetOffset(index: array of integer): PByte;
     function GetDataLength: short;
   protected
-    FBuffer: PAnsiChar;
+    FBuffer: PByte;
     FBufSize: ISC_LONG;
     FArrayID: TISC_QUAD;
     procedure AllocateBuffer; virtual;
@@ -242,7 +242,7 @@ begin
   FArray.Changed;
 end;
 
-function TFBArrayElement.SQLData: PAnsiChar;
+function TFBArrayElement.SQLData: PByte;
 begin
   Result := FBufPtr;
 end;
@@ -268,7 +268,7 @@ begin
     IBError(ibxeArrayElementOverFlow,[nil]);
 end;
 
-constructor TFBArrayElement.Create(anArray: TFBArray; P: PAnsiChar);
+constructor TFBArrayElement.Create(anArray: TFBArray; P: PByte);
 begin
   inherited Create;
   FArray := anArray;
@@ -301,13 +301,13 @@ begin
   case GetSQLType of
   SQL_VARYING:
     begin
-      rs := strpas(FBufPtr);
+      rs := strpas(PAnsiChar(FBufPtr));
       SetCodePage(rs,GetCodePage,false);
       Result := rs;
     end;
   SQL_TEXT:
     begin
-      SetString(rs,FBufPtr,GetDataLength);
+      SetString(rs,PAnsiChar(FBufPtr),GetDataLength);
       SetCodePage(rs,GetCodePage,false);
       Result := rs;
     end
@@ -374,7 +374,7 @@ begin
       if Len > 0 then
         Move(Value[1],FBufPtr^,len);
       if Len < ElementSize - 2 then
-        (FBufPtr+len)^ := #0;
+        (FBufPtr+len)^ := 0;
       Changed;
     end;
 
@@ -703,7 +703,7 @@ begin
   FIsNew := false;
 end;
 
-function TFBArray.GetOffset(index: array of integer): PAnsiChar;
+function TFBArray.GetOffset(index: array of integer): PByte;
 var i: integer;
     Bounds: TArrayBounds;
     FlatIndex: integer;

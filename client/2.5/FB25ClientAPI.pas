@@ -165,13 +165,13 @@ type
 
   public
     {Helper Functions}
-    function DecodeInteger(bufptr: PAnsiChar; len: short): integer; override;
-    procedure SQLEncodeDate(aDate: TDateTime; bufptr: PAnsiChar); override;
-    function SQLDecodeDate(bufptr: PAnsiChar): TDateTime; override;
-    procedure SQLEncodeTime(aTime: TDateTime; bufptr: PAnsiChar); override;
-    function SQLDecodeTime(bufptr: PAnsiChar): TDateTime;  override;
-    procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PAnsiChar); override;
-    function SQLDecodeDateTime(bufptr: PAnsiChar): TDateTime; override;
+    function DecodeInteger(bufptr: PByte; len: short): integer; override;
+    procedure SQLEncodeDate(aDate: TDateTime; bufptr: PByte); override;
+    function SQLDecodeDate(bufptr: PByte): TDateTime; override;
+    procedure SQLEncodeTime(aTime: TDateTime; bufptr: PByte); override;
+    function SQLDecodeTime(bufptr: PByte): TDateTime;  override;
+    procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte); override;
+    function SQLDecodeDateTime(bufptr: PByte): TDateTime; override;
 
   public
     {IFirebirdAPI}
@@ -535,12 +535,12 @@ begin
   Result := FBClientInterfaceVersion;
 end;
 
-function TFB25ClientAPI.DecodeInteger(bufptr: PAnsiChar; len: short): integer;
+function TFB25ClientAPI.DecodeInteger(bufptr: PByte; len: short): integer;
 begin
   Result := isc_portable_integer(bufptr,len);
 end;
 
-procedure TFB25ClientAPI.SQLEncodeDate(aDate: TDateTime; bufptr: PAnsiChar);
+procedure TFB25ClientAPI.SQLEncodeDate(aDate: TDateTime; bufptr: PByte);
 var
   tm_date: TCTimeStructure;
   Yr, Mn, Dy: Word;
@@ -557,7 +557,7 @@ begin
   isc_encode_sql_date(@tm_date, PISC_DATE(bufptr));
 end;
 
-function TFB25ClientAPI.SQLDecodeDate(bufptr: PAnsiChar): TDateTime;
+function TFB25ClientAPI.SQLDecodeDate(bufptr: PByte): TDateTime;
 var
   tm_date: TCTimeStructure;
 begin
@@ -572,7 +572,7 @@ begin
   end;
 end;
 
-procedure TFB25ClientAPI.SQLEncodeTime(aTime: TDateTime; bufptr: PAnsiChar);
+procedure TFB25ClientAPI.SQLEncodeTime(aTime: TDateTime; bufptr: PByte);
 var
   tm_date: TCTimeStructure;
   Hr, Mt, S, Ms: Word;
@@ -592,7 +592,7 @@ begin
     Inc(PISC_TIME(bufptr)^,Ms*10);
 end;
 
-function TFB25ClientAPI.SQLDecodeTime(bufptr: PAnsiChar): TDateTime;
+function TFB25ClientAPI.SQLDecodeTime(bufptr: PByte): TDateTime;
 var
   tm_date: TCTimeStructure;
   msecs: Word;
@@ -609,7 +609,7 @@ begin
   end;
 end;
 
-procedure TFB25ClientAPI.SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PAnsiChar);
+procedure TFB25ClientAPI.SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte);
 var
   tm_date: TCTimeStructure;
   Yr, Mn, Dy, Hr, Mt, S, Ms: Word;
@@ -629,7 +629,7 @@ begin
     Inc(PISC_TIMESTAMP(bufptr)^.timestamp_time,Ms*10);
 end;
 
-function TFB25ClientAPI.SQLDecodeDateTime(bufptr: PAnsiChar): TDateTime;
+function TFB25ClientAPI.SQLDecodeDateTime(bufptr: PByte): TDateTime;
 var
   tm_date: TCTimeStructure;
   msecs: Word;

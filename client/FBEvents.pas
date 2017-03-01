@@ -81,9 +81,9 @@ type
     FAttachment: IAttachment;
     FEventCounts: TEventCounts;
   protected
-    FEventBuffer: PAnsiChar;
+    FEventBuffer: PByte;
     FEventBufferLen: integer;
-    FResultBuffer: PAnsiChar;
+    FResultBuffer: PByte;
     FEventHandler: TEventHandler;
     FCriticalSection: TCriticalSection;
     FInWaitState: boolean;

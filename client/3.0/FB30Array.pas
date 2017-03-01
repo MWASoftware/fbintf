@@ -312,7 +312,7 @@ constructor TSDLBlock.Create;
 begin
   inherited Create;
   FDataLength := 1;
-  FBuffer^ := char(isc_sdl_version1);
+  FBuffer^ := isc_sdl_version1;
 end;
 
 {$IFNDEF FPC}

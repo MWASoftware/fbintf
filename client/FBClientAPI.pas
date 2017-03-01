@@ -142,14 +142,14 @@ type
     procedure SetupEnvironment;
 
     {Encode/Decode}
-    procedure EncodeInteger(aValue: integer; len: integer; buffer: PAnsiChar);
-    function DecodeInteger(bufptr: PAnsiChar; len: short): integer; virtual; abstract;
-    procedure SQLEncodeDate(aDate: TDateTime; bufptr: PAnsiChar); virtual; abstract;
-    function SQLDecodeDate(byfptr: PAnsiChar): TDateTime; virtual; abstract;
-    procedure SQLEncodeTime(aTime: TDateTime; bufptr: PAnsiChar); virtual; abstract;
-    function SQLDecodeTime(bufptr: PAnsiChar): TDateTime;  virtual; abstract;
-    procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PAnsiChar); virtual; abstract;
-    function SQLDecodeDateTime(bufptr: PAnsiChar): TDateTime; virtual; abstract;
+    procedure EncodeInteger(aValue: integer; len: integer; buffer: PByte);
+    function DecodeInteger(bufptr: PByte; len: short): integer; virtual; abstract;
+    procedure SQLEncodeDate(aDate: TDateTime; bufptr: PByte); virtual; abstract;
+    function SQLDecodeDate(byfptr: PByte): TDateTime; virtual; abstract;
+    procedure SQLEncodeTime(aTime: TDateTime; bufptr: PByte); virtual; abstract;
+    function SQLDecodeTime(bufptr: PByte): TDateTime;  virtual; abstract;
+    procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte); virtual; abstract;
+    function SQLDecodeDateTime(bufptr: PByte): TDateTime; virtual; abstract;
 
 
     {IFirebirdAPI}
@@ -361,11 +361,11 @@ begin
   {$ENDIF}
 end;
 
-procedure TFBClientAPI.EncodeInteger(aValue: integer; len: integer; buffer: PAnsiChar);
+procedure TFBClientAPI.EncodeInteger(aValue: integer; len: integer; buffer: PByte);
 begin
   while len > 0 do
   begin
-    buffer^ := AnsiChar(aValue and $FF);
+    buffer^ := aValue and $FF;
     Inc(buffer);
     Dec(len);
     aValue := aValue shr 8;

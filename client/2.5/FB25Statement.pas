@@ -137,11 +137,11 @@ type
     function GetCodePage: TSystemCodePage; override;
     function GetIsNull: Boolean;   override;
     function GetIsNullable: boolean; override;
-    function GetSQLData: PAnsiChar;  override;
+    function GetSQLData: PByte;  override;
     function GetDataLength: cardinal; override;
     procedure SetIsNull(Value: Boolean); override;
     procedure SetIsNullable(Value: Boolean);  override;
-    procedure SetSQLData(AValue: PAnsiChar; len: cardinal); override;
+    procedure SetSQLData(AValue: PByte; len: cardinal); override;
     procedure SetScale(aValue: integer); override;
     procedure SetDataLength(len: cardinal); override;
     procedure SetSQLType(aValue: cardinal); override;
@@ -211,7 +211,7 @@ type
     procedure Bind;
     function GetTransaction: TFB25Transaction; override;
     procedure GetData(index: integer; var aIsNull: boolean; var len: short;
-      var data: PAnsiChar); override;
+      var data: PByte); override;
     function IsInputDataArea: boolean; override;
   end;
 
@@ -357,7 +357,7 @@ begin
   result := (FXSQLVAR^.sqltype and 1 = 1);
 end;
 
-function TIBXSQLVAR.GetSQLData: PAnsiChar;
+function TIBXSQLVAR.GetSQLData: PByte;
 begin
   Result := FXSQLVAR^.sqldata;
 end;
@@ -501,7 +501,7 @@ begin
   end;
 end;
 
-procedure TIBXSQLVAR.SetSQLData(AValue: PAnsiChar; len: cardinal);
+procedure TIBXSQLVAR.SetSQLData(AValue: PByte; len: cardinal);
 begin
   if FOwnsSQLData then
     FreeMem(FXSQLVAR^.sqldata);
@@ -675,7 +675,7 @@ begin
 end;
 
 procedure TIBXOUTPUTSQLDA.GetData(index: integer; var aIsNull:boolean; var len: short;
-  var data: PAnsiChar);
+  var data: PByte);
 begin
   with TIBXSQLVAR(Column[index]), FXSQLVAR^ do
   begin

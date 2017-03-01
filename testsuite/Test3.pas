@@ -71,7 +71,11 @@ begin
   ResultSet := Attachment.OpenCursorAtStart('Select count(*) from EMPLOYEE');
   writeln(OutFile,'Employee Count = ',ResultSet[0].AsInteger);
 
-  Transaction.Rollback;
+  {$IFDEF DCC}
+  Transaction.Rollback; {Delphi does not dispose of interfaces until the end of the function
+                         so we need to explicitly rollback here. FPC will dispose of the
+                         interface as soon as it is overwritten - hence this is not needed.}
+  {$ENDIF}
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taRollback);
   Statement := Attachment.PrepareWithNamedParameters(Transaction,'Execute Procedure DELETE_EMPLOYEE :EMP_NO',3);
   Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 8;

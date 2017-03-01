@@ -371,7 +371,7 @@ begin
         ReqBuffer[i] := Requests[i];
 
       with Firebird25ClientAPI, Result as TDBInformation do
-          if isc_database_info(StatusVector, @(FHandle), Length(Requests), PAnsiChar(ReqBuffer),
+          if isc_database_info(StatusVector, @(FHandle), Length(Requests), ReqBuffer,
                                  getBufSize, Buffer) > 0 then
             IBDataBaseError;
 

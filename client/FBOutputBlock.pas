@@ -54,7 +54,7 @@ type
      {Describes a Clumplet in the buffer. FBufPtr always points to the clumplet id
      the rest of the clumplet up to the FSize is data. The data format is
      given by FDataType, and the data length is given by FDataLength}
-    FBufPtr: PAnsiChar;
+    FBufPtr: PByte;
     FDataLength: integer;
     FSize: integer;
     FDataType: TItemDataType;
@@ -67,7 +67,7 @@ type
 
   TOutputBlock = class(TFBInterfacedObject)
   private
-    FBuffer: PAnsiChar;
+    FBuffer: PByte;
     FBufSize: integer;
     FBufferParsed: boolean;
     procedure ParseBuffer;
@@ -82,18 +82,18 @@ type
     FTruncated: boolean;
     FItems: array of POutputBlockItemData;
     procedure DoParseBuffer; virtual; abstract;
-    function AddItem(BufPtr: PAnsiChar): POutputBlockItemData;
-    function AddIntegerItem(BufPtr: PAnsiChar): POutputBlockItemData;
-    function AddStringItem(BufPtr: PAnsiChar): POutputBlockItemData;
-    function AddShortStringItem(BufPtr: PAnsiChar): POutputBlockItemData;
-    function AddByteItem(BufPtr: PAnsiChar): POutputBlockItemData;
-    function AddBytesItem(BufPtr: PAnsiChar): POutputBlockItemData;
-    function AddListItem(BufPtr: PAnsiChar): POutputBlockItemData; virtual;
-    function AddSpecialItem(BufPtr: PAnsiChar): POutputBlockItemData; virtual;
+    function AddItem(BufPtr: PByte): POutputBlockItemData;
+    function AddIntegerItem(BufPtr: PByte): POutputBlockItemData;
+    function AddStringItem(BufPtr: PByte): POutputBlockItemData;
+    function AddShortStringItem(BufPtr: PByte): POutputBlockItemData;
+    function AddByteItem(BufPtr: PByte): POutputBlockItemData;
+    function AddBytesItem(BufPtr: PByte): POutputBlockItemData;
+    function AddListItem(BufPtr: PByte): POutputBlockItemData; virtual;
+    function AddSpecialItem(BufPtr: PByte): POutputBlockItemData; virtual;
   public
     constructor Create(aSize: integer = DefaultBufferSize);
     destructor Destroy; override;
-    function Buffer: PAnsiChar;
+    function Buffer: PByte;
     function getBufSize: integer;
 
   public
@@ -114,7 +114,7 @@ type
   protected
     function GetItem(index: integer): POutputBlockItemData;
     function Find(ItemType: byte): POutputBlockItemData;
-    procedure SetString(out S: AnsiString; Buf: PAnsiChar; Len: integer;
+    procedure SetString(out S: AnsiString; Buf: PByte; Len: integer;
                                            CodePage: TSystemCodePage);
     property ItemData: POutputBlockItemData read FItemData;
     property Owner: TOutputBlock read FOwner;
@@ -178,7 +178,7 @@ type
 
   TDBInformation = class(TCustomOutputBlock<TDBInfoItem,IDBInfoItem>, IDBInformation)
   protected
-    function AddSpecialItem(BufPtr: PAnsiChar): POutputBlockItemData; override;
+    function AddSpecialItem(BufPtr: PByte): POutputBlockItemData; override;
     procedure DoParseBuffer; override;
   public
     constructor Create(aSize: integer=DBInfoDefaultBufferSize);
@@ -193,8 +193,8 @@ type
 
   TServiceQueryResults = class(TCustomOutputBlock<TServiceQueryResultItem,IServiceQueryResultItem>, IServiceQueryResults)
   protected
-    function AddListItem(BufPtr: PAnsiChar): POutputBlockItemData; override;
-    function AddSpecialItem(BufPtr: PAnsiChar): POutputBlockItemData; override;
+    function AddListItem(BufPtr: PByte): POutputBlockItemData; override;
+    function AddSpecialItem(BufPtr: PByte): POutputBlockItemData; override;
     procedure DoParseBuffer; override;
   end;
 
@@ -225,7 +225,7 @@ type
 
   TDBInformation = class(TOutputBlock,IDBInformation)
   protected
-    function AddSpecialItem(BufPtr: PAnsiChar): POutputBlockItemData; override;
+    function AddSpecialItem(BufPtr: PByte): POutputBlockItemData; override;
     procedure DoParseBuffer; override;
   public
     constructor Create(aSize: integer=DBInfoDefaultBufferSize);
@@ -248,8 +248,8 @@ type
 
   TServiceQueryResults = class(TOutputBlock,IServiceQueryResults)
   protected
-    function AddListItem(BufPtr: PAnsiChar): POutputBlockItemData; override;
-    function AddSpecialItem(BufPtr: PAnsiChar): POutputBlockItemData; override;
+    function AddListItem(BufPtr: PByte): POutputBlockItemData; override;
+    function AddSpecialItem(BufPtr: PByte): POutputBlockItemData; override;
     procedure DoParseBuffer; override;
   public
     {IServiceQueryResults}
@@ -295,7 +295,7 @@ type
 
   TSQLInfoResultsBuffer = class(TCustomOutputBlock<TSQLInfoResultsItem,ISQLInfoItem>, ISQLInfoResults)
   protected
-    function AddListItem(BufPtr: PAnsiChar): POutputBlockItemData; override;
+    function AddListItem(BufPtr: PByte): POutputBlockItemData; override;
     procedure DoParseBuffer; override;
   public
     constructor Create(aSize: integer = 1024);
@@ -313,7 +313,7 @@ type
 
   TSQLInfoResultsBuffer = class(TOutputBlock,ISQLInfoResults)
   protected
-    function AddListItem(BufPtr: PAnsiChar): POutputBlockItemData; override;
+    function AddListItem(BufPtr: PByte): POutputBlockItemData; override;
     procedure DoParseBuffer; override;
   public
     constructor Create(aSize: integer = 1024);
@@ -417,11 +417,11 @@ end;
 
 { TOutputBlockItem }
 
-procedure TOutputBlockItem.SetString(out S: AnsiString; Buf: PAnsiChar;
+procedure TOutputBlockItem.SetString(out S: AnsiString; Buf: PByte;
   Len: integer; CodePage: TSystemCodePage);
 var rs: RawByteString;
 begin
-  system.SetString(rs,Buf,len);
+  system.SetString(rs,PAnsiChar(Buf),len);
   SetCodePage(rs,CodePage,false);
   S := rs;
 end;
@@ -514,7 +514,7 @@ end;
 
 function TOutputBlockItem.getAsBytes: TByteArray;
 var i: integer;
-    P: PAnsiChar;
+    P: PByte;
 begin
   with FItemData^ do
   if FDataType = dtBytes then
@@ -576,7 +576,7 @@ begin
   FBufferParsed := true;
 end;
 
-function TOutputBlock.AddItem(BufPtr: PAnsiChar): POutputBlockItemData;
+function TOutputBlock.AddItem(BufPtr: PByte): POutputBlockItemData;
 begin
   new(Result);
   with Result^ do
@@ -589,7 +589,7 @@ begin
   end;
 end;
 
-function TOutputBlock.AddIntegerItem(BufPtr: PAnsiChar): POutputBlockItemData;
+function TOutputBlock.AddIntegerItem(BufPtr: PByte): POutputBlockItemData;
 begin
   new(Result);
   with Result^ do
@@ -611,7 +611,7 @@ begin
   end;
 end;
 
-function TOutputBlock.AddStringItem(BufPtr: PAnsiChar): POutputBlockItemData;
+function TOutputBlock.AddStringItem(BufPtr: PByte): POutputBlockItemData;
 begin
   new(Result);
   with Result^ do
@@ -625,7 +625,7 @@ begin
   end;
 end;
 
-function TOutputBlock.AddShortStringItem(BufPtr: PAnsiChar): POutputBlockItemData;
+function TOutputBlock.AddShortStringItem(BufPtr: PByte): POutputBlockItemData;
 begin
   new(Result);
   with Result^ do
@@ -638,7 +638,7 @@ begin
   end;
 end;
 
-function TOutputBlock.AddByteItem(BufPtr: PAnsiChar): POutputBlockItemData;
+function TOutputBlock.AddByteItem(BufPtr: PByte): POutputBlockItemData;
 begin
   new(Result);
   with Result^ do
@@ -651,7 +651,7 @@ begin
   end;
 end;
 
-function TOutputBlock.AddBytesItem(BufPtr: PAnsiChar): POutputBlockItemData;
+function TOutputBlock.AddBytesItem(BufPtr: PByte): POutputBlockItemData;
 begin
   new(Result);
   with Result^ do
@@ -665,7 +665,7 @@ begin
   end;
 end;
 
-function TOutputBlock.AddListItem(BufPtr: PAnsiChar): POutputBlockItemData;
+function TOutputBlock.AddListItem(BufPtr: PByte): POutputBlockItemData;
 begin
   new(Result);
   with Result^ do
@@ -678,7 +678,7 @@ begin
   end;
 end;
 
-function TOutputBlock.AddSpecialItem(BufPtr: PAnsiChar): POutputBlockItemData;
+function TOutputBlock.AddSpecialItem(BufPtr: PByte): POutputBlockItemData;
 begin
   new(Result);
   with Result^ do
@@ -716,7 +716,7 @@ begin
   inherited Destroy;
 end;
 
-function TOutputBlock.Buffer: PAnsiChar;
+function TOutputBlock.Buffer: PByte;
 begin
   Result := FBuffer;
 end;
@@ -809,10 +809,10 @@ end;
 
 procedure TDBInfoItem.DecodeIDCluster(var ConnectionType: integer;
   var DBFileName, DBSiteName: AnsiString);
-var  P: PAnsiChar;
+var  P: PByte;
 begin
   with ItemData^ do
-  if FBufPtr^ = char(isc_info_db_id) then
+  if FBufPtr^ = isc_info_db_id then
   begin
     P := FBufPtr + 3;
     if FDataLength > 0 then
@@ -828,10 +828,10 @@ end;
 
 procedure TDBInfoItem.DecodeVersionString(var Version: byte;
   var VersionString: AnsiString);
-var  P: PAnsiChar;
+var  P: PByte;
 begin
   with ItemData^ do
-  if FBufPtr^ = char(isc_info_version) then
+  if FBufPtr^ = isc_info_version then
   begin
    P := FBufPtr+3;
    VersionString := '';
@@ -844,11 +844,11 @@ begin
 end;
 
 procedure TDBInfoItem.DecodeUserNames(UserNames: TStrings);
-var P: PAnsiChar;
+var P: PByte;
     s: AnsiString;
 begin
   with ItemData^ do
-  if FBufPtr^ = char(isc_info_user_names) then
+  if FBufPtr^ = isc_info_user_names then
   begin
     P := FBufPtr+3;
     while (P < FBufPtr + FSize) do
@@ -864,7 +864,7 @@ end;
 
 function TDBInfoItem.getOperationCounts: TDBOperationCounts;
 var tableCounts: integer;
-    P: PAnsiChar;
+    P: PByte;
     i: integer;
 begin
   with ItemData^ do
@@ -906,7 +906,7 @@ end;
 
 { TDBInformation }
 
-function TDBInformation.AddSpecialItem(BufPtr: PAnsiChar): POutputBlockItemData;
+function TDBInformation.AddSpecialItem(BufPtr: PByte): POutputBlockItemData;
 begin
   Result := inherited AddSpecialItem(BufPtr);
   with Result^ do
@@ -918,13 +918,13 @@ begin
 end;
 
 procedure TDBInformation.DoParseBuffer;
-var P: PAnsiChar;
+var P: PByte;
     index: integer;
 begin
   P := Buffer;
   index := 0;
   SetLength(FItems,0);
-  while (P^ <> char(isc_info_end)) and (P < Buffer + getBufSize) do
+  while (P^ <> isc_info_end) and (P < Buffer + getBufSize) do
   begin
     SetLength(FItems,index+1);
     case byte(P^) of
@@ -1012,8 +1012,8 @@ end;
 
 { TServiceQueryResults }
 
-function TServiceQueryResults.AddListItem(BufPtr: PAnsiChar): POutputBlockItemData;
-var P: PAnsiChar;
+function TServiceQueryResults.AddListItem(BufPtr: PByte): POutputBlockItemData;
+var P: PByte;
     i: integer;
     group: byte;
 begin
@@ -1029,7 +1029,7 @@ begin
   end;
   with Result^ do
   begin
-    while (P < FBufPtr + FSize) and (P^ <> char(isc_info_flag_end)) do
+    while (P < FBufPtr + FSize) and (P^ <> isc_info_flag_end) do
     begin
       SetLength(FSubItems,i+1);
       case group of
@@ -1101,16 +1101,16 @@ begin
     if group in [isc_info_svc_get_users,isc_info_svc_limbo_trans] then
       Exit;
 
-    if (P < FBufPtr + FSize) and (P^ = char(isc_info_flag_end)) then
+    if (P < FBufPtr + FSize) and (P^ = isc_info_flag_end) then
       FSize := FDataLength + 2 {include start and end flag}
     else
       FSize := FDataLength + 1; {start flag only}
   end;
 end;
 
-function TServiceQueryResults.AddSpecialItem(BufPtr: PAnsiChar
+function TServiceQueryResults.AddSpecialItem(BufPtr: PByte
   ): POutputBlockItemData;
-var P: PAnsiChar;
+var P: PByte;
     i: integer;
 begin
   Result := inherited AddSpecialItem(BufPtr);
@@ -1131,12 +1131,12 @@ begin
 end;
 
 procedure TServiceQueryResults.DoParseBuffer;
-var P: PAnsiChar;
+var P: PByte;
     i: integer;
 begin
   P := Buffer;
   i := 0;
-  while  (P < Buffer + getBufSize) and (P^ <> char(isc_info_end)) do
+  while  (P < Buffer + getBufSize) and (P^ <> isc_info_end) do
   begin
     SetLength(FItems,i+1);
     case integer(P^) of
@@ -1218,8 +1218,8 @@ end;
 
 { TSQLInfoResultsBuffer }
 
-function TSQLInfoResultsBuffer.AddListItem(BufPtr: PAnsiChar): POutputBlockItemData;
-var P: PAnsiChar;
+function TSQLInfoResultsBuffer.AddListItem(BufPtr: PByte): POutputBlockItemData;
+var P: PByte;
     i: integer;
 begin
   Result := inherited AddListItem(BufPtr);
@@ -1265,13 +1265,13 @@ begin
 end;
 
 procedure TSQLInfoResultsBuffer.DoParseBuffer;
-var P: PAnsiChar;
+var P: PByte;
     index: integer;
 begin
   P := Buffer;
   index := 0;
   SetLength(FItems,0);
-  while (P^ <> char(isc_info_end)) and (P < Buffer + getBufSize) do
+  while (P^ <> isc_info_end) and (P < Buffer + getBufSize) do
   begin
     SetLength(FItems,index+1);
     case byte(P^) of

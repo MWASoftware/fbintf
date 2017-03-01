@@ -318,7 +318,7 @@ end;
 function TFB25Blob.Read(var Buffer; Count: Longint): Longint;
 var
   BytesRead : UShort;
-  LocalBuffer: PAnsiChar;
+  LocalBuffer: PByte;
   returnCode: long;
   localCount: uShort;
 begin
@@ -327,7 +327,7 @@ begin
   if FEOB then
     Exit;
 
-  LocalBuffer := PAnsiChar(@Buffer);
+  LocalBuffer := PByte(@Buffer);
   repeat
     if Count > MaxuShort then
       localCount := MaxuShort
@@ -349,11 +349,11 @@ end;
 
 function TFB25Blob.Write(const Buffer; Count: Longint): Longint;
 var
-  LocalBuffer: PAnsiChar;
+  LocalBuffer: PByte;
   localCount: uShort;
 begin
   CheckWritable;
-  LocalBuffer := PAnsiChar(@Buffer);
+  LocalBuffer := PByte(@Buffer);
   Result := 0;
   if Count = 0 then Exit;
 

@@ -47,7 +47,7 @@ type
     {Describes a Clumplet in the buffer. FBufPtr always points to the clumplet id
      the rest of the clumplet up to the FBufLength is data. The data format is
      given by FDataType}
-    FBufPtr: PAnsiChar;
+    FBufPtr: PByte;
     FBuflength: integer;
     FDataType: TParamDataType;
   end;
@@ -64,7 +64,7 @@ type
     procedure MoveBy(Item: PParamBlockItemData; delta: integer);
     procedure UpdateRequestItemSize(Item: TParamBlockItem; NewSize: integer);
   protected
-    FBuffer: PAnsiChar;
+    FBuffer: PByte;
     FDataLength: integer;
     function Add(ParamType: byte): PParamBlockItemData;
     function Find(ParamType: byte): PParamBlockItemData;
@@ -72,7 +72,7 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-    function getBuffer: PAnsiChar;
+    function getBuffer: PByte;
     function getDataLength: integer;
     function AvailableBufferSpace: integer;
 
@@ -327,7 +327,7 @@ begin
       Result := source.Read((FBufPtr+3)^,count);
       with FirebirdClientAPI do
         EncodeInteger(Result,2,FBufPtr+1);
-      (FBufPtr+Result + 3)^ := chr(isc_info_end);
+      (FBufPtr+Result + 3)^ := isc_info_end;
       if Result <> count then
         FOwner.UpdateRequestItemSize(self,Result + 4);
       FDataType := dtString2;
@@ -399,17 +399,17 @@ begin
     Result := IntToStr(getAsByte);
   dtString:
     begin
-      len := byte((FBufPtr+1)^);
-      SetString(Result,FBufPtr+2,len);
+      len := (FBufPtr+1)^;
+      SetString(Result,PAnsiChar(FBufPtr+2),len);
     end;
   dtString2:
     begin
       with FirebirdClientAPI do
         len := DecodeInteger(FBufPtr+1,2);
-      SetString(Result,FBufPtr+3,len);
+      SetString(Result,PAnsiChar(FBufPtr+3),len);
     end;
   dtString0:
-      Result := strpas(FBufPtr+1);
+      Result := strpas(PAnsiChar(FBufPtr+1));
     else
       IBError(ibxeOutputBlockTypeError,[nil]);
   end;
@@ -429,20 +429,20 @@ end;
 
 procedure TParamBlockItem.addByte(aValue: byte);
 var len: integer;
-    P: PAnsiChar;
+    P: PByte;
 begin
   with FParamData^ do
   begin
     P := FBufPtr + FBufLength;
     len := FBufLength + 1;
     FOwner.UpdateRequestItemSize(self,len);
-    P^ := AnsiChar(aValue)
+    P^ := aValue;
   end;
 end;
 
 procedure TParamBlockItem.addShortInteger(aValue: integer);
 var len: integer;
-    P: PAnsiChar;
+    P: PByte;
 begin
   with FParamData^ do
   begin
@@ -461,8 +461,8 @@ begin
     if FBufLength <> 3 then
       FOwner.UpdateRequestItemSize(self,3);
     FDataType := dtByte;
-    (FBufPtr+1)^ := #1;
-    (FBufPtr+2)^ := AnsiChar(aValue);
+    (FBufPtr+1)^ := $1;
+    (FBufPtr+2)^ := aValue;
   end;
 end;
 
@@ -473,7 +473,7 @@ begin
     if FBufLength <> 2 then
       FOwner.UpdateRequestItemSize(self,2);
     FDataType := dtByte2;
-    (FBufPtr+1)^ := AnsiChar(aValue);
+    (FBufPtr+1)^ := aValue;
   end;
 end;
 
@@ -499,7 +499,7 @@ begin
   begin
     if FBufLength <> 6 then
       FOwner.UpdateRequestItemSize(self,6);
-    (FBufPtr+1)^ := chr(4);
+    (FBufPtr+1)^ := $4;
     with FirebirdClientAPI do
       EncodeInteger(aValue,4,FBufPtr+2);
     FDataType := dtInteger1;
@@ -558,7 +558,7 @@ begin
     if len > 255 then
       IBError(ibxStringTooLong,[aValue,255]);
     FOwner.UpdateRequestItemSize(self,len+2);
-    (FBufPtr+1)^ := AnsiChar(len);
+    (FBufPtr+1)^ := len;
     if len > 0 then
       Move(aValue[1],(FBufPtr+2)^,len);
     FDataType := dtString;
@@ -595,7 +595,7 @@ begin
     FOwner.UpdateRequestItemSize(self,len+2);
     if len > 0 then
       Move(aValue[1],(FBufPtr+1)^,len);
-    (FBufPtr+len+1)^ := #0;
+    (FBufPtr+len+1)^ := 0;
     FDataType := dtString0;
   end;
 end;
@@ -603,7 +603,7 @@ end;
 { TParamBlock }
 
 procedure TParamBlock.AdjustBuffer;
-var P: PAnsiChar;
+var P: PByte;
     i: integer;
     headerLen: integer;
 begin
@@ -625,7 +625,7 @@ begin
 end;
 
 procedure TParamBlock.MoveBy(Item: PParamBlockItemData; delta: integer);
-var src, dest: PAnsiChar;
+var src, dest: PByte;
   i: integer;
 begin
   with Item^ do
@@ -705,7 +705,7 @@ begin
   inherited Destroy;
 end;
 
-function TParamBlock.getBuffer: PAnsiChar;
+function TParamBlock.getBuffer: PByte;
 begin
   if FDataLength = 0 then
     Result := nil
@@ -728,7 +728,7 @@ begin
   new(Result);
   Result^.FBufPtr := FBuffer + FDataLength;
   Result^.FBufLength := 1;
-  Result^.FBufPtr^ := AnsiChar(ParamType);
+  Result^.FBufPtr^ := ParamType;
   Result^.FDataType := dtnone; {default}
   Inc(FDataLength,1);
   AdjustBuffer;
@@ -889,7 +889,7 @@ constructor TBPB.Create;
 begin
   inherited Create;
   FDataLength := 1;
-  FBuffer^ := char(isc_bpb_version1);
+  FBuffer^ := isc_bpb_version1;
 end;
 
 function TBPB.Add(ParamType: byte): IBPBItem;
@@ -921,7 +921,7 @@ constructor TDPB.Create;
 begin
   inherited Create;
   FDataLength := 1;
-  FBuffer^ := char(isc_dpb_version1);
+  FBuffer^ := isc_dpb_version1;
 end;
 
 function TDPB.Add(ParamType: byte): IDPBItem;
@@ -953,7 +953,7 @@ constructor TTPB.Create;
 begin
   inherited Create;
   FDataLength := 1;
-  FBuffer^ := char(isc_tpb_version3);
+  FBuffer^ := isc_tpb_version3;
 end;
 
 function TTPB.Add(ParamType: byte): ITPBItem;
@@ -1010,8 +1010,8 @@ constructor TSPB.Create;
 begin
   inherited Create;
   FDataLength := 2;
-  FBuffer^ := char(isc_spb_version);
-  (FBuffer+1)^ := char(isc_spb_current_version);
+  FBuffer^ := isc_spb_version;
+  (FBuffer+1)^ := isc_spb_current_version;
 end;
 
 function TSPB.Add(ParamType: byte): ISPBItem;
