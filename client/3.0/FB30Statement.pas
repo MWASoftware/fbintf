@@ -1211,7 +1211,7 @@ begin
       if not Force then Check4DataBaseError;
     end;
   finally
-    if (FSQLRecord.FTransaction <> nil) and ((FSQLRecord.FTransaction as ITransaction) <> FTransactionIntf) then
+    if (FSQLRecord.FTransaction <> nil) and (FSQLRecord.FTransaction <> (FTransactionIntf as TFB30Transaction)) then
       RemoveMonitor(FSQLRecord.FTransaction);
     FOpen := False;
     FExecTransactionIntf := nil;

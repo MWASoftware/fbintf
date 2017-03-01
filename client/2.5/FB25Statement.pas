@@ -1133,7 +1133,7 @@ begin
         IBDatabaseError;
     end;
   finally
-    if (FSQLRecord.FTransaction <> nil) and ((FSQLRecord.FTransaction as ITransaction) <> FTransactionIntf) then
+    if (FSQLRecord.FTransaction <> nil) and (FSQLRecord.FTransaction <> (FTransactionIntf as TFB25Transaction)) then
       RemoveMonitor(FSQLRecord.FTransaction);
     FOpen := False;
     FExecTransactionIntf := nil;

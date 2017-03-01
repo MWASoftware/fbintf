@@ -47,8 +47,6 @@ type
 
   {$IFDEF DEBUGINTERFACES}
   TMonitoredObject = class(TInterfacedObject)
-  private
-    FObjectCount: integer; static;
   public
     constructor Create;
     destructor Destroy; override;
@@ -152,6 +150,9 @@ end;
 { TMonitoredObject }
 
 {$IFDEF DEBUGINTERFACES}
+var
+  FObjectCount: integer;
+
 constructor TMonitoredObject.Create;
 begin
   inherited Create;

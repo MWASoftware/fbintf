@@ -173,7 +173,7 @@ end;
 procedure TFBBlob.TransactionEnding(aTransaction: TFBTransaction;
   Force: boolean);
 begin
-  if (aTransaction as ITransaction) <> FTransaction   then
+  if aTransaction  <> (FTransaction as TFBTransaction)  then
     Exit;
   if FCreating then
     InternalCancel(Force)

@@ -73,7 +73,7 @@ uses
   Classes,
     {$IFDEF MSWINDOWS}Windows, {$ENDIF}
     {$IFDEF FPC} Dynlibs, {$ENDIF}
-  IB, IBHeader, FBActivityMonitor, FBMessages, IBExternals;
+   IB, IBHeader, FBActivityMonitor, FBMessages, IBExternals;
 
 {For Linux see result of GetFirebirdLibList method}
 {$IFDEF DARWIN}
