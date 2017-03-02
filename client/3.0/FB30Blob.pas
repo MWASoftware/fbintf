@@ -260,18 +260,18 @@ end;
 procedure TFB30Blob.GetInfo(var NumSegments: Int64; var MaxSegmentSize,
   TotalSize: Int64; var BlobType: TBlobType);
 var
-  items: array[0..3] of Char;
-  results: array[0..99] of Char;
+  items: array[0..3] of Byte;
+  results: array[0..99] of Byte;
   i, item_length: Integer;
   item: Integer;
 begin
   if FBlobIntf = nil then
     IBError(ibxeBlobNotOpen,[nil]);
 
-  items[0] := Char(isc_info_blob_num_segments);
-  items[1] := Char(isc_info_blob_max_segment);
-  items[2] := Char(isc_info_blob_total_length);
-  items[3] := Char(isc_info_blob_type);
+  items[0] := isc_info_blob_num_segments;
+  items[1] := isc_info_blob_max_segment;
+  items[2] := isc_info_blob_total_length;
+  items[3] := isc_info_blob_type;
 
   with Firebird30ClientAPI do
   begin
@@ -279,7 +279,7 @@ begin
     Check4DataBaseError;
     SignalActivity;
     i := 0;
-    while (i < SizeOf(results)) and (results[i] <> Char(isc_info_end)) do
+    while (i < SizeOf(results)) and (results[i] <> isc_info_end) do
     begin
       item := Integer(results[i]); Inc(i);
       item_length := DecodeInteger(@results[i], 2); Inc(i, 2);
