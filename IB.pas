@@ -62,10 +62,10 @@
 unit IB;
 
 {$IFDEF FPC}
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$codepage UTF8}
 {$interfaces COM}
-{$IF FPC_FULLVERSION < 30000 }
+{$IF defined(FPC) and (FPC_FULLVERSION < 30000) }
 {$ERROR FPC Version 3.0.0 or later is required}
 {$ENDIF}
 {$ENDIF}
@@ -123,8 +123,8 @@ const
   {Interface version information}
   FBIntf_Major = 1;
   FBIntf_Minor = 0;
-  FBIntf_Release = 1;
-  FBIntf_Version = '1.0.1';
+  FBIntf_Release = 2;
+  FBIntf_Version = '1.0.2';
 
 {These include files are converted from the 'C' originals in the Firebird API
  and define the various constants used by the API}
@@ -167,6 +167,21 @@ type
    PGDS__QUAD           = ^TGDS__QUAD;
    PISC_QUAD            = ^TISC_QUAD;
 
+{$IFNDEF FPC}
+const
+  CP_ACP     = 0;     // default to ANSI code page
+  CP_OEMCP   = 1;     // default to OEM (console) code page
+  CP_UTF16   = 1200;  // utf-16
+  CP_UTF16BE = 1201;  // unicodeFFFE
+  CP_UTF7    = 65000; // utf-7
+  CP_UTF8    = 65001; // utf-8
+  CP_ASCII   = 20127; // us-ascii
+  CP_NONE    = $FFFF; // rawbytestring encoding
+
+type
+  TSystemCodePage = word; {not defined in Delphi}
+{$ENDIF}
+
   TIBSQLStatementTypes =
                  (SQLUnknown, SQLSelect, SQLInsert,
                   SQLUpdate, SQLDelete, SQLDDL,
@@ -181,10 +196,10 @@ type
   IAttachment = interface;
   ITransaction = interface;
 
-  {The IParameterBlock generic interface provides the template for all parameter
+  {The IParameterBlock interface provides the template for all parameter
    block interfaces}
 
-  generic IParameterBlock<_IItem> = interface
+  IParameterBlock<_IItem> = interface
     function getCount: integer;
     function Add(ParamType: byte): _IItem;
     function getItems(index: integer): _IItem;
@@ -198,14 +213,15 @@ type
    different parameter block items }
 
   IParameterBlockItem = interface
+    ['{53b23f7b-abda-46a5-9aa5-07bd5e723266}']
     function getParamType: byte;
     function getAsInteger: integer;
-    function getAsString: string;
+    function getAsString: AnsiString;
     function getAsByte: byte;
-    procedure setAsString(aValue: string);
+    procedure setAsString(aValue: AnsiString);
     procedure setAsByte(aValue: byte);
     procedure SetAsInteger(aValue: integer);
-    property AsString: string read getAsString write setAsString;
+    property AsString: AnsiString read getAsString write setAsString;
     property AsByte: byte read getAsByte write setAsByte;
     property AsInteger: integer read getAsInteger write SetAsInteger;
   end;
@@ -219,9 +235,10 @@ type
    }
 
   IStatus = interface
+    ['{34167722-af38-4831-b08a-93162d58ede3}']
     function GetIBErrorCode: Long;
     function Getsqlcode: Long;
-    function GetMessage: string;
+    function GetMessage: AnsiString;
     function CheckStatusVector(ErrorCodes: array of TFBStatusCode): Boolean;
     function GetIBDataBaseErrorMessages: TIBDataBaseErrorMessages;
     procedure SetIBDataBaseErrorMessages(Value: TIBDataBaseErrorMessages);
@@ -238,13 +255,14 @@ type
   TArrayBounds = array of TArrayBound;
 
   IArrayMetaData = interface
+    ['{7dd0aea4-59af-4c2a-b958-565d5025c489}']
     function GetSQLType: cardinal;
-    function GetSQLTypeName: string;
+    function GetSQLTypeName: AnsiString;
     function GetScale: integer;
     function GetSize: cardinal;
     function GetCharSetID: cardinal;
-    function GetTableName: string;
-    function GetColumnName: string;
+    function GetTableName: AnsiString;
+    function GetColumnName: AnsiString;
     function GetDimensions: integer;
     function GetBounds: TArrayBounds;
   end;
@@ -269,6 +287,7 @@ type
   TArrayEventHandler = procedure(Sender: IArray; Reason: TArrayEventReason) of object;
 
   IArray = interface(IArrayMetaData)
+    ['{631c6bb1-fb49-44fb-a64a-c49859632b88}']
     function GetArrayID: TISC_QUAD;
     procedure Clear;
     function IsEmpty: boolean;
@@ -284,7 +303,7 @@ type
     function GetAsFloat(index: array of integer): Float;
     function GetAsLong(index: array of integer): Long;
     function GetAsShort(index: array of integer): Short;
-    function GetAsString(index: array of integer): String;
+    function GetAsString(index: array of integer): AnsiString;
     function GetAsVariant(index: array of integer): Variant;
     procedure SetAsInteger(index: array of integer; AValue: integer);
     procedure SetAsBoolean(index: array of integer; AValue: boolean);
@@ -297,7 +316,7 @@ type
     procedure SetAsDouble(index: array of integer; Value: Double);
     procedure SetAsFloat(index: array of integer; Value: Float);
     procedure SetAsShort(index: array of integer; Value: Short);
-    procedure SetAsString(index: array of integer; Value: String);
+    procedure SetAsString(index: array of integer; Value: AnsiString);
     procedure SetAsVariant(index: array of integer; Value: Variant);
     procedure SetBounds(dim, UpperBound, LowerBound: integer);
     function GetAttachment: IAttachment;
@@ -311,19 +330,24 @@ type
   }
 
   IBlobMetaData = interface
+    ['{575f3c61-bb33-46a5-8975-bb7d1b6e37cc}']
     function GetSubType: integer;
     function GetCharSetID: cardinal;
     function GetCodePage: TSystemCodePage;
     function GetSegmentSize: cardinal;
-    function GetRelationName: string;
-    function GetColumnName: string;
+    function GetRelationName: AnsiString;
+    function GetColumnName: AnsiString;
   end;
 
   {The Blob Parameter block is used to select a Blob Filter}
 
-  IBPBItem = interface (IParameterBlockItem) end;
+  IBPBItem = interface (IParameterBlockItem)
+    ['{660822a5-3114-4c16-b6cb-c1a7b2aba70d}']
+  end;
 
-  IBPB = specialize IParameterBlock<IBPBItem>;
+  IBPB = interface(IParameterBlock<IBPBItem>)
+    ['{e0cb9eb5-17f7-4416-b7d1-3cddd1dfca76}']
+  end;
 
   { The Blob Interface provides access to a blob data item.
 
@@ -337,6 +361,7 @@ type
   TBlobType = (btSegmented,btStream);
 
   IBlob = interface(IBlobMetaData)
+    ['{3090a145-7780-442b-b15b-efd4568b8611}']
     function GetBPB: IBPB;
     procedure Cancel;
     procedure Close;
@@ -347,9 +372,9 @@ type
                       TotalSize: Int64; var BlobType: TBlobType);
     function Read(var Buffer; Count: Longint): Longint;
     function Write(const Buffer; Count: Longint): Longint;
-    function LoadFromFile(Filename: string): IBlob;
+    function LoadFromFile(Filename: AnsiString): IBlob;
     function LoadFromStream(S: TStream) : IBlob;
-    function SaveToFile(Filename: string): IBlob;
+    function SaveToFile(Filename: AnsiString): IBlob;
     function SaveToStream(S: TStream): IBlob;
     function GetAsString: rawbytestring;
     procedure SetAsString(aValue: rawbytestring);
@@ -366,15 +391,16 @@ type
   { IColumnMetaData }
 
   IColumnMetaData = interface
+    ['{c222e6c3-53c1-469f-9e05-0a5c3ef232d8}']
     function GetIndex: integer;
     function GetSQLType: cardinal;
-    function GetSQLTypeName: string;
+    function GetSQLTypeName: AnsiString;
     function getSubtype: integer;
-    function getRelationName: string;
-    function getOwnerName: string;
-    function getSQLName: string;    {Name of the column}
-    function getAliasName: string;  {Alias Name of column or Column Name if no alias}
-    function getName: string;       {Disambiguated uppercase Field Name}
+    function getRelationName: AnsiString;
+    function getOwnerName: AnsiString;
+    function getSQLName: AnsiString;    {Name of the column}
+    function getAliasName: AnsiString;  {Alias Name of column or Column Name if no alias}
+    function getName: AnsiString;       {Disambiguated uppercase Field Name}
     function getScale: integer;
     function getCharSetID: cardinal;
     function getCodePage: TSystemCodePage;
@@ -382,7 +408,7 @@ type
     function GetSize: cardinal;
     function GetArrayMetaData: IArrayMetaData; {Valid only for Array SQL Type}
     function GetBlobMetaData: IBlobMetaData; {Valid only for Blob SQL Type}
-    property Name: string read GetName;
+    property Name: AnsiString read GetName;
     property Size: cardinal read GetSize;
     property SQLType: cardinal read GetSQLType;
     property Scale: integer read getScale;
@@ -398,10 +424,11 @@ type
   { IMetaData }
 
   IMetaData = interface
+    ['{4dafdbb6-0d36-4f1f-9c95-8b132804b965}']
     function getCount: integer;
     function getColumnMetaData(index: integer): IColumnMetaData;
-    function GetUniqueRelationName: string; {Non empty if all columns come from the same table}
-    function ByName(Idx: String): IColumnMetaData;
+    function GetUniqueRelationName: AnsiString; {Non empty if all columns come from the same table}
+    function ByName(Idx: AnsiString): IColumnMetaData;
     property ColMetaData[index: integer]: IColumnMetaData read getColumnMetaData; default;
     property Count: integer read getCount;
   end;
@@ -421,6 +448,7 @@ type
 
 
   ISQLData = interface(IColumnMetaData)
+    ['{3f493e31-7e3f-4606-a07c-b210b9e3619d}']
     function GetAsBoolean: boolean;
     function GetAsCurrency: Currency;
     function GetAsInt64: Int64;
@@ -431,7 +459,7 @@ type
     function GetAsPointer: Pointer;
     function GetAsQuad: TISC_QUAD;
     function GetAsShort: short;
-    function GetAsString: String;
+    function GetAsString: AnsiString;
     function GetIsNull: Boolean;
     function GetAsVariant: Variant;
     function GetAsBlob: IBlob; overload;
@@ -450,7 +478,7 @@ type
     property AsPointer: Pointer read GetAsPointer;
     property AsQuad: TISC_QUAD read GetAsQuad;
     property AsShort: short read GetAsShort;
-    property AsString: String read GetAsString;
+    property AsString: AnsiString read GetAsString;
     property AsVariant: Variant read GetAsVariant ;
     property AsBlob: IBlob read GetAsBlob;
     property AsArray: IArray read GetAsArray;
@@ -465,11 +493,12 @@ type
   }
 
   IResults = interface
+    ['{e836b2bb-93d1-4bbf-a8eb-7ce535de3bb5}']
    function getCount: integer;
    function GetTransaction: ITransaction;
-   function ByName(Idx: String): ISQLData;
+   function ByName(Idx: AnsiString): ISQLData;
    function getSQLData(index: integer): ISQLData;
-   procedure GetData(index: integer; var IsNull:boolean; var len: short; var data: PChar);
+   procedure GetData(index: integer; var IsNull:boolean; var len: short; var data: PByte);
    procedure SetRetainInterfaces(aValue: boolean);
    property Data[index: integer]: ISQLData read getSQLData; default;
    property Count: integer read getCount;
@@ -481,8 +510,9 @@ type
     in turn, used to access the data returned by each field of the current row.
   }
   IResultSet = interface(IResults)
+    ['{0ae4979b-7857-4e8c-8918-ec6f155b51a0}']
     function FetchNext: boolean;
-    function GetCursorName: string;
+    function GetCursorName: AnsiString;
     function IsEof: boolean;
     procedure Close;
   end;
@@ -503,11 +533,12 @@ type
   }
 
   ISQLParam = interface
+    ['{b22b4578-6d41-4807-a9a9-d2ec8d1d5a14}']
     function GetIndex: integer;
     function GetSQLType: cardinal;
-    function GetSQLTypeName: string;
+    function GetSQLTypeName: AnsiString;
     function getSubtype: integer;
-    function getName: string;
+    function getName: AnsiString;
     function getScale: integer;
     function getCharSetID: cardinal;
     function getCodePage: TSystemCodePage;
@@ -523,7 +554,7 @@ type
     function GetAsPointer: Pointer;
     function GetAsQuad: TISC_QUAD;
     function GetAsShort: short;
-    function GetAsString: String;
+    function GetAsString: AnsiString;
     function GetIsNull: boolean;
     function GetAsVariant: Variant;
     function GetAsBlob: IBlob;
@@ -541,7 +572,7 @@ type
     procedure SetAsFloat(aValue: Float);
     procedure SetAsPointer(aValue: Pointer);
     procedure SetAsShort(aValue: Short);
-    procedure SetAsString(aValue: String);
+    procedure SetAsString(aValue: AnsiString);
     procedure SetAsVariant(aValue: Variant);
     procedure SetIsNull(aValue: Boolean);
     procedure SetAsBlob(aValue: IBlob);
@@ -560,7 +591,7 @@ type
     property AsLong: Long read GetAsLong write SetAsLong;
     property AsPointer: Pointer read GetAsPointer write SetAsPointer;
     property AsShort: Short read GetAsShort write SetAsShort;
-    property AsString: String read GetAsString write SetAsString;
+    property AsString: AnsiString read GetAsString write SetAsString;
     property AsVariant: Variant read GetAsVariant write SetAsVariant;
     property AsBlob: IBlob read GetAsBlob write SetAsBlob;
     property AsArray: IArray read GetAsArray write SetAsArray;
@@ -569,7 +600,7 @@ type
     property IsNull: Boolean read GetIsNull write SetIsNull;
     property IsNullable: Boolean read GetIsNullable;
     property Modified: Boolean read getModified;
-    property Name: string read GetName;
+    property Name: AnsiString read GetName;
     property SQLType: cardinal read GetSQLType;
   end;
 
@@ -579,9 +610,10 @@ type
   }
 
   ISQLParams = interface
+    ['{c6d95ac7-b2b7-461b-b890-afef0acbb077}']
     function getCount: integer;
     function getSQLParam(index: integer): ISQLParam;
-    function ByName(Idx: String): ISQLParam ;
+    function ByName(Idx: AnsiString): ISQLParam ;
     function GetModified: Boolean;
     property Modified: Boolean read GetModified;
     property Params[index: integer]: ISQLParam read getSQLParam; default;
@@ -593,19 +625,20 @@ type
                 psRealTime, psUserTime, psBuffers,
                 psReads, psWrites, psFetches,psDeltaMemory);
 
-  TPerfCounters = array[TPerfStats] of Int64;
+  TPerfCounters = array[TPerfStats] of comp;
 
   {The IStatement interface provides access to an SQL Statement once it has been
    initially prepared. The interface is returned from the IAttachment interface.
    }
 
   IStatement = interface
+    ['{a260576d-a07d-4a66-b02d-1b72543fd7cf}']
     function GetMetaData: IMetaData;  {Output Metadata}
     function GetSQLParams: ISQLParams;{Statement Parameters}
-    function GetPlan: String;
+    function GetPlan: AnsiString;
     function GetRowsAffected(var SelectCount, InsertCount, UpdateCount, DeleteCount: integer): boolean;
     function GetSQLStatementType: TIBSQLStatementTypes;
-    function GetSQLText: string;
+    function GetSQLText: AnsiString;
     function GetSQLDialect: integer;
     function IsPrepared: boolean;
     procedure Prepare(aTransaction: ITransaction=nil);
@@ -632,9 +665,13 @@ type
    found in the Interbase 6.0 API Guide.
   }
 
-  ITPBItem = interface(IParameterBlockItem) end;
+  ITPBItem = interface(IParameterBlockItem)
+    ['{544c1f2b-7c12-4a87-a4a5-face7ea72671}']
+  end;
 
-  ITPB = specialize IParameterBlock<ITPBItem>;
+  ITPB = interface(IParameterBlock<ITPBItem>)
+    ['{7369b0ff-defe-437b-81fe-19b211d42d25}']
+  end;
 
   {The ITransactionAction interface provides access to a Transaction once it
    has been initially started. After a Commit or Rollback, a transaction
@@ -648,6 +685,7 @@ type
   TTransactionCompletion = TARollback.. TACommit;
 
   ITransaction = interface
+    ['{30928d0e-a9d7-4c61-b7cf-14f4f38abe2a}']
     function getTPB: ITPB;
     procedure Start(DefaultCompletion: TTransactionCompletion=taCommit);
     function GetInTransaction: boolean;
@@ -675,7 +713,7 @@ type
   }
 
   TEventInfo = record
-    EventName: string;
+    EventName: AnsiString;
     Count: integer;
   end;
 
@@ -686,9 +724,10 @@ type
   { IEvents }
 
   IEvents = interface
+    ['{6a0be233-ed08-4524-889c-2e45d0c20e5f}']
     procedure GetEvents(EventNames: TStrings);
     procedure SetEvents(EventNames: TStrings); overload;
-    procedure SetEvents(EventName: string); overload;
+    procedure SetEvents(EventName: AnsiString); overload;
     procedure Cancel;
     function ExtractEventCounts: TEventCounts;
     procedure WaitForEvent;
@@ -719,14 +758,15 @@ type
   TDBOperationCounts = array of TDBOperationCount;
 
   IDBInfoItem = interface
+    ['{eeb97b51-ec0f-473f-9f75-c1721f055fcb}']
     function getItemType: byte;
     function getSize: integer;
     procedure getRawBytes(var Buffer);
-    function getAsString: string;
+    function getAsString: AnsiString;
     function getAsInteger: integer;
-    procedure DecodeIDCluster(var ConnectionType: integer; var DBFileName, DBSiteName: string);
+    procedure DecodeIDCluster(var ConnectionType: integer; var DBFileName, DBSiteName: AnsiString);
     function getAsBytes: TByteArray;
-    procedure DecodeVersionString(var Version: byte; var VersionString: string);
+    procedure DecodeVersionString(var Version: byte; var VersionString: AnsiString);
     function getOperationCounts: TDBOperationCounts;
     procedure DecodeUserNames(UserNames: TStrings);
 
@@ -735,7 +775,7 @@ type
     function GetItem(index: integer): IDBInfoItem;
     function Find(ItemType: byte): IDBInfoItem;
     property AsInteger: integer read getAsInteger;
-    property AsString: string read GetAsString;
+    property AsString: AnsiString read GetAsString;
     property Count: integer read GetCount;
     property Items[index: integer]: IDBInfoItem read getItem; default;
   end;
@@ -743,6 +783,7 @@ type
   { IDBInformation }
 
   IDBInformation = interface
+    ['{7ac6777f-f0a9-498a-9f5c-4a57a554df81}']
     function GetCount: integer;
     function GetItem(index: integer): IDBInfoItem;
     function Find(ItemType: byte): IDBInfoItem;
@@ -762,9 +803,13 @@ type
    found in the Interbase 6.0 API Guide.
    }
 
-  IDPBItem = interface(IParameterBlockItem) end;
+  IDPBItem = interface(IParameterBlockItem)
+    ['{123d4ad0-087a-4cd1-a344-1b3d03b30673}']
+  end;
 
-  IDPB = specialize IParameterBlock<IDPBItem>;
+  IDPB = interface(IParameterBlock<IDPBItem>)
+    ['{e676067b-1cf4-4eba-9256-9724f57e0d16}']
+  end;
 
   {The IAttachment interface provides access to a Database Connection. It may be
    used to:
@@ -794,6 +839,7 @@ type
   { IAttachment }
 
   IAttachment = interface
+    ['{466e9b67-9def-4807-b3e7-e08a35e7185c}']
     function getDPB: IDPB;
     function AllocateBPB: IBPB;
     procedure Connect;
@@ -802,60 +848,60 @@ type
     procedure DropDatabase;
     function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion=taCommit): ITransaction; overload;
     function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionCompletion=taCommit): ITransaction; overload;
-    procedure ExecImmediate(transaction: ITransaction; sql: string; SQLDialect: integer); overload;
-    procedure ExecImmediate(TPB: array of byte; sql: string; SQLDialect: integer); overload;
-    procedure ExecImmediate(transaction: ITransaction; sql: string); overload;
-    procedure ExecImmediate(TPB: array of byte; sql: string); overload;
-    function ExecuteSQL(TPB: array of byte; sql: string; SQLDialect: integer; params: array of const): IResults; overload;
-    function ExecuteSQL(transaction: ITransaction; sql: string; SQLDialect: integer; params: array of const): IResults; overload;
-    function ExecuteSQL(TPB: array of byte; sql: string; params: array of const): IResults; overload;
-    function ExecuteSQL(transaction: ITransaction; sql: string; params: array of const): IResults; overload;
-    function OpenCursor(transaction: ITransaction; sql: string; aSQLDialect: integer): IResultSet; overload;
-    function OpenCursor(transaction: ITransaction; sql: string; aSQLDialect: integer;
+    procedure ExecImmediate(transaction: ITransaction; sql: AnsiString; SQLDialect: integer); overload;
+    procedure ExecImmediate(TPB: array of byte; sql: AnsiString; SQLDialect: integer); overload;
+    procedure ExecImmediate(transaction: ITransaction; sql: AnsiString); overload;
+    procedure ExecImmediate(TPB: array of byte; sql: AnsiString); overload;
+    function ExecuteSQL(TPB: array of byte; sql: AnsiString; SQLDialect: integer; params: array of const): IResults; overload;
+    function ExecuteSQL(transaction: ITransaction; sql: AnsiString; SQLDialect: integer; params: array of const): IResults; overload;
+    function ExecuteSQL(TPB: array of byte; sql: AnsiString; params: array of const): IResults; overload;
+    function ExecuteSQL(transaction: ITransaction; sql: AnsiString; params: array of const): IResults; overload;
+    function OpenCursor(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer): IResultSet; overload;
+    function OpenCursor(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer;
                              params: array of const): IResultSet; overload;
-    function OpenCursor(transaction: ITransaction; sql: string): IResultSet; overload;
-    function OpenCursor(transaction: ITransaction; sql: string;
+    function OpenCursor(transaction: ITransaction; sql: AnsiString): IResultSet; overload;
+    function OpenCursor(transaction: ITransaction; sql: AnsiString;
                              params: array of const): IResultSet; overload;
-    function OpenCursorAtStart(transaction: ITransaction; sql: string; aSQLDialect: integer): IResultSet; overload;
-    function OpenCursorAtStart(transaction: ITransaction; sql: string; aSQLDialect: integer;
+    function OpenCursorAtStart(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer): IResultSet; overload;
+    function OpenCursorAtStart(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer;
                              params: array of const): IResultSet; overload;
-    function OpenCursorAtStart(transaction: ITransaction; sql: string): IResultSet; overload;
-    function OpenCursorAtStart(transaction: ITransaction; sql: string;
+    function OpenCursorAtStart(transaction: ITransaction; sql: AnsiString): IResultSet; overload;
+    function OpenCursorAtStart(transaction: ITransaction; sql: AnsiString;
                              params: array of const): IResultSet; overload;
-    function OpenCursorAtStart(sql: string): IResultSet; overload;
-    function OpenCursorAtStart(sql: string;
+    function OpenCursorAtStart(sql: AnsiString): IResultSet; overload;
+    function OpenCursorAtStart(sql: AnsiString;
                              params: array of const): IResultSet; overload;
-    function Prepare(transaction: ITransaction; sql: string; aSQLDialect: integer): IStatement; overload;
-    function Prepare(transaction: ITransaction; sql: string): IStatement; overload;
-    function PrepareWithNamedParameters(transaction: ITransaction; sql: string;
+    function Prepare(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer): IStatement; overload;
+    function Prepare(transaction: ITransaction; sql: AnsiString): IStatement; overload;
+    function PrepareWithNamedParameters(transaction: ITransaction; sql: AnsiString;
                        aSQLDialect: integer; GenerateParamNames: boolean=false): IStatement; overload;
-    function PrepareWithNamedParameters(transaction: ITransaction; sql: string;
+    function PrepareWithNamedParameters(transaction: ITransaction; sql: AnsiString;
                        GenerateParamNames: boolean=false): IStatement; overload;
 
     {Events}
     function GetEventHandler(Events: TStrings): IEvents; overload;
-    function GetEventHandler(Event: string): IEvents; overload;
+    function GetEventHandler(Event: AnsiString): IEvents; overload;
 
     {Blob - may use to open existing Blobs. However, ISQLData.AsBlob is preferred}
 
-    function CreateBlob(transaction: ITransaction; RelationName, ColumnName: string; BPB: IBPB=nil): IBlob; overload;
+    function CreateBlob(transaction: ITransaction; RelationName, ColumnName: AnsiString; BPB: IBPB=nil): IBlob; overload;
     function CreateBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BPB: IBPB=nil): IBlob; overload;
     function CreateBlob(transaction: ITransaction; SubType: integer; CharSetID: cardinal=0; BPB: IBPB=nil): IBlob; overload;
-    function OpenBlob(transaction: ITransaction; RelationName, ColumnName: string; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob;
+    function OpenBlob(transaction: ITransaction; RelationName, ColumnName: AnsiString; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob;
 
     {Array - may use to open existing arrays. However, ISQLData.AsArray is preferred}
 
-    function OpenArray(transaction: ITransaction; RelationName, ColumnName: string; ArrayID: TISC_QUAD): IArray;
-    function CreateArray(transaction: ITransaction; RelationName, ColumnName: string): IArray; overload;
+    function OpenArray(transaction: ITransaction; RelationName, ColumnName: AnsiString; ArrayID: TISC_QUAD): IArray;
+    function CreateArray(transaction: ITransaction; RelationName, ColumnName: AnsiString): IArray; overload;
     function CreateArray(transaction: ITransaction; ArrayMetaData: IArrayMetaData): IArray; overload;
-    function CreateArrayMetaData(SQLType: cardinal; tableName: string; columnName: string;
+    function CreateArrayMetaData(SQLType: cardinal; tableName: AnsiString; columnName: AnsiString;
                   Scale: integer; size: cardinal; charSetID: cardinal; dimensions: cardinal;
                   bounds: TArrayBounds): IArrayMetaData;
 
     {Database Information}
     function GetSQLDialect: integer;
-    function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: string): IBlobMetaData;
-    function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: string): IArrayMetaData;
+    function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IBlobMetaData;
+    function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IArrayMetaData;
     function GetDBInformation(Requests: array of byte): IDBInformation; overload;
     function GetDBInformation(Request: byte): IDBInformation; overload;
     function HasActivity: boolean;
@@ -875,9 +921,13 @@ type
 
   }
 
-  ISPBItem = interface(IParameterBlockItem) end;
+  ISPBItem = interface(IParameterBlockItem)
+    ['{5d08ae2b-4519-41bd-8b40-97cd451c3f6a}']
+  end;
 
-  ISPB = specialize IParameterBlock<ISPBItem>;
+  ISPB = interface(IParameterBlock<ISPBItem>)
+    ['{2c5836fd-41ed-4426-9b7d-5af580ec2659}']
+  end;
 
   {Service Query Parameter Block (SQPB).
 
@@ -886,10 +936,13 @@ type
   }
 
   ISQPBItem = interface(IParameterBlockItem)
+    ['{b07841a6-33b3-47f0-b5a2-028cbc86dc97}']
     function CopyFrom(source: TStream; count: integer): integer;
   end;
 
-  ISQPB = specialize IParameterBlock<ISQPBItem>;
+  ISQPB = interface(IParameterBlock<ISQPBItem>)
+    ['{8553e66b-ee62-498b-8431-dff030211447}']
+  end;
 
   {Service Request Block (SRB).
 
@@ -903,9 +956,13 @@ type
 
   }
 
-  ISRBItem = interface(IParameterBlockItem) end;
+  ISRBItem = interface(IParameterBlockItem)
+    ['{47ec790e-f265-4b30-9dcd-261e51677245}']
+   end;
 
-  ISRB = specialize IParameterBlock<ISRBItem>;
+  ISRB = interface(IParameterBlock<ISRBItem>)
+    ['{9f2e204f-3c33-4e44-90f9-9135e95dafb9}']
+  end;
 
   {The Service Query Results Interface.
 
@@ -923,19 +980,21 @@ type
   }
 
   IServiceQueryResultSubItem = interface
+    ['{8a4c381e-9923-4cc9-a96b-553729248640}']
     function getItemType: byte;
     function getSize: integer;
     procedure getRawBytes(var Buffer);
-    function getAsString: string;
+    function getAsString: AnsiString;
     function getAsInteger: integer;
     function getAsByte: byte;
     function CopyTo(stream: TStream; count: integer): integer;
-    property AsString: string read getAsString;
+    property AsString: AnsiString read getAsString;
     property AsInteger: integer read getAsInteger;
     property AsByte: byte read getAsByte;
   end;
 
   IServiceQueryResultItem = interface(IServiceQueryResultSubItem)
+    ['{b2806886-206c-4024-8df9-5fe0a7630a5e}']
     function getCount: integer;
     function getItem(index: integer): IServiceQueryResultSubItem;
     function find(ItemType: byte): IServiceQueryResultSubItem;
@@ -944,6 +1003,7 @@ type
   end;
 
   IServiceQueryResults = interface
+    ['{8fbbef7d-fe03-4409-828a-a787d34ef531}']
     function getCount: integer;
     function getItem(index: integer): IServiceQueryResultItem;
     function find(ItemType: byte): IServiceQueryResultItem;
@@ -962,8 +1022,9 @@ type
   { IServiceManager }
 
   IServiceManager = interface
+    ['{905b587d-1e1f-4e40-a3f8-a3519f852e48}']
     function getSPB: ISPB;
-    function getServerName: string;
+    function getServerName: AnsiString;
     procedure Attach;
     procedure Detach(Force: boolean=false);
     function IsAttached: boolean;
@@ -983,11 +1044,12 @@ type
   }
 
   IFirebirdAPI = interface
+    ['{edeee691-c8d3-4dcf-a780-cd7e432821d5}']
     {Database connections}
     function AllocateDPB: IDPB;
-    function OpenDatabase(DatabaseName: string; DPB: IDPB; RaiseExceptionOnConnectError: boolean=true): IAttachment;
-    function CreateDatabase(DatabaseName: string; DPB: IDPB; RaiseExceptionOnError: boolean=true): IAttachment; overload;
-    function CreateDatabase(sql: string; aSQLDialect: integer; RaiseExceptionOnError: boolean=true): IAttachment; overload;
+    function OpenDatabase(DatabaseName: AnsiString; DPB: IDPB; RaiseExceptionOnConnectError: boolean=true): IAttachment;
+    function CreateDatabase(DatabaseName: AnsiString; DPB: IDPB; RaiseExceptionOnError: boolean=true): IAttachment; overload;
+    function CreateDatabase(sql: AnsiString; aSQLDialect: integer; RaiseExceptionOnError: boolean=true): IAttachment; overload;
 
     {Start Transaction against multiple databases}
     function AllocateTPB: ITPB;
@@ -999,29 +1061,29 @@ type
     {Service Manager}
     function HasServiceAPI: boolean;
     function AllocateSPB: ISPB;
-    function GetServiceManager(ServerName: string; Protocol: TProtocol; SPB: ISPB): IServiceManager;
+    function GetServiceManager(ServerName: AnsiString; Protocol: TProtocol; SPB: ISPB): IServiceManager;
 
     {Information}
     function GetStatus: IStatus;
-    function GetLibraryName: string;
+    function GetLibraryName: AnsiString;
     function HasRollbackRetaining: boolean;
     function IsEmbeddedServer: boolean;
-    function GetImplementationVersion: string;
+    function GetImplementationVersion: AnsiString;
 
     {Firebird 3 API}
     function HasMasterIntf: boolean;
     function GetIMaster: TObject;
 
     {utility}
-    function GetCharsetName(CharSetID: integer): string;
+    function GetCharsetName(CharSetID: integer): AnsiString;
     function CharSetID2CodePage(CharSetID: integer; var CodePage: TSystemCodePage): boolean;
     function CodePage2CharSetID(CodePage: TSystemCodePage; var CharSetID: integer): boolean;
-    function CharSetName2CharSetID(CharSetName: string; var CharSetID: integer): boolean;
+    function CharSetName2CharSetID(CharSetName: AnsiString; var CharSetID: integer): boolean;
     function CharSetWidth(CharSetID: integer; var Width: integer): boolean;
 end;
 
 type
-  TOnGetLibraryName = procedure(var libname: string);
+  TOnGetLibraryName = procedure(var libname: AnsiString);
 
 const
   OnGetLibraryName: TOnGetLibraryName = nil;
@@ -1034,7 +1096,7 @@ type
    private
      FSQLCode: Long;
    public
-     constructor Create(ASQLCode: Long; Msg: string);
+     constructor Create(ASQLCode: Long; Msg: AnsiString);
      property SQLCode: Long read FSQLCode;
    end;
 
@@ -1045,7 +1107,7 @@ type
      FIBErrorCode: Long;
    public
      constructor Create(Status: IStatus); overload;
-     constructor Create(ASQLCode: Long; AIBErrorCode: Long; Msg: string); overload;
+     constructor Create(ASQLCode: Long; AIBErrorCode: Long; Msg: AnsiString); overload;
      property IBErrorCode: Long read FIBErrorCode;
    end;
 
@@ -1123,7 +1185,7 @@ end;
 
 { EIBError }
 
-constructor EIBError.Create(ASQLCode: Long; Msg: string);
+constructor EIBError.Create(ASQLCode: Long; Msg: AnsiString);
 begin
   inherited Create(Msg);
   FSQLCode := ASQLCode;
@@ -1138,7 +1200,7 @@ begin
 end;
 
 constructor EIBInterBaseError.Create(ASQLCode: Long; AIBErrorCode: Long;
-  Msg: string);
+  Msg: AnsiString);
 begin
   inherited Create(ASQLCode,Msg);
   FIBErrorCode := AIBErrorCode;

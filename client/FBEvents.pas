@@ -62,7 +62,7 @@
 unit FBEvents;
 
 {$IFDEF FPC}
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$interfaces COM}
 {$ENDIF}
 
@@ -81,9 +81,9 @@ type
     FAttachment: IAttachment;
     FEventCounts: TEventCounts;
   protected
-    FEventBuffer: PChar;
+    FEventBuffer: PByte;
     FEventBufferLen: integer;
-    FResultBuffer: PChar;
+    FResultBuffer: PByte;
     FEventHandler: TEventHandler;
     FCriticalSection: TCriticalSection;
     FInWaitState: boolean;
@@ -99,7 +99,7 @@ type
     {IEvents}
     procedure GetEvents(EventNames: TStrings);
     procedure SetEvents(EventNames: TStrings); overload;
-    procedure SetEvents(Event: string); overload;
+    procedure SetEvents(Event: AnsiString); overload;
     procedure Cancel;
     function ExtractEventCounts: TEventCounts;
     function GetAttachment: IAttachment;
@@ -119,7 +119,8 @@ const
 procedure TFBEvents.CreateEventBlock;
 var
   i: integer;
-  EventNames: array of PChar;
+  EventNames: array of PAnsiChar;
+  EventName: AnsiString;
 begin
   with FirebirdClientAPI do
   begin
@@ -133,7 +134,10 @@ begin
     setlength(EventNames,MaxEvents);
     try
       for i := 0 to FEvents.Count-1 do
-        EventNames[i] := PChar(FEvents[i]);
+      begin
+        EventName := FEvents[i];
+        EventNames[i] := PAnsiChar(EventName);
+      end;
 
       FEventBufferlen := isc_event_block(@FEventBuffer,@FResultBuffer,
                           FEvents.Count,
@@ -189,7 +193,7 @@ begin
   with FirebirdClientAPI do
      isc_event_counts( @EventCountList, FEventBufferLen, FEventBuffer, FResultBuffer);
   j := 0;
-  P := EventCountList;
+  P := @EventCountList;
   for i := 0 to FEvents.Count - 1 do
   begin
     if EventCountList[i] <> 0 then
@@ -247,7 +251,7 @@ begin
   end;
 end;
 
-procedure TFBEvents.SetEvents(Event: string);
+procedure TFBEvents.SetEvents(Event: AnsiString);
 var S: TStringList;
 begin
   S := TStringList.Create;

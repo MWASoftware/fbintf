@@ -62,7 +62,7 @@
 unit FB25Statement;
 
 {$IFDEF FPC}
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$codepage UTF8}
 {$interfaces COM}
 {$ENDIF}
@@ -128,20 +128,20 @@ type
   protected
     function GetSQLType: cardinal; override;
     function GetSubtype: integer; override;
-    function GetAliasName: string;  override;
-    function GetFieldName: string; override;
-    function GetOwnerName: string;  override;
-    function GetRelationName: string;  override;
+    function GetAliasName: AnsiString;  override;
+    function GetFieldName: AnsiString; override;
+    function GetOwnerName: AnsiString;  override;
+    function GetRelationName: AnsiString;  override;
     function GetScale: integer; override;
     function GetCharSetID: cardinal; override;
     function GetCodePage: TSystemCodePage; override;
     function GetIsNull: Boolean;   override;
     function GetIsNullable: boolean; override;
-    function GetSQLData: PChar;  override;
+    function GetSQLData: PByte;  override;
     function GetDataLength: cardinal; override;
     procedure SetIsNull(Value: Boolean); override;
     procedure SetIsNullable(Value: Boolean);  override;
-    procedure SetSQLData(AValue: PChar; len: cardinal); override;
+    procedure SetSQLData(AValue: PByte; len: cardinal); override;
     procedure SetScale(aValue: integer); override;
     procedure SetDataLength(len: cardinal); override;
     procedure SetSQLType(aValue: cardinal); override;
@@ -211,7 +211,7 @@ type
     procedure Bind;
     function GetTransaction: TFB25Transaction; override;
     procedure GetData(index: integer; var aIsNull: boolean; var len: short;
-      var data: PChar); override;
+      var data: PByte); override;
     function IsInputDataArea: boolean; override;
   end;
 
@@ -226,7 +226,7 @@ type
     destructor Destroy; override;
     {IResultSet}
     function FetchNext: boolean;
-    function GetCursorName: string;
+    function GetCursorName: AnsiString;
     function GetTransaction: ITransaction; override;
     function IsEof: boolean;
     procedure Close;
@@ -240,7 +240,7 @@ type
     FHandle: TISC_STMT_HANDLE;
     FSQLParams: TIBXINPUTSQLDA;
     FSQLRecord: TIBXOUTPUTSQLDA;
-    FCursor: String;               { Cursor name...}
+    FCursor: AnsiString;               { Cursor name...}
     FCursorSeqNo: integer;
     procedure GetPerfCounters(var counters: TPerfStatistics);
   protected
@@ -253,9 +253,9 @@ type
     procedure InternalClose(Force: boolean); override;
   public
     constructor Create(Attachment: TFB25Attachment; Transaction: ITransaction;
-      sql: string; aSQLDialect: integer);
+      sql: AnsiString; aSQLDialect: integer);
     constructor CreateWithParameterNames(Attachment: TFB25Attachment;
-      Transaction: ITransaction; sql: string; aSQLDialect: integer; GenerateParamNames: boolean);
+      Transaction: ITransaction; sql: AnsiString; aSQLDialect: integer; GenerateParamNames: boolean);
     destructor Destroy; override;
     function FetchNext: boolean;
 
@@ -263,7 +263,7 @@ type
     {IStatement}
     function GetSQLParams: ISQLParams; override;
     function GetMetaData: IMetaData; override;
-    function GetPlan: String;
+    function GetPlan: AnsiString;
     function IsPrepared: boolean;
     function CreateBlob(column: TColumnMetaData): IBlob; override;
     function CreateArray(column: TColumnMetaData): IArray; override;
@@ -293,22 +293,22 @@ begin
     result := 0;
 end;
 
-function TIBXSQLVAR.GetAliasName: string;
+function TIBXSQLVAR.GetAliasName: AnsiString;
 begin
   result := strpas(FXSQLVAR^.aliasname);
 end;
 
-function TIBXSQLVAR.GetFieldName: string;
+function TIBXSQLVAR.GetFieldName: AnsiString;
 begin
   result := strpas(FXSQLVAR^.sqlname);
 end;
 
-function TIBXSQLVAR.GetOwnerName: string;
+function TIBXSQLVAR.GetOwnerName: AnsiString;
 begin
   result := strpas(FXSQLVAR^.ownname);
 end;
 
-function TIBXSQLVAR.GetRelationName: string;
+function TIBXSQLVAR.GetRelationName: AnsiString;
 begin
   result := strpas(FXSQLVAR^.relname);
 end;
@@ -357,7 +357,7 @@ begin
   result := (FXSQLVAR^.sqltype and 1 = 1);
 end;
 
-function TIBXSQLVAR.GetSQLData: PChar;
+function TIBXSQLVAR.GetSQLData: PByte;
 begin
   Result := FXSQLVAR^.sqldata;
 end;
@@ -501,7 +501,7 @@ begin
   end;
 end;
 
-procedure TIBXSQLVAR.SetSQLData(AValue: PChar; len: cardinal);
+procedure TIBXSQLVAR.SetSQLData(AValue: PByte; len: cardinal);
 begin
   if FOwnsSQLData then
     FreeMem(FXSQLVAR^.sqldata);
@@ -590,7 +590,7 @@ begin
       FResults.Column[i].RowChange;
 end;
 
-function TResultSet.GetCursorName: string;
+function TResultSet.GetCursorName: AnsiString;
 begin
   Result := FResults.FStatement.FCursor;
 end;
@@ -675,7 +675,7 @@ begin
 end;
 
 procedure TIBXOUTPUTSQLDA.GetData(index: integer; var aIsNull:boolean; var len: short;
-  var data: PChar);
+  var data: PByte);
 begin
   with TIBXSQLVAR(Column[index]), FXSQLVAR^ do
   begin
@@ -796,7 +796,7 @@ begin
         if i >= FSize then
           FColumnList[i] := TIBXSQLVAR.Create(self,i);
         TIBXSQLVAR(Column[i]).FXSQLVAR := p;
-        p := Pointer(PChar(p) + sizeof(FXSQLDA^.sqlvar));
+        p := Pointer(PAnsiChar(p) + sizeof(FXSQLDA^.sqlvar));
       end;
       FSize := inherited Count;
     end;
@@ -850,7 +850,7 @@ begin
   {$ELSE}
   counters[psUserTime] := 0;
   {$ENDIF}
-  counters[psRealTime] := Int64(TimeStampToMSecs(DateTimeToTimeStamp(Now)));
+  counters[psRealTime] := TimeStampToMSecs(DateTimeToTimeStamp(Now));
 
   DBInfo := GetAttachment.GetDBInformation([isc_info_reads,isc_info_writes,
          isc_info_fetches, isc_info_num_buffers, isc_info_current_memory,
@@ -912,11 +912,11 @@ begin
         if FProcessedSQL = '' then
           FSQLParams.PreprocessSQL(FSQL,FGenerateParamNames,FProcessedSQL);
         Call(isc_dsql_prepare(StatusVector, @(TRHandle), @FHandle, 0,
-                 PChar(FProcessedSQL), FSQLDialect, nil), True);
+                 PAnsiChar(FProcessedSQL), FSQLDialect, nil), True);
       end
       else
         Call(isc_dsql_prepare(StatusVector, @(TRHandle), @FHandle, 0,
-                 PChar(FSQL), FSQLDialect, nil), True);
+                 PAnsiChar(FSQL), FSQLDialect, nil), True);
     end;
     { After preparing the statement, query the stmt type and possibly
       create a FSQLRecord "holder" }
@@ -1072,7 +1072,7 @@ begin
      CreateGuid(GUID);
      FCursor := GUIDToString(GUID);
      Call(
-       isc_dsql_set_cursor_name(StatusVector, @FHandle, PChar(FCursor), 0),
+       isc_dsql_set_cursor_name(StatusVector, @FHandle, PAnsiChar(FCursor), 0),
        True);
    end;
 
@@ -1133,7 +1133,7 @@ begin
         IBDatabaseError;
     end;
   finally
-    if (FSQLRecord.FTransaction <> nil) and (FSQLRecord.FTransaction <> FTransactionIntf) then
+    if (FSQLRecord.FTransaction <> nil) and (FSQLRecord.FTransaction <> (FTransactionIntf as TFB25Transaction)) then
       RemoveMonitor(FSQLRecord.FTransaction);
     FOpen := False;
     FExecTransactionIntf := nil;
@@ -1143,7 +1143,7 @@ begin
 end;
 
 constructor TFB25Statement.Create(Attachment: TFB25Attachment;
-  Transaction: ITransaction; sql: string; aSQLDialect: integer);
+  Transaction: ITransaction; sql: AnsiString; aSQLDialect: integer);
 begin
   inherited Create(Attachment,Transaction,sql,aSQLDialect);
   FDBHandle := Attachment.Handle;
@@ -1153,7 +1153,7 @@ begin
 end;
 
 constructor TFB25Statement.CreateWithParameterNames(Attachment: TFB25Attachment;
-  Transaction: ITransaction; sql: string; aSQLDialect: integer;
+  Transaction: ITransaction; sql: AnsiString; aSQLDialect: integer;
   GenerateParamNames: boolean);
 begin
   inherited CreateWithParameterNames(Attachment,Transaction,sql,aSQLDialect,GenerateParamNames);
@@ -1228,7 +1228,7 @@ begin
   Result := TMetaData(GetInterface(1));
 end;
 
-function TFB25Statement.GetPlan: String;
+function TFB25Statement.GetPlan: AnsiString;
 var
     RB: ISQLInfoResults;
 begin

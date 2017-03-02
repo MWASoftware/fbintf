@@ -11,8 +11,10 @@ unit Test1;
  A basic query is performed and finally the database dropped.
 }
 
-{$mode objfpc}{$H+}
+{$IFDEF FPC}
+{$mode delphi}
 {$codepage utf8}
+{$ENDIF}
 
 interface
 
@@ -27,8 +29,8 @@ type
   private
     procedure DoQuery(Attachment: IAttachment);
   public
-    function TestTitle: string; override;
-    procedure RunTest(CharSet: string; SQLDialect: integer); override;
+    function TestTitle: AnsiString; override;
+    procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
   end;
 
 implementation
@@ -57,15 +59,15 @@ begin
     end;
 end;
 
-function TTest1.TestTitle: string;
+function TTest1.TestTitle: AnsiString;
 begin
   Result := 'Test 1: Create and Drop a Database';
 end;
 
-procedure TTest1.RunTest(CharSet: string; SQLDialect: integer);
+procedure TTest1.RunTest(CharSet: AnsiString; SQLDialect: integer);
 var DPB: IDPB;
     Attachment: IAttachment;
-    createSQL: string;
+    createSQL: AnsiString;
 begin
   writeln(OutFile,'Creating a Database with empty parameters');
   Attachment := FirebirdAPI.CreateDatabase('',nil,false);

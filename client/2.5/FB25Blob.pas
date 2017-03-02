@@ -62,7 +62,7 @@
 unit FB25Blob;
 
 {$IFDEF FPC}
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$interfaces COM}
 {$ENDIF}
 
@@ -70,7 +70,7 @@ interface
 
 uses
   Classes, SysUtils, IB,  IBHeader,IBExternals, FBClientAPI, FB25ClientAPI, FB25Attachment,
-  FB25Transaction, FBActivityMonitor, FBBlob;
+  FB25Transaction, FBActivityMonitor, FBBlob, FBOutputBlock;
 
 type
 
@@ -85,9 +85,9 @@ type
      procedure NeedFullMetadata; override;
    public
      constructor Create(Attachment: TFB25Attachment; Transaction: TFB25Transaction;
-       RelationName, ColumnName: string); overload;
+       RelationName, ColumnName: AnsiString); overload;
      constructor Create(Attachment: TFB25Attachment; Transaction: TFB25Transaction;
-       RelationName, ColumnName: string; SubType: integer); overload;
+       RelationName, ColumnName: AnsiString; SubType: integer); overload;
   end;
 
 
@@ -101,6 +101,7 @@ type
     procedure CheckReadable; override;
     procedure CheckWritable; override;
     function GetIntf: IBlob; override;
+    procedure GetInfo(Request: array of byte; Response: IBlobInfo); override;
     procedure InternalClose(Force: boolean); override;
     procedure InternalCancel(Force: boolean); override;
   public
@@ -113,8 +114,6 @@ type
     property Handle: TISC_BLOB_HANDLE read FHandle;
 
   public
-    procedure GetInfo(var NumSegments: Int64; var MaxSegmentSize, TotalSize: Int64;
-      var BlobType: TBlobType); override;
     function Read(var Buffer; Count: Longint): Longint; override;
     function Write(const Buffer; Count: Longint): Longint; override;
   end;
@@ -129,16 +128,20 @@ procedure TFB25BlobMetaData.NeedFullMetadata;
 var
   BlobDesc: TISC_BLOB_DESC;
   Global: array [0..31] of char;
+  RelName: AnsiString;
+  ColName: AnsiString;
 begin
   if FHasFullMetaData then Exit;
 
   FSegmentSize := 80;
-  if (GetColumnName <> '') and (GetRelationName <> '') then
+  RelName := AnsiUpperCase(GetRelationName);
+  ColName := AnsiUpperCase(GetColumnName);
+  if (ColName <> '') and (RelName <> '') then
   begin
     with Firebird25ClientAPI do
       Call(isc_blob_lookup_desc(StatusVector,@(FAttachment.Handle),
                                             @(FTransaction.Handle),
-                PChar(AnsiUpperCase(GetRelationName)),PChar(AnsiUpperCase(GetColumnName)),@BlobDesc,@Global));
+                PAnsiChar(RelName),PAnsiChar(ColName),@BlobDesc,@Global));
     if FUnconfirmedCharacterSet then
       FCharSetID := BlobDesc.blob_desc_charset;
     FSubType := BlobDesc.blob_desc_subtype;
@@ -157,7 +160,7 @@ begin
 end;
 
 constructor TFB25BlobMetaData.Create(Attachment: TFB25Attachment;
-  Transaction: TFB25Transaction; RelationName, ColumnName: string);
+  Transaction: TFB25Transaction; RelationName, ColumnName: AnsiString);
 begin
   inherited Create(Transaction,RelationName,ColumnName);
   FAttachment := Attachment;
@@ -165,7 +168,7 @@ begin
 end;
 
 constructor TFB25BlobMetaData.Create(Attachment: TFB25Attachment;
-  Transaction: TFB25Transaction; RelationName, ColumnName: string;
+  Transaction: TFB25Transaction; RelationName, ColumnName: AnsiString;
   SubType: integer);
 begin
   Create(Attachment,Transaction,RelationName,ColumnName);
@@ -190,6 +193,16 @@ end;
 function TFB25Blob.GetIntf: IBlob;
 begin
   Result := self;
+end;
+
+procedure TFB25Blob.GetInfo(Request: array of byte; Response: IBlobInfo);
+begin
+  if FHandle = nil then
+    IBError(ibxeBlobNotOpen,[nil]);
+
+  with Firebird25ClientAPI, Response as TBlobInfo do
+    Call(isc_blob_info(StatusVector, @FHandle, Length(Request),@Request,
+                                               GetBufSize, Buffer));
 end;
 
 procedure TFB25Blob.InternalClose(Force: boolean);
@@ -272,53 +285,10 @@ begin
                    @FBlobID, getDataLength, getBuffer));
 end;
 
-procedure TFB25Blob.GetInfo(var NumSegments: Int64; var MaxSegmentSize,
-  TotalSize: Int64; var BlobType: TBlobType);
-var
-  items: array[0..3] of Char;
-  results: array[0..99] of Char;
-  i, item_length: Integer;
-  item: Integer;
-begin
-  if FHandle = nil then
-    IBError(ibxeBlobNotOpen,[nil]);
-
-  items[0] := Char(isc_info_blob_num_segments);
-  items[1] := Char(isc_info_blob_max_segment);
-  items[2] := Char(isc_info_blob_total_length);
-  items[3] := Char(isc_info_blob_type);
-
-  with Firebird25ClientAPI do
-  begin
-    Call(isc_blob_info(StatusVector, @FHandle, 4, @items[0], SizeOf(results),
-                    @results[0]));
-    i := 0;
-    while (i < SizeOf(results)) and (results[i] <> Char(isc_info_end)) do
-    begin
-      item := Integer(results[i]); Inc(i);
-      item_length := isc_portable_integer(@results[i], 2); Inc(i, 2);
-      case item of
-        isc_info_blob_num_segments:
-          NumSegments := isc_portable_integer(@results[i], item_length);
-        isc_info_blob_max_segment:
-          MaxSegmentSize := isc_portable_integer(@results[i], item_length);
-        isc_info_blob_total_length:
-          TotalSize := isc_portable_integer(@results[i], item_length);
-        isc_info_blob_type:
-          if isc_portable_integer(@results[i], item_length) = 0 then
-            BlobType := btSegmented
-          else
-            BlobType := btStream;
-      end;
-      Inc(i, item_length);
-    end;
-  end;
-end;
-
 function TFB25Blob.Read(var Buffer; Count: Longint): Longint;
 var
   BytesRead : UShort;
-  LocalBuffer: PChar;
+  LocalBuffer: PByte;
   returnCode: long;
   localCount: uShort;
 begin
@@ -327,7 +297,7 @@ begin
   if FEOB then
     Exit;
 
-  LocalBuffer := PChar(@Buffer);
+  LocalBuffer := PByte(@Buffer);
   repeat
     if Count > MaxuShort then
       localCount := MaxuShort
@@ -349,11 +319,11 @@ end;
 
 function TFB25Blob.Write(const Buffer; Count: Longint): Longint;
 var
-  LocalBuffer: PChar;
+  LocalBuffer: PByte;
   localCount: uShort;
 begin
   CheckWritable;
-  LocalBuffer := PChar(@Buffer);
+  LocalBuffer := PByte(@Buffer);
   Result := 0;
   if Count = 0 then Exit;
 

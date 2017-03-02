@@ -1,7 +1,9 @@
 unit Test14;
 
-{$mode objfpc}{$H+}
+{$IFDEF FPC}
+{$mode delphi}
 {$codepage UTF8}
+{$ENDIF}
 
 {Test 14: Non select procedures}
 
@@ -25,8 +27,8 @@ type
     procedure UpdateDatabase(Attachment: IAttachment);
     procedure QueryDatabase(Attachment: IAttachment);
   public
-    function TestTitle: string; override;
-    procedure RunTest(CharSet: string; SQLDialect: integer); override;
+    function TestTitle: AnsiString; override;
+    procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
   end;
 
 implementation
@@ -69,7 +71,7 @@ begin
   ReportResult(Statement.Execute);
 end;
 
-function TTest14.TestTitle: string;
+function TTest14.TestTitle: AnsiString;
 begin
   Result := 'Test 14: Non select procedures';
 end;
@@ -96,7 +98,7 @@ const
 
 
 
-procedure TTest14.RunTest(CharSet: string; SQLDialect: integer);
+procedure TTest14.RunTest(CharSet: AnsiString; SQLDialect: integer);
 var DPB: IDPB;
     Attachment: IAttachment;
 begin

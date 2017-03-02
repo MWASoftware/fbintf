@@ -27,7 +27,7 @@
 unit FBArray;
 
 {$IFDEF FPC}
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$codepage UTF8}
 {$interfaces COM}
 {$ENDIF}
@@ -69,29 +69,29 @@ type
 
   TFBArrayElement = class(TSQLDataItem)
   private
-   FBufPtr: PChar;
+   FBufPtr: PByte;
    FArray: TFBArray;
   protected
    function GetSQLDialect: integer; override;
    procedure Changing; override;
    procedure Changed; override;
-   function SQLData: PChar; override;
+   function SQLData: PByte; override;
    function GetDataLength: cardinal; override;
    function GetCodePage: TSystemCodePage; override;
    function getCharSetID: cardinal; override;
    procedure SetDataLength(len: cardinal); override;
    procedure SetSQLType(aValue: cardinal); override;
   public
-   constructor Create(anArray: TFBArray; P: PChar);
+   constructor Create(anArray: TFBArray; P: PByte);
    function GetSQLType: cardinal; override;
-   function GetName: string; override;
+   function GetName: AnsiString; override;
    function GetScale: integer; override;
    function GetSize: integer;
-   function GetAsString: string; override;
+   function GetAsString: AnsiString; override;
    procedure SetAsLong(Value: Long); override;
    procedure SetAsShort(Value: Short); override;
    procedure SetAsInt64(Value: Int64); override;
-   procedure SetAsString(Value: String); override;
+   procedure SetAsString(Value: AnsiString); override;
    procedure SetAsDouble(Value: Double); override;
    procedure SetAsFloat(Value: Float); override;
    procedure SetAsCurrency(Value: Currency); override;
@@ -106,12 +106,12 @@ type
    FArrayDesc: TISC_ARRAY_DESC;
    FCharSetID: integer;
    procedure LoadMetaData(aAttachment: IAttachment; aTransaction: ITransaction;
-               relationName, columnName: string); virtual; abstract;
+               relationName, columnName: AnsiString); virtual; abstract;
    function NumOfElements: integer;
   public
    constructor Create(aAttachment: IAttachment; aTransaction: ITransaction;
-     relationName, columnName: string); overload;
-   constructor Create(SQLType: cardinal; tableName: string; columnName: string;
+     relationName, columnName: AnsiString); overload;
+   constructor Create(SQLType: cardinal; tableName: AnsiString; columnName: AnsiString;
      Scale: integer; size: cardinal; charSetID: cardinal;
      dimensions: cardinal; bounds: TArrayBounds); overload;
    function GetCodePage: TSystemCodePage; virtual; abstract;
@@ -119,12 +119,12 @@ type
   public
    {IArrayMetaData}
    function GetSQLType: cardinal;
-   function GetSQLTypeName: string;
+   function GetSQLTypeName: AnsiString;
    function GetScale: integer;
    function GetSize: cardinal;
    function GetCharSetID: cardinal; virtual; abstract;
-   function GetTableName: string;
-   function GetColumnName: string;
+   function GetTableName: AnsiString;
+   function GetColumnName: AnsiString;
    function GetDimensions: integer;
    function GetBounds: TArrayBounds;
   end;
@@ -149,10 +149,10 @@ type
     FEventHandlers: array of TArrayEventHandler;
     procedure GetArraySlice;
     procedure PutArraySlice(Force: boolean=false);
-    function GetOffset(index: array of integer): PChar;
+    function GetOffset(index: array of integer): PByte;
     function GetDataLength: short;
   protected
-    FBuffer: PChar;
+    FBuffer: PByte;
     FBufSize: ISC_LONG;
     FArrayID: TISC_QUAD;
     procedure AllocateBuffer; virtual;
@@ -173,12 +173,12 @@ type
    public
     {IArrayMetaData}
     function GetSQLType: cardinal;
-    function GetSQLTypeName: string;
+    function GetSQLTypeName: AnsiString;
     function GetScale: integer;
     function GetSize: cardinal;
     function GetCharSetID: cardinal;
-    function GetTableName: string;
-    function GetColumnName: string;
+    function GetTableName: AnsiString;
+    function GetColumnName: AnsiString;
     function GetDimensions: integer;
     function GetBounds: TArrayBounds;
     {IArray}
@@ -197,7 +197,7 @@ type
     function GetAsFloat(index: array of integer): Float;
     function GetAsLong(index: array of integer): Long;
     function GetAsShort(index: array of integer): Short;
-    function GetAsString(index: array of integer): String;
+    function GetAsString(index: array of integer): AnsiString;
     function GetAsVariant(index: array of integer): Variant;
     procedure SetAsInteger(index: array of integer; AValue: integer);
     procedure SetAsBoolean(index: array of integer; AValue: boolean);
@@ -210,7 +210,7 @@ type
     procedure SetAsDouble(index: array of integer; Value: Double);
     procedure SetAsFloat(index: array of integer; Value: Float);
     procedure SetAsShort(index: array of integer; Value: Short);
-    procedure SetAsString(index: array of integer; Value: String);
+    procedure SetAsString(index: array of integer; Value: AnsiString);
     procedure SetAsVariant(index: array of integer; Value: Variant);
     procedure SetBounds(dim, UpperBound, LowerBound: integer);
     function GetAttachment: IAttachment;
@@ -242,7 +242,7 @@ begin
   FArray.Changed;
 end;
 
-function TFBArrayElement.SQLData: PChar;
+function TFBArrayElement.SQLData: PByte;
 begin
   Result := FBufPtr;
 end;
@@ -268,7 +268,7 @@ begin
     IBError(ibxeArrayElementOverFlow,[nil]);
 end;
 
-constructor TFBArrayElement.Create(anArray: TFBArray; P: PChar);
+constructor TFBArrayElement.Create(anArray: TFBArray; P: PByte);
 begin
   inherited Create;
   FArray := anArray;
@@ -280,7 +280,7 @@ begin
   Result :=  FArray.FMetaData.GetSQLType;
 end;
 
-function TFBArrayElement.GetName: string;
+function TFBArrayElement.GetName: AnsiString;
 begin
   Result := FArray.FMetaData.GetColumnName;
 end;
@@ -295,19 +295,19 @@ begin
   Result := GetDataLength;
 end;
 
-function TFBArrayElement.GetAsString: string;
+function TFBArrayElement.GetAsString: AnsiString;
 var rs: RawByteString;
 begin
   case GetSQLType of
   SQL_VARYING:
     begin
-      rs := strpas(FBufPtr);
+      rs := strpas(PAnsiChar(FBufPtr));
       SetCodePage(rs,GetCodePage,false);
       Result := rs;
     end;
   SQL_TEXT:
     begin
-      SetString(rs,FBufPtr,GetDataLength);
+      SetString(rs,PAnsiChar(FBufPtr),GetDataLength);
       SetCodePage(rs,GetCodePage,false);
       Result := rs;
     end
@@ -349,7 +349,7 @@ begin
   Changed;
 end;
 
-procedure TFBArrayElement.SetAsString(Value: String);
+procedure TFBArrayElement.SetAsString(Value: AnsiString);
 var len: integer;
     ElementSize: integer;
 begin
@@ -374,7 +374,7 @@ begin
       if Len > 0 then
         Move(Value[1],FBufPtr^,len);
       if Len < ElementSize - 2 then
-        (FBufPtr+len)^ := #0;
+        (FBufPtr+len)^ := 0;
       Changed;
     end;
 
@@ -480,14 +480,14 @@ end;
 {TFBArrayMetaData}
 
 constructor TFBArrayMetaData.Create(aAttachment: IAttachment;
-  aTransaction: ITransaction; relationName, columnName: string);
+  aTransaction: ITransaction; relationName, columnName: AnsiString);
 begin
   inherited Create;
   LoadMetaData(aAttachment,aTransaction,relationName, columnName);
 end;
 
-constructor TFBArrayMetaData.Create(SQLType: cardinal; tableName: string;
-  columnName: string; Scale: integer; size: cardinal; charSetID: cardinal;
+constructor TFBArrayMetaData.Create(SQLType: cardinal; tableName: AnsiString;
+  columnName: AnsiString; Scale: integer; size: cardinal; charSetID: cardinal;
   dimensions: cardinal; bounds: TArrayBounds);
 var i: integer;
 begin
@@ -495,7 +495,7 @@ begin
   with FArrayDesc do
   begin
     array_desc_dtype := GetDType(SQLType);
-    array_desc_scale := char(Scale);
+    array_desc_scale := Scale;
     array_desc_length := UShort(size);
     StrPLCopy(array_desc_field_name,columnName,sizeof(array_desc_field_name));
     StrPLCopy(array_desc_relation_name,tableName,sizeof(array_desc_relation_name));
@@ -540,7 +540,7 @@ begin
   end;
 end;
 
-function TFBArrayMetaData.GetSQLTypeName: string;
+function TFBArrayMetaData.GetSQLTypeName: AnsiString;
 begin
   Result := TSQLDataItem.GetSQLTypeName(GetSQLType);
 end;
@@ -555,17 +555,17 @@ begin
   Result := FArrayDesc.array_desc_length;
 end;
 
-function TFBArrayMetaData.GetTableName: string;
+function TFBArrayMetaData.GetTableName: AnsiString;
 begin
   with FArrayDesc do
-   SetString(Result,PChar(@array_desc_relation_name),sizeof(array_desc_relation_name));
+   SetString(Result,PAnsiChar(@array_desc_relation_name),sizeof(array_desc_relation_name));
   Result := trim(Result);
 end;
 
-function TFBArrayMetaData.GetColumnName: string;
+function TFBArrayMetaData.GetColumnName: AnsiString;
 begin
   with FArrayDesc do
-    SetString(Result,PChar(@FArrayDesc.array_desc_field_name),sizeof(array_desc_field_name));
+    SetString(Result,PAnsiChar(@FArrayDesc.array_desc_field_name),sizeof(array_desc_field_name));
   Result := trim(Result);
 end;
 
@@ -620,7 +620,7 @@ begin
   Result := 1;
   Bounds := GetBounds;
   for i := 0 to Length(Bounds) - 1 do
-    Result *= (Bounds[i].UpperBound - Bounds[i].LowerBound + 1);
+    Result := Result * (Bounds[i].UpperBound - Bounds[i].LowerBound + 1);
 end;
 
 
@@ -643,9 +643,9 @@ begin
     FElementSize := FArrayDesc.array_desc_length;
     case GetSQLType of
     SQL_VARYING:
-      FElementSize += 2;
+      FElementSize := FElementSize + 2;
     SQL_TEXT:
-      FElementSize += 1;
+      FElementSize := FElementSize + 1;
     end;
     FBufSize := FElementSize * l;
 
@@ -703,7 +703,7 @@ begin
   FIsNew := false;
 end;
 
-function TFBArray.GetOffset(index: array of integer): PChar;
+function TFBArray.GetOffset(index: array of integer): PByte;
 var i: integer;
     Bounds: TArrayBounds;
     FlatIndex: integer;
@@ -718,7 +718,7 @@ begin
     if (index[i] < Bounds[i].LowerBound) or (index[i] > Bounds[i].UpperBound) then
       IBError(ibxeInvalidSubscript,[index[i],i]);
 
-    FlatIndex += FOffsets[i]*(index[i] - Bounds[i].LowerBound);
+    FlatIndex := FlatIndex + FOffsets[i]*(index[i] - Bounds[i].LowerBound);
   end;
   Result := FBuffer + FlatIndex*FElementSize;
 end;
@@ -826,7 +826,7 @@ begin
   Result := FMetaData.GetSQLType;
 end;
 
-function TFBArray.GetSQLTypeName: string;
+function TFBArray.GetSQLTypeName: AnsiString;
 begin
   Result := FMetaData.GetSQLTypeName;
 end;
@@ -846,12 +846,12 @@ begin
   Result := FMetaData.GetCharSetID;
 end;
 
-function TFBArray.GetTableName: string;
+function TFBArray.GetTableName: AnsiString;
 begin
   Result := FMetaData.GetTableName;
 end;
 
-function TFBArray.GetColumnName: string;
+function TFBArray.GetColumnName: AnsiString;
 begin
   Result := FMetaData.GetColumnName;
 end;
@@ -929,7 +929,7 @@ begin
   Result := FElement.GetAsShort;
 end;
 
-function TFBArray.GetAsString(index: array of integer): String;
+function TFBArray.GetAsString(index: array of integer): AnsiString;
 begin
   GetArraySlice;
   FElement.FBufPtr := GetOffset(index);
@@ -1009,7 +1009,7 @@ begin
   FElement.SetAsShort(Value);
 end;
 
-procedure TFBArray.SetAsString(index: array of integer; Value: String);
+procedure TFBArray.SetAsString(index: array of integer; Value: AnsiString);
 begin
   FElement.FBufPtr := GetOffset(index);
   FElement.SetAsString(Value);
@@ -1062,7 +1062,8 @@ procedure TFBArray.RemoveEventHandler(Handler: TArrayEventHandler);
 var i,j : integer;
 begin
   for i := Length(FEventHandlers) - 1 downto 0 do
-    if FEventHandlers[i] = Handler then
+    if (TMethod(FEventHandlers[i]).Code = TMethod(Handler).Code) and
+      (TMethod(FEventHandlers[i]).Data = TMethod(Handler).Data) then
     begin
       for j := i to Length(FEventHandlers) - 2 do
         FEventHandlers[i] := FEventHandlers[i+1];

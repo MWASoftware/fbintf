@@ -1,7 +1,9 @@
-unit Test7;
+﻿unit Test7;
 
-{$mode objfpc}{$H+}
+{$IFDEF FPC}
+{$mode delphi}
 {$codepage utf8}
+{$ENDIF}
 
 {Test 7: Create and read back an Array}
 
@@ -35,8 +37,8 @@ type
   private
     procedure UpdateDatabase(Attachment: IAttachment);
   public
-    function TestTitle: string; override;
-    procedure RunTest(CharSet: string; SQLDialect: integer); override;
+    function TestTitle: AnsiString; override;
+    procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
   end;
 
 implementation
@@ -75,8 +77,13 @@ begin
     for i := 0 to GetCount - 1 do
       writeln(OutFile,'Param Name = ',Params[i].getName);
     ByName('rowid').AsInteger := 1;
+    {$IFDEF DCC}
+    ByName('title').AsString := UTF8Encode('Blob Test ©€');
+    ByName('Notes').AsString := UTF8Encode('Écoute moi');
+    {$ELSE}
     ByName('title').AsString := 'Blob Test ©€';
     ByName('Notes').AsString := 'Écoute moi';
+    {$ENDIF}
     ByName('Dated').AsDateTime := EncodeDate(2016,4,1) + EncodeTime(9,30,0,100);
   end;
   Statement.Execute;
@@ -122,12 +129,12 @@ begin
   Transaction.Commit;
 end;
 
-function TTest7.TestTitle: string;
+function TTest7.TestTitle: AnsiString;
 begin
   Result := 'Test 7: Create and read back an Array';
 end;
 
-procedure TTest7.RunTest(CharSet: string; SQLDialect: integer);
+procedure TTest7.RunTest(CharSet: AnsiString; SQLDialect: integer);
 var DPB: IDPB;
     Attachment: IAttachment;
 begin

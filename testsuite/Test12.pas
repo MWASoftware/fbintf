@@ -1,8 +1,10 @@
-unit Test12;
+﻿unit Test12;
 
-{$mode objfpc}{$H+}
+{$IFDEF FPC}
+{$mode delphi}
 
 {$codepage UTF8}
+{$ENDIF}
 
 interface
 
@@ -26,8 +28,8 @@ type
     procedure UpdateDatabase(Attachment: IAttachment);
     procedure QueryDatabase(Attachment: IAttachment);
   public
-    function TestTitle: string; override;
-    procedure RunTest(CharSet: string; SQLDialect: integer); override;
+    function TestTitle: AnsiString; override;
+    procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
   end;
 
 implementation
@@ -62,8 +64,13 @@ begin
   with Statement.GetSQLParams do
   begin
     ByName('rowid').AsInteger := 1;
+    {$IFDEF DCC}
+    ByName('title').AsString := UTF8Encode('Blob Test ©€');
+    ByName('Notes').AsString := UTF8Encode('Écoute moi');
+    {$ELSE}
     ByName('title').AsString := 'Blob Test ©€';
     ByName('Notes').AsString := 'Écoute moi';
+    {$ENDIF}
     ByName('BlobData').AsString := 'Some German Special Characters like ÖÄÜöäüß';
     ByName('BlobData2').AsBlob := Attachment.CreateBlob(Transaction,'TestData','BlobData').SetString('Some German Special Characters like ÖÄÜöäüß');
     ByName('InClear').AsString := #$01'Test'#$0D#$C3;
@@ -81,12 +88,12 @@ begin
   ReportResults(Statement);
 end;
 
-function TTest12.TestTitle: string;
+function TTest12.TestTitle: AnsiString;
 begin
   Result := 'Test 12: Character Sets';
 end;
 
-procedure TTest12.RunTest(CharSet: string; SQLDialect: integer);
+procedure TTest12.RunTest(CharSet: AnsiString; SQLDialect: integer);
 var DPB: IDPB;
     Attachment: IAttachment;
 begin

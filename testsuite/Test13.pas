@@ -1,7 +1,9 @@
-unit Test13;
+﻿unit Test13;
 
-{$mode objfpc}{$H+}
+{$IFDEF FPC}
+{$mode delphi}
 {$codepage UTF8}
+{$ENDIF}
 
 {Test 13: Tranasction over two databases}
 
@@ -28,8 +30,8 @@ type
     procedure ModifyDatabase1(Attachment: IAttachment; Transaction: ITransaction);
     procedure ModifyDatabase2(Attachment: IAttachment; Transaction: ITransaction);
   public
-    function TestTitle: string; override;
-    procedure RunTest(CharSet: string; SQLDialect: integer); override;
+    function TestTitle: AnsiString; override;
+    procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
   end;
 
 implementation
@@ -62,8 +64,13 @@ begin
   with Statement.GetSQLParams do
   begin
     ByName('rowid').AsInteger := 1;
+    {$IFDEF DCC}
+    ByName('title').AsString := UTF8Encode('Blob Test ©€');
+    ByName('Notes').AsString := UTF8Encode('Écoute moi');
+    {$ELSE}
     ByName('title').AsString := 'Blob Test ©€';
     ByName('Notes').AsString := 'Écoute moi';
+    {$ENDIF}
     ByName('BlobData').AsString := 'Some German Special Characters like ÖÄÜöäüß';
     ByName('BlobData2').AsBlob := Attachment.CreateBlob(Transaction,'TestData','BlobData').SetString('Some German Special Characters like ÖÄÜöäüß');
     ByName('InClear').AsString := #$01'Test'#$0D#$C3;
@@ -97,12 +104,12 @@ begin
   Statement.Execute;
 end;
 
-function TTest13.TestTitle: string;
+function TTest13.TestTitle: AnsiString;
 begin
   Result := 'Test 13: Transaction over two databases';
 end;
 
-procedure TTest13.RunTest(CharSet: string; SQLDialect: integer);
+procedure TTest13.RunTest(CharSet: AnsiString; SQLDialect: integer);
 var DPB: IDPB;
     Attachment, Attachment2: IAttachment;
     Transaction: ITransaction;

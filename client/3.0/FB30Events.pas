@@ -27,14 +27,14 @@
 unit FB30Events;
 
 {$IFDEF FPC}
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$interfaces COM}
 {$ENDIF}
 
 interface
 
 uses
-  {$IFDEF WINDOWS}Windows, {$ENDIF} Classes, SysUtils, Firebird, IB, FB30ClientAPI, FB30Attachment,
+  {$IF defined(WINDOWS) or defined(MSWINDOWS)}Windows, {$ENDIF} Classes, SysUtils, Firebird, IB, FB30ClientAPI, FB30Attachment,
   syncobjs, FBEvents;
 
 type
@@ -45,9 +45,9 @@ type
   TEventhandlerInterface = class(Firebird.IEventCallbackImpl)
   private
     FOwner: TFB30Events;
-    FName: string;
+    FName: AnsiString;
     FRef: integer;
-    {$IFDEF WINDOWS}
+    {$IF defined(WINDOWS) or defined(MSWINDOWS)}
     {Make direct use of Windows API as TEventObject don't seem to work under
      Windows!}
     FEventHandler: THandle;
@@ -55,7 +55,7 @@ type
     FEventWaiting: TEventObject;
     {$ENDIF}
   public
-    constructor Create(aOwner: TFB30Events; aName: string);
+    constructor Create(aOwner: TFB30Events; aName: AnsiString);
     destructor Destroy; override;
     procedure addRef();  override;
     function release(): Integer; override;
@@ -105,10 +105,10 @@ type
     procedure Terminate;
   end;
 
-constructor TEventhandlerInterface.Create(aOwner: TFB30Events; aName: string);
+constructor TEventhandlerInterface.Create(aOwner: TFB30Events; aName: AnsiString);
 var
   PSa : PSecurityAttributes;
-{$IFDEF WINDOWS}
+{$IF defined(WINDOWS) or defined(MSWINDOWS)}
   Sd : TSecurityDescriptor;
   Sa : TSecurityAttributes;
 begin
@@ -124,7 +124,7 @@ begin
   PSa:= nil;
 {$ENDIF}
   inherited Create;
-{$IFDEF WINDOWS}
+{$IF defined(WINDOWS) or defined(MSWINDOWS)}
   FEventHandler := CreateEvent(PSa,false,false,nil);
 {$ELSE}
   CreateGuid(GUID);
@@ -137,7 +137,7 @@ end;
 
 destructor TEventhandlerInterface.Destroy;
 begin
-{$IFDEF WINDOWS}
+{$IF defined(WINDOWS) or defined(MSWINDOWS)}
   CloseHandle(FEventHandler);
 {$ELSE}
   if assigned(FEventWaiting) then FEventWaiting.Free;
@@ -162,15 +162,16 @@ end;
 procedure TEventhandlerInterface.eventCallbackFunction(length: Cardinal;
   events: BytePtr);
 begin
+//  writeln('TEventhandlerInterface: Event Callback');
   FOwner.FCriticalSection.Enter;
   try
     if FOwner.FResultBuffer <> nil then
-      Move(events[0], FOwner.FResultBuffer[0], Length);
+      Move(events^, FOwner.FResultBuffer^, Length);
   finally
     FOwner.FCriticalSection.Leave
   end;
-//  writeln('Set Event');
-  {$IFDEF WINDOWS}
+  //writeln('TEventhandlerInterface: Set Event Called');
+  {$IF defined(WINDOWS) or defined(MSWINDOWS)}
   SetEvent(FEventHandler);
   {$ELSE}
   FEventWaiting.SetEvent;
@@ -179,17 +180,18 @@ end;
 
 procedure TEventhandlerInterface.WaitForEvent;
 begin
-  {$IFDEF WINDOWS}
+//  writeln('TEventhandlerInterface: Start Event Wait');
+  {$IF defined(WINDOWS) or defined(MSWINDOWS)}
   WaitForSingleObject(FEventHandler,INFINITE);
   {$ELSE}
   FEventWaiting.WaitFor(INFINITE);
   {$ENDIF}
-//  writeln('Event Wait Ends');
+//  writeln('TEventhandlerInterface: Event Wait Ends');
 end;
 
 procedure TEventhandlerInterface.CancelWait;
 begin
-  {$IFDEF WINDOWS}
+  {$IF defined(WINDOWS) or defined(MSWINDOWS)}
     SetEvent(FEventHandler);
   {$ELSE}
     FEventWaiting.SetEvent;
@@ -212,11 +214,10 @@ end;
 constructor TEventHandlerThread.Create(Owner: TFB30Events;
   EventHandler: TEventhandlerInterface);
 begin
-  inherited Create(true);
+  inherited Create(false);
   FOwner := Owner;
   FEventHandler := EventHandler;
   FreeOnTerminate := true;
-  Start;
 end;
 
 procedure TEventHandlerThread.Terminate;

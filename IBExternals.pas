@@ -38,19 +38,23 @@ unit IBExternals;
 interface
 
 uses
-{$IFDEF WINDOWS }
-  Windows
+{$IF defined(WINDOWS) or defined(MSWINDOWS)}
+  Windows;
 {$ELSE}
-  unix
+  unix;
 {$ENDIF}
-;
+
 const
   MaxuShort            = 65535;
 type
-  Int                  = LongInt; { 32 bit signed }
-  UInt                 = DWord;   { 32 bit unsigned }
-  Long                 = LongInt; { 32 bit signed }
-  ULong                = DWord;   { 32 bit unsigned }
+  {$IFDEF FPC}
+  FixedInt             = LongInt;
+  FixedUInt            = LongWord;
+  {$ENDIF}
+  Int                  = FixedInt; { 32 bit signed }
+  UInt                 = FixedUInt;   { 32 bit unsigned }
+  Long                 = FixedInt; { 32 bit signed }
+  ULong                = FixedUInt;   { 32 bit unsigned }
   Short                = SmallInt;{ 16 bit signed }
   UShort               = Word;    { 16 bit unsigned }
   Float                = Single;  { 32 bit }
@@ -95,7 +99,7 @@ type
     tm_yday : integer;  { Day of year (0--365) }
     tm_isdst : integer; { 0 if daylight savings time is not in effect) }
     tm_gmtoff: longint;
-    tm_zone: PChar;
+    tm_zone: PAnsiChar;
   end;
   PCTimeStructure = ^TCTimeStructure;
   TM              = TCTimeStructure;
@@ -114,11 +118,11 @@ type
   {*    in original ibase.h  *}
   {***************************}
   TISC_BlobGetSegment = function(BlobHandle: PInt;
-                                 Buffer: PChar;
+                                 Buffer: PAnsiChar;
                                  BufferSize: Long;
                                  var ResultLength: Long): Short; cdecl;
   TISC_BlobPutSegment = procedure(BlobHandle: PInt;
-                                  Buffer: PChar;
+                                  Buffer: PAnsiChar;
                                   BufferLength: Short); cdecl;
   TBlob = record
     GetSegment         : TISC_BlobGetSegment;
@@ -130,7 +134,7 @@ type
   end;
   PBlob = ^TBlob;
 
-  {$IF FPC_FULLVERSION < 20700 }
+  {$IF defined(FPC) and (FPC_FULLVERSION < 20700) }
    RawByteString = string; {for backwards compatibility}
    {$ENDIF}
 

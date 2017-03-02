@@ -1,7 +1,9 @@
 unit Test15;
 
-{$mode objfpc}{$H+}
+{$IFDEF FPC}
+{$mode delphi}
 {$codepage UTF8}
+{$ENDIF}
 
 {Test 15: Blob Handling and BPBs}
 
@@ -29,8 +31,8 @@ type
     procedure UpdateDatabase(Attachment: IAttachment);
     procedure QueryDatabase(Attachment: IAttachment);
   public
-    function TestTitle: string; override;
-    procedure RunTest(CharSet: string; SQLDialect: integer); override;
+    function TestTitle: AnsiString; override;
+    procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
   end;
 
 
@@ -110,12 +112,12 @@ begin
   ReportResults(Statement);
 end;
 
-function TTest15.TestTitle: string;
+function TTest15.TestTitle: AnsiString;
 begin
   Result := 'Test 15: Blob Handling and BPBs';
 end;
 
-procedure TTest15.RunTest(CharSet: string; SQLDialect: integer);
+procedure TTest15.RunTest(CharSet: AnsiString; SQLDialect: integer);
 var DPB: IDPB;
     Attachment: IAttachment;
 begin

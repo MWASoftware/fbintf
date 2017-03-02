@@ -27,7 +27,7 @@
 unit FB30Array;
 
 {$IFDEF FPC}
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$codepage UTF8}
 {$interfaces COM}
 {$ENDIF}
@@ -40,29 +40,16 @@ uses
 
 type
 
-  ISDLItem = interface
-    function getParamType: byte;
-    function getAsInteger: integer;
-    function getAsString: string;
-    function getAsByte: byte;
+  ISDLItem = interface(IParameterBlockItem)
+    ['{a34b6064-5ae9-4fc1-85c3-f145f069b607}']
     procedure addByte(aValue: byte);
     procedure addShortInteger(aValue: integer);
-    procedure setAsString(aValue: string);
-    procedure setAsByte(aValue: byte);
-    procedure SetAsInteger(aValue: integer);
     procedure SetAsShortInteger(aValue: integer);
     procedure SetAsTinyInteger(aValue: integer);
-    property AsString: string read getAsString write setAsString;
-    property AsByte: byte read getAsByte write setAsByte;
-    property AsInteger: integer read getAsInteger write SetAsInteger;
   end;
 
-  ISDL = interface
-    function getCount: integer;
-    function Add(ParamType: byte): ISDLItem;
-    function getItems(index: integer): ISDLItem;
-    function Find(ParamType: byte): ISDLItem;
-    property Items[index: integer]: ISDLItem read getItems; default;
+  ISDL = interface(IParameterBlock<ISDLItem>)
+    ['{52ae1f5f-657b-4b14-81aa-7b3658454f4c}']
   end;
 
   { TFB30ArrayMetaData }
@@ -72,7 +59,7 @@ type
     FCodePage: TSystemCodePage;
   protected
     procedure LoadMetaData(aAttachment: IAttachment; aTransaction: ITransaction;
-                   relationName, columnName: string); override;
+                   relationName, columnName: AnsiString); override;
   public
     function GetCharSetID: cardinal; override;
     function GetCodePage: TSystemCodePage; override;
@@ -98,7 +85,7 @@ type
 
   { TSDLBlock }
 
-  TSDLBlock = class (specialize TCustomParamBlock<TSDLItem,ISDLItem>, ISDL)
+  TSDLBlock = class (TCustomParamBlock<TSDLItem,ISDLItem>, ISDL)
   public
     constructor Create;
   end;
@@ -122,7 +109,7 @@ const
 {Assemble the array descriptor from the System Tables}
 
 procedure TFB30ArrayMetaData.LoadMetaData(aAttachment: IAttachment;
-  aTransaction: ITransaction; relationName, columnName: string);
+  aTransaction: ITransaction; relationName, columnName: AnsiString);
 var stmt: IStatement;
     CharWidth: integer;
 begin
@@ -142,7 +129,7 @@ begin
       Move(columnName[1],FArrayDesc.array_desc_field_name,Length(columnName));
       Move(relationName[1],FArrayDesc.array_desc_relation_name,length(relationName));
       FArrayDesc.array_desc_length := Data[0].AsInteger;
-      FArrayDesc.array_desc_scale := char(Data[1].AsInteger);
+      FArrayDesc.array_desc_scale := Data[1].AsInteger;
       FArrayDesc.array_desc_dtype := Data[2].AsInteger;
       FArrayDesc.array_desc_dimensions := Data[3].AsInteger;
       FArrayDesc.array_desc_flags := 0; {row major}
@@ -156,7 +143,7 @@ begin
       with aAttachment as TFBAttachment do
       begin
         if HasDefaultCharSet  and FirebirdClientAPI.CharSetWidth(CharSetID,CharWidth) then
-          FArrayDesc.array_desc_length *= CharWidth;
+          FArrayDesc.array_desc_length := FArrayDesc.array_desc_length * CharWidth;
       end;
       repeat
         with FArrayDesc.array_desc_bounds[Data[4].AsInteger] do
@@ -299,7 +286,7 @@ constructor TSDLBlock.Create;
 begin
   inherited Create;
   FDataLength := 1;
-  FBuffer^ := char(isc_sdl_version1);
+  FBuffer^ := isc_sdl_version1;
 end;
 
 end.

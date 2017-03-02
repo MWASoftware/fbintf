@@ -62,7 +62,7 @@
 unit FB25Transaction;
 
 {$IFDEF FPC}
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$interfaces COM}
 {$ENDIF}
 {$R-}

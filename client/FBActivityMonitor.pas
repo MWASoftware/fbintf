@@ -27,7 +27,7 @@
 unit FBActivityMonitor;
 
 {$IFDEF FPC}
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$interfaces COM}
 {$ENDIF}
 
@@ -47,8 +47,6 @@ type
 
   {$IFDEF DEBUGINTERFACES}
   TMonitoredObject = class(TInterfacedObject)
-  private
-    FObjectCount: integer; static;
   public
     constructor Create;
     destructor Destroy; override;
@@ -152,6 +150,9 @@ end;
 { TMonitoredObject }
 
 {$IFDEF DEBUGINTERFACES}
+var
+  FObjectCount: integer;
+
 constructor TMonitoredObject.Create;
 begin
   inherited Create;
@@ -336,7 +337,16 @@ procedure TInterfaceOwner.ReleaseInterfaces;
 var i: integer;
 begin
   for i := 0 to Length(FInterfaces) - 1 do
+  begin
+    {$IFDEF DCC}
+    {With Delphi we need to explicitly null the object reference when it is
+     going to be disposed of. This is because Delphi does not drop the reference
+     count until after the containing object is released.}
+    if (FInterfaces[i] <> nil) and (FInterfaces[i].RefCount <= 2) then
+      FInterfaces[i] := nil;
+    {$ENDIF}
     FInterfaceRefs[i] := nil;
+  end;
 end;
 
 end.

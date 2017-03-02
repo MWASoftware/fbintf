@@ -30,7 +30,7 @@
 unit FBServices;
 
 {$IFDEF FPC}
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$interfaces COM}
 {$ENDIF}
 
@@ -47,23 +47,23 @@ type
   private
     FFirebirdAPI: IFirebirdAPI;
     FProtocol: TProtocol;
-    FServerName: string;
+    FServerName: AnsiString;
     procedure CheckServerName;
   protected
     FSPB: ISPB;
-    procedure InternalAttach(ConnectString: string); virtual; abstract;
+    procedure InternalAttach(ConnectString: AnsiString); virtual; abstract;
   public
-    constructor Create(ServerName: string; Protocol: TProtocol; SPB: ISPB);
+    constructor Create(ServerName: AnsiString; Protocol: TProtocol; SPB: ISPB);
     destructor Destroy; override;
   public
     {IServiceManager}
     function getSPB: ISPB;
-    function getServerName: string;
+    function getServerName: AnsiString;
     procedure Attach;
     procedure Detach(Force: boolean=false); virtual; abstract;
     function AllocateSRB: ISRB;
     function AllocateSQPB: ISQPB;
-    function Query(SQPB: ISQPB; Request: ISRB): IServiceQueryResults; virtual; abstract; overload;
+    function Query(SQPB: ISQPB; Request: ISRB): IServiceQueryResults; overload; virtual; abstract;
     function Query(Request: ISRB): IServiceQueryResults;  overload;
   end;
 
@@ -79,7 +79,7 @@ begin
     IBError(ibxeServerNameMissing, [nil]);
 end;
 
-constructor TFBServiceManager.Create(ServerName: string; Protocol: TProtocol;
+constructor TFBServiceManager.Create(ServerName: AnsiString; Protocol: TProtocol;
   SPB: ISPB);
 begin
   inherited Create;
@@ -101,13 +101,13 @@ begin
   Result := FSPB;
 end;
 
-function TFBServiceManager.getServerName: string;
+function TFBServiceManager.getServerName: AnsiString;
 begin
   Result := FServerName;
 end;
 
 procedure TFBServiceManager.Attach;
-var ConnectString: String;
+var ConnectString: AnsiString;
 begin
   case FProtocol of
     TCP: ConnectString := FServerName + ':service_mgr'; {do not localize}

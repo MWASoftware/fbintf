@@ -1,7 +1,9 @@
 unit Test8;
 
-{$mode objfpc}{$H+}
+{$IFDEF FPC}
+{$mode delphi}
 {$codepage utf8}
+{$ENDIF}
 
 {Test 8: Create and read back an Array with 2 dimensions}
 
@@ -31,8 +33,8 @@ type
   private
     procedure UpdateDatabase(Attachment: IAttachment);
   public
-    function TestTitle: string; override;
-    procedure RunTest(CharSet: string; SQLDialect: integer); override;
+    function TestTitle: AnsiString; override;
+    procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
   end;
 
 implementation
@@ -91,12 +93,12 @@ begin
   ReportResults(Statement);
 end;
 
-function TTest8.TestTitle: string;
+function TTest8.TestTitle: AnsiString;
 begin
   Result := 'Test 8: Create and read back an Array with 2 dimensions';
 end;
 
-procedure TTest8.RunTest(CharSet: string; SQLDialect: integer);
+procedure TTest8.RunTest(CharSet: AnsiString; SQLDialect: integer);
 var DPB: IDPB;
     Attachment: IAttachment;
 begin

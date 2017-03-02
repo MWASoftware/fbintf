@@ -27,7 +27,7 @@
 unit FB30Blob;
 
 {$IFDEF FPC}
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$interfaces COM}
 {$ENDIF}
 
@@ -35,7 +35,7 @@ interface
 
 uses
   Classes, SysUtils, Firebird, IB, IBHeader, IBExternals, FBClientAPI, FB30ClientAPI, FB30Attachment,
-  FBTransaction, FB30Transaction,  FBBlob;
+  FBTransaction, FB30Transaction,  FBBlob, FBOutputBlock;
 
 type
 
@@ -50,9 +50,9 @@ type
      procedure NeedFullMetadata; override;
    public
      constructor Create(Attachment: TFB30Attachment; Transaction: TFB30Transaction;
-       RelationName, ColumnName: string); overload;
+       RelationName, ColumnName: AnsiString); overload;
      constructor Create(Attachment: TFB30Attachment; Transaction: TFB30Transaction;
-       RelationName, ColumnName: string; SubType: integer); overload;
+       RelationName, ColumnName: AnsiString; SubType: integer); overload;
 
   end;
 
@@ -67,6 +67,7 @@ type
     procedure CheckReadable; override;
     procedure CheckWritable; override;
     function GetIntf: IBlob; override;
+    procedure GetInfo(Request: array of byte; Response: IBlobInfo); override;
     procedure InternalClose(Force: boolean); override;
     procedure InternalCancel(Force: boolean); override;
   public
@@ -80,8 +81,6 @@ type
 
   {IBlob}
   public
-    procedure GetInfo(var NumSegments: Int64; var MaxSegmentSize, TotalSize: Int64;
-      var BlobType: TBlobType); override;
     function Read(var Buffer; Count: Longint): Longint; override;
     function Write(const Buffer; Count: Longint): Longint; override;
   end;
@@ -137,7 +136,7 @@ begin
 end;
 
 constructor TFB30BlobMetaData.Create(Attachment: TFB30Attachment;
-  Transaction: TFB30Transaction; RelationName, ColumnName: string);
+  Transaction: TFB30Transaction; RelationName, ColumnName: AnsiString);
 begin
   inherited Create(Transaction,RelationName,ColumnName);
   FAttachment := Attachment;
@@ -145,7 +144,7 @@ begin
 end;
 
 constructor TFB30BlobMetaData.Create(Attachment: TFB30Attachment;
-  Transaction: TFB30Transaction; RelationName, ColumnName: string;
+  Transaction: TFB30Transaction; RelationName, ColumnName: AnsiString;
   SubType: integer);
 begin
   Create(Attachment,Transaction,RelationName,ColumnName);
@@ -170,6 +169,20 @@ end;
 function TFB30Blob.GetIntf: IBlob;
 begin
   Result := self;
+end;
+
+procedure TFB30Blob.GetInfo(Request: array of byte; Response: IBlobInfo);
+begin
+  if FBlobIntf = nil then
+    IBError(ibxeBlobNotOpen,[nil]);
+
+  with Firebird30ClientAPI, Response as TBlobInfo do
+  begin
+    FBlobIntf.getInfo(StatusIntf,Length(Request),BytePtr(@Request),
+                                               GetBufSize, BytePtr(Buffer));
+    Check4DataBaseError;
+    SignalActivity;
+  end;
 end;
 
 procedure TFB30Blob.InternalClose(Force: boolean);
@@ -257,54 +270,10 @@ begin
   end;
 end;
 
-procedure TFB30Blob.GetInfo(var NumSegments: Int64; var MaxSegmentSize,
-  TotalSize: Int64; var BlobType: TBlobType);
-var
-  items: array[0..3] of Char;
-  results: array[0..99] of Char;
-  i, item_length: Integer;
-  item: Integer;
-begin
-  if FBlobIntf = nil then
-    IBError(ibxeBlobNotOpen,[nil]);
-
-  items[0] := Char(isc_info_blob_num_segments);
-  items[1] := Char(isc_info_blob_max_segment);
-  items[2] := Char(isc_info_blob_total_length);
-  items[3] := Char(isc_info_blob_type);
-
-  with Firebird30ClientAPI do
-  begin
-    FBlobIntf.getInfo(StatusIntf,4,@items[0],SizeOf(results),@results[0]);
-    Check4DataBaseError;
-    SignalActivity;
-    i := 0;
-    while (i < SizeOf(results)) and (results[i] <> Char(isc_info_end)) do
-    begin
-      item := Integer(results[i]); Inc(i);
-      item_length := DecodeInteger(@results[i], 2); Inc(i, 2);
-      case item of
-        isc_info_blob_num_segments:
-          NumSegments := DecodeInteger(@results[i], item_length);
-        isc_info_blob_max_segment:
-          MaxSegmentSize := DecodeInteger(@results[i], item_length);
-        isc_info_blob_total_length:
-          TotalSize := DecodeInteger(@results[i], item_length);
-        isc_info_blob_type:
-          if DecodeInteger(@results[i], item_length) = 0 then
-            BlobType := btSegmented
-          else
-            BlobType := btStream;
-      end;
-      Inc(i, item_length);
-    end;
-  end;
-end;
-
 function TFB30Blob.Read(var Buffer; Count: Longint): Longint;
 var
   BytesRead : cardinal;
-  LocalBuffer: PChar;
+  LocalBuffer: PAnsiChar;
   returnCode: integer;
   localCount: uShort;
 begin
@@ -313,7 +282,7 @@ begin
   if FEOB then
     Exit;
 
-  LocalBuffer := PChar(@Buffer);
+  LocalBuffer := PAnsiChar(@Buffer);
   repeat
     localCount := Min(Count,MaxuShort);
     with Firebird30ClientAPI do
@@ -334,14 +303,14 @@ end;
 
 function TFB30Blob.Write(const Buffer; Count: Longint): Longint;
 var
-  LocalBuffer: PChar;
+  LocalBuffer: PAnsiChar;
   localCount: uShort;
 begin
   CheckWritable;
   Result := 0;
   if Count = 0 then Exit;
 
-  LocalBuffer := PChar(@Buffer);
+  LocalBuffer := PAnsiChar(@Buffer);
   repeat
     localCount := Min(Count,MaxuShort);
     with Firebird30ClientAPI do

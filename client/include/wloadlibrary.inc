@@ -1,27 +1,66 @@
 procedure TFBClientAPI.LoadIBLibrary;
 
-  function DoLoadLibrary(LibName: string): TLibHandle;
+  function IsValidHandle(aHandle: TLibHandle): boolean;
+  {$IFDEF FPC}
+  begin
+    Result := aHandle <> nil;
+  end;
+  {$ELSE}
+  begin
+    Result := aHandle > HINSTANCE_ERROR;
+  end;
+  {$ENDIF}
+
+  function DoLoadLibrary(LibName: AnsiString): TLibHandle;
+  {$IFDEF MSWINDOWS}
+  var w: widestring;
+  begin
+    w := LibName;
+    Result := LoadLibrary(PChar(w));
+  {$ELSE}}
   begin
     Result := LoadLibrary(PChar(LibName));
-    if Result <> NilHandle then
+  {$ENDIF}
+    if IsValidHandle(Result) then
     begin
       FFBLibraryName := ExtractFileName(LibName);
       FFBLibraryPath := ExtractFileDir(LibName);
     end;
   end;
 
-var InstallDir: string;
-    dllPathName: string;
-    oldFirebirdEV: string;
+  function GetSpecialFolder(const CSIDL: integer) : AnsiString;
+  {$IFDEF FPC}
+  begin
+    Result := GetWindowsSpecialDir(CSIDL);
+  end;
+  {$ELSE}
+  var
+    RecPath : PWideChar;
+  begin
+    RecPath := StrAlloc(MAX_PATH);
+    try
+    FillChar(RecPath^, MAX_PATH, 0);
+    if SHGetSpecialFolderPath(0, RecPath, CSIDL, false)
+      then result := RecPath
+      else result := '';
+    finally
+      StrDispose(RecPath);
+    end;
+  end;
+  {$ENDIF}
+
+var InstallDir: AnsiString;
+    dllPathName: AnsiString;
+    oldFirebirdEV: AnsiString;
 begin
-  if IBLibrary <> NilHandle then Exit;
+  if IsValidHandle(IBLibrary) then Exit;
 
   {First try any user override}
   dllPathName := GetOverrideLibName;
   if dllPathName <> '' then
   begin
     IBLibrary := DoLoadLibrary(dllPathName);
-    FOwnsIBLibrary := IBLibrary <> NilHandle;
+    FOwnsIBLibrary := IsValidHandle(IBLibrary);
     Exit;
   end;
 
@@ -45,18 +84,18 @@ begin
     try
       IBLibrary := DoLoadLibrary(dllPathName)
     finally
-      if IBLibrary = NILHandle then
+      if not IsValidHandle(IBLibrary) then
         SetEnvironmentVariable('FIREBIRD',PChar(oldFirebirdEV)); {restore}
     end;
   end;
 
 //  writeln('Dir = ',InstallDir);
   {If FIREBIRD environment variable available then try this}
-  if IBLibrary = NilHandle then
+  if not IsValidHandle(IBLibrary) then
   begin
     InstallDir := GetEnvironmentVariable('FIREBIRD');
     if (length(InstallDir) > 0) and (InstallDir[length(InstallDir)] <> DirectorySeparator) then
-      InstallDir += DirectorySeparator;
+      InstallDir := InstallDir + DirectorySeparator;
     if (InstallDir <> '') and FileExists(InstallDir + FIREBIRD_CLIENT) then
     begin
       //assume firebird.conf and firebird.msg in same dir
@@ -71,7 +110,7 @@ begin
     end
   end;
 
-  if IBLibrary = NilHandle then
+  if not IsValidHandle(IBLibrary) then
   {Use Registry key if it exists to locate library}
   begin
     with TRegistry.Create do
@@ -91,9 +130,9 @@ begin
     end;
 
     {Now try default install dir}
-    if IBLibrary = NilHandle then
+    if not IsValidHandle(IBLibrary) then
     begin
-      InstallDir := GetWindowsSpecialDir(CSIDL_PROGRAM_FILES) +
+      InstallDir := GetSpecialFolder(CSIDL_PROGRAM_FILES) +
         DirectorySeparator + 'Firebird' +
         DirectorySeparator + 'Firebird_3_0' +
         DirectorySeparator + 'bin' + DirectorySeparator;
@@ -101,9 +140,9 @@ begin
       IBLibrary := DoLoadLibrary(dllPathName)
     end;
 
-    if IBLibrary = NilHandle then
+    if not IsValidHandle(IBLibrary) then
     begin
-      InstallDir := GetWindowsSpecialDir(CSIDL_PROGRAM_FILES) +
+      InstallDir := GetSpecialFolder(CSIDL_PROGRAM_FILES) +
         DirectorySeparator + 'Firebird' +
         DirectorySeparator + 'Firebird_2_5' +
         DirectorySeparator + 'bin' + DirectorySeparator;
@@ -111,9 +150,9 @@ begin
       IBLibrary := DoLoadLibrary(dllPathName)
     end;
 
-    if IBLibrary = NilHandle then
+    if not IsValidHandle(IBLibrary) then
     begin
-      InstallDir := GetWindowsSpecialDir(CSIDL_PROGRAM_FILES) +
+      InstallDir := GetSpecialFolder(CSIDL_PROGRAM_FILES) +
         DirectorySeparator + 'Firebird' +
         DirectorySeparator + 'Firebird_2_1' +
         DirectorySeparator + 'bin' + DirectorySeparator;
@@ -123,7 +162,7 @@ begin
 
     //Otherwise see if Firebird client is in path
     //and rely on registry for location of firebird.conf and firebird.msg
-    if IBLibrary = NilHandle then
+    if not IsValidHandle(IBLibrary) then
     begin
       IBLibrary := DoLoadLibrary(FIREBIRD_CLIENT);
       if IBLibrary <= HINSTANCE_ERROR then
@@ -131,7 +170,7 @@ begin
        IBLibrary := DoLoadLibrary(IBASE_DLL);
     end;
   end;
-  FOwnsIBLibrary := IBLibrary <> NilHandle;
+  FOwnsIBLibrary := IsValidHandle(IBLibrary);
 end;
 
 

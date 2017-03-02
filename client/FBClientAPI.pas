@@ -70,14 +70,17 @@ unit FBClientAPI;
 interface
 
 uses
-  Classes,  Dynlibs, IB, IBHeader, FBActivityMonitor, FBMessages, IBExternals;
+  Classes,
+    {$IFDEF MSWINDOWS}Windows, {$ENDIF}
+    {$IFDEF FPC} Dynlibs, {$ENDIF}
+   IB, IBHeader, FBActivityMonitor, FBMessages, IBExternals;
 
 {For Linux see result of GetFirebirdLibList method}
 {$IFDEF DARWIN}
 const
 FIREBIRD_SO2 = 'libfbclient.dylib';
 {$ENDIF}
-{$IFDEF WINDOWS}
+{$IF defined(WINDOWS) or defined(MSWINDOWS)}
 const
 IBASE_DLL = 'gds32.dll';
 FIREBIRD_CLIENT = 'fbclient.dll'; {do not localize}
@@ -94,7 +97,6 @@ type
 
   TFBStatus = class(TFBInterfacedObject)
   private
-    FIBCS: TRTLCriticalSection; static;
     FIBDataBaseErrorMessages: TIBDataBaseErrorMessages;
   protected
     FOwner: TFBClientAPI;
@@ -105,7 +107,7 @@ type
     {IStatus}
     function GetIBErrorCode: Long;
     function Getsqlcode: Long;
-    function GetMessage: string;
+    function GetMessage: AnsiString;
     function CheckStatusVector(ErrorCodes: array of TFBStatusCode): Boolean;
     function GetIBDataBaseErrorMessages: TIBDataBaseErrorMessages;
     procedure SetIBDataBaseErrorMessages(Value: TIBDataBaseErrorMessages);
@@ -118,13 +120,10 @@ type
     FOwnsIBLibrary: boolean;
     procedure LoadIBLibrary;
   protected
-    FFBLibraryName: string; static;
-    FFBLibraryPath: string; static;
-    IBLibrary: TLibHandle; static;
-    function GetProcAddr(ProcName: PChar): Pointer;
-    function GetOverrideLibName: string;
+    function GetProcAddr(ProcName: PAnsiChar): Pointer;
+    function GetOverrideLibName: AnsiString;
     {$IFDEF UNIX}
-    function GetFirebirdLibList: string; virtual; abstract;
+    function GetFirebirdLibList: AnsiString; virtual; abstract;
     {$ENDIF}
     procedure LoadInterface; virtual;
   public
@@ -143,37 +142,56 @@ type
     procedure SetupEnvironment;
 
     {Encode/Decode}
-    procedure EncodeInteger(aValue: integer; len: integer; buffer: PChar);
-    function DecodeInteger(bufptr: PChar; len: short): integer; virtual; abstract;
-    procedure SQLEncodeDate(aDate: TDateTime; bufptr: PChar); virtual; abstract;
-    function SQLDecodeDate(byfptr: PChar): TDateTime; virtual; abstract;
-    procedure SQLEncodeTime(aTime: TDateTime; bufptr: PChar); virtual; abstract;
-    function SQLDecodeTime(bufptr: PChar): TDateTime;  virtual; abstract;
-    procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PChar); virtual; abstract;
-    function SQLDecodeDateTime(bufptr: PChar): TDateTime; virtual; abstract;
+    procedure EncodeInteger(aValue: integer; len: integer; buffer: PByte);
+    function DecodeInteger(bufptr: PByte; len: short): integer; virtual; abstract;
+    procedure SQLEncodeDate(aDate: TDateTime; bufptr: PByte); virtual; abstract;
+    function SQLDecodeDate(byfptr: PByte): TDateTime; virtual; abstract;
+    procedure SQLEncodeTime(aTime: TDateTime; bufptr: PByte); virtual; abstract;
+    function SQLDecodeTime(bufptr: PByte): TDateTime;  virtual; abstract;
+    procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte); virtual; abstract;
+    function SQLDecodeDateTime(bufptr: PByte): TDateTime; virtual; abstract;
 
 
     {IFirebirdAPI}
     function GetStatus: IStatus; virtual; abstract;
     function IsLibraryLoaded: boolean;
     function IsEmbeddedServer: boolean; virtual; abstract;
-    function GetLibraryName: string;
-    function GetCharsetName(CharSetID: integer): string;
+    function GetLibraryName: AnsiString;
+    function GetCharsetName(CharSetID: integer): AnsiString;
     function CharSetID2CodePage(CharSetID: integer; var CodePage: TSystemCodePage): boolean;
     function CodePage2CharSetID(CodePage: TSystemCodePage; var CharSetID: integer): boolean;
-    function CharSetName2CharSetID(CharSetName: string; var CharSetID: integer): boolean;
+    function CharSetName2CharSetID(CharSetName: AnsiString; var CharSetID: integer): boolean;
     function CharSetWidth(CharSetID: integer; var Width: integer): boolean;
   end;
 
-const FirebirdClientAPI: TFBClientAPI = nil;
+var FirebirdClientAPI: TFBClientAPI = nil;
+
+{$IFNDEF FPC}
+type
+  TLibHandle = THandle;
+
+const
+  NilHandle = 0;
+  DirectorySeparator = '\';
+{$ENDIF}
+
+var
+  FFBLibraryName: AnsiString;
+  FFBLibraryPath: AnsiString;
+  IBLibrary: TLibHandle;
+  FIBCS: TRTLCriticalSection;
 
 implementation
 
 uses IBUtils, {$IFDEF Unix} initc, {$ENDIF}
+{$IFDEF FPC}
 {$IFDEF WINDOWS }
-Windows,Registry, WinDirs,
+Windows, WinDirs,
 {$ENDIF}
-SysUtils;
+{$ELSE}
+ ShlObj,
+{$ENDIF}
+Registry,SysUtils;
 
 {$IFDEF UNIX}
 {$I uloadlibrary.inc}
@@ -184,7 +202,7 @@ SysUtils;
 type
   TCharsetMap = record
     CharsetID: integer;
-    CharSetName: string;
+    CharSetName: AnsiString;
     CharSetWidth: integer;
     CodePage: TSystemCodePage;
   end;
@@ -267,7 +285,7 @@ const
   {SetEnvironmentVariable doesn't exist so we have to use C Library}
   function setenv(name:Pchar; value:Pchar; replace:integer):integer;cdecl;external clib name 'setenv';
   function unsetenv(name:Pchar):integer;cdecl;external clib name 'unsetenv';
-  function SetEnvironmentVariable(name:PChar; value:PChar):boolean;
+  function SetEnvironmentVariable(name:PAnsiChar; value:PAnsiChar):boolean;
   // Set environment variable; if empty string given, remove it.
   begin
     result:=false; //assume failure
@@ -302,7 +320,7 @@ destructor TFBClientAPI.Destroy;
 begin
   FirebirdClientAPI := nil;
   if FOwnsIBLibrary and (IBLibrary <> NilHandle) then
-    UnloadLibrary(IBLibrary);
+    FreeLibrary(IBLibrary);
   IBLibrary := NilHandle;
   inherited Destroy;
 end;
@@ -312,7 +330,7 @@ var
   i: Integer;
 begin
   ReallocMem(Pointer(P), NewSize);
-  for i := OldSize to NewSize - 1 do PChar(P)[i] := #0;
+  for i := OldSize to NewSize - 1 do PAnsiChar(P)[i] := #0;
 end;
 
 procedure TFBClientAPI.IBDataBaseError;
@@ -323,7 +341,7 @@ end;
 {Under Unixes, if using an embedded server then set up local TMP and LOCK Directories}
 
 procedure TFBClientAPI.SetupEnvironment;
-var TmpDir: string;
+var TmpDir: AnsiString;
 begin
   {$IFDEF UNIX}
     TmpDir := GetTempDir +
@@ -332,22 +350,22 @@ begin
     begin
       if not DirectoryExists(tmpDir) then
         mkdir(tmpDir);
-      SetEnvironmentVariable('FIREBIRD_TMP',PChar(TmpDir));
+      SetEnvironmentVariable('FIREBIRD_TMP',PAnsiChar(TmpDir));
     end;
     if sysutils.GetEnvironmentVariable('FIREBIRD_LOCK') = '' then
     begin
       if not DirectoryExists(tmpDir) then
         mkdir(tmpDir);
-      SetEnvironmentVariable('FIREBIRD_LOCK',PChar(TmpDir));
+      SetEnvironmentVariable('FIREBIRD_LOCK',PAnsiChar(TmpDir));
     end;
   {$ENDIF}
 end;
 
-procedure TFBClientAPI.EncodeInteger(aValue: integer; len: integer; buffer: PChar);
+procedure TFBClientAPI.EncodeInteger(aValue: integer; len: integer; buffer: PByte);
 begin
   while len > 0 do
   begin
-    buffer^ := char(aValue and $FF);
+    buffer^ := aValue and $FF;
     Inc(buffer);
     Dec(len);
     aValue := aValue shr 8;
@@ -359,14 +377,14 @@ begin
   Result := IBLibrary <> NilHandle;
 end;
 
-function TFBClientAPI.GetProcAddr(ProcName: PChar): Pointer;
+function TFBClientAPI.GetProcAddr(ProcName: PAnsiChar): Pointer;
 begin
   Result := GetProcAddress(IBLibrary, ProcName);
   if not Assigned(Result) then
     raise Exception.CreateFmt(SFirebirdAPIFuncNotFound,[ProcName]);
 end;
 
-function TFBClientAPI.GetOverrideLibName: string;
+function TFBClientAPI.GetOverrideLibName: AnsiString;
 begin
   Result := '';
   if AllowUseOfFBLIB then
@@ -388,12 +406,12 @@ begin
   isc_free := GetProcAddr('isc_free'); {do not localize}
 end;
 
-function TFBClientAPI.GetLibraryName: string;
+function TFBClientAPI.GetLibraryName: AnsiString;
 begin
   Result := FFBLibraryName;
 end;
 
-function TFBClientAPI.GetCharsetName(CharSetID: integer): string;
+function TFBClientAPI.GetCharsetName(CharSetID: integer): AnsiString;
 begin
   Result := '';
   if (CharSetID >= Low(CharSetMap)) and (CharSetID <= High(CharSetMap)) and
@@ -431,7 +449,7 @@ begin
     end;
 end;
 
-function TFBClientAPI.CharSetName2CharSetID(CharSetName: string;
+function TFBClientAPI.CharSetName2CharSetID(CharSetName: AnsiString;
   var CharSetID: integer): boolean;
 var i: integer;
 begin
@@ -483,8 +501,8 @@ begin
     Result := isc_sqlcode(PISC_STATUS(StatusVector));
 end;
 
-function TFBStatus.GetMessage: string;
-var local_buffer: array[0..IBHugeLocalBufferLength - 1] of char;
+function TFBStatus.GetMessage: AnsiString;
+var local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
     IBDataBaseErrorMessages: TIBDataBaseErrorMessages;
     sqlcode: Long;
     psb: PStatusVector;
@@ -530,7 +548,7 @@ var
   i: Integer;
   procedure NextP(i: Integer);
   begin
-    p := PISC_STATUS(PChar(p) + (i * SizeOf(ISC_STATUS)));
+    p := PISC_STATUS(PAnsiChar(p) + (i * SizeOf(ISC_STATUS)));
   end;
 begin
   p := PISC_STATUS(StatusVector);
@@ -574,16 +592,24 @@ begin
   end;
 end;
 initialization
-  TFBClientAPI.IBLibrary := NilHandle;
-  InitCriticalSection(TFBStatus.FIBCS);
+  IBLibrary := NilHandle;
+  {$IFDEF MSWINDOWS}
+  InitializeCriticalSection(FIBCS);
+  {$ELSE}
+  InitCriticalSection(FIBCS);
+  {$ENDIF}
 
 finalization
-  DoneCriticalSection(TFBStatus.FIBCS);
-  if TFBClientAPI.IBLibrary <> NilHandle then
+  {$IFDEF MSWINDOWS}
+  DeleteCriticalSection(FIBCS);
+  {$ELSE}
+  DoneCriticalSection(FIBCS);
+  {$ENDIF}
+  if IBLibrary <> NilHandle then
   begin
-    FreeLibrary(TFBClientAPI.IBLibrary);
-    TFBClientAPI.IBLibrary := NilHandle;
-    TFBClientAPI.FFBLibraryName := '';
+    FreeLibrary(IBLibrary);
+    IBLibrary := NilHandle;
+    FFBLibraryName := '';
   end;
 
 end.

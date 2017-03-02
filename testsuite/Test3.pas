@@ -1,7 +1,9 @@
 unit Test3;
 
-{$mode objfpc}{$H+}
+{$IFDEF FPC}
+{$mode delphi}
 {$codepage utf8}
+{$ENDIF}
 
 { Test 3: ad hoc queries}
 
@@ -34,8 +36,8 @@ type
   private
     procedure DoQuery(Attachment: IAttachment);
   public
-    function TestTitle: string; override;
-    procedure RunTest(CharSet: string; SQLDialect: integer); override;
+    function TestTitle: AnsiString; override;
+    procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
   end;
 
 
@@ -69,6 +71,11 @@ begin
   ResultSet := Attachment.OpenCursorAtStart('Select count(*) from EMPLOYEE');
   writeln(OutFile,'Employee Count = ',ResultSet[0].AsInteger);
 
+  {$IFDEF DCC}
+  Transaction.Rollback; {Delphi does not dispose of interfaces until the end of the function
+                         so we need to explicitly rollback here. FPC will dispose of the
+                         interface as soon as it is overwritten - hence this is not needed.}
+  {$ENDIF}
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taRollback);
   Statement := Attachment.PrepareWithNamedParameters(Transaction,'Execute Procedure DELETE_EMPLOYEE :EMP_NO',3);
   Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 8;
@@ -93,12 +100,12 @@ begin
 
 end;
 
-function TTest3.TestTitle: string;
+function TTest3.TestTitle: AnsiString;
 begin
   Result := 'Test 3: ad hoc queries';
 end;
 
-procedure TTest3.RunTest(CharSet: string; SQLDialect: integer);
+procedure TTest3.RunTest(CharSet: AnsiString; SQLDialect: integer);
 var Attachment: IAttachment;
     DPB: IDPB;
 begin

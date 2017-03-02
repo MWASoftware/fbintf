@@ -94,7 +94,7 @@ type
                              goes out of scope.}
   protected
     {$IFDEF UNIX}
-    function GetFirebirdLibList: string; override;
+    function GetFirebirdLibList: AnsiString; override;
     {$ENDIF}
     procedure LoadInterface; override;
   public
@@ -165,22 +165,22 @@ type
 
   public
     {Helper Functions}
-    function DecodeInteger(bufptr: PChar; len: short): integer; override;
-    procedure SQLEncodeDate(aDate: TDateTime; bufptr: PChar); override;
-    function SQLDecodeDate(bufptr: PChar): TDateTime; override;
-    procedure SQLEncodeTime(aTime: TDateTime; bufptr: PChar); override;
-    function SQLDecodeTime(bufptr: PChar): TDateTime;  override;
-    procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PChar); override;
-    function SQLDecodeDateTime(bufptr: PChar): TDateTime; override;
+    function DecodeInteger(bufptr: PByte; len: short): integer; override;
+    procedure SQLEncodeDate(aDate: TDateTime; bufptr: PByte); override;
+    function SQLDecodeDate(bufptr: PByte): TDateTime; override;
+    procedure SQLEncodeTime(aTime: TDateTime; bufptr: PByte); override;
+    function SQLDecodeTime(bufptr: PByte): TDateTime;  override;
+    procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte); override;
+    function SQLDecodeDateTime(bufptr: PByte): TDateTime; override;
 
   public
     {IFirebirdAPI}
 
     {Database connections}
     function AllocateDPB: IDPB;
-    function OpenDatabase(DatabaseName: string; DPB: IDPB; RaiseExceptionOnConnectError: boolean=true): IAttachment;
-    function CreateDatabase(DatabaseName: string; DPB: IDPB; RaiseExceptionOnError: boolean=true): IAttachment;  overload;
-    function CreateDatabase(sql: string; aSQLDialect: integer; RaiseExceptionOnError: boolean=true): IAttachment; overload;
+    function OpenDatabase(DatabaseName: AnsiString; DPB: IDPB; RaiseExceptionOnConnectError: boolean=true): IAttachment;
+    function CreateDatabase(DatabaseName: AnsiString; DPB: IDPB; RaiseExceptionOnError: boolean=true): IAttachment;  overload;
+    function CreateDatabase(sql: AnsiString; aSQLDialect: integer; RaiseExceptionOnError: boolean=true): IAttachment; overload;
 
     {Start Transaction against multiple databases}
     function AllocateTPB: ITPB;
@@ -192,13 +192,13 @@ type
     {Service Manager}
     function AllocateSPB: ISPB;
     function HasServiceAPI: boolean;
-    function GetServiceManager(ServerName: string; Protocol: TProtocol; SPB: ISPB): IServiceManager;
+    function GetServiceManager(ServerName: AnsiString; Protocol: TProtocol; SPB: ISPB): IServiceManager;
 
     {Information}
     function GetStatus: IStatus; override;
     function HasRollbackRetaining: boolean;
     function IsEmbeddedServer: boolean; override;
-    function GetImplementationVersion: string;
+    function GetImplementationVersion: AnsiString;
 
     {Firebird 3 API}
     function HasMasterIntf: boolean;
@@ -206,18 +206,21 @@ type
 
    end;
 
-const
+var
   Firebird25ClientAPI: TFB25ClientAPI = nil;
 
 implementation
 
-uses FBMessages, dynlibs, FB25Attachment, FB25Transaction, FB25Services, FBParamBlock,
+uses FBMessages,
+    {$IFDEF MSWINDOWS}Windows, {$ENDIF}
+    {$IFDEF FPC} Dynlibs, {$ENDIF}
+  FB25Attachment, FB25Transaction, FB25Services, FBParamBlock,
   IBUtils;
 
 { Stubs for 6.0 only functions }
 function isc_rollback_retaining_stub(status_vector   : PISC_STATUS;
               tran_handle     : PISC_TR_HANDLE):
-                                     ISC_STATUS; {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
+                                     ISC_STATUS; {$IF defined(WINDOWS) or defined(MSWINDOWS)} stdcall; {$ELSE} cdecl; {$ENDIF}
 begin
   Result := 0;
   IBError(ibxeIB60feature, ['isc_rollback_retaining']); {do not localize}
@@ -225,11 +228,11 @@ end;
 
 function isc_service_attach_stub(status_vector      : PISC_STATUS;
                                  isc_arg2           : UShort;
-                                 isc_arg3           : PChar;
+                                 isc_arg3           : PAnsiChar;
                                  service_handle     : PISC_SVC_HANDLE;
                                  isc_arg5           : UShort;
-                                 isc_arg6           : PChar):
-                                 ISC_STATUS; {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
+                                 isc_arg6           : PAnsiChar):
+                                 ISC_STATUS; {$IF defined(WINDOWS) or defined(MSWINDOWS)} stdcall; {$ELSE} cdecl; {$ENDIF}
 begin
   Result := 0;
   IBError(ibxeIB60feature, ['isc_service_attach']); {do not localize}
@@ -237,7 +240,7 @@ end;
 
 function isc_service_detach_stub(status_vector      : PISC_STATUS;
                                  service_handle     : PISC_SVC_HANDLE):
-                                 ISC_STATUS; {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
+                                 ISC_STATUS; {$IF defined(WINDOWS) or defined(MSWINDOWS)} stdcall; {$ELSE} cdecl; {$ENDIF}
 begin
   Result := 0;
   IBError(ibxeIB60feature, ['isc_service_detach']); {do not localize}
@@ -247,12 +250,12 @@ function isc_service_query_stub(status_vector        : PISC_STATUS;
                                 service_handle       : PISC_SVC_HANDLE;
                                 recv_handle          : PISC_SVC_HANDLE;
                                 isc_arg4             : UShort;
-                                isc_arg5             : PChar;
+                                isc_arg5             : PAnsiChar;
                                 isc_arg6             : UShort;
-                                isc_arg7             : PChar;
+                                isc_arg7             : PAnsiChar;
                                 isc_arg8             : UShort;
-                                isc_arg9             : PChar):
-                                ISC_STATUS; {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
+                                isc_arg9             : PAnsiChar):
+                                ISC_STATUS; {$IF defined(WINDOWS) or defined(MSWINDOWS)} stdcall; {$ELSE} cdecl; {$ENDIF}
 begin
   Result := 0;
   IBError(ibxeIB60feature, ['isc_service_query']); {do not localize}
@@ -262,8 +265,8 @@ function isc_service_start_stub(status_vector        : PISC_STATUS;
                                 service_handle       : PISC_SVC_HANDLE;
                                 recv_handle          : PISC_SVC_HANDLE;
                                 isc_arg4             : UShort;
-                                isc_arg5             : PChar):
-                                ISC_STATUS; {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
+                                isc_arg5             : PAnsiChar):
+                                ISC_STATUS; {$IF defined(WINDOWS) or defined(MSWINDOWS)} stdcall; {$ELSE} cdecl; {$ENDIF}
 begin
   Result := 0;
   IBError(ibxeIB60feature, ['isc_service_start']); {do not localize}
@@ -271,42 +274,42 @@ end;
 
 procedure isc_encode_sql_date_stub(tm_date           : PCTimeStructure;
                  ib_date           : PISC_DATE);
-                                   {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
+                                   {$IF defined(WINDOWS) or defined(MSWINDOWS)} stdcall; {$ELSE} cdecl; {$ENDIF}
 begin
   IBError(ibxeIB60feature, ['isc_encode_sql_date']); {do not localize}
 end;
 
 procedure isc_encode_sql_time_stub(tm_date           : PCTimeStructure;
                    ib_time           : PISC_TIME);
-                                   {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
+                                   {$IF defined(WINDOWS) or defined(MSWINDOWS)} stdcall; {$ELSE} cdecl; {$ENDIF}
 begin
   IBError(ibxeIB60feature, ['isc_encode_sql_time']); {do not localize}
 end;
 
 procedure isc_encode_timestamp_stub(tm_date          : PCTimeStructure;
                   ib_timestamp     : PISC_TIMESTAMP);
-                                    {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
+                                    {$IF defined(WINDOWS) or defined(MSWINDOWS)} stdcall; {$ELSE} cdecl; {$ENDIF}
 begin
   IBError(ibxeIB60feature, ['isc_encode_sql_timestamp']); {do not localize}
 end;
 
 procedure isc_decode_sql_date_stub(ib_date           : PISC_DATE;
                                    tm_date           : PCTimeStructure);
-                                   {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
+                                   {$IF defined(WINDOWS) or defined(MSWINDOWS)} stdcall; {$ELSE} cdecl; {$ENDIF}
 begin
   IBError(ibxeIB60feature, ['isc_decode_sql_date']); {do not localize}
 end;
 
 procedure isc_decode_sql_time_stub(ib_time           : PISC_TIME;
                                    tm_date           : PCTimeStructure);
-                                   {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
+                                   {$IF defined(WINDOWS) or defined(MSWINDOWS)} stdcall; {$ELSE} cdecl; {$ENDIF}
 begin
   IBError(ibxeIB60feature, ['isc_decode_sql_time']); {do not localize}
 end;
 
 procedure isc_decode_timestamp_stub(ib_timestamp     : PISC_TIMESTAMP;
                                     tm_date          : PCTimeStructure);
-                                    {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
+                                    {$IF defined(WINDOWS) or defined(MSWINDOWS)} stdcall; {$ELSE} cdecl; {$ENDIF}
 begin
   IBError(ibxeIB60feature, ['isc_decode_timestamp']); {do not localize}
 end;
@@ -325,7 +328,7 @@ end;
 { TFB25ClientAPI }
 
 {$IFDEF UNIX}
-function TFB25ClientAPI.GetFirebirdLibList: string;
+function TFB25ClientAPI.GetFirebirdLibList: AnsiString;
 begin
   Result := 'libfbembed.so:libfbembed.so.2.5:libfbembed.so.2.1:libfbclient.so:libfbclient.so.2';
 end;
@@ -441,7 +444,7 @@ begin
   Result := TDPB.Create;
 end;
 
-function TFB25ClientAPI.OpenDatabase(DatabaseName: string; DPB: IDPB;
+function TFB25ClientAPI.OpenDatabase(DatabaseName: AnsiString; DPB: IDPB;
                                     RaiseExceptionOnConnectError: boolean): IAttachment;
 begin
    Result := TFB25Attachment.Create(DatabaseName,DPB,RaiseExceptionOnConnectError);
@@ -449,7 +452,7 @@ begin
      Result := nil;
 end;
 
-function TFB25ClientAPI.CreateDatabase(DatabaseName: string; DPB: IDPB;
+function TFB25ClientAPI.CreateDatabase(DatabaseName: AnsiString; DPB: IDPB;
   RaiseExceptionOnError: boolean): IAttachment;
 begin
   Result := TFB25Attachment.CreateDatabase(DatabaseName, DPB, RaiseExceptionOnError );
@@ -457,7 +460,7 @@ begin
      Result := nil;
 end;
 
-function TFB25ClientAPI.CreateDatabase(sql: string; aSQLDialect: integer;
+function TFB25ClientAPI.CreateDatabase(sql: AnsiString; aSQLDialect: integer;
   RaiseExceptionOnError: boolean): IAttachment;
 begin
   Result := TFB25Attachment.CreateDatabase(sql,aSQLDialect, RaiseExceptionOnError );
@@ -475,7 +478,7 @@ begin
   Result := TTPB.Create;
 end;
 
-function TFB25ClientAPI.GetServiceManager(ServerName: string;
+function TFB25ClientAPI.GetServiceManager(ServerName: AnsiString;
   Protocol: TProtocol; SPB: ISPB): IServiceManager;
 begin
   if HasServiceAPI then
@@ -512,7 +515,7 @@ begin
 {$IFDEF UNIX}
   Result := Pos('libfbembed',FFBLibraryName) = 1;
 {$ENDIF}
-{$IFDEF WINDOWS}
+{$IF defined(WINDOWS) or defined(MSWINDOWS)}
   Result := CompareText(FFBLibraryName,FIREBIRD_EMBEDDED) = 0;
 {$ENDIF}
 end;
@@ -527,17 +530,17 @@ begin
   Result := nil;
 end;
 
-function TFB25ClientAPI.GetImplementationVersion: string;
+function TFB25ClientAPI.GetImplementationVersion: AnsiString;
 begin
   Result := FBClientInterfaceVersion;
 end;
 
-function TFB25ClientAPI.DecodeInteger(bufptr: PChar; len: short): integer;
+function TFB25ClientAPI.DecodeInteger(bufptr: PByte; len: short): integer;
 begin
   Result := isc_portable_integer(bufptr,len);
 end;
 
-procedure TFB25ClientAPI.SQLEncodeDate(aDate: TDateTime; bufptr: PChar);
+procedure TFB25ClientAPI.SQLEncodeDate(aDate: TDateTime; bufptr: PByte);
 var
   tm_date: TCTimeStructure;
   Yr, Mn, Dy: Word;
@@ -554,7 +557,7 @@ begin
   isc_encode_sql_date(@tm_date, PISC_DATE(bufptr));
 end;
 
-function TFB25ClientAPI.SQLDecodeDate(bufptr: PChar): TDateTime;
+function TFB25ClientAPI.SQLDecodeDate(bufptr: PByte): TDateTime;
 var
   tm_date: TCTimeStructure;
 begin
@@ -569,7 +572,7 @@ begin
   end;
 end;
 
-procedure TFB25ClientAPI.SQLEncodeTime(aTime: TDateTime; bufptr: PChar);
+procedure TFB25ClientAPI.SQLEncodeTime(aTime: TDateTime; bufptr: PByte);
 var
   tm_date: TCTimeStructure;
   Hr, Mt, S, Ms: Word;
@@ -589,7 +592,7 @@ begin
     Inc(PISC_TIME(bufptr)^,Ms*10);
 end;
 
-function TFB25ClientAPI.SQLDecodeTime(bufptr: PChar): TDateTime;
+function TFB25ClientAPI.SQLDecodeTime(bufptr: PByte): TDateTime;
 var
   tm_date: TCTimeStructure;
   msecs: Word;
@@ -606,7 +609,7 @@ begin
   end;
 end;
 
-procedure TFB25ClientAPI.SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PChar);
+procedure TFB25ClientAPI.SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte);
 var
   tm_date: TCTimeStructure;
   Yr, Mn, Dy, Hr, Mt, S, Ms: Word;
@@ -626,7 +629,7 @@ begin
     Inc(PISC_TIMESTAMP(bufptr)^.timestamp_time,Ms*10);
 end;
 
-function TFB25ClientAPI.SQLDecodeDateTime(bufptr: PChar): TDateTime;
+function TFB25ClientAPI.SQLDecodeDateTime(bufptr: PByte): TDateTime;
 var
   tm_date: TCTimeStructure;
   msecs: Word;
@@ -650,4 +653,5 @@ begin
 end;
 
 end.
+
 

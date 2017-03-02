@@ -51,7 +51,7 @@ type
   end;
 
   Tfb_get_master_interface = function: IMaster;
-                              {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
+                              {$IF defined(WINDOWS) or defined(MSWINDOWS)} stdcall; {$ELSE} cdecl; {$ENDIF}
 
   { TFB30ClientAPI }
 
@@ -69,7 +69,7 @@ type
     procedure CheckPlugins;
   protected
     {$IFDEF UNIX}
-    function GetFirebirdLibList: string; override;
+    function GetFirebirdLibList: AnsiString; override;
     {$ENDIF}
    procedure LoadInterface; override;
   public
@@ -87,9 +87,9 @@ type
     function AllocateTPB: ITPB;
 
     {Database connections}
-    function OpenDatabase(DatabaseName: string; DPB: IDPB; RaiseExceptionOnConnectError: boolean=true): IAttachment;
-    function CreateDatabase(DatabaseName: string; DPB: IDPB; RaiseExceptionOnError: boolean=true): IAttachment; overload;
-    function CreateDatabase(sql: string; aSQLDialect: integer; RaiseExceptionOnError: boolean=true): IAttachment; overload;
+    function OpenDatabase(DatabaseName: AnsiString; DPB: IDPB; RaiseExceptionOnConnectError: boolean=true): IAttachment;
+    function CreateDatabase(DatabaseName: AnsiString; DPB: IDPB; RaiseExceptionOnError: boolean=true): IAttachment; overload;
+    function CreateDatabase(sql: AnsiString; aSQLDialect: integer; RaiseExceptionOnError: boolean=true): IAttachment; overload;
     {Start Transaction against multiple databases}
     function StartTransaction(Attachments: array of IAttachment;
              TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction; overload;
@@ -98,26 +98,26 @@ type
 
     {Service Manager}
     function AllocateSPB: ISPB;
-    function GetServiceManager(ServerName: string; Protocol: TProtocol; SPB: ISPB): IServiceManager;
+    function GetServiceManager(ServerName: AnsiString; Protocol: TProtocol; SPB: ISPB): IServiceManager;
 
     {Information}
     function HasServiceAPI: boolean;
     function HasRollbackRetaining: boolean;
     function IsEmbeddedServer: boolean; override;
-    function GetImplementationVersion: string;
+    function GetImplementationVersion: AnsiString;
 
     {Firebird 3 API}
     function HasMasterIntf: boolean;
     function GetIMaster: TObject;
 
     {Encode/Decode}
-    function DecodeInteger(bufptr: PChar; len: short): integer; override;
-    procedure SQLEncodeDate(aDate: TDateTime; bufptr: PChar); override;
-    function SQLDecodeDate(bufptr: PChar): TDateTime; override;
-    procedure SQLEncodeTime(aTime: TDateTime; bufptr: PChar); override;
-    function SQLDecodeTime(bufptr: PChar): TDateTime;  override;
-    procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PChar); override;
-    function SQLDecodeDateTime(bufptr: PChar): TDateTime; override;
+    function DecodeInteger(bufptr: PByte; len: short): integer; override;
+    procedure SQLEncodeDate(aDate: TDateTime; bufptr: PByte); override;
+    function SQLDecodeDate(bufptr: PByte): TDateTime; override;
+    procedure SQLEncodeTime(aTime: TDateTime; bufptr: PByte); override;
+    function SQLDecodeTime(bufptr: PByte): TDateTime;  override;
+    procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte); override;
+    function SQLDecodeDateTime(bufptr: PByte): TDateTime; override;
 
     {Firebird Interfaces}
     property MasterIntf: Firebird.IMaster read FMaster;
@@ -129,8 +129,8 @@ var Firebird30ClientAPI: TFB30ClientAPI;
 
 implementation
 
-uses FBParamBlock, FB30Attachment, dynlibs, FBMessages, FB30Services,
-  FB30Transaction;
+uses FBParamBlock, FB30Attachment, {$IFDEF FPC}dynlibs{$ELSE} windows{$ENDIF},
+     FBMessages, FB30Services, FB30Transaction;
 
 type
   PISC_DATE = ^ISC_DATE;
@@ -167,7 +167,7 @@ end;
 
 procedure TFB30ClientAPI.CheckPlugins;
 var FBConf: Firebird.IFirebirdConf;
-    Plugins: string;
+    Plugins: AnsiString;
     PluginsList: TStringList;
 begin
   FIsEmbeddedServer := false;
@@ -189,7 +189,7 @@ begin
 end;
 
 {$IFDEF UNIX}
-function TFB30ClientAPI.GetFirebirdLibList: string;
+function TFB30ClientAPI.GetFirebirdLibList: AnsiString;
 begin
   Result := 'libfbclient.so:libfbclient.so.2';
 end;
@@ -258,7 +258,7 @@ begin
   Result := TTPB.Create;
 end;
 
-function TFB30ClientAPI.OpenDatabase(DatabaseName: string; DPB: IDPB;
+function TFB30ClientAPI.OpenDatabase(DatabaseName: AnsiString; DPB: IDPB;
   RaiseExceptionOnConnectError: boolean): IAttachment;
 begin
   Result := TFB30Attachment.Create(DatabaseName, DPB, RaiseExceptionOnConnectError);
@@ -266,7 +266,7 @@ begin
     Result := nil;
 end;
 
-function TFB30ClientAPI.CreateDatabase(DatabaseName: string; DPB: IDPB;
+function TFB30ClientAPI.CreateDatabase(DatabaseName: AnsiString; DPB: IDPB;
   RaiseExceptionOnError: boolean): IAttachment;
 begin
   Result := TFB30Attachment.CreateDatabase(DatabaseName,DPB, RaiseExceptionOnError);
@@ -274,7 +274,7 @@ begin
     Result := nil;
 end;
 
-function TFB30ClientAPI.CreateDatabase(sql: string; aSQLDialect: integer;
+function TFB30ClientAPI.CreateDatabase(sql: AnsiString; aSQLDialect: integer;
   RaiseExceptionOnError: boolean): IAttachment;
 begin
   Result := TFB30Attachment.CreateDatabase(sql,aSQLDialect, RaiseExceptionOnError);
@@ -299,7 +299,7 @@ begin
   Result := TSPB.Create;
 end;
 
-function TFB30ClientAPI.GetServiceManager(ServerName: string;
+function TFB30ClientAPI.GetServiceManager(ServerName: AnsiString;
   Protocol: TProtocol; SPB: ISPB): IServiceManager;
 begin
   Result := TFB30ServiceManager.Create(ServerName,Protocol,SPB);
@@ -330,24 +330,24 @@ begin
   Result := FIsEmbeddedServer;
 end;
 
-function TFB30ClientAPI.GetImplementationVersion: string;
+function TFB30ClientAPI.GetImplementationVersion: AnsiString;
 begin
   Result := Format('3.%d',[UtilIntf.GetClientVersion]);
 end;
 
-function TFB30ClientAPI.DecodeInteger(bufptr: PChar; len: short): integer;
-var P: PChar;
+function TFB30ClientAPI.DecodeInteger(bufptr: PByte; len: short): integer;
+var P: PByte;
 begin
   Result := 0;
   P := Bufptr + len - 1;
   while P >= bufptr do
   begin
-    Result := (Result shl 8 ) or byte(P^);
+    Result := (Result shl 8 ) or P^;
     Dec(P);
   end;
 end;
 
-procedure TFB30ClientAPI.SQLEncodeDate(aDate: TDateTime; bufptr: PChar);
+procedure TFB30ClientAPI.SQLEncodeDate(aDate: TDateTime; bufptr: PByte);
 var
   Yr, Mn, Dy: Word;
 begin
@@ -355,9 +355,9 @@ begin
    PISC_Date(Bufptr)^ := UtilIntf.encodeDate(Yr, Mn, Dy);
 end;
 
-function TFB30ClientAPI.SQLDecodeDate(bufptr: PChar): TDateTime;
+function TFB30ClientAPI.SQLDecodeDate(bufptr: PByte): TDateTime;
 var
-  Yr, Mn, Dy: Word;
+  Yr, Mn, Dy: cardinal;
 begin
   UtilIntf.decodeDate(PISC_DATE(bufptr)^,@Yr, @Mn, @Dy);
   try
@@ -369,7 +369,7 @@ begin
   end;
 end;
 
-procedure TFB30ClientAPI.SQLEncodeTime(aTime: TDateTime; bufptr: PChar);
+procedure TFB30ClientAPI.SQLEncodeTime(aTime: TDateTime; bufptr: PByte);
 var
   Hr, Mt, S, Ms: Word;
 begin
@@ -377,9 +377,9 @@ begin
   PISC_TIME(bufptr)^ :=  UtilIntf.encodeTime(Hr, Mt, S, Ms*10);
 end;
 
-function TFB30ClientAPI.SQLDecodeTime(bufptr: PChar): TDateTime;
+function TFB30ClientAPI.SQLDecodeTime(bufptr: PByte): TDateTime;
 var
-  Hr, Mt, S, Ms: Word;
+  Hr, Mt, S, Ms: cardinal;
 begin
   UtilIntf.decodeTime(PISC_TIME(bufptr)^,@Hr, @Mt, @S, @Ms);
   try
@@ -391,19 +391,20 @@ begin
   end;
 end;
 
-procedure TFB30ClientAPI.SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PChar);
+procedure TFB30ClientAPI.SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte);
 begin
   SQLEncodeDate(aDateTime,bufPtr);
   Inc(bufptr,sizeof(ISC_DATE));
   SQLEncodeTime(aDateTime,bufPtr);
 end;
 
-function TFB30ClientAPI.SQLDecodeDateTime(bufptr: PChar): TDateTime;
+function TFB30ClientAPI.SQLDecodeDateTime(bufptr: PByte): TDateTime;
 begin
   Result := SQLDecodeDate(bufPtr);
   Inc(bufptr,sizeof(ISC_DATE));
-  Result += SQLDecodeTime(bufPtr);
+  Result := Result + SQLDecodeTime(bufPtr);
 end;
 
 end.
+
 

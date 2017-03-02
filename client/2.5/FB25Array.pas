@@ -27,7 +27,7 @@
 unit FB25Array;
 
 {$IFDEF FPC}
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$codepage UTF8}
 {$interfaces COM}
 {$ENDIF}
@@ -47,7 +47,7 @@ type
     FCodePage: TSystemCodePage;
   protected
     procedure LoadMetaData(aAttachment: IAttachment; aTransaction: ITransaction;
-                   relationName, columnName: string); override;
+                   relationName, columnName: AnsiString); override;
   public
     function GetCharSetID: cardinal; override;
     function GetCodePage: TSystemCodePage; override;
@@ -80,18 +80,22 @@ const
   { TFB25ArrayMetaData }
 
 procedure TFB25ArrayMetaData.LoadMetaData(aAttachment: IAttachment;
-  aTransaction: ITransaction; relationName, columnName: string);
+  aTransaction: ITransaction; relationName, columnName: AnsiString);
 var
   DBHandle: TISC_DB_HANDLE;
   TRHandle: TISC_TR_HANDLE;
   stmt: IStatement;
   CharWidth: integer;
+  RelName: AnsiString;
+  ColName: AnsiString;
 begin
   DBHandle := (aAttachment as TFB25Attachment).Handle;
   TRHandle := (aTransaction as TFB25Transaction).Handle;
+  RelName := AnsiUpperCase(relationName);
+  ColName := AnsiUpperCase(columnName);
   with Firebird25ClientAPI do
     if isc_array_lookup_bounds(StatusVector,@(DBHandle),@(TRHandle),
-        PChar(AnsiUpperCase(relationName)),PChar(AnsiUpperCase(columnName)),@FArrayDesc) > 0 then
+        PAnsiChar(RelName),PAnsiChar(ColName),@FArrayDesc) > 0 then
           IBDatabaseError;
 
   if (GetSQLType = SQL_TEXT) or (GetSQLType = SQL_VARYING) then
@@ -125,7 +129,7 @@ begin
   with aAttachment as TFBAttachment do
   begin
     if HasDefaultCharSet  and FirebirdClientAPI.CharSetWidth(CharSetID,CharWidth) then
-      FArrayDesc.array_desc_length *= CharWidth;
+      FArrayDesc.array_desc_length := FArrayDesc.array_desc_length * CharWidth;
   end;
 end;
 

@@ -41,8 +41,7 @@ unit IBUtils;
 interface
 
 uses
-{$IFDEF WINDOWS }
-  Windows,
+{$IF defined(WINDOWS) or defined(MSWINDOWS)}  Windows,
 {$ELSE}
   unix,
 {$ENDIF}
@@ -258,17 +257,17 @@ const
 
 function Max(n1, n2: Integer): Integer;
 function Min(n1, n2: Integer): Integer;
-function RandomString(iLength: Integer): String;
+function RandomString(iLength: Integer): AnsiString;
 function RandomInteger(iLow, iHigh: Integer): Integer;
-function StripString(st: String; CharsToStrip: String): String;
-function FormatIdentifier(Dialect: Integer; Value: String): String;
-function FormatIdentifierValue(Dialect: Integer; Value: String): String;
-function FormatIdentifierValueNC(Dialect: Integer; Value: String): String;
-function ExtractIdentifier(Dialect: Integer; Value: String): String;
-function QuoteIdentifier(Dialect: Integer; Value: String): String;
-function QuoteIdentifierIfNeeded(Dialect: Integer; Value: String): String;
-function Space2Underscore(s: string): string;
-function SQLSafeString(const s: string): string;
+function StripString(st: AnsiString; CharsToStrip: AnsiString): AnsiString;
+function FormatIdentifier(Dialect: Integer; Value: AnsiString): AnsiString;
+function FormatIdentifierValue(Dialect: Integer; Value: AnsiString): AnsiString;
+function FormatIdentifierValueNC(Dialect: Integer; Value: AnsiString): AnsiString;
+function ExtractIdentifier(Dialect: Integer; Value: AnsiString): AnsiString;
+function QuoteIdentifier(Dialect: Integer; Value: AnsiString): AnsiString;
+function QuoteIdentifierIfNeeded(Dialect: Integer; Value: AnsiString): AnsiString;
+function Space2Underscore(s: AnsiString): AnsiString;
+function SQLSafeString(const s: AnsiString): AnsiString;
 
 implementation
 
@@ -288,7 +287,7 @@ begin
     result := n2;
 end;
 
-function RandomString(iLength: Integer): String;
+function RandomString(iLength: Integer): AnsiString;
 begin
   result := '';
   while Length(result) < iLength do
@@ -302,7 +301,7 @@ begin
   result := Trunc(Random(iHigh - iLow)) + iLow;
 end;
 
-function StripString(st: String; CharsToStrip: String): String;
+function StripString(st: AnsiString; CharsToStrip: AnsiString): AnsiString;
 var
   i: Integer;
 begin
@@ -313,7 +312,7 @@ begin
   end;
 end;
 
-function FormatIdentifier(Dialect: Integer; Value: String): String;
+function FormatIdentifier(Dialect: Integer; Value: AnsiString): AnsiString;
 begin
   Value := Trim(Value);
   if Dialect = 1 then
@@ -326,7 +325,7 @@ begin
   Result := Value;
 end;
 
-function FormatIdentifierValue(Dialect: Integer; Value: String): String;
+function FormatIdentifierValue(Dialect: Integer; Value: AnsiString): AnsiString;
 begin
   Value := Trim(Value);
   if Dialect = 1 then
@@ -345,7 +344,7 @@ begin
   Result := Value;
 end;
 
-function FormatIdentifierValueNC(Dialect: Integer; Value: String): String;
+function FormatIdentifierValueNC(Dialect: Integer; Value: AnsiString): AnsiString;
 begin
   Value := Trim(Value);
   if Dialect = 1 then
@@ -364,7 +363,7 @@ begin
   Result := Value;
 end;
 
-function ExtractIdentifier(Dialect: Integer; Value: String): String;
+function ExtractIdentifier(Dialect: Integer; Value: AnsiString): AnsiString;
 begin
   Value := Trim(Value);
   if Dialect = 1 then
@@ -383,7 +382,7 @@ begin
   Result := Value;
 end;
 
-function IsReservedWord(w: string): boolean;
+function IsReservedWord(w: AnsiString): boolean;
 var i: integer;
 begin
      Result := true;
@@ -393,7 +392,7 @@ begin
      Result := false;
 end;
 
-function QuoteIdentifier(Dialect: Integer; Value: String): String;
+function QuoteIdentifier(Dialect: Integer; Value: AnsiString): AnsiString;
 begin
   if Dialect = 1 then
     Value := AnsiUpperCase(Trim(Value))
@@ -402,7 +401,7 @@ begin
   Result := Value;
 end;
 
-function QuoteIdentifierIfNeeded(Dialect: Integer; Value: String): String;
+function QuoteIdentifierIfNeeded(Dialect: Integer; Value: AnsiString): AnsiString;
 begin
   if (Dialect = 3) and
     ((AnsiUpperCase(Value) <> Value) or IsReservedWord(Value)) then
@@ -411,7 +410,7 @@ begin
     Result := Value
 end;
 
-function Space2Underscore(s: string): string;
+function Space2Underscore(s: AnsiString): AnsiString;
 var
    k: integer;
 begin
@@ -421,7 +420,7 @@ begin
             Result[k] := '_';
 end;
 
-function SQLSafeString(const s: string): string;
+function SQLSafeString(const s: AnsiString): AnsiString;
 begin
   Result := StringReplace(s,'''','''''',[rfReplaceAll]);
 end;

@@ -62,14 +62,14 @@
 unit FB25Events;
 
 {$IFDEF FPC}
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$interfaces COM}
 {$ENDIF}
 
 interface
 
 uses
-  {$IFDEF WINDOWS}Windows, {$ENDIF}Classes, SysUtils, IB, FB25ClientAPI, FB25Attachment,
+  {$IF defined(WINDOWS) or defined(MSWINDOWS)}Windows, {$ENDIF}Classes, SysUtils, IB, FB25ClientAPI, FB25Attachment,
   IBExternals, IBHeader, syncobjs, FBEvents;
 
 type
@@ -80,7 +80,7 @@ type
   TEventhandlerInterface = class
   private
     FOwner: TFB25Events;
-    {$IFDEF WINDOWS}
+    {$IF defined(WINDOWS) or defined(MSWINDOWS)}
     {Make direct use of Windows API as TEventObject don't seem to work under
      Windows!}
     FEventHandler: THandle;
@@ -90,7 +90,7 @@ type
   public
     constructor Create(aOwner: TFB25Events);
     destructor Destroy; override;
-    procedure eventCallbackFunction(length: short; updated: PChar);
+    procedure eventCallbackFunction(length: short; updated: PAnsiChar);
     procedure WaitForEvent;
     procedure CancelWait;
  end;
@@ -150,11 +150,10 @@ type
  constructor TEventHandlerThread.Create(Owner: TFB25Events;
    EventHandler: TEventhandlerInterface);
  begin
-   inherited Create(true);
+   inherited Create(false);
    FOwner := Owner;
    FEventHandler := EventHandler;
    FreeOnTerminate := true;
-   Start;
  end;
 
  procedure TEventHandlerThread.Terminate;
@@ -165,7 +164,7 @@ type
 
   {This procedure is used for the event call back - note the cdecl }
 
- procedure IBEventCallback( ptr: pointer; length: short; updated: PChar); cdecl;
+ procedure IBEventCallback( ptr: pointer; length: short; updated: PAnsiChar); cdecl;
  begin
    if (ptr = nil) or (length = 0) or (updated = nil) then
      Exit;
@@ -178,7 +177,7 @@ type
 constructor TEventhandlerInterface.Create(aOwner: TFB25Events);
 var
   PSa : PSecurityAttributes;
-{$IFDEF WINDOWS}
+{$IF defined(WINDOWS) or defined(MSWINDOWS)}
   Sd : TSecurityDescriptor;
   Sa : TSecurityAttributes;
 begin
@@ -194,7 +193,7 @@ begin
   PSa:= nil;
 {$ENDIF}
   inherited Create;
-{$IFDEF WINDOWS}
+{$IF defined(WINDOWS) or defined(MSWINDOWS)}
   FEventHandler := CreateEvent(PSa,false,false,nil);
 {$ELSE}
   CreateGuid(GUID);
@@ -205,7 +204,7 @@ end;
 
 destructor TEventhandlerInterface.Destroy;
 begin
-{$IFDEF WINDOWS}
+{$IF defined(WINDOWS) or defined(MSWINDOWS)}
   CloseHandle(FEventHandler);
 {$ELSE}
   if assigned(FEventWaiting) then FEventWaiting.Free;
@@ -214,7 +213,7 @@ begin
 end;
 
 procedure TEventhandlerInterface.eventCallbackFunction(length: short;
-  updated: PChar);
+  updated: PAnsiChar);
 begin
   FOwner.FCriticalSection.Enter;
   try
@@ -224,7 +223,7 @@ begin
     FOwner.FCriticalSection.Leave
   end;
 //  writeln('Set Event');
-  {$IFDEF WINDOWS}
+  {$IF defined(WINDOWS) or defined(MSWINDOWS)}
   SetEvent(FEventHandler);
   {$ELSE}
   FEventWaiting.SetEvent;
@@ -233,7 +232,7 @@ end;
 
 procedure TEventhandlerInterface.WaitForEvent;
 begin
-  {$IFDEF WINDOWS}
+  {$IF defined(WINDOWS) or defined(MSWINDOWS)}
   WaitForSingleObject(FEventHandler,INFINITE);
   {$ELSE}
   FEventWaiting.WaitFor(INFINITE);
@@ -243,7 +242,7 @@ end;
 
 procedure TEventhandlerInterface.CancelWait;
 begin
-  {$IFDEF WINDOWS}
+  {$IF defined(WINDOWS) or defined(MSWINDOWS)}
   SetEvent(FEventHandler);
   {$ELSE}
   FEventWaiting.SetEvent;

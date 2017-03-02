@@ -27,7 +27,7 @@
 unit FB30Services;
 
 {$IFDEF FPC}
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$interfaces COM}
 {$ENDIF}
 
@@ -46,7 +46,7 @@ type
     procedure CheckActive;
     procedure CheckInactive;
   protected
-    procedure InternalAttach(ConnectString: string); override;
+    procedure InternalAttach(ConnectString: AnsiString); override;
   public
     property ServiceIntf: Firebird.IService read FServiceIntf;
 
@@ -76,18 +76,18 @@ begin
     IBError(ibxeServiceInActive, [nil]);
 end;
 
-procedure TFB30ServiceManager.InternalAttach(ConnectString: String);
+procedure TFB30ServiceManager.InternalAttach(ConnectString: AnsiString);
 begin
   with Firebird30ClientAPI do
   if FSPB = nil then
   begin
-    FServiceIntf := ProviderIntf.attachServiceManager(StatusIntf, PChar(ConnectString), 0, nil);
+    FServiceIntf := ProviderIntf.attachServiceManager(StatusIntf, PAnsiChar(ConnectString), 0, nil);
     Check4DataBaseError;
   end
   else
   begin
     FServiceIntf := ProviderIntf.attachServiceManager(StatusIntf,
-                                               PChar(ConnectString),
+                                               PAnsiChar(ConnectString),
                                                (FSPB as TSPB).getDataLength,
                                                BytePtr((FSPB as TSPB).getBuffer));
     Check4DataBaseError;

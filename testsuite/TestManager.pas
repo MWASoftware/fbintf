@@ -1,7 +1,9 @@
 unit TestManager;
 
-{$mode objfpc}{$H+}
+{$IFDEF FPC}
+{$mode delphi}
 {$codepage utf8}
+{$ENDIF}
 
 interface
 
@@ -16,12 +18,11 @@ type
   TTestBase = class
   private
     FOwner: TTestManager;
-    FOutputFi: TFileStream;
   protected
     FHexStrings: boolean;
     function ReportResults(Statement: IStatement): IResultSet;
     procedure ReportResult(aValue: IResults);
-    procedure PrintHexString(s: string);
+    procedure PrintHexString(s: AnsiString);
     procedure PrintDPB(DPB: IDPB);
     procedure PrintMetaData(meta: IMetaData);
     procedure ParamInfo(SQLParams: ISQLParams);
@@ -35,14 +36,14 @@ type
     procedure WriteLimboTransactions(limbo: IServiceQueryResultItem);
     procedure WriteDBInfo(DBInfo: IDBInformation);
     procedure WriteBytes(Bytes: TByteArray);
-    procedure WriteOperationCounts(Category: string; ops: TDBOperationCounts);
+    procedure WriteOperationCounts(Category: AnsiString; ops: TDBOperationCounts);
     procedure WritePerfStats(stats: TPerfCounters);
     procedure CheckActivity(Attachment: IAttachment); overload;
     procedure CheckActivity(Transaction: ITransaction); overload;
   public
     constructor Create(aOwner: TTestManager);  virtual;
-    function TestTitle: string; virtual; abstract;
-    procedure RunTest(CharSet: string; SQLDialect: integer); virtual; abstract;
+    function TestTitle: AnsiString; virtual; abstract;
+    procedure RunTest(CharSet: AnsiString; SQLDialect: integer); virtual; abstract;
     property Owner: TTestManager read FOwner;
   end;
 
@@ -53,35 +54,35 @@ type
   TTestManager = class
   private
     FTests: TList;
-    FEmployeeDatabaseName: string;
-    FNewDatabaseName: string;
-    FSecondNewDatabaseName: string;
-    FUserName: string;
-    FPassword: string;
-    FBackupFileName: string;
+    FEmployeeDatabaseName: AnsiString;
+    FNewDatabaseName: AnsiString;
+    FSecondNewDatabaseName: AnsiString;
+    FUserName: AnsiString;
+    FPassword: AnsiString;
+    FBackupFileName: AnsiString;
     FShowStatistics: boolean;
     procedure CleanUp;
   public
     constructor Create;
     destructor Destroy; override;
-    function GetUserName: string;
-    function GetPassword: string;
-    function GetEmployeeDatabaseName: string;
-    function GetNewDatabaseName: string;
-    function GetSecondNewDatabaseName: string;
-    function GetBackupFileName: string;
+    function GetUserName: AnsiString;
+    function GetPassword: AnsiString;
+    function GetEmployeeDatabaseName: AnsiString;
+    function GetNewDatabaseName: AnsiString;
+    function GetSecondNewDatabaseName: AnsiString;
+    function GetBackupFileName: AnsiString;
     procedure RunAll;
     procedure Run(TestID: integer);
-    procedure SetUserName(aValue: string);
-    procedure SetPassword(aValue: string);
-    procedure SetEmployeeDatabaseName(aValue: string);
-    procedure SetNewDatabaseName(aValue: string);
-    procedure SetSecondNewDatabaseName(aValue: string);
-    procedure SetBackupFileName(aValue: string);
+    procedure SetUserName(aValue: AnsiString);
+    procedure SetPassword(aValue: AnsiString);
+    procedure SetEmployeeDatabaseName(aValue: AnsiString);
+    procedure SetNewDatabaseName(aValue: AnsiString);
+    procedure SetSecondNewDatabaseName(aValue: AnsiString);
+    procedure SetBackupFileName(aValue: AnsiString);
     property ShowStatistics: boolean read FShowStatistics write FShowStatistics;
   end;
 
-const
+var
   TestMgr: TTestManager = nil;
 
 var OutFile: text;
@@ -90,6 +91,17 @@ procedure RegisterTest(aTest: TTest);
 
 implementation
 
+{$IFDEF MSWINDOWS}
+uses windows;
+
+function GetTempDir: AnsiString;
+var
+  tempFolder: array[0..MAX_PATH] of Char;
+begin
+  GetTempPath(MAX_PATH, @tempFolder);
+  result := StrPas(tempFolder);
+end;
+{$ENDIF}
 
 procedure RegisterTest(aTest: TTest);
 begin
@@ -121,7 +133,7 @@ end;
 
 procedure TTestBase.ReportResult(aValue: IResults);
 var i: integer;
-    s: string;
+    s: AnsiString;
 begin
   for i := 0 to aValue.getCount - 1 do
   begin
@@ -189,7 +201,7 @@ begin
   end;
 end;
 
-procedure TTestBase.PrintHexString(s: string);
+procedure TTestBase.PrintHexString(s: AnsiString);
 var i: integer;
 begin
   for i := 1 to length(s) do
@@ -312,7 +324,7 @@ end;
 
 function TTestBase.WriteServiceQueryResult(QueryResult: IServiceQueryResults): boolean;
 var i: integer;
-    line: string;
+    line: AnsiString;
 begin
   Result := true;
   for i := 0 to QueryResult.GetCount - 1 do
@@ -471,10 +483,10 @@ procedure TTestBase.WriteDBInfo(DBInfo: IDBInformation);
 var i, j: integer;
     bytes: TByteArray;
     ConType: integer;
-    DBFileName: string;
-    DBSiteName: string;
+    DBFileName: AnsiString;
+    DBSiteName: AnsiString;
     Version: byte;
-    VersionString: string;
+    VersionString: AnsiString;
     Users: TStringList;
 begin
   for i := 0 to DBInfo.GetCount - 1 do
@@ -575,7 +587,7 @@ begin
   writeln(OutFile);
 end;
 
-procedure TTestBase.WriteOperationCounts(Category: string;
+procedure TTestBase.WriteOperationCounts(Category: AnsiString;
   ops: TDBOperationCounts);
 var i: integer;
 begin
@@ -652,32 +664,32 @@ begin
   inherited Destroy;
 end;
 
-function TTestManager.GetUserName: string;
+function TTestManager.GetUserName: AnsiString;
 begin
   Result := FUserName;
 end;
 
-function TTestManager.GetPassword: string;
+function TTestManager.GetPassword: AnsiString;
 begin
   Result := FPassword;
 end;
 
-function TTestManager.GetEmployeeDatabaseName: string;
+function TTestManager.GetEmployeeDatabaseName: AnsiString;
 begin
   Result := FEmployeeDatabaseName;
 end;
 
-function TTestManager.GetNewDatabaseName: string;
+function TTestManager.GetNewDatabaseName: AnsiString;
 begin
   Result := FNewDatabaseName;
 end;
 
-function TTestManager.GetSecondNewDatabaseName: string;
+function TTestManager.GetSecondNewDatabaseName: AnsiString;
 begin
   Result := FSecondNewDatabaseName;
 end;
 
-function TTestManager.GetBackupFileName: string;
+function TTestManager.GetBackupFileName: AnsiString;
 begin
   Result := FBackupFileName;
 end;
@@ -690,7 +702,7 @@ begin
     with TTestBase(FTests[i]) do
   begin
     writeln(OutFile,'Running ' + TestTitle);
-    writeln(stderr,'Running ' + TestTitle);
+    writeln(ErrOutput,'Running ' + TestTitle);
     try
       RunTest('UTF8',3);
     except on E:Exception do
@@ -710,7 +722,7 @@ begin
   with TTestBase(FTests[TestID-1]) do
   begin
     writeln(OutFile,'Running ' + TestTitle);
-    writeln(stderr,'Running ' + TestTitle);
+    writeln(ErrOutput,'Running ' + TestTitle);
     try
       RunTest('UTF8',3);
     except on E:Exception do
@@ -724,32 +736,32 @@ begin
   end;
 end;
 
-procedure TTestManager.SetUserName(aValue: string);
+procedure TTestManager.SetUserName(aValue: AnsiString);
 begin
   FUserName := aValue;
 end;
 
-procedure TTestManager.SetPassword(aValue: string);
+procedure TTestManager.SetPassword(aValue: AnsiString);
 begin
   FPassword := aValue;
 end;
 
-procedure TTestManager.SetEmployeeDatabaseName(aValue: string);
+procedure TTestManager.SetEmployeeDatabaseName(aValue: AnsiString);
 begin
   FEmployeeDatabaseName := aValue;
 end;
 
-procedure TTestManager.SetNewDatabaseName(aValue: string);
+procedure TTestManager.SetNewDatabaseName(aValue: AnsiString);
 begin
   FNewDatabaseName := aValue;
 end;
 
-procedure TTestManager.SetSecondNewDatabaseName(aValue: string);
+procedure TTestManager.SetSecondNewDatabaseName(aValue: AnsiString);
 begin
   FSecondNewDatabaseName := aValue;
 end;
 
-procedure TTestManager.SetBackupFileName(aValue: string);
+procedure TTestManager.SetBackupFileName(aValue: AnsiString);
 begin
   FBackupFileName := aValue;
 end;

@@ -62,7 +62,7 @@
 unit FBMessages;
 
 {$IFDEF FPC}
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$codepage UTF8}
 {$ENDIF}
 
@@ -237,10 +237,11 @@ type
       ibxeInvalidParamCount,
       ibxeInvalidVariantType,
       ibxeServiceRunning,
-      ibxeUniqueRelationReqd
+      ibxeUniqueRelationReqd,
+      ibxeInterfaceNotSupported
       );
 
-function GetErrorMessage(ErrMess: TIBClientError): string;
+function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
 
 resourcestring
   { generic strings used in code }
@@ -433,6 +434,7 @@ resourcestring
   SInvalidVariantType = 'Invalid variant type';
   SServiceRunning = 'Cannot start a new service while an existing service is running';
   SUniqueRelationReqd = 'All Output Fields must derived from the same table';
+  SInterfaceNotSupported = 'Interface not supported; Guid %s not found';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -595,10 +597,11 @@ const
     SInvalidParamCount,
     SInvalidVariantType,
     SServiceRunning,
-    SUniqueRelationReqd
+    SUniqueRelationReqd,
+    SInterfaceNotSupported
   );
 
-function GetErrorMessage(ErrMess: TIBClientError): string;
+function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
 begin
   Result := IBErrorMessages[ErrMess];
 end;

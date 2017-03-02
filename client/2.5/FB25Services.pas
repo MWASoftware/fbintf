@@ -62,7 +62,7 @@
 unit FB25Services;
 
 {$IFDEF FPC}
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$interfaces COM}
 {$ENDIF}
 
@@ -81,7 +81,7 @@ type
     procedure CheckActive;
     procedure CheckInactive;
   protected
-    procedure InternalAttach(ConnectString: string); override;
+    procedure InternalAttach(ConnectString: AnsiString); override;
   public
     property Handle: TISC_SVC_HANDLE read FHandle;
 
@@ -111,19 +111,19 @@ begin
     IBError(ibxeServiceInActive, [nil]);
 end;
 
-procedure TFB25ServiceManager.InternalAttach(ConnectString: String);
+procedure TFB25ServiceManager.InternalAttach(ConnectString: AnsiString);
 begin
   with Firebird25ClientAPI do
   if FSPB = nil then
   begin
     if isc_service_attach(StatusVector, Length(ConnectString),
-                         PChar(ConnectString), @FHandle, 0, nil) > 0 then
+                         PAnsiChar(ConnectString), @FHandle, 0, nil) > 0 then
       IBDataBaseError;
   end
   else
   begin
     if isc_service_attach(StatusVector, Length(ConnectString),
-                           PChar(ConnectString), @FHandle,
+                           PAnsiChar(ConnectString), @FHandle,
                            (FSPB as TSPB).getDataLength,
                            (FSPB as TSPB).getBuffer) > 0 then
       IBDataBaseError;

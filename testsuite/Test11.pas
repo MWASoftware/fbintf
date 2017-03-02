@@ -1,7 +1,9 @@
 unit Test11;
 
-{$mode objfpc}{$H+}
+{$IFDEF FPC}
+{$mode delphi}
 {$codepage utf8}
+{$ENDIF}
 
 {Test 11: Services API}
 
@@ -33,18 +35,18 @@ type
 
   TTest11 = class(TTestBase)
   private
-    procedure GetStatistics(Service: IServiceManager; DBName: string);
-    procedure BackupRestore(Service: IServiceManager; DBName: string);
+    procedure GetStatistics(Service: IServiceManager; DBName: AnsiString);
+    procedure BackupRestore(Service: IServiceManager; DBName: AnsiString);
   public
-    function TestTitle: string; override;
-    procedure RunTest(CharSet: string; SQLDialect: integer); override;
+    function TestTitle: AnsiString; override;
+    procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
   end;
 
 implementation
 
 { TTest11 }
 
-procedure TTest11.GetStatistics(Service: IServiceManager; DBName: string);
+procedure TTest11.GetStatistics(Service: IServiceManager; DBName: AnsiString);
 var Req: ISRB;
     Results: IServiceQueryResults;
 begin
@@ -158,7 +160,7 @@ begin
   writeln(OutFile);
 end;
 
-procedure TTest11.BackupRestore(Service: IServiceManager; DBName: string);
+procedure TTest11.BackupRestore(Service: IServiceManager; DBName: AnsiString);
 var Req: ISRB;
     Results: IServiceQueryResults;
     BakFile: TFileStream;
@@ -168,7 +170,7 @@ var Req: ISRB;
     bytesWritten: integer;
     bytesAvailable: integer;
     i: integer;
-    RestoreDBName: string;
+    RestoreDBName: AnsiString;
     Attachment: IAttachment;
     DPB: IDPB;
 begin
@@ -224,7 +226,7 @@ begin
         SQPB := Service.AllocateSQPB;
         if ReqLength > 0 then
             bytesWritten := SQPB.Add(isc_info_svc_line).CopyFrom(BakFile,ReqLength);
-        bytesAvailable -= bytesWritten;
+        bytesAvailable := bytesAvailable - bytesWritten;
         Req := Service.AllocateSRB;
         Req.Add(isc_info_svc_stdin);
         Req.Add(isc_info_svc_line);
@@ -253,17 +255,17 @@ begin
   writeln(OutFile,'Database Dropped');
 end;
 
-function TTest11.TestTitle: string;
+function TTest11.TestTitle: AnsiString;
 begin
   Result := 'Test 11: Services API';
 end;
 
-procedure TTest11.RunTest(CharSet: string; SQLDialect: integer);
+procedure TTest11.RunTest(CharSet: AnsiString; SQLDialect: integer);
 var SPB: ISPB;
     Service: IServiceManager;
     I: integer;
-    ServerName: string;
-    DBName: string;
+    ServerName: AnsiString;
+    DBName: AnsiString;
 begin
   if not FirebirdAPI.HasServiceAPI then Exit;
 

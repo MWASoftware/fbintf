@@ -1,7 +1,9 @@
 unit Test10;
 
-{$mode objfpc}{$H+}
+{$IFDEF FPC}
+{$mode delphi}
 {$codepage utf8}
+{$ENDIF}
 
 {Test 10: Event Handling}
 
@@ -38,8 +40,8 @@ type
     procedure EventReport(Sender: IEvents);
     procedure ShowEventCounts(Intf: IEvents);
   public
-    function TestTitle: string; override;
-    procedure RunTest(CharSet: string; SQLDialect: integer); override;
+    function TestTitle: AnsiString; override;
+    procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
   end;
 
 
@@ -58,14 +60,14 @@ begin
   FEventSignalled := false;
   EventHandler := Attachment.GetEventHandler('TESTEVENT');
   writeln(OutFile,'Call Async Wait');
-  EventHandler.AsyncWaitForEvent(@EventReport);
+  EventHandler.AsyncWaitForEvent(EventReport);
   writeln(OutFile,'Async Wait Called');
   sleep(500);
   if FEventSignalled then
   begin
     writeln(OutFile,'First Event - usually ignored');
     FEventSignalled := false;
-    EventHandler.AsyncWaitForEvent(@EventReport);
+    EventHandler.AsyncWaitForEvent(EventReport);
     sleep(100);
     if FEventSignalled then
     begin
@@ -88,7 +90,7 @@ begin
     FEventSignalled := false
   end;
   writeln(OutFile,'Call Async Wait');
-  EventHandler.AsyncWaitForEvent(@EventReport);
+  EventHandler.AsyncWaitForEvent(EventReport);
   writeln(OutFile,'Async Wait Called');
   sleep(500);
   if FEventSignalled then
@@ -96,7 +98,7 @@ begin
     writeln(OutFile,'Deferred Events Caught');
     ShowEventCounts(EventHandler);
     FEventSignalled := false;
-    EventHandler.AsyncWaitForEvent(@EventReport);
+    EventHandler.AsyncWaitForEvent(EventReport);
     sleep(100);
     if FEventSignalled then
       writeln(OutFile,'Unexpected Event 3');
@@ -108,7 +110,7 @@ begin
 
   FEventSignalled := false;
   writeln(OutFile,'Async Wait: Test Cancel');
-  EventHandler.AsyncWaitForEvent(@EventReport);
+  EventHandler.AsyncWaitForEvent(EventReport);
   writeln(OutFile,'Async Wait Called');
   EventHandler.Cancel;
   writeln(OutFile,'Event Cancelled');
@@ -144,12 +146,12 @@ begin
     writeln(OutFile,'Event Counts: ',EventCounts[i].EventName,', Count = ',EventCounts[i].Count);
 end;
 
-function TTest10.TestTitle: string;
+function TTest10.TestTitle: AnsiString;
 begin
   Result := 'Test 10: Event Handling';
 end;
 
-procedure TTest10.RunTest(CharSet: string; SQLDialect: integer);
+procedure TTest10.RunTest(CharSet: AnsiString; SQLDialect: integer);
 var Attachment: IAttachment;
     DPB: IDPB;
 begin

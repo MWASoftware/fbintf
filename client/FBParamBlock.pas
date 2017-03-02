@@ -27,7 +27,7 @@
 unit FBParamBlock;
 
 {$IFDEF FPC}
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$interfaces COM}
 {$ENDIF}
 
@@ -47,7 +47,7 @@ type
     {Describes a Clumplet in the buffer. FBufPtr always points to the clumplet id
      the rest of the clumplet up to the FBufLength is data. The data format is
      given by FDataType}
-    FBufPtr: PChar;
+    FBufPtr: PByte;
     FBuflength: integer;
     FDataType: TParamDataType;
   end;
@@ -64,7 +64,7 @@ type
     procedure MoveBy(Item: PParamBlockItemData; delta: integer);
     procedure UpdateRequestItemSize(Item: TParamBlockItem; NewSize: integer);
   protected
-    FBuffer: PChar;
+    FBuffer: PByte;
     FDataLength: integer;
     function Add(ParamType: byte): PParamBlockItemData;
     function Find(ParamType: byte): PParamBlockItemData;
@@ -72,7 +72,7 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-    function getBuffer: PChar;
+    function getBuffer: PByte;
     function getDataLength: integer;
     function AvailableBufferSpace: integer;
 
@@ -96,7 +96,7 @@ type
   public
      function getAsInteger: integer;
      function getParamType: byte;
-     function getAsString: string;
+     function getAsString: AnsiString;
      function getAsByte: byte;
      procedure addByte(aValue: byte);
      procedure addShortInteger(aValue: integer);
@@ -107,123 +107,139 @@ type
      procedure SetAsInteger2(aValue: integer);
      procedure SetAsShortInteger(aValue: integer);
      procedure SetAsTinyInteger(aValue: integer);
-     procedure SetAsString(aValue: string);
-     procedure SetAsString2(aValue: string);
-     procedure SetAsString0(aValue: string);
-  end;
-
-  { TCustomParamBlock }
-
-  generic TCustomParamBlock<_TItem; _IItem> = class(TParamBlock)
-  public
-    function Add(ParamType: byte): _IItem;
-    function Find(ParamType: byte): _IItem;
-    function GetItems(index: integer): _IItem;
+     procedure SetAsString(aValue: AnsiString);
+     procedure SetAsString2(aValue: AnsiString);
+     procedure SetAsString0(aValue: AnsiString);
   end;
 
   { TDPBItem }
 
   TDPBItem = class(TParamBlockItem,IDPBItem);
 
-  { TDPB }
-
-  TDPB = class (specialize TCustomParamBlock<TDPBItem,IDPBItem>, IDPB)
-  public
-    constructor Create;
-  end;
-
   { TTPBItem }
 
   TTPBItem = class(TParamBlockItem,ITPBItem);
-
-  { TTPB }
-
-  TTPB = class (specialize TCustomParamBlock<TTPBItem,ITPBItem>, ITPB)
-  public
-    constructor Create;
-  end;
 
   { TSPBItem }
 
   TSPBItem = class(TParamBlockItem,ISPBItem);
 
-  { TSPB }
-
-  TSPB = class (specialize TCustomParamBlock<TSPBItem,ISPBItem>, ISPB)
-  public
-   constructor Create;
-  end;
-
   { TSRBItem }
 
   TSRBItem = class(TParamBlockItem,ISRBItem)
   public
-    function ISRBItem.SetAsString = SetAsString2;
-    function ISRBItem.SetAsByte = SetAsByte2;
+    {$IFDEF FPC}
+    procedure ISRBItem.SetAsString = SetAsString2;
+    procedure ISRBItem.SetAsByte = SetAsByte2;
+    {$ELSE}
+    procedure SetAsString(aValue: AnsiString) ;
+    procedure SetAsByte(aValue: byte);
+    {$ENDIF}
   end;
-
-  { TSRB }
-
-  TSRB = class (specialize TCustomParamBlock<TSRBItem,ISRBItem>, ISRB);
 
   { TSQPBItem }
 
   TSQPBItem = class(TParamBlockItem,ISQPBItem)
   public
    function CopyFrom(source: TStream; count: integer): integer;
+   {$IFDEF FPC}
    procedure ISQPBItem.SetAsInteger = SetAsInteger2;
    procedure ISQPBItem.SetAsString = SetAsString2;
+   {$ELSE}
+   procedure SetAsString(aValue: AnsiString) ;
+   procedure SetAsInteger(aValue: integer);
+   {$ENDIF}
   end;
-
-  { TSQPB }
-
-  TSQPB = class (specialize TCustomParamBlock<TSQPBItem,ISQPBItem>, ISQPB);
 
   { TBPBItem }
 
   TBPBItem =  class(TParamBlockItem,IBPBItem)
   public
+   {$IFDEF FPC}
     procedure IBPBItem.SetAsInteger = SetAsInteger1;
+   {$ELSE}
+    procedure SetAsInteger(aValue: integer);
+   {$ENDIF}
   end;
+
+  { TCustomParamBlock }
+
+{$IFDEF FPC}
+  TCustomParamBlock<_TItem, _IItem> = class(TParamBlock)
+{$ELSE}
+  TParamBlockItemClass = class of TParamBlockItem;
+  TCustomParamBlock<_TItem: TParamBlockItem;  _IItem: IParameterBlockItem> = class(TParamBlock)
+{$ENDIF}
+  public
+    function Add(ParamType: byte): _IItem;
+    function Find(ParamType: byte): _IItem;
+    function GetItems(index: integer): _IItem;
+  end;
+
+  { TDPB }
+
+  TDPB = class (TCustomParamBlock<TDPBItem,IDPBItem>, IDPB)
+  public
+    constructor Create;
+  end;
+
+  { TTPB }
+
+  TTPB = class (TCustomParamBlock<TTPBItem,ITPBItem>, ITPB)
+  public
+    constructor Create;
+  end;
+
+  { TSPB }
+
+  TSPB = class (TCustomParamBlock<TSPBItem,ISPBItem>, ISPB)
+  public
+   constructor Create;
+  end;
+
+  { TSRB }
+
+  TSRB = class (TCustomParamBlock<TSRBItem,ISRBItem>, ISRB);
+
+  { TSQPB }
+
+  TSQPB = class (TCustomParamBlock<TSQPBItem,ISQPBItem>, ISQPB);
 
   { TBPB }
 
-  TBPB = class (specialize TCustomParamBlock<TBPBItem,IBPBItem>, IBPB)
+  TBPB = class (TCustomParamBlock<TBPBItem,IBPBItem>, IBPB)
   public
    constructor Create;
   end;
 
 implementation
 
-uses FBMessages;
+uses FBMessages {$IFDEF DCC}, TypInfo {$ENDIF};
 
 const
   MaxBufferSize = 65535;
 
-{ TCustomParamBlock }
-
-function TCustomParamBlock.Add(ParamType: byte): _IItem;
-var Item: PParamBlockItemData;
+{ TBPBItem }
+{$IFNDEF FPC}
+procedure TBPBItem.SetAsInteger(aValue: integer);
 begin
-  Item := inherited Add(ParamType);
-  Result := _TItem.Create(self,Item);
+  SetAsInteger1(aValue);
+end;
+{$ENDIF}
+
+{ TSRBItem }
+
+{$IFNDEF FPC}
+procedure TSRBItem.SetAsString(aValue: AnsiString);
+begin
+  SetAsString2(aValue);
 end;
 
-function TCustomParamBlock.Find(ParamType: byte): _IItem;
-var Item: PParamBlockItemData;
+procedure TSRBItem.SetAsByte(aValue: byte);
 begin
-  Result := nil;
-  Item := inherited Find(ParamType);
-  if Item <> nil then
-    Result := _TItem.Create(self,Item);
+  SetAsByte2(aValue);
 end;
-
-function TCustomParamBlock.GetItems(index: integer): _IItem;
-var Item: PParamBlockItemData;
-begin
-  Item := inherited getItems(index);
-  Result := _TItem.Create(self,Item);
-end;
+{$ENDIF}
 
 { TSQPBItem }
 
@@ -237,21 +253,24 @@ begin
       Result := source.Read((FBufPtr+3)^,count);
       with FirebirdClientAPI do
         EncodeInteger(Result,2,FBufPtr+1);
-      (FBufPtr+Result + 3)^ := chr(isc_info_end);
+      (FBufPtr+Result + 3)^ := isc_info_end;
       if Result <> count then
         FOwner.UpdateRequestItemSize(self,Result + 4);
       FDataType := dtString2;
     end;
 end;
 
-{ TBPB }
-
-constructor TBPB.Create;
+{$IFNDEF FPC}
+procedure TSQPBItem.SetAsString(aValue: AnsiString);
 begin
-  inherited Create;
-  FDataLength := 1;
-  FBuffer^ := char(isc_bpb_version1);
+  SetAsString2(aValue);
 end;
+
+procedure TSQPBItem.SetAsInteger(aValue: integer);
+begin
+  SetAsInteger2(aValue);
+end;
+{$ENDIF}
 
 { TParamBlockItem }
 
@@ -288,7 +307,7 @@ begin
   Result := byte(FParamData^.FBufPtr^);
 end;
 
-function TParamBlockItem.getAsString: string;
+function TParamBlockItem.getAsString: AnsiString;
 var len: byte;
 begin
   Result := '';
@@ -306,17 +325,17 @@ begin
     Result := IntToStr(getAsByte);
   dtString:
     begin
-      len := byte((FBufPtr+1)^);
-      SetString(Result,FBufPtr+2,len);
+      len := (FBufPtr+1)^;
+      SetString(Result,PAnsiChar(FBufPtr+2),len);
     end;
   dtString2:
     begin
       with FirebirdClientAPI do
         len := DecodeInteger(FBufPtr+1,2);
-      SetString(Result,FBufPtr+3,len);
+      SetString(Result,PAnsiChar(FBufPtr+3),len);
     end;
   dtString0:
-      Result := strpas(FBufPtr+1);
+      Result := strpas(PAnsiChar(FBufPtr+1));
     else
       IBError(ibxeOutputBlockTypeError,[nil]);
   end;
@@ -336,20 +355,20 @@ end;
 
 procedure TParamBlockItem.addByte(aValue: byte);
 var len: integer;
-    P: PChar;
+    P: PByte;
 begin
   with FParamData^ do
   begin
     P := FBufPtr + FBufLength;
     len := FBufLength + 1;
     FOwner.UpdateRequestItemSize(self,len);
-    P^ := char(aValue)
+    P^ := aValue;
   end;
 end;
 
 procedure TParamBlockItem.addShortInteger(aValue: integer);
 var len: integer;
-    P: PChar;
+    P: PByte;
 begin
   with FParamData^ do
   begin
@@ -368,8 +387,8 @@ begin
     if FBufLength <> 3 then
       FOwner.UpdateRequestItemSize(self,3);
     FDataType := dtByte;
-    (FBufPtr+1)^ := #1;
-    (FBufPtr+2)^ := chr(aValue);
+    (FBufPtr+1)^ := $1;
+    (FBufPtr+2)^ := aValue;
   end;
 end;
 
@@ -380,7 +399,7 @@ begin
     if FBufLength <> 2 then
       FOwner.UpdateRequestItemSize(self,2);
     FDataType := dtByte2;
-    (FBufPtr+1)^ := chr(aValue);
+    (FBufPtr+1)^ := aValue;
   end;
 end;
 
@@ -406,7 +425,7 @@ begin
   begin
     if FBufLength <> 6 then
       FOwner.UpdateRequestItemSize(self,6);
-    (FBufPtr+1)^ := chr(4);
+    (FBufPtr+1)^ := $4;
     with FirebirdClientAPI do
       EncodeInteger(aValue,4,FBufPtr+2);
     FDataType := dtInteger1;
@@ -456,7 +475,7 @@ end;
 
 {Short string encoding}
 
-procedure TParamBlockItem.SetAsString(aValue: string);
+procedure TParamBlockItem.SetAsString(aValue: AnsiString);
 var len: integer;
 begin
   with FParamData^ do
@@ -465,7 +484,7 @@ begin
     if len > 255 then
       IBError(ibxStringTooLong,[aValue,255]);
     FOwner.UpdateRequestItemSize(self,len+2);
-    (FBufPtr+1)^ := char(len);
+    (FBufPtr+1)^ := len;
     if len > 0 then
       Move(aValue[1],(FBufPtr+2)^,len);
     FDataType := dtString;
@@ -474,7 +493,7 @@ end;
 
 {Long string up to 65535 encoding}
 
-procedure TParamBlockItem.SetAsString2(aValue: string);
+procedure TParamBlockItem.SetAsString2(aValue: AnsiString);
 var len: integer;
 begin
   with FParamData^ do
@@ -493,7 +512,7 @@ end;
 
 {Zero byte terminated string encoding}
 
-procedure TParamBlockItem.SetAsString0(aValue: string);
+procedure TParamBlockItem.SetAsString0(aValue: AnsiString);
 var len: integer;
 begin
   with FParamData^ do
@@ -502,7 +521,7 @@ begin
     FOwner.UpdateRequestItemSize(self,len+2);
     if len > 0 then
       Move(aValue[1],(FBufPtr+1)^,len);
-    (FBufPtr+len+1)^ := #0;
+    (FBufPtr+len+1)^ := 0;
     FDataType := dtString0;
   end;
 end;
@@ -510,7 +529,7 @@ end;
 { TParamBlock }
 
 procedure TParamBlock.AdjustBuffer;
-var P: PChar;
+var P: PByte;
     i: integer;
     headerLen: integer;
 begin
@@ -532,7 +551,7 @@ begin
 end;
 
 procedure TParamBlock.MoveBy(Item: PParamBlockItemData; delta: integer);
-var src, dest: PChar;
+var src, dest: PByte;
   i: integer;
 begin
   with Item^ do
@@ -549,7 +568,7 @@ begin
       for i := 0 to FBufLength - 1 do
       (dest +i)^ := (src+i)^;
     end;
-    FBufPtr += delta;
+    FBufPtr := FBufPtr + delta;
   end;
 end;
 
@@ -563,7 +582,7 @@ begin
   begin
     if FDataLength + delta > MaxBufferSize then
       IBError(ibxeParamBufferOverflow,[nil]);
-    FDataLength += delta;
+    FDataLength := FDataLength + delta;
     AdjustBuffer;
     i := Length(FItems) - 1;
     while i >= 0  do
@@ -589,7 +608,7 @@ begin
       Moveby(FItems[i],delta);
       Inc(i);
     end;
-    FDataLength += delta;
+    FDataLength := FDataLength + delta;
   end;
 end;
 
@@ -612,7 +631,7 @@ begin
   inherited Destroy;
 end;
 
-function TParamBlock.getBuffer: PChar;
+function TParamBlock.getBuffer: PByte;
 begin
   if FDataLength = 0 then
     Result := nil
@@ -635,7 +654,7 @@ begin
   new(Result);
   Result^.FBufPtr := FBuffer + FDataLength;
   Result^.FBufLength := 1;
-  Result^.FBufPtr^ := char(ParamType);
+  Result^.FBufPtr^ := ParamType;
   Result^.FDataType := dtnone; {default}
   Inc(FDataLength,1);
   AdjustBuffer;
@@ -648,7 +667,7 @@ var i: integer;
 begin
   Result := nil;
   for i := 0 to getCount - 1 do
-    if FItems[i]^.FBufPtr^ = char(ParamType) then
+    if byte(FItems[i]^.FBufPtr^) = ParamType then
     begin
       Result := FItems[i];
       Exit;
@@ -674,7 +693,7 @@ var P: PParamBlockItemData;
 begin
   P := nil;
   for i := 0 to getCount - 1 do
-    if FItems[i]^.FBufPtr^ = char(ParamType) then
+    if byte(FItems[i]^.FBufPtr^) = ParamType then
     begin
       P := FItems[i];
       for j := i + 1 to getCount - 1 do
@@ -682,7 +701,7 @@ begin
         MoveBy(FItems[j],-P^.FBufLength);
         FItems[j - 1] := FItems[j];
       end;
-      FDataLength -= P^.FBufLength;
+      FDataLength := FDataLength - P^.FBufLength;
       dispose(P);
       SetLength(FItems,Length(FItems)-1);
       Exit;
@@ -698,13 +717,74 @@ begin
   writeln
 end;
 
+{ TCustomParamBlock }
+
+{$IFDEF FPC}
+function TCustomParamBlock<_TItem, _IItem>.Add(ParamType: byte): _IItem;
+var Item: PParamBlockItemData;
+begin
+  Item := inherited Add(ParamType);
+  Result := _TItem.Create(self,Item);
+end;
+
+function TCustomParamBlock<_TItem, _IItem>.Find(ParamType: byte): _IItem;
+var Item: PParamBlockItemData;
+begin
+  Result := nil;
+  Item := inherited Find(ParamType);
+  if Item <> nil then
+    Result := _TItem.Create(self,Item);
+end;
+
+function TCustomParamBlock<_TItem, _IItem>.GetItems(index: integer): _IItem;
+var Item: PParamBlockItemData;
+begin
+  Item := inherited getItems(index);
+  Result := _TItem.Create(self,Item);
+end;
+{$ELSE}
+function TCustomParamBlock<_TItem, _IItem>.Add(ParamType: byte): _IItem;
+var Item: PParamBlockItemData;
+    Obj: TParamBlockItem;
+begin
+  Item := inherited Add(ParamType);
+  Obj := TParamBlockItemClass(_TItem).Create(self,Item);
+  if Obj.QueryInterface(GetTypeData(TypeInfo(_IItem))^.Guid,Result) <> 0 then
+    IBError(ibxeInterfaceNotSupported,[GuidToString(GetTypeData(TypeInfo(_IItem))^.Guid)]);
+end;
+
+function TCustomParamBlock<_TItem, _IItem>.Find(ParamType: byte): _IItem;
+var Item: PParamBlockItemData;
+    Obj: TParamBlockItem;
+begin
+  Result := nil;
+  Item := inherited Find(ParamType);
+  if Item <> nil then
+  begin
+    Obj := TParamBlockItemClass(_TItem).Create(self,Item);
+    if Obj.QueryInterface(GetTypeData(TypeInfo(_IItem))^.Guid,Result) <> 0 then
+      IBError(ibxeInterfaceNotSupported,[GuidToString(GetTypeData(TypeInfo(_IItem))^.Guid)]);
+  end;
+end;
+
+function TCustomParamBlock<_TItem, _IItem>.GetItems(index: integer): _IItem;
+var Item: PParamBlockItemData;
+    Obj: TParamBlockItem;
+begin
+  Item := inherited getItems(index);
+  Obj := TParamBlockItemClass(_TItem).Create(self,Item);
+  if Obj.QueryInterface(GetTypeData(TypeInfo(_IItem))^.Guid,Result) <> 0 then
+    IBError(ibxeInterfaceNotSupported,[GuidToString(GetTypeData(TypeInfo(_IItem))^.Guid)]);
+end;
+{$ENDIF}
+
 { TDPB }
 
 constructor TDPB.Create;
 begin
   inherited Create;
   FDataLength := 1;
-  FBuffer^ := char(isc_dpb_version1);
+  FBuffer^ := isc_dpb_version1;
 end;
 
 { TTPB }
@@ -713,7 +793,7 @@ constructor TTPB.Create;
 begin
   inherited Create;
   FDataLength := 1;
-  FBuffer^ := char(isc_tpb_version3);
+  FBuffer^ := isc_tpb_version3;
 end;
 
 { TSPB }
@@ -722,8 +802,17 @@ constructor TSPB.Create;
 begin
   inherited Create;
   FDataLength := 2;
-  FBuffer^ := char(isc_spb_version);
-  (FBuffer+1)^ := char(isc_spb_current_version);
+  FBuffer^ := isc_spb_version;
+  (FBuffer+1)^ := isc_spb_current_version;
+end;
+
+{ TBPB }
+
+constructor TBPB.Create;
+begin
+  inherited Create;
+  FDataLength := 1;
+  FBuffer^ := isc_bpb_version1;
 end;
 
 end.

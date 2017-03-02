@@ -30,14 +30,15 @@
 unit FBBlob;
 
 {$IFDEF FPC}
-{$mode objfpc}{$H+}
+{$mode delphi}
 {$interfaces COM}
 {$ENDIF}
 
 interface
 
 uses
-  Classes, SysUtils, IB, FBActivityMonitor, FBTransaction, FBClientAPI;
+  Classes, SysUtils, IB, FBActivityMonitor, FBTransaction, FBClientAPI,
+  FBOutputBlock;
 
 type
 
@@ -45,8 +46,8 @@ type
 
   TFBBlobMetaData  = class(TActivityReporter)
   private
-    FRelationName: string;
-    FColumnName: string;
+    FRelationName: AnsiString;
+    FColumnName: AnsiString;
   protected
     FUnconfirmedCharacterSet: boolean;
     FHasSubType: boolean;
@@ -56,7 +57,7 @@ type
     procedure NeedFullMetadata; virtual; abstract;
     procedure NeedSubType;
   public
-    constructor Create(Transaction: TFBTransaction; RelationName, ColumnName: string
+    constructor Create(Transaction: TFBTransaction; RelationName, ColumnName: AnsiString
       );
     procedure SetCharSetID(aValue: integer);
 
@@ -66,8 +67,8 @@ type
    function GetCharSetID: cardinal;
    function GetCodePage: TSystemCodePage;
    function GetSegmentSize: cardinal;
-   function GetRelationName: string;
-   function GetColumnName: string;
+   function GetRelationName: AnsiString;
+   function GetColumnName: AnsiString;
    function GetUnconfirmedCharacterSet: boolean;
   end;
 
@@ -86,6 +87,7 @@ type
     procedure CheckWritable; virtual; abstract;
     procedure ClearStringCache;
     function GetIntf: IBlob; virtual; abstract;
+    procedure GetInfo(Request: array of byte; Response: IBlobInfo); overload; virtual; abstract;
     procedure InternalClose(Force: boolean); virtual; abstract;
     procedure InternalCancel(Force: boolean); virtual; abstract;
   public
@@ -102,8 +104,8 @@ type
    function GetCharSetID: cardinal;
    function GetCodePage: TSystemCodePage;
    function GetSegmentSize: cardinal;
-   function GetRelationName: string;
-   function GetColumnName: string;
+   function GetRelationName: AnsiString;
+   function GetColumnName: AnsiString;
    function GetUnconfirmedCharacterSet: boolean;
 
    {IBlob}
@@ -112,14 +114,14 @@ type
     procedure Close;
     function GetBlobSize: Int64;
     procedure GetInfo(var NumSegments: Int64; var MaxSegmentSize, TotalSize: Int64;
-      var BlobType: TBlobType); virtual; abstract;
+      var BlobType: TBlobType); overload;
     function GetBlobID: TISC_QUAD;
     function GetBlobMode: TFBBlobMode;
     function Read(var Buffer; Count: Longint): Longint; virtual; abstract;
     function Write(const Buffer; Count: Longint): Longint;  virtual; abstract;
-    function LoadFromFile(Filename: string): IBlob;
+    function LoadFromFile(Filename: AnsiString): IBlob;
     function LoadFromStream(S: TStream) : IBlob;
-    function SaveToFile(Filename: string): IBlob;
+    function SaveToFile(Filename: AnsiString): IBlob;
     function SaveToStream(S: TStream): IBlob;
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
@@ -173,7 +175,7 @@ end;
 procedure TFBBlob.TransactionEnding(aTransaction: TFBTransaction;
   Force: boolean);
 begin
-  if aTransaction <> FTransaction then
+  if aTransaction  <> (FTransaction as TFBTransaction)  then
     Exit;
   if FCreating then
     InternalCancel(Force)
@@ -201,12 +203,12 @@ begin
   Result := FMetaData.GetSegmentSize;
 end;
 
-function TFBBlob.GetRelationName: string;
+function TFBBlob.GetRelationName: AnsiString;
 begin
   Result := FMetaData.GetRelationName;
 end;
 
-function TFBBlob.GetColumnName: string;
+function TFBBlob.GetColumnName: AnsiString;
 begin
   Result := FMetaData.GetColumnName;
 end;
@@ -239,6 +241,39 @@ begin
   GetInfo(NumSegments,MaxSegmentSize,Result,BlobType);
 end;
 
+procedure TFBBlob.GetInfo(var NumSegments: Int64; var MaxSegmentSize,
+  TotalSize: Int64; var BlobType: TBlobType);
+var BlobInfo: IBlobInfo;
+    i: integer;
+begin
+  NumSegments := 0;
+  MaxSegmentSize := 0;
+  TotalSize := 0;
+  BlobType := btSegmented;
+
+  BlobInfo := TBlobInfo.Create;
+  GetInfo([isc_info_blob_num_segments,
+           isc_info_blob_max_segment,
+           isc_info_blob_total_length,
+           isc_info_blob_type],BlobInfo);
+
+  for i := 0 to BlobInfo.Count - 1 do
+  with BlobInfo[i] do
+  case getItemType of
+  isc_info_blob_num_segments:
+    NumSegments := GetAsInteger;
+  isc_info_blob_max_segment:
+    MaxSegmentSize := GetAsInteger;
+  isc_info_blob_total_length:
+    TotalSize := GetAsInteger;
+  isc_info_blob_type:
+    if GetAsInteger = 0 then
+      BlobType := btSegmented
+    else
+      BlobType := btStream;
+  end;
+end;
+
 function TFBBlob.GetBlobID: TISC_QUAD;
 begin
   Result := FBlobID;
@@ -252,7 +287,7 @@ begin
     Result := fbmRead;
 end;
 
-function TFBBlob.LoadFromFile(Filename: string): IBlob;
+function TFBBlob.LoadFromFile(Filename: AnsiString): IBlob;
 var
   Stream: TStream;
 begin
@@ -280,7 +315,7 @@ begin
   Result := GetIntf;
 end;
 
-function TFBBlob.SaveToFile(Filename: string): IBlob;
+function TFBBlob.SaveToFile(Filename: AnsiString): IBlob;
 var
   Stream: TStream;
 begin
@@ -375,7 +410,7 @@ begin
 end;
 
 constructor TFBBlobMetaData.Create(Transaction: TFBTransaction; RelationName,
-  ColumnName: string);
+  ColumnName: AnsiString);
 begin
   inherited Create(Transaction);
 //  if (RelationName = '') or (ColumnName = '') then
@@ -416,12 +451,12 @@ begin
   Result := FSegmentSize;
 end;
 
-function TFBBlobMetaData.GetRelationName: string;
+function TFBBlobMetaData.GetRelationName: AnsiString;
 begin
   Result := FRelationName;
 end;
 
-function TFBBlobMetaData.GetColumnName: string;
+function TFBBlobMetaData.GetColumnName: AnsiString;
 begin
   Result := FColumnName;
 end;
