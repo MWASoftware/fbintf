@@ -70,7 +70,7 @@ interface
 
 uses
   Classes, SysUtils, IB,  IBHeader,IBExternals, FBClientAPI, FB25ClientAPI, FB25Attachment,
-  FB25Transaction, FBActivityMonitor, FBBlob;
+  FB25Transaction, FBActivityMonitor, FBBlob, FBOutputBlock;
 
 type
 
@@ -101,6 +101,7 @@ type
     procedure CheckReadable; override;
     procedure CheckWritable; override;
     function GetIntf: IBlob; override;
+    procedure GetInfo(Request: array of byte; Response: IBlobInfo); override;
     procedure InternalClose(Force: boolean); override;
     procedure InternalCancel(Force: boolean); override;
   public
@@ -113,8 +114,6 @@ type
     property Handle: TISC_BLOB_HANDLE read FHandle;
 
   public
-    procedure GetInfo(var NumSegments: Int64; var MaxSegmentSize, TotalSize: Int64;
-      var BlobType: TBlobType); override;
     function Read(var Buffer; Count: Longint): Longint; override;
     function Write(const Buffer; Count: Longint): Longint; override;
   end;
@@ -196,6 +195,16 @@ begin
   Result := self;
 end;
 
+procedure TFB25Blob.GetInfo(Request: array of byte; Response: IBlobInfo);
+begin
+  if FHandle = nil then
+    IBError(ibxeBlobNotOpen,[nil]);
+
+  with Firebird25ClientAPI, Response as TBlobInfo do
+    Call(isc_blob_info(StatusVector, @FHandle, Length(Request),@Request,
+                                               GetBufSize, Buffer));
+end;
+
 procedure TFB25Blob.InternalClose(Force: boolean);
 begin
   if FHandle = nil then
@@ -274,49 +283,6 @@ begin
   with BPB as TBPB do
     Call(isc_open_blob2(StatusVector,  @DBHandle, @TRHandle, @FHandle,
                    @FBlobID, getDataLength, getBuffer));
-end;
-
-procedure TFB25Blob.GetInfo(var NumSegments: Int64; var MaxSegmentSize,
-  TotalSize: Int64; var BlobType: TBlobType);
-var
-  items: array[0..3] of Byte;
-  results: array[0..99] of Byte;
-  i, item_length: Integer;
-  item: Integer;
-begin
-  if FHandle = nil then
-    IBError(ibxeBlobNotOpen,[nil]);
-
-  items[0] := isc_info_blob_num_segments;
-  items[1] := isc_info_blob_max_segment;
-  items[2] := isc_info_blob_total_length;
-  items[3] := isc_info_blob_type;
-
-  with Firebird25ClientAPI do
-  begin
-    Call(isc_blob_info(StatusVector, @FHandle, 4, @items[0], SizeOf(results),
-                    @results[0]));
-    i := 0;
-    while (i < SizeOf(results)) and (results[i] <> isc_info_end) do
-    begin
-      item := Integer(results[i]); Inc(i);
-      item_length := isc_portable_integer(@results[i], 2); Inc(i, 2);
-      case item of
-        isc_info_blob_num_segments:
-          NumSegments := isc_portable_integer(@results[i], item_length);
-        isc_info_blob_max_segment:
-          MaxSegmentSize := isc_portable_integer(@results[i], item_length);
-        isc_info_blob_total_length:
-          TotalSize := isc_portable_integer(@results[i], item_length);
-        isc_info_blob_type:
-          if isc_portable_integer(@results[i], item_length) = 0 then
-            BlobType := btSegmented
-          else
-            BlobType := btStream;
-      end;
-      Inc(i, item_length);
-    end;
-  end;
 end;
 
 function TFB25Blob.Read(var Buffer; Count: Longint): Longint;

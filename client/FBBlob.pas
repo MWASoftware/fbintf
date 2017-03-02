@@ -37,7 +37,8 @@ unit FBBlob;
 interface
 
 uses
-  Classes, SysUtils, IB, FBActivityMonitor, FBTransaction, FBClientAPI;
+  Classes, SysUtils, IB, FBActivityMonitor, FBTransaction, FBClientAPI,
+  FBOutputBlock;
 
 type
 
@@ -86,6 +87,7 @@ type
     procedure CheckWritable; virtual; abstract;
     procedure ClearStringCache;
     function GetIntf: IBlob; virtual; abstract;
+    procedure GetInfo(Request: array of byte; Response: IBlobInfo); overload; virtual; abstract;
     procedure InternalClose(Force: boolean); virtual; abstract;
     procedure InternalCancel(Force: boolean); virtual; abstract;
   public
@@ -112,7 +114,7 @@ type
     procedure Close;
     function GetBlobSize: Int64;
     procedure GetInfo(var NumSegments: Int64; var MaxSegmentSize, TotalSize: Int64;
-      var BlobType: TBlobType); virtual; abstract;
+      var BlobType: TBlobType); overload;
     function GetBlobID: TISC_QUAD;
     function GetBlobMode: TFBBlobMode;
     function Read(var Buffer; Count: Longint): Longint; virtual; abstract;
@@ -237,6 +239,34 @@ var NumSegments: Int64;
     BlobType: TBlobType;
 begin
   GetInfo(NumSegments,MaxSegmentSize,Result,BlobType);
+end;
+
+procedure TFBBlob.GetInfo(var NumSegments: Int64; var MaxSegmentSize,
+  TotalSize: Int64; var BlobType: TBlobType);
+var BlobInfo: IBlobInfo;
+    i: integer;
+begin
+  BlobInfo := TBlobInfo.Create;
+  GetInfo([isc_info_blob_num_segments,
+           isc_info_blob_max_segment,
+           isc_info_blob_total_length,
+           isc_info_blob_type],BlobInfo);
+
+  for i := 0 to BlobInfo.Count - 1 do
+  with BlobInfo[i] do
+  case getItemType of
+  isc_info_blob_num_segments:
+    NumSegments := GetAsInteger;
+  isc_info_blob_max_segment:
+    MaxSegmentSize := GetAsInteger;
+  isc_info_blob_total_length:
+    TotalSize := GetAsInteger;
+  isc_info_blob_type:
+    if GetAsInteger = 0 then
+      BlobType := btSegmented
+    else
+      BlobType := btStream;
+  end;
 end;
 
 function TFBBlob.GetBlobID: TISC_QUAD;

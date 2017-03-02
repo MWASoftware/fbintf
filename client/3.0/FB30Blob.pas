@@ -35,7 +35,7 @@ interface
 
 uses
   Classes, SysUtils, Firebird, IB, IBHeader, IBExternals, FBClientAPI, FB30ClientAPI, FB30Attachment,
-  FBTransaction, FB30Transaction,  FBBlob;
+  FBTransaction, FB30Transaction,  FBBlob, FBOutputBlock;
 
 type
 
@@ -67,6 +67,7 @@ type
     procedure CheckReadable; override;
     procedure CheckWritable; override;
     function GetIntf: IBlob; override;
+    procedure GetInfo(Request: array of byte; Response: IBlobInfo); override;
     procedure InternalClose(Force: boolean); override;
     procedure InternalCancel(Force: boolean); override;
   public
@@ -80,8 +81,6 @@ type
 
   {IBlob}
   public
-    procedure GetInfo(var NumSegments: Int64; var MaxSegmentSize, TotalSize: Int64;
-      var BlobType: TBlobType); override;
     function Read(var Buffer; Count: Longint): Longint; override;
     function Write(const Buffer; Count: Longint): Longint; override;
   end;
@@ -172,6 +171,20 @@ begin
   Result := self;
 end;
 
+procedure TFB30Blob.GetInfo(Request: array of byte; Response: IBlobInfo);
+begin
+  if FBlobIntf = nil then
+    IBError(ibxeBlobNotOpen,[nil]);
+
+  with Firebird30ClientAPI, Response as TBlobInfo do
+  begin
+    FBlobIntf.getInfo(StatusIntf,Length(Request),BytePtr(@Request),
+                                               GetBufSize, BytePtr(Buffer));
+    Check4DataBaseError;
+    SignalActivity;
+  end;
+end;
+
 procedure TFB30Blob.InternalClose(Force: boolean);
 begin
   if FBlobIntf = nil then
@@ -254,50 +267,6 @@ begin
     FBlobIntf := Attachment.AttachmentIntf.openBlob(StatusIntf,(Transaction as TFB30Transaction).TransactionIntf,
                    @FBlobID, getDataLength, BytePtr(getBuffer));
     Check4DataBaseError;
-  end;
-end;
-
-procedure TFB30Blob.GetInfo(var NumSegments: Int64; var MaxSegmentSize,
-  TotalSize: Int64; var BlobType: TBlobType);
-var
-  items: array[0..3] of Byte;
-  results: array[0..99] of Byte;
-  i, item_length: Integer;
-  item: Integer;
-begin
-  if FBlobIntf = nil then
-    IBError(ibxeBlobNotOpen,[nil]);
-
-  items[0] := isc_info_blob_num_segments;
-  items[1] := isc_info_blob_max_segment;
-  items[2] := isc_info_blob_total_length;
-  items[3] := isc_info_blob_type;
-
-  with Firebird30ClientAPI do
-  begin
-    FBlobIntf.getInfo(StatusIntf,4,@items[0],SizeOf(results),@results[0]);
-    Check4DataBaseError;
-    SignalActivity;
-    i := 0;
-    while (i < SizeOf(results)) and (results[i] <> isc_info_end) do
-    begin
-      item := Integer(results[i]); Inc(i);
-      item_length := DecodeInteger(@results[i], 2); Inc(i, 2);
-      case item of
-        isc_info_blob_num_segments:
-          NumSegments := DecodeInteger(@results[i], item_length);
-        isc_info_blob_max_segment:
-          MaxSegmentSize := DecodeInteger(@results[i], item_length);
-        isc_info_blob_total_length:
-          TotalSize := DecodeInteger(@results[i], item_length);
-        isc_info_blob_type:
-          if DecodeInteger(@results[i], item_length) = 0 then
-            BlobType := btSegmented
-          else
-            BlobType := btStream;
-      end;
-      Inc(i, item_length);
-    end;
   end;
 end;
 

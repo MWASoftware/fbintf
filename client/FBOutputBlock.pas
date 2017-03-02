@@ -249,6 +249,42 @@ type
     constructor Create(aSize: integer = 1024);
   end;
 
+  IBlobInfoItem = interface
+     ['{3a55e558-b97f-4cf3-af95-53b84f4d9a65}']
+     function getItemType: byte;
+     function getSize: integer;
+     function getAsString: AnsiString;
+     function getAsInteger: integer;
+   end;
+
+  IBlobInfo = interface
+    ['{8a340109-f600-4d26-ab1d-e0be2c759f1c}']
+    function GetCount: integer;
+    function GetItem(index: integer): IBlobInfoItem;
+    function Find(ItemType: byte): IBlobInfoItem;
+    property Count: integer read GetCount;
+    property Items[index: integer]: IBlobInfoItem read getItem; default;
+  end;
+
+{$IFDEF FPC}
+  TBlobInfoItem = class;
+
+  TBlobInfoItem = class(TOutputBlockItemGroup<TBlobInfoItem,IBlobInfoItem>,IBlobInfoItem)
+{$ELSE}
+  TBlobInfoItem = class(TOutputBlockItemGroup<TOutputBlockItem,IBlobInfoItem>,IBlobInfoItem)
+{$ENDIF}
+
+  end;
+
+  { TBlobInfo }
+
+  TBlobInfo = class(TCustomOutputBlock<TBlobInfoItem,IBlobInfoItem>, IBlobInfo)
+  protected
+    procedure DoParseBuffer; override;
+  public
+    constructor Create(aSize: integer=DBInfoDefaultBufferSize);
+  end;
+
 implementation
 
 uses FBMessages {$IFDEF DCC}, TypInfo {$ENDIF};
@@ -285,6 +321,7 @@ begin
   P := inherited Find(ItemType);
   Result := _TItem.Create(self,P)
 end;
+
 {$ELSE}
 
 { TOutputBlockItemGroup }
@@ -1165,6 +1202,38 @@ begin
 end;
 
 constructor TSQLInfoResultsBuffer.Create(aSize: integer);
+begin
+  inherited Create(aSize);
+  FIntegerType := dtInteger;
+end;
+
+{ TBlobInfo }
+
+procedure TBlobInfo.DoParseBuffer;
+var P: PByte;
+    index: integer;
+begin
+  P := Buffer;
+  index := 0;
+  SetLength(FItems,0);
+  while (P^ <> isc_info_end) and (P < Buffer + getBufSize) do
+  begin
+    SetLength(FItems,index+1);
+    case byte(P^) of
+    isc_info_blob_num_segments,
+    isc_info_blob_max_segment,
+    isc_info_blob_total_length,
+    isc_info_blob_type:
+      FItems[index] := AddIntegerItem(P);
+    else
+      FItems[index] := AddSpecialItem(P);
+    end;
+    P := P + FItems[index]^.FSize;
+    Inc(index);
+  end;
+end;
+
+constructor TBlobInfo.Create(aSize: integer);
 begin
   inherited Create(aSize);
   FIntegerType := dtInteger;
