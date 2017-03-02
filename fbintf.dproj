@@ -38,6 +38,8 @@
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
+        <DCC_BplOutput>.</DCC_BplOutput>
+        <DCC_DcpOutput>.</DCC_DcpOutput>
         <DCC_Define>WINDOWS;$(DCC_Define)</DCC_Define>
         <GenDll>true</GenDll>
         <DCC_ImageBase>00400000</DCC_ImageBase>
@@ -59,6 +61,7 @@
         <DCC_Namespace>System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1)'!=''">
+        <DCC_BplOutput>.</DCC_BplOutput>
         <Version>7.0</Version>
         <DCC_DebugInformation>0</DCC_DebugInformation>
         <DCC_LocalDebugSymbols>False</DCC_LocalDebugSymbols>
@@ -66,6 +69,8 @@
         <DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
+        <DCC_BplOutput>.</DCC_BplOutput>
+        <DCC_DcpOutput>.</DCC_DcpOutput>
         <Version>7.0</Version>
         <DCC_UnitSearchPath>include;client/include;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <DCC_ResourcePath>include;client/include;$(DCC_ResourcePath)</DCC_ResourcePath>
