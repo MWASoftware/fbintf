@@ -1,4 +1,4 @@
-unit Test13;
+﻿unit Test13;
 
 {$IFDEF FPC}
 {$mode delphi}
@@ -64,8 +64,13 @@ begin
   with Statement.GetSQLParams do
   begin
     ByName('rowid').AsInteger := 1;
+    {$IFDEF DCC}
+    ByName('title').AsString := UTF8Encode('Blob Test ©€');
+    ByName('Notes').AsString := UTF8Encode('Écoute moi');
+    {$ELSE}
     ByName('title').AsString := 'Blob Test ©€';
     ByName('Notes').AsString := 'Écoute moi';
+    {$ENDIF}
     ByName('BlobData').AsString := 'Some German Special Characters like ÖÄÜöäüß';
     ByName('BlobData2').AsBlob := Attachment.CreateBlob(Transaction,'TestData','BlobData').SetString('Some German Special Characters like ÖÄÜöäüß');
     ByName('InClear').AsString := #$01'Test'#$0D#$C3;

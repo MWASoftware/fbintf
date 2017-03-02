@@ -77,10 +77,11 @@ begin
     for i := 0 to GetCount - 1 do
       writeln(OutFile,'Param Name = ',Params[i].getName);
     ByName('rowid').AsInteger := 1;
-    ByName('title').AsString := 'Blob Test ©€';
     {$IFDEF DCC}
+    ByName('title').AsString := UTF8Encode('Blob Test ©€');
     ByName('Notes').AsString := UTF8Encode('Écoute moi');
     {$ELSE}
+    ByName('title').AsString := 'Blob Test ©€';
     ByName('Notes').AsString := 'Écoute moi';
     {$ENDIF}
     ByName('Dated').AsDateTime := EncodeDate(2016,4,1) + EncodeTime(9,30,0,100);
