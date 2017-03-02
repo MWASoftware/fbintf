@@ -246,6 +246,11 @@ procedure TFBBlob.GetInfo(var NumSegments: Int64; var MaxSegmentSize,
 var BlobInfo: IBlobInfo;
     i: integer;
 begin
+  NumSegments := 0;
+  MaxSegmentSize := 0;
+  TotalSize := 0;
+  BlobType := btSegmented;
+
   BlobInfo := TBlobInfo.Create;
   GetInfo([isc_info_blob_num_segments,
            isc_info_blob_max_segment,
