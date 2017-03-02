@@ -170,10 +170,14 @@ type
    to leave it as an example of where FPC is better than Delphi.
    }
 
-{$IFDEF FPC}
   { TCustomParamBlock }
 
+{$IFDEF FPC}
   TCustomParamBlock<_TItem, _IItem> = class(TParamBlock)
+{$ELSE}
+  TParamBlockItemClass = class of TParamBlockItem;
+  TCustomParamBlock<_TItem: TParamBlockItem;  _IItem: IParameterBlockItem> = class(TParamBlock)
+{$ENDIF}
   public
     function Add(ParamType: byte): _IItem;
     function Find(ParamType: byte): _IItem;
@@ -215,80 +219,10 @@ type
   public
    constructor Create;
   end;
-{$ELSE}
-
-{ TDPB }
-
-  TDPB = class(TParamBlock, IDPB)
-  public
-    constructor Create;
-
-  public
-    {IDPB}
-    function Add(ParamType: byte): IDPBItem;
-    function Find(ParamType: byte): IDPBItem;
-    function GetItems(index: integer): IDPBItem;
-  end;
-
-  { TTPB }
-
-  TTPB = class(TParamBlock, ITPB)
-  public
-    constructor Create;
-
-  public
-    {ITPB}
-    function Add(ParamType: byte): ITPBItem;
-    function Find(ParamType: byte): ITPBItem;
-    function GetItems(index: integer): ITPBItem;
-  end;
-
-  { TSPB }
-
-  TSPB = class(TParamBlock,ISPB)
-  public
-   constructor Create;
-
-   function Add(ParamType: byte): ISPBItem;
-   function Find(ParamType: byte): ISPBItem;
-   function getItems(index: integer): ISPBItem;
-  end;
-
-  { TSRB }
-
-  TSRB = class(TParamBlock,ISRB)
-  public
-   function Add(ParamType: byte): ISRBItem;
-   function Find(ParamType: byte): ISRBItem;
-   function getItems(index: integer): ISRBItem;
-  end;
-
-  { TSQPB }
-
-  TSQPB = class(TParamBlock,ISQPB)
-  public
-   function Add(ParamType: byte): ISQPBItem;
-   function Find(ParamType: byte): ISQPBItem;
-   function getItems(index: integer): ISQPBItem;
-  end;
-
-  { TBPB }
-
-  TBPB = class(TParamBlock,IBPB)
-  public
-   constructor Create;
-  public
-   {IBPB}
-   function Add(ParamType: byte): IBPBItem;
-   function Find(ParamType: byte): IBPBItem;
-   function getItems(index: integer): IBPBItem;
-  end;
-{$ENDIF}
-
 
 implementation
 
-uses FBMessages;
+uses FBMessages {$IFDEF DCC}, TypInfo {$ENDIF};
 
 const
   MaxBufferSize = 65535;
@@ -791,9 +725,9 @@ begin
   writeln
 end;
 
-{$IFDEF FPC}
 { TCustomParamBlock }
 
+{$IFDEF FPC}
 function TCustomParamBlock<_TItem, _IItem>.Add(ParamType: byte): _IItem;
 var Item: PParamBlockItemData;
 begin
@@ -816,227 +750,75 @@ begin
   Item := inherited getItems(index);
   Result := _TItem.Create(self,Item);
 end;
-
-{ TDPB }
-
-constructor TDPB.Create;
-begin
-  inherited Create;
-  FDataLength := 1;
-  FBuffer^ := isc_dpb_version1;
-end;
-
-{ TTPB }
-
-constructor TTPB.Create;
-begin
-  inherited Create;
-  FDataLength := 1;
-  FBuffer^ := isc_tpb_version3;
-end;
-
-{ TSPB }
-
-constructor TSPB.Create;
-begin
-  inherited Create;
-  FDataLength := 2;
-  FBuffer^ := isc_spb_version;
-  (FBuffer+1)^ := isc_spb_current_version;
-end;
-
-{ TBPB }
-
-constructor TBPB.Create;
-begin
-  inherited Create;
-  FDataLength := 1;
-  FBuffer^ := isc_bpb_version1;
-end;
-
-
 {$ELSE}
-{and now the long winded Delphi way}
-
-{ TSQPB }
-
-function TSQPB.Add(ParamType: byte): ISQPBItem;
+function TCustomParamBlock<_TItem, _IItem>.Add(ParamType: byte): _IItem;
 var Item: PParamBlockItemData;
+    Obj: TParamBlockItem;
 begin
   Item := inherited Add(ParamType);
-  Result := TSQPBItem.Create(self,Item);
+  Obj := TParamBlockItemClass(_TItem).Create(self,Item);
+  Obj.QueryInterface(GetTypeData(TypeInfo(_IItem))^.Guid,Result);
 end;
 
-function TSQPB.Find(ParamType: byte): ISQPBItem;
+function TCustomParamBlock<_TItem, _IItem>.Find(ParamType: byte): _IItem;
 var Item: PParamBlockItemData;
+    Obj: TParamBlockItem;
 begin
   Result := nil;
   Item := inherited Find(ParamType);
   if Item <> nil then
-    Result := TSQPBItem.Create(self,Item);
+  begin
+    Obj := TParamBlockItemClass(_TItem).Create(self,Item);
+    Obj.QueryInterface(GetTypeData(TypeInfo(_IItem))^.Guid,Result);
+  end;
 end;
 
-function TSQPB.getItems(index: integer): ISQPBItem;
+function TCustomParamBlock<_TItem, _IItem>.GetItems(index: integer): _IItem;
 var Item: PParamBlockItemData;
+    Obj: TParamBlockItem;
 begin
   Item := inherited getItems(index);
-  Result := TSQPBItem.Create(self,Item);
-end;
-
-{ TBPB }
-
-constructor TBPB.Create;
-begin
-  inherited Create;
-  FDataLength := 1;
-  FBuffer^ := isc_bpb_version1;
-end;
-
-function TBPB.Add(ParamType: byte): IBPBItem;
-var Item: PParamBlockItemData;
-begin
-  Item := inherited Add(ParamType);
-  Result := TBPBItem.Create(self,Item);
-end;
-
-function TBPB.Find(ParamType: byte): IBPBItem;
-var Item: PParamBlockItemData;
-begin
-  Result := nil;
-  Item := inherited Find(ParamType);
-  if Item <> nil then
-    Result := TBPBItem.Create(self,Item);
-end;
-
-function TBPB.getItems(index: integer): IBPBItem;
-var Item: PParamBlockItemData;
-begin
-  Item := inherited getItems(index);
-  Result := TBPBItem.Create(self,Item);
-end;
-
-{ TDPB }
-
-constructor TDPB.Create;
-begin
-  inherited Create;
-  FDataLength := 1;
-  FBuffer^ := isc_dpb_version1;
-end;
-
-function TDPB.Add(ParamType: byte): IDPBItem;
-var Item: PParamBlockItemData;
-begin
-  Item := inherited Add(ParamType);
-  Result := TDPBItem.Create(self,Item);
-end;
-
-function TDPB.Find(ParamType: byte): IDPBItem;
-var Item: PParamBlockItemData;
-begin
-  Result := nil;
-  Item := inherited Find(ParamType);
-  if Item <> nil then
-    Result := TDPBItem.Create(self,Item);
-end;
-
-function TDPB.getItems(index: integer): IDPBItem;
-var Item: PParamBlockItemData;
-begin
-  Item := inherited getItems(index);
-  Result := TDPBItem.Create(self,Item);
-end;
-
-{ TTPB }
-
-constructor TTPB.Create;
-begin
-  inherited Create;
-  FDataLength := 1;
-  FBuffer^ := isc_tpb_version3;
-end;
-
-function TTPB.Add(ParamType: byte): ITPBItem;
-var Item: PParamBlockItemData;
-begin
-  Item := inherited Add(ParamType);
-  Result := TTPBItem.Create(self,Item);
-end;
-
-function TTPB.Find(ParamType: byte): ITPBItem;
-var Item: PParamBlockItemData;
-begin
-  Result := nil;
-  Item := inherited Find(ParamType);
-  if Item <> nil then
-    Result := TTPBItem.Create(self,Item);
-end;
-
-function TTPB.getItems(index: integer): ITPBItem;
-var Item: PParamBlockItemData;
-begin
-  Item := inherited getItems(index);
-  Result := TTPBItem.Create(self,Item);
-end;
-
-{ TSRB }
-
-function TSRB.Add(ParamType: byte): ISRBItem;
-var Item: PParamBlockItemData;
-begin
-  Item := inherited Add(ParamType);
-  Result := TSRBItem.Create(self,Item);
-end;
-
-function TSRB.Find(ParamType: byte): ISRBItem;
-var Item: PParamBlockItemData;
-begin
-  Result := nil;
-  Item := inherited Find(ParamType);
-  if Item <> nil then
-    Result := TSRBItem.Create(self,Item);
-end;
-
-function TSRB.getItems(index: integer): ISRBItem;
-var Item: PParamBlockItemData;
-begin
-  Item := inherited getItems(index);
-  Result := TSRBItem.Create(self,Item);
-end;
-
-{ TSPB }
-
-constructor TSPB.Create;
-begin
-  inherited Create;
-  FDataLength := 2;
-  FBuffer^ := isc_spb_version;
-  (FBuffer+1)^ := isc_spb_current_version;
-end;
-
-function TSPB.Add(ParamType: byte): ISPBItem;
-var Item: PParamBlockItemData;
-begin
-  Item := inherited Add(ParamType);
-  Result := TSPBItem.Create(self,Item);
-end;
-
-function TSPB.Find(ParamType: byte): ISPBItem;
-var Item: PParamBlockItemData;
-begin
-  Result := nil;
-  Item := inherited Find(ParamType);
-  if Item <> nil then
-    Result := TSPBItem.Create(self,Item);
-end;
-
-function TSPB.getItems(index: integer): ISPBItem;
-var Item: PParamBlockItemData;
-begin
-  Item := inherited getItems(index);
-  Result := TSPBItem.Create(self,Item);
+  Obj := TParamBlockItemClass(_TItem).Create(self,Item);
+  Obj.QueryInterface(GetTypeData(TypeInfo(_IItem))^.Guid,Result);
 end;
 {$ENDIF}
+
+{ TDPB }
+
+constructor TDPB.Create;
+begin
+  inherited Create;
+  FDataLength := 1;
+  FBuffer^ := isc_dpb_version1;
+end;
+
+{ TTPB }
+
+constructor TTPB.Create;
+begin
+  inherited Create;
+  FDataLength := 1;
+  FBuffer^ := isc_tpb_version3;
+end;
+
+{ TSPB }
+
+constructor TSPB.Create;
+begin
+  inherited Create;
+  FDataLength := 2;
+  FBuffer^ := isc_spb_version;
+  (FBuffer+1)^ := isc_spb_current_version;
+end;
+
+{ TBPB }
+
+constructor TBPB.Create;
+begin
+  inherited Create;
+  FDataLength := 1;
+  FBuffer^ := isc_bpb_version1;
+end;
 
 end.
 
