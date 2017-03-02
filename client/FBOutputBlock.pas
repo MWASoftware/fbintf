@@ -135,18 +135,14 @@ type
 
   TServiceQueryResultSubItem = class(TOutputBlockItem,IServiceQueryResultSubItem);
 
- {Delphi generic's don't really work as well as FPC. It's difficult enought to
-   call a constructor with parameters, but just about impossible to extract
-   an interface from a class when both are parameters to the generic class. So
-   we just do this explicitly. To be honest, we could use the Delphi approach
-   for FPC - but why lower yourself to this level just because of Delphi. Better
-   to leave it as an example of where FPC is better than Delphi.
-   }
-
-{$IFDEF FPC}
   { TCustomOutputBlock }
 
+{$IFDEF FPC}
   TCustomOutputBlock<_TItem,_IItem> = class(TOutputBlock)
+{$ELSE}
+  TOutputBlockItemClass = class of TOutputBlockItem;
+  TCustomOutputBlock<_TItem: TOutputBlockItem;_IItem: IParameterBlockItem> = class(TOutputBlock)
+{$ENDIF}
   public
     function getItem(index: integer): _IItem;
     function find(ItemType: byte): _IItem;
@@ -155,7 +151,11 @@ type
 
   { TOutputBlockItemGroup }
 
+{$IFDEF FPC}
   TOutputBlockItemGroup<_TItem,_IItem> = class(TOutputBlockItem)
+{$ELSE}
+  TOutputBlockItemGroup<_TItem: TOutputBlockItem; _IItem: IParameterBlockItem> = class(TOutputBlockItem)
+{$ENDIF}
   public
     function GetItem(index: integer): _IItem;
     function Find(ItemType: byte): _IItem;
@@ -198,67 +198,6 @@ type
     procedure DoParseBuffer; override;
   end;
 
-{$ELSE}
-
-{ TOutputBlockItemGroup }
-
-  TOutputBlockItemGroup = class(TOutputBlockItem)
-  public
-    function GetItem(index: integer): POutputBlockItemData;
-    function Find(ItemType: byte): POutputBlockItemData;
-    property Items[index: integer]: POutputBlockItemData read getItem; default;
-  end;
-
-  { TDBInfoItem }
-
-  TDBInfoItem = class(TOutputBlockItemGroup,IDBInfoItem)
-  public
-    procedure DecodeIDCluster(var ConnectionType: integer; var DBFileName, DBSiteName: AnsiString);
-    procedure DecodeVersionString(var Version: byte; var VersionString: AnsiString);
-    procedure DecodeUserNames(UserNames: TStrings);
-    function getOperationCounts: TDBOperationCounts;
-    function GetItem(index: integer): IDBInfoItem;
-    function Find(ItemType: byte): IDBInfoItem;
- end;
-
-  { TDBInformation }
-
-  TDBInformation = class(TOutputBlock,IDBInformation)
-  protected
-    function AddSpecialItem(BufPtr: PByte): POutputBlockItemData; override;
-    procedure DoParseBuffer; override;
-  public
-    constructor Create(aSize: integer=DBInfoDefaultBufferSize);
-
-  public
-    {IDBInformation}
-    function GetItem(index: integer): IDBInfoItem;
-    function Find(ItemType: byte): IDBInfoItem;
-  end;
-
- { TServiceQueryResultItem }
-
-  TServiceQueryResultItem = class(TOutputBlockItemGroup,IServiceQueryResultItem)
-  public
-    function getItem(index: integer): IServiceQueryResultSubItem;
-    function find(ItemType: byte): IServiceQueryResultSubItem;
-  end;
-
-  { TServiceQueryResults }
-
-  TServiceQueryResults = class(TOutputBlock,IServiceQueryResults)
-  protected
-    function AddListItem(BufPtr: PByte): POutputBlockItemData; override;
-    function AddSpecialItem(BufPtr: PByte): POutputBlockItemData; override;
-    procedure DoParseBuffer; override;
-  public
-    {IServiceQueryResults}
-    function getItem(index: integer): IServiceQueryResultItem;
-    function find(ItemType: byte): IServiceQueryResultItem;
-    property Items[index: integer]: IServiceQueryResultItem read getItem; default;
-  end;
-
-{$ENDIF}
 
   { ISQLInfoItem }
 
@@ -286,7 +225,6 @@ type
 
   TSQLInfoResultsItem = class;
 
-  {$IFDEF FPC}
   { TSQLInfoResultsItem }
 
   TSQLInfoResultsItem = class(TOutputBlockItemGroup<TSQLInfoResultsItem,ISQLInfoItem>,ISQLInfoItem);
@@ -300,30 +238,6 @@ type
   public
     constructor Create(aSize: integer = 1024);
   end;
-{$ELSE}
-
-  { TSQLInfoResultsItem }
-
-  TSQLInfoResultsItem = class(TOutputBlockItemGroup,ISQLInfoItem)
-    function GetItem(index: integer): ISQLInfoItem;
-    function Find(ItemType: byte): ISQLInfoItem;
-  end;
-
-  { TSQLInfoResultsBuffer }
-
-  TSQLInfoResultsBuffer = class(TOutputBlock,ISQLInfoResults)
-  protected
-    function AddListItem(BufPtr: PByte): POutputBlockItemData; override;
-    procedure DoParseBuffer; override;
-  public
-    constructor Create(aSize: integer = 1024);
-    function GetItem(index: integer): ISQLInfoItem;
-    function Find(ItemType: byte): ISQLInfoItem;
-    property Count: integer read GetCount;
-    property Items[index: integer]: ISQLInfoItem read getItem; default;
-  end;
-
-{$ENDIF}
 
 implementation
 
@@ -365,29 +279,47 @@ end;
 
 { TOutputBlockItemGroup }
 
-function TOutputBlockItemGroup.GetItem(index: integer): POutputBlockItemData;
+function TOutputBlockItemGroup<_TItem,_IItem>.GetItem(index: integer): _IItem;
+var P: POutputBlockItemData;
+    Obj: TOutputBlockItem;
 begin
-  if (index >= 0) and (index < Length(FItemData^.FSubItems)) then
-    Result := FItemData^.FSubItems[index]
-  else
-  with FirebirdClientAPI do
-    IBError(ibxeOutputBlockIndexError,[index]);
+  P := inherited getItem(index);
+  Obj := TOutputBlockItemClass(_TItem)Create(self.Owner,P);
+  Obj.QueryInterface(GetTypeData(TypeInfo(_IItem))^.Guid,Result);
 end;
 
-function TOutputBlockItemGroup.Find(ItemType: byte): POutputBlockItemData;
-var i: integer;
+function TOutputBlockItemGroup<_TItem,_IItem>.Find(ItemType: byte): _IItem;
+var P: POutputBlockItemData;
+    Obj: TOutputBlockItem;
 begin
-  Result := nil;
-  for i := 0 to GetCount - 1 do
-    if byte(FItemData^.FSubItems[i]^.FBufPtr^) = ItemType then
-    begin
-      Result := FItemData^.FSubItems[i];
-      Exit;
-    end;
+  P := inherited Find(ItemType);
+  Obj := TOutputBlockItemClass(_TItem)Create(self.Owner,P);
+  Obj.QueryInterface(GetTypeData(TypeInfo(_IItem))^.Guid,Result);
 end;
+
+{ TCustomOutputBlock }
+
+function TCustomOutputBlock<_TItem,_IItem>.getItem(index: integer): _IItem;
+var P: POutputBlockItemData;
+    Obj: TOutputBlockItem;
+begin
+  P := inherited getItem(index);
+  Obj := TOutputBlockItemClass(_TItem)Create(self,P);
+  Obj.QueryInterface(GetTypeData(TypeInfo(_IItem))^.Guid,Result);
+end;
+
+function TCustomOutputBlock<_TItem,_IItem>.find(ItemType: byte): _IItem;
+var P: POutputBlockItemData;
+    Obj: TOutputBlockItem;
+begin
+  P := inherited Find(ItemType);
+  Obj := TOutputBlockItemClass(_TItem)Create(self,P);
+  Obj.QueryInterface(GetTypeData(TypeInfo(_IItem))^.Guid,Result);
+end;
+
 {$ENDIF}
 
-{ TOutputBlockItemGroup }
+{ TOutputBlockItem }
 
 function TOutputBlockItem.GetCount: integer;
 begin
@@ -888,22 +820,6 @@ begin
     IBError(ibxeInfoBufferTypeError,[integer(FBufPtr^)]);
 end;
 
-{$IFNDEF FPC}
-function TDBInfoItem.GetItem(index: integer): IDBInfoItem;
-var P: POutputBlockItemData;
-begin
-  P := inherited getItem(index);
-  Result := TDBInfoItem.Create(self.Owner,P);
-end;
-
-function TDBInfoItem.Find(ItemType: byte): IDBInfoItem;
-var P: POutputBlockItemData;
-begin
-  P := inherited Find(ItemType);
-  Result := TDBInfoItem.Create(self.Owner,P);
-end;
-{$ENDIF}
-
 { TDBInformation }
 
 function TDBInformation.AddSpecialItem(BufPtr: PByte): POutputBlockItemData;
@@ -975,40 +891,6 @@ begin
   inherited Create(aSize);
   FIntegerType := dtInteger;
 end;
-
-{$IFNDEF FPC}
-function TDBInformation.GetItem(index: integer): IDBInfoItem;
-var P: POutputBlockItemData;
-begin
-  P := inherited getItem(index);
-  Result := TDBInfoItem.Create(self,P)
-end;
-
-function TDBInformation.Find(ItemType: byte): IDBInfoItem;
-var P: POutputBlockItemData;
-begin
-  P := inherited Find(ItemType);
-  Result := TDBInfoItem.Create(self,P)
-end;
-
-{ TServiceQueryResultItem }
-
-function TServiceQueryResultItem.getItem(index: integer
-  ): IServiceQueryResultSubItem;
-var P: POutputBlockItemData;
-begin
-  P := inherited getItem(index);
-  Result := TServiceQueryResultSubItem.Create(self.Owner,P);
-end;
-
-function TServiceQueryResultItem.find(ItemType: byte
-  ): IServiceQueryResultSubItem;
-var P: POutputBlockItemData;
-begin
-  P := inherited Find(ItemType);
-  Result := TServiceQueryResultSubItem.Create(self.Owner,P);
-end;
-{$ENDIF}
 
 { TServiceQueryResults }
 
@@ -1180,42 +1062,6 @@ begin
   end;
 end;
 
-{$IFNDEF FPC}
-function TServiceQueryResults.getItem(index: integer): IServiceQueryResultItem;
-var P: POutputBlockItemData;
-begin
-  P := inherited getItem(index);
-  Result := TServiceQueryResultItem.Create(self,P)
-end;
-
-function TServiceQueryResults.find(ItemType: byte): IServiceQueryResultItem;
-var P: POutputBlockItemData;
-begin
-  P := inherited find(ItemType);
-  if P = nil then
-    Result := nil
-  else
-    Result := TServiceQueryResultItem.Create(self,P);
-end;
-
-{ TSQLInfoResultsItem }
-
-function TSQLInfoResultsItem.GetItem(index: integer): ISQLInfoItem;
-var P: POutputBlockItemData;
-begin
-  P := inherited getItem(index);
-  Result := TSQLInfoResultsItem.Create(self.Owner,P)
-end;
-
-function TSQLInfoResultsItem.Find(ItemType: byte): ISQLInfoItem;
-var P: POutputBlockItemData;
-begin
-  P := inherited Find(ItemType);
-  Result := TSQLInfoResultsItem.Create(self.Owner,P)
-end;
-
-{$ENDIF}
-
 { TSQLInfoResultsBuffer }
 
 function TSQLInfoResultsBuffer.AddListItem(BufPtr: PByte): POutputBlockItemData;
@@ -1309,22 +1155,6 @@ begin
   inherited Create(aSize);
   FIntegerType := dtInteger;
 end;
-
-{$IFNDEF FPC}
-function TSQLInfoResultsBuffer.GetItem(index: integer): ISQLInfoItem;
-var P: POutputBlockItemData;
-begin
-  P := inherited getItem(index);
-  Result := TSQLInfoResultsItem.Create(self,P)
-end;
-
-function TSQLInfoResultsBuffer.Find(ItemType: byte): ISQLInfoItem;
-var P: POutputBlockItemData;
-begin
-  P := inherited Find(ItemType);
-  Result := TSQLInfoResultsItem.Create(self,P)
-end;
-{$ENDIF}
 
 end.
 

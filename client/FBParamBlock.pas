@@ -162,14 +162,6 @@ type
    {$ENDIF}
   end;
 
- {Delphi generic's don't really work as well as FPC. It's difficult enought to
-   call a constructor with parameters, but just about impossible to extract
-   an interface from a class when both are parameters to the generic class. So
-   we just do this explicitly. To be honest, we could use the Delphi approach
-   for FPC - but why lower yourself to this level just because of Delphi. Better
-   to leave it as an example of where FPC is better than Delphi.
-   }
-
   { TCustomParamBlock }
 
 {$IFDEF FPC}
