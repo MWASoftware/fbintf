@@ -120,6 +120,7 @@ procedure TFBEvents.CreateEventBlock;
 var
   i: integer;
   EventNames: array of PAnsiChar;
+  EventName: AnsiString;
 begin
   with FirebirdClientAPI do
   begin
@@ -133,15 +134,18 @@ begin
     setlength(EventNames,MaxEvents);
     try
       for i := 0 to FEvents.Count-1 do
-        EventNames[i] := PAnsiChar(FEvents[i]);
+      begin
+        EventName := FEvents[i];
+        EventNames[i] := PAnsiChar(EventName);
+      end;
 
       FEventBufferlen := isc_event_block(@FEventBuffer,@FResultBuffer,
                           FEvents.Count,
-                          [EventNames[0],EventNames[1],EventNames[2],
+                          EventNames[0],EventNames[1],EventNames[2],
                           EventNames[3],EventNames[4],EventNames[5],
                           EventNames[6],EventNames[7],EventNames[8],
                           EventNames[9],EventNames[10],EventNames[11],
-                          EventNames[12],EventNames[13],EventNames[14] ]
+                          EventNames[12],EventNames[13],EventNames[14]
                           );
     finally
       SetLength(EventNames,0)

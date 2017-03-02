@@ -162,6 +162,7 @@ end;
 procedure TEventhandlerInterface.eventCallbackFunction(length: Cardinal;
   events: BytePtr);
 begin
+//  writeln('TEventhandlerInterface: Event Callback');
   FOwner.FCriticalSection.Enter;
   try
     if FOwner.FResultBuffer <> nil then
@@ -169,7 +170,7 @@ begin
   finally
     FOwner.FCriticalSection.Leave
   end;
-//  writeln('Set Event');
+  //writeln('TEventhandlerInterface: Set Event Called');
   {$IF defined(WINDOWS) or defined(MSWINDOWS)}
   SetEvent(FEventHandler);
   {$ELSE}
@@ -179,12 +180,13 @@ end;
 
 procedure TEventhandlerInterface.WaitForEvent;
 begin
+//  writeln('TEventhandlerInterface: Start Event Wait');
   {$IF defined(WINDOWS) or defined(MSWINDOWS)}
   WaitForSingleObject(FEventHandler,INFINITE);
   {$ELSE}
   FEventWaiting.WaitFor(INFINITE);
   {$ENDIF}
-//  writeln('Event Wait Ends');
+//  writeln('TEventhandlerInterface: Event Wait Ends');
 end;
 
 procedure TEventhandlerInterface.CancelWait;
