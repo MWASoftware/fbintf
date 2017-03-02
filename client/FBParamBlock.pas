@@ -823,7 +823,7 @@ constructor TDPB.Create;
 begin
   inherited Create;
   FDataLength := 1;
-  FBuffer^ := char(isc_dpb_version1);
+  FBuffer^ := isc_dpb_version1;
 end;
 
 { TTPB }
@@ -832,7 +832,7 @@ constructor TTPB.Create;
 begin
   inherited Create;
   FDataLength := 1;
-  FBuffer^ := char(isc_tpb_version3);
+  FBuffer^ := isc_tpb_version3;
 end;
 
 { TSPB }
@@ -841,8 +841,8 @@ constructor TSPB.Create;
 begin
   inherited Create;
   FDataLength := 2;
-  FBuffer^ := char(isc_spb_version);
-  (FBuffer+1)^ := char(isc_spb_current_version);
+  FBuffer^ := isc_spb_version;
+  (FBuffer+1)^ := isc_spb_current_version;
 end;
 
 { TBPB }
@@ -851,7 +851,7 @@ constructor TBPB.Create;
 begin
   inherited Create;
   FDataLength := 1;
-  FBuffer^ := char(isc_bpb_version1);
+  FBuffer^ := isc_bpb_version1;
 end;
 
 

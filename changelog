@@ -9,6 +9,11 @@ FBINTF Change Log  version            (1.0-2) tba, 24 Feb 2017 12:17:57 +0000
 
 4. Some generics expanded for Delphi
 
+5. PChar replaced with PByte expect where an actual string is being referenced,
+   where PAnsiChar is used instead.
+
+6. Review of type definitions in IBExternals to ensure Delphi compatibility
+
 FBINTF Change Log  version            (1.0-1) Fri, 24 Feb 2017 12:17:57 +0000
 
 1. Limit maximum Blob segment read/write to MaxuShort. Avoids data loss with
