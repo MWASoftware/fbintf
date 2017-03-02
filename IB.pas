@@ -200,7 +200,6 @@ type
    block interfaces}
 
   IParameterBlock<_IItem> = interface
-    ['{ac603c57-d993-45da-bd15-56f29ba5af55}']
     function getCount: integer;
     function Add(ParamType: byte): _IItem;
     function getItems(index: integer): _IItem;

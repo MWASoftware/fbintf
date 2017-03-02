@@ -141,7 +141,7 @@ type
   TCustomOutputBlock<_TItem,_IItem> = class(TOutputBlock)
 {$ELSE}
   TOutputBlockItemClass = class of TOutputBlockItem;
-  TCustomOutputBlock<_TItem: TOutputBlockItem;_IItem: IParameterBlockItem> = class(TOutputBlock)
+  TCustomOutputBlock<_TItem: TOutputBlockItem;_IItem: IUnknown> = class(TOutputBlock)
 {$ENDIF}
   public
     function getItem(index: integer): _IItem;
@@ -154,7 +154,7 @@ type
 {$IFDEF FPC}
   TOutputBlockItemGroup<_TItem,_IItem> = class(TOutputBlockItem)
 {$ELSE}
-  TOutputBlockItemGroup<_TItem: TOutputBlockItem; _IItem: IParameterBlockItem> = class(TOutputBlockItem)
+  TOutputBlockItemGroup<_TItem: TOutputBlockItem; _IItem: IUnknown> = class(TOutputBlockItem)
 {$ENDIF}
   public
     function GetItem(index: integer): _IItem;
@@ -164,9 +164,7 @@ type
 
   { TDBInfoItem }
 
-  TDBInfoItem = class;
-
-  TDBInfoItem = class(TOutputBlockItemGroup<TDBInfoItem,IDBInfoItem>,IDBInfoItem)
+  TDBInfoItem = class(TOutputBlockItemGroup<TOutputBlockItem,IDBInfoItem>,IDBInfoItem)
   public
     procedure DecodeIDCluster(var ConnectionType: integer; var DBFileName, DBSiteName: AnsiString);
     procedure DecodeVersionString(var Version: byte; var VersionString: AnsiString);
@@ -201,21 +199,27 @@ type
 
   { ISQLInfoItem }
 
-  ISQLInfoItem = interface
+  ISQLInfoSubItem = interface
+    ['{39852ee4-4851-44df-8dc0-26b991250098}']
     function getItemType: byte;
     function getSize: integer;
     function getAsString: AnsiString;
     function getAsInteger: integer;
+  end;
+
+  ISQLInfoItem = interface(ISQLInfoSubItem)
+    ['{34e3c39d-fe4f-4211-a7e3-0266495a359d}']
     function GetCount: integer;
-    function GetItem(index: integer): ISQLInfoItem;
-    function Find(ItemType: byte): ISQLInfoItem;
+    function GetItem(index: integer): ISQLInfoSubItem;
+    function Find(ItemType: byte): ISQLInfoSubItem;
     property Count: integer read GetCount;
-    property Items[index: integer]: ISQLInfoItem read getItem; default;
+    property Items[index: integer]: ISQLInfoSubItem read getItem; default;
   end;
 
   {ISQLInfoResults}
 
   ISQLInfoResults = interface
+    ['{0b3fbe20-6f80-44e7-85ef-e708bc1f2043}']
     function GetCount: integer;
     function GetItem(index: integer): ISQLInfoItem;
     function Find(ItemType: byte): ISQLInfoItem;
@@ -223,11 +227,11 @@ type
     property Items[index: integer]: ISQLInfoItem read getItem; default;
   end;
 
-  TSQLInfoResultsItem = class;
+  TSQLInfoResultsSubItem = class(TOutputBlockItem,ISQLInfoSubItem);
 
   { TSQLInfoResultsItem }
 
-  TSQLInfoResultsItem = class(TOutputBlockItemGroup<TSQLInfoResultsItem,ISQLInfoItem>,ISQLInfoItem);
+  TSQLInfoResultsItem = class(TOutputBlockItemGroup<TSQLInfoResultsSubItem,ISQLInfoSubItem>,ISQLInfoItem);
 
   { TSQLInfoResultsBuffer }
 
@@ -241,7 +245,7 @@ type
 
 implementation
 
-uses FBMessages;
+uses FBMessages {$IFDEF DCC}, TypInfo {$ENDIF};
 
 {$IFDEF FPC}
 { TOutputBlockItemGroup }
@@ -284,8 +288,9 @@ var P: POutputBlockItemData;
     Obj: TOutputBlockItem;
 begin
   P := inherited getItem(index);
-  Obj := TOutputBlockItemClass(_TItem)Create(self.Owner,P);
-  Obj.QueryInterface(GetTypeData(TypeInfo(_IItem))^.Guid,Result);
+  Obj := TOutputBlockItemClass(_TItem).Create(self.Owner,P);
+  if Obj.QueryInterface(GetTypeData(TypeInfo(_IItem))^.Guid,Result) <> 0 then
+    IBError(ibxeInterfaceNotSupported,[GuidToString(GetTypeData(TypeInfo(_IItem))^.Guid)]);
 end;
 
 function TOutputBlockItemGroup<_TItem,_IItem>.Find(ItemType: byte): _IItem;
@@ -293,8 +298,9 @@ var P: POutputBlockItemData;
     Obj: TOutputBlockItem;
 begin
   P := inherited Find(ItemType);
-  Obj := TOutputBlockItemClass(_TItem)Create(self.Owner,P);
-  Obj.QueryInterface(GetTypeData(TypeInfo(_IItem))^.Guid,Result);
+  Obj := TOutputBlockItemClass(_TItem).Create(self.Owner,P);
+  if Obj.QueryInterface(GetTypeData(TypeInfo(_IItem))^.Guid,Result) <> 0 then
+    IBError(ibxeInterfaceNotSupported,[GuidToString(GetTypeData(TypeInfo(_IItem))^.Guid)]);
 end;
 
 { TCustomOutputBlock }
@@ -304,8 +310,9 @@ var P: POutputBlockItemData;
     Obj: TOutputBlockItem;
 begin
   P := inherited getItem(index);
-  Obj := TOutputBlockItemClass(_TItem)Create(self,P);
-  Obj.QueryInterface(GetTypeData(TypeInfo(_IItem))^.Guid,Result);
+  Obj := TOutputBlockItemClass(_TItem).Create(self,P);
+  if Obj.QueryInterface(GetTypeData(TypeInfo(_IItem))^.Guid,Result) <> 0 then
+    IBError(ibxeInterfaceNotSupported,[GuidToString(GetTypeData(TypeInfo(_IItem))^.Guid)]);
 end;
 
 function TCustomOutputBlock<_TItem,_IItem>.find(ItemType: byte): _IItem;
@@ -313,8 +320,9 @@ var P: POutputBlockItemData;
     Obj: TOutputBlockItem;
 begin
   P := inherited Find(ItemType);
-  Obj := TOutputBlockItemClass(_TItem)Create(self,P);
-  Obj.QueryInterface(GetTypeData(TypeInfo(_IItem))^.Guid,Result);
+  Obj := TOutputBlockItemClass(_TItem).Create(self,P);
+  if Obj.QueryInterface(GetTypeData(TypeInfo(_IItem))^.Guid,Result) <> 0 then
+    IBError(ibxeInterfaceNotSupported,[GuidToString(GetTypeData(TypeInfo(_IItem))^.Guid)]);
 end;
 
 {$ENDIF}

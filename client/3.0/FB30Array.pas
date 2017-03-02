@@ -40,29 +40,16 @@ uses
 
 type
 
-  ISDLItem = interface
-    function getParamType: byte;
-    function getAsInteger: integer;
-    function getAsString: AnsiString;
-    function getAsByte: byte;
+  ISDLItem = interface(IParameterBlockItem)
+    ['{a34b6064-5ae9-4fc1-85c3-f145f069b607}']
     procedure addByte(aValue: byte);
     procedure addShortInteger(aValue: integer);
-    procedure setAsString(aValue: AnsiString);
-    procedure setAsByte(aValue: byte);
-    procedure SetAsInteger(aValue: integer);
     procedure SetAsShortInteger(aValue: integer);
     procedure SetAsTinyInteger(aValue: integer);
-    property AsString: AnsiString read getAsString write setAsString;
-    property AsByte: byte read getAsByte write setAsByte;
-    property AsInteger: integer read getAsInteger write SetAsInteger;
   end;
 
-  ISDL = interface
-    function getCount: integer;
-    function Add(ParamType: byte): ISDLItem;
-    function getItems(index: integer): ISDLItem;
-    function Find(ParamType: byte): ISDLItem;
-    property Items[index: integer]: ISDLItem read getItems; default;
+  ISDL = interface(IParameterBlock<ISDLItem>)
+    ['{52ae1f5f-657b-4b14-81aa-7b3658454f4c}']
   end;
 
   { TFB30ArrayMetaData }
@@ -98,23 +85,10 @@ type
 
   { TSDLBlock }
 
-{$IFDEF FPC}
   TSDLBlock = class (TCustomParamBlock<TSDLItem,ISDLItem>, ISDL)
   public
     constructor Create;
   end;
-{$ELSE}
-  TSDLBlock = class(TParamBlock,ISDL)
-  public
-    constructor Create;
-
-  public
-    {ISDL}
-    function Add(ParamType: byte): ISDLItem;
-    function getItems(index: integer): ISDLItem;
-    function Find(ParamType: byte): ISDLItem;
-end;
-{$ENDIF}
 
 implementation
 
@@ -314,31 +288,6 @@ begin
   FDataLength := 1;
   FBuffer^ := isc_sdl_version1;
 end;
-
-{$IFNDEF FPC}
-function TSDLBlock.Add(ParamType: byte): ISDLItem;
-var Item: PParamBlockItemData;
-begin
-  Item := inherited Add(ParamType);
-  Result := TSDLItem.Create(self,Item);
-end;
-
-function TSDLBlock.getItems(index: integer): ISDLItem;
-var Item: PParamBlockItemData;
-begin
-  Item := inherited getItems(index);
-  Result := TSDLItem.Create(self,Item);
-end;
-
-function TSDLBlock.Find(ParamType: byte): ISDLItem;
-var Item: PParamBlockItemData;
-begin
-  Result := nil;
-  Item := inherited Find(ParamType);
-  if Item <> nil then
-    Result := TSDLItem.Create(self,Item);
-end;
-{$ENDIF}
 
 end.
 

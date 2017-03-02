@@ -749,7 +749,8 @@ var Item: PParamBlockItemData;
 begin
   Item := inherited Add(ParamType);
   Obj := TParamBlockItemClass(_TItem).Create(self,Item);
-  Obj.QueryInterface(GetTypeData(TypeInfo(_IItem))^.Guid,Result);
+  if Obj.QueryInterface(GetTypeData(TypeInfo(_IItem))^.Guid,Result) <> 0 then
+    IBError(ibxeInterfaceNotSupported,[GuidToString(GetTypeData(TypeInfo(_IItem))^.Guid)]);
 end;
 
 function TCustomParamBlock<_TItem, _IItem>.Find(ParamType: byte): _IItem;
@@ -761,7 +762,8 @@ begin
   if Item <> nil then
   begin
     Obj := TParamBlockItemClass(_TItem).Create(self,Item);
-    Obj.QueryInterface(GetTypeData(TypeInfo(_IItem))^.Guid,Result);
+    if Obj.QueryInterface(GetTypeData(TypeInfo(_IItem))^.Guid,Result) <> 0 then
+      IBError(ibxeInterfaceNotSupported,[GuidToString(GetTypeData(TypeInfo(_IItem))^.Guid)]);
   end;
 end;
 
@@ -771,7 +773,8 @@ var Item: PParamBlockItemData;
 begin
   Item := inherited getItems(index);
   Obj := TParamBlockItemClass(_TItem).Create(self,Item);
-  Obj.QueryInterface(GetTypeData(TypeInfo(_IItem))^.Guid,Result);
+  if Obj.QueryInterface(GetTypeData(TypeInfo(_IItem))^.Guid,Result) <> 0 then
+    IBError(ibxeInterfaceNotSupported,[GuidToString(GetTypeData(TypeInfo(_IItem))^.Guid)]);
 end;
 {$ENDIF}
 
