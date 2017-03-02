@@ -7,12 +7,14 @@ FBINTF Change Log  version            (1.0-2) tba, 24 Feb 2017 12:17:57 +0000
 
 3. Various syntax changes to ensure Delphi and FPC compilation.
 
-4. Some generics expanded for Delphi
+4. Generics syntax variations for Delphi added
 
 5. PChar replaced with PByte expect where an actual string is being referenced,
    where PAnsiChar is used instead.
 
 6. Review of type definitions in IBExternals to ensure Delphi compatibility
+
+7. Testsuite updated for Delphi
 
 FBINTF Change Log  version            (1.0-1) Fri, 24 Feb 2017 12:17:57 +0000
 

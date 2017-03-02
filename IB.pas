@@ -123,8 +123,8 @@ const
   {Interface version information}
   FBIntf_Major = 1;
   FBIntf_Minor = 0;
-  FBIntf_Release = 1;
-  FBIntf_Version = '1.0.1';
+  FBIntf_Release = 2;
+  FBIntf_Version = '1.0.2';
 
 {These include files are converted from the 'C' originals in the Firebird API
  and define the various constants used by the API}

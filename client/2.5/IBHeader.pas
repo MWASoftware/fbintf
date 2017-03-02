@@ -115,7 +115,7 @@ type
   PISC_ARRAY_BOUND     = ^TISC_ARRAY_BOUND;
    TISC_ARRAY_DESC = record
     array_desc_dtype            : UChar;
-    array_desc_scale            : AnsiChar;
+    array_desc_scale            : ShortInt;
     array_desc_length           : UShort;
     array_desc_field_name       : array[0..31] of AnsiChar;
     array_desc_relation_name    : array[0..31] of AnsiChar;

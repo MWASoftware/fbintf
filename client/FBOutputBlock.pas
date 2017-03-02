@@ -164,7 +164,13 @@ type
 
   { TDBInfoItem }
 
+{$IFDEF FPC}
+   TDBInfoItem = class;
+
+   TDBInfoItem = class(TOutputBlockItemGroup<TDBInfoItem,IDBInfoItem>,IDBInfoItem)
+{$ELSE}
   TDBInfoItem = class(TOutputBlockItemGroup<TOutputBlockItem,IDBInfoItem>,IDBInfoItem)
+{$ENDIF}
   public
     procedure DecodeIDCluster(var ConnectionType: integer; var DBFileName, DBSiteName: AnsiString);
     procedure DecodeVersionString(var Version: byte; var VersionString: AnsiString);

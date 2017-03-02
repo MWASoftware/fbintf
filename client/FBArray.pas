@@ -495,7 +495,7 @@ begin
   with FArrayDesc do
   begin
     array_desc_dtype := GetDType(SQLType);
-    array_desc_scale := AnsiChar(Scale);
+    array_desc_scale := Scale;
     array_desc_length := UShort(size);
     StrPLCopy(array_desc_field_name,columnName,sizeof(array_desc_field_name));
     StrPLCopy(array_desc_relation_name,tableName,sizeof(array_desc_relation_name));
