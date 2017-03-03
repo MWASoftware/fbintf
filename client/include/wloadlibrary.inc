@@ -12,15 +12,8 @@ procedure TFBClientAPI.LoadIBLibrary;
   {$ENDIF}
 
   function DoLoadLibrary(LibName: string): TLibHandle;
-  {$IFDEF MSWINDOWS}
-  var w: widestring;
-  begin
-    w := LibName;
-    Result := LoadLibrary(PChar(w));
-  {$ELSE}}
   begin
     Result := LoadLibrary(PChar(LibName));
-  {$ENDIF}
     if IsValidHandle(Result) then
     begin
       FFBLibraryName := ExtractFileName(LibName);
@@ -35,7 +28,7 @@ procedure TFBClientAPI.LoadIBLibrary;
   end;
   {$ELSE}
   var
-    RecPath : PWideChar;
+    RecPath : PChar;
   begin
     RecPath := StrAlloc(MAX_PATH);
     try
