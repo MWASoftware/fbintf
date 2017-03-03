@@ -3,7 +3,7 @@
   <ProjectSession>
     <Version Value="9"/>
     <BuildModes Active="Default"/>
-    <Units Count="69">
+    <Units Count="70">
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -211,8 +211,8 @@
       <Unit23>
         <Filename Value="../client/FBClientAPI.pas"/>
         <EditorIndex Value="3"/>
-        <TopLine Value="564"/>
-        <CursorPos X="15" Y="606"/>
+        <TopLine Value="186"/>
+        <CursorPos X="5" Y="202"/>
         <UsageCount Value="21"/>
         <Loaded Value="True"/>
       </Unit23>
@@ -226,8 +226,7 @@
       </Unit24>
       <Unit25>
         <Filename Value="../client/FBSQLData.pas"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="769"/>
         <CursorPos X="58" Y="785"/>
         <UsageCount Value="15"/>
@@ -366,7 +365,7 @@
       </Unit43>
       <Unit44>
         <Filename Value="../client/2.5/FB25ClientAPI.pas"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="218"/>
         <CursorPos X="13" Y="218"/>
         <UsageCount Value="12"/>
@@ -545,8 +544,17 @@
         <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="Bat"/>
       </Unit68>
+      <Unit69>
+        <Filename Value="../client/include/wloadlibrary.inc"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="7"/>
+        <CursorPos X="26" Y="54"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit69>
     </Units>
-    <JumpHistory Count="7" HistoryIndex="6">
+    <JumpHistory Count="9" HistoryIndex="8">
       <Position1>
         <Filename Value="TestManager.pas"/>
         <Caret Line="728" Column="10" TopLine="722"/>
@@ -574,6 +582,14 @@
         <Filename Value="../client/FBSQLData.pas"/>
         <Caret Line="1290" Column="56" TopLine="1278"/>
       </Position7>
+      <Position8>
+        <Filename Value="../client/FBClientAPI.pas"/>
+        <Caret Line="606" Column="15" TopLine="575"/>
+      </Position8>
+      <Position9>
+        <Filename Value="../client/FBClientAPI.pas"/>
+        <Caret Line="202" Column="14" TopLine="192"/>
+      </Position9>
     </JumpHistory>
   </ProjectSession>
 </CONFIG>

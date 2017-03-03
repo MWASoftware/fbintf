@@ -11,7 +11,7 @@ procedure TFBClientAPI.LoadIBLibrary;
   end;
   {$ENDIF}
 
-  function DoLoadLibrary(LibName: AnsiString): TLibHandle;
+  function DoLoadLibrary(LibName: string): TLibHandle;
   {$IFDEF MSWINDOWS}
   var w: widestring;
   begin
@@ -28,7 +28,7 @@ procedure TFBClientAPI.LoadIBLibrary;
     end;
   end;
 
-  function GetSpecialFolder(const CSIDL: integer) : AnsiString;
+  function GetSpecialFolder(const CSIDL: integer) : string;
   {$IFDEF FPC}
   begin
     Result := GetWindowsSpecialDir(CSIDL);
@@ -49,9 +49,9 @@ procedure TFBClientAPI.LoadIBLibrary;
   end;
   {$ENDIF}
 
-var InstallDir: AnsiString;
-    dllPathName: AnsiString;
-    oldFirebirdEV: AnsiString;
+var InstallDir: string;
+    dllPathName: string;
+    oldFirebirdEV: string;
 begin
   if IsValidHandle(IBLibrary) then Exit;
 
