@@ -20,9 +20,13 @@
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
+			<DCC_RangeChecking>true</DCC_RangeChecking>
+			<DesignOnlyPackage>false</DesignOnlyPackage>
+			<DCC_BplOutput>.</DCC_BplOutput>
+			<DCC_DcpOutput>.</DCC_DcpOutput>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
 			<GenPackage>true</GenPackage>
-			<DCC_DependencyCheckOutputName>..\..\..\All Users\Documents\RAD Studio\7.0\Bpl\fbintf.bpl</DCC_DependencyCheckOutputName>
+			<DCC_DependencyCheckOutputName>fbintf.bpl</DCC_DependencyCheckOutputName>
 			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>
 			<DCC_Platform>x86</DCC_Platform>
 			<DCC_E>false</DCC_E>

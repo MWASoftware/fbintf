@@ -20,6 +20,8 @@
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
+			<DCC_ExeOutput>.</DCC_ExeOutput>
+			<DCC_RangeChecking>true</DCC_RangeChecking>
 			<DCC_DependencyCheckOutputName>testsuite.exe</DCC_DependencyCheckOutputName>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
 			<DCC_UnitSearchPath>..;../client;../client/2.5;../client/3.0;../client/3.0/firebird;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
