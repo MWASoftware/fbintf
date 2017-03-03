@@ -74,7 +74,7 @@ interface
 
 uses
   Classes,
-    {$IFDEF MSWINDOWS}Windows, {$ENDIF}
+    {$IFDEF WINDOWS}Windows, {$ENDIF}
     {$IFDEF FPC} Dynlibs, {$ENDIF}
    IB, IBHeader, FBActivityMonitor, FBMessages, IBExternals;
 
@@ -189,7 +189,7 @@ implementation
 uses IBUtils, {$IFDEF Unix} initc, {$ENDIF}
 {$IFDEF FPC}
 {$IFDEF WINDOWS }
-Windows, WinDirs,
+WinDirs,
 {$ENDIF}
 {$ELSE}
  ShlObj,
@@ -596,14 +596,14 @@ begin
 end;
 initialization
   IBLibrary := NilHandle;
-  {$IFDEF MSWINDOWS}
+  {$IFNDEF FPC}
   InitializeCriticalSection(FIBCS);
   {$ELSE}
   InitCriticalSection(FIBCS);
   {$ENDIF}
 
 finalization
-  {$IFDEF MSWINDOWS}
+  {$IFNDEF FPC}
   DeleteCriticalSection(FIBCS);
   {$ELSE}
   DoneCriticalSection(FIBCS);

@@ -210,10 +210,11 @@
       </Unit22>
       <Unit23>
         <Filename Value="../client/FBClientAPI.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="116"/>
-        <CursorPos X="29" Y="135"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="564"/>
+        <CursorPos X="15" Y="606"/>
         <UsageCount Value="21"/>
+        <Loaded Value="True"/>
       </Unit23>
       <Unit24>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
@@ -248,9 +249,8 @@
       </Unit27>
       <Unit28>
         <Filename Value="../IB.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
-        <TopLine Value="1179"/>
+        <TopLine Value="109"/>
         <CursorPos X="29" Y="109"/>
         <UsageCount Value="39"/>
         <Loaded Value="True"/>
@@ -365,10 +365,12 @@
       </Unit43>
       <Unit44>
         <Filename Value="../client/2.5/FB25ClientAPI.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="199"/>
-        <CursorPos X="50" Y="220"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="252"/>
+        <CursorPos X="13" Y="218"/>
         <UsageCount Value="12"/>
+        <Loaded Value="True"/>
       </Unit44>
       <Unit45>
         <Filename Value="../client/2.5/IBHeader.pas"/>
@@ -519,15 +521,30 @@
         <UsageCount Value="10"/>
       </Unit64>
     </Units>
-    <JumpHistory Count="2" HistoryIndex="1">
+    <JumpHistory Count="6" HistoryIndex="5">
       <Position1>
         <Filename Value="TestManager.pas"/>
-        <Caret Line="564" Column="22" TopLine="578"/>
+        <Caret Line="728" Column="10" TopLine="722"/>
       </Position1>
       <Position2>
-        <Filename Value="TestManager.pas"/>
-        <Caret Line="728" Column="10" TopLine="722"/>
+        <Filename Value="../client/FBClientAPI.pas"/>
+        <Caret Line="130" Column="24" TopLine="116"/>
       </Position2>
+      <Position3>
+        <Filename Value="../client/FBClientAPI.pas"/>
+        <Caret Line="193" Column="22" TopLine="172"/>
+      </Position3>
+      <Position4>
+        <Filename Value="../client/FBClientAPI.pas"/>
+      </Position4>
+      <Position5>
+        <Filename Value="../client/FBClientAPI.pas"/>
+        <Caret Line="63" Column="18" TopLine="37"/>
+      </Position5>
+      <Position6>
+        <Filename Value="../client/2.5/FB25ClientAPI.pas"/>
+        <Caret Line="71" Column="50" TopLine="55"/>
+      </Position6>
     </JumpHistory>
   </ProjectSession>
 </CONFIG>

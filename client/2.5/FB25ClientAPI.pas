@@ -215,7 +215,7 @@ var
 implementation
 
 uses FBMessages,
-    {$IFDEF MSWINDOWS}Windows, {$ENDIF}
+    {$IFDEF WINDOWS}Windows, {$ENDIF}
     {$IFDEF FPC} Dynlibs, {$ENDIF}
   FB25Attachment, FB25Transaction, FB25Services, FBParamBlock,
   IBUtils;
