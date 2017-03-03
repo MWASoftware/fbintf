@@ -226,11 +226,12 @@
       </Unit24>
       <Unit25>
         <Filename Value="../client/FBSQLData.pas"/>
-        <EditorIndex Value="-1"/>
-        <WindowIndex Value="1"/>
-        <TopLine Value="1279"/>
-        <CursorPos X="3" Y="1279"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="769"/>
+        <CursorPos X="58" Y="785"/>
         <UsageCount Value="15"/>
+        <Loaded Value="True"/>
       </Unit25>
       <Unit26>
         <Filename Value="/usr/share/fpcsrc/rtl/objpas/sysutils/datih.inc"/>
@@ -365,9 +366,8 @@
       </Unit43>
       <Unit44>
         <Filename Value="../client/2.5/FB25ClientAPI.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="4"/>
-        <TopLine Value="252"/>
+        <TopLine Value="218"/>
         <CursorPos X="13" Y="218"/>
         <UsageCount Value="12"/>
         <Loaded Value="True"/>
@@ -521,7 +521,7 @@
         <UsageCount Value="10"/>
       </Unit64>
     </Units>
-    <JumpHistory Count="6" HistoryIndex="5">
+    <JumpHistory Count="7" HistoryIndex="6">
       <Position1>
         <Filename Value="TestManager.pas"/>
         <Caret Line="728" Column="10" TopLine="722"/>
@@ -545,6 +545,10 @@
         <Filename Value="../client/2.5/FB25ClientAPI.pas"/>
         <Caret Line="71" Column="50" TopLine="55"/>
       </Position6>
+      <Position7>
+        <Filename Value="../client/FBSQLData.pas"/>
+        <Caret Line="1290" Column="56" TopLine="1278"/>
+      </Position7>
     </JumpHistory>
   </ProjectSession>
 </CONFIG>

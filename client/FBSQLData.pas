@@ -782,7 +782,7 @@ procedure TSQLVarData.SetString(aValue: AnsiString);
 begin
   {we take full advantage here of reference counted strings. When setting a string
    value, a reference is kept in FVarString and a pointer to it placed in the
-   SQLVar. This avoids string copies. Note that PByte is guaranteed to point to
+   SQLVar. This avoids string copies. Note that PAnsiChar is guaranteed to point to
    a zero byte when the string is empty, neatly avoiding a nil pointer error.}
 
   FVarString := aValue;
