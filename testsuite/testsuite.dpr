@@ -36,8 +36,8 @@ end;
   Result := FindCmdLineSwitch(Switch);
   if Result then
   begin
-    for i := 0 to ParamCount- 2 do
-      if ParamStr(i) = '-' + Switch then
+    for i := 0 to ParamCount do
+      if (ParamStr(i) = '-' + Switch) and (i <= ParamCount) then
       begin
         aValue := ParamStr(i+1);
         exit;
@@ -54,6 +54,7 @@ var
 begin
   try
 
+  FTestID := 0;
   AssignFile(OutFile,'');
   ReWrite(outFile);
 
@@ -120,7 +121,7 @@ begin
 
   writeln(OutFile,'Test Suite Ends');
   Flush(OutFile);
-  readln; {uncomment if running from IDE and console window closes before you can view results}
+  //readln; {uncomment if running from IDE and console window closes before you can view results}
 
   except
     on E: Exception do
