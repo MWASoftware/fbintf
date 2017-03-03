@@ -32,6 +32,9 @@
 {************************************************************************}
 
 unit IBUtils;
+{$IFDEF MSWINDOWS} 
+{$DEFINE WINDOWS} 
+{$ENDIF}
 
 {$IFDEF FPC}
 {$Mode Delphi}

@@ -1,4 +1,7 @@
 unit Test1;
+{$IFDEF MSWINDOWS} 
+{$DEFINE WINDOWS} 
+{$ENDIF}
 
 {Create and Drop a Database}
 {

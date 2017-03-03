@@ -25,6 +25,9 @@
  *
 *)
 unit FBParamBlock;
+{$IFDEF MSWINDOWS} 
+{$DEFINE WINDOWS} 
+{$ENDIF}
 
 {$IFDEF FPC}
 {$mode delphi}

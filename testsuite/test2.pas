@@ -1,4 +1,7 @@
 unit test2;
+{$IFDEF MSWINDOWS} 
+{$DEFINE WINDOWS} 
+{$ENDIF}
 
 {$IFDEF FPC}
 {$mode delphi}

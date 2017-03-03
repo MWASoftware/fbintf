@@ -25,6 +25,9 @@
  *
 *)
 unit FBAttachment;
+{$IFDEF MSWINDOWS} 
+{$DEFINE WINDOWS} 
+{$ENDIF}
 
 {$IFDEF FPC}
 {$mode delphi}

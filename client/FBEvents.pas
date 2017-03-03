@@ -60,6 +60,9 @@
 {                                                                        }
 {************************************************************************}
 unit FBEvents;
+{$IFDEF MSWINDOWS} 
+{$DEFINE WINDOWS} 
+{$ENDIF}
 
 {$IFDEF FPC}
 {$mode delphi}

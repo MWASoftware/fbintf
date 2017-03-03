@@ -32,6 +32,9 @@
 {************************************************************************}
 
 unit IBExternals;
+{$IFDEF MSWINDOWS} 
+{$DEFINE WINDOWS} 
+{$ENDIF}
 
 {$IFDEF FPC}
 {$mode delphi}
@@ -55,7 +58,7 @@ type
   {$IF not declared(FixedInt)}
   FixedInt             = LongInt;
   FixedUInt            = LongWord;
-  {$ENDIF}
+  {$IFEND}
   Int                  = FixedInt; { 32 bit signed }
   UInt                 = FixedUInt;   { 32 bit unsigned }
   Long                 = FixedInt; { 32 bit signed }
@@ -141,7 +144,7 @@ type
 
   {$IF not declared(RawByteString) }
    RawByteString = string; {for backwards compatibility}
-   {$ENDIF}
+  {$IFEND}
 
 const
   { Delphi consts }

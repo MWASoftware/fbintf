@@ -9,6 +9,9 @@
 }
 
 unit Firebird;
+{$IFDEF MSWINDOWS} 
+{$DEFINE WINDOWS} 
+{$ENDIF}
 
 interface
 {$IFDEF FPC}

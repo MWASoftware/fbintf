@@ -60,6 +60,9 @@
 {                                                                        }
 {************************************************************************}
 unit FB25Transaction;
+{$IFDEF MSWINDOWS} 
+{$DEFINE WINDOWS} 
+{$ENDIF}
 
 {$IFDEF FPC}
 {$mode delphi}

@@ -32,6 +32,9 @@
 {************************************************************************}
 
 unit IBErrorCodes;
+{$IFDEF MSWINDOWS} 
+{$DEFINE WINDOWS} 
+{$ENDIF}
 
 interface
 

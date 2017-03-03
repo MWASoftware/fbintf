@@ -25,6 +25,9 @@
  *
 *)
 unit FB30Array;
+{$IFDEF MSWINDOWS} 
+{$DEFINE WINDOWS} 
+{$ENDIF}
 
 {$IFDEF FPC}
 {$mode delphi}
