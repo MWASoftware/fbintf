@@ -5,7 +5,8 @@ FBINTF Change Log  version            (1.0-2) tba, 24 Feb 2017 12:17:57 +0000
 2. Change all uses of string type to explicit AnsiString in order to ensure
    compatibility between Delphi and FPC. 
 
-3. Various syntax changes to ensure Delphi and FPC compilation.
+3. Various syntax changes to ensure Delphi and FPC compilation including GUIDs
+   defined for each interface.
 
 4. Generics syntax variations for Delphi added
 

@@ -106,6 +106,8 @@ unit IB;
 
   5. Straightforward progammatic access to the Firebird API from Pascal programs.
 
+  6. FPC and Delphi Support.
+
   String Types
   ============
 

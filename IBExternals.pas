@@ -142,10 +142,6 @@ type
   end;
   PBlob = ^TBlob;
 
-  {$IF not declared(RawByteString) }
-   RawByteString = string; {for backwards compatibility}
-  {$IFEND}
-
 const
   { Delphi consts }
   { Days of week }

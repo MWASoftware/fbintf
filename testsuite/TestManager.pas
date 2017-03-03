@@ -722,6 +722,11 @@ end;
 procedure TTestManager.Run(TestID: integer);
 begin
   CleanUp;
+  if (TestID <= 0 ) or (TestID > FTests.Count) then
+  begin
+    writeln(OutFile,'Invalid Test ID - ',TestID);
+    Exit;
+  end;
   with TTestBase(FTests[TestID-1]) do
   begin
     writeln(OutFile,'Running ' + TestTitle);

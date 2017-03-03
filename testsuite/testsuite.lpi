@@ -27,7 +27,7 @@
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
-        <CommandLineParams Value="-t 10 -o &quot;C:/lazarus/otherComponents/fbintf/testsuite/test1.log&quot;"/>
+        <CommandLineParams Value="-t 1"/>
       </local>
       <environment>
         <UserOverrides Count="1">
