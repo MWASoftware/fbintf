@@ -41,7 +41,7 @@ unit IBUtils;
 interface
 
 uses
-{$IF defined(WINDOWS) or defined(MSWINDOWS)}  Windows,
+{$IFDEF WINDOWS}  Windows,
 {$ELSE}
   unix,
 {$ENDIF}

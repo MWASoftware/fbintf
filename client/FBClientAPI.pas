@@ -80,7 +80,7 @@ uses
 const
 FIREBIRD_SO2 = 'libfbclient.dylib';
 {$ENDIF}
-{$IF defined(WINDOWS) or defined(MSWINDOWS)}
+{$IFDEF WINDOWS}
 const
 IBASE_DLL = 'gds32.dll';
 FIREBIRD_CLIENT = 'fbclient.dll'; {do not localize}

@@ -67,7 +67,7 @@ unit IB;
 {$interfaces COM}
 {$IF defined(FPC) and (FPC_FULLVERSION < 30000) }
 {$ERROR FPC Version 3.0.0 or later is required}
-{$ENDIF}
+{$IFEND}
 {$ENDIF}
 
 {$DEFINE USEFIREBIRD3API}

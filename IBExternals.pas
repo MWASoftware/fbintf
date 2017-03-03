@@ -33,12 +33,17 @@
 
 unit IBExternals;
 
+{$IFDEF FPC}
+{$mode delphi}
+{$codepage UTF8}
+{$ENDIF}
+
 { Some structures, declarations that we need for the IB stuff to work, but
   that aren't really part of the ib header file. }
 interface
 
 uses
-{$IF defined(WINDOWS) or defined(MSWINDOWS)}
+{$IFDEF WINDOWS}
   Windows;
 {$ELSE}
   unix;
@@ -47,7 +52,7 @@ uses
 const
   MaxuShort            = 65535;
 type
-  {$IFDEF FPC}
+  {$IF not declared(FixedInt)}
   FixedInt             = LongInt;
   FixedUInt            = LongWord;
   {$ENDIF}
@@ -134,7 +139,7 @@ type
   end;
   PBlob = ^TBlob;
 
-  {$IF defined(FPC) and (FPC_FULLVERSION < 20700) }
+  {$IF not declared(RawByteString) }
    RawByteString = string; {for backwards compatibility}
    {$ENDIF}
 
