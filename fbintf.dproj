@@ -4,7 +4,6 @@
 			<MainSource>fbintf.dpk</MainSource>
 			<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
 			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
-			<DCC_DependencyCheckOutputName>..\..\..\All Users\Documents\RAD Studio\5.0\Bpl\fbintf.bpl</DCC_DependencyCheckOutputName>
 			<FrameworkType>None</FrameworkType>
 			<ProjectVersion>18.1</ProjectVersion>
 			<Base>True</Base>
@@ -41,7 +40,7 @@
 			<SanitizedProjectName>fbintf</SanitizedProjectName>
 			<VerInfo_Release>1</VerInfo_Release>
 			<GenPackage>true</GenPackage>
-			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.1.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.2.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.2.0;Comments=</VerInfo_Keys>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1)'!=''">
 			<DCC_BplOutput>.</DCC_BplOutput>
@@ -55,9 +54,9 @@
 			<DCC_BplOutput>.</DCC_BplOutput>
 			<DCC_DcpOutput>.</DCC_DcpOutput>
 			<Version>7.0</Version>
-			<DCC_UnitSearchPath>include;client/include;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
-			<DCC_ResourcePath>include;client/include;$(DCC_ResourcePath)</DCC_ResourcePath>
-			<DCC_ObjPath>include;client/include;$(DCC_ObjPath)</DCC_ObjPath>
+			<DCC_UnitSearchPath>client;client/2.5;client/3.0;client/3.0/firebird;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+			<DCC_ResourcePath>$(DCC_ResourcePath)</DCC_ResourcePath>
+			<DCC_ObjPath>$(DCC_ObjPath)</DCC_ObjPath>
 			<DCC_IncludePath>include;client/include;$(DCC_IncludePath)</DCC_IncludePath>
 		</PropertyGroup>
 		<ProjectExtensions>
@@ -75,7 +74,7 @@
 						<VersionInfo Name="AutoIncBuild">False</VersionInfo>
 						<VersionInfo Name="MajorVer">1</VersionInfo>
 						<VersionInfo Name="MinorVer">0</VersionInfo>
-						<VersionInfo Name="Release">1</VersionInfo>
+						<VersionInfo Name="Release">2</VersionInfo>
 						<VersionInfo Name="Build">0</VersionInfo>
 						<VersionInfo Name="Debug">False</VersionInfo>
 						<VersionInfo Name="PreRelease">False</VersionInfo>
@@ -88,22 +87,16 @@
 					<VersionInfoKeys>
 						<VersionInfoKeys Name="CompanyName"/>
 						<VersionInfoKeys Name="FileDescription"/>
-						<VersionInfoKeys Name="FileVersion">1.0.1.0</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">1.0.2.0</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName"/>
 						<VersionInfoKeys Name="LegalCopyright"/>
 						<VersionInfoKeys Name="LegalTrademarks"/>
 						<VersionInfoKeys Name="OriginalFilename"/>
 						<VersionInfoKeys Name="ProductName"/>
-						<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
+						<VersionInfoKeys Name="ProductVersion">1.0.2.0</VersionInfoKeys>
 						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
-					<Excluded_Packages>
-						<Excluded_Packages Name="$(BDS)\bin\bcboffice2k140.bpl">Embarcadero C++Builder Office 2000 Servers Package</Excluded_Packages>
-						<Excluded_Packages Name="$(BDS)\bin\bcbofficexp140.bpl">Embarcadero C++Builder Office XP Servers Package</Excluded_Packages>
-						<Excluded_Packages Name="$(BDS)\bin\dcloffice2k140.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
-						<Excluded_Packages Name="$(BDS)\bin\dclofficexp140.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
-						<Excluded_Packages Name="C:\Documents and Settings\Tony Whyman\projects\gif\source\Packages\dclmwagiflib.bpl">File C:\Documents and Settings\Tony Whyman\projects\gif\source\Packages\dclmwagiflib.bpl not found</Excluded_Packages>
-					</Excluded_Packages>
+					<Excluded_Packages/>
 					<Source>
 						<Source Name="MainSource">fbintf.dpk</Source>
 					</Source>
