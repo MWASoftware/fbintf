@@ -290,7 +290,7 @@ type
 
 implementation
 
-uses FBMessages {$IFDEF DCC}, TypInfo {$ENDIF};
+uses FBMessages {$IFNDEF FPC}, TypInfo {$ENDIF};
 
 {$IFDEF FPC}
 { TOutputBlockItemGroup }

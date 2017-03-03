@@ -74,7 +74,7 @@ begin
   ResultSet := Attachment.OpenCursorAtStart('Select count(*) from EMPLOYEE');
   writeln(OutFile,'Employee Count = ',ResultSet[0].AsInteger);
 
-  {$IFDEF DCC}
+  {$IFNDEF FPC}
   Transaction.Rollback; {Delphi does not dispose of interfaces until the end of the function
                          so we need to explicitly rollback here. FPC will dispose of the
                          interface as soon as it is overwritten - hence this is not needed.}

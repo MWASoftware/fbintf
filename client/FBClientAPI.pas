@@ -458,7 +458,7 @@ var i: integer;
 begin
   Result := false;
   for i := Low(CharSetMap) to High(CharSetMap) do
-    if CompareStr(CharSetMap[i].CharSetName, CharSetName) = 0 then
+    if AnsiCompareStr(CharSetMap[i].CharSetName, CharSetName) = 0 then
     begin
       CharSetID := CharSetMap[i].CharSetID;
       Result := true;

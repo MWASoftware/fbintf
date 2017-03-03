@@ -5,7 +5,7 @@ program testsuite;
 {$R *.res}
 
 uses
-  System.SysUtils, IB,
+  SysUtils, IB,
   Test1 in 'Test1.pas',
   test2 in 'test2.pas',
   Test3 in 'Test3.pas',
@@ -30,6 +30,22 @@ begin
   writeln(OutFile,'Usage: ', ParamStr(0), ' -h');
 end;
 
+function GetCmdLineValue(const Switch: string; var aValue: string): boolean;
+var i: integer;
+begin
+  Result := FindCmdLineSwitch(Switch);
+  if Result then
+  begin
+    for i := 0 to ParamCount- 2 do
+      if ParamStr(i) = '-' + Switch then
+      begin
+        aValue := ParamStr(i+1);
+        exit;
+      end;
+    Result := false;
+  end;
+end;
+
 
 var
   ErrorMsg: AnsiString;
@@ -49,30 +65,30 @@ begin
     Exit;
   end;
 
-  if FindCmdLineSwitch('t',aValue) then
+  if GetCmdLineValue('t',aValue) then
     FTestID := StrToInt(aValue);
 
   if TestMgr <> nil then
   begin
-    if FindCmdLineSwitch('u',aValue) or FindCmdLineSwitch('user',aValue) then
+    if GetCmdLineValue('u',aValue) or GetCmdLineValue('user',aValue) then
       TestMgr.SetUserName(aValue);
 
-    if FindCmdLineSwitch('p',aValue) or FindCmdLineSwitch('passwd',aValue) then
+    if GetCmdLineValue('p',aValue) or GetCmdLineValue('passwd',aValue) then
       TestMgr.SetPassword(aValue);
 
-    if FindCmdLineSwitch('e',aValue) or FindCmdLineSwitch('employeedb',aValue) then
+    if GetCmdLineValue('e',aValue) or GetCmdLineValue('employeedb',aValue) then
       TestMgr.SetEmployeeDatabaseName(aValue);
 
-    if FindCmdLineSwitch('n',aValue) or FindCmdLineSwitch('newdbname',aValue) then
+    if GetCmdLineValue('n',aValue) or GetCmdLineValue('newdbname',aValue) then
       TestMgr.SetNewDatabaseName(aValue);
 
-    if FindCmdLineSwitch('s',aValue) or FindCmdLineSwitch('secondnewdbname',aValue) then
+    if GetCmdLineValue('s',aValue) or GetCmdLineValue('secondnewdbname',aValue) then
       TestMgr.SetSecondNewDatabaseName(aValue);
 
-    if FindCmdLineSwitch('b',aValue) or FindCmdLineSwitch('backupfile',aValue) then
+    if GetCmdLineValue('b',aValue) or GetCmdLineValue('backupfile',aValue) then
       TestMgr.SetBackupFileName(aValue);
 
-    if FindCmdLineSwitch('o',aValue) or FindCmdLineSwitch('outfile',aValue) then
+    if GetCmdLineValue('o',aValue) or GetCmdLineValue('outfile',aValue) then
     begin
       system.Assign(outFile,aValue);
       ReWrite(outFile);
@@ -81,8 +97,13 @@ begin
     TestMgr.ShowStatistics := FindCmdLineSwitch('S') or FindCmdLineSwitch('stats');
 
     {Ensure consistent date reporting across platforms}
+    {$IF declared(FormatSettings)}
     FormatSettings.ShortDateFormat := 'd/m/yyyy';
     FormatSettings.DateSeparator := '/';
+    {$ELSE}
+    ShortDateFormat := 'd/m/yyyy';
+    DateSeparator := '/';
+    {$IFEND}
 
     writeln(OutFile,'Firebird Client API Test Suite');
     writeln(OutFile,'Copyright MWA Software 2017');

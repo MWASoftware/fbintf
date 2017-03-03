@@ -217,7 +217,7 @@ type
 
 implementation
 
-uses FBMessages {$IFDEF DCC}, TypInfo {$ENDIF};
+uses FBMessages {$IFNDEF FPC} , TypInfo {$ENDIF};
 
 const
   MaxBufferSize = 65535;
@@ -760,7 +760,7 @@ function TCustomParamBlock<_TItem, _IItem>.Find(ParamType: byte): _IItem;
 var Item: PParamBlockItemData;
     Obj: TParamBlockItem;
 begin
-  Result := nil;
+  FillChar(Result,sizeof(Result),0);
   Item := inherited Find(ParamType);
   if Item <> nil then
   begin

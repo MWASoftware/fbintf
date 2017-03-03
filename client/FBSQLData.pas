@@ -457,6 +457,7 @@ implementation
 
 uses FBMessages, FBClientAPI, variants, IBUtils, FBTransaction;
 
+
 { TSQLDataArea }
 
 function TSQLDataArea.GetColumn(index: integer): TSQLVarData;
@@ -924,7 +925,13 @@ begin
       FractionText := IntToStr(abs(Value mod Scaling));
       for i := Length(FractionText) to -aScale -1 do
         PadText := '0' + PadText;
-      with {$IFDEF FPC} DefaultFormatSettings {$ELSE} FormatSettings {$ENDIF} do
+      {$IF declared(DefaultFormatSettings)}
+      with DefaultFormatSettings do
+      {$ELSE}
+      {$IF declared(FormatSettings)}
+      with FormatSettings do
+      {$IFEND}
+      {$IFEND}
       if Value < 0 then
         CurrText := '-' + IntToStr(Abs(Value div Scaling)) + DecimalSeparator + PadText + FractionText
       else
@@ -1316,8 +1323,15 @@ begin
       SQL_TYPE_TIME :
         result := TimeToStr(AsDateTime);
       SQL_TIMESTAMP:
-        result := FormatDateTime(FormatSettings.ShortDateFormat + ' ' +
-                            FormatSettings.LongTimeFormat+'.zzz',AsDateTime);
+      {$IF declared(DefaultFormatSettings)}
+      with DefaultFormatSettings do
+      {$ELSE}
+      {$IF declared(FormatSettings)}
+      with FormatSettings do
+      {$IFEND}
+      {$IFEND}
+        result := FormatDateTime(ShortDateFormat + ' ' +
+                            LongTimeFormat+'.zzz',AsDateTime);
       SQL_SHORT, SQL_LONG:
         if Scale = 0 then
           result := IntToStr(AsLong)
@@ -2551,7 +2565,6 @@ procedure TResults.SetRetainInterfaces(aValue: boolean);
 begin
   RetainInterfaces := aValue;
 end;
-
 
 end.
 
