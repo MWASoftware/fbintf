@@ -1,10 +1,10 @@
 ﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 		<PropertyGroup>
-			<ProjectGuid>{F5B7FFCA-B923-4027-9383-F5D531853FF3}</ProjectGuid>
-			<MainSource>testsuite.dpr</MainSource>
+			<ProjectGuid>{1A50DECD-67A2-4850-A86C-83DADB36F5BD}</ProjectGuid>
+			<MainSource>fbintf.dpk</MainSource>
+			<ProjectVersion>12.0</ProjectVersion>
 			<Config Condition="'$(Config)'==''">Debug</Config>
 			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
-			<ProjectVersion>12.0</ProjectVersion>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
 			<Base>true</Base>
@@ -20,16 +20,17 @@
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
-			<DCC_DependencyCheckOutputName>testsuite.exe</DCC_DependencyCheckOutputName>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
-			<DCC_UnitSearchPath>..;../client;../client/2.5;../client/3.0;../client/3.0/firebird;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
-			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;$(DCC_UnitAlias)</DCC_UnitAlias>
+			<GenPackage>true</GenPackage>
+			<DCC_DependencyCheckOutputName>..\..\..\All Users\Documents\RAD Studio\7.0\Bpl\fbintf.bpl</DCC_DependencyCheckOutputName>
+			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>
 			<DCC_Platform>x86</DCC_Platform>
-			<DCC_N>false</DCC_N>
-			<DCC_S>false</DCC_S>
-			<DCC_K>false</DCC_K>
 			<DCC_E>false</DCC_E>
+			<DCC_S>false</DCC_S>
+			<GenDll>true</GenDll>
+			<DCC_N>false</DCC_N>
 			<DCC_F>false</DCC_F>
+			<DCC_K>false</DCC_K>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1)'!=''">
 			<DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
@@ -41,26 +42,46 @@
 			<DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
 		</PropertyGroup>
 		<ItemGroup>
-			<DelphiCompile Include="testsuite.dpr">
+			<DelphiCompile Include="fbintf.dpk">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
-			<DCCReference Include="Test1.pas"/>
-			<DCCReference Include="test2.pas"/>
-			<DCCReference Include="Test3.pas"/>
-			<DCCReference Include="Test4.pas"/>
-			<DCCReference Include="Test5.pas"/>
-			<DCCReference Include="Test6.pas"/>
-			<DCCReference Include="Test7.pas"/>
-			<DCCReference Include="Test8.pas"/>
-			<DCCReference Include="Test9.pas"/>
-			<DCCReference Include="Test10.pas"/>
-			<DCCReference Include="Test11.pas"/>
-			<DCCReference Include="Test12.pas"/>
-			<DCCReference Include="Test13.pas"/>
-			<DCCReference Include="Test14.pas"/>
-			<DCCReference Include="Test15.pas"/>
-			<DCCReference Include="Test16.pas"/>
-			<DCCReference Include="TestManager.pas"/>
+			<DCCReference Include="rtl.dcp"/>
+			<DCCReference Include="dbrtl.dcp"/>
+			<DCCReference Include="IBUtils.pas"/>
+			<DCCReference Include="IB.pas"/>
+			<DCCReference Include="IBErrorCodes.pas"/>
+			<DCCReference Include="IBExternals.pas"/>
+			<DCCReference Include="client\FBTransaction.pas"/>
+			<DCCReference Include="client\FBActivityMonitor.pas"/>
+			<DCCReference Include="client\FBArray.pas"/>
+			<DCCReference Include="client\FBAttachment.pas"/>
+			<DCCReference Include="client\FBBlob.pas"/>
+			<DCCReference Include="client\FBClientAPI.pas"/>
+			<DCCReference Include="client\FBEvents.pas"/>
+			<DCCReference Include="client\FBMessages.pas"/>
+			<DCCReference Include="client\FBOutputBlock.pas"/>
+			<DCCReference Include="client\FBParamBlock.pas"/>
+			<DCCReference Include="client\FBServices.pas"/>
+			<DCCReference Include="client\FBSQLData.pas"/>
+			<DCCReference Include="client\FBStatement.pas"/>
+			<DCCReference Include="client\2.5\IBHeader.pas"/>
+			<DCCReference Include="client\2.5\FB25Array.pas"/>
+			<DCCReference Include="client\2.5\FB25Attachment.pas"/>
+			<DCCReference Include="client\2.5\FB25Blob.pas"/>
+			<DCCReference Include="client\2.5\FB25ClientAPI.pas"/>
+			<DCCReference Include="client\2.5\FB25Events.pas"/>
+			<DCCReference Include="client\2.5\FB25Services.pas"/>
+			<DCCReference Include="client\2.5\FB25Statement.pas"/>
+			<DCCReference Include="client\2.5\FB25Transaction.pas"/>
+			<DCCReference Include="client\3.0\FB30Transaction.pas"/>
+			<DCCReference Include="client\3.0\FB30Array.pas"/>
+			<DCCReference Include="client\3.0\FB30Attachment.pas"/>
+			<DCCReference Include="client\3.0\FB30Blob.pas"/>
+			<DCCReference Include="client\3.0\FB30ClientAPI.pas"/>
+			<DCCReference Include="client\3.0\FB30Events.pas"/>
+			<DCCReference Include="client\3.0\FB30Services.pas"/>
+			<DCCReference Include="client\3.0\FB30Statement.pas"/>
+			<DCCReference Include="client\3.0\firebird\Firebird.pas"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>
@@ -76,11 +97,11 @@
 		<Import Project="$(BDS)\Bin\CodeGear.Delphi.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')"/>
 		<ProjectExtensions>
 			<Borland.Personality>Delphi.Personality.12</Borland.Personality>
-			<Borland.ProjectType>VCLApplication</Borland.ProjectType>
+			<Borland.ProjectType>Package</Borland.ProjectType>
 			<BorlandProject>
 				<Delphi.Personality>
 					<Source>
-						<Source Name="MainSource">testsuite.dpr</Source>
+						<Source Name="MainSource">fbintf.dpk</Source>
 					</Source>
 					<Parameters>
 						<Parameters Name="UseLauncher">False</Parameters>
@@ -88,7 +109,7 @@
 						<Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
 					</Parameters>
 					<VersionInfo>
-						<VersionInfo Name="IncludeVerInfo">False</VersionInfo>
+						<VersionInfo Name="IncludeVerInfo">True</VersionInfo>
 						<VersionInfo Name="AutoIncBuild">False</VersionInfo>
 						<VersionInfo Name="MajorVer">1</VersionInfo>
 						<VersionInfo Name="MinorVer">0</VersionInfo>

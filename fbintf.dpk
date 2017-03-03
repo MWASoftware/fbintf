@@ -1,33 +1,27 @@
 package fbintf;
 
 {$R *.res}
-{$R *.otares}
-{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
 {$ALIGN 8}
 {$ASSERTIONS ON}
 {$BOOLEVAL OFF}
-{$DEBUGINFO OFF}
+{$DEBUGINFO ON}
 {$EXTENDEDSYNTAX ON}
 {$IMPORTEDDATA ON}
 {$IOCHECKS ON}
 {$LOCALSYMBOLS ON}
 {$LONGSTRINGS ON}
 {$OPENSTRINGS ON}
-{$OPTIMIZATION OFF}
+{$OPTIMIZATION ON}
 {$OVERFLOWCHECKS OFF}
 {$RANGECHECKS OFF}
 {$REFERENCEINFO ON}
 {$SAFEDIVIDE OFF}
-{$STACKFRAMES ON}
+{$STACKFRAMES OFF}
 {$TYPEDADDRESS OFF}
 {$VARSTRINGCHECKS ON}
 {$WRITEABLECONST OFF}
 {$MINENUMSIZE 1}
 {$IMAGEBASE $400000}
-{$DEFINE DEBUG}
-{$ENDIF IMPLICITBUILDING}
-{$DESCRIPTION 'Firebird Pascal API'}
-{$RUNONLY}
 {$IMPLICITBUILD ON}
 
 requires
@@ -36,7 +30,6 @@ requires
 
 contains
   IBUtils in 'IBUtils.pas',
-  fbintf in 'fbintf.pas',
   IB in 'IB.pas',
   IBErrorCodes in 'IBErrorCodes.pas',
   IBExternals in 'IBExternals.pas',
@@ -53,14 +46,6 @@ contains
   FBServices in 'client\FBServices.pas',
   FBSQLData in 'client\FBSQLData.pas',
   FBStatement in 'client\FBStatement.pas',
-  FB30Transaction in 'client\3.0\FB30Transaction.pas',
-  FB30Array in 'client\3.0\FB30Array.pas',
-  FB30Attachment in 'client\3.0\FB30Attachment.pas',
-  FB30Blob in 'client\3.0\FB30Blob.pas',
-  FB30ClientAPI in 'client\3.0\FB30ClientAPI.pas',
-  FB30Events in 'client\3.0\FB30Events.pas',
-  FB30Services in 'client\3.0\FB30Services.pas',
-  FB30Statement in 'client\3.0\FB30Statement.pas',
   IBHeader in 'client\2.5\IBHeader.pas',
   FB25Array in 'client\2.5\FB25Array.pas',
   FB25Attachment in 'client\2.5\FB25Attachment.pas',
@@ -70,6 +55,14 @@ contains
   FB25Services in 'client\2.5\FB25Services.pas',
   FB25Statement in 'client\2.5\FB25Statement.pas',
   FB25Transaction in 'client\2.5\FB25Transaction.pas',
+  FB30Transaction in 'client\3.0\FB30Transaction.pas',
+  FB30Array in 'client\3.0\FB30Array.pas',
+  FB30Attachment in 'client\3.0\FB30Attachment.pas',
+  FB30Blob in 'client\3.0\FB30Blob.pas',
+  FB30ClientAPI in 'client\3.0\FB30ClientAPI.pas',
+  FB30Events in 'client\3.0\FB30Events.pas',
+  FB30Services in 'client\3.0\FB30Services.pas',
+  FB30Statement in 'client\3.0\FB30Statement.pas',
   Firebird in 'client\3.0\firebird\Firebird.pas';
 
 end.
