@@ -134,9 +134,9 @@ const
 {These include files are converted from the 'C' originals in the Firebird API
  and define the various constants used by the API}
 
-{$I consts_pub.inc}
-{$I inf_pub.inc}
-{$I configkeys.inc}
+{$I 'include/consts_pub.inc'}
+{$I 'include/inf_pub.inc'}
+{$I 'include/configkeys.inc'}
 
 {The following constants define the values return by calls to the GetSQLType
  methods provided by several of the interfaces defined below.}

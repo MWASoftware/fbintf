@@ -186,7 +186,7 @@ var
 
 implementation
 
-uses IBUtils, {$IFDEF Unix} initc, {$ENDIF}
+uses IBUtils, Registry, {$IFDEF Unix} initc, {$ENDIF}
 {$IFDEF FPC}
 {$IFDEF WINDOWS }
 WinDirs,
@@ -194,12 +194,12 @@ WinDirs,
 {$ELSE}
  ShlObj,
 {$ENDIF}
-Registry,SysUtils;
+SysUtils;
 
 {$IFDEF UNIX}
-{$I uloadlibrary.inc}
+{$I 'include/uloadlibrary.inc'}
 {$ELSE}
-{$I wloadlibrary.inc}
+{$I 'include/wloadlibrary.inc'}
 {$ENDIF}
 
 type

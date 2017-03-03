@@ -95,7 +95,7 @@ begin
       ReWrite(outFile);
     end;
 
-    TestMgr.ShowStatistics := FindCmdLineSwitch('S') or FindCmdLineSwitch('stats');
+    TestMgr.ShowStatistics := FindCmdLineSwitch('S',false) or FindCmdLineSwitch('stats');
 
     {Ensure consistent date reporting across platforms}
     {$IF declared(FormatSettings)}
@@ -107,7 +107,7 @@ begin
     {$IFEND}
 
     writeln(OutFile,'Firebird Client API Test Suite');
-    writeln(OutFile,'Copyright MWA Software 2017');
+    writeln(OutFile,'Copyright MWA Software 2016');
     writeln(OutFile);
     writeln(OutFile,'Starting Tests');
     writeln(OutFile,'Client API Version = ',FirebirdAPI.GetImplementationVersion);
