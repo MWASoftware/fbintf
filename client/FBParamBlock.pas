@@ -760,7 +760,7 @@ function TCustomParamBlock<_TItem, _IItem>.Find(ParamType: byte): _IItem;
 var Item: PParamBlockItemData;
     Obj: TParamBlockItem;
 begin
-  FillChar(Result,sizeof(Result),0);
+  FillChar(Result,sizeof(Result),0); {workaround for older versions of Delphi}
   Item := inherited Find(ParamType);
   if Item <> nil then
   begin

@@ -1,6 +1,6 @@
 @echo off
-#Test suite Configuration parameters
-#These may be modified if needed to suite local requirements
+REM Test suite Configuration parameters
+REM These may be modified if needed to suite local requirements
 
 set FPCDIR=C:\lazarus\fpc\3.0.0
 set FPCBIN=%FPCDIR%\bin\i386-win32

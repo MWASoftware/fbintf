@@ -3,7 +3,7 @@
   <ProjectSession>
     <Version Value="9"/>
     <BuildModes Active="Default"/>
-    <Units Count="65">
+    <Units Count="69">
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -502,9 +502,9 @@
       <Unit62>
         <Filename Value="../client/FBParamBlock.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="125"/>
-        <CursorPos X="14" Y="162"/>
-        <UsageCount Value="9"/>
+        <TopLine Value="753"/>
+        <CursorPos X="27" Y="763"/>
+        <UsageCount Value="10"/>
       </Unit62>
       <Unit63>
         <Filename Value="../client/FBBlob.pas"/>
@@ -520,6 +520,31 @@
         <CursorPos X="74" Y="136"/>
         <UsageCount Value="10"/>
       </Unit64>
+      <Unit65>
+        <Filename Value="../fbintf.dpk"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="17" Y="16"/>
+        <UsageCount Value="10"/>
+      </Unit65>
+      <Unit66>
+        <Filename Value="testsuite.dpr"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="61"/>
+        <UsageCount Value="10"/>
+      </Unit66>
+      <Unit67>
+        <Filename Value="runtest.bat"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="5" Y="3"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Bat"/>
+      </Unit67>
+      <Unit68>
+        <Filename Value="rundelphitest.bat"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Bat"/>
+      </Unit68>
     </Units>
     <JumpHistory Count="7" HistoryIndex="6">
       <Position1>
