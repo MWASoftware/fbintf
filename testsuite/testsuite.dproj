@@ -27,7 +27,7 @@
 		<PropertyGroup Condition="'$(Base)'!=''">
 			<DCC_RangeChecking>true</DCC_RangeChecking>
 			<DCC_IntegerOverflowCheck>true</DCC_IntegerOverflowCheck>
-			<DCC_UnitSearchPath>..;../client;../client/2.5;../client/3.0;../client/3.0/firebird;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+			<DCC_UnitSearchPath>..;../client;../client/2.5;../client/3.0;../client/3.0/firebird;../include;../client/include;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 			<DCC_IncludePath>../include;../client/include;$(DCC_IncludePath)</DCC_IncludePath>
 			<DCC_UsePackage>vclx;vcl;vclimg;dbrtl;Rave77VCL;bdertl;rtl;vclactnband;xmlrtl;vcldb;vcldbx;vcltouch;dsnap;dsnapcon;TeeUI;TeeDB;Tee;adortl;IndyCore;IndySystem;IndyProtocols;inet;intrawebdb_100_140;Intraweb_100_140;VclSmp;vclie;inetdb;webdsnap;websnap;inetdbbde;inetdbxpress;soaprtl;vclribbon;DbxCommonDriver;DbxClientDriver;DBXInterBaseDriver;DBXMySQLDriver;dbexpress;dbxcds</DCC_UsePackage>
 			<DCC_DependencyCheckOutputName>testsuite.exe</DCC_DependencyCheckOutputName>

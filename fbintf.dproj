@@ -54,7 +54,7 @@
 			<DCC_BplOutput>.</DCC_BplOutput>
 			<DCC_DcpOutput>.</DCC_DcpOutput>
 			<Version>7.0</Version>
-			<DCC_UnitSearchPath>client;client/2.5;client/3.0;client/3.0/firebird;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+			<DCC_UnitSearchPath>client;client/2.5;client/3.0;client/3.0/firebird;include;client/include;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 			<DCC_ResourcePath>$(DCC_ResourcePath)</DCC_ResourcePath>
 			<DCC_ObjPath>$(DCC_ObjPath)</DCC_ObjPath>
 			<DCC_IncludePath>include;client/include;$(DCC_IncludePath)</DCC_IncludePath>
