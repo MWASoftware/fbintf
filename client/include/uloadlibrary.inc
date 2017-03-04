@@ -1,6 +1,6 @@
 procedure TFBClientAPI.LoadIBLibrary;
 
-  function FindLibrary(LibNameList: AnsiString): TLibHandle;
+  function FindLibrary(LibNameList: string): TLibHandle;
   var LibNames: TStringList;
       i: integer;
   begin
@@ -24,7 +24,7 @@ procedure TFBClientAPI.LoadIBLibrary;
     end;
   end;
 
-var LibName: AnsiString;
+var LibName: string;
 begin
   if IBLibrary <> NilHandle then Exit;
 

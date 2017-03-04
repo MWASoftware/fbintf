@@ -97,7 +97,7 @@ type
                              goes out of scope.}
   protected
     {$IFDEF UNIX}
-    function GetFirebirdLibList: AnsiString; override;
+    function GetFirebirdLibList: string; override;
     {$ENDIF}
     procedure LoadInterface; override;
   public
@@ -331,7 +331,7 @@ end;
 { TFB25ClientAPI }
 
 {$IFDEF UNIX}
-function TFB25ClientAPI.GetFirebirdLibList: AnsiString;
+function TFB25ClientAPI.GetFirebirdLibList: string;
 begin
   Result := 'libfbembed.so:libfbembed.so.2.5:libfbembed.so.2.1:libfbclient.so:libfbclient.so.2';
 end;

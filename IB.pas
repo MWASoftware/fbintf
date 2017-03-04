@@ -183,9 +183,12 @@ const
   CP_ASCII   = 20127; // us-ascii
   CP_NONE    = $FFFF; // rawbytestring encoding
 
-type
-  TSystemCodePage = word; {not defined in Delphi}
 {$ENDIF}
+
+type
+{$IF not declared(TSystemCodePage)}
+  TSystemCodePage = word; {not defined in Delphi}
+{$IFEND}
 
   TIBSQLStatementTypes =
                  (SQLUnknown, SQLSelect, SQLInsert,
@@ -1088,7 +1091,7 @@ type
 end;
 
 type
-  TOnGetLibraryName = procedure(var libname: AnsiString);
+  TOnGetLibraryName = procedure(var libname: string);
 
 const
   OnGetLibraryName: TOnGetLibraryName = nil;

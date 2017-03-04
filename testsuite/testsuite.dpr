@@ -30,10 +30,10 @@ begin
   writeln(OutFile,'Usage: ', ParamStr(0), ' -h');
 end;
 
-function GetCmdLineValue(const Switch: string; var aValue: string): boolean;
-var i: integer;
-begin
-  Result := FindCmdLineSwitch(Switch);
+function GetCmdLineValue(const Switch: string; var aValue: string): boolean;
+var i: integer;
+begin
+  Result := FindCmdLineSwitch(Switch,false);
   if Result then
   begin
     for i := 0 to ParamCount do

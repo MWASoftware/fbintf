@@ -72,7 +72,7 @@ type
     procedure CheckPlugins;
   protected
     {$IFDEF UNIX}
-    function GetFirebirdLibList: AnsiString; override;
+    function GetFirebirdLibList: string; override;
     {$ENDIF}
    procedure LoadInterface; override;
   public
@@ -192,7 +192,7 @@ begin
 end;
 
 {$IFDEF UNIX}
-function TFB30ClientAPI.GetFirebirdLibList: AnsiString;
+function TFB30ClientAPI.GetFirebirdLibList: string;
 begin
   Result := 'libfbclient.so:libfbclient.so.2';
 end;

@@ -121,12 +121,15 @@ type
   TFBClientAPI = class(TFBInterfacedObject)
   private
     FOwnsIBLibrary: boolean;
+    class var FIBCS: TRTLCriticalSection;
     procedure LoadIBLibrary;
   protected
+    class var FFBLibraryName: string;
+    class var IBLibrary: TLibHandle;
     function GetProcAddr(ProcName: PAnsiChar): Pointer;
-    function GetOverrideLibName: AnsiString;
+    function GetOverrideLibName: string;
     {$IFDEF UNIX}
-    function GetFirebirdLibList: AnsiString; virtual; abstract;
+    function GetFirebirdLibList: string; virtual; abstract;
     {$ENDIF}
     procedure LoadInterface; virtual;
   public
@@ -159,7 +162,7 @@ type
     function GetStatus: IStatus; virtual; abstract;
     function IsLibraryLoaded: boolean;
     function IsEmbeddedServer: boolean; virtual; abstract;
-    function GetLibraryName: AnsiString;
+    function GetLibraryName: string;
     function GetCharsetName(CharSetID: integer): AnsiString;
     function CharSetID2CodePage(CharSetID: integer; var CodePage: TSystemCodePage): boolean;
     function CodePage2CharSetID(CodePage: TSystemCodePage; var CharSetID: integer): boolean;
@@ -178,11 +181,6 @@ const
   DirectorySeparator = '\';
 {$ENDIF}
 
-var
-  FFBLibraryName: AnsiString;
-  FFBLibraryPath: AnsiString;
-  IBLibrary: TLibHandle;
-  FIBCS: TRTLCriticalSection;
 
 implementation
 
@@ -387,7 +385,7 @@ begin
     raise Exception.CreateFmt(SFirebirdAPIFuncNotFound,[ProcName]);
 end;
 
-function TFBClientAPI.GetOverrideLibName: AnsiString;
+function TFBClientAPI.GetOverrideLibName: string;
 begin
   Result := '';
   if AllowUseOfFBLIB then
@@ -409,7 +407,7 @@ begin
   isc_free := GetProcAddr('isc_free'); {do not localize}
 end;
 
-function TFBClientAPI.GetLibraryName: AnsiString;
+function TFBClientAPI.GetLibraryName: string;
 begin
   Result := FFBLibraryName;
 end;
@@ -577,42 +575,42 @@ end;
 
 function TFBStatus.GetIBDataBaseErrorMessages: TIBDataBaseErrorMessages;
 begin
-  EnterCriticalSection(FIBCS);
+  EnterCriticalSection(TFBClientAPI.FIBCS);
   try
     result := FIBDataBaseErrorMessages;
   finally
-    LeaveCriticalSection(FIBCS);
+    LeaveCriticalSection(TFBClientAPI.FIBCS);
   end;
 end;
 
 procedure TFBStatus.SetIBDataBaseErrorMessages(Value: TIBDataBaseErrorMessages);
 begin
-  EnterCriticalSection(FIBCS);
+  EnterCriticalSection(TFBClientAPI.FIBCS);
   try
     FIBDataBaseErrorMessages := Value;
   finally
-    LeaveCriticalSection(FIBCS);
+    LeaveCriticalSection(TFBClientAPI.FIBCS);
   end;
 end;
 initialization
-  IBLibrary := NilHandle;
+  TFBClientAPI.IBLibrary := NilHandle;
   {$IFNDEF FPC}
-  InitializeCriticalSection(FIBCS);
+  InitializeCriticalSection(TFBClientAPI.FIBCS);
   {$ELSE}
-  InitCriticalSection(FIBCS);
+  InitCriticalSection(TFBClientAPI.FIBCS);
   {$ENDIF}
 
 finalization
   {$IFNDEF FPC}
   DeleteCriticalSection(FIBCS);
   {$ELSE}
-  DoneCriticalSection(FIBCS);
+  DoneCriticalSection(TFBClientAPI.FIBCS);
   {$ENDIF}
-  if IBLibrary <> NilHandle then
+  if TFBClientAPI.IBLibrary <> NilHandle then
   begin
-    FreeLibrary(IBLibrary);
-    IBLibrary := NilHandle;
-    FFBLibraryName := '';
+    FreeLibrary(TFBClientAPI.IBLibrary);
+    TFBClientAPI.IBLibrary := NilHandle;
+    TFBClientAPI.FFBLibraryName := '';
   end;
 
 end.
