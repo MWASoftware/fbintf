@@ -90,6 +90,15 @@ FIREBIRD_CLIENT = 'fbclient.dll'; {do not localize}
 FIREBIRD_EMBEDDED = 'fbembed.dll';
 {$ENDIF}
 
+{$IFNDEF FPC}
+type
+  TLibHandle = THandle;
+
+const
+  NilHandle = 0;
+  DirectorySeparator = '\';
+{$ENDIF}
+
 type
   TStatusVector              = array[0..19] of NativeInt;
   PStatusVector              = ^TStatusVector;
@@ -126,6 +135,9 @@ type
   protected
     class var FFBLibraryName: string;
     class var IBLibrary: TLibHandle;
+    {$IFDEF WINDOWS}
+    class var FFBLibraryPath: string;
+    {$ENDIF}
     function GetProcAddr(ProcName: PAnsiChar): Pointer;
     function GetOverrideLibName: string;
     {$IFDEF UNIX}
@@ -171,16 +183,6 @@ type
   end;
 
 var FirebirdClientAPI: TFBClientAPI = nil;
-
-{$IFNDEF FPC}
-type
-  TLibHandle = THandle;
-
-const
-  NilHandle = 0;
-  DirectorySeparator = '\';
-{$ENDIF}
-
 
 implementation
 
@@ -602,7 +604,7 @@ initialization
 
 finalization
   {$IFNDEF FPC}
-  DeleteCriticalSection(FIBCS);
+  DeleteCriticalSection(TFBClientAPI.FIBCS);
   {$ELSE}
   DoneCriticalSection(TFBClientAPI.FIBCS);
   {$ENDIF}

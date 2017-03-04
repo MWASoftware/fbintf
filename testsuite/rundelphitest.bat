@@ -16,6 +16,7 @@ set BAKFILE=%TESTOUTDIR%\testsuite.gbk
 rd /s /q testunits
 mkdir testunits
 mkdir %TESTOUTDIR%
+del testsuite.exe
 "%DELPHIBIN%\dcc32" -B -E. -N0testunits -I..\include;..\client\include -U..;..\client;..\client\2.5\;..\client\3.0;..\client\3.0\firebird testsuite.dpr
 
 echo( 
