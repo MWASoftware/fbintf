@@ -3,6 +3,9 @@ REM Test suite Configuration parameters
 REM These may be modified if needed to suite local requirements
 
 set FPCDIR=C:\lazarus\fpc\3.0.0
+if not EXIST %FPCDIR% (
+set FPCDIR=C:\lazarus\fpc\3.0.2
+}
 set FPCBIN=%FPCDIR%\bin\i386-win32
 set TESTOUTDIR=%TEMP%\fbintf-testsuite
 set USERNAME=SYSDBA
