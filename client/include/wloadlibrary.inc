@@ -1,7 +1,7 @@
 procedure TFBClientAPI.LoadIBLibrary;
 
   function IsValidHandle(aHandle: TLibHandle): boolean;
-  {$IFDEF FPC}
+  {$IFDEF UNIX}
   begin
     Result := aHandle <> nil;
   end;
