@@ -45,13 +45,6 @@ unit IBExternals;
   that aren't really part of the ib header file. }
 interface
 
-uses
-{$IFDEF WINDOWS}
-  Windows;
-{$ELSE}
-  unix;
-{$ENDIF}
-
 const
   MaxuShort            = 65535;
 type
@@ -115,7 +108,7 @@ type
 
   TISC_VARYING = record
     strlen: Short;
-    str: array[0..0] of Char;
+    str: array[0..0] of AnsiChar;
   end;
 
   {***************************}

@@ -43,12 +43,7 @@ unit IBUtils;
 
 interface
 
-uses
-{$IFDEF WINDOWS}  Windows,
-{$ELSE}
-  unix,
-{$ENDIF}
-  Classes, SysUtils;
+uses Classes, SysUtils;
 
 const
   CRLF = #13 + #10;

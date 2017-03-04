@@ -1847,10 +1847,10 @@ begin
     IsNull := False;
   case SQLTYPE of
   SQL_BOOLEAN:
-    if CompareText(Value,STrue) = 0 then
+    if AnsiCompareText(Value,STrue) = 0 then
       AsBoolean := true
     else
-    if CompareText(Value,SFalse) = 0 then
+    if AnsiCompareText(Value,SFalse) = 0 then
       AsBoolean := false
     else
       IBError(ibxeInvalidDataConversion,[nil]);
