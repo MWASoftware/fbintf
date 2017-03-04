@@ -251,7 +251,6 @@
       </Unit27>
       <Unit28>
         <Filename Value="../IB.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
         <TopLine Value="173"/>
         <CursorPos Y="189"/>
@@ -550,8 +549,9 @@
       </Unit68>
       <Unit69>
         <Filename Value="../client/include/wloadlibrary.inc"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="6"/>
-        <CursorPos X="26" Y="54"/>
+        <CursorPos Y="7"/>
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
       </Unit69>
@@ -576,7 +576,7 @@
         <UsageCount Value="10"/>
       </Unit72>
     </Units>
-    <JumpHistory Count="24" HistoryIndex="23">
+    <JumpHistory Count="22" HistoryIndex="21">
       <Position1>
         <Filename Value="TestManager.pas"/>
         <Caret Line="728" Column="10" TopLine="722"/>
@@ -646,32 +646,24 @@
       </Position17>
       <Position18>
         <Filename Value="../client/2.5/FB25ClientAPI.pas"/>
-        <Caret Line="218" Column="13" TopLine="629"/>
+        <Caret Line="389" Column="44" TopLine="374"/>
       </Position18>
       <Position19>
-        <Filename Value="../client/2.5/FB25ClientAPI.pas"/>
-        <Caret Line="389" Column="44" TopLine="374"/>
-      </Position19>
-      <Position20>
-        <Filename Value="../client/FBOutputBlock.pas"/>
-        <Caret Line="19" Column="84" TopLine="106"/>
-      </Position20>
-      <Position21>
         <Filename Value="../client/FBClientAPI.pas"/>
         <Caret Line="130" Column="40" TopLine="119"/>
-      </Position21>
-      <Position22>
+      </Position19>
+      <Position20>
         <Filename Value="../client/FBClientAPI.pas"/>
         <Caret Line="396" Column="19" TopLine="388"/>
-      </Position22>
-      <Position23>
+      </Position20>
+      <Position21>
         <Filename Value="../client/2.5/FB25ClientAPI.pas"/>
         <Caret Line="100" Column="40" TopLine="91"/>
-      </Position23>
-      <Position24>
+      </Position21>
+      <Position22>
         <Filename Value="../client/3.0/FB30ClientAPI.pas"/>
         <Caret Line="75" Column="40" TopLine="65"/>
-      </Position24>
+      </Position22>
     </JumpHistory>
   </ProjectSession>
 </CONFIG>

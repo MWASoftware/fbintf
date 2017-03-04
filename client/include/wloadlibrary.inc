@@ -1,15 +1,9 @@
 procedure TFBClientAPI.LoadIBLibrary;
 
   function IsValidHandle(aHandle: TLibHandle): boolean;
-  {$IFDEF UNIX}
-  begin
-    Result := aHandle <> nil;
-  end;
-  {$ELSE}
   begin
     Result := aHandle > HINSTANCE_ERROR;
   end;
-  {$ENDIF}
 
   function DoLoadLibrary(LibName: string): TLibHandle;
   begin
