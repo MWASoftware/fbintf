@@ -2,27 +2,37 @@
 REM Test suite Configuration parameters
 REM These may be modified if needed to suite local requirements
 
+
+if EXIST C:\lazarus\fpc\3.0.2\bin\i386-win32\fpc.exe (
 set FPCDIR=C:\lazarus\fpc\3.0.2
 set FPCBIN=%FPCDIR%\bin\i386-win32
+Goto COMPILE
+)
 
-if not EXIST %FPCBIN%\fpc.exe (
+if EXIST C:\lazarus\fpc\3.0.2\bin\x86_64-win64\fpc.exe (
 set FPCDIR=C:\lazarus\fpc\3.0.2
 set FPCBIN=%FPCDIR%\bin\x86_64-win64
+Goto COMPILE
+)
 
-if not EXIST %FPCBIN%\fpc.exe (
+if EXIST C:\lazarus\fpc\3.0.0\bin\i386-win32\fpc.exe (
 set FPCDIR=C:\lazarus\fpc\3.0.0
 set FPCBIN=%FPCDIR%\bin\i386-win32
+Goto COMPILE
+)
 
-if not EXIST %FPCBIN%\fpc.exe (
+if EXIST C:\lazarus\fpc\3.0.0\bin\x86_64-win64\fpc.exe (
 set FPCDIR=C:\lazarus\fpc\3.0.0
 set FPCBIN=%FPCDIR%\bin\x86_64-win64
+Goto COMPILE
+)
+
 if not EXIST %FPCBIN%\fpc.exe (
   echo "Unable to find fpc.exe"
   goto :EOF
 )
-)
-)
-)
+
+:COMPILE
 set TESTOUTDIR=%TEMP%\fbintf-testsuite
 set USERNAME=SYSDBA
 set PASSWORD=masterkey
