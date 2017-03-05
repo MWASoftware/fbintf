@@ -100,9 +100,11 @@ begin
     {Ensure consistent date reporting across platforms}
     {$IF declared(FormatSettings)}
     FormatSettings.ShortDateFormat := 'd/m/yyyy';
+    FormatSettings.ShortTimeFormat := 'HH:MM:SS';
     FormatSettings.DateSeparator := '/';
     {$ELSE}
     ShortDateFormat := 'd/m/yyyy';
+    ShortTimeFormat := 'HH:MM:SS';
     DateSeparator := '/';
     {$IFEND}
 

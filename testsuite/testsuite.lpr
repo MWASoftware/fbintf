@@ -83,6 +83,7 @@ begin
 
     {Ensure consistent date reporting across platforms}
     DefaultFormatSettings.ShortDateFormat := 'd/m/yyyy';
+    DefaultFormatSettings.ShortTimeFormat := 'HH:MM:SS';
     DefaultFormatSettings.DateSeparator := '/';
 
     writeln(OutFile,Title);
