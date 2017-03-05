@@ -7,15 +7,15 @@
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
-        <TopLine Value="93"/>
-        <CursorPos X="49" Y="132"/>
+        <TopLine Value="66"/>
+        <CursorPos X="57" Y="86"/>
         <UsageCount Value="96"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="TestManager.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="3"/>
         <TopLine Value="709"/>
         <CursorPos X="48" Y="727"/>
         <UsageCount Value="96"/>
@@ -183,7 +183,7 @@
       </Unit18>
       <Unit19>
         <Filename Value="../client/3.0/FB30ClientAPI.pas"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="194"/>
         <CursorPos X="3" Y="197"/>
         <UsageCount Value="13"/>
@@ -197,7 +197,7 @@
       </Unit20>
       <Unit21>
         <Filename Value="../client/FBOutputBlock.pas"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="7"/>
         <TopLine Value="1125"/>
         <CursorPos Y="1140"/>
         <UsageCount Value="21"/>
@@ -212,7 +212,7 @@
       </Unit22>
       <Unit23>
         <Filename Value="../client/FBClientAPI.pas"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="135"/>
         <CursorPos X="14" Y="130"/>
         <UsageCount Value="23"/>
@@ -228,7 +228,7 @@
       </Unit24>
       <Unit25>
         <Filename Value="../client/FBSQLData.pas"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="10"/>
         <TopLine Value="1833"/>
         <CursorPos X="12" Y="1853"/>
         <UsageCount Value="17"/>
@@ -244,14 +244,15 @@
       </Unit26>
       <Unit27>
         <Filename Value="/usr/share/fpcsrc/rtl/objpas/sysutils/sysinth.inc"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="42"/>
-        <CursorPos X="18" Y="63"/>
-        <UsageCount Value="5"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="28"/>
+        <CursorPos X="20" Y="47"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
       </Unit27>
       <Unit28>
         <Filename Value="../IB.pas"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="4"/>
         <TopLine Value="173"/>
         <CursorPos Y="189"/>
         <UsageCount Value="41"/>
@@ -367,7 +368,7 @@
       </Unit43>
       <Unit44>
         <Filename Value="../client/2.5/FB25ClientAPI.pas"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="9"/>
         <TopLine Value="528"/>
         <CursorPos X="27" Y="548"/>
         <UsageCount Value="14"/>
@@ -375,9 +376,8 @@
       </Unit44>
       <Unit45>
         <Filename Value="../client/2.5/IBHeader.pas"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="10"/>
-        <TopLine Value="112"/>
+        <EditorIndex Value="12"/>
+        <TopLine Value="536"/>
         <CursorPos X="61" Y="567"/>
         <UsageCount Value="21"/>
         <Loaded Value="True"/>
@@ -518,7 +518,7 @@
       </Unit63>
       <Unit64>
         <Filename Value="../IBExternals.pas"/>
-        <EditorIndex Value="11"/>
+        <EditorIndex Value="13"/>
         <TopLine Value="142"/>
         <CursorPos X="15" Y="109"/>
         <UsageCount Value="12"/>
@@ -532,10 +532,12 @@
       </Unit65>
       <Unit66>
         <Filename Value="testsuite.dpr"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="85"/>
-        <CursorPos X="20" Y="36"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="88"/>
+        <CursorPos X="41" Y="98"/>
         <UsageCount Value="10"/>
+        <Loaded Value="True"/>
       </Unit66>
       <Unit67>
         <Filename Value="runtest.bat"/>
@@ -552,7 +554,7 @@
       </Unit68>
       <Unit69>
         <Filename Value="../client/include/wloadlibrary.inc"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="8"/>
         <CursorPos Y="7"/>
         <UsageCount Value="12"/>
         <Loaded Value="True"/>
@@ -579,7 +581,7 @@
       </Unit72>
       <Unit73>
         <Filename Value="../client/FBArray.pas"/>
-        <EditorIndex Value="12"/>
+        <EditorIndex Value="14"/>
         <TopLine Value="345"/>
         <CursorPos X="12" Y="365"/>
         <UsageCount Value="12"/>
@@ -587,14 +589,14 @@
       </Unit73>
       <Unit74>
         <Filename Value="../IBUtils.pas"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="11"/>
         <TopLine Value="317"/>
         <CursorPos X="6" Y="46"/>
         <UsageCount Value="12"/>
         <Loaded Value="True"/>
       </Unit74>
     </Units>
-    <JumpHistory Count="28" HistoryIndex="27">
+    <JumpHistory Count="29" HistoryIndex="28">
       <Position1>
         <Filename Value="TestManager.pas"/>
         <Caret Line="728" Column="10" TopLine="722"/>
@@ -704,6 +706,10 @@
       <Position28>
         <Filename Value="../client/2.5/FB25ClientAPI.pas"/>
       </Position28>
+      <Position29>
+        <Filename Value="testsuite.lpr"/>
+        <Caret Line="85" Column="33" TopLine="66"/>
+      </Position29>
     </JumpHistory>
   </ProjectSession>
 </CONFIG>
