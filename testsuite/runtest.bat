@@ -5,25 +5,25 @@ REM These may be modified if needed to suite local requirements
 
 if EXIST C:\lazarus\fpc\3.0.2\bin\i386-win32\fpc.exe (
 set FPCDIR=C:\lazarus\fpc\3.0.2
-set FPCBIN=%FPCDIR%\bin\i386-win32
+set FPCBIN=C:\lazarus\fpc\3.0.2\bin\i386-win32
 Goto COMPILE
 )
 
 if EXIST C:\lazarus\fpc\3.0.2\bin\x86_64-win64\fpc.exe (
 set FPCDIR=C:\lazarus\fpc\3.0.2
-set FPCBIN=%FPCDIR%\bin\x86_64-win64
+set FPCBIN=C:\lazarus\fpc\3.0.2\bin\x86_64-win64
 Goto COMPILE
 )
 
 if EXIST C:\lazarus\fpc\3.0.0\bin\i386-win32\fpc.exe (
 set FPCDIR=C:\lazarus\fpc\3.0.0
-set FPCBIN=%FPCDIR%\bin\i386-win32
+set FPCBIN=C:\lazarus\fpc\3.0.0\bin\i386-win32
 Goto COMPILE
 )
 
 if EXIST C:\lazarus\fpc\3.0.0\bin\x86_64-win64\fpc.exe (
 set FPCDIR=C:\lazarus\fpc\3.0.0
-set FPCBIN=%FPCDIR%\bin\x86_64-win64
+set FPCBIN=%C:\lazarus\fpc\3.0.0\bin\x86_64-win64
 Goto COMPILE
 )
 
