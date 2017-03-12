@@ -399,7 +399,7 @@ begin
       SetAsInt64(0)
     else
     if GetScale = 0 then
-      SetAsInt64(StrToInt(Value))
+      SetAsInt64(Trunc(StrToCurr(Value)))
     else
       SetAsNumeric(AdjustScaleFromCurrency(StrToCurr(Value),GetScale),GetScale);
 
