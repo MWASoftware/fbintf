@@ -162,6 +162,7 @@ type
      procedure SetAsShort(Value: short); virtual;
      procedure SetAsString(Value: AnsiString); virtual;
      procedure SetAsVariant(Value: Variant);
+     procedure SetAsNumeric(Value: Int64; aScale: integer);
      procedure SetIsNull(Value: Boolean); virtual;
      procedure SetIsNullable(Value: Boolean); virtual;
      procedure SetName(aValue: AnsiString); virtual;
@@ -1629,6 +1630,20 @@ begin
   end;
 end;
 
+procedure TSQLDataItem.SetAsNumeric(Value: Int64; aScale: integer);
+begin
+  CheckActive;
+  Changing;
+  if IsNullable then
+    IsNull := False;
+
+  SQLType := SQL_INT64;
+  Scale := aScale;
+  DataLength := SizeOf(Int64);
+  PInt64(SQLData)^ := Value;
+  Changed;
+end;
+
 procedure TSQLDataItem.SetAsBoolean(AValue: boolean);
 begin
   CheckActive;
@@ -1841,6 +1856,7 @@ end;
 
 procedure TSQLParam.InternalSetAsString(Value: AnsiString);
 var b: IBlob;
+    dt: TDateTime;
 begin
   CheckActive;
   if IsNullable then
@@ -1875,7 +1891,10 @@ begin
     SQL_SHORT,
     SQL_LONG,
     SQL_INT64:
-      SetAsInt64(StrToInt(Value));
+      if GetScale = 0 then
+        SetAsInt64(StrToInt(Value))
+      else
+        SetAsNumeric(AdjustScaleFromCurrency(StrToCurr(Value),GetScale),GetScale);
 
     SQL_D_FLOAT,
     SQL_DOUBLE,
@@ -1883,13 +1902,22 @@ begin
       SetAsDouble(StrToFloat(Value));
 
     SQL_TIMESTAMP:
-      SetAsDateTime(StrToDateTime(Value));
+      if TryStrToDateTime(Value,dt) then
+        SetAsDateTime(dt)
+      else
+        FIBXSQLVar.SetString(Value);
 
     SQL_TYPE_DATE:
-      SetAsDate(StrToDateTime(Value));
+      if TryStrToDateTime(Value,dt) then
+        SetAsDate(dt)
+      else
+        FIBXSQLVar.SetString(Value);
 
     SQL_TYPE_TIME:
-      SetAsTime(StrToDateTime(Value));
+      if TryStrToDateTime(Value,dt) then
+        SetAsTime(dt)
+      else
+        FIBXSQLVar.SetString(Value);
 
     else
       IBError(ibxeInvalidDataConversion,[nil]);

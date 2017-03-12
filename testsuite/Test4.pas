@@ -116,12 +116,12 @@ begin
     ByName('EMP_NO').AsInteger := 151;
     ByName('FIRST_NAME').AsString := 'Major';
     ByName('PHONE_EXT').AsString := '';
-    ByName('HIRE_DATE').AsDateTime := EncodeDate(2015,4,1);;
+    ByName('HIRE_DATE').AsString :=  '2015-4-1';
     ByName('DEPT_NO').AsString := '600';
     ByName('JOB_CODE').AsString := 'Eng';
     ByName('JOB_GRADE').AsInteger := 4;
     ByName('JOB_COUNTRY').AsString := 'England';
-    ByName('SALARY').AsFloat := 40000.59;
+    ByName('SALARY').AsString := '40000.59';
   end;
   Statement.Execute;
   WriteAffectedRows(Statement);

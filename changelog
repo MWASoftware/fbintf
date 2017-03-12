@@ -1,3 +1,13 @@
+FBINTF Change Log  version             (1.0-3) tba, 00 Mar 2017 14:43:56 +0000
+
+1. Fix issues with setting SQL Param values using SetAsString with Numeric types.
+   Scale is no longer ignored.
+
+2. Fix issues with setting SQL Param values using SetAsString with Date values
+   not in locale format but which are recognised by Firebird. Date values that
+   cannot be converted to a string using Pascal library are now passed through
+   to Firebird as Text Strings.
+
 FBINTF Change Log  version             (1.0-2) Sat, 04 Mar 2017 14:43:56 +0000
 
 1. Change syntax to Mode Delphi
