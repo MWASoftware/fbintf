@@ -1891,10 +1891,7 @@ begin
     SQL_SHORT,
     SQL_LONG,
     SQL_INT64:
-      if GetScale = 0 then
-        SetAsInt64(Trunc(StrToCurr(Value)))
-      else
-        SetAsNumeric(AdjustScaleFromCurrency(StrToCurr(Value),GetScale),GetScale);
+      SetAsNumeric(AdjustScaleFromCurrency(StrToCurr(Value),GetScale),GetScale);
 
     SQL_D_FLOAT,
     SQL_DOUBLE,

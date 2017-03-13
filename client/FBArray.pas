@@ -398,10 +398,7 @@ begin
     if trim(Value) = '' then
       SetAsInt64(0)
     else
-    if GetScale = 0 then
-      SetAsInt64(Trunc(StrToCurr(Value)))
-    else
-      SetAsNumeric(AdjustScaleFromCurrency(StrToCurr(Value),GetScale),GetScale);
+      SetAsInt64(AdjustScaleFromCurrency(StrToCurr(Value),GetScale));
 
   SQL_D_FLOAT,
   SQL_DOUBLE,
