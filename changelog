@@ -8,6 +8,10 @@ FBINTF Change Log  version             (1.0-3) tba, 00 Mar 2017 14:43:56 +0000
    cannot be converted to a string using Pascal library are now passed through
    to Firebird as Text Strings.
 
+3. Lookup character set name by codepage amended to ensure that CP_UTF8 returns
+   UTF8 and not UNICODE_FSS.
+
+
 FBINTF Change Log  version             (1.0-2) Sat, 04 Mar 2017 14:43:56 +0000
 
 1. Change syntax to Mode Delphi
