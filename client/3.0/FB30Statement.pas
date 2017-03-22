@@ -343,6 +343,7 @@ begin
     else
       result := FCharSetID;
   end;
+  result := result;
 end;
 
 function TIBXSQLVAR.GetCodePage: TSystemCodePage;
@@ -738,7 +739,7 @@ begin
         FSQLNullIndicator := nil;
       FScale := aMetaData.getScale(StatusIntf,i);
       Check4DataBaseError;
-      FCharSetID :=  aMetaData.getCharSet(StatusIntf,i);
+      FCharSetID :=  aMetaData.getCharSet(StatusIntf,i) and $FF;
       Check4DataBaseError;
     end;
   end;
@@ -812,7 +813,7 @@ begin
         FSQLNullIndicator := nil;
       FScale := aMetaData.getScale(StatusIntf,i);
       Check4DataBaseError;
-      FCharSetID :=  aMetaData.getCharSet(StatusIntf,i);
+      FCharSetID :=  aMetaData.getCharSet(StatusIntf,i) and $FF;
       Check4DataBaseError;
     end;
   end;

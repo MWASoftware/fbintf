@@ -335,7 +335,7 @@ begin
   SQL_BLOB:
     if (SQLSubType = 1)  then
       {see http://firebirdsql.org/rlsnotesh/rlsnotes210.html}
-      result := FXSQLVAR^.sqlscale;
+      result := FXSQLVAR^.sqlscale and $FF;
 
   SQL_ARRAY:
     if (GetRelationName <> '') and (GetFieldName <> '') then

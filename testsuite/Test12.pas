@@ -42,7 +42,7 @@ const
     'Create Table TestData ('+
     'RowID Integer not null,'+
     'Title VarChar(32) Character Set UTF8,'+
-    'Notes VarChar(64) Character Set ISO8859_1,'+
+    'Notes VarChar(64) Character Set ISO8859_1 collate FR_FR,'+
     'BlobData Blob sub_type 1 Character Set WIN1252, '+
     'BlobData2 Blob sub_type 1 Character Set UTF8, '+
     'InClear VarChar(16) Character Set OCTETS, '+

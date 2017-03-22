@@ -11,6 +11,11 @@ FBINTF Change Log  version             (1.0-3) tba, 00 Mar 2017 14:43:56 +0000
 3. Lookup character set name by codepage amended to ensure that CP_UTF8 returns
    UTF8 and not UNICODE_FSS.
 
+4. Charset ID problem. When using Firebird 3, no default database character set
+   and a column has a non-default collation specified, an incorrect character set
+   id was being reported that could result in a 'division by zero' error when
+   used by IBX. This has now been fixed.
+
 
 FBINTF Change Log  version             (1.0-2) Sat, 04 Mar 2017 14:43:56 +0000
 
