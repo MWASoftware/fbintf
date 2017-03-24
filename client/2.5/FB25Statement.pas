@@ -346,7 +346,7 @@ end;
 function TIBXSQLVAR.GetCodePage: TSystemCodePage;
 begin
   result := CP_NONE;
-  with FirebirdClientAPI do
+  with Statement.GetAttachment do
      CharSetID2CodePage(GetCharSetID,result);
 end;
 

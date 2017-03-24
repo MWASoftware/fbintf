@@ -340,7 +340,7 @@ function TFB25Attachment.CreateArrayMetaData(SQLType: cardinal;
   acharSetID: cardinal; dimensions: cardinal; bounds: TArrayBounds
   ): IArrayMetaData;
 begin
-  Result := TFB25ArrayMetaData.Create(SQLType,tableName,ColumnName,Scale,size,acharSetID,dimensions,bounds);
+  Result := TFB25ArrayMetaData.Create(self,SQLType,tableName,ColumnName,Scale,size,acharSetID,dimensions,bounds);
 end;
 
 function TFB25Attachment.GetBlobMetaData(Transaction: ITransaction; tableName,

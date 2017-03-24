@@ -50,6 +50,7 @@ type
      FAttachment: TFB30Attachment;
      FTransaction: TFB30Transaction;
    protected
+     function Attachment: IAttachment; override;
      procedure NeedFullMetadata; override;
    public
      constructor Create(Attachment: TFB30Attachment; Transaction: TFB30Transaction;
@@ -98,6 +99,11 @@ const
   'Where Trim(R.RDB$RELATION_NAME) = Upper(Trim(?)) and Trim(R.RDB$FIELD_NAME) = Upper(Trim(?))';
 
 { TFB30BlobMetaData }
+
+function TFB30BlobMetaData.Attachment: IAttachment;
+begin
+  Result := FAttachment;
+end;
 
 procedure TFB30BlobMetaData.NeedFullMetadata;
 var stmt: IStatement;

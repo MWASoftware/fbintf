@@ -57,6 +57,7 @@ type
     FSubType: integer;
     FCharSetID: cardinal;
     FSegmentSize: cardinal;
+    function Attachment: IAttachment; virtual; abstract;
     procedure NeedFullMetadata; virtual; abstract;
     procedure NeedSubType;
   public
@@ -445,7 +446,7 @@ end;
 
 function TFBBlobMetaData.GetCodePage: TSystemCodePage;
 begin
-  FirebirdClientAPI.CharSetID2CodePage(GetCharSetID,Result);
+  Attachment.CharSetID2CodePage(GetCharSetID,Result);
 end;
 
 function TFBBlobMetaData.GetSegmentSize: cardinal;

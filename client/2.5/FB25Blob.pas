@@ -85,6 +85,7 @@ type
      FAttachment: TFB25Attachment;
      FTransaction: TFB25Transaction;
    protected
+     function Attachment: IAttachment; override;
      procedure NeedFullMetadata; override;
    public
      constructor Create(Attachment: TFB25Attachment; Transaction: TFB25Transaction;
@@ -126,6 +127,11 @@ implementation
 uses IBErrorCodes, FBMessages, FBParamBlock;
 
 { TFB25BlobMetaData }
+
+function TFB25BlobMetaData.Attachment: IAttachment;
+begin
+  Result := FAttachment;
+end;
 
 procedure TFB25BlobMetaData.NeedFullMetadata;
 var

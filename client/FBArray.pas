@@ -108,13 +108,14 @@ type
   protected
    FArrayDesc: TISC_ARRAY_DESC;
    FCharSetID: integer;
+   FAttachment: IAttachment;
    procedure LoadMetaData(aAttachment: IAttachment; aTransaction: ITransaction;
                relationName, columnName: AnsiString); virtual; abstract;
    function NumOfElements: integer;
   public
    constructor Create(aAttachment: IAttachment; aTransaction: ITransaction;
      relationName, columnName: AnsiString); overload;
-   constructor Create(SQLType: cardinal; tableName: AnsiString; columnName: AnsiString;
+   constructor Create(aAttachment: IAttachment;SQLType: cardinal; tableName: AnsiString; columnName: AnsiString;
      Scale: integer; size: cardinal; charSetID: cardinal;
      dimensions: cardinal; bounds: TArrayBounds); overload;
    function GetCodePage: TSystemCodePage; virtual; abstract;
@@ -486,15 +487,18 @@ constructor TFBArrayMetaData.Create(aAttachment: IAttachment;
   aTransaction: ITransaction; relationName, columnName: AnsiString);
 begin
   inherited Create;
+  FAttachment := aAttachment;
   LoadMetaData(aAttachment,aTransaction,relationName, columnName);
 end;
 
-constructor TFBArrayMetaData.Create(SQLType: cardinal; tableName: AnsiString;
-  columnName: AnsiString; Scale: integer; size: cardinal; charSetID: cardinal;
-  dimensions: cardinal; bounds: TArrayBounds);
+constructor TFBArrayMetaData.Create(aAttachment: IAttachment;
+  SQLType: cardinal; tableName: AnsiString; columnName: AnsiString;
+  Scale: integer; size: cardinal; charSetID: cardinal; dimensions: cardinal;
+  bounds: TArrayBounds);
 var i: integer;
 begin
   inherited Create;
+  FAttachment := aAttachment;
   with FArrayDesc do
   begin
     array_desc_dtype := GetDType(SQLType);

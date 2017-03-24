@@ -140,12 +140,12 @@ begin
       if (FCharSetID > 1) and (aAttachment as TFB30Attachment).HasDefaultCharSet then
         FCharSetID := (aAttachment as TFB30Attachment).CharSetID;
       FCodePage := CP_NONE;
-      FirebirdClientAPI.CharSetID2CodePage(FCharSetID,FCodePage);
+      FAttachment.CharSetID2CodePage(FCharSetID,FCodePage);
       if (FArrayDesc.array_desc_dtype in [blr_text,blr_cstring, blr_varying]) and
         (FCharSetID = 0) then {This really shouldn't be necessary - but it is :(}
       with aAttachment as TFBAttachment do
       begin
-        if HasDefaultCharSet  and FirebirdClientAPI.CharSetWidth(CharSetID,CharWidth) then
+        if HasDefaultCharSet  and FAttachment.CharSetWidth(CharSetID,CharWidth) then
           FArrayDesc.array_desc_length := FArrayDesc.array_desc_length * CharWidth;
       end;
       repeat

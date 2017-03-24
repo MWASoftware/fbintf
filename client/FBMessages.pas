@@ -241,7 +241,9 @@ type
       ibxeInvalidVariantType,
       ibxeServiceRunning,
       ibxeUniqueRelationReqd,
-      ibxeInterfaceNotSupported
+      ibxeInterfaceNotSupported,
+      ibxeCharacterSetExists,
+      ibxeUnknownUserCharSet
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -438,6 +440,8 @@ resourcestring
   SServiceRunning = 'Cannot start a new service while an existing service is running';
   SUniqueRelationReqd = 'All Output Fields must derived from the same table';
   SInterfaceNotSupported = 'Interface not supported; Guid %s not found';
+  SCharacterSetExists = 'Character set "%s" is already defined';
+  SUnknownUserCharSet = 'Unknown user character set "%s"';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -601,7 +605,9 @@ const
     SInvalidVariantType,
     SServiceRunning,
     SUniqueRelationReqd,
-    SInterfaceNotSupported
+    SInterfaceNotSupported,
+    SCharacterSetExists,
+    SUnknownUserCharSet
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;

@@ -356,7 +356,7 @@ function TFB30Attachment.CreateArrayMetaData(SQLType: cardinal; tableName: AnsiS
   Scale: integer; size: cardinal; aCharSetID: cardinal; dimensions: cardinal;
   bounds: TArrayBounds): IArrayMetaData;
 begin
-  Result := TFB30ArrayMetaData.Create(SQLType,tableName,ColumnName,Scale,size,aCharSetID, dimensions,bounds);
+  Result := TFB30ArrayMetaData.Create(self,SQLType,tableName,ColumnName,Scale,size,aCharSetID, dimensions,bounds);
 end;
 
 function TFB30Attachment.GetBlobMetaData(Transaction: ITransaction; tableName,

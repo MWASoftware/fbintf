@@ -912,6 +912,14 @@ type
     function GetDBInformation(Requests: array of byte): IDBInformation; overload;
     function GetDBInformation(Request: byte): IDBInformation; overload;
     function HasActivity: boolean;
+
+    {Character Sets}
+    function GetCharsetName(CharSetID: integer): AnsiString;
+    function CharSetID2CodePage(CharSetID: integer; var CodePage: TSystemCodePage): boolean;
+    function CodePage2CharSetID(CodePage: TSystemCodePage; var CharSetID: integer): boolean;
+    function CharSetName2CharSetID(CharSetName: AnsiString; var CharSetID: integer): boolean;
+    function CharSetWidth(CharSetID: integer; var Width: integer): boolean;
+    procedure RegisterCharSet(CharSetName: AnsiString; CodePage: TSystemCodePage; out CharSetID: integer);
   end;
 
   TProtocol = (TCP, SPX, NamedPipe, Local);
@@ -1080,13 +1088,6 @@ type
     {Firebird 3 API}
     function HasMasterIntf: boolean;
     function GetIMaster: TObject;
-
-    {utility}
-    function GetCharsetName(CharSetID: integer): AnsiString;
-    function CharSetID2CodePage(CharSetID: integer; var CodePage: TSystemCodePage): boolean;
-    function CodePage2CharSetID(CodePage: TSystemCodePage; var CharSetID: integer): boolean;
-    function CharSetName2CharSetID(CharSetName: AnsiString; var CharSetID: integer): boolean;
-    function CharSetWidth(CharSetID: integer; var Width: integer): boolean;
 end;
 
 type

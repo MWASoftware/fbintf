@@ -16,6 +16,11 @@ FBINTF Change Log  version             (1.0-3) tba, 00 Mar 2017 14:43:56 +0000
    id was being reported that could result in a 'division by zero' error when
    used by IBX. This has now been fixed.
 
+5. Move GetCharsetName, CharSetID2CodePage, CodePage2CharSetID, CharSetName2CharSetID,
+   CharSetWidth from IFirebirdAPI to IAttachment. This is a better data model as
+   the character sets supported can be updated on a per database basis. That is
+   it is possible to add a (Firebird) user defined character set to a database.
+
 
 FBINTF Change Log  version             (1.0-2) Sat, 04 Mar 2017 14:43:56 +0000
 
