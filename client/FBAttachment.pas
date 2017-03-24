@@ -37,7 +37,7 @@ unit FBAttachment;
 interface
 
 uses
-  Classes, SysUtils, IB,  FBParamBlock, FBActivityMonitor;
+  Classes, SysUtils, {$IFDEF WINDOWS} windows, {$ENDIF} IB,  FBParamBlock, FBActivityMonitor;
 
 type
   TCharsetMap = record
