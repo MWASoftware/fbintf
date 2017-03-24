@@ -21,6 +21,9 @@ FBINTF Change Log  version             (1.0-3) tba, 00 Mar 2017 14:43:56 +0000
    the character sets supported can be updated on a per database basis. That is
    it is possible to add a (Firebird) user defined character set to a database.
 
+6. Add RegisterCharSet to IAttachment. This is used to register a user defined character
+   set supported by Firebird with the API.
+
 
 FBINTF Change Log  version             (1.0-2) Sat, 04 Mar 2017 14:43:56 +0000
 

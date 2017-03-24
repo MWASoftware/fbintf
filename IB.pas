@@ -919,7 +919,8 @@ type
     function CodePage2CharSetID(CodePage: TSystemCodePage; var CharSetID: integer): boolean;
     function CharSetName2CharSetID(CharSetName: AnsiString; var CharSetID: integer): boolean;
     function CharSetWidth(CharSetID: integer; var Width: integer): boolean;
-    procedure RegisterCharSet(CharSetName: AnsiString; CodePage: TSystemCodePage; out CharSetID: integer);
+    procedure RegisterCharSet(CharSetName: AnsiString; CodePage: TSystemCodePage;
+      AllowReverseLookup:boolean; out CharSetID: integer);
   end;
 
   TProtocol = (TCP, SPX, NamedPipe, Local);

@@ -40,6 +40,13 @@ uses
   Classes, SysUtils, IB,  FBParamBlock, FBActivityMonitor;
 
 type
+  TCharsetMap = record
+    CharsetID: integer;
+    CharSetName: AnsiString;
+    CharSetWidth: integer;
+    CodePage: TSystemCodePage;
+    AllowReverseLookup: boolean; {used to ensure that lookup of CP_UTF* does not return UNICODE_FSS}
+  end;
 
   { TFBAttachment }
 
@@ -47,6 +54,7 @@ type
   private
     FDPB: IDPB;
     FFirebirdAPI: IFirebirdAPI;
+    FUserCharSetMap: array of TCharSetMap;
   protected
     FDatabaseName: AnsiString;
     FRaiseExceptionOnConnectError: boolean;
@@ -112,7 +120,7 @@ public
   function CharSetName2CharSetID(CharSetName: AnsiString; var CharSetID: integer): boolean;
   function CharSetWidth(CharSetID: integer; var Width: integer): boolean;
   procedure RegisterCharSet(CharSetName: AnsiString; CodePage: TSystemCodePage;
-    out CharSetID: integer);
+    AllowReverseLookup:boolean; out CharSetID: integer);
   property HasDefaultCharSet: boolean read FHasDefaultCharSet;
   property CharSetID: integer read FCharSetID;
   property CodePage: TSystemCodePage read FCodePage;
@@ -121,15 +129,6 @@ public
 implementation
 
 uses FBMessages, FBTransaction;
-
-type
-  TCharsetMap = record
-    CharsetID: integer;
-    CharSetName: AnsiString;
-    CharSetWidth: integer;
-    CodePage: TSystemCodePage;
-    AllowReverseLookup: boolean; {used to ensure that lookup of CP_UTF* does not return UNICODE_FSS}
-  end;
 
 const
   CharSetMap: array [0..69] of TCharsetMap = (
@@ -205,7 +204,6 @@ const
   (CharsetID: 69; CharSetName: 'GB18030'; CharSetWidth: 4; CodePage: 54936; AllowReverseLookup: true)
 );
 
-var UserCharSetMap: array of TCharSetMap;
 
 
 
@@ -219,6 +217,7 @@ begin
   FSQLDialect := 3;
   FDatabaseName := DatabaseName;
   FDPB := DPB;
+  SetLength(FUserCharSetMap,0);
   FRaiseExceptionOnConnectError := RaiseExceptionOnConnectError;
 end;
 
@@ -475,10 +474,10 @@ begin
       Exit;
     end;
 
-  for i := 0 to Length(UserCharSetMap) - 1 do
-    if UserCharSetMap[i].CharSetID = CharSetID then
+  for i := 0 to Length(FUserCharSetMap) - 1 do
+    if FUserCharSetMap[i].CharSetID = CharSetID then
     begin
-      Result := UserCharSetMap[i].CharSetName;
+      Result := FUserCharSetMap[i].CharSetName;
       Exit;
     end;
 end;
@@ -496,10 +495,10 @@ begin
       Exit;
     end;
 
-  for i := 0 to Length(UserCharSetMap) - 1 do
-    if UserCharSetMap[i].CharSetID = CharSetID then
+  for i := 0 to Length(FUserCharSetMap) - 1 do
+    if FUserCharSetMap[i].CharSetID = CharSetID then
     begin
-      CodePage := UserCharSetMap[i].CodePage;
+      CodePage := FUserCharSetMap[i].CodePage;
       Result := true;
       Exit;
     end;
@@ -518,10 +517,10 @@ begin
       Exit;
     end;
 
-  for i := 0 to Length(UserCharSetMap) - 1 do
-    if (UserCharSetMap[i].AllowReverseLookup) and (UserCharSetMap[i].CodePage = CodePage) then
+  for i := 0 to Length(FUserCharSetMap) - 1 do
+    if (FUserCharSetMap[i].AllowReverseLookup) and (FUserCharSetMap[i].CodePage = CodePage) then
     begin
-      CharSetID := UserCharSetMap[i].CharSetID;
+      CharSetID := FUserCharSetMap[i].CharSetID;
       Result := true;
       Exit;
     end;
@@ -540,10 +539,10 @@ begin
       Exit;
     end;
 
-    for i := 0 to Length(UserCharSetMap) - 1 do
-      if AnsiCompareStr(UserCharSetMap[i].CharSetName, CharSetName) = 0 then
+    for i := 0 to Length(FUserCharSetMap) - 1 do
+      if AnsiCompareStr(FUserCharSetMap[i].CharSetName, CharSetName) = 0 then
       begin
-        CharSetID := UserCharSetMap[i].CharSetID;
+        CharSetID := FUserCharSetMap[i].CharSetID;
         Result := true;
         Exit;
       end;
@@ -562,10 +561,10 @@ begin
       Exit;
     end;
 
-  for i := 0 to Length(UserCharSetMap) - 1 do
-    if UserCharSetMap[i].CharSetID = CharSetID then
+  for i := 0 to Length(FUserCharSetMap) - 1 do
+    if FUserCharSetMap[i].CharSetID = CharSetID then
     begin
-      Width := UserCharSetMap[i].CharSetWidth;
+      Width := FUserCharSetMap[i].CharSetWidth;
       Result := true;
       Exit;
     end;
@@ -576,7 +575,8 @@ const
                      'Where RDB$SYSTEM_FLAG = 0 and RDB$CHARACTER_SET_NAME = UPPER(?)';
 
 procedure TFBAttachment.RegisterCharSet(CharSetName: AnsiString;
-  CodePage: TSystemCodePage; out CharSetID: integer);
+  CodePage: TSystemCodePage; AllowReverseLookup: boolean; out CharSetID: integer
+  );
 var CharSets: IResultSet;
     idx: integer;
 begin
@@ -587,18 +587,15 @@ begin
   if CharSets.IsEof then
     IBError(ibxeUnknownUserCharSet,[CharSetName]);
 
-  idx := Length(UserCharSetMap);
-  SetLength(UserCharSetMap,idx+1);
-  UserCharSetMap[idx].AllowReverseLookup := true;
-  UserCharSetMap[idx].CharSetID := CharSets[0].AsInteger;
-  UserCharSetMap[idx].CharSetName := AnsiUpperCase(CharSetName);
-  UserCharSetMap[idx].CharSetWidth := CharSets[1].AsInteger;
-  UserCharSetMap[idx].CodePage := CodePage;
+  idx := Length(FUserCharSetMap);
+  SetLength(FUserCharSetMap,idx+1);
+  FUserCharSetMap[idx].AllowReverseLookup := AllowReverseLookup;
+  FUserCharSetMap[idx].CharSetID := CharSets[0].AsInteger;
+  FUserCharSetMap[idx].CharSetName := AnsiUpperCase(CharSetName);
+  FUserCharSetMap[idx].CharSetWidth := CharSets[1].AsInteger;
+  FUserCharSetMap[idx].CodePage := CodePage;
   CharSetID := CharSets[0].AsInteger;
 end;
-
-initialization
-  SetLength(UserCharSetMap,0);
 
 end.
 
