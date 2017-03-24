@@ -1,4 +1,4 @@
-FBINTF Change Log  version             (1.0-3) tba, 00 Mar 2017 14:43:56 +0000
+FBINTF Change Log  version             (1.1-0) tba, 00 Mar 2017 14:43:56 +0000
 
 1. Fix issues with setting SQL Param values using SetAsString with Numeric types.
    Scale is no longer ignored.
@@ -11,7 +11,7 @@ FBINTF Change Log  version             (1.0-3) tba, 00 Mar 2017 14:43:56 +0000
 3. Lookup character set name by codepage amended to ensure that CP_UTF8 returns
    UTF8 and not UNICODE_FSS.
 
-4. Charset ID problem. When using Firebird 3, no default database character set
+4. Charset ID problem. When using Firebird 3, with no default database character set
    and a column has a non-default collation specified, an incorrect character set
    id was being reported that could result in a 'division by zero' error when
    used by IBX. This has now been fixed.

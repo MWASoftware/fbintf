@@ -10,7 +10,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="66"/>
         <CursorPos X="41" Y="86"/>
-        <UsageCount Value="104"/>
+        <UsageCount Value="105"/>
       </Unit0>
       <Unit1>
         <Filename Value="TestManager.pas"/>
@@ -18,21 +18,21 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="172"/>
         <CursorPos X="26" Y="195"/>
-        <UsageCount Value="104"/>
+        <UsageCount Value="105"/>
       </Unit1>
       <Unit2>
         <Filename Value="Test1.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <CursorPos Y="14"/>
-        <UsageCount Value="104"/>
+        <UsageCount Value="105"/>
       </Unit2>
       <Unit3>
         <Filename Value="test2.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="80" Y="24"/>
-        <UsageCount Value="104"/>
+        <UsageCount Value="105"/>
       </Unit3>
       <Unit4>
         <Filename Value="Test3.pas"/>
@@ -40,7 +40,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="62"/>
         <CursorPos Y="62"/>
-        <UsageCount Value="104"/>
+        <UsageCount Value="105"/>
       </Unit4>
       <Unit5>
         <Filename Value="Test4.pas"/>
@@ -48,14 +48,14 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="98"/>
         <CursorPos X="75" Y="115"/>
-        <UsageCount Value="104"/>
+        <UsageCount Value="105"/>
       </Unit5>
       <Unit6>
         <Filename Value="Test5.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="111"/>
-        <UsageCount Value="104"/>
+        <UsageCount Value="105"/>
       </Unit6>
       <Unit7>
         <Filename Value="Test6.pas"/>
@@ -63,7 +63,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="73"/>
         <CursorPos Y="88"/>
-        <UsageCount Value="104"/>
+        <UsageCount Value="105"/>
       </Unit7>
       <Unit8>
         <Filename Value="Test7.pas"/>
@@ -71,7 +71,7 @@
         <EditorIndex Value="-1"/>
         <WindowIndex Value="1"/>
         <TopLine Value="91"/>
-        <UsageCount Value="104"/>
+        <UsageCount Value="105"/>
       </Unit8>
       <Unit9>
         <Filename Value="Test8.pas"/>
@@ -79,7 +79,7 @@
         <EditorIndex Value="-1"/>
         <WindowIndex Value="1"/>
         <TopLine Value="86"/>
-        <UsageCount Value="104"/>
+        <UsageCount Value="105"/>
       </Unit9>
       <Unit10>
         <Filename Value="Test9.pas"/>
@@ -87,7 +87,7 @@
         <EditorIndex Value="-1"/>
         <WindowIndex Value="1"/>
         <TopLine Value="25"/>
-        <UsageCount Value="104"/>
+        <UsageCount Value="105"/>
       </Unit10>
       <Unit11>
         <Filename Value="Test10.pas"/>
@@ -96,7 +96,7 @@
         <WindowIndex Value="1"/>
         <TopLine Value="86"/>
         <CursorPos X="34" Y="111"/>
-        <UsageCount Value="104"/>
+        <UsageCount Value="105"/>
       </Unit11>
       <Unit12>
         <Filename Value="Test11.pas"/>
@@ -105,7 +105,7 @@
         <WindowIndex Value="1"/>
         <TopLine Value="70"/>
         <CursorPos X="19" Y="81"/>
-        <UsageCount Value="104"/>
+        <UsageCount Value="105"/>
       </Unit12>
       <Unit13>
         <Filename Value="Test12.pas"/>
@@ -113,7 +113,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="115"/>
         <CursorPos X="54" Y="131"/>
-        <UsageCount Value="104"/>
+        <UsageCount Value="105"/>
       </Unit13>
       <Unit14>
         <Filename Value="Test13.pas"/>
@@ -129,7 +129,7 @@
           <TopLine Value="114"/>
           <CursorPos X="52" Y="12"/>
         </ExtraEditor1>
-        <UsageCount Value="104"/>
+        <UsageCount Value="105"/>
       </Unit14>
       <Unit15>
         <Filename Value="Test14.pas"/>
@@ -143,7 +143,7 @@
           <TopLine Value="47"/>
           <CursorPos X="67" Y="12"/>
         </ExtraEditor1>
-        <UsageCount Value="104"/>
+        <UsageCount Value="105"/>
       </Unit15>
       <Unit16>
         <Filename Value="Test15.pas"/>
@@ -156,7 +156,7 @@
           <WindowIndex Value="1"/>
           <TopLine Value="91"/>
         </ExtraEditor1>
-        <UsageCount Value="104"/>
+        <UsageCount Value="105"/>
       </Unit16>
       <Unit17>
         <Filename Value="Test16.pas"/>
@@ -172,12 +172,12 @@
           <TopLine Value="110"/>
           <CursorPos Y="131"/>
         </ExtraEditor1>
-        <UsageCount Value="104"/>
+        <UsageCount Value="105"/>
       </Unit17>
       <Unit18>
         <Filename Value="Makefile.fpc"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="104"/>
+        <UsageCount Value="105"/>
       </Unit18>
       <Unit19>
         <Filename Value="../client/3.0/FB30ClientAPI.pas"/>
@@ -201,11 +201,10 @@
       </Unit21>
       <Unit22>
         <Filename Value="../client/FBAttachment.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="44"/>
-        <CursorPos Y="50"/>
-        <UsageCount Value="17"/>
+        <TopLine Value="444"/>
+        <CursorPos X="3" Y="583"/>
+        <UsageCount Value="18"/>
         <Loaded Value="True"/>
       </Unit22>
       <Unit23>
@@ -247,8 +246,8 @@
       <Unit28>
         <Filename Value="../IB.pas"/>
         <TopLine Value="907"/>
-        <CursorPos X="33" Y="923"/>
-        <UsageCount Value="46"/>
+        <CursorPos X="30" Y="922"/>
+        <UsageCount Value="47"/>
         <Loaded Value="True"/>
       </Unit28>
       <Unit29>
@@ -340,7 +339,7 @@
         <EditorIndex Value="2"/>
         <TopLine Value="587"/>
         <CursorPos X="24" Y="610"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="13"/>
         <Loaded Value="True"/>
       </Unit41>
       <Unit42>
@@ -424,9 +423,10 @@
       </Unit52>
       <Unit53>
         <Filename Value="../changelog"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
         <CursorPos X="80" Y="22"/>
-        <UsageCount Value="23"/>
+        <UsageCount Value="24"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit53>
