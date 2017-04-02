@@ -283,15 +283,15 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 19598352
-Delta memory = 2616
-Max memory = 19661928
+Current memory =  1.959857600000000000E+0007
+Delta memory =  2.616000000000000000E+0003
+Max memory =  1.966215200000000000E+0007
 Elapsed time= 0.000 sec
 Cpu = 0.000 sec
-Buffers = 2048
-Reads = 0
-Writes = 0
-Fetches = 2
+Buffers =  2.048000000000000000E+0003
+Reads =  0.000000000000000000E+0000
+Writes =  0.000000000000000000E+0000
+Fetches =  2.000000000000000000E+0000
 Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
 Relation Name = EMPLOYEE
 Metadata
@@ -1619,9 +1619,10 @@ ODS minor = 0
 ODS major = 12
 Page Size = 8192
 Version = 1: LI-V6.3.1.32609 Firebird 3.0
-Server Memory = 18908600
+Database is Read/Write
+Server Memory = 18908760
 Forced Writes  = 1
-Max Memory  = 18945720
+Max Memory  = 18945880
 Num Buffers  = 2048
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
