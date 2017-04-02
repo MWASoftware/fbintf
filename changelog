@@ -24,6 +24,9 @@ FBINTF Change Log  version             (1.1-0) tba, 00 Mar 2017 14:43:56 +0000
 6. Add RegisterCharSet to IAttachment. This is used to register a user defined character
    set supported by Firebird with the API.
 
+7. Add missing isc_info_db_read_only to list of decoded Database Information items
+   in FBOutputBlock.pas and update test suite to include this item.
+
 
 FBINTF Change Log  version             (1.0-2) Sat, 04 Mar 2017 14:43:56 +0000
 

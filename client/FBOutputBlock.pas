@@ -898,6 +898,7 @@ begin
   begin
     SetLength(FItems,index+1);
     case byte(P^) of
+    isc_info_db_read_only,
     isc_info_no_reserve,
     isc_info_allocation,
     isc_info_ods_minor_version,

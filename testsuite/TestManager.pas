@@ -495,6 +495,11 @@ begin
   for i := 0 to DBInfo.GetCount - 1 do
   with DBInfo[i] do
   case getItemType of
+  isc_info_db_read_only:
+     if getAsInteger <> 0 then
+       writeln(OutFile,'Database is Read Only')
+     else
+       writeln(OutFile,'Database is Read/Write');
   isc_info_allocation:
     writeln(OutFile,'Pages =',getAsInteger);
   isc_info_base_level:
