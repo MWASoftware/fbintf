@@ -166,15 +166,15 @@ begin
 
   FDefaultCompletion := DefaultCompletion;
 
-  if Length(FAttachments) > 0 then
-    StartMultiple
-  else
+  if Length(FAttachments) = 1 then
     with Firebird30ClientAPI do
     begin
       FTransactionIntf  := (FAttachments[0] as TFB30Attachment).AttachmentIntf.startTransaction(StatusIntf,
                (FTPB as TTPB).getDataLength,BytePtr((FTPB as TTPB).getBuffer));
       Check4DataBaseError;
-    end;
+    end
+  else
+    StartMultiple;
   SignalActivity;
   Inc(FSeqNo);
 end;
