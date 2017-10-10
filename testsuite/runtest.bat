@@ -1,30 +1,18 @@
 @echo off
-REM Test suite Configuration parameters
+REM Test suite Configuration parameters (FPCDIR and FPCBIN)
 REM These may be modified if needed to suite local requirements
 
-
-if EXIST C:\lazarus\fpc\3.0.2\bin\i386-win32\fpc.exe (
-set FPCDIR=C:\lazarus\fpc\3.0.2
-set FPCBIN=C:\lazarus\fpc\3.0.2\bin\i386-win32
-Goto COMPILE
-)
-
-if EXIST C:\lazarus\fpc\3.0.2\bin\x86_64-win64\fpc.exe (
-set FPCDIR=C:\lazarus\fpc\3.0.2
-set FPCBIN=C:\lazarus\fpc\3.0.2\bin\x86_64-win64
-Goto COMPILE
-)
-
-if EXIST C:\lazarus\fpc\3.0.0\bin\i386-win32\fpc.exe (
-set FPCDIR=C:\lazarus\fpc\3.0.0
-set FPCBIN=C:\lazarus\fpc\3.0.0\bin\i386-win32
-Goto COMPILE
-)
-
-if EXIST C:\lazarus\fpc\3.0.0\bin\x86_64-win64\fpc.exe (
-set FPCDIR=C:\lazarus\fpc\3.0.0
-set FPCBIN=C:\lazarus\fpc\3.0.0\bin\x86_64-win64
-Goto COMPILE
+FOR %%V in (3.0.4 3.0.2 3.0.0) do (
+  if EXIST C:\lazarus\fpc\%%V\bin\i386-win32\fpc.exe (
+    set FPCDIR=C:\lazarus\fpc\%%V
+    set FPCBIN=C:\lazarus\fpc\%%V\bin\i386-win32
+    Goto COMPILE
+  )
+  if EXIST C:\lazarus\fpc\%%V\bin\x86_64-win32\fpc.exe (
+    set FPCDIR=C:\lazarus\fpc\%%V
+    set FPCBIN=C:\lazarus\fpc\%%V\bin\x86_64-win32
+    Goto COMPILE
+  )
 )
 
 if not EXIST %FPCBIN%\fpc.exe (

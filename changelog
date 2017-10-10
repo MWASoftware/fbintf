@@ -34,6 +34,10 @@ FBINTF Change Log  version             (1.1-0) tba, 00 Mar 2017 14:43:56 +0000
    include the FIREBIRD directory. This is to ensure that the correct dlls in the
    firebird client library dependencies are loaded.
 
+10. Testsuite: Ensure consistent UTF-8 output on console.
+
+11. Testsuite: Update Windows script to include FPC 3.0.4 in search path.
+
 
 FBINTF Change Log  version             (1.0-2) Sat, 04 Mar 2017 14:43:56 +0000
 

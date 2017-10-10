@@ -80,6 +80,10 @@ begin
     end;
 
     TestMgr.ShowStatistics := HasOption('S','stats');
+    {$IF declared(SetTextCodePage)}
+    {Ensure consistent UTF-8 output}
+    SetTextCodePage(OutFile,cp_utf8);
+    {$IFEND}
 
     {Ensure consistent date reporting across platforms}
     DefaultFormatSettings.ShortDateFormat := 'd/m/yyyy';
