@@ -36,11 +36,22 @@ procedure TFBClientAPI.LoadIBLibrary;
   end;
   {$ENDIF}
 
+var curPath: string;
+
+  procedure Add2Path(dirname: string);
+  var newPath: string;
+  begin
+    newPath := dirname + ';' + curPath;
+    SetEnvironmentVariable('PATH',PChar(newPath));
+  end;
+
 var InstallDir: string;
     dllPathName: string;
     oldFirebirdEV: string;
 begin
   if IsValidHandle(IBLibrary) then Exit;
+
+  curPath := GetEnvironmentVariable('PATH');
 
   {First try any user override}
   dllPathName := GetOverrideLibName;
@@ -87,18 +98,24 @@ begin
     begin
       //assume firebird.conf and firebird.msg in same dir
       dllPathName := InstallDir + FIREBIRD_CLIENT;
+      Add2Path(InstallDir);
       IBLibrary := DoLoadLibrary(dllPathName)
     end
     else
-    if (InstallDir <> '') and FileExists(InstallDir + 'bin' + DirectorySeparator + FIREBIRD_CLIENT) then
+    if (InstallDir <> '') then
     begin
-      dllPathName := InstallDir + FIREBIRD_CLIENT;
-      IBLibrary := DoLoadLibrary(dllPathName)
+      InstallDir := InstallDir + 'bin' + DirectorySeparator;
+      if FileExists(InstallDir + FIREBIRD_CLIENT) then
+      begin
+        dllPathName := InstallDir +  FIREBIRD_CLIENT;
+        Add2Path(InstallDir);
+        IBLibrary := DoLoadLibrary(dllPathName)
+      end
     end
   end;
 
   if not IsValidHandle(IBLibrary) then
-  {Use Registry key if it exists to locate library}
+  {Use Registry key if it exists to locate library Firebird 2 only}
   begin
     with TRegistry.Create do
     try
@@ -109,6 +126,7 @@ begin
         begin
           InstallDir := ReadString('DefaultInstance')  + 'bin' + DirectorySeparator ;
           dllPathName := InstallDir + FIREBIRD_CLIENT;
+          Add2Path(InstallDir);
           IBLibrary := DoLoadLibrary(dllPathName)
         end
       end
@@ -121,9 +139,9 @@ begin
     begin
       InstallDir := GetSpecialFolder(CSIDL_PROGRAM_FILES) +
         DirectorySeparator + 'Firebird' +
-        DirectorySeparator + 'Firebird_3_0' +
-        DirectorySeparator + 'bin' + DirectorySeparator;
-      dllPathName := InstallDir + FIREBIRD_CLIENT;
+        DirectorySeparator + 'Firebird_3_0' + DirectorySeparator;
+      dllPathName := InstallDir  + FIREBIRD_CLIENT;
+      Add2Path(InstallDir);
       IBLibrary := DoLoadLibrary(dllPathName)
     end;
 
@@ -134,6 +152,7 @@ begin
         DirectorySeparator + 'Firebird_2_5' +
         DirectorySeparator + 'bin' + DirectorySeparator;
       dllPathName := InstallDir + FIREBIRD_CLIENT;
+      Add2Path(InstallDir);
       IBLibrary := DoLoadLibrary(dllPathName)
     end;
 
@@ -144,6 +163,7 @@ begin
         DirectorySeparator + 'Firebird_2_1' +
         DirectorySeparator + 'bin' + DirectorySeparator;
       dllPathName := InstallDir + FIREBIRD_CLIENT;
+      Add2Path(InstallDir);
       IBLibrary := DoLoadLibrary(dllPathName)
     end;
 
@@ -151,6 +171,7 @@ begin
     //and rely on registry for location of firebird.conf and firebird.msg
     if not IsValidHandle(IBLibrary) then
     begin
+      SetEnvironmentVariable('PATH',PChar(curPath));
       IBLibrary := DoLoadLibrary(FIREBIRD_CLIENT);
       if IBLibrary <= HINSTANCE_ERROR then
        //well maybe InterBase is present...
