@@ -138,7 +138,7 @@ begin
     if not IsValidHandle(IBLibrary) then
     begin
       InstallDir := GetSpecialFolder(CSIDL_PROGRAM_FILES) +
-        DirectorySeparator + 'Firebird' +
+        'Firebird' +
         DirectorySeparator + 'Firebird_3_0' + DirectorySeparator;
       dllPathName := InstallDir  + FIREBIRD_CLIENT;
       Add2Path(InstallDir);
@@ -148,7 +148,7 @@ begin
     if not IsValidHandle(IBLibrary) then
     begin
       InstallDir := GetSpecialFolder(CSIDL_PROGRAM_FILES) +
-        DirectorySeparator + 'Firebird' +
+        'Firebird' +
         DirectorySeparator + 'Firebird_2_5' +
         DirectorySeparator + 'bin' + DirectorySeparator;
       dllPathName := InstallDir + FIREBIRD_CLIENT;
@@ -159,7 +159,7 @@ begin
     if not IsValidHandle(IBLibrary) then
     begin
       InstallDir := GetSpecialFolder(CSIDL_PROGRAM_FILES) +
-        DirectorySeparator + 'Firebird' +
+        'Firebird' +
         DirectorySeparator + 'Firebird_2_1' +
         DirectorySeparator + 'bin' + DirectorySeparator;
       dllPathName := InstallDir + FIREBIRD_CLIENT;
