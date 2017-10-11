@@ -116,6 +116,8 @@ begin
   begin
     ByName('rowid').AsInteger := 2;
     ByName('title').AsString := 'Blob Test ©€';
+    ByName('Fp').Clear;
+    ByName('DP').Clear;
   end;
   Statement.Execute;
   Statement := Attachment.Prepare(Transaction,'Select * from TestData Where rowid = 1');

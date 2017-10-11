@@ -502,6 +502,7 @@ begin
       FXSQLVAR^.sqlind := nil;
     end;
   end;
+  Changed;
 end;
 
 procedure TIBXSQLVAR.SetSQLData(AValue: PByte; len: cardinal);
@@ -511,11 +512,13 @@ begin
   FXSQLVAR^.sqldata := AValue;
   FXSQLVAR^.sqllen := len;
   FOwnsSQLData := false;
+  Changed;
 end;
 
 procedure TIBXSQLVAR.SetScale(aValue: integer);
 begin
   FXSQLVAR^.sqlscale := aValue;
+  Changed;
 end;
 
 procedure TIBXSQLVAR.SetDataLength(len: cardinal);
@@ -526,23 +529,28 @@ begin
   with FirebirdClientAPI do
     IBAlloc(FXSQLVAR^.sqldata, 0, FXSQLVAR^.sqllen);
   FOwnsSQLData := true;
+  Changed;
 end;
 
 procedure TIBXSQLVAR.SetSQLType(aValue: cardinal);
 begin
   FXSQLVAR^.sqltype := aValue or (FXSQLVAR^.sqltype and 1);
+  Changed;
 end;
 
 procedure TIBXSQLVAR.SetCharSetID(aValue: cardinal);
 begin
   if aValue <> GetCharSetID then
-  case SQLType of
-  SQL_VARYING, SQL_TEXT:
-      FXSQLVAR^.sqlsubtype := (aValue and $FF) or (FXSQLVAR^.sqlsubtype and not $FF);
+  begin
+    case SQLType of
+    SQL_VARYING, SQL_TEXT:
+        FXSQLVAR^.sqlsubtype := (aValue and $FF) or (FXSQLVAR^.sqlsubtype and not $FF);
 
-  SQL_BLOB,
-  SQL_ARRAY:
-    IBError(ibxeInvalidDataConversion,[nil]);
+    SQL_BLOB,
+    SQL_ARRAY:
+      IBError(ibxeInvalidDataConversion,[nil]);
+    end;
+  Changed;
   end;
 end;
 

@@ -181,6 +181,7 @@ type
     function GetMetaData: Firebird.IMessageMetadata;
     function GetModified: Boolean;
     function GetMsgLength: integer;
+    procedure BuildMetadata;
     procedure PackBuffer;
   protected
     procedure FreeXSQLDA; override;
@@ -270,7 +271,7 @@ end;
 
 implementation
 
-uses IBUtils, FBMessages, FBBLob, FB30Blob, variants,  FBArray, FB30Array;
+uses IBUtils, FBMessages, FBBlob, FB30Blob, variants,  FBArray, FB30Array;
 
 const
   ISQL_COUNTERS = 'CurrentMemory, MaxMemory, RealTime, UserTime, Buffers, Reads, Writes, Fetches';
@@ -422,6 +423,7 @@ begin
   end
   else
     FSQLNullIndicator := nil;
+  Changed;
 end;
 
 procedure TIBXSQLVAR.SetSQLData(AValue: PByte; len: cardinal);
@@ -431,11 +433,13 @@ begin
   FSQLData := AValue;
   FDataLength := len;
   FOwnsSQLData := false;
+  Changed;
 end;
 
 procedure TIBXSQLVAR.SetScale(aValue: integer);
 begin
   FScale := aValue;
+  Changed;
 end;
 
 procedure TIBXSQLVAR.SetDataLength(len: cardinal);
@@ -446,16 +450,19 @@ begin
   with Firebird30ClientAPI do
     IBAlloc(FSQLData, 0, FDataLength);
   FOwnsSQLData := true;
+  Changed;
 end;
 
 procedure TIBXSQLVAR.SetSQLType(aValue: cardinal);
 begin
   FSQLType := aValue;
+  Changed;
 end;
 
 procedure TIBXSQLVAR.SetCharSetID(aValue: cardinal);
 begin
   FCharSetID := aValue;
+  Changed;
 end;
 
 constructor TIBXSQLVAR.Create(aParent: TIBXSQLDA; aIndex: integer);
@@ -607,7 +614,7 @@ end;
 
 function TIBXINPUTSQLDA.GetMetaData: Firebird.IMessageMetadata;
 begin
-  PackBuffer;
+  BuildMetadata;
   Result := FCurMetaData;
 end;
 
@@ -617,12 +624,11 @@ begin
   Result := FMsgLength;
 end;
 
-procedure TIBXINPUTSQLDA.PackBuffer;
+procedure TIBXINPUTSQLDA.BuildMetadata;
 var Builder: Firebird.IMetadataBuilder;
     i: integer;
 begin
-  if FMsgLength > 0 then Exit;
-
+  if FCurMetaData = nil then
   with Firebird30ClientAPI do
   begin
     Builder := inherited MetaData.getBuilder(StatusIntf);
@@ -647,7 +653,17 @@ begin
     finally
       Builder.release;
     end;
+  end;
+end;
 
+procedure TIBXINPUTSQLDA.PackBuffer;
+var i: integer;
+begin
+  BuildMetadata;
+
+  if FMsgLength = 0 then
+  with Firebird30ClientAPI do
+  begin
     FMsgLength := FCurMetaData.getMessageLength(StatusIntf);
     Check4DataBaseError;
 
@@ -656,9 +672,13 @@ begin
     for i := 0 to Count - 1 do
     with TIBXSQLVar(Column[i]) do
     begin
+      if not Modified then
+        IBError(ibxeUninitializedInputParameter,[i,Name]);
+
       if IsNull then
         FillChar((FMessageBuffer + FCurMetaData.getOffset(StatusIntf,i))^,FDataLength,0)
       else
+      if FSQLData <> nil then
         Move(FSQLData^,(FMessageBuffer + FCurMetaData.getOffset(StatusIntf,i))^,FDataLength);
       Check4DataBaseError;
       if IsNullable then

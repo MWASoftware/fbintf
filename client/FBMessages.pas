@@ -243,7 +243,8 @@ type
       ibxeUniqueRelationReqd,
       ibxeInterfaceNotSupported,
       ibxeCharacterSetExists,
-      ibxeUnknownUserCharSet
+      ibxeUnknownUserCharSet,
+      ibxeUninitializedInputParameter
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -442,6 +443,7 @@ resourcestring
   SInterfaceNotSupported = 'Interface not supported; Guid %s not found';
   SCharacterSetExists = 'Character set "%s" is already defined';
   SUnknownUserCharSet = 'Unknown user character set "%s"';
+  SUninitializedInputParameter = 'SQL Param No. %d (%s) is uninitialised';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -607,7 +609,8 @@ const
     SUniqueRelationReqd,
     SInterfaceNotSupported,
     SCharacterSetExists,
-    SUnknownUserCharSet
+    SUnknownUserCharSet,
+    SUninitializedInputParameter
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;

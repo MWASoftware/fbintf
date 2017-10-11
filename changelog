@@ -38,6 +38,12 @@ FBINTF Change Log  version             (1.1-0) tba, 00 Mar 2017 14:43:56 +0000
 
 11. Testsuite: Update Windows script to include FPC 3.0.4 in search path.
 
+12. FB30Statement: Protect call to "Move" and avoid calling with a nil pointer
+
+13. FB30Statement: Trap uninitialised SQL parameters on SQL Exec. Avoids Unknown SQL Type errors.
+
+14. FB30Statement/FB25Statement: Set SQLParam "modified" when string value set.
+
 
 FBINTF Change Log  version             (1.0-2) Sat, 04 Mar 2017 14:43:56 +0000
 
