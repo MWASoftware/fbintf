@@ -34,13 +34,16 @@ FBINTF Change Log  version             (1.1-0) tba, 00 Mar 2017 14:43:56 +0000
    include the FIREBIRD directory. This is to ensure that the correct dlls in the
    firebird client library dependencies are loaded.
 
-10. Testsuite: Ensure consistent UTF-8 output on console.
+10. Testsuite: Ensure consistent UTF-8 output on Windows console.
 
 11. Testsuite: Update Windows script to include FPC 3.0.4 in search path.
 
 12. FB30Statement: Protect call to "Move" and avoid calling with a nil pointer
 
-13. FB30Statement: Trap uninitialised SQL parameters on SQL Exec. Avoids Unknown SQL Type errors.
+13. FB30Statement: A check has been added to ensure that all SQL Parameters
+    have been given a value (including NULL). Previously, failing to set the
+    value of an SQL Parameter could give rise to unpredictable results or
+    an SQLDA error.
 
 14. FB30Statement/FB25Statement: Set SQLParam "modified" when string value set.
 
