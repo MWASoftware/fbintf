@@ -1,0 +1,44 @@
+#   File generated automatically by Lazarus Package Manager
+#
+#   Makefile.fpc for fbintf 0.0
+#
+#   This file was generated on 21/11/16
+
+[package]
+name=fbintf
+version=0.0
+
+[compiler]
+unittargetdir=lib/$(CPU_TARGET)-$(OS_TARGET)
+unitdir=client client/3.0/firebird client/2.5 . client/3.0
+includedir=client/3.0/firebird client/include include
+options= -MObjFPC -Scghi -O3 -l -vewnhibq $(DBG_OPTIONS)
+
+[target]
+units=fbintf.pas
+
+[clean]
+files=$(wildcard $(COMPILER_UNITTARGETDIR)/*$(OEXT)) \
+      $(wildcard $(COMPILER_UNITTARGETDIR)/*$(PPUEXT)) \
+      $(wildcard $(COMPILER_UNITTARGETDIR)/*$(RSTEXT)) \
+      $(wildcard $(COMPILER_UNITTARGETDIR)/*.lfm) \
+      $(wildcard $(COMPILER_UNITTARGETDIR)/*.res) \
+      $(wildcard $(COMPILER_UNITTARGETDIR)/*.compiled) \
+      $(wildcard *$(OEXT)) $(wildcard *$(PPUEXT)) $(wildcard *$(RSTEXT))
+
+[prerules]
+DBG_OPTIONS=
+ifeq ($(OS_TARGET),darwin)
+DBG_OPTIONS=-gw
+endif
+
+[rules]
+.PHONY: cleartarget compiled all
+
+cleartarget:
+        -$(DEL) $(COMPILER_UNITTARGETDIR)/fbintf$(PPUEXT)
+
+all: cleartarget $(COMPILER_UNITTARGETDIR) fbintf$(PPUEXT)
+
+distclean: clean
+        ${DELTREE} lib/*

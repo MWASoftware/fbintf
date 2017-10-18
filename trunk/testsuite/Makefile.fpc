@@ -1,0 +1,16 @@
+[requires]
+packages=fcl-res
+libc=y
+
+[compiler]
+options= -MObjFPC -Scghi -Cg -Cr -O1 -g -gl -gh -l -vewnhibq -dUseCThreads
+
+unittargetdir=testunits/$(CPU_TARGET)-$(OS_TARGET)
+includedir=../client/3.0/firebird ../client/include ../include
+unitdir=../client ../client/3.0/firebird ../client/2.5 . ../client/3.0 ..
+
+[target]
+programs=testsuite 
+
+
+

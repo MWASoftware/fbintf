@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Package Version="4">
+    <Name Value="fbintf"/>
+    <Author Value="MWA Software"/>
+    <CompilerOptions>
+      <Version Value="11"/>
+      <SearchPaths>
+        <IncludeFiles Value="client/3.0/firebird;client/include;include"/>
+        <OtherUnitFiles Value="client;client/3.0/firebird;client/2.5;.;client/3.0"/>
+        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
+      <CodeGeneration>
+        <Checks>
+          <RangeChecks Value="True"/>
+        </Checks>
+      </CodeGeneration>
+    </CompilerOptions>
+    <Description Value="This package provides MWA Software's Firebird Pascal API.
+
+Two interface implementations are provided. One is for the new Firebird 3 Client API and the other for the legacy Firebird Client API used for Firebird 2.x and earlier. The Firebird 3 API implementation is used whenever possible and the older API only if the Firebird 3 API is not available"/>
+    <License Value=" *  Firebird Interface (fbintf). The fbintf components provide a set of
+ *  Pascal language bindings for the Firebird API. Although predominantly
+ *  a new development they include source code taken from IBX and may be
+ *  considered a derived product. This software thus also includes the copyright
+ *  notice and license conditions from IBX.
+ *
+ *  Except for those parts dervied from IBX, contents of this file are subject
+ *  to the Initial Developer's Public License Version 1.0 (the &quot;License&quot;); you
+ *  may not use this file except in compliance with the License. You may obtain a
+ *  copy of the License here:
+ *
+ *    http://www.firebirdsql.org/index.php?op=doc&amp;id=idpl
+ *
+ *  Software distributed under the License is distributed on an &quot;AS
+ *  IS&quot; basis, WITHOUT WARRANTY OF ANY KIND, either express or
+ *  implied. See the License for the specific language governing rights
+ *  and limitations under the License.
+ *
+ *  The Initial Developer of the Original Code is Tony Whyman.
+ *
+ *  The Original Code is (C) 2016 Tony Whyman, MWA Software
+ *  (http://www.mwasoftware.co.uk).
+ *
+ *  All Rights Reserved.
+ *
+ *  Contributor(s): ______________________________________.
+ *    "/>
+    <Version Major="1" Minor="1" Release = "0" />
+    <Files Count="35">
+      <Item1>
+        <Filename Value="client/3.0/firebird/Firebird.pas"/>
+        <UnitName Value="Firebird"/>
+      </Item1>
+      <Item2>
+        <Filename Value="IB.pas"/>
+        <UnitName Value="IB"/>
+      </Item2>
+      <Item3>
+        <Filename Value="client/FBClientAPI.pas"/>
+        <UnitName Value="FBClientAPI"/>
+      </Item3>
+      <Item4>
+        <Filename Value="client/2.5/IBHeader.pas"/>
+        <UnitName Value="IBHeader"/>
+      </Item4>
+      <Item5>
+        <Filename Value="client/2.5/FB25ClientAPI.pas"/>
+        <UnitName Value="FB25ClientAPI"/>
+      </Item5>
+      <Item6>
+        <Filename Value="client/FBMessages.pas"/>
+        <UnitName Value="FBMessages"/>
+      </Item6>
+      <Item7>
+        <Filename Value="client/2.5/FB25Transaction.pas"/>
+        <UnitName Value="FB25Transaction"/>
+      </Item7>
+      <Item8>
+        <Filename Value="client/2.5/FB25Attachment.pas"/>
+        <UnitName Value="FB25Attachment"/>
+      </Item8>
+      <Item9>
+        <Filename Value="client/2.5/FB25Blob.pas"/>
+        <UnitName Value="FB25Blob"/>
+      </Item9>
+      <Item10>
+        <Filename Value="IBExternals.pas"/>
+        <UnitName Value="IBExternals"/>
+      </Item10>
+      <Item11>
+        <Filename Value="IBErrorCodes.pas"/>
+        <UnitName Value="IBErrorCodes"/>
+      </Item11>
+      <Item12>
+        <Filename Value="client/2.5/FB25Events.pas"/>
+        <UnitName Value="FB25Events"/>
+      </Item12>
+      <Item13>
+        <Filename Value="IBUtils.pas"/>
+        <UnitName Value="IBUtils"/>
+      </Item13>
+      <Item14>
+        <Filename Value="client/2.5/FB25Statement.pas"/>
+        <UnitName Value="FB25Statement"/>
+      </Item14>
+      <Item15>
+        <Filename Value="client/2.5/FB25Services.pas"/>
+        <UnitName Value="FB25Services"/>
+      </Item15>
+      <Item16>
+        <Filename Value="client/2.5/FB25Array.pas"/>
+        <UnitName Value="FB25Array"/>
+      </Item16>
+      <Item17>
+        <Filename Value="client/FBActivityMonitor.pas"/>
+        <UnitName Value="FBActivityMonitor"/>
+      </Item17>
+      <Item18>
+        <Filename Value="client/FBOutputBlock.pas"/>
+        <UnitName Value="FBOutputBlock"/>
+      </Item18>
+      <Item19>
+        <Filename Value="client/FBParamBlock.pas"/>
+        <UnitName Value="FBParamBlock"/>
+      </Item19>
+      <Item20>
+        <Filename Value="client/FBSQLData.pas"/>
+        <UnitName Value="FBSQLData"/>
+      </Item20>
+      <Item21>
+        <Filename Value="client/3.0/FB30ClientAPI.pas"/>
+        <UnitName Value="FB30ClientAPI"/>
+      </Item21>
+      <Item22>
+        <Filename Value="client/3.0/FB30Attachment.pas"/>
+        <UnitName Value="FB30Attachment"/>
+      </Item22>
+      <Item23>
+        <Filename Value="client/3.0/FB30Transaction.pas"/>
+        <UnitName Value="FB30Transaction"/>
+      </Item23>
+      <Item24>
+        <Filename Value="client/FBTransaction.pas"/>
+        <UnitName Value="FBTransaction"/>
+      </Item24>
+      <Item25>
+        <Filename Value="client/3.0/FB30Blob.pas"/>
+        <UnitName Value="FB30Blob"/>
+      </Item25>
+      <Item26>
+        <Filename Value="client/3.0/FB30Array.pas"/>
+        <UnitName Value="FB30Array"/>
+      </Item26>
+      <Item27>
+        <Filename Value="client/FBArray.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="FBArray"/>
+      </Item27>
+      <Item28>
+        <Filename Value="client/3.0/FB30Statement.pas"/>
+        <UnitName Value="FB30Statement"/>
+      </Item28>
+      <Item29>
+        <Filename Value="client/3.0/FB30Events.pas"/>
+        <UnitName Value="FB30Events"/>
+      </Item29>
+      <Item30>
+        <Filename Value="client/3.0/FB30Services.pas"/>
+        <UnitName Value="FB30Services"/>
+      </Item30>
+      <Item31>
+        <Filename Value="client/FBEvents.pas"/>
+        <UnitName Value="FBEvents"/>
+      </Item31>
+      <Item32>
+        <Filename Value="client/FBBlob.pas"/>
+        <UnitName Value="FBBlob"/>
+      </Item32>
+      <Item33>
+        <Filename Value="client/FBAttachment.pas"/>
+        <UnitName Value="FBAttachment"/>
+      </Item33>
+      <Item34>
+        <Filename Value="client/FBStatement.pas"/>
+        <UnitName Value="FBStatement"/>
+      </Item34>
+      <Item35>
+        <Filename Value="client/FBServices.pas"/>
+        <UnitName Value="FBServices"/>
+      </Item35>
+    </Files>
+    <RequiredPkgs Count="1">
+      <Item1>
+        <PackageName Value="FCL"/>
+      </Item1>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>
