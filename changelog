@@ -1,4 +1,4 @@
-FBINTF Change Log  version                 (1.1-0) Tue, 10 Oct 2017 14:41:18 +0100
+FBINTF Change Log  version                  (1.1-0) Tue, 10 Oct 2017 14:41:18 +0100
 
 1. Fix issues with setting SQL Param values using SetAsString with Numeric types.
    Scale is no longer ignored.
