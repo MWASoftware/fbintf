@@ -279,8 +279,10 @@ begin
         SQLParams[i].AsInteger := params[i].vinteger;
       vtInt64:
         SQLParams[i].AsInt64 := params[i].VInt64^;
+      {$IF declared (vtQWord)}
       vtQWord:
         SQLParams[i].AsInt64 := params[i].VQWord^;
+      {$IFEND}
       vtboolean    :
         SQLParams[i].AsBoolean :=  params[i].vboolean;
       vtchar       :
