@@ -3,7 +3,7 @@
   <ProjectSession>
     <Version Value="10"/>
     <BuildModes Active="Default"/>
-    <Units Count="86">
+    <Units Count="87">
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -201,10 +201,9 @@
       </Unit21>
       <Unit22>
         <Filename Value="../client/FBAttachment.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
         <TopLine Value="273"/>
-        <CursorPos X="59" Y="285"/>
+        <CursorPos X="29" Y="283"/>
         <UsageCount Value="18"/>
         <Loaded Value="True"/>
       </Unit22>
@@ -246,10 +245,12 @@
       </Unit27>
       <Unit28>
         <Filename Value="../IB.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="1196"/>
-        <CursorPos Y="1220"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="136"/>
+        <CursorPos X="3" Y="156"/>
         <UsageCount Value="47"/>
+        <Loaded Value="True"/>
       </Unit28>
       <Unit29>
         <Filename Value="runtest.sh"/>
@@ -302,10 +303,11 @@
       </Unit35>
       <Unit36>
         <Filename Value="../client/3.0/FB30Statement.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="188"/>
-        <CursorPos X="15" Y="192"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="311"/>
+        <CursorPos X="7" Y="341"/>
         <UsageCount Value="15"/>
+        <Loaded Value="True"/>
       </Unit36>
       <Unit37>
         <Filename Value="../client/FBStatement.pas"/>
@@ -654,8 +656,16 @@
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
       </Unit85>
+      <Unit86>
+        <Filename Value="/usr/share/fpcsrc/rtl/inc/objpash.inc"/>
+        <EditorIndex Value="6"/>
+        <TopLine Value="393"/>
+        <CursorPos X="37" Y="430"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit86>
     </Units>
-    <JumpHistory Count="7" HistoryIndex="6">
+    <JumpHistory Count="13" HistoryIndex="12">
       <Position1>
         <Filename Value="../client/FBAttachment.pas"/>
         <Caret Line="559" Column="46" TopLine="543"/>
@@ -684,6 +694,30 @@
         <Filename Value="../client/FBAttachment.pas"/>
         <Caret Line="277" TopLine="270"/>
       </Position7>
+      <Position8>
+        <Filename Value="../client/FBAttachment.pas"/>
+        <Caret Line="278" Column="13" TopLine="273"/>
+      </Position8>
+      <Position9>
+        <Filename Value="../client/FBAttachment.pas"/>
+        <Caret Line="281" Column="25" TopLine="273"/>
+      </Position9>
+      <Position10>
+        <Filename Value="../client/3.0/FB30Statement.pas"/>
+        <Caret Line="192" Column="15" TopLine="187"/>
+      </Position10>
+      <Position11>
+        <Filename Value="../client/3.0/FB30Statement.pas"/>
+        <Caret Line="194" Column="56" TopLine="187"/>
+      </Position11>
+      <Position12>
+        <Filename Value="../client/3.0/FB30Statement.pas"/>
+        <Caret Line="110" Column="15" TopLine="92"/>
+      </Position12>
+      <Position13>
+        <Filename Value="../client/3.0/FB30Statement.pas"/>
+        <Caret Line="341" Column="7" TopLine="311"/>
+      </Position13>
     </JumpHistory>
   </ProjectSession>
 </CONFIG>

@@ -278,7 +278,9 @@ begin
       vtinteger    :
         SQLParams[i].AsInteger := params[i].vinteger;
       vtInt64:
-        SQLParams[i].AsInteger := params[i].VInt64^;
+        SQLParams[i].AsInt64 := params[i].VInt64^;
+      vtQWord:
+        SQLParams[i].AsInt64 := params[i].VQWord^;
       vtboolean    :
         SQLParams[i].AsBoolean :=  params[i].vboolean;
       vtchar       :
