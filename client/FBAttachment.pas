@@ -286,11 +286,11 @@ begin
       vtCurrency:
         SQLParams[i].AsDouble := params[i].VCurrency^;
       vtString     :
-        SQLParams[i].AsString := params[i].VString^;
+        SQLParams[i].AsString := strpas(PChar(params[i].VString));
       vtPChar      :
         SQLParams[i].AsString := strpas(params[i].VPChar);
       vtAnsiString :
-        SQLParams[i].AsString := AnsiString(params[i].VAnsiString^);
+        SQLParams[i].AsString := strpas(PAnsiChar(params[i].VAnsiString));
       vtVariant:
         SQLParams[i].AsVariant := params[i].VVariant^;
     else
