@@ -277,6 +277,12 @@ begin
     case params[i].vtype of
       vtinteger    :
         SQLParams[i].AsInteger := params[i].vinteger;
+      vtInt64:
+        SQLParams[i].AsInt64 := params[i].VInt64^;
+      {$IF declared (vtQWord)}
+      vtQWord:
+        SQLParams[i].AsInt64 := params[i].VQWord^;
+      {$IFEND}
       vtboolean    :
         SQLParams[i].AsBoolean :=  params[i].vboolean;
       vtchar       :
@@ -286,13 +292,21 @@ begin
       vtCurrency:
         SQLParams[i].AsDouble := params[i].VCurrency^;
       vtString     :
-        SQLParams[i].AsString := params[i].VString^;
+        SQLParams[i].AsString := strpas(PChar(params[i].VString));
       vtPChar      :
         SQLParams[i].AsString := strpas(params[i].VPChar);
       vtAnsiString :
-        SQLParams[i].AsString := AnsiString(params[i].VAnsiString^);
+        SQLParams[i].AsString := strpas(PAnsiChar(params[i].VAnsiString));
       vtVariant:
         SQLParams[i].AsVariant := params[i].VVariant^;
+      vtWideChar:
+        SQLParams[i].AsString := UTF8Encode(WideCharLenToString(@params[i].VWideChar,1));
+      vtPWideChar:
+        SQLParams[i].AsString := UTF8Encode(strpas(PWideChar(params[i].VPWideChar)));
+      vtWideString:
+        SQLParams[i].AsString := UTF8Encode(strpas(PWideChar(params[i].VWideString)));
+      vtUnicodeString:
+        SQLParams[i].AsString := UTF8Encode(strpas(PWideChar(params[i].VUnicodeString)));
     else
         IBError(ibxeInvalidVariantType,[nil]);
     end;

@@ -265,6 +265,8 @@ Employee Count = 42
 Employee Count = 41
 Employee Count = 42
 Constrained Employee Count = 3
+"Johnson" Employee Count = 2
+"Yanowski" Employee Count = 1
 
 
 Running Test 4: Update, Insert and Delete Queries
@@ -284,9 +286,9 @@ SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
 Current memory =  1.959857600000000000E+0007
-Delta memory =  2.616000000000000000E+0003
-Max memory =  1.966215200000000000E+0007
-Elapsed time= 0.000 sec
+Delta memory =  2.952000000000000000E+0003
+Max memory =  1.966170400000000000E+0007
+Elapsed time= 0.007 sec
 Cpu = 0.000 sec
 Buffers =  2.048000000000000000E+0003
 Reads =  0.000000000000000000E+0000
