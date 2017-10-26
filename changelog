@@ -50,6 +50,9 @@ FBINTF Change Log  version                   (1.1-0) Tue, 10 Oct 2017 14:41:18 +
 15. FBAttachment: Avoid string reference count error when processing an Ansistring
     parameter in an array of const passed to IAttachment.OpenCursor, etc.
 
+16. FBAttachment: Allow for WideString and UnicodeString parameters in an array
+    of const passed to IAttachment.OpenCursor, etc.
+
 
 FBINTF Change Log  version             (1.0-2) Sat, 04 Mar 2017 14:43:56 +0000
 

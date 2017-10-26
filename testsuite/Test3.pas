@@ -53,6 +53,7 @@ var Transaction: ITransaction;
     ResultSet: IResultSet;
     Statement: IStatement;
     TPB: ITPB;
+    us: UnicodeString;
 begin
   writeln(OutFile,'Employee Count = ',Attachment.OpenCursorAtStart('Select count(*) from EMPLOYEE')[0].AsInteger);
 
@@ -100,6 +101,16 @@ begin
   writeln(OutFile,'Constrained Employee Count = ',Attachment.OpenCursorAtStart(
          Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit),
          'Select count(*) As Counter from EMPLOYEE Where EMP_NO < ?',3,[8])[0].AsInteger);
+
+  writeln(OutFile,'"Johnson" Employee Count = ',Attachment.OpenCursorAtStart(
+         Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit),
+         'Select count(*) As Counter from EMPLOYEE Where LAST_NAME = ?',3,['Johnson'])[0].AsInteger);
+
+  us := UTF8Decode('Yanowski');   {Test a UnicodeString as a parameter}
+
+  writeln(OutFile,'"Yanowski" Employee Count = ',Attachment.OpenCursorAtStart(
+         Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit),
+         'Select count(*) As Counter from EMPLOYEE Where LAST_NAME = ?',3,[us])[0].AsInteger);
 
 end;
 

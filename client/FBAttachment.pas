@@ -277,6 +277,8 @@ begin
     case params[i].vtype of
       vtinteger    :
         SQLParams[i].AsInteger := params[i].vinteger;
+      vtInt64:
+        SQLParams[i].AsInteger := params[i].VInt64^;
       vtboolean    :
         SQLParams[i].AsBoolean :=  params[i].vboolean;
       vtchar       :
@@ -293,6 +295,14 @@ begin
         SQLParams[i].AsString := strpas(PAnsiChar(params[i].VAnsiString));
       vtVariant:
         SQLParams[i].AsVariant := params[i].VVariant^;
+      vtWideChar:
+        SQLParams[i].AsString := UTF8Encode(WideCharLenToString(@params[i].VWideChar,1));
+      vtPWideChar:
+        SQLParams[i].AsString := UTF8Encode(strpas(PWideChar(params[i].VPWideChar)));
+      vtWideString:
+        SQLParams[i].AsString := UTF8Encode(strpas(PWideChar(params[i].VWideString)));
+      vtUnicodeString:
+        SQLParams[i].AsString := UTF8Encode(strpas(PWideChar(params[i].VUnicodeString)));
     else
         IBError(ibxeInvalidVariantType,[nil]);
     end;
