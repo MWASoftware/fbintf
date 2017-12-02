@@ -401,7 +401,7 @@ var i: integer;
 begin
   writeln(OutFile,'Firebird Configuration File');
   for i := 0 to config.getCount - 1 do
-    writeln(OutFile,'Key = ',config.getItemType,', Value = ',config.getAsInteger);
+    writeln(OutFile,'Key = ',config[i].getItemType,', Value = ',config[i].getAsInteger);
   writeln(OutFile);
 end;
 
