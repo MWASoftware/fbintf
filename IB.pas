@@ -352,7 +352,7 @@ type
     ['{660822a5-3114-4c16-b6cb-c1a7b2aba70d}']
   end;
 
-  IBPB = interface(IParameterBlock<IBPBItem>)
+  IBPB = interface (IParameterBlock<IBPBItem>)
     ['{e0cb9eb5-17f7-4416-b7d1-3cddd1dfca76}']
   end;
 

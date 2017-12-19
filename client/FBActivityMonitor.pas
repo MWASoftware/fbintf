@@ -308,7 +308,7 @@ end;
 
 function TInterfaceOwner.HasInterface(index: integer): boolean;
 begin
-  Result := FInterfaces[index] <> nil;
+  Result := (Length(FInterfaces) > 0) and (FInterfaces[index] <> nil);
 end;
 
 procedure TInterfaceOwner.Remove(intf: TInterfacedObject);

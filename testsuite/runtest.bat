@@ -13,6 +13,11 @@ FOR %%V in (3.0.4 3.0.2 3.0.0) do (
     set FPCBIN=C:\lazarus\fpc\%%V\bin\x86_64-win32
     Goto COMPILE
   )
+  if EXIST C:\lazarus\fpc\%%V\bin\x86_64-win64\fpc.exe (
+    set FPCDIR=C:\lazarus\fpc\%%V
+    set FPCBIN=C:\lazarus\fpc\%%V\bin\x86_64-win64
+    Goto COMPILE
+  )
 )
 
 if not EXIST %FPCBIN%\fpc.exe (
