@@ -244,7 +244,8 @@ type
       ibxeInterfaceNotSupported,
       ibxeCharacterSetExists,
       ibxeUnknownUserCharSet,
-      ibxeUninitializedInputParameter
+      ibxeUninitializedInputParameter,
+      ibxeNegativeGenerator
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -444,6 +445,7 @@ resourcestring
   SCharacterSetExists = 'Character set "%s" is already defined';
   SUnknownUserCharSet = 'Unknown user character set "%s"';
   SUninitializedInputParameter = 'SQL Param No. %d (%s) is uninitialised';
+  SNegativeGenerator = 'A Generator Increment cannot be negative';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -610,7 +612,8 @@ const
     SInterfaceNotSupported,
     SCharacterSetExists,
     SUnknownUserCharSet,
-    SUninitializedInputParameter
+    SUninitializedInputParameter,
+    SNegativeGenerator
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
