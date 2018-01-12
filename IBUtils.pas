@@ -266,6 +266,7 @@ function QuoteIdentifier(Dialect: Integer; Value: AnsiString): AnsiString;
 function QuoteIdentifierIfNeeded(Dialect: Integer; Value: AnsiString): AnsiString;
 function Space2Underscore(s: AnsiString): AnsiString;
 function SQLSafeString(const s: AnsiString): AnsiString;
+function IsSQLIdentifier(Value: AnsiString): boolean;
 
 implementation
 
@@ -399,10 +400,22 @@ begin
   Result := Value;
 end;
 
+const
+  ValidSQLIdentifierChars = ['A'..'Z','a'..'z','0'..'9','_','$'];
+
+function IsSQLIdentifier(Value: AnsiString): boolean;
+var i: integer;
+begin
+  Result := false;
+  for i := 1 to Length(Value) do
+    if not (Value[i] in ValidSQLIdentifierChars) then Exit;
+  Result := true;
+end;
+
 function QuoteIdentifierIfNeeded(Dialect: Integer; Value: AnsiString): AnsiString;
 begin
   if (Dialect = 3) and
-    ((AnsiUpperCase(Value) <> Value) or IsReservedWord(Value)) then
+    (IsReservedWord(Value) or not IsSQLIdentifier(Value)) then
      Result := '"' + Value + '"'
   else
     Result := Value

@@ -1,3 +1,7 @@
+FBINTF Change Log  version                             (1.1-1) Sun, 07 Jan 2018 15:20:02 +0000
+
+1. IBUtils.QuoteIdentifierIfNeeded: Add check for space character.
+
 FBINTF Change Log  version                             (1.1-0) Sun, 07 Jan 2018 15:20:02 +0000
 
 1. Fix issues with setting SQL Param values using SetAsString with Numeric types.
