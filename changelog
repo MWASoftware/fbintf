@@ -2,6 +2,16 @@ FBINTF Change Log  version                              (1.1-1) Fri, 12 Jan 2018
 
 1. IBUtils.QuoteIdentifierIfNeeded: Add check for space character.
 
+2. IAttachment: add two new methods
+     function HasDefaultCharSet: boolean;
+     function GetDefaultCharSetID: integer;
+
+   These return, respectively, true if a connection default character set was
+   specified and the character set id of the connection defautl character set.
+
+3. FB3 Interface Implementation: Blob metadata may not be retrieved for blob parameters
+   for stored procedures.
+
 FBINTF Change Log  version                             (1.1-0) Sun, 07 Jan 2018 15:20:02 +0000
 
 1. Fix issues with setting SQL Param values using SetAsString with Numeric types.

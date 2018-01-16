@@ -114,6 +114,8 @@ type
     property DPB: IDPB read FDPB;
 public
     {Character Sets}
+  function HasDefaultCharSet: boolean;
+  function GetDefaultCharSetID: integer;
   function GetCharsetName(CharSetID: integer): AnsiString;
   function CharSetID2CodePage(CharSetID: integer; var CodePage: TSystemCodePage): boolean;
   function CodePage2CharSetID(CodePage: TSystemCodePage; var CharSetID: integer): boolean;
@@ -121,7 +123,6 @@ public
   function CharSetWidth(CharSetID: integer; var Width: integer): boolean;
   procedure RegisterCharSet(CharSetName: AnsiString; CodePage: TSystemCodePage;
     AllowReverseLookup:boolean; out CharSetID: integer);
-  property HasDefaultCharSet: boolean read FHasDefaultCharSet;
   property CharSetID: integer read FCharSetID;
   property CodePage: TSystemCodePage read FCodePage;
   end;
@@ -475,6 +476,16 @@ function TFBAttachment.OpenBlob(transaction: ITransaction; Field: ISQLData;
   BPB: IBPB): IBlob;
 begin
   Result := OpenBlob(Transaction,Field.GetBlobMetadata, Field.AsQuad,BPB);
+end;
+
+function TFBAttachment.HasDefaultCharSet: boolean;
+begin
+  Result := FHasDefaultCharSet
+end;
+
+function TFBAttachment.GetDefaultCharSetID: integer;
+begin
+  Result := FCharsetID;
 end;
 
 function TFBAttachment.GetCharsetName(CharSetID: integer): AnsiString;

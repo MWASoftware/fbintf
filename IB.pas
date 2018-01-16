@@ -914,6 +914,8 @@ type
     function HasActivity: boolean;
 
     {Character Sets}
+    function HasDefaultCharSet: boolean;
+    function GetDefaultCharSetID: integer;
     function GetCharsetName(CharSetID: integer): AnsiString;
     function CharSetID2CodePage(CharSetID: integer; var CodePage: TSystemCodePage): boolean;
     function CodePage2CharSetID(CodePage: TSystemCodePage; var CharSetID: integer): boolean;

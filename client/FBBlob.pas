@@ -58,6 +58,7 @@ type
     FCharSetID: cardinal;
     FSegmentSize: cardinal;
     function Attachment: IAttachment; virtual; abstract;
+    function CanFetchMetaData: boolean;
     procedure NeedFullMetadata; virtual; abstract;
     procedure NeedSubType;
   public
@@ -404,6 +405,11 @@ end;
 
 {TFBBlobMetaData}
 
+function TFBBlobMetaData.CanFetchMetaData: boolean;
+begin
+  Result := (FRelationName <> '') and (FColumnName <> '');
+end;
+
 procedure TFBBlobMetaData.NeedSubType;
 begin
   if not FHasSubType then
@@ -440,8 +446,16 @@ end;
 
 function TFBBlobMetaData.GetCharSetID: cardinal;
 begin
-  NeedFullMetadata;
-  Result := FCharSetID;
+  if CanFetchMetaData then
+  begin
+    NeedFullMetadata;
+    Result := FCharSetID;
+  end
+  else
+  if Attachment.HasDefaultCharSet then
+    Result := Attachment.GetDefaultCharSetID
+  else
+    Result := FCharSetID;
 end;
 
 function TFBBlobMetaData.GetCodePage: TSystemCodePage;

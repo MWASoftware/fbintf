@@ -94,9 +94,13 @@ implementation
 uses FBMessages, FB30Statement, FBParamBlock, Math;
 
 const
-  sLookupBlobMetaData = 'Select F.RDB$FIELD_SUB_TYPE, F.RDB$SEGMENT_LENGTH, RDB$CHARACTER_SET_ID, F.RDB$FIELD_TYPE '+
+  sLookupBlobMetaData = 'Select F.RDB$FIELD_SUB_TYPE, F.RDB$SEGMENT_LENGTH, F.RDB$CHARACTER_SET_ID, F.RDB$FIELD_TYPE '+
     'From RDB$FIELDS F JOIN RDB$RELATION_FIELDS R On R.RDB$FIELD_SOURCE = F.RDB$FIELD_NAME '+
-  'Where Trim(R.RDB$RELATION_NAME) = Upper(Trim(?)) and Trim(R.RDB$FIELD_NAME) = Upper(Trim(?))';
+  'Where Trim(R.RDB$RELATION_NAME) = Upper(Trim(?)) and Trim(R.RDB$FIELD_NAME) = Upper(Trim(?)) ' +
+  'UNION '+
+  'Select F.RDB$FIELD_SUB_TYPE, F.RDB$SEGMENT_LENGTH, F.RDB$CHARACTER_SET_ID, F.RDB$FIELD_TYPE '+
+  'From RDB$FIELDS F JOIN RDB$PROCEDURE_PARAMETERS P On P.RDB$FIELD_SOURCE = F.RDB$FIELD_NAME '+
+    'Where Trim(P.RDB$PROCEDURE_NAME) = Upper(Trim(?)) and Trim(P.RDB$PARAMETER_NAME) = Upper(Trim(?)) ';
 
 { TFB30BlobMetaData }
 
@@ -118,6 +122,8 @@ begin
     begin
       SQLParams[0].AsString := GetRelationName;
       SQLParams[1].AsString := GetColumnName;
+      SQLParams[2].AsString := GetRelationName;
+      SQLParams[3].AsString := GetColumnName;
       with OpenCursor do
       if FetchNext then
       begin
