@@ -78,7 +78,12 @@ const
   sGetArrayMetaData = 'Select F.RDB$CHARACTER_SET_ID '+
                       'From RDB$FIELDS F JOIN RDB$RELATION_FIELDS RF '+
                       'On F.RDB$FIELD_NAME = RF.RDB$FIELD_SOURCE '+
-                      'Where RF.RDB$RELATION_NAME = ? and RF.RDB$FIELD_NAME = ?';
+                      'Where RF.RDB$RELATION_NAME = ? and RF.RDB$FIELD_NAME = ? '+
+                      'UNION '+
+                      'Select F.RDB$CHARACTER_SET_ID '+
+                      'From RDB$FIELDS F JOIN RDB$PROCEDURE_PARAMETERS PP '+
+                      'On F.RDB$FIELD_NAME = PP.RDB$FIELD_SOURCE '+
+                      'Where PP.RDB$PROCEDURE_NAME = ? and PP.RDB$PARAMETER_NAME = ?';
 
   { TFB25ArrayMetaData }
 
@@ -109,6 +114,8 @@ begin
     begin
       SQLParams[0].AsString := RelationName;
       SQLParams[1].AsString := ColumnName;
+      SQLParams[2].AsString := RelationName;
+      SQLParams[3].AsString := ColumnName;
       with OpenCursor do
       if FetchNext then
       begin
