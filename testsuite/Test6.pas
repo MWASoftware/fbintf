@@ -32,7 +32,9 @@ unit Test6;
 
   10. Select all from new table.
 
-  11. Drop Database and repeat above but with no default connection character set.
+  11. Execute Stored proc and display results
+
+  12. Drop Database and repeat above but with WIN1252 and  no default connection character set.
 }
 
 interface
@@ -91,7 +93,6 @@ var Transaction: ITransaction;
     Statement,
     Statement2: IStatement;
     ResultSet: IResultSet;
-    i: integer;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
 
@@ -151,7 +152,7 @@ var Transaction: ITransaction;
     Statement: IStatement;
     Results: IResults;
 begin
-  writeln('Testing Blob as stored proc parameter');
+  writeln(OutFile,'Testing Blob as stored proc parameter');
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
 
   Statement := Attachment.Prepare(Transaction,sqlExecProc);

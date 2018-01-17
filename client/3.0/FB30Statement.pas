@@ -1146,6 +1146,8 @@ begin
        RemoveMonitor(aTransaction as TFB30Transaction);
   end;
   FExecTransactionIntf := aTransaction;
+  FSQLRecord.FTransaction := (aTransaction as TFB30Transaction);
+  FSQLRecord.FTransactionSeqNo := FSQLRecord.FTransaction.TransactionSeqNo;
   SignalActivity;
   Inc(FChangeSeqNo);
 end;

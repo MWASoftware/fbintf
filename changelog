@@ -11,6 +11,8 @@ FBINTF Change Log  version                               (1.1-1) Tue, 16 Jan 201
 
 3. Avoid exception when a text blob is a stored procedure parameter.
 
+4. Update test suite to include a test for a stored proc returning a text blob.
+
 FBINTF Change Log  version                             (1.1-0) Sun, 07 Jan 2018 15:20:02 +0000
 
 1. Fix issues with setting SQL Param values using SetAsString with Numeric types.
