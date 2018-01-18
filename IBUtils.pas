@@ -415,7 +415,7 @@ end;
 function QuoteIdentifierIfNeeded(Dialect: Integer; Value: AnsiString): AnsiString;
 begin
   if (Dialect = 3) and
-    (IsReservedWord(Value) or not IsSQLIdentifier(Value)) then
+    (IsReservedWord(Value) or not IsSQLIdentifier(Value) or (AnsiUpperCase(Value) <> Value)) then
      Result := '"' + Value + '"'
   else
     Result := Value
