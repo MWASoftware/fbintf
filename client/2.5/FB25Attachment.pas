@@ -60,7 +60,7 @@ type
     {IAttachment}
     procedure Connect;
     procedure Disconnect(Force: boolean=false); override;
-    function IsConnected: boolean;
+    function IsConnected: boolean; override;
     procedure DropDatabase;
     function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction; override;
     function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionCompletion): ITransaction; override;
@@ -89,8 +89,8 @@ type
 
     function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IBlobMetaData;
     function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IArrayMetaData;
-    function GetDBInformation(Requests: array of byte): IDBInformation; overload;
-    function GetDBInformation(Request: byte): IDBInformation; overload;
+    function GetDBInformation(Requests: array of byte): IDBInformation; overload; override;
+    function GetDBInformation(Request: byte): IDBInformation; overload; override;
   end;
 
 implementation
@@ -136,7 +136,9 @@ begin
   begin
     Disconnect;
     Connect;
-  end;
+  end
+  else
+    GetODSAndConnectionInfo;
 end;
 
 constructor TFB25Attachment.CreateDatabase(sql: AnsiString; aSQLDialect: integer;
@@ -160,11 +162,11 @@ begin
     FHasDefaultCharSet := false;
     info := GetDBInformation(isc_info_db_id);
     info[0].DecodeIDCluster(ConnectionType,FDatabaseName,SiteName);
+    GetODSAndConnectionInfo;
   end;
 end;
 
 procedure TFB25Attachment.Connect;
-var Param: IDPBItem;
 begin
   FSQLDialect := 3;
 
@@ -183,18 +185,8 @@ begin
                          (DPB as TDPB).getBuffer) > 0 ) and FRaiseExceptionOnConnectError then
       IBDatabaseError;
 
-    if IsConnected then
-    begin
-     Param := DPB.Find(isc_dpb_set_db_SQL_dialect);
-     if Param <> nil then
-       FSQLDialect := Param.AsByte;
-     Param :=  DPB.Find(isc_dpb_lc_ctype);
-     FHasDefaultCharSet :=  (Param <> nil) and
-                             CharSetName2CharSetID(Param.AsString,FCharSetID) and
-                             CharSetID2CodePage(FCharSetID,FCodePage) and
-                             (FCharSetID > 1);
-    end;
   end;
+  GetODSAndConnectionInfo;
 end;
 
 procedure TFB25Attachment.Disconnect(Force: boolean);

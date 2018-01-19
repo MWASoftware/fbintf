@@ -7,11 +7,23 @@ FBINTF Change Log  version                               (1.1-1) Tue, 16 Jan 201
      function GetDefaultCharSetID: integer;
 
    These return, respectively, true if a connection default character set was
-   specified and the character set id of the connection defautl character set.
+   specified and the character set id of the connection default character set.
+   The DefaultCharSetID is cached when the connection is opened and hence does not
+   require a database lookup.
 
 3. Avoid exception when a text blob is a stored procedure parameter.
 
 4. Update test suite to include a test for a stored proc returning a text blob.
+
+5. IAttachment: add
+      function GetRemoteProtocol: AnsiString;
+      function GetODSMajorVersion: integer;
+      function GetODSMinorVersion: integer;
+
+   These results are cached when the connection is opened and hence do not
+   require a database lookup.
+
+6. Update Test 1 to test above.
 
 FBINTF Change Log  version                             (1.1-0) Sun, 07 Jan 2018 15:20:02 +0000
 

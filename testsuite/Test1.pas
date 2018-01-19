@@ -84,6 +84,11 @@ begin
                       [Owner.GetNewDatabaseName, Owner.GetUserName, Owner.GetPassword, CharSet]);
   Attachment := FirebirdAPI.CreateDatabase(createSQL,SQLDialect);
   WriteDBInfo(Attachment.GetDBInformation([isc_info_db_id,isc_info_db_SQL_Dialect]));
+  writeln(outfile,'DB Charset ID = ',Attachment.GetDefaultCharSetID);
+  writeln(outfile,'DB SQL Dialect = ',Attachment.GetSQLDialect);
+  writeln(outfile,'DB Remote Protocol = ', Attachment.GetRemoteProtocol);
+  writeln(outfile,'DB ODS Major Version = ',Attachment.GetODSMajorVersion);
+  writeln(outfile,'DB ODS Minor Version = ',Attachment.GetODSMinorVersion);
 
   writeln(OutFile,'Dropping Database');
   if Attachment <> nil then
@@ -97,6 +102,12 @@ begin
   DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
 
   Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
+
+  writeln(outfile,'DB Charset ID = ',Attachment.GetDefaultCharSetID);
+  writeln(outfile,'DB SQL Dialect = ',Attachment.GetSQLDialect);
+  writeln(outfile,'DB Remote Protocol = ', Attachment.GetRemoteProtocol);
+  writeln(outfile,'DB ODS Major Version = ',Attachment.GetODSMajorVersion);
+  writeln(outfile,'DB ODS Minor Version = ',Attachment.GetODSMinorVersion);
 
   writeln(OutFile,'Dropping Database');
   if Attachment <> nil then
@@ -113,6 +124,11 @@ begin
     Exit;
   end;
   WriteDBInfo(Attachment.GetDBInformation([isc_info_db_id,isc_info_ods_version,isc_info_ods_minor_version]));
+  writeln(outfile,'DB Charset ID = ',Attachment.GetDefaultCharSetID);
+  writeln(outfile,'DB SQL Dialect = ',Attachment.GetSQLDialect);
+  writeln(outfile,'DB Remote Protocol = ', Attachment.GetRemoteProtocol);
+  writeln(outfile,'DB ODS Major Version = ',Attachment.GetODSMajorVersion);
+  writeln(outfile,'DB ODS Minor Version = ',Attachment.GetODSMinorVersion);
 
   {Querying Database}
   DoQuery(Attachment);
