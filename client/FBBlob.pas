@@ -446,16 +446,9 @@ end;
 
 function TFBBlobMetaData.GetCharSetID: cardinal;
 begin
-  if CanFetchMetaData then
-  begin
+  if FUnconfirmedCharacterSet and CanFetchMetaData then
     NeedFullMetadata;
-    Result := FCharSetID;
-  end
-  else
-  if Attachment.HasDefaultCharSet then
-    Result := Attachment.GetDefaultCharSetID
-  else
-    Result := FCharSetID;
+  Result := FCharSetID;
 end;
 
 function TFBBlobMetaData.GetCodePage: TSystemCodePage;

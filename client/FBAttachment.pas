@@ -54,6 +54,8 @@ type
   private
     FDPB: IDPB;
     FFirebirdAPI: IFirebirdAPI;
+    FODSMajorVersion: integer;
+    FODSMinorVersion: integer;
     FUserCharSetMap: array of TCharSetMap;
   protected
     FDatabaseName: AnsiString;
@@ -62,10 +64,13 @@ type
     FHasDefaultCharSet: boolean;
     FCharSetID: integer;
     FCodePage: TSystemCodePage;
+    FRemoteProtocol: AnsiString;
     constructor Create(DatabaseName: AnsiString; DPB: IDPB;
       RaiseExceptionOnConnectError: boolean);
     procedure CheckHandle; virtual; abstract;
     function GenerateCreateDatabaseSQL(DatabaseName: AnsiString; aDPB: IDPB): AnsiString;
+    procedure GetODSAndConnectionInfo;
+    function IsConnected: boolean; virtual; abstract;
     procedure EndAllTransactions;
     procedure SetParameters(SQLParams: ISQLParams; params: array of const);
   public
@@ -113,7 +118,12 @@ type
     property SQLDialect: integer read FSQLDialect;
     property DPB: IDPB read FDPB;
 public
-    {Character Sets}
+  function GetDBInformation(Requests: array of byte): IDBInformation; overload; virtual; abstract;
+  function GetDBInformation(Request: byte): IDBInformation; overload; virtual; abstract;
+  function GetRemoteProtocol: AnsiString;
+  function GetODSMajorVersion: integer;
+  function GetODSMinorVersion: integer;
+  {Character Sets}
   function HasDefaultCharSet: boolean;
   function GetDefaultCharSetID: integer;
   function GetCharsetName(CharSetID: integer): AnsiString;
@@ -210,6 +220,56 @@ const
 
 { TFBAttachment }
 
+procedure TFBAttachment.GetODSAndConnectionInfo;
+var DBInfo: IDBInformation;
+    i: integer;
+    Stmt: IStatement;
+    ResultSet: IResultSet;
+    Param: IDPBItem;
+begin
+  if not IsConnected then Exit;
+  DBInfo := GetDBInformation([isc_info_db_id,isc_info_ods_version,isc_info_ods_minor_version,
+                               isc_info_db_SQL_Dialect]);
+  for i := 0 to DBInfo.GetCount - 1 do
+    with DBInfo[i] do
+      case getItemType of
+      isc_info_ods_minor_version:
+        FODSMinorVersion := getAsInteger;
+      isc_info_ods_version:
+        FODSMajorVersion := getAsInteger;
+      isc_info_db_SQL_Dialect:
+        FSQLDialect := getAsInteger;
+      end;
+
+  if (FODSMajorVersion > 11) or ((FODSMajorVersion = 11) and (FODSMinorVersion >= 1)) then
+  begin
+    Stmt := Prepare(StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit),
+                    'Select MON$CHARACTER_SET_ID, MON$REMOTE_PROTOCOL From MON$ATTACHMENTS '+
+                    'Where MON$ATTACHMENT_ID = CURRENT_CONNECTION');
+    ResultSet := Stmt.OpenCursor;
+    if ResultSet.FetchNext then
+    begin
+      FCharSetID := ResultSet[0].AsInteger;
+      FRemoteProtocol := ResultSet[1].AsString;
+    end
+  end
+  else
+  if DPB <> nil then
+  begin
+    Param :=  DPB.Find(isc_dpb_lc_ctype);
+    if (Param = nil) or not CharSetName2CharSetID(Param.AsString,FCharSetID) then
+      FCharSetID := 0;
+      FRemoteProtocol := '';
+  end
+  else
+  begin
+    FCharSetID := 0;
+    FRemoteProtocol := '';
+  end;
+  CharSetID2CodePage(FCharSetID,FCodePage);
+  FHasDefaultCharSet :=  FCharSetID > 1;
+end;
+
 constructor TFBAttachment.Create(DatabaseName: AnsiString; DPB: IDPB;
   RaiseExceptionOnConnectError: boolean);
 begin
@@ -220,6 +280,8 @@ begin
   FDPB := DPB;
   SetLength(FUserCharSetMap,0);
   FRaiseExceptionOnConnectError := RaiseExceptionOnConnectError;
+  FODSMajorVersion := 0;
+  FODSMinorVersion := 0;
 end;
 
 function TFBAttachment.GenerateCreateDatabaseSQL(DatabaseName: AnsiString;  aDPB: IDPB): AnsiString;
@@ -476,6 +538,21 @@ function TFBAttachment.OpenBlob(transaction: ITransaction; Field: ISQLData;
   BPB: IBPB): IBlob;
 begin
   Result := OpenBlob(Transaction,Field.GetBlobMetadata, Field.AsQuad,BPB);
+end;
+
+function TFBAttachment.GetRemoteProtocol: AnsiString;
+begin
+  Result := FRemoteProtocol;
+end;
+
+function TFBAttachment.GetODSMajorVersion: integer;
+begin
+  Result := FODSMajorVersion;
+end;
+
+function TFBAttachment.GetODSMinorVersion: integer;
+begin
+  Result := FODSMinorVersion;
 end;
 
 function TFBAttachment.HasDefaultCharSet: boolean;

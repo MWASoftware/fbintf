@@ -258,9 +258,6 @@ function Min(n1, n2: Integer): Integer;
 function RandomString(iLength: Integer): AnsiString;
 function RandomInteger(iLow, iHigh: Integer): Integer;
 function StripString(st: AnsiString; CharsToStrip: AnsiString): AnsiString;
-function FormatIdentifier(Dialect: Integer; Value: AnsiString): AnsiString;
-function FormatIdentifierValue(Dialect: Integer; Value: AnsiString): AnsiString;
-function FormatIdentifierValueNC(Dialect: Integer; Value: AnsiString): AnsiString;
 function ExtractIdentifier(Dialect: Integer; Value: AnsiString): AnsiString;
 function QuoteIdentifier(Dialect: Integer; Value: AnsiString): AnsiString;
 function QuoteIdentifierIfNeeded(Dialect: Integer; Value: AnsiString): AnsiString;
@@ -311,20 +308,9 @@ begin
   end;
 end;
 
-function FormatIdentifier(Dialect: Integer; Value: AnsiString): AnsiString;
-begin
-  Value := Trim(Value);
-  if Dialect = 1 then
-    Value := AnsiUpperCase(Value)
-  else
-    if (Value <> '') and (Value[1] = '"') then
-      Value := '"' + StringReplace (TrimRight(Value), '"', '""', [rfReplaceAll]) + '"'
-    else
-      Value := AnsiUpperCase(Value);
-  Result := Value;
-end;
+{Extracts SQL Identifier typically from a  Dialect 3 encoding}
 
-function FormatIdentifierValue(Dialect: Integer; Value: AnsiString): AnsiString;
+function ExtractIdentifier(Dialect: Integer; Value: AnsiString): AnsiString;
 begin
   Value := Trim(Value);
   if Dialect = 1 then
@@ -343,43 +329,7 @@ begin
   Result := Value;
 end;
 
-function FormatIdentifierValueNC(Dialect: Integer; Value: AnsiString): AnsiString;
-begin
-  Value := Trim(Value);
-  if Dialect = 1 then
-    Value := AnsiUpperCase(Value)
-  else
-  begin
-    if (Value <> '') and (Value[1] = '"') then
-    begin
-      Delete(Value, 1, 1);
-      Delete(Value, Length(Value), 1);
-      Value := AnsiUpperCase(StringReplace (Value, '""', '"', [rfReplaceAll]));
-    end
-    else
-      Value := AnsiUpperCase(Value);
-  end;
-  Result := Value;
-end;
-
-function ExtractIdentifier(Dialect: Integer; Value: AnsiString): AnsiString;
-begin
-  Value := Trim(Value);
-  if Dialect = 1 then
-    Value := AnsiUpperCase(Value)
-  else
-  begin
-    if (Value <> '') and (Value[1] = '"') then
-    begin
-      Delete(Value, 1, 1);
-      Delete(Value, Length(Value), 1);
-      Value := StringReplace (Value, '""', '"', [rfReplaceAll]);
-    end
-    else
-      Value := AnsiUpperCase(Value);
-  end;
-  Result := Value;
-end;
+{Returns true if "w" is a Firebird SQL reserved word}
 
 function IsReservedWord(w: AnsiString): boolean;
 var i: integer;
@@ -391,17 +341,21 @@ begin
      Result := false;
 end;
 
+{Format an SQL Identifier according to SQL Dialect}
+
 function QuoteIdentifier(Dialect: Integer; Value: AnsiString): AnsiString;
 begin
   if Dialect = 1 then
     Value := AnsiUpperCase(Trim(Value))
   else
-    Value := '"' + Value + '"';
+    Value := '"' + StringReplace (Value, '""', '"', [rfReplaceAll]) + '"';
   Result := Value;
 end;
 
 const
   ValidSQLIdentifierChars = ['A'..'Z','a'..'z','0'..'9','_','$'];
+
+{Returns true if the value is a valid SQL Identifier - note lower case accepted}
 
 function IsSQLIdentifier(Value: AnsiString): boolean;
 var i: integer;
@@ -412,14 +366,18 @@ begin
   Result := true;
 end;
 
+{Format an SQL Identifier according to SQL Dialect with encapsulation if necessary}
+
 function QuoteIdentifierIfNeeded(Dialect: Integer; Value: AnsiString): AnsiString;
 begin
   if (Dialect = 3) and
-    (IsReservedWord(Value) or not IsSQLIdentifier(Value)) then
-     Result := '"' + Value + '"'
+    (IsReservedWord(Value) or not IsSQLIdentifier(Value) or (AnsiUpperCase(Value) <> Value)) then
+     Result := '"' + StringReplace (TrimRight(Value), '"', '""', [rfReplaceAll]) + '"'
   else
     Result := Value
 end;
+
+{Replaces unknown characters in a string with underscores}
 
 function Space2Underscore(s: AnsiString): AnsiString;
 var
@@ -427,9 +385,11 @@ var
 begin
      Result := s;
      for k := 1 to Length(s) do
-         if not (Result[k] in ['0'..'9','A'..'Z','_','$'])  then
+         if not (Result[k] in ValidSQLIdentifierChars)  then
             Result[k] := '_';
 end;
+
+{Reformats an SQL string with single quotes duplicated.}
 
 function SQLSafeString(const s: AnsiString): AnsiString;
 begin

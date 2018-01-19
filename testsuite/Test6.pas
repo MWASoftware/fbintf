@@ -11,7 +11,8 @@ unit Test6;
 {Test 6: Blob Handling}
 
 {
-  1. Create an empty database and populate with a single table.
+  1. Create an empty database and populate with a single table and stored procedure
+     returning a blob.
 
   2. Show the character sets available (List RDB$CHARACTER_SETS)
 
@@ -31,7 +32,9 @@ unit Test6;
 
   10. Select all from new table.
 
-  11. Drop Database and repeat above but with no default connection character set.
+  11. Execute Stored proc and display results
+
+  12. Drop Database and repeat above but with WIN1252 and  no default connection character set.
 }
 
 interface
@@ -46,6 +49,7 @@ type
   TTest6 = class(TTestBase)
   private
     procedure UpdateDatabase(Attachment: IAttachment);
+    procedure ExecProc(Attachment: IAttachment);
   public
     function TestTitle: AnsiString; override;
     procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
@@ -64,11 +68,22 @@ const
     'Primary Key(RowID)'+
     ')';
 
+  sqlCreateProc =
+    'Create Procedure TestProc (RowID Integer) '+
+    'Returns (BlobData Blob sub_type 1 Character Set UTF8) '+
+    'As ' +
+    'Begin ' +
+    ' Select BlobData From TestData Where RowID = :RowID Into :BlobData; '+
+    'End';
+
+
   sqlGetCharSets = 'Select RDB$CHARACTER_SET_NAME,RDB$CHARACTER_SET_ID from RDB$CHARACTER_SETS order by 2';
 
   sqlInsert = 'Insert into TestData(RowID,Title,FixedPoint,FloatingPoint) Values(:RowID,:Title,:FP, :DP)';
 
   sqlUpdate = 'Update TestData Set BlobData = ? Where RowID = ?';
+
+  sqlExecProc = 'Execute Procedure TestProc ?';
 
 
 { TTest6 }
@@ -78,7 +93,6 @@ var Transaction: ITransaction;
     Statement,
     Statement2: IStatement;
     ResultSet: IResultSet;
-    i: integer;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
 
@@ -133,6 +147,21 @@ begin
   end;
 end;
 
+procedure TTest6.ExecProc(Attachment: IAttachment);
+var Transaction: ITransaction;
+    Statement: IStatement;
+    Results: IResults;
+begin
+  writeln(OutFile,'Testing Blob as stored proc parameter');
+  Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
+
+  Statement := Attachment.Prepare(Transaction,sqlExecProc);
+  PrintMetaData(Statement.GetMetaData);
+  Statement.SQLParams[0].AsInteger := 1;
+  Results := Statement.Execute;
+  ReportResult(Results);
+end;
+
 function TTest6.TestTitle: AnsiString;
 begin
   Result := 'Test 6: Blob Handling';
@@ -149,7 +178,23 @@ begin
   DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
   Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable);
+  Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateProc);
   UpdateDatabase(Attachment);
+  ExecProc(Attachment);
+
+  Attachment.DropDatabase;
+
+  {Repeat with WIN1252}
+  DPB := FirebirdAPI.AllocateDPB;
+  DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
+  DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);
+  DPB.Add(isc_dpb_lc_ctype).setAsString('WIN1252');
+  DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
+  Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
+  Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable);
+  Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateProc);
+  UpdateDatabase(Attachment);
+  ExecProc(Attachment);
 
   Attachment.DropDatabase;
 
@@ -160,7 +205,9 @@ begin
   DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
   Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable);
+  Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateProc);
   UpdateDatabase(Attachment);
+  ExecProc(Attachment);
 
   Attachment.DropDatabase;
 end;

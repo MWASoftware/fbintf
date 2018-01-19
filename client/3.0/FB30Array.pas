@@ -104,7 +104,16 @@ const
                       'From RDB$FIELDS F JOIN RDB$RELATION_FIELDS RF '+
                       'On F.RDB$FIELD_NAME = RF.RDB$FIELD_SOURCE JOIN RDB$FIELD_DIMENSIONS FD '+
                       'On FD.RDB$FIELD_NAME = F.RDB$FIELD_NAME ' +
-                      'Where RF.RDB$RELATION_NAME = ? and RF.RDB$FIELD_NAME = ? Order by FD.RDB$DIMENSION asc';
+                      'Where RF.RDB$RELATION_NAME = ? and RF.RDB$FIELD_NAME = ? ' +
+                      'UNION '+
+                      'Select F.RDB$FIELD_LENGTH, F.RDB$FIELD_SCALE, F.RDB$FIELD_TYPE, '+
+                      'F.RDB$DIMENSIONS, FD.RDB$DIMENSION, FD.RDB$LOWER_BOUND, FD.RDB$UPPER_BOUND, '+
+                      'F.RDB$CHARACTER_SET_ID '+
+                      'From RDB$FIELDS F JOIN RDB$PROCEDURE_PARAMETERS PP '+
+                      'On F.RDB$FIELD_NAME = PP.RDB$FIELD_SOURCE JOIN RDB$FIELD_DIMENSIONS FD '+
+                      'On FD.RDB$FIELD_NAME = F.RDB$FIELD_NAME ' +
+                      'Where PP.RDB$PROCEDURE_NAME = ? and PP.RDB$PARAMETER_NAME = ? '+
+                      'Order by 5 asc';
 
 
 { TFB30ArrayMetaData }
@@ -124,6 +133,8 @@ begin
   begin
     SQLParams[0].AsString := RelationName;
     SQLParams[1].AsString := ColumnName;
+    SQLParams[2].AsString := RelationName;
+    SQLParams[3].AsString := ColumnName;
     with OpenCursor do
     if FetchNext then
     begin

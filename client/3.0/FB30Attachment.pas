@@ -61,7 +61,7 @@ type
     {IAttachment}
     procedure Connect;
     procedure Disconnect(Force: boolean=false); override;
-    function IsConnected: boolean;
+    function IsConnected: boolean; override;
     procedure DropDatabase;
     function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction; override;
     function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionCompletion): ITransaction; override;
@@ -93,8 +93,8 @@ type
     {Database Information}
     function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IBlobMetaData;
     function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IArrayMetaData;
-    function GetDBInformation(Requests: array of byte): IDBInformation; overload;
-    function GetDBInformation(Request: byte): IDBInformation; overload;
+    function GetDBInformation(Requests: array of byte): IDBInformation; overload; override;
+    function GetDBInformation(Request: byte): IDBInformation; overload; override;
   end;
 
 implementation
@@ -151,7 +151,9 @@ begin
     begin
       Disconnect;
       Connect;
-    end;
+    end
+    else
+      GetODSAndConnectionInfo;
   end;
 end;
 
@@ -176,6 +178,7 @@ begin
     FHasDefaultCharSet := false;
     info := GetDBInformation(isc_info_db_id);
     info[0].DecodeIDCluster(ConnectionType,FDatabaseName,SiteName);
+    GetODSAndConnectionInfo;
   end;
 end;
 
@@ -187,7 +190,6 @@ begin
 end;
 
 procedure TFB30Attachment.Connect;
-var Param: IDPBItem;
 begin
   with Firebird30ClientAPI do
   begin
@@ -198,16 +200,7 @@ begin
     if InErrorState then
       FAttachmentIntf := nil
     else
-    begin
-      Param := DPB.Find(isc_dpb_set_db_SQL_dialect);
-      if Param <> nil then
-        FSQLDialect := Param.AsByte;
-      Param :=  DPB.Find(isc_dpb_lc_ctype);
-      FHasDefaultCharSet :=  (Param <> nil) and
-                             CharSetName2CharSetID(Param.AsString,FCharSetID) and
-                             CharSetID2CodePage(FCharSetID,FCodePage) and
-                             (FCharSetID > 1);
-    end;
+      GetODSAndConnectionInfo;
   end;
 end;
 
