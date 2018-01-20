@@ -92,6 +92,10 @@ begin
   writeln(outfile,'DB ODS Minor Version = ',Attachment.GetODSMinorVersion);
   PrintDPB(Attachment.getDPB);
 
+  {Demonstrate reconnect when database created with SQL Statement}
+  Attachment.Disconnect;
+  Attachment.Connect;
+
   writeln(OutFile,'Dropping Database');
   if Attachment <> nil then
     Attachment.DropDatabase;
@@ -105,6 +109,7 @@ begin
 
   Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
 
+  writeln(outfile,'DB Connect String = ',Attachment.GetConnectString);
   writeln(outfile,'DB Charset ID = ',Attachment.GetDefaultCharSetID);
   writeln(outfile,'DB SQL Dialect = ',Attachment.GetSQLDialect);
   writeln(outfile,'DB Remote Protocol = ', Attachment.GetRemoteProtocol);
@@ -126,6 +131,7 @@ begin
     Exit;
   end;
   WriteDBInfo(Attachment.GetDBInformation([isc_info_db_id,isc_info_ods_version,isc_info_ods_minor_version]));
+  writeln(outfile,'DB Connect String = ',Attachment.GetConnectString);
   writeln(outfile,'DB Charset ID = ',Attachment.GetDefaultCharSetID);
   writeln(outfile,'DB SQL Dialect = ',Attachment.GetSQLDialect);
   writeln(outfile,'DB Remote Protocol = ', Attachment.GetRemoteProtocol);
