@@ -911,6 +911,7 @@ type
     function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IArrayMetaData;
     function GetDBInformation(Requests: array of byte): IDBInformation; overload;
     function GetDBInformation(Request: byte): IDBInformation; overload;
+    function GetConnectString: AnsiString;
     function GetRemoteProtocol: AnsiString;
     function GetODSMajorVersion: integer;
     function GetODSMinorVersion: integer;

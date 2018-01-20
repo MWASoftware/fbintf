@@ -100,7 +100,7 @@ type
 implementation
 
 uses FB30Transaction, FB30Statement, FB30Array, FB30Blob, FBMessages,
-  FBOutputBlock, FB30Events;
+  FBOutputBlock, FB30Events, IBUtils;
 
 { TFB30Attachment }
 
@@ -160,9 +160,6 @@ end;
 constructor TFB30Attachment.CreateDatabase(sql: AnsiString; aSQLDialect: integer;
   RaiseExceptionOnError: boolean);
 var IsCreateDB: boolean;
-    info: IDBInformation;
-    ConnectionType: integer;
-    SiteName: AnsiString;
 begin
   inherited Create('',nil,RaiseExceptionOnError);
   FSQLDialect := aSQLDialect;
@@ -173,13 +170,10 @@ begin
     if FRaiseExceptionOnConnectError then Check4DataBaseError;
     if InErrorState then
       FAttachmentIntf := nil;
-    FCharSetID := 0;
-    FCodePage := CP_NONE;
-    FHasDefaultCharSet := false;
-    info := GetDBInformation(isc_info_db_id);
-    info[0].DecodeIDCluster(ConnectionType,FDatabaseName,SiteName);
-    GetODSAndConnectionInfo;
   end;
+  GetODSAndConnectionInfo;
+  ExtractConnectString(sql,FDatabaseName);
+  DPBFromCreateSQL(sql);
 end;
 
 destructor TFB30Attachment.Destroy;

@@ -80,15 +80,17 @@ begin
     Attachment.DropDatabase;
 
   writeln(OutFile,'Creating a Database using an SQL Statement');
-  createSQL := Format('CREATE DATABASE ''%s'' USER ''%s'' PASSWORD ''%s'' DEFAULT CHARACTER SET %s',
+  createSQL := Format('create database ''%s'' USER ''%s'' PASSWORD ''%s'' DEFAULT CHARACTER SET %s',
                       [Owner.GetNewDatabaseName, Owner.GetUserName, Owner.GetPassword, CharSet]);
   Attachment := FirebirdAPI.CreateDatabase(createSQL,SQLDialect);
   WriteDBInfo(Attachment.GetDBInformation([isc_info_db_id,isc_info_db_SQL_Dialect]));
+  writeln(outfile,'DB Connect String = ',Attachment.GetConnectString);
   writeln(outfile,'DB Charset ID = ',Attachment.GetDefaultCharSetID);
   writeln(outfile,'DB SQL Dialect = ',Attachment.GetSQLDialect);
   writeln(outfile,'DB Remote Protocol = ', Attachment.GetRemoteProtocol);
   writeln(outfile,'DB ODS Major Version = ',Attachment.GetODSMajorVersion);
   writeln(outfile,'DB ODS Minor Version = ',Attachment.GetODSMinorVersion);
+  PrintDPB(Attachment.getDPB);
 
   writeln(OutFile,'Dropping Database');
   if Attachment <> nil then

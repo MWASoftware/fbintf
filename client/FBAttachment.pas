@@ -72,6 +72,7 @@ type
     procedure GetODSAndConnectionInfo;
     function IsConnected: boolean; virtual; abstract;
     procedure EndAllTransactions;
+    procedure DPBFromCreateSQL(CreateSQL: AnsiString);
     procedure SetParameters(SQLParams: ISQLParams; params: array of const);
   public
     destructor Destroy; override;
@@ -120,6 +121,7 @@ type
 public
   function GetDBInformation(Requests: array of byte): IDBInformation; overload; virtual; abstract;
   function GetDBInformation(Request: byte): IDBInformation; overload; virtual; abstract;
+  function GetConnectString: AnsiString;
   function GetRemoteProtocol: AnsiString;
   function GetODSMajorVersion: integer;
   function GetODSMinorVersion: integer;
@@ -139,7 +141,7 @@ public
 
 implementation
 
-uses FBMessages, FBTransaction;
+uses FBMessages, FBTransaction, RegExpr;
 
 const
   CharSetMap: array [0..69] of TCharsetMap = (
@@ -266,8 +268,7 @@ begin
     FCharSetID := 0;
     FRemoteProtocol := '';
   end;
-  CharSetID2CodePage(FCharSetID,FCodePage);
-  FHasDefaultCharSet :=  FCharSetID > 1;
+  FHasDefaultCharSet := CharSetID2CodePage(FCharSetID,FCodePage) and (FCharSetID > 1);
 end;
 
 constructor TFBAttachment.Create(DatabaseName: AnsiString; DPB: IDPB;
@@ -326,6 +327,35 @@ begin
     if (intf <> nil) and  (intf is TFBTransaction) then
       TFBTransaction(intf).DoDefaultTransactionEnd(true);
   end;
+end;
+
+procedure TFBAttachment.DPBFromCreateSQL(CreateSQL: AnsiString);
+var RegexObj: TRegExpr;
+begin
+  FDPB := FFirebirdAPI.AllocateDPB;
+  RegexObj := TRegExpr.Create;
+  try
+    {extact database file spec}
+    RegexObj.ModifierG := false; {turn off greedy matches}
+    RegexObj.ModifierI := true; {case insensitive match}
+    RegexObj.Expression := '^ *CREATE +(DATABASE|SCHEMA) +''.*'' +USER +''(.+)'' PASSWORD +''(.+)''';
+    if RegexObj.Exec(CreateSQL) then
+    begin
+      DPB.Add(isc_dpb_user_name).AsString := system.copy(CreateSQL,RegexObj.MatchPos[2],RegexObj.MatchLen[2]);
+      DPB.Add(isc_dpb_password).AsString := system.copy(CreateSQL,RegexObj.MatchPos[3],RegexObj.MatchLen[3]);
+    end
+    else
+    begin
+      RegexObj.Expression := '^ *CREATE +(DATABASE|SCHEMA) +(''.*'') +USER +''(.+)''';
+      if RegexObj.Exec(CreateSQL) then
+        DPB.Add(isc_dpb_user_name).AsString := system.copy(CreateSQL,RegexObj.MatchPos[2],RegexObj.MatchLen[2]);
+    end;
+  finally
+    RegexObj.Free;
+  end;
+  if FCharSetID > 0 then
+    DPB.Add(isc_dpb_lc_ctype).AsString := GetCharSetName(FCharSetID);
+  DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(FSQLDialect);
 end;
 
 procedure TFBAttachment.SetParameters(SQLParams: ISQLParams;
@@ -411,7 +441,7 @@ end;
 function TFBAttachment.ExecuteSQL(TPB: array of byte; sql: AnsiString;
   SQLDialect: integer; params: array of const): IResults;
 begin
-  Result := ExecuteSQL(StartTransaction(TPB,taCommit),sql,FSQLDialect,params);
+  Result := ExecuteSQL(StartTransaction(TPB,taCommit),sql,SQLDialect,params);
 end;
 
 function TFBAttachment.ExecuteSQL(transaction: ITransaction; sql: AnsiString;
@@ -538,6 +568,11 @@ function TFBAttachment.OpenBlob(transaction: ITransaction; Field: ISQLData;
   BPB: IBPB): IBlob;
 begin
   Result := OpenBlob(Transaction,Field.GetBlobMetadata, Field.AsQuad,BPB);
+end;
+
+function TFBAttachment.GetConnectString: AnsiString;
+begin
+  Result := FDatabaseName;
 end;
 
 function TFBAttachment.GetRemoteProtocol: AnsiString;

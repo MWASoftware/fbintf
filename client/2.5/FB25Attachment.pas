@@ -96,7 +96,7 @@ type
 implementation
 
 uses FB25Events,FB25Transaction, FBMessages, FB25Blob,
-  FB25Statement, FB25Array;
+  FB25Statement, FB25Array, IBUtils;
 
   { TFB25Attachment }
 
@@ -144,9 +144,6 @@ end;
 constructor TFB25Attachment.CreateDatabase(sql: AnsiString; aSQLDialect: integer;
     RaiseExceptionOnError: boolean);
 var tr_handle: TISC_TR_HANDLE;
-    info: IDBInformation;
-    ConnectionType: integer;
-    SiteName: AnsiString;
 begin
   inherited Create('',nil,RaiseExceptionOnError);
   FSQLDialect := aSQLDialect;
@@ -157,13 +154,10 @@ begin
                                   aSQLDialect, nil) > 0) and RaiseExceptionOnError then
       IBDataBaseError;
 
-    FCharSetID := 0;
-    FCodePage := CP_NONE;
-    FHasDefaultCharSet := false;
-    info := GetDBInformation(isc_info_db_id);
-    info[0].DecodeIDCluster(ConnectionType,FDatabaseName,SiteName);
-    GetODSAndConnectionInfo;
   end;
+  GetODSAndConnectionInfo;
+  ExtractConnectString(sql,FDatabaseName);
+  DPBFromCreateSQL(sql);
 end;
 
 procedure TFB25Attachment.Connect;

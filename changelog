@@ -23,7 +23,18 @@ FBINTF Change Log  version                                (1.1-1) Fri, 19 Jan 20
    These results are cached when the connection is opened and hence do not
    require a database lookup.
 
-6. Update Test 1 to test above.
+6. IAttachment: add "function GetConnectString: AnsiString;" This returns the
+   connect string used to create/connect to the database.
+
+7. IAttachment: Create Database using SQL statement. The username and password
+   are now extracted and used to populate a DPB made available via IAttachment.getDPB.
+   It is now possible to use IAttachment disconnect/connect to reconnect to
+   a database for which the initial connection was established by a create
+   database sql statement.
+
+8. Update Test 1 to test 5, 6 and 7 above.
+
+9. IBUtils code tidy up.
 
 FBINTF Change Log  version                             (1.1-0) Sun, 07 Jan 2018 15:20:02 +0000
 

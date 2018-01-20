@@ -264,8 +264,11 @@ function QuoteIdentifierIfNeeded(Dialect: Integer; Value: AnsiString): AnsiStrin
 function Space2Underscore(s: AnsiString): AnsiString;
 function SQLSafeString(const s: AnsiString): AnsiString;
 function IsSQLIdentifier(Value: AnsiString): boolean;
+function ExtractConnectString(const CreateSQL: AnsiString; var ConnectString: AnsiString): boolean;
 
 implementation
+
+uses RegExpr;
 
 function Max(n1, n2: Integer): Integer;
 begin
@@ -364,6 +367,26 @@ begin
   for i := 1 to Length(Value) do
     if not (Value[i] in ValidSQLIdentifierChars) then Exit;
   Result := true;
+end;
+
+{Extracts the Database Connect string from a Create Database Statement}
+
+function ExtractConnectString(const CreateSQL: AnsiString;
+  var ConnectString: AnsiString): boolean;
+var RegexObj: TRegExpr;
+begin
+  RegexObj := TRegExpr.Create;
+  try
+    {extact database file spec}
+    RegexObj.ModifierG := false; {turn off greedy matches}
+    RegexObj.ModifierI := true; {case insensitive match}
+    RegexObj.Expression := '^ *CREATE +(DATABASE|SCHEMA) +''(.*)''';
+    Result := RegexObj.Exec(CreateSQL);
+    if Result then
+      ConnectString := system.copy(CreateSQL,RegexObj.MatchPos[2],RegexObj.MatchLen[2]);
+  finally
+    RegexObj.Free;
+  end;
 end;
 
 {Format an SQL Identifier according to SQL Dialect with encapsulation if necessary}

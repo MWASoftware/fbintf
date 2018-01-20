@@ -3,31 +3,31 @@
   <ProjectSession>
     <Version Value="10"/>
     <BuildModes Active="Default"/>
-    <Units Count="92">
+    <Units Count="93">
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <TopLine Value="75"/>
         <CursorPos X="16" Y="85"/>
-        <UsageCount Value="112"/>
+        <UsageCount Value="115"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="TestManager.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="145"/>
-        <CursorPos X="24" Y="164"/>
-        <UsageCount Value="112"/>
+        <TopLine Value="492"/>
+        <CursorPos X="3" Y="495"/>
+        <UsageCount Value="115"/>
       </Unit1>
       <Unit2>
         <Filename Value="Test1.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="95"/>
-        <CursorPos Y="132"/>
-        <UsageCount Value="112"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="74"/>
+        <CursorPos X="26" Y="93"/>
+        <UsageCount Value="115"/>
+        <Loaded Value="True"/>
       </Unit2>
       <Unit3>
         <Filename Value="test2.pas"/>
@@ -35,7 +35,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="25"/>
         <CursorPos X="26" Y="51"/>
-        <UsageCount Value="112"/>
+        <UsageCount Value="115"/>
       </Unit3>
       <Unit4>
         <Filename Value="Test3.pas"/>
@@ -43,7 +43,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="78"/>
         <CursorPos X="71" Y="109"/>
-        <UsageCount Value="112"/>
+        <UsageCount Value="115"/>
       </Unit4>
       <Unit5>
         <Filename Value="Test4.pas"/>
@@ -51,14 +51,14 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="104"/>
         <CursorPos Y="119"/>
-        <UsageCount Value="112"/>
+        <UsageCount Value="115"/>
       </Unit5>
       <Unit6>
         <Filename Value="Test5.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="111"/>
-        <UsageCount Value="112"/>
+        <UsageCount Value="115"/>
       </Unit6>
       <Unit7>
         <Filename Value="Test6.pas"/>
@@ -66,13 +66,13 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="134"/>
         <CursorPos X="11" Y="161"/>
-        <UsageCount Value="112"/>
+        <UsageCount Value="115"/>
       </Unit7>
       <Unit8>
         <Filename Value="Test7.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="112"/>
+        <UsageCount Value="115"/>
       </Unit8>
       <Unit9>
         <Filename Value="Test8.pas"/>
@@ -80,7 +80,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="70"/>
         <CursorPos X="96" Y="67"/>
-        <UsageCount Value="112"/>
+        <UsageCount Value="115"/>
       </Unit9>
       <Unit10>
         <Filename Value="Test9.pas"/>
@@ -88,7 +88,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="41"/>
         <CursorPos X="109" Y="44"/>
-        <UsageCount Value="112"/>
+        <UsageCount Value="115"/>
       </Unit10>
       <Unit11>
         <Filename Value="Test10.pas"/>
@@ -96,7 +96,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="86"/>
         <CursorPos X="34" Y="111"/>
-        <UsageCount Value="112"/>
+        <UsageCount Value="115"/>
       </Unit11>
       <Unit12>
         <Filename Value="Test11.pas"/>
@@ -104,7 +104,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="70"/>
         <CursorPos Y="70"/>
-        <UsageCount Value="112"/>
+        <UsageCount Value="115"/>
       </Unit12>
       <Unit13>
         <Filename Value="Test12.pas"/>
@@ -112,7 +112,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="102"/>
         <CursorPos X="54" Y="131"/>
-        <UsageCount Value="112"/>
+        <UsageCount Value="115"/>
       </Unit13>
       <Unit14>
         <Filename Value="Test13.pas"/>
@@ -127,7 +127,7 @@
           <TopLine Value="63"/>
           <CursorPos X="40" Y="102"/>
         </ExtraEditor1>
-        <UsageCount Value="112"/>
+        <UsageCount Value="115"/>
       </Unit14>
       <Unit15>
         <Filename Value="Test14.pas"/>
@@ -141,7 +141,7 @@
           <EditorIndex Value="-1"/>
           <CursorPos Y="4"/>
         </ExtraEditor1>
-        <UsageCount Value="112"/>
+        <UsageCount Value="115"/>
       </Unit15>
       <Unit16>
         <Filename Value="Test15.pas"/>
@@ -154,7 +154,7 @@
           <WindowIndex Value="1"/>
           <TopLine Value="91"/>
         </ExtraEditor1>
-        <UsageCount Value="112"/>
+        <UsageCount Value="115"/>
       </Unit16>
       <Unit17>
         <Filename Value="Test16.pas"/>
@@ -170,12 +170,12 @@
           <TopLine Value="110"/>
           <CursorPos Y="131"/>
         </ExtraEditor1>
-        <UsageCount Value="112"/>
+        <UsageCount Value="115"/>
       </Unit17>
       <Unit18>
         <Filename Value="Makefile.fpc"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="112"/>
+        <UsageCount Value="115"/>
       </Unit18>
       <Unit19>
         <Filename Value="../client/3.0/FB30ClientAPI.pas"/>
@@ -193,16 +193,17 @@
       <Unit21>
         <Filename Value="../client/FBOutputBlock.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="1125"/>
-        <CursorPos Y="1140"/>
+        <TopLine Value="786"/>
+        <CursorPos X="38" Y="796"/>
         <UsageCount Value="20"/>
       </Unit21>
       <Unit22>
         <Filename Value="../client/FBAttachment.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="548"/>
-        <CursorPos X="30" Y="555"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="332"/>
+        <CursorPos X="79" Y="341"/>
         <UsageCount Value="20"/>
+        <Loaded Value="True"/>
       </Unit22>
       <Unit23>
         <Filename Value="../client/FBClientAPI.pas"/>
@@ -213,10 +214,12 @@
       </Unit23>
       <Unit24>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="79"/>
-        <CursorPos X="82" Y="97"/>
-        <UsageCount Value="11"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="160"/>
+        <CursorPos Y="174"/>
+        <UsageCount Value="12"/>
+        <Loaded Value="True"/>
       </Unit24>
       <Unit25>
         <Filename Value="../client/FBSQLData.pas"/>
@@ -242,10 +245,11 @@
       </Unit27>
       <Unit28>
         <Filename Value="../IB.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="898"/>
-        <CursorPos Y="917"/>
-        <UsageCount Value="49"/>
+        <EditorIndex Value="9"/>
+        <TopLine Value="840"/>
+        <CursorPos X="43" Y="914"/>
+        <UsageCount Value="50"/>
+        <Loaded Value="True"/>
       </Unit28>
       <Unit29>
         <Filename Value="runtest.sh"/>
@@ -317,10 +321,11 @@
       </Unit38>
       <Unit39>
         <Filename Value="../client/2.5/FB25Attachment.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="63"/>
-        <CursorPos X="83" Y="93"/>
+        <EditorIndex Value="7"/>
+        <TopLine Value="144"/>
+        <CursorPos Y="161"/>
         <UsageCount Value="11"/>
+        <Loaded Value="True"/>
       </Unit39>
       <Unit40>
         <Filename Value="../../ibx/runtime/IBEvents.pas"/>
@@ -346,10 +351,11 @@
       </Unit42>
       <Unit43>
         <Filename Value="../client/3.0/FB30Array.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="268"/>
+        <EditorIndex Value="6"/>
+        <TopLine Value="267"/>
         <CursorPos X="1024" Y="306"/>
         <UsageCount Value="11"/>
+        <Loaded Value="True"/>
       </Unit43>
       <Unit44>
         <Filename Value="../client/2.5/FB25ClientAPI.pas"/>
@@ -374,10 +380,11 @@
       </Unit46>
       <Unit47>
         <Filename Value="../../ibx/runtime/IBDatabase.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="441"/>
-        <CursorPos X="3" Y="412"/>
-        <UsageCount Value="9"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="445"/>
+        <CursorPos X="39" Y="479"/>
+        <UsageCount Value="11"/>
+        <Loaded Value="True"/>
       </Unit47>
       <Unit48>
         <Filename Value="../include/consts_pub.inc"/>
@@ -567,10 +574,11 @@
       </Unit73>
       <Unit74>
         <Filename Value="../IBUtils.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="360"/>
-        <CursorPos X="94" Y="399"/>
-        <UsageCount Value="12"/>
+        <EditorIndex Value="8"/>
+        <TopLine Value="248"/>
+        <CursorPos X="13" Y="271"/>
+        <UsageCount Value="13"/>
+        <Loaded Value="True"/>
       </Unit74>
       <Unit75>
         <Filename Value="/tmp/fbintf/client/FBSQLData.pas"/>
@@ -690,11 +698,140 @@
         <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit91>
+      <Unit92>
+        <Filename Value="../../ibx/runtime/ibxscript.pas"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="821"/>
+        <CursorPos X="87" Y="822"/>
+        <UsageCount Value="11"/>
+        <Loaded Value="True"/>
+      </Unit92>
     </Units>
-    <JumpHistory HistoryIndex="-1"/>
+    <JumpHistory Count="30" HistoryIndex="29">
+      <Position1>
+        <Filename Value="../IBUtils.pas"/>
+        <Caret Line="372" Column="10" TopLine="360"/>
+      </Position1>
+      <Position2>
+        <Filename Value="../IBUtils.pas"/>
+        <Caret Line="379" TopLine="360"/>
+      </Position2>
+      <Position3>
+        <Filename Value="../IBUtils.pas"/>
+        <Caret Line="381" TopLine="360"/>
+      </Position3>
+      <Position4>
+        <Filename Value="../IBUtils.pas"/>
+        <Caret Line="382" TopLine="360"/>
+      </Position4>
+      <Position5>
+        <Filename Value="../IBUtils.pas"/>
+        <Caret Line="383" TopLine="360"/>
+      </Position5>
+      <Position6>
+        <Filename Value="../IBUtils.pas"/>
+        <Caret Line="384" TopLine="360"/>
+      </Position6>
+      <Position7>
+        <Filename Value="../IBUtils.pas"/>
+        <Caret Line="385" TopLine="360"/>
+      </Position7>
+      <Position8>
+        <Filename Value="../IBUtils.pas"/>
+        <Caret Line="386" TopLine="360"/>
+      </Position8>
+      <Position9>
+        <Filename Value="../IBUtils.pas"/>
+        <Caret Line="388" TopLine="360"/>
+      </Position9>
+      <Position10>
+        <Filename Value="../IBUtils.pas"/>
+        <Caret Line="390" TopLine="360"/>
+      </Position10>
+      <Position11>
+        <Filename Value="../client/FBAttachment.pas"/>
+        <Caret Line="124" Column="3" TopLine="94"/>
+      </Position11>
+      <Position12>
+        <Filename Value="Test1.pas"/>
+        <Caret Line="87" TopLine="67"/>
+      </Position12>
+      <Position13>
+        <Filename Value="../../ibx/runtime/IBDatabase.pas"/>
+        <Caret Line="440" Column="35" TopLine="428"/>
+      </Position13>
+      <Position14>
+        <Filename Value="../../ibx/runtime/IBDatabase.pas"/>
+        <Caret Line="479" Column="46" TopLine="447"/>
+      </Position14>
+      <Position15>
+        <Filename Value="../../ibx/runtime/ibxscript.pas"/>
+        <Caret TopLine="16"/>
+      </Position15>
+      <Position16>
+        <Filename Value="../../ibx/runtime/ibxscript.pas"/>
+        <Caret Line="307" Column="25" TopLine="281"/>
+      </Position16>
+      <Position17>
+        <Filename Value="../client/FBAttachment.pas"/>
+        <Caret Line="75" Column="39" TopLine="49"/>
+      </Position17>
+      <Position18>
+        <Filename Value="../client/FBAttachment.pas"/>
+        <Caret Line="334" Column="3" TopLine="332"/>
+      </Position18>
+      <Position19>
+        <Filename Value="../client/FBAttachment.pas"/>
+        <Caret Line="75" Column="15" TopLine="49"/>
+      </Position19>
+      <Position20>
+        <Filename Value="../IBUtils.pas"/>
+        <Caret Line="267" Column="28" TopLine="250"/>
+      </Position20>
+      <Position21>
+        <Filename Value="../client/FBAttachment.pas"/>
+        <Caret Line="346" Column="28" TopLine="332"/>
+      </Position21>
+      <Position22>
+        <Filename Value="../client/2.5/FB25Attachment.pas"/>
+        <Caret Line="55" Column="27" TopLine="46"/>
+      </Position22>
+      <Position23>
+        <Filename Value="../client/3.0/FB30Attachment.pas"/>
+        <Caret Line="177" TopLine="160"/>
+      </Position23>
+      <Position24>
+        <Filename Value="Test1.pas"/>
+        <Caret Line="93" Column="23" TopLine="80"/>
+      </Position24>
+      <Position25>
+        <Filename Value="../IB.pas"/>
+        <Caret Line="914" Column="43" TopLine="840"/>
+      </Position25>
+      <Position26>
+        <Filename Value="../client/FBAttachment.pas"/>
+        <Caret Line="342" TopLine="332"/>
+      </Position26>
+      <Position27>
+        <Filename Value="../client/FBAttachment.pas"/>
+        <Caret Line="344" TopLine="332"/>
+      </Position27>
+      <Position28>
+        <Filename Value="../client/FBAttachment.pas"/>
+        <Caret Line="345" TopLine="332"/>
+      </Position28>
+      <Position29>
+        <Filename Value="../client/FBAttachment.pas"/>
+        <Caret Line="354" TopLine="332"/>
+      </Position29>
+      <Position30>
+        <Filename Value="../client/FBAttachment.pas"/>
+        <Caret Line="356" TopLine="332"/>
+      </Position30>
+    </JumpHistory>
   </ProjectSession>
   <Debugging>
-    <BreakPoints Count="1">
+    <BreakPoints Count="2">
       <Item1>
         <Kind Value="bpkSource"/>
         <WatchScope Value="wpsLocal"/>
@@ -702,6 +839,13 @@
         <Source Value="Test6.pas"/>
         <Line Value="199"/>
       </Item1>
+      <Item2>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="../client/3.0/FB30Attachment.pas"/>
+        <Line Value="174"/>
+      </Item2>
     </BreakPoints>
   </Debugging>
 </CONFIG>
