@@ -33,13 +33,19 @@
 
 unit IBUtils;
 {$IFDEF MSWINDOWS} 
-{$DEFINE WINDOWS} 
+{$DEFINE WINDOWS}
+{$IF CompilerVersion >= 28}
+{Delphi XE7 onwards}}
+{$define HASREQEX}
+{$IFEND}
 {$ENDIF}
 
 {$IFDEF FPC}
 {$Mode Delphi}
 {$codepage UTF8}
+{$define HASREQEX}
 {$ENDIF}
+
 
 interface
 
@@ -268,7 +274,9 @@ function ExtractConnectString(const CreateSQL: AnsiString; var ConnectString: An
 
 implementation
 
+{$IFDEF HASREQEX}
 uses RegExpr;
+{$ENDIF}
 
 function Max(n1, n2: Integer): Integer;
 begin
@@ -371,6 +379,7 @@ end;
 
 {Extracts the Database Connect string from a Create Database Statement}
 
+{$IFDEF HASREQEX}
 function ExtractConnectString(const CreateSQL: AnsiString;
   var ConnectString: AnsiString): boolean;
 var RegexObj: TRegExpr;
@@ -388,6 +397,27 @@ begin
     RegexObj.Free;
   end;
 end;
+{$ELSE}
+{cruder version of above for old versions of Delphi}
+function ExtractConnectString(const CreateSQL: AnsiString;
+  var ConnectString: AnsiString): boolean;
+var i: integer;
+begin
+  Result := false;
+  i := Pos('''',CreateSQL);
+  if i > 0 then
+  begin
+    ConnectString := CreateSQL;
+    delete(ConnectString,1,i);
+    i := Pos('''',ConnectString);
+    if i > 0 then
+    begin
+      delete(ConnectString,i,Length(ConnectString)-i+1);
+      Result := true;
+    end;
+  end;
+end;
+{$ENDIF}
 
 {Format an SQL Identifier according to SQL Dialect with encapsulation if necessary}
 

@@ -30,7 +30,7 @@ FBINTF Change Log  version                                  (1.1-1) Sat, 20 Jan 
    are now extracted and used to populate a DPB made available via IAttachment.getDPB.
    It is now possible to use IAttachment disconnect/connect to reconnect to
    a database for which the initial connection was established by a create
-   database sql statement.
+   database sql statement. Available in FPC, and in Delphi versions from XE7 onwards.
 
 8. Update Test 1 to test 5, 6 and 7 above.
 

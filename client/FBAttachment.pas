@@ -27,11 +27,16 @@
 unit FBAttachment;
 {$IFDEF MSWINDOWS} 
 {$DEFINE WINDOWS} 
+{$IF CompilerVersion >= 28}
+{Delphi XE7 onwards}}
+{$define HASREQEX}
+{$IFEND}
 {$ENDIF}
 
 {$IFDEF FPC}
 {$mode delphi}
 {$interfaces COM}
+{$define HASREQEX}
 {$ENDIF}
 
 interface
@@ -141,7 +146,7 @@ public
 
 implementation
 
-uses FBMessages, FBTransaction, RegExpr;
+uses FBMessages, FBTransaction {$IFDEF HASREQEX}, RegExpr{$ENDIF};
 
 const
   CharSetMap: array [0..69] of TCharsetMap = (
@@ -329,6 +334,7 @@ begin
   end;
 end;
 
+{$IFDEF HASREQEX}
 procedure TFBAttachment.DPBFromCreateSQL(CreateSQL: AnsiString);
 var RegexObj: TRegExpr;
 begin
@@ -357,6 +363,10 @@ begin
     DPB.Add(isc_dpb_lc_ctype).AsString := GetCharSetName(FCharSetID);
   DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(FSQLDialect);
 end;
+{$ELSE}
+procedure TFBAttachment.DPBFromCreateSQL(CreateSQL: AnsiString);
+end;
+{$ENDIF}
 
 procedure TFBAttachment.SetParameters(SQLParams: ISQLParams;
   params: array of const);
