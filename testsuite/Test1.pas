@@ -1,6 +1,10 @@
 unit Test1;
 {$IFDEF MSWINDOWS} 
 {$DEFINE WINDOWS} 
+{$IF CompilerVersion >= 28}
+{Delphi XE7 onwards}}
+{$define HASREQEX}
+{$IFEND}
 {$ENDIF}
 
 {Create and Drop a Database}
@@ -17,6 +21,7 @@ unit Test1;
 {$IFDEF FPC}
 {$mode delphi}
 {$codepage utf8}
+{$define HASREQEX}
 {$ENDIF}
 
 interface
@@ -92,9 +97,11 @@ begin
   writeln(outfile,'DB ODS Minor Version = ',Attachment.GetODSMinorVersion);
   PrintDPB(Attachment.getDPB);
 
+  {$IFDEF HASREQEX}
   {Demonstrate reconnect when database created with SQL Statement}
   Attachment.Disconnect;
   Attachment.Connect;
+  {$ENDIF}
 
   writeln(OutFile,'Dropping Database');
   if Attachment <> nil then

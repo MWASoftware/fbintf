@@ -365,6 +365,11 @@ begin
 end;
 {$ELSE}
 procedure TFBAttachment.DPBFromCreateSQL(CreateSQL: AnsiString);
+begin
+  FDPB := FFirebirdAPI.AllocateDPB;
+  if FCharSetID > 0 then
+    DPB.Add(isc_dpb_lc_ctype).AsString := GetCharSetName(FCharSetID);
+  DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(FSQLDialect);
 end;
 {$ENDIF}
 

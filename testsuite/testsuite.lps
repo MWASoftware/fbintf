@@ -23,9 +23,10 @@
       <Unit2>
         <Filename Value="Test1.pas"/>
         <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="113"/>
-        <CursorPos Y="135"/>
+        <TopLine Value="94"/>
+        <CursorPos X="11" Y="104"/>
         <UsageCount Value="116"/>
         <Loaded Value="True"/>
       </Unit2>
@@ -201,8 +202,7 @@
       <Unit22>
         <Filename Value="../client/FBAttachment.pas"/>
         <EditorIndex Value="4"/>
-        <TopLine Value="334"/>
-        <CursorPos X="5" Y="368"/>
+        <CursorPos Y="34"/>
         <UsageCount Value="21"/>
         <Loaded Value="True"/>
       </Unit22>
@@ -425,7 +425,6 @@
       </Unit52>
       <Unit53>
         <Filename Value="../changelog"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="8"/>
         <CursorPos X="45" Y="33"/>
         <UsageCount Value="24"/>
