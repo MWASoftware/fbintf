@@ -11,8 +11,26 @@ No such file or directory
 Creating a Database using an SQL Statement
 Database ID = 4 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = mint18-FB3
 SQL Dialect = 3
+DB Connect String = localhost:/tmp/fbintf-testsuite/testsuite1.fdb
+DB Charset ID = 0
+DB SQL Dialect = 3
+DB Remote Protocol = TCPv4
+DB ODS Major Version = 12
+DB ODS Minor Version = 0
+DPB
+Count = 3
+28 = SYSDBA
+29 = masterkey
+65 = 3
+
 Dropping Database
 Creating a Database with a DPD
+DB Connect String = localhost:/tmp/fbintf-testsuite/testsuite1.fdb
+DB Charset ID = 4
+DB SQL Dialect = 3
+DB Remote Protocol = TCPv4
+DB ODS Major Version = 12
+DB ODS Minor Version = 0
 Dropping Database
 DPB
 Count = 4
@@ -25,6 +43,12 @@ Creating a Database with a DPD
 Database ID = 4 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = mint18-FB3
 ODS major = 12
 ODS minor = 0
+DB Connect String = localhost:/tmp/fbintf-testsuite/testsuite1.fdb
+DB Charset ID = 4
+DB SQL Dialect = 3
+DB Remote Protocol = TCPv4
+DB ODS Major Version = 12
+DB ODS Minor Version = 0
 RDB$DESCRIPTION = 
 RDB$RELATION_ID = 128
 RDB$SECURITY_CLASS = SQL$363
@@ -285,9 +309,9 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory =  1.959863200000000000E+0007
+Current memory =  1.960264000000000000E+0007
 Delta memory =  2.616000000000000000E+0003
-Max memory =  1.966220800000000000E+0007
+Max memory =  1.966621600000000000E+0007
 Elapsed time= 0.000 sec
 Cpu = 0.000 sec
 Buffers =  2.048000000000000000E+0003
@@ -2218,16 +2242,16 @@ ODS major = 12
 Page Size = 8192
 Version = 1: LI-V6.3.1.32609 Firebird 3.0
 Database is Read/Write
-Server Memory = 18908760
+Server Memory = 19122232
 Forced Writes  = 1
-Max Memory  = 18945880
+Max Memory  = 19230544
 Num Buffers  = 2048
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
-Fetches  = 491
-Writes  = 4
-Reads  = 51
-Page Writes  = 2
+Fetches  = 541
+Writes  = 6
+Reads  = 53
+Page Writes  = 3
 Record Version Removals Operation Counts
 
 Deletes Operation Counts
@@ -2242,9 +2266,9 @@ Indexed Reads Count Operation Counts
 Table ID = 4
 Count = 28
 Table ID = 6
-Count = 5
+Count = 15
 Table ID = 9
-Count = 1
+Count = 2
 Table ID = 11
 Count = 1
 Table ID = 12
