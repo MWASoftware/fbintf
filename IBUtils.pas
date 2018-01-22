@@ -34,7 +34,7 @@
 unit IBUtils;
 {$IFDEF MSWINDOWS} 
 {$DEFINE WINDOWS}
-{$IF CompilerVersion >= 28}
+{$IF defined(CompilerVersion) and (CompilerVersion >= 28)}
 {Delphi XE7 onwards}}
 {$define HASREQEX}
 {$IFEND}
