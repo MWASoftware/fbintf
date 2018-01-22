@@ -99,8 +99,12 @@ begin
 
   {$IFDEF HASREQEX}
   {Demonstrate reconnect when database created with SQL Statement}
-  Attachment.Disconnect;
-  Attachment.Connect;
+  try
+    Attachment.Disconnect;
+    Attachment.Connect;
+  except on E:Exception do
+    writeln(OutFile,'Error reconnecting to Database: ',E.Message);
+  end;
   {$ENDIF}
 
   writeln(OutFile,'Dropping Database');
