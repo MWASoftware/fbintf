@@ -394,7 +394,8 @@ begin
   end;
 end;
 {$ELSE}
-{cruder version of above for old versions of Delphi}
+{cruder version of above for Delphi. Older versions lack regular expression
+ handling.}
 function ExtractConnectString(const CreateSQL: AnsiString;
   var ConnectString: AnsiString): boolean;
 var i: integer;
