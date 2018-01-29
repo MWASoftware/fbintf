@@ -1,4 +1,4 @@
-FBINTF Change Log  version                                        (1.1-1) Wed, 24 Jan 2018 10:54:08 +0000
+FBINTF Change Log  version                                         (1.1-1) Mon, 29 Jan 2018 15:17:49 +0000
 
 1. IBUtils.QuoteIdentifierIfNeeded: Add check for space character.
 
@@ -35,6 +35,11 @@ FBINTF Change Log  version                                        (1.1-1) Wed, 2
 8. Update Test 1 to test 5, 6 and 7 above.
 
 9. IBUtils code tidy up.
+
+10. Parameter Block interfaces "find" method. As documented, this should have
+   returned a nil interface when the item could not be found. Instead, an empty
+   interface item was returned. "Find" now works as documented and will return
+   a nil interface if the item cannot be found.
 
 FBINTF Change Log  version                             (1.1-0) Sun, 07 Jan 2018 15:20:02 +0000
 
