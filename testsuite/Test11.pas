@@ -196,7 +196,8 @@ begin
         QueryResultsItem := Results.Find(isc_info_svc_to_eof);
         if QueryResultsItem <> nil then
           bytesWritten := QueryResultsItem.CopyTo(BakFile,0);
-      until (bytesWritten = 0) or not WriteServiceQueryResult(Results);
+      until ((bytesWritten = 0) and (Results.Find(isc_info_svc_timeout) = nil))
+         or not WriteServiceQueryResult(Results);
       writeln(OutFile,'Local Backup Complete');
     finally
       BakFile.Free;

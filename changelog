@@ -36,6 +36,11 @@ FBINTF Change Log  version                                        (1.1-1) Wed, 2
 
 9. IBUtils code tidy up.
 
+10. Parameter Block interfaces "find" method. As documented, this should have
+   returned a nil interface when the item could not be found. Instead, an empty
+   interface item was returned. "Find" now works as documented and will return
+   a nil interface if the item cannot be found.
+
 FBINTF Change Log  version                             (1.1-0) Sun, 07 Jan 2018 15:20:02 +0000
 
 1. Fix issues with setting SQL Param values using SetAsString with Numeric types.

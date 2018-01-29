@@ -262,6 +262,17 @@ const
   isc_spb_trusted_auth	= 111;
   isc_spb_process_name	= 112;
   isc_spb_trusted_role	= 113;
+  isc_spb_verbint                   = 114;
+  isc_spb_auth_block                = 115;
+  isc_spb_auth_plugin_name          = 116;
+  isc_spb_auth_plugin_list          = 117;
+  isc_spb_utf8_filename		    = 118;
+  isc_spb_client_version            = 119;
+  isc_spb_remote_protocol           = 120;
+  isc_spb_host_name                 = 121;
+  isc_spb_os_user                   = 122;
+  isc_spb_config		    = 123;
+  isc_spb_expected_db		    = 124;
 
   isc_spb_connect_timeout	= isc_dpb_connect_timeout;
   isc_spb_dummy_packet_interval	= isc_dpb_dummy_packet_interval;

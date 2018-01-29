@@ -322,7 +322,10 @@ function TCustomOutputBlock<_TItem,_IItem>.find(ItemType: byte): _IItem;
 var P: POutputBlockItemData;
 begin
   P := inherited Find(ItemType);
-  Result := _TItem.Create(self,P)
+  if P = nil then
+    Result := nil
+  else
+    Result := _TItem.Create(self,P)
 end;
 
 {$ELSE}
@@ -344,9 +347,14 @@ var P: POutputBlockItemData;
     Obj: TOutputBlockItem;
 begin
   P := inherited Find(ItemType);
-  Obj := TOutputBlockItemClass(_TItem).Create(self.Owner,P);
-  if Obj.QueryInterface(GetTypeData(TypeInfo(_IItem))^.Guid,Result) <> 0 then
-    IBError(ibxeInterfaceNotSupported,[GuidToString(GetTypeData(TypeInfo(_IItem))^.Guid)]);
+  if P = nil then
+    Result := nil
+  else
+  begin
+    Obj := TOutputBlockItemClass(_TItem).Create(self.Owner,P);
+    if Obj.QueryInterface(GetTypeData(TypeInfo(_IItem))^.Guid,Result) <> 0 then
+      IBError(ibxeInterfaceNotSupported,[GuidToString(GetTypeData(TypeInfo(_IItem))^.Guid)]);
+  end;
 end;
 
 { TCustomOutputBlock }
