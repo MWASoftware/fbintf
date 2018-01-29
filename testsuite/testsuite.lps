@@ -100,9 +100,10 @@
       <Unit12>
         <Filename Value="Test11.pas"/>
         <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <TopLine Value="172"/>
-        <CursorPos Y="199"/>
+        <CursorPos X="71" Y="199"/>
         <UsageCount Value="122"/>
         <Loaded Value="True"/>
       </Unit12>
@@ -420,10 +421,9 @@
       </Unit52>
       <Unit53>
         <Filename Value="../changelog"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
         <TopLine Value="7"/>
-        <CursorPos X="48" Y="42"/>
+        <CursorPos X="49" Y="42"/>
         <UsageCount Value="24"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
