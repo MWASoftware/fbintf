@@ -40,6 +40,11 @@ procedure TTest9.GetDBInformation(Attachment: IAttachment);
 var DBInfo: IDBInformation;
     DBRequest: IDIRB;
 begin
+  {First check ODS version to avoid information requests supported DB 2.5 and later}
+  DBInfo := Attachment.GetDBInformation([isc_info_ods_version,isc_info_ods_minor_version]);
+  if (DBInfo.Count > 1) and (DBInfo[0].AsInteger > 11) or
+     ((DBInfo[0].AsInteger = 11) and (DBInfo[1].AsInteger > 1)) then
+  begin
     WriteDBInfo(Attachment.GetDBInformation(isc_info_db_id));
     DBInfo := Attachment.GetDBInformation([isc_info_allocation,isc_info_base_level,
                               isc_info_implementation,isc_info_no_reserve,isc_info_ods_minor_version,
@@ -69,6 +74,33 @@ begin
      each run and you will only get false positives in the log}
 //    DBRequest.Add(fb_info_page_contents).AsInteger := 100;
     WriteDBInfo(Attachment.GetDBInformation(DBRequest));
+  end
+  else
+  begin
+    WriteDBInfo(Attachment.GetDBInformation(isc_info_db_id));
+    DBInfo := Attachment.GetDBInformation([isc_info_allocation,isc_info_base_level,
+                              isc_info_implementation,isc_info_no_reserve,isc_info_ods_minor_version,
+                              isc_info_ods_version,isc_info_page_size,isc_info_version,isc_info_db_read_only]);
+    WriteDBInfo(DBInfo);
+
+    DBInfo := Attachment.GetDBInformation([isc_info_current_memory, isc_info_forced_writes,
+                              isc_info_max_memory, isc_info_num_buffers, isc_info_sweep_interval,
+                              isc_info_user_names]);
+    WriteDBInfo(DBInfo);
+
+    DBInfo := Attachment.GetDBInformation([isc_info_fetches,isc_info_marks,
+                              isc_info_reads, isc_info_writes]);
+    WriteDBInfo(DBInfo);
+
+    DBInfo := Attachment.GetDBInformation([isc_info_backout_count, isc_info_delete_count,
+                              isc_info_expunge_count,isc_info_insert_count, isc_info_purge_count,
+                              isc_info_read_idx_count, isc_info_read_seq_count, isc_info_update_count]);
+    WriteDBInfo(DBInfo);
+
+    DBRequest := Attachment.AllocateDIRB;
+    DBRequest.Add(isc_info_page_size);
+    WriteDBInfo(Attachment.GetDBInformation(DBRequest));
+  end;
 end;
 
 function TTest9.TestTitle: AnsiString;
