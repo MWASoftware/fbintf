@@ -55,6 +55,8 @@ type
     constructor CreateDatabase(sql: AnsiString; aSQLDialect: integer;
       RaiseExceptionOnError: boolean); overload;
     destructor Destroy; override;
+    function GetDBInfo(ReqBuffer: PByte; ReqBufLen: integer): IDBInformation;
+      override;
     property AttachmentIntf: Firebird.IAttachment read FAttachmentIntf;
 
   public
@@ -93,8 +95,6 @@ type
     {Database Information}
     function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IBlobMetaData;
     function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IArrayMetaData;
-    function GetDBInformation(Requests: array of byte): IDBInformation; overload; override;
-    function GetDBInformation(Request: byte): IDBInformation; overload; override;
   end;
 
 implementation
@@ -181,6 +181,17 @@ begin
   inherited Destroy;
   if assigned(FAttachmentIntf) then
     FAttachmentIntf.release;
+end;
+
+function TFB30Attachment.GetDBInfo(ReqBuffer: PByte; ReqBufLen: integer): IDBInformation;
+begin
+  Result := TDBInformation.Create;
+  with Firebird30ClientAPI, Result as TDBInformation do
+  begin
+    FAttachmentIntf.getInfo(StatusIntf, ReqBufLen, BytePtr(ReqBuffer),
+                               getBufSize, BytePtr(Buffer));
+      Check4DataBaseError;
+  end
 end;
 
 procedure TFB30Attachment.Connect;
@@ -358,47 +369,6 @@ function TFB30Attachment.GetArrayMetaData(Transaction: ITransaction; tableName,
 begin
   CheckHandle;
   Result := TFB30ArrayMetaData.Create(self,Transaction as TFB30Transaction,tableName,columnName);
-end;
-
-function TFB30Attachment.GetDBInformation(Requests: array of byte
-  ): IDBInformation;
-var ReqBuffer: PByte;
-    i: integer;
-begin
-  CheckHandle;
-  if Length(Requests) = 1 then
-    Result := GetDBInformation(Requests[0])
-  else
-  begin
-    Result := TDBInformation.Create;
-    GetMem(ReqBuffer,Length(Requests));
-    try
-      for i := 0 to Length(Requests) - 1 do
-        ReqBuffer[i] := Requests[i];
-
-      with Firebird30ClientAPI, Result as TDBInformation do
-      begin
-        FAttachmentIntf.getInfo(StatusIntf, Length(Requests), BytePtr(ReqBuffer),
-                                 getBufSize, BytePtr(Buffer));
-          Check4DataBaseError;
-      end
-
-    finally
-      FreeMem(ReqBuffer);
-    end;
-  end;
-end;
-
-function TFB30Attachment.GetDBInformation(Request: byte): IDBInformation;
-begin
-  CheckHandle;
-  Result := TDBInformation.Create;
-  with Firebird30ClientAPI, Result as TDBInformation do
-  begin
-    FAttachmentIntf.getInfo(StatusIntf, 1, BytePtr(@Request),
-                           getBufSize, BytePtr(Buffer));
-      Check4DataBaseError;
-  end;
 end;
 
 end.

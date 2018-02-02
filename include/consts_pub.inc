@@ -107,8 +107,19 @@ const
   isc_dpb_org_filename	= 76;
   isc_dpb_utf8_filename	= 77;
   isc_dpb_ext_call_depth	= 78;
-
-  isc_dpb_last_dpb_constant =  isc_dpb_ext_call_depth;
+  isc_dpb_auth_block		= 79;
+  isc_dpb_client_version	= 80;
+  isc_dpb_remote_protocol	= 81;
+  isc_dpb_host_name		= 82;
+  isc_dpb_os_user		= 83;
+  isc_dpb_specific_auth_data	= 84;
+  isc_dpb_auth_plugin_list	= 85;
+  isc_dpb_auth_plugin_name	= 86;
+  isc_dpb_config		= 87;
+  isc_dpb_nolinger		= 88;
+  isc_dpb_reset_icu		= 89;
+  isc_dpb_map_attach            = 90;
+  isc_dpb_last_dpb_constant =  isc_dpb_map_attach;
 
 (**************************************************)
 (* clumplet tags used inside isc_dpb_address_path *)

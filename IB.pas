@@ -773,6 +773,7 @@ type
     function getAsInteger: integer;
     procedure DecodeIDCluster(var ConnectionType: integer; var DBFileName, DBSiteName: AnsiString);
     function getAsBytes: TByteArray;
+    function getAsDateTime: TDateTime;
     procedure DecodeVersionString(var Version: byte; var VersionString: AnsiString);
     function getOperationCounts: TDBOperationCounts;
     procedure DecodeUserNames(UserNames: TStrings);
@@ -798,6 +799,20 @@ type
     property Count: integer read GetCount;
     property Items[index: integer]: IDBInfoItem read getItem; default;
   end;
+
+  {The Database Information Request Block is used to pass requests for
+   database information where at least one item requested has a parameter.
+   At present, this is only fb_info_page_contents which has a single
+   integer parameter.}
+
+  IDIRBItem = interface(IParameterBlockItem)
+    ['{d34a7511-8435-4a24-81a7-5103d218d234}']
+  end;
+
+  IDIRB = interface(IParameterBlock<IDIRBItem>)
+    ['{1010e5ac-0a8f-403b-a302-91625e9d9579}']
+  end;
+
 
   {The Database Parameter Block (DPB).
 
@@ -849,6 +864,7 @@ type
     ['{466e9b67-9def-4807-b3e7-e08a35e7185c}']
     function getDPB: IDPB;
     function AllocateBPB: IBPB;
+    function AllocateDIRB: IDIRB;
     procedure Connect;
     procedure Disconnect(Force: boolean=false);
     function IsConnected: boolean;
@@ -911,6 +927,7 @@ type
     function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IArrayMetaData;
     function GetDBInformation(Requests: array of byte): IDBInformation; overload;
     function GetDBInformation(Request: byte): IDBInformation; overload;
+    function GetDBInformation(Requests: IDIRB): IDBInformation; overload;
     function GetConnectString: AnsiString;
     function GetRemoteProtocol: AnsiString;
     function GetODSMajorVersion: integer;

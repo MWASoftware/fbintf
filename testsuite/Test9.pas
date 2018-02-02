@@ -38,15 +38,18 @@ implementation
 
 procedure TTest9.GetDBInformation(Attachment: IAttachment);
 var DBInfo: IDBInformation;
+    DBRequest: IDIRB;
 begin
-    DBInfo := Attachment.GetDBInformation([isc_info_db_id,isc_info_allocation,isc_info_base_level,
+    WriteDBInfo(Attachment.GetDBInformation(isc_info_db_id));
+    DBInfo := Attachment.GetDBInformation([isc_info_allocation,isc_info_base_level,
                               isc_info_implementation,isc_info_no_reserve,isc_info_ods_minor_version,
-                              isc_info_ods_version,isc_info_page_size,isc_info_version,isc_info_db_read_only]);
+                              isc_info_ods_version,isc_info_page_size,isc_info_version,isc_info_db_read_only,
+                              isc_info_creation_date]);
     WriteDBInfo(DBInfo);
 
     DBInfo := Attachment.GetDBInformation([isc_info_current_memory, isc_info_forced_writes,
                               isc_info_max_memory, isc_info_num_buffers, isc_info_sweep_interval,
-                              isc_info_user_names]);
+                              isc_info_user_names,isc_info_active_tran_count]);
     WriteDBInfo(DBInfo);
 
     DBInfo := Attachment.GetDBInformation([isc_info_fetches,isc_info_marks,
@@ -57,6 +60,15 @@ begin
                               isc_info_expunge_count,isc_info_insert_count, isc_info_purge_count,
                               isc_info_read_idx_count, isc_info_read_seq_count, isc_info_update_count]);
     WriteDBInfo(DBInfo);
+
+    DBRequest := Attachment.AllocateDIRB;
+
+    DBRequest.Add(isc_info_page_size);
+
+    {Only enable during unit test. This result will always be different for
+     each run and you will only get false positives in the log}
+//    DBRequest.Add(fb_info_page_contents).AsInteger := 100;
+    WriteDBInfo(Attachment.GetDBInformation(DBRequest));
 end;
 
 function TTest9.TestTitle: AnsiString;

@@ -46,11 +46,11 @@ uses
 
 const
   DefaultBufferSize = 32000;
-  DBInfoDefaultBufferSize = 512;
+  DBInfoDefaultBufferSize = DefaultBufferSize; {allow for database page}
 
 type
   TItemDataType = (dtString, dtString2, dtByte, dtBytes, dtInteger, dtIntegerFixed, dtnone,
-    dtList,dtSpecial);
+    dtList,dtSpecial, dtDateTime, dtOctetString);
 
   POutputBlockItemData = ^TOutputBlockItemData;
   TOutputBlockItemData = record
@@ -93,6 +93,8 @@ type
     function AddBytesItem(BufPtr: PByte): POutputBlockItemData;
     function AddListItem(BufPtr: PByte): POutputBlockItemData; virtual;
     function AddSpecialItem(BufPtr: PByte): POutputBlockItemData; virtual;
+    function AddDateTimeItem(BufPtr: PByte): POutputBlockItemData;
+    function AddOctetString(BufPtr: PByte): POutputBlockItemData;
   public
     constructor Create(aSize: integer = DefaultBufferSize);
     destructor Destroy; override;
@@ -133,6 +135,7 @@ type
     function getAsString: AnsiString;
     function getAsByte: byte;
     function getAsBytes: TByteArray;
+    function getAsDateTime: TDateTime;
     function CopyTo(stream: TStream; count: integer): integer;
   end;
 
@@ -179,7 +182,7 @@ type
     procedure DecodeVersionString(var Version: byte; var VersionString: AnsiString);
     procedure DecodeUserNames(UserNames: TStrings);
     function getOperationCounts: TDBOperationCounts;
- end;
+  end;
 
   { TDBInformation }
 
@@ -492,6 +495,12 @@ begin
         len := DecodeInteger(FBufPtr+1,2);
       SetString(Result,FBufPtr+3,len,CP_ACP);
     end;
+  dtOctetString:
+    begin
+      with FirebirdClientAPI do
+        len := DecodeInteger(FBufPtr+1,2);
+      SetString(Result,FBufPtr+3,len,CP_NONE);
+    end;
   else
     IBError(ibxeOutputBlockTypeError,[nil]);
   end;
@@ -524,6 +533,22 @@ begin
   else
     IBError(ibxeOutputBlockTypeError,[nil]);
 end;
+
+function TOutputBlockItem.getAsDateTime: TDateTime;
+var aDate: integer;
+    aTime: integer;
+begin
+  with FItemData^, FirebirdClientAPI do
+  if FDataType = dtDateTime then
+  begin
+    aDate := DecodeInteger(FBufPtr+3,4);
+    aTime := DecodeInteger(FBufPtr+7,4);
+    Result := SQLDecodeDate(@aDate) + SQLDecodeTime(@aTime)
+  end
+  else
+    IBError(ibxeOutputBlockTypeError,[nil]);
+end;
+
 
 function TOutputBlockItem.CopyTo(stream: TStream; count: integer): integer;
 var len: integer;
@@ -681,6 +706,34 @@ begin
     FBufPtr := BufPtr;
     FSize := FBuffer + FBufSize - FBufPtr;
     FDataLength := FSize - 1;
+    SetLength(FSubItems,0);
+  end;
+end;
+
+function TOutputBlock.AddDateTimeItem(BufPtr: PByte): POutputBlockItemData;
+begin
+  new(Result);
+  with Result^ do
+  begin
+    FDataType := dtDateTime;
+    FBufPtr := BufPtr;
+    with FirebirdClientAPI do
+      FDataLength := DecodeInteger(FBufPtr+1, 2);
+    FSize := FDataLength + 3;
+    SetLength(FSubItems,0);
+  end;
+end;
+
+function TOutputBlock.AddOctetString(BufPtr: PByte): POutputBlockItemData;
+begin
+  new(Result);
+  with Result^ do
+  begin
+    FDataType := dtOctetString;
+    FBufPtr := BufPtr;
+    with FirebirdClientAPI do
+      FDataLength := DecodeInteger(FBufPtr+1, 2);
+    FSize := FDataLength + 3;
     SetLength(FSubItems,0);
   end;
 end;
@@ -921,12 +974,19 @@ begin
     isc_info_fetches,
     isc_info_marks,
     isc_info_reads,
-    isc_info_writes:
+    isc_info_writes,
+    isc_info_active_tran_count:
       FItems[index] := AddIntegerItem(P);
 
     isc_info_implementation,
     isc_info_base_level:
       FItems[index] := AddBytesItem(P);
+
+    isc_info_creation_date:
+      FItems[index] := AddDateTimeItem(P);
+
+    fb_info_page_contents:
+      FItems[index] := AddOctetString(P);
 
     isc_info_db_id,
     isc_info_version,

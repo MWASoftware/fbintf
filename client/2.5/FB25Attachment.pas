@@ -54,6 +54,7 @@ type
     constructor CreateDatabase(DatabaseName: AnsiString; aDPB: IDPB; RaiseExceptionOnError: boolean); overload;
     constructor CreateDatabase(sql: AnsiString; aSQLDialect: integer;
       RaiseExceptionOnError: boolean); overload;
+    function GetDBInfo(ReqBuffer: PByte; ReqBufLen: integer): IDBInformation; override;
     property Handle: TISC_DB_HANDLE read FHandle;
 
   public
@@ -89,8 +90,6 @@ type
 
     function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IBlobMetaData;
     function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IArrayMetaData;
-    function GetDBInformation(Requests: array of byte): IDBInformation; overload; override;
-    function GetDBInformation(Request: byte): IDBInformation; overload; override;
   end;
 
 implementation
@@ -158,6 +157,16 @@ begin
   GetODSAndConnectionInfo;
   ExtractConnectString(sql,FDatabaseName);
   DPBFromCreateSQL(sql);
+end;
+
+function TFB25Attachment.GetDBInfo(ReqBuffer: PByte; ReqBufLen: integer
+  ): IDBInformation;
+begin
+  Result := TDBInformation.Create;
+  with Firebird25ClientAPI, Result as TDBInformation do
+     if isc_database_info(StatusVector, @(FHandle), ReqBufLen, ReqBuffer,
+                               getBufSize, Buffer) > 0 then
+          IBDataBaseError;
 end;
 
 procedure TFB25Attachment.Connect;
@@ -341,43 +350,6 @@ function TFB25Attachment.GetArrayMetaData(Transaction: ITransaction; tableName,
 begin
   CheckHandle;
   Result := TFB25ArrayMetaData.Create(self,Transaction as TFB25Transaction,tableName,columnName);
-end;
-
-function TFB25Attachment.GetDBInformation(Requests: array of byte
-  ): IDBInformation;
-var ReqBuffer: PByte;
-    i: integer;
-begin
-  CheckHandle;
-  if Length(Requests) = 1 then
-    Result := GetDBInformation(Requests[0])
-  else
-  begin
-    Result := TDBInformation.Create;
-    GetMem(ReqBuffer,Length(Requests));
-    try
-      for i := 0 to Length(Requests) - 1 do
-        ReqBuffer[i] := Requests[i];
-
-      with Firebird25ClientAPI, Result as TDBInformation do
-          if isc_database_info(StatusVector, @(FHandle), Length(Requests), ReqBuffer,
-                                 getBufSize, Buffer) > 0 then
-            IBDataBaseError;
-
-    finally
-      FreeMem(ReqBuffer);
-    end;
-  end;
-end;
-
-function TFB25Attachment.GetDBInformation(Request: byte): IDBInformation;
-begin
-  CheckHandle;
-  Result := TDBInformation.Create;
-  with Firebird25ClientAPI, Result as TDBInformation do
-    if isc_database_info(StatusVector, @(FHandle), 1, @Request,
-                           getBufSize, Buffer) > 0 then
-      IBDataBaseError;
 end;
 
 end.

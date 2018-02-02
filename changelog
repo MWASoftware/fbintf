@@ -1,4 +1,4 @@
-FBINTF Change Log  version                                          (1.1-1) Mon, 29 Jan 2018 15:24:11 +0000
+FBINTF Change Log  version                                           (1.1-1) Fri, 02 Feb 2018 11:30:07 +0000
 
 1. IBUtils.QuoteIdentifierIfNeeded: Add check for space character.
 
@@ -40,6 +40,13 @@ FBINTF Change Log  version                                          (1.1-1) Mon,
    returned a nil interface when the item could not be found. Instead, an empty
    interface item was returned. "Find" now works as documented and will return
    a nil interface if the item cannot be found.
+
+11. DBInformation: support added for isc_info_active_tran_count and isc_info_creation_date.
+
+12. DBInformation: New interfaces: IDIRB and IDIRBItem added to support DB Information
+    requests with additional parameters. This is to enable support for fb_info_page_contents
+    (return of page contents). Response to fb_info_page_contents returned as
+    a string with code page CP_NONE.
 
 FBINTF Change Log  version                             (1.1-0) Sun, 07 Jan 2018 15:20:02 +0000
 
