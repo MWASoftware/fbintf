@@ -15,7 +15,7 @@
       <Unit1>
         <Filename Value="TestManager.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="11"/>
+        <EditorIndex Value="12"/>
         <TopLine Value="559"/>
         <CursorPos X="35" Y="596"/>
         <UsageCount Value="129"/>
@@ -85,7 +85,6 @@
       <Unit10>
         <Filename Value="Test9.pas"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="10"/>
         <TopLine Value="27"/>
         <CursorPos X="62" Y="46"/>
@@ -103,10 +102,12 @@
       <Unit12>
         <Filename Value="Test11.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="11"/>
         <TopLine Value="172"/>
-        <CursorPos X="71" Y="199"/>
+        <CursorPos X="19" Y="201"/>
         <UsageCount Value="129"/>
+        <Loaded Value="True"/>
       </Unit12>
       <Unit13>
         <Filename Value="Test12.pas"/>
@@ -458,7 +459,7 @@
       </Unit56>
       <Unit57>
         <Filename Value="../include/inf_pub.inc"/>
-        <EditorIndex Value="12"/>
+        <EditorIndex Value="13"/>
         <TopLine Value="10"/>
         <CursorPos X="21" Y="31"/>
         <UsageCount Value="11"/>

@@ -198,7 +198,7 @@ begin
           bytesWritten := QueryResultsItem.CopyTo(BakFile,0);
         QueryResultsItem := Results.Find(isc_info_svc_timeout);
         if (QueryResultsItem = nil) or (QueryResultsItem.GetSize = 0) then
-          Break;
+          continue;
       until (bytesWritten = 0) or not WriteServiceQueryResult(Results);
       writeln(OutFile,'Local Backup Complete');
     finally
