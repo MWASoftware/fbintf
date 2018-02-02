@@ -41,6 +41,13 @@ FBINTF Change Log  version                                          (1.1-1) Mon,
    interface item was returned. "Find" now works as documented and will return
    a nil interface if the item cannot be found.
 
+11. DBInformation: support added for isc_info_active_tran_count and isc_info_creation_date.
+
+12. DBInformation: New interfaces: IDIRB and IDIRBItem added to support DB Information
+    requests with additional parameters. This is to enable support for fb_info_page_contents
+    (return of page contents). Response to fb_info_page_contents returned as
+    a string with code page CP_NONE.
+
 FBINTF Change Log  version                             (1.1-0) Sun, 07 Jan 2018 15:20:02 +0000
 
 1. Fix issues with setting SQL Param values using SetAsString with Numeric types.

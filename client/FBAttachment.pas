@@ -71,6 +71,7 @@ type
     procedure CheckHandle; virtual; abstract;
     function GenerateCreateDatabaseSQL(DatabaseName: AnsiString; aDPB: IDPB): AnsiString;
     procedure GetODSAndConnectionInfo;
+    function GetDBInfo(ReqBuffer: PByte; ReqBufLen: integer): IDBInformation; virtual; abstract;
     function IsConnected: boolean; virtual; abstract;
     procedure EndAllTransactions;
     procedure DPBFromCreateSQL(CreateSQL: AnsiString);
@@ -79,6 +80,7 @@ type
     destructor Destroy; override;
     function getDPB: IDPB;
     function AllocateBPB: IBPB;
+    function AllocateDIRB: IDIRB;
     function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction; overload; virtual; abstract;
     function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionCompletion): ITransaction; overload; virtual; abstract;
     procedure Disconnect(Force: boolean=false); virtual; abstract;
@@ -120,8 +122,9 @@ type
     property SQLDialect: integer read FSQLDialect;
     property DPB: IDPB read FDPB;
 public
-  function GetDBInformation(Requests: array of byte): IDBInformation; overload; virtual; abstract;
-  function GetDBInformation(Request: byte): IDBInformation; overload; virtual; abstract;
+  function GetDBInformation(Requests: array of byte): IDBInformation; overload;
+  function GetDBInformation(Request: byte): IDBInformation; overload;
+  function GetDBInformation(Requests: IDIRB): IDBInformation; overload;
   function GetConnectString: AnsiString;
   function GetRemoteProtocol: AnsiString;
   function GetODSMajorVersion: integer;
@@ -433,6 +436,11 @@ begin
   Result := TBPB.Create;
 end;
 
+function TFBAttachment.AllocateDIRB: IDIRB;
+begin
+  Result := TDIRB.Create;
+end;
+
 procedure TFBAttachment.ExecImmediate(TPB: array of byte; sql: AnsiString;
   aSQLDialect: integer);
 begin
@@ -579,6 +587,42 @@ function TFBAttachment.OpenBlob(transaction: ITransaction; Field: ISQLData;
   BPB: IBPB): IBlob;
 begin
   Result := OpenBlob(Transaction,Field.GetBlobMetadata, Field.AsQuad,BPB);
+end;
+
+function TFBAttachment.GetDBInformation(Requests: array of byte
+  ): IDBInformation;
+var ReqBuffer: PByte;
+    i: integer;
+begin
+  CheckHandle;
+  if Length(Requests) = 1 then
+    Result := GetDBInformation(Requests[0])
+  else
+  begin
+    GetMem(ReqBuffer,Length(Requests));
+    try
+      for i := 0 to Length(Requests) - 1 do
+        ReqBuffer[i] := Requests[i];
+
+      Result := GetDBInfo(ReqBuffer,Length(Requests));
+
+    finally
+      FreeMem(ReqBuffer);
+    end;
+  end;
+end;
+
+function TFBAttachment.GetDBInformation(Request: byte): IDBInformation;
+begin
+  CheckHandle;
+  Result := GetDBInfo(@Request,1);
+end;
+
+function TFBAttachment.GetDBInformation(Requests: IDIRB): IDBInformation;
+begin
+  CheckHandle;
+  with Requests as TDIRB do
+    Result := GetDBInfo(getBuffer,getDataLength);
 end;
 
 function TFBAttachment.GetConnectString: AnsiString;

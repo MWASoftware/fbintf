@@ -165,6 +165,17 @@ type
    {$ENDIF}
   end;
 
+  { TDIRBItem }
+
+  TDIRBItem = class(TParamBlockItem,IDIRBItem)
+  public
+   {$IFDEF FPC}
+    procedure IDIRBItem.SetAsInteger = SetAsInteger2;
+   {$ELSE}
+    procedure SetAsInteger(aValue: integer);
+   {$ENDIF}
+  end;
+
   { TCustomParamBlock }
 
 {$IFDEF FPC}
@@ -215,12 +226,22 @@ type
    constructor Create;
   end;
 
+  TDIRB = class (TCustomParamBlock<TDIRBItem,IDIRBItem>, IDIRB);
+
 implementation
 
 uses FBMessages {$IFNDEF FPC} , TypInfo {$ENDIF};
 
 const
   MaxBufferSize = 65535;
+
+{ TDIRBItem }
+{$IFNDEF FPC}
+procedure TDIRBItem.SetAsInteger(aValue: integer);
+begin
+  SetAsInteger2(aValue);
+end;
+{$ENDIF}
 
 { TBPBItem }
 {$IFNDEF FPC}

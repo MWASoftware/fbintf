@@ -582,6 +582,18 @@ begin
      WriteOperationCounts('Update Count',getOperationCounts);
    isc_info_db_SQL_Dialect:
      writeln(OutFile,'SQL Dialect = ',getAsInteger);
+   isc_info_creation_date:
+     writeln(OutFile,'Database Created: ',DateTimeToStr(getAsDateTime));
+   isc_info_active_tran_count:
+     writeln('Active Transaction Count = ',getAsInteger);
+   fb_info_page_contents:
+     begin
+       writeln('Database Page');
+       PrintHexString(getAsString);
+       writeln;
+     end;
+   isc_info_truncated:
+     writeln('Results Truncated');
    else
      writeln(OutFile,'Unknown Response ',getItemType);
   end;
