@@ -585,7 +585,7 @@ begin
    isc_info_creation_date:
      writeln(OutFile,'Database Created: ',DateTimeToStr(getAsDateTime));
    isc_info_active_tran_count:
-     writeln('Active Transaction Count = ',getAsInteger);
+     writeln(OutFile,'Active Transaction Count = ',getAsInteger);
    fb_info_page_contents:
      begin
        writeln('Database Page');
@@ -593,7 +593,7 @@ begin
        writeln;
      end;
    isc_info_truncated:
-     writeln('Results Truncated');
+     writeln(OutFile,'Results Truncated');
    else
      writeln(OutFile,'Unknown Response ',getItemType);
   end;
