@@ -192,6 +192,9 @@ type
     procedure DoParseBuffer; override;
   public
     constructor Create(aSize: integer=DBInfoDefaultBufferSize);
+  {$IFNDEF FPC}
+    function Find(ItemType: byte): IDBInfoItem;
+  {$ENDIF}
   end;
 
   { TServiceQueryResultItem }
@@ -206,6 +209,10 @@ type
     function AddListItem(BufPtr: PByte): POutputBlockItemData; override;
     function AddSpecialItem(BufPtr: PByte): POutputBlockItemData; override;
     procedure DoParseBuffer; override;
+  {$IFNDEF FPC}
+  public
+    function Find(ItemType: byte): IServiceQueryResultItem;
+  {$ENDIF}
   end;
 
 
@@ -1012,6 +1019,15 @@ begin
   end;
 end;
 
+{$IFNDEF FPC}
+function TDBInformation.Find(ItemType: byte): IDBInfoItem;
+begin
+  Result := inherited Find(ItemType);
+  if Result.GetSize = 0 then
+    Result := nil;
+end;
+{$ENDIF}
+
 constructor TDBInformation.Create(aSize: integer);
 begin
   inherited Create(aSize);
@@ -1187,6 +1203,15 @@ begin
     Inc(i);
   end;
 end;
+
+{$IFNDEF FPC}
+function TServiceQueryResults.Find(ItemType: byte): IServiceQueryResultItem;
+begin
+  Result := inherited Find(ItemType);
+  if Result.GetSize = 0 then
+    Result := nil;
+end;
+{$ENDIF}
 
 { TSQLInfoResultsBuffer }
 
