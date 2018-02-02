@@ -351,7 +351,7 @@ var P: POutputBlockItemData;
 begin
   P := inherited Find(ItemType);
   if P = nil then
-    Result := nil
+    Result := Default(_IITEM)
   else
   begin
     Obj := TOutputBlockItemClass(_TItem).Create(self.Owner,P);
@@ -439,7 +439,10 @@ end;
 
 function TOutputBlockItem.getSize: integer;
 begin
-  Result := FItemData^.FDataLength;
+  if FItemData = nil then
+    Result := 0
+  else
+    Result := FItemData^.FDataLength;
 end;
 
 procedure TOutputBlockItem.getRawBytes(var Buffer);

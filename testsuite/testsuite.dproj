@@ -63,6 +63,7 @@
 			<DCCReference Include="Test15.pas"/>
 			<DCCReference Include="Test16.pas"/>
 			<DCCReference Include="TestManager.pas"/>
+			<DCCReference Include="..\client\FBOutputBlock.pas"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>
@@ -88,6 +89,7 @@
 						<Parameters Name="UseLauncher">False</Parameters>
 						<Parameters Name="LoadAllSymbols">True</Parameters>
 						<Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
+						<Parameters Name="RunParams">-t 11</Parameters>
 					</Parameters>
 					<VersionInfo>
 						<VersionInfo Name="IncludeVerInfo">False</VersionInfo>
