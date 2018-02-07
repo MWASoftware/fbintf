@@ -1,4 +1,4 @@
-FBINTF Change Log  version                                           (1.1-1) Fri, 02 Feb 2018 11:30:07 +0000
+FBINTF Change Log  version                                            (1.1-1) Wed, 07 Feb 2018 12:02:05 +0000
 
 1. IBUtils.QuoteIdentifierIfNeeded: Add check for space character.
 
