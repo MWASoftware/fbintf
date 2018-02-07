@@ -49,7 +49,7 @@ begin
     DBInfo := Attachment.GetDBInformation([isc_info_allocation,isc_info_base_level,
                               isc_info_implementation,isc_info_no_reserve,isc_info_ods_minor_version,
                               isc_info_ods_version,isc_info_page_size,isc_info_version,isc_info_db_read_only,
-                              isc_info_creation_date]);
+                              isc_info_creation_date,fb_info_pages_used,fb_info_pages_free]);
     WriteDBInfo(DBInfo);
 
     DBInfo := Attachment.GetDBInformation([isc_info_current_memory, isc_info_forced_writes,

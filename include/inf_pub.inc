@@ -121,8 +121,23 @@ const
 	isc_info_creation_date = 111;
 	isc_info_db_file_size = 112;
 	fb_info_page_contents = 113;
+	fb_info_implementation = 114;
+	fb_info_page_warns = 115;
+	fb_info_record_warns = 116;
+	fb_info_bpage_warns = 117;
+	fb_info_dpage_warns = 118;
+	fb_info_ipage_warns = 119;
+	fb_info_ppage_warns = 120;
+	fb_info_tpage_warns = 121;
+	fb_info_pip_errors = 122;
+	fb_info_pip_warns = 123;
 
-	isc_info_db_last_value  = fb_info_page_contents;  (* Leave this LAST! *)
+	fb_info_pages_used = 124;
+	fb_info_pages_free = 125;
+
+	fb_info_crypt_state = 126;
+
+	isc_info_db_last_value  = fb_info_crypt_state;  (* Leave this LAST! *)
 
 
   isc_info_version	= isc_info_isc_version;

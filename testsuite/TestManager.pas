@@ -592,6 +592,11 @@ begin
        PrintHexString(getAsString);
        writeln;
      end;
+   fb_info_pages_used:
+     writeln(OutFile,'Pages Used = ',getAsInteger);
+   fb_info_pages_free:
+   writeln(OutFile,'Pages Free = ',getAsInteger);
+
    isc_info_truncated:
      writeln(OutFile,'Results Truncated');
    else
