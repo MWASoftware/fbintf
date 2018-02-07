@@ -245,7 +245,8 @@ type
       ibxeCharacterSetExists,
       ibxeUnknownUserCharSet,
       ibxeUninitializedInputParameter,
-      ibxeNegativeGenerator
+      ibxeNegativeGenerator,
+      ibxeServiceUnavailable
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -446,6 +447,7 @@ resourcestring
   SUnknownUserCharSet = 'Unknown user character set "%s"';
   SUninitializedInputParameter = 'SQL Param No. %d (%s) is uninitialised';
   SNegativeGenerator = 'A Generator Increment cannot be negative';
+  SServiceUnavailable = 'Request Service is not available';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -613,7 +615,8 @@ const
     SCharacterSetExists,
     SUnknownUserCharSet,
     SUninitializedInputParameter,
-    SNegativeGenerator
+    SNegativeGenerator,
+    SServiceUnavailable
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;

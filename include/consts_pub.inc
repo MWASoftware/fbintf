@@ -316,7 +316,8 @@ const
   isc_action_svc_set_mapping	= 27;	// Set auto admins mapping in security database
   isc_action_svc_drop_mapping	= 28;	// Drop auto admins mapping in security database
   isc_action_svc_display_user_adm	= 29;	// Displays user(s) from security database with admin info
-  isc_action_svc_last	= 30;	// keep it last !
+  isc_action_svc_validate = 30;                 // Starts database online validation
+  isc_action_svc_last	= 31;	// keep it last !
 
 (*****************************
  * Service information items *
@@ -356,6 +357,18 @@ const
   isc_spb_sec_middlename	= 11;
   isc_spb_sec_lastname	= 12;
   isc_spb_sec_admin	= 13;
+
+(*****************************************
+ * Parameters for isc_action_svc_validate *
+ *****************************************)
+
+  isc_spb_val_tab_incl		= 1;	// include filter based on regular expression
+  isc_spb_val_tab_excl		= 2;	// exclude filter based on regular expression
+  isc_spb_val_idx_incl		= 3;	// regexp of indices to validate
+  isc_spb_val_idx_excl		= 4;	// regexp of indices to NOT validate
+  isc_spb_val_lock_timeout	= 5;	// how long to wait for table lock
+
+
 
 (*******************************************************
  * Parameters for isc_action_svc_(add|remove)_license, *
