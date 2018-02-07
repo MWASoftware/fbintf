@@ -5,7 +5,8 @@ program testsuite;
 {$R *.res}
 
 uses
-  SysUtils, IB,
+  SysUtils,
+  IB,
   Test1 in 'Test1.pas',
   test2 in 'test2.pas',
   Test3 in 'Test3.pas',
@@ -22,7 +23,8 @@ uses
   Test14 in 'Test14.pas',
   Test15 in 'Test15.pas',
   Test16 in 'Test16.pas',
-  TestManager in 'TestManager.pas';
+  TestManager in 'TestManager.pas',
+  FBOutputBlock in '..\client\FBOutputBlock.pas';
 
 procedure WriteHelp;
 begin

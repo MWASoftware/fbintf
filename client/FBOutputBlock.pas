@@ -192,6 +192,9 @@ type
     procedure DoParseBuffer; override;
   public
     constructor Create(aSize: integer=DBInfoDefaultBufferSize);
+  {$IFNDEF FPC}
+    function Find(ItemType: byte): IDBInfoItem;
+  {$ENDIF}
   end;
 
   { TServiceQueryResultItem }
@@ -206,6 +209,10 @@ type
     function AddListItem(BufPtr: PByte): POutputBlockItemData; override;
     function AddSpecialItem(BufPtr: PByte): POutputBlockItemData; override;
     procedure DoParseBuffer; override;
+  {$IFNDEF FPC}
+  public
+    function Find(ItemType: byte): IServiceQueryResultItem;
+  {$ENDIF}
   end;
 
 
@@ -351,7 +358,7 @@ var P: POutputBlockItemData;
 begin
   P := inherited Find(ItemType);
   if P = nil then
-    Result := nil
+    Result := Default(_IITEM)
   else
   begin
     Obj := TOutputBlockItemClass(_TItem).Create(self.Owner,P);
@@ -439,7 +446,10 @@ end;
 
 function TOutputBlockItem.getSize: integer;
 begin
-  Result := FItemData^.FDataLength;
+  if FItemData = nil then
+    Result := 0
+  else
+    Result := FItemData^.FDataLength;
 end;
 
 procedure TOutputBlockItem.getRawBytes(var Buffer);
@@ -1009,6 +1019,15 @@ begin
   end;
 end;
 
+{$IFNDEF FPC}
+function TDBInformation.Find(ItemType: byte): IDBInfoItem;
+begin
+  Result := inherited Find(ItemType);
+  if Result.GetSize = 0 then
+    Result := nil;
+end;
+{$ENDIF}
+
 constructor TDBInformation.Create(aSize: integer);
 begin
   inherited Create(aSize);
@@ -1081,6 +1100,7 @@ begin
 
       isc_info_svc_get_users:
         case integer(P^) of
+        isc_spb_sec_admin,
         isc_spb_sec_userid,
         isc_spb_sec_groupid:
           FSubItems[i] := AddIntegerItem(P);
@@ -1184,6 +1204,15 @@ begin
     Inc(i);
   end;
 end;
+
+{$IFNDEF FPC}
+function TServiceQueryResults.Find(ItemType: byte): IServiceQueryResultItem;
+begin
+  Result := inherited Find(ItemType);
+  if Result.GetSize = 0 then
+    Result := nil;
+end;
+{$ENDIF}
 
 { TSQLInfoResultsBuffer }
 

@@ -309,10 +309,10 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory =  1.960264000000000000E+0007
+Current memory =  1.960266400000000000E+0007
 Delta memory =  2.616000000000000000E+0003
-Max memory =  1.966621600000000000E+0007
-Elapsed time= 0.000 sec
+Max memory =  1.966624000000000000E+0007
+Elapsed time= 0.001 sec
 Cpu = 0.000 sec
 Buffers =  2.048000000000000000E+0003
 Reads =  0.000000000000000000E+0000
@@ -2242,16 +2242,18 @@ ODS major = 12
 Page Size = 8192
 Version = 1: LI-V6.3.1.32609 Firebird 3.0
 Database is Read/Write
+Database Created: 27/9/2016 12:08:46
 Server Memory = 19122232
 Forced Writes  = 1
-Max Memory  = 19230544
+Max Memory  = 19230568
 Num Buffers  = 2048
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
-Fetches  = 541
-Writes  = 6
+Active Transaction Count = 0
+Fetches  = 544
+Writes  = 8
 Reads  = 53
-Page Writes  = 3
+Page Writes  = 5
 Record Version Removals Operation Counts
 
 Deletes Operation Counts
@@ -2286,6 +2288,7 @@ Count = 2
 
 Update Count Operation Counts
 
+Page Size = 8192
 
 
 Running Test 10: Event Handling
