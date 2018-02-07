@@ -1100,6 +1100,7 @@ begin
 
       isc_info_svc_get_users:
         case integer(P^) of
+        isc_spb_sec_admin,
         isc_spb_sec_userid,
         isc_spb_sec_groupid:
           FSubItems[i] := AddIntegerItem(P);

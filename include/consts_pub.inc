@@ -374,6 +374,7 @@ const
   isc_spb_bkp_file	= 5;
   isc_spb_bkp_factor	= 6;
   isc_spb_bkp_length	= 7;
+  isc_spb_bkp_stat      = 15;
   isc_spb_bkp_ignore_checksums	= $01;
   isc_spb_bkp_ignore_limbo	= $02;
   isc_spb_bkp_metadata_only	= $04;
