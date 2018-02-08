@@ -202,9 +202,10 @@
       </Unit21>
       <Unit22>
         <Filename Value="../client/FBAttachment.pas"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
-        <TopLine Value="656"/>
-        <CursorPos X="25" Y="658"/>
+        <TopLine Value="257"/>
+        <CursorPos Y="288"/>
         <UsageCount Value="24"/>
         <Loaded Value="True"/>
       </Unit22>
@@ -386,7 +387,6 @@
       </Unit47>
       <Unit48>
         <Filename Value="../include/consts_pub.inc"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="6"/>
         <TopLine Value="76"/>
         <CursorPos X="22" Y="94"/>
@@ -712,7 +712,7 @@
         <UsageCount Value="9"/>
       </Unit93>
     </Units>
-    <JumpHistory Count="11" HistoryIndex="10">
+    <JumpHistory Count="13" HistoryIndex="12">
       <Position1>
         <Filename Value="TestManager.pas"/>
         <Caret Line="34" Column="14" TopLine="13"/>
@@ -757,6 +757,14 @@
         <Filename Value="test2.pas"/>
         <Caret Line="91" Column="24" TopLine="70"/>
       </Position11>
+      <Position12>
+        <Filename Value="../client/FBAttachment.pas"/>
+        <Caret Line="654" Column="28" TopLine="638"/>
+      </Position12>
+      <Position13>
+        <Filename Value="../client/FBAttachment.pas"/>
+        <Caret Line="74" Column="15" TopLine="64"/>
+      </Position13>
     </JumpHistory>
   </ProjectSession>
   <Debugging>

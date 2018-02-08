@@ -947,7 +947,7 @@ type
       AllowReverseLookup:boolean; out CharSetID: integer);
   end;
 
-  TProtocol = (TCP, SPX, NamedPipe, Local);
+  TProtocol = (TCP, SPX, NamedPipe, Local, inet, wnet, xnet);
 
   {Service Parameter Block (SPB).
 
@@ -1101,7 +1101,8 @@ type
     {Service Manager}
     function HasServiceAPI: boolean;
     function AllocateSPB: ISPB;
-    function GetServiceManager(ServerName: AnsiString; Protocol: TProtocol; SPB: ISPB): IServiceManager;
+    function GetServiceManager(ServerName: AnsiString; Protocol: TProtocol; SPB: ISPB): IServiceManager; overload;
+    function GetServiceManager(ServerName: AnsiString; Port: integer; Protocol: TProtocol; SPB: ISPB): IServiceManager; overload;
 
     {Information}
     function GetStatus: IStatus;

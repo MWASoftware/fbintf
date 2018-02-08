@@ -249,6 +249,8 @@ begin
         FSQLDialect := getAsInteger;
       end;
 
+  FCharSetID := 0;
+  FRemoteProtocol := '';
   FAuthMethod := 'Legacy_Auth';
   if FODSMajorVersion > 11 then
   begin
@@ -283,12 +285,6 @@ begin
     Param :=  DPB.Find(isc_dpb_lc_ctype);
     if (Param = nil) or not CharSetName2CharSetID(Param.AsString,FCharSetID) then
       FCharSetID := 0;
-      FRemoteProtocol := '';
-  end
-  else
-  begin
-    FCharSetID := 0;
-    FRemoteProtocol := '';
   end;
   FHasDefaultCharSet := CharSetID2CodePage(FCharSetID,FCodePage) and (FCharSetID > 1);
 end;

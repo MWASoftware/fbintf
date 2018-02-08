@@ -52,6 +52,10 @@ FBINTF Change Log  version                                            (1.1-1) We
 13. DBInformation: Support for fb_info_pages_used and fb_info_pages_free added, plus
     test suite updated.
 
+14. Service Manager: List of protocols supported expanded to include inet, wnet and xnet.
+    An overloaded version of IIFirebirdAPI.GetServiceManager also allows a non
+    default connection port to be specified.
+
 FBINTF Change Log  version                             (1.1-0) Sun, 07 Jan 2018 15:20:02 +0000
 
 1. Fix issues with setting SQL Param values using SetAsString with Numeric types.
