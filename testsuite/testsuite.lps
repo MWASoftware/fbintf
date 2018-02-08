@@ -87,6 +87,7 @@
       <Unit10>
         <Filename Value="Test9.pas"/>
         <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
         <TopLine Value="33"/>
         <CursorPos X="91" Y="52"/>
         <UsageCount Value="134"/>
@@ -202,7 +203,6 @@
       </Unit21>
       <Unit22>
         <Filename Value="../client/FBAttachment.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
         <TopLine Value="257"/>
         <CursorPos Y="288"/>

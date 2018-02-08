@@ -45,7 +45,7 @@ unit IBUtils;
 
 interface
 
-uses Classes, SysUtils;
+uses Classes, SysUtils, IB;
 
 const
   CRLF = #13 + #10;
@@ -267,6 +267,8 @@ function Space2Underscore(s: AnsiString): AnsiString;
 function SQLSafeString(const s: AnsiString): AnsiString;
 function IsSQLIdentifier(Value: AnsiString): boolean;
 function ExtractConnectString(const CreateSQL: AnsiString; var ConnectString: AnsiString): boolean;
+function MakeConnectString(ServerName, DatabaseName: AnsiString; Protocol: TProtocol;
+              PortNo: integer = 0): AnsiString;
 
 implementation
 
@@ -393,6 +395,34 @@ begin
     RegexObj.Free;
   end;
 end;
+
+function MakeConnectString(ServerName, DatabaseName: AnsiString;
+  Protocol: TProtocol; PortNo: integer): AnsiString;
+begin
+  if PortNo <> 0 then
+    case Protocol of
+    NamedPipe:
+      ServerName += '@' + IntToStr(PortNo);
+    Local,
+    SPX,
+    xnet: {do nothing};
+    TCP:
+      ServerName += '/' + IntToStr(PortNo);
+    else
+      ServerName += ':' + IntToStr(PortNo);
+    end;
+
+  case Protocol of
+    TCP:        Result := ServerName + ':' + DatabaseName; {do not localize}
+    SPX:        Result := ServerName + '@' + DatabaseName; {do not localize}
+    NamedPipe:  Result := '\\' + ServerName + '\' + DatabaseName; {do not localize}
+    Local:      Result := DatabaseName; {do not localize}
+    inet:       Result := 'inet://' + ServerName + '/'+ DatabaseName; {do not localize}
+    wnet:       Result := 'wnet://' + ServerName + '/'+ DatabaseName; {do not localize}
+    xnet:       Result := 'xnet://' + ServerName + '/'+ DatabaseName;  {do not localize}
+  end;
+end;
+
 {$ELSE}
 {cruder version of above for Delphi. Older versions lack regular expression
  handling.}

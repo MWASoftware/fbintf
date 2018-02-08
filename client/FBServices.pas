@@ -73,7 +73,7 @@ type
 
 implementation
 
-uses FBMessages, FBClientAPI;
+uses FBMessages, FBClientAPI, IBUtils;
 
 { TFBServiceManager }
 
@@ -113,31 +113,8 @@ end;
 
 procedure TFBServiceManager.Attach;
 var ConnectString: AnsiString;
-    ServerName: string;
 begin
-  ServerName := FServerName;
-  if FPort <> 0 then
-    case FProtocol of
-    NamedPipe:
-      ServerName += '@' + IntToStr(FPort);
-    Local,
-    SPX,
-    xnet: {do nothing};
-    TCP:
-      ServerName += '/' + IntToStr(FPort);
-    else
-      ServerName += ':' + IntToStr(FPort);
-    end;
-
-  case FProtocol of
-    TCP:        ConnectString := ServerName + ':service_mgr'; {do not localize}
-    SPX:        ConnectString := ServerName + '@service_mgr'; {do not localize}
-    NamedPipe:  ConnectString := '\\' + ServerName + '\service_mgr'; {do not localize}
-    Local:      ConnectString := 'service_mgr'; {do not localize}
-    inet:       ConnectString := 'inet://' + ServerName + '/service_mgr';
-    wnet:       ConnectString := 'wnet://' + ServerName + '/service_mgr';
-    xnet:       ConnectString := 'xnet://' + ServerName + '/service_mgr';
-  end;
+  ConnectString := MakeConnectString(FServerName,'service_mgr',FProtocol,FPort);
   InternalAttach(ConnectString);
 end;
 
