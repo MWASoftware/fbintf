@@ -19,6 +19,7 @@ FBINTF Change Log  version                                            (1.1-1) We
       function GetRemoteProtocol: AnsiString;
       function GetODSMajorVersion: integer;
       function GetODSMinorVersion: integer;
+      function GetAuthenticationMethod: AnsiString;
 
    These results are cached when the connection is opened and hence do not
    require a database lookup.

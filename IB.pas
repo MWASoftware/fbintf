@@ -930,6 +930,7 @@ type
     function GetDBInformation(Requests: IDIRB): IDBInformation; overload;
     function GetConnectString: AnsiString;
     function GetRemoteProtocol: AnsiString;
+    function GetAuthenticationMethod: AnsiString;
     function GetODSMajorVersion: integer;
     function GetODSMinorVersion: integer;
     function HasActivity: boolean;

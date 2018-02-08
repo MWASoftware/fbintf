@@ -66,6 +66,7 @@ type
     FCharSetID: integer;
     FCodePage: TSystemCodePage;
     FRemoteProtocol: AnsiString;
+    FAuthMethod: AnsiString;
     constructor Create(DatabaseName: AnsiString; DPB: IDPB;
       RaiseExceptionOnConnectError: boolean);
     procedure CheckHandle; virtual; abstract;
@@ -127,6 +128,7 @@ public
   function GetDBInformation(Requests: IDIRB): IDBInformation; overload;
   function GetConnectString: AnsiString;
   function GetRemoteProtocol: AnsiString;
+  function GetAuthenticationMethod: AnsiString;
   function GetODSMajorVersion: integer;
   function GetODSMinorVersion: integer;
   {Character Sets}
@@ -247,7 +249,22 @@ begin
         FSQLDialect := getAsInteger;
       end;
 
-  if (FODSMajorVersion > 11) or ((FODSMajorVersion = 11) and (FODSMinorVersion >= 1)) then
+  FAuthMethod := 'Legacy_Auth';
+  if FODSMajorVersion > 11 then
+  begin
+    Stmt := Prepare(StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit),
+                    'Select MON$CHARACTER_SET_ID, MON$REMOTE_PROTOCOL, MON$AUTH_METHOD From MON$ATTACHMENTS '+
+                    'Where MON$ATTACHMENT_ID = CURRENT_CONNECTION');
+    ResultSet := Stmt.OpenCursor;
+    if ResultSet.FetchNext then
+    begin
+      FCharSetID := ResultSet[0].AsInteger;
+      FRemoteProtocol := ResultSet[1].AsString;
+      FAuthMethod := ResultSet[2].AsString;
+    end
+  end
+  else
+  if (FODSMajorVersion = 11) and (FODSMinorVersion >= 1) then
   begin
     Stmt := Prepare(StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit),
                     'Select MON$CHARACTER_SET_ID, MON$REMOTE_PROTOCOL From MON$ATTACHMENTS '+
@@ -257,6 +274,7 @@ begin
     begin
       FCharSetID := ResultSet[0].AsInteger;
       FRemoteProtocol := ResultSet[1].AsString;
+      FAuthMethod := ResultSet[2].AsString;
     end
   end
   else
@@ -633,6 +651,11 @@ end;
 function TFBAttachment.GetRemoteProtocol: AnsiString;
 begin
   Result := FRemoteProtocol;
+end;
+
+function TFBAttachment.GetAuthenticationMethod: AnsiString;
+begin
+  Result := FAuthMethod;
 end;
 
 function TFBAttachment.GetODSMajorVersion: integer;
