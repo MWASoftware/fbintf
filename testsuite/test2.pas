@@ -97,7 +97,7 @@ begin
   end;
   writeln(OutFile,'Opening ',Owner.GetEmployeeDatabaseName);
   Attachment := FirebirdAPI.OpenDatabase(Owner.GetEmployeeDatabaseName,DPB);
-  writeln(OutFile,'Database Open');
+  writeln(OutFile,'Database Open, SQL Dialect = ',Attachment.GetSQLDialect);
   DoQuery(Attachment);
   Attachment.Disconnect;
 end;
