@@ -466,6 +466,11 @@ begin
     end;
   end;
 end;
+
+function GetProtocol(ConnectString: AnsiString): TProtocolAll;
+begin
+  Result := unknownProtocol; {not implemented for Delphi}
+end;
 {$ENDIF}
 
 {Make a connect string in format appropriate protocol}
