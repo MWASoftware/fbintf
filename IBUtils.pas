@@ -269,6 +269,7 @@ function IsSQLIdentifier(Value: AnsiString): boolean;
 function ExtractConnectString(const CreateSQL: AnsiString; var ConnectString: AnsiString): boolean;
 function MakeConnectString(ServerName, DatabaseName: AnsiString; Protocol: TProtocol;
               PortNo: integer = 0): AnsiString;
+function GetProtocol(ConnectString: AnsiString): TProtocolAll;
 
 implementation
 
@@ -390,11 +391,84 @@ begin
     RegexObj.Expression := '^ *CREATE +(DATABASE|SCHEMA) +''(.*)''';
     Result := RegexObj.Exec(CreateSQL);
     if Result then
-      ConnectString := system.copy(CreateSQL,RegexObj.MatchPos[2],RegexObj.MatchLen[2]);
+      ConnectString := RegexObj.Match[2];
   finally
     RegexObj.Free;
   end;
 end;
+
+function GetProtocol(ConnectString: AnsiString): TProtocolAll;
+var RegexObj: TRegExpr;
+    scheme: AnsiString;
+begin
+  RegexObj := TRegExpr.Create;
+  try
+    {extact database file spec}
+    RegexObj.ModifierG := false; {turn off greedy matches}
+    RegexObj.Expression := '^([a-zA-Z]+)://.*';
+    if RegexObj.Exec(ConnectString) then
+    begin
+      scheme := AnsiUpperCase(RegexObj.Match[1]);
+      if scheme = 'INET' then
+        Result := inet
+      else
+      if scheme = 'XNET' then
+        Result := xnet
+      else
+      if scheme = 'WNET' then
+        Result := wnet
+      else
+        Result := unknownProtocol;
+    end
+    else
+    begin
+      RegexObj.Expression := '^[a-zA-Z]:\\.*';
+      if RegexObj.Exec(ConnectString) then
+        Result := Local {Windows with leading drive ID}
+      else
+      begin
+        RegexObj.Expression := '^([a-zA-Z0-9_\-\.]+)(|/[0-9a-zA-Z_\-]+):.*';
+        if RegexObj.Exec(ConnectString) then
+          Result := TCP
+        else
+        begin
+          RegexObj.Expression := '^\\\\([a-zA-Z0-9_]+)(|@[0-9]+)\\.*';
+          if RegexObj.Exec(ConnectString) then
+            Result := NamedPipe
+          else
+            Result := Local; {Assume local}
+        end;
+      end;
+    end;
+  finally
+    RegexObj.Free;
+  end;
+end;
+
+{$ELSE}
+{cruder version of above for Delphi. Older versions lack regular expression
+ handling.}
+function ExtractConnectString(const CreateSQL: AnsiString;
+  var ConnectString: AnsiString): boolean;
+var i: integer;
+begin
+  Result := false;
+  i := Pos('''',CreateSQL);
+  if i > 0 then
+  begin
+    ConnectString := CreateSQL;
+    delete(ConnectString,1,i);
+    i := Pos('''',ConnectString);
+    if i > 0 then
+    begin
+      delete(ConnectString,i,Length(ConnectString)-i+1);
+      Result := true;
+    end;
+  end;
+end;
+{$ENDIF}
+
+{Make a connect string in format appropriate protocol}
 
 function MakeConnectString(ServerName, DatabaseName: AnsiString;
   Protocol: TProtocol; PortNo: integer): AnsiString;
@@ -422,29 +496,6 @@ begin
     xnet:       Result := 'xnet://' + ServerName + '/'+ DatabaseName;  {do not localize}
   end;
 end;
-
-{$ELSE}
-{cruder version of above for Delphi. Older versions lack regular expression
- handling.}
-function ExtractConnectString(const CreateSQL: AnsiString;
-  var ConnectString: AnsiString): boolean;
-var i: integer;
-begin
-  Result := false;
-  i := Pos('''',CreateSQL);
-  if i > 0 then
-  begin
-    ConnectString := CreateSQL;
-    delete(ConnectString,1,i);
-    i := Pos('''',ConnectString);
-    if i > 0 then
-    begin
-      delete(ConnectString,i,Length(ConnectString)-i+1);
-      Result := true;
-    end;
-  end;
-end;
-{$ENDIF}
 
 {Format an SQL Identifier according to SQL Dialect with encapsulation if necessary}
 
