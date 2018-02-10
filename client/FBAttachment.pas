@@ -276,7 +276,6 @@ begin
     begin
       FCharSetID := ResultSet[0].AsInteger;
       FRemoteProtocol := ResultSet[1].AsString;
-      FAuthMethod := ResultSet[2].AsString;
     end
   end
   else
