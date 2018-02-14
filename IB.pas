@@ -1103,7 +1103,7 @@ type
     function HasServiceAPI: boolean;
     function AllocateSPB: ISPB;
     function GetServiceManager(ServerName: AnsiString; Protocol: TProtocol; SPB: ISPB): IServiceManager; overload;
-    function GetServiceManager(ServerName: AnsiString; Port: integer; Protocol: TProtocol; SPB: ISPB): IServiceManager; overload;
+    function GetServiceManager(ServerName: AnsiString; Port: AnsiString; Protocol: TProtocol; SPB: ISPB): IServiceManager; overload;
 
     {Information}
     function GetStatus: IStatus;

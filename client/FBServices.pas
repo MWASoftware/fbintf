@@ -51,13 +51,13 @@ type
     FFirebirdAPI: IFirebirdAPI;
     FProtocol: TProtocol;
     FServerName: AnsiString;
-    FPort: integer;
+    FPort: AnsiString;
     procedure CheckServerName;
   protected
     FSPB: ISPB;
     procedure InternalAttach(ConnectString: AnsiString); virtual; abstract;
   public
-    constructor Create(ServerName: AnsiString; Protocol: TProtocol; SPB: ISPB; Port: integer = 0);
+    constructor Create(ServerName: AnsiString; Protocol: TProtocol; SPB: ISPB; Port: AnsiString = '');
     destructor Destroy; override;
   public
     {IServiceManager}
@@ -84,7 +84,7 @@ begin
 end;
 
 constructor TFBServiceManager.Create(ServerName: AnsiString;
-  Protocol: TProtocol; SPB: ISPB; Port: integer);
+  Protocol: TProtocol; SPB: ISPB; Port: AnsiString);
 begin
   inherited Create;
   FFirebirdAPI := FirebirdAPI; {Keep reference to interface}
