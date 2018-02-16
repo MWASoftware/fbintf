@@ -147,7 +147,7 @@ public
 
 implementation
 
-uses FBMessages, FBTransaction {$IFDEF HASREQEX}, RegExpr{$ENDIF};
+uses FBMessages, IBUtils, FBTransaction {$IFDEF HASREQEX}, RegExpr{$ENDIF};
 
 const
   CharSetMap: array [0..69] of TCharsetMap = (
@@ -284,6 +284,12 @@ begin
     Param :=  DPB.Find(isc_dpb_lc_ctype);
     if (Param = nil) or not CharSetName2CharSetID(Param.AsString,FCharSetID) then
       FCharSetID := 0;
+    case GetProtocol(FDatabaseName) of
+    TCP:       FRemoteProtocol := 'TCPv4';
+    Local:     FRemoteProtocol := '';
+    NamedPipe: FRemoteProtocol := 'Netbui';
+    SPX:       FRemoteProtocol := 'SPX'
+    end;
   end;
   FHasDefaultCharSet := CharSetID2CodePage(FCharSetID,FCodePage) and (FCharSetID > 1);
 end;
