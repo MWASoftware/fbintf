@@ -513,9 +513,9 @@ begin
   Result := unknownProtocol; {not implemented for Delphi}
 end;
 
-function ParseConnectString(ConnectString: AnsiString; var ServerName,
-  DatabaseName: AnsiString; var Protocol: TProtocolAll; var PortNo: integer
-  ): boolean;
+function ParseConnectString(ConnectString: AnsiString;
+              var ServerName, DatabaseName: AnsiString; var Protocol: TProtocolAll;
+              var PortNo: AnsiString): boolean;
 begin
   Result := false;
 end;
@@ -530,14 +530,14 @@ begin
   if PortNo <> '' then
     case Protocol of
     NamedPipe:
-      ServerName += '@' + PortNo;
+      ServerName := ServerName + '@' + PortNo;
     Local,
     SPX,
     xnet: {do nothing};
     TCP:
-      ServerName += '/' + PortNo;
+      ServerName := ServerName + '/' + PortNo;
     else
-      ServerName += ':' + PortNo;
+      ServerName := ServerName + ':' + PortNo;
     end;
 
   case Protocol of
