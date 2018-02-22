@@ -195,7 +195,8 @@ type
     {Service Manager}
     function AllocateSPB: ISPB;
     function HasServiceAPI: boolean;
-    function GetServiceManager(ServerName: AnsiString; Protocol: TProtocol; SPB: ISPB): IServiceManager;
+    function GetServiceManager(ServerName: AnsiString; Protocol: TProtocol; SPB: ISPB): IServiceManager; overload;
+    function GetServiceManager(ServerName: AnsiString; Port: AnsiString; Protocol: TProtocol; SPB: ISPB): IServiceManager; overload;
 
     {Information}
     function GetStatus: IStatus; override;
@@ -486,6 +487,15 @@ function TFB25ClientAPI.GetServiceManager(ServerName: AnsiString;
 begin
   if HasServiceAPI then
     Result := TFB25ServiceManager.Create(ServerName,Protocol,SPB)
+  else
+    Result := nil;
+end;
+
+function TFB25ClientAPI.GetServiceManager(ServerName: AnsiString;
+  Port: AnsiString; Protocol: TProtocol; SPB: ISPB): IServiceManager;
+begin
+  if HasServiceAPI then
+    Result := TFB25ServiceManager.Create(ServerName,Protocol,SPB,Port)
   else
     Result := nil;
 end;

@@ -17,6 +17,7 @@ DB SQL Dialect = 3
 DB Remote Protocol = TCPv4
 DB ODS Major Version = 12
 DB ODS Minor Version = 0
+User Authentication Method = Srp
 DPB
 Count = 3
 28 = SYSDBA
@@ -31,6 +32,7 @@ DB SQL Dialect = 3
 DB Remote Protocol = TCPv4
 DB ODS Major Version = 12
 DB ODS Minor Version = 0
+User Authentication Method = Srp
 Dropping Database
 DPB
 Count = 4
@@ -49,6 +51,7 @@ DB SQL Dialect = 3
 DB Remote Protocol = TCPv4
 DB ODS Major Version = 12
 DB ODS Minor Version = 0
+User Authentication Method = Srp
 RDB$DESCRIPTION = 
 RDB$RELATION_ID = 128
 RDB$SECURITY_CLASS = SQL$363
@@ -59,7 +62,7 @@ Dropping Database
 
 Running Test 2: Open the employee database and run a query
 Opening localhost:employee
-Database Open
+Database Open, SQL Dialect = 3
 Metadata
 SQLType =SQL_SHORT
 sub type = 0
@@ -309,10 +312,10 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory =  1.960266400000000000E+0007
+Current memory =  1.960269600000000000E+0007
 Delta memory =  2.616000000000000000E+0003
-Max memory =  1.966624000000000000E+0007
-Elapsed time= 0.001 sec
+Max memory =  1.966627200000000000E+0007
+Elapsed time= 0.000 sec
 Cpu = 0.000 sec
 Buffers =  2.048000000000000000E+0003
 Reads =  0.000000000000000000E+0000
@@ -2243,16 +2246,18 @@ Page Size = 8192
 Version = 1: LI-V6.3.1.32609 Firebird 3.0
 Database is Read/Write
 Database Created: 27/9/2016 12:08:46
+Pages Used = 297
+Pages Free = 10
 Server Memory = 19122232
 Forced Writes  = 1
-Max Memory  = 19230568
+Max Memory  = 19235672
 Num Buffers  = 2048
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
 Active Transaction Count = 0
-Fetches  = 544
+Fetches  = 546
 Writes  = 8
-Reads  = 53
+Reads  = 54
 Page Writes  = 5
 Record Version Removals Operation Counts
 

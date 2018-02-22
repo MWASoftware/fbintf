@@ -413,6 +413,7 @@ const
   isc_spb_prp_set_sql_dialect	= 14;
   isc_spb_prp_activate	= $0100;
   isc_spb_prp_db_online	= $0200;
+  isc_spb_prp_nolinger	= $0400;
   isc_spb_prp_force_shutdown	= 41;
   isc_spb_prp_attachments_shutdown	= 42;
   isc_spb_prp_transactions_shutdown	= 43;

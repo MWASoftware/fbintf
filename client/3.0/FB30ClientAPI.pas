@@ -101,7 +101,8 @@ type
 
     {Service Manager}
     function AllocateSPB: ISPB;
-    function GetServiceManager(ServerName: AnsiString; Protocol: TProtocol; SPB: ISPB): IServiceManager;
+    function GetServiceManager(ServerName: AnsiString; Protocol: TProtocol; SPB: ISPB): IServiceManager; overload;
+    function GetServiceManager(ServerName: AnsiString; Port: Ansistring; Protocol: TProtocol; SPB: ISPB): IServiceManager; overload;
 
     {Information}
     function HasServiceAPI: boolean;
@@ -306,6 +307,12 @@ function TFB30ClientAPI.GetServiceManager(ServerName: AnsiString;
   Protocol: TProtocol; SPB: ISPB): IServiceManager;
 begin
   Result := TFB30ServiceManager.Create(ServerName,Protocol,SPB);
+end;
+
+function TFB30ClientAPI.GetServiceManager(ServerName: AnsiString;
+  Port: Ansistring; Protocol: TProtocol; SPB: ISPB): IServiceManager;
+begin
+  Result := TFB30ServiceManager.Create(ServerName,Protocol,SPB,Port);
 end;
 
 function TFB30ClientAPI.HasServiceAPI: boolean;

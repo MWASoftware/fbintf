@@ -985,7 +985,9 @@ begin
     isc_info_marks,
     isc_info_reads,
     isc_info_writes,
-    isc_info_active_tran_count:
+    isc_info_active_tran_count,
+    fb_info_pages_used,
+    fb_info_pages_free:
       FItems[index] := AddIntegerItem(P);
 
     isc_info_implementation,

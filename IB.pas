@@ -930,6 +930,7 @@ type
     function GetDBInformation(Requests: IDIRB): IDBInformation; overload;
     function GetConnectString: AnsiString;
     function GetRemoteProtocol: AnsiString;
+    function GetAuthenticationMethod: AnsiString;
     function GetODSMajorVersion: integer;
     function GetODSMinorVersion: integer;
     function HasActivity: boolean;
@@ -946,7 +947,8 @@ type
       AllowReverseLookup:boolean; out CharSetID: integer);
   end;
 
-  TProtocol = (TCP, SPX, NamedPipe, Local);
+  TProtocolAll = (TCP, SPX, NamedPipe, Local, inet, wnet, xnet, unknownProtocol);
+  TProtocol = TCP..xnet;
 
   {Service Parameter Block (SPB).
 
@@ -1100,7 +1102,8 @@ type
     {Service Manager}
     function HasServiceAPI: boolean;
     function AllocateSPB: ISPB;
-    function GetServiceManager(ServerName: AnsiString; Protocol: TProtocol; SPB: ISPB): IServiceManager;
+    function GetServiceManager(ServerName: AnsiString; Protocol: TProtocol; SPB: ISPB): IServiceManager; overload;
+    function GetServiceManager(ServerName: AnsiString; Port: AnsiString; Protocol: TProtocol; SPB: ISPB): IServiceManager; overload;
 
     {Information}
     function GetStatus: IStatus;

@@ -32,6 +32,7 @@ type
   TTest1 = class(TTestBase)
   private
     procedure DoQuery(Attachment: IAttachment);
+    procedure WriteAttachmentInfo(Attachment: IAttachment);
   public
     function TestTitle: AnsiString; override;
     procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
@@ -63,6 +64,17 @@ begin
     end;
 end;
 
+procedure TTest1.WriteAttachmentInfo(Attachment: IAttachment);
+begin
+  writeln(outfile,'DB Connect String = ',Attachment.GetConnectString);
+  writeln(outfile,'DB Charset ID = ',Attachment.GetDefaultCharSetID);
+  writeln(outfile,'DB SQL Dialect = ',Attachment.GetSQLDialect);
+  writeln(outfile,'DB Remote Protocol = ', Attachment.GetRemoteProtocol);
+  writeln(outfile,'DB ODS Major Version = ',Attachment.GetODSMajorVersion);
+  writeln(outfile,'DB ODS Minor Version = ',Attachment.GetODSMinorVersion);
+  writeln(outfile,'User Authentication Method = ',Attachment.GetAuthenticationMethod);
+end;
+
 function TTest1.TestTitle: AnsiString;
 begin
   Result := 'Test 1: Create and Drop a Database';
@@ -85,12 +97,7 @@ begin
                       [Owner.GetNewDatabaseName, Owner.GetUserName, Owner.GetPassword, CharSet]);
   Attachment := FirebirdAPI.CreateDatabase(createSQL,SQLDialect);
   WriteDBInfo(Attachment.GetDBInformation([isc_info_db_id,isc_info_db_SQL_Dialect]));
-  writeln(outfile,'DB Connect String = ',Attachment.GetConnectString);
-  writeln(outfile,'DB Charset ID = ',Attachment.GetDefaultCharSetID);
-  writeln(outfile,'DB SQL Dialect = ',Attachment.GetSQLDialect);
-  writeln(outfile,'DB Remote Protocol = ', Attachment.GetRemoteProtocol);
-  writeln(outfile,'DB ODS Major Version = ',Attachment.GetODSMajorVersion);
-  writeln(outfile,'DB ODS Minor Version = ',Attachment.GetODSMinorVersion);
+  WriteAttachmentInfo(Attachment);
   PrintDPB(Attachment.getDPB);
 
   {$IFDEF HASREQEX}
@@ -116,12 +123,7 @@ begin
 
   Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
 
-  writeln(outfile,'DB Connect String = ',Attachment.GetConnectString);
-  writeln(outfile,'DB Charset ID = ',Attachment.GetDefaultCharSetID);
-  writeln(outfile,'DB SQL Dialect = ',Attachment.GetSQLDialect);
-  writeln(outfile,'DB Remote Protocol = ', Attachment.GetRemoteProtocol);
-  writeln(outfile,'DB ODS Major Version = ',Attachment.GetODSMajorVersion);
-  writeln(outfile,'DB ODS Minor Version = ',Attachment.GetODSMinorVersion);
+  WriteAttachmentInfo(Attachment);
 
   writeln(OutFile,'Dropping Database');
   if Attachment <> nil then
@@ -138,12 +140,7 @@ begin
     Exit;
   end;
   WriteDBInfo(Attachment.GetDBInformation([isc_info_db_id,isc_info_ods_version,isc_info_ods_minor_version]));
-  writeln(outfile,'DB Connect String = ',Attachment.GetConnectString);
-  writeln(outfile,'DB Charset ID = ',Attachment.GetDefaultCharSetID);
-  writeln(outfile,'DB SQL Dialect = ',Attachment.GetSQLDialect);
-  writeln(outfile,'DB Remote Protocol = ', Attachment.GetRemoteProtocol);
-  writeln(outfile,'DB ODS Major Version = ',Attachment.GetODSMajorVersion);
-  writeln(outfile,'DB ODS Minor Version = ',Attachment.GetODSMinorVersion);
+  WriteAttachmentInfo(Attachment);
 
   {Querying Database}
   DoQuery(Attachment);

@@ -51,12 +51,13 @@ type
     FFirebirdAPI: IFirebirdAPI;
     FProtocol: TProtocol;
     FServerName: AnsiString;
+    FPort: AnsiString;
     procedure CheckServerName;
   protected
     FSPB: ISPB;
     procedure InternalAttach(ConnectString: AnsiString); virtual; abstract;
   public
-    constructor Create(ServerName: AnsiString; Protocol: TProtocol; SPB: ISPB);
+    constructor Create(ServerName: AnsiString; Protocol: TProtocol; SPB: ISPB; Port: AnsiString = '');
     destructor Destroy; override;
   public
     {IServiceManager}
@@ -72,7 +73,7 @@ type
 
 implementation
 
-uses FBMessages, FBClientAPI;
+uses FBMessages, FBClientAPI, IBUtils;
 
 { TFBServiceManager }
 
@@ -82,14 +83,15 @@ begin
     IBError(ibxeServerNameMissing, [nil]);
 end;
 
-constructor TFBServiceManager.Create(ServerName: AnsiString; Protocol: TProtocol;
-  SPB: ISPB);
+constructor TFBServiceManager.Create(ServerName: AnsiString;
+  Protocol: TProtocol; SPB: ISPB; Port: AnsiString);
 begin
   inherited Create;
   FFirebirdAPI := FirebirdAPI; {Keep reference to interface}
   FProtocol := Protocol;
   FSPB := SPB;
   FServerName := ServerName;
+  FPort := Port;
   Attach;
 end;
 
@@ -112,12 +114,7 @@ end;
 procedure TFBServiceManager.Attach;
 var ConnectString: AnsiString;
 begin
-  case FProtocol of
-    TCP: ConnectString := FServerName + ':service_mgr'; {do not localize}
-    SPX: ConnectString := FServerName + '@service_mgr'; {do not localize}
-    NamedPipe: ConnectString := '\\' + FServerName + '\service_mgr'; {do not localize}
-    Local: ConnectString := 'service_mgr'; {do not localize}
-  end;
+  ConnectString := MakeConnectString(FServerName,'service_mgr',FProtocol,FPort);
   InternalAttach(ConnectString);
 end;
 

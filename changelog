@@ -1,4 +1,4 @@
-FBINTF Change Log  version                                            (1.1-1) Wed, 07 Feb 2018 12:02:05 +0000
+FBINTF Change Log  version                                             (1.1-1) Fri, 16 Feb 2018 16:25:26 +0000
 
 1. IBUtils.QuoteIdentifierIfNeeded: Add check for space character.
 
@@ -19,6 +19,7 @@ FBINTF Change Log  version                                            (1.1-1) We
       function GetRemoteProtocol: AnsiString;
       function GetODSMajorVersion: integer;
       function GetODSMinorVersion: integer;
+      function GetAuthenticationMethod: AnsiString;
 
    These results are cached when the connection is opened and hence do not
    require a database lookup.
@@ -47,6 +48,13 @@ FBINTF Change Log  version                                            (1.1-1) We
     requests with additional parameters. This is to enable support for fb_info_page_contents
     (return of page contents). Response to fb_info_page_contents returned as
     a string with code page CP_NONE.
+
+13. DBInformation: Support for fb_info_pages_used and fb_info_pages_free added, plus
+    test suite updated.
+
+14. Service Manager: List of protocols supported expanded to include inet, wnet and xnet.
+    An overloaded version of IIFirebirdAPI.GetServiceManager also allows a non
+    default connection port to be specified.
 
 FBINTF Change Log  version                             (1.1-0) Sun, 07 Jan 2018 15:20:02 +0000
 

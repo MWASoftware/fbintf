@@ -45,7 +45,7 @@ unit IBUtils;
 
 interface
 
-uses Classes, SysUtils;
+uses Classes, SysUtils, IB;
 
 const
   CRLF = #13 + #10;
@@ -267,6 +267,12 @@ function Space2Underscore(s: AnsiString): AnsiString;
 function SQLSafeString(const s: AnsiString): AnsiString;
 function IsSQLIdentifier(Value: AnsiString): boolean;
 function ExtractConnectString(const CreateSQL: AnsiString; var ConnectString: AnsiString): boolean;
+function MakeConnectString(ServerName, DatabaseName: AnsiString; Protocol: TProtocol;
+              PortNo: AnsiString = ''): AnsiString;
+function ParseConnectString(ConnectString: AnsiString;
+              var ServerName, DatabaseName: AnsiString; var Protocol: TProtocolAll;
+              var PortNo: AnsiString): boolean;
+function GetProtocol(ConnectString: AnsiString): TProtocolAll;
 
 implementation
 
@@ -388,11 +394,98 @@ begin
     RegexObj.Expression := '^ *CREATE +(DATABASE|SCHEMA) +''(.*)''';
     Result := RegexObj.Exec(CreateSQL);
     if Result then
-      ConnectString := system.copy(CreateSQL,RegexObj.MatchPos[2],RegexObj.MatchLen[2]);
+      ConnectString := RegexObj.Match[2];
   finally
     RegexObj.Free;
   end;
 end;
+
+function ParseConnectString(ConnectString: AnsiString; var ServerName,
+  DatabaseName: AnsiString; var Protocol: TProtocolAll; var PortNo: AnsiString
+  ): boolean;
+var RegexObj: TRegExpr;
+    scheme: AnsiString;
+begin
+  ServerName := '';
+  DatabaseName := ConnectString;
+  PortNo := '';
+  Protocol := unknownProtocol;
+  RegexObj := TRegExpr.Create;
+  try
+    {extact database file spec}
+    RegexObj.ModifierG := false; {turn off greedy matches}
+    RegexObj.Expression := '^([a-zA-Z]+)://([a-zA-Z0-9\-\.]+)(|:[0-9a-zA-Z\-]+)/(.*)$';
+    Result := RegexObj.Exec(ConnectString);
+    if Result then
+    begin
+      {URL type connect string}
+      scheme := AnsiUpperCase(RegexObj.Match[1]);
+      ServerName := RegexObj.Match[2];
+      if RegexObj.MatchLen[3] > 0 then
+        PortNo := system.Copy(ConnectString,RegexObj.MatchPos[3]+1,RegexObj.MatchLen[3]-1);
+      DatabaseName := RegexObj.Match[4];
+      if scheme = 'INET' then
+        Protocol := inet
+      else
+      if scheme = 'XNET' then
+        Protocol := xnet
+      else
+      if scheme = 'WNET' then
+        Protocol := wnet
+    end
+    else
+    begin
+      RegexObj.Expression := '^([a-zA-Z]:\\.*)';
+      Result := RegexObj.Exec(ConnectString);
+      if Result then
+        Protocol := Local {Windows with leading drive ID}
+      else
+      begin
+        RegexObj.Expression := '^([a-zA-Z0-9\-\.]+)(|/[0-9a-zA-Z\-]+):(.*)$';
+        Result := RegexObj.Exec(ConnectString);
+        if Result then
+        begin
+          {Legacy TCP Format}
+          ServerName := RegexObj.Match[1];
+          if RegexObj.MatchLen[2] > 0 then
+            PortNo := system.Copy(ConnectString,RegexObj.MatchPos[2]+1,RegexObj.MatchLen[2]-1);
+          DatabaseName := RegexObj.Match[3];
+          Protocol := TCP;
+        end
+        else
+        begin
+          RegexObj.Expression := '^\\\\([a-zA-Z0-9\-\.]+)(|@[0-9a-zA-Z\-]+)\\(.*)$';
+          Result := RegexObj.Exec(ConnectString);
+          if Result then
+          begin
+            {Netbui}
+            ServerName := RegexObj.Match[1];
+            if RegexObj.MatchLen[2] > 0 then
+              PortNo := system.Copy(ConnectString,RegexObj.MatchPos[2]+1,RegexObj.MatchLen[2]-1);
+            DatabaseName := RegexObj.Match[3];
+            Protocol := NamedPipe
+          end
+          else
+          begin
+            Result := true;
+            Protocol := Local; {Assume local}
+          end;
+        end;
+      end;
+    end;
+  finally
+    RegexObj.Free;
+  end;
+end;
+
+function GetProtocol(ConnectString: AnsiString): TProtocolAll;
+var ServerName,
+    DatabaseName: AnsiString;
+    PortNo: AnsiString;
+begin
+  ParseConnectString(ConnectString,ServerName,DatabaseName,Result,PortNo);
+end;
+
 {$ELSE}
 {cruder version of above for Delphi. Older versions lack regular expression
  handling.}
@@ -414,7 +507,49 @@ begin
     end;
   end;
 end;
+
+function GetProtocol(ConnectString: AnsiString): TProtocolAll;
+begin
+  Result := unknownProtocol; {not implemented for Delphi}
+end;
+
+function ParseConnectString(ConnectString: AnsiString; var ServerName,
+  DatabaseName: AnsiString; var Protocol: TProtocolAll; var PortNo: integer
+  ): boolean;
+begin
+  Result := false;
+end;
+
 {$ENDIF}
+
+{Make a connect string in format appropriate protocol}
+
+function MakeConnectString(ServerName, DatabaseName: AnsiString;
+  Protocol: TProtocol; PortNo: AnsiString): AnsiString;
+begin
+  if PortNo <> '' then
+    case Protocol of
+    NamedPipe:
+      ServerName += '@' + PortNo;
+    Local,
+    SPX,
+    xnet: {do nothing};
+    TCP:
+      ServerName += '/' + PortNo;
+    else
+      ServerName += ':' + PortNo;
+    end;
+
+  case Protocol of
+    TCP:        Result := ServerName + ':' + DatabaseName; {do not localize}
+    SPX:        Result := ServerName + '@' + DatabaseName; {do not localize}
+    NamedPipe:  Result := '\\' + ServerName + '\' + DatabaseName; {do not localize}
+    Local:      Result := DatabaseName; {do not localize}
+    inet:       Result := 'inet://' + ServerName + '/'+ DatabaseName; {do not localize}
+    wnet:       Result := 'wnet://' + ServerName + '/'+ DatabaseName; {do not localize}
+    xnet:       Result := 'xnet://' + ServerName + '/'+ DatabaseName;  {do not localize}
+  end;
+end;
 
 {Format an SQL Identifier according to SQL Dialect with encapsulation if necessary}
 

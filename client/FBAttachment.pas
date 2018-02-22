@@ -66,6 +66,7 @@ type
     FCharSetID: integer;
     FCodePage: TSystemCodePage;
     FRemoteProtocol: AnsiString;
+    FAuthMethod: AnsiString;
     constructor Create(DatabaseName: AnsiString; DPB: IDPB;
       RaiseExceptionOnConnectError: boolean);
     procedure CheckHandle; virtual; abstract;
@@ -127,6 +128,7 @@ public
   function GetDBInformation(Requests: IDIRB): IDBInformation; overload;
   function GetConnectString: AnsiString;
   function GetRemoteProtocol: AnsiString;
+  function GetAuthenticationMethod: AnsiString;
   function GetODSMajorVersion: integer;
   function GetODSMinorVersion: integer;
   {Character Sets}
@@ -145,7 +147,7 @@ public
 
 implementation
 
-uses FBMessages, FBTransaction {$IFDEF HASREQEX}, RegExpr{$ENDIF};
+uses FBMessages, IBUtils, FBTransaction {$IFDEF HASREQEX}, RegExpr{$ENDIF};
 
 const
   CharSetMap: array [0..69] of TCharsetMap = (
@@ -247,7 +249,24 @@ begin
         FSQLDialect := getAsInteger;
       end;
 
-  if (FODSMajorVersion > 11) or ((FODSMajorVersion = 11) and (FODSMinorVersion >= 1)) then
+  FCharSetID := 0;
+  FRemoteProtocol := '';
+  FAuthMethod := 'Legacy_Auth';
+  if FODSMajorVersion > 11 then
+  begin
+    Stmt := Prepare(StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit),
+                    'Select MON$CHARACTER_SET_ID, MON$REMOTE_PROTOCOL, MON$AUTH_METHOD From MON$ATTACHMENTS '+
+                    'Where MON$ATTACHMENT_ID = CURRENT_CONNECTION');
+    ResultSet := Stmt.OpenCursor;
+    if ResultSet.FetchNext then
+    begin
+      FCharSetID := ResultSet[0].AsInteger;
+      FRemoteProtocol := ResultSet[1].AsString;
+      FAuthMethod := ResultSet[2].AsString;
+    end
+  end
+  else
+  if (FODSMajorVersion = 11) and (FODSMinorVersion >= 1) then
   begin
     Stmt := Prepare(StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit),
                     'Select MON$CHARACTER_SET_ID, MON$REMOTE_PROTOCOL From MON$ATTACHMENTS '+
@@ -265,12 +284,12 @@ begin
     Param :=  DPB.Find(isc_dpb_lc_ctype);
     if (Param = nil) or not CharSetName2CharSetID(Param.AsString,FCharSetID) then
       FCharSetID := 0;
-      FRemoteProtocol := '';
-  end
-  else
-  begin
-    FCharSetID := 0;
-    FRemoteProtocol := '';
+    case GetProtocol(FDatabaseName) of
+    TCP:       FRemoteProtocol := 'TCPv4';
+    Local:     FRemoteProtocol := '';
+    NamedPipe: FRemoteProtocol := 'Netbui';
+    SPX:       FRemoteProtocol := 'SPX'
+    end;
   end;
   FHasDefaultCharSet := CharSetID2CodePage(FCharSetID,FCodePage) and (FCharSetID > 1);
 end;
@@ -633,6 +652,11 @@ end;
 function TFBAttachment.GetRemoteProtocol: AnsiString;
 begin
   Result := FRemoteProtocol;
+end;
+
+function TFBAttachment.GetAuthenticationMethod: AnsiString;
+begin
+  Result := FAuthMethod;
 end;
 
 function TFBAttachment.GetODSMajorVersion: integer;
