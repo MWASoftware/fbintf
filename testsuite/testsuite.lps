@@ -25,7 +25,7 @@
       <Unit2>
         <Filename Value="Test1.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="10"/>
         <TopLine Value="77"/>
         <CursorPos Y="88"/>
         <UsageCount Value="137"/>
@@ -34,7 +34,7 @@
       <Unit3>
         <Filename Value="test2.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="11"/>
         <TopLine Value="70"/>
         <CursorPos X="24" Y="91"/>
         <UsageCount Value="137"/>
@@ -196,14 +196,15 @@
       </Unit20>
       <Unit21>
         <Filename Value="../client/FBOutputBlock.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="958"/>
-        <CursorPos X="23" Y="990"/>
+        <EditorIndex Value="8"/>
+        <TopLine Value="983"/>
+        <CursorPos X="23" Y="991"/>
         <UsageCount Value="22"/>
+        <Loaded Value="True"/>
       </Unit21>
       <Unit22>
         <Filename Value="../client/FBAttachment.pas"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="9"/>
         <TopLine Value="257"/>
         <CursorPos Y="288"/>
         <UsageCount Value="25"/>
@@ -249,8 +250,8 @@
       <Unit28>
         <Filename Value="../IB.pas"/>
         <EditorIndex Value="6"/>
-        <TopLine Value="910"/>
-        <CursorPos X="50" Y="933"/>
+        <TopLine Value="112"/>
+        <CursorPos X="19" Y="138"/>
         <UsageCount Value="55"/>
         <Loaded Value="True"/>
       </Unit28>
@@ -388,7 +389,8 @@
       </Unit47>
       <Unit48>
         <Filename Value="../include/consts_pub.inc"/>
-        <EditorIndex Value="10"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="12"/>
         <TopLine Value="76"/>
         <CursorPos X="22" Y="94"/>
         <UsageCount Value="11"/>
@@ -426,11 +428,10 @@
       </Unit52>
       <Unit53>
         <Filename Value="../changelog"/>
-        <EditorIndex Value="11"/>
-        <TopLine Value="13"/>
-        <CursorPos X="52" Y="22"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="28"/>
+        <CursorPos X="68" Y="56"/>
         <UsageCount Value="26"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit53>
       <Unit54>
@@ -457,10 +458,11 @@
       </Unit56>
       <Unit57>
         <Filename Value="../include/inf_pub.inc"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="104"/>
-        <CursorPos X="27" Y="136"/>
+        <EditorIndex Value="7"/>
+        <TopLine Value="118"/>
+        <CursorPos X="27" Y="138"/>
         <UsageCount Value="11"/>
+        <Loaded Value="True"/>
       </Unit57>
       <Unit58>
         <Filename Value="/usr/share/fpcsrc/rtl/unix/baseunix.pp"/>
@@ -722,7 +724,6 @@
       </Unit94>
       <Unit95>
         <Filename Value="../../ibx/design/IBDBReg.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="4"/>
         <TopLine Value="391"/>
         <CursorPos X="44" Y="409"/>
@@ -730,7 +731,7 @@
         <Loaded Value="True"/>
       </Unit95>
     </Units>
-    <JumpHistory Count="18" HistoryIndex="17">
+    <JumpHistory Count="23" HistoryIndex="22">
       <Position1>
         <Filename Value="TestManager.pas"/>
         <Caret Line="34" Column="14" TopLine="13"/>
@@ -801,6 +802,26 @@
       <Position18>
         <Filename Value="../../ibx/design/IBDBReg.pas"/>
       </Position18>
+      <Position19>
+        <Filename Value="../IB.pas"/>
+        <Caret Line="138" Column="19" TopLine="112"/>
+      </Position19>
+      <Position20>
+        <Filename Value="../client/FBOutputBlock.pas"/>
+        <Caret Line="1005" Column="28" TopLine="986"/>
+      </Position20>
+      <Position21>
+        <Filename Value="../client/FBOutputBlock.pas"/>
+        <Caret Line="97" Column="28" TopLine="65"/>
+      </Position21>
+      <Position22>
+        <Filename Value="../client/FBOutputBlock.pas"/>
+        <Caret Line="649" Column="55" TopLine="639"/>
+      </Position22>
+      <Position23>
+        <Filename Value="../client/FBOutputBlock.pas"/>
+        <Caret Line="737" Column="37" TopLine="706"/>
+      </Position23>
     </JumpHistory>
   </ProjectSession>
   <Debugging>

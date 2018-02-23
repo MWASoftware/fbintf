@@ -987,7 +987,8 @@ begin
     isc_info_writes,
     isc_info_active_tran_count,
     fb_info_pages_used,
-    fb_info_pages_free:
+    fb_info_pages_free,
+    fb_info_conn_flags:
       FItems[index] := AddIntegerItem(P);
 
     isc_info_implementation,
@@ -999,6 +1000,9 @@ begin
 
     fb_info_page_contents:
       FItems[index] := AddOctetString(P);
+
+    fb_info_crypt_key:
+      FItems[index] := AddStringItem(P);
 
     isc_info_db_id,
     isc_info_version,

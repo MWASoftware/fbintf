@@ -135,12 +135,20 @@ const
 	fb_info_pages_used = 124;
 	fb_info_pages_free = 125;
 
-	fb_info_crypt_state = 126;
+        fb_info_conn_flags = 132;
+
+    	fb_info_crypt_key = 133;
+    	fb_info_crypt_state = 134;
 
 	isc_info_db_last_value  = fb_info_crypt_state;  (* Leave this LAST! *)
 
 
   isc_info_version	= isc_info_isc_version;
+
+  { flags set in fb_info_crypt_state }
+
+        fb_info_crypt_encrypted = $01;
+  	fb_info_crypt_process = $02;
 
 
 (**************************************)
