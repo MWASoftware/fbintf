@@ -302,6 +302,12 @@ implementation
 
 uses FBMessages {$IFNDEF FPC}, TypInfo {$ENDIF};
 
+function BufToStr(P: PByte; Len: integer):AnsiString;
+begin
+  SetLength(Result,Len);
+  Move(P^,Result[1],Len);
+end;
+
 {$IFDEF FPC}
 { TOutputBlockItemGroup }
 
@@ -490,6 +496,7 @@ begin
   Result := '';
   with FItemData^ do
   case FDataType of
+  dtIntegerFixed,
   dtInteger:
     Result := IntToStr(getAsInteger);
   dtByte:
@@ -765,9 +772,13 @@ var i, j: integer;
 begin
   for i := 0 to length(FItems) - 1 do
   begin
-    for j := 0 to Length(FItems[i]^.FSubItems) -1 do
-      dispose(FItems[i]^.FSubItems[j]);
-    dispose(FItems[i]);
+    if FItems[i] <> nil then
+    begin
+      for j := 0 to Length(FItems[i]^.FSubItems) -1 do
+        if FItems[i]^.FSubItems[j] <> nil then
+          dispose(FItems[i]^.FSubItems[j]);
+      dispose(FItems[i]);
+    end;
   end;
   FreeMem(FBuffer);
   inherited Destroy;
@@ -843,7 +854,11 @@ begin
     else
       begin
         item := TOutputBlockItem.Create(self,(aItems[i]));
-        writeln(Indent,'ItemType = ',byte(FBufPtr^),' Value = ',(item as TOutputBlockItem).GetAsString);
+        try
+          writeln(Indent,'ItemType = ',byte(FBufPtr^),' Value = ',(item as TOutputBlockItem).GetAsString);
+        except
+          writeln(Indent,'Unknown ItemType = ',byte(FBufPtr^));
+        end;
       end;
     end;
   end;
@@ -857,6 +872,15 @@ begin
   for i := 0 to getBufSize - 1 do
   begin
     write(Format('%x ',[byte(Buffer[i])]));
+    if byte(FBuffer[i]) = isc_info_end then break;
+  end;
+  writeln;
+  for i := 0 to getBufSize - 1 do
+  begin
+    if chr(FBuffer[i]) in [' '..'~'] then
+      write(chr(Buffer[i]))
+    else
+      write('.');
     if byte(FBuffer[i]) = isc_info_end then break;
   end;
   writeln;
@@ -1062,6 +1086,7 @@ begin
     while (P < FBufPtr + FSize) and (P^ <> isc_info_flag_end) do
     begin
       SetLength(FSubItems,i+1);
+      FSubItems[i] := nil;
       case group of
       isc_info_svc_svr_db_info:
         case integer(P^) of
@@ -1073,7 +1098,7 @@ begin
             FSubItems[i] := AddStringItem(P);
 
           else
-            IBError(ibxeOutputParsingError, [integer(P^)]);
+            IBError(ibxeOutputParsingError, [integer(P^),BufToStr(P,FSize - (P-FBufPtr))]);
           end;
 
       isc_info_svc_get_license:
@@ -1082,7 +1107,7 @@ begin
         isc_spb_lic_key:
           FSubItems[i] := AddIntegerItem(P);
         else
-          IBError(ibxeOutputParsingError, [integer(P^)]);
+          IBError(ibxeOutputParsingError, [integer(P^),BufToStr(P,FSize - (P-FBufPtr))]);
         end;
 
       isc_info_svc_limbo_trans:
@@ -1101,7 +1126,7 @@ begin
        isc_spb_tra_state:
          FSubItems[i] := AddByteItem(P);
        else
-         IBError(ibxeOutputParsingError, [integer(P^)]);
+         IBError(ibxeOutputParsingError, [integer(P^),BufToStr(P,FSize - (P-FBufPtr))]);
        end;
 
       isc_info_svc_get_users:
@@ -1119,7 +1144,7 @@ begin
           FSubItems[i] := AddStringItem(P);
 
         else
-          IBError(ibxeOutputParsingError, [integer(P^)]);
+          IBError(ibxeOutputParsingError, [integer(P^),BufToStr(P,FSize - (P-FBufPtr))]);
         end;
 
       end;
@@ -1170,6 +1195,7 @@ begin
   while  (P < Buffer + getBufSize) and (P^ <> isc_info_end) do
   begin
     SetLength(FItems,i+1);
+    FItems[i] := nil;
     case integer(P^) of
     isc_info_svc_line,
     isc_info_svc_get_env,
@@ -1204,7 +1230,7 @@ begin
 
 
     else
-       IBError(ibxeOutputParsingError, [integer(P^)]);
+       IBError(ibxeOutputParsingError, [integer(P^),BufToStr(P,getBufSize - (P-Buffer))]);
     end;
     P := P + FItems[i]^.FSize;
     Inc(i);

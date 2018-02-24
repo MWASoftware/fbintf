@@ -382,7 +382,7 @@ resourcestring
   SServerNameMissing = 'Server Name Missing';
   SQueryParamsError = 'Query Parameters missing or incorrect';
   SStartParamsError = 'start Parameters missing or incorrect';
-  SOutputParsingError = 'Unexpected Output buffer value (%d)';
+  SOutputParsingError = 'Unexpected Output buffer value (%d) - %s';
   SUseSpecificProcedures = 'Generic ServiceStart not applicable: Use Specific Procedures to set configuration params';
   SSQLMonitorAlreadyPresent = 'SQL Monitor Instance is already present';
   SDelphiException = 'DelphiException %s';
