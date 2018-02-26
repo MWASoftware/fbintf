@@ -1,4 +1,4 @@
-FBINTF Change Log  version                                              (1.1-1) Thu, 22 Feb 2018 16:01:13 +0000
+FBINTF Change Log  version                                               (1.1-1) Sat, 24 Feb 2018 23:12:18 +0000
 
 1. IBUtils.QuoteIdentifierIfNeeded: Add check for space character.
 
@@ -52,7 +52,10 @@ FBINTF Change Log  version                                              (1.1-1) 
 13. DBInformation: Support for fb_info_pages_used and fb_info_pages_free added, plus
     test suite updated.
 
-14. Service Manager: List of protocols supported expanded to include inet, wnet and xnet.
+14. DBInformation: Support for fb_info_crypt_key (Firebird 3.0.3 onwards) added as
+    a string type, and fb_info_conn_flags (Firebird 3.0.3 onwards) added as an integer type.
+
+15. Service Manager: List of protocols supported expanded to include inet, wnet and xnet.
     An overloaded version of IIFirebirdAPI.GetServiceManager also allows a non
     default connection port to be specified.
 
