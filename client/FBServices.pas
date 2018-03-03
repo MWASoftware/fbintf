@@ -63,6 +63,7 @@ type
     {IServiceManager}
     function getSPB: ISPB;
     function getServerName: AnsiString;
+    function getPortNo: AnsiString;
     procedure Attach;
     procedure Detach(Force: boolean=false); virtual; abstract;
     function AllocateSRB: ISRB;
@@ -109,6 +110,11 @@ end;
 function TFBServiceManager.getServerName: AnsiString;
 begin
   Result := FServerName;
+end;
+
+function TFBServiceManager.getPortNo: AnsiString;
+begin
+  Result := FPort;
 end;
 
 procedure TFBServiceManager.Attach;

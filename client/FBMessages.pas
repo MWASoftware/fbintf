@@ -246,7 +246,10 @@ type
       ibxeUnknownUserCharSet,
       ibxeUninitializedInputParameter,
       ibxeNegativeGenerator,
-      ibxeServiceUnavailable
+      ibxeServiceUnavailable,
+      ibxeBadConnectString,
+      ibxeServiceNotStarted,
+      ibxeNotRequiredDataSetSource
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -448,6 +451,9 @@ resourcestring
   SUninitializedInputParameter = 'SQL Param No. %d (%s) is uninitialised';
   SNegativeGenerator = 'A Generator Increment cannot be negative';
   SServiceUnavailable = 'Request Service is not available';
+  SBadConnectString = 'Parse Error in Connect String';
+  SServiceNotStarted = 'Cannot Query running service until the service has been started';
+  SNotRequiredDataSetSource = 'Object of class %s is not a valid dataset source';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -616,7 +622,10 @@ const
     SUnknownUserCharSet,
     SUninitializedInputParameter,
     SNegativeGenerator,
-    SServiceUnavailable
+    SServiceUnavailable,
+    SBadConnectString,
+    SServiceNotStarted,
+    SNotRequiredDataSetSource
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;

@@ -1066,6 +1066,7 @@ type
     ['{905b587d-1e1f-4e40-a3f8-a3519f852e48}']
     function getSPB: ISPB;
     function getServerName: AnsiString;
+    function getPortNo: AnsiString;
     procedure Attach;
     procedure Detach(Force: boolean=false);
     function IsAttached: boolean;
