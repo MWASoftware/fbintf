@@ -16,6 +16,7 @@ unit Firebird;
 interface
 {$IFDEF FPC}
 {$mode delphi}
+{$OBJECTCHECKS OFF}
 {$ENDIF}
 
 uses Classes, SysUtils, IB, DB;
