@@ -7,6 +7,12 @@ FBINTF Change Log  version                                                 (1.1-
     function getProtocol: TProtocol;
     function getPortNo: AnsiString;
 
+3. IServiceManager improved error handling. Interfaces changed:
+    function Start(Request: ISRB; RaiseExceptionOnError: boolean=true): boolean;
+    function Query(SQPB: ISQPB; Request: ISRB; RaiseExceptionOnError: boolean=true) :IServiceQueryResults; overload;
+    function Query(Request: ISRB; RaiseExceptionOnError: boolean=true) :IServiceQueryResults; overload;
+
+
 
 FBINTF Change Log  version                                                 (1.1-1) Tue, 27 Feb 2018 16:51:16 +0000
 

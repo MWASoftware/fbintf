@@ -78,6 +78,8 @@ uses
 type
   { TFBServiceManager }
 
+  { TFB25ServiceManager }
+
   TFB25ServiceManager = class(TFBServiceManager,IServiceManager)
   private
     FHandle: TISC_SVC_HANDLE;
@@ -92,8 +94,8 @@ type
     {IServiceManager}
     procedure Detach(Force: boolean=false); override;
     function IsAttached: boolean;
-    procedure Start(Request: ISRB);
-    function Query(SQPB: ISQPB; Request: ISRB): IServiceQueryResults; override;
+    function Start(Request: ISRB; RaiseExceptionOnError: boolean=true): boolean;
+    function Query(SQPB: ISQPB; Request: ISRB; RaiseExceptionOnError: boolean=true): IServiceQueryResults; override;
   end;
 
 implementation
@@ -153,18 +155,28 @@ begin
   Result := FHandle <> nil;
 end;
 
-procedure TFB25ServiceManager.Start(Request: ISRB);
+function TFB25ServiceManager.Start(Request: ISRB; RaiseExceptionOnError: boolean
+  ): boolean;
 begin
-  CheckActive;
+  Result := true;
+  if RaiseExceptionOnError then
+    CheckActive
+  else
+    Result := FHandle <> nil;
+
+  if Result then
   with Firebird25ClientAPI do
-    if isc_service_start(StatusVector, @FHandle, nil,
+  begin
+    Result := isc_service_start(StatusVector, @FHandle, nil,
                            (Request as TSRB).getDataLength,
-                           (Request as TSRB).getBuffer) > 0 then
-        IBDataBaseError;
+                           (Request as TSRB).getBuffer) = 0;
+    if not Result and RaiseExceptionOnError then
+      IBDataBaseError;
+  end;
 end;
 
-function TFB25ServiceManager.Query(SQPB: ISQPB; Request: ISRB
-  ): IServiceQueryResults;
+function TFB25ServiceManager.Query(SQPB: ISQPB; Request: ISRB;
+  RaiseExceptionOnError: boolean): IServiceQueryResults;
 var QueryResults: TServiceQueryResults;
 begin
   CheckActive;
@@ -178,7 +190,12 @@ begin
                          (Request as TSRB).getBuffer,
                          QueryResults.getBufSize,
                          QueryResults.Buffer) > 0 then
-        IBDataBaseError;
+      begin
+        if RaiseExceptionOnError then
+          IBDataBaseError
+        else
+          Result := nil;
+      end;
     end
     else
     if isc_service_query(StatusVector, @FHandle, nil,
@@ -188,8 +205,12 @@ begin
                        (Request as TSRB).getBuffer,
                        QueryResults.getBufSize,
                        QueryResults.Buffer) > 0 then
-      IBDataBaseError;
-
+    begin
+      if RaiseExceptionOnError then
+        IBDataBaseError
+      else
+        Result := nil;
+    end;
 end;
 
 end.

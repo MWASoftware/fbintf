@@ -69,8 +69,8 @@ type
     procedure Detach(Force: boolean=false); virtual; abstract;
     function AllocateSRB: ISRB;
     function AllocateSQPB: ISQPB;
-    function Query(SQPB: ISQPB; Request: ISRB): IServiceQueryResults; overload; virtual; abstract;
-    function Query(Request: ISRB): IServiceQueryResults;  overload;
+    function Query(SQPB: ISQPB; Request: ISRB; RaiseExceptionOnError: boolean=true): IServiceQueryResults; overload; virtual; abstract;
+    function Query(Request: ISRB; RaiseExceptionOnError: boolean=true): IServiceQueryResults;  overload;
   end;
 
 implementation
@@ -140,9 +140,10 @@ begin
    Result := TSQPB.Create;
 end;
 
-function TFBServiceManager.Query(Request: ISRB): IServiceQueryResults;
+function TFBServiceManager.Query(Request: ISRB; RaiseExceptionOnError: boolean
+  ): IServiceQueryResults;
 begin
-   Result := Query(nil,Request);
+   Result := Query(nil,Request,RaiseExceptionOnError);
 end;
 
 end.

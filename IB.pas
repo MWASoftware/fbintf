@@ -1073,9 +1073,9 @@ type
     function IsAttached: boolean;
     function AllocateSRB: ISRB;
     function AllocateSQPB: ISQPB;
-    procedure Start(Request: ISRB);
-    function Query(SQPB: ISQPB; Request: ISRB) :IServiceQueryResults; overload;
-    function Query(Request: ISRB) :IServiceQueryResults; overload;
+    function Start(Request: ISRB; RaiseExceptionOnError: boolean=true): boolean;
+    function Query(SQPB: ISQPB; Request: ISRB; RaiseExceptionOnError: boolean=true) :IServiceQueryResults; overload;
+    function Query(Request: ISRB; RaiseExceptionOnError: boolean=true) :IServiceQueryResults; overload;
   end;
 
   {The Firebird API.

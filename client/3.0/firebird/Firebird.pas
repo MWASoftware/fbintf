@@ -13,11 +13,12 @@ unit Firebird;
 {$DEFINE WINDOWS} 
 {$ENDIF}
 
-interface
 {$IFDEF FPC}
-{$mode delphi}
+{$MODE DELPHI}
 {$OBJECTCHECKS OFF}
 {$ENDIF}
+
+interface
 
 uses Classes, SysUtils, IB, DB;
 

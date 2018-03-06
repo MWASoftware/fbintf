@@ -43,6 +43,8 @@ uses
 type
   { TFBServiceManager }
 
+  { TFB30ServiceManager }
+
   TFB30ServiceManager = class(TFBServiceManager,IServiceManager)
   private
     FServiceIntf: Firebird.IService;
@@ -57,8 +59,8 @@ type
     {IServiceManager}
     procedure Detach(Force: boolean=false); override;
     function IsAttached: boolean;
-    procedure Start(Request: ISRB);
-    function Query(SQPB: ISQPB; Request: ISRB): IServiceQueryResults; override;
+    function Start(Request: ISRB; RaiseExceptionOnError: boolean=true): boolean;
+    function Query(SQPB: ISQPB; Request: ISRB; RaiseExceptionOnError: boolean=true): IServiceQueryResults; override;
   end;
 
 implementation
@@ -115,20 +117,29 @@ begin
   Result := FServiceIntf <> nil;
 end;
 
-procedure TFB30ServiceManager.Start(Request: ISRB);
+function TFB30ServiceManager.Start(Request: ISRB; RaiseExceptionOnError: boolean
+  ): boolean;
 begin
-  CheckActive;
+  Result := true;
+  if RaiseExceptionOnError then
+    CheckActive
+  else
+    Result := FServiceIntf <> nil;
+  if Result then
   with Firebird30ClientAPI do
     begin
       FServiceIntf.Start(StatusIntf,
                            (Request as TSRB).getDataLength,
                            BytePtr((Request as TSRB).getBuffer));
-      Check4DataBaseError;
+      if RaiseExceptionOnError then
+        Check4DataBaseError
+      else
+        Result := not InErrorState;
     end;
 end;
 
-function TFB30ServiceManager.Query(SQPB: ISQPB; Request: ISRB
-  ): IServiceQueryResults;
+function TFB30ServiceManager.Query(SQPB: ISQPB; Request: ISRB;
+  RaiseExceptionOnError: boolean): IServiceQueryResults;
 var QueryResults: TServiceQueryResults;
 begin
   CheckActive;
@@ -145,15 +156,25 @@ begin
                          BytePtr((Request as TSRB).getBuffer),
                          QueryResults.getBufSize,
                          BytePtr(QueryResults.Buffer));
-        Check4DataBaseError;
+      if RaiseExceptionOnError then
+        Check4DataBaseError
+      else
+      if InErrorState then
+        Result := nil;
     end
     else
-     FServiceIntf.query(StatusIntf, 0, nil,
+    begin
+      FServiceIntf.query(StatusIntf, 0, nil,
                        (Request as TSRB).getDataLength,
                        BytePtr((Request as TSRB).getBuffer),
                        QueryResults.getBufSize,
                        BytePtr(QueryResults.Buffer));
-      Check4DataBaseError;
+      if RaiseExceptionOnError then
+        Check4DataBaseError
+      else
+      if InErrorState then
+        Result := nil;
+    end;
   end;
 end;
 
