@@ -121,11 +121,7 @@ function TFB30ServiceManager.Start(Request: ISRB; RaiseExceptionOnError: boolean
   ): boolean;
 begin
   Result := true;
-  if RaiseExceptionOnError then
-    CheckActive
-  else
-    Result := FServiceIntf <> nil;
-  if Result then
+  CheckActive;
   with Firebird30ClientAPI do
     begin
       FServiceIntf.Start(StatusIntf,

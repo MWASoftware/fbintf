@@ -159,12 +159,7 @@ function TFB25ServiceManager.Start(Request: ISRB; RaiseExceptionOnError: boolean
   ): boolean;
 begin
   Result := true;
-  if RaiseExceptionOnError then
-    CheckActive
-  else
-    Result := FHandle <> nil;
-
-  if Result then
+  CheckActive;
   with Firebird25ClientAPI do
   begin
     Result := isc_service_start(StatusVector, @FHandle, nil,
