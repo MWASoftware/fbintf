@@ -58,6 +58,7 @@ type
     FODSMajorVersion: integer;
     FODSMinorVersion: integer;
     FUserCharSetMap: array of TCharSetMap;
+    FSecDatabase: AnsiString;
   protected
     FDatabaseName: AnsiString;
     FRaiseExceptionOnConnectError: boolean;
@@ -129,6 +130,7 @@ public
   function GetConnectString: AnsiString;
   function GetRemoteProtocol: AnsiString;
   function GetAuthenticationMethod: AnsiString;
+  function GetSecurityDatabase: AnsiString;
   function GetODSMajorVersion: integer;
   function GetODSMinorVersion: integer;
   {Character Sets}
@@ -252,17 +254,19 @@ begin
   FCharSetID := 0;
   FRemoteProtocol := '';
   FAuthMethod := 'Legacy_Auth';
+  FSecDatabase := 'Default';
   if FODSMajorVersion > 11 then
   begin
     Stmt := Prepare(StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit),
-                    'Select MON$CHARACTER_SET_ID, MON$REMOTE_PROTOCOL, MON$AUTH_METHOD From MON$ATTACHMENTS '+
+                    'Select MON$CHARACTER_SET_ID, MON$REMOTE_PROTOCOL, MON$AUTH_METHOD, MON$SEC_DATABASE From MON$ATTACHMENTS, MON$DATABASE '+
                     'Where MON$ATTACHMENT_ID = CURRENT_CONNECTION');
     ResultSet := Stmt.OpenCursor;
     if ResultSet.FetchNext then
     begin
       FCharSetID := ResultSet[0].AsInteger;
-      FRemoteProtocol := ResultSet[1].AsString;
-      FAuthMethod := ResultSet[2].AsString;
+      FRemoteProtocol := Trim(ResultSet[1].AsString);
+      FAuthMethod := Trim(ResultSet[2].AsString);
+      FSecDatabase := Trim(ResultSet[3].AsString);
     end
   end
   else
@@ -275,7 +279,7 @@ begin
     if ResultSet.FetchNext then
     begin
       FCharSetID := ResultSet[0].AsInteger;
-      FRemoteProtocol := ResultSet[1].AsString;
+      FRemoteProtocol := Trim(ResultSet[1].AsString);
     end
   end
   else
@@ -657,6 +661,11 @@ end;
 function TFBAttachment.GetAuthenticationMethod: AnsiString;
 begin
   Result := FAuthMethod;
+end;
+
+function TFBAttachment.GetSecurityDatabase: AnsiString;
+begin
+  Result := FSecDatabase;
 end;
 
 function TFBAttachment.GetODSMajorVersion: integer;

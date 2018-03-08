@@ -931,6 +931,7 @@ type
     function GetConnectString: AnsiString;
     function GetRemoteProtocol: AnsiString;
     function GetAuthenticationMethod: AnsiString;
+    function GetSecurityDatabase: AnsiString;
     function GetODSMajorVersion: integer;
     function GetODSMinorVersion: integer;
     function HasActivity: boolean;

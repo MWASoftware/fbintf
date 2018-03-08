@@ -249,7 +249,9 @@ type
       ibxeServiceUnavailable,
       ibxeBadConnectString,
       ibxeServiceNotStarted,
-      ibxeNotRequiredDataSetSource
+      ibxeNotRequiredDataSetSource,
+      ibxeNoLimboTransactionInsert,
+      ibxeDatabaseNotConnected
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -454,6 +456,8 @@ resourcestring
   SBadConnectString = 'Parse Error in Connect String';
   SServiceNotStarted = 'Cannot Query running service until the service has been started';
   SNotRequiredDataSetSource = 'Object of class %s is not a valid dataset source';
+  SNoLimboTransactionInsert = 'You cannot add to a Limbo Transaction list';
+  SDatabaseNotConnected = 'Cannot connect using an unattached database';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -625,7 +629,9 @@ const
     SServiceUnavailable,
     SBadConnectString,
     SServiceNotStarted,
-    SNotRequiredDataSetSource
+    SNotRequiredDataSetSource,
+    SNoLimboTransactionInsert,
+    SDatabaseNotConnected
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
