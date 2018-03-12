@@ -1219,6 +1219,11 @@ begin
       FBOF := false;
       result := true;
     end;
+    if FCollectStatistics then
+    begin
+      GetPerfCounters(FAfterStats);
+      FStatisticsAvailable := true;
+    end;
   end;
   FSQLRecord.RowChange;
   if FEOF then

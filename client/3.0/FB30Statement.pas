@@ -1307,6 +1307,14 @@ begin
       FBOF := false;
       result := true;
     end;
+    if FCollectStatistics then
+    begin
+      UtilIntf.getPerfCounters(StatusIntf,
+                              (GetAttachment as TFB30Attachment).AttachmentIntf,
+                              ISQL_COUNTERS,@FAfterStats);
+      Check4DataBaseError;
+      FStatisticsAvailable := true;
+    end;
   end;
   FSQLRecord.RowChange;
   SignalActivity;

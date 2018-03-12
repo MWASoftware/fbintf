@@ -1253,6 +1253,8 @@ end;
 initialization
   FFirebirdAPI := nil;
 
+finalization
+  FFirebirdAPI := nil;
 
 end.
 

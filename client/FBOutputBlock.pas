@@ -430,8 +430,16 @@ end;
 procedure TOutputBlockItem.SetString(out S: AnsiString; Buf: PByte;
   Len: integer; CodePage: TSystemCodePage);
 var rs: RawByteString;
+    i: integer;
 begin
-  system.SetString(rs,PAnsiChar(Buf),len);
+  {There seems to be a memory manager problem with SetString that can cause
+   an unhandled exception at the end of a program if it is used to set the
+   string. Safer to copy characters one by one. Note that Setlength does
+   not work around the bug either.}
+  rs := '';
+  for i := 0 to len-1 do
+    rs := rs + PAnsiChar(buf+i)^;
+//  system.SetString(rs,PAnsiChar(Buf),len);
   SetCodePage(rs,CodePage,false);
   S := rs;
 end;

@@ -15,6 +15,10 @@ FBINTF Change Log  version                                                 (1.1-
 4. IAttachment addition (informational)
     function GetSecurityDatabase: AnsiString;
 
+5. IStatement: performance counters now updated after each Fetch. GetPerfStatistics
+   thus now returns accumulated stats for a select statement from opening a cursor
+   up to the last fetch.
+
 
 
 FBINTF Change Log  version                                                 (1.1-1) Tue, 27 Feb 2018 16:51:16 +0000
