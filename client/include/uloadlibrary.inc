@@ -33,20 +33,20 @@ begin
     LibName := GetFirebirdLibList;
   IBLibrary := FindLibrary(LibName);
   {$IFDEF DARWIN}
-  if Result = NilHandle then
+  if IBLibrary = NilHandle then
   begin
     {See http://paulbeachsblog.blogspot.co.uk/2008/03/where-is-libfbclientdylib-on-macosx.html
      Try loading direct from Firebird Framework}
 
     LibName := '/Library/Frameworks/Firebird.framework/Firebird';
     IBLibrary := LoadLibrary(LibName);
-    if Result = NilHandle then
+    if IBLibrary = NilHandle then
     begin
       LibName := '/Library/Frameworks/Firebird.framework/Libraries/libfbclient.dylib';
       IBLibrary := LoadLibrary(LibName);
     end;
     if IBLibrary <> NilHandle then
-       FBLibraryName := ExtractFileName(LibName);
+       FFBLibraryName := ExtractFileName(LibName);
   end
   {$ENDIF}
   FOwnsIBLibrary := IBLibrary <> NilHandle;

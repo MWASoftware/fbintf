@@ -19,6 +19,7 @@ FBINTF Change Log  version                                                 (1.1-
    thus now returns accumulated stats for a select statement from opening a cursor
    up to the last fetch.
 
+6. DARWIN: uloadlibrary.inc bug fix.
 
 
 FBINTF Change Log  version                                                 (1.1-1) Tue, 27 Feb 2018 16:51:16 +0000
