@@ -54,7 +54,7 @@ const
   TAB  = #9;
   NULL_TERMINATOR = #0;
 
-  sqlReservedWords: array [0..197] of string = (
+  sqlReservedWords: array [0..198] of string = (
   'ADD',
   'ADMIN',
   'ALL',
@@ -146,6 +146,7 @@ const
   'INTO',
   'IS',
   'JOIN',
+  'KEY',
   'LEADING',
   'LEFT',
   'LIKE',

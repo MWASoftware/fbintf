@@ -45,7 +45,7 @@ uses
   FBTransaction;
 
 type
-  TPerfStatistics = array[psCurrentMemory..psFetches] of comp;
+  TPerfStatistics = array[psCurrentMemory..psFetches] of Int64;
 
   { TFBStatement }
 
@@ -80,6 +80,7 @@ type
     function InternalOpenCursor(aTransaction: ITransaction): IResultSet;   virtual; abstract;
     procedure FreeHandle;  virtual; abstract;
     procedure InternalClose(Force: boolean); virtual; abstract;
+    function TimeStampToMSecs(const TimeStamp: TTimeStamp): Int64;
   public
     constructor Create(Attachment: IAttachment; Transaction: ITransaction;
       sql: AnsiString; SQLDialect: integer);
@@ -133,6 +134,11 @@ begin
 
   if not aTransaction.InTransaction then
     IBError(ibxeNotInTransaction,[]);
+end;
+
+function TFBStatement.TimeStampToMSecs(const TimeStamp: TTimeStamp): Int64;
+begin
+  Result := TimeStamp.Time + Int64(timestamp.date)*msecsperday;
 end;
 
 constructor TFBStatement.Create(Attachment: IAttachment;
