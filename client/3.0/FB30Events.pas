@@ -38,8 +38,7 @@ interface
 
 uses
   {$IFDEF WINDOWS}Windows, {$ENDIF} Classes, SysUtils, Firebird, IB, FB30ClientAPI, FB30Attachment,
-  syncobjs, FBEvents
-  {$IF defined(FPC) and defined(UNIX)} ,cthreads {$IFEND};
+  syncobjs, FBEvents;
 
 type
   TFB30Events = class;
