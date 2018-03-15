@@ -73,7 +73,8 @@ interface
 
 uses
   {$IFDEF WINDOWS}Windows, {$ENDIF}Classes, SysUtils, IB, FB25ClientAPI, FB25Attachment,
-  IBExternals, IBHeader, syncobjs, FBEvents;
+  IBExternals, IBHeader, syncobjs, FBEvents
+  {$IF defined(FPC) and defined(UNIX)} ,cthreads {$IFEND};
 
 type
   TFB25Events = class;
