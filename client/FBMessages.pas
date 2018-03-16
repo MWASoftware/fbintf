@@ -251,7 +251,8 @@ type
       ibxeServiceNotStarted,
       ibxeNotRequiredDataSetSource,
       ibxeNoLimboTransactionInsert,
-      ibxeDatabaseNotConnected
+      ibxeDatabaseNotConnected,
+      ibxMultiThreadRequired
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -458,6 +459,8 @@ resourcestring
   SNotRequiredDataSetSource = 'Object of class %s is not a valid dataset source';
   SNoLimboTransactionInsert = 'You cannot add to a Limbo Transaction list';
   SDatabaseNotConnected = 'Cannot connect using an unattached database';
+  SMultiThreadRequired = 'Multi-threading required for %s but not enabled. Please recompile with multi-threading support enabled. '+
+                         'Hint: you probably need to add -dUseCThreads to the Custom Options.';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -631,7 +634,8 @@ const
     SServiceNotStarted,
     SNotRequiredDataSetSource,
     SNoLimboTransactionInsert,
-    SDatabaseNotConnected
+    SDatabaseNotConnected,
+    SMultiThreadRequired
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;

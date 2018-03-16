@@ -34,12 +34,13 @@ unit FB30Events;
 {$interfaces COM}
 {$ENDIF}
 
+{ $DEFINE EVENTDEBUG}
+
 interface
 
 uses
   {$IFDEF WINDOWS}Windows, {$ENDIF} Classes, SysUtils, Firebird, IB, FB30ClientAPI, FB30Attachment,
-  syncobjs, FBEvents
-  {$IF defined(FPC) and defined(UNIX)} ,cthreads {$IFEND};
+  syncobjs, FBEvents;
 
 type
   TFB30Events = class;
@@ -137,6 +138,7 @@ begin
   FOWner := aOwner;
   FName := aName;
   addRef;
+  {$IFDEF EVENTDEBUG} writeln(FName,' TEventhandlerInterface: Create'); {$ENDIF}
 end;
 
 destructor TEventhandlerInterface.Destroy;
@@ -146,19 +148,20 @@ begin
 {$ELSE}
   if assigned(FEventWaiting) then FEventWaiting.Free;
 {$ENDIF}
+{$IFDEF EVENTDEBUG} writeln(FName,' TEventhandlerInterface: Destroy'); {$ENDIF}
   inherited Destroy;
 end;
 
 procedure TEventhandlerInterface.addRef;
 begin
   Inc(FRef);
-//  writeln(FName,': ref count = ',FRef);
+{$IFDEF EVENTDEBUG}  writeln(FName,': ref count = ',FRef);{$ENDIF}
 end;
 
 function TEventhandlerInterface.release: Integer;
 begin
   Dec(FRef);
-//  writeln(FName,': ref count = ',FRef);
+{$IFDEF EVENTDEBUG}  writeln(FName,': ref count = ',FRef);{$ENDIF}
   if FRef = 0 then Free;
   Result := FRef;
 end;
@@ -166,7 +169,7 @@ end;
 procedure TEventhandlerInterface.eventCallbackFunction(length: Cardinal;
   events: BytePtr);
 begin
-//  writeln('TEventhandlerInterface: Event Callback');
+{$IFDEF EVENTDEBUG}  writeln(FName,' TEventhandlerInterface: Event Callback'); {$ENDIF}
   FOwner.FCriticalSection.Enter;
   try
     if FOwner.FResultBuffer <> nil then
@@ -174,7 +177,7 @@ begin
   finally
     FOwner.FCriticalSection.Leave
   end;
-  //writeln('TEventhandlerInterface: Set Event Called');
+  {$IFDEF EVENTDEBUG}writeln(FName,' TEventhandlerInterface: Set Event Called'); {$ENDIF}
   {$IFDEF WINDOWS}
   SetEvent(FEventHandler);
   {$ELSE}
@@ -184,13 +187,13 @@ end;
 
 procedure TEventhandlerInterface.WaitForEvent;
 begin
-//  writeln('TEventhandlerInterface: Start Event Wait');
+{$IFDEF EVENTDEBUG}  writeln(FName,' TEventhandlerInterface: Start Event Wait'); {$ENDIF}
   {$IFDEF WINDOWS}
   WaitForSingleObject(FEventHandler,INFINITE);
   {$ELSE}
   FEventWaiting.WaitFor(INFINITE);
   {$ENDIF}
-//  writeln('TEventhandlerInterface: Event Wait Ends');
+{$IFDEF EVENTDEBUG}  writeln(FName,' TEventhandlerInterface: Event Wait Ends');{$ENDIF}
 end;
 
 procedure TEventhandlerInterface.CancelWait;
@@ -206,13 +209,16 @@ end;
 
 procedure TEventHandlerThread.Execute;
 begin
+  {$IFDEF EVENTDEBUG}  writeln('Event Handler Thread Starts'); {$ENDIF}
   while not Terminated do
   begin
     FEventHandler.WaitForEvent;
+    {$IFDEF EVENTDEBUG}  writeln('Event Handler Ends Wait ',Terminated); {$ENDIF}
 
     if not Terminated  then
       FOwner.EventSignaled;
   end;
+  {$IFDEF EVENTDEBUG}  writeln('Event Handler Thread Ends'); {$ENDIF}
 end;
 
 constructor TEventHandlerThread.Create(Owner: TFB30Events;
@@ -228,6 +234,7 @@ procedure TEventHandlerThread.Terminate;
 begin
   inherited Terminate;
   FEventHandler.CancelWait;
+  {$IFDEF EVENTDEBUG}  writeln('Event Handler Thread Cancelled'); {$ENDIF}
 end;
 
   { TFB30Events }
