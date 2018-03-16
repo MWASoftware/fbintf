@@ -25,6 +25,8 @@ FBINTF Change Log  version   (1.1-2) Wed, 14 Mar 2018 12:45:19 +0000
 7. Type change: "TPerfCounters = array[TPerfStats] of Int64". Note "Int64"
    replaces deprecated "comp" type.
 
+10. Testsuite Test10 updated to include thread synchronisation for event reporting.
+
 
 FBINTF Change Log  version (1.1-1) Tue, 27 Feb 2018 16:51:16 +0000
 

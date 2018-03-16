@@ -41,6 +41,7 @@ type
     FEventSignalled: boolean;
     procedure EventsTest(Attachment: IAttachment);
     procedure EventReport(Sender: IEvents);
+    procedure ShowEventReport;
     procedure ShowEventCounts(Intf: IEvents);
   public
     function TestTitle: AnsiString; override;
@@ -66,12 +67,14 @@ begin
   EventHandler.AsyncWaitForEvent(EventReport);
   writeln(OutFile,'Async Wait Called');
   sleep(500);
+  CheckSynchronize;
   if FEventSignalled then
   begin
     writeln(OutFile,'First Event - usually ignored');
     FEventSignalled := false;
     EventHandler.AsyncWaitForEvent(EventReport);
     sleep(100);
+    CheckSynchronize;
     if FEventSignalled then
     begin
       writeln(OutFile,'Unexpected Event 1');
@@ -96,6 +99,7 @@ begin
   EventHandler.AsyncWaitForEvent(EventReport);
   writeln(OutFile,'Async Wait Called');
   sleep(500);
+  CheckSynchronize;
   if FEventSignalled then
   begin
     writeln(OutFile,'Deferred Events Caught');
@@ -114,6 +118,7 @@ begin
   FEventSignalled := false;
   writeln(OutFile,'Async Wait: Test Cancel');
   EventHandler.AsyncWaitForEvent(EventReport);
+  CheckSynchronize;
   writeln(OutFile,'Async Wait Called');
   EventHandler.Cancel;
   writeln(OutFile,'Event Cancelled');
@@ -126,16 +131,23 @@ begin
     writeln(OutFile,'Event called - so Cancel failed');
 
   writeln(OutFile,'Sync wait');
+  CheckSynchronize;
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],sqlEvent);
   EventHandler.WaitForEvent;
   writeln(OutFile,'Event Signalled');
   ShowEventCounts(EventHandler);
   EventHandler := nil;
+  CheckSynchronize;
 end;
 
 procedure TTest10.EventReport(Sender: IEvents);
 begin
   FEventSignalled := true;
+  TThread.Synchronize(nil,ShowEventReport);
+end;
+
+procedure TTest10.ShowEventReport;
+begin
   writeln(OutFile,'Event Signalled');
 end;
 
