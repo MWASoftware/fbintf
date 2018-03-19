@@ -106,6 +106,7 @@ begin
     ShowEventCounts(EventHandler);
     FEventSignalled := false;
     EventHandler.AsyncWaitForEvent(EventReport);
+    CheckSynchronize;
     sleep(100);
     if FEventSignalled then
       writeln(OutFile,'Unexpected Event 3');
