@@ -252,7 +252,8 @@ type
       ibxeNotRequiredDataSetSource,
       ibxeNoLimboTransactionInsert,
       ibxeDatabaseNotConnected,
-      ibxMultiThreadRequired
+      ibxeMultiThreadRequired,
+      ibxeODSVersionRequired
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -461,6 +462,7 @@ resourcestring
   SDatabaseNotConnected = 'Cannot connect using an unattached database';
   SMultiThreadRequired = 'Multi-threading required for %s but not enabled. Please recompile with multi-threading support enabled. '+
                          'Hint: you probably need to add -dUseCThreads to the Custom Options.';
+  SODSVersionRequired = 'This feature requires ODS Version %s or later';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -635,7 +637,8 @@ const
     SNotRequiredDataSetSource,
     SNoLimboTransactionInsert,
     SDatabaseNotConnected,
-    SMultiThreadRequired
+    SMultiThreadRequired,
+    SODSVersionRequired
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;

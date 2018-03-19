@@ -247,7 +247,7 @@ end;
 procedure TFBEvents.SetEvents(EventNames: TStrings);
 begin
   if (EventNames.Count > 0) and not IsMultiThread then
-    IBError(ibxMultiThreadRequired,['Firebird Events Handling']);
+    IBError(ibxeMultiThreadRequired,['Firebird Events Handling']);
   if EventNames.Text <> FEvents.Text then
   begin
     Cancel;
