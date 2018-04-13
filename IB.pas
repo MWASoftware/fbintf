@@ -948,7 +948,7 @@ type
       AllowReverseLookup:boolean; out CharSetID: integer);
   end;
 
-  TProtocolAll = (TCP, SPX, NamedPipe, Local, inet, wnet, xnet, unknownProtocol);
+  TProtocolAll = (TCP, SPX, NamedPipe, Local, inet, inet4, inet6, wnet, xnet, unknownProtocol);
   TProtocol = TCP..xnet;
 
   {Service Parameter Block (SPB).

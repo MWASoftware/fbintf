@@ -404,8 +404,27 @@ end;
 function ParseConnectString(ConnectString: AnsiString; var ServerName,
   DatabaseName: AnsiString; var Protocol: TProtocolAll; var PortNo: AnsiString
   ): boolean;
+
+  function GetProtocol(scheme: AnsiString): TProtocolAll;
+  begin
+    scheme := AnsiUpperCase(scheme);
+    if scheme = 'INET' then
+      Result := inet
+    else
+    if scheme = 'INET4' then
+      Result := inet4
+    else
+    if scheme = 'INET6' then
+      Result := inet6
+    else
+    if scheme = 'XNET' then
+      Result := xnet
+    else
+    if scheme = 'WNET' then
+      Result := wnet
+  end;
+
 var RegexObj: TRegExpr;
-    scheme: AnsiString;
 begin
   ServerName := '';
   DatabaseName := ConnectString;
@@ -415,61 +434,66 @@ begin
   try
     {extact database file spec}
     RegexObj.ModifierG := false; {turn off greedy matches}
-    RegexObj.Expression := '^([a-zA-Z]+)://([a-zA-Z0-9\-\.]+)(|:[0-9a-zA-Z\-]+)/(.*)$';
+    RegexObj.Expression := '^([a-zA-Z46]+)://([a-zA-Z0-9\-\.]*)(|:[0-9a-zA-Z\-]+)/(.*)$';
     Result := RegexObj.Exec(ConnectString);
     if Result then
     begin
       {URL type connect string}
-      scheme := AnsiUpperCase(RegexObj.Match[1]);
+      Protocol := GetProtocol(RegexObj.Match[1]);
       ServerName := RegexObj.Match[2];
       if RegexObj.MatchLen[3] > 0 then
         PortNo := system.Copy(ConnectString,RegexObj.MatchPos[3]+1,RegexObj.MatchLen[3]-1);
       DatabaseName := RegexObj.Match[4];
-      if scheme = 'INET' then
-        Protocol := inet
-      else
-      if scheme = 'XNET' then
-        Protocol := xnet
-      else
-      if scheme = 'WNET' then
-        Protocol := wnet
+      if ServerName = '' then
+        DatabaseName := '/' + DatabaseName;
     end
     else
     begin
-      RegexObj.Expression := '^([a-zA-Z]:\\.*)';
+      {URL type connect string - local loop}
+      RegexObj.Expression := '^([a-zA-Z46]+)://(.*)$';
       Result := RegexObj.Exec(ConnectString);
       if Result then
-        Protocol := Local {Windows with leading drive ID}
+      begin
+        Protocol := GetProtocol(RegexObj.Match[1]);
+        DatabaseName := RegexObj.Match[2];
+      end
       else
       begin
-        RegexObj.Expression := '^([a-zA-Z0-9\-\.]+)(|/[0-9a-zA-Z\-]+):(.*)$';
+        RegexObj.Expression := '^([a-zA-Z]:\\.*)';
         Result := RegexObj.Exec(ConnectString);
         if Result then
-        begin
-          {Legacy TCP Format}
-          ServerName := RegexObj.Match[1];
-          if RegexObj.MatchLen[2] > 0 then
-            PortNo := system.Copy(ConnectString,RegexObj.MatchPos[2]+1,RegexObj.MatchLen[2]-1);
-          DatabaseName := RegexObj.Match[3];
-          Protocol := TCP;
-        end
+          Protocol := Local {Windows with leading drive ID}
         else
         begin
-          RegexObj.Expression := '^\\\\([a-zA-Z0-9\-\.]+)(|@[0-9a-zA-Z\-]+)\\(.*)$';
+          RegexObj.Expression := '^([a-zA-Z0-9\-\.]+)(|/[0-9a-zA-Z\-]+):(.*)$';
           Result := RegexObj.Exec(ConnectString);
           if Result then
           begin
-            {Netbui}
+            {Legacy TCP Format}
             ServerName := RegexObj.Match[1];
             if RegexObj.MatchLen[2] > 0 then
               PortNo := system.Copy(ConnectString,RegexObj.MatchPos[2]+1,RegexObj.MatchLen[2]-1);
             DatabaseName := RegexObj.Match[3];
-            Protocol := NamedPipe
+            Protocol := TCP;
           end
           else
           begin
-            Result := true;
-            Protocol := Local; {Assume local}
+            RegexObj.Expression := '^\\\\([a-zA-Z0-9\-\.]+)(|@[0-9a-zA-Z\-]+)\\(.*)$';
+            Result := RegexObj.Exec(ConnectString);
+            if Result then
+            begin
+              {Netbui}
+              ServerName := RegexObj.Match[1];
+              if RegexObj.MatchLen[2] > 0 then
+                PortNo := system.Copy(ConnectString,RegexObj.MatchPos[2]+1,RegexObj.MatchLen[2]-1);
+              DatabaseName := RegexObj.Match[3];
+              Protocol := NamedPipe
+            end
+            else
+            begin
+              Result := true;
+              Protocol := Local; {Assume local}
+            end;
           end;
         end;
       end;
@@ -527,6 +551,15 @@ end;
 
 function MakeConnectString(ServerName, DatabaseName: AnsiString;
   Protocol: TProtocol; PortNo: AnsiString): AnsiString;
+
+  function FormatURL: AnsiString;
+  begin
+    if (ServerName = '') and (Pos('/',DatabaseName) <= 1) then
+      Result := DatabaseName
+    else
+      Result := ServerName + '/' + DatabaseName;
+  end;
+
 begin
   if PortNo <> '' then
     case Protocol of
@@ -546,9 +579,11 @@ begin
     SPX:        Result := ServerName + '@' + DatabaseName; {do not localize}
     NamedPipe:  Result := '\\' + ServerName + '\' + DatabaseName; {do not localize}
     Local:      Result := DatabaseName; {do not localize}
-    inet:       Result := 'inet://' + ServerName + '/'+ DatabaseName; {do not localize}
-    wnet:       Result := 'wnet://' + ServerName + '/'+ DatabaseName; {do not localize}
-    xnet:       Result := 'xnet://' + ServerName + '/'+ DatabaseName;  {do not localize}
+    inet:       Result := 'inet://' + FormatURL; {do not localize}
+    inet4:       Result := 'inet4://' + FormatURL; {do not localize}
+    inet6:       Result := 'inet6://' + FormatURL; {do not localize}
+    wnet:       Result := 'wnet://' + FormatURL; {do not localize}
+    xnet:       Result := 'xnet://' + FormatURL;  {do not localize}
   end;
 end;
 
