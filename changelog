@@ -1,4 +1,4 @@
-FBINTF Change Log  version            (1.1-2) Mon, 09 Apr 2018 11:30:46 +0100
+FBINTF Change Log  version             (1.1-2) Fri, 13 Apr 2018 11:15:35 +0100
 
 1. Firebird.pas: {$OBJECTCHECKS OFF} added to file to avoid runtime error when
    program compiled with -CR command line switch.
