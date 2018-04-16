@@ -757,7 +757,7 @@ var i: integer;
 begin
   Result := false;
   for i := Low(CharSetMap) to High(CharSetMap) do
-    if AnsiCompareStr(CharSetMap[i].CharSetName, CharSetName) = 0 then
+    if AnsiCompareText(CharSetMap[i].CharSetName, CharSetName) = 0 then
     begin
       CharSetID := CharSetMap[i].CharSetID;
       Result := true;
@@ -765,7 +765,7 @@ begin
     end;
 
     for i := 0 to Length(FUserCharSetMap) - 1 do
-      if AnsiCompareStr(FUserCharSetMap[i].CharSetName, CharSetName) = 0 then
+      if AnsiCompareText(FUserCharSetMap[i].CharSetName, CharSetName) = 0 then
       begin
         CharSetID := FUserCharSetMap[i].CharSetID;
         Result := true;
