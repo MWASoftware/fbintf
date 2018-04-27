@@ -47,7 +47,7 @@ begin
     end;
     if IBLibrary <> NilHandle then
        FFBLibraryName := ExtractFileName(LibName);
-  end
+  end;
   {$ENDIF}
   FOwnsIBLibrary := IBLibrary <> NilHandle;
 end;
