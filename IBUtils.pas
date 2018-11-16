@@ -47,6 +47,246 @@ interface
 
 uses Classes, SysUtils, IB;
 
+type
+  TSQLTokens = (
+
+  {Reserved Words}
+
+  sqltAdd,
+  sqltAdmin,
+  sqltAll,
+  sqltAlter,
+  sqltAnd,
+  sqltAny,
+  sqltAs,
+  sqltAt,
+  sqltAvg,
+  sqltBegin,
+  sqltBetween,
+  sqltBigint,
+  sqltBit_Length,
+  sqltBlob,
+  sqltBoolean,
+  sqltBoth,
+  sqltBy,
+  sqltCase,
+  sqltCast,
+  sqltChar,
+  sqltChar_Length,
+  sqltCharacter,
+  sqltCharacter_Length,
+  sqltCheck,
+  sqltClose,
+  sqltCollate,
+  sqltColumn,
+  sqltCommit,
+  sqltConnect,
+  sqltConstraint,
+  sqltCorr,
+  sqltCount,
+  sqltCovar_Pop,
+  sqltCovar_Samp,
+  sqltCreate,
+  sqltCross,
+  sqltCurrent,
+  sqltCurrent_Connection,
+  sqltCurrent_Date,
+  sqltCurrent_Role,
+  sqltCurrent_Time,
+  sqltCurrent_Timestamp,
+  sqltCurrent_Transaction,
+  sqltCurrent_User,
+  sqltCursor,
+  sqltDate,
+  sqltDay,
+  sqltDec,
+  sqltDecimal,
+  sqltDeclare,
+  sqltDefault,
+  sqltDelete,
+  sqltDeleting,
+  sqltDeterministic,
+  sqltDisconnect,
+  sqltDistinct,
+  sqltDouble,
+  sqltDrop,
+  sqltElse,
+  sqltEnd,
+  sqltEscape,
+  sqltExecute,
+  sqltExists,
+  sqltExternal,
+  sqltExtract,
+  sqltFalse,
+  sqltFetch,
+  sqltFilter,
+  sqltFloat,
+  sqltFor,
+  sqltForeign,
+  sqltFrom,
+  sqltFull,
+  sqltFunction,
+  sqltGdscode,
+  sqltGlobal,
+  sqltGrant,
+  sqltGroup,
+  sqltHaving,
+  sqltHour,
+  sqltIn,
+  sqltIndex,
+  sqltInner,
+  sqltInsensitive,
+  sqltInsert,
+  sqltInserting,
+  sqltInt,
+  sqltInteger,
+  sqltInto,
+  sqltIs,
+  sqltJoin,
+  sqltKey,
+  sqltLeading,
+  sqltLeft,
+  sqltLike,
+  sqltLong,
+  sqltLower,
+  sqltMax,
+  sqltMaximum_Segment,
+  sqltMerge,
+  sqltMin,
+  sqltMinute,
+  sqltMonth,
+  sqltNational,
+  sqltNatural,
+  sqltNchar,
+  sqltNo,
+  sqltNot,
+  sqltNull,
+  sqltNumeric,
+  sqltOctet_Length,
+  sqltOf,
+  sqltOffset,
+  sqltOn,
+  sqltOnly,
+  sqltOpen,
+  sqltOr,
+  sqltOrder,
+  sqltOuter,
+  sqltOver,
+  sqltParameter,
+  sqltPlan,
+  sqltPosition,
+  sqltPost_Event,
+  sqltPrecision,
+  sqltPrimary,
+  sqltProcedure,
+  sqltRdbDb_Key,
+  sqltRdbRecord_Version,
+  sqltReal,
+  sqltRecord_Version,
+  sqltRecreate,
+  sqltRecursive,
+  sqltReferences,
+  sqltRegr_Avgx,
+  sqltRegr_Avgy,
+  sqltRegr_Count,
+  sqltRegr_Intercept,
+  sqltRegr_R2,
+  sqltRegr_Slope,
+  sqltRegr_Sxx,
+  sqltRegr_Sxy,
+  sqltRegr_Syy,
+  sqltRelease,
+  sqltReturn,
+  sqltReturning_Values,
+  sqltReturns,
+  sqltRevoke,
+  sqltRight,
+  sqltRollback,
+  sqltRow,
+  sqltRow_Count,
+  sqltRows,
+  sqltSavepoint,
+  sqltScroll,
+  sqltSecond,
+  sqltSelect,
+  sqltSensitive,
+  sqltSet,
+  sqltSimilar,
+  sqltSmallint,
+  sqltSome,
+  sqltSqlcode,
+  sqltSqlstate,
+  sqltStart,
+  sqltStddev_Pop,
+  sqltStddev_Samp,
+  sqltSum,
+  sqltTable,
+  sqltThen,
+  sqltTime,
+  sqltTimestamp,
+  sqltTo,
+  sqltTrailing,
+  sqltTrigger,
+  sqltTrim,
+  sqltTrue,
+  sqltUnion,
+  sqltUnique,
+  sqltUnknown,
+  sqltUpdate,
+  sqltUpdating,
+  sqltUpper,
+  sqltUser,
+  sqltUsing,
+  sqltValue,
+  sqltValues,
+  sqltVar_Pop,
+  sqltVar_Samp,
+  sqltVarchar,
+  sqltVariable,
+  sqltVarying,
+  sqltView,
+  sqltWhen,
+  sqltWhere,
+  sqltWhile,
+  sqltWith,
+  sqltYear,
+
+  {symbols}
+
+  sqltSpace,
+  sqltSemiColon,
+  sqltPlaceholder,
+  sqltSingleQuotes,
+  sqltDoubleQuotes,
+  sqltComma,
+  sqltPeriod,
+  sqltEquals,
+  sqltIdentifier,
+  sqltIdentifierInDoubleQuotes,
+  sqltBadIdentifier,
+  sqltNumberString,
+  sqltString,
+  sqlParam,
+  sqltColon,
+  sqltComment,
+  sqltCommentLine,
+  sqltQuotedString,
+  sqltAsterisk,
+  sqltForwardSlash,
+  sqltOpenSquareBracket,
+  sqltCloseSquareBracket,
+  sqltOpenBracket,
+  sqltCloseBracket,
+  sqltPipe,
+  sqltConcatSymbol,
+  sqltCR,
+  sqltEOL,
+  sqltEOF,
+  sqltInit
+  );
+
+  TSQLReservedWords = sqltAdd..sqltYear;
+
 const
   CRLF = #13 + #10;
   CR   = #13;
@@ -54,7 +294,9 @@ const
   TAB  = #9;
   NULL_TERMINATOR = #0;
 
-  sqlReservedWords: array [0..198] of string = (
+  {SQL Reserved words in alphabetical order}
+
+  sqlReservedWords: array [TSQLReservedWords] of string = (
   'ADD',
   'ADMIN',
   'ALL',
@@ -219,7 +461,6 @@ const
   'SOME',
   'SQLCODE',
   'SQLSTATE',
-  'SQLSTATE',
   'START',
   'STDDEV_POP',
   'STDDEV_SAMP',
@@ -256,12 +497,71 @@ const
   'YEAR'
   );
 
+type
+  {The TSQLTokeniser class provides a common means to parse an SQL statement, or
+   even a stream of SQL Statements. The TSQLStringTokeniser class is instantiated
+   with a single SQL statement or a set of concatenated statements. The TSQLStreamTokeniser
+   is instantiated with a stream from which the SQL statements are read.
+
+   Successive calls to GetNextToken then return each SQL token. The TokenText contains
+   either the single character, the identifier or reserved word, the string or comment.}
+
+  { TSQLTokeniser }
+
+  TSQLTokeniser = class
+  private
+    type
+      TLexState = (stDefault, stInCommentLine, stInComment, stSingleQuoted, stDoubleQuoted,
+                   stInArrayBounds, stInIdentifier, stInNumeric);
+
+  private
+    FLastChar: char;
+    FState: TLexState;
+    function GetNext: TSQLTokens;
+  protected
+    FString: string;
+    FNextToken: TSQLTokens;
+    function GetChar: char; virtual; abstract;
+    function ProcessNextChar(C: char; NextToken: TSQLTokens): TSQLTokens; virtual;
+    function TokenFound: boolean; virtual;
+  public
+    constructor Create;
+    function GetNextToken: TSQLTokens;
+    function EOF: boolean;
+    property TokenText: string read FString;
+  end;
+
+  { TSQLStringTokeniser }
+
+  TSQLStringTokeniser = class(TSQLTokeniser)
+  private
+    FInString: string;
+    FIndex: integer;
+  protected
+    function GetChar: char; override;
+  public
+    constructor Create(S: string);
+  end;
+
+  { TSQLStreamTokeniser }
+
+  TSQLStreamTokeniser = class(TSQLTokeniser)
+  private
+    FInStream: TStream;
+  protected
+    function GetChar: char; override;
+  public
+    constructor Create(S: TStream);
+  end;
+
 function Max(n1, n2: Integer): Integer;
 function Min(n1, n2: Integer): Integer;
 function RandomString(iLength: Integer): AnsiString;
 function RandomInteger(iLow, iHigh: Integer): Integer;
 function StripString(st: AnsiString; CharsToStrip: AnsiString): AnsiString;
 function ExtractIdentifier(Dialect: Integer; Value: AnsiString): AnsiString;
+function FindReservedWord(w: AnsiString; var token: TSQLTokens): boolean;
+function IsReservedWord(w: AnsiString): boolean;
 function QuoteIdentifier(Dialect: Integer; Value: AnsiString): AnsiString;
 function QuoteIdentifierIfNeeded(Dialect: Integer; Value: AnsiString): AnsiString;
 function Space2Underscore(s: AnsiString): AnsiString;
@@ -343,16 +643,33 @@ begin
   Result := Value;
 end;
 
+{Returns true if "w" is a Firebird SQL reserved word, and the
+ corresponding TSQLTokens value.}
+
+function FindReservedWord(w: AnsiString; var token: TSQLTokens): boolean;
+var i: TSQLTokens;
+begin
+   Result := true;
+   w := AnsiUpperCase(Trim(w));
+   for i := Low(TSQLReservedWords) to High(TSQLReservedWords) do
+   begin
+       if w = sqlReservedWords[i] then
+       begin
+         token := i;
+         Exit;
+       end;
+       if w <  sqlReservedWords[i] then
+         break;
+   end;
+   Result := false;
+end;
+
 {Returns true if "w" is a Firebird SQL reserved word}
 
 function IsReservedWord(w: AnsiString): boolean;
-var i: integer;
+var token: TSQLTokens;
 begin
-     Result := true;
-     for i := 0 to Length(sqlReservedWords) - 1 do
-         if w = sqlReservedWords[i] then
-            Exit;
-     Result := false;
+  Result := FindReservedWord(w,token);
 end;
 
 {Format an SQL Identifier according to SQL Dialect}
@@ -615,6 +932,308 @@ end;
 function SQLSafeString(const s: AnsiString): AnsiString;
 begin
   Result := StringReplace(s,'''','''''',[rfReplaceAll]);
+end;
+
+{ TSQLStreamTokeniser }
+
+function TSQLStreamTokeniser.GetChar: char;
+begin
+  if not EOF then
+    Result := char(FInStream.ReadByte)
+  else
+    Result := #0;
+end;
+
+constructor TSQLStreamTokeniser.Create(S: TStream);
+begin
+  inherited Create;
+  FInStream := S;
+end;
+
+{ TSQLStringTokeniser }
+
+function TSQLStringTokeniser.GetChar: char;
+begin
+  if FIndex <= Length(FInString) then
+  begin
+    Result := FInString[FIndex];
+    Inc(FIndex);
+  end
+  else
+    Result := #0;
+end;
+
+constructor TSQLStringTokeniser.Create(S: string);
+begin
+  inherited Create;
+  FInString := S;
+  FIndex := 1;
+end;
+
+{ TSQLTokeniser }
+
+function TSQLTokeniser.GetNext: TSQLTokens;
+var C: char;
+begin
+  if EOF then
+    Result := sqltEOF
+  else
+  begin
+    C := GetChar;
+    case C of
+    #0:
+      Result := sqltEOF;
+    ' ',TAB:
+      Result := sqltSpace;
+    '0'..'9':
+      Result := sqltNumberString;
+    ';':
+      Result := sqltSemiColon;
+    '?':
+      Result := sqltPlaceholder;
+    '|':
+      Result := sqltPipe;
+    '"':
+      Result := sqltDoubleQuotes;
+    '''':
+      Result := sqltSingleQuotes;
+    '/':
+      Result := sqltForwardSlash;
+    '*':
+      Result := sqltAsterisk;
+    '(':
+      Result := sqltOpenBracket;
+    ')':
+      Result := sqltCloseBracket;
+    ':':
+      Result := sqltColon;
+    ',':
+      Result := sqltComma;
+    '.':
+      Result := sqltPeriod;
+    '=':
+      Result := sqltEquals;
+    '[':
+      Result := sqltOpenSquareBracket;
+    ']':
+      Result := sqltCloseSquareBracket;
+    CR:
+      Result := sqltCR;
+    LF:
+      Result := sqltEOL;
+    else
+      Result := sqltIdentifier;
+    end;
+    FLastChar := C
+  end;
+  FNextToken := Result;
+end;
+
+function TSQLTokeniser.ProcessNextChar(C: char; NextToken: TSQLTokens
+  ): TSQLTokens;
+begin
+  Result := NextToken;
+  case FState of
+  stInComment:
+    begin
+      if (Result = sqltAsterisk) and (FNextToken = sqltForwardSlash) then
+      begin
+        FState := stDefault;
+        Result := sqltComment;
+        GetNext;
+        Exit;
+      end
+      else
+        FString += C;
+    end;
+
+  stInCommentLine:
+    if Result = sqltEOL then
+    begin
+      FState := stDefault;
+      Result := sqltCommentLine;
+      Exit;
+    end
+    else
+      FString += C;
+
+  stSingleQuoted:
+    begin
+      if (Result = sqltSingleQuotes) then
+      begin
+        if (FNextToken = sqltSingleQuotes) then
+          GetNext
+        else
+        begin
+          Result := sqltQuotedString;
+          FState := stDefault;
+          Exit;
+        end;
+      end;
+      FString += C;
+    end;
+
+  stDoubleQuoted:
+    begin
+      if (Result = sqltDoubleQuotes) then
+      begin
+        if (FNextToken = sqltDoubleQuotes) then
+          GetNext
+        else
+        begin
+          Result := sqltIdentifierInDoubleQuotes;
+          FState := stDefault;
+          Exit;
+        end;
+      end;
+      FString += C;
+    end;
+
+  stInIdentifier:
+    begin
+      FString += C;
+      Result := sqltIdentifier;
+      if not (FNextToken in [sqltIdentifier,sqltNumberString]) then
+        FState := stDefault
+    end;
+
+  stInNumeric:
+    begin
+      FString += C;
+      if (Result = sqltPeriod) and (FNextToken = sqltPeriod) then
+      begin
+        {malformed decimal}
+        FState := stInIdentifier;
+        Result := sqltIdentifier
+      end
+      else
+      begin
+        if not (FNextToken in [sqltNumberString,sqltPeriod]) then
+          FState := stDefault;
+        Result := sqltNumberString;
+      end;
+    end;
+
+  else {stDefault}
+    begin
+      FString := C;
+      case Result of
+      sqltSpace:
+        while FNextToken = sqltSpace do {consume}
+          GetNext;
+
+      sqltEOL:
+        FString := ' ';
+
+      sqltPipe:
+        if FNextToken = sqltPipe then
+        begin
+          Result := sqltConcatSymbol;
+          FString := C + FLastChar;
+          GetNext;
+        end;
+
+      sqltForwardSlash:
+        begin
+          if FNextToken = sqltAsterisk then
+          begin
+            FString := '';
+            GetNext;
+            FState := stInComment;
+          end
+          else
+          if FNextToken = sqltForwardSlash then
+          begin
+            FString := '';
+            GetNext;
+            FState := stInCommentLine;
+          end;
+        end;
+
+      sqltSingleQuotes:
+        begin
+          FString := '';
+          FState := stSingleQuoted;
+        end;
+
+      sqltDoubleQuotes:
+        begin
+          FString := '';
+          FState := stDoubleQuoted;
+        end;
+
+      sqltOpenSquareBracket:
+        FState := stInArrayBounds;
+
+      sqltIdentifier:
+        if FNextToken = sqltIdentifier then
+          FState := stInIdentifier;
+
+      sqltNumberString:
+        if FNextToken in [sqltNumberString,sqltPeriod] then
+          FState := stInNumeric;
+      end;
+    end;
+  end;
+end;
+
+function TSQLTokeniser.TokenFound: boolean;
+begin
+  Result := (FState = stDefault);
+end;
+
+constructor TSQLTokeniser.Create;
+begin
+  inherited Create;
+  FNextToken := sqltInit;
+  FState := stDefault;
+  FString := '';
+end;
+
+{a simple lookahead one algorithm to extra the next symbol}
+
+function TSQLTokeniser.GetNextToken: TSQLTokens;
+var C: char;
+begin
+  Result := sqltEOF;
+
+  if FNextToken = sqltInit then
+    GetNext;
+
+  repeat
+    Result := FNextToken;
+    C := FLastChar;
+    GetNext;
+
+    {Combine CR/LF to EOF. CR on its own is treated as a space}
+
+    if Result = sqltCR then
+    begin
+      if FNextToken = sqltEOL then
+        continue
+      else
+      begin
+        C := ' ';
+        Result := sqltSpace;
+      end;
+    end;
+
+    Result := ProcessNextChar(C,Result);
+
+//    writeln(FString);
+  until (FNextToken = sqltEOF) or TokenFound;
+
+  if Result = sqltIdentifier then
+  begin
+    if not FindReservedWord(FString,Result) then
+      if not IsSQLIdentifier(FString) then
+        Result := sqltBadIdentifier;
+  end;
+end;
+
+function TSQLTokeniser.EOF: boolean;
+begin
+  Result := FNextToken = sqltEOF;
 end;
 
 end.

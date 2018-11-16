@@ -246,6 +246,7 @@ type
     procedure InternalPrepare; override;
     function InternalExecute(aTransaction: ITransaction): IResults; override;
     function InternalOpenCursor(aTransaction: ITransaction): IResultSet; override;
+    procedure ProcessSQL(sql: string; GenerateParamNames: boolean; var processedSQL: string); override;
     procedure FreeHandle; override;
     procedure InternalClose(Force: boolean); override;
   public
@@ -1004,7 +1005,7 @@ begin
       if FHasParamNames then
       begin
         if FProcessedSQL = '' then
-          FSQLParams.PreprocessSQL(FSQL,FGenerateParamNames,FProcessedSQL);
+          ProcessSQL(FSQL,FGenerateParamNames,FProcessedSQL);
         FStatementIntf := (GetAttachment as TFB30Attachment).AttachmentIntf.prepare(StatusIntf,
                             (FTransactionIntf as TFB30Transaction).TransactionIntf,
                             Length(FProcessedSQL),
@@ -1205,6 +1206,12 @@ begin
  Result := TResultSet.Create(FSQLRecord);
  SignalActivity;
  Inc(FChangeSeqNo);
+end;
+
+procedure TFB30Statement.ProcessSQL(sql: string; GenerateParamNames: boolean;
+  var processedSQL: string);
+begin
+  FSQLParams.PreprocessSQL(sql,GenerateParamNames,processedSQL);
 end;
 
 procedure TFB30Statement.FreeHandle;

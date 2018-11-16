@@ -76,23 +76,15 @@ unit FBSQLData;
   methods are needed for SQL parameters only. The string getters and setters
   are virtual as SQLVar and Array encodings of string data is different.}
 
-{ $define ALLOWDIALECT3PARAMNAMES}
-
-{$ifndef ALLOWDIALECT3PARAMNAMES}
-
-{ Note on SQL Dialects and SQL Parameter Names
+{ Note on SQL Parameter Names
   --------------------------------------------
 
-  Even when dialect 3 quoted format parameter names are not supported, IBX still processes
-  parameter names case insensitive. This does result in some additional overhead
-  due to a call to "AnsiUpperCase". This can be avoided by undefining
+  IBX processes parameter names case insensitive. This does result in some additional
+  overhead due to a call to "AnsiUpperCase". This can be avoided by undefining
   "UseCaseInSensitiveParamName" below.
 
-  Note: do not define "UseCaseSensitiveParamName" when "ALLOWDIALECT3PARAMNAMES"
-  is defined. This will not give a useful result.
 }
 {$define UseCaseInSensitiveParamName}
-{$endif}
 
 interface
 
@@ -510,186 +502,131 @@ end;
 
 procedure TSQLDataArea.PreprocessSQL(sSQL: AnsiString; GenerateParamNames: boolean;
   var sProcessedSQL: AnsiString);
-var
-  cCurChar, cNextChar, cQuoteChar: AnsiChar;
-  sParamName: AnsiString;
-  j, i, iLenSQL, iSQLPos: Integer;
-  iCurState {$ifdef ALLOWDIALECT3PARAMNAMES}, iCurParamState {$endif}: Integer;
-  iParamSuffix: Integer;
-  slNames: TStrings;
-  StrBuffer: PByte;
-  found: boolean;
 
 const
-  DefaultState = 0;
-  CommentState = 1;
-  QuoteState = 2;
-  ParamState = 3;
-  ArrayDimState = 4;
- {$ifdef ALLOWDIALECT3PARAMNAMES}
-  ParamDefaultState = 0;
-  ParamQuoteState = 1;
-  {$endif}
+  sIBXParam = 'IBXParam';  {do not localize}
 
-  procedure AddToProcessedSQL(cChar: AnsiChar);
+var slNames: TStrings;
+
+  procedure ExtractParamNames(var slNames: TStrings);
+  var SQLTokeniser: TSQLTokeniser;
+      State: (stDefault,stInParam,stInBlock, stInArrayDim);
+      Nested: integer;
+      token: TSQLTokens;
+      iParamSuffix: Integer;
   begin
-    StrBuffer[iSQLPos] := byte(cChar);
-    Inc(iSQLPos);
-  end;
-
-begin
-  if not IsInputDataArea then
-    IBError(ibxeNotPermitted,[nil]);
-
-  sParamName := '';
-  iLenSQL := Length(sSQL);
-  GetMem(StrBuffer,iLenSQL + 1);
-  slNames := TStringList.Create;
-  try
-    { Do some initializations of variables }
+    sProcessedSQL := '';
+    State := stDefault;
+    Nested := 0;
     iParamSuffix := 0;
-    cQuoteChar := '''';
-    i := 1;
-    iSQLPos := 0;
-    iCurState := DefaultState;
-    {$ifdef ALLOWDIALECT3PARAMNAMES}
-    iCurParamState := ParamDefaultState;
-    {$endif}
-    { Now, traverse through the SQL string, character by character,
-     picking out the parameters and formatting correctly for InterBase }
-    while (i <= iLenSQL) do begin
-      { Get the current token and a look-ahead }
-      cCurChar := sSQL[i];
-      if i = iLenSQL then
-        cNextChar := #0
-      else
-        cNextChar := sSQL[i + 1];
-      { Now act based on the current state }
-      case iCurState of
-        DefaultState:
-        begin
-          case cCurChar of
-            '''', '"':
-            begin
-              cQuoteChar := cCurChar;
-              iCurState := QuoteState;
-            end;
-            '?', ':':
-            begin
-              iCurState := ParamState;
-              AddToProcessedSQL('?');
-            end;
-            '/': if (cNextChar = '*') then
-            begin
-              AddToProcessedSQL(cCurChar);
-              Inc(i);
-              iCurState := CommentState;
-            end;
-            '[':
-            begin
-              AddToProcessedSQL(cCurChar);
-              Inc(i);
-              iCurState := ArrayDimState;
-            end;
-          end;
-        end;
 
-        ArrayDimState:
-        begin
-          case cCurChar of
-          ':',',','0'..'9',' ',#9,#10,#13:
-            begin
-              AddToProcessedSQL(cCurChar);
-              Inc(i);
-            end;
-          else
-            begin
-              AddToProcessedSQL(cCurChar);
-              Inc(i);
-              iCurState := DefaultState;
-            end;
-          end;
-        end;
-
-        CommentState:
-        begin
-          if (cNextChar = #0) then
-            IBError(ibxeSQLParseError, [SEOFInComment])
-          else if (cCurChar = '*') then begin
-            if (cNextChar = '/') then
-              iCurState := DefaultState;
-          end;
-        end;
-        QuoteState: begin
-          if cNextChar = #0 then
-            IBError(ibxeSQLParseError, [SEOFInString])
-          else if (cCurChar = cQuoteChar) then begin
-            if (cNextChar = cQuoteChar) then begin
-              AddToProcessedSQL(cCurChar);
-              Inc(i);
-            end else
-              iCurState := DefaultState;
-          end;
-        end;
-        ParamState:
-        begin
-          { collect the name of the parameter }
-          {$ifdef ALLOWDIALECT3PARAMNAMES}
-          if iCurParamState = ParamDefaultState then
+    SQLTokeniser := TSQLStringTokeniser.Create(sSQL);
+    try
+      while not SQLTokeniser.EOF do
+      begin
+        token := SQLTokeniser.GetNextToken;
+        case State of
+        stDefault:
           begin
-            if cCurChar = '"' then
-              iCurParamState := ParamQuoteState
+            case token of
+            sqltColon:
+              State := stInParam;
+
+            sqltBegin:
+              begin
+                State := stInBlock;
+                Nested := 1;
+                sProcessedSQL += SQLTokeniser.TokenText;
+              end;
+
+            sqltPlaceHolder:
+              if GenerateParamNames then
+              begin
+                Inc(iParamSuffix);
+                slNames.AddObject(sIBXParam + IntToStr(iParamSuffix),self); //Note local convention
+                                                    //add pointer to self to mark entry
+                sProcessedSQL += '?';
+              end
+              else
+                IBError(ibxeSQLParseError, [SParamNameExpected]);
+
+            sqltOpenSquareBracket:
+              begin
+                State := stInArrayDim;
+                sProcessedSQL += SQLTokeniser.TokenText;
+              end;
+
+            sqltQuotedString:
+              sProcessedSQL += '''' + SQLSafeString(SQLTokeniser.TokenText) + '''';
+
+            sqltIdentifierInDoubleQuotes:
+              sProcessedSQL += '"' + SQLTokeniser.TokenText + '"';
+
+              sqltComment,
+              sqltCommentLine:
+                {ignore};
+
             else
-            {$endif}
-            if (cCurChar in ['A'..'Z', 'a'..'z', '0'..'9', '_', '$']) then
-                sParamName := sParamName + cCurChar
-            else if GenerateParamNames then
+              if token in [Low(TSQLReservedWords)..High(TSQLReservedWords)] then
+                sProcessedSQL += sqlReservedWords[token]
+              else
+                sProcessedSQL += SQLTokeniser.TokenText;
+
+            end;
+          end;
+
+          {colon followed by an identifier - this is a named parameter}
+
+        stInParam:
+          begin
+            if token in [sqltIdentifier, sqltIdentifierInDoubleQuotes] then
             begin
-              sParamName := 'IBXParam' + IntToStr(iParamSuffix); {do not localize}
-              Inc(iParamSuffix);
-              iCurState := DefaultState;
-              slNames.AddObject(sParamName,self); //Note local convention
-                                                  //add pointer to self to mark entry
-              sParamName := '';
+              sProcessedSQL += '?';
+              slNames.Add(SQLTokeniser.TokenText);
             end
             else
-              IBError(ibxeSQLParseError, [SParamNameExpected]);
-          {$ifdef ALLOWDIALECT3PARAMNAMES}
-          end
-          else begin
-            { determine if Quoted parameter name is finished }
-            if cCurChar = '"' then
-            begin
-              Inc(i);
-              slNames.Add(sParamName);
-              SParamName := '';
-              iCurParamState := ParamDefaultState;
-              iCurState := DefaultState;
-            end
-            else
-              sParamName := sParamName + cCurChar
+              sProcessedSQL += ':' +SQLTokeniser.TokenText;
+            State := stDefault;
           end;
-          {$endif}
-          { determine if the unquoted parameter name is finished }
-          if {$ifdef ALLOWDIALECT3PARAMNAMES}(iCurParamState <> ParamQuoteState) and {$endif}
-            (iCurState <> DefaultState) then
+
+          {ignore begin..end blocks for param substitution}
+
+        stInBlock:
           begin
-            if not (cNextChar in ['A'..'Z', 'a'..'z',
-                                  '0'..'9', '_', '$']) then begin
-              Inc(i);
-              iCurState := DefaultState;
-              slNames.Add(sParamName);
-              sParamName := '';
+            case token of
+            sqltBegin:
+              Inc(Nested);
+
+            sqltEnd:
+              begin
+                Dec(Nested);
+                if Nested = 0 then
+                  State := stDefault;
+              end;
             end;
+            sProcessedSQL += SQLTokeniser.TokenText;
+          end;
+
+          {ignore array dimensions for param substitution }
+
+        stInArrayDim:
+          begin
+            if token = sqltCloseSquareBracket then
+              State := stDefault;
+            sProcessedSQL += SQLTokeniser.TokenText;
           end;
         end;
       end;
-      if (iCurState <> ParamState) and (i <= iLenSQL) then
-        AddToProcessedSQL(sSQL[i]);
-      Inc(i);
+    finally
+      SQLTokeniser.Free;
     end;
-    AddToProcessedSQL(#0);
-    sProcessedSQL := strpas(PAnsiChar(StrBuffer));
+  end;
+
+  procedure SetColumnNames(slNames: TStrings);
+  var i, j: integer;
+      found: boolean;
+  begin
+    found := false;
     SetCount(slNames.Count);
     for i := 0 to slNames.Count - 1 do
     begin
@@ -710,9 +647,18 @@ begin
         Column[i].UniqueName := not found;
       end;
     end;
+  end;
+
+begin
+  if not IsInputDataArea then
+    IBError(ibxeNotPermitted,[nil]);
+
+  slNames := TStringList.Create;
+  try
+    ExtractParamNames(slNames);
+    SetColumnNames(slNames);
   finally
     slNames.Free;
-    FreeMem(StrBuffer);
   end;
 end;
 

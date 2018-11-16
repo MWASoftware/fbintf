@@ -78,6 +78,7 @@ type
     procedure InternalPrepare;  virtual; abstract;
     function InternalExecute(aTransaction: ITransaction): IResults;  virtual; abstract;
     function InternalOpenCursor(aTransaction: ITransaction): IResultSet;   virtual; abstract;
+    procedure ProcessSQL(sql: string; GenerateParamNames: boolean; var processedSQL: string); virtual; abstract;
     procedure FreeHandle;  virtual; abstract;
     procedure InternalClose(Force: boolean); virtual; abstract;
     function TimeStampToMSecs(const TimeStamp: TTimeStamp): Int64;
@@ -98,6 +99,7 @@ type
       DeleteCount: integer): boolean;
     function GetSQLStatementType: TIBSQLStatementTypes;
     function GetSQLText: AnsiString;
+    function GetProcessedSQLText: AnsiString;
     function GetSQLDialect: integer;
 
     {GetDSQLInfo only supports isc_info_sql_stmt_type, isc_info_sql_get_plan, isc_info_sql_records}
@@ -226,6 +228,13 @@ end;
 function TFBStatement.GetSQLText: AnsiString;
 begin
   Result := FSQL;
+end;
+
+function TFBStatement.GetProcessedSQLText: AnsiString;
+begin
+  if FProcessedSQL = '' then
+    ProcessSQL(FSQL,FGenerateParamNames,FProcessedSQL);
+  Result := FProcessedSQL
 end;
 
 function TFBStatement.GetSQLDialect: integer;

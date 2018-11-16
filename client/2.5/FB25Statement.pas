@@ -252,6 +252,7 @@ type
     procedure InternalPrepare; override;
     function InternalExecute(aTransaction: ITransaction): IResults; override;
     function InternalOpenCursor(aTransaction: ITransaction): IResultSet; override;
+    procedure ProcessSQL(sql: string; GenerateParamNames: boolean; var processedSQL: string); override;
     procedure FreeHandle; override;
     procedure InternalClose(Force: boolean); override;
   public
@@ -921,7 +922,7 @@ begin
       if FHasParamNames then
       begin
         if FProcessedSQL = '' then
-          FSQLParams.PreprocessSQL(FSQL,FGenerateParamNames,FProcessedSQL);
+          ProcessSQL(FSQL,FGenerateParamNames,FProcessedSQL);
         Call(isc_dsql_prepare(StatusVector, @(TRHandle), @FHandle, 0,
                  PAnsiChar(FProcessedSQL), FSQLDialect, nil), True);
       end
@@ -1105,6 +1106,12 @@ begin
  FSQLRecord.FTransactionSeqNo := FSQLRecord.FTransaction.TransactionSeqNo;
  Result := TResultSet.Create(FSQLRecord);
  Inc(FChangeSeqNo);
+end;
+
+procedure TFB25Statement.ProcessSQL(sql: string; GenerateParamNames: boolean;
+  var processedSQL: string);
+begin
+  FSQLParams.PreprocessSQL(sql,GenerateParamNames, processedSQL);
 end;
 
 procedure TFB25Statement.FreeHandle;

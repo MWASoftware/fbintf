@@ -646,6 +646,7 @@ type
     function GetRowsAffected(var SelectCount, InsertCount, UpdateCount, DeleteCount: integer): boolean;
     function GetSQLStatementType: TIBSQLStatementTypes;
     function GetSQLText: AnsiString;
+    function GetProcessedSQLText: AnsiString;
     function GetSQLDialect: integer;
     function IsPrepared: boolean;
     procedure Prepare(aTransaction: ITransaction=nil);
