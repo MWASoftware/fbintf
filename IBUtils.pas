@@ -510,20 +510,43 @@ type
 
   TSQLTokeniser = class
   private
+    const
+      TokenStackMaxSize = 3;
     type
       TLexState = (stDefault, stInCommentLine, stInComment, stSingleQuoted, stDoubleQuoted,
                    stInArrayBounds, stInIdentifier, stInNumeric);
+
+      TTokenStackItem = record
+                          token: TSQLTokens;
+                          text: string;
+                        end;
+      TTokenStackState = (tsHold, tsRelease);
 
   private
     FLastChar: char;
     FState: TLexState;
     function GetNext: TSQLTokens;
+
+    {The token stack is available for use by descendents so that they can
+     hold back tokens in order to lookahead by token rather than just a single
+     character}
+
+  private
+    FTokenStack: array[0..TokenStackMaxSize] of TTokenStackItem;
+    FStackState: TTokenStackState;
+    FStackPtr: integer; {points to next empty entry}
   protected
     FString: string;
     FNextToken: TSQLTokens;
     function GetChar: char; virtual; abstract;
-    function ProcessNextChar(C: char; NextToken: TSQLTokens): TSQLTokens; virtual;
     function TokenFound: boolean; virtual;
+    function GetNextTokenHook(C: char; var token: TSQLTokens): boolean; virtual;
+    function InternalGetNextToken: TSQLTokens; virtual;
+
+    {Token stack}
+    procedure PushStack(token: TSQLTokens;text: string);
+    procedure ResetStack;
+    procedure ReleaseStack;
   public
     constructor Create;
     function GetNextToken: TSQLTokens;
@@ -577,9 +600,11 @@ function GetProtocol(ConnectString: AnsiString): TProtocolAll;
 
 implementation
 
+uses FBMessages
+
 {$IFDEF HASREQEX}
-uses RegExpr;
-{$ENDIF}
+,RegExpr
+{$ENDIF};
 
 function Max(n1, n2: Integer): Integer;
 begin
@@ -1029,157 +1054,35 @@ begin
   FNextToken := Result;
 end;
 
-function TSQLTokeniser.ProcessNextChar(C: char; NextToken: TSQLTokens
-  ): TSQLTokens;
-begin
-  Result := NextToken;
-  case FState of
-  stInComment:
-    begin
-      if (Result = sqltAsterisk) and (FNextToken = sqltForwardSlash) then
-      begin
-        FState := stDefault;
-        Result := sqltComment;
-        GetNext;
-        Exit;
-      end
-      else
-        FString += C;
-    end;
-
-  stInCommentLine:
-    if Result = sqltEOL then
-    begin
-      FState := stDefault;
-      Result := sqltCommentLine;
-      Exit;
-    end
-    else
-      FString += C;
-
-  stSingleQuoted:
-    begin
-      if (Result = sqltSingleQuotes) then
-      begin
-        if (FNextToken = sqltSingleQuotes) then
-          GetNext
-        else
-        begin
-          Result := sqltQuotedString;
-          FState := stDefault;
-          Exit;
-        end;
-      end;
-      FString += C;
-    end;
-
-  stDoubleQuoted:
-    begin
-      if (Result = sqltDoubleQuotes) then
-      begin
-        if (FNextToken = sqltDoubleQuotes) then
-          GetNext
-        else
-        begin
-          Result := sqltIdentifierInDoubleQuotes;
-          FState := stDefault;
-          Exit;
-        end;
-      end;
-      FString += C;
-    end;
-
-  stInIdentifier:
-    begin
-      FString += C;
-      Result := sqltIdentifier;
-      if not (FNextToken in [sqltIdentifier,sqltNumberString]) then
-        FState := stDefault
-    end;
-
-  stInNumeric:
-    begin
-      FString += C;
-      if (Result = sqltPeriod) and (FNextToken = sqltPeriod) then
-      begin
-        {malformed decimal}
-        FState := stInIdentifier;
-        Result := sqltIdentifier
-      end
-      else
-      begin
-        if not (FNextToken in [sqltNumberString,sqltPeriod]) then
-          FState := stDefault;
-        Result := sqltNumberString;
-      end;
-    end;
-
-  else {stDefault}
-    begin
-      FString := C;
-      case Result of
-      sqltSpace:
-        while FNextToken = sqltSpace do {consume}
-          GetNext;
-
-      sqltEOL:
-        FString := ' ';
-
-      sqltPipe:
-        if FNextToken = sqltPipe then
-        begin
-          Result := sqltConcatSymbol;
-          FString := C + FLastChar;
-          GetNext;
-        end;
-
-      sqltForwardSlash:
-        begin
-          if FNextToken = sqltAsterisk then
-          begin
-            FString := '';
-            GetNext;
-            FState := stInComment;
-          end
-          else
-          if FNextToken = sqltForwardSlash then
-          begin
-            FString := '';
-            GetNext;
-            FState := stInCommentLine;
-          end;
-        end;
-
-      sqltSingleQuotes:
-        begin
-          FString := '';
-          FState := stSingleQuoted;
-        end;
-
-      sqltDoubleQuotes:
-        begin
-          FString := '';
-          FState := stDoubleQuoted;
-        end;
-
-      sqltOpenSquareBracket:
-        FState := stInArrayBounds;
-
-      sqltIdentifier:
-        if FNextToken = sqltIdentifier then
-          FState := stInIdentifier;
-
-      sqltNumberString:
-        if FNextToken in [sqltNumberString,sqltPeriod] then
-          FState := stInNumeric;
-      end;
-    end;
-  end;
-end;
-
 function TSQLTokeniser.TokenFound: boolean;
 begin
   Result := (FState = stDefault);
+end;
+
+function TSQLTokeniser.GetNextTokenHook(C: char; var token: TSQLTokens
+  ): boolean;
+begin
+  Result := false;
+end;
+
+procedure TSQLTokeniser.PushStack(token: TSQLTokens; text: string);
+begin
+  if FStackPtr > TokenStackMaxSize then
+    IBError(ibxeTokenStackOverflow,[]);
+  FTokenStack[FStackPtr].token := token;
+  FTokenStack[FStackPtr].text := text;
+  Inc(FStackPtr);
+end;
+
+procedure TSQLTokeniser.ResetStack;
+begin
+  FStackPtr := 0;
+  FStackState := tsHold;
+end;
+
+procedure TSQLTokeniser.ReleaseStack;
+begin
+  FStackState := tsRelease;
 end;
 
 constructor TSQLTokeniser.Create;
@@ -1188,11 +1091,30 @@ begin
   FNextToken := sqltInit;
   FState := stDefault;
   FString := '';
+  FStackPtr := 0;
+  FStackState := tsHold;
+end;
+
+function TSQLTokeniser.GetNextToken: TSQLTokens;
+begin
+  if FStackState = tsRelease then
+  begin
+    if FStackPtr > 0 then
+    begin
+      Dec(FStackPtr);
+      FString := FTokenStack[FStackPtr].text;
+      Result := FTokenStack[FStackPtr].token;
+      Exit;
+    end
+    else
+      FStackState := tsHold;
+  end;
+  Result := InternalGetNextToken;
 end;
 
 {a simple lookahead one algorithm to extra the next symbol}
 
-function TSQLTokeniser.GetNextToken: TSQLTokens;
+function TSQLTokeniser.InternalGetNextToken: TSQLTokens;
 var C: char;
 begin
   Result := sqltEOF;
@@ -1218,7 +1140,149 @@ begin
       end;
     end;
 
-    Result := ProcessNextChar(C,Result);
+    case FState of
+    stInComment:
+      begin
+        if (Result = sqltAsterisk) and (FNextToken = sqltForwardSlash) then
+        begin
+          FState := stDefault;
+          Result := sqltComment;
+          GetNext;
+          Exit;
+        end
+        else
+          FString += C;
+      end;
+
+    stInCommentLine:
+      if Result = sqltEOL then
+      begin
+        FState := stDefault;
+        Result := sqltCommentLine;
+        Exit;
+      end
+      else
+        FString += C;
+
+    stSingleQuoted:
+      begin
+        if (Result = sqltSingleQuotes) then
+        begin
+          if (FNextToken = sqltSingleQuotes) then
+            GetNext
+          else
+          begin
+            Result := sqltQuotedString;
+            FState := stDefault;
+            Exit;
+          end;
+        end;
+        FString += C;
+      end;
+
+    stDoubleQuoted:
+      begin
+        if (Result = sqltDoubleQuotes) then
+        begin
+          if (FNextToken = sqltDoubleQuotes) then
+            GetNext
+          else
+          begin
+            Result := sqltIdentifierInDoubleQuotes;
+            FState := stDefault;
+            Exit;
+          end;
+        end;
+        FString += C;
+      end;
+
+    stInIdentifier:
+      begin
+        FString += C;
+        Result := sqltIdentifier;
+        if not (FNextToken in [sqltIdentifier,sqltNumberString]) then
+          FState := stDefault
+      end;
+
+    stInNumeric:
+      begin
+        FString += C;
+        if (Result = sqltPeriod) and (FNextToken = sqltPeriod) then
+        begin
+          {malformed decimal}
+          FState := stInIdentifier;
+          Result := sqltIdentifier
+        end
+        else
+        begin
+          if not (FNextToken in [sqltNumberString,sqltPeriod]) then
+            FState := stDefault;
+          Result := sqltNumberString;
+        end;
+      end;
+
+    else {stDefault}
+      if not GetNextTokenHook(C,Result) then
+      begin
+        FString := C;
+        case Result of
+        sqltSpace:
+          while FNextToken = sqltSpace do {consume}
+            GetNext;
+
+        sqltEOL:
+          FString := ' ';
+
+        sqltPipe:
+          if FNextToken = sqltPipe then
+          begin
+            Result := sqltConcatSymbol;
+            FString := C + FLastChar;
+            GetNext;
+          end;
+
+        sqltForwardSlash:
+          begin
+            if FNextToken = sqltAsterisk then
+            begin
+              FString := '';
+              GetNext;
+              FState := stInComment;
+            end
+            else
+            if FNextToken = sqltForwardSlash then
+            begin
+              FString := '';
+              GetNext;
+              FState := stInCommentLine;
+            end;
+          end;
+
+        sqltSingleQuotes:
+          begin
+            FString := '';
+            FState := stSingleQuoted;
+          end;
+
+        sqltDoubleQuotes:
+          begin
+            FString := '';
+            FState := stDoubleQuoted;
+          end;
+
+        sqltOpenSquareBracket:
+          FState := stInArrayBounds;
+
+        sqltIdentifier:
+          if FNextToken = sqltIdentifier then
+            FState := stInIdentifier;
+
+        sqltNumberString:
+          if FNextToken in [sqltNumberString,sqltPeriod] then
+            FState := stInNumeric;
+        end;
+      end;
+    end;
 
 //    writeln(FString);
   until (FNextToken = sqltEOF) or TokenFound;
