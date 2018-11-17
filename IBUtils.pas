@@ -511,30 +511,32 @@ type
   TSQLTokeniser = class
   private
     const
-      TokenStackMaxSize = 3;
+      TokenQueueMaxSize = 3;
     type
       TLexState = (stDefault, stInCommentLine, stInComment, stSingleQuoted, stDoubleQuoted,
                    stInArrayBounds, stInIdentifier, stInNumeric);
 
-      TTokenStackItem = record
+      TTokenQueueItem = record
                           token: TSQLTokens;
                           text: string;
                         end;
-      TTokenStackState = (tsHold, tsRelease);
+      TTokenQueueState = (tsHold, tsRelease);
 
   private
     FLastChar: char;
     FState: TLexState;
     function GetNext: TSQLTokens;
 
-    {The token stack is available for use by descendents so that they can
+    {The token Queue is available for use by descendents so that they can
      hold back tokens in order to lookahead by token rather than just a single
      character}
 
   private
-    FTokenStack: array[0..TokenStackMaxSize] of TTokenStackItem;
-    FStackState: TTokenStackState;
-    FStackPtr: integer; {points to next empty entry}
+    FTokenQueue: array[0..TokenQueueMaxSize] of TTokenQueueItem;
+    FQueueState: TTokenQueueState;
+    FQFirst: integer;  {first and last pointers first=last => queue empty}
+    FQLast: integer;
+    procedure PopQueue(var token: TSQLTokens);
   protected
     FString: string;
     FNextToken: TSQLTokens;
@@ -544,9 +546,9 @@ type
     function InternalGetNextToken: TSQLTokens; virtual;
 
     {Token stack}
-    procedure PushStack(token: TSQLTokens;text: string);
-    procedure ResetStack;
-    procedure ReleaseStack;
+    procedure QueueToken(token: TSQLTokens;text: string);
+    procedure ResetQueue;
+    procedure ReleaseQueue(var token: TSQLTokens);
   public
     constructor Create;
     function GetNextToken: TSQLTokens;
@@ -1054,6 +1056,17 @@ begin
   FNextToken := Result;
 end;
 
+procedure TSQLTokeniser.PopQueue(var token: TSQLTokens);
+begin
+  if FQFirst = FQLast then
+    IBError(ibxeTokenQueueUnderflow,[]);
+  token := FTokenQueue[FQFirst].token;
+  FString := FTokenQueue[FQFirst].text;
+  Inc(FQFirst);
+  if FQFirst = FQLast then
+    FQueueState := tsHold;
+end;
+
 function TSQLTokeniser.TokenFound: boolean;
 begin
   Result := (FState = stDefault);
@@ -1065,24 +1078,26 @@ begin
   Result := false;
 end;
 
-procedure TSQLTokeniser.PushStack(token: TSQLTokens; text: string);
+procedure TSQLTokeniser.QueueToken(token: TSQLTokens; text: string);
 begin
-  if FStackPtr > TokenStackMaxSize then
-    IBError(ibxeTokenStackOverflow,[]);
-  FTokenStack[FStackPtr].token := token;
-  FTokenStack[FStackPtr].text := text;
-  Inc(FStackPtr);
+  if FQLast > TokenQueueMaxSize then
+    IBError(ibxeTokenQueueOverflow,[]);
+  FTokenQueue[FQLast].token := token;
+  FTokenQueue[FQLast].text := text;
+  Inc(FQLast);
 end;
 
-procedure TSQLTokeniser.ResetStack;
+procedure TSQLTokeniser.ResetQueue;
 begin
-  FStackPtr := 0;
-  FStackState := tsHold;
+  FQFirst := 0;
+  FQLast := 0;
+  FQueueState := tsHold;
 end;
 
-procedure TSQLTokeniser.ReleaseStack;
+procedure TSQLTokeniser.ReleaseQueue(var token: TSQLTokens);
 begin
-  FStackState := tsRelease;
+  PopQueue(token);
+  FQueueState := tsRelease;
 end;
 
 constructor TSQLTokeniser.Create;
@@ -1091,25 +1106,15 @@ begin
   FNextToken := sqltInit;
   FState := stDefault;
   FString := '';
-  FStackPtr := 0;
-  FStackState := tsHold;
+  ResetQueue;
 end;
 
 function TSQLTokeniser.GetNextToken: TSQLTokens;
 begin
-  if FStackState = tsRelease then
-  begin
-    if FStackPtr > 0 then
-    begin
-      Dec(FStackPtr);
-      FString := FTokenStack[FStackPtr].text;
-      Result := FTokenStack[FStackPtr].token;
-      Exit;
-    end
-    else
-      FStackState := tsHold;
-  end;
-  Result := InternalGetNextToken;
+  if FQueueState = tsRelease then
+    PopQueue(Result)
+  else
+    Result := InternalGetNextToken;
 end;
 
 {a simple lookahead one algorithm to extra the next symbol}

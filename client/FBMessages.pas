@@ -254,7 +254,8 @@ type
       ibxeDatabaseNotConnected,
       ibxeMultiThreadRequired,
       ibxeODSVersionRequired,
-      ibxeTokenStackOverflow
+      ibxeTokenQueueOverflow,
+      ibxeTokenQueueUnderflow
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -464,7 +465,8 @@ resourcestring
   SMultiThreadRequired = 'Multi-threading required for %s but not enabled. Please recompile with multi-threading support enabled. '+
                          'Hint: you probably need to add -dUseCThreads to the Custom Options.';
   SODSVersionRequired = 'This feature requires ODS Version %s or later';
-  STokenStackOverflow = 'Error in SQL Token Analyser - token stack overflow';
+  STokenQueueOverflow = 'Error in SQL Token Analyser - token queue overflow';
+  STokenQueueUnderflow = 'Error in SQL Token Analyser - token queue underflow';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -641,7 +643,8 @@ const
     SDatabaseNotConnected,
     SMultiThreadRequired,
     SODSVersionRequired,
-    STokenStackOverflow
+    STokenQueueOverflow,
+    STokenQueueUnderflow
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
