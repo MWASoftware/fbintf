@@ -546,6 +546,7 @@ type
     function GetChar: char; virtual; abstract;
     function TokenFound(var token: TSQLTokens): boolean; virtual;
     function InternalGetNextToken: TSQLTokens; virtual;
+    procedure Reset; virtual;
 
     {Token stack}
     procedure QueueToken(token: TSQLTokens; text:string); overload;
@@ -553,9 +554,13 @@ type
     procedure ResetQueue;
     procedure ReleaseQueue(var token: TSQLTokens);
     function GetQueuedText: string;
+    procedure SetTokenText(text: string);
+
+  public
+    const
+        DefaultTerminator = ';';
   public
     constructor Create;
-    procedure Reset;
     function GetNextToken: TSQLTokens;
     function EOF: boolean;
     property TokenText: string read FString;
@@ -1116,6 +1121,11 @@ begin
   Result := '';
   for i := FQFirst to FQLast do
     Result += FTokenQueue[i].text;
+end;
+
+procedure TSQLTokeniser.SetTokenText(text: string);
+begin
+  FString := text;
 end;
 
 constructor TSQLTokeniser.Create;
