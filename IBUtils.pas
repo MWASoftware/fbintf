@@ -279,6 +279,8 @@ type
   sqltCloseBracket,
   sqltPipe,
   sqltConcatSymbol,
+  sqltLT,
+  sqltGT,
   sqltCR,
   sqltEOL,
   sqltEOF,
@@ -511,7 +513,7 @@ type
   TSQLTokeniser = class
   private
     const
-      TokenQueueMaxSize = 3;
+      TokenQueueMaxSize = 32;
     type
       TLexState = (stDefault, stInCommentLine, stInComment, stSingleQuoted, stDoubleQuoted,
                    stInArrayBounds, stInIdentifier, stInNumeric);
@@ -532,6 +534,7 @@ type
      character}
 
   private
+    FCompressWhiteSpace: boolean;
     FTokenQueue: array[0..TokenQueueMaxSize] of TTokenQueueItem;
     FQueueState: TTokenQueueState;
     FQFirst: integer;  {first and last pointers first=last => queue empty}
@@ -541,19 +544,23 @@ type
     FString: string;
     FNextToken: TSQLTokens;
     function GetChar: char; virtual; abstract;
-    function TokenFound: boolean; virtual;
-    function GetNextTokenHook(C: char; var token: TSQLTokens): boolean; virtual;
+    function TokenFound(var token: TSQLTokens): boolean; virtual;
     function InternalGetNextToken: TSQLTokens; virtual;
 
     {Token stack}
-    procedure QueueToken(token: TSQLTokens;text: string);
+    procedure QueueToken(token: TSQLTokens; text:string); overload;
+    procedure QueueToken(token: TSQLTokens); overload;
     procedure ResetQueue;
     procedure ReleaseQueue(var token: TSQLTokens);
+    function GetQueuedText: string;
   public
     constructor Create;
+    procedure Reset;
     function GetNextToken: TSQLTokens;
     function EOF: boolean;
     property TokenText: string read FString;
+    property CompressWhiteSpace: boolean read FCompressWhiteSpace
+                                         write FCompressWhiteSpace default true;
   end;
 
   { TSQLStringTokeniser }
@@ -965,7 +972,7 @@ end;
 
 function TSQLStreamTokeniser.GetChar: char;
 begin
-  if not EOF then
+  if not EOF and assigned(FInStream) then
     Result := char(FInStream.ReadByte)
   else
     Result := #0;
@@ -1044,6 +1051,10 @@ begin
       Result := sqltOpenSquareBracket;
     ']':
       Result := sqltCloseSquareBracket;
+    '<':
+      Result := sqltLT;
+    '>':
+      Result := sqltGT;
     CR:
       Result := sqltCR;
     LF:
@@ -1067,15 +1078,9 @@ begin
     FQueueState := tsHold;
 end;
 
-function TSQLTokeniser.TokenFound: boolean;
+function TSQLTokeniser.TokenFound(var token: TSQLTokens): boolean;
 begin
   Result := (FState = stDefault);
-end;
-
-function TSQLTokeniser.GetNextTokenHook(C: char; var token: TSQLTokens
-  ): boolean;
-begin
-  Result := false;
 end;
 
 procedure TSQLTokeniser.QueueToken(token: TSQLTokens; text: string);
@@ -1085,6 +1090,11 @@ begin
   FTokenQueue[FQLast].token := token;
   FTokenQueue[FQLast].text := text;
   Inc(FQLast);
+end;
+
+procedure TSQLTokeniser.QueueToken(token: TSQLTokens);
+begin
+  QueueToken(token,TokenText);
 end;
 
 procedure TSQLTokeniser.ResetQueue;
@@ -1100,9 +1110,23 @@ begin
   FQueueState := tsRelease;
 end;
 
+function TSQLTokeniser.GetQueuedText: string;
+var i: integer;
+begin
+  Result := '';
+  for i := FQFirst to FQLast do
+    Result += FTokenQueue[i].text;
+end;
+
 constructor TSQLTokeniser.Create;
 begin
   inherited Create;
+  Reset;
+  FCompressWhiteSpace := true;
+end;
+
+procedure TSQLTokeniser.Reset;
+begin
   FNextToken := sqltInit;
   FState := stDefault;
   FString := '';
@@ -1136,6 +1160,9 @@ begin
 
     if Result = sqltCR then
     begin
+      if not CompressWhiteSpace then
+        Result := sqltSpace
+      else
       if FNextToken = sqltEOL then
         continue
       else
@@ -1227,16 +1254,16 @@ begin
       end;
 
     else {stDefault}
-      if not GetNextTokenHook(C,Result) then
       begin
         FString := C;
         case Result of
         sqltSpace:
-          while FNextToken = sqltSpace do {consume}
+          while CompressWhiteSpace and (FNextToken = sqltSpace) do {consume}
             GetNext;
 
         sqltEOL:
-          FString := ' ';
+          if CompressWhiteSpace then
+            FString := ' ';
 
         sqltPipe:
           if FNextToken = sqltPipe then
@@ -1290,7 +1317,7 @@ begin
     end;
 
 //    writeln(FString);
-  until (FNextToken = sqltEOF) or TokenFound;
+  until (FNextToken = sqltEOF) or TokenFound(FNextToken);
 
   if Result = sqltIdentifier then
   begin

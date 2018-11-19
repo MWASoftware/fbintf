@@ -555,16 +555,29 @@ begin
       begin
         case token of
         sqltBegin:
-          Inc(Nested);
+          begin
+            Inc(Nested);
+            Result += TokenText;
+          end;
 
         sqltEnd:
           begin
             Dec(Nested);
             if Nested = 0 then
               State := stDefault;
+            Result += TokenText;
           end;
+
+        sqltQuotedString:
+          Result += '''' + SQLSafeString(TokenText) + '''';
+
+        sqltIdentifierInDoubleQuotes:
+          Result += '"' + TokenText + '"';
+
+        else
+          Result += TokenText;
+
         end;
-        Result += TokenText;
       end;
 
       {ignore array dimensions for param substitution }
