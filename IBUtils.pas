@@ -584,17 +584,6 @@ type
     function TokenFound(var token: TSQLTokens): boolean; override;
   end;
 
-  { TSQLStreamTokeniser }
-
-  TSQLStreamTokeniser = class(TSQLwithNamedParamsTokeniser)
-  private
-    FInStream: TStream;
-  protected
-    function GetChar: char; override;
-  public
-    constructor Create(S: TStream);
-  end;
-
 function Max(n1, n2: Integer): Integer;
 function Min(n1, n2: Integer): Integer;
 function RandomString(iLength: Integer): AnsiString;
@@ -1056,22 +1045,6 @@ begin
     end;
 
   Result := (FState <> stInParam);
-end;
-
-{ TSQLStreamTokeniser }
-
-function TSQLStreamTokeniser.GetChar: char;
-begin
-  if not EOF and assigned(FInStream) then
-    Result := char(FInStream.ReadByte)
-  else
-    Result := #0;
-end;
-
-constructor TSQLStreamTokeniser.Create(S: TStream);
-begin
-  inherited Create;
-  FInStream := S;
 end;
 
 { TSQLTokeniser }
