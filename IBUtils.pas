@@ -266,7 +266,8 @@ type
   sqltBadIdentifier,
   sqltNumberString,
   sqltString,
-  sqlParam,
+  sqltParam,
+  sqltQuotedParam,
   sqltColon,
   sqltComment,
   sqltCommentLine,
@@ -511,7 +512,7 @@ type
   { TSQLTokeniser }
 
   TSQLTokeniser = class
-  private
+  strict private
     const
       TokenQueueMaxSize = 32;
     type
@@ -527,6 +528,7 @@ type
   private
     FLastChar: char;
     FState: TLexState;
+    FSkipNext: boolean;
     function GetNext: TSQLTokens;
 
     {The token Queue is available for use by descendents so that they can
@@ -568,21 +570,23 @@ type
                                          write FCompressWhiteSpace default true;
   end;
 
-  { TSQLStringTokeniser }
+  { TSQLwithNamedParamsTokeniser }
 
-  TSQLStringTokeniser = class(TSQLTokeniser)
+  TSQLwithNamedParamsTokeniser = class(TSQLTokeniser)
+  strict private
+    type
+      TSQLState = (stInit,stInParam,stInBlock, stInArrayDim);
   private
-    FInString: string;
-    FIndex: integer;
+    FState: TSQLState;
+    FNested: integer;
   protected
-    function GetChar: char; override;
-  public
-    constructor Create(S: string);
+    procedure Reset; override;
+    function TokenFound(var token: TSQLTokens): boolean; override;
   end;
 
   { TSQLStreamTokeniser }
 
-  TSQLStreamTokeniser = class(TSQLTokeniser)
+  TSQLStreamTokeniser = class(TSQLwithNamedParamsTokeniser)
   private
     FInStream: TStream;
   protected
@@ -973,6 +977,87 @@ begin
   Result := StringReplace(s,'''','''''',[rfReplaceAll]);
 end;
 
+{ TSQLwithNamedParamsTokeniser }
+
+procedure TSQLwithNamedParamsTokeniser.Reset;
+begin
+  inherited Reset;
+  FState := stInit;
+  FNested := 0;
+end;
+
+function TSQLwithNamedParamsTokeniser.TokenFound(var token: TSQLTokens
+  ): boolean;
+begin
+  Result := inherited TokenFound(token);
+  if not Result then Exit;
+
+  case FState of
+  stInit:
+    begin
+      case token of
+      sqltColon:
+        begin
+          FState := stInParam;
+          ResetQueue;
+          QueueToken(token);
+        end;
+
+      sqltBegin:
+        begin
+          FState := stInBlock;
+          FNested := 1;
+        end;
+
+      sqltOpenSquareBracket:
+          FState := stInArrayDim;
+
+      end;
+    end;
+
+  stInParam:
+    begin
+      case token of
+      sqltIdentifier:
+        token := sqltParam;
+
+      sqltIdentifierInDoubleQuotes:
+        token := sqltQuotedParam;
+
+      else
+        begin
+          QueueToken(token);
+          ReleaseQueue(token);
+        end;
+      end;
+      FState := stInit;
+    end;
+
+  stInBlock:
+    begin
+      case token of
+      sqltBegin:
+          Inc(FNested);
+
+      sqltEnd:
+        begin
+          Dec(FNested);
+          if FNested = 0 then
+            FState := stInit;
+        end;
+      end;
+    end;
+
+    stInArrayDim:
+      begin
+        if token = sqltCloseSquareBracket then
+            FState := stInit;
+      end;
+    end;
+
+  Result := (FState <> stInParam);
+end;
+
 { TSQLStreamTokeniser }
 
 function TSQLStreamTokeniser.GetChar: char;
@@ -987,26 +1072,6 @@ constructor TSQLStreamTokeniser.Create(S: TStream);
 begin
   inherited Create;
   FInStream := S;
-end;
-
-{ TSQLStringTokeniser }
-
-function TSQLStringTokeniser.GetChar: char;
-begin
-  if FIndex <= Length(FInString) then
-  begin
-    Result := FInString[FIndex];
-    Inc(FIndex);
-  end
-  else
-    Result := #0;
-end;
-
-constructor TSQLStringTokeniser.Create(S: string);
-begin
-  inherited Create;
-  FInString := S;
-  FIndex := 1;
 end;
 
 { TSQLTokeniser }
@@ -1086,6 +1151,12 @@ end;
 function TSQLTokeniser.TokenFound(var token: TSQLTokens): boolean;
 begin
   Result := (FState = stDefault);
+  if Result and (token = sqltIdentifier)  then
+  begin
+    if not FindReservedWord(FString,token) then
+      if not IsSQLIdentifier(FString) then
+        token := sqltBadIdentifier;
+  end;
 end;
 
 procedure TSQLTokeniser.QueueToken(token: TSQLTokens; text: string);
@@ -1166,6 +1237,12 @@ begin
     C := FLastChar;
     GetNext;
 
+    if FSkipNext then
+    begin
+      FSkipNext := false;
+      continue;
+    end;
+
     {Combine CR/LF to EOF. CR on its own is treated as a space}
 
     if Result = sqltCR then
@@ -1190,7 +1267,6 @@ begin
           FState := stDefault;
           Result := sqltComment;
           GetNext;
-          Exit;
         end
         else
           FString += C;
@@ -1201,7 +1277,6 @@ begin
       begin
         FState := stDefault;
         Result := sqltCommentLine;
-        Exit;
       end
       else
         FString += C;
@@ -1211,15 +1286,18 @@ begin
         if (Result = sqltSingleQuotes) then
         begin
           if (FNextToken = sqltSingleQuotes) then
-            GetNext
+          begin
+            FSkipNext := true;
+            FString += C;
+          end
           else
           begin
             Result := sqltQuotedString;
             FState := stDefault;
-            Exit;
           end;
-        end;
-        FString += C;
+        end
+        else
+          FString += C;
       end;
 
     stDoubleQuoted:
@@ -1227,15 +1305,18 @@ begin
         if (Result = sqltDoubleQuotes) then
         begin
           if (FNextToken = sqltDoubleQuotes) then
-            GetNext
+          begin
+            FSkipNext := true;
+            FString += C;
+          end
           else
           begin
             Result := sqltIdentifierInDoubleQuotes;
             FState := stDefault;
-            Exit;
           end;
-        end;
-        FString += C;
+        end
+        else
+          FString += C;
       end;
 
     stInIdentifier:
@@ -1327,14 +1408,7 @@ begin
     end;
 
 //    writeln(FString);
-  until (FNextToken = sqltEOF) or TokenFound(FNextToken);
-
-  if Result = sqltIdentifier then
-  begin
-    if not FindReservedWord(FString,Result) then
-      if not IsSQLIdentifier(FString) then
-        Result := sqltBadIdentifier;
-  end;
+  until (Result = sqltEOF) or TokenFound(Result);
 end;
 
 function TSQLTokeniser.EOF: boolean;

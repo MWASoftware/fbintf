@@ -454,15 +454,17 @@ type
 
    { TSQLParamProcessor }
 
-   TSQLParamProcessor = class(TSQLStringTokeniser)
+   TSQLParamProcessor = class(TSQLwithNamedParamsTokeniser)
    private
    const
      sIBXParam = 'IBXParam';  {do not localize}
-   type
-     TSQLState = (stDefault,stInParam,stInBlock, stInArrayDim);
    private
+     FInString: string;
+     FIndex: integer;
      function DoExecute(GenerateParamNames: boolean;
        var slNames: TStrings): string;
+   protected
+     function GetChar: char; override;
    public
      class function Execute(sSQL: AnsiString; GenerateParamNames: boolean;
        var slNames: TStrings): string;
@@ -472,131 +474,71 @@ type
 
 function TSQLParamProcessor.DoExecute(GenerateParamNames: boolean;
   var slNames: TStrings): string;
-var State: TSQLState;
-    Nested: integer;
-    token: TSQLTokens;
+var token: TSQLTokens;
     iParamSuffix: Integer;
 begin
   Result := '';
-  State := stDefault;
-  Nested := 0;
   iParamSuffix := 0;
 
   while not EOF do
   begin
     token := GetNextToken;
-    case State of
-    stDefault:
+    case token of
+    sqltParam,
+    sqltQuotedParam:
       begin
-        case token of
-        sqltColon:
-          State := stInParam;
-
-        sqltBegin:
-          begin
-            State := stInBlock;
-            Nested := 1;
-            Result += TokenText;
-          end;
-
-        sqltPlaceHolder:
-          if GenerateParamNames then
-          begin
-            Inc(iParamSuffix);
-            slNames.AddObject(sIBXParam + IntToStr(iParamSuffix),self); //Note local convention
-                                                //add pointer to self to mark entry
-            Result += '?';
-          end
-          else
-            IBError(ibxeSQLParseError, [SParamNameExpected]);
-
-        sqltOpenSquareBracket:
-          begin
-            State := stInArrayDim;
-            Result += TokenText;
-          end;
-
-        sqltQuotedString:
-          Result += '''' + SQLSafeString(TokenText) + '''';
-
-        sqltIdentifierInDoubleQuotes:
-          Result += '"' + TokenText + '"';
-
-          sqltComment,
-          sqltCommentLine:
-            {ignore};
-
-        else
-          if token in [Low(TSQLReservedWords)..High(TSQLReservedWords)] then
-            Result += sqlReservedWords[token]
-          else
-            Result += TokenText;
-
-        end;
+        Result += '?';
+        slNames.Add(TokenText);
       end;
 
-      {colon followed by an identifier - this is a named parameter}
-
-    stInParam:
+    sqltPlaceHolder:
+      if GenerateParamNames then
       begin
-        if token in [sqltIdentifier, sqltIdentifierInDoubleQuotes] then
-        begin
-          Result += '?';
-          slNames.Add(TokenText);
-        end
-        else
-          Result += ':' + TokenText;
-        State := stDefault;
-      end;
+        Inc(iParamSuffix);
+        slNames.AddObject(sIBXParam + IntToStr(iParamSuffix),self); //Note local convention
+                                            //add pointer to self to mark entry
+        Result += '?';
+      end
+      else
+        IBError(ibxeSQLParseError, [SParamNameExpected]);
 
-      {ignore begin..end blocks for param substitution}
+    sqltQuotedString:
+      Result += '''' + SQLSafeString(TokenText) + '''';
 
-    stInBlock:
-      begin
-        case token of
-        sqltBegin:
-          begin
-            Inc(Nested);
-            Result += TokenText;
-          end;
+    sqltIdentifierInDoubleQuotes:
+      Result += '"' + TokenText + '"';
 
-        sqltEnd:
-          begin
-            Dec(Nested);
-            if Nested = 0 then
-              State := stDefault;
-            Result += TokenText;
-          end;
+    sqltComment,
+    sqltCommentLine:
+        {ignore};
 
-        sqltQuotedString:
-          Result += '''' + SQLSafeString(TokenText) + '''';
-
-        sqltIdentifierInDoubleQuotes:
-          Result += '"' + TokenText + '"';
-
-        else
-          Result += TokenText;
-
-        end;
-      end;
-
-      {ignore array dimensions for param substitution }
-
-    stInArrayDim:
-      begin
-        if token = sqltCloseSquareBracket then
-          State := stDefault;
+    else
+      if token in [Low(TSQLReservedWords)..High(TSQLReservedWords)] then
+        Result += sqlReservedWords[token]
+      else
         Result += TokenText;
-      end;
     end;
   end;
+end;
+
+function TSQLParamProcessor.GetChar: char;
+begin
+  if FIndex <= Length(FInString) then
+  begin
+    Result := FInString[FIndex];
+    Inc(FIndex);
+  end
+  else
+    Result := #0;
 end;
 
 class function TSQLParamProcessor.Execute(sSQL: AnsiString;
   GenerateParamNames: boolean; var slNames: TStrings): string;
 begin
-  with self.Create(sSQL) do
+  with self.Create do
   try
+    FInString := sSQL;
+    FIndex := 1;
     Result := DoExecute(GenerateParamNames,slNames);
   finally
     Free;
