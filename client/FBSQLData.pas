@@ -506,7 +506,7 @@ begin
       Result += '''' + SQLSafeString(TokenText) + '''';
 
     sqltIdentifierInDoubleQuotes:
-      Result += '"' + TokenText + '"';
+      Result += '"' + StringReplace(TokenText,'"','""',[rfReplaceAll]) + '"';
 
     sqltComment,
     sqltCommentLine:

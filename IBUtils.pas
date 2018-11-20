@@ -541,6 +541,7 @@ type
     FQueueState: TTokenQueueState;
     FQFirst: integer;  {first and last pointers first=last => queue empty}
     FQLast: integer;
+    FEOF: boolean;
     procedure PopQueue(var token: TSQLTokens);
   protected
     FString: string;
@@ -563,8 +564,9 @@ type
         DefaultTerminator = ';';
   public
     constructor Create;
+    destructor Destroy; override;
     function GetNextToken: TSQLTokens;
-    function EOF: boolean;
+    property EOF: boolean read FEOF;
     property TokenText: string read FString;
     property CompressWhiteSpace: boolean read FCompressWhiteSpace
                                          write FCompressWhiteSpace default true;
@@ -1179,11 +1181,18 @@ begin
   FCompressWhiteSpace := true;
 end;
 
+destructor TSQLTokeniser.Destroy;
+begin
+  Reset;
+  inherited Destroy;
+end;
+
 procedure TSQLTokeniser.Reset;
 begin
   FNextToken := sqltInit;
   FState := stDefault;
   FString := '';
+  FEOF := false;
   ResetQueue;
 end;
 
@@ -1223,10 +1232,8 @@ begin
       if not CompressWhiteSpace then
         Result := sqltSpace
       else
-      if FNextToken = sqltEOL then
-        continue
-      else
       begin
+        FSkipNext := FNextToken = sqltEOL;
         C := ' ';
         Result := sqltSpace;
       end;
@@ -1381,12 +1388,8 @@ begin
     end;
 
 //    writeln(FString);
-  until (Result = sqltEOF) or TokenFound(Result);
-end;
-
-function TSQLTokeniser.EOF: boolean;
-begin
-  Result := FNextToken = sqltEOF;
+    FEOF := Result = sqltEOF;
+  until TokenFound(Result) or EOF;
 end;
 
 end.

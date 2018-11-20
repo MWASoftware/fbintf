@@ -255,7 +255,8 @@ type
       ibxeMultiThreadRequired,
       ibxeODSVersionRequired,
       ibxeTokenQueueOverflow,
-      ibxeTokenQueueUnderflow
+      ibxeTokenQueueUnderflow,
+      ibxErrorParsing
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -467,6 +468,7 @@ resourcestring
   SODSVersionRequired = 'This feature requires ODS Version %s or later';
   STokenQueueOverflow = 'Error in SQL Token Analyser - token queue overflow';
   STokenQueueUnderflow = 'Error in SQL Token Analyser - token queue underflow';
+  SErrorParsing = 'Error parsing SQL Statement at clause starting with %s';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -644,7 +646,8 @@ const
     SMultiThreadRequired,
     SODSVersionRequired,
     STokenQueueOverflow,
-    STokenQueueUnderflow
+    STokenQueueUnderflow,
+    SErrorParsing
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
