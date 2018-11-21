@@ -203,8 +203,8 @@ type
   sqltRight,
   sqltRollback,
   sqltRow,
-  sqltRow_Count,
   sqltRows,
+  sqltRow_Count,
   sqltSavepoint,
   sqltScroll,
   sqltSecond,
@@ -451,8 +451,8 @@ const
   'RIGHT',
   'ROLLBACK',
   'ROW',
-  'ROW_COUNT',
   'ROWS',
+  'ROW_COUNT',
   'SAVEPOINT',
   'SCROLL',
   'SECOND',
@@ -546,6 +546,7 @@ type
   protected
     FString: string;
     FNextToken: TSQLTokens;
+    procedure Assign(source: TSQLTokeniser); virtual;
     function GetChar: char; virtual; abstract;
     function TokenFound(var token: TSQLTokens): boolean; virtual;
     function InternalGetNextToken: TSQLTokens; virtual;
@@ -554,8 +555,11 @@ type
     {Token stack}
     procedure QueueToken(token: TSQLTokens; text:string); overload;
     procedure QueueToken(token: TSQLTokens); overload;
-    procedure ResetQueue;
-    procedure ReleaseQueue(var token: TSQLTokens);
+    procedure ResetQueue; overload;
+    procedure ResetQueue(token: TSQLTokens; text:string); overload;
+    procedure ResetQueue(token: TSQLTokens); overload;
+    procedure ReleaseQueue(var token: TSQLTokens); overload;
+    procedure ReleaseQueue; overload;
     function GetQueuedText: string;
     procedure SetTokenText(text: string);
 
@@ -582,6 +586,7 @@ type
     FState: TSQLState;
     FNested: integer;
   protected
+    procedure Assign(source: TSQLTokeniser); override;
     procedure Reset; override;
     function TokenFound(var token: TSQLTokens): boolean; override;
   end;
@@ -970,6 +975,16 @@ end;
 
 { TSQLwithNamedParamsTokeniser }
 
+procedure TSQLwithNamedParamsTokeniser.Assign(source: TSQLTokeniser);
+begin
+  inherited Assign(source);
+  if source is TSQLwithNamedParamsTokeniser then
+  begin
+    FState := TSQLwithNamedParamsTokeniser(source).FState;
+    FNested := TSQLwithNamedParamsTokeniser(source).FNested;
+  end;
+end;
+
 procedure TSQLwithNamedParamsTokeniser.Reset;
 begin
   inherited Reset;
@@ -990,8 +1005,7 @@ begin
       sqltColon:
         begin
           FState := stInParam;
-          ResetQueue;
-          QueueToken(token);
+          ResetQueue(token);
         end;
 
       sqltBegin:
@@ -1123,6 +1137,16 @@ begin
     FQueueState := tsHold;
 end;
 
+procedure TSQLTokeniser.Assign(source: TSQLTokeniser);
+begin
+  FString := source.FString;
+  FNextToken := source.FNextToken;
+  FTokenQueue := source.FTokenQueue;
+  FQueueState := source.FQueueState;
+  FQFirst := source.FQFirst;
+  FQLast := source.FQLast;
+end;
+
 function TSQLTokeniser.TokenFound(var token: TSQLTokens): boolean;
 begin
   Result := (FState = stDefault);
@@ -1155,9 +1179,26 @@ begin
   FQueueState := tsHold;
 end;
 
+procedure TSQLTokeniser.ResetQueue(token: TSQLTokens; text: string);
+begin
+  ResetQueue;
+  QueueToken(token,text);
+end;
+
+procedure TSQLTokeniser.ResetQueue(token: TSQLTokens);
+begin
+  ResetQueue;
+  QueueToken(token);
+end;
+
 procedure TSQLTokeniser.ReleaseQueue(var token: TSQLTokens);
 begin
   PopQueue(token);
+  FQueueState := tsRelease;
+end;
+
+procedure TSQLTokeniser.ReleaseQueue;
+begin
   FQueueState := tsRelease;
 end;
 
@@ -1199,9 +1240,14 @@ end;
 function TSQLTokeniser.GetNextToken: TSQLTokens;
 begin
   if FQueueState = tsRelease then
-    PopQueue(Result)
-  else
-    Result := InternalGetNextToken;
+  repeat
+    PopQueue(Result);
+    FEOF := Result = sqltEOF;
+    if TokenFound(Result) then
+      Exit;
+  until FQueueState <> tsRelease;
+
+  Result := InternalGetNextToken;
 end;
 
 {a simple lookahead one algorithm to extra the next symbol}
