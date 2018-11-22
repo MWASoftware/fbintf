@@ -512,7 +512,7 @@ type
   { TSQLTokeniser }
 
   TSQLTokeniser = class
-  strict private
+  private
     const
       TokenQueueMaxSize = 64;
     type
@@ -576,7 +576,7 @@ type
   { TSQLwithNamedParamsTokeniser }
 
   TSQLwithNamedParamsTokeniser = class(TSQLTokeniser)
-  strict private
+  private
     type
       TSQLState = (stInit,stInParam,stInBlock, stInArrayDim);
   private
