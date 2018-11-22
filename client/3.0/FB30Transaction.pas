@@ -163,7 +163,6 @@ procedure TFB30Transaction.Start(DefaultCompletion: TTransactionCompletion);
 begin
   if FTransactionIntf <> nil then
     Exit;
-
   FDefaultCompletion := DefaultCompletion;
 
   if Length(FAttachments) = 1 then

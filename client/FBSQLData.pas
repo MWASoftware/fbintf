@@ -508,15 +508,17 @@ begin
     sqltIdentifierInDoubleQuotes:
       Result += '"' + StringReplace(TokenText,'"','""',[rfReplaceAll]) + '"';
 
-    sqltComment,
+    sqltComment:
+      Result += '/*' + TokenText + '*/';
+
     sqltCommentLine:
-        {ignore};
+      Result += '//' + TokenText + LineEnding;
+
+    sqltEOL:
+      Result += LineEnding;
 
     else
-      if token in [Low(TSQLReservedWords)..High(TSQLReservedWords)] then
-        Result += sqlReservedWords[token]
-      else
-        Result += TokenText;
+      Result += TokenText;
     end;
   end;
 end;

@@ -514,10 +514,10 @@ type
   TSQLTokeniser = class
   strict private
     const
-      TokenQueueMaxSize = 32;
+      TokenQueueMaxSize = 64;
     type
       TLexState = (stDefault, stInCommentLine, stInComment, stSingleQuoted, stDoubleQuoted,
-                   stInArrayBounds, stInIdentifier, stInNumeric);
+                   stInIdentifier, stInNumeric);
 
       TTokenQueueItem = record
                           token: TSQLTokens;
@@ -536,7 +536,6 @@ type
      character}
 
   private
-    FCompressWhiteSpace: boolean;
     FTokenQueue: array[0..TokenQueueMaxSize] of TTokenQueueItem;
     FQueueState: TTokenQueueState;
     FQFirst: integer;  {first and last pointers first=last => queue empty}
@@ -572,8 +571,6 @@ type
     function GetNextToken: TSQLTokens;
     property EOF: boolean read FEOF;
     property TokenText: string read FString;
-    property CompressWhiteSpace: boolean read FCompressWhiteSpace
-                                         write FCompressWhiteSpace default true;
   end;
 
   { TSQLwithNamedParamsTokeniser }
@@ -1193,8 +1190,8 @@ end;
 
 procedure TSQLTokeniser.ReleaseQueue(var token: TSQLTokens);
 begin
-  PopQueue(token);
   FQueueState := tsRelease;
+  PopQueue(token);
 end;
 
 procedure TSQLTokeniser.ReleaseQueue;
@@ -1219,7 +1216,6 @@ constructor TSQLTokeniser.Create;
 begin
   inherited Create;
   Reset;
-  FCompressWhiteSpace := true;
 end;
 
 destructor TSQLTokeniser.Destroy;
@@ -1274,16 +1270,7 @@ begin
     {Combine CR/LF to EOF. CR on its own is treated as a space}
 
     if Result = sqltCR then
-    begin
-      if not CompressWhiteSpace then
-        Result := sqltSpace
-      else
-      begin
-        FSkipNext := FNextToken = sqltEOL;
-        C := ' ';
-        Result := sqltSpace;
-      end;
-    end;
+      FSkipNext := FNextToken = sqltEOL;
 
     case FState of
     stInComment:
@@ -1374,13 +1361,6 @@ begin
       begin
         FString := C;
         case Result of
-        sqltSpace:
-          while CompressWhiteSpace and (FNextToken = sqltSpace) do {consume}
-            GetNext;
-
-        sqltEOL:
-          if CompressWhiteSpace then
-            FString := ' ';
 
         sqltPipe:
           if FNextToken = sqltPipe then
@@ -1418,9 +1398,6 @@ begin
             FString := '';
             FState := stDoubleQuoted;
           end;
-
-        sqltOpenSquareBracket:
-          FState := stInArrayBounds;
 
         sqltIdentifier:
           if FNextToken = sqltIdentifier then
