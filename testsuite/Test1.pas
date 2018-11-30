@@ -73,6 +73,7 @@ begin
   writeln(outfile,'DB ODS Major Version = ',Attachment.GetODSMajorVersion);
   writeln(outfile,'DB ODS Minor Version = ',Attachment.GetODSMinorVersion);
   writeln(outfile,'User Authentication Method = ',Attachment.GetAuthenticationMethod);
+  writeln(outfile,'Firebird Library Path = ',Attachment.getFirebirdAPI.GetFBLibrary.GetLibraryFilePath);
 end;
 
 function TTest1.TestTitle: AnsiString;

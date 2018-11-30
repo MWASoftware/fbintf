@@ -84,6 +84,7 @@ type
      FHasFullMetaData: boolean;
      FAttachment: TFB25Attachment;
      FTransaction: TFB25Transaction;
+     FFirebird25ClientAPI: TFB25ClientAPI;
    protected
      function Attachment: IAttachment; override;
      procedure NeedFullMetadata; override;
@@ -101,6 +102,7 @@ type
   private
     FHandle: TISC_BLOB_HANDLE;
     FEOB: boolean;
+    FFirebird25ClientAPI: TFB25ClientAPI;
   protected
     procedure CheckReadable; override;
     procedure CheckWritable; override;
@@ -147,7 +149,7 @@ begin
   ColName := AnsiUpperCase(GetColumnName);
   if (ColName <> '') and (RelName <> '') then
   begin
-    with Firebird25ClientAPI do
+    with FFirebird25ClientAPI do
       Call(isc_blob_lookup_desc(StatusVector,@(FAttachment.Handle),
                                             @(FTransaction.Handle),
                 PAnsiChar(RelName),PAnsiChar(ColName),@BlobDesc,@Global));
@@ -174,6 +176,8 @@ begin
   inherited Create(Transaction,RelationName,ColumnName);
   FAttachment := Attachment;
   FTransaction := Transaction;
+  FFirebird25ClientAPI := Attachment.Firebird25ClientAPI;
+  OnDatabaseError := FFirebird25ClientAPI.IBDataBaseError;
 end;
 
 constructor TFB25BlobMetaData.Create(Attachment: TFB25Attachment;
@@ -209,7 +213,7 @@ begin
   if FHandle = nil then
     IBError(ibxeBlobNotOpen,[nil]);
 
-  with Firebird25ClientAPI, Response as TBlobInfo do
+  with FFirebird25ClientAPI, Response as TBlobInfo do
     Call(isc_blob_info(StatusVector, @FHandle, Length(Request),@Request,
                                                GetBufSize, Buffer));
 end;
@@ -218,7 +222,7 @@ procedure TFB25Blob.InternalClose(Force: boolean);
 begin
   if FHandle = nil then
     Exit;
-  with Firebird25ClientAPI do
+  with FFirebird25ClientAPI do
     Call(isc_close_blob(StatusVector, @FHandle), not Force);
   FHandle := nil;
 end;
@@ -227,7 +231,7 @@ procedure TFB25Blob.InternalCancel(Force: boolean);
 begin
   if FHandle = nil then
     Exit;
-  with Firebird25ClientAPI do
+  with FFirebird25ClientAPI do
     Call(isc_cancel_blob(StatusVector,@FHandle),not Force);
   FHandle := nil;
 end;
@@ -240,7 +244,9 @@ begin
   inherited Create(Attachment,Transaction,MetaData,BPB);
   DBHandle := Attachment.Handle;
   TRHandle := Transaction.Handle;
-  with Firebird25ClientAPI do
+  FFirebird25ClientAPI := Attachment.Firebird25ClientAPI;
+  OnDatabaseError := FFirebird25ClientAPI.IBDataBaseError;
+  with FFirebird25ClientAPI do
   if BPB = nil then
     Call(isc_create_blob2(StatusVector, @DBHandle, @TRHandle, @FHandle, @FBlobID,
                            0, nil))
@@ -263,7 +269,9 @@ begin
   inherited Create(Attachment,Transaction,MetaData,BPB);
   DBHandle := Attachment.Handle;
   TRHandle := Transaction.Handle;
-  with Firebird25ClientAPI do
+  FFirebird25ClientAPI := Attachment.Firebird25ClientAPI;
+  OnDatabaseError := FFirebird25ClientAPI.IBDataBaseError;
+  with FFirebird25ClientAPI do
   if BPB = nil then
     Call(isc_create_blob2(StatusVector, @DBHandle, @TRHandle, @FHandle, @FBlobID,
                            0, nil))
@@ -281,10 +289,12 @@ begin
   inherited Create(Attachment,Transaction,MetaData,BlobID,BPB);
   DBHandle := Attachment.Handle;
   TRHandle := Transaction.Handle;
+  FFirebird25ClientAPI := Attachment.Firebird25ClientAPI;
+  OnDatabaseError := FFirebird25ClientAPI.IBDataBaseError;
   if (BlobID.gds_quad_high = 0) and (BlobID.gds_quad_low = 0) then
     Exit;
 
-  with Firebird25ClientAPI do
+  with FFirebird25ClientAPI do
   if BPB = nil then
     Call(isc_open_blob2(StatusVector,  @DBHandle, @TRHandle, @FHandle,
                      @FBlobID, 0, nil))
@@ -312,7 +322,7 @@ begin
       localCount := MaxuShort
     else
       localCount := Count;
-    with Firebird25ClientAPI do
+    with FFirebird25ClientAPI do
       returnCode := isc_get_segment(StatusVector, @FHandle, @BytesRead, localCount,
                            LocalBuffer);
     Inc(LocalBuffer,BytesRead);
@@ -323,7 +333,7 @@ begin
   FEOB := returnCode = isc_segstr_eof;
   ClearStringCache;
   if (returnCode <> 0) and (returnCode <> isc_segment) and (returnCode <> isc_segstr_eof) then
-    Firebird25ClientAPI.IBDataBaseError
+    FFirebird25ClientAPI.IBDataBaseError
 end;
 
 function TFB25Blob.Write(const Buffer; Count: Longint): Longint;
@@ -341,7 +351,7 @@ begin
       localCount := MaxuShort
     else
       localCount := Count;
-    with Firebird25ClientAPI do
+    with FFirebird25ClientAPI do
       Call(isc_put_segment(StatusVector,@FHandle,localCount,LocalBuffer));
     Dec(Count,localCount);
     Inc(LocalBuffer,localCount);

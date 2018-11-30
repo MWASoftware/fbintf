@@ -46,16 +46,18 @@ type
   TFB25Attachment = class(TFBAttachment, IAttachment, IActivityMonitor)
   private
     FHandle: TISC_DB_HANDLE;
+    FFirebird25ClientAPI: TFB25ClientAPI;
   protected
     procedure CheckHandle; override;
   public
-    constructor Create(DatabaseName: AnsiString; aDPB: IDPB;
+    constructor Create(api: TFB25ClientAPI; DatabaseName: AnsiString; aDPB: IDPB;
       RaiseExceptionOnConnectError: boolean);
-    constructor CreateDatabase(DatabaseName: AnsiString; aDPB: IDPB; RaiseExceptionOnError: boolean); overload;
-    constructor CreateDatabase(sql: AnsiString; aSQLDialect: integer;
+    constructor CreateDatabase(api: TFB25ClientAPI; DatabaseName: AnsiString; aDPB: IDPB; RaiseExceptionOnError: boolean); overload;
+    constructor CreateDatabase(api: TFB25ClientAPI; sql: AnsiString; aSQLDialect: integer;
       RaiseExceptionOnError: boolean); overload;
     function GetDBInfo(ReqBuffer: PByte; ReqBufLen: integer): IDBInformation; override;
     property Handle: TISC_DB_HANDLE read FHandle;
+    property Firebird25ClientAPI: TFB25ClientAPI read FFirebird25ClientAPI;
 
   public
     {IAttachment}
@@ -105,28 +107,30 @@ begin
     IBError(ibxeDatabaseClosed,[nil]);
 end;
 
-constructor TFB25Attachment.Create(DatabaseName: AnsiString; aDPB: IDPB;
+constructor TFB25Attachment.Create(api: TFB25ClientAPI; DatabaseName: AnsiString; aDPB: IDPB;
   RaiseExceptionOnConnectError: boolean);
 begin
+  FFirebird25ClientAPI := api;
   if aDPB = nil then
   begin
     if RaiseExceptionOnConnectError then
        IBError(ibxeNoDPB,[nil]);
     Exit;
   end;
-  inherited Create(DatabaseName,aDPB,RaiseExceptionOnConnectError);
+  inherited Create(api,DatabaseName,aDPB,RaiseExceptionOnConnectError);
   Connect;
 end;
 
-constructor TFB25Attachment.CreateDatabase(DatabaseName: AnsiString; aDPB: IDPB;
+constructor TFB25Attachment.CreateDatabase(api: TFB25ClientAPI; DatabaseName: AnsiString; aDPB: IDPB;
   RaiseExceptionOnError: boolean);
 var sql: AnsiString;
     tr_handle: TISC_TR_HANDLE;
 begin
-  inherited Create(DatabaseName,aDPB,RaiseExceptionOnError);
+  inherited Create(api,DatabaseName,aDPB,RaiseExceptionOnError);
+  FFirebird25ClientAPI := api;
   sql := GenerateCreateDatabaseSQL(DatabaseName,aDPB);
   tr_handle := nil;
-  with Firebird25ClientAPI do
+  with FFirebird25ClientAPI do
   if (isc_dsql_execute_immediate(StatusVector, @FHandle, @tr_handle, 0, PAnsiChar(sql),
                                   SQLDialect, nil) > 0) and RaiseExceptionOnError then
     IBDataBaseError;
@@ -140,14 +144,15 @@ begin
     GetODSAndConnectionInfo;
 end;
 
-constructor TFB25Attachment.CreateDatabase(sql: AnsiString; aSQLDialect: integer;
+constructor TFB25Attachment.CreateDatabase(api: TFB25ClientAPI; sql: AnsiString; aSQLDialect: integer;
     RaiseExceptionOnError: boolean);
 var tr_handle: TISC_TR_HANDLE;
 begin
-  inherited Create('',nil,RaiseExceptionOnError);
+  inherited Create(api,'',nil,RaiseExceptionOnError);
+  FFirebird25ClientAPI := api;
   FSQLDialect := aSQLDialect;
   tr_handle := nil;
-  with Firebird25ClientAPI do
+  with FFirebird25ClientAPI do
   begin
     if (isc_dsql_execute_immediate(StatusVector, @FHandle, @tr_handle, 0, PAnsiChar(sql),
                                   aSQLDialect, nil) > 0) and RaiseExceptionOnError then
@@ -162,8 +167,8 @@ end;
 function TFB25Attachment.GetDBInfo(ReqBuffer: PByte; ReqBufLen: integer
   ): IDBInformation;
 begin
-  Result := TDBInformation.Create;
-  with Firebird25ClientAPI, Result as TDBInformation do
+  Result := TDBInformation.Create(FFirebird25ClientAPI);
+  with FFirebird25ClientAPI, Result as TDBInformation do
      if isc_database_info(StatusVector, @(FHandle), ReqBufLen, ReqBuffer,
                                getBufSize, Buffer) > 0 then
           IBDataBaseError;
@@ -173,7 +178,7 @@ procedure TFB25Attachment.Connect;
 begin
   FSQLDialect := 3;
 
-  with Firebird25ClientAPI do
+  with FFirebird25ClientAPI do
   if DPB = nil then
   begin
     if (isc_attach_database(StatusVector, Length(FDatabaseName),
@@ -199,7 +204,7 @@ begin
 
   EndAllTransactions;
   {Disconnect}
-  with Firebird25ClientAPI do
+  with FFirebird25ClientAPI do
     if (isc_detach_database(StatusVector, @FHandle) > 0) and not Force then
       IBDatabaseError;
   FHandle := nil;
@@ -217,7 +222,7 @@ procedure TFB25Attachment.DropDatabase;
 begin
   CheckHandle;
   EndAllTransactions;
-  with Firebird25ClientAPI do
+  with FFirebird25ClientAPI do
     if isc_drop_database(StatusVector, @FHandle) > 0 then
       IBDatabaseError;
   FHandle := nil;
@@ -227,14 +232,14 @@ function TFB25Attachment.StartTransaction(TPB: array of byte;
   DefaultCompletion: TTransactionCompletion): ITransaction;
 begin
   CheckHandle;
-  Result := TFB25Transaction.Create(self,TPB,DefaultCompletion);
+  Result := TFB25Transaction.Create(FFirebird25ClientAPI,self,TPB,DefaultCompletion);
 end;
 
 function TFB25Attachment.StartTransaction(TPB: ITPB;
   DefaultCompletion: TTransactionCompletion): ITransaction;
 begin
   CheckHandle;
-  Result := TFB25Transaction.Create(self,TPB,DefaultCompletion);
+  Result := TFB25Transaction.Create(FFirebird25ClientAPI,self,TPB,DefaultCompletion);
 end;
 
 function TFB25Attachment.CreateBlob(transaction: ITransaction; RelationName,
@@ -281,7 +286,7 @@ var TRHandle: TISC_TR_HANDLE;
 begin
   CheckHandle;
   TRHandle := (Transaction as TFB25Transaction).Handle;
-  with Firebird25ClientAPI do
+  with FFirebird25ClientAPI do
     if isc_dsql_execute_immediate(StatusVector, @fHandle, @TRHandle, 0,PAnsiChar(sql), aSQLDialect, nil) > 0 then
       IBDatabaseError;
   SignalActivity;

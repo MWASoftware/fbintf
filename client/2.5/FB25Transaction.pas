@@ -82,8 +82,10 @@ type
   TFB25Transaction = class(TFBTransaction,ITransaction, IActivityMonitor)
   private
     FHandle: TISC_TR_HANDLE;
+    FFirebird25ClientAPI: TFB25ClientAPI;
   protected
     function GetActivityIntf(att: IAttachment): IActivityMonitor; override;
+    procedure SetInterface(api: TFBClientAPI); override;
   public
     property Handle: TISC_TR_HANDLE read FHandle;
 
@@ -109,6 +111,13 @@ begin
   Result := (att as TFB25Attachment);
 end;
 
+procedure TFB25Transaction.SetInterface(api: TFBClientAPI);
+begin
+  inherited SetInterface(api);
+  FFirebird25ClientAPI := api as TFB25ClientAPI;
+  OnDatabaseError := FFirebird25ClientAPI.IBDataBaseError;
+end;
+
 function TFB25Transaction.GetInTransaction: boolean;
 begin
   Result := FHandle <> nil;
@@ -120,7 +129,7 @@ begin
     IBError(ibxeNotAMultiDatabaseTransaction,[nil]);
   if FHandle = nil then
     Exit;
-  with Firebird25ClientAPI do
+  with FFirebird25ClientAPI do
     Call(isc_prepare_transaction(StatusVector, @FHandle));
 end;
 
@@ -128,7 +137,7 @@ procedure TFB25Transaction.Commit(Force: boolean);
 begin
   if FHandle = nil then
     Exit;
-  with Firebird25ClientAPI do
+  with FFirebird25ClientAPI do
     Call(isc_commit_transaction(StatusVector, @FHandle),not Force);
   FHandle := nil;
 end;
@@ -137,7 +146,7 @@ procedure TFB25Transaction.CommitRetaining;
 begin
   if FHandle = nil then
     Exit;
-  with Firebird25ClientAPI do
+  with FFirebird25ClientAPI do
     Call(isc_commit_retaining(StatusVector, @FHandle));
 end;
 
@@ -150,7 +159,7 @@ begin
     Exit;
   pteb := nil;
   FDefaultCompletion := DefaultCompletion;
-  with Firebird25ClientAPI do
+  with FFirebird25ClientAPI do
   if (Length(FAttachments) = 1)  then
   try
     db_handle := (FAttachments[0] as TFB25Attachment).Handle;
@@ -189,7 +198,7 @@ procedure TFB25Transaction.Rollback(Force: boolean);
 begin
   if FHandle = nil then
     Exit;
-  with Firebird25ClientAPI do
+  with FFirebird25ClientAPI do
     Call(isc_rollback_transaction(StatusVector, @FHandle),not Force);
   FHandle := nil;
 end;
@@ -198,7 +207,7 @@ procedure TFB25Transaction.RollbackRetaining;
 begin
   if FHandle = nil then
     Exit;
-  with Firebird25ClientAPI do
+  with FFirebird25ClientAPI do
     Call(isc_rollback_retaining(StatusVector, @FHandle));
 end;
 

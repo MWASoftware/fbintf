@@ -203,6 +203,7 @@ type
   TFBStatusCode = cardinal;
   TByteArray = array of byte;
 
+  IFirebirdAPI = interface;
   IAttachment = interface;
   ITransaction = interface;
 
@@ -866,6 +867,7 @@ type
 
   IAttachment = interface
     ['{466e9b67-9def-4807-b3e7-e08a35e7185c}']
+    function getFirebirdAPI: IFirebirdAPI;
     function getDPB: IDPB;
     function AllocateBPB: IBPB;
     function AllocateDIRB: IDIRB;
@@ -1071,6 +1073,7 @@ type
 
   IServiceManager = interface
     ['{905b587d-1e1f-4e40-a3f8-a3519f852e48}']
+    function getFirebirdAPI: IFirebirdAPI;
     function getSPB: ISPB;
     function getServerName: AnsiString;
     function getProtocol: TProtocol;
@@ -1087,7 +1090,6 @@ type
 
   {Tbe Firebird Library API used to get information about the Firebird library}
 
-  IFirebirdAPI = interface;
 
   IFirebirdLibrary = interface
     ['{3c04e0a1-12e0-428a-b2e1-bc6fcd97b79b}']
@@ -1238,7 +1240,7 @@ begin
 end;
 
 function TryIBLoad: Boolean;
-var fblib: IFirebirdLibrary
+var fblib: IFirebirdLibrary;
 begin
  Result := FDefaultFBLibrary <> nil;
  try
@@ -1262,7 +1264,7 @@ begin
 end;
 
 function LoadFBLibrary(aLibPathName: string): IFirebirdLibrary;
-var fblib: IFirebirdLibrary
+var fblib: IFirebirdLibrary;
 begin
   if trim(aLibPathName) = '' then
   begin
@@ -1271,7 +1273,7 @@ begin
   end
   else
   begin
-    fblib := TFBLibrary.Create(aLibPathName);
+    fblib := TFBLibrary.GetFBLibrary(aLibPathName);
     if (fblib = nil) or (fblib.GetFirebirdAPI = nil) then
       IBError(ibxeInterBaseMissing, [nil]);
     Result := fblib;

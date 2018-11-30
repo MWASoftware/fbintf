@@ -46,18 +46,20 @@ type
   TFB30Attachment = class(TFBAttachment,IAttachment, IActivityMonitor)
   private
     FAttachmentIntf: Firebird.IAttachment;
+    FFirebird30ClientAPI: TFB30ClientAPI;
   protected
     procedure CheckHandle; override;
   public
-    constructor Create(DatabaseName: AnsiString; aDPB: IDPB;
+    constructor Create(api: TFB30ClientAPI; DatabaseName: AnsiString; aDPB: IDPB;
           RaiseExceptionOnConnectError: boolean);
-    constructor CreateDatabase(DatabaseName: AnsiString; aDPB: IDPB; RaiseExceptionOnError: boolean);  overload;
-    constructor CreateDatabase(sql: AnsiString; aSQLDialect: integer;
+    constructor CreateDatabase(api: TFB30ClientAPI; DatabaseName: AnsiString; aDPB: IDPB; RaiseExceptionOnError: boolean);  overload;
+    constructor CreateDatabase(api: TFB30ClientAPI; sql: AnsiString; aSQLDialect: integer;
       RaiseExceptionOnError: boolean); overload;
     destructor Destroy; override;
     function GetDBInfo(ReqBuffer: PByte; ReqBufLen: integer): IDBInformation;
       override;
     property AttachmentIntf: Firebird.IAttachment read FAttachmentIntf;
+    property Firebird30ClientAPI: TFB30ClientAPI read FFirebird30ClientAPI;
 
   public
     {IAttachment}
@@ -89,7 +91,7 @@ type
     function CreateArray(transaction: ITransaction; ArrayMetaData: IArrayMetaData): IArray; overload;
     function CreateArrayMetaData(SQLType: cardinal; tableName: AnsiString;
       columnName: AnsiString; Scale: integer; size: cardinal; aCharSetID: cardinal;
-  dimensions: cardinal; bounds: TArrayBounds): IArrayMetaData;
+      dimensions: cardinal; bounds: TArrayBounds): IArrayMetaData;
 
 
     {Database Information}
@@ -110,26 +112,28 @@ begin
     IBError(ibxeDatabaseClosed,[nil]);
 end;
 
-constructor TFB30Attachment.Create(DatabaseName: AnsiString; aDPB: IDPB;
+constructor TFB30Attachment.Create(api: TFB30ClientAPI; DatabaseName: AnsiString; aDPB: IDPB;
   RaiseExceptionOnConnectError: boolean);
 begin
+  FFirebird30ClientAPI := api;
   if aDPB = nil then
   begin
     if RaiseExceptionOnConnectError then
        IBError(ibxeNoDPB,[nil]);
     Exit;
   end;
-  inherited Create(DatabaseName,aDPB,RaiseExceptionOnConnectError);
+  inherited Create(api,DatabaseName,aDPB,RaiseExceptionOnConnectError);
   Connect;
 end;
 
-constructor TFB30Attachment.CreateDatabase(DatabaseName: AnsiString; aDPB: IDPB;
+constructor TFB30Attachment.CreateDatabase(api: TFB30ClientAPI; DatabaseName: AnsiString; aDPB: IDPB;
   RaiseExceptionOnError: boolean);
 var Param: IDPBItem;
     sql: AnsiString;
     IsCreateDB: boolean;
 begin
-  inherited Create(DatabaseName,aDPB,RaiseExceptionOnError);
+  inherited Create(api,DatabaseName,aDPB,RaiseExceptionOnError);
+  FFirebird30ClientAPI := api;
   IsCreateDB := true;
   if aDPB <> nil then
   begin
@@ -138,7 +142,7 @@ begin
       FSQLDialect := Param.AsByte;
   end;
   sql := GenerateCreateDatabaseSQL(DatabaseName,aDPB);
-  with Firebird30ClientAPI do
+  with FFirebird30ClientAPI do
   begin
     FAttachmentIntf := UtilIntf.executeCreateDatabase(StatusIntf,Length(sql),
                                        PAnsiChar(sql),FSQLDialect,@IsCreateDB);
@@ -157,13 +161,14 @@ begin
   end;
 end;
 
-constructor TFB30Attachment.CreateDatabase(sql: AnsiString; aSQLDialect: integer;
+constructor TFB30Attachment.CreateDatabase(api: TFB30ClientAPI; sql: AnsiString; aSQLDialect: integer;
   RaiseExceptionOnError: boolean);
 var IsCreateDB: boolean;
 begin
-  inherited Create('',nil,RaiseExceptionOnError);
+  inherited Create(api,'',nil,RaiseExceptionOnError);
+  FFirebird30ClientAPI := api;
   FSQLDialect := aSQLDialect;
-  with Firebird30ClientAPI do
+  with FFirebird30ClientAPI do
   begin
     FAttachmentIntf := UtilIntf.executeCreateDatabase(StatusIntf,Length(sql),
                                        PAnsiChar(sql),aSQLDialect,@IsCreateDB);
@@ -185,8 +190,8 @@ end;
 
 function TFB30Attachment.GetDBInfo(ReqBuffer: PByte; ReqBufLen: integer): IDBInformation;
 begin
-  Result := TDBInformation.Create;
-  with Firebird30ClientAPI, Result as TDBInformation do
+  Result := TDBInformation.Create(Firebird30ClientAPI);
+  with FFirebird30ClientAPI, Result as TDBInformation do
   begin
     FAttachmentIntf.getInfo(StatusIntf, ReqBufLen, BytePtr(ReqBuffer),
                                getBufSize, BytePtr(Buffer));
@@ -196,7 +201,7 @@ end;
 
 procedure TFB30Attachment.Connect;
 begin
-  with Firebird30ClientAPI do
+  with FFirebird30ClientAPI do
   begin
     FAttachmentIntf := ProviderIntf.attachDatabase(StatusIntf,PAnsiChar(FDatabaseName),
                          (DPB as TDPB).getDataLength,
@@ -212,7 +217,7 @@ end;
 procedure TFB30Attachment.Disconnect(Force: boolean);
 begin
   if IsConnected then
-    with Firebird30ClientAPI do
+    with FFirebird30ClientAPI do
     begin
       EndAllTransactions;
       FAttachmentIntf.Detach(StatusIntf);
@@ -233,7 +238,7 @@ end;
 procedure TFB30Attachment.DropDatabase;
 begin
   if IsConnected then
-    with Firebird30ClientAPI do
+    with FFirebird30ClientAPI do
     begin
       EndAllTransactions;
       FAttachmentIntf.dropDatabase(StatusIntf);
@@ -246,21 +251,21 @@ function TFB30Attachment.StartTransaction(TPB: array of byte;
   DefaultCompletion: TTransactionCompletion): ITransaction;
 begin
   CheckHandle;
-  Result := TFB30Transaction.Create(self,TPB,DefaultCompletion);
+  Result := TFB30Transaction.Create(FFirebird30ClientAPI,self,TPB,DefaultCompletion);
 end;
 
 function TFB30Attachment.StartTransaction(TPB: ITPB;
   DefaultCompletion: TTransactionCompletion): ITransaction;
 begin
   CheckHandle;
-  Result := TFB30Transaction.Create(self,TPB,DefaultCompletion);
+  Result := TFB30Transaction.Create(FFirebird30ClientAPI,self,TPB,DefaultCompletion);
 end;
 
 procedure TFB30Attachment.ExecImmediate(transaction: ITransaction; sql: AnsiString;
   aSQLDialect: integer);
 begin
   CheckHandle;
-  with Firebird30ClientAPI do
+  with FFirebird30ClientAPI do
   begin
     FAttachmentIntf.execute(StatusIntf,(transaction as TFB30Transaction).TransactionIntf,
                     Length(sql),PAnsiChar(sql),aSQLDialect,nil,nil,nil,nil);

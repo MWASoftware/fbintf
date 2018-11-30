@@ -87,6 +87,7 @@ type
   TIBXSQLVAR = class(TSQLVarData)
   private
     FStatement: TFB30Statement;
+    FFirebird30ClientAPI: TFB30ClientAPI;
     FBlob: IBlob;             {Cache references}
     FArray: IArray;
     FNullIndicator: short;
@@ -148,8 +149,9 @@ type
     FSize: Integer;  {Number of TIBXSQLVARs in column list}
     FMetaData: Firebird.IMessageMetadata;
     FTransactionSeqNo: integer;
-  protected
+ protected
     FStatement: TFB30Statement;
+    FFirebird30ClientAPI: TFB30ClientAPI;
     function GetTransactionSeqNo: integer; override;
     procedure FreeXSQLDA; virtual;
     function GetStatement: IStatement; override;
@@ -236,6 +238,7 @@ type
   TFB30Statement = class(TFBStatement,IStatement)
   private
     FStatementIntf: Firebird.IStatement;
+    FFirebird30ClientAPI: TFB30ClientAPI;
     FSQLParams: TIBXINPUTSQLDA;
     FSQLRecord: TIBXOUTPUTSQLDA;
     FResultSet: Firebird.IResultSet;
@@ -297,7 +300,7 @@ end;
 
 function TIBXSQLVAR.GetAliasName: AnsiString;
 begin
-  with Firebird30ClientAPI do
+  with FFirebird30ClientAPI do
   begin
     result := strpas(TIBXSQLDA(Parent).MetaData.getAlias(StatusIntf,Index));
     Check4DataBaseError;
@@ -311,7 +314,7 @@ end;
 
 function TIBXSQLVAR.GetOwnerName: AnsiString;
 begin
-  with Firebird30ClientAPI do
+  with FFirebird30ClientAPI do
   begin
     result := strpas(TIBXSQLDA(Parent).MetaData.getOwner(StatusIntf,Index));
     Check4DataBaseError;
@@ -448,7 +451,7 @@ begin
   if not FOwnsSQLData then
     FSQLData := nil;
   FDataLength := len;
-  with Firebird30ClientAPI do
+  with FFirebird30ClientAPI do
     IBAlloc(FSQLData, 0, FDataLength);
   FOwnsSQLData := true;
   Changed;
@@ -470,6 +473,7 @@ constructor TIBXSQLVAR.Create(aParent: TIBXSQLDA; aIndex: integer);
 begin
   inherited Create(aParent,aIndex);
   FStatement := aParent.Statement;
+  FFirebird30ClientAPI := aParent.FFirebird30ClientAPI;
 end;
 
 procedure TIBXSQLVAR.RowChange;
@@ -630,7 +634,7 @@ var Builder: Firebird.IMetadataBuilder;
     i: integer;
 begin
   if FCurMetaData = nil then
-  with Firebird30ClientAPI do
+  with FFirebird30ClientAPI do
   begin
     Builder := inherited MetaData.getBuilder(StatusIntf);
     Check4DataBaseError;
@@ -663,7 +667,7 @@ begin
   BuildMetadata;
 
   if FMsgLength = 0 then
-  with Firebird30ClientAPI do
+  with FFirebird30ClientAPI do
   begin
     FMsgLength := FCurMetaData.getMessageLength(StatusIntf);
     Check4DataBaseError;
@@ -713,7 +717,7 @@ procedure TIBXINPUTSQLDA.Bind(aMetaData: Firebird.IMessageMetadata);
 var i: integer;
 begin
   FMetaData := aMetaData;
-  with Firebird30ClientAPI do
+  with FFirebird30ClientAPI do
   begin
     Count := metadata.getCount(StatusIntf);
     Check4DataBaseError;
@@ -791,7 +795,7 @@ procedure TIBXOUTPUTSQLDA.Bind(aMetaData: Firebird.IMessageMetadata);
 var i: integer;
 begin
   FMetaData := aMetaData;
-  with Firebird30ClientAPI do
+  with FFirebird30ClientAPI do
   begin
     Count := metadata.getCount(StatusIntf);
     Check4DataBaseError;
@@ -851,7 +855,7 @@ begin
     len := FDataLength;
     if not IsNull and (FSQLType = SQL_VARYING) then
     begin
-      with Firebird30ClientAPI do
+      with FFirebird30ClientAPI do
         len := DecodeInteger(data,2);
       Inc(Data,2);
     end;
@@ -868,6 +872,7 @@ constructor TIBXSQLDA.Create(aStatement: TFB30Statement);
 begin
   inherited Create;
   FStatement := aStatement;
+  FFirebird30ClientAPI := aStatement.FFirebird30ClientAPI;
   FSize := 0;
 //  writeln('Creating ',ClassName);
 end;
@@ -984,7 +989,7 @@ end;
 procedure TFB30Statement.GetDSQLInfo(info_request: byte; buffer: ISQLInfoResults
   );
 begin
-  with Firebird30ClientAPI, buffer as TSQLInfoResultsBuffer do
+  with FFirebird30ClientAPI, buffer as TSQLInfoResultsBuffer do
   begin
     StatementIntf.getInfo(StatusIntf,1,BytePtr(@info_request),
                      GetBufSize, BytePtr(Buffer));
@@ -1000,7 +1005,7 @@ begin
     IBError(ibxeEmptyQuery, [nil]);
   try
     CheckTransaction(FTransactionIntf);
-    with Firebird30ClientAPI do
+    with FFirebird30ClientAPI do
     begin
       if FHasParamNames then
       begin
@@ -1097,7 +1102,7 @@ begin
     IBError(ibxeInterfaceOutofDate,[nil]);
 
   try
-    with Firebird30ClientAPI do
+    with FFirebird30ClientAPI do
     begin
       if FCollectStatistics then
       begin
@@ -1168,7 +1173,7 @@ begin
   if (FSQLParams.FTransactionSeqNo < (FTransactionIntf as TFB30transaction).TransactionSeqNo) then
     IBError(ibxeInterfaceOutofDate,[nil]);
 
- with Firebird30ClientAPI do
+ with FFirebird30ClientAPI do
  begin
    if FCollectStatistics then
    begin
@@ -1230,7 +1235,7 @@ procedure TFB30Statement.InternalClose(Force: boolean);
 begin
   if (FStatementIntf <> nil) and (SQLStatementType = SQLSelect) and FOpen then
   try
-    with Firebird30ClientAPI do
+    with FFirebird30ClientAPI do
     begin
       if FResultSet <> nil then
       begin
@@ -1258,6 +1263,7 @@ constructor TFB30Statement.Create(Attachment: TFB30Attachment;
   Transaction: ITransaction; sql: AnsiString; aSQLDialect: integer);
 begin
   inherited Create(Attachment,Transaction,sql,aSQLDialect);
+  FFirebird30ClientAPI := Attachment.Firebird30ClientAPI;
   FSQLParams := TIBXINPUTSQLDA.Create(self);
   FSQLRecord := TIBXOUTPUTSQLDA.Create(self);
   InternalPrepare;
@@ -1268,6 +1274,7 @@ constructor TFB30Statement.CreateWithParameterNames(
   aSQLDialect: integer; GenerateParamNames: boolean);
 begin
   inherited CreateWithParameterNames(Attachment,Transaction,sql,aSQLDialect,GenerateParamNames);
+  FFirebird30ClientAPI := Attachment.Firebird30ClientAPI;
   FSQLParams := TIBXINPUTSQLDA.Create(self);
   FSQLRecord := TIBXOUTPUTSQLDA.Create(self);
   InternalPrepare;
@@ -1289,7 +1296,7 @@ begin
   if FEOF then
     IBError(ibxeEOF,[nil]);
 
-  with Firebird30ClientAPI do
+  with FFirebird30ClientAPI do
   begin
     { Go to the next record... }
     fetchResult := FResultSet.fetchNext(StatusIntf,FSQLRecord.MessageBuffer);
@@ -1353,7 +1360,7 @@ begin
        SQLUpdate, SQLDelete])) then
     result := ''
   else
-  with Firebird30ClientAPI do
+  with FFirebird30ClientAPI do
   begin
     Result := FStatementIntf.getPlan(StatusIntf,true);
     Check4DataBaseError;

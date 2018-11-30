@@ -40,7 +40,7 @@ unit FBServices;
 interface
 
 uses
-  Classes, SysUtils, IB,  FBParamBlock, FBActivityMonitor;
+  Classes, SysUtils, IB,  FBParamBlock, FBActivityMonitor, FBClientAPI;
 
 type
 
@@ -57,10 +57,11 @@ type
     FSPB: ISPB;
     procedure InternalAttach(ConnectString: AnsiString); virtual; abstract;
   public
-    constructor Create(ServerName: AnsiString; Protocol: TProtocol; SPB: ISPB; Port: AnsiString = '');
+    constructor Create(api: TFBClientAPI; ServerName: AnsiString; Protocol: TProtocol; SPB: ISPB; Port: AnsiString = '');
     destructor Destroy; override;
   public
     {IServiceManager}
+    function getFirebirdAPI: IFirebirdAPI;
     function getSPB: ISPB;
     function getServerName: AnsiString;
     function getProtocol: TProtocol;
@@ -75,7 +76,7 @@ type
 
 implementation
 
-uses FBMessages, FBClientAPI, IBUtils;
+uses FBMessages, IBUtils;
 
 { TFBServiceManager }
 
@@ -85,11 +86,11 @@ begin
     IBError(ibxeServerNameMissing, [nil]);
 end;
 
-constructor TFBServiceManager.Create(ServerName: AnsiString;
+constructor TFBServiceManager.Create(api: TFBClientAPI; ServerName: AnsiString;
   Protocol: TProtocol; SPB: ISPB; Port: AnsiString);
 begin
   inherited Create;
-  FFirebirdAPI := FirebirdAPI; {Keep reference to interface}
+  FFirebirdAPI := api.getAPI; {Keep reference to interface}
   FProtocol := Protocol;
   FSPB := SPB;
   FServerName := ServerName;
@@ -101,6 +102,11 @@ destructor TFBServiceManager.Destroy;
 begin
   Detach(true);
   inherited Destroy;
+end;
+
+function TFBServiceManager.getFirebirdAPI: IFirebirdAPI;
+begin
+  Result := FFirebirdAPI;
 end;
 
 function TFBServiceManager.getSPB: ISPB;
@@ -132,12 +138,12 @@ end;
 
 function TFBServiceManager.AllocateSRB: ISRB;
 begin
-  Result := TSRB.Create;
+  Result := TSRB.Create(FFirebirdAPI as TFBClientAPI);
 end;
 
 function TFBServiceManager.AllocateSQPB: ISQPB;
 begin
-   Result := TSQPB.Create;
+   Result := TSQPB.Create(FFirebirdAPI as TFBClientAPI);
 end;
 
 function TFBServiceManager.Query(Request: ISRB; RaiseExceptionOnError: boolean

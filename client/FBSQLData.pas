@@ -89,7 +89,7 @@ unit FBSQLData;
 interface
 
 uses
-  Classes, SysUtils, IBExternals, IBHeader, IB,  FBActivityMonitor;
+  Classes, SysUtils, IBExternals, IBHeader, IB,  FBActivityMonitor, FBClientAPI;
 
 type
 
@@ -97,6 +97,7 @@ type
 
   TSQLDataItem = class(TFBInterfacedObject)
   private
+     FFirebirdClientAPI: TFBClientAPI;
      function AdjustScale(Value: Int64; aScale: Integer): Double;
      function AdjustScaleToInt64(Value: Int64; aScale: Integer): Int64;
      function AdjustScaleToCurrency(Value: Int64; aScale: Integer): Currency;
@@ -120,6 +121,7 @@ type
      property DataLength: cardinal read GetDataLength write SetDataLength;
 
   public
+     constructor Create(api: TFBClientAPI);
      function GetSQLType: cardinal; virtual; abstract;
      function GetSQLTypeName: AnsiString; overload;
      class function GetSQLTypeName(SQLType: short): AnsiString; overload;
@@ -448,7 +450,7 @@ type
 
 implementation
 
-uses FBMessages, FBClientAPI, variants, IBUtils, FBTransaction;
+uses FBMessages, variants, IBUtils, FBTransaction;
 
 type
 
@@ -972,6 +974,12 @@ begin
    //Do nothing by default
 end;
 
+constructor TSQLDataItem.Create(api: TFBClientAPI);
+begin
+  inherited Create;
+  FFirebirdClientAPI := api;
+end;
+
 function TSQLDataItem.GetSQLTypeName: AnsiString;
 begin
   Result := GetSQLTypeName(GetSQLType);
@@ -1078,7 +1086,7 @@ begin
   CheckActive;
   result := 0;
   if not IsNull then
-    with FirebirdClientAPI do
+    with FFirebirdClientAPI do
     case SQLType of
       SQL_TEXT, SQL_VARYING: begin
         try
@@ -1218,7 +1226,7 @@ begin
   result := '';
   { Check null, if so return a default string }
   if not IsNull then
-  with FirebirdClientAPI do
+  with FFirebirdClientAPI do
     case SQLType of
       SQL_BOOLEAN:
         if AsBoolean then
@@ -1397,7 +1405,7 @@ begin
 
   SQLType := SQL_TYPE_DATE;
   DataLength := SizeOf(ISC_DATE);
-  with FirebirdClientAPI do
+  with FFirebirdClientAPI do
     SQLEncodeDate(Value,SQLData);
   Changed;
 end;
@@ -1417,7 +1425,7 @@ begin
 
   SQLType := SQL_TYPE_TIME;
   DataLength := SizeOf(ISC_TIME);
-  with FirebirdClientAPI do
+  with FFirebirdClientAPI do
     SQLEncodeTime(Value,SQLData);
   Changed;
 end;
@@ -1431,7 +1439,7 @@ begin
   Changing;
   SQLType := SQL_TIMESTAMP;
   DataLength := SizeOf(ISC_TIME) + sizeof(ISC_DATE);
-  with FirebirdClientAPI do
+  with FFirebirdClientAPI do
     SQLEncodeDateTime(Value,SQLData);
   Changed;
 end;
@@ -1617,7 +1625,7 @@ end;
 
 constructor TColumnMetaData.Create(aOwner: IUnknown; aIBXSQLVAR: TSQLVarData);
 begin
-  inherited Create;
+  inherited Create(aIBXSQLVAR.GetStatement.GetAttachment.getFirebirdAPI as TFBClientAPI);
   FIBXSQLVAR := aIBXSQLVAR;
   FOwner := aOwner;
   FPrepareSeqNo := FIBXSQLVAR.Parent.PrepareSeqNo;

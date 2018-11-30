@@ -23,7 +23,7 @@
     </PublishOptions>
     <RunParams>
       <local>
-        <CommandLineParams Value="-t 4"/>
+        <CommandLineParams Value="-t 11"/>
       </local>
       <environment>
         <UserOverrides Count="1">
@@ -34,7 +34,7 @@
       <Modes Count="1">
         <Mode0 Name="default">
           <local>
-            <CommandLineParams Value="-t 4"/>
+            <CommandLineParams Value="-t 11"/>
           </local>
           <environment>
             <UserOverrides Count="1">
@@ -144,6 +144,9 @@
       <Checks>
         <RangeChecks Value="True"/>
       </Checks>
+      <Optimizations>
+        <OptimizationLevel Value="0"/>
+      </Optimizations>
     </CodeGeneration>
     <Linking>
       <Debugging>

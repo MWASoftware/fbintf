@@ -29,9 +29,9 @@ begin
   Result := FIBLibrary <> NilHandle;
   if Result then Exit;
 
-  LibName := (FFirebirdAPI as TFBClientAPI).GetOverrideLibName;
+  LibName := GetOverrideLibName;
   if LibName = '' then
-    LibName := GetFirebirdLibList;
+    LibName := (FFirebirdAPI as TFBClientAPI).GetFirebirdLibList;
   FIBLibrary := FindLibrary(LibName);
   {$IFDEF DARWIN}
   if FIBLibrary = NilHandle then
@@ -99,17 +99,17 @@ const
   RTLD_DI_ORIGIN = 6;
 
 type
-  Tdlinfo = function (Lib : Pointer; Request: longint; var info: TDl_serinfo) : Longint; cdecl;
+  Tdlinfo = function (Lib : Pointer; Request: longint; info: pointer) : Longint; cdecl;
 
 function TFBLibrary.GetLibraryFilePath: string;
-var path: array [0..IBHugeLocalBufferLength]; {hopefully this is big enough}
+var path: array [0..IBLocalBufferLength] of char; {hopefully this is big enough}
     dlinfo: Tdlinfo;
 begin
   Result := FFBLibraryName;
-  dlinfo = GetProcAddress(RTLD_DEFAULT,'dlinfo');
+  dlinfo := dlsym(RTLD_DEFAULT,'dlinfo');
   if assigned(dlinfo) then
   begin
-    if dlinfo(@FFBLibrary,RTLD_DI_ORIGIN,@path) = -1 then
+    if dlinfo(Pointer(FIBLibrary),RTLD_DI_ORIGIN,@path) = -1 then
       IBError(ibxeDLInfoError,[strpas(dlerror)]);
     Result := strpas(@path) + DirectorySeparator + Result;
   end;

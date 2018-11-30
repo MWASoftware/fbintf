@@ -38,7 +38,8 @@ unit FBAttachment;
 interface
 
 uses
-  Classes, SysUtils, {$IFDEF WINDOWS} windows, {$ENDIF} IB,  FBParamBlock, FBActivityMonitor;
+  Classes, SysUtils, {$IFDEF WINDOWS} windows, {$ENDIF} IB,  FBParamBlock,
+  FBActivityMonitor, FBClientAPI;
 
 type
   TCharsetMap = record
@@ -68,7 +69,7 @@ type
     FCodePage: TSystemCodePage;
     FRemoteProtocol: AnsiString;
     FAuthMethod: AnsiString;
-    constructor Create(DatabaseName: AnsiString; DPB: IDPB;
+    constructor Create(api: TFBClientAPI; DatabaseName: AnsiString; DPB: IDPB;
       RaiseExceptionOnConnectError: boolean);
     procedure CheckHandle; virtual; abstract;
     function GenerateCreateDatabaseSQL(DatabaseName: AnsiString; aDPB: IDPB): AnsiString;
@@ -80,6 +81,7 @@ type
     procedure SetParameters(SQLParams: ISQLParams; params: array of const);
   public
     destructor Destroy; override;
+    function getFirebirdAPI: IFirebirdAPI;
     function getDPB: IDPB;
     function AllocateBPB: IBPB;
     function AllocateDIRB: IDIRB;
@@ -298,11 +300,11 @@ begin
   FHasDefaultCharSet := CharSetID2CodePage(FCharSetID,FCodePage) and (FCharSetID > 1);
 end;
 
-constructor TFBAttachment.Create(DatabaseName: AnsiString; DPB: IDPB;
-  RaiseExceptionOnConnectError: boolean);
+constructor TFBAttachment.Create(api: TFBClientAPI; DatabaseName: AnsiString;
+  DPB: IDPB; RaiseExceptionOnConnectError: boolean);
 begin
   inherited Create;
-  FFirebirdAPI := FirebirdAPI; {Keep reference to interface}
+  FFirebirdAPI := api.GetAPI; {Keep reference to interface}
   FSQLDialect := 3;
   FDatabaseName := DatabaseName;
   FDPB := DPB;
@@ -449,6 +451,11 @@ begin
   inherited Destroy;
 end;
 
+function TFBAttachment.getFirebirdAPI: IFirebirdAPI;
+begin
+  Result := FFirebirdAPI;
+end;
+
 function TFBAttachment.getDPB: IDPB;
 begin
   Result := FDPB;
@@ -456,12 +463,12 @@ end;
 
 function TFBAttachment.AllocateBPB: IBPB;
 begin
-  Result := TBPB.Create;
+  Result := TBPB.Create(FFirebirdAPI as TFBClientAPI);
 end;
 
 function TFBAttachment.AllocateDIRB: IDIRB;
 begin
-  Result := TDIRB.Create;
+  Result := TDIRB.Create(FFirebirdAPI as TFBClientAPI);
 end;
 
 procedure TFBAttachment.ExecImmediate(TPB: array of byte; sql: AnsiString;
