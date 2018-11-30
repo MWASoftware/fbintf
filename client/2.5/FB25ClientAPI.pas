@@ -95,15 +95,14 @@ type
     FStatusIntf: IStatus;   {Keep a reference to the interface - automatic destroy
                              when this class is freed and last reference to IStatus
                              goes out of scope.}
-  protected
-    {$IFDEF UNIX}
-    function GetFirebirdLibList: string; override;
-    {$ENDIF}
-    procedure LoadInterface; override;
   public
     constructor Create;
     destructor Destroy; override;
     function StatusVector: PISC_STATUS;
+    function LoadInterface: boolean; override;
+    {$IFDEF UNIX}
+    function GetFirebirdLibList: string; override;
+    {$ENDIF}
     property IBServiceAPIPresent: boolean read FIBServiceAPIPresent;
     property Status: TFB25Status read FStatus;
 
@@ -209,9 +208,6 @@ type
     function GetIMaster: TObject;
 
    end;
-
-var
-  Firebird25ClientAPI: TFB25ClientAPI = nil;
 
 implementation
 
@@ -338,9 +334,9 @@ begin
 end;
 {$ENDIF}
 
-procedure TFB25ClientAPI.LoadInterface;
+function TFB25ClientAPI.LoadInterface: boolean;
 begin
-  inherited LoadInterface;
+  Result := inherited LoadInterface;
   BLOB_get := GetProcAddr('BLOB_get'); {do not localize}
   BLOB_put := GetProcAddr('BLOB_put'); {do not localize}
   isc_wait_for_event := GetProcAddr('isc_wait_for_event'); {do not localize}
@@ -415,6 +411,7 @@ begin
     isc_encode_sql_time := @isc_encode_sql_time_stub;
     isc_encode_timestamp := @isc_encode_timestamp_stub;
   end;
+  Result := Result and (isc_attach_database <> nil);
 end;
 
 constructor TFB25ClientAPI.Create;

@@ -70,11 +70,6 @@ type
                              when this class is freed and last reference to IStatus
                              goes out of scope.}
     procedure CheckPlugins;
-  protected
-    {$IFDEF UNIX}
-    function GetFirebirdLibList: string; override;
-    {$ENDIF}
-   procedure LoadInterface; override;
   public
     constructor Create;
     destructor Destroy; override;
@@ -82,6 +77,10 @@ type
     function StatusIntf: Firebird.IStatus;
     procedure Check4DataBaseError;
     function InErrorState: boolean;
+    function LoadInterface: boolean; override;
+    {$IFDEF UNIX}
+    function GetFirebirdLibList: string; override;
+    {$ENDIF}
 
   public
     {IFirebirdAPI}
@@ -128,8 +127,6 @@ type
     property UtilIntf: Firebird.IUtil read FUtil;
     property ProviderIntf: Firebird.IProvider read FProvider;
   end;
-
-var Firebird30ClientAPI: TFB30ClientAPI;
 
 implementation
 
@@ -199,11 +196,11 @@ begin
 end;
 {$ENDIF}
 
-procedure TFB30ClientAPI.LoadInterface;
+function TFB30ClientAPI.LoadInterface: boolean;
 var
   fb_get_master_interface: Tfb_get_master_interface;
 begin
-  inherited LoadInterface;
+  Result := inherited LoadInterface;
   fb_get_master_interface := GetProcAddress(IBLibrary, 'fb_get_master_interface'); {do not localize}
   if assigned(fb_get_master_interface) then
   begin
@@ -213,6 +210,7 @@ begin
     FConfigManager := FMaster.getConfigManager;
     CheckPlugins;
   end;
+  Result := Result and HasMasterIntf;
 end;
 
 constructor TFB30ClientAPI.Create;

@@ -256,7 +256,8 @@ type
       ibxeODSVersionRequired,
       ibxeTokenQueueOverflow,
       ibxeTokenQueueUnderflow,
-      ibxErrorParsing
+      ibxErrorParsing,
+      ibxeDLInfoError
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -469,6 +470,7 @@ resourcestring
   STokenQueueOverflow = 'Error in SQL Token Analyser - token queue overflow';
   STokenQueueUnderflow = 'Error in SQL Token Analyser - token queue underflow';
   SErrorParsing = 'Error parsing SQL Statement at clause starting with %s';
+  SDLInfoError = 'dlinfo returned error - %s';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -647,7 +649,8 @@ const
     SODSVersionRequired,
     STokenQueueOverflow,
     STokenQueueUnderflow,
-    SErrorParsing
+    SErrorParsing,
+    SDLInfoError
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
