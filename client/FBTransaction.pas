@@ -72,13 +72,14 @@ unit FBTransaction;
 interface
 
 uses
-  Classes, SysUtils, IB, FBParamBlock, FBActivityMonitor;
+  Classes, SysUtils, IB, FBParamBlock, FBActivityMonitor, FBClientAPI;
 
 type
   { TFBTransaction }
 
   TFBTransaction = class(TActivityReporter, IActivityMonitor,ITransaction)
   private
+    FFirebirdAPI: TFBClientAPI;
     function GenerateTPB(sl: array of byte): ITPB;
   protected
     FTPB: ITPB;
@@ -87,13 +88,15 @@ type
     FAttachments: array of IAttachment; {Keep reference to attachment - ensures
                                           attachment cannot be freed before transaction}
     function GetActivityIntf(att: IAttachment): IActivityMonitor; virtual; abstract;
+    procedure SetInterface(api: TFBClientAPI); virtual;
   public
-    constructor Create(Attachments: array of IAttachment; Params: array of byte; DefaultCompletion: TTransactionAction); overload;
-    constructor Create(Attachments: array of IAttachment; TPB: ITPB; DefaultCompletion: TTransactionAction); overload;
-    constructor Create(Attachment: IAttachment; Params: array of byte; DefaultCompletion: TTransactionAction); overload;
-    constructor Create(Attachment: IAttachment; TPB: ITPB; DefaultCompletion: TTransactionAction); overload;
+    constructor Create(api: TFBClientAPI; Attachments: array of IAttachment; Params: array of byte; DefaultCompletion: TTransactionAction); overload;
+    constructor Create(api: TFBClientAPI; Attachments: array of IAttachment; TPB: ITPB; DefaultCompletion: TTransactionAction); overload;
+    constructor Create(api: TFBClientAPI; Attachment: IAttachment; Params: array of byte; DefaultCompletion: TTransactionAction); overload;
+    constructor Create(api: TFBClientAPI; Attachment: IAttachment; TPB: ITPB; DefaultCompletion: TTransactionAction); overload;
     destructor Destroy; override;
     procedure DoDefaultTransactionEnd(Force: boolean);
+    property FirebirdAPI: TFBClientAPI read FFirebirdAPI;
 
   public
     {ITransaction}
@@ -123,25 +126,36 @@ function TFBTransaction.GenerateTPB(sl: array of byte): ITPB;
 var
   i: Integer;
 begin
-  Result := TTPB.Create;
+  Result := TTPB.Create(FFirebirdAPI);
   for i := 0 to Length(sl) - 1 do
     Result.Add(sl[i]);
 end;
 
-constructor TFBTransaction.Create(Attachments: array of IAttachment;
-  Params: array of byte; DefaultCompletion: TTransactionAction);
+procedure TFBTransaction.SetInterface(api: TFBClientAPI);
 begin
-  Create(Attachments,GenerateTPB(Params), DefaultCompletion);
+  FFirebirdAPI := api;
 end;
 
-constructor TFBTransaction.Create(Attachments: array of IAttachment; TPB: ITPB;
+constructor TFBTransaction.Create(api: TFBClientAPI; Attachments: array of IAttachment;
+  Params: array of byte; DefaultCompletion: TTransactionAction);
+begin
+  Create(api, Attachments,GenerateTPB(Params), DefaultCompletion);
+end;
+
+constructor TFBTransaction.Create(api: TFBClientAPI; Attachments: array of IAttachment; TPB: ITPB;
   DefaultCompletion: TTransactionAction);
 var
   i: Integer;
 begin
   inherited Create(nil);
+  SetInterface(api);
   if Length(Attachments) = 0 then
     IBError(ibxeEmptyAttachmentsList,[nil]);
+
+  {make sure all attachments use same Firebird API}
+  for i := 0 to Length(Attachments) - 1 do
+    if Attachments[i].getFirebirdAPI.GetFBLibrary.GetHandle <> FFirebirdAPI.GetFBLibrary.GetHandle then
+      IBError(ibxeDifferentAPIs,[nil]);
 
   SetLength(FAttachments,Length(Attachments));
   for i := 0 to Length(Attachments) - 1 do
@@ -153,16 +167,17 @@ begin
   Start(DefaultCompletion);
 end;
 
-constructor TFBTransaction.Create(Attachment: IAttachment;
+constructor TFBTransaction.Create(api: TFBClientAPI; Attachment: IAttachment;
   Params: array of byte; DefaultCompletion: TTransactionAction);
 begin
-  Create(Attachment,GenerateTPB(Params),DefaultCompletion);
+  Create(api,Attachment,GenerateTPB(Params),DefaultCompletion);
 end;
 
-constructor TFBTransaction.Create(Attachment: IAttachment; TPB: ITPB;
+constructor TFBTransaction.Create(api: TFBClientAPI; Attachment: IAttachment; TPB: ITPB;
   DefaultCompletion: TTransactionAction);
 begin
   inherited Create(nil);
+  SetInterface(api);
   AddMonitor(GetActivityIntf(Attachment));
   SetLength(FAttachments,1);
   FAttachments[0] := Attachment;

@@ -83,11 +83,13 @@ type
   TFB25ServiceManager = class(TFBServiceManager,IServiceManager)
   private
     FHandle: TISC_SVC_HANDLE;
+    FFirebird25ClientAPI: TFB25ClientAPI;
     procedure CheckActive;
     procedure CheckInactive;
   protected
     procedure InternalAttach(ConnectString: AnsiString); override;
   public
+    constructor Create(api: TFB25ClientAPI; ServerName: AnsiString; Protocol: TProtocol; SPB: ISPB; Port: AnsiString = '');
     property Handle: TISC_SVC_HANDLE read FHandle;
 
   public
@@ -118,7 +120,7 @@ end;
 
 procedure TFB25ServiceManager.InternalAttach(ConnectString: AnsiString);
 begin
-  with Firebird25ClientAPI do
+  with FFirebird25ClientAPI do
   if FSPB = nil then
   begin
     if isc_service_attach(StatusVector, Length(ConnectString),
@@ -135,11 +137,18 @@ begin
   end;
 end;
 
+constructor TFB25ServiceManager.Create(api: TFB25ClientAPI;
+  ServerName: AnsiString; Protocol: TProtocol; SPB: ISPB; Port: AnsiString);
+begin
+  FFirebird25ClientAPI := api;
+  inherited Create(api,ServerName, Protocol, SPB, Port);
+end;
+
 procedure TFB25ServiceManager.Detach(Force: boolean);
 begin
   if FHandle = nil then
     Exit;
-  with Firebird25ClientAPI do
+  with FFirebird25ClientAPI do
   if isc_service_detach(StatusVector, @FHandle) > 0 then
   begin
     FHandle := nil;
@@ -160,7 +169,7 @@ function TFB25ServiceManager.Start(Request: ISRB; RaiseExceptionOnError: boolean
 begin
   Result := true;
   CheckActive;
-  with Firebird25ClientAPI do
+  with FFirebird25ClientAPI do
   begin
     Result := isc_service_start(StatusVector, @FHandle, nil,
                            (Request as TSRB).getDataLength,
@@ -175,9 +184,9 @@ function TFB25ServiceManager.Query(SQPB: ISQPB; Request: ISRB;
 var QueryResults: TServiceQueryResults;
 begin
   CheckActive;
-  QueryResults := TServiceQueryResults.Create;
+  QueryResults := TServiceQueryResults.Create(FFirebird25ClientAPI);
   Result := QueryResults;
-  with Firebird25ClientAPI do
+  with FFirebird25ClientAPI do
     if SQPB = nil then
     begin
       if isc_service_query(StatusVector, @FHandle, nil,0,nil,

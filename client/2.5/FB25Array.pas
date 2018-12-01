@@ -39,7 +39,7 @@ interface
 
 uses
   Classes, SysUtils, IB, FBArray, IBHeader, FB25Statement, FB25Attachment, FBClientAPI,
-  FB25Transaction;
+  FB25Transaction, FB25ClientAPI;
 
 type
 
@@ -62,6 +62,7 @@ type
   private
     FDBHandle: TISC_DB_HANDLE;
     FTRHandle: TISC_TR_HANDLE;
+    FFirebird25ClientAPI: TFB25ClientAPI;
   protected
     procedure InternalGetSlice; override;
     procedure InternalPutSlice(Force: boolean); override;
@@ -72,7 +73,7 @@ type
 
 implementation
 
-uses FBAttachment, FB25ClientAPI;
+uses FBAttachment;
 
 const
   sGetArrayMetaData = 'Select F.RDB$CHARACTER_SET_ID '+
@@ -101,7 +102,7 @@ begin
   TRHandle := (aTransaction as TFB25Transaction).Handle;
   RelName := AnsiUpperCase(relationName);
   ColName := AnsiUpperCase(columnName);
-  with Firebird25ClientAPI do
+  with (aAttachment as TFB25Attachment).Firebird25ClientAPI do
     if isc_array_lookup_bounds(StatusVector,@(DBHandle),@(TRHandle),
         PAnsiChar(RelName),PAnsiChar(ColName),@FArrayDesc) > 0 then
           IBDatabaseError;
@@ -157,7 +158,7 @@ end;
 
 procedure TFB25Array.InternalGetSlice;
 begin
-  with Firebird25ClientAPI do
+  with FFirebird25ClientAPI do
      Call(isc_array_get_slice(StatusVector,@(FDBHandle),@(FTRHandle),
                                 @FArrayID, GetArrayDesc,
                                 Pointer(FBuffer), @FBufSize));
@@ -165,7 +166,7 @@ end;
 
 procedure TFB25Array.InternalPutSlice(Force: boolean);
 begin
-  with Firebird25ClientAPI do
+  with FFirebird25ClientAPI do
      if (isc_array_put_slice(StatusVector, @(FDBHandle),@(FTRHandle),
                                 @FArrayID, GetArrayDesc,
                                 Pointer(FBuffer),@FBufSize) > 0) and not Force then
@@ -179,6 +180,8 @@ begin
   inherited Create(aAttachment,aTransaction,aField);
   FDBHandle := aAttachment.Handle;
   FTRHandle := aTransaction.Handle;
+  FFirebird25ClientAPI := aAttachment.Firebird25ClientAPI;
+  OnDatabaseError := FFirebird25ClientAPI.IBDataBaseError;
 end;
 
 constructor TFB25Array.Create(aAttachment: TFB25Attachment;
@@ -187,6 +190,8 @@ begin
   inherited Create(aAttachment,aTransaction,aField,ArrayID);
   FDBHandle := aAttachment.Handle;
   FTRHandle := aTransaction.Handle;
+  FFirebird25ClientAPI := aAttachment.Firebird25ClientAPI;
+  OnDatabaseError := FFirebird25ClientAPI.IBDataBaseError;
 end;
 
 end.

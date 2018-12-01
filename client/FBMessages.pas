@@ -256,7 +256,9 @@ type
       ibxeODSVersionRequired,
       ibxeTokenQueueOverflow,
       ibxeTokenQueueUnderflow,
-      ibxErrorParsing
+      ibxErrorParsing,
+      ibxeDLInfoError,
+      ibxeDifferentAPIs
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -469,6 +471,8 @@ resourcestring
   STokenQueueOverflow = 'Error in SQL Token Analyser - token queue overflow';
   STokenQueueUnderflow = 'Error in SQL Token Analyser - token queue underflow';
   SErrorParsing = 'Error parsing SQL Statement at clause starting with %s';
+  SDLInfoError = 'dlinfo returned error - %s';
+  SDifferentAPIs = 'All transaction attachments must use the same Firebird Library';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -647,7 +651,9 @@ const
     SODSVersionRequired,
     STokenQueueOverflow,
     STokenQueueUnderflow,
-    SErrorParsing
+    SErrorParsing,
+    SDLInfoError,
+    SDifferentAPIs
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;

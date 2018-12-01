@@ -89,7 +89,7 @@ unit FBSQLData;
 interface
 
 uses
-  Classes, SysUtils, IBExternals, IBHeader, IB,  FBActivityMonitor;
+  Classes, SysUtils, IBExternals, IBHeader, IB,  FBActivityMonitor, FBClientAPI;
 
 type
 
@@ -97,6 +97,7 @@ type
 
   TSQLDataItem = class(TFBInterfacedObject)
   private
+     FFirebirdClientAPI: TFBClientAPI;
      function AdjustScale(Value: Int64; aScale: Integer): Double;
      function AdjustScaleToInt64(Value: Int64; aScale: Integer): Int64;
      function AdjustScaleToCurrency(Value: Int64; aScale: Integer): Currency;
@@ -120,6 +121,7 @@ type
      property DataLength: cardinal read GetDataLength write SetDataLength;
 
   public
+     constructor Create(api: TFBClientAPI);
      function GetSQLType: cardinal; virtual; abstract;
      function GetSQLTypeName: AnsiString; overload;
      class function GetSQLTypeName(SQLType: short): AnsiString; overload;
@@ -137,7 +139,7 @@ type
      function GetAsShort: short;
      function GetAsString: AnsiString; virtual;
      function GetIsNull: Boolean; virtual;
-     function getIsNullable: boolean; virtual;
+     function GetIsNullable: boolean; virtual;
      function GetAsVariant: Variant;
      function GetModified: boolean; virtual;
      procedure SetAsBoolean(AValue: boolean); virtual;
@@ -448,7 +450,7 @@ type
 
 implementation
 
-uses FBMessages, FBClientAPI, variants, IBUtils, FBTransaction;
+uses FBMessages, variants, IBUtils, FBTransaction;
 
 type
 
@@ -459,21 +461,21 @@ type
    const
      sIBXParam = 'IBXParam';  {do not localize}
    private
-     FInString: string;
+     FInString: AnsiString;
      FIndex: integer;
      function DoExecute(GenerateParamNames: boolean;
-       var slNames: TStrings): string;
+       var slNames: TStrings): AnsiString;
    protected
-     function GetChar: char; override;
+     function GetChar: AnsiChar; override;
    public
      class function Execute(sSQL: AnsiString; GenerateParamNames: boolean;
-       var slNames: TStrings): string;
+       var slNames: TStrings): AnsiString;
    end;
 
 { TSQLParamProcessor }
 
 function TSQLParamProcessor.DoExecute(GenerateParamNames: boolean;
-  var slNames: TStrings): string;
+  var slNames: TStrings): AnsiString;
 var token: TSQLTokens;
     iParamSuffix: Integer;
 begin
@@ -487,7 +489,7 @@ begin
     sqltParam,
     sqltQuotedParam:
       begin
-        Result += '?';
+        Result := Result + '?';
         slNames.Add(TokenText);
       end;
 
@@ -497,33 +499,33 @@ begin
         Inc(iParamSuffix);
         slNames.AddObject(sIBXParam + IntToStr(iParamSuffix),self); //Note local convention
                                             //add pointer to self to mark entry
-        Result += '?';
+        Result := Result + '?';
       end
       else
         IBError(ibxeSQLParseError, [SParamNameExpected]);
 
     sqltQuotedString:
-      Result += '''' + SQLSafeString(TokenText) + '''';
+      Result := Result + '''' + SQLSafeString(TokenText) + '''';
 
     sqltIdentifierInDoubleQuotes:
-      Result += '"' + StringReplace(TokenText,'"','""',[rfReplaceAll]) + '"';
+      Result := Result + '"' + StringReplace(TokenText,'"','""',[rfReplaceAll]) + '"';
 
     sqltComment:
-      Result += '/*' + TokenText + '*/';
+      Result := Result + '/*' + TokenText + '*/';
 
     sqltCommentLine:
-      Result += '//' + TokenText + LineEnding;
+      Result := Result + '//' + TokenText + LineEnding;
 
     sqltEOL:
-      Result += LineEnding;
+      Result := Result + LineEnding;
 
     else
-      Result += TokenText;
+      Result := Result + TokenText;
     end;
   end;
 end;
 
-function TSQLParamProcessor.GetChar: char;
+function TSQLParamProcessor.GetChar: AnsiChar;
 begin
   if FIndex <= Length(FInString) then
   begin
@@ -535,7 +537,7 @@ begin
 end;
 
 class function TSQLParamProcessor.Execute(sSQL: AnsiString;
-  GenerateParamNames: boolean; var slNames: TStrings): string;
+  GenerateParamNames: boolean; var slNames: TStrings): AnsiString;
 begin
   with self.Create do
   try
@@ -972,6 +974,12 @@ begin
    //Do nothing by default
 end;
 
+constructor TSQLDataItem.Create(api: TFBClientAPI);
+begin
+  inherited Create;
+  FFirebirdClientAPI := api;
+end;
+
 function TSQLDataItem.GetSQLTypeName: AnsiString;
 begin
   Result := GetSQLTypeName(GetSQLType);
@@ -1078,7 +1086,7 @@ begin
   CheckActive;
   result := 0;
   if not IsNull then
-    with FirebirdClientAPI do
+    with FFirebirdClientAPI do
     case SQLType of
       SQL_TEXT, SQL_VARYING: begin
         try
@@ -1218,7 +1226,7 @@ begin
   result := '';
   { Check null, if so return a default string }
   if not IsNull then
-  with FirebirdClientAPI do
+  with FFirebirdClientAPI do
     case SQLType of
       SQL_BOOLEAN:
         if AsBoolean then
@@ -1397,7 +1405,7 @@ begin
 
   SQLType := SQL_TYPE_DATE;
   DataLength := SizeOf(ISC_DATE);
-  with FirebirdClientAPI do
+  with FFirebirdClientAPI do
     SQLEncodeDate(Value,SQLData);
   Changed;
 end;
@@ -1417,7 +1425,7 @@ begin
 
   SQLType := SQL_TYPE_TIME;
   DataLength := SizeOf(ISC_TIME);
-  with FirebirdClientAPI do
+  with FFirebirdClientAPI do
     SQLEncodeTime(Value,SQLData);
   Changed;
 end;
@@ -1431,7 +1439,7 @@ begin
   Changing;
   SQLType := SQL_TIMESTAMP;
   DataLength := SizeOf(ISC_TIME) + sizeof(ISC_DATE);
-  with FirebirdClientAPI do
+  with FFirebirdClientAPI do
     SQLEncodeDateTime(Value,SQLData);
   Changed;
 end;
@@ -1617,7 +1625,7 @@ end;
 
 constructor TColumnMetaData.Create(aOwner: IUnknown; aIBXSQLVAR: TSQLVarData);
 begin
-  inherited Create;
+  inherited Create(aIBXSQLVAR.GetStatement.GetAttachment.getFirebirdAPI as TFBClientAPI);
   FIBXSQLVAR := aIBXSQLVAR;
   FOwner := aOwner;
   FPrepareSeqNo := FIBXSQLVAR.Parent.PrepareSeqNo;

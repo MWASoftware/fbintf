@@ -90,15 +90,6 @@ FIREBIRD_CLIENT = 'fbclient.dll'; {do not localize}
 FIREBIRD_EMBEDDED = 'fbembed.dll';
 {$ENDIF}
 
-{$IFNDEF FPC}
-type
-  TLibHandle = THandle;
-
-const
-  NilHandle = 0;
-  DirectorySeparator = '\';
-{$ENDIF}
-
 type
   TStatusVector              = array[0..19] of NativeInt;
   PStatusVector              = ^TStatusVector;
@@ -125,25 +116,46 @@ type
     procedure SetIBDataBaseErrorMessages(Value: TIBDataBaseErrorMessages);
   end;
 
+  { TFBLibrary }
+
+  TFBLibrary = class(TFBInterfacedObject,IFirebirdLibrary)
+  private
+    class var FEnvSetupDone: boolean;
+    class var FLibraryList: array of IFirebirdLibrary;
+    FFirebirdAPI: IFirebirdAPI;
+    FRequestedLibName: string;
+    function LoadIBLibrary: boolean;
+  protected
+    FFBLibraryName: string;
+    FIBLibrary: TLibHandle;
+    procedure FreeFBLibrary;
+    function GetOverrideLibName: string;
+    class procedure SetupEnvironment;
+  protected
+    function GetFirebird3API: IFirebirdAPI; virtual; abstract;
+    function GetLegacyFirebirdAPI: IFirebirdAPI; virtual; abstract;
+  public
+    constructor Create(aLibPathName: string='');
+    destructor Destroy; override;
+    class function GetFBLibrary(aLibPathName: string): IFirebirdLibrary;
+    class procedure FreeLibraries;
+
+    {IFirebirdLibrary}
+    function GetHandle: TLibHandle;
+    function GetLibraryName: string;
+    function GetLibraryFilePath: string;
+    function GetFirebirdAPI: IFirebirdAPI;
+    property IBLibrary: TLibHandle read FIBLibrary;
+  end;
+
   { TFBClientAPI }
 
   TFBClientAPI = class(TFBInterfacedObject)
   private
-    FOwnsIBLibrary: boolean;
     class var FIBCS: TRTLCriticalSection;
-    procedure LoadIBLibrary;
   protected
-    class var FFBLibraryName: string;
-    class var IBLibrary: TLibHandle;
-    {$IFDEF WINDOWS}
-    class var FFBLibraryPath: string;
-    {$ENDIF}
+    FFBLibrary: TFBLibrary;
     function GetProcAddr(ProcName: PAnsiChar): Pointer;
-    function GetOverrideLibName: string;
-    {$IFDEF UNIX}
-    function GetFirebirdLibList: string; virtual; abstract;
-    {$ENDIF}
-    procedure LoadInterface; virtual;
   public
     {Taken from legacy API}
     isc_sqlcode: Tisc_sqlcode;
@@ -153,11 +165,14 @@ type
     isc_event_block: Tisc_event_block;
     isc_free: Tisc_free;
 
-    constructor Create;
-    destructor Destroy; override;
+    constructor Create(aFBLibrary: TFBLibrary);
     procedure IBAlloc(var P; OldSize, NewSize: Integer);
     procedure IBDataBaseError;
-    procedure SetupEnvironment;
+    function LoadInterface: boolean; virtual;
+    function GetAPI: IFirebirdAPI; virtual; abstract;
+    {$IFDEF UNIX}
+    function GetFirebirdLibList: string; virtual; abstract;
+    {$ENDIF}
 
     {Encode/Decode}
     procedure EncodeInteger(aValue: integer; len: integer; buffer: PByte);
@@ -174,14 +189,13 @@ type
     function GetStatus: IStatus; virtual; abstract;
     function IsLibraryLoaded: boolean;
     function IsEmbeddedServer: boolean; virtual; abstract;
-    function GetLibraryName: string;
+    function GetFBLibrary: IFirebirdLibrary;
 end;
-
-var FirebirdClientAPI: TFBClientAPI = nil;
 
 implementation
 
-uses IBUtils, Registry, {$IFDEF Unix} initc, {$ENDIF}
+uses IBUtils, Registry,
+  {$IFDEF Unix} initc, dl, BaseUnix, {$ENDIF}
 {$IFDEF FPC}
 {$IFDEF WINDOWS }
 WinDirs,
@@ -191,54 +205,130 @@ WinDirs,
 {$ENDIF}
 SysUtils;
 
+const
+  IBLocalBufferLength = 512;
+  IBBigLocalBufferLength = IBLocalBufferLength * 2;
+  IBHugeLocalBufferLength = IBBigLocalBufferLength * 20;
+
 {$IFDEF UNIX}
 {$I 'include/uloadlibrary.inc'}
 {$ELSE}
 {$I 'include/wloadlibrary.inc'}
 {$ENDIF}
 
-  {$IFDEF Unix}
-  {SetEnvironmentVariable doesn't exist so we have to use C Library}
-  function setenv(name:Pchar; value:Pchar; replace:integer):integer;cdecl;external clib name 'setenv';
-  function unsetenv(name:Pchar):integer;cdecl;external clib name 'unsetenv';
-  function SetEnvironmentVariable(name:PAnsiChar; value:PAnsiChar):boolean;
-  // Set environment variable; if empty string given, remove it.
+
+{ TFBLibrary }
+
+function TFBLibrary.GetOverrideLibName: string;
+begin
+  Result := FFBLibraryName;
+  if (Result = '') and AllowUseOfFBLIB then
+    Result := GetEnvironmentVariable('FBLIB');
+  if Result = '' then
   begin
-    result:=false; //assume failure
-    if value = '' then
+    if assigned(OnGetLibraryName) then
+      OnGetLibraryName(Result)
+  end;
+end;
+
+procedure TFBLibrary.FreeFBLibrary;
+begin
+  if FIBLibrary <> NilHandle then
+    FreeLibrary(FIBLibrary);
+  FIBLibrary := NilHandle;
+end;
+
+function TFBLibrary.GetLibraryName: string;
+begin
+  Result := ExtractFileName(FFBLibraryName);
+end;
+
+function TFBLibrary.GetFirebirdAPI: IFirebirdAPI;
+begin
+  Result := FFirebirdAPI;
+end;
+
+constructor TFBLibrary.Create(aLibPathName: string);
+begin
+  inherited Create;
+  FFBLibraryName := aLibPathName;
+  FIBLibrary := NilHandle;
+  FFirebirdAPI := GetFirebird3API;
+  FRequestedLibName := aLibPathName;
+  if aLibPathName <> '' then
+  begin
+    SetLength(FLibraryList,Length(FLibraryList)+1);
+    FLibraryList[Length(FLibraryList)-1] := self;
+  end;
+  if FFirebirdAPI <> nil then
+  begin
+    {First try Firebird 3}
+    if not LoadIBLibrary or not (FFirebirdAPI as TFBClientAPI).LoadInterface then
+      FFirebirdAPI := nil;
+  end;
+
+  if FFirebirdAPI = nil then
+  begin
+    {now try Firebird 2.5. Under Unix we need to reload the library in case we
+     are to use the embedded library}
+    FFirebirdAPI := GetLegacyFirebirdAPI;
+    if FFirebirdAPI <> nil then
     begin
-      // Assume user wants to remove variable.
-      if unsetenv(name)=0 then result:=true;
-    end
-    else
-    begin
-      // Non empty so set the variable
-      if setenv(name, value, 1)=0 then result:=true;
+      {$IFDEF UNIX}
+      FreeFBLibrary;
+      {$ENDIF}
+      if not LoadIBLibrary or not (FFirebirdAPI as TFBClientAPI).LoadInterface then
+        FFirebirdAPI := nil;
     end;
   end;
-  {$ENDIF}
+  {Note: FFirebirdAPI will be set to nil if the Firebird API fails to load}
+  if FFirebirdAPI <> nil then
+    SetupEnvironment;
+end;
+
+destructor TFBLibrary.Destroy;
+begin
+  FFirebirdAPI := nil;
+  FreeFBLibrary;
+  inherited Destroy;
+end;
+
+class function TFBLibrary.GetFBLibrary(aLibPathName: string): IFirebirdLibrary;
+var i: integer;
+begin
+  Result := nil;
+  if aLibPathName <> '' then
+  begin
+    for i := 0 to Length(FLibraryList) - 1 do
+      if (FLibraryList[i] as TFBLibrary).FRequestedLibName = aLibPathName then
+      begin
+        Result := FLibraryList[i];
+        Exit;
+      end;
+    Result := Create(aLibPathName);
+  end;
+
+end;
+
+class procedure TFBLibrary.FreeLibraries;
+var i: integer;
+begin
+  for i := 0 to Length(FLibraryList) - 1 do
+    FLibraryList[i] := nil;
+  SetLength(FLibraryList,0);
+end;
+
+function TFBLibrary.GetHandle: TLibHandle;
+begin
+  Result := FIBLibrary;
+end;
 
 { TFBClientAPI }
 
-constructor TFBClientAPI.Create;
+constructor TFBClientAPI.Create(aFBLibrary: TFBLibrary);
 begin
   inherited Create;
-  LoadIBLibrary;
-  if (IBLibrary <> NilHandle) then
-  begin
-    SetupEnvironment;
-    LoadInterface;
-  end;
-  FirebirdClientAPI := self;
-end;
-
-destructor TFBClientAPI.Destroy;
-begin
-  FirebirdClientAPI := nil;
-  if FOwnsIBLibrary and (IBLibrary <> NilHandle) then
-    FreeLibrary(IBLibrary);
-  IBLibrary := NilHandle;
-  inherited Destroy;
+  FFBLibrary := aFBLibrary;
 end;
 
 procedure TFBClientAPI.IBAlloc(var P; OldSize, NewSize: Integer);
@@ -256,27 +346,6 @@ end;
 
 {Under Unixes, if using an embedded server then set up local TMP and LOCK Directories}
 
-procedure TFBClientAPI.SetupEnvironment;
-var TmpDir: AnsiString;
-begin
-  {$IFDEF UNIX}
-    TmpDir := GetTempDir +
-        DirectorySeparator + 'firebird_' + sysutils.GetEnvironmentVariable('USER');
-    if sysutils.GetEnvironmentVariable('FIREBIRD_TMP') = '' then
-    begin
-      if not DirectoryExists(tmpDir) then
-        mkdir(tmpDir);
-      SetEnvironmentVariable('FIREBIRD_TMP',PAnsiChar(TmpDir));
-    end;
-    if sysutils.GetEnvironmentVariable('FIREBIRD_LOCK') = '' then
-    begin
-      if not DirectoryExists(tmpDir) then
-        mkdir(tmpDir);
-      SetEnvironmentVariable('FIREBIRD_LOCK',PAnsiChar(TmpDir));
-    end;
-  {$ENDIF}
-end;
-
 procedure TFBClientAPI.EncodeInteger(aValue: integer; len: integer; buffer: PByte);
 begin
   while len > 0 do
@@ -290,29 +359,22 @@ end;
 
 function TFBClientAPI.IsLibraryLoaded: boolean;
 begin
-  Result := IBLibrary <> NilHandle;
+  Result := FFBLibrary.IBLibrary <> NilHandle;
+end;
+
+function TFBClientAPI.GetFBLibrary: IFirebirdLibrary;
+begin
+  Result := FFBLibrary;
 end;
 
 function TFBClientAPI.GetProcAddr(ProcName: PAnsiChar): Pointer;
 begin
-  Result := GetProcAddress(IBLibrary, ProcName);
+  Result := GetProcAddress(FFBLibrary.IBLibrary, ProcName);
   if not Assigned(Result) then
     raise Exception.CreateFmt(SFirebirdAPIFuncNotFound,[ProcName]);
 end;
 
-function TFBClientAPI.GetOverrideLibName: string;
-begin
-  Result := '';
-  if AllowUseOfFBLIB then
-    Result := GetEnvironmentVariable('FBLIB');
-  if Result = '' then
-  begin
-    if assigned(OnGetLibraryName) then
-      OnGetLibraryName(Result)
-  end;
-end;
-
-procedure TFBClientAPI.LoadInterface;
+function TFBClientAPI.LoadInterface: boolean;
 begin
   isc_sqlcode := GetProcAddr('isc_sqlcode'); {do not localize}
   isc_sql_interprete := GetProcAddr('isc_sql_interprete'); {do not localize}
@@ -320,17 +382,8 @@ begin
   isc_event_counts := GetProcAddr('isc_event_counts'); {do not localize}
   isc_event_block := GetProcAddr('isc_event_block'); {do not localize}
   isc_free := GetProcAddr('isc_free'); {do not localize}
+  Result := assigned(isc_free);
 end;
-
-function TFBClientAPI.GetLibraryName: string;
-begin
-  Result := FFBLibraryName;
-end;
-
-const
-  IBLocalBufferLength = 512;
-  IBBigLocalBufferLength = IBLocalBufferLength * 2;
-  IBHugeLocalBufferLength = IBBigLocalBufferLength * 20;
 
 { TFBStatus }
 
@@ -444,7 +497,7 @@ begin
 end;
 
 initialization
-  TFBClientAPI.IBLibrary := NilHandle;
+  TFBLibrary.FEnvSetupDone := false;
   {$IFNDEF FPC}
   InitializeCriticalSection(TFBClientAPI.FIBCS);
   {$ELSE}
@@ -452,17 +505,11 @@ initialization
   {$ENDIF}
 
 finalization
+  TFBLibrary.FreeLibraries;
   {$IFNDEF FPC}
   DeleteCriticalSection(TFBClientAPI.FIBCS);
   {$ELSE}
   DoneCriticalSection(TFBClientAPI.FIBCS);
   {$ENDIF}
-  if TFBClientAPI.IBLibrary <> NilHandle then
-  begin
-    FreeLibrary(TFBClientAPI.IBLibrary);
-    TFBClientAPI.IBLibrary := NilHandle;
-    TFBClientAPI.FFBLibraryName := '';
-  end;
-
 end.
 

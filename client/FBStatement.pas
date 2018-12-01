@@ -52,6 +52,7 @@ type
   TFBStatement = class(TActivityReporter)
   private
     FAttachmentIntf: IAttachment;
+    FFirebirdClientAPI: TFBClientAPI;
   protected
     FTransactionIntf: ITransaction;
     FExecTransactionIntf: ITransaction;
@@ -78,7 +79,7 @@ type
     procedure InternalPrepare;  virtual; abstract;
     function InternalExecute(aTransaction: ITransaction): IResults;  virtual; abstract;
     function InternalOpenCursor(aTransaction: ITransaction): IResultSet;   virtual; abstract;
-    procedure ProcessSQL(sql: string; GenerateParamNames: boolean; var processedSQL: string); virtual; abstract;
+    procedure ProcessSQL(sql: AnsiString; GenerateParamNames: boolean; var processedSQL: AnsiString); virtual; abstract;
     procedure FreeHandle;  virtual; abstract;
     procedure InternalClose(Force: boolean); virtual; abstract;
     function TimeStampToMSecs(const TimeStamp: TTimeStamp): Int64;
@@ -91,6 +92,7 @@ type
     procedure Close;
     procedure TransactionEnding(aTransaction: ITransaction; Force: boolean);
     property SQLDialect: integer read FSQLDialect;
+    property FirebirdClientAPI: TFBClientAPI read FFirebirdClientAPI;
 
   public
     function GetSQLParams: ISQLParams; virtual; abstract;
@@ -149,6 +151,7 @@ begin
   inherited Create(Transaction as TFBTransaction,2);
   FAttachmentIntf := Attachment;
   FTransactionIntf := Transaction;
+  FFirebirdClientAPI := Attachment.getFirebirdAPI as TFBClientAPI;
   FSQLDialect := SQLDialect;
   FSQL := sql;
 end;
@@ -315,7 +318,7 @@ end;
 
 function TFBStatement.GetDSQLInfo(Request: byte): ISQLInfoResults;
 begin
-  Result := TSQLInfoResultsBuffer.Create;
+  Result := TSQLInfoResultsBuffer.Create(FFirebirdClientAPI);
   GetDsqlInfo(Request,Result);
 end;
 

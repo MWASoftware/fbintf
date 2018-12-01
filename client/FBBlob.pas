@@ -256,7 +256,7 @@ begin
   TotalSize := 0;
   BlobType := btSegmented;
 
-  BlobInfo := TBlobInfo.Create;
+  BlobInfo := TBlobInfo.Create(FAttachment.getFirebirdAPI as TFBClientAPI);
   GetInfo([isc_info_blob_num_segments,
            isc_info_blob_max_segment,
            isc_info_blob_total_length,
