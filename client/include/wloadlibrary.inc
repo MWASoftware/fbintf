@@ -190,5 +190,5 @@ begin
   nSize := GetModuleFileNameA(FIBLibrary,@buffer,IBBigLocalBufferLength+1);
   if nSize > IBBigLocalBufferLength then
     buffer[IBBigLocalBufferLength] :=#0;
-  Result := strpas(@buffer);
+  Result := strpas(PAnsiChar(@buffer));
 end;

@@ -90,15 +90,6 @@ FIREBIRD_CLIENT = 'fbclient.dll'; {do not localize}
 FIREBIRD_EMBEDDED = 'fbembed.dll';
 {$ENDIF}
 
-{$IFNDEF FPC}
-type
-  TLibHandle = THandle;
-
-const
-  NilHandle = 0;
-  DirectorySeparator = '\';
-{$ENDIF}
-
 type
   TStatusVector              = array[0..19] of NativeInt;
   PStatusVector              = ^TStatusVector;
@@ -314,7 +305,7 @@ begin
         Result := FLibraryList[i];
         Exit;
       end;
-    Result := TFBLibrary.Create(aLibPathName);
+    Result := Create(aLibPathName);
   end;
 
 end;

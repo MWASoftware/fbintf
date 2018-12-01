@@ -139,7 +139,7 @@ type
      function GetAsShort: short;
      function GetAsString: AnsiString; virtual;
      function GetIsNull: Boolean; virtual;
-     function getIsNullable: boolean; virtual;
+     function GetIsNullable: boolean; virtual;
      function GetAsVariant: Variant;
      function GetModified: boolean; virtual;
      procedure SetAsBoolean(AValue: boolean); virtual;
@@ -461,21 +461,21 @@ type
    const
      sIBXParam = 'IBXParam';  {do not localize}
    private
-     FInString: string;
+     FInString: AnsiString;
      FIndex: integer;
      function DoExecute(GenerateParamNames: boolean;
-       var slNames: TStrings): string;
+       var slNames: TStrings): AnsiString;
    protected
-     function GetChar: char; override;
+     function GetChar: AnsiChar; override;
    public
      class function Execute(sSQL: AnsiString; GenerateParamNames: boolean;
-       var slNames: TStrings): string;
+       var slNames: TStrings): AnsiString;
    end;
 
 { TSQLParamProcessor }
 
 function TSQLParamProcessor.DoExecute(GenerateParamNames: boolean;
-  var slNames: TStrings): string;
+  var slNames: TStrings): AnsiString;
 var token: TSQLTokens;
     iParamSuffix: Integer;
 begin
@@ -489,7 +489,7 @@ begin
     sqltParam,
     sqltQuotedParam:
       begin
-        Result += '?';
+        Result := Result + '?';
         slNames.Add(TokenText);
       end;
 
@@ -499,33 +499,33 @@ begin
         Inc(iParamSuffix);
         slNames.AddObject(sIBXParam + IntToStr(iParamSuffix),self); //Note local convention
                                             //add pointer to self to mark entry
-        Result += '?';
+        Result := Result + '?';
       end
       else
         IBError(ibxeSQLParseError, [SParamNameExpected]);
 
     sqltQuotedString:
-      Result += '''' + SQLSafeString(TokenText) + '''';
+      Result := Result + '''' + SQLSafeString(TokenText) + '''';
 
     sqltIdentifierInDoubleQuotes:
-      Result += '"' + StringReplace(TokenText,'"','""',[rfReplaceAll]) + '"';
+      Result := Result + '"' + StringReplace(TokenText,'"','""',[rfReplaceAll]) + '"';
 
     sqltComment:
-      Result += '/*' + TokenText + '*/';
+      Result := Result + '/*' + TokenText + '*/';
 
     sqltCommentLine:
-      Result += '//' + TokenText + LineEnding;
+      Result := Result + '//' + TokenText + LineEnding;
 
     sqltEOL:
-      Result += LineEnding;
+      Result := Result + LineEnding;
 
     else
-      Result += TokenText;
+      Result := Result + TokenText;
     end;
   end;
 end;
 
-function TSQLParamProcessor.GetChar: char;
+function TSQLParamProcessor.GetChar: AnsiChar;
 begin
   if FIndex <= Length(FInString) then
   begin
@@ -537,7 +537,7 @@ begin
 end;
 
 class function TSQLParamProcessor.Execute(sSQL: AnsiString;
-  GenerateParamNames: boolean; var slNames: TStrings): string;
+  GenerateParamNames: boolean; var slNames: TStrings): AnsiString;
 begin
   with self.Create do
   try

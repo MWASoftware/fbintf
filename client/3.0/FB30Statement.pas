@@ -249,7 +249,7 @@ type
     procedure InternalPrepare; override;
     function InternalExecute(aTransaction: ITransaction): IResults; override;
     function InternalOpenCursor(aTransaction: ITransaction): IResultSet; override;
-    procedure ProcessSQL(sql: string; GenerateParamNames: boolean; var processedSQL: string); override;
+    procedure ProcessSQL(sql: AnsiString; GenerateParamNames: boolean; var processedSQL: AnsiString); override;
     procedure FreeHandle; override;
     procedure InternalClose(Force: boolean); override;
   public
@@ -1213,8 +1213,8 @@ begin
  Inc(FChangeSeqNo);
 end;
 
-procedure TFB30Statement.ProcessSQL(sql: string; GenerateParamNames: boolean;
-  var processedSQL: string);
+procedure TFB30Statement.ProcessSQL(sql: AnsiString; GenerateParamNames: boolean;
+  var processedSQL: AnsiString);
 begin
   FSQLParams.PreprocessSQL(sql,GenerateParamNames,processedSQL);
 end;

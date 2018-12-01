@@ -297,6 +297,10 @@ const
   TAB  = #9;
   NULL_TERMINATOR = #0;
 
+  {$IFNDEF FPC}
+  LineEnding = CRLF;
+  {$ENDIF}
+
   {SQL Reserved words in alphabetical order}
 
   sqlReservedWords: array [TSQLReservedWords] of string = (
@@ -521,12 +525,12 @@ type
 
       TTokenQueueItem = record
                           token: TSQLTokens;
-                          text: string;
+                          text: AnsiString;
                         end;
       TTokenQueueState = (tsHold, tsRelease);
 
   private
-    FLastChar: char;
+    FLastChar: AnsiChar;
     FState: TLexState;
     FSkipNext: boolean;
     function GetNext: TSQLTokens;
@@ -543,24 +547,24 @@ type
     FEOF: boolean;
     procedure PopQueue(var token: TSQLTokens);
   protected
-    FString: string;
+    FString: AnsiString;
     FNextToken: TSQLTokens;
     procedure Assign(source: TSQLTokeniser); virtual;
-    function GetChar: char; virtual; abstract;
+    function GetChar: AnsiChar; virtual; abstract;
     function TokenFound(var token: TSQLTokens): boolean; virtual;
     function InternalGetNextToken: TSQLTokens; virtual;
     procedure Reset; virtual;
 
     {Token stack}
-    procedure QueueToken(token: TSQLTokens; text:string); overload;
+    procedure QueueToken(token: TSQLTokens; text:AnsiString); overload;
     procedure QueueToken(token: TSQLTokens); overload;
     procedure ResetQueue; overload;
-    procedure ResetQueue(token: TSQLTokens; text:string); overload;
+    procedure ResetQueue(token: TSQLTokens; text:AnsiString); overload;
     procedure ResetQueue(token: TSQLTokens); overload;
     procedure ReleaseQueue(var token: TSQLTokens); overload;
     procedure ReleaseQueue; overload;
-    function GetQueuedText: string;
-    procedure SetTokenText(text: string);
+    function GetQueuedText: AnsiString;
+    procedure SetTokenText(text: AnsiString);
 
   public
     const
@@ -570,7 +574,7 @@ type
     destructor Destroy; override;
     function GetNextToken: TSQLTokens;
     property EOF: boolean read FEOF;
-    property TokenText: string read FString;
+    property TokenText: AnsiString read FString;
   end;
 
   { TSQLwithNamedParamsTokeniser }
@@ -1063,7 +1067,7 @@ end;
 { TSQLTokeniser }
 
 function TSQLTokeniser.GetNext: TSQLTokens;
-var C: char;
+var C: AnsiChar;
 begin
   if EOF then
     Result := sqltEOF
@@ -1155,7 +1159,7 @@ begin
   end;
 end;
 
-procedure TSQLTokeniser.QueueToken(token: TSQLTokens; text: string);
+procedure TSQLTokeniser.QueueToken(token: TSQLTokens; text: AnsiString);
 begin
   if FQLast > TokenQueueMaxSize then
     IBError(ibxeTokenQueueOverflow,[]);
@@ -1176,7 +1180,7 @@ begin
   FQueueState := tsHold;
 end;
 
-procedure TSQLTokeniser.ResetQueue(token: TSQLTokens; text: string);
+procedure TSQLTokeniser.ResetQueue(token: TSQLTokens; text: AnsiString);
 begin
   ResetQueue;
   QueueToken(token,text);
@@ -1199,15 +1203,15 @@ begin
   FQueueState := tsRelease;
 end;
 
-function TSQLTokeniser.GetQueuedText: string;
+function TSQLTokeniser.GetQueuedText: AnsiString;
 var i: integer;
 begin
   Result := '';
   for i := FQFirst to FQLast do
-    Result += FTokenQueue[i].text;
+    Result := Result + FTokenQueue[i].text;
 end;
 
-procedure TSQLTokeniser.SetTokenText(text: string);
+procedure TSQLTokeniser.SetTokenText(text: AnsiString);
 begin
   FString := text;
 end;
@@ -1249,7 +1253,7 @@ end;
 {a simple lookahead one algorithm to extra the next symbol}
 
 function TSQLTokeniser.InternalGetNextToken: TSQLTokens;
-var C: char;
+var C: AnsiChar;
 begin
   Result := sqltEOF;
 
@@ -1282,7 +1286,7 @@ begin
           GetNext;
         end
         else
-          FString += C;
+          FString := FString + C;
       end;
 
     stInCommentLine:
@@ -1292,7 +1296,7 @@ begin
         Result := sqltCommentLine;
       end
       else
-        FString += C;
+        FString := FString + C;
 
     stSingleQuoted:
       begin
@@ -1301,7 +1305,7 @@ begin
           if (FNextToken = sqltSingleQuotes) then
           begin
             FSkipNext := true;
-            FString += C;
+            FString := FString + C;
           end
           else
           begin
@@ -1310,7 +1314,7 @@ begin
           end;
         end
         else
-          FString += C;
+          FString := FString + C;
       end;
 
     stDoubleQuoted:
@@ -1320,7 +1324,7 @@ begin
           if (FNextToken = sqltDoubleQuotes) then
           begin
             FSkipNext := true;
-            FString += C;
+            FString := FString + C;
           end
           else
           begin
@@ -1329,12 +1333,12 @@ begin
           end;
         end
         else
-          FString += C;
+          FString := FString + C;
       end;
 
     stInIdentifier:
       begin
-        FString += C;
+        FString := FString + C;
         Result := sqltIdentifier;
         if not (FNextToken in [sqltIdentifier,sqltNumberString]) then
           FState := stDefault
@@ -1342,7 +1346,7 @@ begin
 
     stInNumeric:
       begin
-        FString += C;
+        FString := FString + C;
         if (Result = sqltPeriod) and (FNextToken = sqltPeriod) then
         begin
           {malformed decimal}

@@ -176,6 +176,14 @@ type
    PISC_QUAD            = ^TISC_QUAD;
 
 {$IFNDEF FPC}
+{Delphi missing definitions}
+type
+  TLibHandle = THandle;
+
+const
+  NilHandle = 0;
+  DirectorySeparator = '\';
+
 {Delphi only seems to define CP_UTF8 and CP_UTF16}
 const
   CP_ACP     = 0;     // default to ANSI code page

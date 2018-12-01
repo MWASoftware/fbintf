@@ -79,7 +79,7 @@ type
     procedure InternalPrepare;  virtual; abstract;
     function InternalExecute(aTransaction: ITransaction): IResults;  virtual; abstract;
     function InternalOpenCursor(aTransaction: ITransaction): IResultSet;   virtual; abstract;
-    procedure ProcessSQL(sql: string; GenerateParamNames: boolean; var processedSQL: string); virtual; abstract;
+    procedure ProcessSQL(sql: AnsiString; GenerateParamNames: boolean; var processedSQL: AnsiString); virtual; abstract;
     procedure FreeHandle;  virtual; abstract;
     procedure InternalClose(Force: boolean); virtual; abstract;
     function TimeStampToMSecs(const TimeStamp: TTimeStamp): Int64;
