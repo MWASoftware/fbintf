@@ -1,4 +1,4 @@
-function TFBLibrary.LoadFIBLibrary: boolean;
+function TFBLibrary.LoadIBLibrary: boolean;
 
   function IsValidHandle(aHandle: TLibHandle): boolean;
   begin

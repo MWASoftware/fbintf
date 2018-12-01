@@ -532,7 +532,7 @@ begin
   Result := Pos('libfbembed',FFBLibrary.GetLibraryName) = 1;
 {$ENDIF}
 {$IFDEF WINDOWS}
-  Result := CompareText(FFBLibraryName,FIREBIRD_EMBEDDED) = 0;
+  Result := CompareText(FFBLibrary.GetLibraryName,FIREBIRD_EMBEDDED) = 0;
 {$ENDIF}
 end;
 

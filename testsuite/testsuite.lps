@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectSession>
-    <Version Value="11"/>
+    <Version Value="10"/>
     <BuildModes Active="Default"/>
     <Units Count="61">
       <Unit0>
@@ -109,10 +109,11 @@
       </Unit18>
       <Unit19>
         <Filename Value="../client/FBClientAPI.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="180"/>
-        <CursorPos X="25" Y="207"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="112"/>
+        <CursorPos X="19" Y="138"/>
         <UsageCount Value="19"/>
+        <Loaded Value="True"/>
       </Unit19>
       <Unit20>
         <Filename Value="../IBUtils.pas"/>
@@ -143,7 +144,6 @@
       </Unit22>
       <Unit23>
         <Filename Value="../IB.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <TopLine Value="52"/>
         <CursorPos X="2" Y="76"/>
@@ -159,10 +159,10 @@
       </Unit24>
       <Unit25>
         <Filename Value="../client/include/wloadlibrary.inc"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="27"/>
-        <CursorPos X="9" Y="179"/>
+        <EditorIndex Value="2"/>
+        <CursorPos X="25"/>
         <UsageCount Value="13"/>
+        <Loaded Value="True"/>
       </Unit25>
       <Unit26>
         <Filename Value="../../fbintf/client/FBClientAPI.pas"/>
@@ -180,10 +180,12 @@
       </Unit27>
       <Unit28>
         <Filename Value="../client/2.5/FB25ClientAPI.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="285"/>
-        <CursorPos X="36" Y="304"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="517"/>
+        <CursorPos X="50" Y="535"/>
         <UsageCount Value="18"/>
+        <Loaded Value="True"/>
       </Unit28>
       <Unit29>
         <Filename Value="/usr/share/fpcsrc/rtl/inc/dynlibs.pas"/>
@@ -409,7 +411,7 @@
         <UsageCount Value="12"/>
       </Unit60>
     </Units>
-    <JumpHistory Count="2" HistoryIndex="1">
+    <JumpHistory Count="5" HistoryIndex="4">
       <Position1>
         <Filename Value="Test1.pas"/>
         <Caret Line="76" Column="105" TopLine="46"/>
@@ -418,10 +420,18 @@
         <Filename Value="../IB.pas"/>
         <Caret Line="1260" Column="39" TopLine="1249"/>
       </Position2>
+      <Position3>
+        <Filename Value="../client/include/wloadlibrary.inc"/>
+        <Caret Line="179" Column="9" TopLine="27"/>
+      </Position3>
+      <Position4>
+        <Filename Value="../client/include/wloadlibrary.inc"/>
+        <Caret Line="12" Column="21"/>
+      </Position4>
+      <Position5>
+        <Filename Value="../client/2.5/FB25ClientAPI.pas"/>
+        <Caret Line="304" Column="36" TopLine="285"/>
+      </Position5>
     </JumpHistory>
-    <RunParams>
-      <FormatVersion Value="2"/>
-      <Modes Count="0" ActiveMode="default"/>
-    </RunParams>
   </ProjectSession>
 </CONFIG>
