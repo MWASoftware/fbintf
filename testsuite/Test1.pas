@@ -90,11 +90,13 @@ var DPB: IDPB;
     FBLibrary: IFirebirdLibrary;
 begin
   writeln(OutFile,'Creating a Database with empty parameters');
+  writeln(Outfile,'FIREBIRD_TMP = ',GetEnvironmentVariable('FIREBIRD_TMP'));
   Attachment := FirebirdAPI.CreateDatabase('',nil,false);
   if Attachment = nil then
     writeln(OutFile,'Create Database fails (as expected): ',FirebirdAPI.GetStatus.GetMessage)
   else
     Attachment.DropDatabase;
+  writeln(Outfile,'FIREBIRD_TMP = ',GetEnvironmentVariable('FIREBIRD_TMP'));
 
   writeln(OutFile,'Creating a Database using an SQL Statement');
   createSQL := Format('create database ''%s'' USER ''%s'' PASSWORD ''%s'' DEFAULT CHARACTER SET %s',
