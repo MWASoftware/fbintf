@@ -79,13 +79,13 @@ begin
   if FEnvSetupDone then Exit;
     TmpDir := GetTempDir +
         DirectorySeparator + 'firebird_' + sysutils.GetEnvironmentVariable('USER');
-    if sysutils.GetEnvironmentVariable('FIREBIRD_TMP') = '' then
+    if trim(sysutils.GetEnvironmentVariable('FIREBIRD_TMP')) = '' then
     begin
       if not DirectoryExists(tmpDir) then
         mkdir(tmpDir);
       SetEnvironmentVariable('FIREBIRD_TMP',PAnsiChar(TmpDir));
     end;
-    if sysutils.GetEnvironmentVariable('FIREBIRD_LOCK') = '' then
+    if trim(sysutils.GetEnvironmentVariable('FIREBIRD_LOCK')) = '' then
     begin
       if not DirectoryExists(tmpDir) then
         mkdir(tmpDir);
