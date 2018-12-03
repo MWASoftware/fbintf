@@ -251,6 +251,7 @@ end;
 constructor TFBLibrary.Create(aLibPathName: string);
 begin
   inherited Create;
+  SetupEnvironment;
   FFBLibraryName := aLibPathName;
   FIBLibrary := NilHandle;
   FFirebirdAPI := GetFirebird3API;
@@ -282,8 +283,6 @@ begin
     end;
   end;
   {Note: FFirebirdAPI will be set to nil if the Firebird API fails to load}
-  if FFirebirdAPI <> nil then
-    SetupEnvironment;
 end;
 
 destructor TFBLibrary.Destroy;
