@@ -23,24 +23,22 @@
     </PublishOptions>
     <RunParams>
       <local>
-        <CommandLineParams Value="-t 1"/>
+        <CommandLineParams Value="-t 4"/>
       </local>
       <environment>
-        <UserOverrides Count="2">
+        <UserOverrides Count="1">
           <Variable0 Name="FIREBIRD_LOCK" Value="/tmp"/>
-          <Variable1 Name="TESTFIREBIRDLIBRARY" Value="/home/tony/opt/firebird/lib/libfbclient.so.2"/>
         </UserOverrides>
       </environment>
       <FormatVersion Value="2"/>
       <Modes Count="1">
         <Mode0 Name="default">
           <local>
-            <CommandLineParams Value="-t 1"/>
+            <CommandLineParams Value="-t 4"/>
           </local>
           <environment>
-            <UserOverrides Count="2">
+            <UserOverrides Count="1">
               <Variable0 Name="FIREBIRD_LOCK" Value="/tmp"/>
-              <Variable1 Name="TESTFIREBIRDLIBRARY" Value="/home/tony/opt/firebird/lib/libfbclient.so.2"/>
             </UserOverrides>
           </environment>
         </Mode0>

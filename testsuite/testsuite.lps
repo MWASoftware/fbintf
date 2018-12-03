@@ -36,10 +36,12 @@
       <Unit5>
         <Filename Value="Test4.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="49"/>
-        <CursorPos X="113" Y="76"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="177"/>
+        <CursorPos X="75" Y="207"/>
         <UsageCount Value="40"/>
+        <Loaded Value="True"/>
       </Unit5>
       <Unit6>
         <Filename Value="Test5.pas"/>
@@ -110,8 +112,8 @@
       <Unit19>
         <Filename Value="../client/FBClientAPI.pas"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="179"/>
-        <CursorPos X="28" Y="198"/>
+        <TopLine Value="325"/>
+        <CursorPos Y="344"/>
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
       </Unit19>
@@ -144,7 +146,6 @@
       </Unit22>
       <Unit23>
         <Filename Value="../IB.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
         <TopLine Value="1267"/>
         <CursorPos X="30" Y="1283"/>
@@ -161,7 +162,7 @@
       </Unit24>
       <Unit25>
         <Filename Value="../client/include/wloadlibrary.inc"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="5"/>
         <CursorPos X="25"/>
         <UsageCount Value="13"/>
         <Loaded Value="True"/>
@@ -175,7 +176,7 @@
       </Unit26>
       <Unit27>
         <Filename Value="../client/2.5/FB25ClientAPI.pas"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="517"/>
         <CursorPos X="50" Y="535"/>
         <UsageCount Value="18"/>
@@ -405,7 +406,7 @@
         <UsageCount Value="12"/>
       </Unit59>
     </Units>
-    <JumpHistory Count="15" HistoryIndex="14">
+    <JumpHistory Count="20" HistoryIndex="19">
       <Position1>
         <Filename Value="Test1.pas"/>
         <Caret Line="76" Column="105" TopLine="46"/>
@@ -466,6 +467,26 @@
         <Filename Value="../IB.pas"/>
         <Caret Line="1316" TopLine="1290"/>
       </Position15>
+      <Position16>
+        <Filename Value="Test4.pas"/>
+        <Caret Line="74" TopLine="51"/>
+      </Position16>
+      <Position17>
+        <Filename Value="Test4.pas"/>
+        <Caret Line="211" Column="57" TopLine="177"/>
+      </Position17>
+      <Position18>
+        <Filename Value="../client/FBClientAPI.pas"/>
+        <Caret Line="344" TopLine="325"/>
+      </Position18>
+      <Position19>
+        <Filename Value="Test4.pas"/>
+        <Caret Line="200" Column="64" TopLine="180"/>
+      </Position19>
+      <Position20>
+        <Filename Value="../client/FBClientAPI.pas"/>
+        <Caret Line="344" TopLine="325"/>
+      </Position20>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
