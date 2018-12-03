@@ -18,8 +18,9 @@
       <Unit2>
         <Filename Value="Test1.pas"/>
         <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
         <TopLine Value="74"/>
-        <CursorPos X="76" Y="99"/>
+        <CursorPos Y="98"/>
         <UsageCount Value="40"/>
         <Loaded Value="True"/>
       </Unit2>
@@ -153,7 +154,6 @@
       </Unit23>
       <Unit24>
         <Filename Value="../client/include/uloadlibrary.inc"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
         <TopLine Value="45"/>
         <CursorPos X="44" Y="76"/>
