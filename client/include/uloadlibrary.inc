@@ -105,7 +105,7 @@ function TFBLibrary.GetLibraryFilePath: string;
 var path: array [0..IBLocalBufferLength] of char; {hopefully this is big enough}
     dlinfo: Tdlinfo;
 begin
-  Result := FFBLibraryName;
+  Result := GetLibraryName;
   dlinfo := dlsym(RTLD_DEFAULT,'dlinfo');
   if assigned(dlinfo) then
   begin

@@ -195,7 +195,7 @@ end;
 implementation
 
 uses IBUtils, Registry,
-  {$IFDEF Unix} initc, dl, BaseUnix, {$ENDIF}
+  {$IFDEF Unix} initc, dl, {$ENDIF}
 {$IFDEF FPC}
 {$IFDEF WINDOWS }
 WinDirs,
