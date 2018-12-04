@@ -25,22 +25,12 @@
       <local>
         <CommandLineParams Value="-t 1"/>
       </local>
-      <environment>
-        <UserOverrides Count="1">
-          <Variable0 Name="FIREBIRD_LOCK" Value="/tmp"/>
-        </UserOverrides>
-      </environment>
       <FormatVersion Value="2"/>
       <Modes Count="1">
         <Mode0 Name="default">
           <local>
             <CommandLineParams Value="-t 1"/>
           </local>
-          <environment>
-            <UserOverrides Count="1">
-              <Variable0 Name="FIREBIRD_LOCK" Value="/tmp"/>
-            </UserOverrides>
-          </environment>
         </Mode0>
       </Modes>
     </RunParams>
