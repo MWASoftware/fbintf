@@ -7,7 +7,6 @@
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <UsageCount Value="40"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -121,10 +120,12 @@
       </Unit19>
       <Unit20>
         <Filename Value="../IBUtils.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="1064"/>
-        <CursorPos X="25" Y="1083"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="689"/>
+        <CursorPos X="10" Y="689"/>
         <UsageCount Value="14"/>
+        <Loaded Value="True"/>
       </Unit20>
       <Unit21>
         <Filename Value="../client/FBSQLData.pas"/>
@@ -425,7 +426,23 @@
         <UsageCount Value="10"/>
       </Unit62>
     </Units>
-    <JumpHistory HistoryIndex="-1"/>
+    <JumpHistory Count="4" HistoryIndex="3">
+      <Position1>
+        <Filename Value="../IBUtils.pas"/>
+        <Caret Line="1089" Column="46" TopLine="1080"/>
+      </Position1>
+      <Position2>
+        <Filename Value="../IBUtils.pas"/>
+      </Position2>
+      <Position3>
+        <Filename Value="../IBUtils.pas"/>
+        <Caret Line="267" TopLine="236"/>
+      </Position3>
+      <Position4>
+        <Filename Value="../IBUtils.pas"/>
+        <Caret Line="1158" Column="14" TopLine="1130"/>
+      </Position4>
+    </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
       <Modes Count="0" ActiveMode="default"/>
