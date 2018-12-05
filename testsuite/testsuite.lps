@@ -3,12 +3,11 @@
   <ProjectSession>
     <Version Value="11"/>
     <BuildModes Active="Default"/>
-    <Units Count="62">
+    <Units Count="63">
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="104"/>
         <UsageCount Value="40"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -113,8 +112,8 @@
       <Unit19>
         <Filename Value="../client/FBClientAPI.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="233"/>
-        <CursorPos Y="257"/>
+        <TopLine Value="194"/>
+        <CursorPos X="39" Y="225"/>
         <UsageCount Value="10"/>
       </Unit19>
       <Unit20>
@@ -147,8 +146,8 @@
       <Unit23>
         <Filename Value="../IB.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="1257"/>
-        <CursorPos X="28" Y="1284"/>
+        <TopLine Value="1125"/>
+        <CursorPos X="18" Y="1156"/>
         <UsageCount Value="16"/>
       </Unit23>
       <Unit24>
@@ -415,6 +414,13 @@
         <CursorPos Y="830"/>
         <UsageCount Value="10"/>
       </Unit61>
+      <Unit62>
+        <Filename Value="../../ibx/design/IBDBReg.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="420"/>
+        <CursorPos X="27" Y="441"/>
+        <UsageCount Value="10"/>
+      </Unit62>
     </Units>
     <JumpHistory HistoryIndex="-1"/>
     <RunParams>
