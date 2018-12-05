@@ -261,9 +261,9 @@ type
   sqltComma,
   sqltPeriod,
   sqltEquals,
+  sqltOtherCharacter,
   sqltIdentifier,
   sqltIdentifierInDoubleQuotes,
-  sqltBadIdentifier,
   sqltNumberString,
   sqltString,
   sqltParam,
@@ -1120,7 +1120,10 @@ begin
     LF:
       Result := sqltEOL;
     else
-      Result := sqltIdentifier;
+      if C in ValidSQLIdentifierChars then
+        Result := sqltIdentifier
+      else
+        Result := sqltOtherCharacter;
     end;
     FLastChar := C
   end;
@@ -1152,11 +1155,7 @@ function TSQLTokeniser.TokenFound(var token: TSQLTokens): boolean;
 begin
   Result := (FState = stDefault);
   if Result and (token = sqltIdentifier)  then
-  begin
-    if not FindReservedWord(FString,token) then
-      if not IsSQLIdentifier(FString) then
-        token := sqltBadIdentifier;
-  end;
+    FindReservedWord(FString,token);
 end;
 
 procedure TSQLTokeniser.QueueToken(token: TSQLTokens; text: AnsiString);
