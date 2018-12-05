@@ -1270,11 +1270,6 @@ begin
       continue;
     end;
 
-    {Combine CR/LF to EOF. CR on its own is treated as a space}
-
-    if Result = sqltCR then
-      FSkipNext := FNextToken = sqltEOL;
-
     case FState of
     stInComment:
       begin
