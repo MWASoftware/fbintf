@@ -1284,13 +1284,20 @@ begin
       end;
 
     stInCommentLine:
-      if Result = sqltEOL then
       begin
-        FState := stDefault;
-        Result := sqltCommentLine;
-      end
-      else
-        FString := FString + C;
+        case Result of
+        sqltEOL:
+          begin
+            FState := stDefault;
+            Result := sqltCommentLine;
+          end;
+
+        sqltCR: {ignore};
+
+        else
+          FString := FString + C;
+        end;
+      end;
 
     stSingleQuoted:
       begin
