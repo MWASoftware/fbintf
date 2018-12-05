@@ -261,6 +261,7 @@ type
   sqltComma,
   sqltPeriod,
   sqltEquals,
+  sqltOtherCharacter,
   sqltIdentifier,
   sqltIdentifierInDoubleQuotes,
   sqltBadIdentifier,
@@ -1120,7 +1121,10 @@ begin
     LF:
       Result := sqltEOL;
     else
-      Result := sqltIdentifier;
+      if C in ValidSQLIdentifierChars then
+        Result := sqltIdentifier
+      else
+        Result := sqltOtherCharacter;
     end;
     FLastChar := C
   end;

@@ -66,6 +66,9 @@
       <Unit10>
         <Filename Value="Test9.pas"/>
         <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="53"/>
+        <CursorPos X="22" Y="53"/>
         <UsageCount Value="40"/>
       </Unit10>
       <Unit11>
