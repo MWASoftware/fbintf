@@ -264,7 +264,6 @@ type
   sqltOtherCharacter,
   sqltIdentifier,
   sqltIdentifierInDoubleQuotes,
-  sqltBadIdentifier,
   sqltNumberString,
   sqltString,
   sqltParam,
@@ -1156,11 +1155,7 @@ function TSQLTokeniser.TokenFound(var token: TSQLTokens): boolean;
 begin
   Result := (FState = stDefault);
   if Result and (token = sqltIdentifier)  then
-  begin
-    if not FindReservedWord(FString,token) then
-      if not IsSQLIdentifier(FString) then
-        token := sqltBadIdentifier;
-  end;
+    FindReservedWord(FString,token);
 end;
 
 procedure TSQLTokeniser.QueueToken(token: TSQLTokens; text: AnsiString);
