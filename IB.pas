@@ -1216,13 +1216,13 @@ type
 
   { TFBLibrary }
 
-  TFBLibrary = class(FBClientAPI.TFBLibrary)
+  TFBLibraryImpl = class(TFBLibrary)
   protected
     function GetFirebird3API: IFirebirdAPI; override;
     function GetLegacyFirebirdAPI: IFirebirdAPI; override;
   end;
 
-function TFBLibrary.GetFirebird3API: IFirebirdAPI;
+function TFBLibraryImpl.GetFirebird3API: IFirebirdAPI;
 begin
  {$IFDEF USEFIREBIRD3API}
  Result := TFB30ClientAPI.Create(self);
@@ -1231,7 +1231,7 @@ begin
  {$ENDIF}
 end;
 
-function TFBLibrary.GetLegacyFirebirdAPI: IFirebirdAPI;
+function TFBLibraryImpl.GetLegacyFirebirdAPI: IFirebirdAPI;
 begin
   {$IFDEF USELEGACYFIREBIRDAPI}
   Result := TFB25ClientAPI.Create(self);
@@ -1254,7 +1254,7 @@ begin
  try
   if not Result then
   begin
-    fblib := TFBLibrary.Create;
+    fblib := TFBLibraryImpl.Create;
     if (fblib <> nil) and (fblib.GetFirebirdAPI <> nil) then
       FDefaultFBLibrary := fblib;
     Result := FDefaultFBLibrary <> nil;
@@ -1281,7 +1281,7 @@ begin
   end
   else
   begin
-    fblib := TFBLibrary.GetFBLibrary(aLibPathName);
+    fblib := TFBLibraryImpl.GetFBLibrary(aLibPathName);
     if (fblib = nil) or (fblib.GetFirebirdAPI = nil) then
       IBError(ibxeInterBaseMissing, [nil]);
     Result := fblib;

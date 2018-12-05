@@ -8,6 +8,7 @@
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
+        <TopLine Value="104"/>
         <UsageCount Value="40"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -22,7 +23,7 @@
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="135"/>
-        <CursorPos Y="158"/>
+        <CursorPos X="57" Y="155"/>
         <UsageCount Value="40"/>
       </Unit2>
       <Unit3>
@@ -146,8 +147,8 @@
       <Unit23>
         <Filename Value="../IB.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="1209"/>
-        <CursorPos Y="1228"/>
+        <TopLine Value="1257"/>
+        <CursorPos X="28" Y="1284"/>
         <UsageCount Value="16"/>
       </Unit23>
       <Unit24>
@@ -421,15 +422,4 @@
       <Modes Count="0" ActiveMode="default"/>
     </RunParams>
   </ProjectSession>
-  <Debugging>
-    <BreakPoints Count="1">
-      <Item1>
-        <Kind Value="bpkSource"/>
-        <WatchScope Value="wpsLocal"/>
-        <WatchKind Value="wpkWrite"/>
-        <Source Value="Test1.pas"/>
-        <Line Value="158"/>
-      </Item1>
-    </BreakPoints>
-  </Debugging>
 </CONFIG>
