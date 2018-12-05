@@ -194,6 +194,24 @@ begin
   writeln(OutFile,'Same Statement - updated params');
   Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 9;
   ReportResults(Statement);
+
+  writeln(outfile,'Test using Execute Block');
+
+  Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taRollback);
+  Statement := Attachment.PrepareWithNamedParameters(Transaction,
+    'Execute Block (Hired Timestamp = :Hire_Date, empno integer = :EMP_NO) '+
+    'As Begin ' +
+    '  Update Employee Set Hire_Date = :Hired Where EMP_NO = :empno; '+
+    'End'
+    ,3);
+  Statement.GetSQLParams.ByName('Hire_Date').AsDateTime := EncodeDate(2015,1,31);;
+  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 8;
+  Statement.Execute;
+  WriteAffectedRows(Statement);
+  Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
+  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 8;
+  ReportResults(Statement);
+
 end;
 
 function TTest4.TestTitle: AnsiString;

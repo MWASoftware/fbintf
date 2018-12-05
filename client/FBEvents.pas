@@ -83,6 +83,7 @@ type
     FEvents: TStringList;
     FAttachment: IAttachment;
     FEventCounts: TEventCounts;
+    FFirebirdClientAPI: TFBClientAPI;
   protected
     FEventBuffer: PByte;
     FEventBufferLen: integer;
@@ -125,7 +126,7 @@ var
   EventNames: array of PAnsiChar;
   EventName: AnsiString;
 begin
-  with FirebirdClientAPI do
+  with FFirebirdClientAPI do
   begin
     if FEventBuffer <> nil then
       isc_free( FEventBuffer);
@@ -193,7 +194,7 @@ begin
 
   FillChar(EventCountList,sizeof(EventCountList),0);
 
-  with FirebirdClientAPI do
+  with FFirebirdClientAPI do
      isc_event_counts( @EventCountList, FEventBufferLen, FEventBuffer, FResultBuffer);
   j := 0;
   P := @EventCountList;
@@ -216,6 +217,7 @@ constructor TFBEvents.Create(DBAttachment: IAttachment;
 begin
   inherited Create(aMonitor);
   FAttachment := DBAttachment;
+  FFirebirdClientAPI := DBAttachment.getFirebirdAPI as TFBClientAPI;
   if Events.Count > MaxEvents then
     IBError(ibxeMaximumEvents, [nil]);
 
@@ -229,7 +231,7 @@ destructor TFBEvents.Destroy;
 begin
   if assigned(FCriticalSection) then FCriticalSection.Free;
   if assigned(FEvents) then FEvents.Free;
-  with FirebirdClientAPI do
+  with FFirebirdClientAPI do
   begin
     if FEventBuffer <> nil then
       isc_free( FEventBuffer);
@@ -246,8 +248,10 @@ end;
 
 procedure TFBEvents.SetEvents(EventNames: TStrings);
 begin
+  {$ifdef Unix}
   if (EventNames.Count > 0) and not IsMultiThread then
     IBError(ibxeMultiThreadRequired,['Firebird Events Handling']);
+  {$endif}
   if EventNames.Text <> FEvents.Text then
   begin
     Cancel;

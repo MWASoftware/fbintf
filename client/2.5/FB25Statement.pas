@@ -121,6 +121,7 @@ type
   TIBXSQLVAR = class(TSQLVarData)
   private
     FStatement: TFB25Statement;
+    FFirebird25ClientAPI: TFB25ClientAPI;
     FBlob: IBlob;             {Cache references}
     FArray: IArray;
     FNullIndicator: short;
@@ -177,6 +178,7 @@ type
     function GetXSQLDA: PXSQLDA;
   protected
     FStatement: TFB25Statement;
+    FFirebird25ClientAPI: TFB25ClientAPI;
     function GetTransactionSeqNo: integer; override;
     procedure FreeXSQLDA;
     function GetStatement: IStatement; override;
@@ -241,6 +243,7 @@ type
   private
     FDBHandle: TISC_DB_HANDLE;
     FHandle: TISC_STMT_HANDLE;
+    FFirebird25ClientAPI: TFB25ClientAPI;
     FSQLParams: TIBXINPUTSQLDA;
     FSQLRecord: TIBXOUTPUTSQLDA;
     FCursor: AnsiString;               { Cursor name...}
@@ -252,6 +255,7 @@ type
     procedure InternalPrepare; override;
     function InternalExecute(aTransaction: ITransaction): IResults; override;
     function InternalOpenCursor(aTransaction: ITransaction): IResultSet; override;
+    procedure ProcessSQL(sql: AnsiString; GenerateParamNames: boolean; var processedSQL: AnsiString); override;
     procedure FreeHandle; override;
     procedure InternalClose(Force: boolean); override;
   public
@@ -441,7 +445,7 @@ procedure TIBXSQLVAR.Initialize;
 begin
   inherited Initialize;
   FOwnsSQLData := true;
-  with FirebirdClientAPI, FXSQLVar^ do
+  with FFirebird25ClientAPI, FXSQLVar^ do
   begin
     case sqltype and (not 1) of
       SQL_TEXT, SQL_TYPE_DATE, SQL_TYPE_TIME, SQL_TIMESTAMP,
@@ -526,7 +530,7 @@ begin
   if not FOwnsSQLData then
     FXSQLVAR^.sqldata := nil;
   FXSQLVAR^.sqllen := len;
-  with FirebirdClientAPI do
+  with FFirebird25ClientAPI do
     IBAlloc(FXSQLVAR^.sqldata, 0, FXSQLVAR^.sqllen);
   FOwnsSQLData := true;
   Changed;
@@ -558,6 +562,7 @@ constructor TIBXSQLVAR.Create(aParent: TIBXSQLDA; aIndex: integer);
 begin
   inherited Create(aParent,aIndex);
   FStatement := aParent.Statement;
+  FFirebird25ClientAPI := aParent.FFirebird25ClientAPI;
 end;
 
 procedure TIBXSQLVAR.FreeSQLData;
@@ -628,7 +633,7 @@ procedure TIBXINPUTSQLDA.Bind;
 begin
   if Count = 0 then
     Count := 1;
-  with Firebird25ClientAPI do
+  with FFirebird25ClientAPI do
   begin
     if (FXSQLDA <> nil) then
        if isc_dsql_describe_bind(StatusVector, @(FStatement.Handle), FStatement.SQLDialect,
@@ -660,7 +665,7 @@ procedure TIBXOUTPUTSQLDA.Bind;
 begin
   { Allocate an initial output descriptor (with one column) }
   Count := 1;
-  with Firebird25ClientAPI do
+  with FFirebird25ClientAPI do
   begin
     { Using isc_dsql_describe, get the right size for the columns... }
     if isc_dsql_describe(StatusVector, @(FStatement.Handle), FStatement.SQLDialect, FXSQLDA) > 0 then
@@ -695,7 +700,7 @@ begin
     len := sqllen;
     if not IsNull and ((sqltype and (not 1)) = SQL_VARYING) then
     begin
-      with FirebirdClientAPI do
+      with FFirebird25ClientAPI do
         len := DecodeInteger(data,2);
       Inc(data,2);
     end;
@@ -712,6 +717,7 @@ constructor TIBXSQLDA.Create(aStatement: TFB25Statement);
 begin
   inherited Create;
   FStatement := aStatement;
+  FFirebird25ClientAPI := aStatement.FFirebird25ClientAPI;
   FSize := 0;
 //  writeln('Creating ',ClassName);
 end;
@@ -798,7 +804,7 @@ begin
       OldSize := 0;
     if Count > FSize then
     begin
-      Firebird25ClientAPI.IBAlloc(FXSQLDA, OldSize, XSQLDA_LENGTH(Count));
+      FFirebird25ClientAPI.IBAlloc(FXSQLDA, OldSize, XSQLDA_LENGTH(Count));
       SetLength(FColumnList, FCount);
       FXSQLDA^.version := SQLDA_VERSION1;
       p := @FXSQLDA^.sqlvar[0];
@@ -896,7 +902,7 @@ end;
 procedure TFB25Statement.GetDsqlInfo(info_request: byte; buffer: ISQLInfoResults
   );
 begin
-  with Firebird25ClientAPI, buffer as TSQLInfoResultsBuffer do
+  with FFirebird25ClientAPI, buffer as TSQLInfoResultsBuffer do
   if isc_dsql_sql_info(StatusVector, @(FHandle), 1, @info_request,
                      GetBufSize, Buffer) > 0 then
     IBDatabaseError;
@@ -913,7 +919,7 @@ begin
     IBError(ibxeEmptyQuery, [nil]);
   try
     CheckTransaction(FTransactionIntf);
-    with Firebird25ClientAPI do
+    with FFirebird25ClientAPI do
     begin
       Call(isc_dsql_alloc_statement2(StatusVector, @(FDBHandle),
                                       @FHandle), True);
@@ -921,7 +927,7 @@ begin
       if FHasParamNames then
       begin
         if FProcessedSQL = '' then
-          FSQLParams.PreprocessSQL(FSQL,FGenerateParamNames,FProcessedSQL);
+          ProcessSQL(FSQL,FGenerateParamNames,FProcessedSQL);
         Call(isc_dsql_prepare(StatusVector, @(TRHandle), @FHandle, 0,
                  PAnsiChar(FProcessedSQL), FSQLDialect, nil), True);
       end
@@ -1007,7 +1013,7 @@ begin
 
   try
     TRHandle := (aTransaction as TFB25Transaction).Handle;
-    with Firebird25ClientAPI do
+    with FFirebird25ClientAPI do
     begin
       if FCollectStatistics then
         GetPerfCounters(FBeforeStats);
@@ -1068,7 +1074,7 @@ begin
   if (FSQLParams.FTransactionSeqNo < (FTransactionIntf as TFB25transaction).TransactionSeqNo) then
     IBError(ibxeInterfaceOutofDate,[nil]);
 
- with Firebird25ClientAPI do
+ with FFirebird25ClientAPI do
  begin
    if FCollectStatistics then
      GetPerfCounters(FBeforeStats);
@@ -1107,6 +1113,12 @@ begin
  Inc(FChangeSeqNo);
 end;
 
+procedure TFB25Statement.ProcessSQL(sql: AnsiString; GenerateParamNames: boolean;
+  var processedSQL: AnsiString);
+begin
+  FSQLParams.PreprocessSQL(sql,GenerateParamNames, processedSQL);
+end;
+
 procedure TFB25Statement.FreeHandle;
 var
   isc_res: ISC_STATUS;
@@ -1115,7 +1127,7 @@ begin
   ReleaseInterfaces;
   try
     if FHandle <> nil then
-    with Firebird25ClientAPI do
+    with FFirebird25ClientAPI do
     begin
       isc_res :=
         Call(isc_dsql_free_statement(StatusVector, @FHandle, DSQL_drop), False);
@@ -1135,7 +1147,7 @@ var
 begin
   if (FHandle <> nil) and (SQLStatementType = SQLSelect) and FOpen then
   try
-    with Firebird25ClientAPI do
+    with FFirebird25ClientAPI do
     begin
       isc_res := Call(
                    isc_dsql_free_statement(StatusVector, @FHandle, DSQL_close),
@@ -1160,6 +1172,8 @@ constructor TFB25Statement.Create(Attachment: TFB25Attachment;
 begin
   inherited Create(Attachment,Transaction,sql,aSQLDialect);
   FDBHandle := Attachment.Handle;
+  FFirebird25ClientAPI := Attachment.Firebird25ClientAPI;
+  OnDatabaseError := FFirebird25ClientAPI.IBDataBaseError;
   FSQLParams := TIBXINPUTSQLDA.Create(self);
   FSQLRecord := TIBXOUTPUTSQLDA.Create(self);
   InternalPrepare;
@@ -1171,6 +1185,8 @@ constructor TFB25Statement.CreateWithParameterNames(Attachment: TFB25Attachment;
 begin
   inherited CreateWithParameterNames(Attachment,Transaction,sql,aSQLDialect,GenerateParamNames);
   FDBHandle := Attachment.Handle;
+  FFirebird25ClientAPI := Attachment.Firebird25ClientAPI;
+  OnDatabaseError := FFirebird25ClientAPI.IBDataBaseError;
   FSQLParams := TIBXINPUTSQLDA.Create(self);
   FSQLRecord := TIBXOUTPUTSQLDA.Create(self);
   InternalPrepare;
@@ -1193,7 +1209,7 @@ begin
   if FEOF then
     IBError(ibxeEOF,[nil]);
 
-  with Firebird25ClientAPI do
+  with FFirebird25ClientAPI do
   begin
     { Go to the next record... }
     fetch_res :=
@@ -1256,7 +1272,7 @@ begin
     result := ''
   else
   begin
-    RB := TSQLInfoResultsBuffer.Create(4*4096);
+    RB := TSQLInfoResultsBuffer.Create(FFirebird25ClientAPI,4*4096);
     GetDsqlInfo(isc_info_sql_get_plan,RB);
      if RB.Count > 0 then
      Result := RB[0].GetAsString;

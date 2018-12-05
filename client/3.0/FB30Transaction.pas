@@ -47,10 +47,12 @@ type
   TFB30Transaction = class(TFBTransaction,ITransaction, IActivityMonitor)
   private
     FTransactionIntf: Firebird.ITransaction;
+    FFirebird30ClientAPI: TFB30ClientAPI;
     procedure StartMultiple;
     procedure FreeHandle;
   protected
     function GetActivityIntf(att: IAttachment): IActivityMonitor; override;
+    procedure SetInterface(api: TFBClientAPI); override;
   public
     destructor Destroy; override;
     property TransactionIntf: Firebird.ITransaction read FTransactionIntf;
@@ -76,7 +78,7 @@ var Dtc: IDtc;
     DtcStart: IDtcStart;
     i: integer;
 begin
-  with Firebird30ClientAPI do
+  with FFirebird30ClientAPI do
   begin
     Dtc := MasterIntf.getDtc;
     DtcStart := Dtc.startBuilder(StatusIntf);
@@ -108,6 +110,12 @@ begin
   Result := att as TFB30Attachment;
 end;
 
+procedure TFB30Transaction.SetInterface(api: TFBClientAPI);
+begin
+  inherited SetInterface(api);
+  FFirebird30ClientAPI := api as TFB30ClientAPI;
+end;
+
 destructor TFB30Transaction.Destroy;
 begin
   inherited Destroy;
@@ -125,7 +133,7 @@ begin
     IBError(ibxeNotAMultiDatabaseTransaction,[nil]);
   if FTransactionIntf = nil then
     Exit;
-  with Firebird30ClientAPI do
+  with FFirebird30ClientAPI do
   begin
     FTransactionIntf.prepare(StatusIntf,0,nil);
     Check4DataBaseError;
@@ -137,7 +145,7 @@ procedure TFB30Transaction.Commit(Force: boolean);
 begin
   if FTransactionIntf = nil then
     Exit;
-  with Firebird30ClientAPI do
+  with FFirebird30ClientAPI do
   begin
     FTransactionIntf.commit(StatusIntf);
     if not Force and InErrorState then
@@ -151,7 +159,7 @@ procedure TFB30Transaction.CommitRetaining;
 begin
   if FTransactionIntf = nil then
     Exit;
-  with Firebird30ClientAPI do
+  with FFirebird30ClientAPI do
   begin
     FTransactionIntf.commitRetaining(StatusIntf);
     Check4DataBaseError;
@@ -163,11 +171,10 @@ procedure TFB30Transaction.Start(DefaultCompletion: TTransactionCompletion);
 begin
   if FTransactionIntf <> nil then
     Exit;
-
   FDefaultCompletion := DefaultCompletion;
 
   if Length(FAttachments) = 1 then
-    with Firebird30ClientAPI do
+    with FFirebird30ClientAPI do
     begin
       FTransactionIntf  := (FAttachments[0] as TFB30Attachment).AttachmentIntf.startTransaction(StatusIntf,
                (FTPB as TTPB).getDataLength,BytePtr((FTPB as TTPB).getBuffer));
@@ -183,7 +190,7 @@ procedure TFB30Transaction.Rollback(Force: boolean);
 begin
   if FTransactionIntf = nil then
     Exit;
-  with Firebird30ClientAPI do
+  with FFirebird30ClientAPI do
   begin
     FTransactionIntf.rollback(StatusIntf);
     if not Force and InErrorState then
@@ -197,7 +204,7 @@ procedure TFB30Transaction.RollbackRetaining;
 begin
   if FTransactionIntf = nil then
     Exit;
-  with Firebird30ClientAPI do
+  with FFirebird30ClientAPI do
   begin
     FTransactionIntf.rollbackRetaining(StatusIntf);
     Check4DataBaseError;

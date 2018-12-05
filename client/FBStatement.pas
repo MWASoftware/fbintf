@@ -52,6 +52,7 @@ type
   TFBStatement = class(TActivityReporter)
   private
     FAttachmentIntf: IAttachment;
+    FFirebirdClientAPI: TFBClientAPI;
   protected
     FTransactionIntf: ITransaction;
     FExecTransactionIntf: ITransaction;
@@ -78,6 +79,7 @@ type
     procedure InternalPrepare;  virtual; abstract;
     function InternalExecute(aTransaction: ITransaction): IResults;  virtual; abstract;
     function InternalOpenCursor(aTransaction: ITransaction): IResultSet;   virtual; abstract;
+    procedure ProcessSQL(sql: AnsiString; GenerateParamNames: boolean; var processedSQL: AnsiString); virtual; abstract;
     procedure FreeHandle;  virtual; abstract;
     procedure InternalClose(Force: boolean); virtual; abstract;
     function TimeStampToMSecs(const TimeStamp: TTimeStamp): Int64;
@@ -90,6 +92,7 @@ type
     procedure Close;
     procedure TransactionEnding(aTransaction: ITransaction; Force: boolean);
     property SQLDialect: integer read FSQLDialect;
+    property FirebirdClientAPI: TFBClientAPI read FFirebirdClientAPI;
 
   public
     function GetSQLParams: ISQLParams; virtual; abstract;
@@ -98,6 +101,7 @@ type
       DeleteCount: integer): boolean;
     function GetSQLStatementType: TIBSQLStatementTypes;
     function GetSQLText: AnsiString;
+    function GetProcessedSQLText: AnsiString;
     function GetSQLDialect: integer;
 
     {GetDSQLInfo only supports isc_info_sql_stmt_type, isc_info_sql_get_plan, isc_info_sql_records}
@@ -147,6 +151,7 @@ begin
   inherited Create(Transaction as TFBTransaction,2);
   FAttachmentIntf := Attachment;
   FTransactionIntf := Transaction;
+  FFirebirdClientAPI := Attachment.getFirebirdAPI as TFBClientAPI;
   FSQLDialect := SQLDialect;
   FSQL := sql;
 end;
@@ -228,6 +233,13 @@ begin
   Result := FSQL;
 end;
 
+function TFBStatement.GetProcessedSQLText: AnsiString;
+begin
+  if FProcessedSQL = '' then
+    ProcessSQL(FSQL,FGenerateParamNames,FProcessedSQL);
+  Result := FProcessedSQL
+end;
+
 function TFBStatement.GetSQLDialect: integer;
 begin
   Result := FSQLDialect;
@@ -306,7 +318,7 @@ end;
 
 function TFBStatement.GetDSQLInfo(Request: byte): ISQLInfoResults;
 begin
-  Result := TSQLInfoResultsBuffer.Create;
+  Result := TSQLInfoResultsBuffer.Create(FFirebirdClientAPI);
   GetDsqlInfo(Request,Result);
 end;
 

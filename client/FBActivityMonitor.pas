@@ -37,7 +37,7 @@ unit FBActivityMonitor;
 interface
 
 uses
-  Classes, SysUtils, IBExternals;
+  Classes, SysUtils, IBExternals, IB;
 
   { $DEFINE DEBUGINTERFACES}   {Define this to check that all interfaces are
                                 being destroyed.}
@@ -107,10 +107,13 @@ type
     interface, implemented through the helper object TTransactionMonitor.
   }
 
+  TOnDatabaseError = procedure of object;
+
   TActivityReporter = class(TInterfaceOwner)
   private
     FHasActivity: boolean;
     FMonitors: array of IActivityMonitor;
+    FOnDatabaseError: TOnDatabaseError;
     function FindMonitor(aMonitor: IActivityMonitor): integer;
   protected
     function Call(ErrCode: ISC_STATUS; RaiseError: Boolean = true): ISC_STATUS;
@@ -121,6 +124,7 @@ type
     destructor Destroy; override;
     function HasActivity: boolean;
     procedure SignalActivity;
+    property OnDatabaseError: TOnDatabaseError read FOnDatabaseError write FOnDatabaseError;
   end;
 
   { TActivityHandler is a base class for classes that receive activity reports.}
@@ -135,7 +139,7 @@ type
 
 implementation
 
-uses FB25ClientAPI;
+uses FBClientAPI;
 
 { TActivityHandler }
 
@@ -189,8 +193,8 @@ function TActivityReporter.Call(ErrCode: ISC_STATUS; RaiseError: Boolean): ISC_S
 begin
   result := ErrCode;
   SignalActivity;
-  if RaiseError and (ErrCode > 0) then
-    Firebird25ClientAPI.IBDataBaseError;
+  if RaiseError and (ErrCode > 0) and assigned(FOnDatabaseError) then
+    OnDatabaseError;
 end;
 
 procedure TActivityReporter.AddMonitor(aMonitor: IActivityMonitor);

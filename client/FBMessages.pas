@@ -253,7 +253,12 @@ type
       ibxeNoLimboTransactionInsert,
       ibxeDatabaseNotConnected,
       ibxeMultiThreadRequired,
-      ibxeODSVersionRequired
+      ibxeODSVersionRequired,
+      ibxeTokenQueueOverflow,
+      ibxeTokenQueueUnderflow,
+      ibxErrorParsing,
+      ibxeDLInfoError,
+      ibxeDifferentAPIs
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -463,6 +468,11 @@ resourcestring
   SMultiThreadRequired = 'Multi-threading required for %s but not enabled. Please recompile with multi-threading support enabled. '+
                          'Hint: you probably need to add -dUseCThreads to the Custom Options.';
   SODSVersionRequired = 'This feature requires ODS Version %s or later';
+  STokenQueueOverflow = 'Error in SQL Token Analyser - token queue overflow';
+  STokenQueueUnderflow = 'Error in SQL Token Analyser - token queue underflow';
+  SErrorParsing = 'Error parsing SQL Statement at clause starting with %s';
+  SDLInfoError = 'dlinfo returned error - %s';
+  SDifferentAPIs = 'All transaction attachments must use the same Firebird Library';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -638,7 +648,12 @@ const
     SNoLimboTransactionInsert,
     SDatabaseNotConnected,
     SMultiThreadRequired,
-    SODSVersionRequired
+    SODSVersionRequired,
+    STokenQueueOverflow,
+    STokenQueueUnderflow,
+    SErrorParsing,
+    SDLInfoError,
+    SDifferentAPIs
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;

@@ -18,6 +18,8 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 12
 DB ODS Minor Version = 0
 User Authentication Method = Srp
+Firebird Library Path = /usr/lib/libfbclient.so
+DB Client Implementation Version = 3.768
 DPB
 Count = 3
 28 = SYSDBA
@@ -33,6 +35,8 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 12
 DB ODS Minor Version = 0
 User Authentication Method = Srp
+Firebird Library Path = /usr/lib/libfbclient.so
+DB Client Implementation Version = 3.768
 Dropping Database
 DPB
 Count = 4
@@ -52,6 +56,8 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 12
 DB ODS Minor Version = 0
 User Authentication Method = Srp
+Firebird Library Path = /usr/lib/libfbclient.so
+DB Client Implementation Version = 3.768
 RDB$DESCRIPTION = 
 RDB$RELATION_ID = 128
 RDB$SECURITY_CLASS = SQL$363
@@ -312,15 +318,15 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory =  1.960269600000000000E+0007
-Delta memory =  2.616000000000000000E+0003
-Max memory =  1.966627200000000000E+0007
+Current memory = 19604216
+Delta memory = 4280
+Max memory = 19666136
 Elapsed time= 0.000 sec
 Cpu = 0.000 sec
-Buffers =  2.048000000000000000E+0003
-Reads =  0.000000000000000000E+0000
-Writes =  0.000000000000000000E+0000
-Fetches =  2.000000000000000000E+0000
+Buffers = 2048
+Reads = 0
+Writes = 0
+Fetches = 4
 Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
 Relation Name = EMPLOYEE
 Metadata
@@ -552,6 +558,20 @@ JOB_GRADE = 3
 JOB_COUNTRY = USA
 SALARY = 75,060.00
 FULL_NAME = Forest, Phil
+
+Test using Execute Block
+Select Count = 1 InsertCount = 0 UpdateCount = 1 DeleteCount = 0
+EMP_NO = 8
+FIRST_NAME = Leslie
+LAST_NAME = Johnson
+PHONE_EXT = 410
+HIRE_DATE = 31/1/2015 00:00:00.000
+DEPT_NO = 180
+JOB_CODE = Mktg
+JOB_GRADE = 3
+JOB_COUNTRY = USA
+SALARY = 64,635.00
+FULL_NAME = Johnson, Leslie
 
 
 
@@ -2248,14 +2268,14 @@ Database is Read/Write
 Database Created: 27/9/2016 12:08:46
 Pages Used = 297
 Pages Free = 10
-Server Memory = 19122232
+Server Memory = 19122464
 Forced Writes  = 1
-Max Memory  = 19235672
+Max Memory  = 19242808
 Num Buffers  = 2048
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
 Active Transaction Count = 0
-Fetches  = 546
+Fetches  = 552
 Writes  = 8
 Reads  = 54
 Page Writes  = 5
@@ -2275,7 +2295,7 @@ Count = 28
 Table ID = 6
 Count = 15
 Table ID = 9
-Count = 2
+Count = 3
 Table ID = 11
 Count = 1
 Table ID = 12
@@ -2302,18 +2322,18 @@ Async Wait Called
 Event Signalled
 First Event - usually ignored
 Signal Event
-Event Signalled
 Event Counts: TESTEVENT, Count = 1
 Two more events
 Call Async Wait
 Async Wait Called
 Event Signalled
+Event Signalled
 Deferred Events Caught
 Event Counts: TESTEVENT, Count = 2
 Signal Event
-Event Signalled
 Event Counts: TESTEVENT, Count = 1
 Async Wait: Test Cancel
+Event Signalled
 Async Wait Called
 Event Cancelled
 Time Out - Cancel Worked!
@@ -2337,6 +2357,12 @@ Databases In Use = 0
 
 Sec. Database User
 User Name = SYSDBA
+First Name = 
+Middle Name = 
+Last Name = 
+User ID = 0
+Group ID = 0
+User Name = ALICE
 First Name = 
 Middle Name = 
 Last Name = 
@@ -2573,8 +2599,7 @@ Invalid Param SQL Type Test
 Error Handled: Field "EMP_NO" not found
 Invalid Server Name Test
 Error Handled: Unable to complete network request to host "unknown".
-Failed to locate host machine.
-The specified name was not found in the hosts file or Domain Name Services
+Failed to establish a connection
 Invalid User Name Test
 Error Handled: Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Invalid password Test

@@ -48,11 +48,13 @@ type
   TFB30ServiceManager = class(TFBServiceManager,IServiceManager)
   private
     FServiceIntf: Firebird.IService;
+    FFirebird30ClientAPI: TFB30ClientAPI;
     procedure CheckActive;
     procedure CheckInactive;
   protected
     procedure InternalAttach(ConnectString: AnsiString); override;
   public
+    constructor Create(api: TFB30ClientAPI; ServerName: AnsiString; Protocol: TProtocol; SPB: ISPB; Port: AnsiString = '');
     property ServiceIntf: Firebird.IService read FServiceIntf;
 
   public
@@ -83,7 +85,7 @@ end;
 
 procedure TFB30ServiceManager.InternalAttach(ConnectString: AnsiString);
 begin
-  with Firebird30ClientAPI do
+  with FFirebird30ClientAPI do
   if FSPB = nil then
   begin
     FServiceIntf := ProviderIntf.attachServiceManager(StatusIntf, PAnsiChar(ConnectString), 0, nil);
@@ -99,11 +101,18 @@ begin
   end;
 end;
 
+constructor TFB30ServiceManager.Create(api: TFB30ClientAPI;
+  ServerName: AnsiString; Protocol: TProtocol; SPB: ISPB; Port: AnsiString);
+begin
+  FFirebird30ClientAPI := api;
+  inherited Create(api,ServerName, Protocol, SPB, Port);
+end;
+
 procedure TFB30ServiceManager.Detach(Force: boolean);
 begin
   if FServiceIntf = nil then
     Exit;
-  with Firebird30ClientAPI do
+  with FFirebird30ClientAPI do
   begin
     FServiceIntf.detach(StatusIntf);
     if not Force and InErrorState then
@@ -122,7 +131,7 @@ function TFB30ServiceManager.Start(Request: ISRB; RaiseExceptionOnError: boolean
 begin
   Result := true;
   CheckActive;
-  with Firebird30ClientAPI do
+  with FFirebird30ClientAPI do
     begin
       FServiceIntf.Start(StatusIntf,
                            (Request as TSRB).getDataLength,
@@ -139,9 +148,9 @@ function TFB30ServiceManager.Query(SQPB: ISQPB; Request: ISRB;
 var QueryResults: TServiceQueryResults;
 begin
   CheckActive;
-  QueryResults := TServiceQueryResults.Create;
+  QueryResults := TServiceQueryResults.Create(FFirebird30ClientAPI);
   Result := QueryResults;
-  with Firebird30ClientAPI do
+  with FFirebird30ClientAPI do
   begin
     if SQPB <> nil then
     begin

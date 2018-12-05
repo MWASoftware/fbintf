@@ -73,6 +73,7 @@ type
     FBuffer: PByte;
     FBufSize: integer;
     FBufferParsed: boolean;
+    FFirebirdClientAPI: TFBClientAPI;
     procedure ParseBuffer;
     {$IFDEF DEBUGOUTPUTBLOCK}
     procedure FormattedPrint(const aItems: array of POutputBlockItemData;
@@ -96,7 +97,7 @@ type
     function AddDateTimeItem(BufPtr: PByte): POutputBlockItemData;
     function AddOctetString(BufPtr: PByte): POutputBlockItemData;
   public
-    constructor Create(aSize: integer = DefaultBufferSize);
+    constructor Create(api: TFBClientAPI; aSize: integer = DefaultBufferSize);
     destructor Destroy; override;
     function Buffer: PByte;
     function getBufSize: integer;
@@ -116,6 +117,7 @@ type
     FOwner: TOutputBlock;
     FOwnerIntf: IUnknown;
     FItemData: POutputBlockItemData;
+    FFirebirdClientAPI: TFBClientAPI;
   protected
     function GetItem(index: integer): POutputBlockItemData;
     function Find(ItemType: byte): POutputBlockItemData;
@@ -191,7 +193,7 @@ type
     function AddSpecialItem(BufPtr: PByte): POutputBlockItemData; override;
     procedure DoParseBuffer; override;
   public
-    constructor Create(aSize: integer=DBInfoDefaultBufferSize);
+    constructor Create(api: TFBClientAPI; aSize: integer = DefaultBufferSize);
   {$IFNDEF FPC}
     function Find(ItemType: byte): IDBInfoItem;
   {$ENDIF}
@@ -259,7 +261,7 @@ type
     function AddListItem(BufPtr: PByte): POutputBlockItemData; override;
     procedure DoParseBuffer; override;
   public
-    constructor Create(aSize: integer = 1024);
+    constructor Create(api: TFBClientAPI; aSize: integer= DefaultBufferSize);
   end;
 
   IBlobInfoItem = interface
@@ -295,7 +297,7 @@ type
   protected
     procedure DoParseBuffer; override;
   public
-    constructor Create(aSize: integer=DBInfoDefaultBufferSize);
+    constructor Create(api: TFBClientAPI; aSize: integer = DefaultBufferSize);
   end;
 
 implementation
@@ -409,7 +411,7 @@ begin
   if (index >= 0) and (index < Length(FItemData^.FSubItems)) then
     Result := FItemData^.FSubItems[index]
   else
-  with FirebirdClientAPI do
+  with FFirebirdClientAPI do
     IBError(ibxeOutputBlockIndexError,[index]);
 end;
 
@@ -450,6 +452,7 @@ begin
   inherited Create;
   FOwner := AOwner;
   FOwnerIntf := AOwner;
+  FFirebirdClientAPI := AOwner.FFirebirdClientAPI;
   FItemData := Data;
 end;
 
@@ -478,12 +481,12 @@ begin
   with FItemData^ do
   case FDataType of
   dtIntegerFixed:
-    with FirebirdClientAPI do
+    with FFirebirdClientAPI do
       Result := DecodeInteger(FBufPtr+1,4);
 
   dtByte,
   dtInteger:
-    with FirebirdClientAPI do
+    with FFirebirdClientAPI do
     begin
       len := DecodeInteger(FBufPtr+1,2);
       Result := DecodeInteger(FBufPtr+3,len);
@@ -516,13 +519,13 @@ begin
     end;
   dtString2:
     begin
-      with FirebirdClientAPI do
+      with FFirebirdClientAPI do
         len := DecodeInteger(FBufPtr+1,2);
       SetString(Result,FBufPtr+3,len,CP_ACP);
     end;
   dtOctetString:
     begin
-      with FirebirdClientAPI do
+      with FFirebirdClientAPI do
         len := DecodeInteger(FBufPtr+1,2);
       SetString(Result,FBufPtr+3,len,CP_NONE);
     end;
@@ -563,7 +566,7 @@ function TOutputBlockItem.getAsDateTime: TDateTime;
 var aDate: integer;
     aTime: integer;
 begin
-  with FItemData^, FirebirdClientAPI do
+  with FItemData^, FFirebirdClientAPI do
   if FDataType = dtDateTime then
   begin
     aDate := DecodeInteger(FBufPtr+3,4);
@@ -590,7 +593,7 @@ begin
       end;
     dtString2:
       begin
-        with FirebirdClientAPI do
+        with FFirebirdClientAPI do
           len := DecodeInteger(FBufPtr+1,2);
         if (count > 0) and (count < len) then len := count;
         Result := stream.Write((FBufPtr+3)^,len);
@@ -647,7 +650,7 @@ begin
     end
     else
     begin
-      with FirebirdClientAPI do
+      with FFirebirdClientAPI do
         FDataLength := DecodeInteger(FBufPtr+1, 2);
       FSize := FDataLength + 3;
     end;
@@ -662,7 +665,7 @@ begin
   begin
     FDataType := dtString2;
     FBufPtr := BufPtr;
-    with FirebirdClientAPI do
+    with FFirebirdClientAPI do
       FDataLength := DecodeInteger(FBufPtr+1, 2);
     FSize := FDataLength + 3;
     SetLength(FSubItems,0);
@@ -702,7 +705,7 @@ begin
   begin
     FDataType := dtBytes;
     FBufPtr := BufPtr;
-    with FirebirdClientAPI do
+    with FFirebirdClientAPI do
       FDataLength := DecodeInteger(FBufPtr+1, 2);
     FSize := FDataLength + 3;
     SetLength(FSubItems,0);
@@ -742,7 +745,7 @@ begin
   begin
     FDataType := dtDateTime;
     FBufPtr := BufPtr;
-    with FirebirdClientAPI do
+    with FFirebirdClientAPI do
       FDataLength := DecodeInteger(FBufPtr+1, 2);
     FSize := FDataLength + 3;
     SetLength(FSubItems,0);
@@ -756,16 +759,17 @@ begin
   begin
     FDataType := dtOctetString;
     FBufPtr := BufPtr;
-    with FirebirdClientAPI do
+    with FFirebirdClientAPI do
       FDataLength := DecodeInteger(FBufPtr+1, 2);
     FSize := FDataLength + 3;
     SetLength(FSubItems,0);
   end;
 end;
 
-constructor TOutputBlock.Create(aSize: integer);
+constructor TOutputBlock.Create(api: TFBClientAPI; aSize: integer);
 begin
   inherited Create;
+  FFirebirdClientAPI := api;
   FBufSize := aSize;
   GetMem(FBuffer,aSize);
   if FBuffer = nil then
@@ -965,7 +969,7 @@ begin
     SetLength(Result,TableCounts);
     P := FBufPtr + 3;
     for i := 0 to TableCounts -1 do
-    with FirebirdClientAPI do
+    with FFirebirdClientAPI do
     begin
       Result[i].TableID := DecodeInteger(P,2);
       Inc(P,2);
@@ -984,7 +988,7 @@ begin
   Result := inherited AddSpecialItem(BufPtr);
   with Result^ do
   begin
-    with FirebirdClientAPI do
+    with FFirebirdClientAPI do
       FDataLength := DecodeInteger(FBufPtr+1,2);
     FSize := FDataLength + 3;
   end;
@@ -1066,9 +1070,9 @@ begin
 end;
 {$ENDIF}
 
-constructor TDBInformation.Create(aSize: integer);
+constructor TDBInformation.Create(api: TFBClientAPI; aSize: integer);
 begin
-  inherited Create(aSize);
+  inherited Create(api,aSize);
   FIntegerType := dtInteger;
 end;
 
@@ -1085,7 +1089,7 @@ begin
   group := byte(BufPtr^);
   if group in [isc_info_svc_get_users,isc_info_svc_limbo_trans] then
   begin
-    with FirebirdClientAPI do
+    with FFirebirdClientAPI do
        Result^.FSize := DecodeInteger(P,2) + 3;
     Inc(P,2);
   end;
@@ -1180,7 +1184,7 @@ begin
   Result := inherited AddSpecialItem(BufPtr);
   with Result^ do
   begin
-    with FirebirdClientAPI do
+    with FFirebirdClientAPI do
       FDataLength := DecodeInteger(FBufPtr+1, 2);
 
     P := FBufPtr + 3; {skip length bytes}
@@ -1266,7 +1270,7 @@ begin
 
   if byte(BufPtr^) = isc_info_sql_records then
   begin
-    with FirebirdClientAPI do
+    with FFirebirdClientAPI do
       Result^.FSize := DecodeInteger(P,2) + 3;
     Inc(P,2);
     with Result^ do
@@ -1342,9 +1346,9 @@ begin
   end;
 end;
 
-constructor TSQLInfoResultsBuffer.Create(aSize: integer);
+constructor TSQLInfoResultsBuffer.Create(api: TFBClientAPI; aSize: integer);
 begin
-  inherited Create(aSize);
+  inherited Create(api,aSize);
   FIntegerType := dtInteger;
 end;
 
@@ -1374,9 +1378,9 @@ begin
   end;
 end;
 
-constructor TBlobInfo.Create(aSize: integer);
+constructor TBlobInfo.Create(api: TFBClientAPI; aSize: integer);
 begin
-  inherited Create(aSize);
+  inherited Create(api,aSize);
   FIntegerType := dtInteger;
 end;
 

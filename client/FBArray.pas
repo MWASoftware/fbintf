@@ -138,6 +138,7 @@ type
 
   TFBArray = class(TActivityReporter,IArray)
   private
+    FFirebirdClientAPI: TFBClientAPI;
     FMetaData: IArrayMetaData;
     FIsNew: boolean;
     FLoaded: boolean;
@@ -274,7 +275,7 @@ end;
 
 constructor TFBArrayElement.Create(anArray: TFBArray; P: PByte);
 begin
-  inherited Create;
+  inherited Create(anArray.FFirebirdClientAPI);
   FArray := anArray;
   FBufPtr := P;
 end;
@@ -656,7 +657,7 @@ begin
     end;
     FBufSize := FElementSize * l;
 
-    with FirebirdClientAPI do
+    with FFirebirdClientAPI do
       IBAlloc(FBuffer,0,FBufSize);
 
     Dims := GetDimensions;
@@ -745,6 +746,7 @@ begin
   inherited Create(aTransaction);
   FMetaData := aField;
   FAttachment := aAttachment;
+  FFirebirdClientAPI := aTransaction.FirebirdAPI;
   FTransactionIntf :=  aTransaction;
   FTransactionSeqNo := aTransaction.TransactionSeqNo;
   FIsNew := true;

@@ -106,6 +106,7 @@ type
     FDBHandle: TISC_DB_HANDLE;
     FEventHandlerThread: TObject;
     FAsyncEventCallback: TEventhandlerInterface;
+    FFirebird25ClientAPI: TFB25ClientAPI;
   protected
     procedure CancelEvents(Force: boolean = false); override;
     function GetIEvents: IEvents; override;
@@ -260,7 +261,7 @@ begin
   FCriticalSection.Enter;
   try
     if not FInWaitState then Exit;
-    with Firebird25ClientAPI do
+    with FFirebird25ClientAPI do
       if (Call(isc_Cancel_events( StatusVector, @FDBHandle, @FEventID),false) > 0) and not Force then
         IBDatabaseError;
 
@@ -280,6 +281,8 @@ constructor TFB25Events.Create(DBAttachment: TFB25Attachment; Events: TStrings);
 begin
   inherited Create(DBAttachment,DBAttachment,Events);
   FDBHandle := DBAttachment.Handle;
+  FFirebird25ClientAPI := DBAttachment.Firebird25ClientAPI;
+  OnDatabaseError := FFirebird25ClientAPI.IBDataBaseError;
   FAsyncEventCallback := TEventhandlerInterface.Create(self);
   FEventHandlerThread := TEventHandlerThread.Create(self,FAsyncEventCallback);
 end;
@@ -304,7 +307,7 @@ begin
 
     FEventHandler := EventHandler;
     callback := @IBEventCallback;
-    with Firebird25ClientAPI do
+    with FFirebird25ClientAPI do
       Call(isc_que_events( StatusVector, @FDBHandle, @FEventID, FEventBufferLen,
                      FEventBuffer, TISC_CALLBACK(callback), PVoid(FAsyncEventCallback)));
     FInWaitState := true;
@@ -320,7 +323,7 @@ begin
 
   FInWaitState := true;
   try
-    with Firebird25ClientAPI do
+    with FFirebird25ClientAPI do
        Call(isc_wait_for_event(StatusVector,@FDBHandle, FEventBufferlen,FEventBuffer,FResultBuffer));
   finally
     FInWaitState := false;

@@ -76,28 +76,20 @@ unit FBSQLData;
   methods are needed for SQL parameters only. The string getters and setters
   are virtual as SQLVar and Array encodings of string data is different.}
 
-{ $define ALLOWDIALECT3PARAMNAMES}
-
-{$ifndef ALLOWDIALECT3PARAMNAMES}
-
-{ Note on SQL Dialects and SQL Parameter Names
+{ Note on SQL Parameter Names
   --------------------------------------------
 
-  Even when dialect 3 quoted format parameter names are not supported, IBX still processes
-  parameter names case insensitive. This does result in some additional overhead
-  due to a call to "AnsiUpperCase". This can be avoided by undefining
+  IBX processes parameter names case insensitive. This does result in some additional
+  overhead due to a call to "AnsiUpperCase". This can be avoided by undefining
   "UseCaseInSensitiveParamName" below.
 
-  Note: do not define "UseCaseSensitiveParamName" when "ALLOWDIALECT3PARAMNAMES"
-  is defined. This will not give a useful result.
 }
 {$define UseCaseInSensitiveParamName}
-{$endif}
 
 interface
 
 uses
-  Classes, SysUtils, IBExternals, IBHeader, IB,  FBActivityMonitor;
+  Classes, SysUtils, IBExternals, IBHeader, IB,  FBActivityMonitor, FBClientAPI;
 
 type
 
@@ -105,6 +97,7 @@ type
 
   TSQLDataItem = class(TFBInterfacedObject)
   private
+     FFirebirdClientAPI: TFBClientAPI;
      function AdjustScale(Value: Int64; aScale: Integer): Double;
      function AdjustScaleToInt64(Value: Int64; aScale: Integer): Int64;
      function AdjustScaleToCurrency(Value: Int64; aScale: Integer): Currency;
@@ -128,6 +121,7 @@ type
      property DataLength: cardinal read GetDataLength write SetDataLength;
 
   public
+     constructor Create(api: TFBClientAPI);
      function GetSQLType: cardinal; virtual; abstract;
      function GetSQLTypeName: AnsiString; overload;
      class function GetSQLTypeName(SQLType: short): AnsiString; overload;
@@ -145,7 +139,7 @@ type
      function GetAsShort: short;
      function GetAsString: AnsiString; virtual;
      function GetIsNull: Boolean; virtual;
-     function getIsNullable: boolean; virtual;
+     function GetIsNullable: boolean; virtual;
      function GetAsVariant: Variant;
      function GetModified: boolean; virtual;
      procedure SetAsBoolean(AValue: boolean); virtual;
@@ -456,7 +450,104 @@ type
 
 implementation
 
-uses FBMessages, FBClientAPI, variants, IBUtils, FBTransaction;
+uses FBMessages, variants, IBUtils, FBTransaction;
+
+type
+
+   { TSQLParamProcessor }
+
+   TSQLParamProcessor = class(TSQLwithNamedParamsTokeniser)
+   private
+   const
+     sIBXParam = 'IBXParam';  {do not localize}
+   private
+     FInString: AnsiString;
+     FIndex: integer;
+     function DoExecute(GenerateParamNames: boolean;
+       var slNames: TStrings): AnsiString;
+   protected
+     function GetChar: AnsiChar; override;
+   public
+     class function Execute(sSQL: AnsiString; GenerateParamNames: boolean;
+       var slNames: TStrings): AnsiString;
+   end;
+
+{ TSQLParamProcessor }
+
+function TSQLParamProcessor.DoExecute(GenerateParamNames: boolean;
+  var slNames: TStrings): AnsiString;
+var token: TSQLTokens;
+    iParamSuffix: Integer;
+begin
+  Result := '';
+  iParamSuffix := 0;
+
+  while not EOF do
+  begin
+    token := GetNextToken;
+    case token of
+    sqltParam,
+    sqltQuotedParam:
+      begin
+        Result := Result + '?';
+        slNames.Add(TokenText);
+      end;
+
+    sqltPlaceHolder:
+      if GenerateParamNames then
+      begin
+        Inc(iParamSuffix);
+        slNames.AddObject(sIBXParam + IntToStr(iParamSuffix),self); //Note local convention
+                                            //add pointer to self to mark entry
+        Result := Result + '?';
+      end
+      else
+        IBError(ibxeSQLParseError, [SParamNameExpected]);
+
+    sqltQuotedString:
+      Result := Result + '''' + SQLSafeString(TokenText) + '''';
+
+    sqltIdentifierInDoubleQuotes:
+      Result := Result + '"' + StringReplace(TokenText,'"','""',[rfReplaceAll]) + '"';
+
+    sqltComment:
+      Result := Result + '/*' + TokenText + '*/';
+
+    sqltCommentLine:
+      Result := Result + '//' + TokenText + LineEnding;
+
+    sqltEOL:
+      Result := Result + LineEnding;
+
+    else
+      Result := Result + TokenText;
+    end;
+  end;
+end;
+
+function TSQLParamProcessor.GetChar: AnsiChar;
+begin
+  if FIndex <= Length(FInString) then
+  begin
+    Result := FInString[FIndex];
+    Inc(FIndex);
+  end
+  else
+    Result := #0;
+end;
+
+class function TSQLParamProcessor.Execute(sSQL: AnsiString;
+  GenerateParamNames: boolean; var slNames: TStrings): AnsiString;
+begin
+  with self.Create do
+  try
+    FInString := sSQL;
+    FIndex := 1;
+    Result := DoExecute(GenerateParamNames,slNames);
+  finally
+    Free;
+  end;
+end;
 
 
 { TSQLDataArea }
@@ -510,186 +601,14 @@ end;
 
 procedure TSQLDataArea.PreprocessSQL(sSQL: AnsiString; GenerateParamNames: boolean;
   var sProcessedSQL: AnsiString);
-var
-  cCurChar, cNextChar, cQuoteChar: AnsiChar;
-  sParamName: AnsiString;
-  j, i, iLenSQL, iSQLPos: Integer;
-  iCurState {$ifdef ALLOWDIALECT3PARAMNAMES}, iCurParamState {$endif}: Integer;
-  iParamSuffix: Integer;
-  slNames: TStrings;
-  StrBuffer: PByte;
-  found: boolean;
 
-const
-  DefaultState = 0;
-  CommentState = 1;
-  QuoteState = 2;
-  ParamState = 3;
-  ArrayDimState = 4;
- {$ifdef ALLOWDIALECT3PARAMNAMES}
-  ParamDefaultState = 0;
-  ParamQuoteState = 1;
-  {$endif}
+var slNames: TStrings;
 
-  procedure AddToProcessedSQL(cChar: AnsiChar);
+  procedure SetColumnNames(slNames: TStrings);
+  var i, j: integer;
+      found: boolean;
   begin
-    StrBuffer[iSQLPos] := byte(cChar);
-    Inc(iSQLPos);
-  end;
-
-begin
-  if not IsInputDataArea then
-    IBError(ibxeNotPermitted,[nil]);
-
-  sParamName := '';
-  iLenSQL := Length(sSQL);
-  GetMem(StrBuffer,iLenSQL + 1);
-  slNames := TStringList.Create;
-  try
-    { Do some initializations of variables }
-    iParamSuffix := 0;
-    cQuoteChar := '''';
-    i := 1;
-    iSQLPos := 0;
-    iCurState := DefaultState;
-    {$ifdef ALLOWDIALECT3PARAMNAMES}
-    iCurParamState := ParamDefaultState;
-    {$endif}
-    { Now, traverse through the SQL string, character by character,
-     picking out the parameters and formatting correctly for InterBase }
-    while (i <= iLenSQL) do begin
-      { Get the current token and a look-ahead }
-      cCurChar := sSQL[i];
-      if i = iLenSQL then
-        cNextChar := #0
-      else
-        cNextChar := sSQL[i + 1];
-      { Now act based on the current state }
-      case iCurState of
-        DefaultState:
-        begin
-          case cCurChar of
-            '''', '"':
-            begin
-              cQuoteChar := cCurChar;
-              iCurState := QuoteState;
-            end;
-            '?', ':':
-            begin
-              iCurState := ParamState;
-              AddToProcessedSQL('?');
-            end;
-            '/': if (cNextChar = '*') then
-            begin
-              AddToProcessedSQL(cCurChar);
-              Inc(i);
-              iCurState := CommentState;
-            end;
-            '[':
-            begin
-              AddToProcessedSQL(cCurChar);
-              Inc(i);
-              iCurState := ArrayDimState;
-            end;
-          end;
-        end;
-
-        ArrayDimState:
-        begin
-          case cCurChar of
-          ':',',','0'..'9',' ',#9,#10,#13:
-            begin
-              AddToProcessedSQL(cCurChar);
-              Inc(i);
-            end;
-          else
-            begin
-              AddToProcessedSQL(cCurChar);
-              Inc(i);
-              iCurState := DefaultState;
-            end;
-          end;
-        end;
-
-        CommentState:
-        begin
-          if (cNextChar = #0) then
-            IBError(ibxeSQLParseError, [SEOFInComment])
-          else if (cCurChar = '*') then begin
-            if (cNextChar = '/') then
-              iCurState := DefaultState;
-          end;
-        end;
-        QuoteState: begin
-          if cNextChar = #0 then
-            IBError(ibxeSQLParseError, [SEOFInString])
-          else if (cCurChar = cQuoteChar) then begin
-            if (cNextChar = cQuoteChar) then begin
-              AddToProcessedSQL(cCurChar);
-              Inc(i);
-            end else
-              iCurState := DefaultState;
-          end;
-        end;
-        ParamState:
-        begin
-          { collect the name of the parameter }
-          {$ifdef ALLOWDIALECT3PARAMNAMES}
-          if iCurParamState = ParamDefaultState then
-          begin
-            if cCurChar = '"' then
-              iCurParamState := ParamQuoteState
-            else
-            {$endif}
-            if (cCurChar in ['A'..'Z', 'a'..'z', '0'..'9', '_', '$']) then
-                sParamName := sParamName + cCurChar
-            else if GenerateParamNames then
-            begin
-              sParamName := 'IBXParam' + IntToStr(iParamSuffix); {do not localize}
-              Inc(iParamSuffix);
-              iCurState := DefaultState;
-              slNames.AddObject(sParamName,self); //Note local convention
-                                                  //add pointer to self to mark entry
-              sParamName := '';
-            end
-            else
-              IBError(ibxeSQLParseError, [SParamNameExpected]);
-          {$ifdef ALLOWDIALECT3PARAMNAMES}
-          end
-          else begin
-            { determine if Quoted parameter name is finished }
-            if cCurChar = '"' then
-            begin
-              Inc(i);
-              slNames.Add(sParamName);
-              SParamName := '';
-              iCurParamState := ParamDefaultState;
-              iCurState := DefaultState;
-            end
-            else
-              sParamName := sParamName + cCurChar
-          end;
-          {$endif}
-          { determine if the unquoted parameter name is finished }
-          if {$ifdef ALLOWDIALECT3PARAMNAMES}(iCurParamState <> ParamQuoteState) and {$endif}
-            (iCurState <> DefaultState) then
-          begin
-            if not (cNextChar in ['A'..'Z', 'a'..'z',
-                                  '0'..'9', '_', '$']) then begin
-              Inc(i);
-              iCurState := DefaultState;
-              slNames.Add(sParamName);
-              sParamName := '';
-            end;
-          end;
-        end;
-      end;
-      if (iCurState <> ParamState) and (i <= iLenSQL) then
-        AddToProcessedSQL(sSQL[i]);
-      Inc(i);
-    end;
-    AddToProcessedSQL(#0);
-    sProcessedSQL := strpas(PAnsiChar(StrBuffer));
+    found := false;
     SetCount(slNames.Count);
     for i := 0 to slNames.Count - 1 do
     begin
@@ -710,9 +629,18 @@ begin
         Column[i].UniqueName := not found;
       end;
     end;
+  end;
+
+begin
+  if not IsInputDataArea then
+    IBError(ibxeNotPermitted,[nil]);
+
+  slNames := TStringList.Create;
+  try
+    sProcessedSQL := TSQLParamProcessor.Execute(sSQL,GenerateParamNames,slNames);
+    SetColumnNames(slNames);
   finally
     slNames.Free;
-    FreeMem(StrBuffer);
   end;
 end;
 
@@ -1046,6 +974,12 @@ begin
    //Do nothing by default
 end;
 
+constructor TSQLDataItem.Create(api: TFBClientAPI);
+begin
+  inherited Create;
+  FFirebirdClientAPI := api;
+end;
+
 function TSQLDataItem.GetSQLTypeName: AnsiString;
 begin
   Result := GetSQLTypeName(GetSQLType);
@@ -1152,7 +1086,7 @@ begin
   CheckActive;
   result := 0;
   if not IsNull then
-    with FirebirdClientAPI do
+    with FFirebirdClientAPI do
     case SQLType of
       SQL_TEXT, SQL_VARYING: begin
         try
@@ -1292,7 +1226,7 @@ begin
   result := '';
   { Check null, if so return a default string }
   if not IsNull then
-  with FirebirdClientAPI do
+  with FFirebirdClientAPI do
     case SQLType of
       SQL_BOOLEAN:
         if AsBoolean then
@@ -1471,7 +1405,7 @@ begin
 
   SQLType := SQL_TYPE_DATE;
   DataLength := SizeOf(ISC_DATE);
-  with FirebirdClientAPI do
+  with FFirebirdClientAPI do
     SQLEncodeDate(Value,SQLData);
   Changed;
 end;
@@ -1491,7 +1425,7 @@ begin
 
   SQLType := SQL_TYPE_TIME;
   DataLength := SizeOf(ISC_TIME);
-  with FirebirdClientAPI do
+  with FFirebirdClientAPI do
     SQLEncodeTime(Value,SQLData);
   Changed;
 end;
@@ -1505,7 +1439,7 @@ begin
   Changing;
   SQLType := SQL_TIMESTAMP;
   DataLength := SizeOf(ISC_TIME) + sizeof(ISC_DATE);
-  with FirebirdClientAPI do
+  with FFirebirdClientAPI do
     SQLEncodeDateTime(Value,SQLData);
   Changed;
 end;
@@ -1691,7 +1625,7 @@ end;
 
 constructor TColumnMetaData.Create(aOwner: IUnknown; aIBXSQLVAR: TSQLVarData);
 begin
-  inherited Create;
+  inherited Create(aIBXSQLVAR.GetStatement.GetAttachment.getFirebirdAPI as TFBClientAPI);
   FIBXSQLVAR := aIBXSQLVAR;
   FOwner := aOwner;
   FPrepareSeqNo := FIBXSQLVAR.Parent.PrepareSeqNo;

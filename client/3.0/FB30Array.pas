@@ -39,7 +39,7 @@ interface
 
 uses
   Classes, SysUtils, Firebird, IB, FBArray, IBHeader, FB30Attachment, FBClientAPI,
-  FB30Transaction, FBParamBlock;
+  FB30Transaction, FBParamBlock, FB30ClientAPI;
 
 type
 
@@ -74,6 +74,7 @@ type
   private
     FAttachmentIntf: Firebird.IAttachment;
     FTransactionIntf: Firebird.ITransaction;
+    FFirebird30ClientAPI: TFB30ClientAPI;
     FSDL: ISDL;
   protected
     procedure AllocateBuffer; override;
@@ -90,12 +91,12 @@ type
 
   TSDLBlock = class (TCustomParamBlock<TSDLItem,ISDLItem>, ISDL)
   public
-    constructor Create;
+    constructor Create(api: TFBClientAPI);
   end;
 
 implementation
 
-uses FBAttachment, FB30ClientAPI, FB30Statement;
+uses FBAttachment, FB30Statement;
 
 const
   sGetArrayMetaData = 'Select F.RDB$FIELD_LENGTH, F.RDB$FIELD_SCALE, F.RDB$FIELD_TYPE, '+
@@ -125,6 +126,7 @@ procedure TFB30ArrayMetaData.LoadMetaData(aAttachment: IAttachment;
 var stmt: IStatement;
     CharWidth: integer;
 begin
+  CharWidth := 0;
   RelationName := AnsiUpperCase(RelationName);
   ColumnName := AnsiUpperCase(ColumnName);
   stmt := TFB30Statement.Create(aAttachment as TFB30Attachment,aTransaction,
@@ -201,7 +203,7 @@ begin
   inherited AllocateBuffer;
   {Now set up the SDL}
 
-  FSDL := TSDLBlock.Create;
+  FSDL := TSDLBlock.Create(FFirebird30ClientAPI);
   with GetArrayDesc^ do
   {The following is based on gen_SDL from Firebird src/dsql/array.cpp}
   begin
@@ -248,7 +250,7 @@ end;
 
 procedure TFB30Array.InternalGetSlice;
 begin
-  with Firebird30ClientAPI do
+  with FFirebird30ClientAPI do
   begin
     FAttachmentIntf.getSlice(StatusIntf,FTransactionIntf,
                           @FArrayID,
@@ -264,7 +266,7 @@ end;
 
 procedure TFB30Array.InternalPutSlice(Force: boolean);
 begin
-  with Firebird30ClientAPI do
+  with FFirebird30ClientAPI do
   begin
     FAttachmentIntf.putSlice(StatusIntf,FTransactionIntf, @FArrayID,
                           (FSDL as TSDLBlock).getDataLength,
@@ -284,6 +286,7 @@ begin
   inherited Create(aAttachment,aTransaction,aField);
   FAttachmentIntf := aAttachment.AttachmentIntf;
   FTransactionIntf := aTransaction.TransactionIntf;
+  FFirebird30ClientAPI := aAttachment.Firebird30ClientAPI;
 end;
 
 constructor TFB30Array.Create(aAttachment: TFB30Attachment;
@@ -292,13 +295,14 @@ begin
   inherited Create(aAttachment,aTransaction,aField,ArrayID);
   FAttachmentIntf := aAttachment.AttachmentIntf;
   FTransactionIntf := aTransaction.TransactionIntf;
+  FFirebird30ClientAPI := aAttachment.Firebird30ClientAPI;
 end;
 
 { TSDLBlock }
 
-constructor TSDLBlock.Create;
+constructor TSDLBlock.Create(api: TFBClientAPI);
 begin
-  inherited Create;
+  inherited Create(api);
   FDataLength := 1;
   FBuffer^ := isc_sdl_version1;
 end;

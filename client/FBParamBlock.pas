@@ -63,6 +63,7 @@ type
   private
     FItems: array of PParamBlockItemData;
     FBufferSize: integer;
+    FFirebirdClientAPI: TFBClientAPI;
     procedure AdjustBuffer;
     procedure MoveBy(Item: PParamBlockItemData; delta: integer);
     procedure UpdateRequestItemSize(Item: TParamBlockItem; NewSize: integer);
@@ -73,7 +74,7 @@ type
     function Find(ParamType: byte): PParamBlockItemData;
     function GetItems(index: integer): PParamBlockItemData;
   public
-    constructor Create;
+    constructor Create(api: TFBClientAPI);
     destructor Destroy; override;
     function getBuffer: PByte;
     function getDataLength: integer;
@@ -92,6 +93,7 @@ type
      FOwner: TParamBlock;
      FOwnerIntf: IUnknown;
      FParamData: PParamBlockItemData;
+     FFirebirdClientAPI: TFBClientAPI;
   protected
     property ParamData: PParamBlockItemData read FParamData;
   public
@@ -194,21 +196,21 @@ type
 
   TDPB = class (TCustomParamBlock<TDPBItem,IDPBItem>, IDPB)
   public
-    constructor Create;
+    constructor Create(api: TFBClientAPI);
   end;
 
   { TTPB }
 
   TTPB = class (TCustomParamBlock<TTPBItem,ITPBItem>, ITPB)
   public
-    constructor Create;
+    constructor Create(api: TFBClientAPI);
   end;
 
   { TSPB }
 
   TSPB = class (TCustomParamBlock<TSPBItem,ISPBItem>, ISPB)
   public
-   constructor Create;
+   constructor Create(api: TFBClientAPI);
   end;
 
   { TSRB }
@@ -223,7 +225,7 @@ type
 
   TBPB = class (TCustomParamBlock<TBPBItem,IBPBItem>, IBPB)
   public
-   constructor Create;
+   constructor Create(api: TFBClientAPI);
   end;
 
   TDIRB = class (TCustomParamBlock<TDIRBItem,IDIRBItem>, IDIRB);
@@ -275,7 +277,7 @@ begin
     begin
       FOwner.UpdateRequestItemSize(self,count + 4);
       Result := source.Read((FBufPtr+3)^,count);
-      with FirebirdClientAPI do
+      with FFirebirdClientAPI do
         EncodeInteger(Result,2,FBufPtr+1);
       (FBufPtr+Result + 3)^ := isc_info_end;
       if Result <> count then
@@ -303,13 +305,14 @@ constructor TParamBlockItem.Create(AOwner: TParamBlock;
 begin
   inherited Create;
   FOwner := AOwner;
+  FFirebirdClientAPI := AOwner.FFirebirdClientAPI;
   FOwnerIntf := AOwner;
   FParamData := Data;
 end;
 
 function TParamBlockItem.getAsInteger: integer;
 begin
-  with FirebirdClientAPI, FParamData^ do
+  with FFirebirdClientAPI, FParamData^ do
   case FDataType of
   dtInteger:
     Result := DecodeInteger(FBufPtr+1,4);
@@ -354,7 +357,7 @@ begin
     end;
   dtString2:
     begin
-      with FirebirdClientAPI do
+      with FFirebirdClientAPI do
         len := DecodeInteger(FBufPtr+1,2);
       SetString(Result,PAnsiChar(FBufPtr+3),len);
     end;
@@ -399,7 +402,7 @@ begin
     P := FBufPtr + FBufLength;
     len := FBufLength + 2;
     FOwner.UpdateRequestItemSize(self,len);
-    with FirebirdClientAPI do
+    with FFirebirdClientAPI do
       EncodeInteger(aValue,2,P);
   end;
 end;
@@ -435,7 +438,7 @@ begin
   begin
     if FBufLength <> 5 then
       FOwner.UpdateRequestItemSize(self,5);
-    with FirebirdClientAPI do
+    with FFirebirdClientAPI do
       EncodeInteger(aValue,4,FBufPtr+1);
     FDataType := dtInteger;
   end;
@@ -450,7 +453,7 @@ begin
     if FBufLength <> 6 then
       FOwner.UpdateRequestItemSize(self,6);
     (FBufPtr+1)^ := $4;
-    with FirebirdClientAPI do
+    with FFirebirdClientAPI do
       EncodeInteger(aValue,4,FBufPtr+2);
     FDataType := dtInteger1;
   end;
@@ -464,7 +467,7 @@ begin
   begin
     if FBufLength <> 7 then
       FOwner.UpdateRequestItemSize(self,7);
-    with FirebirdClientAPI do
+    with FFirebirdClientAPI do
     begin
       EncodeInteger(4,2,FBufPtr+1); {Encode length as two bytes}
       EncodeInteger(aValue,4,FBufPtr+3);
@@ -479,7 +482,7 @@ begin
   begin
     if FBufLength <> 3 then
       FOwner.UpdateRequestItemSize(self,3);
-    with FirebirdClientAPI do
+    with FFirebirdClientAPI do
       EncodeInteger(aValue,2,FBufPtr+1);
     FDataType := dtShortInteger;
   end;
@@ -491,7 +494,7 @@ begin
   begin
     if FBufLength <> 2 then
       FOwner.UpdateRequestItemSize(self,2);
-    with FirebirdClientAPI do
+    with FFirebirdClientAPI do
       EncodeInteger(aValue,1,FBufPtr+1);
     FDataType := dtTinyInteger;
   end;
@@ -526,7 +529,7 @@ begin
     if len > 65535 then
       IBError(ibxStringTooLong,[aValue,65535]);
     FOwner.UpdateRequestItemSize(self,len + 3);
-    with FirebirdClientAPI do
+    with FFirebirdClientAPI do
       EncodeInteger(len,2,FBufPtr+1);
     if len > 0 then
       Move(aValue[1],(FBufPtr+3)^,len);
@@ -636,9 +639,10 @@ begin
   end;
 end;
 
-constructor TParamBlock.Create;
+constructor TParamBlock.Create(api: TFBClientAPI);
 begin
   inherited Create;
+  FFirebirdClientAPI := api;
   GetMem(FBuffer,128);
   if FBuffer = nil then
     OutOfMemoryError;
@@ -804,27 +808,27 @@ end;
 
 { TDPB }
 
-constructor TDPB.Create;
+constructor TDPB.Create(api: TFBClientAPI);
 begin
-  inherited Create;
+  inherited Create(api);
   FDataLength := 1;
   FBuffer^ := isc_dpb_version1;
 end;
 
 { TTPB }
 
-constructor TTPB.Create;
+constructor TTPB.Create(api: TFBClientAPI);
 begin
-  inherited Create;
+  inherited Create(api);
   FDataLength := 1;
   FBuffer^ := isc_tpb_version3;
 end;
 
 { TSPB }
 
-constructor TSPB.Create;
+constructor TSPB.Create(api: TFBClientAPI);
 begin
-  inherited Create;
+  inherited Create(api);
   FDataLength := 2;
   FBuffer^ := isc_spb_version;
   (FBuffer+1)^ := isc_spb_current_version;
@@ -832,9 +836,9 @@ end;
 
 { TBPB }
 
-constructor TBPB.Create;
+constructor TBPB.Create(api: TFBClientAPI);
 begin
-  inherited Create;
+  inherited Create(api);
   FDataLength := 1;
   FBuffer^ := isc_bpb_version1;
 end;

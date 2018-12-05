@@ -70,18 +70,18 @@ type
                              when this class is freed and last reference to IStatus
                              goes out of scope.}
     procedure CheckPlugins;
-  protected
-    {$IFDEF UNIX}
-    function GetFirebirdLibList: string; override;
-    {$ENDIF}
-   procedure LoadInterface; override;
   public
-    constructor Create;
+    constructor Create(aFBLibrary: TFBLibrary);
     destructor Destroy; override;
 
     function StatusIntf: Firebird.IStatus;
     procedure Check4DataBaseError;
     function InErrorState: boolean;
+    function LoadInterface: boolean; override;
+    function GetAPI: IFirebirdAPI; override;
+    {$IFDEF UNIX}
+    function GetFirebirdLibList: string; override;
+    {$ENDIF}
 
   public
     {IFirebirdAPI}
@@ -128,8 +128,6 @@ type
     property UtilIntf: Firebird.IUtil read FUtil;
     property ProviderIntf: Firebird.IProvider read FProvider;
   end;
-
-var Firebird30ClientAPI: TFB30ClientAPI;
 
 implementation
 
@@ -199,12 +197,12 @@ begin
 end;
 {$ENDIF}
 
-procedure TFB30ClientAPI.LoadInterface;
+function TFB30ClientAPI.LoadInterface: boolean;
 var
   fb_get_master_interface: Tfb_get_master_interface;
 begin
-  inherited LoadInterface;
-  fb_get_master_interface := GetProcAddress(IBLibrary, 'fb_get_master_interface'); {do not localize}
+  Result := inherited LoadInterface;
+  fb_get_master_interface := GetProcAddress(GetFBLibrary.GetHandle, 'fb_get_master_interface'); {do not localize}
   if assigned(fb_get_master_interface) then
   begin
     FMaster := fb_get_master_interface;
@@ -213,14 +211,19 @@ begin
     FConfigManager := FMaster.getConfigManager;
     CheckPlugins;
   end;
+  Result := Result and HasMasterIntf;
 end;
 
-constructor TFB30ClientAPI.Create;
+function TFB30ClientAPI.GetAPI: IFirebirdAPI;
 begin
-  inherited;
+  Result := self;
+end;
+
+constructor TFB30ClientAPI.Create(aFBLibrary: TFBLibrary);
+begin
+  inherited Create(aFBLibrary);
   FStatus := TFB30Status.Create(self);
   FStatusIntf := FStatus;
-  Firebird30ClientAPI := self;
 end;
 
 destructor TFB30ClientAPI.Destroy;
@@ -254,18 +257,18 @@ end;
 
 function TFB30ClientAPI.AllocateDPB: IDPB;
 begin
-  Result := TDPB.Create;
+  Result := TDPB.Create(self);
 end;
 
 function TFB30ClientAPI.AllocateTPB: ITPB;
 begin
-  Result := TTPB.Create;
+  Result := TTPB.Create(self);
 end;
 
 function TFB30ClientAPI.OpenDatabase(DatabaseName: AnsiString; DPB: IDPB;
   RaiseExceptionOnConnectError: boolean): IAttachment;
 begin
-  Result := TFB30Attachment.Create(DatabaseName, DPB, RaiseExceptionOnConnectError);
+  Result := TFB30Attachment.Create(self,DatabaseName, DPB, RaiseExceptionOnConnectError);
   if not Result.IsConnected then
     Result := nil;
 end;
@@ -273,7 +276,7 @@ end;
 function TFB30ClientAPI.CreateDatabase(DatabaseName: AnsiString; DPB: IDPB;
   RaiseExceptionOnError: boolean): IAttachment;
 begin
-  Result := TFB30Attachment.CreateDatabase(DatabaseName,DPB, RaiseExceptionOnError);
+  Result := TFB30Attachment.CreateDatabase(self,DatabaseName,DPB, RaiseExceptionOnError);
   if not Result.IsConnected then
     Result := nil;
 end;
@@ -281,7 +284,7 @@ end;
 function TFB30ClientAPI.CreateDatabase(sql: AnsiString; aSQLDialect: integer;
   RaiseExceptionOnError: boolean): IAttachment;
 begin
-  Result := TFB30Attachment.CreateDatabase(sql,aSQLDialect, RaiseExceptionOnError);
+  Result := TFB30Attachment.CreateDatabase(self,sql,aSQLDialect, RaiseExceptionOnError);
   if not Result.IsConnected then
     Result := nil;
 end;
@@ -289,30 +292,30 @@ end;
 function TFB30ClientAPI.StartTransaction(Attachments: array of IAttachment;
   TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction;
 begin
-  Result := TFB30Transaction.Create(Attachments,TPB,DefaultCompletion);
+  Result := TFB30Transaction.Create(self,Attachments,TPB,DefaultCompletion);
 end;
 
 function TFB30ClientAPI.StartTransaction(Attachments: array of IAttachment;
   TPB: ITPB; DefaultCompletion: TTransactionCompletion): ITransaction;
 begin
-  Result := TFB30Transaction.Create(Attachments,TPB,DefaultCompletion);
+  Result := TFB30Transaction.Create(self,Attachments,TPB,DefaultCompletion);
 end;
 
 function TFB30ClientAPI.AllocateSPB: ISPB;
 begin
-  Result := TSPB.Create;
+  Result := TSPB.Create(self);
 end;
 
 function TFB30ClientAPI.GetServiceManager(ServerName: AnsiString;
   Protocol: TProtocol; SPB: ISPB): IServiceManager;
 begin
-  Result := TFB30ServiceManager.Create(ServerName,Protocol,SPB);
+  Result := TFB30ServiceManager.Create(self,ServerName,Protocol,SPB);
 end;
 
 function TFB30ClientAPI.GetServiceManager(ServerName: AnsiString;
   Port: Ansistring; Protocol: TProtocol; SPB: ISPB): IServiceManager;
 begin
-  Result := TFB30ServiceManager.Create(ServerName,Protocol,SPB,Port);
+  Result := TFB30ServiceManager.Create(self,ServerName,Protocol,SPB,Port);
 end;
 
 function TFB30ClientAPI.HasServiceAPI: boolean;

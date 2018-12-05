@@ -67,6 +67,7 @@ type
   private
     FBlobIntf: Firebird.IBlob;
     FEOB: boolean;
+    FFirebird30ClientAPI: TFB30ClientAPI;
   protected
     procedure CheckReadable; override;
     procedure CheckWritable; override;
@@ -191,7 +192,7 @@ begin
   if FBlobIntf = nil then
     IBError(ibxeBlobNotOpen,[nil]);
 
-  with Firebird30ClientAPI, Response as TBlobInfo do
+  with FFirebird30ClientAPI, Response as TBlobInfo do
   begin
     FBlobIntf.getInfo(StatusIntf,Length(Request),BytePtr(@Request),
                                                GetBufSize, BytePtr(Buffer));
@@ -204,7 +205,7 @@ procedure TFB30Blob.InternalClose(Force: boolean);
 begin
   if FBlobIntf = nil then
     Exit;
-  with Firebird30ClientAPI do
+  with FFirebird30ClientAPI do
   begin
     FBlobIntf.close(StatusIntf);
     if not Force then Check4DataBaseError;
@@ -217,7 +218,7 @@ procedure TFB30Blob.InternalCancel(Force: boolean);
 begin
   if FBlobIntf = nil then
     Exit;
-  with Firebird30ClientAPI do
+  with FFirebird30ClientAPI do
   begin
     FBlobIntf.cancel(StatusIntf);
     if not Force then Check4DataBaseError;
@@ -230,7 +231,8 @@ constructor TFB30Blob.Create(Attachment: TFB30Attachment; Transaction: TFB30Tran
   MetaData: IBlobMetaData; BPB: IBPB);
 begin
     inherited Create(Attachment,Transaction,MetaData,BPB);
-    with Firebird30ClientAPI do
+    FFirebird30ClientAPI := Attachment.Firebird30ClientAPI;
+    with FFirebird30ClientAPI do
     begin
       if BPB = nil then
         FBlobIntf := Attachment.AttachmentIntf.createBlob(StatusIntf,Transaction.TransactionIntf,
@@ -252,7 +254,8 @@ begin
   MetaData.FCharSetID := CharSetID;
   MetaData.FHasFullMetaData := true;
   inherited Create(Attachment,Transaction,MetaData,BPB);
-  with Firebird30ClientAPI do
+  FFirebird30ClientAPI := Attachment.Firebird30ClientAPI;
+  with FFirebird30ClientAPI do
   begin
     if BPB = nil then
       FBlobIntf := Attachment.AttachmentIntf.createBlob(StatusIntf,Transaction.TransactionIntf,
@@ -269,10 +272,11 @@ constructor TFB30Blob.Create(Attachment: TFB30Attachment;
   Transaction: TFBTransaction; MetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB);
 begin
   inherited Create(Attachment,Transaction,MetaData,BlobID,BPB);
+  FFirebird30ClientAPI := Attachment.Firebird30ClientAPI;
   if (BlobID.gds_quad_high = 0) and (BlobID.gds_quad_low = 0) then
     Exit;
 
-  with Firebird30ClientAPI do
+  with FFirebird30ClientAPI do
   begin
     if BPB = nil then
       FBlobIntf := Attachment.AttachmentIntf.openBlob(StatusIntf,(Transaction as TFB30Transaction).TransactionIntf,
@@ -300,7 +304,7 @@ begin
   LocalBuffer := PAnsiChar(@Buffer);
   repeat
     localCount := Min(Count,MaxuShort);
-    with Firebird30ClientAPI do
+    with FFirebird30ClientAPI do
       returnCode := FBlobIntf.getSegment(StatusIntf,localCount, LocalBuffer, @BytesRead);
     SignalActivity;
     Inc(LocalBuffer,BytesRead);
@@ -313,7 +317,7 @@ begin
   if (returnCode <> Firebird.IStatus.Result_OK) and
      (returnCode <> Firebird.IStatus.Result_SEGMENT) and
      (returnCode <> Firebird.IStatus.RESULT_NO_DATA) then
-    Firebird30ClientAPI.IBDataBaseError
+    FFirebird30ClientAPI.IBDataBaseError
 end;
 
 function TFB30Blob.Write(const Buffer; Count: Longint): Longint;
@@ -328,7 +332,7 @@ begin
   LocalBuffer := PAnsiChar(@Buffer);
   repeat
     localCount := Min(Count,MaxuShort);
-    with Firebird30ClientAPI do
+    with FFirebird30ClientAPI do
     begin
       FBlobIntf.putSegment(StatusIntf,localCount,LocalBuffer);
       Check4DataBaseError;

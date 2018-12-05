@@ -95,15 +95,15 @@ type
     FStatusIntf: IStatus;   {Keep a reference to the interface - automatic destroy
                              when this class is freed and last reference to IStatus
                              goes out of scope.}
-  protected
+  public
+    constructor Create(aFBLibrary: TFBLibrary);
+    destructor Destroy; override;
+    function StatusVector: PISC_STATUS;
+    function LoadInterface: boolean; override;
+    function GetAPI: IFirebirdAPI; override;
     {$IFDEF UNIX}
     function GetFirebirdLibList: string; override;
     {$ENDIF}
-    procedure LoadInterface; override;
-  public
-    constructor Create;
-    destructor Destroy; override;
-    function StatusVector: PISC_STATUS;
     property IBServiceAPIPresent: boolean read FIBServiceAPIPresent;
     property Status: TFB25Status read FStatus;
 
@@ -209,9 +209,6 @@ type
     function GetIMaster: TObject;
 
    end;
-
-var
-  Firebird25ClientAPI: TFB25ClientAPI = nil;
 
 implementation
 
@@ -323,6 +320,8 @@ end;
 threadvar
   FStatusVector: TStatusVector;
 
+{ TFB25ActivityReporter }
+
 function TFB25Status.StatusVector: PStatusVector;
 begin
   Result := @FStatusVector;
@@ -338,9 +337,9 @@ begin
 end;
 {$ENDIF}
 
-procedure TFB25ClientAPI.LoadInterface;
+function TFB25ClientAPI.LoadInterface: boolean;
 begin
-  inherited LoadInterface;
+  Result := inherited LoadInterface;
   BLOB_get := GetProcAddr('BLOB_get'); {do not localize}
   BLOB_put := GetProcAddr('BLOB_put'); {do not localize}
   isc_wait_for_event := GetProcAddr('isc_wait_for_event'); {do not localize}
@@ -387,7 +386,7 @@ begin
   isc_prepare_transaction  := GetProcAddr('isc_prepare_transaction'); {do not localize}
 
   FIBServiceAPIPresent := true;
-  isc_rollback_retaining := GetProcAddress(IBLibrary, 'isc_rollback_retaining'); {do not localize}
+  isc_rollback_retaining := GetProcAddress(FFBLibrary.IBLibrary, 'isc_rollback_retaining'); {do not localize}
   if Assigned(isc_rollback_retaining) then
   begin
     isc_service_attach := GetProcAddr('isc_service_attach'); {do not localize}
@@ -415,20 +414,24 @@ begin
     isc_encode_sql_time := @isc_encode_sql_time_stub;
     isc_encode_timestamp := @isc_encode_timestamp_stub;
   end;
+  Result := Result and assigned(isc_attach_database);
 end;
 
-constructor TFB25ClientAPI.Create;
+function TFB25ClientAPI.GetAPI: IFirebirdAPI;
 begin
-  inherited;
+  Result := self;
+end;
+
+constructor TFB25ClientAPI.Create(aFBLibrary: TFBLibrary);
+begin
+  inherited Create(aFBLibrary);
   FStatus := TFB25Status.Create(self);
   FStatusIntf := FStatus;
-  Firebird25ClientAPI := self;
 end;
 
 destructor TFB25ClientAPI.Destroy;
 begin
   FStatusIntf := nil;
-  Firebird25ClientAPI := nil;
   inherited Destroy;
 end;
 
@@ -445,13 +448,13 @@ end;
 
 function TFB25ClientAPI.AllocateDPB: IDPB;
 begin
-  Result := TDPB.Create;
+  Result := TDPB.Create(self);
 end;
 
 function TFB25ClientAPI.OpenDatabase(DatabaseName: AnsiString; DPB: IDPB;
                                     RaiseExceptionOnConnectError: boolean): IAttachment;
 begin
-   Result := TFB25Attachment.Create(DatabaseName,DPB,RaiseExceptionOnConnectError);
+   Result := TFB25Attachment.Create(self,DatabaseName,DPB,RaiseExceptionOnConnectError);
    if not Result.IsConnected then
      Result := nil;
 end;
@@ -459,7 +462,7 @@ end;
 function TFB25ClientAPI.CreateDatabase(DatabaseName: AnsiString; DPB: IDPB;
   RaiseExceptionOnError: boolean): IAttachment;
 begin
-  Result := TFB25Attachment.CreateDatabase(DatabaseName, DPB, RaiseExceptionOnError );
+  Result := TFB25Attachment.CreateDatabase(self,DatabaseName, DPB, RaiseExceptionOnError );
    if (Result <> nil) and not Result.IsConnected then
      Result := nil;
 end;
@@ -467,26 +470,26 @@ end;
 function TFB25ClientAPI.CreateDatabase(sql: AnsiString; aSQLDialect: integer;
   RaiseExceptionOnError: boolean): IAttachment;
 begin
-  Result := TFB25Attachment.CreateDatabase(sql,aSQLDialect, RaiseExceptionOnError );
+  Result := TFB25Attachment.CreateDatabase(self,sql,aSQLDialect, RaiseExceptionOnError );
    if (Result <> nil) and not Result.IsConnected then
      Result := nil;
 end;
 
 function TFB25ClientAPI.AllocateSPB: ISPB;
 begin
-  Result := TSPB.Create;
+  Result := TSPB.Create(self);
 end;
 
 function TFB25ClientAPI.AllocateTPB: ITPB;
 begin
-  Result := TTPB.Create;
+  Result := TTPB.Create(self);
 end;
 
 function TFB25ClientAPI.GetServiceManager(ServerName: AnsiString;
   Protocol: TProtocol; SPB: ISPB): IServiceManager;
 begin
   if HasServiceAPI then
-    Result := TFB25ServiceManager.Create(ServerName,Protocol,SPB)
+    Result := TFB25ServiceManager.Create(self,ServerName,Protocol,SPB)
   else
     Result := nil;
 end;
@@ -495,7 +498,7 @@ function TFB25ClientAPI.GetServiceManager(ServerName: AnsiString;
   Port: AnsiString; Protocol: TProtocol; SPB: ISPB): IServiceManager;
 begin
   if HasServiceAPI then
-    Result := TFB25ServiceManager.Create(ServerName,Protocol,SPB,Port)
+    Result := TFB25ServiceManager.Create(self,ServerName,Protocol,SPB,Port)
   else
     Result := nil;
 end;
@@ -503,13 +506,13 @@ end;
 function TFB25ClientAPI.StartTransaction(Attachments: array of IAttachment;
   TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction;
 begin
-  Result := TFB25Transaction.Create(Attachments,TPB,DefaultCompletion);
+  Result := TFB25Transaction.Create(self,Attachments,TPB,DefaultCompletion);
 end;
 
 function TFB25ClientAPI.StartTransaction(Attachments: array of IAttachment;
   TPB: ITPB; DefaultCompletion: TTransactionCompletion): ITransaction;
 begin
-  Result := TFB25Transaction.Create(Attachments,TPB,DefaultCompletion);
+  Result := TFB25Transaction.Create(self,Attachments,TPB,DefaultCompletion);
 end;
 
 function TFB25ClientAPI.HasServiceAPI: boolean;
@@ -526,10 +529,10 @@ function TFB25ClientAPI.IsEmbeddedServer: boolean;
 begin
   Result := false;
 {$IFDEF UNIX}
-  Result := Pos('libfbembed',FFBLibraryName) = 1;
+  Result := Pos('libfbembed',FFBLibrary.GetLibraryName) = 1;
 {$ENDIF}
 {$IFDEF WINDOWS}
-  Result := CompareText(FFBLibraryName,FIREBIRD_EMBEDDED) = 0;
+  Result := CompareText(FFBLibrary.GetLibraryName,FIREBIRD_EMBEDDED) = 0;
 {$ENDIF}
 end;
 
@@ -599,8 +602,7 @@ begin
     tm_mon := 0;
     tm_year := 0;
   end;
-  with Firebird25ClientAPI do
-    isc_encode_sql_time(@tm_date, PISC_TIME(bufptr));
+  isc_encode_sql_time(@tm_date, PISC_TIME(bufptr));
   if Ms > 0 then
     Inc(PISC_TIME(bufptr)^,Ms*10);
 end;

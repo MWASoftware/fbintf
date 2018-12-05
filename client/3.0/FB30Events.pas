@@ -78,6 +78,7 @@ type
     FEventsIntf: Firebird.IEvents;
     FAsyncEventCallback: TEventhandlerInterface;
     FSyncEventCallback: TEventhandlerInterface;
+    FFirebird30ClientAPI: TFB30ClientAPI;
     procedure InternalAsyncWaitForEvent(EventHandler: TEventHandler; EventCallBack: TEventhandlerInterface);
     procedure ReleaseIntf;
   protected
@@ -245,7 +246,7 @@ begin
   try
     if not FInWaitState then Exit;
     if FEventsIntf <> nil then
-    with Firebird30ClientAPI do
+    with FFirebird30ClientAPI do
     begin
       FEventsIntf.Cancel(StatusIntf);
       if not Force then
@@ -274,7 +275,7 @@ begin
 
     FEventHandler := EventHandler;
     ReleaseIntf;
-    with Firebird30ClientAPI do
+    with FFirebird30ClientAPI do
     begin
       FEventsIntf := FAttachmentIntf.queEvents(
                                 StatusIntf,EventCallBack,
@@ -299,6 +300,7 @@ constructor TFB30Events.Create(DBAttachment: TFB30Attachment; Events: TStrings);
 begin
   inherited Create(DBAttachment,DBAttachment,Events);
   FAttachmentIntf := DBAttachment.AttachmentIntf;
+  FFirebird30ClientAPI := DBAttachment.Firebird30ClientAPI;
   FSyncEventCallback := TEventhandlerInterface.Create(self,'Sync');
 end;
 

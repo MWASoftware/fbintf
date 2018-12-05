@@ -122,7 +122,10 @@ unit IB;
 interface
 
 uses
-  Classes, SysUtils, DB, FBMessages, IBExternals;
+  Classes,
+  {$IFDEF WINDOWS}Windows, {$ENDIF}
+  {$IFDEF FPC} Dynlibs, {$ENDIF}
+  SysUtils, DB, FBMessages, IBExternals;
 
 const
   {Interface version information}
@@ -173,6 +176,14 @@ type
    PISC_QUAD            = ^TISC_QUAD;
 
 {$IFNDEF FPC}
+{Delphi missing definitions}
+type
+  TLibHandle = THandle;
+
+const
+  NilHandle = 0;
+  DirectorySeparator = '\';
+
 {Delphi only seems to define CP_UTF8 and CP_UTF16}
 const
   CP_ACP     = 0;     // default to ANSI code page
@@ -200,6 +211,7 @@ type
   TFBStatusCode = cardinal;
   TByteArray = array of byte;
 
+  IFirebirdAPI = interface;
   IAttachment = interface;
   ITransaction = interface;
 
@@ -646,6 +658,7 @@ type
     function GetRowsAffected(var SelectCount, InsertCount, UpdateCount, DeleteCount: integer): boolean;
     function GetSQLStatementType: TIBSQLStatementTypes;
     function GetSQLText: AnsiString;
+    function GetProcessedSQLText: AnsiString;
     function GetSQLDialect: integer;
     function IsPrepared: boolean;
     procedure Prepare(aTransaction: ITransaction=nil);
@@ -862,6 +875,7 @@ type
 
   IAttachment = interface
     ['{466e9b67-9def-4807-b3e7-e08a35e7185c}']
+    function getFirebirdAPI: IFirebirdAPI;
     function getDPB: IDPB;
     function AllocateBPB: IBPB;
     function AllocateDIRB: IDIRB;
@@ -1054,6 +1068,8 @@ type
     property Count: integer read getCount;
   end;
 
+  IFirebirdLibrary = interface;
+
   {The IServiceManager interface provides access to a service manager. It can
    used to Detach and re-attach to Service Manager, to start services and to
    query the service manager.
@@ -1065,6 +1081,7 @@ type
 
   IServiceManager = interface
     ['{905b587d-1e1f-4e40-a3f8-a3519f852e48}']
+    function getFirebirdAPI: IFirebirdAPI;
     function getSPB: ISPB;
     function getServerName: AnsiString;
     function getProtocol: TProtocol;
@@ -1077,6 +1094,17 @@ type
     function Start(Request: ISRB; RaiseExceptionOnError: boolean=true): boolean;
     function Query(SQPB: ISQPB; Request: ISRB; RaiseExceptionOnError: boolean=true) :IServiceQueryResults; overload;
     function Query(Request: ISRB; RaiseExceptionOnError: boolean=true) :IServiceQueryResults; overload;
+  end;
+
+  {Tbe Firebird Library API used to get information about the Firebird library}
+
+
+  IFirebirdLibrary = interface
+    ['{3c04e0a1-12e0-428a-b2e1-bc6fcd97b79b}']
+    function GetHandle: TLibHandle;
+    function GetLibraryName: string;
+    function GetLibraryFilePath: string;
+    function GetFirebirdAPI: IFirebirdAPI;
   end;
 
   {The Firebird API.
@@ -1110,7 +1138,6 @@ type
 
     {Information}
     function GetStatus: IStatus;
-    function GetLibraryName: string;
     function HasRollbackRetaining: boolean;
     function IsEmbeddedServer: boolean;
     function GetImplementationVersion: AnsiString;
@@ -1118,6 +1145,7 @@ type
     {Firebird 3 API}
     function HasMasterIntf: boolean;
     function GetIMaster: TObject;
+    function GetFBLibrary: IFirebirdLibrary;
 end;
 
 type
@@ -1170,44 +1198,66 @@ function FirebirdAPI: IFirebirdAPI;
 function TryIBLoad: Boolean;
 procedure CheckIBLoaded;
 
+{If you want to explicitly load the Firebird library from a
+ non-default location then use this function and its GetFirebirdAPI function
+ to get the API.}
+
+function LoadFBLibrary(aLibPathName: string): IFirebirdLibrary;
+
 implementation
 
 uses FBClientAPI
   {$IFDEF USELEGACYFIREBIRDAPI}, FB25ClientAPI {$ENDIF}
   {$IFDEF USEFIREBIRD3API}, FB30ClientAPI {$ENDIF};
 
-var FFirebirdAPI: IFirebirdAPI;
+var FDefaultFBLibrary: IFirebirdLibrary;
+
+type
+
+  { TFBLibrary }
+
+  TFBLibraryImpl = class(TFBLibrary)
+  protected
+    function GetFirebird3API: IFirebirdAPI; override;
+    function GetLegacyFirebirdAPI: IFirebirdAPI; override;
+  end;
+
+function TFBLibraryImpl.GetFirebird3API: IFirebirdAPI;
+begin
+ {$IFDEF USEFIREBIRD3API}
+ Result := TFB30ClientAPI.Create(self);
+ {$ELSE}
+ Result := nil;
+ {$ENDIF}
+end;
+
+function TFBLibraryImpl.GetLegacyFirebirdAPI: IFirebirdAPI;
+begin
+  {$IFDEF USELEGACYFIREBIRDAPI}
+  Result := TFB25ClientAPI.Create(self);
+  {$ELSE}
+  Result := nil;
+  {$ENDIF}
+end;
 
 function FirebirdAPI: IFirebirdAPI;
 begin
-  if FFirebirdAPI = nil then
+  if FDefaultFBLibrary = nil then
     CheckIBLoaded;
-  Result := FFirebirdAPI;
+  Result := FDefaultFBLibrary.GetFirebirdAPI;
 end;
 
 function TryIBLoad: Boolean;
+var fblib: IFirebirdLibrary;
 begin
- Result := FFirebirdAPI <> nil;
+ Result := FDefaultFBLibrary <> nil;
  try
-  {$IFDEF USEFIREBIRD3API}
   if not Result then
   begin
-    FFirebirdAPI := TFB30ClientAPI.Create;
-    Result := FFirebirdAPI.HasMasterIntf;
-  end;
-  {$ENDIF}
-  {$IFDEF USELEGACYFIREBIRDAPI}
-  if not Result then
-  begin
-    FFirebirdAPI := nil;
-    FFirebirdAPI := TFB25ClientAPI.Create;
-    Result := true;
-  end;
-  {$ENDIF}
-  if Result and not (FFirebirdAPI as TFBClientAPI).IsLibraryLoaded then
-  begin
-    Result := false;
-    FFirebirdAPI := nil;
+    fblib := TFBLibraryImpl.Create;
+    if (fblib <> nil) and (fblib.GetFirebirdAPI <> nil) then
+      FDefaultFBLibrary := fblib;
+    Result := FDefaultFBLibrary <> nil;
   end;
  except
    SysUtils.showexception(ExceptObject,ExceptAddr);
@@ -1219,6 +1269,23 @@ procedure CheckIBLoaded;
 begin
   if not TryIBLoad then
     IBError(ibxeInterBaseMissing, [nil]);
+end;
+
+function LoadFBLibrary(aLibPathName: string): IFirebirdLibrary;
+var fblib: IFirebirdLibrary;
+begin
+  if trim(aLibPathName) = '' then
+  begin
+    CheckIBLoaded;
+    Result := FDefaultFBLibrary;
+  end
+  else
+  begin
+    fblib := TFBLibraryImpl.GetFBLibrary(aLibPathName);
+    if (fblib = nil) or (fblib.GetFirebirdAPI = nil) then
+      IBError(ibxeInterBaseMissing, [nil]);
+    Result := fblib;
+  end;
 end;
 
 { EIBError }
@@ -1251,10 +1318,10 @@ begin
 end;
 
 initialization
-  FFirebirdAPI := nil;
+  FDefaultFBLibrary := nil;
 
 finalization
-  FFirebirdAPI := nil;
+  FDefaultFBLibrary := nil;
 
 end.
 

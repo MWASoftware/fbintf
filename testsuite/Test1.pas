@@ -73,6 +73,8 @@ begin
   writeln(outfile,'DB ODS Major Version = ',Attachment.GetODSMajorVersion);
   writeln(outfile,'DB ODS Minor Version = ',Attachment.GetODSMinorVersion);
   writeln(outfile,'User Authentication Method = ',Attachment.GetAuthenticationMethod);
+  writeln(outfile,'Firebird Library Path = ',Attachment.getFirebirdAPI.GetFBLibrary.GetLibraryFilePath);
+  writeln(outfile,'DB Client Implementation Version = ',Attachment.getFirebirdAPI.GetImplementationVersion);
 end;
 
 function TTest1.TestTitle: AnsiString;
@@ -84,6 +86,8 @@ procedure TTest1.RunTest(CharSet: AnsiString; SQLDialect: integer);
 var DPB: IDPB;
     Attachment: IAttachment;
     createSQL: AnsiString;
+    libpath: string;
+    FBLibrary: IFirebirdLibrary;
 begin
   writeln(OutFile,'Creating a Database with empty parameters');
   Attachment := FirebirdAPI.CreateDatabase('',nil,false);
@@ -147,6 +151,28 @@ begin
 
   writeln(OutFile,'Dropping Database');
   Attachment.DropDatabase;
+
+  libpath := GetEnvironmentVariable('TESTFIREBIRDLIBRARY');
+  if libpath <> '' then
+  begin
+    FBLibrary := LoadFBLibrary(libpath);
+
+    writeln(OutFile,'Creating a Database with a DPD using Firebird Library in ',libpath);
+    Attachment := FBLibrary.GetFirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
+    if Attachment = nil then
+    begin
+      writeln(OutFile,'Create Database Failed');
+      Exit;
+    end;
+    WriteDBInfo(Attachment.GetDBInformation([isc_info_db_id,isc_info_ods_version,isc_info_ods_minor_version]));
+    WriteAttachmentInfo(Attachment);
+
+    {Querying Database}
+    DoQuery(Attachment);
+
+    writeln(OutFile,'Dropping Database');
+    Attachment.DropDatabase;
+  end;
 end;
 
 
