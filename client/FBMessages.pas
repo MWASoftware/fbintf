@@ -281,6 +281,11 @@ resourcestring
   SDefaultTransaction = '%s, Default';
   SFirebirdAPIFuncNotFound = 'Unable to load Firebird Client Library Function "%s"';
   SDatabaseFilter = 'Database Files (*.fdb; *.gdb)|*.gdb; *.fdb|All files (*.*)|*.*';
+  {$IFDEF WINDOWS}
+  SLibraryNameFilter = 'DLLs (*.dll)|*.dll|All files (*.*)|*.*';
+  {$ELSE}
+  SLibraryNameFilter = 'All files (*.*)|*.*';
+  {$ENDIF}
   STrue = 'true';
   SFalse = 'false';
   SArray = '(array)';

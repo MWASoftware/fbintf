@@ -1270,11 +1270,6 @@ begin
       continue;
     end;
 
-    {Combine CR/LF to EOF. CR on its own is treated as a space}
-
-    if Result = sqltCR then
-      FSkipNext := FNextToken = sqltEOL;
-
     case FState of
     stInComment:
       begin
@@ -1289,13 +1284,20 @@ begin
       end;
 
     stInCommentLine:
-      if Result = sqltEOL then
       begin
-        FState := stDefault;
-        Result := sqltCommentLine;
-      end
-      else
-        FString := FString + C;
+        case Result of
+        sqltEOL:
+          begin
+            FState := stDefault;
+            Result := sqltCommentLine;
+          end;
+
+        sqltCR: {ignore};
+
+        else
+          FString := FString + C;
+        end;
+      end;
 
     stSingleQuoted:
       begin
