@@ -73,9 +73,9 @@ begin
   Transaction.Rollback;
   Transaction.Start(TARollback);
 
-  Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
+  Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :F1',3);
   Statement.EnableStatistics(true);
-  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 8;
+  Statement.GetSQLParams.ByName('F1').AsInteger := 8;
   ReportResults(Statement);
   if Statement.GetPerfStatistics(stats) then
     WritePerfStats(stats);
