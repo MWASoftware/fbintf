@@ -92,12 +92,13 @@ type
 
     function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IBlobMetaData;
     function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IArrayMetaData;
+    procedure getFBVersion(version: TStrings);
   end;
 
 implementation
 
 uses FB25Events,FB25Transaction, FBMessages, FB25Blob,
-  FB25Statement, FB25Array, IBUtils;
+  FB25Statement, FB25Array, IBUtils, IBExternals;
 
   { TFB25Attachment }
 
@@ -355,6 +356,18 @@ function TFB25Attachment.GetArrayMetaData(Transaction: ITransaction; tableName,
 begin
   CheckHandle;
   Result := TFB25ArrayMetaData.Create(self,Transaction as TFB25Transaction,tableName,columnName);
+end;
+
+procedure ISCVersionCallback(userArg: pointer; text: PAnsiChar); cdecl;
+begin
+  TStrings(userArg).Add(text);
+end;
+
+procedure TFB25Attachment.getFBVersion(version: TStrings);
+var callback: pointer;
+begin
+  callback := @ISCVersionCallback;
+  FFirebird25ClientAPI.isc_version(@FHandle,TISC_CALLBACK(callback),PVoid(version));
 end;
 
 end.

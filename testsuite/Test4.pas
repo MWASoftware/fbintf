@@ -222,16 +222,27 @@ end;
 procedure TTest4.RunTest(CharSet: AnsiString; SQLDialect: integer);
 var Attachment: IAttachment;
     DPB: IDPB;
+    S: TStrings;
+    i: integer;
 begin
   DPB := FirebirdAPI.AllocateDPB;
   DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
   DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);
   DPB.Add(isc_dpb_lc_ctype).setAsString(CharSet);
   DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
+//  DPB.Add(isc_dpb_config).SetAsString('WireCompression=true');
 
   writeln(OutFile,'Opening ',Owner.GetEmployeeDatabaseName);
   Attachment := FirebirdAPI.OpenDatabase(Owner.GetEmployeeDatabaseName,DPB);
   writeln(OutFile,'Database Open');
+  S := TStringList.Create;
+  try
+    Attachment.getFBVersion(S);
+    for i := 0 to S.Count -1 do
+      writeln(OutFile,S[i]);
+  finally
+    S.Free;
+  end;
   DoQuery(Attachment);
 end;
 
