@@ -405,6 +405,7 @@ end;
 procedure TFB30Attachment.getFBVersion(version: TStrings);
 var bufferObj: TVersionCallback;
 begin
+  version.Clear;
   bufferObj := TVersionCallback.Create(version);
   try
     with FFirebird30ClientAPI do

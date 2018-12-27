@@ -367,6 +367,7 @@ procedure TFB25Attachment.getFBVersion(version: TStrings);
 var callback: pointer;
 begin
   callback := @ISCVersionCallback;
+  version.Clear;
   with FFirebird25ClientAPI do
     if isc_version(@FHandle,TISC_CALLBACK(callback),PVoid(version)) > 0 then
        IBDataBaseError;
