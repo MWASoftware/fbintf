@@ -948,6 +948,7 @@ type
     function GetSecurityDatabase: AnsiString;
     function GetODSMajorVersion: integer;
     function GetODSMinorVersion: integer;
+    procedure getFBVersion(version: TStrings);
     function HasActivity: boolean;
 
     {Character Sets}

@@ -97,12 +97,38 @@ type
     {Database Information}
     function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IBlobMetaData;
     function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IArrayMetaData;
+    procedure getFBVersion(version: TStrings);
   end;
 
 implementation
 
 uses FB30Transaction, FB30Statement, FB30Array, FB30Blob, FBMessages,
   FBOutputBlock, FB30Events, IBUtils;
+
+type
+  { TVersionCallback }
+
+  TVersionCallback = class(Firebird.IVersionCallbackImpl)
+  private
+    FOutput: TStrings;
+  public
+    constructor Create(output: TStrings);
+    procedure callback(status: Firebird.IStatus; text: PAnsiChar); override;
+  end;
+
+{ TVersionCallback }
+
+constructor TVersionCallback.Create(output: TStrings);
+begin
+  inherited Create;
+  FOutput := output;
+end;
+
+procedure TVersionCallback.callback(status: Firebird.IStatus; text: PAnsiChar);
+begin
+  FOutput.Add(text);
+end;
+
 
 { TFB30Attachment }
 
@@ -374,6 +400,22 @@ function TFB30Attachment.GetArrayMetaData(Transaction: ITransaction; tableName,
 begin
   CheckHandle;
   Result := TFB30ArrayMetaData.Create(self,Transaction as TFB30Transaction,tableName,columnName);
+end;
+
+procedure TFB30Attachment.getFBVersion(version: TStrings);
+var bufferObj: TVersionCallback;
+begin
+  version.Clear;
+  bufferObj := TVersionCallback.Create(version);
+  try
+    with FFirebird30ClientAPI do
+    begin
+       UtilIntf.getFbVersion(StatusIntf,FAttachmentIntf,bufferObj);
+       Check4DataBaseError;
+    end;
+  finally
+    bufferObj.Free;
+  end;
 end;
 
 end.

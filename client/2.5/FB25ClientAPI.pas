@@ -165,6 +165,7 @@ type
     isc_array_get_slice: Tisc_array_get_slice;
     isc_array_put_slice: Tisc_array_put_slice;
     isc_prepare_transaction: Tisc_prepare_transaction;
+    isc_version: Tisc_Version;
 
   public
     {Helper Functions}
@@ -384,6 +385,7 @@ begin
   isc_array_get_slice := GetProcAddr('isc_array_get_slice'); {do not localize}
   isc_array_put_slice := GetProcAddr('isc_array_put_slice'); {do not localize}
   isc_prepare_transaction  := GetProcAddr('isc_prepare_transaction'); {do not localize}
+  isc_version  := GetProcAddr('isc_version'); {do not localize}
 
   FIBServiceAPIPresent := true;
   isc_rollback_retaining := GetProcAddress(FFBLibrary.IBLibrary, 'isc_rollback_retaining'); {do not localize}

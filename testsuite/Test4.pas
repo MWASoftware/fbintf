@@ -73,9 +73,9 @@ begin
   Transaction.Rollback;
   Transaction.Start(TARollback);
 
-  Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
+  Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :F1',3);
   Statement.EnableStatistics(true);
-  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 8;
+  Statement.GetSQLParams.ByName('F1').AsInteger := 8;
   ReportResults(Statement);
   if Statement.GetPerfStatistics(stats) then
     WritePerfStats(stats);
@@ -222,16 +222,27 @@ end;
 procedure TTest4.RunTest(CharSet: AnsiString; SQLDialect: integer);
 var Attachment: IAttachment;
     DPB: IDPB;
+    S: TStrings;
+    i: integer;
 begin
   DPB := FirebirdAPI.AllocateDPB;
   DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
   DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);
   DPB.Add(isc_dpb_lc_ctype).setAsString(CharSet);
   DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
+  DPB.Add(isc_dpb_config).SetAsString('WireCompression=true');
 
   writeln(OutFile,'Opening ',Owner.GetEmployeeDatabaseName);
   Attachment := FirebirdAPI.OpenDatabase(Owner.GetEmployeeDatabaseName,DPB);
   writeln(OutFile,'Database Open');
+  S := TStringList.Create;
+  try
+    Attachment.getFBVersion(S);
+    for i := 0 to S.Count -1 do
+      writeln(OutFile,S[i]);
+  finally
+    S.Free;
+  end;
   DoQuery(Attachment);
 end;
 

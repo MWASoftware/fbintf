@@ -1405,7 +1405,7 @@ begin
           end;
 
         sqltIdentifier:
-          if FNextToken = sqltIdentifier then
+          if FNextToken in [sqltIdentifier,sqltNumberString] then
             FState := stInIdentifier;
 
         sqltNumberString:
