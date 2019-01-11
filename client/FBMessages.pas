@@ -258,7 +258,8 @@ type
       ibxeTokenQueueUnderflow,
       ibxErrorParsing,
       ibxeDLInfoError,
-      ibxeDifferentAPIs
+      ibxeDifferentAPIs,
+      ibxeParameterNameNotFound
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -478,6 +479,7 @@ resourcestring
   SErrorParsing = 'Error parsing SQL Statement at clause starting with %s';
   SDLInfoError = 'dlinfo returned error - %s';
   SDifferentAPIs = 'All transaction attachments must use the same Firebird Library';
+  SParameterNameNotFound = 'Parameter Name (%s) not found';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -658,7 +660,8 @@ const
     STokenQueueUnderflow,
     SErrorParsing,
     SDLInfoError,
-    SDifferentAPIs
+    SDifferentAPIs,
+    SParameterNameNotFound
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
