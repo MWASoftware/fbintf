@@ -101,6 +101,9 @@ type
      function AdjustScale(Value: Int64; aScale: Integer): Double;
      function AdjustScaleToInt64(Value: Int64; aScale: Integer): Int64;
      function AdjustScaleToCurrency(Value: Int64; aScale: Integer): Currency;
+     function GetTimestampFormatStr: AnsiString;
+     function GetDateFormatStr(IncludeTime: boolean): AnsiString;
+     function GetTimeFormatStr: AnsiString;
      procedure SetAsInteger(AValue: Integer);
   protected
      function AdjustScaleFromCurrency(Value: Currency; aScale: Integer): Int64;
@@ -142,6 +145,7 @@ type
      function GetIsNullable: boolean; virtual;
      function GetAsVariant: Variant;
      function GetModified: boolean; virtual;
+     function GetDateTimeStrLength(DateTimeFormat: TIBDateTimeFormats): integer;
      procedure SetAsBoolean(AValue: boolean); virtual;
      procedure SetAsCurrency(Value: Currency); virtual;
      procedure SetAsInt64(Value: Int64); virtual;
@@ -450,7 +454,7 @@ type
 
 implementation
 
-uses FBMessages, variants, IBUtils, FBTransaction;
+uses FBMessages, variants, IBUtils, FBTransaction, DateUtils;
 
 type
 
@@ -876,6 +880,50 @@ begin
       result := Value;
 end;
 
+function TSQLDataItem.GetDateFormatStr(IncludeTime: boolean): AnsiString;
+begin
+  {$IF declared(DefaultFormatSettings)}
+  with DefaultFormatSettings do
+  {$ELSE}
+  {$IF declared(FormatSettings)}
+  with FormatSettings do
+  {$IFEND}
+  {$IFEND}
+  case GetSQLDialect of
+    1:
+      if IncludeTime then
+        result := ShortDateFormat + ' ' + LongTimeFormat
+      else
+        result := ShortDateFormat;
+    3:
+      result := ShortDateFormat;
+  end;
+end;
+
+function TSQLDataItem.GetTimeFormatStr: AnsiString;
+begin
+  {$IF declared(DefaultFormatSettings)}
+  with DefaultFormatSettings do
+  {$ELSE}
+  {$IF declared(FormatSettings)}
+  with FormatSettings do
+  {$IFEND}
+  {$IFEND}
+    Result := LongTimeFormat;
+end;
+
+function TSQLDataItem.GetTimestampFormatStr: AnsiString;
+begin
+  {$IF declared(DefaultFormatSettings)}
+  with DefaultFormatSettings do
+  {$ELSE}
+  {$IF declared(FormatSettings)}
+  with FormatSettings do
+  {$IFEND}
+  {$IFEND}
+    Result := ShortDateFormat + ' ' +  LongTimeFormat + '.zzz';
+end;
+
 procedure TSQLDataItem.SetAsInteger(AValue: Integer);
 begin
   SetAsLong(aValue);
@@ -1251,22 +1299,11 @@ begin
           Result := rs
       end;
       SQL_TYPE_DATE:
-        case GetSQLDialect of
-          1 : result := DateTimeToStr(AsDateTime);
-          3 : result := DateToStr(AsDateTime);
-        end;
+        result := FormatDateTime(GetDateFormatStr(TimeOf(AsDateTime)<>0),AsDateTime);
       SQL_TYPE_TIME :
-        result := TimeToStr(AsDateTime);
+        result := FormatDateTime(GetTimeFormatStr,AsDateTime);
       SQL_TIMESTAMP:
-      {$IF declared(DefaultFormatSettings)}
-      with DefaultFormatSettings do
-      {$ELSE}
-      {$IF declared(FormatSettings)}
-      with FormatSettings do
-      {$IFEND}
-      {$IFEND}
-        result := FormatDateTime(ShortDateFormat + ' ' +
-                            LongTimeFormat+'.zzz',AsDateTime);
+        result := FormatDateTime(GetTimestampFormatStr,AsDateTime);
       SQL_SHORT, SQL_LONG:
         if Scale = 0 then
           result := IntToStr(AsLong)
@@ -1294,7 +1331,7 @@ begin
   Result := false;
 end;
 
-function TSQLDataItem.getIsNullable: boolean;
+function TSQLDataItem.GetIsNullable: boolean;
 begin
   CheckActive;
   Result := false;
@@ -1340,6 +1377,21 @@ end;
 function TSQLDataItem.GetModified: boolean;
 begin
   Result := false;
+end;
+
+function TSQLDataItem.GetDateTimeStrLength(DateTimeFormat: TIBDateTimeFormats
+  ): integer;
+begin
+  case DateTimeFormat of
+  dfTimestamp:
+    Result := Length(GetTimestampFormatStr);
+  dfDateTime:
+    Result := Length(GetDateFormatStr(true));
+  dfTime:
+    Result := Length(GetTimeFormatStr);
+  else
+    Result := 0;
+  end;
 end;
 
 

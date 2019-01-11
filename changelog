@@ -7,6 +7,21 @@ FBINTF Change Log  version          (1.1-4 Build 11291)  Fri, 28 Dec 2018 10:04:
    This returns the isc_version connection information as one or more lines.
    This is the same information as returned by isql with the -z option.
 
+3. If -dFIREBIRD3APIONLY is used as a compiler option then the legacy Firebird API
+   is no longer compiled in. Likewise, if -dLEGACYFIREBIRDAPIONLY is used as a
+   compiler option then the Firebird 3 API is no longer compiled in.
+
+4. IColumnMetaData: new method.
+
+   TIBDateTimeFormats = (dfTimestamp, {SQL TIMESTAMP}
+                        dfDateTime,   {SQL DATETIME}
+                        dfTime);
+
+   function GetDateTimeStrLength(DateTimeFormat: TIBDateTimeFormats): integer;
+
+   This returns the max. number of characters returned by the "AsString" method
+   when the SQL type of the column is respectively TIMESTAMP, DATETIME or TIME.
+
 
 FBINTF Change Log  version                  (1.1-3) Wed, 05 Dec 2018 14:28:10 +0000
 
