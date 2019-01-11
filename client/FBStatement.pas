@@ -73,6 +73,7 @@ type
     FStatisticsAvailable: boolean;
     FBeforeStats: TPerfStatistics;
     FAfterStats: TPerfStatistics;
+    FCaseSensitiveParams: boolean;
     procedure CheckHandle; virtual; abstract;
     procedure CheckTransaction(aTransaction: ITransaction);
     procedure GetDsqlInfo(info_request: byte; buffer: ISQLInfoResults); overload; virtual; abstract;
@@ -87,7 +88,8 @@ type
     constructor Create(Attachment: IAttachment; Transaction: ITransaction;
       sql: AnsiString; SQLDialect: integer);
     constructor CreateWithParameterNames(Attachment: IAttachment; Transaction: ITransaction;
-      sql: AnsiString;  SQLDialect: integer; GenerateParamNames: boolean =false);
+      sql: AnsiString;  SQLDialect: integer; GenerateParamNames: boolean =false;
+      CaseSensitiveParams: boolean = false);
     destructor Destroy; override;
     procedure Close;
     procedure TransactionEnding(aTransaction: ITransaction; Force: boolean);
@@ -158,10 +160,11 @@ end;
 
 constructor TFBStatement.CreateWithParameterNames(Attachment: IAttachment;
   Transaction: ITransaction; sql: AnsiString; SQLDialect: integer;
-  GenerateParamNames: boolean);
+  GenerateParamNames: boolean; CaseSensitiveParams: boolean);
 begin
   FHasParamNames := true;
   FGenerateParamNames := GenerateParamNames;
+  FCaseSensitiveParams := CaseSensitiveParams;
   Create(Attachment,Transaction,sql,SQLDialect);
 end;
 

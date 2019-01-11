@@ -76,15 +76,6 @@ unit FBSQLData;
   methods are needed for SQL parameters only. The string getters and setters
   are virtual as SQLVar and Array encodings of string data is different.}
 
-{ Note on SQL Parameter Names
-  --------------------------------------------
-
-  IBX processes parameter names case insensitive. This does result in some additional
-  overhead due to a call to "AnsiUpperCase". This can be avoided by undefining
-  "UseCaseInSensitiveParamName" below.
-
-}
-{$define UseCaseInSensitiveParamName}
 
 interface
 
@@ -194,6 +185,7 @@ type
 
   TSQLDataArea = class
   private
+    FCaseSensitiveParams: boolean;
     function GetColumn(index: integer): TSQLVarData;
     function GetCount: integer;
   protected
@@ -216,6 +208,8 @@ type
       var data: PByte); virtual;
     procedure RowChange;
     function StateChanged(var ChangeSeqNo: integer): boolean; virtual; abstract;
+    property CaseSensitiveParams: boolean read FCaseSensitiveParams
+                                            write FCaseSensitiveParams; {Only used when IsInputDataArea true}
     property Count: integer read GetCount;
     property Column[index: integer]: TSQLVarData read GetColumn;
     property UniqueRelationName: AnsiString read FUniqueRelationName;
@@ -658,11 +652,11 @@ var
   s: AnsiString;
   i: Integer;
 begin
-  {$ifdef UseCaseInSensitiveParamName}
-   s := AnsiUpperCase(Idx);
-  {$else}
+  if not IsInputDataArea or not CaseSensitiveParams then
+   s := AnsiUpperCase(Idx)
+  else
    s := Idx;
-  {$endif}
+
   for i := 0 to Count - 1 do
     if Column[i].Name = s then
     begin
@@ -694,12 +688,9 @@ end;
 
 procedure TSQLVarData.SetName(AValue: AnsiString);
 begin
-  if FName = AValue then Exit;
-  {$ifdef UseCaseInSensitiveParamName}
-  if Parent.IsInputDataArea then
+  if not Parent.IsInputDataArea or not Parent.CaseSensitiveParams then
     FName := AnsiUpperCase(AValue)
   else
-  {$endif}
     FName := AValue;
 end;
 
