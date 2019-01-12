@@ -29,9 +29,7 @@ FBINTF Change Log  version          (1.1-4 Build 11291)  Fri, 28 Dec 2018 10:04:
    sensitive and must be referenced (using ISQLParams.ByName) using the case
    sensitive name.
 
-6. Tokeniser now recognises the backslash as an escape character in SQL strings.
-
-7. Bug fix: when setting a query parameter, it is now possible, when the parameter
+6. Bug fix: when setting a query parameter, it is now possible, when the parameter
    is of type VarChar or Char to set the parameter to a numeric value (e.g. using
    .AsCurrency) and then subsequently to update the value to a non-numeric string
    using .AsString.
