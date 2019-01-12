@@ -31,6 +31,12 @@ FBINTF Change Log  version          (1.1-4 Build 11291)  Fri, 28 Dec 2018 10:04:
 
 6. Tokeniser now recognises the backslash as an escape character in SQL strings.
 
+7. Bug fix: when setting a query parameter, it is now possible, when the parameter
+   is of type VarChar or Char to set the parameter to a numeric value (e.g. using
+   .AsCurrency) and then subsequently to update the value to a non-numeric string
+   using .AsString.
+
+
 
 FBINTF Change Log  version                  (1.1-3) Wed, 05 Dec 2018 14:28:10 +0000
 

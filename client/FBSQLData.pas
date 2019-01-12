@@ -1734,8 +1734,20 @@ end;
 { TSQLParam }
 
 procedure TSQLParam.InternalSetAsString(Value: AnsiString);
+
+procedure DoSetString;
+begin
+  Changing;
+  if (SQLType <> SQL_VARYING) or (SQLType <> SQL_TEXT) then
+    SQLType := SQL_VARYING;
+  FIBXSQLVar.SetString(Transliterate(Value,GetCodePage));
+  Changed;
+end;
+
 var b: IBlob;
     dt: TDateTime;
+    CurrValue: Currency;
+    FloatValue: single;
 begin
   CheckActive;
   if IsNullable then
@@ -1761,39 +1773,41 @@ begin
 
   SQL_VARYING,
   SQL_TEXT:
-    begin
-      Changing;
-      FIBXSQLVar.SetString(Transliterate(Value,GetCodePage));
-      Changed;
-    end;
+    DoSetString;
 
     SQL_SHORT,
     SQL_LONG,
     SQL_INT64:
-      SetAsNumeric(AdjustScaleFromCurrency(StrToCurr(Value),GetScale),GetScale);
+      if TryStrToCurr(Value,CurrValue) then
+        SetAsNumeric(AdjustScaleFromCurrency(CurrValue,GetScale),GetScale)
+      else
+        DoSetString;
 
     SQL_D_FLOAT,
     SQL_DOUBLE,
     SQL_FLOAT:
-      SetAsDouble(StrToFloat(Value));
+      if TryStrToFloat(Value,FloatValue) then
+        SetAsDouble(FloatValue)
+      else
+        DoSetString;
 
     SQL_TIMESTAMP:
       if TryStrToDateTime(Value,dt) then
         SetAsDateTime(dt)
       else
-        FIBXSQLVar.SetString(Value);
+        DoSetString;
 
     SQL_TYPE_DATE:
       if TryStrToDateTime(Value,dt) then
         SetAsDate(dt)
       else
-        FIBXSQLVar.SetString(Value);
+        DoSetString;
 
     SQL_TYPE_TIME:
       if TryStrToDateTime(Value,dt) then
         SetAsTime(dt)
       else
-        FIBXSQLVar.SetString(Value);
+        DoSetString;
 
     else
       IBError(ibxeInvalidDataConversion,[nil]);
