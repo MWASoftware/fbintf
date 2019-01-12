@@ -1400,8 +1400,7 @@ begin
 
     stSingleQuoted:
       begin
-        case Result of
-        sqltSingleQuotes:
+        if (Result = sqltSingleQuotes) then
         begin
           if (FNextToken = sqltSingleQuotes) then
           begin
@@ -1413,22 +1412,9 @@ begin
             Result := sqltQuotedString;
             FState := stDefault;
           end;
-        end;
-
-        sqltBackslash:
-          begin
-            if (FNextToken = sqltSingleQuotes) then
-            begin
-              FSkipNext := true;
-              FString := FString + FLastChar
-            end
-            else
-              FString := FString + FLastChar;
-          end;
-
+        end
         else
           FString := FString + C;
-        end;
       end;
 
     stDoubleQuoted:

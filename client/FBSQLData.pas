@@ -1738,7 +1738,7 @@ procedure TSQLParam.InternalSetAsString(Value: AnsiString);
 procedure DoSetString;
 begin
   Changing;
-  if (SQLType <> SQL_VARYING) or (SQLType <> SQL_TEXT) then
+  if (SQLType <> SQL_VARYING) and (SQLType <> SQL_TEXT) then
     SQLType := SQL_VARYING;
   FIBXSQLVar.SetString(Transliterate(Value,GetCodePage));
   Changed;

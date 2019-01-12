@@ -7,8 +7,6 @@
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
-        <TopLine Value="13"/>
         <UsageCount Value="45"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -40,9 +38,10 @@
       <Unit5>
         <Filename Value="Test4.pas"/>
         <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <TopLine Value="144"/>
-        <CursorPos X="13" Y="174"/>
+        <CursorPos X="106" Y="171"/>
         <UsageCount Value="45"/>
         <Loaded Value="True"/>
       </Unit5>
