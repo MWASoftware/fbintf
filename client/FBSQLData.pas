@@ -613,6 +613,7 @@ begin
 
   FVarString := aValue;
   SQLType := SQL_TEXT;
+  Scale := 0;
   SetSQLData(PByte(PAnsiChar(FVarString)),Length(aValue));
 end;
 
@@ -1738,8 +1739,6 @@ procedure TSQLParam.InternalSetAsString(Value: AnsiString);
 procedure DoSetString;
 begin
   Changing;
-  if (SQLType <> SQL_VARYING) and (SQLType <> SQL_TEXT) then
-    SQLType := SQL_VARYING;
   FIBXSQLVar.SetString(Transliterate(Value,GetCodePage));
   Changed;
 end;

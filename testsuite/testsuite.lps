@@ -7,6 +7,7 @@
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
         <UsageCount Value="45"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -38,11 +39,10 @@
       <Unit5>
         <Filename Value="Test4.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="144"/>
         <CursorPos X="106" Y="171"/>
         <UsageCount Value="45"/>
-        <Loaded Value="True"/>
       </Unit5>
       <Unit6>
         <Filename Value="Test5.pas"/>
@@ -443,12 +443,10 @@
       </Unit62>
       <Unit63>
         <Filename Value="../changelog"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="10"/>
         <CursorPos X="4" Y="32"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit63>
       <Unit64>
@@ -459,36 +457,7 @@
         <UsageCount Value="10"/>
       </Unit64>
     </Units>
-    <JumpHistory Count="7" HistoryIndex="6">
-      <Position1>
-        <Filename Value="Test4.pas"/>
-        <Caret Line="174" Column="32" TopLine="149"/>
-      </Position1>
-      <Position2>
-        <Filename Value="Test4.pas"/>
-        <Caret Line="171" Column="118" TopLine="144"/>
-      </Position2>
-      <Position3>
-        <Filename Value="Test4.pas"/>
-        <Caret Line="171" TopLine="144"/>
-      </Position3>
-      <Position4>
-        <Filename Value="Test4.pas"/>
-        <Caret Line="171" TopLine="144"/>
-      </Position4>
-      <Position5>
-        <Filename Value="Test4.pas"/>
-        <Caret Line="172" TopLine="144"/>
-      </Position5>
-      <Position6>
-        <Filename Value="Test4.pas"/>
-        <Caret Line="166" Column="20" TopLine="144"/>
-      </Position6>
-      <Position7>
-        <Filename Value="Test4.pas"/>
-        <Caret Line="166" Column="20" TopLine="144"/>
-      </Position7>
-    </JumpHistory>
+    <JumpHistory HistoryIndex="-1"/>
     <RunParams>
       <FormatVersion Value="2"/>
       <Modes Count="0" ActiveMode="default"/>
