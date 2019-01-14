@@ -256,7 +256,8 @@ type
     constructor Create(Attachment: TFB30Attachment; Transaction: ITransaction;
       sql: AnsiString; aSQLDialect: integer);
     constructor CreateWithParameterNames(Attachment: TFB30Attachment; Transaction: ITransaction;
-      sql: AnsiString;  aSQLDialect: integer; GenerateParamNames: boolean =false);
+      sql: AnsiString;  aSQLDialect: integer; GenerateParamNames: boolean =false;
+      CaseSensitiveParams: boolean=false);
     destructor Destroy; override;
     function FetchNext: boolean;
     property StatementIntf: Firebird.IStatement read FStatementIntf;
@@ -1271,11 +1272,13 @@ end;
 
 constructor TFB30Statement.CreateWithParameterNames(
   Attachment: TFB30Attachment; Transaction: ITransaction; sql: AnsiString;
-  aSQLDialect: integer; GenerateParamNames: boolean);
+  aSQLDialect: integer; GenerateParamNames: boolean;
+  CaseSensitiveParams: boolean);
 begin
   inherited CreateWithParameterNames(Attachment,Transaction,sql,aSQLDialect,GenerateParamNames);
   FFirebird30ClientAPI := Attachment.Firebird30ClientAPI;
   FSQLParams := TIBXINPUTSQLDA.Create(self);
+  FSQLParams.CaseSensitiveParams := CaseSensitiveParams;
   FSQLRecord := TIBXOUTPUTSQLDA.Create(self);
   InternalPrepare;
 end;

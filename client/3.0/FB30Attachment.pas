@@ -72,7 +72,8 @@ type
     procedure ExecImmediate(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer); override;
     function Prepare(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer): IStatement; override;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: AnsiString;
-                       aSQLDialect: integer; GenerateParamNames: boolean=false): IStatement; override;
+                       aSQLDialect: integer; GenerateParamNames: boolean=false;
+                       CaseSensitiveParams: boolean=false): IStatement; override;
 
     {Events}
     function GetEventHandler(Events: TStrings): IEvents; override;
@@ -307,11 +308,12 @@ begin
 end;
 
 function TFB30Attachment.PrepareWithNamedParameters(transaction: ITransaction;
-  sql: AnsiString; aSQLDialect: integer; GenerateParamNames: boolean): IStatement;
+  sql: AnsiString; aSQLDialect: integer; GenerateParamNames: boolean;
+  CaseSensitiveParams: boolean): IStatement;
 begin
   CheckHandle;
   Result := TFB30Statement.CreateWithParameterNames(self,transaction,sql,aSQLDialect,
-         GenerateParamNames);
+         GenerateParamNames,CaseSensitiveParams);
 end;
 
 function TFB30Attachment.GetEventHandler(Events: TStrings): IEvents;

@@ -73,8 +73,12 @@ unit IB;
 {$IFEND}
 {$ENDIF}
 
+{$IFNDEF LEGACYFIREBIRDAPIONLY}
 {$DEFINE USEFIREBIRD3API}
+{$ENDIF}
+{$IFNDEF FIREBIRD3APIONLY}
 {$DEFINE USELEGACYFIREBIRDAPI}
+{$ENDIF}
 
 {
   This unit defines the interfaces used to provide the Pascal Language
@@ -407,6 +411,10 @@ type
     the output of an SQL Statement.
   }
 
+  TIBDateTimeFormats = (dfTimestamp, {SQL TIMESTAMP}
+                        dfDateTime,   {SQL DATETIME}
+                        dfTime);      {SQL TIME}
+
   { IColumnMetaData }
 
   IColumnMetaData = interface
@@ -427,6 +435,7 @@ type
     function GetSize: cardinal;
     function GetArrayMetaData: IArrayMetaData; {Valid only for Array SQL Type}
     function GetBlobMetaData: IBlobMetaData; {Valid only for Blob SQL Type}
+    function GetDateTimeStrLength(DateTimeFormat: TIBDateTimeFormats): integer;
     property Name: AnsiString read GetName;
     property Size: cardinal read GetSize;
     property SQLType: cardinal read GetSQLType;
@@ -911,9 +920,11 @@ type
     function Prepare(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer): IStatement; overload;
     function Prepare(transaction: ITransaction; sql: AnsiString): IStatement; overload;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: AnsiString;
-                       aSQLDialect: integer; GenerateParamNames: boolean=false): IStatement; overload;
+                       aSQLDialect: integer; GenerateParamNames: boolean=false;
+                       CaseSensitiveParams: boolean = false): IStatement; overload;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: AnsiString;
-                       GenerateParamNames: boolean=false): IStatement; overload;
+                       GenerateParamNames: boolean=false;
+                       CaseSensitiveParams: boolean = false): IStatement; overload;
 
     {Events}
     function GetEventHandler(Events: TStrings): IEvents; overload;

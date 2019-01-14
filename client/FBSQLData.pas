@@ -76,15 +76,6 @@ unit FBSQLData;
   methods are needed for SQL parameters only. The string getters and setters
   are virtual as SQLVar and Array encodings of string data is different.}
 
-{ Note on SQL Parameter Names
-  --------------------------------------------
-
-  IBX processes parameter names case insensitive. This does result in some additional
-  overhead due to a call to "AnsiUpperCase". This can be avoided by undefining
-  "UseCaseInSensitiveParamName" below.
-
-}
-{$define UseCaseInSensitiveParamName}
 
 interface
 
@@ -101,6 +92,9 @@ type
      function AdjustScale(Value: Int64; aScale: Integer): Double;
      function AdjustScaleToInt64(Value: Int64; aScale: Integer): Int64;
      function AdjustScaleToCurrency(Value: Int64; aScale: Integer): Currency;
+     function GetTimestampFormatStr: AnsiString;
+     function GetDateFormatStr(IncludeTime: boolean): AnsiString;
+     function GetTimeFormatStr: AnsiString;
      procedure SetAsInteger(AValue: Integer);
   protected
      function AdjustScaleFromCurrency(Value: Currency; aScale: Integer): Int64;
@@ -142,6 +136,7 @@ type
      function GetIsNullable: boolean; virtual;
      function GetAsVariant: Variant;
      function GetModified: boolean; virtual;
+     function GetDateTimeStrLength(DateTimeFormat: TIBDateTimeFormats): integer;
      procedure SetAsBoolean(AValue: boolean); virtual;
      procedure SetAsCurrency(Value: Currency); virtual;
      procedure SetAsInt64(Value: Int64); virtual;
@@ -190,6 +185,7 @@ type
 
   TSQLDataArea = class
   private
+    FCaseSensitiveParams: boolean;
     function GetColumn(index: integer): TSQLVarData;
     function GetCount: integer;
   protected
@@ -212,6 +208,8 @@ type
       var data: PByte); virtual;
     procedure RowChange;
     function StateChanged(var ChangeSeqNo: integer): boolean; virtual; abstract;
+    property CaseSensitiveParams: boolean read FCaseSensitiveParams
+                                            write FCaseSensitiveParams; {Only used when IsInputDataArea true}
     property Count: integer read GetCount;
     property Column[index: integer]: TSQLVarData read GetColumn;
     property UniqueRelationName: AnsiString read FUniqueRelationName;
@@ -450,105 +448,7 @@ type
 
 implementation
 
-uses FBMessages, variants, IBUtils, FBTransaction;
-
-type
-
-   { TSQLParamProcessor }
-
-   TSQLParamProcessor = class(TSQLwithNamedParamsTokeniser)
-   private
-   const
-     sIBXParam = 'IBXParam';  {do not localize}
-   private
-     FInString: AnsiString;
-     FIndex: integer;
-     function DoExecute(GenerateParamNames: boolean;
-       var slNames: TStrings): AnsiString;
-   protected
-     function GetChar: AnsiChar; override;
-   public
-     class function Execute(sSQL: AnsiString; GenerateParamNames: boolean;
-       var slNames: TStrings): AnsiString;
-   end;
-
-{ TSQLParamProcessor }
-
-function TSQLParamProcessor.DoExecute(GenerateParamNames: boolean;
-  var slNames: TStrings): AnsiString;
-var token: TSQLTokens;
-    iParamSuffix: Integer;
-begin
-  Result := '';
-  iParamSuffix := 0;
-
-  while not EOF do
-  begin
-    token := GetNextToken;
-    case token of
-    sqltParam,
-    sqltQuotedParam:
-      begin
-        Result := Result + '?';
-        slNames.Add(TokenText);
-      end;
-
-    sqltPlaceHolder:
-      if GenerateParamNames then
-      begin
-        Inc(iParamSuffix);
-        slNames.AddObject(sIBXParam + IntToStr(iParamSuffix),self); //Note local convention
-                                            //add pointer to self to mark entry
-        Result := Result + '?';
-      end
-      else
-        IBError(ibxeSQLParseError, [SParamNameExpected]);
-
-    sqltQuotedString:
-      Result := Result + '''' + SQLSafeString(TokenText) + '''';
-
-    sqltIdentifierInDoubleQuotes:
-      Result := Result + '"' + StringReplace(TokenText,'"','""',[rfReplaceAll]) + '"';
-
-    sqltComment:
-      Result := Result + '/*' + TokenText + '*/';
-
-    sqltCommentLine:
-      Result := Result + '//' + TokenText + LineEnding;
-
-    sqltEOL:
-      Result := Result + LineEnding;
-
-    else
-      Result := Result + TokenText;
-    end;
-  end;
-end;
-
-function TSQLParamProcessor.GetChar: AnsiChar;
-begin
-  if FIndex <= Length(FInString) then
-  begin
-    Result := FInString[FIndex];
-    Inc(FIndex);
-  end
-  else
-    Result := #0;
-end;
-
-class function TSQLParamProcessor.Execute(sSQL: AnsiString;
-  GenerateParamNames: boolean; var slNames: TStrings): AnsiString;
-begin
-  with self.Create do
-  try
-    FInString := sSQL;
-    FIndex := 1;
-    Result := DoExecute(GenerateParamNames,slNames);
-  finally
-    Free;
-  end;
-end;
-
+uses FBMessages, variants, IBUtils, FBTransaction, DateUtils;
 
 { TSQLDataArea }
 
@@ -654,11 +554,11 @@ var
   s: AnsiString;
   i: Integer;
 begin
-  {$ifdef UseCaseInSensitiveParamName}
-   s := AnsiUpperCase(Idx);
-  {$else}
+  if not IsInputDataArea or not CaseSensitiveParams then
+   s := AnsiUpperCase(Idx)
+  else
    s := Idx;
-  {$endif}
+
   for i := 0 to Count - 1 do
     if Column[i].Name = s then
     begin
@@ -690,12 +590,9 @@ end;
 
 procedure TSQLVarData.SetName(AValue: AnsiString);
 begin
-  if FName = AValue then Exit;
-  {$ifdef UseCaseInSensitiveParamName}
-  if Parent.IsInputDataArea then
+  if not Parent.IsInputDataArea or not Parent.CaseSensitiveParams then
     FName := AnsiUpperCase(AValue)
   else
-  {$endif}
     FName := AValue;
 end;
 
@@ -716,6 +613,7 @@ begin
 
   FVarString := aValue;
   SQLType := SQL_TEXT;
+  Scale := 0;
   SetSQLData(PByte(PAnsiChar(FVarString)),Length(aValue));
 end;
 
@@ -874,6 +772,50 @@ begin
     end
     else
       result := Value;
+end;
+
+function TSQLDataItem.GetDateFormatStr(IncludeTime: boolean): AnsiString;
+begin
+  {$IF declared(DefaultFormatSettings)}
+  with DefaultFormatSettings do
+  {$ELSE}
+  {$IF declared(FormatSettings)}
+  with FormatSettings do
+  {$IFEND}
+  {$IFEND}
+  case GetSQLDialect of
+    1:
+      if IncludeTime then
+        result := ShortDateFormat + ' ' + LongTimeFormat
+      else
+        result := ShortDateFormat;
+    3:
+      result := ShortDateFormat;
+  end;
+end;
+
+function TSQLDataItem.GetTimeFormatStr: AnsiString;
+begin
+  {$IF declared(DefaultFormatSettings)}
+  with DefaultFormatSettings do
+  {$ELSE}
+  {$IF declared(FormatSettings)}
+  with FormatSettings do
+  {$IFEND}
+  {$IFEND}
+    Result := LongTimeFormat;
+end;
+
+function TSQLDataItem.GetTimestampFormatStr: AnsiString;
+begin
+  {$IF declared(DefaultFormatSettings)}
+  with DefaultFormatSettings do
+  {$ELSE}
+  {$IF declared(FormatSettings)}
+  with FormatSettings do
+  {$IFEND}
+  {$IFEND}
+    Result := ShortDateFormat + ' ' +  LongTimeFormat + '.zzz';
 end;
 
 procedure TSQLDataItem.SetAsInteger(AValue: Integer);
@@ -1251,22 +1193,11 @@ begin
           Result := rs
       end;
       SQL_TYPE_DATE:
-        case GetSQLDialect of
-          1 : result := DateTimeToStr(AsDateTime);
-          3 : result := DateToStr(AsDateTime);
-        end;
+        result := FormatDateTime(GetDateFormatStr(TimeOf(AsDateTime)<>0),AsDateTime);
       SQL_TYPE_TIME :
-        result := TimeToStr(AsDateTime);
+        result := FormatDateTime(GetTimeFormatStr,AsDateTime);
       SQL_TIMESTAMP:
-      {$IF declared(DefaultFormatSettings)}
-      with DefaultFormatSettings do
-      {$ELSE}
-      {$IF declared(FormatSettings)}
-      with FormatSettings do
-      {$IFEND}
-      {$IFEND}
-        result := FormatDateTime(ShortDateFormat + ' ' +
-                            LongTimeFormat+'.zzz',AsDateTime);
+        result := FormatDateTime(GetTimestampFormatStr,AsDateTime);
       SQL_SHORT, SQL_LONG:
         if Scale = 0 then
           result := IntToStr(AsLong)
@@ -1294,7 +1225,7 @@ begin
   Result := false;
 end;
 
-function TSQLDataItem.getIsNullable: boolean;
+function TSQLDataItem.GetIsNullable: boolean;
 begin
   CheckActive;
   Result := false;
@@ -1340,6 +1271,21 @@ end;
 function TSQLDataItem.GetModified: boolean;
 begin
   Result := false;
+end;
+
+function TSQLDataItem.GetDateTimeStrLength(DateTimeFormat: TIBDateTimeFormats
+  ): integer;
+begin
+  case DateTimeFormat of
+  dfTimestamp:
+    Result := Length(GetTimestampFormatStr);
+  dfDateTime:
+    Result := Length(GetDateFormatStr(true));
+  dfTime:
+    Result := Length(GetTimeFormatStr);
+  else
+    Result := 0;
+  end;
 end;
 
 
@@ -1789,8 +1735,18 @@ end;
 { TSQLParam }
 
 procedure TSQLParam.InternalSetAsString(Value: AnsiString);
+
+procedure DoSetString;
+begin
+  Changing;
+  FIBXSQLVar.SetString(Transliterate(Value,GetCodePage));
+  Changed;
+end;
+
 var b: IBlob;
     dt: TDateTime;
+    CurrValue: Currency;
+    FloatValue: single;
 begin
   CheckActive;
   if IsNullable then
@@ -1816,39 +1772,41 @@ begin
 
   SQL_VARYING,
   SQL_TEXT:
-    begin
-      Changing;
-      FIBXSQLVar.SetString(Transliterate(Value,GetCodePage));
-      Changed;
-    end;
+    DoSetString;
 
     SQL_SHORT,
     SQL_LONG,
     SQL_INT64:
-      SetAsNumeric(AdjustScaleFromCurrency(StrToCurr(Value),GetScale),GetScale);
+      if TryStrToCurr(Value,CurrValue) then
+        SetAsNumeric(AdjustScaleFromCurrency(CurrValue,GetScale),GetScale)
+      else
+        DoSetString;
 
     SQL_D_FLOAT,
     SQL_DOUBLE,
     SQL_FLOAT:
-      SetAsDouble(StrToFloat(Value));
+      if TryStrToFloat(Value,FloatValue) then
+        SetAsDouble(FloatValue)
+      else
+        DoSetString;
 
     SQL_TIMESTAMP:
       if TryStrToDateTime(Value,dt) then
         SetAsDateTime(dt)
       else
-        FIBXSQLVar.SetString(Value);
+        DoSetString;
 
     SQL_TYPE_DATE:
       if TryStrToDateTime(Value,dt) then
         SetAsDate(dt)
       else
-        FIBXSQLVar.SetString(Value);
+        DoSetString;
 
     SQL_TYPE_TIME:
       if TryStrToDateTime(Value,dt) then
         SetAsTime(dt)
       else
-        FIBXSQLVar.SetString(Value);
+        DoSetString;
 
     else
       IBError(ibxeInvalidDataConversion,[nil]);

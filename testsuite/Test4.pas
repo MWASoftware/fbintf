@@ -60,7 +60,7 @@ implementation
 
 procedure TTest4.DoQuery(Attachment: IAttachment);
 var Transaction, Transaction2, Transaction3: ITransaction;
-    Statement: IStatement;
+    Statement, Statement2: IStatement;
     Rows: IResultSet;
     stats: TPerfCounters;
 begin
@@ -168,6 +168,12 @@ begin
   writeln(OutFile,'Employee Count = ', Attachment.OpenCursorAtStart(Transaction,
          'Select count(*) from EMPLOYEE',3)[0].AsInteger);
 
+  Statement2 := Attachment.PrepareWithNamedParameters(Transaction,'Update EMPLOYEE Set FIRST_NAME = ''Jayne''''s'' Where EMP_NO = :EMP_NO',3);
+  Statement2.GetSQLParams.ByName('EMP_NO').AsInteger := 150;
+  writeln(OutFile,'Updating');
+  Statement2.Execute;
+  WriteAffectedRows(Statement);
+
   writeln(OutFile,'Prepare Query again');
   writeln(OutFile);
   Statement.Prepare;
@@ -209,7 +215,7 @@ begin
   Statement.Execute;
   WriteAffectedRows(Statement);
   Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
-  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 8;
+  Statement.GetSQLParams.ByName('emp_no').AsInteger := 8;
   ReportResults(Statement);
 
 end;

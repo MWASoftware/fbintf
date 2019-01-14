@@ -70,7 +70,8 @@ type
     procedure ExecImmediate(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer); override;
     function Prepare(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer): IStatement; override;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: AnsiString;
-                       aSQLDialect: integer; GenerateParamNames: boolean=false): IStatement; override;
+                       aSQLDialect: integer; GenerateParamNames: boolean=false;
+                       CaseSensitiveParams: boolean=false): IStatement; override;
     function GetEventHandler(Events: TStrings): IEvents; override;
     function CreateBlob(transaction: ITransaction; RelationName, ColumnName: AnsiString; BPB: IBPB=nil): IBlob; overload;
     function CreateBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BPB: IBPB=nil): IBlob; overload;
@@ -301,11 +302,12 @@ begin
 end;
 
 function TFB25Attachment.PrepareWithNamedParameters(transaction: ITransaction;
-  sql: AnsiString; aSQLDialect: integer; GenerateParamNames: boolean): IStatement;
+  sql: AnsiString; aSQLDialect: integer; GenerateParamNames: boolean;
+  CaseSensitiveParams: boolean): IStatement;
 begin
   CheckHandle;
   Result := TFB25Statement.CreateWithParameterNames(self,transaction,sql,aSQLDialect,
-         GenerateParamNames);
+         GenerateParamNames,CaseSensitiveParams);
 end;
 
 function TFB25Attachment.GetEventHandler(Events: TStrings): IEvents;

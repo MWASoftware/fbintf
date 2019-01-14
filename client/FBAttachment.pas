@@ -114,9 +114,11 @@ type
     function Prepare(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer): IStatement; overload; virtual; abstract;
     function Prepare(transaction: ITransaction; sql: AnsiString): IStatement; overload;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: AnsiString;
-                       aSQLDialect: integer; GenerateParamNames: boolean=false): IStatement; overload; virtual; abstract;
+                       aSQLDialect: integer; GenerateParamNames: boolean=false;
+                       CaseSensitiveParams: boolean = false): IStatement; overload; virtual; abstract;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: AnsiString;
-                       GenerateParamNames: boolean=false): IStatement; overload;
+                       GenerateParamNames: boolean=false;
+                       CaseSensitiveParams: boolean = false): IStatement; overload;
     function GetEventHandler(Events: TStrings): IEvents; overload; virtual; abstract;
     function GetEventHandler(Event: AnsiString): IEvents; overload;
 
@@ -591,9 +593,9 @@ begin
 end;
 
 function TFBAttachment.PrepareWithNamedParameters(transaction: ITransaction;
-  sql: AnsiString; GenerateParamNames: boolean): IStatement;
+  sql: AnsiString; GenerateParamNames: boolean; CaseSensitiveParams: boolean): IStatement;
 begin
-  Result := PrepareWithNamedParameters(transaction,sql,FSQLDialect,GenerateParamNames);
+  Result := PrepareWithNamedParameters(transaction,sql,FSQLDialect,GenerateParamNames,CaseSensitiveParams);
 end;
 
 function TFBAttachment.GetEventHandler(Event: AnsiString): IEvents;

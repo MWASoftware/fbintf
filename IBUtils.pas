@@ -258,6 +258,7 @@ type
   sqltPlaceholder,
   sqltSingleQuotes,
   sqltDoubleQuotes,
+  sqltBackslash,
   sqltComma,
   sqltPeriod,
   sqltEquals,
@@ -591,6 +592,25 @@ type
     procedure Reset; override;
     function TokenFound(var token: TSQLTokens): boolean; override;
   end;
+
+    { TSQLParamProcessor }
+
+  TSQLParamProcessor = class(TSQLwithNamedParamsTokeniser)
+  private
+  const
+    sIBXParam = 'IBXParam';  {do not localize}
+  private
+    FInString: AnsiString;
+    FIndex: integer;
+    function DoExecute(GenerateParamNames: boolean;
+        var slNames: TStrings): AnsiString;
+  protected
+    function GetChar: AnsiChar; override;
+  public
+    class function Execute(sSQL: AnsiString; GenerateParamNames: boolean;
+        var slNames: TStrings): AnsiString;
+  end;
+
 
 function Max(n1, n2: Integer): Integer;
 function Min(n1, n2: Integer): Integer;
@@ -974,6 +994,83 @@ begin
   Result := StringReplace(s,'''','''''',[rfReplaceAll]);
 end;
 
+{ TSQLParamProcessor }
+
+function TSQLParamProcessor.DoExecute(GenerateParamNames: boolean;
+  var slNames: TStrings): AnsiString;
+var token: TSQLTokens;
+    iParamSuffix: Integer;
+begin
+  Result := '';
+  iParamSuffix := 0;
+
+  while not EOF do
+  begin
+    token := GetNextToken;
+    case token of
+    sqltParam,
+    sqltQuotedParam:
+      begin
+        Result := Result + '?';
+        slNames.Add(TokenText);
+      end;
+
+    sqltPlaceHolder:
+      if GenerateParamNames then
+      begin
+        Inc(iParamSuffix);
+        slNames.AddObject(sIBXParam + IntToStr(iParamSuffix),self); //Note local convention
+                                            //add pointer to self to mark entry
+        Result := Result + '?';
+      end
+      else
+        IBError(ibxeSQLParseError, [SParamNameExpected]);
+
+    sqltQuotedString:
+      Result := Result + '''' + SQLSafeString(TokenText) + '''';
+
+    sqltIdentifierInDoubleQuotes:
+      Result := Result + '"' + StringReplace(TokenText,'"','""',[rfReplaceAll]) + '"';
+
+    sqltComment:
+      Result := Result + '/*' + TokenText + '*/';
+
+    sqltCommentLine:
+      Result := Result + '//' + TokenText + LineEnding;
+
+    sqltEOL:
+      Result := Result + LineEnding;
+
+    else
+      Result := Result + TokenText;
+    end;
+  end;
+end;
+
+function TSQLParamProcessor.GetChar: AnsiChar;
+begin
+  if FIndex <= Length(FInString) then
+  begin
+    Result := FInString[FIndex];
+    Inc(FIndex);
+  end
+  else
+    Result := #0;
+end;
+
+class function TSQLParamProcessor.Execute(sSQL: AnsiString;
+  GenerateParamNames: boolean; var slNames: TStrings): AnsiString;
+begin
+  with self.Create do
+  try
+    FInString := sSQL;
+    FIndex := 1;
+    Result := DoExecute(GenerateParamNames,slNames);
+  finally
+    Free;
+  end;
+end;
+
 { TSQLwithNamedParamsTokeniser }
 
 procedure TSQLwithNamedParamsTokeniser.Assign(source: TSQLTokeniser);
@@ -1093,6 +1190,8 @@ begin
       Result := sqltSingleQuotes;
     '/':
       Result := sqltForwardSlash;
+    '\':
+      Result := sqltBackslash;
     '*':
       Result := sqltAsterisk;
     '(':

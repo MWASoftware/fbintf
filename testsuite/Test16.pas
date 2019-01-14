@@ -111,6 +111,17 @@ begin
   except on E: Exception do
     writeln(OutFile,'Error Handled: ',E.Message);
   end;
+  Transaction.Rollback;
+  Transaction.Start;
+  try
+    writeln(OutFile,'Case sensitive Param SQL  Test');
+    Statement := Attachment.PrepareWithNamedParameters(Transaction,'Update Employee Set Hire_Date = :Hire_Date Where emp_no = :emp_no',3,false,true);
+    Statement.SQLParams.ByName('Hire_Date').AsDate := EncodeDate(2016,11,5);
+    Statement.SQLParams.ByName('emp_no').AsInteger := 1;
+    Statement.SQLParams.ByName('EMP_NO').AsInteger := 1;
+  except on E: Exception do
+    writeln(OutFile,'Error Handled: ',E.Message);
+  end;
 end;
 
 procedure TTest16.ServiceTests(CharSet: AnsiString; SQLDialect: integer);

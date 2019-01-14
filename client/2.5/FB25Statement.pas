@@ -262,7 +262,8 @@ type
     constructor Create(Attachment: TFB25Attachment; Transaction: ITransaction;
       sql: AnsiString; aSQLDialect: integer);
     constructor CreateWithParameterNames(Attachment: TFB25Attachment;
-      Transaction: ITransaction; sql: AnsiString; aSQLDialect: integer; GenerateParamNames: boolean);
+      Transaction: ITransaction; sql: AnsiString; aSQLDialect: integer; GenerateParamNames: boolean;
+      CaseSensitiveParams: boolean=false);
     destructor Destroy; override;
     function FetchNext: boolean;
 
@@ -1179,15 +1180,17 @@ begin
   InternalPrepare;
 end;
 
-constructor TFB25Statement.CreateWithParameterNames(Attachment: TFB25Attachment;
-  Transaction: ITransaction; sql: AnsiString; aSQLDialect: integer;
-  GenerateParamNames: boolean);
+constructor TFB25Statement.CreateWithParameterNames(
+  Attachment: TFB25Attachment; Transaction: ITransaction; sql: AnsiString;
+  aSQLDialect: integer; GenerateParamNames: boolean;
+  CaseSensitiveParams: boolean);
 begin
   inherited CreateWithParameterNames(Attachment,Transaction,sql,aSQLDialect,GenerateParamNames);
   FDBHandle := Attachment.Handle;
   FFirebird25ClientAPI := Attachment.Firebird25ClientAPI;
   OnDatabaseError := FFirebird25ClientAPI.IBDataBaseError;
   FSQLParams := TIBXINPUTSQLDA.Create(self);
+  FSQLParams.CaseSensitiveParams := CaseSensitiveParams;
   FSQLRecord := TIBXOUTPUTSQLDA.Create(self);
   InternalPrepare;
 end;
