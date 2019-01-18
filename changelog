@@ -1,4 +1,4 @@
-FBINTF Change Log  version          (1.1-4 Build 11339)  Fri, 28 Dec 2018 10:04:19 +0000
+FBINTF Change Log  version          (1.1-4 Build 11351)  Fri, 28 Dec 2018 10:04:19 +0000
 
 1. Fix a problem with the SQL parameter parser that failed to recognise parameters
    where the second character of the parameter name is a numeric.
