@@ -305,6 +305,10 @@ Constrained Employee Count = 3
 Running Test 4: Update, Insert and Delete Queries
 Opening localhost:employee
 Database Open
+Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V3.0.1.32609 Firebird 3.0"
+Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V3.0.1.32609 Firebird 3.0/tcp (mint18-FB3)/P14:CZ"
+Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-V3.0.1.32609 Firebird 3.0/tcp (mint18-FB3)/P14:CZ"
+on disk structure version 12.0
 Select Count = 1 InsertCount = 0 UpdateCount = 1 DeleteCount = 0
 EMP_NO = 8
 FIRST_NAME = Leslie
@@ -318,10 +322,10 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 19604216
+Current memory = 19604200
 Delta memory = 4280
-Max memory = 19666136
-Elapsed time= 0.000 sec
+Max memory = 19666120
+Elapsed time= 0.001 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
@@ -505,10 +509,12 @@ SALARY = 41,000.89
 FULL_NAME = Doe, Jane
 
 Employee Count = 43
+Updating
+Select Count = 1 InsertCount = 0 UpdateCount = 0 DeleteCount = 0
 Prepare Query again
 
 EMP_NO = 150
-FIRST_NAME = Jane
+FIRST_NAME = Jayne's
 LAST_NAME = Doe
 PHONE_EXT = NULL
 HIRE_DATE = 1/4/2015 00:00:00.000
@@ -517,7 +523,7 @@ JOB_CODE = Eng
 JOB_GRADE = 4
 JOB_COUNTRY = England
 SALARY = 41,000.89
-FULL_NAME = Doe, Jane
+FULL_NAME = Doe, Jayne's
 
 Prepare Query again with a different transaction
 
@@ -2268,9 +2274,9 @@ Database is Read/Write
 Database Created: 27/9/2016 12:08:46
 Pages Used = 297
 Pages Free = 10
-Server Memory = 19122464
+Server Memory = 19122448
 Forced Writes  = 1
-Max Memory  = 19242808
+Max Memory  = 19242792
 Num Buffers  = 2048
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
@@ -2597,9 +2603,12 @@ Transaction not started Test
 Error Handled: Transaction is not active
 Invalid Param SQL Type Test
 Error Handled: Field "EMP_NO" not found
+Case sensitive Param SQL  Test
+Error Handled: Field "EMP_NO" not found
 Invalid Server Name Test
 Error Handled: Unable to complete network request to host "unknown".
-Failed to establish a connection
+Failed to locate host machine.
+The specified name was not found in the hosts file or Domain Name Services
 Invalid User Name Test
 Error Handled: Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Invalid password Test
