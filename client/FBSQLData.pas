@@ -421,6 +421,7 @@ type
     function getSQLParam(index: integer): ISQLParam;
     function ByName(Idx: AnsiString): ISQLParam ;
     function GetModified: Boolean;
+    function GetHasCaseSensitiveParams: Boolean;
   end;
 
   { TResults }
@@ -2390,6 +2391,11 @@ begin
       result := True;
       exit;
     end;
+end;
+
+function TSQLParams.GetHasCaseSensitiveParams: Boolean;
+begin
+  Result := FSQLParams.CaseSensitiveParams;
 end;
 
 { TResults }

@@ -643,6 +643,7 @@ type
     function getSQLParam(index: integer): ISQLParam;
     function ByName(Idx: AnsiString): ISQLParam ;
     function GetModified: Boolean;
+    function GetHasCaseSensitiveParams: Boolean;
     property Modified: Boolean read GetModified;
     property Params[index: integer]: ISQLParam read getSQLParam; default;
     property Count: integer read getCount;
