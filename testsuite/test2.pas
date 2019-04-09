@@ -51,7 +51,11 @@ var Transaction: ITransaction;
     ResultSet: IResultSet;
 begin
     Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
-    Statement := Attachment.Prepare(Transaction,'Select First 3 * from EMPLOYEE',3);
+    Statement := Attachment.Prepare(Transaction,
+    '-- SQL style inline comment' + LineEnding +
+    '/* this is a comment */ '+
+    'Select First 3 * from EMPLOYEE'
+    ,3);
     PrintMetaData(Statement.GetMetaData);
     writeln(OutFile,'Plan = ' ,Statement.GetPlan);
     writeln(OutFile,Statement.GetSQLText);
@@ -63,7 +67,9 @@ begin
     Statement.GetSQLParams[0].AsInteger := 8;
     ReportResults(Statement);
     writeln(OutFile,'With param names');
-    Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
+    Statement := Attachment.PrepareWithNamedParameters(Transaction,
+    '//C++ style inline comment'+ LineEnding +
+    'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
     Statement.SetRetainInterfaces(true);
     try
       writeln(OutFile,Statement.GetSQLText);

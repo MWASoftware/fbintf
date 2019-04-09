@@ -280,6 +280,7 @@ type
   sqltOpenBracket,
   sqltCloseBracket,
   sqltPipe,
+  sqltMinus,
   sqltConcatSymbol,
   sqltLT,
   sqltGT,
@@ -1036,7 +1037,7 @@ begin
       Result := Result + '/*' + TokenText + '*/';
 
     sqltCommentLine:
-      Result := Result + '//' + TokenText + LineEnding;
+      Result := Result + '--' + TokenText + LineEnding;
 
     sqltEOL:
       Result := Result + LineEnding;
@@ -1210,6 +1211,8 @@ begin
       Result := sqltOpenSquareBracket;
     ']':
       Result := sqltCloseSquareBracket;
+    '-':
+      Result := sqltMinus;
     '<':
       Result := sqltLT;
     '>':
@@ -1484,6 +1487,16 @@ begin
             end
             else
             if FNextToken = sqltForwardSlash then
+            begin
+              FString := '';
+              GetNext;
+              FState := stInCommentLine;
+            end;
+          end;
+
+        sqltMinus:
+          begin
+            if FNextToken = sqltMinus then
             begin
               FString := '';
               GetNext;
