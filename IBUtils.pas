@@ -1485,13 +1485,6 @@ begin
               GetNext;
               FState := stInComment;
             end
-            else
-            if FNextToken = sqltForwardSlash then
-            begin
-              FString := '';
-              GetNext;
-              FState := stInCommentLine;
-            end;
           end;
 
         sqltMinus:

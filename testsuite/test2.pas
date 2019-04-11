@@ -68,7 +68,6 @@ begin
     ReportResults(Statement);
     writeln(OutFile,'With param names');
     Statement := Attachment.PrepareWithNamedParameters(Transaction,
-    '//C++ style inline comment'+ LineEnding +
     'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
     Statement.SetRetainInterfaces(true);
     try

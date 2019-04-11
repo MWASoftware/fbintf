@@ -7,7 +7,6 @@
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <UsageCount Value="46"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -28,10 +27,12 @@
       <Unit3>
         <Filename Value="test2.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="36"/>
-        <CursorPos X="5" Y="72"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="48"/>
+        <CursorPos Y="71"/>
         <UsageCount Value="46"/>
+        <Loaded Value="True"/>
       </Unit3>
       <Unit4>
         <Filename Value="Test3.pas"/>
@@ -42,10 +43,11 @@
       <Unit5>
         <Filename Value="Test4.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="2"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="53"/>
         <CursorPos X="106" Y="171"/>
         <UsageCount Value="46"/>
+        <Loaded Value="True"/>
       </Unit5>
       <Unit6>
         <Filename Value="Test5.pas"/>
@@ -135,17 +137,19 @@
       </Unit18>
       <Unit19>
         <Filename Value="../client/FBClientAPI.pas"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="2"/>
         <TopLine Value="324"/>
         <CursorPos Y="343"/>
         <UsageCount Value="10"/>
+        <Loaded Value="True"/>
       </Unit19>
       <Unit20>
         <Filename Value="../IBUtils.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="1016"/>
-        <CursorPos Y="1049"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="1473"/>
+        <CursorPos Y="1488"/>
         <UsageCount Value="14"/>
+        <Loaded Value="True"/>
       </Unit20>
       <Unit21>
         <Filename Value="../client/FBSQLData.pas"/>
@@ -458,7 +462,28 @@
         <UsageCount Value="10"/>
       </Unit64>
     </Units>
-    <JumpHistory HistoryIndex="-1"/>
+    <JumpHistory Count="5" HistoryIndex="4">
+      <Position1>
+        <Filename Value="../IBUtils.pas"/>
+        <Caret Line="1049" TopLine="991"/>
+      </Position1>
+      <Position2>
+        <Filename Value="../IBUtils.pas"/>
+        <Caret Line="538" Column="14" TopLine="520"/>
+      </Position2>
+      <Position3>
+        <Filename Value="../IBUtils.pas"/>
+        <Caret Line="1170" Column="3" TopLine="1350"/>
+      </Position3>
+      <Position4>
+        <Filename Value="../IBUtils.pas"/>
+        <Caret Line="557" Column="14" TopLine="539"/>
+      </Position4>
+      <Position5>
+        <Filename Value="../IBUtils.pas"/>
+        <Caret Line="1488" TopLine="1473"/>
+      </Position5>
+    </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
       <Modes Count="0" ActiveMode="default"/>
