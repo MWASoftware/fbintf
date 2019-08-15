@@ -73,17 +73,12 @@ type
                        aSQLDialect: integer; GenerateParamNames: boolean=false;
                        CaseSensitiveParams: boolean=false): IStatement; override;
     function GetEventHandler(Events: TStrings): IEvents; override;
-    function CreateBlob(transaction: ITransaction; RelationName, ColumnName: AnsiString; BPB: IBPB=nil): IBlob; overload;
-    function CreateBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BPB: IBPB=nil): IBlob; overload;
+    function CreateBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BPB: IBPB=nil): IBlob; overload; override;
     function CreateBlob(transaction: ITransaction; SubType: integer; aCharSetID: cardinal=0; BPB: IBPB=nil): IBlob; overload;
-    function OpenBlob(transaction: ITransaction; RelationName, ColumnName: AnsiString; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob; overload;
     function OpenBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob; overload; override;
 
-    function OpenArray(transaction: ITransaction; RelationName, ColumnName: AnsiString;
-      ArrayID: TISC_QUAD): IArray;
-    function CreateArray(transaction: ITransaction; RelationName, ColumnName: AnsiString
-      ): IArray; overload;
-    function CreateArray(transaction: ITransaction; ArrayMetaData: IArrayMetaData): IArray; overload;
+    function OpenArray(transaction: ITransaction; ArrayMetaData: IArrayMetaData; ArrayID: TISC_QUAD): IArray; overload; override;
+    function CreateArray(transaction: ITransaction; ArrayMetaData: IArrayMetaData): IArray; overload; override;
     function CreateArrayMetaData(SQLType: cardinal; tableName: AnsiString; columnName: AnsiString;
       Scale: integer; size: cardinal;
       acharSetID: cardinal; dimensions: cardinal; bounds: TArrayBounds
@@ -91,8 +86,8 @@ type
 
     {Database Information}
 
-    function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IBlobMetaData;
-    function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IArrayMetaData;
+    function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IBlobMetaData; override;
+    function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IArrayMetaData; override;
     procedure getFBVersion(version: TStrings);
   end;
 
@@ -244,14 +239,6 @@ begin
   Result := TFB25Transaction.Create(FFirebird25ClientAPI,self,TPB,DefaultCompletion);
 end;
 
-function TFB25Attachment.CreateBlob(transaction: ITransaction; RelationName,
-  ColumnName: AnsiString; BPB: IBPB): IBlob;
-begin
-  CheckHandle;
-  Result := TFB25Blob.Create(self,transaction as TFB25transaction,
-                TFB25BlobMetaData.Create(self,Transaction as TFB25Transaction,RelationName,ColumnName),BPB);
-end;
-
 function TFB25Attachment.CreateBlob(transaction: ITransaction;
   BlobMetaData: IBlobMetaData; BPB: IBPB): IBlob;
 begin
@@ -264,15 +251,6 @@ function TFB25Attachment.CreateBlob(transaction: ITransaction;
 begin
   CheckHandle;
   Result := TFB25Blob.Create(self,transaction as TFB25transaction,SubType,aCharSetID,BPB);
-end;
-
-function TFB25Attachment.OpenBlob(transaction: ITransaction; RelationName,
-  ColumnName: AnsiString; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob;
-begin
-  CheckHandle;
-  Result := TFB25Blob.Create(self,transaction as TFB25transaction,
-                TFB25BlobMetaData.Create(self,Transaction as TFB25Transaction,RelationName,ColumnName),
-                BlobID,BPB);
 end;
 
 function TFB25Attachment.OpenBlob(transaction: ITransaction;
@@ -316,19 +294,12 @@ begin
   Result := TFB25Events.Create(self,Events);
 end;
 
-function TFB25Attachment.OpenArray(transaction: ITransaction; RelationName, ColumnName: AnsiString;
+function TFB25Attachment.OpenArray(transaction: ITransaction; ArrayMetaData: IArrayMetaData;
   ArrayID: TISC_QUAD): IArray;
 begin
   CheckHandle;
   Result := TFB25Array.Create(self,transaction as TFB25Transaction,
-                    GetArrayMetaData(transaction,RelationName,ColumnName),ArrayID);
-end;
-
-function TFB25Attachment.CreateArray(transaction: ITransaction; RelationName, ColumnName: AnsiString): IArray;
-begin
-  CheckHandle;
-  Result := TFB25Array.Create(self,transaction as TFB25Transaction,
-                    GetArrayMetaData(transaction,RelationName,ColumnName));
+                    ArrayMetaData,ArrayID);
 end;
 
 function TFB25Attachment.CreateArray(transaction: ITransaction;

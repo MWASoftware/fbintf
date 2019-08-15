@@ -218,6 +218,7 @@ type
   IFirebirdAPI = interface;
   IAttachment = interface;
   ITransaction = interface;
+  IStatement = interface;
 
   {The IParameterBlock interface provides the template for all parameter
    block interfaces}
@@ -436,6 +437,8 @@ type
     function GetArrayMetaData: IArrayMetaData; {Valid only for Array SQL Type}
     function GetBlobMetaData: IBlobMetaData; {Valid only for Blob SQL Type}
     function GetDateTimeStrLength(DateTimeFormat: TIBDateTimeFormats): integer;
+    function GetStatement: IStatement;
+    function GetTransaction: ITransaction;
     property Name: AnsiString read GetName;
     property Size: cardinal read GetSize;
     property SQLType: cardinal read GetSQLType;
@@ -477,6 +480,7 @@ type
 
   ISQLData = interface(IColumnMetaData)
     ['{3f493e31-7e3f-4606-a07c-b210b9e3619d}']
+    function GetStrDataLength: short;
     function GetAsBoolean: boolean;
     function GetAsCurrency: Currency;
     function GetAsInt64: Int64;
@@ -523,6 +527,7 @@ type
   IResults = interface
     ['{e836b2bb-93d1-4bbf-a8eb-7ce535de3bb5}']
    function getCount: integer;
+   function GetStatement: IStatement;
    function GetTransaction: ITransaction;
    function ByName(Idx: AnsiString): ISQLData;
    function getSQLData(index: integer): ISQLData;
@@ -936,11 +941,13 @@ type
     function CreateBlob(transaction: ITransaction; RelationName, ColumnName: AnsiString; BPB: IBPB=nil): IBlob; overload;
     function CreateBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BPB: IBPB=nil): IBlob; overload;
     function CreateBlob(transaction: ITransaction; SubType: integer; CharSetID: cardinal=0; BPB: IBPB=nil): IBlob; overload;
-    function OpenBlob(transaction: ITransaction; RelationName, ColumnName: AnsiString; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob;
+    function OpenBlob(transaction: ITransaction; RelationName, ColumnName: AnsiString; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob; overload;
+    function OpenBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob;  overload;
 
     {Array - may use to open existing arrays. However, ISQLData.AsArray is preferred}
 
-    function OpenArray(transaction: ITransaction; RelationName, ColumnName: AnsiString; ArrayID: TISC_QUAD): IArray;
+    function OpenArray(transaction: ITransaction; RelationName, ColumnName: AnsiString; ArrayID: TISC_QUAD): IArray; overload;
+    function OpenArray(transaction: ITransaction; ArrayMetaData: IArrayMetaData; ArrayID: TISC_QUAD): IArray; overload;
     function CreateArray(transaction: ITransaction; RelationName, ColumnName: AnsiString): IArray; overload;
     function CreateArray(transaction: ITransaction; ArrayMetaData: IArrayMetaData): IArray; overload;
     function CreateArrayMetaData(SQLType: cardinal; tableName: AnsiString; columnName: AnsiString;

@@ -119,6 +119,7 @@ type
      function GetSQLType: cardinal; virtual; abstract;
      function GetSQLTypeName: AnsiString; overload;
      class function GetSQLTypeName(SQLType: short): AnsiString; overload;
+     function GetStrDataLength: short;
      function GetName: AnsiString; virtual; abstract;
      function GetScale: integer; virtual; abstract;
      function GetAsBoolean: boolean;
@@ -322,6 +323,8 @@ type
     function GetSize: cardinal;
     function GetArrayMetaData: IArrayMetaData;
     function GetBlobMetaData: IBlobMetaData;
+    function GetStatement: IStatement;
+    function GetTransaction: ITransaction; virtual;
     property Name: AnsiString read GetName;
     property Size: cardinal read GetSize;
     property CharSetID: cardinal read getCharSetID;
@@ -332,9 +335,12 @@ type
   { TIBSQLData }
 
   TIBSQLData = class(TColumnMetaData,ISQLData)
+  private
+    FTransaction: ITransaction;
   protected
     procedure CheckActive; override;
   public
+    function GetTransaction: ITransaction; override;
     function GetIsNull: Boolean; override;
     function GetAsArray: IArray;
     function GetAsBlob: IBlob; overload;
@@ -443,6 +449,7 @@ type
      function ByName(Idx: AnsiString): ISQLData;
      function getSQLData(index: integer): ISQLData;
      procedure GetData(index: integer; var IsNull:boolean; var len: short; var data: PByte);
+     function GetStatement: IStatement;
      function GetTransaction: ITransaction; virtual;
      procedure SetRetainInterfaces(aValue: boolean);
  end;
@@ -947,6 +954,15 @@ begin
   SQL_TYPE_DATE:	Result := 'SQL_TYPE_DATE';
   SQL_INT64:		Result := 'SQL_INT64';
   end;
+end;
+
+function TSQLDataItem.GetStrDataLength: short;
+begin
+  with FFirebirdClientAPI do
+  if SQLType = SQL_VARYING then
+    Result := DecodeInteger(SQLData, 2)
+  else
+    Result := DataLength;
 end;
 
 function TSQLDataItem.GetAsBoolean: boolean;
@@ -1674,6 +1690,16 @@ begin
   result := FIBXSQLVAR.GetBlobMetaData;
 end;
 
+function TColumnMetaData.GetStatement: IStatement;
+begin
+  Result := FStatement;
+end;
+
+function TColumnMetaData.GetTransaction: ITransaction;
+begin
+  Result := GetStatement.GetTransaction;
+end;
+
 { TIBSQLData }
 
 procedure TIBSQLData.CheckActive;
@@ -1691,6 +1717,14 @@ begin
 
   if FIBXSQLVAR.Parent.CheckStatementStatus(ssBOF) then
     IBError(ibxeBOF,[nil]);
+end;
+
+function TIBSQLData.GetTransaction: ITransaction;
+begin
+  if FTransaction = nil then
+    Result := inherited GetTransaction
+  else
+    Result := FTransaction;
 end;
 
 function TIBSQLData.GetIsNull: Boolean;
@@ -2416,13 +2450,16 @@ begin
 end;
 
 function TResults.GetISQLData(aIBXSQLVAR: TSQLVarData): ISQLData;
+var col: TIBSQLData;
 begin
   if (aIBXSQLVAR.Index < 0) or (aIBXSQLVAR.Index >= getCount) then
     IBError(ibxeInvalidColumnIndex,[nil]);
 
   if not HasInterface(aIBXSQLVAR.Index) then
     AddInterface(aIBXSQLVAR.Index, TIBSQLData.Create(self,aIBXSQLVAR));
-  Result := TIBSQLData(GetInterface(aIBXSQLVAR.Index));
+  col := TIBSQLData(GetInterface(aIBXSQLVAR.Index));
+  col.FTransaction := GetTransaction;
+  Result := col;
 end;
 
 constructor TResults.Create(aResults: TSQLDataArea);
@@ -2477,6 +2514,11 @@ procedure TResults.GetData(index: integer; var IsNull: boolean; var len: short;
 begin
   CheckActive;
   FResults.GetData(index,IsNull, len,data);
+end;
+
+function TResults.GetStatement: IStatement;
+begin
+  Result := FStatement;
 end;
 
 function TResults.GetTransaction: ITransaction;

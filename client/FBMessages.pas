@@ -259,7 +259,9 @@ type
       ibxErrorParsing,
       ibxeDLInfoError,
       ibxeDifferentAPIs,
-      ibxeParameterNameNotFound
+      ibxeParameterNameNotFound,
+      ibxeInvalidForUniCursor,
+      ibxeRowIsModified
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -480,6 +482,8 @@ resourcestring
   SDLInfoError = 'dlinfo returned error - %s';
   SDifferentAPIs = 'All transaction attachments must use the same Firebird Library';
   SParameterNameNotFound = 'Parameter Name (%s) not found';
+  SInvalidForUniCursor = 'Operation invalid for Unidirectional Cursor';
+  SRowIsModified = 'Current row has been modified and not yet saved';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -661,7 +665,9 @@ const
     SErrorParsing,
     SDLInfoError,
     SDifferentAPIs,
-    SParameterNameNotFound
+    SParameterNameNotFound,
+    SInvalidForUniCursor,
+    SRowIsModified
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;

@@ -123,8 +123,16 @@ type
     function GetEventHandler(Event: AnsiString): IEvents; overload;
 
     function GetSQLDialect: integer;
+    function CreateBlob(transaction: ITransaction; RelationName, ColumnName: AnsiString; BPB: IBPB=nil): IBlob; overload;
+    function CreateBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BPB: IBPB=nil): IBlob; overload; virtual; abstract;
     function OpenBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob; overload; virtual; abstract;
+    function OpenBlob(transaction: ITransaction; RelationName, ColumnName: AnsiString; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob; overload;
     function OpenBlob(transaction: ITransaction; Field: ISQLData; BPB: IBPB=nil): IBlob; overload;
+    function CreateArray(transaction: ITransaction; RelationName, ColumnName: AnsiString
+      ): IArray; overload;
+    function CreateArray(transaction: ITransaction; ArrayMetaData: IArrayMetaData): IArray; overload; virtual; abstract;
+    function OpenArray(transaction: ITransaction; RelationName, ColumnName: AnsiString; ArrayID: TISC_QUAD): IArray; overload;
+    function OpenArray(transaction: ITransaction; ArrayMetaData: IArrayMetaData; ArrayID: TISC_QUAD): IArray; overload; virtual; abstract;
     property SQLDialect: integer read FSQLDialect;
     property DPB: IDPB read FDPB;
 public
@@ -147,6 +155,8 @@ public
   function CharSetWidth(CharSetID: integer; var Width: integer): boolean;
   procedure RegisterCharSet(CharSetName: AnsiString; CodePage: TSystemCodePage;
     AllowReverseLookup:boolean; out CharSetID: integer);
+  function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IBlobMetaData; virtual; abstract;
+  function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IArrayMetaData; virtual; abstract;
   property CharSetID: integer read FCharSetID;
   property CodePage: TSystemCodePage read FCodePage;
   end;
@@ -615,10 +625,37 @@ begin
   Result := FSQLDialect;
 end;
 
+function TFBAttachment.CreateBlob(transaction: ITransaction; RelationName,
+  ColumnName: AnsiString; BPB: IBPB): IBlob;
+begin
+  Result := CreateBlob(transaction,GetBlobMetaData(Transaction,RelationName,ColumnName),BPB);
+end;
+
+function TFBAttachment.OpenBlob(transaction: ITransaction; RelationName,
+  ColumnName: AnsiString; BlobID: TISC_QUAD; BPB: IBPB): IBlob;
+begin
+  Result := OpenBlob(Transaction,
+                GetBlobMetaData(Transaction,RelationName,ColumnName),
+                BlobID,BPB);
+end;
+
 function TFBAttachment.OpenBlob(transaction: ITransaction; Field: ISQLData;
   BPB: IBPB): IBlob;
 begin
   Result := OpenBlob(Transaction,Field.GetBlobMetadata, Field.AsQuad,BPB);
+end;
+
+function TFBAttachment.CreateArray(transaction: ITransaction; RelationName,
+  ColumnName: AnsiString): IArray;
+begin
+  Result := CreateArray(transaction,GetArrayMetaData(transaction,RelationName,ColumnName));
+end;
+
+function TFBAttachment.OpenArray(transaction: ITransaction; RelationName,
+  ColumnName: AnsiString; ArrayID: TISC_QUAD): IArray;
+begin
+  Result := OpenArray(transaction,
+    GetArrayMetaData(transaction,RelationName,ColumnName),ArrayID);
 end;
 
 function TFBAttachment.GetDBInformation(Requests: array of byte
