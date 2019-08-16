@@ -258,6 +258,12 @@ type
    This interface can be accessed from IFirebirdAPI.
    }
 
+   TIBDataBaseErrorMessage    = (ShowSQLCode,
+                                   ShowIBMessage,
+                                   ShowSQLMessage);
+
+   TIBDataBaseErrorMessages   = set of TIBDataBaseErrorMessage;
+
   IStatus = interface
     ['{34167722-af38-4831-b08a-93162d58ede3}']
     function GetIBErrorCode: Long;
@@ -1200,10 +1206,6 @@ type
    {IB Client Exceptions}
    EIBClientError = class(EIBError);
 
-{IBError is used internally and by IBX to throw an EIBClientError}
-
-procedure IBError(ErrMess: TIBClientError; const Args: array of const);
-
 {The Firebird API function is used to access the IFirebirdAPI interface.
 
  It will load the Firebird Client Library if this is not already loaded and
@@ -1331,11 +1333,6 @@ begin
   FIBErrorCode := AIBErrorCode;
 end;
 
-procedure IBError(ErrMess: TIBClientError; const Args: array of const);
-begin
-  raise EIBClientError.Create(Ord(ErrMess),
-                              Format(GetErrorMessage(ErrMess), Args));
-end;
 
 initialization
   FDefaultFBLibrary := nil;

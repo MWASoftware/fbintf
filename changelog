@@ -5,6 +5,16 @@ FBINTF Change Log  version          (1.1-5 Build 11664) Thu, 11 Apr 2019 09:43:4
 
 2. Single line SQL comments starting with '--' are now recognised by SQL Parser.
 
+3. New API Calls:
+	IColumnMetaData.GetStatement
+	IColumnMetaData.GetTransaction
+	ISQLData.GetStrLength
+	IResults.GetStatement
+	IAttachment.OpenBlob (using Blob metadata)
+	IAttachment.OpenArray (using array metadata)
+
+4. FBMessages: removal of unused messages
+
 FBINTF Change Log  version          (1.1-4 Build 11515)  Fri, 28 Dec 2018 10:04:19 +0000
 
 1. Fix a problem with the SQL parameter parser that failed to recognise parameters

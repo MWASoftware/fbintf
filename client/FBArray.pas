@@ -161,8 +161,8 @@ type
     FBufSize: ISC_LONG;
     FArrayID: TISC_QUAD;
     procedure AllocateBuffer; virtual;
-    procedure Changing;
-    procedure Changed;
+    procedure Changing; virtual;
+    procedure Changed;  virtual;
     function GetArrayDesc: PISC_ARRAY_DESC;
     procedure InternalGetSlice; virtual; abstract;
     procedure InternalPutSlice(Force: boolean); virtual; abstract;
