@@ -7,6 +7,8 @@
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="16"/>
         <UsageCount Value="46"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -27,9 +29,8 @@
       <Unit3>
         <Filename Value="test2.pas"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="4"/>
-        <TopLine Value="48"/>
+        <TopLine Value="18"/>
         <CursorPos Y="71"/>
         <UsageCount Value="46"/>
         <Loaded Value="True"/>
@@ -462,7 +463,7 @@
         <UsageCount Value="10"/>
       </Unit64>
     </Units>
-    <JumpHistory Count="5" HistoryIndex="4">
+    <JumpHistory Count="4" HistoryIndex="3">
       <Position1>
         <Filename Value="../IBUtils.pas"/>
         <Caret Line="1049" TopLine="991"/>
@@ -473,16 +474,12 @@
       </Position2>
       <Position3>
         <Filename Value="../IBUtils.pas"/>
-        <Caret Line="1170" Column="3" TopLine="1350"/>
+        <Caret Line="557" Column="14" TopLine="539"/>
       </Position3>
       <Position4>
         <Filename Value="../IBUtils.pas"/>
-        <Caret Line="557" Column="14" TopLine="539"/>
-      </Position4>
-      <Position5>
-        <Filename Value="../IBUtils.pas"/>
         <Caret Line="1488" TopLine="1473"/>
-      </Position5>
+      </Position4>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

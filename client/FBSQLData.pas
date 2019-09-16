@@ -293,7 +293,6 @@ type
     FIBXSQLVAR: TSQLVarData;
     FOwner: IUnknown;         {Keep reference to ensure Metadata/statement not discarded}
     FPrepareSeqNo: integer;
-    FStatement: IStatement;
     FChangeSeqNo: integer;
   protected
     procedure CheckActive; override;
@@ -305,7 +304,6 @@ type
     constructor Create(aOwner: IUnknown; aIBXSQLVAR: TSQLVarData);
     destructor Destroy; override;
     function GetSQLDialect: integer; override;
-    property Statement: IStatement read FStatement;
 
   public
     {IColumnMetaData}
@@ -330,6 +328,8 @@ type
     property CharSetID: cardinal read getCharSetID;
     property SQLSubtype: integer read getSubtype;
     property IsNullable: Boolean read GetIsNullable;
+  public
+    property Statement: IStatement read GetStatement;
   end;
 
   { TIBSQLData }
@@ -1692,7 +1692,7 @@ end;
 
 function TColumnMetaData.GetStatement: IStatement;
 begin
-  Result := FStatement;
+  Result := FIBXSQLVAR.GetStatement;
 end;
 
 function TColumnMetaData.GetTransaction: ITransaction;
