@@ -765,6 +765,7 @@ begin
   FMetaData := aField;
   FArrayID := ArrayID;
   FAttachment := aAttachment;
+  FFirebirdClientAPI := aTransaction.FirebirdAPI;
   FTransactionIntf :=  aTransaction;
   FTransactionSeqNo := aTransaction.TransactionSeqNo;
   FIsNew := false;
