@@ -142,6 +142,7 @@ const
  and define the various constants used by the API}
 
 {$I 'include/consts_pub.inc'}
+{$I 'include/dyn_consts.inc'}
 {$I 'include/inf_pub.inc'}
 {$I 'include/configkeys.inc'}
 
@@ -166,6 +167,12 @@ const
   SQL_TYPE_DATE                  =        570;
   SQL_INT64                      =        580;
   SQL_BOOLEAN                    =        32764;
+  SQL_TIMESTAMP_TZ               =        32754;
+  SQL_TIME_TZ                    =        32756;
+  SQL_DEC_FIXED                  =        32758;
+  SQL_DEC16                      =        32760;
+  SQL_DEC34                      =        32762;
+  SQL_NULL                       =        32766;
   SQL_DATE                       =        SQL_TIMESTAMP;
 
 type

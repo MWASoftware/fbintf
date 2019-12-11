@@ -17,6 +17,8 @@ FBINTF Change Log  version          (1.1-5 Build 11664) Thu, 11 Apr 2019 09:43:4
 
 5. TFBArray.Create (2nd case): ensure that FFirebirdClientAPI is correctly set.
 
+6. Imported (Firebird) constants updated for Firebird 4.
+
 FBINTF Change Log  version          (1.1-4 Build 11515)  Fri, 28 Dec 2018 10:04:19 +0000
 
 1. Fix a problem with the SQL parameter parser that failed to recognise parameters
