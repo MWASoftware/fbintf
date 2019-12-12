@@ -183,6 +183,13 @@ type
     function SQLDecodeTime(bufptr: PByte): TDateTime;  virtual; abstract;
     procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte); virtual; abstract;
     function SQLDecodeDateTime(bufptr: PByte): TDateTime; virtual; abstract;
+    {Firebird 4 Extensions}
+    procedure SQLEncodeTimeTZ(aTime: TDateTime; aTimeZone: AnsiString; bufptr: PByte); virtual;
+    procedure SQLDecodeTimeTZ(var aTime: TDateTime; var aTimeZone: AnsiString; bufptr: PByte); virtual;
+    procedure SQLEncodeTimeStampTZ(aTimeStamp: TDateTime; aTimeZone: AnsiString;
+      bufptr: PByte); virtual;
+    procedure SQLDecodeTimeStampTZ(var aTimeStamp: TDateTime;
+      var aTimeZone: AnsiString; bufptr: PByte); virtual;
 
 
     {IFirebirdAPI}
@@ -354,6 +361,30 @@ begin
     Dec(len);
     aValue := aValue shr 8;
   end;
+end;
+
+procedure TFBClientAPI.SQLEncodeTimeTZ(aTime: TDateTime; aTimeZone: AnsiString;
+  bufptr: PByte);
+begin
+  IBError(ibxeNotSupported,[]);
+end;
+
+procedure TFBClientAPI.SQLDecodeTimeTZ(var aTime: TDateTime;
+  var aTimeZone: AnsiString; bufptr: PByte);
+begin
+  IBError(ibxeNotSupported,[]);
+end;
+
+procedure TFBClientAPI.SQLEncodeTimeStampTZ(aTimeStamp: TDateTime;
+  aTimeZone: AnsiString; bufptr: PByte);
+begin
+  IBError(ibxeNotSupported,[]);
+end;
+
+procedure TFBClientAPI.SQLDecodeTimeStampTZ(var aTimeStamp: TDateTime;
+  var aTimeZone: AnsiString; bufptr: PByte);
+begin
+  IBError(ibxeNotSupported,[]);
 end;
 
 function TFBClientAPI.IsLibraryLoaded: boolean;

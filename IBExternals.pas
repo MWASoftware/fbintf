@@ -62,6 +62,7 @@ type
   UChar                = Byte;    { 8 bit unsigned }
   ISC_LONG             = Long;    { 32 bit signed  }
   UISC_LONG            = ULong;   { 32 bit unsigned }
+  ISC_USHORT           = UShort;  { 16 bit unsigned }
   ISC_INT64            = Int64;   { 64 bit signed  }
 {$IFDEF CPU64}
   ISC_STATUS           = Int64;   { 64 bit signed }
@@ -87,7 +88,29 @@ type
   PPISC_STATUS         = ^PISC_STATUS;
   PUISC_STATUS         = ^UISC_STATUS;
 
+  FB_DEC16 = array [1..1] of Int64;
+  FB_DEC34 = array [1..2] of Int64;
+  FB_DEC_FIXED = array [1..2] of Int64;
+
+  ISC_DATE = Integer;
+  ISC_TIME = Integer;
+
+  ISC_TIME_TZ = record
+    utc_time: ISC_TIME;
+    time_zone: ISC_USHORT;
+  end;
+
+  ISC_TIMESTAMP = record
+    timestamp_date: ISC_DATE;
+    timestamp_time: ISC_TIME;
+  end;
+
+  ISC_TIMESTAMP_TZ = record
+    utc_timestamp: ISC_TIMESTAMP;
+    time_zone: ISC_USHORT;
+  end;
 type
+
   { C Date/Time Structure }
   TCTimeStructure = record
     tm_sec : integer;   { Seconds }

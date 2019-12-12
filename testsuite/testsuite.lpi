@@ -34,13 +34,10 @@
         </Mode0>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="2">
+    <RequiredPackages Count="1">
       <Item1>
-        <PackageName Value="LCL"/>
-      </Item1>
-      <Item2>
         <PackageName Value="fbintf"/>
-      </Item2>
+      </Item1>
     </RequiredPackages>
     <Units Count="19">
       <Unit0>
@@ -140,6 +137,7 @@
     </CodeGeneration>
     <Linking>
       <Debugging>
+        <DebugInfoType Value="dsDwarf2Set"/>
         <UseHeaptrc Value="True"/>
       </Debugging>
     </Linking>

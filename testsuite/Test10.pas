@@ -58,7 +58,6 @@ const
 
 procedure TTest10.EventsTest(Attachment: IAttachment);
 var EventHandler: IEvents;
-    i: integer;
     WaitCount: integer;
 begin
   FEventSignalled := false;
