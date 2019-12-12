@@ -7,6 +7,50 @@
  Use of FBException is now conditional and not used for IBX.
 
  constants removed and imported separately into IB.pas
+
+ The original Firebird.pas also contains the following defects - fixed in this version:
+
+
+1. The reserved word "record" is used as a parameter name and needs to be escaped i.e. to "&record".
+
+2. Unknown Types:
+
+Replace:
+    isc_tr_handle = ^integer32;
+    isc_stmt_handle = ^integer32;
+
+with
+
+    isc_tr_handle = ^FixedInt;
+    isc_stmt_handle = ^FixedInt;
+
+3. Missing Types: (now defined in IBExternals)
+
+  ISC_USHORT  = word;   (16 bit unsigned )
+
+  ISC_TIME_TZ = record
+    utc_time: ISC_TIME;
+    time_zone: ISC_USHORT;
+  end;
+
+  ISC_TIMESTAMP = record
+    timestamp_date: ISC_DATE;
+    timestamp_time: ISC_TIME;
+  end;
+
+  ISC_TIMESTAMP_TZ = record
+    utc_timestamp: ISC_TIMESTAMP;
+    time_zone: ISC_USHORT;
+  end;
+
+4. Commented out:
+
+  function fb_get_master_interface : IMaster; cdecl; external 'fbclient';
+
+This is not an appropriate external function declaration for a dynamic link library and only applies to a static library.
+
+When testing with FPC, if this line was not commented out, a linker error occurs when trying to link with the debug heap
+manager (needed for testing for memory leaks).
 }
 
 {$IFDEF MSWINDOWS}

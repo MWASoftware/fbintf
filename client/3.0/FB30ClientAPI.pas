@@ -70,6 +70,8 @@ type
                              when this class is freed and last reference to IStatus
                              goes out of scope.}
     procedure CheckPlugins;
+  protected
+     function SupportsTimeZone: boolean; override;
   public
     constructor Create(aFBLibrary: TFBLibrary);
     destructor Destroy; override;
@@ -129,6 +131,7 @@ type
       bufptr: PByte); override;
     procedure SQLDecodeTimeStampTZ(var aTimeStamp: TDateTime;
       var aTimeZone: AnsiString; bufptr: PByte); override;
+    function GetTimeZoneName(timeZoneID: word): AnsiString; override;
 
     {Firebird Interfaces}
     property MasterIntf: Firebird.IMaster read FMaster;
@@ -195,6 +198,11 @@ begin
   finally
     PluginsList.Free;
   end;
+end;
+
+function TFB30ClientAPI.SupportsTimeZone: boolean;
+begin
+  Result := UtilIntf.version >= 21
 end;
 
 {$IFDEF UNIX}
@@ -430,12 +438,13 @@ procedure TFB30ClientAPI.SQLEncodeTimeTZ(aTime: TDateTime;
 var
   Hr, Mt, S, Ms: word;
 begin
-  if UtilIntf.version < 21 then
+  if not SupportsTimeZone then
     inherited SQLEncodeTimeTZ(aTime, aTimeZone, bufptr)
   else
   begin
     DecodeTime(aTime, Hr, Mt, S, Ms);
     UtilIntf.encodeTimeTz(StatusIntf,ISC_TIME_TZPtr(bufptr),Hr,Mt, S, Ms*10, @aTimeZone);
+    Check4DataBaseError;
   end;
 end;
 
@@ -447,11 +456,12 @@ var
   Hr, Mt, S, Ms: cardinal;
   tzBuffer: array[ 0.. bufLength] of AnsiChar;
 begin
-  if UtilIntf.version < 21 then
+  if not SupportsTimeZone then
     inherited SQLDecodeTimeTZ(aTime, aTimeZone, bufptr)
   else
   begin
     UtilIntf.decodeTimeTz(StatusIntf, ISC_TIME_TZPtr(bufptr),@Hr, @Mt, @S, @Ms,bufLength,@tzBuffer);
+    Check4DataBaseError;
     try
       aTime := EncodeTime(Hr, Mt, S, Ms div 10);
     except
@@ -469,13 +479,14 @@ var
   Yr, Mn, Dy: word;
   Hr, Mt, S, Ms: word;
 begin
-  if UtilIntf.version < 21 then
+  if not SupportsTimeZone then
     inherited SQLEncodeTimeStampTZ(aTimeStamp, aTimeZone, bufptr)
   else
   begin
     DecodeDate(aTimeStamp, Yr, Mn, Dy);
     DecodeTime(aTimeStamp, Hr, Mt, S, Ms);
     UtilIntf.encodeTimeStampTz(StatusIntf,ISC_TIMESTAMP_TZPtr(bufPtr),Yr, Mn, Dy, Hr, Mt, S, Ms*10,@aTimeZone);
+    Check4DataBaseError;
   end;
 end;
 
@@ -488,11 +499,12 @@ var
   Hr, Mt, S, Ms: cardinal;
   tzBuffer: array[ 0.. bufLength] of AnsiChar;
 begin
-  if UtilIntf.version < 21 then
+  if not SupportsTimeZone then
     inherited SQLDecodeTimeStampTZ(aTimeStamp, aTimeZone, bufptr)
   else
   begin
     UtilIntf.decodeTimeStampTz(StatusIntf,ISC_TIMESTAMP_TZPtr(bufPtr),@Yr,@ Mn, @Dy, @Hr, @Mt, @S, @Ms,bufLength,@tzBuffer);
+    Check4DataBaseError;
     try
       aTimeStamp := EncodeDate(Yr, Mn,Dy);
       aTimeStamp := aTimeStamp + EncodeTime(Hr, Mt, S, Ms div 10);
@@ -504,6 +516,17 @@ begin
     aTimeZone := strpas(@tzBuffer);
   end;
 end;
+
+function TFB30ClientAPI.GetTimeZoneName(timeZoneID: word): AnsiString;
+var aTime: TDateTime;
+    aTimeTZ: ISC_TIME_TZ;
+begin
+  aTimeTZ.time_zone := timeZoneID;
+  aTimeTZ.utc_time := 0;
+  SQLDecodeTimeTZ(aTime,Result,@aTimeTZ);
+end;
+
+
 
 end.
 

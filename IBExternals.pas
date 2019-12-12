@@ -95,16 +95,19 @@ type
   ISC_DATE = Integer;
   ISC_TIME = Integer;
 
+  PISC_TIME_TZ = ^ISC_TIME_TZ;
   ISC_TIME_TZ = record
     utc_time: ISC_TIME;
     time_zone: ISC_USHORT;
   end;
 
+  PISC_TIMESTAMP = ^ISC_TIMESTAMP;
   ISC_TIMESTAMP = record
     timestamp_date: ISC_DATE;
     timestamp_time: ISC_TIME;
   end;
 
+  PISC_TIMESTAMP_TZ = ^ISC_TIMESTAMP_TZ;
   ISC_TIMESTAMP_TZ = record
     utc_timestamp: ISC_TIMESTAMP;
     time_zone: ISC_USHORT;

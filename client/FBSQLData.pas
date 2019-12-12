@@ -126,6 +126,7 @@ type
      function GetAsCurrency: Currency;
      function GetAsInt64: Int64;
      function GetAsDateTime: TDateTime;
+     function GetAsDateTimeTZ: TFBTZDateTime;
      function GetAsDouble: Double;
      function GetAsFloat: Float;
      function GetAsLong: Long;
@@ -144,7 +145,8 @@ type
      procedure SetAsDate(Value: TDateTime); virtual;
      procedure SetAsLong(Value: Long); virtual;
      procedure SetAsTime(Value: TDateTime); virtual;
-     procedure SetAsDateTime(Value: TDateTime);
+     procedure SetAsDateTime(Value: TDateTime); overload;
+     procedure SetAsDateTime(aValue: TFBTZDateTime); overload;
      procedure SetAsDouble(Value: Double); virtual;
      procedure SetAsFloat(Value: Float); virtual;
      procedure SetAsPointer(Value: Pointer);
@@ -375,7 +377,8 @@ type
     procedure SetAsDate(AValue: TDateTime);
     procedure SetAsLong(AValue: Long);
     procedure SetAsTime(AValue: TDateTime);
-    procedure SetAsDateTime(AValue: TDateTime);
+    procedure SetAsDateTime(AValue: TDateTime); overload;
+    procedure SetAsDateTime(aValue: TFBTZDateTime); overload;
     procedure SetAsDouble(AValue: Double);
     procedure SetAsFloat(AValue: Float);
     procedure SetAsPointer(AValue: Pointer);
@@ -1041,25 +1044,47 @@ begin
 end;
 
 function TSQLDataItem.GetAsDateTime: TDateTime;
+var TZDateTime: TFBTZDateTime;
+begin
+  TZDateTime := GetAsDateTimeTZ;
+  Result := TZDateTime.timestamp;
+end;
+
+function TSQLDataItem.GetAsDateTimeTZ: TFBTZDateTime;
 begin
   CheckActive;
-  result := 0;
+  with result do
+  begin
+    timestamp := 0;
+    timeZone := '';
+    timeZoneID := 0;
+  end;
   if not IsNull then
     with FFirebirdClientAPI do
     case SQLType of
       SQL_TEXT, SQL_VARYING: begin
         try
-          result := StrToDate(AsString);
+          result := FBStrToDate(AsString);
         except
-          on E: EConvertError do IBError(ibxeInvalidDataConversion, [nil]);
+          on E: EConvertError do IBError(ibxeInvalidDateTimeStr, [AsString]);
         end;
       end;
       SQL_TYPE_DATE:
-        result := SQLDecodeDate(SQLData);
+        result.timestamp := SQLDecodeDate(SQLData);
       SQL_TYPE_TIME:
-        result := SQLDecodeTime(SQLData);
+        result.timestamp := SQLDecodeTime(SQLData);
       SQL_TIMESTAMP:
-        result := SQLDecodeDateTime(SQLData);
+        result.timestamp := SQLDecodeDateTime(SQLData);
+      SQL_TIMESTAMP_TZ:
+        begin
+          SQLDecodeTimeStampTZ(result.timestamp,result.timeZone,SQLData);
+          result.timeZoneID := PISC_TIMESTAMP_TZ(SQLData)^.time_zone;
+        end;
+      SQL_TIME_TZ:
+        begin
+          SQLDecodeTimeTZ(result.timestamp,result.timeZone,SQLData);
+          result.timeZoneID := PISC_TIME_TZ(SQLData)^.time_zone;
+        end;
       else
         IBError(ibxeInvalidDataConversion, [nil]);
     end;
@@ -1180,6 +1205,7 @@ var
   sz: PByte;
   str_len: Integer;
   rs: RawByteString;
+  DT: TFBTZDateTime;
 begin
   CheckActive;
   result := '';
@@ -1215,6 +1241,16 @@ begin
         result := FormatDateTime(GetTimeFormatStr,AsDateTime);
       SQL_TIMESTAMP:
         result := FormatDateTime(GetTimestampFormatStr,AsDateTime);
+      SQL_TIMESTAMP_TZ:
+        begin
+          DT := GetAsDateTimeTZ;
+          result := FormatDateTime(GetTimestampFormatStr,DT.timestamp) + ' ' + DT.timeZone;
+        end;
+      SQL_TIME_TZ:
+        begin
+          DT := GetAsDateTimeTZ;
+          result := FormatDateTime(GetTimeFormatStr,DT.timestamp) + ' ' + DT.timeZone;
+        end;
       SQL_SHORT, SQL_LONG:
         if Scale = 0 then
           result := IntToStr(AsLong)
@@ -1404,6 +1440,20 @@ begin
   DataLength := SizeOf(ISC_TIME) + sizeof(ISC_DATE);
   with FFirebirdClientAPI do
     SQLEncodeDateTime(Value,SQLData);
+  Changed;
+end;
+
+procedure TSQLDataItem.SetAsDateTime(aValue: TFBTZDateTime);
+begin
+  CheckActive;
+  if IsNullable then
+    IsNull := False;
+
+  Changing;
+  SQLType := SQL_TIMESTAMP_TZ;
+  DataLength := SizeOf(ISC_TIMESTAMP);
+  with FFirebirdClientAPI do
+    SQLEncodeTimeStampTZ(aValue.timestamp,aValue.timeZone,SQLData);
   Changed;
 end;
 
@@ -2087,6 +2137,29 @@ begin
 end;
 
 procedure TSQLParam.SetAsDateTime(AValue: TDateTime);
+var i: integer;
+    OldSQLVar: TSQLVarData;
+begin
+  if FIBXSQLVAR.UniqueName then
+    inherited SetAsDateTime(AValue)
+  else
+  with FIBXSQLVAR.Parent do
+  begin
+    for i := 0 to Count - 1 do
+      if Column[i].Name = Name then
+      begin
+        OldSQLVar := FIBXSQLVAR;
+        FIBXSQLVAR := Column[i];
+        try
+          inherited SetAsDateTime(AValue);
+        finally
+          FIBXSQLVAR := OldSQLVar;
+        end;
+      end;
+  end;
+end;
+
+procedure TSQLParam.SetAsDateTime(aValue: TFBTZDateTime);
 var i: integer;
     OldSQLVar: TSQLVarData;
 begin

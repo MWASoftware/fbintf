@@ -142,7 +142,8 @@ type
       ibxeTokenQueueUnderflow,
       ibxErrorParsing,
       ibxeDLInfoError,
-      ibxeDifferentAPIs
+      ibxeDifferentAPIs,
+      ibxeInvalidDateTimeStr
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -235,6 +236,7 @@ resourcestring
   SErrorParsing = 'Error parsing SQL Statement at clause starting with %s';
   SDLInfoError = 'dlinfo returned error - %s';
   SDifferentAPIs = 'All transaction attachments must use the same Firebird Library';
+  SInvalidDateTimeStr = '%s is not a valid Date/Time string';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -304,7 +306,8 @@ const
     STokenQueueUnderflow,
     SErrorParsing,
     SDLInfoError,
-    SDifferentAPIs
+    SDifferentAPIs,
+    SInvalidDateTimeStr
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;

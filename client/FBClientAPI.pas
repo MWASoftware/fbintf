@@ -156,6 +156,7 @@ type
   protected
     FFBLibrary: TFBLibrary;
     function GetProcAddr(ProcName: PAnsiChar): Pointer;
+    function SupportsTimeZone: boolean; virtual;
   public
     {Taken from legacy API}
     isc_sqlcode: Tisc_sqlcode;
@@ -191,6 +192,9 @@ type
     procedure SQLDecodeTimeStampTZ(var aTimeStamp: TDateTime;
       var aTimeZone: AnsiString; bufptr: PByte); virtual;
 
+    {utility}
+    function FBStrToDate(S: AnsiString): TFBTZDateTime;
+    function GetTimeZoneName(timeZoneID: word): AnsiString; virtual;
 
     {IFirebirdAPI}
     function GetStatus: IStatus; virtual; abstract;
@@ -387,6 +391,90 @@ begin
   IBError(ibxeNotSupported,[]);
 end;
 
+{This function is a generic string to date decoder that also allows for a
+ time zone component. A Time Zone is ignored if FBClient is less than Firebird 4}
+
+function TFBClientAPI.FBStrToDate(S: AnsiString): TFBTZDateTime;
+var Parts: TStringList;
+    i: integer;
+    TimeStamp: ISC_TIMESTAMP_TZ;
+
+    function LTrim(S: AnsiString): AnsiString;
+    begin
+      while (S <> '') and (S[1] = ' ') do
+        system.Delete(S,1,Length(S)-1);
+    end;
+
+begin
+  with result do
+  begin
+    timestamp := 0;
+    timeZone := '';
+    timeZoneID := 0;
+  end;
+
+  Parts := TStringList.Create;
+  try
+    i := 0;
+    repeat
+      S := LTrim(S);
+      i := AnsiPos(' ',S);
+      if i > 0 then
+      begin
+        Parts.Add(system.copy(S,1,i-1));
+        system.Delete(S,1,i);
+      end;
+    until i = 0;
+    Parts.Add(S);
+
+    case Parts.Count of
+    1:
+      {date or time part only}
+      if not TryStrToDate(S,result.timestamp) then
+        result.timestamp := StrToTime(Parts[0]);
+
+    2:
+      {date and time or time and TZ}
+      if TryStrToDate(Parts[0],result.timestamp) then
+        result.timestamp := result.timestamp + StrToTime(Parts[1])
+      else
+      begin
+        result.timestamp := StrToTime(Parts[0]);
+        if SupportsTimeZone then
+        begin
+          {Let Firebird validate the time zone part}
+          SQLEncodeTimeTZ(result.timestamp,Parts[1],@TimeStamp);
+          result.timeZone := Parts[1];
+          result.timeZoneID := TimeStamp.time_zone;
+        end;
+      end;
+
+    3:
+      {date, time and TZ}
+      begin
+        result.timestamp := StrToDate(Parts[0]) + StrToTime(Parts[1]) ;
+        if SupportsTimeZone then
+        begin
+          {Let Firebird validate the time zone part}
+          SQLEncodeTimeTZ(result.timestamp,Parts[2],@TimeStamp);
+          result.timeZone := Parts[2];
+          result.timeZoneID := TimeStamp.time_zone;
+        end;
+      end;
+
+    else
+      IBError(ibxeInvalidDateTimeStr, [S]);
+    end;
+  finally
+    Parts.Free;
+  end;
+end;
+
+function TFBClientAPI.GetTimeZoneName(timeZoneID: word): AnsiString;
+begin
+  IBError(ibxeNotSupported,[]);
+end;
+
 function TFBClientAPI.IsLibraryLoaded: boolean;
 begin
   Result := FFBLibrary.IBLibrary <> NilHandle;
@@ -402,6 +490,11 @@ begin
   Result := GetProcAddress(FFBLibrary.IBLibrary, ProcName);
   if not Assigned(Result) then
     raise Exception.CreateFmt(SFirebirdAPIFuncNotFound,[ProcName]);
+end;
+
+function TFBClientAPI.SupportsTimeZone: boolean;
+begin
+  Result := false;
 end;
 
 function TFBClientAPI.LoadInterface: boolean;

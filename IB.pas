@@ -490,6 +490,12 @@ type
     That is GetAsString is safe to use for sql types other than  boolean.
   }
 
+  TFBTZDateTime = record
+    timestamp: TDateTime;
+    timeZone: AnsiString;
+    timeZoneID: word;
+  end;
+
 
   ISQLData = interface(IColumnMetaData)
     ['{3f493e31-7e3f-4606-a07c-b210b9e3619d}']
@@ -498,6 +504,7 @@ type
     function GetAsCurrency: Currency;
     function GetAsInt64: Int64;
     function GetAsDateTime: TDateTime;
+    function GetAsDateTimeTZ: TFBTZDateTime;
     function GetAsDouble: Double;
     function GetAsFloat: Float;
     function GetAsLong: Long;
@@ -594,6 +601,7 @@ type
     function GetAsCurrency: Currency;
     function GetAsInt64: Int64;
     function GetAsDateTime: TDateTime;
+    function GetAsDateTimeTZ: TFBTZDateTime;
     function GetAsDouble: Double;
     function GetAsFloat: Float;
     function GetAsLong: Long;
@@ -613,7 +621,8 @@ type
     procedure SetAsDate(aValue: TDateTime);
     procedure SetAsLong(aValue: Long);
     procedure SetAsTime(aValue: TDateTime);
-    procedure SetAsDateTime(aValue: TDateTime);
+    procedure SetAsDateTime(aValue: TDateTime); overload;
+    procedure SetAsDateTime(aValue: TFBTZDateTime); overload;
     procedure SetAsDouble(aValue: Double);
     procedure SetAsFloat(aValue: Float);
     procedure SetAsPointer(aValue: Pointer);
@@ -1179,6 +1188,9 @@ type
     function HasMasterIntf: boolean;
     function GetIMaster: TObject;
     function GetFBLibrary: IFirebirdLibrary;
+
+    {utility}
+    function GetTimeZoneName(timeZoneID: word): AnsiString;
 end;
 
 type
