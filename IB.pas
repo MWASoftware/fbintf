@@ -621,8 +621,9 @@ type
     procedure SetAsDate(aValue: TDateTime);
     procedure SetAsLong(aValue: Long);
     procedure SetAsTime(aValue: TDateTime);
-    procedure SetAsDateTime(aValue: TDateTime); overload;
-    procedure SetAsDateTime(aValue: TFBTZDateTime); overload;
+    procedure SetAsTimeTZ(aValue: TFBTZDateTime);
+    procedure SetAsDateTime(aValue: TDateTime);
+    procedure SetAsDateTimeTZ(aValue: TFBTZDateTime);
     procedure SetAsDouble(aValue: Double);
     procedure SetAsFloat(aValue: Float);
     procedure SetAsPointer(aValue: Pointer);

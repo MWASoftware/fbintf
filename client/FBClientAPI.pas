@@ -185,14 +185,21 @@ type
     procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte); virtual; abstract;
     function SQLDecodeDateTime(bufptr: PByte): TDateTime; virtual; abstract;
     {Firebird 4 Extensions}
-    procedure SQLEncodeTimeTZ(aTime: TDateTime; aTimeZone: AnsiString; bufptr: PByte); virtual;
-    procedure SQLDecodeTimeTZ(var aTime: TDateTime; var aTimeZone: AnsiString; bufptr: PByte); virtual;
+    function TrySQLEncodeTimeTZ(aTime: TDateTime; aTimeZone: AnsiString; bufptr: PByte): boolean; virtual;
+    procedure SQLEncodeTimeTZ(aTime: TDateTime; aTimeZone: AnsiString; bufptr: PByte);
+    function TrySQLDecodeTimeTZ(var aTime: TDateTime; var aTimeZone: AnsiString; bufptr: PByte): boolean; virtual;
+    procedure SQLDecodeTimeTZ(var aTime: TDateTime; var aTimeZone: AnsiString; bufptr: PByte);
+    function TrySQLEncodeTimeStampTZ(aTimeStamp: TDateTime; aTimeZone: AnsiString;
+      bufptr: PByte): boolean; virtual;
     procedure SQLEncodeTimeStampTZ(aTimeStamp: TDateTime; aTimeZone: AnsiString;
-      bufptr: PByte); virtual;
+      bufptr: PByte);
     procedure SQLDecodeTimeStampTZ(var aTimeStamp: TDateTime;
-      var aTimeZone: AnsiString; bufptr: PByte); virtual;
+      var aTimeZone: AnsiString; bufptr: PByte);
+    function TrySQLDecodeTimeStampTZ(var aTimeStamp: TDateTime;
+      var aTimeZone: AnsiString; bufptr: PByte): boolean; virtual;
 
     {utility}
+    function TryFBStrToDate(S: AnsiString; var dt: TFBTZDateTime): boolean;
     function FBStrToDate(S: AnsiString): TFBTZDateTime;
     function GetTimeZoneName(timeZoneID: word): AnsiString; virtual;
 
@@ -367,8 +374,21 @@ begin
   end;
 end;
 
+function TFBClientAPI.TrySQLEncodeTimeTZ(aTime: TDateTime;
+  aTimeZone: AnsiString; bufptr: PByte): boolean;
+begin
+  IBError(ibxeNotSupported,[]);
+end;
+
 procedure TFBClientAPI.SQLEncodeTimeTZ(aTime: TDateTime; aTimeZone: AnsiString;
   bufptr: PByte);
+begin
+ if not TrySQLEncodeTimeTZ(aTime, aTimeZone, bufPtr) then
+   raise EIBInterBaseError.Create(GetStatus);
+end;
+
+function TFBClientAPI.TrySQLDecodeTimeTZ(var aTime: TDateTime;
+  var aTimeZone: AnsiString; bufptr: PByte): boolean;
 begin
   IBError(ibxeNotSupported,[]);
 end;
@@ -376,37 +396,61 @@ end;
 procedure TFBClientAPI.SQLDecodeTimeTZ(var aTime: TDateTime;
   var aTimeZone: AnsiString; bufptr: PByte);
 begin
+  if not TrySQLDecodeTimeTZ(aTime, aTimeZone, bufptr) then
+    raise EIBInterBaseError.Create(GetStatus);
+end;
+
+function TFBClientAPI.TrySQLEncodeTimeStampTZ(aTimeStamp: TDateTime;
+  aTimeZone: AnsiString; bufptr: PByte): boolean;
+begin
   IBError(ibxeNotSupported,[]);
 end;
 
 procedure TFBClientAPI.SQLEncodeTimeStampTZ(aTimeStamp: TDateTime;
   aTimeZone: AnsiString; bufptr: PByte);
 begin
-  IBError(ibxeNotSupported,[]);
+  if not TrySQLEncodeTimeStampTZ(aTimeStamp, aTimeZone, bufptr) then
+    raise EIBInterBaseError.Create(GetStatus);
 end;
 
 procedure TFBClientAPI.SQLDecodeTimeStampTZ(var aTimeStamp: TDateTime;
   var aTimeZone: AnsiString; bufptr: PByte);
 begin
+  if not TrySQLDecodeTimeStampTZ(aTimeStamp, aTimeZone, bufptr) then
+    raise EIBInterBaseError.Create(GetStatus);
+end;
+
+function TFBClientAPI.TrySQLDecodeTimeStampTZ(var aTimeStamp: TDateTime;
+  var aTimeZone: AnsiString; bufptr: PByte): boolean;
+begin
   IBError(ibxeNotSupported,[]);
+end;
+
+function TFBClientAPI.FBStrToDate(S: AnsiString): TFBTZDateTime;
+begin
+  if not TryFBStrToDate(S,Result) then
+    IBError(ibxeInvalidDateTimeStr, [S]);
 end;
 
 {This function is a generic string to date decoder that also allows for a
  time zone component. A Time Zone is ignored if FBClient is less than Firebird 4}
 
-function TFBClientAPI.FBStrToDate(S: AnsiString): TFBTZDateTime;
+function TFBClientAPI.TryFBStrToDate(S: AnsiString; var dt: TFBTZDateTime
+   ): boolean;
 var Parts: TStringList;
     i: integer;
     TimeStamp: ISC_TIMESTAMP_TZ;
+    timePart: TDateTime;
 
     function LTrim(S: AnsiString): AnsiString;
     begin
       while (S <> '') and (S[1] = ' ') do
-        system.Delete(S,1,Length(S)-1);
+        system.Delete(S,1,1);
     end;
 
 begin
-  with result do
+  Result := true;
+  with dt do
   begin
     timestamp := 0;
     timeZone := '';
@@ -430,40 +474,50 @@ begin
     case Parts.Count of
     1:
       {date or time part only}
-      if not TryStrToDate(S,result.timestamp) then
-        result.timestamp := StrToTime(Parts[0]);
+      begin
+        Result := TryStrToDate(Parts[0],dt.timestamp);
+        if not Result then
+          Result := TryStrToTime(Parts[0],dt.timestamp);
+      end;
 
     2:
       {date and time or time and TZ}
-      if TryStrToDate(Parts[0],result.timestamp) then
-        result.timestamp := result.timestamp + StrToTime(Parts[1])
+      if TryStrToDate(Parts[0],dt.timestamp) and TryStrToTime(Parts[1],timePart) then
+        dt.timestamp := dt.timestamp + timePart
       else
       begin
-        result.timestamp := StrToTime(Parts[0]);
-        if SupportsTimeZone then
+        Result :=  TryStrToTime(Parts[0],dt.timestamp) and SupportsTimeZone;
+        if Result then
         begin
           {Let Firebird validate the time zone part}
-          SQLEncodeTimeTZ(result.timestamp,Parts[1],@TimeStamp);
-          result.timeZone := Parts[1];
-          result.timeZoneID := TimeStamp.time_zone;
+          Result := TrySQLEncodeTimeTZ(dt.timestamp,Parts[1],@TimeStamp);
+          if Result then
+          begin
+            dt.timeZone := Parts[1];
+            dt.timeZoneID := TimeStamp.time_zone;
+          end;
         end;
       end;
 
     3:
       {date, time and TZ}
       begin
-        result.timestamp := StrToDate(Parts[0]) + StrToTime(Parts[1]) ;
-        if SupportsTimeZone then
+        Result := TryStrToDate(Parts[0],dt.timestamp) and TryStrToTime(Parts[1],timePart) and SupportsTimeZone;
+        if Result then
         begin
+          dt.timestamp := dt.timestamp + timePart;
           {Let Firebird validate the time zone part}
-          SQLEncodeTimeTZ(result.timestamp,Parts[2],@TimeStamp);
-          result.timeZone := Parts[2];
-          result.timeZoneID := TimeStamp.time_zone;
+          Result := TrySQLEncodeTimestampTZ(dt.timestamp,Parts[2],@TimeStamp);
+          if Result then
+          begin
+            dt.timeZone := Parts[2];
+            dt.timeZoneID := TimeStamp.time_zone;
+          end;
         end;
       end;
 
     else
-      IBError(ibxeInvalidDateTimeStr, [S]);
+      Result := false;
     end;
   finally
     Parts.Free;

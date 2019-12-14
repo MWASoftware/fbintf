@@ -23,6 +23,9 @@ FBINTF Change Log  version          (1.1-5 Build 11664) Thu, 11 Apr 2019 09:43:4
 
 8. Added Support for SQL_TIMESTAMP_TZ and SQL_TIME_TZ.
 
+9. GetImplementationVersion now correctly returns '3.0' for Firebird 3 API
+   with a Firebrid 3 client library.
+
 
 FBINTF Change Log  version          (1.1-4 Build 11515)  Fri, 28 Dec 2018 10:04:19 +0000
 
