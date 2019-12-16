@@ -178,12 +178,14 @@ type
     {Encode/Decode}
     procedure EncodeInteger(aValue: integer; len: integer; buffer: PByte);
     function DecodeInteger(bufptr: PByte; len: short): integer; virtual; abstract;
-    procedure SQLEncodeDate(aDate: TDateTime; bufptr: PByte); virtual; abstract;
-    function SQLDecodeDate(byfptr: PByte): TDateTime; virtual; abstract;
-    procedure SQLEncodeTime(aTime: TDateTime; bufptr: PByte); virtual; abstract;
-    function SQLDecodeTime(bufptr: PByte): TDateTime;  virtual; abstract;
-    procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte); virtual; abstract;
-    function SQLDecodeDateTime(bufptr: PByte): TDateTime; virtual; abstract;
+    procedure DecodeFBExtTime(aTime: longint; var Hour, Minute, Second, DeciMillisecond: word);
+    function EncodeFBExtTime(Hour, Minute, Second, DeciMillisecond: word): longint;
+    procedure SQLEncodeDate(aDate: longint; bufptr: PByte); virtual; abstract;
+    function SQLDecodeDate(byfptr: PByte): longint; virtual; abstract;
+    procedure SQLEncodeTime(aTime: longint; bufptr: PByte); virtual; abstract;
+    function SQLDecodeTime(bufptr: PByte): longint;  virtual; abstract;
+    procedure SQLEncodeDateTime(aDate, aTime: longint; bufptr: PByte); virtual; abstract;
+    procedure SQLDecodeDateTime(bufptr: PByte; var aDate, aTime: longint); virtual; abstract;
     {Firebird 4 Extensions}
     function TrySQLEncodeTimeTZ(aTime: TDateTime; aTimeZone: AnsiString; bufptr: PByte): boolean; virtual;
     procedure SQLEncodeTimeTZ(aTime: TDateTime; aTimeZone: AnsiString; bufptr: PByte);
@@ -372,6 +374,24 @@ begin
     Dec(len);
     aValue := aValue shr 8;
   end;
+end;
+
+procedure TFBClientAPI.DecodeFBExtTime(aTime: longint; var Hour, Minute,
+  Second, DeciMillisecond: word);
+begin
+  with aTime do
+  begin
+    DeciMilliSecond := aTime mod decimillsecondsPerSecond;
+    Second := (aTime div decimillsecondsPerSecond) mod SecsPerMin;
+    Minute := (aTime div decimillsecondsPerSecond*SecsPerMin) mod MinsPerHour;
+    Hour := aTime div decimillsecondsPerSecond*SecsPerMin*MinsPerHour;
+  end;
+end;
+
+function TFBClientAPI.EncodeFBExtTime(Hour, Minute, Second,
+  DeciMillisecond: word): longint;
+begin
+  Result := ((((Hour * MinsPerHour) + Minute) * SecsPerMin) + Second)*decimillsecondsPerSecond + DeciMilliSecond;
 end;
 
 function TFBClientAPI.TrySQLEncodeTimeTZ(aTime: TDateTime;

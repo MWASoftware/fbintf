@@ -477,6 +477,44 @@ type
     property Count: integer read getCount;
   end;
 
+  { The ISQLTimestamp interface has been introduced in order to support time and
+    timestamps with a timezone. It also allows for deci-millisecond resolution (native
+    Firebird) while the TDateTime type is limited to millisecond resolution.
+
+    The TFBSystemTime type is introduced in order to record both deci-millisecond
+    resolution and time zone information.
+
+    When FormatSettings are provided then 'TZ' in a longTimeFormat is interpreted
+    as a placeholder for the current timezone offset. When no FormatSettings are
+    provided and the timestamp includes a timezone, then ' TZ' is added to the
+    default longTimeFormat.
+  }
+
+   TFBSystemTime = record
+      Year, Month, Day, DayOfWeek: word;
+      Hour, Minute, Second, DeciMilliSecond: word;
+      TimeZone: AnsiString;
+   end ;
+
+
+  ISQLTimestamp = interface
+    ['{f4bb2c3e-2fd4-481b-a0aa-7bc677ff3d84}']
+    function GetAsDateTime: TDateTime;
+    function GetAsTimestamp: TTimestamp;
+    function GetAsMilliseconds: comp;
+    function GetAsSystemTime: TSystemTime;
+    function GetAsExtSystemTime: TExtSystemTime;
+    function GetTimezone: AnsiString;
+    function GetTimezoneID: ISC_USHORT; {native Firebird timezone integer identifier}
+    function GetAsString(FormatSettings: TFormatSettings): AnsiString; overload;
+    function GetAsString: AnsiString; overload;
+    function HasDatePart: boolean;
+    function HasTimezone: boolean;
+    property AsDateTime: TDateTime read GetAsDateTime;
+    property AsMillseconds: comp read GetAsMilliseconds;
+    property Timezone: AnsiString read GetTimezone;
+  end;
+
   {
     The ISQLData interface provides access to the data returned in a field in the
     current row returned from a query or the result of an SQL Execute statement.
@@ -490,12 +528,6 @@ type
     That is GetAsString is safe to use for sql types other than  boolean.
   }
 
-  TFBTZDateTime = record
-    timestamp: TDateTime;
-    timeZone: AnsiString;
-    timeZoneID: word;
-  end;
-
 
   ISQLData = interface(IColumnMetaData)
     ['{3f493e31-7e3f-4606-a07c-b210b9e3619d}']
@@ -504,7 +536,7 @@ type
     function GetAsCurrency: Currency;
     function GetAsInt64: Int64;
     function GetAsDateTime: TDateTime;
-    function GetAsDateTimeTZ: TFBTZDateTime;
+    function GetAsSQLTimestamp: ISQLTimestamp;
     function GetAsDouble: Double;
     function GetAsFloat: Float;
     function GetAsLong: Long;
@@ -569,6 +601,24 @@ type
     function IsEof: boolean;
     procedure Close;
   end;
+
+  ISQLParamTimestamp = interface(ISQLTimestamp)
+    ['{b5374eb4-a9e7-489f-8874-c1a9fbb60993}']
+    procedure SetAsDateTime(aValue: TDateTime);
+    procedure SetAsTime(aValue: TDateTime); overload;
+    procedure SetAsTimeMS(aValue: longint); overload;
+    procedure SetAsTimestamp(aValue: TTimestamp);
+    procedure SetAsMilliseconds(aValue: comp);
+    procedure SetAsSystemTime(aValue: TSystemTime);
+    procedure SetAsExtSystemTime(aValue: TFBSystemTime);
+    procedure SetTimezone(aValue: AnsiString);
+    procedure SetAsString(aValue: AnsiString);
+    property AsDateTime: TDateTime read GetAsDateTime write SetAsDateTime;
+    property AsMillseconds: comp read GetAsMilliseconds write SetAsMilliseconds;
+    property Timezone: AnsiString read GetTimezone write SetTimezone;
+  end;
+
+
 
   {The ISQLParam interface is used to provide access to each parameter in a
    parametised SQL Statement. It subclasses IColumnMetaData and this part of

@@ -170,12 +170,12 @@ type
   public
     {Helper Functions}
     function DecodeInteger(bufptr: PByte; len: short): integer; override;
-    procedure SQLEncodeDate(aDate: TDateTime; bufptr: PByte); override;
-    function SQLDecodeDate(bufptr: PByte): TDateTime; override;
-    procedure SQLEncodeTime(aTime: TDateTime; bufptr: PByte); override;
-    function SQLDecodeTime(bufptr: PByte): TDateTime;  override;
+    procedure SQLEncodeDate(aDate: longint; bufptr: PByte); override;
+    function SQLDecodeDate(bufptr: PByte): longint; override;
+    procedure SQLEncodeTime(aTime: longint; bufptr: PByte); override;
+    function SQLDecodeTime(bufptr: PByte): longint;  override;
     procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte); override;
-    function SQLDecodeDateTime(bufptr: PByte): TDateTime; override;
+    procedure SQLDecodeDateTime(bufptr: PByte; var aDate, aTime: longint); override;
 
   public
     {IFirebirdAPI}
@@ -558,7 +558,7 @@ begin
   Result := isc_portable_integer(bufptr,len);
 end;
 
-procedure TFB25ClientAPI.SQLEncodeDate(aDate: TDateTime; bufptr: PByte);
+procedure TFB25ClientAPI.SQLEncodeDate(aDate: longint; bufptr: PByte);
 var
   tm_date: TCTimeStructure;
   Yr, Mn, Dy: Word;
@@ -575,14 +575,14 @@ begin
   isc_encode_sql_date(@tm_date, PISC_DATE(bufptr));
 end;
 
-function TFB25ClientAPI.SQLDecodeDate(bufptr: PByte): TDateTime;
+function TFB25ClientAPI.SQLDecodeDate(bufptr: PByte): longint;
 var
   tm_date: TCTimeStructure;
 begin
   isc_decode_sql_date(PISC_DATE(bufptr), @tm_date);
   try
-    result := EncodeDate(Word(tm_date.tm_year + 1900), Word(tm_date.tm_mon + 1),
-                         Word(tm_date.tm_mday));
+    result := Trunc(EncodeDate(Word(tm_date.tm_year + 1900), Word(tm_date.tm_mon + 1),
+                         Word(tm_date.tm_mday)));
   except
     on E: EConvertError do begin
       IBError(ibxeInvalidDataConversion, [nil]);
@@ -590,12 +590,12 @@ begin
   end;
 end;
 
-procedure TFB25ClientAPI.SQLEncodeTime(aTime: TDateTime; bufptr: PByte);
+procedure TFB25ClientAPI.SQLEncodeTime(aTime: longint; bufptr: PByte);
 var
   tm_date: TCTimeStructure;
-  Hr, Mt, S, Ms: Word;
+  Hr, Mt, S, DMs: Word;
 begin
-  DecodeTime(aTime, Hr, Mt, S, Ms);
+  DecodeFBExtTime(aTime, Hr, Mt, S, DMs);
   with tm_date do begin
     tm_sec := S;
     tm_min := Mt;
@@ -606,19 +606,19 @@ begin
   end;
   isc_encode_sql_time(@tm_date, PISC_TIME(bufptr));
   if Ms > 0 then
-    Inc(PISC_TIME(bufptr)^,Ms*10);
+    Inc(PISC_TIME(bufptr)^,DMs);
 end;
 
-function TFB25ClientAPI.SQLDecodeTime(bufptr: PByte): TDateTime;
+function TFB25ClientAPI.SQLDecodeTime(bufptr: PByte): longint;
 var
   tm_date: TCTimeStructure;
-  msecs: Word;
+  decimsecs: Word;
 begin
   isc_decode_sql_time(PISC_TIME(bufptr), @tm_date);
   try
-    msecs :=  (PISC_TIME(bufptr)^ mod 10000) div 10;
-    result := EncodeTime(Word(tm_date.tm_hour), Word(tm_date.tm_min),
-                         Word(tm_date.tm_sec), msecs)
+    decimsecs :=  PISC_TIME(bufptr)^ mod 10000;
+    result := EncodeFBExtTime(Word(tm_date.tm_hour), Word(tm_date.tm_min),
+                         Word(tm_date.tm_sec), decimsecs)
   except
     on E: EConvertError do begin
       IBError(ibxeInvalidDataConversion, [nil]);
@@ -626,13 +626,13 @@ begin
   end;
 end;
 
-procedure TFB25ClientAPI.SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte);
+procedure TFB25ClientAPI.SQLEncodeDateTime(aDate, aTime: longint; bufptr: PByte);
 var
   tm_date: TCTimeStructure;
-  Yr, Mn, Dy, Hr, Mt, S, Ms: Word;
+  Yr, Mn, Dy, Hr, Mt, S, DMs: Word;
 begin
-  DecodeDate(aDateTime, Yr, Mn, Dy);
-  DecodeTime(aDateTime, Hr, Mt, S, Ms);
+  DecodeDate(aDate, Yr, Mn, Dy);
+  DecodeFBExtTime(aTime, Hr, Mt, S, DMs);
   with tm_date do begin
     tm_sec := S;
     tm_min := Mt;
@@ -642,26 +642,22 @@ begin
     tm_year := Yr - 1900;
   end;
   isc_encode_date(@tm_date, PISC_QUAD(bufptr));
-  if Ms > 0 then
-    Inc(PISC_TIMESTAMP(bufptr)^.timestamp_time,Ms*10);
+  if DMs > 0 then
+    Inc(PISC_TIMESTAMP(bufptr)^.timestamp_time,DMs);
 end;
 
-function TFB25ClientAPI.SQLDecodeDateTime(bufptr: PByte): TDateTime;
+procedure TFB25ClientAPI.SQLDecodeDateTime(bufptr: PByte; var aDate, aTime: longint);
 var
   tm_date: TCTimeStructure;
-  msecs: Word;
+  decimsecs: Word;
 begin
   isc_decode_date(PISC_QUAD(bufptr), @tm_date);
   try
-    result := EncodeDate(Word(tm_date.tm_year + 1900), Word(tm_date.tm_mon + 1),
+    aDate := EncodeFBDate(Word(tm_date.tm_year + 1900), Word(tm_date.tm_mon + 1),
                         Word(tm_date.tm_mday));
-    msecs := (PISC_TIMESTAMP(bufptr)^.timestamp_time mod 10000) div 10;
-    if result >= 0 then
-      result := result + EncodeTime(Word(tm_date.tm_hour), Word(tm_date.tm_min),
-                                    Word(tm_date.tm_sec), msecs)
-    else
-      result := result - EncodeTime(Word(tm_date.tm_hour), Word(tm_date.tm_min),
-                                    Word(tm_date.tm_sec), msecs)
+    decimsecs := PISC_TIMESTAMP(bufptr)^.timestamp_time mod 10000;
+    aTime := EncodeFBExtTime(Word(tm_date.tm_hour), Word(tm_date.tm_min),
+                                    Word(tm_date.tm_sec), decimsecs)
   except
     on E: EConvertError do begin
       IBError(ibxeInvalidDataConversion, [nil]);
