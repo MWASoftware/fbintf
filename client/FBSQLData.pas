@@ -1211,6 +1211,12 @@ begin
           result := FloatToStr(AsDouble);
       SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT:
         result := FloatToStr(AsDouble);
+
+      SQL_DEC_FIXED,
+      SQL_DEC16,
+      SQL_DEC34:
+        result := BCDToStr(GetAsBCD);
+
       else
         IBError(ibxeInvalidDataConversion, [nil]);
     end;
