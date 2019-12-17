@@ -93,9 +93,6 @@ type
      function AdjustScale(Value: Int64; aScale: Integer): Double;
      function AdjustScaleToInt64(Value: Int64; aScale: Integer): Int64;
      function AdjustScaleToCurrency(Value: Int64; aScale: Integer): Currency;
-     function GetTimestampFormatStr: AnsiString;
-     function GetDateFormatStr(IncludeTime: boolean): AnsiString;
-     function GetTimeFormatStr: AnsiString;
      procedure SetAsInteger(AValue: Integer);
   protected
      function AdjustScaleFromCurrency(Value: Currency; aScale: Integer): Int64;
@@ -786,50 +783,6 @@ begin
       result := Value;
 end;
 
-function TSQLDataItem.GetDateFormatStr(IncludeTime: boolean): AnsiString;
-begin
-  {$IF declared(DefaultFormatSettings)}
-  with DefaultFormatSettings do
-  {$ELSE}
-  {$IF declared(FormatSettings)}
-  with FormatSettings do
-  {$IFEND}
-  {$IFEND}
-  case GetSQLDialect of
-    1:
-      if IncludeTime then
-        result := ShortDateFormat + ' ' + LongTimeFormat
-      else
-        result := ShortDateFormat;
-    3:
-      result := ShortDateFormat;
-  end;
-end;
-
-function TSQLDataItem.GetTimeFormatStr: AnsiString;
-begin
-  {$IF declared(DefaultFormatSettings)}
-  with DefaultFormatSettings do
-  {$ELSE}
-  {$IF declared(FormatSettings)}
-  with FormatSettings do
-  {$IFEND}
-  {$IFEND}
-    Result := LongTimeFormat;
-end;
-
-function TSQLDataItem.GetTimestampFormatStr: AnsiString;
-begin
-  {$IF declared(DefaultFormatSettings)}
-  with DefaultFormatSettings do
-  {$ELSE}
-  {$IF declared(FormatSettings)}
-  with FormatSettings do
-  {$IFEND}
-  {$IFEND}
-    Result := ShortDateFormat + ' ' +  LongTimeFormat + '.zzz';
-end;
-
 procedure TSQLDataItem.SetAsInteger(AValue: Integer);
 begin
   SetAsLong(aValue);
@@ -1310,16 +1263,7 @@ end;
 function TSQLDataItem.GetDateTimeStrLength(DateTimeFormat: TIBDateTimeFormats
   ): integer;
 begin
-  case DateTimeFormat of
-  dfTimestamp:
-    Result := Length(GetTimestampFormatStr);
-  dfDateTime:
-    Result := Length(GetDateFormatStr(true));
-  dfTime:
-    Result := Length(GetTimeFormatStr);
-  else
-    Result := 0;
-  end;
+  Result := TSQLTimestamp.GetDateTimeStrLength(DateTimeFormat);
 end;
 
 

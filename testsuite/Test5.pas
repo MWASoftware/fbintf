@@ -57,7 +57,7 @@ var Transaction: ITransaction;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taRollback);
   Statement := Attachment.Prepare(Transaction,'Update Employee Set Hire_Date = ? Where EMP_NO = ? Returning LAST_NAME',3);
-  Statement.GetSQLParams[0].AsDAteTime := EncodeDate(2016,1,31);;
+  Statement.GetSQLParams[0].AsDateTime := EncodeDate(2016,1,31);;
   Statement.GetSQLParams[1].AsInteger := 8;
   Results := Statement.Execute;
   WriteAffectedRows(Statement);

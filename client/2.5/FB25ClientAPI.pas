@@ -566,7 +566,7 @@ var
   tm_date: TCTimeStructure;
   Yr, Mn, Dy: Word;
 begin
-  DecodeDate(aDate, Yr, Mn, Dy);
+  DecodeDate(aDate - DateDelta, Yr, Mn, Dy);
   with tm_date do begin
     tm_sec := 0;
     tm_min := 0;
@@ -585,7 +585,7 @@ begin
   isc_decode_sql_date(PISC_DATE(bufptr), @tm_date);
   try
     result := Trunc(EncodeDate(Word(tm_date.tm_year + 1900), Word(tm_date.tm_mon + 1),
-                         Word(tm_date.tm_mday)));
+                         Word(tm_date.tm_mday))) + DateDelta;
   except
     on E: EConvertError do begin
       IBError(ibxeInvalidDataConversion, [nil]);
@@ -634,7 +634,7 @@ var
   tm_date: TCTimeStructure;
   Yr, Mn, Dy, Hr, Mt, S, DMs: Word;
 begin
-  DecodeDate(aDate, Yr, Mn, Dy);
+  DecodeDate(aDate - DateDelta, Yr, Mn, Dy);
   DecodeFBExtTime(aTime, Hr, Mt, S, DMs);
   with tm_date do begin
     tm_sec := S;
@@ -657,7 +657,7 @@ begin
   isc_decode_date(PISC_QUAD(bufptr), @tm_date);
   try
     aDate := Trunc(EncodeDate(Word(tm_date.tm_year + 1900), Word(tm_date.tm_mon + 1),
-                        Word(tm_date.tm_mday)));
+                        Word(tm_date.tm_mday))) + DateDelta;
     decimsecs := PISC_TIMESTAMP(bufptr)^.timestamp_time mod 10000;
     aTime := EncodeFBExtTime(Word(tm_date.tm_hour), Word(tm_date.tm_min),
                                     Word(tm_date.tm_sec), decimsecs)

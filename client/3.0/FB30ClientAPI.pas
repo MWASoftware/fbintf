@@ -384,7 +384,7 @@ var
 begin
   UtilIntf.decodeDate(PISC_DATE(bufptr)^,@Yr, @Mn, @Dy);
   try
-    result := Trunc(EncodeDate(Yr, Mn,Dy));
+    result := Trunc(EncodeDate(Yr, Mn,Dy)) + DateDelta;
   except
     on E: EConvertError do begin
       IBError(ibxeInvalidDataConversion, [nil]);
@@ -462,7 +462,7 @@ var
   Hr, Mt, S, DMs: word;
 begin
   inherited SQLEncodeTimeStampTZ(aDate, aTime, aTimeZone, bufptr);
-  DecodeDate(aDate, Yr, Mn, Dy);
+  DecodeDate(aDate - DateDelta, Yr, Mn, Dy);
   DecodeFBExtTime(aTime, Hr, Mt, S, DMs);
   UtilIntf.encodeTimeStampTz(StatusIntf,ISC_TIMESTAMP_TZPtr(bufPtr),Yr, Mn, Dy, Hr, Mt, S, DMs,@aTimeZone);
   Check4DataBaseError;
@@ -480,7 +480,7 @@ begin
   inherited SQLDecodeTimeStampTZ(aDate, aTime, aTimeZone, aTimeZoneID, bufptr);
   UtilIntf.decodeTimeStampTz(StatusIntf,ISC_TIMESTAMP_TZPtr(bufPtr),@Yr,@ Mn, @Dy, @Hr, @Mt, @S, @DMs,bufLength,@tzBuffer);
   Check4DataBaseError;
-  aDate := Trunc(EncodeDate(Yr, Mn,Dy));
+  aDate := Trunc(EncodeDate(Yr, Mn,Dy) + DateDelta);
   aTime := EncodeFBExtTime(Hr, Mt, S, DMs);
   aTimeZoneID := ISC_TIMESTAMP_TZPtr(bufptr)^.time_zone;
   aTimeZone := strpas(@tzBuffer);

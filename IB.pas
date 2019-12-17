@@ -427,7 +427,9 @@ type
 
   TIBDateTimeFormats = (dfTimestamp, {SQL TIMESTAMP}
                         dfDateTime,   {SQL DATETIME}
-                        dfTime);      {SQL TIME}
+                        dfTime,      {SQL TIME}
+                        dfTimestampTZ, {SQL_TIMESTAMP_TZ}
+                        dfTimeTZ);       {SQLTIME_TZ
 
   { IColumnMetaData }
 
@@ -506,8 +508,7 @@ type
     function GetAsFBSystemTime: TFBSystemTime;
     function GetTimezone: AnsiString;
     function GetTimezoneID: ISC_USHORT; {native Firebird timezone integer identifier}
-    function GetAsString(FormatSettings: TFormatSettings; IncludeTZifAvailable: boolean=true): AnsiString; overload;
-    function GetAsString(IncludeTZifAvailable: boolean=true): AnsiString; overload;
+    function GetAsString(IncludeTZifAvailable: boolean=true): AnsiString;
     function GetDatePart: longint;
     function GetTimePart: longint;
     function HasDatePart: boolean;

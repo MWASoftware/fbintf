@@ -376,8 +376,8 @@ procedure TFBClientAPI.DecodeFBExtTime(aTime: longint; var Hour, Minute,
 begin
   DeciMilliSecond := aTime mod decimillsecondsPerSecond;
   Second := (aTime div decimillsecondsPerSecond) mod SecsPerMin;
-  Minute := (aTime div decimillsecondsPerSecond*SecsPerMin) mod MinsPerHour;
-  Hour := aTime div decimillsecondsPerSecond*SecsPerMin*MinsPerHour;
+  Minute := (aTime div (decimillsecondsPerSecond*SecsPerMin)) mod MinsPerHour;
+  Hour := aTime div (decimillsecondsPerSecond*SecsPerMin*MinsPerHour);
 end;
 
 function TFBClientAPI.EncodeFBExtTime(Hour, Minute, Second,
@@ -397,7 +397,7 @@ procedure TFBClientAPI.SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte);
 var aTimestamp: TTimestamp;
 begin
   aTimestamp := DateTimeToTimeStamp(aDateTime);
-  SQLEncodeDateTime(aTimestamp.date, aTimestamp.Time*10,bufPtr);
+  SQLEncodeDateTime(aTimestamp.date - DateDelta, aTimestamp.Time*10,bufPtr);
 end;
 
 procedure TFBClientAPI.SQLEncodeTimeTZ(aTime: longint; aTimeZone: AnsiString;
