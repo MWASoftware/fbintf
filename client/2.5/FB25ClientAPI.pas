@@ -74,9 +74,6 @@ interface
 uses
   Classes, SysUtils, FBClientAPI, IBHeader, IBExternals, IB;
 
-const
-  FBClientInterfaceVersion = '2.5';
-
 type
 
   { TFB25Status }
@@ -174,7 +171,7 @@ type
     function SQLDecodeDate(bufptr: PByte): longint; override;
     procedure SQLEncodeTime(aTime: longint; bufptr: PByte); override;
     function SQLDecodeTime(bufptr: PByte): longint;  override;
-    procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte); override;
+    procedure SQLEncodeDateTime(aDate, aTime: longint; bufptr: PByte); override;
     procedure SQLDecodeDateTime(bufptr: PByte; var aDate, aTime: longint); override;
 
   public
@@ -203,7 +200,8 @@ type
     function GetStatus: IStatus; override;
     function HasRollbackRetaining: boolean;
     function IsEmbeddedServer: boolean; override;
-    function GetImplementationVersion: AnsiString;
+    function GetClientMajor: integer; override;
+    function GetClientMinor: integer; override;
 
     {Firebird 3 API}
     function HasMasterIntf: boolean;
@@ -548,9 +546,14 @@ begin
   Result := nil;
 end;
 
-function TFB25ClientAPI.GetImplementationVersion: AnsiString;
+function TFB25ClientAPI.GetClientMajor: integer;
 begin
-  Result := FBClientInterfaceVersion;
+  Result := 2;
+end;
+
+function TFB25ClientAPI.GetClientMinor: integer;
+begin
+  Result := 5;
 end;
 
 function TFB25ClientAPI.DecodeInteger(bufptr: PByte; len: short): integer;
@@ -605,7 +608,7 @@ begin
     tm_year := 0;
   end;
   isc_encode_sql_time(@tm_date, PISC_TIME(bufptr));
-  if Ms > 0 then
+  if DMs > 0 then
     Inc(PISC_TIME(bufptr)^,DMs);
 end;
 
@@ -653,8 +656,8 @@ var
 begin
   isc_decode_date(PISC_QUAD(bufptr), @tm_date);
   try
-    aDate := EncodeFBDate(Word(tm_date.tm_year + 1900), Word(tm_date.tm_mon + 1),
-                        Word(tm_date.tm_mday));
+    aDate := Trunc(EncodeDate(Word(tm_date.tm_year + 1900), Word(tm_date.tm_mon + 1),
+                        Word(tm_date.tm_mday)));
     decimsecs := PISC_TIMESTAMP(bufptr)^.timestamp_time mod 10000;
     aTime := EncodeFBExtTime(Word(tm_date.tm_hour), Word(tm_date.tm_min),
                                     Word(tm_date.tm_sec), decimsecs)

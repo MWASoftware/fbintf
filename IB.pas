@@ -503,11 +503,13 @@ type
     function GetAsTimestamp: TTimestamp;
     function GetAsMilliseconds: comp;
     function GetAsSystemTime: TSystemTime;
-    function GetAsExtSystemTime: TExtSystemTime;
+    function GetAsFBSystemTime: TFBSystemTime;
     function GetTimezone: AnsiString;
     function GetTimezoneID: ISC_USHORT; {native Firebird timezone integer identifier}
-    function GetAsString(FormatSettings: TFormatSettings): AnsiString; overload;
-    function GetAsString: AnsiString; overload;
+    function GetAsString(FormatSettings: TFormatSettings; IncludeTZifAvailable: boolean=true): AnsiString; overload;
+    function GetAsString(IncludeTZifAvailable: boolean=true): AnsiString; overload;
+    function GetDatePart: longint;
+    function GetTimePart: longint;
     function HasDatePart: boolean;
     function HasTimezone: boolean;
     property AsDateTime: TDateTime read GetAsDateTime;
@@ -604,15 +606,18 @@ type
 
   ISQLParamTimestamp = interface(ISQLTimestamp)
     ['{b5374eb4-a9e7-489f-8874-c1a9fbb60993}']
+    procedure Clear;
     procedure SetAsDateTime(aValue: TDateTime);
     procedure SetAsTime(aValue: TDateTime); overload;
     procedure SetAsTimeMS(aValue: longint); overload;
     procedure SetAsTimestamp(aValue: TTimestamp);
     procedure SetAsMilliseconds(aValue: comp);
     procedure SetAsSystemTime(aValue: TSystemTime);
-    procedure SetAsExtSystemTime(aValue: TFBSystemTime);
+    procedure SetAsFBSystemTime(aValue: TFBSystemTime);
     procedure SetTimezone(aValue: AnsiString);
-    procedure SetAsString(aValue: AnsiString);
+    procedure SetDatePart(aValue: longint);
+    procedure SetTimePart(aValue: longint);
+    procedure SetTimeZoneID(aTimeZoneID: ISC_USHORT);
     property AsDateTime: TDateTime read GetAsDateTime write SetAsDateTime;
     property AsMillseconds: comp read GetAsMilliseconds write SetAsMilliseconds;
     property Timezone: AnsiString read GetTimezone write SetTimezone;
@@ -651,7 +656,6 @@ type
     function GetAsCurrency: Currency;
     function GetAsInt64: Int64;
     function GetAsDateTime: TDateTime;
-    function GetAsDateTimeTZ: TFBTZDateTime;
     function GetAsDouble: Double;
     function GetAsFloat: Float;
     function GetAsLong: Long;
@@ -671,9 +675,8 @@ type
     procedure SetAsDate(aValue: TDateTime);
     procedure SetAsLong(aValue: Long);
     procedure SetAsTime(aValue: TDateTime);
-    procedure SetAsTimeTZ(aValue: TFBTZDateTime);
     procedure SetAsDateTime(aValue: TDateTime);
-    procedure SetAsDateTimeTZ(aValue: TFBTZDateTime);
+    procedure SetAsSQLTimestamp(aValue: ISQLParamTimestamp);
     procedure SetAsDouble(aValue: Double);
     procedure SetAsFloat(aValue: Float);
     procedure SetAsPointer(aValue: Pointer);
@@ -1234,6 +1237,9 @@ type
     function HasRollbackRetaining: boolean;
     function IsEmbeddedServer: boolean;
     function GetImplementationVersion: AnsiString;
+    function GetClientMajor: integer;
+    function GetClientMinor: integer;
+    function HasTimeZoneSupport: boolean;
 
     {Firebird 3 API}
     function HasMasterIntf: boolean;
@@ -1241,7 +1247,7 @@ type
     function GetFBLibrary: IFirebirdLibrary;
 
     {utility}
-    function GetTimeZoneName(timeZoneID: word): AnsiString;
+    function GetSQLTimestampParam: ISQLParamTimestamp;
 end;
 
 type

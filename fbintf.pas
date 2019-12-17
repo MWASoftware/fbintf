@@ -4,6 +4,7 @@
 
 unit fbintf;
 
+{$warn 5023 off : no warning about unused units}
 interface
 
 uses
@@ -13,7 +14,7 @@ uses
   FBActivityMonitor, FBOutputBlock, FBParamBlock, FBSQLData, FB30ClientAPI, 
   FB30Attachment, FB30Transaction, FBTransaction, FB30Blob, FB30Array, 
   FB30Statement, FB30Events, FB30Services, FBEvents, FBBlob, FBAttachment, 
-  FBStatement, FBServices;
+  FBStatement, FBServices, FBTimestamp;
 
 implementation
 

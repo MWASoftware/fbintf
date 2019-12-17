@@ -156,7 +156,6 @@ type
   protected
     FFBLibrary: TFBLibrary;
     function GetProcAddr(ProcName: PAnsiChar): Pointer;
-    function SupportsTimeZone: boolean; virtual;
   public
     {Taken from legacy API}
     isc_sqlcode: Tisc_sqlcode;
@@ -181,40 +180,36 @@ type
     procedure DecodeFBExtTime(aTime: longint; var Hour, Minute, Second, DeciMillisecond: word);
     function EncodeFBExtTime(Hour, Minute, Second, DeciMillisecond: word): longint;
     procedure SQLEncodeDate(aDate: longint; bufptr: PByte); virtual; abstract;
-    function SQLDecodeDate(byfptr: PByte): longint; virtual; abstract;
-    procedure SQLEncodeTime(aTime: longint; bufptr: PByte); virtual; abstract;
+    function SQLDecodeDate(byfptr: PByte): longint;  virtual; abstract;
+    procedure SQLEncodeTime(aTime: longint; bufptr: PByte); overload; virtual; abstract;
+    procedure SQLEncodeTime(aTime: TDateTime; bufptr: PByte); overload;
     function SQLDecodeTime(bufptr: PByte): longint;  virtual; abstract;
-    procedure SQLEncodeDateTime(aDate, aTime: longint; bufptr: PByte); virtual; abstract;
+    procedure SQLEncodeDateTime(aDate, aTime: longint; bufptr: PByte); overload; virtual; abstract;
+    procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte); overload;
     procedure SQLDecodeDateTime(bufptr: PByte; var aDate, aTime: longint); virtual; abstract;
     {Firebird 4 Extensions}
-    function TrySQLEncodeTimeTZ(aTime: TDateTime; aTimeZone: AnsiString; bufptr: PByte): boolean; virtual;
-    procedure SQLEncodeTimeTZ(aTime: TDateTime; aTimeZone: AnsiString; bufptr: PByte);
-    function TrySQLDecodeTimeTZ(var aTime: TDateTime; var aTimeZone: AnsiString; bufptr: PByte): boolean; virtual;
-    procedure SQLDecodeTimeTZ(var aTime: TDateTime; var aTimeZone: AnsiString; bufptr: PByte);
-    function TrySQLEncodeTimeStampTZ(aTimeStamp: TDateTime; aTimeZone: AnsiString;
-      bufptr: PByte): boolean; virtual;
-    procedure SQLEncodeTimeStampTZ(aTimeStamp: TDateTime; aTimeZone: AnsiString;
-      bufptr: PByte);
-    procedure SQLDecodeTimeStampTZ(var aTimeStamp: TDateTime;
-      var aTimeZone: AnsiString; bufptr: PByte);
-    function TrySQLDecodeTimeStampTZ(var aTimeStamp: TDateTime;
-      var aTimeZone: AnsiString; bufptr: PByte): boolean; virtual;
-
-    {utility}
-    function TryFBStrToDate(S: AnsiString; var dt: TFBTZDateTime): boolean;
-    function FBStrToDate(S: AnsiString): TFBTZDateTime;
-    function GetTimeZoneName(timeZoneID: word): AnsiString; virtual;
+    procedure SQLEncodeTimeTZ(aTime: longint; aTimeZone: AnsiString; bufptr: PByte); virtual;
+    procedure SQLDecodeTimeTZ(var aTime: longint; var aTimeZone: AnsiString; var aTimeZoneID: ISC_USHORT; bufptr: PByte);  virtual;
+    procedure SQLEncodeTimeStampTZ(aDate, aTime: longint; aTimeZone: AnsiString;
+      bufptr: PByte); virtual;
+    procedure SQLDecodeTimeStampTZ(var aDate, aTime: longint;
+      var aTimeZone: AnsiString; var aTimeZoneID: ISC_USHORT; bufptr: PByte); virtual;
 
     {IFirebirdAPI}
     function GetStatus: IStatus; virtual; abstract;
     function IsLibraryLoaded: boolean;
     function IsEmbeddedServer: boolean; virtual; abstract;
     function GetFBLibrary: IFirebirdLibrary;
+    function HasTimeZoneSupport: boolean; virtual;
+    function GetImplementationVersion: AnsiString;
+    function GetClientMajor: integer;  virtual; abstract;
+    function GetClientMinor: integer;  virtual; abstract;
+    function GetSQLTimestampParam: ISQLParamTimestamp;
 end;
 
 implementation
 
-uses IBUtils, Registry,
+uses IBUtils, Registry, FBTimestamp,
   {$IFDEF Unix} initc, dl, {$ENDIF}
 {$IFDEF FPC}
 {$IFDEF WINDOWS }
@@ -379,13 +374,10 @@ end;
 procedure TFBClientAPI.DecodeFBExtTime(aTime: longint; var Hour, Minute,
   Second, DeciMillisecond: word);
 begin
-  with aTime do
-  begin
-    DeciMilliSecond := aTime mod decimillsecondsPerSecond;
-    Second := (aTime div decimillsecondsPerSecond) mod SecsPerMin;
-    Minute := (aTime div decimillsecondsPerSecond*SecsPerMin) mod MinsPerHour;
-    Hour := aTime div decimillsecondsPerSecond*SecsPerMin*MinsPerHour;
-  end;
+  DeciMilliSecond := aTime mod decimillsecondsPerSecond;
+  Second := (aTime div decimillsecondsPerSecond) mod SecsPerMin;
+  Minute := (aTime div decimillsecondsPerSecond*SecsPerMin) mod MinsPerHour;
+  Hour := aTime div decimillsecondsPerSecond*SecsPerMin*MinsPerHour;
 end;
 
 function TFBClientAPI.EncodeFBExtTime(Hour, Minute, Second,
@@ -394,159 +386,46 @@ begin
   Result := ((((Hour * MinsPerHour) + Minute) * SecsPerMin) + Second)*decimillsecondsPerSecond + DeciMilliSecond;
 end;
 
-function TFBClientAPI.TrySQLEncodeTimeTZ(aTime: TDateTime;
-  aTimeZone: AnsiString; bufptr: PByte): boolean;
+procedure TFBClientAPI.SQLEncodeTime(aTime: TDateTime; bufptr: PByte);
+var aTimestamp: TTimestamp;
 begin
-  IBError(ibxeNotSupported,[]);
+  aTimestamp := DateTimeToTimeStamp(aTime);
+  SQLEncodeTime(aTimestamp.Time*10,bufPtr);
 end;
 
-procedure TFBClientAPI.SQLEncodeTimeTZ(aTime: TDateTime; aTimeZone: AnsiString;
+procedure TFBClientAPI.SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte);
+var aTimestamp: TTimestamp;
+begin
+  aTimestamp := DateTimeToTimeStamp(aDateTime);
+  SQLEncodeDateTime(aTimestamp.date, aTimestamp.Time*10,bufPtr);
+end;
+
+procedure TFBClientAPI.SQLEncodeTimeTZ(aTime: longint; aTimeZone: AnsiString;
   bufptr: PByte);
 begin
- if not TrySQLEncodeTimeTZ(aTime, aTimeZone, bufPtr) then
-   raise EIBInterBaseError.Create(GetStatus);
+  if not HasTimeZoneSupport then
+     IBError(ibxeNotSupported,[]);
 end;
 
-function TFBClientAPI.TrySQLDecodeTimeTZ(var aTime: TDateTime;
-  var aTimeZone: AnsiString; bufptr: PByte): boolean;
+procedure TFBClientAPI.SQLDecodeTimeTZ(var aTime: longint;
+  var aTimeZone: AnsiString; var aTimeZoneID: ISC_USHORT; bufptr: PByte);
 begin
-  IBError(ibxeNotSupported,[]);
+  if not HasTimeZoneSupport then
+    IBError(ibxeNotSupported,[]);
 end;
 
-procedure TFBClientAPI.SQLDecodeTimeTZ(var aTime: TDateTime;
-  var aTimeZone: AnsiString; bufptr: PByte);
-begin
-  if not TrySQLDecodeTimeTZ(aTime, aTimeZone, bufptr) then
-    raise EIBInterBaseError.Create(GetStatus);
-end;
-
-function TFBClientAPI.TrySQLEncodeTimeStampTZ(aTimeStamp: TDateTime;
-  aTimeZone: AnsiString; bufptr: PByte): boolean;
-begin
-  IBError(ibxeNotSupported,[]);
-end;
-
-procedure TFBClientAPI.SQLEncodeTimeStampTZ(aTimeStamp: TDateTime;
+procedure TFBClientAPI.SQLEncodeTimeStampTZ(aDate, aTime: longint;
   aTimeZone: AnsiString; bufptr: PByte);
 begin
-  if not TrySQLEncodeTimeStampTZ(aTimeStamp, aTimeZone, bufptr) then
-    raise EIBInterBaseError.Create(GetStatus);
+  if not HasTimeZoneSupport then
+    IBError(ibxeNotSupported,[]);
 end;
 
-procedure TFBClientAPI.SQLDecodeTimeStampTZ(var aTimeStamp: TDateTime;
-  var aTimeZone: AnsiString; bufptr: PByte);
+procedure TFBClientAPI.SQLDecodeTimeStampTZ(var aDate, aTime: longint;
+  var aTimeZone: AnsiString; var aTimeZoneID: ISC_USHORT; bufptr: PByte);
 begin
-  if not TrySQLDecodeTimeStampTZ(aTimeStamp, aTimeZone, bufptr) then
-    raise EIBInterBaseError.Create(GetStatus);
-end;
-
-function TFBClientAPI.TrySQLDecodeTimeStampTZ(var aTimeStamp: TDateTime;
-  var aTimeZone: AnsiString; bufptr: PByte): boolean;
-begin
-  IBError(ibxeNotSupported,[]);
-end;
-
-function TFBClientAPI.FBStrToDate(S: AnsiString): TFBTZDateTime;
-begin
-  if not TryFBStrToDate(S,Result) then
-    IBError(ibxeInvalidDateTimeStr, [S]);
-end;
-
-{This function is a generic string to date decoder that also allows for a
- time zone component. A Time Zone is ignored if FBClient is less than Firebird 4}
-
-function TFBClientAPI.TryFBStrToDate(S: AnsiString; var dt: TFBTZDateTime
-   ): boolean;
-var Parts: TStringList;
-    i: integer;
-    TimeStamp: ISC_TIMESTAMP_TZ;
-    timePart: TDateTime;
-
-    function LTrim(S: AnsiString): AnsiString;
-    begin
-      while (S <> '') and (S[1] = ' ') do
-        system.Delete(S,1,1);
-    end;
-
-begin
-  Result := true;
-  with dt do
-  begin
-    timestamp := 0;
-    timeZone := '';
-    timeZoneID := 0;
-  end;
-
-  Parts := TStringList.Create;
-  try
-    i := 0;
-    repeat
-      S := LTrim(S);
-      i := AnsiPos(' ',S);
-      if i > 0 then
-      begin
-        Parts.Add(system.copy(S,1,i-1));
-        system.Delete(S,1,i);
-      end;
-    until i = 0;
-    Parts.Add(S);
-
-    case Parts.Count of
-    1:
-      {date or time part only}
-      begin
-        Result := TryStrToDate(Parts[0],dt.timestamp);
-        if not Result then
-          Result := TryStrToTime(Parts[0],dt.timestamp);
-      end;
-
-    2:
-      {date and time or time and TZ}
-      if TryStrToDate(Parts[0],dt.timestamp) and TryStrToTime(Parts[1],timePart) then
-        dt.timestamp := dt.timestamp + timePart
-      else
-      begin
-        Result :=  TryStrToTime(Parts[0],dt.timestamp) and SupportsTimeZone;
-        if Result then
-        begin
-          {Let Firebird validate the time zone part}
-          Result := TrySQLEncodeTimeTZ(dt.timestamp,Parts[1],@TimeStamp);
-          if Result then
-          begin
-            dt.timeZone := Parts[1];
-            dt.timeZoneID := TimeStamp.time_zone;
-          end;
-        end;
-      end;
-
-    3:
-      {date, time and TZ}
-      begin
-        Result := TryStrToDate(Parts[0],dt.timestamp) and TryStrToTime(Parts[1],timePart) and SupportsTimeZone;
-        if Result then
-        begin
-          dt.timestamp := dt.timestamp + timePart;
-          {Let Firebird validate the time zone part}
-          Result := TrySQLEncodeTimestampTZ(dt.timestamp,Parts[2],@TimeStamp);
-          if Result then
-          begin
-            dt.timeZone := Parts[2];
-            dt.timeZoneID := TimeStamp.time_zone;
-          end;
-        end;
-      end;
-
-    else
-      Result := false;
-    end;
-  finally
-    Parts.Free;
-  end;
-end;
-
-function TFBClientAPI.GetTimeZoneName(timeZoneID: word): AnsiString;
-begin
-  IBError(ibxeNotSupported,[]);
+  if not HasTimeZoneSupport then
+    IBError(ibxeNotSupported,[]);
 end;
 
 function TFBClientAPI.IsLibraryLoaded: boolean;
@@ -566,9 +445,19 @@ begin
     raise Exception.CreateFmt(SFirebirdAPIFuncNotFound,[ProcName]);
 end;
 
-function TFBClientAPI.SupportsTimeZone: boolean;
+function TFBClientAPI.HasTimeZoneSupport: boolean;
 begin
   Result := false;
+end;
+
+function TFBClientAPI.GetImplementationVersion: AnsiString;
+begin
+  Result := Format('%d.%d',[GetClientMajor,GetClientMinor]);
+end;
+
+function TFBClientAPI.GetSQLTimestampParam: ISQLParamTimestamp;
+begin
+  Result := TSQLTimestamp.Create(self);
 end;
 
 function TFBClientAPI.LoadInterface: boolean;

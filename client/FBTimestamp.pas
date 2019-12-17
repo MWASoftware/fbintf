@@ -56,56 +56,54 @@ type
     FDate: longint; { One plus number of days since 1/1/0001 }
     FHasTimeZone: boolean;
     FTimeZone: AnsiString;
-    FTimeZoneID: ISC_SHORT; {native Firebird timezone integer identifier}
+    FTimeZoneID: ISC_USHORT; {native Firebird timezone integer identifier}
     function GetTimeZoneID(aTimeZone: AnsiString): ISC_USHORT; overload;
   public
     constructor Create(api: TFBClientAPI);
     procedure ToSQLData(SQLType: cardinal; SQLData: PByte);
     procedure FromSQLData(SQLType: cardinal; SQLData: PByte);
-    function TrySetAsString(aValue: AnsiString): boolean;
   public
     {ISQLTimestamp}
     function GetAsDateTime: TDateTime;
     function GetAsTimestamp: TTimestamp;
     function GetAsMilliseconds: comp;
     function GetAsSystemTime: TSystemTime;
-    function GetAsExtSystemTime: TExtSystemTime;
+    function GetAsFBSystemTime: TFBSystemTime;
     function GetTimezone: AnsiString;
     function GetTimezoneID: ISC_USHORT; overload; {native Firebird timezone integer identifier}
-    function GetAsString(FormatSettings: TFormatSettings): AnsiString; overload;
-    function GetAsString: AnsiString; overload;
+    function GetAsString(FormatSettings: TFormatSettings; IncludeTZifAvailable: boolean=true): AnsiString; overload;
+    function GetAsString(IncludeTZifAvailable: boolean=true): AnsiString; overload;
+    function GetDatePart: longint;
+    function GetTimePart: longint;
     function HasDatePart: boolean;
     function HasTimezone: boolean;
     {ISQLParamTimestamp}
+    procedure Clear;
     procedure SetAsDateTime(aValue: TDateTime);
     procedure SetAsTime(aValue: TDateTime); overload;
     procedure SetAsTimeMS(aValue: longint); overload;
     procedure SetAsTimestamp(aValue: TTimestamp);
     procedure SetAsMilliseconds(aValue: comp);
     procedure SetAsSystemTime(aValue: TSystemTime);
-    procedure SetAsExtSystemTime(aValue: TFBSystemTime);
+    procedure SetAsFBSystemTime(aValue: TFBSystemTime);
+    procedure SetDatePart(aValue: longint);
+    procedure SetTimePart(aValue: longint);
     procedure SetTimezone(aValue: AnsiString);
-    procedure SetAsString(aValue: AnsiString);
+    procedure SetTimeZoneID(aTimeZoneID: ISC_USHORT);
   end;
 
 implementation
 
-uses FBMessages;
+uses FBMessages, StrUtils;
 
 { TSQLTimestamp }
 
 function TSQLTimestamp.GetTimeZoneID(aTimeZone: AnsiString): ISC_USHORT;
 var aTime: ISC_TIME_TZ;
 begin
-  if SupportsTimeZone then
   with FFirebirdClientAPI do
-  begin
-    UtilIntf.encodeTimeTz(StatusIntf,@aTime,0,0,0,0, @aTimeZone);
-    Check4DataBaseError;
-    Result := aTime.time_zone;
-  end
-  else
-    IBError(ibxeNotSupported,[]);
+    SQLEncodeTimeTZ(0,aTimeZone,@aTime);
+  Result := aTime.time_zone;
 end;
 
 constructor TSQLTimestamp.Create(api: TFBClientAPI);
@@ -115,167 +113,79 @@ begin
 end;
 
 procedure TSQLTimestamp.ToSQLData(SQLType: cardinal; SQLData: PByte);
-var aTimeZone: AnsiString;
 begin
-   aTimeZone := GetTimeZone;
-   with FFirebirdClientAPI, GetAsSystemTime do
+   with FFirebirdClientAPI do
    case SQLType of
    SQL_TIMESTAMP_TZ:
-     if SupportsTimeZone then
-     with (FFirebirdClientAPI as TFB30ClientAPI) do
-     begin
-       UtilIntf.encodeTimeStampTz(StatusIntf,
-          ISC_TIMESTAMP_TZPtr(SQLData),Year, Month, Day, Hour, Minute, Second, DeciMilliSecond,
-          @aTimeZone);
-       Check4DataBaseError;
-     end
-   else
-     IBError(ibxeNotSupported,[]);
-
-   SQL_TIME_TZ:;
-     if SupportsTimeZone then
-     with (FFirebirdClientAPI as TFB30ClientAPI) do
-     begin
-       UtilIntf.encodeTimeTz(StatusIntf,
-          ISC_TIME_TZPtr(SQLData),Hour,Minute, Second, DeciMilliSecond, @aTimeZone);
-       Check4DataBaseError;
-     end
+     if FHasDatePart then
+       SQLEncodeTimeStampTZ(FDate,FTime,GetTimeZone,SQLData)
      else
-       IBError(ibxeNotSupported,[]);
+       SQLEncodeTimeStampTZ(0,FTime,GetTimeZone,SQLData);
+
+   SQL_TIME_TZ:
+     SQLEncodeTimeTZ(FTime,GetTimeZone,SQLData);
 
    SQL_TIMESTAMP:
-     SQLEncodeDateTime(FDate,FTime,SQLData);
+     if FHasDatePart then
+       SQLEncodeDateTime(FDate,FTime,SQLData)
+     else
+       SQLEncodeDateTime(0,FTime,SQLData);
 
    SQL_TYPE_DATE:
       SQLEncodeDate(FDate,SQLData);
 
    SQL_TYPE_TIME:
      SQLEncodeTime(FTime,SQLData);
+
+   else
+     IBError(ibxeInvalidDataConversion, [nil]);
    end;
 end;
 
 procedure TSQLTimestamp.FromSQLData(SQLType: cardinal; SQLData: PByte);
 begin
-
-end;
-
-function TSQLTimestamp.TrySetAsString(aValue: AnsiString): boolean;
-var Parts: TStringList;
-    i: integer;
-    TmpTimeStamp: ISC_TIMESTAMP_TZ;
-    aTimestamp: TTimestamp;
-    aTimeZone: AnsiString;
-    aTimezoneID : ISC_SHORT;
-    aHasDatePart: boolean;
-    aHasTimeZone: boolean;
-    datePart: TDateTime;
-    timePart: TDateTime;
-
-    function LTrim(S: AnsiString): AnsiString;
+  with FFirebirdClientAPI do
+  case SQLType of
+  SQL_TIMESTAMP_TZ:
     begin
-      while (S <> '') and (S[1] = ' ') do
-        system.Delete(S,1,1);
+      SQLDecodeTimeStampTZ(FDate,FTime,FTimeZone,FTimeZoneID,SQLData);
+      FHasDatePart := true;
+      FHasTimeZone := true;
     end;
 
-begin
-  Result := true;
-  aTimestamp.date := 0;
-  aTimestamp.Time := 0;
-  aHasDatePart := false;
-  aHasTimeZone := false;
-  aTimeZone := '';
-  aTimeZoneID := 0;
-
-  Parts := TStringList.Create;
-  try
-    i := 0;
-    repeat
-      aValue := LTrim(aValue);
-      i := AnsiPos(' ',aValue);
-      if i > 0 then
-      begin
-        Parts.Add(system.copy(aValue,1,i-1));
-        system.Delete(aValue,1,i);
-      end;
-    until i = 0;
-    Parts.Add(aValue);
-
-    with FFirebirdClientAPI do
-    case Parts.Count of
-    1:
-      {date or time part only}
-      begin
-        Result := TryStrToDate(Parts[0],datePart);
-        if  Result then
-        begin
-          aHasDatePart := true;
-          aTimestamp.Date := Trunc(datePart);
-        end
-        else
-        begin
-          Result := TryStrToTime(Parts[0],timepart);
-          if Result then
-            aTimestamp.Time := timepart * MSecsPerDay;
-        end;
-      end;
-
-    2:
-      {date and time or time and TZ}
-      if TryStrToDate(Parts[0],datePart) and TryStrToTime(Parts[1],timePart) then
-      begin
-        aHasDatePart := true;
-        aTimestamp.Date := Trunc(datePart);
-        aTimestamp.Time := timepart * MSecsPerDay;
-      end
-      else
-      begin
-        Result :=  TryStrToTime(Parts[0],timepart) and SupportsTimeZone;
-        if Result then
-        begin
-          {Let Firebird validate the time zone part}
-          Result := TrySQLEncodeTimeTZ(timepart,Parts[1],@TimeStamp);
-          if Result then
-          begin
-            aHasTimeZone := true;
-            aTimeZone := Parts[1];
-            aTimeZoneID := TimeStamp.time_zone;
-          end;
-        end;
-      end;
-
-    3:
-      {date, time and TZ}
-      begin
-        Result := TryStrToDate(Parts[0],datepart) and TryStrToTime(Parts[1],timePart) and SupportsTimeZone;
-        if Result then
-        begin
-          aHasDatePart := true;
-          aTimestamp.Date := Trunc(datePart);
-          aTimestamp.Time := timepart * MSecsPerDay;
-          {Let Firebird validate the time zone part}
-          Result := TrySQLEncodeTimestampTZ(timepart,Parts[2],@TimeStamp);
-          if Result then
-          begin
-            aHasTimeZone := true;
-            aTimeZone := Parts[2];
-            aTimeZoneID := TimeStamp.time_zone;
-          end;
-        end;
-      end;
-
-    else
-      Result := false;
+  SQL_TIME_TZ:
+    begin
+      SQLDecodeTimeTZ(FTime,FTimeZone,FTimeZoneID,SQLData);
+      FDate := 0;
+      FHasDatePart := false;
+      FHasTimeZone := true;
     end;
-  finally
-    Parts.Free;
-  end;
-  if Result then
-  begin
-    SetAsTimestamp(aTimestamp);
-    FHasDatePart := aHasDatePart;
-    FTimestamp.TimeZone := aTimeZone;
-    FTimestamp.HasTimeZone := aHasTimeZone;
-    FTimestamp.TimezoneID := aTimezoneID;
+
+  SQL_TIMESTAMP:
+    begin
+      SQLDecodeDateTime(SQLData,FDate,FTime);
+      FHasDatePart := true;
+      FHasTimeZone := false;
+    end;
+
+  SQL_TYPE_DATE:
+    begin
+      FDate := SQLDecodeDate(SQLData);
+      FTime := 0;
+      FHasDatePart := true;
+      FHasTimeZone := false;
+    end;
+
+  SQL_TYPE_TIME:
+    begin
+      FDate := 0;
+      FTime := SQLDecodeTime(SQLData);
+      FHasDatePart := false;
+      FHasTimeZone := false;
+    end;
+
+  else
+    IBError(ibxeInvalidDataConversion, [nil]);
   end;
 end;
 
@@ -292,30 +202,29 @@ end;
 
 function TSQLTimestamp.GetAsMilliseconds: comp;
 begin
-  Result := TimeStampToMSecs(GetTimestamp);
+  Result := TimeStampToMSecs(GetAsTimestamp);
 end;
 
 function TSQLTimestamp.GetAsSystemTime: TSystemTime;
 {Convert to system time (broken time) avoiding millisecond rounding issues}
 var DeciMillisecond: word;
 begin
-  aTime := FTime;
-  with Result do
+  with FFirebirdClientAPI, Result do
   begin
-    DecodeDateFully(TimeStampToDateTime(GetTimestamp),Year,Month,Day,DayOfWeek);
+    DecodeDateFully(TimeStampToDateTime(GetAsTimestamp),Year,Month,Day,DayOfWeek);
     DecodeFBExtTime(FTime, Hour, Minute, Second, DeciMillisecond);
     Millisecond := DeciMillisecond div 10;
   end;
 end;
 
-function TSQLTimestamp.GetAsExtSystemTime: TExtSystemTime;
+function TSQLTimestamp.GetAsFBSystemTime: TFBSystemTime;
 {Convert to Ext system time avoiding millisecond rounding issues}
 var aTime: word;
 begin
   aTime := FTime;
-  with Result do
+  with FFirebirdClientAPI, Result do
   begin
-    DecodeDateFully(TimeStampToDateTime(GetTimestamp),Year,Month,Day,DayOfWeek);
+    DecodeDateFully(TimeStampToDateTime(GetAsTimestamp),Year,Month,Day,DayOfWeek);
     DecodeFBExtTime(FTime, Hour, Minute, Second, DeciMillisecond);
   end;
 end;
@@ -328,7 +237,7 @@ begin
   else
   begin
     offset := GetLocalTimeOffset;
-    Result := Format('%.2d%.2d',offset div MinsPerHour, offset mod MinsPerHour);
+    Result := Format('%.2d%.2d',[offset div MinsPerHour, abs(offset) mod MinsPerHour]);
   end;
 end;
 
@@ -337,35 +246,39 @@ begin
   Result := GetTimeZoneID(FTimeZone);
 end;
 
-{Extends FormatSettings.LongTimeFormat to add TZ as a placeholder for the TimeZone}
-
-function TSQLTimestamp.GetAsString(FormatSettings: TFormatSettings): AnsiString;
+function TSQLTimestamp.GetAsString(FormatSettings: TFormatSettings;
+  IncludeTZifAvailable: boolean): AnsiString;
 var TimeFormat: AnsiString;
 begin
   Result := '';
   if HasDatePart then
-    Result := DateToStr(GetAsDateTime,FormatSettings) + ' ';
+    Result := DateToStr(FDate,FormatSettings) + ' ';
   TimeFormat := FormatSettings.LongTimeFormat;
   if Pos('zzz',TimeFormat) > 1 then
-    TimeFormat := ReplaceStr(TimeFormat,'zzz',Format('%.4d',FTimestamp.time mod 10000))
+    TimeFormat := ReplaceStr(TimeFormat,'zzz',Format('%.4d',[FTime mod decimillsecondsPerSecond]));
   if Pos('z',TimeFormat) > 1 then
-    TimeFormat := ReplaceStr(TimeFormat,'z',Format('%d',FTimestamp.time mod 10000));
-  if Pos('TZ', TimeFormat) > 1 then
-  begin
-    if HasTimeZone then
-      ReplaceStr(TimeFormat,'TZ',TimeZone)
-    else
-      ReplaceStr(TimeFormat,'TZ','');
-  end;
-  Result := Result + FormatDateTime(TimeFormat,(FTimeStamp.Time div 10000) * 1000) / MSecsPerDay);
+    TimeFormat := ReplaceStr(TimeFormat,'z',Format('%d',[FTime mod decimillsecondsPerSecond]));
+  Result := Result + FormatDateTime(TimeFormat,(FTime div decimillsecondsPerSecond) * MSecsPerSec / MSecsPerDay);
+  if IncludeTZifAvailable and HasTimeZone then
+    Result := Result + ' ' + FTimeZone
 end;
 
-function TSQLTimestamp.GetAsString: AnsiString;
-var FormatSettings: TFormatSettings;
+function TSQLTimestamp.GetAsString(IncludeTZifAvailable: boolean): AnsiString;
 begin
-  FormatSettings := DefaultFormatSettings;
-  FormatSettings.LongTimeFormat := ' TZ';
-  Result := GetAsString(FormatSettings);
+  Result := GetAsString(DefaultFormatSettings,IncludeTZifAvailable);
+end;
+
+function TSQLTimestamp.GetDatePart: longint;
+begin
+  if FHasDatePart then
+    Result := FDate
+  else
+    Result := 0;
+end;
+
+function TSQLTimestamp.GetTimePart: longint;
+begin
+  Result := FTime;
 end;
 
 function TSQLTimestamp.HasDatePart: boolean;
@@ -375,7 +288,17 @@ end;
 
 function TSQLTimestamp.HasTimezone: boolean;
 begin
-  Result := FTimestamp.HasTimeZone;
+  Result := FHasTimeZone;
+end;
+
+procedure TSQLTimestamp.Clear;
+begin
+  FDate := 0;
+  FTime := 0;
+  FHasDatePart := false;
+  FHasTimeZone := false;
+  FTimeZone := '';
+  FTimeZoneID := 0;
 end;
 
 procedure TSQLTimestamp.SetAsDateTime(aValue: TDateTime);
@@ -387,14 +310,14 @@ end;
 procedure TSQLTimestamp.SetAsTime(aValue: TDateTime);
 begin
   SetAsTimestamp(DateTimeToTimeStamp(AValue));
-  FTimestamp.Date := 0;
+  FDate := 0;
   FHasDatePart := false;
 end;
 
 procedure TSQLTimestamp.SetAsTimeMS(aValue: longint);
 begin
   SetAsTimestamp(MSecsToTimeStamp(aValue));
-  FTimestamp.Date := 0;
+  FDate := 0;
   FHasDatePart := false;
 end;
 
@@ -416,29 +339,40 @@ end;
 
 procedure TSQLTimestamp.SetAsSystemTime(aValue: TSystemTime);
 begin
-  with aValue do
+  with FFirebirdClientAPI, aValue do
   begin
     FDate := Trunc(EncodeDate(Year, Month, Day));
-    FHasDate := true;
+    FHasDatePart := true;
     FTime := EncodeFBExtTime(Hour,Minute,Second,Millisecond*10);
     FHasTimeZone := false;
   end;
 end;
 
-procedure TSQLTimestamp.SetAsExtSystemTime(aValue: TFBSystemTime);
+procedure TSQLTimestamp.SetAsFBSystemTime(aValue: TFBSystemTime);
 begin
   with FFirebirdClientAPI, aValue do
   begin
     FDate := Trunc(EncodeDate(Year, Month, Day));
-    FHasDate := true;
+    FHasDatePart := true;
     FTime := EncodeFBExtTime(Hour,Minute,Second,DeciMilliSecond);
-    FHasTimeZone := (TimeZone <> '') and SupportsTimeZone;
+    FHasTimeZone := (TimeZone <> '') and HasTimeZoneSupport;
     if FHasTimeZone then
     begin
       FTimeZone := TimeZone;
       FTimeZoneID := GetTimeZoneID(FTimeZone);
     end;
   end;
+end;
+
+procedure TSQLTimestamp.SetDatePart(aValue: longint);
+begin
+  FDate := aValue;
+  FHasDatePart := true;
+end;
+
+procedure TSQLTimestamp.SetTimePart(aValue: longint);
+begin
+  FTime := aValue;
 end;
 
 procedure TSQLTimestamp.SetTimezone(aValue: AnsiString);
@@ -448,10 +382,13 @@ begin
   FTimeZoneID := GetTimeZoneID(FTimeZone);
 end;
 
-procedure TSQLTimestamp.SetAsString(aValue: AnsiString);
+procedure TSQLTimestamp.SetTimeZoneID(aTimeZoneID: ISC_USHORT);
+var aTime: longint;
+    aTimeTZ: ISC_TIME_TZ;
 begin
-  if not TrySetAsString(aValue) then
-    IBError(ibxeInvalidDateTimeStr, [aValue]);
+  aTimeTZ.time_zone := aTimeZoneID;
+  aTimeTZ.utc_time := 0;
+  FFirebirdClientAPI.SQLDecodeTimeTZ(aTime,FTimeZone,FTimeZoneID,@aTimeTZ);
 end;
 
 end.
