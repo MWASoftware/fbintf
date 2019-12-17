@@ -81,7 +81,7 @@ interface
 
 uses
   Classes, SysUtils, IBExternals, IBHeader, IB,  FBActivityMonitor, FBClientAPI,
-  FBTimestamp;
+  FBTimestamp, FmtBCD;
 
 type
 
@@ -137,6 +137,7 @@ type
      function GetAsVariant: Variant;
      function GetModified: boolean; virtual;
      function GetDateTimeStrLength(DateTimeFormat: TIBDateTimeFormats): integer;
+     function GetAsBCD: tBCD;
      procedure SetAsBoolean(AValue: boolean); virtual;
      procedure SetAsCurrency(Value: Currency); virtual;
      procedure SetAsInt64(Value: Int64); virtual;
@@ -153,6 +154,7 @@ type
      procedure SetAsString(Value: AnsiString); virtual;
      procedure SetAsVariant(Value: Variant);
      procedure SetAsNumeric(Value: Int64; aScale: integer);
+     procedure SetAsBcd(aValue: tBCD);
      procedure SetIsNull(Value: Boolean); virtual;
      procedure SetIsNullable(Value: Boolean); virtual;
      procedure SetName(aValue: AnsiString); virtual;
@@ -386,6 +388,7 @@ type
     procedure SetAsBlob(aValue: IBlob);
     procedure SetAsQuad(AValue: TISC_QUAD);
     procedure SetCharSetID(aValue: cardinal);
+    procedure SetAsBcd(aValue: tBCD);
 
     property AsBlob: IBlob read GetAsBlob write SetAsBlob;
     property IsNullable: Boolean read GetIsNullable write SetIsNullable;
@@ -962,6 +965,13 @@ begin
                                       Scale);
         SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT:
           result := Trunc(AsDouble);
+
+        SQL_DEC_FIXED,
+        SQL_DEC16,
+        SQL_DEC34:
+          if not BCDToCurr(GetAsBCD,Result) then
+            IBError(ibxeInvalidDataConversion, [nil]);
+
         else
           IBError(ibxeInvalidDataConversion, [nil]);
       end;
@@ -1250,6 +1260,10 @@ begin
         result := AsDouble;
       SQL_BOOLEAN:
         result := AsBoolean;
+      SQL_DEC_FIXED,
+      SQL_DEC16,
+      SQL_DEC34:
+        result := VarFmtBCDCreate(GetAsBcd);
       else
         IBError(ibxeInvalidDataConversion, [nil]);
     end;
@@ -1264,6 +1278,29 @@ function TSQLDataItem.GetDateTimeStrLength(DateTimeFormat: TIBDateTimeFormats
   ): integer;
 begin
   Result := TSQLTimestamp.GetDateTimeStrLength(DateTimeFormat);
+end;
+
+function TSQLDataItem.GetAsBCD: tBCD;
+begin
+  CheckActive;
+  if IsNull then
+   with Result do
+   begin
+     FillChar(Result,sizeof(Result),0);
+     Precision := 1;
+     exit;
+   end;
+
+  case SQLType of
+  SQL_DEC_FIXED,
+  SQL_DEC16,
+  SQL_DEC34:
+    with FFirebirdClientAPI do
+      Result := SQLDecFloatDecode(SQLType,GetScale, SQLData);
+
+  else
+    Result := CurrToBCD(GetAsCurrency);
+  end;
 end;
 
 
@@ -1528,6 +1565,11 @@ begin
       IBError(ibxeNotSupported, [nil]);
     varByRef, varDispatch, varError, varUnknown, varVariant:
       IBError(ibxeNotPermitted, [nil]);
+    else
+      if VarIsFmtBCD(Value) then
+        SetAsBCD(VarToBCD(Value))
+      else
+        IBError(ibxeNotSupported, [nil]);
   end;
 end;
 
@@ -1542,6 +1584,21 @@ begin
   Scale := aScale;
   DataLength := SizeOf(Int64);
   PInt64(SQLData)^ := Value;
+  Changed;
+end;
+
+procedure TSQLDataItem.SetAsBcd(aValue: tBCD);
+begin
+  CheckActive;
+  Changing;
+  if IsNullable then
+    IsNull := False;
+
+  SQLType := SQL_DEC34;
+  Scale := -(aValue.SignSpecialPlaces and $3f);
+  DataLength := SizeOf(FB_DEC34);
+  with FFirebirdClientAPI do
+    SQLDecFloatEncode(aValue,SQLType,SQLData);
   Changed;
 end;
 
@@ -2319,6 +2376,29 @@ end;
 procedure TSQLParam.SetCharSetID(aValue: cardinal);
 begin
   FIBXSQLVAR.SetCharSetID(aValue);
+end;
+
+procedure TSQLParam.SetAsBcd(aValue: tBCD);
+var i: integer;
+    OldSQLVar: TSQLVarData;
+begin
+  if FIBXSQLVAR.UniqueName then
+    inherited SetAsBcd(AValue)
+  else
+  with FIBXSQLVAR.Parent do
+  begin
+    for i := 0 to Count - 1 do
+      if Column[i].Name = Name then
+      begin
+        OldSQLVar := FIBXSQLVAR;
+        FIBXSQLVAR := Column[i];
+        try
+          inherited SetAsBcd(AValue);
+        finally
+          FIBXSQLVAR := OldSQLVar;
+        end;
+      end;
+  end;
 end;
 
 { TMetaData }

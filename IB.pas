@@ -129,7 +129,7 @@ uses
   Classes,
   {$IFDEF WINDOWS}Windows, {$ENDIF}
   {$IFDEF FPC} Dynlibs, {$ENDIF}
-  SysUtils, DB, FBMessages, IBExternals;
+  SysUtils, DB, FBMessages, IBExternals, FmtBcd;
 
 const
   {Interface version information}
@@ -552,6 +552,7 @@ type
     function GetAsBlob: IBlob; overload;
     function GetAsBlob(BPB: IBPB): IBlob; overload;
     function GetAsArray: IArray;
+    function GetAsBCD: tBCD;
     property AsDate: TDateTime read GetAsDateTime;
     property AsBoolean:boolean read GetAsBoolean;
     property AsTime: TDateTime read GetAsDateTime;
@@ -657,6 +658,7 @@ type
     function GetAsCurrency: Currency;
     function GetAsInt64: Int64;
     function GetAsDateTime: TDateTime;
+    function GetAsSQLTimestamp: ISQLTimestamp;
     function GetAsDouble: Double;
     function GetAsFloat: Float;
     function GetAsLong: Long;
@@ -668,6 +670,7 @@ type
     function GetAsVariant: Variant;
     function GetAsBlob: IBlob;
     function GetAsArray: IArray;
+    function GetAsBCD: tBCD;
     procedure Clear;
     function GetModified: boolean;
     procedure SetAsBoolean(AValue: boolean);
@@ -689,6 +692,7 @@ type
     procedure SetAsArray(anArray: IArray);
     procedure SetAsQuad(aValue: TISC_QUAD);
     procedure SetCharSetID(aValue: cardinal);
+    procedure SetAsBcd(aValue: tBCD);
     property AsDate: TDateTime read GetAsDateTime write SetAsDate;
     property AsBoolean:boolean read GetAsBoolean write SetAsBoolean;
     property AsTime: TDateTime read GetAsDateTime write SetAsTime;
@@ -1241,6 +1245,7 @@ type
     function GetClientMajor: integer;
     function GetClientMinor: integer;
     function HasTimeZoneSupport: boolean;
+    function HasDecFloatSupport: boolean;
 
     {Firebird 3 API}
     function HasMasterIntf: boolean;

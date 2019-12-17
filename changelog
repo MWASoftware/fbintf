@@ -26,6 +26,28 @@ FBINTF Change Log  version          (1.1-5 Build 11664) Thu, 11 Apr 2019 09:43:4
 9. GetImplementationVersion now correctly returns '3.0' for Firebird 3 API
    with a Firebrid 3 client library.
 
+10. Added Support for SQL_DEC16 and SQL_DEC34.
+
+11. New Interface: ISQLTimestamp. This supports decimillisecond time resolution and
+    time zones.
+
+12. New IFirebirdAPI Calls:
+    function GetClientMajor: integer;
+    function GetClientMinor: integer;
+    function HasTimeZoneSupport: boolean;
+    function HasDecFloatSupport: boolean;
+    function GetSQLTimestampParam: ISQLParamTimestamp;
+
+13. New ISQLData API Calls:
+    function GetAsSQLTimestamp: ISQLTimestamp;
+    function GetAsBCD: tBCD;
+
+14. New ISQLParam API Calls
+    function GetAsSQLTimestamp: ISQLTimestamp;
+    function GetAsBCD: tBCD;
+    procedure SetAsSQLTimestamp(aValue: ISQLParamTimestamp);
+    procedure SetAsBcd(aValue: tBCD);
+
 
 FBINTF Change Log  version          (1.1-4 Build 11515)  Fri, 28 Dec 2018 10:04:19 +0000
 

@@ -76,7 +76,7 @@ uses
   Classes,
     {$IFDEF WINDOWS}Windows, {$ENDIF}
     {$IFDEF FPC} Dynlibs, {$ENDIF}
-   IB, IBHeader, FBActivityMonitor, FBMessages, IBExternals;
+   IB, IBHeader, FBActivityMonitor, FBMessages, IBExternals, FmtBCD;
 
 {For Linux see result of GetFirebirdLibList method}
 {$IFDEF DARWIN}
@@ -194,13 +194,16 @@ type
       bufptr: PByte); virtual;
     procedure SQLDecodeTimeStampTZ(var aDate, aTime: longint;
       var aTimeZone: AnsiString; var aTimeZoneID: ISC_USHORT; bufptr: PByte); virtual;
+    procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal; bufptr: PByte); virtual;
+    function SQLDecFloatDecode(SQLType: cardinal; scale: integer; bufptr: PByte): tBCD; virtual;
 
     {IFirebirdAPI}
     function GetStatus: IStatus; virtual; abstract;
     function IsLibraryLoaded: boolean;
     function IsEmbeddedServer: boolean; virtual; abstract;
     function GetFBLibrary: IFirebirdLibrary;
-    function HasTimeZoneSupport: boolean; virtual;
+    function HasTimeZoneSupport: boolean;
+    function HasDecFloatSupport: boolean;
     function GetImplementationVersion: AnsiString;
     function GetClientMajor: integer;  virtual; abstract;
     function GetClientMinor: integer;  virtual; abstract;
@@ -428,6 +431,20 @@ begin
     IBError(ibxeNotSupported,[]);
 end;
 
+procedure TFBClientAPI.SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal;
+  bufptr: PByte);
+begin
+  if not HasDecFloatSupport then
+    IBError(ibxeNotSupported,[]);
+end;
+
+function TFBClientAPI.SQLDecFloatDecode(SQLType: cardinal; scale: integer;
+  bufptr: PByte): tBCD;
+begin
+  if not HasDecFloatSupport then
+    IBError(ibxeNotSupported,[]);
+end;
+
 function TFBClientAPI.IsLibraryLoaded: boolean;
 begin
   Result := FFBLibrary.IBLibrary <> NilHandle;
@@ -447,7 +464,12 @@ end;
 
 function TFBClientAPI.HasTimeZoneSupport: boolean;
 begin
-  Result := false;
+  Result := GetClientMajor >= 4;
+end;
+
+function TFBClientAPI.HasDecFloatSupport: boolean;
+begin
+  Result := GetClientMajor >= 4;
 end;
 
 function TFBClientAPI.GetImplementationVersion: AnsiString;

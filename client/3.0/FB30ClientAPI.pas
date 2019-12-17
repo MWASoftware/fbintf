@@ -37,7 +37,7 @@ unit FB30ClientAPI;
 interface
 
 uses
-  Classes, SysUtils, FBClientAPI, Firebird, IB, IBExternals;
+  Classes, SysUtils, FBClientAPI, Firebird, IB, IBExternals, FmtBCD;
 
 type
 
@@ -70,8 +70,6 @@ type
                              when this class is freed and last reference to IStatus
                              goes out of scope.}
     procedure CheckPlugins;
-  protected
-     function HasTimeZoneSupport: boolean; override;
   public
     constructor Create(aFBLibrary: TFBLibrary);
     destructor Destroy; override;
@@ -132,6 +130,9 @@ type
       bufptr: PByte); override;
     procedure SQLDecodeTimeStampTZ(var aDate, aTime: longint;
       var aTimeZone: AnsiString; var aTimeZoneID: ISC_USHORT; bufptr: PByte); override;
+    procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal; bufptr: PByte); override;
+    function SQLDecFloatDecode(SQLType: cardinal; scale: integer; bufptr: PByte
+      ): tBCD; override;
 
     {Firebird Interfaces}
     property MasterIntf: Firebird.IMaster read FMaster;
@@ -198,11 +199,6 @@ begin
   finally
     PluginsList.Free;
   end;
-end;
-
-function TFB30ClientAPI.HasTimeZoneSupport: boolean;
-begin
-  Result := (UtilIntf.getClientVersion div 256) >= 4;
 end;
 
 {$IFDEF UNIX}
@@ -484,6 +480,67 @@ begin
   aTime := EncodeFBExtTime(Hr, Mt, S, DMs);
   aTimeZoneID := ISC_TIMESTAMP_TZPtr(bufptr)^.time_zone;
   aTimeZone := strpas(@tzBuffer);
+end;
+
+procedure TFB30ClientAPI.SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal;
+  bufptr: PByte);
+var DecFloat16: IDecFloat16;
+    DecFloat34: IDecFloat34;
+    sign: integer;
+    exp: integer;
+begin
+  inherited SQLDecFloatEncode(aValue, SQLType, bufptr);
+  sign := (aValue.SignSpecialPlaces and $80) shr 7;
+  exp := aValue.Precision;
+  case SQLType of
+  SQL_DEC16:
+    begin
+      DecFloat16 := UtilIntf.getDecFloat16(StatusIntf);
+      Check4DataBaseError;
+      DecFloat16.fromBcd(sign,@aValue.Fraction,exp,FB_DEC16Ptr(bufptr));
+    end;
+
+  SQL_DEC34:
+    begin
+      DecFloat34 := UtilIntf.getDecFloat34(StatusIntf);
+      Check4DataBaseError;
+      DecFloat34.fromBcd(sign,@aValue.Fraction,exp,FB_DEC34Ptr(bufptr));
+    end;
+
+  else
+    IBError(ibxeInvalidDataConversion,[]);
+  end;
+end;
+
+function TFB30ClientAPI.SQLDecFloatDecode(SQLType: cardinal; scale: integer;
+  bufptr: PByte): tBCD;
+var DecFloat16: IDecFloat16;
+    DecFloat34: IDecFloat34;
+    sign: integer;
+    exp: integer;
+begin
+  Result := inherited SQLDecFloatDecode(SQLType, scale, bufptr);
+  case SQLType of
+  SQL_DEC16:
+    begin
+      DecFloat16 := UtilIntf.getDecFloat16(StatusIntf);
+      Check4DataBaseError;
+      DecFloat16.toBcd(FB_DEC16Ptr(bufptr),@sign,@Result.Fraction,@exp);
+    end;
+
+  SQL_DEC34:
+    begin
+      DecFloat34 := UtilIntf.getDecFloat34(StatusIntf);
+      Check4DataBaseError;
+      DecFloat34.toBcd(FB_DEC34Ptr(bufptr),@sign,@Result.Fraction,@exp);
+    end;
+
+  else
+    IBError(ibxeInvalidDataConversion,[]);
+  end;
+  Result.SignSpecialPlaces :=  (-scale and $3f);
+  if sign <> 0 then
+    Result.SignSpecialPlaces := Result.SignSpecialPlaces or $80;
 end;
 
 function TFB30ClientAPI.GetClientMajor: integer;
