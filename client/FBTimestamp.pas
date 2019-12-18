@@ -239,7 +239,7 @@ end;
 
 function TSQLTimestamp.GetAsDateTime: TDateTime;
 begin
-  Result := TimeStampToDateTime(GetAsTimestamp);
+  Result := ComposeDateTime(FDate - DateDelta,FTime / (MSecsPerDay*10))
 end;
 
 function TSQLTimestamp.GetAsTimestamp: TTimestamp;
@@ -305,7 +305,7 @@ begin
     TimeFormat := ReplaceStr(TimeFormat,'zzz',Format('%.4d',[FTime mod decimillsecondsPerSecond]));
   if Pos('z',TimeFormat) > 1 then
     TimeFormat := ReplaceStr(TimeFormat,'z',Format('%d',[FTime mod decimillsecondsPerSecond]));
-  Result := Result + FormatDateTime(TimeFormat,(FTime div decimillsecondsPerSecond) * MSecsPerSec / MSecsPerDay);
+  Result := Result + FormatDateTime(TimeFormat,FTime / (MSecsPerDay*10));
   if IncludeTZifAvailable and HasTimeZone then
     Result := Result + ' ' + FTimeZone
 end;
@@ -344,8 +344,17 @@ begin
 end;
 
 procedure TSQLTimestamp.SetAsDateTime(aValue: TDateTime);
+Var
+  D : Double;
 begin
-  SetAsTimestamp(DateTimeToTimeStamp(AValue));
+  {copied from DateTimeToTimeStamp and adjusted for deci-milliseconds}
+  D:=aValue * Single(MSecsPerDay*10); {Convert to deci-milliseconds}
+  if D<0 then {round up}
+    D:=D-0.5
+  else
+    D:=D+0.5;
+  FTime := Abs(Trunc(D)) Mod (MSecsPerDay*10);
+  FDate := DateDelta + Trunc(D) div (MSecsPerDay*10);
   FHasDatePart := true;
 end;
 
