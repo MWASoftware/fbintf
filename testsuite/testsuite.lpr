@@ -36,7 +36,7 @@ var
 begin
   OutFile := stdout;
   // quick check parameters
-  ErrorMsg := CheckOptions('htupensboS', 'help test user passwd employeedb newdbname secondnewdbname backupfile outfile stats');
+  ErrorMsg := CheckOptions('htupensbolrS', 'help test user passwd employeedb newdbname secondnewdbname backupfile outfile fbclientlibrary server stats');
   if ErrorMsg <> '' then begin
     ShowException(Exception.Create(ErrorMsg));
     Terminate;
@@ -73,6 +73,12 @@ begin
     if HasOption('b','backupfile') then
       TestMgr.SetBackupFileName(GetOptionValue('b'));
 
+    if HasOption('l','fbclientlibrary') then
+      TestMgr.SetClientLibraryPath(GetOptionValue('l'));
+
+    if HasOption('r','server') then
+      TestMgr.SetServerName(GetOptionValue('r'));
+
     if HasOption('o','outfile') then
     begin
       system.Assign(outFile,GetOptionValue('o'));
@@ -94,7 +100,7 @@ begin
     writeln(OutFile,'Copyright MWA Software 2016');
     writeln(OutFile);
     writeln(OutFile,'Starting Tests');
-    writeln(OutFile,'Client API Version = ',FirebirdAPI.GetImplementationVersion);
+    writeln(OutFile,'Client API Version = ',TestMgr.FirebirdAPI.GetImplementationVersion);
 
     if FTestID = 0 then
       TestMgr.RunAll

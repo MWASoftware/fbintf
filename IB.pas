@@ -512,6 +512,7 @@ type
     function GetDatePart: longint;
     function GetTimePart: longint;
     function HasDatePart: boolean;
+    function HasTimePart: boolean;
     function HasTimezone: boolean;
     property AsDateTime: TDateTime read GetAsDateTime;
     property AsMillseconds: comp read GetAsMilliseconds;

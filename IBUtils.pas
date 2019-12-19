@@ -939,6 +939,7 @@ function MakeConnectString(ServerName, DatabaseName: AnsiString;
   end;
 
 begin
+  if ServerName = '' then ServerName := 'localhost';
   if PortNo <> '' then
     case Protocol of
     NamedPipe:

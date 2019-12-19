@@ -11,7 +11,7 @@ unit TestManager;
 interface
 
 uses
-  Classes, SysUtils, IB;
+  Classes, SysUtils, IB, IBUtils;
 
 type
   TTestManager = class;
@@ -56,6 +56,7 @@ type
 
   TTestManager = class
   private
+    FServer: AnsiString;
     FTests: TList;
     FEmployeeDatabaseName: AnsiString;
     FNewDatabaseName: AnsiString;
@@ -64,7 +65,9 @@ type
     FPassword: AnsiString;
     FBackupFileName: AnsiString;
     FShowStatistics: boolean;
+    FFirebirdAPI: IFirebirdAPI;
     procedure CleanUp;
+    function GetFirebirdAPI: IFirebirdAPI;
   public
     constructor Create;
     destructor Destroy; override;
@@ -76,13 +79,17 @@ type
     function GetBackupFileName: AnsiString;
     procedure RunAll;
     procedure Run(TestID: integer);
+    procedure SetClientLibraryPath(aLibName: string);
     procedure SetUserName(aValue: AnsiString);
     procedure SetPassword(aValue: AnsiString);
     procedure SetEmployeeDatabaseName(aValue: AnsiString);
     procedure SetNewDatabaseName(aValue: AnsiString);
     procedure SetSecondNewDatabaseName(aValue: AnsiString);
     procedure SetBackupFileName(aValue: AnsiString);
+    procedure SetServerName(AValue: AnsiString);
     property ShowStatistics: boolean read FShowStatistics write FShowStatistics;
+    property FirebirdAPI: IFirebirdAPI read GetFirebirdAPI;
+    property Server: AnsiString read FServer;
   end;
 
 var
@@ -665,15 +672,29 @@ begin
     Attachment.DropDatabase;
 end;
 
+function TTestManager.GetFirebirdAPI: IFirebirdAPI;
+begin
+  if FFirebirdAPI = nil then
+    FFirebirdAPI := IB.FirebirdAPI;
+  Result := FFirebirdAPI;
+end;
+
+procedure TTestManager.SetServerName(AValue: AnsiString);
+begin
+  if FServer = AValue then Exit;
+  FServer := AValue;
+end;
+
 constructor TTestManager.Create;
 begin
   inherited Create;
   FTests := TList.Create;
-  FNewDatabaseName := 'localhost:' + GetTempDir + 'fbtestsuite.fdb';
-  FSecondNewDatabaseName :=  'localhost:' + GetTempDir + 'fbtestsuite2.fdb';
+  FServer := 'localhost';
+  FNewDatabaseName := GetTempDir + 'fbtestsuite.fdb';
+  FSecondNewDatabaseName := GetTempDir + 'fbtestsuite2.fdb';
   FUserName := 'SYSDBA';
   FPassword := 'masterkey';
-  FEmployeeDatabaseName := 'localhost:employee';
+  FEmployeeDatabaseName := 'employee';
   FBackupFileName := GetTempDir + 'testbackup.gbk';
 end;
 
@@ -701,17 +722,17 @@ end;
 
 function TTestManager.GetEmployeeDatabaseName: AnsiString;
 begin
-  Result := FEmployeeDatabaseName;
+  Result := MakeConnectString(FServer,  FEmployeeDatabaseName, inet,'');
 end;
 
 function TTestManager.GetNewDatabaseName: AnsiString;
 begin
-  Result := FNewDatabaseName;
+  Result := MakeConnectString(FServer,  FNewDatabaseName, inet,'');
 end;
 
 function TTestManager.GetSecondNewDatabaseName: AnsiString;
 begin
-  Result := FSecondNewDatabaseName;
+  Result := MakeConnectString(FServer,  FSecondNewDatabaseName, inet,'');
 end;
 
 function TTestManager.GetBackupFileName: AnsiString;
@@ -764,6 +785,11 @@ begin
     writeln(OutFile);
     writeln(OutFile);
   end;
+end;
+
+procedure TTestManager.SetClientLibraryPath(aLibName: string);
+begin
+  FFirebirdAPI := LoadFBLibrary(aLibName).GetFirebirdAPI;
 end;
 
 procedure TTestManager.SetUserName(aValue: AnsiString);

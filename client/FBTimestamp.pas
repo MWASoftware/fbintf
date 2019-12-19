@@ -54,6 +54,7 @@ type
     FTime: longint;  {deci-milliseconds since midnight}
     FHasDatePart: boolean;
     FDate: longint; { One plus number of days since 1/1/0001 }
+    FHasTimePart: boolean;
     FHasTimeZone: boolean;
     FTimeZone: AnsiString;
     FTimeZoneID: ISC_USHORT; {native Firebird timezone integer identifier}
@@ -78,6 +79,7 @@ type
     function GetDatePart: longint;
     function GetTimePart: longint;
     function HasDatePart: boolean;
+    function HasTimePart: boolean;
     function HasTimezone: boolean;
     {ISQLParamTimestamp}
     procedure Clear;
@@ -146,19 +148,13 @@ begin
    with FFirebirdClientAPI do
    case SQLType of
    SQL_TIMESTAMP_TZ:
-     if FHasDatePart then
-       SQLEncodeTimeStampTZ(FDate,FTime,GetTimeZone,SQLData)
-     else
-       SQLEncodeTimeStampTZ(0,FTime,GetTimeZone,SQLData);
+     SQLEncodeTimeStampTZ(FDate,FTime,GetTimeZone,SQLData);
 
    SQL_TIME_TZ:
      SQLEncodeTimeTZ(FTime,GetTimeZone,SQLData);
 
    SQL_TIMESTAMP:
-     if FHasDatePart then
-       SQLEncodeDateTime(FDate,FTime,SQLData)
-     else
-       SQLEncodeDateTime(0,FTime,SQLData);
+     SQLEncodeDateTime(FDate,FTime,SQLData);
 
    SQL_TYPE_DATE:
       SQLEncodeDate(FDate,SQLData);
@@ -173,12 +169,14 @@ end;
 
 procedure TSQLTimestamp.FromSQLData(SQLType: cardinal; SQLData: PByte);
 begin
+  Clear;
   with FFirebirdClientAPI do
   case SQLType of
   SQL_TIMESTAMP_TZ:
     begin
       SQLDecodeTimeStampTZ(FDate,FTime,FTimeZone,FTimeZoneID,SQLData);
       FHasDatePart := true;
+      FHasTimePart := true;
       FHasTimeZone := true;
     end;
 
@@ -187,6 +185,7 @@ begin
       SQLDecodeTimeTZ(FTime,FTimeZone,FTimeZoneID,SQLData);
       FDate := 0;
       FHasDatePart := false;
+      FHasTimePart := true;
       FHasTimeZone := true;
     end;
 
@@ -194,6 +193,7 @@ begin
     begin
       SQLDecodeDateTime(SQLData,FDate,FTime);
       FHasDatePart := true;
+      FHasTimePart := true;
       FHasTimeZone := false;
     end;
 
@@ -202,6 +202,7 @@ begin
       FDate := SQLDecodeDate(SQLData);
       FTime := 0;
       FHasDatePart := true;
+      FHasTimePart := false;
       FHasTimeZone := false;
     end;
 
@@ -210,6 +211,7 @@ begin
       FDate := 0;
       FTime := SQLDecodeTime(SQLData);
       FHasDatePart := false;
+      FHasTimePart := true;
       FHasTimeZone := false;
     end;
 
@@ -300,12 +302,15 @@ begin
   Result := '';
   if HasDatePart then
     Result := FormatDateTime(GetDateFormatStr,FDate - DateDelta) + ' ';
-  TimeFormat := GetTimeFormatStr;
-  if Pos('zzz',TimeFormat) > 1 then
-    TimeFormat := ReplaceStr(TimeFormat,'zzz',Format('%.4d',[FTime mod decimillsecondsPerSecond]));
-  if Pos('z',TimeFormat) > 1 then
-    TimeFormat := ReplaceStr(TimeFormat,'z',Format('%d',[FTime mod decimillsecondsPerSecond]));
-  Result := Result + FormatDateTime(TimeFormat,FTime / (MSecsPerDay*10));
+  if FHasTimePart then
+  begin
+    TimeFormat := GetTimeFormatStr;
+    if Pos('zzz',TimeFormat) > 1 then
+      TimeFormat := ReplaceStr(TimeFormat,'zzz',Format('%.4d',[FTime mod decimillsecondsPerSecond]));
+    if Pos('z',TimeFormat) > 1 then
+      TimeFormat := ReplaceStr(TimeFormat,'z',Format('%d',[FTime mod decimillsecondsPerSecond]));
+    Result := Result + FormatDateTime(TimeFormat,FTime / (MSecsPerDay*10));
+  end;
   if IncludeTZifAvailable and HasTimeZone then
     Result := Result + ' ' + FTimeZone
 end;
@@ -320,12 +325,20 @@ end;
 
 function TSQLTimestamp.GetTimePart: longint;
 begin
-  Result := FTime;
+  if FHasTimePart then
+    Result := FTime
+  else
+    Result := 0;
 end;
 
 function TSQLTimestamp.HasDatePart: boolean;
 begin
   Result := FHasDatePart;
+end;
+
+function TSQLTimestamp.HasTimePart: boolean;
+begin
+  Result := FHasTimePart;
 end;
 
 function TSQLTimestamp.HasTimezone: boolean;
@@ -338,6 +351,7 @@ begin
   FDate := 0;
   FTime := 0;
   FHasDatePart := false;
+  FHasTimePart := false;
   FHasTimeZone := false;
   FTimeZone := '';
   FTimeZoneID := 0;
@@ -356,6 +370,7 @@ begin
   FTime := Abs(Trunc(D)) Mod (MSecsPerDay*10);
   FDate := DateDelta + Trunc(D) div (MSecsPerDay*10);
   FHasDatePart := true;
+  FHasTimePart := true;
 end;
 
 procedure TSQLTimestamp.SetAsTime(aValue: TDateTime);
@@ -363,6 +378,7 @@ begin
   SetAsTimestamp(DateTimeToTimeStamp(AValue));
   FDate := 0;
   FHasDatePart := false;
+  FHasTimePart := true;
 end;
 
 procedure TSQLTimestamp.SetAsTimeMS(aValue: longint);
@@ -370,6 +386,7 @@ begin
   SetAsTimestamp(MSecsToTimeStamp(aValue));
   FDate := 0;
   FHasDatePart := false;
+  FHasTimePart := true;
 end;
 
 procedure TSQLTimestamp.SetAsTimestamp(aValue: TTimestamp);
@@ -380,12 +397,14 @@ begin
   FTimeZone := '';
   FTimeZoneID := 0;
   FHasDatePart := true;
+  FHasTimePart := true;
 end;
 
 procedure TSQLTimestamp.SetAsMilliseconds(aValue: comp);
 begin
   SetAsTimestamp(MSecsToTimeStamp(aValue));
   FHasDatePart := true;
+  FHasTimePart := true;
 end;
 
 procedure TSQLTimestamp.SetAsSystemTime(aValue: TSystemTime);
@@ -395,6 +414,7 @@ begin
     FDate := Trunc(EncodeDate(Year, Month, Day)) + DateDelta;
     FHasDatePart := true;
     FTime := EncodeFBExtTime(Hour,Minute,Second,Millisecond*10);
+    FHasTimePart := true;
     FHasTimeZone := false;
   end;
 end;
@@ -406,6 +426,7 @@ begin
     FDate := Trunc(EncodeDate(Year, Month, Day)) + DateDelta;
     FHasDatePart := true;
     FTime := EncodeFBExtTime(Hour,Minute,Second,DeciMilliSecond);
+    FHasTimePart := true;
     FHasTimeZone := (TimeZone <> '') and HasTimeZoneSupport;
     if FHasTimeZone then
     begin
@@ -424,6 +445,7 @@ end;
 procedure TSQLTimestamp.SetTimePart(aValue: longint);
 begin
   FTime := aValue;
+  FHasTimePart := true;
 end;
 
 procedure TSQLTimestamp.SetTimezone(aValue: AnsiString);
