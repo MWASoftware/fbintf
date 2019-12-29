@@ -23,13 +23,13 @@
     </PublishOptions>
     <RunParams>
       <local>
-        <CommandLineParams Value="-t 4 -l /home/tony/fb4/lib/libfbclient.so.2"/>
+        <CommandLineParams Value="-t 17"/>
       </local>
       <FormatVersion Value="2"/>
       <Modes Count="1">
         <Mode0 Name="default">
           <local>
-            <CommandLineParams Value="-t 4 -l /home/tony/fb4/lib/libfbclient.so.2"/>
+            <CommandLineParams Value="-t 17"/>
           </local>
         </Mode0>
       </Modes>
@@ -39,7 +39,7 @@
         <PackageName Value="fbintf"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="19">
+    <Units Count="20">
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -116,6 +116,10 @@
         <Filename Value="Makefile.fpc"/>
         <IsPartOfProject Value="True"/>
       </Unit18>
+      <Unit19>
+        <Filename Value="Test17.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit19>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

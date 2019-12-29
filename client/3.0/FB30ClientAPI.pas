@@ -370,7 +370,7 @@ procedure TFB30ClientAPI.SQLEncodeDate(aDate: longint; bufptr: PByte);
 var
   Yr, Mn, Dy: Word;
 begin
-   DecodeDate(aDate, Yr, Mn, Dy);
+   DecodeDate(aDate - DateDelta, Yr, Mn, Dy);
    PISC_Date(Bufptr)^ := UtilIntf.encodeDate(Yr, Mn, Dy);
 end;
 

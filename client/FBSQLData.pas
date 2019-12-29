@@ -1013,7 +1013,7 @@ begin
 end;
 
 function TSQLDataItem.GetAsSQLTimestamp: ISQLTimestamp;
-var SQLTimestamp: TSQLTimestamp;
+var SQLTimestamp: TSQLTimestampParam;
 begin
   CheckActive;
   if IsNull then
@@ -1022,7 +1022,7 @@ begin
     Exit;
   end;
 
-  SQLTimestamp := TSQLTimestamp.Create(FFirebirdClientAPI);
+  SQLTimestamp := TSQLTimestampParam.Create(FFirebirdClientAPI);
   Result := SQLTimestamp;
   case SQLType of
     SQL_TEXT, SQL_VARYING:
@@ -1358,57 +1358,28 @@ begin
 end;
 
 procedure TSQLDataItem.SetAsDate(Value: TDateTime);
+var TS: ISQLParamTimestamp;
 begin
-  CheckActive;
-  if GetSQLDialect < 3 then
-  begin
-    AsDateTime := Value;
-    exit;
-  end;
-
-  Changing;
-  if IsNullable then
-    IsNull := False;
-
-  SQLType := SQL_TYPE_DATE;
-  DataLength := SizeOf(ISC_DATE);
-  with FFirebirdClientAPI do
-    SQLEncodeDate(Trunc(Value),SQLData);
-  Changed;
+  TS := FFirebirdClientAPI.GetSQLTimestampParam;
+  TS.SetAsDate(Value);
+  SetAsSQLTimestamp(TS);
 end;
 
 procedure TSQLDataItem.SetAsTime(Value: TDateTime);
+var TS: ISQLParamTimestamp;
 begin
-  CheckActive;
-  if GetSQLDialect < 3 then
-  begin
-    AsDateTime := Value;
-    exit;
-  end;
-
-  Changing;
-  if IsNullable then
-    IsNull := False;
-
-  SQLType := SQL_TYPE_TIME;
-  DataLength := SizeOf(ISC_TIME);
-  with FFirebirdClientAPI do
-    SQLEncodeTime(Value,SQLData);
-  Changed;
+  TS := FFirebirdClientAPI.GetSQLTimestampParam;
+  TS.SetAsTime(Value);
+  SetAsSQLTimestamp(TS);
 end;
 
 procedure TSQLDataItem.SetAsDateTime(Value: TDateTime);
+var TS: ISQLParamTimestamp;
 begin
-  CheckActive;
-  Changing;
-  if IsNullable then
-    IsNull := False;
+  TS := FFirebirdClientAPI.GetSQLTimestampParam;
+  TS.SetAsDateTime(Value);
+  SetAsSQLTimestamp(TS);
 
-  SQLType := SQL_TIMESTAMP;
-  DataLength := SizeOf(ISC_TIME) + sizeof(ISC_DATE);
-  with FFirebirdClientAPI do
-    SQLEncodeDateTime(Value,SQLData);
-  Changed;
 end;
 
 procedure TSQLDataItem.SetAsSQLTimestamp(aValue: ISQLTimestamp);
@@ -1433,24 +1404,38 @@ begin
     end
     else
     begin
-      SQLType := SQL_TIMESTAMP;
-      DataLength := SizeOf(ISC_TIME) + sizeof(ISC_DATE);
+      if aValue.HasTimePart then
+      begin
+        SQLType := SQL_TIMESTAMP;
+        DataLength := SizeOf(ISC_TIME) + sizeof(ISC_DATE);
+      end
+      else
+      begin
+        SQLType := SQL_TYPE_DATE;
+        DataLength := sizeof(ISC_DATE);
+      end;
     end;
   end
   else
+  if aValue.HasTimePart then
   begin
     if aValue.HasTimeZone then
     begin
       SQLType := SQL_TIME_TZ;
-      DataLength := SizeOf(SQL_TIME_TZ);
+      DataLength := SizeOf(ISC_TIME_TZ);
     end
     else
     begin
       SQLType := SQL_TYPE_TIME;
-      DataLength := SizeOf(SQL_TYPE_TIME);
+      DataLength := SizeOf(ISC_TIME);
     end;
+  end
+  else
+  begin
+    IsNull := true;
+    Exit;
   end;
-  (aValue as TSQLTimestamp).ToSQLData(SQLType,SQLData);
+  (aValue as TSQLTimestampParam).ToSQLData(SQLType,SQLData);
   Changed;
 end;
 

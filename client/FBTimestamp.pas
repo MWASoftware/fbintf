@@ -48,7 +48,7 @@ type
 
   { TSQLTimestamp }
 
-  TSQLTimestamp = class(TFBInterfacedObject, ISQLTimestamp, ISQLParamTimestamp)
+  TSQLTimestamp = class(TFBInterfacedObject, ISQLTimestamp)
   private
     FFirebirdClientAPI: TFBClientAPI;
     FTime: longint;  {deci-milliseconds since midnight}
@@ -63,12 +63,14 @@ type
     class function GetTimeFormatStr: AnsiString;
   public
     constructor Create(api: TFBClientAPI);
-    procedure ToSQLData(SQLType: cardinal; SQLData: PByte);
     procedure FromSQLData(SQLType: cardinal; SQLData: PByte);
     class function GetDateTimeStrLength(DateTimeFormat: TIBDateTimeFormats): integer;
+    procedure Clear;
   public
     {ISQLTimestamp}
     function GetAsDateTime: TDateTime;
+    function GetAsDate: TDateTime;
+    function GetAsTime: TDateTime;
     function GetAsTimestamp: TTimestamp;
     function GetAsMilliseconds: comp;
     function GetAsSystemTime: TSystemTime;
@@ -81,11 +83,18 @@ type
     function HasDatePart: boolean;
     function HasTimePart: boolean;
     function HasTimezone: boolean;
+  end;
+
+  TSQLTimestampParam = class(TSQLTimestamp, ISQLParamTimestamp)
+  public
+    procedure ToSQLData(SQLType: cardinal; SQLData: PByte);
+  public
     {ISQLParamTimestamp}
-    procedure Clear;
     procedure SetAsDateTime(aValue: TDateTime);
+    procedure SetAsDate(aValue: TDateTime);
     procedure SetAsTime(aValue: TDateTime); overload;
-    procedure SetAsTimeMS(aValue: longint); overload;
+    procedure SetAsTime(Hr, Mn, S, DeciMS: word); overload;
+    procedure SetAsTimeMS(aValue: longint);
     procedure SetAsTimestamp(aValue: TTimestamp);
     procedure SetAsMilliseconds(aValue: comp);
     procedure SetAsSystemTime(aValue: TSystemTime);
@@ -143,28 +152,15 @@ begin
   FFirebirdClientAPI := api;
 end;
 
-procedure TSQLTimestamp.ToSQLData(SQLType: cardinal; SQLData: PByte);
+procedure TSQLTimestamp.Clear;
 begin
-   with FFirebirdClientAPI do
-   case SQLType of
-   SQL_TIMESTAMP_TZ:
-     SQLEncodeTimeStampTZ(FDate,FTime,GetTimeZone,SQLData);
-
-   SQL_TIME_TZ:
-     SQLEncodeTimeTZ(FTime,GetTimeZone,SQLData);
-
-   SQL_TIMESTAMP:
-     SQLEncodeDateTime(FDate,FTime,SQLData);
-
-   SQL_TYPE_DATE:
-      SQLEncodeDate(FDate,SQLData);
-
-   SQL_TYPE_TIME:
-     SQLEncodeTime(FTime,SQLData);
-
-   else
-     IBError(ibxeInvalidDataConversion, [nil]);
-   end;
+  FDate := 0;
+  FTime := 0;
+  FHasDatePart := false;
+  FHasTimePart := false;
+  FHasTimeZone := false;
+  FTimeZone := '';
+  FTimeZoneID := 0;
 end;
 
 procedure TSQLTimestamp.FromSQLData(SQLType: cardinal; SQLData: PByte);
@@ -242,6 +238,16 @@ end;
 function TSQLTimestamp.GetAsDateTime: TDateTime;
 begin
   Result := ComposeDateTime(FDate - DateDelta,FTime / (MSecsPerDay*10))
+end;
+
+function TSQLTimestamp.GetAsDate: TDateTime;
+begin
+  Result := FDate - DateDelta;
+end;
+
+function TSQLTimestamp.GetAsTime: TDateTime;
+begin
+  Result := FTime / (MSecsPerDay*10);
 end;
 
 function TSQLTimestamp.GetAsTimestamp: TTimestamp;
@@ -346,23 +352,39 @@ begin
   Result := FHasTimeZone;
 end;
 
-procedure TSQLTimestamp.Clear;
+{TSQLTimestampParam}
+
+procedure TSQLTimestampParam.ToSQLData(SQLType: cardinal; SQLData: PByte);
 begin
-  FDate := 0;
-  FTime := 0;
-  FHasDatePart := false;
-  FHasTimePart := false;
-  FHasTimeZone := false;
-  FTimeZone := '';
-  FTimeZoneID := 0;
+   with FFirebirdClientAPI do
+   case SQLType of
+   SQL_TIMESTAMP_TZ:
+     SQLEncodeTimeStampTZ(FDate,FTime,GetTimeZone,SQLData);
+
+   SQL_TIME_TZ:
+     SQLEncodeTimeTZ(FTime,GetTimeZone,SQLData);
+
+   SQL_TIMESTAMP:
+     SQLEncodeDateTime(FDate,FTime,SQLData);
+
+   SQL_TYPE_DATE:
+      SQLEncodeDate(FDate,SQLData);
+
+   SQL_TYPE_TIME:
+     SQLEncodeTime(FTime,SQLData);
+
+   else
+     IBError(ibxeInvalidDataConversion, [nil]);
+   end;
 end;
 
-procedure TSQLTimestamp.SetAsDateTime(aValue: TDateTime);
+procedure TSQLTimestampParam.SetAsDateTime(aValue: TDateTime);
 Var
   D : Double;
 begin
+  Clear;
   {copied from DateTimeToTimeStamp and adjusted for deci-milliseconds}
-  D:=aValue * Single(MSecsPerDay*10); {Convert to deci-milliseconds}
+  D:=aValue * MSecsPerDay*10; {Convert to deci-milliseconds}
   if D<0 then {round up}
     D:=D-0.5
   else
@@ -373,54 +395,72 @@ begin
   FHasTimePart := true;
 end;
 
-procedure TSQLTimestamp.SetAsTime(aValue: TDateTime);
+procedure TSQLTimestampParam.SetAsDate(aValue: TDateTime);
 begin
-  SetAsTimestamp(DateTimeToTimeStamp(AValue));
-  FDate := 0;
-  FHasDatePart := false;
+  Clear;
+  FDate := Trunc(aValue) + DateDelta;
+  FHasDatePart := true;
+end;
+
+procedure TSQLTimestampParam.SetAsTime(aValue: TDateTime);
+Var
+  D : Double;
+begin
+  Clear;
+  {copied from DateTimeToTimeStamp and adjusted for deci-milliseconds}
+  D:=aValue * MSecsPerDay*10; {Convert to deci-milliseconds}
+  if D<0 then {round up}
+    D:=D-0.5
+  else
+    D:=D+0.5;
+  FTime := Trunc(D);
   FHasTimePart := true;
 end;
 
-procedure TSQLTimestamp.SetAsTimeMS(aValue: longint);
+procedure TSQLTimestampParam.SetAsTime(Hr, Mn, S, DeciMS: word);
 begin
-  SetAsTimestamp(MSecsToTimeStamp(aValue));
-  FDate := 0;
-  FHasDatePart := false;
+  Clear;
+  with FFirebirdClientAPI do
+    FTime := EncodeFBExtTime(Hr, Mn, S, DeciMS);
   FHasTimePart := true;
 end;
 
-procedure TSQLTimestamp.SetAsTimestamp(aValue: TTimestamp);
+procedure TSQLTimestampParam.SetAsTimeMS(aValue: longint);
 begin
+  Clear;
+  FTime := aValue * 10;
+  FHasTimePart := true;
+end;
+
+procedure TSQLTimestampParam.SetAsTimestamp(aValue: TTimestamp);
+begin
+  Clear;
   FDate := aValue.date;
   FTime := AValue.time*10;
-  FHasTimeZone := false;
-  FTimeZone := '';
-  FTimeZoneID := 0;
   FHasDatePart := true;
   FHasTimePart := true;
 end;
 
-procedure TSQLTimestamp.SetAsMilliseconds(aValue: comp);
+procedure TSQLTimestampParam.SetAsMilliseconds(aValue: comp);
 begin
   SetAsTimestamp(MSecsToTimeStamp(aValue));
-  FHasDatePart := true;
-  FHasTimePart := true;
 end;
 
-procedure TSQLTimestamp.SetAsSystemTime(aValue: TSystemTime);
+procedure TSQLTimestampParam.SetAsSystemTime(aValue: TSystemTime);
 begin
+  Clear;
   with FFirebirdClientAPI, aValue do
   begin
     FDate := Trunc(EncodeDate(Year, Month, Day)) + DateDelta;
     FHasDatePart := true;
     FTime := EncodeFBExtTime(Hour,Minute,Second,Millisecond*10);
     FHasTimePart := true;
-    FHasTimeZone := false;
   end;
 end;
 
-procedure TSQLTimestamp.SetAsFBSystemTime(aValue: TFBSystemTime);
+procedure TSQLTimestampParam.SetAsFBSystemTime(aValue: TFBSystemTime);
 begin
+  Clear;
   with FFirebirdClientAPI, aValue do
   begin
     FDate := Trunc(EncodeDate(Year, Month, Day)) + DateDelta;
@@ -436,26 +476,26 @@ begin
   end;
 end;
 
-procedure TSQLTimestamp.SetDatePart(aValue: longint);
+procedure TSQLTimestampParam.SetDatePart(aValue: longint);
 begin
   FDate := aValue;
   FHasDatePart := true;
 end;
 
-procedure TSQLTimestamp.SetTimePart(aValue: longint);
+procedure TSQLTimestampParam.SetTimePart(aValue: longint);
 begin
   FTime := aValue;
   FHasTimePart := true;
 end;
 
-procedure TSQLTimestamp.SetTimezone(aValue: AnsiString);
+procedure TSQLTimestampParam.SetTimezone(aValue: AnsiString);
 begin
   FTimezone := aValue;
   FHasTimezone := true;
   FTimeZoneID := GetTimeZoneID(FTimeZone);
 end;
 
-procedure TSQLTimestamp.SetTimeZoneID(aTimeZoneID: ISC_USHORT);
+procedure TSQLTimestampParam.SetTimeZoneID(aTimeZoneID: ISC_USHORT);
 var aTime: longint;
     aTimeTZ: ISC_TIME_TZ;
 begin

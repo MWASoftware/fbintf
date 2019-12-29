@@ -386,7 +386,7 @@ end;
 function TFBClientAPI.EncodeFBExtTime(Hour, Minute, Second,
   DeciMillisecond: word): longint;
 begin
-  Result := ((((Hour * MinsPerHour) + Minute) * SecsPerMin) + Second)*decimillsecondsPerSecond + DeciMilliSecond;
+  Result := (((Hour * MinsPerHour + Minute) * SecsPerMin) + Second)*decimillsecondsPerSecond + DeciMilliSecond;
 end;
 
 procedure TFBClientAPI.SQLEncodeTime(aTime: TDateTime; bufptr: PByte);
@@ -479,7 +479,7 @@ end;
 
 function TFBClientAPI.GetSQLTimestampParam: ISQLParamTimestamp;
 begin
-  Result := TSQLTimestamp.Create(self);
+  Result := TSQLTimestampParam.Create(self);
 end;
 
 function TFBClientAPI.LoadInterface: boolean;

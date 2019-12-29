@@ -502,6 +502,8 @@ type
   ISQLTimestamp = interface
     ['{f4bb2c3e-2fd4-481b-a0aa-7bc677ff3d84}']
     function GetAsDateTime: TDateTime;
+    function GetAsDate: TDateTime;
+    function GetAsTime: TDateTime;
     function GetAsTimestamp: TTimestamp;
     function GetAsMilliseconds: comp;
     function GetAsSystemTime: TSystemTime;
@@ -515,6 +517,8 @@ type
     function HasTimePart: boolean;
     function HasTimezone: boolean;
     property AsDateTime: TDateTime read GetAsDateTime;
+    property AsDate: TDateTime read GetAsDate;
+    property AsTime: TDateTime read GetAsTime;
     property AsMillseconds: comp read GetAsMilliseconds;
     property Timezone: AnsiString read GetTimezone;
   end;
@@ -611,8 +615,10 @@ type
     ['{b5374eb4-a9e7-489f-8874-c1a9fbb60993}']
     procedure Clear;
     procedure SetAsDateTime(aValue: TDateTime);
+    procedure SetAsDate(aValue: TDateTime);
     procedure SetAsTime(aValue: TDateTime); overload;
-    procedure SetAsTimeMS(aValue: longint); overload;
+    procedure SetAsTime(Hr, Mn, S, DeciMS: word); overload;
+    procedure SetAsTimeMS(aValue: longint);
     procedure SetAsTimestamp(aValue: TTimestamp);
     procedure SetAsMilliseconds(aValue: comp);
     procedure SetAsSystemTime(aValue: TSystemTime);
@@ -621,6 +627,8 @@ type
     procedure SetDatePart(aValue: longint);
     procedure SetTimePart(aValue: longint);
     procedure SetTimeZoneID(aTimeZoneID: ISC_USHORT);
+    property AsDate: TDateTime read GetAsDate write SetAsDate;
+    property AsTime: TDateTime read GetAsTime write SetAsTime;
     property AsDateTime: TDateTime read GetAsDateTime write SetAsDateTime;
     property AsMillseconds: comp read GetAsMilliseconds write SetAsMilliseconds;
     property Timezone: AnsiString read GetTimezone write SetTimezone;
@@ -1308,6 +1316,7 @@ procedure CheckIBLoaded;
  to get the API.}
 
 function LoadFBLibrary(aLibPathName: string): IFirebirdLibrary;
+
 
 implementation
 
