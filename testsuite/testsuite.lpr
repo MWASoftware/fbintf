@@ -36,7 +36,7 @@ var
 begin
   OutFile := stdout;
   // quick check parameters
-  ErrorMsg := CheckOptions('htupensbolrS', 'help test user passwd employeedb newdbname secondnewdbname backupfile outfile fbclientlibrary server stats');
+  ErrorMsg := CheckOptions('htupensbolrSP', 'help test user passwd employeedb newdbname secondnewdbname backupfile outfile fbclientlibrary server stats port');
   if ErrorMsg <> '' then begin
     ShowException(Exception.Create(ErrorMsg));
     Terminate;
@@ -84,6 +84,9 @@ begin
       system.Assign(outFile,GetOptionValue('o'));
       ReWrite(outFile);
     end;
+
+    if HasOption('P','port') then
+      TestMgr.SetPortNum(GetOptionValue('P'));
 
     TestMgr.ShowStatistics := HasOption('S','stats');
     {$IF declared(SetTextCodePage)}

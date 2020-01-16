@@ -906,6 +906,7 @@ begin
   SQL_LONG:		Result := 'SQL_LONG';
   SQL_SHORT:		Result := 'SQL_SHORT';
   SQL_TIMESTAMP:	Result := 'SQL_TIMESTAMP';
+  SQL_TIMESTAMP_TZ:     Result := 'SQL_TIMESTAMP_TZ';
   SQL_BLOB:		Result := 'SQL_BLOB';
   SQL_D_FLOAT:          Result := 'SQL_D_FLOAT';
   SQL_ARRAY:		Result := 'SQL_ARRAY';
@@ -913,6 +914,11 @@ begin
   SQL_TYPE_TIME:	Result := 'SQL_TYPE_TIME';
   SQL_TYPE_DATE:	Result := 'SQL_TYPE_DATE';
   SQL_INT64:		Result := 'SQL_INT64';
+  SQL_TIME_TZ:          Result := 'SQL_TIME_TZ';
+  SQL_DEC_FIXED:        Result := 'SQL_DEC_FIXED';
+  SQL_DEC16:            Result := 'SQL_DEC16';
+  SQL_DEC34:            Result := 'SQL_DEC34';
+  SQL_NULL:             Result := 'SQL_NULL';
   end;
 end;
 
@@ -1035,7 +1041,7 @@ begin
     end;
 
     SQL_TYPE_DATE, SQL_TYPE_TIME,
-    SQL_TIMESTAMP, SQL_TIME_TZ:
+    SQL_TIMESTAMP, SQL_TIMESTAMP_TZ, SQL_TIME_TZ:
       SQLTimestamp.FromSQLData(SQLType,SQLData);
 
     else
@@ -1154,6 +1160,24 @@ end;
 
 
 function TSQLDataItem.GetAsString: AnsiString;
+
+  function StripLeadingZeros(Value: AnsiString): AnsiString;
+  var i: Integer;
+  begin
+    Result := '';
+    if (Length(Value) > 0) and (Value[1] = '-') then
+    begin
+      Result := '-';
+      system.delete(Value,1,1);
+    end;
+    for i := 1 to Length(Value) do
+      if Value[i] <> '0' then
+      begin
+        Result := Result + system.copy(Value, i, MaxInt);
+        Exit;
+      end;
+  end;
+
 var
   sz: PByte;
   str_len: Integer;
@@ -1215,7 +1239,7 @@ begin
       SQL_DEC_FIXED,
       SQL_DEC16,
       SQL_DEC34:
-        result := BCDToStr(GetAsBCD);
+        result := StripLeadingZeros(BCDToStr(GetAsBCD));
 
       else
         IBError(ibxeInvalidDataConversion, [nil]);
@@ -1585,9 +1609,12 @@ begin
   if IsNullable then
     IsNull := False;
 
-  SQLType := SQL_DEC34;
-  Scale := -(aValue.SignSpecialPlaces and $3f);
-  DataLength := SizeOf(FB_DEC34);
+  if (SQLType <> SQL_DEC16) and (SQLType <> SQL_DEC34) and (SQLType <> SQL_DEC_FIXED) then
+  begin
+    SQLType := SQL_DEC34;
+    Scale := 0;
+    DataLength := SizeOf(FB_DEC34);
+  end;
   with FFirebirdClientAPI do
     SQLDecFloatEncode(aValue,SQLType,SQLData);
   Changed;
@@ -1899,6 +1926,11 @@ begin
     SQL_TIMESTAMP_TZ,
     SQL_TIME_TZ:
         DoSetString;
+
+    SQL_DEC_FIXED,
+    SQL_DEC16,
+    SQL_DEC34:
+      SetAsBCD(StrToBCD(Value));
 
     else
       IBError(ibxeInvalidDataConversion,[nil]);

@@ -742,7 +742,7 @@ begin
         SQL_TEXT, SQL_TYPE_DATE, SQL_TYPE_TIME, SQL_TIMESTAMP,
         SQL_BLOB, SQL_ARRAY, SQL_QUAD, SQL_SHORT, SQL_BOOLEAN,
         SQL_LONG, SQL_INT64, SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT,
-        SQL_TIMESTAMP_TZ, SQL_TIME_TZ:
+        SQL_TIMESTAMP_TZ, SQL_TIME_TZ, SQL_DEC_FIXED, SQL_DEC16, SQL_DEC34:
         begin
           if (FDataLength = 0) then
             { Make sure you get a valid pointer anyway

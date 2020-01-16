@@ -11,7 +11,7 @@ unit TestManager;
 interface
 
 uses
-  Classes, SysUtils, IB, IBUtils;
+  Classes, SysUtils, IB, IBUtils, FmtBCD;
 
 type
   TTestManager = class;
@@ -21,8 +21,10 @@ type
   TTestBase = class
   private
     FOwner: TTestManager;
+    function GetFirebirdAPI: IFirebirdAPI;
   protected
     FHexStrings: boolean;
+    procedure DumpBCD(bcd: tBCD);
     function ReportResults(Statement: IStatement): IResultSet;
     procedure ReportResult(aValue: IResults);
     procedure PrintHexString(s: AnsiString);
@@ -46,6 +48,7 @@ type
   public
     constructor Create(aOwner: TTestManager);  virtual;
     function TestTitle: AnsiString; virtual; abstract;
+    property FirebirdAPI: IFirebirdAPI read GetFirebirdAPI;
     procedure RunTest(CharSet: AnsiString; SQLDialect: integer); virtual; abstract;
     property Owner: TTestManager read FOwner;
   end;
@@ -66,6 +69,7 @@ type
     FBackupFileName: AnsiString;
     FShowStatistics: boolean;
     FFirebirdAPI: IFirebirdAPI;
+    FPortNo: AnsiString;
     procedure CleanUp;
     function GetFirebirdAPI: IFirebirdAPI;
   public
@@ -87,6 +91,7 @@ type
     procedure SetSecondNewDatabaseName(aValue: AnsiString);
     procedure SetBackupFileName(aValue: AnsiString);
     procedure SetServerName(AValue: AnsiString);
+    procedure SetPortNum(aValue: AnsiString);
     property ShowStatistics: boolean read FShowStatistics write FShowStatistics;
     property FirebirdAPI: IFirebirdAPI read GetFirebirdAPI;
     property Server: AnsiString read FServer;
@@ -128,6 +133,26 @@ begin
   FOwner := aOwner;
 end;
 
+function TTestBase.GetFirebirdAPI: IFirebirdAPI;
+begin
+  Result := FOwner.FirebirdAPI;
+end;
+
+procedure TTestBase.DumpBCD(bcd: tBCD);
+var i: integer;
+begin
+  with bcd do
+  begin
+    writeln(OutFile,'  Precision = ',Precision);
+    writeln(OutFile,'  Sign = ',(SignSpecialPlaces and $80) shl 7);
+    writeln(OutFile,'  Special = ', (SignSpecialPlaces and $40) shl 6);
+    writeln(OutFile,'  Places = ', SignSpecialPlaces and $7F);
+    write(OutFile,'  Digits = ');
+    for i := 0 to (MaxFmtBCDFractionSize DIV 2 ) - 1 do
+      write(OutFile,Format('%x',[Fraction[i]]),' ');
+    writeln;
+  end;
+end;
 
 function TTestBase.ReportResults(Statement: IStatement): IResultSet;
 begin
@@ -685,6 +710,11 @@ begin
   FServer := AValue;
 end;
 
+procedure TTestManager.SetPortNum(aValue: AnsiString);
+begin
+  FPortNo := aValue;
+end;
+
 constructor TTestManager.Create;
 begin
   inherited Create;
@@ -722,17 +752,17 @@ end;
 
 function TTestManager.GetEmployeeDatabaseName: AnsiString;
 begin
-  Result := MakeConnectString(FServer,  FEmployeeDatabaseName, inet,'');
+  Result := MakeConnectString(FServer,  FEmployeeDatabaseName, inet,FPortNo);
 end;
 
 function TTestManager.GetNewDatabaseName: AnsiString;
 begin
-  Result := MakeConnectString(FServer,  FNewDatabaseName, inet,'');
+  Result := MakeConnectString(FServer,  FNewDatabaseName, inet,FPortNo);
 end;
 
 function TTestManager.GetSecondNewDatabaseName: AnsiString;
 begin
-  Result := MakeConnectString(FServer,  FSecondNewDatabaseName, inet,'');
+  Result := MakeConnectString(FServer,  FSecondNewDatabaseName, inet,FPortNo);
 end;
 
 function TTestManager.GetBackupFileName: AnsiString;

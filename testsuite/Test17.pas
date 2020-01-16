@@ -38,7 +38,9 @@ type
   TTest17 = class(TTestBase)
   private
     procedure UpdateDatabase(Attachment: IAttachment);
+    procedure UpdateDatabase4(Attachment: IAttachment);
     procedure QueryDatabase(Attachment: IAttachment; aTableName: AnsiString);
+    procedure QueryDatabase4(Attachment: IAttachment; aTableName: AnsiString);
   public
     function TestTitle: AnsiString; override;
     procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
@@ -47,7 +49,7 @@ type
 
 implementation
 
-uses IBUtils;
+uses IBUtils, FmtBCD;
 
 const
     sqlCreateTable =
@@ -62,6 +64,19 @@ const
 
     sqlInsert2 = 'Insert into TestData(RowID,DateCol,TimeCol,TimestampCol) VALUES(?,?,?,?)';
 
+    sqlCreateTable2 =
+    'Create Table FB4TestData ('+
+    'RowID Integer not null,'+
+    'TimeCol TIME WITH TIME ZONE,'+
+    'TimestampCol TIMESTAMP WITH TIME ZONE,'+
+    'Float16 DecFloat(16),'+
+    'Float34 DecFloat(34),'+
+    'BigNumber NUMERIC(24,6),'+
+    'Primary Key(RowID)'+
+    ')';
+
+    sqlInsert4 = 'Insert into FB4TestData(RowID,TimeCol,TimestampCol, Float16,Float34,BigNumber)' +
+                 'Values(?,?,?,?,?,?)';
 
 { TTest17 }
 
@@ -127,6 +142,45 @@ begin
 
 end;
 
+procedure TTest17.UpdateDatabase4(Attachment: IAttachment);
+var Transaction: ITransaction;
+    Statement: IStatement;
+    sqlInsert: AnsiString;
+    FormatSettings: TFormatSettings;
+    Timestamp: ISQLParamTimestamp;
+begin
+  FormatSettings := DefaultFormatSettings;
+  FormatSettings.DateSeparator := '.'; {Firebird convention}
+  Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
+  sqlInsert := 'Insert into FB4TestData(RowID,TimeCol,TimestampCol, Float16,Float34,BigNumber) ' +
+               'Values(1,''11:32:10.0002 -05:00'','''+
+               DateToStr(EncodeDate(2020,4,1),FormatSettings)+
+               ' 11:31:05.0001 +01:00'','+
+               '64000000000.01,123456789123456789.12345678,123456123456.123456)';
+  Attachment.ExecuteSQL(Transaction,sqlInsert,[]);
+  sqlInsert := 'Insert into FB4TestData(RowID,TimeCol,TimestampCol, Float16,Float34,BigNumber) ' +
+               'Values(2,NULL,NULL,' +
+               '-64000000000.01,-123456789123456789.12345678,-123456123456.123456)';
+  Attachment.ExecuteSQL(Transaction,sqlInsert,[]);
+
+
+  Statement := Attachment.Prepare(Transaction,SQLInsert4);
+
+  Timestamp := FirebirdAPI.GetSQLTimestampParam;
+  Statement.SQLParams[0].AsInteger := 3;
+  Timestamp.AsTime := EncodeTime(14,02,10,05);
+  Timestamp.Timezone := '-08:00';
+  Statement.SQLParams[1].SetAsSQLTimestamp(Timestamp);
+  Timestamp.Clear;
+  Timestamp.AsDateTime := EncodeDate(1918,11,11) + EncodeTime(11,11,0,0);
+  Timestamp.Timezone := 'Europe/London';
+  Statement.SQLParams[2].SetAsSQLTimestamp(Timestamp);
+  Statement.SQLParams[3].AsBCD := StrToBCD('64100000000.011');
+  Statement.SQLParams[4].AsCurrency := 12345678912.12;
+  Statement.SQLParams[5].AsString := '1234561234567.123456';
+  Statement.Execute;
+end;
+
 procedure TTest17.QueryDatabase(Attachment: IAttachment; aTableName: AnsiString);
 var Transaction: ITransaction;
     Statement: IStatement;
@@ -165,6 +219,35 @@ begin
   end;
 end;
 
+procedure TTest17.QueryDatabase4(Attachment: IAttachment; aTableName: AnsiString
+  );
+var Transaction: ITransaction;
+    Statement: IStatement;
+    Results: IResultSet;
+begin
+  Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
+  Statement := Attachment.Prepare(Transaction,'Select * from  '+aTableName);
+  writeln(OutFile);
+  writeln(OutFile,'FB4 Testdata');
+  writeln(OutFile);
+{  Results := Statement.OpenCursor;
+  try
+    while Results.FetchNext do
+    begin
+      writeln(OutFile,'Float16:');
+      DumpBCD(Results.ByName('Float16').GetAsBCD);
+      writeln(OutFile,'Float34:');
+      DumpBCD(Results.ByName('Float34').GetAsBCD);
+      writeln(OutFile,'BigNumber:');
+      DumpBCD(Results.ByName('BigNumber').GetAsBCD);
+    end;
+  finally
+    Results.Close;
+  end;}
+  ReportResults(Statement);
+
+end;
+
 function TTest17.TestTitle: AnsiString;
 begin
   Result := 'Test 17: Date/Time tests and Firebird 4 extensions';
@@ -173,6 +256,7 @@ end;
 procedure TTest17.RunTest(CharSet: AnsiString; SQLDialect: integer);
 var DPB: IDPB;
     Attachment: IAttachment;
+    VerStrings: TStringList;
 begin
   DPB := FirebirdAPI.AllocateDPB;
   DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
@@ -180,20 +264,27 @@ begin
   DPB.Add(isc_dpb_lc_ctype).setAsString('UTF8');
   DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
   Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
+  VerStrings := TStringList.Create;
+  try
+    Attachment.getFBVersion(VerStrings);
+    writeln(OutFile,' FBVersion = ',VerStrings[0]);
+  finally
+    VerStrings.Free;
+  end;
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable);
   UpdateDatabase(Attachment);
   QueryDatabase(Attachment,'TestData');
 
-  if FirebirdAPI.GetClientMajor < 4 then
+  if (FirebirdAPI.GetClientMajor < 4) or (Attachment.GetODSMajorVersion < 13) then
     writeln(OutFile,'Skipping Firebird 4 and later test part')
   else
   begin
-//    Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable2);
+    Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable2);
 
-//    UpdateDatabase(Attachment);
- //   QueryDatabase(Attachment);
+    UpdateDatabase4(Attachment);
+    QueryDatabase4(Attachment,'FB4TestData');
   end;
-//  Attachment.DropDatabase;
+  Attachment.DropDatabase;
 end;
 
 initialization

@@ -194,7 +194,8 @@ type
       bufptr: PByte); virtual;
     procedure SQLDecodeTimeStampTZ(var aDate, aTime: longint;
       var aTimeZone: AnsiString; var aTimeZoneID: ISC_USHORT; bufptr: PByte); virtual;
-    procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal; bufptr: PByte); virtual;
+    procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal;
+      bufptr: PByte); virtual;
     function SQLDecFloatDecode(SQLType: cardinal; scale: integer; bufptr: PByte): tBCD; virtual;
 
     {IFirebirdAPI}

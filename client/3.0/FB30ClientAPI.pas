@@ -130,7 +130,8 @@ type
       bufptr: PByte); override;
     procedure SQLDecodeTimeStampTZ(var aDate, aTime: longint;
       var aTimeZone: AnsiString; var aTimeZoneID: ISC_USHORT; bufptr: PByte); override;
-    procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal; bufptr: PByte); override;
+    procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal; bufptr: PByte);
+      override;
     function SQLDecFloatDecode(SQLType: cardinal; scale: integer; bufptr: PByte
       ): tBCD; override;
 
@@ -431,7 +432,7 @@ var
 begin
   inherited SQLEncodeTimeTZ(aTime, aTimeZone, bufptr);
   DecodeFBExtTime(aTime, Hr, Mt, S, DMs);
-  UtilIntf.encodeTimeTz(StatusIntf,ISC_TIME_TZPtr(bufptr),Hr,Mt, S,DMs, @aTimeZone);
+  UtilIntf.encodeTimeTz(StatusIntf,ISC_TIME_TZPtr(bufptr),Hr,Mt, S,DMs, PAnsiChar(aTimeZone));
   Check4DataBaseError;
 end;
 
@@ -444,7 +445,7 @@ var
   tzBuffer: array[ 0.. bufLength] of AnsiChar;
 begin
   inherited SQLDecodeTimeTZ(aTime,aTimeZone, aTimeZoneID, bufptr);
-  UtilIntf.decodeTimeTz(StatusIntf, ISC_TIME_TZPtr(bufptr),@Hr, @Mt, @S, @DMs,bufLength,@tzBuffer);
+  UtilIntf.decodeTimeTz(StatusIntf, ISC_TIME_TZPtr(bufptr),@Hr, @Mt, @S, @DMs,bufLength,PAnsiChar(tzBuffer));
   Check4DataBaseError;
   aTime := EncodeFBExtTime(Hr, Mt, S, DMs);
   aTimeZoneID := ISC_TIME_TZPtr(bufptr)^.time_zone;
@@ -460,7 +461,7 @@ begin
   inherited SQLEncodeTimeStampTZ(aDate, aTime, aTimeZone, bufptr);
   DecodeDate(aDate - DateDelta, Yr, Mn, Dy);
   DecodeFBExtTime(aTime, Hr, Mt, S, DMs);
-  UtilIntf.encodeTimeStampTz(StatusIntf,ISC_TIMESTAMP_TZPtr(bufPtr),Yr, Mn, Dy, Hr, Mt, S, DMs,@aTimeZone);
+  UtilIntf.encodeTimeStampTz(StatusIntf,ISC_TIMESTAMP_TZPtr(bufPtr),Yr, Mn, Dy, Hr, Mt, S, DMs,PAnsiChar(aTimeZone));
   Check4DataBaseError;
 end;
 
@@ -474,7 +475,7 @@ var
   tzBuffer: array[ 0.. bufLength] of AnsiChar;
 begin
   inherited SQLDecodeTimeStampTZ(aDate, aTime, aTimeZone, aTimeZoneID, bufptr);
-  UtilIntf.decodeTimeStampTz(StatusIntf,ISC_TIMESTAMP_TZPtr(bufPtr),@Yr,@ Mn, @Dy, @Hr, @Mt, @S, @DMs,bufLength,@tzBuffer);
+  UtilIntf.decodeTimeStampTz(StatusIntf,ISC_TIMESTAMP_TZPtr(bufPtr),@Yr,@ Mn, @Dy, @Hr, @Mt, @S, @DMs,bufLength,PAnsiChar(tzBuffer));
   Check4DataBaseError;
   aDate := Trunc(EncodeDate(Yr, Mn,Dy) + DateDelta);
   aTime := EncodeFBExtTime(Hr, Mt, S, DMs);
@@ -488,23 +489,50 @@ var DecFloat16: IDecFloat16;
     DecFloat34: IDecFloat34;
     sign: integer;
     exp: integer;
+    buffer: array [1..34] of byte;
+
+    procedure UnpackBuffer(width: integer);
+    var i,j: integer;
+    begin
+      Fillchar(buffer,sizeof(buffer),0);
+      j := 1 + (width - aValue.Precision);
+      for i := 0 to (aValue.Precision div 2) do
+      begin
+          buffer[j] := (aValue.Fraction[i] and $f0) shr 4;
+          Inc(j);
+          if j < 34 then
+          begin
+            buffer[j] := (aValue.Fraction[i] and $0f);
+            Inc(j);
+          end;
+      end;
+      {writeln('Precision = ',aValue.Precision,' Places = ',aValue.SignSpecialPlaces and $2f);
+      write('BCD Buffer = ');
+      for i := 1 to 34 do
+        write(buffer[i],' ');
+      writeln; }
+    end;
+
 begin
   inherited SQLDecFloatEncode(aValue, SQLType, bufptr);
   sign := (aValue.SignSpecialPlaces and $80) shr 7;
-  exp := aValue.Precision;
+  exp := -(aValue.SignSpecialPlaces and $2f);
   case SQLType of
   SQL_DEC16:
     begin
+      UnPackbuffer(16);
       DecFloat16 := UtilIntf.getDecFloat16(StatusIntf);
       Check4DataBaseError;
-      DecFloat16.fromBcd(sign,@aValue.Fraction,exp,FB_DEC16Ptr(bufptr));
+      DecFloat16.fromBcd(sign,@buffer,exp,FB_DEC16Ptr(bufptr));
     end;
 
-  SQL_DEC34:
+  SQL_DEC34,
+  SQL_DEC_FIXED:
     begin
+      UnPackbuffer(34);
       DecFloat34 := UtilIntf.getDecFloat34(StatusIntf);
       Check4DataBaseError;
-      DecFloat34.fromBcd(sign,@aValue.Fraction,exp,FB_DEC34Ptr(bufptr));
+      DecFloat34.fromBcd(sign,@buffer,exp,FB_DEC34Ptr(bufptr));
     end;
 
   else
@@ -514,10 +542,34 @@ end;
 
 function TFB30ClientAPI.SQLDecFloatDecode(SQLType: cardinal; scale: integer;
   bufptr: PByte): tBCD;
+
 var DecFloat16: IDecFloat16;
     DecFloat34: IDecFloat34;
     sign: integer;
     exp: integer;
+    buffer: array [1..34] of byte;
+
+  procedure packbuffer;
+  var i,j: integer;
+  begin
+{    write('Decode: BCD Buffer = ');
+    for i := 1 to 34 do
+      write(buffer[i],' ');
+    writeln; }
+    {pack buffer}
+    j := 0;
+    for i := 1 to Result.Precision do
+    begin
+      if odd(i) then
+        Result.Fraction[j] := (buffer[i - scale] and $0f)
+      else
+      begin
+        Result.Fraction[j] := (Result.Fraction[j] shl 4) or (buffer[i - scale] and $0f);
+        Inc(j);
+      end;
+    end;
+  end;
+
 begin
   Result := inherited SQLDecFloatDecode(SQLType, scale, bufptr);
   case SQLType of
@@ -525,20 +577,24 @@ begin
     begin
       DecFloat16 := UtilIntf.getDecFloat16(StatusIntf);
       Check4DataBaseError;
-      DecFloat16.toBcd(FB_DEC16Ptr(bufptr),@sign,@Result.Fraction,@exp);
+      Result.Precision := 16;
+      DecFloat16.toBcd(FB_DEC16Ptr(bufptr),@sign,@buffer,@exp);
     end;
 
-  SQL_DEC34:
+  SQL_DEC34,
+  SQL_DEC_FIXED:
     begin
       DecFloat34 := UtilIntf.getDecFloat34(StatusIntf);
       Check4DataBaseError;
-      DecFloat34.toBcd(FB_DEC34Ptr(bufptr),@sign,@Result.Fraction,@exp);
+      Result.Precision := 34 + scale;
+      DecFloat34.toBcd(FB_DEC34Ptr(bufptr),@sign,@buffer,@exp);
     end;
 
   else
     IBError(ibxeInvalidDataConversion,[]);
   end;
-  Result.SignSpecialPlaces :=  (-scale and $3f);
+  packbuffer;
+  Result.SignSpecialPlaces :=  (-exp and $2f);
   if sign <> 0 then
     Result.SignSpecialPlaces := Result.SignSpecialPlaces or $80;
 end;

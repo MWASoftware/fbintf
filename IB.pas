@@ -575,6 +575,7 @@ type
     property AsVariant: Variant read GetAsVariant ;
     property AsBlob: IBlob read GetAsBlob;
     property AsArray: IArray read GetAsArray;
+    property AsBCD: tBCD read GetAsBCD;
     property IsNull: Boolean read GetIsNull;
     property Value: Variant read GetAsVariant;
   end;
@@ -718,6 +719,7 @@ type
     property AsVariant: Variant read GetAsVariant write SetAsVariant;
     property AsBlob: IBlob read GetAsBlob write SetAsBlob;
     property AsArray: IArray read GetAsArray write SetAsArray;
+    property AsBCD: tBCD read GetAsBCD write SetAsBCD;
     property AsQuad: TISC_QUAD read GetAsQuad write SetAsQuad;
     property Value: Variant read GetAsVariant write SetAsVariant;
     property IsNull: Boolean read GetIsNull write SetIsNull;
