@@ -98,6 +98,7 @@ type
      function AdjustScaleFromCurrency(Value: Currency; aScale: Integer): Int64;
      function AdjustScaleFromDouble(Value: Double; aScale: Integer): Int64;
      procedure CheckActive; virtual;
+     function GetAttachment: IAttachment; virtual; abstract;
      function GetSQLDialect: integer; virtual; abstract;
      procedure Changed; virtual;
      procedure Changing; virtual;
@@ -298,6 +299,7 @@ type
     FChangeSeqNo: integer;
   protected
     procedure CheckActive; override;
+    function GetAttachment: IAttachment; override;
     function SQLData: PByte; override;
     function GetDataLength: cardinal; override;
     function GetCodePage: TSystemCodePage; override;
@@ -1028,7 +1030,7 @@ begin
     Exit;
   end;
 
-  SQLTimestamp := TSQLTimestampParam.Create(FFirebirdClientAPI);
+  SQLTimestamp := GetAttachment.GetSQLTimestampParam as TSQLTimestampParam;
   Result := SQLTimestamp;
   case SQLType of
     SQL_TEXT, SQL_VARYING:
@@ -1163,14 +1165,16 @@ function TSQLDataItem.GetAsString: AnsiString;
 
   function StripLeadingZeros(Value: AnsiString): AnsiString;
   var i: Integer;
+      start: integer;
   begin
     Result := '';
+    start := 1;
     if (Length(Value) > 0) and (Value[1] = '-') then
     begin
       Result := '-';
-      system.delete(Value,1,1);
+      start := 2;
     end;
-    for i := 1 to Length(Value) do
+    for i := start to Length(Value) do
       if Value[i] <> '0' then
       begin
         Result := Result + system.copy(Value, i, MaxInt);
@@ -1384,7 +1388,7 @@ end;
 procedure TSQLDataItem.SetAsDate(Value: TDateTime);
 var TS: ISQLParamTimestamp;
 begin
-  TS := FFirebirdClientAPI.GetSQLTimestampParam;
+  TS := GetAttachment.GetSQLTimestampParam;
   TS.SetAsDate(Value);
   SetAsSQLTimestamp(TS);
 end;
@@ -1392,7 +1396,7 @@ end;
 procedure TSQLDataItem.SetAsTime(Value: TDateTime);
 var TS: ISQLParamTimestamp;
 begin
-  TS := FFirebirdClientAPI.GetSQLTimestampParam;
+  TS := GetAttachment.GetSQLTimestampParam;
   TS.SetAsTime(Value);
   SetAsSQLTimestamp(TS);
 end;
@@ -1400,7 +1404,7 @@ end;
 procedure TSQLDataItem.SetAsDateTime(Value: TDateTime);
 var TS: ISQLParamTimestamp;
 begin
-  TS := FFirebirdClientAPI.GetSQLTimestampParam;
+  TS := GetAttachment.GetSQLTimestampParam;
   TS.SetAsDateTime(Value);
   SetAsSQLTimestamp(TS);
 
@@ -1603,20 +1607,27 @@ begin
 end;
 
 procedure TSQLDataItem.SetAsBcd(aValue: tBCD);
+var C: Currency;
 begin
   CheckActive;
   Changing;
   if IsNullable then
     IsNull := False;
 
-  if (SQLType <> SQL_DEC16) and (SQLType <> SQL_DEC34) and (SQLType <> SQL_DEC_FIXED) then
-  begin
-    SQLType := SQL_DEC34;
-    Scale := 0;
-    DataLength := SizeOf(FB_DEC34);
-  end;
-  with FFirebirdClientAPI do
-    SQLDecFloatEncode(aValue,SQLType,SQLData);
+  case SQLType of
+    SQL_DEC16,
+    SQL_DEC34,
+    SQL_DEC_FIXED:
+      with FFirebirdClientAPI do
+        SQLDecFloatEncode(aValue,SQLType,SQLData);
+    else
+      begin
+        if BcdToCurr(aValue,C) then
+          SetAsCurrency(C)
+        else
+          IBError(ibxeInvalidDataConversion,[]);
+      end;
+    end;
   Changed;
 end;
 
@@ -1648,6 +1659,11 @@ begin
 
   if not FIBXSQLVAR.Parent.CheckStatementStatus(ssPrepared)  then
     IBError(ibxeStatementNotPrepared, [nil]);
+end;
+
+function TColumnMetaData.GetAttachment: IAttachment;
+begin
+  Result := GetStatement.GetAttachment;
 end;
 
 function TColumnMetaData.SQLData: PByte;

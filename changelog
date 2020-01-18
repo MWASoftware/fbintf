@@ -36,13 +36,15 @@ FBINTF Change Log  version          (1.1-5 Build 11664) Thu, 11 Apr 2019 09:43:4
     function GetClientMinor: integer;
     function HasTimeZoneSupport: boolean;
     function HasDecFloatSupport: boolean;
+
+13. New IAttachment Calls:
     function GetSQLTimestampParam: ISQLParamTimestamp;
 
-13. New ISQLData API Calls:
+14. New ISQLData API Calls:
     function GetAsSQLTimestamp: ISQLTimestamp;
     function GetAsBCD: tBCD;
 
-14. New ISQLParam API Calls
+15. New ISQLParam API Calls
     function GetAsSQLTimestamp: ISQLTimestamp;
     function GetAsBCD: tBCD;
     procedure SetAsSQLTimestamp(aValue: ISQLParamTimestamp);

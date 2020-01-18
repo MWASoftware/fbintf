@@ -208,7 +208,6 @@ type
     function GetImplementationVersion: AnsiString;
     function GetClientMajor: integer;  virtual; abstract;
     function GetClientMinor: integer;  virtual; abstract;
-    function GetSQLTimestampParam: ISQLParamTimestamp;
 end;
 
 implementation
@@ -476,11 +475,6 @@ end;
 function TFBClientAPI.GetImplementationVersion: AnsiString;
 begin
   Result := Format('%d.%d',[GetClientMajor,GetClientMinor]);
-end;
-
-function TFBClientAPI.GetSQLTimestampParam: ISQLParamTimestamp;
-begin
-  Result := TSQLTimestampParam.Create(self);
 end;
 
 function TFBClientAPI.LoadInterface: boolean;

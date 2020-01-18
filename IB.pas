@@ -498,6 +498,7 @@ type
       TimeZone: AnsiString;
    end ;
 
+   TDaylightSavingsTime = (dstUnknown, dstNotInEffect, dstInEffect);
 
   ISQLTimestamp = interface
     ['{f4bb2c3e-2fd4-481b-a0aa-7bc677ff3d84}']
@@ -510,12 +511,14 @@ type
     function GetAsFBSystemTime: TFBSystemTime;
     function GetTimezone: AnsiString;
     function GetTimezoneID: ISC_USHORT; {native Firebird timezone integer identifier}
+    function GetEffectiveTimeOffsetMins: integer;
     function GetAsString(IncludeTZifAvailable: boolean=true): AnsiString;
     function GetDatePart: longint;
     function GetTimePart: longint;
     function HasDatePart: boolean;
     function HasTimePart: boolean;
     function HasTimezone: boolean;
+    function DSTStatus: TDaylightSavingsTime;
     property AsDateTime: TDateTime read GetAsDateTime;
     property AsDate: TDateTime read GetAsDate;
     property AsTime: TDateTime read GetAsTime;
@@ -1072,7 +1075,10 @@ type
     function CharSetWidth(CharSetID: integer; var Width: integer): boolean;
     procedure RegisterCharSet(CharSetName: AnsiString; CodePage: TSystemCodePage;
       AllowReverseLookup:boolean; out CharSetID: integer);
-  end;
+
+    {utility}
+    function GetSQLTimestampParam: ISQLParamTimestamp;
+ end;
 
   TProtocolAll = (TCP, SPX, NamedPipe, Local, inet, inet4, inet6, wnet, xnet, unknownProtocol);
   TProtocol = TCP..xnet;
@@ -1262,9 +1268,6 @@ type
     function HasMasterIntf: boolean;
     function GetIMaster: TObject;
     function GetFBLibrary: IFirebirdLibrary;
-
-    {utility}
-    function GetSQLTimestampParam: ISQLParamTimestamp;
 end;
 
 type

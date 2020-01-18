@@ -75,6 +75,7 @@ type
    FBufPtr: PByte;
    FArray: TFBArray;
   protected
+   function GetAttachment: IAttachment; override;
    function GetSQLDialect: integer; override;
    procedure Changing; override;
    procedure Changed; override;
@@ -229,6 +230,11 @@ implementation
 uses FBMessages;
 
 { TFBArrayElement }
+
+function TFBArrayElement.GetAttachment: IAttachment;
+begin
+  Result := FArray.GetAttachment;
+end;
 
 function TFBArrayElement.GetSQLDialect: integer;
 begin

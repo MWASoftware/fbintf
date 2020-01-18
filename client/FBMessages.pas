@@ -143,7 +143,9 @@ type
       ibxErrorParsing,
       ibxeDLInfoError,
       ibxeDifferentAPIs,
-      ibxeInvalidDateTimeStr
+      ibxeInvalidDateTimeStr,
+      ibxeBadTimeZoneID,
+      ibxeTimeZoneOffsetSyntaxError
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -237,6 +239,8 @@ resourcestring
   SDLInfoError = 'dlinfo returned error - %s';
   SDifferentAPIs = 'All transaction attachments must use the same Firebird Library';
   SInvalidDateTimeStr = '%s is not a valid Date/Time string';
+  SBadTimeZoneID = 'Invalid Time Zone ID (%d,%d)';
+  STimeZoneOffsetSyntaxError = 'Invalid Time Zone Offset - %s';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -307,7 +311,9 @@ const
     SErrorParsing,
     SDLInfoError,
     SDifferentAPIs,
-    SInvalidDateTimeStr
+    SInvalidDateTimeStr,
+    SBadTimeZoneID,
+    STimeZoneOffsetSyntaxError
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;

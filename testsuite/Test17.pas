@@ -119,7 +119,7 @@ begin
     Second := 0;
     Millisecond := 0;
   end;
-  Timestamp := FirebirdAPI.GetSQLTimestampParam;
+  Timestamp := Attachment.GetSQLTimestampParam;
   Timestamp.SetAsSystemTime(SysTime);
   Statement.SQLParams[3].SetAsSQLTimestamp(Timestamp);
   Statement.Execute;
@@ -166,7 +166,7 @@ begin
 
   Statement := Attachment.Prepare(Transaction,SQLInsert4);
 
-  Timestamp := FirebirdAPI.GetSQLTimestampParam;
+  Timestamp := Attachment.GetSQLTimestampParam;
   Statement.SQLParams[0].AsInteger := 3;
   Timestamp.AsTime := EncodeTime(14,02,10,05);
   Timestamp.Timezone := '-08:00';
@@ -230,20 +230,27 @@ begin
   writeln(OutFile);
   writeln(OutFile,'FB4 Testdata');
   writeln(OutFile);
-{  Results := Statement.OpenCursor;
+  Results := Statement.OpenCursor;
   try
     while Results.FetchNext do
     begin
-      writeln(OutFile,'Float16:');
+      writeln('TimeCol');
+      if not Results[1].IsNull then
+      with Results[1].GetAsSQLTimestamp do
+        writeln(GetAsString,', TimeZoneID = ',GetTimezoneID);
+      if not Results[2].IsNull then
+      with Results[2].GetAsSQLTimestamp do
+        writeln(GetAsString,', TimeZoneID = ',GetTimezoneID);
+{      writeln(OutFile,'Float16:');
       DumpBCD(Results.ByName('Float16').GetAsBCD);
       writeln(OutFile,'Float34:');
       DumpBCD(Results.ByName('Float34').GetAsBCD);
       writeln(OutFile,'BigNumber:');
-      DumpBCD(Results.ByName('BigNumber').GetAsBCD);
+      DumpBCD(Results.ByName('BigNumber').GetAsBCD);}
     end;
   finally
     Results.Close;
-  end;}
+  end;
   ReportResults(Statement);
 
 end;
@@ -280,6 +287,14 @@ begin
   else
   begin
     Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable2);
+
+    with Attachment.GetSQLTimestampParam do
+    begin
+      SetTimeZoneID(65535);
+      writeln(OutFile,'Time Zone GMT = ',TimeZone);
+      SetTimeZoneID(65037);
+      writeln(OutFile,'Time Zone Zagreb = ',TimeZone);
+    end;
 
     UpdateDatabase4(Attachment);
     QueryDatabase4(Attachment,'FB4TestData');
