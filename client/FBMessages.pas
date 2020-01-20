@@ -145,7 +145,8 @@ type
       ibxeDifferentAPIs,
       ibxeInvalidDateTimeStr,
       ibxeBadTimeZoneID,
-      ibxeTimeZoneOffsetSyntaxError
+      ibxeTimeZoneOffsetSyntaxError,
+      ibxeTZRegionNotAvailable
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -241,6 +242,7 @@ resourcestring
   SInvalidDateTimeStr = '%s is not a valid Date/Time string';
   SBadTimeZoneID = 'Invalid Time Zone ID (%d,%d)';
   STimeZoneOffsetSyntaxError = 'Invalid Time Zone Offset - %s';
+  STZRegionNotAvailable = 'Time Zone Region unknown (ID = %d)';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -313,7 +315,8 @@ const
     SDifferentAPIs,
     SInvalidDateTimeStr,
     SBadTimeZoneID,
-    STimeZoneOffsetSyntaxError
+    STimeZoneOffsetSyntaxError,
+    STZRegionNotAvailable
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;

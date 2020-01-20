@@ -43,7 +43,48 @@ uses
 
 const
   decimillsecondsPerSecond = 10000;
-  MinTimeZoneDBID = 64000;
+  MaxOffsetTimeZoneID = 2879;
+
+{
+The TSQLTimestamp and TSQLTimestampParam classes and corresponding interfaces provide
+read/only and read/write access to columns and parameters, respectively, with the Date, Time,
+Timestamp, Time with Time Zone and Timestamp with Time Zone types.
+
+The ISQLData.GetAsDateTime and the ISQLParam.SetAsDateTime methods are still available for
+simple use. However, the new interfaces provide more date/time formats and are the only way that
+time zone data can be accessed.
+
+Internally, Firebird stores date/time information as three 32-bit unsigned integers:
+
+  • Date: In days from From 01.01.0001 AD to 31.12.9999 AD
+  • Time: In deci-milliseconds from 0:00 to 23:59:59.9999
+  • Time Zone:
+     ◦ 0 to 2878 represent time zone offsets (in minutes) from -23:59 to 23:59
+     ◦ Higher values identify time zones from the time zone database (see
+RDB$TIME_ZONES).
+
+Each Date/Time type stores its information in a different combination of the above.
+TSQLTimestamp and TSQLTimestampParam internally store date/time information in Firebird
+format.
+
+Note that a time zone can be represented as either a displacement (in minutes) from GMT, or as a
+time zone name (e.g. Europe/London). There is a subtle difference in the semantics of the two
+representations. A displacement accurately reflections the different from GMT. However, it does not
+identify the actual time zone, nor does it identify whether daylight savings time is in effect. On the
+other hand, when a time zone name is provided, the time zone database can be used to determine
+not just the displacement from GMT on any given date, but also whether daylight savings time is in
+effect.
+
+A displacement is simply the time difference in hours and minutes between the local time given by
+the time value and GMT. For a timestamp (i.e. which includes the date) there is little to choose
+between using a displacement and a time zone name. Both can be used to calculate the equivalent in
+UTC. However, for a “Time with Time Zone” type, the time is devoid of any date information. It is
+a local time – but on which day?
+
+If your application needs to be able to translate a “Time with Time Zone” from a local time to GMT
+and there is no context information otherwise available that can be used to determine the time zone,
+then the time zone should be specified by a time zone name.
+}
 
 type
 
@@ -70,8 +111,8 @@ type
     procedure UpdateDSTStatus;
     function TimeZoneID2Name(aTimeZoneID: ISC_USHORT): AnsiString;
     procedure GetTimeZoneInfo(aTimeZoneID: ISC_USHORT; OnDate: TDateTime;
-      var aTimeZone: AnsiString; var ZoneOffset: integer;
-      var DSTOffset: integer; var EffectiveOffset: integer);
+      var ZoneOffset: integer; var DSTOffset: integer;
+  var EffectiveOffset: integer);
   public
     constructor Create(attachment: IAttachment);
     procedure FromSQLData(SQLType: cardinal; SQLData: PByte);
@@ -89,7 +130,7 @@ type
     function GetTimezone: AnsiString;
     function GetTimezoneID: ISC_USHORT; overload; {native Firebird timezone integer identifier}
     function GetEffectiveTimeOffsetMins: integer;
-    function GetAsString(IncludeTZifAvailable: boolean=true): AnsiString;
+    function GetAsString(IncludeTZifAvailable: boolean=true; ShowAsRegion: boolean = false): AnsiString;
     function GetDatePart: longint;
     function GetTimePart: longint;
     function HasDatePart: boolean;
@@ -120,7 +161,7 @@ type
 
 implementation
 
-uses FBMessages, StrUtils;
+uses FBMessages, StrUtils, DateUtils;
 
 { TSQLTimestamp }
 
@@ -175,11 +216,10 @@ end;
 
 procedure TSQLTimestamp.UpdateDSTStatus;
 var ZoneOffset,DSTOffset: integer;
-    aTimeZone: AnsiString;
 begin
   if FHasTimeZone then
   begin
-    if FTimeZoneID < MinTimeZoneDBID then
+    if FTimeZoneID < MaxOffsetTimeZoneID then
     begin
       FDSTStatus := dstUnknown;
       FEffectiveTimeOffsetMins := DecodeTZOffset(FTimeZone);
@@ -187,9 +227,9 @@ begin
     else
     begin
       if FHasDatePart then
-        GetTimeZoneInfo(FTimeZoneID,GetAsDate,aTimeZone,ZoneOffset,DSTOffset,FEffectiveTimeOffsetMins)
+        GetTimeZoneInfo(FTimeZoneID,GetAsDate,ZoneOffset,DSTOffset,FEffectiveTimeOffsetMins)
       else
-        GetTimeZoneInfo(FTimeZoneID,Now,aTimeZone,ZoneOffset,DSTOffset,FEffectiveTimeOffsetMins);
+        GetTimeZoneInfo(FTimeZoneID,LocalTimeToUniversal(Now),ZoneOffset,DSTOffset,FEffectiveTimeOffsetMins);
       if DSTOffset = 0 then
         FDSTStatus := dstNotInEffect
       else
@@ -210,16 +250,15 @@ begin
 end;
 
 procedure TSQLTimestamp.GetTimeZoneInfo(aTimeZoneID: ISC_USHORT;
-  OnDate: TDateTime; var aTimeZone: AnsiString; var ZoneOffset: integer;
+  OnDate: TDateTime; var ZoneOffset: integer;
   var DSTOffset: integer; var EffectiveOffset: integer);
 var Stmt: IStatement;
     TZInfo: IResultSet;
 begin
-  aTimeZone := TimeZoneID2Name(aTimeZoneID);
   with FAttachment do
     Stmt := Prepare(StartTransaction([isc_tpb_read,isc_tpb_wait,isc_tpb_concurrency],taCommit),
-                 'select * from rdb$time_zone_util.transitions(?,?,?)');
-  Stmt.SQLParams[0].AsString := aTimeZone;
+                 'select * from rdb$time_zone_util.transitions((Select First 1 RDB$TIME_ZONE_NAME From RDB$TIME_ZONES Where RDB$TIME_ZONE_ID = ?),?,?)');
+  Stmt.SQLParams[0].AsInteger := aTimeZoneID;
   Stmt.SQLParams[1].AsDateTime := OnDate;
   Stmt.SQLParams[2].AsDateTime := OnDate;
   TZInfo := Stmt.OpenCursor;
@@ -397,7 +436,8 @@ begin
   Result := FEffectiveTimeOffsetMins;
 end;
 
-function TSQLTimestamp.GetAsString(IncludeTZifAvailable: boolean): AnsiString;
+function TSQLTimestamp.GetAsString(IncludeTZifAvailable: boolean;
+  ShowAsRegion: boolean): AnsiString;
 var TimeFormat: AnsiString;
 begin
   Result := '';
@@ -413,7 +453,20 @@ begin
     Result := Result + FormatDateTime(TimeFormat,FTime / (MSecsPerDay*10));
   end;
   if IncludeTZifAvailable and HasTimeZone then
-    Result := Result + ' ' + FTimeZone
+  begin
+    if ShowAsRegion then
+    begin
+      if DSTStatus = dstUnknown then
+        IBError(ibxeTZRegionNotAvailable,[FTimeZoneID])
+      else
+        Result := Result + ' ' + FTimeZone
+    end
+    else
+    if FEffectiveTimeOffsetMins > 0 then
+      Result := Result + ' ' + Format('+%.2d:%.2d',[FEffectiveTimeOffsetMins div 60,abs(FEffectiveTimeOffsetMins mod 60)])
+    else
+      Result := Result + ' ' + Format('%.2d:%.2d',[FEffectiveTimeOffsetMins div 60,abs(FEffectiveTimeOffsetMins mod 60)]);
+  end;
 end;
 
 function TSQLTimestamp.GetDatePart: longint;
@@ -593,6 +646,7 @@ begin
   FTimezone := aValue;
   FHasTimezone := true;
   FTimeZoneID := GetTimeZoneID(FTimeZone);
+  UpdateDSTStatus;
 end;
 
 procedure TSQLTimestampParam.SetTimeZoneID(aTimeZoneID: ISC_USHORT);
@@ -603,6 +657,7 @@ begin
   aTimeTZ.time_zone := aTimeZoneID;
   aTimeTZ.utc_time := 0;
   FFirebirdClientAPI.SQLDecodeTimeTZ(aTime,FTimeZone,FTimeZoneID,@aTimeTZ);
+  UpdateDSTStatus;
 end;
 
 end.

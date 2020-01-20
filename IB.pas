@@ -512,7 +512,7 @@ type
     function GetTimezone: AnsiString;
     function GetTimezoneID: ISC_USHORT; {native Firebird timezone integer identifier}
     function GetEffectiveTimeOffsetMins: integer;
-    function GetAsString(IncludeTZifAvailable: boolean=true): AnsiString;
+    function GetAsString(IncludeTZifAvailable: boolean=true; ShowAsRegion: boolean = false): AnsiString;
     function GetDatePart: longint;
     function GetTimePart: longint;
     function HasDatePart: boolean;

@@ -144,7 +144,7 @@ begin
   with bcd do
   begin
     writeln(OutFile,'  Precision = ',Precision);
-    writeln(OutFile,'  Sign = ',(SignSpecialPlaces and $80) shl 7);
+    writeln(OutFile,'  Sign = ',(SignSpecialPlaces and $80) shr 7);
     writeln(OutFile,'  Special = ', (SignSpecialPlaces and $40) shl 6);
     writeln(OutFile,'  Places = ', SignSpecialPlaces and $7F);
     write(OutFile,'  Digits = ');

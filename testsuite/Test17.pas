@@ -37,10 +37,13 @@ type
 
   TTest17 = class(TTestBase)
   private
+    procedure QueryDatabase4_DECFloat(Attachment: IAttachment);
+    procedure TestFBTimezoneSettings(Attachment: IAttachment);
     procedure UpdateDatabase(Attachment: IAttachment);
-    procedure UpdateDatabase4(Attachment: IAttachment);
-    procedure QueryDatabase(Attachment: IAttachment; aTableName: AnsiString);
-    procedure QueryDatabase4(Attachment: IAttachment; aTableName: AnsiString);
+    procedure UpdateDatabase4_DECFloat(Attachment: IAttachment);
+    procedure UpdateDatabase4_TZ(Attachment: IAttachment);
+    procedure QueryDatabase(Attachment: IAttachment);
+    procedure QueryDatabase4_TZ(Attachment: IAttachment);
   public
     function TestTitle: AnsiString; override;
     procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
@@ -65,13 +68,20 @@ const
     sqlInsert2 = 'Insert into TestData(RowID,DateCol,TimeCol,TimestampCol) VALUES(?,?,?,?)';
 
     sqlCreateTable2 =
-    'Create Table FB4TestData ('+
+    'Create Table FB4TestData_TZ ('+
     'RowID Integer not null,'+
     'TimeCol TIME WITH TIME ZONE,'+
     'TimestampCol TIMESTAMP WITH TIME ZONE,'+
+    'Primary Key(RowID)'+
+    ')';
+
+    sqlCreateTable3 =
+    'Create Table FB4TestData_DECFloat ('+
+    'RowID Integer not null,'+
     'Float16 DecFloat(16),'+
     'Float34 DecFloat(34),'+
     'BigNumber NUMERIC(24,6),'+
+    'BiggerNumber NUMERIC(26,4),'+
     'Primary Key(RowID)'+
     ')';
 
@@ -79,6 +89,29 @@ const
                  'Values(?,?,?,?,?,?)';
 
 { TTest17 }
+
+procedure TTest17.TestFBTimezoneSettings(Attachment: IAttachment);
+begin
+  writeln('Test Time Zone Setting');
+  with Attachment.GetSQLTimestampParam do
+  begin
+    SetTimeZoneID(65535);
+    writeln(OutFile,'Time Zone GMT = ',TimeZone);
+    SetTimeZoneID(65037);
+    writeln(OutFile,'Time Zone Zagreb = ',TimeZone);
+    SetTimeZoneID(959);
+    writeln(OutFile,'Time Zone Offset = ',TimeZone);
+    clear;
+    SetTimeZoneID(2878);
+    writeln(OutFile,'Time Zone Offset = ',TimeZone);
+    clear;
+    TimeZone := '+06:00';
+    writeln(OutFile,'Time Zone ID = ',GetTimezoneID);
+    clear;
+    TimeZone := 'US/Arizona';
+    writeln(OutFile,'Time Zone ID = ',GetTimezoneID);
+  end;
+end;
 
 procedure TTest17.UpdateDatabase(Attachment: IAttachment);
 var Transaction: ITransaction;
@@ -142,7 +175,7 @@ begin
 
 end;
 
-procedure TTest17.UpdateDatabase4(Attachment: IAttachment);
+procedure TTest17.UpdateDatabase4_TZ(Attachment: IAttachment);
 var Transaction: ITransaction;
     Statement: IStatement;
     sqlInsert: AnsiString;
@@ -152,22 +185,17 @@ begin
   FormatSettings := DefaultFormatSettings;
   FormatSettings.DateSeparator := '.'; {Firebird convention}
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
-  sqlInsert := 'Insert into FB4TestData(RowID,TimeCol,TimestampCol, Float16,Float34,BigNumber) ' +
+  sqlInsert := 'Insert into FB4TestData_TZ(RowID,TimeCol,TimestampCol) ' +
                'Values(1,''11:32:10.0002 -05:00'','''+
                DateToStr(EncodeDate(2020,4,1),FormatSettings)+
-               ' 11:31:05.0001 +01:00'','+
-               '64000000000.01,123456789123456789.12345678,123456123456.123456)';
-  Attachment.ExecuteSQL(Transaction,sqlInsert,[]);
-  sqlInsert := 'Insert into FB4TestData(RowID,TimeCol,TimestampCol, Float16,Float34,BigNumber) ' +
-               'Values(2,NULL,NULL,' +
-               '-64000000000.01,-123456789123456789.12345678,-123456123456.123456)';
+               ' 11:31:05.0001 +01:00'')';
   Attachment.ExecuteSQL(Transaction,sqlInsert,[]);
 
 
-  Statement := Attachment.Prepare(Transaction,SQLInsert4);
+  Statement := Attachment.Prepare(Transaction,'Insert into FB4TestData_TZ(RowID,TimeCol,TimestampCol) Values(?,?,?)');
 
   Timestamp := Attachment.GetSQLTimestampParam;
-  Statement.SQLParams[0].AsInteger := 3;
+  Statement.SQLParams[0].AsInteger := 2;
   Timestamp.AsTime := EncodeTime(14,02,10,05);
   Timestamp.Timezone := '-08:00';
   Statement.SQLParams[1].SetAsSQLTimestamp(Timestamp);
@@ -175,25 +203,47 @@ begin
   Timestamp.AsDateTime := EncodeDate(1918,11,11) + EncodeTime(11,11,0,0);
   Timestamp.Timezone := 'Europe/London';
   Statement.SQLParams[2].SetAsSQLTimestamp(Timestamp);
-  Statement.SQLParams[3].AsBCD := StrToBCD('64100000000.011');
-  Statement.SQLParams[4].AsCurrency := 12345678912.12;
-  Statement.SQLParams[5].AsString := '1234561234567.123456';
   Statement.Execute;
 end;
 
-procedure TTest17.QueryDatabase(Attachment: IAttachment; aTableName: AnsiString);
+procedure TTest17.UpdateDatabase4_DECFloat(Attachment: IAttachment);
+var Transaction: ITransaction;
+    Statement: IStatement;
+    sqlInsert: AnsiString;
+begin
+  Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
+  sqlInsert := 'Insert into FB4TestData_DECFLoat(RowID,Float16,Float34,BigNumber) ' +
+               'Values(1,64000000000.01,123456789123456789.12345678,123456123456.123456)';
+  Attachment.ExecuteSQL(Transaction,sqlInsert,[]);
+  sqlInsert := 'Insert into FB4TestData_DECFLoat(RowID,Float16,Float34,BigNumber) '+
+               'Values(2,-64000000000.01,-123456789123456789.12345678,-123456123456.123456)';
+  Attachment.ExecuteSQL(Transaction,sqlInsert,[]);
+
+
+  Statement := Attachment.Prepare(Transaction,'Insert into FB4TestData_DECFLoat(RowID,Float16,Float34,BigNumber,BiggerNumber) VALUES (?,?,?,?,?)');
+
+  Statement.SQLParams[0].AsInteger := 3;
+  Statement.SQLParams[1].AsBCD := StrToBCD('64100000000.011');
+  Statement.SQLParams[2].AsCurrency := 12345678912.12;
+  Statement.SQLParams[3].AsString := '1234561234567.123456';
+  Statement.SQLParams[4].AsString := '123456123456123456123456.123456';
+  Statement.Execute;
+end;
+
+procedure TTest17.QueryDatabase(Attachment: IAttachment);
 var Transaction: ITransaction;
     Statement: IStatement;
     Results: IResultSet;
     SysTime: TSystemTime;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
-  Statement := Attachment.Prepare(Transaction,'Select * from  '+aTableName);
+  Statement := Attachment.Prepare(Transaction,'Select * from  TestData');
   writeln(OutFile);
   writeln(OutFile,'Testdata');
   writeln(OutFile);
+  PrintMetaData(Statement.MetaData);
   ReportResults(Statement);
-  Statement := Attachment.Prepare(Transaction,'Select * from  '+aTableName);
+  Statement := Attachment.Prepare(Transaction,'Select * from  TestData');
   writeln(OutFile);
   writeln(OutFile,'Testdata - second pass');
   writeln(OutFile);
@@ -219,40 +269,73 @@ begin
   end;
 end;
 
-procedure TTest17.QueryDatabase4(Attachment: IAttachment; aTableName: AnsiString
-  );
+procedure TTest17.QueryDatabase4_TZ(Attachment: IAttachment);
 var Transaction: ITransaction;
     Statement: IStatement;
     Results: IResultSet;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
-  Statement := Attachment.Prepare(Transaction,'Select * from  '+aTableName);
+  Statement := Attachment.Prepare(Transaction,'Select * from  FB4TestData_TZ');
   writeln(OutFile);
-  writeln(OutFile,'FB4 Testdata');
+  writeln(OutFile,'FB4 Testdata_TZ');
   writeln(OutFile);
+  PrintMetaData(Statement.MetaData);
   Results := Statement.OpenCursor;
   try
     while Results.FetchNext do
     begin
-      writeln('TimeCol');
+      writeln('ROW ID = ',Results[0].AsInteger);
+      write('TimeCol = ');
       if not Results[1].IsNull then
-      with Results[1].GetAsSQLTimestamp do
-        writeln(GetAsString,', TimeZoneID = ',GetTimezoneID);
+        with Results[1].GetAsSQLTimestamp do
+          writeln(GetAsString,', TimeZoneID = ',GetTimezoneID,', Time Zone Name = ',TimeZone)
+      else
+        writeln('NULL');
+      write('TimeStampCol = ');
       if not Results[2].IsNull then
-      with Results[2].GetAsSQLTimestamp do
-        writeln(GetAsString,', TimeZoneID = ',GetTimezoneID);
-{      writeln(OutFile,'Float16:');
-      DumpBCD(Results.ByName('Float16').GetAsBCD);
-      writeln(OutFile,'Float34:');
-      DumpBCD(Results.ByName('Float34').GetAsBCD);
-      writeln(OutFile,'BigNumber:');
-      DumpBCD(Results.ByName('BigNumber').GetAsBCD);}
+        with Results[2].GetAsSQLTimestamp do
+          writeln(GetAsString,', TimeZoneID = ',GetTimezoneID,', Time Zone Name = ',TimeZone)
+      else
+        writeln('NULL');
     end;
   finally
     Results.Close;
   end;
-  ReportResults(Statement);
+end;
 
+procedure TTest17.QueryDatabase4_DECFloat(Attachment: IAttachment);
+var Transaction: ITransaction;
+    Statement: IStatement;
+    Results: IResultSet;
+begin
+  Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
+  Statement := Attachment.Prepare(Transaction,'Select * from  FB4TestData_DECFloat');
+  writeln(OutFile);
+  writeln(OutFile,'FB4 Testdata_DECFloat');
+  writeln(OutFile);
+  PrintMetaData(Statement.MetaData);
+  Results := Statement.OpenCursor;
+  try
+    while Results.FetchNext do
+    with Results do
+    begin
+      writeln(OutFile,'RowID = ',ByName('ROWID').GetAsString);
+      writeln(OutFile,'Float16 = ', ByName('Float16').GetAsString);
+      DumpBCD(ByName('Float16').GetAsBCD);
+      writeln(OutFile,'Float34 = ', ByName('Float34').GetAsString);
+      DumpBCD(ByName('Float34').GetAsBCD);
+      writeln(OutFile,'BigNumber = ', ByName('BigNumber').GetAsString);
+      DumpBCD(ByName('BigNumber').GetAsBCD);
+      if not ByName('BiggerNumber').IsNull then
+      begin
+        writeln(OutFile,'BiggerNumber = ', ByName('BiggerNumber').GetAsString);
+        DumpBCD(ByName('BiggerNumber').GetAsBCD);
+      end;
+      writeln;
+    end;
+  finally
+    Results.Close;
+  end;
 end;
 
 function TTest17.TestTitle: AnsiString;
@@ -280,24 +363,22 @@ begin
   end;
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable);
   UpdateDatabase(Attachment);
-  QueryDatabase(Attachment,'TestData');
+  QueryDatabase(Attachment);
 
   if (FirebirdAPI.GetClientMajor < 4) or (Attachment.GetODSMajorVersion < 13) then
     writeln(OutFile,'Skipping Firebird 4 and later test part')
   else
   begin
+    writeln(OutFile,'Firebird 4 extension types');
+    writeln;
+    TestFBTimezoneSettings(Attachment);
+
     Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable2);
-
-    with Attachment.GetSQLTimestampParam do
-    begin
-      SetTimeZoneID(65535);
-      writeln(OutFile,'Time Zone GMT = ',TimeZone);
-      SetTimeZoneID(65037);
-      writeln(OutFile,'Time Zone Zagreb = ',TimeZone);
-    end;
-
-    UpdateDatabase4(Attachment);
-    QueryDatabase4(Attachment,'FB4TestData');
+    UpdateDatabase4_TZ(Attachment);
+    QueryDatabase4_TZ(Attachment);
+    Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable3);
+    UpdateDatabase4_DECFloat(Attachment);
+    QueryDatabase4_DECFloat(Attachment);
   end;
   Attachment.DropDatabase;
 end;
