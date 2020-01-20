@@ -25,6 +25,7 @@ type
   protected
     FHexStrings: boolean;
     procedure DumpBCD(bcd: tBCD);
+    function ExtractDBName(ConnectString: AnsiString): AnsiString;
     function ReportResults(Statement: IStatement): IResultSet;
     procedure ReportResult(aValue: IResults);
     procedure PrintHexString(s: AnsiString);
@@ -152,6 +153,14 @@ begin
       write(OutFile,Format('%x',[Fraction[i]]),' ');
     writeln;
   end;
+end;
+
+function TTestBase.ExtractDBName(ConnectString: AnsiString): AnsiString;
+var ServerName: AnsiString;
+    Protocol: TProtocolAll;
+    PortNo: AnsiString;
+begin
+  ParseConnectString(ConnectString, ServerName, Result, Protocol,PortNo);
 end;
 
 function TTestBase.ReportResults(Statement: IStatement): IResultSet;

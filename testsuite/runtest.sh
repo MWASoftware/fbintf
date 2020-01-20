@@ -6,9 +6,9 @@
 TESTOUTDIR=/tmp/fbintf-testsuite
 USERNAME=SYSDBA
 PASSWORD=masterkey
-EMPLOYEEDB=localhost:employee
-NEWDBNAME=localhost:$TESTOUTDIR/testsuite1.fdb
-NEWDBNAME2=localhost:$TESTOUTDIR/testsuite2.fdb
+EMPLOYEEDB=employee
+NEWDBNAME=$TESTOUTDIR/testsuite1.fdb
+NEWDBNAME2=$TESTOUTDIR/testsuite2.fdb
 BAKFILE=$TESTOUTDIR/testsuite.gbk
 
 cd `dirname $0`
@@ -22,7 +22,7 @@ if [ -x testsuite ]; then
   echo ""
   echo "Starting Testsuite"
   echo ""
-  ./testsuite -u $USERNAME -p $PASSWORD -e $EMPLOYEEDB -n $NEWDBNAME -s $NEWDBNAME2 -b $BAKFILE -o testout.log $1
+  ./testsuite -u $USERNAME -p $PASSWORD -e $EMPLOYEEDB -n $NEWDBNAME -s $NEWDBNAME2 -b $BAKFILE -o testout.log $@
   echo "Comparing results with reference log"
   echo ""
   diff reference.log testout.log >diff.log

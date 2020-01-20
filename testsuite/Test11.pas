@@ -209,10 +209,7 @@ begin
 
   {Local Restore}
   writeln(OutFile,'Local Restore');
-  RestoreDBName := Owner.GetNewDatabaseName;
-  i := Pos(':',RestoreDBName);
-  if i > 0 then
-    system.Delete(RestoreDBName,1,i);
+  RestoreDBName := ExtractDBName(Owner.GetNewDatabaseName);
   Req := Service.AllocateSRB;
   Req.Add(isc_action_svc_restore);
   Req.Add(isc_spb_dbname).AsString := RestoreDBName;
@@ -273,11 +270,8 @@ var SPB: ISPB;
 begin
   if not FirebirdAPI.HasServiceAPI then Exit;
 
-  ServerName := Owner.GetEmployeeDatabaseName;
-  I := Pos(':',ServerName);
-  if i > 0 then
-    DBName := system.copy(ServerName,i+1,length(ServerName) - 2);
-  system.Delete(ServerName,i,Length(ServerName)-i+1);
+  DBName := ExtractDBName(Owner.GetEmployeeDatabaseName);
+  ServerName := Owner.Server;
 
   SPB := FirebirdAPI.AllocateSPB;
   SPB.Add(isc_spb_user_name).setAsString(Owner.GetUserName);

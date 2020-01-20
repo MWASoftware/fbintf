@@ -92,7 +92,7 @@ const
 
 procedure TTest17.TestFBTimezoneSettings(Attachment: IAttachment);
 begin
-  writeln('Test Time Zone Setting');
+  writeln(OutFile,'Test Time Zone Setting');
   with Attachment.GetSQLTimestampParam do
   begin
     SetTimeZoneID(65535);
@@ -284,19 +284,19 @@ begin
   try
     while Results.FetchNext do
     begin
-      writeln('ROW ID = ',Results[0].AsInteger);
-      write('TimeCol = ');
+      writeln(OutFile.'ROW ID = ',Results[0].AsInteger);
+      write(OutFile,'TimeCol = ');
       if not Results[1].IsNull then
         with Results[1].GetAsSQLTimestamp do
-          writeln(GetAsString,', TimeZoneID = ',GetTimezoneID,', Time Zone Name = ',TimeZone)
+          writeln(OutFile,GetAsString,', TimeZoneID = ',GetTimezoneID,', Time Zone Name = ',TimeZone)
       else
-        writeln('NULL');
-      write('TimeStampCol = ');
+        writeln(OutFile,'NULL');
+      write(OutFile,'TimeStampCol = ');
       if not Results[2].IsNull then
         with Results[2].GetAsSQLTimestamp do
-          writeln(GetAsString,', TimeZoneID = ',GetTimezoneID,', Time Zone Name = ',TimeZone)
+          writeln(OutFile,GetAsString,', TimeZoneID = ',GetTimezoneID,', Time Zone Name = ',TimeZone)
       else
-        writeln('NULL');
+        writeln(OutFile,'NULL');
     end;
   finally
     Results.Close;
@@ -370,7 +370,7 @@ begin
   else
   begin
     writeln(OutFile,'Firebird 4 extension types');
-    writeln;
+    writeln(OutFile);
     TestFBTimezoneSettings(Attachment);
 
     Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable2);
