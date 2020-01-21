@@ -23,13 +23,13 @@
     </PublishOptions>
     <RunParams>
       <local>
-        <CommandLineParams Value="-t 16"/>
+        <CommandLineParams Value="-t 17 -l /opt/firebird4/lib/libfbclient.so.2 -P 33050"/>
       </local>
       <FormatVersion Value="2"/>
       <Modes Count="1">
         <Mode0 Name="default">
           <local>
-            <CommandLineParams Value="-t 16"/>
+            <CommandLineParams Value="-t 17 -l /opt/firebird4/lib/libfbclient.so.2 -P 33050"/>
           </local>
         </Mode0>
       </Modes>
