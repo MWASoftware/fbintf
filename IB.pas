@@ -491,7 +491,12 @@ type
     provided and the timestamp includes a timezone, then ' TZ' is added to the
     default longTimeFormat.
   }
+  const
+    MaxOffsetTimeZoneID = 2879; {lower values represent a time zone offset between
+                                 -23:59 and 23:59. Higher values are keys to the
+                                 Time Zone database.}
 
+  type
    TFBSystemTime = record
       Year, Month, Day, DayOfWeek: word;
       Hour, Minute, Second, DeciMilliSecond: word;

@@ -43,7 +43,6 @@ uses
 
 const
   decimillsecondsPerSecond = 10000;
-  MaxOffsetTimeZoneID = 2879;
 
 {
 The TSQLTimestamp and TSQLTimestampParam classes and corresponding interfaces provide

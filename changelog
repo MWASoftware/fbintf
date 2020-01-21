@@ -8,7 +8,7 @@ FBINTF Change Log  version          (1.1-5 Build 11664) Thu, 11 Apr 2019 09:43:4
 3. New API Calls:
 	IColumnMetaData.GetStatement
 	IColumnMetaData.GetTransaction
-	ISQLData.GetStrLength
+	ISQLData.GetStrDataLength
 	IResults.GetStatement
 	IAttachment.OpenBlob (using Blob metadata)
 	IAttachment.OpenArray (using array metadata)
@@ -26,10 +26,10 @@ FBINTF Change Log  version          (1.1-5 Build 11664) Thu, 11 Apr 2019 09:43:4
 9. GetImplementationVersion now correctly returns '3.0' for Firebird 3 API
    with a Firebrid 3 client library.
 
-10. Added Support for SQL_DEC16 and SQL_DEC34.
+10. Added Support for SQL_DEC16, SQL_DEC34 and SQL_DEC_FIXED.
 
-11. New Interface: ISQLTimestamp. This supports decimillisecond time resolution and
-    time zones.
+11. New Interfaces: ISQLTimestamp and ISQLParamTimestamp. These support
+    decimillisecond time resolution and time zones.
 
 12. New IFirebirdAPI Calls:
     function GetClientMajor: integer;
