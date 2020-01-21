@@ -557,7 +557,6 @@ var DecFloat16: IDecFloat16;
       write(buffer[i],' ');
     writeln; }
     {pack buffer}
-    FillChar(Result.Fraction,(MaxFmtBCDFractionSize DIV 2 ) - 1,0);
     j := 0;
     for i := 1 to Result.Precision do
     begin
@@ -573,6 +572,7 @@ var DecFloat16: IDecFloat16;
 
 begin
   Result := inherited SQLDecFloatDecode(SQLType, scale, bufptr);
+  FillChar(Result, sizeof(tBCD),0);
   case SQLType of
   SQL_DEC16:
     begin
