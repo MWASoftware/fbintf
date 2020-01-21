@@ -138,6 +138,12 @@ const
   FBIntf_Release = 5;
   FBIntf_Version = '1.1.5';
 
+const
+  {Time Zone ID constraint}
+  MaxOffsetTimeZoneID = 2879; {lower values represent a time zone offset between
+                               -23:59 and 23:59. Higher values are keys to the
+                               Time Zone database.}
+
 {These include files are converted from the 'C' originals in the Firebird API
  and define the various constants used by the API}
 
@@ -491,13 +497,8 @@ type
     provided and the timestamp includes a timezone, then ' TZ' is added to the
     default longTimeFormat.
   }
-  const
-    MaxOffsetTimeZoneID = 2879; {lower values represent a time zone offset between
-                                 -23:59 and 23:59. Higher values are keys to the
-                                 Time Zone database.}
 
-  type
-   TFBSystemTime = record
+  TFBSystemTime = record
       Year, Month, Day, DayOfWeek: word;
       Hour, Minute, Second, DeciMilliSecond: word;
       TimeZone: AnsiString;
