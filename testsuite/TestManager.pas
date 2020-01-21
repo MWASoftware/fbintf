@@ -761,17 +761,26 @@ end;
 
 function TTestManager.GetEmployeeDatabaseName: AnsiString;
 begin
-  Result := MakeConnectString(FServer,  FEmployeeDatabaseName, inet,FPortNo);
+  if FirebirdAPI.GetClientMajor < 3 then
+    Result := MakeConnectString(FServer,  FEmployeeDatabaseName, TCP,FPortNo)
+  else
+    Result := MakeConnectString(FServer,  FEmployeeDatabaseName, inet,FPortNo);
 end;
 
 function TTestManager.GetNewDatabaseName: AnsiString;
 begin
-  Result := MakeConnectString(FServer,  FNewDatabaseName, inet,FPortNo);
+  if FirebirdAPI.GetClientMajor < 3 then
+    Result := MakeConnectString(FServer,  FNewDatabaseName, TCP,FPortNo)
+  else
+    Result := MakeConnectString(FServer,  FNewDatabaseName, inet,FPortNo);
 end;
 
 function TTestManager.GetSecondNewDatabaseName: AnsiString;
 begin
-  Result := MakeConnectString(FServer,  FSecondNewDatabaseName, inet,FPortNo);
+  if FirebirdAPI.GetClientMajor < 3 then
+    Result := MakeConnectString(FServer,  FSecondNewDatabaseName, TCP,FPortNo)
+  else
+    Result := MakeConnectString(FServer,  FSecondNewDatabaseName, inet,FPortNo);
 end;
 
 function TTestManager.GetBackupFileName: AnsiString;
