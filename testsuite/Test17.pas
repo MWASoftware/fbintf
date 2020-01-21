@@ -85,9 +85,6 @@ const
     'Primary Key(RowID)'+
     ')';
 
-    sqlInsert4 = 'Insert into FB4TestData(RowID,TimeCol,TimestampCol, Float16,Float34,BigNumber)' +
-                 'Values(?,?,?,?,?,?)';
-
 { TTest17 }
 
 procedure TTest17.TestFBTimezoneSettings(Attachment: IAttachment);
@@ -284,7 +281,7 @@ begin
   try
     while Results.FetchNext do
     begin
-      writeln(OutFile.'ROW ID = ',Results[0].AsInteger);
+      writeln(OutFile,'ROW ID = ',Results[0].AsInteger);
       write(OutFile,'TimeCol = ');
       if not Results[1].IsNull then
         with Results[1].GetAsSQLTimestamp do
