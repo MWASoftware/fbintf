@@ -149,8 +149,8 @@ begin
     writeln(OutFile,'  Special = ', (SignSpecialPlaces and $40) shl 6);
     writeln(OutFile,'  Places = ', SignSpecialPlaces and $7F);
     write(OutFile,'  Digits = ');
-    for i := 0 to (MaxFmtBCDFractionSize DIV 2 ) - 1 do
-      write(OutFile,Format('%x',[Fraction[i]]),' ');
+    for i := 0 to (Precision DIV 2 ) - 1 do
+      write(OutFile,Format('%.2x',[Fraction[i]]),' ');
     writeln(OutFile);
   end;
 end;

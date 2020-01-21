@@ -13,7 +13,8 @@ unit Test17;
 
 {
   This test provides a test of the ISQLTimestamp interface both for pre-Firebird 4
-  attachments and with the Time Zone SQL types introduced in Firebird 4.
+  attachments and with the Time Zone SQL types introduced in Firebird 4. It also
+  provides tests for the new DECFloat16 and DECFloat34 types.
 
   1. A new temporary database is created and a single table added containing
      columns for each time zone type (all Firebird versions).
@@ -22,7 +23,7 @@ unit Test17;
 
   3. A Select query is used to read back the rows, testing out the data read variations.
 
-  4. If the client library and attached server are Firbird 4 or later, then the
+  4. If the client library and attached server are Firebird 4 or later, then the
      tests are repeated with time zones added.
 }
 
@@ -223,7 +224,7 @@ begin
   Statement.SQLParams[1].AsBCD := StrToBCD('64100000000.011');
   Statement.SQLParams[2].AsCurrency := 12345678912.12;
   Statement.SQLParams[3].AsString := '1234561234567.123456';
-  Statement.SQLParams[4].AsString := '123456123456123456123456.123456';
+  Statement.SQLParams[4].AsBCD := StrToBCD('123456123456123456123456.123456');
   Statement.Execute;
 end;
 
