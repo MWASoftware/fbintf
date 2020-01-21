@@ -2,7 +2,7 @@ Firebird API Test Suite
 Copyright MWA Software 2016
 
 Starting Tests
-Client API Version = 3.768
+Client API Version = 3.0
 Running Test 1: Create and Drop a Database
 Creating a Database with empty parameters
 Create Database fails (as expected): I/O error during "open O_CREAT" operation for file ""
@@ -11,7 +11,7 @@ No such file or directory
 Creating a Database using an SQL Statement
 Database ID = 4 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = mint18-FB3
 SQL Dialect = 3
-DB Connect String = localhost:/tmp/fbintf-testsuite/testsuite1.fdb
+DB Connect String = inet://localhost//tmp/fbintf-testsuite/testsuite1.fdb
 DB Charset ID = 0
 DB SQL Dialect = 3
 DB Remote Protocol = TCPv4
@@ -19,7 +19,7 @@ DB ODS Major Version = 12
 DB ODS Minor Version = 0
 User Authentication Method = Srp
 Firebird Library Path = /usr/lib/libfbclient.so
-DB Client Implementation Version = 3.768
+DB Client Implementation Version = 3.0
 DPB
 Count = 3
 28 = SYSDBA
@@ -28,7 +28,7 @@ Count = 3
 
 Dropping Database
 Creating a Database with a DPD
-DB Connect String = localhost:/tmp/fbintf-testsuite/testsuite1.fdb
+DB Connect String = inet://localhost//tmp/fbintf-testsuite/testsuite1.fdb
 DB Charset ID = 4
 DB SQL Dialect = 3
 DB Remote Protocol = TCPv4
@@ -36,7 +36,7 @@ DB ODS Major Version = 12
 DB ODS Minor Version = 0
 User Authentication Method = Srp
 Firebird Library Path = /usr/lib/libfbclient.so
-DB Client Implementation Version = 3.768
+DB Client Implementation Version = 3.0
 Dropping Database
 DPB
 Count = 4
@@ -49,7 +49,7 @@ Creating a Database with a DPD
 Database ID = 4 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = mint18-FB3
 ODS major = 12
 ODS minor = 0
-DB Connect String = localhost:/tmp/fbintf-testsuite/testsuite1.fdb
+DB Connect String = inet://localhost//tmp/fbintf-testsuite/testsuite1.fdb
 DB Charset ID = 4
 DB SQL Dialect = 3
 DB Remote Protocol = TCPv4
@@ -57,7 +57,7 @@ DB ODS Major Version = 12
 DB ODS Minor Version = 0
 User Authentication Method = Srp
 Firebird Library Path = /usr/lib/libfbclient.so
-DB Client Implementation Version = 3.768
+DB Client Implementation Version = 3.0
 RDB$DESCRIPTION = 
 RDB$RELATION_ID = 128
 RDB$SECURITY_CLASS = SQL$363
@@ -67,7 +67,7 @@ Dropping Database
 
 
 Running Test 2: Open the employee database and run a query
-Opening localhost:employee
+Opening inet://localhost/employee
 Database Open, SQL Dialect = 3
 Metadata
 SQLType =SQL_SHORT
@@ -206,13 +206,14 @@ Plan =
 Select Expression
     -> First N Records
         -> Table "EMPLOYEE" Full Scan
-Select First 3 * from EMPLOYEE
+-- SQL style inline comment
+/* this is a comment */ Select First 3 * from EMPLOYEE
 
 EMP_NO = 2
 FIRST_NAME = Robert
 LAST_NAME = Nelson
 PHONE_EXT = 250
-HIRE_DATE = 28/12/1988 00:00:00.000
+HIRE_DATE = 28/12/1988 00:00:00.0000
 DEPT_NO = 600
 JOB_CODE = VP
 JOB_GRADE = 2
@@ -223,7 +224,7 @@ EMP_NO = 4
 FIRST_NAME = Bruce
 LAST_NAME = Young
 PHONE_EXT = 233
-HIRE_DATE = 28/12/1988 00:00:00.000
+HIRE_DATE = 28/12/1988 00:00:00.0000
 DEPT_NO = 621
 JOB_CODE = Eng
 JOB_GRADE = 2
@@ -234,7 +235,7 @@ EMP_NO = 5
 FIRST_NAME = Kim
 LAST_NAME = Lambert
 PHONE_EXT = 22
-HIRE_DATE = 6/2/1989 00:00:00.000
+HIRE_DATE = 6/2/1989 00:00:00.0000
 DEPT_NO = 130
 JOB_CODE = Eng
 JOB_GRADE = 2
@@ -256,7 +257,7 @@ EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
 PHONE_EXT = 410
-HIRE_DATE = 5/4/1989 00:00:00.000
+HIRE_DATE = 5/4/1989 00:00:00.0000
 DEPT_NO = 180
 JOB_CODE = Mktg
 JOB_GRADE = 3
@@ -279,7 +280,7 @@ EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
 PHONE_EXT = 410
-HIRE_DATE = 5/4/1989 00:00:00.000
+HIRE_DATE = 5/4/1989 00:00:00.0000
 DEPT_NO = 180
 JOB_CODE = Mktg
 JOB_GRADE = 3
@@ -290,7 +291,7 @@ FULL_NAME = Johnson, Leslie
 
 
 Running Test 3: ad hoc queries
-Opening localhost:employee
+Opening inet://localhost/employee
 Database Open
 Employee Count = 42
 Employee Count = 41
@@ -303,7 +304,7 @@ Constrained Employee Count = 3
 
 
 Running Test 4: Update, Insert and Delete Queries
-Opening localhost:employee
+Opening inet://localhost/employee
 Database Open
 Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V3.0.1.32609 Firebird 3.0"
 Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V3.0.1.32609 Firebird 3.0/tcp (mint18-FB3)/P14:CZ"
@@ -314,7 +315,7 @@ EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
 PHONE_EXT = 410
-HIRE_DATE = 5/4/1989 00:00:00.000
+HIRE_DATE = 5/4/1989 00:00:00.0000
 DEPT_NO = 180
 JOB_CODE = Mktg
 JOB_GRADE = 3
@@ -322,9 +323,9 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 19604200
+Current memory = 19604208
 Delta memory = 4280
-Max memory = 19666120
+Max memory = 19666128
 Elapsed time= 0.001 sec
 Cpu = 0.000 sec
 Buffers = 2048
@@ -470,7 +471,7 @@ EMP_NO = 150
 FIRST_NAME = John
 LAST_NAME = Doe
 PHONE_EXT = 
-HIRE_DATE = 1/4/2015 00:00:00.000
+HIRE_DATE = 1/4/2015 00:00:00.0000
 DEPT_NO = 600
 JOB_CODE = Eng
 JOB_GRADE = 4
@@ -483,7 +484,7 @@ EMP_NO = 151
 FIRST_NAME = Major
 LAST_NAME = Major
 PHONE_EXT = 
-HIRE_DATE = 1/4/2015 00:00:00.000
+HIRE_DATE = 1/4/2015 00:00:00.0000
 DEPT_NO = 600
 JOB_CODE = Eng
 JOB_GRADE = 4
@@ -500,7 +501,7 @@ EMP_NO = 150
 FIRST_NAME = Jane
 LAST_NAME = Doe
 PHONE_EXT = NULL
-HIRE_DATE = 1/4/2015 00:00:00.000
+HIRE_DATE = 1/4/2015 00:00:00.0000
 DEPT_NO = 600
 JOB_CODE = Eng
 JOB_GRADE = 4
@@ -517,7 +518,7 @@ EMP_NO = 150
 FIRST_NAME = Jayne's
 LAST_NAME = Doe
 PHONE_EXT = NULL
-HIRE_DATE = 1/4/2015 00:00:00.000
+HIRE_DATE = 1/4/2015 00:00:00.0000
 DEPT_NO = 600
 JOB_CODE = Eng
 JOB_GRADE = 4
@@ -531,7 +532,7 @@ EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
 PHONE_EXT = 410
-HIRE_DATE = 5/4/1989 00:00:00.000
+HIRE_DATE = 5/4/1989 00:00:00.0000
 DEPT_NO = 180
 JOB_CODE = Mktg
 JOB_GRADE = 3
@@ -545,7 +546,7 @@ EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
 PHONE_EXT = 410
-HIRE_DATE = 5/4/1989 00:00:00.000
+HIRE_DATE = 5/4/1989 00:00:00.0000
 DEPT_NO = 180
 JOB_CODE = Mktg
 JOB_GRADE = 3
@@ -557,7 +558,7 @@ EMP_NO = 9
 FIRST_NAME = Phil
 LAST_NAME = Forest
 PHONE_EXT = 229
-HIRE_DATE = 17/4/1989 00:00:00.000
+HIRE_DATE = 17/4/1989 00:00:00.0000
 DEPT_NO = 622
 JOB_CODE = Mngr
 JOB_GRADE = 3
@@ -571,7 +572,7 @@ EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
 PHONE_EXT = 410
-HIRE_DATE = 31/1/2015 00:00:00.000
+HIRE_DATE = 31/1/2015 00:00:00.0000
 DEPT_NO = 180
 JOB_CODE = Mktg
 JOB_GRADE = 3
@@ -582,7 +583,7 @@ FULL_NAME = Johnson, Leslie
 
 
 Running Test 5: Update Returning and Activity Check
-Opening localhost:employee
+Opening inet://localhost/employee
 Database Open
 Database Closed
 Database Open
@@ -592,7 +593,7 @@ EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
 PHONE_EXT = 410
-HIRE_DATE = 31/1/2016 00:00:00.000
+HIRE_DATE = 31/1/2016 00:00:00.0000
 DEPT_NO = 180
 JOB_CODE = Mktg
 JOB_GRADE = 3
@@ -2155,7 +2156,7 @@ Param Name = DATED
 Param Name = NOTES
 ROWID = 1
 TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
-DATED = 1/4/2016 09:30:00.100
+DATED = 1/4/2016 09:30:00.1000
 NOTES = Écoute moi (Charset Id = 4 Codepage = 65001)
 MYARRAY = NULL
 
@@ -2170,7 +2171,7 @@ Size = 8
 
 ROWID = 1
 TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
-DATED = 1/4/2016 09:30:00.100
+DATED = 1/4/2016 09:30:00.1000
 NOTES = Écoute moi (Charset Id = 4 Codepage = 65001)
 Array: (0: 100) (1: 99) (2: 98) (3: 97) (4: 96) (5: 95) (6: 94) (7: 93) (8: 92) (9: 91) (10: 90) (11: 89) (12: 88) (13: 87) (14: 86) (15: 85) (16: 84) 
 
@@ -2180,7 +2181,7 @@ Write updated reduced slice
 Show update array
 ROWID = 1
 TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
-DATED = 1/4/2016 09:30:00.100
+DATED = 1/4/2016 09:30:00.1000
 NOTES = Écoute moi (Charset Id = 4 Codepage = 65001)
 Array: (0: 100) (1: 99) (2: 1000) (3: 97) (4: 96) (5: 95) (6: 94) (7: 93) (8: 92) (9: 91) (10: 90) (11: 89) (12: 88) (13: 87) (14: 86) (15: 85) (16: 84) 
 
@@ -2271,12 +2272,12 @@ ODS major = 12
 Page Size = 8192
 Version = 1: LI-V6.3.1.32609 Firebird 3.0
 Database is Read/Write
-Database Created: 27/9/2016 12:08:46
+Database Created: 31/12/9999
 Pages Used = 297
 Pages Free = 10
-Server Memory = 19122448
+Server Memory = 19122368
 Forced Writes  = 1
-Max Memory  = 19242792
+Max Memory  = 19242800
 Num Buffers  = 2048
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
@@ -2613,6 +2614,88 @@ Invalid User Name Test
 Error Handled: Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Invalid password Test
 Error Handled: Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+
+
+Running Test 17: Date/Time tests and Firebird 4 extensions
+ FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V3.0.1.32609 Firebird 3.0"
+
+Testdata
+
+Metadata
+SQLType =SQL_LONG
+sub type = 0
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = ROWID
+Alias Name = ROWID
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+
+SQLType =SQL_TYPE_DATE
+sub type = 0
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = DATECOL
+Alias Name = DATECOL
+Field Name = DATECOL
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_TYPE_TIME
+sub type = 0
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = TIMECOL
+Alias Name = TIMECOL
+Field Name = TIMECOL
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_TIMESTAMP
+sub type = 0
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = TIMESTAMPCOL
+Alias Name = TIMESTAMPCOL
+Field Name = TIMESTAMPCOL
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+ROWID = 1
+DATECOL = 1/4/2019 
+TIMECOL = 11:31:05.0001
+TIMESTAMPCOL = 29/2/2016 22:02:35.0000
+ROWID = 2
+DATECOL = 3/9/1939 
+TIMECOL = 15:40:00.0000
+TIMESTAMPCOL = 11/11/1918 11:11:00.0000
+ROWID = 3
+DATECOL = 3/9/1939 
+TIMECOL = 15:40:00.0000
+TIMESTAMPCOL = 11/11/1918 11:11:00.0000
+ROWID = 4
+DATECOL = 25/12/2019 
+TIMECOL = 00:01:40.1115
+TIMESTAMPCOL = 12/12/2019 22:10:00.0010
+
+
+Testdata - second pass
+
+1, 1/4/2019, 11:31:05, 29/2/2016 22:02:35
+2, 3/9/1939, 15:40:00.000, 11/11/1918 11:11:00
+3, 3/9/1939, 15:40:00.000, 11/11/1918 11:11:00
+4, 25/12/2019, 00:01:40.112, 12/12/2019 22:10:00
+Sys Time = 2019, 12, 12, 5, 22, 10, 0, 1
+Skipping Firebird 4 and later test part
 
 
 Test Suite Ends
