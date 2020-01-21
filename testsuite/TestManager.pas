@@ -151,7 +151,7 @@ begin
     write(OutFile,'  Digits = ');
     for i := 0 to (MaxFmtBCDFractionSize DIV 2 ) - 1 do
       write(OutFile,Format('%x',[Fraction[i]]),' ');
-    writeln;
+    writeln(OutFile);
   end;
 end;
 
