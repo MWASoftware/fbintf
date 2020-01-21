@@ -25,7 +25,11 @@ if [ -x testsuite ]; then
   ./testsuite -u $USERNAME -p $PASSWORD -e $EMPLOYEEDB -n $NEWDBNAME -s $NEWDBNAME2 -b $BAKFILE -o testout.log $@
   echo "Comparing results with reference log"
   echo ""
-  diff reference.log testout.log >diff.log
+  if grep 'ODS Major Version = 13' testout.log >/dev/null; then
+    diff FB4reference.log testout.log >diff.log
+  else
+    diff reference.log testout.log >diff.log
+  fi
   cat diff.log 
 else
   echo "Unable to run test suite"
