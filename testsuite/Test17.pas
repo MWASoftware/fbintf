@@ -117,20 +117,11 @@ var Transaction: ITransaction;
     Timestamp: ISQLParamTimestamp;
     FPCTimestamp: TTimestamp;
     sqlInsert: AnsiString;
-    {$IF defined(TFormatSettings)}
-    FormatSettings: TFormatSettings;
-    {$IFEND}
     SysTime: TSystemTime;
 begin
-  {$IF defined(TFormatSettings)}
-  FormatSettings := DefaultFormatSettings;
-  {$IFEND}
-  FormatSettings.DateSeparator := '.'; {Firebird convention}
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
-  sqlInsert := 'Insert into TestData(RowID,DateCol,TimeCol,TimestampCol) Values(1,'''+
-              DateToStr(EncodeDate(2019,4,1),FormatSettings)+
-              ''',''11:31:05.0001'','''+
-              DateTimeToStr(EncodeDate(2016,2,29) + EncodeTime(22,2,35,10),FormatSettings) + ''')';
+  sqlInsert := 'Insert into TestData(RowID,DateCol,TimeCol,TimestampCol) Values(1,''2019.4.1'''+
+              ',''11:31:05.0001'',''2016.2.29 22:2:35.0010'')';
   Attachment.ExecuteSQL(Transaction,sqlInsert,[]);
 
   Statement := Attachment.Prepare(Transaction,SQLInsert2);
@@ -187,26 +178,17 @@ begin
   Timestamp.SetAsTimestamp(FPCTimeStamp);
   Statement.SQLParams[3].SetAsSQLTimestamp(Timestamp);
   Statement.Execute;
-  FormatSettings.DateSeparator := '/'; {restore}
 end;
 
 procedure TTest17.UpdateDatabase4_TZ(Attachment: IAttachment);
 var Transaction: ITransaction;
     Statement: IStatement;
     sqlInsert: AnsiString;
-    {$IF defined(TFormatSettings)}
-    FormatSettings: TFormatSettings;
-    {$IFEND}
     Timestamp: ISQLParamTimestamp;
 begin
-  {$IF defined(TFormatSettings)}
-  FormatSettings := DefaultFormatSettings;
-  {$IFEND}
-  FormatSettings.DateSeparator := '.'; {Firebird convention}
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   sqlInsert := 'Insert into FB4TestData_TZ(RowID,TimeCol,TimestampCol) ' +
-               'Values(1,''11:32:10.0002 -05:00'','''+
-               DateToStr(EncodeDate(2020,4,1),FormatSettings)+
+               'Values(1,''11:32:10.0002 -05:00'',''2020.4.1'''+
                ' 11:31:05.0001 +01:00'')';
   Attachment.ExecuteSQL(Transaction,sqlInsert,[]);
 
@@ -223,7 +205,6 @@ begin
   Timestamp.Timezone := 'Europe/London';
   Statement.SQLParams[2].SetAsSQLTimestamp(Timestamp);
   Statement.Execute;
-  FormatSettings.DateSeparator := '/'; {restore}
 end;
 
 procedure TTest17.UpdateDatabase4_DECFloat(Attachment: IAttachment);

@@ -107,9 +107,7 @@ type
     class function GetDateFormatStr: AnsiString;
     class function GetTimeFormatStr: AnsiString;
   protected
-    {$IFNDEF FPC}
-    function LocalTimeToUniversal(aDateTime: TDateTime): TDateTime;
-    {$ENDIF}
+    function InternalLocalTimeToUniversal(aDateTime: TDateTime): TDateTime;
     function DecodeTZOffset(offset: AnsiString): integer;
     procedure UpdateDSTStatus;
     function TimeZoneID2Name(aTimeZoneID: ISC_USHORT): AnsiString;
@@ -203,12 +201,18 @@ begin
     Result := LongTimeFormat
 end;
 
-{$IFNDEF FPC}
-function TSQLTimestamp.LocalTimeToUniversal(aDateTime: TDateTime): TDateTime;
+function TSQLTimestamp.InternalLocalTimeToUniversal(aDateTime: TDateTime): TDateTime;
 begin
+  {$IF declared(TTimeZone)}
   Result := TTimeZone.Local.ToUniversalTime(aDateTime);
+  {$ELSE}
+  {$IF declared(LocalTimeToUniversal)}
+  Result := LocalTimeToUniversal(aDateTime);
+  {$ELSE}
+  Result := aDateTime; {No time zone support}
+  {$IFEND}
+  {$IFEND}
 end;
-{$ENDIF}
 
 function TSQLTimestamp.DecodeTZOffset(offset: AnsiString): integer;
 var i: integer;
@@ -239,7 +243,7 @@ begin
       if FHasDatePart then
         GetTimeZoneInfo(FTimeZoneID,GetAsDate,ZoneOffset,DSTOffset,FEffectiveTimeOffsetMins)
       else
-        GetTimeZoneInfo(FTimeZoneID,LocalTimeToUniversal(Now),ZoneOffset,DSTOffset,FEffectiveTimeOffsetMins);
+        GetTimeZoneInfo(FTimeZoneID,InternalLocalTimeToUniversal(Now),ZoneOffset,DSTOffset,FEffectiveTimeOffsetMins);
       if DSTOffset = 0 then
         FDSTStatus := dstNotInEffect
       else
@@ -438,13 +442,17 @@ begin
     Result := FTimezone
   else
   begin
-    {$IFNDEF FPC}
+    {$IF declared(TTimeZone)}
     with TTimeZone.Local.GetUtcOffset(Now) do
     Result := Format('%.2d%.2d',[Trunc(Hours), Trunc(Minutes)]);
     {$ELSE}
+    {$IF declared(GetLocalTimeOffset)}
     offset := GetLocalTimeOffset;
-    {$ENDIF}
+    {$ELSE}
+    offset := 0; {No time zone sumpport}
+    {$IFEND}
     Result := Format('%.2d%.2d',[offset div MinsPerHour, abs(offset) mod MinsPerHour]);
+    {$IFEND}
   end;
 end;
 

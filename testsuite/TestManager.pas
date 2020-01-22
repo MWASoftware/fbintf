@@ -177,7 +177,7 @@ begin
   end
   else
   if Pos('localhost:',Result) = 1 then
-    system.Delete(Result,1,9)
+    system.Delete(Result,1,10)
   else
   {$ENDIF}
   ParseConnectString(ConnectString, ServerName, Result, Protocol,PortNo);
