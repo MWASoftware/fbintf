@@ -42,6 +42,9 @@ unit IBUtils;
 {$define HASREQEX}
 {$ENDIF}
 
+{ $IF declared(CompilerVersion) and (CompilerVersion >= 22)}
+{ $define HASDELPHIREQEX}
+{ $IFEND}
 
 interface
 
@@ -640,6 +643,9 @@ uses FBMessages
 
 {$IFDEF HASREQEX}
 ,RegExpr
+{$ENDIF}
+{$IFDEF HASDELPHIREGEX}
+, RegularExpressions
 {$ENDIF};
 
 function Max(n1, n2: Integer): Integer;
