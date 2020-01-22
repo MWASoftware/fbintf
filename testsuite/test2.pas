@@ -48,7 +48,6 @@ implementation
 procedure TTest2.DoQuery(Attachment: IAttachment);
 var Transaction: ITransaction;
     Statement: IStatement;
-    ResultSet: IResultSet;
 begin
     Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
     Statement := Attachment.Prepare(Transaction,

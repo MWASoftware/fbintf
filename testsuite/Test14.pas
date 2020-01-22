@@ -57,7 +57,6 @@ const
 procedure TTest14.QueryDatabase(Attachment: IAttachment);
 var Transaction, Transaction2: ITransaction;
     Statement: IStatement;
-    ResultSet: IResultSet;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   Statement := Attachment.Prepare(Transaction,sqlCallQueryProc);

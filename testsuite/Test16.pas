@@ -127,7 +127,6 @@ end;
 procedure TTest16.ServiceTests(CharSet: AnsiString; SQLDialect: integer);
 var SPB: ISPB;
     Service: IServiceManager;
-    I: integer;
     ServerName: AnsiString;
     DBName: AnsiString;
 begin

@@ -1333,7 +1333,8 @@ begin
       Result := SQLDecFloatDecode(SQLType,GetScale, SQLData);
 
   else
-    Result := CurrToBCD(GetAsCurrency);
+    if not CurrToBCD(GetAsCurrency,Result) then
+      IBError(ibxeBadBCDConversion,[]);
   end;
 end;
 

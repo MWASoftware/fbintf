@@ -84,7 +84,6 @@ end;
 procedure TTest13.QueryDatabase(Attachment: IAttachment);
 var Transaction: ITransaction;
     Statement: IStatement;
-    ResultSet: IResultSet;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   Statement := Attachment.Prepare(Transaction,'Select * from TestData');

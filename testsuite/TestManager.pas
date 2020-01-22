@@ -13,6 +13,11 @@ interface
 uses
   Classes, SysUtils, IB, IBUtils, FmtBCD;
 
+{$IF not defined(LineEnding)}
+const
+  LineEnding = #$0D#$0A;
+{$IFEND}
+
 type
   TTestManager = class;
 
@@ -159,7 +164,22 @@ function TTestBase.ExtractDBName(ConnectString: AnsiString): AnsiString;
 var ServerName: AnsiString;
     Protocol: TProtocolAll;
     PortNo: AnsiString;
+    i: integer;
 begin
+  {$IFNDEF FPC}
+  Result := ConnectString;
+  if Pos('inet',Result) = 1 then
+  begin
+    system.Delete(Result,1,7);
+    i := Pos('/',Result);
+    if i > 0 then
+      system.delete(Result,1,i);
+  end
+  else
+  if Pos('localhost:',Result) = 1 then
+    system.Delete(Result,1,9)
+  else
+  {$ENDIF}
   ParseConnectString(ConnectString, ServerName, Result, Protocol,PortNo);
 end;
 

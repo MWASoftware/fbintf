@@ -172,7 +172,6 @@ var Req: ISRB;
     SQPB: ISQPB;
     bytesWritten: integer;
     bytesAvailable: integer;
-    i: integer;
     RestoreDBName: AnsiString;
     Attachment: IAttachment;
     DPB: IDPB;
@@ -264,7 +263,6 @@ end;
 procedure TTest11.RunTest(CharSet: AnsiString; SQLDialect: integer);
 var SPB: ISPB;
     Service: IServiceManager;
-    I: integer;
     ServerName: AnsiString;
     DBName: AnsiString;
 begin

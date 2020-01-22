@@ -60,7 +60,6 @@ const
 procedure TTest8.UpdateDatabase(Attachment: IAttachment);
 var Transaction: ITransaction;
     Statement: IStatement;
-    ResultSet: IResultSet;
     i,j,k : integer;
     ar: IArray;
 begin

@@ -30,7 +30,7 @@ unit Test17;
 interface
 
 uses
-  Classes, SysUtils, TestManager, IB;
+  Classes, SysUtils, TestManager, IB {$IFDEF WINDOWS},Windows{$ENDIF};
 
 type
 
@@ -117,10 +117,14 @@ var Transaction: ITransaction;
     Timestamp: ISQLParamTimestamp;
     FPCTimestamp: TTimestamp;
     sqlInsert: AnsiString;
+    {$IF defined(TFormatSettings)}
     FormatSettings: TFormatSettings;
+    {$IFEND}
     SysTime: TSystemTime;
 begin
+  {$IF defined(TFormatSettings)}
   FormatSettings := DefaultFormatSettings;
+  {$IFEND}
   FormatSettings.DateSeparator := '.'; {Firebird convention}
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   sqlInsert := 'Insert into TestData(RowID,DateCol,TimeCol,TimestampCol) Values(1,'''+
@@ -140,6 +144,7 @@ begin
   Statement.SQLParams[0].AsInteger := 3;
   Statement.SQLParams[1].AsDate := EncodeDate(1939,9,3);
   Statement.SQLParams[2].AsTime := EncodeTime(15,40,0,0);
+  {$IFDEF FPC}
   with SysTime do
   begin
     Year := 1918;
@@ -150,6 +155,18 @@ begin
     Second := 0;
     Millisecond := 0;
   end;
+  {$ELSE}
+  with SysTime do
+  begin
+    wYear := 1918;
+    wMonth := 11;
+    wDay := 11;
+    wHour := 11;
+    wMinute := 11;
+    wSecond := 0;
+    wMilliseconds := 0;
+  end;
+  {$ENDIF}
   Timestamp := Attachment.GetSQLTimestampParam;
   Timestamp.SetAsSystemTime(SysTime);
   Statement.SQLParams[3].SetAsSQLTimestamp(Timestamp);
@@ -170,17 +187,21 @@ begin
   Timestamp.SetAsTimestamp(FPCTimeStamp);
   Statement.SQLParams[3].SetAsSQLTimestamp(Timestamp);
   Statement.Execute;
-
+  FormatSettings.DateSeparator := '/'; {restore}
 end;
 
 procedure TTest17.UpdateDatabase4_TZ(Attachment: IAttachment);
 var Transaction: ITransaction;
     Statement: IStatement;
     sqlInsert: AnsiString;
+    {$IF defined(TFormatSettings)}
     FormatSettings: TFormatSettings;
+    {$IFEND}
     Timestamp: ISQLParamTimestamp;
 begin
+  {$IF defined(TFormatSettings)}
   FormatSettings := DefaultFormatSettings;
+  {$IFEND}
   FormatSettings.DateSeparator := '.'; {Firebird convention}
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   sqlInsert := 'Insert into FB4TestData_TZ(RowID,TimeCol,TimestampCol) ' +
@@ -202,6 +223,7 @@ begin
   Timestamp.Timezone := 'Europe/London';
   Statement.SQLParams[2].SetAsSQLTimestamp(Timestamp);
   Statement.Execute;
+  FormatSettings.DateSeparator := '/'; {restore}
 end;
 
 procedure TTest17.UpdateDatabase4_DECFloat(Attachment: IAttachment);
@@ -262,7 +284,11 @@ begin
     SysTime := Results[3].GetAsSQLTimestamp.GetAsSystemTime;
     with SysTime do
     begin
+      {$IFDEF FPC}
       writeln(OutFile,'Sys Time = ',Year, ', ',Month, ', ',Day, ', ',DayOfWeek, ', ',Hour, ', ',Minute, ', ',Second, ', ',MilliSecond);
+      {$ELSE}
+      writeln(OutFile,'Sys Time = ',wYear, ', ',wMonth, ', ',wDay, ', ',wDayOfWeek, ', ',wHour, ', ',wMinute, ', ',wSecond, ', ',wMilliSeconds);
+      {$ENDIF}
     end;
   end;
 end;

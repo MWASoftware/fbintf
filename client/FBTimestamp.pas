@@ -1,4 +1,4 @@
-(*
+﻿(*
  *  Firebird Interface (fbintf). The fbintf components provide a set of
  *  Pascal language bindings for the Firebird API.
  *
@@ -39,7 +39,8 @@ unit FBTimestamp;
 interface
 
 uses
-  Classes, SysUtils, IB, FBActivityMonitor, IBExternals, FBClientAPI;
+  Classes, SysUtils, IB, FBActivityMonitor, IBExternals, FBClientAPI
+  {$IFDEF WINDOWS}, Windows {$ENDIF};
 
 const
   decimillsecondsPerSecond = 10000;
@@ -106,6 +107,9 @@ type
     class function GetDateFormatStr: AnsiString;
     class function GetTimeFormatStr: AnsiString;
   protected
+    {$IFNDEF FPC}
+    function LocalTimeToUniversal(aDateTime: TDateTime): TDateTime;
+    {$ENDIF}
     function DecodeTZOffset(offset: AnsiString): integer;
     procedure UpdateDSTStatus;
     function TimeZoneID2Name(aTimeZoneID: ISC_USHORT): AnsiString;
@@ -198,6 +202,13 @@ begin
   else
     Result := LongTimeFormat
 end;
+
+{$IFNDEF FPC}
+function TSQLTimestamp.LocalTimeToUniversal(aDateTime: TDateTime): TDateTime;
+begin
+  Result := TTimeZone.Local.ToUniversalTime(aDateTime);
+end;
+{$ENDIF}
 
 function TSQLTimestamp.DecodeTZOffset(offset: AnsiString): integer;
 var i: integer;
@@ -361,8 +372,14 @@ begin
 end;
 
 function TSQLTimestamp.GetAsDateTime: TDateTime;
+var aDate, aTime: TDateTime;
 begin
-  Result := ComposeDateTime(FDate - DateDelta,FTime / (MSecsPerDay*10))
+  aDate := FDate - DateDelta;
+  aTime := FTime / (MSecsPerDay*10);
+  if aDate < 0 then
+    Result := trunc(aDate) - abs(frac(aTime))
+  else
+    Result := trunc(aDate) + abs(frac(aTime));
 end;
 
 function TSQLTimestamp.GetAsDate: TDateTime;
@@ -392,17 +409,21 @@ var DeciMillisecond: word;
 begin
   with FFirebirdClientAPI, Result do
   begin
+    {$IFNDEF FPC}
+    DecodeDateFully(TimeStampToDateTime(GetAsTimestamp),wYear,wMonth,wDay,wDayOfWeek);
+    DecodeFBExtTime(FTime, wHour, wMinute, wSecond, DeciMillisecond);
+    wMilliseconds := DeciMillisecond div 10;
+    {$ELSE}
     DecodeDateFully(TimeStampToDateTime(GetAsTimestamp),Year,Month,Day,DayOfWeek);
     DecodeFBExtTime(FTime, Hour, Minute, Second, DeciMillisecond);
     Millisecond := DeciMillisecond div 10;
+    {$ENDIF}
   end;
 end;
 
 function TSQLTimestamp.GetAsFBSystemTime: TFBSystemTime;
 {Convert to Ext system time avoiding millisecond rounding issues}
-var aTime: word;
 begin
-  aTime := FTime;
   with FFirebirdClientAPI, Result do
   begin
     DecodeDateFully(TimeStampToDateTime(GetAsTimestamp),Year,Month,Day,DayOfWeek);
@@ -417,7 +438,12 @@ begin
     Result := FTimezone
   else
   begin
+    {$IFNDEF FPC}
+    with TTimeZone.Local.GetUtcOffset(Now) do
+    Result := Format('%.2d%.2d',[Trunc(Hours), Trunc(Minutes)]);
+    {$ELSE}
     offset := GetLocalTimeOffset;
+    {$ENDIF}
     Result := Format('%.2d%.2d',[offset div MinsPerHour, abs(offset) mod MinsPerHour]);
   end;
 end;
@@ -603,9 +629,14 @@ begin
   Clear;
   with FFirebirdClientAPI, aValue do
   begin
+    {$IFNDEF FPC}
+    FDate := Trunc(EncodeDate(wYear, wMonth, wDay)) + DateDelta;
+    FTime := EncodeFBExtTime(wHour,wMinute,wSecond,wMilliseconds*10);
+    {$ELSE}
     FDate := Trunc(EncodeDate(Year, Month, Day)) + DateDelta;
-    FHasDatePart := true;
     FTime := EncodeFBExtTime(Hour,Minute,Second,Millisecond*10);
+    {$ENDIF}
+    FHasDatePart := true;
     FHasTimePart := true;
   end;
 end;

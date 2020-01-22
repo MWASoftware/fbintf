@@ -33,7 +33,8 @@ set EMPLOYEEDB=employee
 set NEWDBNAME=%TESTOUTDIR%\testsuite1.fdb
 set NEWDBNAME2=%TESTOUTDIR%\testsuite2.fdb
 set BAKFILE=%TESTOUTDIR%\testsuite.gbk
-set GREP=%FPCDIR%\grep.exe
+set GREP=%FPCBIN%\grep.exe
+set DIFF=%FPCBIN%\diff.exe
 
 rd /s /q testunits
 mkdir %TESTOUTDIR%
@@ -45,20 +46,25 @@ echo Starting Testsuite
 echo( 
 IF EXIST "testsuite.exe" (
 testsuite.exe -u %USERNAME% -p %PASSWORD% -e %EMPLOYEEDB% -n %NEWDBNAME% -s %NEWDBNAME2% -b %BAKFILE% -o testout.log %1
+
+if not EXIST "%DIFF%" (
+  echo Unable to compare results - diff not found - %DIFF%
+  goto :EOF
+  )
+
 echo Comparing results with reference log
 echo(
 IF EXIST %GREP% (
-  %GREP% 'ODS Major Version = 13' testout.log
+  %GREP% "ODS Major Version = 13" testout.log
   IF /I "%ERRORLEVEL%" EQU "0" (
-   %FPCBIN%\diff FB4reference.log testout.log >diff.log
+   %DIFF% FB4reference.log testout.log >diff.log
   ) ELSE (
-   %FPCBIN%\diff reference.log testout.log >diff.log
+  %DIFF% reference.log testout.log >diff.log
   )
 ) ELSE (
-   %FPCBIN%\diff reference.log testout.log >diff.log
+   %DIFF% reference.log testout.log >diff.log
 )
-
-type diff.log 
+type diff.log
 rd /s /q testunits
 del testsuite.exe
 )

@@ -9,26 +9,25 @@
         <IsPartOfProject Value="True"/>
         <TopLine Value="102"/>
         <CursorPos X="5" Y="118"/>
-        <UsageCount Value="134"/>
+        <UsageCount Value="135"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="TestManager.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="7"/>
         <TopLine Value="726"/>
         <CursorPos X="3" Y="729"/>
-        <UsageCount Value="134"/>
+        <UsageCount Value="135"/>
         <Loaded Value="True"/>
       </Unit1>
       <Unit2>
         <Filename Value="Test1.pas"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <TopLine Value="81"/>
         <CursorPos Y="103"/>
-        <UsageCount Value="134"/>
+        <UsageCount Value="135"/>
         <Loaded Value="True"/>
       </Unit2>
       <Unit3>
@@ -37,14 +36,14 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="70"/>
         <CursorPos Y="92"/>
-        <UsageCount Value="134"/>
+        <UsageCount Value="135"/>
       </Unit3>
       <Unit4>
         <Filename Value="Test3.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="87"/>
-        <UsageCount Value="134"/>
+        <UsageCount Value="135"/>
       </Unit4>
       <Unit5>
         <Filename Value="Test4.pas"/>
@@ -52,7 +51,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="70"/>
         <CursorPos X="106" Y="171"/>
-        <UsageCount Value="134"/>
+        <UsageCount Value="135"/>
       </Unit5>
       <Unit6>
         <Filename Value="Test5.pas"/>
@@ -60,7 +59,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="37"/>
         <CursorPos X="33" Y="60"/>
-        <UsageCount Value="134"/>
+        <UsageCount Value="135"/>
       </Unit6>
       <Unit7>
         <Filename Value="Test6.pas"/>
@@ -68,7 +67,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="181"/>
         <CursorPos X="9" Y="101"/>
-        <UsageCount Value="134"/>
+        <UsageCount Value="135"/>
       </Unit7>
       <Unit8>
         <Filename Value="Test7.pas"/>
@@ -76,14 +75,14 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="59"/>
         <CursorPos Y="90"/>
-        <UsageCount Value="134"/>
+        <UsageCount Value="135"/>
       </Unit8>
       <Unit9>
         <Filename Value="Test8.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="40"/>
-        <UsageCount Value="134"/>
+        <UsageCount Value="135"/>
       </Unit9>
       <Unit10>
         <Filename Value="Test9.pas"/>
@@ -91,7 +90,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="91"/>
         <CursorPos X="57" Y="120"/>
-        <UsageCount Value="134"/>
+        <UsageCount Value="135"/>
       </Unit10>
       <Unit11>
         <Filename Value="Test10.pas"/>
@@ -99,15 +98,15 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="24"/>
         <CursorPos X="32" Y="30"/>
-        <UsageCount Value="134"/>
+        <UsageCount Value="135"/>
       </Unit11>
       <Unit12>
         <Filename Value="Test11.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="12"/>
+        <EditorIndex Value="13"/>
         <TopLine Value="204"/>
         <CursorPos X="29" Y="212"/>
-        <UsageCount Value="134"/>
+        <UsageCount Value="135"/>
         <Loaded Value="True"/>
       </Unit12>
       <Unit13>
@@ -115,19 +114,19 @@
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="109"/>
-        <UsageCount Value="134"/>
+        <UsageCount Value="135"/>
       </Unit13>
       <Unit14>
         <Filename Value="Test13.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="134"/>
+        <UsageCount Value="135"/>
       </Unit14>
       <Unit15>
         <Filename Value="Test14.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="134"/>
+        <UsageCount Value="135"/>
       </Unit15>
       <Unit16>
         <Filename Value="Test15.pas"/>
@@ -135,27 +134,27 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="83"/>
         <CursorPos Y="111"/>
-        <UsageCount Value="134"/>
+        <UsageCount Value="135"/>
       </Unit16>
       <Unit17>
         <Filename Value="Test16.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="11"/>
+        <EditorIndex Value="12"/>
         <TopLine Value="133"/>
         <CursorPos Y="138"/>
-        <UsageCount Value="134"/>
+        <UsageCount Value="135"/>
         <Loaded Value="True"/>
       </Unit17>
       <Unit18>
         <Filename Value="Makefile.fpc"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="134"/>
+        <UsageCount Value="135"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit18>
       <Unit19>
         <Filename Value="Test17.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="4"/>
         <CursorPos X="56" Y="26"/>
         <ExtraEditorCount Value="1"/>
@@ -165,12 +164,12 @@
           <TopLine Value="48"/>
           <CursorPos X="62" Y="239"/>
         </ExtraEditor1>
-        <UsageCount Value="58"/>
+        <UsageCount Value="59"/>
         <Loaded Value="True"/>
       </Unit19>
       <Unit20>
         <Filename Value="../client/FBClientAPI.pas"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="9"/>
         <TopLine Value="165"/>
         <CursorPos Y="361"/>
         <UsageCount Value="43"/>
@@ -178,7 +177,7 @@
       </Unit20>
       <Unit21>
         <Filename Value="../IBUtils.pas"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="8"/>
         <TopLine Value="940"/>
         <CursorPos X="3" Y="942"/>
         <UsageCount Value="25"/>
@@ -206,7 +205,7 @@
       </Unit23>
       <Unit24>
         <Filename Value="../IB.pas"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="4"/>
         <TopLine Value="1244"/>
         <CursorPos X="3" Y="1090"/>
         <ExtraEditorCount Value="1"/>
@@ -233,7 +232,7 @@
       </Unit26>
       <Unit27>
         <Filename Value="../client/3.0/FB30ClientAPI.pas"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="11"/>
         <TopLine Value="559"/>
         <CursorPos X="25" Y="575"/>
         <UsageCount Value="49"/>
@@ -255,7 +254,7 @@
       </Unit29>
       <Unit30>
         <Filename Value="../client/FBAttachment.pas"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="10"/>
         <TopLine Value="164"/>
         <CursorPos X="105" Y="596"/>
         <UsageCount Value="18"/>
@@ -493,7 +492,7 @@
       </Unit63>
       <Unit64>
         <Filename Value="../changelog"/>
-        <EditorIndex Value="13"/>
+        <EditorIndex Value="14"/>
         <CursorPos X="3" Y="47"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
@@ -711,7 +710,7 @@
       </Unit93>
       <Unit94>
         <Filename Value="../client/FBTimestamp.pas"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="27"/>
         <CursorPos Y="46"/>
         <ExtraEditorCount Value="1"/>
@@ -822,9 +821,11 @@
       </Unit108>
       <Unit109>
         <Filename Value="runtest.sh"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="12" Y="11"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="6"/>
+        <CursorPos X="47" Y="28"/>
         <UsageCount Value="10"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Bash"/>
       </Unit109>
       <Unit110>
@@ -837,9 +838,9 @@
       </Unit110>
       <Unit111>
         <Filename Value="runtest.bat"/>
-        <EditorIndex Value="2"/>
-        <TopLine Value="10"/>
-        <CursorPos X="16" Y="34"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="3"/>
+        <CursorPos X="77" Y="37"/>
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Bat"/>

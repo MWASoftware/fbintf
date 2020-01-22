@@ -23,6 +23,7 @@ uses
   Test14 in 'Test14.pas',
   Test15 in 'Test15.pas',
   Test16 in 'Test16.pas',
+  Test17 in 'Test17.pas',
   TestManager in 'TestManager.pas',
   FBOutputBlock in '..\client\FBOutputBlock.pas';
 
@@ -50,7 +51,6 @@ end;
 
 
 var
-  ErrorMsg: AnsiString;
   FTestID: integer;
   aValue: string;
 begin
