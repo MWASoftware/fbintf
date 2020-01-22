@@ -91,6 +91,15 @@ begin
     if GetCmdLineValue('b',aValue) or GetCmdLineValue('backupfile',aValue) then
       TestMgr.SetBackupFileName(aValue);
 
+    if GetCmdLineValue('r',aValue) or GetCmdLineValue('server',aValue) then
+      TestMgr.SetServerName(aValue);
+
+    if GetCmdLineValue('P',aValue) or GetCmdLineValue('port',aValue) then
+      TestMgr.SetPortNum(aValue);
+
+    if GetCmdLineValue('l',aValue) or GetCmdLineValue('fbclientlibrary',aValue) then
+      TestMgr.SetClientLibraryPath(aValue);
+
     if GetCmdLineValue('o',aValue) or GetCmdLineValue('outfile',aValue) then
     begin
       system.Assign(outFile,aValue);

@@ -115,7 +115,9 @@ begin
   writeln(OutFile,'Test Suite Ends');
   Flush(OutFile);
   {$IFDEF WINDOWS}
-  //readln; {uncomment if running from IDE and console window closes before you can view results}
+  {$IFDEF INIDE}
+  readln; {uncomment if running from IDE and console window closes before you can view results}
+  {$ENDIF}
   {$ENDIF}
 
   // stop program loop
@@ -143,7 +145,7 @@ var
   Application: TFBIntTestbed;
 begin
   Application := TFBIntTestbed.Create(nil);
-  Application.Title := 'Firebird API Test Suite';
+  Application.Title:='Firebird API Test Suite';
   Application.Run;
   Application.Free;
 end.

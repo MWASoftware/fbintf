@@ -23,13 +23,13 @@
     </PublishOptions>
     <RunParams>
       <local>
-        <CommandLineParams Value="-t  1"/>
+        <CommandLineParams Value="-t  1 -r olympus -n /tmp/testsuite.fdb"/>
       </local>
       <FormatVersion Value="2"/>
       <Modes Count="1">
         <Mode0 Name="default">
           <local>
-            <CommandLineParams Value="-t  1"/>
+            <CommandLineParams Value="-t  1 -r olympus  -n /tmp/testsuite.fdb"/>
           </local>
         </Mode0>
       </Modes>
@@ -145,6 +145,12 @@
         <UseHeaptrc Value="True"/>
       </Debugging>
     </Linking>
+    <Other>
+      <CustomOptions Value="-dINIDE"/>
+      <OtherDefines Count="1">
+        <Define0 Value="INIDE"/>
+      </OtherDefines>
+    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="3">
