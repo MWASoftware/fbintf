@@ -145,9 +145,10 @@ type
       ibxeDifferentAPIs,
       ibxeInvalidDateTimeStr,
       ibxeBadTimeZoneID,
-      ibxeTimeZoneOffsetSyntaxError,
       ibxeTZRegionNotAvailable,
-      ibxeBadBCDConversion
+      ibxeBadBCDConversion,
+      ibxeBadTimeZoneName,
+      ibxeTimeZoneUnknown
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -242,9 +243,10 @@ resourcestring
   SDifferentAPIs = 'All transaction attachments must use the same Firebird Library';
   SInvalidDateTimeStr = '%s is not a valid Date/Time string';
   SBadTimeZoneID = 'Invalid Time Zone ID (%d,%d)';
-  STimeZoneOffsetSyntaxError = 'Invalid Time Zone Offset - %s';
   STZRegionNotAvailable = 'Time Zone Region unknown (ID = %d)';
   SBadBCDConversion = 'Conversion to BCD failed';
+  SBadTimeZoneName = 'Invalid Time Zone Name "%s"';
+  STimeZoneUnknown = 'Time Zone Unknown';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -317,9 +319,10 @@ const
     SDifferentAPIs,
     SInvalidDateTimeStr,
     SBadTimeZoneID,
-    STimeZoneOffsetSyntaxError,
     STZRegionNotAvailable,
-    SBadBCDConversion
+    SBadBCDConversion,
+    SBadTimeZoneName,
+    STimeZoneUnknown
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
