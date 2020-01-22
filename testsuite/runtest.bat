@@ -33,7 +33,6 @@ set EMPLOYEEDB=employee
 set NEWDBNAME=%TESTOUTDIR%\testsuite1.fdb
 set NEWDBNAME2=%TESTOUTDIR%\testsuite2.fdb
 set BAKFILE=%TESTOUTDIR%\testsuite.gbk
-set GREP=%FPCBIN%\grep.exe
 set DIFF=%FPCBIN%\diff.exe
 
 rd /s /q testunits
@@ -54,15 +53,11 @@ if not EXIST "%DIFF%" (
 
 echo Comparing results with reference log
 echo(
-IF EXIST %GREP% (
-  %GREP% "ODS Major Version = 13" testout.log
-  IF /I "%ERRORLEVEL%" EQU "0" (
-   %DIFF% FB4reference.log testout.log >diff.log
-  ) ELSE (
+findstr /C:"ODS Major Version = 13" testout.log
+IF ERRORLEVEL 1 (
   %DIFF% reference.log testout.log >diff.log
-  )
 ) ELSE (
-   %DIFF% reference.log testout.log >diff.log
+  %DIFF% FB4reference.log testout.log >diff.log
 )
 type diff.log
 rd /s /q testunits

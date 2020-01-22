@@ -28,7 +28,6 @@ FOR %%V in (3.0.4 3.0.2 3.0.0) do (
 set DELPHIBIN=C:\Program Files\Embarcadero\RAD Studio\7.0\bin
 if EXIST "%FPCBIN%\diff.exe" (
   set DIFF=%FPCBIN%\diff.exe
-  set GREP=%FPCBIN%\grep.exe
 ) ELSE (
   set DIFF=C:\Program Files\GnuWin32\bin\diff.exe
 )
@@ -61,15 +60,11 @@ if not EXIST "%DIFF%" (
 
 echo Comparing results with reference log
 echo(
-IF EXIST %GREP% (
-  %GREP% "ODS Major Version = 13" testout.log
-  IF /I "%ERRORLEVEL%" EQU "0" (
-   %DIFF% FB4reference.log testout.log >diff.log
-  ) ELSE (
+findstr /C:"ODS Major Version = 13" testout.log
+IF ERRORLEVEL 1 (
   %DIFF% reference.log testout.log >diff.log
-  )
 ) ELSE (
-   %DIFF% reference.log testout.log >diff.log
+  %DIFF% FB4reference.log testout.log >diff.log
 )
 type diff.log
 
