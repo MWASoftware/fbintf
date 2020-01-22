@@ -590,7 +590,7 @@ begin
        IBError(ibxeTimeZoneUnknown,[])
      else
      begin
-       SQLEncodeDateTime(FDate,FTime,SQLData);
+       SQLEncodeDateTime(FDate,FTime - FEffectiveTimeOffsetMins * decimillsecondsPerSecond * 60,SQLData);
        PISC_TIMESTAMP_TZ(SQLData)^.time_zone := FTimeZoneID;
      end;
 
@@ -599,7 +599,7 @@ begin
        IBError(ibxeTimeZoneUnknown,[])
      else
      begin
-       SQLEncodeTime(FTime,SQLData);
+       SQLEncodeTime(FTime - FEffectiveTimeOffsetMins * decimillsecondsPerSecond * 60,SQLData);
         PISC_TIME_TZ(SQLData)^.time_zone := FTimeZoneID;
      end;
 
