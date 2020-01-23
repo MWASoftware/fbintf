@@ -400,7 +400,7 @@ procedure TFBClientAPI.SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte);
 var aTimestamp: TTimestamp;
 begin
   aTimestamp := DateTimeToTimeStamp(aDateTime);
-  SQLEncodeDateTime(aTimestamp.date - DateDelta, aTimestamp.Time*10,bufPtr);
+  SQLEncodeDateTime(aTimestamp.date, aTimestamp.Time*10,bufPtr);
 end;
 
 procedure TFBClientAPI.SQLEncodeTimeTZ(aTime: longint; aTimeZone: AnsiString;

@@ -626,6 +626,7 @@ type
     ['{b5374eb4-a9e7-489f-8874-c1a9fbb60993}']
     procedure Clear;
     procedure SetAsDateTime(aValue: TDateTime);
+    procedure SetAsUTCDateTime(aValue: TDateTime;  aTimeZone: AnsiString);
     procedure SetAsDate(aValue: TDateTime);
     procedure SetAsTime(aValue: TDateTime); overload;
     procedure SetAsTime(Hr, Mn, S, DeciMS: word); overload;

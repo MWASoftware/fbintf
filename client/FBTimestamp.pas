@@ -152,11 +152,13 @@ type
   TSQLTimestampParam = class(TSQLTimestamp, ISQLParamTimestamp)
   private
     procedure Changed;
+    procedure InternalSetAsDateTime(aValue: TDateTime);
   public
     procedure ToSQLData(SQLType: cardinal; SQLData: PByte);
   public
     {ISQLParamTimestamp}
     procedure SetAsDateTime(aValue: TDateTime);
+    procedure SetAsUTCDateTime(aValue: TDateTime; aTimeZone: AnsiString);
     procedure SetAsDate(aValue: TDateTime);
     procedure SetAsTime(aValue: TDateTime); overload;
     procedure SetAsTime(Hr, Mn, S, DeciMS: word); overload;
@@ -589,14 +591,13 @@ begin
     if FHasDatePart then
     begin
       SQLEncodeTimeStampTZ(FDate,FTime,FTimeZone,@TSBuffer);
-      FUTCDate := TSBuffer.utc_timestamp.timestamp_date;
-      FUTCTime := TSBuffer.utc_timestamp.timestamp_time;
+      SQLDecodeDateTime(@TSBuffer.utc_timestamp,FUTCDate,FUTCTime);
       FTimeZoneID := TSBuffer.time_zone;
     end
     else
     begin
       SQLEncodeTimeTZ(FTime,FTimeZone,@TimeBuffer);
-      FUTCTime := TimeBuffer.utc_time;
+      FUTCTime := SQLDecodeTime(@TimeBuffer);
       FTimeZoneID := TimeBuffer.time_zone;
     end;
     FDSTPending := FTimeZoneID >= MaxOffsetTimeZoneID;
@@ -608,6 +609,22 @@ begin
     FDSTPending := false;
   end;
   FDSTStatus := dstUnknown;
+end;
+
+procedure TSQLTimestampParam.InternalSetAsDateTime(aValue: TDateTime);
+var D : Double;
+begin
+  Clear;
+  {copied from DateTimeToTimeStamp and adjusted for deci-milliseconds}
+  D:=aValue * MSecsPerDay*10; {Convert to deci-milliseconds}
+  if D<0 then {round up}
+    D:=D-0.5
+  else
+    D:=D+0.5;
+  FTime := Abs(Trunc(D)) Mod (MSecsPerDay*10);
+  FDate := DateDelta + Trunc(D) div (MSecsPerDay*10);
+  FHasDatePart := true;
+  FHasTimePart := true;
 end;
 
 procedure TSQLTimestampParam.ToSQLData(SQLType: cardinal; SQLData: PByte);
@@ -641,21 +658,36 @@ begin
 end;
 
 procedure TSQLTimestampParam.SetAsDateTime(aValue: TDateTime);
-Var
-  D : Double;
 begin
-  Clear;
-  {copied from DateTimeToTimeStamp and adjusted for deci-milliseconds}
-  D:=aValue * MSecsPerDay*10; {Convert to deci-milliseconds}
-  if D<0 then {round up}
-    D:=D-0.5
-  else
-    D:=D+0.5;
-  FTime := Abs(Trunc(D)) Mod (MSecsPerDay*10);
-  FDate := DateDelta + Trunc(D) div (MSecsPerDay*10);
-  FHasDatePart := true;
-  FHasTimePart := true;
+  InternalSetAsDateTime(aValue);
   Changed;
+end;
+
+procedure TSQLTimestampParam.SetAsUTCDateTime(aValue: TDateTime;
+  aTimeZone: AnsiString);
+var Buffer: ISC_TIMESTAMP_TZ;
+    TSBuffer: ISC_TIMESTAMP;
+    TimeBuffer: ISC_TIME_TZ;
+begin
+  with FFirebirdClientAPI do
+  if HasTimeZoneSupport then
+  begin
+    InternalSetAsDateTime(aValue);
+    FUTCDate := FDate;
+    FUTCTime := FTime;
+    FTimeZone := aTimeZone;
+    {Get Time Zone ID}
+    SQLEncodeTimeTZ(0,FTimeZone,@TimeBuffer); {decode to Time Zone ID}
+    SQLEncodeDateTime(FDate,FTime,@TSBuffer); {Encode date & time in Firebird Buffer format}
+    Buffer.utc_timestamp.timestamp_date := TSBuffer.timestamp_date;
+    Buffer.utc_timestamp.timestamp_time := TSBuffer.timestamp_time;
+    Buffer.time_zone := TimeBuffer.time_zone;
+    SQLDecodeTimeStampTZ(FDate,FTime,aTimeZone,@Buffer); {decode as local time}
+    FHasTimeZone := true;
+    Changed;
+  end
+  else
+    SetAsDateTime(aValue);
 end;
 
 procedure TSQLTimestampParam.SetAsDate(aValue: TDateTime);

@@ -106,11 +106,16 @@ begin
     TimeZone := '+06:00';
     writeln(OutFile,'Time Zone ID = ',GetTimezoneID);
     clear;
+    SetAsDateTime(EncodeDate(2020,1,23) + EncodeTime(2,30,0,0));
     TimeZone := '-08:00';
-    writeln(OutFile,'Time Zone ID = ',GetTimezoneID);
+    writeln(OutFile,'Time Zone ID = ',GetTimezoneID,', UTC Time = ',DateTimeToStr(GetAsUTCDateTime));
     clear;
     TimeZone := 'US/Arizona';
     writeln(OutFile,'Time Zone ID = ',GetTimezoneID);
+
+    clear;
+    SetAsUTCDateTime(EncodeDate(2020,1,23) + EncodeTime(2,30,0,0),'-08:00');
+    writeln(OutFile,'Local Time = ',GetAsString,', Time Zone = ',TimeZone);
   end;
 end;
 
