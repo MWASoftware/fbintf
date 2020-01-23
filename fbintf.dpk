@@ -1,10 +1,11 @@
 package fbintf;
 
 {$R *.res}
+{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
 {$ALIGN 8}
 {$ASSERTIONS ON}
 {$BOOLEVAL OFF}
-{$DEBUGINFO ON}
+{$DEBUGINFO OFF}
 {$EXTENDEDSYNTAX ON}
 {$IMPORTEDDATA ON}
 {$IOCHECKS ON}
@@ -22,6 +23,8 @@ package fbintf;
 {$WRITEABLECONST OFF}
 {$MINENUMSIZE 1}
 {$IMAGEBASE $400000}
+{$DEFINE DEBUG}
+{$ENDIF IMPLICITBUILDING}
 {$IMPLICITBUILD ON}
 
 requires
@@ -63,6 +66,7 @@ contains
   FB30Events in 'client\3.0\FB30Events.pas',
   FB30Services in 'client\3.0\FB30Services.pas',
   FB30Statement in 'client\3.0\FB30Statement.pas',
-  Firebird in 'client\3.0\firebird\Firebird.pas';
+  Firebird in 'client\3.0\firebird\Firebird.pas',
+  FBTimestamp in 'client\FBTimestamp.pas';
 
 end.
