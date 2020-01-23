@@ -115,15 +115,23 @@ begin
     with TRegistry.Create do
     try
       RootKey := HKEY_LOCAL_MACHINE;
-      if OpenKey('SOFTWARE\Firebird Project\Firebird Server\Instances',false) then
+      if OpenKeyReadOnly('SOFTWARE\Firebird Project\Firebird Server\Instances') then
       begin
         if ValueExists('DefaultInstance') then
         begin
-          InstallDir := ReadString('DefaultInstance')  + 'bin' + DirectorySeparator ;
+          InstallDir := ReadString('DefaultInstance') ;
           dllPathName := InstallDir + FIREBIRD_CLIENT;
           Add2Path(InstallDir);
           SetEnvironmentVariable('FIREBIRD',PChar(InstallDir));
-          FIBLibrary := DoLoadLibrary(dllPathName)
+          FIBLibrary := DoLoadLibrary(dllPathName);
+          if not IsValidHandle(FIBLibrary) then
+          begin
+            InstallDir := InstallDir  + 'bin' + DirectorySeparator ;
+            dllPathName := InstallDir + FIREBIRD_CLIENT;
+            Add2Path(InstallDir);
+            SetEnvironmentVariable('FIREBIRD',PChar(InstallDir));
+            FIBLibrary := DoLoadLibrary(dllPathName)
+          end;
         end
       end
     finally
@@ -131,6 +139,17 @@ begin
     end;
 
     {Now try default install dir}
+    if not IsValidHandle(FIBLibrary) then
+    begin
+      InstallDir := GetSpecialFolder(CSIDL_PROGRAM_FILES) +
+        'Firebird' +
+        DirectorySeparator + 'Firebird_4_0' + DirectorySeparator;
+      dllPathName := InstallDir  + FIREBIRD_CLIENT;
+      Add2Path(InstallDir);
+      SetEnvironmentVariable('FIREBIRD',PChar(InstallDir));
+      FIBLibrary := DoLoadLibrary(dllPathName)
+    end;
+
     if not IsValidHandle(FIBLibrary) then
     begin
       InstallDir := GetSpecialFolder(CSIDL_PROGRAM_FILES) +
@@ -170,6 +189,7 @@ begin
     //and rely on registry for location of firebird.conf and firebird.msg
     if not IsValidHandle(FIBLibrary) then
     begin
+      SetEnvironmentVariable('FIREBIRD',PChar(oldFirebirdEV)); {restore}
       SetEnvironmentVariable('PATH',PChar(curPath));
       FIBLibrary := DoLoadLibrary(FIREBIRD_CLIENT);
       if FIBLibrary <= HINSTANCE_ERROR then
@@ -178,8 +198,6 @@ begin
     end;
   end;
   Result := IsValidHandle(FIBLibrary);
-  if not Result then
-    SetEnvironmentVariable('FIREBIRD',PChar(oldFirebirdEV)); {restore}
 end;
 
 class procedure TFBLibrary.SetupEnvironment;

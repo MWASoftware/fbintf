@@ -104,6 +104,7 @@ begin
     writeln(OutFile);
     writeln(OutFile,'Starting Tests');
     writeln(OutFile,'Client API Version = ',TestMgr.FirebirdAPI.GetImplementationVersion);
+    writeln(OutFile,'Firebird Environment Variable = ',GetEnvironmentVariable('FIREBIRD'));
     writeln(OutFile,'Firebird Bin Directory = ', IMaster(TestMgr.FirebirdAPI.GetIMaster).getConfigManager.getDirectory(IConfigManager.DIR_BIN));
     writeln(OutFile,'Firebird Conf Directory = ', IMaster(TestMgr.FirebirdAPI.GetIMaster).getConfigManager.getDirectory(IConfigManager.DIR_CONF));
 
