@@ -54,6 +54,7 @@ end;
 var
   FTestID: integer;
   aValue: string;
+  DoPrompt: boolean;
 begin
   try
 
@@ -71,6 +72,8 @@ begin
 
   if GetCmdLineValue('t',aValue) then
     FTestID := StrToInt(aValue);
+
+  DoPrompt := GetCmdLineValue('X',aValue);
 
   if TestMgr <> nil then
   begin
@@ -141,7 +144,11 @@ begin
 
   writeln(OutFile,'Test Suite Ends');
   Flush(OutFile);
-  //readln; {uncomment if running from IDE and console window closes before you can view results}
+  if DoPrompt then
+  begin
+    write('Press Enter to continue');
+    readln; {when running from IDE and console window closes before you can view results}
+  end;
 
   except
     on E: Exception do

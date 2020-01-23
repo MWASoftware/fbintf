@@ -33,10 +33,11 @@ type
 procedure TFBIntTestbed.DoRun;
 var
   ErrorMsg: String;
+  DoPrompt: boolean;
 begin
   OutFile := stdout;
   // quick check parameters
-  ErrorMsg := CheckOptions('htupensbolrSP', 'help test user passwd employeedb newdbname secondnewdbname backupfile outfile fbclientlibrary server stats port');
+  ErrorMsg := CheckOptions('htupensbolrSPX', 'help test user passwd employeedb newdbname secondnewdbname backupfile outfile fbclientlibrary server stats port prompt');
   if ErrorMsg <> '' then begin
     ShowException(Exception.Create(ErrorMsg));
     Terminate;
@@ -52,6 +53,8 @@ begin
 
   if HasOption('t') then
     FTestID := StrToInt(GetOptionValue('t'));
+
+  DoPrompt := HasOption('X','prompt');
 
   if TestMgr <> nil then
   begin
@@ -121,9 +124,11 @@ begin
   writeln(OutFile,'Test Suite Ends');
   Flush(OutFile);
   {$IFDEF WINDOWS}
-  {$IFDEF INIDE}
-  //readln; {uncomment if running from IDE and console window closes before you can view results}
-  {$ENDIF}
+  if DoPrompt then
+  begin
+    write('Press Entry to continue');
+    readln; {uncomment if running from IDE and console window closes before you can view results}
+  end;
   {$ENDIF}
 
   // stop program loop
