@@ -330,7 +330,7 @@ FULL_NAME = Johnson, Leslie
 Current memory = 22394208
 Delta memory = 4672
 Max memory = 22487200
-Elapsed time= 0.001 sec
+Elapsed time= 0.000 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
@@ -2707,8 +2707,9 @@ Time Zone Zagreb = Europe/Zagreb
 Time Zone Offset -08:00 = -08:00
 Time Zone Offset +13:39 = +13:39
 Time Zone ID = 1799
-Time Zone ID = 959
+Time Zone ID = 959, UTC Time = 23/1/2020 10:30:00
 Time Zone ID = 64920
+Local Time = 22/1/2020 18:30:00.0000 -08:00, Time Zone = -08:00
 
 FB4 Testdata_TZ
 
