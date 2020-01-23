@@ -152,9 +152,8 @@
       <Unit19>
         <Filename Value="Test17.pas"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="13"/>
-        <TopLine Value="94"/>
+        <TopLine Value="90"/>
         <CursorPos X="100" Y="111"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
@@ -204,9 +203,10 @@
       </Unit23>
       <Unit24>
         <Filename Value="../IB.pas"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
         <TopLine Value="616"/>
-        <CursorPos X="73" Y="629"/>
+        <CursorPos X="9" Y="627"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
@@ -632,7 +632,7 @@
         <EditorIndex Value="6"/>
         <TopLine Value="94"/>
         <CursorPos X="4" Y="105"/>
-        <UsageCount Value="26"/>
+        <UsageCount Value="27"/>
         <Loaded Value="True"/>
       </Unit82>
       <Unit83>
@@ -884,7 +884,7 @@
         <EditorIndex Value="5"/>
         <TopLine Value="809"/>
         <CursorPos Y="830"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="11"/>
         <Loaded Value="True"/>
       </Unit117>
     </Units>
