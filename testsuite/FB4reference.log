@@ -3,6 +3,9 @@ Copyright MWA Software 2016
 
 Starting Tests
 Client API Version = 4.0
+Firebird Environment Variable = 
+Firebird Bin Directory = /opt/firebird/bin
+Firebird Conf Directory = /opt/firebird/
 Running Test 1: Create and Drop a Database
 Creating a Database with empty parameters
 Create Database fails (as expected): I/O error during "open O_CREAT" operation for file ""
@@ -327,7 +330,7 @@ FULL_NAME = Johnson, Leslie
 Current memory = 22394208
 Delta memory = 4672
 Max memory = 22487200
-Elapsed time= 0.000 sec
+Elapsed time= 0.001 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
@@ -2674,7 +2677,7 @@ Size = 8
 ROWID = 1
 DATECOL = 1/4/2019 
 TIMECOL = 11:31:05.0001
-TIMESTAMPCOL = 29/2/2016 22:02:35.0000
+TIMESTAMPCOL = 29/2/2016 22:02:35.0010
 ROWID = 2
 DATECOL = 3/9/1939 
 TIMECOL = 15:40:00.0000
@@ -2701,9 +2704,10 @@ Firebird 4 extension types
 Test Time Zone Setting
 Time Zone GMT = GMT
 Time Zone Zagreb = Europe/Zagreb
-Time Zone Offset = -08:00
-Time Zone Offset = +23:59
+Time Zone Offset -08:00 = -08:00
+Time Zone Offset +13:39 = +13:39
 Time Zone ID = 1799
+Time Zone ID = 959
 Time Zone ID = 64920
 
 FB4 Testdata_TZ
@@ -2746,11 +2750,14 @@ Nullable
 Size = 12
 
 ROW ID = 1
-TimeCol = 11:32:10.0002 -05:00, TimeZoneID = 1139, Time Zone Name = -05:00
-TimeStampCol = 1/4/2020 11:31:05.0001 +01:00, TimeZoneID = 1499, Time Zone Name = +01:00
+TimeCol = 11:32:10.0002 -05:00, TimeZoneID = 1139, Time Zone Name = -05:00, UTC Time = 16:32:10
+TimeStampCol = 1/4/2020 11:31:05.0001 +01:00, TimeZoneID = 1499, Time Zone Name = +01:00, UTC Timestamp = 1/4/2020 10:31:05
 ROW ID = 2
-TimeCol = 14:02:10.0050 -08:00, TimeZoneID = 959, Time Zone Name = -08:00
-TimeStampCol = 11/11/1918 11:11:00.0000 00:00, TimeZoneID = 65071, Time Zone Name = Europe/London
+TimeCol = 14:02:10.0050 -08:00, TimeZoneID = 959, Time Zone Name = -08:00, UTC Time = 22:02:10
+TimeStampCol = 11/11/1918 11:11:00.0000 00:00, TimeZoneID = 65071, Time Zone Name = Europe/London, UTC Timestamp = 11/11/1918 11:11:00
+ROW ID = 3
+TimeCol = 22:02:10.0050 -08:00, TimeZoneID = 959, Time Zone Name = -08:00, UTC Time = 06:02:10
+TimeStampCol = 11/11/1918 00:11:00.0000 +04:00, TimeZoneID = 1679, Time Zone Name = +04:00, UTC Timestamp = 10/11/1918 20:11:00
 
 FB4 Testdata_DECFloat
 
