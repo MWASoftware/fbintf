@@ -419,12 +419,17 @@ end;
 function TSQLTimestamp.GetAsUTCDateTime: TDateTime;
 var aDate, aTime: TDateTime;
 begin
-  aDate := FUTCDate - DateDelta;
-  aTime := FUTCTime / (MSecsPerDay*10);
-  if aDate < 0 then
-    Result := trunc(aDate) - abs(frac(aTime))
+  if FHasTimeZone then
+  begin
+    aDate := FUTCDate - DateDelta;
+    aTime := FUTCTime / (MSecsPerDay*10);
+    if aDate < 0 then
+      Result := trunc(aDate) - abs(frac(aTime))
+    else
+      Result := trunc(aDate) + abs(frac(aTime));
+  end
   else
-    Result := trunc(aDate) + abs(frac(aTime));
+    Result := GetAsDAteTime;
 end;
 
 function TSQLTimestamp.GetAsDate: TDateTime;

@@ -3,12 +3,13 @@
   <ProjectSession>
     <Version Value="11"/>
     <BuildModes Active="Default"/>
-    <Units Count="116">
+    <Units Count="117">
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
-        <TopLine Value="82"/>
-        <CursorPos Y="108"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="91"/>
+        <CursorPos Y="112"/>
         <UsageCount Value="144"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -16,7 +17,7 @@
         <Filename Value="TestManager.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="725"/>
+        <TopLine Value="737"/>
         <CursorPos Y="731"/>
         <UsageCount Value="144"/>
         <Loaded Value="True"/>
@@ -225,10 +226,9 @@
       </Unit25>
       <Unit26>
         <Filename Value="../client/include/wloadlibrary.inc"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="8"/>
-        <TopLine Value="61"/>
-        <CursorPos X="12" Y="83"/>
+        <TopLine Value="170"/>
+        <CursorPos Y="187"/>
         <UsageCount Value="12"/>
         <Loaded Value="True"/>
       </Unit26>
@@ -714,7 +714,7 @@
         <Filename Value="../client/FBTimestamp.pas"/>
         <EditorIndex Value="4"/>
         <TopLine Value="406"/>
-        <CursorPos X="16" Y="423"/>
+        <CursorPos Y="430"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
@@ -874,11 +874,18 @@
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
       </Unit115>
+      <Unit116>
+        <Filename Value="../../../lazarus/otherComponents/ibx/fbintf/client/include/wloadlibrary.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="160"/>
+        <CursorPos Y="86"/>
+        <UsageCount Value="10"/>
+      </Unit116>
     </Units>
     <OtherDefines Count="1">
       <Define0 Value="INIDE"/>
     </OtherDefines>
-    <JumpHistory Count="29" HistoryIndex="28">
+    <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="../../../lazarus/fpc/3.0.4/source/packages/fcl-registry/src/registry.pp"/>
         <Caret Line="58" Column="15" TopLine="42"/>
@@ -994,6 +1001,10 @@
         <Filename Value="../client/include/wloadlibrary.inc"/>
         <Caret Line="10"/>
       </Position29>
+      <Position30>
+        <Filename Value="../client/include/wloadlibrary.inc"/>
+        <Caret Line="130" Column="3" TopLine="106"/>
+      </Position30>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

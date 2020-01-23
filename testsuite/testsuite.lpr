@@ -105,8 +105,11 @@ begin
     writeln(OutFile,'Starting Tests');
     writeln(OutFile,'Client API Version = ',TestMgr.FirebirdAPI.GetImplementationVersion);
     writeln(OutFile,'Firebird Environment Variable = ',GetEnvironmentVariable('FIREBIRD'));
-    writeln(OutFile,'Firebird Bin Directory = ', IMaster(TestMgr.FirebirdAPI.GetIMaster).getConfigManager.getDirectory(IConfigManager.DIR_BIN));
-    writeln(OutFile,'Firebird Conf Directory = ', IMaster(TestMgr.FirebirdAPI.GetIMaster).getConfigManager.getDirectory(IConfigManager.DIR_CONF));
+    if TestMgr.FirebirdAPI.GetClientMajor >= 3 then
+    begin
+      writeln(OutFile,'Firebird Bin Directory = ', IMaster(TestMgr.FirebirdAPI.GetIMaster).getConfigManager.getDirectory(IConfigManager.DIR_BIN));
+      writeln(OutFile,'Firebird Conf Directory = ', IMaster(TestMgr.FirebirdAPI.GetIMaster).getConfigManager.getDirectory(IConfigManager.DIR_CONF));
+    end;
 
     if FTestID = 0 then
       TestMgr.RunAll
@@ -119,7 +122,7 @@ begin
   Flush(OutFile);
   {$IFDEF WINDOWS}
   {$IFDEF INIDE}
-  readln; {uncomment if running from IDE and console window closes before you can view results}
+  //readln; {uncomment if running from IDE and console window closes before you can view results}
   {$ENDIF}
   {$ENDIF}
 
