@@ -98,10 +98,10 @@ begin
     SetTimeZoneID(65037);
     writeln(OutFile,'Time Zone Zagreb = ',TimeZone);
     SetTimeZoneID(959);
-    writeln(OutFile,'Time Zone Offset = ',TimeZone);
+    writeln(OutFile,'Time Zone Offset -08:00 = ',TimeZone);
     clear;
-    SetTimeZoneID(2878);
-    writeln(OutFile,'Time Zone Offset = ',TimeZone);
+    SetTimeZoneID(2258);
+    writeln(OutFile,'Time Zone Offset +13:39 = ',TimeZone);
     clear;
     TimeZone := '+06:00';
     writeln(OutFile,'Time Zone ID = ',GetTimezoneID);
@@ -200,7 +200,7 @@ begin
 
   Timestamp := Attachment.GetSQLTimestampParam;
   Statement.SQLParams[0].AsInteger := 2;
-  Timestamp.AsTime := EncodeTime(14,02,10,05);
+  Timestamp.AsTime := EncodeTime(14,02,10,5);
   Timestamp.Timezone := '-08:00';
   Statement.SQLParams[1].SetAsSQLTimestamp(Timestamp);
   Timestamp.Clear;
@@ -210,7 +210,7 @@ begin
   Statement.Execute;
   Timestamp.Clear;
   Statement.SQLParams[0].AsInteger := 3;
-  Timestamp.AsTime := EncodeTime(22,02,10,05);
+  Timestamp.AsTime := EncodeTime(22,02,10,5);
   Timestamp.Timezone := '-08:00';
   Statement.SQLParams[1].SetAsSQLTimestamp(Timestamp);
   Timestamp.Clear;
@@ -303,6 +303,7 @@ begin
     while Results.FetchNext do
     begin
       writeln(OutFile,'ROW ID = ',Results[0].AsInteger);
+
       write(OutFile,'TimeCol = ');
       if not Results[1].IsNull then
         with Results[1].GetAsSQLTimestamp do
@@ -310,6 +311,7 @@ begin
             ', UTC Time = ',TimeToStr(GetAsUTCDateTime))
       else
         writeln(OutFile,'NULL');
+
       write(OutFile,'TimeStampCol = ');
       if not Results[2].IsNull then
         with Results[2].GetAsSQLTimestamp do

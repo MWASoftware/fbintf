@@ -107,20 +107,19 @@ type
     FTimeZoneID: ISC_USHORT; {native Firebird timezone integer identifier}
     FDSTStatus: TDaylightSavingsTime;
     FEffectiveTimeOffsetMins: integer;
-    function GetTimeZoneID(aTimeZone: AnsiString): ISC_USHORT; overload;
     function GetTimeZoneOffset(aEffectiveOffset: integer): AnsiString;
     class function GetDateFormatStr: AnsiString;
     class function GetTimeFormatStr: AnsiString;
   protected
     function InternalLocalTimeToUniversal(aDateTime: TDateTime): TDateTime;
-    function DecodeTZOffset(offset: AnsiString; var aTimeZoneID: ISC_USHORT
-      ): boolean;
     procedure UpdateTimeZoneInfo;
     function TimeZoneID2Name(aTimeZoneID: ISC_USHORT): AnsiString;
     function TimeZone2TimeZoneID(aTimeZone: AnsiString): ISC_USHORT;
+    procedure GetTimeZoneInfo(aTimeZone: AnsiString; OnDate: TDateTime;
+      var ZoneOffset, DSTOffset, EffectiveOffset: integer); overload;
     procedure GetTimeZoneInfo(aTimeZoneID: ISC_USHORT; OnDate: TDateTime;
-      var aTimeZone: AnsiString; var ZoneOffset: integer;
-  var DSTOffset: integer; var EffectiveOffset: integer);
+      var aTimeZone: AnsiString;
+      var ZoneOffset, DSTOffset, EffectiveOffset: integer); overload;
   public
     constructor Create(attachment: IAttachment);
     procedure FromSQLData(SQLType: cardinal; SQLData: PByte);
@@ -137,7 +136,7 @@ type
     function GetAsSystemTime: TSystemTime;
     function GetAsFBSystemTime: TFBSystemTime;
     function GetTimezone: AnsiString;
-    function GetTimezoneID: ISC_USHORT; overload; {native Firebird timezone integer identifier}
+    function GetTimezoneID: ISC_USHORT;  {native Firebird timezone integer identifier}
     function GetEffectiveTimeOffsetMins: integer;
     function GetAsString(IncludeTZifAvailable: boolean=true; ShowAsRegion: boolean = false): AnsiString;
     function GetDatePart: longint;
@@ -177,13 +176,6 @@ implementation
 uses FBMessages, StrUtils, DateUtils;
 
 { TSQLTimestamp }
-
-function TSQLTimestamp.GetTimeZoneID(aTimeZone: AnsiString): ISC_USHORT;
-var aTime: ISC_TIME_TZ;
-begin
-  if not DecodeTZOffset(aTimeZone,Result) then
-    Result := TimeZone2TimeZoneID(aTimeZone);
-end;
 
 function TSQLTimestamp.GetTimeZoneOffset(aEffectiveOffset: integer): AnsiString;
 begin
@@ -228,26 +220,9 @@ begin
   {$IF declared(LocalTimeToUniversal)}
   Result := LocalTimeToUniversal(aDateTime);
   {$ELSE}
-  Result := aDateTime; {No time zone support}
+  Result := aDateTime; {No time zone support - old version of Dephi?}
   {$IFEND}
   {$IFEND}
-end;
-
-function TSQLTimestamp.DecodeTZOffset(offset: AnsiString; var aTimeZoneID: ISC_USHORT
-  ): boolean;
-var i: integer;
-    hour, mins: integer;
-begin
-  Result := false;
-  i := Pos(':',offset);
-  if i = 0 then
-    Exit;
-
-  if TryStrToInt(system.copy(offset,1,i-1),hour) and TryStrtoInt(system.copy(offset,i+1,MaxInt),mins) then
-  begin
-    aTimeZoneID := hour*60 + mins + TimeZoneDisplaymentDelta;
-    Result := true;
-  end;
 end;
 
 procedure TSQLTimestamp.UpdateTimeZoneInfo;
@@ -257,7 +232,7 @@ begin
   begin
     FEffectiveTimeOffsetMins := (FDate - FUTCDate) * MinsPerDay + ((FTime - FUTCTime) DIV (decimillisecondsPerSecond * SecsPerMin));
     FDSTStatus := dstUnknown;
-    FDSTPending := FTimeZoneID >= MaxOffsetTimeZoneID;
+    FDSTPending := FTimeZoneID >= MaxOffsetTimeZoneID; {remote query necessary}
   end;
 end;
 
@@ -282,13 +257,11 @@ begin
   end;
 end;
 
-procedure TSQLTimestamp.GetTimeZoneInfo(aTimeZoneID: ISC_USHORT;
-  OnDate: TDateTime; var aTimeZone: AnsiString; var ZoneOffset: integer;
-  var DSTOffset: integer; var EffectiveOffset: integer);
+procedure TSQLTimestamp.GetTimeZoneInfo(aTimeZone: AnsiString;
+  OnDate: TDateTime; var ZoneOffset, DSTOffset, EffectiveOffset: integer);
 var Stmt: IStatement;
     TZInfo: IResultSet;
 begin
-  aTimeZone := TimeZoneID2Name(aTimeZoneID);
   with FAttachment do
     Stmt := Prepare(StartTransaction([isc_tpb_read,isc_tpb_wait,isc_tpb_concurrency],taCommit),
                  'select * from rdb$time_zone_util.transitions(?,?,?)');
@@ -302,6 +275,14 @@ begin
     DSTOffset := TZInfo.ByName('DST_OFFSET').AsInteger;
     EffectiveOffset := TZInfo.ByName('EFFECTIVE_OFFSET').AsInteger;
   end;
+end;
+
+procedure TSQLTimestamp.GetTimeZoneInfo(aTimeZoneID: ISC_USHORT;
+  OnDate: TDateTime; var aTimeZone: AnsiString; var ZoneOffset, DSTOffset,
+  EffectiveOffset: integer);
+begin
+  aTimeZone := TimeZoneID2Name(aTimeZoneID);
+  GetTimeZoneInfo(aTimeZone,OnDate, ZoneOffset, DSTOffset, EffectiveOffset);
 end;
 
 constructor TSQLTimestamp.Create(attachment: IAttachment);
@@ -539,15 +520,7 @@ begin
 
   if IncludeTZifAvailable and HasTimeZone then
   begin
-    if ShowAsRegion then
-    begin
-      if DSTStatus = dstUnknown then
-        IBError(ibxeTZRegionNotAvailable,[FTimeZoneID])
-      else
-        Result := Result + ' ' + FTimeZone
-    end
-    else
-    if FTimeZoneID < MaxOffsetTimeZoneID then
+    if ShowAsRegion or (FTimeZoneID < MaxOffsetTimeZoneID) then
       Result := Result + ' ' + FTimeZone
     else
       Result := Result + ' ' + GetTimeZoneOffset(FEffectiveTimeOffsetMins);
@@ -592,9 +565,9 @@ begin
   if FDSTPending then
   begin
     if FHasDatePart then
-      GetTimeZoneInfo(FTimeZoneID,GetAsDate,aTimezone,ZoneOffset,DSTOffset,EffectiveOffset)
+      GetTimeZoneInfo(FTimeZone,GetAsDate,ZoneOffset,DSTOffset,EffectiveOffset)
     else
-      GetTimeZoneInfo(FTimeZoneID,InternalLocalTimeToUniversal(Now),aTimezone,ZoneOffset,DSTOffset,EffectiveOffset);
+      GetTimeZoneInfo(FTimeZone,InternalLocalTimeToUniversal(Now),ZoneOffset,DSTOffset,EffectiveOffset);
     if DSTOffset = 0 then
       FDSTStatus := dstNotInEffect
     else
@@ -610,7 +583,7 @@ procedure TSQLTimestampParam.Changed;
 var TSBuffer: ISC_TIMESTAMP_TZ;
     TimeBuffer: ISC_TIME_TZ;
 begin
-  if FHasTimeZone and FHasTimePart then
+  if FHasTimeZone then
   with FFirebirdClientAPI do
   begin
     if FHasDatePart then
@@ -618,18 +591,23 @@ begin
       SQLEncodeTimeStampTZ(FDate,FTime,FTimeZone,@TSBuffer);
       FUTCDate := TSBuffer.utc_timestamp.timestamp_date;
       FUTCTime := TSBuffer.utc_timestamp.timestamp_time;
+      FTimeZoneID := TSBuffer.time_zone;
     end
     else
     begin
       SQLEncodeTimeTZ(FTime,FTimeZone,@TimeBuffer);
       FUTCTime := TimeBuffer.utc_time;
+      FTimeZoneID := TimeBuffer.time_zone;
     end;
+    FDSTPending := FTimeZoneID >= MaxOffsetTimeZoneID;
   end
   else
   begin
     FUTCDate := FDate;
     FUTCTime := FTime;
+    FDSTPending := false;
   end;
+  FDSTStatus := dstUnknown;
 end;
 
 procedure TSQLTimestampParam.ToSQLData(SQLType: cardinal; SQLData: PByte);
@@ -763,13 +741,10 @@ begin
     FHasDatePart := true;
     FTime := EncodeFBExtTime(Hour,Minute,Second,DeciMilliSecond);
     FHasTimePart := true;
-    FHasTimeZone := (TimeZone <> '') and HasTimeZoneSupport;
-    if FHasTimeZone then
-    begin
-      FTimeZone := TimeZone;
-      FTimeZoneID := GetTimeZoneID(FTimeZone);
-    end;
-    Changed;
+    if  FFirebirdClientAPI.HasTimeZoneSupport then
+      SetTimeZone(TimeZone)
+    else
+      Changed; {otherwise called by SetTimeZone}
   end;
 end;
 
@@ -790,10 +765,8 @@ end;
 procedure TSQLTimestampParam.SetTimezone(aValue: AnsiString);
 var Buffer: ISC_TIME_TZ;
 begin
+  if not FFirebirdClientAPI.HasTimeZoneSupport then Exit;
   FTimeZone := aValue;
-  with FFirebirdClientAPI do
-    SQLEncodeTimeTZ(0,aValue,@Buffer);
-  FTimeZoneID := Buffer.time_zone;
   FHasTimezone := true;
   Changed;
 end;
@@ -802,11 +775,11 @@ procedure TSQLTimestampParam.SetTimeZoneID(aTimeZoneID: ISC_USHORT);
 var aTime: longint;
     Buffer: ISC_TIME_TZ;
 begin
+  if not FFirebirdClientAPI.HasTimeZoneSupport then Exit;
   FTimeZoneID := aTimeZoneID;
   Buffer.utc_time := 0;
   Buffer.time_zone := aTimeZoneID;
-  with FFirebirdClientAPI do
-   SQLDecodeTimeTZ(aTime,FTimeZone,@Buffer);
+  FFirebirdClientAPI.SQLDecodeTimeTZ(aTime,FTimeZone,@Buffer);
   FHasTimeZone := true;
   Changed;
 end;

@@ -145,7 +145,6 @@ type
       ibxeDifferentAPIs,
       ibxeInvalidDateTimeStr,
       ibxeBadTimeZoneID,
-      ibxeTZRegionNotAvailable,
       ibxeBadBCDConversion,
       ibxeBadTimeZoneName,
       ibxeTimeZoneUnknown
@@ -243,7 +242,6 @@ resourcestring
   SDifferentAPIs = 'All transaction attachments must use the same Firebird Library';
   SInvalidDateTimeStr = '%s is not a valid Date/Time string';
   SBadTimeZoneID = 'Invalid Time Zone ID (%d,%d)';
-  STZRegionNotAvailable = 'Time Zone Region unknown (ID = %d)';
   SBadBCDConversion = 'Conversion to BCD failed';
   SBadTimeZoneName = 'Invalid Time Zone Name "%s"';
   STimeZoneUnknown = 'Time Zone Unknown';
@@ -319,7 +317,6 @@ const
     SDifferentAPIs,
     SInvalidDateTimeStr,
     SBadTimeZoneID,
-    STZRegionNotAvailable,
     SBadBCDConversion,
     SBadTimeZoneName,
     STimeZoneUnknown
