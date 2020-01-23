@@ -84,9 +84,7 @@ begin
   {If FIREBIRD environment variable available then try this}
   if not IsValidHandle(FIBLibrary) then
   begin
-    InstallDir := oldFirebirdEV;
-    if (length(InstallDir) > 0) and (InstallDir[length(InstallDir)] <> DirectorySeparator) then
-      InstallDir := InstallDir + DirectorySeparator;
+    InstallDir := IncludeTrailingPathDelimiter(oldFirebirdEV);
     if (InstallDir <> '') and FileExists(InstallDir + FIREBIRD_CLIENT) then
     begin
       //assume firebird.conf and firebird.msg in same dir
@@ -119,7 +117,7 @@ begin
       begin
         if ValueExists('DefaultInstance') then
         begin
-          InstallDir := ReadString('DefaultInstance') ;
+          InstallDir := IncludeTrailingPathDelimiter(ReadString('DefaultInstance')) ;
           dllPathName := InstallDir + FIREBIRD_CLIENT;
           Add2Path(InstallDir);
           SetEnvironmentVariable('FIREBIRD',PChar(InstallDir));
@@ -141,7 +139,7 @@ begin
     {Now try default install dir}
     if not IsValidHandle(FIBLibrary) then
     begin
-      InstallDir := GetSpecialFolder(CSIDL_PROGRAM_FILES) +
+      InstallDir := IncludeTrailingPathDelimiter(GetSpecialFolder(CSIDL_PROGRAM_FILES)) +
         'Firebird' +
         DirectorySeparator + 'Firebird_4_0' + DirectorySeparator;
       dllPathName := InstallDir  + FIREBIRD_CLIENT;
@@ -152,7 +150,7 @@ begin
 
     if not IsValidHandle(FIBLibrary) then
     begin
-      InstallDir := GetSpecialFolder(CSIDL_PROGRAM_FILES) +
+      InstallDir := IncludeTrailingPathDelimiter(GetSpecialFolder(CSIDL_PROGRAM_FILES)) +
         'Firebird' +
         DirectorySeparator + 'Firebird_3_0' + DirectorySeparator;
       dllPathName := InstallDir  + FIREBIRD_CLIENT;
@@ -163,7 +161,7 @@ begin
 
     if not IsValidHandle(FIBLibrary) then
     begin
-      InstallDir := GetSpecialFolder(CSIDL_PROGRAM_FILES) +
+      InstallDir := IncludeTrailingPathDelimiter(GetSpecialFolder(CSIDL_PROGRAM_FILES)) +
         'Firebird' +
         DirectorySeparator + 'Firebird_2_5' +
         DirectorySeparator + 'bin' + DirectorySeparator;
@@ -175,7 +173,7 @@ begin
 
     if not IsValidHandle(FIBLibrary) then
     begin
-      InstallDir := GetSpecialFolder(CSIDL_PROGRAM_FILES) +
+      InstallDir := IncludeTrailingPathDelimiter(GetSpecialFolder(CSIDL_PROGRAM_FILES)) +
         'Firebird' +
         DirectorySeparator + 'Firebird_2_1' +
         DirectorySeparator + 'bin' + DirectorySeparator;

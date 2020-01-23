@@ -24,6 +24,7 @@ uses
   Test15 in 'Test15.pas',
   Test16 in 'Test16.pas',
   Test17 in 'Test17.pas',
+  Firebird,
   TestManager in 'TestManager.pas',
   FBOutputBlock in '..\client\FBOutputBlock.pas';
 
@@ -123,7 +124,10 @@ begin
     writeln(OutFile,'Copyright MWA Software 2016');
     writeln(OutFile);
     writeln(OutFile,'Starting Tests');
-    writeln(OutFile,'Client API Version = ',FirebirdAPI.GetImplementationVersion);
+    writeln(OutFile,'Client API Version = ',TestMgr.FirebirdAPI.GetImplementationVersion);
+    writeln(OutFile,'Firebird Environment Variable = ',GetEnvironmentVariable('FIREBIRD'));
+    writeln(OutFile,'Firebird Bin Directory = ', IMaster(TestMgr.FirebirdAPI.GetIMaster).getConfigManager.getDirectory(IConfigManager.DIR_BIN));
+    writeln(OutFile,'Firebird Conf Directory = ', IMaster(TestMgr.FirebirdAPI.GetIMaster).getConfigManager.getDirectory(IConfigManager.DIR_CONF));
 
     if FTestID = 0 then
       TestMgr.RunAll

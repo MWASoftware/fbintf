@@ -43,7 +43,6 @@ contains
   FBBlob in 'client\FBBlob.pas',
   FBClientAPI in 'client\FBClientAPI.pas',
   FBEvents in 'client\FBEvents.pas',
-  FBMessages in 'client\FBMessages.pas',
   FBOutputBlock in 'client\FBOutputBlock.pas',
   FBParamBlock in 'client\FBParamBlock.pas',
   FBServices in 'client\FBServices.pas',
@@ -67,6 +66,7 @@ contains
   FB30Services in 'client\3.0\FB30Services.pas',
   FB30Statement in 'client\3.0\FB30Statement.pas',
   Firebird in 'client\3.0\firebird\Firebird.pas',
-  FBTimestamp in 'client\FBTimestamp.pas';
+  FBTimestamp in 'client\FBTimestamp.pas',
+  FBMessages in 'client\FBMessages.pas';
 
 end.
