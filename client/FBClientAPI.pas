@@ -189,11 +189,11 @@ type
     procedure SQLDecodeDateTime(bufptr: PByte; var aDate, aTime: longint); virtual; abstract;
     {Firebird 4 Extensions}
     procedure SQLEncodeTimeTZ(aTime: longint; aTimeZone: AnsiString; bufptr: PByte); virtual;
-    procedure SQLDecodeTimeTZ(var aTime: longint; var aTimeZone: AnsiString; var aTimeZoneID: ISC_USHORT; bufptr: PByte);  virtual;
+    procedure SQLDecodeTimeTZ(var aTime: longint; var aTimeZone: AnsiString; bufptr: PByte);  virtual;
     procedure SQLEncodeTimeStampTZ(aDate, aTime: longint; aTimeZone: AnsiString;
       bufptr: PByte); virtual;
     procedure SQLDecodeTimeStampTZ(var aDate, aTime: longint;
-      var aTimeZone: AnsiString; var aTimeZoneID: ISC_USHORT; bufptr: PByte); virtual;
+      var aTimeZone: AnsiString;  bufptr: PByte); virtual;
     procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal;
       bufptr: PByte); virtual;
     function SQLDecFloatDecode(SQLType: cardinal; scale: integer; bufptr: PByte): tBCD; virtual;
@@ -377,16 +377,16 @@ end;
 procedure TFBClientAPI.DecodeFBExtTime(aTime: longint; var Hour, Minute,
   Second, DeciMillisecond: word);
 begin
-  DeciMilliSecond := aTime mod decimillsecondsPerSecond;
-  Second := (aTime div decimillsecondsPerSecond) mod SecsPerMin;
-  Minute := (aTime div (decimillsecondsPerSecond*SecsPerMin)) mod MinsPerHour;
-  Hour := aTime div (decimillsecondsPerSecond*SecsPerMin*MinsPerHour);
+  DeciMilliSecond := aTime mod decimillisecondsPerSecond;
+  Second := (aTime div decimillisecondsPerSecond) mod SecsPerMin;
+  Minute := (aTime div (decimillisecondsPerSecond*SecsPerMin)) mod MinsPerHour;
+  Hour := aTime div (decimillisecondsPerSecond*SecsPerMin*MinsPerHour);
 end;
 
 function TFBClientAPI.EncodeFBExtTime(Hour, Minute, Second,
   DeciMillisecond: word): longint;
 begin
-  Result := (((Hour * MinsPerHour + Minute) * SecsPerMin) + Second)*decimillsecondsPerSecond + DeciMilliSecond;
+  Result := (((Hour * MinsPerHour + Minute) * SecsPerMin) + Second)*decimillisecondsPerSecond + DeciMilliSecond;
 end;
 
 procedure TFBClientAPI.SQLEncodeTime(aTime: TDateTime; bufptr: PByte);
@@ -411,7 +411,7 @@ begin
 end;
 
 procedure TFBClientAPI.SQLDecodeTimeTZ(var aTime: longint;
-  var aTimeZone: AnsiString; var aTimeZoneID: ISC_USHORT; bufptr: PByte);
+  var aTimeZone: AnsiString; bufptr: PByte);
 begin
   if not HasTimeZoneSupport then
     IBError(ibxeNotSupported,[]);
@@ -425,7 +425,7 @@ begin
 end;
 
 procedure TFBClientAPI.SQLDecodeTimeStampTZ(var aDate, aTime: longint;
-  var aTimeZone: AnsiString; var aTimeZoneID: ISC_USHORT; bufptr: PByte);
+  var aTimeZone: AnsiString; bufptr: PByte);
 begin
   if not HasTimeZoneSupport then
     IBError(ibxeNotSupported,[]);

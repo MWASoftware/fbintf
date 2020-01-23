@@ -125,11 +125,12 @@ type
     procedure SQLDecodeDateTime(bufptr: PByte; var aDate, aTime: longint); override;
     {Firebird 4 Extensions}
     procedure SQLEncodeTimeTZ(aTime: longint; aTimeZone: AnsiString; bufptr: PByte); override;
-    procedure SQLDecodeTimeTZ(var aTime: longint; var aTimeZone: AnsiString; var aTimeZoneID: ISC_USHORT; bufptr: PByte); override;
+    procedure SQLDecodeTimeTZ(var aTime: longint; var aTimeZone: AnsiString;
+      bufptr: PByte); override;
     procedure SQLEncodeTimeStampTZ(aDate, aTime: longint; aTimeZone: AnsiString;
       bufptr: PByte); override;
     procedure SQLDecodeTimeStampTZ(var aDate, aTime: longint;
-      var aTimeZone: AnsiString; var aTimeZoneID: ISC_USHORT; bufptr: PByte); override;
+      var aTimeZone: AnsiString; bufptr: PByte); override;
     procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal; bufptr: PByte);
       override;
     function SQLDecFloatDecode(SQLType: cardinal; scale: integer; bufptr: PByte
@@ -437,18 +438,17 @@ begin
 end;
 
 procedure TFB30ClientAPI.SQLDecodeTimeTZ(var aTime: longint;
-  var aTimeZone: AnsiString; var aTimeZoneID: ISC_USHORT; bufptr: PByte);
+  var aTimeZone: AnsiString; bufptr: PByte);
 const
     bufLength = 128;
 var
   Hr, Mt, S, DMs: cardinal;
   tzBuffer: array[ 0.. bufLength] of AnsiChar;
 begin
-  inherited SQLDecodeTimeTZ(aTime,aTimeZone, aTimeZoneID, bufptr);
+  inherited SQLDecodeTimeTZ(aTime,aTimeZone, bufptr);
   UtilIntf.decodeTimeTz(StatusIntf, ISC_TIME_TZPtr(bufptr),@Hr, @Mt, @S, @DMs,bufLength,PAnsiChar(@tzBuffer));
   Check4DataBaseError;
   aTime := EncodeFBExtTime(Hr, Mt, S, DMs);
-  aTimeZoneID := ISC_TIME_TZPtr(bufptr)^.time_zone;
   aTimeZone := strpas(PAnsiChar(@tzBuffer));
 end;
 
@@ -466,7 +466,7 @@ begin
 end;
 
 procedure TFB30ClientAPI.SQLDecodeTimeStampTZ(var aDate, aTime: longint;
-  var aTimeZone: AnsiString; var aTimeZoneID: ISC_USHORT; bufptr: PByte);
+  var aTimeZone: AnsiString; bufptr: PByte);
 const
   bufLength = 128;
 var
@@ -474,12 +474,11 @@ var
   Hr, Mt, S, DMs: cardinal;
   tzBuffer: array[ 0.. bufLength] of AnsiChar;
 begin
-  inherited SQLDecodeTimeStampTZ(aDate, aTime, aTimeZone, aTimeZoneID, bufptr);
+  inherited SQLDecodeTimeStampTZ(aDate, aTime, aTimeZone, bufptr);
   UtilIntf.decodeTimeStampTz(StatusIntf,ISC_TIMESTAMP_TZPtr(bufPtr),@Yr,@ Mn, @Dy, @Hr, @Mt, @S, @DMs,bufLength,PAnsiChar(@tzBuffer));
   Check4DataBaseError;
   aDate := Trunc(EncodeDate(Yr, Mn,Dy) + DateDelta);
   aTime := EncodeFBExtTime(Hr, Mt, S, DMs);
-  aTimeZoneID := ISC_TIMESTAMP_TZPtr(bufptr)^.time_zone;
   aTimeZone := strpas(PAnsiChar(@tzBuffer));
 end;
 

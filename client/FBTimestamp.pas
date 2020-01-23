@@ -43,7 +43,7 @@ uses
   {$IFDEF WINDOWS}, Windows {$ENDIF};
 
 const
-  decimillsecondsPerSecond = 10000;
+  decimillisecondsPerSecond = 10000;
   TimeZoneDisplaymentDelta = 60*23 + 59; {23:59 in minutes}
 
 {
@@ -95,11 +95,14 @@ type
   private
     FAttachment: IAttachment;
     FFirebirdClientAPI: TFBClientAPI;
-    FTime: longint;  {deci-milliseconds since midnight}
+    FUTCDate: ISC_DATE; { One plus number of days since 1/1/0001 }
+    FUTCTime: ISC_TIME; {deci-milliseconds since midnight}
+    FTime: ISC_TIME;  {Local Time in deci-milliseconds since midnight}
     FHasDatePart: boolean;
-    FDate: longint; { One plus number of days since 1/1/0001 }
+    FDate: ISC_DATE; {Local Time: One plus number of days since 1/1/0001 }
     FHasTimePart: boolean;
     FHasTimeZone: boolean;
+    FDSTPending: boolean;
     FTimeZone: AnsiString;
     FTimeZoneID: ISC_USHORT; {native Firebird timezone integer identifier}
     FDSTStatus: TDaylightSavingsTime;
@@ -126,6 +129,7 @@ type
   public
     {ISQLTimestamp}
     function GetAsDateTime: TDateTime;
+    function GetAsUTCDateTime: TDateTime;
     function GetAsDate: TDateTime;
     function GetAsTime: TDateTime;
     function GetAsTimestamp: TTimestamp;
@@ -144,7 +148,11 @@ type
     function DSTStatus: TDaylightSavingsTime;
   end;
 
+  { TSQLTimestampParam }
+
   TSQLTimestampParam = class(TSQLTimestamp, ISQLParamTimestamp)
+  private
+    procedure Changed;
   public
     procedure ToSQLData(SQLType: cardinal; SQLData: PByte);
   public
@@ -247,23 +255,9 @@ var ZoneOffset,DSTOffset: integer;
 begin
   if FHasTimeZone then
   begin
-    if FTimeZoneID < MaxOffsetTimeZoneID then
-    begin
-      FDSTStatus := dstUnknown;
-      FEffectiveTimeOffsetMins := FTimeZoneID - TimeZoneDisplaymentDelta;
-      FTimeZone := GetTimeZoneOffset(FEffectiveTimeOffsetMins);
-    end
-    else
-    begin
-      if FHasDatePart then
-        GetTimeZoneInfo(FTimeZoneID,GetAsDate,FTimeZone,ZoneOffset,DSTOffset,FEffectiveTimeOffsetMins)
-      else
-        GetTimeZoneInfo(FTimeZoneID,InternalLocalTimeToUniversal(Now),FTimeZone,ZoneOffset,DSTOffset,FEffectiveTimeOffsetMins);
-      if DSTOffset = 0 then
-        FDSTStatus := dstNotInEffect
-      else
-        FDSTStatus := dstInEffect;
-    end;
+    FEffectiveTimeOffsetMins := (FDate - FUTCDate) * MinsPerDay + ((FTime - FUTCTime) DIV (decimillisecondsPerSecond * SecsPerMin));
+    FDSTStatus := dstUnknown;
+    FDSTPending := FTimeZoneID >= MaxOffsetTimeZoneID;
   end;
 end;
 
@@ -329,6 +323,7 @@ begin
   FTimeZoneID := 0;
   FEffectiveTimeOffsetMins := 0;
   FDSTStatus := dstUnknown;
+  FDSTPending := false;
 end;
 
 procedure TSQLTimestamp.FromSQLData(SQLType: cardinal; SQLData: PByte);
@@ -338,25 +333,25 @@ begin
   case SQLType of
   SQL_TIMESTAMP_TZ:
     begin
-      SQLDecodeDateTime(SQLData,FDate,FTime);
+      SQLDecodeDateTime(SQLData,FUTCDate,FUTCTime);
+      SQLDecodeTimeStampTZ(FDate,FTime,FTimeZone,SQLData);
       FTimeZoneID := PISC_TIMESTAMP_TZ(SQLData)^.time_zone;
       FHasDatePart := true;
       FHasTimePart := true;
       FHasTimeZone := true;
       UpdateTimeZoneInfo;
-      FTime := FTime + FEffectiveTimeOffsetMins * decimillsecondsPerSecond * 60; {adjust to local time}
     end;
 
   SQL_TIME_TZ:
     begin
-      FTime := SQLDecodeTime(SQLData);
+      FUTCTime := SQLDecodeTime(SQLData);
+      SQLDecodeTimeTZ(FTime,FTimeZone,SQLData);
       FTimeZoneID := PISC_TIME_TZ(SQLData)^.time_zone;
       FDate := 0;
       FHasDatePart := false;
       FHasTimePart := true;
       FHasTimeZone := true;
       UpdateTimeZoneInfo;
-      FTime := FTime + FEffectiveTimeOffsetMins * decimillsecondsPerSecond * 60; {adjust to local time}
     end;
 
   SQL_TIMESTAMP:
@@ -415,6 +410,17 @@ var aDate, aTime: TDateTime;
 begin
   aDate := FDate - DateDelta;
   aTime := FTime / (MSecsPerDay*10);
+  if aDate < 0 then
+    Result := trunc(aDate) - abs(frac(aTime))
+  else
+    Result := trunc(aDate) + abs(frac(aTime));
+end;
+
+function TSQLTimestamp.GetAsUTCDateTime: TDateTime;
+var aDate, aTime: TDateTime;
+begin
+  aDate := FUTCDate - DateDelta;
+  aTime := FUTCTime / (MSecsPerDay*10);
   if aDate < 0 then
     Result := trunc(aDate) - abs(frac(aTime))
   else
@@ -516,13 +522,13 @@ begin
   begin
     TimeFormat := GetTimeFormatStr;
     if Pos('zzzz',TimeFormat) > 1 then
-      TimeFormat := ReplaceStr(TimeFormat,'zzzz',Format('%.4d',[FTime mod decimillsecondsPerSecond]))
+      TimeFormat := ReplaceStr(TimeFormat,'zzzz',Format('%.4d',[FTime mod decimillisecondsPerSecond]))
     else
     if Pos('zzz',TimeFormat) > 1 then
-      TimeFormat := ReplaceStr(TimeFormat,'zzz',Format('%.3d',[(FTime mod decimillsecondsPerSecond) div 10]))
+      TimeFormat := ReplaceStr(TimeFormat,'zzz',Format('%.3d',[(FTime mod decimillisecondsPerSecond) div 10]))
     else
     if Pos('z',TimeFormat) > 1 then
-      TimeFormat := ReplaceStr(TimeFormat,'z',Format('%d',[FTime mod decimillsecondsPerSecond]));
+      TimeFormat := ReplaceStr(TimeFormat,'z',Format('%d',[FTime mod decimillisecondsPerSecond]));
     Result := Result + FormatDateTime(TimeFormat,FTime / (MSecsPerDay*10));
   end;
 
@@ -575,11 +581,51 @@ begin
 end;
 
 function TSQLTimestamp.DSTStatus: TDaylightSavingsTime;
+var aTimezone: AnsiString;
+    ZoneOffset,DSTOffset,EffectiveOffset: integer;
 begin
+  if FDSTPending then
+  begin
+    if FHasDatePart then
+      GetTimeZoneInfo(FTimeZoneID,GetAsDate,aTimezone,ZoneOffset,DSTOffset,EffectiveOffset)
+    else
+      GetTimeZoneInfo(FTimeZoneID,InternalLocalTimeToUniversal(Now),aTimezone,ZoneOffset,DSTOffset,EffectiveOffset);
+    if DSTOffset = 0 then
+      FDSTStatus := dstNotInEffect
+    else
+      FDSTStatus := dstInEffect;
+    FDSTPending := false;
+  end;
   Result := FDSTStatus;
 end;
 
 {TSQLTimestampParam}
+
+procedure TSQLTimestampParam.Changed;
+var TSBuffer: ISC_TIMESTAMP_TZ;
+    TimeBuffer: ISC_TIME_TZ;
+begin
+  if FHasTimeZone and FHasTimePart then
+  with FFirebirdClientAPI do
+  begin
+    if FHasDatePart then
+    begin
+      SQLEncodeTimeStampTZ(FDate,FTime,FTimeZone,@TSBuffer);
+      FUTCDate := TSBuffer.utc_timestamp.timestamp_date;
+      FUTCTime := TSBuffer.utc_timestamp.timestamp_time;
+    end
+    else
+    begin
+      SQLEncodeTimeTZ(FTime,FTimeZone,@TimeBuffer);
+      FUTCTime := TimeBuffer.utc_time;
+    end;
+  end
+  else
+  begin
+    FUTCDate := FDate;
+    FUTCTime := FTime;
+  end;
+end;
 
 procedure TSQLTimestampParam.ToSQLData(SQLType: cardinal; SQLData: PByte);
 begin
@@ -589,19 +635,13 @@ begin
      if not FHasTimeZone then
        IBError(ibxeTimeZoneUnknown,[])
      else
-     begin
-       SQLEncodeDateTime(FDate,FTime - FEffectiveTimeOffsetMins * decimillsecondsPerSecond * 60,SQLData);
-       PISC_TIMESTAMP_TZ(SQLData)^.time_zone := FTimeZoneID;
-     end;
+       SQLEncodeTimeStampTZ(FDate,FTime,FTimeZone,SQLData);
 
    SQL_TIME_TZ:
      if not FHasTimeZone then
        IBError(ibxeTimeZoneUnknown,[])
      else
-     begin
-       SQLEncodeTime(FTime - FEffectiveTimeOffsetMins * decimillsecondsPerSecond * 60,SQLData);
-        PISC_TIME_TZ(SQLData)^.time_zone := FTimeZoneID;
-     end;
+       SQLEncodeTimeTZ(FTime,FTimeZone,SQLData);
 
    SQL_TIMESTAMP:
      SQLEncodeDateTime(FDate,FTime,SQLData);
@@ -632,6 +672,7 @@ begin
   FDate := DateDelta + Trunc(D) div (MSecsPerDay*10);
   FHasDatePart := true;
   FHasTimePart := true;
+  Changed;
 end;
 
 procedure TSQLTimestampParam.SetAsDate(aValue: TDateTime);
@@ -639,6 +680,7 @@ begin
   Clear;
   FDate := Trunc(aValue) + DateDelta;
   FHasDatePart := true;
+  Changed;
 end;
 
 procedure TSQLTimestampParam.SetAsTime(aValue: TDateTime);
@@ -654,6 +696,7 @@ begin
     D:=D+0.5;
   FTime := Trunc(D);
   FHasTimePart := true;
+  Changed;
 end;
 
 procedure TSQLTimestampParam.SetAsTime(Hr, Mn, S, DeciMS: word);
@@ -662,6 +705,7 @@ begin
   with FFirebirdClientAPI do
     FTime := EncodeFBExtTime(Hr, Mn, S, DeciMS);
   FHasTimePart := true;
+  Changed;
 end;
 
 procedure TSQLTimestampParam.SetAsTimeMS(aValue: longint);
@@ -669,6 +713,7 @@ begin
   Clear;
   FTime := aValue * 10;
   FHasTimePart := true;
+  Changed;
 end;
 
 procedure TSQLTimestampParam.SetAsTimestamp(aValue: TTimestamp);
@@ -678,6 +723,7 @@ begin
   FTime := AValue.time*10;
   FHasDatePart := true;
   FHasTimePart := true;
+  Changed;
 end;
 
 procedure TSQLTimestampParam.SetAsMilliseconds(aValue: comp);
@@ -699,6 +745,7 @@ begin
     {$ENDIF}
     FHasDatePart := true;
     FHasTimePart := true;
+    Changed;
   end;
 end;
 
@@ -717,6 +764,7 @@ begin
       FTimeZone := TimeZone;
       FTimeZoneID := GetTimeZoneID(FTimeZone);
     end;
+    Changed;
   end;
 end;
 
@@ -724,28 +772,38 @@ procedure TSQLTimestampParam.SetDatePart(aValue: longint);
 begin
   FDate := aValue;
   FHasDatePart := true;
+  Changed;
 end;
 
 procedure TSQLTimestampParam.SetTimePart(aValue: longint);
 begin
   FTime := aValue;
   FHasTimePart := true;
+  Changed;
 end;
 
 procedure TSQLTimestampParam.SetTimezone(aValue: AnsiString);
+var Buffer: ISC_TIME_TZ;
 begin
-  FTimeZoneID := GetTimeZoneID(aValue);
+  FTimeZone := aValue;
+  with FFirebirdClientAPI do
+    SQLEncodeTimeTZ(0,aValue,@Buffer);
+  FTimeZoneID := Buffer.time_zone;
   FHasTimezone := true;
-  UpdateTimeZoneInfo;
+  Changed;
 end;
 
 procedure TSQLTimestampParam.SetTimeZoneID(aTimeZoneID: ISC_USHORT);
 var aTime: longint;
-    aTimeTZ: ISC_TIME_TZ;
+    Buffer: ISC_TIME_TZ;
 begin
   FTimeZoneID := aTimeZoneID;
+  Buffer.utc_time := 0;
+  Buffer.time_zone := aTimeZoneID;
+  with FFirebirdClientAPI do
+   SQLDecodeTimeTZ(aTime,FTimeZone,@Buffer);
   FHasTimeZone := true;
-  UpdateTimeZoneInfo;
+  Changed;
 end;
 
 end.

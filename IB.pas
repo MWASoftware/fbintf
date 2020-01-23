@@ -509,6 +509,7 @@ type
   ISQLTimestamp = interface
     ['{f4bb2c3e-2fd4-481b-a0aa-7bc677ff3d84}']
     function GetAsDateTime: TDateTime;
+    function GetAsUTCDateTime: TDateTime;
     function GetAsDate: TDateTime;
     function GetAsTime: TDateTime;
     function GetAsTimestamp: TTimestamp;

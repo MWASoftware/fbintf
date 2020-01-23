@@ -106,6 +106,9 @@ begin
     TimeZone := '+06:00';
     writeln(OutFile,'Time Zone ID = ',GetTimezoneID);
     clear;
+    TimeZone := '-08:00';
+    writeln(OutFile,'Time Zone ID = ',GetTimezoneID);
+    clear;
     TimeZone := 'US/Arizona';
     writeln(OutFile,'Time Zone ID = ',GetTimezoneID);
   end;
@@ -205,6 +208,16 @@ begin
   Timestamp.Timezone := 'Europe/London';
   Statement.SQLParams[2].SetAsSQLTimestamp(Timestamp);
   Statement.Execute;
+  Timestamp.Clear;
+  Statement.SQLParams[0].AsInteger := 3;
+  Timestamp.AsTime := EncodeTime(22,02,10,05);
+  Timestamp.Timezone := '-08:00';
+  Statement.SQLParams[1].SetAsSQLTimestamp(Timestamp);
+  Timestamp.Clear;
+  Timestamp.AsDateTime := EncodeDate(1918,11,11) + EncodeTime(0,11,0,0);
+  Timestamp.Timezone := '+04:00';
+  Statement.SQLParams[2].SetAsSQLTimestamp(Timestamp);
+  Statement.Execute;
 end;
 
 procedure TTest17.UpdateDatabase4_DECFloat(Attachment: IAttachment);
@@ -293,13 +306,15 @@ begin
       write(OutFile,'TimeCol = ');
       if not Results[1].IsNull then
         with Results[1].GetAsSQLTimestamp do
-          writeln(OutFile,GetAsString,', TimeZoneID = ',GetTimezoneID,', Time Zone Name = ',TimeZone)
+          writeln(OutFile,GetAsString,', TimeZoneID = ',GetTimezoneID,', Time Zone Name = ',TimeZone,
+            ', UTC Time = ',TimeToStr(GetAsUTCDateTime))
       else
         writeln(OutFile,'NULL');
       write(OutFile,'TimeStampCol = ');
       if not Results[2].IsNull then
         with Results[2].GetAsSQLTimestamp do
-          writeln(OutFile,GetAsString,', TimeZoneID = ',GetTimezoneID,', Time Zone Name = ',TimeZone)
+          writeln(OutFile,GetAsString,', TimeZoneID = ',GetTimezoneID,', Time Zone Name = ',TimeZone,
+            ', UTC Timestamp = ',DateTimeToStr(GetAsUTCDateTime))
       else
         writeln(OutFile,'NULL');
     end;

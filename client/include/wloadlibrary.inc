@@ -50,6 +50,7 @@ begin
   if Result then Exit;
 
   curPath := GetEnvironmentVariable('PATH');
+  oldFirebirdEV := GetEnvironmentVariable('FIREBIRD');
 
   {First try any user override}
   dllPathName := GetOverrideLibName;
@@ -74,22 +75,16 @@ begin
   if FileExists(InstallDir + FIREBIRD_CLIENT) then
   begin
     //assume firebird.conf and firebird.msg in same dir
-    oldFirebirdEV := GetEnvironmentVariable('FIREBIRD');
     SetEnvironmentVariable('FIREBIRD',PChar(InstallDir));
     dllPathName := InstallDir + FIREBIRD_CLIENT;
-    try
-      FIBLibrary := DoLoadLibrary(dllPathName)
-    finally
-      if not IsValidHandle(FIBLibrary) then
-        SetEnvironmentVariable('FIREBIRD',PChar(oldFirebirdEV)); {restore}
-    end;
+    FIBLibrary := DoLoadLibrary(dllPathName)
   end;
 
 //  writeln('Dir = ',InstallDir);
   {If FIREBIRD environment variable available then try this}
   if not IsValidHandle(FIBLibrary) then
   begin
-    InstallDir := GetEnvironmentVariable('FIREBIRD');
+    InstallDir := oldFirebirdEV;
     if (length(InstallDir) > 0) and (InstallDir[length(InstallDir)] <> DirectorySeparator) then
       InstallDir := InstallDir + DirectorySeparator;
     if (InstallDir <> '') and FileExists(InstallDir + FIREBIRD_CLIENT) then
@@ -97,6 +92,7 @@ begin
       //assume firebird.conf and firebird.msg in same dir
       dllPathName := InstallDir + FIREBIRD_CLIENT;
       Add2Path(InstallDir);
+      SetEnvironmentVariable('FIREBIRD',PChar(InstallDir));
       FIBLibrary := DoLoadLibrary(dllPathName)
     end
     else
@@ -107,6 +103,7 @@ begin
       begin
         dllPathName := InstallDir +  FIREBIRD_CLIENT;
         Add2Path(InstallDir);
+        SetEnvironmentVariable('FIREBIRD',PChar(InstallDir));
         FIBLibrary := DoLoadLibrary(dllPathName)
       end
     end
@@ -125,6 +122,7 @@ begin
           InstallDir := ReadString('DefaultInstance')  + 'bin' + DirectorySeparator ;
           dllPathName := InstallDir + FIREBIRD_CLIENT;
           Add2Path(InstallDir);
+          SetEnvironmentVariable('FIREBIRD',PChar(InstallDir));
           FIBLibrary := DoLoadLibrary(dllPathName)
         end
       end
@@ -140,6 +138,7 @@ begin
         DirectorySeparator + 'Firebird_3_0' + DirectorySeparator;
       dllPathName := InstallDir  + FIREBIRD_CLIENT;
       Add2Path(InstallDir);
+      SetEnvironmentVariable('FIREBIRD',PChar(InstallDir));
       FIBLibrary := DoLoadLibrary(dllPathName)
     end;
 
@@ -151,6 +150,7 @@ begin
         DirectorySeparator + 'bin' + DirectorySeparator;
       dllPathName := InstallDir + FIREBIRD_CLIENT;
       Add2Path(InstallDir);
+      SetEnvironmentVariable('FIREBIRD',PChar(InstallDir));
       FIBLibrary := DoLoadLibrary(dllPathName)
     end;
 
@@ -162,6 +162,7 @@ begin
         DirectorySeparator + 'bin' + DirectorySeparator;
       dllPathName := InstallDir + FIREBIRD_CLIENT;
       Add2Path(InstallDir);
+      SetEnvironmentVariable('FIREBIRD',PChar(InstallDir));
       FIBLibrary := DoLoadLibrary(dllPathName)
     end;
 
@@ -177,6 +178,8 @@ begin
     end;
   end;
   Result := IsValidHandle(FIBLibrary);
+  if not Result then
+    SetEnvironmentVariable('FIREBIRD',PChar(oldFirebirdEV)); {restore}
 end;
 
 class procedure TFBLibrary.SetupEnvironment;
