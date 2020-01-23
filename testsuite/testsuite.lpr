@@ -11,7 +11,7 @@ uses
   {$ENDIF}
   Classes, SysUtils, CustApp, TestManager, Test1, test2, Test3, Test4, Test5,
   Test6, Test7, Test8, Test9, Test10, Test11, Test12, Test13, Test14, Test15,
-  Test16, IB, Test17;
+  Test16, IB, Test17, Firebird;
 
 type
 
@@ -104,6 +104,8 @@ begin
     writeln(OutFile);
     writeln(OutFile,'Starting Tests');
     writeln(OutFile,'Client API Version = ',TestMgr.FirebirdAPI.GetImplementationVersion);
+    writeln(OutFile,'Firebird Bin Directory = ', IMaster(TestMgr.FirebirdAPI.GetIMaster).getConfigManager.getDirectory(IConfigManager.DIR_BIN));
+    writeln(OutFile,'Firebird Conf Directory = ', IMaster(TestMgr.FirebirdAPI.GetIMaster).getConfigManager.getDirectory(IConfigManager.DIR_CONF));
 
     if FTestID = 0 then
       TestMgr.RunAll
