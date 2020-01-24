@@ -637,6 +637,11 @@ function ParseConnectString(ConnectString: AnsiString;
               var PortNo: AnsiString): boolean;
 function GetProtocol(ConnectString: AnsiString): TProtocolAll;
 
+function ParseDateTimeTZString(AValue: Ansistring; var aDateTime: TDateTime;
+              var aTimezone: AnsiString; TimeOnly: boolean=false): boolean;
+procedure GetTimeZoneInfo(attachment: IAttachment; aTimeZone: AnsiString;
+  OnDate: TDateTime; var ZoneOffset, DSTOffset, EffectiveOffset: integer);
+
 implementation
 
 uses FBMessages
@@ -1530,6 +1535,75 @@ begin
 //    writeln(FString);
     FEOF := Result = sqltEOF;
   until TokenFound(Result) or EOF;
+end;
+
+function ParseDateTimeTZString(AValue: Ansistring; var aDateTime: TDateTime;
+  var aTimezone: AnsiString; TimeOnly: boolean): boolean;
+const
+  whitespacechars = [' ',#$09,#$0A,#$0D];
+var i,j: integer;
+    aTime: TDateTime;
+begin
+  Result := false;
+  aTimezone := '';
+  if AValue <> '' then
+  {$if declared(DefaultFormatSettings)}
+  with DefaultFormatSettings do
+  {$ELSE}
+  with FormatSettings do
+  {$IFEND}
+  begin
+    aDateTime := 0;
+    {Parse to get time zone info}
+    i := 1;
+    while (i <= length(AValue)) and (AValue[i] in whitespacechars) do inc(i); {skip white space}
+    if not TimeOnly then
+    begin
+      {decode date}
+      j := i;
+      while (j <= length(AValue)) and (AValue[j] in [0..9,DateSeparator]) do inc(j);
+      if TryStrToDate(system.copy(AValue,i,j-i),aDateTime) then
+        i := j; {otherwise start again i.e. assume time only}
+    end;
+
+    while (i <= length(AValue)) and (AValue[i] in whitespacechars) do inc(i); {skip white space}
+    {decode time}
+    j := i;
+    while (j <= length(AValue)) and (AValue[j] in [0..9,TimeSeparator]) do inc(j);
+    Result := TryStrToTime(system.copy(AValue,i,j-i),aTime);
+    if not Result then Exit;
+    aDateTime := aDateTime + aTime;
+    i := j;
+
+    while (i <= length(AValue)) and (AValue[i] in whitespacechars) do inc(i); {skip white space}
+    {decode time zone}
+    if i < length(AValue) then
+    begin
+      j := i;
+      while (j <= length(AValue)) and not (AValue[j] in whitespacechars) do inc(j);
+      aTimezone := system.copy(AValue,i,j-i);
+    end
+  end
+end;
+
+procedure GetTimeZoneInfo(attachment: IAttachment; aTimeZone: AnsiString;
+  OnDate: TDateTime; var ZoneOffset, DSTOffset, EffectiveOffset: integer);
+var Stmt: IStatement;
+    TZInfo: IResultSet;
+begin
+  with attachment do
+    Stmt := Prepare(StartTransaction([isc_tpb_read,isc_tpb_wait,isc_tpb_concurrency],taCommit),
+                 'select * from rdb$time_zone_util.transitions(?,?,?)');
+  Stmt.SQLParams[0].AsString := aTimeZone;
+  Stmt.SQLParams[1].AsDateTime := OnDate;
+  Stmt.SQLParams[2].AsDateTime := OnDate;
+  TZInfo := Stmt.OpenCursor;
+  if TZInfo.FetchNext then
+  begin
+    ZoneOffset := TZInfo.ByName('ZONE_OFFSET').AsInteger;
+    DSTOffset := TZInfo.ByName('DST_OFFSET').AsInteger;
+    EffectiveOffset := TZInfo.ByName('EFFECTIVE_OFFSET').AsInteger;
+  end;
 end;
 
 end.

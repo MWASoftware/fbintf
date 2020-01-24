@@ -144,6 +144,10 @@ const
                                -23:59 and 23:59. Higher values are keys to the
                                Time Zone database.}
 
+  TimeZoneID_GMT = 23*minsPerHour + 59;
+  decimillisecondsPerSecond = 10000;
+  TimeZoneDisplaymentDelta = 60*23 + 59; {23:59 in minutes}
+
 {These include files are converted from the 'C' originals in the Firebird API
  and define the various constants used by the API}
 
@@ -485,53 +489,7 @@ type
     property Count: integer read getCount;
   end;
 
-  { The ISQLTimestamp interface has been introduced in order to support time and
-    timestamps with a timezone. It also allows for deci-millisecond resolution (native
-    Firebird) while the TDateTime type is limited to millisecond resolution.
-
-    The TFBSystemTime type is introduced in order to record both deci-millisecond
-    resolution and time zone information.
-
-    When FormatSettings are provided then 'TZ' in a longTimeFormat is interpreted
-    as a placeholder for the current timezone offset. When no FormatSettings are
-    provided and the timestamp includes a timezone, then ' TZ' is added to the
-    default longTimeFormat.
-  }
-
-  TFBSystemTime = record
-      Year, Month, Day, DayOfWeek: word;
-      Hour, Minute, Second, DeciMilliSecond: word;
-      TimeZone: AnsiString;
-   end ;
-
-   TDaylightSavingsTime = (dstUnknown, dstNotInEffect, dstInEffect);
-
-  ISQLTimestamp = interface
-    ['{f4bb2c3e-2fd4-481b-a0aa-7bc677ff3d84}']
-    function GetAsDateTime: TDateTime;
-    function GetAsUTCDateTime: TDateTime;
-    function GetAsDate: TDateTime;
-    function GetAsTime: TDateTime;
-    function GetAsTimestamp: TTimestamp;
-    function GetAsMilliseconds: comp;
-    function GetAsSystemTime: TSystemTime;
-    function GetAsFBSystemTime: TFBSystemTime;
-    function GetTimezone: AnsiString;
-    function GetTimezoneID: ISC_USHORT; {native Firebird timezone integer identifier}
-    function GetEffectiveTimeOffsetMins: integer;
-    function GetAsString(IncludeTZifAvailable: boolean=true; ShowAsRegion: boolean = false): AnsiString;
-    function GetDatePart: longint;
-    function GetTimePart: longint;
-    function HasDatePart: boolean;
-    function HasTimePart: boolean;
-    function HasTimezone: boolean;
-    function DSTStatus: TDaylightSavingsTime;
-    property AsDateTime: TDateTime read GetAsDateTime;
-    property AsDate: TDateTime read GetAsDate;
-    property AsTime: TDateTime read GetAsTime;
-    property AsMillseconds: comp read GetAsMilliseconds;
-    property Timezone: AnsiString read GetTimezone;
-  end;
+   TFBTimeZoneID = ISC_USHORT;
 
   {
     The ISQLData interface provides access to the data returned in a field in the
@@ -553,8 +511,10 @@ type
     function GetAsBoolean: boolean;
     function GetAsCurrency: Currency;
     function GetAsInt64: Int64;
-    function GetAsDateTime: TDateTime;
-    function GetAsSQLTimestamp: ISQLTimestamp;
+    function GetAsDateTime: TDateTime; overload;
+    procedure GetAsDateTime(var aDateTime: TDateTime; var aTimezoneID: TFBTimeZoneID); overload;
+    procedure GetAsDateTime(var aDateTime: TDateTime; var aTimezone: AnsiString); overload;
+    function GetAsUTCDateTime: TDateTime;
     function GetAsDouble: Double;
     function GetAsFloat: Float;
     function GetAsLong: Long;
@@ -622,32 +582,6 @@ type
     procedure Close;
   end;
 
-  ISQLParamTimestamp = interface(ISQLTimestamp)
-    ['{b5374eb4-a9e7-489f-8874-c1a9fbb60993}']
-    procedure Clear;
-    procedure SetAsDateTime(aValue: TDateTime);
-    procedure SetAsUTCDateTime(aValue: TDateTime;  aTimeZone: AnsiString);
-    procedure SetAsDate(aValue: TDateTime);
-    procedure SetAsTime(aValue: TDateTime); overload;
-    procedure SetAsTime(Hr, Mn, S, DeciMS: word); overload;
-    procedure SetAsTimeMS(aValue: longint);
-    procedure SetAsTimestamp(aValue: TTimestamp);
-    procedure SetAsMilliseconds(aValue: comp);
-    procedure SetAsSystemTime(aValue: TSystemTime);
-    procedure SetAsFBSystemTime(aValue: TFBSystemTime);
-    procedure SetTimezone(aValue: AnsiString);
-    procedure SetDatePart(aValue: longint);
-    procedure SetTimePart(aValue: longint);
-    procedure SetTimeZoneID(aTimeZoneID: ISC_USHORT);
-    property AsDate: TDateTime read GetAsDate write SetAsDate;
-    property AsTime: TDateTime read GetAsTime write SetAsTime;
-    property AsDateTime: TDateTime read GetAsDateTime write SetAsDateTime;
-    property AsMillseconds: comp read GetAsMilliseconds write SetAsMilliseconds;
-    property Timezone: AnsiString read GetTimezone write SetTimezone;
-  end;
-
-
-
   {The ISQLParam interface is used to provide access to each parameter in a
    parametised SQL Statement. It subclasses IColumnMetaData and this part of
    the interface may be used to access information on the expected SQL Type, etc.
@@ -678,8 +612,10 @@ type
     function GetAsBoolean: boolean;
     function GetAsCurrency: Currency;
     function GetAsInt64: Int64;
-    function GetAsDateTime: TDateTime;
-    function GetAsSQLTimestamp: ISQLTimestamp;
+    function GetAsDateTime: TDateTime; overload;
+    procedure GetAsDateTime(var aDateTime: TDateTime; var aTimezoneID: TFBTimeZoneID); overload;
+    procedure GetAsDateTime(var aDateTime: TDateTime; var aTimezone: AnsiString); overload;
+    function GetAsUTCDateTime: TDateTime;
     function GetAsDouble: Double;
     function GetAsFloat: Float;
     function GetAsLong: Long;
@@ -699,9 +635,13 @@ type
     procedure SetAsInt64(aValue: Int64);
     procedure SetAsDate(aValue: TDateTime);
     procedure SetAsLong(aValue: Long);
-    procedure SetAsTime(aValue: TDateTime);
-    procedure SetAsDateTime(aValue: TDateTime);
-    procedure SetAsSQLTimestamp(aValue: ISQLParamTimestamp);
+    procedure SetAsTime(aValue: TDateTime); overload;
+    procedure SetAsTime(aValue: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
+    procedure SetAsTime(aValue: TDateTime; aTimeZone: AnsiString); overload;
+    procedure SetAsDateTime(aValue: TDateTime); overload;
+    procedure SetAsDateTime(aValue: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
+    procedure SetAsDateTime(aValue: TDateTime; aTimeZone: AnsiString); overload;
+    procedure SetAsUTCDateTime(aUTCTime: TDateTime; aTimeZone: AnsiString);
     procedure SetAsDouble(aValue: Double);
     procedure SetAsFloat(aValue: Float);
     procedure SetAsPointer(aValue: Pointer);
@@ -1083,9 +1023,6 @@ type
     function CharSetWidth(CharSetID: integer; var Width: integer): boolean;
     procedure RegisterCharSet(CharSetName: AnsiString; CodePage: TSystemCodePage;
       AllowReverseLookup:boolean; out CharSetID: integer);
-
-    {utility}
-    function GetSQLTimestampParam: ISQLParamTimestamp;
  end;
 
   TProtocolAll = (TCP, SPX, NamedPipe, Local, inet, inet4, inet6, wnet, xnet, unknownProtocol);
@@ -1241,6 +1178,8 @@ type
    The interface is returned by the FirebirdAPI function.
   }
 
+  { IFirebirdAPI }
+
   IFirebirdAPI = interface
     ['{edeee691-c8d3-4dcf-a780-cd7e432821d5}']
     {Database connections}
@@ -1276,6 +1215,20 @@ type
     function HasMasterIntf: boolean;
     function GetIMaster: TObject;
     function GetFBLibrary: IFirebirdLibrary;
+
+    {BCD Field Support}
+    procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal; bufptr: PByte);
+    function SQLDecFloatDecode(SQLType: cardinal; scale: integer; bufptr: PByte): tBCD;
+
+    {Time Zone Support - uses client local ICU}
+    function TimeZoneID2TimeZoneName(aTimeZoneID: TFBTimeZoneID): AnsiString;
+    function TimeZoneName2TimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID;
+    function LocalTimeToUTCTime(aLocalTime: TDateTime; aTimeZone: AnsiString): TDateTime;
+    function UTCTimeToLocalTime(aUTCTime: TDateTime; aTimeZone: AnsiString): TDateTime;
+    procedure DecodeFBExtTime(aTime: longint; var Hour, Minute, Second, DeciMillisecond: word);
+    function EncodeFBExtTime(Hour, Minute, Second, DeciMillisecond: word): TDateTime;
+    function DecimillisecondsToDateTime(aTime: longint): TDateTime;
+    function DateTimeToDecimilliseconds(aTime: TDateTime): longint;
 end;
 
 type

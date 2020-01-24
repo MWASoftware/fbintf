@@ -117,12 +117,12 @@ type
 
     {Encode/Decode}
     function DecodeInteger(bufptr: PByte; len: short): integer; override;
-    procedure SQLEncodeDate(aDate: longint; bufptr: PByte); override;
-    function SQLDecodeDate(bufptr: PByte): longint; override;
-    procedure SQLEncodeTime(aTime: longint; bufptr: PByte); override;
-    function SQLDecodeTime(bufptr: PByte): longint;  override;
-    procedure SQLEncodeDateTime(aDate, aTime: longint; bufptr: PByte); override;
-    procedure SQLDecodeDateTime(bufptr: PByte; var aDate, aTime: longint); override;
+    procedure SQLEncodeDate(aDate: TDateTime; bufptr: PByte); override;
+    function SQLDecodeDate(bufptr: PByte): TDateTime; override;
+    procedure SQLEncodeTime(aTime: TDateTime; bufptr: PByte); override;
+    function SQLDecodeTime(bufptr: PByte): TDateTime;  override;
+    procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte); override;
+    function SQLDecodeDateTime(bufptr: PByte): TDateTime; override;
     {Firebird 4 Extensions}
     procedure SQLEncodeTimeTZ(aTime: longint; aTimeZone: AnsiString; bufptr: PByte); override;
     procedure SQLDecodeTimeTZ(var aTime: longint; var aTimeZone: AnsiString;
@@ -135,6 +135,10 @@ type
       override;
     function SQLDecFloatDecode(SQLType: cardinal; scale: integer; bufptr: PByte
       ): tBCD; override;
+    function TimeZoneID2TimeZoneName(aTimeZoneID: TFBTimeZoneID): AnsiString;
+      override;
+    function TimeZoneName2TimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID;
+      override;
 
     {Firebird Interfaces}
     property MasterIntf: Firebird.IMaster read FMaster;
@@ -368,21 +372,21 @@ begin
   end;
 end;
 
-procedure TFB30ClientAPI.SQLEncodeDate(aDate: longint; bufptr: PByte);
+procedure TFB30ClientAPI.SQLEncodeDate(aDate: TDateTime; bufptr: PByte);
 var
   Yr, Mn, Dy: Word;
 begin
-   DecodeDate(aDate - DateDelta, Yr, Mn, Dy);
+   DecodeDate(aDate, Yr, Mn, Dy);
    PISC_Date(Bufptr)^ := UtilIntf.encodeDate(Yr, Mn, Dy);
 end;
 
-function TFB30ClientAPI.SQLDecodeDate(bufptr: PByte): longint;
+function TFB30ClientAPI.SQLDecodeDate(bufptr: PByte): TDateTime;
 var
   Yr, Mn, Dy: cardinal;
 begin
   UtilIntf.decodeDate(PISC_DATE(bufptr)^,@Yr, @Mn, @Dy);
   try
-    result := Trunc(EncodeDate(Yr, Mn,Dy)) + DateDelta;
+    result := EncodeDate(Yr, Mn,Dy);
   except
     on E: EConvertError do begin
       IBError(ibxeInvalidDataConversion, [nil]);
@@ -390,21 +394,21 @@ begin
   end;
 end;
 
-procedure TFB30ClientAPI.SQLEncodeTime(aTime: longint; bufptr: PByte);
+procedure TFB30ClientAPI.SQLEncodeTime(aTime: TDateTime; bufptr: PByte);
 var
-  Hr, Mt, S, DMs: Word;
+  Hr, Mt, S, Ms: Word;
 begin
-  DecodeFBExtTime(aTime, Hr, Mt, S, DMs);
-  PISC_TIME(bufptr)^ :=  UtilIntf.encodeTime(Hr, Mt, S, DMs);
+  DecodeTime(aTime, Hr, Mt, S, Ms);
+  PISC_TIME(bufptr)^ :=  UtilIntf.encodeTime(Hr, Mt, S, Ms*10);
 end;
 
-function TFB30ClientAPI.SQLDecodeTime(bufptr: PByte): longint;
+function TFB30ClientAPI.SQLDecodeTime(bufptr: PByte): TDateTime;
 var
-  Hr, Mt, S, DMs: cardinal;
+  Hr, Mt, S, Ms: cardinal;
 begin
-  UtilIntf.decodeTime(PISC_TIME(bufptr)^,@Hr, @Mt, @S, @DMs);
+  UtilIntf.decodeTime(PISC_TIME(bufptr)^,@Hr, @Mt, @S, @Ms);
   try
-    Result := EncodeFBExtTime(Hr, Mt, S, DMs);
+    Result := EncodeTime(Hr, Mt, S, Ms div 10);
   except
     on E: EConvertError do begin
       IBError(ibxeInvalidDataConversion, [nil]);
@@ -412,18 +416,18 @@ begin
   end;
 end;
 
-procedure TFB30ClientAPI.SQLEncodeDateTime(aDate, aTime: longint; bufptr: PByte);
+procedure TFB30ClientAPI.SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte);
 begin
-  SQLEncodeDate(aDate,bufPtr);
+  SQLEncodeDate(aDateTime,bufPtr);
   Inc(bufptr,sizeof(ISC_DATE));
-  SQLEncodeTime(aTime,bufPtr);
+  SQLEncodeTime(aDateTime,bufPtr);
 end;
 
-procedure TFB30ClientAPI.SQLDecodeDateTime(bufptr: PByte; var aDate, aTime: longint);
+function TFB30ClientAPI.SQLDecodeDateTime(bufptr: PByte): TDateTime;
 begin
-  aDate := SQLDecodeDate(bufPtr);
+  Result := SQLDecodeDate(bufPtr);
   Inc(bufptr,sizeof(ISC_DATE));
-  aTime := SQLDecodeTime(bufPtr);
+  Result := Result + SQLDecodeTime(bufPtr);
 end;
 
 procedure TFB30ClientAPI.SQLEncodeTimeTZ(aTime: longint; aTimeZone: AnsiString;
@@ -597,6 +601,24 @@ begin
   Result.SignSpecialPlaces :=  (-exp and $2f);
   if sign <> 0 then
     Result.SignSpecialPlaces := Result.SignSpecialPlaces or $80;
+end;
+
+function TFB30ClientAPI.TimeZoneID2TimeZoneName(aTimeZoneID: TFBTimeZoneID): AnsiString;
+var Buffer: ISC_TIME_TZ;
+    aTime: integer;
+begin
+  Result := inherited TimeZoneID2TimeZoneName(aTimeZoneID);
+  Buffer.utc_time := 0;
+  Buffer.time_zone := aTimeZoneID;
+  SQLDecodeTimeTZ(aTime,Result,@Buffer);
+end;
+
+function TFB30ClientAPI.TimeZoneName2TimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID;
+var Buffer: ISC_TIME_TZ;
+begin
+  Result := inherited TimeZoneName2TimeZoneID(aTimeZone);
+  SQLEncodeTimeTZ(0,aTimeZone,@Buffer);
+  Result := Buffer.time_zone;
 end;
 
 function TFB30ClientAPI.GetClientMajor: integer;

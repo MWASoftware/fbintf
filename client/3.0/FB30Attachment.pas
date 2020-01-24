@@ -96,15 +96,12 @@ type
     function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IBlobMetaData; override;
     function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IArrayMetaData; override;
     procedure getFBVersion(version: TStrings);
-
-    {utility}
-    function GetSQLTimestampParam: ISQLParamTimestamp;
   end;
 
 implementation
 
 uses FB30Transaction, FB30Statement, FB30Array, FB30Blob, FBMessages,
-  FBOutputBlock, FB30Events, IBUtils, FBTimestamp;
+  FBOutputBlock, FB30Events, IBUtils;
 
 type
   { TVersionCallback }
@@ -393,11 +390,6 @@ begin
   finally
     bufferObj.Free;
   end;
-end;
-
-function TFB30Attachment.GetSQLTimestampParam: ISQLParamTimestamp;
-begin
-  Result := TSQLTimestampParam.Create(self);
 end;
 
 end.

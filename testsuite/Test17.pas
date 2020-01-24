@@ -91,38 +91,23 @@ const
 procedure TTest17.TestFBTimezoneSettings(Attachment: IAttachment);
 begin
   writeln(OutFile,'Test Time Zone Setting');
-  with Attachment.GetSQLTimestampParam do
+  with FirebirdAPI do
   begin
-    SetTimeZoneID(65535);
-    writeln(OutFile,'Time Zone GMT = ',TimeZone);
-    SetTimeZoneID(65037);
-    writeln(OutFile,'Time Zone Zagreb = ',TimeZone);
-    SetTimeZoneID(959);
-    writeln(OutFile,'Time Zone Offset -08:00 = ',TimeZone);
-    clear;
-    SetTimeZoneID(2258);
-    writeln(OutFile,'Time Zone Offset +13:39 = ',TimeZone);
-    clear;
-    TimeZone := '+06:00';
-    writeln(OutFile,'Time Zone ID = ',GetTimezoneID);
-    clear;
-    SetAsDateTime(EncodeDate(2020,1,23) + EncodeTime(2,30,0,0));
-    TimeZone := '-08:00';
-    writeln(OutFile,'Time Zone ID = ',GetTimezoneID,', UTC Time = ',DateTimeToStr(GetAsUTCDateTime));
-    clear;
-    TimeZone := 'US/Arizona';
-    writeln(OutFile,'Time Zone ID = ',GetTimezoneID);
-
-    clear;
-    SetAsUTCDateTime(EncodeDate(2020,1,23) + EncodeTime(2,30,0,0),'-08:00');
-    writeln(OutFile,'Local Time = ',GetAsString,', Time Zone = ',TimeZone);
+    writeln(OutFile,'Time Zone GMT = ',TimeZoneID2TimeZoneName(65535));
+    writeln(OutFile,'Time Zone Zagreb = ',TimeZoneID2TimeZoneName(65037));
+    writeln(OutFile,'Time Zone Offset -08:00 = ',TimeZoneID2TimeZoneName(959));
+    writeln(OutFile,'Time Zone Offset +13:39 = ',TimeZoneID2TimeZoneName(2258));
+    writeln(OutFile,'Time Zone ID = ',TimeZoneName2TimeZoneID('+06:00'));
+    writeln(OutFile,'Time Zone ID = ',TimeZoneName2TimeZoneID('-08:00'),', UTC Time = ',
+      LocalTimeToUTCTime(EncodeDate(2020,1,23) + EncodeTime(2,30,0,0), '-08:00'));
+    writeln(OutFile,'Time Zone ID = ',TimeZoneName2TimeZoneID('US/Arizona'));
+    writeln(OutFile,'Local Time = ',UTCTimeToLocalTime(EncodeDate(2020,1,23) + EncodeTime(2,30,0,0),'-08:00'),', Time Zone = -08:00');
   end;
 end;
 
 procedure TTest17.UpdateDatabase(Attachment: IAttachment);
 var Transaction: ITransaction;
     Statement: IStatement;
-    Timestamp: ISQLParamTimestamp;
     FPCTimestamp: TTimestamp;
     sqlInsert: AnsiString;
     SysTime: TSystemTime;
@@ -166,25 +151,15 @@ begin
     wMilliseconds := 0;
   end;
   {$ENDIF}
-  Timestamp := Attachment.GetSQLTimestampParam;
-  Timestamp.SetAsSystemTime(SysTime);
-  Statement.SQLParams[3].SetAsSQLTimestamp(Timestamp);
+  Statement.SQLParams[3].SetAsDateTime(SystemTimeToDateTime(SysTime));
   Statement.Execute;
 
   Statement.SQLParams[0].AsInteger := 4;
-
-  Timestamp.AsDate :=  EncodeDate(2019,12,25);
-  Statement.SQLParams[1].SetAsSQLTimestamp(Timestamp);
-  Timestamp.Clear;
-
-  Timestamp.SetAsTime(0,1,40,1115);
-  Statement.SQLParams[2].SetAsSQLTimestamp(Timestamp);
-  Timestamp.Clear;
-
+  Statement.SQLParams[1].SetAsDate(EncodeDate(2019,12,25));
+  Statement.SQLParams[2].SetAsTime(FirebirdAPI.EncodeFBExtTime(0,1,40,1115));
   FPCTimestamp.Date := Trunc(EncodeDate(2019,12,12)) + DateDelta;
   FPCTimestamp.Time :=  ((22*MinsPerHour + 10)*SecsPerMin)*MSecsPerSec + 1; {22:10:0.001)}
-  Timestamp.SetAsTimestamp(FPCTimeStamp);
-  Statement.SQLParams[3].SetAsSQLTimestamp(Timestamp);
+  Statement.SQLParams[3].SetAsDateTime(TimestampToDateTime(FPCTimestamp));
   Statement.Execute;
 end;
 
@@ -192,7 +167,6 @@ procedure TTest17.UpdateDatabase4_TZ(Attachment: IAttachment);
 var Transaction: ITransaction;
     Statement: IStatement;
     sqlInsert: AnsiString;
-    Timestamp: ISQLParamTimestamp;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   sqlInsert := 'Insert into FB4TestData_TZ(RowID,TimeCol,TimestampCol) ' +
@@ -203,25 +177,13 @@ begin
 
   Statement := Attachment.Prepare(Transaction,'Insert into FB4TestData_TZ(RowID,TimeCol,TimestampCol) Values(?,?,?)');
 
-  Timestamp := Attachment.GetSQLTimestampParam;
   Statement.SQLParams[0].AsInteger := 2;
-  Timestamp.AsTime := EncodeTime(14,02,10,5);
-  Timestamp.Timezone := '-08:00';
-  Statement.SQLParams[1].SetAsSQLTimestamp(Timestamp);
-  Timestamp.Clear;
-  Timestamp.AsDateTime := EncodeDate(1918,11,11) + EncodeTime(11,11,0,0);
-  Timestamp.Timezone := 'Europe/London';
-  Statement.SQLParams[2].SetAsSQLTimestamp(Timestamp);
+  Statement.SQLParams[1].SetAsTime(EncodeTime(14,02,10,5),'-08:00');
+  Statement.SQLParams[2].SetAsDateTime(EncodeDate(1918,11,11) + EncodeTime(11,11,0,0),'Europe/London');
   Statement.Execute;
-  Timestamp.Clear;
   Statement.SQLParams[0].AsInteger := 3;
-  Timestamp.AsTime := EncodeTime(22,02,10,5);
-  Timestamp.Timezone := '-08:00';
-  Statement.SQLParams[1].SetAsSQLTimestamp(Timestamp);
-  Timestamp.Clear;
-  Timestamp.AsDateTime := EncodeDate(1918,11,11) + EncodeTime(0,11,0,0);
-  Timestamp.Timezone := '+04:00';
-  Statement.SQLParams[2].SetAsSQLTimestamp(Timestamp);
+  Statement.SQLParams[1].SetAsTime(EncodeTime(22,02,10,5),'-08:00');
+  Statement.SQLParams[2].SetAsDateTime(EncodeDate(1918,11,11) + EncodeTime(0,11,0,0),'+04:00');
   Statement.Execute;
 end;
 
@@ -280,9 +242,9 @@ begin
   begin
     writeln(OutFile,Results[0].AsInteger,', ',DateToStr(Results[1].AsDate),', ',
       FormatDateTime('hh:nn:ss.zzz',Results[2].AsTime),', ', DateTimeToStr(Results[3].AsDateTime));
-    SysTime := Results[3].GetAsSQLTimestamp.GetAsSystemTime;
-    with SysTime do
-    begin
+   DateTimeToSystemTime(Results[3].GetAsDateTime,SysTime);
+   with SysTime do
+   begin
       {$IFDEF FPC}
       writeln(OutFile,'Sys Time = ',Year, ', ',Month, ', ',Day, ', ',DayOfWeek, ', ',Hour, ', ',Minute, ', ',Second, ', ',MilliSecond);
       {$ELSE}
@@ -296,6 +258,8 @@ procedure TTest17.QueryDatabase4_TZ(Attachment: IAttachment);
 var Transaction: ITransaction;
     Statement: IStatement;
     Results: IResultSet;
+    aDate: TDateTime;
+    aTimeZone: AnsiString;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   Statement := Attachment.Prepare(Transaction,'Select * from  FB4TestData_TZ');
@@ -311,17 +275,25 @@ begin
 
       write(OutFile,'TimeCol = ');
       if not Results[1].IsNull then
-        with Results[1].GetAsSQLTimestamp do
-          writeln(OutFile,GetAsString,', TimeZoneID = ',GetTimezoneID,', Time Zone Name = ',TimeZone,
-            ', UTC Time = ',TimeToStr(GetAsUTCDateTime))
+      begin
+        Results[1].GetAsDateTime(aDate,aTimeZone);
+        writeln(OutFile,Results[1].GetAsString,
+                       ',TimeZoneID = ',FirebirdAPI.TimeZoneName2TimeZoneID(aTimeZone),
+                       ', Time Zone Name = ',aTimeZone,
+                       ', UTC Time = ',TimeToStr( Results[1].GetAsUTCDateTime))
+      end
       else
         writeln(OutFile,'NULL');
 
       write(OutFile,'TimeStampCol = ');
       if not Results[2].IsNull then
-        with Results[2].GetAsSQLTimestamp do
-          writeln(OutFile,GetAsString,', TimeZoneID = ',GetTimezoneID,', Time Zone Name = ',TimeZone,
-            ', UTC Timestamp = ',DateTimeToStr(GetAsUTCDateTime))
+      begin
+        Results[2].GetAsDateTime(aDate,aTimeZone);
+        writeln(OutFile,Results[2].GetAsString,
+                        ', TimeZoneID = ',FirebirdAPI.TimeZoneName2TimeZoneID(aTimeZone),
+                        ', Time Zone Name = ',aTimeZone,
+                        ', UTC Timestamp = ',DateTimeToStr( Results[2].GetAsUTCDateTime))
+      end
       else
         writeln(OutFile,'NULL');
     end;
