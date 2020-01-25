@@ -643,6 +643,8 @@ procedure GetTimeZoneInfo(attachment: IAttachment; aTimeZone: AnsiString;
   OnDate: TDateTime; var ZoneOffset, DSTOffset, EffectiveOffset: integer);
 procedure FBDecodeTime(aTime: TDateTime; var Hour, Minute, Second: word; var DeciMillisecond: cardinal);
 function FBEncodeTime(Hour, Minute, Second, DeciMillisecond: cardinal): TDateTime;
+function FBFormatDateTime(fmt: AnsiString; aDateTime: TDateTime): AnsiString;
+function FormatTimeZoneOffset(EffectiveTimeOffsetMins: integer): AnsiString;
 
 
 implementation
@@ -1640,6 +1642,27 @@ begin
   end
   else
     IBError(ibxeBadTimeSpecification,[Hour, Minute, Second, DeciMillisecond]);
+end;
+
+function FBFormatDateTime(fmt: AnsiString; aDateTime: TDateTime): AnsiString;
+var Hour, Minute, Second: word;
+    DeciMillisecond: cardinal;
+begin
+  if Pos('zzzz',fmt) > 0 then
+  begin
+    FBDecodeTime(aDateTime, Hour, Minute, Second, DeciMillisecond);
+    fmt := StringReplace(fmt, 'zzzz', Format('%.4d',[DeciMillisecond]), [rfReplaceAll]);
+  end;
+  Result := FormatDateTime(fmt,aDateTime);
+end;
+
+function FormatTimeZoneOffset(EffectiveTimeOffsetMins: integer): AnsiString;
+begin
+  if EffectiveTimeOffsetMins > 0 then
+    Result := Result + ' ' + Format('+%.2d:%.2d',[EffectiveTimeOffsetMins div 60,abs(EffectiveTimeOffsetMins mod 60)])
+  else
+    Result := Result + ' ' + Format('%.2d:%.2d',[EffectiveTimeOffsetMins div 60,abs(EffectiveTimeOffsetMins mod 60)]);
+end;
 end;
 
 end.

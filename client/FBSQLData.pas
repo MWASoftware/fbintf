@@ -825,7 +825,7 @@ begin
   with FormatSettings do
   {$IFEND}
   {$IFEND}
-    Result := LongTimeFormat;
+    Result := 'hh' + TimeSeparator + 'nn' + TimeSeparator + 'ss' + '.zzzz';;
 end;
 
 function TSQLDataItem.GetTimestampFormatStr: AnsiString;
@@ -837,7 +837,7 @@ begin
   with FormatSettings do
   {$IFEND}
   {$IFEND}
-    Result := ShortDateFormat + ' ' +  LongTimeFormat + '.zzz';
+    Result := ShortDateFormat + ' ' +  'hh' + TimeSeparator + 'nn' + TimeSeparator + 'ss' + '.zzzz';
 end;
 
 procedure TSQLDataItem.SetAsInteger(AValue: Integer);
@@ -1303,20 +1303,21 @@ begin
           Result := rs
       end;
 
-      SQL_TYPE_DATE,
+      SQL_TYPE_DATE:
+        Result := DateToStr(GetAsDateTime);
       SQL_TIMESTAMP:
-        Result := DateTimeToStr(GetAsDateTime);
+        Result := FBFormatDateTime(GetTimestampFormatStr,GetAsDateTime);
       SQL_TYPE_TIME:
-        Result := TimeToStr(GetAsDateTime);
+        Result := FBFormatDateTime(GetTimeFormatStr,GetAsDateTime);
       SQL_TIMESTAMP_TZ:
         begin
           GetAsDateTime(aDateTime,aTimeZone);
-          Result := DateTimeToStr(aDateTime) + ' ' + aTimeZone;
+          Result := FBFormatDateTime(GetTimestampFormatStr,aDateTime) + ' ' + aTimeZone;
         end;
       SQL_TIME_TZ:
         begin
           GetAsDateTime(aDateTime,aTimeZone);
-          Result := TimeToStr(aDateTime) + ' ' + aTimeZone;
+          Result := FBFormatDateTime(GetTimeFormatStr,aDateTime) + ' ' + aTimeZone;
         end;
 
       SQL_SHORT, SQL_LONG:

@@ -198,6 +198,7 @@ end;
 procedure TTestBase.ReportResult(aValue: IResults);
 var i: integer;
     s: AnsiString;
+    dt: TDateTime;
 begin
   for i := 0 to aValue.getCount - 1 do
   begin
@@ -257,6 +258,23 @@ begin
         writeln(OutFile,aValue[i].Name,' = ',s,' (Charset Id = ',aValue[i].GetCharSetID, ' Codepage = ',StringCodePage(s),')')
       else
         writeln(OutFile,aValue[i].Name,' = ',s);
+    end;
+
+    SQL_TIMESTAMP:
+      writeln(OutFile,aValue[i].Name,' = ',FBFormatDateTime('yyyy/mm/dd hh:nn:ss.zzzz',aValue[i].AsDateTime));
+    SQL_TYPE_DATE:
+      writeln(OutFile,aValue[i].Name,' = ',FBFormatDateTime('yyyy/mm/dd',aValue[i].AsDate));
+    SQL_TYPE_TIME:
+      writeln(OutFile,aValue[i].Name,' = ',FBFormatDateTime('hh:nn:ss.zzzz',aValue[i].AsTime));
+    SQL_TIMESTAMP_TZ:
+    begin
+      aValue[i].GetAsDateTime(dt,s);
+      writeln(OutFile,aValue[i].Name,' = ',FBFormatDateTime('yyyy/mm/dd hh:nn:ss.zzzz',dt) + ' ' + s);
+    end;
+    SQL_TIME_TZ:
+    begin
+      aValue[i].GetAsDateTime(dt,s);
+      writeln(OutFile,aValue[i].Name,' = ',FBFormatDateTime('hh:nn:ss.zzzz',dt) + ' ' + s);
     end;
 
     else
