@@ -641,6 +641,9 @@ function ParseDateTimeTZString(AValue: Ansistring; var aDateTime: TDateTime;
               var aTimezone: AnsiString; TimeOnly: boolean=false): boolean;
 procedure GetTimeZoneInfo(attachment: IAttachment; aTimeZone: AnsiString;
   OnDate: TDateTime; var ZoneOffset, DSTOffset, EffectiveOffset: integer);
+procedure FBDecodeTime(aTime: TDateTime; var Hour, Minute, Second: word; var DeciMillisecond: cardinal);
+function FBEncodeTime(Hour, Minute, Second, DeciMillisecond: cardinal): TDateTime;
+
 
 implementation
 
@@ -1604,6 +1607,39 @@ begin
     DSTOffset := TZInfo.ByName('DST_OFFSET').AsInteger;
     EffectiveOffset := TZInfo.ByName('EFFECTIVE_OFFSET').AsInteger;
   end;
+end;
+
+procedure FBDecodeTime(aTime: TDateTime; var Hour, Minute, Second: word;
+  var DeciMillisecond: cardinal);
+var D : Double;
+    l : cardinal;
+begin
+  {conversion to decimilliseconds hacked from FPC DateTimeToTimeStamp}
+  D := aTime * MSecsPerDay *10;
+  if D < 0 then
+    D := D - 0.5
+  else
+    D := D + 0.5;
+  {rest hacked from FPC DecodeTIme}
+  l := Abs(Trunc(D)) Mod (MSecsPerDay*10);
+  Hour   := l div 36000000;
+  l := l mod 36000000;
+  Minute := l div 600000;
+  l := l mod 600000;
+  Second := l div 10000;
+  DeciMillisecond := l mod 10000;
+end;
+
+function FBEncodeTime(Hour, Minute, Second, DeciMillisecond: cardinal): TDateTime;
+var DMs: cardinal;
+begin
+  if (Hour<24) and (Minute<60) and (Second<60) and (DeciMillisecond<10000) then
+  begin
+    DMs := Hour*36000000+Minute*600000+Second*10000+DeciMillisecond;
+    Result:=TDateTime(DMs/(MSecsPerDay*10))
+  end
+  else
+    IBError(ibxeBadTimeSpecification,[Hour, Minute, Second, DeciMillisecond]);
 end;
 
 end.

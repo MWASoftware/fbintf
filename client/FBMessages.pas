@@ -147,7 +147,8 @@ type
       ibxeBadTimeZoneID,
       ibxeBadBCDConversion,
       ibxeBadTimeZoneName,
-      ibxeTimeZoneUnknown
+      ibxeTimeZoneUnknown,
+      ibxeBadTimeSpecification
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -245,6 +246,7 @@ resourcestring
   SBadBCDConversion = 'Conversion to BCD failed';
   SBadTimeZoneName = 'Invalid Time Zone Name "%s"';
   STimeZoneUnknown = 'Time Zone Unknown';
+  SBadTimeSpecification = '%d:%d:%d.%d is not a valid time specification';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -319,7 +321,8 @@ const
     SBadTimeZoneID,
     SBadBCDConversion,
     SBadTimeZoneName,
-    STimeZoneUnknown
+    STimeZoneUnknown,
+    SBadTimeSpecification
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;

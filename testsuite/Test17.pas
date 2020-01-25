@@ -99,9 +99,9 @@ begin
     writeln(OutFile,'Time Zone Offset +13:39 = ',TimeZoneID2TimeZoneName(2258));
     writeln(OutFile,'Time Zone ID = ',TimeZoneName2TimeZoneID('+06:00'));
     writeln(OutFile,'Time Zone ID = ',TimeZoneName2TimeZoneID('-08:00'),', UTC Time = ',
-      LocalTimeToUTCTime(EncodeDate(2020,1,23) + EncodeTime(2,30,0,0), '-08:00'));
+      DateTimeToStr(LocalTimeToUTCTime(EncodeDate(2020,1,23) + EncodeTime(2,30,0,0), '-08:00')));
     writeln(OutFile,'Time Zone ID = ',TimeZoneName2TimeZoneID('US/Arizona'));
-    writeln(OutFile,'Local Time = ',UTCTimeToLocalTime(EncodeDate(2020,1,23) + EncodeTime(2,30,0,0),'-08:00'),', Time Zone = -08:00');
+    writeln(OutFile,'Local Time = ',DateTimeToStr(UTCTimeToLocalTime(EncodeDate(2020,1,23) + EncodeTime(2,30,0,0),'-08:00')),', Time Zone = -08:00');
   end;
 end;
 
@@ -156,7 +156,7 @@ begin
 
   Statement.SQLParams[0].AsInteger := 4;
   Statement.SQLParams[1].SetAsDate(EncodeDate(2019,12,25));
-  Statement.SQLParams[2].SetAsTime(FirebirdAPI.EncodeFBExtTime(0,1,40,1115));
+  Statement.SQLParams[2].SetAsTime(FBEncodeTime(0,1,40,1115));
   FPCTimestamp.Date := Trunc(EncodeDate(2019,12,12)) + DateDelta;
   FPCTimestamp.Time :=  ((22*MinsPerHour + 10)*SecsPerMin)*MSecsPerSec + 1; {22:10:0.001)}
   Statement.SQLParams[3].SetAsDateTime(TimestampToDateTime(FPCTimestamp));

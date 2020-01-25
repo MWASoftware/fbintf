@@ -1225,10 +1225,6 @@ type
     function TimeZoneName2TimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID;
     function LocalTimeToUTCTime(aLocalTime: TDateTime; aTimeZone: AnsiString): TDateTime;
     function UTCTimeToLocalTime(aUTCTime: TDateTime; aTimeZone: AnsiString): TDateTime;
-    procedure DecodeFBExtTime(aTime: longint; var Hour, Minute, Second, DeciMillisecond: word);
-    function EncodeFBExtTime(Hour, Minute, Second, DeciMillisecond: word): TDateTime;
-    function DecimillisecondsToDateTime(aTime: longint): TDateTime;
-    function DateTimeToDecimilliseconds(aTime: TDateTime): longint;
 end;
 
 type

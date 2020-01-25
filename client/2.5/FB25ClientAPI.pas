@@ -596,9 +596,10 @@ end;
 procedure TFB25ClientAPI.SQLEncodeTime(aTime: TDateTime; bufptr: PByte);
 var
   tm_date: TCTimeStructure;
-  Hr, Mt, S, Ms: Word;
+  Hr, Mt, S: Word;
+  DMs: cardinal; {DMs = decimilliseconds}
 begin
-  DecodeTime(aTime, Hr, Mt, S, Ms);
+  FBDecodeTime(aTime, Hr, Mt, S, DMs);
   with tm_date do begin
     tm_sec := S;
     tm_min := Mt;
@@ -608,20 +609,20 @@ begin
     tm_year := 0;
   end;
   isc_encode_sql_time(@tm_date, PISC_TIME(bufptr));
-  if Ms > 0 then
-    Inc(PISC_TIME(bufptr)^,Ms*10);
+  if DMs > 0 then
+    Inc(PISC_TIME(bufptr)^,DMs);
 end;
 
 function TFB25ClientAPI.SQLDecodeTime(bufptr: PByte): TDateTime;
 var
   tm_date: TCTimeStructure;
-  msecs: Word;
+  DMs: cardinal; {DMs = decimilliseconds}
 begin
   isc_decode_sql_time(PISC_TIME(bufptr), @tm_date);
   try
-    msecs :=  (PISC_TIME(bufptr)^ mod 10000) div 10;
-    result := EncodeTime(Word(tm_date.tm_hour), Word(tm_date.tm_min),
-                         Word(tm_date.tm_sec), msecs)
+    DMs :=  PISC_TIME(bufptr)^ mod 10000;
+    result := FBEncodeTime(Word(tm_date.tm_hour), Word(tm_date.tm_min),
+                         Word(tm_date.tm_sec), DMs)
   except
     on E: EConvertError do begin
       IBError(ibxeInvalidDataConversion, [nil]);

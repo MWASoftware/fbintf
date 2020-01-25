@@ -1555,8 +1555,7 @@ begin
   SQLType := SQL_TIME_TZ;
   DataLength := SizeOf(ISC_TIME_TZ);
   with FFirebirdClientAPI do
-    SQLEncodeTimeTZ(Trunc(frac(aValue)*decimillisecondsPerSecond),
-                        aTimeZone,SQLData);
+    SQLEncodeTimeTZ(aValue, aTimeZone,SQLData);
   Changed;
 end;
 
