@@ -1225,6 +1225,7 @@ type
     function TimeZoneName2TimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID;
     function LocalTimeToUTCTime(aLocalTime: TDateTime; aTimeZone: AnsiString): TDateTime;
     function UTCTimeToLocalTime(aUTCTime: TDateTime; aTimeZone: AnsiString): TDateTime;
+    function GetEffectiveOffsetMins(aLocalTime: TDateTime; aTimeZone: AnsiString): integer;
 end;
 
 type

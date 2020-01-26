@@ -39,7 +39,6 @@ unit IBUtils;
 {$IFDEF FPC}
 {$Mode Delphi}
 {$codepage UTF8}
-{$define HASREQEX}
 {$ENDIF}
 
 { $IF declared(CompilerVersion) and (CompilerVersion >= 22)}
@@ -637,8 +636,12 @@ function ParseConnectString(ConnectString: AnsiString;
               var PortNo: AnsiString): boolean;
 function GetProtocol(ConnectString: AnsiString): TProtocolAll;
 
-function ParseDateTimeTZString(AValue: Ansistring; var aDateTime: TDateTime;
-              var aTimezone: AnsiString; TimeOnly: boolean=false): boolean;
+{$IF declared(TFormatSettings)}
+function ParseDateTimeTZString(aDateTimeStr: Ansistring; var aDateTime: TDateTime;
+              var aTimezone: AnsiString; aFormatSettings: TFormatSettings; TimeOnly: boolean=false): boolean; overload;
+{$IFEND}
+function ParseDateTimeTZString(aDateTimeStr: Ansistring; var aDateTime: TDateTime;
+              var aTimezone: AnsiString; TimeOnly: boolean=false): boolean;  overload;
 procedure GetTimeZoneInfo(attachment: IAttachment; aTimeZone: AnsiString;
   OnDate: TDateTime; var ZoneOffset, DSTOffset, EffectiveOffset: integer);
 procedure FBDecodeTime(aTime: TDateTime; var Hour, Minute, Second: word; var DeciMillisecond: cardinal);
@@ -651,12 +654,14 @@ implementation
 
 uses FBMessages
 
-{$IFDEF HASREQEX}
+{$IFDEF FPC}
 ,RegExpr
-{$ENDIF}
-{$IFDEF HASDELPHIREGEX}
+{$ELSE}
+{$IF defined(CompilerVersion) and (CompilerVersion >= 22)}
 , RegularExpressions
+{$IFEND}
 {$ENDIF};
+
 
 function Max(n1, n2: Integer): Integer;
 begin
@@ -774,9 +779,28 @@ begin
   Result := true;
 end;
 
+function SchemeToProtocol(scheme: AnsiString): TProtocolAll;
+begin
+  scheme := AnsiUpperCase(scheme);
+  if scheme = 'INET' then
+    Result := inet
+  else
+  if scheme = 'INET4' then
+    Result := inet4
+  else
+  if scheme = 'INET6' then
+    Result := inet6
+  else
+  if scheme = 'XNET' then
+    Result := xnet
+  else
+  if scheme = 'WNET' then
+    Result := wnet
+end;
+
 {Extracts the Database Connect string from a Create Database Statement}
 
-{$IFDEF HASREQEX}
+{$IF declared(TRegexpr)}
 function ExtractConnectString(const CreateSQL: AnsiString;
   var ConnectString: AnsiString): boolean;
 var RegexObj: TRegExpr;
@@ -799,25 +823,6 @@ function ParseConnectString(ConnectString: AnsiString; var ServerName,
   DatabaseName: AnsiString; var Protocol: TProtocolAll; var PortNo: AnsiString
   ): boolean;
 
-  function GetProtocol(scheme: AnsiString): TProtocolAll;
-  begin
-    scheme := AnsiUpperCase(scheme);
-    if scheme = 'INET' then
-      Result := inet
-    else
-    if scheme = 'INET4' then
-      Result := inet4
-    else
-    if scheme = 'INET6' then
-      Result := inet6
-    else
-    if scheme = 'XNET' then
-      Result := xnet
-    else
-    if scheme = 'WNET' then
-      Result := wnet
-  end;
-
 var RegexObj: TRegExpr;
 begin
   ServerName := '';
@@ -833,7 +838,7 @@ begin
     if Result then
     begin
       {URL type connect string}
-      Protocol := GetProtocol(RegexObj.Match[1]);
+      Protocol := SchemeToProtocol(RegexObj.Match[1]);
       ServerName := RegexObj.Match[2];
       if RegexObj.MatchLen[3] > 0 then
         PortNo := system.Copy(ConnectString,RegexObj.MatchPos[3]+1,RegexObj.MatchLen[3]-1);
@@ -848,7 +853,7 @@ begin
       Result := RegexObj.Exec(ConnectString);
       if Result then
       begin
-        Protocol := GetProtocol(RegexObj.Match[1]);
+        Protocol := SchemeToProtocol(RegexObj.Match[1]);
         DatabaseName := RegexObj.Match[2];
       end
       else
@@ -897,16 +902,97 @@ begin
   end;
 end;
 
-function GetProtocol(ConnectString: AnsiString): TProtocolAll;
-var ServerName,
-    DatabaseName: AnsiString;
-    PortNo: AnsiString;
+{$ELSE}
+{$IF declared(TRegex)}
+function ExtractConnectString(const CreateSQL: AnsiString;
+  var ConnectString: AnsiString): boolean;
+var Regex: TRegEx;
+    Match: TMatch;
 begin
-  ParseConnectString(ConnectString,ServerName,DatabaseName,Result,PortNo);
+  Regex := TRegEx.Create('^ *CREATE +(DATABASE|SCHEMA) +''(.*)''',[roIgnoreCase]);
+  {extact database file spec}
+  Match := Regex.Match(CreateSQL);
+  Result := Match.Success and (Match.Groups.Count = 2);
+  if Result then
+    ConnectString := Match.Groups[1].Value;
 end;
 
+function ParseConnectString(ConnectString: AnsiString; var ServerName,
+  DatabaseName: AnsiString; var Protocol: TProtocolAll; var PortNo: AnsiString
+  ): boolean;
+
+var Regex: TRegEx;
+    Match: TMatch;
+begin
+  ServerName := '';
+  DatabaseName := ConnectString;
+  PortNo := '';
+  Protocol := unknownProtocol;
+  {extact database file spec}
+  Match := Regex.Match(ConnectString,'^([a-zA-Z46]+)://([a-zA-Z0-9\-\.]*)(|:[0-9a-zA-Z\-]+)/(.*)$',[roIgnoreCase]);
+  Result := Match.Success and (Match.Groups.Count = 4);
+  if Result then
+  begin
+    {URL type connect string}
+    Protocol := SchemeToProtocol(Match.Groups[0].Value);
+    ServerName := Match.Groups[1].Value;
+    PortNo := Match.Groups[2].Value;
+    DatabaseName := Match.Groups[3].Value;
+    if ServerName = '' then
+      DatabaseName := '/' + DatabaseName;
+  end
+  else
+  begin
+    {URL type connect string - local loop}
+    Match := Regex.Match(ConnectString,'^([a-zA-Z46]+)://(.*)$',[roIgnoreCase]);
+    Result := Match.Success and (Match.Groups.Count = 2);
+    if Result then
+    begin
+      Protocol := SchemeToProtocol(Match.Groups[0].Value);
+      DatabaseName := Match.Groups[1].Value;
+    end
+    else
+    begin
+      Match := Regex.Match(ConnectString,'^([a-zA-Z]:\\.*)',[roIgnoreCase]);
+      Result := Match.Success;
+      if Result then
+        Protocol := Local {Windows with leading drive ID}
+      else
+      begin
+        Match := Regex.Match(ConnectString,'^([a-zA-Z0-9\-\.]+)(|/[0-9a-zA-Z\-]+):(.*)$',[roIgnoreCase]);
+        Result := Match.Success and (Match.Groups.Count = 3);
+        if Result then
+        begin
+          {Legacy TCP Format}
+          ServerName := Match.Groups[0].Value;
+          PortNo := Match.Groups[1].Value;
+          DatabaseName := Match.Groups[2].Value;
+          Protocol := TCP;
+        end
+        else
+        begin
+          Match := Regex.Match(ConnectString,'^\\\\([a-zA-Z0-9\-\.]+)(|@[0-9a-zA-Z\-]+)\\(.*)$',[roIgnoreCase]);
+          Result := Match.Success and (Match.Groups.Count = 3);
+          if Result then
+          begin
+            {Netbui}
+            ServerName := Match.Groups[0].Value;
+            PortNo := Match.Groups[1].Value;
+            DatabaseName := Match.Groups[2].Value;
+            Protocol := NamedPipe
+          end
+          else
+          begin
+            Result := true;
+            Protocol := Local; {Assume local}
+          end;
+        end;
+      end;
+    end;
+  end;
+end;
 {$ELSE}
-{cruder version of above for Delphi. Older versions lack regular expression
+{cruder version of above for Delphi < XE. Older versions lack regular expression
  handling.}
 function ExtractConnectString(const CreateSQL: AnsiString;
   var ConnectString: AnsiString): boolean;
@@ -927,11 +1013,6 @@ begin
   end;
 end;
 
-function GetProtocol(ConnectString: AnsiString): TProtocolAll;
-begin
-  Result := unknownProtocol; {not implemented for Delphi}
-end;
-
 function ParseConnectString(ConnectString: AnsiString;
               var ServerName, DatabaseName: AnsiString; var Protocol: TProtocolAll;
               var PortNo: AnsiString): boolean;
@@ -939,7 +1020,17 @@ begin
   Result := false;
 end;
 
+{$IFEND}
 {$ENDIF}
+
+function GetProtocol(ConnectString: AnsiString): TProtocolAll;
+var ServerName,
+    DatabaseName: AnsiString;
+    PortNo: AnsiString;
+begin
+  if not ParseConnectString(ConnectString,ServerName,DatabaseName,Result,PortNo) then
+    Result := unknownProtocol;
+end;
 
 {Make a connect string in format appropriate protocol}
 
@@ -1542,52 +1633,86 @@ begin
   until TokenFound(Result) or EOF;
 end;
 
-function ParseDateTimeTZString(AValue: Ansistring; var aDateTime: TDateTime;
+function ParseDateTimeTZString(aDateTimeStr: Ansistring; var aDateTime: TDateTime;
   var aTimezone: AnsiString; TimeOnly: boolean): boolean;
+{$IF declared(TFormatSettings)}
+begin
+    {$IF declared(DefaultFormatSettings)}
+    Result := ParseDateTimeTZString(aDateTimeStr,aDateTime,aTimeZone,DefaultFormatSettings,TimeOnly);
+    {$ELSE}
+    Result := ParseDateTimeTZString(aDateTimeStr,aDateTime,aTimeZone,FormatSettings,TimeOnly);
+    {$IFEND}
+end;
+
+function ParseDateTimeTZString(aDateTimeStr: Ansistring; var aDateTime: TDateTime;
+              var aTimezone: AnsiString; aFormatSettings: TFormatSettings; TimeOnly: boolean=false): boolean;
+{$IFEND}
 const
   whitespacechars = [' ',#$09,#$0A,#$0D];
 var i,j: integer;
     aTime: TDateTime;
+    DMs: longint;
 begin
   Result := false;
   aTimezone := '';
-  if AValue <> '' then
-  {$if declared(DefaultFormatSettings)}
-  with DefaultFormatSettings do
-  {$ELSE}
-  with FormatSettings do
+  if aDateTimeStr <> '' then
+  {$if declared(TFormatSettings)}
+  with aFormatSettings do
   {$IFEND}
   begin
     aDateTime := 0;
     {Parse to get time zone info}
     i := 1;
-    while (i <= length(AValue)) and (AValue[i] in whitespacechars) do inc(i); {skip white space}
+    while (i <= length(aDateTimeStr)) and (aDateTimeStr[i] in whitespacechars) do inc(i); {skip white space}
     if not TimeOnly then
     begin
       {decode date}
       j := i;
-      while (j <= length(AValue)) and (AValue[j] in [0..9,DateSeparator]) do inc(j);
-      if TryStrToDate(system.copy(AValue,i,j-i),aDateTime) then
+      while (j <= length(aDateTimeStr)) and (aDateTimeStr[j] in ['0'..'9',DateSeparator]) do inc(j);
+      if TryStrToDate(system.copy(aDateTimeStr,i,j-i),aDateTime) then
         i := j; {otherwise start again i.e. assume time only}
     end;
 
-    while (i <= length(AValue)) and (AValue[i] in whitespacechars) do inc(i); {skip white space}
+    while (i <= length(aDateTimeStr)) and (aDateTimeStr[i] in whitespacechars) do inc(i); {skip white space}
     {decode time}
     j := i;
-    while (j <= length(AValue)) and (AValue[j] in [0..9,TimeSeparator]) do inc(j);
-    Result := TryStrToTime(system.copy(AValue,i,j-i),aTime);
+    while (j <= length(aDateTimeStr)) and (aDateTimeStr[j] in ['0'..'9',TimeSeparator]) do inc(j);
+    Result := TryStrToTime(system.copy(aDateTimeStr,i,j-i),aTime);
     if not Result then Exit;
     aDateTime := aDateTime + aTime;
     i := j;
 
-    while (i <= length(AValue)) and (AValue[i] in whitespacechars) do inc(i); {skip white space}
+    {is there a factional second part}
+    if aDateTimeStr[i] = '.' then
+    begin
+      inc(i);
+      inc(j);
+      while (j <= Length(aDateTimeStr)) and (aDateTimeStr[j] in ['0'..'9']) do inc(j);
+      if j > i then
+        Result := TryStrToInt(system.copy(aDateTimeStr,i,j-i),DMs);
+      if not Result then Exit;
+      {adjust for number of significant digits}
+      if j-i = 3 then
+        DMs := DMs * 10
+      else
+      if j-i = 2 then
+        DMs := DMs * 100
+      else
+      if j-i = 1 then
+        DMs := DMs * 1000;
+      aDateTime := aDateTime + (DMs / (MsecsPerDay*10));
+    end;
+    i := j;
+
+    while (i <= length(aDateTimeStr)) and (aDateTimeStr[i] in whitespacechars) do inc(i); {skip white space}
     {decode time zone}
-    if i < length(AValue) then
+    if i < length(aDateTimeStr) then
     begin
       j := i;
-      while (j <= length(AValue)) and not (AValue[j] in whitespacechars) do inc(j);
-      aTimezone := system.copy(AValue,i,j-i);
-    end
+      while (j <= length(aDateTimeStr)) and not (aDateTimeStr[j] in whitespacechars) do inc(j);
+      aTimezone := system.copy(aDateTimeStr,i,j-i);
+    end;
+    Result := true;
   end
 end;
 
@@ -1662,7 +1787,6 @@ begin
     Result := Result + ' ' + Format('+%.2d:%.2d',[EffectiveTimeOffsetMins div 60,abs(EffectiveTimeOffsetMins mod 60)])
   else
     Result := Result + ' ' + Format('%.2d:%.2d',[EffectiveTimeOffsetMins div 60,abs(EffectiveTimeOffsetMins mod 60)]);
-end;
 end;
 
 end.

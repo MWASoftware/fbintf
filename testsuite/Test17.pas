@@ -89,6 +89,8 @@ const
 { TTest17 }
 
 procedure TTest17.TestFBTimezoneSettings(Attachment: IAttachment);
+var aDateTime: TDateTime;
+    aTimeZone: AnsiString;
 begin
   writeln(OutFile,'Test Time Zone Setting');
   with FirebirdAPI do
@@ -102,7 +104,17 @@ begin
       DateTimeToStr(LocalTimeToUTCTime(EncodeDate(2020,1,23) + EncodeTime(2,30,0,0), '-08:00')));
     writeln(OutFile,'Time Zone ID = ',TimeZoneName2TimeZoneID('US/Arizona'));
     writeln(OutFile,'Local Time = ',DateTimeToStr(UTCTimeToLocalTime(EncodeDate(2020,1,23) + EncodeTime(2,30,0,0),'-08:00')),', Time Zone = -08:00');
+    writeln(OutFile,'Time Zone Offset = ',GetEffectiveOffsetMins(StrToDateTime('1/7/1989 23:00:00'),'Europe/London'));
   end;
+  if ParseDateTimeTZString('29/11/1969 23:30:00 GMT',aDateTime,aTimeZone) then
+    writeln(OutFile,'Date = ',DateTimeToStr(aDateTime),', TimeZone = ',aTimeZone)
+  else
+    writeln(OutFile,'ParseDateTimeTZString failed');
+  if ParseDateTimeTZString('1/4/2001 22:30:10.001 -08:00',aDateTime,aTimeZone) then
+    with DefaultFormatSettings do
+    writeln(OutFile,'Date = ',FBFormatDateTime(ShortDateFormat + ' ' + LongTimeFormat + '.zzzz',aDateTime),', TimeZone = ',aTimeZone)
+  else
+    writeln(OutFile,'ParseDateTimeTZString failed');
 end;
 
 procedure TTest17.UpdateDatabase(Attachment: IAttachment);

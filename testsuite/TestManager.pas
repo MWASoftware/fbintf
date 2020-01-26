@@ -166,21 +166,21 @@ var ServerName: AnsiString;
     PortNo: AnsiString;
     i: integer;
 begin
-  {$IFNDEF FPC}
-  Result := ConnectString;
-  if Pos('inet',Result) = 1 then
+  if not ParseConnectString(ConnectString, ServerName, Result, Protocol,PortNo) then
   begin
-    system.Delete(Result,1,7);
-    i := Pos('/',Result);
-    if i > 0 then
-      system.delete(Result,1,i);
-  end
-  else
-  if Pos('localhost:',Result) = 1 then
-    system.Delete(Result,1,10)
-  else
-  {$ENDIF}
-  ParseConnectString(ConnectString, ServerName, Result, Protocol,PortNo);
+    {assume either inet format (remote) or localhost}
+    Result := ConnectString;
+    if Pos('inet',Result) = 1 then
+    begin
+      system.Delete(Result,1,7);
+      i := Pos('/',Result);
+      if i > 0 then
+        system.delete(Result,1,i);
+    end
+    else
+    if Pos('localhost:',Result) = 1 then
+      system.Delete(Result,1,10)
+  end;
 end;
 
 function TTestBase.ReportResults(Statement: IStatement): IResultSet;

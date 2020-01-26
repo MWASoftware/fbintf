@@ -208,6 +208,8 @@ type
     function TimeZoneName2TimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID; virtual;
     function LocalTimeToUTCTime(aLocalTime: TDateTime; aTimeZone: AnsiString): TDateTime;
     function UTCTimeToLocalTime(aUTCTime: TDateTime; aTimeZone: AnsiString): TDateTime;
+    function GetEffectiveOffsetMins(aLocalTime: TDateTime; aTimeZone: AnsiString
+      ): integer;
 
 end;
 
@@ -447,6 +449,16 @@ begin
   SQLEncodeDateTime(aUTCTime,@Buffer);
   Buffer.time_zone := TimeZoneName2TimeZoneID(aTimeZone);
   SQLDecodeTimestampTZ(Result,theTimeZone,@Buffer);
+end;
+
+function TFBClientAPI.GetEffectiveOffsetMins(aLocalTime: TDateTime;
+  aTimeZone: AnsiString): integer;
+var UTCTime: TDateTime;
+    Buffer: ISC_TIMESTAMP_TZ;
+begin
+  SQLEncodeTimestampTZ(aLocalTime,aTimeZone,@Buffer);
+  UTCTime := SQLDecodeDateTime(@Buffer);
+  Result := Round((aLocalTime - UTCTime) * MinsPerDay);
 end;
 
 function TFBClientAPI.IsLibraryLoaded: boolean;
