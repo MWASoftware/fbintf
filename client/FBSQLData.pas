@@ -1360,6 +1360,8 @@ begin
 end;
 
 function TSQLDataItem.GetAsVariant: Variant;
+var ts: TDateTime;
+    timezone: AnsiString;
 begin
   CheckActive;
   if IsNull then
@@ -1373,6 +1375,12 @@ begin
         result := AsString;
       SQL_TIMESTAMP, SQL_TYPE_DATE, SQL_TYPE_TIME:
         result := AsDateTime;
+      SQL_TIMESTAMP_TZ,
+      SQL_TIME_TZ:
+        begin
+          GetAsDateTime(ts,timezone);
+          result := VarArrayOf([ts,timezone]);
+        end;
       SQL_SHORT, SQL_LONG:
         if Scale = 0 then
           result := AsLong
@@ -1696,6 +1704,9 @@ begin
   CheckActive;
   if VarIsNull(Value) then
     IsNull := True
+  else
+  if VarIsArray(Value) then {must be datetime plus timezone}
+    SetAsDateTime(Value[0],AnsiString(Value[1]))
   else case VarType(Value) of
     varEmpty, varNull:
       IsNull := True;
