@@ -295,7 +295,7 @@ begin
       begin
         Results[1].GetAsDateTime(aDate,aTimeZone);
         writeln(OutFile,Results[1].GetAsString,
-                       ',TimeZoneID = ',FirebirdAPI.TimeZoneName2TimeZoneID(aTimeZone),
+                       ', TimeZoneID = ',FirebirdAPI.TimeZoneName2TimeZoneID(aTimeZone),
                        ', Time Zone Name = ',aTimeZone,
                        ', UTC Time = ',TimeToStr( Results[1].GetAsUTCDateTime))
       end

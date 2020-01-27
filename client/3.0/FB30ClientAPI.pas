@@ -503,7 +503,7 @@ var DecFloat16: IDecFloat16;
         IBError(ibxBCDTooBig,[aValue.Precision,width]);
 
       j := 1 + (width - aValue.Precision);
-      for i := 0 to (aValue.Precision div 2) - 1  do
+      for i := 0 to (aValue.Precision - 1) div 2 do
       begin
           buffer[j] := (aValue.Fraction[i] and $f0) shr 4;
           Inc(j);
