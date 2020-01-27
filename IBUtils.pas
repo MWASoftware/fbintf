@@ -1021,7 +1021,7 @@ begin
 end;
 
 {$IFEND}
-{$ENDIF}
+{$IFEND}
 
 function GetProtocol(ConnectString: AnsiString): TProtocolAll;
 var ServerName,
@@ -1640,13 +1640,14 @@ begin
     {$IF declared(DefaultFormatSettings)}
     Result := ParseDateTimeTZString(aDateTimeStr,aDateTime,aTimeZone,DefaultFormatSettings,TimeOnly);
     {$ELSE}
+    {$IF declared(FormatSettings)}
     Result := ParseDateTimeTZString(aDateTimeStr,aDateTime,aTimeZone,FormatSettings,TimeOnly);
-    {$IFEND}
+    {$else}
 end;
 
 function ParseDateTimeTZString(aDateTimeStr: Ansistring; var aDateTime: TDateTime;
               var aTimezone: AnsiString; aFormatSettings: TFormatSettings; TimeOnly: boolean=false): boolean;
-{$IFEND}
+{$IFEND}{$IFEND}{$IFEND}
 const
   whitespacechars = [' ',#$09,#$0A,#$0D];
 var i,j: integer;

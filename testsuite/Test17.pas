@@ -141,7 +141,7 @@ var Transaction: ITransaction;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   sqlInsert := 'Insert into TestData(RowID,DateCol,TimeCol,TimestampCol) Values(1,''2019.4.1'''+
-              ',''11:31:05.0001'',''2016.2.29 22:2:35.0010'')';
+              ',''11:31:05.0001'',''2016.2.29 22:2:35.0001'')';
   Attachment.ExecuteSQL(Transaction,sqlInsert,[]);
 
   Statement := Attachment.Prepare(Transaction,SQLInsert2);
