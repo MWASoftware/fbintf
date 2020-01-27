@@ -1218,7 +1218,7 @@ type
 
     {BCD Field Support}
     procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal; bufptr: PByte);
-    function SQLDecFloatDecode(SQLType: cardinal; scale: integer; bufptr: PByte): tBCD;
+    function SQLDecFloatDecode(SQLType: cardinal; bufptr: PByte): tBCD;
 
     {Time Zone Support - uses client local ICU}
     function TimeZoneID2TimeZoneName(aTimeZoneID: TFBTimeZoneID): AnsiString;

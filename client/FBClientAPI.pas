@@ -203,7 +203,7 @@ type
     function GetClientMinor: integer;  virtual; abstract;
     procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal;
       bufptr: PByte); virtual;
-    function SQLDecFloatDecode(SQLType: cardinal; scale: integer; bufptr: PByte): tBCD; virtual;
+    function SQLDecFloatDecode(SQLType: cardinal;  bufptr: PByte): tBCD; virtual;
     function TimeZoneID2TimeZoneName(aTimeZoneID: TFBTimeZoneID): AnsiString; virtual;
     function TimeZoneName2TimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID; virtual;
     function LocalTimeToUTCTime(aLocalTime: TDateTime; aTimeZone: AnsiString): TDateTime;
@@ -412,8 +412,7 @@ begin
     IBError(ibxeNotSupported,[]);
 end;
 
-function TFBClientAPI.SQLDecFloatDecode(SQLType: cardinal; scale: integer;
-  bufptr: PByte): tBCD;
+function TFBClientAPI.SQLDecFloatDecode(SQLType: cardinal; bufptr: PByte): tBCD;
 begin
   if not HasDecFloatSupport then
     IBError(ibxeNotSupported,[]);

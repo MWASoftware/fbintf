@@ -1447,7 +1447,7 @@ begin
   SQL_DEC16,
   SQL_DEC34:
     with FFirebirdClientAPI do
-      Result := SQLDecFloatDecode(SQLType,GetScale, SQLData);
+      Result := SQLDecFloatDecode(SQLType, SQLData);
 
   else
     if not CurrToBCD(GetAsCurrency,Result) then

@@ -115,6 +115,11 @@ begin
     writeln(OutFile,'Date = ',FBFormatDateTime(ShortDateFormat + ' ' + LongTimeFormat + '.zzzz',aDateTime),', TimeZone = ',aTimeZone)
   else
     writeln(OutFile,'ParseDateTimeTZString failed');
+  if ParseDateTimeTZString('23:59:10.2 Europe/London',aDateTime,aTimeZone,true) then
+    with DefaultFormatSettings do
+    writeln(OutFile,'Date = ',FBFormatDateTime(LongTimeFormat + '.zzzz',aDateTime),', TimeZone = ',aTimeZone)
+  else
+    writeln(OutFile,'ParseDateTimeTZString failed');
 end;
 
 procedure TTest17.UpdateDatabase(Attachment: IAttachment);

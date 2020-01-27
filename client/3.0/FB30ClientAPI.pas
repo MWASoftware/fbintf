@@ -133,8 +133,7 @@ type
       var aTimeZone: AnsiString; bufptr: PByte); override;
     procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal; bufptr: PByte);
       override;
-    function SQLDecFloatDecode(SQLType: cardinal; scale: integer; bufptr: PByte
-      ): tBCD; override;
+    function SQLDecFloatDecode(SQLType: cardinal; bufptr: PByte): tBCD; override;
     function TimeZoneID2TimeZoneName(aTimeZoneID: TFBTimeZoneID): AnsiString;
       override;
     function TimeZoneName2TimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID;
@@ -500,12 +499,15 @@ var DecFloat16: IDecFloat16;
     var i,j: integer;
     begin
       Fillchar(buffer,sizeof(buffer),0);
+      if aValue.Precision > width then
+        IBError(ibxBCDTooBig,[aValue.Precision,width]);
+
       j := 1 + (width - aValue.Precision);
-      for i := 0 to (aValue.Precision div 2) do
+      for i := 0 to (aValue.Precision div 2) - 1  do
       begin
           buffer[j] := (aValue.Fraction[i] and $f0) shr 4;
           Inc(j);
-          if j < 34 then
+          if j <= width then
           begin
             buffer[j] := (aValue.Fraction[i] and $0f);
             Inc(j);
@@ -529,6 +531,7 @@ begin
       DecFloat16 := UtilIntf.getDecFloat16(StatusIntf);
       Check4DataBaseError;
       DecFloat16.fromBcd(sign,@buffer,exp,FB_DEC16Ptr(bufptr));
+      Check4DataBaseError;
     end;
 
   SQL_DEC34,
@@ -538,6 +541,7 @@ begin
       DecFloat34 := UtilIntf.getDecFloat34(StatusIntf);
       Check4DataBaseError;
       DecFloat34.fromBcd(sign,@buffer,exp,FB_DEC34Ptr(bufptr));
+      Check4DataBaseError;
     end;
 
   else
@@ -545,7 +549,7 @@ begin
   end;
 end;
 
-function TFB30ClientAPI.SQLDecFloatDecode(SQLType: cardinal; scale: integer;
+function TFB30ClientAPI.SQLDecFloatDecode(SQLType: cardinal;
   bufptr: PByte): tBCD;
 
 var DecFloat16: IDecFloat16;
@@ -566,17 +570,17 @@ var DecFloat16: IDecFloat16;
     for i := 1 to Result.Precision do
     begin
       if odd(i) then
-        Result.Fraction[j] := (buffer[i - scale] and $0f)
+        Result.Fraction[j] := (buffer[i] and $0f)
       else
       begin
-        Result.Fraction[j] := (Result.Fraction[j] shl 4) or (buffer[i - scale] and $0f);
+        Result.Fraction[j] := (Result.Fraction[j] shl 4) or (buffer[i] and $0f);
         Inc(j);
       end;
     end;
   end;
 
 begin
-  Result := inherited SQLDecFloatDecode(SQLType, scale, bufptr);
+  Result := inherited SQLDecFloatDecode(SQLType, bufptr);
   FillChar(Result, sizeof(tBCD),0);
   case SQLType of
   SQL_DEC16:
@@ -585,6 +589,7 @@ begin
       Check4DataBaseError;
       Result.Precision := 16;
       DecFloat16.toBcd(FB_DEC16Ptr(bufptr),@sign,@buffer,@exp);
+      Check4DataBaseError;
     end;
 
   SQL_DEC34,
@@ -592,8 +597,9 @@ begin
     begin
       DecFloat34 := UtilIntf.getDecFloat34(StatusIntf);
       Check4DataBaseError;
-      Result.Precision := 34 + scale;
+      Result.Precision := 34;
       DecFloat34.toBcd(FB_DEC34Ptr(bufptr),@sign,@buffer,@exp);
+      Check4DataBaseError;
     end;
 
   else
