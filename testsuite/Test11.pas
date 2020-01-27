@@ -269,6 +269,7 @@ begin
   if not FirebirdAPI.HasServiceAPI then Exit;
 
   DBName := ExtractDBName(Owner.GetEmployeeDatabaseName);
+  writeln('DBName = ',DBName);
   ServerName := Owner.Server;
 
   SPB := FirebirdAPI.AllocateSPB;

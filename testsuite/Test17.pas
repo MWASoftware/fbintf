@@ -111,12 +111,22 @@ begin
   else
     writeln(OutFile,'ParseDateTimeTZString failed');
   if ParseDateTimeTZString('1/4/2001 22:30:10.001 -08:00',aDateTime,aTimeZone) then
+  {$if declard(DefaultFormatSettings)}
     with DefaultFormatSettings do
+  {$else}
+  {$if declared(FormatSettings)}
+    with FormatSettings do
+  {$ifend}{$ifend}
     writeln(OutFile,'Date = ',FBFormatDateTime(ShortDateFormat + ' ' + LongTimeFormat + '.zzzz',aDateTime),', TimeZone = ',aTimeZone)
   else
     writeln(OutFile,'ParseDateTimeTZString failed');
   if ParseDateTimeTZString('23:59:10.2 Europe/London',aDateTime,aTimeZone,true) then
+  {$if declard(DefaultFormatSettings)}
     with DefaultFormatSettings do
+  {$else}
+  {$if declared(FormatSettings)}
+    with FormatSettings do
+  {$ifend}{$ifend}
     writeln(OutFile,'Date = ',FBFormatDateTime(LongTimeFormat + '.zzzz',aDateTime),', TimeZone = ',aTimeZone)
   else
     writeln(OutFile,'ParseDateTimeTZString failed');

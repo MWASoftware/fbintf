@@ -66,7 +66,6 @@ contains
   FB30Services in 'client\3.0\FB30Services.pas',
   FB30Statement in 'client\3.0\FB30Statement.pas',
   Firebird in 'client\3.0\firebird\Firebird.pas',
-  FBTimestamp in 'client\FBTimestamp.pas',
   FBMessages in 'client\FBMessages.pas';
 
 end.

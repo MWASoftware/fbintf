@@ -25,8 +25,7 @@ uses
   Test16 in 'Test16.pas',
   Test17 in 'Test17.pas',
   Firebird,
-  TestManager in 'TestManager.pas',
-  FBOutputBlock in '..\client\FBOutputBlock.pas';
+  TestManager in 'TestManager.pas';
 
 procedure WriteHelp;
 begin

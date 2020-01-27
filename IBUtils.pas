@@ -657,7 +657,7 @@ uses FBMessages
 {$IFDEF FPC}
 ,RegExpr
 {$ELSE}
-{$IF defined(CompilerVersion) and (CompilerVersion >= 22)}
+{$IF declared(CompilerVersion) and (CompilerVersion >= 22)}
 , RegularExpressions
 {$IFEND}
 {$ENDIF};
@@ -912,9 +912,9 @@ begin
   Regex := TRegEx.Create('^ *CREATE +(DATABASE|SCHEMA) +''(.*)''',[roIgnoreCase]);
   {extact database file spec}
   Match := Regex.Match(CreateSQL);
-  Result := Match.Success and (Match.Groups.Count = 2);
+  Result := Match.Success and (Match.Groups.Count = 3);
   if Result then
-    ConnectString := Match.Groups[1].Value;
+    ConnectString := Match.Groups[2].Value;
 end;
 
 function ParseConnectString(ConnectString: AnsiString; var ServerName,
@@ -930,14 +930,14 @@ begin
   Protocol := unknownProtocol;
   {extact database file spec}
   Match := Regex.Match(ConnectString,'^([a-zA-Z46]+)://([a-zA-Z0-9\-\.]*)(|:[0-9a-zA-Z\-]+)/(.*)$',[roIgnoreCase]);
-  Result := Match.Success and (Match.Groups.Count = 4);
+  Result := Match.Success and (Match.Groups.Count = 5);
   if Result then
   begin
     {URL type connect string}
-    Protocol := SchemeToProtocol(Match.Groups[0].Value);
-    ServerName := Match.Groups[1].Value;
-    PortNo := Match.Groups[2].Value;
-    DatabaseName := Match.Groups[3].Value;
+    Protocol := SchemeToProtocol(Match.Groups[1].Value);
+    ServerName := Match.Groups[2].Value;
+    PortNo := Match.Groups[3].Value;
+    DatabaseName := Match.Groups[4].Value;
     if ServerName = '' then
       DatabaseName := '/' + DatabaseName;
   end
@@ -945,11 +945,11 @@ begin
   begin
     {URL type connect string - local loop}
     Match := Regex.Match(ConnectString,'^([a-zA-Z46]+)://(.*)$',[roIgnoreCase]);
-    Result := Match.Success and (Match.Groups.Count = 2);
+    Result := Match.Success and (Match.Groups.Count = 3);
     if Result then
     begin
-      Protocol := SchemeToProtocol(Match.Groups[0].Value);
-      DatabaseName := Match.Groups[1].Value;
+      Protocol := SchemeToProtocol(Match.Groups[1].Value);
+      DatabaseName := Match.Groups[2].Value;
     end
     else
     begin
@@ -960,25 +960,25 @@ begin
       else
       begin
         Match := Regex.Match(ConnectString,'^([a-zA-Z0-9\-\.]+)(|/[0-9a-zA-Z\-]+):(.*)$',[roIgnoreCase]);
-        Result := Match.Success and (Match.Groups.Count = 3);
+        Result := Match.Success and (Match.Groups.Count = 4);
         if Result then
         begin
           {Legacy TCP Format}
-          ServerName := Match.Groups[0].Value;
-          PortNo := Match.Groups[1].Value;
-          DatabaseName := Match.Groups[2].Value;
+          ServerName := Match.Groups[1].Value;
+          PortNo := Match.Groups[2].Value;
+          DatabaseName := Match.Groups[3].Value;
           Protocol := TCP;
         end
         else
         begin
           Match := Regex.Match(ConnectString,'^\\\\([a-zA-Z0-9\-\.]+)(|@[0-9a-zA-Z\-]+)\\(.*)$',[roIgnoreCase]);
-          Result := Match.Success and (Match.Groups.Count = 3);
+          Result := Match.Success and (Match.Groups.Count = 4);
           if Result then
           begin
             {Netbui}
-            ServerName := Match.Groups[0].Value;
-            PortNo := Match.Groups[1].Value;
-            DatabaseName := Match.Groups[2].Value;
+            ServerName := Match.Groups[1].Value;
+            PortNo := Match.Groups[2].Value;
+            DatabaseName := Match.Groups[3].Value;
             Protocol := NamedPipe
           end
           else
@@ -1759,11 +1759,13 @@ end;
 
 function FBEncodeTime(Hour, Minute, Second, DeciMillisecond: cardinal): TDateTime;
 var DMs: cardinal;
+    D: Double;
 begin
   if (Hour<24) and (Minute<60) and (Second<60) and (DeciMillisecond<10000) then
   begin
     DMs := Hour*36000000+Minute*600000+Second*10000+DeciMillisecond;
-    Result:=TDateTime(DMs/(MSecsPerDay*10))
+    D := DMs/(MSecsPerDay*10);
+    Result:=TDateTime(d)
   end
   else
     IBError(ibxeBadTimeSpecification,[Hour, Minute, Second, DeciMillisecond]);
