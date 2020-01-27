@@ -149,7 +149,7 @@ type
       ibxeBadTimeZoneName,
       ibxeTimeZoneUnknown,
       ibxeBadTimeSpecification,
-      ibxBCDTooBig
+      ibxeBCDTooBig
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
