@@ -217,7 +217,7 @@ EMP_NO = 2
 FIRST_NAME = Robert
 LAST_NAME = Nelson
 PHONE_EXT = 250
-HIRE_DATE = 28/12/1988 00:00:00.0000
+HIRE_DATE = 1988/12/28 00:00:00.0000
 DEPT_NO = 600
 JOB_CODE = VP
 JOB_GRADE = 2
@@ -228,7 +228,7 @@ EMP_NO = 4
 FIRST_NAME = Bruce
 LAST_NAME = Young
 PHONE_EXT = 233
-HIRE_DATE = 28/12/1988 00:00:00.0000
+HIRE_DATE = 1988/12/28 00:00:00.0000
 DEPT_NO = 621
 JOB_CODE = Eng
 JOB_GRADE = 2
@@ -239,7 +239,7 @@ EMP_NO = 5
 FIRST_NAME = Kim
 LAST_NAME = Lambert
 PHONE_EXT = 22
-HIRE_DATE = 6/2/1989 00:00:00.0000
+HIRE_DATE = 1989/02/06 00:00:00.0000
 DEPT_NO = 130
 JOB_CODE = Eng
 JOB_GRADE = 2
@@ -261,7 +261,7 @@ EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
 PHONE_EXT = 410
-HIRE_DATE = 5/4/1989 00:00:00.0000
+HIRE_DATE = 1989/04/05 00:00:00.0000
 DEPT_NO = 180
 JOB_CODE = Mktg
 JOB_GRADE = 3
@@ -284,7 +284,7 @@ EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
 PHONE_EXT = 410
-HIRE_DATE = 5/4/1989 00:00:00.0000
+HIRE_DATE = 1989/04/05 00:00:00.0000
 DEPT_NO = 180
 JOB_CODE = Mktg
 JOB_GRADE = 3
@@ -319,7 +319,7 @@ EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
 PHONE_EXT = 410
-HIRE_DATE = 5/4/1989 00:00:00.0000
+HIRE_DATE = 1989/04/05 00:00:00.0000
 DEPT_NO = 180
 JOB_CODE = Mktg
 JOB_GRADE = 3
@@ -330,7 +330,7 @@ FULL_NAME = Johnson, Leslie
 Current memory = 22394208
 Delta memory = 4672
 Max memory = 22487200
-Elapsed time= 0.000 sec
+Elapsed time= 0.004 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
@@ -475,7 +475,7 @@ EMP_NO = 150
 FIRST_NAME = John
 LAST_NAME = Doe
 PHONE_EXT = 
-HIRE_DATE = 1/4/2015 00:00:00.0000
+HIRE_DATE = 2015/04/01 00:00:00.0000
 DEPT_NO = 600
 JOB_CODE = Eng
 JOB_GRADE = 4
@@ -488,7 +488,7 @@ EMP_NO = 151
 FIRST_NAME = Major
 LAST_NAME = Major
 PHONE_EXT = 
-HIRE_DATE = 1/4/2015 00:00:00.0000
+HIRE_DATE = 2015/04/01 00:00:00.0000
 DEPT_NO = 600
 JOB_CODE = Eng
 JOB_GRADE = 4
@@ -505,7 +505,7 @@ EMP_NO = 150
 FIRST_NAME = Jane
 LAST_NAME = Doe
 PHONE_EXT = NULL
-HIRE_DATE = 1/4/2015 00:00:00.0000
+HIRE_DATE = 2015/04/01 00:00:00.0000
 DEPT_NO = 600
 JOB_CODE = Eng
 JOB_GRADE = 4
@@ -522,7 +522,7 @@ EMP_NO = 150
 FIRST_NAME = Jayne's
 LAST_NAME = Doe
 PHONE_EXT = NULL
-HIRE_DATE = 1/4/2015 00:00:00.0000
+HIRE_DATE = 2015/04/01 00:00:00.0000
 DEPT_NO = 600
 JOB_CODE = Eng
 JOB_GRADE = 4
@@ -536,7 +536,7 @@ EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
 PHONE_EXT = 410
-HIRE_DATE = 5/4/1989 00:00:00.0000
+HIRE_DATE = 1989/04/05 00:00:00.0000
 DEPT_NO = 180
 JOB_CODE = Mktg
 JOB_GRADE = 3
@@ -550,7 +550,7 @@ EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
 PHONE_EXT = 410
-HIRE_DATE = 5/4/1989 00:00:00.0000
+HIRE_DATE = 1989/04/05 00:00:00.0000
 DEPT_NO = 180
 JOB_CODE = Mktg
 JOB_GRADE = 3
@@ -562,7 +562,7 @@ EMP_NO = 9
 FIRST_NAME = Phil
 LAST_NAME = Forest
 PHONE_EXT = 229
-HIRE_DATE = 17/4/1989 00:00:00.0000
+HIRE_DATE = 1989/04/17 00:00:00.0000
 DEPT_NO = 622
 JOB_CODE = Mngr
 JOB_GRADE = 3
@@ -576,7 +576,7 @@ EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
 PHONE_EXT = 410
-HIRE_DATE = 31/1/2015 00:00:00.0000
+HIRE_DATE = 2015/01/31 00:00:00.0000
 DEPT_NO = 180
 JOB_CODE = Mktg
 JOB_GRADE = 3
@@ -597,7 +597,7 @@ EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
 PHONE_EXT = 410
-HIRE_DATE = 31/1/2016 00:00:00.0000
+HIRE_DATE = 2016/01/31 00:00:00.0000
 DEPT_NO = 180
 JOB_CODE = Mktg
 JOB_GRADE = 3
@@ -2160,7 +2160,7 @@ Param Name = DATED
 Param Name = NOTES
 ROWID = 1
 TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
-DATED = 1/4/2016 09:30:00.1000
+DATED = 2016/04/01 09:30:00.1000
 NOTES = Écoute moi (Charset Id = 4 Codepage = 65001)
 MYARRAY = NULL
 
@@ -2175,7 +2175,7 @@ Size = 8
 
 ROWID = 1
 TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
-DATED = 1/4/2016 09:30:00.1000
+DATED = 2016/04/01 09:30:00.1000
 NOTES = Écoute moi (Charset Id = 4 Codepage = 65001)
 Array: (0: 100) (1: 99) (2: 98) (3: 97) (4: 96) (5: 95) (6: 94) (7: 93) (8: 92) (9: 91) (10: 90) (11: 89) (12: 88) (13: 87) (14: 86) (15: 85) (16: 84) 
 
@@ -2185,7 +2185,7 @@ Write updated reduced slice
 Show update array
 ROWID = 1
 TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
-DATED = 1/4/2016 09:30:00.1000
+DATED = 2016/04/01 09:30:00.1000
 NOTES = Écoute moi (Charset Id = 4 Codepage = 65001)
 Array: (0: 100) (1: 99) (2: 1000) (3: 97) (4: 96) (5: 95) (6: 94) (7: 93) (8: 92) (9: 91) (10: 90) (11: 89) (12: 88) (13: 87) (14: 86) (15: 85) (16: 84) 
 
@@ -2276,7 +2276,7 @@ ODS major = 13
 Page Size = 8192
 Version = 1: LI-T6.3.0.1436 Firebird 4.0 Beta 1
 Database is Read/Write
-Database Created: 31/12/9999
+Database Created: 19/2/2019 10:38:52
 Pages Used = 302
 Pages Free = 24
 Server Memory = 21816592
@@ -2675,21 +2675,21 @@ Nullable
 Size = 8
 
 ROWID = 1
-DATECOL = 1/4/2019 
+DATECOL = 2019/04/01
 TIMECOL = 11:31:05.0001
-TIMESTAMPCOL = 29/2/2016 22:02:35.0010
+TIMESTAMPCOL = 2016/02/29 22:02:35.0010
 ROWID = 2
-DATECOL = 3/9/1939 
+DATECOL = 1939/09/03
 TIMECOL = 15:40:00.0000
-TIMESTAMPCOL = 11/11/1918 11:11:00.0000
+TIMESTAMPCOL = 1918/11/11 11:11:00.0000
 ROWID = 3
-DATECOL = 3/9/1939 
+DATECOL = 1939/09/03
 TIMECOL = 15:40:00.0000
-TIMESTAMPCOL = 11/11/1918 11:11:00.0000
+TIMESTAMPCOL = 1918/11/11 11:11:00.0000
 ROWID = 4
-DATECOL = 25/12/2019 
+DATECOL = 2019/12/25
 TIMECOL = 00:01:40.1115
-TIMESTAMPCOL = 12/12/2019 22:10:00.0010
+TIMESTAMPCOL = 2019/12/12 22:10:00.0010
 
 
 Testdata - second pass
@@ -2698,7 +2698,7 @@ Testdata - second pass
 2, 3/9/1939, 15:40:00.000, 11/11/1918 11:11:00
 3, 3/9/1939, 15:40:00.000, 11/11/1918 11:11:00
 4, 25/12/2019, 00:01:40.112, 12/12/2019 22:10:00
-Sys Time = 2019, 12, 12, 5, 22, 10, 0, 1
+Sys Time = 2019, 12, 12, 4, 22, 10, 0, 1
 Firebird 4 extension types
 
 Test Time Zone Setting
@@ -2709,7 +2709,11 @@ Time Zone Offset +13:39 = +13:39
 Time Zone ID = 1799
 Time Zone ID = 959, UTC Time = 23/1/2020 10:30:00
 Time Zone ID = 64920
-Local Time = 22/1/2020 18:30:00.0000 -08:00, Time Zone = -08:00
+Local Time = 22/1/2020 18:30:00, Time Zone = -08:00
+Time Zone Offset = 60
+Date = 29/11/1969 23:30:00, TimeZone = GMT
+Date = 1/4/2001 22:30:10.0010, TimeZone = -08:00
+Date = 23:59:10.2000, TimeZone = Europe/London
 
 FB4 Testdata_TZ
 
@@ -2755,7 +2759,7 @@ TimeCol = 11:32:10.0002 -05:00, TimeZoneID = 1139, Time Zone Name = -05:00, UTC 
 TimeStampCol = 1/4/2020 11:31:05.0001 +01:00, TimeZoneID = 1499, Time Zone Name = +01:00, UTC Timestamp = 1/4/2020 10:31:05
 ROW ID = 2
 TimeCol = 14:02:10.0050 -08:00, TimeZoneID = 959, Time Zone Name = -08:00, UTC Time = 22:02:10
-TimeStampCol = 11/11/1918 11:11:00.0000 00:00, TimeZoneID = 65071, Time Zone Name = Europe/London, UTC Timestamp = 11/11/1918 11:11:00
+TimeStampCol = 11/11/1918 11:11:00.0000 Europe/London, TimeZoneID = 65071, Time Zone Name = Europe/London, UTC Timestamp = 11/11/1918 11:11:00
 ROW ID = 3
 TimeCol = 22:02:10.0050 -08:00, TimeZoneID = 959, Time Zone Name = -08:00, UTC Time = 06:02:10
 TimeStampCol = 11/11/1918 00:11:00.0000 +04:00, TimeZoneID = 1679, Time Zone Name = +04:00, UTC Timestamp = 10/11/1918 20:11:00
@@ -2837,11 +2841,11 @@ Float34 = 123456789123456789.12345678
   Places = 8
   Digits = 00 00 00 00 12 34 56 78 91 23 45 67 89 12 34 56 78 
 BigNumber = 123456123456.123456
-  Precision = 28
+  Precision = 34
   Sign = 0
   Special = 0
   Places = 6
-  Digits = 00 00 00 00 00 12 34 56 12 34 56 12 34 56 
+  Digits = 00 00 00 00 00 00 00 00 12 34 56 12 34 56 12 34 56 
 RowID = 2
 Float16 = -64000000000.01
   Precision = 16
@@ -2856,11 +2860,11 @@ Float34 = -123456789123456789.12345678
   Places = 8
   Digits = 00 00 00 00 12 34 56 78 91 23 45 67 89 12 34 56 78 
 BigNumber = -123456123456.123456
-  Precision = 28
+  Precision = 34
   Sign = 1
   Special = 0
   Places = 6
-  Digits = 00 00 00 00 00 12 34 56 12 34 56 12 34 56 
+  Digits = 00 00 00 00 00 00 00 00 12 34 56 12 34 56 12 34 56 
 RowID = 3
 Float16 = 64100000000.011
   Precision = 16
@@ -2875,17 +2879,17 @@ Float34 = 12345678912.1200
   Places = 4
   Digits = 00 00 00 00 00 00 00 00 00 01 23 45 67 89 12 12 00 
 BigNumber = 1234561234567.123456
-  Precision = 28
+  Precision = 34
   Sign = 0
   Special = 0
   Places = 6
-  Digits = 00 00 00 00 01 23 45 61 23 45 67 12 34 56 
+  Digits = 00 00 00 00 00 00 00 01 23 45 61 23 45 67 12 34 56 
 BiggerNumber = 123456123456123456123456.1235
-  Precision = 30
+  Precision = 34
   Sign = 0
   Special = 0
   Places = 4
-  Digits = 00 12 34 56 12 34 56 12 34 56 12 34 56 12 35 
+  Digits = 00 00 00 12 34 56 12 34 56 12 34 56 12 34 56 12 35 
 
 
 Test Suite Ends
