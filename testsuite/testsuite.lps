@@ -173,7 +173,7 @@
         <EditorIndex Value="3"/>
         <TopLine Value="1762"/>
         <CursorPos Y="1785"/>
-        <UsageCount Value="34"/>
+        <UsageCount Value="35"/>
         <Loaded Value="True"/>
       </Unit21>
       <Unit22>
@@ -191,11 +191,10 @@
       </Unit22>
       <Unit23>
         <Filename Value="../client/FBMessages.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="4"/>
         <TopLine Value="124"/>
         <CursorPos X="11" Y="152"/>
-        <UsageCount Value="37"/>
+        <UsageCount Value="38"/>
         <Loaded Value="True"/>
       </Unit23>
       <Unit24>
@@ -210,7 +209,7 @@
           <TopLine Value="564"/>
           <CursorPos Y="588"/>
         </ExtraEditor1>
-        <UsageCount Value="76"/>
+        <UsageCount Value="77"/>
         <Loaded Value="True"/>
       </Unit24>
       <Unit25>
@@ -228,10 +227,12 @@
       </Unit26>
       <Unit27>
         <Filename Value="../client/3.0/FB30ClientAPI.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="492"/>
-        <CursorPos Y="507"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="485"/>
+        <CursorPos X="21" Y="503"/>
         <UsageCount Value="64"/>
+        <Loaded Value="True"/>
       </Unit27>
       <Unit28>
         <Filename Value="../client/2.5/FB25ClientAPI.pas"/>
@@ -914,7 +915,7 @@
     <OtherDefines Count="1">
       <Define0 Value="INIDE"/>
     </OtherDefines>
-    <JumpHistory Count="22" HistoryIndex="21">
+    <JumpHistory Count="23" HistoryIndex="22">
       <Position1>
         <Filename Value="../IB.pas"/>
         <Caret Line="1221" Column="51" TopLine="1198"/>
@@ -1003,6 +1004,10 @@
         <Filename Value="../IBUtils.pas"/>
         <Caret Line="1782" Column="10" TopLine="1762"/>
       </Position22>
+      <Position23>
+        <Filename Value="../client/FBMessages.pas"/>
+        <Caret Line="152" Column="11" TopLine="124"/>
+      </Position23>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
