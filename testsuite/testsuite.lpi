@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="11"/>
+    <Version Value="10"/>
     <General>
       <Flags>
         <MainUnitHasCreateFormStatements Value="False"/>
@@ -23,6 +23,7 @@
     </PublishOptions>
     <RunParams>
       <local>
+        <FormatVersion Value="1"/>
         <CommandLineParams Value="-t 17 -l /opt/firebird4/lib/libfbclient.so.2 -P 33050"/>
       </local>
       <environment>
@@ -30,19 +31,6 @@
           <Variable0 Name="PROMPT_AT_END" Value="YES"/>
         </UserOverrides>
       </environment>
-      <FormatVersion Value="2"/>
-      <Modes Count="1">
-        <Mode0 Name="default">
-          <local>
-            <CommandLineParams Value="-t 17 -l /opt/firebird4/lib/libfbclient.so.2 -P 33050"/>
-          </local>
-          <environment>
-            <UserOverrides Count="1">
-              <Variable0 Name="PROMPT_AT_END" Value="YES"/>
-            </UserOverrides>
-          </environment>
-        </Mode0>
-      </Modes>
     </RunParams>
     <RequiredPackages Count="1">
       <Item1>
