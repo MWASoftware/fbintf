@@ -1642,12 +1642,12 @@ begin
     {$ELSE}
     {$IF declared(FormatSettings)}
     Result := ParseDateTimeTZString(aDateTimeStr,aDateTime,aTimeZone,FormatSettings,TimeOnly);
-    {$else}
+    {$IFEND} {$IFEND}
 end;
 
 function ParseDateTimeTZString(aDateTimeStr: Ansistring; var aDateTime: TDateTime;
               var aTimezone: AnsiString; aFormatSettings: TFormatSettings; TimeOnly: boolean=false): boolean;
-{$IFEND}{$IFEND}{$IFEND}
+{$IFEND}
 const
   whitespacechars = [' ',#$09,#$0A,#$0D];
 var i,j: integer;
