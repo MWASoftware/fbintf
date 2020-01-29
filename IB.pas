@@ -155,6 +155,7 @@ const
 {$I 'include/dyn_consts.inc'}
 {$I 'include/inf_pub.inc'}
 {$I 'include/configkeys.inc'}
+{$I 'include/blr.inc'}
 
 {The following constants define the values return by calls to the GetSQLType
  methods provided by several of the interfaces defined below.}
