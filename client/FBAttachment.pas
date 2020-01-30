@@ -273,7 +273,7 @@ begin
   begin
     Stmt := Prepare(StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit),
                     'Select MON$CHARACTER_SET_ID, MON$REMOTE_PROTOCOL, MON$AUTH_METHOD, MON$SEC_DATABASE From MON$ATTACHMENTS, MON$DATABASE '+
-                    'Where MON$ATTACHMENT_ID = CURRENT_CONNECTION');
+                    'Where MON$ATTACHMENT_ID = CURRENT_CONNECTION ');
     ResultSet := Stmt.OpenCursor;
     if ResultSet.FetchNext then
     begin

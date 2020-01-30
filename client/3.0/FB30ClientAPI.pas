@@ -200,7 +200,8 @@ begin
   PluginsList := TStringList.Create;
   try
     PluginsList.CommaText := Plugins;
-    FIsEmbeddedServer := PluginsList.IndexOf('Engine12') <> -1;
+    FIsEmbeddedServer := (PluginsList.IndexOf('Engine12') <> -1) or {Firebird 3}
+                         (PluginsList.IndexOf('Engine13') <> -1); {Firebird 4}
   finally
     PluginsList.Free;
   end;

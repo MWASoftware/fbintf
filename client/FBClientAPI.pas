@@ -122,6 +122,7 @@ type
   private
     class var FEnvSetupDone: boolean;
     class var FLibraryList: array of IFirebirdLibrary;
+  private
     FFirebirdAPI: IFirebirdAPI;
     FRequestedLibName: string;
     function LoadIBLibrary: boolean;
@@ -139,6 +140,7 @@ type
     destructor Destroy; override;
     class function GetFBLibrary(aLibPathName: string): IFirebirdLibrary;
     class procedure FreeLibraries;
+    function SameLibrary(aLibName: string): boolean;
 
     {IFirebirdLibrary}
     function GetHandle: TLibHandle;
@@ -320,11 +322,13 @@ begin
   if aLibPathName <> '' then
   begin
     for i := 0 to Length(FLibraryList) - 1 do
-      if (FLibraryList[i] as TFBLibrary).FRequestedLibName = aLibPathName then
+    begin
+      if (FLibraryList[i] as TFBLibrary).SameLibrary(aLibPathName) then
       begin
         Result := FLibraryList[i];
         Exit;
       end;
+    end;
     Result := Create(aLibPathName);
   end;
 
@@ -336,6 +340,11 @@ begin
   for i := 0 to Length(FLibraryList) - 1 do
     FLibraryList[i] := nil;
   SetLength(FLibraryList,0);
+end;
+
+function TFBLibrary.SameLibrary(aLibName: string): boolean;
+begin
+  Result := FRequestedLibName = aLibName;
 end;
 
 function TFBLibrary.GetHandle: TLibHandle;
