@@ -648,7 +648,7 @@ procedure FBDecodeTime(aTime: TDateTime; var Hour, Minute, Second: word; var Dec
 function FBEncodeTime(Hour, Minute, Second, DeciMillisecond: cardinal): TDateTime;
 function FBFormatDateTime(fmt: AnsiString; aDateTime: TDateTime): AnsiString;
 function FormatTimeZoneOffset(EffectiveTimeOffsetMins: integer): AnsiString;
-
+function StripLeadingZeros(Value: AnsiString): AnsiString;
 
 implementation
 
@@ -1790,6 +1790,25 @@ begin
     Result := Result + ' ' + Format('+%.2d:%.2d',[EffectiveTimeOffsetMins div 60,abs(EffectiveTimeOffsetMins mod 60)])
   else
     Result := Result + ' ' + Format('%.2d:%.2d',[EffectiveTimeOffsetMins div 60,abs(EffectiveTimeOffsetMins mod 60)]);
+end;
+
+function StripLeadingZeros(Value: AnsiString): AnsiString;
+var i: Integer;
+    start: integer;
+begin
+  Result := '';
+  start := 1;
+  if (Length(Value) > 0) and (Value[1] = '-') then
+  begin
+    Result := '-';
+    start := 2;
+  end;
+  for i := start to Length(Value) do
+    if Value[i] <> '0' then
+    begin
+      Result := Result + system.copy(Value, i, MaxInt);
+      Exit;
+    end;
 end;
 
 end.

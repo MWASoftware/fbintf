@@ -1247,26 +1247,6 @@ end;
 
 
 function TSQLDataItem.GetAsString: AnsiString;
-
-  function StripLeadingZeros(Value: AnsiString): AnsiString;
-  var i: Integer;
-      start: integer;
-  begin
-    Result := '';
-    start := 1;
-    if (Length(Value) > 0) and (Value[1] = '-') then
-    begin
-      Result := '-';
-      start := 2;
-    end;
-    for i := start to Length(Value) do
-      if Value[i] <> '0' then
-      begin
-        Result := Result + system.copy(Value, i, MaxInt);
-        Exit;
-      end;
-  end;
-
 var
   sz: PByte;
   str_len: Integer;
