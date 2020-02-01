@@ -236,6 +236,13 @@ begin
   Statement.SQLParams[3].AsString := '1234561234567.123456';
   Statement.SQLParams[4].AsBCD := StrToBCD('123456123456123456123456.123456');
   Statement.Execute;
+
+  Statement.SQLParams[0].AsInteger := 4;
+  Statement.SQLParams[1].AsBCD := 0;
+  Statement.SQLParams[2].AsBCD := -1;
+  Statement.SQLParams[3].AsBCD := 0;
+  Statement.SQLParams[4].AsBCD := 0;
+  Statement.Execute;
 end;
 
 procedure TTest17.QueryDatabase(Attachment: IAttachment);

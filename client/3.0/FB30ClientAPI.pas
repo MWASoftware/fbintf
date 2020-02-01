@@ -505,6 +505,7 @@ var DecFloat16: IDecFloat16;
 
       j := 1 + (width - aValue.Precision);
       for i := 0 to (aValue.Precision - 1) div 2 do
+      if j <= width then
       begin
           buffer[j] := (aValue.Fraction[i] and $f0) shr 4;
           Inc(j);
@@ -568,7 +569,7 @@ var DecFloat16: IDecFloat16;
     writeln; }
     {pack buffer}
     i := 1;
-    while (buffer[i] = 0) and (i <= buflen) do  {skip leading zeroes}
+    while (i <= buflen) and (buffer[i] = 0) do  {skip leading zeroes}
       inc(i);
 
     j := 0;
@@ -577,16 +578,14 @@ var DecFloat16: IDecFloat16;
     begin
       inc(Result.Precision);
       if odd(Result.Precision) then
-        Result.Fraction[j] := (buffer[i] and $0f)
+        Result.Fraction[j] := (buffer[i] and $0f) shl 4
       else
       begin
-        Result.Fraction[j] := (Result.Fraction[j] shl 4) or (buffer[i] and $0f);
+        Result.Fraction[j] := Result.Fraction[j] or (buffer[i] and $0f);
         Inc(j);
       end;
       inc(i);
     end;
-    if odd(Result.Precision) then
-      Result.Fraction[j] := Result.Fraction[j] shl 4;
   end;
 
 begin
