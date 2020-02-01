@@ -1320,7 +1320,7 @@ begin
       SQL_DEC_FIXED,
       SQL_DEC16,
       SQL_DEC34:
-        result := StripLeadingZeros(BCDToStr(GetAsBCD));
+        result := BCDToStr(GetAsBCD);
 
       else
         IBError(ibxeInvalidDataConversion, [nil]);

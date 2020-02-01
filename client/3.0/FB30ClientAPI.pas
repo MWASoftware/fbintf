@@ -559,7 +559,7 @@ var DecFloat16: IDecFloat16;
     exp: integer;
     buffer: array [1..34] of byte;
 
-  procedure packbuffer;
+  procedure packbuffer(buflen: integer);
   var i,j: integer;
   begin
 {    write('Decode: BCD Buffer = ');
@@ -567,17 +567,26 @@ var DecFloat16: IDecFloat16;
       write(buffer[i],' ');
     writeln; }
     {pack buffer}
+    i := 1;
+    while (buffer[i] = 0) and (i <= buflen) do  {skip leading zeroes}
+      inc(i);
+
     j := 0;
-    for i := 1 to Result.Precision do
+    Result.Precision := 0;
+    while i <= buflen do
     begin
-      if odd(i) then
+      inc(Result.Precision);
+      if odd(Result.Precision) then
         Result.Fraction[j] := (buffer[i] and $0f)
       else
       begin
         Result.Fraction[j] := (Result.Fraction[j] shl 4) or (buffer[i] and $0f);
         Inc(j);
       end;
+      inc(i);
     end;
+    if odd(Result.Precision) then
+      Result.Fraction[j] := Result.Fraction[j] shl 4;
   end;
 
 begin
@@ -588,9 +597,9 @@ begin
     begin
       DecFloat16 := UtilIntf.getDecFloat16(StatusIntf);
       Check4DataBaseError;
-      Result.Precision := 16;
       DecFloat16.toBcd(FB_DEC16Ptr(bufptr),@sign,@buffer,@exp);
       Check4DataBaseError;
+      packbuffer(16);
     end;
 
   SQL_DEC34,
@@ -598,15 +607,14 @@ begin
     begin
       DecFloat34 := UtilIntf.getDecFloat34(StatusIntf);
       Check4DataBaseError;
-      Result.Precision := 34;
       DecFloat34.toBcd(FB_DEC34Ptr(bufptr),@sign,@buffer,@exp);
       Check4DataBaseError;
+      packbuffer(34);
     end;
 
   else
     IBError(ibxeInvalidDataConversion,[]);
   end;
-  packbuffer;
   Result.SignSpecialPlaces :=  (-exp and $2f);
   if sign <> 0 then
     Result.SignSpecialPlaces := Result.SignSpecialPlaces or $80;
