@@ -17,8 +17,8 @@
         <Filename Value="TestManager.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="244"/>
-        <CursorPos X="54" Y="264"/>
+        <TopLine Value="800"/>
+        <CursorPos Y="818"/>
         <UsageCount Value="202"/>
       </Unit1>
       <Unit2>
@@ -160,13 +160,13 @@
           <TopLine Value="235"/>
           <CursorPos Y="246"/>
         </ExtraEditor1>
-        <UsageCount Value="132"/>
+        <UsageCount Value="133"/>
       </Unit19>
       <Unit20>
         <Filename Value="../client/FBClientAPI.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="413"/>
-        <CursorPos X="3" Y="417"/>
+        <TopLine Value="356"/>
+        <CursorPos Y="373"/>
         <UsageCount Value="59"/>
       </Unit20>
       <Unit21>
@@ -199,14 +199,13 @@
       <Unit24>
         <Filename Value="../IB.pas"/>
         <EditorIndex Value="-1"/>
-        <WindowIndex Value="1"/>
-        <TopLine Value="564"/>
-        <CursorPos Y="588"/>
+        <TopLine Value="1204"/>
+        <CursorPos X="32" Y="1227"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
-          <TopLine Value="1204"/>
-          <CursorPos X="32" Y="1227"/>
+          <TopLine Value="442"/>
+          <CursorPos Y="468"/>
         </ExtraEditor1>
         <UsageCount Value="89"/>
       </Unit24>
@@ -226,8 +225,8 @@
       <Unit27>
         <Filename Value="../client/3.0/FB30ClientAPI.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="552"/>
-        <CursorPos X="18" Y="570"/>
+        <TopLine Value="621"/>
+        <CursorPos Y="648"/>
         <UsageCount Value="64"/>
       </Unit27>
       <Unit28>
@@ -394,8 +393,8 @@
       <Unit51>
         <Filename Value="../client/3.0/FB30Statement.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="734"/>
-        <CursorPos X="75" Y="745"/>
+        <TopLine Value="796"/>
+        <CursorPos X="63" Y="830"/>
         <UsageCount Value="10"/>
       </Unit51>
       <Unit52>
@@ -470,8 +469,8 @@
       <Unit61>
         <Filename Value="../client/3.0/firebird/Firebird.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="1113"/>
-        <CursorPos X="31" Y="1119"/>
+        <TopLine Value="1260"/>
+        <CursorPos X="9" Y="1271"/>
         <UsageCount Value="26"/>
       </Unit61>
       <Unit62>
@@ -532,7 +531,7 @@
       <Unit70>
         <Filename Value="../IBErrorCodes.pas"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="3"/>
+        <UsageCount Value="10"/>
       </Unit70>
       <Unit71>
         <Filename Value="../client/3.0/firebird/Firebird4.pas"/>
