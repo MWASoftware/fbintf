@@ -1,398 +1,329 @@
-const
-  blr_text = 14;
-  blr_text2 = 15;	{ added in 3.2 JPN }
-  blr_short = 7;
-  blr_long = 8;
-  blr_quad = 9;
-  blr_float = 10;
-  blr_double = 27;
-  blr_d_float = 11;
-  blr_timestamp = 35;
-  blr_varying = 37;
-  blr_varying2 = 38;	{ added in 3.2 JPN }
-  blr_blob = 261;
-  blr_cstring = 40;
-  blr_cstring2 = 41;	{ added in 3.2 JPN }
-  blr_blob_id = 45;	{ added from gds.h }
-  blr_sql_date = 12;
-  blr_sql_time = 13;
-  blr_int64 = 16;
-  blr_blob2 = 17;
-  blr_domain_name = 18;
-  blr_domain_name2 = 19;
-  blr_not_nullable = 20;
-  blr_column_name = 21;
-  blr_column_name2 = 22;
-  blr_bool = 23;
-  blr_dec64 = 24;
-  blr_dec128 = 25;
-  blr_dec_fixed = 26;
-  blr_sql_time_tz = 28;
-  blr_timestamp_tz = 29;
-
-// first sub parameter for blr_domain_name[2]
-  blr_domain_type_of = 0;
-  blr_domain_full = 1;
-
-{ Historical alias for pre V6 applications }
-  blr_date	= blr_timestamp;
-
-  blr_inner = 0;
-  blr_left = 1;
-  blr_right = 2;
-  blr_full = 3;
-
-  blr_gds_code = 0;
-  blr_sql_code = 1;
-  blr_exception = 2;
-  blr_trigger_code = 3;
-  blr_default_code = 4;
-  blr_raise = 5;
-  blr_exception_msg = 6;
-  blr_exception_params = 7;
-  blr_sql_state = 8;
-
-  blr_version4 = 4;
-  blr_version5 = 5;
-//  blr_version6 = 6;
-  blr_eoc = 76;
-  blr_end = 255;
-
-  blr_assignment = 1;
-  blr_begin = 2;
-  blr_dcl_variable = 3;	{ added from gds.h }
-  blr_message = 4;
-  blr_erase = 5;
-  blr_fetch = 6;
-  blr_for = 7;
-  blr_if = 8;
-  blr_loop = 9;
-  blr_modify = 10;
-  blr_handler = 11;
-  blr_receive = 12;
-  blr_select = 13;
-  blr_send = 14;
-  blr_store = 15;
-  blr_label = 17;
-  blr_leave = 18;
-  blr_store2 = 19;
-  blr_post = 20;
-  blr_literal = 21;
-  blr_dbkey = 22;
-  blr_field = 23;
-  blr_fid = 24;
-  blr_parameter = 25;
-  blr_variable = 26;
-  blr_average = 27;
-  blr_count = 28;
-  blr_maximum = 29;
-  blr_minimum = 30;
-  blr_total = 31;
-  blr_receive_batch = 32;
-
-// unused code: 33
-
-  blr_add = 34;
-  blr_subtract = 35;
-  blr_multiply = 36;
-  blr_divide = 37;
-  blr_negate = 38;
-  blr_concatenate = 39;
-  blr_substring = 40;
-  blr_parameter2 = 41;
-  blr_from = 42;
-  blr_via = 43;
-  blr_user_name = 44;	{ added from gds.h }
-  blr_null = 45;
-
-  blr_equiv = 46;
-  blr_eql = 47;
-  blr_neq = 48;
-  blr_gtr = 49;
-  blr_geq = 50;
-  blr_lss = 51;
-  blr_leq = 52;
-  blr_containing = 53;
-  blr_matching = 54;
-  blr_starting = 55;
-  blr_between = 56;
-  blr_or = 57;
-  blr_and = 58;
-  blr_not = 59;
-  blr_any = 60;
-  blr_missing = 61;
-  blr_unique = 62;
-  blr_like = 63;
-
-// unused codes: 64..66
-
-  blr_rse = 67;
-  blr_first = 68;
-  blr_project = 69;
-  blr_sort = 70;
-  blr_boolean = 71;
-  blr_ascending = 72;
-  blr_descending = 73;
-  blr_relation = 74;
-  blr_rid = 75;
-  blr_union = 76;
-  blr_map = 77;
-  blr_group_by = 78;
-  blr_aggregate = 79;
-  blr_join_type = 80;
-
-// unused codes: 81..82
-
-  blr_agg_count = 83;
-  blr_agg_max = 84;
-  blr_agg_min = 85;
-  blr_agg_total = 86;
-  blr_agg_average = 87;
-  blr_parameter3 = 88;	{ same as Rdb definition }
-{ unsupported
-  blr_run_max = 89;
-  blr_run_min = 90;
-  blr_run_total = 91;
-  blr_run_average = 92;
+{
+  Automatically converted by H2Pas 1.0.0 from inf_pub.h
+  The following command line parameters were used:
+    inf_pub.h
 }
-  blr_agg_count2 = 93;
-  blr_agg_count_distinct = 94;
-  blr_agg_total_distinct = 95;
-  blr_agg_average_distinct = 96;
 
-// unused codes: 97..99
+{$IFDEF FPC}
+{$PACKRECORDS C}
+{$ENDIF}
 
-  blr_function = 100;
-  blr_gen_id = 101;
-///  blr_prot_mask = 102;
-  blr_upcase = 103;
-///  blr_lock_state = 104;
-  blr_value_if = 105;
-  blr_matching2 = 106;
-  blr_index = 107;
-  blr_ansi_like = 108;
-  blr_scrollable = 109;
 
-// unused codes: 110..117
+  {
+   *	PROGRAM:	JRD Access Method
+   *	MODULE:		inf.h
+   *	DESCRIPTION:	Information call declarations.
+   *
+   * The contents of this file are subject to the Interbase Public
+   * License Version 1.0 (the "License"); you may not use this file
+   * except in compliance with the License. You may obtain a copy
+   * of the License at http://www.Inprise.com/IPL.html
+   *
+   * Software distributed under the License is distributed on an
+   * "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express
+   * or implied. See the License for the specific language governing
+   * rights and limitations under the License.
+   *
+   * The Original Code was created by Inprise Corporation
+   * and its predecessors. Portions created by Inprise Corporation are
+   * Copyright (C) Inprise Corporation.
+   *
+   * All Rights Reserved.
+   * Contributor(s): ______________________________________.
+   *
+   * 2001.07.28: John Bellardo: Added isc_info_rsb_skip to support LIMIT.
+    }
+{$ifndef FIREBIRD_IMPL_INF_PUB_H}
+{$define FIREBIRD_IMPL_INF_PUB_H}
+  { Common, structural codes  }
+  {************************** }
 
-  blr_run_count = 118;	{ changed from 88 to avoid conflict with blr_parameter3 }
-  blr_rs_stream = 119;
-  blr_exec_proc = 120;
+  const
+    isc_info_end = 1;
+    isc_info_truncated = 2;
+    isc_info_error = 3;
+    isc_info_data_not_ready = 4;
+    isc_info_length = 126;
+    isc_info_flag_end = 127;
+  {**************************** }
+  { Database information items  }
+  {**************************** }
+  { Begin deprecated WAL and JOURNAL items.  }
+  { End deprecated WAL and JOURNAL items.  }
+  { Values 65 -100 unused to avoid conflict with InterBase  }
+  { codes 126 and 127 are used for special purposes }
+  { do not use them here }
+  { Leave this LAST!  }
 
-// unused codes: 121..123
+  type
+    db_info_types = (isc_info_db_id := 4,isc_info_reads := 5,
+      isc_info_writes := 6,isc_info_fetches := 7,
+      isc_info_marks := 8,isc_info_implementation := 11,
+      isc_info_isc_version := 12,isc_info_base_level := 13,
+      isc_info_page_size := 14,isc_info_num_buffers := 15,
+      isc_info_limbo := 16,isc_info_current_memory := 17,
+      isc_info_max_memory := 18,isc_info_window_turns := 19,
+      isc_info_license := 20,isc_info_allocation := 21,
+      isc_info_attachment_id := 22,isc_info_read_seq_count := 23,
+      isc_info_read_idx_count := 24,isc_info_insert_count := 25,
+      isc_info_update_count := 26,isc_info_delete_count := 27,
+      isc_info_backout_count := 28,isc_info_purge_count := 29,
+      isc_info_expunge_count := 30,isc_info_sweep_interval := 31,
+      isc_info_ods_version := 32,isc_info_ods_minor_version := 33,
+      isc_info_no_reserve := 34,isc_info_logfile := 35,
+      isc_info_cur_logfile_name := 36,isc_info_cur_log_part_offset := 37,
+      isc_info_num_wal_buffers := 38,isc_info_wal_buffer_size := 39,
+      isc_info_wal_ckpt_length := 40,isc_info_wal_cur_ckpt_interval := 41,
+      isc_info_wal_prv_ckpt_fname := 42,isc_info_wal_prv_ckpt_poffset := 43,
+      isc_info_wal_recv_ckpt_fname := 44,isc_info_wal_recv_ckpt_poffset := 45,
+      isc_info_wal_grpc_wait_usecs := 47,isc_info_wal_num_io := 48,
+      isc_info_wal_avg_io_size := 49,isc_info_wal_num_commits := 50,
+      isc_info_wal_avg_grpc_size := 51,isc_info_forced_writes := 52,
+      isc_info_user_names := 53,isc_info_page_errors := 54,
+      isc_info_record_errors := 55,isc_info_bpage_errors := 56,
+      isc_info_dpage_errors := 57,isc_info_ipage_errors := 58,
+      isc_info_ppage_errors := 59,isc_info_tpage_errors := 60,
+      isc_info_set_page_buffers := 61,isc_info_db_sql_dialect := 62,
+      isc_info_db_read_only := 63,isc_info_db_size_in_pages := 64,
+      frb_info_att_charset := 101,isc_info_db_class := 102,
+      isc_info_firebird_version := 103,isc_info_oldest_transaction := 104,
+      isc_info_oldest_active := 105,isc_info_oldest_snapshot := 106,
+      isc_info_next_transaction := 107,isc_info_db_provider := 108,
+      isc_info_active_transactions := 109,isc_info_active_tran_count := 110,
+      isc_info_creation_date := 111,isc_info_db_file_size := 112,
+      fb_info_page_contents := 113,fb_info_implementation := 114,
+      fb_info_page_warns := 115,fb_info_record_warns := 116,
+      fb_info_bpage_warns := 117,fb_info_dpage_warns := 118,
+      fb_info_ipage_warns := 119,fb_info_ppage_warns := 120,
+      fb_info_tpage_warns := 121,fb_info_pip_errors := 122,
+      fb_info_pip_warns := 123,fb_info_pages_used := 124,
+      fb_info_pages_free := 125,fb_info_ses_idle_timeout_db := 129,
+      fb_info_ses_idle_timeout_att := 130,fb_info_ses_idle_timeout_run := 131,
+      fb_info_conn_flags := 132,fb_info_crypt_key := 133,
+      fb_info_crypt_state := 134,fb_info_statement_timeout_db := 135,
+      fb_info_statement_timeout_att := 136,
+      fb_info_protocol_version := 137,fb_info_crypt_plugin := 138,
+      fb_info_creation_timestamp_tz := 139,
+      fb_info_wire_crypt := 140,isc_info_db_last_value
+      );
 
-  blr_procedure = 124;
-  blr_pid = 125;
-  blr_exec_pid = 126;
-  blr_singular = 127;
-  blr_abort = 128;
-  blr_block = 129;
-  blr_error_handler = 130;
+  { flags set in fb_info_crypt_state  }
+    db_info_crypt = (fb_info_crypt_encrypted := $01,fb_info_crypt_process := $02
+      );
 
-  blr_cast = 131;
 
-  blr_pid2 = 132;
-  blr_procedure2 = 133;
+  const
+    isc_info_version = isc_info_isc_version;
+  {************************************ }
+  { Database information return values  }
+  {************************************ }
+  { Leave this LAST! }
 
-  blr_start_savepoint = 134;
-  blr_end_savepoint = 135;
+  type
+    info_db_implementations = (isc_info_db_impl_rdb_vms := 1,isc_info_db_impl_rdb_eln := 2,
+      isc_info_db_impl_rdb_eln_dev := 3,isc_info_db_impl_rdb_vms_y := 4,
+      isc_info_db_impl_rdb_eln_y := 5,isc_info_db_impl_jri := 6,
+      isc_info_db_impl_jsv := 7,isc_info_db_impl_isc_apl_68K := 25,
+      isc_info_db_impl_isc_vax_ultr := 26,
+      isc_info_db_impl_isc_vms := 27,isc_info_db_impl_isc_sun_68k := 28,
+      isc_info_db_impl_isc_os2 := 29,isc_info_db_impl_isc_sun4 := 30,
+      isc_info_db_impl_isc_hp_ux := 31,isc_info_db_impl_isc_sun_386i := 32,
+      isc_info_db_impl_isc_vms_orcl := 33,
+      isc_info_db_impl_isc_mac_aux := 34,isc_info_db_impl_isc_rt_aix := 35,
+      isc_info_db_impl_isc_mips_ult := 36,
+      isc_info_db_impl_isc_xenix := 37,isc_info_db_impl_isc_dg := 38,
+      isc_info_db_impl_isc_hp_mpexl := 39,
+      isc_info_db_impl_isc_hp_ux68K := 40,
+      isc_info_db_impl_isc_sgi := 41,isc_info_db_impl_isc_sco_unix := 42,
+      isc_info_db_impl_isc_cray := 43,isc_info_db_impl_isc_imp := 44,
+      isc_info_db_impl_isc_delta := 45,isc_info_db_impl_isc_next := 46,
+      isc_info_db_impl_isc_dos := 47,isc_info_db_impl_m88K := 48,
+      isc_info_db_impl_unixware := 49,isc_info_db_impl_isc_winnt_x86 := 50,
+      isc_info_db_impl_isc_epson := 51,isc_info_db_impl_alpha_osf := 52,
+      isc_info_db_impl_alpha_vms := 53,isc_info_db_impl_netware_386 := 54,
+      isc_info_db_impl_win_only := 55,isc_info_db_impl_ncr_3000 := 56,
+      isc_info_db_impl_winnt_ppc := 57,isc_info_db_impl_dg_x86 := 58,
+      isc_info_db_impl_sco_ev := 59,isc_info_db_impl_i386 := 60,
+      isc_info_db_impl_freebsd := 61,isc_info_db_impl_netbsd := 62,
+      isc_info_db_impl_darwin_ppc := 63,isc_info_db_impl_sinixz := 64,
+      isc_info_db_impl_linux_sparc := 65,isc_info_db_impl_linux_amd64 := 66,
+      isc_info_db_impl_freebsd_amd64 := 67,
+      isc_info_db_impl_winnt_amd64 := 68,isc_info_db_impl_linux_ppc := 69,
+      isc_info_db_impl_darwin_x86 := 70,isc_info_db_impl_linux_mipsel := 71,
+      isc_info_db_impl_linux_mips := 72,isc_info_db_impl_darwin_x64 := 73,
+      isc_info_db_impl_sun_amd64 := 74,isc_info_db_impl_linux_arm := 75,
+      isc_info_db_impl_linux_ia64 := 76,isc_info_db_impl_darwin_ppc64 := 77,
+      isc_info_db_impl_linux_s390x := 78,isc_info_db_impl_linux_s390 := 79,
+      isc_info_db_impl_linux_sh := 80,isc_info_db_impl_linux_sheb := 81,
+      isc_info_db_impl_linux_hppa := 82,isc_info_db_impl_linux_alpha := 83,
+      isc_info_db_impl_linux_arm64 := 84,isc_info_db_impl_linux_ppc64el := 85,
+      isc_info_db_impl_linux_ppc64 := 86,isc_info_db_impl_linux_m68k := 87,
+      isc_info_db_impl_linux_riscv64 := 88,
+      isc_info_db_impl_last_value);
 
-// unused codes: 136..138
+  { Leave this LAST!  }
+    info_db_class = (isc_info_db_class_access := 1,isc_info_db_class_y_valve := 2,
+      isc_info_db_class_rem_int := 3,isc_info_db_class_rem_srvr := 4,
+      isc_info_db_class_pipe_int := 7,isc_info_db_class_pipe_srvr := 8,
+      isc_info_db_class_sam_int := 9,isc_info_db_class_sam_srvr := 10,
+      isc_info_db_class_gateway := 11,isc_info_db_class_cache := 12,
+      isc_info_db_class_classic_access := 13,
+      isc_info_db_class_server_access := 14,
+      isc_info_db_class_last_value);
 
-  blr_plan = 139;	{ access plan items }
-  blr_merge = 140;
-  blr_join = 141;
-  blr_sequential = 142;
-  blr_navigational = 143;
-  blr_indices = 144;
-  blr_retrieve = 145;
+  { Leave this LAST!  }
+    info_db_provider = (isc_info_db_code_rdb_eln := 1,isc_info_db_code_rdb_vms := 2,
+      isc_info_db_code_interbase := 3,isc_info_db_code_firebird := 4,
+      isc_info_db_code_last_value);
 
-  blr_relation2 = 146;
-  blr_rid2 = 147;
+  {*************************** }
+  { Request information items  }
+  {*************************** }
 
-// unused codes: 148..149
+  const
+    isc_info_number_messages = 4;
+    isc_info_max_message = 5;
+    isc_info_max_send = 6;
+    isc_info_max_receive = 7;
+    isc_info_state = 8;
+    isc_info_message_number = 9;
+    isc_info_message_size = 10;
+    isc_info_request_cost = 11;
+    isc_info_access_path = 12;
+    isc_info_req_select_count = 13;
+    isc_info_req_insert_count = 14;
+    isc_info_req_update_count = 15;
+    isc_info_req_delete_count = 16;
+  {******************* }
+  { Access path items  }
+  {******************* }
+    isc_info_rsb_end = 0;
+    isc_info_rsb_begin = 1;
+    isc_info_rsb_type = 2;
+    isc_info_rsb_relation = 3;
+    isc_info_rsb_plan = 4;
+  {*********** }
+  { RecordSource (RSB) types  }
+  {*********** }
+    isc_info_rsb_unknown = 1;
+    isc_info_rsb_indexed = 2;
+    isc_info_rsb_navigate = 3;
+    isc_info_rsb_sequential = 4;
+    isc_info_rsb_cross = 5;
+    isc_info_rsb_sort = 6;
+    isc_info_rsb_first = 7;
+    isc_info_rsb_boolean = 8;
+    isc_info_rsb_union = 9;
+    isc_info_rsb_aggregate = 10;
+    isc_info_rsb_merge = 11;
+    isc_info_rsb_ext_sequential = 12;
+    isc_info_rsb_ext_indexed = 13;
+    isc_info_rsb_ext_dbkey = 14;
+    isc_info_rsb_left_cross = 15;
+    isc_info_rsb_select = 16;
+    isc_info_rsb_sql_join = 17;
+    isc_info_rsb_simulate = 18;
+    isc_info_rsb_sim_cross = 19;
+    isc_info_rsb_once = 20;
+    isc_info_rsb_procedure = 21;
+    isc_info_rsb_skip = 22;
+    isc_info_rsb_virt_sequential = 23;
+    isc_info_rsb_recursive = 24;
+    isc_info_rsb_window = 25;
+    isc_info_rsb_singular = 26;
+    isc_info_rsb_writelock = 27;
+    isc_info_rsb_buffer = 28;
+    isc_info_rsb_hash = 29;
+  {******************** }
+  { Bitmap expressions  }
+  {******************** }
+    isc_info_rsb_and = 1;
+    isc_info_rsb_or = 2;
+    isc_info_rsb_dbkey = 3;
+    isc_info_rsb_index = 4;
+    isc_info_req_active = 2;
+    isc_info_req_inactive = 3;
+    isc_info_req_send = 4;
+    isc_info_req_receive = 5;
+    isc_info_req_select = 6;
+    isc_info_req_sql_stall = 7;
+  {************************ }
+  { Blob information items  }
+  {************************ }
+    isc_info_blob_num_segments = 4;
+    isc_info_blob_max_segment = 5;
+    isc_info_blob_total_length = 6;
+    isc_info_blob_type = 7;
+  {******************************* }
+  { Transaction information items  }
+  {******************************* }
+    isc_info_tra_id = 4;
+    isc_info_tra_oldest_interesting = 5;
+    isc_info_tra_oldest_snapshot = 6;
+    isc_info_tra_oldest_active = 7;
+    isc_info_tra_isolation = 8;
+    isc_info_tra_access = 9;
+    isc_info_tra_lock_timeout = 10;
+    fb_info_tra_dbpath = 11;
+    fb_info_tra_snapshot_number = 12;
+  { isc_info_tra_isolation responses }
+    isc_info_tra_consistency = 1;
+    isc_info_tra_concurrency = 2;
+    isc_info_tra_read_committed = 3;
+  { isc_info_tra_read_committed options }
+    isc_info_tra_no_rec_version = 0;
+    isc_info_tra_rec_version = 1;
+    isc_info_tra_read_consistency = 2;
+  { isc_info_tra_access responses }
+    isc_info_tra_readonly = 0;
+    isc_info_tra_readwrite = 1;
+  {*********************** }
+  { SQL information items  }
+  {*********************** }
+    isc_info_sql_select = 4;
+    isc_info_sql_bind = 5;
+    isc_info_sql_num_variables = 6;
+    isc_info_sql_describe_vars = 7;
+    isc_info_sql_describe_end = 8;
+    isc_info_sql_sqlda_seq = 9;
+    isc_info_sql_message_seq = 10;
+    isc_info_sql_type = 11;
+    isc_info_sql_sub_type = 12;
+    isc_info_sql_scale = 13;
+    isc_info_sql_length = 14;
+    isc_info_sql_null_ind = 15;
+    isc_info_sql_field = 16;
+    isc_info_sql_relation = 17;
+    isc_info_sql_owner = 18;
+    isc_info_sql_alias = 19;
+    isc_info_sql_sqlda_start = 20;
+    isc_info_sql_stmt_type = 21;
+    isc_info_sql_get_plan = 22;
+    isc_info_sql_records = 23;
+    isc_info_sql_batch_fetch = 24;
+    isc_info_sql_relation_alias = 25;
+    isc_info_sql_explain_plan = 26;
+    isc_info_sql_stmt_flags = 27;
+    isc_info_sql_stmt_timeout_user = 28;
+    isc_info_sql_stmt_timeout_run = 29;
+    isc_info_sql_stmt_blob_align = 30;
+  {******************************* }
+  { SQL information return values  }
+  {******************************* }
+    isc_info_sql_stmt_select = 1;
+    isc_info_sql_stmt_insert = 2;
+    isc_info_sql_stmt_update = 3;
+    isc_info_sql_stmt_delete = 4;
+    isc_info_sql_stmt_ddl = 5;
+    isc_info_sql_stmt_get_segment = 6;
+    isc_info_sql_stmt_put_segment = 7;
+    isc_info_sql_stmt_exec_procedure = 8;
+    isc_info_sql_stmt_start_trans = 9;
+    isc_info_sql_stmt_commit = 10;
+    isc_info_sql_stmt_rollback = 11;
+    isc_info_sql_stmt_select_for_upd = 12;
+    isc_info_sql_stmt_set_generator = 13;
+    isc_info_sql_stmt_savepoint = 14;
+{$endif}
+  { FIREBIRD_IMPL_INF_PUB_H  }
 
-  blr_set_generator = 150;
-
-  blr_ansi_any = 151;   { required for NULL handling }
-  blr_exists = 152;   { required for NULL handling }
-
-// unused codes: 153
-
-  blr_record_version = 154;	{ get tid of record }
-  blr_stall = 155;	{ fake server stall }
-
-// unused codes: 156..157
-
-  blr_ansi_all = 158;   { required for NULL handling }
-
-  blr_extract = 159;
-
-{ sub parameters for blr_extract }
-
-  blr_extract_year = 0;
-  blr_extract_month = 1;
-  blr_extract_day = 2;
-  blr_extract_hour = 3;
-  blr_extract_minute = 4;
-  blr_extract_second = 5;
-  blr_extract_weekday = 6;
-  blr_extract_yearday = 7;
-  blr_extract_millisecond = 8;
-  blr_extract_week = 9;
-  blr_extract_timezone_hour = 10;
-  blr_extract_timezone_minute = 11;
-
-  blr_current_date = 160;
-  blr_current_timestamp = 161;
-  blr_current_time = 162;
-
-{ These codes reuse BLR code space }
-
-  blr_post_arg = 163;
-  blr_exec_into = 164;
-  blr_user_savepoint = 165;
-  blr_dcl_cursor = 166;
-  blr_cursor_stmt = 167;
-  blr_current_timestamp2 = 168;
-  blr_current_time2 = 169;
-  blr_agg_list = 170;
-  blr_agg_list_distinct = 171;
-  blr_modify2 = 172;
-
-// unused codes: 173
-
-{ FB 1.0 specific BLR }
-
-  blr_current_role = 174;
-  blr_skip = 175;
-
-{ FB 1.5 specific BLR }
-
-  blr_exec_sql = 176;
-  blr_internal_info = 177;
-  blr_nullsfirst = 178;
-  blr_writelock = 179;
-  blr_nullslast = 180;
-
-{ FB 2.0 specific BLR }
-
-  blr_lowcase = 181;
-  blr_strlen = 182;
-
-{ sub parameter for blr_strlen }
-  blr_strlen_bit = 0;
-  blr_strlen_char = 1;
-  blr_strlen_octet = 2;
-
-  blr_trim = 183;
-
-{ first sub parameter for blr_trim }
-  blr_trim_both = 0;
-  blr_trim_leading = 1;
-  blr_trim_trailing = 2;
-
-{ second sub parameter for blr_trim }
-  blr_trim_spaces = 0;
-  blr_trim_characters = 1;
-
-{ These codes are actions for user-defined savepoints }
-
-  blr_savepoint_set = 0;
-  blr_savepoint_release = 1;
-  blr_savepoint_undo = 2;
-  blr_savepoint_release_single = 3;
-
-{ These codes are actions for cursors }
-
-  blr_cursor_open = 0;
-  blr_cursor_close = 1;
-  blr_cursor_fetch = 2;
-  blr_cursor_fetch_scroll = 3;
-
-{ scroll options }
-
-  blr_scroll_forward = 0;
-  blr_scroll_backward = 1;
-  blr_scroll_bof = 2;
-  blr_scroll_eof = 3;
-  blr_scroll_absolute = 4;
-  blr_scroll_relative = 5;
-
-{ FB 2.1 specific BLR }
-
-  blr_init_variable = 184;
-  blr_recurse = 185;
-  blr_sys_function = 186;
-
-// FB 2.5 specific BLR
-
-  blr_auto_trans = 187;
-  blr_similar = 188;
-  blr_exec_stmt = 189;
-
-// subcodes of blr_exec_stmt
-  blr_exec_stmt_inputs = 1;	// input parameters count
-  blr_exec_stmt_outputs = 2;	// output parameters count
-  blr_exec_stmt_sql = 3;
-  blr_exec_stmt_proc_block = 4;
-  blr_exec_stmt_data_src = 5;
-  blr_exec_stmt_user = 6;
-  blr_exec_stmt_pwd = 7;
-  blr_exec_stmt_tran = 8;	// not implemented yet
-  blr_exec_stmt_tran_clone = 9;	// make transaction parameters equal to current transaction
-  blr_exec_stmt_privs = 10;
-  blr_exec_stmt_in_params = 11;	// not named input parameters
-  blr_exec_stmt_in_params2 = 12;	// named input parameters
-  blr_exec_stmt_out_params = 13;	// output parameters
-  blr_exec_stmt_role = 14;
-
-  blr_stmt_expr = 190;
-  blr_derived_expr = 191;
-
-// FB 3.0 specific BLR
-
-  blr_procedure3 = 192;
-  blr_exec_proc2 = 193;
-  blr_function2 = 194;
-  blr_window = 195;
-  blr_partition_by = 196;
-  blr_continue_loop = 197;
-  blr_procedure4 = 198;
-  blr_agg_function = 199;
-  blr_substring_similar = 200;
-  blr_bool_as_value = 201;
-  blr_coalesce = 202;
-  blr_decode = 203;
-  blr_exec_subproc = 204;
-  blr_subproc_decl = 205;
-  blr_subproc = 206;
-  blr_subfunc_decl = 207;
-  blr_subfunc = 208;
-  blr_record_version2 = 209;
-  blr_gen_id2 = 210; // NEXT VALUE FOR generator
-
-// FB 4.0 specific BLR
-
-  blr_window_win = 211;
-
-// subcodes of blr_window_win
-  blr_window_win_partition = 1;
-  blr_window_win_order = 2;
-  blr_window_win_map = 3;
-  blr_window_win_extent_unit = 4;
-  blr_window_win_extent_frame_bound = 5;
-  blr_window_win_extent_frame_value = 6;
-  blr_window_win_exclusion = 7;
-
-  blr_default = 212;
-  blr_store3 = 213;
-
-  blr_local_timestamp = 214;
-  blr_local_time = 215;
-
-  blr_at = 216;
-
-// subcodes of blr_at
-  blr_at_local = 0;
-  blr_at_zone = 1;

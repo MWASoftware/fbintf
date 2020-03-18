@@ -87,10 +87,12 @@ type
   PISC_STATUS          = ^ISC_STATUS;
   PPISC_STATUS         = ^PISC_STATUS;
   PUISC_STATUS         = ^UISC_STATUS;
+  ISC_SHORT            = SmallInt;
 
   FB_DEC16 = array [1..1] of Int64;
   FB_DEC34 = array [1..2] of Int64;
   FB_DEC_FIXED = array [1..2] of Int64;
+  FB_I128 = array [1..2] of Int64;
 
   ISC_DATE = Integer;
   ISC_TIME = Integer;
@@ -112,6 +114,21 @@ type
     utc_timestamp: ISC_TIMESTAMP;
     time_zone: ISC_USHORT;
   end;
+
+  PISC_TIME_TZ_EX = ^ISC_TIME_TZ_EX;
+  ISC_TIME_TZ_EX = record
+    utc_time: ISC_TIME;
+    time_zone: ISC_USHORT;
+    ext_offset: ISC_SHORT;
+  end;
+
+  PISC_TIMESTAMP_TZ_EX = ^ISC_TIMESTAMP_TZ_EX;
+  ISC_TIMESTAMP_TZ_EX = record
+    utc_timestamp: ISC_TIMESTAMP;
+    time_zone: ISC_USHORT;
+    ext_offset: ISC_SHORT;
+  end;
+
 type
 
   { C Date/Time Structure }
