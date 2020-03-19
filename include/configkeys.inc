@@ -22,5 +22,7 @@ const
   ISCCFG_LOCKSPIN_KEY            =         16;
   ISCCFG_CONN_TIMEOUT_KEY        =         17;
   ISCCFG_DUMMY_INTRVL_KEY        =         18;
+  ISCCFG_TRACE_POOLS_KEY         =         19;   { Internal Use only }
+  ISCCFG_REMOTE_BUFFER_KEY       =         20;
 
 
