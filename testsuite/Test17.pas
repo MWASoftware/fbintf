@@ -294,6 +294,7 @@ var Transaction: ITransaction;
     Results: IResultSet;
     aDate: TDateTime;
     aTimeZone: AnsiString;
+    offset: SmallInt;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   Statement := Attachment.Prepare(Transaction,'Select * from  FB4TestData_TZ');
@@ -310,11 +311,12 @@ begin
       write(OutFile,'TimeCol = ');
       if not Results[1].IsNull then
       begin
-        Results[1].GetAsDateTime(aDate,aTimeZone);
+        Results[1].GetAsDateTime(aDate,aTimeZone,offset);
         writeln(OutFile,Results[1].GetAsString,
                        ', TimeZoneID = ',FirebirdAPI.TimeZoneName2TimeZoneID(aTimeZone),
                        ', Time Zone Name = ',aTimeZone,
-                       ', UTC Time = ',TimeToStr( Results[1].GetAsUTCDateTime))
+                       ', UTC Time = ',TimeToStr( Results[1].GetAsUTCDateTime),
+                       ', Offset = ',offset)
       end
       else
         writeln(OutFile,'NULL');
@@ -322,11 +324,12 @@ begin
       write(OutFile,'TimeStampCol = ');
       if not Results[2].IsNull then
       begin
-        Results[2].GetAsDateTime(aDate,aTimeZone);
+        Results[2].GetAsDateTime(aDate,aTimeZone,offset);
         writeln(OutFile,Results[2].GetAsString,
                         ', TimeZoneID = ',FirebirdAPI.TimeZoneName2TimeZoneID(aTimeZone),
                         ', Time Zone Name = ',aTimeZone,
-                        ', UTC Timestamp = ',DateTimeToStr( Results[2].GetAsUTCDateTime))
+                        ', UTC Timestamp = ',DateTimeToStr( Results[2].GetAsUTCDateTime),
+                       ', Offset = ',offset)
       end
       else
         writeln(OutFile,'NULL');

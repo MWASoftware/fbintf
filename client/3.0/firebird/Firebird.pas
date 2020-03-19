@@ -11,12 +11,6 @@
 
  constants removed and imported separately into IB.pas
 
-Missing Types: (now defined in IBExternals)
-
- ISC_TIMESTAMP_TZ_EX
- ISC_SHORT
- ISC_TIME_TZ_EX
-
 Commented out:
 
  function fb_get_master_interface : IMaster; cdecl; external 'fbclient';
@@ -160,8 +154,8 @@ type
 	end;
 
 
-	isc_tr_handle = ^FixedInt;
-	isc_stmt_handle = ^FixedInt;
+	isc_tr_handle = ^integer;
+	isc_stmt_handle = ^integer;
 
 	ntrace_relation_t = Integer;
 	TraceCounts = Record

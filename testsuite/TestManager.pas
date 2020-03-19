@@ -199,6 +199,7 @@ procedure TTestBase.ReportResult(aValue: IResults);
 var i: integer;
     s: AnsiString;
     dt: TDateTime;
+    offset: SmallInt;
 begin
   for i := 0 to aValue.getCount - 1 do
   begin
@@ -266,15 +267,17 @@ begin
       writeln(OutFile,aValue[i].Name,' = ',FBFormatDateTime('yyyy/mm/dd',aValue[i].AsDate));
     SQL_TYPE_TIME:
       writeln(OutFile,aValue[i].Name,' = ',FBFormatDateTime('hh:nn:ss.zzzz',aValue[i].AsTime));
-    SQL_TIMESTAMP_TZ:
+    SQL_TIMESTAMP_TZ,
+    SQL_TIMESTAMP_TZ_EX:
     begin
-      aValue[i].GetAsDateTime(dt,s);
-      writeln(OutFile,aValue[i].Name,' = ',FBFormatDateTime('yyyy/mm/dd hh:nn:ss.zzzz',dt) + ' ' + s);
+      aValue[i].GetAsDateTime(dt,s,offset);
+      writeln(OutFile,aValue[i].Name,' = ',FBFormatDateTime('yyyy/mm/dd hh:nn:ss.zzzz',dt) + ' ' + s + ' (Offset = ',offset,')');
     end;
-    SQL_TIME_TZ:
+    SQL_TIME_TZ,
+    SQL_TIME_TZ_EX:
     begin
-      aValue[i].GetAsDateTime(dt,s);
-      writeln(OutFile,aValue[i].Name,' = ',FBFormatDateTime('hh:nn:ss.zzzz',dt) + ' ' + s);
+      aValue[i].GetAsDateTime(dt,s,offset);
+      writeln(OutFile,aValue[i].Name,' = ',FBFormatDateTime('hh:nn:ss.zzzz',dt) + ' ' + s + ' (Offset = ',offset,')');
     end;
 
     else

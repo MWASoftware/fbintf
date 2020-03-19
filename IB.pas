@@ -177,10 +177,13 @@ const
   SQL_TYPE_TIME                  =        560;
   SQL_TYPE_DATE                  =        570;
   SQL_INT64                      =        580;
+  SQL_TIMESTAMP_TZ_EX            =        32748;
+  SQL_TIME_TZ_EX                 =        32750;
+  SQL_INT128                     =        32752;
   SQL_BOOLEAN                    =        32764;
   SQL_TIMESTAMP_TZ               =        32754;
   SQL_TIME_TZ                    =        32756;
-  SQL_DEC_FIXED                  =        32758;
+  SQL_DEC_FIXED                  =        32758;    {FB4 Beta 1 only}
   SQL_DEC16                      =        32760;
   SQL_DEC34                      =        32762;
   SQL_NULL                       =        32766;
@@ -513,8 +516,8 @@ type
     function GetAsCurrency: Currency;
     function GetAsInt64: Int64;
     function GetAsDateTime: TDateTime; overload;
-    procedure GetAsDateTime(var aDateTime: TDateTime; var aTimezoneID: TFBTimeZoneID); overload;
-    procedure GetAsDateTime(var aDateTime: TDateTime; var aTimezone: AnsiString); overload;
+    procedure GetAsDateTime(var aDateTime: TDateTime; var aTimezoneID: TFBTimeZoneID; var offset: SmallInt); overload;
+    procedure GetAsDateTime(var aDateTime: TDateTime; var aTimezone: AnsiString;  var offset: SmallInt); overload;
     function GetAsUTCDateTime: TDateTime;
     function GetAsDouble: Double;
     function GetAsFloat: Float;
