@@ -37,16 +37,29 @@ unit FB30Attachment;
 interface
 
 uses
-  Classes, SysUtils, FBAttachment, FB30ClientAPI, Firebird, IB, FBActivityMonitor, FBParamBlock;
+  Classes, SysUtils, FBAttachment, FB30ClientAPI, Firebird, IB, FBActivityMonitor, FBParamBlock,
+  IBExternals;
 
 type
 
   { TFB30Attachment }
 
   TFB30Attachment = class(TFBAttachment,IAttachment, IActivityMonitor)
+  private const
+    TimeZoneCacheIncrement = 10;
+  private type
+    TTimeZoneCache = record
+      TimeZoneID: TFBTimeZoneID;
+      TimeZoneName: AnsiString;
+    end;
   private
     FAttachmentIntf: Firebird.IAttachment;
     FFirebird30ClientAPI: TFB30ClientAPI;
+    FTimeZoneCache: array of TTimeZoneCache;
+    FTZCacheEnd: integer;
+    function LookupTimeZoneName(aTimeZoneID: TFBTimeZoneID): AnsiString;
+    function LookupTimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID;
+    procedure AddtoTimeZoneCache(aTimeZoneID: TFBTimeZoneID; aTimeZone: AnsiString);
   protected
     procedure CheckHandle; override;
   public
@@ -96,6 +109,14 @@ type
     function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IBlobMetaData; override;
     function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IArrayMetaData; override;
     procedure getFBVersion(version: TStrings);
+
+    {Time Zone Support}
+    function TimeZoneID2TimeZoneName(aTimeZoneID: TFBTimeZoneID): AnsiString; override;
+    function TimeZoneName2TimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID; override;
+    function LocalTimeToUTCTime(aLocalTime: TDateTime; aTimeZone: AnsiString): TDateTime; override;
+    function UTCTimeToLocalTime(aUTCTime: TDateTime; aTimeZone: AnsiString): TDateTime; override;
+    function GetEffectiveOffsetMins(aLocalTime: TDateTime; aTimeZone: AnsiString
+      ): integer; override;
   end;
 
 implementation
@@ -129,6 +150,55 @@ end;
 
 
 { TFB30Attachment }
+
+function TFB30Attachment.LookupTimeZoneName(aTimeZoneID: TFBTimeZoneID
+  ): AnsiString;
+var i: integer;
+begin
+  for i := 0 to FTZCacheEnd - 1 do
+    if FTimeZoneCache[i].TimeZoneID = aTimeZoneID then
+    begin
+      Result := FTimeZoneCache[i].TimeZoneName;
+      Exit;
+    end;
+
+  try
+    Result := OpenCursorAtStart(Format('Select RDB$TIME_ZONE_NAME From RDB$TIME_ZONES Where RDB$TIME_ZONE_ID = %d',
+        [aTimeZoneID]))[0].AsString;
+    AddtoTimeZoneCache(aTimeZoneID,Result);
+  except
+    IBError(ibxeBadTimeZoneID,[aTimeZoneID,0]);
+  end;
+end;
+
+function TFB30Attachment.LookupTimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID;
+var i: integer;
+begin
+  for i := 0 to FTZCacheEnd - 1 do
+    if FTimeZoneCache[i].TimeZoneName = aTimeZone then
+    begin
+      Result := FTimeZoneCache[i].TimeZoneID;
+      Exit;
+    end;
+
+  try
+    Result := OpenCursorAtStart(Format('Select RDB$TIME_ZONE_ID From RDB$TIME_ZONES Where RDB$TIME_ZONE_Name = ''%s''',
+        [aTimeZone]))[0].AsInteger;
+    AddtoTimeZoneCache(Result,aTimeZone);
+  except
+    IBError(ibxeBadTimeZoneName,[aTimeZone]);
+  end;
+end;
+
+procedure TFB30Attachment.AddtoTimeZoneCache(aTimeZoneID: TFBTimeZoneID;
+  aTimeZone: AnsiString);
+begin
+  if FTZCacheEnd >= Length(FTimeZoneCache) then
+    SetLength(FTimeZoneCache,FTZCacheEnd + TimeZoneCacheIncrement);
+  FTimeZoneCache[FTZCacheEnd].TimeZoneName := aTimeZone;
+  FTimeZoneCache[FTZCacheEnd].TimeZoneID := aTimeZoneID;
+  Inc(FTZCacheEnd);
+end;
 
 procedure TFB30Attachment.CheckHandle;
 begin
@@ -389,6 +459,106 @@ begin
     end;
   finally
     bufferObj.Free;
+  end;
+end;
+
+function TFB30Attachment.TimeZoneID2TimeZoneName(aTimeZoneID: TFBTimeZoneID
+  ): AnsiString;
+var Buffer: ISC_TIME_TZ;
+    aTime: TDateTime;
+begin
+  Result := inherited TimeZoneID2TimeZoneName(aTimeZoneID);
+  with FFirebird30ClientAPI do
+  if HasLocalICU then
+  begin
+    Buffer.utc_time := 0;
+    Buffer.time_zone := aTimeZoneID;
+    SQLDecodeTimeTZ(aTime,Result,@Buffer);
+  end
+  else
+   Result := LookupTimeZoneName(aTimeZoneID);
+end;
+
+function TFB30Attachment.TimeZoneName2TimeZoneID(aTimeZone: AnsiString
+  ): TFBTimeZoneID;
+var Buffer: ISC_TIME_TZ;
+begin
+  Result := inherited TimeZoneName2TimeZoneID(aTimeZone);
+  with FFirebird30ClientAPI do
+  if HasLocalICU then
+  begin
+    SQLEncodeTimeTZ(0,aTimeZone,@Buffer);
+    Result := Buffer.time_zone;
+  end
+  else
+    Result := LookupTimeZoneID(aTimeZone);
+end;
+
+function TFB30Attachment.LocalTimeToUTCTime(aLocalTime: TDateTime;
+  aTimeZone: AnsiString): TDateTime;
+var Buffer: ISC_TIMESTAMP_TZ;
+begin
+  Result := inherited LocalTimeToUTCTime(aLocalTime, aTimeZone);
+  with FFirebird30ClientAPI do
+  if HasLocalICU then
+  begin
+    SQLEncodeTimeStampTZ(aLocalTime,aTimeZone,@Buffer);
+    Result := SQLDecodeDateTime(@Buffer);
+  end
+  else
+  with Prepare(self.StartTransaction([isc_tpb_read,isc_tpb_wait,isc_tpb_concurrency],taCommit),
+               'Select ? AT ''UTC'' From RDB$Database') do
+  begin
+    SQLParams[0].SetAsDateTime(aLocalTime,aTimeZone);
+    Result := OpenCursor[0].AsDateTime;
+  end;
+end;
+
+function TFB30Attachment.UTCTimeToLocalTime(aUTCTime: TDateTime;
+  aTimeZone: AnsiString): TDateTime;
+var Buffer: ISC_TIMESTAMP_TZ;
+    theTimeZone: AnsiString;
+begin
+  Result := inherited UTCTimeToLocalTime(aUTCTime, aTimeZone);
+  with FFirebird30ClientAPI do
+  if HasLocalICU then
+  begin
+    SQLEncodeDateTime(aUTCTime,@Buffer);
+    Buffer.time_zone := TimeZoneName2TimeZoneID(aTimeZone);
+    SQLDecodeTimestampTZ(Result,theTimeZone,@Buffer);
+  end
+  else
+  with Prepare(self.StartTransaction([isc_tpb_read,isc_tpb_wait,isc_tpb_concurrency],taCommit),
+               'Select ? AT ? From RDB$Database') do
+  begin
+    SQLParams[0].SetAsDateTime(aUTCTime,'UTC');
+    SQLParams[1].AsString := aTimeZone;
+    Result := OpenCursor[0].AsDateTime;
+  end;
+end;
+
+function TFB30Attachment.GetEffectiveOffsetMins(aLocalTime: TDateTime;
+  aTimeZone: AnsiString): integer;
+var UTCTime: TDateTime;
+    Buffer: ISC_TIMESTAMP_TZ;
+begin
+  Result := inherited GetEffectiveOffsetMins(aLocalTime, aTimeZone);
+  with FFirebird30ClientAPI do
+  if HasLocalICU then
+  begin
+    SQLEncodeTimestampTZ(aLocalTime,aTimeZone,@Buffer);
+    UTCTime := SQLDecodeDateTime(@Buffer);
+    Result := Round((aLocalTime - UTCTime) * MinsPerDay);
+  end
+  else
+  {Use remote ICU}
+  with Prepare(self.StartTransaction([isc_tpb_read,isc_tpb_wait,isc_tpb_concurrency],taCommit),
+               'Select EFFECTIVE_OFFSET From rdb$time_zone_util.transitions(?,?,?)') do
+  begin
+    SQLParams[0].AsString := aTimeZone;
+    SQLParams[1].AsDateTime := aLocalTime;
+    SQLParams[2].AsDateTime := aLocalTime;
+    Result := OpenCursor[0].AsInteger;
   end;
 end;
 

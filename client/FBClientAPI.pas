@@ -188,14 +188,14 @@ type
     function  SQLDecodeDateTime(bufptr: PByte): TDateTime; virtual; abstract;
     {Firebird 4 Extensions}
     procedure SQLEncodeTimeTZ(aTime: TDateTime; aTimeZone: AnsiString; bufptr: PByte); virtual;
-    procedure SQLDecodeTimeTZ(var aTime: TDateTime; var aTimeZone: AnsiString; var offset: SmallInt; bufptr: PByte);  virtual;
+    procedure SQLDecodeTimeTZ(var aTime: TDateTime; var aTimeZone: AnsiString; bufptr: PByte);  virtual;
     procedure SQLEncodeTimeStampTZ(aDateTime: TDateTime; aTimeZone: AnsiString; bufptr: PByte); virtual;
     procedure SQLDecodeTimeStampTZ(var aDateTime: TDateTime;
-      var aTimeZone: AnsiString; var offset: SmallInt; bufptr: PByte); virtual;
+      var aTimeZone: AnsiString; bufptr: PByte); virtual;
     {Extended timestamps are only seen in column values and when remote ICU is used to decode timezone}
-    procedure SQLDecodeTimeTZEX(var aTime: TDateTime; var aTimeZone: AnsiString; var offset: SmallInt; bufptr: PByte);  virtual;
+    procedure SQLDecodeTimeTZEX(var aTime: TDateTime; var aTimeZone: AnsiString; bufptr: PByte);  virtual;
     procedure SQLDecodeTimeStampTZEX(var aDateTime: TDateTime;
-      var aTimeZone: AnsiString; var offset: SmallInt; bufptr: PByte); virtual;
+      var aTimeZone: AnsiString; bufptr: PByte); virtual;
 
     {IFirebirdAPI}
     function GetStatus: IStatus; virtual; abstract;
@@ -210,12 +210,7 @@ type
     procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal;
       bufptr: PByte); virtual;
     function SQLDecFloatDecode(SQLType: cardinal;  bufptr: PByte): tBCD; virtual;
-    function TimeZoneID2TimeZoneName(aTimeZoneID: TFBTimeZoneID): AnsiString; virtual;
-    function TimeZoneName2TimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID; virtual;
-    function LocalTimeToUTCTime(aLocalTime: TDateTime; aTimeZone: AnsiString): TDateTime;
-    function UTCTimeToLocalTime(aUTCTime: TDateTime; aTimeZone: AnsiString): TDateTime;
-    function GetEffectiveOffsetMins(aLocalTime: TDateTime; aTimeZone: AnsiString
-      ): integer;
+    function HasLocalICU: boolean; virtual;
 
 end;
 
@@ -398,7 +393,7 @@ begin
 end;
 
 procedure TFBClientAPI.SQLDecodeTimeTZ(var aTime: TDateTime;
-  var aTimeZone: AnsiString; var offset: SmallInt; bufptr: PByte);
+  var aTimeZone: AnsiString; bufptr: PByte);
 begin
   if not HasTimeZoneSupport then
     IBError(ibxeNotSupported,[]);
@@ -412,21 +407,21 @@ begin
 end;
 
 procedure TFBClientAPI.SQLDecodeTimeStampTZ(var aDateTime: TDateTime;
-  var aTimeZone: AnsiString; var offset: SmallInt; bufptr: PByte);
+  var aTimeZone: AnsiString; bufptr: PByte);
 begin
   if not HasTimeZoneSupport then
     IBError(ibxeNotSupported,[]);
 end;
 
 procedure TFBClientAPI.SQLDecodeTimeTZEX(var aTime: TDateTime;
-  var aTimeZone: AnsiString; var offset: SmallInt; bufptr: PByte);
+  var aTimeZone: AnsiString; bufptr: PByte);
 begin
   if not HasTimeZoneSupport then
     IBError(ibxeNotSupported,[]);
 end;
 
 procedure TFBClientAPI.SQLDecodeTimeStampTZEX(var aDateTime: TDateTime;
-  var aTimeZone: AnsiString; var offset: SmallInt; bufptr: PByte);
+  var aTimeZone: AnsiString; bufptr: PByte);
 begin
   if not HasTimeZoneSupport then
     IBError(ibxeNotSupported,[]);
@@ -445,47 +440,10 @@ begin
     IBError(ibxeNotSupported,[]);
 end;
 
-function TFBClientAPI.TimeZoneID2TimeZoneName(aTimeZoneID: TFBTimeZoneID
-  ): AnsiString;
+function TFBClientAPI.HasLocalICU: boolean;
 begin
   if not HasTimeZoneSupport then
     IBError(ibxeNotSupported,[]);
-end;
-
-function TFBClientAPI.TimeZoneName2TimeZoneID(aTimeZone: AnsiString
-  ): TFBTimeZoneID;
-begin
-  if not HasTimeZoneSupport then
-    IBError(ibxeNotSupported,[]);
-end;
-
-function TFBClientAPI.LocalTimeToUTCTime(aLocalTime: TDateTime;
-  aTimeZone: AnsiString): TDateTime;
-var Buffer: ISC_TIMESTAMP_TZ;
-begin
-  SQLEncodeTimeStampTZ(aLocalTime,aTimeZone,@Buffer);
-  Result := SQLDecodeDateTime(@Buffer);
-end;
-
-function TFBClientAPI.UTCTimeToLocalTime(aUTCTime: TDateTime;
-  aTimeZone: AnsiString): TDateTime;
-var Buffer: ISC_TIMESTAMP_TZ;
-    theTimeZone: AnsiString;
-    offset: SmallInt;
-begin
-  SQLEncodeDateTime(aUTCTime,@Buffer);
-  Buffer.time_zone := TimeZoneName2TimeZoneID(aTimeZone);
-  SQLDecodeTimestampTZ(Result,theTimeZone,offset,@Buffer);
-end;
-
-function TFBClientAPI.GetEffectiveOffsetMins(aLocalTime: TDateTime;
-  aTimeZone: AnsiString): integer;
-var UTCTime: TDateTime;
-    Buffer: ISC_TIMESTAMP_TZ;
-begin
-  SQLEncodeTimestampTZ(aLocalTime,aTimeZone,@Buffer);
-  UTCTime := SQLDecodeDateTime(@Buffer);
-  Result := Round((aLocalTime - UTCTime) * MinsPerDay);
 end;
 
 function TFBClientAPI.IsLibraryLoaded: boolean;

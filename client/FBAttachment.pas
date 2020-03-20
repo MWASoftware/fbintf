@@ -159,6 +159,13 @@ public
   function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IArrayMetaData; virtual; abstract;
   property CharSetID: integer read FCharSetID;
   property CodePage: TSystemCodePage read FCodePage;
+  {Time Zone Support}
+  function TimeZoneID2TimeZoneName(aTimeZoneID: TFBTimeZoneID): AnsiString; virtual;
+  function TimeZoneName2TimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID; virtual;
+  function LocalTimeToUTCTime(aLocalTime: TDateTime; aTimeZone: AnsiString): TDateTime; virtual;
+  function UTCTimeToLocalTime(aUTCTime: TDateTime; aTimeZone: AnsiString): TDateTime; virtual;
+  function GetEffectiveOffsetMins(aLocalTime: TDateTime; aTimeZone: AnsiString
+    ): integer; virtual;
   end;
 
 implementation
@@ -866,6 +873,41 @@ begin
   FUserCharSetMap[idx].CharSetWidth := CharSets[1].AsInteger;
   FUserCharSetMap[idx].CodePage := CodePage;
   CharSetID := CharSets[0].AsInteger;
+end;
+
+function TFBAttachment.TimeZoneID2TimeZoneName(aTimeZoneID: TFBTimeZoneID
+  ): AnsiString;
+begin
+  if not getFirebirdAPI.HasTimeZoneSupport then
+    IBError(ibxeNotSupported,[]);
+end;
+
+function TFBAttachment.TimeZoneName2TimeZoneID(aTimeZone: AnsiString
+  ): TFBTimeZoneID;
+begin
+  if not getFirebirdAPI.HasTimeZoneSupport then
+    IBError(ibxeNotSupported,[]);
+end;
+
+function TFBAttachment.LocalTimeToUTCTime(aLocalTime: TDateTime;
+  aTimeZone: AnsiString): TDateTime;
+begin
+  if not getFirebirdAPI.HasTimeZoneSupport then
+    IBError(ibxeNotSupported,[]);
+end;
+
+function TFBAttachment.UTCTimeToLocalTime(aUTCTime: TDateTime;
+  aTimeZone: AnsiString): TDateTime;
+begin
+  if not getFirebirdAPI.HasTimeZoneSupport then
+    IBError(ibxeNotSupported,[]);
+end;
+
+function TFBAttachment.GetEffectiveOffsetMins(aLocalTime: TDateTime;
+  aTimeZone: AnsiString): integer;
+begin
+  if not getFirebirdAPI.HasTimeZoneSupport then
+    IBError(ibxeNotSupported,[]);
 end;
 
 end.

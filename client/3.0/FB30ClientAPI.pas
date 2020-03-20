@@ -125,28 +125,26 @@ type
     function SQLDecodeDateTime(bufptr: PByte): TDateTime; override;
     {Firebird 4 Extensions}
     procedure SQLEncodeTimeTZ(aTime: TDateTime; aTimeZone: AnsiString; bufptr: PByte); override;
-    procedure SQLDecodeTimeTZ(var aTime: TDateTime; var aTimeZone: AnsiString; var offset: SmallInt;
+    procedure SQLDecodeTimeTZ(var aTime: TDateTime; var aTimeZone: AnsiString;
       bufptr: PByte); override;
     procedure SQLEncodeTimeStampTZ(aDateTime: TDateTime; aTimeZone: AnsiString;
       bufptr: PByte); override;
     procedure SQLDecodeTimeStampTZ(var aDateTime: TDateTime;
-      var aTimeZone: AnsiString; var offset: SmallInt; bufptr: PByte); override;
+      var aTimeZone: AnsiString; bufptr: PByte); override;
     procedure SQLDecodeTimeTZEX(var aTime: TDateTime; var aTimeZone: AnsiString;
-      var offset: SmallInt; bufptr: PByte);  override;
+      bufptr: PByte);  override;
     procedure SQLDecodeTimeStampTZEX(var aDateTime: TDateTime;
-      var aTimeZone: AnsiString; var offset: SmallInt;  bufptr: PByte); override;
+      var aTimeZone: AnsiString; bufptr: PByte); override;
     procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal; bufptr: PByte);
       override;
     function SQLDecFloatDecode(SQLType: cardinal; bufptr: PByte): tBCD; override;
-    function TimeZoneID2TimeZoneName(aTimeZoneID: TFBTimeZoneID): AnsiString;
-      override;
-    function TimeZoneName2TimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID;
-      override;
+    function HasLocalICU: boolean; override;
 
     {Firebird Interfaces}
     property MasterIntf: Firebird.IMaster read FMaster;
     property UtilIntf: Firebird.IUtil read FUtil;
     property ProviderIntf: Firebird.IProvider read FProvider;
+
   end;
 
 implementation
@@ -448,19 +446,18 @@ begin
 end;
 
 procedure TFB30ClientAPI.SQLDecodeTimeTZ(var aTime: TDateTime;
-  var aTimeZone: AnsiString; var offset: SmallInt; bufptr: PByte);
+  var aTimeZone: AnsiString; bufptr: PByte);
 const
     bufLength = 128;
 var
   Hr, Mt, S, DMs: cardinal;
   tzBuffer: array[ 0.. bufLength] of AnsiChar;
 begin
-  inherited SQLDecodeTimeTZ(aTime,aTimeZone, offset, bufptr);
+  inherited SQLDecodeTimeTZ(aTime,aTimeZone,  bufptr);
   UtilIntf.decodeTimeTz(StatusIntf, ISC_TIME_TZPtr(bufptr),@Hr, @Mt, @S, @DMs,bufLength,PAnsiChar(@tzBuffer));
   Check4DataBaseError;
   aTime := FBEncodeTime(Hr, Mt, S, DMs);
   aTimeZone := strpas(PAnsiChar(@tzBuffer));
-  offset := Round((aTime - SQLDecodeTime(bufptr)) * MinsPerDay);
 end;
 
 procedure TFB30ClientAPI.SQLEncodeTimeStampTZ(aDateTime: TDateTime;
@@ -478,7 +475,7 @@ begin
 end;
 
 procedure TFB30ClientAPI.SQLDecodeTimeStampTZ(var aDateTime: TDateTime;
-  var aTimeZone: AnsiString; var offset: SmallInt; bufptr: PByte);
+  var aTimeZone: AnsiString; bufptr: PByte);
 const
   bufLength = 128;
 var
@@ -486,12 +483,11 @@ var
   Hr, Mt, S, DMs: cardinal;
   tzBuffer: array[ 0.. bufLength] of AnsiChar;
 begin
-  inherited SQLDecodeTimeStampTZ(aDateTime, aTimeZone, offset, bufptr);
+  inherited SQLDecodeTimeStampTZ(aDateTime, aTimeZone,  bufptr);
   UtilIntf.decodeTimeStampTz(StatusIntf,ISC_TIMESTAMP_TZPtr(bufPtr),@Yr,@ Mn, @Dy, @Hr, @Mt, @S, @DMs,bufLength,PAnsiChar(@tzBuffer));
   Check4DataBaseError;
   aDateTime := EncodeDate(Yr, Mn, Dy) + FBEncodeTime(Hr,Mt,S,DMs);
   aTimeZone := strpas(PAnsiChar(@tzBuffer));
-  offset := Round((aDateTime - SQLDecodeDateTime(bufPtr)) * MinsPerDay);
 end;
 
 {The extended time with timezone types were added post FB4 Beta 1. There is thus
@@ -501,25 +497,24 @@ end;
  This can only occur if the remote server is later than FB4 Beta 1.}
 
 procedure TFB30ClientAPI.SQLDecodeTimeTZEX(var aTime: TDateTime;
-  var aTimeZone: AnsiString; var offset: SmallInt; bufptr: PByte);
+  var aTimeZone: AnsiString; bufptr: PByte);
 const
     bufLength = 128;
 var
   Hr, Mt, S, DMs: cardinal;
   tzBuffer: array[ 0.. bufLength] of AnsiChar;
 begin
-  inherited SQLDecodeTimeTZEX(aTime,aTimeZone, offset, bufptr);
+  inherited SQLDecodeTimeTZEX(aTime,aTimeZone,  bufptr);
   if UtilIntf.vtable.version = 21 {FB4 Beta1} then
     IBError(ibxeNotSupported,[]);
   UtilIntf.decodeTimeTzEx(StatusIntf, ISC_TIME_TZ_EXPtr(bufptr),@Hr, @Mt, @S, @DMs,bufLength,PAnsiChar(@tzBuffer));
   Check4DataBaseError;
   aTime := FBEncodeTime(Hr, Mt, S, DMs);
-  aTimeZone := strpas(PAnsiChar(@tzBuffer));
-  offset :=  ISC_TIME_TZ_EXPtr(bufptr)^.ext_offset;
+  aTimeZone := strpas(PAnsiChar(@tzBuffer))
 end;
 
 procedure TFB30ClientAPI.SQLDecodeTimeStampTZEX(var aDateTime: TDateTime;
-  var aTimeZone: AnsiString; var offset: SmallInt; bufptr: PByte);
+  var aTimeZone: AnsiString; bufptr: PByte);
 const
   bufLength = 128;
 var
@@ -527,14 +522,13 @@ var
   Hr, Mt, S, DMs: cardinal;
   tzBuffer: array[ 0.. bufLength] of AnsiChar;
 begin
-  inherited SQLDecodeTimeStampTZEX(aDateTime, aTimeZone, offset, bufptr);
+  inherited SQLDecodeTimeStampTZEX(aDateTime, aTimeZone, bufptr);
   if UtilIntf.vtable.version = 21 {FB4 Beta1} then
     IBError(ibxeNotSupported,[]);
   UtilIntf.decodeTimeStampTzEx(StatusIntf,ISC_TIMESTAMP_TZ_EXPtr(bufPtr),@Yr,@ Mn, @Dy, @Hr, @Mt, @S, @DMs,bufLength,PAnsiChar(@tzBuffer));
   Check4DataBaseError;
   aDateTime := EncodeDate(Yr, Mn, Dy) + FBEncodeTime(Hr,Mt,S,DMs);
   aTimeZone := strpas(PAnsiChar(@tzBuffer));
-  offset := ISC_TIMESTAMP_TZ_EXPtr(bufptr)^.ext_offset;
 end;
 
 procedure TFB30ClientAPI.SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal;
@@ -668,23 +662,16 @@ begin
     Result.SignSpecialPlaces := Result.SignSpecialPlaces or $80;
 end;
 
-function TFB30ClientAPI.TimeZoneID2TimeZoneName(aTimeZoneID: TFBTimeZoneID): AnsiString;
+function TFB30ClientAPI.HasLocalICU: boolean;
 var Buffer: ISC_TIME_TZ;
     aTime: TDateTime;
-    offset: SmallInt;
+    aTimeZone: AnsiString;
 begin
-  Result := inherited TimeZoneID2TimeZoneName(aTimeZoneID);
+  Result := inherited HasLocalICU;
   Buffer.utc_time := 0;
-  Buffer.time_zone := aTimeZoneID;
-  SQLDecodeTimeTZ(aTime,Result,offset,@Buffer);
-end;
-
-function TFB30ClientAPI.TimeZoneName2TimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID;
-var Buffer: ISC_TIME_TZ;
-begin
-  Result := inherited TimeZoneName2TimeZoneID(aTimeZone);
-  SQLEncodeTimeTZ(0,aTimeZone,@Buffer);
-  Result := Buffer.time_zone;
+  Buffer.time_zone := TimeZoneID_GMT;
+  SQLDecodeTimeTZ(aTime,aTimeZone,@Buffer);
+  Result := aTimeZone <> 'GMT*';
 end;
 
 function TFB30ClientAPI.GetClientMajor: integer;

@@ -516,8 +516,8 @@ type
     function GetAsCurrency: Currency;
     function GetAsInt64: Int64;
     function GetAsDateTime: TDateTime; overload;
-    procedure GetAsDateTime(var aDateTime: TDateTime; var aTimezoneID: TFBTimeZoneID; var offset: SmallInt); overload;
-    procedure GetAsDateTime(var aDateTime: TDateTime; var aTimezone: AnsiString;  var offset: SmallInt); overload;
+    procedure GetAsDateTime(var aDateTime: TDateTime; var aTimezoneID: TFBTimeZoneID); overload;
+    procedure GetAsDateTime(var aDateTime: TDateTime; var aTimezone: AnsiString); overload;
     function GetAsUTCDateTime: TDateTime;
     function GetAsDouble: Double;
     function GetAsFloat: Float;
@@ -1027,6 +1027,14 @@ type
     function CharSetWidth(CharSetID: integer; var Width: integer): boolean;
     procedure RegisterCharSet(CharSetName: AnsiString; CodePage: TSystemCodePage;
       AllowReverseLookup:boolean; out CharSetID: integer);
+
+    {Time Zone Support - FB4 onwards}
+    function TimeZoneID2TimeZoneName(aTimeZoneID: TFBTimeZoneID): AnsiString;
+    function TimeZoneName2TimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID;
+    function LocalTimeToUTCTime(aLocalTime: TDateTime; aTimeZone: AnsiString): TDateTime;
+    function UTCTimeToLocalTime(aUTCTime: TDateTime; aTimeZone: AnsiString): TDateTime;
+    function GetEffectiveOffsetMins(aLocalTime: TDateTime; aTimeZone: AnsiString): integer;
+
  end;
 
   TProtocolAll = (TCP, SPX, NamedPipe, Local, inet, inet4, inet6, wnet, xnet, unknownProtocol);
@@ -1224,12 +1232,8 @@ type
     procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal; bufptr: PByte);
     function SQLDecFloatDecode(SQLType: cardinal; bufptr: PByte): tBCD;
 
-    {Time Zone Support - uses client local ICU}
-    function TimeZoneID2TimeZoneName(aTimeZoneID: TFBTimeZoneID): AnsiString;
-    function TimeZoneName2TimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID;
-    function LocalTimeToUTCTime(aLocalTime: TDateTime; aTimeZone: AnsiString): TDateTime;
-    function UTCTimeToLocalTime(aUTCTime: TDateTime; aTimeZone: AnsiString): TDateTime;
-    function GetEffectiveOffsetMins(aLocalTime: TDateTime; aTimeZone: AnsiString): integer;
+    {Time Zone Support - is client local ICU available}
+    function HasLocalICU: boolean;
 end;
 
 type
