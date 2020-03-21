@@ -69,6 +69,7 @@ type
     FCodePage: TSystemCodePage;
     FRemoteProtocol: AnsiString;
     FAuthMethod: AnsiString;
+    FForceUseServerICU: boolean;
     constructor Create(api: TFBClientAPI; DatabaseName: AnsiString; DPB: IDPB;
       RaiseExceptionOnConnectError: boolean);
     procedure CheckHandle; virtual; abstract;
@@ -79,6 +80,7 @@ type
     procedure EndAllTransactions;
     procedure DPBFromCreateSQL(CreateSQL: AnsiString);
     procedure SetParameters(SQLParams: ISQLParams; params: array of const);
+    procedure UseServerICUChanged; virtual;
   public
     destructor Destroy; override;
     function getFirebirdAPI: IFirebirdAPI;
@@ -135,37 +137,40 @@ type
     function OpenArray(transaction: ITransaction; ArrayMetaData: IArrayMetaData; ArrayID: TISC_QUAD): IArray; overload; virtual; abstract;
     property SQLDialect: integer read FSQLDialect;
     property DPB: IDPB read FDPB;
-public
-  function GetDBInformation(Requests: array of byte): IDBInformation; overload;
-  function GetDBInformation(Request: byte): IDBInformation; overload;
-  function GetDBInformation(Requests: IDIRB): IDBInformation; overload;
-  function GetConnectString: AnsiString;
-  function GetRemoteProtocol: AnsiString;
-  function GetAuthenticationMethod: AnsiString;
-  function GetSecurityDatabase: AnsiString;
-  function GetODSMajorVersion: integer;
-  function GetODSMinorVersion: integer;
-  {Character Sets}
-  function HasDefaultCharSet: boolean;
-  function GetDefaultCharSetID: integer;
-  function GetCharsetName(CharSetID: integer): AnsiString;
-  function CharSetID2CodePage(CharSetID: integer; var CodePage: TSystemCodePage): boolean;
-  function CodePage2CharSetID(CodePage: TSystemCodePage; var CharSetID: integer): boolean;
-  function CharSetName2CharSetID(CharSetName: AnsiString; var CharSetID: integer): boolean;
-  function CharSetWidth(CharSetID: integer; var Width: integer): boolean;
-  procedure RegisterCharSet(CharSetName: AnsiString; CodePage: TSystemCodePage;
-    AllowReverseLookup:boolean; out CharSetID: integer);
-  function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IBlobMetaData; virtual; abstract;
-  function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IArrayMetaData; virtual; abstract;
-  property CharSetID: integer read FCharSetID;
-  property CodePage: TSystemCodePage read FCodePage;
-  {Time Zone Support}
-  function TimeZoneID2TimeZoneName(aTimeZoneID: TFBTimeZoneID): AnsiString; virtual;
-  function TimeZoneName2TimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID; virtual;
-  function LocalTimeToUTCTime(aLocalTime: TDateTime; aTimeZone: AnsiString): TDateTime; virtual;
-  function UTCTimeToLocalTime(aUTCTime: TDateTime; aTimeZone: AnsiString): TDateTime; virtual;
-  function GetEffectiveOffsetMins(aLocalTime: TDateTime; aTimeZone: AnsiString
-    ): integer; virtual;
+  public
+    function GetDBInformation(Requests: array of byte): IDBInformation; overload;
+    function GetDBInformation(Request: byte): IDBInformation; overload;
+    function GetDBInformation(Requests: IDIRB): IDBInformation; overload;
+    function GetConnectString: AnsiString;
+    function GetRemoteProtocol: AnsiString;
+    function GetAuthenticationMethod: AnsiString;
+    function GetSecurityDatabase: AnsiString;
+    function GetODSMajorVersion: integer;
+    function GetODSMinorVersion: integer;
+    {Character Sets}
+    function HasDefaultCharSet: boolean;
+    function GetDefaultCharSetID: integer;
+    function GetCharsetName(CharSetID: integer): AnsiString;
+    function CharSetID2CodePage(CharSetID: integer; var CodePage: TSystemCodePage): boolean;
+    function CodePage2CharSetID(CodePage: TSystemCodePage; var CharSetID: integer): boolean;
+    function CharSetName2CharSetID(CharSetName: AnsiString; var CharSetID: integer): boolean;
+    function CharSetWidth(CharSetID: integer; var Width: integer): boolean;
+    procedure RegisterCharSet(CharSetName: AnsiString; CodePage: TSystemCodePage;
+      AllowReverseLookup:boolean; out CharSetID: integer);
+    function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IBlobMetaData; virtual; abstract;
+    function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IArrayMetaData; virtual; abstract;
+    property CharSetID: integer read FCharSetID;
+    property CodePage: TSystemCodePage read FCodePage;
+    {Time Zone Support}
+    function TimeZoneID2TimeZoneName(aTimeZoneID: TFBTimeZoneID): AnsiString; virtual;
+    function TimeZoneName2TimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID; virtual;
+    function LocalTimeToUTCTime(aLocalTime: TDateTime; aTimeZone: AnsiString): TDateTime; virtual;
+    function UTCTimeToLocalTime(aUTCTime: TDateTime; aTimeZone: AnsiString): TDateTime; virtual;
+    function GetEffectiveOffsetMins(aLocalTime: TDateTime; aTimeZone: AnsiString
+      ): integer; virtual;
+    function UsingRemoteICU: boolean; virtual;
+    function GetForceUseServerICU: boolean;
+    procedure SetForceUseServerICU(aValue: boolean);
   end;
 
 implementation
@@ -462,6 +467,11 @@ begin
         IBError(ibxeInvalidVariantType,[nil]);
     end;
   end;
+end;
+
+procedure TFBAttachment.UseServerICUChanged;
+begin
+  // Do nothing by default
 end;
 
 destructor TFBAttachment.Destroy;
@@ -880,6 +890,7 @@ function TFBAttachment.TimeZoneID2TimeZoneName(aTimeZoneID: TFBTimeZoneID
 begin
   if not getFirebirdAPI.HasTimeZoneSupport then
     IBError(ibxeNotSupported,[]);
+  Result := 'UTC';
 end;
 
 function TFBAttachment.TimeZoneName2TimeZoneID(aTimeZone: AnsiString
@@ -887,6 +898,7 @@ function TFBAttachment.TimeZoneName2TimeZoneID(aTimeZone: AnsiString
 begin
   if not getFirebirdAPI.HasTimeZoneSupport then
     IBError(ibxeNotSupported,[]);
+  Result := TimeZoneID_GMT;
 end;
 
 function TFBAttachment.LocalTimeToUTCTime(aLocalTime: TDateTime;
@@ -894,6 +906,7 @@ function TFBAttachment.LocalTimeToUTCTime(aLocalTime: TDateTime;
 begin
   if not getFirebirdAPI.HasTimeZoneSupport then
     IBError(ibxeNotSupported,[]);
+  Result := aLocalTime;
 end;
 
 function TFBAttachment.UTCTimeToLocalTime(aUTCTime: TDateTime;
@@ -901,6 +914,7 @@ function TFBAttachment.UTCTimeToLocalTime(aUTCTime: TDateTime;
 begin
   if not getFirebirdAPI.HasTimeZoneSupport then
     IBError(ibxeNotSupported,[]);
+  Result := aUTCTime;
 end;
 
 function TFBAttachment.GetEffectiveOffsetMins(aLocalTime: TDateTime;
@@ -908,6 +922,26 @@ function TFBAttachment.GetEffectiveOffsetMins(aLocalTime: TDateTime;
 begin
   if not getFirebirdAPI.HasTimeZoneSupport then
     IBError(ibxeNotSupported,[]);
+  Result := 0;
+end;
+
+function TFBAttachment.UsingRemoteICU: boolean;
+begin
+  Result := false;
+end;
+
+function TFBAttachment.GetForceUseServerICU: boolean;
+begin
+  Result := FForceUseServerICU;
+end;
+
+procedure TFBAttachment.SetForceUseServerICU(aValue: boolean);
+begin
+  if FForceUseServerICU <> aValue then
+  begin
+    FForceUseServerICU := aValue;
+    UseServerICUChanged;
+  end;
 end;
 
 end.

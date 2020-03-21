@@ -1034,6 +1034,9 @@ type
     function LocalTimeToUTCTime(aLocalTime: TDateTime; aTimeZone: AnsiString): TDateTime;
     function UTCTimeToLocalTime(aUTCTime: TDateTime; aTimeZone: AnsiString): TDateTime;
     function GetEffectiveOffsetMins(aLocalTime: TDateTime; aTimeZone: AnsiString): integer;
+    function UsingRemoteICU: boolean;
+    function GetForceUseServerICU: boolean;
+    procedure SetForceUseServerICU(aValue: boolean);
 
  end;
 

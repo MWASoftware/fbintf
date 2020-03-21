@@ -57,11 +57,14 @@ type
     FFirebird30ClientAPI: TFB30ClientAPI;
     FTimeZoneCache: array of TTimeZoneCache;
     FTZCacheEnd: integer;
+    FUsingRemoteICU: boolean;
     function LookupTimeZoneName(aTimeZoneID: TFBTimeZoneID): AnsiString;
     function LookupTimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID;
     procedure AddtoTimeZoneCache(aTimeZoneID: TFBTimeZoneID; aTimeZone: AnsiString);
+    procedure SetUseRemoteICU(aValue: boolean);
   protected
     procedure CheckHandle; override;
+    procedure UseServerICUChanged; override;
   public
     constructor Create(api: TFB30ClientAPI; DatabaseName: AnsiString; aDPB: IDPB;
           RaiseExceptionOnConnectError: boolean);
@@ -117,6 +120,7 @@ type
     function UTCTimeToLocalTime(aUTCTime: TDateTime; aTimeZone: AnsiString): TDateTime; override;
     function GetEffectiveOffsetMins(aLocalTime: TDateTime; aTimeZone: AnsiString
       ): integer; override;
+    function UsingRemoteICU: boolean; override;
   end;
 
 implementation
@@ -200,10 +204,28 @@ begin
   Inc(FTZCacheEnd);
 end;
 
+procedure TFB30Attachment.SetUseRemoteICU(aValue: boolean);
+begin
+  if (FUsingRemoteICU <> aValue) and (GetODSMajorVersion >= 13) then
+  begin
+    if aValue then
+      ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_concurrency],'SET BIND OF TIME ZONE TO EXTENDED')
+    else
+      ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_concurrency],'SET BIND OF TIME ZONE TO NATIVE');
+    FUsingRemoteICU := aValue;
+  end;
+end;
+
 procedure TFB30Attachment.CheckHandle;
 begin
   if FAttachmentIntf = nil then
     IBError(ibxeDatabaseClosed,[nil]);
+end;
+
+procedure TFB30Attachment.UseServerICUChanged;
+begin
+  if FFirebird30ClientAPI.HasLocalICU then
+    SetUseRemoteICU(FForceUseServerICU);
 end;
 
 constructor TFB30Attachment.Create(api: TFB30ClientAPI; DatabaseName: AnsiString; aDPB: IDPB;
@@ -305,6 +327,9 @@ begin
       FAttachmentIntf := nil
     else
       GetODSAndConnectionInfo;
+
+    if not FFirebird30ClientAPI.HasLocalICU then
+      SetUseRemoteICU(true);
   end;
 end;
 
@@ -469,13 +494,15 @@ var Buffer: ISC_TIME_TZ;
 begin
   Result := inherited TimeZoneID2TimeZoneName(aTimeZoneID);
   with FFirebird30ClientAPI do
-  if HasLocalICU then
+  if not FUsingRemoteICU then
   begin
     Buffer.utc_time := 0;
     Buffer.time_zone := aTimeZoneID;
     SQLDecodeTimeTZ(aTime,Result,@Buffer);
   end
   else
+  if GetODSMajorVersion >= 13 then
+  {Use remote ICU}
    Result := LookupTimeZoneName(aTimeZoneID);
 end;
 
@@ -485,12 +512,14 @@ var Buffer: ISC_TIME_TZ;
 begin
   Result := inherited TimeZoneName2TimeZoneID(aTimeZone);
   with FFirebird30ClientAPI do
-  if HasLocalICU then
+  if not FUsingRemoteICU then
   begin
     SQLEncodeTimeTZ(0,aTimeZone,@Buffer);
     Result := Buffer.time_zone;
   end
   else
+  if GetODSMajorVersion >= 13 then
+  {Use remote ICU}
     Result := LookupTimeZoneID(aTimeZone);
 end;
 
@@ -500,12 +529,14 @@ var Buffer: ISC_TIMESTAMP_TZ;
 begin
   Result := inherited LocalTimeToUTCTime(aLocalTime, aTimeZone);
   with FFirebird30ClientAPI do
-  if HasLocalICU then
+  if not FUsingRemoteICU then
   begin
     SQLEncodeTimeStampTZ(aLocalTime,aTimeZone,@Buffer);
     Result := SQLDecodeDateTime(@Buffer);
   end
   else
+  if GetODSMajorVersion >= 13 then
+  {Use remote ICU}
   with Prepare(self.StartTransaction([isc_tpb_read,isc_tpb_wait,isc_tpb_concurrency],taCommit),
                'Select ? AT ''UTC'' From RDB$Database') do
   begin
@@ -521,13 +552,15 @@ var Buffer: ISC_TIMESTAMP_TZ;
 begin
   Result := inherited UTCTimeToLocalTime(aUTCTime, aTimeZone);
   with FFirebird30ClientAPI do
-  if HasLocalICU then
+  if not FUsingRemoteICU then
   begin
     SQLEncodeDateTime(aUTCTime,@Buffer);
     Buffer.time_zone := TimeZoneName2TimeZoneID(aTimeZone);
     SQLDecodeTimestampTZ(Result,theTimeZone,@Buffer);
   end
   else
+  if GetODSMajorVersion >= 13 then
+  {Use remote ICU}
   with Prepare(self.StartTransaction([isc_tpb_read,isc_tpb_wait,isc_tpb_concurrency],taCommit),
                'Select ? AT ? From RDB$Database') do
   begin
@@ -544,13 +577,14 @@ var UTCTime: TDateTime;
 begin
   Result := inherited GetEffectiveOffsetMins(aLocalTime, aTimeZone);
   with FFirebird30ClientAPI do
-  if HasLocalICU then
+  if not FUsingRemoteICU then
   begin
     SQLEncodeTimestampTZ(aLocalTime,aTimeZone,@Buffer);
     UTCTime := SQLDecodeDateTime(@Buffer);
     Result := Round((aLocalTime - UTCTime) * MinsPerDay);
   end
   else
+  if GetODSMajorVersion >= 13 then
   {Use remote ICU}
   with Prepare(self.StartTransaction([isc_tpb_read,isc_tpb_wait,isc_tpb_concurrency],taCommit),
                'Select EFFECTIVE_OFFSET From rdb$time_zone_util.transitions(?,?,?)') do
@@ -560,6 +594,11 @@ begin
     SQLParams[2].AsDateTime := aLocalTime;
     Result := OpenCursor[0].AsInteger;
   end;
+end;
+
+function TFB30Attachment.UsingRemoteICU: boolean;
+begin
+  Result := FUsingRemoteICU;
 end;
 
 end.

@@ -667,11 +667,14 @@ var Buffer: ISC_TIME_TZ;
     aTime: TDateTime;
     aTimeZone: AnsiString;
 begin
-  Result := inherited HasLocalICU;
-  Buffer.utc_time := 0;
-  Buffer.time_zone := TimeZoneID_GMT;
-  SQLDecodeTimeTZ(aTime,aTimeZone,@Buffer);
-  Result := aTimeZone <> 'GMT*';
+  Result := HasTimeZoneSupport;
+  if Result then
+  begin
+    Buffer.utc_time := 0;
+    Buffer.time_zone := TimeZoneID_GMT;
+    SQLDecodeTimeTZ(aTime,aTimeZone,@Buffer);
+    Result := aTimeZone <> 'GMT*';
+  end;
 end;
 
 function TFB30ClientAPI.GetClientMajor: integer;
