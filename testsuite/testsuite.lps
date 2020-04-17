@@ -14,10 +14,13 @@
       <Unit1>
         <Filename Value="TestManager.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <CursorPos Y="19"/>
         <TopLine Value="256"/>
         <CursorPos X="43" Y="273"/>
         <UsageCount Value="202"/>
+        <Loaded Value="True"/>
       </Unit1>
       <Unit2>
         <Filename Value="Test1.pas"/>
