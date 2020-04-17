@@ -7,7 +7,6 @@
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <CursorPos X="31" Y="14"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
@@ -197,9 +196,9 @@
       </Unit23>
       <Unit24>
         <Filename Value="../IB.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="442"/>
-        <CursorPos Y="468"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="228"/>
+        <CursorPos X="39" Y="235"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
@@ -207,6 +206,7 @@
           <CursorPos Y="228"/>
         </ExtraEditor1>
         <UsageCount Value="99"/>
+        <Loaded Value="True"/>
       </Unit24>
       <Unit25>
         <Filename Value="../client/include/uloadlibrary.inc"/>
@@ -488,10 +488,12 @@
       </Unit63>
       <Unit64>
         <Filename Value="../../ibx/runtime/nongui/IBCustomDataSet.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="5163"/>
-        <CursorPos X="14" Y="5168"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="883"/>
+        <CursorPos X="3" Y="849"/>
         <UsageCount Value="40"/>
+        <Loaded Value="True"/>
       </Unit64>
       <Unit65>
         <Filename Value="/usr/share/fpcsrc/packages/fcl-db/src/base/db.pas"/>
@@ -970,11 +972,40 @@
         <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit130>
+      <Unit65>
+        <Filename Value="../../ibx/dclibx.pas"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+      </Unit65>
+      <Unit66>
+        <Filename Value="../../ibx/design/ibgeneratoreditor.pas"/>
+        <ComponentName Value="GeneratorEditor"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="IBGeneratorEditor"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="76"/>
+        <CursorPos X="6" Y="88"/>
+        <UsageCount Value="10"/>
+      </Unit66>
     </Units>
     <OtherDefines Count="1">
       <Define0 Value="INIDE"/>
     </OtherDefines>
-    <JumpHistory HistoryIndex="-1"/>
+    <JumpHistory Count="3" HistoryIndex="2">
+      <Position1>
+        <Filename Value="../IB.pas"/>
+        <Caret Line="468" TopLine="59"/>
+      </Position1>
+      <Position2>
+        <Filename Value="../IB.pas"/>
+        <Caret Line="722" Column="49" TopLine="694"/>
+      </Position2>
+      <Position3>
+        <Filename Value="../../ibx/runtime/nongui/IBCustomDataSet.pas"/>
+        <Caret Line="5168" Column="14" TopLine="5105"/>
+      </Position3>
+    </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
       <Modes Count="0" ActiveMode="default"/>
