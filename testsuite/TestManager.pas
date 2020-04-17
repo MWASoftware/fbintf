@@ -13,6 +13,10 @@ interface
 uses
   Classes, SysUtils, IB;
 
+{$IFDEF MSWINDOWS}
+const LineEnding = #$0D#$0A;
+{$ENDIF}
+
 type
   TTestManager = class;
 
