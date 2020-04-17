@@ -1,4 +1,4 @@
-FBINTF Change Log  version          (1.1-5 Build 12034) Fri, 17 Apr 2020 12:28:42 +0100
+FBINTF Change Log  version          (1.1-5 Build 12044) Fri, 17 Apr 2020 12:30:01 +0100
 
 1. ISQLParams.GetHasCaseSensitiveParams added. Returns true if param names are
    case sensitive
