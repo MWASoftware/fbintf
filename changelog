@@ -68,6 +68,8 @@ FBINTF Change Log  version          (1.1-5 Build 11664) Thu, 11 Apr 2019 09:43:4
     function FBFormatDateTime(fmt: AnsiString; aDateTime: TDateTime): AnsiString;
     function FormatTimeZoneOffset(EffectiveTimeOffsetMins: integer): AnsiString;
 
+15. TSQLStatementType: added missing element for Save Points.
+
 
 
 FBINTF Change Log  version          (1.1-4 Build 11515)  Fri, 28 Dec 2018 10:04:19 +0000

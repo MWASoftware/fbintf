@@ -231,7 +231,8 @@ type
                   SQLGetSegment, SQLPutSegment,
                   SQLExecProcedure, SQLStartTransaction,
                   SQLCommit, SQLRollback,
-                  SQLSelectForUpdate, SQLSetGenerator);
+                  SQLSelectForUpdate, SQLSetGenerator,
+                  SQLSavePoint);
 
   TFBStatusCode = cardinal;
   TByteArray = array of byte;
