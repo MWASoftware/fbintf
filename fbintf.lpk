@@ -46,7 +46,7 @@ Two interface implementations are provided. One is for the new Firebird 3 Client
  *
  *  Contributor(s): ______________________________________.
  *    "/>
-    <Version Major="1" Minor="1" Release = "5" Build="11664" />
+    <Version Major="1" Minor="1" Release = "5" Build="12022" />
     <Files Count="35">
       <Item1>
         <Filename Value="client/3.0/firebird/Firebird.pas"/>

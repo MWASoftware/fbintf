@@ -3,12 +3,11 @@
   <ProjectSession>
     <Version Value="11"/>
     <BuildModes Active="Default"/>
-    <Units Count="65">
+    <Units Count="67">
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="16"/>
         <UsageCount Value="46"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -29,11 +28,10 @@
       <Unit3>
         <Filename Value="test2.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="18"/>
         <CursorPos Y="71"/>
         <UsageCount Value="46"/>
-        <Loaded Value="True"/>
       </Unit3>
       <Unit4>
         <Filename Value="Test3.pas"/>
@@ -44,11 +42,10 @@
       <Unit5>
         <Filename Value="Test4.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="53"/>
         <CursorPos X="106" Y="171"/>
         <UsageCount Value="46"/>
-        <Loaded Value="True"/>
       </Unit5>
       <Unit6>
         <Filename Value="Test5.pas"/>
@@ -138,19 +135,17 @@
       </Unit18>
       <Unit19>
         <Filename Value="../client/FBClientAPI.pas"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="324"/>
         <CursorPos Y="343"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
       </Unit19>
       <Unit20>
         <Filename Value="../IBUtils.pas"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="1473"/>
         <CursorPos Y="1488"/>
         <UsageCount Value="14"/>
-        <Loaded Value="True"/>
       </Unit20>
       <Unit21>
         <Filename Value="../client/FBSQLData.pas"/>
@@ -175,8 +170,8 @@
       <Unit23>
         <Filename Value="../IB.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="1301"/>
-        <CursorPos Y="1328"/>
+        <TopLine Value="190"/>
+        <CursorPos X="31" Y="214"/>
         <UsageCount Value="16"/>
       </Unit23>
       <Unit24>
@@ -451,7 +446,7 @@
       <Unit63>
         <Filename Value="../changelog"/>
         <EditorIndex Value="-1"/>
-        <CursorPos X="81" Y="6"/>
+        <CursorPos X="65" Y="20"/>
         <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit63>
@@ -462,25 +457,24 @@
         <CursorPos X="9" Y="1017"/>
         <UsageCount Value="10"/>
       </Unit64>
+      <Unit65>
+        <Filename Value="../../ibx/dclibx.pas"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+      </Unit65>
+      <Unit66>
+        <Filename Value="../../ibx/design/ibgeneratoreditor.pas"/>
+        <ComponentName Value="GeneratorEditor"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="IBGeneratorEditor"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="76"/>
+        <CursorPos X="6" Y="88"/>
+        <UsageCount Value="10"/>
+      </Unit66>
     </Units>
-    <JumpHistory Count="4" HistoryIndex="3">
-      <Position1>
-        <Filename Value="../IBUtils.pas"/>
-        <Caret Line="1049" TopLine="991"/>
-      </Position1>
-      <Position2>
-        <Filename Value="../IBUtils.pas"/>
-        <Caret Line="538" Column="14" TopLine="520"/>
-      </Position2>
-      <Position3>
-        <Filename Value="../IBUtils.pas"/>
-        <Caret Line="557" Column="14" TopLine="539"/>
-      </Position3>
-      <Position4>
-        <Filename Value="../IBUtils.pas"/>
-        <Caret Line="1488" TopLine="1473"/>
-      </Position4>
-    </JumpHistory>
+    <JumpHistory HistoryIndex="-1"/>
     <RunParams>
       <FormatVersion Value="2"/>
       <Modes Count="0" ActiveMode="default"/>
