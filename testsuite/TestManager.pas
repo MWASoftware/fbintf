@@ -270,14 +270,14 @@ begin
     SQL_TIMESTAMP_TZ,
     SQL_TIMESTAMP_TZ_EX:
     begin
-      aValue[i].GetAsDateTime(dt,s,offset);
-      writeln(OutFile,aValue[i].Name,' = ',FBFormatDateTime('yyyy/mm/dd hh:nn:ss.zzzz',dt) + ' ' + s + ' (Offset = ',offset,')');
+      aValue[i].GetAsDateTime(dt,s);
+      writeln(OutFile,aValue[i].Name,' = ',FBFormatDateTime('yyyy/mm/dd hh:nn:ss.zzzz',dt) + ' ' + s);
     end;
     SQL_TIME_TZ,
     SQL_TIME_TZ_EX:
     begin
-      aValue[i].GetAsDateTime(dt,s,offset);
-      writeln(OutFile,aValue[i].Name,' = ',FBFormatDateTime('hh:nn:ss.zzzz',dt) + ' ' + s + ' (Offset = ',offset,')');
+      aValue[i].GetAsDateTime(dt,s);
+      writeln(OutFile,aValue[i].Name,' = ',FBFormatDateTime('hh:nn:ss.zzzz',dt) + ' ' + s);
     end;
 
     else

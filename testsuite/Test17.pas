@@ -93,7 +93,7 @@ var aDateTime: TDateTime;
     aTimeZone: AnsiString;
 begin
   writeln(OutFile,'Test Time Zone Setting');
-  with FirebirdAPI do
+  with FirebirdAPI, Attachment do
   begin
     writeln(OutFile,'Time Zone GMT = ',TimeZoneID2TimeZoneName(65535));
     writeln(OutFile,'Time Zone Zagreb = ',TimeZoneID2TimeZoneName(65037));
@@ -311,12 +311,11 @@ begin
       write(OutFile,'TimeCol = ');
       if not Results[1].IsNull then
       begin
-        Results[1].GetAsDateTime(aDate,aTimeZone,offset);
+        Results[1].GetAsDateTime(aDate,aTimeZone);
         writeln(OutFile,Results[1].GetAsString,
-                       ', TimeZoneID = ',FirebirdAPI.TimeZoneName2TimeZoneID(aTimeZone),
+                       ', TimeZoneID = ',Attachment.TimeZoneName2TimeZoneID(aTimeZone),
                        ', Time Zone Name = ',aTimeZone,
-                       ', UTC Time = ',TimeToStr( Results[1].GetAsUTCDateTime),
-                       ', Offset = ',offset)
+                       ', UTC Time = ',TimeToStr( Results[1].GetAsUTCDateTime))
       end
       else
         writeln(OutFile,'NULL');
@@ -324,12 +323,11 @@ begin
       write(OutFile,'TimeStampCol = ');
       if not Results[2].IsNull then
       begin
-        Results[2].GetAsDateTime(aDate,aTimeZone,offset);
+        Results[2].GetAsDateTime(aDate,aTimeZone);
         writeln(OutFile,Results[2].GetAsString,
-                        ', TimeZoneID = ',FirebirdAPI.TimeZoneName2TimeZoneID(aTimeZone),
+                        ', TimeZoneID = ',Attachment.TimeZoneName2TimeZoneID(aTimeZone),
                         ', Time Zone Name = ',aTimeZone,
-                        ', UTC Timestamp = ',DateTimeToStr( Results[2].GetAsUTCDateTime),
-                       ', Offset = ',offset)
+                        ', UTC Timestamp = ',DateTimeToStr( Results[2].GetAsUTCDateTime))
       end
       else
         writeln(OutFile,'NULL');

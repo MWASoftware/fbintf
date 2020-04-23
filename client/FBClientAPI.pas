@@ -90,6 +90,11 @@ FIREBIRD_CLIENT = 'fbclient.dll'; {do not localize}
 FIREBIRD_EMBEDDED = 'fbembed.dll';
 {$ENDIF}
 
+const
+  IBLocalBufferLength = 512;
+  IBBigLocalBufferLength = IBLocalBufferLength * 2;
+  IBHugeLocalBufferLength = IBBigLocalBufferLength * 20;
+
 type
   TStatusVector              = array[0..19] of NativeInt;
   PStatusVector              = ^TStatusVector;
@@ -163,7 +168,6 @@ type
     {Taken from legacy API}
     isc_sqlcode: Tisc_sqlcode;
     isc_sql_interprete: Tisc_sql_interprete;
-    isc_interprete: Tisc_interprete;
     isc_event_counts: Tisc_event_counts;
     isc_event_block: Tisc_event_block;
     isc_free: Tisc_free;
@@ -186,7 +190,8 @@ type
     function SQLDecodeTime(bufptr: PByte): TDateTime;  virtual; abstract;
     procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte); virtual; abstract;
     function  SQLDecodeDateTime(bufptr: PByte): TDateTime; virtual; abstract;
-    {Firebird 4 Extensions}
+    function FormatStatus(Status: TFBStatus): AnsiString; virtual; abstract;
+   {Firebird 4 Extensions}
     procedure SQLEncodeTimeTZ(aTime: TDateTime; aTimeZone: AnsiString; bufptr: PByte); virtual;
     procedure SQLDecodeTimeTZ(var aTime: TDateTime; var aTimeZone: AnsiString; bufptr: PByte);  virtual;
     procedure SQLEncodeTimeStampTZ(aDateTime: TDateTime; aTimeZone: AnsiString; bufptr: PByte); virtual;
@@ -226,11 +231,6 @@ WinDirs,
  ShlObj,
 {$ENDIF}
 SysUtils;
-
-const
-  IBLocalBufferLength = 512;
-  IBBigLocalBufferLength = IBLocalBufferLength * 2;
-  IBHugeLocalBufferLength = IBBigLocalBufferLength * 20;
 
 {$IFDEF UNIX}
 {$I 'include/uloadlibrary.inc'}
@@ -492,7 +492,6 @@ function TFBClientAPI.LoadInterface: boolean;
 begin
   isc_sqlcode := GetProcAddr('isc_sqlcode'); {do not localize}
   isc_sql_interprete := GetProcAddr('isc_sql_interprete'); {do not localize}
-  isc_interprete := GetProcAddr('isc_interprete'); {do not localize}
   isc_event_counts := GetProcAddr('isc_event_counts'); {do not localize}
   isc_event_block := GetProcAddr('isc_event_block'); {do not localize}
   isc_free := GetProcAddr('isc_free'); {do not localize}
@@ -523,7 +522,6 @@ function TFBStatus.GetMessage: AnsiString;
 var local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
     IBDataBaseErrorMessages: TIBDataBaseErrorMessages;
     sqlcode: Long;
-    psb: PStatusVector;
 begin
   Result := '';
   IBDataBaseErrorMessages := FIBDataBaseErrorMessages;
@@ -535,7 +533,7 @@ begin
   if (ShowSQLMessage in IBDataBaseErrorMessages) then
   begin
     with FOwner do
-      isc_sql_interprete(sqlcode, local_buffer, IBLocalBufferLength);
+      isc_sql_interprete(sqlcode, local_buffer, sizeof(local_buffer));
     if (ShowSQLCode in FIBDataBaseErrorMessages) then
       Result := Result + CRLF;
     Result := Result + strpas(local_buffer);
@@ -545,15 +543,8 @@ begin
   begin
     if (ShowSQLCode in IBDataBaseErrorMessages) or
        (ShowSQLMessage in IBDataBaseErrorMessages) then
-      Result := Result + CRLF;
-    psb := StatusVector;
-    with FOwner do
-    while (isc_interprete(@local_buffer, @psb) > 0) do
-    begin
-      if (Result <> '') and (Result[Length(Result)] <> LF) then
-        Result := Result + CRLF;
-      Result := Result + strpas(local_buffer);
-    end;
+      Result := Result + LineEnding;
+    Result := Result + LineEnding + FOwner.FormatStatus(self);
   end;
   if (Result <> '') and (Result[Length(Result)] = '.') then
     Delete(Result, Length(Result), 1);

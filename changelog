@@ -2,7 +2,7 @@ FBINTF Change Log  version          (1.2-0 Build 12022) Fri, 17 Apr 2020 10:35:5
 
 1. Imported (Firebird) constants updated for Firebird 4.
 
-2. Firebird.pas from Firebird 4 Beta 1 integrated into source code tree.
+2. Firebird.pas from Firebird 4 integrated into source code tree.
 
 3. Added Support for SQL_TIMESTAMP_TZ and SQL_TIME_TZ.
 
@@ -50,6 +50,8 @@ FBINTF Change Log  version          (1.2-0 Build 12022) Fri, 17 Apr 2020 10:35:5
     function FBEncodeTime(Hour, Minute, Second, DeciMillisecond: cardinal): TDateTime;
     function FBFormatDateTime(fmt: AnsiString; aDateTime: TDateTime): AnsiString;
     function FormatTimeZoneOffset(EffectiveTimeOffsetMins: integer): AnsiString;
+
+10. IUtil.FormatStatus now used to format error messages when using new API.
 
 FBINTF Change Log  version          (1.1-5 Build 12022) Fri, 17 Apr 2020 10:35:55 +0100
 
