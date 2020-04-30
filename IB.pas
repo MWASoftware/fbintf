@@ -517,8 +517,8 @@ type
     function GetAsCurrency: Currency;
     function GetAsInt64: Int64;
     function GetAsDateTime: TDateTime; overload;
-    procedure GetAsDateTime(var aDateTime: TDateTime; var aTimezoneID: TFBTimeZoneID); overload;
-    procedure GetAsDateTime(var aDateTime: TDateTime; var aTimezone: AnsiString); overload;
+    procedure GetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID); overload;
+    procedure GetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString); overload;
     function GetAsUTCDateTime: TDateTime;
     function GetAsDouble: Double;
     function GetAsFloat: Float;
@@ -618,8 +618,8 @@ type
     function GetAsCurrency: Currency;
     function GetAsInt64: Int64;
     function GetAsDateTime: TDateTime; overload;
-    procedure GetAsDateTime(var aDateTime: TDateTime; var aTimezoneID: TFBTimeZoneID); overload;
-    procedure GetAsDateTime(var aDateTime: TDateTime; var aTimezone: AnsiString); overload;
+    procedure GetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID); overload;
+    procedure GetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString); overload;
     function GetAsUTCDateTime: TDateTime;
     function GetAsDouble: Double;
     function GetAsFloat: Float;

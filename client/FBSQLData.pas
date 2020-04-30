@@ -97,7 +97,8 @@ type
      function GetTimeFormatStr: AnsiString;
      function GetTimestampFormatStr: AnsiString;
      procedure SetAsInteger(AValue: Integer);
-     procedure InternalGetAsDateTime(var aDateTime: TDateTime; var aTimezone: AnsiString; var aTimeZoneID: TFBTimeZoneID);
+     procedure InternalGetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint;
+       var aTimezone: AnsiString; var aTimeZoneID: TFBTimeZoneID);
   protected
      function AdjustScaleFromCurrency(Value: Currency; aScale: Integer): Int64;
      function AdjustScaleFromDouble(Value: Double; aScale: Integer): Int64;
@@ -129,8 +130,8 @@ type
      function GetAsCurrency: Currency;
      function GetAsInt64: Int64;
      function GetAsDateTime: TDateTime; overload;
-     procedure GetAsDateTime(var aDateTime: TDateTime; var aTimezone: AnsiString); overload;
-     procedure GetAsDateTime(var aDateTime: TDateTime; var aTimezoneID: TFBTimeZoneID); overload;
+     procedure GetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString); overload;
+     procedure GetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID); overload;
      function GetAsUTCDateTime: TDateTime;
      function GetAsDouble: Double;
      function GetAsFloat: Float;
@@ -365,7 +366,7 @@ type
 
   { TSQLParam }
 
-  TSQLParam = class(TIBSQLData,ISQLParam)
+  TSQLParam = class(TIBSQLData,ISQLParam,ISQLData)
   protected
     procedure CheckActive; override;
     procedure Changed; override;
@@ -847,10 +848,12 @@ begin
 end;
 
 procedure TSQLDataItem.InternalGetAsDateTime(var aDateTime: TDateTime;
-  var aTimezone: AnsiString; var aTimeZoneID: TFBTimeZoneID);
+  var dstOffset: smallint; var aTimezone: AnsiString;
+  var aTimeZoneID: TFBTimeZoneID);
 begin
   CheckActive;
   aDateTime := 0;
+  dstOffset := 0;
   aTimezone := '';
   aTimeZoneID := TimeZoneID_GMT;
   if not IsNull then
@@ -867,22 +870,22 @@ begin
         aDateTime := SQLDecodeDateTime(SQLData);
       SQL_TIMESTAMP_TZ:
         begin
-          SQLDecodeTimeStampTZ(aDateTime,aTimeZone,SQLData);
+          SQLDecodeTimeStampTZ(aDateTime,dstOffset,aTimeZone,SQLData);
           aTimeZoneID := PISC_TIMESTAMP_TZ(SQLData)^.time_zone;
         end;
       SQL_TIMESTAMP_TZ_EX:
       begin
-        SQLDecodeTimeStampTZEX(aDateTime,aTimeZone,SQLData);
+        SQLDecodeTimeStampTZEX(aDateTime,dstOffset,aTimeZone,SQLData);
         aTimeZoneID := PISC_TIMESTAMP_TZ_EX(SQLData)^.time_zone;
       end;
       SQL_TIME_TZ:
       begin
-        SQLDecodeTimeTZ(aDateTime,aTimeZone,SQLData);
+        SQLDecodeTimeTZ(aDateTime,dstOffset,aTimeZone,SQLData);
         aTimeZoneID := PISC_TIME_TZ(SQLData)^.time_zone;
       end;
       SQL_TIME_TZ_EX:
       begin
-        SQLDecodeTimeTZEX(aDateTime,aTimeZone,SQLData);
+        SQLDecodeTimeTZEX(aDateTime,dstOffset,aTimeZone,SQLData);
         aTimeZoneID := PISC_TIME_TZ_EX(SQLData)^.time_zone;
       end
       else
@@ -1116,27 +1119,28 @@ end;
 
 function TSQLDataItem.GetAsDateTime: TDateTime;
 var aTimezone: AnsiString;
+    dstOffset: smallint;
 begin
-  GetAsDateTime(Result,aTimeZone);
+  GetAsDateTime(Result,dstOffset,aTimeZone);
 end;
 
 procedure TSQLDataItem.GetAsDateTime(var aDateTime: TDateTime;
-  var aTimezone: AnsiString);
+  var dstOffset: smallint; var aTimezone: AnsiString);
 var aTimeZoneID: TFBTimeZoneID;
 begin
-  InternalGetAsDateTime(aDateTime,aTimeZone,aTimeZoneID);
+  InternalGetAsDateTime(aDateTime,dstOffset,aTimeZone,aTimeZoneID);
   if (aTimeZoneID > MaxOffsetTimeZoneID) and not FFirebirdClientAPI.HasLocalICU then
     aTimeZone := GetAttachment.TimeZoneID2TimeZoneName(aTimeZoneID);
 end;
 
-procedure TSQLDataItem.GetAsDateTime(var aDateTime: TDateTime;
+procedure TSQLDataItem.GetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint;
   var aTimezoneID: TFBTimeZoneID);
 var aTimezone: AnsiString;
 begin
-  InternalGetAsDateTime(aDateTime,aTimeZone,aTimeZoneID);
+  InternalGetAsDateTime(aDateTime,dstOffset,aTimeZone,aTimeZoneID);
 end;
 
-function TSQLDataItem.GetAsUTCDateTime: TDateTime;
+function TSQLDataItem.GetAsUTCDateTime: TDateTime; var dstOffset: smallint;
 var aTimezone: AnsiString;
 begin
   CheckActive;
@@ -1283,6 +1287,7 @@ var
   rs: RawByteString;
   aTimeZone: AnsiString;
   aDateTime: TDateTime;
+  dstOffset: smallint;
 begin
   CheckActive;
   result := '';
@@ -1322,13 +1327,13 @@ begin
       SQL_TIMESTAMP_TZ,
       SQL_TIMESTAMP_TZ_EX:
         begin
-          GetAsDateTime(aDateTime,aTimeZone);
+          GetAsDateTime(aDateTime,dstOffset,aTimeZone);
           Result := FBFormatDateTime(GetTimestampFormatStr,aDateTime) + ' ' + aTimeZone;
         end;
       SQL_TIME_TZ,
       SQL_TIME_TZ_EX:
         begin
-          GetAsDateTime(aDateTime,aTimeZone);
+          GetAsDateTime(aDateTime,dstOffset,aTimeZone);
           Result := FBFormatDateTime(GetTimeFormatStr,aDateTime) + ' ' + aTimeZone;
         end;
 
@@ -1373,6 +1378,7 @@ end;
 
 function TSQLDataItem.GetAsVariant: Variant;
 var ts: TDateTime;
+  dstOffset: smallint;
     timezone: AnsiString;
 begin
   CheckActive;
@@ -1392,8 +1398,8 @@ begin
       SQL_TIMESTAMP_TZ_EX,
       SQL_TIME_TZ_EX:
         begin
-          GetAsDateTime(ts,timezone);
-          result := VarArrayOf([ts,timezone]);
+          GetAsDateTime(ts,dstOffset,timezone);
+          result := VarArrayOf([ts,dstOffset,timezone]);
         end;
       SQL_SHORT, SQL_LONG:
         if Scale = 0 then

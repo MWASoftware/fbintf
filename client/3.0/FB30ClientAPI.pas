@@ -127,15 +127,15 @@ type
 
     {Firebird 4 Extensions}
     procedure SQLEncodeTimeTZ(aTime: TDateTime; aTimeZone: AnsiString; bufptr: PByte); override;
-    procedure SQLDecodeTimeTZ(var aTime: TDateTime; var aTimeZone: AnsiString;
+    procedure SQLDecodeTimeTZ(var aTime: TDateTime; var dstOffset: smallint; var aTimeZone: AnsiString;
       bufptr: PByte); override;
     procedure SQLEncodeTimeStampTZ(aDateTime: TDateTime; aTimeZone: AnsiString;
       bufptr: PByte); override;
-    procedure SQLDecodeTimeStampTZ(var aDateTime: TDateTime;
+    procedure SQLDecodeTimeStampTZ(var aDateTime: TDateTime; var dstOffset: smallint;
       var aTimeZone: AnsiString; bufptr: PByte); override;
-    procedure SQLDecodeTimeTZEX(var aTime: TDateTime; var aTimeZone: AnsiString;
+    procedure SQLDecodeTimeTZEX(var aTime: TDateTime; var dstOffset: smallint; var aTimeZone: AnsiString;
       bufptr: PByte);  override;
-    procedure SQLDecodeTimeStampTZEX(var aDateTime: TDateTime;
+    procedure SQLDecodeTimeStampTZEX(var aDateTime: TDateTime; var dstOffset: smallint;
       var aTimeZone: AnsiString; bufptr: PByte); override;
     procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal; bufptr: PByte);
       override;
@@ -152,7 +152,7 @@ type
 implementation
 
 uses FBParamBlock, FB30Attachment, {$IFDEF FPC}dynlibs{$ELSE} windows{$ENDIF},
-     FBMessages, FB30Services, FB30Transaction, IBUtils;
+     FBMessages, FB30Services, FB30Transaction, IBUtils, DateUtils;
 
 type
   PISC_DATE = ^ISC_DATE;
@@ -456,17 +456,22 @@ begin
 end;
 
 procedure TFB30ClientAPI.SQLDecodeTimeTZ(var aTime: TDateTime;
-  var aTimeZone: AnsiString; bufptr: PByte);
+  var dstOffset: smallint; var aTimeZone: AnsiString; bufptr: PByte);
 const
     bufLength = 128;
 var
   Hr, Mt, S, DMs: cardinal;
   tzBuffer: array[ 0.. bufLength] of AnsiChar;
+  aGMTTime: TDateTime;
 begin
-  inherited SQLDecodeTimeTZ(aTime,aTimeZone,  bufptr);
+  inherited SQLDecodeTimeTZ(aTime,dstOffset,aTimeZone,bufptr);
   UtilIntf.decodeTimeTz(StatusIntf, ISC_TIME_TZPtr(bufptr),@Hr, @Mt, @S, @DMs,bufLength,PAnsiChar(@tzBuffer));
   Check4DataBaseError;
   aTime := FBEncodeTime(Hr, Mt, S, DMs);
+  UtilIntf.decodeTime(PISC_TIME(bufptr)^,@Hr, @Mt, @S, @DMs);
+  aGMTTime := FBEncodeTime(Hr, Mt, S, DMs);
+  dstOffset := Round(MinuteSpan(aTime,aGMTTime));
+  if aGMTTime > aTime then dstOffset := -dstOffset;
   aTimeZone := strpas(PAnsiChar(@tzBuffer));
 end;
 
@@ -485,18 +490,25 @@ begin
 end;
 
 procedure TFB30ClientAPI.SQLDecodeTimeStampTZ(var aDateTime: TDateTime;
-  var aTimeZone: AnsiString; bufptr: PByte);
+  var dstOffset: smallint; var aTimeZone: AnsiString; bufptr: PByte);
 const
   bufLength = 128;
 var
   Yr, Mn, Dy: cardinal;
   Hr, Mt, S, DMs: cardinal;
   tzBuffer: array[ 0.. bufLength] of AnsiChar;
+  aGMTDateTime: TDateTime;
 begin
-  inherited SQLDecodeTimeStampTZ(aDateTime, aTimeZone,  bufptr);
+  inherited SQLDecodeTimeStampTZ(aDateTime, dstOffset, aTimeZone,  bufptr);
   UtilIntf.decodeTimeStampTz(StatusIntf,ISC_TIMESTAMP_TZPtr(bufPtr),@Yr,@ Mn, @Dy, @Hr, @Mt, @S, @DMs,bufLength,PAnsiChar(@tzBuffer));
   Check4DataBaseError;
   aDateTime := EncodeDate(Yr, Mn, Dy) + FBEncodeTime(Hr,Mt,S,DMs);
+  UtilIntf.decodeDate(PISC_DATE(bufptr)^,@Yr, @Mn, @Dy);
+  Inc(bufptr,sizeof(ISC_DATE));
+  UtilIntf.decodeTime(PISC_TIME(bufptr)^,@Hr, @Mt, @S, @DMs);
+  aGMTDateTime := EncodeDate(Yr, Mn, Dy) + FBEncodeTime(Hr,Mt,S,DMs);
+  dstOffset := Round(MinuteSpan(aDateTime,aGMTDateTime));
+  if aGMTDateTime > aDateTime then dstOffset := -dstOffset;
   aTimeZone := strpas(PAnsiChar(@tzBuffer));
 end;
 
@@ -507,24 +519,25 @@ end;
  This can only occur if the remote server is later than FB4 Beta 1.}
 
 procedure TFB30ClientAPI.SQLDecodeTimeTZEX(var aTime: TDateTime;
-  var aTimeZone: AnsiString; bufptr: PByte);
+  var dstOffset: smallint; var aTimeZone: AnsiString; bufptr: PByte);
 const
     bufLength = 128;
 var
   Hr, Mt, S, DMs: cardinal;
   tzBuffer: array[ 0.. bufLength] of AnsiChar;
 begin
-  inherited SQLDecodeTimeTZEX(aTime,aTimeZone,  bufptr);
+  inherited SQLDecodeTimeTZEX(aTime,dstOffset, aTimeZone,  bufptr);
   if UtilIntf.vtable.version = 21 {FB4 Beta1} then
     IBError(ibxeNotSupported,[]);
   UtilIntf.decodeTimeTzEx(StatusIntf, ISC_TIME_TZ_EXPtr(bufptr),@Hr, @Mt, @S, @DMs,bufLength,PAnsiChar(@tzBuffer));
   Check4DataBaseError;
   aTime := FBEncodeTime(Hr, Mt, S, DMs);
+  dstOffset :=  ISC_TIME_TZ_EXPtr(bufptr)^.ext_offset;
   aTimeZone := strpas(PAnsiChar(@tzBuffer))
 end;
 
 procedure TFB30ClientAPI.SQLDecodeTimeStampTZEX(var aDateTime: TDateTime;
-  var aTimeZone: AnsiString; bufptr: PByte);
+  var dstOffset: smallint; var aTimeZone: AnsiString; bufptr: PByte);
 const
   bufLength = 128;
 var
@@ -532,12 +545,13 @@ var
   Hr, Mt, S, DMs: cardinal;
   tzBuffer: array[ 0.. bufLength] of AnsiChar;
 begin
-  inherited SQLDecodeTimeStampTZEX(aDateTime, aTimeZone, bufptr);
+  inherited SQLDecodeTimeStampTZEX(aDateTime, dstOffset, aTimeZone, bufptr);
   if UtilIntf.vtable.version = 21 {FB4 Beta1} then
     IBError(ibxeNotSupported,[]);
   UtilIntf.decodeTimeStampTzEx(StatusIntf,ISC_TIMESTAMP_TZ_EXPtr(bufPtr),@Yr,@ Mn, @Dy, @Hr, @Mt, @S, @DMs,bufLength,PAnsiChar(@tzBuffer));
   Check4DataBaseError;
   aDateTime := EncodeDate(Yr, Mn, Dy) + FBEncodeTime(Hr,Mt,S,DMs);
+  dstOffset := ISC_TIMESTAMP_TZ_EXPtr(bufPtr)^.ext_offset;
   aTimeZone := strpas(PAnsiChar(@tzBuffer));
 end;
 
@@ -676,13 +690,14 @@ function TFB30ClientAPI.HasLocalICU: boolean;
 var Buffer: ISC_TIME_TZ;
     aTime: TDateTime;
     aTimeZone: AnsiString;
+    dstOffset: smallint;
 begin
   Result := HasTimeZoneSupport;
   if Result then
   begin
     Buffer.utc_time := 0;
     Buffer.time_zone := TimeZoneID_GMT;
-    SQLDecodeTimeTZ(aTime,aTimeZone,@Buffer);
+    SQLDecodeTimeTZ(aTime,dstOffset,aTimeZone,@Buffer);
     Result := aTimeZone <> 'GMT*';
   end;
 end;

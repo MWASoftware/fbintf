@@ -491,6 +491,7 @@ function TFB30Attachment.TimeZoneID2TimeZoneName(aTimeZoneID: TFBTimeZoneID
   ): AnsiString;
 var Buffer: ISC_TIME_TZ;
     aTime: TDateTime;
+    dstOffset: smallint;
 begin
   Result := inherited TimeZoneID2TimeZoneName(aTimeZoneID);
   with FFirebird30ClientAPI do
@@ -498,7 +499,7 @@ begin
   begin
     Buffer.utc_time := 0;
     Buffer.time_zone := aTimeZoneID;
-    SQLDecodeTimeTZ(aTime,Result,@Buffer);
+    SQLDecodeTimeTZ(aTime,dstOffset,Result,@Buffer);
   end
   else
   if GetODSMajorVersion >= 13 then
@@ -549,6 +550,7 @@ function TFB30Attachment.UTCTimeToLocalTime(aUTCTime: TDateTime;
   aTimeZone: AnsiString): TDateTime;
 var Buffer: ISC_TIMESTAMP_TZ;
     theTimeZone: AnsiString;
+    dstOffset: smallint;
 begin
   Result := inherited UTCTimeToLocalTime(aUTCTime, aTimeZone);
   with FFirebird30ClientAPI do
@@ -556,7 +558,7 @@ begin
   begin
     SQLEncodeDateTime(aUTCTime,@Buffer);
     Buffer.time_zone := TimeZoneName2TimeZoneID(aTimeZone);
-    SQLDecodeTimestampTZ(Result,theTimeZone,@Buffer);
+    SQLDecodeTimestampTZ(Result,dstOffset,theTimeZone,@Buffer);
   end
   else
   if GetODSMajorVersion >= 13 then

@@ -211,7 +211,21 @@ begin
   Statement.SQLParams[0].AsInteger := 3;
   Statement.SQLParams[1].SetAsTime(EncodeTime(22,02,10,5),'-08:00');
   Statement.SQLParams[2].SetAsDateTime(EncodeDate(1918,11,11) + EncodeTime(0,11,0,0),'+04:00');
+  writeln(OutFile,'Show Parameter 2');
+  writeSQLData(Statement.SQLParams[2] as ISQLData);
   Statement.Execute;
+  sqlInsert := 'Insert into FB4TestData_TZ(RowID,TimeCol,TimestampCol) Values(5,'+
+              '''11:31:05.0001 America/New_York'',''2020.7.1 07:00:00 America/New_York'')';
+  Attachment.ExecuteSQL(Transaction,sqlInsert,[]);
+  sqlInsert := 'Insert into FB4TestData_TZ(RowID,TimeCol,TimestampCol) Values(6,'+
+              '''11:31:05.0001 EST5EDT'',''01.JUL.2020 7:00 America/New_York'')';
+  Attachment.ExecuteSQL(Transaction,sqlInsert,[]);
+  sqlInsert := 'Insert into FB4TestData_TZ(RowID,TimeCol,TimestampCol) Values(7,'+
+              '''11:31:05.0001 BST'',''01.JUL.2020 7:00 EST5EDT'')';
+  Attachment.ExecuteSQL(Transaction,sqlInsert,[]);
+  sqlInsert := 'Insert into FB4TestData_TZ(RowID,TimeCol,TimestampCol) Values(8,'+
+              '''11:31:05.0001 EUrope/Paris'',''01.JUL.2020 6:00 EST'')';
+  Attachment.ExecuteSQL(Transaction,sqlInsert,[]);
 end;
 
 procedure TTest17.UpdateDatabase4_DECFloat(Attachment: IAttachment);
@@ -294,7 +308,7 @@ var Transaction: ITransaction;
     Results: IResultSet;
     aDate: TDateTime;
     aTimeZone: AnsiString;
-    offset: SmallInt;
+    dstOffset: SmallInt;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   Statement := Attachment.Prepare(Transaction,'Select * from  FB4TestData_TZ');
@@ -311,11 +325,12 @@ begin
       write(OutFile,'TimeCol = ');
       if not Results[1].IsNull then
       begin
-        Results[1].GetAsDateTime(aDate,aTimeZone);
+        Results[1].GetAsDateTime(aDate,dstOffset,aTimeZone);
         writeln(OutFile,Results[1].GetAsString,
                        ', TimeZoneID = ',Attachment.TimeZoneName2TimeZoneID(aTimeZone),
                        ', Time Zone Name = ',aTimeZone,
-                       ', UTC Time = ',TimeToStr( Results[1].GetAsUTCDateTime))
+                       ', UTC Time = ',TimeToStr( Results[1].GetAsUTCDateTime),
+                       ', DST Offset = ',dstOffset)
       end
       else
         writeln(OutFile,'NULL');
@@ -323,11 +338,12 @@ begin
       write(OutFile,'TimeStampCol = ');
       if not Results[2].IsNull then
       begin
-        Results[2].GetAsDateTime(aDate,aTimeZone);
+        Results[2].GetAsDateTime(aDate,dstOffset,aTimeZone);
         writeln(OutFile,Results[2].GetAsString,
                         ', TimeZoneID = ',Attachment.TimeZoneName2TimeZoneID(aTimeZone),
                         ', Time Zone Name = ',aTimeZone,
-                        ', UTC Timestamp = ',DateTimeToStr( Results[2].GetAsUTCDateTime))
+                        ', UTC Timestamp = ',DateTimeToStr( Results[2].GetAsUTCDateTime),
+                        ', DST Offset = ',dstOffset)
       end
       else
         writeln(OutFile,'NULL');
