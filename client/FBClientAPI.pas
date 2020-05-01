@@ -215,7 +215,7 @@ type
     procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal;
       bufptr: PByte); virtual;
     function SQLDecFloatDecode(SQLType: cardinal;  bufptr: PByte): tBCD; virtual;
-    function HasLocalICU: boolean; virtual;
+    function HasLocalTZDB: boolean; virtual;
 
 end;
 
@@ -440,7 +440,7 @@ begin
     IBError(ibxeNotSupported,[]);
 end;
 
-function TFBClientAPI.HasLocalICU: boolean;
+function TFBClientAPI.HasLocalTZDB: boolean;
 begin
   if not HasTimeZoneSupport then
     IBError(ibxeNotSupported,[]);

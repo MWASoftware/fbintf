@@ -140,7 +140,7 @@ type
     procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal; bufptr: PByte);
       override;
     function SQLDecFloatDecode(SQLType: cardinal; bufptr: PByte): tBCD; override;
-    function HasLocalICU: boolean; override;
+    function HasLocalTZDB: boolean; override;
 
     {Firebird Interfaces}
     property MasterIntf: Firebird.IMaster read FMaster;
@@ -686,7 +686,7 @@ begin
     Result.SignSpecialPlaces := Result.SignSpecialPlaces or $80;
 end;
 
-function TFB30ClientAPI.HasLocalICU: boolean;
+function TFB30ClientAPI.HasLocalTZDB: boolean;
 var Buffer: ISC_TIME_TZ;
     aTime: TDateTime;
     aTimeZone: AnsiString;
