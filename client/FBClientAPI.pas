@@ -180,6 +180,8 @@ type
     {$IFDEF UNIX}
     function GetFirebirdLibList: string; virtual; abstract;
     {$ENDIF}
+    function HasDecFloatSupport: boolean;
+    function HasLocalTZDB: boolean; virtual;
 
     {Encode/Decode}
     procedure EncodeInteger(aValue: integer; len: integer; buffer: PByte);
@@ -191,31 +193,18 @@ type
     procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte); virtual; abstract;
     function  SQLDecodeDateTime(bufptr: PByte): TDateTime; virtual; abstract;
     function FormatStatus(Status: TFBStatus): AnsiString; virtual; abstract;
-   {Firebird 4 Extensions}
-    procedure SQLEncodeTimeTZ(aTime: TDateTime; aTimeZone: AnsiString; bufptr: PByte); virtual;
-    procedure SQLDecodeTimeTZ(var aTime: TDateTime; var dstOffset: smallint; var aTimeZone: AnsiString; bufptr: PByte);  virtual;
-    procedure SQLEncodeTimeStampTZ(aDateTime: TDateTime; aTimeZone: AnsiString; bufptr: PByte); virtual;
-    procedure SQLDecodeTimeStampTZ(var aDateTime: TDateTime; var dstOffset: smallint;
-      var aTimeZone: AnsiString; bufptr: PByte); virtual;
-    {Extended timestamps are only seen in column values and when remote ICU is used to decode timezone}
-    procedure SQLDecodeTimeTZEX(var aTime: TDateTime; var dstOffset: smallint;  var aTimeZone: AnsiString; bufptr: PByte);  virtual;
-    procedure SQLDecodeTimeStampTZEX(var aDateTime: TDateTime; var dstOffset: smallint;
-      var aTimeZone: AnsiString; bufptr: PByte); virtual;
 
     {IFirebirdAPI}
     function GetStatus: IStatus; virtual; abstract;
     function IsLibraryLoaded: boolean;
     function IsEmbeddedServer: boolean; virtual; abstract;
     function GetFBLibrary: IFirebirdLibrary;
-    function HasTimeZoneSupport: boolean;
-    function HasDecFloatSupport: boolean;
     function GetImplementationVersion: AnsiString;
     function GetClientMajor: integer;  virtual; abstract;
     function GetClientMinor: integer;  virtual; abstract;
     procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal;
       bufptr: PByte); virtual;
     function SQLDecFloatDecode(SQLType: cardinal;  bufptr: PByte): tBCD; virtual;
-    function HasLocalTZDB: boolean; virtual;
 
 end;
 
@@ -385,48 +374,6 @@ begin
   end;
 end;
 
-procedure TFBClientAPI.SQLEncodeTimeTZ(aTime: TDateTime; aTimeZone: AnsiString;
-  bufptr: PByte);
-begin
-  if not HasTimeZoneSupport then
-     IBError(ibxeNotSupported,[]);
-end;
-
-procedure TFBClientAPI.SQLDecodeTimeTZ(var aTime: TDateTime;
-  var dstOffset: smallint; var aTimeZone: AnsiString; bufptr: PByte);
-begin
-  if not HasTimeZoneSupport then
-    IBError(ibxeNotSupported,[]);
-end;
-
-procedure TFBClientAPI.SQLEncodeTimeStampTZ(aDateTime: TDateTime;
-  aTimeZone: AnsiString; bufptr: PByte);
-begin
-  if not HasTimeZoneSupport then
-    IBError(ibxeNotSupported,[]);
-end;
-
-procedure TFBClientAPI.SQLDecodeTimeStampTZ(var aDateTime: TDateTime;
-  var dstOffset: smallint; var aTimeZone: AnsiString; bufptr: PByte);
-begin
-  if not HasTimeZoneSupport then
-    IBError(ibxeNotSupported,[]);
-end;
-
-procedure TFBClientAPI.SQLDecodeTimeTZEX(var aTime: TDateTime;
-  var dstOffset: smallint; var aTimeZone: AnsiString; bufptr: PByte);
-begin
-  if not HasTimeZoneSupport then
-    IBError(ibxeNotSupported,[]);
-end;
-
-procedure TFBClientAPI.SQLDecodeTimeStampTZEX(var aDateTime: TDateTime;
-  var dstOffset: smallint; var aTimeZone: AnsiString; bufptr: PByte);
-begin
-  if not HasTimeZoneSupport then
-    IBError(ibxeNotSupported,[]);
-end;
-
 procedure TFBClientAPI.SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal;
   bufptr: PByte);
 begin
@@ -437,12 +384,6 @@ end;
 function TFBClientAPI.SQLDecFloatDecode(SQLType: cardinal; bufptr: PByte): tBCD;
 begin
   if not HasDecFloatSupport then
-    IBError(ibxeNotSupported,[]);
-end;
-
-function TFBClientAPI.HasLocalTZDB: boolean;
-begin
-  if not HasTimeZoneSupport then
     IBError(ibxeNotSupported,[]);
 end;
 
@@ -473,14 +414,14 @@ begin
     raise Exception.CreateFmt(SFirebirdAPIFuncNotFound,[ProcName]);
 end;
 
-function TFBClientAPI.HasTimeZoneSupport: boolean;
+function TFBClientAPI.HasDecFloatSupport: boolean;
 begin
   Result := GetClientMajor >= 4;
 end;
 
-function TFBClientAPI.HasDecFloatSupport: boolean;
+function TFBClientAPI.HasLocalTZDB: boolean;
 begin
-  Result := GetClientMajor >= 4;
+  Result := false;
 end;
 
 function TFBClientAPI.GetImplementationVersion: AnsiString;

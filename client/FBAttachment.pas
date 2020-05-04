@@ -60,6 +60,7 @@ type
     FODSMinorVersion: integer;
     FUserCharSetMap: array of TCharSetMap;
     FSecDatabase: AnsiString;
+    FTimeTZDate: TDateTime;
   protected
     FDatabaseName: AnsiString;
     FRaiseExceptionOnConnectError: boolean;
@@ -69,7 +70,6 @@ type
     FCodePage: TSystemCodePage;
     FRemoteProtocol: AnsiString;
     FAuthMethod: AnsiString;
-    FForceUseServerICU: boolean;
     constructor Create(api: TFBClientAPI; DatabaseName: AnsiString; DPB: IDPB;
       RaiseExceptionOnConnectError: boolean);
     procedure CheckHandle; virtual; abstract;
@@ -147,6 +147,9 @@ type
     function GetSecurityDatabase: AnsiString;
     function GetODSMajorVersion: integer;
     function GetODSMinorVersion: integer;
+    function HasDecFloatSupport: boolean; virtual;
+
+  public
     {Character Sets}
     function HasDefaultCharSet: boolean;
     function GetDefaultCharSetID: integer;
@@ -161,16 +164,14 @@ type
     function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IArrayMetaData; virtual; abstract;
     property CharSetID: integer read FCharSetID;
     property CodePage: TSystemCodePage read FCodePage;
+
+  public
     {Time Zone Support}
-    function TimeZoneID2TimeZoneName(aTimeZoneID: TFBTimeZoneID): AnsiString; virtual;
-    function TimeZoneName2TimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID; virtual;
-    function LocalTimeToUTCTime(aLocalTime: TDateTime; aTimeZone: AnsiString): TDateTime; virtual;
-    function UTCTimeToLocalTime(aUTCTime: TDateTime; aTimeZone: AnsiString): TDateTime; virtual;
-    function GetEffectiveOffsetMins(aLocalTime: TDateTime; aTimeZone: AnsiString
-      ): integer; virtual;
-    function UsingRemoteICU: boolean; virtual;
-    function GetForceUseServerICU: boolean;
-    procedure SetForceUseServerICU(aValue: boolean);
+    function GetTimeZoneServices: ITimeZoneServices; virtual;
+    function HasTimeZoneSupport: boolean; virtual;
+    function GetTimeTZDate: TDateTime;
+    procedure SetTimeTZDate(aDate: TDateTime);
+
   end;
 
 implementation
@@ -336,6 +337,7 @@ begin
   FRaiseExceptionOnConnectError := RaiseExceptionOnConnectError;
   FODSMajorVersion := 0;
   FODSMinorVersion := 0;
+  FTimeTZDate := Sysutils.Date;
 end;
 
 function TFBAttachment.GenerateCreateDatabaseSQL(DatabaseName: AnsiString;  aDPB: IDPB): AnsiString;
@@ -741,6 +743,11 @@ begin
   Result := FODSMinorVersion;
 end;
 
+function TFBAttachment.HasDecFloatSupport: boolean;
+begin
+  Result := false;
+end;
+
 function TFBAttachment.HasDefaultCharSet: boolean;
 begin
   Result := FHasDefaultCharSet
@@ -885,63 +892,24 @@ begin
   CharSetID := CharSets[0].AsInteger;
 end;
 
-function TFBAttachment.TimeZoneID2TimeZoneName(aTimeZoneID: TFBTimeZoneID
-  ): AnsiString;
+function TFBAttachment.GetTimeZoneServices: ITimeZoneServices;
 begin
-  if not getFirebirdAPI.HasTimeZoneSupport then
-    IBError(ibxeNotSupported,[]);
-  Result := 'UTC';
+  IBError(ibxeNotSupported,[]);
 end;
 
-function TFBAttachment.TimeZoneName2TimeZoneID(aTimeZone: AnsiString
-  ): TFBTimeZoneID;
-begin
-  if not getFirebirdAPI.HasTimeZoneSupport then
-    IBError(ibxeNotSupported,[]);
-  Result := TimeZoneID_GMT;
-end;
-
-function TFBAttachment.LocalTimeToUTCTime(aLocalTime: TDateTime;
-  aTimeZone: AnsiString): TDateTime;
-begin
-  if not getFirebirdAPI.HasTimeZoneSupport then
-    IBError(ibxeNotSupported,[]);
-  Result := aLocalTime;
-end;
-
-function TFBAttachment.UTCTimeToLocalTime(aUTCTime: TDateTime;
-  aTimeZone: AnsiString): TDateTime;
-begin
-  if not getFirebirdAPI.HasTimeZoneSupport then
-    IBError(ibxeNotSupported,[]);
-  Result := aUTCTime;
-end;
-
-function TFBAttachment.GetEffectiveOffsetMins(aLocalTime: TDateTime;
-  aTimeZone: AnsiString): integer;
-begin
-  if not getFirebirdAPI.HasTimeZoneSupport then
-    IBError(ibxeNotSupported,[]);
-  Result := 0;
-end;
-
-function TFBAttachment.UsingRemoteICU: boolean;
+function TFBAttachment.HasTimeZoneSupport: boolean;
 begin
   Result := false;
 end;
 
-function TFBAttachment.GetForceUseServerICU: boolean;
+function TFBAttachment.GetTimeTZDate: TDateTime;
 begin
-  Result := FForceUseServerICU;
+  Result := FTimeTZDate;
 end;
 
-procedure TFBAttachment.SetForceUseServerICU(aValue: boolean);
+procedure TFBAttachment.SetTimeTZDate(aDate: TDateTime);
 begin
-  if FForceUseServerICU <> aValue then
-  begin
-    FForceUseServerICU := aValue;
-    UseServerICUChanged;
-  end;
+  FTimeTZDate := aDate;
 end;
 
 end.

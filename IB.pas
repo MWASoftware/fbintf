@@ -822,8 +822,6 @@ type
    used for the attachment. It may be used in support of TIMESTAMP WITH TIME ZONE
    and TIME WITH TIME ZONE data types.}
 
-  TFBTimeZoneID = word;
-
   ITimeZoneServices = interface
     ['{163821f5-ebef-42b9-ac60-8ac4b5c09954}']
     {encode/decode - used to encode/decode the wire protocol}
@@ -842,7 +840,7 @@ type
     procedure DecodeTimestampTZEx(bufptr: PByte; var timestamp: TDateTime;
       var dstOffset: smallint; var timezoneID: TFBTimeZoneID); overload;
     procedure DecodeTimestampTZEx(bufptr: PByte; var timestamp: TDateTime;
-      var dstOffset: smallint; var timezone: AnisString); overload;
+      var dstOffset: smallint; var timezone: AnsiString); overload;
     procedure DecodeTimeTZ(bufptr: PByte; OnDate: TDateTime; var time: TDateTime;
       var dstOffset: smallint; var timezoneID: TFBTimeZoneID); overload;
     procedure DecodeTimeTZ(bufptr: PByte; OnDate: TDateTime; var time: TDateTime;
@@ -855,14 +853,18 @@ type
     {utility functions}
     function TimeZoneID2TimeZoneName(aTimeZoneID: TFBTimeZoneID): AnsiString;
     function TimeZoneName2TimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID;
-    function LocalTimeToUTCTime(aLocalTime: TDateTime; aTimeZone: AnsiString): TDateTime;
-    function UTCTimeToLocalTime(aUTCTime: TDateTime; aTimeZone: AnsiString): TDateTime;
-    function GetEffectiveOffsetMins(aLocalTime: TDateTime; aTimeZone: AnsiString): integer;
+    function LocalTimeToGMT(aLocalTime: TDateTime; aTimeZone: AnsiString): TDateTime; overload;
+    function LocalTimeToGMT(aLocalTime: TDateTime; aTimeZoneID: TFBTimeZoneID): TDateTime; overload;
+    function GMTToLocalTime(aUTCTime: TDateTime; aTimeZone: AnsiString): TDateTime; overload;
+    function GMTToLocalTime(aUTCTime: TDateTime; aTimeZoneID: TFBTimeZoneID): TDateTime; overload;
+    function GetEffectiveOffsetMins(aLocalTime: TDateTime; aTimeZone: AnsiString): integer; overload;
+    function GetEffectiveOffsetMins(aLocalTime: TDateTime; aTimeZoneID: TFBTimeZoneID): integer; overload;
 
     {Time Zone DB Information}
     function UsingRemoteTZDB: boolean;
     function GetForceUseServerTZDB: boolean;
     procedure SetForceUseServerTZDB(aValue: boolean);
+    function HasExtendedTZSupport: boolean;
 
   end;
 
@@ -1065,6 +1067,7 @@ type
     function GetODSMinorVersion: integer;
     procedure getFBVersion(version: TStrings);
     function HasActivity: boolean;
+    function HasDecFloatSupport: boolean;
 
     {Character Sets}
     function HasDefaultCharSet: boolean;
@@ -1079,6 +1082,9 @@ type
 
     {Time Zone Database}
     function GetTimeZoneServices: ITimeZoneServices;
+    function HasTimeZoneSupport: boolean;
+    function GetTimeTZDate: TDateTime;
+    procedure SetTimeTZDate(aDate: TDateTime);
  end;
 
   TProtocolAll = (TCP, SPX, NamedPipe, Local, inet, inet4, inet6, wnet, xnet, unknownProtocol);
@@ -1264,8 +1270,7 @@ type
     function GetImplementationVersion: AnsiString;
     function GetClientMajor: integer;
     function GetClientMinor: integer;
-    function HasTimeZoneSupport: boolean;
-    function HasDecFloatSupport: boolean;
+    function HasLocalTZDB: boolean;
 
     {Firebird 3 API}
     function HasMasterIntf: boolean;
@@ -1275,9 +1280,6 @@ type
     {BCD Field Support}
     procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal; bufptr: PByte);
     function SQLDecFloatDecode(SQLType: cardinal; bufptr: PByte): tBCD;
-
-    {Time Zone Support - is client local Time Zone Database available}
-    function HasLocalTZDB: boolean;
 end;
 
 type

@@ -870,22 +870,24 @@ begin
         aDateTime := SQLDecodeDateTime(SQLData);
       SQL_TIMESTAMP_TZ:
         begin
-          SQLDecodeTimeStampTZ(aDateTime,dstOffset,aTimeZone,SQLData);
+          GetAttachment.GetTimeZoneServices.DecodeTimestampTZ(SQLData,aDateTime,dstOffset,aTimeZone);
           aTimeZoneID := PISC_TIMESTAMP_TZ(SQLData)^.time_zone;
         end;
       SQL_TIMESTAMP_TZ_EX:
       begin
-        SQLDecodeTimeStampTZEX(aDateTime,dstOffset,aTimeZone,SQLData);
+        GetAttachment.GetTimeZoneServices.DecodeTimestampTZEx(SQLData,aDateTime,dstOffset,aTimeZone);
         aTimeZoneID := PISC_TIMESTAMP_TZ_EX(SQLData)^.time_zone;
       end;
       SQL_TIME_TZ:
       begin
-        SQLDecodeTimeTZ(aDateTime,dstOffset,aTimeZone,SQLData);
+        GetAttachment.GetTimeZoneServices.DecodeTimeTZ(SQLData,GetAttachment.GetTimeTZDate,
+                                                       aDateTime,dstOffset,aTimeZone);
         aTimeZoneID := PISC_TIME_TZ(SQLData)^.time_zone;
       end;
       SQL_TIME_TZ_EX:
       begin
-        SQLDecodeTimeTZEX(aDateTime,dstOffset,aTimeZone,SQLData);
+        GetAttachment.GetTimeZoneServices.DecodeTimeTZEx(SQLData,GetAttachment.GetTimeTZDate,
+                                                         aDateTime,dstOffset,aTimeZone);
         aTimeZoneID := PISC_TIME_TZ_EX(SQLData)^.time_zone;
       end
       else
@@ -1129,8 +1131,6 @@ procedure TSQLDataItem.GetAsDateTime(var aDateTime: TDateTime;
 var aTimeZoneID: TFBTimeZoneID;
 begin
   InternalGetAsDateTime(aDateTime,dstOffset,aTimeZone,aTimeZoneID);
-  if (aTimeZoneID > MaxOffsetTimeZoneID) and not FFirebirdClientAPI.HasLocalICU then
-    aTimeZone := GetAttachment.TimeZoneID2TimeZoneName(aTimeZoneID);
 end;
 
 procedure TSQLDataItem.GetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint;
@@ -1140,7 +1140,7 @@ begin
   InternalGetAsDateTime(aDateTime,dstOffset,aTimeZone,aTimeZoneID);
 end;
 
-function TSQLDataItem.GetAsUTCDateTime: TDateTime; var dstOffset: smallint;
+function TSQLDataItem.GetAsUTCDateTime: TDateTime;
 var aTimezone: AnsiString;
 begin
   CheckActive;
@@ -1153,7 +1153,7 @@ begin
       begin
         if not ParseDateTimeTZString(AsString,Result,aTimeZone) then
           IBError(ibxeInvalidDataConversion, [nil]);
-        Result := GetAttachment.LocalTimeToUTCTime(Result,aTimeZone);
+        Result := GetAttachment.GetTimeZoneServices.LocalTimeToGMT(Result,aTimeZone);
       end;
       SQL_TYPE_DATE:
         result := SQLDecodeDate(SQLData);
@@ -1565,7 +1565,21 @@ end;
 
 procedure TSQLDataItem.SetAsTime(aValue: TDateTime; aTimeZoneID: TFBTimeZoneID);
 begin
-  SetAsTime(aValue,GetAttachment.TimeZoneID2TimeZoneName(aTimeZoneID));
+  CheckActive;
+  if GetSQLDialect < 3 then
+  begin
+    AsDateTime := aValue;
+    exit;
+  end;
+
+  Changing;
+  if IsNullable then
+    IsNull := False;
+
+  SQLType := SQL_TIME_TZ;
+  DataLength := SizeOf(ISC_TIME_TZ);
+  GetAttachment.GetTimeZoneServices.EncodeTimeTZ(aValue, aTimeZoneID,GetAttachment.GetTimeTZDate,SQLData);
+  Changed;
 end;
 
 procedure TSQLDataItem.SetAsTime(aValue: TDateTime; aTimeZone: AnsiString);
@@ -1583,8 +1597,7 @@ begin
 
   SQLType := SQL_TIME_TZ;
   DataLength := SizeOf(ISC_TIME_TZ);
-  with FFirebirdClientAPI do
-    SQLEncodeTimeTZ(aValue, aTimeZone,SQLData);
+  GetAttachment.GetTimeZoneServices.EncodeTimeTZ(aValue, aTimeZone,GetAttachment.GetTimeTZDate,SQLData);
   Changed;
 end;
 
@@ -1605,7 +1618,15 @@ end;
 procedure TSQLDataItem.SetAsDateTime(aValue: TDateTime;
   aTimeZoneID: TFBTimeZoneID);
 begin
-  SetAsDateTime(aValue,GetAttachment.TimeZoneID2TimeZoneName(aTimeZoneID));
+  CheckActive;
+  if IsNullable then
+    IsNull := False;
+
+  Changing;
+  SQLType := SQL_TIMESTAMP_TZ;
+  DataLength := SizeOf(ISC_TIMESTAMP_TZ);
+  GetAttachment.GetTimeZoneServices.EncodeTimestampTZ(aValue,aTimeZoneID,SQLData);
+  Changed;
 end;
 
 procedure TSQLDataItem.SetAsDateTime(aValue: TDateTime; aTimeZone: AnsiString
@@ -1618,15 +1639,14 @@ begin
   Changing;
   SQLType := SQL_TIMESTAMP_TZ;
   DataLength := SizeOf(ISC_TIMESTAMP_TZ);
-  with FFirebirdClientAPI do
-    SQLEncodeTimeStampTZ(aValue,aTimeZone,SQLData);
+  GetAttachment.GetTimeZoneServices.EncodeTimestampTZ(aValue,aTimeZone,SQLData);
   Changed;
 end;
 
 procedure TSQLDataItem.SetAsUTCDateTime(aUTCTime: TDateTime;
   aTimeZone: AnsiString);
 begin
-  SetAsDateTime(GetAttachment.UTCTimeToLocalTime(aUTCTime,aTimeZone),aTimeZone);
+  SetAsDateTime(GetAttachment.GetTimeZoneServices.GMTToLocalTime(aUTCTime,aTimeZone),aTimeZone);
 end;
 
 procedure TSQLDataItem.SetAsDouble(Value: Double);
