@@ -6,24 +6,58 @@ interface
 
 uses
   Classes, SysUtils, Firebird, IB, IBExternals, FBActivityMonitor, FBClientAPI,
-  FB30ClientAPI, FBAttachment, FB30Attachment, FBTransaction;
+  FB30ClientAPI, FBAttachment, FB30Attachment, FBTransaction, contnrs;
 
 type
 
   { TFB30TimeZoneServices }
 
   TFB30TimeZoneServices = class(TInterfaceOwner, ITimeZoneServices)
+  private type
+    PTimeZoneInfo = ^TTimeZoneInfo;
+    TTimeZoneInfo = record
+      Starts: TDateTime;
+      Ends: TDateTime;
+      ZoneOffset: Smallint;
+      DstOffer: SmallInt;
+      EffectiveOffset: SmallInt;
+      Prev: PTimeZoneInfo;
+      Next: PTimeZoneInfo;
+    end;
+
+  private type
+    ITimeZone = interface
+      function GetTimeZoneID: TFBTimeZoneID;
+      function GetTimeZoneName: AnsiString;
+      function GetTimeZoneInfoGMT(gmtTimestamp: TDateTime): PTimeZoneInfo;
+      function GetTimeZoneInfo(localtime: TDateTime): PTimeZoneInfo;
+      function GetFirstTimeZoneInfo: PTimeZoneInfo;
+      function GetLastTimeZoneInfo: PTimeZoneInfo;
+      function AddTimeZoneInfo(Starts_, Ends_: TDateTime; ZoneOffset_: Smallint;
+                               DstOffer_: SmallInt; EffectiveOffset_: SmallInt): PTimeZoneInfo;
+    end;
+
+  private type
+    ITimeZoneCache = interface
+      function GetTimeZone(aTimeZoneID: TFBTimeZoneID): ITimeZone; overload;
+      function GetTimeZone(aTimeZone: AnsiString): ITimeZone; overload;
+      function AddTimeZone(aTimeZoneID: TFBTimeZoneID; aTimeZone: AnsiString): ITimeZone;
+    end;
+
   private
     FAttachment: TFB30Attachment;
     FTransaction: ITransaction;
     FFirebird30ClientAPI: TFB30ClientAPI;
     FUsingRemoteTZDB: boolean;
     FForceRemoteTZDB: boolean;
+    FTimeZoneCache: ITimeZoneCache;
     function GetTransaction: ITransaction;
+    function GetTimeZoneCache: ITimeZoneCache;
     function GetDstOffset(AtTimeStamp: TDateTime; timezoneID: TFBTimeZoneID; AtIsGMT: boolean=true): smallint;
     function DecodeGMTTimestampTZ(bufptr: PISC_TIMESTAMP_TZ): TDateTime;
     function LookupTimeZoneName(aTimeZoneID: TFBTimeZoneID): AnsiString;
     function LookupTimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID;
+    function LookupTimeZone(aTimeZoneID: TFBTimeZoneID): ITimeZone;
   public
     constructor Create(attachment: TFB30Attachment; ForceRemoteTZDB: boolean=true);
   public
@@ -74,6 +108,224 @@ implementation
 
 uses DateUtils, IBUtils, FBMessages;
 
+type
+
+  { TTimeZoneCache }
+
+  TTimeZoneCache = class(TFPHashList,TFB30TimeZoneServices.ITimeZoneCache)
+  private
+    FTimeZoneIDIndex: array of TFB30TimeZoneServices.ITimeZone;
+    FLastTimeZoneID: integer;
+    FLastTimeZone: TFB30TimeZoneServices.ITimeZone;
+    FLowValue: integer;
+  public
+    constructor Create(aTZCount, aLowValue: integer);
+  public
+    {ITimeZoneCache}
+    function GetTimeZone(aTimeZoneID: TFBTimeZoneID): TFB30TimeZoneServices.ITimeZone; overload;
+    function GetTimeZone(aTimeZone: AnsiString): TFB30TimeZoneServices.ITimeZone; overload;
+    function AddTimeZone(aTimeZoneID: TFBTimeZoneID; aTimeZone: AnsiString): ITimeZone;
+  end;
+
+  TTimeZone = class(TFB30TimeZoneServices.ITimeZone)
+  private
+    FTimeZoneID: TFBTimeZoneID;
+    FTimeZone: AnsiString;
+    FFirst: TFB30TimeZoneServices.PTimeZoneInfo;
+    FLast: TFB30TimeZoneServices.PTimeZoneInfo;
+    FCurrent: TFB30TimeZoneServices.PTimeZoneInfo;
+  public
+    constructor Create(aTimeZoneID: TFBTimeZoneID; aTimeZone: AnsiString);
+    destructor Destroy; override;
+  public
+    {ITimeZone}
+    function GetTimeZoneID: TFBTimeZoneID;
+    function GetTimeZoneName: AnsiString;
+    function GetTimeZoneInfoGMT(gmtTimestamp: TDateTime): TFB30TimeZoneServices.PTimeZoneInfo;
+    function GetTimeZoneInfo(localtime: TDateTime): TFB30TimeZoneServices.PTimeZoneInfo;
+    function GetFirstTimeZoneInfo: PTimeZoneInfo;
+    function GetLastTimeZoneInfo: PTimeZoneInfo;
+    function AddTimeZoneInfo(Starts_, Ends_: TDateTime; ZoneOffset_: Smallint;
+      DstOffset_: SmallInt; EffectiveOffset_: SmallInt): PTimeZoneInfo;
+  end;
+
+constructor TTimeZone.Create(aTimeZoneID: TFBTimeZoneID; aTimeZone: AnsiString);
+begin
+  inherited Create;
+  FTimeZoneID := aTimeZoneID;
+  FTimeZone := aTimeZone;
+end;
+
+destructor TTimeZone.Destroy;
+var P: TFB30TimeZoneServices.PTimeZoneInfo;
+    tmp: TFB30TimeZoneServices.PTimeZoneInfo;
+begin
+  P := FFirst;
+  while p <> nil do
+  begin
+    tmp := P.Next;
+    dispose(P);
+    P := tmp;
+  end;
+  inherited Destroy;
+end;
+
+function TTimeZone.GetTimeZoneID: TFBTimeZoneID;
+begin
+ Result := FTimeZoneID;
+end;
+
+function TTimeZone.GetTimeZoneName: AnsiString;
+begin
+  Result := FTimeZone;
+end;
+
+function TTimeZone.GetTimeZoneInfoGMT(gmtTimestamp: TDateTime
+  ): TFB30TimeZoneServices.PTimeZoneInfo;
+begin
+  Result := nil;
+  if FCurrent <> nil then
+  begin
+    while (FCurrent^.Starts > gmtTimestamp) and (FCurrent.Prev <> nil) do
+      FCurrent := FCurrent.Prev;
+    while (FCurrent^.Ends < gmtTimestamp) and (FCurrent.Next <> nil) do
+      FCurrent := FCurrent^.Next;
+    if (gmtTimestamp >= FCurrent^.Starts) and (gmtTimestamp <= FCurrent.Ends) then
+      Result := FCurrent;
+  end;
+end;
+
+function TTimeZone.GetTimeZoneInfo(localtime: TDateTime
+  ): TFB30TimeZoneServices.PTimeZoneInfo;
+begin
+ Result := nil;
+ if FCurrent <> nil then
+ begin
+   while (FCurrent^.Starts > localtime - FCurrent^.EffectiveOffset) and (FCurrent.Prev <> nil) do
+     FCurrent := FCurrent.Prev;
+   while (FCurrent^.Ends < localtime - FCurrent^.EffectiveOffset) and (FCurrent.Next <> nil) do
+     FCurrent := FCurrent^.Next;
+   if (localtime  - FCurrent^.EffectiveOffset>= FCurrent^.Starts) and (localtime  - FCurrent^.EffectiveOffset <= FCurrent.Ends) then
+     Result := FCurrent;
+ end;
+end;
+
+function TTimeZone.GetFirstTimeZoneInfo: PTimeZoneInfo;
+begin
+  Result := FFirst;
+end;
+
+function TTimeZone.GetLastTimeZoneInfo: PTimeZoneInfo;
+begin
+  Result := FLast;
+end;
+
+function TTimeZone.AddTimeZoneInfo(Starts_, Ends_: TDateTime;
+  ZoneOffset_: Smallint; DstOffset_: SmallInt; EffectiveOffset_: SmallInt
+  ): PTimeZoneInfo;
+var P: TFB30TimeZoneServices.PTimeZoneInfo;
+    P1: TFB30TimeZoneServices.PTimeZoneInfo;
+begin
+  {create and initialise new entry}
+  new(Result);
+  with Result do
+  begin
+    Starts := Starts_;
+    Ends := Ends_;
+    ZoneOffset := ZoneOffset_;
+    DstOffset := DstOffset_;
+    EffectiveOffset := EffectiveOffset_;
+  end;
+
+  {empty list? then insert at front}
+  if FFirst = nil then
+  begin
+    FFirst := Result;
+    FCurrent := Result;
+    FLast := Result;
+    Result^.Prev := nil;
+    Result^.Next := nil;
+  end
+  else
+  {Before first entry in list? then insert before}
+  if Result^.Starts < FFirst^.Starts then
+  begin
+    Result^.Next := FFirst;
+    Result^.Prev := nil;
+    FFirst := Result;
+  end
+  else
+  {walk the list to find where we have to insert new entry}
+  begin
+    P := FFirst^.Next;
+    P1 := FFirst;
+    while (P <> nil) and (Result^.Starts > P^.Ends) do
+    begin
+      P1 := P;
+      P := P^.Next;
+    end;
+
+    {ignore duplicate entry}
+    if (P <> nil) and (Result^.Starts = P^.Starts) then
+    begin
+      dispose(Result);
+      Result := nil;
+    end
+    else
+    {either at end of list (P=nil) or we insert after P1}
+    begin
+      Result^.Next := P;
+      Result^.Prev := P1;
+      P1^.Next := Result;
+      if P <> nil then {P=nil => at end of list}
+        P^.Prev := Result
+      else
+        FLast := Result;
+    end
+  end;
+end;
+
+{ TTimeZoneCache }
+
+constructor TTimeZoneCache.Create(aTZCount, aLowValue: integer);
+begin
+  inherited Createl
+  SetLength(FTimeZoneIDIndex,aTZCount);
+  FLowValue := aLowValue;
+  FLastTimeZoneID := MaxOffsetTimeZoneID;
+end;
+
+function TTimeZoneCache.GetTimeZone(aTimeZoneID: TFBTimeZoneID
+  ): TFB30TimeZoneServices.ITimeZone;
+begin
+  if aTimeZoneID <> FLastTimeZoneID then
+  begin
+    FLastTimeZone := FTimeZoneIDIndex[aTimeZoneID - FLowValue];
+    FLastTimeZoneID := aTimeZoneID;
+  end;
+  Result := FLastTimeZone
+end;
+
+function TTimeZoneCache.GetTimeZone(aTimeZone: AnsiString
+  ): TFB30TimeZoneServices.ITimeZone;
+begin
+  Result := GetTimeZone(PtrUInt(Find(aTimeZone));
+end;
+
+function TTimeZoneCache.AddTimeZone(aTimeZoneID: TFBTimeZoneID;
+  aTimeZone: AnsiString): ITimeZone;
+var index: integer;
+begin
+  Result := nil;
+  index := aTimeZoneID - FLowValue;
+  if FTimeZoneIDIndex[index] = nil then
+  begin
+    Result := TTimeZone.Create(aTimeZoneID,aTimeZone);
+    FTimeZoneIDIndex[index] := Result;
+    Add(aTimeZone,Pointer(index));
+  end;
+end;
+
 { TFB30TimeZoneServices }
 
 function TFB30TimeZoneServices.GetTransaction: ITransaction;
@@ -83,16 +335,48 @@ begin
   Result := FTransaction;
 end;
 
+function TFB30TimeZoneServices.GetTimeZoneCache: ITimeZoneCache;
+var Data: IResultSet;
+begin
+  if FTimeZoneCache = nil then
+  begin
+    Data := FAttachment.OpenCursorAtStart(GetTransaction,
+            'select count(*) as TimeZones, min(RDB$TIME_ZONE_ID) as LowValue From RDB$TIME_ZONES');
+    FTimeZoneCache := TTimeZoneCache.Create(Data[0].AsInteger,Data[1].AsInteger);
+  end;
+  Result := FTimeZoneCache;
+end;
+
 function TFB30TimeZoneServices.GetDstOffset(AtTimeStamp: TDateTime;
   timezoneID: TFBTimeZoneID; AtIsGMT: boolean): smallint;
+var TimeZoneData: ITimeZone;
+    TimeZoneInfo: PTimeZoneInfo;
+    Data: IResultSet;
 begin
- with FAttachment.Prepare(GetTransaction,'Select EFFECTIVE_OFFSET From rdb$time_zone_util.transitions(?,?,?)') do
- begin
-   SQLParams[0].AsString := LookupTimeZoneName(timezoneID);
-   SQLParams[1].AsDateTime := AtTimeStamp;
-   SQLParams[2].AsDateTime := AtTimeStamp;
-   Result := OpenCursor[0].AsInteger;
- end;
+  TimeZoneData := LookupTimeZone(aTimeZoneID);
+  if AtIsGMT then
+    TimeZoneInfo := TimeZoneData.GetTimeZoneInfoGMT(AtTimestamp)
+  else
+    TimeZoneInfo := TimeZoneData.GetTimeZoneInfo(AtTimestamp);
+  if TimeZoneInfo = nil then
+  with FAttachment.Prepare(GetTransaction,'Select * From rdb$time_zone_util.transitions(?,?,?)') do
+  begin
+    SQLParams[0].AsString := TimeZoneData.GetTimeZoneName;
+    SQLParams[1].AsDateTime := IncYear(AtTimeStamp,-5);
+    SQLParams[2].AsDateTime := IncYear(AtTimeStamp,5);
+    Data := OpenCursorAtStart;
+    while not Data.EOF do
+    begin
+      TimeZoneData.AddTimeZoneInfo(Data[0].AsDateTime,Data[1].AsDateTime,
+                                                   Data[2].AsInteger,Data[3].AsInteger,
+                                                   Data[4].AsInteger);
+      Data.Next;
+    end;
+    if AtIsGMT then
+      TimeZoneInfo := TimeZoneData.GetTimeZoneInfoGMT(AtTimestamp)
+    else
+      TimeZoneInfo := TimeZoneData.GetTimeZoneInfo(AtTimestamp);
+  end;
  if not AtIsGMT then
    Result := -Result;
 end;
@@ -114,24 +398,44 @@ end;
 function TFB30TimeZoneServices.LookupTimeZoneName(aTimeZoneID: TFBTimeZoneID
   ): AnsiString;
 begin
- try
-   Result := FAttachment.OpenCursorAtStart(GetTransaction,
-       'Select RDB$TIME_ZONE_NAME From RDB$TIME_ZONES Where RDB$TIME_ZONE_ID = ?',3,
-       [aTimeZoneID])[0].AsString;
- except
-   IBError(ibxeBadTimeZoneID,[aTimeZoneID,0]);
- end;
+ Result := LookupTimeZone(aTimeZoneID).GetTimeZoneName;
 end;
 
 function TFB30TimeZoneServices.LookupTimeZoneID(aTimeZone: AnsiString
   ): TFBTimeZoneID;
+var TimeZoneData: ITimeZone;
+    aTimeZoneID: TFBTimeZoneID;
 begin
- try
-   Result := FAttachment.OpenCursorAtStart(GetTransaction,
-        'Select RDB$TIME_ZONE_ID From RDB$TIME_ZONES Where RDB$TIME_ZONE_Name = ?',3,
-       [aTimeZone])[0].AsInteger;
- except
-   IBError(ibxeBadTimeZoneName,[aTimeZone]);
+ TimeZoneData := GetTimeZoneCache.GetTimeZone(aTimeZone);
+ if TimeZoneData = nil then
+ begin
+   try
+     aTimeZoneID := FAttachment.OpenCursorAtStart(GetTransaction,
+          'Select RDB$TIME_ZONE_ID From RDB$TIME_ZONES Where RDB$TIME_ZONE_Name = ?',3,
+         [aTimeZone])[0].AsInteger;
+   except
+     IBError(ibxeBadTimeZoneName,[aTimeZone]);
+   end;
+   TimeZoneData := GetTimeZoneCache.AddTimeZone(aTimeZoneID,aTimeZone);
+ end;
+ Result := TimeZoneData.GetTimeZoneID;
+end;
+
+function TFB30TimeZoneServices.LookupTimeZone(aTimeZoneID: TFBTimeZoneID
+  ): ITimeZone;
+var aTimeZone: Ansistring;
+begin
+ Result := GetTimeZoneCache.GetTimeZone(aTimeZoneID);
+ if Result = nil then
+ begin
+   try
+     aTimeZone := FAttachment.OpenCursorAtStart(GetTransaction,
+              'Select RDB$TIME_ZONE_NAME From RDB$TIME_ZONES Where RDB$TIME_ZONE_ID = ?',3,
+              [aTimeZoneID])[0].AsString;
+   except
+     IBError(ibxeBadTimeZoneID,[aTimeZoneID,0]);
+   end;
+   Result := GetTimeZoneCache.AddTimeZone(aTimeZoneID,aTimeZone);
  end;
 end;
 
