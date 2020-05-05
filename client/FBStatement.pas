@@ -49,7 +49,7 @@ type
 
   { TFBStatement }
 
-  TFBStatement = class(TActivityReporter)
+  TFBStatement = class(TActivityReporter,ITransactionUser)
   private
     FAttachmentIntf: IAttachment;
     FFirebirdClientAPI: TFBClientAPI;
@@ -183,7 +183,7 @@ end;
 procedure TFBStatement.TransactionEnding(aTransaction: ITransaction;
   Force: boolean);
 begin
-  if FOpen and (FExecTransactionIntf = aTransaction) then
+  if FOpen and ((FExecTransactionIntf as TObject) = (aTransaction as TObject)) then
     InternalClose(Force);
 
   if FTransactionIntf = aTransaction then

@@ -137,7 +137,7 @@ type
 
   { TFBArray }
 
-  TFBArray = class(TActivityReporter,IArray)
+  TFBArray = class(TActivityReporter,IArray,ITransactionUser)
   private
     FFirebirdClientAPI: TFBClientAPI;
     FMetaData: IArrayMetaData;
@@ -174,6 +174,9 @@ type
       aField: IArrayMetaData; ArrayID: TISC_QUAD); overload;
     destructor Destroy; override;
     function GetSQLDialect: integer;
+
+  public
+    {ITransactionUser}
     procedure TransactionEnding(aTransaction: ITransaction; Force: boolean);
 
    public
@@ -833,7 +836,7 @@ end;
 procedure TFBArray.TransactionEnding(aTransaction: ITransaction; Force: boolean
   );
 begin
-  if (aTransaction = FTransactionIntf) and FModified and not FIsNew then
+  if ((aTransaction as TObject) = (FTransactionIntf as TObject)) and FModified and not FIsNew then
     PutArraySlice(Force);
 end;
 

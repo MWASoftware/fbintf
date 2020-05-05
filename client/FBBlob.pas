@@ -77,7 +77,7 @@ type
    function GetUnconfirmedCharacterSet: boolean;
   end;
 
-  TFBBlob = class(TActivityReporter)
+  TFBBlob = class(TActivityReporter,ITransactionUser)
   private
     FMetaData: IBlobMetaData;
     FAttachment: IAttachment;
@@ -101,7 +101,10 @@ type
     constructor Create(Attachment: IAttachment; Transaction: TFBTransaction;
                        MetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB); overload;
     destructor Destroy; override;
-    procedure TransactionEnding(aTransaction: TFBTransaction; Force: boolean);
+
+  public
+    {ITransactionUser}
+    procedure TransactionEnding(aTransaction: ITransaction; Force: boolean);
 
   public
     {IBlobMetaData}
@@ -177,10 +180,9 @@ begin
   inherited Destroy;
 end;
 
-procedure TFBBlob.TransactionEnding(aTransaction: TFBTransaction;
-  Force: boolean);
+procedure TFBBlob.TransactionEnding(aTransaction: ITransaction; Force: boolean);
 begin
-  if aTransaction  <> (FTransaction as TFBTransaction)  then
+  if (aTransaction as TObject) <> (FTransaction as TObject) then
     Exit;
   if FCreating then
     InternalCancel(Force)

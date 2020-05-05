@@ -149,7 +149,9 @@ type
       ibxeBadTimeZoneName,
       ibxeTimeZoneUnknown,
       ibxeBadTimeSpecification,
-      ibxeBCDTooBig
+      ibxeBCDTooBig,
+      ibxeInvalidTimeZoneID,
+      ibxeBadTimestampOrNoTimeZoneDBEntry
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -249,6 +251,8 @@ resourcestring
   STimeZoneUnknown = 'Time Zone Unknown';
   SBadTimeSpecification = '%d:%d:%d.%d is not a valid time specification';
   SBCDTooBig = 'BCD Precision (%d) is too large for Firebird Data Type max precision (%d)';
+  SInvalidTimeZoneID = 'Invalid Time Zone ID (%d)';
+  SBadTimestampOrNoTimeZoneDBEntry = 'Bad Timestamp or missing time zone DB entry (%s,%d)';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -325,7 +329,9 @@ const
     SBadTimeZoneName,
     STimeZoneUnknown,
     SBadTimeSpecification,
-    SBCDTooBig
+    SBCDTooBig,
+    SInvalidTimeZoneID,
+    SBadTimestampOrNoTimeZoneDBEntry
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;

@@ -862,8 +862,7 @@ type
 
     {Time Zone DB Information}
     function UsingRemoteTZDB: boolean;
-    function GetForceUseServerTZDB: boolean;
-    procedure SetForceUseServerTZDB(aValue: boolean);
+    procedure SetUseLocalTZDB(useLocalTZDB: boolean);
     function HasExtendedTZSupport: boolean;
 
   end;

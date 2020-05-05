@@ -116,6 +116,14 @@ type
     property TransactionSeqNo: integer read FSeqNo;
   end;
 
+  {The transaction user interface is used to force an action on the end of the
+   transaction.}
+
+  ITransactionUser = interface
+    ['{156fcdc9-a326-44b3-a82d-f23c6fb9f97c}']
+    procedure TransactionEnding(aTransaction: ITransaction; Force: boolean);
+  end;
+
 implementation
 
 uses FBMessages, FBStatement;
@@ -193,15 +201,16 @@ end;
 
 procedure TFBTransaction.DoDefaultTransactionEnd(Force: boolean);
 var i: integer;
-    intf: TInterfacedObject;
+    intf: IUnknown;
+    user: ITransactionUser;
 begin
   if InTransaction then
   begin
     for i := 0 to InterfaceCount - 1 do
     begin
       intf := GetInterface(i);
-      if (intf <> nil) and  (intf is TFBStatement) then
-        TFBStatement(intf).TransactionEnding(self,Force);
+      if (intf <> nil) and  (intf.QueryInterface(ITransactionUser,user) = S_OK) then
+        user.TransactionEnding(self,Force);
     end;
     case FDefaultCompletion of
     taRollback:

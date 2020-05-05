@@ -38,10 +38,8 @@ type
 
   TTest17 = class(TTestBase)
   private
-    procedure QueryDatabase4_DECFloat(Attachment: IAttachment);
     procedure TestFBTimezoneSettings(Attachment: IAttachment);
     procedure UpdateDatabase(Attachment: IAttachment);
-    procedure UpdateDatabase4_DECFloat(Attachment: IAttachment);
     procedure UpdateDatabase4_TZ(Attachment: IAttachment);
     procedure QueryDatabase(Attachment: IAttachment);
     procedure QueryDatabase4_TZ(Attachment: IAttachment);
@@ -76,15 +74,6 @@ const
     'Primary Key(RowID)'+
     ')';
 
-    sqlCreateTable3 =
-    'Create Table FB4TestData_DECFloat ('+
-    'RowID Integer not null,'+
-    'Float16 DecFloat(16),'+
-    'Float34 DecFloat(34),'+
-    'BigNumber NUMERIC(24,6),'+
-    'BiggerNumber NUMERIC(26,4),'+
-    'Primary Key(RowID)'+
-    ')';
 
 { TTest17 }
 
@@ -93,7 +82,7 @@ var aDateTime: TDateTime;
     aTimeZone: AnsiString;
 begin
   writeln(OutFile,'Test Time Zone Setting');
-  with FirebirdAPI, Attachment do
+  with FirebirdAPI, Attachment.GetTimeZoneServices do
   begin
     writeln(OutFile,'Time Zone GMT = ',TimeZoneID2TimeZoneName(65535));
     writeln(OutFile,'Time Zone Zagreb = ',TimeZoneID2TimeZoneName(65037));
@@ -101,9 +90,9 @@ begin
     writeln(OutFile,'Time Zone Offset +13:39 = ',TimeZoneID2TimeZoneName(2258));
     writeln(OutFile,'Time Zone ID = ',TimeZoneName2TimeZoneID('+06:00'));
     writeln(OutFile,'Time Zone ID = ',TimeZoneName2TimeZoneID('-08:00'),', UTC Time = ',
-      DateTimeToStr(LocalTimeToUTCTime(EncodeDate(2020,1,23) + EncodeTime(2,30,0,0), '-08:00')));
+      DateTimeToStr(LocalTimeToGMT(EncodeDate(2020,1,23) + EncodeTime(2,30,0,0), '-08:00')));
     writeln(OutFile,'Time Zone ID = ',TimeZoneName2TimeZoneID('US/Arizona'));
-    writeln(OutFile,'Local Time = ',DateTimeToStr(UTCTimeToLocalTime(EncodeDate(2020,1,23) + EncodeTime(2,30,0,0),'-08:00')),', Time Zone = -08:00');
+    writeln(OutFile,'Local Time = ',DateTimeToStr(GMTToLocalTime(EncodeDate(2020,1,23) + EncodeTime(2,30,0,0),'-08:00')),', Time Zone = -08:00');
     writeln(OutFile,'Time Zone Offset = ',GetEffectiveOffsetMins(StrToDateTime('1/7/1989 23:00:00'),'Europe/London'));
   end;
   if ParseDateTimeTZString('29/11/1969 23:30:00 GMT',aDateTime,aTimeZone) then
@@ -228,37 +217,6 @@ begin
   Attachment.ExecuteSQL(Transaction,sqlInsert,[]);
 end;
 
-procedure TTest17.UpdateDatabase4_DECFloat(Attachment: IAttachment);
-var Transaction: ITransaction;
-    Statement: IStatement;
-    sqlInsert: AnsiString;
-begin
-  Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
-  sqlInsert := 'Insert into FB4TestData_DECFLoat(RowID,Float16,Float34,BigNumber) ' +
-               'Values(1,64000000000.01,123456789123456789.12345678,123456123456.123456)';
-  Attachment.ExecuteSQL(Transaction,sqlInsert,[]);
-  sqlInsert := 'Insert into FB4TestData_DECFLoat(RowID,Float16,Float34,BigNumber) '+
-               'Values(2,-64000000000.01,-123456789123456789.12345678,-123456123456.123456)';
-  Attachment.ExecuteSQL(Transaction,sqlInsert,[]);
-
-
-  Statement := Attachment.Prepare(Transaction,'Insert into FB4TestData_DECFLoat(RowID,Float16,Float34,BigNumber,BiggerNumber) VALUES (?,?,?,?,?)');
-
-  Statement.SQLParams[0].AsInteger := 3;
-  Statement.SQLParams[1].AsBCD := StrToBCD('64100000000.011');
-  Statement.SQLParams[2].AsCurrency := 12345678912.12;
-  Statement.SQLParams[3].AsString := '1234561234567.123456';
-  Statement.SQLParams[4].AsBCD := StrToBCD('123456123456123456123456.123456');
-  Statement.Execute;
-
-  Statement.SQLParams[0].AsInteger := 4;
-  Statement.SQLParams[1].AsBCD := 0;
-  Statement.SQLParams[2].AsBCD := -1;
-  Statement.SQLParams[3].AsBCD := 0;
-  Statement.SQLParams[4].AsBCD := 0;
-  Statement.Execute;
-end;
-
 procedure TTest17.QueryDatabase(Attachment: IAttachment);
 var Transaction: ITransaction;
     Statement: IStatement;
@@ -327,7 +285,7 @@ begin
       begin
         Results[1].GetAsDateTime(aDate,dstOffset,aTimeZone);
         writeln(OutFile,Results[1].GetAsString,
-                       ', TimeZoneID = ',Attachment.TimeZoneName2TimeZoneID(aTimeZone),
+                       ', TimeZoneID = ',Attachment.GetTimeZoneServices.TimeZoneName2TimeZoneID(aTimeZone),
                        ', Time Zone Name = ',aTimeZone,
                        ', UTC Time = ',TimeToStr( Results[1].GetAsUTCDateTime),
                        ', DST Offset = ',dstOffset)
@@ -340,48 +298,13 @@ begin
       begin
         Results[2].GetAsDateTime(aDate,dstOffset,aTimeZone);
         writeln(OutFile,Results[2].GetAsString,
-                        ', TimeZoneID = ',Attachment.TimeZoneName2TimeZoneID(aTimeZone),
+                        ', TimeZoneID = ',Attachment.GetTimeZoneServices.TimeZoneName2TimeZoneID(aTimeZone),
                         ', Time Zone Name = ',aTimeZone,
                         ', UTC Timestamp = ',DateTimeToStr( Results[2].GetAsUTCDateTime),
                         ', DST Offset = ',dstOffset)
       end
       else
         writeln(OutFile,'NULL');
-    end;
-  finally
-    Results.Close;
-  end;
-end;
-
-procedure TTest17.QueryDatabase4_DECFloat(Attachment: IAttachment);
-var Transaction: ITransaction;
-    Statement: IStatement;
-    Results: IResultSet;
-begin
-  Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
-  Statement := Attachment.Prepare(Transaction,'Select * from  FB4TestData_DECFloat');
-  writeln(OutFile);
-  writeln(OutFile,'FB4 Testdata_DECFloat');
-  writeln(OutFile);
-  PrintMetaData(Statement.MetaData);
-  Results := Statement.OpenCursor;
-  try
-    while Results.FetchNext do
-    with Results do
-    begin
-      writeln(OutFile,'RowID = ',ByName('ROWID').GetAsString);
-      writeln(OutFile,'Float16 = ', ByName('Float16').GetAsString);
-      DumpBCD(ByName('Float16').GetAsBCD);
-      writeln(OutFile,'Float34 = ', ByName('Float34').GetAsString);
-      DumpBCD(ByName('Float34').GetAsBCD);
-      writeln(OutFile,'BigNumber = ', ByName('BigNumber').GetAsString);
-      DumpBCD(ByName('BigNumber').GetAsBCD);
-      if not ByName('BiggerNumber').IsNull then
-      begin
-        writeln(OutFile,'BiggerNumber = ', ByName('BiggerNumber').GetAsString);
-        DumpBCD(ByName('BiggerNumber').GetAsBCD);
-      end;
-      writeln;
     end;
   finally
     Results.Close;
@@ -426,9 +349,6 @@ begin
     Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable2);
     UpdateDatabase4_TZ(Attachment);
     QueryDatabase4_TZ(Attachment);
-    Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable3);
-    UpdateDatabase4_DECFloat(Attachment);
-    QueryDatabase4_DECFloat(Attachment);
   end;
   Attachment.DropDatabase;
 end;

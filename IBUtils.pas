@@ -648,6 +648,7 @@ procedure FBDecodeTime(aTime: TDateTime; var Hour, Minute, Second: word; var Dec
 function FBEncodeTime(Hour, Minute, Second, DeciMillisecond: cardinal): TDateTime;
 function FBFormatDateTime(fmt: AnsiString; aDateTime: TDateTime): AnsiString;
 function FormatTimeZoneOffset(EffectiveTimeOffsetMins: integer): AnsiString;
+function DecodeTimeZoneOffset(TZOffset: AnsiString; var dstOffset: integer): boolean;
 function StripLeadingZeros(Value: AnsiString): AnsiString;
 
 implementation
@@ -1787,9 +1788,25 @@ end;
 function FormatTimeZoneOffset(EffectiveTimeOffsetMins: integer): AnsiString;
 begin
   if EffectiveTimeOffsetMins > 0 then
-    Result := Result + ' ' + Format('+%.2d:%.2d',[EffectiveTimeOffsetMins div 60,abs(EffectiveTimeOffsetMins mod 60)])
+    Result := Format('+%.2d:%.2d',[EffectiveTimeOffsetMins div 60,abs(EffectiveTimeOffsetMins mod 60)])
   else
-    Result := Result + ' ' + Format('%.2d:%.2d',[EffectiveTimeOffsetMins div 60,abs(EffectiveTimeOffsetMins mod 60)]);
+    Result := Format('%.2d:%.2d',[EffectiveTimeOffsetMins div 60,abs(EffectiveTimeOffsetMins mod 60)]);
+end;
+
+function DecodeTimeZoneOffset(TZOffset: AnsiString; var dstOffset: integer): boolean;
+var i: integer;
+begin
+  Result := false;
+  TZOffset := Trim(TZOffset);
+  for i := 1 to Length(TZOffset) do
+    if not (TZOffset[i] in ['0'..'9','-','+',':']) then Exit;
+
+  Result := true;
+  i := Pos(':',TZOffset);
+  if i > 0 then
+    dstOffset := StrToInt(copy(TZOffset,1,i-1)) * 60 + StrToInt(copy(TZOffset,i + 1))
+  else
+    dstOffset := StrToInt(TZOffset) * 60;
 end;
 
 function StripLeadingZeros(Value: AnsiString): AnsiString;

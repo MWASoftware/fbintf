@@ -45,23 +45,11 @@ type
   { TFB30Attachment }
 
   TFB30Attachment = class(TFBAttachment,IAttachment, IActivityMonitor)
-  private const
-    TimeZoneCacheIncrement = 10;
-  private type
-    TTimeZoneCache = record
-      TimeZoneID: TFBTimeZoneID;
-      TimeZoneName: AnsiString;
-    end;
   private
     FAttachmentIntf: Firebird.IAttachment;
     FFirebird30ClientAPI: TFB30ClientAPI;
     FTimeZoneServices: ITimeZoneServices;
-    FTimeZoneCache: array of TTimeZoneCache;
-    FTZCacheEnd: integer;
     FUsingRemoteICU: boolean;
-    function LookupTimeZoneName(aTimeZoneID: TFBTimeZoneID): AnsiString;
-    function LookupTimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID;
-    procedure AddtoTimeZoneCache(aTimeZoneID: TFBTimeZoneID; aTimeZone: AnsiString);
     procedure SetUseRemoteICU(aValue: boolean);
   protected
     procedure CheckHandle; override;
@@ -150,55 +138,6 @@ end;
 
 
 { TFB30Attachment }
-
-function TFB30Attachment.LookupTimeZoneName(aTimeZoneID: TFBTimeZoneID
-  ): AnsiString;
-var i: integer;
-begin
-  for i := 0 to FTZCacheEnd - 1 do
-    if FTimeZoneCache[i].TimeZoneID = aTimeZoneID then
-    begin
-      Result := FTimeZoneCache[i].TimeZoneName;
-      Exit;
-    end;
-
-  try
-    Result := OpenCursorAtStart(Format('Select RDB$TIME_ZONE_NAME From RDB$TIME_ZONES Where RDB$TIME_ZONE_ID = %d',
-        [aTimeZoneID]))[0].AsString;
-    AddtoTimeZoneCache(aTimeZoneID,Result);
-  except
-    IBError(ibxeBadTimeZoneID,[aTimeZoneID,0]);
-  end;
-end;
-
-function TFB30Attachment.LookupTimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID;
-var i: integer;
-begin
-  for i := 0 to FTZCacheEnd - 1 do
-    if FTimeZoneCache[i].TimeZoneName = aTimeZone then
-    begin
-      Result := FTimeZoneCache[i].TimeZoneID;
-      Exit;
-    end;
-
-  try
-    Result := OpenCursorAtStart(Format('Select RDB$TIME_ZONE_ID From RDB$TIME_ZONES Where RDB$TIME_ZONE_Name = ''%s''',
-        [aTimeZone]))[0].AsInteger;
-    AddtoTimeZoneCache(Result,aTimeZone);
-  except
-    IBError(ibxeBadTimeZoneName,[aTimeZone]);
-  end;
-end;
-
-procedure TFB30Attachment.AddtoTimeZoneCache(aTimeZoneID: TFBTimeZoneID;
-  aTimeZone: AnsiString);
-begin
-  if FTZCacheEnd >= Length(FTimeZoneCache) then
-    SetLength(FTimeZoneCache,FTZCacheEnd + TimeZoneCacheIncrement);
-  FTimeZoneCache[FTZCacheEnd].TimeZoneName := aTimeZone;
-  FTimeZoneCache[FTZCacheEnd].TimeZoneID := aTimeZoneID;
-  Inc(FTZCacheEnd);
-end;
 
 procedure TFB30Attachment.SetUseRemoteICU(aValue: boolean);
 begin
@@ -334,6 +273,7 @@ begin
       FHasDefaultCharSet := false;
       FCodePage := CP_NONE;
       FCharSetID := 0;
+      FTimeZoneServices := nil;
     end;
 end;
 
