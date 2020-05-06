@@ -855,8 +855,8 @@ type
     function TimeZoneName2TimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID;
     function LocalTimeToGMT(aLocalTime: TDateTime; aTimeZone: AnsiString): TDateTime; overload;
     function LocalTimeToGMT(aLocalTime: TDateTime; aTimeZoneID: TFBTimeZoneID): TDateTime; overload;
-    function GMTToLocalTime(aUTCTime: TDateTime; aTimeZone: AnsiString): TDateTime; overload;
-    function GMTToLocalTime(aUTCTime: TDateTime; aTimeZoneID: TFBTimeZoneID): TDateTime; overload;
+    function GMTToLocalTime(aGMTTime: TDateTime; aTimeZone: AnsiString): TDateTime; overload;
+    function GMTToLocalTime(aGMTTime: TDateTime; aTimeZoneID: TFBTimeZoneID): TDateTime; overload;
     function GetEffectiveOffsetMins(aLocalTime: TDateTime; aTimeZone: AnsiString): integer; overload;
     function GetEffectiveOffsetMins(aLocalTime: TDateTime; aTimeZoneID: TFBTimeZoneID): integer; overload;
 

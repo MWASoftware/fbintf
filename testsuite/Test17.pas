@@ -94,6 +94,15 @@ begin
     writeln(OutFile,'Time Zone ID = ',TimeZoneName2TimeZoneID('US/Arizona'));
     writeln(OutFile,'Local Time = ',DateTimeToStr(GMTToLocalTime(EncodeDate(2020,1,23) + EncodeTime(2,30,0,0),'-08:00')),', Time Zone = -08:00');
     writeln(OutFile,'Time Zone Offset = ',GetEffectiveOffsetMins(StrToDateTime('1/7/1989 23:00:00'),'Europe/London'));
+    writeln(OutFile,'Time Zone Offset = ',GetEffectiveOffsetMins(StrToDateTime('1/7/2000 23:00:00'),'Europe/London'));
+    writeln(OutFile,'Time Zone Offset = ',GetEffectiveOffsetMins(StrToDateTime('1/7/1966 23:00:00'),'Europe/London'));
+    writeln(OutFile,'Time Zone Offset = ',GetEffectiveOffsetMins(StrToDateTime('1/2/1989 12:00:00'),'Europe/London'));
+    writeln(OutFile,'Time Zone Offset = ',GetEffectiveOffsetMins(StrToDateTime('1/4/1989 12:00:00'),'Europe/London'));
+    try
+      writeln(OutFile,'Time Zone Offset = ',GetEffectiveOffsetMins(StrToDateTime('26/3/1989 01:30:00'),'Europe/London'));
+    except On E: Exception do
+      writeln(OutFile,E.Message);
+    end;
   end;
   if ParseDateTimeTZString('29/11/1969 23:30:00 GMT',aDateTime,aTimeZone) then
     writeln(OutFile,'Date = ',DateTimeToStr(aDateTime),', TimeZone = ',aTimeZone)
@@ -116,7 +125,7 @@ begin
   {$if declared(FormatSettings)}
     with FormatSettings do
   {$ifend}{$ifend}
-    writeln(OutFile,'Date = ',FBFormatDateTime(LongTimeFormat + '.zzzz',aDateTime),', TimeZone = ',aTimeZone)
+    writeln(OutFile,'Time = ',FBFormatDateTime(LongTimeFormat + '.zzzz',aDateTime),', TimeZone = ',aTimeZone)
   else
     writeln(OutFile,'ParseDateTimeTZString failed');
 end;
@@ -185,6 +194,7 @@ var Transaction: ITransaction;
     sqlInsert: AnsiString;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
+  Attachment.SetTimeTZDate(EncodeDate(2020,5,1));
   sqlInsert := 'Insert into FB4TestData_TZ(RowID,TimeCol,TimestampCol) ' +
                'Values(1,''11:32:10.0002 -05:00'',''2020.4.1'+
                ' 11:31:05.0001 +01:00'')';
