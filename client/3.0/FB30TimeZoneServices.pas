@@ -246,8 +246,8 @@ begin
     CompareFlag := CompareTimeRange(FCurrent,timestamp,isLocalTime);
     case CompareFlag of
     -1:
-      if (FCurrent^.Prev <> nil) and (FCurrent^.Prev^.Ends < timestamp) then
-        IBError(ibxeInvalidTimestamp4TimeZone,[DateTimeToStr(timestamp)])
+      if (FCurrent^.Prev <> nil) and (CompareTimeRange(FCurrent^.Prev,timestamp,isLocalTime) > 0) then
+        FCurrent := nil
       else
         FCurrent := FCurrent^.Prev;
     0:
@@ -256,8 +256,8 @@ begin
         Exit;
       end;
     1:
-      if (FCurrent^.Next <> nil) and (FCurrent^.Ends > timestamp) and (timestamp < FCurrent^.Next^.Starts) then
-        IBError(ibxeInvalidTimestamp4TimeZone,[DateTimeToStr(timestamp)])
+      if (FCurrent^.Next <> nil) and (CompareTimeRange(FCurrent^.Next,timestamp,isLocalTime) < 0) then
+        FCurrent := nil
       else
         FCurrent := FCurrent^.Next;
     end;
@@ -496,6 +496,9 @@ var gmtTimeStamp: TDateTime;
     Buffer: ISC_TIMESTAMP_TZ;
     TimeZoneInfo: PTimeZoneInfo;
 begin
+  if FInLoadTimeZoneData then
+    Result := 0 {Assume GMT}
+  else
   if timeZoneID < MaxOffsetTimeZoneID then
   begin
     if IsLocalTime then
@@ -510,9 +513,6 @@ begin
     gmtTimeStamp := FFirebird30ClientAPI.SQLDecodeDateTime(@Buffer);
     Result := ComputeDstOffset(timestamp,gmtTimestamp);
   end
-  else
-  if FInLoadTimeZoneData then
-    Result := 0 {Assume GMT}
   else
   begin
     TimeZoneInfo := LookupTimeZoneInfo(timezoneID,timestamp,isLocalTime);
@@ -684,23 +684,24 @@ end;
 
 procedure TFB30TimeZoneServices.EncodeTimeTZ(time: TDateTime;
   timezoneID: TFBTimeZoneID; OnDate: TDateTime; bufptr: PByte);
-var Hr, Mt, S: word;
-    DMs: cardinal;
-    localtime: TDateTime;
-    gmtTimestamp: TDateTime;
+var localtime: TDateTime;
+    buffer: ISC_TIMESTAMP_TZ;
 begin
   localtime := DateOf(OnDate) + time;
-  gmtTimestamp := IncMinute(localtime,GetDstOffset(localtime,timezoneID,true));
-  FBDecodeTime(gmtTimestamp, Hr, Mt, S, DMs);
-  with FFirebird30ClientAPI do
-    PISC_TIME_TZ(bufptr)^.utc_time := UtilIntf.encodeTime(Hr, Mt, S, DMs);
-  PISC_TIME_TZ(bufptr)^.time_zone := timezoneID;
+  EncodeTimestampTZ(localtime,timezoneID,@buffer);
+  PISC_TIME_TZ(bufptr)^.utc_time := buffer.utc_timestamp.timestamp_time;
+  PISC_TIME_TZ(bufptr)^.time_zone := buffer.time_zone;
 end;
 
 procedure TFB30TimeZoneServices.EncodeTimeTZ(time: TDateTime;
   timezone: AnsiString; OnDate: TDateTime; bufptr: PByte);
+var localtime: TDateTime;
+    buffer: ISC_TIMESTAMP_TZ;
 begin
-  EncodeTimeTZ(time,TimeZoneName2TimeZoneID(timezone),OnDate,bufptr);
+ localtime := DateOf(OnDate) + time;
+ EncodeTimestampTZ(localtime,timezone,@buffer);
+ PISC_TIME_TZ(bufptr)^.utc_time := buffer.utc_timestamp.timestamp_time;
+ PISC_TIME_TZ(bufptr)^.time_zone := buffer.time_zone;
 end;
 
 procedure TFB30TimeZoneServices.DecodeTimestampTZ(bufptr: PByte;

@@ -151,8 +151,7 @@ type
       ibxeBadTimeSpecification,
       ibxeBCDTooBig,
       ibxeInvalidTimeZoneID,
-      ibxeBadTimestampOrNoTimeZoneDBEntry,
-      ibxeInvalidTimestamp4TimeZone
+      ibxeBadTimestampOrNoTimeZoneDBEntry
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -254,7 +253,6 @@ resourcestring
   SBCDTooBig = 'BCD Precision (%d) is too large for Firebird Data Type max precision (%d)';
   SInvalidTimeZoneID = 'Invalid Time Zone ID (%d)';
   SBadTimestampOrNoTimeZoneDBEntry = 'Bad Timestamp or missing time zone DB entry (%s,%d)';
-  SInvalidTimestamp4TimeZone = 'Timestamp invalid for time zone (%s)';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -333,8 +331,7 @@ const
     SBadTimeSpecification,
     SBCDTooBig,
     SInvalidTimeZoneID,
-    SBadTimestampOrNoTimeZoneDBEntry,
-    SInvalidTimestamp4TimeZone
+    SBadTimestampOrNoTimeZoneDBEntry
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
