@@ -182,6 +182,7 @@ type
     {$ENDIF}
     function HasDecFloatSupport: boolean;
     function HasLocalTZDB: boolean; virtual;
+    function HasExtendedTZSupport: boolean; virtual;
 
     {Encode/Decode}
     procedure EncodeInteger(aValue: integer; len: integer; buffer: PByte);
@@ -420,6 +421,11 @@ begin
 end;
 
 function TFBClientAPI.HasLocalTZDB: boolean;
+begin
+  Result := false;
+end;
+
+function TFBClientAPI.HasExtendedTZSupport: boolean;
 begin
   Result := false;
 end;

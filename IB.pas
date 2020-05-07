@@ -863,7 +863,6 @@ type
     {Time Zone DB Information}
     function UsingRemoteTZDB: boolean;
     procedure SetUseLocalTZDB(useLocalTZDB: boolean);
-    function HasExtendedTZSupport: boolean;
     function GetLocalTimeZoneName: AnsiString;
     function GetLocalTimeZoneID: TFBTimeZoneID;
 
@@ -1272,6 +1271,7 @@ type
     function GetClientMajor: integer;
     function GetClientMinor: integer;
     function HasLocalTZDB: boolean;
+    function HasExtendedTZSupport: boolean;
 
     {Firebird 3 API}
     function HasMasterIntf: boolean;

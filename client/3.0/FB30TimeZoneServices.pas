@@ -152,7 +152,6 @@ type
     {Time Zone DB Information}
     function UsingRemoteTZDB: boolean;
     procedure SetUseLocalTZDB(useLocalTZDB: boolean);
-    function HasExtendedTZSupport: boolean;
     function GetLocalTimeZoneName: AnsiString;
     function GetLocalTimeZoneID: TFBTimeZoneID;
   end;
@@ -1003,12 +1002,6 @@ begin
     FUsingRemoteTZDB := not useLocalTZDB
   else
     FUsingRemoteTZDB := true;
-end;
-
-function TFB30TimeZoneServices.HasExtendedTZSupport: boolean;
-begin
- with FFirebird30ClientAPI do
-  Result :=  UtilIntf.vtable.version <> 21 {FB4 Beta1}
 end;
 
 function TFB30TimeZoneServices.GetLocalTimeZoneName: AnsiString;

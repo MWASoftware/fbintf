@@ -111,6 +111,7 @@ type
     function GetClientMajor: integer; override;
     function GetClientMinor: integer; override;
     function HasLocalTZDB: boolean; override;
+    function HasExtendedTZSupport: boolean; override;
 
     {Firebird 3 API}
     function HasMasterIntf: boolean;
@@ -580,6 +581,11 @@ begin
     Check4DataBaseError;
     Result := strpas(@tzBuffer) <> 'GMT*';
   end;
+end;
+
+function TFB30ClientAPI.HasExtendedTZSupport: boolean;
+begin
+  Result :=  (GetClientMajor >=4) and (UtilIntf.vtable.version <> 21) {FB4 Beta1}
 end;
 
 function TFB30ClientAPI.GetClientMajor: integer;

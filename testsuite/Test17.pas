@@ -361,6 +361,16 @@ begin
     Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable2);
     UpdateDatabase4_TZ(Attachment);
     QueryDatabase4_TZ(Attachment);
+    Attachment.DropDatabase;
+    Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
+
+    writeln(Outfile);
+    writeln(Outfile,'Using local TZ database');
+    writeln(Outfile);
+    TestFBTimezoneSettings(Attachment);
+    Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable2);
+    UpdateDatabase4_TZ(Attachment);
+    QueryDatabase4_TZ(Attachment);
   end;
   Attachment.DropDatabase;
 end;
