@@ -864,6 +864,8 @@ type
     function UsingRemoteTZDB: boolean;
     procedure SetUseLocalTZDB(useLocalTZDB: boolean);
     function HasExtendedTZSupport: boolean;
+    function GetLocalTimeZoneName: AnsiString;
+    function GetLocalTimeZoneID: TFBTimeZoneID;
 
   end;
 

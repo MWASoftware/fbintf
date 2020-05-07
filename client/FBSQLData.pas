@@ -389,8 +389,12 @@ type
     procedure SetAsInt64(AValue: Int64);
     procedure SetAsDate(AValue: TDateTime);
     procedure SetAsLong(AValue: Long);
-    procedure SetAsTime(AValue: TDateTime);
-    procedure SetAsDateTime(AValue: TDateTime);
+    procedure SetAsTime(AValue: TDateTime); overload;
+    procedure SetAsTime(aValue: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
+    procedure SetAsTime(aValue: TDateTime; aTimeZone: AnsiString); overload;
+    procedure SetAsDateTime(AValue: TDateTime); overload;
+    procedure SetAsDateTime(aValue: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
+    procedure SetAsDateTime(aValue: TDateTime; aTimeZone: AnsiString); overload;
     procedure SetAsDouble(AValue: Double);
     procedure SetAsFloat(AValue: Float);
     procedure SetAsPointer(AValue: Pointer);
@@ -2062,6 +2066,7 @@ var b: IBlob;
     dt: TDateTime;
     CurrValue: Currency;
     FloatValue: single;
+    timezone: AnsiString;
 begin
   CheckActive;
   if IsNullable then
@@ -2124,8 +2129,24 @@ begin
       else
         DoSetString;
 
-    SQL_TIMESTAMP_TZ,
+    SQL_TIMESTAMP_TZ:
+      if ParseDateTimeTZString(value,dt,timezone) then
+      begin
+        if timezone = '' then
+          timezone := GetAttachment.GetTimeZoneServices.GetLocalTimeZoneName;
+        SetAsDateTime(dt,timezone);
+      end
+      else
+        DoSetString;
+
     SQL_TIME_TZ:
+      if ParseDateTimeTZString(value,dt,timezone,true) then
+      begin
+        if timezone = '' then
+          timezone := GetAttachment.GetTimeZoneServices.GetLocalTimeZoneName;
+        SetAsTime(dt,timezone);
+    end
+    else
         DoSetString;
 
     SQL_DEC_FIXED,
@@ -2376,6 +2397,52 @@ begin
   end;
 end;
 
+procedure TSQLParam.SetAsTime(aValue: TDateTime; aTimeZoneID: TFBTimeZoneID);
+var i: integer;
+    OldSQLVar: TSQLVarData;
+begin
+  if FIBXSQLVAR.UniqueName then
+    inherited SetAsTime(AValue,aTimeZoneID)
+  else
+  with FIBXSQLVAR.Parent do
+  begin
+    for i := 0 to Count - 1 do
+      if Column[i].Name = Name then
+      begin
+        OldSQLVar := FIBXSQLVAR;
+        FIBXSQLVAR := Column[i];
+        try
+          inherited SetAsTime(AValue,aTimeZoneID);
+        finally
+          FIBXSQLVAR := OldSQLVar;
+        end;
+      end;
+  end;
+end;
+
+procedure TSQLParam.SetAsTime(aValue: TDateTime; aTimeZone: AnsiString);
+var i: integer;
+    OldSQLVar: TSQLVarData;
+begin
+  if FIBXSQLVAR.UniqueName then
+    inherited SetAsTime(AValue,aTimeZone)
+  else
+  with FIBXSQLVAR.Parent do
+  begin
+    for i := 0 to Count - 1 do
+      if Column[i].Name = Name then
+      begin
+        OldSQLVar := FIBXSQLVAR;
+        FIBXSQLVAR := Column[i];
+        try
+          inherited SetAsTime(AValue,aTimeZone);
+        finally
+          FIBXSQLVAR := OldSQLVar;
+        end;
+      end;
+  end;
+end;
+
 procedure TSQLParam.SetAsDateTime(AValue: TDateTime);
 var i: integer;
     OldSQLVar: TSQLVarData;
@@ -2392,6 +2459,53 @@ begin
         FIBXSQLVAR := Column[i];
         try
           inherited SetAsDateTime(AValue);
+        finally
+          FIBXSQLVAR := OldSQLVar;
+        end;
+      end;
+  end;
+end;
+
+procedure TSQLParam.SetAsDateTime(aValue: TDateTime; aTimeZoneID: TFBTimeZoneID
+  );
+var i: integer;
+    OldSQLVar: TSQLVarData;
+begin
+  if FIBXSQLVAR.UniqueName then
+    inherited SetAsDateTime(AValue,aTimeZoneID)
+  else
+  with FIBXSQLVAR.Parent do
+  begin
+    for i := 0 to Count - 1 do
+      if Column[i].Name = Name then
+      begin
+        OldSQLVar := FIBXSQLVAR;
+        FIBXSQLVAR := Column[i];
+        try
+          inherited SetAsDateTime(AValue,aTimeZoneID);
+        finally
+          FIBXSQLVAR := OldSQLVar;
+        end;
+      end;
+  end;
+end;
+
+procedure TSQLParam.SetAsDateTime(aValue: TDateTime; aTimeZone: AnsiString);
+var i: integer;
+    OldSQLVar: TSQLVarData;
+begin
+  if FIBXSQLVAR.UniqueName then
+    inherited SetAsDateTime(AValue,aTimeZone)
+  else
+  with FIBXSQLVAR.Parent do
+  begin
+    for i := 0 to Count - 1 do
+      if Column[i].Name = Name then
+      begin
+        OldSQLVar := FIBXSQLVAR;
+        FIBXSQLVAR := Column[i];
+        try
+          inherited SetAsDateTime(AValue,aTimeZone);
         finally
           FIBXSQLVAR := OldSQLVar;
         end;

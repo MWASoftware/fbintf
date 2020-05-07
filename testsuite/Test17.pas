@@ -354,6 +354,8 @@ begin
   begin
     writeln(OutFile,'Firebird 4 extension types');
     writeln(OutFile);
+    writeln(OutFile,'Local Time Zone Name = ',Attachment.GetTimeZoneServices.GetLocalTimeZoneName,
+                     ', ID = ',Attachment.GetTimeZoneServices.GetLocalTimeZoneID);
     TestFBTimezoneSettings(Attachment);
 
     Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable2);
