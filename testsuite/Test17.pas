@@ -344,6 +344,7 @@ begin
   finally
     VerStrings.Free;
   end;
+  writeln(Outfile,'Has Local TZ DB = ',FirebirdAPI.HasLocalTZDB);
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable);
   UpdateDatabase(Attachment);
   QueryDatabase(Attachment);
@@ -367,10 +368,24 @@ begin
     writeln(Outfile);
     writeln(Outfile,'Using local TZ database');
     writeln(Outfile);
+    Attachment.GetTimeZoneServices.SetUseLocalTZDB(true);
     TestFBTimezoneSettings(Attachment);
     Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable2);
     UpdateDatabase4_TZ(Attachment);
     QueryDatabase4_TZ(Attachment);
+    if FirebirdAPI.HasExtendedTZSupport then
+    begin
+     writeln(Outfile);
+     writeln(Outfile,'Using Extended TZ Data Type');
+     writeln(Outfile);
+     Attachment.DropDatabase;
+     Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
+
+     Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],'SET BIND TIME ZONE TO EXTENDED');
+     Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable2);
+     UpdateDatabase4_TZ(Attachment);
+     QueryDatabase4_TZ(Attachment);
+    end;
   end;
   Attachment.DropDatabase;
 end;

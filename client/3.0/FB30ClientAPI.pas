@@ -585,7 +585,7 @@ end;
 
 function TFB30ClientAPI.HasExtendedTZSupport: boolean;
 begin
-  Result :=  (GetClientMajor >=4) and (UtilIntf.vtable.version <> 21) {FB4 Beta1}
+  Result :=  (GetClientMajor >=4) and (UtilIntf.vtable.version >= 4) {ignore FB4 Beta1}
 end;
 
 function TFB30ClientAPI.GetClientMajor: integer;

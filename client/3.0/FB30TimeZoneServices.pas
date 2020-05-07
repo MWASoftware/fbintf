@@ -95,7 +95,9 @@ type
     function GetTimeZoneData(aTimeZone: ITimeZone; timestamp: TDateTime;
       isLocalTime: boolean): PTimeZoneInfo;
     function GetDstOffset(timestamp: TDateTime; timezoneID: TFBTimeZoneID;
-      IsLocalTime: boolean): smallint;
+      IsLocalTime: boolean): smallint; overload;
+    function GetDstOffset(timestamp: TDateTime; timezone: AnsiString;
+      IsLocalTime: boolean): smallint; overload;
     function DecodeGMTTimestampTZ(bufptr: PISC_TIMESTAMP_TZ): TDateTime;
     function LookupTimeZoneName(aTimeZoneID: TFBTimeZoneID): AnsiString;
     function LookupTimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID;
@@ -521,11 +523,7 @@ begin
   end
   else
   if not FUsingRemoteTZDB then
-  begin
-    EncodeTimestampTZ(timestamp,timezoneID,@Buffer);
-    gmtTimeStamp := FFirebird30ClientAPI.SQLDecodeDateTime(@Buffer);
-    Result := ComputeDstOffset(timestamp,gmtTimestamp);
-  end
+    Result := GetDstOffset(timestamp,TimeZoneID2TimeZoneName(timezoneID),isLocalTime)
   else
   begin
     TimeZoneInfo := LookupTimeZoneInfo(timezoneID,timestamp,isLocalTime);
@@ -538,6 +536,24 @@ begin
     else
       IBError(ibxeBadTimestampOrNoTimeZoneDBEntry,[DateTimeToStr(timestamp),timezoneID]);
   end;
+end;
+
+function TFB30TimeZoneServices.GetDstOffset(timestamp: TDateTime;
+  timezone: AnsiString; IsLocalTime: boolean): smallint;
+var gmtTimeStamp: TDateTime;
+    Buffer: ISC_TIMESTAMP_TZ;
+    TimeZoneInfo: PTimeZoneInfo;
+begin
+  if DateOf(timestamp) = 0 then
+    IBError(ibxeDatePartMissing,[DateTimeToStr(timestamp)]);
+  if not FUsingRemoteTZDB then
+  begin
+    EncodeTimestampTZ(timestamp,timezone,@Buffer);
+    gmtTimeStamp := FFirebird30ClientAPI.SQLDecodeDateTime(@Buffer);
+    Result := -ComputeDstOffset(timestamp,gmtTimestamp);
+  end
+  else
+    Result := GetDstOffset(timestamp,TimeZoneName2TimeZoneID(timezone),isLocalTime);
 end;
 
 function TFB30TimeZoneServices.DecodeGMTTimestampTZ(bufptr: PISC_TIMESTAMP_TZ
@@ -948,7 +964,7 @@ begin
   with FFirebird30ClientAPI do
   if not FUsingRemoteTZDB then
   begin
-    UtilIntf.EncodeTimeTZ(StatusIntf,@Buffer.utc_time,0,0,0,0,@aTimeZone);
+    UtilIntf.EncodeTimeTZ(StatusIntf,@Buffer,0,0,0,0,PAnsiChar(aTimeZone));
     Result := Buffer.time_zone;
   end
   else
@@ -958,7 +974,7 @@ end;
 function TFB30TimeZoneServices.LocalTimeToGMT(aLocalTime: TDateTime;
   aTimeZone: AnsiString): TDateTime;
 begin
-  Result := LocalTimeToGMT(aLocalTime,TimeZoneName2TimeZoneID(aTimeZone));
+  Result := IncMinute(aLocalTime,GetDSTOffset(aLocalTime,aTimeZone,true));
 end;
 
 function TFB30TimeZoneServices.LocalTimeToGMT(aLocalTime: TDateTime;
@@ -970,7 +986,7 @@ end;
 function TFB30TimeZoneServices.GMTToLocalTime(aGMTTime: TDateTime;
   aTimeZone: AnsiString): TDateTime;
 begin
- Result := GMTToLocalTime(aGMTTime,TimeZoneName2TimeZoneID(aTimeZone));
+  Result := IncMinute(aGMTTime,GetDSTOffset(aGMTTime,aTimeZone,false));
 end;
 
 function TFB30TimeZoneServices.GMTToLocalTime(aGMTTime: TDateTime;
@@ -982,7 +998,7 @@ end;
 function TFB30TimeZoneServices.GetEffectiveOffsetMins(aLocalTime: TDateTime;
   aTimeZone: AnsiString): integer;
 begin
-  Result :=  GetEffectiveOffsetMins(aLocalTime,TimeZoneName2TimeZoneID(aTimeZone));
+  Result := -GetDSTOffset(aLocalTime,aTimeZone,true);
 end;
 
 function TFB30TimeZoneServices.GetEffectiveOffsetMins(aLocalTime: TDateTime;
