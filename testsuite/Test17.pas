@@ -386,7 +386,7 @@ begin
      Attachment.DropDatabase;
      Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
 
-     Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],'SET BIND TIME ZONE TO EXTENDED');
+     Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],'SET BIND OF TIME ZONE TO EXTENDED');
      Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable2);
      UpdateDatabase4_TZ(Attachment);
      QueryDatabase4_TZ(Attachment);

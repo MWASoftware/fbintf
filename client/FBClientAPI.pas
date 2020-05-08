@@ -91,6 +91,9 @@ FIREBIRD_EMBEDDED = 'fbembed.dll';
 {$ENDIF}
 
 const
+    DefaultTimeZoneFile = '/etc/timezone';
+
+const
   IBLocalBufferLength = 512;
   IBBigLocalBufferLength = IBLocalBufferLength * 2;
   IBHugeLocalBufferLength = IBBigLocalBufferLength * 20;
@@ -159,8 +162,11 @@ type
 
   TFBClientAPI = class(TFBInterfacedObject)
   private
+    FLocalTimeZoneName: AnsiString; {Informal Time Zone Name from tzname e.g. GMT or BST}
+    FTZDataTimeZoneID: AnsiString; {TZData DB ID e.g. Europe/London}
     class var FIBCS: TRTLCriticalSection;
     function FBTimeStampToDateTime(aDate, aTime: longint): TDateTime;
+    procedure GetTZDataSettings;
   protected
     FFBLibrary: TFBLibrary;
     function GetProcAddr(ProcName: PAnsiChar): Pointer;
@@ -184,6 +190,10 @@ type
     function HasLocalTZDB: boolean; virtual;
     function HasExtendedTZSupport: boolean; virtual;
 
+  public
+    property LocalTimeZoneName: AnsiString read FLocalTimeZoneName;
+    property TZDataTimeZoneID: AnsiString read FTZDataTimeZoneID;
+  public
     {Encode/Decode}
     procedure EncodeInteger(aValue: integer; len: integer; buffer: PByte);
     function DecodeInteger(bufptr: PByte; len: short): integer; virtual; abstract;
@@ -212,7 +222,7 @@ end;
 implementation
 
 uses IBUtils, Registry,
-  {$IFDEF Unix} initc, dl, {$ENDIF}
+  {$IFDEF Unix} unix, initc, dl, {$ENDIF}
 {$IFDEF FPC}
 {$IFDEF WINDOWS }
 WinDirs,
@@ -347,6 +357,7 @@ constructor TFBClientAPI.Create(aFBLibrary: TFBLibrary);
 begin
   inherited Create;
   FFBLibrary := aFBLibrary;
+  GetTZDataSettings;
 end;
 
 procedure TFBClientAPI.IBAlloc(var P; OldSize, NewSize: Integer);
@@ -407,6 +418,42 @@ begin
   else
     Result := trunc(aDate) + abs(frac(aTime / (MSecsPerDay*10)));
 end;
+
+{$IFDEF UNIX}
+procedure TFBClientAPI.GetTZDataSettings;
+var S: TStringList;
+begin
+  FLocalTimeZoneName := strpas(tzname[tzdaylight]);
+  if FileExists(DefaultTimeZoneFile) then
+  begin
+    S := TStringList.Create;
+    try
+      S.LoadFromFile(DefaultTimeZoneFile);
+      if S.Count > 0 then
+        FTZDataTimeZoneID := S[0];
+    finally
+      S.Free;
+    end;
+  end;
+end;
+{$ENDIF}
+
+{$IFDEF WINDOWS}
+procedure TFBClientAPI.GetTZDataSettings;
+var TZInfo: TTimeZoneInformation;
+begin
+  {is there any way of working out the default TZData DB time zone ID under Windows?}
+  case GetTimeZoneInformation(TZInfo) of
+    TIME_ZONE_ID_UNKNOWN:
+      FLocalTimeZoneName := '';
+    TIME_ZONE_ID_STANDARD:
+      FLocalTimeZoneName := strpas(@TZInfo.StandardName);
+    TIME_ZONE_ID_DAYLIGHT:
+      FLocalTimeZoneName := strpas(@TZInfo.DaylightName);
+  end;
+end;
+{$ENDIF}
+
 
 function TFBClientAPI.GetProcAddr(ProcName: PAnsiChar): Pointer;
 begin
