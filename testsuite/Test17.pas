@@ -92,6 +92,7 @@ begin
     writeln(OutFile,'Time Zone ID = ',TimeZoneName2TimeZoneID('-08:00'),', UTC Time = ',
       DateTimeToStr(LocalTimeToGMT(EncodeDate(2020,1,23) + EncodeTime(2,30,0,0), '-08:00')));
     writeln(OutFile,'Time Zone ID = ',TimeZoneName2TimeZoneID('US/Arizona'));
+    writeln(OutFile,'Local Time Zone ID = ',TimeZoneName2TimeZoneID(''));
     writeln(OutFile,'Local Time = ',DateTimeToStr(GMTToLocalTime(EncodeDate(2020,1,23) + EncodeTime(2,30,0,0),'-08:00')),', Time Zone = -08:00');
     writeln(OutFile,'Time Zone Offset = ',GetEffectiveOffsetMins(StrToDateTime('1/7/1989 23:00:00'),'Europe/London'));
     writeln(OutFile,'Time Zone Offset = ',GetEffectiveOffsetMins(StrToDateTime('1/7/2000 23:00:00'),'Europe/London'));
@@ -212,6 +213,10 @@ begin
   Statement.SQLParams[2].SetAsDateTime(EncodeDate(1918,11,11) + EncodeTime(0,11,0,0),'+04:00');
   writeln(OutFile,'Show Parameter 2');
   writeSQLData(Statement.SQLParams[2] as ISQLData);
+  Statement.Execute;
+  Statement.SQLParams[0].AsInteger := 4;
+  Statement.SQLParams[1].SetAsString('14:02:10.5 -08:00');
+  Statement.SQLParams[2].SetAsString('11/11/1918 11:11:0');
   Statement.Execute;
   sqlInsert := 'Insert into FB4TestData_TZ(RowID,TimeCol,TimestampCol) Values(5,'+
               '''11:31:05.0001 America/New_York'',''2020.7.1 07:00:00 America/New_York'')';

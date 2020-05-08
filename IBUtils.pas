@@ -1685,7 +1685,7 @@ begin
     i := j;
 
     {is there a factional second part}
-    if aDateTimeStr[i] = '.' then
+    if (i <= length(aDateTimeStr)) and (aDateTimeStr[i] = '.') then
     begin
       inc(i);
       inc(j);

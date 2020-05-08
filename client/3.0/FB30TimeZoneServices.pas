@@ -45,6 +45,9 @@ uses
   Classes, SysUtils, Firebird, IB, IBExternals, FBActivityMonitor, FBClientAPI,
   FB30ClientAPI, FBAttachment, FB30Attachment, FBTransaction, contnrs;
 
+const
+    DefaultTimeZoneFile = '/etc/timezone';
+
 type
 
   { TFB30TimeZoneServices }
@@ -88,8 +91,10 @@ type
     FUsingRemoteTZDB: boolean;
     FTimeZoneCache: ITimeZoneCache;
     FInLoadTimeZoneData: boolean;
-    FLocalTimeZoneName: AnsiString;
+    FLocalTimeZoneName: AnsiString; {Informal Time Zone Name from tzname e.g. GMT or BST}
+    FTZDataTimeZoneID: AnsiString; {TZData DB ID e.g. Europe/London}
     function ComputeDstOffset(localtime, gmtTimestamp: TDateTime): integer;
+    procedure GetTZDataSettings;
     function GetTransaction: ITransaction;
     function GetTimeZoneCache: ITimeZoneCache;
     function GetTimeZoneData(aTimeZone: ITimeZone; timestamp: TDateTime;
@@ -435,6 +440,40 @@ begin
    Result := -Result;
 end;
 
+{$IFDEF UNIX}
+procedure TFB30TimeZoneServices.GetTZDataSettings;
+var S: TStringList;
+begin
+  FLocalTimeZoneName := strpas(tzname[tzdaylight]);
+  if FileExists(DefaultTimeZoneFile) then
+  begin
+    S := TStringList.Create;
+    try
+      S.LoadFromFile(DefaultTimeZoneFile);
+      if S.Count > 0 then
+        FTZDataTimeZoneID := S[0];
+    finally
+      S.Free;
+    end;
+  end;
+end;
+{$ENDIF}
+
+{$IFDEF WINDOWS}
+procedure TFB30TimeZoneServices.GetTZDataSettings;
+var TZInfo: TTimeZoneInformation;
+begin
+  case GetTimeZoneInformation(TZInfo) of
+    TIME_ZONE_ID_UNKNOWN:
+      FLocalTimeZoneName := '';
+    TIME_ZONE_ID_STANDARD:
+      FLocalTimeZoneName := strpas(@TZInfo.StandardName);
+    TIME_ZONE_ID_DAYLIGHT:
+      FLocalTimeZoneName := strpas(@TZInfo.DaylightName);
+  end;
+end;
+{$ENDIF}
+
 function TFB30TimeZoneServices.GetTransaction: ITransaction;
 begin
   if FTransaction = nil then
@@ -640,27 +679,12 @@ begin
 end;
 
 constructor TFB30TimeZoneServices.Create(attachment: TFB30Attachment);
-{$IFDEF WINDOWS}
-var TZInfo: TTimeZoneInformation;
-{$ENDIF}
 begin
   inherited Create;
   FAttachment := attachment;
   FFirebird30ClientAPI := attachment.Firebird30ClientAPI;
   FUsingRemoteTZDB := true;
-  {$IFDEF UNIX}
-  FLocalTimeZoneName := strpas(tzname[tzdaylight]);
-  {$ENDIF}
-  {$IFDEF WINDOWS}
-  case GetTimeZoneInformation(TZInfo) of
-    TIME_ZONE_ID_UNKNOWN:
-      FLocalTimeZoneName := '';
-    TIME_ZONE_ID_STANDARD:
-      FLocalTimeZoneName := strpas(@TZInfo.StandardName);
-    TIME_ZONE_ID_DAYLIGHT:
-      FLocalTimeZoneName := strpas(@TZInfo.DaylightName);
-  end;
-  {$ENDIF}
+  GetTZDataSettings;
 end;
 
 destructor TFB30TimeZoneServices.Destroy;
@@ -720,6 +744,13 @@ begin
   begin
     DecodeDate(timestamp, Yr, Mn, Dy);
     FBDecodeTime(timestamp, Hr, Mt, S, DMs);
+    if timezone = '' then
+    begin
+      if FTZDataTimeZoneID <> '' then
+        timezone := FTZDataTimeZoneID
+      else
+        timezone := FormatTimeZoneOffset(-GetLocalTimeOffset);
+    end;
     UtilIntf.encodeTimeStampTz(StatusIntf,ISC_TIMESTAMP_TZPtr(bufPtr),Yr, Mn, Dy, Hr, Mt, S, DMs,PAnsiChar(timezone));
     Check4DataBaseError;
   end;
@@ -958,6 +989,14 @@ function TFB30TimeZoneServices.TimeZoneName2TimeZoneID(aTimeZone: AnsiString
 var Buffer: ISC_TIME_TZ;
     dstOffset: integer;
 begin
+  if Trim(aTimeZone) = '' then
+  begin
+    if FTZDataTimeZoneID <> '' then
+      Result := LookupTimeZoneID(FTZDataTimeZoneID)
+    else
+      Result := -GetLocalTimeOffset + TimeZoneID_GMT //use current local time offset
+  end
+  else
   if DecodeTimeZoneOffset(aTimeZone,dstOffset) then
     Result := dstOffset + TimeZoneDisplaymentDelta
   else
@@ -1022,7 +1061,10 @@ end;
 
 function TFB30TimeZoneServices.GetLocalTimeZoneName: AnsiString;
 begin
-  Result := FLocalTimeZoneName;
+  if FTZDataTimeZoneID <> '' then
+    Result := FTZDataTimeZoneID
+  else
+    Result := FLocalTimeZoneName;
 end;
 
 function TFB30TimeZoneServices.GetLocalTimeZoneID: TFBTimeZoneID;

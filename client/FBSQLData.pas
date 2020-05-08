@@ -2131,22 +2131,14 @@ begin
 
     SQL_TIMESTAMP_TZ:
       if ParseDateTimeTZString(value,dt,timezone) then
-      begin
-        if timezone = '' then
-          timezone := GetAttachment.GetTimeZoneServices.GetLocalTimeZoneName;
-        SetAsDateTime(dt,timezone);
-      end
+        SetAsDateTime(dt,timezone)
       else
         DoSetString;
 
     SQL_TIME_TZ:
       if ParseDateTimeTZString(value,dt,timezone,true) then
-      begin
-        if timezone = '' then
-          timezone := GetAttachment.GetTimeZoneServices.GetLocalTimeZoneName;
-        SetAsTime(dt,timezone);
-    end
-    else
+        SetAsTime(dt,timezone)
+      else
         DoSetString;
 
     SQL_DEC_FIXED,
