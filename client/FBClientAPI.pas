@@ -204,6 +204,9 @@ type
     procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte); virtual; abstract;
     function  SQLDecodeDateTime(bufptr: PByte): TDateTime; virtual; abstract;
     function FormatStatus(Status: TFBStatus): AnsiString; virtual; abstract;
+    function Int128ToStr(bufptr: PByte; scale: integer): AnsiString; virtual;
+    procedure StrToInt128(scale: integer; aValue: AnsiString; bufptr: PByte);
+      virtual;
 
     {IFirebirdAPI}
     function GetStatus: IStatus; virtual; abstract;
@@ -384,6 +387,16 @@ begin
     Dec(len);
     aValue := aValue shr 8;
   end;
+end;
+
+function TFBClientAPI.Int128ToStr(bufptr: PByte; scale: integer): AnsiString;
+begin
+  IBError(ibxeNotSupported,[]);
+end;
+
+procedure TFBClientAPI.StrToInt128(scale: integer; aValue: AnsiString; bufptr: PByte);
+begin
+  IBError(ibxeNotSupported,[]);
 end;
 
 procedure TFBClientAPI.SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal;

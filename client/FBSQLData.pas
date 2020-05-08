@@ -1363,6 +1363,9 @@ begin
       SQL_DEC34:
         result := BCDToStr(GetAsBCD);
 
+      SQL_INT128:
+        result := Int128ToStr(SQLData,scale);
+
       else
         IBError(ibxeInvalidDataConversion, [nil]);
     end;
@@ -1472,6 +1475,10 @@ begin
   SQL_DEC34:
     with FFirebirdClientAPI do
       Result := SQLDecFloatDecode(SQLType, SQLData);
+
+  SQL_INT128:
+    with FFirebirdClientAPI do
+      Result := StrToBCD(Int128ToStr(SQLData,scale));
 
   else
     if not CurrToBCD(GetAsCurrency,Result) then
@@ -1809,6 +1816,11 @@ begin
     SQL_DEC_FIXED:
       with FFirebirdClientAPI do
         SQLDecFloatEncode(aValue,SQLType,SQLData);
+
+    SQL_INT128:
+      with FFirebirdClientAPI do
+        StrToInt128(scale,BcdToStr(aValue),SQLData);
+
     else
       begin
         if BcdToCurr(aValue,C) then
@@ -2143,7 +2155,8 @@ begin
 
     SQL_DEC_FIXED,
     SQL_DEC16,
-    SQL_DEC34:
+    SQL_DEC34,
+    SQL_INT128:
       SetAsBCD(StrToBCD(Value));
 
     else

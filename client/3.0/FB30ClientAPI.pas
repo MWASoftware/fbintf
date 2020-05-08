@@ -131,6 +131,8 @@ type
     procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal; bufptr: PByte);
       override;
     function SQLDecFloatDecode(SQLType: cardinal; bufptr: PByte): tBCD; override;
+    function Int128ToStr(bufptr: PByte; scale: integer): AnsiString; override;
+    procedure StrToInt128(scale: integer; aValue: AnsiString; bufptr: PByte); override;
 
     {Firebird Interfaces}
     property MasterIntf: Firebird.IMaster read FMaster;
@@ -562,6 +564,30 @@ begin
   Result.SignSpecialPlaces :=  (-exp and $2f);
   if sign <> 0 then
     Result.SignSpecialPlaces := Result.SignSpecialPlaces or $80;
+end;
+
+procedure TFB30ClientAPI.StrToInt128(scale: integer; aValue: AnsiString;
+  bufptr: PByte);
+begin
+  if (GetClientMajor < 4) or (UtilIntf.vtable.version< 4) then {ignore FB4 Beta1}
+    IBError(ibxeNotSupported,[]);
+
+  UtilIntf.getInt128(StatusIntf).fromString(StatusIntf,scale,@aValue,FB_I128Ptr(bufptr));
+  Check4DatabaseError;
+end;
+
+function TFB30ClientAPI.Int128ToStr(bufptr: PByte; scale: integer
+  ): AnsiString;
+const
+  bufLength = 64;
+var Buffer: array[ 0.. bufLength] of AnsiChar;
+begin
+  if (GetClientMajor < 4) or (UtilIntf.vtable.version< 4) then {ignore FB4 Beta1}
+    IBError(ibxeNotSupported,[]);
+
+  UtilIntf.getInt128(StatusIntf).toString(StatusIntf,FB_I128Ptr(bufptr),scale,buflength,PAnsiChar(@Buffer));
+  Check4DatabaseError;
+  Result := strpas(@Buffer);
 end;
 
 function TFB30ClientAPI.HasLocalTZDB: boolean;
