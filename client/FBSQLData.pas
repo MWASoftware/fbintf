@@ -167,6 +167,7 @@ type
      procedure SetAsVariant(Value: Variant);
      procedure SetAsNumeric(Value: Int64; aScale: integer);
      procedure SetAsBcd(aValue: tBCD);
+     procedure SetAsInt128(aValue: tBCD);
      procedure SetIsNull(Value: Boolean); virtual;
      procedure SetIsNullable(Value: Boolean); virtual;
      procedure SetName(aValue: AnsiString); virtual;
@@ -1084,7 +1085,8 @@ begin
 
         SQL_DEC_FIXED,
         SQL_DEC16,
-        SQL_DEC34:
+        SQL_DEC34,
+        SQL_INT128:
           if not BCDToCurr(GetAsBCD,Result) then
             IBError(ibxeInvalidDataConversion, [nil]);
 
@@ -1199,6 +1201,11 @@ begin
         result := PFloat(SQLData)^;
       SQL_DOUBLE, SQL_D_FLOAT:
         result := PDouble(SQLData)^;
+      SQL_DEC_FIXED,
+      SQL_DEC16,
+      SQL_DEC34,
+      SQL_INT128:
+        Result := BCDToDouble(GetAsBCD);
       else
         IBError(ibxeInvalidDataConversion, [nil]);
     end;
@@ -1244,6 +1251,11 @@ begin
         result := Trunc(AdjustScale(PInt64(SQLData)^, Scale));
       SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT:
         result := Trunc(AsDouble);
+      SQL_DEC_FIXED,
+      SQL_DEC16,
+      SQL_DEC34,
+      SQL_INT128:
+        Result := BCDToInteger(GetAsBCD);
       else
         IBError(ibxeInvalidDataConversion, [nil]);
     end;
@@ -1428,7 +1440,8 @@ begin
         result := AsBoolean;
       SQL_DEC_FIXED,
       SQL_DEC16,
-      SQL_DEC34:
+      SQL_DEC34,
+      SQL_INT128:
         result := VarFmtBCDCreate(GetAsBcd);
       else
         IBError(ibxeInvalidDataConversion, [nil]);
@@ -1829,6 +1842,22 @@ begin
           IBError(ibxeInvalidDataConversion,[]);
       end;
     end;
+  Changed;
+end;
+
+procedure TSQLDataItem.SetAsInt128(aValue: tBCD);
+begin
+  CheckActive;
+  Changing;
+  if IsNullable then
+    IsNull := False;
+
+  SQLType := SQL_INT128;
+  DataLength := 8;
+  Scale := BCDScale(aValue);
+
+  with FFirebirdClientAPI do
+        StrToInt128(scale,BcdToStr(aValue),SQLData);
   Changed;
 end;
 
