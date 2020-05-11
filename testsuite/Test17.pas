@@ -38,6 +38,7 @@ type
 
   TTest17 = class(TTestBase)
   private
+    procedure TestArrayTZDataTypes(Attachment: IAttachment);
     procedure TestFBTimezoneSettings(Attachment: IAttachment);
     procedure UpdateDatabase(Attachment: IAttachment);
     procedure UpdateDatabase4_TZ(Attachment: IAttachment);
@@ -71,12 +72,76 @@ const
     'RowID Integer not null,'+
     'TimeCol TIME WITH TIME ZONE,'+
     'TimestampCol TIMESTAMP WITH TIME ZONE,'+
-    'TZArray TIMESTAMP WITH TIME ZONE[0:16], '+
+    'Primary Key(RowID)'+
+    ')';
+
+    sqlCreateTable3 =
+    'Create Table FB4TestData_ARTZ ('+
+    'RowID Integer not null,'+
+    'TimeCol TIME WITH TIME ZONE [0:16],'+
+    'TimestampCol TIMESTAMP WITH TIME ZONE [0:16],'+
     'Primary Key(RowID)'+
     ')';
 
 
 { TTest17 }
+
+procedure TTest17.TestArrayTZDataTypes(Attachment: IAttachment);
+var Transaction: ITransaction;
+    Statement: IStatement;
+    sqlInsert: AnsiString;
+    ar: IArray;
+    aDateTime: TDateTime;
+    i: integer;
+    ResultSet: IResultSet;
+    Bounds: TArrayBounds;
+    tzName: AnsiString;
+    dstOffset: smallint;
+begin
+  Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
+  sqlInsert := 'Insert into FB4TestData_ARTZ(RowID,TimeCol,TimestampCol) Values(?,?,?)';
+  Statement := Attachment.Prepare(Transaction,sqlInsert);
+  ParamInfo(Statement.GetSQLParams);
+  Statement.SQLParams[0].AsInteger := 1;
+  ar := Attachment.CreateArray(Transaction,'FB4TestData_ARTZ','TimeCol');
+  for i := 0 to 16 do
+  begin
+    aDateTime := EncodeTime(16,i,0,0);
+    ar.SetAsTime(i,aDateTime,TimeZoneID_GMT + 10*i);
+  end;
+
+  Statement.SQLParams[1].AsArray := ar;
+  ar := Attachment.CreateArray(Transaction,'FB4TestData_ARTZ','TimestampCol');
+  for i := 0 to 16 do
+  begin
+    aDateTime := EncodeDate(2020,5,1) + EncodeTime(12,i,0,0);
+    ar.SetAsDateTime(i,aDateTime,'America/New_York');
+  end;
+  Statement.SQLParams[2].AsArray := ar;
+  Statement.Execute;
+  Attachment.Prepare(Transaction,'Select * From FB4TestData_ARTZ');
+  writeln(OutFile);
+  writeln(OutFile,'TimeZone Arrays');
+  ResultSet := Statement.OpenCursor;
+  while ResultSet.FetchNext do
+  begin
+    writeln('Row No ',ResultSet[0].AsInteger);
+    ar := ResultSet[1].AsArray;
+    Bounds := ar.GetBounds;
+    for i := Bounds[0].LowerBound to Bounds[0].UpperBound do
+    begin
+      ar.GetAsDateTime(i,aDateTime,dstOffset,tzName);
+      writeln(OutFile,'Time [',i,'] = ',TimeToStr(aDateTime),' dstOffset = ',dstOffset,' Time Zone = ',tzName);
+    end;
+    ar := ResultSet[2].AsArray;
+    Bounds := ar.GetBounds;
+    for i := Bounds[0].LowerBound to Bounds[0].UpperBound do
+    begin
+      ar.GetAsDateTime(i,aDateTime,dstOffset,tzName);
+      writeln(OutFile,'Timestamp [',i,'] = ',DateTimeToStr(aDateTime),' dstOffset = ',dstOffset,' Time Zone = ',tzName);
+    end;
+  end;
+end;
 
 procedure TTest17.TestFBTimezoneSettings(Attachment: IAttachment);
 var aDateTime: TDateTime;
@@ -366,8 +431,10 @@ begin
     TestFBTimezoneSettings(Attachment);
 
     Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable2);
+    Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable3);
     UpdateDatabase4_TZ(Attachment);
     QueryDatabase4_TZ(Attachment);
+    TestArrayTZDataTypes(Attachment);
     Attachment.DropDatabase;
     Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
 

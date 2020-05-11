@@ -38,7 +38,7 @@ unit FBArray;
 interface
 
 uses
-  Classes, SysUtils, IB, IBHeader, FBTransaction,
+  Classes, SysUtils, IBHeader, IB,  FBTransaction,
   FBSQLData,  FBClientAPI, IBExternals, FBActivityMonitor, FmtBCD;
 
 (*
@@ -497,7 +497,7 @@ end;
 
 procedure TFBArrayElement.SetSQLType(aValue: cardinal);
 begin
-  if aValue = GetSQLType then
+  if aValue <> GetSQLType then
     IBError(ibxeInvalidDataConversion, [nil]);
 end;
 
@@ -564,6 +564,20 @@ begin
     Result :=  SQL_TYPE_TIME;
   blr_int64:
     Result := SQL_INT64;
+  blr_sql_time_tz:
+    Result := SQL_TIME_TZ;
+  blr_timestamp_tz:
+    Result := SQL_TIMESTAMP_TZ;
+  blr_ex_time_tz:
+    Result := SQL_TIME_TZ_EX;
+  blr_ex_timestamp_tz:
+    Result := SQL_TIMESTAMP_TZ_EX;
+  blr_dec64:
+    Result := SQL_DEC16;
+  blr_dec128:
+    Result := SQL_DEC34;
+  blr_int128:
+    Result := SQL_INT128;
   end;
 end;
 
@@ -637,6 +651,20 @@ begin
     Result :=  blr_sql_time;
   SQL_INT64:
     Result := blr_int64;
+  SQL_TIME_TZ:
+    Result := blr_sql_time_tz;
+  SQL_TIMESTAMP_TZ:
+    Result := blr_timestamp_tz;
+  SQL_TIME_TZ_EX:
+    Result := blr_ex_time_tz;
+  SQL_TIMESTAMP_TZ_EX:
+    Result := blr_ex_timestamp_tz;
+  SQL_DEC16:
+    Result := blr_dec64;
+  SQL_DEC34:
+    Result := blr_dec128;
+  SQL_INT128:
+    Result := blr_int128;
   end;
 end;
 
