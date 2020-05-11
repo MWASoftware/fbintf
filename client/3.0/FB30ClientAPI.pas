@@ -111,7 +111,9 @@ type
     function GetClientMajor: integer; override;
     function GetClientMinor: integer; override;
     function HasLocalTZDB: boolean; override;
+    function HasTimeZoneSupport: boolean; override;
     function HasExtendedTZSupport: boolean; override;
+    function HasInt128Support: boolean; override;
 
     {Firebird 3 API}
     function HasMasterIntf: boolean;
@@ -569,8 +571,7 @@ end;
 procedure TFB30ClientAPI.StrToInt128(scale: integer; aValue: AnsiString;
   bufptr: PByte);
 begin
-  if (GetClientMajor < 4) or (UtilIntf.vtable.version< 4) then {ignore FB4 Beta1}
-    IBError(ibxeNotSupported,[]);
+  inherited StrToInt128(scale,aValue,bufPtr);
 
   UtilIntf.getInt128(StatusIntf).fromString(StatusIntf,scale,@aValue,FB_I128Ptr(bufptr));
   Check4DatabaseError;
@@ -582,8 +583,7 @@ const
   bufLength = 64;
 var Buffer: array[ 0.. bufLength] of AnsiChar;
 begin
-  if (GetClientMajor < 4) or (UtilIntf.vtable.version< 4) then {ignore FB4 Beta1}
-    IBError(ibxeNotSupported,[]);
+  Result := inherited Int128ToStr(bufPtr,scale);
 
   UtilIntf.getInt128(StatusIntf).toString(StatusIntf,FB_I128Ptr(bufptr),scale,buflength,PAnsiChar(@Buffer));
   Check4DatabaseError;
@@ -597,7 +597,7 @@ var Buffer: ISC_TIME_TZ;
     Hr, Mt, S, DMs: cardinal;
     tzBuffer: array[ 0.. bufLength] of AnsiChar;
 begin
-  Result := GetClientMajor >=4;
+  Result := HasTimeZoneSupport;
   if Result then
   begin
     Buffer.utc_time := 0;
@@ -608,9 +608,19 @@ begin
   end;
 end;
 
+function TFB30ClientAPI.HasTimeZoneSupport: boolean;
+begin
+  Result := GetClientMajor >=4;
+end;
+
 function TFB30ClientAPI.HasExtendedTZSupport: boolean;
 begin
   Result :=  (GetClientMajor >=4) and (UtilIntf.vtable.version >= 4) {ignore FB4 Beta1}
+end;
+
+function TFB30ClientAPI.HasInt128Support: boolean;
+begin
+  Result := (GetClientMajor >=4) and (UtilIntf.vtable.version >= 4) {ignore FB4 Beta1} ;
 end;
 
 function TFB30ClientAPI.GetClientMajor: integer;

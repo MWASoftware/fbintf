@@ -833,32 +833,6 @@ type
 
   ITimeZoneServices = interface
     ['{163821f5-ebef-42b9-ac60-8ac4b5c09954}']
-    {encode/decode - used to encode/decode the wire protocol}
-    procedure EncodeTimestampTZ(timestamp: TDateTime; timezoneID: TFBTimeZoneID;
-      bufptr: PByte); overload;
-    procedure EncodeTimestampTZ(timestamp: TDateTime; timezone: AnsiString;
-        bufptr: PByte); overload;
-    procedure EncodeTimeTZ(time: TDateTime; timezoneID: TFBTimeZoneID; OnDate: TDateTime;
-      bufptr: PByte); overload;
-    procedure EncodeTimeTZ(time: TDateTime; timezone: AnsiString; OnDate: TDateTime;
-      bufptr: PByte); overload;
-    procedure DecodeTimestampTZ(bufptr: PByte; var timestamp: TDateTime;
-      var dstOffset: smallint; var timezoneID: TFBTimeZoneID); overload;
-    procedure DecodeTimestampTZ(bufptr: PByte; var timestamp: TDateTime;
-      var dstOffset: smallint; var timezone: AnsiString); overload;
-    procedure DecodeTimestampTZEx(bufptr: PByte; var timestamp: TDateTime;
-      var dstOffset: smallint; var timezoneID: TFBTimeZoneID); overload;
-    procedure DecodeTimestampTZEx(bufptr: PByte; var timestamp: TDateTime;
-      var dstOffset: smallint; var timezone: AnsiString); overload;
-    procedure DecodeTimeTZ(bufptr: PByte; OnDate: TDateTime; var time: TDateTime;
-      var dstOffset: smallint; var timezoneID: TFBTimeZoneID); overload;
-    procedure DecodeTimeTZ(bufptr: PByte; OnDate: TDateTime; var time: TDateTime;
-      var dstOffset: smallint; var timezone: AnsiString); overload;
-    procedure DecodeTimeTZEx(bufptr: PByte; OnDate: TDateTime; var time: TDateTime;
-      var dstOffset: smallint; var timezoneID: TFBTimeZoneID); overload;
-    procedure DecodeTimeTZEx(bufptr: PByte; OnDate: TDateTime; var time: TDateTime;
-      var dstOffset: smallint; var timezone: AnsiString); overload;
-
     {utility functions}
     function TimeZoneID2TimeZoneName(aTimeZoneID: TFBTimeZoneID): AnsiString;
     function TimeZoneName2TimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID;
@@ -874,7 +848,6 @@ type
     procedure SetUseLocalTZDB(useLocalTZDB: boolean);
     function GetLocalTimeZoneName: AnsiString;
     function GetLocalTimeZoneID: TFBTimeZoneID;
-
   end;
 
   {The IDBInformation Interface.
@@ -1279,17 +1252,16 @@ type
     function GetImplementationVersion: AnsiString;
     function GetClientMajor: integer;
     function GetClientMinor: integer;
+    function HasDecFloatSupport: boolean;
+    function HasInt128Support: boolean;
     function HasLocalTZDB: boolean;
+    function HasTimeZoneSupport: boolean;
     function HasExtendedTZSupport: boolean;
 
     {Firebird 3 API}
     function HasMasterIntf: boolean;
     function GetIMaster: TObject;
     function GetFBLibrary: IFirebirdLibrary;
-
-    {BCD Field Support}
-    procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal; bufptr: PByte);
-    function SQLDecFloatDecode(SQLType: cardinal; bufptr: PByte): tBCD;
 end;
 
 type

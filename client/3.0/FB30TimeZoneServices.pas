@@ -43,13 +43,13 @@ interface
 
 uses
   Classes, SysUtils, Firebird, IB, IBExternals, FBActivityMonitor, FBClientAPI,
-  FB30ClientAPI, FBAttachment, FB30Attachment, FBTransaction, contnrs;
+  FB30ClientAPI, FBAttachment, FB30Attachment, FBTransaction, FBSQLData, contnrs;
 
 type
 
   { TFB30TimeZoneServices }
 
-  TFB30TimeZoneServices = class(TFBInterfacedObject, ITimeZoneServices, ITransactionUser)
+  TFB30TimeZoneServices = class(TFBInterfacedObject, ITimeZoneServices, IExTimeZoneServices, ITransactionUser)
   private type
     PTimeZoneInfo = ^TTimeZoneInfo;
     TTimeZoneInfo = record

@@ -85,6 +85,35 @@ uses
 
 type
 
+   IExTimeZoneServices = interface(ITimeZoneServices)
+   ['{789c2eeb-c4a7-4fed-837e-0cbdef775904}']
+   {encode/decode - used to encode/decode the wire protocol}
+   procedure EncodeTimestampTZ(timestamp: TDateTime; timezoneID: TFBTimeZoneID;
+     bufptr: PByte); overload;
+   procedure EncodeTimestampTZ(timestamp: TDateTime; timezone: AnsiString;
+       bufptr: PByte); overload;
+   procedure EncodeTimeTZ(time: TDateTime; timezoneID: TFBTimeZoneID; OnDate: TDateTime;
+     bufptr: PByte); overload;
+   procedure EncodeTimeTZ(time: TDateTime; timezone: AnsiString; OnDate: TDateTime;
+     bufptr: PByte); overload;
+   procedure DecodeTimestampTZ(bufptr: PByte; var timestamp: TDateTime;
+     var dstOffset: smallint; var timezoneID: TFBTimeZoneID); overload;
+   procedure DecodeTimestampTZ(bufptr: PByte; var timestamp: TDateTime;
+     var dstOffset: smallint; var timezone: AnsiString); overload;
+   procedure DecodeTimestampTZEx(bufptr: PByte; var timestamp: TDateTime;
+     var dstOffset: smallint; var timezoneID: TFBTimeZoneID); overload;
+   procedure DecodeTimestampTZEx(bufptr: PByte; var timestamp: TDateTime;
+     var dstOffset: smallint; var timezone: AnsiString); overload;
+   procedure DecodeTimeTZ(bufptr: PByte; OnDate: TDateTime; var time: TDateTime;
+     var dstOffset: smallint; var timezoneID: TFBTimeZoneID); overload;
+   procedure DecodeTimeTZ(bufptr: PByte; OnDate: TDateTime; var time: TDateTime;
+     var dstOffset: smallint; var timezone: AnsiString); overload;
+   procedure DecodeTimeTZEx(bufptr: PByte; OnDate: TDateTime; var time: TDateTime;
+     var dstOffset: smallint; var timezoneID: TFBTimeZoneID); overload;
+   procedure DecodeTimeTZEx(bufptr: PByte; OnDate: TDateTime; var time: TDateTime;
+     var dstOffset: smallint; var timezone: AnsiString); overload;
+   end;
+
   { TSQLDataItem }
 
   TSQLDataItem = class(TFBInterfacedObject)
@@ -103,8 +132,10 @@ type
      function AdjustScaleFromCurrency(Value: Currency; aScale: Integer): Int64;
      function AdjustScaleFromDouble(Value: Double; aScale: Integer): Int64;
      procedure CheckActive; virtual;
+     procedure CheckTZSupport;
      function GetAttachment: IAttachment; virtual; abstract;
      function GetSQLDialect: integer; virtual; abstract;
+     function GetTimeZoneServices: IExTimeZoneServices; virtual;
      procedure Changed; virtual;
      procedure Changing; virtual;
      procedure InternalSetAsString(Value: AnsiString); virtual;
@@ -874,23 +905,23 @@ begin
         aDateTime := SQLDecodeDateTime(SQLData);
       SQL_TIMESTAMP_TZ:
         begin
-          GetAttachment.GetTimeZoneServices.DecodeTimestampTZ(SQLData,aDateTime,dstOffset,aTimeZone);
+          GetTimeZoneServices.DecodeTimestampTZ(SQLData,aDateTime,dstOffset,aTimeZone);
           aTimeZoneID := PISC_TIMESTAMP_TZ(SQLData)^.time_zone;
         end;
       SQL_TIMESTAMP_TZ_EX:
       begin
-        GetAttachment.GetTimeZoneServices.DecodeTimestampTZEx(SQLData,aDateTime,dstOffset,aTimeZone);
+        GetTimeZoneServices.DecodeTimestampTZEx(SQLData,aDateTime,dstOffset,aTimeZone);
         aTimeZoneID := PISC_TIMESTAMP_TZ_EX(SQLData)^.time_zone;
       end;
       SQL_TIME_TZ:
       begin
-        GetAttachment.GetTimeZoneServices.DecodeTimeTZ(SQLData,GetAttachment.GetTimeTZDate,
+        GetTimeZoneServices.DecodeTimeTZ(SQLData,GetAttachment.GetTimeTZDate,
                                                        aDateTime,dstOffset,aTimeZone);
         aTimeZoneID := PISC_TIME_TZ(SQLData)^.time_zone;
       end;
       SQL_TIME_TZ_EX:
       begin
-        GetAttachment.GetTimeZoneServices.DecodeTimeTZEx(SQLData,GetAttachment.GetTimeTZDate,
+        GetTimeZoneServices.DecodeTimeTZEx(SQLData,GetAttachment.GetTimeTZDate,
                                                          aDateTime,dstOffset,aTimeZone);
         aTimeZoneID := PISC_TIME_TZ_EX(SQLData)^.time_zone;
       end
@@ -952,6 +983,17 @@ end;
 procedure TSQLDataItem.CheckActive;
 begin
   //Do nothing by default
+end;
+
+procedure TSQLDataItem.CheckTZSupport;
+begin
+  if not FFirebirdClientAPI.HasTimeZoneSupport then
+    IBError(ibxeNoTimezoneSupport,[]);
+end;
+
+function TSQLDataItem.GetTimeZoneServices: IExTimeZoneServices;
+begin
+  GetAttachment.GetTimeZoneServices.QueryInterface(IExTimeZoneServices,Result);
 end;
 
 procedure TSQLDataItem.Changed;
@@ -1158,7 +1200,7 @@ begin
       begin
         if not ParseDateTimeTZString(AsString,Result,aTimeZone) then
           IBError(ibxeInvalidDataConversion, [nil]);
-        Result := GetAttachment.GetTimeZoneServices.LocalTimeToGMT(Result,aTimeZone);
+        Result := GetTimeZoneServices.LocalTimeToGMT(Result,aTimeZone);
       end;
       SQL_TYPE_DATE:
         result := SQLDecodeDate(SQLData);
@@ -1589,6 +1631,7 @@ end;
 procedure TSQLDataItem.SetAsTime(aValue: TDateTime; aTimeZoneID: TFBTimeZoneID);
 begin
   CheckActive;
+  CheckTZSupport;
   if GetSQLDialect < 3 then
   begin
     AsDateTime := aValue;
@@ -1601,13 +1644,14 @@ begin
 
   SQLType := SQL_TIME_TZ;
   DataLength := SizeOf(ISC_TIME_TZ);
-  GetAttachment.GetTimeZoneServices.EncodeTimeTZ(aValue, aTimeZoneID,GetAttachment.GetTimeTZDate,SQLData);
+  GetTimeZoneServices.EncodeTimeTZ(aValue, aTimeZoneID,GetAttachment.GetTimeTZDate,SQLData);
   Changed;
 end;
 
 procedure TSQLDataItem.SetAsTime(aValue: TDateTime; aTimeZone: AnsiString);
 begin
   CheckActive;
+  CheckTZSupport;
   if GetSQLDialect < 3 then
   begin
     AsDateTime := aValue;
@@ -1620,7 +1664,7 @@ begin
 
   SQLType := SQL_TIME_TZ;
   DataLength := SizeOf(ISC_TIME_TZ);
-  GetAttachment.GetTimeZoneServices.EncodeTimeTZ(aValue, aTimeZone,GetAttachment.GetTimeTZDate,SQLData);
+  GetTimeZoneServices.EncodeTimeTZ(aValue, aTimeZone,GetAttachment.GetTimeTZDate,SQLData);
   Changed;
 end;
 
@@ -1642,13 +1686,14 @@ procedure TSQLDataItem.SetAsDateTime(aValue: TDateTime;
   aTimeZoneID: TFBTimeZoneID);
 begin
   CheckActive;
+  CheckTZSupport;
   if IsNullable then
     IsNull := False;
 
   Changing;
   SQLType := SQL_TIMESTAMP_TZ;
   DataLength := SizeOf(ISC_TIMESTAMP_TZ);
-  GetAttachment.GetTimeZoneServices.EncodeTimestampTZ(aValue,aTimeZoneID,SQLData);
+  GetTimeZoneServices.EncodeTimestampTZ(aValue,aTimeZoneID,SQLData);
   Changed;
 end;
 
@@ -1656,13 +1701,14 @@ procedure TSQLDataItem.SetAsDateTime(aValue: TDateTime; aTimeZone: AnsiString
   );
 begin
   CheckActive;
+  CheckTZSupport;
   if IsNullable then
     IsNull := False;
 
   Changing;
   SQLType := SQL_TIMESTAMP_TZ;
   DataLength := SizeOf(ISC_TIMESTAMP_TZ);
-  GetAttachment.GetTimeZoneServices.EncodeTimestampTZ(aValue,aTimeZone,SQLData);
+  GetTimeZoneServices.EncodeTimestampTZ(aValue,aTimeZone,SQLData);
   Changed;
 end;
 
@@ -1821,9 +1867,13 @@ begin
   if IsNullable then
     IsNull := False;
 
+
   with FFirebirdClientAPI do
   if BCDPrecision(aValue) <= 16 then
   begin
+    if not HasDecFloatSupport then
+      IBError(ibxeDecFloatNotSupported,[]);
+
     SQLType := SQL_DEC16;
     DataLength := 8;
     SQLDecFloatEncode(aValue,SQLType,SQLData);
@@ -1831,6 +1881,9 @@ begin
   else
   if BCDPrecision(aValue) <= 34 then
   begin
+    if not HasDecFloatSupport then
+      IBError(ibxeDecFloatNotSupported,[]);
+
     SQLType := SQL_DEC34;
     DataLength := 16;
     SQLDecFloatEncode(aValue,SQLType,SQLData);
@@ -1838,6 +1891,9 @@ begin
   else
   if BCDPrecision(aValue) <= 38 then
   begin
+    if not HasInt128Support then
+      IBError(ibxeInt128NotSupported,[]);
+
     SQLType := SQL_INT128;
     DataLength := 16;
     StrToInt128(BCDScale(aValue),BcdToStr(aValue),SQLData);

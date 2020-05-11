@@ -187,8 +187,10 @@ type
     function GetFirebirdLibList: string; virtual; abstract;
     {$ENDIF}
     function HasDecFloatSupport: boolean;
+    function HasInt128Support: boolean; virtual;
     function HasLocalTZDB: boolean; virtual;
     function HasExtendedTZSupport: boolean; virtual;
+    function HasTimeZoneSupport: boolean; virtual;
 
   public
     property LocalTimeZoneName: AnsiString read FLocalTimeZoneName;
@@ -391,12 +393,14 @@ end;
 
 function TFBClientAPI.Int128ToStr(bufptr: PByte; scale: integer): AnsiString;
 begin
-  IBError(ibxeNotSupported,[]);
+  if not HasInt128Support then
+    IBError(ibxeNotSupported,[]);
 end;
 
 procedure TFBClientAPI.StrToInt128(scale: integer; aValue: AnsiString; bufptr: PByte);
 begin
-  IBError(ibxeNotSupported,[]);
+  if not HasInt128Support then
+    IBError(ibxeNotSupported,[]);
 end;
 
 procedure TFBClientAPI.SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal;
@@ -480,12 +484,22 @@ begin
   Result := GetClientMajor >= 4;
 end;
 
+function TFBClientAPI.HasInt128Support: boolean;
+begin
+  Result := false;
+end;
+
 function TFBClientAPI.HasLocalTZDB: boolean;
 begin
   Result := false;
 end;
 
 function TFBClientAPI.HasExtendedTZSupport: boolean;
+begin
+  Result := false;
+end;
+
+function TFBClientAPI.HasTimeZoneSupport: boolean;
 begin
   Result := false;
 end;

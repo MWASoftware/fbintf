@@ -153,7 +153,10 @@ type
       ibxeInvalidTimeZoneID,
       ibxeBadTimestampOrNoTimeZoneDBEntry,
       ibxeDatePartMissing,
-      ibxeBCDOverflow
+      ibxeBCDOverflow,
+      ibxeNoTimezoneSupport,
+      ibxeDecFloatNotSupported,
+      ibxeInt128NotSupported
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -257,6 +260,9 @@ resourcestring
   SBadTimestampOrNoTimeZoneDBEntry = 'Bad Timestamp or missing time zone DB entry (%s,%d)';
   SDatePartMissing = 'Timestamp has no date part (%s)';
   SBCDOverflow = 'BCD Precision too large for Firebird data type,[%s]';
+  SNoTimezoneSupport = 'TIME/TIMESTAMP WITH TIME ZONE data type not supported';
+  SDecFloatNotSupported = 'DecFloat Data Type not supported';
+  SInt128NotSupported = 'INT128 Data Type not supported';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -337,7 +343,10 @@ const
     SInvalidTimeZoneID,
     SBadTimestampOrNoTimeZoneDBEntry,
     SDatePartMissing,
-    SBCDOverflow
+    SBCDOverflow,
+    SNoTimezoneSupport,
+    SDecFloatNotSupported,
+    SInt128NotSupported
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
