@@ -157,7 +157,7 @@ type
      procedure SetAsDateTime(Value: TDateTime); overload;
      procedure SetAsDateTime(aValue: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
      procedure SetAsDateTime(aValue: TDateTime; aTimeZone: AnsiString); overload;
-     procedure SetAsUTCDateTime(aUTCTime: TDateTime; aTimeZone: AnsiString);
+     procedure SetAsUTCDateTime(aUTCTime: TDateTime);
      procedure SetAsDouble(Value: Double); virtual;
      procedure SetAsFloat(Value: Float); virtual;
      procedure SetAsPointer(Value: Pointer);
@@ -167,7 +167,6 @@ type
      procedure SetAsVariant(Value: Variant);
      procedure SetAsNumeric(Value: Int64; aScale: integer);
      procedure SetAsBcd(aValue: tBCD);
-     procedure SetAsInt128(aValue: tBCD);
      procedure SetIsNull(Value: Boolean); virtual;
      procedure SetIsNullable(Value: Boolean); virtual;
      procedure SetName(aValue: AnsiString); virtual;
@@ -1667,10 +1666,9 @@ begin
   Changed;
 end;
 
-procedure TSQLDataItem.SetAsUTCDateTime(aUTCTime: TDateTime;
-  aTimeZone: AnsiString);
+procedure TSQLDataItem.SetAsUTCDateTime(aUTCTime: TDateTime);
 begin
-  SetAsDateTime(GetAttachment.GetTimeZoneServices.GMTToLocalTime(aUTCTime,aTimeZone),aTimeZone);
+  SetAsDateTime(aUTCTime,TimeZoneID_GMT);
 end;
 
 procedure TSQLDataItem.SetAsDouble(Value: Double);
@@ -1823,41 +1821,30 @@ begin
   if IsNullable then
     IsNull := False;
 
-  case SQLType of
-    SQL_DEC16,
-    SQL_DEC34,
-    SQL_DEC_FIXED:
-      with FFirebirdClientAPI do
-        SQLDecFloatEncode(aValue,SQLType,SQLData);
-
-    SQL_INT128:
-      with FFirebirdClientAPI do
-        StrToInt128(scale,BcdToStr(aValue),SQLData);
-
-    else
-      begin
-        if BcdToCurr(aValue,C) then
-          SetAsCurrency(C)
-        else
-          IBError(ibxeInvalidDataConversion,[]);
-      end;
-    end;
-  Changed;
-end;
-
-procedure TSQLDataItem.SetAsInt128(aValue: tBCD);
-begin
-  CheckActive;
-  Changing;
-  if IsNullable then
-    IsNull := False;
-
-  SQLType := SQL_INT128;
-  DataLength := 8;
-  Scale := BCDScale(aValue);
-
   with FFirebirdClientAPI do
-        StrToInt128(scale,BcdToStr(aValue),SQLData);
+  if BCDPrecision(aValue) <= 16 then
+  begin
+    SQLType := SQL_DEC16;
+    DataLength := 8;
+    SQLDecFloatEncode(aValue,SQLType,SQLData);
+  end
+  else
+  if BCDPrecision(aValue) <= 34 then
+  begin
+    SQLType := SQL_DEC34;
+    DataLength := 16;
+    SQLDecFloatEncode(aValue,SQLType,SQLData);
+  end
+  else
+  if BCDPrecision(aValue) <= 38 then
+  begin
+    SQLType := SQL_INT128;
+    DataLength := 16;
+    StrToInt128(BCDScale(aValue),BcdToStr(aValue),SQLData);
+  end
+  else
+    IBError(ibxeBCDOverflow,[BCDToStr(aValue)]);
+
   Changed;
 end;
 

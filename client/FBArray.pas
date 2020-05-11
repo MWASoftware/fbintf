@@ -39,7 +39,7 @@ interface
 
 uses
   Classes, SysUtils, IB, IBHeader, FBTransaction,
-  FBSQLData,  FBClientAPI, IBExternals, FBActivityMonitor;
+  FBSQLData,  FBClientAPI, IBExternals, FBActivityMonitor, FmtBCD;
 
 (*
 
@@ -201,26 +201,36 @@ type
     function GetAsBoolean(index: array of integer): boolean;
     function GetAsCurrency(index: array of integer): Currency;
     function GetAsInt64(index: array of integer): Int64;
-    function GetAsDateTime(index: array of integer): TDateTime;
+    function GetAsDateTime(index: array of integer): TDateTime; overload;
+    procedure GetAsDateTime(index: array of integer; var aDateTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID); overload;
+    procedure GetAsDateTime(index: array of integer; var aDateTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString); overload;
+    function GetAsUTCDateTime(index: array of integer): TDateTime;
     function GetAsDouble(index: array of integer): Double;
     function GetAsFloat(index: array of integer): Float;
     function GetAsLong(index: array of integer): Long;
     function GetAsShort(index: array of integer): Short;
     function GetAsString(index: array of integer): AnsiString;
     function GetAsVariant(index: array of integer): Variant;
+    function GetAsBCD(index: array of integer): tBCD;
     procedure SetAsInteger(index: array of integer; AValue: integer);
     procedure SetAsBoolean(index: array of integer; AValue: boolean);
     procedure SetAsCurrency(index: array of integer; Value: Currency);
     procedure SetAsInt64(index: array of integer; Value: Int64);
     procedure SetAsDate(index: array of integer; Value: TDateTime);
     procedure SetAsLong(index: array of integer; Value: Long);
-    procedure SetAsTime(index: array of integer; Value: TDateTime);
-    procedure SetAsDateTime(index: array of integer; Value: TDateTime);
+    procedure SetAsTime(index: array of integer; Value: TDateTime); overload;
+    procedure SetAsTime(index: array of integer; aValue: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
+    procedure SetAsTime(index: array of integer; aValue: TDateTime; aTimeZone: AnsiString); overload;
+    procedure SetAsDateTime(index: array of integer; Value: TDateTime); overload;
+    procedure SetAsDateTime(index: array of integer; aValue: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
+    procedure SetAsDateTime(index: array of integer; aValue: TDateTime; aTimeZone: AnsiString); overload;
+    procedure SetAsUTCDateTime(index: array of integer; aUTCTime: TDateTime);
     procedure SetAsDouble(index: array of integer; Value: Double);
     procedure SetAsFloat(index: array of integer; Value: Float);
     procedure SetAsShort(index: array of integer; Value: Short);
     procedure SetAsString(index: array of integer; Value: AnsiString);
     procedure SetAsVariant(index: array of integer; Value: Variant);
+    procedure SetAsBcd(index: array of integer; aValue: tBCD);
     procedure SetBounds(dim, UpperBound, LowerBound: integer);
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
@@ -920,6 +930,30 @@ begin
   Result := FElement.GetAsDateTime;
 end;
 
+procedure TFBArray.GetAsDateTime(index: array of integer;
+  var aDateTime: TDateTime; var dstOffset: smallint;
+  var aTimezoneID: TFBTimeZoneID);
+begin
+  GetArraySlice;
+  FElement.FBufPtr := GetOffset(index);
+  FElement.GetAsDateTime(aDateTime,dstOffset,aTimezoneID);
+end;
+
+procedure TFBArray.GetAsDateTime(index: array of integer;
+  var aDateTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString);
+begin
+  GetArraySlice;
+  FElement.FBufPtr := GetOffset(index);
+  FElement.GetAsDateTime(aDateTime,dstOffset,aTimezone);
+end;
+
+function TFBArray.GetAsUTCDateTime(index: array of integer): TDateTime;
+begin
+  GetArraySlice;
+  FElement.FBufPtr := GetOffset(index);
+  Result := FElement.GetAsUTCDateTime;
+end;
+
 function TFBArray.GetAsDouble(index: array of integer): Double;
 begin
   GetArraySlice;
@@ -960,6 +994,13 @@ begin
   GetArraySlice;
   FElement.FBufPtr := GetOffset(index);
   Result := FElement.GetAsVariant;
+end;
+
+function TFBArray.GetAsBCD(index: array of integer): tBCD;
+begin
+  GetArraySlice;
+  FElement.FBufPtr := GetOffset(index);
+  Result := FElement.GetAsBCD;
 end;
 
 procedure TFBArray.SetAsInteger(index: array of integer; AValue: integer);
@@ -1004,10 +1045,45 @@ begin
   FElement.SetAsTime(Value);
 end;
 
+procedure TFBArray.SetAsTime(index: array of integer; aValue: TDateTime;
+  aTimeZoneID: TFBTimeZoneID);
+begin
+  FElement.FBufPtr := GetOffset(index);
+  FElement.SetAsTime(aValue,aTimeZoneID);
+end;
+
+procedure TFBArray.SetAsTime(index: array of integer; aValue: TDateTime;
+  aTimeZone: AnsiString);
+begin
+  FElement.FBufPtr := GetOffset(index);
+  FElement.SetAsTime(aValue,aTimeZone);
+end;
+
 procedure TFBArray.SetAsDateTime(index: array of integer; Value: TDateTime);
 begin
   FElement.FBufPtr := GetOffset(index);
   FElement.SetAsDateTime(Value);
+end;
+
+procedure TFBArray.SetAsDateTime(index: array of integer; aValue: TDateTime;
+  aTimeZoneID: TFBTimeZoneID);
+begin
+  FElement.FBufPtr := GetOffset(index);
+  FElement.SetAsDateTime(aValue,aTimeZoneID);
+end;
+
+procedure TFBArray.SetAsDateTime(index: array of integer; aValue: TDateTime;
+  aTimeZone: AnsiString);
+begin
+  FElement.FBufPtr := GetOffset(index);
+  FElement.SetAsDateTime(aValue,aTimeZone);
+end;
+
+procedure TFBArray.SetAsUTCDateTime(index: array of integer;
+  aUTCTime: TDateTime);
+begin
+  FElement.FBufPtr := GetOffset(index);
+  FElement.SetAsUTCDateTime(aUTCTime);
 end;
 
 procedure TFBArray.SetAsDouble(index: array of integer; Value: Double);
@@ -1038,6 +1114,12 @@ procedure TFBArray.SetAsVariant(index: array of integer; Value: Variant);
 begin
   FElement.FBufPtr := GetOffset(index);
   FElement.SetAsVariant(Value);
+end;
+
+procedure TFBArray.SetAsBcd(index: array of integer; aValue: tBCD);
+begin
+  FElement.FBufPtr := GetOffset(index);
+  FElement.SetAsBcd(aValue);
 end;
 
 procedure TFBArray.SetBounds(dim, UpperBound, LowerBound: integer);

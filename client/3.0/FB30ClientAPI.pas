@@ -594,7 +594,6 @@ function TFB30ClientAPI.HasLocalTZDB: boolean;
 const
   bufLength = 128;
 var Buffer: ISC_TIME_TZ;
-    aTime: TDateTime;
     Hr, Mt, S, DMs: cardinal;
     tzBuffer: array[ 0.. bufLength] of AnsiChar;
 begin

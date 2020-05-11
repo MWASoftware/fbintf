@@ -71,6 +71,7 @@ const
     'RowID Integer not null,'+
     'TimeCol TIME WITH TIME ZONE,'+
     'TimestampCol TIMESTAMP WITH TIME ZONE,'+
+    'TZArray TIMESTAMP WITH TIME ZONE[0:16], '+
     'Primary Key(RowID)'+
     ')';
 

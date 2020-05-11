@@ -236,6 +236,7 @@ type
 
   TFBStatusCode = cardinal;
   TByteArray = array of byte;
+  TFBTimeZoneID = ISC_USHORT;
 
   IFirebirdAPI = interface;
   IAttachment = interface;
@@ -350,26 +351,36 @@ type
     function GetAsBoolean(index: array of integer): boolean;
     function GetAsCurrency(index: array of integer): Currency;
     function GetAsInt64(index: array of integer): Int64;
-    function GetAsDateTime(index: array of integer): TDateTime;
+    function GetAsDateTime(index: array of integer): TDateTime; overload;
+    procedure GetAsDateTime(index: array of integer; var aDateTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID); overload;
+    procedure GetAsDateTime(index: array of integer; var aDateTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString); overload;
+    function GetAsUTCDateTime(index: array of integer): TDateTime;
     function GetAsDouble(index: array of integer): Double;
     function GetAsFloat(index: array of integer): Float;
     function GetAsLong(index: array of integer): Long;
     function GetAsShort(index: array of integer): Short;
     function GetAsString(index: array of integer): AnsiString;
     function GetAsVariant(index: array of integer): Variant;
+    function GetAsBCD(index: array of integer): tBCD;
     procedure SetAsInteger(index: array of integer; AValue: integer);
     procedure SetAsBoolean(index: array of integer; AValue: boolean);
     procedure SetAsCurrency(index: array of integer; Value: Currency);
     procedure SetAsInt64(index: array of integer; Value: Int64);
     procedure SetAsDate(index: array of integer; Value: TDateTime);
     procedure SetAsLong(index: array of integer; Value: Long);
-    procedure SetAsTime(index: array of integer; Value: TDateTime);
-    procedure SetAsDateTime(index: array of integer; Value: TDateTime);
+    procedure SetAsTime(index: array of integer; Value: TDateTime); overload;
+    procedure SetAsTime(index: array of integer; aValue: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
+    procedure SetAsTime(index: array of integer; aValue: TDateTime; aTimeZone: AnsiString); overload;
+    procedure SetAsDateTime(index: array of integer; Value: TDateTime); overload;
+    procedure SetAsDateTime(index: array of integer; aValue: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
+    procedure SetAsDateTime(index: array of integer; aValue: TDateTime; aTimeZone: AnsiString); overload;
+    procedure SetAsUTCDateTime(index: array of integer; aUTCTime: TDateTime);
     procedure SetAsDouble(index: array of integer; Value: Double);
     procedure SetAsFloat(index: array of integer; Value: Float);
     procedure SetAsShort(index: array of integer; Value: Short);
     procedure SetAsString(index: array of integer; Value: AnsiString);
     procedure SetAsVariant(index: array of integer; Value: Variant);
+    procedure SetAsBcd(index: array of integer; aValue: tBCD);
     procedure SetBounds(dim, UpperBound, LowerBound: integer);
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
@@ -493,8 +504,6 @@ type
     property ColMetaData[index: integer]: IColumnMetaData read getColumnMetaData; default;
     property Count: integer read getCount;
   end;
-
-   TFBTimeZoneID = ISC_USHORT;
 
   {
     The ISQLData interface provides access to the data returned in a field in the
@@ -646,7 +655,7 @@ type
     procedure SetAsDateTime(aValue: TDateTime); overload;
     procedure SetAsDateTime(aValue: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
     procedure SetAsDateTime(aValue: TDateTime; aTimeZone: AnsiString); overload;
-    procedure SetAsUTCDateTime(aUTCTime: TDateTime; aTimeZone: AnsiString);
+    procedure SetAsUTCDateTime(aUTCTime: TDateTime);
     procedure SetAsDouble(aValue: Double);
     procedure SetAsFloat(aValue: Float);
     procedure SetAsPointer(aValue: Pointer);
@@ -659,7 +668,6 @@ type
     procedure SetAsQuad(aValue: TISC_QUAD);
     procedure SetCharSetID(aValue: cardinal);
     procedure SetAsBcd(aValue: tBCD);
-    procedure SetAsInt128(aValue: tBCD);
     property AsDate: TDateTime read GetAsDateTime write SetAsDate;
     property AsBoolean:boolean read GetAsBoolean write SetAsBoolean;
     property AsTime: TDateTime read GetAsDateTime write SetAsTime;

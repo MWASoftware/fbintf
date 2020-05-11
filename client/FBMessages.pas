@@ -152,7 +152,8 @@ type
       ibxeBCDTooBig,
       ibxeInvalidTimeZoneID,
       ibxeBadTimestampOrNoTimeZoneDBEntry,
-      ibxeDatePartMissing
+      ibxeDatePartMissing,
+      ibxeBCDOverflow
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -255,6 +256,7 @@ resourcestring
   SInvalidTimeZoneID = 'Invalid Time Zone ID (%d)';
   SBadTimestampOrNoTimeZoneDBEntry = 'Bad Timestamp or missing time zone DB entry (%s,%d)';
   SDatePartMissing = 'Timestamp has no date part (%s)';
+  SBCDOverflow = 'BCD Precision too large for Firebird data type,[%s]';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -334,7 +336,8 @@ const
     SBCDTooBig,
     SInvalidTimeZoneID,
     SBadTimestampOrNoTimeZoneDBEntry,
-    SDatePartMissing
+    SDatePartMissing,
+    SBCDOverflow
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
