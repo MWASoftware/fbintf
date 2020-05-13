@@ -37,6 +37,7 @@ type
   private
     procedure QueryDatabase4_DECFloat(Attachment: IAttachment);
     procedure UpdateDatabase4_DECFloat(Attachment: IAttachment);
+    procedure ArrayTest(Attachment: IAttachment);
   public
     function TestTitle: AnsiString; override;
     procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
@@ -55,6 +56,16 @@ const
     'Float34 DecFloat(34),'+
     'BigNumber NUMERIC(24,6),'+
     'BiggerNumber NUMERIC(26,4),'+
+    'Primary Key(RowID)'+
+    ')';
+
+    sqlCreateTable2 =
+    'Create Table FB4TestData_DECFloat_AR ('+
+    'RowID Integer not null,'+
+    'Float16 DecFloat(16) [0:16],'+
+    'Float34 DecFloat(34) [0:16],'+
+    'BigNumber NUMERIC(24,6) [0:16],'+
+    'BiggerNumber NUMERIC(26,4) [0:16],'+
     'Primary Key(RowID)'+
     ')';
 
@@ -89,6 +100,78 @@ begin
   Statement.SQLParams[3].AsBCD := 0;
   Statement.SQLParams[4].AsBCD := 0;
   Statement.Execute;
+end;
+
+procedure TTest18.ArrayTest(Attachment: IAttachment);
+var Transaction: ITransaction;
+    Statement: IStatement;
+    ResultSet: IResultSet;
+    ar: IArray;
+    value: tBCD;
+    i: integer;
+begin
+  Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable2);
+  Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
+  Statement := Attachment.Prepare(Transaction,'Select * From FB4TestData_DECFloat_AR');
+  Printmetadata(Statement.MetaData);
+  Attachment.Prepare(Transaction,'Insert into FB4TestData_DECFloat_AR (RowID) Values(1)').Execute;
+
+  {Float16}
+  ar := Attachment.CreateArray(Transaction,'FB4TestData_DECFloat_AR','Float16');
+  value := StrToBCD('64100000000.011');
+  for i := 0 to 16 do
+  begin
+    ar.SetAsBcd(i,value);
+    value := value + 1;
+  end;
+
+  Statement := Attachment.Prepare(Transaction,'Update FB4TestData_DECFloat_AR Set Float16 = ? Where RowID = 1');
+  Statement.SQLParams[0].AsArray := ar;
+  Statement.Execute;
+
+  {Float 34}
+  ar := Attachment.CreateArray(Transaction,'FB4TestData_DECFloat_AR','Float34');
+  value := StrToBCD('123456789123456789.12345678');
+  for i := 0 to 16 do
+  begin
+    ar.SetAsBcd(i,value);
+    value := value + 1;
+  end;
+
+  Statement := Attachment.Prepare(Transaction,'Update FB4TestData_DECFloat_AR Set Float34 = ? Where RowID = 1');
+  Statement.SQLParams[0].AsArray := ar;
+  Statement.Execute;
+
+  {NUMERIC(24,6)}
+ { ar := Attachment.CreateArray(Transaction,'FB4TestData_DECFloat_AR','BigNumber');
+  value := StrToBCD('-123456123400.123456');
+  for i := 0 to 16 do
+  begin
+    ar.SetAsBcd(i,value);
+    value := value + 1;
+  end;
+
+  Statement := Attachment.Prepare(Transaction,'Update FB4TestData_DECFloat_AR Set BigNumber = ? Where RowID = 1');
+  Statement.SQLParams[0].AsArray := ar;
+  Statement.Execute; }
+
+  Statement := Attachment.Prepare(Transaction,'Select RowID, Float16, Float34,BigNumber From FB4TestData_DECFloat_AR');
+  writeln(OutFile);
+  writeln(OutFile,'Decfloat Arrays');
+  ResultSet := Statement.OpenCursor;
+  while ResultSet.FetchNext do
+  begin
+    writeln('Row No ',ResultSet[0].AsInteger);
+    write(OutFile,'Float16 ');
+    ar := ResultSet[1].AsArray;
+    WriteArray(ar);
+    write(OutFile,'Float34 ');
+    ar := ResultSet[2].AsArray;
+    WriteArray(ar);
+  {  write(OutFile,'BigNumber ');
+    ar := ResultSet[3].AsArray;
+    WriteArray(ar); }
+  end;
 end;
 
 procedure TTest18.QueryDatabase4_DECFloat(Attachment: IAttachment);
@@ -159,6 +242,7 @@ begin
     Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable);
     UpdateDatabase4_DECFloat(Attachment);
     QueryDatabase4_DECFloat(Attachment);
+    ArrayTest(Attachment);
   end;
   Attachment.DropDatabase;
 end;

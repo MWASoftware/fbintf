@@ -99,10 +99,10 @@ var Transaction: ITransaction;
     dstOffset: smallint;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
-  sqlInsert := 'Insert into FB4TestData_ARTZ(RowID,TimeCol,TimestampCol) Values(?,?,?)';
+  sqlInsert := 'Insert into FB4TestData_ARTZ(RowID) Values(1)';
   Statement := Attachment.Prepare(Transaction,sqlInsert);
-  ParamInfo(Statement.GetSQLParams);
-  Statement.SQLParams[0].AsInteger := 1;
+  Statement.Execute;
+
   ar := Attachment.CreateArray(Transaction,'FB4TestData_ARTZ','TimeCol');
   for i := 0 to 16 do
   begin
@@ -110,16 +110,21 @@ begin
     ar.SetAsTime(i,aDateTime,TimeZoneID_GMT + 10*i);
   end;
 
-  Statement.SQLParams[1].AsArray := ar;
+  Statement := Attachment.Prepare(Transaction,'Update FB4TestData_ARTZ Set TimeCol = ? Where RowID = 1');
+  Statement.SQLParams[0].AsArray := ar;
+  Statement.Execute;
+
   ar := Attachment.CreateArray(Transaction,'FB4TestData_ARTZ','TimestampCol');
   for i := 0 to 16 do
   begin
     aDateTime := EncodeDate(2020,5,1) + EncodeTime(12,i,0,0);
     ar.SetAsDateTime(i,aDateTime,'America/New_York');
   end;
-  Statement.SQLParams[2].AsArray := ar;
+  Statement := Attachment.Prepare(Transaction,'Update FB4TestData_ARTZ Set TimestampCol = ? Where RowID = 1');
+  Statement.SQLParams[0].AsArray := ar;
   Statement.Execute;
-  Attachment.Prepare(Transaction,'Select * From FB4TestData_ARTZ');
+
+  Statement := Attachment.Prepare(Transaction,'Select * From FB4TestData_ARTZ');
   writeln(OutFile);
   writeln(OutFile,'TimeZone Arrays');
   ResultSet := Statement.OpenCursor;
@@ -428,14 +433,17 @@ begin
     writeln(OutFile);
     writeln(OutFile,'Local Time Zone Name = ',Attachment.GetTimeZoneServices.GetLocalTimeZoneName,
                      ', ID = ',Attachment.GetTimeZoneServices.GetLocalTimeZoneID);
-    TestFBTimezoneSettings(Attachment);
+    try
+      TestFBTimezoneSettings(Attachment);
 
-    Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable2);
-    Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable3);
-    UpdateDatabase4_TZ(Attachment);
-    QueryDatabase4_TZ(Attachment);
-    TestArrayTZDataTypes(Attachment);
-    Attachment.DropDatabase;
+      Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable2);
+      Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable3);
+      UpdateDatabase4_TZ(Attachment);
+      QueryDatabase4_TZ(Attachment);
+      TestArrayTZDataTypes(Attachment);
+    finally
+      Attachment.DropDatabase;
+    end;
     Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
 
     writeln(Outfile);

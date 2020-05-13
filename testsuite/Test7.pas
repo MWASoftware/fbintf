@@ -54,12 +54,16 @@ const
     'Dated TIMESTAMP, '+
     'Notes VarChar(64) Character Set ISO8859_1,'+
     'MyArray Integer [0:16],'+
+    'MyArray2 Timestamp [0:16],'+
+    'MyArray3 Numeric(10,2) [0:16],'+
     'Primary Key(RowID)'+
     ')';
 
   sqlInsert = 'Insert into TestData(RowID,Title,Dated,Notes) Values(:RowID,:Title,:Dated,:Notes)';
 
   sqlUpdate = 'Update TestData Set MyArray = :MyArray Where RowID = 1';
+  sqlUpdate2 = 'Update TestData Set MyArray2 = :MyArray2 Where RowID = 1';
+  sqlUpdate3 = 'Update TestData Set MyArray3 = :MyArray3 Where RowID = 1';
 
 { TTest7 }
 
@@ -69,6 +73,8 @@ var Transaction: ITransaction;
     ResultSet: IResultSet;
     i,j: integer;
     ar: IArray;
+    aDateTime: TDateTime;
+    f: double;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   Statement := Attachment.Prepare(Transaction,'Select * from TestData');
@@ -105,7 +111,32 @@ begin
   end;
   Statement.SQLParams[0].AsArray := ar;
   Statement.Execute;
+
+  Statement := Attachment.PrepareWithNamedParameters(Transaction,sqlUpdate2);
+  ParamInfo(Statement.GetSQLParams);
+  ar := Attachment.CreateArray(Transaction,'TestData','MyArray2');
+  for i := 0 to 16 do
+  begin
+    aDateTime := EncodeDate(2020,5,1) + EncodeTime(12,i,0,0);
+    ar.SetAsDateTime(i,aDateTime);
+  end;
+  Statement.SQLParams[0].AsArray := ar;
+  Statement.Execute;
+
+  Statement := Attachment.PrepareWithNamedParameters(Transaction,sqlUpdate3);
+  ParamInfo(Statement.GetSQLParams);
+  ar := Attachment.CreateArray(Transaction,'TestData','MyArray3');
+  f := 0;
+  for i := 0 to 16 do
+  begin
+    ar.SetAsFloat(i,f);
+    f := f + 1.05
+  end;
+  Statement.SQLParams[0].AsArray := ar;
+  Statement.Execute;
+
   Statement := Attachment.Prepare(Transaction,'Select * from TestData');
+  PrintMetaData(Statement.GetMetaData);
   ReportResults(Statement);
 
   ResultSet := Statement.OpenCursor;

@@ -37,8 +37,7 @@ unit FB30Attachment;
 interface
 
 uses
-  Classes, SysUtils, FBAttachment, FB30ClientAPI, Firebird, IB, FBActivityMonitor, FBParamBlock,
-  IBExternals;
+  Classes, SysUtils, FBAttachment, FB30ClientAPI, Firebird, IB, FBActivityMonitor, FBParamBlock;
 
 type
 

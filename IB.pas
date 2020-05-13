@@ -1253,7 +1253,6 @@ type
     function GetClientMajor: integer;
     function GetClientMinor: integer;
     function HasDecFloatSupport: boolean;
-    function HasInt128Support: boolean;
     function HasLocalTZDB: boolean;
     function HasTimeZoneSupport: boolean;
     function HasExtendedTZSupport: boolean;

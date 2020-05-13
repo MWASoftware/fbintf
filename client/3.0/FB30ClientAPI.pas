@@ -573,7 +573,7 @@ procedure TFB30ClientAPI.StrToInt128(scale: integer; aValue: AnsiString;
 begin
   inherited StrToInt128(scale,aValue,bufPtr);
 
-  UtilIntf.getInt128(StatusIntf).fromString(StatusIntf,scale,@aValue,FB_I128Ptr(bufptr));
+  UtilIntf.getInt128(StatusIntf).fromString(StatusIntf,scale,PAnsiChar(aValue),FB_I128Ptr(bufptr));
   Check4DatabaseError;
 end;
 

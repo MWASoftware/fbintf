@@ -99,6 +99,7 @@ type
    procedure SetAsDouble(Value: Double); override;
    procedure SetAsFloat(Value: Float); override;
    procedure SetAsCurrency(Value: Currency); override;
+   procedure SetAsBcd(aValue: tBCD); override;
   end;
 
   { TFBArrayMetaData }
@@ -495,6 +496,29 @@ begin
   end
 end;
 
+procedure TFBArrayElement.SetAsBcd(aValue: tBCD);
+var C: Currency;
+begin
+  CheckActive;
+  with FirebirdClientAPI do
+  case SQLType of
+  SQL_DEC_FIXED,
+  SQL_DEC16,
+  SQL_DEC34:
+    SQLDecFloatEncode(aValue,SQLType,SQLData);
+
+  SQL_INT128:
+    StrToInt128(Scale,BcdToStr(aValue),SQLData);
+
+  else
+    begin
+      BCDToCurr(aValue,C);
+      SetAsCurrency(C);
+    end;
+  end;
+  Changed;
+end;
+
 procedure TFBArrayElement.SetSQLType(aValue: cardinal);
 begin
   if aValue <> GetSQLType then
@@ -588,7 +612,7 @@ end;
 
 function TFBArrayMetaData.GetScale: integer;
 begin
-  Result := byte(FArrayDesc.array_desc_scale);
+  Result := FArrayDesc.array_desc_scale;
 end;
 
 function TFBArrayMetaData.GetSize: cardinal;

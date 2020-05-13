@@ -142,8 +142,6 @@ type
 
 implementation
 
-uses FBMessages;
-
 { TFBBlob }
 
 procedure TFBBlob.ClearStringCache;

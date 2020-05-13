@@ -126,7 +126,7 @@ type
 
 implementation
 
-uses FBMessages, FBStatement;
+uses FBMessages;
 
 { TFBTransaction }
 

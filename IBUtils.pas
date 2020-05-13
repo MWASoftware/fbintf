@@ -1738,6 +1738,9 @@ begin
   end;
 end;
 
+{The following is similar to FPC DecodeTime except that the Firebird standard
+ decimilliseconds is used instead of milliseconds for fractional seconds}
+
 procedure FBDecodeTime(aTime: TDateTime; var Hour, Minute, Second: word;
   var DeciMillisecond: cardinal);
 var D : Double;
@@ -1759,6 +1762,9 @@ begin
   DeciMillisecond := l mod 10000;
 end;
 
+{The following is similar to FPC EncodeTime except that the Firebird standard
+ decimilliseconds is used instead of milliseconds for fractional seconds}
+
 function FBEncodeTime(Hour, Minute, Second, DeciMillisecond: cardinal): TDateTime;
 var DMs: cardinal;
     D: Double;
@@ -1772,6 +1778,11 @@ begin
   else
     IBError(ibxeBadTimeSpecification,[Hour, Minute, Second, DeciMillisecond]);
 end;
+
+{The following is similar to FPC FormatDateTime except that it additionally
+ allows the timstamp to have a fractional seconds component with a resolution
+ of four decimal places. This is appended to the result for FormatDateTime
+ if the format string contains a "zzzz' string.}
 
 function FBFormatDateTime(fmt: AnsiString; aDateTime: TDateTime): AnsiString;
 var Hour, Minute, Second: word;

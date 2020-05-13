@@ -148,7 +148,7 @@ type
      procedure SetDataLength(len: cardinal); virtual;
      procedure SetSQLType(aValue: cardinal); virtual;
      property DataLength: cardinal read GetDataLength write SetDataLength;
-
+     property FirebirdClientAPI: TFBClientAPI read FFirebirdClientAPI;
   public
      constructor Create(api: TFBClientAPI);
      function GetSQLType: cardinal; virtual; abstract;
@@ -197,7 +197,7 @@ type
      procedure SetAsString(Value: AnsiString); virtual;
      procedure SetAsVariant(Value: Variant);
      procedure SetAsNumeric(Value: Int64; aScale: integer);
-     procedure SetAsBcd(aValue: tBCD);
+     procedure SetAsBcd(aValue: tBCD); virtual;
      procedure SetIsNull(Value: Boolean); virtual;
      procedure SetIsNullable(Value: Boolean); virtual;
      procedure SetName(aValue: AnsiString); virtual;
@@ -1070,6 +1070,7 @@ begin
   SQL_DEC_FIXED:        Result := 'SQL_DEC_FIXED';
   SQL_DEC16:            Result := 'SQL_DEC16';
   SQL_DEC34:            Result := 'SQL_DEC34';
+  SQL_INT128:           Result := 'SQL_INT128';
   SQL_NULL:             Result := 'SQL_NULL';
   end;
 end;

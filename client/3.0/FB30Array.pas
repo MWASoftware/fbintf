@@ -212,8 +212,9 @@ begin
 
     case array_desc_dtype of
     blr_short,blr_long,
-    blr_int64,blr_quad:
-        SDLItem.AddByte(byte(array_desc_scale));
+    blr_int64,blr_quad,
+    blr_int128:
+        SDLItem.SetAsTinyInteger(array_desc_scale);
 
     blr_text,blr_cstring, blr_varying:
         SDLItem.addShortInteger(array_desc_length);

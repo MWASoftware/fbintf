@@ -648,8 +648,11 @@ begin
   case aValue.SQLType of
   SQL_ARRAY:
     begin
+      write(OutFile, aValue.Name,' = ');
       if not aValue.IsNull then
-        WriteArray(aValue.AsArray);
+        WriteArray(aValue.AsArray)
+      else
+        writeln(OutFile,'NULL');
     end;
   SQL_FLOAT,SQL_DOUBLE,
   SQL_D_FLOAT:

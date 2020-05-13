@@ -37,7 +37,7 @@ unit FBActivityMonitor;
 interface
 
 uses
-  Classes, SysUtils, IBExternals, IB;
+  Classes, SysUtils, IBExternals;
 
   { $DEFINE DEBUGINTERFACES}   {Define this to check that all interfaces are
                                 being destroyed.}

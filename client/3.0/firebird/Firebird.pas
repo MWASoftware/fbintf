@@ -34,7 +34,7 @@ unit Firebird;
 
 interface
 
-uses Classes, SysUtils, IB, DB, IBExternals;
+uses Classes, SysUtils, IB, IBExternals;
 
 type
 {$IFNDEF FPC}

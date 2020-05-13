@@ -503,9 +503,7 @@ end;
 
 function TFB30TimeZoneServices.GetDstOffset(timestamp: TDateTime;
   timezoneID: TFBTimeZoneID; IsLocalTime: boolean): smallint;
-var gmtTimeStamp: TDateTime;
-    Buffer: ISC_TIMESTAMP_TZ;
-    TimeZoneInfo: PTimeZoneInfo;
+var TimeZoneInfo: PTimeZoneInfo;
 begin
   if DateOf(timestamp) = 0 then
     IBError(ibxeDatePartMissing,[DateTimeToStr(timestamp)]);
@@ -540,7 +538,6 @@ function TFB30TimeZoneServices.GetDstOffset(timestamp: TDateTime;
   timezone: AnsiString; IsLocalTime: boolean): smallint;
 var gmtTimeStamp: TDateTime;
     Buffer: ISC_TIMESTAMP_TZ;
-    TimeZoneInfo: PTimeZoneInfo;
 begin
   if DateOf(timestamp) = 0 then
     IBError(ibxeDatePartMissing,[DateTimeToStr(timestamp)]);
