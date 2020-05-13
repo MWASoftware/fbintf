@@ -65,7 +65,6 @@ const
     'Float16 DecFloat(16) [0:16],'+
     'Float34 DecFloat(34) [0:16],'+
     'BigNumber NUMERIC(24,6) [0:16],'+
-    'BiggerNumber NUMERIC(26,4) [0:16],'+
     'Primary Key(RowID)'+
     ')';
 
@@ -143,17 +142,17 @@ begin
   Statement.Execute;
 
   {NUMERIC(24,6)}
- { ar := Attachment.CreateArray(Transaction,'FB4TestData_DECFloat_AR','BigNumber');
-  value := StrToBCD('-123456123400.123456');
+  ar := Attachment.CreateArray(Transaction,'FB4TestData_DECFloat_AR','BigNumber');
+  value := StrToBCD('123456123400.123456');
   for i := 0 to 16 do
   begin
     ar.SetAsBcd(i,value);
-    value := value + 1;
+    value := value + 1.5;
   end;
 
   Statement := Attachment.Prepare(Transaction,'Update FB4TestData_DECFloat_AR Set BigNumber = ? Where RowID = 1');
   Statement.SQLParams[0].AsArray := ar;
-  Statement.Execute; }
+  Statement.Execute;
 
   Statement := Attachment.Prepare(Transaction,'Select RowID, Float16, Float34,BigNumber From FB4TestData_DECFloat_AR');
   writeln(OutFile);
@@ -168,9 +167,9 @@ begin
     write(OutFile,'Float34 ');
     ar := ResultSet[2].AsArray;
     WriteArray(ar);
-  {  write(OutFile,'BigNumber ');
+    write(OutFile,'BigNumber ');
     ar := ResultSet[3].AsArray;
-    WriteArray(ar); }
+    WriteArray(ar);
   end;
 end;
 
@@ -234,7 +233,7 @@ begin
   end;
 
   if (FirebirdAPI.GetClientMajor < 4) or (Attachment.GetODSMajorVersion < 13) then
-    writeln(OutFile,'Skipping Firebird 4 and later test part')
+    writeln(OutFile,'Skipping test for Firebird 4 and later')
   else
   begin
     writeln(OutFile,'Firebird 4 extension types');
