@@ -125,6 +125,7 @@ begin
   Statement.Execute;
 
   Statement := Attachment.Prepare(Transaction,'Select * From FB4TestData_ARTZ');
+  PrintMetaData(Statement.Metadata);
   writeln(OutFile);
   writeln(OutFile,'TimeZone Arrays');
   ResultSet := Statement.OpenCursor;
@@ -440,7 +441,7 @@ begin
       Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable3);
       UpdateDatabase4_TZ(Attachment);
       QueryDatabase4_TZ(Attachment);
-//      TestArrayTZDataTypes(Attachment);
+      TestArrayTZDataTypes(Attachment);
     finally
       Attachment.DropDatabase;
     end;

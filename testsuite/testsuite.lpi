@@ -23,7 +23,7 @@
     </PublishOptions>
     <RunParams>
       <local>
-        <CommandLineParams Value="-t 17 -l /opt/firebird4b2/lib/libfbclient.so.2 -P 33050"/>
+        <CommandLineParams Value="-t 17 -l /opt/firebird4/lib/libfbclient.so.2 -P 33050"/>
       </local>
       <environment>
         <UserOverrides Count="1">
@@ -34,7 +34,7 @@
       <Modes Count="1">
         <Mode0 Name="default">
           <local>
-            <CommandLineParams Value="-t 17 -l /opt/firebird4b2/lib/libfbclient.so.2 -P 33050"/>
+            <CommandLineParams Value="-t 17 -l /opt/firebird4/lib/libfbclient.so.2 -P 33050"/>
           </local>
           <environment>
             <UserOverrides Count="1">

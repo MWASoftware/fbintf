@@ -46,6 +46,7 @@ type
   ISDLItem = interface(IParameterBlockItem)
     ['{a34b6064-5ae9-4fc1-85c3-f145f069b607}']
     procedure addByte(aValue: byte);
+    procedure addShortInt(aValue: ShortInt);
     procedure addShortInteger(aValue: integer);
     procedure SetAsShortInteger(aValue: integer);
     procedure SetAsTinyInteger(aValue: integer);
@@ -212,8 +213,9 @@ begin
 
     case array_desc_dtype of
     blr_short,blr_long,
-    blr_int64,blr_quad:
-        SDLItem.SetAsTinyInteger(array_desc_scale);
+    blr_int64,blr_quad,
+    blr_int128:
+        SDLItem.AddShortInt(array_desc_scale);
 
     blr_text,blr_cstring, blr_varying:
         SDLItem.addShortInteger(array_desc_length);
