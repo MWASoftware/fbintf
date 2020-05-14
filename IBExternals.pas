@@ -91,7 +91,7 @@ type
 
   FB_DEC16 = array [1..1] of Int64;
   FB_DEC34 = array [1..2] of Int64;
-  FB_DEC_FIXED = array [1..2] of Int64;
+  FB_DEC_FIXED = array [1..2] of Int64; {FB4 Beta 1 only}
   FB_I128 = array [1..2] of Int64;
 
   ISC_DATE = Integer;

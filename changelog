@@ -35,22 +35,37 @@ FBINTF Change Log  version          (1.2-0 Build 12022) Fri, 17 Apr 2020 10:35:5
 10. New ISQLData API Calls:
     procedure GetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID); overload;
     procedure GetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString); overload;
+    procedure GetAsTime(var aTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID; OnDate: TDateTime); overload;
+    procedure GetAsTime(var aTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString; OnDate: TDateTime); overload;
     function GetAsUTCDateTime: TDateTime;
     function GetAsBCD: tBCD;
 
 11. New ISQLParam API Calls
     procedure GetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID); overload;
     procedure GetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString); overload;
+    procedure GetAsTime(var aTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID; OnDate: TDateTime); overload;
+    procedure GetAsTime(var aTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString; OnDate: TDateTime); overload;
     function GetAsUTCDateTime: TDateTime;
     function GetAsBCD: tBCD;
-    procedure SetAsTime(aValue: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
-    procedure SetAsTime(aValue: TDateTime; aTimeZone: AnsiString); overload;
+    procedure SetAsTime(aValue: TDateTime; OnDate: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
+    procedure SetAsTime(aValue: TDateTime; OnDate: TDateTime; aTimeZone: AnsiString); overload;
     procedure SetAsDateTime(aValue: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
     procedure SetAsDateTime(aValue: TDateTime; aTimeZone: AnsiString); overload;
     procedure SetAsUTCDateTime(aUTCTime: TDateTime);
     procedure SetAsBcd(aValue: tBCD);
 
-12. Utility functions in IBUtils
+12. New IArray API Calls
+    procedure GetAsDateTime(index: array of integer; var aDateTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID); overload;
+    procedure GetAsDateTime(index: array of integer; var aDateTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString); overload;
+    procedure GetAsTime(index: array of integer; var aTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID; OnDate: TDateTime); overload;
+    procedure GetAsTime(index: array of integer; var aTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString; OnDate: TDateTime); overload;
+    function GetAsUTCDateTime(index: array of integer): TDateTime;
+    procedure SetAsDateTime(index: array of integer; aValue: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
+    procedure SetAsDateTime(index: array of integer; aValue: TDateTime; aTimeZone: AnsiString); overload;
+    procedure SetAsTime(index: array of integer; aValue: TDateTime; OnDate: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
+    procedure SetAsTime(index: array of integer; aValue: TDateTime; OnDate: TDateTime; aTimeZone: AnsiString); overload;
+
+13. Utility functions in IBUtils
     function ParseDateTimeTZString(aDateTimeStr: Ansistring; var aDateTime: TDateTime;
               var aTimezone: AnsiString; aFormatSettings: TFormatSettings; TimeOnly: boolean=false): boolean;
     procedure GetTimeZoneInfo(attachment: IAttachment; aTimeZone: AnsiString;
@@ -61,7 +76,7 @@ FBINTF Change Log  version          (1.2-0 Build 12022) Fri, 17 Apr 2020 10:35:5
     function FormatTimeZoneOffset(EffectiveTimeOffsetMins: integer): AnsiString;
     function DecodeTimeZoneOffset(TZOffset: AnsiString; var dstOffset: integer): boolean;
 
-10. IUtil.FormatStatus now used to format error messages when using new API.
+14. IUtil.FormatStatus now used to format error messages when using new API.
 
 FBINTF Change Log  version          (1.1-5 Build 12022) Fri, 17 Apr 2020 10:35:55 +0100
 

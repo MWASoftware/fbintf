@@ -38,6 +38,7 @@ type
 
   TTest17 = class(TTestBase)
   private
+    FOnDate: TDateTime; //used for Time with Time Zone conversions
     procedure TestArrayTZDataTypes(Attachment: IAttachment);
     procedure TestFBTimezoneSettings(Attachment: IAttachment);
     procedure UpdateDatabase(Attachment: IAttachment);
@@ -107,7 +108,7 @@ begin
   for i := 0 to 16 do
   begin
     aDateTime := EncodeTime(16,i,0,0);
-    ar.SetAsTime(i,aDateTime,TimeZoneID_GMT + 10*i);
+    ar.SetAsTime(i,aDateTime,FOnDate,TimeZoneID_GMT + 10*i);
   end;
 
   Statement := Attachment.Prepare(Transaction,'Update FB4TestData_ARTZ Set TimeCol = ? Where RowID = 1');
@@ -267,7 +268,7 @@ var Transaction: ITransaction;
     sqlInsert: AnsiString;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
-  Attachment.SetTimeTZDate(EncodeDate(2020,5,1));
+  Attachment.SetTimeTZDate(FOnDate);
   sqlInsert := 'Insert into FB4TestData_TZ(RowID,TimeCol,TimestampCol) ' +
                'Values(1,''11:32:10.0002 -05:00'',''2020.4.1'+
                ' 11:31:05.0001 +01:00'')';
@@ -277,11 +278,11 @@ begin
   Statement := Attachment.Prepare(Transaction,'Insert into FB4TestData_TZ(RowID,TimeCol,TimestampCol) Values(?,?,?)');
 
   Statement.SQLParams[0].AsInteger := 2;
-  Statement.SQLParams[1].SetAsTime(EncodeTime(14,02,10,5),'-08:00');
+  Statement.SQLParams[1].SetAsTime(EncodeTime(14,02,10,5),FOnDate,'-08:00');
   Statement.SQLParams[2].SetAsDateTime(EncodeDate(1918,11,11) + EncodeTime(11,11,0,0),'Europe/London');
   Statement.Execute;
   Statement.SQLParams[0].AsInteger := 3;
-  Statement.SQLParams[1].SetAsTime(EncodeTime(22,02,10,5),'-08:00');
+  Statement.SQLParams[1].SetAsTime(EncodeTime(22,02,10,5),FOnDate,'-08:00');
   Statement.SQLParams[2].SetAsDateTime(EncodeDate(1918,11,11) + EncodeTime(0,11,0,0),'+04:00');
   writeln(OutFile,'Show Parameter 2');
   writeSQLData(Statement.SQLParams[2] as ISQLData);
@@ -408,6 +409,7 @@ var DPB: IDPB;
     Attachment: IAttachment;
     VerStrings: TStringList;
 begin
+  FOnDate := EncodeDate(2020,5,1);
   DPB := FirebirdAPI.AllocateDPB;
   DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
   DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);

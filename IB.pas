@@ -354,6 +354,8 @@ type
     function GetAsDateTime(index: array of integer): TDateTime; overload;
     procedure GetAsDateTime(index: array of integer; var aDateTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID); overload;
     procedure GetAsDateTime(index: array of integer; var aDateTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString); overload;
+    procedure GetAsTime(index: array of integer; var aTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID; OnDate: TDateTime); overload;
+    procedure GetAsTime(index: array of integer; var aTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString; OnDate: TDateTime); overload;
     function GetAsUTCDateTime(index: array of integer): TDateTime;
     function GetAsDouble(index: array of integer): Double;
     function GetAsFloat(index: array of integer): Float;
@@ -368,12 +370,12 @@ type
     procedure SetAsInt64(index: array of integer; Value: Int64);
     procedure SetAsDate(index: array of integer; Value: TDateTime);
     procedure SetAsLong(index: array of integer; Value: Long);
-    procedure SetAsTime(index: array of integer; Value: TDateTime); overload;
-    procedure SetAsTime(index: array of integer; aValue: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
-    procedure SetAsTime(index: array of integer; aValue: TDateTime; aTimeZone: AnsiString); overload;
     procedure SetAsDateTime(index: array of integer; Value: TDateTime); overload;
     procedure SetAsDateTime(index: array of integer; aValue: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
     procedure SetAsDateTime(index: array of integer; aValue: TDateTime; aTimeZone: AnsiString); overload;
+    procedure SetAsTime(index: array of integer; Value: TDateTime); overload;
+    procedure SetAsTime(index: array of integer; aValue: TDateTime; OnDate: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
+    procedure SetAsTime(index: array of integer; aValue: TDateTime; OnDate: TDateTime; aTimeZone: AnsiString); overload;
     procedure SetAsUTCDateTime(index: array of integer; aUTCTime: TDateTime);
     procedure SetAsDouble(index: array of integer; Value: Double);
     procedure SetAsFloat(index: array of integer; Value: Float);
@@ -528,6 +530,8 @@ type
     function GetAsDateTime: TDateTime; overload;
     procedure GetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID); overload;
     procedure GetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString); overload;
+    procedure GetAsTime(var aTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID; OnDate: TDateTime); overload;
+    procedure GetAsTime(var aTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString; OnDate: TDateTime); overload;
     function GetAsUTCDateTime: TDateTime;
     function GetAsDouble: Double;
     function GetAsFloat: Float;
@@ -629,6 +633,8 @@ type
     function GetAsDateTime: TDateTime; overload;
     procedure GetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID); overload;
     procedure GetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString); overload;
+    procedure GetAsTime(var aTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID; OnDate: TDateTime); overload;
+    procedure GetAsTime(var aTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString; OnDate: TDateTime); overload;
     function GetAsUTCDateTime: TDateTime;
     function GetAsDouble: Double;
     function GetAsFloat: Float;
@@ -650,8 +656,8 @@ type
     procedure SetAsDate(aValue: TDateTime);
     procedure SetAsLong(aValue: Long);
     procedure SetAsTime(aValue: TDateTime); overload;
-    procedure SetAsTime(aValue: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
-    procedure SetAsTime(aValue: TDateTime; aTimeZone: AnsiString); overload;
+    procedure SetAsTime(aValue: TDateTime; OnDate: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
+    procedure SetAsTime(aValue: TDateTime; OnDate: TDateTime; aTimeZone: AnsiString); overload;
     procedure SetAsDateTime(aValue: TDateTime); overload;
     procedure SetAsDateTime(aValue: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
     procedure SetAsDateTime(aValue: TDateTime; aTimeZone: AnsiString); overload;
