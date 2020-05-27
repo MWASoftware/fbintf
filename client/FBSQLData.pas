@@ -119,6 +119,7 @@ type
   TSQLDataItem = class(TFBInterfacedObject)
   private
      FFirebirdClientAPI: TFBClientAPI;
+     FTimeZoneServices: IExTimeZoneServices;
      function AdjustScale(Value: Int64; aScale: Integer): Double;
      function AdjustScaleToInt64(Value: Int64; aScale: Integer): Int64;
      function AdjustScaleToCurrency(Value: Int64; aScale: Integer): Currency;
@@ -995,7 +996,9 @@ end;
 
 function TSQLDataItem.GetTimeZoneServices: IExTimeZoneServices;
 begin
-  GetAttachment.GetTimeZoneServices.QueryInterface(IExTimeZoneServices,Result);
+  if FTimeZoneServices = nil then
+    GetAttachment.GetTimeZoneServices.QueryInterface(IExTimeZoneServices,FTimeZoneServices);
+  Result := FTimeZoneServices;
 end;
 
 procedure TSQLDataItem.Changed;
@@ -1436,7 +1439,7 @@ begin
       SQL_TIME_TZ,
       SQL_TIME_TZ_EX:
         begin
-          GetAsTime(aDateTime,dstOffset,aTimeZone,GetAttachment.GetTimeTZDate);
+          GetAsTime(aDateTime,dstOffset,aTimeZone,GetAttachment.GetTimeZoneServices.GetTimeTZDate);
           Result := FBFormatDateTime(GetTimeFormatStr,aDateTime) + ' ' + aTimeZone;
         end;
 
@@ -2267,7 +2270,7 @@ begin
 
     SQL_TIME_TZ:
       if ParseDateTimeTZString(value,dt,timezone,true) then
-        SetAsTime(dt,GetAttachment.GetTimeTZDate,timezone)
+        SetAsTime(dt,GetAttachment.GetTimeZoneServices.GetTimeTZDate,timezone)
       else
         DoSetString;
 
@@ -2994,7 +2997,7 @@ begin
   if not FResults.CheckStatementStatus(ssPrepared)  then
     IBError(ibxeStatementNotPrepared, [nil]);
 
-  with GetTransaction as TFBTransaction do
+  with GetTransaction do
   if not InTransaction or (FResults.TransactionSeqNo <> FTransactionSeqNo) then
     IBError(ibxeInterfaceOutofDate,[nil]);
 end;

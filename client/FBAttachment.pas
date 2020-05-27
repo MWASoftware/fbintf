@@ -60,7 +60,6 @@ type
     FODSMinorVersion: integer;
     FUserCharSetMap: array of TCharSetMap;
     FSecDatabase: AnsiString;
-    FTimeTZDate: TDateTime;
   protected
     FDatabaseName: AnsiString;
     FRaiseExceptionOnConnectError: boolean;
@@ -169,8 +168,6 @@ type
     {Time Zone Support}
     function GetTimeZoneServices: ITimeZoneServices; virtual;
     function HasTimeZoneSupport: boolean; virtual;
-    function GetTimeTZDate: TDateTime;
-    procedure SetTimeTZDate(aDate: TDateTime);
 
   end;
 
@@ -337,7 +334,6 @@ begin
   FRaiseExceptionOnConnectError := RaiseExceptionOnConnectError;
   FODSMajorVersion := 0;
   FODSMinorVersion := 0;
-  FTimeTZDate := Sysutils.Date;
 end;
 
 function TFBAttachment.GenerateCreateDatabaseSQL(DatabaseName: AnsiString;  aDPB: IDPB): AnsiString;
@@ -900,16 +896,6 @@ end;
 function TFBAttachment.HasTimeZoneSupport: boolean;
 begin
   Result := false;
-end;
-
-function TFBAttachment.GetTimeTZDate: TDateTime;
-begin
-  Result := FTimeTZDate;
-end;
-
-procedure TFBAttachment.SetTimeTZDate(aDate: TDateTime);
-begin
-  FTimeTZDate := aDate;
 end;
 
 end.

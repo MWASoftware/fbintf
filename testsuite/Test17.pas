@@ -268,7 +268,7 @@ var Transaction: ITransaction;
     sqlInsert: AnsiString;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
-  Attachment.SetTimeTZDate(FOnDate);
+  Attachment.GetTimeZoneServices.SetTimeTZDate(FOnDate);
   sqlInsert := 'Insert into FB4TestData_TZ(RowID,TimeCol,TimestampCol) ' +
                'Values(1,''11:32:10.0002 -05:00'',''2020.4.1'+
                ' 11:31:05.0001 +01:00'')';

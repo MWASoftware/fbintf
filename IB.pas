@@ -854,6 +854,10 @@ type
     procedure SetUseLocalTZDB(useLocalTZDB: boolean);
     function GetLocalTimeZoneName: AnsiString;
     function GetLocalTimeZoneID: TFBTimeZoneID;
+    procedure GetTimeZoneInfo(aTimeZone: AnsiString; OnDate: TDateTime;
+                           var ZoneOffset, DSTOffset, EffectiveOffset: integer);
+    function GetTimeTZDate: TDateTime;
+    procedure SetTimeTZDate(aDate: TDateTime);
   end;
 
   {The IDBInformation Interface.
@@ -1071,8 +1075,6 @@ type
     {Time Zone Database}
     function GetTimeZoneServices: ITimeZoneServices;
     function HasTimeZoneSupport: boolean;
-    function GetTimeTZDate: TDateTime;
-    procedure SetTimeTZDate(aDate: TDateTime);
  end;
 
   TProtocolAll = (TCP, SPX, NamedPipe, Local, inet, inet4, inet6, wnet, xnet, unknownProtocol);

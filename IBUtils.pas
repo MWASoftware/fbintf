@@ -642,8 +642,6 @@ function ParseDateTimeTZString(aDateTimeStr: Ansistring; var aDateTime: TDateTim
 {$IFEND}
 function ParseDateTimeTZString(aDateTimeStr: Ansistring; var aDateTime: TDateTime;
               var aTimezone: AnsiString; TimeOnly: boolean=false): boolean;  overload;
-procedure GetTimeZoneInfo(attachment: IAttachment; aTimeZone: AnsiString;
-  OnDate: TDateTime; var ZoneOffset, DSTOffset, EffectiveOffset: integer);
 procedure FBDecodeTime(aTime: TDateTime; var Hour, Minute, Second: word; var DeciMillisecond: cardinal);
 function FBEncodeTime(Hour, Minute, Second, DeciMillisecond: cardinal): TDateTime;
 function FBFormatDateTime(fmt: AnsiString; aDateTime: TDateTime): AnsiString;
@@ -1651,7 +1649,7 @@ function ParseDateTimeTZString(aDateTimeStr: Ansistring; var aDateTime: TDateTim
 {$IFEND}
 const
   whitespacechars = [' ',#$09,#$0A,#$0D];
-var i,j: integer;
+var i,j,l: integer;
     aTime: TDateTime;
     DMs: longint;
 begin
@@ -1691,18 +1689,20 @@ begin
       inc(j);
       while (j <= Length(aDateTimeStr)) and (aDateTimeStr[j] in ['0'..'9']) do inc(j);
       if j > i then
-        Result := TryStrToInt(system.copy(aDateTimeStr,i,j-i),DMs);
-      if not Result then Exit;
-      {adjust for number of significant digits}
-      if j-i = 3 then
-        DMs := DMs * 10
-      else
-      if j-i = 2 then
-        DMs := DMs * 100
-      else
-      if j-i = 1 then
-        DMs := DMs * 1000;
-      aDateTime := aDateTime + (DMs / (MsecsPerDay*10));
+      begin
+        l := j-i;
+        if l > 4 then l := 4;
+        Result := TryStrToInt(system.copy(aDateTimeStr,i,l),DMs);
+        if not Result then Exit;
+
+        {adjust for number of significant digits}
+        case l of
+        3:   DMs := DMs * 10;
+        2:   DMs := DMs * 100;
+        1:   DMs := DMs * 1000;
+        end;
+       aDateTime := aDateTime + (DMs / (MsecsPerDay*10));
+      end;
     end;
     i := j;
 
@@ -1716,26 +1716,6 @@ begin
     end;
     Result := true;
   end
-end;
-
-procedure GetTimeZoneInfo(attachment: IAttachment; aTimeZone: AnsiString;
-  OnDate: TDateTime; var ZoneOffset, DSTOffset, EffectiveOffset: integer);
-var Stmt: IStatement;
-    TZInfo: IResultSet;
-begin
-  with attachment do
-    Stmt := Prepare(StartTransaction([isc_tpb_read,isc_tpb_wait,isc_tpb_concurrency],taCommit),
-                 'select * from rdb$time_zone_util.transitions(?,?,?)');
-  Stmt.SQLParams[0].AsString := aTimeZone;
-  Stmt.SQLParams[1].AsDateTime := OnDate;
-  Stmt.SQLParams[2].AsDateTime := OnDate;
-  TZInfo := Stmt.OpenCursor;
-  if TZInfo.FetchNext then
-  begin
-    ZoneOffset := TZInfo.ByName('ZONE_OFFSET').AsInteger;
-    DSTOffset := TZInfo.ByName('DST_OFFSET').AsInteger;
-    EffectiveOffset := TZInfo.ByName('EFFECTIVE_OFFSET').AsInteger;
-  end;
 end;
 
 {The following is similar to FPC DecodeTime except that the Firebird standard

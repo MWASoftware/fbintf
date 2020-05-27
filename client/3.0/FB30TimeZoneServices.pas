@@ -88,6 +88,7 @@ type
     FUsingRemoteTZDB: boolean;
     FTimeZoneCache: ITimeZoneCache;
     FInLoadTimeZoneData: boolean;
+    FTimeTZDate: TDateTime;
     function ComputeDstOffset(localtime, gmtTimestamp: TDateTime): integer;
     function GetTransaction: ITransaction;
     function GetTimeZoneCache: ITimeZoneCache;
@@ -115,6 +116,27 @@ type
 
   public
     {ITimeZoneServices}
+    function TimeZoneID2TimeZoneName(aTimeZoneID: TFBTimeZoneID): AnsiString;
+    function TimeZoneName2TimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID;
+    function LocalTimeToGMT(aLocalTime: TDateTime; aTimeZone: AnsiString): TDateTime; overload;
+    function LocalTimeToGMT(aLocalTime: TDateTime; aTimeZoneID: TFBTimeZoneID): TDateTime; overload;
+    function GMTToLocalTime(aGMTTime: TDateTime; aTimeZone: AnsiString): TDateTime; overload;
+    function GMTToLocalTime(aGMTTime: TDateTime; aTimeZoneID: TFBTimeZoneID): TDateTime; overload;
+    function GetEffectiveOffsetMins(aLocalTime: TDateTime; aTimeZone: AnsiString): integer; overload;
+    function GetEffectiveOffsetMins(aLocalTime: TDateTime; aTimeZoneID: TFBTimeZoneID): integer; overload;
+
+    {Time Zone DB Information}
+    function UsingRemoteTZDB: boolean;
+    procedure SetUseLocalTZDB(useLocalTZDB: boolean);
+    function GetLocalTimeZoneName: AnsiString;
+    function GetLocalTimeZoneID: TFBTimeZoneID;
+    procedure GetTimeZoneInfo(aTimeZone: AnsiString; OnDate: TDateTime;
+                           var ZoneOffset, DSTOffset, EffectiveOffset: integer);
+    function GetTimeTZDate: TDateTime;
+    procedure SetTimeTZDate(aDate: TDateTime);
+
+  public
+    {IExTimeZoneServices}
     procedure EncodeTimestampTZ(timestamp: TDateTime; timezoneID: TFBTimeZoneID;
       bufptr: PByte); overload;
     procedure EncodeTimestampTZ(timestamp: TDateTime; timezone: AnsiString;
@@ -139,22 +161,6 @@ type
       var dstOffset: smallint; var timezoneID: TFBTimeZoneID); overload;
     procedure DecodeTimeTZEx(bufptr: PByte; OnDate: TDateTime; var time: TDateTime;
       var dstOffset: smallint; var timezone: AnsiString); overload;
-
-    {utility functions}
-    function TimeZoneID2TimeZoneName(aTimeZoneID: TFBTimeZoneID): AnsiString;
-    function TimeZoneName2TimeZoneID(aTimeZone: AnsiString): TFBTimeZoneID;
-    function LocalTimeToGMT(aLocalTime: TDateTime; aTimeZone: AnsiString): TDateTime; overload;
-    function LocalTimeToGMT(aLocalTime: TDateTime; aTimeZoneID: TFBTimeZoneID): TDateTime; overload;
-    function GMTToLocalTime(aGMTTime: TDateTime; aTimeZone: AnsiString): TDateTime; overload;
-    function GMTToLocalTime(aGMTTime: TDateTime; aTimeZoneID: TFBTimeZoneID): TDateTime; overload;
-    function GetEffectiveOffsetMins(aLocalTime: TDateTime; aTimeZone: AnsiString): integer; overload;
-    function GetEffectiveOffsetMins(aLocalTime: TDateTime; aTimeZoneID: TFBTimeZoneID): integer; overload;
-
-    {Time Zone DB Information}
-    function UsingRemoteTZDB: boolean;
-    procedure SetUseLocalTZDB(useLocalTZDB: boolean);
-    function GetLocalTimeZoneName: AnsiString;
-    function GetLocalTimeZoneID: TFBTimeZoneID;
   end;
 
 implementation
@@ -640,6 +646,7 @@ begin
   FAttachment := attachment;
   FFirebird30ClientAPI := attachment.Firebird30ClientAPI;
   FUsingRemoteTZDB := true;
+  FTimeTZDate := Sysutils.Date;
 end;
 
 destructor TFB30TimeZoneServices.Destroy;
@@ -1027,6 +1034,36 @@ function TFB30TimeZoneServices.GetLocalTimeZoneID: TFBTimeZoneID;
 begin
   with FFirebird30ClientAPI do
     Result := TimeZoneName2TimeZoneID(LocalTimeZoneName);
+end;
+
+procedure TFB30TimeZoneServices.GetTimeZoneInfo(aTimeZone: AnsiString;
+  OnDate: TDateTime; var ZoneOffset, DSTOffset, EffectiveOffset: integer);
+var Stmt: IStatement;
+    TZInfo: IResultSet;
+begin
+  with FAttachment do
+    Stmt := Prepare(StartTransaction([isc_tpb_read,isc_tpb_wait,isc_tpb_concurrency],taCommit),
+                 'select * from rdb$time_zone_util.transitions(?,?,?)');
+  Stmt.SQLParams[0].AsString := aTimeZone;
+  Stmt.SQLParams[1].AsDateTime := OnDate;
+  Stmt.SQLParams[2].AsDateTime := OnDate;
+  TZInfo := Stmt.OpenCursor;
+  if TZInfo.FetchNext then
+  begin
+    ZoneOffset := TZInfo.ByName('ZONE_OFFSET').AsInteger;
+    DSTOffset := TZInfo.ByName('DST_OFFSET').AsInteger;
+    EffectiveOffset := TZInfo.ByName('EFFECTIVE_OFFSET').AsInteger;
+  end;
+end;
+
+function TFB30TimeZoneServices.GetTimeTZDate: TDateTime;
+begin
+  Result := FTimeTZDate;
+end;
+
+procedure TFB30TimeZoneServices.SetTimeTZDate(aDate: TDateTime);
+begin
+  FTimeTZDate := aDate;
 end;
 
 end.
