@@ -80,10 +80,12 @@ unit FBSQLData;
 interface
 
 uses
-  Classes, SysUtils, IBExternals, IBHeader, IB,  FBActivityMonitor, FBClientAPI,
+  Classes, SysUtils, IBExternals, IB,  FBActivityMonitor, FBClientAPI,
   FmtBCD;
 
 type
+
+   {The IExTimeZoneServices is only available in FB4 and onwards}
 
    IExTimeZoneServices = interface(ITimeZoneServices)
    ['{789c2eeb-c4a7-4fed-837e-0cbdef775904}']
@@ -114,7 +116,7 @@ type
      var dstOffset: smallint; var timezone: AnsiString); overload;
    end;
 
-  { TSQLDataItem }
+   { TSQLDataItem }
 
   TSQLDataItem = class(TFBInterfacedObject)
   private
@@ -1001,7 +1003,11 @@ end;
 function TSQLDataItem.GetTimeZoneServices: IExTimeZoneServices;
 begin
   if FTimeZoneServices = nil then
+  begin
+    if not GetAttachment.HasTimeZoneSupport then
+      IBError(ibxeNoTimezoneSupport,[]);
     GetAttachment.GetTimeZoneServices.QueryInterface(IExTimeZoneServices,FTimeZoneServices);
+  end;
   Result := FTimeZoneServices;
 end;
 

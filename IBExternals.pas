@@ -47,6 +47,9 @@ interface
 
 const
   MaxuShort            = 65535;
+  ISC_TRUE             = 1;
+  ISC_FALSE             = 0;
+
 type
   {$IF not declared(FixedInt)}
   FixedInt             = LongInt;

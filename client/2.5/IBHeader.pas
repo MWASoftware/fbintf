@@ -48,8 +48,6 @@ uses
 
 
 const
-  ISC_TRUE = 1;
-  ISC_FALSE = 0;
   DSQL_close = 1;
   DSQL_drop = 2;
 

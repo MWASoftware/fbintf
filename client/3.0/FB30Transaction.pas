@@ -107,7 +107,7 @@ end;
 
 function TFB30Transaction.GetActivityIntf(att: IAttachment): IActivityMonitor;
 begin
-  Result := att as TFB30Attachment;
+  att.QueryInterface(IActivityMonitor,Result);
 end;
 
 procedure TFB30Transaction.SetInterface(api: TFBClientAPI);

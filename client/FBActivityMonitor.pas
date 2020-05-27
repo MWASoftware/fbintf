@@ -91,6 +91,7 @@ type
    reports.}
 
   IActivityMonitor = interface
+    ['{8261840a-741b-4c1c-94ea-c5c66ba72f22}']
     procedure AddObject(obj: TInterfacedObject);
     procedure Remove(intf: TInterfacedObject);
     procedure SignalActivity;
