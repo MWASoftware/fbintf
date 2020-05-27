@@ -532,6 +532,8 @@ type
     procedure GetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString); overload;
     procedure GetAsTime(var aTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID; OnDate: TDateTime); overload;
     procedure GetAsTime(var aTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString; OnDate: TDateTime); overload;
+    procedure GetAsTime(var aTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID); overload;
+    procedure GetAsTime(var aTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString); overload;
     function GetAsUTCDateTime: TDateTime;
     function GetAsDouble: Double;
     function GetAsFloat: Float;
@@ -635,6 +637,8 @@ type
     procedure GetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString); overload;
     procedure GetAsTime(var aTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID; OnDate: TDateTime); overload;
     procedure GetAsTime(var aTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString; OnDate: TDateTime); overload;
+    procedure GetAsTime(var aTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID); overload;
+    procedure GetAsTime(var aTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString); overload;
     function GetAsUTCDateTime: TDateTime;
     function GetAsDouble: Double;
     function GetAsFloat: Float;
@@ -658,6 +662,8 @@ type
     procedure SetAsTime(aValue: TDateTime); overload;
     procedure SetAsTime(aValue: TDateTime; OnDate: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
     procedure SetAsTime(aValue: TDateTime; OnDate: TDateTime; aTimeZone: AnsiString); overload;
+    procedure SetAsTime(aValue: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
+    procedure SetAsTime(aValue: TDateTime; aTimeZone: AnsiString); overload;
     procedure SetAsDateTime(aValue: TDateTime); overload;
     procedure SetAsDateTime(aValue: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
     procedure SetAsDateTime(aValue: TDateTime; aTimeZone: AnsiString); overload;
@@ -833,6 +839,10 @@ type
     function GetAttachment: IAttachment;
   end;
 
+  TTZTextOptions = (tzOffset,      {Time Zone Rendered as an offset to GMT}
+                    tzGMT,         {No Time Zone. Time part is always rendered in GMT}
+                    tzOriginalID); {Time Zone shown as originally entered}
+
   {The ITimeZoneServices interface provides access to the time zone database
    used for the attachment. It may be used in support of TIMESTAMP WITH TIME ZONE
    and TIME WITH TIME ZONE data types.}
@@ -856,8 +866,11 @@ type
     function GetLocalTimeZoneID: TFBTimeZoneID;
     procedure GetTimeZoneInfo(aTimeZone: AnsiString; OnDate: TDateTime;
                            var ZoneOffset, DSTOffset, EffectiveOffset: integer);
+    {Configurable Options}
     function GetTimeTZDate: TDateTime;
     procedure SetTimeTZDate(aDate: TDateTime);
+    function GetTZTextOption: TTZTextOptions;
+    procedure SetTZTextOption(aOptionValue: TTZTextOptions);
   end;
 
   {The IDBInformation Interface.

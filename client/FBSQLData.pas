@@ -166,6 +166,8 @@ type
      procedure GetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID); overload;
      procedure GetAsTime(var aTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID; OnDate: TDateTime); overload;
      procedure GetAsTime(var aTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString; OnDate: TDateTime); overload;
+     procedure GetAsTime(var aTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID); overload;
+     procedure GetAsTime(var aTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString); overload;
      function GetAsUTCDateTime: TDateTime;
      function GetAsDouble: Double;
      function GetAsFloat: Float;
@@ -426,6 +428,8 @@ type
     procedure SetAsTime(AValue: TDateTime); overload;
     procedure SetAsTime(aValue: TDateTime; OnDate: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
     procedure SetAsTime(aValue: TDateTime; OnDate: TDateTime; aTimeZone: AnsiString); overload;
+    procedure SetAsTime(aValue: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
+    procedure SetAsTime(aValue: TDateTime; aTimeZone: AnsiString); overload;
     procedure SetAsDateTime(AValue: TDateTime); overload;
     procedure SetAsDateTime(aValue: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
     procedure SetAsDateTime(aValue: TDateTime; aTimeZone: AnsiString); overload;
@@ -917,17 +921,17 @@ begin
         aTimeZoneID := PISC_TIMESTAMP_TZ_EX(SQLData)^.time_zone;
       end;
       SQL_TIME_TZ:
-      begin
-        GetTimeZoneServices.DecodeTimeTZ(SQLData,DateOf(Now),
-                                                       aDateTime,dstOffset,aTimeZone);
-        aTimeZoneID := PISC_TIME_TZ(SQLData)^.time_zone;
-      end;
+        with GetTimeZoneServices do
+        begin
+          DecodeTimeTZ(SQLData,GetTimeTZDate,aDateTime,dstOffset,aTimeZone);
+          aTimeZoneID := PISC_TIME_TZ(SQLData)^.time_zone;
+        end;
       SQL_TIME_TZ_EX:
-      begin
-        GetTimeZoneServices.DecodeTimeTZEx(SQLData,DateOf(Now),
-                                                         aDateTime,dstOffset,aTimeZone);
-        aTimeZoneID := PISC_TIME_TZ_EX(SQLData)^.time_zone;
-      end
+        with GetTimeZoneServices do
+        begin
+          DecodeTimeTZEx(SQLData,GetTimeTZDate,aDateTime,dstOffset,aTimeZone);
+          aTimeZoneID := PISC_TIME_TZ_EX(SQLData)^.time_zone;
+        end;
       else
         IBError(ibxeInvalidDataConversion, [nil]);
     end;
@@ -1174,9 +1178,10 @@ end;
 
 function TSQLDataItem.GetAsDateTime: TDateTime;
 var aTimezone: AnsiString;
+    aTimeZoneID: TFBTimeZoneID;
     dstOffset: smallint;
 begin
-  GetAsDateTime(Result,dstOffset,aTimeZone);
+  InternalGetAsDateTime(Result,dstOffset,aTimeZone,aTimeZoneID);
 end;
 
 procedure TSQLDataItem.GetAsDateTime(var aDateTime: TDateTime;
@@ -1234,6 +1239,18 @@ begin
     else
       IBError(ibxeInvalidDataConversion, [nil]);
     end;
+end;
+
+procedure TSQLDataItem.GetAsTime(var aTime: TDateTime; var dstOffset: smallint;
+  var aTimezoneID: TFBTimeZoneID);
+begin
+  GetAsTime(aTime,dstOffset,aTimeZoneID,GetTimeZoneServices.GetTimeTZDate);
+end;
+
+procedure TSQLDataItem.GetAsTime(var aTime: TDateTime; var dstOffset: smallint;
+  var aTimezone: AnsiString);
+begin
+  GetAsTime(aTime,dstOffset,aTimeZone,GetTimeZoneServices.GetTimeTZDate);
 end;
 
 function TSQLDataItem.GetAsUTCDateTime: TDateTime;
@@ -1432,15 +1449,33 @@ begin
         Result := FBFormatDateTime(GetTimeFormatStr,GetAsDateTime);
       SQL_TIMESTAMP_TZ,
       SQL_TIMESTAMP_TZ_EX:
+        with GetAttachment.GetTimeZoneServices do
         begin
-          GetAsDateTime(aDateTime,dstOffset,aTimeZone);
-          Result := FBFormatDateTime(GetTimestampFormatStr,aDateTime) + ' ' + aTimeZone;
+          if GetTZTextOption = tzGMT then
+            Result := FBFormatDateTime(GetTimestampFormatStr,GetAsUTCDateTime)
+          else
+          begin
+            GetAsDateTime(aDateTime,dstOffset,aTimeZone);
+            if GetTZTextOption = tzOffset then
+              Result := FBFormatDateTime(GetTimestampFormatStr,aDateTime) + ' ' + FormatTimeZoneOffset(dstOffset)
+            else
+              Result := FBFormatDateTime(GetTimestampFormatStr,aDateTime) + ' ' + aTimeZone;
+          end;
         end;
       SQL_TIME_TZ,
       SQL_TIME_TZ_EX:
+        with GetAttachment.GetTimeZoneServices do
         begin
-          GetAsTime(aDateTime,dstOffset,aTimeZone,GetAttachment.GetTimeZoneServices.GetTimeTZDate);
-          Result := FBFormatDateTime(GetTimeFormatStr,aDateTime) + ' ' + aTimeZone;
+          if GetTZTextOption = tzGMT then
+             Result := FBFormatDateTime(GetTimeFormatStr,GetAsUTCDateTime)
+          else
+          begin
+            GetAsTime(aDateTime,dstOffset,aTimeZone,GetTimeTZDate);
+            if GetTZTextOption = tzOffset then
+              Result := FBFormatDateTime(GetTimeFormatStr,aDateTime) + ' ' + FormatTimeZoneOffset(dstOffset)
+            else
+              Result := FBFormatDateTime(GetTimeFormatStr,aDateTime) + ' ' + aTimeZone;
+          end;
         end;
 
       SQL_SHORT, SQL_LONG:
@@ -2567,6 +2602,16 @@ begin
         end;
       end;
   end;
+end;
+
+procedure TSQLParam.SetAsTime(aValue: TDateTime; aTimeZoneID: TFBTimeZoneID);
+begin
+  SetAsTime(aValue,GetTimeZoneServices.GetTimeTZDate,aTimeZoneID);
+end;
+
+procedure TSQLParam.SetAsTime(aValue: TDateTime; aTimeZone: AnsiString);
+begin
+  SetAsTime(aValue,GetTimeZoneServices.GetTimeTZDate,aTimeZone);
 end;
 
 procedure TSQLParam.SetAsDateTime(AValue: TDateTime);

@@ -38,6 +38,10 @@ unit FB30TimeZoneServices;
 {$codepage UTF8}
 {$ENDIF}
 
+{Enable the following to use the current date for GMT/Local Time translations instead
+ of the the Firebird default of 2020/1/1}
+
+{ $DEFINE USECURRENTDATEFORGMTTOLOCALTIME}
 
 interface
 
@@ -89,6 +93,7 @@ type
     FTimeZoneCache: ITimeZoneCache;
     FInLoadTimeZoneData: boolean;
     FTimeTZDate: TDateTime;
+    FTZTextOption: TTZTextOptions;
     function ComputeDstOffset(localtime, gmtTimestamp: TDateTime): integer;
     function GetTransaction: ITransaction;
     function GetTimeZoneCache: ITimeZoneCache;
@@ -134,6 +139,8 @@ type
                            var ZoneOffset, DSTOffset, EffectiveOffset: integer);
     function GetTimeTZDate: TDateTime;
     procedure SetTimeTZDate(aDate: TDateTime);
+    function GetTZTextOption: TTZTextOptions;
+    procedure SetTZTextOption(aOptionValue: TTZTextOptions);
 
   public
     {IExTimeZoneServices}
@@ -646,7 +653,11 @@ begin
   FAttachment := attachment;
   FFirebird30ClientAPI := attachment.Firebird30ClientAPI;
   FUsingRemoteTZDB := true;
+  {$IFDEF USECURRENTDATEFORGMTTOLOCALTIME}
   FTimeTZDate := Sysutils.Date;
+  {$ELSE}
+  FTimeTZDate := EncodeDate(2020,1,1);
+  {$ENDIF}
 end;
 
 destructor TFB30TimeZoneServices.Destroy;
@@ -1063,7 +1074,17 @@ end;
 
 procedure TFB30TimeZoneServices.SetTimeTZDate(aDate: TDateTime);
 begin
-  FTimeTZDate := aDate;
+  FTimeTZDate := DateOf(aDate);
+end;
+
+function TFB30TimeZoneServices.GetTZTextOption: TTZTextOptions;
+begin
+  Result := FTZTextOption;
+end;
+
+procedure TFB30TimeZoneServices.SetTZTextOption(aOptionValue: TTZTextOptions);
+begin
+  FTZTextOption := aOptionValue;
 end;
 
 end.
