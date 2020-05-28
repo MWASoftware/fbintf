@@ -33,6 +33,7 @@ type
   private
     procedure DoQuery(Attachment: IAttachment);
     procedure WriteAttachmentInfo(Attachment: IAttachment);
+    procedure GetFBVersion(Attachment: IAttachment);
   public
     function TestTitle: AnsiString; override;
     procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
@@ -77,6 +78,20 @@ begin
   writeln(outfile,'DB Client Implementation Version = ',Attachment.getFirebirdAPI.GetImplementationVersion);
 end;
 
+procedure TTest1.GetFBVersion(Attachment: IAttachment);
+var Version: TStrings;
+    i: integer;
+begin
+  Version := TStringList.Create;
+  try
+    Attachment.getFBVersion(Version);
+    for i := 0 to Version.Count - 1 do
+      writeln(OutFile,Version[i]);
+  finally
+    Version.Free;
+  end;
+end;
+
 function TTest1.TestTitle: AnsiString;
 begin
   Result := 'Test 1: Create and Drop a Database';
@@ -103,6 +118,9 @@ begin
   WriteDBInfo(Attachment.GetDBInformation([isc_info_db_id,isc_info_db_SQL_Dialect]));
   WriteAttachmentInfo(Attachment);
   PrintDPB(Attachment.getDPB);
+  writeln(OutFile,'Firebird Server Version Info');
+  GetFBVersion(Attachment);
+  writeln(OutFile);
 
   {$IFDEF HASREQEX}
   {Demonstrate reconnect when database created with SQL Statement}

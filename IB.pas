@@ -1327,7 +1327,7 @@ type
 function FirebirdAPI: IFirebirdAPI;
 
 {IBX support functions. Probably best ignored i.e. always used the FirebirdAPI
- functino to load the library and check if it's loaded.}
+ function to load the library and check if it's loaded.}
 
 function TryIBLoad: Boolean;
 procedure CheckIBLoaded;
