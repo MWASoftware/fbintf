@@ -1408,7 +1408,6 @@ begin
   end;
 end;
 
-
 function TSQLDataItem.GetAsString: AnsiString;
 var
   sz: PByte;

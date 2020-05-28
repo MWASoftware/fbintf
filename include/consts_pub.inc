@@ -132,7 +132,8 @@
     isc_dpb_set_db_replica = 92;    
     isc_dpb_set_bind = 93;    
     isc_dpb_decfloat_round = 94;    
-    isc_dpb_decfloat_traps = 95;    
+    isc_dpb_decfloat_traps = 95;
+    isc_dpb_last_dpb_constant = isc_dpb_decfloat_traps;
   {************************************************ }
   { clumplet tags used inside isc_dpb_address_path  }
   {						 and isc_spb_address_path  }
@@ -244,7 +245,8 @@
     isc_tpb_no_auto_undo = 20;    
     isc_tpb_lock_timeout = 21;    
     isc_tpb_read_consistency = 22;    
-    isc_tpb_at_snapshot_number = 23;    
+    isc_tpb_at_snapshot_number = 23;
+    isc_tpb_last_tpb_constant = isc_tpb_at_snapshot_number;
   {********************** }
   { Blob Parameter Block  }
   {********************** }
