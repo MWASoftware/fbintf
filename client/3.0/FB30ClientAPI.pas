@@ -53,6 +53,13 @@ type
     function StatusVector: PStatusVector; override;
   end;
 
+  { TFB30StatusObject }
+
+  TFB30StatusObject = class(TFB30Status)
+  public
+    constructor Create(aOwner: TFBClientAPI; status: Firebird.IStatus);
+  end;
+
   Tfb_get_master_interface = function: IMaster;
                               {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
@@ -151,6 +158,15 @@ uses FBParamBlock, FB30Attachment, {$IFDEF FPC}dynlibs{$ELSE} windows{$ENDIF},
 type
   PISC_DATE = ^ISC_DATE;
   PISC_TIME = ^ISC_TIME;
+
+{ TFB30StatusObject }
+
+constructor TFB30StatusObject.Create(aOwner: TFBClientAPI;
+  status: Firebird.IStatus);
+begin
+  inherited Create(aOwner);
+  FStatus := status;
+end;
 
 { TFB30Status }
 

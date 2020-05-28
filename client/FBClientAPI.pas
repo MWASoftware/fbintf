@@ -209,6 +209,9 @@ type
     function Int128ToStr(bufptr: PByte; scale: integer): AnsiString; virtual;
     procedure StrToInt128(scale: integer; aValue: AnsiString; bufptr: PByte);
       virtual;
+    procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal;
+      bufptr: PByte); virtual;
+    function SQLDecFloatDecode(SQLType: cardinal;  bufptr: PByte): tBCD; virtual;
 
     {IFirebirdAPI}
     function GetStatus: IStatus; virtual; abstract;
@@ -218,9 +221,6 @@ type
     function GetImplementationVersion: AnsiString;
     function GetClientMajor: integer;  virtual; abstract;
     function GetClientMinor: integer;  virtual; abstract;
-    procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal;
-      bufptr: PByte); virtual;
-    function SQLDecFloatDecode(SQLType: cardinal;  bufptr: PByte): tBCD; virtual;
 
 end;
 

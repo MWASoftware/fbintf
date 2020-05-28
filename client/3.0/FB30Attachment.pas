@@ -37,7 +37,8 @@ unit FB30Attachment;
 interface
 
 uses
-  Classes, SysUtils, FBAttachment, FB30ClientAPI, Firebird, IB, FBActivityMonitor, FBParamBlock;
+  Classes, SysUtils, FBAttachment, FBClientAPI, FB30ClientAPI, Firebird, IB,
+  FBActivityMonitor, FBParamBlock;
 
 type
 
@@ -117,21 +118,34 @@ type
   TVersionCallback = class(Firebird.IVersionCallbackImpl)
   private
     FOutput: TStrings;
+    FFirebirdClientAPI: TFBClientAPI;
   public
-    constructor Create(output: TStrings);
+    constructor Create(FirebirdClientAPI: TFBClientAPI; output: TStrings);
     procedure callback(status: Firebird.IStatus; text: PAnsiChar); override;
   end;
 
 { TVersionCallback }
 
-constructor TVersionCallback.Create(output: TStrings);
+constructor TVersionCallback.Create(FirebirdClientAPI: TFBClientAPI;
+  output: TStrings);
 begin
   inherited Create;
+  FFirebirdClientAPI := FirebirdClientAPI;
   FOutput := output;
 end;
 
 procedure TVersionCallback.callback(status: Firebird.IStatus; text: PAnsiChar);
+var StatusObj: TFB30StatusObject;
 begin
+  if ((status.getState and status.STATE_ERRORS) <> 0) then
+  begin
+    StatusObj := TFB30StatusObject.Create(FFirebirdClientAPI,status);
+    try
+      raise EIBInterBaseError.Create(StatusObj);
+    finally
+      StatusObj.Free;
+    end;
+  end;
   FOutput.Add(text);
 end;
 
@@ -402,7 +416,7 @@ procedure TFB30Attachment.getFBVersion(version: TStrings);
 var bufferObj: TVersionCallback;
 begin
   version.Clear;
-  bufferObj := TVersionCallback.Create(version);
+  bufferObj := TVersionCallback.Create(Firebird30ClientAPI,version);
   try
     with FFirebird30ClientAPI do
     begin

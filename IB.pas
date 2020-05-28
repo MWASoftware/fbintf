@@ -369,7 +369,6 @@ type
     procedure SetAsCurrency(index: array of integer; Value: Currency);
     procedure SetAsInt64(index: array of integer; Value: Int64);
     procedure SetAsDate(index: array of integer; Value: TDateTime);
-    procedure SetAsLong(index: array of integer; Value: Long);
     procedure SetAsDateTime(index: array of integer; Value: TDateTime); overload;
     procedure SetAsDateTime(index: array of integer; aValue: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
     procedure SetAsDateTime(index: array of integer; aValue: TDateTime; aTimeZone: AnsiString); overload;
@@ -377,6 +376,7 @@ type
     procedure SetAsTime(index: array of integer; aValue: TDateTime; OnDate: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
     procedure SetAsTime(index: array of integer; aValue: TDateTime; OnDate: TDateTime; aTimeZone: AnsiString); overload;
     procedure SetAsUTCDateTime(index: array of integer; aUTCTime: TDateTime);
+    procedure SetAsLong(index: array of integer; Value: Long);
     procedure SetAsDouble(index: array of integer; Value: Double);
     procedure SetAsFloat(index: array of integer; Value: Float);
     procedure SetAsShort(index: array of integer; Value: Short);
@@ -652,6 +652,8 @@ type
     function GetAsBlob: IBlob;
     function GetAsArray: IArray;
     function GetAsBCD: tBCD;
+    function GetStatement: IStatement;
+    function GetTransaction: ITransaction;
     procedure Clear;
     function GetModified: boolean;
     procedure SetAsBoolean(AValue: boolean);

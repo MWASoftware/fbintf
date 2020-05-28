@@ -45,6 +45,8 @@ FBINTF Change Log  version          (1.2-0 Build 12022) Fri, 17 Apr 2020 10:35:5
     procedure GetAsTime(var aTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString; OnDate: TDateTime); overload;
     function GetAsUTCDateTime: TDateTime;
     function GetAsBCD: tBCD;
+    function GetStatement: IStatement;
+    function GetTransaction: ITransaction;
     procedure SetAsTime(aValue: TDateTime; OnDate: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
     procedure SetAsTime(aValue: TDateTime; OnDate: TDateTime; aTimeZone: AnsiString); overload;
     procedure SetAsDateTime(aValue: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
