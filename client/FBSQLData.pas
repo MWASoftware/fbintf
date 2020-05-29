@@ -1615,11 +1615,11 @@ begin
 
   case SQLType of
   SQL_DEC16,
-  SQL_DEC34,
-  SQL_DEC_FIXED:
+  SQL_DEC34:
     with FFirebirdClientAPI do
-      Result := SQLDecFloatDecode(SQLType, SQLData);
+      Result := SQLDecFloatDecode(SQLType,  SQLData);
 
+  SQL_DEC_FIXED,
   SQL_INT128:
     with FFirebirdClientAPI do
       Result := StrToBCD(Int128ToStr(SQLData,scale));
@@ -1965,7 +1965,7 @@ begin
 
     SQLType := SQL_DEC16;
     DataLength := 8;
-    SQLDecFloatEncode(aValue,SQLType,scale,SQLData);
+    SQLDecFloatEncode(aValue,SQLType,SQLData);
   end
   else
   if BCDPrecision(aValue) <= 34 then
@@ -1975,7 +1975,7 @@ begin
 
     SQLType := SQL_DEC34;
     DataLength := 16;
-    SQLDecFloatEncode(aValue,SQLType,scale,SQLData);
+    SQLDecFloatEncode(aValue,SQLType,SQLData);
   end
   else
   if BCDPrecision(aValue) <= 38 then

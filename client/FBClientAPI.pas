@@ -209,8 +209,7 @@ type
     function Int128ToStr(bufptr: PByte; scale: integer): AnsiString; virtual;
     procedure StrToInt128(scale: integer; aValue: AnsiString; bufptr: PByte);
       virtual;
-    procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal; scale: integer;
-      bufptr: PByte); virtual;
+    procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal; bufptr: PByte); virtual;
     function SQLDecFloatDecode(SQLType: cardinal;  bufptr: PByte): tBCD; virtual;
 
     {IFirebirdAPI}
@@ -404,7 +403,7 @@ begin
 end;
 
 procedure TFBClientAPI.SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal;
-  scale: integer; bufptr: PByte);
+  bufptr: PByte);
 begin
   if not HasDecFloatSupport then
     IBError(ibxeNotSupported,[]);
