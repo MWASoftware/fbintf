@@ -1500,11 +1500,11 @@ begin
       SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT:
         result := FloatToStr(AsDouble);
 
-      SQL_DEC_FIXED,
       SQL_DEC16,
       SQL_DEC34:
         result := BCDToStr(GetAsBCD);
 
+      SQL_DEC_FIXED,
       SQL_INT128:
         result := Int128ToStr(SQLData,scale);
 
@@ -1602,6 +1602,7 @@ begin
   end;end;
 
 function TSQLDataItem.GetAsBCD: tBCD;
+
 begin
   CheckActive;
   if IsNull then
@@ -1613,16 +1614,15 @@ begin
    end;
 
   case SQLType of
-  SQL_DEC_FIXED,
   SQL_DEC16,
-  SQL_DEC34:
+  SQL_DEC34,
+  SQL_DEC_FIXED:
     with FFirebirdClientAPI do
       Result := SQLDecFloatDecode(SQLType, SQLData);
 
   SQL_INT128:
     with FFirebirdClientAPI do
       Result := StrToBCD(Int128ToStr(SQLData,scale));
-
   else
     if not CurrToBCD(GetAsCurrency,Result) then
       IBError(ibxeBadBCDConversion,[]);
@@ -1965,7 +1965,7 @@ begin
 
     SQLType := SQL_DEC16;
     DataLength := 8;
-    SQLDecFloatEncode(aValue,SQLType,SQLData);
+    SQLDecFloatEncode(aValue,SQLType,scale,SQLData);
   end
   else
   if BCDPrecision(aValue) <= 34 then
@@ -1975,7 +1975,7 @@ begin
 
     SQLType := SQL_DEC34;
     DataLength := 16;
-    SQLDecFloatEncode(aValue,SQLType,SQLData);
+    SQLDecFloatEncode(aValue,SQLType,scale,SQLData);
   end
   else
   if BCDPrecision(aValue) <= 38 then
@@ -1985,7 +1985,7 @@ begin
 
     SQLType := SQL_INT128;
     DataLength := 16;
-    StrToInt128(BCDScale(aValue),BcdToStr(aValue),SQLData);
+    StrToInt128(scale,BcdToStr(aValue),SQLData);
   end
   else
     IBError(ibxeBCDOverflow,[BCDToStr(aValue)]);

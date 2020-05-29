@@ -9,6 +9,8 @@ unit Test18;
 {$codepage UTF8}
 {$ENDIF}
 
+{ $DEFINE TESTINT128ARRAY}
+
 {Test 18: Firebird 4 extensions: DecFloat data types}
 
 {
@@ -55,7 +57,7 @@ const
     'Float16 DecFloat(16),'+
     'Float34 DecFloat(34),'+
     'BigNumber NUMERIC(24,6),'+
-    'BiggerNumber NUMERIC(26,4),'+
+    'BiggerNumber NUMERIC(34,4),'+
     'Primary Key(RowID)'+
     ')';
 
@@ -90,7 +92,7 @@ begin
   Statement.SQLParams[1].AsBCD := StrToBCD('64100000000.011');
   Statement.SQLParams[2].AsCurrency := 12345678912.12;
   Statement.SQLParams[3].AsString := '1234561234567.123456';
-  Statement.SQLParams[4].AsBCD := StrToBCD('123456123456123456123456.123456');
+  Statement.SQLParams[4].AsBCD := StrToBCD('11123456123456123456123456123456.123456');
   Statement.Execute;
 
   Statement.SQLParams[0].AsInteger := 4;
@@ -142,6 +144,7 @@ begin
   Statement.Execute;
 
   {NUMERIC(24,6)}
+  {$IFDEF TESTINT128ARRAY}
   ar := Attachment.CreateArray(Transaction,'FB4TestData_DECFloat_AR','BigNumber');
   value := StrToBCD('123456123400.123456');
   for i := 0 to 16 do
@@ -153,6 +156,7 @@ begin
   Statement := Attachment.Prepare(Transaction,'Update FB4TestData_DECFloat_AR Set BigNumber = ? Where RowID = 1');
   Statement.SQLParams[0].AsArray := ar;
   Statement.Execute;
+  {$ENDIF}
 
   Statement := Attachment.Prepare(Transaction,'Select RowID, Float16, Float34,BigNumber From FB4TestData_DECFloat_AR');
   writeln(OutFile);
@@ -167,9 +171,11 @@ begin
     write(OutFile,'Float34 ');
     ar := ResultSet[2].AsArray;
     WriteArray(ar);
+    {$IFDEF TESTINT128ARRAY}
     write(OutFile,'BigNumber ');
     ar := ResultSet[3].AsArray;
     WriteArray(ar);
+    {$ENDIF}
   end;
 end;
 
@@ -236,8 +242,6 @@ begin
     writeln(OutFile,'Skipping test for Firebird 4 and later')
   else
   begin
-    writeln(OutFile,'Firebird 4 extension types');
-    writeln(OutFile);
     Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable);
     UpdateDatabase4_DECFloat(Attachment);
     QueryDatabase4_DECFloat(Attachment);

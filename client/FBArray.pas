@@ -507,7 +507,7 @@ begin
   SQL_DEC_FIXED,
   SQL_DEC16,
   SQL_DEC34:
-    SQLDecFloatEncode(aValue,SQLType,SQLData);
+    SQLDecFloatEncode(aValue,SQLType,scale,SQLData);
 
   SQL_INT128:
     StrToInt128(Scale,BcdToStr(aValue),SQLData);

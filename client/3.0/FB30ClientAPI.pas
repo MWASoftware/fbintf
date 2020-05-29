@@ -137,7 +137,7 @@ type
     function FormatStatus(Status: TFBStatus): AnsiString; override;
 
     {Firebird 4 Extensions}
-    procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal; bufptr: PByte);
+    procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal; scale: integer; bufptr: PByte);
       override;
     function SQLDecFloatDecode(SQLType: cardinal; bufptr: PByte): tBCD; override;
     function Int128ToStr(bufptr: PByte; scale: integer): AnsiString; override;
@@ -454,7 +454,7 @@ begin
 end;
 
 procedure TFB30ClientAPI.SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal;
-  bufptr: PByte);
+  scale: integer; bufptr: PByte);
 var DecFloat16: IDecFloat16;
     DecFloat34: IDecFloat34;
     sign: integer;
@@ -488,9 +488,13 @@ var DecFloat16: IDecFloat16;
     end;
 
 begin
-  inherited SQLDecFloatEncode(aValue, SQLType, bufptr);
+  inherited SQLDecFloatEncode(aValue, SQLType, scale, bufptr);
   sign := (aValue.SignSpecialPlaces and $80) shr 7;
-  exp := -(aValue.SignSpecialPlaces and $2f);
+  if scale <> 0 then
+    exp := scale
+  else
+    exp := -(aValue.SignSpecialPlaces and $2f);
+
   case SQLType of
   SQL_DEC16:
     begin
@@ -501,8 +505,7 @@ begin
       Check4DataBaseError;
     end;
 
-  SQL_DEC34,
-  SQL_DEC_FIXED:
+  SQL_DEC34:
     begin
       UnPackbuffer(34);
       DecFloat34 := UtilIntf.getDecFloat34(StatusIntf);
@@ -567,7 +570,8 @@ begin
     end;
 
   SQL_DEC34,
-  SQL_DEC_FIXED:
+  SQL_DEC_FIXED,
+  SQL_INT128:
     begin
       DecFloat34 := UtilIntf.getDecFloat34(StatusIntf);
       Check4DataBaseError;
