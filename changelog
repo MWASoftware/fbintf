@@ -76,6 +76,12 @@ FBINTF Change Log  version          (1.2-0 Build 12022) Fri, 17 Apr 2020 10:35:5
 
 14. IUtil.FormatStatus now used to format error messages when using new API.
 
+15. Linux Only: FIREBIRD environment variable is now checked when loading the client library.
+    If a client library path is not explicitly provided and the FIREBIRD environment
+    variable is set then the directory given by this variable and any 'lib' subdirectory
+    are searched for the Firebird client library. Only if none is found, is the default
+    client library used.
+
 FBINTF Change Log  version          (1.1-5 Build 12022) Fri, 17 Apr 2020 10:35:55 +0100
 
 1. ISQLParams.GetHasCaseSensitiveParams added. Returns true if param names are

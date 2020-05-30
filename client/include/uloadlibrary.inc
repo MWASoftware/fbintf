@@ -1,24 +1,40 @@
 function TFBLibrary.LoadIBLibrary: boolean;
 
+  function TryLoadLibrary(LibraryPath: AnsiString; LibNames: TStrings): TLibHandle;
+  var i: integer;
+  begin
+    Result := NilHandle;
+    for i := 0 to LibNames.Count - 1 do
+    begin
+      Result := LoadLibrary(LibraryPath + LibNames[i]);
+      if Result <> NilHandle then
+      begin
+        FFBLibraryName := LibNames[i];
+        Exit;
+      end;
+    end;
+  end;
+
   function FindLibrary(LibNameList: string): TLibHandle;
   var LibNames: TStringList;
       i: integer;
+      FirebirdDir: Ansistring;
   begin
     Result := NilHandle;
+    FirebirdDir :=  IncludeTrailingPathDelimiter(GetEnvironmentVariable('FIREBIRD'));
     LibNames := TStringList.Create;
     try
       LibNames.Delimiter := ':';
       LibNames.StrictDelimiter := true;
       LibNames.DelimitedText := LibNameList; {Split list on semi-colon}
-      for i := 0 to LibNames.Count - 1 do
+      if FirebirdDir <> '' then
       begin
-        Result := LoadLibrary(LibNames[i]);
-        if Result <> NilHandle then
-        begin
-          FFBLibraryName := LibNames[i];
-          Exit;
-        end;
+        Result := TryLoadLibrary(FirebirdDir,LibNames);
+        if Result = NilHandle then
+          Result := TryLoadLibrary(FirebirdDir + 'lib' + DirectorySeparator,LibNames);
       end;
+      if Result = NilHandle then
+        Result := TryLoadLibrary('',LibNames);
     finally
       LibNames.Free;
     end;

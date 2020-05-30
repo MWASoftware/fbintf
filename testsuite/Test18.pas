@@ -9,7 +9,7 @@ unit Test18;
 {$codepage UTF8}
 {$ENDIF}
 
-{ $DEFINE TESTINT128ARRAY}
+{ $DEFINE TESTINT128ARRAY}  {Depends on resolution of CORE-6302}
 
 {Test 18: Firebird 4 extensions: DecFloat data types}
 
