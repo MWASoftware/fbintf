@@ -257,7 +257,7 @@ resourcestring
   SBadTimeSpecification = '%d:%d:%d.%d is not a valid time specification';
   SBCDTooBig = 'BCD Precision (%d) is too large for Firebird Data Type max precision (%d)';
   SInvalidTimeZoneID = 'Invalid Time Zone ID (%d)';
-  SBadTimestampOrNoTimeZoneDBEntry = 'Bad Timestamp or missing time zone DB entry (%s,%d)';
+  SBadTimestampOrNoTimeZoneDBEntry = 'Bad Timestamp or missing time zone DB entry (%s) TZ ID = %d';
   SDatePartMissing = 'Timestamp has no date part (%s)';
   SBCDOverflow = 'BCD Precision too large for Firebird data type,[%s]';
   SNoTimezoneSupport = 'TIME/TIMESTAMP WITH TIME ZONE data type not supported';

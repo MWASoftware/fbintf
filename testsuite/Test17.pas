@@ -11,6 +11,8 @@ unit Test17;
 
 {Test 17: Date/Time tests and Firebird 4 extensions}
 
+{ $DEFINE CORE6303FIXED}
+
 {
   This test provides a test of the ISQLTimestamp interface both for pre-Firebird 4
   attachments and with the Time Zone SQL types introduced in Firebird 4. It also
@@ -225,8 +227,8 @@ begin
   Statement.Execute;
 
   Statement.SQLParams[0].AsInteger := 3;
-  Statement.SQLParams[1].AsDate := EncodeDate(1939,9,3);
-  Statement.SQLParams[2].AsTime := EncodeTime(15,40,0,0);
+  Statement.SQLParams[1].AsDate := EncodeDate(1066,10,14);
+  Statement.SQLParams[2].AsTime := FBEncodeTime(23,59,59,9994);
   {$IFDEF FPC}
   with SysTime do
   begin
@@ -254,9 +256,9 @@ begin
   Statement.Execute;
 
   Statement.SQLParams[0].AsInteger := 4;
-  Statement.SQLParams[1].SetAsDate(EncodeDate(2019,12,25));
+  Statement.SQLParams[1].SetAsDate(EncodeDate(1815,6,18));
   Statement.SQLParams[2].SetAsTime(FBEncodeTime(0,1,40,1115));
-  FPCTimestamp.Date := Trunc(EncodeDate(2019,12,12)) + DateDelta;
+  FPCTimestamp.Date := Trunc(EncodeDate(1945,5,8)) + DateDelta;
   FPCTimestamp.Time :=  ((22*MinsPerHour + 10)*SecsPerMin)*MSecsPerSec + 1; {22:10:0.001)}
   Statement.SQLParams[3].SetAsDateTime(TimestampToDateTime(FPCTimestamp));
   Statement.Execute;
@@ -292,7 +294,7 @@ begin
   Statement.SQLParams[2].SetAsString('11/11/1918 11:11:0');
   Statement.Execute;
   sqlInsert := 'Insert into FB4TestData_TZ(RowID,TimeCol,TimestampCol) Values(5,'+
-              '''11:31:05.0001 America/New_York'',''2020.7.1 07:00:00 America/New_York'')';
+              '''11:31:05.0001 America/New_York'',''2020.7.4 07:00:00 America/New_York'')';
   Attachment.ExecuteSQL(Transaction,sqlInsert,[]);
   sqlInsert := 'Insert into FB4TestData_TZ(RowID,TimeCol,TimestampCol) Values(6,'+
               '''11:31:05.0001 EST5EDT'',''01.JUL.2020 7:00 America/New_York'')';
@@ -351,10 +353,6 @@ end;
 procedure TTest17.QueryDatabase4_TZ(Attachment: IAttachment);
 var Transaction: ITransaction;
     Statement: IStatement;
-    Results: IResultSet;
-    aDate: TDateTime;
-    aTimeZone: AnsiString;
-    dstOffset: SmallInt;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   Statement := Attachment.Prepare(Transaction,'Select * from  FB4TestData_TZ');
@@ -362,41 +360,7 @@ begin
   writeln(OutFile,'FB4 Testdata_TZ');
   writeln(OutFile);
   PrintMetaData(Statement.MetaData);
-  Results := Statement.OpenCursor;
-  try
-    while Results.FetchNext do
-    begin
-      writeln(OutFile,'ROW ID = ',Results[0].AsInteger);
-
-      write(OutFile,'TimeCol = ');
-      if not Results[1].IsNull then
-      begin
-        Results[1].GetAsDateTime(aDate,dstOffset,aTimeZone);
-        writeln(OutFile,Results[1].GetAsString,
-                       ', TimeZoneID = ',Attachment.GetTimeZoneServices.TimeZoneName2TimeZoneID(aTimeZone),
-                       ', Time Zone Name = ',aTimeZone,
-                       ', UTC Time = ',TimeToStr( Results[1].GetAsUTCDateTime),
-                       ', DST Offset = ',dstOffset)
-      end
-      else
-        writeln(OutFile,'NULL');
-
-      write(OutFile,'TimeStampCol = ');
-      if not Results[2].IsNull then
-      begin
-        Results[2].GetAsDateTime(aDate,dstOffset,aTimeZone);
-        writeln(OutFile,Results[2].GetAsString,
-                        ', TimeZoneID = ',Attachment.GetTimeZoneServices.TimeZoneName2TimeZoneID(aTimeZone),
-                        ', Time Zone Name = ',aTimeZone,
-                        ', UTC Timestamp = ',DateTimeToStr( Results[2].GetAsUTCDateTime),
-                        ', DST Offset = ',dstOffset)
-      end
-      else
-        writeln(OutFile,'NULL');
-    end;
-  finally
-    Results.Close;
-  end;
+  ReportResults(Statement);
 end;
 
 function TTest17.TestTitle: AnsiString;
@@ -409,7 +373,7 @@ var DPB: IDPB;
     Attachment: IAttachment;
     VerStrings: TStringList;
 begin
-  FOnDate := EncodeDate(2020,5,1);
+  FOnDate := EncodeDate(2020,1,1);
   DPB := FirebirdAPI.AllocateDPB;
   DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
   DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);
@@ -432,8 +396,13 @@ begin
     writeln(OutFile,'Skipping Firebird 4 and later test part')
   else
   begin
-    writeln(OutFile,'Firebird 4 extension types');
     writeln(OutFile);
+    writeln(OutFile,'Firebird 4 extension types');
+    writeln(OutFile,'==========================');
+    writeln(OutFile);
+    writeln(Outfile);
+    writeln(Outfile,'Using local FB Client with server TZ database');
+    writeln(Outfile);
     writeln(OutFile,'Local Time Zone Name = ',Attachment.GetTimeZoneServices.GetLocalTimeZoneName,
                      ', ID = ',Attachment.GetTimeZoneServices.GetLocalTimeZoneID);
     try
@@ -443,7 +412,9 @@ begin
       Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable3);
       UpdateDatabase4_TZ(Attachment);
       QueryDatabase4_TZ(Attachment);
+      {$IFDEF CORE6303FIXED}
       TestArrayTZDataTypes(Attachment);
+      {$ENDIF}
     finally
       Attachment.DropDatabase;
     end;

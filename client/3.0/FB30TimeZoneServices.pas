@@ -912,15 +912,18 @@ procedure TFB30TimeZoneServices.DecodeTimeTZEx(bufptr: PByte;
   OnDate: TDateTime; var time: TDateTime; var dstOffset: smallint;
   var timezoneID: TFBTimeZoneID);
 
+const
+  bufLength = 128;
 var
   Hr, Mt, S, DMs: cardinal;
   gmtTime: TDateTime;
   gmtTimestamp: TDateTime;
+  tzBuffer: array[ 0.. bufLength] of AnsiChar;
 begin
   with FFirebird30ClientAPI do
   begin
     {decode the GMT time}
-    UtilIntf.decodeTime(PISC_TIME_TZ_EX(bufptr)^.utc_time, @Hr, @Mt, @S, @DMs);
+(*    UtilIntf.decodeTime(PISC_TIME_TZ_EX(bufptr)^.utc_time, @Hr, @Mt, @S, @DMs);
     gmtTime := FBEncodeTime(Hr, Mt, S, DMs);
 
     {expand to a timestamp}
@@ -928,6 +931,11 @@ begin
     dstOffset :=  PISC_TIME_TZ_EX(bufptr)^.ext_offset;
 
     time := TimeOf(IncMinute(gmtTimestamp,dstOffset));
+    timezoneID := PISC_TIME_TZ_EX(bufptr)^.time_zone;*)
+
+    UtilIntf.decodeTimeTzEx(StatusIntf,PISC_TIME_TZ_EX(bufptr), @Hr, @Mt, @S, @DMs,bufLength,@tzBuffer);
+    time :=  FBEncodeTime(Hr, Mt, S, DMs);
+    dstOffset :=  PISC_TIME_TZ_EX(bufptr)^.ext_offset;
     timezoneID := PISC_TIME_TZ_EX(bufptr)^.time_zone;
   end;
 end;

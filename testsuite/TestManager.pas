@@ -315,6 +315,7 @@ begin
     end;
   end;
   writeln(OutFile);
+  writeln(OutFile);
 end;
 
 procedure TTestBase.WriteAffectedRows(Statement: IStatement);
@@ -641,6 +642,7 @@ procedure TTestBase.WriteSQLData(aValue: ISQLData);
 var s: AnsiString;
     dt: TDateTime;
     dstOffset: SmallInt;
+    aTimeZone: AnsiString;
 begin
   if aValue.IsNull then
     writeln(OutFile,aValue.Name,' = NULL')
@@ -712,14 +714,26 @@ begin
   SQL_TIMESTAMP_TZ,
   SQL_TIMESTAMP_TZ_EX:
   begin
-    aValue.GetAsDateTime(dt,dstOffset,s);
-    writeln(OutFile,aValue.Name,' = ',FBFormatDateTime('yyyy/mm/dd hh:nn:ss.zzzz',dt) + ' ' + s + ' with DST Offset = ',dstOffset);
+    aValue.GetAsDateTime(dt,dstOffset,aTimeZone);
+    writeln(OutFile,aValue.Name,' =');
+    writeln(OutFile,'  AsString  = ',aValue.GetAsString);
+    writeln(OutFile,'  Formatted = ',FBFormatDateTime('yyyy/mm/dd hh:nn:ss.zzzz',dt),' ',aTimeZone);
+    writeln(OutFile,'  TimeZoneID = ',aValue.GetStatement.GetAttachment.GetTimeZoneServices.TimeZoneName2TimeZoneID(aTimeZone));
+    writeln(OutFile,'  Time Zone Name = ',aTimeZone);
+    writeln(OutFile,'  UTC Time = ',DateTimeToStr( aValue.GetAsUTCDateTime));
+    writeln(OutFile,'  DST Offset = ',dstOffset);
   end;
   SQL_TIME_TZ,
   SQL_TIME_TZ_EX:
   begin
-    aValue.GetAsDateTime(dt,dstOffset,s);
-    writeln(OutFile,aValue.Name,' = ',FBFormatDateTime('hh:nn:ss.zzzz',dt) + ' ' + s + ' with DST Offset = ',dstOffset);
+    aValue.GetAsDateTime(dt,dstOffset,aTimeZone);
+    writeln(OutFile,aValue.Name,' =');
+    writeln(OutFile,'  AsString =  ',aValue.GetAsString);
+    writeln(OutFile,'  Formatted = ',FBFormatDateTime('hh:nn:ss.zzzz',dt),' ',aTimeZone);
+    writeln(OutFile,'  TimeZoneID = ',aValue.GetStatement.GetAttachment.GetTimeZoneServices.TimeZoneName2TimeZoneID(aTimeZone));
+    writeln(OutFile,'  Time Zone Name = ',aTimeZone);
+    writeln(OutFile,'  UTC Time = ',TimeToStr( aValue.GetAsUTCDateTime));
+    writeln(OutFile,'  DST Offset = ',dstOffset);
   end;
 
   else

@@ -9,7 +9,7 @@ unit Test18;
 {$codepage UTF8}
 {$ENDIF}
 
-{ $DEFINE TESTINT128ARRAY}  {Depends on resolution of CORE-6302}
+{$DEFINE TESTINT128ARRAY}  {Depends on resolution of CORE-6302}
 
 {Test 18: Firebird 4 extensions: DecFloat data types}
 
@@ -92,7 +92,7 @@ begin
   Statement.SQLParams[1].AsBCD := StrToBCD('64100000000.011');
   Statement.SQLParams[2].AsCurrency := 12345678912.12;
   Statement.SQLParams[3].AsString := '1234561234567.123456';
-  Statement.SQLParams[4].AsBCD := StrToBCD('11123456123456123456123456123456.123456');
+  Statement.SQLParams[4].AsBCD := StrToBCD('11123456123456123456123456123456.123456'); {last digit should be dropped}
   Statement.Execute;
 
   Statement.SQLParams[0].AsInteger := 4;

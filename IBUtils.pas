@@ -1746,13 +1746,14 @@ end;
  decimilliseconds is used instead of milliseconds for fractional seconds}
 
 function FBEncodeTime(Hour, Minute, Second, DeciMillisecond: cardinal): TDateTime;
+const DMSecsPerDay = MSecsPerDay*10;
 var DMs: cardinal;
     D: Double;
 begin
   if (Hour<24) and (Minute<60) and (Second<60) and (DeciMillisecond<10000) then
   begin
     DMs := Hour*36000000+Minute*600000+Second*10000+DeciMillisecond;
-    D := DMs/(MSecsPerDay*10);
+    D := DMs/DMSecsPerDay;
     Result:=TDateTime(d)
   end
   else
