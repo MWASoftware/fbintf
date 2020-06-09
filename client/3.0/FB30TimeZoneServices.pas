@@ -780,8 +780,8 @@ procedure TFB30TimeZoneServices.DecodeTimestampTZ(bufptr: PByte;
 const
   bufLength = 128;
 
-var Yr, Mn, Dy: word;
-    Hr, Mt, S: word;
+var Yr, Mn, Dy: cardinal;
+    Hr, Mt, S: cardinal;
     DMs: cardinal;
     tzBuffer: array[ 0.. bufLength] of AnsiChar;
     gmtTimestamp: TDateTime;
@@ -859,42 +859,57 @@ procedure TFB30TimeZoneServices.DecodeTimeTZ(bufptr: PByte; OnDate: TDateTime;
   var time: TDateTime; var dstOffset: smallint; var timezoneID: TFBTimeZoneID);
 
 var
-    wYr, wMn, wDy: word;
-    gmtTimestamp: ISC_TIMESTAMP_TZ;
-    localtime: TDateTime;
+  Hr, Mt, S, DMs: cardinal;
+  gmtTime: TDateTime;
+  gmtTimestamp: TDateTime;
+  aTimeZone: AnsiString;
 begin
- with FFirebird30ClientAPI do
- begin
-   {expand to a full timestamp}
-   DecodeDate(OnDate, wYr, wMn, wDy);
-   gmtTimestamp.utc_timestamp.timestamp_date := UtilIntf.encodeDate(wYr, wMn, wDy);
-   gmtTimestamp.utc_timestamp.timestamp_time := PISC_TIME_TZ(bufptr)^.utc_time;
-   gmtTimestamp.time_zone := PISC_TIME_TZ(bufptr)^.time_zone;
+  timezoneID := PISC_TIME_TZ(bufptr)^.time_zone;
+  if FUsingRemoteTZDB then
+  with FFirebird30ClientAPI do
+  begin
+    {decode the GMT time}
+    UtilIntf.decodeTime(PISC_TIME_TZ(bufptr)^.utc_time, @Hr, @Mt, @S, @DMs);
+    gmtTime := FBEncodeTime(Hr, Mt, S, DMs);
 
-   {now decode the full timestamp}
-   DecodeTimestampTZ(@gmtTimestamp,localtime,dstOffset,timezoneID);
-   time := TimeOf(localtime);
- end;
+    {expand to a timestamp}
+    gmtTimestamp := DateOf(OnDate) + gmtTime;
+
+    dstOffset := GetDstOffset(gmtTimestamp,timezoneID,false);
+    time := TimeOf(IncMinute(gmtTimestamp,dstOffset));
+  end
+  else
+    DecodeTimeTZ(bufptr,OnDate,time,dstOffset,aTimeZone);
 end;
 
 procedure TFB30TimeZoneServices.DecodeTimeTZ(bufptr: PByte; OnDate: TDateTime;
   var time: TDateTime; var dstOffset: smallint; var timezone: AnsiString);
-var
-  wYr, wMn, wDy: word;
-  gmtTimestamp: ISC_TIMESTAMP_TZ;
-  localtime: TDateTime;
+var aTimeZoneID: TFBTimeZoneID;
+    Hr, Mt, S, DMs: cardinal;
+    gmtTime: TDateTime;
+    gmtTimestamp: TDateTime;
+    localtimestamp: TDateTime;
+    tmptimestamp: ISC_TIMESTAMP_TZ;
 begin
+  if FUsingRemoteTZDB then
+  begin
+    DecodeTimeTZ(bufptr,OnDate,time,dstOffset,aTimeZoneID);
+    timezone := TimeZoneID2TimeZoneName(aTimeZoneID);
+  end
+  else
   with FFirebird30ClientAPI do
   begin
-    {expand to a full timestamp}
-    DecodeDate(OnDate, wYr, wMn, wDy);
-    gmtTimestamp.utc_timestamp.timestamp_date := UtilIntf.encodeDate(wYr, wMn, wDy);
-    gmtTimestamp.utc_timestamp.timestamp_time := PISC_TIME_TZ(bufptr)^.utc_time;
-    gmtTimestamp.time_zone := PISC_TIME_TZ(bufptr)^.time_zone;
+    {decode the GMT time}
+    UtilIntf.decodeTime(PISC_TIME_TZ(bufptr)^.utc_time, @Hr, @Mt, @S, @DMs);
+    gmtTime := FBEncodeTime(Hr, Mt, S, DMs);
 
-    {now decode the full timestamp}
-    DecodeTimestampTZ(@gmtTimestamp,localtime,dstOffset,timezone);
-    time := TimeOf(localtime);
+    {expand to a timestamp}
+    gmtTimestamp := DateOf(OnDate) + gmtTime;
+
+    SQLEncodeDateTime(gmtTimeStamp,@(tmpTimestamp.utc_timestamp));
+    tmpTimestamp.time_zone := PISC_TIME_TZ(bufptr)^.time_zone;
+    DecodeTimestampTZ(@tmpTimestamp,localtimestamp,dstOffset,timezone);
+    time := TimeOf(localtimestamp);
   end;
 end;
 
@@ -912,31 +927,24 @@ procedure TFB30TimeZoneServices.DecodeTimeTZEx(bufptr: PByte;
   OnDate: TDateTime; var time: TDateTime; var dstOffset: smallint;
   var timezoneID: TFBTimeZoneID);
 
-const
-  bufLength = 128;
 var
   Hr, Mt, S, DMs: cardinal;
   gmtTime: TDateTime;
   gmtTimestamp: TDateTime;
-  tzBuffer: array[ 0.. bufLength] of AnsiChar;
 begin
   with FFirebird30ClientAPI do
   begin
     {decode the GMT time}
-(*    UtilIntf.decodeTime(PISC_TIME_TZ_EX(bufptr)^.utc_time, @Hr, @Mt, @S, @DMs);
+    UtilIntf.decodeTime(PISC_TIME_TZ_EX(bufptr)^.utc_time, @Hr, @Mt, @S, @DMs);
     gmtTime := FBEncodeTime(Hr, Mt, S, DMs);
 
     {expand to a timestamp}
     gmtTimestamp := DateOf(OnDate) + gmtTime;
-    dstOffset :=  PISC_TIME_TZ_EX(bufptr)^.ext_offset;
+    timezoneID := PISC_TIME_TZ_EX(bufptr)^.time_zone;
+    dstOffset := GetDstOffset(gmtTimestamp,timezoneID,false);
+{    dstOffset :=  PISC_TIME_TZ_EX(bufptr)^.ext_offset; --ignored see CORE6328}
 
     time := TimeOf(IncMinute(gmtTimestamp,dstOffset));
-    timezoneID := PISC_TIME_TZ_EX(bufptr)^.time_zone;*)
-
-    UtilIntf.decodeTimeTzEx(StatusIntf,PISC_TIME_TZ_EX(bufptr), @Hr, @Mt, @S, @DMs,bufLength,@tzBuffer);
-    time :=  FBEncodeTime(Hr, Mt, S, DMs);
-    dstOffset :=  PISC_TIME_TZ_EX(bufptr)^.ext_offset;
-    timezoneID := PISC_TIME_TZ_EX(bufptr)^.time_zone;
   end;
 end;
 
@@ -946,7 +954,6 @@ const
     bufLength = 128;
 var Buffer: ISC_TIME_TZ;
     Hr, Mt, S, DMs: cardinal;
-    aTime: TDateTime;
     tzBuffer: array[ 0.. bufLength] of AnsiChar;
 begin
   if aTimeZoneID < MaxOffsetTimeZoneID then {Time Zone ID is for an offset}
