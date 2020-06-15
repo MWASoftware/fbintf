@@ -146,7 +146,7 @@ const
 
   TimeZoneID_GMT = 23*minsPerHour + 59;
   decimillisecondsPerSecond = 10000;
-  TimeZoneDisplaymentDelta = 60*23 + 59; {23:59 in minutes}
+  TimeZoneDisplacementDelta = 60*23 + 59; {23:59 in minutes}
 
 {These include files are converted from the 'C' originals in the Firebird API
  and define the various constants used by the API}

@@ -550,9 +550,9 @@ begin
   if timeZoneID < MaxOffsetTimeZoneID then
   begin
     if IsLocalTime then
-      Result := TimeZoneDisplaymentDelta - timezoneID
+      Result := TimeZoneDisplacementDelta - timezoneID
     else
-      Result := timezoneID - TimeZoneDisplaymentDelta
+      Result := timezoneID - TimeZoneDisplacementDelta
   end
   else
   if not FUsingRemoteTZDB then
@@ -610,8 +610,12 @@ end;
 
 function TFB30TimeZoneServices.LookupTimeZoneID(aTimeZone: AnsiString
   ): TFBTimeZoneID;
+var dstOffset: integer;
 begin
-  Result := LookupTimeZone(aTimeZone).GetTimeZoneID;
+  if DecodeTimeZoneOffset(aTimeZone,dstOffset) then
+    Result := dstOffset + TimeZoneDisplacementDelta
+  else
+    Result := LookupTimeZone(aTimeZone).GetTimeZoneID;
 end;
 
 function TFB30TimeZoneServices.LookupTimeZone(aTimeZoneID: TFBTimeZoneID
@@ -742,12 +746,7 @@ begin
     DecodeDate(timestamp, Yr, Mn, Dy);
     FBDecodeTime(timestamp, Hr, Mt, S, DMs);
     if timezone = '' then
-    begin
-      if TZDataTimeZoneID <> '' then
-        timezone := TZDataTimeZoneID
-      else
-        timezone := FormatTimeZoneOffset(-LocalTimeOffset);
-    end;
+      timezone := GetLocalTimeZoneName;
     UtilIntf.encodeTimeStampTz(StatusIntf,ISC_TIMESTAMP_TZPtr(bufPtr),Yr, Mn, Dy, Hr, Mt, S, DMs,PAnsiChar(timezone));
     Check4DataBaseError;
   end;
@@ -984,7 +983,7 @@ var Buffer: ISC_TIME_TZ;
     tzBuffer: array[ 0.. bufLength] of AnsiChar;
 begin
   if aTimeZoneID < MaxOffsetTimeZoneID then {Time Zone ID is for an offset}
-    Result := FormatTimeZoneOffset(aTimeZoneID - TimeZoneDisplaymentDelta)
+    Result := FormatTimeZoneOffset(aTimeZoneID - TimeZoneDisplacementDelta)
   else
   with FFirebird30ClientAPI do
   if not FUsingRemoteTZDB then
@@ -1008,14 +1007,11 @@ begin
   if Trim(aTimeZone) = '' then
   begin
     aTimeZone := GetLocalTimeZoneName;
-    if aTimeZone <> '' then
-      Result := LookupTimeZoneID(aTimeZone)
-    else
-      Result := -LocalTimeOffset + TimeZoneID_GMT //use current local time offset
+    Result := LookupTimeZoneID(aTimeZone);
   end
   else
   if DecodeTimeZoneOffset(aTimeZone,dstOffset) then
-    Result := dstOffset + TimeZoneDisplaymentDelta
+    Result := dstOffset + TimeZoneDisplacementDelta
   else
   if not FUsingRemoteTZDB then
   begin
