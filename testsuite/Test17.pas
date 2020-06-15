@@ -134,7 +134,7 @@ begin
   ResultSet := Statement.OpenCursor;
   while ResultSet.FetchNext do
   begin
-    writeln('Row No ',ResultSet[0].AsInteger);
+    writeln(OutFile,'Row No ',ResultSet[0].AsInteger);
     ar := ResultSet[1].AsArray;
     Bounds := ar.GetBounds;
     for i := Bounds[0].LowerBound to Bounds[0].UpperBound do

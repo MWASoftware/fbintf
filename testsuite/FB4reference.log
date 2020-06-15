@@ -341,7 +341,7 @@ Elapsed time= 0.002 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
-Writes = 0
+Writes = 1
 Fetches = 3
 Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
 Relation Name = EMPLOYEE
@@ -2900,7 +2900,7 @@ Firebird 4 extension types
 
 Using local FB Client with server TZ database
 
-Local Time Zone Name = Europe/London, ID = 65162
+Local Time Zone Name = Europe/London, ID = 65071
 Test Time Zone Setting
 Time Zone GMT = GMT
 Time Zone Zagreb = Europe/Zagreb

@@ -1097,8 +1097,7 @@ end;
 
 function TFB30TimeZoneServices.GetLocalTimeZoneID: TFBTimeZoneID;
 begin
-  with FFirebird30ClientAPI do
-    Result := TimeZoneName2TimeZoneID(GetLocalTimeZoneName);
+  Result := TimeZoneName2TimeZoneID(GetLocalTimeZoneName);
 end;
 
 procedure TFB30TimeZoneServices.GetTimeZoneInfo(aTimeZone: AnsiString;

@@ -151,7 +151,7 @@
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="3"/>
         <TopLine Value="387"/>
-        <CursorPos X="3" Y="159"/>
+        <CursorPos X="21" Y="137"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
@@ -172,12 +172,13 @@
           <TopLine Value="158"/>
           <CursorPos X="12" Y="177"/>
         </ExtraEditor1>
-        <UsageCount Value="108"/>
+        <UsageCount Value="109"/>
       </Unit20>
       <Unit21>
         <Filename Value="../client/FBClientAPI.pas"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="7"/>
-        <TopLine Value="464"/>
+        <TopLine Value="152"/>
         <CursorPos Y="466"/>
         <UsageCount Value="61"/>
         <Loaded Value="True"/>
@@ -716,7 +717,7 @@
       <Unit93>
         <Filename Value="FB4reference.log"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="2866"/>
+        <TopLine Value="2887"/>
         <CursorPos X="16" Y="2920"/>
         <UsageCount Value="18"/>
         <DefaultSyntaxHighlighter Value="None"/>
@@ -940,10 +941,9 @@
       </Unit123>
       <Unit124>
         <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <TopLine Value="1097"/>
-        <CursorPos X="19" Y="1111"/>
+        <CursorPos Y="1100"/>
         <ExtraEditorCount Value="2"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
@@ -996,8 +996,8 @@
       <Unit130>
         <Filename Value="../../../../fpcsrc/3.0.4/rtl/inc/objpas.inc"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="207"/>
-        <CursorPos Y="232"/>
+        <TopLine Value="40"/>
+        <CursorPos Y="62"/>
         <UsageCount Value="11"/>
       </Unit130>
       <Unit131>
@@ -1102,121 +1102,103 @@
     <OtherDefines Count="1">
       <Define0 Value="INIDE"/>
     </OtherDefines>
-    <JumpHistory Count="29" HistoryIndex="28">
+    <JumpHistory Count="24" HistoryIndex="23">
       <Position1>
         <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
-        <Caret Line="745" Column="26" TopLine="717"/>
+        <Caret Line="637" TopLine="620"/>
       </Position1>
       <Position2>
         <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
-        <Caret Line="746" Column="37" TopLine="718"/>
+        <Caret Line="638" TopLine="620"/>
       </Position2>
       <Position3>
         <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
-        <Caret Line="1009" Column="24" TopLine="981"/>
+        <Caret Line="639" TopLine="620"/>
       </Position3>
       <Position4>
         <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
-        <Caret Line="1010" Column="50" TopLine="982"/>
+        <Caret Line="641" TopLine="620"/>
       </Position4>
       <Position5>
         <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
-        <Caret Line="1076" Column="52" TopLine="1051"/>
+        <Caret Line="642" TopLine="620"/>
       </Position5>
       <Position6>
         <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
+        <Caret Line="644" TopLine="620"/>
       </Position6>
       <Position7>
         <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
-        <Caret Line="136" Column="34" TopLine="109"/>
+        <Caret Line="642" TopLine="620"/>
       </Position7>
       <Position8>
         <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
-        <Caret Line="1076" Column="52" TopLine="1054"/>
+        <Caret Line="644" TopLine="620"/>
       </Position8>
       <Position9>
-        <Filename Value="../IB.pas"/>
-        <Caret Line="1233" Column="65" TopLine="1218"/>
+        <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
+        <Caret Line="642" TopLine="620"/>
       </Position9>
       <Position10>
         <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
-        <Caret Line="1089" Column="3" TopLine="1056"/>
+        <Caret Line="644" TopLine="620"/>
       </Position10>
       <Position11>
         <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
-        <Caret Line="1084" TopLine="1062"/>
+        <Caret Line="643" TopLine="620"/>
       </Position11>
       <Position12>
         <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
-        <Caret Line="1079" Column="25" TopLine="1069"/>
+        <Caret Line="644" TopLine="620"/>
       </Position12>
       <Position13>
         <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
-        <Caret Line="1086" TopLine="1069"/>
+        <Caret Line="642" TopLine="620"/>
       </Position13>
       <Position14>
         <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
-        <Caret Line="1087" TopLine="1069"/>
+        <Caret Line="648" TopLine="620"/>
       </Position14>
       <Position15>
         <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
-        <Caret Line="1088" TopLine="1069"/>
+        <Caret Line="485" TopLine="468"/>
       </Position15>
       <Position16>
         <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
-        <Caret Line="1087" TopLine="1069"/>
+        <Caret Line="486" TopLine="468"/>
       </Position16>
       <Position17>
         <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
-        <Caret Line="1089" TopLine="1069"/>
+        <Caret Line="492" TopLine="468"/>
       </Position17>
       <Position18>
         <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
-        <Caret Line="196" Column="20" TopLine="176"/>
+        <Caret Line="493" TopLine="468"/>
       </Position18>
       <Position19>
         <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
-        <Caret Line="397" Column="3" TopLine="395"/>
+        <Caret Line="650" TopLine="633"/>
       </Position19>
       <Position20>
         <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
-        <Caret Line="196" Column="17" TopLine="179"/>
+        <Caret Line="615" TopLine="598"/>
       </Position20>
       <Position21>
         <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
-        <Caret Line="397" Column="3" TopLine="395"/>
+        <Caret Line="1026" TopLine="1010"/>
       </Position21>
       <Position22>
-        <Filename Value="Test17.pas"/>
-        <Caret Line="427" Column="16" TopLine="412"/>
+        <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
+        <Caret Line="984" Column="88" TopLine="975"/>
       </Position22>
       <Position23>
-        <Filename Value="Test17.pas"/>
-        <Caret Line="45" Column="15" TopLine="45"/>
+        <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
+        <Caret Line="137" Column="14" TopLine="121"/>
       </Position23>
       <Position24>
         <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
-        <Caret Line="138" Column="29" TopLine="111"/>
+        <Caret Line="138" Column="14" TopLine="121"/>
       </Position24>
-      <Position25>
-        <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
-        <Caret Line="1101" Column="42" TopLine="1097"/>
-      </Position25>
-      <Position26>
-        <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
-      </Position26>
-      <Position27>
-        <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
-        <Caret Line="137" Column="34" TopLine="110"/>
-      </Position27>
-      <Position28>
-        <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
-        <Caret Line="1077" Column="52" TopLine="1049"/>
-      </Position28>
-      <Position29>
-        <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
-        <Caret Line="1094" Column="34" TopLine="1066"/>
-      </Position29>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
