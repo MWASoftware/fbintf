@@ -98,6 +98,7 @@
 			<DCCReference Include="client\3.0\FB30Statement.pas"/>
 			<DCCReference Include="client\3.0\firebird\Firebird.pas"/>
 			<DCCReference Include="client\FBMessages.pas"/>
+			<DCCReference Include="client\3.0\FB30TimeZoneServices.pas"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>

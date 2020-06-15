@@ -601,7 +601,7 @@ begin
 
   UtilIntf.getInt128(StatusIntf).toString(StatusIntf,FB_I128Ptr(bufptr),scale,buflength,PAnsiChar(@Buffer));
   Check4DatabaseError;
-  Result := strpas(@Buffer);
+  Result := strpas(PAnsiChar(@Buffer));
 end;
 
 function TFB30ClientAPI.HasLocalTZDB: boolean;
@@ -618,7 +618,7 @@ begin
     Buffer.time_zone := TimeZoneID_GMT;
     UtilIntf.decodeTimeTz(StatusIntf, ISC_TIME_TZPtr(@Buffer),@Hr, @Mt, @S, @DMs,bufLength,PAnsiChar(@tzBuffer));
     Check4DataBaseError;
-    Result := strpas(@tzBuffer) <> 'GMT*';
+    Result := strpas(PAnsiChar(@tzBuffer)) <> 'GMT*';
   end;
 end;
 

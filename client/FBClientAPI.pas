@@ -150,6 +150,7 @@ type
     class procedure FreeLibraries;
     function SameLibrary(aLibName: string): boolean;
 
+  public
     {IFirebirdLibrary}
     function GetHandle: TLibHandle;
     function GetLibraryName: string;
@@ -164,6 +165,7 @@ type
   private
     FLocalTimeZoneName: AnsiString; {Informal Time Zone Name from tzname e.g. GMT or BST}
     FTZDataTimeZoneID: AnsiString; {TZData DB ID e.g. Europe/London}
+    FLocalTimeOffset: integer;
     class var FIBCS: TRTLCriticalSection;
     function FBTimeStampToDateTime(aDate, aTime: longint): TDateTime;
     procedure GetTZDataSettings;
@@ -195,6 +197,7 @@ type
   public
     property LocalTimeZoneName: AnsiString read FLocalTimeZoneName;
     property TZDataTimeZoneID: AnsiString read FTZDataTimeZoneID;
+    property LocalTimeOFfset: integer read FLocalTimeOffset;
   public
     {Encode/Decode}
     procedure EncodeInteger(aValue: integer; len: integer; buffer: PByte);
@@ -439,6 +442,7 @@ end;
 procedure TFBClientAPI.GetTZDataSettings;
 var S: TStringList;
 begin
+  FLocalTimeOffset := GetLocalTimeOffset;
   FLocalTimeZoneName := strpas(tzname[tzdaylight]);
   if FileExists(DefaultTimeZoneFile) then
   begin
@@ -463,10 +467,11 @@ begin
     TIME_ZONE_ID_UNKNOWN:
       FLocalTimeZoneName := '';
     TIME_ZONE_ID_STANDARD:
-      FLocalTimeZoneName := strpas(@TZInfo.StandardName);
+      FLocalTimeZoneName := strpas(PAnsiChar(@TZInfo.StandardName));
     TIME_ZONE_ID_DAYLIGHT:
-      FLocalTimeZoneName := strpas(@TZInfo.DaylightName);
+      FLocalTimeZoneName := strpas(PAnsiChar(@TZInfo.DaylightName));
   end;
+  FLocalTimeOffset := TZInfo.Bias;
 end;
 {$ENDIF}
 

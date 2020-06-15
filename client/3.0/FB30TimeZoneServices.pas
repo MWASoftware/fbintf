@@ -47,10 +47,10 @@ interface
 
 uses
   Classes, SysUtils, Firebird, IB, IBExternals, FBActivityMonitor, FBClientAPI,
-  FB30ClientAPI, FBAttachment, FB30Attachment, FBTransaction, FBSQLData, contnrs;
+  FB30ClientAPI, FBAttachment, FB30Attachment, FBTransaction, FBSQLData,
+  {$IFDEF FPC} contnrs; {$ELSE} Generics.Collections; {$ENDIF}
 
 type
-
   { TFB30TimeZoneServices }
 
   TFB30TimeZoneServices = class(TFBInterfacedObject, ITimeZoneServices, IExTimeZoneServices, ITransactionUser)
@@ -70,19 +70,19 @@ type
     ITimeZone = interface
       function GetTimeZoneID: TFBTimeZoneID;
       function GetTimeZoneName: AnsiString;
-      function GetTimeZoneData(timestamp: TDateTime; isLocalTime: boolean): PTimeZoneInfo;
-      function GetFirstTimeZoneInfo: PTimeZoneInfo;
-      function GetLastTimeZoneInfo: PTimeZoneInfo;
+      function GetTimeZoneData(timestamp: TDateTime; isLocalTime: boolean): TFB30TimeZoneServices.PTimeZoneInfo;
+      function GetFirstTimeZoneInfo: TFB30TimeZoneServices.PTimeZoneInfo;
+      function GetLastTimeZoneInfo: TFB30TimeZoneServices.PTimeZoneInfo;
       function AddTimeZoneInfo(Starts_, Ends_: TDateTime; ZoneOffset_: Smallint;
-                               DstOffer_: SmallInt; EffectiveOffset_: SmallInt): PTimeZoneInfo;
-      function CompareTimeRange(timeZoneInfo: PTimeZoneInfo; timestamp: TDateTime; isLocalTime: boolean): integer;
+                               DstOffer_: SmallInt; EffectiveOffset_: SmallInt): TFB30TimeZoneServices.PTimeZoneInfo;
+      function CompareTimeRange(timeZoneInfo: TFB30TimeZoneServices.PTimeZoneInfo; timestamp: TDateTime; isLocalTime: boolean): integer;
     end;
 
   private type
     ITimeZoneCache = interface
-      function GetTimeZone(aTimeZoneID: TFBTimeZoneID): ITimeZone; overload;
-      function GetTimeZone(aTimeZone: AnsiString): ITimeZone; overload;
-      function AddTimeZone(aTimeZoneID: TFBTimeZoneID; aTimeZone: AnsiString): ITimeZone;
+      function GetTimeZone(aTimeZoneID: TFBTimeZoneID): TFB30TimeZoneServices.ITimeZone; overload;
+      function GetTimeZone(aTimeZone: AnsiString): TFB30TimeZoneServices.ITimeZone; overload;
+      function AddTimeZone(aTimeZoneID: TFBTimeZoneID; aTimeZone: AnsiString): TFB30TimeZoneServices.ITimeZone;
     end;
 
   private
@@ -175,6 +175,12 @@ implementation
 uses DateUtils, IBUtils, FBMessages;
 
 type
+ {$IFDEF FPC}
+  TTZHashTable = TFPHashList;
+ {$ELSE}
+  TTZHashTable = TDictionary<AnsiString,integer>;
+ {$ENDIF}
+
 
   { TTimeZoneCache }
 
@@ -183,7 +189,7 @@ type
     MaxZoneID = High(TFBTimeZoneID);
   private
     FTimeZoneIDIndex: array of TFB30TimeZoneServices.ITimeZone;
-    FTimeZoneNameIndex: TFPHashList;
+    FTimeZoneNameIndex: TTZHashTable;
     FLowValue: integer;
   public
     constructor Create(aLowValue: integer);
@@ -388,7 +394,7 @@ end;
 constructor TTimeZoneCache.Create(aLowValue: integer);
 begin
   inherited Create;
-  FTimeZoneNameIndex := TFPHashList.Create;
+  FTimeZoneNameIndex := TTZHashTable.Create;
   SetLength(FTimeZoneIDIndex,MaxZoneID - aLowValue + 1);
   FLowValue := aLowValue;
 end;
@@ -410,6 +416,7 @@ end;
 
 function TTimeZoneCache.GetTimeZone(aTimeZone: AnsiString
   ): TFB30TimeZoneServices.ITimeZone;
+{$IFDEF FPC}
 var index: Pointer;
 begin
   index := FTimeZoneNameIndex.Find(aTimeZone);
@@ -418,10 +425,22 @@ begin
   else
     Result := FTimeZoneIDIndex[PtrUInt(index)];
 end;
+{$ELSE}
+var index: integer;
+begin
+  Result := nil;
+  if FTimeZoneNameIndex.TryGetValue(aTimeZone,index) then
+    Result := FTimeZoneIDIndex[index];
+end;
+{$ENDIF}
 
 function TTimeZoneCache.AddTimeZone(aTimeZoneID: TFBTimeZoneID;
   aTimeZone: AnsiString): TFB30TimeZoneServices.ITimeZone;
+{$IFDEF FPC}
 var index: PtrUInt;
+{$ELSE}
+var index: integer;
+{$ENDIF}
 begin
   Result := nil;
   if aTimeZoneID < FLowValue then
@@ -432,7 +451,11 @@ begin
   begin
     Result := TTimeZone.Create(aTimeZoneID,aTimeZone);
     FTimeZoneIDIndex[index] := Result;
+   {$IFDEF FPC}
     FTimeZoneNameIndex.Add(aTimeZone,Pointer(index));
+   {$ELSE}
+    FTimeZoneNameIndex.Add(aTimeZone,index);
+   {$ENDIF}
   end;
 end;
 
@@ -722,7 +745,7 @@ begin
       if TZDataTimeZoneID <> '' then
         timezone := TZDataTimeZoneID
       else
-        timezone := FormatTimeZoneOffset(-GetLocalTimeOffset);
+        timezone := FormatTimeZoneOffset(-LocalTimeOffset);
     end;
     UtilIntf.encodeTimeStampTz(StatusIntf,ISC_TIMESTAMP_TZPtr(bufPtr),Yr, Mn, Dy, Hr, Mt, S, DMs,PAnsiChar(timezone));
     Check4DataBaseError;
@@ -986,7 +1009,7 @@ begin
     if TZDataTimeZoneID <> '' then
       Result := LookupTimeZoneID(TZDataTimeZoneID)
     else
-      Result := -GetLocalTimeOffset + TimeZoneID_GMT //use current local time offset
+      Result := -LocalTimeOffset + TimeZoneID_GMT //use current local time offset
   end
   else
   if DecodeTimeZoneOffset(aTimeZone,dstOffset) then
