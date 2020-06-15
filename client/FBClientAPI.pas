@@ -166,6 +166,7 @@ type
     FLocalTimeZoneName: AnsiString; {Informal Time Zone Name from tzname e.g. GMT or BST}
     FTZDataTimeZoneID: AnsiString; {TZData DB ID e.g. Europe/London}
     FLocalTimeOffset: integer;
+    FIsDaylightSavingsTime: boolean;
     class var FIBCS: TRTLCriticalSection;
     function FBTimeStampToDateTime(aDate, aTime: longint): TDateTime;
     procedure GetTZDataSettings;
@@ -197,7 +198,7 @@ type
   public
     property LocalTimeZoneName: AnsiString read FLocalTimeZoneName;
     property TZDataTimeZoneID: AnsiString read FTZDataTimeZoneID;
-    property LocalTimeOFfset: integer read FLocalTimeOffset;
+    property LocalTimeOffset: integer read FLocalTimeOffset;
   public
     {Encode/Decode}
     procedure EncodeInteger(aValue: integer; len: integer; buffer: PByte);
@@ -444,6 +445,7 @@ var S: TStringList;
 begin
   FLocalTimeOffset := GetLocalTimeOffset;
   FLocalTimeZoneName := strpas(tzname[tzdaylight]);
+  FIsDaylightSavingsTime := tzdaylight;
   if FileExists(DefaultTimeZoneFile) then
   begin
     S := TStringList.Create;
@@ -461,8 +463,8 @@ end;
 {$IFDEF WINDOWS}
 procedure TFBClientAPI.GetTZDataSettings;
 var TZInfo: TTimeZoneInformation;
-    i: integer;
 begin
+  FIsDaylightSavingsTime := false;
   {is there any way of working out the default TZData DB time zone ID under Windows?}
   case GetTimeZoneInformation(TZInfo) of
     TIME_ZONE_ID_UNKNOWN:
@@ -479,11 +481,9 @@ begin
       begin
         FLocalTimeZoneName := strpas(PWideChar(@TZInfo.DaylightName));
         FLocalTimeOffset := TZInfo.DayLightBias;
+        FIsDaylightSavingsTime := true;
       end;
   end;
-  i := Pos(' ',FLocalTimeZoneName);
-  if i > 0 then
-  system.Delete(FLocalTimeZoneName,i,Length(FLocalTimeZoneName)-i+1);
 end;
 {$ENDIF}
 

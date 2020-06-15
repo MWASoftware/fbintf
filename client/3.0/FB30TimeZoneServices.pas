@@ -94,6 +94,7 @@ type
     FInLoadTimeZoneData: boolean;
     FTimeTZDate: TDateTime;
     FTZTextOption: TTZTextOptions;
+    FServerTZName: AnsiString;
     function ComputeDstOffset(localtime, gmtTimestamp: TDateTime): integer;
     function GetTransaction: ITransaction;
     function GetTimeZoneCache: ITimeZoneCache;
@@ -1074,12 +1075,24 @@ begin
 end;
 
 function TFB30TimeZoneServices.GetLocalTimeZoneName: AnsiString;
+var aDateTime: TDateTime;
+    dstOffset: SmallInt;
 begin
   with FFirebird30ClientAPI do
   if TZDataTimeZoneID <> '' then
     Result := TZDataTimeZoneID
   else
-    Result := LocalTimeZoneName;
+  {Use the Server TZ Data Name if possible}
+  begin
+    if FServerTZName = '' then
+      FAttachment.OpenCursorAtStart('Select Current_Timestamp at local from RDB$Database')[0].
+                  GetAsDateTime(aDateTime,dstOffset,FServerTZName);
+    if FServerTZName <> '' then
+      Result := FServerTZName
+    else
+    {Otherwise use the (short form) local time zone name}
+      Result := LocalTimeZoneName;
+  end;
 end;
 
 function TFB30TimeZoneServices.GetLocalTimeZoneID: TFBTimeZoneID;
