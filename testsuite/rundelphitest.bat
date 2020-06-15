@@ -75,6 +75,6 @@ type diff.log
 
 IF EXIST "%DELPHIBIN%\dcc32" (
 rd /s /q testunits
-del testsuite.exe
+rem del testsuite.exe
 )
 )

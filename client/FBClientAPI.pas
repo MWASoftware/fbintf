@@ -461,17 +461,29 @@ end;
 {$IFDEF WINDOWS}
 procedure TFBClientAPI.GetTZDataSettings;
 var TZInfo: TTimeZoneInformation;
+    i: integer;
 begin
   {is there any way of working out the default TZData DB time zone ID under Windows?}
   case GetTimeZoneInformation(TZInfo) of
     TIME_ZONE_ID_UNKNOWN:
-      FLocalTimeZoneName := '';
+      begin
+        FLocalTimeZoneName := '';
+        FLocalTimeOffset := 0;
+      end;
     TIME_ZONE_ID_STANDARD:
-      FLocalTimeZoneName := strpas(PAnsiChar(@TZInfo.StandardName));
+      begin
+        FLocalTimeZoneName := strpas(PWideChar(@TZInfo.StandardName));
+        FLocalTimeOffset := TZInfo.Bias;
+      end;
     TIME_ZONE_ID_DAYLIGHT:
-      FLocalTimeZoneName := strpas(PAnsiChar(@TZInfo.DaylightName));
+      begin
+        FLocalTimeZoneName := strpas(PWideChar(@TZInfo.DaylightName));
+        FLocalTimeOffset := TZInfo.DayLightBias;
+      end;
   end;
-  FLocalTimeOffset := TZInfo.Bias;
+  i := Pos(' ',FLocalTimeZoneName);
+  if i > 0 then
+  system.Delete(FLocalTimeZoneName,i,Length(FLocalTimeZoneName)-i+1);
 end;
 {$ENDIF}
 

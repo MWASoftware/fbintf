@@ -23,24 +23,22 @@
     </PublishOptions>
     <RunParams>
       <local>
-        <CommandLineParams Value="-t 7"/>
+        <CommandLineParams Value="-t 18 -X"/>
       </local>
       <environment>
-        <UserOverrides Count="2">
+        <UserOverrides Count="1">
           <Variable0 Name="PROMPT_AT_END" Value="YES"/>
-          <Variable1 Name="FIREBIRD" Value="/opt/firebird4b2"/>
         </UserOverrides>
       </environment>
       <FormatVersion Value="2"/>
       <Modes Count="1">
         <Mode0 Name="default">
           <local>
-            <CommandLineParams Value="-t 7"/>
+            <CommandLineParams Value="-t 18 -X"/>
           </local>
           <environment>
-            <UserOverrides Count="2">
+            <UserOverrides Count="1">
               <Variable0 Name="PROMPT_AT_END" Value="YES"/>
-              <Variable1 Name="FIREBIRD" Value="/opt/firebird4b2"/>
             </UserOverrides>
           </environment>
         </Mode0>

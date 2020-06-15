@@ -55,7 +55,7 @@ echo Comparing results with reference log
 echo(
 findstr /C:"ODS Major Version = 11" testout.log
 IF ERRORLEVEL 1 (
-  findstr /C:"ODS Major Version = 13" testout.log
+  findstr /C:"ODS Major Version = 12" testout.log
   IF ERRORLEVEL 1 (
     %DIFF% FB4reference.log testout.log >diff.log
   ) ELSE (
