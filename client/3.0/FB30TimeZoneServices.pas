@@ -1008,7 +1008,7 @@ begin
   if Trim(aTimeZone) = '' then
   begin
     if TZDataTimeZoneID <> '' then
-      Result := LookupTimeZoneID(TZDataTimeZoneID)
+      Result := LookupTimeZoneID(GetLocalTimeZoneName)
     else
       Result := -LocalTimeOffset + TimeZoneID_GMT //use current local time offset
   end
