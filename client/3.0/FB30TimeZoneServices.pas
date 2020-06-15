@@ -1108,7 +1108,7 @@ var Stmt: IStatement;
 begin
   with FAttachment do
     Stmt := Prepare(StartTransaction([isc_tpb_read,isc_tpb_wait,isc_tpb_concurrency],taCommit),
-                 'select * from rdb$time_zone_util.transitions(?,?,?)');
+                  'select * from rdb$time_zone_util.transitions(?,?,?)');
   Stmt.SQLParams[0].AsString := aTimeZone;
   Stmt.SQLParams[1].AsDateTime := OnDate;
   Stmt.SQLParams[2].AsDateTime := OnDate;
