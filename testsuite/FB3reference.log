@@ -2,11 +2,11 @@ Firebird API Test Suite
 Copyright MWA Software 2016-2020
 
 Starting Tests
-Client API Version = 4.0
-Firebird Environment Variable = /opt/firebird4b2
-Firebird Bin Directory = /opt/firebird4b2/bin
-Firebird Conf Directory = /opt/firebird4b2/
-Firebird Client Library Path = /opt/firebird4b2/lib/libfbclient.so
+Client API Version = 3.0
+Firebird Environment Variable = /opt/firebird3.0.5
+Firebird Bin Directory = /opt/firebird3.0.5/bin
+Firebird Conf Directory = /opt/firebird3.0.5/
+Firebird Client Library Path = /opt/firebird3.0.5/lib/libfbclient.so
 Running Test 1: Create and Drop a Database
 Creating a Database with empty parameters
 Create Database fails (as expected): I/O error during "open O_CREAT" operation for file ""
@@ -19,11 +19,11 @@ DB Connect String = inet://localhost//tmp/fbintf-testsuite/testsuite1.fdb
 DB Charset ID = 0
 DB SQL Dialect = 3
 DB Remote Protocol = TCPv4
-DB ODS Major Version = 13
+DB ODS Major Version = 12
 DB ODS Minor Version = 0
-User Authentication Method = Srp256
-Firebird Library Path = /opt/firebird4b2/lib/libfbclient.so
-DB Client Implementation Version = 4.0
+User Authentication Method = Srp
+Firebird Library Path = /opt/firebird3.0.5/lib/libfbclient.so
+DB Client Implementation Version = 3.0
 DPB
 Count = 3
 28 = SYSDBA
@@ -31,10 +31,10 @@ Count = 3
 65 = 3
 
 Firebird Server Version Info
-Firebird/Linux/AMD/Intel/x64 (access method), version "LI-T4.0.0.2006 Firebird 4.0 Beta 2"
-Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-T4.0.0.2006 Firebird 4.0 Beta 2/tcp (zeus)/P16:C"
-Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-T4.0.0.2006 Firebird 4.0 Beta 2/tcp (zeus)/P16:C"
-on disk structure version 13.0
+Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V3.0.5.33220 Firebird 3.0"
+Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V3.0.5.33220 Firebird 3.0/tcp (zeus)/P15:C"
+Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-V3.0.5.33220 Firebird 3.0/tcp (zeus)/P15:C"
+on disk structure version 12.0
 
 Dropping Database
 Creating a Database with a DPD
@@ -42,11 +42,11 @@ DB Connect String = inet://localhost//tmp/fbintf-testsuite/testsuite1.fdb
 DB Charset ID = 4
 DB SQL Dialect = 3
 DB Remote Protocol = TCPv4
-DB ODS Major Version = 13
+DB ODS Major Version = 12
 DB ODS Minor Version = 0
-User Authentication Method = Srp256
-Firebird Library Path = /opt/firebird4b2/lib/libfbclient.so
-DB Client Implementation Version = 4.0
+User Authentication Method = Srp
+Firebird Library Path = /opt/firebird3.0.5/lib/libfbclient.so
+DB Client Implementation Version = 3.0
 Dropping Database
 DPB
 Count = 4
@@ -57,23 +57,22 @@ Count = 4
 
 Creating a Database with a DPD
 Database ID = 4 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = zeus
-ODS major = 13
+ODS major = 12
 ODS minor = 0
 DB Connect String = inet://localhost//tmp/fbintf-testsuite/testsuite1.fdb
 DB Charset ID = 4
 DB SQL Dialect = 3
 DB Remote Protocol = TCPv4
-DB ODS Major Version = 13
+DB ODS Major Version = 12
 DB ODS Minor Version = 0
-User Authentication Method = Srp256
-Firebird Library Path = /opt/firebird4b2/lib/libfbclient.so
-DB Client Implementation Version = 4.0
+User Authentication Method = Srp
+Firebird Library Path = /opt/firebird3.0.5/lib/libfbclient.so
+DB Client Implementation Version = 3.0
 RDB$DESCRIPTION = 
 RDB$RELATION_ID = 128
-RDB$SECURITY_CLASS = SQL$378
+RDB$SECURITY_CLASS = SQL$363
 RDB$CHARACTER_SET_NAME = UTF8
 RDB$LINGER = 
-RDB$SQL_SECURITY = 
 Dropping Database
 
 
@@ -317,10 +316,10 @@ Constrained Employee Count = 3
 Running Test 4: Update, Insert and Delete Queries
 Opening inet://localhost/employee
 Database Open
-Firebird/Linux/AMD/Intel/x64 (access method), version "LI-T4.0.0.2006 Firebird 4.0 Beta 2"
-Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-T4.0.0.2006 Firebird 4.0 Beta 2/tcp (zeus)/P16:CZ"
-Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-T4.0.0.2006 Firebird 4.0 Beta 2/tcp (zeus)/P16:CZ"
-on disk structure version 13.0
+Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V3.0.5.33220 Firebird 3.0"
+Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V3.0.5.33220 Firebird 3.0/tcp (zeus)/P15:CZ"
+Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-V3.0.5.33220 Firebird 3.0/tcp (zeus)/P15:CZ"
+on disk structure version 12.0
 Select Count = 1 InsertCount = 0 UpdateCount = 1 DeleteCount = 0
 EMP_NO = 8
 FIRST_NAME = Leslie
@@ -334,9 +333,9 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 22544944
-Delta memory = 4672
-Max memory = 22638000
+Current memory = 19693296
+Delta memory = 4480
+Max memory = 19755408
 Elapsed time= 0.002 sec
 Cpu = 0.000 sec
 Buffers = 2048
@@ -638,7 +637,7 @@ Field Name = RDB$CHARACTER_SET_NAME
 Scale = 0
 Charset id = 4
 Nullable
-Size = 252
+Size = 124
 
 SQLType =SQL_SHORT
 sub type = 0
@@ -1114,7 +1113,7 @@ Field Name = RDB$CHARACTER_SET_NAME
 Scale = 0
 Charset id = 53
 Nullable
-Size = 63
+Size = 31
 
 SQLType =SQL_SHORT
 sub type = 0
@@ -1588,9 +1587,9 @@ Column Name = RDB$CHARACTER_SET_NAME
 Alias Name = RDB$CHARACTER_SET_NAME
 Field Name = RDB$CHARACTER_SET_NAME
 Scale = 0
-Charset id = 4
+Charset id = 3
 Nullable
-Size = 252
+Size = 93
 
 SQLType =SQL_SHORT
 sub type = 0
@@ -1604,109 +1603,109 @@ Charset id = 0
 Nullable
 Size = 2
 
-RDB$CHARACTER_SET_NAME = NONE (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = NONE (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 0
-RDB$CHARACTER_SET_NAME = OCTETS (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = OCTETS (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 1
-RDB$CHARACTER_SET_NAME = ASCII (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = ASCII (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 2
-RDB$CHARACTER_SET_NAME = UNICODE_FSS (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = UNICODE_FSS (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 3
-RDB$CHARACTER_SET_NAME = UTF8 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = UTF8 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 4
-RDB$CHARACTER_SET_NAME = SJIS_0208 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = SJIS_0208 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 5
-RDB$CHARACTER_SET_NAME = EUCJ_0208 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = EUCJ_0208 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 6
-RDB$CHARACTER_SET_NAME = DOS737 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = DOS737 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 9
-RDB$CHARACTER_SET_NAME = DOS437 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = DOS437 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 10
-RDB$CHARACTER_SET_NAME = DOS850 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = DOS850 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 11
-RDB$CHARACTER_SET_NAME = DOS865 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = DOS865 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 12
-RDB$CHARACTER_SET_NAME = DOS860 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = DOS860 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 13
-RDB$CHARACTER_SET_NAME = DOS863 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = DOS863 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 14
-RDB$CHARACTER_SET_NAME = DOS775 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = DOS775 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 15
-RDB$CHARACTER_SET_NAME = DOS858 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = DOS858 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 16
-RDB$CHARACTER_SET_NAME = DOS862 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = DOS862 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 17
-RDB$CHARACTER_SET_NAME = DOS864 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = DOS864 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 18
-RDB$CHARACTER_SET_NAME = NEXT (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = NEXT (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 19
-RDB$CHARACTER_SET_NAME = ISO8859_1 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = ISO8859_1 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 21
-RDB$CHARACTER_SET_NAME = ISO8859_2 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = ISO8859_2 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 22
-RDB$CHARACTER_SET_NAME = ISO8859_3 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = ISO8859_3 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 23
-RDB$CHARACTER_SET_NAME = ISO8859_4 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = ISO8859_4 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 34
-RDB$CHARACTER_SET_NAME = ISO8859_5 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = ISO8859_5 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 35
-RDB$CHARACTER_SET_NAME = ISO8859_6 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = ISO8859_6 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 36
-RDB$CHARACTER_SET_NAME = ISO8859_7 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = ISO8859_7 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 37
-RDB$CHARACTER_SET_NAME = ISO8859_8 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = ISO8859_8 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 38
-RDB$CHARACTER_SET_NAME = ISO8859_9 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = ISO8859_9 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 39
-RDB$CHARACTER_SET_NAME = ISO8859_13 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = ISO8859_13 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 40
-RDB$CHARACTER_SET_NAME = KSC_5601 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = KSC_5601 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 44
-RDB$CHARACTER_SET_NAME = DOS852 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = DOS852 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 45
-RDB$CHARACTER_SET_NAME = DOS857 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = DOS857 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 46
-RDB$CHARACTER_SET_NAME = DOS861 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = DOS861 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 47
-RDB$CHARACTER_SET_NAME = DOS866 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = DOS866 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 48
-RDB$CHARACTER_SET_NAME = DOS869 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = DOS869 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 49
-RDB$CHARACTER_SET_NAME = CYRL (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = CYRL (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 50
-RDB$CHARACTER_SET_NAME = WIN1250 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = WIN1250 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 51
-RDB$CHARACTER_SET_NAME = WIN1251 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = WIN1251 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 52
-RDB$CHARACTER_SET_NAME = WIN1252 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = WIN1252 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 53
-RDB$CHARACTER_SET_NAME = WIN1253 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = WIN1253 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 54
-RDB$CHARACTER_SET_NAME = WIN1254 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = WIN1254 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 55
-RDB$CHARACTER_SET_NAME = BIG_5 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = BIG_5 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 56
-RDB$CHARACTER_SET_NAME = GB_2312 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = GB_2312 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 57
-RDB$CHARACTER_SET_NAME = WIN1255 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = WIN1255 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 58
-RDB$CHARACTER_SET_NAME = WIN1256 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = WIN1256 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 59
-RDB$CHARACTER_SET_NAME = WIN1257 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = WIN1257 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 60
-RDB$CHARACTER_SET_NAME = KOI8R (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = KOI8R (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 63
-RDB$CHARACTER_SET_NAME = KOI8U (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = KOI8U (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 64
-RDB$CHARACTER_SET_NAME = WIN1258 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = WIN1258 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 65
-RDB$CHARACTER_SET_NAME = TIS620 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = TIS620 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 66
-RDB$CHARACTER_SET_NAME = GBK (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = GBK (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 67
-RDB$CHARACTER_SET_NAME = CP943C (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = CP943C (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 68
-RDB$CHARACTER_SET_NAME = GB18030 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_NAME = GB18030 (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 69
 
 Metadata
@@ -2459,29 +2458,29 @@ MYARRAY = Array: (0,-1: A50) (0,0: A51) (0,1: A52) (0,2: A53) (0,3: A54) (0,4: A
 
 
 Running Test 9: Database Information tests
-Database ID = 4 FB = /opt/firebird4b2/examples/empbuild/employee.fdb SN = zeus
-Pages =346
+Database ID = 4 FB = /opt/firebird3.0.5/examples/empbuild/employee.fdb SN = zeus
+Pages =307
 Base Level = 13,4,0,3,
-Implementation = 11,7,0,3,66,1,66,
+Implementation = 11,7,0,3,65,1,65,
 Reserved = 0
 ODS minor = 0
-ODS major = 13
+ODS major = 12
 Page Size = 8192
-Version = 1: LI-T6.3.0.2006 Firebird 4.0 Beta 2
+Version = 1: LI-V6.3.5.33220 Firebird 3.0
 Database is Read/Write
-Database Created: 29/5/2020 02:53:19
-Pages Used = 310
-Pages Free = 36
-Server Memory = 21959808
+Database Created: 9/1/2020 13:13:45
+Pages Used = 297
+Pages Free = 10
+Server Memory = 19195648
 Forced Writes  = 1
-Max Memory  = 22141856
+Max Memory  = 19316160
 Num Buffers  = 2048
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
 Active Transaction Count = 0
-Fetches  = 1621
+Fetches  = 452
 Writes  = 8
-Reads  = 89
+Reads  = 57
 Page Writes  = 4
 Record Version Removals Operation Counts
 
@@ -2495,31 +2494,25 @@ Purge Count Countites Operation Counts
 
 Indexed Reads Count Operation Counts
 Table ID = 4
-Count = 63
+Count = 28
 Table ID = 6
-Count = 23
+Count = 15
 Table ID = 9
 Count = 3
 Table ID = 11
-Count = 2
+Count = 1
 Table ID = 12
-Count = 24
-Table ID = 18
-Count = 794
-Table ID = 20
-Count = 5
+Count = 15
 Table ID = 28
-Count = 2
+Count = 1
 Table ID = 29
-Count = 2
-Table ID = 31
 Count = 1
 
 Sequential Table Scans Operation Counts
 Table ID = 0
-Count = 98
+Count = 94
 Table ID = 1
-Count = 24
+Count = 2
 
 Update Count Operation Counts
 
@@ -2554,12 +2547,12 @@ Event Counts: TESTEVENT, Count = 1
 
 Running Test 11: Services API
 Service Manager Version = 2
-Server Version = LI-T4.0.0.2006 Firebird 4.0 Beta 2
+Server Version = LI-V3.0.5.33220 Firebird 3.0
 Implementation = Firebird/Linux/AMD/Intel/x64
 
 Lock Directory = /tmp/firebird/
-Message File = /opt/firebird4b2/
-Security File = /opt/firebird4b2/security4.fdb
+Message File = /opt/firebird3.0.5/
+Security File = security.db
 
 DB Attachments
 No. of Attachments = 0
@@ -2814,8 +2807,8 @@ Error Handled: Your user name and password are not defined. Ask your database ad
 
 
 Running Test 17: Date/Time tests and Firebird 4 extensions
- FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-T4.0.0.2006 Firebird 4.0 Beta 2"
-Has Local TZ DB = TRUE
+ FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V3.0.5.33220 Firebird 3.0"
+Has Local TZ DB = FALSE
 
 Testdata
 
@@ -2893,805 +2886,12 @@ Testdata - second pass
 3, 14/10/1066, 23:59:59.999, 11/11/1918 11:11:00
 4, 18/6/1815, 00:01:40.112, 8/5/1945 22:10:00
 Sys Time = 1945, 5, 8, 2, 22, 10, 0, 1
-
-Firebird 4 extension types
-==========================
-
-
-Using local FB Client with server TZ database
-
-Local Time Zone Name = Europe/London, ID = 65162
-Test Time Zone Setting
-Time Zone GMT = GMT
-Time Zone Zagreb = Europe/Zagreb
-Time Zone Offset -08:00 = -08:00
-Time Zone Offset +13:39 = +13:39
-Time Zone ID = 1799
-Time Zone ID = 959, UTC Time = 23/1/2020 10:30:00
-Time Zone ID = 64920
-Local Time Zone ID = 65071
-Local Time = 22/1/2020 18:30:00, Time Zone = -08:00
-Time Zone Offset = 60
-Time Zone Offset = 60
-Time Zone Offset = 60
-Time Zone Offset = 0
-Time Zone Offset = 60
-Time Zone Offset = Bad Timestamp or missing time zone DB entry (26/3/1989 01:30:00) TZ ID = 65071
-Date = 29/11/1969 23:30:00, TimeZone = GMT
-Date = 1/4/2001 22:30:10.0010, TimeZone = -08:00
-Time = 23:59:10.2000, TimeZone = Europe/London
-Show Parameter 2
- =
-  AsString  = 11/11/1918 00:11:00.0000 +04:00
-  Formatted = 1918/11/11 00:11:00.0000 +04:00
-  TimeZoneID = 1679
-  Time Zone Name = +04:00
-  UTC Time = 10/11/1918 20:11:00
-  DST Offset = 240
-
-FB4 Testdata_TZ
-
-Metadata
-SQLType =SQL_LONG
-sub type = 0
-Table = FB4TESTDATA_TZ
-Owner = SYSDBA
-Column Name = ROWID
-Alias Name = ROWID
-Field Name = ROWID
-Scale = 0
-Charset id = 0
-Not Null
-Size = 4
-
-SQLType =SQL_TIME_TZ
-sub type = 0
-Table = FB4TESTDATA_TZ
-Owner = SYSDBA
-Column Name = TIMECOL
-Alias Name = TIMECOL
-Field Name = TIMECOL
-Scale = 0
-Charset id = 0
-Nullable
-Size = 8
-
-SQLType =SQL_TIMESTAMP_TZ
-sub type = 0
-Table = FB4TESTDATA_TZ
-Owner = SYSDBA
-Column Name = TIMESTAMPCOL
-Alias Name = TIMESTAMPCOL
-Field Name = TIMESTAMPCOL
-Scale = 0
-Charset id = 0
-Nullable
-Size = 12
-
-ROWID = 1
-TIMECOL =
-  AsString =  11:32:10.0002 -05:00
-  Formatted = 11:32:10.0002 -05:00
-  TimeZoneID = 1139
-  Time Zone Name = -05:00
-  UTC Time = 16:32:10
-  DST Offset = -300
-TIMESTAMPCOL =
-  AsString  = 1/4/2020 11:31:05.0001 +01:00
-  Formatted = 2020/04/01 11:31:05.0001 +01:00
-  TimeZoneID = 1499
-  Time Zone Name = +01:00
-  UTC Time = 1/4/2020 10:31:05
-  DST Offset = 60
-ROWID = 2
-TIMECOL =
-  AsString =  14:02:10.0050 -08:00
-  Formatted = 14:02:10.0050 -08:00
-  TimeZoneID = 959
-  Time Zone Name = -08:00
-  UTC Time = 22:02:10
-  DST Offset = -480
-TIMESTAMPCOL =
-  AsString  = 11/11/1918 11:11:00.0000 00:00
-  Formatted = 1918/11/11 11:11:00.0000 Europe/London
-  TimeZoneID = 65071
-  Time Zone Name = Europe/London
-  UTC Time = 11/11/1918 11:11:00
-  DST Offset = 0
-ROWID = 3
-TIMECOL =
-  AsString =  22:02:10.0050 -08:00
-  Formatted = 22:02:10.0050 -08:00
-  TimeZoneID = 959
-  Time Zone Name = -08:00
-  UTC Time = 06:02:10
-  DST Offset = -480
-TIMESTAMPCOL =
-  AsString  = 11/11/1918 00:11:00.0000 +04:00
-  Formatted = 1918/11/11 00:11:00.0000 +04:00
-  TimeZoneID = 1679
-  Time Zone Name = +04:00
-  UTC Time = 10/11/1918 20:11:00
-  DST Offset = 240
-ROWID = 4
-TIMECOL =
-  AsString =  14:02:10.5000 -08:00
-  Formatted = 14:02:10.5000 -08:00
-  TimeZoneID = 959
-  Time Zone Name = -08:00
-  UTC Time = 22:02:10
-  DST Offset = -480
-TIMESTAMPCOL =
-  AsString  = 11/11/1918 11:11:00.0000 00:00
-  Formatted = 1918/11/11 11:11:00.0000 Europe/London
-  TimeZoneID = 65071
-  Time Zone Name = Europe/London
-  UTC Time = 11/11/1918 11:11:00
-  DST Offset = 0
-ROWID = 5
-TIMECOL =
-  AsString =  11:31:05.0001 -05:00
-  Formatted = 11:31:05.0001 America/New_York
-  TimeZoneID = 65361
-  Time Zone Name = America/New_York
-  UTC Time = 16:31:05
-  DST Offset = -300
-TIMESTAMPCOL =
-  AsString  = 4/7/2020 07:00:00.0000 -04:00
-  Formatted = 2020/07/04 07:00:00.0000 America/New_York
-  TimeZoneID = 65361
-  Time Zone Name = America/New_York
-  UTC Time = 4/7/2020 11:00:00
-  DST Offset = -240
-ROWID = 6
-TIMECOL =
-  AsString =  11:31:05.0001 -05:00
-  Formatted = 11:31:05.0001 EST5EDT
-  TimeZoneID = 65135
-  Time Zone Name = EST5EDT
-  UTC Time = 16:31:05
-  DST Offset = -300
-TIMESTAMPCOL =
-  AsString  = 1/7/2020 07:00:00.0000 -04:00
-  Formatted = 2020/07/01 07:00:00.0000 America/New_York
-  TimeZoneID = 65361
-  Time Zone Name = America/New_York
-  UTC Time = 1/7/2020 11:00:00
-  DST Offset = -240
-ROWID = 7
-TIMECOL =
-  AsString =  11:31:05.0001 +06:00
-  Formatted = 11:31:05.0001 BST
-  TimeZoneID = 65162
-  Time Zone Name = BST
-  UTC Time = 05:31:05
-  DST Offset = 360
-TIMESTAMPCOL =
-  AsString  = 1/7/2020 07:00:00.0000 -04:00
-  Formatted = 2020/07/01 07:00:00.0000 EST5EDT
-  TimeZoneID = 65135
-  Time Zone Name = EST5EDT
-  UTC Time = 1/7/2020 11:00:00
-  DST Offset = -240
-ROWID = 8
-TIMECOL =
-  AsString =  11:31:05.0001 +01:00
-  Formatted = 11:31:05.0001 Europe/Paris
-  TimeZoneID = 65061
-  Time Zone Name = Europe/Paris
-  UTC Time = 10:31:05
-  DST Offset = 60
-TIMESTAMPCOL =
-  AsString  = 1/7/2020 06:00:00.0000 -05:00
-  Formatted = 2020/07/01 06:00:00.0000 EST
-  TimeZoneID = 65136
-  Time Zone Name = EST
-  UTC Time = 1/7/2020 11:00:00
-  DST Offset = -300
-
-
-Using local TZ database
-
-Test Time Zone Setting
-Time Zone GMT = GMT
-Time Zone Zagreb = Europe/Zagreb
-Time Zone Offset -08:00 = -08:00
-Time Zone Offset +13:39 = +13:39
-Time Zone ID = 1799
-Time Zone ID = 959, UTC Time = 23/1/2020 10:30:00
-Time Zone ID = 64920
-Local Time Zone ID = 65071
-Local Time = 23/1/2020 10:30:00, Time Zone = -08:00
-Time Zone Offset = 60
-Time Zone Offset = 60
-Time Zone Offset = 60
-Time Zone Offset = 0
-Time Zone Offset = 60
-Time Zone Offset = 0
-Date = 29/11/1969 23:30:00, TimeZone = GMT
-Date = 1/4/2001 22:30:10.0010, TimeZone = -08:00
-Time = 23:59:10.2000, TimeZone = Europe/London
-Show Parameter 2
- =
-  AsString  = 11/11/1918 00:11:00.0000 +04:00
-  Formatted = 1918/11/11 00:11:00.0000 +04:00
-  TimeZoneID = 1679
-  Time Zone Name = +04:00
-  UTC Time = 10/11/1918 20:11:00
-  DST Offset = 240
-
-FB4 Testdata_TZ
-
-Metadata
-SQLType =SQL_LONG
-sub type = 0
-Table = FB4TESTDATA_TZ
-Owner = SYSDBA
-Column Name = ROWID
-Alias Name = ROWID
-Field Name = ROWID
-Scale = 0
-Charset id = 0
-Not Null
-Size = 4
-
-SQLType =SQL_TIME_TZ
-sub type = 0
-Table = FB4TESTDATA_TZ
-Owner = SYSDBA
-Column Name = TIMECOL
-Alias Name = TIMECOL
-Field Name = TIMECOL
-Scale = 0
-Charset id = 0
-Nullable
-Size = 8
-
-SQLType =SQL_TIMESTAMP_TZ
-sub type = 0
-Table = FB4TESTDATA_TZ
-Owner = SYSDBA
-Column Name = TIMESTAMPCOL
-Alias Name = TIMESTAMPCOL
-Field Name = TIMESTAMPCOL
-Scale = 0
-Charset id = 0
-Nullable
-Size = 12
-
-ROWID = 1
-TIMECOL =
-  AsString =  11:32:10.0002 -05:00
-  Formatted = 11:32:10.0002 -05:00
-  TimeZoneID = 1139
-  Time Zone Name = -05:00
-  UTC Time = 16:32:10
-  DST Offset = -300
-TIMESTAMPCOL =
-  AsString  = 1/4/2020 11:31:05.0001 +01:00
-  Formatted = 2020/04/01 11:31:05.0001 +01:00
-  TimeZoneID = 1499
-  Time Zone Name = +01:00
-  UTC Time = 1/4/2020 10:31:05
-  DST Offset = 60
-ROWID = 2
-TIMECOL =
-  AsString =  14:02:10.0050 -08:00
-  Formatted = 14:02:10.0050 -08:00
-  TimeZoneID = 959
-  Time Zone Name = -08:00
-  UTC Time = 22:02:10
-  DST Offset = -480
-TIMESTAMPCOL =
-  AsString  = 11/11/1918 11:11:00.0000 00:00
-  Formatted = 1918/11/11 11:11:00.0000 Europe/London
-  TimeZoneID = 65071
-  Time Zone Name = Europe/London
-  UTC Time = 11/11/1918 11:11:00
-  DST Offset = 0
-ROWID = 3
-TIMECOL =
-  AsString =  22:02:10.0050 -08:00
-  Formatted = 22:02:10.0050 -08:00
-  TimeZoneID = 959
-  Time Zone Name = -08:00
-  UTC Time = 06:02:10
-  DST Offset = -480
-TIMESTAMPCOL =
-  AsString  = 11/11/1918 00:11:00.0000 +04:00
-  Formatted = 1918/11/11 00:11:00.0000 +04:00
-  TimeZoneID = 1679
-  Time Zone Name = +04:00
-  UTC Time = 10/11/1918 20:11:00
-  DST Offset = 240
-ROWID = 4
-TIMECOL =
-  AsString =  14:02:10.5000 -08:00
-  Formatted = 14:02:10.5000 -08:00
-  TimeZoneID = 959
-  Time Zone Name = -08:00
-  UTC Time = 22:02:10
-  DST Offset = -480
-TIMESTAMPCOL =
-  AsString  = 11/11/1918 11:11:00.0000 00:00
-  Formatted = 1918/11/11 11:11:00.0000 Europe/London
-  TimeZoneID = 65071
-  Time Zone Name = Europe/London
-  UTC Time = 11/11/1918 11:11:00
-  DST Offset = 0
-ROWID = 5
-TIMECOL =
-  AsString =  11:31:05.0001 -05:00
-  Formatted = 11:31:05.0001 America/New_York
-  TimeZoneID = 65361
-  Time Zone Name = America/New_York
-  UTC Time = 16:31:05
-  DST Offset = -300
-TIMESTAMPCOL =
-  AsString  = 4/7/2020 07:00:00.0000 -04:00
-  Formatted = 2020/07/04 07:00:00.0000 America/New_York
-  TimeZoneID = 65361
-  Time Zone Name = America/New_York
-  UTC Time = 4/7/2020 11:00:00
-  DST Offset = -240
-ROWID = 6
-TIMECOL =
-  AsString =  11:31:05.0001 -05:00
-  Formatted = 11:31:05.0001 EST5EDT
-  TimeZoneID = 65135
-  Time Zone Name = EST5EDT
-  UTC Time = 16:31:05
-  DST Offset = -300
-TIMESTAMPCOL =
-  AsString  = 1/7/2020 07:00:00.0000 -04:00
-  Formatted = 2020/07/01 07:00:00.0000 America/New_York
-  TimeZoneID = 65361
-  Time Zone Name = America/New_York
-  UTC Time = 1/7/2020 11:00:00
-  DST Offset = -240
-ROWID = 7
-TIMECOL =
-  AsString =  11:31:05.0001 +06:00
-  Formatted = 11:31:05.0001 BST
-  TimeZoneID = 65162
-  Time Zone Name = BST
-  UTC Time = 05:31:05
-  DST Offset = 360
-TIMESTAMPCOL =
-  AsString  = 1/7/2020 07:00:00.0000 -04:00
-  Formatted = 2020/07/01 07:00:00.0000 EST5EDT
-  TimeZoneID = 65135
-  Time Zone Name = EST5EDT
-  UTC Time = 1/7/2020 11:00:00
-  DST Offset = -240
-ROWID = 8
-TIMECOL =
-  AsString =  11:31:05.0001 +01:00
-  Formatted = 11:31:05.0001 Europe/Paris
-  TimeZoneID = 65061
-  Time Zone Name = Europe/Paris
-  UTC Time = 10:31:05
-  DST Offset = 60
-TIMESTAMPCOL =
-  AsString  = 1/7/2020 06:00:00.0000 -05:00
-  Formatted = 2020/07/01 06:00:00.0000 EST
-  TimeZoneID = 65136
-  Time Zone Name = EST
-  UTC Time = 1/7/2020 11:00:00
-  DST Offset = -300
-
-
-Using Extended TZ Data Type
-
-Show Parameter 2
- =
-  AsString  = 11/11/1918 00:11:00.0000 +04:00
-  Formatted = 1918/11/11 00:11:00.0000 +04:00
-  TimeZoneID = 1679
-  Time Zone Name = +04:00
-  UTC Time = 10/11/1918 20:11:00
-  DST Offset = 240
-
-FB4 Testdata_TZ
-
-Metadata
-SQLType =SQL_LONG
-sub type = 0
-Table = FB4TESTDATA_TZ
-Owner = SYSDBA
-Column Name = ROWID
-Alias Name = ROWID
-Field Name = ROWID
-Scale = 0
-Charset id = 0
-Not Null
-Size = 4
-
-SQLType =SQL_TIME_TZ_EX
-sub type = 0
-Table = FB4TESTDATA_TZ
-Owner = SYSDBA
-Column Name = TIMECOL
-Alias Name = TIMECOL
-Field Name = TIMECOL
-Scale = 0
-Charset id = 0
-Nullable
-Size = 8
-
-SQLType =SQL_TIMESTAMP_TZ_EX
-sub type = 0
-Table = FB4TESTDATA_TZ
-Owner = SYSDBA
-Column Name = TIMESTAMPCOL
-Alias Name = TIMESTAMPCOL
-Field Name = TIMESTAMPCOL
-Scale = 0
-Charset id = 0
-Nullable
-Size = 12
-
-ROWID = 1
-TIMECOL =
-  AsString =  11:32:10.0002 -05:00
-  Formatted = 11:32:10.0002 -05:00
-  TimeZoneID = 1139
-  Time Zone Name = -05:00
-  UTC Time = 16:32:10
-  DST Offset = -300
-TIMESTAMPCOL =
-  AsString  = 1/4/2020 11:31:05.0001 +01:00
-  Formatted = 2020/04/01 11:31:05.0001 +01:00
-  TimeZoneID = 1499
-  Time Zone Name = +01:00
-  UTC Time = 1/4/2020 10:31:05
-  DST Offset = 60
-ROWID = 2
-TIMECOL =
-  AsString =  14:02:10.0050 -08:00
-  Formatted = 14:02:10.0050 -08:00
-  TimeZoneID = 959
-  Time Zone Name = -08:00
-  UTC Time = 22:02:10
-  DST Offset = -480
-TIMESTAMPCOL =
-  AsString  = 11/11/1918 11:11:00.0000 00:00
-  Formatted = 1918/11/11 11:11:00.0000 Europe/London
-  TimeZoneID = 65071
-  Time Zone Name = Europe/London
-  UTC Time = 11/11/1918 11:11:00
-  DST Offset = 0
-ROWID = 3
-TIMECOL =
-  AsString =  22:02:10.0050 -08:00
-  Formatted = 22:02:10.0050 -08:00
-  TimeZoneID = 959
-  Time Zone Name = -08:00
-  UTC Time = 06:02:10
-  DST Offset = -480
-TIMESTAMPCOL =
-  AsString  = 11/11/1918 00:11:00.0000 +04:00
-  Formatted = 1918/11/11 00:11:00.0000 +04:00
-  TimeZoneID = 1679
-  Time Zone Name = +04:00
-  UTC Time = 10/11/1918 20:11:00
-  DST Offset = 240
-ROWID = 4
-TIMECOL =
-  AsString =  14:02:10.5000 -08:00
-  Formatted = 14:02:10.5000 -08:00
-  TimeZoneID = 959
-  Time Zone Name = -08:00
-  UTC Time = 22:02:10
-  DST Offset = -480
-TIMESTAMPCOL =
-  AsString  = 11/11/1918 11:11:00.0000 00:00
-  Formatted = 1918/11/11 11:11:00.0000 Europe/London
-  TimeZoneID = 65071
-  Time Zone Name = Europe/London
-  UTC Time = 11/11/1918 11:11:00
-  DST Offset = 0
-ROWID = 5
-TIMECOL =
-  AsString =  11:31:05.0001 -05:00
-  Formatted = 11:31:05.0001 America/New_York
-  TimeZoneID = 65361
-  Time Zone Name = America/New_York
-  UTC Time = 16:31:05
-  DST Offset = -300
-TIMESTAMPCOL =
-  AsString  = 4/7/2020 07:00:00.0000 -04:00
-  Formatted = 2020/07/04 07:00:00.0000 America/New_York
-  TimeZoneID = 65361
-  Time Zone Name = America/New_York
-  UTC Time = 4/7/2020 11:00:00
-  DST Offset = -240
-ROWID = 6
-TIMECOL =
-  AsString =  11:31:05.0001 -05:00
-  Formatted = 11:31:05.0001 EST5EDT
-  TimeZoneID = 65135
-  Time Zone Name = EST5EDT
-  UTC Time = 16:31:05
-  DST Offset = -300
-TIMESTAMPCOL =
-  AsString  = 1/7/2020 07:00:00.0000 -04:00
-  Formatted = 2020/07/01 07:00:00.0000 America/New_York
-  TimeZoneID = 65361
-  Time Zone Name = America/New_York
-  UTC Time = 1/7/2020 11:00:00
-  DST Offset = -240
-ROWID = 7
-TIMECOL =
-  AsString =  11:31:05.0001 +06:00
-  Formatted = 11:31:05.0001 BST
-  TimeZoneID = 65162
-  Time Zone Name = BST
-  UTC Time = 05:31:05
-  DST Offset = 360
-TIMESTAMPCOL =
-  AsString  = 1/7/2020 07:00:00.0000 -04:00
-  Formatted = 2020/07/01 07:00:00.0000 EST5EDT
-  TimeZoneID = 65135
-  Time Zone Name = EST5EDT
-  UTC Time = 1/7/2020 11:00:00
-  DST Offset = -240
-ROWID = 8
-TIMECOL =
-  AsString =  11:31:05.0001 +01:00
-  Formatted = 11:31:05.0001 Europe/Paris
-  TimeZoneID = 65061
-  Time Zone Name = Europe/Paris
-  UTC Time = 10:31:05
-  DST Offset = 60
-TIMESTAMPCOL =
-  AsString  = 1/7/2020 06:00:00.0000 -05:00
-  Formatted = 2020/07/01 06:00:00.0000 EST
-  TimeZoneID = 65136
-  Time Zone Name = EST
-  UTC Time = 1/7/2020 11:00:00
-  DST Offset = -300
-
+Skipping Firebird 4 and later test part
 
 
 Running Test 18: Firebird 4 Decfloat extensions
- FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-T4.0.0.2006 Firebird 4.0 Beta 2"
-
-FB4 Testdata_DECFloat
-
-Metadata
-SQLType =SQL_LONG
-sub type = 0
-Table = FB4TESTDATA_DECFLOAT
-Owner = SYSDBA
-Column Name = ROWID
-Alias Name = ROWID
-Field Name = ROWID
-Scale = 0
-Charset id = 0
-Not Null
-Size = 4
-
-SQLType =SQL_DEC16
-sub type = 0
-Table = FB4TESTDATA_DECFLOAT
-Owner = SYSDBA
-Column Name = FLOAT16
-Alias Name = FLOAT16
-Field Name = FLOAT16
-Scale = 0
-Charset id = 0
-Nullable
-Size = 8
-
-SQLType =SQL_DEC34
-sub type = 0
-Table = FB4TESTDATA_DECFLOAT
-Owner = SYSDBA
-Column Name = FLOAT34
-Alias Name = FLOAT34
-Field Name = FLOAT34
-Scale = 0
-Charset id = 0
-Nullable
-Size = 16
-
-SQLType =SQL_INT128
-sub type = 0
-Table = FB4TESTDATA_DECFLOAT
-Owner = SYSDBA
-Column Name = BIGNUMBER
-Alias Name = BIGNUMBER
-Field Name = BIGNUMBER
-Scale = -6
-Charset id = 0
-Nullable
-Size = 16
-
-SQLType =SQL_INT128
-sub type = 0
-Table = FB4TESTDATA_DECFLOAT
-Owner = SYSDBA
-Column Name = BIGGERNUMBER
-Alias Name = BIGGERNUMBER
-Field Name = BIGGERNUMBER
-Scale = -4
-Charset id = 0
-Nullable
-Size = 16
-
-RowID = 1
-Float16 = 64000000000.01
-  Precision = 13
-  Sign = 0
-  Special = 0
-  Places = 2
-  Digits = 64 00 00 00 00 00 
-Float34 = 123456789123456789.12345678
-  Precision = 26
-  Sign = 0
-  Special = 0
-  Places = 8
-  Digits = 12 34 56 78 91 23 45 67 89 12 34 56 78 
-BigNumber = 123456123456.123456
-  Precision = 18
-  Sign = 0
-  Special = 0
-  Places = 6
-  Digits = 12 34 56 12 34 56 12 34 56 
-RowID = 2
-Float16 = -64000000000.01
-  Precision = 13
-  Sign = 1
-  Special = 0
-  Places = 2
-  Digits = 64 00 00 00 00 00 
-Float34 = -123456789123456789.12345678
-  Precision = 26
-  Sign = 1
-  Special = 0
-  Places = 8
-  Digits = 12 34 56 78 91 23 45 67 89 12 34 56 78 
-BigNumber = -123456123456.123456
-  Precision = 18
-  Sign = 1
-  Special = 0
-  Places = 6
-  Digits = 12 34 56 12 34 56 12 34 56 
-RowID = 3
-Float16 = 64100000000.011
-  Precision = 14
-  Sign = 0
-  Special = 0
-  Places = 3
-  Digits = 64 10 00 00 00 00 11 
-Float34 = 12345678912.1200
-  Precision = 15
-  Sign = 0
-  Special = 0
-  Places = 4
-  Digits = 12 34 56 78 91 21 20 
-BigNumber = 1234561234567.123456
-  Precision = 19
-  Sign = 0
-  Special = 0
-  Places = 6
-  Digits = 12 34 56 12 34 56 71 23 45 
-BiggerNumber = 11123456123456123456123456123456.1235
-  Precision = 36
-  Sign = 0
-  Special = 0
-  Places = 4
-  Digits = 11 12 34 56 12 34 56 12 34 56 12 34 56 12 34 56 12 35 
-RowID = 4
-Float16 = 0
-  Precision = 0
-  Sign = 0
-  Special = 0
-  Places = 0
-  Digits = 
-Float34 = -1
-  Precision = 1
-  Sign = 1
-  Special = 0
-  Places = 0
-  Digits = 
-BigNumber = 0.000000
-  Precision = 0
-  Sign = 0
-  Special = 0
-  Places = 0
-  Digits = 
-BiggerNumber = 0.0000
-  Precision = 0
-  Sign = 0
-  Special = 0
-  Places = 0
-  Digits = 
-Metadata
-SQLType =SQL_LONG
-sub type = 0
-Table = FB4TESTDATA_DECFLOAT_AR
-Owner = SYSDBA
-Column Name = ROWID
-Alias Name = ROWID
-Field Name = ROWID
-Scale = 0
-Charset id = 0
-Not Null
-Size = 4
-
-SQLType =SQL_ARRAY
-sub type = 0
-Table = FB4TESTDATA_DECFLOAT_AR
-Owner = SYSDBA
-Column Name = FLOAT16
-Alias Name = FLOAT16
-Field Name = FLOAT16
-Scale = 0
-Charset id = 0
-Nullable
-Size = 8
-Array Meta Data:
-SQLType =SQL_DEC16
-Scale = 0
-Charset id = 0
-Size = 8
-Table = FB4TESTDATA_DECFLOAT_AR
-Column = FLOAT16
-Dimensions = 1
-Bounds: (0:16) 
-
-SQLType =SQL_ARRAY
-sub type = 0
-Table = FB4TESTDATA_DECFLOAT_AR
-Owner = SYSDBA
-Column Name = FLOAT34
-Alias Name = FLOAT34
-Field Name = FLOAT34
-Scale = 0
-Charset id = 0
-Nullable
-Size = 8
-Array Meta Data:
-SQLType =SQL_DEC34
-Scale = 0
-Charset id = 0
-Size = 16
-Table = FB4TESTDATA_DECFLOAT_AR
-Column = FLOAT34
-Dimensions = 1
-Bounds: (0:16) 
-
-SQLType =SQL_ARRAY
-sub type = 0
-Table = FB4TESTDATA_DECFLOAT_AR
-Owner = SYSDBA
-Column Name = BIGNUMBER
-Alias Name = BIGNUMBER
-Field Name = BIGNUMBER
-Scale = 0
-Charset id = 0
-Nullable
-Size = 8
-Array Meta Data:
-SQLType =SQL_INT128
-Scale = -6
-Charset id = 0
-Size = 16
-Table = FB4TESTDATA_DECFLOAT_AR
-Column = BIGNUMBER
-Dimensions = 1
-Bounds: (0:16) 
-
-
-Decfloat Arrays
-Float16 Array: (0: 64100000000.011) (1: 64100000001.011) (2: 64100000002.011) (3: 64100000003.011) (4: 64100000004.011) (5: 64100000005.011) (6: 64100000006.011) (7: 64100000007.011) (8: 64100000008.011) (9: 64100000009.011) (10: 64100000010.011) (11: 64100000011.011) (12: 64100000012.011) (13: 64100000013.011) (14: 64100000014.011) (15: 64100000015.011) (16: 64100000016.011) 
-
-Float34 Array: (0: 123456789123456789.12345678) (1: 123456789123456790.12345678) (2: 123456789123456791.12345678) (3: 123456789123456792.12345678) (4: 123456789123456793.12345678) (5: 123456789123456794.12345678) (6: 123456789123456795.12345678) (7: 123456789123456796.12345678) (8: 123456789123456797.12345678) (9: 123456789123456798.12345678) (10: 123456789123456799.12345678) (11: 123456789123456800.12345678) (12: 123456789123456801.12345678) (13: 123456789123456802.12345678) (14: 123456789123456803.12345678) (15: 123456789123456804.12345678) (16: 123456789123456805.12345678) 
-
-BigNumber Array: (0: 123456123400.123456) (1: 123456123401.623456) (2: 123456123403.123456) (3: 123456123404.623456) (4: 123456123406.123456) (5: 123456123407.623456) (6: 123456123409.123456) (7: 123456123410.623456) (8: 123456123412.123456) (9: 123456123413.623456) (10: 123456123415.123456) (11: 123456123416.623456) (12: 123456123418.123456) (13: 123456123419.623456) (14: 123456123421.123456) (15: 123456123422.623456) (16: 123456123424.123456) 
-
+ FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V3.0.5.33220 Firebird 3.0"
+Skipping test for Firebird 4 and later
 
 
 Test Suite Ends

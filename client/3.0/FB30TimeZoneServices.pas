@@ -906,8 +906,11 @@ begin
     {expand to a timestamp}
     gmtTimestamp := DateOf(OnDate) + gmtTime;
 
+    {re-encode as a timestamp}
     SQLEncodeDateTime(gmtTimeStamp,@(tmpTimestamp.utc_timestamp));
     tmpTimestamp.time_zone := PISC_TIME_TZ(bufptr)^.time_zone;
+
+    {Decode to local time using local TZ data}
     DecodeTimestampTZ(@tmpTimestamp,localtimestamp,dstOffset,timezone);
     time := TimeOf(localtimestamp);
   end;

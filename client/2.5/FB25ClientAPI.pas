@@ -636,9 +636,10 @@ procedure TFB25ClientAPI.SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte);
 var
   tm_date: TCTimeStructure;
   Yr, Mn, Dy, Hr, Mt, S, Ms: Word;
+  DMs: cardinal;
 begin
   DecodeDate(aDateTime, Yr, Mn, Dy);
-  DecodeTime(aDateTime, Hr, Mt, S, Ms);
+  FBDecodeTime(aDateTime, Hr, Mt, S, DMs);
   with tm_date do begin
     tm_sec := S;
     tm_min := Mt;
@@ -648,26 +649,26 @@ begin
     tm_year := Yr - 1900;
   end;
   isc_encode_date(@tm_date, PISC_QUAD(bufptr));
-  if Ms > 0 then
-    Inc(PISC_TIMESTAMP(bufptr)^.timestamp_time,Ms*10);
+  if DMs > 0 then
+    Inc(PISC_TIMESTAMP(bufptr)^.timestamp_time,DMs);
 end;
 
 function TFB25ClientAPI.SQLDecodeDateTime(bufptr: PByte): TDateTime;
 var
   tm_date: TCTimeStructure;
-  msecs: Word;
+  Dmsecs: Word;
 begin
   isc_decode_date(PISC_QUAD(bufptr), @tm_date);
   try
     result := EncodeDate(Word(tm_date.tm_year + 1900), Word(tm_date.tm_mon + 1),
                         Word(tm_date.tm_mday));
-    msecs := (PISC_TIMESTAMP(bufptr)^.timestamp_time mod 10000) div 10;
+    Dmsecs := PISC_TIMESTAMP(bufptr)^.timestamp_time mod 10000;
     if result >= 0 then
-      result := result + EncodeTime(Word(tm_date.tm_hour), Word(tm_date.tm_min),
-                                    Word(tm_date.tm_sec), msecs)
+      result := result + FBEncodeTime(Word(tm_date.tm_hour), Word(tm_date.tm_min),
+                                    Word(tm_date.tm_sec), Dmsecs)
     else
-      result := result - EncodeTime(Word(tm_date.tm_hour), Word(tm_date.tm_min),
-                                    Word(tm_date.tm_sec), msecs)
+      result := result - FBEncodeTime(Word(tm_date.tm_hour), Word(tm_date.tm_min),
+                                    Word(tm_date.tm_sec), Dmsecs)
   except
     on E: EConvertError do begin
       IBError(ibxeInvalidDataConversion, [nil]);
@@ -684,7 +685,7 @@ begin
   while isc_interprete(@local_buffer,@psb) > 0 do
   begin
     if (Result <> '') and (Result[Length(Result)] <> LF) then
-      Result := Result + LineEnding;
+      Result := Result + LineEnding + '-';
     Result := Result + strpas(local_buffer);
   end;
 end;

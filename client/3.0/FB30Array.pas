@@ -77,6 +77,7 @@ type
     FTransactionIntf: Firebird.ITransaction;
     FFirebird30ClientAPI: TFB30ClientAPI;
     FSDL: ISDL;
+    procedure GenerateSDL;
   protected
     procedure AllocateBuffer; override;
     procedure InternalGetSlice; override;
@@ -84,7 +85,7 @@ type
   public
     constructor Create(aAttachment: TFB30Attachment; aTransaction: TFB30Transaction; aField: IArrayMetaData); overload;
     constructor Create(aAttachment: TFB30Attachment; aTransaction: TFB30Transaction; aField: IArrayMetaData; ArrayID: TISC_QUAD); overload;
- end;
+  end;
 
   TSDLItem = class(TParamBlockItem,ISDLItem);
 
@@ -185,7 +186,7 @@ end;
 
 { TFB30Array }
 
-procedure TFB30Array.AllocateBuffer;
+procedure TFB30Array.GenerateSDL;
 
   procedure AddVarInteger(aValue: integer);
   begin
@@ -201,9 +202,6 @@ procedure TFB30Array.AllocateBuffer;
 var i: integer;
     SDLItem: ISDLItem;
 begin
-  inherited AllocateBuffer;
-  {Now set up the SDL}
-
   FSDL := TSDLBlock.Create(FFirebird30ClientAPI);
   with GetArrayDesc^ do
   {The following is based on gen_SDL from Firebird src/dsql/array.cpp}
@@ -248,6 +246,14 @@ begin
     end;
     FSDL.Add(isc_sdl_eoc);
   end;
+end;
+
+procedure TFB30Array.AllocateBuffer;
+
+begin
+  inherited AllocateBuffer;
+  {Now set up the SDL}
+  GenerateSDL;
 end;
 
 procedure TFB30Array.InternalGetSlice;

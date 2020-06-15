@@ -564,7 +564,7 @@ begin
     if (ShowSQLCode in IBDataBaseErrorMessages) or
        (ShowSQLMessage in IBDataBaseErrorMessages) then
       Result := Result + LineEnding;
-    Result := Result + LineEnding + FOwner.FormatStatus(self);
+    Result := Result + FOwner.FormatStatus(self);
   end;
   if (Result <> '') and (Result[Length(Result)] = '.') then
     Delete(Result, Length(Result), 1);

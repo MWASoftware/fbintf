@@ -82,6 +82,8 @@ FBINTF Change Log  version          (1.2-0 Build 12022) Fri, 17 Apr 2020 10:35:5
     are searched for the Firebird client library. Only if none is found, is the default
     client library used.
 
+16. Legacy API driver: time is now decoded to resolution of 10^-4 seconds.
+
 FBINTF Change Log  version          (1.1-5 Build 12022) Fri, 17 Apr 2020 10:35:55 +0100
 
 1. ISQLParams.GetHasCaseSensitiveParams added. Returns true if param names are

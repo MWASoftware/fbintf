@@ -53,12 +53,16 @@ if not EXIST "%DIFF%" (
 
 echo Comparing results with reference log
 echo(
+findstr /C:"ODS Major Version = 11" testout.log
+IF ERRORLEVEL 1 (
+  %DIFF% FB2reference.log testout.log >diff.log
+) ELSE (
 findstr /C:"ODS Major Version = 13" testout.log
 IF ERRORLEVEL 1 (
-  %DIFF% reference.log testout.log >diff.log
+  %DIFF% FB3reference.log testout.log >diff.log
 ) ELSE (
   %DIFF% FB4reference.log testout.log >diff.log
-)
+))
 type diff.log
 rd /s /q testunits
 del testsuite.exe

@@ -222,7 +222,7 @@ begin
 
   Statement.SQLParams[0].AsInteger := 2;
   Statement.SQLParams[1].AsDate := EncodeDate(1939,9,3);
-  Statement.SQLParams[2].AsTime := EncodeTime(15,40,0,0);
+  Statement.SQLParams[2].AsTime := FBEncodeTime(15,40,0,2);
   Statement.SQLParams[3].AsDateTime := EncodeDate(1918,11,11) + EncodeTime(11,11,0,0);
   Statement.Execute;
 
