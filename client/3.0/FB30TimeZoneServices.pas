@@ -1007,8 +1007,9 @@ begin
   with FFirebird30ClientAPI do
   if Trim(aTimeZone) = '' then
   begin
-    if TZDataTimeZoneID <> '' then
-      Result := LookupTimeZoneID(GetLocalTimeZoneName)
+    aTimeZone := GetLocalTimeZoneName;
+    if aTimeZone <> '' then
+      Result := LookupTimeZoneID(aTimeZone)
     else
       Result := -LocalTimeOffset + TimeZoneID_GMT //use current local time offset
   end
@@ -1090,8 +1091,8 @@ begin
     if FServerTZName <> '' then
       Result := FServerTZName
     else
-    {Otherwise use the (short form) local time zone name}
-      Result := LocalTimeZoneName;
+    {Otherwise use local time offset}
+      Result := FormatTimeZoneOffset(-LocalTimeOffset);
   end;
 end;
 
