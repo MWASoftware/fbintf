@@ -25,7 +25,8 @@ uses
   Test16 in 'Test16.pas',
   Test17 in 'Test17.pas',
   Firebird,
-  TestManager in 'TestManager.pas';
+  TestManager in 'TestManager.pas',
+  Test18 in 'Test18.pas';
 
 procedure WriteHelp;
 begin
@@ -123,7 +124,7 @@ begin
     {$IFEND}
 
     writeln(OutFile,'Firebird Client API Test Suite');
-    writeln(OutFile,'Copyright MWA Software 2016');
+    writeln(OutFile,'Copyright MWA Software 2016-2020');
     writeln(OutFile);
     writeln(OutFile,'Starting Tests');
     writeln(OutFile,'Client API Version = ',TestMgr.FirebirdAPI.GetImplementationVersion);
@@ -133,6 +134,7 @@ begin
       writeln(OutFile,'Firebird Bin Directory = ', IMaster(TestMgr.FirebirdAPI.GetIMaster).getConfigManager.getDirectory(IConfigManager.DIR_BIN));
       writeln(OutFile,'Firebird Conf Directory = ', IMaster(TestMgr.FirebirdAPI.GetIMaster).getConfigManager.getDirectory(IConfigManager.DIR_CONF));
     end;
+    writeln(OutFile,'Firebird Client Library Path = ',TestMgr.FirebirdAPI.GetFBLibrary.GetLibraryFilePath);
 
     if FTestID = 0 then
       TestMgr.RunAll
