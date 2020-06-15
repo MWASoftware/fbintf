@@ -149,7 +149,6 @@
       <Unit19>
         <Filename Value="Test17.pas"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
         <TopLine Value="206"/>
         <CursorPos X="58" Y="225"/>
@@ -242,7 +241,7 @@
         <EditorIndex Value="4"/>
         <TopLine Value="415"/>
         <CursorPos X="3" Y="443"/>
-        <UsageCount Value="38"/>
+        <UsageCount Value="39"/>
         <Loaded Value="True"/>
       </Unit28>
       <Unit29>
@@ -250,7 +249,7 @@
         <EditorIndex Value="1"/>
         <TopLine Value="637"/>
         <CursorPos X="51" Y="653"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="11"/>
         <Loaded Value="True"/>
       </Unit29>
       <Unit30>
@@ -444,15 +443,16 @@
       </Unit56>
       <Unit57>
         <Filename Value="../changelog"/>
+        <IsVisibleTab Value="True"/>
         <TopLine Value="61"/>
-        <CursorPos X="66" Y="85"/>
+        <CursorPos Y="84"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
           <WindowIndex Value="1"/>
           <CursorPos X="38" Y="15"/>
         </ExtraEditor1>
-        <UsageCount Value="60"/>
+        <UsageCount Value="61"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit57>
