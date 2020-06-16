@@ -164,7 +164,7 @@ begin
   ResultSet := Statement.OpenCursor;
   while ResultSet.FetchNext do
   begin
-    writeln('Row No ',ResultSet[0].AsInteger);
+    writeln(OutFile,'Row No ',ResultSet[0].AsInteger);
     write(OutFile,'Float16 ');
     ar := ResultSet[1].AsArray;
     WriteArray(ar);
