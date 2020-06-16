@@ -96,10 +96,10 @@ begin
   Statement.Execute;
 
   Statement.SQLParams[0].AsInteger := 4;
-  Statement.SQLParams[1].AsBCD := 0;
-  Statement.SQLParams[2].AsBCD := -1;
-  Statement.SQLParams[3].AsBCD := 0;
-  Statement.SQLParams[4].AsBCD := 0;
+  Statement.SQLParams[1].AsBCD := StrToBCD('0');
+  Statement.SQLParams[2].AsBCD := StrToBCD('-1');
+  Statement.SQLParams[3].AsBCD := StrToBCD('0');
+  Statement.SQLParams[4].AsBCD := StrToBCD('0');
   Statement.Execute;
 end;
 
@@ -123,7 +123,7 @@ begin
   for i := 0 to 16 do
   begin
     ar.SetAsBcd(i,value);
-    value := value + 1;
+    BcdAdd(value,IntegerToBCD(1),Value);
   end;
 
   Statement := Attachment.Prepare(Transaction,'Update FB4TestData_DECFloat_AR Set Float16 = ? Where RowID = 1');
@@ -136,7 +136,7 @@ begin
   for i := 0 to 16 do
   begin
     ar.SetAsBcd(i,value);
-    value := value + 1;
+    BcdAdd(value,IntegerToBCD(1),Value);
   end;
 
   Statement := Attachment.Prepare(Transaction,'Update FB4TestData_DECFloat_AR Set Float34 = ? Where RowID = 1');
@@ -150,7 +150,7 @@ begin
   for i := 0 to 16 do
   begin
     ar.SetAsBcd(i,value);
-    value := value + 1.5;
+    BcdAdd(value,DoubleToBCD(1.5),value);
   end;
 
   Statement := Attachment.Prepare(Transaction,'Update FB4TestData_DECFloat_AR Set BigNumber = ? Where RowID = 1');
