@@ -146,16 +146,18 @@ begin
 end;
 
 procedure TTestBase.DumpBCD(bcd: tBCD);
-var i: integer;
+var i,l: integer;
 begin
   with bcd do
   begin
-    writeln(OutFile,'  Precision = ',Precision);
+    writeln(OutFile,'  Precision = ',bcd.Precision);
     writeln(OutFile,'  Sign = ',(SignSpecialPlaces and $80) shr 7);
     writeln(OutFile,'  Special = ', (SignSpecialPlaces and $40) shl 6);
     writeln(OutFile,'  Places = ', SignSpecialPlaces and $7F);
     write(OutFile,'  Digits = ');
-    for i := 0 to (Precision DIV 2 ) - 1 do
+    l := Precision div 2;
+    if not odd(Precision) then l := l - 1;
+    for i := 0 to l do
       write(OutFile,Format('%.2x',[Fraction[i]]),' ');
     writeln(OutFile);
   end;

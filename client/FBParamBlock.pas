@@ -683,7 +683,7 @@ end;
 
 function TParamBlock.getDataLength: integer;
 begin
-  Result :=  FDataLength
+  Result :=  FDataLength;
 end;
 
 function TParamBlock.AvailableBufferSpace: integer;
@@ -753,7 +753,7 @@ end;
 procedure TParamBlock.PrintBuf;
 var i: integer;
 begin
-  write(ClassName,': ');
+  write(ClassName,': (',getDataLength,') ');
   for i := 0 to getDataLength - 1 do
     write(Format('%x ',[byte(FBuffer[i])]));
   writeln

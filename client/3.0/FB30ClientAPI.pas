@@ -465,9 +465,8 @@ var DecFloat16: IDecFloat16;
     var i,j: integer;
     begin
       Fillchar(buffer,sizeof(buffer),0);
-      if aValue.Precision > width then
-        IBError(ibxeBCDTooBig,[aValue.Precision,width]);
-
+      if BCDPrecision(aValue) > width then
+        IBError(ibxeBCDTooBig,[BCDPrecision(aValue),width]);
       j := 1 + (width - aValue.Precision);
       for i := 0 to (aValue.Precision - 1) div 2 do
       if j <= width then

@@ -1958,7 +1958,7 @@ begin
 
 
   with FFirebirdClientAPI do
-  if BCDPrecision(aValue) <= 16 then
+  if aValue.Precision <= 16 then
   begin
     if not HasDecFloatSupport then
       IBError(ibxeDecFloatNotSupported,[]);
@@ -1968,7 +1968,7 @@ begin
     SQLDecFloatEncode(aValue,SQLType,SQLData);
   end
   else
-  if BCDPrecision(aValue) <= 34 then
+  if aValue.Precision <= 34 then
   begin
     if not HasDecFloatSupport then
       IBError(ibxeDecFloatNotSupported,[]);
@@ -1978,7 +1978,7 @@ begin
     SQLDecFloatEncode(aValue,SQLType,SQLData);
   end
   else
-  if BCDPrecision(aValue) <= 38 then
+  if aValue.Precision <= 38 then
   begin
     if not HasInt128Support then
       IBError(ibxeInt128NotSupported,[]);
