@@ -543,7 +543,7 @@ function TFB30TimeZoneServices.GetDstOffset(timestamp: TDateTime;
 var TimeZoneInfo: PTimeZoneInfo;
 begin
   if DateOf(timestamp) = 0 then
-    IBError(ibxeDatePartMissing,[DateTimeToStr(timestamp)]);
+    timestamp := timestamp + GetTimeTZDate;
   if FInLoadTimeZoneData then
     Result := 0 {Assume GMT}
   else
@@ -577,7 +577,7 @@ var gmtTimeStamp: TDateTime;
     Buffer: ISC_TIMESTAMP_TZ;
 begin
   if DateOf(timestamp) = 0 then
-    IBError(ibxeDatePartMissing,[DateTimeToStr(timestamp)]);
+    timestamp := timestamp + GetTimeTZDate;
   if not FUsingRemoteTZDB then
   begin
     EncodeTimestampTZ(timestamp,timezone,@Buffer);
