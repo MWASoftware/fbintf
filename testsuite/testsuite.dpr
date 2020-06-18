@@ -6,9 +6,7 @@ program testsuite;
 
 uses
   SysUtils,
-  IB,
   Test1 in 'Test1.pas',
-  test2 in 'test2.pas',
   Test3 in 'Test3.pas',
   Test4 in 'Test4.pas',
   Test5 in 'Test5.pas',
@@ -24,135 +22,16 @@ uses
   Test15 in 'Test15.pas',
   Test16 in 'Test16.pas',
   Test17 in 'Test17.pas',
-  Firebird,
-  TestManager in 'TestManager.pas',
-  Test18 in 'Test18.pas';
-
-procedure WriteHelp;
-begin
-  { add your help code here }
-  writeln(OutFile,'Usage: ', ParamStr(0), ' -h');
-end;
-
-function GetCmdLineValue(const Switch: string; var aValue: string): boolean;
-var i: integer;
-begin
-  Result := FindCmdLineSwitch(Switch,false);
-  if Result then
-  begin
-    for i := 0 to ParamCount do
-      if (ParamStr(i) = '-' + Switch) and (i <= ParamCount) then
-      begin
-        aValue := ParamStr(i+1);
-        exit;
-      end;
-    Result := false;
-  end;
-end;
-
+  Test18 in 'Test18.pas',
+  Test2 in 'Test2.pas',
+  TestApplication in 'testApp\TestApplication.pas',
+  FBTestApp in 'FBTestApp.pas';
 
 var
-  FTestID: integer;
-  aValue: string;
-  DoPrompt: boolean;
+  Application: TTestApplication;
 begin
-  try
-
-  FTestID := 0;
-  AssignFile(OutFile,'');
-  ReWrite(outFile);
-
-  
-  // parse parameters
-  if FindCmdLineSwitch('h') or FindCmdLineSwitch('help') then
-  begin
-    WriteHelp;
-    Exit;
-  end;
-
-  if GetCmdLineValue('t',aValue) then
-    FTestID := StrToInt(aValue);
-
-  DoPrompt := GetCmdLineValue('X',aValue);
-
-  if TestMgr <> nil then
-  begin
-    if GetCmdLineValue('u',aValue) or GetCmdLineValue('user',aValue) then
-      TestMgr.SetUserName(aValue);
-
-    if GetCmdLineValue('p',aValue) or GetCmdLineValue('passwd',aValue) then
-      TestMgr.SetPassword(aValue);
-
-    if GetCmdLineValue('e',aValue) or GetCmdLineValue('employeedb',aValue) then
-      TestMgr.SetEmployeeDatabaseName(aValue);
-
-    if GetCmdLineValue('n',aValue) or GetCmdLineValue('newdbname',aValue) then
-      TestMgr.SetNewDatabaseName(aValue);
-
-    if GetCmdLineValue('s',aValue) or GetCmdLineValue('secondnewdbname',aValue) then
-      TestMgr.SetSecondNewDatabaseName(aValue);
-
-    if GetCmdLineValue('b',aValue) or GetCmdLineValue('backupfile',aValue) then
-      TestMgr.SetBackupFileName(aValue);
-
-    if GetCmdLineValue('r',aValue) or GetCmdLineValue('server',aValue) then
-      TestMgr.SetServerName(aValue);
-
-    if GetCmdLineValue('P',aValue) or GetCmdLineValue('port',aValue) then
-      TestMgr.SetPortNum(aValue);
-
-    if GetCmdLineValue('l',aValue) or GetCmdLineValue('fbclientlibrary',aValue) then
-      TestMgr.SetClientLibraryPath(aValue);
-
-    if GetCmdLineValue('o',aValue) or GetCmdLineValue('outfile',aValue) then
-    begin
-      system.Assign(outFile,aValue);
-      ReWrite(outFile);
-    end;
-
-    TestMgr.ShowStatistics := FindCmdLineSwitch('S',false) or FindCmdLineSwitch('stats');
-
-    {Ensure consistent date reporting across platforms}
-    {$IF declared(FormatSettings)}
-    FormatSettings.ShortDateFormat := 'd/m/yyyy';
-    FormatSettings.LongTimeFormat := 'HH:MM:SS';
-    FormatSettings.DateSeparator := '/';
-    {$ELSE}
-    ShortDateFormat := 'd/m/yyyy';
-    LongTimeFormat := 'HH:MM:SS';
-    DateSeparator := '/';
-    {$IFEND}
-
-    writeln(OutFile,'Firebird Client API Test Suite');
-    writeln(OutFile,'Copyright MWA Software 2016-2020');
-    writeln(OutFile);
-    writeln(OutFile,'Starting Tests');
-    writeln(OutFile,'Client API Version = ',TestMgr.FirebirdAPI.GetImplementationVersion);
-    writeln(OutFile,'Firebird Environment Variable = ',GetEnvironmentVariable('FIREBIRD'));
-    if TestMgr.FirebirdAPI.GetClientMajor >= 3 then
-    begin
-      writeln(OutFile,'Firebird Bin Directory = ', IMaster(TestMgr.FirebirdAPI.GetIMaster).getConfigManager.getDirectory(IConfigManager.DIR_BIN));
-      writeln(OutFile,'Firebird Conf Directory = ', IMaster(TestMgr.FirebirdAPI.GetIMaster).getConfigManager.getDirectory(IConfigManager.DIR_CONF));
-    end;
-    writeln(OutFile,'Firebird Client Library Path = ',TestMgr.FirebirdAPI.GetFBLibrary.GetLibraryFilePath);
-
-    if FTestID = 0 then
-      TestMgr.RunAll
-    else
-      TestMgr.Run(FTestID);
-    TestMgr.Free;
-  end;
-
-  writeln(OutFile,'Test Suite Ends');
-  Flush(OutFile);
-  if DoPrompt then
-  begin
-    write('Press Enter to continue');
-    readln; {when running from IDE and console window closes before you can view results}
-  end;
-
-  except
-    on E: Exception do
-      Writeln(E.ClassName, ': ', E.Message);
-  end;
+  Application := TTestApplication.Create(nil);
+  Application.Title:='Firebird API Test Suite';
+  Application.Run;
+  Application.Free;
 end.

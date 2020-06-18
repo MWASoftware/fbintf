@@ -1,6 +1,13 @@
 unit FBTestApp;
 
-{$mode objfpc}{$H+}
+{$IFDEF MSWINDOWS}
+{$DEFINE WINDOWS}
+{$ENDIF}
+
+{$IFDEF FPC}
+{$mode delphi}
+{$codepage utf8}
+{$ENDIF}
 
 interface
 

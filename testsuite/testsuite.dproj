@@ -60,7 +60,6 @@
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
 			<DCCReference Include="Test1.pas"/>
-			<DCCReference Include="test2.pas"/>
 			<DCCReference Include="Test3.pas"/>
 			<DCCReference Include="Test4.pas"/>
 			<DCCReference Include="Test5.pas"/>
@@ -76,8 +75,10 @@
 			<DCCReference Include="Test15.pas"/>
 			<DCCReference Include="Test16.pas"/>
 			<DCCReference Include="Test17.pas"/>
-			<DCCReference Include="TestManager.pas"/>
 			<DCCReference Include="Test18.pas"/>
+			<DCCReference Include="Test2.pas"/>
+			<DCCReference Include="testApp\TestApplication.pas"/>
+			<DCCReference Include="FBTestApp.pas"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>
@@ -103,7 +104,7 @@
 						<Parameters Name="UseLauncher">False</Parameters>
 						<Parameters Name="LoadAllSymbols">True</Parameters>
 						<Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
-						<Parameters Name="RunParams">-t 11</Parameters>
+						<Parameters Name="RunParams">-t 1 -X</Parameters>
 					</Parameters>
 					<VersionInfo>
 						<VersionInfo Name="IncludeVerInfo">False</VersionInfo>
