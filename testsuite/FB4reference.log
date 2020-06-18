@@ -2360,7 +2360,7 @@ DATED = 2016/04/01 09:30:00.1000
 NOTES = Écoute moi (Charset Id = 4 Codepage = 65001)
 MYARRAY = Array: (0: 100) (1: 99) (2: 98) (3: 97) (4: 96) (5: 95) (6: 94) (7: 93) (8: 92) (9: 91) (10: 90) (11: 89) (12: 88) (13: 87) (14: 86) (15: 85) (16: 84) 
 
-MYARRAY2 = Array: (0: 1/5/2020 12:00:00) (1: 1/5/2020 12:01:00) (2: 1/5/2020 12:02:00) (3: 1/5/2020 12:03:00) (4: 1/5/2020 12:04:00) (5: 1/5/2020 12:05:00) (6: 1/5/2020 12:06:00) (7: 1/5/2020 12:07:00) (8: 1/5/2020 12:08:00) (9: 1/5/2020 12:09:00) (10: 1/5/2020 12:10:00) (11: 1/5/2020 12:11:00) (12: 1/5/2020 12:12:00) (13: 1/5/2020 12:13:00) (14: 1/5/2020 12:14:00) (15: 1/5/2020 12:15:00) (16: 1/5/2020 12:16:00) 
+MYARRAY2 = Array: (0: 01/5/2020 12:00:00) (1: 01/5/2020 12:01:00) (2: 01/5/2020 12:02:00) (3: 01/5/2020 12:03:00) (4: 01/5/2020 12:04:00) (5: 01/5/2020 12:05:00) (6: 01/5/2020 12:06:00) (7: 01/5/2020 12:07:00) (8: 01/5/2020 12:08:00) (9: 01/5/2020 12:09:00) (10: 01/5/2020 12:10:00) (11: 01/5/2020 12:11:00) (12: 01/5/2020 12:12:00) (13: 01/5/2020 12:13:00) (14: 01/5/2020 12:14:00) (15: 01/5/2020 12:15:00) (16: 01/5/2020 12:16:00) 
 
 MYARRAY3 = Array: (0: 0) (1: 1.04) (2: 2.09) (3: 3.15) (4: 4.19) (5: 5.25) (6: 6.3) (7: 7.34) (8: 8.39) (9: 9.44) (10: 10.5) (11: 11.55) (12: 12.6) (13: 13.64) (14: 14.69) (15: 15.75) (16: 16.79) 
 
@@ -2376,7 +2376,7 @@ DATED = 2016/04/01 09:30:00.1000
 NOTES = Écoute moi (Charset Id = 4 Codepage = 65001)
 MYARRAY = Array: (0: 100) (1: 99) (2: 1000) (3: 97) (4: 96) (5: 95) (6: 94) (7: 93) (8: 92) (9: 91) (10: 90) (11: 89) (12: 88) (13: 87) (14: 86) (15: 85) (16: 84) 
 
-MYARRAY2 = Array: (0: 1/5/2020 12:00:00) (1: 1/5/2020 12:01:00) (2: 1/5/2020 12:02:00) (3: 1/5/2020 12:03:00) (4: 1/5/2020 12:04:00) (5: 1/5/2020 12:05:00) (6: 1/5/2020 12:06:00) (7: 1/5/2020 12:07:00) (8: 1/5/2020 12:08:00) (9: 1/5/2020 12:09:00) (10: 1/5/2020 12:10:00) (11: 1/5/2020 12:11:00) (12: 1/5/2020 12:12:00) (13: 1/5/2020 12:13:00) (14: 1/5/2020 12:14:00) (15: 1/5/2020 12:15:00) (16: 1/5/2020 12:16:00) 
+MYARRAY2 = Array: (0: 01/5/2020 12:00:00) (1: 01/5/2020 12:01:00) (2: 01/5/2020 12:02:00) (3: 01/5/2020 12:03:00) (4: 01/5/2020 12:04:00) (5: 01/5/2020 12:05:00) (6: 01/5/2020 12:06:00) (7: 01/5/2020 12:07:00) (8: 01/5/2020 12:08:00) (9: 01/5/2020 12:09:00) (10: 01/5/2020 12:10:00) (11: 01/5/2020 12:11:00) (12: 01/5/2020 12:12:00) (13: 01/5/2020 12:13:00) (14: 01/5/2020 12:14:00) (15: 01/5/2020 12:15:00) (16: 01/5/2020 12:16:00) 
 
 MYARRAY3 = Array: (0: 0) (1: 1.04) (2: 2.09) (3: 3.15) (4: 4.19) (5: 5.25) (6: 6.3) (7: 7.34) (8: 8.39) (9: 9.44) (10: 10.5) (11: 11.55) (12: 12.6) (13: 13.64) (14: 14.69) (15: 15.75) (16: 16.79) 
 
@@ -2588,7 +2588,6 @@ Limbo Transactions
 
 
 Local Backup
-
 
 
 
@@ -2889,10 +2888,10 @@ TIMESTAMPCOL = 1945/05/08 22:10:00.0010
 
 Testdata - second pass
 
-1, 1/4/2019, 11:31:05, 29/2/2016 22:02:35
-2, 3/9/1939, 15:40:00.000, 11/11/1918 11:11:00
+1, 01/4/2019, 11:31:05, 29/2/2016 22:02:35
+2, 03/9/1939, 15:40:00.000, 11/11/1918 11:11:00
 3, 14/10/1066, 23:59:59.999, 11/11/1918 11:11:00
-4, 18/6/1815, 00:01:40.112, 8/5/1945 22:10:00
+4, 18/6/1815, 00:01:40.112, 08/5/1945 22:10:00
 Sys Time = 1945, 5, 8, 2, 22, 10, 0, 1
 
 Firebird 4 extension types
@@ -2919,7 +2918,7 @@ Time Zone Offset = 0
 Time Zone Offset = 60
 Time Zone Offset = Bad Timestamp or missing time zone DB entry (26/3/1989 01:30:00) TZ ID = 65071
 Date = 29/11/1969 23:30:00, TimeZone = GMT
-Date = 1/4/2001 22:30:10.0010, TimeZone = -08:00
+Date = 01/4/2001 22:30:10.0010, TimeZone = -08:00
 Time = 23:59:10.2000, TimeZone = Europe/London
 Show Parameter 2
  =
@@ -2978,11 +2977,11 @@ TIMECOL =
   UTC Time = 16:32:10
   DST Offset = -300
 TIMESTAMPCOL =
-  AsString  = 1/4/2020 11:31:05.0001 +01:00
+  AsString  = 01/4/2020 11:31:05.0001 +01:00
   Formatted = 2020/04/01 11:31:05.0001 +01:00
   TimeZoneID = 1499
   Time Zone Name = +01:00
-  UTC Time = 1/4/2020 10:31:05
+  UTC Time = 01/4/2020 10:31:05
   DST Offset = 60
 ROWID = 2
 TIMECOL =
@@ -3038,11 +3037,11 @@ TIMECOL =
   UTC Time = 16:31:05
   DST Offset = -300
 TIMESTAMPCOL =
-  AsString  = 4/7/2020 07:00:00.0000 -04:00
+  AsString  = 04/7/2020 07:00:00.0000 -04:00
   Formatted = 2020/07/04 07:00:00.0000 America/New_York
   TimeZoneID = 65361
   Time Zone Name = America/New_York
-  UTC Time = 4/7/2020 11:00:00
+  UTC Time = 04/7/2020 11:00:00
   DST Offset = -240
 ROWID = 6
 TIMECOL =
@@ -3053,11 +3052,11 @@ TIMECOL =
   UTC Time = 16:31:05
   DST Offset = -300
 TIMESTAMPCOL =
-  AsString  = 1/7/2020 07:00:00.0000 -04:00
+  AsString  = 01/7/2020 07:00:00.0000 -04:00
   Formatted = 2020/07/01 07:00:00.0000 America/New_York
   TimeZoneID = 65361
   Time Zone Name = America/New_York
-  UTC Time = 1/7/2020 11:00:00
+  UTC Time = 01/7/2020 11:00:00
   DST Offset = -240
 ROWID = 7
 TIMECOL =
@@ -3068,11 +3067,11 @@ TIMECOL =
   UTC Time = 05:31:05
   DST Offset = 360
 TIMESTAMPCOL =
-  AsString  = 1/7/2020 07:00:00.0000 -04:00
+  AsString  = 01/7/2020 07:00:00.0000 -04:00
   Formatted = 2020/07/01 07:00:00.0000 EST5EDT
   TimeZoneID = 65135
   Time Zone Name = EST5EDT
-  UTC Time = 1/7/2020 11:00:00
+  UTC Time = 01/7/2020 11:00:00
   DST Offset = -240
 ROWID = 8
 TIMECOL =
@@ -3083,11 +3082,11 @@ TIMECOL =
   UTC Time = 10:31:05
   DST Offset = 60
 TIMESTAMPCOL =
-  AsString  = 1/7/2020 06:00:00.0000 -05:00
+  AsString  = 01/7/2020 06:00:00.0000 -05:00
   Formatted = 2020/07/01 06:00:00.0000 EST
   TimeZoneID = 65136
   Time Zone Name = EST
-  UTC Time = 1/7/2020 11:00:00
+  UTC Time = 01/7/2020 11:00:00
   DST Offset = -300
 
 
@@ -3110,7 +3109,7 @@ Time Zone Offset = 0
 Time Zone Offset = 60
 Time Zone Offset = 0
 Date = 29/11/1969 23:30:00, TimeZone = GMT
-Date = 1/4/2001 22:30:10.0010, TimeZone = -08:00
+Date = 01/4/2001 22:30:10.0010, TimeZone = -08:00
 Time = 23:59:10.2000, TimeZone = Europe/London
 Show Parameter 2
  =
@@ -3169,11 +3168,11 @@ TIMECOL =
   UTC Time = 16:32:10
   DST Offset = -300
 TIMESTAMPCOL =
-  AsString  = 1/4/2020 11:31:05.0001 +01:00
+  AsString  = 01/4/2020 11:31:05.0001 +01:00
   Formatted = 2020/04/01 11:31:05.0001 +01:00
   TimeZoneID = 1499
   Time Zone Name = +01:00
-  UTC Time = 1/4/2020 10:31:05
+  UTC Time = 01/4/2020 10:31:05
   DST Offset = 60
 ROWID = 2
 TIMECOL =
@@ -3229,11 +3228,11 @@ TIMECOL =
   UTC Time = 16:31:05
   DST Offset = -300
 TIMESTAMPCOL =
-  AsString  = 4/7/2020 07:00:00.0000 -04:00
+  AsString  = 04/7/2020 07:00:00.0000 -04:00
   Formatted = 2020/07/04 07:00:00.0000 America/New_York
   TimeZoneID = 65361
   Time Zone Name = America/New_York
-  UTC Time = 4/7/2020 11:00:00
+  UTC Time = 04/7/2020 11:00:00
   DST Offset = -240
 ROWID = 6
 TIMECOL =
@@ -3244,11 +3243,11 @@ TIMECOL =
   UTC Time = 16:31:05
   DST Offset = -300
 TIMESTAMPCOL =
-  AsString  = 1/7/2020 07:00:00.0000 -04:00
+  AsString  = 01/7/2020 07:00:00.0000 -04:00
   Formatted = 2020/07/01 07:00:00.0000 America/New_York
   TimeZoneID = 65361
   Time Zone Name = America/New_York
-  UTC Time = 1/7/2020 11:00:00
+  UTC Time = 01/7/2020 11:00:00
   DST Offset = -240
 ROWID = 7
 TIMECOL =
@@ -3259,11 +3258,11 @@ TIMECOL =
   UTC Time = 05:31:05
   DST Offset = 360
 TIMESTAMPCOL =
-  AsString  = 1/7/2020 07:00:00.0000 -04:00
+  AsString  = 01/7/2020 07:00:00.0000 -04:00
   Formatted = 2020/07/01 07:00:00.0000 EST5EDT
   TimeZoneID = 65135
   Time Zone Name = EST5EDT
-  UTC Time = 1/7/2020 11:00:00
+  UTC Time = 01/7/2020 11:00:00
   DST Offset = -240
 ROWID = 8
 TIMECOL =
@@ -3274,11 +3273,11 @@ TIMECOL =
   UTC Time = 10:31:05
   DST Offset = 60
 TIMESTAMPCOL =
-  AsString  = 1/7/2020 06:00:00.0000 -05:00
+  AsString  = 01/7/2020 06:00:00.0000 -05:00
   Formatted = 2020/07/01 06:00:00.0000 EST
   TimeZoneID = 65136
   Time Zone Name = EST
-  UTC Time = 1/7/2020 11:00:00
+  UTC Time = 01/7/2020 11:00:00
   DST Offset = -300
 
 
@@ -3341,11 +3340,11 @@ TIMECOL =
   UTC Time = 16:32:10
   DST Offset = -300
 TIMESTAMPCOL =
-  AsString  = 1/4/2020 11:31:05.0001 +01:00
+  AsString  = 01/4/2020 11:31:05.0001 +01:00
   Formatted = 2020/04/01 11:31:05.0001 +01:00
   TimeZoneID = 1499
   Time Zone Name = +01:00
-  UTC Time = 1/4/2020 10:31:05
+  UTC Time = 01/4/2020 10:31:05
   DST Offset = 60
 ROWID = 2
 TIMECOL =
@@ -3401,11 +3400,11 @@ TIMECOL =
   UTC Time = 16:31:05
   DST Offset = -300
 TIMESTAMPCOL =
-  AsString  = 4/7/2020 07:00:00.0000 -04:00
+  AsString  = 04/7/2020 07:00:00.0000 -04:00
   Formatted = 2020/07/04 07:00:00.0000 America/New_York
   TimeZoneID = 65361
   Time Zone Name = America/New_York
-  UTC Time = 4/7/2020 11:00:00
+  UTC Time = 04/7/2020 11:00:00
   DST Offset = -240
 ROWID = 6
 TIMECOL =
@@ -3416,11 +3415,11 @@ TIMECOL =
   UTC Time = 16:31:05
   DST Offset = -300
 TIMESTAMPCOL =
-  AsString  = 1/7/2020 07:00:00.0000 -04:00
+  AsString  = 01/7/2020 07:00:00.0000 -04:00
   Formatted = 2020/07/01 07:00:00.0000 America/New_York
   TimeZoneID = 65361
   Time Zone Name = America/New_York
-  UTC Time = 1/7/2020 11:00:00
+  UTC Time = 01/7/2020 11:00:00
   DST Offset = -240
 ROWID = 7
 TIMECOL =
@@ -3431,11 +3430,11 @@ TIMECOL =
   UTC Time = 05:31:05
   DST Offset = 360
 TIMESTAMPCOL =
-  AsString  = 1/7/2020 07:00:00.0000 -04:00
+  AsString  = 01/7/2020 07:00:00.0000 -04:00
   Formatted = 2020/07/01 07:00:00.0000 EST5EDT
   TimeZoneID = 65135
   Time Zone Name = EST5EDT
-  UTC Time = 1/7/2020 11:00:00
+  UTC Time = 01/7/2020 11:00:00
   DST Offset = -240
 ROWID = 8
 TIMECOL =
@@ -3446,11 +3445,11 @@ TIMECOL =
   UTC Time = 10:31:05
   DST Offset = 60
 TIMESTAMPCOL =
-  AsString  = 1/7/2020 06:00:00.0000 -05:00
+  AsString  = 01/7/2020 06:00:00.0000 -05:00
   Formatted = 2020/07/01 06:00:00.0000 EST
   TimeZoneID = 65136
   Time Zone Name = EST
-  UTC Time = 1/7/2020 11:00:00
+  UTC Time = 01/7/2020 11:00:00
   DST Offset = -300
 
 
