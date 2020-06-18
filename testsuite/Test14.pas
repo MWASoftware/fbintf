@@ -20,12 +20,12 @@ unit Test14;
 interface
 
 uses
-  Classes, SysUtils, TestManager, IB;
+  Classes, SysUtils, TestApplication, FBTestApp, IB;
 
 type
     { TTest14 }
 
-  TTest14 = class(TTestBase)
+  TTest14 = class(TFBTestBase)
   private
     procedure UpdateDatabase(Attachment: IAttachment);
     procedure QueryDatabase(Attachment: IAttachment);

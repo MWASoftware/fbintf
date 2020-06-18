@@ -29,13 +29,13 @@ unit Test18;
 interface
 
 uses
-  Classes, SysUtils, TestManager, IB {$IFDEF WINDOWS},Windows{$ENDIF};
+  Classes, SysUtils, TestApplication, FBTestApp, IB {$IFDEF WINDOWS},Windows{$ENDIF};
 
 type
 
   { TTest18 }
 
-  TTest18 = class(TTestBase)
+  TTest18 = class(TFBTestBase)
   private
     procedure QueryDatabase4_DECFloat(Attachment: IAttachment);
     procedure UpdateDatabase4_DECFloat(Attachment: IAttachment);

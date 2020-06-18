@@ -334,9 +334,9 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 22544944
-Delta memory = 4672
-Max memory = 22638000
+Current memory = 22,544,944
+Delta memory = 4,672
+Max memory = 22,638,000
 Elapsed time= 0.001 sec
 Cpu = 0.000 sec
 Buffers = 2048
@@ -2588,6 +2588,7 @@ Limbo Transactions
 
 
 Local Backup
+
 
 
 

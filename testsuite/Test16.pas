@@ -27,13 +27,13 @@ unit Test16;
 interface
 
 uses
-  Classes, SysUtils, TestManager, IB;
+  Classes, SysUtils, TestApplication, FBTestApp, IB;
 
 type
 
   { TTest16 }
 
-  TTest16 = class(TTestBase)
+  TTest16 = class(TFBTestBase)
   private
     procedure DBTests(CharSet: AnsiString; SQLDialect: integer);
     procedure ServiceTests(CharSet: AnsiString; SQLDialect: integer);

@@ -23,7 +23,7 @@
     </PublishOptions>
     <RunParams>
       <local>
-        <CommandLineParams Value="-t 18 -X"/>
+        <CommandLineParams Value="-t 17"/>
       </local>
       <environment>
         <UserOverrides Count="2">
@@ -35,7 +35,7 @@
       <Modes Count="1">
         <Mode0 Name="default">
           <local>
-            <CommandLineParams Value="-t 18 -X"/>
+            <CommandLineParams Value="-t 17"/>
           </local>
           <environment>
             <UserOverrides Count="2">
@@ -51,91 +51,95 @@
         <PackageName Value="fbintf"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="21">
+    <Units Count="22">
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
       <Unit1>
-        <Filename Value="TestManager.pas"/>
+        <Filename Value="Test1.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit1>
       <Unit2>
-        <Filename Value="Test1.pas"/>
+        <Filename Value="Test3.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit2>
       <Unit3>
-        <Filename Value="test2.pas"/>
+        <Filename Value="Test4.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit3>
       <Unit4>
-        <Filename Value="Test3.pas"/>
+        <Filename Value="Test5.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit4>
       <Unit5>
-        <Filename Value="Test4.pas"/>
+        <Filename Value="Test6.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit5>
       <Unit6>
-        <Filename Value="Test5.pas"/>
+        <Filename Value="Test7.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit6>
       <Unit7>
-        <Filename Value="Test6.pas"/>
+        <Filename Value="Test8.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit7>
       <Unit8>
-        <Filename Value="Test7.pas"/>
+        <Filename Value="Test9.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit8>
       <Unit9>
-        <Filename Value="Test8.pas"/>
+        <Filename Value="Test10.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit9>
       <Unit10>
-        <Filename Value="Test9.pas"/>
+        <Filename Value="Test11.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit10>
       <Unit11>
-        <Filename Value="Test10.pas"/>
+        <Filename Value="Test12.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit11>
       <Unit12>
-        <Filename Value="Test11.pas"/>
+        <Filename Value="Test13.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit12>
       <Unit13>
-        <Filename Value="Test12.pas"/>
+        <Filename Value="Test14.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit13>
       <Unit14>
-        <Filename Value="Test13.pas"/>
+        <Filename Value="Test15.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit14>
       <Unit15>
-        <Filename Value="Test14.pas"/>
+        <Filename Value="Test16.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit15>
       <Unit16>
-        <Filename Value="Test15.pas"/>
+        <Filename Value="Makefile.fpc"/>
         <IsPartOfProject Value="True"/>
       </Unit16>
       <Unit17>
-        <Filename Value="Test16.pas"/>
+        <Filename Value="Test17.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit17>
       <Unit18>
-        <Filename Value="Makefile.fpc"/>
+        <Filename Value="Test18.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit18>
       <Unit19>
-        <Filename Value="Test17.pas"/>
+        <Filename Value="testApp/TestApplication.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit19>
       <Unit20>
-        <Filename Value="Test18.pas"/>
+        <Filename Value="FBTestApp.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit20>
+      <Unit21>
+        <Filename Value="Test2.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit21>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -145,6 +149,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
+      <OtherUnitFiles Value="testApp"/>
       <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <CodeGeneration>

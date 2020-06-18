@@ -32,13 +32,13 @@ unit Test17;
 interface
 
 uses
-  Classes, SysUtils, TestManager, IB {$IFDEF WINDOWS},Windows{$ENDIF};
+  Classes, SysUtils, TestApplication, FBTestApp, IB {$IFDEF WINDOWS},Windows{$ENDIF};
 
 type
 
   { TTest17 }
 
-  TTest17 = class(TTestBase)
+  TTest17 = class(TFBTestBase)
   private
     FOnDate: TDateTime; //used for Time with Time Zone conversions
     procedure TestArrayTZDataTypes(Attachment: IAttachment);

@@ -39,13 +39,13 @@ unit Test4;
 interface
 
 uses
-  Classes, SysUtils, TestManager, IB;
+  Classes, SysUtils, TestApplication, FBTestApp, IB;
 
 type
 
   { TTest4 }
 
-  TTest4 = class(TTestBase)
+  TTest4 = class(TFBTestBase)
   private
     procedure DoQuery(Attachment: IAttachment);
   public

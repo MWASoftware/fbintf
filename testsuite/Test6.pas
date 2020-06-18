@@ -40,13 +40,13 @@ unit Test6;
 interface
 
 uses
-  Classes, SysUtils, TestManager, IB;
+  Classes, SysUtils, TestApplication, FBTestApp, IB;
 
 type
 
   { TTest6 }
 
-  TTest6 = class(TTestBase)
+  TTest6 = class(TFBTestBase)
   private
     procedure UpdateDatabase(Attachment: IAttachment);
     procedure ExecProc(Attachment: IAttachment);

@@ -18,13 +18,13 @@ unit Test9;
 interface
 
 uses
-  Classes, SysUtils, TestManager, IB;
+  Classes, SysUtils, TestApplication, FBTestApp, IB;
 
 type
 
   { TTest9 }
 
-  TTest9 = class(TTestBase)
+  TTest9 = class(TFBTestBase)
   private
     procedure GetDBInformation(Attachment: IAttachment);
   public

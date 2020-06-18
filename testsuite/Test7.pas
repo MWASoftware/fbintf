@@ -30,13 +30,13 @@
 interface
 
 uses
-  Classes, SysUtils, TestManager, IB;
+  Classes, SysUtils, TestApplication, FBTestApp, IB;
 
 type
 
   { TTest7 }
 
-  TTest7 = class(TTestBase)
+  TTest7 = class(TFBTestBase)
   private
     procedure UpdateDatabase(Attachment: IAttachment);
   public

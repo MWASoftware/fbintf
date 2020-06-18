@@ -26,13 +26,13 @@ unit Test8;
 interface
 
 uses
-  Classes, SysUtils, TestManager, IB;
+  Classes, SysUtils, TestApplication, FBTestApp, IB;
 
 type
 
   { TTest8 }
 
-  TTest8 = class(TTestBase)
+  TTest8 = class(TFBTestBase)
   private
     procedure UpdateDatabase(Attachment: IAttachment);
   public

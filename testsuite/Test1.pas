@@ -23,13 +23,13 @@ unit Test1;
 interface
 
 uses
-  Classes, SysUtils, TestManager, IB;
+  Classes, SysUtils, TestApplication, FBTestApp, IB;
 
 type
 
   { TTest1 }
 
-  TTest1 = class(TTestBase)
+  TTest1 = class(TFBTestBase)
   private
     procedure DoQuery(Attachment: IAttachment);
     procedure WriteAttachmentInfo(Attachment: IAttachment);

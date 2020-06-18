@@ -30,13 +30,13 @@ unit Test11;
 interface
 
 uses
-  Classes, SysUtils, TestManager, IB;
+  Classes, SysUtils, TestApplication, FBTestApp, IB;
 
 type
 
   { TTest11 }
 
-  TTest11 = class(TTestBase)
+  TTest11 = class(TFBTestBase)
   private
     procedure GetStatistics(Service: IServiceManager; DBName: AnsiString);
     procedure BackupRestore(Service: IServiceManager; DBName: AnsiString);

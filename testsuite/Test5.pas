@@ -32,13 +32,13 @@ unit Test5;
 interface
 
 uses
-  Classes, SysUtils, TestManager, IB;
+  Classes, SysUtils, TestApplication, FBTestApp, IB;
 
 type
 
   { TTest5 }
 
-  TTest5 = class(TTestBase)
+  TTest5 = class(TFBTestBase)
   private
     procedure DoQuery(Attachment: IAttachment);
   public

@@ -30,13 +30,13 @@ unit Test10;
 interface
 
 uses
-  Classes, SysUtils, TestManager, IB;
+  Classes, SysUtils, TestApplication, FBTestApp, IB;
 
 type
 
 { TTest10 }
 
-  TTest10 = class(TTestBase)
+  TTest10 = class(TFBTestBase)
   private
     FEventSignalled: boolean;
     procedure EventsTest(Attachment: IAttachment);

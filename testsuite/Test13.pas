@@ -21,12 +21,12 @@
 interface
 
 uses
-  Classes, SysUtils, TestManager, IB;
+  Classes, SysUtils, TestApplication, FBTestApp, IB;
 
 type
     { TTest13 }
 
-  TTest13 = class(TTestBase)
+  TTest13 = class(TFBTestBase)
   private
     procedure UpdateDatabase(Attachment: IAttachment);
     procedure QueryDatabase(Attachment: IAttachment);
