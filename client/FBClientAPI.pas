@@ -224,7 +224,6 @@ type
     function GetImplementationVersion: AnsiString;
     function GetClientMajor: integer;  virtual; abstract;
     function GetClientMinor: integer;  virtual; abstract;
-
 end;
 
 implementation
