@@ -37,7 +37,7 @@ unit FB30ClientAPI;
 interface
 
 uses
-  Classes, SysUtils, FBClientAPI, Firebird, IB, IBExternals, FmtBCD;
+  Classes, SysUtils, FBClientAPI, Firebird, IB, IBExternals, FmtBCD, FBClientLib;
 
 type
 
@@ -65,7 +65,7 @@ type
 
   { TFB30ClientAPI }
 
-  TFB30ClientAPI = class(TFBClientAPI,IFirebirdAPI)
+  TFB30ClientAPI = class(TFBClientAPI,IFirebirdAPI,IFBIMasterProvider)
   private
     FMaster: Firebird.IMaster;
     FUtil: Firebird.IUtil;
@@ -124,7 +124,10 @@ type
 
     {Firebird 3 API}
     function HasMasterIntf: boolean;
-    function GetIMaster: TObject;
+    function GetIMaster: TObject; overload;
+
+    {IFBIMasterProvider}
+    function GetIMaster: Firebird.IMaster; overload;
 
     {Encode/Decode}
     function DecodeInteger(bufptr: PByte; len: short): integer; override;
@@ -360,6 +363,11 @@ begin
 end;
 
 function TFB30ClientAPI.GetIMaster: TObject;
+begin
+  Result := FMaster;
+end;
+
+function TFB30ClientAPI.GetIMaster: Firebird.IMaster;
 begin
   Result := FMaster;
 end;

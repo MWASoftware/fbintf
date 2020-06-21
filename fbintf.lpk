@@ -47,7 +47,7 @@ Two interface implementations are provided. One is for the new Firebird 3 Client
  *  Contributor(s): ______________________________________.
  *    "/>
     <Version Major="1" Minor="1" Release="5" Build="9999"/>
-    <Files Count="36">
+    <Files Count="37">
       <Item1>
         <Filename Value="client/3.0/firebird/Firebird.pas"/>
         <UnitName Value="Firebird"/>
@@ -193,6 +193,10 @@ Two interface implementations are provided. One is for the new Firebird 3 Client
         <Filename Value="client/3.0/FB30TimeZoneServices.pas"/>
         <UnitName Value="FB30TimeZoneServices"/>
       </Item36>
+      <Item37>
+        <Filename Value="FBClientLib.pas"/>
+        <UnitName Value="FBClientLib"/>
+      </Item37>
     </Files>
     <RequiredPkgs Count="1">
       <Item1>

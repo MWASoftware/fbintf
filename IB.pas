@@ -1282,7 +1282,7 @@ type
 
     {Firebird 3 API}
     function HasMasterIntf: boolean;
-    function GetIMaster: TObject;
+    function GetIMaster: TObject;  deprecated 'Use QueryInterface and FBClientLib.pas IFBIMasterProvider instead';
     function GetFBLibrary: IFirebirdLibrary;
 end;
 
