@@ -14,7 +14,13 @@ FBINTF Change Log  version          (1.2-0 Build 12022) Fri, 17 Apr 2020 10:35:5
 6. Arrays of elements with a scale factor (e.g. NUMBERIC (10,2)) should now be
    written correctly to the database.
 
-7. New IFirebirdAPI Calls:
+7. New unit 'FBClientLib.pas' added and provides new interface IFBIMasterProvider.
+   QueryInterface may be used to coerce this interface from IFirebirdAPI. The
+   interface provides a single method "function GetIMaster: IMaster". This provides
+   type safe access to the Firebird IMaster interface and avoids the need to turn
+   off object checks when coercing "funcition GetIMaster: TObject" to IMaster.
+
+8. New IFirebirdAPI Calls:
     function GetClientMajor: integer;
     function GetClientMinor: integer;
     function HasLocalTZDB: boolean;
@@ -23,14 +29,14 @@ FBINTF Change Log  version          (1.2-0 Build 12022) Fri, 17 Apr 2020 10:35:5
     procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal; bufptr: PByte);
     function SQLDecFloatDecode(SQLType: cardinal; scale: integer; bufptr: PByte): tBCD;
 
-8. New IAttachment Calls:
+9. New IAttachment Calls:
     function HasDecFloatSupport: boolean;
     function GetTimeZoneServices: ITimeZoneServices;
     function HasTimeZoneSupport: boolean;
 
-9. New Interface ITimeZoneServices.
+10. New Interface ITimeZoneServices.
 
-10. New ISQLData API Calls:
+11. New ISQLData API Calls:
     procedure GetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID); overload;
     procedure GetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString); overload;
     procedure GetAsTime(var aTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID; OnDate: TDateTime); overload;
@@ -38,7 +44,7 @@ FBINTF Change Log  version          (1.2-0 Build 12022) Fri, 17 Apr 2020 10:35:5
     function GetAsUTCDateTime: TDateTime;
     function GetAsBCD: tBCD;
 
-11. New ISQLParam API Calls
+12. New ISQLParam API Calls
     procedure GetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID); overload;
     procedure GetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString); overload;
     procedure GetAsTime(var aTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID; OnDate: TDateTime); overload;
@@ -54,7 +60,7 @@ FBINTF Change Log  version          (1.2-0 Build 12022) Fri, 17 Apr 2020 10:35:5
     procedure SetAsUTCDateTime(aUTCTime: TDateTime);
     procedure SetAsBcd(aValue: tBCD);
 
-12. New IArray API Calls
+13. New IArray API Calls
     procedure GetAsDateTime(index: array of integer; var aDateTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID); overload;
     procedure GetAsDateTime(index: array of integer; var aDateTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString); overload;
     procedure GetAsTime(index: array of integer; var aTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID; OnDate: TDateTime); overload;
@@ -65,7 +71,7 @@ FBINTF Change Log  version          (1.2-0 Build 12022) Fri, 17 Apr 2020 10:35:5
     procedure SetAsTime(index: array of integer; aValue: TDateTime; OnDate: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
     procedure SetAsTime(index: array of integer; aValue: TDateTime; OnDate: TDateTime; aTimeZone: AnsiString); overload;
 
-13. Utility functions in IBUtils
+14. Utility functions in IBUtils
     function ParseDateTimeTZString(aDateTimeStr: Ansistring; var aDateTime: TDateTime;
               var aTimezone: AnsiString; aFormatSettings: TFormatSettings; TimeOnly: boolean=false): boolean;
     procedure FBDecodeTime(aTime: TDateTime; var Hour, Minute, Second: word; var DeciMillisecond: cardinal);
@@ -74,9 +80,9 @@ FBINTF Change Log  version          (1.2-0 Build 12022) Fri, 17 Apr 2020 10:35:5
     function FormatTimeZoneOffset(EffectiveTimeOffsetMins: integer): AnsiString;
     function DecodeTimeZoneOffset(TZOffset: AnsiString; var dstOffset: integer): boolean;
 
-14. IUtil.FormatStatus now used to format error messages when using new API.
+15. IUtil.FormatStatus now used to format error messages when using new API.
 
-15. Linux Only: FIREBIRD environment variable is now checked when loading the client library.
+16. Linux Only: FIREBIRD environment variable is now checked when loading the client library.
     If a client library path is not explicitly provided and the FIREBIRD environment
     variable is set then the directory given by this variable and any 'lib' subdirectory
     are searched for the Firebird client library. Only if none is found, is the default

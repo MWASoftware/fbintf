@@ -228,7 +228,6 @@
       </Unit26>
       <Unit27>
         <Filename Value="../IB.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <TopLine Value="1259"/>
         <CursorPos X="115" Y="1285"/>
@@ -463,8 +462,9 @@
       </Unit58>
       <Unit59>
         <Filename Value="../changelog"/>
-        <TopLine Value="61"/>
-        <CursorPos Y="84"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="64"/>
+        <CursorPos X="3" Y="85"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
@@ -1163,7 +1163,7 @@
       <Unit154>
         <Filename Value="../FBClientLib.pas"/>
         <EditorIndex Value="2"/>
-        <TopLine Value="26"/>
+        <TopLine Value="25"/>
         <CursorPos X="21" Y="48"/>
         <UsageCount Value="11"/>
         <Loaded Value="True"/>
