@@ -44,12 +44,28 @@ interface
 uses
   Classes, SysUtils, Firebird, IB;
 
+  {IFBIMasterProvider may be coerced from an IFirebirdAPI when the Firebird 3 API
+   is provided and itself provides type safe access to the underlying Firebird
+   IMaster interface - see Firebird.pas}
+
 type
   IFBIMasterProvider = interface
     ['{c0202c92-5d2d-4130-b4df-427469aa42cf}']
     {Firebird 3 API}
     function GetIMaster: Firebird.IMaster;
   end;
+
+  {Example Code:
+  var MasterProvider: IFBIMasterProvider;
+  begin
+   ..
+     if FirebirdAPI.HasMasterIntf and (FirebirdAPI.QueryInterface(IFBIMasterProvider,MasterProvider) = S_OK) then
+     with MasterProvider.GetIMaster.getConfigManager do
+     begin
+       writeln('Firebird Bin Directory = ', getDirectory(DIR_BIN));
+       writeln('Firebird Conf Directory = ', getDirectory(DIR_CONF));
+       ..
+  }
 
 
 
