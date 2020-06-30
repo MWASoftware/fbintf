@@ -365,7 +365,7 @@ begin
   dtString0:
       Result := strpas(PAnsiChar(FBufPtr+1));
   dtNone:
-      Result := 'No Value';
+      Result := '';
   else
     IBError(ibxeOutputBlockTypeError,[nil]);
   end;
