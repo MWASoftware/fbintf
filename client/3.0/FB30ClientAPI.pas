@@ -155,9 +155,9 @@ type
 
 implementation
 
-uses FBParamBlock, FB30Attachment, {$IFDEF FPC}dynlibs{$ELSE} windows{$ENDIF},
+uses FB30Attachment, {$IFDEF FPC}dynlibs{$ELSE} windows{$ENDIF},
      FBMessages, FB30Services, FB30Transaction, IBUtils, DateUtils,
-     FBAttachment, FBTransaction;
+     FBAttachment, FBTransaction, FBServices;
 
 type
   PISC_DATE = ^ISC_DATE;

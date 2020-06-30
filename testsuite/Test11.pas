@@ -303,6 +303,7 @@ begin
   SPB.Add(isc_spb_user_name).setAsString(Owner.GetUserName);
   SPB.Add(isc_spb_password).setAsString(Owner.GetPassword);
   Service := FirebirdAPI.GetServiceManager(ServerName,TCP,SPB);
+  PrintSPB(Service.getSPB);
 
   GetStatistics(Service,DBName);
   BackupRestore(Service,DBName);

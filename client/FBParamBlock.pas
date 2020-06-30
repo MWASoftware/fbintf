@@ -73,6 +73,7 @@ type
     function Add(ParamType: byte): PParamBlockItemData;
     function Find(ParamType: byte): PParamBlockItemData;
     function GetItems(index: integer): PParamBlockItemData;
+    function LookupItemType(ParamTypeName: AnsiString): byte; virtual;
   public
     constructor Create(api: TFBClientAPI);
     destructor Destroy; override;
@@ -101,6 +102,7 @@ type
   public
      function getAsInteger: integer;
      function getParamType: byte;
+     function getParamTypeName: AnsiString; virtual;
      function getAsString: AnsiString;
      function getAsByte: byte;
      procedure addByte(aValue: byte);
@@ -117,10 +119,6 @@ type
      procedure SetAsString2(aValue: AnsiString);
      procedure SetAsString0(aValue: AnsiString);
   end;
-
-  { TSPBItem }
-
-  TSPBItem = class(TParamBlockItem,ISPBItem);
 
   { TSRBItem }
 
@@ -181,15 +179,9 @@ type
 {$ENDIF}
   public
     function Add(ParamType: byte): _IItem;
+    function AddByTypeName(ParamTypeName: AnsiString): _IItem;
     function Find(ParamType: byte): _IItem;
     function GetItems(index: integer): _IItem;
-  end;
-
-  { TSPB }
-
-  TSPB = class (TCustomParamBlock<TSPBItem,ISPBItem>, ISPB)
-  public
-   constructor Create(api: TFBClientAPI);
   end;
 
   { TSRB }
@@ -311,6 +303,11 @@ end;
 function TParamBlockItem.getParamType: byte;
 begin
   Result := byte(FParamData^.FBufPtr^);
+end;
+
+function TParamBlockItem.getParamTypeName: AnsiString;
+begin
+  Result := '';
 end;
 
 function TParamBlockItem.getAsString: AnsiString;
@@ -704,6 +701,11 @@ begin
    IBError(ibxePBIndexError,[index]);
 end;
 
+function TParamBlock.LookupItemType(ParamTypeName: AnsiString): byte;
+begin
+  IBError(ibxeNotSupported,[]);
+end;
+
 function TParamBlock.getCount: integer;
 begin
   Result := Length(FItems);
@@ -741,6 +743,16 @@ end;
 
 { TCustomParamBlock }
 
+function TCustomParamBlock<_IItem, _TItem>.AddByTypeName(ParamTypeName: AnsiString
+  ): _IItem;
+var ParamType: byte;
+begin
+  ParamType := LookupItemType(ParamTypeName);
+  if ParamType = 0 then
+    IBError(ibxeUnknownParamTypeName,[ParamTypeName]);
+  Result := Add(ParamType);
+end;
+
 {$IFDEF FPC}
 function TCustomParamBlock<_TItem, _IItem>.Add(ParamType: byte): _IItem;
 var Item: PParamBlockItemData;
@@ -764,6 +776,7 @@ begin
   Item := inherited getItems(index);
   Result := _TItem.Create(self,Item);
 end;
+
 {$ELSE}
 function TCustomParamBlock<_TItem, _IItem>.Add(ParamType: byte): _IItem;
 var Item: PParamBlockItemData;
@@ -799,16 +812,6 @@ begin
     IBError(ibxeInterfaceNotSupported,[GuidToString(GetTypeData(TypeInfo(_IItem))^.Guid)]);
 end;
 {$ENDIF}
-
-{ TSPB }
-
-constructor TSPB.Create(api: TFBClientAPI);
-begin
-  inherited Create(api);
-  FDataLength := 2;
-  FBuffer^ := isc_spb_version;
-  (FBuffer+1)^ := isc_spb_current_version;
-end;
 
 { TBPB }
 

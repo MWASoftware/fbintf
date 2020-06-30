@@ -42,7 +42,7 @@ unit FBClientLib;
 interface
 
 uses
-  Classes, SysUtils, Firebird, IB;
+  Classes, SysUtils, Firebird;
 
   {IFBIMasterProvider may be coerced from an IFirebirdAPI when the Firebird 3 API
    is provided and itself provides type safe access to the underlying Firebird

@@ -88,6 +88,14 @@ FBINTF Change Log  version          (1.2-0 Build 12022) Fri, 17 Apr 2020 10:35:5
     are searched for the Firebird client library. Only if none is found, is the default
     client library used.
 
+17. IDPB, ITPB and ISPB: new interface method
+      function AddByTypeName(ParamTypeName: AnsiString): IDPBItem/ITPBItem/ISPBItem;
+    This is used to add a parameter block item by the string equivalent of its
+    symbolic type name. e.g. DPB.AddByTypeName('isc_dpb_user_name').AsString := '...'
+
+18. IDPBItem/ITPBItem/ISPBItem: new interface method:
+      function getParamTypeName: AnsiString;
+
 FBINTF Change Log  version          (1.1-5 Build 12022) Fri, 17 Apr 2020 10:35:55 +0100
 
 1. ISQLParams.GetHasCaseSensitiveParams added. Returns true if param names are

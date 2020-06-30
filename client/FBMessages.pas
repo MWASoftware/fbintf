@@ -155,7 +155,8 @@ type
       ibxeBCDOverflow,
       ibxeNoTimezoneSupport,
       ibxeDecFloatNotSupported,
-      ibxeInt128NotSupported
+      ibxeInt128NotSupported,
+      ibxeUnknownParamTypeName
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -261,6 +262,7 @@ resourcestring
   SNoTimezoneSupport = 'TIME/TIMESTAMP WITH TIME ZONE data type not supported';
   SDecFloatNotSupported = 'DecFloat Data Type not supported';
   SInt128NotSupported = 'INT128 Data Type not supported';
+  SUnknownParamTypeName = 'Unknown Param Type Name "%s"';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -343,7 +345,8 @@ const
     SBCDOverflow,
     SNoTimezoneSupport,
     SDecFloatNotSupported,
-    SInt128NotSupported
+    SInt128NotSupported,
+    SUnknownParamTypeName
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;

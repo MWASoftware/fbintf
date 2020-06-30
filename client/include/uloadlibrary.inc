@@ -17,7 +17,6 @@ function TFBLibrary.LoadIBLibrary: boolean;
 
   function FindLibrary(LibNameList: string): TLibHandle;
   var LibNames: TStringList;
-      i: integer;
       FirebirdDir: Ansistring;
   begin
     Result := NilHandle;

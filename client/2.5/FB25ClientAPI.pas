@@ -215,8 +215,8 @@ implementation
 uses FBMessages,
     {$IFDEF WINDOWS}Windows, {$ENDIF}
     {$IFDEF FPC} Dynlibs, {$ENDIF}
-  FB25Attachment, FB25Transaction, FB25Services, FBParamBlock,
-  IBUtils, FBAttachment, FBTransaction;
+  FB25Attachment, FB25Transaction, FB25Services,
+  IBUtils, FBAttachment, FBTransaction, FBServices;
 
 { Stubs for 6.0 only functions }
 function isc_rollback_retaining_stub(status_vector   : PISC_STATUS;

@@ -74,9 +74,76 @@ type
     function Query(Request: ISRB; RaiseExceptionOnError: boolean=true): IServiceQueryResults;  overload;
   end;
 
+ { TSPBItem }
+
+  TSPBItem = class(TParamBlockItem,ISPBItem)
+  public
+   function getParamTypeName: AnsiString; override;
+  end;
+
+ { TSPB }
+
+  TSPB = class (TCustomParamBlock<TSPBItem,ISPBItem>, ISPB)
+  protected
+   function LookupItemType(ParamTypeName: AnsiString): byte; override;
+  public
+   constructor Create(api: TFBClientAPI);
+  end;
+
 implementation
 
 uses FBMessages, IBUtils;
+
+const
+  SPBPrefix = 'isc_spb_';
+  isc_spb_last_spb_constant = 13;
+  SPBConstantNames: array[1..isc_spb_last_spb_constant] of String = (
+    'user_name',
+    'sys_user_name',
+    'sys_user_name_enc',
+    'password',
+    'password_enc',
+    'command_line',
+    'db_name',
+    'verbose',
+    'options',
+    'connect_timeout',
+    'dummy_packet_interval',
+    'sql_role_name',
+    'expected_db'
+  );
+
+  SPBConstantValues: array[1..isc_spb_last_spb_constant] of Integer = (
+    isc_spb_user_name,
+    isc_spb_sys_user_name,
+    isc_spb_sys_user_name_enc,
+    isc_spb_password,
+    isc_spb_password_enc,
+    isc_spb_command_line,
+    isc_spb_dbname,
+    isc_spb_verbose,
+    isc_spb_options,
+    isc_spb_connect_timeout,
+    isc_spb_dummy_packet_interval,
+    isc_spb_sql_role_name,
+    isc_spb_expected_db
+  );
+
+{ TSPBItem }
+
+function TSPBItem.getParamTypeName: AnsiString;
+var i: integer;
+    ParamType: byte;
+begin
+  Result := '';
+  ParamType := getParamType;
+  for i := 1 to isc_spb_last_spb_constant do
+    if SPBConstantValues [i] = ParamType then
+    begin
+      Result := SPBConstantNames[i];
+      break;
+    end;
+end;
 
 { TFBServiceManager }
 
@@ -150,6 +217,31 @@ function TFBServiceManager.Query(Request: ISRB; RaiseExceptionOnError: boolean
   ): IServiceQueryResults;
 begin
    Result := Query(nil,Request,RaiseExceptionOnError);
+end;
+
+{ TSPB }
+
+function TSPB.LookupItemType(ParamTypeName: AnsiString): byte;
+var i: integer;
+begin
+  Result := 0;
+  ParamTypeName := LowerCase(ParamTypeName);
+  if Pos(SPBPrefix,ParamTypeName) = 1 then
+    system.Delete(ParamTypeName,1,Length(SPBPrefix));
+  for i := 1 to isc_spb_last_spb_constant do
+    if SPBConstantNames [i] = ParamTypeName then
+    begin
+      Result := SPBConstantValues[i];
+      break;
+    end;
+end;
+
+constructor TSPB.Create(api: TFBClientAPI);
+begin
+  inherited Create(api);
+  FDataLength := 2;
+  FBuffer^ := isc_spb_version;
+  (FBuffer+1)^ := isc_spb_current_version;
 end;
 
 end.

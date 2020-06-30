@@ -128,15 +128,16 @@ type
 
   TTPBItem = class(TParamBlockItem,ITPBItem)
   public
-    function getParamName: AnsiString;
+    function getParamTypeName: AnsiString; override;
   end;
 
   { TTPB }
 
   TTPB = class (TCustomParamBlock<TTPBItem,ITPBItem>, ITPB)
+  protected
+    function LookupItemType(ParamTypeName: AnsiString): byte; override;
   public
     constructor Create(api: TFBClientAPI);
-    function ParamNameToParamType(ParamName: AnsiString): byte;
   end;
 
 implementation
@@ -293,7 +294,7 @@ end;
 
 { TTPBItem }
 
-function TTPBItem.getParamName: AnsiString;
+function TTPBItem.getParamTypeName: AnsiString;
 begin
   Result :=  TPBPrefix + TPBConstantNames[getParamType];
 end;
@@ -308,16 +309,16 @@ begin
   FBuffer^ := isc_tpb_version3;
 end;
 
-function TTPB.ParamNameToParamType(ParamName: AnsiString): byte;
+function TTPB.LookupItemType(ParamTypeName: AnsiString): byte;
 var i: byte;
 begin
   Result := 0;
-  ParamName := LowerCase(ParamName);
-  if (Pos(TPBPrefix, ParamName) = 1) then
-    Delete(ParamName, 1, Length(TPBPrefix));
+  ParamTypeName := LowerCase(ParamTypeName);
+  if (Pos(TPBPrefix, ParamTypeName) = 1) then
+    Delete(ParamTypeName, 1, Length(TPBPrefix));
 
   for i := 1 to isc_tpb_last_tpb_constant do
-    if (ParamName = TPBConstantNames[i]) then
+    if (ParamTypeName = TPBConstantNames[i]) then
     begin
       Result := i;
       break;
