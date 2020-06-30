@@ -171,6 +171,21 @@ type
 
   end;
 
+  { TDPBItem }
+
+  TDPBItem = class(TParamBlockItem,IDPBItem)
+  public
+   function getParamName: AnsiString;
+  end;
+
+  { TDPB }
+
+  TDPB = class (TCustomParamBlock<TDPBItem,IDPBItem>, IDPB)
+  public
+    constructor Create(api: TFBClientAPI);
+    function ParamNameToParamType(ParamName: AnsiString): byte;
+  end;
+
 implementation
 
 uses FBMessages, IBUtils, FBTransaction {$IFDEF HASREQEX}, RegExpr{$ENDIF};
@@ -249,6 +264,107 @@ const
   (CharsetID: 69; CharSetName: 'GB18030'; CharSetWidth: 4; CodePage: 54936; AllowReverseLookup: true)
 );
 
+const
+  isc_dpb_last_dpb_constant = isc_dpb_decfloat_traps;
+
+  DPBPrefix = 'isc_dpb_';
+  DPBConstantNames: array[1..isc_dpb_last_dpb_constant] of string = (
+    'cdd_pathname',
+    'allocation',
+    'journal',
+    'page_size',
+    'num_buffers',
+    'buffer_length',
+    'debug',
+    'garbage_collect',
+    'verify',
+    'sweep',
+    'enable_journal',
+    'disable_journal',
+    'dbkey_scope',
+    'number_of_users',
+    'trace',
+    'no_garbage_collect',
+    'damaged',
+    'license',
+    'sys_user_name',
+    'encrypt_key',
+    'activate_shadow',
+    'sweep_interval',
+    'delete_shadow',
+    'force_write',
+    'begin_log',
+    'quit_log',
+    'no_reserve',
+    'user_name',
+    'password',
+    'password_enc',
+    'sys_user_name_enc',
+    'interp',
+    'online_dump',
+    'old_file_size',
+    'old_num_files',
+    'old_file',
+    'old_start_page',
+    'old_start_seqno',
+    'old_start_file',
+    'drop_walfile',
+    'old_dump_id',
+    'wal_backup_dir',
+    'wal_chkptlen',
+    'wal_numbufs',
+    'wal_bufsize',
+    'wal_grp_cmt_wait',
+    'lc_messages',
+    'lc_ctype',
+    'cache_manager',
+    'shutdown',
+    'online',
+    'shutdown_delay',
+    'reserved',
+    'overwrite',
+    'sec_attach',
+    'disable_wal',
+    'connect_timeout',
+    'dummy_packet_interval',
+    'gbak_attach',
+    'sql_role_name',
+    'set_page_buffers',
+    'working_directory',
+    'sql_dialect',
+    'set_db_readonly',
+    'set_db_sql_dialect',
+    'gfix_attach',
+    'gstat_attach',
+    'set_db_charset',
+    'gsec_attach',
+    'address_path' ,
+    'process_id',
+    'no_db_triggers',
+    'trusted_auth',
+    'process_name',
+    'trusted_role',
+    'org_filename',
+    'utf8_ilename',
+    'ext_call_depth',
+    'auth_block',
+    'client_version',
+    'remote_protocol',
+    'host_name',
+    'os_user',
+    'specific_auth_data',
+    'auth_plugin_list',
+    'auth_plugin_name',
+    'config',
+    'nolinger',
+    'reset_icu',
+    'map_attach',
+    'session_time_zone',
+    'set_db_replica',
+    'set_bind',
+    'decfloat_round',
+    'decfloat_traps'
+    );
 
 
 
@@ -896,6 +1012,38 @@ end;
 function TFBAttachment.HasTimeZoneSupport: boolean;
 begin
   Result := false;
+end;
+
+{ TDPBItem }
+
+function TDPBItem.getParamName: AnsiString;
+begin
+  Result := DPBPrefix + DPBConstantNames[getParamType];
+end;
+
+{ TDPB }
+
+constructor TDPB.Create(api: TFBClientAPI);
+begin
+  inherited Create(api);
+  FDataLength := 1;
+  FBuffer^ := isc_dpb_version1;
+end;
+
+function TDPB.ParamNameToParamType(ParamName: AnsiString): byte;
+var i: byte;
+begin
+  Result := 0;
+  ParamName := LowerCase(ParamName);
+  if (Pos(DPBPrefix, ParamName) = 1) then
+    Delete(ParamName, 1, Length(DPBPrefix));
+
+  for i := 1 to isc_dpb_last_dpb_constant do
+    if (ParamName = DPBConstantNames[i]) then
+    begin
+      Result := i;
+      break;
+    end;
 end;
 
 end.

@@ -773,10 +773,12 @@ type
 
   ITPBItem = interface(IParameterBlockItem)
     ['{544c1f2b-7c12-4a87-a4a5-face7ea72671}']
+    function getParamName: AnsiString;
   end;
 
   ITPB = interface(IParameterBlock<ITPBItem>)
     ['{7369b0ff-defe-437b-81fe-19b211d42d25}']
+    function ParamNameToParamType(ParamName: AnsiString): byte;
   end;
 
   {The ITransactionAction interface provides access to a Transaction once it
@@ -960,10 +962,12 @@ type
 
   IDPBItem = interface(IParameterBlockItem)
     ['{123d4ad0-087a-4cd1-a344-1b3d03b30673}']
+    function getParamName: AnsiString;
   end;
 
   IDPB = interface(IParameterBlock<IDPBItem>)
     ['{e676067b-1cf4-4eba-9256-9724f57e0d16}']
+    function ParamNameToParamType(ParamName: AnsiString): byte;
   end;
 
   {The IAttachment interface provides access to a Database Connection. It may be

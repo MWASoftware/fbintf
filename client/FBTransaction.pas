@@ -124,9 +124,54 @@ type
     procedure TransactionEnding(aTransaction: ITransaction; Force: boolean);
   end;
 
+  { TTPBItem }
+
+  TTPBItem = class(TParamBlockItem,ITPBItem)
+  public
+    function getParamName: AnsiString;
+  end;
+
+  { TTPB }
+
+  TTPB = class (TCustomParamBlock<TTPBItem,ITPBItem>, ITPB)
+  public
+    constructor Create(api: TFBClientAPI);
+    function ParamNameToParamType(ParamName: AnsiString): byte;
+  end;
+
 implementation
 
 uses FBMessages;
+
+const
+  isc_tpb_last_tpb_constant = isc_tpb_at_snapshot_number;
+
+  TPBPrefix = 'isc_tpb_';
+  TPBConstantNames: array[1..isc_tpb_last_tpb_constant] of string = (
+    'consistency',
+    'concurrency',
+    'shared',
+    'protected',
+    'exclusive',
+    'wait',
+    'nowait',
+    'read',
+    'write',
+    'lock_read',
+    'lock_write',
+    'verb_time',
+    'commit_time',
+    'ignore_limbo',
+    'read_committed',
+    'autocommit',
+    'rec_version',
+    'no_rec_version',
+    'restart_requests',
+    'no_auto_undo',
+    'lock_timeout',
+    'read_consistency',
+    'at_snapshot_number'
+  );
 
 { TFBTransaction }
 
@@ -244,6 +289,39 @@ procedure TFBTransaction.Start(TPB: ITPB; DefaultCompletion: TTransactionComplet
 begin
   FTPB := TPB;
   Start(DefaultCompletion);
+end;
+
+{ TTPBItem }
+
+function TTPBItem.getParamName: AnsiString;
+begin
+  Result :=  TPBPrefix + TPBConstantNames[getParamType];
+end;
+
+
+{TTPB}
+
+constructor TTPB.Create(api: TFBClientAPI);
+begin
+  inherited Create(api);
+  FDataLength := 1;
+  FBuffer^ := isc_tpb_version3;
+end;
+
+function TTPB.ParamNameToParamType(ParamName: AnsiString): byte;
+var i: byte;
+begin
+  Result := 0;
+  ParamName := LowerCase(ParamName);
+  if (Pos(TPBPrefix, ParamName) = 1) then
+    Delete(ParamName, 1, Length(TPBPrefix));
+
+  for i := 1 to isc_tpb_last_tpb_constant do
+    if (ParamName = TPBConstantNames[i]) then
+    begin
+      Result := i;
+      break;
+    end;
 end;
 
 end.

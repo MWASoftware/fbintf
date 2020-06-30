@@ -118,14 +118,6 @@ type
      procedure SetAsString0(aValue: AnsiString);
   end;
 
-  { TDPBItem }
-
-  TDPBItem = class(TParamBlockItem,IDPBItem);
-
-  { TTPBItem }
-
-  TTPBItem = class(TParamBlockItem,ITPBItem);
-
   { TSPBItem }
 
   TSPBItem = class(TParamBlockItem,ISPBItem);
@@ -191,20 +183,6 @@ type
     function Add(ParamType: byte): _IItem;
     function Find(ParamType: byte): _IItem;
     function GetItems(index: integer): _IItem;
-  end;
-
-  { TDPB }
-
-  TDPB = class (TCustomParamBlock<TDPBItem,IDPBItem>, IDPB)
-  public
-    constructor Create(api: TFBClientAPI);
-  end;
-
-  { TTPB }
-
-  TTPB = class (TCustomParamBlock<TTPBItem,ITPBItem>, ITPB)
-  public
-    constructor Create(api: TFBClientAPI);
   end;
 
   { TSPB }
@@ -821,24 +799,6 @@ begin
     IBError(ibxeInterfaceNotSupported,[GuidToString(GetTypeData(TypeInfo(_IItem))^.Guid)]);
 end;
 {$ENDIF}
-
-{ TDPB }
-
-constructor TDPB.Create(api: TFBClientAPI);
-begin
-  inherited Create(api);
-  FDataLength := 1;
-  FBuffer^ := isc_dpb_version1;
-end;
-
-{ TTPB }
-
-constructor TTPB.Create(api: TFBClientAPI);
-begin
-  inherited Create(api);
-  FDataLength := 1;
-  FBuffer^ := isc_tpb_version3;
-end;
 
 { TSPB }
 

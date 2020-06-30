@@ -78,6 +78,7 @@ var Transaction: ITransaction;
     Statement: IStatement;
 begin
     Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
+    PrintTPB(Transaction.getTPB);
     Statement := Attachment.Prepare(Transaction,
     '-- SQL style inline comment' + LineEnding +
     '/* this is a comment */ '+
