@@ -364,8 +364,10 @@ begin
     end;
   dtString0:
       Result := strpas(PAnsiChar(FBufPtr+1));
-    else
-      IBError(ibxeOutputBlockTypeError,[nil]);
+  dtNone:
+      Result := 'No Value';
+  else
+    IBError(ibxeOutputBlockTypeError,[nil]);
   end;
 end;
 
