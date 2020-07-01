@@ -139,6 +139,11 @@ const
   FBIntf_Version = '1.1.5';
 
 const
+  {DPB, TPB and SPB Parameter Block Name Prefixes}
+  DPBPrefix = 'isc_dpb_';
+  TPBPrefix = 'isc_tpb_';
+
+const
   {Time Zone ID constraint}
   MaxOffsetTimeZoneID = 2879; {lower values represent a time zone offset between
                                -23:59 and 23:59. Higher values are keys to the
@@ -256,6 +261,11 @@ type
     property Items[index: integer]: _IItem read getItems; default;
   end;
 
+  IParameterBlockWithTypeNames<_IItem> = interface(IParameterBlock<_IItem>)
+    function AddByTypeName(ParamTypeName: AnsiString): _IItem;
+    function GetDPBParamTypeName(ParamType: byte): Ansistring;
+  end;
+
   {IParameterBlockItem is not used on its own but instead provides a base type for
    different parameter block items }
 
@@ -273,6 +283,9 @@ type
     property AsInteger: integer read getAsInteger write SetAsInteger;
   end;
 
+  IParameterBlockItemWithTypeName = interface(IParameterBlockItem)
+    function getParamTypeName: AnsiString;
+  end;
 
   {The IStatus interface provides access to error information, if any, returned
    by the last API call. It can also be used to customise the error message
@@ -771,14 +784,13 @@ type
    found in the Interbase 6.0 API Guide.
   }
 
-  ITPBItem = interface(IParameterBlockItem)
+  ITPBItem = interface(IParameterBlockItemWithTypeName)
     ['{544c1f2b-7c12-4a87-a4a5-face7ea72671}']
     function getParamTypeName: AnsiString;
   end;
 
-  ITPB = interface(IParameterBlock<ITPBItem>)
+  ITPB = interface(IParameterBlockWithTypeNames<ITPBItem>)
     ['{7369b0ff-defe-437b-81fe-19b211d42d25}']
-    function AddByTypeName(ParamTypeName: AnsiString): ITPBItem;
   end;
 
   {The ITransactionAction interface provides access to a Transaction once it
@@ -960,15 +972,13 @@ type
    found in the Interbase 6.0 API Guide.
    }
 
-  IDPBItem = interface(IParameterBlockItem)
+  IDPBItem = interface(IParameterBlockItemWithTypeName)
     ['{123d4ad0-087a-4cd1-a344-1b3d03b30673}']
-    function getParamTypeName: AnsiString;
   end;
 
-  IDPB = interface(IParameterBlock<IDPBItem>)
-    ['{e676067b-1cf4-4eba-9256-9724f57e0d16}']
-    function AddByTypeName(ParamTypeName: AnsiString): IDPBItem;
-  end;
+   IDPB = interface(IParameterBlockWithTypeNames<IDPBItem>)
+     ['{e676067b-1cf4-4eba-9256-9724f57e0d16}']
+   end;
 
   {The IAttachment interface provides access to a Database Connection. It may be
    used to:
@@ -1111,14 +1121,12 @@ type
 
   }
 
-  ISPBItem = interface(IParameterBlockItem)
+  ISPBItem = interface(IParameterBlockItemWithTypeName)
     ['{5d08ae2b-4519-41bd-8b40-97cd451c3f6a}']
-    function getParamTypeName: AnsiString;
   end;
 
-  ISPB = interface(IParameterBlock<ISPBItem>)
+  ISPB = interface(IParameterBlockWithTypeNames<ISPBItem>)
     ['{2c5836fd-41ed-4426-9b7d-5af580ec2659}']
-    function AddByTypeName(ParamTypeName: AnsiString): ISPBItem;
   end;
 
   {Service Query Parameter Block (SQPB).

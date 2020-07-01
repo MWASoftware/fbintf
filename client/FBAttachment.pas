@@ -185,6 +185,7 @@ type
    function LookupItemType(ParamTypeName: AnsiString): byte; override;
   public
     constructor Create(api: TFBClientAPI);
+    function GetDPBParamTypeName(ParamType: byte): Ansistring;
   end;
 
 implementation
@@ -268,7 +269,6 @@ const
 const
   isc_dpb_last_dpb_constant = isc_dpb_decfloat_traps;
 
-  DPBPrefix = 'isc_dpb_';
   DPBConstantNames: array[1..isc_dpb_last_dpb_constant] of string = (
     'cdd_pathname',
     'allocation',
@@ -1029,6 +1029,11 @@ begin
   inherited Create(api);
   FDataLength := 1;
   FBuffer^ := isc_dpb_version1;
+end;
+
+function TDPB.GetDPBParamTypeName(ParamType: byte): Ansistring;
+begin
+  Result := DPBConstantNames[ParamType];
 end;
 
 function TDPB.LookupItemType(ParamTypeName: AnsiString): byte;

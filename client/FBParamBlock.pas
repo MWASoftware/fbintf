@@ -749,7 +749,7 @@ var ParamType: byte;
 begin
   ParamType := LookupItemType(ParamTypeName);
   if ParamType = 0 then
-    IBError(ibxeUnknownParamTypeName,[ParamTypeName]);
+    IBError(ibxeUnknownParamTypeName,[ClassName,ParamTypeName]);
   Result := Add(ParamType);
 end;
 

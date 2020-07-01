@@ -79,6 +79,7 @@ type
   TSPBItem = class(TParamBlockItem,ISPBItem)
   public
    function getParamTypeName: AnsiString; override;
+   class function LookupParamTypeName(ParamType: byte): AnsiString;
   end;
 
  { TSPB }
@@ -88,6 +89,7 @@ type
    function LookupItemType(ParamTypeName: AnsiString): byte; override;
   public
    constructor Create(api: TFBClientAPI);
+   function GetDPBParamTypeName(ParamType: byte): Ansistring;
   end;
 
 implementation
@@ -132,11 +134,14 @@ const
 { TSPBItem }
 
 function TSPBItem.getParamTypeName: AnsiString;
+begin
+    Result := LookupParamTypeName(getParamType);
+end;
+
+class function TSPBItem.LookupParamTypeName(ParamType: byte): AnsiString;
 var i: integer;
-    ParamType: byte;
 begin
   Result := '';
-  ParamType := getParamType;
   for i := 1 to isc_spb_last_spb_constant do
     if SPBConstantValues [i] = ParamType then
     begin
@@ -242,6 +247,11 @@ begin
   FDataLength := 2;
   FBuffer^ := isc_spb_version;
   (FBuffer+1)^ := isc_spb_current_version;
+end;
+
+function TSPB.GetDPBParamTypeName(ParamType: byte): Ansistring;
+begin
+  Result := TSPBItem.LookupParamTypeName(ParamType);
 end;
 
 end.

@@ -138,6 +138,7 @@ type
     function LookupItemType(ParamTypeName: AnsiString): byte; override;
   public
     constructor Create(api: TFBClientAPI);
+    function GetDPBParamTypeName(ParamType: byte): Ansistring;
   end;
 
 implementation
@@ -147,7 +148,6 @@ uses FBMessages;
 const
   isc_tpb_last_tpb_constant = isc_tpb_at_snapshot_number;
 
-  TPBPrefix = 'isc_tpb_';
   TPBConstantNames: array[1..isc_tpb_last_tpb_constant] of string = (
     'consistency',
     'concurrency',
@@ -307,6 +307,11 @@ begin
   inherited Create(api);
   FDataLength := 1;
   FBuffer^ := isc_tpb_version3;
+end;
+
+function TTPB.GetDPBParamTypeName(ParamType: byte): Ansistring;
+begin
+  Result := TPBConstantNames[ParamType];
 end;
 
 function TTPB.LookupItemType(ParamTypeName: AnsiString): byte;

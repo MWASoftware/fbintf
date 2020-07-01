@@ -262,7 +262,7 @@ resourcestring
   SNoTimezoneSupport = 'TIME/TIMESTAMP WITH TIME ZONE data type not supported';
   SDecFloatNotSupported = 'DecFloat Data Type not supported';
   SInt128NotSupported = 'INT128 Data Type not supported';
-  SUnknownParamTypeName = 'Unknown Param Type Name "%s"';
+  SUnknownParamTypeName = '%s:Unknown Param Type Name "%s"';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
