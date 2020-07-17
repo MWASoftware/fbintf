@@ -90,6 +90,7 @@ type
     procedure SetSecondNewDatabaseName(aValue: AnsiString);
     procedure SetBackupFileName(aValue: AnsiString);
     property ShowStatistics: boolean read FShowStatistics write FShowStatistics;
+    property Server: AnsiString read FServer;
   end;
 
 var
@@ -703,11 +704,11 @@ constructor TTestManager.Create;
 begin
   inherited Create;
   FTests := TList.Create;
-  FNewDatabaseName := 'localhost:' + GetTempDir + 'fbtestsuite.fdb';
-  FSecondNewDatabaseName :=  'localhost:' + GetTempDir + 'fbtestsuite2.fdb';
+  FNewDatabaseName :=  GetTempDir + 'fbtestsuite.fdb';
+  FSecondNewDatabaseName :=   GetTempDir + 'fbtestsuite2.fdb';
   FUserName := 'SYSDBA';
   FPassword := 'masterkey';
-  FEmployeeDatabaseName := 'localhost:employee';
+  FEmployeeDatabaseName := 'employee';
   FBackupFileName := GetTempDir + 'testbackup.gbk';
   FServer := 'localhost';
 end;

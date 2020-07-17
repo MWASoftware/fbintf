@@ -267,17 +267,13 @@ end;
 procedure TTest11.RunTest(CharSet: AnsiString; SQLDialect: integer);
 var SPB: ISPB;
     Service: IServiceManager;
-    I: integer;
     ServerName: AnsiString;
     DBName: AnsiString;
 begin
   if not FirebirdAPI.HasServiceAPI then Exit;
 
-  ServerName := ExtractDBName(Owner.GetEmployeeDatabaseName);
-  I := Pos(':',ServerName);
-  if i > 0 then
-    DBName := system.copy(ServerName,i+1,length(ServerName) - 2);
-  system.Delete(ServerName,i,Length(ServerName)-i+1);
+  DBName := ExtractDBName(Owner.GetEmployeeDatabaseName);
+  ServerName := Owner.Server;
 
   SPB := FirebirdAPI.AllocateSPB;
   SPB.Add(isc_spb_user_name).setAsString(Owner.GetUserName);
