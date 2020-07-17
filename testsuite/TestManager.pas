@@ -188,7 +188,10 @@ begin
 
     SQL_TEXT,SQL_VARYING:
     begin
-      s := aValue[i].AsString;
+      if aValue[i].GetCharSetID = 1 then
+      s := aValue[i].AsString
+      else
+        s := Trim(aValue[i].AsString);
       if FHexStrings then
       begin
         write(OutFile,aValue[i].Name,' = ');

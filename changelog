@@ -13,6 +13,13 @@ FBINTF Change Log  version          (1.1-6 Build 12044) Fri, 17 Apr 2020 12:30:0
 
 4.  Fixed Array SDL: array_desc_scale now correctly encoded as a signed integer.
 
+5.  SQL_TEXT handling changed. When the value of an SQL_TEXT (i.e. fixed width string) column is
+    returned using GetAsString and the string codepage is UTF8, the string is truncated so
+    that the byte length corresponds to the number of characters specified for the column.
+    SQL_TEXT strings are no longer automatically trimmed to remove all trailing white space. This is
+    correct behaviour but may affect some implementations that relied upon automatic
+    trimming of trailing white space.
+
 FBINTF Change Log  version          (1.1-5 Build 12044) Fri, 17 Apr 2020 12:30:01 +0100
 
 1. ISQLParams.GetHasCaseSensitiveParams added. Returns true if param names are

@@ -56,7 +56,7 @@ begin
       while ResultSet.FetchNext do
       begin
         for i := 0 to ResultSet.getCount - 1 do
-          writeln(OutFile,ResultSet[i].Name,' = ',ResultSet[i].AsString);
+          writeln(OutFile,ResultSet[i].Name,' = ',Trim(ResultSet[i].AsString));
       end;
     finally
       ResultSet.Close;
