@@ -2,24 +2,23 @@ Firebird API Test Suite
 Copyright MWA Software 2016
 
 Starting Tests
-Client API Version = 3.768
+Client API Version = 2.5
 Running Test 1: Create and Drop a Database
 Creating a Database with empty parameters
-Create Database fails (as expected): I/O error during "open O_CREAT" operation for file ""
-Error while trying to create file
-No such file or directory
+Create Database fails (as expected): 
+unavailable database
 Creating a Database using an SQL Statement
-Database ID = 4 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = mint18-FB3
+Database ID = 4 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = zeus
 SQL Dialect = 3
 DB Connect String = localhost:/tmp/fbintf-testsuite/testsuite1.fdb
 DB Charset ID = 0
 DB SQL Dialect = 3
 DB Remote Protocol = TCPv4
-DB ODS Major Version = 12
-DB ODS Minor Version = 0
-User Authentication Method = Srp
-Firebird Library Path = /usr/lib/libfbclient.so
-DB Client Implementation Version = 3.768
+DB ODS Major Version = 11
+DB ODS Minor Version = 2
+User Authentication Method = Legacy_Auth
+Firebird Library Path = /opt/firebird2.5.9/lib/libfbclient.so
+DB Client Implementation Version = 2.5
 DPB
 Count = 3
 28 = SYSDBA
@@ -32,11 +31,11 @@ DB Connect String = localhost:/tmp/fbintf-testsuite/testsuite1.fdb
 DB Charset ID = 4
 DB SQL Dialect = 3
 DB Remote Protocol = TCPv4
-DB ODS Major Version = 12
-DB ODS Minor Version = 0
-User Authentication Method = Srp
-Firebird Library Path = /usr/lib/libfbclient.so
-DB Client Implementation Version = 3.768
+DB ODS Major Version = 11
+DB ODS Minor Version = 2
+User Authentication Method = Legacy_Auth
+Firebird Library Path = /opt/firebird2.5.9/lib/libfbclient.so
+DB Client Implementation Version = 2.5
 Dropping Database
 DPB
 Count = 4
@@ -46,23 +45,22 @@ Count = 4
 65 = 3
 
 Creating a Database with a DPD
-Database ID = 4 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = mint18-FB3
-ODS major = 12
-ODS minor = 0
+Database ID = 4 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = zeus
+ODS major = 11
+ODS minor = 2
 DB Connect String = localhost:/tmp/fbintf-testsuite/testsuite1.fdb
 DB Charset ID = 4
 DB SQL Dialect = 3
 DB Remote Protocol = TCPv4
-DB ODS Major Version = 12
-DB ODS Minor Version = 0
-User Authentication Method = Srp
-Firebird Library Path = /usr/lib/libfbclient.so
-DB Client Implementation Version = 3.768
+DB ODS Major Version = 11
+DB ODS Minor Version = 2
+User Authentication Method = Legacy_Auth
+Firebird Library Path = /opt/firebird2.5.9/lib/libfbclient.so
+DB Client Implementation Version = 2.5
 RDB$DESCRIPTION = 
 RDB$RELATION_ID = 128
-RDB$SECURITY_CLASS = SQL$363
+RDB$SECURITY_CLASS = 
 RDB$CHARACTER_SET_NAME = UTF8
-RDB$LINGER = 
 Dropping Database
 
 
@@ -203,10 +201,9 @@ Nullable
 Size = 37
 
 Plan = 
-Select Expression
-    -> First N Records
-        -> Table "EMPLOYEE" Full Scan
-Select First 3 * from EMPLOYEE
+PLAN (EMPLOYEE NATURAL)
+-- SQL style inline comment
+/* this is a comment */ Select First 3 * from EMPLOYEE
 
 EMP_NO = 2
 FIRST_NAME = Robert
@@ -305,10 +302,10 @@ Constrained Employee Count = 3
 Running Test 4: Update, Insert and Delete Queries
 Opening localhost:employee
 Database Open
-Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V3.0.1.32609 Firebird 3.0"
-Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V3.0.1.32609 Firebird 3.0/tcp (mint18-FB3)/P14:CZ"
-Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-V3.0.1.32609 Firebird 3.0/tcp (mint18-FB3)/P14:CZ"
-on disk structure version 12.0
+Firebird/linux AMD64 (access method), version "LI-V2.5.9.27139 Firebird 2.5"
+Firebird/linux AMD64 (remote server), version "LI-V2.5.9.27139 Firebird 2.5/tcp (zeus)/P12"
+Firebird/linux AMD64 (remote interface), version "LI-V2.5.9.27139 Firebird 2.5/tcp (zeus)/P12"
+on disk structure version 11.2
 Select Count = 1 InsertCount = 0 UpdateCount = 1 DeleteCount = 0
 EMP_NO = 8
 FIRST_NAME = Leslie
@@ -322,12 +319,12 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 19604200
-Delta memory = 4280
-Max memory = 19666120
-Elapsed time= 0.001 sec
+Current memory = 948608
+Delta memory = 1400
+Max memory = 992544
+Elapsed time= 0.000 sec
 Cpu = 0.000 sec
-Buffers = 2048
+Buffers = 75
 Reads = 0
 Writes = 0
 Fetches = 4
@@ -2261,30 +2258,30 @@ Array: (0,-1: A50) (0,0: A51) (0,1: A52) (0,2: A53) (0,3: A54) (0,4: A55) (0,5: 
 
 
 Running Test 9: Database Information tests
-Database ID = 4 FB = /opt/firebird/examples/empbuild/employee.fdb SN = mint18-FB3
-Pages =307
+Database ID = 4 FB = /opt/firebird2.5.9/examples/empbuild/employee.fdb SN = zeus
+Pages =272
 Base Level = 13,4,0,3,
 Implementation = 11,7,0,3,66,1,66,
 Reserved = 0
-ODS minor = 0
-ODS major = 12
-Page Size = 8192
-Version = 1: LI-V6.3.1.32609 Firebird 3.0
+ODS minor = 2
+ODS major = 11
+Page Size = 4096
+Version = 1: LI-V6.3.9.27139 Firebird 2.5
 Database is Read/Write
-Database Created: 27/9/2016 12:08:46
-Pages Used = 297
-Pages Free = 10
-Server Memory = 19122448
+Database Created: 17/6/2019 19:37:08
+Unknown Response 3
+Unknown Response 3
+Server Memory = 841392
 Forced Writes  = 1
-Max Memory  = 19242792
-Num Buffers  = 2048
+Max Memory  = 879272
+Num Buffers  = 75
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
 Active Transaction Count = 0
-Fetches  = 552
-Writes  = 8
-Reads  = 54
-Page Writes  = 5
+Fetches  = 1040
+Writes  = 6
+Reads  = 84
+Page Writes  = 6
 Record Version Removals Operation Counts
 
 Deletes Operation Counts
@@ -2296,30 +2293,30 @@ Insert Count Operation Counts
 Purge Count Countites Operation Counts
 
 Indexed Reads Count Operation Counts
-Table ID = 4
+Table ID = 2
+Count = 14
+Table ID = 5
 Count = 28
 Table ID = 6
-Count = 15
-Table ID = 9
-Count = 3
+Count = 58
 Table ID = 11
-Count = 1
+Count = 3
 Table ID = 12
-Count = 15
+Count = 36
 Table ID = 28
-Count = 1
+Count = 9
 Table ID = 29
-Count = 1
+Count = 7
 
 Sequential Table Scans Operation Counts
 Table ID = 0
-Count = 94
+Count = 88
 Table ID = 1
-Count = 2
+Count = 1
 
 Update Count Operation Counts
 
-Page Size = 8192
+Page Size = 4096
 
 
 Running Test 10: Event Handling
@@ -2333,11 +2330,8 @@ Two more events
 Call Async Wait
 Async Wait Called
 Event Signalled
-Event Signalled
-Deferred Events Caught
-Event Counts: TESTEVENT, Count = 2
 Signal Event
-Event Counts: TESTEVENT, Count = 1
+Event Counts: TESTEVENT, Count = 2
 Async Wait: Test Cancel
 Event Signalled
 Async Wait Called
@@ -2345,17 +2339,17 @@ Event Cancelled
 Time Out - Cancel Worked!
 Sync wait
 Event Signalled
-Event Counts: TESTEVENT, Count = 1
+Event Counts: TESTEVENT, Count = 2
 
 
 Running Test 11: Services API
 Service Manager Version = 2
-Server Version = LI-V3.0.1.32609 Firebird 3.0
-Implementation = Firebird/Linux/AMD/Intel/x64
+Server Version = LI-V2.5.9.27139 Firebird 2.5
+Implementation = Firebird/linux AMD64
 
 Lock Directory = /tmp/firebird/
-Message File = /opt/firebird/
-Security File = /opt/firebird/security3.fdb
+Message File = /opt/firebird2.5.9/
+Security File = /opt/firebird2.5.9/security2.fdb
 
 DB Attachments
 No. of Attachments = 0
@@ -2363,25 +2357,21 @@ Databases In Use = 0
 
 Sec. Database User
 User Name = SYSDBA
-First Name = 
-Middle Name = 
-Last Name = 
-User ID = 0
-Group ID = 0
-User Name = ALICE
-First Name = 
-Middle Name = 
-Last Name = 
+First Name = Sql
+Middle Name = Server
+Last Name = Administrator
 User ID = 0
 Group ID = 0
 
 
-Licence Info: feature is not supported
+Licence Info: 
+feature is not supported
+-feature is not supported
+
+Licence Mask Info: 
 feature is not supported
 
-Licence Mask Info: feature is not supported
-
-Capabilities = 6
+Capabilities = 260
 
 
 Get Limbo transactions
@@ -2580,25 +2570,30 @@ BLOBDATA (Charset Id = 4 Codepage = 65001)
 
 Running Test 16: Error handling
 Invalid Database Name Test
-Error Handled: I/O error during "open" operation for file "Malformed Name"
-Error while trying to open file
-No such file or directory
+Error Handled: 
+I/O error during "open" operation for file "Malformed Name"
+-Error while trying to open file
+-No such file or directory
 Invalid User Name Test
-Error Handled: Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Error Handled: 
+Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Invalid password Test
-Error Handled: Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Error Handled: 
+Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Invalid Prepare SQL Test
-Error Handled: Dynamic SQL Error
-SQL error code = -206
-Column unknown
-UNKNOWN_DATE
-At line 1, column 21 When Executing: Update Employee Set Unknown_Date = ? Where EMP_NO = ?
+Error Handled: 
+Dynamic SQL Error
+-SQL error code = -206
+-Column unknown
+-UNKNOWN_DATE
+-At line 1, column 21 When Executing: Update Employee Set Unknown_Date = ? Where EMP_NO = ?
 Invalid Open Cursor SQL Test
-Error Handled: Dynamic SQL Error
-SQL error code = -206
-Column unknown
-X
-At line 1, column 8 When Executing: Select X,count(*) As Counter from EMPLOYEE
+Error Handled: 
+Dynamic SQL Error
+-SQL error code = -206
+-Column unknown
+-X
+-At line 1, column 8 When Executing: Select X,count(*) As Counter from EMPLOYEE
 Transaction not started Test
 Error Handled: Transaction is not active
 Invalid Param SQL Type Test
@@ -2606,13 +2601,15 @@ Error Handled: Field "EMP_NO" not found
 Case sensitive Param SQL  Test
 Error Handled: Field "EMP_NO" not found
 Invalid Server Name Test
-Error Handled: Unable to complete network request to host "unknown".
-Failed to locate host machine.
-The specified name was not found in the hosts file or Domain Name Services
+Error Handled: 
+Unable to complete network request to host "unknown".
+-Failed to locate host machine
 Invalid User Name Test
-Error Handled: Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Error Handled: 
+Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Invalid password Test
-Error Handled: Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Error Handled: 
+Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 
 
 Test Suite Ends

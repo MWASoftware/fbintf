@@ -686,7 +686,7 @@ begin
   while isc_interprete(@local_buffer,@psb) > 0 do
   begin
     if (Result <> '') and (Result[Length(Result)] <> LF) then
-      Result := Result + LineEnding;
+      Result := Result + LineEnding + '-';
     Result := Result + strpas(local_buffer);
   end;
 end;
