@@ -29,9 +29,9 @@ if not EXIST %FPCBIN%\fpc.exe (
 set TESTOUTDIR=%TEMP%\fbintf-testsuite
 set USERNAME=SYSDBA
 set PASSWORD=masterkey
-set EMPLOYEEDB=localhost:employee
-set NEWDBNAME=localhost:%TESTOUTDIR%\testsuite1.fdb
-set NEWDBNAME2=localhost:%TESTOUTDIR%\testsuite2.fdb
+set EMPLOYEEDB=employee
+set NEWDBNAME=%TESTOUTDIR%\testsuite1.fdb
+set NEWDBNAME2=%TESTOUTDIR%\testsuite2.fdb
 set BAKFILE=%TESTOUTDIR%\testsuite.gbk
 set DIFF=%FPCBIN%\diff.exe
 

@@ -6,9 +6,9 @@
 TESTOUTDIR=/tmp/fbintf-testsuite
 USERNAME=SYSDBA
 PASSWORD=masterkey
-EMPLOYEEDB=localhost:employee
-NEWDBNAME=localhost:$TESTOUTDIR/testsuite1.fdb
-NEWDBNAME2=localhost:$TESTOUTDIR/testsuite2.fdb
+EMPLOYEEDB=employee
+NEWDBNAME=$TESTOUTDIR/testsuite1.fdb
+NEWDBNAME2=$TESTOUTDIR/testsuite2.fdb
 BAKFILE=$TESTOUTDIR/testsuite.gbk
 
 cd `dirname $0`
