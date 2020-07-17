@@ -2,7 +2,7 @@
 REM Test suite Configuration parameters (FPCDIR and FPCBIN)
 REM These may be modified if needed to suite local requirements
 
-FOR %%V in (3.0.4 3.0.2 3.0.0) do (
+FOR %%V in (3.2.0 3.0.4 3.0.2 3.0.0) do (
   if EXIST C:\lazarus\fpc\%%V\bin\i386-win32\fpc.exe (
     set FPCDIR=C:\lazarus\fpc\%%V
     set FPCBIN=C:\lazarus\fpc\%%V\bin\i386-win32
@@ -33,6 +33,7 @@ set EMPLOYEEDB=localhost:employee
 set NEWDBNAME=localhost:%TESTOUTDIR%\testsuite1.fdb
 set NEWDBNAME2=localhost:%TESTOUTDIR%\testsuite2.fdb
 set BAKFILE=%TESTOUTDIR%\testsuite.gbk
+set DIFF=%FPCBIN%\diff.exe
 
 rd /s /q testunits
 mkdir %TESTOUTDIR%
@@ -44,10 +45,21 @@ echo Starting Testsuite
 echo( 
 IF EXIST "testsuite.exe" (
 testsuite.exe -u %USERNAME% -p %PASSWORD% -e %EMPLOYEEDB% -n %NEWDBNAME% -s %NEWDBNAME2% -b %BAKFILE% -o testout.log %1
+
+if not EXIST "%DIFF%" (
+  echo Unable to compare results - diff not found - %DIFF%
+  goto :EOF
+  )
+
 echo Comparing results with reference log
 echo( 
-%FPCBIN%\diff reference.log testout.log >diff.log
-type diff.log 
+findstr /C:"ODS Major Version = 11" testout.log
+IF ERRORLEVEL 1 (
+  %DIFF% FB3reference.log testout.log >diff.log
+) ELSE (
+  %DIFF% FB2reference.log testout.log >diff.log
+)
+type diff.log
 rd /s /q testunits
 del testsuite.exe
 )
