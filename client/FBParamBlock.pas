@@ -104,6 +104,7 @@ type
      function getAsString: AnsiString;
      function getAsByte: byte;
      procedure addByte(aValue: byte);
+     procedure addShortInt(aValue: ShortInt);
      procedure addShortInteger(aValue: integer);
      procedure setAsByte(aValue: byte);
      procedure setAsByte2(aValue: byte);
@@ -390,6 +391,19 @@ begin
     len := FBufLength + 1;
     FOwner.UpdateRequestItemSize(self,len);
     P^ := aValue;
+  end;
+end;
+
+procedure TParamBlockItem.addShortInt(aValue: ShortInt);
+var len: integer;
+    P: PByte;
+begin
+  with FParamData^ do
+  begin
+    P := FBufPtr + FBufLength;
+    len := FBufLength + 1;
+    FOwner.UpdateRequestItemSize(self,len);
+    PShortInt(P)^ := aValue;
   end;
 end;
 

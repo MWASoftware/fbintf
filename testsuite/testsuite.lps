@@ -3,7 +3,7 @@
   <ProjectSession>
     <Version Value="11"/>
     <BuildModes Active="Default"/>
-    <Units Count="69">
+    <Units Count="72">
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -14,7 +14,7 @@
       <Unit1>
         <Filename Value="TestManager.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="11"/>
         <TopLine Value="73"/>
         <CursorPos Y="19"/>
         <UsageCount Value="47"/>
@@ -138,10 +138,10 @@
       </Unit18>
       <Unit19>
         <Filename Value="../client/FBClientAPI.pas"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="9"/>
         <TopLine Value="413"/>
         <CursorPos X="3" Y="418"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="11"/>
         <Loaded Value="True"/>
       </Unit19>
       <Unit20>
@@ -173,10 +173,11 @@
       </Unit22>
       <Unit23>
         <Filename Value="../IB.pas"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="190"/>
-        <CursorPos X="31" Y="214"/>
+        <CursorPos X="8" Y="201"/>
         <UsageCount Value="16"/>
+        <Loaded Value="True"/>
       </Unit23>
       <Unit24>
         <Filename Value="../client/include/uloadlibrary.inc"/>
@@ -193,8 +194,7 @@
       </Unit25>
       <Unit26>
         <Filename Value="../client/3.0/FB30ClientAPI.pas"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="10"/>
         <TopLine Value="405"/>
         <CursorPos Y="434"/>
         <UsageCount Value="18"/>
@@ -374,10 +374,11 @@
       </Unit51>
       <Unit52>
         <Filename Value="../client/3.0/FB30Array.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="274"/>
-        <CursorPos X="3" Y="286"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="195"/>
+        <CursorPos X="50" Y="217"/>
         <UsageCount Value="10"/>
+        <Loaded Value="True"/>
       </Unit52>
       <Unit53>
         <Filename Value="../client/2.5/FB25Array.pas"/>
@@ -451,9 +452,10 @@
       </Unit62>
       <Unit63>
         <Filename Value="../changelog"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <CursorPos X="4" Y="12"/>
-        <UsageCount Value="10"/>
+        <CursorPos X="38" Y="14"/>
+        <UsageCount Value="11"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit63>
@@ -483,22 +485,45 @@
       <Unit67>
         <Filename Value="../../fbintf.fb4/changelog"/>
         <EditorIndex Value="2"/>
-        <TopLine Value="67"/>
+        <TopLine Value="64"/>
         <CursorPos X="76" Y="83"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="11"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit67>
       <Unit68>
         <Filename Value="../client/FBClientAPI.pas.rej"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="8"/>
         <CursorPos X="78" Y="8"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="11"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit68>
+      <Unit69>
+        <Filename Value="../include/inf_pub.inc"/>
+        <EditorIndex Value="7"/>
+        <TopLine Value="106"/>
+        <CursorPos X="9" Y="123"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit69>
+      <Unit70>
+        <Filename Value="../../fbintf.fb4/client/3.0/FB30ClientAPI.pas"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="198"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit70>
+      <Unit71>
+        <Filename Value="../../fbintf.fb4/client/3.0/FB30Array.pas"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="188"/>
+        <CursorPos X="26" Y="212"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit71>
     </Units>
-    <JumpHistory Count="3" HistoryIndex="2">
+    <JumpHistory Count="10" HistoryIndex="9">
       <Position1>
         <Filename Value="../client/FBClientAPI.pas"/>
         <Caret Line="118" Column="20" TopLine="97"/>
@@ -511,6 +536,33 @@
         <Filename Value="../changelog"/>
         <Caret Line="12" Column="4"/>
       </Position3>
+      <Position4>
+        <Filename Value="../IB.pas"/>
+        <Caret Line="201" Column="12" TopLine="190"/>
+      </Position4>
+      <Position5>
+        <Filename Value="../../fbintf.fb4/client/3.0/FB30Array.pas"/>
+      </Position5>
+      <Position6>
+        <Filename Value="../../fbintf.fb4/client/3.0/FB30Array.pas"/>
+        <Caret Line="49" Column="20" TopLine="30"/>
+      </Position6>
+      <Position7>
+        <Filename Value="../../fbintf.fb4/client/3.0/FB30Array.pas"/>
+        <Caret Line="50" Column="26" TopLine="30"/>
+      </Position7>
+      <Position8>
+        <Filename Value="../../fbintf.fb4/client/3.0/FB30Array.pas"/>
+        <Caret Line="216" Column="28" TopLine="188"/>
+      </Position8>
+      <Position9>
+        <Filename Value="../client/3.0/FB30Array.pas"/>
+        <Caret Line="286" Column="3" TopLine="209"/>
+      </Position9>
+      <Position10>
+        <Filename Value="../../fbintf.fb4/client/3.0/FB30Array.pas"/>
+        <Caret Line="90" Column="3" TopLine="73"/>
+      </Position10>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
