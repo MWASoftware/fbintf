@@ -27,6 +27,7 @@ type
     FOwner: TTestManager;
   protected
     FHexStrings: boolean;
+    function ExtractDBName(ConnectString: AnsiString): AnsiString;
     function ReportResults(Statement: IStatement): IResultSet;
     procedure ReportResult(aValue: IResults);
     procedure PrintHexString(s: AnsiString);
@@ -61,6 +62,8 @@ type
   TTestManager = class
   private
     FTests: TList;
+    FServer: AnsiString;
+    FPortNo: AnsiString;
     FEmployeeDatabaseName: AnsiString;
     FNewDatabaseName: AnsiString;
     FSecondNewDatabaseName: AnsiString;
@@ -98,6 +101,8 @@ procedure RegisterTest(aTest: TTest);
 
 implementation
 
+uses IBUtils;
+
 {$IFDEF MSWINDOWS}
 uses windows;
 
@@ -125,6 +130,28 @@ begin
   FOwner := aOwner;
 end;
 
+function TTestBase.ExtractDBName(ConnectString: AnsiString): AnsiString;
+var ServerName: AnsiString;
+    Protocol: TProtocolAll;
+    PortNo: AnsiString;
+    i: integer;
+begin
+  if not ParseConnectString(ConnectString, ServerName, Result, Protocol,PortNo) then
+  begin
+    {assume either inet format (remote) or localhost}
+    Result := ConnectString;
+    if Pos('inet',Result) = 1 then
+    begin
+      system.Delete(Result,1,7);
+      i := Pos('/',Result);
+      if i > 0 then
+        system.delete(Result,1,i);
+    end
+    else
+    if Pos('localhost:',Result) = 1 then
+      system.Delete(Result,1,10)
+  end;
+end;
 
 function TTestBase.ReportResults(Statement: IStatement): IResultSet;
 begin
@@ -682,6 +709,7 @@ begin
   FPassword := 'masterkey';
   FEmployeeDatabaseName := 'localhost:employee';
   FBackupFileName := GetTempDir + 'testbackup.gbk';
+  FServer := 'localhost';
 end;
 
 destructor TTestManager.Destroy;
@@ -708,17 +736,26 @@ end;
 
 function TTestManager.GetEmployeeDatabaseName: AnsiString;
 begin
-  Result := FEmployeeDatabaseName;
+  if FirebirdAPI.GetClientMajor < 3 then
+    Result := MakeConnectString(FServer,  FEmployeeDatabaseName, TCP,FPortNo)
+  else
+    Result := MakeConnectString(FServer,  FEmployeeDatabaseName, inet,FPortNo);
 end;
 
 function TTestManager.GetNewDatabaseName: AnsiString;
 begin
-  Result := FNewDatabaseName;
+  if FirebirdAPI.GetClientMajor < 3 then
+    Result := MakeConnectString(FServer,  FNewDatabaseName, TCP,FPortNo)
+  else
+    Result := MakeConnectString(FServer,  FNewDatabaseName, inet,FPortNo);
 end;
 
 function TTestManager.GetSecondNewDatabaseName: AnsiString;
 begin
-  Result := FSecondNewDatabaseName;
+  if FirebirdAPI.GetClientMajor < 3 then
+    Result := MakeConnectString(FServer,  FSecondNewDatabaseName, TCP,FPortNo)
+  else
+    Result := MakeConnectString(FServer,  FSecondNewDatabaseName, inet,FPortNo);
 end;
 
 function TTestManager.GetBackupFileName: AnsiString;

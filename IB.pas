@@ -1168,6 +1168,8 @@ type
     function HasRollbackRetaining: boolean;
     function IsEmbeddedServer: boolean;
     function GetImplementationVersion: AnsiString;
+    function GetClientMajor: integer;
+    function GetClientMinor: integer;
 
     {Firebird 3 API}
     function HasMasterIntf: boolean;

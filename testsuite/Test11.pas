@@ -209,7 +209,7 @@ begin
 
   {Local Restore}
   writeln(OutFile,'Local Restore');
-  RestoreDBName := Owner.GetNewDatabaseName;
+  RestoreDBName := ExtractDBName(Owner.GetNewDatabaseName);
   i := Pos(':',RestoreDBName);
   if i > 0 then
     system.Delete(RestoreDBName,1,i);
@@ -273,7 +273,7 @@ var SPB: ISPB;
 begin
   if not FirebirdAPI.HasServiceAPI then Exit;
 
-  ServerName := Owner.GetEmployeeDatabaseName;
+  ServerName := ExtractDBName(Owner.GetEmployeeDatabaseName);
   I := Pos(':',ServerName);
   if i > 0 then
     DBName := system.copy(ServerName,i+1,length(ServerName) - 2);

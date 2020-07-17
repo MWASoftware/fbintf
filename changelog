@@ -20,6 +20,11 @@ FBINTF Change Log  version          (1.1-6 Build 12044) Fri, 17 Apr 2020 12:30:0
     correct behaviour but may affect some implementations that relied upon automatic
     trimming of trailing white space.
 
+6.  New IFirebirdAPI Calls:
+      function GetClientMajor: integer;
+      function GetClientMinor: integer;
+
+
 FBINTF Change Log  version          (1.1-5 Build 12044) Fri, 17 Apr 2020 12:30:01 +0100
 
 1. ISQLParams.GetHasCaseSensitiveParams added. Returns true if param names are
