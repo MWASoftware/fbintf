@@ -457,7 +457,7 @@ type
 
 implementation
 
-uses FBMessages, variants, IBUtils, FBTransaction, DateUtils;
+uses FBMessages, variants, IBUtils, FBTransaction, DateUtils {$IFDEF WINDOWS}, Windows {$ENDIF};
 
 { TSQLDataArea }
 
