@@ -80,7 +80,7 @@ unit FBSQLData;
 interface
 
 uses
-  Classes, SysUtils, IBExternals, IBHeader, IB,  FBActivityMonitor, FBClientAPI;
+  Classes, SysUtils, IBExternals, IBHeader, {$IFDEF WINDOWS} Windows, {$ENDIF} IB,  FBActivityMonitor, FBClientAPI;
 
 type
 
@@ -457,7 +457,7 @@ type
 
 implementation
 
-uses FBMessages, variants, IBUtils, FBTransaction, DateUtils {$IFDEF WINDOWS}, Windows {$ENDIF};
+uses FBMessages, variants, IBUtils, FBTransaction, DateUtils;
 
 { TSQLDataArea }
 

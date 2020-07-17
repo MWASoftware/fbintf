@@ -125,7 +125,7 @@ begin
 
   writeln(OutFile,'Test Suite Ends');
   Flush(OutFile);
-  //readln; {uncomment if running from IDE and console window closes before you can view results}
+  readln; {uncomment if running from IDE and console window closes before you can view results}
 
   except
     on E: Exception do

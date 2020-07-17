@@ -102,10 +102,9 @@ procedure RegisterTest(aTest: TTest);
 
 implementation
 
-uses IBUtils;
-
+uses IBUtils
 {$IFDEF MSWINDOWS}
-uses windows;
+, windows;
 
 function GetTempDir: AnsiString;
 var
@@ -114,6 +113,8 @@ begin
   GetTempPath(MAX_PATH, @tempFolder);
   result := StrPas(tempFolder);
 end;
+{$ELSE}
+;
 {$ENDIF}
 
 procedure RegisterTest(aTest: TTest);
