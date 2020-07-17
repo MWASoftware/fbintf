@@ -133,11 +133,7 @@ var SPB: ISPB;
 begin
   if not FirebirdAPI.HasServiceAPI then Exit;
 
-  ServerName := Owner.GetEmployeeDatabaseName;
-  I := Pos(':',ServerName);
-  if i > 0 then
-    DBName := system.copy(ServerName,i+1,length(ServerName) - 2);
-  system.Delete(ServerName,i,Length(ServerName)-i+1);
+  ServerName := Owner.Server;
 
   SPB := FirebirdAPI.AllocateSPB;
   SPB.Add(isc_spb_user_name).setAsString(Owner.GetUserName);
