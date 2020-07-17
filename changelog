@@ -9,6 +9,8 @@ FBINTF Change Log  version          (1.1-6 Build 12044) Fri, 17 Apr 2020 12:30:0
     are searched for the Firebird client library. Only if none is found, is the default
     client library used.
 
+3.  IUtil.FormatStatus now used to format error messages when using new API
+
 FBINTF Change Log  version          (1.1-5 Build 12044) Fri, 17 Apr 2020 12:30:01 +0100
 
 1. ISQLParams.GetHasCaseSensitiveParams added. Returns true if param names are

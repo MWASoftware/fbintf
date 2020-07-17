@@ -123,6 +123,7 @@ type
     function SQLDecodeTime(bufptr: PByte): TDateTime;  override;
     procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte); override;
     function SQLDecodeDateTime(bufptr: PByte): TDateTime; override;
+    function FormatStatus(Status: TFBStatus): AnsiString; override;
 
     {Firebird Interfaces}
     property MasterIntf: Firebird.IMaster read FMaster;
@@ -422,6 +423,14 @@ begin
   Result := SQLDecodeDate(bufPtr);
   Inc(bufptr,sizeof(ISC_DATE));
   Result := Result + SQLDecodeTime(bufPtr);
+end;
+
+function TFB30ClientAPI.FormatStatus(Status: TFBStatus): AnsiString;
+var local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
+begin
+  Result := '';
+  if UtilIntf.formatStatus(@local_buffer,sizeof(local_buffer),(Status as TFB30Status).GetStatus) > 0 then
+    Result := strpas(local_buffer);
 end;
 
 end.

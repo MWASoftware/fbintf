@@ -166,6 +166,7 @@ type
     isc_array_put_slice: Tisc_array_put_slice;
     isc_prepare_transaction: Tisc_prepare_transaction;
     isc_version: Tisc_Version;
+    isc_interprete: Tisc_interprete;
 
   public
     {Helper Functions}
@@ -176,7 +177,7 @@ type
     function SQLDecodeTime(bufptr: PByte): TDateTime;  override;
     procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte); override;
     function SQLDecodeDateTime(bufptr: PByte): TDateTime; override;
-
+    function FormatStatus(Status: TFBStatus): AnsiString; override;
   public
     {IFirebirdAPI}
 
@@ -387,6 +388,7 @@ begin
   isc_array_put_slice := GetProcAddr('isc_array_put_slice'); {do not localize}
   isc_prepare_transaction  := GetProcAddr('isc_prepare_transaction'); {do not localize}
   isc_version  := GetProcAddr('isc_version'); {do not localize}
+  isc_interprete := GetProcAddr('isc_interprete'); {do not localize}
 
   FIBServiceAPIPresent := true;
   isc_rollback_retaining := GetProcAddress(FFBLibrary.IBLibrary, 'isc_rollback_retaining'); {do not localize}
@@ -672,6 +674,20 @@ begin
     on E: EConvertError do begin
       IBError(ibxeInvalidDataConversion, [nil]);
     end;
+  end;
+end;
+
+function TFB25ClientAPI.FormatStatus(Status: TFBStatus): AnsiString;
+var psb: PStatusVector;
+    local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
+begin
+  psb := Status.StatusVector;
+  Result := '';
+  while isc_interprete(@local_buffer,@psb) > 0 do
+  begin
+    if (Result <> '') and (Result[Length(Result)] <> LF) then
+      Result := Result + LineEnding;
+    Result := Result + strpas(local_buffer);
   end;
 end;
 
