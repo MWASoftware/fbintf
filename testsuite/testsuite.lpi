@@ -23,14 +23,24 @@
     </PublishOptions>
     <RunParams>
       <local>
-        <CommandLineParams Value="-t 2"/>
+        <CommandLineParams Value="-t 1"/>
       </local>
+      <environment>
+        <UserOverrides Count="1">
+          <Variable0 Name="FIREBIRD" Value="/opt/firebird3.0.5"/>
+        </UserOverrides>
+      </environment>
       <FormatVersion Value="2"/>
       <Modes Count="1">
         <Mode0 Name="default">
           <local>
-            <CommandLineParams Value="-t 2"/>
+            <CommandLineParams Value="-t 1"/>
           </local>
+          <environment>
+            <UserOverrides Count="1">
+              <Variable0 Name="FIREBIRD" Value="/opt/firebird3.0.5"/>
+            </UserOverrides>
+          </environment>
         </Mode0>
       </Modes>
     </RunParams>

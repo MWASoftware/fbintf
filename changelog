@@ -1,3 +1,14 @@
+FBINTF Change Log  version          (1.1-6 Build 12044) Fri, 17 Apr 2020 12:30:01 +0100
+
+1. GetImplementationVersion now correctly returns '3.0' for Firebird 3 API
+   with a Firebrid 3 client library.
+
+2. Linux Only: FIREBIRD environment variable is now checked when loading the client library.
+    If a client library path is not explicitly provided and the FIREBIRD environment
+    variable is set then the directory given by this variable and any 'lib' subdirectory
+    are searched for the Firebird client library. Only if none is found, is the default
+    client library used.
+
 FBINTF Change Log  version          (1.1-5 Build 12044) Fri, 17 Apr 2020 12:30:01 +0100
 
 1. ISQLParams.GetHasCaseSensitiveParams added. Returns true if param names are

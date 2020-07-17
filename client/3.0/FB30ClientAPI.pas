@@ -108,7 +108,8 @@ type
     function HasServiceAPI: boolean;
     function HasRollbackRetaining: boolean;
     function IsEmbeddedServer: boolean; override;
-    function GetImplementationVersion: AnsiString;
+    function GetClientMajor: integer; override;
+    function GetClientMinor: integer; override;
 
     {Firebird 3 API}
     function HasMasterIntf: boolean;
@@ -343,9 +344,14 @@ begin
   Result := FIsEmbeddedServer;
 end;
 
-function TFB30ClientAPI.GetImplementationVersion: AnsiString;
+function TFB30ClientAPI.GetClientMajor: integer;
 begin
-  Result := Format('3.%d',[UtilIntf.GetClientVersion]);
+  Result := UtilIntf.GetClientVersion div 256;
+end;
+
+function TFB30ClientAPI.GetClientMinor: integer;
+begin
+  Result := UtilIntf.GetClientVersion mod 256;
 end;
 
 function TFB30ClientAPI.DecodeInteger(bufptr: PByte; len: short): integer;

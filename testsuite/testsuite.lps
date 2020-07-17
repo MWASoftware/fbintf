@@ -3,18 +3,19 @@
   <ProjectSession>
     <Version Value="11"/>
     <BuildModes Active="Default"/>
-    <Units Count="67">
+    <Units Count="68">
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
+        <TopLine Value="73"/>
         <UsageCount Value="46"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="TestManager.pas"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="73"/>
         <CursorPos Y="19"/>
         <UsageCount Value="46"/>
         <Loaded Value="True"/>
@@ -447,9 +448,11 @@
       </Unit62>
       <Unit63>
         <Filename Value="../changelog"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="65" Y="20"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <CursorPos X="2" Y="6"/>
         <UsageCount Value="10"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit63>
       <Unit64>
@@ -475,6 +478,15 @@
         <CursorPos X="6" Y="88"/>
         <UsageCount Value="10"/>
       </Unit66>
+      <Unit67>
+        <Filename Value="../../fbintf.fb4/changelog"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="67"/>
+        <CursorPos X="29" Y="89"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit67>
     </Units>
     <JumpHistory HistoryIndex="-1"/>
     <RunParams>

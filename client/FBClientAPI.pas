@@ -190,6 +190,9 @@ type
     function IsLibraryLoaded: boolean;
     function IsEmbeddedServer: boolean; virtual; abstract;
     function GetFBLibrary: IFirebirdLibrary;
+    function GetImplementationVersion: AnsiString;
+    function GetClientMajor: integer;  virtual; abstract;
+    function GetClientMinor: integer;  virtual; abstract;
 end;
 
 implementation
@@ -364,6 +367,11 @@ end;
 function TFBClientAPI.GetFBLibrary: IFirebirdLibrary;
 begin
   Result := FFBLibrary;
+end;
+
+function TFBClientAPI.GetImplementationVersion: AnsiString;
+begin
+  Result := Format('%d.%d',[GetClientMajor,GetClientMinor]);
 end;
 
 function TFBClientAPI.GetProcAddr(ProcName: PAnsiChar): Pointer;
