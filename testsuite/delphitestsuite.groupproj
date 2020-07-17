@@ -1,0 +1,48 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{3854F81C-7F58-4780-9FCB-57535A544318}</ProjectGuid>
+		</PropertyGroup>
+		<ItemGroup>
+			<Projects Include="testsuite.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="..\fbintf.dproj">
+				<Dependencies/>
+			</Projects>
+		</ItemGroup>
+		<ProjectExtensions>
+			<Borland.Personality>Default.Personality.12</Borland.Personality>
+			<Borland.ProjectType/>
+			<BorlandProject>
+				<Default.Personality/>
+			</BorlandProject>
+		</ProjectExtensions>
+		<Target Name="testsuite">
+			<MSBuild Projects="testsuite.dproj"/>
+		</Target>
+		<Target Name="testsuite:Clean">
+			<MSBuild Targets="Clean" Projects="testsuite.dproj"/>
+		</Target>
+		<Target Name="testsuite:Make">
+			<MSBuild Targets="Make" Projects="testsuite.dproj"/>
+		</Target>
+		<Target Name="fbintf">
+			<MSBuild Projects="..\fbintf.dproj"/>
+		</Target>
+		<Target Name="fbintf:Clean">
+			<MSBuild Targets="Clean" Projects="..\fbintf.dproj"/>
+		</Target>
+		<Target Name="fbintf:Make">
+			<MSBuild Targets="Make" Projects="..\fbintf.dproj"/>
+		</Target>
+		<Target Name="Build">
+			<CallTarget Targets="testsuite;fbintf"/>
+		</Target>
+		<Target Name="Clean">
+			<CallTarget Targets="testsuite:Clean;fbintf:Clean"/>
+		</Target>
+		<Target Name="Make">
+			<CallTarget Targets="testsuite:Make;fbintf:Make"/>
+		</Target>
+		<Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+	</Project>
