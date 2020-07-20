@@ -80,7 +80,7 @@ unit FBSQLData;
 interface
 
 uses
-  Classes, SysUtils, IBExternals, IB,  FBActivityMonitor, FBClientAPI,
+  Classes, SysUtils, IBExternals, {$IFDEF WINDOWS} Windows, {$ENDIF} IB,  FBActivityMonitor, FBClientAPI,
   FmtBCD;
 
 type
@@ -184,6 +184,7 @@ type
      function GetModified: boolean; virtual;
      function GetDateTimeStrLength(DateTimeFormat: TIBDateTimeFormats): integer;
      function GetAsBCD: tBCD;
+     function GetSize: cardinal; virtual; abstract;
      procedure SetAsBoolean(AValue: boolean); virtual;
      procedure SetAsCurrency(Value: Currency); virtual;
      procedure SetAsInt64(Value: Int64); virtual;
@@ -371,7 +372,7 @@ type
     function GetScale: integer; override;
     function getCharSetID: cardinal; override;
     function GetIsNullable: boolean; override;
-    function GetSize: cardinal;
+    function GetSize: cardinal; override;
     function GetArrayMetaData: IArrayMetaData;
     function GetBlobMetaData: IBlobMetaData;
     function GetStatement: IStatement;
@@ -1408,6 +1409,71 @@ begin
   end;
 end;
 
+{Copied from LazUTF8}
+
+function UTF8CodepointSizeFull(p: PAnsiChar): integer;
+const TopBitSetMask   = $8000; {%10000000}
+      Top2BitsSetMask = $C000; {%11000000}
+      Top3BitsSetMask = $E000; {%11100000}
+      Top4BitsSetMask = $F000; {%11110000}
+      Top5BitsSetMask = $F800; {%11111000}
+begin
+  case p^ of
+  #0..#191: // %11000000
+    // regular single byte character (#0 is a character, this is Pascal ;)
+    Result:=1;
+  #192..#223: // p^ and %11100000 = %11000000
+    begin
+      // could be 2 byte character
+      if (ord(p[1]) and Top2BitsSetMask) = TopBitSetMask then
+        Result:=2
+      else
+        Result:=1;
+    end;
+  #224..#239: // p^ and %11110000 = %11100000
+    begin
+      // could be 3 byte character
+      if ((ord(p[1]) and Top2BitsSetMask) = TopBitSetMask)
+      and ((ord(p[2]) and Top2BitsSetMask) = TopBitSetMask) then
+        Result:=3
+      else
+        Result:=1;
+    end;
+  #240..#247: // p^ and %11111000 = %11110000
+    begin
+      // could be 4 byte character
+      if ((ord(p[1]) and Top2BitsSetMask) = TopBitSetMask)
+      and ((ord(p[2]) and Top2BitsSetMask) = TopBitSetMask)
+      and ((ord(p[3]) and Top2BitsSetMask) = TopBitSetMask) then
+        Result:=4
+      else
+        Result:=1;
+    end;
+  else
+    Result:=1;
+  end;
+end;
+
+{Returns the byte length of a UTF8 string with a fixed charwidth}
+
+function GetStrLen(p: PAnsiChar; CharWidth, MaxDataLength: cardinal): integer;
+var i: integer;
+    cplen: integer;
+begin
+  Result := 0;
+  for i := 1 to CharWidth do
+  begin
+    cplen := UTF8CodepointSizeFull(p);
+    Inc(p,cplen);
+    Inc(Result,cplen);
+    if Result >= MaxDataLength then
+    begin
+      Result := MaxDataLength;
+      Exit;
+    end;
+  end;
+end;
+
 function TSQLDataItem.GetAsString: AnsiString;
 var
   sz: PByte;
@@ -1433,17 +1499,19 @@ begin
       begin
         sz := SQLData;
         if (SQLType = SQL_TEXT) then
-          str_len := DataLength
+        begin
+          if GetCodePage = cp_utf8 then
+            str_len := GetStrLen(PAnsiChar(sz),GetSize,DataLength)
+          else
+            str_len := DataLength
+        end
         else begin
-          str_len := DecodeInteger(SQLData, 2);
+          str_len := DecodeInteger(sz, 2);
           Inc(sz, 2);
         end;
         SetString(rs, PAnsiChar(sz), str_len);
         SetCodePage(rs,GetCodePage,false);
-        if (SQLType = SQL_TEXT) and (GetCharSetID <> 1) then
-          Result := TrimRight(rs)
-        else
-          Result := rs
+        Result := rs;
       end;
 
       SQL_TYPE_DATE:

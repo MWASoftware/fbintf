@@ -538,16 +538,6 @@ begin
 {$ENDIF}
 end;
 
-function TFB25ClientAPI.HasMasterIntf: boolean;
-begin
-  Result := false;
-end;
-
-function TFB25ClientAPI.GetIMaster: TObject;
-begin
-  Result := nil;
-end;
-
 function TFB25ClientAPI.GetClientMajor: integer;
 begin
   Result := 2;
@@ -556,6 +546,16 @@ end;
 function TFB25ClientAPI.GetClientMinor: integer;
 begin
   Result := 5;
+end;
+
+function TFB25ClientAPI.HasMasterIntf: boolean;
+begin
+  Result := false;
+end;
+
+function TFB25ClientAPI.GetIMaster: TObject;
+begin
+  Result := nil;
 end;
 
 function TFB25ClientAPI.DecodeInteger(bufptr: PByte; len: short): integer;

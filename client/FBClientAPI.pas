@@ -486,7 +486,6 @@ begin
 end;
 {$ENDIF}
 
-
 function TFBClientAPI.GetProcAddr(ProcName: PAnsiChar): Pointer;
 begin
   Result := GetProcAddress(FFBLibrary.IBLibrary, ProcName);

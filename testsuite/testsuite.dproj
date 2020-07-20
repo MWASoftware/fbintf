@@ -113,6 +113,7 @@
 						<VersionInfo Name="MinorVer">1</VersionInfo>
 						<VersionInfo Name="Release">5</VersionInfo>
 						<VersionInfo Name="Build">11664</VersionInfo>
+						<VersionInfo Name="Build">12044</VersionInfo>
 						<VersionInfo Name="Debug">False</VersionInfo>
 						<VersionInfo Name="PreRelease">False</VersionInfo>
 						<VersionInfo Name="Special">False</VersionInfo>
@@ -125,12 +126,14 @@
 						<VersionInfoKeys Name="CompanyName">MWA Software</VersionInfoKeys>
 						<VersionInfoKeys Name="FileDescription"/>
 						<VersionInfoKeys Name="FileVersion">1.1.5.11664</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">1.1.5.12044</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName"/>
 						<VersionInfoKeys Name="LegalCopyright"/>
 						<VersionInfoKeys Name="LegalTrademarks"/>
 						<VersionInfoKeys Name="OriginalFilename"/>
 						<VersionInfoKeys Name="ProductName"/>
 						<VersionInfoKeys Name="ProductVersion">1.1.5.11664</VersionInfoKeys>
+						<VersionInfoKeys Name="ProductVersion">1.1.5.12044</VersionInfoKeys>
 						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
 				</Delphi.Personality>

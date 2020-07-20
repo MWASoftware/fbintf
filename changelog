@@ -6,37 +6,29 @@ FBINTF Change Log  version          (1.2-0 Build 12022) Fri, 17 Apr 2020 10:35:5
 
 3. Added Support for TIMETAMP WITH TIME ZONE and TIME WITH TIME ZONE data types.
 
-4. GetImplementationVersion now correctly returns '3.0' for Firebird 3 API
-   with a Firebrid 3 client library.
+4. Added Support for SQL_DEC16, SQL_DEC34 and extended NUMERIC precision.
 
-5. Added Support for SQL_DEC16, SQL_DEC34 and extended NUMERIC precision.
-
-6. Arrays of elements with a scale factor (e.g. NUMBERIC (10,2)) should now be
-   written correctly to the database.
-
-7. New unit 'FBClientLib.pas' added and provides new interface IFBIMasterProvider.
+5. New unit 'FBClientLib.pas' added and provides new interface IFBIMasterProvider.
    QueryInterface may be used to coerce this interface from IFirebirdAPI. The
    interface provides a single method "function GetIMaster: IMaster". This provides
    type safe access to the Firebird IMaster interface and avoids the need to turn
    off object checks when coercing "funcition GetIMaster: TObject" to IMaster.
 
-8. New IFirebirdAPI Calls:
-    function GetClientMajor: integer;
-    function GetClientMinor: integer;
+6. New IFirebirdAPI Calls:
     function HasLocalTZDB: boolean;
     function HasTimeZoneSupport: boolean;
     function HasExtendedTZSupport: boolean;
     procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal; bufptr: PByte);
     function SQLDecFloatDecode(SQLType: cardinal; scale: integer; bufptr: PByte): tBCD;
 
-9. New IAttachment Calls:
+7. New IAttachment Calls:
     function HasDecFloatSupport: boolean;
     function GetTimeZoneServices: ITimeZoneServices;
     function HasTimeZoneSupport: boolean;
 
-10. New Interface ITimeZoneServices.
+8. New Interface ITimeZoneServices.
 
-11. New ISQLData API Calls:
+9. New ISQLData API Calls:
     procedure GetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID); overload;
     procedure GetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString); overload;
     procedure GetAsTime(var aTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID; OnDate: TDateTime); overload;
@@ -44,7 +36,7 @@ FBINTF Change Log  version          (1.2-0 Build 12022) Fri, 17 Apr 2020 10:35:5
     function GetAsUTCDateTime: TDateTime;
     function GetAsBCD: tBCD;
 
-12. New ISQLParam API Calls
+10. New ISQLParam API Calls
     procedure GetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID); overload;
     procedure GetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString); overload;
     procedure GetAsTime(var aTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID; OnDate: TDateTime); overload;
@@ -60,7 +52,7 @@ FBINTF Change Log  version          (1.2-0 Build 12022) Fri, 17 Apr 2020 10:35:5
     procedure SetAsUTCDateTime(aUTCTime: TDateTime);
     procedure SetAsBcd(aValue: tBCD);
 
-13. New IArray API Calls
+11. New IArray API Calls
     procedure GetAsDateTime(index: array of integer; var aDateTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID); overload;
     procedure GetAsDateTime(index: array of integer; var aDateTime: TDateTime; var dstOffset: smallint; var aTimezone: AnsiString); overload;
     procedure GetAsTime(index: array of integer; var aTime: TDateTime; var dstOffset: smallint; var aTimezoneID: TFBTimeZoneID; OnDate: TDateTime); overload;
@@ -71,7 +63,7 @@ FBINTF Change Log  version          (1.2-0 Build 12022) Fri, 17 Apr 2020 10:35:5
     procedure SetAsTime(index: array of integer; aValue: TDateTime; OnDate: TDateTime; aTimeZoneID: TFBTimeZoneID); overload;
     procedure SetAsTime(index: array of integer; aValue: TDateTime; OnDate: TDateTime; aTimeZone: AnsiString); overload;
 
-14. Utility functions in IBUtils
+12. Utility functions in IBUtils
     function ParseDateTimeTZString(aDateTimeStr: Ansistring; var aDateTime: TDateTime;
               var aTimezone: AnsiString; aFormatSettings: TFormatSettings; TimeOnly: boolean=false): boolean;
     procedure FBDecodeTime(aTime: TDateTime; var Hour, Minute, Second: word; var DeciMillisecond: cardinal);
@@ -80,21 +72,39 @@ FBINTF Change Log  version          (1.2-0 Build 12022) Fri, 17 Apr 2020 10:35:5
     function FormatTimeZoneOffset(EffectiveTimeOffsetMins: integer): AnsiString;
     function DecodeTimeZoneOffset(TZOffset: AnsiString; var dstOffset: integer): boolean;
 
-15. IUtil.FormatStatus now used to format error messages when using new API.
+13. IDPB, ITPB and ISPB: new interface method
+      function AddByTypeName(ParamTypeName: AnsiString): IDPBItem/ITPBItem/ISPBItem;
+    This is used to add a parameter block item by the string equivalent of its
+    symbolic type name. e.g. DPB.AddByTypeName('isc_dpb_user_name').AsString := '...'
 
-16. Linux Only: FIREBIRD environment variable is now checked when loading the client library.
+14. IDPBItem/ITPBItem/ISPBItem: new interface method:
+      function getParamTypeName: AnsiString;
+
+FBINTF Change Log  version          (1.1-6 Build 12214) Fri, 17 Jul 2020 23:10:11 +0100
+
+1. GetImplementationVersion now correctly returns '3.0' for Firebird 3 API
+   with a Firebrid 3 client library.
+
+2. Linux Only: FIREBIRD environment variable is now checked when loading the client library.
     If a client library path is not explicitly provided and the FIREBIRD environment
     variable is set then the directory given by this variable and any 'lib' subdirectory
     are searched for the Firebird client library. Only if none is found, is the default
     client library used.
 
-17. IDPB, ITPB and ISPB: new interface method
-      function AddByTypeName(ParamTypeName: AnsiString): IDPBItem/ITPBItem/ISPBItem;
-    This is used to add a parameter block item by the string equivalent of its
-    symbolic type name. e.g. DPB.AddByTypeName('isc_dpb_user_name').AsString := '...'
+3.  IUtil.FormatStatus now used to format error messages when using new API
 
-18. IDPBItem/ITPBItem/ISPBItem: new interface method:
-      function getParamTypeName: AnsiString;
+4.  Fixed Array SDL: array_desc_scale now correctly encoded as a signed integer.
+
+5.  SQL_TEXT handling changed. When the value of an SQL_TEXT (i.e. fixed width string) column is
+    returned using GetAsString and the string codepage is UTF8, the string is truncated so
+    that the byte length corresponds to the number of characters specified for the column.
+    SQL_TEXT strings are no longer automatically trimmed to remove all trailing white space. This is
+    correct behaviour but may affect some implementations that relied upon automatic
+    trimming of trailing white space.
+
+6.  New IFirebirdAPI Calls:
+      function GetClientMajor: integer;
+      function GetClientMinor: integer;
 
 FBINTF Change Log  version          (1.1-5 Build 12022) Fri, 17 Apr 2020 10:35:55 +0100
 

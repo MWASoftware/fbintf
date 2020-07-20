@@ -383,6 +383,16 @@ begin
   Result := FIsEmbeddedServer;
 end;
 
+function TFB30ClientAPI.GetClientMajor: integer;
+begin
+  Result := UtilIntf.GetClientVersion div 256;
+end;
+
+function TFB30ClientAPI.GetClientMinor: integer;
+begin
+  Result := UtilIntf.GetClientVersion mod 256;
+end;
+
 function TFB30ClientAPI.DecodeInteger(bufptr: PByte; len: short): integer;
 var P: PByte;
 begin
@@ -644,18 +654,6 @@ function TFB30ClientAPI.HasInt128Support: boolean;
 begin
   Result := (GetClientMajor >=4) and (UtilIntf.vtable.version >= 4) {ignore FB4 Beta1} ;
 end;
-
-function TFB30ClientAPI.GetClientMajor: integer;
-begin
-  Result := UtilIntf.GetClientVersion div 256;
-end;
-
-function TFB30ClientAPI.GetClientMinor: integer;
-begin
-  Result := UtilIntf.GetClientVersion mod 256;
-end;
-
-
 
 end.
 
