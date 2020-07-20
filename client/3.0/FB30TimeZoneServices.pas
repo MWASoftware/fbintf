@@ -968,7 +968,7 @@ begin
     gmtTimestamp := DateOf(OnDate) + gmtTime;
     timezoneID := PISC_TIME_TZ_EX(bufptr)^.time_zone;
     dstOffset := GetDstOffset(gmtTimestamp,timezoneID,false);
-{    dstOffset :=  PISC_TIME_TZ_EX(bufptr)^.ext_offset; --ignored see CORE6328}
+    {dstOffset :=  PISC_TIME_TZ_EX(bufptr)^.ext_offset; {--ignored see CORE6328}
 
     time := TimeOf(IncMinute(gmtTimestamp,dstOffset));
   end;

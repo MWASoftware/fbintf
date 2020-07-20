@@ -1033,7 +1033,10 @@ end;
 
 function TDPB.GetDPBParamTypeName(ParamType: byte): Ansistring;
 begin
-  Result := DPBConstantNames[ParamType];
+  if ParamType <= isc_dpb_last_dpb_constant then
+    Result := DPBConstantNames[ParamType]
+  else
+    Result := '';
 end;
 
 function TDPB.LookupItemType(ParamTypeName: AnsiString): byte;
