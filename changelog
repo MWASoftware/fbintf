@@ -24,6 +24,9 @@ FBINTF Change Log  version          (1.1-6 Build 12214) Fri, 17 Jul 2020 23:10:1
       function GetClientMajor: integer;
       function GetClientMinor: integer;
 
+7.  IColumnMetaData and IArrayMetaData: new method
+      function GetCharSetWidth: integer;
+
 
 FBINTF Change Log  version          (1.1-5 Build 12044) Fri, 17 Apr 2020 12:30:01 +0100
 

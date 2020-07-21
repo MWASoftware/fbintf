@@ -61,12 +61,14 @@ type
   TFB30ArrayMetaData = class(TFBArrayMetaData,IArrayMetaData)
   private
     FCodePage: TSystemCodePage;
+    FCharSetWidth: integer;
   protected
     procedure LoadMetaData(aAttachment: IAttachment; aTransaction: ITransaction;
                    relationName, columnName: AnsiString); override;
   public
     function GetCharSetID: cardinal; override;
     function GetCodePage: TSystemCodePage; override;
+    function GetCharSetWidth: integer; override;
   end;
 
   { TFB30Array }
@@ -155,6 +157,8 @@ begin
         FCharSetID := (aAttachment as TFB30Attachment).CharSetID;
       FCodePage := CP_NONE;
       FAttachment.CharSetID2CodePage(FCharSetID,FCodePage);
+      FCharSetWidth := 1;
+      FAttachment.CharSetWidth(FCharSetID,FCharSetWidth);
       if (FArrayDesc.array_desc_dtype in [blr_text,blr_cstring, blr_varying]) and
         (FCharSetID = 0) then {This really shouldn't be necessary - but it is :(}
       with aAttachment as TFBAttachment do
@@ -181,6 +185,11 @@ end;
 function TFB30ArrayMetaData.GetCodePage: TSystemCodePage;
 begin
   Result := FCodePage;
+end;
+
+function TFB30ArrayMetaData.GetCharSetWidth: integer;
+begin
+  Result := FCharSetWidth;
 end;
 
 { TFB30Array }
