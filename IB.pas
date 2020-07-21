@@ -489,6 +489,7 @@ type
     function getScale: integer;
     function getCharSetID: cardinal;
     function getCodePage: TSystemCodePage;
+    function GetCharSetWidth: integer;
     function getIsNullable: boolean;
     function GetSize: cardinal;
     function GetArrayMetaData: IArrayMetaData; {Valid only for Array SQL Type}
