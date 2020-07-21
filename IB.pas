@@ -326,6 +326,7 @@ type
     function GetSQLTypeName: AnsiString;
     function GetScale: integer;
     function GetSize: cardinal;
+    function GetCharSetWidth: integer;
     function GetCharSetID: cardinal;
     function GetTableName: AnsiString;
     function GetColumnName: AnsiString;

@@ -1129,6 +1129,162 @@
         <CursorPos X="3" Y="2826"/>
         <UsageCount Value="9"/>
       </Unit149>
+      <Unit67>
+        <Filename Value="../../fbintf.fb4/changelog"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="20"/>
+        <CursorPos Y="26"/>
+        <UsageCount Value="11"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit67>
+      <Unit68>
+        <Filename Value="../client/FBClientAPI.pas.rej"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="78" Y="8"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit68>
+      <Unit69>
+        <Filename Value="../include/inf_pub.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="106"/>
+        <CursorPos X="9" Y="123"/>
+        <UsageCount Value="10"/>
+      </Unit69>
+      <Unit70>
+        <Filename Value="../../fbintf.fb4/client/3.0/FB30ClientAPI.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="629"/>
+        <CursorPos X="3" Y="650"/>
+        <UsageCount Value="10"/>
+      </Unit70>
+      <Unit71>
+        <Filename Value="../../fbintf.fb4/client/3.0/FB30Array.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="188"/>
+        <CursorPos X="26" Y="212"/>
+        <UsageCount Value="10"/>
+      </Unit71>
+      <Unit72>
+        <Filename Value="../../fbintf.fb4/client/2.5/FB25ClientAPI.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="662"/>
+        <CursorPos X="42" Y="688"/>
+        <UsageCount Value="10"/>
+      </Unit72>
+      <Unit73>
+        <Filename Value="runtest.sh"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="3"/>
+        <CursorPos X="5" Y="32"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Bash"/>
+      </Unit73>
+      <Unit74>
+        <Filename Value="runtest.bat"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="19" Y="5"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Bat"/>
+      </Unit74>
+      <Unit75>
+        <Filename Value="../../fbintf.fb4/testsuite/runtest.bat"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="31"/>
+        <CursorPos Y="53"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Bat"/>
+      </Unit75>
+      <Unit76>
+        <Filename Value="../../fbintf.fb4/testsuite/rundelphitest.bat"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Bat"/>
+      </Unit76>
+      <Unit77>
+        <Filename Value="rundelphitest.bat"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="19" Y="8"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Bat"/>
+      </Unit77>
+      <Unit78>
+        <Filename Value="/usr/share/fpcsrc/rtl/objpas/sysutils/sysstrh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="84"/>
+        <CursorPos X="10" Y="100"/>
+        <UsageCount Value="11"/>
+      </Unit78>
+      <Unit79>
+        <Filename Value="../../fbintf.fb4/testsuite/Test11.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="283"/>
+        <CursorPos Y="301"/>
+        <UsageCount Value="11"/>
+      </Unit79>
+      <Unit80>
+        <Filename Value="../../fbintf.fb4/testsuite/FBTestApp.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="25"/>
+        <CursorPos X="41" Y="42"/>
+        <UsageCount Value="10"/>
+      </Unit80>
+      <Unit81>
+        <Filename Value="../../fbintf.fb4/testsuite/testApp/TestApplication.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="821"/>
+        <CursorPos X="3" Y="825"/>
+        <UsageCount Value="10"/>
+      </Unit81>
+      <Unit82>
+        <Filename Value="../../fbintf.fb4/FBClientLib.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="21"/>
+        <UsageCount Value="10"/>
+      </Unit82>
+      <Unit83>
+        <Filename Value="../../fbintf.fb4/client/FBClientAPI.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="198"/>
+        <CursorPos Y="227"/>
+        <UsageCount Value="10"/>
+      </Unit83>
+      <Unit84>
+        <Filename Value="../../fbintf.fb4/IB.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1271"/>
+        <CursorPos Y="1292"/>
+        <UsageCount Value="10"/>
+      </Unit84>
+      <Unit85>
+        <Filename Value="../../fbintf.fb4/testsuite/Test1.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="121"/>
+        <CursorPos X="35" Y="144"/>
+        <UsageCount Value="10"/>
+      </Unit85>
+      <Unit86>
+        <Filename Value="../../../../fpcsrc/3.0.4/rtl/objpas/sysutils/sysstr.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="957"/>
+        <CursorPos Y="975"/>
+        <UsageCount Value="10"/>
+      </Unit86>
+      <Unit87>
+        <Filename Value="../../ibx/runtime/nongui/IBCustomDataSet.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="956"/>
+        <CursorPos X="28" Y="984"/>
+        <UsageCount Value="11"/>
+      </Unit87>
+      <Unit88>
+        <Filename Value="../../../components/lazutils/lazutf8.pas"/>
+        <UnitName Value="LazUTF8"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="402"/>
+        <CursorPos X="31" Y="406"/>
+        <UsageCount Value="11"/>
+      </Unit88>
     </Units>
     <OtherDefines Count="1">
       <Define0 Value="INIDE"/>

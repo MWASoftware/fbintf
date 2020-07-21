@@ -91,6 +91,7 @@ type
    function GetName: AnsiString; override;
    function GetScale: integer; override;
    function GetSize: integer;
+   function GetCharSetWidth: integer; override;
    function GetAsString: AnsiString; override;
    procedure SetAsLong(Value: Long); override;
    procedure SetAsShort(Value: Short); override;
@@ -129,6 +130,7 @@ type
    function GetScale: integer;
    function GetSize: cardinal;
    function GetCharSetID: cardinal; virtual; abstract;
+   function GetCharSetWidth: integer; virtual; abstract;
    function GetTableName: AnsiString;
    function GetColumnName: AnsiString;
    function GetDimensions: integer;
@@ -187,6 +189,7 @@ type
     function GetScale: integer;
     function GetSize: cardinal;
     function GetCharSetID: cardinal;
+    function GetCharSetWidth: integer;
     function GetTableName: AnsiString;
     function GetColumnName: AnsiString;
     function GetDimensions: integer;
@@ -320,6 +323,11 @@ end;
 function TFBArrayElement.GetSize: integer;
 begin
   Result := GetDataLength;
+end;
+
+function TFBArrayElement.GetCharSetWidth: integer;
+begin
+  Result := FArray.FMetaData.GetCharSetWidth;
 end;
 
 function TFBArrayElement.GetAsString: AnsiString;
@@ -927,6 +935,11 @@ end;
 function TFBArray.GetCharSetID: cardinal;
 begin
   Result := FMetaData.GetCharSetID;
+end;
+
+function TFBArray.GetCharSetWidth: integer;
+begin
+  Result := FMetaData.GetCharSetWidth;
 end;
 
 function TFBArray.GetTableName: AnsiString;

@@ -185,6 +185,7 @@ type
      function GetDateTimeStrLength(DateTimeFormat: TIBDateTimeFormats): integer;
      function GetAsBCD: tBCD;
      function GetSize: cardinal; virtual; abstract;
+     function GetCharSetWidth: integer; virtual; abstract;
      procedure SetAsBoolean(AValue: boolean); virtual;
      procedure SetAsCurrency(Value: Currency); virtual;
      procedure SetAsInt64(Value: Int64); virtual;
@@ -293,6 +294,7 @@ type
     function GetRelationName: AnsiString;  virtual; abstract;
     function GetScale: integer; virtual; abstract;
     function GetCharSetID: cardinal; virtual; abstract;
+    function GetCharSetWidth: integer; virtual; abstract;
     function GetCodePage: TSystemCodePage; virtual; abstract;
     function GetIsNull: Boolean;   virtual; abstract;
     function GetIsNullable: boolean; virtual; abstract;
@@ -373,6 +375,7 @@ type
     function getCharSetID: cardinal; override;
     function GetIsNullable: boolean; override;
     function GetSize: cardinal; override;
+    function GetCharSetWidth: integer; override;
     function GetArrayMetaData: IArrayMetaData;
     function GetBlobMetaData: IBlobMetaData;
     function GetStatement: IStatement;
@@ -1412,11 +1415,11 @@ end;
 {Copied from LazUTF8}
 
 function UTF8CodepointSizeFull(p: PAnsiChar): integer;
-const TopBitSetMask   = $8000; {%10000000}
-      Top2BitsSetMask = $C000; {%11000000}
-      Top3BitsSetMask = $E000; {%11100000}
-      Top4BitsSetMask = $F000; {%11110000}
-      Top5BitsSetMask = $F800; {%11111000}
+const TopBitSetMask   = $80; {%10000000}
+      Top2BitsSetMask = $C0; {%11000000}
+      Top3BitsSetMask = $E0; {%11100000}
+      Top4BitsSetMask = $F0; {%11110000}
+      Top5BitsSetMask = $F8; {%11111000}
 begin
   case p^ of
   #0..#191: // %11000000
@@ -1459,8 +1462,10 @@ end;
 function GetStrLen(p: PAnsiChar; CharWidth, MaxDataLength: cardinal): integer;
 var i: integer;
     cplen: integer;
+    s: AnsiString;
 begin
   Result := 0;
+  s := strpas(p);
   for i := 1 to CharWidth do
   begin
     cplen := UTF8CodepointSizeFull(p);
@@ -1501,7 +1506,7 @@ begin
         if (SQLType = SQL_TEXT) then
         begin
           if GetCodePage = cp_utf8 then
-            str_len := GetStrLen(PAnsiChar(sz),GetSize,DataLength)
+            str_len := GetStrLen(PAnsiChar(sz),GetSize div GetCharSetWidth,DataLength)
           else
             str_len := DataLength
         end
@@ -2201,6 +2206,12 @@ function TColumnMetaData.GetSize: cardinal;
 begin
   CheckActive;
   result := FIBXSQLVAR.DataLength;
+end;
+
+function TColumnMetaData.GetCharSetWidth: integer;
+begin
+  CheckActive;
+  result := FIBXSQLVAR.GetCharSetWidth;
 end;
 
 function TColumnMetaData.GetArrayMetaData: IArrayMetaData;

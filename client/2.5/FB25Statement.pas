@@ -139,6 +139,7 @@ type
     function GetScale: integer; override;
     function GetCharSetID: cardinal; override;
     function GetCodePage: TSystemCodePage; override;
+    function GetCharSetWidth: integer; override;
     function GetIsNull: Boolean;   override;
     function GetIsNullable: boolean; override;
     function GetSQLData: PByte;  override;
@@ -353,6 +354,13 @@ begin
   result := CP_NONE;
   with Statement.GetAttachment do
      CharSetID2CodePage(GetCharSetID,result);
+end;
+
+function TIBXSQLVAR.GetCharSetWidth: integer;
+begin
+  result := 1;
+  with Statement.GetAttachment DO
+    CharSetWidth(GetCharSetID,result);
 end;
 
 function TIBXSQLVAR.GetIsNull: Boolean;

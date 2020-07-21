@@ -74,12 +74,14 @@ const
     'BlobData Blob sub_type 1 Character Set WIN1252, '+
     'BlobData2 Blob sub_type 1 Character Set UTF8, '+
     'InClear VarChar(16) Character Set OCTETS, '+
+    'FixedWidth Char(4) Character set UTF8, '+
     'Primary Key(RowID)'+
     ')';
 
   sqlGetCharSets = 'Select RDB$CHARACTER_SET_NAME,RDB$CHARACTER_SET_ID from RDB$CHARACTER_SETS order by 2';
 
-  sqlInsert = 'Insert into TestData(RowID,Title,Notes, BlobData,BlobData2,InClear) Values(:RowID,:Title,:Notes,:BlobData,:BlobData2,:InClear)';
+  sqlInsert = 'Insert into TestData(RowID,Title,Notes, BlobData,BlobData2,InClear,FixedWidth) '+
+              'Values(:RowID,:Title,:Notes,:BlobData,:BlobData2,:InClear,:FixedWidth)';
 
 
 { TTest12 }
@@ -105,6 +107,7 @@ begin
     ByName('BlobData').AsString := 'Some German Special Characters like ÖÄÜöäüß';
     ByName('BlobData2').AsBlob := Attachment.CreateBlob(Transaction,'TestData','BlobData').SetString('Some German Special Characters like ÖÄÜöäüß');
     ByName('InClear').AsString := #$01'Test'#$0D#$C3;
+    ByName('FixedWidth').AsString := 'É';
   end;
   Statement.Execute;
 end;
