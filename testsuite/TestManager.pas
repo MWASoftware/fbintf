@@ -225,11 +225,13 @@ begin
       begin
         write(OutFile,aValue[i].Name,' = ');
         PrintHexString(s);
-        writeln(OutFile,' (Charset Id = ',aValue[i].GetCharSetID, ' Codepage = ',StringCodePage(s),')');
+        writeln(OutFile,' (Charset Id = ',aValue[i].GetCharSetID, ' Codepage = ',StringCodePage(s),
+         ' Byte Length = ',Length(aValue[i].AsString),')');
       end
       else
       if aValue[i].GetCharSetID > 0 then
-        writeln(OutFile,aValue[i].Name,' = ',s,' (Charset Id = ',aValue[i].GetCharSetID, ' Codepage = ',StringCodePage(s),')')
+        writeln(OutFile,aValue[i].Name,' = ',s,' (Charset Id = ',aValue[i].GetCharSetID, ' Codepage = ',StringCodePage(s),
+         ' Byte Length = ',Length(aValue[i].AsString), ')')
       else
         writeln(OutFile,aValue[i].Name,' = ',s);
     end;
