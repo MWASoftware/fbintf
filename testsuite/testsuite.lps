@@ -7,7 +7,6 @@
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <UsageCount Value="57"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -176,10 +175,12 @@
       </Unit22>
       <Unit23>
         <Filename Value="../IB.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="268"/>
-        <CursorPos Y="295"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="427"/>
+        <CursorPos Y="444"/>
         <UsageCount Value="17"/>
+        <Loaded Value="True"/>
       </Unit23>
       <Unit24>
         <Filename Value="../client/include/uloadlibrary.inc"/>
@@ -637,7 +638,12 @@
         <UsageCount Value="11"/>
       </Unit88>
     </Units>
-    <JumpHistory HistoryIndex="-1"/>
+    <JumpHistory Count="1">
+      <Position1>
+        <Filename Value="../IB.pas"/>
+        <Caret Line="295" TopLine="271"/>
+      </Position1>
+    </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
       <Modes Count="0" ActiveMode="default"/>
