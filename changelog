@@ -1,4 +1,4 @@
-FBINTF Change Log  version          (1.1-6 Build 12300) Tue, 21 Jul 2020 09:18:01 +0100
+FBINTF Change Log  version          (1.1-6 Build 12344) Fri, 21 Aug 2020 15:15:24 +0100
 
 1. GetImplementationVersion now correctly returns '3.0' for Firebird 3 API
    with a Firebrid 3 client library.

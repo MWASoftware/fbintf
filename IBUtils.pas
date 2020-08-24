@@ -737,8 +737,9 @@ end;
 
 function QuoteIdentifier(Dialect: Integer; Value: AnsiString): AnsiString;
 begin
+  Value := TrimRight(Value);
   if Dialect = 1 then
-    Value := AnsiUpperCase(Trim(Value))
+    Value := AnsiUpperCase(Value)
   else
     Value := '"' + StringReplace (Value, '""', '"', [rfReplaceAll]) + '"';
   Result := Value;
@@ -969,6 +970,7 @@ end;
 
 function QuoteIdentifierIfNeeded(Dialect: Integer; Value: AnsiString): AnsiString;
 begin
+  Value := TrimRight(Value);
   if (Dialect = 3) and
     (IsReservedWord(Value) or not IsSQLIdentifier(Value) or (AnsiUpperCase(Value) <> Value)) then
      Result := '"' + StringReplace (TrimRight(Value), '"', '""', [rfReplaceAll]) + '"'
