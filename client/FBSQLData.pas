@@ -1091,6 +1091,7 @@ begin
   SQL_DEC34:            Result := 'SQL_DEC34';
   SQL_INT128:           Result := 'SQL_INT128';
   SQL_NULL:             Result := 'SQL_NULL';
+  SQL_BOOLEAN:          Result := 'SQL_BOOLEAN';
   end;
 end;
 
@@ -1374,7 +1375,7 @@ begin
       SQL_INT128:
         Result := BCDToInteger(GetAsBCD);
       else
-        IBError(ibxeInvalidDataConversion, [nil]);
+        IBError(ibxeInvalidDataConversion, [GetSQLTypeName]);
     end;
 end;
 

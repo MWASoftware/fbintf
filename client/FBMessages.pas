@@ -194,7 +194,7 @@ resourcestring
   SSQLClosed = 'IBSQL Closed';
   SUnknownSQLDataType = 'Unknown SQL Data type (%d)';
   SInvalidColumnIndex = 'Invalid column index (index exceeds permitted range)';
-  SInvalidDataConversion = 'Invalid data conversion';
+  SInvalidDataConversion = 'Invalid data conversion from %s';
   SBlobCannotBeRead = 'Blob stream cannot be read';
   SBlobCannotBeWritten = 'Blob stream cannot be written';
   SBlobNotOpen = 'The Blob is not open';

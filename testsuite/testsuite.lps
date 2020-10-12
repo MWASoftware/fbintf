@@ -54,10 +54,12 @@
       <Unit6>
         <Filename Value="Test7.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="12"/>
-        <CursorPos Y="29"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="6"/>
+        <TopLine Value="112"/>
+        <CursorPos Y="141"/>
         <UsageCount Value="202"/>
+        <Loaded Value="True"/>
       </Unit6>
       <Unit7>
         <Filename Value="Test8.pas"/>
@@ -159,7 +161,7 @@
           <EditorIndex Value="-1"/>
           <CursorPos X="34" Y="20"/>
         </ExtraEditor1>
-        <UsageCount Value="132"/>
+        <UsageCount Value="136"/>
         <Loaded Value="True"/>
       </Unit18>
       <Unit19>
@@ -168,7 +170,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="291"/>
         <CursorPos X="24" Y="297"/>
-        <UsageCount Value="41"/>
+        <UsageCount Value="45"/>
       </Unit19>
       <Unit20>
         <Filename Value="FBTestApp.pas"/>
@@ -176,7 +178,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="31"/>
         <CursorPos X="39" Y="20"/>
-        <UsageCount Value="41"/>
+        <UsageCount Value="45"/>
       </Unit20>
       <Unit21>
         <Filename Value="Test2.pas"/>
@@ -184,7 +186,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="70"/>
         <CursorPos Y="80"/>
-        <UsageCount Value="39"/>
+        <UsageCount Value="43"/>
       </Unit21>
       <Unit22>
         <Filename Value="TestManager.pas"/>
@@ -198,7 +200,7 @@
         <EditorIndex Value="3"/>
         <TopLine Value="198"/>
         <CursorPos Y="218"/>
-        <UsageCount Value="62"/>
+        <UsageCount Value="64"/>
         <Loaded Value="True"/>
         <Loaded Value="True"/>
       </Unit23>
@@ -259,11 +261,10 @@
       </Unit29>
       <Unit30>
         <Filename Value="../client/3.0/FB30ClientAPI.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="5"/>
-        <TopLine Value="627"/>
+        <TopLine Value="626"/>
         <CursorPos Y="658"/>
-        <UsageCount Value="43"/>
+        <UsageCount Value="45"/>
         <Loaded Value="True"/>
       </Unit30>
       <Unit31>
@@ -472,7 +473,7 @@
           <WindowIndex Value="1"/>
           <CursorPos X="38" Y="15"/>
         </ExtraEditor1>
-        <UsageCount Value="77"/>
+        <UsageCount Value="79"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit59>
@@ -909,7 +910,7 @@
       </Unit118>
       <Unit119>
         <Filename Value="../client/3.0/FB30TimeZoneServices.pas"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="7"/>
         <TopLine Value="970"/>
         <CursorPos X="6" Y="971"/>
         <ExtraEditorCount Value="2"/>
@@ -923,7 +924,7 @@
           <TopLine Value="997"/>
           <CursorPos X="43" Y="1014"/>
         </ExtraEditor2>
-        <UsageCount Value="62"/>
+        <UsageCount Value="64"/>
         <Loaded Value="True"/>
       </Unit119>
       <Unit120>
