@@ -627,7 +627,7 @@ begin
  begin
    try
      aTimeZone := FAttachment.OpenCursorAtStart(GetTransaction,
-              'Select RDB$TIME_ZONE_NAME From RDB$TIME_ZONES Where RDB$TIME_ZONE_ID = ?',3,
+              'Select Trim(RDB$TIME_ZONE_NAME) as RDB$TIME_ZONE_NAME From RDB$TIME_ZONES Where RDB$TIME_ZONE_ID = ?',3,
               [aTimeZoneID])[0].AsString;
    except
      IBError(ibxeBadTimeZoneID,[aTimeZoneID,0]);

@@ -299,7 +299,8 @@ type
     function GetIsNull: Boolean;   virtual; abstract;
     function GetIsNullable: boolean; virtual; abstract;
     function GetSQLData: PByte;  virtual; abstract;
-    function GetDataLength: cardinal; virtual; abstract;
+    function GetDataLength: cardinal; virtual; abstract; {current field length}
+    function GetSize: cardinal; virtual; abstract; {field length as given by metadata}
     procedure SetIsNull(Value: Boolean); virtual; abstract;
     procedure SetIsNullable(Value: Boolean);  virtual; abstract;
     procedure SetSQLData(AValue: PByte; len: cardinal); virtual; abstract;
@@ -1460,14 +1461,14 @@ end;
 
 {Returns the byte length of a UTF8 string with a fixed charwidth}
 
-function GetStrLen(p: PAnsiChar; CharWidth, MaxDataLength: cardinal): integer;
+function GetStrLen(p: PAnsiChar; FieldWidth, MaxDataLength: cardinal): integer;
 var i: integer;
     cplen: integer;
     s: AnsiString;
 begin
   Result := 0;
   s := strpas(p);
-  for i := 1 to CharWidth do
+  for i := 1 to FieldWidth do
   begin
     cplen := UTF8CodepointSizeFull(p);
     Inc(p,cplen);
@@ -2206,7 +2207,7 @@ end;
 function TColumnMetaData.GetSize: cardinal;
 begin
   CheckActive;
-  result := FIBXSQLVAR.DataLength;
+  result := FIBXSQLVAR.GetSize;
 end;
 
 function TColumnMetaData.GetCharSetWidth: integer;

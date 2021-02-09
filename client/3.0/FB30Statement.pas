@@ -101,6 +101,7 @@ type
     FSQLData: PByte; {Address of SQL Data in Message Buffer}
     FSQLNullIndicator: PShort; {Address of null indicator}
     FDataLength: integer;
+    FSize: integer;
     FNullable: boolean;
     FScale: integer;
     FCharSetID: cardinal;
@@ -122,6 +123,7 @@ type
      function GetIsNullable: boolean; override;
      function GetSQLData: PByte;  override;
      function GetDataLength: cardinal; override;
+     function GetSize: cardinal; override;
      procedure SetIsNull(Value: Boolean); override;
      procedure SetIsNullable(Value: Boolean);  override;
      procedure SetSQLData(AValue: PByte; len: cardinal); override;
@@ -385,6 +387,11 @@ end;
 function TIBXSQLVAR.GetDataLength: cardinal;
 begin
   Result := FDataLength;
+end;
+
+function TIBXSQLVAR.GetSize: cardinal;
+begin
+  Result := FSize;
 end;
 
 function TIBXSQLVAR.GetArrayMetaData: IArrayMetaData;
@@ -745,6 +752,7 @@ begin
       else
         FSQLSubType := 0;
       FDataLength := aMetaData.getLength(StatusIntf,i);
+      FSize := FDataLength;
       Check4DataBaseError;
       case SQLType of
         SQL_TEXT, SQL_TYPE_DATE, SQL_TYPE_TIME, SQL_TIMESTAMP,
@@ -834,6 +842,7 @@ begin
       Check4DataBaseError;
       FDataLength := aMetaData.getLength(StatusIntf,i);
       Check4DataBaseError;
+      FSize := FDataLength;
       FRelationName := strpas(aMetaData.getRelation(StatusIntf,i));
       Check4DataBaseError;
       FFieldName := strpas(aMetaData.getField(StatusIntf,i));

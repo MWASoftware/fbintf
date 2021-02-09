@@ -128,6 +128,7 @@ type
     FOwnsSQLData: boolean;
     FBlobMetaData: IBlobMetaData;
     FArrayMetaData: IArrayMetaData;
+    FSize: short; {size of field from metadat}
     FXSQLVAR: PXSQLVAR;       { Points to the PXSQLVAR in the owner object }
   protected
     function GetSQLType: cardinal; override;
@@ -144,6 +145,7 @@ type
     function GetIsNullable: boolean; override;
     function GetSQLData: PByte;  override;
     function GetDataLength: cardinal; override;
+    function GetSize: cardinal; override;
     procedure SetIsNull(Value: Boolean); override;
     procedure SetIsNullable(Value: Boolean);  override;
     procedure SetSQLData(AValue: PByte; len: cardinal); override;
@@ -381,6 +383,11 @@ end;
 function TIBXSQLVAR.GetDataLength: cardinal;
 begin
   Result := FXSQLVAR^.sqllen;
+end;
+
+function TIBXSQLVAR.GetSize: cardinal;
+begin
+  Result := FSize;
 end;
 
 function TIBXSQLVAR.GetArrayMetaData: IArrayMetaData;
@@ -822,6 +829,7 @@ begin
         if i >= FSize then
           FColumnList[i] := TIBXSQLVAR.Create(self,i);
         TIBXSQLVAR(Column[i]).FXSQLVAR := p;
+        TIBXSQLVAR(Column[i]).FSize := p^.sqllen;
         p := Pointer(PAnsiChar(p) + sizeof(FXSQLDA^.sqlvar));
       end;
       FSize := inherited Count;
