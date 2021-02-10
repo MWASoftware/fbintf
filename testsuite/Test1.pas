@@ -141,7 +141,7 @@ begin
 
   writeln(OutFile,'Creating a Database using an SQL Statement');
   createSQL := Format('create database ''%s'' USER ''%s'' PASSWORD ''%s'' DEFAULT CHARACTER SET %s',
-                      [ExtractDBName(Owner.GetNewDatabaseName), Owner.GetUserName, Owner.GetPassword, CharSet]);
+                      [Owner.GetNewDatabaseName, Owner.GetUserName, Owner.GetPassword, CharSet]);
   Attachment := FirebirdAPI.CreateDatabase(createSQL,SQLDialect);
   WriteDBInfo(Attachment.GetDBInformation([isc_info_db_id,isc_info_db_SQL_Dialect]));
   WriteAttachmentInfo(Attachment);
@@ -171,7 +171,7 @@ begin
   DPB.Add(isc_dpb_lc_ctype).setAsString(CharSet);
   DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
 
-  Attachment := FirebirdAPI.CreateDatabase(ExtractDBName(Owner.GetNewDatabaseName),DPB);
+  Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
 
   WriteAttachmentInfo(Attachment);
 
@@ -183,7 +183,7 @@ begin
 
   PrintDPB(DPB);
   writeln(OutFile,'Creating a Database with a DPD');
-  Attachment := FirebirdAPI.CreateDatabase(ExtractDBName(Owner.GetNewDatabaseName),DPB);
+  Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
   if Attachment = nil then
   begin
     writeln(OutFile,'Create Database Failed');
@@ -204,7 +204,7 @@ begin
     FBLibrary := LoadFBLibrary(libpath);
 
     writeln(OutFile,'Creating a Database with a DPD using Firebird Library in ',libpath);
-    Attachment := FBLibrary.GetFirebirdAPI.CreateDatabase(ExtractDBName(Owner.GetNewDatabaseName),DPB);
+    Attachment := FBLibrary.GetFirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
     if Attachment = nil then
     begin
       writeln(OutFile,'Create Database Failed');

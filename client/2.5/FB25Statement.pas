@@ -128,7 +128,7 @@ type
     FOwnsSQLData: boolean;
     FBlobMetaData: IBlobMetaData;
     FArrayMetaData: IArrayMetaData;
-    FSize: short; {size of field from metadat}
+    FMetadataSize: short; {size of field from metadata}
     FXSQLVAR: PXSQLVAR;       { Points to the PXSQLVAR in the owner object }
   protected
     function GetSQLType: cardinal; override;
@@ -387,7 +387,7 @@ end;
 
 function TIBXSQLVAR.GetSize: cardinal;
 begin
-  Result := FSize;
+  Result := FMetadataSize;
 end;
 
 function TIBXSQLVAR.GetArrayMetaData: IArrayMetaData;
@@ -463,6 +463,7 @@ begin
   FOwnsSQLData := true;
   with FFirebird25ClientAPI, FXSQLVar^ do
   begin
+    FMetadataSize := sqllen;
     case sqltype and (not 1) of
       SQL_TEXT, SQL_TYPE_DATE, SQL_TYPE_TIME, SQL_TIMESTAMP,
       SQL_BLOB, SQL_ARRAY, SQL_QUAD, SQL_SHORT, SQL_BOOLEAN,
@@ -829,7 +830,6 @@ begin
         if i >= FSize then
           FColumnList[i] := TIBXSQLVAR.Create(self,i);
         TIBXSQLVAR(Column[i]).FXSQLVAR := p;
-        TIBXSQLVAR(Column[i]).FSize := p^.sqllen;
         p := Pointer(PAnsiChar(p) + sizeof(FXSQLDA^.sqlvar));
       end;
       FSize := inherited Count;

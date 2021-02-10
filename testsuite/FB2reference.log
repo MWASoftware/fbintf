@@ -20,11 +20,10 @@ DB ODS Minor Version = 2
 User Authentication Method = Legacy_Auth
 Firebird Library Path = /opt/firebird2.5.9/lib/libfbclient.so
 DB Client Implementation Version = 2.5
-DPB
-Count = 3
-28 = SYSDBA
-29 = masterkey
-65 = 3
+DPB: Item Count = 3
+  isc_dpb_user_name = SYSDBA
+  isc_dpb_password = masterkey
+  isc_dpb_set_db_sql_dialect = 3
 
 Firebird Server Version Info
 Firebird/linux AMD64 (access method), version "LI-V2.5.9.27139 Firebird 2.5"
@@ -44,12 +43,11 @@ User Authentication Method = Legacy_Auth
 Firebird Library Path = /opt/firebird2.5.9/lib/libfbclient.so
 DB Client Implementation Version = 2.5
 Dropping Database
-DPB
-Count = 4
-28 = SYSDBA
-29 = masterkey
-48 = UTF8
-65 = 3
+DPB: Item Count = 4
+  isc_dpb_user_name = SYSDBA
+  isc_dpb_password = masterkey
+  isc_dpb_lc_ctype = UTF8
+  isc_dpb_set_db_sql_dialect = 3
 
 Creating a Database with a DPD
 Database ID = 4 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = zeus
@@ -74,6 +72,11 @@ Dropping Database
 Running Test 2: Open the employee database and run a query
 Opening localhost:employee
 Database Open, SQL Dialect = 3
+TPB: Item Count = 3
+  isc_tpb_read = 
+  isc_tpb_nowait = 
+  isc_tpb_concurrency = 
+
 Metadata
 SQLType =SQL_SHORT
 sub type = 0
@@ -326,10 +329,10 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 948,592
+Current memory = 948,696
 Delta memory = 1,400
-Max memory = 992,544
-Elapsed time= 0.002 sec
+Max memory = 992,640
+Elapsed time= 0.001 sec
 Cpu = 0.000 sec
 Buffers = 75
 Reads = 0
@@ -2466,7 +2469,7 @@ Unknown Response 3
 Unknown Response 3
 Server Memory = 841392
 Forced Writes  = 1
-Max Memory  = 879272
+Max Memory  = 879368
 Num Buffers  = 75
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
@@ -2536,6 +2539,10 @@ Event Counts: TESTEVENT, Count = 2
 
 
 Running Test 11: Services API
+SPB: Item Count = 2
+  user_name = SYSDBA
+  password = masterkey
+
 Service Manager Version = 2
 Server Version = LI-V2.5.9.27139 Firebird 2.5
 Implementation = Firebird/linux AMD64
@@ -2640,6 +2647,14 @@ Charset id = 1
 Nullable
 Size = 16
 
+SQLType =SQL_TEXT
+sub type = 0
+Field Name = FIXEDWIDTH
+Scale = 0
+Charset id = 4
+Nullable
+Size = 16
+
 Connection Character Set UTF8
 ROWID = 1
 TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage = 65001)
@@ -2647,6 +2662,7 @@ NOTES = C3 89 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 4 Codepage = 65001)
 BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
 BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
 INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
+FIXEDWIDTH = C3 89  (Charset Id = 4 Codepage = 65001)
 
 Connection Character Set NONE
 ROWID = 1
@@ -2655,6 +2671,7 @@ NOTES = C9 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 21 Codepage = 28591)
 BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 D6 C4 DC F6 E4 FC DF  (Charset Id = 53 Codepage = 1252)
 BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
 INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
+FIXEDWIDTH = C3 89  (Charset Id = 4 Codepage = 65001)
 
 Connection Character Set WIN1252
 ROWID = 1
@@ -2663,6 +2680,7 @@ NOTES = C9 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 53 Codepage = 1252)
 BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 D6 C4 DC F6 E4 FC DF  (Charset Id = 53 Codepage = 1252)
 BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 D6 C4 DC F6 E4 FC DF  (Charset Id = 53 Codepage = 1252)
 INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
+FIXEDWIDTH = C9  (Charset Id = 53 Codepage = 1252)
 
 
 

@@ -383,7 +383,7 @@ var Transaction: ITransaction;
     Statement: IStatement;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
-  Statement := Attachment.Prepare(Transaction,'Select TIMECOL,Extract(TIMEZONE_HOUR FROM TIMECOL) AS TZ_HOUR,'+
+  Statement := Attachment.Prepare(Transaction,'Select ROWID, TIMECOL,TimeStampCol, Extract(TIMEZONE_HOUR FROM TIMECOL) AS TZ_HOUR,'+
                      'Extract(TIMEZONE_MINUTE FROM TIMECOL) as TZ_MINUTE from  FB4TestData_TZ');
   writeln(OutFile);
   writeln(OutFile,'FB4 Testdata_TZ');

@@ -24,11 +24,10 @@ DB ODS Minor Version = 0
 User Authentication Method = Srp256
 Firebird Library Path = /opt/firebird4b2/lib/libfbclient.so
 DB Client Implementation Version = 4.0
-DPB
-Count = 3
-28 = SYSDBA
-29 = masterkey
-65 = 3
+DPB: Item Count = 3
+  isc_dpb_user_name = SYSDBA
+  isc_dpb_password = masterkey
+  isc_dpb_set_db_sql_dialect = 3
 
 Firebird Server Version Info
 Firebird/Linux/AMD/Intel/x64 (access method), version "LI-T4.0.0.2006 Firebird 4.0 Beta 2"
@@ -48,12 +47,11 @@ User Authentication Method = Srp256
 Firebird Library Path = /opt/firebird4b2/lib/libfbclient.so
 DB Client Implementation Version = 4.0
 Dropping Database
-DPB
-Count = 4
-28 = SYSDBA
-29 = masterkey
-48 = UTF8
-65 = 3
+DPB: Item Count = 4
+  isc_dpb_user_name = SYSDBA
+  isc_dpb_password = masterkey
+  isc_dpb_lc_ctype = UTF8
+  isc_dpb_set_db_sql_dialect = 3
 
 Creating a Database with a DPD
 Database ID = 4 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = zeus
@@ -80,6 +78,11 @@ Dropping Database
 Running Test 2: Open the employee database and run a query
 Opening inet://localhost/employee
 Database Open, SQL Dialect = 3
+TPB: Item Count = 3
+  isc_tpb_read = 
+  isc_tpb_nowait = 
+  isc_tpb_concurrency = 
+
 Metadata
 SQLType =SQL_SHORT
 sub type = 0
@@ -337,7 +340,7 @@ FULL_NAME = Johnson, Leslie
 Current memory = 22,544,944
 Delta memory = 4,672
 Max memory = 22,638,000
-Elapsed time= 0.001 sec
+Elapsed time= 0.002 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
@@ -2553,6 +2556,10 @@ Event Counts: TESTEVENT, Count = 1
 
 
 Running Test 11: Services API
+SPB: Item Count = 2
+  user_name = SYSDBA
+  password = masterkey
+
 Service Manager Version = 2
 Server Version = LI-T4.0.0.2006 Firebird 4.0 Beta 2
 Implementation = Firebird/Linux/AMD/Intel/x64
@@ -2657,6 +2664,14 @@ Charset id = 1
 Nullable
 Size = 16
 
+SQLType =SQL_TEXT
+sub type = 0
+Field Name = FIXEDWIDTH
+Scale = 0
+Charset id = 4
+Nullable
+Size = 16
+
 Connection Character Set UTF8
 ROWID = 1
 TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage = 65001)
@@ -2664,6 +2679,7 @@ NOTES = C3 89 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 4 Codepage = 65001)
 BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
 BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
 INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
+FIXEDWIDTH = C3 89  (Charset Id = 4 Codepage = 65001)
 
 Connection Character Set NONE
 ROWID = 1
@@ -2672,6 +2688,7 @@ NOTES = C9 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 21 Codepage = 28591)
 BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 D6 C4 DC F6 E4 FC DF  (Charset Id = 53 Codepage = 1252)
 BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
 INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
+FIXEDWIDTH = C3 89  (Charset Id = 4 Codepage = 65001)
 
 Connection Character Set WIN1252
 ROWID = 1
@@ -2680,6 +2697,7 @@ NOTES = C9 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 53 Codepage = 1252)
 BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 D6 C4 DC F6 E4 FC DF  (Charset Id = 53 Codepage = 1252)
 BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 D6 C4 DC F6 E4 FC DF  (Charset Id = 53 Codepage = 1252)
 INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
+FIXEDWIDTH = C9  (Charset Id = 53 Codepage = 1252)
 
 
 
@@ -2968,6 +2986,30 @@ Charset id = 0
 Nullable
 Size = 12
 
+SQLType =SQL_SHORT
+sub type = 0
+Table = 
+Owner = 
+Column Name = EXTRACT
+Alias Name = TZ_HOUR
+Field Name = TZ_HOUR
+Scale = 0
+Charset id = 0
+Nullable
+Size = 2
+
+SQLType =SQL_SHORT
+sub type = 0
+Table = 
+Owner = 
+Column Name = EXTRACT
+Alias Name = TZ_MINUTE
+Field Name = TZ_MINUTE
+Scale = 0
+Charset id = 0
+Nullable
+Size = 2
+
 ROWID = 1
 TIMECOL =
   AsString =  11:32:10.0002 -05:00
@@ -2983,6 +3025,8 @@ TIMESTAMPCOL =
   Time Zone Name = +01:00
   UTC Time = 01/4/2020 10:31:05
   DST Offset = 60
+TZ_HOUR = -5
+TZ_MINUTE = 0
 ROWID = 2
 TIMECOL =
   AsString =  14:02:10.0050 -08:00
@@ -2998,6 +3042,8 @@ TIMESTAMPCOL =
   Time Zone Name = Europe/London
   UTC Time = 11/11/1918 11:11:00
   DST Offset = 0
+TZ_HOUR = -8
+TZ_MINUTE = 0
 ROWID = 3
 TIMECOL =
   AsString =  22:02:10.0050 -08:00
@@ -3013,6 +3059,8 @@ TIMESTAMPCOL =
   Time Zone Name = +04:00
   UTC Time = 10/11/1918 20:11:00
   DST Offset = 240
+TZ_HOUR = -8
+TZ_MINUTE = 0
 ROWID = 4
 TIMECOL =
   AsString =  14:02:10.5000 -08:00
@@ -3028,6 +3076,8 @@ TIMESTAMPCOL =
   Time Zone Name = Europe/London
   UTC Time = 11/11/1918 11:11:00
   DST Offset = 0
+TZ_HOUR = -8
+TZ_MINUTE = 0
 ROWID = 5
 TIMECOL =
   AsString =  11:31:05.0001 -05:00
@@ -3043,6 +3093,8 @@ TIMESTAMPCOL =
   Time Zone Name = America/New_York
   UTC Time = 04/7/2020 11:00:00
   DST Offset = -240
+TZ_HOUR = -5
+TZ_MINUTE = 0
 ROWID = 6
 TIMECOL =
   AsString =  11:31:05.0001 -05:00
@@ -3058,6 +3110,8 @@ TIMESTAMPCOL =
   Time Zone Name = America/New_York
   UTC Time = 01/7/2020 11:00:00
   DST Offset = -240
+TZ_HOUR = -5
+TZ_MINUTE = 0
 ROWID = 7
 TIMECOL =
   AsString =  11:31:05.0001 +06:00
@@ -3073,6 +3127,8 @@ TIMESTAMPCOL =
   Time Zone Name = EST5EDT
   UTC Time = 01/7/2020 11:00:00
   DST Offset = -240
+TZ_HOUR = 6
+TZ_MINUTE = 0
 ROWID = 8
 TIMECOL =
   AsString =  11:31:05.0001 +01:00
@@ -3088,6 +3144,8 @@ TIMESTAMPCOL =
   Time Zone Name = EST
   UTC Time = 01/7/2020 11:00:00
   DST Offset = -300
+TZ_HOUR = 1
+TZ_MINUTE = 0
 
 
 Using local TZ database
@@ -3159,6 +3217,30 @@ Charset id = 0
 Nullable
 Size = 12
 
+SQLType =SQL_SHORT
+sub type = 0
+Table = 
+Owner = 
+Column Name = EXTRACT
+Alias Name = TZ_HOUR
+Field Name = TZ_HOUR
+Scale = 0
+Charset id = 0
+Nullable
+Size = 2
+
+SQLType =SQL_SHORT
+sub type = 0
+Table = 
+Owner = 
+Column Name = EXTRACT
+Alias Name = TZ_MINUTE
+Field Name = TZ_MINUTE
+Scale = 0
+Charset id = 0
+Nullable
+Size = 2
+
 ROWID = 1
 TIMECOL =
   AsString =  11:32:10.0002 -05:00
@@ -3174,6 +3256,8 @@ TIMESTAMPCOL =
   Time Zone Name = +01:00
   UTC Time = 01/4/2020 10:31:05
   DST Offset = 60
+TZ_HOUR = -5
+TZ_MINUTE = 0
 ROWID = 2
 TIMECOL =
   AsString =  14:02:10.0050 -08:00
@@ -3189,6 +3273,8 @@ TIMESTAMPCOL =
   Time Zone Name = Europe/London
   UTC Time = 11/11/1918 11:11:00
   DST Offset = 0
+TZ_HOUR = -8
+TZ_MINUTE = 0
 ROWID = 3
 TIMECOL =
   AsString =  22:02:10.0050 -08:00
@@ -3204,6 +3290,8 @@ TIMESTAMPCOL =
   Time Zone Name = +04:00
   UTC Time = 10/11/1918 20:11:00
   DST Offset = 240
+TZ_HOUR = -8
+TZ_MINUTE = 0
 ROWID = 4
 TIMECOL =
   AsString =  14:02:10.5000 -08:00
@@ -3219,6 +3307,8 @@ TIMESTAMPCOL =
   Time Zone Name = Europe/London
   UTC Time = 11/11/1918 11:11:00
   DST Offset = 0
+TZ_HOUR = -8
+TZ_MINUTE = 0
 ROWID = 5
 TIMECOL =
   AsString =  11:31:05.0001 -05:00
@@ -3234,6 +3324,8 @@ TIMESTAMPCOL =
   Time Zone Name = America/New_York
   UTC Time = 04/7/2020 11:00:00
   DST Offset = -240
+TZ_HOUR = -5
+TZ_MINUTE = 0
 ROWID = 6
 TIMECOL =
   AsString =  11:31:05.0001 -05:00
@@ -3249,6 +3341,8 @@ TIMESTAMPCOL =
   Time Zone Name = America/New_York
   UTC Time = 01/7/2020 11:00:00
   DST Offset = -240
+TZ_HOUR = -5
+TZ_MINUTE = 0
 ROWID = 7
 TIMECOL =
   AsString =  11:31:05.0001 +06:00
@@ -3264,6 +3358,8 @@ TIMESTAMPCOL =
   Time Zone Name = EST5EDT
   UTC Time = 01/7/2020 11:00:00
   DST Offset = -240
+TZ_HOUR = 6
+TZ_MINUTE = 0
 ROWID = 8
 TIMECOL =
   AsString =  11:31:05.0001 +01:00
@@ -3279,6 +3375,8 @@ TIMESTAMPCOL =
   Time Zone Name = EST
   UTC Time = 01/7/2020 11:00:00
   DST Offset = -300
+TZ_HOUR = 1
+TZ_MINUTE = 0
 
 
 Using Extended TZ Data Type
@@ -3331,6 +3429,30 @@ Charset id = 0
 Nullable
 Size = 12
 
+SQLType =SQL_SHORT
+sub type = 0
+Table = 
+Owner = 
+Column Name = EXTRACT
+Alias Name = TZ_HOUR
+Field Name = TZ_HOUR
+Scale = 0
+Charset id = 0
+Nullable
+Size = 2
+
+SQLType =SQL_SHORT
+sub type = 0
+Table = 
+Owner = 
+Column Name = EXTRACT
+Alias Name = TZ_MINUTE
+Field Name = TZ_MINUTE
+Scale = 0
+Charset id = 0
+Nullable
+Size = 2
+
 ROWID = 1
 TIMECOL =
   AsString =  11:32:10.0002 -05:00
@@ -3346,6 +3468,8 @@ TIMESTAMPCOL =
   Time Zone Name = +01:00
   UTC Time = 01/4/2020 10:31:05
   DST Offset = 60
+TZ_HOUR = -5
+TZ_MINUTE = 0
 ROWID = 2
 TIMECOL =
   AsString =  14:02:10.0050 -08:00
@@ -3361,6 +3485,8 @@ TIMESTAMPCOL =
   Time Zone Name = Europe/London
   UTC Time = 11/11/1918 11:11:00
   DST Offset = 0
+TZ_HOUR = -8
+TZ_MINUTE = 0
 ROWID = 3
 TIMECOL =
   AsString =  22:02:10.0050 -08:00
@@ -3376,6 +3502,8 @@ TIMESTAMPCOL =
   Time Zone Name = +04:00
   UTC Time = 10/11/1918 20:11:00
   DST Offset = 240
+TZ_HOUR = -8
+TZ_MINUTE = 0
 ROWID = 4
 TIMECOL =
   AsString =  14:02:10.5000 -08:00
@@ -3391,6 +3519,8 @@ TIMESTAMPCOL =
   Time Zone Name = Europe/London
   UTC Time = 11/11/1918 11:11:00
   DST Offset = 0
+TZ_HOUR = -8
+TZ_MINUTE = 0
 ROWID = 5
 TIMECOL =
   AsString =  11:31:05.0001 -05:00
@@ -3406,6 +3536,8 @@ TIMESTAMPCOL =
   Time Zone Name = America/New_York
   UTC Time = 04/7/2020 11:00:00
   DST Offset = -240
+TZ_HOUR = -5
+TZ_MINUTE = 0
 ROWID = 6
 TIMECOL =
   AsString =  11:31:05.0001 -05:00
@@ -3421,6 +3553,8 @@ TIMESTAMPCOL =
   Time Zone Name = America/New_York
   UTC Time = 01/7/2020 11:00:00
   DST Offset = -240
+TZ_HOUR = -5
+TZ_MINUTE = 0
 ROWID = 7
 TIMECOL =
   AsString =  11:31:05.0001 +06:00
@@ -3436,6 +3570,8 @@ TIMESTAMPCOL =
   Time Zone Name = EST5EDT
   UTC Time = 01/7/2020 11:00:00
   DST Offset = -240
+TZ_HOUR = 6
+TZ_MINUTE = 0
 ROWID = 8
 TIMECOL =
   AsString =  11:31:05.0001 +01:00
@@ -3451,6 +3587,8 @@ TIMESTAMPCOL =
   Time Zone Name = EST
   UTC Time = 01/7/2020 11:00:00
   DST Offset = -300
+TZ_HOUR = 1
+TZ_MINUTE = 0
 
 
 
