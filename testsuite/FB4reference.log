@@ -75,13 +75,14 @@ RDB$SQL_SECURITY =
 Dropping Database
 
 
+------------------------------------------------------
 Running Test 2: Open the employee database and run a query
 Opening inet://localhost/employee
 Database Open, SQL Dialect = 3
 TPB: Item Count = 3
-  isc_tpb_read = 
-  isc_tpb_nowait = 
-  isc_tpb_concurrency = 
+  isc_tpb_read
+  isc_tpb_nowait
+  isc_tpb_concurrency
 
 Metadata
 SQLType =SQL_SHORT
@@ -304,6 +305,7 @@ FULL_NAME = Johnson, Leslie
 
 
 
+------------------------------------------------------
 Running Test 3: ad hoc queries
 Opening inet://localhost/employee
 Database Open
@@ -317,6 +319,7 @@ Constrained Employee Count = 3
 "Yanowski" Employee Count = 1
 
 
+------------------------------------------------------
 Running Test 4: Update, Insert and Delete Queries
 Opening inet://localhost/employee
 Database Open
@@ -340,7 +343,7 @@ FULL_NAME = Johnson, Leslie
 Current memory = 22,544,944
 Delta memory = 4,672
 Max memory = 22,638,000
-Elapsed time= 0.002 sec
+Elapsed time= 0.001 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
@@ -596,6 +599,7 @@ FULL_NAME = Johnson, Leslie
 
 
 
+------------------------------------------------------
 Running Test 5: Update Returning and Activity Check
 Opening inet://localhost/employee
 Database Open
@@ -629,6 +633,7 @@ Transaction Active
 Transaction inactive
 
 
+------------------------------------------------------
 Running Test 6: Blob Handling
 Metadata
 SQLType =SQL_TEXT
@@ -2060,6 +2065,7 @@ Be all my sins remembered
 
 
 
+------------------------------------------------------
 Running Test 7: Create and read back an Array
 Metadata
 SQLType =SQL_LONG
@@ -2386,6 +2392,7 @@ MYARRAY3 = Array: (0: 0) (1: 1.04) (2: 2.09) (3: 3.15) (4: 4.19) (5: 5.25) (6: 6
 
 
 
+------------------------------------------------------
 Running Test 8: Create and read back an Array with 2 dimensions
 Metadata
 SQLType =SQL_LONG
@@ -2461,6 +2468,7 @@ MYARRAY = Array: (0,-1: A50) (0,0: A51) (0,1: A52) (0,2: A53) (0,3: A54) (0,4: A
 
 
 
+------------------------------------------------------
 Running Test 9: Database Information tests
 Database ID = 4 FB = /opt/firebird4b2/examples/empbuild/employee.fdb SN = zeus
 Pages =346
@@ -2529,6 +2537,7 @@ Update Count Operation Counts
 Page Size = 8192
 
 
+------------------------------------------------------
 Running Test 10: Event Handling
 Call Async Wait
 Async Wait Called
@@ -2555,6 +2564,7 @@ Event Signalled
 Event Counts: TESTEVENT, Count = 1
 
 
+------------------------------------------------------
 Running Test 11: Services API
 SPB: Item Count = 2
   user_name = SYSDBA
@@ -2598,6 +2608,7 @@ Local Backup
 
 
 
+
 Local Backup Complete
 
 Local Restore
@@ -2614,6 +2625,7 @@ Database OK
 Database Dropped
 
 
+------------------------------------------------------
 Running Test 12: Character Sets
 SQL Params
 SQLType =SQL_LONG
@@ -2701,6 +2713,7 @@ FIXEDWIDTH = C9  (Charset Id = 53 Codepage = 1252)
 
 
 
+------------------------------------------------------
 Running Test 13: Transaction over two databases
 Init Database 1
 ROWID = 1
@@ -2734,6 +2747,7 @@ INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
 
 
 
+------------------------------------------------------
 Running Test 14: Non select procedures
 Default Character set Name = UTF8
 Metadata
@@ -2775,6 +2789,7 @@ ROWID = 1
 TITLE = Testing (Charset Id = 4 Codepage = 65001)
 
 
+------------------------------------------------------
 Running Test 15: Blob Handling and BPBs
 
 Testdata
@@ -2794,6 +2809,7 @@ BLOBDATA (Charset Id = 4 Codepage = 65001)
 
 
 
+------------------------------------------------------
 Running Test 16: Error handling
 Invalid Database Name Test
 Error Handled: I/O error during "open" operation for file "Malformed Name"
@@ -2831,6 +2847,7 @@ Invalid password Test
 Error Handled: Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 
 
+------------------------------------------------------
 Running Test 17: Date/Time tests and Firebird 4 extensions
  FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-T4.0.0.2006 Firebird 4.0 Beta 2"
 Has Local TZ DB = TRUE
@@ -3592,6 +3609,7 @@ TZ_MINUTE = 0
 
 
 
+------------------------------------------------------
 Running Test 18: Firebird 4 Decfloat extensions
  FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-T4.0.0.2006 Firebird 4.0 Beta 2"
 
@@ -3833,4 +3851,5 @@ BigNumber Array: (0: 123456123400.123456) (1: 123456123401.623456) (2: 123456123
 
 
 
+------------------------------------------------------
 Test Suite Ends
