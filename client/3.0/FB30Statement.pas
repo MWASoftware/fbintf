@@ -1081,12 +1081,8 @@ begin
       if (FStatementIntf <> nil) then
         FreeHandle;
       if E is EIBInterBaseError then
-        raise EIBInterBaseError.Create(EIBInterBaseError(E).SQLCode,
-                                       EIBInterBaseError(E).IBErrorCode,
-                                       EIBInterBaseError(E).Message +
-                                       sSQLErrorSeparator + FSQL)
-      else
-        raise;
+        E.Message := E.Message + sSQLErrorSeparator + FSQL;
+      raise;
     end;
   end;
   FPrepared := true;

@@ -380,8 +380,6 @@ begin
   raise EIBInterBaseError.Create(GetStatus);
 end;
 
-{Under Unixes, if using an embedded server then set up local TMP and LOCK Directories}
-
 procedure TFBClientAPI.EncodeInteger(aValue: integer; len: integer; buffer: PByte);
 begin
   while len > 0 do
