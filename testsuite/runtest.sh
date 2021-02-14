@@ -19,6 +19,9 @@ fpcmake
 make clean
 make
 if [ -x testsuite ]; then
+  if [ -n "$FIREBIRD" ]; then
+    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$FIREBIRD/lib"
+  fi
   echo ""
   echo "Starting Testsuite"
   echo ""

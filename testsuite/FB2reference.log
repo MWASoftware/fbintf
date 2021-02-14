@@ -4,10 +4,12 @@ Copyright MWA Software 2016-2020
 Starting Tests
 Client API Version = 2.5
 Firebird Environment Variable = /opt/firebird2.5.9
-Firebird Client Library Path = /opt/firebird2.5.9/lib/libfbclient.so
+Firebird Client Library Path = /opt/firebird2.5.9/lib/libfbembed.so
 Running Test 1: Create and Drop a Database
 Creating a Database with empty parameters
-Create Database fails (as expected): unavailable database
+Create Database fails (as expected): I/O error during "open O_CREAT" operation for file ""
+-Error while trying to create file
+-No such file or directory
 Creating a Database using an SQL Statement
 Database ID = 4 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = zeus
 SQL Dialect = 3
@@ -18,7 +20,7 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 11
 DB ODS Minor Version = 2
 User Authentication Method = Legacy_Auth
-Firebird Library Path = /opt/firebird2.5.9/lib/libfbclient.so
+Firebird Library Path = /opt/firebird2.5.9/lib/libfbembed.so
 DB Client Implementation Version = 2.5
 DPB: Item Count = 3
   isc_dpb_user_name = SYSDBA
@@ -40,7 +42,7 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 11
 DB ODS Minor Version = 2
 User Authentication Method = Legacy_Auth
-Firebird Library Path = /opt/firebird2.5.9/lib/libfbclient.so
+Firebird Library Path = /opt/firebird2.5.9/lib/libfbembed.so
 DB Client Implementation Version = 2.5
 Dropping Database
 DPB: Item Count = 4
@@ -60,7 +62,7 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 11
 DB ODS Minor Version = 2
 User Authentication Method = Legacy_Auth
-Firebird Library Path = /opt/firebird2.5.9/lib/libfbclient.so
+Firebird Library Path = /opt/firebird2.5.9/lib/libfbembed.so
 DB Client Implementation Version = 2.5
 RDB$DESCRIPTION = 
 RDB$RELATION_ID = 128
@@ -73,6 +75,229 @@ Dropping Database
 Running Test 2: Open the employee database and run a query
 Opening localhost:employee
 Database Open, SQL Dialect = 3
+TPB: Item Count = 3
+  isc_tpb_read
+  isc_tpb_nowait
+  isc_tpb_concurrency
+
+Metadata
+SQLType =SQL_SHORT
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = EMP_NO
+Alias Name = EMP_NO
+Field Name = EMP_NO
+Scale = 0
+Charset id = 0
+Not Null
+Size = 2
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = FIRST_NAME
+Alias Name = FIRST_NAME
+Field Name = FIRST_NAME
+Scale = 0
+Charset id = 0
+Not Null
+Size = 15
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = LAST_NAME
+Alias Name = LAST_NAME
+Field Name = LAST_NAME
+Scale = 0
+Charset id = 0
+Not Null
+Size = 20
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = PHONE_EXT
+Alias Name = PHONE_EXT
+Field Name = PHONE_EXT
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_TIMESTAMP
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = HIRE_DATE
+Alias Name = HIRE_DATE
+Field Name = HIRE_DATE
+Scale = 0
+Charset id = 0
+Not Null
+Size = 8
+
+SQLType =SQL_TEXT
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = DEPT_NO
+Alias Name = DEPT_NO
+Field Name = DEPT_NO
+Scale = 0
+Charset id = 0
+Not Null
+Size = 3
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = JOB_CODE
+Alias Name = JOB_CODE
+Field Name = JOB_CODE
+Scale = 0
+Charset id = 0
+Not Null
+Size = 5
+
+SQLType =SQL_SHORT
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = JOB_GRADE
+Alias Name = JOB_GRADE
+Field Name = JOB_GRADE
+Scale = 0
+Charset id = 0
+Not Null
+Size = 2
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = JOB_COUNTRY
+Alias Name = JOB_COUNTRY
+Field Name = JOB_COUNTRY
+Scale = 0
+Charset id = 0
+Not Null
+Size = 15
+
+SQLType =SQL_INT64
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = SALARY
+Alias Name = SALARY
+Field Name = SALARY
+Scale = -2
+Charset id = 0
+Not Null
+Size = 8
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = FULL_NAME
+Alias Name = FULL_NAME
+Field Name = FULL_NAME
+Scale = 0
+Charset id = 0
+Nullable
+Size = 37
+
+Plan = 
+PLAN (EMPLOYEE NATURAL)
+-- SQL style inline comment
+/* this is a comment */ Select First 3 * from EMPLOYEE
+
+EMP_NO = 2
+FIRST_NAME = Robert
+LAST_NAME = Nelson
+PHONE_EXT = 250
+HIRE_DATE = 1988/12/28 00:00:00.0000
+DEPT_NO = 600
+JOB_CODE = VP
+JOB_GRADE = 2
+JOB_COUNTRY = USA
+SALARY = 105,900.00
+FULL_NAME = Nelson, Robert
+EMP_NO = 4
+FIRST_NAME = Bruce
+LAST_NAME = Young
+PHONE_EXT = 233
+HIRE_DATE = 1988/12/28 00:00:00.0000
+DEPT_NO = 621
+JOB_CODE = Eng
+JOB_GRADE = 2
+JOB_COUNTRY = USA
+SALARY = 97,500.00
+FULL_NAME = Young, Bruce
+EMP_NO = 5
+FIRST_NAME = Kim
+LAST_NAME = Lambert
+PHONE_EXT = 22
+HIRE_DATE = 1989/02/06 00:00:00.0000
+DEPT_NO = 130
+JOB_CODE = Eng
+JOB_GRADE = 2
+JOB_COUNTRY = USA
+SALARY = 102,750.00
+FULL_NAME = Lambert, Kim
+
+Select * from EMPLOYEE Where EMP_NO = ?
+SQL Params
+SQLType =SQL_SHORT
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Not Null
+Size = 2
+
+EMP_NO = 8
+FIRST_NAME = Leslie
+LAST_NAME = Johnson
+PHONE_EXT = 410
+HIRE_DATE = 1989/04/05 00:00:00.0000
+DEPT_NO = 180
+JOB_CODE = Mktg
+JOB_GRADE = 3
+JOB_COUNTRY = USA
+SALARY = 64,635.00
+FULL_NAME = Johnson, Leslie
+
+With param names
+Select * from EMPLOYEE Where EMP_NO = :EMP_NO
+SQL Params
+SQLType =SQL_SHORT
+sub type = 0
+Field Name = EMP_NO
+Scale = 0
+Charset id = 0
+Not Null
+Size = 2
+
+EMP_NO = 8
+FIRST_NAME = Leslie
+LAST_NAME = Johnson
+PHONE_EXT = 410
+HIRE_DATE = 1989/04/05 00:00:00.0000
+DEPT_NO = 180
+JOB_CODE = Mktg
+JOB_GRADE = 3
+JOB_COUNTRY = USA
+SALARY = 64,635.00
+FULL_NAME = Johnson, Leslie
+
+Now open the employee database as a local database
 TPB: Item Count = 3
   isc_tpb_read
   isc_tpb_nowait
@@ -332,9 +557,9 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 948,712
+Current memory = 948,496
 Delta memory = 1,400
-Max memory = 992,648
+Max memory = 992,448
 Elapsed time= 0.002 sec
 Cpu = 0.000 sec
 Buffers = 75
@@ -2477,7 +2702,7 @@ Unknown Response 3
 Unknown Response 3
 Server Memory = 841392
 Forced Writes  = 1
-Max Memory  = 879408
+Max Memory  = 879176
 Num Buffers  = 75
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
