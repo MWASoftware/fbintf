@@ -85,6 +85,7 @@ type
     procedure Check4DataBaseError;
     function InErrorState: boolean;
     function LoadInterface: boolean; override;
+    procedure FBShutdown; override;
     function GetAPI: IFirebirdAPI; override;
     {$IFDEF UNIX}
     function GetFirebirdLibList: string; override;
@@ -247,6 +248,16 @@ begin
     CheckPlugins;
   end;
   Result := Result and HasMasterIntf;
+end;
+
+procedure TFB30ClientAPI.FBShutdown;
+begin
+  if assigned(FProvider) then
+  begin
+    FProvider.release;
+    FProvider := nil;
+  end;
+  inherited;
 end;
 
 function TFB30ClientAPI.GetAPI: IFirebirdAPI;

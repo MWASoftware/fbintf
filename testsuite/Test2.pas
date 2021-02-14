@@ -133,6 +133,20 @@ begin
   writeln(OutFile,'Database Open, SQL Dialect = ',Attachment.GetSQLDialect);
   DoQuery(Attachment);
   Attachment.Disconnect;
+  writeln(OutFile,'Now open the employee database as a local database');
+  DPB := FirebirdAPI.AllocateDPB;
+  DPB.Add(isc_dpb_lc_ctype).setAsString(CharSet);
+  DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
+  DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
+  if FirebirdAPI.GetClientMajor < 3 then
+    DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);
+  try
+    Attachment := FirebirdAPI.OpenDatabase(ExtractDBName(Owner.GetEmployeeDatabaseName),DPB);
+  except on e: Exception do
+    writeln(OutFile,'Open Local Database fails ',E.Message);
+  end;
+  DoQuery(Attachment);
+  Attachment.Disconnect;
 end;
 
 initialization

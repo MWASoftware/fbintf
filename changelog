@@ -80,6 +80,9 @@ FBINTF Change Log  version          (1.2-0 Build 12022) Fri, 17 Apr 2020 10:35:5
 14. IDPBItem/ITPBItem/ISPBItem: new interface method:
       function getParamTypeName: AnsiString;
 
+15. fb_shutdown now called before unloading Firebird library. This can avoid a
+     SIGEVENT error when a programme using the embeded server is unloaded.
+
 FBINTF Change Log  version          (1.1-6 Build 12237) Tue, 21 Jul 2020 08:54:21 +0100
 
 1. GetImplementationVersion now correctly returns '3.0' for Firebird 3 API

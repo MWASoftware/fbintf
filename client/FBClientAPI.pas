@@ -91,6 +91,15 @@ FIREBIRD_EMBEDDED = 'fbembed.dll';
 {$ENDIF}
 
 const
+  {fb_shutdown reasons}
+  fb_shutrsn_svc_stopped          = -1;
+  fb_shutrsn_no_connection	  = -2;
+  fb_shutrsn_app_stopped	  = -3;
+  fb_shutrsn_signal		  = -5;
+  fb_shutrsn_services		  = -6;
+  fb_shutrsn_exit_called	  = -7;
+
+const
     DefaultTimeZoneFile = '/etc/timezone';
 
 const
@@ -173,6 +182,12 @@ type
   protected
     FFBLibrary: TFBLibrary;
     function GetProcAddr(ProcName: PAnsiChar): Pointer;
+
+  public type
+    Tfb_shutdown = function (timeout: uint;
+                                 const reason: int): int;
+                   {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
+
   public
     {Taken from legacy API}
     isc_sqlcode: Tisc_sqlcode;
@@ -180,11 +195,14 @@ type
     isc_event_counts: Tisc_event_counts;
     isc_event_block: Tisc_event_block;
     isc_free: Tisc_free;
+    {FB Shutdown API}
+    fb_shutdown: Tfb_shutdown;
 
     constructor Create(aFBLibrary: TFBLibrary);
     procedure IBAlloc(var P; OldSize, NewSize: Integer);
     procedure IBDataBaseError;
     function LoadInterface: boolean; virtual;
+    procedure FBShutdown; virtual;
     function GetAPI: IFirebirdAPI; virtual; abstract;
     {$IFDEF UNIX}
     function GetFirebirdLibList: string; virtual; abstract;
@@ -262,9 +280,11 @@ end;
 
 procedure TFBLibrary.FreeFBLibrary;
 begin
+  (FFirebirdAPI as TFBClientAPI).FBShutdown;
   if FIBLibrary <> NilHandle then
-    FreeLibrary(FIBLibrary);
+    UnloadLibrary(FIBLibrary);
   FIBLibrary := NilHandle;
+  FFBLibraryName := '';
 end;
 
 function TFBLibrary.GetLibraryName: string;
@@ -316,8 +336,8 @@ end;
 
 destructor TFBLibrary.Destroy;
 begin
-  FFirebirdAPI := nil;
   FreeFBLibrary;
+  FFirebirdAPI := nil;
   inherited Destroy;
 end;
 
@@ -528,7 +548,14 @@ begin
   isc_event_counts := GetProcAddr('isc_event_counts'); {do not localize}
   isc_event_block := GetProcAddr('isc_event_block'); {do not localize}
   isc_free := GetProcAddr('isc_free'); {do not localize}
+  fb_shutdown := GetProcAddr('fb_shutdown'); {do not localize}
   Result := assigned(isc_free);
+end;
+
+procedure TFBClientAPI.FBShutdown;
+begin
+  if assigned(fb_shutdown) then
+    fb_shutdown(0,fb_shutrsn_exit_called);
 end;
 
 { TFBStatus }
