@@ -128,8 +128,7 @@ type
     function GetIMaster: TObject; overload;
 
     {IFBIMasterProvider}
-    procedure GetIMaster
-    (var intf: Firebird.IMaster); overload;
+    procedure GetIMaster(var intf: Firebird.IMaster); overload;
 
     {Encode/Decode}
     function DecodeInteger(bufptr: PByte; len: short): integer; override;

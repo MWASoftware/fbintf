@@ -1,4 +1,4 @@
-(*
+﻿(*
  *  Firebird Interface (fbintf) Test suite. This program is used to
  *  test the Firebird Pascal Interface and provide a semi-automated
  *  pass/fail check for each test.
@@ -116,11 +116,10 @@ begin
     ByName('rowid').AsInteger := 1;
     {$IFDEF DCC}
     ByName('title').AsString := UTF8Encode('Blob Test ©€');
-    ByName('Notes').AsString := UTF8Encode('Écoute moi');
     {$ELSE}
     ByName('title').AsString := 'Blob Test ©€';
-    ByName('Notes').AsString := 'Écoute moi';
     {$ENDIF}
+    ByName('Notes').AsString := 'Écoute moi';
     ByName('Dated').AsDateTime := EncodeDate(2016,4,1) + EncodeTime(9,30,0,100);
   end;
   Statement.Execute;

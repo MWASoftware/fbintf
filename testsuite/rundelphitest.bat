@@ -78,4 +78,4 @@ IF EXIST "%DELPHIBIN%\dcc32" (
 rd /s /q testunits
 rem del testsuite.exe
 )
-pause
+)
