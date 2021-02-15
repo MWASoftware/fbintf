@@ -132,7 +132,7 @@
     isc_dpb_set_db_replica = 92;    
     isc_dpb_set_bind = 93;    
     isc_dpb_decfloat_round = 94;    
-    isc_dpb_decfloat_traps = 95;
+    isc_dpb_decfloat_traps = 95;    
   {************************************************ }
   { clumplet tags used inside isc_dpb_address_path  }
   {						 and isc_spb_address_path  }
@@ -244,7 +244,7 @@
     isc_tpb_no_auto_undo = 20;    
     isc_tpb_lock_timeout = 21;    
     isc_tpb_read_consistency = 22;    
-    isc_tpb_at_snapshot_number = 23;
+    isc_tpb_at_snapshot_number = 23;    
   {********************** }
   { Blob Parameter Block  }
   {********************** }
@@ -339,7 +339,8 @@
     isc_action_svc_drop_mapping = 28;    { Drop auto admins mapping in security database }
     isc_action_svc_display_user_adm = 29;    { Displays user(s) from security database with admin info }
     isc_action_svc_validate = 30;    { Starts database online validation }
-    isc_action_svc_last = 31;    { keep it last ! }
+    isc_action_svc_nfix = 31;    { Fixup database after file system copy }
+    isc_action_svc_last = 32;    { keep it last ! }
   {****************************
    * Service information items *
    **************************** }

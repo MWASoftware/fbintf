@@ -220,8 +220,8 @@ begin
 
     case array_desc_dtype of
     blr_short,blr_long,
-    blr_int64,blr_quad{,    see CORE-6302
-    blr_int128}:
+    blr_int64,blr_quad,
+    blr_int128:
         SDLItem.AddShortInt(array_desc_scale);
 
     blr_text,blr_cstring, blr_varying:

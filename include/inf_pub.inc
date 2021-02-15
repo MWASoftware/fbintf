@@ -48,6 +48,7 @@
   { Values 65 -100 unused to avoid conflict with InterBase  }
   { codes 126 and 127 are used for special purposes }
   { do not use them here }
+  { Return list of features supported by provider of current connection }
   { Leave this LAST!  }
 
   type
@@ -148,7 +149,13 @@
       fb_info_crypt_plugin = 138;
       fb_info_creation_timestamp_tz = 139;
       fb_info_wire_crypt = 140;
-      isc_info_db_last_value = 141;
+      fb_info_features = 141;
+      fb_info_next_attachment = 142;
+      fb_info_next_statement = 143;
+      fb_info_db_guid = 144;
+      fb_info_db_file_id = 145;
+      fb_info_replica_mode = 146;
+      isc_info_db_last_value = 147;
 
   { flags set in fb_info_crypt_state  }
 
@@ -157,6 +164,37 @@
     Const
       fb_info_crypt_encrypted = $01;
       fb_info_crypt_process = $02;
+
+  { response to fb_info_features }
+  { Multiple prepared statements in single attachment }
+  { Multiple concurrent transaction in single attachment }
+  { Query parameters can be named }
+  { ALTER SESSION RESET is supported }
+  { Read consistency TIL is supported }
+  { Statement timeout is supported }
+  { Prepared statements are not dropped on transaction end }
+  { Not really a feature. Keep this last. }
+
+  type
+    info_features =  Longint;
+    Const
+      fb_feature_multi_statements = 1;
+      fb_feature_multi_transactions = 2;
+      fb_feature_named_parameters = 3;
+      fb_feature_session_reset = 4;
+      fb_feature_read_consistency = 5;
+      fb_feature_statement_timeout = 6;
+      fb_feature_statement_long_life = 7;
+      fb_feature_max = 8;
+
+  { response to fb_info_replica_mode }
+
+  type
+    replica_mode =  Longint;
+    Const
+      fb_info_replica_none = 0;
+      fb_info_replica_read_only = 1;
+      fb_info_replica_read_write = 2;
 
     isc_info_version = isc_info_isc_version;    
   {************************************ }

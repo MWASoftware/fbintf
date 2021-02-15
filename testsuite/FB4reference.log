@@ -3,10 +3,10 @@ Copyright MWA Software 2016-2020
 
 Starting Tests
 Client API Version = 4.0
-Firebird Environment Variable = /opt/firebird4b2
-Firebird Bin Directory = /opt/firebird4b2/bin
-Firebird Conf Directory = /opt/firebird4b2/
-Firebird Client Library Path = /opt/firebird4b2/lib/libfbclient.so
+Firebird Environment Variable = /opt/firebird4rc1
+Firebird Bin Directory = /opt/firebird4rc1/bin
+Firebird Conf Directory = /opt/firebird4rc1/
+Firebird Client Library Path = /opt/firebird4rc1/lib/libfbclient.so
 Running Test 1: Create and Drop a Database
 Creating a Database with empty parameters
 Create Database fails (as expected): I/O error during "open O_CREAT" operation for file ""
@@ -22,7 +22,7 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 13
 DB ODS Minor Version = 0
 User Authentication Method = Srp256
-Firebird Library Path = /opt/firebird4b2/lib/libfbclient.so
+Firebird Library Path = /opt/firebird4rc1/lib/libfbclient.so
 DB Client Implementation Version = 4.0
 DPB: Item Count = 3
   isc_dpb_user_name = SYSDBA
@@ -30,9 +30,9 @@ DPB: Item Count = 3
   isc_dpb_set_db_sql_dialect = 3
 
 Firebird Server Version Info
-Firebird/Linux/AMD/Intel/x64 (access method), version "LI-T4.0.0.2006 Firebird 4.0 Beta 2"
-Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-T4.0.0.2006 Firebird 4.0 Beta 2/tcp (zeus)/P16:C"
-Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-T4.0.0.2006 Firebird 4.0 Beta 2/tcp (zeus)/P16:C"
+Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.0.2353 Firebird 4.0 Release Candidate 1"
+Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V4.0.0.2353 Firebird 4.0 Release Candidate 1/tcp (zeus)/P16:C"
+Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-V4.0.0.2353 Firebird 4.0 Release Candidate 1/tcp (zeus)/P16:C"
 on disk structure version 13.0
 
 Dropping Database
@@ -44,7 +44,7 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 13
 DB ODS Minor Version = 0
 User Authentication Method = Srp256
-Firebird Library Path = /opt/firebird4b2/lib/libfbclient.so
+Firebird Library Path = /opt/firebird4rc1/lib/libfbclient.so
 DB Client Implementation Version = 4.0
 Dropping Database
 DPB: Item Count = 4
@@ -64,11 +64,11 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 13
 DB ODS Minor Version = 0
 User Authentication Method = Srp256
-Firebird Library Path = /opt/firebird4b2/lib/libfbclient.so
+Firebird Library Path = /opt/firebird4rc1/lib/libfbclient.so
 DB Client Implementation Version = 4.0
 RDB$DESCRIPTION = 
 RDB$RELATION_ID = 128
-RDB$SECURITY_CLASS = SQL$378
+RDB$SECURITY_CLASS = SQL$384
 RDB$CHARACTER_SET_NAME = UTF8
 RDB$LINGER = 
 RDB$SQL_SECURITY = 
@@ -548,9 +548,9 @@ Constrained Employee Count = 3
 Running Test 4: Update, Insert and Delete Queries
 Opening inet://localhost/employee
 Database Open
-Firebird/Linux/AMD/Intel/x64 (access method), version "LI-T4.0.0.2006 Firebird 4.0 Beta 2"
-Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-T4.0.0.2006 Firebird 4.0 Beta 2/tcp (zeus)/P16:CZ"
-Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-T4.0.0.2006 Firebird 4.0 Beta 2/tcp (zeus)/P16:CZ"
+Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.0.2353 Firebird 4.0 Release Candidate 1"
+Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V4.0.0.2353 Firebird 4.0 Release Candidate 1/tcp (zeus)/P16:CZ"
+Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-V4.0.0.2353 Firebird 4.0 Release Candidate 1/tcp (zeus)/P16:CZ"
 on disk structure version 13.0
 Select Count = 1 InsertCount = 0 UpdateCount = 1 DeleteCount = 0
 EMP_NO = 8
@@ -565,9 +565,9 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 22,544,944
-Delta memory = 4,672
-Max memory = 22,638,000
+Current memory = 19,747,376
+Delta memory = 4,464
+Max memory = 19,793,248
 Elapsed time= 0.001 sec
 Cpu = 0.000 sec
 Buffers = 2048
@@ -2695,7 +2695,7 @@ MYARRAY = Array: (0,-1: A50) (0,0: A51) (0,1: A52) (0,2: A53) (0,3: A54) (0,4: A
 
 ------------------------------------------------------
 Running Test 9: Database Information tests
-Database ID = 4 FB = /opt/firebird4b2/examples/empbuild/employee.fdb SN = zeus
+Database ID = 4 FB = /opt/firebird4rc1/examples/empbuild/employee.fdb SN = zeus
 Pages =346
 Base Level = 13,4,0,3,
 Implementation = 11,7,0,3,66,1,66,
@@ -2703,21 +2703,21 @@ Reserved = 0
 ODS minor = 0
 ODS major = 13
 Page Size = 8192
-Version = 1: LI-T6.3.0.2006 Firebird 4.0 Beta 2
+Version = 1: LI-V6.3.0.2353 Firebird 4.0 Release Candidate 1
 Database is Read/Write
-Database Created: 29/5/2020 02:53:19
+Database Created: 01/2/2021 14:57:08
 Pages Used = 310
 Pages Free = 36
-Server Memory = 21959808
+Server Memory = 19466032
 Forced Writes  = 1
-Max Memory  = 22141856
+Max Memory  = 19612048
 Num Buffers  = 2048
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
 Active Transaction Count = 0
-Fetches  = 1621
+Fetches  = 1634
 Writes  = 8
-Reads  = 89
+Reads  = 91
 Page Writes  = 4
 Record Version Removals Operation Counts
 
@@ -2741,7 +2741,7 @@ Count = 2
 Table ID = 12
 Count = 24
 Table ID = 18
-Count = 794
+Count = 805
 Table ID = 20
 Count = 5
 Table ID = 28
@@ -2796,12 +2796,12 @@ SPB: Item Count = 2
   password = masterkey
 
 Service Manager Version = 2
-Server Version = LI-T4.0.0.2006 Firebird 4.0 Beta 2
+Server Version = LI-V4.0.0.2353 Firebird 4.0 Release Candidate 1
 Implementation = Firebird/Linux/AMD/Intel/x64
 
 Lock Directory = /tmp/firebird/
-Message File = /opt/firebird4b2/
-Security File = /opt/firebird4b2/security4.fdb
+Message File = /opt/firebird4rc1/
+Security File = /opt/firebird4rc1/security4.fdb
 
 DB Attachments
 No. of Attachments = 0
@@ -3073,7 +3073,7 @@ Error Handled: Your user name and password are not defined. Ask your database ad
 
 ------------------------------------------------------
 Running Test 17: Date/Time tests and Firebird 4 extensions
- FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-T4.0.0.2006 Firebird 4.0 Beta 2"
+ FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.0.2353 Firebird 4.0 Release Candidate 1"
 Has Local TZ DB = TRUE
 
 Testdata
@@ -3835,7 +3835,7 @@ TZ_MINUTE = 0
 
 ------------------------------------------------------
 Running Test 18: Firebird 4 Decfloat extensions
- FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-T4.0.0.2006 Firebird 4.0 Beta 2"
+ FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.0.2353 Firebird 4.0 Release Candidate 1"
 
 FB4 Testdata_DECFloat
 

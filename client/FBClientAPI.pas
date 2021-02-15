@@ -183,10 +183,13 @@ type
     FFBLibrary: TFBLibrary;
     function GetProcAddr(ProcName: PAnsiChar): Pointer;
 
-  public type
+  protected type
     Tfb_shutdown = function (timeout: uint;
                                  const reason: int): int;
                    {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
+  protected
+    {FB Shutdown API}
+    fb_shutdown: Tfb_shutdown;
 
   public
     {Taken from legacy API}
@@ -195,8 +198,6 @@ type
     isc_event_counts: Tisc_event_counts;
     isc_event_block: Tisc_event_block;
     isc_free: Tisc_free;
-    {FB Shutdown API}
-    fb_shutdown: Tfb_shutdown;
 
     constructor Create(aFBLibrary: TFBLibrary);
     procedure IBAlloc(var P; OldSize, NewSize: Integer);

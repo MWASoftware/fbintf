@@ -1021,6 +1021,10 @@
     isc_truncate_warn = 335545266;    
     isc_truncate_monitor = 335545267;    
     isc_truncate_context = 335545268;    
+    isc_merge_dup_update = 335545269;    
+    isc_wrong_page = 335545270;    
+    isc_repl_error = 335545271;    
+    isc_ses_reset_failed = 335545272;    
     isc_gfix_db_name = 335740929;    
     isc_gfix_invalid_sw = 335740930;    
     isc_gfix_incmp_sw = 335740932;    
@@ -1500,6 +1504,7 @@
     isc_nbackup_user_stop = 337117257;    
     isc_nbackup_deco_parse = 337117259;    
     isc_nbackup_lostrec_guid_db = 337117261;    
+    isc_nbackup_seq_misuse = 337117265;    
     isc_trace_conflict_acts = 337182750;    
     isc_trace_act_notfound = 337182751;    
     isc_trace_switch_once = 337182752;    
@@ -1511,7 +1516,7 @@
     isc_trace_switch_param_miss = 337182758;    
     isc_trace_param_act_notcompat = 337182759;    
     isc_trace_mandatory_switch_miss = 337182760;    
-    isc_err_max = 1438;    
+    isc_err_max = 1443;    
 {$endif}
   { JRD_GEN_IBERROR_H  }
 

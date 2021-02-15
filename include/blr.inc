@@ -391,7 +391,8 @@ in define line 36 *)
       blr_at = 216;      
     { subcodes of blr_at }
       blr_at_local = 0;      
-      blr_at_zone = 1;      
+      blr_at_zone = 1;   
+ 	  blr_marks = 217;
 {$endif}
     { FIREBIRD_IMPL_BLR_H }
 

@@ -252,7 +252,7 @@ end;
 
 procedure TFB30ClientAPI.FBShutdown;
 begin
-  if assigned(FProvider) then
+  if assigned(fb_shutdown) and assigned(FProvider) then
   begin
     FProvider.release;
     FProvider := nil;
