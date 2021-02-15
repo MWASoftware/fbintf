@@ -5,6 +5,7 @@ REM These may be modified if needed to suite local requirements
 REM Test suite Configuration parameters (FPCDIR and FPCBIN)
 REM These may be modified if needed to suite local requirements
 
+
 FOR %%V in (3.0.4 3.0.2 3.0.0) do (
   if EXIST C:\lazarus\fpc\%%V\bin\i386-win32\fpc.exe (
     set FPCDIR=C:\lazarus\fpc\%%V
@@ -22,7 +23,7 @@ FOR %%V in (3.0.4 3.0.2 3.0.0) do (
     Goto COMPILE
   )
 )
-)
+
 
 :COMPILE
 set DELPHIBIN=C:\Program Files\Embarcadero\RAD Studio\7.0\bin
@@ -77,4 +78,4 @@ IF EXIST "%DELPHIBIN%\dcc32" (
 rd /s /q testunits
 rem del testsuite.exe
 )
-)
+pause

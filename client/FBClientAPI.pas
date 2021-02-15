@@ -283,7 +283,7 @@ procedure TFBLibrary.FreeFBLibrary;
 begin
   (FFirebirdAPI as TFBClientAPI).FBShutdown;
   if FIBLibrary <> NilHandle then
-    UnloadLibrary(FIBLibrary);
+    FreeLibrary(FIBLibrary);
   FIBLibrary := NilHandle;
   FFBLibraryName := '';
 end;

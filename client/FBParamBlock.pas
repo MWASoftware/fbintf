@@ -743,7 +743,7 @@ end;
 
 { TCustomParamBlock }
 
-function TCustomParamBlock<_IItem, _TItem>.AddByTypeName(ParamTypeName: AnsiString
+function TCustomParamBlock<_TItem, _IItem>.AddByTypeName(ParamTypeName: AnsiString
   ): _IItem;
 var ParamType: byte;
 begin

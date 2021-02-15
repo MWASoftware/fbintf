@@ -128,7 +128,8 @@ type
     function GetIMaster: TObject; overload;
 
     {IFBIMasterProvider}
-    function GetIMaster: Firebird.IMaster; overload;
+    procedure GetIMaster
+    (var intf: Firebird.IMaster); overload;
 
     {Encode/Decode}
     function DecodeInteger(bufptr: PByte; len: short): integer; override;
@@ -379,9 +380,9 @@ begin
   Result := FMaster;
 end;
 
-function TFB30ClientAPI.GetIMaster: Firebird.IMaster;
+procedure TFB30ClientAPI.GetIMaster(var intf: Firebird.IMaster);
 begin
-  Result := FMaster;
+  intf := FMaster;
 end;
 
 function TFB30ClientAPI.HasRollbackRetaining: boolean;
