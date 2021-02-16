@@ -10,9 +10,9 @@ FBINTF Change Log  version          (1.2-0 Build 12022) Fri, 17 Apr 2020 10:35:5
 
 5. New unit 'FBClientLib.pas' added and provides new interface IFBIMasterProvider.
    QueryInterface may be used to coerce this interface from IFirebirdAPI. The
-   interface provides a single method "function GetIMaster: IMaster". This provides
+   interface provides a single method "function GetIMasterIntf: IMaster". This provides
    type safe access to the Firebird IMaster interface and avoids the need to turn
-   off object checks when coercing "funcition GetIMaster: TObject" to IMaster.
+   off object checks when coercing "function GetIMaster: TObject" to IMaster.
 
 6. New IFirebirdAPI Calls:
     function HasLocalTZDB: boolean;

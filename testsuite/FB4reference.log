@@ -1,5 +1,5 @@
 Firebird API Test Suite
-Copyright MWA Software 2016-2020
+Copyright MWA Software 2016-2021
 
 Starting Tests
 Client API Version = 4.0
@@ -568,7 +568,7 @@ FULL_NAME = Johnson, Leslie
 Current memory = 19,747,376
 Delta memory = 4,464
 Max memory = 19,793,248
-Elapsed time= 0.001 sec
+Elapsed time= 0.002 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
