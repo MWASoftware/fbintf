@@ -52,7 +52,7 @@ type
   IFBIMasterProvider = interface
     ['{c0202c92-5d2d-4130-b4df-427469aa42cf}']
     {Firebird 3 API}
-    procedure GetIMaster(var intf: Firebird.IMaster);
+    function GetIMasterIntf: Firebird.IMaster;
   end;
 
   {Example Code:

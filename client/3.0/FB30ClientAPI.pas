@@ -125,10 +125,10 @@ type
 
     {Firebird 3 API}
     function HasMasterIntf: boolean;
-    function GetIMaster: TObject; overload;
+    function GetIMaster: TObject;
 
     {IFBIMasterProvider}
-    procedure GetIMaster(var intf: Firebird.IMaster); overload;
+    function GetIMasterIntf: Firebird.IMaster;
 
     {Encode/Decode}
     function DecodeInteger(bufptr: PByte; len: short): integer; override;
@@ -379,9 +379,9 @@ begin
   Result := FMaster;
 end;
 
-procedure TFB30ClientAPI.GetIMaster(var intf: Firebird.IMaster);
+function TFB30ClientAPI.GetIMasterIntf: Firebird.IMaster;
 begin
-  intf := FMaster;
+  Result := FMaster;
 end;
 
 function TFB30ClientAPI.HasRollbackRetaining: boolean;
