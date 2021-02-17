@@ -653,17 +653,23 @@ end;
 
 function TFB30ClientAPI.HasTimeZoneSupport: boolean;
 begin
-  Result := GetClientMajor >=4;
+  Result :=  (GetClientMajor >=4) and (UtilIntf.vtable.version >= 4)
+    and (UtilIntf.vtable.version <> 21) {ignore FB4 Beta1}
+    and (UtilIntf.vtable.version <> 24) {ignore FB4 Beta2}
 end;
 
 function TFB30ClientAPI.HasExtendedTZSupport: boolean;
 begin
-  Result :=  (GetClientMajor >=4) and (UtilIntf.vtable.version >= 4) {ignore FB4 Beta1}
+  Result :=  (GetClientMajor >=4) and (UtilIntf.vtable.version >= 4)
+    and (UtilIntf.vtable.version <> 21) {ignore FB4 Beta1}
+    and (UtilIntf.vtable.version <> 24) {ignore FB4 Beta2}
 end;
 
 function TFB30ClientAPI.HasInt128Support: boolean;
 begin
-  Result := (GetClientMajor >=4) and (UtilIntf.vtable.version >= 4) {ignore FB4 Beta1} ;
+  Result :=  (GetClientMajor >=4) and (UtilIntf.vtable.version >= 4)
+    and (UtilIntf.vtable.version <> 21) {ignore FB4 Beta1}
+    and (UtilIntf.vtable.version <> 24) {ignore FB4 Beta2}
 end;
 
 end.
