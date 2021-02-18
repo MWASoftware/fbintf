@@ -3900,6 +3900,18 @@ Charset id = 0
 Nullable
 Size = 16
 
+SQLType =SQL_INT128
+sub type = 0
+Table = FB4TESTDATA_DECFLOAT
+Owner = SYSDBA
+Column Name = BIGINTEGER
+Alias Name = BIGINTEGER
+Field Name = BIGINTEGER
+Scale = 0
+Charset id = 0
+Nullable
+Size = 16
+
 RowID = 1
 Float16 = 64000000000.01
   Precision = 13
@@ -3919,6 +3931,12 @@ BigNumber = 123456123456.123456
   Special = 0
   Places = 6
   Digits = 12 34 56 12 34 56 12 34 56 
+BigInteger = 123456789123456789
+  Precision = 18
+  Sign = 0
+  Special = 0
+  Places = 0
+  Digits = 12 34 56 78 91 23 45 67 89 
 RowID = 2
 Float16 = -64000000000.01
   Precision = 13
@@ -3938,6 +3956,7 @@ BigNumber = -123456123456.123456
   Special = 0
   Places = 6
   Digits = 12 34 56 12 34 56 12 34 56 
+BigInteger = Null
 RowID = 3
 Float16 = 64100000000.011
   Precision = 14
@@ -3963,6 +3982,7 @@ BiggerNumber = 11123456123456123456123456123456.1235
   Special = 0
   Places = 4
   Digits = 11 12 34 56 12 34 56 12 34 56 12 34 56 12 34 56 12 35 
+BigInteger = Null
 RowID = 4
 Float16 = 0
   Precision = 0
@@ -3988,6 +4008,7 @@ BiggerNumber = 0.0000
   Special = 0
   Places = 0
   Digits = 
+BigInteger = Null
 Metadata
 SQLType =SQL_LONG
 sub type = 0

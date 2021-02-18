@@ -86,6 +86,7 @@ const
     'Float34 DecFloat(34),'+
     'BigNumber NUMERIC(24,6),'+
     'BiggerNumber NUMERIC(34,4),'+
+    'BigInteger INT128, '+
     'Primary Key(RowID)'+
     ')';
 
@@ -106,8 +107,8 @@ var Transaction: ITransaction;
     sqlInsert: AnsiString;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
-  sqlInsert := 'Insert into FB4TestData_DECFLoat(RowID,Float16,Float34,BigNumber) ' +
-               'Values(1,64000000000.01,123456789123456789.12345678,123456123456.123456)';
+  sqlInsert := 'Insert into FB4TestData_DECFLoat(RowID,Float16,Float34,BigNumber,BigInteger) ' +
+               'Values(1,64000000000.01,123456789123456789.12345678,123456123456.123456,123456789123456789)';
   Attachment.ExecuteSQL(Transaction,sqlInsert,[]);
   sqlInsert := 'Insert into FB4TestData_DECFLoat(RowID,Float16,Float34,BigNumber) '+
                'Values(2,-64000000000.01,-123456789123456789.12345678,-123456123456.123456)';
@@ -234,6 +235,13 @@ begin
       begin
         writeln(OutFile,'BiggerNumber = ', ByName('BiggerNumber').GetAsString);
         DumpBCD(ByName('BiggerNumber').GetAsBCD);
+      end;
+      if ByName('BigInteger').IsNull then
+        writeln(OutFile,'BigInteger = Null')
+      else
+      begin
+        writeln(OutFile,'BigInteger = ', ByName('BigInteger').GetAsString);
+        DumpBCD(ByName('BigInteger').GetAsBCD);
       end;
       writeln;
     end;
