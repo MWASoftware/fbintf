@@ -77,6 +77,7 @@ type
                              when this class is freed and last reference to IStatus
                              goes out of scope.}
     procedure CheckPlugins;
+    function Firebird4orLater: boolean;
   public
     constructor Create(aFBLibrary: TFBLibrary);
     destructor Destroy; override;
@@ -224,6 +225,13 @@ begin
   finally
     PluginsList.Free;
   end;
+end;
+
+function TFB30ClientAPI.Firebird4orLater: boolean;
+begin
+  Result :=  (GetClientMajor >=4) and (UtilIntf.vtable.version >= 4)
+    and (UtilIntf.vtable.version <> 21) {ignore FB4 Beta1}
+    and (UtilIntf.vtable.version <> 24) {ignore FB4 Beta2}
 end;
 
 {$IFDEF UNIX}
@@ -653,17 +661,17 @@ end;
 
 function TFB30ClientAPI.HasTimeZoneSupport: boolean;
 begin
-  Result := GetClientMajor >=4;
+  Result := Firebird4orLater;
 end;
 
 function TFB30ClientAPI.HasExtendedTZSupport: boolean;
 begin
-  Result :=  (GetClientMajor >=4) and (UtilIntf.vtable.version >= 4) {ignore FB4 Beta1}
+  Result := Firebird4orLater;
 end;
 
 function TFB30ClientAPI.HasInt128Support: boolean;
 begin
-  Result := (GetClientMajor >=4) and (UtilIntf.vtable.version >= 4) {ignore FB4 Beta1} ;
+  Result := Firebird4orLater;
 end;
 
 end.
