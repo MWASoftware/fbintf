@@ -78,7 +78,7 @@ uses
     {$IFDEF FPC} Dynlibs, {$ENDIF}
    IB, IBHeader, FBActivityMonitor, FBMessages, IBExternals, FmtBCD;
 
-{For Linux see result of GetFirebirdLibList method}
+{For Linux see result of GetFirebirdLibListruntime/nongui/winipc.inc method}
 {$IFDEF DARWIN}
 const
 FIREBIRD_SO2 = 'libfbclient.dylib';
