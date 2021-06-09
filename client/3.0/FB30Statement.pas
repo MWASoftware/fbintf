@@ -735,7 +735,7 @@ begin
   FMetaData := aMetaData;
   with FFirebird30ClientAPI do
   begin
-    Count := metadata.getCount(StatusIntf);
+    Count := aMetadata.getCount(StatusIntf);
     Check4DataBaseError;
     Initialize;
 

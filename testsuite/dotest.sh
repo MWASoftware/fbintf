@@ -5,12 +5,9 @@ usage()
   echo "dotest.sh [-2] [-3] [-4 b1|b2] [-t <testid>]"
 }
 
-if [ $# -eq 0 ]; then
-  FB=4
-  BUILD=b2
-else
+BUILD=
 #Parse Parameters
-TEMP=`getopt h234:t: "$@"`
+TEMP=`getopt h234b:t: "$@"`
 if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
 
 eval set -- "$TEMP"
@@ -23,9 +20,11 @@ while true ; do
 
         \-3) 	FB="3.0.5"; shift 1;;
 
-        \-4) 	FB=4; BUILD="$2"; shift 2;;
+        \-4) 	FB="4.0.0"; shift 1;;
         
         -t)    TEST="-t $2"; shift 2;;
+
+	-b)	BUILD="$2"; shift 2;;
 
         --)    shift; break;; 
 
@@ -33,9 +32,9 @@ while true ; do
         
         esac
 done
-fi
 
 export FIREBIRD=/opt/firebird$FB$BUILD
+echo "FIREBIRD=$FIREBIRD"
 
 if [ ! -d "$FIREBIRD" ]; then
   echo "$FIREBIRD not found"
