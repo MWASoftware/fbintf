@@ -109,6 +109,16 @@ begin
   end;
   Statement.Execute;
 
+  Statement := Attachment.PrepareWithNamedParameters(Transaction,sqlInsert);
+  with Statement.GetSQLParams do
+  begin
+    ByName('rowid').AsInteger := 2;
+    ByName('title').AsString := 'Blob Test with binary string';
+    aText := #$0#$09#$0a;
+    ByName('BlobData').AsString := aText;
+  end;
+  Statement.Execute;
+
   BPB := Attachment.AllocateBPB;
   BPB.Add(isc_bpb_target_type).AsInteger := 1;
   BPB.Add(isc_bpb_target_interp).AsInteger := 4; {utf8}
@@ -131,11 +141,16 @@ var Transaction: ITransaction;
     Statement: IStatement;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
-  Statement := Attachment.Prepare(Transaction,'Select * from TestData ');
+  Statement := Attachment.Prepare(Transaction,'Select * from TestData Where RowID = 1');
   writeln(OutFile);
   writeln(OutFile,'Testdata');
   writeln(OutFile);
   ReportResults(Statement);
+  FShowBinaryBlob := true;
+  Statement := Attachment.Prepare(Transaction,'Select * from TestData Where RowID = 2');
+  ReportResults(Statement);
+  FShowBinaryBlob := false;
+
   Statement := Attachment.Prepare(Transaction,'Select * from TestData2 ');
   writeln(OutFile);
   writeln(OutFile,'Testdata 2');

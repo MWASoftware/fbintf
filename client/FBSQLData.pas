@@ -83,6 +83,9 @@ uses
   Classes, SysUtils, IBExternals, {$IFDEF WINDOWS} Windows, {$ENDIF} IB,  FBActivityMonitor, FBClientAPI,
   FmtBCD;
 
+const
+  MaxInlineBlobString = 8192;
+
 type
 
    {The IExTimeZoneServices is only available in FB4 and onwards}
@@ -2337,6 +2340,9 @@ begin
       IBError(ibxeInvalidDataConversion,[nil]);
 
   SQL_BLOB:
+    if Length(Value) < MaxInlineBlobString then
+      DoSetString
+    else
     begin
       Changing;
       b := FIBXSQLVAR.CreateBlob;

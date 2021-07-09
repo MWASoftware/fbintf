@@ -487,14 +487,16 @@ end;
 
 function TIBXSQLVAR.GetCharSetID: cardinal;
 begin
-  result := 0;
+  result := 0; {NONE}
   case SQLType of
   SQL_VARYING, SQL_TEXT:
       result := FCharSetID;
 
   SQL_BLOB:
     if (SQLSubType = 1) then
-      result := FCharSetID;
+      result := FCharSetID
+    else
+      result := 1; {OCTETS}
 
   SQL_ARRAY:
     if (FRelationName <> '') and (FFieldName <> '') then
@@ -502,7 +504,6 @@ begin
     else
       result := FCharSetID;
   end;
-  result := result;
 end;
 
 function TIBXSQLVAR.GetCodePage: TSystemCodePage;
@@ -1255,34 +1256,33 @@ end;
 function TFB30Statement.InternalExecute(action: TExecuteActions;
   aTransaction: ITransaction): IResults;
 
+  function SavePerfStats(var Stats: TPerfStatistics): boolean;
+  begin
+    Result := false;
+    if FCollectStatistics then
+    with FFirebird30ClientAPI do
+    begin
+      UtilIntf.getPerfCounters(StatusIntf,
+                (GetAttachment as TFB30Attachment).AttachmentIntf,
+                ISQL_COUNTERS, @Stats);
+      Check4DataBaseError;
+      Result := true;
+    end;
+  end;
+
   procedure ExecuteQuery(outMetaData: Firebird.IMessageMetaData=nil; outBuffer: pointer=nil);
   begin
     with FFirebird30ClientAPI do
     begin
-        if FCollectStatistics then
-        begin
-          UtilIntf.getPerfCounters(StatusIntf,
-                        (GetAttachment as TFB30Attachment).AttachmentIntf,
-                        ISQL_COUNTERS,@FBeforeStats);
-          Check4DataBaseError;
-        end;
-
-        FStatementIntf.execute(StatusIntf,
-                               (aTransaction as TFB30Transaction).TransactionIntf,
-                               FSQLParams.MetaData,
-                               FSQLParams.MessageBuffer,
-                               outMetaData,
-                               outBuffer);
-        Check4DataBaseError;
-
-        if FCollectStatistics then
-        begin
-          UtilIntf.getPerfCounters(StatusIntf,
-                    (GetAttachment as TFB30Attachment).AttachmentIntf,
-                    ISQL_COUNTERS, @FAfterStats);
-          Check4DataBaseError;
-          FStatisticsAvailable := true;
-        end;
+      SavePerfStats(FBeforeStats);
+      FStatementIntf.execute(StatusIntf,
+                             (aTransaction as TFB30Transaction).TransactionIntf,
+                             FSQLParams.MetaData,
+                             FSQLParams.MessageBuffer,
+                             outMetaData,
+                             outBuffer);
+      Check4DataBaseError;
+      FStatisticsAvailable := SavePerfStats(FAfterStats);
     end;
   end;
 
@@ -1306,6 +1306,7 @@ function TFB30Statement.InternalExecute(action: TExecuteActions;
   begin
     with FFirebird30ClientAPI do
     begin
+      SavePerfStats(FBeforeStats);
       cs := FBatch.execute(StatusIntf,(aTransaction as TFB30Transaction).TransactionIntf);
       Check4DataBaseError;
       FBatch.execute(StatusIntf,(aTransaction as TFB30Transaction).TransactionIntf);
@@ -1313,7 +1314,8 @@ function TFB30Statement.InternalExecute(action: TExecuteActions;
       FBatch.release;
       FBatch := nil;
       FBatchCompletion := TBatchCompletion.Create(FFirebird30ClientAPI,cs);
-      end;
+      FStatisticsAvailable := SavePerfStats(FAfterStats);
+    end;
   end;
 
   procedure CheckQueryAction;
@@ -1328,6 +1330,7 @@ begin
   FEOF := false;
   FBatchCompletion := nil;
   FSingleResults := false;
+  FStatisticsAvailable := false;
   CheckTransaction(aTransaction);
   if not FPrepared then
     InternalPrepare;

@@ -23,7 +23,7 @@
     </PublishOptions>
     <RunParams>
       <local>
-        <CommandLineParams Value="-t 11"/>
+        <CommandLineParams Value="-t 15"/>
       </local>
       <environment>
         <UserOverrides Count="3">
@@ -36,7 +36,7 @@
       <Modes Count="1">
         <Mode0 Name="default">
           <local>
-            <CommandLineParams Value="-t 11"/>
+            <CommandLineParams Value="-t 15"/>
           </local>
           <environment>
             <UserOverrides Count="3">
