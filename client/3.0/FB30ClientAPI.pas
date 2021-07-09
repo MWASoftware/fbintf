@@ -77,7 +77,6 @@ type
                              when this class is freed and last reference to IStatus
                              goes out of scope.}
     procedure CheckPlugins;
-    function Firebird4orLater: boolean;
   public
     constructor Create(aFBLibrary: TFBLibrary);
     destructor Destroy; override;
@@ -88,6 +87,7 @@ type
     function LoadInterface: boolean; override;
     procedure FBShutdown; override;
     function GetAPI: IFirebirdAPI; override;
+    function Firebird4orLater: boolean;
     {$IFDEF UNIX}
     function GetFirebirdLibList: string; override;
     {$ENDIF}
@@ -229,9 +229,10 @@ end;
 
 function TFB30ClientAPI.Firebird4orLater: boolean;
 begin
-  Result :=  (GetClientMajor >=4) and (UtilIntf.vtable.version >= 4)
+  Result :=  (GetClientMajor > 4) or (
+    (GetClientMajor = 4) and (UtilIntf.vtable.version >= 4)
     and (UtilIntf.vtable.version <> 21) {ignore FB4 Beta1}
-    and (UtilIntf.vtable.version <> 24) {ignore FB4 Beta2}
+    and (UtilIntf.vtable.version <> 24)) {ignore FB4 Beta2}
 end;
 
 {$IFDEF UNIX}

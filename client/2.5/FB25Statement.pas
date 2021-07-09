@@ -256,7 +256,7 @@ type
     procedure CheckHandle; override;
     procedure GetDsqlInfo(info_request: byte; buffer: ISQLInfoResults); override;
     procedure InternalPrepare; override;
-    function InternalExecute(aTransaction: ITransaction): IResults; override;
+    function InternalExecute(action: TExecuteActions; aTransaction: ITransaction): IResults; override;
     function InternalOpenCursor(aTransaction: ITransaction): IResultSet; override;
     procedure ProcessSQL(sql: AnsiString; GenerateParamNames: boolean; var processedSQL: AnsiString); override;
     procedure FreeHandle; override;
@@ -1008,10 +1008,13 @@ begin
   end;
 end;
 
-function TFB25Statement.InternalExecute(aTransaction: ITransaction): IResults;
+function TFB25Statement.InternalExecute(action: TExecuteActions;
+  aTransaction: ITransaction): IResults;
 var TRHandle: TISC_TR_HANDLE;
 begin
   Result := nil;
+  if action <> eaApply then
+    IBError(ibxeNotSupported,[nil]);
   FBOF := false;
   FEOF := false;
   FSingleResults := false;

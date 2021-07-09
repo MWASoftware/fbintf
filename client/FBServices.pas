@@ -89,7 +89,8 @@ type
    function LookupItemType(ParamTypeName: AnsiString): byte; override;
   public
    constructor Create(api: TFBClientAPI);
-   function GetDPBParamTypeName(ParamType: byte): Ansistring;
+   function GetParamTypeName(ParamType: byte): Ansistring;
+   function ISPB.GetDPBParamTypeName = GetParamTypeName;
   end;
 
 implementation
@@ -249,7 +250,7 @@ begin
   (FBuffer+1)^ := isc_spb_current_version;
 end;
 
-function TSPB.GetDPBParamTypeName(ParamType: byte): Ansistring;
+function TSPB.GetParamTypeName(ParamType: byte): Ansistring;
 begin
   Result := TSPBItem.LookupParamTypeName(ParamType);
 end;

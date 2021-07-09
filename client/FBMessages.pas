@@ -156,7 +156,8 @@ type
       ibxeNoTimezoneSupport,
       ibxeDecFloatNotSupported,
       ibxeInt128NotSupported,
-      ibxeUnknownParamTypeName
+      ibxeUnknownParamTypeName,
+      ibxInvalidQueryAction
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -263,6 +264,7 @@ resourcestring
   SDecFloatNotSupported = 'DecFloat Data Type not supported';
   SInt128NotSupported = 'INT128 Data Type not supported';
   SUnknownParamTypeName = '%s:Unknown Param Type Name "%s"';
+  SInvalidQueryAction = 'Query Action only valid for an Update or Insert Query';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -346,7 +348,8 @@ const
     SNoTimezoneSupport,
     SDecFloatNotSupported,
     SInt128NotSupported,
-    SUnknownParamTypeName
+    SUnknownParamTypeName,
+    SInvalidQueryAction
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;

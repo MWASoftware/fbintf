@@ -263,7 +263,8 @@ type
 
   IParameterBlockWithTypeNames<_IItem> = interface(IParameterBlock<_IItem>)
     function AddByTypeName(ParamTypeName: AnsiString): _IItem;
-    function GetDPBParamTypeName(ParamType: byte): Ansistring;
+    function GetDPBParamTypeName(ParamType: byte): Ansistring; deprecated 'Use Get ParamTypeName';
+    function GetParamTypeName(ParamType: byte): Ansistring;
   end;
 
   {IParameterBlockItem is not used on its own but instead provides a base type for
@@ -747,6 +748,23 @@ type
 
   TPerfCounters = array[TPerfStats] of Int64;
 
+  {Batch Query Execution Support}
+
+  TExecuteActions = (eaApply, {Default action - executes query}
+                     eaDefer, {Save current param values for later execution and clear parameter block}
+                     eaApplyIgnoreCurrent); {As eaApply, except that current param values are not applied}
+
+  TBatchCompletionState = (bcExecuteFailed, bcSuccessNoInfo, bcNoMoreErrors);
+
+  IBatchCompletion = interface
+  ['{9bc3d49d-16d9-4606-94e5-ee987103ad92}']
+    function getTotalProcessed: integer;
+    function getState(updateNo: integer): TBatchCompletionState;
+    function getStatusMessage(updateNo: integer): AnsiString;
+    function getUpdated: integer;
+    function hasCompletionState: boolean;
+  end;
+
   {The IStatement interface provides access to an SQL Statement once it has been
    initially prepared. The interface is returned from the IAttachment interface.
    }
@@ -762,14 +780,18 @@ type
     function GetProcessedSQLText: AnsiString;
     function GetSQLDialect: integer;
     function IsPrepared: boolean;
+    function IsInBatchMode: boolean;
+    function HasBatchMode: boolean;
     procedure Prepare(aTransaction: ITransaction=nil);
-    function Execute(aTransaction: ITransaction=nil): IResults;
+    function Execute(aTransaction: ITransaction=nil): IResults; overload;
+    function Execute(action: TExecuteActions; aTransaction: ITransaction=nil): IResults; overload;
     function OpenCursor(aTransaction: ITransaction=nil): IResultSet;
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
     procedure SetRetainInterfaces(aValue: boolean);
     procedure EnableStatistics(aValue: boolean);
     function GetPerfStatistics(var stats: TPerfCounters): boolean;
+    function GetBatchCompletion: IBatchCompletion;
     property MetaData: IMetaData read GetMetaData;
     property SQLParams: ISQLParams read GetSQLParams;
     property SQLStatementType: TIBSQLStatementTypes read GetSQLStatementType;

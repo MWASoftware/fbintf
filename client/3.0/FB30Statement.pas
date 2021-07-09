@@ -75,9 +75,16 @@ interface
 
 uses
   Classes, SysUtils, Firebird, IB,  FBStatement, FB30ClientAPI, FB30Transaction,
-  FB30Attachment,IBExternals, FBSQLData, FBOutputBlock, FBActivityMonitor;
+  FB30Attachment,IBExternals, FBSQLData, FBParamBlock, FBOutputBlock, FBActivityMonitor;
 
 type
+  IBatchPBItem = interface(IParameterBlockItem)
+    ['{13e59097-803b-41e9-be34-b610904b9f50}']
+  end;
+
+  IBatchPB = interface(IParameterBlock<IBatchPBItem>)
+    ['{62eb1b31-2476-4f8c-9c16-23e71bf0d3f2}']
+  end;
 
   TFB30Statement = class;
   TIBXSQLDA = class;
@@ -236,6 +243,23 @@ type
     procedure Close;
   end;
 
+  { TBatchCompletion }
+
+  TBatchCompletion = class(TInterfaceOwner,IBatchCompletion)
+  private
+    FCompletionState: IBatchCompletionState;
+    FFirebird30ClientAPI: TFB30ClientAPI;
+  public
+    constructor Create(api: TFB30ClientAPI; cs: IBatchCompletionState);
+    destructor Destroy; override;
+    {IBatchCompletion}
+    function getTotalProcessed: integer;
+    function getState(updateNo: integer): TBatchCompletionState;
+    function getStatusMessage(updateNo: integer): AnsiString;
+    function getUpdated: integer;
+    function hasCompletionState: boolean;
+  end;
+
   { TFB30Statement }
 
   TFB30Statement = class(TFBStatement,IStatement)
@@ -246,11 +270,13 @@ type
     FSQLRecord: TIBXOUTPUTSQLDA;
     FResultSet: Firebird.IResultSet;
     FCursorSeqNo: integer;
+    FBatch: Firebird.IBatch;
+    FBatchCompletion: IBatchCompletion;
   protected
     procedure CheckHandle; override;
     procedure GetDSQLInfo(info_request: byte; buffer: ISQLInfoResults); override;
     procedure InternalPrepare; override;
-    function InternalExecute(aTransaction: ITransaction): IResults; override;
+    function InternalExecute(action: TExecuteActions; aTransaction: ITransaction): IResults; override;
     function InternalOpenCursor(aTransaction: ITransaction): IResultSet; override;
     procedure ProcessSQL(sql: AnsiString; GenerateParamNames: boolean; var processedSQL: AnsiString); override;
     procedure FreeHandle; override;
@@ -274,7 +300,9 @@ type
     function CreateBlob(column: TColumnMetaData): IBlob; override;
     function CreateArray(column: TColumnMetaData): IArray; override;
     procedure SetRetainInterfaces(aValue: boolean); override;
-
+    function IsInBatchMode: boolean; override;
+    function HasBatchMode: boolean; override;
+    function GetBatchCompletion: IBatchCompletion; override;
 end;
 
 implementation
@@ -283,6 +311,128 @@ uses IBUtils, FBMessages, FBBlob, FB30Blob, variants,  FBArray, FB30Array;
 
 const
   ISQL_COUNTERS = 'CurrentMemory, MaxMemory, RealTime, UserTime, Buffers, Reads, Writes, Fetches';
+
+type
+  TBatchPBItem = class(TParamBlockItem,IBatchPBItem)
+  public
+  {$IFDEF FPC}
+   procedure IBatchPBItem.SetAsInteger = SetAsInteger1;
+  {$ELSE}
+   procedure SetAsInteger(aValue: integer);
+  {$ENDIF}
+  end;
+
+  { TBatchPBlock }
+
+  TBatchPBlock = class (TCustomParamBlock<TBatchPBItem,IBatchPBItem>, IBatchPB)
+  public
+    constructor Create(api: TFB30ClientAPI);
+  end;
+
+{ TBatchCompletion }
+
+constructor TBatchCompletion.Create(api: TFB30ClientAPI;
+  cs: IBatchCompletionState);
+begin
+  inherited Create;
+  FFirebird30ClientAPI := api;
+  FCompletionState := cs;
+end;
+
+destructor TBatchCompletion.Destroy;
+begin
+  if FCompletionState <> nil then
+  begin
+    FCompletionState.dispose;
+    FCompletionState := nil;
+  end;
+  inherited Destroy;
+end;
+
+function TBatchCompletion.getTotalProcessed: integer;
+begin
+  with FFirebird30ClientAPI do
+  begin
+    Result := FCompletionState.getsize(StatusIntf);
+    Check4DataBaseError;
+  end;
+end;
+
+function TBatchCompletion.getState(updateNo: integer): TBatchCompletionState;
+var state: integer;
+begin
+  with FFirebird30ClientAPI do
+  begin
+    state := FCompletionState.getState(StatusIntf,updateNo);
+    Check4DataBaseError;
+    case state of
+      Firebird.IBatchCompletionState.EXECUTE_FAILED:
+        Result := bcExecuteFailed;
+
+      Firebird.IBatchCompletionState.SUCCESS_NO_INFO:
+        Result := bcSuccessNoInfo;
+
+     else
+        Result := bcNoMoreErrors;
+    end;
+  end;
+end;
+
+function TBatchCompletion.getStatusMessage(updateNo: integer): AnsiString;
+var status: Firebird.IStatus;
+    textbuffer: array [1..1024] of AnsiChar;
+begin
+  with FFirebird30ClientAPI do
+  begin
+    FCompletionState.getStatus(StatusIntf,status,updateNo);
+    Check4DataBaseError;
+    UtilIntf.formatStatus(@textbuffer,length(textbuffer),status);
+  end;
+  Result := strpas(@textbuffer);
+end;
+
+function TBatchCompletion.getUpdated: integer;
+var i: integer;
+    upcount: integer;
+    state: integer;
+begin
+  Result := 0;
+  with FFirebird30ClientAPI do
+  begin
+    upcount := FCompletionState.getSize(StatusIntf);
+    Check4DataBaseError;
+    for i := 0 to upcount do
+    begin
+      state := FCompletionState.getState(StatusIntf,i);
+      if state = Firebird.IBatchCompletionState.EXECUTE_FAILED then
+          break;
+      Inc(Result);
+    end;
+  end;
+end;
+
+function TBatchCompletion.hasCompletionState: boolean;
+begin
+  Result := FCompletionState <> nil;
+end;
+
+{ TBatchPBlock }
+
+constructor TBatchPBlock.Create(api: TFB30ClientAPI);
+begin
+  inherited Create(api);
+  FDataLength := 1;
+  FBuffer^ := Firebird.IBatch.VERSION;
+end;
+
+ { TBatchPBItem }
+
+{$IFNDEF FPC}
+procedure TBatchPBItem.SetAsInteger(aValue: integer);
+begin
+  SetAsInteger1(aValue);
+end;
+{$ENDIF}
 
 { TIBXSQLVAR }
 
@@ -1102,11 +1252,81 @@ begin
   Inc(FChangeSeqNo);
 end;
 
-function TFB30Statement.InternalExecute(aTransaction: ITransaction): IResults;
+function TFB30Statement.InternalExecute(action: TExecuteActions;
+  aTransaction: ITransaction): IResults;
+
+  procedure ExecuteQuery(outMetaData: Firebird.IMessageMetaData=nil; outBuffer: pointer=nil);
+  begin
+    with FFirebird30ClientAPI do
+    begin
+        if FCollectStatistics then
+        begin
+          UtilIntf.getPerfCounters(StatusIntf,
+                        (GetAttachment as TFB30Attachment).AttachmentIntf,
+                        ISQL_COUNTERS,@FBeforeStats);
+          Check4DataBaseError;
+        end;
+
+        FStatementIntf.execute(StatusIntf,
+                               (aTransaction as TFB30Transaction).TransactionIntf,
+                               FSQLParams.MetaData,
+                               FSQLParams.MessageBuffer,
+                               outMetaData,
+                               outBuffer);
+        Check4DataBaseError;
+
+        if FCollectStatistics then
+        begin
+          UtilIntf.getPerfCounters(StatusIntf,
+                    (GetAttachment as TFB30Attachment).AttachmentIntf,
+                    ISQL_COUNTERS, @FAfterStats);
+          Check4DataBaseError;
+          FStatisticsAvailable := true;
+        end;
+    end;
+  end;
+
+  procedure CreateBatch;
+  var BatchPB: IBatchPB;
+  begin
+    with FFirebird30ClientAPI do
+    begin
+      BatchPB := TBatchPBlock.Create(FFirebird30ClientAPI);
+      BatchPB.Add(Firebird.IBatch.TAG_RECORD_COUNTS);
+      FBatch := FStatementIntf.createBatch(StatusIntf,
+                                           FSQLParams.MetaData,
+                                           (BatchPB as TBatchPBlock).getDataLength,
+                                           (BatchPB as TBatchPBlock).getBuffer);
+      Check4DataBaseError;
+    end;
+  end;
+
+  procedure ExecuteBatchQuery;
+  var cs: Firebird.IBatchCompletionState;
+  begin
+    with FFirebird30ClientAPI do
+    begin
+      cs := FBatch.execute(StatusIntf,(aTransaction as TFB30Transaction).TransactionIntf);
+      Check4DataBaseError;
+      FBatch.execute(StatusIntf,(aTransaction as TFB30Transaction).TransactionIntf);
+      Check4DataBaseError;
+      FBatch.release;
+      FBatch := nil;
+      FBatchCompletion := TBatchCompletion.Create(FFirebird30ClientAPI,cs);
+      end;
+  end;
+
+  procedure CheckQueryAction;
+  begin
+    if action <> eaApply then
+      IBError(ibxInvalidQueryAction,[nil]);
+  end;
+
 begin
   Result := nil;
   FBOF := false;
   FEOF := false;
+  FBatchCompletion := nil;
   FSingleResults := false;
   CheckTransaction(aTransaction);
   if not FPrepared then
@@ -1120,47 +1340,49 @@ begin
   try
     with FFirebird30ClientAPI do
     begin
-      if FCollectStatistics then
-      begin
-        UtilIntf.getPerfCounters(StatusIntf,
-                      (GetAttachment as TFB30Attachment).AttachmentIntf,
-                      ISQL_COUNTERS,@FBeforeStats);
-        Check4DataBaseError;
-      end;
-
       case FSQLStatementType of
       SQLSelect:
         IBError(ibxeIsAExecuteProcedure,[]);
 
       SQLExecProcedure:
       begin
-        FStatementIntf.execute(StatusIntf,
-                               (aTransaction as TFB30Transaction).TransactionIntf,
-                               FSQLParams.MetaData,
-                               FSQLParams.MessageBuffer,
-                               FSQLRecord.MetaData,
-                               FSQLRecord.MessageBuffer);
-        Check4DataBaseError;
-
+        CheckQueryAction;
+        ExecuteQuery(FSQLRecord.MetaData,FSQLRecord.MessageBuffer);
         Result := TResults.Create(FSQLRecord);
         FSingleResults := true;
-      end
-      else
-        FStatementIntf.execute(StatusIntf,
-                               (aTransaction as TFB30Transaction).TransactionIntf,
-                               FSQLParams.MetaData,
-                               FSQLParams.MessageBuffer,
-                               nil,
-                               nil);
-        Check4DataBaseError;
       end;
-      if FCollectStatistics then
-      begin
-        UtilIntf.getPerfCounters(StatusIntf,
-                  (GetAttachment as TFB30Attachment).AttachmentIntf,
-                  ISQL_COUNTERS, @FAfterStats);
-        Check4DataBaseError;
-        FStatisticsAvailable := true;
+
+      SQLUpdate, SQLInsert:
+        begin
+          case action of
+          eaApply:
+            if FBatch = nil then
+              ExecuteQuery
+            else
+            begin
+              FBatch.Add(StatusIntf,FSQLParams.GetMsgLength,FSQLParams.GetMessageBuffer);
+              Check4DataBaseError;
+              ExecuteBatchQuery;
+            end;
+
+          eaDefer:
+            begin
+              if FBatch = nil then
+                CreateBatch;
+                FBatch.Add(StatusIntf,FSQLParams.GetMsgLength,FSQLParams.GetMessageBuffer);
+                Check4DataBaseError;
+                {reset params buffer}
+                FSQLParams.Bind(FStatementIntf.getInputMetadata(StatusIntf));
+            end;
+
+          eaApplyIgnoreCurrent:
+            ExecuteBatchQuery;
+          end;
+        end;
+
+      else
+        CheckQueryAction;
+        ExecuteQuery;
       end;
     end;
   finally
@@ -1239,6 +1461,12 @@ procedure TFB30Statement.FreeHandle;
 begin
   Close;
   ReleaseInterfaces;
+  if FBatch <> nil then
+  begin
+    FBatch.release;
+    FBatch := nil;
+  end;
+  FBatchCompletion := nil;
   if FStatementIntf <> nil then
   begin
     FStatementIntf.release;
@@ -1410,6 +1638,21 @@ begin
     TMetaData(GetInterface(1)).RetainInterfaces := aValue;
   if HasInterface(0) then
     TSQLParams(GetInterface(0)).RetainInterfaces := aValue;
+end;
+
+function TFB30Statement.IsInBatchMode: boolean;
+begin
+  Result := FBatch <> nil;
+end;
+
+function TFB30Statement.HasBatchMode: boolean;
+begin
+  Result := FFirebird30ClientAPI.Firebird4orLater;
+end;
+
+function TFB30Statement.GetBatchCompletion: IBatchCompletion;
+begin
+  Result := FBatchCompletion;
 end;
 
 function TFB30Statement.IsPrepared: boolean;

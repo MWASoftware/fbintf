@@ -138,8 +138,9 @@ type
     function LookupItemType(ParamTypeName: AnsiString): byte; override;
   public
     constructor Create(api: TFBClientAPI);
-    function GetDPBParamTypeName(ParamType: byte): Ansistring;
-  end;
+    function GetParamTypeName(ParamType: byte): Ansistring;
+    function ITPB.GetDPBParamTypeName = GetParamTypeName;
+end;
 
 implementation
 
@@ -309,7 +310,7 @@ begin
   FBuffer^ := isc_tpb_version3;
 end;
 
-function TTPB.GetDPBParamTypeName(ParamType: byte): Ansistring;
+function TTPB.GetParamTypeName(ParamType: byte): Ansistring;
 begin
   if ParamType <= isc_tpb_last_tpb_constant then
     Result := TPBConstantNames[ParamType]
