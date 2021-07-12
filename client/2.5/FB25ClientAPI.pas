@@ -111,7 +111,6 @@ type
     BLOB_put: TBLOB_put;
     isc_wait_for_event: Tisc_wait_for_event;
     isc_vax_integer: Tisc_vax_integer;
-    isc_portable_integer: Tisc_portable_integer;
     isc_blob_info: Tisc_blob_info;
     isc_blob_lookup_desc: Tisc_blob_lookup_desc;
     isc_open_blob2: Tisc_open_blob2;
@@ -167,7 +166,6 @@ type
 
   public
     {Helper Functions}
-    function DecodeInteger(bufptr: PByte; len: short): integer; override;
     procedure SQLEncodeDate(aDate: TDateTime; bufptr: PByte); override;
     function SQLDecodeDate(bufptr: PByte): TDateTime; override;
     procedure SQLEncodeTime(aTime: TDateTime; bufptr: PByte); override;
@@ -344,7 +342,6 @@ begin
   BLOB_put := GetProcAddr('BLOB_put'); {do not localize}
   isc_wait_for_event := GetProcAddr('isc_wait_for_event'); {do not localize}
   isc_vax_integer := GetProcAddr('isc_vax_integer'); {do not localize}
-  isc_portable_integer := GetProcAddr('isc_portable_integer'); {do not localize}
   isc_blob_info := GetProcAddr('isc_blob_info'); {do not localize}
   isc_blob_lookup_desc := GetProcAddr('isc_blob_lookup_desc');  {do not localize}
   isc_open_blob2 := GetProcAddr('isc_open_blob2'); {do not localize}
@@ -556,11 +553,6 @@ end;
 function TFB25ClientAPI.GetIMaster: TObject;
 begin
   Result := nil;
-end;
-
-function TFB25ClientAPI.DecodeInteger(bufptr: PByte; len: short): integer;
-begin
-  Result := isc_portable_integer(bufptr,len);
 end;
 
 procedure TFB25ClientAPI.SQLEncodeDate(aDate: TDateTime; bufptr: PByte);

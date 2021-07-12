@@ -132,7 +132,7 @@ type
     function getItemType: byte;
     function getSize: integer;
     procedure getRawBytes(var Buffer);
-    function getAsInteger: integer;
+    function getAsInteger: int64;
     function getParamType: byte;
     function getAsString: AnsiString;
     function getAsByte: byte;
@@ -225,7 +225,7 @@ type
     function getItemType: byte;
     function getSize: integer;
     function getAsString: AnsiString;
-    function getAsInteger: integer;
+    function getAsInteger: int64;
   end;
 
   ISQLInfoItem = interface(ISQLInfoSubItem)
@@ -269,7 +269,7 @@ type
      function getItemType: byte;
      function getSize: integer;
      function getAsString: AnsiString;
-     function getAsInteger: integer;
+     function getAsInteger: int64;
    end;
 
   IBlobInfo = interface
@@ -475,7 +475,7 @@ begin
     Move(FBufPtr^,Buffer,FDatalength);
 end;
 
-function TOutputBlockItem.getAsInteger: integer;
+function TOutputBlockItem.getAsInteger: int64;
 var len: integer;
 begin
   with FItemData^ do

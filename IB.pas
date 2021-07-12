@@ -941,7 +941,7 @@ type
     function getSize: integer;
     procedure getRawBytes(var Buffer);
     function getAsString: AnsiString;
-    function getAsInteger: integer;
+    function getAsInteger: int64;
     procedure DecodeIDCluster(var ConnectionType: integer; var DBFileName, DBSiteName: AnsiString);
     function getAsBytes: TByteArray;
     function getAsDateTime: TDateTime;
@@ -953,7 +953,7 @@ type
     function GetCount: integer;
     function GetItem(index: integer): IDBInfoItem;
     function Find(ItemType: byte): IDBInfoItem;
-    property AsInteger: integer read getAsInteger;
+    property AsInteger: int64 read getAsInteger;
     property AsString: AnsiString read GetAsString;
     property Count: integer read GetCount;
     property Items[index: integer]: IDBInfoItem read getItem; default;
@@ -1209,11 +1209,11 @@ type
     function getSize: integer;
     procedure getRawBytes(var Buffer);
     function getAsString: AnsiString;
-    function getAsInteger: integer;
+    function getAsInteger: int64;
     function getAsByte: byte;
     function CopyTo(stream: TStream; count: integer): integer;
     property AsString: AnsiString read getAsString;
-    property AsInteger: integer read getAsInteger;
+    property AsInteger: int64 read getAsInteger;
     property AsByte: byte read getAsByte;
   end;
 

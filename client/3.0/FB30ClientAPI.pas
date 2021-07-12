@@ -132,7 +132,6 @@ type
     function GetIMasterIntf: Firebird.IMaster;
 
     {Encode/Decode}
-    function DecodeInteger(bufptr: PByte; len: short): integer; override;
     procedure SQLEncodeDate(aDate: TDateTime; bufptr: PByte); override;
     function SQLDecodeDate(bufptr: PByte): TDateTime; override;
     procedure SQLEncodeTime(aTime: TDateTime; bufptr: PByte); override;
@@ -411,18 +410,6 @@ end;
 function TFB30ClientAPI.GetClientMinor: integer;
 begin
   Result := UtilIntf.GetClientVersion mod 256;
-end;
-
-function TFB30ClientAPI.DecodeInteger(bufptr: PByte; len: short): integer;
-var P: PByte;
-begin
-  Result := 0;
-  P := Bufptr + len - 1;
-  while P >= bufptr do
-  begin
-    Result := (Result shl 8 ) or P^;
-    Dec(P);
-  end;
 end;
 
 procedure TFB30ClientAPI.SQLEncodeDate(aDate: TDateTime; bufptr: PByte);

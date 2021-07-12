@@ -186,7 +186,11 @@ type
   public
     constructor Create(api: TFBClientAPI);
     function GetParamTypeName(ParamType: byte): Ansistring;
+    {$IFDEF FPC}
     function IDPB.GetDPBParamTypeName = GetParamTypeName;
+    {$ELSE}
+    function GetDPBParamTypeName(ParamType: byte): Ansistring;
+    {$ENDIF}
   end;
 
 implementation
@@ -1039,6 +1043,13 @@ begin
   else
     Result := '';
 end;
+
+{$IFNDEF FPC}
+function TDPB.GetDPBParamTypeName(ParamType: byte): Ansistring;
+begin
+  Result := GetParamTypeName(ParamType);
+end;
+{$ENDIF}
 
 function TDPB.LookupItemType(ParamTypeName: AnsiString): byte;
 var i: byte;

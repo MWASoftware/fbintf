@@ -198,6 +198,7 @@ type
     isc_event_counts: Tisc_event_counts;
     isc_event_block: Tisc_event_block;
     isc_free: Tisc_free;
+    isc_portable_integer: Tisc_portable_integer;
 
     constructor Create(aFBLibrary: TFBLibrary);
     procedure IBAlloc(var P; OldSize, NewSize: Integer);
@@ -221,7 +222,7 @@ type
   public
     {Encode/Decode}
     procedure EncodeInteger(aValue: integer; len: integer; buffer: PByte);
-    function DecodeInteger(bufptr: PByte; len: short): integer; virtual; abstract;
+    function DecodeInteger(bufptr: PByte; len: short): int64;
     procedure SQLEncodeDate(aDate: TDateTime; bufptr: PByte);  virtual; abstract;
     function SQLDecodeDate(byfptr: PByte): TDateTime;  virtual; abstract;
     procedure SQLEncodeTime(aTime: TDateTime; bufptr: PByte);  virtual; abstract;
@@ -412,6 +413,11 @@ begin
   end;
 end;
 
+function TFBClientAPI.DecodeInteger(bufptr: PByte; len: short): int64;
+begin
+  Result := isc_portable_integer(bufptr,len);
+end;
+
 function TFBClientAPI.Int128ToStr(bufptr: PByte; scale: integer): AnsiString;
 begin
   if not HasInt128Support then
@@ -549,6 +555,7 @@ begin
   isc_event_counts := GetProcAddr('isc_event_counts'); {do not localize}
   isc_event_block := GetProcAddr('isc_event_block'); {do not localize}
   isc_free := GetProcAddr('isc_free'); {do not localize}
+  isc_portable_integer := GetProcAddr('isc_portable_integer'); {do not localize}
   fb_shutdown := GetProcAddr('fb_shutdown'); {do not localize}
   Result := assigned(isc_free);
 end;

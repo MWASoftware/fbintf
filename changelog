@@ -1,3 +1,7 @@
+FBINTF Change Log  version          (1.2-2 Build 12552) Wed, 09 Jun 2021 13:05:40 +0100
+
+1. Integer decodes widen from 32 bit to 64-bit integers.
+
 FBINTF Change Log  version          (1.2-1 Build 12552) Wed, 09 Jun 2021 13:05:40 +0100
 
 1. Big fix for Firebird 4.0. A internal change in Firebird 4.0.0 from RC1 flushed out a 
