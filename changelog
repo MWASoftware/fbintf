@@ -1,6 +1,6 @@
 FBINTF Change Log  version          (1.2-2 Build 12552) Wed, 09 Jun 2021 13:05:40 +0100
 
-1. Integer decodes widen from 32 bit to 64-bit integers.
+1. Integer decodes in information blocks (e.g. IDBInfoItem) widened from 32 bit to 64-bit integers.
 
 2. Support for inline blob encoding. Blob values pass using the "SetAsString" method
    will now be encoded inline (i.e. as part of the parameter buffer) if they are
@@ -12,6 +12,26 @@ FBINTF Change Log  version          (1.2-2 Build 12552) Wed, 09 Jun 2021 13:05:4
 
     function GetInlineBlobLimit: integer;
     procedure SetInlineBlobLimit(limit: integer);
+
+3. Support for Firebird 4 IBatch interface added. This is largely transparent to the API
+   user as the functionality is embedded in the implementation of the IStatement
+   interface, where there are now two overloaded versions of the Execute method:
+
+    function Execute(aTransaction: ITransaction=nil): IResults; overload;
+    function Execute(action: TExecuteActions; aTransaction: ITransaction=nil): IResults; overload;
+
+   TExecuteActions = (eaApply, {Default action - executes query}
+                     eaDefer, {Save current param values for later execution and clear parameter block}
+                     eaApplyIgnoreCurrent); {As eaApply, except that current param values are not applied}
+
+   Also
+
+    function IsInBatchMode: boolean;        {true after call to execute(eaDefer)}
+    function HasBatchMode: boolean;         {true if and only if IBatch Supported}
+    function GetBatchCompletion: IBatchCompletion; (returns interface to batch completion state}
+
+   For more information see the User Guide.
+
 
 FBINTF Change Log  version          (1.2-1 Build 12552) Wed, 09 Jun 2021 13:05:40 +0100
 

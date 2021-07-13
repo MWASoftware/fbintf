@@ -1664,7 +1664,8 @@ end;
 
 function TFB30Statement.HasBatchMode: boolean;
 begin
-  Result := FFirebird30ClientAPI.Firebird4orLater;
+  Result := FFirebird30ClientAPI.Firebird4orLater and
+     (GetAttachment.GetODSMajorVersion >= 13);
 end;
 
 function TFB30Statement.GetBatchCompletion: IBatchCompletion;

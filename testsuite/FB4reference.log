@@ -568,7 +568,7 @@ FULL_NAME = Johnson, Leslie
 Current memory = 19,763,536
 Delta memory = 4,464
 Max memory = 19,809,408
-Elapsed time= 0.002 sec
+Elapsed time= 0.001 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
@@ -3022,6 +3022,10 @@ ROWID = 1
 TITLE = Blob Test (Charset Id = 4 Codepage = 65001)
 BLOBDATA = (blob), Length = 92514
 
+ROWID = 2
+TITLE = Blob Test with binary string (Charset Id = 4 Codepage = 65001)
+BLOBDATA = (blob), Length = 13
+0 9 A C9 63 6F 75 74 65 20 6D 6F 69 
 
 Testdata 2
 
@@ -4093,6 +4097,241 @@ Float16 Array: (0: 64100000000.011) (1: 64100000001.011) (2: 64100000002.011) (3
 Float34 Array: (0: 123456789123456789.12345678) (1: 123456789123456790.12345678) (2: 123456789123456791.12345678) (3: 123456789123456792.12345678) (4: 123456789123456793.12345678) (5: 123456789123456794.12345678) (6: 123456789123456795.12345678) (7: 123456789123456796.12345678) (8: 123456789123456797.12345678) (9: 123456789123456798.12345678) (10: 123456789123456799.12345678) (11: 123456789123456800.12345678) (12: 123456789123456801.12345678) (13: 123456789123456802.12345678) (14: 123456789123456803.12345678) (15: 123456789123456804.12345678) (16: 123456789123456805.12345678) 
 
 BigNumber Array: (0: 123456123400.123456) (1: 123456123401.623456) (2: 123456123403.123456) (3: 123456123404.623456) (4: 123456123406.123456) (5: 123456123407.623456) (6: 123456123409.123456) (7: 123456123410.623456) (8: 123456123412.123456) (9: 123456123413.623456) (10: 123456123415.123456) (11: 123456123416.623456) (12: 123456123418.123456) (13: 123456123419.623456) (14: 123456123421.123456) (15: 123456123422.623456) (16: 123456123424.123456) 
+
+
+
+------------------------------------------------------
+Running Test 19: Batch Update and Insert Queries
+Opening inet://localhost/employee
+Database Open
+Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.0.2496 Firebird 4.0"
+Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V4.0.0.2496 Firebird 4.0/tcp (zeus)/P16:CZ"
+Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-V4.0.0.2496 Firebird 4.0/tcp (zeus)/P16:CZ"
+on disk structure version 13.0
+Rows before update
+EMP_NO = 2
+FIRST_NAME = Robert
+LAST_NAME = Nelson
+PHONE_EXT = 250
+HIRE_DATE = 1988/12/28 00:00:00.0000
+DEPT_NO = 600
+JOB_CODE = VP
+JOB_GRADE = 2
+JOB_COUNTRY = USA
+SALARY = 105,900.00
+FULL_NAME = Nelson, Robert
+EMP_NO = 8
+FIRST_NAME = Leslie
+LAST_NAME = Johnson
+PHONE_EXT = 410
+HIRE_DATE = 1989/04/05 00:00:00.0000
+DEPT_NO = 180
+JOB_CODE = Mktg
+JOB_GRADE = 3
+JOB_COUNTRY = USA
+SALARY = 64,635.00
+FULL_NAME = Johnson, Leslie
+
+Select Count = 2 InsertCount = 0 UpdateCount = 2 DeleteCount = 0
+Batch Completion Info
+Total rows processed = 2
+Updated Records = 2
+Row 1 State = bcNoMoreErrors Msg = 
+Row 2 State = bcNoMoreErrors Msg = 
+Rows after update
+EMP_NO = 2
+FIRST_NAME = Robert
+LAST_NAME = Nelson
+PHONE_EXT = 250
+HIRE_DATE = 2018/05/28 00:00:00.0000
+DEPT_NO = 600
+JOB_CODE = VP
+JOB_GRADE = 2
+JOB_COUNTRY = USA
+SALARY = 105,900.00
+FULL_NAME = Nelson, Robert
+EMP_NO = 8
+FIRST_NAME = Leslie
+LAST_NAME = Johnson
+PHONE_EXT = 410
+HIRE_DATE = 2016/01/31 00:00:00.0000
+DEPT_NO = 180
+JOB_CODE = Mktg
+JOB_GRADE = 3
+JOB_COUNTRY = USA
+SALARY = 64,635.00
+FULL_NAME = Johnson, Leslie
+
+
+Repeat but with a last dummy row that is ignored
+Select Count = 2 InsertCount = 0 UpdateCount = 2 DeleteCount = 0
+Batch Completion Info
+Total rows processed = 2
+Updated Records = 2
+Row 1 State = bcNoMoreErrors Msg = 
+Row 2 State = bcNoMoreErrors Msg = 
+Rows after update
+EMP_NO = 2
+FIRST_NAME = Robert
+LAST_NAME = Nelson
+PHONE_EXT = 250
+HIRE_DATE = 2018/05/28 00:00:00.0000
+DEPT_NO = 600
+JOB_CODE = VP
+JOB_GRADE = 2
+JOB_COUNTRY = USA
+SALARY = 105,900.00
+FULL_NAME = Nelson, Robert
+EMP_NO = 8
+FIRST_NAME = Leslie
+LAST_NAME = Johnson
+PHONE_EXT = 410
+HIRE_DATE = 2016/01/31 00:00:00.0000
+DEPT_NO = 180
+JOB_CODE = Mktg
+JOB_GRADE = 3
+JOB_COUNTRY = USA
+SALARY = 64,635.00
+FULL_NAME = Johnson, Leslie
+
+
+Insert rows
+Select Count = 0 InsertCount = 3 UpdateCount = 0 DeleteCount = 0
+Batch Completion Info
+Total rows processed = 3
+Updated Records = 3
+Row 1 State = bcNoMoreErrors Msg = 
+Row 2 State = bcNoMoreErrors Msg = 
+Row 3 State = bcNoMoreErrors Msg = 
+Rows after insert
+EMP_NO = 150
+FIRST_NAME = John
+LAST_NAME = Doe
+PHONE_EXT = 
+HIRE_DATE = 2015/04/01 00:00:00.0000
+DEPT_NO = 600
+JOB_CODE = Eng
+JOB_GRADE = 4
+JOB_COUNTRY = England
+SALARY = 41,000.89
+FULL_NAME = Doe, John
+EMP_NO = 151
+FIRST_NAME = Jane
+LAST_NAME = Doe
+PHONE_EXT = 
+HIRE_DATE = 2015/04/02 00:00:00.0000
+DEPT_NO = 600
+JOB_CODE = Eng
+JOB_GRADE = 4
+JOB_COUNTRY = England
+SALARY = 42,000.89
+FULL_NAME = Doe, Jane
+EMP_NO = 152
+FIRST_NAME = John
+LAST_NAME = SmithAndJonesFamily1
+PHONE_EXT = 
+HIRE_DATE = 2015/04/03 00:00:00.0000
+DEPT_NO = 600
+JOB_CODE = Eng
+JOB_GRADE = 4
+JOB_COUNTRY = England
+SALARY = 41,000.99
+FULL_NAME = SmithAndJonesFamily1, John
+
+
+Insert rows - ignore last row
+Select Count = 0 InsertCount = 2 UpdateCount = 0 DeleteCount = 0
+Batch Completion Info
+Total rows processed = 2
+Updated Records = 2
+Row 1 State = bcNoMoreErrors Msg = 
+Row 2 State = bcNoMoreErrors Msg = 
+Rows after insert
+EMP_NO = 150
+FIRST_NAME = John
+LAST_NAME = Doe
+PHONE_EXT = 
+HIRE_DATE = 2015/04/01 00:00:00.0000
+DEPT_NO = 600
+JOB_CODE = Eng
+JOB_GRADE = 4
+JOB_COUNTRY = England
+SALARY = 41,000.89
+FULL_NAME = Doe, John
+EMP_NO = 151
+FIRST_NAME = Jane
+LAST_NAME = Doe
+PHONE_EXT = 
+HIRE_DATE = 2015/04/02 00:00:00.0000
+DEPT_NO = 600
+JOB_CODE = Eng
+JOB_GRADE = 4
+JOB_COUNTRY = England
+SALARY = 42,000.89
+FULL_NAME = Doe, Jane
+
+Insert with inline blob
+Select Count = 0 InsertCount = 2 UpdateCount = 0 DeleteCount = 0
+Batch Completion Info
+Total rows processed = 2
+Updated Records = 2
+Row 1 State = bcNoMoreErrors Msg = 
+Row 2 State = bcNoMoreErrors Msg = 
+Rows after insert
+JOB_CODE = ABC
+JOB_GRADE = 3
+JOB_COUNTRY = England
+JOB_TITLE = Chief Tester
+MIN_SALARY = 21,000.00
+MAX_SALARY = 24,000.99
+JOB_REQUIREMENT (Charset Id = 0 Codepage = 0)
+
+The quick brown fox jumped over the lazy dog
+LANGUAGE_REQ = Array: (1: Eng) (2: ) (3: ) (4: ) (5: ) 
+
+JOB_CODE = DEF
+JOB_GRADE = 3
+JOB_COUNTRY = England
+JOB_TITLE = Deputy Tester
+MIN_SALARY = 21,000.00
+MAX_SALARY = 24,000.99
+JOB_REQUIREMENT (Charset Id = 0 Codepage = 0)
+
+The quick brown fox jumped over the running dog
+LANGUAGE_REQ = Array: (1: Eng) (2: Fra) (3: ) (4: ) (5: ) 
+
+
+
+Insert with explicit blob
+Select Count = 0 InsertCount = 2 UpdateCount = 0 DeleteCount = 0
+Batch Completion Info
+Total rows processed = 2
+Updated Records = 2
+Row 1 State = bcNoMoreErrors Msg = 
+Row 2 State = bcNoMoreErrors Msg = 
+Rows after insert
+JOB_CODE = ABC
+JOB_GRADE = 3
+JOB_COUNTRY = England
+JOB_TITLE = Chief Tester
+MIN_SALARY = 21,000.00
+MAX_SALARY = 24,000.99
+JOB_REQUIREMENT (Charset Id = 0 Codepage = 0)
+
+The quick brown fox jumped over the lazy dog
+LANGUAGE_REQ = Array: (1: Eng) (2: ) (3: ) (4: ) (5: ) 
+
+JOB_CODE = DEF
+JOB_GRADE = 3
+JOB_COUNTRY = England
+JOB_TITLE = Deputy Tester
+MIN_SALARY = 21,000.00
+MAX_SALARY = 24,000.99
+JOB_REQUIREMENT (Charset Id = 0 Codepage = 0)
+
+The quick brown fox jumped over the running dog
+LANGUAGE_REQ = Array: (1: Eng) (2: Fra) (3: ) (4: ) (5: ) 
+
 
 
 

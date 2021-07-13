@@ -557,9 +557,9 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 948,496
-Delta memory = 1,400
-Max memory = 992,448
+Current memory = 948,536
+Delta memory = 1,408
+Max memory = 992,464
 Elapsed time= 0.002 sec
 Cpu = 0.000 sec
 Buffers = 75
@@ -2702,7 +2702,7 @@ Unknown Response 3
 Unknown Response 3
 Server Memory = 841392
 Forced Writes  = 1
-Max Memory  = 879176
+Max Memory  = 879240
 Num Buffers  = 75
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
@@ -3005,6 +3005,10 @@ ROWID = 1
 TITLE = Blob Test (Charset Id = 4 Codepage = 65001)
 BLOBDATA = (blob), Length = 92514
 
+ROWID = 2
+TITLE = Blob Test with binary string (Charset Id = 4 Codepage = 65001)
+BLOBDATA = (blob), Length = 13
+0 9 A C9 63 6F 75 74 65 20 6D 6F 69 
 
 Testdata 2
 
@@ -3140,6 +3144,12 @@ Skipping Firebird 4 and later test part
 ------------------------------------------------------
 Running Test 18: Firebird 4 Decfloat extensions
  FBVersion = Firebird/linux AMD64 (access method), version "LI-V2.5.9.27139 Firebird 2.5"
+Skipping test for Firebird 4 and later
+
+
+------------------------------------------------------
+Running Test 19: Batch Update and Insert Queries
+Opening localhost:employee
 Skipping test for Firebird 4 and later
 
 
