@@ -794,6 +794,7 @@ begin
 //        writeln('Column ',Name,' Type = ',TSQLDataItem.GetSQLTypeName(FSQLType),' Size = ',GetSize,' DataLength = ',GetDataLength);
         if FSQLType = SQL_VARYING then
         begin
+          {The datalength can be greater than the metadata size when SQLType has been overridden to text}
           if (GetDataLength > GetSize) and CanChangeMetaData then
             Builder.setLength(StatusIntf,i,GetDataLength)
           else
