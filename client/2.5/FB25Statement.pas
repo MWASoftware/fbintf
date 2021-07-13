@@ -146,6 +146,8 @@ type
     function GetSQLData: PByte;  override;
     function GetDataLength: cardinal; override;
     function GetSize: cardinal; override;
+    function GetAttachment: IAttachment; override;
+    function GetDefaultTextSQLType: cardinal; override;
     procedure SetIsNull(Value: Boolean); override;
     procedure SetIsNullable(Value: Boolean);  override;
     procedure SetSQLData(AValue: PByte; len: cardinal); override;
@@ -165,6 +167,7 @@ type
     procedure Initialize; override;
 
     property Statement: TFB25Statement read FStatement;
+    property SQLType: cardinal read GetSQLType write SetSQLType;
   end;
 
   TIBXINPUTSQLDA = class;
@@ -390,6 +393,11 @@ begin
   Result := FMetadataSize;
 end;
 
+function TIBXSQLVAR.GetAttachment: IAttachment;
+begin
+  Result := FStatement.GetAttachment;
+end;
+
 function TIBXSQLVAR.GetArrayMetaData: IArrayMetaData;
 begin
   if GetSQLType <> SQL_ARRAY then
@@ -573,6 +581,11 @@ begin
     end;
   Changed;
   end;
+end;
+
+function TIBXSQLVAR.GetDefaultTextSQLType: cardinal;
+begin
+  Result := SQL_TEXT;
 end;
 
 constructor TIBXSQLVAR.Create(aParent: TIBXSQLDA; aIndex: integer);

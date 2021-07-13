@@ -758,11 +758,10 @@ type
 
   IBatchCompletion = interface
   ['{9bc3d49d-16d9-4606-94e5-ee987103ad92}']
-    function getTotalProcessed: integer;
-    function getState(updateNo: integer): TBatchCompletionState;
-    function getStatusMessage(updateNo: integer): AnsiString;
+    function getTotalProcessed: cardinal;
+    function getState(updateNo: cardinal): TBatchCompletionState;
+    function getStatusMessage(updateNo: cardinal): AnsiString;
     function getUpdated: integer;
-    function hasCompletionState: boolean;
   end;
 
   {The IStatement interface provides access to an SQL Statement once it has been
@@ -1086,6 +1085,8 @@ type
     function CreateBlob(transaction: ITransaction; SubType: integer; CharSetID: cardinal=0; BPB: IBPB=nil): IBlob; overload;
     function OpenBlob(transaction: ITransaction; RelationName, ColumnName: AnsiString; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob; overload;
     function OpenBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob;  overload;
+    function GetInlineBlobLimit: integer;
+    procedure SetInlineBlobLimit(limit: integer);
 
     {Array - may use to open existing arrays. However, ISQLData.AsArray is preferred}
 

@@ -41,6 +41,9 @@ uses
   Classes, SysUtils, {$IFDEF WINDOWS} windows, {$ENDIF} IB,  FBParamBlock,
   FBActivityMonitor, FBClientAPI;
 
+const
+  DefaultMaxInlineBlobLimit = 8192;
+
 type
   TCharsetMap = record
     CharsetID: integer;
@@ -60,6 +63,7 @@ type
     FODSMinorVersion: integer;
     FUserCharSetMap: array of TCharSetMap;
     FSecDatabase: AnsiString;
+    FInlineBlobLimit: integer;
   protected
     FDatabaseName: AnsiString;
     FRaiseExceptionOnConnectError: boolean;
@@ -147,6 +151,8 @@ type
     function GetODSMajorVersion: integer;
     function GetODSMinorVersion: integer;
     function HasDecFloatSupport: boolean; virtual;
+    function GetInlineBlobLimit: integer;
+    procedure SetInlineBlobLimit(limit: integer);
 
   public
     {Character Sets}
@@ -456,6 +462,7 @@ begin
   FRaiseExceptionOnConnectError := RaiseExceptionOnConnectError;
   FODSMajorVersion := 0;
   FODSMinorVersion := 0;
+  FInlineBlobLimit := DefaultMaxInlineBlobLimit;
 end;
 
 function TFBAttachment.GenerateCreateDatabaseSQL(DatabaseName: AnsiString;  aDPB: IDPB): AnsiString;
@@ -864,6 +871,16 @@ end;
 function TFBAttachment.HasDecFloatSupport: boolean;
 begin
   Result := false;
+end;
+
+function TFBAttachment.GetInlineBlobLimit: integer;
+begin
+  Result := FInlineBlobLimit;
+end;
+
+procedure TFBAttachment.SetInlineBlobLimit(limit: integer);
+begin
+  FInlineBlobLimit := limit;
 end;
 
 function TFBAttachment.HasDefaultCharSet: boolean;

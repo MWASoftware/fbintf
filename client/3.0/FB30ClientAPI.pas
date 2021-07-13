@@ -37,7 +37,8 @@ unit FB30ClientAPI;
 interface
 
 uses
-  Classes, SysUtils, FBClientAPI, Firebird, IB, IBExternals, FmtBCD, FBClientLib;
+  Classes, SysUtils, FBClientAPI, Firebird, IB, IBExternals, FmtBCD, FBClientLib,
+  FBActivityMonitor;
 
 type
 
@@ -138,7 +139,8 @@ type
     function SQLDecodeTime(bufptr: PByte): TDateTime;  override;
     procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte); override;
     function SQLDecodeDateTime(bufptr: PByte): TDateTime; override;
-    function FormatStatus(Status: TFBStatus): AnsiString; override;
+    function FormatStatus(Status: TFBStatus): AnsiString; override; overload;
+    function FormatStatus(Status: Firebird.IStatus): AnsiString; overload;
 
     {Firebird 4 Extensions}
     procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal; bufptr: PByte);
@@ -154,6 +156,22 @@ type
 
   end;
 
+  { TXPBParameterBlock }
+
+  TXPBParameterBlock = class(TFBInterfacedObject)
+  private
+    FBuilder: Firebird.IXpbBuilder;
+    FFirebird30ClientAPI: TFB30ClientAPI;
+  public
+    constructor Create(api: TFB30ClientAPI; kind: cardinal);
+    destructor Destroy; override;
+    function getBuffer: PByte;
+    function getDataLength: cardinal;
+    property Builder: Firebird.IXpbBuilder read FBuilder;
+  public
+    procedure PrintBuf;
+  end;
+
 implementation
 
 uses FB30Attachment, {$IFDEF FPC}dynlibs{$ELSE} windows{$ENDIF},
@@ -163,6 +181,61 @@ uses FB30Attachment, {$IFDEF FPC}dynlibs{$ELSE} windows{$ENDIF},
 type
   PISC_DATE = ^ISC_DATE;
   PISC_TIME = ^ISC_TIME;
+
+{ TXPBParameterBlock }
+
+constructor TXPBParameterBlock.Create(api: TFB30ClientAPI; kind: cardinal);
+begin
+  inherited Create;
+  FFirebird30ClientAPI := api;
+  with FFirebird30ClientAPI do
+  begin
+    FBuilder := UtilIntf.getXpbBuilder(StatusIntf,kind,nil,0);
+    Check4DataBaseError;
+  end;
+end;
+
+destructor TXPBParameterBlock.Destroy;
+begin
+  if FBuilder <> nil then
+  begin
+    FBuilder.dispose;
+    FBuilder := nil;
+  end;
+  inherited Destroy;
+end;
+
+function TXPBParameterBlock.getBuffer: PByte;
+begin
+  with FFirebird30ClientAPI do
+  begin
+    Result := FBuilder.getBuffer(StatusIntf);
+    Check4DataBaseError;
+  end;
+end;
+
+function TXPBParameterBlock.getDataLength: cardinal;
+begin
+  with FFirebird30ClientAPI do
+  begin
+    Result := FBuilder.getBufferLength(StatusIntf);
+    Check4DataBaseError;
+  end;
+end;
+
+procedure TXPBParameterBlock.PrintBuf;
+var i: integer;
+    buffer: PByte;
+begin
+  write(ClassName,': (',getDataLength,') ');
+  buffer := getBuffer;
+  for i := 0 to getDataLength - 1 do
+  begin
+    write(Format('%x ',[buffer^]));
+    Inc(buffer);
+  end;
+  writeln
+end;
 
 { TFB30StatusObject }
 
@@ -472,10 +545,15 @@ begin
 end;
 
 function TFB30ClientAPI.FormatStatus(Status: TFBStatus): AnsiString;
+begin
+  Result := FormatStatus((Status as TFB30Status).GetStatus);
+end;
+
+function TFB30ClientAPI.FormatStatus(Status: Firebird.IStatus): AnsiString;
 var local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
 begin
   Result := '';
-  if UtilIntf.formatStatus(@local_buffer,sizeof(local_buffer),(Status as TFB30Status).GetStatus) > 0 then
+  if UtilIntf.formatStatus(@local_buffer,sizeof(local_buffer) - 1,Status) > 0 then
     Result := strpas(local_buffer);
 end;
 

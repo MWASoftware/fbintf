@@ -2,6 +2,17 @@ FBINTF Change Log  version          (1.2-2 Build 12552) Wed, 09 Jun 2021 13:05:4
 
 1. Integer decodes widen from 32 bit to 64-bit integers.
 
+2. Support for inline blob encoding. Blob values pass using the "SetAsString" method
+   will now be encoded inline (i.e. as part of the parameter buffer) if they are
+   shorter than a pre-set limit. Longer values continue to be saved as blobs as a
+   separate server interaction. This is intended as a performance optimisation.
+
+   The pre-set limit defaults to 8192 bytes and can be inspected/modified using the new
+   IAttachment interface functions:
+
+    function GetInlineBlobLimit: integer;
+    procedure SetInlineBlobLimit(limit: integer);
+
 FBINTF Change Log  version          (1.2-1 Build 12552) Wed, 09 Jun 2021 13:05:40 +0100
 
 1. Big fix for Firebird 4.0. A internal change in Firebird 4.0.0 from RC1 flushed out a 

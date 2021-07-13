@@ -83,9 +83,6 @@ uses
   Classes, SysUtils, IBExternals, {$IFDEF WINDOWS} Windows, {$ENDIF} IB,  FBActivityMonitor, FBClientAPI,
   FmtBCD;
 
-const
-  MaxInlineBlobString = 8192;
-
 type
 
    {The IExTimeZoneServices is only available in FB4 and onwards}
@@ -268,6 +265,7 @@ type
     function StateChanged(var ChangeSeqNo: integer): boolean; virtual; abstract;
     property CaseSensitiveParams: boolean read FCaseSensitiveParams
                                             write FCaseSensitiveParams; {Only used when IsInputDataArea true}
+    function CanChangeMetaData: boolean; virtual; abstract;
     property Count: integer read GetCount;
     property Column[index: integer]: TSQLVarData read GetColumn;
     property UniqueRelationName: AnsiString read FUniqueRelationName;
@@ -289,6 +287,7 @@ type
     function GetStatement: IStatement;
     procedure SetName(AValue: AnsiString);
   protected
+    function GetAttachment: IAttachment; virtual; abstract;
     function GetSQLType: cardinal; virtual; abstract;
     function GetSubtype: integer; virtual; abstract;
     function GetAliasName: AnsiString;  virtual; abstract;
@@ -304,6 +303,7 @@ type
     function GetSQLData: PByte;  virtual; abstract;
     function GetDataLength: cardinal; virtual; abstract; {current field length}
     function GetSize: cardinal; virtual; abstract; {field length as given by metadata}
+    function GetDefaultTextSQLType: cardinal; virtual; abstract;
     procedure SetIsNull(Value: Boolean); virtual; abstract;
     procedure SetIsNullable(Value: Boolean);  virtual; abstract;
     procedure SetSQLData(AValue: PByte; len: cardinal); virtual; abstract;
@@ -311,6 +311,7 @@ type
     procedure SetDataLength(len: cardinal); virtual; abstract;
     procedure SetSQLType(aValue: cardinal); virtual; abstract;
     procedure SetCharSetID(aValue: cardinal); virtual; abstract;
+    procedure SetMetaSize(aValue: cardinal); virtual;
   public
     constructor Create(aParent: TSQLDataArea; aIndex: integer);
     procedure SetString(aValue: AnsiString);
@@ -672,6 +673,11 @@ begin
     FName := AValue;
 end;
 
+procedure TSQLVarData.SetMetaSize(aValue: cardinal);
+begin
+  //Ignore
+end;
+
 constructor TSQLVarData.Create(aParent: TSQLDataArea; aIndex: integer);
 begin
   inherited Create;
@@ -688,7 +694,9 @@ begin
    a zero byte when the string is empty, neatly avoiding a nil pointer error.}
 
   FVarString := aValue;
-  SQLType := SQL_TEXT;
+  if SQLType = SQL_BLOB then
+    SetMetaSize(GetAttachment.GetInlineBlobLimit);
+  SQLType := GetDefaultTextSQLType;
   Scale := 0;
   SetSQLData(PByte(PAnsiChar(FVarString)),Length(aValue));
 end;
@@ -2340,7 +2348,7 @@ begin
       IBError(ibxeInvalidDataConversion,[nil]);
 
   SQL_BLOB:
-    if Length(Value) < MaxInlineBlobString then
+    if Length(Value) < GetAttachment.GetInlineBlobLimit then
       DoSetString
     else
     begin
@@ -2408,7 +2416,7 @@ begin
       SetAsBCD(StrToBCD(Value));
 
     else
-      IBError(ibxeInvalidDataConversion,[nil]);
+      IBError(ibxeInvalidDataConversion,[GetSQLTypeName(SQLType)]);
   end;
 end;
 

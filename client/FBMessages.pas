@@ -157,7 +157,9 @@ type
       ibxeDecFloatNotSupported,
       ibxeInt128NotSupported,
       ibxeUnknownParamTypeName,
-      ibxInvalidQueryAction
+      ibxInvalidQueryAction,
+      ibxeSQLTypeUnchangeable,
+      ibxeCannotIncreaseMetadatasize
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -265,6 +267,8 @@ resourcestring
   SInt128NotSupported = 'INT128 Data Type not supported';
   SUnknownParamTypeName = '%s:Unknown Param Type Name "%s"';
   SInvalidQueryAction = 'Query Action only valid for an Update or Insert Query';
+  SSQLTypeUnchangeable = 'Cannot change SQL Type from %s to %s';
+  SCannotIncreaseMetadatasize = 'Cannot increase Metadata size from %d to %d';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -349,7 +353,9 @@ const
     SDecFloatNotSupported,
     SInt128NotSupported,
     SUnknownParamTypeName,
-    SInvalidQueryAction
+    SInvalidQueryAction,
+    SSQLTypeUnchangeable,
+    SCannotIncreaseMetadatasize
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;

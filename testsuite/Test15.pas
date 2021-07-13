@@ -114,7 +114,8 @@ begin
   begin
     ByName('rowid').AsInteger := 2;
     ByName('title').AsString := 'Blob Test with binary string';
-    aText := #$0#$09#$0a;
+    aText := #$0#$09#$0a {random digits} +
+             #$C9#$63#$6F#$75#$74#$65#$20#$6D#$6F#$69;  {Écoute moi' encoded in Win1252}
     ByName('BlobData').AsString := aText;
   end;
   Statement.Execute;

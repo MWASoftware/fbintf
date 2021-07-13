@@ -78,14 +78,6 @@ uses
   FB30Attachment,IBExternals, FBSQLData, FBParamBlock, FBOutputBlock, FBActivityMonitor;
 
 type
-  IBatchPBItem = interface(IParameterBlockItem)
-    ['{13e59097-803b-41e9-be34-b610904b9f50}']
-  end;
-
-  IBatchPB = interface(IParameterBlock<IBatchPBItem>)
-    ['{62eb1b31-2476-4f8c-9c16-23e71bf0d3f2}']
-  end;
-
   TFB30Statement = class;
   TIBXSQLDA = class;
 
@@ -116,6 +108,7 @@ type
     FFieldName: AnsiString;
 
     protected
+     function CanChangeSQLType: boolean;
      function GetSQLType: cardinal; override;
      function GetSubtype: integer; override;
      function GetAliasName: AnsiString;  override;
@@ -131,6 +124,8 @@ type
      function GetSQLData: PByte;  override;
      function GetDataLength: cardinal; override;
      function GetSize: cardinal; override;
+     function GetAttachment: IAttachment; override;
+     function GetDefaultTextSQLType: cardinal; override;
      procedure SetIsNull(Value: Boolean); override;
      procedure SetIsNullable(Value: Boolean);  override;
      procedure SetSQLData(AValue: PByte; len: cardinal); override;
@@ -138,7 +133,7 @@ type
      procedure SetDataLength(len: cardinal); override;
      procedure SetSQLType(aValue: cardinal); override;
      procedure SetCharSetID(aValue: cardinal); override;
-
+     procedure SetMetaSize(aValue: cardinal); override;
   public
     constructor Create(aParent: TIBXSQLDA; aIndex: integer);
     procedure Changed; override;
@@ -176,6 +171,7 @@ type
     function GetTransaction: TFB30Transaction; virtual;
     procedure Initialize; override;
     function StateChanged(var ChangeSeqNo: integer): boolean; override;
+    function CanChangeMetaData: boolean; override;
     property MetaData: Firebird.IMessageMetadata read FMetaData;
     property Count: Integer read FCount write SetCount;
     property Statement: TFB30Statement read FStatement;
@@ -253,11 +249,10 @@ type
     constructor Create(api: TFB30ClientAPI; cs: IBatchCompletionState);
     destructor Destroy; override;
     {IBatchCompletion}
-    function getTotalProcessed: integer;
-    function getState(updateNo: integer): TBatchCompletionState;
-    function getStatusMessage(updateNo: integer): AnsiString;
+    function getTotalProcessed: cardinal;
+    function getState(updateNo: cardinal): TBatchCompletionState;
+    function getStatusMessage(updateNo: cardinal): AnsiString;
     function getUpdated: integer;
-    function hasCompletionState: boolean;
   end;
 
   { TFB30Statement }
@@ -312,23 +307,6 @@ uses IBUtils, FBMessages, FBBlob, FB30Blob, variants,  FBArray, FB30Array;
 const
   ISQL_COUNTERS = 'CurrentMemory, MaxMemory, RealTime, UserTime, Buffers, Reads, Writes, Fetches';
 
-type
-  TBatchPBItem = class(TParamBlockItem,IBatchPBItem)
-  public
-  {$IFDEF FPC}
-   procedure IBatchPBItem.SetAsInteger = SetAsInteger1;
-  {$ELSE}
-   procedure SetAsInteger(aValue: integer);
-  {$ENDIF}
-  end;
-
-  { TBatchPBlock }
-
-  TBatchPBlock = class (TCustomParamBlock<TBatchPBItem,IBatchPBItem>, IBatchPB)
-  public
-    constructor Create(api: TFB30ClientAPI);
-  end;
-
 { TBatchCompletion }
 
 constructor TBatchCompletion.Create(api: TFB30ClientAPI;
@@ -349,7 +327,7 @@ begin
   inherited Destroy;
 end;
 
-function TBatchCompletion.getTotalProcessed: integer;
+function TBatchCompletion.getTotalProcessed: cardinal;
 begin
   with FFirebird30ClientAPI do
   begin
@@ -358,7 +336,7 @@ begin
   end;
 end;
 
-function TBatchCompletion.getState(updateNo: integer): TBatchCompletionState;
+function TBatchCompletion.getState(updateNo: cardinal): TBatchCompletionState;
 var state: integer;
 begin
   with FFirebird30ClientAPI do
@@ -378,22 +356,21 @@ begin
   end;
 end;
 
-function TBatchCompletion.getStatusMessage(updateNo: integer): AnsiString;
+function TBatchCompletion.getStatusMessage(updateNo: cardinal): AnsiString;
 var status: Firebird.IStatus;
-    textbuffer: array [1..1024] of AnsiChar;
 begin
   with FFirebird30ClientAPI do
   begin
+    status := MasterIntf.getStatus;
     FCompletionState.getStatus(StatusIntf,status,updateNo);
     Check4DataBaseError;
-    UtilIntf.formatStatus(@textbuffer,length(textbuffer),status);
+    Result := FormatStatus(status);
   end;
-  Result := strpas(@textbuffer);
 end;
 
 function TBatchCompletion.getUpdated: integer;
 var i: integer;
-    upcount: integer;
+    upcount: cardinal;
     state: integer;
 begin
   Result := 0;
@@ -401,7 +378,7 @@ begin
   begin
     upcount := FCompletionState.getSize(StatusIntf);
     Check4DataBaseError;
-    for i := 0 to upcount do
+    for i := 1 to upcount do
     begin
       state := FCompletionState.getState(StatusIntf,i);
       if state = Firebird.IBatchCompletionState.EXECUTE_FAILED then
@@ -411,35 +388,17 @@ begin
   end;
 end;
 
-function TBatchCompletion.hasCompletionState: boolean;
-begin
-  Result := FCompletionState <> nil;
-end;
-
-{ TBatchPBlock }
-
-constructor TBatchPBlock.Create(api: TFB30ClientAPI);
-begin
-  inherited Create(api);
-  FDataLength := 1;
-  FBuffer^ := Firebird.IBatch.VERSION;
-end;
-
- { TBatchPBItem }
-
-{$IFNDEF FPC}
-procedure TBatchPBItem.SetAsInteger(aValue: integer);
-begin
-  SetAsInteger1(aValue);
-end;
-{$ENDIF}
-
 { TIBXSQLVAR }
 
 procedure TIBXSQLVAR.Changed;
 begin
   inherited Changed;
   TIBXSQLDA(Parent).Changed;
+end;
+
+function TIBXSQLVAR.CanChangeSQLType: boolean;
+begin
+  Result := Parent.CanChangeMetaData;
 end;
 
 function TIBXSQLVAR.GetSQLType: cardinal;
@@ -545,6 +504,11 @@ begin
   Result := FMetadataSize;
 end;
 
+function TIBXSQLVAR.GetAttachment: IAttachment;
+begin
+  Result := FStatement.GetAttachment;
+end;
+
 function TIBXSQLVAR.GetArrayMetaData: IArrayMetaData;
 begin
   if GetSQLType <> SQL_ARRAY then
@@ -626,6 +590,8 @@ end;
 
 procedure TIBXSQLVAR.SetSQLType(aValue: cardinal);
 begin
+  if (FSQLType <> aValue) and not CanChangeSQLType then
+    IBError(ibxeSQLTypeUnchangeable,[TSQLDataItem.GetSQLTypeName(FSQLType),TSQLDataItem.GetSQLTypeName(aValue)]);
   FSQLType := aValue;
   Changed;
 end;
@@ -634,6 +600,18 @@ procedure TIBXSQLVAR.SetCharSetID(aValue: cardinal);
 begin
   FCharSetID := aValue;
   Changed;
+end;
+
+procedure TIBXSQLVAR.SetMetaSize(aValue: cardinal);
+begin
+  if (aValue > FMetaDataSize) and not CanChangeSQLType then
+    IBError(ibxeCannotIncreaseMetadatasize,[FMetaDataSize,aValue]);
+  FMetaDataSize := aValue;
+end;
+
+function TIBXSQLVAR.GetDefaultTextSQLType: cardinal;
+begin
+  Result := SQL_VARYING;
 end;
 
 constructor TIBXSQLVAR.Create(aParent: TIBXSQLDA; aIndex: integer);
@@ -800,10 +778,10 @@ procedure TIBXINPUTSQLDA.BuildMetadata;
 var Builder: Firebird.IMetadataBuilder;
     i: integer;
 begin
-  if FCurMetaData = nil then
+  if (FCurMetaData = nil) and (Count > 0) then
   with FFirebird30ClientAPI do
   begin
-    Builder := inherited MetaData.getBuilder(StatusIntf);
+    Builder := FFirebird30ClientAPI.MasterIntf.getMetadataBuilder(StatusIntf,Count);
     Check4DataBaseError;
     try
       for i := 0 to Count - 1 do
@@ -813,7 +791,16 @@ begin
         Check4DataBaseError;
         Builder.setSubType(StatusIntf,i,FSQLSubType);
         Check4DataBaseError;
-        Builder.setLength(StatusIntf,i,FDataLength);
+//        writeln('Column ',Name,' Type = ',TSQLDataItem.GetSQLTypeName(FSQLType),' Size = ',GetSize,' DataLength = ',GetDataLength);
+        if FSQLType = SQL_VARYING then
+        begin
+          if (GetDataLength > GetSize) and CanChangeMetaData then
+            Builder.setLength(StatusIntf,i,GetDataLength)
+          else
+            Builder.setLength(StatusIntf,i,GetSize)
+        end
+        else
+          Builder.setLength(StatusIntf,i,GetDataLength);
         Check4DataBaseError;
         Builder.setCharSet(StatusIntf,i,GetCharSetID);
         Check4DataBaseError;
@@ -830,10 +817,11 @@ end;
 
 procedure TIBXINPUTSQLDA.PackBuffer;
 var i: integer;
+    P: PByte;
 begin
   BuildMetadata;
 
-  if FMsgLength = 0 then
+  if (FMsgLength = 0) and (FCurMetaData <> nil) then
   with FFirebird30ClientAPI do
   begin
     FMsgLength := FCurMetaData.getMessageLength(StatusIntf);
@@ -844,15 +832,28 @@ begin
     for i := 0 to Count - 1 do
     with TIBXSQLVar(Column[i]) do
     begin
+      P := FMessageBuffer + FCurMetaData.getOffset(StatusIntf,i);
+ //     writeln('Packbuffer: Column ',Name,' Type = ',TSQLDataItem.GetSQLTypeName(FSQLType),' Size = ',GetSize,' DataLength = ',GetDataLength);
       if not Modified then
         IBError(ibxeUninitializedInputParameter,[i,Name]);
-
       if IsNull then
-        FillChar((FMessageBuffer + FCurMetaData.getOffset(StatusIntf,i))^,FDataLength,0)
+        FillChar(P^,FDataLength,0)
       else
       if FSQLData <> nil then
-        Move(FSQLData^,(FMessageBuffer + FCurMetaData.getOffset(StatusIntf,i))^,FDataLength);
-      Check4DataBaseError;
+      begin
+        if SQLType = SQL_VARYING then
+        begin
+            EncodeInteger(FDataLength,2,P);
+            Inc(P,2);
+        end
+        else
+        if (SQLType = SQL_BLOB) and (FStatement.FBatch <> nil) then
+        begin
+          FStatement.FBatch.registerBlob(Statusintf,ISC_QUADPtr(FSQLData),ISC_QUADPtr(FSQLData));
+          Check4DatabaseError;
+        end;
+        Move(FSQLData^,P^,FDataLength);
+      end;
       if IsNullable then
       begin
         Move(FNullIndicator,(FMessageBuffer + FCurMetaData.getNullOffset(StatusIntf,i))^,sizeof(FNullIndicator));
@@ -883,6 +884,10 @@ end;
 procedure TIBXINPUTSQLDA.Bind(aMetaData: Firebird.IMessageMetadata);
 var i: integer;
 begin
+  FreeMessageBuffer;
+  for i := 0 to Count - 1 do
+    TIBXSQLVAR(Column[i]).FreeSQLData;
+  for i := 0 to FSize - 1  do
   FMetaData := aMetaData;
   with FFirebird30ClientAPI do
   begin
@@ -1104,6 +1109,11 @@ begin
     ChangeSeqNo := FStatement.ChangeSeqNo;
 end;
 
+function TIBXSQLDA.CanChangeMetaData: boolean;
+begin
+  Result := FStatement.FBatch = nil;
+end;
+
 procedure TIBXSQLDA.SetCount(Value: Integer);
 var
   i: Integer;
@@ -1287,17 +1297,20 @@ function TFB30Statement.InternalExecute(action: TExecuteActions;
   end;
 
   procedure CreateBatch;
-  var BatchPB: IBatchPB;
+  var BatchPB: TXPBParameterBlock;
   begin
+    BatchPB := TXPBParameterBlock.Create(FFirebird30ClientAPI,Firebird.IXpbBuilder.BATCH);
     with FFirebird30ClientAPI do
-    begin
-      BatchPB := TBatchPBlock.Create(FFirebird30ClientAPI);
-      BatchPB.Add(Firebird.IBatch.TAG_RECORD_COUNTS);
+    try
+      BatchPB.Builder.insertInt(StatusIntf,Firebird.IBatch.TAG_RECORD_COUNTS,1);
+      Check4DataBaseError;
       FBatch := FStatementIntf.createBatch(StatusIntf,
                                            FSQLParams.MetaData,
-                                           (BatchPB as TBatchPBlock).getDataLength,
-                                           (BatchPB as TBatchPBlock).getBuffer);
+                                           BatchPB.getDataLength,
+                                           BatchPB.getBuffer);
       Check4DataBaseError;
+    finally
+      BatchPB.Free;
     end;
   end;
 
@@ -1308,8 +1321,6 @@ function TFB30Statement.InternalExecute(action: TExecuteActions;
     begin
       SavePerfStats(FBeforeStats);
       cs := FBatch.execute(StatusIntf,(aTransaction as TFB30Transaction).TransactionIntf);
-      Check4DataBaseError;
-      FBatch.execute(StatusIntf,(aTransaction as TFB30Transaction).TransactionIntf);
       Check4DataBaseError;
       FBatch.release;
       FBatch := nil;
@@ -1363,7 +1374,8 @@ begin
               ExecuteQuery
             else
             begin
-              FBatch.Add(StatusIntf,FSQLParams.GetMsgLength,FSQLParams.GetMessageBuffer);
+              {save the current parameter values}
+              FBatch.Add(StatusIntf,1,FSQLParams.GetMessageBuffer);
               Check4DataBaseError;
               ExecuteBatchQuery;
             end;
@@ -1372,10 +1384,11 @@ begin
             begin
               if FBatch = nil then
                 CreateBatch;
-                FBatch.Add(StatusIntf,FSQLParams.GetMsgLength,FSQLParams.GetMessageBuffer);
-                Check4DataBaseError;
-                {reset params buffer}
-                FSQLParams.Bind(FStatementIntf.getInputMetadata(StatusIntf));
+              FBatch.Add(StatusIntf,1,FSQLParams.GetMessageBuffer);
+              Check4DataBaseError;
+              {reset params buffer}
+              FSQLParams.Bind(FBatch.getMetadata(StatusIntf));
+              Check4DataBaseError;
             end;
 
           eaApplyIgnoreCurrent:

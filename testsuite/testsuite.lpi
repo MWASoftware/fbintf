@@ -23,26 +23,26 @@
     </PublishOptions>
     <RunParams>
       <local>
-        <CommandLineParams Value="-t 9"/>
+        <CommandLineParams Value="-t 19"/>
       </local>
       <environment>
         <UserOverrides Count="3">
           <Variable0 Name="PROMPT_AT_END" Value="YES"/>
-          <Variable1 Name="FIREBIRD" Value="/opt/firebird4rc1"/>
-          <Variable2 Name="LD_LIBRARY_PATH" Value="/opt/firebird4rc1/lib"/>
+          <Variable1 Name="FIREBIRD" Value="/opt/firebird4.0.0"/>
+          <Variable2 Name="LD_LIBRARY_PATH" Value="//opt/firebird4.0.0/lib"/>
         </UserOverrides>
       </environment>
       <FormatVersion Value="2"/>
       <Modes Count="1">
         <Mode0 Name="default">
           <local>
-            <CommandLineParams Value="-t 9"/>
+            <CommandLineParams Value="-t 19"/>
           </local>
           <environment>
             <UserOverrides Count="3">
               <Variable0 Name="PROMPT_AT_END" Value="YES"/>
-              <Variable1 Name="FIREBIRD" Value="/opt/firebird4rc1"/>
-              <Variable2 Name="LD_LIBRARY_PATH" Value="/opt/firebird4rc1/lib"/>
+              <Variable1 Name="FIREBIRD" Value="/opt/firebird4.0.0"/>
+              <Variable2 Name="LD_LIBRARY_PATH" Value="//opt/firebird4.0.0/lib"/>
             </UserOverrides>
           </environment>
         </Mode0>
@@ -53,7 +53,7 @@
         <PackageName Value="fbintf"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="22">
+    <Units Count="23">
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -142,6 +142,10 @@
         <Filename Value="Test2.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit21>
+      <Unit22>
+        <Filename Value="Test19.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit22>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

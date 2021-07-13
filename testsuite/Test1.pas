@@ -31,7 +31,7 @@ unit Test1;
 {$DEFINE WINDOWS} 
 {$ENDIF}
 
-{Create and Drop a Database}
+{Test 1: Create and Drop a Database}
 {
  This test first attempts to create a database without specifying any parameters
  (should fail). It then goes on to create and drop a database, print out the
