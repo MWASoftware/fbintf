@@ -137,6 +137,7 @@ type
   public
     constructor Create(aParent: TIBXSQLDA; aIndex: integer);
     procedure Changed; override;
+    procedure ColumnSQLDataInit;
     procedure RowChange; override;
     procedure FreeSQLData;
     function GetAsArray(Array_ID: TISC_QUAD): IArray; override;
@@ -185,6 +186,7 @@ type
     FMsgLength: integer; {Message Buffer length}
     FCurMetaData: Firebird.IMessageMetadata;
     procedure FreeMessageBuffer;
+    procedure FreeCurMetaData;
     function GetMessageBuffer: PByte;
     function GetMetaData: Firebird.IMessageMetadata;
     function GetModified: Boolean;
@@ -198,6 +200,7 @@ type
     destructor Destroy; override;
     procedure Bind(aMetaData: Firebird.IMessageMetadata);
     procedure Changed; override;
+    procedure ReInitialise;
     function IsInputDataArea: boolean; override;
     property MetaData: Firebird.IMessageMetadata read GetMetaData;
     property MessageBuffer: PByte read GetMessageBuffer;
@@ -394,6 +397,35 @@ procedure TIBXSQLVAR.Changed;
 begin
   inherited Changed;
   TIBXSQLDA(Parent).Changed;
+end;
+
+procedure TIBXSQLVAR.ColumnSQLDataInit;
+begin
+  FreeSQLData;
+  with FFirebird30ClientAPI do
+  begin
+    case SQLType of
+      SQL_TEXT, SQL_TYPE_DATE, SQL_TYPE_TIME, SQL_TIMESTAMP,
+      SQL_BLOB, SQL_ARRAY, SQL_QUAD, SQL_SHORT, SQL_BOOLEAN,
+      SQL_LONG, SQL_INT64, SQL_INT128, SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT,
+      SQL_TIMESTAMP_TZ, SQL_TIME_TZ, SQL_DEC_FIXED, SQL_DEC16, SQL_DEC34,
+      SQL_TIMESTAMP_TZ_EX, SQL_TIME_TZ_EX:
+      begin
+        if (FDataLength = 0) then
+          { Make sure you get a valid pointer anyway
+           select '' from foo }
+          IBAlloc(FSQLData, 0, 1)
+        else
+          IBAlloc(FSQLData, 0, FDataLength)
+      end;
+      SQL_VARYING:
+        IBAlloc(FSQLData, 0, FDataLength + 2);
+     else
+        IBError(ibxeUnknownSQLDataType, [SQLType and (not 1)])
+    end;
+    FOwnsSQLData := true;
+    FNullIndicator := -1;
+  end;
 end;
 
 function TIBXSQLVAR.CanChangeSQLType: boolean;
@@ -743,17 +775,21 @@ end;
 
 procedure TIBXINPUTSQLDA.FreeMessageBuffer;
 begin
-  if FCurMetaData <> nil then
-  begin
-    FCurMetaData.release;
-    FCurMetaData := nil;
-  end;
   if FMessageBuffer <> nil then
   begin
     FreeMem(FMessageBuffer);
     FMessageBuffer := nil;
   end;
   FMsgLength := 0;
+end;
+
+procedure TIBXINPUTSQLDA.FreeCurMetaData;
+begin
+  if FCurMetaData <> nil then
+  begin
+    FCurMetaData.release;
+    FCurMetaData := nil;
+  end;
 end;
 
 function TIBXINPUTSQLDA.GetMessageBuffer: PByte;
@@ -867,6 +903,7 @@ end;
 procedure TIBXINPUTSQLDA.FreeXSQLDA;
 begin
   inherited FreeXSQLDA;
+  FreeCurMetaData;
   FreeMessageBuffer;
 end;
 
@@ -878,17 +915,13 @@ end;
 
 destructor TIBXINPUTSQLDA.Destroy;
 begin
-  FreeMessageBuffer;
+  FreeXSQLDA;
   inherited Destroy;
 end;
 
 procedure TIBXINPUTSQLDA.Bind(aMetaData: Firebird.IMessageMetadata);
 var i: integer;
 begin
-  FreeMessageBuffer;
-  for i := 0 to Count - 1 do
-    TIBXSQLVAR(Column[i]).FreeSQLData;
-  for i := 0 to FSize - 1  do
   FMetaData := aMetaData;
   with FFirebird30ClientAPI do
   begin
@@ -909,31 +942,10 @@ begin
       else
         FSQLSubType := 0;
       FDataLength := aMetaData.getLength(StatusIntf,i);
+      Check4DataBaseError;
       FMetadataSize := FDataLength;
-      Check4DataBaseError;
-      case SQLType of
-        SQL_TEXT, SQL_TYPE_DATE, SQL_TYPE_TIME, SQL_TIMESTAMP,
-        SQL_BLOB, SQL_ARRAY, SQL_QUAD, SQL_SHORT, SQL_BOOLEAN,
-        SQL_LONG, SQL_INT64, SQL_INT128, SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT,
-        SQL_TIMESTAMP_TZ, SQL_TIME_TZ, SQL_DEC_FIXED, SQL_DEC16, SQL_DEC34,
-        SQL_TIMESTAMP_TZ_EX, SQL_TIME_TZ_EX:
-        begin
-          if (FDataLength = 0) then
-            { Make sure you get a valid pointer anyway
-             select '' from foo }
-            IBAlloc(FSQLData, 0, 1)
-          else
-            IBAlloc(FSQLData, 0, FDataLength)
-        end;
-        SQL_VARYING:
-          IBAlloc(FSQLData, 0, FDataLength + 2);
-       else
-          IBError(ibxeUnknownSQLDataType, [sqltype and (not 1)])
-      end;
       FNullable := aMetaData.isNullable(StatusIntf,i);
-      FOwnsSQLData := true;
       Check4DataBaseError;
-      FNullIndicator := -1;
       if FNullable then
         FSQLNullIndicator := @FNullIndicator
       else
@@ -942,6 +954,7 @@ begin
       Check4DataBaseError;
       FCharSetID :=  aMetaData.getCharSet(StatusIntf,i) and $FF;
       Check4DataBaseError;
+      ColumnSQLDataInit;
     end;
   end;
 end;
@@ -949,7 +962,16 @@ end;
 procedure TIBXINPUTSQLDA.Changed;
 begin
   inherited Changed;
+  FreeCurMetaData;
   FreeMessageBuffer;
+end;
+
+procedure TIBXINPUTSQLDA.ReInitialise;
+var i: integer;
+begin
+  FreeMessageBuffer;
+  for i := 0 to Count - 1 do
+    TIBXSQLVar(Column[i]).ColumnSQLDataInit;
 end;
 
 function TIBXINPUTSQLDA.IsInputDataArea: boolean;
@@ -1146,6 +1168,7 @@ begin
     TIBXSQLVAR(Column[i]).FreeSQLData;
   for i := 0 to FSize - 1  do
     TIBXSQLVAR(Column[i]).Free;
+  FCount := 0;
   SetLength(FColumnList,0);
   FSize := 0;
 end;
@@ -1387,9 +1410,6 @@ begin
                 CreateBatch;
               FBatch.Add(StatusIntf,1,FSQLParams.GetMessageBuffer);
               Check4DataBaseError;
-              {reset params buffer}
-              FSQLParams.Bind(FBatch.getMetadata(StatusIntf));
-              Check4DataBaseError;
             end;
 
           eaApplyIgnoreCurrent:
@@ -1402,6 +1422,8 @@ begin
         ExecuteQuery;
       end;
     end;
+    {reset params buffer}
+    FSQLParams.ReInitialise;
   finally
     if aTransaction <> FTransactionIntf then
        RemoveMonitor(aTransaction as TFB30Transaction);

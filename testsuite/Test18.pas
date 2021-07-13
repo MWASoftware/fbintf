@@ -243,7 +243,7 @@ begin
         writeln(OutFile,'BigInteger = ', ByName('BigInteger').GetAsString);
         DumpBCD(ByName('BigInteger').GetAsBCD);
       end;
-      writeln;
+      writeln(Outfile);
     end;
   finally
     Results.Close;

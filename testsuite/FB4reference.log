@@ -568,7 +568,7 @@ FULL_NAME = Johnson, Leslie
 Current memory = 19,763,536
 Delta memory = 4,464
 Max memory = 19,809,408
-Elapsed time= 0.001 sec
+Elapsed time= 0.002 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
@@ -3941,6 +3941,7 @@ BigInteger = 123456789123456789
   Special = 0
   Places = 0
   Digits = 12 34 56 78 91 23 45 67 89 
+
 RowID = 2
 Float16 = -64000000000.01
   Precision = 13
@@ -3961,6 +3962,7 @@ BigNumber = -123456123456.123456
   Places = 6
   Digits = 12 34 56 12 34 56 12 34 56 
 BigInteger = Null
+
 RowID = 3
 Float16 = 64100000000.011
   Precision = 14
@@ -3987,6 +3989,7 @@ BiggerNumber = 11123456123456123456123456123456.1235
   Places = 4
   Digits = 11 12 34 56 12 34 56 12 34 56 12 34 56 12 34 56 12 35 
 BigInteger = Null
+
 RowID = 4
 Float16 = 0
   Precision = 0
@@ -4013,6 +4016,7 @@ BiggerNumber = 0.0000
   Places = 0
   Digits = 
 BigInteger = Null
+
 Metadata
 SQLType =SQL_LONG
 sub type = 0
