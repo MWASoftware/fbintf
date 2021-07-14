@@ -159,7 +159,8 @@ type
       ibxeUnknownParamTypeName,
       ibxInvalidQueryAction,
       ibxeSQLTypeUnchangeable,
-      ibxeCannotIncreaseMetadatasize
+      ibxeCannotIncreaseMetadatasize,
+      ibxeBatchModeNotSupported
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -269,6 +270,7 @@ resourcestring
   SInvalidQueryAction = 'Query Action only valid for an Update or Insert Query';
   SSQLTypeUnchangeable = 'Cannot change SQL Type from %s to %s';
   SCannotIncreaseMetadatasize = 'Cannot increase Metadata size from %d to %d';
+  SBatchModeNotSupported = 'Batch Mode is not available. Firebird 4 or later client nd server is required';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -355,7 +357,8 @@ const
     SUnknownParamTypeName,
     SInvalidQueryAction,
     SSQLTypeUnchangeable,
-    SCannotIncreaseMetadatasize
+    SCannotIncreaseMetadatasize,
+    SBatchModeNotSupported
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;

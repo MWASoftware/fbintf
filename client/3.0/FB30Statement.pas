@@ -1359,6 +1359,12 @@ function TFB30Statement.InternalExecute(action: TExecuteActions;
       IBError(ibxInvalidQueryAction,[nil]);
   end;
 
+  procedure CheckBatchModeAvailable;
+  begin
+    if not HasBatchMode then
+      IBError(ibxeBatchModeNotSupported,[nil]);
+  end;
+
 begin
   Result := nil;
   FBOF := false;
@@ -1398,6 +1404,7 @@ begin
               ExecuteQuery
             else
             begin
+              CheckBatchModeAvailable;
               {save the current parameter values}
               FBatch.Add(StatusIntf,1,FSQLParams.GetMessageBuffer);
               Check4DataBaseError;
@@ -1406,6 +1413,7 @@ begin
 
           eaDefer:
             begin
+              CheckBatchModeAvailable;
               if FBatch = nil then
                 CreateBatch;
               FBatch.Add(StatusIntf,1,FSQLParams.GetMessageBuffer);
@@ -1413,7 +1421,10 @@ begin
             end;
 
           eaApplyIgnoreCurrent:
-            ExecuteBatchQuery;
+            begin
+              CheckBatchModeAvailable;
+              ExecuteBatchQuery;
+            end;
           end;
         end;
 
