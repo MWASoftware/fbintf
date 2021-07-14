@@ -1422,8 +1422,7 @@ begin
         ExecuteQuery;
       end;
     end;
-    {reset params buffer}
-    FSQLParams.ReInitialise;
+//    FSQLParams.ReInitialise;  {reset params buffer}
   finally
     if aTransaction <> FTransactionIntf then
        RemoveMonitor(aTransaction as TFB30Transaction);
