@@ -399,6 +399,20 @@ begin
       ByName('JOB_COUNTRY').AsString := 'England';
       ByName('SALARY').AsFloat := 42000.89;
     end;
+    Statement.Execute(eaDefer);
+    with Statement.GetSQLParams do
+    begin
+      ByName('EMP_NO').AsInteger := 152;
+      ByName('FIRST_NAME').AsString := 'John';
+      ByName('LAST_NAME').AsString := 'SmithAndJonesFamily1';  //Longest Name
+      ByName('PHONE_EXT').AsString := '';
+      ByName('HIRE_DATE').AsDateTime := EncodeDate(2015,4,3);
+      ByName('DEPT_NO').AsString := '600';
+      ByName('JOB_CODE').AsString := 'Eng';
+      ByName('JOB_GRADE').AsInteger := 4;
+      ByName('JOB_COUNTRY').AsString := 'England';
+      ByName('SALARY').AsFloat := 41000.99;
+    end;
     Statement.Execute;
   except on E:Exception do
     writeln(Outfile,'Error reported when inserting: ' + E.Message);

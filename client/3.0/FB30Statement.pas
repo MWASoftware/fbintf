@@ -361,6 +361,7 @@ begin
         end;
         status := TFB30StatusObject.Create(FFirebird30ClientAPI,FBStatus,
                       Format(SBatchCompletionError,[RowNo]));
+        status.SetIBDataBaseErrorMessages(GetStatus.GetIBDataBaseErrorMessages);
         Result := true;
         break;
       end;

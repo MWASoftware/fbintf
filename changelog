@@ -32,6 +32,9 @@ FBINTF Change Log  version          (1.2-2 Build 12552) Wed, 09 Jun 2021 13:05:4
 
    For more information see the User Guide.
 
+4. Default error message contents. Now aligned with User Guide section 10.2 i.e. error messages
+   provided with the EIBInterBaseError now include all three parts.
+
 
 FBINTF Change Log  version          (1.2-1 Build 12552) Wed, 09 Jun 2021 13:05:40 +0100
 

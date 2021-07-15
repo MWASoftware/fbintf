@@ -574,7 +574,7 @@ begin
   inherited Create;
   FOwner := aOwner;
   FPrefix := prefix;
-  FIBDataBaseErrorMessages := [ShowSQLMessage, ShowIBMessage];
+  FIBDataBaseErrorMessages := [ShowSQLCode, ShowSQLMessage, ShowIBMessage];
 end;
 
 function TFBStatus.GetIBErrorCode: Long;
@@ -599,7 +599,6 @@ begin
   if (ShowSQLCode in IBDataBaseErrorMessages) then
     Result := Result + 'SQLCODE: ' + IntToStr(sqlcode); {do not localize}
 
-  Exclude(IBDataBaseErrorMessages, ShowSQLMessage);
   if (ShowSQLMessage in IBDataBaseErrorMessages) then
   begin
     with FOwner do
