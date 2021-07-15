@@ -406,7 +406,7 @@ begin
     status := MasterIntf.getStatus;
     FCompletionState.getStatus(StatusIntf,status,updateNo);
     Check4DataBaseError;
-    Result := FormatStatus(status);
+    Result := FormatFBStatus(status);
   end;
 end;
 
@@ -1370,7 +1370,7 @@ function TFB30Statement.InternalExecute(action: TExecuteActions;
       FBatch := FStatementIntf.createBatch(StatusIntf,
                                            FSQLParams.MetaData,
                                            BatchPB.getDataLength,
-                                           BatchPB.getBuffer);
+                                           BytePtr(BatchPB.getBuffer));
       Check4DataBaseError;
     finally
       BatchPB.Free;

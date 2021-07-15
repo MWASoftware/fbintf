@@ -141,8 +141,8 @@ type
     function SQLDecodeTime(bufptr: PByte): TDateTime;  override;
     procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte); override;
     function SQLDecodeDateTime(bufptr: PByte): TDateTime; override;
-    function FormatStatus(Status: TFBStatus): AnsiString; override; overload;
-    function FormatStatus(Status: Firebird.IStatus): AnsiString; overload;
+    function FormatStatus(Status: TFBStatus): AnsiString; override;
+    function FormatFBStatus(Status: Firebird.IStatus): AnsiString;
 
     {Firebird 4 Extensions}
     procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal; bufptr: PByte);
@@ -211,7 +211,7 @@ function TXPBParameterBlock.getBuffer: PByte;
 begin
   with FFirebird30ClientAPI do
   begin
-    Result := FBuilder.getBuffer(StatusIntf);
+    Result := PByte(FBuilder.getBuffer(StatusIntf));
     Check4DataBaseError;
   end;
 end;
@@ -568,10 +568,10 @@ end;
 
 function TFB30ClientAPI.FormatStatus(Status: TFBStatus): AnsiString;
 begin
-  Result := FormatStatus((Status as TFB30Status).GetStatus);
+  Result := FormatFBStatus((Status as TFB30Status).GetStatus);
 end;
 
-function TFB30ClientAPI.FormatStatus(Status: Firebird.IStatus): AnsiString;
+function TFB30ClientAPI.FormatFBStatus(Status: Firebird.IStatus): AnsiString;
 var local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
 begin
   Result := '';

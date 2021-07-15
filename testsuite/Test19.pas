@@ -89,7 +89,6 @@ implementation
 procedure TTest19.DoQuery(Attachment: IAttachment);
 var Transaction: ITransaction;
     Statement: IStatement;
-    stats: TPerfCounters;
     ar: IArray;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taRollback);
@@ -336,7 +335,11 @@ if bc <> nil then
     writeln(OutFile,'Total rows processed = ',getTotalProcessed);
     writeln(Outfile,'Updated Records = ',getUpdated);
     for i := 0 to getTotalProcessed -1 do
+    {$IFDEF FPC}
       writeln(Outfile,'Row ',i+1,' State = ',getState(i),' Msg = ',getStatusMessage(i));
+    {$ELSE}
+      writeln(Outfile,'Row ',i+1,' State = ',ord(getState(i)),' Msg = ',getStatusMessage(i));
+    {$ENDIF}
   end;
 end;
 
