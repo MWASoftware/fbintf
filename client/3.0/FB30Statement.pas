@@ -1387,8 +1387,6 @@ function TFB30Statement.InternalExecute(action: TExecuteActions;
 
   procedure ExecuteBatchQuery;
   var cs: Firebird.IBatchCompletionState;
-      RowNo: integer;
-      Msg: AnsiString;
   begin
     with FFirebird30ClientAPI do
     begin
