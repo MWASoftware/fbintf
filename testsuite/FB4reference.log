@@ -568,7 +568,7 @@ FULL_NAME = Johnson, Leslie
 Current memory = 19,763,536
 Delta memory = 4,464
 Max memory = 19,809,408
-Elapsed time= 0.002 sec
+Elapsed time= 0.001 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
@@ -4337,6 +4337,20 @@ The quick brown fox jumped over the running dog
 LANGUAGE_REQ = Array: (1: Eng) (2: Fra) (3: ) (4: ) (5: ) 
 
 
+Test Error Handling
+Error reported (as expected) when changing param type: Cannot change SQL Type from SQL_TIMESTAMP to SQL_VARYING
+Test Error Handling - Update returning should fail
+Error reported (as expected) when defering update returning query: Query Action only valid for an Update or Insert Query
+Error handling when Insert rows - duplicate key
+Error reported when inserting: Error Processing update/insert batch on row number 2 - violation of PRIMARY or UNIQUE KEY constraint "INTEG_27" on table "EMPLOYEE"
+-Problematic key value is ("EMP_NO" = 150)
+Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
+Batch Completion Info
+Total rows processed = 2
+Updated Records = 1
+Row 1 State = bcNoMoreErrors Msg = 
+Row 2 State = bcExecuteFailed Msg = violation of PRIMARY or UNIQUE KEY constraint "INTEG_27" on table "EMPLOYEE"
+-Problematic key value is ("EMP_NO" = 150)
 
 
 ------------------------------------------------------

@@ -45,10 +45,12 @@ type
   { TFB30Status }
 
   TFB30Status = class(TFBStatus,IStatus)
-  private
+  protected
     FStatus: Firebird.IStatus;
   public
+    destructor Destroy; override;
     procedure Init;
+    procedure FreeHandle;
     function InErrorState: boolean;
     function GetStatus: Firebird.IStatus;
     function StatusVector: PStatusVector; override;
@@ -58,7 +60,7 @@ type
 
   TFB30StatusObject = class(TFB30Status)
   public
-    constructor Create(aOwner: TFBClientAPI; status: Firebird.IStatus);
+    constructor Create(aOwner: TFBClientAPI; status: Firebird.IStatus; prefix: Ansistring='');
   end;
 
   Tfb_get_master_interface = function: IMaster;
@@ -240,18 +242,33 @@ end;
 { TFB30StatusObject }
 
 constructor TFB30StatusObject.Create(aOwner: TFBClientAPI;
-  status: Firebird.IStatus);
+  status: Firebird.IStatus; prefix: Ansistring);
 begin
-  inherited Create(aOwner);
+  inherited Create(aOwner,prefix);
   FStatus := status;
 end;
 
 { TFB30Status }
 
+destructor TFB30Status.Destroy;
+begin
+  FreeHandle;
+  inherited Destroy;
+end;
+
 procedure TFB30Status.Init;
 begin
   if assigned(FStatus) then
     FStatus.Init;
+end;
+
+procedure TFB30Status.FreeHandle;
+begin
+  if FStatus <> nil then
+  begin
+    FStatus.dispose;
+    FStatus := nil;
+  end;
 end;
 
 function TFB30Status.InErrorState: boolean;
@@ -333,10 +350,14 @@ end;
 
 procedure TFB30ClientAPI.FBShutdown;
 begin
-  if assigned(fb_shutdown) and assigned(FProvider) then
+  if assigned(fb_shutdown) then
   begin
-    FProvider.release;
-    FProvider := nil;
+    FStatus.FreeHandle;
+    if assigned(FProvider) then
+    begin
+      FProvider.release;
+      FProvider := nil;
+    end;
   end;
   inherited;
 end;
@@ -355,6 +376,7 @@ end;
 
 destructor TFB30ClientAPI.Destroy;
 begin
+  FStatus.FreeHandle;
   if assigned(FProvider) then
     FProvider.release;
   inherited Destroy;

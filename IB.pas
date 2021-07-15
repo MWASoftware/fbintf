@@ -762,7 +762,8 @@ type
     function getState(updateNo: cardinal): TBatchCompletionState;
     function getStatusMessage(updateNo: cardinal): AnsiString;
     function getUpdated: integer;
-  end;
+    function getErrorStatus(var RowNo: integer; var status: IStatus): boolean;
+    end;
 
   {The IStatement interface provides access to an SQL Statement once it has been
    initially prepared. The interface is returned from the IAttachment interface.

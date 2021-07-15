@@ -118,10 +118,11 @@ type
   TFBStatus = class(TFBInterfacedObject)
   private
     FIBDataBaseErrorMessages: TIBDataBaseErrorMessages;
+    FPrefix: AnsiString;
   protected
     FOwner: TFBClientAPI;
   public
-    constructor Create(aOwner: TFBClientAPI);
+    constructor Create(aOwner: TFBClientAPI; prefix: AnsiString='');
     function StatusVector: PStatusVector; virtual; abstract;
 
     {IStatus}
@@ -568,10 +569,11 @@ end;
 
 { TFBStatus }
 
-constructor TFBStatus.Create(aOwner: TFBClientAPI);
+constructor TFBStatus.Create(aOwner: TFBClientAPI; prefix: AnsiString);
 begin
   inherited Create;
   FOwner := aOwner;
+  FPrefix := prefix;
   FIBDataBaseErrorMessages := [ShowSQLMessage, ShowIBMessage];
 end;
 
@@ -591,7 +593,7 @@ var local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
     IBDataBaseErrorMessages: TIBDataBaseErrorMessages;
     sqlcode: Long;
 begin
-  Result := '';
+  Result := FPrefix;
   IBDataBaseErrorMessages := FIBDataBaseErrorMessages;
   sqlcode := Getsqlcode;
   if (ShowSQLCode in IBDataBaseErrorMessages) then

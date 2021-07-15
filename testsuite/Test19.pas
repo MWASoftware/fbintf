@@ -75,6 +75,7 @@ type
   private
     procedure DoQuery(Attachment: IAttachment);
     procedure WriteBatchCompletion(bc: IBatchCompletion);
+    procedure ErrorHandlingTests(Attachment: IAttachment);
   public
     function TestTitle: AnsiString; override;
     procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
@@ -339,6 +340,74 @@ if bc <> nil then
   end;
 end;
 
+procedure TTest19.ErrorHandlingTests(Attachment: IAttachment);
+var Transaction: ITransaction;
+    Statement: IStatement;
+begin
+  Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taRollback);
+  writeln(Outfile,'Test Error Handling');
+  try
+    Statement := Attachment.Prepare(Transaction,'Update Employee Set HIRE_DATE = ? Where EMP_NO = ?',3);
+    Statement.GetSQLParams[0].AsDateTime := EncodeDate(2016,1,31);
+    Statement.GetSQLParams[1].AsInteger := 8;
+    Statement.Execute(eaDefer);
+    Statement.GetSQLParams[0].AsString := '2018.5.28';
+    Statement.GetSQLParams[1].AsInteger := 2;
+    Statement.Execute;
+  except on E:Exception do
+    writeln(Outfile,'Error reported (as expected) when changing param type: ' + E.Message);
+  end;
+  writeln(Outfile,'Test Error Handling - Update returning should fail');
+  try
+    Statement := Attachment.Prepare(Transaction,'Update Employee Set HIRE_DATE = ? Where EMP_NO = ? Returning EMP_NO',3);
+    Statement.GetSQLParams[0].AsDateTime := EncodeDate(2016,1,31);
+    Statement.GetSQLParams[1].AsInteger := 8;
+    Statement.Execute(eaDefer);
+  except on E:Exception do
+    writeln(Outfile,'Error reported (as expected) when defering update returning query: ' + E.Message);
+  end;
+  try
+    writeln(Outfile,'Error handling when Insert rows - duplicate key');
+    Statement := Attachment.PrepareWithNamedParameters(Transaction,'INSERT INTO EMPLOYEE (EMP_NO, FIRST_NAME, LAST_NAME, PHONE_EXT, HIRE_DATE,' +
+        'DEPT_NO, JOB_CODE, JOB_GRADE, JOB_COUNTRY, SALARY) '+
+        'VALUES (:EMP_NO, :FIRST_NAME, :LAST_NAME, :PHONE_EXT, :HIRE_DATE,' +
+        ':DEPT_NO, :JOB_CODE, :JOB_GRADE, :JOB_COUNTRY, :SALARY)',3);
+    with Statement.GetSQLParams do
+    begin
+      ByName('EMP_NO').AsInteger := 150;
+      ByName('FIRST_NAME').AsString := 'John';
+      ByName('LAST_NAME').AsString := 'Doe';
+      ByName('PHONE_EXT').AsString := '';
+      ByName('HIRE_DATE').AsDateTime := EncodeDate(2015,4,1);
+      ByName('DEPT_NO').AsString := '600';
+      ByName('JOB_CODE').AsString := 'Eng';
+      ByName('JOB_GRADE').AsInteger := 4;
+      ByName('JOB_COUNTRY').AsString := 'England';
+      ByName('SALARY').AsFloat := 41000.89;
+    end;
+    Statement.Execute(eaDefer);
+    with Statement.GetSQLParams do
+    begin
+      ByName('EMP_NO').AsInteger := 150; {duplicate key}
+      ByName('FIRST_NAME').AsString := 'Jane';
+      ByName('LAST_NAME').AsString := 'Doe';
+      ByName('PHONE_EXT').AsString := '';
+      ByName('HIRE_DATE').AsDateTime := EncodeDate(2015,4,2);
+      ByName('DEPT_NO').AsString := '600';
+      ByName('JOB_CODE').AsString := 'Eng';
+      ByName('JOB_GRADE').AsInteger := 4;
+      ByName('JOB_COUNTRY').AsString := 'England';
+      ByName('SALARY').AsFloat := 42000.89;
+    end;
+    Statement.Execute;
+  except on E:Exception do
+    writeln(Outfile,'Error reported when inserting: ' + E.Message);
+  end;
+  WriteAffectedRows(Statement);
+  WriteBatchCompletion(Statement.GetBatchCompletion);
+  Transaction.Rollback;
+end;
+
 function TTest19.TestTitle: AnsiString;
 begin
   Result := 'Test 19: Batch Update and Insert Queries';
@@ -374,6 +443,7 @@ begin
     S.Free;
   end;
   DoQuery(Attachment);
+  ErrorHandlingTests(Attachment);
   end;
 end;
 

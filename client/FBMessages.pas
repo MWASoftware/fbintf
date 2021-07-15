@@ -177,6 +177,7 @@ resourcestring
   STrue = 'true';
   SFalse = 'false';
   SArray = '(array)';
+  SBatchCompletionError = 'Error Processing update/insert batch on row number %d - ';
 
 implementation
 
@@ -270,7 +271,7 @@ resourcestring
   SInvalidQueryAction = 'Query Action only valid for an Update or Insert Query';
   SSQLTypeUnchangeable = 'Cannot change SQL Type from %s to %s';
   SCannotIncreaseMetadatasize = 'Cannot increase Metadata size from %d to %d';
-  SBatchModeNotSupported = 'Batch Mode is not available. Firebird 4 or later client nd server is required';
+  SBatchModeNotSupported = 'Batch Mode is not available. Firebird 4 or later client and server is required';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (

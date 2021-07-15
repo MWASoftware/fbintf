@@ -75,7 +75,7 @@ interface
 
 uses
   Classes, SysUtils, Firebird, IB,  FBStatement, FB30ClientAPI, FB30Transaction,
-  FB30Attachment,IBExternals, FBSQLData, FBParamBlock, FBOutputBlock, FBActivityMonitor;
+  FB30Attachment,IBExternals, FBSQLData, FBOutputBlock, FBActivityMonitor;
 
 type
   TFB30Statement = class;
@@ -246,12 +246,13 @@ type
 
   TBatchCompletion = class(TInterfaceOwner,IBatchCompletion)
   private
-    FCompletionState: IBatchCompletionState;
+    FCompletionState: Firebird.IBatchCompletionState;
     FFirebird30ClientAPI: TFB30ClientAPI;
   public
     constructor Create(api: TFB30ClientAPI; cs: IBatchCompletionState);
     destructor Destroy; override;
     {IBatchCompletion}
+    function getErrorStatus(var RowNo: integer; var status: IStatus): boolean;
     function getTotalProcessed: cardinal;
     function getState(updateNo: cardinal): TBatchCompletionState;
     function getStatusMessage(updateNo: cardinal): AnsiString;
@@ -330,6 +331,43 @@ begin
   inherited Destroy;
 end;
 
+function TBatchCompletion.getErrorStatus(var RowNo: integer; var status: IStatus
+  ): boolean;
+var i: integer;
+  upcount: cardinal;
+  state: integer;
+  FBStatus: Firebird.IStatus;
+begin
+  Result := false;
+  RowNo := -1;
+  FBStatus := nil;
+  with FFirebird30ClientAPI do
+  begin
+    upcount := FCompletionState.getSize(StatusIntf);
+    Check4DataBaseError;
+    for i := 0 to upcount - 1 do
+    begin
+      state := FCompletionState.getState(StatusIntf,i);
+      if state = Firebird.IBatchCompletionState.EXECUTE_FAILED then
+      begin
+        RowNo := i+1;
+        FBStatus := MasterIntf.getStatus;
+        try
+          FCompletionState.getStatus(StatusIntf,FBStatus,i);
+          Check4DataBaseError;
+        except
+          FBStatus.dispose;
+          raise
+        end;
+        status := TFB30StatusObject.Create(FFirebird30ClientAPI,FBStatus,
+                      Format(SBatchCompletionError,[RowNo]));
+        Result := true;
+        break;
+      end;
+    end;
+  end;
+end;
+
 function TBatchCompletion.getTotalProcessed: cardinal;
 begin
   with FFirebird30ClientAPI do
@@ -381,7 +419,7 @@ begin
   begin
     upcount := FCompletionState.getSize(StatusIntf);
     Check4DataBaseError;
-    for i := 1 to upcount do
+    for i := 0 to upcount -1  do
     begin
       state := FCompletionState.getState(StatusIntf,i);
       if state = Firebird.IBatchCompletionState.EXECUTE_FAILED then
@@ -1338,8 +1376,19 @@ function TFB30Statement.InternalExecute(action: TExecuteActions;
     end;
   end;
 
+  procedure Check4BatchCompletionError;
+  var status: IStatus;
+      RowNo: integer;
+  begin
+    {Raise an exception if there was an error reported in the BatchCompletion}
+    if (FBatchCompletion <> nil) and FBatchCompletion.getErrorStatus(RowNo,status) then
+      raise EIBInterBaseError.Create(status);
+  end;
+
   procedure ExecuteBatchQuery;
   var cs: Firebird.IBatchCompletionState;
+      RowNo: integer;
+      Msg: AnsiString;
   begin
     with FFirebird30ClientAPI do
     begin
@@ -1350,6 +1399,7 @@ function TFB30Statement.InternalExecute(action: TExecuteActions;
       FBatch := nil;
       FBatchCompletion := TBatchCompletion.Create(FFirebird30ClientAPI,cs);
       FStatisticsAvailable := SavePerfStats(FAfterStats);
+      Check4BatchCompletionError;
     end;
   end;
 
