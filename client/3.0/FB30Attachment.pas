@@ -101,6 +101,7 @@ type
     function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IArrayMetaData; override;
     procedure getFBVersion(version: TStrings);
     function HasDecFloatSupport: boolean; override;
+    function HasBatchMode: boolean; override;
 
     {Time Zone Support}
     function GetTimeZoneServices: ITimeZoneServices; override;
@@ -432,6 +433,12 @@ function TFB30Attachment.HasDecFloatSupport: boolean;
 begin
   Result := (FFirebird30ClientAPI.GetClientMajor >= 4) and
    (GetODSMajorVersion >= 13);
+end;
+
+function TFB30Attachment.HasBatchMode: boolean;
+begin
+  Result := FFirebird30ClientAPI.Firebird4orLater and
+     (GetODSMajorVersion >= 13);
 end;
 
 function TFB30Attachment.GetTimeZoneServices: ITimeZoneServices;

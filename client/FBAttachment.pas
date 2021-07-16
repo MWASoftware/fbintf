@@ -153,6 +153,7 @@ type
     function HasDecFloatSupport: boolean; virtual;
     function GetInlineBlobLimit: integer;
     procedure SetInlineBlobLimit(limit: integer);
+    function HasBatchMode: boolean; virtual;
 
   public
     {Character Sets}
@@ -881,6 +882,11 @@ end;
 procedure TFBAttachment.SetInlineBlobLimit(limit: integer);
 begin
   FInlineBlobLimit := limit;
+end;
+
+function TFBAttachment.HasBatchMode: boolean;
+begin
+  Result := false;
 end;
 
 function TFBAttachment.HasDefaultCharSet: boolean;

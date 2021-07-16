@@ -1115,6 +1115,7 @@ type
     procedure getFBVersion(version: TStrings);
     function HasActivity: boolean;
     function HasDecFloatSupport: boolean;
+    function HasBatchMode: boolean;
 
     {Character Sets}
     function HasDefaultCharSet: boolean;

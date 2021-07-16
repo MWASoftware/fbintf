@@ -396,7 +396,7 @@ begin
       ByName('LAST_NAME').AsString := 'Doe';
       ByName('PHONE_EXT').AsString := '';
       ByName('HIRE_DATE').AsDateTime := EncodeDate(2015,4,2);
-      ByName('DEPT_NO').AsString := '600';
+//      ByName('DEPT_NO').AsString := '600';
       ByName('JOB_CODE').AsString := 'Eng';
       ByName('JOB_GRADE').AsInteger := 4;
       ByName('JOB_COUNTRY').AsString := 'England';
@@ -410,7 +410,7 @@ begin
       ByName('LAST_NAME').AsString := 'SmithAndJonesFamily1';  //Longest Name
       ByName('PHONE_EXT').AsString := '';
       ByName('HIRE_DATE').AsDateTime := EncodeDate(2015,4,3);
-      ByName('DEPT_NO').AsString := '600';
+//      ByName('DEPT_NO').AsString := '600';
       ByName('JOB_CODE').AsString := 'Eng';
       ByName('JOB_GRADE').AsInteger := 4;
       ByName('JOB_COUNTRY').AsString := 'England';
@@ -446,7 +446,7 @@ begin
   writeln(OutFile,'Opening ',Owner.GetEmployeeDatabaseName);
   Attachment := FirebirdAPI.OpenDatabase(Owner.GetEmployeeDatabaseName,DPB);
 
-  if (FirebirdAPI.GetClientMajor < 4) or (Attachment.GetODSMajorVersion < 13) then
+  if not Attachment.HasBatchMode then
     writeln(OutFile,'Skipping test for Firebird 4 and later')
   else
   begin

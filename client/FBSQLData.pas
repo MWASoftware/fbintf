@@ -425,6 +425,7 @@ type
     procedure Clear;
     function GetModified: boolean; override;
     function GetAsPointer: Pointer;
+    function GetAsString: AnsiString; override;
     procedure SetName(Value: AnsiString); override;
     procedure SetIsNull(Value: Boolean);  override;
     procedure SetIsNullable(Value: Boolean); override;
@@ -2465,6 +2466,22 @@ begin
   IsNull := false; {Assume that we get the pointer in order to set a value}
   Changed;
   Result := inherited GetAsPointer;
+end;
+
+function TSQLParam.GetAsString: AnsiString;
+var rs: RawByteString;
+begin
+  Result := '';
+  if (SQLType = SQL_VARYING) and not IsNull then
+  {SQLData points to start of string - default is to length word}
+  begin
+    CheckActive;
+    SetString(rs,PAnsiChar(SQLData),DataLength);
+    SetCodePage(rs,GetCodePage,false);
+    Result := rs;
+  end
+  else
+    Result := inherited GetAsString;
 end;
 
 procedure TSQLParam.SetName(Value: AnsiString);

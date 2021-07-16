@@ -266,6 +266,7 @@ Scale = 0
 Charset id = 0
 Not Null
 Size = 2
+Value = 0
 
 EMP_NO = 8
 FIRST_NAME = Leslie
@@ -289,6 +290,7 @@ Scale = 0
 Charset id = 0
 Not Null
 Size = 2
+Value = 0
 
 EMP_NO = 8
 FIRST_NAME = Leslie
@@ -491,6 +493,7 @@ Scale = 0
 Charset id = 0
 Not Null
 Size = 2
+Value = 0
 
 EMP_NO = 8
 FIRST_NAME = Leslie
@@ -514,6 +517,7 @@ Scale = 0
 Charset id = 0
 Not Null
 Size = 2
+Value = 0
 
 EMP_NO = 8
 FIRST_NAME = Leslie
@@ -1066,6 +1070,7 @@ Scale = 0
 Charset id = 0
 Not Null
 Size = 4
+Value = 0
 
 SQLType =SQL_VARYING
 sub type = 0
@@ -1113,6 +1118,7 @@ Scale = 0
 Charset id = 0
 Not Null
 Size = 4
+Value = 0
 
 ROWID = 1
 FIXEDPOINT = 20.28
@@ -1165,6 +1171,7 @@ Scale = 0
 Charset id = 0
 Not Null
 Size = 4
+Value = 0
 
 SQLType =SQL_VARYING
 sub type = 0
@@ -1542,6 +1549,7 @@ Scale = 0
 Charset id = 0
 Not Null
 Size = 4
+Value = 0
 
 SQLType =SQL_VARYING
 sub type = 0
@@ -1589,6 +1597,7 @@ Scale = 0
 Charset id = 0
 Not Null
 Size = 4
+Value = 0
 
 ROWID = 1
 FIXEDPOINT = 20.28
@@ -1641,6 +1650,7 @@ Scale = 0
 Charset id = 0
 Not Null
 Size = 4
+Value = 0
 
 SQLType =SQL_VARYING
 sub type = 0
@@ -2018,6 +2028,7 @@ Scale = 0
 Charset id = 0
 Not Null
 Size = 4
+Value = 0
 
 SQLType =SQL_VARYING
 sub type = 0
@@ -2065,6 +2076,7 @@ Scale = 0
 Charset id = 0
 Not Null
 Size = 4
+Value = 0
 
 ROWID = 1
 FIXEDPOINT = 20.28
@@ -2117,6 +2129,7 @@ Scale = 0
 Charset id = 0
 Not Null
 Size = 4
+Value = 0
 
 SQLType =SQL_VARYING
 sub type = 0
@@ -2411,6 +2424,7 @@ Scale = 0
 Charset id = 0
 Not Null
 Size = 4
+Value = 0
 
 SQLType =SQL_VARYING
 sub type = 0
@@ -2672,6 +2686,7 @@ Scale = 0
 Charset id = 0
 Not Null
 Size = 4
+Value = 0
 
 SQLType =SQL_VARYING
 sub type = 0
@@ -2852,6 +2867,7 @@ Scale = 0
 Charset id = 0
 Not Null
 Size = 4
+Value = 0
 
 SQLType =SQL_VARYING
 sub type = 0
@@ -2900,6 +2916,71 @@ Scale = 0
 Charset id = 4
 Nullable
 Size = 16
+
+Show Param Values
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+Value = 1
+
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = TITLE
+Scale = 0
+Charset id = 4
+Nullable
+Size = 128
+Value = Blob Test ©€
+
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = NOTES
+Scale = 0
+Charset id = 4
+Nullable
+Size = 256
+Value = Écoute moi
+
+SQLType =SQL_VARYING
+sub type = 1
+Field Name = BLOBDATA
+Scale = 0
+Charset id = 4
+Nullable
+Size = 8192
+Value = Some German Special Characters like ÖÄÜöäüß
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = BLOBDATA2
+Scale = 0
+Charset id = 4
+Nullable
+Size = 8
+Value = Some German Special Characters like ÖÄÜöäüß
+
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = INCLEAR
+Scale = 0
+Charset id = 1
+Nullable
+Size = 16
+Value = Test�
+
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = FIXEDWIDTH
+Scale = 0
+Charset id = 4
+Nullable
+Size = 16
+Value = É
 
 Connection Character Set UTF8
 ROWID = 1
