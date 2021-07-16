@@ -134,9 +134,9 @@ uses
 const
   {Interface version information}
   FBIntf_Major = 1;
-  FBIntf_Minor = 2;
+  FBIntf_Minor = 3;
   FBIntf_Release = 1;
-  FBIntf_Version = '1.2.1';
+  FBIntf_Version = '1.3.1';
 
 const
   {DPB, TPB and SPB Parameter Block Name Prefixes}

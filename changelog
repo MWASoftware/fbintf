@@ -1,4 +1,4 @@
-FBINTF Change Log  version          (1.2-2 Build 12552) Wed, 09 Jun 2021 13:05:40 +0100
+FBINTF Change Log  version          (1.3-1 Build 12577) Thu, 15 Jul 2021 14:44:08 +0100
 
 1. Integer decodes in information blocks (e.g. IDBInfoItem) widened from 32 bit to 64-bit integers.
 
