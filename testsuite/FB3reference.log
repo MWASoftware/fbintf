@@ -568,10 +568,10 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 19,693,296
+Current memory = 19,693,312
 Delta memory = 4,480
-Max memory = 19,755,408
-Elapsed time= 0.002 sec
+Max memory = 19,755,424
+Elapsed time= 0.001 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
@@ -2722,9 +2722,9 @@ Database is Read/Write
 Database Created: 09/1/2020 13:13:45
 Pages Used = 297
 Pages Free = 10
-Server Memory = 19195648
+Server Memory = 19195664
 Forced Writes  = 1
-Max Memory  = 19316160
+Max Memory  = 19316176
 Num Buffers  = 2048
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
@@ -3242,6 +3242,12 @@ Skipping test for Firebird 4 and later
 ------------------------------------------------------
 Running Test 19: Batch Update and Insert Queries
 Opening inet://localhost/employee
+Skipping test for Firebird 4 and later
+
+
+------------------------------------------------------
+Running Test 20: Stress Test IBatch interface
+ FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V3.0.5.33220 Firebird 3.0"
 Skipping test for Firebird 4 and later
 
 

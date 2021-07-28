@@ -15,20 +15,16 @@ FBINTF Change Log  version          (1.3-1 Build 12582) Fri, 16 Jul 2021 11:18:1
 
 3. Support for Firebird 4 IBatch interface added. This is largely transparent to the API
    user as the functionality is embedded in the implementation of the IStatement
-   interface, where there are now two overloaded versions of the Execute method:
+   interface. Three new functions are defined:
 
-    function Execute(aTransaction: ITransaction=nil): IResults; overload;
-    function Execute(action: TExecuteActions; aTransaction: ITransaction=nil): IResults; overload;
-
-   TExecuteActions = (eaApply, {Default action - executes query}
-                     eaDefer, {Save current param values for later execution and clear parameter block}
-                     eaApplyIgnoreCurrent); {As eaApply, except that current param values are not applied}
+    function AddToBatch(ExceptionOnError: boolean=true): TStatusCode;
+    function ExecuteBatch(aTransaction: ITransaction=nil): IBatchCompletion;
+    procedure CancelBatch;
 
    Also
 
     function IsInBatchMode: boolean;        {true after call to execute(eaDefer)}
     function HasBatchMode: boolean;         {true if and only if IBatch Supported}
-    function GetBatchCompletion: IBatchCompletion; (returns interface to batch completion state}
 
    For more information see the User Guide.
 
@@ -36,6 +32,9 @@ FBINTF Change Log  version          (1.3-1 Build 12582) Fri, 16 Jul 2021 11:18:1
    provided with the EIBInterBaseError now include all three parts.
 
 5. Firebird.pas and include files updated to Firebird 4.0.0
+
+6. New IStatement method: function GetSQLStatementTypeName: AnsiString;
+   Returns SQL Statement type as a text string;
 
 FBINTF Change Log  version          (1.2-1 Build 12552) Wed, 09 Jun 2021 13:05:40 +0100
 

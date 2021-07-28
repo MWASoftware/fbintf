@@ -564,7 +564,7 @@ FULL_NAME = Johnson, Leslie
 Current memory = 948,560
 Delta memory = 1,400
 Max memory = 992,504
-Elapsed time= 0.003 sec
+Elapsed time= 0.002 sec
 Cpu = 0.000 sec
 Buffers = 75
 Reads = 0
@@ -3231,6 +3231,12 @@ Skipping test for Firebird 4 and later
 ------------------------------------------------------
 Running Test 19: Batch Update and Insert Queries
 Opening localhost:employee
+Skipping test for Firebird 4 and later
+
+
+------------------------------------------------------
+Running Test 20: Stress Test IBatch interface
+ FBVersion = Firebird/linux AMD64 (access method), version "LI-V2.5.9.27139 Firebird 2.5"
 Skipping test for Firebird 4 and later
 
 

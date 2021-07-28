@@ -569,14 +569,14 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 19,763,536
+Current memory = 19,767,232
 Delta memory = 4,464
-Max memory = 19,809,408
-Elapsed time= 0.001 sec
+Max memory = 19,813,104
+Elapsed time= 0.002 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
-Writes = 1
+Writes = 0
 Fetches = 3
 Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
 Relation Name = EMPLOYEE
@@ -2711,7 +2711,7 @@ MYARRAY = Array: (0,-1: A50) (0,0: A51) (0,1: A52) (0,2: A53) (0,3: A54) (0,4: A
 ------------------------------------------------------
 Running Test 9: Database Information tests
 Database ID = 4 FB = /opt/firebird4.0.0/examples/empbuild/employee.fdb SN = zeus
-Pages =346
+Pages =1075
 Base Level = 13,4,0,3,
 Implementation = 11,7,0,3,66,1,66,
 Reserved = 0
@@ -2721,18 +2721,18 @@ Page Size = 8192
 Version = 1: LI-V6.3.0.2496 Firebird 4.0
 Database is Read/Write
 Database Created: 29/5/2021 16:47:30
-Pages Used = 310
-Pages Free = 36
-Server Memory = 19481792
+Pages Used = 314
+Pages Free = 761
+Server Memory = 19483648
 Forced Writes  = 1
-Max Memory  = 19627808
+Max Memory  = 19629664
 Num Buffers  = 2048
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
 Active Transaction Count = 0
-Fetches  = 1634
+Fetches  = 1645
 Writes  = 8
-Reads  = 91
+Reads  = 92
 Page Writes  = 4
 Record Version Removals Operation Counts
 
@@ -2756,7 +2756,7 @@ Count = 2
 Table ID = 12
 Count = 24
 Table ID = 18
-Count = 805
+Count = 813
 Table ID = 20
 Count = 5
 Table ID = 28
@@ -2768,7 +2768,7 @@ Count = 1
 
 Sequential Table Scans Operation Counts
 Table ID = 0
-Count = 98
+Count = 100
 Table ID = 1
 Count = 24
 
@@ -4421,17 +4421,151 @@ LANGUAGE_REQ = Array: (1: Eng) (2: Fra) (3: ) (4: ) (5: )
 Test Error Handling
 Error reported (as expected) when changing param type: Cannot change SQL Type from SQL_TIMESTAMP to SQL_VARYING
 Test Error Handling - Update returning should fail
-Error reported (as expected) when defering update returning query: Query Action only valid for an Update or Insert Query
+Error reported (as expected) when defering update returning query: This query type (SQL_ExecProcedure) cannot be batched
 Error handling when Insert rows - duplicate key
 Error reported when inserting: Error Processing update/insert batch on row number 2 - violation of PRIMARY or UNIQUE KEY constraint "INTEG_27" on table "EMPLOYEE"
 -Problematic key value is ("EMP_NO" = 150)
 Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
 Batch Completion Info
-Total rows processed = 2
+Total rows processed = 3
 Updated Records = 1
 Row 1 State = bcNoMoreErrors Msg = 
 Row 2 State = bcExecuteFailed Msg = violation of PRIMARY or UNIQUE KEY constraint "INTEG_27" on table "EMPLOYEE"
 -Problematic key value is ("EMP_NO" = 150)
+Row 3 State = bcNoMoreErrors Msg = 
+
+
+------------------------------------------------------
+Running Test 20: Stress Test IBatch interface
+ FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.0.2496 Firebird 4.0"
+Intermediate Apply Batch on row 4085
+Batch Completion Info
+Total rows processed = 4084
+Updated Records = 4084
+Row 4084 State = bcNoMoreErrors Msg = 
+Intermediate Apply Batch on row 8169
+Batch Completion Info
+Total rows processed = 4084
+Updated Records = 4084
+Row 4084 State = bcNoMoreErrors Msg = 
+Intermediate Apply Batch on row 12253
+Batch Completion Info
+Total rows processed = 4084
+Updated Records = 4084
+Row 4084 State = bcNoMoreErrors Msg = 
+Intermediate Apply Batch on row 16337
+Batch Completion Info
+Total rows processed = 4084
+Updated Records = 4084
+Row 4084 State = bcNoMoreErrors Msg = 
+Intermediate Apply Batch on row 20421
+Batch Completion Info
+Total rows processed = 4084
+Updated Records = 4084
+Row 4084 State = bcNoMoreErrors Msg = 
+Intermediate Apply Batch on row 24505
+Batch Completion Info
+Total rows processed = 4084
+Updated Records = 4084
+Row 4084 State = bcNoMoreErrors Msg = 
+Intermediate Apply Batch on row 28589
+Batch Completion Info
+Total rows processed = 4084
+Updated Records = 4084
+Row 4084 State = bcNoMoreErrors Msg = 
+Intermediate Apply Batch on row 32673
+Batch Completion Info
+Total rows processed = 4084
+Updated Records = 4084
+Row 4084 State = bcNoMoreErrors Msg = 
+Intermediate Apply Batch on row 36757
+Batch Completion Info
+Total rows processed = 4084
+Updated Records = 4084
+Row 4084 State = bcNoMoreErrors Msg = 
+Intermediate Apply Batch on row 40841
+Batch Completion Info
+Total rows processed = 4084
+Updated Records = 4084
+Row 4084 State = bcNoMoreErrors Msg = 
+Intermediate Apply Batch on row 44925
+Batch Completion Info
+Total rows processed = 4084
+Updated Records = 4084
+Row 4084 State = bcNoMoreErrors Msg = 
+Intermediate Apply Batch on row 49009
+Batch Completion Info
+Total rows processed = 4084
+Updated Records = 4084
+Row 4084 State = bcNoMoreErrors Msg = 
+Intermediate Apply Batch on row 53093
+Batch Completion Info
+Total rows processed = 4084
+Updated Records = 4084
+Row 4084 State = bcNoMoreErrors Msg = 
+Intermediate Apply Batch on row 57177
+Batch Completion Info
+Total rows processed = 4084
+Updated Records = 4084
+Row 4084 State = bcNoMoreErrors Msg = 
+Intermediate Apply Batch on row 61261
+Batch Completion Info
+Total rows processed = 4084
+Updated Records = 4084
+Row 4084 State = bcNoMoreErrors Msg = 
+Intermediate Apply Batch on row 65345
+Batch Completion Info
+Total rows processed = 4084
+Updated Records = 4084
+Row 4084 State = bcNoMoreErrors Msg = 
+Intermediate Apply Batch on row 69429
+Batch Completion Info
+Total rows processed = 4084
+Updated Records = 4084
+Row 4084 State = bcNoMoreErrors Msg = 
+Intermediate Apply Batch on row 73513
+Batch Completion Info
+Total rows processed = 4084
+Updated Records = 4084
+Row 4084 State = bcNoMoreErrors Msg = 
+Intermediate Apply Batch on row 77597
+Batch Completion Info
+Total rows processed = 4084
+Updated Records = 4084
+Row 4084 State = bcNoMoreErrors Msg = 
+Intermediate Apply Batch on row 81681
+Batch Completion Info
+Total rows processed = 4084
+Updated Records = 4084
+Row 4084 State = bcNoMoreErrors Msg = 
+Intermediate Apply Batch on row 85765
+Batch Completion Info
+Total rows processed = 4084
+Updated Records = 4084
+Row 4084 State = bcNoMoreErrors Msg = 
+Intermediate Apply Batch on row 89849
+Batch Completion Info
+Total rows processed = 4084
+Updated Records = 4084
+Row 4084 State = bcNoMoreErrors Msg = 
+Intermediate Apply Batch on row 93933
+Batch Completion Info
+Total rows processed = 4084
+Updated Records = 4084
+Row 4084 State = bcNoMoreErrors Msg = 
+Intermediate Apply Batch on row 98017
+Batch Completion Info
+Total rows processed = 4084
+Updated Records = 4084
+Row 4084 State = bcNoMoreErrors Msg = 
+Batch Completion Info
+Total rows processed = 1984
+Updated Records = 1984
+Row 1984 State = bcNoMoreErrors Msg = 
+Rows in Dataset = 100000
+ MD5 checksum = 2014887b8ad27fbb20893a22d6e39f26
+ MD5 Dataset checksum = 2014887b8ad27fbb20893a22d6e39f26
+Test Completed Successfully
 
 
 ------------------------------------------------------

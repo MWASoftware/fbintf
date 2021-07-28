@@ -102,6 +102,7 @@ type
     function GetRowsAffected(var SelectCount, InsertCount, UpdateCount,
       DeleteCount: integer): boolean;
     function GetSQLStatementType: TIBSQLStatementTypes;
+    function GetSQLStatementTypeName: AnsiString;
     function GetSQLText: AnsiString;
     function GetProcessedSQLText: AnsiString;
     function GetSQLDialect: integer;
@@ -110,7 +111,8 @@ type
     procedure Prepare(aTransaction: ITransaction=nil); virtual;
     function Execute(aTransaction: ITransaction=nil): IResults;
     function AddToBatch(ExceptionOnError: boolean): TStatusCode; virtual;
-    function ExecuteBatch(action: TExecuteBatchActions; aTransaction: ITransaction): IBatchCompletion; virtual;
+    function ExecuteBatch(aTransaction: ITransaction): IBatchCompletion; virtual;
+    procedure CancelBatch; virtual;
     function OpenCursor(aTransaction: ITransaction=nil): IResultSet;
     function CreateBlob(paramName: AnsiString): IBlob; overload;
     function CreateBlob(index: integer): IBlob; overload;
@@ -235,6 +237,27 @@ begin
   Result := FSQLStatementType;
 end;
 
+function TFBStatement.GetSQLStatementTypeName: AnsiString;
+begin
+  case FSQLStatementType of
+  SQLUnknown: Result := 'SQL_Unknown';
+  SQLSelect: Result := 'SQL_Select';
+  SQLInsert: Result := 'SQL_Insert';
+  SQLUpdate: Result := 'SQL_Update';
+  SQLDelete: Result := 'SQL_Delete';
+  SQLDDL: Result := 'SQL_DDL';
+  SQLGetSegment: Result := 'SQL_GetSegment';
+  SQLPutSegment: Result := 'SQL_PutSegment';
+  SQLExecProcedure: Result := 'SQL_ExecProcedure';
+  SQLStartTransaction: Result := 'SQL_StartTransaction';
+  SQLCommit: Result := 'SQL_Commit';
+  SQLRollback: Result := 'SQL_Rollback';
+  SQLSelectForUpdate: Result := 'SQL_SelectForUpdate';
+  SQLSetGenerator: Result := 'SQL_SetGenerator';
+  SQLSavePoint: Result := 'SQL_SavePoint';
+  end;
+end;
+
 function TFBStatement.GetSQLText: AnsiString;
 begin
   Result := FSQL;
@@ -274,15 +297,18 @@ end;
 
 function TFBStatement.AddToBatch(ExceptionOnError: boolean): TStatusCode;
 begin
-  if not HasBatchMode then
-    IBError(ibxeBatchModeNotSupported,[]);
+  IBError(ibxeBatchModeNotSupported,[]);
 end;
 
-function TFBStatement.ExecuteBatch(action: TExecuteBatchActions;
-  aTransaction: ITransaction): IBatchCompletion;
+function TFBStatement.ExecuteBatch(aTransaction: ITransaction
+  ): IBatchCompletion;
 begin
-  if not HasBatchMode then
-    IBError(ibxeBatchModeNotSupported,[]);
+  IBError(ibxeBatchModeNotSupported,[]);
+end;
+
+procedure TFBStatement.CancelBatch;
+begin
+  IBError(ibxeBatchModeNotSupported,[]);
 end;
 
 function TFBStatement.OpenCursor(aTransaction: ITransaction): IResultSet;

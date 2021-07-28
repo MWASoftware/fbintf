@@ -752,10 +752,6 @@ type
 
   {Batch Query Execution Support}
 
-  TExecuteBatchActions = (eaApply, {Default action - executes query}
-                          eaApplyIgnoreCurrent, {As eaApply, except that current param values are not applied}
-                          eaCancel); {Cancels the current batch and exits batch mode}
-
   TBatchCompletionState = (bcExecuteFailed, bcSuccessNoInfo, bcNoMoreErrors);
 
   IBatchCompletion = interface
@@ -778,6 +774,7 @@ type
     function GetPlan: AnsiString;
     function GetRowsAffected(var SelectCount, InsertCount, UpdateCount, DeleteCount: integer): boolean;
     function GetSQLStatementType: TIBSQLStatementTypes;
+    function GetSQLStatementTypeName: AnsiString;
     function GetSQLText: AnsiString;
     function GetProcessedSQLText: AnsiString;
     function GetSQLDialect: integer;
@@ -787,7 +784,8 @@ type
     procedure Prepare(aTransaction: ITransaction=nil);
     function Execute(aTransaction: ITransaction=nil): IResults;
     function AddToBatch(ExceptionOnError: boolean=true): TStatusCode;
-    function ExecuteBatch(action: TExecuteBatchActions; aTransaction: ITransaction=nil): IBatchCompletion;
+    function ExecuteBatch(aTransaction: ITransaction=nil): IBatchCompletion;
+    procedure CancelBatch;
     function OpenCursor(aTransaction: ITransaction=nil): IResultSet;
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;

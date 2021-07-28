@@ -102,7 +102,8 @@ begin
   Statement.AddToBatch;
   Statement.GetSQLParams[0].AsDateTime := EncodeDate(2018,5,28);;
   Statement.GetSQLParams[1].AsInteger := 2;
-  BC := Statement.ExecuteBatch(eaApply);
+  Statement.AddToBatch;
+  BC := Statement.ExecuteBatch;
   WriteAffectedRows(Statement);
   WriteBatchCompletion(BC);
   Statement := Attachment.Prepare(Transaction,'Select * from EMPLOYEE Where EMP_NO in (8,2)',3);
@@ -122,7 +123,7 @@ begin
   Statement.AddToBatch;
   Statement.GetSQLParams[0].AsDateTime := EncodeDate(2019,5,28);;
   Statement.GetSQLParams[1].AsInteger := 2;
-  BC := Statement.ExecuteBatch(eaApplyIgnoreCurrent);
+  BC := Statement.ExecuteBatch;
   WriteAffectedRows(Statement);
   WriteBatchCompletion(BC);
   Statement := Attachment.Prepare(Transaction,'Select * from EMPLOYEE Where EMP_NO in (8,2)',3);
@@ -178,7 +179,8 @@ begin
     ByName('JOB_COUNTRY').AsString := 'England';
     ByName('SALARY').AsFloat := 41000.99;
   end;
-  BC := Statement.ExecuteBatch(eaApply);
+  Statement.AddToBatch;
+  BC := Statement.ExecuteBatch;
   WriteAffectedRows(Statement);
   WriteBatchCompletion(BC);
   Statement := Attachment.Prepare(Transaction,'Select * from EMPLOYEE Where EMP_NO >= 150',3);
@@ -233,7 +235,7 @@ begin
     ByName('JOB_COUNTRY').AsString := 'England';
     ByName('SALARY').AsFloat := 41000.99;
   end;
-  BC := Statement.ExecuteBatch(eaApplyIgnoreCurrent);
+  BC := Statement.ExecuteBatch;
   WriteAffectedRows(Statement);
   WriteBatchCompletion(BC);
   Statement := Attachment.Prepare(Transaction,'Select * from EMPLOYEE Where EMP_NO >= 150',3);
@@ -274,7 +276,8 @@ begin
     ar.SetAsString([2],'Fra');
     Params[7].AsArray := ar;
   end;
-  BC := Statement.ExecuteBatch(eaApply);
+  Statement.AddToBatch;
+  BC := Statement.ExecuteBatch;
   WriteAffectedRows(Statement);
   WriteBatchCompletion(BC);
   Statement := Attachment.Prepare(Transaction,'Select * from JOB Where JOB_CODE in (''ABC'',''DEF'')',3);
@@ -317,7 +320,8 @@ begin
     ar.SetAsString([2],'Fra');
     Params[7].AsArray := ar;
   end;
-  BC := Statement.ExecuteBatch(eaApply);
+  Statement.AddToBatch;
+  BC := Statement.ExecuteBatch;
   WriteAffectedRows(Statement);
   WriteBatchCompletion(BC);
   Statement := Attachment.Prepare(Transaction,'Select * from JOB Where JOB_CODE in (''ABC'',''DEF'')',3);
@@ -358,7 +362,8 @@ begin
     Statement.AddToBatch;
     Statement.GetSQLParams[0].AsString := '2018.5.28';
     Statement.GetSQLParams[1].AsInteger := 2;
-    Statement.ExecuteBatch(eaApply);
+    Statement.AddToBatch;
+    Statement.ExecuteBatch;
   except on E:Exception do
     writeln(Outfile,'Error reported (as expected) when changing param type: ' + E.Message);
   end;
@@ -368,6 +373,7 @@ begin
     Statement.GetSQLParams[0].AsDateTime := EncodeDate(2016,1,31);
     Statement.GetSQLParams[1].AsInteger := 8;
     Statement.AddToBatch;
+    Statement.ExecuteBatch;
   except on E:Exception do
     writeln(Outfile,'Error reported (as expected) when defering update returning query: ' + E.Message);
   end;
@@ -418,7 +424,8 @@ begin
       ByName('JOB_COUNTRY').AsString := 'England';
       ByName('SALARY').AsFloat := 41000.99;
     end;
-    BC := Statement.ExecuteBatch(eaApply);
+    Statement.AddToBatch;
+    BC := Statement.ExecuteBatch;
   except on E:Exception do
     writeln(Outfile,'Error reported when inserting: ' + E.Message);
   end;
