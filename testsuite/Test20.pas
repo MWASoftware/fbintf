@@ -115,7 +115,7 @@ begin
      MDUpdate(MD5Context,PAnsiChar(HashString)^,Length(HashString));
      case Statement.AddToBatch(false) of
      0: {ignore};
-     isc_dsql_error,
+     isc_dsql_error, {Why? - probably a bug in Firebird}
      isc_batch_too_big:
      begin
        BC := Statement.ExecuteBatch;

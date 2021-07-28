@@ -189,6 +189,42 @@ begin
   Transaction.Rollback;
   Transaction.Start(taRollback);
   writeln(Outfile);
+  writeln(Outfile,'Insert rows - and then cancel');
+  Statement := Attachment.PrepareWithNamedParameters(Transaction,'INSERT INTO EMPLOYEE (EMP_NO, FIRST_NAME, LAST_NAME, PHONE_EXT, HIRE_DATE,' +
+      'DEPT_NO, JOB_CODE, JOB_GRADE, JOB_COUNTRY, SALARY) '+
+      'VALUES (:EMP_NO, :FIRST_NAME, :LAST_NAME, :PHONE_EXT, :HIRE_DATE,' +
+      ':DEPT_NO, :JOB_CODE, :JOB_GRADE, :JOB_COUNTRY, :SALARY)',3);
+  with Statement.GetSQLParams do
+  begin
+    ByName('EMP_NO').AsInteger := 150;
+    ByName('FIRST_NAME').AsString := 'John';
+    ByName('LAST_NAME').AsString := 'Doe';
+    ByName('PHONE_EXT').AsString := '';
+    ByName('HIRE_DATE').AsDateTime := EncodeDate(2015,4,1);
+    ByName('DEPT_NO').AsString := '600';
+    ByName('JOB_CODE').AsString := 'Eng';
+    ByName('JOB_GRADE').AsInteger := 4;
+    ByName('JOB_COUNTRY').AsString := 'England';
+    ByName('SALARY').AsFloat := 41000.89;
+  end;
+  Statement.AddToBatch;
+  with Statement.GetSQLParams do
+  begin
+    ByName('EMP_NO').AsInteger := 151;
+    ByName('FIRST_NAME').AsString := 'Jane';
+    ByName('LAST_NAME').AsString := 'Doe';
+    ByName('PHONE_EXT').AsString := '';
+    ByName('HIRE_DATE').AsDateTime := EncodeDate(2015,4,2);
+    ByName('DEPT_NO').AsString := '600';
+    ByName('JOB_CODE').AsString := 'Eng';
+    ByName('JOB_GRADE').AsInteger := 4;
+    ByName('JOB_COUNTRY').AsString := 'England';
+    ByName('SALARY').AsFloat := 42000.89;
+  end;
+  Statement.AddToBatch;
+  writeln(Outfile,'Cancel Batch - note - next step will fail with a duplicate key if cancel fails');
+  Statement.CancelBatch;
+  writeln(Outfile);
   writeln(Outfile,'Insert rows - ignore last row');
   Statement := Attachment.PrepareWithNamedParameters(Transaction,'INSERT INTO EMPLOYEE (EMP_NO, FIRST_NAME, LAST_NAME, PHONE_EXT, HIRE_DATE,' +
       'DEPT_NO, JOB_CODE, JOB_GRADE, JOB_COUNTRY, SALARY) '+

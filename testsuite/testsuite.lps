@@ -175,19 +175,20 @@
       <Unit22>
         <Filename Value="Test19.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="404"/>
-        <CursorPos Y="377"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="204"/>
+        <CursorPos X="98" Y="225"/>
         <UsageCount Value="75"/>
+        <Loaded Value="True"/>
       </Unit22>
       <Unit23>
         <Filename Value="Test20.pas"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="118"/>
-        <CursorPos X="93" Y="140"/>
+        <CursorPos X="56" Y="118"/>
         <UsageCount Value="33"/>
-        <Loaded Value="True"/>
       </Unit23>
       <Unit24>
         <Filename Value="TestManager.pas"/>
@@ -471,7 +472,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="1012"/>
         <CursorPos Y="1028"/>
-        <UsageCount Value="13"/>
+        <UsageCount Value="12"/>
       </Unit62>
       <Unit63>
         <Filename Value="../client/FBParamBlock.pas"/>
@@ -889,7 +890,6 @@
       </Unit120>
       <Unit121>
         <Filename Value="../../ibx/testsuite/Test21.pas"/>
-        <EditorIndex Value="1"/>
         <TopLine Value="112"/>
         <CursorPos X="41" Y="114"/>
         <UsageCount Value="10"/>
@@ -950,12 +950,12 @@
     </Units>
     <JumpHistory Count="2" HistoryIndex="1">
       <Position1>
-        <Filename Value="Test20.pas"/>
-        <Caret Line="151" Column="57" TopLine="124"/>
+        <Filename Value="Test19.pas"/>
+        <Caret Line="377" TopLine="389"/>
       </Position1>
       <Position2>
-        <Filename Value="Test20.pas"/>
-        <Caret Line="103" Column="27" TopLine="79"/>
+        <Filename Value="Test19.pas"/>
+        <Caret Line="76" Column="15" TopLine="60"/>
       </Position2>
     </JumpHistory>
     <RunParams>
@@ -967,8 +967,8 @@
         <Item1 Value="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </List0>
       <List1 Name="CommandLineParameters" Count="3">
-        <Item1 Value="-t 20"/>
-        <Item2 Value="-t 19"/>
+        <Item1 Value="-t 19"/>
+        <Item2 Value="-t 20"/>
         <Item3 Value="-t 12"/>
       </List1>
       <List2 Name="WorkingDirectory" Type="File" Count="1"/>

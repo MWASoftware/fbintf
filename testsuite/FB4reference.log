@@ -576,7 +576,7 @@ Elapsed time= 0.002 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
-Writes = 0
+Writes = 1
 Fetches = 3
 Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
 Relation Name = EMPLOYEE
@@ -4323,6 +4323,9 @@ JOB_COUNTRY = England
 SALARY = 41,000.99
 FULL_NAME = SmithAndJonesFamily1, John
 
+
+Insert rows - and then cancel
+Cancel Batch - note - next step will fail with a duplicate key if cancel fails
 
 Insert rows - ignore last row
 Select Count = 0 InsertCount = 2 UpdateCount = 0 DeleteCount = 0
