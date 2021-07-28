@@ -211,6 +211,12 @@
     isc_dpb_shut_multi = $20;    
     isc_dpb_shut_single = $30;    
     isc_dpb_shut_full = $40;    
+  {*************************************** }
+  { isc_dpb_set_db_replica specific flags  }
+  {*************************************** }
+    isc_dpb_replica_none = 0;    
+    isc_dpb_replica_read_only = 1;    
+    isc_dpb_replica_read_write = 2;    
   {************************************ }
   { Bit assignments in RDB$SYSTEM_FLAG  }
   {************************************ }
@@ -447,6 +453,7 @@
     isc_spb_prp_transactions_shutdown = 43;    
     isc_spb_prp_shutdown_mode = 44;    
     isc_spb_prp_online_mode = 45;    
+    isc_spb_prp_replica_mode = 46;    
   {*******************************************
    * Parameters for isc_spb_prp_shutdown_mode *
    *            and isc_spb_prp_online_mode   *
@@ -470,6 +477,12 @@
    ***************************************** }
     isc_spb_prp_am_readonly = 39;    
     isc_spb_prp_am_readwrite = 40;    
+  {******************************************
+   * Parameters for isc_spb_prp_replica_mode *
+   ****************************************** }
+    isc_spb_prp_rm_none = 0;    
+    isc_spb_prp_rm_readonly = 1;    
+    isc_spb_prp_rm_readwrite = 2;    
   {****************************************
    * Parameters for isc_action_svc_repair  *
    **************************************** }
@@ -529,6 +542,7 @@
     isc_spb_res_replace = $1000;    
     isc_spb_res_create = $2000;    
     isc_spb_res_use_all_space = $4000;    
+    isc_spb_res_replica_mode = 20;    
   {****************************************
    * Parameters for isc_action_svc_validate *
    **************************************** }
@@ -542,6 +556,12 @@
    ***************************************** }
     isc_spb_res_am_readonly = isc_spb_prp_am_readonly;    
     isc_spb_res_am_readwrite = isc_spb_prp_am_readwrite;    
+  {******************************************
+   * Parameters for isc_spb_res_replica_mode *
+   ****************************************** }
+    isc_spb_res_rm_none = isc_spb_prp_rm_none;    
+    isc_spb_res_rm_readonly = isc_spb_prp_rm_readonly;    
+    isc_spb_res_rm_readwrite = isc_spb_prp_rm_readwrite;    
   {******************************************
    * Parameters for isc_info_svc_svr_db_info *
    ****************************************** }
@@ -573,6 +593,7 @@
     isc_spb_nbk_guid = 8;    
     isc_spb_nbk_no_triggers = $01;    
     isc_spb_nbk_inplace = $02;    
+    isc_spb_nbk_sequence = $04;    
   {**************************************
    * Parameters for isc_action_svc_trace *
    ************************************** }
@@ -675,6 +696,7 @@
     fb_shutrsn_signal = -(5);    
     fb_shutrsn_services = -(6);    
     fb_shutrsn_exit_called = -(7);    
+    fb_shutrsn_emergency = -(8);    
   {************************************** }
   { Cancel types for fb_cancel_operation  }
   {************************************** }

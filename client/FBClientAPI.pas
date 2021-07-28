@@ -126,8 +126,8 @@ type
     function StatusVector: PStatusVector; virtual; abstract;
 
     {IStatus}
-    function GetIBErrorCode: Long;
-    function Getsqlcode: Long;
+    function GetIBErrorCode: TStatusCode;
+    function Getsqlcode: TStatusCode;
     function GetMessage: AnsiString;
     function CheckStatusVector(ErrorCodes: array of TFBStatusCode): Boolean;
     function GetIBDataBaseErrorMessages: TIBDataBaseErrorMessages;
@@ -577,12 +577,12 @@ begin
   FIBDataBaseErrorMessages := [ShowSQLCode, ShowSQLMessage, ShowIBMessage];
 end;
 
-function TFBStatus.GetIBErrorCode: Long;
+function TFBStatus.GetIBErrorCode: TStatusCode;
 begin
   Result := StatusVector^[1];
 end;
 
-function TFBStatus.Getsqlcode: Long;
+function TFBStatus.Getsqlcode: TStatusCode;
 begin
   with FOwner do
     Result := isc_sqlcode(PISC_STATUS(StatusVector));
