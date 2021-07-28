@@ -270,6 +270,7 @@ type
     FResultSet: Firebird.IResultSet;
     FCursorSeqNo: integer;
     FBatch: Firebird.IBatch;
+    FBatchCompletion: IBatchCompletion;
   protected
     procedure CheckHandle; override;
     procedure CheckBatchModeAvailable;
@@ -306,6 +307,7 @@ type
     function ExecuteBatch(aTransaction: ITransaction
       ): IBatchCompletion; override;
     procedure CancelBatch; override;
+    function GetBatchCompletion: IBatchCompletion; override;
 end;
 
 implementation
@@ -1365,6 +1367,7 @@ function TFB30Statement.InternalExecute(aTransaction: ITransaction): IResults;
 
 begin
   Result := nil;
+  FBatchCompletion := nil;
   FBOF := false;
   FEOF := false;
   FSingleResults := false;
@@ -1416,7 +1419,8 @@ begin
   if FSQLStatementType <> SQLSelect then
    IBError(ibxeIsASelectStatement,[]);
 
- CheckTransaction(aTransaction);
+  FBatchCompletion := nil;
+  CheckTransaction(aTransaction);
   if not FPrepared then
     InternalPrepare;
   CheckHandle;
@@ -1681,6 +1685,7 @@ function TFB30Statement.AddToBatch(ExceptionOnError: boolean): TStatusCode;
 var BatchPB: TXPBParameterBlock;
 begin
   Result := 0;
+  FBatchCompletion := nil;
   CheckBatchModeAvailable;
   with FFirebird30ClientAPI do
   begin
@@ -1729,6 +1734,7 @@ end;
 var cs: Firebird.IBatchCompletionState;
 
 begin
+  Result := nil;
   if FBatch = nil then
     IBError(ibxeNotInBatchMode,[]);
 
@@ -1740,11 +1746,12 @@ begin
     else
       cs := FBatch.execute(StatusIntf,(aTransaction as TFB30Transaction).TransactionIntf);
     Check4DataBaseError;
-    Result := TBatchCompletion.Create(FFirebird30ClientAPI,cs);
+    FBatchCompletion := TBatchCompletion.Create(FFirebird30ClientAPI,cs);
     FStatisticsAvailable := SavePerfStats(FAfterStats);
     FBatch.release;
     FBatch := nil;
-    Check4BatchCompletionError(Result);
+    Check4BatchCompletionError(FBatchCompletion);
+    Result := FBatchCompletion;
   end;
 end;
 
@@ -1754,6 +1761,11 @@ begin
     IBError(ibxeNotInBatchMode,[]);
   FBatch.release;
   FBatch := nil;
+end;
+
+function TFB30Statement.GetBatchCompletion: IBatchCompletion;
+begin
+  Result := FBatchCompletion;
 end;
 
 function TFB30Statement.IsPrepared: boolean;

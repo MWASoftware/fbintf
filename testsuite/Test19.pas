@@ -461,12 +461,14 @@ begin
       ByName('SALARY').AsFloat := 41000.99;
     end;
     Statement.AddToBatch;
-    BC := Statement.ExecuteBatch;
+    Statement.ExecuteBatch;
   except on E:Exception do
     writeln(Outfile,'Error reported when inserting: ' + E.Message);
   end;
   WriteAffectedRows(Statement);
-  WriteBatchCompletion(BC);
+  BC := Statement.GetBatchCompletion;
+  if BC <> nil then
+    WriteBatchCompletion(BC);
   Transaction.Rollback;
 end;
 

@@ -113,6 +113,7 @@ type
     function AddToBatch(ExceptionOnError: boolean): TStatusCode; virtual;
     function ExecuteBatch(aTransaction: ITransaction): IBatchCompletion; virtual;
     procedure CancelBatch; virtual;
+    function GetBatchCompletion: IBatchCompletion; virtual;
     function OpenCursor(aTransaction: ITransaction=nil): IResultSet;
     function CreateBlob(paramName: AnsiString): IBlob; overload;
     function CreateBlob(index: integer): IBlob; overload;
@@ -307,6 +308,11 @@ begin
 end;
 
 procedure TFBStatement.CancelBatch;
+begin
+  IBError(ibxeBatchModeNotSupported,[]);
+end;
+
+function TFBStatement.GetBatchCompletion: IBatchCompletion;
 begin
   IBError(ibxeBatchModeNotSupported,[]);
 end;

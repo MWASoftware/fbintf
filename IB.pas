@@ -779,13 +779,14 @@ type
     function GetProcessedSQLText: AnsiString;
     function GetSQLDialect: integer;
     function IsPrepared: boolean;
-    function IsInBatchMode: boolean;
     function HasBatchMode: boolean;
+    function IsInBatchMode: boolean;
     procedure Prepare(aTransaction: ITransaction=nil);
     function Execute(aTransaction: ITransaction=nil): IResults;
     function AddToBatch(ExceptionOnError: boolean=true): TStatusCode;
     function ExecuteBatch(aTransaction: ITransaction=nil): IBatchCompletion;
     procedure CancelBatch;
+    function GetBatchCompletion: IBatchCompletion;
     function OpenCursor(aTransaction: ITransaction=nil): IResultSet;
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
