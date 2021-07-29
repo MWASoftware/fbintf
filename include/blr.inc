@@ -215,7 +215,8 @@ in define line 36 *)
       blr_index = 107;      
       blr_ansi_like = 108;      
       blr_scrollable = 109;      
-    { unused codes: 110..117 }
+      blr_lateral_rse = 110;      
+    { unused codes: 111..117 }
     { changed from 88 to avoid conflict with blr_parameter3  }
       blr_run_count = 118;      
       blr_rs_stream = 119;      
@@ -386,13 +387,16 @@ in define line 36 *)
       blr_window_win_exclusion = 7;      
       blr_default = 212;      
       blr_store3 = 213;      
+    { subcodes of blr_store3 }
+      blr_store_override_user = 1;      
+      blr_store_override_system = 2;      
       blr_local_timestamp = 214;      
       blr_local_time = 215;      
       blr_at = 216;      
     { subcodes of blr_at }
       blr_at_local = 0;      
-      blr_at_zone = 1;   
- 	  blr_marks = 217;
+      blr_at_zone = 1;      
+      blr_marks = 217;      { mark some blr code with specific flags }
 {$endif}
     { FIREBIRD_IMPL_BLR_H }
 

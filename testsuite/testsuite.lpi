@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="11"/>
+    <Version Value="12"/>
     <General>
       <Flags>
         <MainUnitHasCreateFormStatements Value="False"/>
+        <MainUnitHasTitleStatement Value="False"/>
+        <MainUnitHasScaledStatement Value="False"/>
+        <CompatibilityMode Value="True"/>
       </Flags>
       <SessionStorage Value="InProjectDir"/>
-      <MainUnit Value="0"/>
       <Title Value="Firebird API Test Suite"/>
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
@@ -29,7 +31,7 @@
         <UserOverrides Count="3">
           <Variable0 Name="PROMPT_AT_END" Value="YES"/>
           <Variable1 Name="FIREBIRD" Value="/opt/firebird4.0.0"/>
-          <Variable2 Name="LD_LIBRARY_PATH" Value="//opt/firebird4.0.0/lib"/>
+          <Variable2 Name="LD_LIBRARY_PATH" Value="/opt/firebird4.0.0/lib"/>
         </UserOverrides>
       </environment>
       <FormatVersion Value="2"/>
@@ -42,7 +44,7 @@
             <UserOverrides Count="3">
               <Variable0 Name="PROMPT_AT_END" Value="YES"/>
               <Variable1 Name="FIREBIRD" Value="/opt/firebird4.0.0"/>
-              <Variable2 Name="LD_LIBRARY_PATH" Value="//opt/firebird4.0.0/lib"/>
+              <Variable2 Name="LD_LIBRARY_PATH" Value="/opt/firebird4.0.0/lib"/>
             </UserOverrides>
           </environment>
         </Mode0>
@@ -53,7 +55,7 @@
         <PackageName Value="fbintf"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="23">
+    <Units Count="24">
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -146,6 +148,10 @@
         <Filename Value="Test19.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit22>
+      <Unit23>
+        <Filename Value="Test20.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit23>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -174,9 +180,6 @@
     </Linking>
     <Other>
       <CustomOptions Value="-dINIDE"/>
-      <OtherDefines Count="1">
-        <Define0 Value="INIDE"/>
-      </OtherDefines>
     </Other>
   </CompilerOptions>
   <Debugging>

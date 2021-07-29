@@ -160,7 +160,10 @@ type
       ibxInvalidQueryAction,
       ibxeSQLTypeUnchangeable,
       ibxeCannotIncreaseMetadatasize,
-      ibxeBatchModeNotSupported
+      ibxeBatchModeNotSupported,
+      ibxeNotInBatchMode,
+      ibxeInBatchMode,
+      ibxeInvalidBatchQuery
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -272,6 +275,9 @@ resourcestring
   SSQLTypeUnchangeable = 'Cannot change SQL Type from %s to %s';
   SCannotIncreaseMetadatasize = 'Cannot increase Metadata size from %d to %d';
   SBatchModeNotSupported = 'Batch Mode is not available. Firebird 4 or later client and server is required';
+  SNotInBatchMode = 'Not in Batch Mode - have you called AddToBatch?';
+  SInBatchMode = 'Cannot Execute a Query while a Batch is pending';
+  SInvalidBatchQuery = 'This query type (%s) cannot be batched';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -359,7 +365,10 @@ const
     SInvalidQueryAction,
     SSQLTypeUnchangeable,
     SCannotIncreaseMetadatasize,
-    SBatchModeNotSupported
+    SBatchModeNotSupported,
+    SNotInBatchMode,
+    SInBatchMode,
+    SInvalidBatchQuery
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;

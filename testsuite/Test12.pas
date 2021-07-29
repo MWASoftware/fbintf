@@ -110,6 +110,8 @@ begin
     ByName('BlobData2').AsBlob := Attachment.CreateBlob(Transaction,'TestData','BlobData').SetString('Some German Special Characters like ÖÄÜöäüß');
     ByName('InClear').AsString := #$01'Test'#$0D#$C3;
   end;
+  writeln(Outfile,'Show Param Values');
+  ParamInfo(Statement.SQLParams);
   Statement.Execute;
 end;
 

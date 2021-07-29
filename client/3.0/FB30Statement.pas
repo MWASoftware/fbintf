@@ -273,13 +273,15 @@ type
     FBatchCompletion: IBatchCompletion;
   protected
     procedure CheckHandle; override;
+    procedure CheckBatchModeAvailable;
     procedure GetDSQLInfo(info_request: byte; buffer: ISQLInfoResults); override;
     procedure InternalPrepare; override;
-    function InternalExecute(action: TExecuteActions; aTransaction: ITransaction): IResults; override;
+    function InternalExecute(aTransaction: ITransaction): IResults; override;
     function InternalOpenCursor(aTransaction: ITransaction): IResultSet; override;
     procedure ProcessSQL(sql: AnsiString; GenerateParamNames: boolean; var processedSQL: AnsiString); override;
     procedure FreeHandle; override;
     procedure InternalClose(Force: boolean); override;
+    function SavePerfStats(var Stats: TPerfStatistics): boolean;
   public
     constructor Create(Attachment: TFB30Attachment; Transaction: ITransaction;
       sql: AnsiString; aSQLDialect: integer);
@@ -301,6 +303,10 @@ type
     procedure SetRetainInterfaces(aValue: boolean); override;
     function IsInBatchMode: boolean; override;
     function HasBatchMode: boolean; override;
+    function AddToBatch(ExceptionOnError: boolean): TStatusCode; override;
+    function ExecuteBatch(aTransaction: ITransaction
+      ): IBatchCompletion; override;
+    procedure CancelBatch; override;
     function GetBatchCompletion: IBatchCompletion; override;
 end;
 
@@ -310,6 +316,8 @@ uses IBUtils, FBMessages, FBBlob, FB30Blob, variants,  FBArray, FB30Array;
 
 const
   ISQL_COUNTERS = 'CurrentMemory, MaxMemory, RealTime, UserTime, Buffers, Reads, Writes, Fetches';
+
+{ EIBBatchCompletionError }
 
 { TBatchCompletion }
 
@@ -862,7 +870,7 @@ begin
       for i := 0 to Count - 1 do
       with TIBXSQLVar(Column[i]) do
       begin
-        Builder.setType(StatusIntf,i,FSQLType);
+        Builder.setType(StatusIntf,i,FSQLType+1);
         Check4DataBaseError;
         Builder.setSubType(StatusIntf,i,FSQLSubType);
         Check4DataBaseError;
@@ -1230,6 +1238,18 @@ begin
     IBError(ibxeInvalidStatementHandle,[nil]);
 end;
 
+procedure TFB30Statement.CheckBatchModeAvailable;
+begin
+  if not HasBatchMode then
+    IBError(ibxeBatchModeNotSupported,[nil]);
+  case SQLStatementType of
+  SQLInsert,
+  SQLUpdate: {OK};
+  else
+     IBError(ibxeInvalidBatchQuery,[GetSQLStatementTypeName]);
+  end;
+end;
+
 procedure TFB30Statement.GetDSQLInfo(info_request: byte; buffer: ISQLInfoResults
   );
 begin
@@ -1326,22 +1346,7 @@ begin
   Inc(FChangeSeqNo);
 end;
 
-function TFB30Statement.InternalExecute(action: TExecuteActions;
-  aTransaction: ITransaction): IResults;
-
-  function SavePerfStats(var Stats: TPerfStatistics): boolean;
-  begin
-    Result := false;
-    if FCollectStatistics then
-    with FFirebird30ClientAPI do
-    begin
-      UtilIntf.getPerfCounters(StatusIntf,
-                (GetAttachment as TFB30Attachment).AttachmentIntf,
-                ISQL_COUNTERS, @Stats);
-      Check4DataBaseError;
-      Result := true;
-    end;
-  end;
+function TFB30Statement.InternalExecute(aTransaction: ITransaction): IResults;
 
   procedure ExecuteQuery(outMetaData: Firebird.IMessageMetaData=nil; outBuffer: pointer=nil);
   begin
@@ -1359,68 +1364,16 @@ function TFB30Statement.InternalExecute(action: TExecuteActions;
     end;
   end;
 
-  procedure CreateBatch;
-  var BatchPB: TXPBParameterBlock;
-  begin
-    BatchPB := TXPBParameterBlock.Create(FFirebird30ClientAPI,Firebird.IXpbBuilder.BATCH);
-    with FFirebird30ClientAPI do
-    try
-      BatchPB.Builder.insertInt(StatusIntf,Firebird.IBatch.TAG_RECORD_COUNTS,1);
-      Check4DataBaseError;
-      FBatch := FStatementIntf.createBatch(StatusIntf,
-                                           FSQLParams.MetaData,
-                                           BatchPB.getDataLength,
-                                           BytePtr(BatchPB.getBuffer));
-      Check4DataBaseError;
-    finally
-      BatchPB.Free;
-    end;
-  end;
-
-  procedure Check4BatchCompletionError;
-  var status: IStatus;
-      RowNo: integer;
-  begin
-    {Raise an exception if there was an error reported in the BatchCompletion}
-    if (FBatchCompletion <> nil) and FBatchCompletion.getErrorStatus(RowNo,status) then
-      raise EIBInterBaseError.Create(status);
-  end;
-
-  procedure ExecuteBatchQuery;
-  var cs: Firebird.IBatchCompletionState;
-  begin
-    with FFirebird30ClientAPI do
-    begin
-      SavePerfStats(FBeforeStats);
-      cs := FBatch.execute(StatusIntf,(aTransaction as TFB30Transaction).TransactionIntf);
-      Check4DataBaseError;
-      FBatch.release;
-      FBatch := nil;
-      FBatchCompletion := TBatchCompletion.Create(FFirebird30ClientAPI,cs);
-      FStatisticsAvailable := SavePerfStats(FAfterStats);
-      Check4BatchCompletionError;
-    end;
-  end;
-
-  procedure CheckQueryAction;
-  begin
-    if action <> eaApply then
-      IBError(ibxInvalidQueryAction,[nil]);
-  end;
-
-  procedure CheckBatchModeAvailable;
-  begin
-    if not HasBatchMode then
-      IBError(ibxeBatchModeNotSupported,[nil]);
-  end;
 
 begin
   Result := nil;
+  FBatchCompletion := nil;
   FBOF := false;
   FEOF := false;
-  FBatchCompletion := nil;
   FSingleResults := false;
   FStatisticsAvailable := false;
+  if IsInBatchMode then
+    IBerror(ibxeInBatchMode,[]);
   CheckTransaction(aTransaction);
   if not FPrepared then
     InternalPrepare;
@@ -1429,6 +1382,7 @@ begin
     AddMonitor(aTransaction as TFB30Transaction);
   if (FSQLParams.FTransactionSeqNo < (FTransactionIntf as TFB30transaction).TransactionSeqNo) then
     IBError(ibxeInterfaceOutofDate,[nil]);
+
 
   try
     with FFirebird30ClientAPI do
@@ -1439,50 +1393,15 @@ begin
 
       SQLExecProcedure:
       begin
-        CheckQueryAction;
         ExecuteQuery(FSQLRecord.MetaData,FSQLRecord.MessageBuffer);
         Result := TResults.Create(FSQLRecord);
         FSingleResults := true;
       end;
 
-      SQLUpdate, SQLInsert:
-        begin
-          case action of
-          eaApply:
-            if FBatch = nil then
-              ExecuteQuery
-            else
-            begin
-              CheckBatchModeAvailable;
-              {save the current parameter values}
-              FBatch.Add(StatusIntf,1,FSQLParams.GetMessageBuffer);
-              Check4DataBaseError;
-              ExecuteBatchQuery;
-            end;
-
-          eaDefer:
-            begin
-              CheckBatchModeAvailable;
-              if FBatch = nil then
-                CreateBatch;
-              FBatch.Add(StatusIntf,1,FSQLParams.GetMessageBuffer);
-              Check4DataBaseError;
-            end;
-
-          eaApplyIgnoreCurrent:
-            begin
-              CheckBatchModeAvailable;
-              ExecuteBatchQuery;
-            end;
-          end;
-        end;
-
       else
-        CheckQueryAction;
         ExecuteQuery;
       end;
     end;
-//    FSQLParams.ReInitialise;  {reset params buffer}
   finally
     if aTransaction <> FTransactionIntf then
        RemoveMonitor(aTransaction as TFB30Transaction);
@@ -1500,7 +1419,8 @@ begin
   if FSQLStatementType <> SQLSelect then
    IBError(ibxeIsASelectStatement,[]);
 
- CheckTransaction(aTransaction);
+  FBatchCompletion := nil;
+  CheckTransaction(aTransaction);
   if not FPrepared then
     InternalPrepare;
   CheckHandle;
@@ -1564,7 +1484,6 @@ begin
     FBatch.release;
     FBatch := nil;
   end;
-  FBatchCompletion := nil;
   if FStatementIntf <> nil then
   begin
     FStatementIntf.release;
@@ -1599,6 +1518,20 @@ begin
   end;
   SignalActivity;
   Inc(FChangeSeqNo);
+end;
+
+function TFB30Statement.SavePerfStats(var Stats: TPerfStatistics): boolean;
+begin
+  Result := false;
+  if FCollectStatistics then
+  with FFirebird30ClientAPI do
+  begin
+    UtilIntf.getPerfCounters(StatusIntf,
+              (GetAttachment as TFB30Attachment).AttachmentIntf,
+              ISQL_COUNTERS, @Stats);
+    Check4DataBaseError;
+    Result := true;
+  end;
 end;
 
 constructor TFB30Statement.Create(Attachment: TFB30Attachment;
@@ -1745,8 +1678,89 @@ end;
 
 function TFB30Statement.HasBatchMode: boolean;
 begin
-  Result := FFirebird30ClientAPI.Firebird4orLater and
-     (GetAttachment.GetODSMajorVersion >= 13);
+  Result := GetAttachment.HasBatchMode;
+end;
+
+function TFB30Statement.AddToBatch(ExceptionOnError: boolean): TStatusCode;
+var BatchPB: TXPBParameterBlock;
+begin
+  Result := 0;
+  FBatchCompletion := nil;
+  CheckBatchModeAvailable;
+  with FFirebird30ClientAPI do
+  begin
+    if FBatch = nil then
+    begin
+      {Start Batch}
+      BatchPB := TXPBParameterBlock.Create(FFirebird30ClientAPI,Firebird.IXpbBuilder.BATCH);
+      with FFirebird30ClientAPI do
+      try
+        BatchPB.insertInt(Firebird.IBatch.TAG_RECORD_COUNTS,1);
+        BatchPB.insertInt(Firebird.IBatch.TAG_MULTIERROR,1);
+        BatchPB.insertInt(Firebird.IBatch.TAG_DETAILED_ERRORS,1);
+        FBatch := FStatementIntf.createBatch(StatusIntf,
+                                             FSQLParams.MetaData,
+                                             BatchPB.getDataLength,
+                                             BatchPB.getBuffer);
+        Check4DataBaseError;
+      finally
+        BatchPB.Free;
+      end;
+    end;
+
+    FBatch.Add(StatusIntf,1,FSQLParams.GetMessageBuffer);
+    if ExceptionOnError then
+      Check4DataBaseError
+    else
+    with GetStatus as TFB30Status do
+    if InErrorState then
+      Result := GetIBErrorCode;
+  end;
+end;
+
+function TFB30Statement.ExecuteBatch(aTransaction: ITransaction
+  ): IBatchCompletion;
+
+procedure Check4BatchCompletionError(bc: IBatchCompletion);
+var status: IStatus;
+    RowNo: integer;
+begin
+  status := nil;
+  {Raise an exception if there was an error reported in the BatchCompletion}
+  if (bc <> nil) and bc.getErrorStatus(RowNo,status) then
+    raise EIBInterbaseError.Create(status);
+end;
+
+var cs: Firebird.IBatchCompletionState;
+
+begin
+  Result := nil;
+  if FBatch = nil then
+    IBError(ibxeNotInBatchMode,[]);
+
+  with FFirebird30ClientAPI do
+  begin
+    SavePerfStats(FBeforeStats);
+    if aTransaction = nil then
+      cs := FBatch.execute(StatusIntf,(FTransactionIntf as TFB30Transaction).TransactionIntf)
+    else
+      cs := FBatch.execute(StatusIntf,(aTransaction as TFB30Transaction).TransactionIntf);
+    Check4DataBaseError;
+    FBatchCompletion := TBatchCompletion.Create(FFirebird30ClientAPI,cs);
+    FStatisticsAvailable := SavePerfStats(FAfterStats);
+    FBatch.release;
+    FBatch := nil;
+    Check4BatchCompletionError(FBatchCompletion);
+    Result := FBatchCompletion;
+  end;
+end;
+
+procedure TFB30Statement.CancelBatch;
+begin
+  if FBatch = nil then
+    IBError(ibxeNotInBatchMode,[]);
+  FBatch.release;
+  FBatch := nil;
 end;
 
 function TFB30Statement.GetBatchCompletion: IBatchCompletion;

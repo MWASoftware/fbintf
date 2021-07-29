@@ -301,10 +301,12 @@ type
 
    TIBDataBaseErrorMessages   = set of TIBDataBaseErrorMessage;
 
+   TStatusCode = long;
+
   IStatus = interface
     ['{34167722-af38-4831-b08a-93162d58ede3}']
-    function GetIBErrorCode: Long;
-    function Getsqlcode: Long;
+    function GetIBErrorCode: TStatusCode;
+    function Getsqlcode: TStatusCode;
     function GetMessage: AnsiString;
     function CheckStatusVector(ErrorCodes: array of TFBStatusCode): Boolean;
     function GetIBDataBaseErrorMessages: TIBDataBaseErrorMessages;
@@ -750,10 +752,6 @@ type
 
   {Batch Query Execution Support}
 
-  TExecuteActions = (eaApply, {Default action - executes query}
-                     eaDefer, {Save current param values for later execution and clear parameter block}
-                     eaApplyIgnoreCurrent); {As eaApply, except that current param values are not applied}
-
   TBatchCompletionState = (bcExecuteFailed, bcSuccessNoInfo, bcNoMoreErrors);
 
   IBatchCompletion = interface
@@ -776,22 +774,25 @@ type
     function GetPlan: AnsiString;
     function GetRowsAffected(var SelectCount, InsertCount, UpdateCount, DeleteCount: integer): boolean;
     function GetSQLStatementType: TIBSQLStatementTypes;
+    function GetSQLStatementTypeName: AnsiString;
     function GetSQLText: AnsiString;
     function GetProcessedSQLText: AnsiString;
     function GetSQLDialect: integer;
     function IsPrepared: boolean;
-    function IsInBatchMode: boolean;
     function HasBatchMode: boolean;
+    function IsInBatchMode: boolean;
     procedure Prepare(aTransaction: ITransaction=nil);
-    function Execute(aTransaction: ITransaction=nil): IResults; overload;
-    function Execute(action: TExecuteActions; aTransaction: ITransaction=nil): IResults; overload;
+    function Execute(aTransaction: ITransaction=nil): IResults;
+    function AddToBatch(ExceptionOnError: boolean=true): TStatusCode;
+    function ExecuteBatch(aTransaction: ITransaction=nil): IBatchCompletion;
+    procedure CancelBatch;
+    function GetBatchCompletion: IBatchCompletion;
     function OpenCursor(aTransaction: ITransaction=nil): IResultSet;
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
     procedure SetRetainInterfaces(aValue: boolean);
     procedure EnableStatistics(aValue: boolean);
     function GetPerfStatistics(var stats: TPerfCounters): boolean;
-    function GetBatchCompletion: IBatchCompletion;
     property MetaData: IMetaData read GetMetaData;
     property SQLParams: ISQLParams read GetSQLParams;
     property SQLStatementType: TIBSQLStatementTypes read GetSQLStatementType;
@@ -1115,6 +1116,7 @@ type
     procedure getFBVersion(version: TStrings);
     function HasActivity: boolean;
     function HasDecFloatSupport: boolean;
+    function HasBatchMode: boolean;
 
     {Character Sets}
     function HasDefaultCharSet: boolean;

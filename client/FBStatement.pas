@@ -78,7 +78,7 @@ type
     procedure CheckTransaction(aTransaction: ITransaction);
     procedure GetDsqlInfo(info_request: byte; buffer: ISQLInfoResults); overload; virtual; abstract;
     procedure InternalPrepare;  virtual; abstract;
-    function InternalExecute(action: TExecuteActions; Transaction: ITransaction): IResults;  virtual; abstract;
+    function InternalExecute(Transaction: ITransaction): IResults;  virtual; abstract;
     function InternalOpenCursor(aTransaction: ITransaction): IResultSet;   virtual; abstract;
     procedure ProcessSQL(sql: AnsiString; GenerateParamNames: boolean; var processedSQL: AnsiString); virtual; abstract;
     procedure FreeHandle;  virtual; abstract;
@@ -102,14 +102,18 @@ type
     function GetRowsAffected(var SelectCount, InsertCount, UpdateCount,
       DeleteCount: integer): boolean;
     function GetSQLStatementType: TIBSQLStatementTypes;
+    function GetSQLStatementTypeName: AnsiString;
     function GetSQLText: AnsiString;
     function GetProcessedSQLText: AnsiString;
     function GetSQLDialect: integer;
 
     {GetDSQLInfo only supports isc_info_sql_stmt_type, isc_info_sql_get_plan, isc_info_sql_records}
     procedure Prepare(aTransaction: ITransaction=nil); virtual;
-    function Execute(aTransaction: ITransaction=nil): IResults; overload;
-    function Execute(action: TExecuteActions; aTransaction: ITransaction=nil): IResults; overload;
+    function Execute(aTransaction: ITransaction=nil): IResults;
+    function AddToBatch(ExceptionOnError: boolean): TStatusCode; virtual;
+    function ExecuteBatch(aTransaction: ITransaction): IBatchCompletion; virtual;
+    procedure CancelBatch; virtual;
+    function GetBatchCompletion: IBatchCompletion; virtual;
     function OpenCursor(aTransaction: ITransaction=nil): IResultSet;
     function CreateBlob(paramName: AnsiString): IBlob; overload;
     function CreateBlob(index: integer): IBlob; overload;
@@ -123,7 +127,6 @@ type
     procedure SetRetainInterfaces(aValue: boolean); virtual;
     procedure EnableStatistics(aValue: boolean);
     function GetPerfStatistics(var stats: TPerfCounters): boolean;
-    function GetBatchCompletion: IBatchCompletion; virtual;
     function IsInBatchMode: boolean; virtual;
     function HasBatchMode: boolean; virtual;
     property ChangeSeqNo: integer read FChangeSeqNo;
@@ -235,6 +238,27 @@ begin
   Result := FSQLStatementType;
 end;
 
+function TFBStatement.GetSQLStatementTypeName: AnsiString;
+begin
+  case FSQLStatementType of
+  SQLUnknown: Result := 'SQL_Unknown';
+  SQLSelect: Result := 'SQL_Select';
+  SQLInsert: Result := 'SQL_Insert';
+  SQLUpdate: Result := 'SQL_Update';
+  SQLDelete: Result := 'SQL_Delete';
+  SQLDDL: Result := 'SQL_DDL';
+  SQLGetSegment: Result := 'SQL_GetSegment';
+  SQLPutSegment: Result := 'SQL_PutSegment';
+  SQLExecProcedure: Result := 'SQL_ExecProcedure';
+  SQLStartTransaction: Result := 'SQL_StartTransaction';
+  SQLCommit: Result := 'SQL_Commit';
+  SQLRollback: Result := 'SQL_Rollback';
+  SQLSelectForUpdate: Result := 'SQL_SelectForUpdate';
+  SQLSetGenerator: Result := 'SQL_SetGenerator';
+  SQLSavePoint: Result := 'SQL_SavePoint';
+  end;
+end;
+
 function TFBStatement.GetSQLText: AnsiString;
 begin
   Result := FSQL;
@@ -267,18 +291,30 @@ end;
 function TFBStatement.Execute(aTransaction: ITransaction): IResults;
 begin
   if aTransaction = nil then
-    Result :=  InternalExecute(eaApply,FTransactionIntf)
+    Result :=  InternalExecute(FTransactionIntf)
   else
-    Result := InternalExecute(eaApply,aTransaction);
+    Result := InternalExecute(aTransaction);
 end;
 
-function TFBStatement.Execute(action: TExecuteActions;
-  aTransaction: ITransaction): IResults;
+function TFBStatement.AddToBatch(ExceptionOnError: boolean): TStatusCode;
 begin
-  if aTransaction = nil then
-    Result :=  InternalExecute(action,FTransactionIntf)
-  else
-    Result := InternalExecute(action,aTransaction);
+  IBError(ibxeBatchModeNotSupported,[]);
+end;
+
+function TFBStatement.ExecuteBatch(aTransaction: ITransaction
+  ): IBatchCompletion;
+begin
+  IBError(ibxeBatchModeNotSupported,[]);
+end;
+
+procedure TFBStatement.CancelBatch;
+begin
+  IBError(ibxeBatchModeNotSupported,[]);
+end;
+
+function TFBStatement.GetBatchCompletion: IBatchCompletion;
+begin
+  IBError(ibxeBatchModeNotSupported,[]);
 end;
 
 function TFBStatement.OpenCursor(aTransaction: ITransaction): IResultSet;
@@ -367,11 +403,6 @@ begin
     stats[psFetches] := FAfterStats[psFetches] - FBeforeStats[psFetches];
     stats[psBuffers] :=  FAfterStats[psBuffers];
   end;
-end;
-
-function TFBStatement.GetBatchCompletion: IBatchCompletion;
-begin
-  Result := nil;
 end;
 
 function TFBStatement.IsInBatchMode: boolean;

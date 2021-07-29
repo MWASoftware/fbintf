@@ -47,13 +47,16 @@ type
   TFB30Status = class(TFBStatus,IStatus)
   protected
     FStatus: Firebird.IStatus;
+    FDirty: boolean;
   public
     destructor Destroy; override;
     procedure Init;
     procedure FreeHandle;
     function InErrorState: boolean;
+    function Warning: boolean;
     function GetStatus: Firebird.IStatus;
     function StatusVector: PStatusVector; override;
+    property Dirty: boolean read FDirty;
   end;
 
   { TFB30StatusObject }
@@ -85,7 +88,8 @@ type
     destructor Destroy; override;
 
     function StatusIntf: Firebird.IStatus;
-    procedure Check4DataBaseError;
+    procedure Check4DataBaseError; overload;
+    procedure Check4DataBaseError(st: Firebird.IStatus); overload;
     function InErrorState: boolean;
     function LoadInterface: boolean; override;
     procedure FBShutdown; override;
@@ -169,6 +173,7 @@ type
     destructor Destroy; override;
     function getBuffer: PByte;
     function getDataLength: cardinal;
+    procedure insertInt(tag: Byte; value: Integer);
     property Builder: Firebird.IXpbBuilder read FBuilder;
   public
     procedure PrintBuf;
@@ -225,6 +230,15 @@ begin
   end;
 end;
 
+procedure TXPBParameterBlock.insertInt(tag: Byte; value: Integer);
+begin
+  with FFirebird30ClientAPI do
+  begin
+    Builder.insertInt(StatusIntf,tag,value);
+    Check4DataBaseError;
+  end;
+end;
+
 procedure TXPBParameterBlock.PrintBuf;
 var i: integer;
     buffer: PByte;
@@ -258,8 +272,11 @@ end;
 
 procedure TFB30Status.Init;
 begin
-  if assigned(FStatus) then
+  if assigned(FStatus) and Dirty then
+  begin
     FStatus.Init;
+    FDirty := false;
+  end;
 end;
 
 procedure TFB30Status.FreeHandle;
@@ -275,13 +292,23 @@ function TFB30Status.InErrorState: boolean;
 begin
   with GetStatus do
     Result := ((getState and STATE_ERRORS) <> 0);
+  if Result then
+    FDirty := true;
+end;
+
+function TFB30Status.Warning: boolean;
+begin
+  with GetStatus do
+    Result := ((getState and STATE_WARNINGS) <> 0);
+  if Result then
+    FDirty := true;
 end;
 
 function TFB30Status.GetStatus: Firebird.IStatus;
 begin
   if FStatus = nil then
-  with FOwner do
-    FStatus := (FOwner as TFB30ClientAPI).MasterIntf.GetStatus;
+    with FOwner do
+      FStatus := (FOwner as TFB30ClientAPI).MasterIntf.GetStatus;
   Result := FStatus;
 end;
 
@@ -392,6 +419,12 @@ procedure TFB30ClientAPI.Check4DataBaseError;
 begin
   if FStatus.InErrorState then
     IBDataBaseError;
+end;
+
+procedure TFB30ClientAPI.Check4DataBaseError(st: Firebird.IStatus);
+begin
+  if ((st.getState and st.STATE_ERRORS) <> 0) then
+    raise EIBInterBaseError.Create(TFB30StatusObject.Create(self,st));
 end;
 
 function TFB30ClientAPI.InErrorState: boolean;

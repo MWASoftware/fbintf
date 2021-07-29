@@ -90,6 +90,7 @@ procedure TTest19.DoQuery(Attachment: IAttachment);
 var Transaction: ITransaction;
     Statement: IStatement;
     ar: IArray;
+    BC: IBatchCompletion;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taRollback);
   Statement := Attachment.Prepare(Transaction,'Select * from EMPLOYEE Where EMP_NO in (8,2)',3);
@@ -98,12 +99,13 @@ begin
   Statement := Attachment.Prepare(Transaction,'Update Employee Set HIRE_DATE = ? Where EMP_NO = ?',3);
   Statement.GetSQLParams[0].AsDateTime := EncodeDate(2016,1,31);;
   Statement.GetSQLParams[1].AsInteger := 8;
-  Statement.Execute(eaDefer);
+  Statement.AddToBatch;
   Statement.GetSQLParams[0].AsDateTime := EncodeDate(2018,5,28);;
   Statement.GetSQLParams[1].AsInteger := 2;
-  Statement.Execute;
+  Statement.AddToBatch;
+  BC := Statement.ExecuteBatch;
   WriteAffectedRows(Statement);
-  WriteBatchCompletion(Statement.GetBatchCompletion);
+  WriteBatchCompletion(BC);
   Statement := Attachment.Prepare(Transaction,'Select * from EMPLOYEE Where EMP_NO in (8,2)',3);
   writeln(Outfile,'Rows after update');
   ReportResults(Statement);
@@ -115,15 +117,15 @@ begin
   Statement := Attachment.Prepare(Transaction,'Update Employee Set HIRE_DATE = ? Where EMP_NO = ?',3);
   Statement.GetSQLParams[0].AsDateTime := EncodeDate(2016,1,31);;
   Statement.GetSQLParams[1].AsInteger := 8;
-  Statement.Execute(eaDefer);
+  Statement.AddToBatch;
   Statement.GetSQLParams[0].AsDateTime := EncodeDate(2018,5,28);;
   Statement.GetSQLParams[1].AsInteger := 2;
-  Statement.Execute(eaDefer);
+  Statement.AddToBatch;
   Statement.GetSQLParams[0].AsDateTime := EncodeDate(2019,5,28);;
   Statement.GetSQLParams[1].AsInteger := 2;
-  Statement.Execute(eaApplyIgnoreCurrent);
+  BC := Statement.ExecuteBatch;
   WriteAffectedRows(Statement);
-  WriteBatchCompletion(Statement.GetBatchCompletion);
+  WriteBatchCompletion(BC);
   Statement := Attachment.Prepare(Transaction,'Select * from EMPLOYEE Where EMP_NO in (8,2)',3);
   writeln(Outfile,'Rows after update');
   ReportResults(Statement);
@@ -149,7 +151,7 @@ begin
     ByName('JOB_COUNTRY').AsString := 'England';
     ByName('SALARY').AsFloat := 41000.89;
   end;
-  Statement.Execute(eaDefer);
+  Statement.AddToBatch;
   with Statement.GetSQLParams do
   begin
     ByName('EMP_NO').AsInteger := 151;
@@ -163,7 +165,7 @@ begin
     ByName('JOB_COUNTRY').AsString := 'England';
     ByName('SALARY').AsFloat := 42000.89;
   end;
-  Statement.Execute(eaDefer);
+  Statement.AddToBatch;
   with Statement.GetSQLParams do
   begin
     ByName('EMP_NO').AsInteger := 152;
@@ -177,14 +179,51 @@ begin
     ByName('JOB_COUNTRY').AsString := 'England';
     ByName('SALARY').AsFloat := 41000.99;
   end;
-  Statement.Execute;
+  Statement.AddToBatch;
+  BC := Statement.ExecuteBatch;
   WriteAffectedRows(Statement);
-  WriteBatchCompletion(Statement.GetBatchCompletion);
+  WriteBatchCompletion(BC);
   Statement := Attachment.Prepare(Transaction,'Select * from EMPLOYEE Where EMP_NO >= 150',3);
   writeln(Outfile,'Rows after insert');
   ReportResults(Statement);
   Transaction.Rollback;
   Transaction.Start(taRollback);
+  writeln(Outfile);
+  writeln(Outfile,'Insert rows - and then cancel');
+  Statement := Attachment.PrepareWithNamedParameters(Transaction,'INSERT INTO EMPLOYEE (EMP_NO, FIRST_NAME, LAST_NAME, PHONE_EXT, HIRE_DATE,' +
+      'DEPT_NO, JOB_CODE, JOB_GRADE, JOB_COUNTRY, SALARY) '+
+      'VALUES (:EMP_NO, :FIRST_NAME, :LAST_NAME, :PHONE_EXT, :HIRE_DATE,' +
+      ':DEPT_NO, :JOB_CODE, :JOB_GRADE, :JOB_COUNTRY, :SALARY)',3);
+  with Statement.GetSQLParams do
+  begin
+    ByName('EMP_NO').AsInteger := 150;
+    ByName('FIRST_NAME').AsString := 'John';
+    ByName('LAST_NAME').AsString := 'Doe';
+    ByName('PHONE_EXT').AsString := '';
+    ByName('HIRE_DATE').AsDateTime := EncodeDate(2015,4,1);
+    ByName('DEPT_NO').AsString := '600';
+    ByName('JOB_CODE').AsString := 'Eng';
+    ByName('JOB_GRADE').AsInteger := 4;
+    ByName('JOB_COUNTRY').AsString := 'England';
+    ByName('SALARY').AsFloat := 41000.89;
+  end;
+  Statement.AddToBatch;
+  with Statement.GetSQLParams do
+  begin
+    ByName('EMP_NO').AsInteger := 151;
+    ByName('FIRST_NAME').AsString := 'Jane';
+    ByName('LAST_NAME').AsString := 'Doe';
+    ByName('PHONE_EXT').AsString := '';
+    ByName('HIRE_DATE').AsDateTime := EncodeDate(2015,4,2);
+    ByName('DEPT_NO').AsString := '600';
+    ByName('JOB_CODE').AsString := 'Eng';
+    ByName('JOB_GRADE').AsInteger := 4;
+    ByName('JOB_COUNTRY').AsString := 'England';
+    ByName('SALARY').AsFloat := 42000.89;
+  end;
+  Statement.AddToBatch;
+  writeln(Outfile,'Cancel Batch - note - next step will fail with a duplicate key if cancel fails');
+  Statement.CancelBatch;
   writeln(Outfile);
   writeln(Outfile,'Insert rows - ignore last row');
   Statement := Attachment.PrepareWithNamedParameters(Transaction,'INSERT INTO EMPLOYEE (EMP_NO, FIRST_NAME, LAST_NAME, PHONE_EXT, HIRE_DATE,' +
@@ -204,7 +243,7 @@ begin
     ByName('JOB_COUNTRY').AsString := 'England';
     ByName('SALARY').AsFloat := 41000.89;
   end;
-  Statement.Execute(eaDefer);
+  Statement.AddToBatch;
   with Statement.GetSQLParams do
   begin
     ByName('EMP_NO').AsInteger := 151;
@@ -218,7 +257,7 @@ begin
     ByName('JOB_COUNTRY').AsString := 'England';
     ByName('SALARY').AsFloat := 42000.89;
   end;
-  Statement.Execute(eaDefer);
+  Statement.AddToBatch;
   with Statement.GetSQLParams do
   begin
     ByName('EMP_NO').AsInteger := 152;
@@ -232,9 +271,9 @@ begin
     ByName('JOB_COUNTRY').AsString := 'England';
     ByName('SALARY').AsFloat := 41000.99;
   end;
-  Statement.Execute(eaApplyIgnoreCurrent);
+  BC := Statement.ExecuteBatch;
   WriteAffectedRows(Statement);
-  WriteBatchCompletion(Statement.GetBatchCompletion);
+  WriteBatchCompletion(BC);
   Statement := Attachment.Prepare(Transaction,'Select * from EMPLOYEE Where EMP_NO >= 150',3);
   writeln(Outfile,'Rows after insert');
   ReportResults(Statement);
@@ -258,7 +297,7 @@ begin
     ar.SetAsString([1],'Eng');
     Params[7].AsArray := ar;
   end;
-  Statement.Execute(eaDefer);;
+  Statement.AddToBatch;
   with Statement.GetSQLParams do
   begin
     Params[0].AsString := 'DEF';
@@ -273,9 +312,10 @@ begin
     ar.SetAsString([2],'Fra');
     Params[7].AsArray := ar;
   end;
-  Statement.Execute;
+  Statement.AddToBatch;
+  BC := Statement.ExecuteBatch;
   WriteAffectedRows(Statement);
-  WriteBatchCompletion(Statement.GetBatchCompletion);
+  WriteBatchCompletion(BC);
   Statement := Attachment.Prepare(Transaction,'Select * from JOB Where JOB_CODE in (''ABC'',''DEF'')',3);
   writeln(Outfile,'Rows after insert');
   ReportResults(Statement);
@@ -300,7 +340,7 @@ begin
     ar.SetAsString([1],'Eng');
     Params[7].AsArray := ar;
   end;
-  Statement.Execute(eaDefer);;
+  Statement.AddToBatch;
   with Statement.GetSQLParams do
   begin
     Params[0].AsString := 'DEF';
@@ -316,9 +356,10 @@ begin
     ar.SetAsString([2],'Fra');
     Params[7].AsArray := ar;
   end;
-  Statement.Execute;
+  Statement.AddToBatch;
+  BC := Statement.ExecuteBatch;
   WriteAffectedRows(Statement);
-  WriteBatchCompletion(Statement.GetBatchCompletion);
+  WriteBatchCompletion(BC);
   Statement := Attachment.Prepare(Transaction,'Select * from JOB Where JOB_CODE in (''ABC'',''DEF'')',3);
   writeln(Outfile,'Rows after insert');
   ReportResults(Statement);
@@ -346,6 +387,7 @@ end;
 procedure TTest19.ErrorHandlingTests(Attachment: IAttachment);
 var Transaction: ITransaction;
     Statement: IStatement;
+    BC: IBatchCompletion;
 begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taRollback);
   writeln(Outfile,'Test Error Handling');
@@ -353,10 +395,11 @@ begin
     Statement := Attachment.Prepare(Transaction,'Update Employee Set HIRE_DATE = ? Where EMP_NO = ?',3);
     Statement.GetSQLParams[0].AsDateTime := EncodeDate(2016,1,31);
     Statement.GetSQLParams[1].AsInteger := 8;
-    Statement.Execute(eaDefer);
+    Statement.AddToBatch;
     Statement.GetSQLParams[0].AsString := '2018.5.28';
     Statement.GetSQLParams[1].AsInteger := 2;
-    Statement.Execute;
+    Statement.AddToBatch;
+    Statement.ExecuteBatch;
   except on E:Exception do
     writeln(Outfile,'Error reported (as expected) when changing param type: ' + E.Message);
   end;
@@ -365,7 +408,8 @@ begin
     Statement := Attachment.Prepare(Transaction,'Update Employee Set HIRE_DATE = ? Where EMP_NO = ? Returning EMP_NO',3);
     Statement.GetSQLParams[0].AsDateTime := EncodeDate(2016,1,31);
     Statement.GetSQLParams[1].AsInteger := 8;
-    Statement.Execute(eaDefer);
+    Statement.AddToBatch;
+    Statement.ExecuteBatch;
   except on E:Exception do
     writeln(Outfile,'Error reported (as expected) when defering update returning query: ' + E.Message);
   end;
@@ -388,7 +432,7 @@ begin
       ByName('JOB_COUNTRY').AsString := 'England';
       ByName('SALARY').AsFloat := 41000.89;
     end;
-    Statement.Execute(eaDefer);
+    Statement.AddToBatch;
     with Statement.GetSQLParams do
     begin
       ByName('EMP_NO').AsInteger := 150; {duplicate key}
@@ -396,13 +440,13 @@ begin
       ByName('LAST_NAME').AsString := 'Doe';
       ByName('PHONE_EXT').AsString := '';
       ByName('HIRE_DATE').AsDateTime := EncodeDate(2015,4,2);
-      ByName('DEPT_NO').AsString := '600';
+//      ByName('DEPT_NO').AsString := '600';
       ByName('JOB_CODE').AsString := 'Eng';
       ByName('JOB_GRADE').AsInteger := 4;
       ByName('JOB_COUNTRY').AsString := 'England';
       ByName('SALARY').AsFloat := 42000.89;
     end;
-    Statement.Execute(eaDefer);
+    Statement.AddToBatch;
     with Statement.GetSQLParams do
     begin
       ByName('EMP_NO').AsInteger := 152;
@@ -410,18 +454,21 @@ begin
       ByName('LAST_NAME').AsString := 'SmithAndJonesFamily1';  //Longest Name
       ByName('PHONE_EXT').AsString := '';
       ByName('HIRE_DATE').AsDateTime := EncodeDate(2015,4,3);
-      ByName('DEPT_NO').AsString := '600';
+//      ByName('DEPT_NO').AsString := '600';
       ByName('JOB_CODE').AsString := 'Eng';
       ByName('JOB_GRADE').AsInteger := 4;
       ByName('JOB_COUNTRY').AsString := 'England';
       ByName('SALARY').AsFloat := 41000.99;
     end;
-    Statement.Execute;
+    Statement.AddToBatch;
+    Statement.ExecuteBatch;
   except on E:Exception do
     writeln(Outfile,'Error reported when inserting: ' + E.Message);
   end;
   WriteAffectedRows(Statement);
-  WriteBatchCompletion(Statement.GetBatchCompletion);
+  BC := Statement.GetBatchCompletion;
+  if BC <> nil then
+    WriteBatchCompletion(BC);
   Transaction.Rollback;
 end;
 
@@ -446,7 +493,7 @@ begin
   writeln(OutFile,'Opening ',Owner.GetEmployeeDatabaseName);
   Attachment := FirebirdAPI.OpenDatabase(Owner.GetEmployeeDatabaseName,DPB);
 
-  if (FirebirdAPI.GetClientMajor < 4) or (Attachment.GetODSMajorVersion < 13) then
+  if not Attachment.HasBatchMode then
     writeln(OutFile,'Skipping test for Firebird 4 and later')
   else
   begin
