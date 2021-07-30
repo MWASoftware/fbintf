@@ -85,7 +85,11 @@ if bc <> nil then
     updated := getUpdated;
     writeln(Outfile,'Updated Records = ',updated);
     if updated > 0 then
+    {$IFDEF FPC}
       writeln(Outfile,'Row ',updated,' State = ',getState(updated-1),' Msg = ',getStatusMessage(updated-1));
+    {$ELSE}
+      writeln(Outfile,'Row ',updated,' State = ',ord(getState(updated-1)),' Msg = ',getStatusMessage(updated-1));
+    {$ENDIF}
   end;
 end;
 
