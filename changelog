@@ -1,4 +1,4 @@
-FBINTF Change Log  version          (1.3-1 Build 12696) Wed, 28 Jul 2021 23:16:59 +0100
+FBINTF Change Log  version          (1.3-1 Build 12707) Fri, 30 Jul 2021 11:01:05 +0100
 
 1. Integer decodes in information blocks (e.g. IDBInfoItem) widened from 32 bit to 64-bit integers.
 
@@ -35,6 +35,9 @@ FBINTF Change Log  version          (1.3-1 Build 12696) Wed, 28 Jul 2021 23:16:5
 
 6. New IStatement method: function GetSQLStatementTypeName: AnsiString;
    Returns SQL Statement type as a text string;
+
+7. ISQLData.AsInteger and AsInt64 now use "Round" to convert a float field to
+   an integer instead of "trunc". This is for compatibility with TFloatField.AsInteger.
 
 FBINTF Change Log  version          (1.2-1 Build 12552) Wed, 09 Jun 2021 13:05:40 +0100
 

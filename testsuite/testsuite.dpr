@@ -26,7 +26,8 @@ uses
   Test2 in 'Test2.pas',
   TestApplication in 'testApp\TestApplication.pas',
   FBTestApp in 'FBTestApp.pas',
-  Test19 in 'Test19.pas';
+  Test19 in 'Test19.pas',
+  Test20 in 'Test20.pas';
 
 var
   Application: TTestApplication;
