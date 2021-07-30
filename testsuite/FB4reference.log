@@ -576,7 +576,7 @@ Elapsed time= 0.002 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
-Writes = 1
+Writes = 0
 Fetches = 3
 Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
 Relation Name = EMPLOYEE
@@ -2721,8 +2721,8 @@ Page Size = 8192
 Version = 1: LI-V6.3.0.2496 Firebird 4.0
 Database is Read/Write
 Database Created: 29/5/2021 16:47:30
-Pages Used = 314
-Pages Free = 761
+Pages Used = 313
+Pages Free = 762
 Server Memory = 19483648
 Forced Writes  = 1
 Max Memory  = 19629664
@@ -2730,7 +2730,7 @@ Num Buffers  = 2048
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
 Active Transaction Count = 0
-Fetches  = 1645
+Fetches  = 1648
 Writes  = 8
 Reads  = 92
 Page Writes  = 4
@@ -2756,7 +2756,7 @@ Count = 2
 Table ID = 12
 Count = 24
 Table ID = 18
-Count = 813
+Count = 816
 Table ID = 20
 Count = 5
 Table ID = 28
@@ -4566,8 +4566,8 @@ Total rows processed = 1984
 Updated Records = 1984
 Row 1984 State = bcNoMoreErrors Msg = 
 Rows in Dataset = 100000
- MD5 checksum = 2014887b8ad27fbb20893a22d6e39f26
- MD5 Dataset checksum = 2014887b8ad27fbb20893a22d6e39f26
+ Message Hash = 2014887b8ad27fbb20893a22d6e39f26
+ Message Hash = 2014887b8ad27fbb20893a22d6e39f26
 Test Completed Successfully
 
 

@@ -62,7 +62,7 @@ type
 
 implementation
 
-uses IBUtils, IBErrorCodes, MD5;
+uses IBUtils, IBErrorCodes;
 
 const
    sqlCreateTable = 'Create Table LotsOfData ('+
@@ -98,57 +98,61 @@ var Transaction: ITransaction;
     i: integer;
     rows: integer;
     BC: IBatchCompletion;
-    MD5Context: TMDContext;
+    InMsgHash, OutMsgHash: TMsgHash;
     HashString: AnsiString;
-    InDigest, OutDigest: TMDDigest;
     Results: IResultSet;
 begin
 
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   Statement := Attachment.Prepare(Transaction,'insert into LotsOfData values(?, current_timestamp, ?)');
-  MDInit(MD5Context,MD_VERSION_5);
-  for i := 1 to RecordCount do
-  begin
-     Statement.SQLParams[0].AsInteger := i;
-     HashString := Format('asdbfkwfwf83274kjdfj0usd0uj329j9rfh38fvhuhsijf9u28rf4329jf-j9rghvvsw89rgf8yh%d', [i * 2]);
-     Statement.SQLParams[1].AsString := HashString;
-     MDUpdate(MD5Context,PAnsiChar(HashString)^,Length(HashString));
-     case Statement.AddToBatch(false) of
-     0: {ignore};
-     isc_dsql_error, {Why? - probably a bug in Firebird}
-     isc_batch_too_big:
-     begin
-       BC := Statement.ExecuteBatch;
-       writeln(Outfile,'Intermediate Apply Batch on row ', i);
-       WriteBatchCompletion(BC);
-       Statement.AddToBatch;
-     end;
-     else
-       raise EIBInterbaseError.Create(FirebirdAPI.GetStatus);
-     end;
+  InMsgHash := TMsgHash.CreateMsgHash;
+  try
+    for i := 1 to RecordCount do
+    begin
+       Statement.SQLParams[0].AsInteger := i;
+       HashString := Format('asdbfkwfwf83274kjdfj0usd0uj329j9rfh38fvhuhsijf9u28rf4329jf-j9rghvvsw89rgf8yh%d', [i * 2]);
+       Statement.SQLParams[1].AsString := HashString;
+       InMsgHash.AddText(HashString);
+       case Statement.AddToBatch(false) of
+       0: {ignore};
+       isc_dsql_error, {Why? - probably a bug in Firebird}
+       isc_batch_too_big:
+       begin
+         BC := Statement.ExecuteBatch;
+         writeln(Outfile,'Intermediate Apply Batch on row ', i);
+         WriteBatchCompletion(BC);
+         Statement.AddToBatch;
+       end;
+       else
+         raise EIBInterbaseError.Create(FirebirdAPI.GetStatus);
+       end;
+    end;
+    BC := Statement.ExecuteBatch;
+    WriteBatchCompletion(BC);
+    rows :=  Attachment.OpenCursorAtStart(Transaction,'Select count(*) From LOTSOFData')[0].AsInteger;
+    writeln(Outfile,'Rows in Dataset = ',rows);
+    InMsgHash.Finalise;
+    writeln(Outfile,' Message Hash = ',InMsgHash.Digest);
+    if rows <> RecordCount then
+      writeln(Outfile,'Test Fails - expecting ',RecordCount,' rows - found ',rows);
+    {Now check the table checksum}
+    OutMsgHash := TMsgHash.CreateMsgHash;
+    Results := Attachment.OpenCursor(Transaction,'Select MyText From LotsOfData Order by RowID');
+    try
+      while Results.FetchNext do
+        OutMsgHash.AddText(Results[0].AsString);
+      OutMsgHash.Finalise;
+      writeln(Outfile,' Message Hash = ',OutMsgHash.Digest);
+      if OutMsgHash.SameHash(InMsgHash) then
+        writeln(Outfile,'Test Completed Successfully')
+      else
+        writeln(Outfile,'Test Failed - MD5 checksum error');
+    finally
+      OutMsgHash.Free;
+    end;
+  finally
+    InMsgHash.Free;
   end;
-  BC := Statement.ExecuteBatch;
-  WriteBatchCompletion(BC);
-  rows :=  Attachment.OpenCursorAtStart(Transaction,'Select count(*) From LOTSOFData')[0].AsInteger;
-  writeln(Outfile,'Rows in Dataset = ',rows);
-  MDFinal(MD5Context,InDigest);
-  writeln(Outfile,' MD5 checksum = ',MD5Print(InDigest));
-  if rows <> RecordCount then
-    writeln(Outfile,'Test Fails - expecting ',RecordCount,' rows - found ',rows);
-  {Now check the table checksum}
-  MDInit(MD5Context,MD_VERSION_5);
-  Results := Attachment.OpenCursor(Transaction,'Select MyText From LotsOfData Order by RowID');
-  while Results.FetchNext do
-  begin
-    HashString := Results[0].AsString;
-    MDUpdate(MD5Context,PAnsiChar(HashString)^,Length(HashString));
-  end;
-  MDFinal(MD5Context,OutDigest);
-  writeln(Outfile,' MD5 Dataset checksum = ',MD5Print(OutDigest));
-  if MD5Print(InDigest) = MD5Print(OutDigest) then
-    writeln(Outfile,'Test Completed Successfully')
-  else
-    writeln(Outfile,'Test Failed - MD5 checksum error');
 end;
 
 
