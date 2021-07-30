@@ -1156,7 +1156,7 @@ begin
           result := AdjustScaleToCurrency(PInt64(SQLData)^,
                                       Scale);
         SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT:
-          result := Trunc(AsDouble);
+          result := Round(AsDouble);
 
         SQL_DEC_FIXED,
         SQL_DEC16,
@@ -1194,7 +1194,7 @@ begin
         result := AdjustScaleToInt64(PInt64(SQLData)^,
                                     Scale);
       SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT:
-        result := Trunc(AsDouble);
+        result := Round(AsDouble);
       else
         IBError(ibxeInvalidDataConversion, [nil]);
     end;
@@ -1373,15 +1373,15 @@ begin
         end;
       end;
       SQL_SHORT:
-        result := Trunc(AdjustScale(Int64(PShort(SQLData)^),
+        result := Round(AdjustScale(Int64(PShort(SQLData)^),
                                     Scale));
       SQL_LONG:
-        result := Trunc(AdjustScale(Int64(PLong(SQLData)^),
+        result := Round(AdjustScale(Int64(PLong(SQLData)^),
                                     Scale));
       SQL_INT64:
-        result := Trunc(AdjustScale(PInt64(SQLData)^, Scale));
+        result := Round(AdjustScale(PInt64(SQLData)^, Scale));
       SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT:
-        result := Trunc(AsDouble);
+        result := Round(AsDouble);
       SQL_DEC_FIXED,
       SQL_DEC16,
       SQL_DEC34,
