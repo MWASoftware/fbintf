@@ -37,7 +37,7 @@ unit Test20;
 {$codepage UTF8}
 {$ENDIF}
 
-{$DEFINE USELOCALDATABASE} //Remote fails - see https://github.com/FirebirdSQL/firebird/issues/6900
+{ $DEFINE USELOCALDATABASE} //Remote fails - see https://github.com/FirebirdSQL/firebird/issues/6900
 
 {Test 20: stress test IBatch interface}
 
@@ -62,7 +62,7 @@ type
 
 implementation
 
-uses IBUtils, IBErrorCodes;
+uses IBUtils;
 
 const
    sqlCreateTable = 'Create Table LotsOfData ('+
@@ -83,7 +83,7 @@ if bc <> nil then
     writeln(OutFile,'Batch Completion Info');
     writeln(OutFile,'Total rows processed = ',getTotalProcessed);
     updated := getUpdated;
-    writeln(Outfile,'Updated Records = ',updated);
+    writeln(Outfile,'Updated Rows = ',updated);
     if updated > 0 then
     {$IFDEF FPC}
       writeln(Outfile,'Row ',updated,' State = ',getState(updated-1),' Msg = ',getStatusMessage(updated-1));
@@ -95,6 +95,7 @@ end;
 
 const
    RecordCount = 100000;
+   RowLimit    = 50000;
 
 procedure TTest20.DoTest(Attachment: IAttachment);
 var Transaction: ITransaction;
@@ -106,10 +107,14 @@ var Transaction: ITransaction;
     HashString: AnsiString;
     Results: IResultSet;
 begin
-
+  Attachment.getFirebirdAPI.getStatus.SetIBDataBaseErrorMessages([ShowSQLCode,
+                                   ShowIBMessage,
+                                   ShowSQLMessage]);
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   Statement := Attachment.Prepare(Transaction,'insert into LotsOfData values(?, current_timestamp, ?)');
   InMsgHash := TMsgHash.CreateMsgHash;
+  rows := 0;
+  Statement.SetBatchRowLimit(RowLimit);
   try
     for i := 1 to RecordCount do
     begin
@@ -117,20 +122,28 @@ begin
        HashString := Format('asdbfkwfwf83274kjdfj0usd0uj329j9rfh38fvhuhsijf9u28rf4329jf-j9rghvvsw89rgf8yh%d', [i * 2]);
        Statement.SQLParams[1].AsString := HashString;
        InMsgHash.AddText(HashString);
-       case Statement.AddToBatch(false) of
-       0: {ignore};
-       isc_dsql_error, {Why? - probably a bug in Firebird}
-       isc_batch_too_big:
-       begin
-         BC := Statement.ExecuteBatch;
-         writeln(Outfile,'Intermediate Apply Batch on row ', i);
-         WriteBatchCompletion(BC);
+       Inc(rows);
+       if rows mod 10000 = 0 then
+         writeln(Outfile,rows,' rows added');
+       try
          Statement.AddToBatch;
-       end;
-       else
-         raise EIBInterbaseError.Create(FirebirdAPI.GetStatus);
+       except
+         on E: EIBBatchBufferOverflow do
+           begin
+             writeln(outfile,'Batch Execute');
+             BC := Statement.ExecuteBatch;
+             writeln(Outfile,'Intermediate Apply Batch on row ', i);
+             WriteBatchCompletion(BC);
+             Statement.AddToBatch;
+           end
+         else
+           begin
+             writeln(Outfile,'Exception raised on row ',i);
+             raise;
+           end;
        end;
     end;
+    writeln(outfile,'Batch Execute');
     BC := Statement.ExecuteBatch;
     WriteBatchCompletion(BC);
     rows :=  Attachment.OpenCursorAtStart(Transaction,'Select count(*) From LOTSOFData')[0].AsInteger;

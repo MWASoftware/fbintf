@@ -44,6 +44,9 @@ uses
   Classes, SysUtils,  IB,  FBClientAPI, FBSQLData, FBOutputBlock, FBActivityMonitor,
   FBTransaction;
 
+const
+  DefaultBatchRowLimit = 1000;
+
 type
   TPerfStatistics = array[psCurrentMemory..psFetches] of Int64;
 
@@ -74,6 +77,8 @@ type
     FBeforeStats: TPerfStatistics;
     FAfterStats: TPerfStatistics;
     FCaseSensitiveParams: boolean;
+    FBatchRowLimit: integer;
+    procedure CheckChangeBatchRowLimit; virtual;
     procedure CheckHandle; virtual; abstract;
     procedure CheckTransaction(aTransaction: ITransaction);
     procedure GetDsqlInfo(info_request: byte; buffer: ISQLInfoResults); overload; virtual; abstract;
@@ -110,10 +115,6 @@ type
     {GetDSQLInfo only supports isc_info_sql_stmt_type, isc_info_sql_get_plan, isc_info_sql_records}
     procedure Prepare(aTransaction: ITransaction=nil); virtual;
     function Execute(aTransaction: ITransaction=nil): IResults;
-    function AddToBatch(ExceptionOnError: boolean): TStatusCode; virtual;
-    function ExecuteBatch(aTransaction: ITransaction): IBatchCompletion; virtual;
-    procedure CancelBatch; virtual;
-    function GetBatchCompletion: IBatchCompletion; virtual;
     function OpenCursor(aTransaction: ITransaction=nil): IResultSet;
     function CreateBlob(paramName: AnsiString): IBlob; overload;
     function CreateBlob(index: integer): IBlob; overload;
@@ -129,6 +130,15 @@ type
     function GetPerfStatistics(var stats: TPerfCounters): boolean;
     function IsInBatchMode: boolean; virtual;
     function HasBatchMode: boolean; virtual;
+  public
+    {IBatch support}
+    procedure AddToBatch; virtual;
+    function ExecuteBatch(aTransaction: ITransaction): IBatchCompletion; virtual;
+    procedure CancelBatch; virtual;
+    function GetBatchCompletion: IBatchCompletion; virtual;
+    function GetBatchRowLimit: integer;
+    procedure SetBatchRowLimit(aLimit: integer);
+  public
     property ChangeSeqNo: integer read FChangeSeqNo;
     property SQLParams: ISQLParams read GetSQLParams;
     property SQLStatementType: TIBSQLStatementTypes read GetSQLStatementType;
@@ -139,6 +149,11 @@ implementation
 uses FBMessages;
 
 { TFBStatement }
+
+procedure TFBStatement.CheckChangeBatchRowLimit;
+begin
+  //Do Nothing
+end;
 
 procedure TFBStatement.CheckTransaction(aTransaction: ITransaction);
 begin
@@ -163,6 +178,7 @@ begin
   FFirebirdClientAPI := Attachment.getFirebirdAPI as TFBClientAPI;
   FSQLDialect := SQLDialect;
   FSQL := sql;
+  FBatchRowLimit := DefaultBatchRowLimit;
 end;
 
 constructor TFBStatement.CreateWithParameterNames(Attachment: IAttachment;
@@ -296,7 +312,7 @@ begin
     Result := InternalExecute(aTransaction);
 end;
 
-function TFBStatement.AddToBatch(ExceptionOnError: boolean): TStatusCode;
+procedure TFBStatement.AddToBatch;
 begin
   IBError(ibxeBatchModeNotSupported,[]);
 end;
@@ -315,6 +331,17 @@ end;
 function TFBStatement.GetBatchCompletion: IBatchCompletion;
 begin
   IBError(ibxeBatchModeNotSupported,[]);
+end;
+
+function TFBStatement.GetBatchRowLimit: integer;
+begin
+  Result := FBatchRowLimit;
+end;
+
+procedure TFBStatement.SetBatchRowLimit(aLimit: integer);
+begin
+  CheckChangeBatchRowLimit;
+  FBatchRowLimit := aLimit;
 end;
 
 function TFBStatement.OpenCursor(aTransaction: ITransaction): IResultSet;

@@ -163,7 +163,9 @@ type
       ibxeBatchModeNotSupported,
       ibxeNotInBatchMode,
       ibxeInBatchMode,
-      ibxeInvalidBatchQuery
+      ibxeInvalidBatchQuery,
+      ibxeBatchRowBufferOverflow,
+      ibxeBatchBufferSizeTooBig
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -276,8 +278,10 @@ resourcestring
   SCannotIncreaseMetadatasize = 'Cannot increase Metadata size from %d to %d';
   SBatchModeNotSupported = 'Batch Mode is not available. Firebird 4 or later client and server is required';
   SNotInBatchMode = 'Not in Batch Mode - have you called AddToBatch?';
-  SInBatchMode = 'Cannot Execute a Query while a Batch is pending';
+  SInBatchMode = 'Invalid Operation: a Batch is pending';
   SInvalidBatchQuery = 'This query type (%s) cannot be batched';
+  SBatchRowBufferOverflow = 'Adding Row No. %d - batch buffer size limit (%d bytes) exceeded';
+  SBatchBufferSizeTooBig = 'Requested Batch Buffer Size (%d bytes) exceeds 256MB limit';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -368,7 +372,9 @@ const
     SBatchModeNotSupported,
     SNotInBatchMode,
     SInBatchMode,
-    SInvalidBatchQuery
+    SInvalidBatchQuery,
+    SBatchRowBufferOverflow,
+    SBatchBufferSizeTooBig
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -381,6 +387,7 @@ begin
   raise EIBClientError.Create(Ord(ErrMess),
                               Format(GetErrorMessage(ErrMess), Args));
 end;
+
 
 end.
 

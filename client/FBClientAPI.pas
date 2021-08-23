@@ -604,8 +604,8 @@ begin
     with FOwner do
       isc_sql_interprete(sqlcode, local_buffer, sizeof(local_buffer));
     if (ShowSQLCode in FIBDataBaseErrorMessages) then
-      Result := Result + CRLF;
-    Result := Result + strpas(local_buffer);
+      Result := Result + LineEnding;
+    Result := Result + 'Engine Code: ' + IntToStr(GetIBErrorCode) + ' ' + strpas(local_buffer);
   end;
 
   if (ShowIBMessage in IBDataBaseErrorMessages) then

@@ -271,7 +271,11 @@ type
     FCursorSeqNo: integer;
     FBatch: Firebird.IBatch;
     FBatchCompletion: IBatchCompletion;
+    FBatchRowCount: integer;
+    FBatchBufferSize: integer;
+    FBatchBufferUsed: integer;
   protected
+    procedure CheckChangeBatchRowLimit; override;
     procedure CheckHandle; override;
     procedure CheckBatchModeAvailable;
     procedure GetDSQLInfo(info_request: byte; buffer: ISQLInfoResults); override;
@@ -303,7 +307,7 @@ type
     procedure SetRetainInterfaces(aValue: boolean); override;
     function IsInBatchMode: boolean; override;
     function HasBatchMode: boolean; override;
-    function AddToBatch(ExceptionOnError: boolean): TStatusCode; override;
+    procedure AddToBatch; override;
     function ExecuteBatch(aTransaction: ITransaction
       ): IBatchCompletion; override;
     procedure CancelBatch; override;
@@ -1232,6 +1236,12 @@ end;
 
 { TFB30Statement }
 
+procedure TFB30Statement.CheckChangeBatchRowLimit;
+begin
+  if IsInBatchMode then
+    IBError(ibxeInBatchMode,[nil]);
+end;
+
 procedure TFB30Statement.CheckHandle;
 begin
   if FStatementIntf = nil then
@@ -1681,11 +1691,15 @@ begin
   Result := GetAttachment.HasBatchMode;
 end;
 
-function TFB30Statement.AddToBatch(ExceptionOnError: boolean): TStatusCode;
+procedure TFB30Statement.AddToBatch;
 var BatchPB: TXPBParameterBlock;
+
+const SixteenMB = 16 * 1024 * 1024;
 begin
-  Result := 0;
   FBatchCompletion := nil;
+  if not FPrepared then
+    InternalPrepare;
+  CheckHandle;
   CheckBatchModeAvailable;
   with FFirebird30ClientAPI do
   begin
@@ -1695,26 +1709,38 @@ begin
       BatchPB := TXPBParameterBlock.Create(FFirebird30ClientAPI,Firebird.IXpbBuilder.BATCH);
       with FFirebird30ClientAPI do
       try
+        FBatchBufferSize := FBatchRowLimit * FSQLParams.MetaData.getAlignedLength(StatusIntf);
+        Check4DatabaseError;
+        if FBatchBufferSize < SixteenMB then
+          FBatchBufferSize := SixteenMB;
+        if FBatchBufferSize > 256 * 1024 *1024 {assumed limit} then
+          IBError(ibxeBatchBufferSizeTooBig,[FBatchBufferSize]);
+
         BatchPB.insertInt(Firebird.IBatch.TAG_RECORD_COUNTS,1);
-        BatchPB.insertInt(Firebird.IBatch.TAG_MULTIERROR,1);
-        BatchPB.insertInt(Firebird.IBatch.TAG_DETAILED_ERRORS,1);
+        BatchPB.insertInt(Firebird.IBatch.TAG_BUFFER_BYTES_SIZE,FBatchBufferSize);
         FBatch := FStatementIntf.createBatch(StatusIntf,
                                              FSQLParams.MetaData,
                                              BatchPB.getDataLength,
                                              BatchPB.getBuffer);
         Check4DataBaseError;
+
       finally
         BatchPB.Free;
       end;
+      FBatchRowCount := 0;
+      FBatchBufferUsed := 0;
     end;
 
+    Inc(FBatchRowCount);
+    Inc(FBatchBufferUsed,FSQLParams.MetaData.getAlignedLength(StatusIntf));
+    Check4DataBaseError;
+    if FBatchBufferUsed > FBatchBufferSize then
+      raise EIBBatchBufferOverflow.Create(Ord(ibxeBatchRowBufferOverflow),
+                              Format(GetErrorMessage(ibxeBatchRowBufferOverflow),
+                              [FBatchRowCount,FBatchBufferSize]));
+
     FBatch.Add(StatusIntf,1,FSQLParams.GetMessageBuffer);
-    if ExceptionOnError then
       Check4DataBaseError
-    else
-    with GetStatus as TFB30Status do
-    if InErrorState then
-      Result := GetIBErrorCode;
   end;
 end;
 

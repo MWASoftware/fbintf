@@ -783,16 +783,20 @@ type
     function IsInBatchMode: boolean;
     procedure Prepare(aTransaction: ITransaction=nil);
     function Execute(aTransaction: ITransaction=nil): IResults;
-    function AddToBatch(ExceptionOnError: boolean=true): TStatusCode;
-    function ExecuteBatch(aTransaction: ITransaction=nil): IBatchCompletion;
-    procedure CancelBatch;
-    function GetBatchCompletion: IBatchCompletion;
     function OpenCursor(aTransaction: ITransaction=nil): IResultSet;
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
     procedure SetRetainInterfaces(aValue: boolean);
     procedure EnableStatistics(aValue: boolean);
     function GetPerfStatistics(var stats: TPerfCounters): boolean;
+    {IBatch interface support}
+    procedure AddToBatch;
+    function ExecuteBatch(aTransaction: ITransaction=nil): IBatchCompletion;
+    procedure CancelBatch;
+    function GetBatchCompletion: IBatchCompletion;
+    function GetBatchRowLimit: integer;
+    procedure SetBatchRowLimit(aLimit: integer);
+
     property MetaData: IMetaData read GetMetaData;
     property SQLParams: ISQLParams read GetSQLParams;
     property SQLStatementType: TIBSQLStatementTypes read GetSQLStatementType;
@@ -1359,6 +1363,9 @@ type
 
    {IB Client Exceptions}
    EIBClientError = class(EIBError);
+
+   {Used to explicitly report a Batch Buffer overflow}
+   EIBBatchBufferOverflow = class(EIBError);
 
 {The Firebird API function is used to access the IFirebirdAPI interface.
 
