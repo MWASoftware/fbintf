@@ -572,7 +572,7 @@ FULL_NAME = Johnson, Leslie
 Current memory = 19,767,232
 Delta memory = 4,464
 Max memory = 19,813,104
-Elapsed time= 0.002 sec
+Elapsed time= 0.001 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
@@ -4430,141 +4430,37 @@ Error reported when inserting: Error Processing update/insert batch on row numbe
 -Problematic key value is ("EMP_NO" = 150)
 Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
 Batch Completion Info
-Total rows processed = 3
+Total rows processed = 2
 Updated Records = 1
 Row 1 State = bcNoMoreErrors Msg = 
 Row 2 State = bcExecuteFailed Msg = violation of PRIMARY or UNIQUE KEY constraint "INTEG_27" on table "EMPLOYEE"
 -Problematic key value is ("EMP_NO" = 150)
-Row 3 State = bcNoMoreErrors Msg = 
 
 
 ------------------------------------------------------
 Running Test 20: Stress Test IBatch interface
  FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.0.2496 Firebird 4.0"
-Intermediate Apply Batch on row 4085
+10000 rows added
+20000 rows added
+30000 rows added
+40000 rows added
+50000 rows added
+Batch Execute
+Intermediate Apply Batch on row 50001
 Batch Completion Info
-Total rows processed = 4084
-Updated Records = 4084
-Row 4084 State = bcNoMoreErrors Msg = 
-Intermediate Apply Batch on row 8169
+Total rows processed = 50000
+Updated Rows = 50000
+Row 50000 State = bcNoMoreErrors Msg = 
+60000 rows added
+70000 rows added
+80000 rows added
+90000 rows added
+100000 rows added
+Batch Execute
 Batch Completion Info
-Total rows processed = 4084
-Updated Records = 4084
-Row 4084 State = bcNoMoreErrors Msg = 
-Intermediate Apply Batch on row 12253
-Batch Completion Info
-Total rows processed = 4084
-Updated Records = 4084
-Row 4084 State = bcNoMoreErrors Msg = 
-Intermediate Apply Batch on row 16337
-Batch Completion Info
-Total rows processed = 4084
-Updated Records = 4084
-Row 4084 State = bcNoMoreErrors Msg = 
-Intermediate Apply Batch on row 20421
-Batch Completion Info
-Total rows processed = 4084
-Updated Records = 4084
-Row 4084 State = bcNoMoreErrors Msg = 
-Intermediate Apply Batch on row 24505
-Batch Completion Info
-Total rows processed = 4084
-Updated Records = 4084
-Row 4084 State = bcNoMoreErrors Msg = 
-Intermediate Apply Batch on row 28589
-Batch Completion Info
-Total rows processed = 4084
-Updated Records = 4084
-Row 4084 State = bcNoMoreErrors Msg = 
-Intermediate Apply Batch on row 32673
-Batch Completion Info
-Total rows processed = 4084
-Updated Records = 4084
-Row 4084 State = bcNoMoreErrors Msg = 
-Intermediate Apply Batch on row 36757
-Batch Completion Info
-Total rows processed = 4084
-Updated Records = 4084
-Row 4084 State = bcNoMoreErrors Msg = 
-Intermediate Apply Batch on row 40841
-Batch Completion Info
-Total rows processed = 4084
-Updated Records = 4084
-Row 4084 State = bcNoMoreErrors Msg = 
-Intermediate Apply Batch on row 44925
-Batch Completion Info
-Total rows processed = 4084
-Updated Records = 4084
-Row 4084 State = bcNoMoreErrors Msg = 
-Intermediate Apply Batch on row 49009
-Batch Completion Info
-Total rows processed = 4084
-Updated Records = 4084
-Row 4084 State = bcNoMoreErrors Msg = 
-Intermediate Apply Batch on row 53093
-Batch Completion Info
-Total rows processed = 4084
-Updated Records = 4084
-Row 4084 State = bcNoMoreErrors Msg = 
-Intermediate Apply Batch on row 57177
-Batch Completion Info
-Total rows processed = 4084
-Updated Records = 4084
-Row 4084 State = bcNoMoreErrors Msg = 
-Intermediate Apply Batch on row 61261
-Batch Completion Info
-Total rows processed = 4084
-Updated Records = 4084
-Row 4084 State = bcNoMoreErrors Msg = 
-Intermediate Apply Batch on row 65345
-Batch Completion Info
-Total rows processed = 4084
-Updated Records = 4084
-Row 4084 State = bcNoMoreErrors Msg = 
-Intermediate Apply Batch on row 69429
-Batch Completion Info
-Total rows processed = 4084
-Updated Records = 4084
-Row 4084 State = bcNoMoreErrors Msg = 
-Intermediate Apply Batch on row 73513
-Batch Completion Info
-Total rows processed = 4084
-Updated Records = 4084
-Row 4084 State = bcNoMoreErrors Msg = 
-Intermediate Apply Batch on row 77597
-Batch Completion Info
-Total rows processed = 4084
-Updated Records = 4084
-Row 4084 State = bcNoMoreErrors Msg = 
-Intermediate Apply Batch on row 81681
-Batch Completion Info
-Total rows processed = 4084
-Updated Records = 4084
-Row 4084 State = bcNoMoreErrors Msg = 
-Intermediate Apply Batch on row 85765
-Batch Completion Info
-Total rows processed = 4084
-Updated Records = 4084
-Row 4084 State = bcNoMoreErrors Msg = 
-Intermediate Apply Batch on row 89849
-Batch Completion Info
-Total rows processed = 4084
-Updated Records = 4084
-Row 4084 State = bcNoMoreErrors Msg = 
-Intermediate Apply Batch on row 93933
-Batch Completion Info
-Total rows processed = 4084
-Updated Records = 4084
-Row 4084 State = bcNoMoreErrors Msg = 
-Intermediate Apply Batch on row 98017
-Batch Completion Info
-Total rows processed = 4084
-Updated Records = 4084
-Row 4084 State = bcNoMoreErrors Msg = 
-Batch Completion Info
-Total rows processed = 1984
-Updated Records = 1984
-Row 1984 State = bcNoMoreErrors Msg = 
+Total rows processed = 50000
+Updated Rows = 50000
+Row 50000 State = bcNoMoreErrors Msg = 
 Rows in Dataset = 100000
  Message Hash = 2014887b8ad27fbb20893a22d6e39f26
  Message Hash = 2014887b8ad27fbb20893a22d6e39f26
