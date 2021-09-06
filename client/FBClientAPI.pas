@@ -514,7 +514,9 @@ end;
 
 function TFBClientAPI.GetProcAddr(ProcName: PAnsiChar): Pointer;
 begin
-  Result := GetProcAddress(FFBLibrary.IBLibrary, ProcName);
+  Result := nil;
+  if assigned(FFBLibrary) and (FFBLibrary.IBLibrary <> NilHandle) then
+    Result := GetProcAddress(FFBLibrary.IBLibrary, ProcName);
   if not Assigned(Result) then
     raise Exception.CreateFmt(SFirebirdAPIFuncNotFound,[ProcName]);
 end;
