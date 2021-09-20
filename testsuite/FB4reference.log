@@ -572,8 +572,8 @@ FULL_NAME = Johnson, Leslie
 Current memory = 19,767,232
 Delta memory = 4,464
 Max memory = 19,813,104
-Elapsed time= 0.001 sec
-Cpu = 0.000 sec
+Elapsed time= 0.002 sec
+Cpu = 0.010 sec
 Buffers = 2048
 Reads = 0
 Writes = 0
@@ -3146,6 +3146,21 @@ Invalid Param SQL Type Test
 Error Handled: Field "EMP_NO" not found
 Case sensitive Param SQL  Test
 Error Handled: Field "EMP_NO" not found
+Stale Reference Check
+First test correct usage
+COUNTER = 42
+
+New Transaction before param set
+Error Handled: This interface is no longer up-to-date
+New Transaction before Open Cursor
+Error Handled: This interface is no longer up-to-date
+Stop Stale Reference Checks
+New Transaction before param set
+COUNTER = 42
+
+New Transaction before Open Cursor
+COUNTER = 42
+
 Invalid Server Name Test
 Error Handled: Unable to complete network request to host "unknown".
 -Failed to locate host machine.

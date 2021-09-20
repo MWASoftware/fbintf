@@ -561,11 +561,11 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 948,560
+Current memory = 948,496
 Delta memory = 1,400
-Max memory = 992,504
+Max memory = 992,448
 Elapsed time= 0.002 sec
-Cpu = 0.000 sec
+Cpu = 0.001 sec
 Buffers = 75
 Reads = 0
 Writes = 0
@@ -2717,7 +2717,7 @@ Unknown Response 3
 Unknown Response 3
 Server Memory = 841392
 Forced Writes  = 1
-Max Memory  = 879240
+Max Memory  = 879176
 Num Buffers  = 75
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
@@ -3129,6 +3129,21 @@ Invalid Param SQL Type Test
 Error Handled: Field "EMP_NO" not found
 Case sensitive Param SQL  Test
 Error Handled: Field "EMP_NO" not found
+Stale Reference Check
+First test correct usage
+COUNTER = 42
+
+New Transaction before param set
+Error Handled: This interface is no longer up-to-date
+New Transaction before Open Cursor
+Error Handled: This interface is no longer up-to-date
+Stop Stale Reference Checks
+New Transaction before param set
+COUNTER = 42
+
+New Transaction before Open Cursor
+COUNTER = 42
+
 Invalid Server Name Test
 Error Handled: Unable to complete network request to host "unknown".
 -Failed to locate host machine
