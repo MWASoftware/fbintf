@@ -1390,7 +1390,7 @@ begin
   CheckHandle;
   if aTransaction <> FTransactionIntf then
     AddMonitor(aTransaction as TFB30Transaction);
-  if (FSQLParams.FTransactionSeqNo < (FTransactionIntf as TFB30transaction).TransactionSeqNo) then
+  if FStaleReferenceChecks and (FSQLParams.FTransactionSeqNo < (FTransactionIntf as TFB30transaction).TransactionSeqNo) then
     IBError(ibxeInterfaceOutofDate,[nil]);
 
 
@@ -1436,7 +1436,7 @@ begin
   CheckHandle;
   if aTransaction <> FTransactionIntf then
     AddMonitor(aTransaction as TFB30Transaction);
-  if (FSQLParams.FTransactionSeqNo < (FTransactionIntf as TFB30transaction).TransactionSeqNo) then
+  if FStaleReferenceChecks and (FSQLParams.FTransactionSeqNo < (FTransactionIntf as TFB30transaction).TransactionSeqNo) then
     IBError(ibxeInterfaceOutofDate,[nil]);
 
  with FFirebird30ClientAPI do

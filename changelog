@@ -2,6 +2,14 @@ FBINTF Change Log  version          (1.3-2 Build 12776) Mon, 23 Aug 2021 11:09:3
 
 1. TFBClientAPI.GetProcAddr. Add check for nil reference.
 
+2. IStatement: new methods:
+    procedure SetStaleReferenceChecks(Enable:boolean); {default true}
+    function GetStaleReferenceChecks: boolean;
+
+   In previous versions, stale reference checks were always enabled. This allows the
+   user to disable them on a per statement basis. Note this can risk out-of-date
+   statement BLR. See User Guide.
+
 FBINTF Change Log  version          (1.3-1 Build 12776) Mon, 23 Aug 2021 11:09:33 +0100
 
 1. Integer decodes in information blocks (e.g. IDBInfoItem) widened from 32 bit to 64-bit integers.

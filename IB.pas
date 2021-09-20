@@ -796,6 +796,9 @@ type
     function GetBatchCompletion: IBatchCompletion;
     function GetBatchRowLimit: integer;
     procedure SetBatchRowLimit(aLimit: integer);
+    {Stale Reference Check}
+    procedure SetStaleReferenceChecks(Enable:boolean); {default true}
+    function GetStaleReferenceChecks: boolean;
 
     property MetaData: IMetaData read GetMetaData;
     property SQLParams: ISQLParams read GetSQLParams;

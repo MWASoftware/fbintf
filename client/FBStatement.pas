@@ -59,6 +59,7 @@ type
   protected
     FTransactionIntf: ITransaction;
     FExecTransactionIntf: ITransaction;
+    FStaleReferenceChecks: boolean;
     FSQLStatementType: TIBSQLStatementTypes;         { Select, update, delete, insert, create, alter, etc...}
     FSQLDialect: integer;
     FOpen: boolean;
@@ -138,6 +139,9 @@ type
     function GetBatchCompletion: IBatchCompletion; virtual;
     function GetBatchRowLimit: integer;
     procedure SetBatchRowLimit(aLimit: integer);
+    {Stale Reference Check}
+    procedure SetStaleReferenceChecks(Enable:boolean); {default true}
+    function GetStaleReferenceChecks: boolean;
   public
     property ChangeSeqNo: integer read FChangeSeqNo;
     property SQLParams: ISQLParams read GetSQLParams;
@@ -179,6 +183,7 @@ begin
   FSQLDialect := SQLDialect;
   FSQL := sql;
   FBatchRowLimit := DefaultBatchRowLimit;
+  FStaleReferenceChecks := true;
 end;
 
 constructor TFBStatement.CreateWithParameterNames(Attachment: IAttachment;
@@ -342,6 +347,16 @@ procedure TFBStatement.SetBatchRowLimit(aLimit: integer);
 begin
   CheckChangeBatchRowLimit;
   FBatchRowLimit := aLimit;
+end;
+
+procedure TFBStatement.SetStaleReferenceChecks(Enable: boolean);
+begin
+  FStaleReferenceChecks := Enable;
+end;
+
+function TFBStatement.GetStaleReferenceChecks: boolean;
+begin
+  Result := FStaleReferenceChecks;
 end;
 
 function TFBStatement.OpenCursor(aTransaction: ITransaction): IResultSet;
