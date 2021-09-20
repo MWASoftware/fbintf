@@ -150,6 +150,59 @@ begin
   except on E: Exception do
     writeln(OutFile,'Error Handled: ',E.Message);
   end;
+  Transaction.Rollback;
+  Transaction.Start;
+  writeln(Outfile,'Stale Reference Check');
+  writeln(Outfile,'First test correct usage');
+  Statement :=  Attachment.Prepare(Transaction,'Select count(*) As Counter from EMPLOYEE Where Hire_Date < ?',3);
+  Statement.SQLParams[0].AsDate := EncodeDate(2016,11,5);
+  ReportResults(Statement);
+  try
+    writeln(Outfile,'New Transaction before param set');
+    Statement.Prepare(Transaction);
+    Transaction.Rollback;
+    Transaction.Start;
+    Statement.SQLParams[0].AsDate := EncodeDate(2016,11,5);
+    ReportResults(Statement);
+  except on E: Exception do
+    writeln(OutFile,'Error Handled: ',E.Message);
+  end;
+  Transaction.Rollback;
+  Transaction.Start;
+  try
+    writeln(Outfile,'New Transaction before Open Cursor');
+    Statement.Prepare(Transaction);
+    Statement.SQLParams[0].AsDate := EncodeDate(2016,11,5);
+    Transaction.Rollback;
+    Transaction.Start;
+    ReportResults(Statement);
+  except on E: Exception do
+    writeln(OutFile,'Error Handled: ',E.Message);
+  end;
+  Transaction.Rollback;
+  Transaction.Start;
+  writeln(Outfile,'Stop Stale Reference Checks');
+  Statement.SetStaleReferenceChecks(false);
+  try
+    writeln(Outfile,'New Transaction before param set');
+    Statement.Prepare(Transaction);
+    Transaction.Rollback;
+    Transaction.Start;
+    Statement.SQLParams[0].AsDate := EncodeDate(2016,11,5);
+    ReportResults(Statement);
+  except on E: Exception do
+    writeln(OutFile,'Error Handled: ',E.Message);
+  end;
+  try
+    writeln(Outfile,'New Transaction before Open Cursor');
+    Statement.Prepare(Transaction);
+    Statement.SQLParams[0].AsDate := EncodeDate(2016,11,5);
+    Transaction.Rollback;
+    Transaction.Start;
+    ReportResults(Statement);
+  except on E: Exception do
+    writeln(OutFile,'Error Handled: ',E.Message);
+  end;
 end;
 
 procedure TTest16.ServiceTests(CharSet: AnsiString; SQLDialect: integer);
