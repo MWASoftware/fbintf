@@ -1,5 +1,6 @@
 #!/bin/sh
 
+
 usage()
 {
   echo "dotest.sh [-2] [-3] [-4 b1|b2] [-t <testid>]"
@@ -42,6 +43,6 @@ echo "FIREBIRD=$FIREBIRD"
 if [ ! -d "$FIREBIRD" ]; then
   echo "$FIREBIRD not found"
 else
-  ./runtest.sh $TEST
+  ./runtest.sh  $TEST
 fi
 

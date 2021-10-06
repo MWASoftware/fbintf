@@ -1249,7 +1249,8 @@ begin
   stInBlock:
     begin
       case token of
-      sqltBegin:
+      sqltBegin,
+      sqltCase:
           Inc(FNested);
 
       sqltEnd:
