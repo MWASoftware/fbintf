@@ -10,6 +10,10 @@ FBINTF Change Log  version          (1.3-2 Build 12798) Mon, 20 Sep 2021 12:42:4
    user to disable them on a per statement basis. Note this can risk out-of-date
    statement BLR. See User Guide.
 
+3. IBUtils: TSQLwithNamedParamsTokeniser now recognises a CASE...END block within a
+   stored procedure and hence avoids replacing named parameters within a containing
+   BEGIN..END block.
+
 FBINTF Change Log  version          (1.3-1 Build 12776) Mon, 23 Aug 2021 11:09:33 +0100
 
 1. Integer decodes in information blocks (e.g. IDBInfoItem) widened from 32 bit to 64-bit integers.
