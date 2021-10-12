@@ -2332,6 +2332,7 @@ var b: IBlob;
     dt: TDateTime;
     CurrValue: Currency;
     FloatValue: single;
+    Int64Value: Int64;
     timezone: AnsiString;
 begin
   CheckActive;
@@ -2367,6 +2368,9 @@ begin
     SQL_SHORT,
     SQL_LONG,
     SQL_INT64:
+      if (GetScale = 0) and TryStrToInt64(Value,Int64Value) then
+        SetAsInt64(Int64Value)
+      else
       if TryStrToCurr(Value,CurrValue) then
         SetAsNumeric(AdjustScaleFromCurrency(CurrValue,GetScale),GetScale)
       else
