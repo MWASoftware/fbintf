@@ -18,6 +18,17 @@ FBINTF Change Log  version          (1.3-2 Build 12806) Wed, 06 Oct 2021 09:07:0
    zero is now treated as a special case to avoid the risk of floating point
    rounding errors affecting pure integers.
 
+5. ISQLParam:  Review and tidy-up of SetAsString for numeric types.
+
+6. ISQLParam: new methods:
+    function GetColumnSQLType: cardinal;
+    function getColumnScale: integer;
+   These are guaranteed to return the actual column type and scale even after a
+   parameter value has been set. The existing GetSQLType and getScale return the
+   current type and scale, which may have been updated when setting a value to the
+   SQL Param.
+
+
 FBINTF Change Log  version          (1.3-1 Build 12776) Mon, 23 Aug 2021 11:09:33 +0100
 
 1. Integer decodes in information blocks (e.g. IDBInfoItem) widened from 32 bit to 64-bit integers.

@@ -639,10 +639,12 @@ type
     ['{b22b4578-6d41-4807-a9a9-d2ec8d1d5a14}']
     function GetIndex: integer;
     function GetSQLType: cardinal;
+    function GetColumnSQLType: cardinal;
     function GetSQLTypeName: AnsiString;
     function getSubtype: integer;
     function getName: AnsiString;
     function getScale: integer;
+    function getColumnScale: integer;
     function getCharSetID: cardinal;
     function getCodePage: TSystemCodePage;
     function getIsNullable: boolean;

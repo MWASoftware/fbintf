@@ -154,12 +154,14 @@ type
      property FirebirdClientAPI: TFBClientAPI read FFirebirdClientAPI;
   public
      constructor Create(api: TFBClientAPI);
-     function GetSQLType: cardinal; virtual; abstract;
+     function GetSQLType: cardinal; virtual; abstract; {Current Field Data SQL Type}
+     function GetColumnSQLType: cardinal; virtual; abstract; {The SQL Type of the column itself}
      function GetSQLTypeName: AnsiString; overload;
-     class function GetSQLTypeName(SQLType: short): AnsiString; overload;
+     class function GetSQLTypeName(SQLType: cardinal): AnsiString; overload;
      function GetStrDataLength: short;
      function GetName: AnsiString; virtual; abstract;
-     function GetScale: integer; virtual; abstract;
+     function GetScale: integer; virtual; abstract; {Current Field Data scale}
+     function GetColumnScale: integer; virtual; abstract; {The scale of the column itself}
      function GetAsBoolean: boolean;
      function GetAsCurrency: Currency;
      function GetAsInt64: Int64;
@@ -228,8 +230,14 @@ type
      property Modified: Boolean read getModified;
      property IsNull: Boolean read GetIsNull write SetIsNull;
      property IsNullable: Boolean read GetIsNullable write SetIsNullable;
+     {For read only fields, ColumnScale = Scale and ColumnSQLType = SQLType.
+      for read/write fields, ColumnScale and ColumnSQLType are the scale and type
+      of the database column while scale and SQLType are the scale and type of
+      the current field value.}
      property Scale: integer read GetScale write SetScale;
+     property ColumnScale: integer read GetColumnScale;
      property SQLType: cardinal read GetSQLType write SetSQLType;
+     property ColumnSQLType: cardinal read GetColumnSQLType;
   end;
 
   TSQLVarData = class;
@@ -289,12 +297,14 @@ type
   protected
     function GetAttachment: IAttachment; virtual; abstract;
     function GetSQLType: cardinal; virtual; abstract;
+    function GetColumnSQLType: cardinal; virtual; abstract;
     function GetSubtype: integer; virtual; abstract;
     function GetAliasName: AnsiString;  virtual; abstract;
     function GetFieldName: AnsiString; virtual; abstract;
     function GetOwnerName: AnsiString;  virtual; abstract;
     function GetRelationName: AnsiString;  virtual; abstract;
     function GetScale: integer; virtual; abstract;
+    function GetColumnScale: integer; virtual; abstract;
     function GetCharSetID: cardinal; virtual; abstract;
     function GetCharSetWidth: integer; virtual; abstract;
     function GetCodePage: TSystemCodePage; virtual; abstract;
@@ -334,12 +344,14 @@ type
     property Name: AnsiString read FName write SetName;
     property CharSetID: cardinal read GetCharSetID write SetCharSetID;
     property SQLType: cardinal read GetSQLType write SetSQLType;
+    property ColumnSQLType: cardinal read GetColumnSQLType;
     property SQLSubtype: integer read GetSubtype;
     property SQLData: PByte read GetSQLData;
     property DataLength: cardinal read GetDataLength write SetDataLength;
     property IsNull: Boolean read GetIsNull write SetIsNull;
     property IsNullable: Boolean read GetIsNullable write SetIsNullable;
     property Scale: integer read GetScale write SetScale;
+    property ColumnScale: integer read GetColumnScale;
   public
     property Modified: Boolean read FModified;
     property Statement: IStatement read GetStatement;
@@ -370,6 +382,7 @@ type
     {IColumnMetaData}
     function GetIndex: integer;
     function GetSQLType: cardinal; override;
+    function GetColumnSQLType: cardinal; override;
     function getSubtype: integer;
     function getRelationName: AnsiString;
     function getOwnerName: AnsiString;
@@ -377,6 +390,7 @@ type
     function getAliasName: AnsiString;  {Alias Name of column or Column Name if not alias}
     function GetName: AnsiString; override;      {Disambiguated uppercase Field Name}
     function GetScale: integer; override;
+    function GetColumnScale: integer; override;
     function getCharSetID: cardinal; override;
     function GetIsNullable: boolean; override;
     function GetSize: cardinal; override;
@@ -1004,6 +1018,7 @@ begin
   end
   else
     result := trunc(Value);
+//  writeln('Adjusted ',Value,' to ',Result);
 end;
 
 procedure TSQLDataItem.CheckActive;
@@ -1077,7 +1092,7 @@ begin
   Result := GetSQLTypeName(GetSQLType);
 end;
 
-class function TSQLDataItem.GetSQLTypeName(SQLType: short): AnsiString;
+class function TSQLDataItem.GetSQLTypeName(SQLType: cardinal): AnsiString;
 begin
   Result := 'Unknown';
   case SQLType of
@@ -2162,6 +2177,12 @@ begin
   result := FIBXSQLVAR.SQLType;
 end;
 
+function TColumnMetaData.GetColumnSQLType: cardinal;
+begin
+  CheckActive;
+  result := FIBXSQLVAR.ColumnSQLType;
+end;
+
 function TColumnMetaData.getSubtype: integer;
 begin
   CheckActive;
@@ -2202,6 +2223,12 @@ function TColumnMetaData.GetScale: integer;
 begin
   CheckActive;
   result := FIBXSQLVAR.Scale;
+end;
+
+function TColumnMetaData.GetColumnScale: integer;
+begin
+  CheckActive;
+  result := FIBXSQLVAR.ColumnScale;
 end;
 
 function TColumnMetaData.getCharSetID: cardinal;
@@ -2330,16 +2357,16 @@ end;
 
 var b: IBlob;
     dt: TDateTime;
-    CurrValue: Currency;
-    FloatValue: single;
-    Int64Value: Int64;
     timezone: AnsiString;
+    FloatValue: Double;
+    Int64Value: Int64;
+    BCDValue: TBCD;
 begin
   CheckActive;
   if IsNullable then
     IsNull := False;
   with FFirebirdClientAPI do
-  case SQLTYPE of
+  case ColumnSQLTYPE of
   SQL_BOOLEAN:
     if AnsiCompareText(Value,STrue) = 0 then
       AsBoolean := true
@@ -2365,63 +2392,79 @@ begin
   SQL_TEXT:
     DoSetString;
 
-    SQL_SHORT,
-    SQL_LONG,
-    SQL_INT64:
-      if (GetScale = 0) and TryStrToInt64(Value,Int64Value) then
-        SetAsInt64(Int64Value)
-      else
-      if TryStrToCurr(Value,CurrValue) then
-        SetAsNumeric(AdjustScaleFromCurrency(CurrValue,GetScale),GetScale)
-      else
-        DoSetString;
-
-    SQL_D_FLOAT,
-    SQL_DOUBLE,
-    SQL_FLOAT:
+  SQL_SHORT,
+  SQL_LONG,
+  SQL_INT64:
+    {If the string contains an integer then convert and set directly}
+    if TryStrToInt64(Value,Int64Value) then
+      SetAsInt64(Int64Value)
+    else
+    if ColumnScale = 0 then {integer expected but non-integer string}
+    begin
       if TryStrToFloat(Value,FloatValue) then
-        SetAsDouble(FloatValue)
+        {truncate it if the column is limited to an integer}
+        SetAsInt64(Trunc(FloatValue))
       else
         DoSetString;
+    end
+    else
+    if TryStrToFloat(Value,FloatValue) then
+      {Set as int64 with adjusted scale}
+      SetAsNumeric(AdjustScaleFromDouble(FloatValue,ColumnScale),ColumnScale)
+    else
+      DoSetString;
 
-    SQL_TIMESTAMP:
+  SQL_DEC_FIXED,
+  SQL_DEC16,
+  SQL_DEC34,
+  SQL_INT128:
+    if TryStrToBCD(Value,BCDValue) then
+      SetAsBCD(BCDValue)
+    else
+      DoSetString;
+
+  SQL_D_FLOAT,
+  SQL_DOUBLE,
+  SQL_FLOAT:
+    if TryStrToFloat(Value,FloatValue) then
+      SetAsDouble(FloatValue)
+    else
+      DoSetString;
+
+  SQL_TIMESTAMP:
       if TryStrToDateTime(Value,dt) then
         SetAsDateTime(dt)
       else
         DoSetString;
 
-    SQL_TYPE_DATE:
+  SQL_TYPE_DATE:
       if TryStrToDateTime(Value,dt) then
         SetAsDate(dt)
       else
         DoSetString;
 
-    SQL_TYPE_TIME:
+  SQL_TYPE_TIME:
       if TryStrToDateTime(Value,dt) then
         SetAsTime(dt)
       else
         DoSetString;
 
-    SQL_TIMESTAMP_TZ:
+  SQL_TIMESTAMP_TZ,
+  SQL_TIMESTAMP_TZ_EX:
       if ParseDateTimeTZString(value,dt,timezone) then
         SetAsDateTime(dt,timezone)
       else
         DoSetString;
 
-    SQL_TIME_TZ:
+  SQL_TIME_TZ,
+  SQL_TIME_TZ_EX:
       if ParseDateTimeTZString(value,dt,timezone,true) then
         SetAsTime(dt,GetAttachment.GetTimeZoneServices.GetTimeTZDate,timezone)
       else
         DoSetString;
 
-    SQL_DEC_FIXED,
-    SQL_DEC16,
-    SQL_DEC34,
-    SQL_INT128:
-      SetAsBCD(StrToBCD(Value));
-
-    else
-      IBError(ibxeInvalidDataConversion,[GetSQLTypeName(SQLType)]);
+  else
+    IBError(ibxeInvalidDataConversion,[GetSQLTypeName(ColumnSQLType)]);
   end;
 end;
 

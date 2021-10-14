@@ -387,6 +387,7 @@ end;
 procedure TFBArrayElement.SetAsString(Value: AnsiString);
 var len: integer;
     ElementSize: integer;
+    Int64Value: Int64;
 begin
   CheckActive;
   case GetSQLType of
@@ -430,7 +431,10 @@ begin
     if trim(Value) = '' then
       SetAsInt64(0)
     else
-      SetAsInt64(AdjustScaleFromCurrency(StrToCurr(Value),GetScale));
+    if TryStrToInt64(Value,Int64Value) then
+      SetAsInt64(Int64Value)
+    else
+      SetAsCurrency(StrToCurr(Value));
 
   SQL_D_FLOAT,
   SQL_DOUBLE,
