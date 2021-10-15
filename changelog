@@ -1,4 +1,4 @@
-FBINTF Change Log  version          (1.3-2 Build 12806) Wed, 06 Oct 2021 09:07:03 +0100
+FBINTF Change Log  version          (1.3-2 Build 12822) Fri, 15 Oct 2021 10:18:04 +0100
 
 1. TFBClientAPI.GetProcAddr. Add check for nil reference.
 
@@ -13,6 +13,22 @@ FBINTF Change Log  version          (1.3-2 Build 12806) Wed, 06 Oct 2021 09:07:0
 3. IBUtils: TSQLwithNamedParamsTokeniser now recognises a CASE...END block within a
    stored procedure and hence avoids replacing named parameters within a containing
    BEGIN..END block.
+
+4. ISQLParam: using a string value to set an integer field with a scale factor of
+   zero is now treated as a special case to avoid the risk of floating point
+   rounding errors affecting pure integers.
+
+5. ISQLParam:  Review and tidy-up of SetAsString for numeric types.
+
+6. ISQLParam is now subclassed from IParamMetaData, which provides access to the mutable
+   SQL Parameter metadata (methods moved from ISQLParam).
+
+7. ISQLParam: new method
+     function getColMetadata: IParamMetaData;
+   This instance of IParamMetaData returns the original column metadata which is unmutable.
+   Note: ISQLParam metadata can change after a parameter value has been set e.g when
+   setting a VARCHAR column to an integer value.
+
 
 FBINTF Change Log  version          (1.3-1 Build 12776) Mon, 23 Aug 2021 11:09:33 +0100
 

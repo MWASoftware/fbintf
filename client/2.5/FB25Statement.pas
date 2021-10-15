@@ -497,6 +497,7 @@ begin
     else
       sqlInd :=  nil;
   end;
+  SaveMetaData;
 end;
 
 procedure TIBXSQLVAR.SetIsNull(Value: Boolean);

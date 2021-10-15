@@ -137,6 +137,7 @@ type
   public
     constructor Create(aParent: TIBXSQLDA; aIndex: integer);
     procedure Changed; override;
+    procedure InitColumnMetaData(aMetaData: Firebird.IMessageMetadata);
     procedure ColumnSQLDataInit;
     procedure RowChange; override;
     procedure FreeSQLData;
@@ -448,6 +449,35 @@ procedure TIBXSQLVAR.Changed;
 begin
   inherited Changed;
   TIBXSQLDA(Parent).Changed;
+end;
+
+procedure TIBXSQLVAR.InitColumnMetaData(aMetaData: Firebird.IMessageMetadata);
+begin
+  with FFirebird30ClientAPI do
+  begin
+    FSQLType := aMetaData.getType(StatusIntf,Index);
+    Check4DataBaseError;
+    if FSQLType = SQL_BLOB then
+    begin
+      FSQLSubType := aMetaData.getSubType(StatusIntf,Index);
+      Check4DataBaseError;
+    end
+    else
+      FSQLSubType := 0;
+    FDataLength := aMetaData.getLength(StatusIntf,Index);
+    Check4DataBaseError;
+    FMetadataSize := FDataLength;
+    FRelationName := strpas(aMetaData.getRelation(StatusIntf,Index));
+    Check4DataBaseError;
+    FFieldName := strpas(aMetaData.getField(StatusIntf,Index));
+    Check4DataBaseError;
+    FNullable := aMetaData.isNullable(StatusIntf,Index);
+    Check4DataBaseError;
+    FScale := aMetaData.getScale(StatusIntf,Index);
+    Check4DataBaseError;
+    FCharSetID :=  aMetaData.getCharSet(StatusIntf,Index) and $FF;
+    Check4DataBaseError;
+  end;
 end;
 
 procedure TIBXSQLVAR.ColumnSQLDataInit;
@@ -983,28 +1013,12 @@ begin
     for i := 0 to Count - 1 do
     with TIBXSQLVar(Column[i]) do
     begin
-      FSQLType := aMetaData.getType(StatusIntf,i);
-      Check4DataBaseError;
-      if FSQLType = SQL_BLOB then
-      begin
-        FSQLSubType := aMetaData.getSubType(StatusIntf,i);
-        Check4DataBaseError;
-      end
-      else
-        FSQLSubType := 0;
-      FDataLength := aMetaData.getLength(StatusIntf,i);
-      Check4DataBaseError;
-      FMetadataSize := FDataLength;
-      FNullable := aMetaData.isNullable(StatusIntf,i);
-      Check4DataBaseError;
+      InitColumnMetaData(aMetaData);
+      SaveMetaData;
       if FNullable then
         FSQLNullIndicator := @FNullIndicator
       else
         FSQLNullIndicator := nil;
-      FScale := aMetaData.getScale(StatusIntf,i);
-      Check4DataBaseError;
-      FCharSetID :=  aMetaData.getCharSet(StatusIntf,i) and $FF;
-      Check4DataBaseError;
       ColumnSQLDataInit;
     end;
   end;
@@ -1057,27 +1071,8 @@ begin
     for i := 0 to Count - 1 do
     with TIBXSQLVar(Column[i]) do
     begin
-      FSQLType := aMetaData.getType(StatusIntf,i);
-      Check4DataBaseError;
-      if FSQLType = SQL_BLOB then
-      begin
-        FSQLSubType := aMetaData.getSubType(StatusIntf,i);
-        Check4DataBaseError;
-      end
-      else
-        FSQLSubType := 0;
-      FBlob := nil;
-      FArray := nil;
+      InitColumnMetaData(aMetaData);
       FSQLData := FMessageBuffer + metaData.getOffset(StatusIntf,i);
-      Check4DataBaseError;
-      FDataLength := aMetaData.getLength(StatusIntf,i);
-      Check4DataBaseError;
-      FMetadataSize := FDataLength;
-      FRelationName := strpas(aMetaData.getRelation(StatusIntf,i));
-      Check4DataBaseError;
-      FFieldName := strpas(aMetaData.getField(StatusIntf,i));
-      Check4DataBaseError;
-      FNullable := aMetaData.isNullable(StatusIntf,i);
       Check4DataBaseError;
       if FNullable then
       begin
@@ -1086,10 +1081,8 @@ begin
       end
       else
         FSQLNullIndicator := nil;
-      FScale := aMetaData.getScale(StatusIntf,i);
-      Check4DataBaseError;
-      FCharSetID :=  aMetaData.getCharSet(StatusIntf,i) and $FF;
-      Check4DataBaseError;
+      FBlob := nil;
+      FArray := nil;
     end;
   end;
   SetUniqueRelationName;

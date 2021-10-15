@@ -621,32 +621,41 @@ type
   end;
 
   {The ISQLParam interface is used to provide access to each parameter in a
-   parametised SQL Statement. It subclasses IColumnMetaData and this part of
-   the interface may be used to access information on the expected SQL Type, etc.
-
-   It also subclasses ISQLData and this part of the interface may be used to access
-   current values for each parameter.
-
-   Otherwise, the interface comprises the Setter Methods and properties used to
+   parametised SQL Statement. The interface comprises the Setter Methods and properties used to
    set the value of each parameter.
 
    Automatic conversion is provided to and from strings. That is GetAsString and
    SetAsString are safe to use for sql types other than boolean - provided automatic
    conversion is possible.
+
+   ISQLParam is subclassed from the IParamMetaData interface. This interface provides
+   access to the parameter metadata. This metadata is mutable and can change after
+   a parameter is set to a given value. This is acceptable as long as the parameter
+   metadata is type compatible with the underlying column metadata and hence the
+   parameter value can be converted by Firebird into a value acceptable by the
+   underlying column. The column metadata, which is unmutable, can be obtained
+   by the ISQLParam.getColMetadata interface. When a statement is prepared, the
+   parameter metadata is always initialised to the column metadata.
   }
 
-  ISQLParam = interface
-    ['{b22b4578-6d41-4807-a9a9-d2ec8d1d5a14}']
-    function GetIndex: integer;
+  IParamMetaData = interface
+  ['{4e148c4e-2d48-4991-a263-f66eca05c6aa}']
     function GetSQLType: cardinal;
     function GetSQLTypeName: AnsiString;
     function getSubtype: integer;
-    function getName: AnsiString;
     function getScale: integer;
     function getCharSetID: cardinal;
     function getCodePage: TSystemCodePage;
     function getIsNullable: boolean;
     function GetSize: cardinal;
+    property SQLType: cardinal read GetSQLType;
+  end;
+
+  ISQLParam = interface(IParamMetaData)
+    ['{b22b4578-6d41-4807-a9a9-d2ec8d1d5a14}']
+    function getColMetadata: IParamMetaData;
+    function GetIndex: integer;
+    function getName: AnsiString;
     function GetAsBoolean: boolean;
     function GetAsCurrency: Currency;
     function GetAsInt64: Int64;
@@ -723,7 +732,6 @@ type
     property IsNullable: Boolean read GetIsNullable;
     property Modified: Boolean read getModified;
     property Name: AnsiString read GetName;
-    property SQLType: cardinal read GetSQLType;
   end;
 
    {

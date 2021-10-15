@@ -154,12 +154,12 @@ type
      property FirebirdClientAPI: TFBClientAPI read FFirebirdClientAPI;
   public
      constructor Create(api: TFBClientAPI);
-     function GetSQLType: cardinal; virtual; abstract;
+     function GetSQLType: cardinal; virtual; abstract; {Current Field Data SQL Type}
      function GetSQLTypeName: AnsiString; overload;
-     class function GetSQLTypeName(SQLType: short): AnsiString; overload;
+     class function GetSQLTypeName(SQLType: cardinal): AnsiString; overload;
      function GetStrDataLength: short;
      function GetName: AnsiString; virtual; abstract;
-     function GetScale: integer; virtual; abstract;
+     function GetScale: integer; virtual; abstract; {Current Field Data scale}
      function GetAsBoolean: boolean;
      function GetAsCurrency: Currency;
      function GetAsInt64: Int64;
@@ -284,6 +284,7 @@ type
     FModified: boolean;
     FUniqueName: boolean;
     FVarString: RawByteString;
+    FColMetaData: IParamMetaData;
     function GetStatement: IStatement;
     procedure SetName(AValue: AnsiString);
   protected
@@ -322,7 +323,9 @@ type
     function CreateBlob: IBlob; virtual; abstract;
     function GetArrayMetaData: IArrayMetaData; virtual; abstract;
     function GetBlobMetaData: IBlobMetaData; virtual; abstract;
+    function getColMetadata: IParamMetaData;
     procedure Initialize; virtual;
+    procedure SaveMetaData;
 
   public
     property AliasName: AnsiString read GetAliasName;
@@ -411,6 +414,31 @@ type
     property AsBlob: IBlob read GetAsBlob;
  end;
 
+  { TSQLParamMetaData }
+
+  TSQLParamMetaData = class(TFBInterfacedObject,IParamMetaData)
+  private
+    FSQLType: cardinal;
+    FSQLSubType: integer;
+    FScale: integer;
+    FCharSetID: cardinal;
+    FNullable: boolean;
+    FSize: cardinal;
+    FCodePage: TSystemCodePage;
+  public
+    constructor Create(src: TSQLVarData);
+    {IParamMetaData}
+    function GetSQLType: cardinal;
+    function GetSQLTypeName: AnsiString;
+    function getSubtype: integer;
+    function getScale: integer;
+    function getCharSetID: cardinal;
+    function getCodePage: TSystemCodePage;
+    function getIsNullable: boolean;
+    function GetSize: cardinal;
+    property SQLType: cardinal read GetSQLType;
+  end;
+
   { TSQLParam }
 
   TSQLParam = class(TIBSQLData,ISQLParam,ISQLData)
@@ -423,6 +451,7 @@ type
     procedure SetSQLType(aValue: cardinal); override;
   public
     procedure Clear;
+    function getColMetadata: IParamMetaData;
     function GetModified: boolean; override;
     function GetAsPointer: Pointer;
     function GetAsString: AnsiString; override;
@@ -527,6 +556,60 @@ type
 implementation
 
 uses FBMessages, variants, IBUtils, FBTransaction, DateUtils;
+
+{ TSQLParamMetaData }
+
+constructor TSQLParamMetaData.Create(src: TSQLVarData);
+begin
+  inherited Create;
+  FSQLType := src.GetSQLType;
+  FSQLSubType := src.getSubtype;
+  FScale := src.GetScale;
+  FCharSetID := src.getCharSetID;
+  FNullable := src.GetIsNullable;
+  FSize := src.GetSize;
+  FCodePage := src.GetCodePage;
+end;
+
+function TSQLParamMetaData.GetSQLType: cardinal;
+begin
+  Result := FSQLType;
+end;
+
+function TSQLParamMetaData.GetSQLTypeName: AnsiString;
+begin
+  Result := TSQLDataItem.GetSQLTypeName(FSQLType);
+end;
+
+function TSQLParamMetaData.getSubtype: integer;
+begin
+  Result := FSQLSubType;
+end;
+
+function TSQLParamMetaData.getScale: integer;
+begin
+  Result := FScale;
+end;
+
+function TSQLParamMetaData.getCharSetID: cardinal;
+begin
+  Result := FCharSetID;
+end;
+
+function TSQLParamMetaData.getCodePage: TSystemCodePage;
+begin
+  Result :=  FCodePage;
+end;
+
+function TSQLParamMetaData.getIsNullable: boolean;
+begin
+  Result :=  FNullable;
+end;
+
+function TSQLParamMetaData.GetSize: cardinal;
+begin
+  Result := FSize;
+end;
 
 { TSQLDataArea }
 
@@ -679,6 +762,11 @@ begin
   //Ignore
 end;
 
+procedure TSQLVarData.SaveMetaData;
+begin
+  FColMetaData := TSQLParamMetaData.Create(self);
+end;
+
 constructor TSQLVarData.Create(aParent: TSQLDataArea; aIndex: integer);
 begin
   inherited Create;
@@ -711,6 +799,11 @@ procedure TSQLVarData.RowChange;
 begin
   FModified := false;
   FVarString := '';
+end;
+
+function TSQLVarData.getColMetadata: IParamMetaData;
+begin
+  Result := FColMetaData;
 end;
 
 procedure TSQLVarData.Initialize;
@@ -1004,6 +1097,7 @@ begin
   end
   else
     result := trunc(Value);
+//  writeln('Adjusted ',Value,' to ',Result);
 end;
 
 procedure TSQLDataItem.CheckActive;
@@ -1077,7 +1171,7 @@ begin
   Result := GetSQLTypeName(GetSQLType);
 end;
 
-class function TSQLDataItem.GetSQLTypeName(SQLType: short): AnsiString;
+class function TSQLDataItem.GetSQLTypeName(SQLType: cardinal): AnsiString;
 begin
   Result := 'Unknown';
   case SQLType of
@@ -2330,15 +2424,17 @@ end;
 
 var b: IBlob;
     dt: TDateTime;
-    CurrValue: Currency;
-    FloatValue: single;
     timezone: AnsiString;
+    FloatValue: Double;
+    Int64Value: Int64;
+    BCDValue: TBCD;
+    aScale: integer;
 begin
   CheckActive;
   if IsNullable then
     IsNull := False;
   with FFirebirdClientAPI do
-  case SQLTYPE of
+  case getColMetaData.SQLTYPE of
   SQL_BOOLEAN:
     if AnsiCompareText(Value,STrue) = 0 then
       AsBoolean := true
@@ -2364,60 +2460,82 @@ begin
   SQL_TEXT:
     DoSetString;
 
-    SQL_SHORT,
-    SQL_LONG,
-    SQL_INT64:
-      if TryStrToCurr(Value,CurrValue) then
-        SetAsNumeric(AdjustScaleFromCurrency(CurrValue,GetScale),GetScale)
-      else
-        DoSetString;
-
-    SQL_D_FLOAT,
-    SQL_DOUBLE,
-    SQL_FLOAT:
+  SQL_SHORT,
+  SQL_LONG,
+  SQL_INT64:
+    {If the string contains an integer then convert and set directly}
+    if TryStrToInt64(Value,Int64Value) then
+      SetAsInt64(Int64Value)
+    else
+    if getColMetaData.getScale = 0 then {integer expected but non-integer string}
+    begin
       if TryStrToFloat(Value,FloatValue) then
-        SetAsDouble(FloatValue)
+        {truncate it if the column is limited to an integer}
+        SetAsInt64(Trunc(FloatValue))
       else
         DoSetString;
+    end
+    else
+    if TryStrToFloat(Value,FloatValue) then
+    begin
+      aScale := getColMetaData.getScale;
+      {Set as int64 with adjusted scale}
+      SetAsNumeric(AdjustScaleFromDouble(FloatValue,aScale),aScale)
+    end
+    else
+      DoSetString;
 
-    SQL_TIMESTAMP:
+  SQL_DEC_FIXED,
+  SQL_DEC16,
+  SQL_DEC34,
+  SQL_INT128:
+    if TryStrToBCD(Value,BCDValue) then
+      SetAsBCD(BCDValue)
+    else
+      DoSetString;
+
+  SQL_D_FLOAT,
+  SQL_DOUBLE,
+  SQL_FLOAT:
+    if TryStrToFloat(Value,FloatValue) then
+      SetAsDouble(FloatValue)
+    else
+      DoSetString;
+
+  SQL_TIMESTAMP:
       if TryStrToDateTime(Value,dt) then
         SetAsDateTime(dt)
       else
         DoSetString;
 
-    SQL_TYPE_DATE:
+  SQL_TYPE_DATE:
       if TryStrToDateTime(Value,dt) then
         SetAsDate(dt)
       else
         DoSetString;
 
-    SQL_TYPE_TIME:
+  SQL_TYPE_TIME:
       if TryStrToDateTime(Value,dt) then
         SetAsTime(dt)
       else
         DoSetString;
 
-    SQL_TIMESTAMP_TZ:
+  SQL_TIMESTAMP_TZ,
+  SQL_TIMESTAMP_TZ_EX:
       if ParseDateTimeTZString(value,dt,timezone) then
         SetAsDateTime(dt,timezone)
       else
         DoSetString;
 
-    SQL_TIME_TZ:
+  SQL_TIME_TZ,
+  SQL_TIME_TZ_EX:
       if ParseDateTimeTZString(value,dt,timezone,true) then
         SetAsTime(dt,GetAttachment.GetTimeZoneServices.GetTimeTZDate,timezone)
       else
         DoSetString;
 
-    SQL_DEC_FIXED,
-    SQL_DEC16,
-    SQL_DEC34,
-    SQL_INT128:
-      SetAsBCD(StrToBCD(Value));
-
-    else
-      IBError(ibxeInvalidDataConversion,[GetSQLTypeName(SQLType)]);
+  else
+    IBError(ibxeInvalidDataConversion,[GetSQLTypeName(getColMetaData.SQLTYPE)]);
   end;
 end;
 
@@ -2453,6 +2571,11 @@ end;
 procedure TSQLParam.Clear;
 begin
   IsNull := true;
+end;
+
+function TSQLParam.getColMetadata: IParamMetaData;
+begin
+  Result := FIBXSQLVAR.getColMetadata;
 end;
 
 function TSQLParam.GetModified: boolean;
