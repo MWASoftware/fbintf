@@ -155,13 +155,11 @@ type
   public
      constructor Create(api: TFBClientAPI);
      function GetSQLType: cardinal; virtual; abstract; {Current Field Data SQL Type}
-     function GetColumnSQLType: cardinal; virtual; abstract; {The SQL Type of the column itself}
      function GetSQLTypeName: AnsiString; overload;
      class function GetSQLTypeName(SQLType: cardinal): AnsiString; overload;
      function GetStrDataLength: short;
      function GetName: AnsiString; virtual; abstract;
      function GetScale: integer; virtual; abstract; {Current Field Data scale}
-     function GetColumnScale: integer; virtual; abstract; {The scale of the column itself}
      function GetAsBoolean: boolean;
      function GetAsCurrency: Currency;
      function GetAsInt64: Int64;
@@ -230,14 +228,8 @@ type
      property Modified: Boolean read getModified;
      property IsNull: Boolean read GetIsNull write SetIsNull;
      property IsNullable: Boolean read GetIsNullable write SetIsNullable;
-     {For read only fields, ColumnScale = Scale and ColumnSQLType = SQLType.
-      for read/write fields, ColumnScale and ColumnSQLType are the scale and type
-      of the database column while scale and SQLType are the scale and type of
-      the current field value.}
      property Scale: integer read GetScale write SetScale;
-     property ColumnScale: integer read GetColumnScale;
      property SQLType: cardinal read GetSQLType write SetSQLType;
-     property ColumnSQLType: cardinal read GetColumnSQLType;
   end;
 
   TSQLVarData = class;
@@ -292,19 +284,18 @@ type
     FModified: boolean;
     FUniqueName: boolean;
     FVarString: RawByteString;
+    FColMetaData: IParamMetaData;
     function GetStatement: IStatement;
     procedure SetName(AValue: AnsiString);
   protected
     function GetAttachment: IAttachment; virtual; abstract;
     function GetSQLType: cardinal; virtual; abstract;
-    function GetColumnSQLType: cardinal; virtual; abstract;
     function GetSubtype: integer; virtual; abstract;
     function GetAliasName: AnsiString;  virtual; abstract;
     function GetFieldName: AnsiString; virtual; abstract;
     function GetOwnerName: AnsiString;  virtual; abstract;
     function GetRelationName: AnsiString;  virtual; abstract;
     function GetScale: integer; virtual; abstract;
-    function GetColumnScale: integer; virtual; abstract;
     function GetCharSetID: cardinal; virtual; abstract;
     function GetCharSetWidth: integer; virtual; abstract;
     function GetCodePage: TSystemCodePage; virtual; abstract;
@@ -332,7 +323,9 @@ type
     function CreateBlob: IBlob; virtual; abstract;
     function GetArrayMetaData: IArrayMetaData; virtual; abstract;
     function GetBlobMetaData: IBlobMetaData; virtual; abstract;
+    function getColMetadata: IParamMetaData;
     procedure Initialize; virtual;
+    procedure SaveMetaData;
 
   public
     property AliasName: AnsiString read GetAliasName;
@@ -344,14 +337,12 @@ type
     property Name: AnsiString read FName write SetName;
     property CharSetID: cardinal read GetCharSetID write SetCharSetID;
     property SQLType: cardinal read GetSQLType write SetSQLType;
-    property ColumnSQLType: cardinal read GetColumnSQLType;
     property SQLSubtype: integer read GetSubtype;
     property SQLData: PByte read GetSQLData;
     property DataLength: cardinal read GetDataLength write SetDataLength;
     property IsNull: Boolean read GetIsNull write SetIsNull;
     property IsNullable: Boolean read GetIsNullable write SetIsNullable;
     property Scale: integer read GetScale write SetScale;
-    property ColumnScale: integer read GetColumnScale;
   public
     property Modified: Boolean read FModified;
     property Statement: IStatement read GetStatement;
@@ -382,7 +373,6 @@ type
     {IColumnMetaData}
     function GetIndex: integer;
     function GetSQLType: cardinal; override;
-    function GetColumnSQLType: cardinal; override;
     function getSubtype: integer;
     function getRelationName: AnsiString;
     function getOwnerName: AnsiString;
@@ -390,7 +380,6 @@ type
     function getAliasName: AnsiString;  {Alias Name of column or Column Name if not alias}
     function GetName: AnsiString; override;      {Disambiguated uppercase Field Name}
     function GetScale: integer; override;
-    function GetColumnScale: integer; override;
     function getCharSetID: cardinal; override;
     function GetIsNullable: boolean; override;
     function GetSize: cardinal; override;
@@ -425,6 +414,31 @@ type
     property AsBlob: IBlob read GetAsBlob;
  end;
 
+  { TSQLParamMetaData }
+
+  TSQLParamMetaData = class(TFBInterfacedObject,IParamMetaData)
+  private
+    FSQLType: cardinal;
+    FSQLSubType: integer;
+    FScale: integer;
+    FCharSetID: cardinal;
+    FNullable: boolean;
+    FSize: cardinal;
+    FCodePage: TSystemCodePage;
+  public
+    constructor Create(src: TSQLVarData);
+    {IParamMetaData}
+    function GetSQLType: cardinal;
+    function GetSQLTypeName: AnsiString;
+    function getSubtype: integer;
+    function getScale: integer;
+    function getCharSetID: cardinal;
+    function getCodePage: TSystemCodePage;
+    function getIsNullable: boolean;
+    function GetSize: cardinal;
+    property SQLType: cardinal read GetSQLType;
+  end;
+
   { TSQLParam }
 
   TSQLParam = class(TIBSQLData,ISQLParam,ISQLData)
@@ -437,6 +451,7 @@ type
     procedure SetSQLType(aValue: cardinal); override;
   public
     procedure Clear;
+    function getColMetadata: IParamMetaData;
     function GetModified: boolean; override;
     function GetAsPointer: Pointer;
     function GetAsString: AnsiString; override;
@@ -541,6 +556,60 @@ type
 implementation
 
 uses FBMessages, variants, IBUtils, FBTransaction, DateUtils;
+
+{ TSQLParamMetaData }
+
+constructor TSQLParamMetaData.Create(src: TSQLVarData);
+begin
+  inherited Create;
+  FSQLType := src.GetSQLType;
+  FSQLSubType := src.getSubtype;
+  FScale := src.GetScale;
+  FCharSetID := src.getCharSetID;
+  FNullable := src.GetIsNullable;
+  FSize := src.GetSize;
+  FCodePage := src.GetCodePage;
+end;
+
+function TSQLParamMetaData.GetSQLType: cardinal;
+begin
+  Result := FSQLType;
+end;
+
+function TSQLParamMetaData.GetSQLTypeName: AnsiString;
+begin
+  Result := TSQLDataItem.GetSQLTypeName(FSQLType);
+end;
+
+function TSQLParamMetaData.getSubtype: integer;
+begin
+  Result := FSQLSubType;
+end;
+
+function TSQLParamMetaData.getScale: integer;
+begin
+  Result := FScale;
+end;
+
+function TSQLParamMetaData.getCharSetID: cardinal;
+begin
+  Result := FCharSetID;
+end;
+
+function TSQLParamMetaData.getCodePage: TSystemCodePage;
+begin
+  Result :=  FCodePage;
+end;
+
+function TSQLParamMetaData.getIsNullable: boolean;
+begin
+  Result :=  FNullable;
+end;
+
+function TSQLParamMetaData.GetSize: cardinal;
+begin
+  Result := FSize;
+end;
 
 { TSQLDataArea }
 
@@ -693,6 +762,11 @@ begin
   //Ignore
 end;
 
+procedure TSQLVarData.SaveMetaData;
+begin
+  FColMetaData := TSQLParamMetaData.Create(self);
+end;
+
 constructor TSQLVarData.Create(aParent: TSQLDataArea; aIndex: integer);
 begin
   inherited Create;
@@ -725,6 +799,11 @@ procedure TSQLVarData.RowChange;
 begin
   FModified := false;
   FVarString := '';
+end;
+
+function TSQLVarData.getColMetadata: IParamMetaData;
+begin
+  Result := FColMetaData;
 end;
 
 procedure TSQLVarData.Initialize;
@@ -2177,12 +2256,6 @@ begin
   result := FIBXSQLVAR.SQLType;
 end;
 
-function TColumnMetaData.GetColumnSQLType: cardinal;
-begin
-  CheckActive;
-  result := FIBXSQLVAR.ColumnSQLType;
-end;
-
 function TColumnMetaData.getSubtype: integer;
 begin
   CheckActive;
@@ -2223,12 +2296,6 @@ function TColumnMetaData.GetScale: integer;
 begin
   CheckActive;
   result := FIBXSQLVAR.Scale;
-end;
-
-function TColumnMetaData.GetColumnScale: integer;
-begin
-  CheckActive;
-  result := FIBXSQLVAR.ColumnScale;
 end;
 
 function TColumnMetaData.getCharSetID: cardinal;
@@ -2361,12 +2428,13 @@ var b: IBlob;
     FloatValue: Double;
     Int64Value: Int64;
     BCDValue: TBCD;
+    aScale: integer;
 begin
   CheckActive;
   if IsNullable then
     IsNull := False;
   with FFirebirdClientAPI do
-  case ColumnSQLTYPE of
+  case getColMetaData.SQLTYPE of
   SQL_BOOLEAN:
     if AnsiCompareText(Value,STrue) = 0 then
       AsBoolean := true
@@ -2399,7 +2467,7 @@ begin
     if TryStrToInt64(Value,Int64Value) then
       SetAsInt64(Int64Value)
     else
-    if ColumnScale = 0 then {integer expected but non-integer string}
+    if getColMetaData.getScale = 0 then {integer expected but non-integer string}
     begin
       if TryStrToFloat(Value,FloatValue) then
         {truncate it if the column is limited to an integer}
@@ -2409,8 +2477,11 @@ begin
     end
     else
     if TryStrToFloat(Value,FloatValue) then
+    begin
+      aScale := getColMetaData.getScale;
       {Set as int64 with adjusted scale}
-      SetAsNumeric(AdjustScaleFromDouble(FloatValue,ColumnScale),ColumnScale)
+      SetAsNumeric(AdjustScaleFromDouble(FloatValue,aScale),aScale)
+    end
     else
       DoSetString;
 
@@ -2464,7 +2535,7 @@ begin
         DoSetString;
 
   else
-    IBError(ibxeInvalidDataConversion,[GetSQLTypeName(ColumnSQLType)]);
+    IBError(ibxeInvalidDataConversion,[GetSQLTypeName(getColMetaData.SQLTYPE)]);
   end;
 end;
 
@@ -2500,6 +2571,11 @@ end;
 procedure TSQLParam.Clear;
 begin
   IsNull := true;
+end;
+
+function TSQLParam.getColMetadata: IParamMetaData;
+begin
+  Result := FIBXSQLVAR.getColMetadata;
 end;
 
 function TSQLParam.GetModified: boolean;

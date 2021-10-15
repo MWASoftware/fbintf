@@ -96,7 +96,6 @@ type
 
     {SQL Var Type Data}
     FSQLType: cardinal;
-    FColumnSQLType: cardinal;
     FSQLSubType: integer;
     FSQLData: PByte; {Address of SQL Data in Message Buffer}
     FSQLNullIndicator: PShort; {Address of null indicator}
@@ -104,7 +103,6 @@ type
     FMetadataSize: integer;
     FNullable: boolean;
     FScale: integer;
-    FColumnScale: integer;
     FCharSetID: cardinal;
     FRelationName: AnsiString;
     FFieldName: AnsiString;
@@ -112,14 +110,12 @@ type
     protected
      function CanChangeSQLType: boolean;
      function GetSQLType: cardinal; override;
-     function GetColumnSQLType: cardinal; override;
      function GetSubtype: integer; override;
      function GetAliasName: AnsiString;  override;
      function GetFieldName: AnsiString; override;
      function GetOwnerName: AnsiString;  override;
      function GetRelationName: AnsiString;  override;
      function GetScale: integer; override;
-     function GetColumnScale: integer; override;
      function GetCharSetID: cardinal; override;
      function GetCodePage: TSystemCodePage; override;
      function GetCharSetWidth: integer; override;
@@ -481,8 +477,6 @@ begin
     Check4DataBaseError;
     FCharSetID :=  aMetaData.getCharSet(StatusIntf,Index) and $FF;
     Check4DataBaseError;
-    FColumnSQLType := GetSQLType;
-    FColumnScale := GetScale;
   end;
 end;
 
@@ -525,11 +519,6 @@ begin
   Result := FSQLType;
 end;
 
-function TIBXSQLVAR.GetColumnSQLType: cardinal;
-begin
-  Result := FColumnSQLType;
-end;
-
 function TIBXSQLVAR.GetSubtype: integer;
 begin
   Result := FSQLSubType;
@@ -566,11 +555,6 @@ end;
 function TIBXSQLVAR.GetScale: integer;
 begin
   Result := FScale;
-end;
-
-function TIBXSQLVAR.GetColumnScale: integer;
-begin
-  Result := FColumnScale;
 end;
 
 function TIBXSQLVAR.GetCharSetID: cardinal;
@@ -1030,6 +1014,7 @@ begin
     with TIBXSQLVar(Column[i]) do
     begin
       InitColumnMetaData(aMetaData);
+      SaveMetaData;
       if FNullable then
         FSQLNullIndicator := @FNullIndicator
       else

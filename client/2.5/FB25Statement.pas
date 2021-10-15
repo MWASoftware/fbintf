@@ -129,19 +129,15 @@ type
     FBlobMetaData: IBlobMetaData;
     FArrayMetaData: IArrayMetaData;
     FMetadataSize: short; {size of field from metadata}
-    FColumnSQLType: cardinal;
-    FColumnScale: integer;
     FXSQLVAR: PXSQLVAR;       { Points to the PXSQLVAR in the owner object }
   protected
     function GetSQLType: cardinal; override;
-    function GetColumnSQLType: cardinal; override;
     function GetSubtype: integer; override;
     function GetAliasName: AnsiString;  override;
     function GetFieldName: AnsiString; override;
     function GetOwnerName: AnsiString;  override;
     function GetRelationName: AnsiString;  override;
     function GetScale: integer; override;
-    function GetColumnScale: integer; override;
     function GetCharSetID: cardinal; override;
     function GetCodePage: TSystemCodePage; override;
     function GetCharSetWidth: integer; override;
@@ -303,11 +299,6 @@ begin
   result := FXSQLVAR^.sqltype and (not 1);
 end;
 
-function TIBXSQLVAR.GetColumnSQLType: cardinal;
-begin
-  result := FColumnSQLType;
-end;
-
 function TIBXSQLVAR.GetSubtype: integer;
 begin
   if GetSQLType = SQL_BLOB then
@@ -342,11 +333,6 @@ begin
     result := 0
   else
     result := FXSQLVAR^.sqlscale;
-end;
-
-function TIBXSQLVAR.GetColumnScale: integer;
-begin
-  result := FColumnScale;
 end;
 
 function TIBXSQLVAR.GetCharSetID: cardinal;
@@ -511,8 +497,7 @@ begin
     else
       sqlInd :=  nil;
   end;
-  FColumnSQLType := GetSQLType;
-  FColumnScale := GetScale;
+  SaveMetaData;
 end;
 
 procedure TIBXSQLVAR.SetIsNull(Value: Boolean);
