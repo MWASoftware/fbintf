@@ -20,13 +20,14 @@ FBINTF Change Log  version          (1.3-2 Build 12806) Wed, 06 Oct 2021 09:07:0
 
 5. ISQLParam:  Review and tidy-up of SetAsString for numeric types.
 
-6. ISQLParam: new methods:
-    function GetColumnSQLType: cardinal;
-    function getColumnScale: integer;
-   These are guaranteed to return the actual column type and scale even after a
-   parameter value has been set. The existing GetSQLType and getScale return the
-   current type and scale, which may have been updated when setting a value to the
-   SQL Param.
+6. ISQLParam is now subclassed from IParamMetaData, which provides access to the mutable
+   SQL Parameter metadata (methods moved from ISQLParam).
+
+7. ISQLParam: new method
+     function getColMetadata: IParamMetaData;
+   This instance of IParamMetaData returns the original column metadata which is unmutable.
+   Note: ISQLParam metadata can change after a parameter value has been set e.g when
+   setting a VARCHAR column to an integer value.
 
 
 FBINTF Change Log  version          (1.3-1 Build 12776) Mon, 23 Aug 2021 11:09:33 +0100
