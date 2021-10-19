@@ -218,7 +218,6 @@ PLAN (EMPLOYEE NATURAL)
 -- SQL style inline comment
 /* this is a comment */ Select First 3 * from EMPLOYEE
 
-Results for Cursor: Cursor 02.1
 EMP_NO = 2
 FIRST_NAME = Robert
 LAST_NAME = Nelson
@@ -264,7 +263,6 @@ Not Null
 Size = 2
 Value = 0
 
-Results for Cursor: Cursor 02.2
 EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
@@ -289,7 +287,7 @@ Not Null
 Size = 2
 Value = 0
 
-Results for Cursor: {22ED46EA-AA15-4C60-A27D-49E87B20BA84}
+Results for Cursor: Test Cursor
 EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
@@ -446,7 +444,6 @@ PLAN (EMPLOYEE NATURAL)
 -- SQL style inline comment
 /* this is a comment */ Select First 3 * from EMPLOYEE
 
-Results for Cursor: Cursor 02.3
 EMP_NO = 2
 FIRST_NAME = Robert
 LAST_NAME = Nelson
@@ -492,7 +489,6 @@ Not Null
 Size = 2
 Value = 0
 
-Results for Cursor: Cursor 02.4
 EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
@@ -517,7 +513,7 @@ Not Null
 Size = 2
 Value = 0
 
-Results for Cursor: {A7B3A3E2-E8D3-4A80-9775-06D23EFFB83F}
+Results for Cursor: Test Cursor
 EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
@@ -555,7 +551,6 @@ Firebird/linux AMD64 (remote server), version "LI-V2.5.9.27139 Firebird 2.5/tcp 
 Firebird/linux AMD64 (remote interface), version "LI-V2.5.9.27139 Firebird 2.5/tcp (zeus)/P12"
 on disk structure version 11.2
 Select Count = 1 InsertCount = 0 UpdateCount = 1 DeleteCount = 0
-Results for Cursor: Cursor 04.1
 EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
@@ -568,10 +563,10 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 948,408
+Current memory = 948,448
 Delta memory = 1,288
-Max memory = 992,448
-Elapsed time= 0.002 sec
+Max memory = 992,592
+Elapsed time= 0.001 sec
 Cpu = 0.000 sec
 Buffers = 75
 Reads = 0
@@ -712,7 +707,6 @@ Charset id = 0
 Nullable
 Size = 37
 
-Results for Cursor: Cursor 04.2
 EMP_NO = 150
 FIRST_NAME = John
 LAST_NAME = Doe
@@ -726,7 +720,6 @@ SALARY = 41,000.89
 FULL_NAME = Doe, John
 
 Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
-Results for Cursor: Cursor 04.3
 EMP_NO = 151
 FIRST_NAME = Major
 LAST_NAME = Major
@@ -744,7 +737,6 @@ Select Count = 1 InsertCount = 0 UpdateCount = 0 DeleteCount = 1
 Select Count = 1 InsertCount = 0 UpdateCount = 0 DeleteCount = 1
 Inserting
 Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
-Results for Cursor: Cursor 04.4
 EMP_NO = 150
 FIRST_NAME = Jane
 LAST_NAME = Doe
@@ -762,7 +754,6 @@ Updating
 Select Count = 1 InsertCount = 0 UpdateCount = 0 DeleteCount = 0
 Prepare Query again
 
-Results for Cursor: Cursor 04.5
 EMP_NO = 150
 FIRST_NAME = Jayne's
 LAST_NAME = Doe
@@ -777,7 +768,6 @@ FULL_NAME = Doe, Jayne's
 
 Prepare Query again with a different transaction
 
-Results for Cursor: Cursor 04.6
 EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
@@ -804,7 +794,6 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 Same Statement - updated params
-Results for Cursor: Cursor 04.7
 EMP_NO = 9
 FIRST_NAME = Phil
 LAST_NAME = Forest
@@ -819,7 +808,6 @@ FULL_NAME = Forest, Phil
 
 Test using Execute Block
 Select Count = 1 InsertCount = 0 UpdateCount = 1 DeleteCount = 0
-Results for Cursor: Cursor 04.8
 EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
@@ -842,7 +830,6 @@ Database Closed
 Database Open
 Select Count = 1 InsertCount = 0 UpdateCount = 1 DeleteCount = 0
 Last Name = Johnson
-Results for Cursor: Cursor 05.1
 EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
@@ -896,7 +883,6 @@ Charset id = 0
 Nullable
 Size = 2
 
-Results for Cursor: Cursor 06.1
 RDB$CHARACTER_SET_NAME = NONE (Charset Id = 4 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 0
 RDB$CHARACTER_SET_NAME = OCTETS (Charset Id = 4 Codepage = 65001)
@@ -1105,7 +1091,6 @@ Charset id = 0
 Nullable
 Size = 8
 
-Results for Cursor: Cursor 06.2
 ROWID = 1
 FIXEDPOINT = 20.28
 FLOATINGPOINT = 3.14
@@ -1130,7 +1115,6 @@ Not Null
 Size = 4
 Value = 0
 
-Results for Cursor: Cursor 06.3
 ROWID = 1
 FIXEDPOINT = 20.28
 FLOATINGPOINT = 3.14
@@ -1208,7 +1192,6 @@ Charset id = 0
 Nullable
 Size = 8
 
-Results for Cursor: Cursor 06.4
 ROWID = 1
 FIXEDPOINT = 20.28
 FLOATINGPOINT = 3.14
@@ -1379,7 +1362,6 @@ Charset id = 0
 Nullable
 Size = 2
 
-Results for Cursor: Cursor 06.5
 RDB$CHARACTER_SET_NAME = NONE (Charset Id = 53 Codepage = 1252)
 RDB$CHARACTER_SET_ID = 0
 RDB$CHARACTER_SET_NAME = OCTETS (Charset Id = 53 Codepage = 1252)
@@ -1588,7 +1570,6 @@ Charset id = 0
 Nullable
 Size = 8
 
-Results for Cursor: Cursor 06.6
 ROWID = 1
 FIXEDPOINT = 20.28
 FLOATINGPOINT = 3.14
@@ -1613,7 +1594,6 @@ Not Null
 Size = 4
 Value = 0
 
-Results for Cursor: Cursor 06.7
 ROWID = 1
 FIXEDPOINT = 20.28
 FLOATINGPOINT = 3.14
@@ -1691,7 +1671,6 @@ Charset id = 0
 Nullable
 Size = 8
 
-Results for Cursor: Cursor 06.8
 ROWID = 1
 FIXEDPOINT = 20.28
 FLOATINGPOINT = 3.14
@@ -1862,7 +1841,6 @@ Charset id = 0
 Nullable
 Size = 2
 
-Results for Cursor: Cursor 06.9
 RDB$CHARACTER_SET_NAME = NONE (Charset Id = 3 Codepage = 65001)
 RDB$CHARACTER_SET_ID = 0
 RDB$CHARACTER_SET_NAME = OCTETS (Charset Id = 3 Codepage = 65001)
@@ -2071,7 +2049,6 @@ Charset id = 0
 Nullable
 Size = 8
 
-Results for Cursor: Cursor 06.10
 ROWID = 1
 FIXEDPOINT = 20.28
 FLOATINGPOINT = 3.14
@@ -2096,7 +2073,6 @@ Not Null
 Size = 4
 Value = 0
 
-Results for Cursor: Cursor 06.11
 ROWID = 1
 FIXEDPOINT = 20.28
 FLOATINGPOINT = 3.14
@@ -2174,7 +2150,6 @@ Charset id = 0
 Nullable
 Size = 8
 
-Results for Cursor: Cursor 06.12
 ROWID = 1
 FIXEDPOINT = 20.28
 FLOATINGPOINT = 3.14
@@ -2474,7 +2449,6 @@ Param Name = ROWID
 Param Name = TITLE
 Param Name = DATED
 Param Name = NOTES
-Results for Cursor: Cursor 07.1
 ROWID = 1
 TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
 DATED = 2016/04/01 09:30:00.1000
@@ -2622,7 +2596,6 @@ Column = MYARRAY3
 Dimensions = 1
 Bounds: (0:16) 
 
-Results for Cursor: Cursor 07.2
 ROWID = 1
 TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
 DATED = 2016/04/01 09:30:00.1000
@@ -2639,7 +2612,6 @@ Array: (2: 98) (3: 97) (4: 96) (5: 95) (6: 94) (7: 93) (8: 92) (9: 91) (10: 90)
 
 Write updated reduced slice
 Show update array
-Results for Cursor: Cursor 07.3
 ROWID = 1
 TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
 DATED = 2016/04/01 09:30:00.1000
@@ -2719,12 +2691,10 @@ Charset id = 4
 Nullable
 Size = 128
 
-Results for Cursor: Cursor 08.1
 ROWID = 1
 TITLE = 2D Array (Charset Id = 4 Codepage = 65001)
 MYARRAY = NULL
 
-Results for Cursor: Cursor 08.2
 ROWID = 1
 TITLE = 2D Array (Charset Id = 4 Codepage = 65001)
 MYARRAY = Array: (0,-1: A50) (0,0: A51) (0,1: A52) (0,2: A53) (0,3: A54) (0,4: A55) (0,5: A56) (0,6: A57) (0,7: A58) (1,-1: A59) (1,0: A60) (1,1: A61) (1,2: A62) (1,3: A63) (1,4: A64) (1,5: A65) (1,6: A66) (1,7: A67) (2,-1: A68) (2,0: A69) (2,1: A70) (2,2: A71) (2,3: A72) (2,4: A73) (2,5: A74) (2,6: A75) (2,7: A76) (3,-1: A77) (3,0: A78) (3,1: A79) (3,2: A80) (3,3: A81) (3,4: A82) (3,5: A83) (3,6: A84) (3,7: A85) (4,-1: A86) (4,0: A87) (4,1: A88) (4,2: A89) (4,3: A90) (4,4: A91) (4,5: A92) (4,6: A93) (4,7: A94) (5,-1: A95) (5,0: A96) (5,1: A97) (5,2: A98) (5,3: A99) (5,4: A100) (5,5: A101) (5,6: A102) (5,7: A103) (6,-1: A104) (6,0: A105) (6,1: A106) (6,2: A107) (6,3: A108) (6,4: A109) (6,5: A110) (6,6: A111) (6,7: A112) (7,-1: A113) (7,0: A114) (7,1: A115) (7,2: A116) (7,3: A117) (7,4: A118) (7,5: A119) (7,6: A120) (7,7: A121) (8,-1: A122) (8,0: A123) (8,1: A124) (8,2: A125) (8,3: A126) (8,4: A127) (8,5: A128) (8,6: A129) (8,7: A130) (9,-1: A131) (9,0: A132) (9,1: A133) (9,2: A134) (9,3: A135) (9,4: A136) (9,5: A137) (9,6: A138) (9,7: A139) (10,-1: A140) (10,0: A141) (10,1: A142) (10,2: A143) (10,3: A144) (10,4: A145) (10,5: A146) (10,6: A147) (10,7: A148) (11,-1: A149) (11,0: A150) (11,1: A151) (11,2: A152) (11,3: A153) (11,4: A154) (11,5: A155) (11,6: A156) (11,7: A157) (12,-1: A158) (12,0: A159) (12,1: A160) (12,2: A161) (12,3: A162) (12,4: A163) (12,5: A164) (12,6: A165) (12,7: A166) (13,-1: A167) (13,0: A168) (13,1: A169) (13,2: A170) (13,3: A171) (13,4: A172) (13,5: A173) (13,6: A174) (13,7: A175) (14,-1: A176) (14,0: A177) (14,1: A178) (14,2: A179) (14,3: A180) (14,4: A181) (14,5: A182) (14,6: A183) (14,7: A184) (15,-1: A185) (15,0: A186) (15,1: A187) (15,2: A188) (15,3: A189) (15,4: A190) (15,5: A191) (15,6: A192) (15,7: A193) (16,-1: A194) (16,0: A195) (16,1: A196) (16,2: A197) (16,3: A198) (16,4: A199) (16,5: A200) (16,6: A201) (16,7: A202) 
@@ -2749,7 +2719,7 @@ Unknown Response 3
 Unknown Response 3
 Server Memory = 841392
 Forced Writes  = 1
-Max Memory  = 879176
+Max Memory  = 879216
 Num Buffers  = 75
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
@@ -3005,7 +2975,6 @@ Size = 16
 Value = É
 
 Connection Character Set UTF8
-Results for Cursor: Cursor 12.1
 ROWID = 1
 TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage = 65001)
 NOTES = C3 89 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 4 Codepage = 65001)
@@ -3015,7 +2984,6 @@ INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
 FIXEDWIDTH = C3 89  (Charset Id = 4 Codepage = 65001)
 
 Connection Character Set NONE
-Results for Cursor: Cursor 12.2
 ROWID = 1
 TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage = 65001)
 NOTES = C9 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 21 Codepage = 28591)
@@ -3025,7 +2993,6 @@ INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
 FIXEDWIDTH = C3 89  (Charset Id = 4 Codepage = 65001)
 
 Connection Character Set WIN1252
-Results for Cursor: Cursor 12.3
 ROWID = 1
 TITLE = 42 6C 6F 62 20 54 65 73 74 20 A9 80  (Charset Id = 53 Codepage = 1252)
 NOTES = C9 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 53 Codepage = 1252)
@@ -3039,7 +3006,6 @@ FIXEDWIDTH = C9  (Charset Id = 53 Codepage = 1252)
 ------------------------------------------------------
 Running Test 13: Transaction over two databases
 Init Database 1
-Results for Cursor: Cursor 13.1
 ROWID = 1
 TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage = 65001)
 NOTES = C3 89 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 4 Codepage = 65001)
@@ -3048,7 +3014,6 @@ BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61
 INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
 
 Init Database 2
-Results for Cursor: Cursor 13.2
 ROWID = 1
 TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage = 65001)
 NOTES = C3 89 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 4 Codepage = 65001)
@@ -3056,7 +3021,6 @@ BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 
 BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
 INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
 
-Results for Cursor: Cursor 13.3
 ROWID = 1
 TITLE = 44 61 74 61 62 61 73 65 31  (Charset Id = 4 Codepage = 65001)
 NOTES = C3 89 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 4 Codepage = 65001)
@@ -3064,7 +3028,6 @@ BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 
 BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
 INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
 
-Results for Cursor: Cursor 13.4
 ROWID = 1
 TITLE = 44 61 74 61 62 61 73 65 32  (Charset Id = 4 Codepage = 65001)
 NOTES = C3 89 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 4 Codepage = 65001)
@@ -3121,12 +3084,10 @@ Running Test 15: Blob Handling and BPBs
 
 Testdata
 
-Results for Cursor: Cursor 15.1
 ROWID = 1
 TITLE = Blob Test (Charset Id = 4 Codepage = 65001)
 BLOBDATA = (blob), Length = 92514
 
-Results for Cursor: Cursor 15.2
 ROWID = 2
 TITLE = Blob Test with binary string (Charset Id = 4 Codepage = 65001)
 BLOBDATA = (blob), Length = 13
@@ -3134,7 +3095,6 @@ BLOBDATA = (blob), Length = 13
 
 Testdata 2
 
-Results for Cursor: Cursor 15.3
 ROWID = 1
 TITLE = Blob Test (Charset Id = 4 Codepage = 65001)
 BLOBDATA (Charset Id = 4 Codepage = 65001)
@@ -3173,7 +3133,6 @@ Case sensitive Param SQL  Test
 Error Handled: Field "EMP_NO" not found
 Stale Reference Check
 First test correct usage
-Results for Cursor: Cursor 16.1
 COUNTER = 42
 
 New Transaction before param set
@@ -3182,11 +3141,9 @@ New Transaction before Open Cursor
 Error Handled: This interface is no longer up-to-date
 Stop Stale Reference Checks
 New Transaction before param set
-Results for Cursor: Cursor 16.4
 COUNTER = 42
 
 New Transaction before Open Cursor
-Results for Cursor: Cursor 16.5
 COUNTER = 42
 
 Invalid Server Name Test
@@ -3254,7 +3211,6 @@ Charset id = 0
 Nullable
 Size = 8
 
-Results for Cursor: Cursor 17.1
 ROWID = 1
 DATECOL = 2019/04/01
 TIMECOL = 11:31:05.0001
@@ -3353,7 +3309,6 @@ Charset id = 0
 Nullable
 Size = 8
 
-Results for Cursor: Cursor 21.1
 ROWID = 1
 ITYPE = 101
 I64TYPE = 9223372036854775807

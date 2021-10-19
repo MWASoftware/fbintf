@@ -795,11 +795,11 @@ type
     function IsPrepared: boolean;
     function HasBatchMode: boolean;
     function IsInBatchMode: boolean;
-    procedure Prepare(aTransaction: ITransaction=nil);
+    procedure Prepare(aTransaction: ITransaction=nil); overload;
+    procedure Prepare(CursorName: AnsiString; aTransaction: ITransaction=nil); overload;
     function Execute(aTransaction: ITransaction=nil): IResults;
     function OpenCursor(aTransaction: ITransaction=nil): IResultSet; overload;
-    function OpenCursor(CursorName: AnsiString; aTransaction: ITransaction=nil): IResultSet; overload;
-    function OpenCursor(Scrollable: boolean; CursorName: AnsiString =''; aTransaction: ITransaction=nil): IResultSet; overload;
+    function OpenCursor(Scrollable: boolean; aTransaction: ITransaction=nil): IResultSet; overload;
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
     procedure SetRetainInterfaces(aValue: boolean);
@@ -1100,14 +1100,14 @@ type
                              params: array of const): IResultSet; overload;
     function OpenCursorAtStart(sql: AnsiString;
                              params: array of const): IResultSet; overload;
-    function Prepare(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer): IStatement; overload;
-    function Prepare(transaction: ITransaction; sql: AnsiString): IStatement; overload;
+    function Prepare(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer; CursorName: AnsiString=''): IStatement; overload;
+    function Prepare(transaction: ITransaction; sql: AnsiString; CursorName: AnsiString=''): IStatement; overload;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: AnsiString;
                        aSQLDialect: integer; GenerateParamNames: boolean=false;
-                       CaseSensitiveParams: boolean = false): IStatement; overload;
+                       CaseSensitiveParams: boolean = false; CursorName: AnsiString=''): IStatement; overload;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: AnsiString;
                        GenerateParamNames: boolean=false;
-                       CaseSensitiveParams: boolean = false): IStatement; overload;
+                       CaseSensitiveParams: boolean = false; CursorName: AnsiString=''): IStatement; overload;
 
     {Events}
     function GetEventHandler(Events: TStrings): IEvents; overload;

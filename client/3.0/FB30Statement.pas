@@ -290,19 +290,20 @@ type
     procedure CheckHandle; override;
     procedure CheckBatchModeAvailable;
     procedure GetDSQLInfo(info_request: byte; buffer: ISQLInfoResults); override;
-    procedure InternalPrepare; override;
+    procedure InternalPrepare(CursorName: AnsiString=''); override;
     function InternalExecute(aTransaction: ITransaction): IResults; override;
-    function InternalOpenCursor(aTransaction: ITransaction; Scrollable: boolean; CursorName: AnsiString): IResultSet; override;
+    function InternalOpenCursor(aTransaction: ITransaction; Scrollable: boolean
+      ): IResultSet; override;
     procedure ProcessSQL(sql: AnsiString; GenerateParamNames: boolean; var processedSQL: AnsiString); override;
     procedure FreeHandle; override;
     procedure InternalClose(Force: boolean); override;
     function SavePerfStats(var Stats: TPerfStatistics): boolean;
   public
     constructor Create(Attachment: TFB30Attachment; Transaction: ITransaction;
-      sql: AnsiString; aSQLDialect: integer);
+      sql: AnsiString; aSQLDialect: integer; CursorName: AnsiString='');
     constructor CreateWithParameterNames(Attachment: TFB30Attachment; Transaction: ITransaction;
       sql: AnsiString;  aSQLDialect: integer; GenerateParamNames: boolean =false;
-      CaseSensitiveParams: boolean=false);
+      CaseSensitiveParams: boolean=false; CursorName: AnsiString='');
     destructor Destroy; override;
     function Fetch(FetchType: TFetchType; PosOrOffset: integer=0): boolean;
     property StatementIntf: Firebird.IStatement read FStatementIntf;
@@ -1323,16 +1324,25 @@ begin
   end;
 end;
 
-procedure TFB30Statement.InternalPrepare;
+procedure TFB30Statement.InternalPrepare(CursorName: AnsiString);
+var GUID : TGUID;
 begin
   if FPrepared then
     Exit;
+
+  FCursor := CursorName;
   if (FSQL = '') then
     IBError(ibxeEmptyQuery, [nil]);
   try
     CheckTransaction(FTransactionIntf);
     with FFirebird30ClientAPI do
     begin
+      if FCursor = '' then
+      begin
+        CreateGuid(GUID);
+        FCursor := GUIDToString(GUID);
+      end;
+
       if FHasParamNames then
       begin
         if FProcessedSQL = '' then
@@ -1355,6 +1365,11 @@ begin
       FSQLStatementType := TIBSQLStatementTypes(FStatementIntf.getType(StatusIntf));
       Check4DataBaseError;
 
+      if FSQLStatementType = SQLSelect then
+      begin
+        FStatementIntf.setCursorName(StatusIntf,PAnsiChar(FCursor));
+        Check4DataBaseError;
+      end;
       { Done getting the type }
       case FSQLStatementType of
         SQLGetSegment,
@@ -1392,6 +1407,7 @@ begin
     end;
   end;
   FPrepared := true;
+
   FSingleResults := false;
   if RetainInterfaces then
   begin
@@ -1476,9 +1492,8 @@ begin
 end;
 
 function TFB30Statement.InternalOpenCursor(aTransaction: ITransaction;
-  Scrollable: boolean; CursorName: AnsiString): IResultSet;
-var GUID : TGUID;
-    flags: cardinal;
+  Scrollable: boolean): IResultSet;
+var flags: cardinal;
 begin
   flags := 0;
   if FSQLStatementType <> SQLSelect then
@@ -1494,7 +1509,6 @@ begin
   if FStaleReferenceChecks and (FSQLParams.FTransactionSeqNo < (FTransactionIntf as TFB30transaction).TransactionSeqNo) then
     IBError(ibxeInterfaceOutofDate,[nil]);
 
- FCursor := CursorName;
  if Scrollable then
    flags := Firebird.IStatement.CURSOR_TYPE_SCROLLABLE;
 
@@ -1515,14 +1529,6 @@ begin
                           FSQLRecord.MetaData,
                           flags);
    Check4DataBaseError;
-
-   if FCursor = '' then
-   begin
-     CreateGuid(GUID);
-     FCursor := GUIDToString(GUID);
-     FStatementIntf.setCursorName(StatusIntf,PAnsiChar(FCursor));
-     Check4DataBaseError;
-   end;
 
    if FCollectStatistics then
    begin
@@ -1613,26 +1619,27 @@ begin
 end;
 
 constructor TFB30Statement.Create(Attachment: TFB30Attachment;
-  Transaction: ITransaction; sql: AnsiString; aSQLDialect: integer);
+  Transaction: ITransaction; sql: AnsiString; aSQLDialect: integer;
+  CursorName: AnsiString);
 begin
   inherited Create(Attachment,Transaction,sql,aSQLDialect);
   FFirebird30ClientAPI := Attachment.Firebird30ClientAPI;
   FSQLParams := TIBXINPUTSQLDA.Create(self);
   FSQLRecord := TIBXOUTPUTSQLDA.Create(self);
-  InternalPrepare;
+  InternalPrepare(CursorName);
 end;
 
 constructor TFB30Statement.CreateWithParameterNames(
   Attachment: TFB30Attachment; Transaction: ITransaction; sql: AnsiString;
   aSQLDialect: integer; GenerateParamNames: boolean;
-  CaseSensitiveParams: boolean);
+  CaseSensitiveParams: boolean; CursorName: AnsiString);
 begin
   inherited CreateWithParameterNames(Attachment,Transaction,sql,aSQLDialect,GenerateParamNames);
   FFirebird30ClientAPI := Attachment.Firebird30ClientAPI;
   FSQLParams := TIBXINPUTSQLDA.Create(self);
   FSQLParams.CaseSensitiveParams := CaseSensitiveParams;
   FSQLRecord := TIBXOUTPUTSQLDA.Create(self);
-  InternalPrepare;
+  InternalPrepare(CursorName);
 end;
 
 destructor TFB30Statement.Destroy;

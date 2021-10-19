@@ -126,14 +126,14 @@ type
                              params: array of const): IResultSet; overload;
     function OpenCursorAtStart(sql: AnsiString;
                              params: array of const): IResultSet; overload;
-    function Prepare(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer): IStatement; overload; virtual; abstract;
-    function Prepare(transaction: ITransaction; sql: AnsiString): IStatement; overload;
+    function Prepare(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer; CursorName: AnsiString=''): IStatement; overload; virtual; abstract;
+    function Prepare(transaction: ITransaction; sql: AnsiString; CursorName: AnsiString=''): IStatement; overload;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: AnsiString;
                        aSQLDialect: integer; GenerateParamNames: boolean=false;
-                       CaseSensitiveParams: boolean = false): IStatement; overload; virtual; abstract;
+                       CaseSensitiveParams: boolean = false; CursorName: AnsiString=''): IStatement; overload; virtual; abstract;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: AnsiString;
                        GenerateParamNames: boolean=false;
-                       CaseSensitiveParams: boolean = false): IStatement; overload;
+                       CaseSensitiveParams: boolean = false; CursorName: AnsiString=''): IStatement; overload;
     function GetEventHandler(Events: TStrings): IEvents; overload; virtual; abstract;
     function GetEventHandler(Event: AnsiString): IEvents; overload;
 
@@ -782,16 +782,17 @@ begin
                    false,params);
 end;
 
-function TFBAttachment.Prepare(transaction: ITransaction; sql: AnsiString
-  ): IStatement;
+function TFBAttachment.Prepare(transaction: ITransaction; sql: AnsiString;
+  CursorName: AnsiString): IStatement;
 begin
-  Result := Prepare(transaction,sql,FSQLDialect);
+  Result := Prepare(transaction,sql,FSQLDialect,CursorName);
 end;
 
 function TFBAttachment.PrepareWithNamedParameters(transaction: ITransaction;
-  sql: AnsiString; GenerateParamNames: boolean; CaseSensitiveParams: boolean): IStatement;
+  sql: AnsiString; GenerateParamNames: boolean; CaseSensitiveParams: boolean;
+  CursorName: AnsiString): IStatement;
 begin
-  Result := PrepareWithNamedParameters(transaction,sql,FSQLDialect,GenerateParamNames,CaseSensitiveParams);
+  Result := PrepareWithNamedParameters(transaction,sql,FSQLDialect,GenerateParamNames,CaseSensitiveParams,CursorName);
 end;
 
 function TFBAttachment.GetEventHandler(Event: AnsiString): IEvents;

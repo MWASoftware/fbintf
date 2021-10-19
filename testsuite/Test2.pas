@@ -97,13 +97,13 @@ begin
     ReportResults(Statement);
     writeln(OutFile,'With param names');
     Statement := Attachment.PrepareWithNamedParameters(Transaction,
-    'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
+    'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3,false,false,'Test Cursor');
     Statement.SetRetainInterfaces(true);
     try
       writeln(OutFile,Statement.GetSQLText);
       ParamInfo(Statement.SQLParams);
       Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 8;
-      ReportResults(Statement,'');
+      ReportResults(Statement,true);
     finally
       Statement.SetRetainInterfaces(false);
     end;

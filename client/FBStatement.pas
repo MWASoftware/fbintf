@@ -83,9 +83,9 @@ type
     procedure CheckHandle; virtual; abstract;
     procedure CheckTransaction(aTransaction: ITransaction);
     procedure GetDsqlInfo(info_request: byte; buffer: ISQLInfoResults); overload; virtual; abstract;
-    procedure InternalPrepare;  virtual; abstract;
+    procedure InternalPrepare(CursorName: AnsiString='');  virtual; abstract;
     function InternalExecute(Transaction: ITransaction): IResults;  virtual; abstract;
-    function InternalOpenCursor(aTransaction: ITransaction; Scrollable: boolean; CursorName: AnsiString): IResultSet;   virtual; abstract;
+    function InternalOpenCursor(aTransaction: ITransaction; Scrollable: boolean): IResultSet;   virtual; abstract;
     procedure ProcessSQL(sql: AnsiString; GenerateParamNames: boolean; var processedSQL: AnsiString); virtual; abstract;
     procedure FreeHandle;  virtual; abstract;
     procedure InternalClose(Force: boolean); virtual; abstract;
@@ -114,11 +114,11 @@ type
     function GetSQLDialect: integer;
 
     {GetDSQLInfo only supports isc_info_sql_stmt_type, isc_info_sql_get_plan, isc_info_sql_records}
-    procedure Prepare(aTransaction: ITransaction=nil); virtual;
+    procedure Prepare(aTransaction: ITransaction=nil);  overload;
+    procedure Prepare(CursorName: AnsiString; aTransaction: ITransaction=nil); virtual; overload;
     function Execute(aTransaction: ITransaction=nil): IResults;
     function OpenCursor(aTransaction: ITransaction=nil): IResultSet; overload;
-    function OpenCursor(CursorName: AnsiString; aTransaction: ITransaction=nil): IResultSet; overload;
-    function OpenCursor(Scrollable: boolean; CursorName: AnsiString =''; aTransaction: ITransaction=nil): IResultSet; overload;
+    function OpenCursor(Scrollable: boolean; aTransaction: ITransaction=nil): IResultSet; overload;
     function CreateBlob(paramName: AnsiString): IBlob; overload;
     function CreateBlob(index: integer): IBlob; overload;
     function CreateBlob(column: TColumnMetaData): IBlob; overload; virtual; abstract;
@@ -301,6 +301,12 @@ end;
 
 procedure TFBStatement.Prepare(aTransaction: ITransaction);
 begin
+  Prepare('',aTransaction);
+end;
+
+procedure TFBStatement.Prepare(CursorName: AnsiString;
+  aTransaction: ITransaction);
+begin
   if FPrepared then FreeHandle;
   if aTransaction <> nil then
   begin
@@ -308,7 +314,7 @@ begin
     FTransactionIntf := aTransaction;
     AddMonitor(FTransactionIntf as TFBTransaction);
   end;
-  InternalPrepare;
+  InternalPrepare(CursorName);
 end;
 
 function TFBStatement.Execute(aTransaction: ITransaction): IResults;
@@ -363,23 +369,17 @@ end;
 
 function TFBStatement.OpenCursor(aTransaction: ITransaction): IResultSet;
 begin
-  Result := OpenCursor(false,'',aTransaction);
+  Result := OpenCursor(false,aTransaction);
 end;
 
-function TFBStatement.OpenCursor(CursorName: AnsiString;
-  aTransaction: ITransaction): IResultSet;
-begin
-  Result := OpenCursor(false,CursorName,aTransaction);
-end;
-
-function TFBStatement.OpenCursor(Scrollable: boolean; CursorName: AnsiString;
-  aTransaction: ITransaction): IResultSet;
+function TFBStatement.OpenCursor(Scrollable: boolean; aTransaction: ITransaction
+  ): IResultSet;
 begin
   Close;
   if aTransaction = nil then
-    Result := InternalOpenCursor(FTransactionIntf,Scrollable,CursorName)
+    Result := InternalOpenCursor(FTransactionIntf,Scrollable)
   else
-    Result := InternalOpenCursor(aTransaction,Scrollable,CursorName);
+    Result := InternalOpenCursor(aTransaction,Scrollable);
 end;
 
 function TFBStatement.CreateBlob(paramName: AnsiString): IBlob;

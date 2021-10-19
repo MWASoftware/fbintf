@@ -30,7 +30,16 @@ FBINTF Change Log  version          (1.3-2 Build 12832) Fri, 15 Oct 2021 12:03:1
    setting a VARCHAR column to an integer value.
 
 8. IStatement: can now set cursor name when opening a cursor. New overloaded method:
-    function OpenCursor(CursorName: AnsiString; aTransaction: ITransaction=nil): IResultSet; overload;
+    procedure Prepare(CursorName: AnsiString; aTransaction: ITransaction=nil); overload;
+   also IAttachment:
+    function Prepare(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer; CursorName: AnsiString=''): IStatement; overload;
+    function Prepare(transaction: ITransaction; sql: AnsiString; CursorName: AnsiString=''): IStatement; overload;
+    function PrepareWithNamedParameters(transaction: ITransaction; sql: AnsiString;
+                       aSQLDialect: integer; GenerateParamNames: boolean=false;
+                       CaseSensitiveParams: boolean = false; CursorName: AnsiString=''): IStatement; overload;
+    function PrepareWithNamedParameters(transaction: ITransaction; sql: AnsiString;
+                       GenerateParamNames: boolean=false;
+                       CaseSensitiveParams: boolean = false; CursorName: AnsiString=''): IStatement; overload;
 
 9. Support for scrollable cursors added. New/updated methods:
    IFirebirdAPI:
