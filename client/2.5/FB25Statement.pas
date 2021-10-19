@@ -236,10 +236,16 @@ type
     constructor Create(aResults: TIBXOUTPUTSQLDA);
     destructor Destroy; override;
     {IResultSet}
-    function FetchNext: boolean;
+    function FetchNext: boolean; {fetch next record}
+    function FetchPrior: boolean; {fetch previous record}
+    function FetchFirst:boolean; {fetch first record}
+    function FetchLast: boolean; {fetch last record}
+    function FetchAbsolute(position: Integer): boolean; {fetch record by its absolute position in result set}
+    function FetchRelative(offset: Integer): boolean; {fetch record by position relative to current}
     function GetCursorName: AnsiString;
     function GetTransaction: ITransaction; override;
     function IsEof: boolean;
+    function IsBof: boolean;
     procedure Close;
   end;
 
@@ -260,7 +266,7 @@ type
     procedure GetDsqlInfo(info_request: byte; buffer: ISQLInfoResults); override;
     procedure InternalPrepare; override;
     function InternalExecute(aTransaction: ITransaction): IResults; override;
-    function InternalOpenCursor(aTransaction: ITransaction): IResultSet; override;
+    function InternalOpenCursor(aTransaction: ITransaction; Scrollable: boolean; CursorName: AnsiString): IResultSet; override;
     procedure ProcessSQL(sql: AnsiString; GenerateParamNames: boolean; var processedSQL: AnsiString); override;
     procedure FreeHandle; override;
     procedure InternalClose(Force: boolean); override;
@@ -637,6 +643,31 @@ begin
       FResults.Column[i].RowChange;
 end;
 
+function TResultSet.FetchPrior: boolean;
+begin
+  IBError(ibxeNoScrollableCursors,[]);
+end;
+
+function TResultSet.FetchFirst: boolean;
+begin
+  IBError(ibxeNoScrollableCursors,[]);
+end;
+
+function TResultSet.FetchLast: boolean;
+begin
+  IBError(ibxeNoScrollableCursors,[]);
+end;
+
+function TResultSet.FetchAbsolute(position: Integer): boolean;
+begin
+  IBError(ibxeNoScrollableCursors,[]);
+end;
+
+function TResultSet.FetchRelative(offset: Integer): boolean;
+begin
+  IBError(ibxeNoScrollableCursors,[]);
+end;
+
 function TResultSet.GetCursorName: AnsiString;
 begin
   Result := FResults.FStatement.FCursor;
@@ -650,6 +681,11 @@ end;
 function TResultSet.IsEof: boolean;
 begin
   Result := FResults.FStatement.FEof;
+end;
+
+function TResultSet.IsBof: boolean;
+begin
+  Result := FResults.FStatement.FBof;
 end;
 
 procedure TResultSet.Close;
@@ -1084,13 +1120,16 @@ begin
   Inc(FChangeSeqNo);
 end;
 
-function TFB25Statement.InternalOpenCursor(aTransaction: ITransaction
-  ): IResultSet;
+function TFB25Statement.InternalOpenCursor(aTransaction: ITransaction;
+  Scrollable: boolean; CursorName: AnsiString): IResultSet;
 var TRHandle: TISC_TR_HANDLE;
     GUID : TGUID;
 begin
   if FSQLStatementType <> SQLSelect then
    IBError(ibxeIsASelectStatement,[]);
+
+  if Scrollable then
+    IBError(ibxeNoScrollableCursors,[]);
 
  CheckTransaction(aTransaction);
   if not FPrepared then
@@ -1101,6 +1140,7 @@ begin
   if FStaleReferenceChecks and (FSQLParams.FTransactionSeqNo < (FTransactionIntf as TFB25transaction).TransactionSeqNo) then
     IBError(ibxeInterfaceOutofDate,[nil]);
 
+ FCursor := CursorName;
  with FFirebird25ClientAPI do
  begin
    if FCollectStatistics then

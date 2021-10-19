@@ -63,6 +63,7 @@ type
 TTest2 = class(TFBTestBase)
 private
   procedure DoQuery(Attachment: IAttachment);
+  procedure DoScrollableQuery(Attachment: IAttachment);
 public
   function TestTitle: AnsiString; override;
   procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
@@ -102,10 +103,44 @@ begin
       writeln(OutFile,Statement.GetSQLText);
       ParamInfo(Statement.SQLParams);
       Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 8;
-      ReportResults(Statement);
+      ReportResults(Statement,'');
     finally
       Statement.SetRetainInterfaces(false);
     end;
+end;
+
+procedure TTest2.DoScrollableQuery(Attachment: IAttachment);
+var Transaction: ITransaction;
+    Statement: IStatement;
+    Results: IResultSet;
+begin
+  writeln(Outfile,'Scollable Cursors');
+  Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
+  Statement := Attachment.Prepare(Transaction,'Select * from EMPLOYEE order by EMP_NO',3);
+  Results := Statement.OpenCursor(true);
+  writeln(Outfile,'Do Fetch Next:');
+  if Results.FetchNext then
+    ReportResult(Results);
+  writeln(Outfile,'Do Fetch Last:');
+  if Results.FetchLast then
+    ReportResult(Results);
+  writeln(Outfile,'Do Fetch Prior:');
+  if Results.FetchPrior then
+    ReportResult(Results);
+  writeln(Outfile,'Do Fetch First:');
+  if Results.FetchFirst then
+    ReportResult(Results);
+  writeln(Outfile,'Do Fetch Abs 8 :');
+  if Results.FetchAbsolute(8) then
+    ReportResult(Results);
+  writeln(Outfile,'Do Fetch Relative -2 :');
+  if Results.FetchRelative(-2) then
+    ReportResult(Results);
+  writeln(Outfile,'Do Fetch beyond EOF :');
+  if Results.FetchAbsolute(150) then
+      ReportResult(Results)
+  else
+    writeln('Fetch returned false');
 end;
 
 function TTest2.TestTitle: AnsiString;
@@ -146,6 +181,8 @@ begin
     writeln(OutFile,'Open Local Database fails ',E.Message);
   end;
   DoQuery(Attachment);
+  if FirebirdAPI.HasScollableCursors then
+    DoScrollableQuery(Attachment);
   Attachment.Disconnect;
 end;
 

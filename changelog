@@ -29,6 +29,41 @@ FBINTF Change Log  version          (1.3-2 Build 12832) Fri, 15 Oct 2021 12:03:1
    Note: ISQLParam metadata can change after a parameter value has been set e.g when
    setting a VARCHAR column to an integer value.
 
+8. IStatement: can now set cursor name when opening a cursor. New overloaded method:
+    function OpenCursor(CursorName: AnsiString; aTransaction: ITransaction=nil): IResultSet; overload;
+
+9. Support for scrollable cursors added. New/updated methods:
+   IFirebirdAPI:
+     function HasScollableCursors: boolean;
+   IAttachment:
+    function OpenCursor(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer;
+                             Scrollable: boolean=false): IResultSet; overload;
+    function OpenCursor(transaction: ITransaction; sql: AnsiString; Scrollable: boolean=false): IResultSet; overload;
+    function OpenCursor(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer; Scrollable: boolean;
+                             params: array of const): IResultSet; overload;
+    function OpenCursor(transaction: ITransaction; sql: AnsiString; Scrollable: boolean=false;
+                             params: array of const): IResultSet; overload;
+    function OpenCursorAtStart(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer; Scrollable: boolean;
+                             params: array of const): IResultSet; overload;
+    function OpenCursorAtStart(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer;
+                             Scrollable: boolean=false): IResultSet; overload;
+    function OpenCursorAtStart(transaction: ITransaction; sql: AnsiString; Scrollable: boolean=false): IResultSet; overload;
+    function OpenCursorAtStart(transaction: ITransaction; sql: AnsiString; Scrollable: boolean;
+                             params: array of const): IResultSet; overload;
+    function OpenCursorAtStart(sql: AnsiString; Scrollable: boolean=false): IResultSet; overload;
+    function OpenCursorAtStart(sql: AnsiString; Scrollable: boolean;
+                             params: array of const): IResultSet; overload;
+   IStatement:
+     function OpenCursor(Scrollable: boolean; CursorName: AnsiString =''; aTransaction: ITransaction=nil): IResultSet; overload;
+   IResultSet:
+    function FetchPrior: boolean; {fetch previous record}
+    function FetchFirst:boolean; {fetch first record}
+    function FetchLast: boolean; {fetch last record}
+    function FetchAbsolute(position: Integer): boolean; {fetch record by its absolute position in result set}
+    function FetchRelative(offset: Integer): boolean; {fetch record by position relative to current}
+    function IsBof: boolean;
+
+
 
 FBINTF Change Log  version          (1.3-1 Build 12776) Mon, 23 Aug 2021 11:09:33 +0100
 

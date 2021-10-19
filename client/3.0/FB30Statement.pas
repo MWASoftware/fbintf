@@ -232,13 +232,20 @@ type
   private
     FResults: TIBXOUTPUTSQLDA;
     FCursorSeqNo: integer;
+    procedure RowChange;
   public
     constructor Create(aResults: TIBXOUTPUTSQLDA);
     destructor Destroy; override;
     {IResultSet}
-    function FetchNext: boolean;
+    function FetchNext: boolean; {fetch next record}
+    function FetchPrior: boolean; {fetch previous record}
+    function FetchFirst:boolean; {fetch first record}
+    function FetchLast: boolean; {fetch last record}
+    function FetchAbsolute(position: Integer): boolean; {fetch record by its absolute position in result set}
+    function FetchRelative(offset: Integer): boolean; {fetch record by position relative to current}
     function GetCursorName: AnsiString;
     function GetTransaction: ITransaction; override;
+    function IsBof: boolean;
     function IsEof: boolean;
     procedure Close;
   end;
@@ -260,6 +267,8 @@ type
     function getUpdated: integer;
   end;
 
+  TFetchType = (ftNext,ftPrior,ftFirst,ftLast,ftAbsolute,ftRelative);
+
   { TFB30Statement }
 
   TFB30Statement = class(TFBStatement,IStatement)
@@ -270,6 +279,7 @@ type
     FSQLRecord: TIBXOUTPUTSQLDA;
     FResultSet: Firebird.IResultSet;
     FCursorSeqNo: integer;
+    FCursor: AnsiString;
     FBatch: Firebird.IBatch;
     FBatchCompletion: IBatchCompletion;
     FBatchRowCount: integer;
@@ -282,7 +292,7 @@ type
     procedure GetDSQLInfo(info_request: byte; buffer: ISQLInfoResults); override;
     procedure InternalPrepare; override;
     function InternalExecute(aTransaction: ITransaction): IResults; override;
-    function InternalOpenCursor(aTransaction: ITransaction): IResultSet; override;
+    function InternalOpenCursor(aTransaction: ITransaction; Scrollable: boolean; CursorName: AnsiString): IResultSet; override;
     procedure ProcessSQL(sql: AnsiString; GenerateParamNames: boolean; var processedSQL: AnsiString); override;
     procedure FreeHandle; override;
     procedure InternalClose(Force: boolean); override;
@@ -294,7 +304,7 @@ type
       sql: AnsiString;  aSQLDialect: integer; GenerateParamNames: boolean =false;
       CaseSensitiveParams: boolean=false);
     destructor Destroy; override;
-    function FetchNext: boolean;
+    function Fetch(FetchType: TFetchType; PosOrOffset: integer=0): boolean;
     property StatementIntf: Firebird.IStatement read FStatementIntf;
 
   public
@@ -794,6 +804,13 @@ end;
 
 { TResultSet }
 
+procedure TResultSet.RowChange;
+var i: integer;
+begin
+  for i := 0 to getCount - 1 do
+    FResults.Column[i].RowChange;
+end;
+
 constructor TResultSet.Create(aResults: TIBXOUTPUTSQLDA);
 begin
   inherited Create(aResults);
@@ -808,24 +825,66 @@ begin
 end;
 
 function TResultSet.FetchNext: boolean;
-var i: integer;
 begin
   CheckActive;
-  Result := FResults.FStatement.FetchNext;
+  Result := FResults.FStatement.Fetch(ftNext);
   if Result then
-    for i := 0 to getCount - 1 do
-      FResults.Column[i].RowChange;
+    RowChange;
+end;
+
+function TResultSet.FetchPrior: boolean;
+begin
+  CheckActive;
+  Result := FResults.FStatement.Fetch(ftPrior);
+  if Result then
+    RowChange;
+end;
+
+function TResultSet.FetchFirst: boolean;
+begin
+  CheckActive;
+  Result := FResults.FStatement.Fetch(ftFirst);
+  if Result then
+    RowChange;
+end;
+
+function TResultSet.FetchLast: boolean;
+begin
+  CheckActive;
+  Result := FResults.FStatement.Fetch(ftLast);
+  if Result then
+    RowChange;
+end;
+
+function TResultSet.FetchAbsolute(position: Integer): boolean;
+begin
+  CheckActive;
+  Result := FResults.FStatement.Fetch(ftAbsolute,position);
+  if Result then
+    RowChange;
+end;
+
+function TResultSet.FetchRelative(offset: Integer): boolean;
+begin
+  CheckActive;
+  Result := FResults.FStatement.Fetch(ftRelative,offset);
+  if Result then
+    RowChange;
 end;
 
 function TResultSet.GetCursorName: AnsiString;
 begin
-  IBError(ibxeNotSupported,[nil]);
-  Result := '';
+  Result := FResults.FStatement.FCursor;
 end;
 
 function TResultSet.GetTransaction: ITransaction;
 begin
   Result := FResults.FTransaction;
+end;
+
+function TResultSet.IsBof: boolean;
+begin
+  Result := FResults.FStatement.FBof;
 end;
 
 function TResultSet.IsEof: boolean;
@@ -1416,9 +1475,12 @@ begin
   Inc(FChangeSeqNo);
 end;
 
-function TFB30Statement.InternalOpenCursor(aTransaction: ITransaction
-  ): IResultSet;
+function TFB30Statement.InternalOpenCursor(aTransaction: ITransaction;
+  Scrollable: boolean; CursorName: AnsiString): IResultSet;
+var GUID : TGUID;
+    flags: cardinal;
 begin
+  flags := 0;
   if FSQLStatementType <> SQLSelect then
    IBError(ibxeIsASelectStatement,[]);
 
@@ -1431,6 +1493,10 @@ begin
     AddMonitor(aTransaction as TFB30Transaction);
   if FStaleReferenceChecks and (FSQLParams.FTransactionSeqNo < (FTransactionIntf as TFB30transaction).TransactionSeqNo) then
     IBError(ibxeInterfaceOutofDate,[nil]);
+
+ FCursor := CursorName;
+ if Scrollable then
+   flags := Firebird.IStatement.CURSOR_TYPE_SCROLLABLE;
 
  with FFirebird30ClientAPI do
  begin
@@ -1447,8 +1513,16 @@ begin
                           FSQLParams.MetaData,
                           FSQLParams.MessageBuffer,
                           FSQLRecord.MetaData,
-                          0);
+                          flags);
    Check4DataBaseError;
+
+   if FCursor = '' then
+   begin
+     CreateGuid(GUID);
+     FCursor := GUIDToString(GUID);
+     FStatementIntf.setCursorName(StatusIntf,PAnsiChar(FCursor));
+     Check4DataBaseError;
+   end;
 
    if FCollectStatistics then
    begin
@@ -1493,6 +1567,7 @@ begin
     FStatementIntf := nil;
     FPrepared := false;
   end;
+  FCursor := '';
 end;
 
 procedure TFB30Statement.InternalClose(Force: boolean);
@@ -1567,40 +1642,67 @@ begin
   if assigned(FSQLRecord) then FSQLRecord.Free;
 end;
 
-function TFB30Statement.FetchNext: boolean;
+function TFB30Statement.Fetch(FetchType: TFetchType; PosOrOffset: integer
+  ): boolean;
 var fetchResult: integer;
 begin
   result := false;
   if not FOpen then
     IBError(ibxeSQLClosed, [nil]);
-  if FEOF then
-    IBError(ibxeEOF,[nil]);
 
   with FFirebird30ClientAPI do
   begin
-    { Go to the next record... }
-    fetchResult := FResultSet.fetchNext(StatusIntf,FSQLRecord.MessageBuffer);
-    if fetchResult = Firebird.IStatus.RESULT_NO_DATA then
-    begin
-      FBOF := false;
-      FEOF := true;
-      Exit; {End of File}
-    end
-    else
-    if fetchResult <> Firebird.IStatus.RESULT_OK then
-    begin
-      try
-        IBDataBaseError;
-      except
-        Close;
-        raise;
+    case FetchType of
+    ftNext:
+      begin
+        if FEOF then
+          IBError(ibxeEOF,[nil]);
+        { Go to the next record... }
+        fetchResult := FResultSet.fetchNext(StatusIntf,FSQLRecord.MessageBuffer);
+        if fetchResult = Firebird.IStatus.RESULT_NO_DATA then
+        begin
+          FBOF := false;
+          FEOF := true;
+          Exit; {End of File}
+        end
       end;
-    end
-    else
-    begin
-      FBOF := false;
-      result := true;
+
+    ftPrior:
+      begin
+        if FBOF then
+          IBError(ibxeBOF,[nil]);
+        { Go to the next record... }
+        fetchResult := FResultSet.fetchPrior(StatusIntf,FSQLRecord.MessageBuffer);
+        if fetchResult = Firebird.IStatus.RESULT_NO_DATA then
+        begin
+          FBOF := true;
+          FEOF := false;
+          Exit; {Top of File}
+        end
+      end;
+
+    ftFirst:
+      fetchResult := FResultSet.fetchFirst(StatusIntf,FSQLRecord.MessageBuffer);
+
+    ftLast:
+      fetchResult := FResultSet.fetchLast(StatusIntf,FSQLRecord.MessageBuffer);
+
+    ftAbsolute:
+      fetchResult := FResultSet.fetchAbsolute(StatusIntf,PosOrOffset,FSQLRecord.MessageBuffer);
+
+    ftRelative:
+      fetchResult := FResultSet.fetchRelative(StatusIntf,PosOrOffset,FSQLRecord.MessageBuffer);
     end;
+
+    Check4DataBaseError;
+    if fetchResult <> Firebird.IStatus.RESULT_OK then
+      exit; {result = false}
+
+    {Result OK}
+    FBOF := false;
+    FEOF := false;
+    result := true;
+
     if FCollectStatistics then
     begin
       UtilIntf.getPerfCounters(StatusIntf,
