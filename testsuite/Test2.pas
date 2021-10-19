@@ -140,7 +140,7 @@ begin
   if Results.FetchAbsolute(150) then
       ReportResult(Results)
   else
-    writeln('Fetch returned false');
+    writeln(Outfile,'Fetch returned false');
 end;
 
 function TTest2.TestTitle: AnsiString;

@@ -696,7 +696,7 @@ function TFBAttachment.OpenCursor(transaction: ITransaction; sql: AnsiString;
   aSQLDialect: integer; params: array of const): IResultSet;
 
 begin
-  Result := OpenCursor(transaction,sql,FSQLDialect,false,[]);
+  Result := OpenCursor(transaction,sql,FSQLDialect,false,params);
 end;
 
 function TFBAttachment.OpenCursor(transaction: ITransaction; sql: AnsiString;
@@ -759,7 +759,7 @@ end;
 function TFBAttachment.OpenCursorAtStart(transaction: ITransaction;
   sql: AnsiString; Scrollable: boolean; params: array of const): IResultSet;
 begin
-  Result := OpenCursorAtStart(transaction,sql,FSQLDialect,SCrollable,params);
+  Result := OpenCursorAtStart(transaction,sql,FSQLDialect,Scrollable,params);
 end;
 
 function TFBAttachment.OpenCursorAtStart(sql: AnsiString; Scrollable: boolean
