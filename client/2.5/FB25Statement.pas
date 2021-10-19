@@ -1001,9 +1001,6 @@ begin
       Call(isc_dsql_alloc_statement2(StatusVector, @(FDBHandle),
                                       @FHandle), True);
       TRHandle := (FTransactionIntf as TFB25Transaction).Handle;
-      Call(
-        isc_dsql_set_cursor_name(StatusVector, @FHandle, PAnsiChar(FCursor), 0),
-        True);
       if FHasParamNames then
       begin
         if FProcessedSQL = '' then
@@ -1024,6 +1021,12 @@ begin
       FSQLStatementType := TIBSQLStatementTypes(RB[0].GetAsInteger)
     else
       FSQLStatementType := SQLUnknown;
+
+    if FSQLStatementType = SQLSelect then
+    with FFirebird25ClientAPI do
+      Call(
+        isc_dsql_set_cursor_name(StatusVector, @FHandle, PAnsiChar(FCursor), 0),
+        True);
 
     case FSQLStatementType of
       SQLGetSegment,
