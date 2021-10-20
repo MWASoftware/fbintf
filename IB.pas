@@ -614,8 +614,14 @@ type
   }
   IResultSet = interface(IResults)
     ['{0ae4979b-7857-4e8c-8918-ec6f155b51a0}']
-    function FetchNext: boolean;
+    function FetchNext: boolean; {fetch next record}
+    function FetchPrior: boolean; {fetch previous record}
+    function FetchFirst:boolean; {fetch first record}
+    function FetchLast: boolean; {fetch last record}
+    function FetchAbsolute(position: Integer): boolean; {fetch record by its absolute position in result set}
+    function FetchRelative(offset: Integer): boolean; {fetch record by position relative to current}
     function GetCursorName: AnsiString;
+    function IsBof: boolean;
     function IsEof: boolean;
     procedure Close;
   end;
@@ -789,9 +795,11 @@ type
     function IsPrepared: boolean;
     function HasBatchMode: boolean;
     function IsInBatchMode: boolean;
-    procedure Prepare(aTransaction: ITransaction=nil);
+    procedure Prepare(aTransaction: ITransaction=nil); overload;
+    procedure Prepare(CursorName: AnsiString; aTransaction: ITransaction=nil); overload;
     function Execute(aTransaction: ITransaction=nil): IResults;
-    function OpenCursor(aTransaction: ITransaction=nil): IResultSet;
+    function OpenCursor(aTransaction: ITransaction=nil): IResultSet; overload;
+    function OpenCursor(Scrollable: boolean; aTransaction: ITransaction=nil): IResultSet; overload;
     function GetAttachment: IAttachment;
     function GetTransaction: ITransaction;
     procedure SetRetainInterfaces(aValue: boolean);
@@ -1067,29 +1075,39 @@ type
     function ExecuteSQL(transaction: ITransaction; sql: AnsiString; SQLDialect: integer; params: array of const): IResults; overload;
     function ExecuteSQL(TPB: array of byte; sql: AnsiString; params: array of const): IResults; overload;
     function ExecuteSQL(transaction: ITransaction; sql: AnsiString; params: array of const): IResults; overload;
-    function OpenCursor(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer): IResultSet; overload;
+    function OpenCursor(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer;
+                             Scrollable: boolean=false): IResultSet; overload;
     function OpenCursor(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer;
                              params: array of const): IResultSet; overload;
-    function OpenCursor(transaction: ITransaction; sql: AnsiString): IResultSet; overload;
-    function OpenCursor(transaction: ITransaction; sql: AnsiString;
+    function OpenCursor(transaction: ITransaction; sql: AnsiString; Scrollable: boolean=false): IResultSet; overload;
+    function OpenCursor(transaction: ITransaction; sql: AnsiString; Scrollable: boolean=false;
                              params: array of const): IResultSet; overload;
-    function OpenCursorAtStart(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer): IResultSet; overload;
+    function OpenCursor(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer; Scrollable: boolean;
+                             params: array of const): IResultSet; overload;
+    function OpenCursorAtStart(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer;
+                             Scrollable: boolean=false): IResultSet; overload;
     function OpenCursorAtStart(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer;
                              params: array of const): IResultSet; overload;
-    function OpenCursorAtStart(transaction: ITransaction; sql: AnsiString): IResultSet; overload;
+    function OpenCursorAtStart(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer; Scrollable: boolean;
+                             params: array of const): IResultSet; overload;
+    function OpenCursorAtStart(transaction: ITransaction; sql: AnsiString; Scrollable: boolean=false): IResultSet; overload;
     function OpenCursorAtStart(transaction: ITransaction; sql: AnsiString;
                              params: array of const): IResultSet; overload;
-    function OpenCursorAtStart(sql: AnsiString): IResultSet; overload;
+    function OpenCursorAtStart(transaction: ITransaction; sql: AnsiString; Scrollable: boolean;
+                             params: array of const): IResultSet; overload;
+    function OpenCursorAtStart(sql: AnsiString; Scrollable: boolean=false): IResultSet; overload;
+    function OpenCursorAtStart(sql: AnsiString; Scrollable: boolean;
+                             params: array of const): IResultSet; overload;
     function OpenCursorAtStart(sql: AnsiString;
                              params: array of const): IResultSet; overload;
-    function Prepare(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer): IStatement; overload;
-    function Prepare(transaction: ITransaction; sql: AnsiString): IStatement; overload;
+    function Prepare(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer; CursorName: AnsiString=''): IStatement; overload;
+    function Prepare(transaction: ITransaction; sql: AnsiString; CursorName: AnsiString=''): IStatement; overload;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: AnsiString;
                        aSQLDialect: integer; GenerateParamNames: boolean=false;
-                       CaseSensitiveParams: boolean = false): IStatement; overload;
+                       CaseSensitiveParams: boolean = false; CursorName: AnsiString=''): IStatement; overload;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: AnsiString;
                        GenerateParamNames: boolean=false;
-                       CaseSensitiveParams: boolean = false): IStatement; overload;
+                       CaseSensitiveParams: boolean = false; CursorName: AnsiString=''): IStatement; overload;
 
     {Events}
     function GetEventHandler(Events: TStrings): IEvents; overload;
@@ -1336,6 +1354,7 @@ type
     function HasLocalTZDB: boolean;
     function HasTimeZoneSupport: boolean;
     function HasExtendedTZSupport: boolean;
+    function HasScollableCursors: boolean;
 
     {Firebird 3 API}
     function HasMasterIntf: boolean;

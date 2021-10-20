@@ -236,10 +236,16 @@ type
     constructor Create(aResults: TIBXOUTPUTSQLDA);
     destructor Destroy; override;
     {IResultSet}
-    function FetchNext: boolean;
+    function FetchNext: boolean; {fetch next record}
+    function FetchPrior: boolean; {fetch previous record}
+    function FetchFirst:boolean; {fetch first record}
+    function FetchLast: boolean; {fetch last record}
+    function FetchAbsolute(position: Integer): boolean; {fetch record by its absolute position in result set}
+    function FetchRelative(offset: Integer): boolean; {fetch record by position relative to current}
     function GetCursorName: AnsiString;
     function GetTransaction: ITransaction; override;
     function IsEof: boolean;
+    function IsBof: boolean;
     procedure Close;
   end;
 
@@ -258,18 +264,18 @@ type
   protected
     procedure CheckHandle; override;
     procedure GetDsqlInfo(info_request: byte; buffer: ISQLInfoResults); override;
-    procedure InternalPrepare; override;
+    procedure InternalPrepare(CursorName: AnsiString=''); override;
     function InternalExecute(aTransaction: ITransaction): IResults; override;
-    function InternalOpenCursor(aTransaction: ITransaction): IResultSet; override;
+    function InternalOpenCursor(aTransaction: ITransaction; Scrollable: boolean): IResultSet; override;
     procedure ProcessSQL(sql: AnsiString; GenerateParamNames: boolean; var processedSQL: AnsiString); override;
     procedure FreeHandle; override;
     procedure InternalClose(Force: boolean); override;
   public
     constructor Create(Attachment: TFB25Attachment; Transaction: ITransaction;
-      sql: AnsiString; aSQLDialect: integer);
+      sql: AnsiString; aSQLDialect: integer; CursorName: AnsiString='');
     constructor CreateWithParameterNames(Attachment: TFB25Attachment;
       Transaction: ITransaction; sql: AnsiString; aSQLDialect: integer; GenerateParamNames: boolean;
-      CaseSensitiveParams: boolean=false);
+      CaseSensitiveParams: boolean=false; CursorName: AnsiString='');
     destructor Destroy; override;
     function FetchNext: boolean;
 
@@ -637,6 +643,31 @@ begin
       FResults.Column[i].RowChange;
 end;
 
+function TResultSet.FetchPrior: boolean;
+begin
+  IBError(ibxeNoScrollableCursors,[]);
+end;
+
+function TResultSet.FetchFirst: boolean;
+begin
+  IBError(ibxeNoScrollableCursors,[]);
+end;
+
+function TResultSet.FetchLast: boolean;
+begin
+  IBError(ibxeNoScrollableCursors,[]);
+end;
+
+function TResultSet.FetchAbsolute(position: Integer): boolean;
+begin
+  IBError(ibxeNoScrollableCursors,[]);
+end;
+
+function TResultSet.FetchRelative(offset: Integer): boolean;
+begin
+  IBError(ibxeNoScrollableCursors,[]);
+end;
+
 function TResultSet.GetCursorName: AnsiString;
 begin
   Result := FResults.FStatement.FCursor;
@@ -650,6 +681,11 @@ end;
 function TResultSet.IsEof: boolean;
 begin
   Result := FResults.FStatement.FEof;
+end;
+
+function TResultSet.IsBof: boolean;
+begin
+  Result := FResults.FStatement.FBof;
 end;
 
 procedure TResultSet.Close;
@@ -939,15 +975,25 @@ begin
     IBDatabaseError;
 end;
 
-procedure TFB25Statement.InternalPrepare;
+procedure TFB25Statement.InternalPrepare(CursorName: AnsiString);
 var
+  GUID: TGUID;
   RB: ISQLInfoResults;
   TRHandle: TISC_TR_HANDLE;
 begin
   if FPrepared then
     Exit;
+
   if (FSQL = '') then
     IBError(ibxeEmptyQuery, [nil]);
+
+  FCursor := CursorName;
+  if FCursor = '' then
+  begin
+    CreateGuid(GUID);
+    FCursor := GUIDToString(GUID);
+  end;
+
   try
     CheckTransaction(FTransactionIntf);
     with FFirebird25ClientAPI do
@@ -966,6 +1012,7 @@ begin
         Call(isc_dsql_prepare(StatusVector, @(TRHandle), @FHandle, 0,
                  PAnsiChar(FSQL), FSQLDialect, nil), True);
     end;
+
     { After preparing the statement, query the stmt type and possibly
       create a FSQLRecord "holder" }
     { Get the type of the statement }
@@ -974,6 +1021,12 @@ begin
       FSQLStatementType := TIBSQLStatementTypes(RB[0].GetAsInteger)
     else
       FSQLStatementType := SQLUnknown;
+
+    if FSQLStatementType = SQLSelect then
+    with FFirebird25ClientAPI do
+      Call(
+        isc_dsql_set_cursor_name(StatusVector, @FHandle, PAnsiChar(FCursor), 0),
+        True);
 
     case FSQLStatementType of
       SQLGetSegment,
@@ -1084,13 +1137,15 @@ begin
   Inc(FChangeSeqNo);
 end;
 
-function TFB25Statement.InternalOpenCursor(aTransaction: ITransaction
-  ): IResultSet;
+function TFB25Statement.InternalOpenCursor(aTransaction: ITransaction;
+  Scrollable: boolean): IResultSet;
 var TRHandle: TISC_TR_HANDLE;
-    GUID : TGUID;
 begin
   if FSQLStatementType <> SQLSelect then
    IBError(ibxeIsASelectStatement,[]);
+
+  if Scrollable then
+    IBError(ibxeNoScrollableCursors,[]);
 
  CheckTransaction(aTransaction);
   if not FPrepared then
@@ -1113,14 +1168,6 @@ begin
                        SQLDialect,
                        FSQLParams.AsXSQLDA,
                        nil), True);
-   if FCursor = '' then
-   begin
-     CreateGuid(GUID);
-     FCursor := GUIDToString(GUID);
-     Call(
-       isc_dsql_set_cursor_name(StatusVector, @FHandle, PAnsiChar(FCursor), 0),
-       True);
-   end;
 
    if FCollectStatistics then
    begin
@@ -1195,7 +1242,8 @@ begin
 end;
 
 constructor TFB25Statement.Create(Attachment: TFB25Attachment;
-  Transaction: ITransaction; sql: AnsiString; aSQLDialect: integer);
+  Transaction: ITransaction; sql: AnsiString; aSQLDialect: integer;
+  CursorName: AnsiString);
 begin
   inherited Create(Attachment,Transaction,sql,aSQLDialect);
   FDBHandle := Attachment.Handle;
@@ -1203,13 +1251,13 @@ begin
   OnDatabaseError := FFirebird25ClientAPI.IBDataBaseError;
   FSQLParams := TIBXINPUTSQLDA.Create(self);
   FSQLRecord := TIBXOUTPUTSQLDA.Create(self);
-  InternalPrepare;
+  InternalPrepare(CursorName);
 end;
 
 constructor TFB25Statement.CreateWithParameterNames(
   Attachment: TFB25Attachment; Transaction: ITransaction; sql: AnsiString;
   aSQLDialect: integer; GenerateParamNames: boolean;
-  CaseSensitiveParams: boolean);
+  CaseSensitiveParams: boolean; CursorName: AnsiString);
 begin
   inherited CreateWithParameterNames(Attachment,Transaction,sql,aSQLDialect,GenerateParamNames);
   FDBHandle := Attachment.Handle;
@@ -1218,7 +1266,7 @@ begin
   FSQLParams := TIBXINPUTSQLDA.Create(self);
   FSQLParams.CaseSensitiveParams := CaseSensitiveParams;
   FSQLRecord := TIBXOUTPUTSQLDA.Create(self);
-  InternalPrepare;
+  InternalPrepare(CursorName);
 end;
 
 destructor TFB25Statement.Destroy;

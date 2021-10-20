@@ -165,7 +165,8 @@ type
       ibxeInBatchMode,
       ibxeInvalidBatchQuery,
       ibxeBatchRowBufferOverflow,
-      ibxeBatchBufferSizeTooBig
+      ibxeBatchBufferSizeTooBig,
+      ibxeNoScrollableCursors
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -282,6 +283,7 @@ resourcestring
   SInvalidBatchQuery = 'This query type (%s) cannot be batched';
   SBatchRowBufferOverflow = 'Adding Row No. %d - batch buffer size limit (%d bytes) exceeded';
   SBatchBufferSizeTooBig = 'Requested Batch Buffer Size (%d bytes) exceeds 256MB limit';
+  SNoScrollableCursors = 'Scrollable cursors are not supported';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -374,7 +376,8 @@ const
     SInBatchMode,
     SInvalidBatchQuery,
     SBatchRowBufferOverflow,
-    SBatchBufferSizeTooBig
+    SBatchBufferSizeTooBig,
+    SNoScrollableCursors
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;

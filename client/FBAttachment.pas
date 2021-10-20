@@ -101,29 +101,39 @@ type
     function ExecuteSQL(transaction: ITransaction; sql: AnsiString; SQLDialect: integer; params: array of const): IResults; overload;
     function ExecuteSQL(TPB: array of byte; sql: AnsiString; params: array of const): IResults; overload;
     function ExecuteSQL(transaction: ITransaction; sql: AnsiString; params: array of const): IResults; overload;
-    function OpenCursor(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer): IResultSet; overload;
+    function OpenCursor(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer;
+                             Scrollable: boolean=false): IResultSet; overload;
     function OpenCursor(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer;
                              params: array of const): IResultSet; overload;
-    function OpenCursor(transaction: ITransaction; sql: AnsiString): IResultSet; overload;
-    function OpenCursor(transaction: ITransaction; sql: AnsiString;
+    function OpenCursor(transaction: ITransaction; sql: AnsiString; Scrollable: boolean=false): IResultSet; overload;
+    function OpenCursor(transaction: ITransaction; sql: AnsiString; Scrollable: boolean=false;
                              params: array of const): IResultSet; overload;
-    function OpenCursorAtStart(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer): IResultSet; overload;
+    function OpenCursor(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer; Scrollable: boolean;
+                             params: array of const): IResultSet; overload;
+    function OpenCursorAtStart(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer;
+                             Scrollable: boolean=false): IResultSet; overload;
     function OpenCursorAtStart(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer;
                              params: array of const): IResultSet; overload;
-    function OpenCursorAtStart(transaction: ITransaction; sql: AnsiString): IResultSet; overload;
+    function OpenCursorAtStart(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer; Scrollable: boolean;
+                             params: array of const): IResultSet; overload;
+    function OpenCursorAtStart(transaction: ITransaction; sql: AnsiString; Scrollable: boolean=false): IResultSet; overload;
     function OpenCursorAtStart(transaction: ITransaction; sql: AnsiString;
                              params: array of const): IResultSet; overload;
-    function OpenCursorAtStart(sql: AnsiString): IResultSet; overload;
+    function OpenCursorAtStart(transaction: ITransaction; sql: AnsiString; Scrollable: boolean;
+                             params: array of const): IResultSet; overload;
+    function OpenCursorAtStart(sql: AnsiString;Scrollable: boolean=false): IResultSet; overload;
+    function OpenCursorAtStart(sql: AnsiString; Scrollable: boolean;
+                             params: array of const): IResultSet; overload;
     function OpenCursorAtStart(sql: AnsiString;
                              params: array of const): IResultSet; overload;
-    function Prepare(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer): IStatement; overload; virtual; abstract;
-    function Prepare(transaction: ITransaction; sql: AnsiString): IStatement; overload;
+    function Prepare(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer; CursorName: AnsiString=''): IStatement; overload; virtual; abstract;
+    function Prepare(transaction: ITransaction; sql: AnsiString; CursorName: AnsiString=''): IStatement; overload;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: AnsiString;
                        aSQLDialect: integer; GenerateParamNames: boolean=false;
-                       CaseSensitiveParams: boolean = false): IStatement; overload; virtual; abstract;
+                       CaseSensitiveParams: boolean = false; CursorName: AnsiString=''): IStatement; overload; virtual; abstract;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: AnsiString;
                        GenerateParamNames: boolean=false;
-                       CaseSensitiveParams: boolean = false): IStatement; overload;
+                       CaseSensitiveParams: boolean = false; CursorName: AnsiString=''): IStatement; overload;
     function GetEventHandler(Events: TStrings): IEvents; overload; virtual; abstract;
     function GetEventHandler(Event: AnsiString): IEvents; overload;
 
@@ -677,37 +687,45 @@ begin
 end;
 
 function TFBAttachment.OpenCursor(transaction: ITransaction; sql: AnsiString;
-  aSQLDialect: integer): IResultSet;
+  aSQLDialect: integer; Scrollable: boolean): IResultSet;
 begin
-  Result := OpenCursor(transaction,sql,aSQLDialect,[]);
+  Result := OpenCursor(transaction,sql,aSQLDialect,Scrollable,[]);
 end;
 
 function TFBAttachment.OpenCursor(transaction: ITransaction; sql: AnsiString;
   aSQLDialect: integer; params: array of const): IResultSet;
+
+begin
+  Result := OpenCursor(transaction,sql,FSQLDialect,false,params);
+end;
+
+function TFBAttachment.OpenCursor(transaction: ITransaction; sql: AnsiString;
+  Scrollable: boolean): IResultSet;
+begin
+  Result := OpenCursor(transaction,sql,FSQLDialect,Scrollable,[]);
+end;
+
+function TFBAttachment.OpenCursor(transaction: ITransaction; sql: AnsiString;
+  Scrollable: boolean; params: array of const): IResultSet;
+begin
+  Result := OpenCursor(transaction,sql,FSQLDialect,Scrollable,params);
+end;
+
+function TFBAttachment.OpenCursor(transaction: ITransaction; sql: AnsiString;
+  aSQLDialect: integer; Scrollable: boolean;
+  params: array of const): IResultSet;
 var Statement: IStatement;
 begin
   CheckHandle;
   Statement := Prepare(transaction,sql,aSQLDialect);
   SetParameters(Statement.SQLParams,params);
-  Result := Statement.OpenCursor;
-end;
-
-function TFBAttachment.OpenCursor(transaction: ITransaction; sql: AnsiString
-  ): IResultSet;
-begin
-  Result := OpenCursor(transaction,sql,FSQLDialect,[]);
-end;
-
-function TFBAttachment.OpenCursor(transaction: ITransaction; sql: AnsiString;
-  params: array of const): IResultSet;
-begin
-  Result := OpenCursor(transaction,sql,FSQLDialect,params);
+  Result := Statement.OpenCursor(Scrollable);
 end;
 
 function TFBAttachment.OpenCursorAtStart(transaction: ITransaction;
-  sql: AnsiString; aSQLDialect: integer): IResultSet;
+  sql: AnsiString; aSQLDialect: integer; Scrollable: boolean): IResultSet;
 begin
-  Result := OpenCursor(transaction,sql,aSQLDialect,[]);
+  Result := OpenCursor(transaction,sql,aSQLDialect,Scrollable,[]);
   Result.FetchNext;
 end;
 
@@ -718,10 +736,18 @@ begin
   Result.FetchNext;
 end;
 
-function TFBAttachment.OpenCursorAtStart(transaction: ITransaction; sql: AnsiString
-  ): IResultSet;
+function TFBAttachment.OpenCursorAtStart(transaction: ITransaction;
+  sql: AnsiString; aSQLDialect: integer; Scrollable: boolean;
+  params: array of const): IResultSet;
 begin
-  Result := OpenCursorAtStart(transaction,sql,FSQLDialect,[]);
+  Result := OpenCursor(transaction,sql,aSQLDialect,Scrollable,params);
+  Result.FetchNext;
+end;
+
+function TFBAttachment.OpenCursorAtStart(transaction: ITransaction;
+  sql: AnsiString; Scrollable: boolean): IResultSet;
+begin
+  Result := OpenCursorAtStart(transaction,sql,FSQLDialect,Scrollable,[]);
 end;
 
 function TFBAttachment.OpenCursorAtStart(transaction: ITransaction;
@@ -730,27 +756,43 @@ begin
   Result := OpenCursorAtStart(transaction,sql,FSQLDialect,params);
 end;
 
-function TFBAttachment.OpenCursorAtStart(sql: AnsiString): IResultSet;
+function TFBAttachment.OpenCursorAtStart(transaction: ITransaction;
+  sql: AnsiString; Scrollable: boolean; params: array of const): IResultSet;
 begin
-  Result := OpenCursorAtStart(sql,[]);
+  Result := OpenCursorAtStart(transaction,sql,FSQLDialect,Scrollable,params);
+end;
+
+function TFBAttachment.OpenCursorAtStart(sql: AnsiString; Scrollable: boolean
+  ): IResultSet;
+begin
+  Result := OpenCursorAtStart(sql,Scrollable,[]);
+end;
+
+function TFBAttachment.OpenCursorAtStart(sql: AnsiString; Scrollable: boolean;
+  params: array of const): IResultSet;
+begin
+  Result := OpenCursorAtStart(StartTransaction([isc_tpb_read,isc_tpb_wait,isc_tpb_concurrency],taCommit),sql,FSQLDialect,
+                   Scrollable,params);
 end;
 
 function TFBAttachment.OpenCursorAtStart(sql: AnsiString;
   params: array of const): IResultSet;
 begin
-  Result := OpenCursorAtStart(StartTransaction([isc_tpb_read,isc_tpb_wait,isc_tpb_concurrency],taCommit),sql,FSQLDialect,params);
+  Result := OpenCursorAtStart(StartTransaction([isc_tpb_read,isc_tpb_wait,isc_tpb_concurrency],taCommit),sql,FSQLDialect,
+                   false,params);
 end;
 
-function TFBAttachment.Prepare(transaction: ITransaction; sql: AnsiString
-  ): IStatement;
+function TFBAttachment.Prepare(transaction: ITransaction; sql: AnsiString;
+  CursorName: AnsiString): IStatement;
 begin
-  Result := Prepare(transaction,sql,FSQLDialect);
+  Result := Prepare(transaction,sql,FSQLDialect,CursorName);
 end;
 
 function TFBAttachment.PrepareWithNamedParameters(transaction: ITransaction;
-  sql: AnsiString; GenerateParamNames: boolean; CaseSensitiveParams: boolean): IStatement;
+  sql: AnsiString; GenerateParamNames: boolean; CaseSensitiveParams: boolean;
+  CursorName: AnsiString): IStatement;
 begin
-  Result := PrepareWithNamedParameters(transaction,sql,FSQLDialect,GenerateParamNames,CaseSensitiveParams);
+  Result := PrepareWithNamedParameters(transaction,sql,FSQLDialect,GenerateParamNames,CaseSensitiveParams,CursorName);
 end;
 
 function TFBAttachment.GetEventHandler(Event: AnsiString): IEvents;

@@ -2422,10 +2422,58 @@ begin
   Changed;
 end;
 
+function TryStrToNumeric(S: Ansistring; out Value: int64; out scale: integer): boolean;
+var i: integer;
+    ds: integer;
+begin
+  Result := false;
+  ds := 0;
+  S := Trim(S);
+  {$IF declared(DefaultFormatSettings)}
+  with DefaultFormatSettings do
+  {$ELSE}
+  {$IF declared(FormatSettings)}
+  with FormatSettings do
+  {$IFEND}
+  {$IFEND}
+  begin
+    {ThousandSeparator not allowed as by Delphi specs}
+    if (ThousandSeparator <> DecimalSeparator) and
+       (Pos(ThousandSeparator, S) <> 0) then
+        Exit;
+
+    for i := length(S) downto 1 do
+    begin
+      if S[i] = DecimalSeparator then
+      begin
+          if ds <> 0 then Exit; {only one allowed}
+          ds := i-1;
+          system.Delete(S,i,1);
+      end
+      else
+      if (i > 1) and (S[i] in ['+','-']) then
+        Exit
+      else
+      if not (S[i] in ['0'..'9']) then
+          Exit; {bad character}
+
+    end;
+    if ds = 0 then
+      scale := 0
+    else
+      scale := ds - Length(S);
+    Result := TryStrToInt64(S,Value);
+  end;
+end;
+
 var b: IBlob;
     dt: TDateTime;
     timezone: AnsiString;
+    {$ifdef FPC_HAS_TYPE_EXTENDED}
+    FloatValue: Extended;
+    {$else}
     FloatValue: Double;
+    {$endif}
     Int64Value: Int64;
     BCDValue: TBCD;
     aScale: integer;
@@ -2463,25 +2511,16 @@ begin
   SQL_SHORT,
   SQL_LONG,
   SQL_INT64:
-    {If the string contains an integer then convert and set directly}
-    if TryStrToInt64(Value,Int64Value) then
-      SetAsInt64(Int64Value)
-    else
-    if getColMetaData.getScale = 0 then {integer expected but non-integer string}
+    if TryStrToNumeric(Value,Int64Value,aScale) then
     begin
-      if TryStrToFloat(Value,FloatValue) then
-        {truncate it if the column is limited to an integer}
-        SetAsInt64(Trunc(FloatValue))
+      if aScale = 0 then
+        SetAsInt64(Int64Value)
       else
-        DoSetString;
+        SetAsNumeric(Int64Value,aScale);
     end
     else
     if TryStrToFloat(Value,FloatValue) then
-    begin
-      aScale := getColMetaData.getScale;
-      {Set as int64 with adjusted scale}
-      SetAsNumeric(AdjustScaleFromDouble(FloatValue,aScale),aScale)
-    end
+      SetAsDouble(FloatValue)
     else
       DoSetString;
 

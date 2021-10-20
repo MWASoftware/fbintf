@@ -74,10 +74,10 @@ type
     function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction; override;
     function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionCompletion): ITransaction; override;
     procedure ExecImmediate(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer); override;
-    function Prepare(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer): IStatement; override;
+    function Prepare(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer; CursorName: AnsiString=''): IStatement; override;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: AnsiString;
                        aSQLDialect: integer; GenerateParamNames: boolean=false;
-                       CaseSensitiveParams: boolean=false): IStatement; override;
+                       CaseSensitiveParams: boolean=false; CursorName: AnsiString=''): IStatement; override;
 
     {Events}
     function GetEventHandler(Events: TStrings): IEvents; override;
@@ -335,19 +335,19 @@ begin
 end;
 
 function TFB30Attachment.Prepare(transaction: ITransaction; sql: AnsiString;
-  aSQLDialect: integer): IStatement;
+  aSQLDialect: integer; CursorName: AnsiString): IStatement;
 begin
   CheckHandle;
-  Result := TFB30Statement.Create(self,transaction,sql,aSQLDialect);
+  Result := TFB30Statement.Create(self,transaction,sql,aSQLDialect,CursorName);
 end;
 
 function TFB30Attachment.PrepareWithNamedParameters(transaction: ITransaction;
   sql: AnsiString; aSQLDialect: integer; GenerateParamNames: boolean;
-  CaseSensitiveParams: boolean): IStatement;
+  CaseSensitiveParams: boolean; CursorName: AnsiString): IStatement;
 begin
   CheckHandle;
   Result := TFB30Statement.CreateWithParameterNames(self,transaction,sql,aSQLDialect,
-         GenerateParamNames,CaseSensitiveParams);
+         GenerateParamNames,CaseSensitiveParams,CursorName);
 end;
 
 function TFB30Attachment.GetEventHandler(Events: TStrings): IEvents;

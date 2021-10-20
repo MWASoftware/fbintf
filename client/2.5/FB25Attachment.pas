@@ -68,10 +68,10 @@ type
     function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction; override;
     function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionCompletion): ITransaction; override;
     procedure ExecImmediate(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer); override;
-    function Prepare(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer): IStatement; override;
+    function Prepare(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer; CursorName: AnsiString=''): IStatement; override;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: AnsiString;
                        aSQLDialect: integer; GenerateParamNames: boolean=false;
-                       CaseSensitiveParams: boolean=false): IStatement; override;
+                       CaseSensitiveParams: boolean=false; CursorName: AnsiString=''): IStatement; override;
     function GetEventHandler(Events: TStrings): IEvents; override;
     function CreateBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BPB: IBPB=nil): IBlob; overload; override;
     function CreateBlob(transaction: ITransaction; SubType: integer; aCharSetID: cardinal=0; BPB: IBPB=nil): IBlob; overload;
@@ -273,7 +273,7 @@ begin
 end;
 
 function TFB25Attachment.Prepare(transaction: ITransaction; sql: AnsiString;
-  aSQLDialect: integer): IStatement;
+  aSQLDialect: integer; CursorName: AnsiString): IStatement;
 begin
   CheckHandle;
   Result := TFB25Statement.Create(self,transaction,sql,aSQLDialect);
@@ -281,11 +281,11 @@ end;
 
 function TFB25Attachment.PrepareWithNamedParameters(transaction: ITransaction;
   sql: AnsiString; aSQLDialect: integer; GenerateParamNames: boolean;
-  CaseSensitiveParams: boolean): IStatement;
+  CaseSensitiveParams: boolean; CursorName: AnsiString): IStatement;
 begin
   CheckHandle;
   Result := TFB25Statement.CreateWithParameterNames(self,transaction,sql,aSQLDialect,
-         GenerateParamNames,CaseSensitiveParams);
+         GenerateParamNames,CaseSensitiveParams,CursorName);
 end;
 
 function TFB25Attachment.GetEventHandler(Events: TStrings): IEvents;

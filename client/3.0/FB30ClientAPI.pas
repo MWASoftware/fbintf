@@ -130,6 +130,7 @@ type
     function HasTimeZoneSupport: boolean; override;
     function HasExtendedTZSupport: boolean; override;
     function HasInt128Support: boolean; override;
+    function HasScollableCursors: boolean;
 
     {Firebird 3 API}
     function HasMasterIntf: boolean;
@@ -793,6 +794,11 @@ end;
 function TFB30ClientAPI.HasInt128Support: boolean;
 begin
   Result := Firebird4orLater;
+end;
+
+function TFB30ClientAPI.HasScollableCursors: boolean;
+begin
+  Result := true;
 end;
 
 end.

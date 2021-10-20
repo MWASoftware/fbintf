@@ -293,6 +293,7 @@ Not Null
 Size = 2
 Value = 0
 
+Results for Cursor: Test Cursor
 EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
@@ -520,6 +521,7 @@ Not Null
 Size = 2
 Value = 0
 
+Results for Cursor: Test Cursor
 EMP_NO = 8
 FIRST_NAME = Leslie
 LAST_NAME = Johnson
@@ -532,6 +534,81 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
+Scollable Cursors
+Do Fetch Next:
+EMP_NO = 2
+FIRST_NAME = Robert
+LAST_NAME = Nelson
+PHONE_EXT = 250
+HIRE_DATE = 1988/12/28 00:00:00.0000
+DEPT_NO = 600
+JOB_CODE = VP
+JOB_GRADE = 2
+JOB_COUNTRY = USA
+SALARY = 105,900.00
+FULL_NAME = Nelson, Robert
+Do Fetch Last:
+EMP_NO = 145
+FIRST_NAME = Mark
+LAST_NAME = Guckenheimer
+PHONE_EXT = 221
+HIRE_DATE = 1994/05/02 00:00:00.0000
+DEPT_NO = 622
+JOB_CODE = Eng
+JOB_GRADE = 5
+JOB_COUNTRY = USA
+SALARY = 32,000.00
+FULL_NAME = Guckenheimer, Mark
+Do Fetch Prior:
+EMP_NO = 144
+FIRST_NAME = John
+LAST_NAME = Montgomery
+PHONE_EXT = 820
+HIRE_DATE = 1994/03/30 00:00:00.0000
+DEPT_NO = 672
+JOB_CODE = Eng
+JOB_GRADE = 5
+JOB_COUNTRY = USA
+SALARY = 35,000.00
+FULL_NAME = Montgomery, John
+Do Fetch First:
+EMP_NO = 2
+FIRST_NAME = Robert
+LAST_NAME = Nelson
+PHONE_EXT = 250
+HIRE_DATE = 1988/12/28 00:00:00.0000
+DEPT_NO = 600
+JOB_CODE = VP
+JOB_GRADE = 2
+JOB_COUNTRY = USA
+SALARY = 105,900.00
+FULL_NAME = Nelson, Robert
+Do Fetch Abs 8 :
+EMP_NO = 14
+FIRST_NAME = Stewart
+LAST_NAME = Hall
+PHONE_EXT = 227
+HIRE_DATE = 1990/06/04 00:00:00.0000
+DEPT_NO = 900
+JOB_CODE = Finan
+JOB_GRADE = 3
+JOB_COUNTRY = USA
+SALARY = 69,482.63
+FULL_NAME = Hall, Stewart
+Do Fetch Relative -2 :
+EMP_NO = 11
+FIRST_NAME = K. J.
+LAST_NAME = Weston
+PHONE_EXT = 34
+HIRE_DATE = 1990/01/17 00:00:00.0000
+DEPT_NO = 130
+JOB_CODE = SRep
+JOB_GRADE = 4
+JOB_COUNTRY = USA
+SALARY = 86,292.94
+FULL_NAME = Weston, K. J.
+Do Fetch beyond EOF :
+Fetch returned false
 
 
 ------------------------------------------------------
@@ -569,10 +646,10 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 19,767,232
+Current memory = 19,767,952
 Delta memory = 4,464
-Max memory = 19,813,104
-Elapsed time= 0.001 sec
+Max memory = 19,813,568
+Elapsed time= 0.000 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
@@ -735,7 +812,7 @@ DEPT_NO = 600
 JOB_CODE = Eng
 JOB_GRADE = 4
 JOB_COUNTRY = England
-SALARY = 40,000.58
+SALARY = 40,000.59
 FULL_NAME = Major, Major
 
 Now Delete the rows
@@ -2723,9 +2800,9 @@ Database is Read/Write
 Database Created: 29/5/2021 16:47:30
 Pages Used = 313
 Pages Free = 762
-Server Memory = 19483648
+Server Memory = 19484112
 Forced Writes  = 1
-Max Memory  = 19629664
+Max Memory  = 19630384
 Num Buffers  = 2048
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
@@ -4534,24 +4611,40 @@ Charset id = 0
 Nullable
 Size = 8
 
+Expected Error - SQLCODE: -303
+Engine Code: 335544569 Incompatible column/host variable data type
+Dynamic SQL Error
+-SQL error code = -303
+-conversion error from string "1,000"
+Expected Error - SQLCODE: -303
+Engine Code: 335544569 Incompatible column/host variable data type
+Dynamic SQL Error
+-SQL error code = -303
+-conversion error from string "10.0.0"
 ROWID = 1
 ITYPE = 101
 I64TYPE = 9223372036854775807
 CURRTYPE = 10,000.12340000
 DTYPE = 9,999.12345678
-FIXEDPOINT = 1,234,567,890.12345600
+FIXEDPOINT = 1,234,567,890.12345700
 ROWID = 2
 ITYPE = -32457
 I64TYPE = -9223372036854775808
 CURRTYPE = 1,000,001.12000000
 DTYPE = 1.7E308
-FIXEDPOINT = -1,234,567,890.12345600
+FIXEDPOINT = -1,234,567,890.12345700
 ROWID = 3
 ITYPE = 0
 I64TYPE = 0
 CURRTYPE = .00000000
 DTYPE = .00000000
 FIXEDPOINT = .00000000
+ROWID = 4
+ITYPE = 1
+I64TYPE = 10
+CURRTYPE = .02300000
+DTYPE = .00000000
+FIXEDPOINT = 233.45600000
 
 
 
