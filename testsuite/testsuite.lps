@@ -191,7 +191,7 @@
         <Filename Value="Test21.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="4"/>
-        <TopLine Value="85"/>
+        <TopLine Value="100"/>
         <CursorPos X="30" Y="139"/>
         <UsageCount Value="54"/>
         <Loaded Value="True"/>
@@ -212,7 +212,7 @@
       </Unit26>
       <Unit27>
         <Filename Value="../IBUtils.pas"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="7"/>
         <TopLine Value="1102"/>
         <CursorPos X="54" Y="1104"/>
         <UsageCount Value="15"/>
@@ -222,8 +222,8 @@
         <Filename Value="../client/FBSQLData.pas"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
-        <TopLine Value="2441"/>
-        <CursorPos X="34" Y="2465"/>
+        <TopLine Value="2447"/>
+        <CursorPos X="30" Y="2464"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
@@ -486,7 +486,7 @@
       </Unit63>
       <Unit64>
         <Filename Value="../client/FBOutputBlock.pas"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="10"/>
         <TopLine Value="228"/>
         <CursorPos X="3" Y="242"/>
         <UsageCount Value="15"/>
@@ -529,10 +529,10 @@
       </Unit69>
       <Unit70>
         <Filename Value="../changelog"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="26"/>
+        <EditorIndex Value="5"/>
         <CursorPos Y="43"/>
         <UsageCount Value="21"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit70>
       <Unit71>
@@ -639,7 +639,7 @@
       </Unit84>
       <Unit85>
         <Filename Value="/usr/share/fpcsrc/rtl/objpas/sysutils/sysstrh.inc"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="8"/>
         <TopLine Value="187"/>
         <CursorPos Y="204"/>
         <UsageCount Value="26"/>
@@ -970,7 +970,7 @@
       </Unit131>
       <Unit132>
         <Filename Value="/usr/share/fpcsrc/rtl/objpas/sysutils/sysstr.inc"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="9"/>
         <TopLine Value="1249"/>
         <CursorPos Y="1262"/>
         <UsageCount Value="26"/>
@@ -978,7 +978,7 @@
       </Unit132>
       <Unit133>
         <Filename Value="/usr/share/fpcsrc/rtl/objpas/sysutils/sysinth.inc"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="42"/>
         <CursorPos X="21" Y="61"/>
         <UsageCount Value="14"/>

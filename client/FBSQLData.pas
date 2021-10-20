@@ -2446,9 +2446,8 @@ begin
     begin
       if S[i] = DecimalSeparator then
       begin
-          if ds <> 0 then Exit {only one allowed}
-          else
-            ds := i;
+          if ds <> 0 then Exit; {only one allowed}
+          ds := i-1;
           system.Delete(S,i,1);
       end
       else
@@ -2462,7 +2461,7 @@ begin
     if ds = 0 then
       scale := 0
     else
-      scale := ds - Length(S) - 1;
+      scale := ds - Length(S);
     Result := TryStrToInt64(S,Value);
   end;
 end;
