@@ -106,7 +106,9 @@ type
     function OpenCursor(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer;
                              params: array of const): IResultSet; overload;
     function OpenCursor(transaction: ITransaction; sql: AnsiString; Scrollable: boolean=false): IResultSet; overload;
-    function OpenCursor(transaction: ITransaction; sql: AnsiString; Scrollable: boolean=false;
+    function OpenCursor(transaction: ITransaction; sql: AnsiString;
+                             params: array of const): IResultSet; overload;
+    function OpenCursor(transaction: ITransaction; sql: AnsiString; Scrollable: boolean;
                              params: array of const): IResultSet; overload;
     function OpenCursor(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer; Scrollable: boolean;
                              params: array of const): IResultSet; overload;
@@ -703,6 +705,12 @@ function TFBAttachment.OpenCursor(transaction: ITransaction; sql: AnsiString;
   Scrollable: boolean): IResultSet;
 begin
   Result := OpenCursor(transaction,sql,FSQLDialect,Scrollable,[]);
+end;
+
+function TFBAttachment.OpenCursor(transaction: ITransaction; sql: AnsiString;
+  params: array of const): IResultSet;
+begin
+  Result := OpenCursor(transaction,sql,FSQLDialect,false,params);
 end;
 
 function TFBAttachment.OpenCursor(transaction: ITransaction; sql: AnsiString;
