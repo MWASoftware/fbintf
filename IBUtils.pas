@@ -649,11 +649,12 @@ function FormatTimeZoneOffset(EffectiveTimeOffsetMins: integer): AnsiString;
 function DecodeTimeZoneOffset(TZOffset: AnsiString; var dstOffset: integer): boolean;
 function StripLeadingZeros(Value: AnsiString): AnsiString;
 function TryStrToNumeric(S: Ansistring; out Value: int64; out scale: integer): boolean;
+function NumericToDouble(aValue: Int64; aScale: integer): double;
 
 
 implementation
 
-uses FBMessages
+uses FBMessages, Math
 
 {$IFDEF FPC}
 ,RegExpr
@@ -1877,8 +1878,13 @@ begin
     end;
     if exponent > 0 then
     begin
-      scale := StrToInt(system.copy(S,exponent+1,Length(S)-exponent)) - (exponent - ds - 1);
-      Result := TryStrToInt64(system.copy(S,1,exponent-1),Value);
+      Result := TryStrToInt(system.copy(S,exponent+1,maxint),Scale);
+      if Result then
+      begin
+        {adjust scale for decimal point}
+        Scale := Scale - (exponent - ds - 1);
+        Result := TryStrToInt64(system.copy(S,1,exponent-1),Value);
+      end;
     end
     else
     begin
@@ -1887,6 +1893,11 @@ begin
       Result := TryStrToInt64(S,Value);
     end;
   end;
+end;
+
+function NumericToDouble(aValue: Int64; aScale: integer): double;
+begin
+  Result := aValue * IntPower(10,aScale)
 end;
 
 end.

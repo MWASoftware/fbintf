@@ -80,7 +80,7 @@ unit FBSQLData;
 interface
 
 uses
-  Classes, Math, SysUtils, IBExternals, {$IFDEF WINDOWS} Windows, {$ENDIF} IB,  FBActivityMonitor, FBClientAPI,
+  Classes, SysUtils, IBExternals, {$IFDEF WINDOWS} Windows, {$ENDIF} IB,  FBActivityMonitor, FBClientAPI,
   FmtBCD;
 
 type
@@ -2515,7 +2515,7 @@ begin
   SQL_DOUBLE,
   SQL_FLOAT:
     if TryStrToNumeric(Value,Int64Value,aScale) then
-      SetAsDouble(Int64Value * IntPower(10,aScale))
+      SetAsDouble(NumericToDouble(Int64Value,aScale))
     else
       DoSetString;
 

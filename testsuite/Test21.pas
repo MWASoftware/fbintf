@@ -121,7 +121,7 @@ begin
     Params[1].AsString := '1.0';
     Params[2].AsString := '10.';
     Params[3].AsString := '2.3E-2';
-    Params[4].AsString := '0';
+    Params[4].AsString := '11e-4';
     Params[5].AsString := '2.33456E2';
   end;
   Statement.Execute;

@@ -55,7 +55,7 @@
         <Filename Value="Test7.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="5"/>
-        <TopLine Value="113"/>
+        <TopLine Value="152"/>
         <CursorPos X="28" Y="162"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
@@ -141,7 +141,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="394"/>
         <CursorPos X="56" Y="411"/>
-        <UsageCount Value="164"/>
+        <UsageCount Value="166"/>
       </Unit17>
       <Unit18>
         <Filename Value="Test18.pas"/>
@@ -149,7 +149,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="83"/>
         <CursorPos X="38" Y="127"/>
-        <UsageCount Value="164"/>
+        <UsageCount Value="166"/>
       </Unit18>
       <Unit19>
         <Filename Value="testApp/TestApplication.pas"/>
@@ -157,7 +157,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="84"/>
         <CursorPos Y="99"/>
-        <UsageCount Value="164"/>
+        <UsageCount Value="166"/>
       </Unit19>
       <Unit20>
         <Filename Value="FBTestApp.pas"/>
@@ -165,7 +165,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="20"/>
         <CursorPos X="28" Y="48"/>
-        <UsageCount Value="164"/>
+        <UsageCount Value="166"/>
       </Unit20>
       <Unit21>
         <Filename Value="Test2.pas"/>
@@ -173,15 +173,16 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="157"/>
         <CursorPos X="16" Y="184"/>
-        <UsageCount Value="113"/>
+        <UsageCount Value="115"/>
       </Unit21>
       <Unit22>
         <Filename Value="Test19.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="470"/>
-        <CursorPos X="3" Y="471"/>
-        <UsageCount Value="136"/>
+        <EditorIndex Value="8"/>
+        <TopLine Value="440"/>
+        <CursorPos X="73" Y="394"/>
+        <UsageCount Value="138"/>
+        <Loaded Value="True"/>
       </Unit22>
       <Unit23>
         <Filename Value="Test20.pas"/>
@@ -189,16 +190,15 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="182"/>
         <CursorPos Y="147"/>
-        <UsageCount Value="94"/>
+        <UsageCount Value="96"/>
       </Unit23>
       <Unit24>
         <Filename Value="Test21.pas"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="12"/>
-        <TopLine Value="95"/>
-        <CursorPos Y="104"/>
-        <UsageCount Value="62"/>
+        <EditorIndex Value="15"/>
+        <TopLine Value="104"/>
+        <CursorPos X="31" Y="124"/>
+        <UsageCount Value="64"/>
         <Loaded Value="True"/>
       </Unit24>
       <Unit25>
@@ -210,45 +210,48 @@
       </Unit25>
       <Unit26>
         <Filename Value="../client/FBClientAPI.pas"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="378"/>
         <CursorPos Y="403"/>
-        <UsageCount Value="46"/>
+        <UsageCount Value="47"/>
+        <Loaded Value="True"/>
       </Unit26>
       <Unit27>
         <Filename Value="../IBUtils.pas"/>
-        <EditorIndex Value="10"/>
-        <TopLine Value="1843"/>
-        <CursorPos X="54" Y="1870"/>
-        <UsageCount Value="19"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="13"/>
+        <TopLine Value="1864"/>
+        <CursorPos X="55" Y="1881"/>
+        <UsageCount Value="20"/>
         <Loaded Value="True"/>
       </Unit27>
       <Unit28>
         <Filename Value="../client/FBSQLData.pas"/>
-        <EditorIndex Value="7"/>
-        <TopLine Value="3034"/>
-        <CursorPos X="3" Y="3040"/>
+        <EditorIndex Value="9"/>
+        <TopLine Value="254"/>
+        <CursorPos X="31" Y="269"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
           <TopLine Value="2447"/>
           <CursorPos X="30" Y="2464"/>
         </ExtraEditor1>
-        <UsageCount Value="66"/>
+        <UsageCount Value="67"/>
         <Loaded Value="True"/>
       </Unit28>
       <Unit29>
         <Filename Value="../client/FBMessages.pas"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="10"/>
         <TopLine Value="365"/>
         <CursorPos Y="390"/>
         <UsageCount Value="29"/>
+        <Loaded Value="True"/>
       </Unit29>
       <Unit30>
         <Filename Value="../IB.pas"/>
-        <TopLine Value="689"/>
-        <CursorPos X="3" Y="660"/>
-        <UsageCount Value="83"/>
+        <TopLine Value="1331"/>
+        <CursorPos X="40" Y="1341"/>
+        <UsageCount Value="84"/>
         <Loaded Value="True"/>
       </Unit30>
       <Unit31>
@@ -423,7 +426,7 @@
         <EditorIndex Value="1"/>
         <TopLine Value="532"/>
         <CursorPos X="51" Y="557"/>
-        <UsageCount Value="13"/>
+        <UsageCount Value="14"/>
         <Loaded Value="True"/>
       </Unit55>
       <Unit56>
@@ -431,7 +434,7 @@
         <EditorIndex Value="4"/>
         <TopLine Value="297"/>
         <CursorPos X="1024" Y="327"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="13"/>
         <Loaded Value="True"/>
       </Unit56>
       <Unit57>
@@ -443,16 +446,17 @@
       </Unit57>
       <Unit58>
         <Filename Value="../client/3.0/FB30Statement.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="1324"/>
-        <CursorPos X="3" Y="1330"/>
+        <EditorIndex Value="7"/>
+        <TopLine Value="1239"/>
+        <CursorPos X="3" Y="1241"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
           <TopLine Value="278"/>
           <CursorPos X="15" Y="293"/>
         </ExtraEditor1>
-        <UsageCount Value="64"/>
+        <UsageCount Value="65"/>
+        <Loaded Value="True"/>
       </Unit58>
       <Unit59>
         <Filename Value="../client/2.5/FB25Statement.pas"/>
@@ -512,11 +516,10 @@
       </Unit66>
       <Unit67>
         <Filename Value="../changelog"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="57"/>
-        <CursorPos X="92" Y="74"/>
-        <UsageCount Value="21"/>
-        <Loaded Value="True"/>
+        <CursorPos Y="76"/>
+        <UsageCount Value="22"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit67>
       <Unit68>
@@ -623,10 +626,10 @@
       </Unit81>
       <Unit82>
         <Filename Value="/usr/share/fpcsrc/rtl/objpas/sysutils/sysstrh.inc"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="12"/>
         <TopLine Value="188"/>
         <CursorPos X="10" Y="203"/>
-        <UsageCount Value="26"/>
+        <UsageCount Value="27"/>
         <Loaded Value="True"/>
       </Unit82>
       <Unit83>
@@ -971,15 +974,15 @@
         <EditorIndex Value="3"/>
         <TopLine Value="817"/>
         <CursorPos Y="837"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="13"/>
         <Loaded Value="True"/>
       </Unit131>
       <Unit132>
         <Filename Value="../../../../../fpcsrc/3.2.2/rtl/objpas/sysutils/sysstr.inc"/>
-        <EditorIndex Value="11"/>
+        <EditorIndex Value="14"/>
         <TopLine Value="960"/>
         <CursorPos Y="976"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="12"/>
         <Loaded Value="True"/>
       </Unit132>
       <Unit133>
@@ -993,133 +996,130 @@
       <Unit134>
         <Filename Value="/usr/share/fpcsrc/rtl/objpas/math.pp"/>
         <UnitName Value="Math"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="11"/>
         <TopLine Value="1044"/>
         <CursorPos X="5" Y="1046"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="11"/>
         <Loaded Value="True"/>
       </Unit134>
     </Units>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="../client/FBSQLData.pas"/>
-        <Caret Line="2518" TopLine="2493"/>
+        <Caret Line="1569" Column="22" TopLine="1543"/>
       </Position1>
       <Position2>
         <Filename Value="../client/FBSQLData.pas"/>
-        <Caret Line="2519" TopLine="2494"/>
+        <Caret Line="1479" Column="23" TopLine="1463"/>
       </Position2>
       <Position3>
-        <Filename Value="../client/FBSQLData.pas"/>
-        <Caret Line="876" TopLine="860"/>
+        <Filename Value="../IBUtils.pas"/>
+        <Caret Line="652" Column="66" TopLine="639"/>
       </Position3>
       <Position4>
         <Filename Value="../client/FBSQLData.pas"/>
-        <Caret Line="1171" Column="43" TopLine="1145"/>
+        <Caret Line="565" Column="74" TopLine="553"/>
       </Position4>
       <Position5>
         <Filename Value="../client/FBSQLData.pas"/>
-        <Caret Line="2113" Column="22" TopLine="2087"/>
+        <Caret Line="1170" Column="43" TopLine="1144"/>
       </Position5>
       <Position6>
         <Filename Value="../client/FBSQLData.pas"/>
-        <Caret Line="2500" Column="24" TopLine="2478"/>
+        <Caret Line="2112" Column="22" TopLine="2086"/>
       </Position6>
       <Position7>
-        <Filename Value="/usr/share/fpcsrc/rtl/objpas/sysutils/sysstrh.inc"/>
-        <Caret Line="202" Column="20" TopLine="187"/>
+        <Filename Value="../IBUtils.pas"/>
+        <Caret Line="657" Column="22" TopLine="649"/>
       </Position7>
       <Position8>
-        <Filename Value="/usr/share/fpcsrc/rtl/objpas/sysutils/sysstrh.inc"/>
-        <Caret Line="203" Column="10" TopLine="188"/>
+        <Filename Value="../client/FBSQLData.pas"/>
+        <Caret Line="2508" Column="61" TopLine="2492"/>
       </Position8>
       <Position9>
         <Filename Value="../client/FBSQLData.pas"/>
-        <Caret Line="2519" Column="49" TopLine="2504"/>
       </Position9>
       <Position10>
         <Filename Value="../client/FBSQLData.pas"/>
-        <Caret Line="560" Column="61" TopLine="553"/>
+        <Caret Line="1569" Column="22" TopLine="1543"/>
       </Position10>
       <Position11>
         <Filename Value="../client/FBSQLData.pas"/>
-        <Caret Line="83" Column="18" TopLine="76"/>
+        <Caret Line="1553" Column="14" TopLine="1543"/>
       </Position11>
       <Position12>
-        <Filename Value="../client/3.0/FB30Array.pas"/>
-        <Caret Line="327" Column="1024" TopLine="297"/>
+        <Filename Value="../client/FBSQLData.pas"/>
+        <Caret Line="165" Column="26" TopLine="159"/>
       </Position12>
       <Position13>
         <Filename Value="../client/FBSQLData.pas"/>
-        <Caret Line="84" Column="60" TopLine="76"/>
       </Position13>
       <Position14>
         <Filename Value="../client/FBSQLData.pas"/>
-        <Caret Line="145" Column="35" TopLine="119"/>
+        <Caret Line="2967" Column="45" TopLine="2941"/>
       </Position14>
       <Position15>
-        <Filename Value="../client/FBSQLData.pas"/>
-        <Caret Line="449" Column="34" TopLine="423"/>
+        <Filename Value="../client/FBMessages.pas"/>
+        <Caret Line="390" TopLine="365"/>
       </Position15>
       <Position16>
         <Filename Value="../client/FBSQLData.pas"/>
-        <Caret Line="1171" Column="43" TopLine="1145"/>
+        <Caret Line="2526" TopLine="2511"/>
       </Position16>
       <Position17>
-        <Filename Value="../client/FBSQLData.pas"/>
-        <Caret Line="2113" Column="22" TopLine="2087"/>
+        <Filename Value="Test19.pas"/>
+        <Caret Line="510" TopLine="488"/>
       </Position17>
       <Position18>
-        <Filename Value="../client/FBSQLData.pas"/>
-        <Caret Line="2519" Column="44" TopLine="2494"/>
+        <Filename Value="Test19.pas"/>
+        <Caret Line="399" TopLine="383"/>
       </Position18>
       <Position19>
-        <Filename Value="/usr/share/fpcsrc/rtl/objpas/math.pp"/>
-        <Caret Line="402" Column="10" TopLine="384"/>
+        <Filename Value="../client/FBSQLData.pas"/>
+        <Caret Line="2526" TopLine="2511"/>
       </Position19>
       <Position20>
-        <Filename Value="/usr/share/fpcsrc/rtl/objpas/math.pp"/>
-        <Caret Line="1091" Column="5" TopLine="1089"/>
+        <Filename Value="../client/FBSQLData.pas"/>
+        <Caret Line="2456" TopLine="2440"/>
       </Position20>
       <Position21>
-        <Filename Value="/usr/share/fpcsrc/rtl/objpas/math.pp"/>
-        <Caret Line="399" Column="10" TopLine="386"/>
+        <Filename Value="../client/FBSQLData.pas"/>
+        <Caret Line="789" TopLine="773"/>
       </Position21>
       <Position22>
-        <Filename Value="/usr/share/fpcsrc/rtl/objpas/math.pp"/>
-        <Caret Line="402" Column="10" TopLine="386"/>
+        <Filename Value="../client/3.0/FB30Statement.pas"/>
+        <Caret Line="718" TopLine="702"/>
       </Position22>
       <Position23>
-        <Filename Value="/usr/share/fpcsrc/rtl/objpas/math.pp"/>
-        <Caret Line="1091" Column="5" TopLine="1089"/>
+        <Filename Value="../client/FBSQLData.pas"/>
+        <Caret Line="789" TopLine="773"/>
       </Position23>
       <Position24>
-        <Filename Value="/usr/share/fpcsrc/rtl/objpas/math.pp"/>
-        <Caret Line="397" Column="10" TopLine="386"/>
+        <Filename Value="../client/3.0/FB30Statement.pas"/>
+        <Caret Line="717" Column="45" TopLine="702"/>
       </Position24>
       <Position25>
-        <Filename Value="../client/FBSQLData.pas"/>
-        <Caret Line="2508" Column="42" TopLine="2479"/>
+        <Filename Value="../client/3.0/FB30Statement.pas"/>
+        <Caret Line="111" Column="15" TopLine="111"/>
       </Position25>
       <Position26>
-        <Filename Value="../client/FBSQLData.pas"/>
-        <Caret Line="468" Column="15" TopLine="453"/>
+        <Filename Value="../client/3.0/FB30Statement.pas"/>
+        <Caret Line="525" Column="31" TopLine="523"/>
       </Position26>
       <Position27>
-        <Filename Value="../client/FBSQLData.pas"/>
-        <Caret Line="2750" TopLine="2749"/>
+        <Filename Value="../client/3.0/FB30Statement.pas"/>
       </Position27>
       <Position28>
-        <Filename Value="../client/FBSQLData.pas"/>
-        <Caret Line="482" Column="22" TopLine="455"/>
+        <Filename Value="../client/3.0/FB30Statement.pas"/>
+        <Caret Line="176" Column="31" TopLine="150"/>
       </Position28>
       <Position29>
-        <Filename Value="../client/FBSQLData.pas"/>
-        <Caret Line="3040" Column="3" TopLine="3034"/>
+        <Filename Value="../IBUtils.pas"/>
+        <Caret Line="1885" Column="3" TopLine="1865"/>
       </Position29>
       <Position30>
-        <Filename Value="../client/3.0/FB30Array.pas"/>
-        <Caret Line="327" Column="1024" TopLine="297"/>
+        <Filename Value="../IBUtils.pas"/>
+        <Caret Line="1881" Column="81" TopLine="1867"/>
       </Position30>
     </JumpHistory>
     <RunParams>
@@ -1132,10 +1132,10 @@
       </List0>
       <List1 Name="CommandLineParameters" Count="8">
         <Item1 Value="-t 21"/>
-        <Item2 Value="-t 7"/>
-        <Item3 Value="-t 2"/>
-        <Item4 Value="-t 3"/>
-        <Item5 Value="-t 19"/>
+        <Item2 Value="-t 19"/>
+        <Item3 Value="-t 7"/>
+        <Item4 Value="-t 2"/>
+        <Item5 Value="-t 3"/>
         <Item6 Value="-t 20"/>
         <Item7 Value="-t 17"/>
         <Item8 Value="-t 16"/>
