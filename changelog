@@ -1,4 +1,4 @@
-FBINTF Change Log  version          (1.3-2 Build 12850) Wed, 20 Oct 2021 15:12:15 +0100
+FBINTF Change Log  version          (1.3-2 Build 12860) Thu, 21 Oct 2021 13:16:09 +0100
 
 1. TFBClientAPI.GetProcAddr. Add check for nil reference.
 
