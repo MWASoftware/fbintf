@@ -102,6 +102,7 @@ type
     procedure getFBVersion(version: TStrings);
     function HasDecFloatSupport: boolean; override;
     function HasBatchMode: boolean; override;
+    function HasScollableCursors: boolean;
 
     {Time Zone Support}
     function GetTimeZoneServices: ITimeZoneServices; override;
@@ -439,6 +440,11 @@ function TFB30Attachment.HasBatchMode: boolean;
 begin
   Result := FFirebird30ClientAPI.Firebird4orLater and
      (GetODSMajorVersion >= 13);
+end;
+
+function TFB30Attachment.HasScollableCursors: boolean;
+begin
+  Result := GetODSMajorVersion >= 12;
 end;
 
 function TFB30Attachment.GetTimeZoneServices: ITimeZoneServices;

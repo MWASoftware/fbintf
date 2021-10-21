@@ -1080,7 +1080,9 @@ type
     function OpenCursor(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer;
                              params: array of const): IResultSet; overload;
     function OpenCursor(transaction: ITransaction; sql: AnsiString; Scrollable: boolean=false): IResultSet; overload;
-    function OpenCursor(transaction: ITransaction; sql: AnsiString; Scrollable: boolean=false;
+    function OpenCursor(transaction: ITransaction; sql: AnsiString; Scrollable: boolean;
+                             params: array of const): IResultSet; overload;
+    function OpenCursor(transaction: ITransaction; sql: AnsiString;
                              params: array of const): IResultSet; overload;
     function OpenCursor(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer; Scrollable: boolean;
                              params: array of const): IResultSet; overload;
@@ -1150,6 +1152,7 @@ type
     function HasActivity: boolean;
     function HasDecFloatSupport: boolean;
     function HasBatchMode: boolean;
+    function HasScollableCursors: boolean;
 
     {Character Sets}
     function HasDefaultCharSet: boolean;
@@ -1354,7 +1357,6 @@ type
     function HasLocalTZDB: boolean;
     function HasTimeZoneSupport: boolean;
     function HasExtendedTZSupport: boolean;
-    function HasScollableCursors: boolean;
 
     {Firebird 3 API}
     function HasMasterIntf: boolean;

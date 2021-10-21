@@ -2444,7 +2444,7 @@ begin
 
     for i := length(S) downto 1 do
     begin
-      if S[i] = DecimalSeparator then
+      if S[i] = AnsiChar(DecimalSeparator) then
       begin
           if ds <> 0 then Exit; {only one allowed}
           ds := i-1;

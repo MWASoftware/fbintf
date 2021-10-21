@@ -201,7 +201,6 @@ type
     function IsEmbeddedServer: boolean; override;
     function GetClientMajor: integer; override;
     function GetClientMinor: integer; override;
-    function HasScollableCursors: boolean;
 
     {Firebird 3 API}
     function HasMasterIntf: boolean;
@@ -544,11 +543,6 @@ end;
 function TFB25ClientAPI.GetClientMinor: integer;
 begin
   Result := 5;
-end;
-
-function TFB25ClientAPI.HasScollableCursors: boolean;
-begin
-  Result := false;
 end;
 
 function TFB25ClientAPI.HasMasterIntf: boolean;

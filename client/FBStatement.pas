@@ -115,7 +115,7 @@ type
 
     {GetDSQLInfo only supports isc_info_sql_stmt_type, isc_info_sql_get_plan, isc_info_sql_records}
     procedure Prepare(aTransaction: ITransaction=nil);  overload;
-    procedure Prepare(CursorName: AnsiString; aTransaction: ITransaction=nil); virtual; overload;
+    procedure Prepare(CursorName: AnsiString; aTransaction: ITransaction=nil); overload; virtual;
     function Execute(aTransaction: ITransaction=nil): IResults;
     function OpenCursor(aTransaction: ITransaction=nil): IResultSet; overload;
     function OpenCursor(Scrollable: boolean; aTransaction: ITransaction=nil): IResultSet; overload;

@@ -181,7 +181,7 @@ begin
     writeln(OutFile,'Open Local Database fails ',E.Message);
   end;
   DoQuery(Attachment);
-  if FirebirdAPI.HasScollableCursors then
+  if Attachment.HasScollableCursors then
     DoScrollableQuery(Attachment);
   Attachment.Disconnect;
 end;
