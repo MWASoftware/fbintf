@@ -101,6 +101,7 @@ type
    procedure SetAsFloat(Value: Float); override;
    procedure SetAsCurrency(Value: Currency); override;
    procedure SetAsBcd(aValue: tBCD); override;
+   procedure SetAsNumeric(Value: Int64; aScale: integer); override;
   end;
 
   { TFBArrayMetaData }
@@ -246,7 +247,7 @@ type
 
 implementation
 
-uses FBMessages;
+uses FBMessages, IBUtils;
 
 { TFBArrayElement }
 
@@ -366,11 +367,11 @@ begin
   CheckActive;
   case GetSQLType of
   SQL_LONG:
-    PLong(SQLData)^ := Value;
+    PLong(SQLData)^ := AdjustScaleToInt64(Value,getScale);
   SQL_SHORT:
-    PShort(SQLData)^ := Value;
+    PShort(SQLData)^ := AdjustScaleToInt64(Value,getScale);
   SQL_INT64:
-    PInt64(SQLData)^ := Value;
+    PInt64(SQLData)^ := AdjustScaleToInt64(Value,getScale);
   SQL_TEXT, SQL_VARYING:
     SetAsString(IntToStr(Value));
   SQL_D_FLOAT,
@@ -388,6 +389,7 @@ procedure TFBArrayElement.SetAsString(Value: AnsiString);
 var len: integer;
     ElementSize: integer;
     Int64Value: Int64;
+    aScale: integer;
 begin
   CheckActive;
   case GetSQLType of
@@ -428,11 +430,8 @@ begin
   SQL_SHORT,
   SQL_LONG,
   SQL_INT64:
-    if trim(Value) = '' then
-      SetAsInt64(0)
-    else
-    if TryStrToInt64(Value,Int64Value) then
-      SetAsInt64(Int64Value)
+    if TryStrToNumeric(Value,Int64Value,aScale) then
+      SetAsNumeric(Int64Value,AScale)
     else
       SetAsCurrency(StrToCurr(Value));
 
@@ -443,6 +442,12 @@ begin
     SetAsDouble(0)
   else
     SetAsDouble(StrToFloat(Value));
+
+  SQL_DEC_FIXED,
+  SQL_DEC16,
+  SQL_DEC34,
+  SQL_INT128:
+    SetAsBCD(StrToBCD(Value));
 
   SQL_TIMESTAMP:
     SetAsDateTime(StrToDateTime(Value));
@@ -529,6 +534,29 @@ begin
       BCDToCurr(aValue,C);
       SetAsCurrency(C);
     end;
+  end;
+  Changed;
+end;
+
+procedure TFBArrayElement.SetAsNumeric(Value: Int64; aScale: integer);
+begin
+  CheckActive;
+  case GetSQLType of
+  SQL_LONG:
+    PLong(SQLData)^ := AdjustScaleToInt64(Value,aScale - getScale);
+  SQL_SHORT:
+    PShort(SQLData)^ := AdjustScaleToInt64(Value,aScale - getScale);
+  SQL_INT64:
+    PInt64(SQLData)^ := AdjustScaleToInt64(Value,aScale - getScale);
+  SQL_TEXT, SQL_VARYING:
+   SetAsString(AdjustScaleToStr(Value,aScale));
+  SQL_D_FLOAT,
+  SQL_DOUBLE:
+    PDouble(SQLData)^ := AdjustScale(Value,aScale);
+  SQL_FLOAT:
+    PSingle(SQLData)^ := AdjustScale(Value,aScale);
+  else
+    IBError(ibxeInvalidDataConversion, [nil]);
   end;
   Changed;
 end;

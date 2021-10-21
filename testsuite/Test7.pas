@@ -154,11 +154,14 @@ begin
   ParamInfo(Statement.GetSQLParams);
   ar := Attachment.CreateArray(Transaction,'TestData','MyArray3');
   f := 0;
-  for i := 0 to 16 do
+  for i := 0 to 13 do
   begin
     ar.SetAsFloat(i,f);
     f := f + 1.05
   end;
+  ar.SetAsString([14],'0.424567');
+  ar.SetAsString([15],'42.4567');
+  ar.SetAsString([16],'4269');
   Statement.SQLParams[0].AsArray := ar;
   Statement.Execute;
 

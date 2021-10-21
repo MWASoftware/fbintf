@@ -71,6 +71,8 @@ FBINTF Change Log  version          (1.3-2 Build 12860) Thu, 21 Oct 2021 13:16:0
     function FetchRelative(offset: Integer): boolean; {fetch record by position relative to current}
     function IsBof: boolean;
 
+10. IArray: tidyup of SetAsString method to ensure correct handling of fixed point numbers.
+
 
 
 FBINTF Change Log  version          (1.3-1 Build 12776) Mon, 23 Aug 2021 11:09:33 +0100

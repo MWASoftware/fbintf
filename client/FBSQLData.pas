@@ -80,7 +80,7 @@ unit FBSQLData;
 interface
 
 uses
-  Classes, SysUtils, IBExternals, {$IFDEF WINDOWS} Windows, {$ENDIF} IB,  FBActivityMonitor, FBClientAPI,
+  Classes, Math, SysUtils, IBExternals, {$IFDEF WINDOWS} Windows, {$ENDIF} IB,  FBActivityMonitor, FBClientAPI,
   FmtBCD;
 
 type
@@ -122,9 +122,6 @@ type
   private
      FFirebirdClientAPI: TFBClientAPI;
      FTimeZoneServices: IExTimeZoneServices;
-     function AdjustScale(Value: Int64; aScale: Integer): Double;
-     function AdjustScaleToInt64(Value: Int64; aScale: Integer): Int64;
-     function AdjustScaleToCurrency(Value: Int64; aScale: Integer): Currency;
      function GetDateFormatStr(IncludeTime: boolean): AnsiString;
      function GetTimeFormatStr: AnsiString;
      function GetTimestampFormatStr: AnsiString;
@@ -132,6 +129,10 @@ type
      procedure InternalGetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint;
        var aTimezone: AnsiString; var aTimeZoneID: TFBTimeZoneID);
   protected
+     function AdjustScale(Value: Int64; aScale: Integer): Double;
+     function AdjustScaleToInt64(Value: Int64; aScale: Integer): Int64;
+     function AdjustScaleToStr(Value: Int64; aScale: Integer): AnsiString;
+     function AdjustScaleToCurrency(Value: Int64; aScale: Integer): Currency;
      function AdjustScaleFromCurrency(Value: Currency; aScale: Integer): Int64;
      function AdjustScaleFromDouble(Value: Double; aScale: Integer): Int64;
      procedure CheckActive; virtual;
@@ -205,7 +206,7 @@ type
      procedure SetAsShort(Value: short); virtual;
      procedure SetAsString(Value: AnsiString); virtual;
      procedure SetAsVariant(Value: Variant);
-     procedure SetAsNumeric(Value: Int64; aScale: integer);
+     procedure SetAsNumeric(Value: Int64; aScale: integer); virtual;
      procedure SetAsBcd(aValue: tBCD); virtual;
      procedure SetIsNull(Value: Boolean); virtual;
      procedure SetIsNullable(Value: Boolean); virtual;
@@ -904,6 +905,40 @@ begin
     result := Val div Scaling;
   end else
     result := Val;
+end;
+
+function TSQLDataItem.AdjustScaleToStr(Value: Int64; aScale: Integer
+  ): AnsiString;
+var Scaling : AnsiString;
+    i: Integer;
+begin
+  Result := IntToStr(Value);
+  Scaling := '';
+  if aScale > 0 then
+  begin
+    for i := 1 to aScale do
+      Result := Result + '0';
+  end
+  else
+  if aScale < 0 then
+  {$IF declared(DefaultFormatSettings)}
+  with DefaultFormatSettings do
+  {$ELSE}
+  {$IF declared(FormatSettings)}
+  with FormatSettings do
+  {$IFEND}
+  {$IFEND}
+  begin
+    if Length(Result) > -aScale then
+      system.Insert(DecimalSeparator,Result,Length(Result) + aScale)
+    else
+    begin
+      Scaling := '0' + DecimalSeparator;
+      for i := -1 downto aScale + Length(Result) do
+        Scaling := Scaling + '0';
+      Result := Scaling + Result;
+    end;
+  end;
 end;
 
 function TSQLDataItem.AdjustScaleToCurrency(Value: Int64; aScale: Integer
@@ -2422,58 +2457,9 @@ begin
   Changed;
 end;
 
-function TryStrToNumeric(S: Ansistring; out Value: int64; out scale: integer): boolean;
-var i: integer;
-    ds: integer;
-begin
-  Result := false;
-  ds := 0;
-  S := Trim(S);
-  {$IF declared(DefaultFormatSettings)}
-  with DefaultFormatSettings do
-  {$ELSE}
-  {$IF declared(FormatSettings)}
-  with FormatSettings do
-  {$IFEND}
-  {$IFEND}
-  begin
-    {ThousandSeparator not allowed as by Delphi specs}
-    if (ThousandSeparator <> DecimalSeparator) and
-       (Pos(ThousandSeparator, S) <> 0) then
-        Exit;
-
-    for i := length(S) downto 1 do
-    begin
-      if S[i] = AnsiChar(DecimalSeparator) then
-      begin
-          if ds <> 0 then Exit; {only one allowed}
-          ds := i-1;
-          system.Delete(S,i,1);
-      end
-      else
-      if (i > 1) and (S[i] in ['+','-']) then
-        Exit
-      else
-      if not (S[i] in ['0'..'9']) then
-          Exit; {bad character}
-
-    end;
-    if ds = 0 then
-      scale := 0
-    else
-      scale := ds - Length(S);
-    Result := TryStrToInt64(S,Value);
-  end;
-end;
-
 var b: IBlob;
     dt: TDateTime;
     timezone: AnsiString;
-    {$ifdef FPC_HAS_TYPE_EXTENDED}
-    FloatValue: Extended;
-    {$else}
-    FloatValue: Double;
-    {$endif}
     Int64Value: Int64;
     BCDValue: TBCD;
     aScale: integer;
@@ -2512,15 +2498,7 @@ begin
   SQL_LONG,
   SQL_INT64:
     if TryStrToNumeric(Value,Int64Value,aScale) then
-    begin
-      if aScale = 0 then
-        SetAsInt64(Int64Value)
-      else
-        SetAsNumeric(Int64Value,aScale);
-    end
-    else
-    if TryStrToFloat(Value,FloatValue) then
-      SetAsDouble(FloatValue)
+      SetAsNumeric(Int64Value,aScale)
     else
       DoSetString;
 
@@ -2536,8 +2514,8 @@ begin
   SQL_D_FLOAT,
   SQL_DOUBLE,
   SQL_FLOAT:
-    if TryStrToFloat(Value,FloatValue) then
-      SetAsDouble(FloatValue)
+    if TryStrToNumeric(Value,Int64Value,aScale) then
+      SetAsDouble(Int64Value * IntPower(10,aScale))
     else
       DoSetString;
 
