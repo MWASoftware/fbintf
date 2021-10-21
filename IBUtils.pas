@@ -1867,6 +1867,7 @@ begin
       if S[i] in ['e','E'] then {scientific notation}
       begin
         if ds <> 0 then Exit; {not permitted in exponent}
+        if exponent <> 0 then Exit; {only one allowed}
         exponent := i;
       end
       else
