@@ -1152,6 +1152,7 @@ type
     function HasActivity: boolean;
     function HasDecFloatSupport: boolean;
     function HasBatchMode: boolean;
+    function HasScollableCursors: boolean;
 
     {Character Sets}
     function HasDefaultCharSet: boolean;
@@ -1356,7 +1357,6 @@ type
     function HasLocalTZDB: boolean;
     function HasTimeZoneSupport: boolean;
     function HasExtendedTZSupport: boolean;
-    function HasScollableCursors: boolean;
 
     {Firebird 3 API}
     function HasMasterIntf: boolean;

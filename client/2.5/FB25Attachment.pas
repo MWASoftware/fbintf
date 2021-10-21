@@ -89,6 +89,7 @@ type
     function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IBlobMetaData; override;
     function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IArrayMetaData; override;
     procedure getFBVersion(version: TStrings);
+    function HasScollableCursors: boolean;
   end;
 
 implementation
@@ -344,6 +345,11 @@ begin
   with FFirebird25ClientAPI do
     if isc_version(@FHandle,TISC_CALLBACK(callback),PVoid(version)) > 0 then
        IBDataBaseError;
+end;
+
+function TFB25Attachment.HasScollableCursors: boolean;
+begin
+  Result := false;
 end;
 
 end.

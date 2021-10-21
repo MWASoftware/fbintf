@@ -42,9 +42,8 @@ FBINTF Change Log  version          (1.3-2 Build 12850) Wed, 20 Oct 2021 15:12:1
                        CaseSensitiveParams: boolean = false; CursorName: AnsiString=''): IStatement; overload;
 
 9. Support for scrollable cursors added. New/updated methods:
-   IFirebirdAPI:
-     function HasScollableCursors: boolean;
    IAttachment:
+    function HasScollableCursors: boolean;
     function OpenCursor(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer;
                              Scrollable: boolean=false): IResultSet; overload;
     function OpenCursor(transaction: ITransaction; sql: AnsiString; Scrollable: boolean=false): IResultSet; overload;
