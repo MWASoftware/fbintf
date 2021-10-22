@@ -73,6 +73,11 @@ FBINTF Change Log  version          (1.3-2 Build 12860) Thu, 21 Oct 2021 13:16:0
 
 10. IArray: tidyup of SetAsString method to ensure correct handling of fixed point numbers.
 
+11. IBUtils: TSQLTokeniser. CRLF now combined by low level parser into sqltEOL token. This
+    may be noticeable when a line separator occurs inside quoted text. The quoted text
+    output by the tokeniser will now use the platform specific lineEnding regardless
+    of whether the input uses the CRLF or LF as a line separator.
+
 
 FBINTF Change Log  version          (1.3-1 Build 12776) Mon, 23 Aug 2021 11:09:33 +0100
 

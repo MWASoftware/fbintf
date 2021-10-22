@@ -1485,6 +1485,13 @@ begin
       continue;
     end;
 
+    if (Result = sqltCR) and (FNextToken = sqltEOL) then
+    begin
+      FSkipNext := false;
+      Result := sqltEOL;
+      C := LF;
+    end;
+
     case FState of
     stInComment:
       begin
@@ -1494,6 +1501,9 @@ begin
           Result := sqltComment;
           GetNext;
         end
+        else
+        if Result = sqltEOL then
+          FString := FString + LineEnding
         else
           FString := FString + C;
       end;
@@ -1506,8 +1516,6 @@ begin
             FState := stDefault;
             Result := sqltCommentLine;
           end;
-
-        sqltCR: {ignore};
 
         else
           FString := FString + C;
@@ -1530,6 +1538,9 @@ begin
           end;
         end
         else
+        if Result = sqltEOL then
+          FString := FString + LineEnding
+        else
           FString := FString + C;
       end;
 
@@ -1548,6 +1559,9 @@ begin
             FState := stDefault;
           end;
         end
+        else
+        if Result = sqltEOL then
+          FString := FString + LineEnding
         else
           FString := FString + C;
       end;
@@ -1629,6 +1643,9 @@ begin
         sqltNumberString:
           if FNextToken in [sqltNumberString,sqltPeriod] then
             FState := stInNumeric;
+
+        sqltEOL:
+          FString := LineEnding;
         end;
       end;
     end;
@@ -1874,8 +1891,8 @@ begin
       else
       if not (S[i] in ['0'..'9']) then
           Exit; {bad character}
-
     end;
+
     if exponent > 0 then
     begin
       Result := TryStrToInt(system.copy(S,exponent+1,maxint),Scale);

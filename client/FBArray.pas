@@ -438,10 +438,10 @@ begin
   SQL_D_FLOAT,
   SQL_DOUBLE,
   SQL_FLOAT:
-  if trim(Value) = '' then
-    SetAsDouble(0)
-  else
-    SetAsDouble(StrToFloat(Value));
+    if TryStrToNumeric(Value,Int64Value,aScale) then
+      SetAsDouble(NumericToDouble(Int64Value,aScale))
+    else
+      IBError(ibxeInvalidDataConversion,[nil]);
 
   SQL_DEC_FIXED,
   SQL_DEC16,
