@@ -1475,19 +1475,21 @@ begin
     GetNext;
 
   repeat
+    if FSkipNext then
+    begin
+      FSkipNext := false;
+      Result := FNextToken;
+      C := FLastChar;
+      GetNext;
+    end;
+
     Result := FNextToken;
     C := FLastChar;
     GetNext;
 
-    if FSkipNext then
-    begin
-      FSkipNext := false;
-      continue;
-    end;
-
     if (Result = sqltCR) and (FNextToken = sqltEOL) then
     begin
-      FSkipNext := false;
+      FSkipNext := true;
       Result := sqltEOL;
       C := LF;
     end;
