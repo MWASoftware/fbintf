@@ -1013,15 +1013,16 @@
         <Item1 Value="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </List0>
       <List1 Name="CommandLineParameters" Count="8">
-        <Item1 Value="-t 21"/>
-        <Item2 Value="-t 19"/>
-        <Item3 Value="-t 7"/>
-        <Item4 Value="-t 2"/>
+        <Item1 Value="-t 2"/>
+        <Item2 Value="-t 21"/>
+        <Item3 Value="-t 19"/>
+        <Item4 Value="-t 7"/>
         <Item5 Value="-t 3"/>
         <Item6 Value="-t 20"/>
         <Item7 Value="-t 17"/>
         <Item8 Value="-t 16"/>
       </List1>
+      <List2 Name="WorkingDirectory" Type="File" Count="1"/>
     </HistoryLists>
   </ProjectSession>
 </CONFIG>

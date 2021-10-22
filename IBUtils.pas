@@ -1478,8 +1478,6 @@ begin
     if FSkipNext then
     begin
       FSkipNext := false;
-      Result := FNextToken;
-      C := FLastChar;
       GetNext;
     end;
 
