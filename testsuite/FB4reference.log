@@ -77,6 +77,7 @@ Dropping Database
 
 ------------------------------------------------------
 Running Test 2: Open the employee database and run a query
+Open Database fails Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Opening inet://localhost/employee
 Database Open, SQL Dialect = 3
 TPB: Item Count = 3
@@ -535,6 +536,15 @@ SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
 Scollable Cursors
+DB Connect String = employee
+DB Charset ID = 4
+DB SQL Dialect = 3
+DB Remote Protocol = 
+DB ODS Major Version = 13
+DB ODS Minor Version = 0
+User Authentication Method = User name in DPB
+Firebird Library Path = /opt/firebird4.0.0/lib/libfbclient.so
+DB Client Implementation Version = 4.0
 Do Fetch Next:
 EMP_NO = 2
 FIRST_NAME = Robert
@@ -646,10 +656,10 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 19,767,952
+Current memory = 19,764,272
 Delta memory = 4,464
-Max memory = 19,813,568
-Elapsed time= 0.001 sec
+Max memory = 19,809,888
+Elapsed time= 0.002 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
@@ -2798,16 +2808,16 @@ Page Size = 8192
 Version = 1: LI-V6.3.0.2496 Firebird 4.0
 Database is Read/Write
 Database Created: 29/5/2021 16:47:30
-Pages Used = 313
-Pages Free = 762
-Server Memory = 19484112
+Pages Used = 310
+Pages Free = 765
+Server Memory = 19482272
 Forced Writes  = 1
-Max Memory  = 19630384
+Max Memory  = 19628544
 Num Buffers  = 2048
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
 Active Transaction Count = 0
-Fetches  = 1648
+Fetches  = 1641
 Writes  = 8
 Reads  = 92
 Page Writes  = 4
@@ -2833,7 +2843,7 @@ Count = 2
 Table ID = 12
 Count = 24
 Table ID = 18
-Count = 816
+Count = 811
 Table ID = 20
 Count = 5
 Table ID = 28
@@ -2845,7 +2855,7 @@ Count = 1
 
 Sequential Table Scans Operation Counts
 Table ID = 0
-Count = 100
+Count = 98
 Table ID = 1
 Count = 24
 

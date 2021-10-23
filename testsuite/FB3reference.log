@@ -76,6 +76,7 @@ Dropping Database
 
 ------------------------------------------------------
 Running Test 2: Open the employee database and run a query
+Open Database fails Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Opening inet://localhost/employee
 Database Open, SQL Dialect = 3
 TPB: Item Count = 3
@@ -534,6 +535,15 @@ SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
 Scollable Cursors
+DB Connect String = employee
+DB Charset ID = 4
+DB SQL Dialect = 3
+DB Remote Protocol = 
+DB ODS Major Version = 12
+DB ODS Minor Version = 0
+User Authentication Method = User name in DPB
+Firebird Library Path = /opt/firebird3.0.5/lib/libfbclient.so
+DB Client Implementation Version = 3.0
 Do Fetch Next:
 EMP_NO = 2
 FIRST_NAME = Robert
@@ -648,11 +658,11 @@ FULL_NAME = Johnson, Leslie
 Current memory = 19,694,032
 Delta memory = 4,480
 Max memory = 19,755,888
-Elapsed time= 0.001 sec
+Elapsed time= 0.002 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
-Writes = 1
+Writes = 0
 Fetches = 3
 Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
 Relation Name = EMPLOYEE
@@ -2915,6 +2925,7 @@ Limbo Transactions
 
 
 Local Backup
+
 
 
 

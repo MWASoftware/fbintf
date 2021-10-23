@@ -60,7 +60,6 @@ type
   TTest1 = class(TFBTestBase)
   private
     procedure DoQuery(Attachment: IAttachment);
-    procedure WriteAttachmentInfo(Attachment: IAttachment);
     procedure GetFBVersion(Attachment: IAttachment);
   public
     function TestTitle: AnsiString; override;
@@ -91,19 +90,6 @@ begin
       ResultSet.Close;
       ResultSet.SetRetainInterfaces(false);
     end;
-end;
-
-procedure TTest1.WriteAttachmentInfo(Attachment: IAttachment);
-begin
-  writeln(outfile,'DB Connect String = ',Attachment.GetConnectString);
-  writeln(outfile,'DB Charset ID = ',Attachment.GetDefaultCharSetID);
-  writeln(outfile,'DB SQL Dialect = ',Attachment.GetSQLDialect);
-  writeln(outfile,'DB Remote Protocol = ', Attachment.GetRemoteProtocol);
-  writeln(outfile,'DB ODS Major Version = ',Attachment.GetODSMajorVersion);
-  writeln(outfile,'DB ODS Minor Version = ',Attachment.GetODSMinorVersion);
-  writeln(outfile,'User Authentication Method = ',Attachment.GetAuthenticationMethod);
-  writeln(outfile,'Firebird Library Path = ',Attachment.getFirebirdAPI.GetFBLibrary.GetLibraryFilePath);
-  writeln(outfile,'DB Client Implementation Version = ',Attachment.getFirebirdAPI.GetImplementationVersion);
 end;
 
 procedure TTest1.GetFBVersion(Attachment: IAttachment);

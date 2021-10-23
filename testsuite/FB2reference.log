@@ -73,6 +73,7 @@ Dropping Database
 
 ------------------------------------------------------
 Running Test 2: Open the employee database and run a query
+Open Database fails Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Opening localhost:employee
 Database Open, SQL Dialect = 3
 TPB: Item Count = 3
@@ -563,9 +564,9 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 948,536
+Current memory = 948,560
 Delta memory = 1,288
-Max memory = 992,472
+Max memory = 992,480
 Elapsed time= 0.002 sec
 Cpu = 0.000 sec
 Buffers = 75
