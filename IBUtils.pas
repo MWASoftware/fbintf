@@ -1879,8 +1879,11 @@ begin
           system.Delete(S,i,1);
       end
       else
-      if (i > 1) and (S[i] in ['+','-']) and not (S[i-1] in ['e','E']) then
-          Exit {malformed}
+      if S[i] in ['+','-'] then
+      begin
+       if (i > 1) and not (S[i-1] in ['e','E']) then
+          Exit; {malformed}
+      end
       else
       if S[i] in ['e','E'] then {scientific notation}
       begin
@@ -1899,7 +1902,8 @@ begin
       if Result then
       begin
         {adjust scale for decimal point}
-        Scale := Scale - (exponent - ds - 1);
+        if ds > 0 then
+          Scale := Scale - (exponent - ds - 1);
         Result := TryStrToInt64(system.copy(S,1,exponent-1),Value);
       end;
     end
