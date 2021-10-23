@@ -115,6 +115,7 @@ var Transaction: ITransaction;
     Results: IResultSet;
 begin
   writeln(Outfile,'Scollable Cursors');
+  WriteAttachmentInfo(Attachment);
   Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   Statement := Attachment.Prepare(Transaction,'Select * from EMPLOYEE order by EMP_NO',3);
   Results := Statement.OpenCursor(true);
@@ -157,12 +158,12 @@ begin
   DPB.Add(isc_dpb_password).setAsString(' ');
   DPB.Add(isc_dpb_lc_ctype).setAsString(CharSet);
   DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
-  DPB.Find(isc_dpb_password).setAsString(Owner.GetPassword);
   try
     Attachment := FirebirdAPI.OpenDatabase(Owner.GetEmployeeDatabaseName,DPB);
   except on e: Exception do
     writeln(OutFile,'Open Database fails ',E.Message);
   end;
+  DPB.Find(isc_dpb_password).setAsString(Owner.GetPassword);
   writeln(OutFile,'Opening ',Owner.GetEmployeeDatabaseName);
   Attachment := FirebirdAPI.OpenDatabase(Owner.GetEmployeeDatabaseName,DPB);
   writeln(OutFile,'Database Open, SQL Dialect = ',Attachment.GetSQLDialect);

@@ -648,10 +648,13 @@ function FBFormatDateTime(fmt: AnsiString; aDateTime: TDateTime): AnsiString;
 function FormatTimeZoneOffset(EffectiveTimeOffsetMins: integer): AnsiString;
 function DecodeTimeZoneOffset(TZOffset: AnsiString; var dstOffset: integer): boolean;
 function StripLeadingZeros(Value: AnsiString): AnsiString;
+function TryStrToNumeric(S: Ansistring; out Value: int64; out scale: integer): boolean;
+function NumericToDouble(aValue: Int64; aScale: integer): double;
+
 
 implementation
 
-uses FBMessages
+uses FBMessages, Math
 
 {$IFDEF FPC}
 ,RegExpr
@@ -1472,14 +1475,21 @@ begin
     GetNext;
 
   repeat
+    if FSkipNext then
+    begin
+      FSkipNext := false;
+      GetNext;
+    end;
+
     Result := FNextToken;
     C := FLastChar;
     GetNext;
 
-    if FSkipNext then
+    if (Result = sqltCR) and (FNextToken = sqltEOL) then
     begin
-      FSkipNext := false;
-      continue;
+      FSkipNext := true;
+      Result := sqltEOL;
+      C := LF;
     end;
 
     case FState of
@@ -1492,6 +1502,9 @@ begin
           GetNext;
         end
         else
+        if Result = sqltEOL then
+          FString := FString + LineEnding
+        else
           FString := FString + C;
       end;
 
@@ -1503,8 +1516,6 @@ begin
             FState := stDefault;
             Result := sqltCommentLine;
           end;
-
-        sqltCR: {ignore};
 
         else
           FString := FString + C;
@@ -1527,6 +1538,9 @@ begin
           end;
         end
         else
+        if Result = sqltEOL then
+          FString := FString + LineEnding
+        else
           FString := FString + C;
       end;
 
@@ -1545,6 +1559,9 @@ begin
             FState := stDefault;
           end;
         end
+        else
+        if Result = sqltEOL then
+          FString := FString + LineEnding
         else
           FString := FString + C;
       end;
@@ -1626,6 +1643,9 @@ begin
         sqltNumberString:
           if FNextToken in [sqltNumberString,sqltPeriod] then
             FState := stInNumeric;
+
+        sqltEOL:
+          FString := LineEnding;
         end;
       end;
     end;
@@ -1821,6 +1841,80 @@ begin
       Result := Result + system.copy(Value, i, MaxInt);
       Exit;
     end;
+end;
+
+function TryStrToNumeric(S: Ansistring; out Value: int64; out scale: integer): boolean;
+var i: integer;
+    ds: integer;
+    exponent: integer;
+begin
+  Result := false;
+  ds := 0;
+  exponent := 0;
+  S := Trim(S);
+  Value := 0;
+  scale := 0;
+  if Length(S) = 0 then
+    Exit;
+  {$IF declared(DefaultFormatSettings)}
+  with DefaultFormatSettings do
+  {$ELSE}
+  {$IF declared(FormatSettings)}
+  with FormatSettings do
+  {$IFEND}
+  {$IFEND}
+  begin
+    {ThousandSeparator not allowed as by Delphi specs}
+    if (ThousandSeparator <> DecimalSeparator) and
+       (Pos(ThousandSeparator, S) <> 0) then
+        Exit;
+
+    for i := length(S) downto 1 do
+    begin
+      if S[i] = AnsiChar(DecimalSeparator) then
+      begin
+          if ds <> 0 then Exit; {only one allowed}
+          ds := i-1;
+          dec(exponent);
+          system.Delete(S,i,1);
+      end
+      else
+      if (i > 1) and (S[i] in ['+','-']) and not (S[i-1] in ['e','E']) then
+          Exit {malformed}
+      else
+      if S[i] in ['e','E'] then {scientific notation}
+      begin
+        if ds <> 0 then Exit; {not permitted in exponent}
+        if exponent <> 0 then Exit; {only one allowed}
+        exponent := i;
+      end
+      else
+      if not (S[i] in ['0'..'9']) then
+          Exit; {bad character}
+    end;
+
+    if exponent > 0 then
+    begin
+      Result := TryStrToInt(system.copy(S,exponent+1,maxint),Scale);
+      if Result then
+      begin
+        {adjust scale for decimal point}
+        Scale := Scale - (exponent - ds - 1);
+        Result := TryStrToInt64(system.copy(S,1,exponent-1),Value);
+      end;
+    end
+    else
+    begin
+      if ds <> 0 then
+        scale := ds - Length(S);
+      Result := TryStrToInt64(S,Value);
+    end;
+  end;
+end;
+
+function NumericToDouble(aValue: Int64; aScale: integer): double;
+begin
+  Result := aValue * IntPower(10,aScale)
 end;
 
 end.
