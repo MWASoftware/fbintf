@@ -1864,23 +1864,21 @@ begin
   {$IFEND}
   {$IFEND}
   begin
-    {ThousandSeparator not allowed as by Delphi specs}
-    if (ThousandSeparator <> DecimalSeparator) and
-       (Pos(ThousandSeparator, S) <> 0) then
-        Exit;
-
     for i := length(S) downto 1 do
     begin
       if S[i] = AnsiChar(DecimalSeparator) then
       begin
           if ds <> 0 then Exit; {only one allowed}
-          ds := i-1;
+          ds := i;
           dec(exponent);
           system.Delete(S,i,1);
       end
       else
-      if (i > 1) and (S[i] in ['+','-']) and not (S[i-1] in ['e','E']) then
-          Exit {malformed}
+      if S[i] in ['+','-'] then
+      begin
+       if (i > 1) and not (S[i-1] in ['e','E']) then
+          Exit; {malformed}
+      end
       else
       if S[i] in ['e','E'] then {scientific notation}
       begin
@@ -1890,6 +1888,7 @@ begin
       end
       else
       if not (S[i] in ['0'..'9']) then
+      {Note: ThousandSeparator not allowed by Delphi specs}
           Exit; {bad character}
     end;
 
@@ -1899,14 +1898,15 @@ begin
       if Result then
       begin
         {adjust scale for decimal point}
-        Scale := Scale - (exponent - ds - 1);
+        if ds <> 0 then
+          Scale := Scale - (exponent - ds);
         Result := TryStrToInt64(system.copy(S,1,exponent-1),Value);
       end;
     end
     else
     begin
       if ds <> 0 then
-        scale := ds - Length(S);
+        scale := ds - Length(S) - 1;
       Result := TryStrToInt64(S,Value);
     end;
   end;

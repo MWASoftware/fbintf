@@ -4571,6 +4571,30 @@ Test Completed Successfully
 
 ------------------------------------------------------
 Running Test 21: Exercise setting and getting of numeric data types
+1234.567 parsed to 1234567 scale = -3
+As Float =  1.2345670000000000E+003
+-765.4321 parsed to -7654321 scale = -4
+As Float = -7.6543209999999999E+002
+0.1 parsed to 1 scale = -1
+As Float =  1.0000000000000001E-001
+0.01 parsed to 1 scale = -2
+As Float =  1.0000000000000000E-002
++123 parsed to 123 scale = 0
+As Float =  1.2300000000000000E+002
+1.23456E308 parsed to 123456 scale = 303
+As Float =  1.2345600000000001E+308
+-1.2e-02 parsed to -12 scale = -3
+As Float = -1.2000000000000000E-002
+10. parsed to 10 scale = 0
+As Float =  1.0000000000000000E+001
+.12 parsed to 12 scale = -2
+As Float =  1.2000000000000000E-001
+0.12 parsed to 12 scale = -2
+As Float =  1.2000000000000000E-001
+Parsing of 1.2E1.2 failed
+Parsing of 1,000 failed
+Parsing of 1e1e1 failed
+Parsing of 1.2+3 failed
 SQL Params
 SQLType =SQL_LONG
 sub type = 0
