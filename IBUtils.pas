@@ -1888,7 +1888,7 @@ begin
       end
       else
       if not (S[i] in ['0'..'9']) then
-      {Note: ThousandSeparator not allowed as by Delphi specs}
+      {Note: ThousandSeparator not allowed by Delphi specs}
           Exit; {bad character}
     end;
 
