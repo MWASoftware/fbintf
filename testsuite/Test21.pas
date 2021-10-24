@@ -52,6 +52,7 @@ type
   private
     procedure UpdateDatabase(Attachment: IAttachment);
     procedure QueryDatabase(Attachment: IAttachment);
+    procedure ValidateStrToNumeric;
   public
     function TestTitle: AnsiString; override;
     procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
@@ -60,6 +61,8 @@ type
 
 
 implementation
+
+uses IBUtils;
 
 const
   sqlCreateTable =
@@ -154,6 +157,28 @@ begin
   ReportResults(Statement);
 end;
 
+procedure TTest21.ValidateStrToNumeric;
+const
+  TestValues: array of string = ['1234.567','-765.4321','0.1','0.01','+123',
+                                 '1.23456E308','-1.2e-02','10.','.12', '0.12',
+                                 '1.2E1.2', '1,000', '1e1e1', '1.2+3']; {bad syntax}
+var
+  i: integer;
+  aValue: Int64;
+  aScale: integer;
+begin
+  for i := 0 to Length(TestValues) - 1 do
+  begin
+    if TryStrToNumeric(TestValues[i],aValue,aScale) then
+    begin
+      writeln(Outfile,TestValues[i],' parsed to ',aValue,' scale = ',aScale);
+      writeln(Outfile,'As Float = ',NumericToDouble(aValue,aScale));
+    end
+    else
+      writeln(Outfile,'Parsing of ',TestValues[i],' failed');
+  end;
+end;
+
 function TTest21.TestTitle: AnsiString;
 begin
   Result := 'Test 21: Exercise setting and getting of numeric data types';
@@ -171,6 +196,7 @@ begin
   Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
   try
     Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable);
+    ValidateStrToNumeric;
     SetFloatTemplate('#,###.00000000');
     UpdateDatabase(Attachment);
     QueryDatabase(Attachment);
