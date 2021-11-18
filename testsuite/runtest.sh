@@ -10,11 +10,14 @@ EMPLOYEEDB=employee
 NEWDBNAME=$TESTOUTDIR/testsuite1.fdb
 NEWDBNAME2=$TESTOUTDIR/testsuite2.fdb
 BAKFILE=$TESTOUTDIR/testsuite.gbk
+if [ -z "$FPC" ]; then
+  export FPC=fpc
+fi
 
 cd `dirname $0`
 mkdir -p $TESTOUTDIR
 chmod 777 $TESTOUTDIR
-export FPCDIR=/usr/lib/fpc/`fpc -iV`
+export FPCDIR=/usr/lib/fpc/`$FPC -iV`
 fpcmake
 make clean
 make

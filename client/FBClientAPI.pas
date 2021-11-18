@@ -465,11 +465,16 @@ begin
 end;
 
 {$IFDEF UNIX}
+
 procedure TFBClientAPI.GetTZDataSettings;
 var S: TStringList;
 begin
   FLocalTimeOffset := GetLocalTimeOffset;
-  FLocalTimeZoneName := strpas(tzname[tzdaylight]);
+  {$if declared(Gettzname)}
+  FLocalTimeZoneName := Gettzname(tzdaylight);
+  {$else}
+  FLocalTimeZoneName := tzname[tzdaylight];
+  {$ifend}
   FIsDaylightSavingsTime := tzdaylight;
   if FileExists(DefaultTimeZoneFile) then
   begin
