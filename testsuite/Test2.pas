@@ -168,6 +168,12 @@ begin
   Attachment := FirebirdAPI.OpenDatabase(Owner.GetEmployeeDatabaseName,DPB);
   writeln(OutFile,'Database Open, SQL Dialect = ',Attachment.GetSQLDialect);
   DoQuery(Attachment);
+  if Attachment.HasScollableCursors then
+  try
+    DoScrollableQuery(Attachment);
+  except on e: Exception do
+    writeln(OutFile,'Remote Scrollable cursors test fails ',E.Message);
+  end;
   Attachment.Disconnect;
   writeln(OutFile,'Now open the employee database as a local database');
   DPB := FirebirdAPI.AllocateDPB;

@@ -444,7 +444,7 @@ end;
 
 function TFB30Attachment.HasScollableCursors: boolean;
 begin
-  Result := (GetODSMajorVersion >= 12) and (Trim(GetRemoteProtocol) = '');
+  Result := (GetODSMajorVersion >= 12);
 end;
 
 function TFB30Attachment.GetTimeZoneServices: ITimeZoneServices;
