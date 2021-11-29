@@ -781,6 +781,9 @@ type
    initially prepared. The interface is returned from the IAttachment interface.
    }
 
+  TStatementFlag = (stHasCursor,stRepeatExecute,stScrollable);
+  TStatementFlags = set of TStatementFlag;
+
   IStatement = interface
     ['{a260576d-a07d-4a66-b02d-1b72543fd7cf}']
     function GetMetaData: IMetaData;  {Output Metadata}
@@ -792,6 +795,7 @@ type
     function GetSQLText: AnsiString;
     function GetProcessedSQLText: AnsiString;
     function GetSQLDialect: integer;
+    function GetFlags: TStatementFlags;
     function IsPrepared: boolean;
     function HasBatchMode: boolean;
     function IsInBatchMode: boolean;

@@ -112,6 +112,7 @@ type
     function GetSQLText: AnsiString;
     function GetProcessedSQLText: AnsiString;
     function GetSQLDialect: integer;
+    function GetFlags: TStatementFlags; virtual;
 
     {GetDSQLInfo only supports isc_info_sql_stmt_type, isc_info_sql_get_plan, isc_info_sql_records}
     procedure Prepare(aTransaction: ITransaction=nil);  overload;
@@ -297,6 +298,11 @@ end;
 function TFBStatement.GetSQLDialect: integer;
 begin
   Result := FSQLDialect;
+end;
+
+function TFBStatement.GetFlags: TStatementFlags;
+begin
+  Result := [];
 end;
 
 procedure TFBStatement.Prepare(aTransaction: ITransaction);

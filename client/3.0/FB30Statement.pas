@@ -314,6 +314,7 @@ type
     function GetMetaData: IMetaData; override;
     function GetPlan: AnsiString;
     function IsPrepared: boolean;
+    function GetFlags: TStatementFlags; override;
     function CreateBlob(column: TColumnMetaData): IBlob; override;
     function CreateArray(column: TColumnMetaData): IArray; override;
     procedure SetRetainInterfaces(aValue: boolean); override;
@@ -1442,6 +1443,7 @@ function TFB30Statement.InternalExecute(aTransaction: ITransaction): IResults;
     end;
   end;
 
+var Cursor: IResultSet;
 
 begin
   Result := nil;
@@ -1467,7 +1469,14 @@ begin
     begin
       case FSQLStatementType of
       SQLSelect:
-        IBError(ibxeIsAExecuteProcedure,[]);
+       {e.g. Update...returning with a single row in Firebird 5 and later}
+      begin
+        Cursor := InternalOpenCursor(aTransaction,false);
+        if not Cursor.IsEof then
+          Cursor.FetchNext;
+        Result := Cursor; {note only first row}
+        FSingleResults := true;
+      end;
 
       SQLExecProcedure:
       begin
@@ -1496,7 +1505,7 @@ function TFB30Statement.InternalOpenCursor(aTransaction: ITransaction;
 var flags: cardinal;
 begin
   flags := 0;
-  if FSQLStatementType <> SQLSelect then
+  if (FSQLStatementType <> SQLSelect) and not (stHasCursor in getFlags) then
    IBError(ibxeIsASelectStatement,[]);
 
   FBatchCompletion := nil;
@@ -1899,6 +1908,24 @@ end;
 function TFB30Statement.IsPrepared: boolean;
 begin
   Result := FStatementIntf <> nil;
+end;
+
+function TFB30Statement.GetFlags: TStatementFlags;
+var flags: cardinal;
+begin
+  CheckHandle;
+  Result := [];
+  with FFirebird30ClientAPI do
+  begin
+    flags := FStatementIntf.getFlags(StatusIntf);
+    Check4DataBaseError;
+  end;
+  if flags and Firebird.IStatement.FLAG_HAS_CURSOR <> 0 then
+    Result := Result + [stHasCursor];
+  if flags and Firebird.IStatement.FLAG_REPEAT_EXECUTE <> 0 then
+    Result := Result + [stRepeatExecute];
+  if flags and Firebird.IStatement.CURSOR_TYPE_SCROLLABLE <> 0 then
+    Result := Result + [stScrollable];
 end;
 
 end.
