@@ -72,7 +72,7 @@ unit FBTransaction;
 interface
 
 uses
-  Classes, SysUtils, IB, FBParamBlock, FBActivityMonitor, FBClientAPI;
+  Classes, SysUtils, IB, FBParamBlock, FBActivityMonitor, FBClientAPI, FBOutputBlock;
 
 type
   { TFBTransaction }
@@ -87,8 +87,10 @@ type
     FDefaultCompletion: TTransactionAction;
     FAttachments: array of IAttachment; {Keep reference to attachment - ensures
                                           attachment cannot be freed before transaction}
+    procedure CheckHandle;
     function GetActivityIntf(att: IAttachment): IActivityMonitor; virtual; abstract;
     procedure SetInterface(api: TFBClientAPI); virtual;
+    function GetTrInfo(ReqBuffer: PByte; ReqBufLen: integer): ITrInformation; virtual; abstract;
   public
     constructor Create(api: TFBClientAPI; Attachments: array of IAttachment; Params: array of byte; DefaultCompletion: TTransactionAction); overload;
     constructor Create(api: TFBClientAPI; Attachments: array of IAttachment; TPB: ITPB; DefaultCompletion: TTransactionAction); overload;
@@ -105,12 +107,16 @@ type
     procedure Commit(Force: boolean=false);  virtual; abstract;
     procedure CommitRetaining;  virtual; abstract;
     function GetInTransaction: boolean; virtual; abstract;
+    function GetIsReadOnly: boolean;
+    function GetTransactionID: integer;
     function GetAttachmentCount: integer;
     function GetAttachment(index: integer): IAttachment;
     procedure Rollback(Force: boolean=false);  virtual; abstract;
     procedure RollbackRetaining;  virtual; abstract;
     procedure Start(DefaultCompletion: TTransactionCompletion=taCommit); overload; virtual; abstract;
     procedure Start(TPB: ITPB; DefaultCompletion: TTransactionCompletion=taCommit); overload;
+    function GetTrInformation(Requests: array of byte): ITrInformation; overload;
+    function GetTrInformation(Request: byte): ITrInformation; overload;
 
     property InTransaction: boolean read GetInTransaction;
     property TransactionSeqNo: integer read FSeqNo;
@@ -145,6 +151,31 @@ type
     function GetDPBParamTypeName(ParamType: byte): Ansistring;
     {$ENDIF}
 end;
+
+  {$IFDEF FPC}
+  TTrInfoItem = class;
+
+  { TTrInfoItem }
+
+  TTrInfoItem = class(TOutputBlockItemGroup<TTrInfoItem,ITrInfoItem>,ITrInfoItem)
+  {$ELSE}
+    TTransInfoItem = class(TOutputBlockItemGroup<TOutputBlockItem,ITransInfoItem>,ITransInfoItem)
+  {$ENDIF}
+    public
+      procedure DecodeTraIsolation(var IsolationType, RecVersion: byte);
+  end;
+
+  { TTrInformation }
+
+  TTrInformation = class(TCustomOutputBlock<TTrInfoItem,ITrInfoItem>, ITrInformation)
+  protected
+    procedure DoParseBuffer; override;
+  public
+    constructor Create(api: TFBClientAPI; aSize: integer = DefaultBufferSize);
+    {$IFNDEF FPC}
+    function Find(ItemType: byte): ITransInfoItem;
+    {$ENDIF}
+  end;
 
 implementation
 
@@ -188,6 +219,12 @@ begin
   Result := TTPB.Create(FFirebirdAPI);
   for i := 0 to Length(sl) - 1 do
     Result.Add(sl[i]);
+end;
+
+procedure TFBTransaction.CheckHandle;
+begin
+  if not InTransaction then
+    IBError(ibxeNotInTransaction,[]);
 end;
 
 procedure TFBTransaction.SetInterface(api: TFBClientAPI);
@@ -277,6 +314,25 @@ begin
   Result := FTPB;
 end;
 
+function TFBTransaction.GetIsReadOnly: boolean;
+var Info: ITrInformation;
+begin
+  Info := GetTrInformation(isc_info_tra_access);
+  if (Info.Count > 0) and (Info[0].getItemType = isc_info_tra_access) then
+    Result := Info[0].getAsInteger = isc_info_tra_readonly
+  else
+    Result := false;
+end;
+
+function TFBTransaction.GetTransactionID: integer;
+var Info: ITrInformation;
+begin
+  Result := -1;
+  Info := GetTrInformation(isc_info_tra_id);
+  if (Info.Count > 0) and (Info[0].getItemType = isc_info_tra_id) then
+    Result := Info[0].getAsInteger;
+end;
+
 function TFBTransaction.GetAttachmentCount: integer;
 begin
   Result := Length(FAttachments);
@@ -295,6 +351,35 @@ procedure TFBTransaction.Start(TPB: ITPB; DefaultCompletion: TTransactionComplet
 begin
   FTPB := TPB;
   Start(DefaultCompletion);
+end;
+
+function TFBTransaction.GetTrInformation(Requests: array of byte
+  ): ITrInformation;
+var ReqBuffer: PByte;
+    i: integer;
+begin
+  CheckHandle;
+  if Length(Requests) = 1 then
+    Result := GetTrInformation(Requests[0])
+  else
+  begin
+    GetMem(ReqBuffer,Length(Requests));
+    try
+      for i := 0 to Length(Requests) - 1 do
+        ReqBuffer[i] := Requests[i];
+
+      Result := GetTrInfo(ReqBuffer,Length(Requests));
+
+    finally
+      FreeMem(ReqBuffer);
+    end;
+  end;
+end;
+
+function TFBTransaction.GetTrInformation(Request: byte): ITrInformation;
+begin
+  CheckHandle;
+  Result := GetTrInfo(@Request,1);
 end;
 
 { TTPBItem }
@@ -344,6 +429,78 @@ begin
       Result := i;
       break;
     end;
+end;
+
+{ TTrInfoItem }
+
+procedure TTrInfoItem.DecodeTraIsolation(var IsolationType, RecVersion: byte);
+begin
+  with FFirebirdClientAPI, ItemData^ do
+  if getItemType = isc_info_tra_isolation then
+  begin
+    if FDataLength = 1 then
+    begin
+      IsolationType := getAsInteger;
+      RecVersion := 0;
+    end
+    else
+    begin
+      IsolationType := (FBufPtr + 3)^;
+      RecVersion := (FBufPtr + 4)^;
+    end
+  end
+  else
+    IBError(ibxeInfoBufferTypeError,[integer(FBufPtr^)]);
+end;
+
+{ TTrInformation }
+
+procedure TTrInformation.DoParseBuffer;
+var P: PByte;
+    index: integer;
+begin
+  P := Buffer;
+  index := 0;
+  SetLength(FItems,0);
+  while (P^ <> isc_info_end) and (P < Buffer + getBufSize) do
+  begin
+    SetLength(FItems,index+1);
+    case byte(P^) of
+    isc_info_tra_id,
+    isc_info_tra_oldest_interesting,
+    isc_info_tra_oldest_active,
+    isc_info_tra_oldest_snapshot,
+    fb_info_tra_snapshot_number,
+    isc_info_tra_lock_timeout:
+      FItems[index] := AddIntegerItem(P);
+
+    isc_info_tra_isolation,
+      {return transaction isolation mode of current transaction.
+	format of returned clumplets is following:
+
+	isc_info_tra_isolation,
+		1, isc_info_tra_consistency | isc_info_tra_concurrency
+	|
+		2, isc_info_tra_read_committed,
+			 isc_info_tra_no_rec_version | isc_info_tra_rec_version
+
+	i.e. for read committed transactions returned 2 items while for
+        other transactions returned 1 item}
+
+    isc_info_tra_access:
+      FItems[index] := AddIntegerItem(P);
+    fb_info_tra_dbpath:
+      FItems[index] := AddStringItem(P);
+    end;
+    P := P + FItems[index]^.FSize;
+    Inc(index);
+  end;
+end;
+
+constructor TTrInformation.Create(api: TFBClientAPI; aSize: integer);
+begin
+  inherited Create(api,aSize);
+  FIntegerType := dtInteger;
 end;
 
 end.

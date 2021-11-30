@@ -85,6 +85,7 @@ type
     FFirebird25ClientAPI: TFB25ClientAPI;
   protected
     function GetActivityIntf(att: IAttachment): IActivityMonitor; override;
+    function GetTrInfo(ReqBuffer: PByte; ReqBufLen: integer): ITrInformation; override;
     procedure SetInterface(api: TFBClientAPI); override;
   public
     property Handle: TISC_TR_HANDLE read FHandle;
@@ -109,6 +110,16 @@ uses FBMessages, FBParamBlock;
 function TFB25Transaction.GetActivityIntf(att: IAttachment): IActivityMonitor;
 begin
   Result := (att as TFB25Attachment);
+end;
+
+function TFB25Transaction.GetTrInfo(ReqBuffer: PByte; ReqBufLen: integer
+  ): ITrInformation;
+begin
+  Result := TTrInformation.Create(FFirebird25ClientAPI);
+  with FFirebird25ClientAPI, Result as TTrInformation do
+     if isc_transaction_info(StatusVector, @(FHandle), ReqBufLen, ReqBuffer,
+                               getBufSize, Buffer) > 0 then
+          IBDataBaseError;
 end;
 
 procedure TFB25Transaction.SetInterface(api: TFBClientAPI);

@@ -53,6 +53,7 @@ type
   protected
     function GetActivityIntf(att: IAttachment): IActivityMonitor; override;
     procedure SetInterface(api: TFBClientAPI); override;
+    function GetTrInfo(ReqBuffer: PByte; ReqBufLen: integer): ITrInformation; override;
   public
     destructor Destroy; override;
     property TransactionIntf: Firebird.ITransaction read FTransactionIntf;
@@ -114,6 +115,18 @@ procedure TFB30Transaction.SetInterface(api: TFBClientAPI);
 begin
   inherited SetInterface(api);
   FFirebird30ClientAPI := api as TFB30ClientAPI;
+end;
+
+function TFB30Transaction.GetTrInfo(ReqBuffer: PByte; ReqBufLen: integer
+  ): ITrInformation;
+begin
+  Result := TTrInformation.Create(FFirebird30ClientAPI);
+  with FFirebird30ClientAPI, Result as TTrInformation do
+  begin
+    FTransactionIntf.getInfo(StatusIntf, ReqBufLen, BytePtr(ReqBuffer),
+                               getBufSize, BytePtr(Buffer));
+    Check4DataBaseError;
+  end
 end;
 
 destructor TFB30Transaction.Destroy;

@@ -92,6 +92,20 @@ begin
   TPB.Add(isc_tpb_lock_read).AsString := 'EMPLOYEE';
   TPB.Add(isc_tpb_protected);
   Transaction := Attachment.StartTransaction(TPB,taRollback);
+  writeln(OutFile,'Transaction ID = ',Transaction.GetTransactionID);
+  if Transaction.GetIsReadOnly then
+    writeln(OutFile,'Transaction is Read Only')
+  else
+    writeln(OutFile,'Transaction is Read/Write');
+  writeTRInfo(Transaction.GetTrInformation([isc_info_tra_id,
+                                                            isc_info_tra_oldest_interesting,
+                                                            isc_info_tra_oldest_active,
+                                                            isc_info_tra_oldest_snapshot,
+                                                            fb_info_tra_snapshot_number,
+                                                            isc_info_tra_lock_timeout,
+                                                            fb_info_tra_dbpath,
+                                                            isc_info_tra_access,
+                                                            isc_info_tra_isolation]));
   Attachment.ExecuteSQL(Transaction, 'Execute Procedure DELETE_EMPLOYEE ?', [8]);
 
   ResultSet := Attachment.OpenCursorAtStart(

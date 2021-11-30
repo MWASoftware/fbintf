@@ -146,6 +146,7 @@ type
     isc_detach_database: Tisc_detach_database;
     isc_attach_database: Tisc_attach_database;
     isc_database_info: Tisc_database_info;
+    isc_transaction_info: Tisc_transaction_info;
     isc_start_transaction: Tisc_start_transaction;
     isc_start_multiple: Tisc_start_multiple;
     isc_commit_transaction: Tisc_commit_transaction;
@@ -367,6 +368,7 @@ begin
   isc_detach_database := GetProcAddr('isc_detach_database'); {do not localize}
   isc_attach_database := GetProcAddr('isc_attach_database'); {do not localize}
   isc_database_info := GetProcAddr('isc_database_info'); {do not localize}
+  isc_transaction_info := GetProcAddr('isc_transaction_info'); {do not localize}
   isc_start_transaction := GetProcAddr('isc_start_transaction'); {do not localize}
   isc_start_multiple := GetProcAddr('isc_start_multiple'); {do not localize}
   isc_commit_transaction := GetProcAddr('isc_commit_transaction'); {do not localize}

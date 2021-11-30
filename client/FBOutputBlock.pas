@@ -49,8 +49,8 @@ const
   DBInfoDefaultBufferSize = DefaultBufferSize; {allow for database page}
 
 type
-  TItemDataType = (dtString, dtString2, dtByte, dtBytes, dtInteger, dtIntegerFixed, dtnone,
-    dtList,dtSpecial, dtDateTime, dtOctetString);
+  TItemDataType = (dtString, dtString2, dtByte, dtBytes, dtInteger, dtIntegerFixed,
+    dtTinyInteger, dtShortIntFixed, dtnone, dtList, dtSpecial, dtDateTime, dtOctetString);
 
   POutputBlockItemData = ^TOutputBlockItemData;
   TOutputBlockItemData = record
@@ -79,7 +79,6 @@ type
     procedure FormattedPrint(const aItems: array of POutputBlockItemData;
       Indent: AnsiString);
     {$ENDIF}
-    procedure PrintBuf;
   protected
     FIntegerType: TItemDataType;
     FError: boolean;
@@ -87,7 +86,8 @@ type
     FItems: array of POutputBlockItemData;
     procedure DoParseBuffer; virtual; abstract;
     function AddItem(BufPtr: PByte): POutputBlockItemData;
-    function AddIntegerItem(BufPtr: PByte): POutputBlockItemData;
+    function AddIntegerItem(BufPtr: PByte; IntType: TItemDataType): POutputBlockItemData; overload;
+    function AddIntegerItem(BufPtr: PByte): POutputBlockItemData; overload;
     function AddStringItem(BufPtr: PByte): POutputBlockItemData;
     function AddShortStringItem(BufPtr: PByte): POutputBlockItemData;
     function AddByteItem(BufPtr: PByte): POutputBlockItemData;
@@ -106,6 +106,7 @@ type
     function GetCount: integer;
     function GetItem(index: integer): POutputBlockItemData;
     function Find(ItemType: byte): POutputBlockItemData;
+    procedure PrintBuf;
     property Count: integer read GetCount;
     property Items[index: integer]: POutputBlockItemData read getItem; default;
   end;
@@ -117,8 +118,8 @@ type
     FOwner: TOutputBlock;
     FOwnerIntf: IUnknown;
     FItemData: POutputBlockItemData;
-    FFirebirdClientAPI: TFBClientAPI;
   protected
+    FFirebirdClientAPI: TFBClientAPI;
     function GetItem(index: integer): POutputBlockItemData;
     function Find(ItemType: byte): POutputBlockItemData;
     procedure SetString(out S: AnsiString; Buf: PByte; Len: integer;
@@ -484,6 +485,17 @@ begin
     with FFirebirdClientAPI do
       Result := DecodeInteger(FBufPtr+1,4);
 
+  dtShortIntFixed:
+    with FFirebirdClientAPI do
+      Result := DecodeInteger(FBufPtr+1,2);
+
+  dtTinyInteger:
+    with FFirebirdClientAPI do
+    begin
+      len := DecodeInteger(FBufPtr+1,1);
+      Result := DecodeInteger(FBufPtr+2,len);
+    end;
+
   dtByte,
   dtInteger:
     with FFirebirdClientAPI do
@@ -636,26 +648,48 @@ begin
   end;
 end;
 
-function TOutputBlock.AddIntegerItem(BufPtr: PByte): POutputBlockItemData;
+function TOutputBlock.AddIntegerItem(BufPtr: PByte; IntType: TItemDataType
+  ): POutputBlockItemData;
 begin
   new(Result);
   with Result^ do
   begin
-    FDataType := FIntegerType;
+    FDataType := IntType;
     FBufPtr := BufPtr;
-    if FDataType = dtIntegerFixed then
-    begin
-      FDataLength := 4;
-      FSize := 5;
-    end
-    else
-    begin
-      with FFirebirdClientAPI do
-        FDataLength := DecodeInteger(FBufPtr+1, 2);
-      FSize := FDataLength + 3;
+    case FDataType of
+      dtIntegerFixed:
+      begin
+        FDataLength := 4;
+        FSize := 5;
+      end;
+
+      dtShortIntFixed:
+      begin
+        FDataLength := 2;
+        FSize := 3;
+      end;
+
+      dtTinyInteger:
+      begin
+        with FFirebirdClientAPI do
+          FDataLength := DecodeInteger(FBufPtr+1, 1);
+        FSize := FDataLength + 2;
+      end;
+
+      else
+      begin
+        with FFirebirdClientAPI do
+          FDataLength := DecodeInteger(FBufPtr+1, 2);
+        FSize := FDataLength + 3;
+      end;
     end;
     SetLength(FSubItems,0);
   end;
+end;
+
+function TOutputBlock.AddIntegerItem(BufPtr: PByte): POutputBlockItemData;
+begin
+  Result := AddIntegerItem(BufPtr,FIntegerType);
 end;
 
 function TOutputBlock.AddStringItem(BufPtr: PByte): POutputBlockItemData;
@@ -883,17 +917,19 @@ begin
   write(classname,': ');
   for i := 0 to getBufSize - 1 do
   begin
+    if byte(FBuffer[i]) = $FF then break;
     write(Format('%x ',[byte(Buffer[i])]));
-    if byte(FBuffer[i]) = isc_info_end then break;
+//    if byte(FBuffer[i]) = isc_info_end then break;
   end;
   writeln;
   for i := 0 to getBufSize - 1 do
   begin
+    if byte(FBuffer[i]) = $FF then break;
     if chr(FBuffer[i]) in [' '..'~'] then
       write(chr(Buffer[i]))
     else
       write('.');
-    if byte(FBuffer[i]) = isc_info_end then break;
+//    if byte(FBuffer[i]) = isc_info_end then break;
   end;
   writeln;
 end;

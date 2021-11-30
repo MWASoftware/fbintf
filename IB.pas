@@ -825,6 +825,27 @@ type
     property SQLStatementType: TIBSQLStatementTypes read GetSQLStatementType;
   end;
 
+  ITrInfoItem = interface
+    ['{41455e1a-f84e-4e26-aff0-1a78e8b69cfe}']
+    function getItemType: byte;
+    function getSize: integer;
+    function getAsString: AnsiString;
+    function getAsInteger: int64;
+    procedure DecodeTraIsolation(var IsolationType, RecVersion: byte);
+  end;
+
+  { ITrInformation }
+
+  ITrInformation = interface
+    ['{e6ea4a52-c1a1-44ba-9609-c8bcc7cba7b2}']
+    function GetCount: integer;
+    function GetItem(index: integer): ITrInfoItem;
+    function Find(ItemType: byte): ITrInfoItem;
+    procedure PrintBuf; {can be used to print buffer in hex for debugging}
+    property Count: integer read GetCount;
+    property Items[index: integer]: ITrInfoItem read getItem; default;
+  end;
+
   {Transaction Parameter Block: (TPB)
 
    The TPB provides the parameters used when starting a transaction. It is allocated
@@ -861,6 +882,8 @@ type
     function getTPB: ITPB;
     procedure Start(DefaultCompletion: TTransactionCompletion=taCommit);
     function GetInTransaction: boolean;
+    function GetIsReadOnly: boolean;
+    function GetTransactionID: integer;
     procedure PrepareForCommit; {Two phase commit - stage 1}
     procedure Commit(Force: boolean=false);
     procedure CommitRetaining;
@@ -869,6 +892,8 @@ type
     procedure RollbackRetaining;
     function GetAttachmentCount: integer;
     function GetAttachment(index: integer): IAttachment;
+    function GetTrInformation(Requests: array of byte): ITrInformation; overload;
+    function GetTrInformation(Request: byte): ITrInformation; overload;
     property InTransaction: boolean read GetInTransaction;
   end;
 
