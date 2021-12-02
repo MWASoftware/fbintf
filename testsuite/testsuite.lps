@@ -23,10 +23,12 @@
       <Unit2>
         <Filename Value="Test3.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
         <TopLine Value="83"/>
-        <CursorPos X="69" Y="95"/>
+        <CursorPos X="83" Y="108"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit2>
       <Unit3>
         <Filename Value="Test4.pas"/>
@@ -234,7 +236,6 @@
       </Unit29>
       <Unit30>
         <Filename Value="../IB.pas"/>
-        <IsVisibleTab Value="True"/>
         <TopLine Value="871"/>
         <CursorPos X="50" Y="893"/>
         <UsageCount Value="92"/>
@@ -321,14 +322,14 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="100"/>
         <CursorPos Y="108"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit42>
       <Unit43>
         <Filename Value="../client/2.5/FB25Services.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="126"/>
         <CursorPos Y="144"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit43>
       <Unit44>
         <Filename Value="../client/FBServices.pas"/>
@@ -823,7 +824,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="191"/>
         <CursorPos Y="218"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit112>
       <Unit113>
         <Filename Value="../../../../fpcsrc/3.2.0/rtl/inc/heap.inc"/>
@@ -997,12 +998,7 @@
         <UsageCount Value="8"/>
       </Unit136>
     </Units>
-    <JumpHistory Count="1">
-      <Position1>
-        <Filename Value="../IB.pas"/>
-        <Caret Line="989" Column="3" TopLine="1013"/>
-      </Position1>
-    </JumpHistory>
+    <JumpHistory HistoryIndex="-1"/>
     <RunParams>
       <FormatVersion Value="2"/>
       <Modes ActiveMode="default"/>

@@ -558,6 +558,7 @@ type
     function TokenFound(var token: TSQLTokens): boolean; virtual;
     function InternalGetNextToken: TSQLTokens; virtual;
     procedure Reset; virtual;
+    function ReadCharacters(NumOfChars: integer): AnsiString;
 
     {Token stack}
     procedure QueueToken(token: TSQLTokens; text:AnsiString); overload;
@@ -1449,6 +1450,17 @@ begin
   FString := '';
   FEOF := false;
   ResetQueue;
+end;
+
+function TSQLTokeniser.ReadCharacters(NumOfChars: integer): AnsiString;
+var i: integer;
+begin
+  Result := FLastChar;
+  for i := 2 to NumOfChars do
+  begin
+    if GetNext = sqltEOF then break;
+    Result := Result + FLastChar;
+  end;
 end;
 
 function TSQLTokeniser.GetNextToken: TSQLTokens;
