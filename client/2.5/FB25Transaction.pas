@@ -145,11 +145,17 @@ begin
 end;
 
 procedure TFB25Transaction.Commit(Force: boolean);
+var IsReadOnly: boolean;
+    TransactionID: integer;
 begin
   if FHandle = nil then
     Exit;
+  IsReadOnly := GetIsReadOnly;
+  TransactionID := GetTransactionID;
+  JournalTransactionEnd(TACommit);
   with FFirebird25ClientAPI do
     Call(isc_commit_transaction(StatusVector, @FHandle),not Force);
+  JournalTransactionEndDone(IsReadOnly,TransactionID);
   FHandle := nil;
 end;
 
@@ -157,8 +163,10 @@ procedure TFB25Transaction.CommitRetaining;
 begin
   if FHandle = nil then
     Exit;
+  JournalTransactionEnd(TACommitRetaining);
   with FFirebird25ClientAPI do
     Call(isc_commit_retaining(StatusVector, @FHandle));
+  Inc(FPhaseNo);
 end;
 
 procedure TFB25Transaction.Start(DefaultCompletion: TTransactionCompletion);
@@ -203,14 +211,21 @@ begin
      end;
   end;
   Inc(FSeqNo);
+  JournalTransactionStart;
 end;
 
 procedure TFB25Transaction.Rollback(Force: boolean);
+var IsReadOnly: boolean;
+    TransactionID: integer;
 begin
   if FHandle = nil then
     Exit;
+  IsReadOnly := GetIsReadOnly;
+  TransactionID := GetTransactionID;
+  JournalTransactionEnd(TARollback);
   with FFirebird25ClientAPI do
     Call(isc_rollback_transaction(StatusVector, @FHandle),not Force);
+  JournalTransactionEndDone(IsReadOnly,TransactionID);
   FHandle := nil;
 end;
 
@@ -218,8 +233,10 @@ procedure TFB25Transaction.RollbackRetaining;
 begin
   if FHandle = nil then
     Exit;
+  JournalTransactionEnd(TARollbackRetaining);
   with FFirebird25ClientAPI do
     Call(isc_rollback_retaining(StatusVector, @FHandle));
+  Inc(FPhaseNo);
 end;
 
 end.

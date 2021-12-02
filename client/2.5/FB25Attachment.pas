@@ -49,6 +49,7 @@ type
     FFirebird25ClientAPI: TFB25ClientAPI;
   protected
     procedure CheckHandle; override;
+    function GetAttachment: IAttachment; override;
   public
     constructor Create(api: TFB25ClientAPI; DatabaseName: AnsiString; aDPB: IDPB;
       RaiseExceptionOnConnectError: boolean);
@@ -103,6 +104,11 @@ procedure TFB25Attachment.CheckHandle;
 begin
   if FHandle = nil then
     IBError(ibxeDatabaseClosed,[nil]);
+end;
+
+function TFB25Attachment.GetAttachment: IAttachment;
+begin
+  Result := self;
 end;
 
 constructor TFB25Attachment.Create(api: TFB25ClientAPI; DatabaseName: AnsiString; aDPB: IDPB;
@@ -197,6 +203,7 @@ end;
 
 procedure TFB25Attachment.Disconnect(Force: boolean);
 begin
+  inherited Disconnect(Force);
   if FHandle = nil then
     Exit;
 

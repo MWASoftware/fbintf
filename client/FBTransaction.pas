@@ -84,13 +84,19 @@ type
   protected
     FTPB: ITPB;
     FSeqNo: integer;
+    FPhaseNo: integer;
     FDefaultCompletion: TTransactionAction;
     FAttachments: array of IAttachment; {Keep reference to attachment - ensures
                                           attachment cannot be freed before transaction}
+    FTransactionName: AnsiString;
     procedure CheckHandle;
     function GetActivityIntf(att: IAttachment): IActivityMonitor; virtual; abstract;
+    function GetJournalIntf(Attachment: IAttachment): IJournallingHook;
     procedure SetInterface(api: TFBClientAPI); virtual;
     function GetTrInfo(ReqBuffer: PByte; ReqBufLen: integer): ITrInformation; virtual; abstract;
+    procedure JournalTransactionStart;
+    procedure JournalTransactionEnd(Action: TTransactionAction);
+    procedure JournalTransactionEndDone(IsReadOnly: boolean;TransactionID: integer);
   public
     constructor Create(api: TFBClientAPI; Attachments: array of IAttachment; Params: array of byte; DefaultCompletion: TTransactionAction); overload;
     constructor Create(api: TFBClientAPI; Attachments: array of IAttachment; TPB: ITPB; DefaultCompletion: TTransactionAction); overload;
@@ -111,12 +117,15 @@ type
     function GetTransactionID: integer;
     function GetAttachmentCount: integer;
     function GetAttachment(index: integer): IAttachment;
+    function GetPhaseNo: integer;
     procedure Rollback(Force: boolean=false);  virtual; abstract;
     procedure RollbackRetaining;  virtual; abstract;
     procedure Start(DefaultCompletion: TTransactionCompletion=taCommit); overload; virtual; abstract;
     procedure Start(TPB: ITPB; DefaultCompletion: TTransactionCompletion=taCommit); overload;
     function GetTrInformation(Requests: array of byte): ITrInformation; overload;
     function GetTrInformation(Request: byte): ITrInformation; overload;
+    function GetTransactionName: AnsiString;
+    procedure SetTransactionName(aValue: AnsiString);
 
     property InTransaction: boolean read GetInTransaction;
     property TransactionSeqNo: integer read FSeqNo;
@@ -150,6 +159,7 @@ type
     {$ELSE}
     function GetDPBParamTypeName(ParamType: byte): Ansistring;
     {$ENDIF}
+    function AsText: AnsiString;
 end;
 
   {$IFDEF FPC}
@@ -227,9 +237,39 @@ begin
     IBError(ibxeNotInTransaction,[]);
 end;
 
+function TFBTransaction.GetJournalIntf(Attachment: IAttachment): IJournallingHook;
+begin
+  Attachment.QueryInterface(IJournallingHook,Result)
+end;
+
 procedure TFBTransaction.SetInterface(api: TFBClientAPI);
 begin
   FFirebirdAPI := api;
+end;
+
+procedure TFBTransaction.JournalTransactionStart;
+var i: integer;
+begin
+  for i := 0 to Length(FAttachments) - 1 do
+    if (FAttachments[i] <> nil)  then
+      GetJournalIntf(FAttachments[i]).TransactionStart(self);
+end;
+
+procedure TFBTransaction.JournalTransactionEnd(Action: TTransactionAction);
+var i: integer;
+begin
+  for i := 0 to Length(FAttachments) - 1 do
+    if (FAttachments[i] <> nil)  then
+      GetJournalIntf(FAttachments[i]).TransactionEnd(self,Action);
+end;
+
+procedure TFBTransaction.JournalTransactionEndDone(IsReadOnly: boolean;
+  TransactionID: integer);
+var i: integer;
+begin
+  for i := 0 to Length(FAttachments) - 1 do
+    if (FAttachments[i] <> nil)  then
+      GetJournalIntf(FAttachments[i]).TransactionEndDone(IsReadOnly,TransactionID);
 end;
 
 constructor TFBTransaction.Create(api: TFBClientAPI; Attachments: array of IAttachment;
@@ -346,6 +386,11 @@ begin
     IBError(ibxeAttachmentListIndexError,[index]);
 end;
 
+function TFBTransaction.GetPhaseNo: integer;
+begin
+  Result := FPhaseNo;
+end;
+
 procedure TFBTransaction.Start(TPB: ITPB; DefaultCompletion: TTransactionCompletion
   );
 begin
@@ -382,6 +427,16 @@ begin
   Result := GetTrInfo(@Request,1);
 end;
 
+function TFBTransaction.GetTransactionName: AnsiString;
+begin
+  Result := FTransactionName;
+end;
+
+procedure TFBTransaction.SetTransactionName(aValue: AnsiString);
+begin
+  FTransactionName := aValue;
+end;
+
 { TTPBItem }
 
 function TTPBItem.getParamTypeName: AnsiString;
@@ -405,6 +460,19 @@ begin
     Result := TPBConstantNames[ParamType]
   else
     Result := '';
+end;
+
+function TTPB.AsText: AnsiString;
+var i: integer;
+begin
+  Result := '[';
+  for i := 0 to getCount - 1 do
+  begin
+    Result := Result + GetParamTypeName(getItems(i).getParamType);
+    if i < getCount - 1 then
+      Result := Result + ',';
+  end;
+  Result := Result + ']';
 end;
 
 {$IFNDEF FPC}

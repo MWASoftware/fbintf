@@ -264,6 +264,7 @@ type
   protected
     procedure CheckHandle; override;
     procedure GetDsqlInfo(info_request: byte; buffer: ISQLInfoResults); override;
+    function GetStatementIntf: IStatement; override;
     procedure InternalPrepare(CursorName: AnsiString=''); override;
     function InternalExecute(aTransaction: ITransaction): IResults; override;
     function InternalOpenCursor(aTransaction: ITransaction; Scrollable: boolean): IResultSet; override;
@@ -973,6 +974,11 @@ begin
   if isc_dsql_sql_info(StatusVector, @(FHandle), 1, @info_request,
                      GetBufSize, Buffer) > 0 then
     IBDatabaseError;
+end;
+
+function TFB25Statement.GetStatementIntf: IStatement;
+begin
+  Result := self;
 end;
 
 procedure TFB25Statement.InternalPrepare(CursorName: AnsiString);

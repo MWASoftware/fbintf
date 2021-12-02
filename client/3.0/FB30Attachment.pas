@@ -53,6 +53,7 @@ type
     procedure SetUseRemoteICU(aValue: boolean);
   protected
     procedure CheckHandle; override;
+    function GetAttachment: IAttachment; override;
   public
     constructor Create(api: TFB30ClientAPI; DatabaseName: AnsiString; aDPB: IDPB;
           RaiseExceptionOnConnectError: boolean);
@@ -172,6 +173,11 @@ begin
     IBError(ibxeDatabaseClosed,[nil]);
 end;
 
+function TFB30Attachment.GetAttachment: IAttachment;
+begin
+  Result := self;
+end;
+
 constructor TFB30Attachment.Create(api: TFB30ClientAPI; DatabaseName: AnsiString; aDPB: IDPB;
   RaiseExceptionOnConnectError: boolean);
 begin
@@ -277,6 +283,7 @@ end;
 
 procedure TFB30Attachment.Disconnect(Force: boolean);
 begin
+  inherited Disconnect(Force);
   if IsConnected then
     with FFirebird30ClientAPI do
     begin

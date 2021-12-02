@@ -155,15 +155,21 @@ begin
 end;
 
 procedure TFB30Transaction.Commit(Force: boolean);
+var IsReadOnly: boolean;
+    TransactionID: integer;
 begin
   if FTransactionIntf = nil then
     Exit;
+  IsReadOnly := GetIsReadOnly;
+  TransactionID := GetTransactionID;
+  JournalTransactionEnd(TACommit);
   with FFirebird30ClientAPI do
   begin
     FTransactionIntf.commit(StatusIntf);
     if not Force and InErrorState then
        IBDataBaseError;
   end;
+  JournalTransactionEndDone(IsReadOnly,TransactionID);
   SignalActivity;
   FreeHandle;
 end;
@@ -172,11 +178,13 @@ procedure TFB30Transaction.CommitRetaining;
 begin
   if FTransactionIntf = nil then
     Exit;
+  JournalTransactionEnd(TACommitRetaining);
   with FFirebird30ClientAPI do
   begin
     FTransactionIntf.commitRetaining(StatusIntf);
     Check4DataBaseError;
   end;
+  Inc(FPhaseNo);
   SignalActivity;
 end;
 
@@ -195,20 +203,27 @@ begin
     end
   else
     StartMultiple;
+  JournalTransactionStart;
   SignalActivity;
   Inc(FSeqNo);
 end;
 
 procedure TFB30Transaction.Rollback(Force: boolean);
+var IsReadOnly: boolean;
+    TransactionID: integer;
 begin
   if FTransactionIntf = nil then
     Exit;
+  IsReadOnly := GetIsReadOnly;
+  TransactionID := GetTransactionID;
+  JournalTransactionEnd(TARollback);
   with FFirebird30ClientAPI do
   begin
     FTransactionIntf.rollback(StatusIntf);
     if not Force and InErrorState then
        IBDataBaseError;
   end;
+  JournalTransactionEndDone(IsReadOnly,TransactionID);
   SignalActivity;
   FreeHandle;
 end;
@@ -217,11 +232,13 @@ procedure TFB30Transaction.RollbackRetaining;
 begin
   if FTransactionIntf = nil then
     Exit;
+  JournalTransactionEnd(TARollbackRetaining);
   with FFirebird30ClientAPI do
   begin
     FTransactionIntf.rollbackRetaining(StatusIntf);
     Check4DataBaseError;
   end;
+  Inc(FPhaseNo);
   SignalActivity;
 end;
 

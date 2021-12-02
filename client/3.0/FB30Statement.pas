@@ -290,6 +290,7 @@ type
     procedure CheckHandle; override;
     procedure CheckBatchModeAvailable;
     procedure GetDSQLInfo(info_request: byte; buffer: ISQLInfoResults); override;
+    function GetStatementIntf: IStatement; override;
     procedure InternalPrepare(CursorName: AnsiString=''); override;
     function InternalExecute(aTransaction: ITransaction): IResults; override;
     function InternalOpenCursor(aTransaction: ITransaction; Scrollable: boolean
@@ -1323,6 +1324,11 @@ begin
                      GetBufSize, BytePtr(Buffer));
     Check4DataBaseError;
   end;
+end;
+
+function TFB30Statement.GetStatementIntf: IStatement;
+begin
+  Result := self;
 end;
 
 procedure TFB30Statement.InternalPrepare(CursorName: AnsiString);

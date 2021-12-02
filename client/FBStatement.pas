@@ -82,6 +82,8 @@ type
     procedure CheckChangeBatchRowLimit; virtual;
     procedure CheckHandle; virtual; abstract;
     procedure CheckTransaction(aTransaction: ITransaction);
+    function GetJournalIntf: IJournallingHook;
+    function GetStatementIntf: IStatement; virtual; abstract;
     procedure GetDsqlInfo(info_request: byte; buffer: ISQLInfoResults); overload; virtual; abstract;
     procedure InternalPrepare(CursorName: AnsiString='');  virtual; abstract;
     function InternalExecute(Transaction: ITransaction): IResults;  virtual; abstract;
@@ -169,6 +171,11 @@ begin
 
   if not aTransaction.InTransaction then
     IBError(ibxeNotInTransaction,[]);
+end;
+
+function TFBStatement.GetJournalIntf: IJournallingHook;
+begin
+  GetAttachment.QueryInterface(IJournallingHook,Result)
 end;
 
 function TFBStatement.TimeStampToMSecs(const TimeStamp: TTimeStamp): Int64;
@@ -329,6 +336,7 @@ begin
     Result :=  InternalExecute(FTransactionIntf)
   else
     Result := InternalExecute(aTransaction);
+  GetJournalIntf.ExecQuery(GetStatementIntf);
 end;
 
 procedure TFBStatement.AddToBatch;
@@ -386,6 +394,7 @@ begin
     Result := InternalOpenCursor(FTransactionIntf,Scrollable)
   else
     Result := InternalOpenCursor(aTransaction,Scrollable);
+  GetJournalIntf.ExecQuery(GetStatementIntf);
 end;
 
 function TFBStatement.CreateBlob(paramName: AnsiString): IBlob;

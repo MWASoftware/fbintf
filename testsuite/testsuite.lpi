@@ -25,7 +25,7 @@
     </PublishOptions>
     <RunParams>
       <local>
-        <CommandLineParams Value="-t 3"/>
+        <CommandLineParams Value="-t 22"/>
       </local>
       <environment>
         <UserOverrides Count="3">
@@ -38,7 +38,7 @@
       <Modes Count="1">
         <Mode0 Name="default">
           <local>
-            <CommandLineParams Value="-t 3"/>
+            <CommandLineParams Value="-t 22"/>
           </local>
           <environment>
             <UserOverrides Count="3">
@@ -55,7 +55,7 @@
         <PackageName Value="fbintf"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="25">
+    <Units Count="26">
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -156,6 +156,10 @@
         <Filename Value="Test21.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit24>
+      <Unit25>
+        <Filename Value="Test22.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit25>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

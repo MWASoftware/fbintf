@@ -245,7 +245,15 @@ type
     function GetImplementationVersion: AnsiString;
     function GetClientMajor: integer;  virtual; abstract;
     function GetClientMinor: integer;  virtual; abstract;
-end;
+  end;
+
+    IJournallingHook = interface
+      ['{7d3e45e0-3628-416a-9e22-c20474825031}']
+      procedure TransactionStart(Tr: ITransaction);
+      procedure TransactionEnd(Tr: ITransaction; Action: TTransactionAction);
+      procedure TransactionEndDone(IsReadOnly: boolean;TransactionID: integer);
+      procedure ExecQuery(Stmt: IStatement);
+    end;
 
 implementation
 

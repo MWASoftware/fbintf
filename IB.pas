@@ -864,6 +864,7 @@ type
 
   ITPB = interface(IParameterBlockWithTypeNames<ITPBItem>)
     ['{7369b0ff-defe-437b-81fe-19b211d42d25}']
+    function AsText: AnsiString;
   end;
 
   {The ITransactionAction interface provides access to a Transaction once it
@@ -884,6 +885,7 @@ type
     function GetInTransaction: boolean;
     function GetIsReadOnly: boolean;
     function GetTransactionID: integer;
+    function GetPhaseNo: integer;
     procedure PrepareForCommit; {Two phase commit - stage 1}
     procedure Commit(Force: boolean=false);
     procedure CommitRetaining;
@@ -894,7 +896,10 @@ type
     function GetAttachment(index: integer): IAttachment;
     function GetTrInformation(Requests: array of byte): ITrInformation; overload;
     function GetTrInformation(Request: byte): ITrInformation; overload;
+    function GetTransactionName: AnsiString;
+    procedure SetTransactionName(aValue: AnsiString);
     property InTransaction: boolean read GetInTransaction;
+    property TransactionName: AnsiString read GetTransactionName write SetTransactionName;
   end;
 
   { The IEvents Interface is used to handle events from a single database. The
@@ -1057,6 +1062,13 @@ type
      ['{e676067b-1cf4-4eba-9256-9724f57e0d16}']
    end;
 
+   {Journaling options. Default is [joReadWriteTransactions,joModifyQueries] }
+
+   TJournalOption = (joReadOnlyTransactions, joReadWriteTransactions,
+                     joModifyQueries, joReadOnlyQueries);
+
+   TJournalOptions = set of TJournalOption;
+
   {The IAttachment interface provides access to a Database Connection. It may be
    used to:
 
@@ -1182,6 +1194,7 @@ type
     function HasDecFloatSupport: boolean;
     function HasBatchMode: boolean;
     function HasScollableCursors: boolean;
+    function HasTable(aTableName: AnsiString): boolean;
 
     {Character Sets}
     function HasDefaultCharSet: boolean;
@@ -1197,6 +1210,12 @@ type
     {Time Zone Database}
     function GetTimeZoneServices: ITimeZoneServices;
     function HasTimeZoneSupport: boolean;
+
+    {Client side Journaling}
+    function JournalingActive: boolean;
+    procedure StartJournaling(aJournalLogFile: AnsiString; RetainJournal: boolean); overload;
+    procedure StartJournaling(aJournalLogFile: AnsiString; RetainJournal: boolean; Options: TJournalOptions); overload;
+    procedure StopJournaling;
  end;
 
   TProtocolAll = (TCP, SPX, NamedPipe, Local, inet, inet4, inet6, wnet, xnet, unknownProtocol);

@@ -53,9 +53,49 @@ type
     AllowReverseLookup: boolean; {used to ensure that lookup of CP_UTF* does not return UNICODE_FSS}
   end;
 
+  { TFBJournaling }
+
+  TFBJournaling = class(TActivityHandler, IJournallingHook)
+  private
+    {Logfile}
+    const DefaultVendor          = 'Snake Oil (Sales) Ltd';
+    const DefaultJournalTemplate = 'Journal.%d.log';
+    const sQueryJournal          = '*Q:%d,%d,%d,%d:%s' + LineEnding;
+    const sTransStartJnl         = '*S:%d,%d,%d:%s' + LineEnding;
+    const sTransCommitJnl        = '*C:%d,%d,%d' + LineEnding;
+    const sTransCommitRetJnl     = '*c:%d,%d,%d' + LineEnding;
+    const sTransRollBackJnl      = '*R:%d,%d,%d' + LineEnding;
+    const sTransRollBackRetJnl   = '*e:%d,%d,%d' + LineEnding;
+    const sTransEndJnl           = '*E:%d,%d' + LineEnding;
+  private
+    FOptions: TJournalOptions;
+    FJournalFilePath: string;
+    FJournalFileStream: TStream;
+    FSessionID: integer;
+    FRetainJournal: boolean;
+    procedure EndSession;
+ protected
+    function GetAttachment: IAttachment; virtual; abstract;
+  public
+    {IAttachment}
+    procedure Disconnect(Force: boolean=false); virtual;
+  public
+    {IJournallingHook}
+    procedure TransactionStart(Tr: ITransaction);
+    procedure TransactionEnd(Tr: ITransaction; Action: TTransactionAction);
+    procedure TransactionEndDone(IsReadOnly: boolean;TransactionID: integer);
+    procedure ExecQuery(Stmt: IStatement);
+  public
+    {Client side Journaling}
+    function JournalingActive: boolean;
+    procedure StartJournaling(aJournalLogFile: AnsiString; RetainJournal: boolean); overload;
+    procedure StartJournaling(aJournalLogFile: AnsiString; RetainJournal: boolean; Options: TJournalOptions); overload;
+    procedure StopJournaling;
+  end;
+
   { TFBAttachment }
 
-  TFBAttachment = class(TActivityHandler)
+  TFBAttachment = class(TFBJournaling)
   private
     FDPB: IDPB;
     FFirebirdAPI: IFirebirdAPI;
@@ -92,7 +132,6 @@ type
     function AllocateDIRB: IDIRB;
     function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction; overload; virtual; abstract;
     function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionCompletion): ITransaction; overload; virtual; abstract;
-    procedure Disconnect(Force: boolean=false); virtual; abstract;
     procedure ExecImmediate(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer); overload; virtual; abstract;
     procedure ExecImmediate(TPB: array of byte; sql: AnsiString; aSQLDialect: integer); overload;
     procedure ExecImmediate(transaction: ITransaction; sql: AnsiString); overload;
@@ -166,6 +205,7 @@ type
     function GetInlineBlobLimit: integer;
     procedure SetInlineBlobLimit(limit: integer);
     function HasBatchMode: boolean; virtual;
+    function HasTable(aTableName: AnsiString): boolean;
 
   public
     {Character Sets}
@@ -215,6 +255,29 @@ type
 implementation
 
 uses FBMessages, IBUtils, FBTransaction {$IFDEF HASREQEX}, RegExpr{$ENDIF};
+
+const
+  {Journaling}
+  sJournalTableName = 'IBX$JOURNALS';
+  sSequenceName = 'IBX$SESSIONS';
+
+  sqlCreateJournalTable =
+    'Create Table ' + sJournalTableName + '(' +
+    '  IBX$SessionID Integer not null, '+
+    '  IBX$TransactionID Integer not null, '+
+    '  IBX$USER VarChar(32) Default CURRENT_USER,'+
+    '  IBX$TIMESTAMP TIMESTAMP Default CURRENT_TIMESTAMP,'+
+    '  Primary Key(IBX$SessionID,IBX$TransactionID)' +
+    ')';
+
+  sqlCreateSequence = 'CREATE SEQUENCE ' + sSequenceName;
+
+  sqlGetNextSessionID = 'Select Gen_ID(' + sSequenceName + ',1) as SessionID From RDB$DATABASE';
+
+  sqlRecordJournalEntry = 'Insert into ' + sJournalTableName + '(IBX$SessionID,IBX$TransactionID) '+
+                        'Values(?,?)';
+
+  sqlCleanUpSession = 'Delete From ' + sJournalTableName + ' Where ' + sSequenceName + ' = ?';
 
 const
   CharSetMap: array [0..69] of TCharsetMap = (
@@ -390,6 +453,251 @@ const
     'decfloat_round',
     'decfloat_traps'
     );
+
+type
+
+  { TQueryProcessor }
+
+  TQueryProcessor=class(TSQLTokeniser)
+  private
+    FInString: AnsiString;
+    FIndex: integer;
+    FStmt: IStatement;
+    function DoExecute: AnsiString;
+    function GetParamValue(ParamIndex: integer): AnsiString;
+  protected
+    function GetChar: AnsiChar; override;
+  public
+    class function Execute(Stmt: IStatement): AnsiString;
+  end;
+
+  { TQueryProcessor }
+
+function TQueryProcessor.DoExecute: AnsiString;
+var token: TSQLTokens;
+    ParamIndex: integer;
+begin
+  Result := '';
+  ParamIndex := 0;
+
+  while not EOF do
+  begin
+    token := GetNextToken;
+    case token of
+    sqltPlaceHolder:
+      begin
+        Result := Result + GetParamValue(ParamIndex);
+        Inc(ParamIndex);
+      end;
+    else
+      Result := Result + TokenText;
+    end;
+  end;
+end;
+
+function TQueryProcessor.GetParamValue(ParamIndex: integer): AnsiString;
+var arIndex: integer;
+begin
+  with FStmt.SQLParams[ParamIndex] do
+  begin
+    if IsNull then
+      Result := 'NULL'
+    else
+    case GetSQLType of
+    SQL_BLOB:
+      if getSubType = 1 then {string}
+        Result := '''' + SQLSafeString(GetAsString) + ''''
+      else
+        Result := TSQLXMLReader.FormatBlob(GetAsString,getSubType);
+
+    SQL_ARRAY:
+        Result := TSQLXMLReader.FormatArray(FStmt.GetAttachment,getAsArray);
+
+    SQL_VARYING,
+    SQL_TEXT,
+    SQL_TIMESTAMP,
+    SQL_TYPE_DATE,
+    SQL_TYPE_TIME,
+    SQL_TIMESTAMP_TZ_EX,
+    SQL_TIME_TZ_EX,
+    SQL_TIMESTAMP_TZ,
+    SQL_TIME_TZ:
+      Result := '''' + SQLSafeString(GetAsString) + '''';
+    else
+      Result := GetAsString;
+    end;
+  end;
+end;
+
+function TQueryProcessor.GetChar: AnsiChar;
+begin
+  if FIndex <= Length(FInString) then
+  begin
+    Result := FInString[FIndex];
+    Inc(FIndex);
+  end
+  else
+    Result := #0;
+end;
+
+class function TQueryProcessor.Execute(Stmt: IStatement): AnsiString;
+begin
+  if not Stmt.IsPrepared then
+    IBError(ibxeSQLClosed,[]);
+  with self.Create do
+  try
+    FStmt := Stmt;
+    FInString := Stmt.GetProcessedSQLText;
+    FIndex := 1;
+    Result := Trim(DoExecute);
+  finally
+    Free;
+  end;
+end;
+
+{ TFBJournaling }
+
+procedure TFBJournaling.EndSession;
+begin
+  if JournalingActive then
+  begin
+    FreeAndNil(FJournalFileStream);
+    FSessionID := -1;
+    if not FRetainJournal then
+    begin
+        GetAttachment.ExecuteSQL([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],
+             sqlCleanUpSession,[FSessionID]);
+        DeleteFile(FJournalFilePath);
+    end;
+  end;
+end;
+
+procedure TFBJournaling.Disconnect(Force: boolean);
+begin
+  if JournalingActive then
+    EndSession;
+end;
+
+procedure TFBJournaling.TransactionStart(Tr: ITransaction);
+var LogEntry: AnsiString;
+    Description: AnsiString;
+    i: integer;
+begin
+  if JournalingActive and
+     ((((joReadOnlyTransactions in FOptions) and Tr.GetIsReadOnly)) or
+     ((joReadWriteTransactions in FOptions) and not Tr.GetIsReadOnly)) then
+  begin
+    GetAttachment.ExecuteSQL(Tr,sqlRecordJournalEntry,[FSessionID,Tr.GetTransactionID]);
+    if Tr.TransactionName <> '' then
+      Description := Tr.TransactionName
+    else
+      Description := Tr.getTPB.AsText;
+    LogEntry := Format(sTransStartJnl,[FSessionID,
+                                       Tr.GetTransactionID,
+                                       Length(Description),
+                                       Description]);
+    if assigned(FJournalFileStream) then
+      FJournalFileStream.Write(LogEntry[1],Length(LogEntry));
+  end;
+end;
+
+procedure TFBJournaling.TransactionEnd(Tr: ITransaction;
+  Action: TTransactionAction);
+var LogEntry: AnsiString;
+begin
+  if JournalingActive and
+     ((((joReadOnlyTransactions in FOptions) and Tr.GetIsReadOnly)) or
+     ((joReadWriteTransactions in FOptions) and not Tr.GetIsReadOnly)) then
+  begin
+    case Action of
+    TARollback:
+      LogEntry := Format(sTransRollbackJnl,[FSessionID,Tr.GetTransactionID,Tr.GetPhaseNo]);
+    TACommit:
+      LogEntry := Format(sTransCommitJnl,[FSessionID,Tr.GetTransactionID,Tr.GetPhaseNo]);
+    TACommitRetaining:
+      LogEntry := Format(sTransCommitRetJnl,[FSessionID,Tr.GetTransactionID,Tr.GetPhaseNo]);
+    TARollbackRetaining:
+      LogEntry := Format(sTransRollbackRetJnl,[FSessionID,Tr.GetTransactionID,Tr.GetPhaseNo]);
+    end;
+    if assigned(FJournalFileStream) then
+      FJournalFileStream.Write(LogEntry[1],Length(LogEntry));
+  end;
+end;
+
+procedure TFBJournaling.TransactionEndDone(IsReadOnly: boolean;
+  TransactionID: integer);
+var LogEntry: AnsiString;
+begin
+  if JournalingActive and
+     ((((joReadOnlyTransactions in FOptions) and IsReadOnly)) or
+     ((joReadWriteTransactions in FOptions) and not IsReadOnly)) then
+  begin
+    LogEntry := Format(sTransEndJnl,[FSessionID,TransactionID]);
+    if assigned(FJournalFileStream) then
+      FJournalFileStream.Write(LogEntry[1],Length(LogEntry));
+  end;
+end;
+
+procedure TFBJournaling.ExecQuery(Stmt: IStatement);
+var SQL: AnsiString;
+    LogEntry: AnsiString;
+
+  function GetRowsAffected: integer;
+  var a,i,u,d: integer;
+  begin
+    Stmt.GetRowsAffected(a,i,u,d);
+    Result := i + u + d;
+  end;
+
+var RowsAffected: integer;
+begin
+  RowsAffected := GetRowsAffected;
+  if JournalingActive and
+  (((joReadOnlyQueries in FOptions) and (RowsAffected = 0)) or
+   ((joModifyQueries in FOptions) and (RowsAffected > 0))) then
+  begin
+    SQL := TQueryProcessor.Execute(Stmt);
+    LogEntry := Format(sQueryJournal,[FSessionID,
+                                      Stmt.GetTransaction.GetTransactionID,
+                                      Stmt.GetTransaction.GetPhaseNo,
+                                      Length(SQL),SQL]);
+    FJournalFileStream.Write(LogEntry[1],Length(LogEntry));
+  end;
+end;
+
+function TFBJournaling.JournalingActive: boolean;
+begin
+  Result := FJournalFileStream <> nil;
+end;
+
+procedure TFBJournaling.StartJournaling(aJournalLogFile: AnsiString; RetainJournal: boolean);
+begin
+  StartJournaling(aJournalLogFile,RetainJournal,[joReadWriteTransactions,joModifyQueries]);
+end;
+
+procedure TFBJournaling.StartJournaling(aJournalLogFile: AnsiString;
+  RetainJournal: boolean; Options: TJournalOptions);
+begin
+  FOptions := Options;
+  FRetainJournal := RetainJournal;
+  with GetAttachment do
+  begin
+    if not HasTable(sJournalTableName) then
+    begin
+      ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateJournalTable);
+      ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateSequence);
+    end;
+    FSessionID := OpenCursorAtStart(sqlGetNextSessionID)[0].AsInteger;
+  end;
+  FJournalFilePath := aJournalLogFile;
+  FJournalFileStream := TFileStream.Create(FJournalFilePath,fmCreate);
+end;
+
+procedure TFBJournaling.StopJournaling;
+begin
+  EndSession;
+end;
+
 
 
 
@@ -940,6 +1248,13 @@ end;
 function TFBAttachment.HasBatchMode: boolean;
 begin
   Result := false;
+end;
+
+function TFBAttachment.HasTable(aTableName: AnsiString): boolean;
+begin
+  Result := OpenCursorAtStart(
+       'Select count(*) From RDB$RELATIONS Where RDB$RELATION_NAME = ?',
+          [aTableName])[0].AsInteger > 0;
 end;
 
 function TFBAttachment.HasDefaultCharSet: boolean;
