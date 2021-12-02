@@ -36,33 +36,8 @@ unit Test22;
 {$codepage utf8}
 {$ENDIF}
 
-{Test 22: Update, Insert and Delete Queries + Journalling}
+{Test 22: Journalling}
 
-{ This test opens the employee example databases with the supplied user name/password
-  and runs several queries:
-
-  1. Update an employee record and report affected rows.
-
-  2. Show Changed Record
-
-  3. Insert new employee record and report affected rows Repeat with a duplicated
-     parameter name.
-
-  4. Show inserted record and then delete it and report affected rows
-
-  5. Repeat insert with a null PHONE_EXT.
-
-  6. Show inserted record and total records
-
-  7. Prepare query again and report results
-
-  8. Prepare query with a different transaction and report results.
-
-  9. Open Cursor with a different transaction and report results.
-
-  10. Implicit Rollback and disconnect.
-
-}
 
 interface
 
@@ -75,9 +50,13 @@ type
 
   TTest22 = class(TFBTestBase)
   private
-    procedure DoQuery(Attachment: IAttachment);
-    procedure HandleOnJnlEntry(JnlEntryType: TJnlEntryType; SessionID, TransactionID, PhaseNo: integer;
-                                 Description: AnsiString);
+    procedure PrintJournalTable(Attachment: IAttachment);
+    procedure UpdateDatabase(Attachment: IAttachment);
+    procedure QueryDatabase(Attachment: IAttachment);
+    procedure ValidateStrToNumeric;
+    procedure HandleOnJnlEntry(JnlEntryType: TJnlEntryType;
+      JnlEntryTypeName: AnsiString; SessionID, TransactionID, PhaseNo: integer;
+  Description, TPBText: AnsiString);
   public
     function TestTitle: AnsiString; override;
     procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
@@ -86,236 +65,157 @@ type
 
 implementation
 
-{ TTest22 }
+const
+  sqlCreateTable =
+    'Create Table TestData ('+
+    'RowID Integer not null,'+
+    'iType Integer,'+
+    'i64Type BIGINT,'+
+    'CurrType Numeric(12,4),'+
+    'dType DOUBLE PRECISION,'+
+    'FixedPoint Numeric(10,6),'+
+    'Primary Key (RowID)'+
+    ')';
 
-procedure TTest22.DoQuery(Attachment: IAttachment);
-var Transaction, Transaction2, Transaction3: ITransaction;
-    Statement, Statement2: IStatement;
-    Rows: IResultSet;
-    stats: TPerfCounters;
+  sqlInsert = 'Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(?,?,?,?,?,?)';
+
+  { TTest22 }
+
+procedure TTest22.UpdateDatabase(Attachment: IAttachment);
+var Transaction: ITransaction;
+    Statement: IStatement;
 begin
-  Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taRollback);
-  Statement := Attachment.Prepare(Transaction,'Update Employee Set Hire_Date = ? Where EMP_NO = ?',3);
-  Statement.GetSQLParams[0].AsDAteTime := EncodeDate(2016,1,31);;
-  Statement.GetSQLParams[1].AsInteger := 8;
-  Statement.Execute;
-  WriteAffectedRows(Statement);
-  Transaction.Rollback;
-  Transaction.Start(TARollback);
-
-  Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :F1',3);
-  Statement.EnableStatistics(true);
-  Statement.GetSQLParams.ByName('F1').AsInteger := 8;
-  ReportResults(Statement);
-  if Statement.GetPerfStatistics(stats) then
-    WritePerfStats(stats);
-
-  Statement := Attachment.PrepareWithNamedParameters(Transaction,'INSERT INTO EMPLOYEE (EMP_NO, FIRST_NAME, LAST_NAME, PHONE_EXT, HIRE_DATE,' +
-      'DEPT_NO, JOB_CODE, JOB_GRADE, JOB_COUNTRY, SALARY) '+
-      'VALUES (:EMP_NO, :FIRST_NAME, :LAST_NAME, :PHONE_EXT, :HIRE_DATE,' +
-      ':DEPT_NO, :JOB_CODE, :JOB_GRADE, :JOB_COUNTRY, :SALARY)',3);
+  Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit,'Transaction_29');
+  Statement := Attachment.Prepare(Transaction,sqlInsert);
+  ParamInfo(Statement.GetSQLParams);
   with Statement.GetSQLParams do
   begin
-    ByName('EMP_NO').AsInteger := 150;
-    ByName('FIRST_NAME').AsString := 'John';
-    ByName('LAST_NAME').AsString := 'Doe';
-    ByName('PHONE_EXT').AsString := '';
-    ByName('HIRE_DATE').AsDateTime := EncodeDate(2015,4,1);
-    ByName('DEPT_NO').AsString := '600';
-    ByName('JOB_CODE').AsString := 'Eng';
-    ByName('JOB_GRADE').AsInteger := 4;
-    ByName('JOB_COUNTRY').AsString := 'England';
-    ByName('SALARY').AsFloat := 41000.89;
+    Params[0].AsInteger := 1;
+    Params[1].AsString := '101';
+    Params[2].AsString := ' 9223372036854775807';
+    Params[3].AsString := '10000.1234';
+    Params[4].AsString := '9999.123456780';
+    Params[5].AsString := '1234567890.12345678';
   end;
   Statement.Execute;
-  WriteAffectedRows(Statement);
-
-  Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
-  writeln(OutFile,'Relation Name = ',Statement.Metadata.GetUniqueRelationName);
-  PrintMetaData(Statement.GetMetaData);
-  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 150;
-  ReportResults(Statement);
-
-  {Now repeat but with a non-unique parameter name}
-  Statement := Attachment.PrepareWithNamedParameters(Transaction,'INSERT INTO EMPLOYEE (EMP_NO, FIRST_NAME, LAST_NAME, PHONE_EXT, HIRE_DATE,' +
-      'DEPT_NO, JOB_CODE, JOB_GRADE, JOB_COUNTRY, SALARY) '+
-      'VALUES (:EMP_NO, :FIRST_NAME, :FIRST_NAME, :PHONE_EXT, :HIRE_DATE,' +
-      ':DEPT_NO, :JOB_CODE, :JOB_GRADE, :JOB_COUNTRY, :SALARY)',3);
   with Statement.GetSQLParams do
   begin
-    ByName('EMP_NO').AsInteger := 151;
-    ByName('FIRST_NAME').AsString := 'Major';
-    ByName('PHONE_EXT').AsString := '';
-    ByName('HIRE_DATE').AsString :=  '2015-4-1';
-    ByName('DEPT_NO').AsString := '600';
-    ByName('JOB_CODE').AsString := 'Eng';
-    ByName('JOB_GRADE').AsInteger := 4;
-    ByName('JOB_COUNTRY').AsString := 'England';
-    ByName('SALARY').AsString := '40000.59';
+    Params[0].AsInteger := 2;
+    Params[1].AsString := '-32457';
+    Params[2].AsString := ' -9223372036854775808 ';
+    Params[3].AsString := '+1000001.12';
+    Params[4].AsString := '1.7E308';
+    Params[5].AsString := '-1234567890.12345678';
   end;
   Statement.Execute;
-  WriteAffectedRows(Statement);
-
-  Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
-  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 151;
-  ReportResults(Statement);
-
-  writeln(OutFile,'Now Delete the rows');
-  Statement := Attachment.Prepare(Transaction,'Delete From Employee Where EMP_NO = ?',3);
-  Statement.GetSQLParams[0].AsInteger := 150;
-  Statement.Execute;
-  WriteAffectedRows(Statement);
-  Statement.GetSQLParams[0].AsInteger := 151;
-  Statement.Execute;
-  WriteAffectedRows(Statement);
-
-  {Now again but with a null}
-  Statement := Attachment.PrepareWithNamedParameters(Transaction,'INSERT INTO EMPLOYEE (EMP_NO, FIRST_NAME, LAST_NAME, PHONE_EXT, HIRE_DATE,' +
-      'DEPT_NO, JOB_CODE, JOB_GRADE, JOB_COUNTRY, SALARY) '+
-      'VALUES (:EMP_NO, :FIRST_NAME, :LAST_NAME, :PHONE_EXT, :HIRE_DATE,' +
-      ':DEPT_NO, :JOB_CODE, :JOB_GRADE, :JOB_COUNTRY, :SALARY)',3);
   with Statement.GetSQLParams do
   begin
-    ByName('EMP_NO').AsInteger := 150;
-    ByName('FIRST_NAME').AsString := 'Jane';
-    ByName('LAST_NAME').AsString := 'Doe';
-    ByName('PHONE_EXT').Clear;
-    ByName('HIRE_DATE').AsDateTime := EncodeDate(2015,4,1);;
-    ByName('DEPT_NO').AsString := '600';
-    ByName('JOB_CODE').AsString := 'Eng';
-    ByName('JOB_GRADE').AsInteger := 4;
-    ByName('JOB_COUNTRY').AsString := 'England';
-    ByName('SALARY').AsFloat := 41000.89;
+    Params[0].AsInteger := 3;
+    Params[1].AsString := '0';
+    Params[2].AsString := '0';
+    Params[3].AsString := '0';
+    Params[4].AsString := '0';
+    Params[5].AsString := '0';
   end;
-  writeln(OutFile,'Inserting');
   Statement.Execute;
-  WriteAffectedRows(Statement);
-
-  Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
-  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 150;
-  ReportResults(Statement);
-
-  writeln(OutFile,'Employee Count = ', Attachment.OpenCursorAtStart(Transaction,
-         'Select count(*) from EMPLOYEE',3)[0].AsInteger);
-
-  Statement2 := Attachment.PrepareWithNamedParameters(Transaction,'Update EMPLOYEE Set FIRST_NAME = ''Jayne''''s'' Where EMP_NO = :EMP_NO',3);
-  Statement2.GetSQLParams.ByName('EMP_NO').AsInteger := 150;
-  writeln(OutFile,'Updating');
-  Statement2.Execute;
-  WriteAffectedRows(Statement);
-
-  writeln(OutFile,'Prepare Query again');
-  writeln(OutFile);
-  Statement.Prepare;
-  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 150;
-  ReportResults(Statement);
-
-  Transaction2 := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taRollback);
-  writeln(OutFile,'Prepare Query again with a different transaction');
-  writeln(OutFile);
-  Statement.Prepare(Transaction2);
-  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 8;
-  ReportResults(Statement);
-
-  Transaction3 := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taRollback);
-  writeln(OutFile,'Open Cursor with a different transaction');
-  writeln(OutFile);
-  Rows := Statement.OpenCursor(Transaction3);
-  try
-    while Rows.FetchNext do
-      ReportResult(Rows);
-  finally
-    Rows.Close;
+  with Statement.GetSQLParams do
+  begin
+    Params[0].AsInteger := 4;
+    Params[1].AsString := '1.0';
+    Params[2].AsString := '10.';
+    Params[3].AsString := '2.3E-2';
+    Params[4].AsString := '11e-4';
+    Params[5].AsString := '2.33456E2';
   end;
-  writeln(OutFile,'Same Statement - updated params');
-  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 9;
-  ReportResults(Statement);
-
-  writeln(outfile,'Test using Execute Block');
-
-  Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taRollback);
-  Statement := Attachment.PrepareWithNamedParameters(Transaction,
-    'Execute Block (Hired Timestamp = :Hire_Date, empno integer = :EMP_NO) '+
-    'As Begin ' +
-    '  Update Employee Set Hire_Date = :Hired Where EMP_NO = :empno; '+
-    'End'
-    ,3);
-  Statement.GetSQLParams.ByName('Hire_Date').AsDateTime := EncodeDate(2015,1,31);;
-  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 8;
   Statement.Execute;
-  WriteAffectedRows(Statement);
-  Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
-  Statement.GetSQLParams.ByName('emp_no').AsInteger := 8;
-  ReportResults(Statement);
-
 end;
 
-procedure TTest22.HandleOnJnlEntry(JnlEntryType: TJnlEntryType; SessionID,
-  TransactionID, PhaseNo: integer; Description: AnsiString);
+procedure TTest22.QueryDatabase(Attachment: IAttachment);
+var Transaction: ITransaction;
+    Statement: IStatement;
+begin
+  Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
+  Statement := Attachment.Prepare(Transaction,'Select * from TestData');
+  ReportResults(Statement);
+end;
 
-  function JnlEntryText(je: TJnlEntryType): string;
+procedure TTest22.ValidateStrToNumeric;
+const
+  TestValues: array of string = ['1234.567','-765.4321','0.1','0.01','+123',
+                                 '1.23456E308','-1.2e-02','10.','.12', '0.12',
+                                 '1.2E1.2', '1,000', '1e1e1', '1.2+3']; {bad syntax}
+var
+  i: integer;
+  aValue: Int64;
+  aScale: integer;
+begin
+  for i := 0 to Length(TestValues) - 1 do
   begin
-    case je of
-    jeTransStart:
-      Result := 'Transaction Start';
-    jeTransCommit:
-      Result := 'Commit';
-    jeTransCommitRet:
-      Result := 'Commit Retaining';
-    jeTransRollback:
-      Result := 'Rollback';
-    jeTransRollbackRet:
-      Result := 'Rollback Retaining';
-    jeTransEnd:
-      Result := 'Transaction End';
-    jeQuery:
-      Result := 'Query';
-    jeUnknown:
-      Result := 'Unknown';
-    end;
+    if TryStrToNumeric(TestValues[i],aValue,aScale) then
+    begin
+      writeln(Outfile,TestValues[i],' parsed to ',aValue,' scale = ',aScale);
+      writeln(Outfile,'As Float = ',NumericToDouble(aValue,aScale));
+    end
+    else
+      writeln(Outfile,'Parsing of ',TestValues[i],' failed');
   end;
+end;
+
+procedure TTest22.HandleOnJnlEntry(JnlEntryType: TJnlEntryType;
+  JnlEntryTypeName: AnsiString; SessionID, TransactionID, PhaseNo: integer;
+  Description, TPBText: AnsiString);
 
 begin
-  writeln(OutFile,'Journal Entry = ',JnlEntryText(JnlEntryType));
+  writeln(OutFile,'Journal Entry = ',JnlEntryType,'(',JnlEntryTypeName,')');;
   writeln(OutFile,'Session ID = ',SessionID);
   writeln(OutFile,'Transaction ID = ',TransactionID);
   writeln(OutFile,'Phase No = ',PhaseNo);
   writeln(OutFile,'Description = "',Description,'"');
+  writeln(OutFile,'TPBText = ',TPBText);
   writeln(OutFile);
+end;
+
+procedure TTest22.PrintJournalTable(Attachment: IAttachment);
+var Results: IResultSet;
+begin
+  writeln(OutFile,'Journal Table');
+  Results := Attachment.OpenCursorAtStart('Select * From IBX$JOURNALS');
+  while not Results.IsEof do
+  begin
+    ReportResult(Results);
+    Results.Fetchnext;
+  end;
 end;
 
 function TTest22.TestTitle: AnsiString;
 begin
-  Result := 'Test 22: Update, Insert and Delete Queries + Journalling';
+  Result := 'Test 22: Journalling';
 end;
 
 procedure TTest22.RunTest(CharSet: AnsiString; SQLDialect: integer);
-var Attachment: IAttachment;
-    DPB: IDPB;
-    S: TStrings;
-    i: integer;
+var DPB: IDPB;
+    Attachment: IAttachment;
 begin
   DPB := FirebirdAPI.AllocateDPB;
   DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
   DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);
   DPB.Add(isc_dpb_lc_ctype).setAsString(CharSet);
   DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
-  DPB.Add(isc_dpb_config).SetAsString('WireCompression=true');
-
-  writeln(OutFile,'Opening ',Owner.GetEmployeeDatabaseName);
-  Attachment := FirebirdAPI.OpenDatabase(Owner.GetEmployeeDatabaseName,DPB);
-  writeln(OutFile,'Database Open');
-  Attachment.StartJournaling('Test'+GetTestID+'.log',true);
-  S := TStringList.Create;
+  Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
   try
-    Attachment.getFBVersion(S);
-    for i := 0 to S.Count -1 do
-      writeln(OutFile,S[i]);
+    Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable);
+    Attachment.StartJournaling('Test'+GetTestID+'.log',true);
+    ValidateStrToNumeric;
+    SetFloatTemplate('#,###.00000000');
+    UpdateDatabase(Attachment);
+    QueryDatabase(Attachment);
+    PrintJournalTable(Attachment);
   finally
-    S.Free;
+    Attachment.DropDatabase;
   end;
-  DoQuery(Attachment);
   Attachment.StopJournaling;
+  writeln(OutFile);
+  writeln(OutFile,'Journal Entries');
   with TJournalProcessor.Create do
   try
      Execute('Test'+GetTestID+'.log',HandleOnJnlEntry);

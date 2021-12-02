@@ -111,9 +111,9 @@ type
     function CreateDatabase(sql: AnsiString; aSQLDialect: integer; RaiseExceptionOnError: boolean=true): IAttachment; overload;
     {Start Transaction against multiple databases}
     function StartTransaction(Attachments: array of IAttachment;
-             TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction; overload;
+             TPB: array of byte; DefaultCompletion: TTransactionCompletion; aName: AnsiString=''): ITransaction; overload;
     function StartTransaction(Attachments: array of IAttachment;
-             TPB: ITPB; DefaultCompletion: TTransactionCompletion): ITransaction; overload;
+             TPB: ITPB; DefaultCompletion: TTransactionCompletion; aName: AnsiString=''): ITransaction; overload;
 
     {Service Manager}
     function AllocateSPB: ISPB;
@@ -473,15 +473,15 @@ begin
 end;
 
 function TFB30ClientAPI.StartTransaction(Attachments: array of IAttachment;
-  TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction;
+  TPB: array of byte; DefaultCompletion: TTransactionCompletion; aName: AnsiString): ITransaction;
 begin
-  Result := TFB30Transaction.Create(self,Attachments,TPB,DefaultCompletion);
+  Result := TFB30Transaction.Create(self,Attachments,TPB,DefaultCompletion,aName);
 end;
 
 function TFB30ClientAPI.StartTransaction(Attachments: array of IAttachment;
-  TPB: ITPB; DefaultCompletion: TTransactionCompletion): ITransaction;
+  TPB: ITPB; DefaultCompletion: TTransactionCompletion; aName: AnsiString): ITransaction;
 begin
-  Result := TFB30Transaction.Create(self,Attachments,TPB,DefaultCompletion);
+  Result := TFB30Transaction.Create(self,Attachments,TPB,DefaultCompletion,aName);
 end;
 
 function TFB30ClientAPI.AllocateSPB: ISPB;

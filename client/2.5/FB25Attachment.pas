@@ -66,8 +66,8 @@ type
     procedure Disconnect(Force: boolean=false); override;
     function IsConnected: boolean; override;
     procedure DropDatabase;
-    function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction; override;
-    function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionCompletion): ITransaction; override;
+    function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion; aName: AnsiString): ITransaction; override;
+    function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionCompletion; aName: AnsiString): ITransaction; override;
     procedure ExecImmediate(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer); override;
     function Prepare(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer; CursorName: AnsiString=''): IStatement; override;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: AnsiString;
@@ -234,17 +234,17 @@ begin
 end;
 
 function TFB25Attachment.StartTransaction(TPB: array of byte;
-  DefaultCompletion: TTransactionCompletion): ITransaction;
+  DefaultCompletion: TTransactionCompletion; aName: AnsiString): ITransaction;
 begin
   CheckHandle;
-  Result := TFB25Transaction.Create(FFirebird25ClientAPI,self,TPB,DefaultCompletion);
+  Result := TFB25Transaction.Create(FFirebird25ClientAPI,self,TPB,DefaultCompletion,aName);
 end;
 
 function TFB25Attachment.StartTransaction(TPB: ITPB;
-  DefaultCompletion: TTransactionCompletion): ITransaction;
+  DefaultCompletion: TTransactionCompletion; aName: AnsiString): ITransaction;
 begin
   CheckHandle;
-  Result := TFB25Transaction.Create(FFirebird25ClientAPI,self,TPB,DefaultCompletion);
+  Result := TFB25Transaction.Create(FFirebird25ClientAPI,self,TPB,DefaultCompletion,aName);
 end;
 
 function TFB25Attachment.CreateBlob(transaction: ITransaction;

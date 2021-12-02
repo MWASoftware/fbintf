@@ -186,9 +186,9 @@ type
     {Start Transaction against multiple databases}
     function AllocateTPB: ITPB;
     function StartTransaction(Attachments: array of IAttachment;
-             TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction; overload;
+             TPB: array of byte; DefaultCompletion: TTransactionCompletion; aName: AnsiString=''): ITransaction; overload;
     function StartTransaction(Attachments: array of IAttachment;
-             TPB: ITPB; DefaultCompletion: TTransactionCompletion): ITransaction; overload;
+             TPB: ITPB; DefaultCompletion: TTransactionCompletion; aName: AnsiString=''): ITransaction; overload;
 
     {Service Manager}
     function AllocateSPB: ISPB;
@@ -505,15 +505,15 @@ begin
 end;
 
 function TFB25ClientAPI.StartTransaction(Attachments: array of IAttachment;
-  TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction;
+  TPB: array of byte; DefaultCompletion: TTransactionCompletion; aName: AnsiString): ITransaction;
 begin
-  Result := TFB25Transaction.Create(self,Attachments,TPB,DefaultCompletion);
+  Result := TFB25Transaction.Create(self,Attachments,TPB,DefaultCompletion,aName);
 end;
 
 function TFB25ClientAPI.StartTransaction(Attachments: array of IAttachment;
-  TPB: ITPB; DefaultCompletion: TTransactionCompletion): ITransaction;
+  TPB: ITPB; DefaultCompletion: TTransactionCompletion; aName: AnsiString): ITransaction;
 begin
-  Result := TFB25Transaction.Create(self,Attachments,TPB,DefaultCompletion);
+  Result := TFB25Transaction.Create(self,Attachments,TPB,DefaultCompletion, aName);
 end;
 
 function TFB25ClientAPI.HasServiceAPI: boolean;

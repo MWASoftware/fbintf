@@ -98,10 +98,10 @@ type
     procedure JournalTransactionEnd(Action: TTransactionAction);
     procedure JournalTransactionEndDone(IsReadOnly: boolean;TransactionID: integer);
   public
-    constructor Create(api: TFBClientAPI; Attachments: array of IAttachment; Params: array of byte; DefaultCompletion: TTransactionAction); overload;
-    constructor Create(api: TFBClientAPI; Attachments: array of IAttachment; TPB: ITPB; DefaultCompletion: TTransactionAction); overload;
-    constructor Create(api: TFBClientAPI; Attachment: IAttachment; Params: array of byte; DefaultCompletion: TTransactionAction); overload;
-    constructor Create(api: TFBClientAPI; Attachment: IAttachment; TPB: ITPB; DefaultCompletion: TTransactionAction); overload;
+    constructor Create(api: TFBClientAPI; Attachments: array of IAttachment; Params: array of byte; DefaultCompletion: TTransactionAction; aName: AnsiString); overload;
+    constructor Create(api: TFBClientAPI; Attachments: array of IAttachment; TPB: ITPB; DefaultCompletion: TTransactionAction; aName: AnsiString); overload;
+    constructor Create(api: TFBClientAPI; Attachment: IAttachment; Params: array of byte; DefaultCompletion: TTransactionAction; aName: AnsiString); overload;
+    constructor Create(api: TFBClientAPI; Attachment: IAttachment; TPB: ITPB; DefaultCompletion: TTransactionAction; aName: AnsiString); overload;
     destructor Destroy; override;
     procedure DoDefaultTransactionEnd(Force: boolean);
     property FirebirdAPI: TFBClientAPI read FFirebirdAPI;
@@ -273,17 +273,18 @@ begin
 end;
 
 constructor TFBTransaction.Create(api: TFBClientAPI; Attachments: array of IAttachment;
-  Params: array of byte; DefaultCompletion: TTransactionAction);
+  Params: array of byte; DefaultCompletion: TTransactionAction; aName: AnsiString);
 begin
-  Create(api, Attachments,GenerateTPB(Params), DefaultCompletion);
+  Create(api, Attachments,GenerateTPB(Params), DefaultCompletion, aName);
 end;
 
 constructor TFBTransaction.Create(api: TFBClientAPI; Attachments: array of IAttachment; TPB: ITPB;
-  DefaultCompletion: TTransactionAction);
+  DefaultCompletion: TTransactionAction; aName: AnsiString);
 var
   i: Integer;
 begin
   inherited Create(nil);
+  FTransactionName := aName;
   SetInterface(api);
   if Length(Attachments) = 0 then
     IBError(ibxeEmptyAttachmentsList,[nil]);
@@ -304,13 +305,13 @@ begin
 end;
 
 constructor TFBTransaction.Create(api: TFBClientAPI; Attachment: IAttachment;
-  Params: array of byte; DefaultCompletion: TTransactionAction);
+  Params: array of byte; DefaultCompletion: TTransactionAction; aName: AnsiString);
 begin
-  Create(api,Attachment,GenerateTPB(Params),DefaultCompletion);
+  Create(api,Attachment,GenerateTPB(Params),DefaultCompletion,aName);
 end;
 
 constructor TFBTransaction.Create(api: TFBClientAPI; Attachment: IAttachment; TPB: ITPB;
-  DefaultCompletion: TTransactionAction);
+  DefaultCompletion: TTransactionAction; aName: AnsiString);
 begin
   inherited Create(nil);
   SetInterface(api);
@@ -318,6 +319,7 @@ begin
   SetLength(FAttachments,1);
   FAttachments[0] := Attachment;
   FTPB := TPB;
+  FTransactionName := aName;
   Start(DefaultCompletion);
 end;
 

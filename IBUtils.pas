@@ -719,20 +719,23 @@ type
  TJnlEntryType = (jeTransStart, jeTransCommit, jeTransCommitRet, jeTransRollback,
                    jeTransRollbackRet, jeTransEnd, jeQuery,jeUnknown);
 
- TOnNextJournalEntry = procedure(JnlEntryType: TJnlEntryType; SessionID, TransactionID, PhaseNo: integer;
-                                   Description: AnsiString) of object;
+ TOnNextJournalEntry = procedure(JnlEntryType: TJnlEntryType; JnlEntryTypeName: AnsiString;
+                                 SessionID, TransactionID, PhaseNo: integer;
+                                 Description,TPBText: AnsiString) of object;
 
  { TJournalProcessor - used to parse a client side journal}
 
    TJournalProcessor = class(TSQLTokeniser)
     private
       type TLineState = (lsInit, lsJnlFound, lsGotJnlType,  lsGotSessionID,
-                          lsGotTransactionID, lsGotPhaseNo, lsGotLength);
+                          lsGotTransactionID, lsGotPhaseNo, lsGotText1Length,
+                          lsGotText1, lsGotText2Length);
     private
       FOnNextJournalEntry: TOnNextJournalEntry;
       FInStream: TStream;
       procedure DoExecute;
       function IdentifyJnlEntry(aTokenText: AnsiString): TJnlEntryType;
+      function JnlEntryText(je: TJnlEntryType): string;
     protected
       function GetChar: AnsiChar; override;
       property OnNextJournalEntry: TOnNextJournalEntry read FOnNextJournalEntry write FOnNextJournalEntry;
@@ -1601,9 +1604,10 @@ begin
   Result := FLastChar;
   for i := 2 to NumOfChars do
   begin
-    if GetNext = sqltEOF then break;
+    if GetNext = sqltEOF then Exit;
     Result := Result + FLastChar;
   end;
+  GetNext;
 end;
 
 function TSQLTokeniser.GetNextToken: TSQLTokens;
@@ -2744,6 +2748,7 @@ var token: TSQLTokens;
     SessionID, TransactionID, PhaseNo: integer;
     Len: integer;
     Description: AnsiString;
+    TPBText: AnsiString;
 begin
   LineState := lsInit;
   while not EOF do
@@ -2755,6 +2760,7 @@ begin
       PhaseNo := 0;
       Len := 0;
       Description := '';
+      TPBText := '';
       JnlEntryType := jeUnknown;
     end;
     token := GetNextToken;
@@ -2773,19 +2779,39 @@ begin
         LineState := lsInit;
 
     sqltColon:
-      if LineState = lsGotLength then
-      begin
-        Description := ReadCharacters(Len);
-        if assigned(FOnNextJournalEntry) then
-          OnNextJournalEntry(JnlEntryType,SessionID, TransactionID, PhaseNo, Description);
-        LineState := lsInit;
-      end
+      case LineState of
+      lsGotText1Length:
+        begin
+          if Len > 0 then
+            Description := ReadCharacters(Len);
+          if JnlEntryType = jeTransStart then
+             LineState := lsGotText1
+          else
+          begin
+            if assigned(FOnNextJournalEntry) then
+              OnNextJournalEntry(JnlEntryType,JnlEntryText(JnlEntryType),SessionID,
+                                 TransactionID, PhaseNo, Description, TPBText);
+            LineState := lsInit;
+          end
+        end;
+
+      lsGotText2Length:
+        begin
+          if Len > 0 then
+            TPBText :=  ReadCharacters(Len);
+          if assigned(FOnNextJournalEntry) then
+            OnNextJournalEntry(JnlEntryType,JnlEntryText(JnlEntryType),SessionID,
+                                  TransactionID, PhaseNo, Description, TPBText);
+          LineState := lsInit;
+        end;
+
       else
       if LineState <> lsGotJnlType then
         LineState := lsInit;
+    end;
 
    sqltComma:
-     if not (LineState in [lsGotSessionID,lsGotTransactionID,lsGotPhaseNo]) then
+     if not (LineState in [lsGotSessionID,lsGotTransactionID,lsGotPhaseNo,lsGotText1]) then
        LineState := lsInit;
 
    sqltNumberString:
@@ -2802,7 +2828,8 @@ begin
          if JnlEntryType = jeTransEnd then
          begin
            if assigned(FOnNextJournalEntry) then
-             OnNextJournalEntry(JnlEntryType,SessionID, TransactionID, PhaseNo, Description);
+             OnNextJournalEntry(JnlEntryType,JnlEntryText(JnlEntryType),SessionID,
+                                    TransactionID, PhaseNo, Description, TPBText);
            LineState := lsInit;
          end
          else
@@ -2815,7 +2842,7 @@ begin
          jeTransStart:
            begin
              len := StrToInt(TokenText);
-             LineState := lsGotLength;
+             LineState := lsGotText1Length;
            end;
 
            jeTransCommit,
@@ -2825,14 +2852,16 @@ begin
              begin
                PhaseNo := StrToInt(TokenText);
                if assigned(FOnNextJournalEntry) then
-                 OnNextJournalEntry(JnlEntryType,SessionID, TransactionID, PhaseNo, Description);
+                 OnNextJournalEntry(JnlEntryType,JnlEntryText(JnlEntryType),SessionID,
+                                   TransactionID, PhaseNo, Description, TPBText);
                LineState := lsInit;
              end;
 
            jeTransEnd:
              begin
                if assigned(FOnNextJournalEntry) then
-                 OnNextJournalEntry(JnlEntryType,SessionID, TransactionID, PhaseNo, Description);
+                 OnNextJournalEntry(JnlEntryType,JnlEntryText(JnlEntryType),SessionID,
+                                           TransactionID, PhaseNo, Description, TPBText);
                LineState := lsInit;
              end;
 
@@ -2850,10 +2879,16 @@ begin
        if JnlEntryType = jeQuery then
        begin
          len :=  StrToInt(TokenText);
-         LineState := lsGotLength;
+         LineState := lsGotText1Length;
        end
        else
          LineState := lsInit;
+
+     lsGotText1:
+       begin
+         len := StrToInt(TokenText);
+         LineState := lsGotText2Length;
+       end;
 
      end; {case LineState}
     end; {case token}
@@ -2880,6 +2915,28 @@ begin
     Result := jeTransEnd;
   'Q':
     Result := jeQuery;
+  end;
+end;
+
+function TJournalProcessor.JnlEntryText(je: TJnlEntryType): string;
+begin
+  case je of
+  jeTransStart:
+    Result := 'Transaction Start';
+  jeTransCommit:
+    Result := 'Commit';
+  jeTransCommitRet:
+    Result := 'Commit Retaining';
+  jeTransRollback:
+    Result := 'Rollback';
+  jeTransRollbackRet:
+    Result := 'Rollback Retaining';
+  jeTransEnd:
+    Result := 'Transaction End';
+  jeQuery:
+    Result := 'Query';
+  jeUnknown:
+    Result := 'Unknown';
   end;
 end;
 

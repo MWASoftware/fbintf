@@ -297,9 +297,14 @@ end;
 
 function TFBStatement.GetProcessedSQLText: AnsiString;
 begin
-  if FProcessedSQL = '' then
-    ProcessSQL(FSQL,FGenerateParamNames,FProcessedSQL);
-  Result := FProcessedSQL
+  if not FHasParamNames then
+    Result := FSQL
+  else
+  begin
+    if FProcessedSQL = '' then
+      ProcessSQL(FSQL,FGenerateParamNames,FProcessedSQL);
+    Result := FProcessedSQL;
+  end;
 end;
 
 function TFBStatement.GetSQLDialect: integer;

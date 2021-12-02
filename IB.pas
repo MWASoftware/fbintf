@@ -1106,8 +1106,12 @@ type
     procedure Disconnect(Force: boolean=false);
     function IsConnected: boolean;
     procedure DropDatabase;
-    function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion=taCommit): ITransaction; overload;
-    function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionCompletion=taCommit): ITransaction; overload;
+    function StartTransaction(TPB: array of byte;
+                              DefaultCompletion: TTransactionCompletion=taCommit;
+                              aName: AnsiString=''): ITransaction; overload;
+    function StartTransaction(TPB: ITPB;
+                              DefaultCompletion: TTransactionCompletion=taCommit;
+                              aName: AnsiString=''): ITransaction; overload;
     procedure ExecImmediate(transaction: ITransaction; sql: AnsiString; SQLDialect: integer); overload;
     procedure ExecImmediate(TPB: array of byte; sql: AnsiString; SQLDialect: integer); overload;
     procedure ExecImmediate(transaction: ITransaction; sql: AnsiString); overload;
@@ -1384,9 +1388,11 @@ type
     {Start Transaction against multiple databases}
     function AllocateTPB: ITPB;
     function StartTransaction(Attachments: array of IAttachment;
-             TPB: array of byte; DefaultCompletion: TTransactionCompletion=taCommit): ITransaction; overload;
+             TPB: array of byte; DefaultCompletion: TTransactionCompletion=taCommit;
+             aName: AnsiString=''): ITransaction; overload;
     function StartTransaction(Attachments: array of IAttachment;
-             TPB: ITPB; DefaultCompletion: TTransactionCompletion=taCommit): ITransaction; overload;
+             TPB: ITPB; DefaultCompletion: TTransactionCompletion=taCommit;
+             aName: AnsiString=''): ITransaction; overload;
 
     {Service Manager}
     function HasServiceAPI: boolean;

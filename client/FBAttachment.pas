@@ -53,15 +53,51 @@ type
     AllowReverseLookup: boolean; {used to ensure that lookup of CP_UTF* does not return UNICODE_FSS}
   end;
 
+  { Database Journalling.
+
+    This class is intended to support a client side journal of all database
+    updates, inserts and deletes made by the client during a session. It also records
+    the transaction each update was made under.
+
+    The database schema is required to include a control table "IBX$JOURNALS" and
+    an SQL Sequence IBX$SESSIONS. These are created by the class when the
+    database is opened, if they are not already present. However, it is recommended
+    that they are created as an orginal part of the database schema in order to
+    unnecessarily avoid each user being given sufficient priviledge to create tables
+    and Sequences.
+
+    Syntax:
+
+    Transaction Start:
+    !S:<session id>,<transaction no.>,<string length>:<transaction Name>,<string length>:<TPB>
+
+    Transaction Commit (retaining) Called :
+    !C:<session id>,<transaction no.>,<phase no.>
+
+    Transaction Commit retaining Called :
+    !c:<session id>,<transaction no.>,<phase no.>
+
+    Transaction Rollback Called:
+    !R:<session id>,<transaction no.>,<phase no.>
+
+    Transaction Rollback retaining Called:
+    !r:<session id>,<transaction no.>,<phase no.>
+
+    Transaction Commit/Rollback  Completed:
+    !E:<session id>,<transaction no.>
+
+    Update/Insert/Delete
+    !Q:<session id>,<transaction no.>,<phase no.>,<length of query text in bytes>:<query text>
+
+  }
+
   { TFBJournaling }
 
   TFBJournaling = class(TActivityHandler, IJournallingHook)
   private
     {Logfile}
-    const DefaultVendor          = 'Snake Oil (Sales) Ltd';
-    const DefaultJournalTemplate = 'Journal.%d.log';
     const sQueryJournal          = '*Q:%d,%d,%d,%d:%s' + LineEnding;
-    const sTransStartJnl         = '*S:%d,%d,%d:%s' + LineEnding;
+    const sTransStartJnl         = '*S:%d,%d,%d:%s,%d:%s' + LineEnding;
     const sTransCommitJnl        = '*C:%d,%d,%d' + LineEnding;
     const sTransCommitRetJnl     = '*c:%d,%d,%d' + LineEnding;
     const sTransRollBackJnl      = '*R:%d,%d,%d' + LineEnding;
@@ -73,6 +109,7 @@ type
     FJournalFileStream: TStream;
     FSessionID: integer;
     FRetainJournal: boolean;
+    FDoNotJournal: boolean;
     procedure EndSession;
  protected
     function GetAttachment: IAttachment; virtual; abstract;
@@ -130,8 +167,11 @@ type
     function getDPB: IDPB;
     function AllocateBPB: IBPB;
     function AllocateDIRB: IDIRB;
-    function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction; overload; virtual; abstract;
-    function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionCompletion): ITransaction; overload; virtual; abstract;
+    function StartTransaction(TPB: array of byte;
+      DefaultCompletion: TTransactionCompletion;
+      aName: AnsiString=''): ITransaction; overload; virtual; abstract;
+    function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionCompletion;
+      aName: AnsiString=''): ITransaction; overload; virtual; abstract;
     procedure ExecImmediate(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer); overload; virtual; abstract;
     procedure ExecImmediate(TPB: array of byte; sql: AnsiString; aSQLDialect: integer); overload;
     procedure ExecImmediate(transaction: ITransaction; sql: AnsiString); overload;
@@ -580,22 +620,25 @@ end;
 
 procedure TFBJournaling.TransactionStart(Tr: ITransaction);
 var LogEntry: AnsiString;
-    Description: AnsiString;
+    TPBText: AnsiString;
     i: integer;
 begin
   if JournalingActive and
      ((((joReadOnlyTransactions in FOptions) and Tr.GetIsReadOnly)) or
      ((joReadWriteTransactions in FOptions) and not Tr.GetIsReadOnly)) then
   begin
-    GetAttachment.ExecuteSQL(Tr,sqlRecordJournalEntry,[FSessionID,Tr.GetTransactionID]);
-    if Tr.TransactionName <> '' then
-      Description := Tr.TransactionName
-    else
-      Description := Tr.getTPB.AsText;
+    FDoNotJournal := true;
+    try
+      GetAttachment.ExecuteSQL(Tr,sqlRecordJournalEntry,[FSessionID,Tr.GetTransactionID]);
+    finally
+      FDoNotJournal := false;
+    end;
+    TPBText := Tr.getTPB.AsText;
     LogEntry := Format(sTransStartJnl,[FSessionID,
                                        Tr.GetTransactionID,
-                                       Length(Description),
-                                       Description]);
+                                       Length(Tr.TransactionName),
+                                       Tr.TransactionName,
+                                       Length(TPBText),TPBText]);
     if assigned(FJournalFileStream) then
       FJournalFileStream.Write(LogEntry[1],Length(LogEntry));
   end;
@@ -667,7 +710,7 @@ end;
 
 function TFBJournaling.JournalingActive: boolean;
 begin
-  Result := FJournalFileStream <> nil;
+  Result := (FJournalFileStream <> nil) and not FDoNotJournal;
 end;
 
 procedure TFBJournaling.StartJournaling(aJournalLogFile: AnsiString; RetainJournal: boolean);
