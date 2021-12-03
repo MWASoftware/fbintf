@@ -82,6 +82,7 @@ const
   sqlInsert = 'Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(?,?,?,?,?,?)';
   sqlInsertText = 'Insert into TestData(RowID, Str, TextBlob) Values(?,?,?)';
   sqlInsertArray = 'Insert into TestData(RowID,MyArray) Values (?,?)';
+  sqlInsertBlob = 'Insert into TestData(RowID,OtherBlob) Values (?,?)';
 
   { TTest22 }
 
@@ -147,6 +148,15 @@ begin
   end;
   Statement.Execute;
   writeln(OutFile);
+  writeln(OutFile,'Binary Blob Tests');
+  Statement := Attachment.Prepare(Transaction,sqlInsertBlob);
+  with Statement.GetSQLParams do
+  begin
+    Params[0].AsInteger := 6;
+    Params[1].AsBlob := Attachment.CreateBlob(Transaction,'TestData','OtherBlob').LoadFromFile('Test22.dat');
+  end;
+  Statement.Execute;
+  writeln(OutFile);
   writeln(OutFile,'Array Test');
   Statement := Attachment.Prepare(Transaction,sqlInsertArray);
   ar := Attachment.CreateArray(Transaction,'TestData','MyArray');
@@ -159,7 +169,7 @@ begin
   ParamInfo(Statement.GetSQLParams);
   with Statement.GetSQLParams do
   begin
-    Params[0].AsInteger := 6;
+    Params[0].AsInteger := 7;
     Params[1].AsArray := ar;
   end;
   Statement.Execute;

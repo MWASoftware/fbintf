@@ -88,7 +88,6 @@ type
     FStatement: TFB30Statement;
     FFirebird30ClientAPI: TFB30ClientAPI;
     FBlob: IBlob;             {Cache references}
-    FArray: IArray;
     FNullIndicator: short;
     FOwnsSQLData: boolean;
     FBlobMetaData: IBlobMetaData;
@@ -141,7 +140,7 @@ type
     procedure ColumnSQLDataInit;
     procedure RowChange; override;
     procedure FreeSQLData;
-    function GetAsArray(Array_ID: TISC_QUAD): IArray; override;
+    function GetAsArray: IArray; override;
     function GetAsBlob(Blob_ID: TISC_QUAD; BPB: IBPB): IBlob; override;
     function GetArrayMetaData: IArrayMetaData; override;
     function GetBlobMetaData: IBlobMetaData; override;
@@ -751,7 +750,6 @@ procedure TIBXSQLVAR.RowChange;
 begin
   inherited;
   FBlob := nil;
-  FArray := nil;
 end;
 
 procedure TIBXSQLVAR.FreeSQLData;
@@ -762,7 +760,7 @@ begin
   FOwnsSQLData := true;
 end;
 
-function TIBXSQLVAR.GetAsArray(Array_ID: TISC_QUAD): IArray;
+function TIBXSQLVAR.GetAsArray: IArray;
 begin
   if SQLType <> SQL_ARRAY then
     IBError(ibxeInvalidDataConversion,[nil]);
@@ -771,11 +769,11 @@ begin
     Result := nil
   else
   begin
-    if FArray = nil then
-      FArray := TFB30Array.Create(FStatement.GetAttachment as TFB30Attachment,
+    if FArrayIntf = nil then
+      FArrayIntf := TFB30Array.Create(FStatement.GetAttachment as TFB30Attachment,
                                 TIBXSQLDA(Parent).GetTransaction,
-                                GetArrayMetaData,Array_ID);
-    Result := FArray;
+                                GetArrayMetaData,PISC_QUAD(SQLData)^);
+    Result := FArrayIntf;
   end;
 end;
 
@@ -1144,7 +1142,7 @@ begin
       else
         FSQLNullIndicator := nil;
       FBlob := nil;
-      FArray := nil;
+      FArrayIntf := nil;
     end;
   end;
   SetUniqueRelationName;

@@ -2739,7 +2739,8 @@ begin
     Result := TextOut.Text;
   finally
     TextOut.Free;
-  end;       end;
+  end;
+end;
 
 procedure TSQLXMLReader.Reset;
 begin

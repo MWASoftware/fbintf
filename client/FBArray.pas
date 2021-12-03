@@ -822,6 +822,7 @@ begin
   InternalPutSlice(Force);
   FModified := false;
   FIsNew := false;
+  FLoaded := true;
 end;
 
 function TFBArray.GetOffset(index: array of integer): PByte;

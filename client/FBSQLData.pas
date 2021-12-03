@@ -289,6 +289,7 @@ type
     function GetStatement: IStatement;
     procedure SetName(AValue: AnsiString);
   protected
+    FArrayIntf: IArray;
     function GetAttachment: IAttachment; virtual; abstract;
     function GetSQLType: cardinal; virtual; abstract;
     function GetSubtype: integer; virtual; abstract;
@@ -319,7 +320,7 @@ type
     procedure SetString(aValue: AnsiString);
     procedure Changed; virtual;
     procedure RowChange; virtual;
-    function GetAsArray(Array_ID: TISC_QUAD): IArray; virtual; abstract;
+    function GetAsArray: IArray; virtual; abstract;
     function GetAsBlob(Blob_ID: TISC_QUAD; BPB: IBPB): IBlob; virtual; abstract;
     function CreateBlob: IBlob; virtual; abstract;
     function GetArrayMetaData: IArrayMetaData; virtual; abstract;
@@ -327,6 +328,7 @@ type
     function getColMetadata: IParamMetaData;
     procedure Initialize; virtual;
     procedure SaveMetaData;
+    procedure SetArray(AValue: IArray);
 
   public
     property AliasName: AnsiString read GetAliasName;
@@ -768,6 +770,11 @@ begin
   FColMetaData := TSQLParamMetaData.Create(self);
 end;
 
+procedure TSQLVarData.SetArray(AValue: IArray);
+begin
+  FArrayIntf := AValue;
+end;
+
 constructor TSQLVarData.Create(aParent: TSQLDataArea; aIndex: integer);
 begin
   inherited Create;
@@ -798,6 +805,7 @@ end;
 
 procedure TSQLVarData.RowChange;
 begin
+  FArrayIntf := nil;
   FModified := false;
   FVarString := '';
 end;
@@ -2415,7 +2423,7 @@ end;
 function TIBSQLData.GetAsArray: IArray;
 begin
   CheckActive;
-  result := FIBXSQLVAR.GetAsArray(AsQuad);
+  result := FIBXSQLVAR.GetAsArray;
 end;
 
 function TIBSQLData.GetAsBlob: IBlob;
@@ -2669,6 +2677,7 @@ begin
   if not FIBXSQLVAR.UniqueName then
     IBError(ibxeDuplicateParamName,[FIBXSQLVAR.Name]);
 
+  FIBXSQLVAR.SetArray(anArray); {save array interface}
   SetAsQuad(AnArray.GetArrayID);
 end;
 
