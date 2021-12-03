@@ -235,6 +235,7 @@ type
     function GetDBInformation(Requests: array of byte): IDBInformation; overload;
     function GetDBInformation(Request: byte): IDBInformation; overload;
     function GetDBInformation(Requests: IDIRB): IDBInformation; overload;
+    function GetAttachmentID: integer;
     function GetConnectString: AnsiString;
     function GetRemoteProtocol: AnsiString;
     function GetAuthenticationMethod: AnsiString;
@@ -1245,6 +1246,16 @@ begin
   CheckHandle;
   with Requests as TDIRB do
     Result := GetDBInfo(getBuffer,getDataLength);
+end;
+
+function TFBAttachment.GetAttachmentID: integer;
+var Info: IDBInformation;
+begin
+  Info := GetDBInformation(isc_info_attachment_id);
+  if (Info.Count > 0) and (Info[0].getItemType = isc_info_attachment_id) then
+    Result := Info[0].getAsInteger
+  else
+    Result := -1;
 end;
 
 function TFBAttachment.GetConnectString: AnsiString;
