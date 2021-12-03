@@ -567,6 +567,8 @@ begin
       FItems[index] := AddIntegerItem(P);
     fb_info_tra_dbpath:
       FItems[index] := AddStringItem(P);
+    else
+      FItems[index] := AddItem(P);
     end;
     P := P + FItems[index]^.FSize;
     Inc(index);

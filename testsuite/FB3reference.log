@@ -306,6 +306,30 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
+Scollable Cursors
+DB Connect String = inet://localhost/employee
+DB Charset ID = 4
+DB SQL Dialect = 3
+DB Remote Protocol = TCPv4
+DB ODS Major Version = 12
+DB ODS Minor Version = 0
+User Authentication Method = Srp
+Firebird Library Path = /opt/firebird3.0.5/lib/libfbclient.so
+DB Client Implementation Version = 3.0
+Do Fetch Next:
+EMP_NO = 2
+FIRST_NAME = Robert
+LAST_NAME = Nelson
+PHONE_EXT = 250
+HIRE_DATE = 1988/12/28 00:00:00.0000
+DEPT_NO = 600
+JOB_CODE = VP
+JOB_GRADE = 2
+JOB_COUNTRY = USA
+SALARY = 105,900.00
+FULL_NAME = Nelson, Robert
+Do Fetch Last:
+Remote Scrollable cursors test fails feature is not supported
 Now open the employee database as a local database
 TPB: Item Count = 3
   isc_tpb_read
@@ -625,6 +649,14 @@ Running Test 3: ad hoc queries
 Opening inet://localhost/employee
 Database Open
 Employee Count = 42
+Transaction ID = 4907
+Transaction is Read/Write
+Transaction Database Path = inet://localhost/employee
+Transaction ID = 4907
+Oldest Interesting = 4905
+Oldest Action = 4906
+Oldest Snapshot = 4906
+Oldest Interesting = 0
 Employee Count = 41
 Employee Count = 42
 Employee Count = 41
@@ -3459,6 +3491,324 @@ I64TYPE = 10
 CURRTYPE = .02300000
 DTYPE = .00110000
 FIXEDPOINT = 233.45600000
+
+
+
+------------------------------------------------------
+Running Test 22: Journalling
+Start Journaling. Session ID = 1
+1234.567 parsed to 1234567 scale = -3
+As Float =  1.2345670000000000E+003
+-765.4321 parsed to -7654321 scale = -4
+As Float = -7.6543209999999999E+002
+0.1 parsed to 1 scale = -1
+As Float =  1.0000000000000001E-001
+0.01 parsed to 1 scale = -2
+As Float =  1.0000000000000000E-002
++123 parsed to 123 scale = 0
+As Float =  1.2300000000000000E+002
+1.23456E308 parsed to 123456 scale = 303
+As Float =  1.2345600000000001E+308
+-1.2e-02 parsed to -12 scale = -3
+As Float = -1.2000000000000000E-002
+10. parsed to 10 scale = 0
+As Float =  1.0000000000000000E+001
+.12 parsed to 12 scale = -2
+As Float =  1.2000000000000000E-001
+0.12 parsed to 12 scale = -2
+As Float =  1.2000000000000000E-001
+Parsing of 1.2E1.2 failed
+Parsing of 1,000 failed
+Parsing of 1e1e1 failed
+Parsing of 1.2+3 failed
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+Value = 0
+
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_INT64
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+SQLType =SQL_INT64
+sub type = 0
+Field Name = 
+Scale = -4
+Charset id = 0
+Nullable
+Size = 8
+
+SQLType =SQL_DOUBLE
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+SQLType =SQL_INT64
+sub type = 0
+Field Name = 
+Scale = -6
+Charset id = 0
+Nullable
+Size = 8
+
+
+Text Tests
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+Value = 0
+
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 4
+Nullable
+Size = 1024
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = 
+Scale = 0
+Charset id = 4
+Nullable
+Size = 8
+
+
+Binary Blob Tests
+
+Array Test
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+Value = 0
+
+SQLType =SQL_ARRAY
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+ROWID = 1
+ITYPE = 101
+I64TYPE = 9223372036854775807
+CURRTYPE = 10,000.12340000
+DTYPE = 9,999.12345678
+FIXEDPOINT = 1,234,567,890.12345700
+STR = NULL
+TEXTBLOB = NULL
+OTHERBLOB = NULL
+MYARRAY = NULL
+ROWID = 2
+ITYPE = -32457
+I64TYPE = -9223372036854775808
+CURRTYPE = 1,000,001.12000000
+DTYPE = 1.7E308
+FIXEDPOINT = -1,234,567,890.12345700
+STR = NULL
+TEXTBLOB = NULL
+OTHERBLOB = NULL
+MYARRAY = NULL
+ROWID = 3
+ITYPE = 0
+I64TYPE = 0
+CURRTYPE = .00000000
+DTYPE = .00000000
+FIXEDPOINT = .00000000
+STR = NULL
+TEXTBLOB = NULL
+OTHERBLOB = NULL
+MYARRAY = NULL
+ROWID = 4
+ITYPE = 1
+I64TYPE = 10
+CURRTYPE = .02300000
+DTYPE = .00110000
+FIXEDPOINT = 233.45600000
+STR = NULL
+TEXTBLOB = NULL
+OTHERBLOB = NULL
+MYARRAY = NULL
+
+Journal Table
+IBX$SESSIONID = 1
+IBX$TRANSACTIONID = 9
+IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
+IBX$TIMESTAMP = 2021/12/03 15:10:06.5350
+
+Journal Entries
+Journal Entry = jeTransStart(Transaction Start)
+Session ID = 1
+Transaction ID = 9
+Transaction Name = "Transaction_29_1"
+TPB: Item Count = 3
+  isc_tpb_write
+  isc_tpb_nowait
+  isc_tpb_concurrency
+
+Default Completion = TACommit
+
+Journal Entry = jeQuery(Query)
+Session ID = 1
+Transaction ID = 9
+Phase No = 0
+Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(1,101,9223372036854775807,10000.1234,9999.12345678,1234567890.12346)
+
+Journal Entry = jeQuery(Query)
+Session ID = 1
+Transaction ID = 9
+Phase No = 0
+Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(2,-32457,-9223372036854775808,1000001.12,1.7E308,-1234567890.12346)
+
+Journal Entry = jeQuery(Query)
+Session ID = 1
+Transaction ID = 9
+Phase No = 0
+Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(3,0,0,0,0,0)
+
+Journal Entry = jeQuery(Query)
+Session ID = 1
+Transaction ID = 9
+Phase No = 0
+Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(4,1,10,0.023,0.0011,233.456)
+
+Journal Entry = jeTransStart(Transaction Start)
+Session ID = 1
+Transaction ID = 10
+Transaction Name = "Transaction_29_2"
+TPB: Item Count = 3
+  isc_tpb_write
+  isc_tpb_nowait
+  isc_tpb_concurrency
+
+Default Completion = TARollback
+
+Journal Entry = jeTransCommit(Commit)
+Session ID = 1
+Transaction ID = 9
+Phase No = 0
+
+Journal Entry = jeTransEnd(Transaction End)
+Session ID = 1
+Transaction ID = 9
+
+Journal Entry = jeQuery(Query)
+Session ID = 1
+Transaction ID = 10
+Phase No = 0
+Query = Insert into TestData(RowID, Str, TextBlob) Values(5,'It''s the quick brown fox jumps over the lazy dog','To be or not to be-that is the question:
+Whether ''tis nobler in the mind to suffer
+The slings and arrows of outrageous fortune,
+Or to take arms against a sea of troubles,
+And, by opposing, end them. To die, to sleep-
+No more-and by a sleep to say we end
+The heartache and the thousand natural shocks
+That flesh is heir to-''tis a consummation
+Devoutly to be wished. To die, to sleep-
+To sleep, perchance to dream. Aye, there''s the rub,
+For in that sleep of death what dreams may come,
+When we have shuffled off this mortal coil,
+Must give us pause. There''s the respect
+That makes calamity of so long life.
+For who would bear the whips and scorns of time,
+Th'' oppressor''s wrong, the proud man''s contumely, 
+The pangs of despised love, the law’s delay, 
+The insolence of office, and the spurns
+That patient merit of the unworthy takes,
+When he himself might his quietus make
+With a bare bodkin? Who would fardels bear, 
+To grunt and sweat under a weary life,
+But that the dread of something after death,
+The undiscovered country from whose bourn
+No traveler returns, puzzles the will
+And makes us rather bear those ills we have
+Than fly to others that we know not of?
+Thus conscience does make cowards of us all,
+And thus the native hue of resolution
+Is sicklied o''er with the pale cast of thought,
+And enterprises of great pitch and moment, 
+With this regard their currents turn awry, 
+And lose the name of action.-Soft you now,
+The fair Ophelia.-Nymph, in thy orisons
+Be all my sins remembered
+')
+
+Journal Entry = jeQuery(Query)
+Session ID = 1
+Transaction ID = 10
+Phase No = 0
+Query = Insert into TestData(RowID,OtherBlob) Values (6,<blob subtype="0">
+FFD8FFE000104A46494600010101004800480000FFE11E0545786966000049492A00080000000C00
+0E010200200000009E0000000F01020014000000BE0000001001020008000000D200000012010300
+01000000010000001A01050001000000DA000000
+</blob>
+)
+
+Journal Entry = jeQuery(Query)
+Session ID = 1
+Transaction ID = 10
+Phase No = 0
+Query = Insert into TestData(RowID,MyArray) Values (7,<array dim = "1" sqltype = "496" length = "4" relation_name = "TESTDATA" column_name = "MYARRAY" scale = "0" bounds="0:16">
+ <elt ix="0">100</elt>
+ <elt ix="1">99</elt>
+ <elt ix="2">98</elt>
+ <elt ix="3">97</elt>
+ <elt ix="4">96</elt>
+ <elt ix="5">95</elt>
+ <elt ix="6">94</elt>
+ <elt ix="7">93</elt>
+ <elt ix="8">92</elt>
+ <elt ix="9">91</elt>
+ <elt ix="10">90</elt>
+ <elt ix="11">89</elt>
+ <elt ix="12">88</elt>
+ <elt ix="13">87</elt>
+ <elt ix="14">86</elt>
+ <elt ix="15">85</elt>
+ <elt ix="16">84</elt>
+</array>
+)
+
+Journal Entry = jeTransRollback(Rollback)
+Session ID = 1
+Transaction ID = 10
+Phase No = 0
+
+Journal Entry = jeTransEnd(Transaction End)
+Session ID = 1
+Transaction ID = 10
 
 
 
