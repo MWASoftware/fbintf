@@ -49,7 +49,7 @@ type
     FTransactionIntf: Firebird.ITransaction;
     FFirebird30ClientAPI: TFB30ClientAPI;
     procedure StartMultiple;
-    procedure FreeHandle;
+    procedure FreeHandle(Force: boolean);
   protected
     function GetActivityIntf(att: IAttachment): IActivityMonitor; override;
     procedure SetInterface(api: TFBClientAPI); override;
@@ -99,10 +99,15 @@ begin
   end;
 end;
 
-procedure TFB30Transaction.FreeHandle;
+procedure TFB30Transaction.FreeHandle(Force: boolean);
 begin
   if assigned(FTransactionIntf) then
+  try
     FTransactionIntf.release;
+  except
+    if not Force then raise;
+    {else ignore if Force = true}
+  end;
   FTransactionIntf := nil;
 end;
 
@@ -132,7 +137,7 @@ end;
 destructor TFB30Transaction.Destroy;
 begin
   inherited Destroy;
-  FreeHandle;
+  FreeHandle(true);
 end;
 
 function TFB30Transaction.GetInTransaction: boolean;
@@ -171,7 +176,7 @@ begin
   end;
   JournalTransactionEndDone(IsReadOnly,TransactionID);
   SignalActivity;
-  FreeHandle;
+  FreeHandle(Force);
 end;
 
 procedure TFB30Transaction.CommitRetaining;
@@ -225,7 +230,7 @@ begin
   end;
   JournalTransactionEndDone(IsReadOnly,TransactionID);
   SignalActivity;
-  FreeHandle;
+  FreeHandle(Force);
 end;
 
 procedure TFB30Transaction.RollbackRetaining;

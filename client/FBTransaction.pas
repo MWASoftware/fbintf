@@ -85,7 +85,7 @@ type
     FTPB: ITPB;
     FSeqNo: integer;
     FPhaseNo: integer;
-    FDefaultCompletion: TTransactionAction;
+    FDefaultCompletion: TTransactionCompletion;
     FAttachments: array of IAttachment; {Keep reference to attachment - ensures
                                           attachment cannot be freed before transaction}
     FTransactionName: AnsiString;
@@ -117,6 +117,7 @@ type
     function GetTransactionID: integer;
     function GetAttachmentCount: integer;
     function GetAttachment(index: integer): IAttachment;
+    function GetDefaultCompletion: TTransactionCompletion;
     function GetPhaseNo: integer;
     procedure Rollback(Force: boolean=false);  virtual; abstract;
     procedure RollbackRetaining;  virtual; abstract;
@@ -388,6 +389,11 @@ begin
     IBError(ibxeAttachmentListIndexError,[index]);
 end;
 
+function TFBTransaction.GetDefaultCompletion: TTransactionCompletion;
+begin
+  Result := FDefaultCompletion;
+end;
+
 function TFBTransaction.GetPhaseNo: integer;
 begin
   Result := FPhaseNo;
@@ -459,7 +465,7 @@ end;
 function TTPB.GetParamTypeName(ParamType: byte): Ansistring;
 begin
   if ParamType <= isc_tpb_last_tpb_constant then
-    Result := TPBConstantNames[ParamType]
+    Result := TPBPrefix + TPBConstantNames[ParamType]
   else
     Result := '';
 end;

@@ -886,6 +886,7 @@ type
     function GetIsReadOnly: boolean;
     function GetTransactionID: integer;
     function GetPhaseNo: integer;
+    function GetDefaultCompletion: TTransactionCompletion;
     procedure PrepareForCommit; {Two phase commit - stage 1}
     procedure Commit(Force: boolean=false);
     procedure CommitRetaining;
@@ -1217,8 +1218,8 @@ type
 
     {Client side Journaling}
     function JournalingActive: boolean;
-    procedure StartJournaling(aJournalLogFile: AnsiString; RetainJournal: boolean); overload;
-    procedure StartJournaling(aJournalLogFile: AnsiString; RetainJournal: boolean; Options: TJournalOptions); overload;
+    function StartJournaling(aJournalLogFile: AnsiString; RetainJournal: boolean): integer; overload;
+    function StartJournaling(aJournalLogFile: AnsiString; RetainJournal: boolean; Options: TJournalOptions): integer; overload;
     procedure StopJournaling;
  end;
 

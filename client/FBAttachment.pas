@@ -69,7 +69,7 @@ type
     Syntax:
 
     Transaction Start:
-    !S:<session id>,<transaction no.>,<string length>:<transaction Name>,<string length>:<TPB>
+    !S:<session id>,<transaction no.>,<string length>:<transaction Name>,<string length>:<TPB>,<default Completion>
 
     Transaction Commit (retaining) Called :
     !C:<session id>,<transaction no.>,<phase no.>
@@ -97,7 +97,7 @@ type
   private
     {Logfile}
     const sQueryJournal          = '*Q:%d,%d,%d,%d:%s' + LineEnding;
-    const sTransStartJnl         = '*S:%d,%d,%d:%s,%d:%s' + LineEnding;
+    const sTransStartJnl         = '*S:%d,%d,%d:%s,%d:%s,%d' + LineEnding;
     const sTransCommitJnl        = '*C:%d,%d,%d' + LineEnding;
     const sTransCommitRetJnl     = '*c:%d,%d,%d' + LineEnding;
     const sTransRollBackJnl      = '*R:%d,%d,%d' + LineEnding;
@@ -125,8 +125,8 @@ type
   public
     {Client side Journaling}
     function JournalingActive: boolean;
-    procedure StartJournaling(aJournalLogFile: AnsiString; RetainJournal: boolean); overload;
-    procedure StartJournaling(aJournalLogFile: AnsiString; RetainJournal: boolean; Options: TJournalOptions); overload;
+    function StartJournaling(aJournalLogFile: AnsiString; RetainJournal: boolean): integer; overload;
+    function StartJournaling(aJournalLogFile: AnsiString; RetainJournal: boolean; Options: TJournalOptions): integer; overload;
     procedure StopJournaling;
   end;
 
@@ -294,7 +294,7 @@ type
 
 implementation
 
-uses FBMessages, IBUtils, FBTransaction {$IFDEF HASREQEX}, RegExpr{$ENDIF};
+uses FBMessages, IBUtils, IBErrorCodes, FBTransaction {$IFDEF HASREQEX}, RegExpr{$ENDIF};
 
 const
   {Journaling}
@@ -604,10 +604,14 @@ begin
     FreeAndNil(FJournalFileStream);
     FSessionID := -1;
     if not FRetainJournal then
-    begin
+    try
         GetAttachment.ExecuteSQL([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],
              sqlCleanUpSession,[FSessionID]);
         DeleteFile(FJournalFilePath);
+    except On E: EIBInterBaseError do
+      if E.IBErrorCode <> isc_lost_db_connection then
+        raise;
+      {ignore - do not delete journal if database gone away}
     end;
   end;
 end;
@@ -638,7 +642,8 @@ begin
                                        Tr.GetTransactionID,
                                        Length(Tr.TransactionName),
                                        Tr.TransactionName,
-                                       Length(TPBText),TPBText]);
+                                       Length(TPBText),TPBText,
+                                       ord(tr.GetDefaultCompletion)]);
     if assigned(FJournalFileStream) then
       FJournalFileStream.Write(LogEntry[1],Length(LogEntry));
   end;
@@ -713,13 +718,14 @@ begin
   Result := (FJournalFileStream <> nil) and not FDoNotJournal;
 end;
 
-procedure TFBJournaling.StartJournaling(aJournalLogFile: AnsiString; RetainJournal: boolean);
+function TFBJournaling.StartJournaling(aJournalLogFile: AnsiString;
+  RetainJournal: boolean): integer;
 begin
-  StartJournaling(aJournalLogFile,RetainJournal,[joReadWriteTransactions,joModifyQueries]);
+  Result := StartJournaling(aJournalLogFile,RetainJournal,[joReadWriteTransactions,joModifyQueries]);
 end;
 
-procedure TFBJournaling.StartJournaling(aJournalLogFile: AnsiString;
-  RetainJournal: boolean; Options: TJournalOptions);
+function TFBJournaling.StartJournaling(aJournalLogFile: AnsiString;
+  RetainJournal: boolean; Options: TJournalOptions): integer;
 begin
   FOptions := Options;
   FRetainJournal := RetainJournal;
@@ -734,6 +740,7 @@ begin
   end;
   FJournalFilePath := aJournalLogFile;
   FJournalFileStream := TFileStream.Create(FJournalFilePath,fmCreate);
+  Result := FSessionID;
 end;
 
 procedure TFBJournaling.StopJournaling;

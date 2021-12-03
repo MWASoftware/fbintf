@@ -54,9 +54,7 @@ type
     procedure UpdateDatabase(Attachment: IAttachment);
     procedure QueryDatabase(Attachment: IAttachment);
     procedure ValidateStrToNumeric;
-    procedure HandleOnJnlEntry(JnlEntryType: TJnlEntryType;
-      JnlEntryTypeName: AnsiString; SessionID, TransactionID, PhaseNo: integer;
-  Description, TPBText: AnsiString);
+    procedure HandleOnJnlEntry(JnlEntry: TJnlEntry);
   public
     function TestTitle: AnsiString; override;
     procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
@@ -74,18 +72,26 @@ const
     'CurrType Numeric(12,4),'+
     'dType DOUBLE PRECISION,'+
     'FixedPoint Numeric(10,6),'+
+    'Str VarChar(256),' +
+    'TextBlob BLOB sub_type 1,'+
+    'OtherBlob Blob sub_type 0,'+
+    'MyArray Integer [0:16],'+
     'Primary Key (RowID)'+
     ')';
 
   sqlInsert = 'Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(?,?,?,?,?,?)';
+  sqlInsertText = 'Insert into TestData(RowID, Str, TextBlob) Values(?,?,?)';
+  sqlInsertArray = 'Insert into TestData(RowID,MyArray) Values (?,?)';
 
   { TTest22 }
 
 procedure TTest22.UpdateDatabase(Attachment: IAttachment);
 var Transaction: ITransaction;
     Statement: IStatement;
+    i,j: integer;
+    ar: IArray;
 begin
-  Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit,'Transaction_29');
+  Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit,'Transaction_29_1');
   Statement := Attachment.Prepare(Transaction,sqlInsert);
   ParamInfo(Statement.GetSQLParams);
   with Statement.GetSQLParams do
@@ -128,6 +134,35 @@ begin
     Params[5].AsString := '2.33456E2';
   end;
   Statement.Execute;
+  writeln(OutFile);
+  writeln(OutFile,'Text Tests');
+  Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taRollback,'Transaction_29_2');
+  Statement := Attachment.Prepare(Transaction,sqlInsertText);
+  ParamInfo(Statement.GetSQLParams);
+  with Statement.GetSQLParams do
+  begin
+    Params[0].AsInteger := 5;
+    Params[1].AsString := 'It''s the quick brown fox jumps over the lazy dog';
+    Params[2].AsBlob := Attachment.CreateBlob(Transaction,'TestData','TextBlob').LoadFromFile('testtext.txt');
+  end;
+  Statement.Execute;
+  writeln(OutFile);
+  writeln(OutFile,'Array Test');
+  Statement := Attachment.Prepare(Transaction,sqlInsertArray);
+  ar := Attachment.CreateArray(Transaction,'TestData','MyArray');
+  j := 100;
+  for i := 0 to 16 do
+  begin
+    ar.SetAsInteger([i],j);
+    dec(j);
+  end;
+  ParamInfo(Statement.GetSQLParams);
+  with Statement.GetSQLParams do
+  begin
+    Params[0].AsInteger := 6;
+    Params[1].AsArray := ar;
+  end;
+  Statement.Execute;
 end;
 
 procedure TTest22.QueryDatabase(Attachment: IAttachment);
@@ -161,17 +196,35 @@ begin
   end;
 end;
 
-procedure TTest22.HandleOnJnlEntry(JnlEntryType: TJnlEntryType;
-  JnlEntryTypeName: AnsiString; SessionID, TransactionID, PhaseNo: integer;
-  Description, TPBText: AnsiString);
+procedure TTest22.HandleOnJnlEntry(JnlEntry: TJnlEntry);
 
 begin
-  writeln(OutFile,'Journal Entry = ',JnlEntryType,'(',JnlEntryTypeName,')');;
-  writeln(OutFile,'Session ID = ',SessionID);
-  writeln(OutFile,'Transaction ID = ',TransactionID);
-  writeln(OutFile,'Phase No = ',PhaseNo);
-  writeln(OutFile,'Description = "',Description,'"');
-  writeln(OutFile,'TPBText = ',TPBText);
+  with JnlEntry do
+  begin
+    writeln(OutFile,'Journal Entry = ',JnlEntryType,'(', TJournalProcessor.JnlEntryText(JnlEntryType),')');
+    writeln(OutFile,'Session ID = ',SessionID);
+    writeln(OutFile,'Transaction ID = ',TransactionID);
+    case JnlEntry.JnlEntryType of
+    jeTransStart:
+      begin
+        writeln(OutFile,'Transaction Name = "',TransactionName,'"');
+        PrintTPB(TPB);
+        writeln(OutFile,'Default Completion = ',DefaultCompletion);
+      end;
+
+    jeTransRollback,
+    jeTransRollbackRet,
+    jeTransCommit,
+    jeTransCommitRet:
+      writeln(OutFile,'Phase No = ',PhaseNo);
+
+    jeQuery:
+      begin
+        writeln(OutFile,'Phase No = ',PhaseNo);
+        writeln(OutFile,'Query = ',QueryText);
+      end;
+    end;
+  end;
   writeln(OutFile);
 end;
 
@@ -204,7 +257,8 @@ begin
   Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
   try
     Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable);
-    Attachment.StartJournaling('Test'+GetTestID+'.log',true);
+    writeln(OutFile,'Start Journaling. Session ID = ',
+    Attachment.StartJournaling('Test'+GetTestID+'.log',true));
     ValidateStrToNumeric;
     SetFloatTemplate('#,###.00000000');
     UpdateDatabase(Attachment);
@@ -218,7 +272,7 @@ begin
   writeln(OutFile,'Journal Entries');
   with TJournalProcessor.Create do
   try
-     Execute('Test'+GetTestID+'.log',HandleOnJnlEntry);
+     Execute('Test'+GetTestID+'.log',FirebirdAPI,HandleOnJnlEntry);
   finally
     Free
   end;

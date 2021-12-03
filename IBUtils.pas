@@ -719,9 +719,18 @@ type
  TJnlEntryType = (jeTransStart, jeTransCommit, jeTransCommitRet, jeTransRollback,
                    jeTransRollbackRet, jeTransEnd, jeQuery,jeUnknown);
 
- TOnNextJournalEntry = procedure(JnlEntryType: TJnlEntryType; JnlEntryTypeName: AnsiString;
-                                 SessionID, TransactionID, PhaseNo: integer;
-                                 Description,TPBText: AnsiString) of object;
+ TJnlEntry = record
+   JnlEntryType: TJnlEntryType;
+   SessionID: integer;
+   TransactionID: integer;
+   TransactionName: AnsiString;
+   TPB: ITPB;
+   DefaultCompletion: TTransactionCompletion;
+   PhaseNo: integer;
+   QueryText: AnsiString;
+ end;
+
+ TOnNextJournalEntry = procedure(JnlEntry: TJnlEntry) of object;
 
  { TJournalProcessor - used to parse a client side journal}
 
@@ -729,19 +738,20 @@ type
     private
       type TLineState = (lsInit, lsJnlFound, lsGotJnlType,  lsGotSessionID,
                           lsGotTransactionID, lsGotPhaseNo, lsGotText1Length,
-                          lsGotText1, lsGotText2Length);
+                          lsGotText1, lsGotText2Length, lsGotText2);
     private
       FOnNextJournalEntry: TOnNextJournalEntry;
       FInStream: TStream;
+      FFirebirdClientAPI: IFirebirdAPI;
       procedure DoExecute;
       function IdentifyJnlEntry(aTokenText: AnsiString): TJnlEntryType;
-      function JnlEntryText(je: TJnlEntryType): string;
     protected
       function GetChar: AnsiChar; override;
       property OnNextJournalEntry: TOnNextJournalEntry read FOnNextJournalEntry write FOnNextJournalEntry;
     public
       destructor Destroy; override;
-      class procedure Execute( aFileName: string; aOnNextJournalEntry: TOnNextJournalEntry);
+      class procedure Execute( aFileName: string; api: IFirebirdAPI; aOnNextJournalEntry: TOnNextJournalEntry);
+      class function JnlEntryText(je: TJnlEntryType): string;
     end;
 
 
@@ -2744,26 +2754,63 @@ end;
 procedure TJournalProcessor.DoExecute;
 var token: TSQLTokens;
     LineState: TLineState;
-    JnlEntryType: TJnlEntryType;
-    SessionID, TransactionID, PhaseNo: integer;
+    JnlEntry: TJnlEntry;
     Len: integer;
-    Description: AnsiString;
-    TPBText: AnsiString;
-begin
-  LineState := lsInit;
-  while not EOF do
+
+  procedure ClearJnlEntry;
   begin
-    if LineState = lsInit then
+    with JnlEntry do
     begin
+      TransactionName := '';
+      TPB := nil;
+      QueryText :='';
+      JnlEntryType := jeUnknown;
       SessionID := 0;
       TransactionID := 0;
       PhaseNo := 0;
-      Len := 0;
-      Description := '';
-      TPBText := '';
-      JnlEntryType := jeUnknown;
+      DefaultCompletion := taCommit;
     end;
+  end;
+
+  function CreateTPB(TPBText: AnsiString): ITPB;
+  var index: integer;
+  begin
+    Result := nil;
+    if Length(TPBText) = 0 then
+      Exit;
+    Result := FFirebirdClientAPI.AllocateTPB;
+    try
+      index := Pos('[',TPBText);
+      if index > 0 then
+        system.Delete(TPBText,1,index);
+      repeat
+        index := Pos(',',TPBText);
+        if index = 0 then
+        begin
+          index := Pos(']',TPBText);
+          if index <> 0 then
+            system.Delete(TPBText,index,1);
+          Result.AddByTypeName(TPBText);
+          break;
+        end;
+        Result.AddByTypeName(system.copy(TPBText,1,index-1));
+        system.Delete(TPBText,1,index);
+      until false;
+    except
+      Result := nil;
+      raise;
+    end;
+  end;
+
+begin
+  LineState := lsInit;
+  JnlEntry.JnlEntryType := jeUnknown;
+  while not EOF do
+  begin
+    if LineState = lsInit then
+      ClearJnlEntry;
     token := GetNextToken;
+    with JnlEntry do
     case token of
     sqltAsterisk:
       if LineState = lsInit then
@@ -2783,14 +2830,18 @@ begin
       lsGotText1Length:
         begin
           if Len > 0 then
-            Description := ReadCharacters(Len);
+          begin
+            if JnlEntryType = jeTransStart then
+              TransactionName := ReadCharacters(Len)
+            else
+              QueryText := ReadCharacters(Len)
+          end;
           if JnlEntryType = jeTransStart then
              LineState := lsGotText1
           else
           begin
             if assigned(FOnNextJournalEntry) then
-              OnNextJournalEntry(JnlEntryType,JnlEntryText(JnlEntryType),SessionID,
-                                 TransactionID, PhaseNo, Description, TPBText);
+              OnNextJournalEntry(JnlEntry);
             LineState := lsInit;
           end
         end;
@@ -2798,11 +2849,8 @@ begin
       lsGotText2Length:
         begin
           if Len > 0 then
-            TPBText :=  ReadCharacters(Len);
-          if assigned(FOnNextJournalEntry) then
-            OnNextJournalEntry(JnlEntryType,JnlEntryText(JnlEntryType),SessionID,
-                                  TransactionID, PhaseNo, Description, TPBText);
-          LineState := lsInit;
+            TPB :=  CreateTPB(ReadCharacters(Len));
+          LineState := lsGotText2;
         end;
 
       else
@@ -2811,7 +2859,7 @@ begin
     end;
 
    sqltComma:
-     if not (LineState in [lsGotSessionID,lsGotTransactionID,lsGotPhaseNo,lsGotText1]) then
+     if not (LineState in [lsGotSessionID,lsGotTransactionID,lsGotPhaseNo,lsGotText1,lsGotText2]) then
        LineState := lsInit;
 
    sqltNumberString:
@@ -2828,8 +2876,7 @@ begin
          if JnlEntryType = jeTransEnd then
          begin
            if assigned(FOnNextJournalEntry) then
-             OnNextJournalEntry(JnlEntryType,JnlEntryText(JnlEntryType),SessionID,
-                                    TransactionID, PhaseNo, Description, TPBText);
+             OnNextJournalEntry(JnlEntry);
            LineState := lsInit;
          end
          else
@@ -2852,16 +2899,14 @@ begin
              begin
                PhaseNo := StrToInt(TokenText);
                if assigned(FOnNextJournalEntry) then
-                 OnNextJournalEntry(JnlEntryType,JnlEntryText(JnlEntryType),SessionID,
-                                   TransactionID, PhaseNo, Description, TPBText);
+                 OnNextJournalEntry(JnlEntry);
                LineState := lsInit;
              end;
 
            jeTransEnd:
              begin
                if assigned(FOnNextJournalEntry) then
-                 OnNextJournalEntry(JnlEntryType,JnlEntryText(JnlEntryType),SessionID,
-                                           TransactionID, PhaseNo, Description, TPBText);
+                 OnNextJournalEntry(JnlEntry);
                LineState := lsInit;
              end;
 
@@ -2873,6 +2918,7 @@ begin
            else
              LineState := lsInit;
          end; {case JnlEntryType}
+
        end;
 
      lsGotPhaseNo:
@@ -2890,9 +2936,20 @@ begin
          LineState := lsGotText2Length;
        end;
 
+     lsGotText2:
+        begin
+          if JnlEntryType = jeTransStart then
+          begin
+            DefaultCompletion := TTransactionCompletion(StrToInt(TokenText));
+            if assigned(FOnNextJournalEntry) then
+              OnNextJournalEntry(JnlEntry);
+          end;
+          LineState := lsInit;
+        end;
      end; {case LineState}
     end; {case token}
   end; {while}
+  ClearJnlEntry;
 end;
 
 function TJournalProcessor.IdentifyJnlEntry(aTokenText: AnsiString
@@ -2918,7 +2975,7 @@ begin
   end;
 end;
 
-function TJournalProcessor.JnlEntryText(je: TJnlEntryType): string;
+class function TJournalProcessor.JnlEntryText(je: TJnlEntryType): string;
 begin
   case je of
   jeTransStart:
@@ -2952,12 +3009,13 @@ begin
   inherited Destroy;
 end;
 
-class procedure TJournalProcessor.Execute(aFileName: string;
+class procedure TJournalProcessor.Execute(aFileName: string; api: IFirebirdAPI;
   aOnNextJournalEntry: TOnNextJournalEntry);
 begin
   with TJournalProcessor.Create do
   try
     FInStream := TFileStream.Create(aFileName,fmOpenRead);
+    FFirebirdClientAPI := api;
     OnNextJournalEntry := aOnNextJournalEntry;
     DoExecute;
   finally
