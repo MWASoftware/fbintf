@@ -39,7 +39,7 @@ interface
 
 uses
   Classes, SysUtils, {$IFDEF WINDOWS} windows, {$ENDIF} IB,  FBParamBlock,
-  FBActivityMonitor, FBClientAPI;
+  FBActivityMonitor, FBClientAPI, IBUtils;
 
 const
   DefaultMaxInlineBlobLimit = 8192;
@@ -294,7 +294,7 @@ type
 
 implementation
 
-uses FBMessages, IBUtils, IBErrorCodes, FBTransaction {$IFDEF HASREQEX}, RegExpr{$ENDIF};
+uses FBMessages, IBErrorCodes, FBTransaction {$IFDEF HASREQEX}, RegExpr{$ENDIF};
 
 const
   {Journaling}

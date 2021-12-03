@@ -49,6 +49,15 @@ interface
 
 uses Classes, SysUtils, IB;
 
+{$IF not defined(LineEnding)}
+const
+  {$IFDEF WINDOWS}
+  LineEnding = #$0D#$0A;
+  {$ELSE}
+  LineEnding = #$0A;
+  {$ENDIF}
+{$IFEND}
+
 type
   TSQLTokens = (
 
@@ -300,10 +309,6 @@ const
   LF   = #10;
   TAB  = #9;
   NULL_TERMINATOR = #0;
-
-  {$IFNDEF FPC}
-  LineEnding = CRLF;
-  {$ENDIF}
 
   {SQL Reserved words in alphabetical order}
 
@@ -699,7 +704,7 @@ type
     function GetErrorPrefix: string; virtual; abstract;
     function TokenFound(var token: TSQLTokens): boolean; override;
     procedure Reset; override;
-    procedure ShowError(msg: string; params: array of const); virtual; overload;
+    procedure ShowError(msg: string; params: array of const); overload; virtual;
     procedure ShowError(msg: string); overload;
   public
     constructor Create;
@@ -796,7 +801,7 @@ procedure StringToHex(octetString: string; TextOut: TStrings; MaxLineLength: int
 
 implementation
 
-uses FBMessages, Math
+uses FBMessages, Math, FBClientAPI
 
 {$IFDEF FPC}
 ,RegExpr
@@ -2104,7 +2109,7 @@ begin
   if MaxLineLength = 0 then
   while i <= Length(octetString) do
   begin
-    Result += ToHex(byte(octetString[i]));
+    Result := Result +  ToHex(byte(octetString[i]));
     Inc(i);
   end
   else
@@ -2115,10 +2120,10 @@ begin
         if i > Length(octetString) then
           Exit
         else
-          Result += ToHex(byte(octetString[i]));
+          Result := Result + ToHex(byte(octetString[i]));
         inc(i);
       end;
-      Result += LineEnding;
+      Result := Result + LineEnding;
   end;
 end;
 
@@ -2303,7 +2308,7 @@ procedure TSQLXMLReader.ProcessTagValue(tagValue: string);
     if odd(length(hexData)) then
       ShowError(sBinaryBlockMustbeEven,[nil]);
     blength := Length(hexData) div 2;
-    FBlobBuffer := GetMem(blength);
+    ReallocMem(FBlobBuffer,blength);
     j := 1;
     P := FBlobBuffer;
     for i := 1 to blength do
@@ -2440,7 +2445,7 @@ function TSQLXMLReader.TokenFound(var token: TSQLTokens): boolean;
      begin
        {Not an XML tag, so just push back to XML Data}
        FXMLState := stXMLData;
-       FXMLString += GetQueuedText;
+       FXMLString := FXMLString + GetQueuedText;
        ResetQueue;
      end;
    end;
@@ -2565,7 +2570,7 @@ begin
       FXMLState := stInTag;
     end
     else
-      FXMLString += TokenText;
+      FXMLString := FXMLString + TokenText;
 
   stInEndTag:
     {Opening '</' found, now looking for tag name}
@@ -2717,20 +2722,20 @@ begin
                                  ar.GetTableName,ar.GetColumnName]);
     case ar.GetSQLType of
     SQL_DOUBLE, SQL_FLOAT, SQL_LONG, SQL_SHORT, SQL_D_FLOAT, SQL_INT64:
-       s += Format(' scale = "%d"',[ ar.GetScale]);
+       s := s + Format(' scale = "%d"',[ ar.GetScale]);
     SQL_TEXT,
     SQL_VARYING:
-      s += Format(' charset = "%s"',[Attachment.GetCharsetName(ar.GetCharSetID)]);
+      s := s + Format(' charset = "%s"',[Attachment.GetCharsetName(ar.GetCharSetID)]);
     end;
     bounds := ar.GetBounds;
     boundsList := '';
     for i := 0 to length(bounds) - 1 do
     begin
-      if i <> 0 then boundsList += ',';
-      boundsList += Format('%d:%d',[bounds[i].LowerBound,bounds[i].UpperBound]);
+      if i <> 0 then boundsList := boundsList + ',';
+      boundsList := boundsList + Format('%d:%d',[bounds[i].LowerBound,bounds[i].UpperBound]);
     end;
-    s += Format(' bounds="%s"',[boundsList]);
-    s += '>';
+    s := s + Format(' bounds="%s"',[boundsList]);
+    s := s + '>';
     TextOut.Add(s);
 
     SetLength(index,0);

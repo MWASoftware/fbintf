@@ -170,7 +170,7 @@ end;
 
   TTrInfoItem = class(TOutputBlockItemGroup<TTrInfoItem,ITrInfoItem>,ITrInfoItem)
   {$ELSE}
-    TTransInfoItem = class(TOutputBlockItemGroup<TOutputBlockItem,ITransInfoItem>,ITransInfoItem)
+    TTrInfoItem = class(TOutputBlockItemGroup<TOutputBlockItem,ITrInfoItem>,ITrInfoItem)
   {$ENDIF}
     public
       procedure DecodeTraIsolation(var IsolationType, RecVersion: byte);
@@ -184,9 +184,10 @@ end;
   public
     constructor Create(api: TFBClientAPI; aSize: integer = DefaultBufferSize);
     {$IFNDEF FPC}
-    function Find(ItemType: byte): ITransInfoItem;
+    function Find(ItemType: byte): ITrInfoItem;
     {$ENDIF}
   end;
+
 
 implementation
 
@@ -580,6 +581,15 @@ begin
   inherited Create(api,aSize);
   FIntegerType := dtInteger;
 end;
+
+{$IFNDEF FPC}
+function TTrInformation.Find(ItemType: byte): ITrInfoItem;
+begin
+  Result := inherited Find(ItemType);
+  if Result.GetSize = 0 then
+    Result := nil;
+end;
+{$ENDIF}
 
 end.
 

@@ -211,7 +211,11 @@ procedure TTest22.HandleOnJnlEntry(JnlEntry: TJnlEntry);
 begin
   with JnlEntry do
   begin
+    {$IFNDEF FPC}
+    writeln(OutFile,'Journal Entry = ',ord(JnlEntryType),'(', TJournalProcessor.JnlEntryText(JnlEntryType),')');
+    {$ELSE}
     writeln(OutFile,'Journal Entry = ',JnlEntryType,'(', TJournalProcessor.JnlEntryText(JnlEntryType),')');
+    {$ENDIF}
     writeln(OutFile,'Session ID = ',SessionID);
     writeln(OutFile,'Transaction ID = ',TransactionID);
     case JnlEntry.JnlEntryType of
@@ -219,7 +223,11 @@ begin
       begin
         writeln(OutFile,'Transaction Name = "',TransactionName,'"');
         PrintTPB(TPB);
+        {$IFNDEF FPC}
+        writeln(OutFile,'Default Completion = ',ord(DefaultCompletion));
+        {$ELSE}
         writeln(OutFile,'Default Completion = ',DefaultCompletion);
+        {$ENDIF}
       end;
 
     jeTransRollback,
