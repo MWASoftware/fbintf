@@ -711,7 +711,7 @@ type
     procedure FreeDataObjects;
     class function FormatBlob(Field: ISQLData): string; overload;
     class function FormatBlob(contents: string; subtype:integer): string; overload;
-    class function FormatArray(Attachment: IAttachment; ar: IArray): string;
+    class function FormatArray(ar: IArray): string;
     property BlobData[index: integer]: TBlobData read GetBlobData;
     property BlobDataCount: integer read GetBlobDataCount;
     property ArrayData[index: integer]: TArrayData read GetArrayData;
@@ -819,8 +819,6 @@ resourcestring
   sXMLAttributeError = 'Unexpected attribute - "%s" = "%s"';
   sInvalidBoundsList = 'Invalid array bounds list - "%s"';
   sBinaryBlockMustbeEven = 'Binary block must have an even number of characters';
-  sInvalidCharacterSet = 'Unrecognised character set name - "%s"';
-  sOnLineError = 'On Line %d Character %d: ';
   sArrayIndexError = 'Array Index Error (%d)';
   sBlobIndexError = 'Blob Index Error (%d)';
   sNoDatabase = 'Missing database for xml tag import';
@@ -2674,7 +2672,7 @@ begin
 end;
 
 
-class function TSQLXMLReader.FormatArray(Attachment: IAttachment; ar: IArray
+class function TSQLXMLReader.FormatArray(ar: IArray
   ): string;
 var index: array of integer;
     TextOut: TStrings;
@@ -2725,7 +2723,7 @@ begin
        s := s + Format(' scale = "%d"',[ ar.GetScale]);
     SQL_TEXT,
     SQL_VARYING:
-      s := s + Format(' charset = "%s"',[Attachment.GetCharsetName(ar.GetCharSetID)]);
+      s := s + Format(' charset = "%s"',[ar.GetAttachment.GetCharsetName(ar.GetCharSetID)]);
     end;
     bounds := ar.GetBounds;
     boundsList := '';

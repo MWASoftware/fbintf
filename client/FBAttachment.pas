@@ -552,7 +552,7 @@ begin
         Result := TSQLXMLReader.FormatBlob(GetAsString,getSubType);
 
     SQL_ARRAY:
-        Result := TSQLXMLReader.FormatArray(FStmt.GetAttachment,getAsArray);
+        Result := TSQLXMLReader.FormatArray(getAsArray);
 
     SQL_VARYING,
     SQL_TEXT,
