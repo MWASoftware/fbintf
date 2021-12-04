@@ -50,11 +50,9 @@ type
 
   TTest22 = class(TFBTestBase)
   private
-    procedure PrintJournalTable(Attachment: IAttachment);
     procedure UpdateDatabase(Attachment: IAttachment);
     procedure QueryDatabase(Attachment: IAttachment);
     procedure ValidateStrToNumeric;
-    procedure HandleOnJnlEntry(JnlEntry: TJnlEntry);
   public
     function TestTitle: AnsiString; override;
     procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
@@ -206,58 +204,6 @@ begin
   end;
 end;
 
-procedure TTest22.HandleOnJnlEntry(JnlEntry: TJnlEntry);
-
-begin
-  with JnlEntry do
-  begin
-    {$IFNDEF FPC}
-    writeln(OutFile,'Journal Entry = ',ord(JnlEntryType),'(', TJournalProcessor.JnlEntryText(JnlEntryType),')');
-    {$ELSE}
-    writeln(OutFile,'Journal Entry = ',JnlEntryType,'(', TJournalProcessor.JnlEntryText(JnlEntryType),')');
-    {$ENDIF}
-    writeln(OutFile,'Session ID = ',SessionID);
-    writeln(OutFile,'Transaction ID = ',TransactionID);
-    case JnlEntry.JnlEntryType of
-    jeTransStart:
-      begin
-        writeln(OutFile,'Transaction Name = "',TransactionName,'"');
-        PrintTPB(TPB);
-        {$IFNDEF FPC}
-        writeln(OutFile,'Default Completion = ',ord(DefaultCompletion));
-        {$ELSE}
-        writeln(OutFile,'Default Completion = ',DefaultCompletion);
-        {$ENDIF}
-      end;
-
-    jeTransRollback,
-    jeTransRollbackRet,
-    jeTransCommit,
-    jeTransCommitRet:
-      writeln(OutFile,'Phase No = ',PhaseNo);
-
-    jeQuery:
-      begin
-        writeln(OutFile,'Phase No = ',PhaseNo);
-        writeln(OutFile,'Query = ',QueryText);
-      end;
-    end;
-  end;
-  writeln(OutFile);
-end;
-
-procedure TTest22.PrintJournalTable(Attachment: IAttachment);
-var Results: IResultSet;
-begin
-  writeln(OutFile,'Journal Table');
-  Results := Attachment.OpenCursorAtStart('Select * From IBX$JOURNALS');
-  while not Results.IsEof do
-  begin
-    ReportResult(Results);
-    Results.Fetchnext;
-  end;
-end;
-
 function TTest22.TestTitle: AnsiString;
 begin
   Result := 'Test 22: Journalling';
@@ -287,13 +233,7 @@ begin
   end;
   Attachment.StopJournaling;
   writeln(OutFile);
-  writeln(OutFile,'Journal Entries');
-  with TJournalProcessor.Create do
-  try
-     Execute('Test'+GetTestID+'.log',FirebirdAPI,HandleOnJnlEntry);
-  finally
-    Free
-  end;
+  PrintJournalFile('Test'+GetTestID+'.log');
 end;
 
 initialization
