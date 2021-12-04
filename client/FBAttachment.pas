@@ -306,8 +306,9 @@ const
     'Create Table ' + sJournalTableName + '(' +
     '  IBX$SessionID Integer not null, '+
     '  IBX$TransactionID Integer not null, '+
-    '  IBX$USER VarChar(32) Default CURRENT_USER,'+
-    '  IBX$TIMESTAMP TIMESTAMP Default CURRENT_TIMESTAMP,'+
+    '  IBX$PhaseNo Integer default 0, '+
+    '  IBX$USER VarChar(32) Default CURRENT_USER, '+
+    '  IBX$TIMESTAMP TIMESTAMP Default CURRENT_TIMESTAMP, '+
     '  Primary Key(IBX$SessionID,IBX$TransactionID)' +
     ')';
 
@@ -317,6 +318,9 @@ const
 
   sqlRecordJournalEntry = 'Insert into ' + sJournalTableName + '(IBX$SessionID,IBX$TransactionID) '+
                         'Values(?,?)';
+
+  sUpdateJnlEntry = 'Update '+  sJournalTableName + ' Set IBX$PhaseNo = ? Where '+
+                        'IBX$SessionID + ? and IBX$TransactionID = ';
 
   sqlCleanUpSession = 'Delete From ' + sJournalTableName + ' Where ' + sSequenceName + ' = ?';
 
@@ -652,6 +656,17 @@ end;
 
 procedure TFBJournaling.TransactionEnd(Tr: ITransaction;
   Action: TTransactionAction);
+
+  procedure UpdateJournal;
+  begin
+    FDoNotJournal := true;
+    try
+      GetAttachment.ExecuteSQL(Tr,sUpdateJnlEntry,[Tr.GetPhaseNo,FSessionID,Tr.GetTransactionID]);
+    finally
+      FDoNotJournal := false;
+    end;
+  end;
+
 var LogEntry: AnsiString;
 begin
   if JournalingActive and
@@ -664,9 +679,15 @@ begin
     TACommit:
       LogEntry := Format(sTransCommitJnl,[FSessionID,Tr.GetTransactionID,Tr.GetPhaseNo]);
     TACommitRetaining:
-      LogEntry := Format(sTransCommitRetJnl,[FSessionID,Tr.GetTransactionID,Tr.GetPhaseNo]);
+      begin
+        LogEntry := Format(sTransCommitRetJnl,[FSessionID,Tr.GetTransactionID,Tr.GetPhaseNo]);
+        UpdateJournal;
+      end;
     TARollbackRetaining:
-      LogEntry := Format(sTransRollbackRetJnl,[FSessionID,Tr.GetTransactionID,Tr.GetPhaseNo]);
+      begin
+        LogEntry := Format(sTransRollbackRetJnl,[FSessionID,Tr.GetTransactionID,Tr.GetPhaseNo]);
+        UpdateJournal;
+      end;
     end;
     if assigned(FJournalFileStream) then
       FJournalFileStream.Write(LogEntry[1],Length(LogEntry));
