@@ -320,7 +320,7 @@ const
                         'Values(?,?)';
 
   sUpdateJnlEntry = 'Update '+  sJournalTableName + ' Set IBX$PhaseNo = ? Where '+
-                        'IBX$SessionID + ? and IBX$TransactionID = ';
+                        'IBX$SessionID = ? and IBX$TransactionID = ?';
 
   sqlCleanUpSession = 'Delete From ' + sJournalTableName + ' Where ' + sSequenceName + ' = ?';
 
