@@ -726,6 +726,7 @@ type
 
  TJnlEntry = record
    JnlEntryType: TJnlEntryType;
+   Timestamp: TDateTime;
    SessionID: integer;
    TransactionID: integer;
    TransactionName: AnsiString;
@@ -741,7 +742,7 @@ type
 
    TJournalProcessor = class(TSQLTokeniser)
     private
-      type TLineState = (lsInit, lsJnlFound, lsGotJnlType,  lsGotSessionID,
+      type TLineState = (lsInit, lsJnlFound, lsGotTimestamp, lsGotJnlType,  lsGotSessionID,
                           lsGotTransactionID, lsGotPhaseNo, lsGotText1Length,
                           lsGotText1, lsGotText2Length, lsGotText2);
     private
@@ -2760,6 +2761,7 @@ var token: TSQLTokens;
     LineState: TLineState;
     JnlEntry: TJnlEntry;
     Len: integer;
+    tz: AnsiString;
 
   procedure ClearJnlEntry;
   begin
@@ -2829,6 +2831,13 @@ begin
       else
         LineState := lsInit;
 
+    sqltQuotedString:
+      if (LineState = lsGotJnlType)
+          and ParseDateTimeTZString(TokenText,TimeStamp,tz) then
+            LineState := lsGotTimestamp
+      else
+        LineState := lsInit;
+
     sqltColon:
       case LineState of
       lsGotText1Length:
@@ -2863,12 +2872,12 @@ begin
     end;
 
    sqltComma:
-     if not (LineState in [lsGotSessionID,lsGotTransactionID,lsGotPhaseNo,lsGotText1,lsGotText2]) then
+     if not (LineState in [lsGotTimestamp,lsGotSessionID,lsGotTransactionID,lsGotPhaseNo,lsGotText1,lsGotText2]) then
        LineState := lsInit;
 
    sqltNumberString:
      case LineState of
-     lsGotJnlType:
+     lsGotTimestamp:
        begin
          SessionID := StrToInt(TokenText);
          LineState := lsGotSessionID;
@@ -3026,5 +3035,6 @@ begin
     Free
   end;
 end;
+
 
 end.

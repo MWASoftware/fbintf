@@ -69,25 +69,25 @@ type
     Syntax:
 
     Transaction Start:
-    !S:<session id>,<transaction no.>,<string length>:<transaction Name>,<string length>:<TPB>,<default Completion>
+    !S:<date/time>,<session id>,<transaction no.>,<string length>:<transaction Name>,<string length>:<TPB>,<default Completion>
 
     Transaction Commit (retaining) Called :
-    !C:<session id>,<transaction no.>,<phase no.>
+    !C:<date/time>,<session id>,<transaction no.>,<phase no.>
 
     Transaction Commit retaining Called :
-    !c:<session id>,<transaction no.>,<phase no.>
+    !c:<date/time>,<session id>,<transaction no.>,<phase no.>
 
     Transaction Rollback Called:
-    !R:<session id>,<transaction no.>,<phase no.>
+    !R:<date/time>,<session id>,<transaction no.>,<phase no.>
 
     Transaction Rollback retaining Called:
-    !r:<session id>,<transaction no.>,<phase no.>
+    !r:<date/time>,<session id>,<transaction no.>,<phase no.>
 
     Transaction Commit/Rollback  Completed:
-    !E:<session id>,<transaction no.>
+    !E:<date/time>,<session id>,<transaction no.>
 
     Update/Insert/Delete
-    !Q:<session id>,<transaction no.>,<phase no.>,<length of query text in bytes>:<query text>
+    !Q:<date/time>,<session id>,<transaction no.>,<phase no.>,<length of query text in bytes>:<query text>
 
   }
 
@@ -96,13 +96,13 @@ type
   TFBJournaling = class(TActivityHandler, IJournallingHook)
   private
     {Logfile}
-    const sQueryJournal          = '*Q:%d,%d,%d,%d:%s' + LineEnding;
-    const sTransStartJnl         = '*S:%d,%d,%d:%s,%d:%s,%d' + LineEnding;
-    const sTransCommitJnl        = '*C:%d,%d,%d' + LineEnding;
-    const sTransCommitRetJnl     = '*c:%d,%d,%d' + LineEnding;
-    const sTransRollBackJnl      = '*R:%d,%d,%d' + LineEnding;
-    const sTransRollBackRetJnl   = '*e:%d,%d,%d' + LineEnding;
-    const sTransEndJnl           = '*E:%d,%d' + LineEnding;
+    const sQueryJournal          = '*Q:''%s'',%d,%d,%d,%d:%s' + LineEnding;
+    const sTransStartJnl         = '*S:''%s'',%d,%d,%d:%s,%d:%s,%d' + LineEnding;
+    const sTransCommitJnl        = '*C:''%s'',%d,%d,%d' + LineEnding;
+    const sTransCommitRetJnl     = '*c:''%s'',%d,%d,%d' + LineEnding;
+    const sTransRollBackJnl      = '*R:''%s'',%d,%d,%d' + LineEnding;
+    const sTransRollBackRetJnl   = '*e:''%s'',%d,%d,%d' + LineEnding;
+    const sTransEndJnl           = '*E:''%s'',%d,%d' + LineEnding;
   private
     FOptions: TJournalOptions;
     FJournalFilePath: string;
@@ -110,8 +110,9 @@ type
     FSessionID: integer;
     FRetainJournal: boolean;
     FDoNotJournal: boolean;
+    function GetDateTimeFmt: AnsiString;
     procedure EndSession;
- protected
+  protected
     function GetAttachment: IAttachment; virtual; abstract;
   public
     {IAttachment}
@@ -602,6 +603,20 @@ end;
 
 { TFBJournaling }
 
+function TFBJournaling.GetDateTimeFmt: AnsiString;
+begin
+  {$IF declared(DefaultFormatSettings)}
+  with DefaultFormatSettings do
+  {$ELSE}
+  {$IF declared(FormatSettings)}
+  with FormatSettings do
+  {$IFEND}
+  {$IFEND}
+  Result := ShortDateFormat + ' ' + LongTimeFormat + '.zzzz'
+{  Result := 'yyyy' + DateSeparator + 'mm' + DateSeparator +
+                             'dd hh' + TimeSeparator + 'nn' + TimeSeparator + 'ss.zzzz';}
+end;
+
 procedure TFBJournaling.EndSession;
 begin
   if JournalingActive then
@@ -643,7 +658,8 @@ begin
       FDoNotJournal := false;
     end;
     TPBText := Tr.getTPB.AsText;
-    LogEntry := Format(sTransStartJnl,[FSessionID,
+    LogEntry := Format(sTransStartJnl,[FBFormatDateTime(GetDateTimeFmt,Now),
+                                       FSessionID,
                                        Tr.GetTransactionID,
                                        Length(Tr.TransactionName),
                                        Tr.TransactionName,
@@ -675,17 +691,17 @@ begin
   begin
     case Action of
     TARollback:
-      LogEntry := Format(sTransRollbackJnl,[FSessionID,Tr.GetTransactionID,Tr.GetPhaseNo]);
+      LogEntry := Format(sTransRollbackJnl,[FBFormatDateTime(GetDateTimeFmt,Now),FSessionID,Tr.GetTransactionID,Tr.GetPhaseNo]);
     TACommit:
-      LogEntry := Format(sTransCommitJnl,[FSessionID,Tr.GetTransactionID,Tr.GetPhaseNo]);
+      LogEntry := Format(sTransCommitJnl,[FBFormatDateTime(GetDateTimeFmt,Now),FSessionID,Tr.GetTransactionID,Tr.GetPhaseNo]);
     TACommitRetaining:
       begin
-        LogEntry := Format(sTransCommitRetJnl,[FSessionID,Tr.GetTransactionID,Tr.GetPhaseNo]);
+        LogEntry := Format(sTransCommitRetJnl,[FBFormatDateTime(GetDateTimeFmt,Now),FSessionID,Tr.GetTransactionID,Tr.GetPhaseNo]);
         UpdateJournal;
       end;
     TARollbackRetaining:
       begin
-        LogEntry := Format(sTransRollbackRetJnl,[FSessionID,Tr.GetTransactionID,Tr.GetPhaseNo]);
+        LogEntry := Format(sTransRollbackRetJnl,[FBFormatDateTime(GetDateTimeFmt,Now),FSessionID,Tr.GetTransactionID,Tr.GetPhaseNo]);
         UpdateJournal;
       end;
     end;
@@ -702,7 +718,7 @@ begin
      ((((joReadOnlyTransactions in FOptions) and IsReadOnly)) or
      ((joReadWriteTransactions in FOptions) and not IsReadOnly)) then
   begin
-    LogEntry := Format(sTransEndJnl,[FSessionID,TransactionID]);
+    LogEntry := Format(sTransEndJnl,[FBFormatDateTime(GetDateTimeFmt,Now),FSessionID,TransactionID]);
     if assigned(FJournalFileStream) then
       FJournalFileStream.Write(LogEntry[1],Length(LogEntry));
   end;
@@ -727,7 +743,8 @@ begin
    ((joModifyQueries in FOptions) and (RowsAffected > 0))) then
   begin
     SQL := TQueryProcessor.Execute(Stmt);
-    LogEntry := Format(sQueryJournal,[FSessionID,
+    LogEntry := Format(sQueryJournal,[FBFormatDateTime(GetDateTimeFmt,Now),
+                                      FSessionID,
                                       Stmt.GetTransaction.GetTransactionID,
                                       Stmt.GetTransaction.GetPhaseNo,
                                       Length(SQL),SQL]);
