@@ -55,6 +55,7 @@ Creating a Database with a DPD
 Database ID = 4 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = zeus
 ODS major = 11
 ODS minor = 2
+Attachment ID = 2
 DB Connect String = localhost:/tmp/fbintf-testsuite/testsuite1.fdb
 DB Charset ID = 4
 DB SQL Dialect = 3
@@ -534,12 +535,12 @@ Running Test 3: ad hoc queries
 Opening localhost:employee
 Database Open
 Employee Count = 42
-Transaction ID = 4979
+Transaction ID = 5054
 Transaction is Read/Write
-Transaction ID = 4979
+Transaction ID = 5054
 Oldest Interesting = 4949
-Oldest Action = 4978
-Oldest Snapshot = 4978
+Oldest Action = 5053
+Oldest Snapshot = 5053
 Oldest Interesting = 0
 Employee Count = 41
 Employee Count = 42
@@ -573,8 +574,8 @@ FULL_NAME = Johnson, Leslie
 
 Current memory = 948,520
 Delta memory = 1,288
-Max memory = 992,448
-Elapsed time= 0.003 sec
+Max memory = 992,456
+Elapsed time= 0.001 sec
 Cpu = 0.000 sec
 Buffers = 75
 Reads = 0
@@ -2727,7 +2728,7 @@ Unknown Response 3
 Unknown Response 3
 Server Memory = 841392
 Forced Writes  = 1
-Max Memory  = 879288
+Max Memory  = 879352
 Num Buffers  = 75
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
@@ -3521,16 +3522,6 @@ STR = NULL
 TEXTBLOB = NULL
 OTHERBLOB = NULL
 MYARRAY = NULL
-ROWID = 3
-ITYPE = 0
-I64TYPE = 0
-CURRTYPE = .00000000
-DTYPE = .00000000
-FIXEDPOINT = .00000000
-STR = NULL
-TEXTBLOB = NULL
-OTHERBLOB = NULL
-MYARRAY = NULL
 ROWID = 4
 ITYPE = 1
 I64TYPE = 10
@@ -3545,11 +3536,18 @@ MYARRAY = NULL
 Journal Table
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 8
+IBX$OLDTRANSACTIONID = -1
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$TIMESTAMP = 2021/12/03 15:11:35.6440
+IBX$CREATED = 2021/12/06 16:59:08.5180
+IBX$SESSIONID = 1
+IBX$TRANSACTIONID = 10
+IBX$OLDTRANSACTIONID = 9
+IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
+IBX$CREATED = 2021/12/06 16:59:10.1300
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)
+Timestamp = 2021/12/06 16:59:08.6550
 Session ID = 1
 Transaction ID = 8
 Transaction Name = "Transaction_29_1"
@@ -3561,32 +3559,45 @@ TPB: Item Count = 3
 Default Completion = TACommit
 
 Journal Entry = jeQuery(Query)
+Timestamp = 2021/12/06 16:59:08.7970
 Session ID = 1
 Transaction ID = 8
-Phase No = 0
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(1,101,9223372036854775807,10000.1234,9999.12345678,1234567890.12346)
 
 Journal Entry = jeQuery(Query)
+Timestamp = 2021/12/06 16:59:08.8170
 Session ID = 1
 Transaction ID = 8
-Phase No = 0
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(2,-32457,-9223372036854775808,1000001.12,1.7E308,-1234567890.12346)
 
-Journal Entry = jeQuery(Query)
+Journal Entry = jeTransCommitRet(Commit Retaining)
+Timestamp = 2021/12/06 16:59:09.4530
 Session ID = 1
-Transaction ID = 8
-Phase No = 0
-Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(3,0,0,0,0,0)
+Transaction ID = 9
+Old TransactionID = 8
 
 Journal Entry = jeQuery(Query)
+Timestamp = 2021/12/06 16:59:09.4750
 Session ID = 1
-Transaction ID = 8
-Phase No = 0
+Transaction ID = 9
+Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(3,0,0,0,0,0)
+
+Journal Entry = jeTransRollbackRet(Rollback Retaining)
+Timestamp = 2021/12/06 16:59:10.1280
+Session ID = 1
+Transaction ID = 10
+Old TransactionID = 9
+
+Journal Entry = jeQuery(Query)
+Timestamp = 2021/12/06 16:59:10.1470
+Session ID = 1
+Transaction ID = 10
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(4,1,10,0.023,0.0011,233.456)
 
 Journal Entry = jeTransStart(Transaction Start)
+Timestamp = 2021/12/06 16:59:10.2490
 Session ID = 1
-Transaction ID = 9
+Transaction ID = 11
 Transaction Name = "Transaction_29_2"
 TPB: Item Count = 3
   isc_tpb_write
@@ -3596,18 +3607,14 @@ TPB: Item Count = 3
 Default Completion = TARollback
 
 Journal Entry = jeTransCommit(Commit)
+Timestamp = 2021/12/06 16:59:10.5540
 Session ID = 1
-Transaction ID = 8
-Phase No = 0
-
-Journal Entry = jeTransEnd(Transaction End)
-Session ID = 1
-Transaction ID = 8
+Transaction ID = 10
 
 Journal Entry = jeQuery(Query)
+Timestamp = 2021/12/06 16:59:10.5830
 Session ID = 1
-Transaction ID = 9
-Phase No = 0
+Transaction ID = 11
 Query = Insert into TestData(RowID, Str, TextBlob) Values(5,'It''s the quick brown fox jumps over the lazy dog','To be or not to be-that is the question:
 Whether ''tis nobler in the mind to suffer
 The slings and arrows of outrageous fortune,
@@ -3646,9 +3653,9 @@ Be all my sins remembered
 ')
 
 Journal Entry = jeQuery(Query)
+Timestamp = 2021/12/06 16:59:10.5970
 Session ID = 1
-Transaction ID = 9
-Phase No = 0
+Transaction ID = 11
 Query = Insert into TestData(RowID,OtherBlob) Values (6,<blob subtype="0">
 FFD8FFE000104A46494600010101004800480000FFE11E0545786966000049492A00080000000C00
 0E010200200000009E0000000F01020014000000BE0000001001020008000000D200000012010300
@@ -3657,9 +3664,9 @@ FFD8FFE000104A46494600010101004800480000FFE11E0545786966000049492A00080000000C00
 )
 
 Journal Entry = jeQuery(Query)
+Timestamp = 2021/12/06 16:59:10.6170
 Session ID = 1
-Transaction ID = 9
-Phase No = 0
+Transaction ID = 11
 Query = Insert into TestData(RowID,MyArray) Values (7,<array dim = "1" sqltype = "496" length = "4" relation_name = "TESTDATA" column_name = "MYARRAY" scale = "0" bounds="0:16">
  <elt ix="0">100</elt>
  <elt ix="1">99</elt>
@@ -3682,13 +3689,9 @@ Query = Insert into TestData(RowID,MyArray) Values (7,<array dim = "1" sqltype =
 )
 
 Journal Entry = jeTransRollback(Rollback)
+Timestamp = 2021/12/06 16:59:11.0360
 Session ID = 1
-Transaction ID = 9
-Phase No = 0
-
-Journal Entry = jeTransEnd(Transaction End)
-Session ID = 1
-Transaction ID = 9
+Transaction ID = 11
 
 
 
