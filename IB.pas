@@ -885,7 +885,7 @@ type
     function GetInTransaction: boolean;
     function GetIsReadOnly: boolean;
     function GetTransactionID: integer;
-    function GetPhaseNo: integer;
+    function GetJournalingActive(attachment: IAttachment): boolean;
     function GetDefaultCompletion: TTransactionCompletion;
     procedure PrepareForCommit; {Two phase commit - stage 1}
     procedure Commit(Force: boolean=false);
@@ -1219,6 +1219,7 @@ type
 
     {Client side Journaling}
     function JournalingActive: boolean;
+    function GetJournalOptions: TJournalOptions;
     function StartJournaling(aJournalLogFile: AnsiString; RetainJournal: boolean): integer; overload;
     function StartJournaling(aJournalLogFile: AnsiString; RetainJournal: boolean; Options: TJournalOptions): integer; overload;
     procedure StopJournaling;

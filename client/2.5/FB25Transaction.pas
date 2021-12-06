@@ -87,6 +87,12 @@ type
     function GetActivityIntf(att: IAttachment): IActivityMonitor; override;
     function GetTrInfo(ReqBuffer: PByte; ReqBufLen: integer): ITrInformation; override;
     procedure SetInterface(api: TFBClientAPI); override;
+    procedure InternalStartSingle(attachment: IAttachment); override;
+    procedure InternalStartMultiple; override;
+    procedure InternalCommit(Force: boolean); override;
+    procedure InternalRollback(Force: boolean); override;
+    procedure InternalCommitRetaining; override;
+    procedure InternalRollbackRetaining; override;
   public
     property Handle: TISC_TR_HANDLE read FHandle;
 
@@ -94,11 +100,6 @@ type
     {ITransaction}
     function GetInTransaction: boolean; override;
     procedure PrepareForCommit; override;
-    procedure Commit(Force: boolean=false); override;
-    procedure CommitRetaining; override;
-    procedure Start(DefaultCompletion: TTransactionCompletion=taCommit); overload; override;
-    procedure Rollback(Force: boolean=false); override;
-    procedure RollbackRetaining; override;
  end;
 
 implementation
@@ -129,6 +130,76 @@ begin
   OnDatabaseError := FFirebird25ClientAPI.IBDataBaseError;
 end;
 
+procedure TFB25Transaction.InternalStartSingle(attachment: IAttachment);
+var db_handle: TISC_DB_HANDLE;
+begin
+  with FFirebird25ClientAPI do
+  try
+    db_handle := (attachment as TFB25Attachment).Handle;
+    Call(isc_start_transaction(StatusVector, @FHandle,1,
+              @db_handle,(FTPB as TTPB).getDataLength,(FTPB as TTPB).getBuffer));
+  except
+    FHandle := nil;
+    raise;
+  end
+end;
+
+procedure TFB25Transaction.InternalStartMultiple;
+var pteb: PISC_TEB_ARRAY;
+    i: integer;
+begin
+  pteb := nil;
+  with FFirebird25ClientAPI do
+  begin
+    IBAlloc(pteb, 0, Length(FAttachments) * SizeOf(TISC_TEB));
+     try
+        for i := 0 to Length(FAttachments) - 1 do
+        if (FAttachments[i] <> nil)  then
+        begin
+          pteb^[i].db_handle := @((FAttachments[i] as TFB25Attachment).Handle);
+          pteb^[i].tpb_length := (FTPB as TTPB).getDataLength;
+          pteb^[i].tpb_address := (FTPB as TTPB).getBuffer;
+        end;
+
+        try
+          Call(isc_start_multiple(StatusVector, @FHandle,
+                                   Length(FAttachments), PISC_TEB(pteb)));
+        except
+          FHandle := nil;
+          raise;
+        end;
+     finally
+        FreeMem(pteb);
+     end;
+  end;
+end;
+
+procedure TFB25Transaction.InternalCommit(Force: boolean);
+begin
+  with FFirebird25ClientAPI do
+    Call(isc_commit_transaction(StatusVector, @FHandle),not Force);
+  FHandle := nil;
+end;
+
+procedure TFB25Transaction.InternalRollback(Force: boolean);
+begin
+  with FFirebird25ClientAPI do
+    Call(isc_rollback_transaction(StatusVector, @FHandle),not Force);
+  FHandle := nil;
+end;
+
+procedure TFB25Transaction.InternalCommitRetaining;
+begin
+  with FFirebird25ClientAPI do
+    Call(isc_commit_retaining(StatusVector, @FHandle));
+end;
+
+procedure TFB25Transaction.InternalRollbackRetaining;
+begin
+  with FFirebird25ClientAPI do
+    Call(isc_rollback_retaining(StatusVector, @FHandle));
+end;
+
 function TFB25Transaction.GetInTransaction: boolean;
 begin
   Result := FHandle <> nil;
@@ -142,101 +213,6 @@ begin
     Exit;
   with FFirebird25ClientAPI do
     Call(isc_prepare_transaction(StatusVector, @FHandle));
-end;
-
-procedure TFB25Transaction.Commit(Force: boolean);
-var IsReadOnly: boolean;
-    TransactionID: integer;
-begin
-  if FHandle = nil then
-    Exit;
-  IsReadOnly := GetIsReadOnly;
-  TransactionID := GetTransactionID;
-  JournalTransactionEnd(TACommit);
-  with FFirebird25ClientAPI do
-    Call(isc_commit_transaction(StatusVector, @FHandle),not Force);
-  JournalTransactionEndDone(IsReadOnly,TransactionID);
-  FHandle := nil;
-end;
-
-procedure TFB25Transaction.CommitRetaining;
-begin
-  if FHandle = nil then
-    Exit;
-  JournalTransactionEnd(TACommitRetaining);
-  with FFirebird25ClientAPI do
-    Call(isc_commit_retaining(StatusVector, @FHandle));
-  Inc(FPhaseNo);
-end;
-
-procedure TFB25Transaction.Start(DefaultCompletion: TTransactionCompletion);
-var pteb: PISC_TEB_ARRAY;
-    i: integer;
-    db_handle: TISC_DB_HANDLE;
-begin
-  if FHandle <> nil then
-    Exit;
-  pteb := nil;
-  FDefaultCompletion := DefaultCompletion;
-  with FFirebird25ClientAPI do
-  if (Length(FAttachments) = 1)  then
-  try
-    db_handle := (FAttachments[0] as TFB25Attachment).Handle;
-    Call(isc_start_transaction(StatusVector, @FHandle,1,
-              @db_handle,(FTPB as TTPB).getDataLength,(FTPB as TTPB).getBuffer));
-  except
-    FHandle := nil;
-    raise;
-  end
-  else
-  begin
-    IBAlloc(pteb, 0, Length(FAttachments) * SizeOf(TISC_TEB));
-     try
-        for i := 0 to Length(FAttachments) - 1 do
-        if (FAttachments[i] <> nil)  then
-        begin
-          pteb^[i].db_handle := @((FAttachments[i] as TFB25Attachment).Handle);
-          pteb^[i].tpb_length := (FTPB as TTPB).getDataLength;
-          pteb^[i].tpb_address := (FTPB as TTPB).getBuffer;
-        end;
-        try
-          Call(isc_start_multiple(StatusVector, @FHandle,
-                                   Length(FAttachments), PISC_TEB(pteb)));
-        except
-          FHandle := nil;
-          raise;
-        end;
-     finally
-        FreeMem(pteb);
-     end;
-  end;
-  Inc(FSeqNo);
-  JournalTransactionStart;
-end;
-
-procedure TFB25Transaction.Rollback(Force: boolean);
-var IsReadOnly: boolean;
-    TransactionID: integer;
-begin
-  if FHandle = nil then
-    Exit;
-  IsReadOnly := GetIsReadOnly;
-  TransactionID := GetTransactionID;
-  JournalTransactionEnd(TARollback);
-  with FFirebird25ClientAPI do
-    Call(isc_rollback_transaction(StatusVector, @FHandle),not Force);
-  JournalTransactionEndDone(IsReadOnly,TransactionID);
-  FHandle := nil;
-end;
-
-procedure TFB25Transaction.RollbackRetaining;
-begin
-  if FHandle = nil then
-    Exit;
-  JournalTransactionEnd(TARollbackRetaining);
-  with FFirebird25ClientAPI do
-    Call(isc_rollback_retaining(StatusVector, @FHandle));
-  Inc(FPhaseNo);
 end;
 
 end.

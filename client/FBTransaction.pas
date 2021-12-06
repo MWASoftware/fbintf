@@ -84,7 +84,6 @@ type
   protected
     FTPB: ITPB;
     FSeqNo: integer;
-    FPhaseNo: integer;
     FDefaultCompletion: TTransactionCompletion;
     FAttachments: array of IAttachment; {Keep reference to attachment - ensures
                                           attachment cannot be freed before transaction}
@@ -94,9 +93,12 @@ type
     function GetJournalIntf(Attachment: IAttachment): IJournallingHook;
     procedure SetInterface(api: TFBClientAPI); virtual;
     function GetTrInfo(ReqBuffer: PByte; ReqBufLen: integer): ITrInformation; virtual; abstract;
-    procedure JournalTransactionStart;
-    procedure JournalTransactionEnd(Action: TTransactionAction);
-    procedure JournalTransactionEndDone(IsReadOnly: boolean;TransactionID: integer);
+    procedure InternalStartSingle(attachment: IAttachment); virtual; abstract;
+    procedure InternalStartMultiple; virtual; abstract;
+    procedure InternalCommit(Force: boolean); virtual; abstract;
+    procedure InternalCommitRetaining; virtual; abstract;
+    procedure InternalRollback(Force: boolean); virtual; abstract;
+    procedure InternalRollbackRetaining; virtual; abstract;
   public
     constructor Create(api: TFBClientAPI; Attachments: array of IAttachment; Params: array of byte; DefaultCompletion: TTransactionAction; aName: AnsiString); overload;
     constructor Create(api: TFBClientAPI; Attachments: array of IAttachment; TPB: ITPB; DefaultCompletion: TTransactionAction; aName: AnsiString); overload;
@@ -110,18 +112,18 @@ type
     {ITransaction}
     function getTPB: ITPB;
     procedure PrepareForCommit;virtual; abstract;
-    procedure Commit(Force: boolean=false);  virtual; abstract;
-    procedure CommitRetaining;  virtual; abstract;
+    procedure Commit(Force: boolean=false);
+    procedure CommitRetaining;
     function GetInTransaction: boolean; virtual; abstract;
     function GetIsReadOnly: boolean;
     function GetTransactionID: integer;
     function GetAttachmentCount: integer;
     function GetAttachment(index: integer): IAttachment;
+    function GetJournalingActive(attachment: IAttachment): boolean;
     function GetDefaultCompletion: TTransactionCompletion;
-    function GetPhaseNo: integer;
-    procedure Rollback(Force: boolean=false);  virtual; abstract;
-    procedure RollbackRetaining;  virtual; abstract;
-    procedure Start(DefaultCompletion: TTransactionCompletion=taCommit); overload; virtual; abstract;
+    procedure Rollback(Force: boolean=false);
+    procedure RollbackRetaining;
+    procedure Start(DefaultCompletion: TTransactionCompletion=taCommit); overload;
     procedure Start(TPB: ITPB; DefaultCompletion: TTransactionCompletion=taCommit); overload;
     function GetTrInformation(Requests: array of byte): ITrInformation; overload;
     function GetTrInformation(Request: byte): ITrInformation; overload;
@@ -249,31 +251,6 @@ begin
   FFirebirdAPI := api;
 end;
 
-procedure TFBTransaction.JournalTransactionStart;
-var i: integer;
-begin
-  for i := 0 to Length(FAttachments) - 1 do
-    if (FAttachments[i] <> nil)  then
-      GetJournalIntf(FAttachments[i]).TransactionStart(self);
-end;
-
-procedure TFBTransaction.JournalTransactionEnd(Action: TTransactionAction);
-var i: integer;
-begin
-  for i := 0 to Length(FAttachments) - 1 do
-    if (FAttachments[i] <> nil)  then
-      GetJournalIntf(FAttachments[i]).TransactionEnd(self,Action);
-end;
-
-procedure TFBTransaction.JournalTransactionEndDone(IsReadOnly: boolean;
-  TransactionID: integer);
-var i: integer;
-begin
-  for i := 0 to Length(FAttachments) - 1 do
-    if (FAttachments[i] <> nil)  then
-      GetJournalIntf(FAttachments[i]).TransactionEndDone(IsReadOnly,TransactionID);
-end;
-
 constructor TFBTransaction.Create(api: TFBClientAPI; Attachments: array of IAttachment;
   Params: array of byte; DefaultCompletion: TTransactionAction; aName: AnsiString);
 begin
@@ -358,6 +335,39 @@ begin
   Result := FTPB;
 end;
 
+procedure TFBTransaction.Commit(Force: boolean);
+var i: integer;
+    TransactionID: integer;
+    TransactionEndNeeded: array of boolean;
+begin
+  if not GetInTransaction then Exit;
+
+  SetLength(TransactionEndNeeded,Length(FAttachments));
+  TransactionID := GetTransactionID;
+  for i := 0 to Length(FAttachments) - 1 do
+    if (FAttachments[i] <> nil)  then
+      TransactionEndNeeded[i] := GetJournalingActive(FAttachments[i])
+    else
+      TransactionEndNeeded[i] := false;
+  InternalCommit(Force);
+  for i := 0 to Length(FAttachments) - 1 do
+    if TransactionEndNeeded[i] then
+       GetJournalIntf(FAttachments[i]).TransactionEnd(TransactionID, TACommit);
+end;
+
+procedure TFBTransaction.CommitRetaining;
+var i: integer;
+    TransactionID: integer;
+begin
+  if not GetInTransaction then Exit;
+
+  TransactionID := GetTransactionID;
+  InternalCommitRetaining;
+  for i := 0 to Length(FAttachments) - 1 do
+    if (FAttachments[i] <> nil) and GetJournalingActive(FAttachments[i]) then
+       GetJournalIntf(FAttachments[i]).TransactionRetained(self,TransactionID, TACommitRetaining);
+end;
+
 function TFBTransaction.GetIsReadOnly: boolean;
 var Info: ITrInformation;
 begin
@@ -390,14 +400,69 @@ begin
     IBError(ibxeAttachmentListIndexError,[index]);
 end;
 
+function TFBTransaction.GetJournalingActive(attachment: IAttachment): boolean;
+begin
+  if attachment <> nil then
+  with attachment do
+  Result := self.GetInTransaction and JournalingActive and
+     ((((joReadOnlyTransactions in GetJournalOptions) and self.GetIsReadOnly)) or
+     ((joReadWriteTransactions in GetJournalOptions) and not self.GetIsReadOnly));
+end;
+
 function TFBTransaction.GetDefaultCompletion: TTransactionCompletion;
 begin
   Result := FDefaultCompletion;
 end;
 
-function TFBTransaction.GetPhaseNo: integer;
+procedure TFBTransaction.Rollback(Force: boolean);
+var i: integer;
+    TransactionID: integer;
+    TransactionEndNeeded: array of boolean;
 begin
-  Result := FPhaseNo;
+  if not GetInTransaction then Exit;
+
+  SetLength(TransactionEndNeeded,Length(FAttachments));
+  TransactionID := GetTransactionID;
+  for i := 0 to Length(FAttachments) - 1 do
+    if (FAttachments[i] <> nil)  then
+      TransactionEndNeeded[i] := GetJournalingActive(FAttachments[i])
+    else
+      TransactionEndNeeded[i] := false;
+  InternalRollback(Force);
+  for i := 0 to Length(FAttachments) - 1 do
+    if TransactionEndNeeded[i] then
+       GetJournalIntf(FAttachments[i]).TransactionEnd(TransactionID, TARollback);
+end;
+
+procedure TFBTransaction.RollbackRetaining;
+var i: integer;
+    TransactionID: integer;
+begin
+  if not GetInTransaction then Exit;
+
+  TransactionID := GetTransactionID;
+  InternalRollbackRetaining;
+  for i := 0 to Length(FAttachments) - 1 do
+    if (FAttachments[i] <> nil) and GetJournalingActive(FAttachments[i]) then
+       GetJournalIntf(FAttachments[i]).TransactionRetained(self,TransactionID,TARollbackRetaining);
+end;
+
+procedure TFBTransaction.Start(DefaultCompletion: TTransactionCompletion);
+var i: integer;
+begin
+  if GetInTransaction then
+    Exit;
+
+  FDefaultCompletion := DefaultCompletion;
+
+  if Length(FAttachments) = 1 then
+    InternalStartSingle(FAttachments[0])
+  else
+    InternalStartMultiple;
+  for i := 0 to Length(FAttachments) - 1 do
+    if (FAttachments[i] <> nil) and GetJournalingActive(FAttachments[i]) then
+      GetJournalIntf(FAttachments[i]).TransactionStart(self);
+  Inc(FSeqNo);
 end;
 
 procedure TFBTransaction.Start(TPB: ITPB; DefaultCompletion: TTransactionCompletion

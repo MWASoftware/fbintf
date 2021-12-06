@@ -729,10 +729,10 @@ type
    Timestamp: TDateTime;
    SessionID: integer;
    TransactionID: integer;
+   OldTransactionID: integer;
    TransactionName: AnsiString;
    TPB: ITPB;
    DefaultCompletion: TTransactionCompletion;
-   PhaseNo: integer;
    QueryText: AnsiString;
  end;
 
@@ -743,7 +743,7 @@ type
    TJournalProcessor = class(TSQLTokeniser)
     private
       type TLineState = (lsInit, lsJnlFound, lsGotTimestamp, lsGotJnlType,  lsGotSessionID,
-                          lsGotTransactionID, lsGotPhaseNo, lsGotText1Length,
+                          lsGotTransactionID,  lsGotOldTransactionID, lsGotText1Length,
                           lsGotText1, lsGotText2Length, lsGotText2);
     private
       FOnNextJournalEntry: TOnNextJournalEntry;
@@ -2773,7 +2773,6 @@ var token: TSQLTokens;
       JnlEntryType := jeUnknown;
       SessionID := 0;
       TransactionID := 0;
-      PhaseNo := 0;
       DefaultCompletion := taCommit;
     end;
   end;
@@ -2872,7 +2871,7 @@ begin
     end;
 
    sqltComma:
-     if not (LineState in [lsGotTimestamp,lsGotSessionID,lsGotTransactionID,lsGotPhaseNo,lsGotText1,lsGotText2]) then
+     if not (LineState in [lsGotTimestamp,lsGotSessionID,lsGotTransactionID,lsGotText1,lsGotText2]) then
        LineState := lsInit;
 
    sqltNumberString:
@@ -2886,7 +2885,7 @@ begin
      lsGotSessionID:
        begin
          TransactionID := StrToInt(TokenText);
-         if JnlEntryType = jeTransEnd then
+         if JnlEntryType in [jeTransCommit, jeTransRollback] then
          begin
            if assigned(FOnNextJournalEntry) then
              OnNextJournalEntry(JnlEntry);
@@ -2894,7 +2893,7 @@ begin
          end
          else
            LineState := lsGotTransactionID;
-     end;
+       end;
 
      lsGotTransactionID:
        begin
@@ -2905,43 +2904,26 @@ begin
              LineState := lsGotText1Length;
            end;
 
-           jeTransCommit,
-           jeTransCommitRet,
-           jeTransRollback,
-           jeTransRollbackRet:
-             begin
-               PhaseNo := StrToInt(TokenText);
-               if assigned(FOnNextJournalEntry) then
-                 OnNextJournalEntry(JnlEntry);
-               LineState := lsInit;
-             end;
+         jeQuery:
+           begin
+             len :=  StrToInt(TokenText);
+             LineState := lsGotText1Length;
+           end;
 
-           jeTransEnd:
-             begin
-               if assigned(FOnNextJournalEntry) then
-                 OnNextJournalEntry(JnlEntry);
-               LineState := lsInit;
-             end;
+         jeTransCommitRet,
+         jeTransRollbackRet:
+           begin
+             OldTransactionID := StrToInt(TokenText);
+             if assigned(FOnNextJournalEntry) then
+               OnNextJournalEntry(JnlEntry);
+             LineState := lsInit;
+           end;
 
-           jeQuery:
-             begin
-               PhaseNo := StrToInt(TokenText);
-               LineState := lsGotPhaseNo;
-             end;
            else
              LineState := lsInit;
          end; {case JnlEntryType}
 
        end;
-
-     lsGotPhaseNo:
-       if JnlEntryType = jeQuery then
-       begin
-         len :=  StrToInt(TokenText);
-         LineState := lsGotText1Length;
-       end
-       else
-         LineState := lsInit;
 
      lsGotText1:
        begin

@@ -113,6 +113,7 @@ begin
     Params[5].AsString := '-1234567890.12345678';
   end;
   Statement.Execute;
+  Transaction.CommitRetaining;
   with Statement.GetSQLParams do
   begin
     Params[0].AsInteger := 3;
@@ -123,6 +124,7 @@ begin
     Params[5].AsString := '0';
   end;
   Statement.Execute;
+  Transaction.RollbackRetaining;
   with Statement.GetSQLParams do
   begin
     Params[0].AsInteger := 4;

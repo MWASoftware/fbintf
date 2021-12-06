@@ -1,3 +1,47 @@
+FBINTF Change Log  version          (1.4-0 Build 12889) Sun, 24 Oct 2021 13:49:28 +0100
+
+1. Client side journaling support added. Interface changes
+   IAttachment
+     function JournalingActive: boolean;
+     function StartJournaling(aJournalLogFile: AnsiString; RetainJournal: boolean): integer; overload;
+     function StartJournaling(aJournalLogFile: AnsiString; RetainJournal: boolean; Options: TJournalOptions): integer; overload;
+     procedure StopJournaling;
+
+2. Transactions may now be given a local transaction name:
+   IFirebirdAPI
+     function StartTransaction(Attachments: array of IAttachment;
+             TPB: array of byte; DefaultCompletion: TTransactionCompletion=taCommit): ITransaction; overload;
+             TPB: array of byte; DefaultCompletion: TTransactionCompletion=taCommit;
+             aName: AnsiString=''): ITransaction; overload;
+     function StartTransaction(Attachments: array of IAttachment;
+             TPB: ITPB; DefaultCompletion: TTransactionCompletion=taCommit): ITransaction; overload;
+             TPB: ITPB; DefaultCompletion: TTransactionCompletion=taCommit;
+             aName: AnsiString=''): ITransaction; overload;
+
+   IAttachment
+    function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion=taCommit): ITransaction; overload;
+    function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionCompletion=taCommit): ITransaction; overload;
+    function StartTransaction(TPB: array of byte;
+                              DefaultCompletion: TTransactionCompletion=taCommit;
+                              aName: AnsiString=''): ITransaction; overload;
+    function StartTransaction(TPB: ITPB;
+                              DefaultCompletion: TTransactionCompletion=taCommit;
+                              aName: AnsiString=''): ITransaction; overload;
+
+  ITransaction
+    function GetTransactionName: AnsiString;
+    procedure SetTransactionName(aValue: AnsiString);
+
+3. Additional Transaction information
+     ITPB.function AsText: AnsiString; {Returns TPB as a text string}
+
+   ITransaction
+    function GetDefaultCompletion: TTransactionCompletion;
+
+4. New IAttachment helper functions
+     function HasTable(aTableName: AnsiString): boolean;
+     function GetAttachmentID: integer;
+
 FBINTF Change Log  version          (1.3-3 Build 12889) Sun, 24 Oct 2021 13:49:28 +0100
 
 1. Fix compile error with fpc trunk (3.3.1 and later), due to type change to tzname in "unix" unit.
