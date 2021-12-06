@@ -402,6 +402,9 @@ end;
 
 function TFBTransaction.GetJournalingActive(attachment: IAttachment): boolean;
 begin
+  Result := false;
+  if (attachment = nil) and (length(FAttachments) > 0) then
+    attachment := FAttachments[0];
   if attachment <> nil then
   with attachment do
   Result := self.GetInTransaction and JournalingActive and

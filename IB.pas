@@ -1220,9 +1220,9 @@ type
     {Client side Journaling}
     function JournalingActive: boolean;
     function GetJournalOptions: TJournalOptions;
-    function StartJournaling(aJournalLogFile: AnsiString; RetainJournal: boolean): integer; overload;
-    function StartJournaling(aJournalLogFile: AnsiString; RetainJournal: boolean; Options: TJournalOptions): integer; overload;
-    procedure StopJournaling;
+    function StartJournaling(aJournalLogFile: AnsiString): integer; overload;
+    function StartJournaling(aJournalLogFile: AnsiString; Options: TJournalOptions): integer; overload;
+    procedure StopJournaling(RetainJournal: boolean);
  end;
 
   TProtocolAll = (TCP, SPX, NamedPipe, Local, inet, inet4, inet6, wnet, xnet, unknownProtocol);

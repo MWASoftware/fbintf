@@ -104,11 +104,10 @@ type
     FJournalFilePath: string;
     FJournalFileStream: TStream;
     FSessionID: integer;
-    FRetainJournal: boolean;
     FDoNotJournal: boolean;
     function GetDateTimeFmt: AnsiString;
-    procedure EndSession;
   protected
+    procedure EndSession(RetainJournal: boolean);
     function GetAttachment: IAttachment; virtual; abstract;
   public
     {IAttachment}
@@ -124,9 +123,9 @@ type
     {Client side Journaling}
     function JournalingActive: boolean;
     function GetJournalOptions: TJournalOptions;
-    function StartJournaling(aJournalLogFile: AnsiString; RetainJournal: boolean): integer; overload;
-    function StartJournaling(aJournalLogFile: AnsiString; RetainJournal: boolean; Options: TJournalOptions): integer; overload;
-    procedure StopJournaling;
+    function StartJournaling(aJournalLogFile: AnsiString): integer; overload;
+    function StartJournaling(aJournalLogFile: AnsiString; Options: TJournalOptions): integer; overload;
+    procedure StopJournaling(RetainJournal: boolean);
   end;
 
   { TFBAttachment }
@@ -305,7 +304,7 @@ const
     'Create Table ' + sJournalTableName + '(' +
     '  IBX$SessionID Integer not null, '+
     '  IBX$TransactionID Integer not null, '+
-    '  IBX$OldTransactionID Integer not null, '+
+    '  IBX$OldTransactionID Integer, '+
     '  IBX$USER VarChar(32) Default CURRENT_USER, '+
     '  IBX$CREATED TIMESTAMP Default CURRENT_TIMESTAMP, '+
     '  Primary Key(IBX$SessionID,IBX$TransactionID)' +
@@ -318,7 +317,7 @@ const
   sqlRecordJournalEntry = 'Insert into ' + sJournalTableName + '(IBX$SessionID,IBX$TransactionID,IBX$OldTransactionID) '+
                         'Values(?,?,?)';
 
-  sqlCleanUpSession = 'Delete From ' + sJournalTableName + ' Where ' + sSequenceName + ' = ?';
+  sqlCleanUpSession = 'Delete From ' + sJournalTableName + ' Where IBX$SessionID = ?';
 
 const
   CharSetMap: array [0..69] of TCharsetMap = (
@@ -610,13 +609,12 @@ begin
   Result := ShortDateFormat + ' ' + LongTimeFormat + '.zzzz'
 end;
 
-procedure TFBJournaling.EndSession;
+procedure TFBJournaling.EndSession(RetainJournal: boolean);
 begin
   if JournalingActive then
   begin
     FreeAndNil(FJournalFileStream);
-    FSessionID := -1;
-    if not FRetainJournal then
+    if not RetainJournal then
     try
         GetAttachment.ExecuteSQL([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],
              sqlCleanUpSession,[FSessionID]);
@@ -626,13 +624,14 @@ begin
         raise;
       {ignore - do not delete journal if database gone away}
     end;
+    FSessionID := -1;
   end;
 end;
 
 procedure TFBJournaling.Disconnect(Force: boolean);
 begin
   if JournalingActive then
-    EndSession;
+    EndSession(Force);
 end;
 
 procedure TFBJournaling.TransactionStart(Tr: ITransaction);
@@ -642,7 +641,7 @@ var LogEntry: AnsiString;
 begin
   FDoNotJournal := true;
   try
-    GetAttachment.ExecuteSQL(Tr,sqlRecordJournalEntry,[FSessionID,Tr.GetTransactionID,-1]);
+    GetAttachment.ExecuteSQL(Tr,sqlRecordJournalEntry,[FSessionID,Tr.GetTransactionID,NULL]);
   finally
     FDoNotJournal := false;
   end;
@@ -726,17 +725,15 @@ begin
   Result := FOptions;
 end;
 
-function TFBJournaling.StartJournaling(aJournalLogFile: AnsiString;
-  RetainJournal: boolean): integer;
+function TFBJournaling.StartJournaling(aJournalLogFile: AnsiString): integer;
 begin
-  Result := StartJournaling(aJournalLogFile,RetainJournal,[joReadWriteTransactions,joModifyQueries]);
+  Result := StartJournaling(aJournalLogFile,[joReadWriteTransactions,joModifyQueries]);
 end;
 
 function TFBJournaling.StartJournaling(aJournalLogFile: AnsiString;
-  RetainJournal: boolean; Options: TJournalOptions): integer;
+  Options: TJournalOptions): integer;
 begin
   FOptions := Options;
-  FRetainJournal := RetainJournal;
   with GetAttachment do
   begin
     if not HasTable(sJournalTableName) then
@@ -751,9 +748,9 @@ begin
   Result := FSessionID;
 end;
 
-procedure TFBJournaling.StopJournaling;
+procedure TFBJournaling.StopJournaling(RetainJournal: boolean);
 begin
-  EndSession;
+  EndSession(RetainJournal);
 end;
 
 

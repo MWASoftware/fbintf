@@ -224,16 +224,16 @@ begin
   try
     Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable);
     writeln(OutFile,'Start Journaling. Session ID = ',
-    Attachment.StartJournaling('Test'+GetTestID+'.log',true));
+    Attachment.StartJournaling('Test'+GetTestID+'.log'));
     ValidateStrToNumeric;
     SetFloatTemplate('#,###.00000000');
     UpdateDatabase(Attachment);
     QueryDatabase(Attachment);
     PrintJournalTable(Attachment);
+    Attachment.StopJournaling(true);
   finally
     Attachment.DropDatabase;
   end;
-  Attachment.StopJournaling;
   writeln(OutFile);
   PrintJournalFile('Test'+GetTestID+'.log');
 end;

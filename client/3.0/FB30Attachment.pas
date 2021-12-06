@@ -310,6 +310,7 @@ begin
     with FFirebird30ClientAPI do
     begin
       EndAllTransactions;
+      EndSession(false);
       FAttachmentIntf.dropDatabase(StatusIntf);
       Check4DataBaseError;
       FAttachmentIntf := nil;

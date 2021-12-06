@@ -2,10 +2,11 @@ FBINTF Change Log  version          (1.4-0 Build 12889) Sun, 24 Oct 2021 13:49:2
 
 1. Client side journaling support added. Interface changes
    IAttachment
-     function JournalingActive: boolean;
-     function StartJournaling(aJournalLogFile: AnsiString; RetainJournal: boolean): integer; overload;
-     function StartJournaling(aJournalLogFile: AnsiString; RetainJournal: boolean; Options: TJournalOptions): integer; overload;
-     procedure StopJournaling;
+    function JournalingActive: boolean;
+    function GetJournalOptions: TJournalOptions;
+    function StartJournaling(aJournalLogFile: AnsiString): integer; overload;
+    function StartJournaling(aJournalLogFile: AnsiString; Options: TJournalOptions): integer; overload;
+    procedure StopJournaling(RetainJournal: boolean);
 
 2. Transactions may now be given a local transaction name:
    IFirebirdAPI
@@ -36,7 +37,8 @@ FBINTF Change Log  version          (1.4-0 Build 12889) Sun, 24 Oct 2021 13:49:2
      ITPB.function AsText: AnsiString; {Returns TPB as a text string}
 
    ITransaction
-    function GetDefaultCompletion: TTransactionCompletion;
+     function GetDefaultCompletion: TTransactionCompletion;
+     function GetJournalingActive(attachment: IAttachment): boolean; {attachment must be specified when multi-database transaction}
 
 4. New IAttachment helper functions
      function HasTable(aTableName: AnsiString): boolean;

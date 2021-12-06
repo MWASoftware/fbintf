@@ -225,12 +225,15 @@ end;
 
 procedure TFB25Attachment.DropDatabase;
 begin
-  CheckHandle;
-  EndAllTransactions;
-  with FFirebird25ClientAPI do
-    if isc_drop_database(StatusVector, @FHandle) > 0 then
-      IBDatabaseError;
-  FHandle := nil;
+  if IsConnected then
+  begin
+    EndAllTransactions;
+    EndSession(false);
+    with FFirebird25ClientAPI do
+      if isc_drop_database(StatusVector, @FHandle) > 0 then
+        IBDatabaseError;
+    FHandle := nil;
+  end;
 end;
 
 function TFB25Attachment.StartTransaction(TPB: array of byte;
