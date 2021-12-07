@@ -674,9 +674,7 @@ type
         end;
 
   private
-    FAttachment: IAttachment;
     FOnProgressEvent: TOnProgressEvent;
-    FTransaction: ITransaction;
     FXMLState: TXMLStates;
     FXMLTagStack: array [1..MaxXMLTags] of TXMLTag;
     FXMLTagIndex: integer;
@@ -701,6 +699,8 @@ type
     function XMLTagEnd(var xmltag: TXMLTag): boolean;
     procedure XMLTagEnter;
   protected
+    function GetAttachment: IAttachment; virtual; abstract;
+    function GetTransaction: ITransaction; virtual; abstract;
     function GetErrorPrefix: string; virtual; abstract;
     function TokenFound(var token: TSQLTokens): boolean; override;
     procedure Reset; override;
@@ -716,8 +716,8 @@ type
     property BlobDataCount: integer read GetBlobDataCount;
     property ArrayData[index: integer]: TArrayData read GetArrayData;
     property ArrayDataCount: integer read GetArrayDataCount;
-    property Attachment: IAttachment read FAttachment write FAttachment;
-    property Transaction: ITransaction read FTransaction write FTransaction;
+    property Attachment: IAttachment read GetAttachment;
+    property Transaction: ITransaction read GetTransaction;
     property OnProgressEvent: TOnProgressEvent read FOnProgressEvent write FOnProgressEvent; {Progress Bar Support}
  end;
 
