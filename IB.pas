@@ -1594,7 +1594,7 @@ end;
      VarClearProc(TVarData(Result));
      TVarData(Result).VType := varnull;
    end;
-{endif}
+{$endif}
 
 initialization
   FDefaultFBLibrary := nil;
