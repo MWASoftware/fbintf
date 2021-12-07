@@ -536,7 +536,6 @@ begin
 end;
 
 function TQueryProcessor.GetParamValue(ParamIndex: integer): AnsiString;
-var arIndex: integer;
 begin
   with FStmt.SQLParams[ParamIndex] do
   begin
@@ -637,7 +636,6 @@ end;
 procedure TFBJournaling.TransactionStart(Tr: ITransaction);
 var LogEntry: AnsiString;
     TPBText: AnsiString;
-    i: integer;
 begin
   FDoNotJournal := true;
   try

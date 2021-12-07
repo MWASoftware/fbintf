@@ -679,7 +679,6 @@ type
     FXMLTagStack: array [1..MaxXMLTags] of TXMLTag;
     FXMLTagIndex: integer;
     FAttributeName: string;
-    FXMLData: string;
     FBlobData: array of TBlobData;
     FCurrentBlob: integer;
     FBlobBuffer: PByte;
@@ -802,7 +801,7 @@ procedure StringToHex(octetString: string; TextOut: TStrings; MaxLineLength: int
 
 implementation
 
-uses FBMessages, Math, FBClientAPI
+uses FBMessages, Math
 
 {$IFDEF FPC}
 ,RegExpr

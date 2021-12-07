@@ -859,7 +859,6 @@ type
 
   ITPBItem = interface(IParameterBlockItemWithTypeName)
     ['{544c1f2b-7c12-4a87-a4a5-face7ea72671}']
-    function getParamTypeName: AnsiString;
   end;
 
   ITPB = interface(IParameterBlockWithTypeNames<ITPBItem>)

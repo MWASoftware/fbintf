@@ -192,6 +192,7 @@ type
   public
     constructor Create(aStatement: TFB25Statement);
     destructor Destroy; override;
+    function CanChangeMetaData: boolean; override;
     function CheckStatementStatus(Request: TStatementStatus): boolean; override;
     function ColumnsInUseCount: integer; override;
     function GetTransaction: TFB25Transaction; virtual;
@@ -793,6 +794,11 @@ begin
   FreeXSQLDA;
 //  writeln('Destroying ',ClassName);
   inherited Destroy;
+end;
+
+function TIBXSQLDA.CanChangeMetaData: boolean;
+begin
+  Result := true;
 end;
 
 function TIBXSQLDA.CheckStatementStatus(Request: TStatementStatus): boolean;

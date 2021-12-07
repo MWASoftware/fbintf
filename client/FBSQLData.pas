@@ -1613,10 +1613,8 @@ end;
 function GetStrLen(p: PAnsiChar; FieldWidth, MaxDataLength: cardinal): integer;
 var i: integer;
     cplen: integer;
-    s: AnsiString;
 begin
   Result := 0;
-  s := strpas(p);
   for i := 1 to FieldWidth do
   begin
     cplen := UTF8CodepointSizeFull(p);
@@ -2173,7 +2171,6 @@ begin
 end;
 
 procedure TSQLDataItem.SetAsBcd(aValue: tBCD);
-var C: Currency;
 begin
   CheckActive;
   Changing;
