@@ -1476,10 +1476,14 @@ procedure CheckIBLoaded;
 
 function LoadFBLibrary(aLibPathName: string): IFirebirdLibrary;
 
+{$if not declared(NULL)} {Needed for Delphi}
+ function Null: Variant;       // Null standard constant
+{$ifend
+       }
 
 implementation
 
-uses FBClientAPI
+uses FBClientAPI {$if not declared(NULL)}, Variants {$ifend}
   {$IFDEF USELEGACYFIREBIRDAPI}, FB25ClientAPI {$ENDIF}
   {$IFDEF USEFIREBIRD3API}, FB30ClientAPI {$ENDIF};
 
@@ -1584,6 +1588,13 @@ begin
   FIBErrorCode := AIBErrorCode;
 end;
 
+{$if not declared(NULL)}
+ function Null: Variant;       // Null standard constant
+   begin
+     VarClearProc(TVarData(Result));
+     TVarData(Result).VType := varnull;
+   end;
+{$ifend}
 
 initialization
   FDefaultFBLibrary := nil;

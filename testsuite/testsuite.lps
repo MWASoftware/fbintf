@@ -249,8 +249,9 @@
       </Unit30>
       <Unit31>
         <Filename Value="../IB.pas"/>
-        <TopLine Value="1109"/>
-        <CursorPos X="14" Y="1123"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="1464"/>
+        <CursorPos X="17" Y="1486"/>
         <UsageCount Value="100"/>
         <Loaded Value="True"/>
       </Unit31>
@@ -276,10 +277,9 @@
       </Unit34>
       <Unit35>
         <Filename Value="../client/FBAttachment.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
         <TopLine Value="484"/>
-        <CursorPos X="11" Y="497"/>
+        <CursorPos Y="497"/>
         <UsageCount Value="40"/>
         <Loaded Value="True"/>
       </Unit35>
@@ -1085,8 +1085,8 @@
       <Unit148>
         <Filename Value="/usr/share/fpcsrc/rtl/inc/varianth.inc"/>
         <EditorIndex Value="3"/>
-        <TopLine Value="6"/>
-        <CursorPos X="4" Y="21"/>
+        <TopLine Value="212"/>
+        <CursorPos X="3" Y="227"/>
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
       </Unit148>
@@ -1099,7 +1099,7 @@
         <Loaded Value="True"/>
       </Unit149>
     </Units>
-    <JumpHistory Count="21" HistoryIndex="20">
+    <JumpHistory Count="22" HistoryIndex="21">
       <Position1>
         <Filename Value="../IB.pas"/>
         <Caret Line="1222" Column="55" TopLine="1200"/>
@@ -1183,6 +1183,10 @@
         <Filename Value="../client/FBAttachment.pas"/>
         <Caret Line="160" Column="15" TopLine="160"/>
       </Position21>
+      <Position22>
+        <Filename Value="../client/FBAttachment.pas"/>
+        <Caret Line="500" Column="13" TopLine="484"/>
+      </Position22>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
