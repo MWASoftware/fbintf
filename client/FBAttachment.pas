@@ -494,6 +494,14 @@ const
     'decfloat_traps'
     );
 
+ {$if not declared(NULL)}
+  function Null: Variant;       // Null standard constant
+    begin
+      VarClearProc(TVarData(Result));
+      TVarData(Result).VType := varnull;
+    end;
+{$ifend}
+
 type
 
   { TQueryProcessor }
