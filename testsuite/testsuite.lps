@@ -3,7 +3,7 @@
   <ProjectSession>
     <Version Value="12"/>
     <BuildModes Active="Default"/>
-    <Units Count="147">
+    <Units Count="148">
       <Unit0>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -495,7 +495,8 @@
         <Filename Value="../changelog"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <CursorPos X="131" Y="41"/>
+        <TopLine Value="16"/>
+        <CursorPos X="90" Y="47"/>
         <UsageCount Value="28"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
@@ -1074,6 +1075,12 @@
         <CursorPos Y="60"/>
         <UsageCount Value="10"/>
       </Unit146>
+      <Unit147>
+        <Filename Value="../../fbintf-trunk/changelog"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit147>
     </Units>
     <JumpHistory Count="3" HistoryIndex="2">
       <Position1>
