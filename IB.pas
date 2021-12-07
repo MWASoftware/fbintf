@@ -1478,8 +1478,8 @@ function LoadFBLibrary(aLibPathName: string): IFirebirdLibrary;
 
 {$if not declared(NULL)} {Needed for Delphi}
  function Null: Variant;       // Null standard constant
-{$ifend
-       }
+{$define NEEDNULLFUNCTION}
+{$ifend}
 
 implementation
 
@@ -1588,13 +1588,13 @@ begin
   FIBErrorCode := AIBErrorCode;
 end;
 
-{$if not declared(NULL)}
+{$ifdef NEEDNULLFUNCTION}
  function Null: Variant;       // Null standard constant
    begin
      VarClearProc(TVarData(Result));
      TVarData(Result).VType := varnull;
    end;
-{$ifend}
+{endif}
 
 initialization
   FDefaultFBLibrary := nil;

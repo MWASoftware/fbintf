@@ -250,8 +250,8 @@
       <Unit31>
         <Filename Value="../IB.pas"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="1464"/>
-        <CursorPos X="17" Y="1486"/>
+        <TopLine Value="1576"/>
+        <CursorPos X="7" Y="1597"/>
         <UsageCount Value="100"/>
         <Loaded Value="True"/>
       </Unit31>
@@ -1099,7 +1099,7 @@
         <Loaded Value="True"/>
       </Unit149>
     </Units>
-    <JumpHistory Count="22" HistoryIndex="21">
+    <JumpHistory Count="23" HistoryIndex="22">
       <Position1>
         <Filename Value="../IB.pas"/>
         <Caret Line="1222" Column="55" TopLine="1200"/>
@@ -1187,6 +1187,10 @@
         <Filename Value="../client/FBAttachment.pas"/>
         <Caret Line="500" Column="13" TopLine="484"/>
       </Position22>
+      <Position23>
+        <Filename Value="../IB.pas"/>
+        <Caret Line="1481" Column="26" TopLine="1464"/>
+      </Position23>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
