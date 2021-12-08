@@ -196,9 +196,6 @@ type
 
   public
     {Taken from legacy API}
-    isc_event_counts: Tisc_event_counts;
-    isc_event_block: Tisc_event_block;
-    isc_free: Tisc_free;
     isc_interprete: Tisc_interprete;
     isc_sqlcode: Tisc_sqlcode;
 
@@ -601,13 +598,10 @@ end;
 
 function TFBClientAPI.LoadInterface: boolean;
 begin
-  isc_event_counts := GetProcAddr('isc_event_counts'); {do not localize}
-  isc_event_block := GetProcAddr('isc_event_block'); {do not localize}
-  isc_free := GetProcAddr('isc_free'); {do not localize}
   isc_interprete := GetProcAddr('isc_interprete'); {do not localize}
   isc_sqlcode := GetProcAddr('isc_sqlcode'); {do not localize}
   fb_shutdown := GetProcAddr('fb_shutdown'); {do not localize}
-  Result := assigned(isc_free);
+  Result := assigned(isc_sqlcode);
 end;
 
 procedure TFBClientAPI.FBShutdown;
