@@ -134,19 +134,9 @@ uses
 const
   {Interface version information}
   FBIntf_Major = 1;
-<<<<<<< .working
   FBIntf_Minor = 4;
   FBIntf_Release = 0;
   FBIntf_Version = '1.4.0';
-||||||| .merge-left.r12926
-  FBIntf_Minor = 3;
-  FBIntf_Release = 2;
-  FBIntf_Version = '1.3.2';
-=======
-  FBIntf_Minor = 3;
-  FBIntf_Release = 3;
-  FBIntf_Version = '1.3.3';
->>>>>>> .merge-right.r12964
 
 const
   {DPB, TPB and SPB Parameter Block Name Prefixes}
@@ -1485,7 +1475,7 @@ procedure CheckIBLoaded;
 
 function LoadFBLibrary(aLibPathName: string): IFirebirdLibrary;
 
-{$if not declared(NULL)} {Needed for Delphi}
+{$if not declared(Null)} {Needed for Delphi}
  function Null: Variant;       // Null standard constant
 {$define NEEDNULLFUNCTION}
 {$ifend}
