@@ -202,14 +202,13 @@ SLONG API_ROUTINE_VARARG isc_event_block(UCHAR** event_buffer,
 procedure TFBEvents.CreateEventBlock;
 var i: integer;
     P: PByte;
-    S: AnsiString;
 begin
   {calculate length of event parameter block, setting initial length to include version
    and counts for each argument}
 
   FEventBufferLen := 1;
   for i := 0 to FEvents.Count - 1 do
-    FEventBufferLen := FEventBufferLen + length(FEvents[i]) + 5;
+    FEventBufferLen := FEventBufferLen + length(FEvents[i]) + 1 + sizeof(Long);
 
   with FFirebirdClientAPI do
   begin
@@ -228,11 +227,10 @@ begin
     Inc(P);
     for i := 0 to FEvents.Count - 1 do
     begin
-      S := Trim(FEvents[i]);
-      P^ := Length(S);
+      P^ := Length(FEvents[i]);
       Inc(P);
-      Move(S[1],P^,Length(S));
-      Inc(P,Length(FEvents[i])+4);
+      Move(FEvents[i][1],P^,Length(FEvents[i]));
+      Inc(P,Length(FEvents[i])+sizeof(Long));
     end;
   end;
 {  for i := 0 to FEventBufferLen - 1 do
@@ -413,6 +411,7 @@ begin
 end;
 
 procedure TFBEvents.SetEvents(EventNames: TStrings);
+var i: integer;
 begin
   {$ifdef Unix}
   if (EventNames.Count > 0) and not IsMultiThread then
@@ -421,7 +420,8 @@ begin
   if EventNames.Text <> FEvents.Text then
   begin
     Cancel;
-    FEvents.Assign(EventNames);
+    for i := 0 to EventNames.Count - 1 do
+      FEvents[i] := Trim(EventNames[i]);
     CreateEventBlock;
   end;
 end;
