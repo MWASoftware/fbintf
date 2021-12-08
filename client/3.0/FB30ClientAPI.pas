@@ -48,6 +48,7 @@ type
   protected
     FStatus: Firebird.IStatus;
     FDirty: boolean;
+    function GetSQLMessage: Ansistring; override;
   public
     destructor Destroy; override;
     procedure Init;
@@ -90,6 +91,7 @@ type
     function StatusIntf: Firebird.IStatus;
     procedure Check4DataBaseError; overload;
     procedure Check4DataBaseError(st: Firebird.IStatus); overload;
+    function FormatStatus(Status: Firebird.IStatus): AnsiString;
     function InErrorState: boolean;
     function LoadInterface: boolean; override;
     procedure FBShutdown; override;
@@ -146,8 +148,6 @@ type
     function SQLDecodeTime(bufptr: PByte): TDateTime;  override;
     procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte); override;
     function SQLDecodeDateTime(bufptr: PByte): TDateTime; override;
-    function FormatStatus(Status: TFBStatus): AnsiString; override;
-    function FormatFBStatus(Status: Firebird.IStatus): AnsiString;
 
     {Firebird 4 Extensions}
     procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal; bufptr: PByte);
@@ -264,6 +264,11 @@ begin
 end;
 
 { TFB30Status }
+
+function TFB30Status.GetSQLMessage: Ansistring;
+begin
+  Result := (FOwner as TFB30ClientAPI).FormatStatus(FStatus);
+end;
 
 destructor TFB30Status.Destroy;
 begin
@@ -426,6 +431,14 @@ procedure TFB30ClientAPI.Check4DataBaseError(st: Firebird.IStatus);
 begin
   if ((st.getState and st.STATE_ERRORS) <> 0) then
     raise EIBInterBaseError.Create(TFB30StatusObject.Create(self,st));
+end;
+
+function TFB30ClientAPI.FormatStatus(Status: Firebird.IStatus): AnsiString;
+var local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
+begin
+  Result := '';
+  if UtilIntf.formatStatus(@local_buffer,sizeof(local_buffer) - 1,Status) > 0 then
+    Result := strpas(local_buffer);
 end;
 
 function TFB30ClientAPI.InErrorState: boolean;
@@ -598,19 +611,6 @@ begin
   Result := SQLDecodeDate(bufPtr);
   Inc(bufptr,sizeof(ISC_DATE));
   Result := Result + SQLDecodeTime(bufPtr);
-end;
-
-function TFB30ClientAPI.FormatStatus(Status: TFBStatus): AnsiString;
-begin
-  Result := FormatFBStatus((Status as TFB30Status).GetStatus);
-end;
-
-function TFB30ClientAPI.FormatFBStatus(Status: Firebird.IStatus): AnsiString;
-var local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
-begin
-  Result := '';
-  if UtilIntf.formatStatus(@local_buffer,sizeof(local_buffer) - 1,Status) > 0 then
-    Result := strpas(local_buffer);
 end;
 
 procedure TFB30ClientAPI.SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal;

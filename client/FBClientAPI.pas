@@ -121,6 +121,8 @@ type
     FPrefix: AnsiString;
   protected
     FOwner: TFBClientAPI;
+    function GetIBMessage: Ansistring;
+    function GetSQLMessage: Ansistring; virtual; abstract;
   public
     constructor Create(aOwner: TFBClientAPI; prefix: AnsiString='');
     function StatusVector: PStatusVector; virtual; abstract;
@@ -194,12 +196,11 @@ type
 
   public
     {Taken from legacy API}
-    isc_sqlcode: Tisc_sqlcode;
-    isc_sql_interprete: Tisc_sql_interprete;
     isc_event_counts: Tisc_event_counts;
     isc_event_block: Tisc_event_block;
     isc_free: Tisc_free;
-    isc_portable_integer: Tisc_portable_integer;
+    isc_interprete: Tisc_interprete;
+    isc_sqlcode: Tisc_sqlcode;
 
     constructor Create(aFBLibrary: TFBLibrary);
     procedure IBAlloc(var P; OldSize, NewSize: Integer);
@@ -222,7 +223,7 @@ type
     property LocalTimeOffset: integer read FLocalTimeOffset;
   public
     {Encode/Decode}
-    procedure EncodeInteger(aValue: integer; len: integer; buffer: PByte);
+    procedure EncodeInteger(aValue: int64; len: integer; buffer: PByte);
     function DecodeInteger(bufptr: PByte; len: short): int64;
     procedure SQLEncodeDate(aDate: TDateTime; bufptr: PByte);  virtual; abstract;
     function SQLDecodeDate(byfptr: PByte): TDateTime;  virtual; abstract;
@@ -230,7 +231,6 @@ type
     function SQLDecodeTime(bufptr: PByte): TDateTime;  virtual; abstract;
     procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte); virtual; abstract;
     function  SQLDecodeDateTime(bufptr: PByte): TDateTime; virtual; abstract;
-    function FormatStatus(Status: TFBStatus): AnsiString; virtual; abstract;
     function Int128ToStr(bufptr: PByte; scale: integer): AnsiString; virtual;
     procedure StrToInt128(scale: integer; aValue: AnsiString; bufptr: PByte);
       virtual;
@@ -411,7 +411,7 @@ begin
   raise EIBInterBaseError.Create(GetStatus);
 end;
 
-procedure TFBClientAPI.EncodeInteger(aValue: integer; len: integer; buffer: PByte);
+procedure TFBClientAPI.EncodeInteger(aValue: int64; len: integer; buffer: PByte);
 begin
   while len > 0 do
   begin
@@ -422,9 +422,44 @@ begin
   end;
 end;
 
+(*
+  DecodeInteger is Translated from
+
+SINT64 API_ROUTINE isc_portable_integer(const UCHAR* ptr, SSHORT length)
+if (!ptr || length <= 0 || length > 8)
+	return 0;
+
+SINT64 value = 0;
+int shift = 0;
+
+while (--length > 0)
+{
+	value += ((SINT64) *ptr++) << shift;
+	shift += 8;
+}
+
+value += ((SINT64)(SCHAR) *ptr) << shift;
+
+return value;
+*)
+
 function TFBClientAPI.DecodeInteger(bufptr: PByte; len: short): int64;
+var shift: integer;
 begin
-  Result := isc_portable_integer(bufptr,len);
+  Result := 0;
+  if (BufPtr = nil) or (len <= 0) or (len > 8) then
+    Exit;
+
+  shift := 0;
+  dec(len);
+  while len > 0 do
+  begin
+    Result := Result + (int64(bufptr^) shl shift);
+    Inc(bufptr);
+    shift := shift + 8;
+    dec(len);
+  end;
+  Result := Result + (int64(bufptr^) shl shift);
 end;
 
 function TFBClientAPI.Int128ToStr(bufptr: PByte; scale: integer): AnsiString;
@@ -566,12 +601,11 @@ end;
 
 function TFBClientAPI.LoadInterface: boolean;
 begin
-  isc_sqlcode := GetProcAddr('isc_sqlcode'); {do not localize}
-  isc_sql_interprete := GetProcAddr('isc_sql_interprete'); {do not localize}
   isc_event_counts := GetProcAddr('isc_event_counts'); {do not localize}
   isc_event_block := GetProcAddr('isc_event_block'); {do not localize}
   isc_free := GetProcAddr('isc_free'); {do not localize}
-  isc_portable_integer := GetProcAddr('isc_portable_integer'); {do not localize}
+  isc_interprete := GetProcAddr('isc_interprete'); {do not localize}
+  isc_sqlcode := GetProcAddr('isc_sqlcode'); {do not localize}
   fb_shutdown := GetProcAddr('fb_shutdown'); {do not localize}
   Result := assigned(isc_free);
 end;
@@ -583,6 +617,21 @@ begin
 end;
 
 { TFBStatus }
+
+function TFBStatus.GetIBMessage: Ansistring;
+var psb: PStatusVector;
+    local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
+begin
+  psb := StatusVector;
+  Result := '';
+  if assigned(FOwner.isc_interprete) then
+  while FOwner.isc_interprete(@local_buffer,@psb) > 0 do
+  begin
+    if (Result <> '') and (Result[Length(Result)] <> LF) then
+      Result := Result + LineEnding + '-';
+    Result := Result + strpas(local_buffer);
+  end;
+end;
 
 constructor TFBStatus.Create(aOwner: TFBClientAPI; prefix: AnsiString);
 begin
@@ -599,36 +648,35 @@ end;
 
 function TFBStatus.Getsqlcode: TStatusCode;
 begin
-  with FOwner do
-    Result := isc_sqlcode(PISC_STATUS(StatusVector));
+  if assigned(FOwner.isc_sqlcode) then
+    Result := FOwner.isc_sqlcode(PISC_STATUS(StatusVector))
+  else
+    Result := -999; {generic SQL Code}
 end;
 
 function TFBStatus.GetMessage: AnsiString;
-var local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
-    IBDataBaseErrorMessages: TIBDataBaseErrorMessages;
-    sqlcode: Long;
+var IBDataBaseErrorMessages: TIBDataBaseErrorMessages;
 begin
   Result := FPrefix;
   IBDataBaseErrorMessages := FIBDataBaseErrorMessages;
-  sqlcode := Getsqlcode;
   if (ShowSQLCode in IBDataBaseErrorMessages) then
-    Result := Result + 'SQLCODE: ' + IntToStr(sqlcode); {do not localize}
+    Result := Result + 'SQLCODE: ' + IntToStr(Getsqlcode); {do not localize}
 
-  if (ShowSQLMessage in IBDataBaseErrorMessages) then
+  if [ShowSQLMessage, ShowIBMessage]*IBDataBaseErrorMessages <> [] then
   begin
-    with FOwner do
-      isc_sql_interprete(sqlcode, local_buffer, sizeof(local_buffer));
     if (ShowSQLCode in FIBDataBaseErrorMessages) then
       Result := Result + LineEnding;
-    Result := Result + 'Engine Code: ' + IntToStr(GetIBErrorCode) + ' ' + strpas(local_buffer);
+    Result := Result + 'Engine Code: ' + IntToStr(GetIBErrorCode) + ' ';
   end;
+
+  if (ShowSQLMessage in IBDataBaseErrorMessages) then
+    Result := Result + GetSQLMessage;
 
   if (ShowIBMessage in IBDataBaseErrorMessages) then
   begin
-    if (ShowSQLCode in IBDataBaseErrorMessages) or
-       (ShowSQLMessage in IBDataBaseErrorMessages) then
+    if ShowSQLMessage in IBDataBaseErrorMessages then
       Result := Result + LineEnding;
-    Result := Result + FOwner.FormatStatus(self);
+    Result := Result + GetIBMessage;
   end;
   if (Result <> '') and (Result[Length(Result)] = '.') then
     Delete(Result, Length(Result), 1);
