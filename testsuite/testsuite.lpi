@@ -25,26 +25,26 @@
     </PublishOptions>
     <RunParams>
       <local>
-        <CommandLineParams Value="-t 16"/>
+        <CommandLineParams Value="-t 10"/>
       </local>
       <environment>
         <UserOverrides Count="3">
           <Variable0 Name="PROMPT_AT_END" Value="YES"/>
           <Variable1 Name="FIREBIRD" Value="/opt/firebird4.0.0"/>
-          <Variable2 Name="LD_LIBRARY_PATH" Value="/opt/firebirddev/4.0.0"/>
+          <Variable2 Name="LD_LIBRARY_PATH" Value="/opt/firebird4.0.0/lib"/>
         </UserOverrides>
       </environment>
       <FormatVersion Value="2"/>
       <Modes Count="1">
         <Mode0 Name="default">
           <local>
-            <CommandLineParams Value="-t 16"/>
+            <CommandLineParams Value="-t 10"/>
           </local>
           <environment>
             <UserOverrides Count="3">
               <Variable0 Name="PROMPT_AT_END" Value="YES"/>
               <Variable1 Name="FIREBIRD" Value="/opt/firebird4.0.0"/>
-              <Variable2 Name="LD_LIBRARY_PATH" Value="/opt/firebirddev/4.0.0"/>
+              <Variable2 Name="LD_LIBRARY_PATH" Value="/opt/firebird4.0.0/lib"/>
             </UserOverrides>
           </environment>
         </Mode0>
