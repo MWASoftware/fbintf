@@ -9,7 +9,7 @@ Firebird Conf Directory = /opt/firebird3.0.5/
 Firebird Client Library Path = /opt/firebird3.0.5/lib/libfbclient.so
 Running Test 1: Create and Drop a Database
 Creating a Database with empty parameters
-Create Database fails (as expected): I/O error during "open O_CREAT" operation for file ""
+Create Database fails (as expected): Engine Code: 335544344 I/O error during "open O_CREAT" operation for file ""
 -Error while trying to create file
 -No such file or directory
 Creating a Database using an SQL Statement
@@ -76,7 +76,7 @@ Dropping Database
 
 ------------------------------------------------------
 Running Test 2: Open the employee database and run a query
-Open Database fails Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Open Database fails Engine Code: 335544472 Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Opening inet://localhost/employee
 Database Open, SQL Dialect = 3
 TPB: Item Count = 3
@@ -306,6 +306,30 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
+Scollable Cursors
+DB Connect String = inet://localhost/employee
+DB Charset ID = 4
+DB SQL Dialect = 3
+DB Remote Protocol = TCPv4
+DB ODS Major Version = 12
+DB ODS Minor Version = 0
+User Authentication Method = Srp
+Firebird Library Path = /opt/firebird3.0.5/lib/libfbclient.so
+DB Client Implementation Version = 3.0
+Do Fetch Next:
+EMP_NO = 2
+FIRST_NAME = Robert
+LAST_NAME = Nelson
+PHONE_EXT = 250
+HIRE_DATE = 1988/12/28 00:00:00.0000
+DEPT_NO = 600
+JOB_CODE = VP
+JOB_GRADE = 2
+JOB_COUNTRY = USA
+SALARY = 105,900.00
+FULL_NAME = Nelson, Robert
+Do Fetch Last:
+Remote Scrollable cursors test fails Engine Code: 335544378 feature is not supported
 Now open the employee database as a local database
 TPB: Item Count = 3
   isc_tpb_read
@@ -625,6 +649,14 @@ Running Test 3: ad hoc queries
 Opening inet://localhost/employee
 Database Open
 Employee Count = 42
+Transaction ID = 5132
+Transaction is Read/Write
+Transaction Database Path = inet://localhost/employee
+Transaction ID = 5132
+Oldest Interesting = 5130
+Oldest Action = 5131
+Oldest Snapshot = 5131
+Oldest Interesting = 0
 Employee Count = 41
 Employee Count = 42
 Employee Count = 41
@@ -658,7 +690,7 @@ FULL_NAME = Johnson, Leslie
 Current memory = 19,694,032
 Delta memory = 4,480
 Max memory = 19,755,888
-Elapsed time= 0.002 sec
+Elapsed time= 0.001 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
@@ -2911,10 +2943,10 @@ User ID = 0
 Group ID = 0
 
 
-Licence Info: feature is not supported
+Licence Info: Engine Code: 335544378 feature is not supported
 -feature is not supported
 
-Licence Mask Info: feature is not supported
+Licence Mask Info: Engine Code: 335544378 feature is not supported
 
 Capabilities = 6
 
@@ -3201,21 +3233,26 @@ BLOBDATA (Charset Id = 4 Codepage = 65001)
 ------------------------------------------------------
 Running Test 16: Error handling
 Invalid Database Name Test
-Error Handled: I/O error during "open" operation for file "Malformed Name"
+Error Handled: SQLCODE: -902
+Engine Code: 335544344 I/O error during "open" operation for file "Malformed Name"
 -Error while trying to open file
 -No such file or directory
 Invalid User Name Test
-Error Handled: Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Error Handled: SQLCODE: -902
+Engine Code: 335544472 Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Invalid password Test
-Error Handled: Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Error Handled: SQLCODE: -902
+Engine Code: 335544472 Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Invalid Prepare SQL Test
-Error Handled: Dynamic SQL Error
+Error Handled: SQLCODE: -206
+Engine Code: 335544569 Dynamic SQL Error
 -SQL error code = -206
 -Column unknown
 -UNKNOWN_DATE
 -At line 1, column 21 When Executing: Update Employee Set Unknown_Date = ? Where EMP_NO = ?
 Invalid Open Cursor SQL Test
-Error Handled: Dynamic SQL Error
+Error Handled: SQLCODE: -206
+Engine Code: 335544569 Dynamic SQL Error
 -SQL error code = -206
 -Column unknown
 -X
@@ -3242,13 +3279,16 @@ New Transaction before Open Cursor
 COUNTER = 42
 
 Invalid Server Name Test
-Error Handled: Unable to complete network request to host "unknown".
+Error Handled: SQLCODE: -902
+Engine Code: 335544721 Unable to complete network request to host "unknown".
 -Failed to locate host machine.
 -The specified name was not found in the hosts file or Domain Name Services
 Invalid User Name Test
-Error Handled: Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Error Handled: SQLCODE: -902
+Engine Code: 335544472 Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Invalid password Test
-Error Handled: Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Error Handled: SQLCODE: -902
+Engine Code: 335544472 Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 
 
 ------------------------------------------------------
@@ -3429,10 +3469,12 @@ Charset id = 0
 Nullable
 Size = 8
 
-Expected Error - Dynamic SQL Error
+Expected Error - SQLCODE: -303
+Engine Code: 335544569 Dynamic SQL Error
 -SQL error code = -303
 -conversion error from string "1,000"
-Expected Error - Dynamic SQL Error
+Expected Error - SQLCODE: -303
+Engine Code: 335544569 Dynamic SQL Error
 -SQL error code = -303
 -conversion error from string "10.0.0"
 ROWID = 1

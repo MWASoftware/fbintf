@@ -431,7 +431,7 @@ begin
     status := MasterIntf.getStatus;
     FCompletionState.getStatus(StatusIntf,status,updateNo);
     Check4DataBaseError;
-    Result := FormatFBStatus(status);
+    Result := FormatStatus(status);
   end;
 end;
 

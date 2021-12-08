@@ -7,7 +7,7 @@ Firebird Environment Variable = /opt/firebird2.5.9
 Firebird Client Library Path = /opt/firebird2.5.9/lib/libfbembed.so
 Running Test 1: Create and Drop a Database
 Creating a Database with empty parameters
-Create Database fails (as expected): I/O error during "open O_CREAT" operation for file ""
+Create Database fails (as expected): Engine Code: 335544344 I/O error during "open O_CREAT" operation for file ""
 -Error while trying to create file
 -No such file or directory
 Creating a Database using an SQL Statement
@@ -73,7 +73,7 @@ Dropping Database
 
 ------------------------------------------------------
 Running Test 2: Open the employee database and run a query
-Open Database fails Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Open Database fails Engine Code: 335544472 Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Opening localhost:employee
 Database Open, SQL Dialect = 3
 TPB: Item Count = 3
@@ -534,6 +534,13 @@ Running Test 3: ad hoc queries
 Opening localhost:employee
 Database Open
 Employee Count = 42
+Transaction ID = 5536
+Transaction is Read/Write
+Transaction ID = 5536
+Oldest Interesting = 5461
+Oldest Action = 5535
+Oldest Snapshot = 5535
+Oldest Interesting = 0
 Employee Count = 41
 Employee Count = 42
 Employee Count = 41
@@ -564,10 +571,10 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 948,496
+Current memory = 948,520
 Delta memory = 1,288
 Max memory = 992,448
-Elapsed time= 0.001 sec
+Elapsed time= 0.002 sec
 Cpu = 0.000 sec
 Buffers = 75
 Reads = 0
@@ -2817,10 +2824,10 @@ User ID = 0
 Group ID = 0
 
 
-Licence Info: feature is not supported
+Licence Info: Engine Code: 335544378 feature is not supported
 -feature is not supported
 
-Licence Mask Info: feature is not supported
+Licence Mask Info: Engine Code: 335544378 feature is not supported
 
 Capabilities = 260
 
@@ -3107,25 +3114,20 @@ BLOBDATA (Charset Id = 4 Codepage = 65001)
 ------------------------------------------------------
 Running Test 16: Error handling
 Invalid Database Name Test
-Error Handled: I/O error during "open" operation for file "Malformed Name"
--Error while trying to open file
--No such file or directory
+Error Handled: SQLCODE: -902
+Engine Code: 335544344 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
 Invalid User Name Test
-Error Handled: Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Error Handled: SQLCODE: -902
+Engine Code: 335544472 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
 Invalid password Test
-Error Handled: Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Error Handled: SQLCODE: -902
+Engine Code: 335544472 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
 Invalid Prepare SQL Test
-Error Handled: Dynamic SQL Error
--SQL error code = -206
--Column unknown
--UNKNOWN_DATE
--At line 1, column 21 When Executing: Update Employee Set Unknown_Date = ? Where EMP_NO = ?
+Error Handled: SQLCODE: -206
+Engine Code: 335544569 Column does not belong to referenced table When Executing: Update Employee Set Unknown_Date = ? Where EMP_NO = ?
 Invalid Open Cursor SQL Test
-Error Handled: Dynamic SQL Error
--SQL error code = -206
--Column unknown
--X
--At line 1, column 8 When Executing: Select X,count(*) As Counter from EMPLOYEE
+Error Handled: SQLCODE: -206
+Engine Code: 335544569 Column does not belong to referenced table When Executing: Select X,count(*) As Counter from EMPLOYEE
 Transaction not started Test
 Error Handled: Transaction is not active
 Invalid Param SQL Type Test
@@ -3148,12 +3150,14 @@ New Transaction before Open Cursor
 COUNTER = 42
 
 Invalid Server Name Test
-Error Handled: Unable to complete network request to host "unknown".
--Failed to locate host machine
+Error Handled: SQLCODE: -902
+Engine Code: 335544721 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
 Invalid User Name Test
-Error Handled: Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Error Handled: SQLCODE: -902
+Engine Code: 335544472 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
 Invalid password Test
-Error Handled: Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Error Handled: SQLCODE: -902
+Engine Code: 335544472 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
 
 
 ------------------------------------------------------
@@ -3334,12 +3338,10 @@ Charset id = 0
 Nullable
 Size = 8
 
-Expected Error - Dynamic SQL Error
--SQL error code = -303
--conversion error from string "1,000"
-Expected Error - Dynamic SQL Error
--SQL error code = -303
--conversion error from string "10.0.0"
+Expected Error - SQLCODE: -303
+Engine Code: 335544569 Incompatible column/host variable data type
+Expected Error - SQLCODE: -303
+Engine Code: 335544569 Incompatible column/host variable data type
 ROWID = 1
 ITYPE = 101
 I64TYPE = 9223372036854775807
