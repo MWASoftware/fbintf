@@ -48,7 +48,7 @@ type
   protected
     FStatus: Firebird.IStatus;
     FDirty: boolean;
-    function GetSQLMessage: Ansistring; override;
+    function GetIBMessage: Ansistring; override;
   public
     destructor Destroy; override;
     procedure Init;
@@ -265,7 +265,7 @@ end;
 
 { TFB30Status }
 
-function TFB30Status.GetSQLMessage: Ansistring;
+function TFB30Status.GetIBMessage: Ansistring;
 begin
   Result := (FOwner as TFB30ClientAPI).FormatStatus(FStatus);
 end;

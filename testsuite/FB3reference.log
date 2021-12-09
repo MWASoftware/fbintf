@@ -9,7 +9,7 @@ Firebird Conf Directory = /opt/firebird3.0.5/
 Firebird Client Library Path = /opt/firebird3.0.5/lib/libfbclient.so
 Running Test 1: Create and Drop a Database
 Creating a Database with empty parameters
-Create Database fails (as expected): I/O error during "open O_CREAT" operation for file ""
+Create Database fails (as expected): Engine Code: 335544344 I/O error during "open O_CREAT" operation for file ""
 -Error while trying to create file
 -No such file or directory
 Creating a Database using an SQL Statement
@@ -77,7 +77,7 @@ Dropping Database
 
 ------------------------------------------------------
 Running Test 2: Open the employee database and run a query
-Open Database fails Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Open Database fails Engine Code: 335544472 Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Opening inet://localhost/employee
 Database Open, SQL Dialect = 3
 TPB: Item Count = 3
@@ -330,7 +330,7 @@ JOB_COUNTRY = USA
 SALARY = 105,900.00
 FULL_NAME = Nelson, Robert
 Do Fetch Last:
-Remote Scrollable cursors test fails feature is not supported
+Remote Scrollable cursors test fails Engine Code: 335544378 feature is not supported
 Now open the employee database as a local database
 TPB: Item Count = 3
   isc_tpb_read
@@ -650,13 +650,13 @@ Running Test 3: ad hoc queries
 Opening inet://localhost/employee
 Database Open
 Employee Count = 42
-Transaction ID = 5005
+Transaction ID = 5230
 Transaction is Read/Write
 Transaction Database Path = inet://localhost/employee
-Transaction ID = 5005
-Oldest Interesting = 5003
-Oldest Action = 5004
-Oldest Snapshot = 5004
+Transaction ID = 5230
+Oldest Interesting = 5228
+Oldest Action = 5229
+Oldest Snapshot = 5229
 Oldest Interesting = 0
 Employee Count = 41
 Employee Count = 42
@@ -692,7 +692,7 @@ Current memory = 19,694,032
 Delta memory = 4,480
 Max memory = 19,755,888
 Elapsed time= 0.002 sec
-Cpu = 0.010 sec
+Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
 Writes = 0
@@ -2944,10 +2944,10 @@ User ID = 0
 Group ID = 0
 
 
-Licence Info: feature is not supported
+Licence Info: Engine Code: 335544378 feature is not supported
 -feature is not supported
 
-Licence Mask Info: feature is not supported
+Licence Mask Info: Engine Code: 335544378 feature is not supported
 
 Capabilities = 6
 
@@ -3234,21 +3234,31 @@ BLOBDATA (Charset Id = 4 Codepage = 65001)
 ------------------------------------------------------
 Running Test 16: Error handling
 Invalid Database Name Test
-Error Handled: I/O error during "open" operation for file "Malformed Name"
+Error Handled: SQLCODE: -902
+Engine Code: 335544344 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+I/O error during "open" operation for file "Malformed Name"
 -Error while trying to open file
 -No such file or directory
 Invalid User Name Test
-Error Handled: Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Error Handled: SQLCODE: -902
+Engine Code: 335544472 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Invalid password Test
-Error Handled: Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Error Handled: SQLCODE: -902
+Engine Code: 335544472 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Invalid Prepare SQL Test
-Error Handled: Dynamic SQL Error
+Error Handled: SQLCODE: -206
+Engine Code: 335544569 Column does not belong to referenced table
+Dynamic SQL Error
 -SQL error code = -206
 -Column unknown
 -UNKNOWN_DATE
 -At line 1, column 21 When Executing: Update Employee Set Unknown_Date = ? Where EMP_NO = ?
 Invalid Open Cursor SQL Test
-Error Handled: Dynamic SQL Error
+Error Handled: SQLCODE: -206
+Engine Code: 335544569 Column does not belong to referenced table
+Dynamic SQL Error
 -SQL error code = -206
 -Column unknown
 -X
@@ -3275,13 +3285,19 @@ New Transaction before Open Cursor
 COUNTER = 42
 
 Invalid Server Name Test
-Error Handled: Unable to complete network request to host "unknown".
+Error Handled: SQLCODE: -902
+Engine Code: 335544721 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Unable to complete network request to host "unknown".
 -Failed to locate host machine.
 -The specified name was not found in the hosts file or Domain Name Services
 Invalid User Name Test
-Error Handled: Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Error Handled: SQLCODE: -902
+Engine Code: 335544472 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Invalid password Test
-Error Handled: Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Error Handled: SQLCODE: -902
+Engine Code: 335544472 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 
 
 ------------------------------------------------------
@@ -3462,10 +3478,14 @@ Charset id = 0
 Nullable
 Size = 8
 
-Expected Error - Dynamic SQL Error
+Expected Error - SQLCODE: -303
+Engine Code: 335544569 Incompatible column/host variable data type
+Dynamic SQL Error
 -SQL error code = -303
 -conversion error from string "1,000"
-Expected Error - Dynamic SQL Error
+Expected Error - SQLCODE: -303
+Engine Code: 335544569 Incompatible column/host variable data type
+Dynamic SQL Error
 -SQL error code = -303
 -conversion error from string "10.0.0"
 ROWID = 1
@@ -3658,16 +3678,16 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 9
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2021/12/07 09:58:40.6960
+IBX$CREATED = 2021/12/09 09:46:53.2200
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 11
 IBX$OLDTRANSACTIONID = 10
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2021/12/07 09:58:41.0190
+IBX$CREATED = 2021/12/09 09:46:53.6800
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)
-Timestamp = 2021/12/07 09:58:40.7300
+Timestamp = 2021/12/09 09:46:53.2680
 Session ID = 1
 Transaction ID = 9
 Transaction Name = "Transaction_29_1"
@@ -3679,43 +3699,43 @@ TPB: Item Count = 3
 Default Completion = TACommit
 
 Journal Entry = jeQuery(Query)
-Timestamp = 2021/12/07 09:58:40.7970
+Timestamp = 2021/12/09 09:46:53.3190
 Session ID = 1
 Transaction ID = 9
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(1,101,9223372036854775807,10000.1234,9999.12345678,1234567890.12346)
 
 Journal Entry = jeQuery(Query)
-Timestamp = 2021/12/07 09:58:40.8130
+Timestamp = 2021/12/09 09:46:53.3330
 Session ID = 1
 Transaction ID = 9
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(2,-32457,-9223372036854775808,1000001.12,1.7E308,-1234567890.12346)
 
 Journal Entry = jeTransCommitRet(Commit Retaining)
-Timestamp = 2021/12/07 09:58:40.8900
+Timestamp = 2021/12/09 09:46:53.4360
 Session ID = 1
 Transaction ID = 10
 Old TransactionID = 9
 
 Journal Entry = jeQuery(Query)
-Timestamp = 2021/12/07 09:58:40.9150
+Timestamp = 2021/12/09 09:46:53.4600
 Session ID = 1
 Transaction ID = 10
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(3,0,0,0,0,0)
 
 Journal Entry = jeTransRollbackRet(Rollback Retaining)
-Timestamp = 2021/12/07 09:58:41.0150
+Timestamp = 2021/12/09 09:46:53.6770
 Session ID = 1
 Transaction ID = 11
 Old TransactionID = 10
 
 Journal Entry = jeQuery(Query)
-Timestamp = 2021/12/07 09:58:41.0390
+Timestamp = 2021/12/09 09:46:53.7010
 Session ID = 1
 Transaction ID = 11
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(4,1,10,0.023,0.0011,233.456)
 
 Journal Entry = jeTransStart(Transaction Start)
-Timestamp = 2021/12/07 09:58:41.0610
+Timestamp = 2021/12/09 09:46:53.7150
 Session ID = 1
 Transaction ID = 12
 Transaction Name = "Transaction_29_2"
@@ -3727,12 +3747,12 @@ TPB: Item Count = 3
 Default Completion = TARollback
 
 Journal Entry = jeTransCommit(Commit)
-Timestamp = 2021/12/07 09:58:41.1310
+Timestamp = 2021/12/09 09:46:53.7600
 Session ID = 1
 Transaction ID = 11
 
 Journal Entry = jeQuery(Query)
-Timestamp = 2021/12/07 09:58:41.1910
+Timestamp = 2021/12/09 09:46:53.8160
 Session ID = 1
 Transaction ID = 12
 Query = Insert into TestData(RowID, Str, TextBlob) Values(5,'It''s the quick brown fox jumps over the lazy dog','To be or not to be-that is the question:
@@ -3773,7 +3793,7 @@ Be all my sins remembered
 ')
 
 Journal Entry = jeQuery(Query)
-Timestamp = 2021/12/07 09:58:41.2100
+Timestamp = 2021/12/09 09:46:53.8330
 Session ID = 1
 Transaction ID = 12
 Query = Insert into TestData(RowID,OtherBlob) Values (6,<blob subtype="0">
@@ -3784,7 +3804,7 @@ FFD8FFE000104A46494600010101004800480000FFE11E0545786966000049492A00080000000C00
 )
 
 Journal Entry = jeQuery(Query)
-Timestamp = 2021/12/07 09:58:41.2330
+Timestamp = 2021/12/09 09:46:53.8560
 Session ID = 1
 Transaction ID = 12
 Query = Insert into TestData(RowID,MyArray) Values (7,<array dim = "1" sqltype = "496" length = "4" relation_name = "TESTDATA" column_name = "MYARRAY" scale = "0" bounds="0:16">
@@ -3809,7 +3829,7 @@ Query = Insert into TestData(RowID,MyArray) Values (7,<array dim = "1" sqltype =
 )
 
 Journal Entry = jeTransRollback(Rollback)
-Timestamp = 2021/12/07 09:58:41.3650
+Timestamp = 2021/12/09 09:46:53.9680
 Session ID = 1
 Transaction ID = 12
 

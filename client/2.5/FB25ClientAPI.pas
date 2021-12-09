@@ -80,7 +80,7 @@ type
 
   TFB25Status = class(TFBStatus,IStatus)
   protected
-    function GetSQLMessage: Ansistring; override;
+    function GetIBMessage: Ansistring; override;
   public
     function StatusVector: PStatusVector; override;
   end;
@@ -165,7 +165,8 @@ type
     isc_array_put_slice: Tisc_array_put_slice;
     isc_prepare_transaction: Tisc_prepare_transaction;
     isc_version: Tisc_Version;
-    isc_sql_interprete: Tisc_sql_interprete;
+    isc_interprete: Tisc_interprete;
+    fb_interpret: Tfb_interpret;
 
   public
     {Helper Functions}
@@ -322,11 +323,26 @@ threadvar
 
 { TFB25ActivityReporter }
 
-function TFB25Status.GetSQLMessage: Ansistring;
-var local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
+function TFB25Status.GetIBMessage: Ansistring;
+var psb: PStatusVector;
+    local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
 begin
-  (FOwner as TFB25ClientAPI).isc_sql_interprete(Getsqlcode, local_buffer, sizeof(local_buffer));
-  Result := strpas(local_buffer);
+  psb := StatusVector;
+  Result := '';
+  with FOwner as TFB25ClientAPI do
+  if assigned(fb_interpret) then
+  begin
+    if fb_interpret(@local_buffer,sizeof(local_buffer),@psb) > 0 then
+       Result := strpas(local_buffer);
+  end
+  else
+  if assigned(isc_interprete) then
+  while isc_interprete(@local_buffer,@psb) > 0 do
+  begin
+    if (Result <> '') and (Result[Length(Result)] <> LF) then
+      Result := Result + LineEnding + '-';
+    Result := Result + strpas(local_buffer);
+  end;
 end;
 
 function TFB25Status.StatusVector: PStatusVector;
@@ -392,7 +408,8 @@ begin
   isc_array_put_slice := GetProcAddr('isc_array_put_slice'); {do not localize}
   isc_prepare_transaction  := GetProcAddr('isc_prepare_transaction'); {do not localize}
   isc_version  := GetProcAddr('isc_version'); {do not localize}
-  isc_sql_interprete := GetProcAddr('isc_sql_interprete'); {do not localize}
+  isc_interprete := GetProcAddr('isc_interprete'); {do not localize}
+  fb_interpret := GetProcAddr('fb_interpret'); {do not localize}
 
   FIBServiceAPIPresent := true;
   isc_rollback_retaining := GetProcAddress(FFBLibrary.IBLibrary, 'isc_rollback_retaining'); {do not localize}

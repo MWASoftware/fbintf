@@ -121,8 +121,8 @@ type
     FPrefix: AnsiString;
   protected
     FOwner: TFBClientAPI;
-    function GetIBMessage: Ansistring;
-    function GetSQLMessage: Ansistring; virtual; abstract;
+    function GetIBMessage: Ansistring; virtual; abstract;
+    function GetSQLMessage: Ansistring;
   public
     constructor Create(aOwner: TFBClientAPI; prefix: AnsiString='');
     function StatusVector: PStatusVector; virtual; abstract;
@@ -196,7 +196,7 @@ type
 
   public
     {Taken from legacy API}
-    isc_interprete: Tisc_interprete;
+    isc_sql_interprete: Tisc_sql_interprete;
     isc_sqlcode: Tisc_sqlcode;
 
     constructor Create(aFBLibrary: TFBLibrary);
@@ -598,10 +598,10 @@ end;
 
 function TFBClientAPI.LoadInterface: boolean;
 begin
-  isc_interprete := GetProcAddr('isc_interprete'); {do not localize}
   isc_sqlcode := GetProcAddr('isc_sqlcode'); {do not localize}
+  isc_sql_interprete := GetProcAddr('isc_sql_interprete'); {do not localize}
   fb_shutdown := GetProcAddr('fb_shutdown'); {do not localize}
-  Result := assigned(isc_sqlcode);
+  Result := true; {don't case if these fail to load}
 end;
 
 procedure TFBClientAPI.FBShutdown;
@@ -612,19 +612,11 @@ end;
 
 { TFBStatus }
 
-function TFBStatus.GetIBMessage: Ansistring;
-var psb: PStatusVector;
-    local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
+function TFBStatus.GetSQLMessage: Ansistring;
+var local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
 begin
-  psb := StatusVector;
-  Result := '';
-  if assigned(FOwner.isc_interprete) then
-  while FOwner.isc_interprete(@local_buffer,@psb) > 0 do
-  begin
-    if (Result <> '') and (Result[Length(Result)] <> LF) then
-      Result := Result + LineEnding + '-';
-    Result := Result + strpas(local_buffer);
-  end;
+   FOwner.isc_sql_interprete(Getsqlcode, local_buffer, sizeof(local_buffer));
+  Result := strpas(local_buffer);
 end;
 
 constructor TFBStatus.Create(aOwner: TFBClientAPI; prefix: AnsiString);
