@@ -78,6 +78,19 @@ type
 
   { TFBEvents }
 
+  {Firebird Event and Result buffer syntax is:
+
+    record
+      version: byte;
+      event: array of packed record
+        strlen: byte;
+        strchars: array of AnsiChar; //no of chars given by strlen
+        EventCounts: long;
+      end;
+    end;
+
+  }
+
   TFBEvents = class(TActivityReporter)
   private
     FEvents: TStringList;
@@ -122,7 +135,8 @@ const
 
 { TFBEvents }
 
-(*  CreateEventBlock based on
+(* Original Firebird 'C' code
+
 SLONG API_ROUTINE_VARARG isc_event_block(UCHAR** event_buffer,
   UCHAR** result_buffer,
   USHORT count, ...)
@@ -199,6 +213,8 @@ SLONG API_ROUTINE_VARARG isc_event_block(UCHAR** event_buffer,
 }
 *)
 
+{CreateEventBlock effectively replaces isc_event_block}
+
 procedure TFBEvents.CreateEventBlock;
 var i: integer;
     P: PByte;
@@ -225,14 +241,18 @@ begin
     P := FEventBuffer;
     P^ := EPB_version1;
     Inc(P);
+    SetLength(FEventCounts,FEvents.Count);
+
     for i := 0 to FEvents.Count - 1 do
     begin
       P^ := Length(FEvents[i]);
       Inc(P);
       Move(FEvents[i][1],P^,Length(FEvents[i]));
       Inc(P,Length(FEvents[i])+sizeof(Long));
+      FEventCounts[i].EventName := FEvents[i];
     end;
   end;
+
 {  for i := 0 to FEventBufferLen - 1 do
   write(Format('%x ', [FEventBuffer[i]]));
    writeln;}
@@ -265,7 +285,7 @@ begin
 end;
 
 (*
-  getEventCounts derived from
+  Original Firebird 'C' code for isc_event_counts
 
 void API_ROUTINE isc_event_counts(ULONG* result_vector,
 								  SSHORT buffer_length,
@@ -318,23 +338,21 @@ void API_ROUTINE isc_event_counts(ULONG* result_vector,
 }
 *)
 
+{ProcessEventCounts effectively replaces isc_event_counts}
+
 procedure TFBEvents.ProcessEventCounts;
 
-  procedure getEventCounts(var ResultVector: array of Long; BufLen: integer; EventBuffer, ResultBuffer: PByte);
   var i: integer;
       P, Q: PByte;
       initial_count: Long;
       new_count: Long;
-      bufend: PByte;
       len: byte;
   begin
-    P := EventBuffer;
-    Q := ResultBuffer;
-    bufend := P + BufLen;
-    i := 0;
+    P := FEventBuffer;
+    Q := FResultBuffer;
     Inc(P); {skip past version byte}
     Inc(Q);
-    while P < BufEnd do
+    for i := 0 to Length(FEventCounts) - 1 do
     with FFirebirdClientAPI do
     begin
       {skip over the event name}
@@ -345,36 +363,10 @@ procedure TFBEvents.ProcessEventCounts;
       Inc(P,sizeof(Long));
       new_count := DecodeInteger(Q,sizeof(Long));
       Inc(Q,sizeof(Long));
-      ResultVector[i] := new_count - initial_count;
-      Inc(i);
+      FEventCounts[i].Count := new_count - initial_count;
     end;
-    Move(ResultBuffer^,EventBuffer^,BufLen);
+    Move(FResultBuffer^,FEventBuffer^,FEventBufferLen);
   end;
-
-var EventCountList: array[0..19] of ISC_LONG;
-    i: integer;
-    j: integer;
-begin
-  SetLength(FEventCounts,0);
-  if FResultBuffer = nil then Exit;
-
-  FillChar(EventCountList,sizeof(EventCountList),0);
-
-  getEventCounts(EventCountList, FEventBufferLen, FEventBuffer, FResultBuffer);
-
-  j := 0;
-  for i := 0 to FEvents.Count - 1 do
-  begin
-    if EventCountList[i] <> 0 then
-    begin
-      Inc(j);
-      SetLength(FEventCounts,j);
-      FEventCounts[j-1].EventName := FEvents[i];
-      FEventCounts[j-1].Count := EventCountList[i];
-//      writeln('Event: ',FEventCounts[j-1].EventName,' Count = ',FEventCounts[j-1].Count);
-    end;
-  end;
-end;
 
 constructor TFBEvents.Create(DBAttachment: IAttachment;
   aMonitor: IActivityMonitor; Events: TStrings);

@@ -650,13 +650,13 @@ Running Test 3: ad hoc queries
 Opening inet://localhost/employee
 Database Open
 Employee Count = 42
-Transaction ID = 6891
+Transaction ID = 7194
 Transaction is Read/Write
 Transaction Database Path = inet://localhost/employee
-Transaction ID = 6891
-Oldest Interesting = 6889
-Oldest Action = 6890
-Oldest Snapshot = 6890
+Transaction ID = 7194
+Oldest Interesting = 7192
+Oldest Action = 7193
+Oldest Snapshot = 7193
 Oldest Snapshot Number = 2
 Lock Timeout = 0
 Transaction Access = isc_info_tra_readwrite
@@ -694,11 +694,11 @@ FULL_NAME = Johnson, Leslie
 Current memory = 19,767,952
 Delta memory = 4,464
 Max memory = 19,813,568
-Elapsed time= 0.002 sec
+Elapsed time= 0.001 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
-Writes = 1
+Writes = 0
 Fetches = 3
 Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
 Relation Name = EMPLOYEE
@@ -3244,25 +3244,30 @@ BLOBDATA (Charset Id = 4 Codepage = 65001)
 Running Test 16: Error handling
 Invalid Database Name Test
 Error Handled: SQLCODE: -902
-Engine Code: 335544344 I/O error during "open" operation for file "Malformed Name"
+Engine Code: 335544344 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+I/O error during "open" operation for file "Malformed Name"
 -Error while trying to open file
 -No such file or directory
 Invalid User Name Test
 Error Handled: SQLCODE: -902
-Engine Code: 335544472 Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Engine Code: 335544472 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Invalid password Test
 Error Handled: SQLCODE: -902
-Engine Code: 335544472 Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Engine Code: 335544472 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Invalid Prepare SQL Test
 Error Handled: SQLCODE: -206
-Engine Code: 335544569 Dynamic SQL Error
+Engine Code: 335544569 Column does not belong to referenced table
+Dynamic SQL Error
 -SQL error code = -206
 -Column unknown
 -UNKNOWN_DATE
 -At line 1, column 21 When Executing: Update Employee Set Unknown_Date = ? Where EMP_NO = ?
 Invalid Open Cursor SQL Test
 Error Handled: SQLCODE: -206
-Engine Code: 335544569 Dynamic SQL Error
+Engine Code: 335544569 Column does not belong to referenced table
+Dynamic SQL Error
 -SQL error code = -206
 -Column unknown
 -X
@@ -3290,15 +3295,18 @@ COUNTER = 42
 
 Invalid Server Name Test
 Error Handled: SQLCODE: -902
-Engine Code: 335544721 Unable to complete network request to host "unknown".
+Engine Code: 335544721 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Unable to complete network request to host "unknown".
 -Failed to locate host machine.
 -The specified name was not found in the hosts file or Domain Name Services
 Invalid User Name Test
 Error Handled: SQLCODE: -902
-Engine Code: 335544472 Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Engine Code: 335544472 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Invalid password Test
 Error Handled: SQLCODE: -902
-Engine Code: 335544472 Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Engine Code: 335544472 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 
 
 ------------------------------------------------------
@@ -4572,7 +4580,8 @@ Test Error Handling - Update returning should fail
 Error reported (as expected) when defering update returning query: This query type (SQL_ExecProcedure) cannot be batched
 Error handling when Insert rows - duplicate key
 Error reported when inserting: Error Processing update/insert batch on row number 2 - SQLCODE: -803
-Engine Code: 335544665 violation of PRIMARY or UNIQUE KEY constraint "INTEG_27" on table "EMPLOYEE"
+Engine Code: 335544665 Invalid insert or update value(s): object columns are constrained - no 2 table rows can have duplicate column values
+violation of PRIMARY or UNIQUE KEY constraint "INTEG_27" on table "EMPLOYEE"
 -Problematic key value is ("EMP_NO" = 150)
 Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
 Batch Completion Info
@@ -4690,16 +4699,12 @@ Nullable
 Size = 8
 
 Expected Error - SQLCODE: -303
-Engine Code: 335544569 Dynamic SQL Error
--SQL error code = -303
--conversion error from string "1,000"
+Engine Code: 335544569 Incompatible column/host variable data type
 Dynamic SQL Error
 -SQL error code = -303
 -conversion error from string "1,000"
 Expected Error - SQLCODE: -303
-Engine Code: 335544569 Dynamic SQL Error
--SQL error code = -303
--conversion error from string "10.0.0"
+Engine Code: 335544569 Incompatible column/host variable data type
 Dynamic SQL Error
 -SQL error code = -303
 -conversion error from string "10.0.0"

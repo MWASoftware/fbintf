@@ -649,13 +649,13 @@ Running Test 3: ad hoc queries
 Opening inet://localhost/employee
 Database Open
 Employee Count = 42
-Transaction ID = 5132
+Transaction ID = 5181
 Transaction is Read/Write
 Transaction Database Path = inet://localhost/employee
-Transaction ID = 5132
-Oldest Interesting = 5130
-Oldest Action = 5131
-Oldest Snapshot = 5131
+Transaction ID = 5181
+Oldest Interesting = 5179
+Oldest Action = 5180
+Oldest Snapshot = 5180
 Oldest Interesting = 0
 Employee Count = 41
 Employee Count = 42
@@ -690,8 +690,8 @@ FULL_NAME = Johnson, Leslie
 Current memory = 19,694,032
 Delta memory = 4,480
 Max memory = 19,755,888
-Elapsed time= 0.001 sec
-Cpu = 0.000 sec
+Elapsed time= 0.002 sec
+Cpu = 0.010 sec
 Buffers = 2048
 Reads = 0
 Writes = 0
@@ -3234,25 +3234,30 @@ BLOBDATA (Charset Id = 4 Codepage = 65001)
 Running Test 16: Error handling
 Invalid Database Name Test
 Error Handled: SQLCODE: -902
-Engine Code: 335544344 I/O error during "open" operation for file "Malformed Name"
+Engine Code: 335544344 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+I/O error during "open" operation for file "Malformed Name"
 -Error while trying to open file
 -No such file or directory
 Invalid User Name Test
 Error Handled: SQLCODE: -902
-Engine Code: 335544472 Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Engine Code: 335544472 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Invalid password Test
 Error Handled: SQLCODE: -902
-Engine Code: 335544472 Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Engine Code: 335544472 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Invalid Prepare SQL Test
 Error Handled: SQLCODE: -206
-Engine Code: 335544569 Dynamic SQL Error
+Engine Code: 335544569 Column does not belong to referenced table
+Dynamic SQL Error
 -SQL error code = -206
 -Column unknown
 -UNKNOWN_DATE
 -At line 1, column 21 When Executing: Update Employee Set Unknown_Date = ? Where EMP_NO = ?
 Invalid Open Cursor SQL Test
 Error Handled: SQLCODE: -206
-Engine Code: 335544569 Dynamic SQL Error
+Engine Code: 335544569 Column does not belong to referenced table
+Dynamic SQL Error
 -SQL error code = -206
 -Column unknown
 -X
@@ -3280,15 +3285,18 @@ COUNTER = 42
 
 Invalid Server Name Test
 Error Handled: SQLCODE: -902
-Engine Code: 335544721 Unable to complete network request to host "unknown".
+Engine Code: 335544721 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Unable to complete network request to host "unknown".
 -Failed to locate host machine.
 -The specified name was not found in the hosts file or Domain Name Services
 Invalid User Name Test
 Error Handled: SQLCODE: -902
-Engine Code: 335544472 Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Engine Code: 335544472 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Invalid password Test
 Error Handled: SQLCODE: -902
-Engine Code: 335544472 Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Engine Code: 335544472 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 
 
 ------------------------------------------------------
@@ -3470,11 +3478,13 @@ Nullable
 Size = 8
 
 Expected Error - SQLCODE: -303
-Engine Code: 335544569 Dynamic SQL Error
+Engine Code: 335544569 Incompatible column/host variable data type
+Dynamic SQL Error
 -SQL error code = -303
 -conversion error from string "1,000"
 Expected Error - SQLCODE: -303
-Engine Code: 335544569 Dynamic SQL Error
+Engine Code: 335544569 Incompatible column/host variable data type
+Dynamic SQL Error
 -SQL error code = -303
 -conversion error from string "10.0.0"
 ROWID = 1
