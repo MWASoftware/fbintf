@@ -38,8 +38,8 @@ FBINTF Change Log  version          (1.3-3 Build 12935) Mon, 06 Dec 2021 23:17:1
 8. ITransaction (Firebird 3 and later): An exception raised when freeing an underlying
    transaction handle is now ignored if Rollback/Commit is called with Force=true
 
-9. Ensure Exception message consistency between legacy and new Firebird API. SQL and IB
-   messages were swapped around.
+9. Tidy up of exception handling code. Under the legacy API, fb_interpret is now
+   used to get an IBError Message instead of isc_interprete.
 
 10. Internal tidyup. Native code now used for decoding integers and the events
     buffer. Avoids dependencies on fbclient functions isc_portable_integer,

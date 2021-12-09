@@ -615,6 +615,12 @@ Tisc_interprete = function      (buffer                    : PByte;
 				 status_vector             : PPISC_STATUS): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
+Tfb_interpret   = function      (buffer                    : PByte;
+                                 buflen                    : integer;
+				 status_vector             : PPISC_STATUS): long;
+                                {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
+
+
 Tisc_open_blob = function       (status_vector             : PISC_STATUS;
                                  db_handle                 : PISC_DB_HANDLE;
                                  tran_handle               : PISC_TR_HANDLE;
