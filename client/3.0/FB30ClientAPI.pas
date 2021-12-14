@@ -85,7 +85,9 @@ type
                              goes out of scope.}
     procedure CheckPlugins;
   public
-    constructor Create(aFBLibrary: TFBLibrary);
+    constructor Create(aFBLibrary: TFBLibrary); overload;
+    constructor Create(aMaster: Firebird.IMaster; aStatus: Firebird.IStatus;
+      prefix: AnsiString = '');
     destructor Destroy; override;
 
     function StatusIntf: Firebird.IStatus;
@@ -369,10 +371,14 @@ var
   fb_get_master_interface: Tfb_get_master_interface;
 begin
   Result := inherited LoadInterface;
-  fb_get_master_interface := GetProcAddress(GetFBLibrary.GetHandle, 'fb_get_master_interface'); {do not localize}
-  if assigned(fb_get_master_interface) then
+  if (FMaster = nil) and (GetFBLibrary <> nil) then {get from library}
   begin
-    FMaster := fb_get_master_interface;
+    fb_get_master_interface := GetProcAddress(GetFBLibrary.GetHandle, 'fb_get_master_interface'); {do not localize}
+    if assigned(fb_get_master_interface) then
+      FMaster := fb_get_master_interface;
+  end;
+  if FMaster <> nil then
+  begin
     FUtil := FMaster.getUtilInterface;
     FProvider := FMaster.getDispatcher;
     FConfigManager := FMaster.getConfigManager;
@@ -404,6 +410,15 @@ constructor TFB30ClientAPI.Create(aFBLibrary: TFBLibrary);
 begin
   inherited Create(aFBLibrary);
   FStatus := TFB30Status.Create(self);
+  FStatusIntf := FStatus;
+end;
+
+constructor TFB30ClientAPI.Create(aMaster: Firebird.IMaster;
+  aStatus: Firebird.IStatus; prefix: AnsiString);
+begin
+  inherited Create(nil);
+  FMaster := aMaster;
+  FStatus := TFB30StatusObject.Create(self,aStatus,prefix);
   FStatusIntf := FStatus;
 end;
 

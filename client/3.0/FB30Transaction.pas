@@ -48,6 +48,7 @@ type
   private
     FTransactionIntf: Firebird.ITransaction;
     FFirebird30ClientAPI: TFB30ClientAPI;
+    procedure SetTransactionIntf(AValue: Firebird.ITransaction);
     procedure StartMultiple;
     procedure FreeHandle(Force: boolean);
   protected
@@ -56,7 +57,7 @@ type
     function GetTrInfo(ReqBuffer: PByte; ReqBufLen: integer): ITrInformation; override;
   public
     destructor Destroy; override;
-    property TransactionIntf: Firebird.ITransaction read FTransactionIntf;
+    property TransactionIntf: Firebird.ITransaction read FTransactionIntf write SetTransactionIntf;
     {ITransaction}
     function GetInTransaction: boolean; override;
     procedure PrepareForCommit; override;
@@ -97,6 +98,14 @@ begin
     FTransactionIntf := DtcStart.start(StatusIntf);
     Check4DataBaseError;
   end;
+end;
+
+procedure TFB30Transaction.SetTransactionIntf(AValue: Firebird.ITransaction);
+begin
+  if FTransactionIntf = AValue then Exit;
+  FreeHandle(true);
+  FTransactionIntf := AValue;
+  FTransactionIntf.addRef();
 end;
 
 procedure TFB30Transaction.FreeHandle(Force: boolean);

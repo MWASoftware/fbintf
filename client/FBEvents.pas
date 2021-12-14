@@ -342,31 +342,31 @@ void API_ROUTINE isc_event_counts(ULONG* result_vector,
 
 procedure TFBEvents.ProcessEventCounts;
 
-  var i: integer;
-      P, Q: PByte;
-      initial_count: Long;
-      new_count: Long;
-      len: byte;
+var i: integer;
+    P, Q: PByte;
+    initial_count: Long;
+    new_count: Long;
+    len: byte;
+begin
+  P := FEventBuffer;
+  Q := FResultBuffer;
+  Inc(P); {skip past version byte}
+  Inc(Q);
+  for i := 0 to Length(FEventCounts) - 1 do
+  with FFirebirdClientAPI do
   begin
-    P := FEventBuffer;
-    Q := FResultBuffer;
-    Inc(P); {skip past version byte}
-    Inc(Q);
-    for i := 0 to Length(FEventCounts) - 1 do
-    with FFirebirdClientAPI do
-    begin
-      {skip over the event name}
-      len := P^;
-      P := P + len + 1;
-      Q := Q + len + 1; {event name length in P^}
-      initial_count := DecodeInteger(P,sizeof(Long));
-      Inc(P,sizeof(Long));
-      new_count := DecodeInteger(Q,sizeof(Long));
-      Inc(Q,sizeof(Long));
-      FEventCounts[i].Count := new_count - initial_count;
-    end;
-    Move(FResultBuffer^,FEventBuffer^,FEventBufferLen);
+    {skip over the event name}
+    len := P^;
+    P := P + len + 1;
+    Q := Q + len + 1; {event name length in P^}
+    initial_count := DecodeInteger(P,sizeof(Long));
+    Inc(P,sizeof(Long));
+    new_count := DecodeInteger(Q,sizeof(Long));
+    Inc(Q,sizeof(Long));
+    FEventCounts[i].Count := new_count - initial_count;
   end;
+  Move(FResultBuffer^,FEventBuffer^,FEventBufferLen);
+end;
 
 constructor TFBEvents.Create(DBAttachment: IAttachment;
   aMonitor: IActivityMonitor; Events: TStrings);

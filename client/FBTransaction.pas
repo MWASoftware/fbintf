@@ -92,10 +92,10 @@ type
     procedure SetInterface(api: TFBClientAPI); virtual;
     function GetTrInfo(ReqBuffer: PByte; ReqBufLen: integer): ITrInformation; virtual; abstract;
   public
-    constructor Create(api: TFBClientAPI; Attachments: array of IAttachment; Params: array of byte; DefaultCompletion: TTransactionAction); overload;
-    constructor Create(api: TFBClientAPI; Attachments: array of IAttachment; TPB: ITPB; DefaultCompletion: TTransactionAction); overload;
-    constructor Create(api: TFBClientAPI; Attachment: IAttachment; Params: array of byte; DefaultCompletion: TTransactionAction); overload;
-    constructor Create(api: TFBClientAPI; Attachment: IAttachment; TPB: ITPB; DefaultCompletion: TTransactionAction); overload;
+    constructor Create(api: TFBClientAPI; Attachments: array of IAttachment; Params: array of byte; DefaultCompletion: TTransactionAction=TACommit); overload;
+    constructor Create(api: TFBClientAPI; Attachments: array of IAttachment; TPB: ITPB; DefaultCompletion: TTransactionAction=TACommit); overload;
+    constructor Create(api: TFBClientAPI; Attachment: IAttachment; Params: array of byte; DefaultCompletion: TTransactionAction=TACommit); overload;
+    constructor Create(api: TFBClientAPI; Attachment: IAttachment; TPB: ITPB; DefaultCompletion: TTransactionAction=TACommit); overload;
     destructor Destroy; override;
     procedure DoDefaultTransactionEnd(Force: boolean);
     property FirebirdAPI: TFBClientAPI read FFirebirdAPI;

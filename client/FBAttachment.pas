@@ -64,6 +64,7 @@ type
     FUserCharSetMap: array of TCharSetMap;
     FSecDatabase: AnsiString;
     FInlineBlobLimit: integer;
+    FAttachmentID: integer;
   protected
     FDatabaseName: AnsiString;
     FRaiseExceptionOnConnectError: boolean;
@@ -140,6 +141,7 @@ type
     function GetEventHandler(Event: AnsiString): IEvents; overload;
 
     function GetSQLDialect: integer;
+    function GetAttachmentID: integer;
     function CreateBlob(transaction: ITransaction; RelationName, ColumnName: AnsiString; BPB: IBPB=nil): IBlob; overload;
     function CreateBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BPB: IBPB=nil): IBlob; overload; virtual; abstract;
     function OpenBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob; overload; virtual; abstract;
@@ -404,7 +406,7 @@ var DBInfo: IDBInformation;
 begin
   if not IsConnected then Exit;
   DBInfo := GetDBInformation([isc_info_db_id,isc_info_ods_version,isc_info_ods_minor_version,
-                               isc_info_db_SQL_Dialect]);
+                               isc_info_db_SQL_Dialect, isc_info_attachment_id]);
   for i := 0 to DBInfo.GetCount - 1 do
     with DBInfo[i] do
       case getItemType of
@@ -414,6 +416,8 @@ begin
         FODSMajorVersion := getAsInteger;
       isc_info_db_SQL_Dialect:
         FSQLDialect := getAsInteger;
+      isc_info_attachment_id:
+        FAttachmentID := getAsInteger;
       end;
 
   FCharSetID := 0;
@@ -470,12 +474,12 @@ begin
   FFirebirdAPI := api.GetAPI; {Keep reference to interface}
   FSQLDialect := 3;
   FDatabaseName := DatabaseName;
-  FDPB := DPB;
   SetLength(FUserCharSetMap,0);
-  FRaiseExceptionOnConnectError := RaiseExceptionOnConnectError;
   FODSMajorVersion := 0;
   FODSMinorVersion := 0;
   FInlineBlobLimit := DefaultMaxInlineBlobLimit;
+  FDPB := DPB;
+  FRaiseExceptionOnConnectError := RaiseExceptionOnConnectError;
 end;
 
 function TFBAttachment.GenerateCreateDatabaseSQL(DatabaseName: AnsiString;  aDPB: IDPB): AnsiString;
@@ -818,6 +822,11 @@ end;
 function TFBAttachment.GetSQLDialect: integer;
 begin
   Result := FSQLDialect;
+end;
+
+function TFBAttachment.GetAttachmentID: integer;
+begin
+  Result := FAttachmentID;
 end;
 
 function TFBAttachment.CreateBlob(transaction: ITransaction; RelationName,

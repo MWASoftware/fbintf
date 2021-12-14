@@ -1166,6 +1166,7 @@ type
 
     {Database Information}
     function GetSQLDialect: integer;
+    function GetAttachmentID: integer;
     function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IBlobMetaData;
     function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IArrayMetaData;
     function GetDBInformation(Requests: array of byte): IDBInformation; overload;

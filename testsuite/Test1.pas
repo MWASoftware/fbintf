@@ -176,6 +176,7 @@ begin
     Exit;
   end;
   WriteDBInfo(Attachment.GetDBInformation([isc_info_db_id,isc_info_ods_version,isc_info_ods_minor_version]));
+  writeln(OutFile,'Attachment ID = ',Attachment.GetAttachmentID);
   WriteAttachmentInfo(Attachment);
 
   {Querying Database}
@@ -197,6 +198,7 @@ begin
       Exit;
     end;
     WriteDBInfo(Attachment.GetDBInformation([isc_info_db_id,isc_info_ods_version,isc_info_ods_minor_version]));
+    writeln(OutFile,'Attachment ID = ',Attachment.GetAttachmentID);
     WriteAttachmentInfo(Attachment);
 
     {Querying Database}
