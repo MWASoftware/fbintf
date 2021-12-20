@@ -69,22 +69,22 @@ type
     Syntax:
 
     Transaction Start:
-    *S:<date/time>,<session id>,<transaction no.>,<string length>:<transaction Name>,<string length>:<TPB>,<default Completion>
+    *S:<date/time>,<attachmentid>,<session id>,<transaction no.>,<string length>:<transaction Name>,<string length>:<TPB>,<default Completion>
 
     Transaction Commit:
-    *C:<date/time>,<session id>,<transaction no.>
+    *C:<date/time>,<attachmentid>,<session id>,<transaction no.>
 
     Transaction Commit retaining :
-    *c:<date/time>,<session id>,<transaction no.><old transaction no.>
+    *c:<date/time>,<attachmentid>,<session id>,<transaction no.><old transaction no.>
 
     Transaction Rollback:
-    *R:<date/time>,<session id>,<transaction no.>
+    *R:<date/time>,<attachmentid>,<session id>,<transaction no.>
 
     Transaction Rollback retaining:
-    *r:<date/time>,<session id>,<transaction no.><old transaction no.>
+    *r:<date/time>,<attachmentid>,<session id>,<transaction no.><old transaction no.>
 
     Update/Insert/Delete
-    *Q:<date/time>,<session id>,<transaction no.>,<length of query text in bytes>:<query text>
+    *Q:<date/time>,<attachmentid>,<session id>,<transaction no.>,<length of query text in bytes>:<query text>
 
   }
 
@@ -93,12 +93,12 @@ type
   TFBJournaling = class(TActivityHandler, IJournallingHook)
   private
     {Logfile}
-    const sQueryJournal          = '*Q:''%s'',%d,%d,%d:%s' + LineEnding;
-    const sTransStartJnl         = '*S:''%s'',%d,%d,%d:%s,%d:%s,%d' + LineEnding;
-    const sTransCommitJnl        = '*C:''%s'',%d,%d' + LineEnding;
-    const sTransCommitRetJnl     = '*c:''%s'',%d,%d,%d' + LineEnding;
-    const sTransRollBackJnl      = '*R:''%s'',%d,%d' + LineEnding;
-    const sTransRollBackRetJnl   = '*r:''%s'',%d,%d,%d' + LineEnding;
+    const sQueryJournal          = '*Q:''%s'',%d,%d,%d,%d:%s' + LineEnding;
+    const sTransStartJnl         = '*S:''%s'',%d,%d,%d,%d:%s,%d:%s,%d' + LineEnding;
+    const sTransCommitJnl        = '*C:''%s'',%d,%d,%d' + LineEnding;
+    const sTransCommitRetJnl     = '*c:''%s'',%d,%d,%d,%d' + LineEnding;
+    const sTransRollBackJnl      = '*R:''%s'',%d,%d,%d' + LineEnding;
+    const sTransRollBackRetJnl   = '*r:''%s'',%d,%d,%d,%d' + LineEnding;
   private
     FOptions: TJournalOptions;
     FJournalFilePath: string;
@@ -125,6 +125,7 @@ type
     function GetJournalOptions: TJournalOptions;
     function StartJournaling(aJournalLogFile: AnsiString): integer; overload;
     function StartJournaling(aJournalLogFile: AnsiString; Options: TJournalOptions): integer; overload;
+    function StartJournaling(S: TStream; Options: TJournalOptions): integer; overload;
     procedure StopJournaling(RetainJournal: boolean);
   end;
 
@@ -139,6 +140,7 @@ type
     FUserCharSetMap: array of TCharSetMap;
     FSecDatabase: AnsiString;
     FInlineBlobLimit: integer;
+    FAttachmentID: integer;
   protected
     FDatabaseName: AnsiString;
     FRaiseExceptionOnConnectError: boolean;
@@ -217,6 +219,7 @@ type
     function GetEventHandler(Event: AnsiString): IEvents; overload;
 
     function GetSQLDialect: integer;
+    function GetAttachmentID: integer;
     function CreateBlob(transaction: ITransaction; RelationName, ColumnName: AnsiString; BPB: IBPB=nil): IBlob; overload;
     function CreateBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BPB: IBPB=nil): IBlob; overload; virtual; abstract;
     function OpenBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB=nil): IBlob; overload; virtual; abstract;
@@ -233,7 +236,6 @@ type
     function GetDBInformation(Requests: array of byte): IDBInformation; overload;
     function GetDBInformation(Request: byte): IDBInformation; overload;
     function GetDBInformation(Requests: IDIRB): IDBInformation; overload;
-    function GetAttachmentID: integer;
     function GetConnectString: AnsiString;
     function GetRemoteProtocol: AnsiString;
     function GetAuthenticationMethod: AnsiString;
@@ -645,6 +647,7 @@ begin
   end;
   TPBText := Tr.getTPB.AsText;
   LogEntry := Format(sTransStartJnl,[FBFormatDateTime(GetDateTimeFmt,Now),
+                                     GetAttachment.GetAttachmentID,
                                      FSessionID,
                                      Tr.GetTransactionID,
                                      Length(Tr.TransactionName),
@@ -664,12 +667,16 @@ begin
     case Action of
     TARollback:
       begin
-        LogEntry := Format(sTransRollbackJnl,[FBFormatDateTime(GetDateTimeFmt,Now),FSessionID,TransactionID]);
+        LogEntry := Format(sTransRollbackJnl,[FBFormatDateTime(GetDateTimeFmt,Now),
+                                              GetAttachment.GetAttachmentID,
+                                              FSessionID,TransactionID]);
         Result := true;
       end;
     TACommit:
       begin
-        LogEntry := Format(sTransCommitJnl,[FBFormatDateTime(GetDateTimeFmt,Now),FSessionID,TransactionID]);
+        LogEntry := Format(sTransCommitJnl,[FBFormatDateTime(GetDateTimeFmt,Now),
+                                            GetAttachment.GetAttachmentID,
+                                            FSessionID,TransactionID]);
         Result := true;
       end;
     end;
@@ -684,9 +691,11 @@ begin
     case Action of
       TACommitRetaining:
           LogEntry := Format(sTransCommitRetJnl,[FBFormatDateTime(GetDateTimeFmt,Now),
+                                  GetAttachment.GetAttachmentID,
                                   FSessionID,Tr.GetTransactionID,OldTransactionID]);
       TARollbackRetaining:
           LogEntry := Format(sTransRollbackRetJnl,[FBFormatDateTime(GetDateTimeFmt,Now),
+                                      GetAttachment.GetAttachmentID,
                                       FSessionID,Tr.GetTransactionID,OldTransactionID]);
     end;
     if assigned(FJournalFileStream) then
@@ -706,6 +715,7 @@ var SQL: AnsiString;
 begin
   SQL := TQueryProcessor.Execute(Stmt);
   LogEntry := Format(sQueryJournal,[FBFormatDateTime(GetDateTimeFmt,Now),
+                                      GetAttachment.GetAttachmentID,
                                       FSessionID,
                                       Stmt.GetTransaction.GetTransactionID,
                                       Length(SQL),SQL]);
@@ -731,6 +741,16 @@ end;
 function TFBJournaling.StartJournaling(aJournalLogFile: AnsiString;
   Options: TJournalOptions): integer;
 begin
+  try
+    StartJournaling(TFileStream.Create(aJournalLogFile,fmCreate),Options);
+  finally
+    FJournalFilePath := aJournalLogFile;
+  end;
+end;
+
+function TFBJournaling.StartJournaling(S: TStream; Options: TJournalOptions
+  ): integer;
+begin
   FOptions := Options;
   with GetAttachment do
   begin
@@ -741,8 +761,7 @@ begin
     end;
     FSessionID := OpenCursorAtStart(sqlGetNextSessionID)[0].AsInteger;
   end;
-  FJournalFilePath := aJournalLogFile;
-  FJournalFileStream := TFileStream.Create(FJournalFilePath,fmCreate);
+  FJournalFileStream := S;
   Result := FSessionID;
 end;
 
@@ -765,7 +784,7 @@ var DBInfo: IDBInformation;
 begin
   if not IsConnected then Exit;
   DBInfo := GetDBInformation([isc_info_db_id,isc_info_ods_version,isc_info_ods_minor_version,
-                               isc_info_db_SQL_Dialect]);
+                               isc_info_db_SQL_Dialect, isc_info_attachment_id]);
   for i := 0 to DBInfo.GetCount - 1 do
     with DBInfo[i] do
       case getItemType of
@@ -775,6 +794,8 @@ begin
         FODSMajorVersion := getAsInteger;
       isc_info_db_SQL_Dialect:
         FSQLDialect := getAsInteger;
+      isc_info_attachment_id:
+        FAttachmentID := getAsInteger;
       end;
 
   FCharSetID := 0;
@@ -831,12 +852,12 @@ begin
   FFirebirdAPI := api.GetAPI; {Keep reference to interface}
   FSQLDialect := 3;
   FDatabaseName := DatabaseName;
-  FDPB := DPB;
   SetLength(FUserCharSetMap,0);
-  FRaiseExceptionOnConnectError := RaiseExceptionOnConnectError;
   FODSMajorVersion := 0;
   FODSMinorVersion := 0;
   FInlineBlobLimit := DefaultMaxInlineBlobLimit;
+  FDPB := DPB;
+  FRaiseExceptionOnConnectError := RaiseExceptionOnConnectError;
 end;
 
 function TFBAttachment.GenerateCreateDatabaseSQL(DatabaseName: AnsiString;  aDPB: IDPB): AnsiString;
@@ -1181,6 +1202,11 @@ begin
   Result := FSQLDialect;
 end;
 
+function TFBAttachment.GetAttachmentID: integer;
+begin
+  Result := FAttachmentID;
+end;
+
 function TFBAttachment.CreateBlob(transaction: ITransaction; RelationName,
   ColumnName: AnsiString; BPB: IBPB): IBlob;
 begin
@@ -1248,16 +1274,6 @@ begin
   CheckHandle;
   with Requests as TDIRB do
     Result := GetDBInfo(getBuffer,getDataLength);
-end;
-
-function TFBAttachment.GetAttachmentID: integer;
-var Info: IDBInformation;
-begin
-  Info := GetDBInformation(isc_info_attachment_id);
-  if (Info.Count > 0) and (Info[0].getItemType = isc_info_attachment_id) then
-    Result := Info[0].getAsInteger
-  else
-    Result := -1;
 end;
 
 function TFBAttachment.GetConnectString: AnsiString;

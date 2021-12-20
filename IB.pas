@@ -1221,6 +1221,7 @@ type
     function GetJournalOptions: TJournalOptions;
     function StartJournaling(aJournalLogFile: AnsiString): integer; overload;
     function StartJournaling(aJournalLogFile: AnsiString; Options: TJournalOptions): integer; overload;
+    function StartJournaling(S: TStream; Options: TJournalOptions): integer; overload;
     procedure StopJournaling(RetainJournal: boolean);
  end;
 
@@ -1443,10 +1444,12 @@ type
    EIBInterBaseError = class(EIBError)
    private
      FIBErrorCode: Long;
+     FStatus: IStatus;
    public
-     constructor Create(Status: IStatus); overload;
+     constructor Create(aStatus: IStatus); overload;
      constructor Create(ASQLCode: Long; AIBErrorCode: Long; Msg: AnsiString); overload;
      property IBErrorCode: Long read FIBErrorCode;
+     property Status: IStatus read FStatus;
    end;
 
    {IB Client Exceptions}
@@ -1574,10 +1577,11 @@ end;
 
 { EIBInterBaseError }
 
-constructor EIBInterBaseError.Create(Status: IStatus);
+constructor EIBInterBaseError.Create(aStatus: IStatus);
 begin
-  inherited Create(Status.Getsqlcode,Status.GetMessage);
-  FIBErrorCode := Status.GetIBErrorCode;
+  inherited Create(aStatus.Getsqlcode,aStatus.GetMessage);
+  FIBErrorCode := aStatus.GetIBErrorCode;
+  FStatus := Status;
 end;
 
 constructor EIBInterBaseError.Create(ASQLCode: Long; AIBErrorCode: Long;

@@ -50,6 +50,8 @@ type
     FFirebird30ClientAPI: TFB30ClientAPI;
     FTimeZoneServices: ITimeZoneServices;
     FUsingRemoteICU: boolean;
+    FOwnsAttachmentHandle: boolean;
+    procedure SetAttachmentIntf(AValue: Firebird.IAttachment);
     procedure SetUseRemoteICU(aValue: boolean);
   protected
     procedure CheckHandle; override;
@@ -60,10 +62,11 @@ type
     constructor CreateDatabase(api: TFB30ClientAPI; DatabaseName: AnsiString; aDPB: IDPB; RaiseExceptionOnError: boolean);  overload;
     constructor CreateDatabase(api: TFB30ClientAPI; sql: AnsiString; aSQLDialect: integer;
       RaiseExceptionOnError: boolean); overload;
-    destructor Destroy; override;
+    constructor CreateExisting(api: TFB30ClientAPI;
+      attachment: Firebird.IAttachment; aDatabaseName: AnsiString);
     function GetDBInfo(ReqBuffer: PByte; ReqBufLen: integer): IDBInformation;
       override;
-    property AttachmentIntf: Firebird.IAttachment read FAttachmentIntf;
+    property AttachmentIntf: Firebird.IAttachment read FAttachmentIntf write SetAttachmentIntf;
     property Firebird30ClientAPI: TFB30ClientAPI read FFirebird30ClientAPI;
 
   public
@@ -167,6 +170,27 @@ begin
   end;
 end;
 
+procedure TFB30Attachment.SetAttachmentIntf(AValue: Firebird.IAttachment);
+begin
+  if FAttachmentIntf = AValue then Exit;
+  if FAttachmentIntf <> nil then
+  try
+    FAttachmentIntf.release;
+  except {ignore - forced release}
+  end;
+  FOwnsAttachmentHandle := false;
+  FHasDefaultCharSet := false;
+  FCodePage := CP_NONE;
+  FCharSetID := 0;
+  FTimeZoneServices := nil;
+  FAttachmentIntf := AValue;
+  if FAttachmentIntf <> nil then
+  begin
+    FAttachmentIntf.AddRef;
+    GetODSAndConnectionInfo;
+  end;
+end;
+
 procedure TFB30Attachment.CheckHandle;
 begin
   if FAttachmentIntf = nil then
@@ -197,6 +221,7 @@ constructor TFB30Attachment.CreateDatabase(api: TFB30ClientAPI; DatabaseName: An
 var Param: IDPBItem;
     sql: AnsiString;
     IsCreateDB: boolean;
+    Intf: Firebird.IAttachment;
 begin
   inherited Create(api,DatabaseName,aDPB,RaiseExceptionOnError);
   FFirebird30ClientAPI := api;
@@ -210,48 +235,52 @@ begin
   sql := GenerateCreateDatabaseSQL(DatabaseName,aDPB);
   with FFirebird30ClientAPI do
   begin
-    FAttachmentIntf := UtilIntf.executeCreateDatabase(StatusIntf,Length(sql),
+    Intf := UtilIntf.executeCreateDatabase(StatusIntf,Length(sql),
                                        PAnsiChar(sql),FSQLDialect,@IsCreateDB);
     if FRaiseExceptionOnConnectError then Check4DataBaseError;
-    if InErrorState then
-      FAttachmentIntf := nil
-    else
-    if aDPB <> nil then
-    {Connect using known parameters}
+    if not InErrorState then
     begin
-      Disconnect;
-      Connect;
-    end
-    else
-      GetODSAndConnectionInfo;
+      if aDPB <> nil then
+      {Connect using known parameters}
+      begin
+        Intf.Detach(StatusIntf); {releases interface}
+        Check4DataBaseError;
+        Connect;
+      end
+      else
+        AttachmentIntf := Intf;
+    end;
   end;
 end;
 
 constructor TFB30Attachment.CreateDatabase(api: TFB30ClientAPI; sql: AnsiString; aSQLDialect: integer;
   RaiseExceptionOnError: boolean);
 var IsCreateDB: boolean;
+    Intf: Firebird.IAttachment;
 begin
   inherited Create(api,'',nil,RaiseExceptionOnError);
   FFirebird30ClientAPI := api;
   FSQLDialect := aSQLDialect;
   with FFirebird30ClientAPI do
   begin
-    FAttachmentIntf := UtilIntf.executeCreateDatabase(StatusIntf,Length(sql),
+    Intf := UtilIntf.executeCreateDatabase(StatusIntf,Length(sql),
                                        PAnsiChar(sql),aSQLDialect,@IsCreateDB);
     if FRaiseExceptionOnConnectError then Check4DataBaseError;
     if InErrorState then
-      FAttachmentIntf := nil;
+      Exit;
   end;
-  GetODSAndConnectionInfo;
+  AttachmentIntf := Intf;
+  FOwnsAttachmentHandle:= true;
   ExtractConnectString(sql,FDatabaseName);
   DPBFromCreateSQL(sql);
 end;
 
-destructor TFB30Attachment.Destroy;
+constructor TFB30Attachment.CreateExisting(api: TFB30ClientAPI;
+  attachment: Firebird.IAttachment; aDatabaseName: AnsiString);
 begin
-  inherited Destroy;
-  if assigned(FAttachmentIntf) then
-    FAttachmentIntf.release;
+  inherited Create(api,aDatabaseName,nil,false);
+  FFirebird30ClientAPI := api;
+  AttachmentIntf := attachment;
 end;
 
 function TFB30Attachment.GetDBInfo(ReqBuffer: PByte; ReqBufLen: integer): IDBInformation;
@@ -266,18 +295,19 @@ begin
 end;
 
 procedure TFB30Attachment.Connect;
+var Intf: Firebird.IAttachment;
 begin
   with FFirebird30ClientAPI do
   begin
-    FAttachmentIntf := ProviderIntf.attachDatabase(StatusIntf,PAnsiChar(FDatabaseName),
+    Intf := ProviderIntf.attachDatabase(StatusIntf,PAnsiChar(FDatabaseName),
                          (DPB as TDPB).getDataLength,
                          BytePtr((DPB as TDPB).getBuffer));
     if FRaiseExceptionOnConnectError then Check4DataBaseError;
-    if InErrorState then
-      FAttachmentIntf := nil
-    else
-      GetODSAndConnectionInfo;
-
+    if not InErrorState then
+    begin
+      AttachmentIntf := Intf;
+      FOwnsAttachmentHandle := true;
+    end;
   end;
 end;
 
@@ -288,14 +318,13 @@ begin
     with FFirebird30ClientAPI do
     begin
       EndAllTransactions;
-      FAttachmentIntf.Detach(StatusIntf);
-      if not Force and InErrorState then
-        IBDataBaseError;
-      FAttachmentIntf := nil;
-      FHasDefaultCharSet := false;
-      FCodePage := CP_NONE;
-      FCharSetID := 0;
-      FTimeZoneServices := nil;
+      if FOwnsAttachmentHandle then
+      begin
+        FAttachmentIntf.Detach(StatusIntf);
+        if not Force and InErrorState then
+          IBDataBaseError;
+      end;
+      AttachmentIntf := nil;
     end;
 end;
 
@@ -311,9 +340,9 @@ begin
     begin
       EndAllTransactions;
       EndSession(false);
-      FAttachmentIntf.dropDatabase(StatusIntf);
+      FAttachmentIntf.dropDatabase(StatusIntf); {releases Handle}
       Check4DataBaseError;
-      FAttachmentIntf := nil;
+      AttachmentIntf := nil;
     end;
 end;
 

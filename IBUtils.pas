@@ -726,9 +726,10 @@ type
  TJnlEntry = record
    JnlEntryType: TJnlEntryType;
    Timestamp: TDateTime;
-   SessionID: integer;
-   TransactionID: integer;
-   OldTransactionID: integer;
+   AttachmentID: cardinal;
+   SessionID: cardinal;
+   TransactionID: cardinal;
+   OldTransactionID: cardinal;
    TransactionName: AnsiString;
    TPB: ITPB;
    DefaultCompletion: TTransactionCompletion;
@@ -741,7 +742,8 @@ type
 
    TJournalProcessor = class(TSQLTokeniser)
     private
-      type TLineState = (lsInit, lsJnlFound, lsGotTimestamp, lsGotJnlType,  lsGotSessionID,
+      type TLineState = (lsInit, lsJnlFound, lsGotTimestamp, lsGotJnlType,
+                          lsGotAttachmentID, lsGotSessionID,
                           lsGotTransactionID,  lsGotOldTransactionID, lsGotText1Length,
                           lsGotText1, lsGotText2Length, lsGotText2);
     private
@@ -2870,12 +2872,18 @@ begin
     end;
 
    sqltComma:
-     if not (LineState in [lsGotTimestamp,lsGotSessionID,lsGotTransactionID,lsGotText1,lsGotText2]) then
+     if not (LineState in [lsGotTimestamp,lsGotAttachmentID,lsGotSessionID,lsGotTransactionID,lsGotText1,lsGotText2]) then
        LineState := lsInit;
 
    sqltNumberString:
      case LineState of
      lsGotTimestamp:
+       begin
+         AttachmentID := StrToInt(TokenText);
+         LineState := lsGotAttachmentID;
+       end;
+
+     lsGotAttachmentID:
        begin
          SessionID := StrToInt(TokenText);
          LineState := lsGotSessionID;

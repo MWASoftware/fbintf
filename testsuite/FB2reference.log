@@ -533,12 +533,12 @@ Running Test 3: ad hoc queries
 Opening localhost:employee
 Database Open
 Employee Count = 42
-Transaction ID = 5678
+Transaction ID = 5768
 Transaction is Read/Write
-Transaction ID = 5678
+Transaction ID = 5768
 Oldest Interesting = 5461
-Oldest Action = 5677
-Oldest Snapshot = 5677
+Oldest Action = 5767
+Oldest Snapshot = 5767
 Oldest Interesting = 0
 Employee Count = 41
 Employee Count = 42
@@ -570,7 +570,7 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 948,560
+Current memory = 948,568
 Delta memory = 1,288
 Max memory = 992,504
 Elapsed time= 0.002 sec
@@ -2726,7 +2726,7 @@ Unknown Response 3
 Unknown Response 3
 Server Memory = 841392
 Forced Writes  = 1
-Max Memory  = 879360
+Max Memory  = 879352
 Num Buffers  = 75
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
@@ -3379,7 +3379,7 @@ FIXEDPOINT = 233.45600000
 
 ------------------------------------------------------
 Running Test 22: Journalling
-Start Journaling. Session ID = 1
+Start Journaling. Session ID = 0
 1234.567 parsed to 1234567 scale = -3
 As Float =  1.2345670000000000E+003
 -765.4321 parsed to -7654321 scale = -4
@@ -3540,16 +3540,17 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 8
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2021/12/09 09:44:46.1980
+IBX$CREATED = 2021/12/20 11:47:06.6620
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 10
 IBX$OLDTRANSACTIONID = 9
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2021/12/09 09:44:46.5330
+IBX$CREATED = 2021/12/20 11:47:06.9910
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)
-Timestamp = 2021/12/09 09:44:46.2290
+Timestamp = 2021/12/20 11:47:06.6980
+Attachment ID = 2
 Session ID = 1
 Transaction ID = 8
 Transaction Name = "Transaction_29_1"
@@ -3561,43 +3562,50 @@ TPB: Item Count = 3
 Default Completion = TACommit
 
 Journal Entry = jeQuery(Query)
-Timestamp = 2021/12/09 09:44:46.2890
+Timestamp = 2021/12/20 11:47:06.7490
+Attachment ID = 2
 Session ID = 1
 Transaction ID = 8
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(1,101,9223372036854775807,10000.1234,9999.12345678,1234567890.12346)
 
 Journal Entry = jeQuery(Query)
-Timestamp = 2021/12/09 09:44:46.3080
+Timestamp = 2021/12/20 11:47:06.7640
+Attachment ID = 2
 Session ID = 1
 Transaction ID = 8
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(2,-32457,-9223372036854775808,1000001.12,1.7E308,-1234567890.12346)
 
 Journal Entry = jeTransCommitRet(Commit Retaining)
-Timestamp = 2021/12/09 09:44:46.3900
+Timestamp = 2021/12/20 11:47:06.8680
+Attachment ID = 2
 Session ID = 1
 Transaction ID = 9
 Old TransactionID = 8
 
 Journal Entry = jeQuery(Query)
-Timestamp = 2021/12/09 09:44:46.4150
+Timestamp = 2021/12/20 11:47:06.8890
+Attachment ID = 2
 Session ID = 1
 Transaction ID = 9
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(3,0,0,0,0,0)
 
 Journal Entry = jeTransRollbackRet(Rollback Retaining)
-Timestamp = 2021/12/09 09:44:46.5310
+Timestamp = 2021/12/20 11:47:06.9870
+Attachment ID = 2
 Session ID = 1
 Transaction ID = 10
 Old TransactionID = 9
 
 Journal Entry = jeQuery(Query)
-Timestamp = 2021/12/09 09:44:46.5510
+Timestamp = 2021/12/20 11:47:07.0090
+Attachment ID = 2
 Session ID = 1
 Transaction ID = 10
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(4,1,10,0.023,0.0011,233.456)
 
 Journal Entry = jeTransStart(Transaction Start)
-Timestamp = 2021/12/09 09:44:46.5650
+Timestamp = 2021/12/20 11:47:07.0190
+Attachment ID = 2
 Session ID = 1
 Transaction ID = 11
 Transaction Name = "Transaction_29_2"
@@ -3609,12 +3617,14 @@ TPB: Item Count = 3
 Default Completion = TARollback
 
 Journal Entry = jeTransCommit(Commit)
-Timestamp = 2021/12/09 09:44:46.6250
+Timestamp = 2021/12/20 11:47:07.0610
+Attachment ID = 2
 Session ID = 1
 Transaction ID = 10
 
 Journal Entry = jeQuery(Query)
-Timestamp = 2021/12/09 09:44:46.6420
+Timestamp = 2021/12/20 11:47:07.0850
+Attachment ID = 2
 Session ID = 1
 Transaction ID = 11
 Query = Insert into TestData(RowID, Str, TextBlob) Values(5,'It''s the quick brown fox jumps over the lazy dog','To be or not to be-that is the question:
@@ -3655,7 +3665,8 @@ Be all my sins remembered
 ')
 
 Journal Entry = jeQuery(Query)
-Timestamp = 2021/12/09 09:44:46.6570
+Timestamp = 2021/12/20 11:47:07.1000
+Attachment ID = 2
 Session ID = 1
 Transaction ID = 11
 Query = Insert into TestData(RowID,OtherBlob) Values (6,<blob subtype="0">
@@ -3666,7 +3677,8 @@ FFD8FFE000104A46494600010101004800480000FFE11E0545786966000049492A00080000000C00
 )
 
 Journal Entry = jeQuery(Query)
-Timestamp = 2021/12/09 09:44:46.6760
+Timestamp = 2021/12/20 11:47:07.1210
+Attachment ID = 2
 Session ID = 1
 Transaction ID = 11
 Query = Insert into TestData(RowID,MyArray) Values (7,<array dim = "1" sqltype = "496" length = "4" relation_name = "TESTDATA" column_name = "MYARRAY" scale = "0" bounds="0:16">
@@ -3691,7 +3703,8 @@ Query = Insert into TestData(RowID,MyArray) Values (7,<array dim = "1" sqltype =
 )
 
 Journal Entry = jeTransRollback(Rollback)
-Timestamp = 2021/12/09 09:44:46.7510
+Timestamp = 2021/12/20 11:47:07.1950
+Attachment ID = 2
 Session ID = 1
 Transaction ID = 11
 

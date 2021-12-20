@@ -158,13 +158,18 @@ type
  protected
     FStatement: TFB30Statement;
     FFirebird30ClientAPI: TFB30ClientAPI;
+    FMessageBuffer: PByte; {Message Buffer}
+    FMsgLength: integer; {Message Buffer length}
     function GetTransactionSeqNo: integer; override;
     procedure FreeXSQLDA; virtual;
     function GetStatement: IStatement; override;
     function GetPrepareSeqNo: integer; override;
     procedure SetCount(Value: Integer); override;
+    procedure AllocMessageBuffer(len: integer); virtual;
+    procedure FreeMessageBuffer; virtual;
   public
-    constructor Create(aStatement: TFB30Statement);
+    constructor Create(aStatement: TFB30Statement); overload;
+    constructor Create(api: IFirebirdAPI); overload;
     destructor Destroy; override;
     procedure Changed; virtual;
     function CheckStatementStatus(Request: TStatementStatus): boolean; override;
@@ -182,21 +187,19 @@ type
 
   TIBXINPUTSQLDA = class(TIBXSQLDA)
   private
-    FMessageBuffer: PByte; {Message Buffer}
-    FMsgLength: integer; {Message Buffer length}
     FCurMetaData: Firebird.IMessageMetadata;
-    procedure FreeMessageBuffer;
     procedure FreeCurMetaData;
     function GetMessageBuffer: PByte;
     function GetMetaData: Firebird.IMessageMetadata;
     function GetModified: Boolean;
     function GetMsgLength: integer;
     procedure BuildMetadata;
-    procedure PackBuffer;
   protected
+    procedure PackBuffer;
     procedure FreeXSQLDA; override;
   public
-    constructor Create(aStatement: TFB30Statement);
+    constructor Create(aStatement: TFB30Statement); overload;
+    constructor Create(api: IFirebirdAPI); overload;
     destructor Destroy; override;
     procedure Bind(aMetaData: Firebird.IMessageMetadata);
     procedure Changed; override;
@@ -212,10 +215,6 @@ type
   TIBXOUTPUTSQLDA = class(TIBXSQLDA)
   private
     FTransaction: TFB30Transaction; {transaction used to execute the statement}
-    FMessageBuffer: PByte; {Message Buffer}
-    FMsgLength: integer; {Message Buffer length}
-  protected
-    procedure FreeXSQLDA; override;
   public
     procedure Bind(aMetaData: Firebird.IMessageMetadata);
     procedure GetData(index: integer; var aIsNull: boolean; var len: short;
@@ -914,16 +913,6 @@ begin
     end;
 end;
 
-procedure TIBXINPUTSQLDA.FreeMessageBuffer;
-begin
-  if FMessageBuffer <> nil then
-  begin
-    FreeMem(FMessageBuffer);
-    FMessageBuffer := nil;
-  end;
-  FMsgLength := 0;
-end;
-
 procedure TIBXINPUTSQLDA.FreeCurMetaData;
 begin
   if FCurMetaData <> nil then
@@ -996,16 +985,17 @@ end;
 procedure TIBXINPUTSQLDA.PackBuffer;
 var i: integer;
     P: PByte;
+    MsgLen: cardinal;
 begin
   BuildMetadata;
 
   if (FMsgLength = 0) and (FCurMetaData <> nil) then
   with FFirebird30ClientAPI do
   begin
-    FMsgLength := FCurMetaData.getMessageLength(StatusIntf);
+    MsgLen := FCurMetaData.getMessageLength(StatusIntf);
     Check4DataBaseError;
 
-    IBAlloc(FMessageBuffer,0,FMsgLength);
+    AllocMessageBuffer(MsgLen);
 
     for i := 0 to Count - 1 do
     with TIBXSQLVar(Column[i]) do
@@ -1045,12 +1035,17 @@ procedure TIBXINPUTSQLDA.FreeXSQLDA;
 begin
   inherited FreeXSQLDA;
   FreeCurMetaData;
-  FreeMessageBuffer;
 end;
 
 constructor TIBXINPUTSQLDA.Create(aStatement: TFB30Statement);
 begin
   inherited Create(aStatement);
+  FMessageBuffer := nil;
+end;
+
+constructor TIBXINPUTSQLDA.Create(api: IFirebirdAPI);
+begin
+  inherited Create(api);
   FMessageBuffer := nil;
 end;
 
@@ -1106,16 +1101,9 @@ end;
 
 { TIBXOUTPUTSQLDA }
 
-procedure TIBXOUTPUTSQLDA.FreeXSQLDA;
-begin
-  inherited FreeXSQLDA;
-  FreeMem(FMessageBuffer);
-  FMessageBuffer := nil;
-  FMsgLength := 0;
-end;
-
 procedure TIBXOUTPUTSQLDA.Bind(aMetaData: Firebird.IMessageMetadata);
 var i: integer;
+    MsgLen: cardinal;
 begin
   FMetaData := aMetaData;
   with FFirebird30ClientAPI do
@@ -1124,9 +1112,9 @@ begin
     Check4DataBaseError;
     Initialize;
 
-    FMsgLength := metaData.getMessageLength(StatusIntf);
+    MsgLen := metaData.getMessageLength(StatusIntf);
     Check4DataBaseError;
-    IBAlloc(FMessageBuffer,0,FMsgLength);
+    AllocMessageBuffer(MsgLen);
 
     for i := 0 to Count - 1 do
     with TIBXSQLVar(Column[i]) do
@@ -1178,6 +1166,14 @@ begin
   FFirebird30ClientAPI := aStatement.FFirebird30ClientAPI;
   FSize := 0;
 //  writeln('Creating ',ClassName);
+end;
+
+constructor TIBXSQLDA.Create(api: IFirebirdAPI);
+begin
+  inherited Create;
+  FStatement := nil;
+  FSize := 0;
+  FFirebird30ClientAPI := api as TFB30ClientAPI;
 end;
 
 destructor TIBXSQLDA.Destroy;
@@ -1257,6 +1253,23 @@ begin
   end;
 end;
 
+procedure TIBXSQLDA.AllocMessageBuffer(len: integer);
+begin
+  with FFirebird30ClientAPI do
+    IBAlloc(FMessageBuffer,0,len);
+  FMsgLength := len;
+end;
+
+procedure TIBXSQLDA.FreeMessageBuffer;
+begin
+  if FMessageBuffer <> nil then
+  begin
+    FreeMem(FMessageBuffer);
+    FMessageBuffer := nil;
+  end;
+  FMsgLength := 0;
+end;
+
 function TIBXSQLDA.GetTransactionSeqNo: integer;
 begin
   Result := FTransactionSeqNo;
@@ -1275,6 +1288,7 @@ begin
   FCount := 0;
   SetLength(FColumnList,0);
   FSize := 0;
+  FreeMessageBuffer;
 end;
 
 function TIBXSQLDA.GetStatement: IStatement;
@@ -1666,7 +1680,7 @@ function TFB30Statement.Fetch(FetchType: TFetchType; PosOrOffset: integer
   ): boolean;
 var fetchResult: integer;
 begin
-  result := false;
+    result := false;
   if not FOpen then
     IBError(ibxeSQLClosed, [nil]);
 
