@@ -60,7 +60,7 @@ type
   begin
    ..
      if FirebirdAPI.HasMasterIntf and (FirebirdAPI.QueryInterface(IFBIMasterProvider,MasterProvider) = S_OK) then
-     with MasterProvider.GetIMaster.getConfigManager do
+     with MasterProvider.GetIMasterIntf.getConfigManager do
      begin
        writeln('Firebird Bin Directory = ', getDirectory(DIR_BIN));
        writeln('Firebird Conf Directory = ', getDirectory(DIR_CONF));

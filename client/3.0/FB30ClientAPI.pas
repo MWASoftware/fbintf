@@ -86,8 +86,7 @@ type
     procedure CheckPlugins;
   public
     constructor Create(aFBLibrary: TFBLibrary); overload;
-    constructor Create(aMaster: Firebird.IMaster; aStatus: Firebird.IStatus;
-      prefix: AnsiString = '');
+    constructor Create(aMaster: Firebird.IMaster);
     destructor Destroy; override;
 
     function StatusIntf: Firebird.IStatus;
@@ -413,13 +412,19 @@ begin
   FStatusIntf := FStatus;
 end;
 
-constructor TFB30ClientAPI.Create(aMaster: Firebird.IMaster;
-  aStatus: Firebird.IStatus; prefix: AnsiString);
+constructor TFB30ClientAPI.Create(aMaster: Firebird.IMaster);
 begin
   inherited Create(nil);
   FMaster := aMaster;
-  FStatus := TFB30StatusObject.Create(self,aStatus,prefix);
+  FStatus := TFB30Status.Create(self);
   FStatusIntf := FStatus;
+  if FMaster <> nil then
+  begin
+    FUtil := FMaster.getUtilInterface;
+    FProvider := FMaster.getDispatcher;
+    FConfigManager := FMaster.getConfigManager;
+    CheckPlugins;
+  end;
 end;
 
 destructor TFB30ClientAPI.Destroy;
