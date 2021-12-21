@@ -1816,6 +1816,7 @@ procedure TFB30Statement.AddToBatch;
 var BatchPB: TXPBParameterBlock;
 
 const SixteenMB = 16 * 1024 * 1024;
+      MB256 = 1024 *1024;
 begin
   FBatchCompletion := nil;
   if not FPrepared then
@@ -1830,13 +1831,17 @@ begin
       BatchPB := TXPBParameterBlock.Create(FFirebird30ClientAPI,Firebird.IXpbBuilder.BATCH);
       with FFirebird30ClientAPI do
       try
-        FBatchBufferSize := FBatchRowLimit * FSQLParams.MetaData.getAlignedLength(StatusIntf);
-        Check4DatabaseError;
-        if FBatchBufferSize < SixteenMB then
-          FBatchBufferSize := SixteenMB;
-        if FBatchBufferSize > 256 * 1024 *1024 {assumed limit} then
-          IBError(ibxeBatchBufferSizeTooBig,[FBatchBufferSize]);
-
+        if FBatchRowLimit = maxint then
+          FBatchBufferSize := MB256
+        else
+        begin
+          FBatchBufferSize := FBatchRowLimit * FSQLParams.MetaData.getAlignedLength(StatusIntf);
+          Check4DatabaseError;
+          if FBatchBufferSize < SixteenMB then
+            FBatchBufferSize := SixteenMB;
+          if FBatchBufferSize > MB256 {assumed limit} then
+            IBError(ibxeBatchBufferSizeTooBig,[FBatchBufferSize]);
+        end;
         BatchPB.insertInt(Firebird.IBatch.TAG_RECORD_COUNTS,1);
         BatchPB.insertInt(Firebird.IBatch.TAG_BUFFER_BYTES_SIZE,FBatchBufferSize);
         FBatch := FStatementIntf.createBatch(StatusIntf,

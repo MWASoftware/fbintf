@@ -45,6 +45,15 @@ FBINTF Change Log  version          (1.4-0 Build 12952) Tue, 07 Dec 2021 11:53:4
      function HasTable(aTableName: AnsiString): boolean;
      function GetAttachmentID: integer;
 
+5. IStatement: if the BatchRowLimit is set to maxint, the maximum possible buffer size
+   will be allocted for batch operations.
+
+6. IStatement, IColumnMetaData and ISQLParam all now consistently provide:
+    function GetStatement: IStatement;
+    function GetTransaction: ITransaction;
+    function GetAttachment: IAttachment;
+
+
 FBINTF Change Log  version          (1.3-3 Build 12935) Mon, 06 Dec 2021 23:17:13 +0000
 
 1. Fix compile error with fpc trunk (3.3.1 and later), due to type change to tzname in "unix" unit.
