@@ -145,7 +145,6 @@ type
     function GetSQLData: PByte;  override;
     function GetDataLength: cardinal; override;
     function GetSize: cardinal; override;
-    function GetAttachment: IAttachment; override;
     function GetDefaultTextSQLType: cardinal; override;
     procedure SetIsNull(Value: Boolean); override;
     procedure SetIsNullable(Value: Boolean);  override;
@@ -243,7 +242,6 @@ type
     function FetchAbsolute(position: Integer): boolean; {fetch record by its absolute position in result set}
     function FetchRelative(offset: Integer): boolean; {fetch record by position relative to current}
     function GetCursorName: AnsiString;
-    function GetTransaction: ITransaction; override;
     function IsEof: boolean;
     function IsBof: boolean;
     procedure Close;
@@ -398,11 +396,6 @@ end;
 function TIBXSQLVAR.GetSize: cardinal;
 begin
   Result := FMetadataSize;
-end;
-
-function TIBXSQLVAR.GetAttachment: IAttachment;
-begin
-  Result := FStatement.GetAttachment;
 end;
 
 function TIBXSQLVAR.GetArrayMetaData: IArrayMetaData;
@@ -673,11 +666,6 @@ begin
   Result := FResults.FStatement.FCursor;
 end;
 
-function TResultSet.GetTransaction: ITransaction;
-begin
-  Result := FResults.GetTransaction;
-end;
-
 function TResultSet.IsEof: boolean;
 begin
   Result := FResults.FStatement.FEof;
@@ -754,7 +742,10 @@ end;
 
 function TIBXOUTPUTSQLDA.GetTransaction: TFB25Transaction;
 begin
-  Result := FTransaction;
+  if FTransaction <> nil then
+    Result := FTransaction
+  else
+    Result := inherited GetTransaction;
 end;
 
 procedure TIBXOUTPUTSQLDA.GetData(index: integer; var aIsNull:boolean; var len: short;

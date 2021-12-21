@@ -58,12 +58,12 @@ type
     function GetAttachment: IAttachment; override;
   public
     constructor Create(api: TFB30ClientAPI; DatabaseName: AnsiString; aDPB: IDPB;
-          RaiseExceptionOnConnectError: boolean);
+          RaiseExceptionOnConnectError: boolean); overload;
+    constructor Create(api: TFB30ClientAPI;
+      attachment: Firebird.IAttachment; aDatabaseName: AnsiString); overload;
     constructor CreateDatabase(api: TFB30ClientAPI; DatabaseName: AnsiString; aDPB: IDPB; RaiseExceptionOnError: boolean);  overload;
     constructor CreateDatabase(api: TFB30ClientAPI; sql: AnsiString; aSQLDialect: integer;
       RaiseExceptionOnError: boolean); overload;
-    constructor CreateExisting(api: TFB30ClientAPI;
-      attachment: Firebird.IAttachment; aDatabaseName: AnsiString);
     function GetDBInfo(ReqBuffer: PByte; ReqBufLen: integer): IDBInformation;
       override;
     property AttachmentIntf: Firebird.IAttachment read FAttachmentIntf write SetAttachmentIntf;
@@ -275,7 +275,7 @@ begin
   DPBFromCreateSQL(sql);
 end;
 
-constructor TFB30Attachment.CreateExisting(api: TFB30ClientAPI;
+constructor TFB30Attachment.Create(api: TFB30ClientAPI;
   attachment: Firebird.IAttachment; aDatabaseName: AnsiString);
 begin
   inherited Create(api,aDatabaseName,nil,false);

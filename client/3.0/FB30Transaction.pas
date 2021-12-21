@@ -48,7 +48,6 @@ type
   private
     FTransactionIntf: Firebird.ITransaction;
     FFirebird30ClientAPI: TFB30ClientAPI;
-    procedure SetTransactionIntf(AValue: Firebird.ITransaction);
     procedure FreeHandle(Force: boolean);
   protected
     function GetActivityIntf(att: IAttachment): IActivityMonitor; override;
@@ -61,8 +60,9 @@ type
     procedure InternalRollback(Force: boolean); override;
     procedure InternalRollbackRetaining; override;
   public
+    constructor Create(api: TFBClientAPI; Attachment: IAttachment; aTransactionIntf: Firebird.ITransaction); overload;
     destructor Destroy; override;
-    property TransactionIntf: Firebird.ITransaction read FTransactionIntf write SetTransactionIntf;
+    property TransactionIntf: Firebird.ITransaction read FTransactionIntf;
     {ITransaction}
     function GetInTransaction: boolean; override;
     procedure PrepareForCommit; override;
@@ -74,14 +74,6 @@ implementation
 uses FBMessages;
 
 { TFB30Transaction }
-
-procedure TFB30Transaction.SetTransactionIntf(AValue: Firebird.ITransaction);
-begin
-  if FTransactionIntf = AValue then Exit;
-  FreeHandle(true);
-  FTransactionIntf := AValue;
-  FTransactionIntf.addRef();
-end;
 
 procedure TFB30Transaction.FreeHandle(Force: boolean);
 begin
@@ -198,6 +190,14 @@ begin
     Check4DataBaseError;
   end;
   SignalActivity;
+end;
+
+constructor TFB30Transaction.Create(api: TFBClientAPI; Attachment: IAttachment;
+  aTransactionIntf: Firebird.ITransaction);
+begin
+  inherited Create(api,Attachment,nil,taCommit,'');
+  FTransactionIntf := aTransactionIntf;
+  FTransactionIntf.addRef();
 end;
 
 destructor TFB30Transaction.Destroy;

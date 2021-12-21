@@ -612,7 +612,7 @@ end;
 
 procedure TFBJournaling.EndSession(RetainJournal: boolean);
 begin
-  if JournalingActive then
+  if JournalingActive and (FJournalFilePath <> '') then
   begin
     FreeAndNil(FJournalFileStream);
     if not RetainJournal then

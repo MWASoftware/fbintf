@@ -123,7 +123,6 @@ type
      function GetSQLData: PByte;  override;
      function GetDataLength: cardinal; override;
      function GetSize: cardinal; override;
-     function GetAttachment: IAttachment; override;
      function GetDefaultTextSQLType: cardinal; override;
      procedure SetIsNull(Value: Boolean); override;
      procedure SetIsNullable(Value: Boolean);  override;
@@ -174,7 +173,6 @@ type
     procedure Changed; virtual;
     function CheckStatementStatus(Request: TStatementStatus): boolean; override;
     function ColumnsInUseCount: integer; override;
-    function GetTransaction: TFB30Transaction; virtual;
     procedure Initialize; override;
     function StateChanged(var ChangeSeqNo: integer): boolean; override;
     function CanChangeMetaData: boolean; override;
@@ -215,6 +213,8 @@ type
   TIBXOUTPUTSQLDA = class(TIBXSQLDA)
   private
     FTransaction: TFB30Transaction; {transaction used to execute the statement}
+  protected
+    function GetTransaction: ITransaction; override;
   public
     procedure Bind(aMetaData: Firebird.IMessageMetadata);
     procedure GetData(index: integer; var aIsNull: boolean; var len: short;
@@ -242,7 +242,6 @@ type
     function FetchAbsolute(position: Integer): boolean; {fetch record by its absolute position in result set}
     function FetchRelative(offset: Integer): boolean; {fetch record by position relative to current}
     function GetCursorName: AnsiString;
-    function GetTransaction: ITransaction; override;
     function IsBof: boolean;
     function IsEof: boolean;
     procedure Close;
@@ -592,14 +591,14 @@ end;
 function TIBXSQLVAR.GetCodePage: TSystemCodePage;
 begin
   result := CP_NONE;
-  with Statement.GetAttachment do
+  with GetAttachment do
      CharSetID2CodePage(GetCharSetID,result);
 end;
 
 function TIBXSQLVAR.GetCharSetWidth: integer;
 begin
   result := 1;
-  with Statement.GetAttachment DO
+  with GetAttachment DO
     CharSetWidth(GetCharSetID,result);
 end;
 
@@ -628,19 +627,14 @@ begin
   Result := FMetadataSize;
 end;
 
-function TIBXSQLVAR.GetAttachment: IAttachment;
-begin
-  Result := FStatement.GetAttachment;
-end;
-
 function TIBXSQLVAR.GetArrayMetaData: IArrayMetaData;
 begin
   if GetSQLType <> SQL_ARRAY then
     IBError(ibxeInvalidDataConversion,[nil]);
 
   if FArrayMetaData = nil then
-    FArrayMetaData := TFB30ArrayMetaData.Create(FStatement.GetAttachment as TFB30Attachment,
-                FStatement.GetTransaction as TFB30Transaction,
+    FArrayMetaData := TFB30ArrayMetaData.Create(GetAttachment as TFB30Attachment,
+                GetTransaction as TFB30Transaction,
                 GetRelationName,GetFieldName);
   Result := FArrayMetaData;
 end;
@@ -651,8 +645,8 @@ begin
     IBError(ibxeInvalidDataConversion,[nil]);
 
   if FBlobMetaData = nil then
-    FBlobMetaData := TFB30BlobMetaData.Create(FStatement.GetAttachment as TFB30Attachment,
-              FStatement.GetTransaction as TFB30Transaction,
+    FBlobMetaData := TFB30BlobMetaData.Create(GetAttachment as TFB30Attachment,
+              GetTransaction as TFB30Transaction,
               GetRelationName,GetFieldName,
               GetSubType);
   (FBlobMetaData as TFBBlobMetaData).SetCharSetID(GetCharSetID);
@@ -769,8 +763,8 @@ begin
   else
   begin
     if FArrayIntf = nil then
-      FArrayIntf := TFB30Array.Create(FStatement.GetAttachment as TFB30Attachment,
-                                TIBXSQLDA(Parent).GetTransaction,
+      FArrayIntf := TFB30Array.Create(GetAttachment as TFB30Attachment,
+                                GetTransaction as TFB30Transaction,
                                 GetArrayMetaData,PISC_QUAD(SQLData)^);
     Result := FArrayIntf;
   end;
@@ -787,8 +781,8 @@ begin
     if IsNull then
       Result := nil
     else
-      Result := TFB30Blob.Create(FStatement.GetAttachment as TFB30Attachment,
-                               TIBXSQLDA(Parent).GetTransaction,
+      Result := TFB30Blob.Create(GetAttachment as TFB30Attachment,
+                               GetTransaction as TFB30Transaction,
                                GetBlobMetaData,
                                Blob_ID,BPB);
     FBlob := Result;
@@ -797,8 +791,8 @@ end;
 
 function TIBXSQLVAR.CreateBlob: IBlob;
 begin
-  Result := TFB30Blob.Create(FStatement.GetAttachment as TFB30Attachment,
-                             FStatement.GetTransaction as TFB30Transaction,
+  Result := TFB30Blob.Create(GetAttachment as TFB30Attachment,
+                             GetTransaction as TFB30Transaction,
                              GetSubType,GetCharSetID,nil);
 end;
 
@@ -875,11 +869,6 @@ end;
 function TResultSet.GetCursorName: AnsiString;
 begin
   Result := FResults.FStatement.FCursor;
-end;
-
-function TResultSet.GetTransaction: ITransaction;
-begin
-  Result := FResults.FTransaction;
 end;
 
 function TResultSet.IsBof: boolean;
@@ -1101,6 +1090,14 @@ end;
 
 { TIBXOUTPUTSQLDA }
 
+function TIBXOUTPUTSQLDA.GetTransaction: ITransaction;
+begin
+  if FTransaction <> nil then
+    Result := FTransaction
+  else
+    Result := inherited GetTransaction;
+end;
+
 procedure TIBXOUTPUTSQLDA.Bind(aMetaData: Firebird.IMessageMetadata);
 var i: integer;
     MsgLen: cardinal;
@@ -1212,11 +1209,6 @@ end;
 function TIBXSQLDA.ColumnsInUseCount: integer;
 begin
   Result := FCount;
-end;
-
-function TIBXSQLDA.GetTransaction: TFB30Transaction;
-begin
-  Result := FStatement.GetTransaction as TFB30Transaction;
 end;
 
 procedure TIBXSQLDA.Initialize;

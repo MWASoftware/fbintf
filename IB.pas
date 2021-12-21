@@ -500,6 +500,7 @@ type
     function GetDateTimeStrLength(DateTimeFormat: TIBDateTimeFormats): integer;
     function GetStatement: IStatement;
     function GetTransaction: ITransaction;
+    function GetAttachment: IAttachment;
     property Name: AnsiString read GetName;
     property Size: cardinal read GetSize;
     property SQLType: cardinal read GetSQLType;
@@ -599,6 +600,7 @@ type
    function getCount: integer;
    function GetStatement: IStatement;
    function GetTransaction: ITransaction;
+   function GetAttachment: IAttachment;
    function ByName(Idx: AnsiString): ISQLData;
    function getSQLData(index: integer): ISQLData;
    procedure GetData(index: integer; var IsNull:boolean; var len: short; var data: PByte);
@@ -660,6 +662,9 @@ type
   ISQLParam = interface(IParamMetaData)
     ['{b22b4578-6d41-4807-a9a9-d2ec8d1d5a14}']
     function getColMetadata: IParamMetaData;
+    function GetStatement: IStatement;
+    function GetTransaction: ITransaction;
+    function GetAttachment: IAttachment;
     function GetIndex: integer;
     function getName: AnsiString;
     function GetAsBoolean: boolean;
@@ -685,8 +690,6 @@ type
     function GetAsBlob: IBlob;
     function GetAsArray: IArray;
     function GetAsBCD: tBCD;
-    function GetStatement: IStatement;
-    function GetTransaction: ITransaction;
     procedure Clear;
     function GetModified: boolean;
     procedure SetAsBoolean(AValue: boolean);
@@ -752,6 +755,9 @@ type
     function ByName(Idx: AnsiString): ISQLParam ;
     function GetModified: Boolean;
     function GetHasCaseSensitiveParams: Boolean;
+    function GetStatement: IStatement;
+    function GetTransaction: ITransaction;
+    function GetAttachment: IAttachment;
     property Modified: Boolean read GetModified;
     property Params[index: integer]: ISQLParam read getSQLParam; default;
     property Count: integer read getCount;

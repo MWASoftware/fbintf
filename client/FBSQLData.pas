@@ -138,6 +138,7 @@ type
      procedure CheckActive; virtual;
      procedure CheckTZSupport;
      function GetAttachment: IAttachment; virtual; abstract;
+     function GetTransaction: ITransaction; virtual; abstract;
      function GetSQLDialect: integer; virtual; abstract;
      function GetTimeZoneServices: IExTimeZoneServices; virtual;
      procedure Changed; virtual;
@@ -248,6 +249,8 @@ type
     FUniqueRelationName: AnsiString;
     FColumnList: array of TSQLVarData;
     function GetStatement: IStatement; virtual; abstract;
+    function GetAttachment: IAttachment; virtual;
+    function GetTransaction: ITransaction; virtual;
     function GetPrepareSeqNo: integer; virtual; abstract;
     function GetTransactionSeqNo: integer; virtual; abstract;
     procedure SetCount(aValue: integer); virtual; abstract;
@@ -271,7 +274,9 @@ type
     property Column[index: integer]: TSQLVarData read GetColumn;
     property UniqueRelationName: AnsiString read FUniqueRelationName;
     property Statement: IStatement read GetStatement;
+    property Attachment: IAttachment read GetAttachment;
     property PrepareSeqNo: integer read GetPrepareSeqNo;
+    property Transaction: ITransaction read GetTransaction;
     property TransactionSeqNo: integer read GetTransactionSeqNo;
   end;
 
@@ -290,7 +295,8 @@ type
     procedure SetName(AValue: AnsiString);
   protected
     FArrayIntf: IArray;
-    function GetAttachment: IAttachment; virtual; abstract;
+    function GetAttachment: IAttachment;
+    function GetTransaction: ITransaction;
     function GetSQLType: cardinal; virtual; abstract;
     function GetSubtype: integer; virtual; abstract;
     function GetAliasName: AnsiString;  virtual; abstract;
@@ -362,7 +368,6 @@ type
     FChangeSeqNo: integer;
   protected
     procedure CheckActive; override;
-    function GetAttachment: IAttachment; override;
     function SQLData: PByte; override;
     function GetDataLength: cardinal; override;
     function GetCodePage: TSystemCodePage; override;
@@ -390,7 +395,8 @@ type
     function GetArrayMetaData: IArrayMetaData;
     function GetBlobMetaData: IBlobMetaData;
     function GetStatement: IStatement;
-    function GetTransaction: ITransaction; virtual;
+    function GetTransaction: ITransaction; override;
+    function GetAttachment: IAttachment; override;
     property Name: AnsiString read GetName;
     property Size: cardinal read GetSize;
     property CharSetID: cardinal read getCharSetID;
@@ -403,12 +409,9 @@ type
   { TIBSQLData }
 
   TIBSQLData = class(TColumnMetaData,ISQLData)
-  private
-    FTransaction: ITransaction;
   protected
     procedure CheckActive; override;
   public
-    function GetTransaction: ITransaction; override;
     function GetIsNull: Boolean; override;
     function GetAsArray: IArray;
     function GetAsBlob: IBlob; overload;
@@ -530,6 +533,9 @@ type
     function ByName(Idx: AnsiString): ISQLParam ;
     function GetModified: Boolean;
     function GetHasCaseSensitiveParams: Boolean;
+    function GetStatement: IStatement;
+    function GetTransaction: ITransaction;
+    function GetAttachment: IAttachment;
   end;
 
   { TResults }
@@ -552,7 +558,8 @@ type
      function getSQLData(index: integer): ISQLData;
      procedure GetData(index: integer; var IsNull:boolean; var len: short; var data: PByte);
      function GetStatement: IStatement;
-     function GetTransaction: ITransaction; virtual;
+     function GetTransaction: ITransaction;
+     function GetAttachment: IAttachment;
      procedure SetRetainInterfaces(aValue: boolean);
  end;
 
@@ -626,6 +633,16 @@ end;
 function TSQLDataArea.GetCount: integer;
 begin
   Result := Length(FColumnList);
+end;
+
+function TSQLDataArea.GetTransaction: ITransaction;
+begin
+  Result := GetStatement.GetTransaction;
+end;
+
+function TSQLDataArea.GetAttachment: IAttachment;
+begin
+  Result := GetStatement.GetAttachment;
 end;
 
 procedure TSQLDataArea.SetUniqueRelationName;
@@ -758,6 +775,16 @@ begin
     FName := AnsiUpperCase(AValue)
   else
     FName := AValue;
+end;
+
+function TSQLVarData.GetAttachment: IAttachment;
+begin
+  Result := Parent.Attachment;
+end;
+
+function TSQLVarData.GetTransaction: ITransaction;
+begin
+  Result := Parent.Transaction;
 end;
 
 procedure TSQLVarData.SetMetaSize(aValue: cardinal);
@@ -2246,7 +2273,7 @@ end;
 
 function TColumnMetaData.GetAttachment: IAttachment;
 begin
-  Result := GetStatement.GetAttachment;
+  Result := FIBXSQLVAR.GetAttachment;
 end;
 
 function TColumnMetaData.SQLData: PByte;
@@ -2266,7 +2293,7 @@ end;
 
 constructor TColumnMetaData.Create(aOwner: IUnknown; aIBXSQLVAR: TSQLVarData);
 begin
-  inherited Create(aIBXSQLVAR.GetStatement.GetAttachment.getFirebirdAPI as TFBClientAPI);
+  inherited Create(aIBXSQLVAR.GetAttachment.getFirebirdAPI as TFBClientAPI);
   FIBXSQLVAR := aIBXSQLVAR;
   FOwner := aOwner;
   FPrepareSeqNo := FIBXSQLVAR.Parent.PrepareSeqNo;
@@ -2381,7 +2408,7 @@ end;
 
 function TColumnMetaData.GetTransaction: ITransaction;
 begin
-  Result := GetStatement.GetTransaction;
+  Result := FIBXSQLVAR.GetTransaction;
 end;
 
 { TIBSQLData }
@@ -2401,14 +2428,6 @@ begin
 
   if FIBXSQLVAR.Parent.CheckStatementStatus(ssBOF) then
     IBError(ibxeBOF,[nil]);
-end;
-
-function TIBSQLData.GetTransaction: ITransaction;
-begin
-  if FTransaction = nil then
-    Result := inherited GetTransaction
-  else
-    Result := FTransaction;
 end;
 
 function TIBSQLData.GetIsNull: Boolean;
@@ -3293,6 +3312,21 @@ begin
   Result := FSQLParams.CaseSensitiveParams;
 end;
 
+function TSQLParams.GetStatement: IStatement;
+begin
+  Result := FSQLParams.GetStatement;
+end;
+
+function TSQLParams.GetTransaction: ITransaction;
+begin
+  Result := FSQLParams.GetTransaction;
+end;
+
+function TSQLParams.GetAttachment: IAttachment;
+begin
+  Result := FSQLParams.GetAttachment;
+end;
+
 { TResults }
 
 procedure TResults.CheckActive;
@@ -3317,9 +3351,12 @@ begin
     IBError(ibxeInvalidColumnIndex,[nil]);
 
   if not HasInterface(aIBXSQLVAR.Index) then
-    AddInterface(aIBXSQLVAR.Index, TIBSQLData.Create(self,aIBXSQLVAR));
-  col := TIBSQLData(GetInterface(aIBXSQLVAR.Index));
-  col.FTransaction := GetTransaction;
+  begin
+    col := TIBSQLData.Create(self,aIBXSQLVAR);
+    AddInterface(aIBXSQLVAR.Index, col);
+  end
+  else
+    col := TIBSQLData(GetInterface(aIBXSQLVAR.Index));
   Result := col;
 end;
 
@@ -3384,7 +3421,12 @@ end;
 
 function TResults.GetTransaction: ITransaction;
 begin
-  Result := FStatement.GetTransaction;
+  Result := FResults.GetTransaction;
+end;
+
+function TResults.GetAttachment: IAttachment;
+begin
+  Result := FResults.GetAttachment;
 end;
 
 procedure TResults.SetRetainInterfaces(aValue: boolean);
