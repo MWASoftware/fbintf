@@ -305,6 +305,8 @@ type
     destructor Destroy; override;
     function Fetch(FetchType: TFetchType; PosOrOffset: integer=0): boolean;
     property StatementIntf: Firebird.IStatement read FStatementIntf;
+    property SQLParams: TIBXINPUTSQLDA read FSQLParams;
+    property SQLRecord: TIBXOUTPUTSQLDA read FSQLRecord;
 
   public
     {IStatement}
