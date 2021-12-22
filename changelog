@@ -44,6 +44,7 @@ FBINTF Change Log  version          (1.4-0 Build 12952) Tue, 07 Dec 2021 11:53:4
 4. New IAttachment helper functions
      function HasTable(aTableName: AnsiString): boolean;
      function GetAttachmentID: integer;
+     function GetCharSetID: integer;
 
 5. IStatement: if the BatchRowLimit is set to maxint, the maximum possible buffer size
    will be allocted for batch operations.

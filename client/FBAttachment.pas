@@ -242,6 +242,7 @@ type
     function GetSecurityDatabase: AnsiString;
     function GetODSMajorVersion: integer;
     function GetODSMinorVersion: integer;
+    function GetCharSetID: integer;
     function HasDecFloatSupport: boolean; virtual;
     function GetInlineBlobLimit: integer;
     procedure SetInlineBlobLimit(limit: integer);
@@ -1304,6 +1305,11 @@ end;
 function TFBAttachment.GetODSMinorVersion: integer;
 begin
   Result := FODSMinorVersion;
+end;
+
+function TFBAttachment.GetCharSetID: integer;
+begin
+  Result := FCharSetID;
 end;
 
 function TFBAttachment.HasDecFloatSupport: boolean;

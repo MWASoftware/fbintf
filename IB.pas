@@ -1208,6 +1208,7 @@ type
     function HasTable(aTableName: AnsiString): boolean;
 
     {Character Sets}
+    function GetCharSetID: integer; {connection character set}
     function HasDefaultCharSet: boolean;
     function GetDefaultCharSetID: integer;
     function GetCharsetName(CharSetID: integer): AnsiString;
