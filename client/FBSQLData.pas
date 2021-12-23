@@ -1758,7 +1758,7 @@ begin
         result := Int128ToStr(SQLData,scale);
 
       else
-        IBError(ibxeInvalidDataConversion, [nil]);
+        IBError(ibxeInvalidDataConversion, [GetSQLTypeName]);
     end;
 end;
 

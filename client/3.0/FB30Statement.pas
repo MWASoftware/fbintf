@@ -1190,12 +1190,13 @@ end;
 function TIBXSQLDA.CheckStatementStatus(Request: TStatementStatus): boolean;
 begin
   Result := false;
+  if FStatement <> nil then
   case Request of
   ssPrepared:
     Result := FStatement.IsPrepared;
 
   ssExecuteResults:
-    Result :=FStatement.FSingleResults;
+    Result := FStatement.FSingleResults;
 
   ssCursorOpen:
     Result := FStatement.FOpen;
@@ -1221,7 +1222,7 @@ end;
 
 function TIBXSQLDA.StateChanged(var ChangeSeqNo: integer): boolean;
 begin
-  Result := FStatement.ChangeSeqNo <> ChangeSeqNo;
+  Result := (FStatement <> nil) and (FStatement.ChangeSeqNo <> ChangeSeqNo);
   if Result then
     ChangeSeqNo := FStatement.ChangeSeqNo;
 end;
@@ -1292,7 +1293,10 @@ end;
 
 function TIBXSQLDA.GetPrepareSeqNo: integer;
 begin
-  Result := FStatement.FPrepareSeqNo;
+  if FStatement = nil then
+    Result := 0
+  else
+    Result := FStatement.FPrepareSeqNo;
 end;
 
 { TFB30Statement }

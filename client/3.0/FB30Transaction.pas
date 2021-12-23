@@ -112,6 +112,7 @@ end;
 
 procedure TFB30Transaction.InternalStartSingle(attachment: IAttachment);
 begin
+  if FTransactionIntf = nil then
   with FFirebird30ClientAPI do
   begin
     FTransactionIntf  := (attachment as TFB30Attachment).AttachmentIntf.startTransaction(StatusIntf,
@@ -126,6 +127,7 @@ var Dtc: IDtc;
     DtcStart: IDtcStart;
     i: integer;
 begin
+  if FTransactionIntf = nil then
   with FFirebird30ClientAPI do
   begin
     Dtc := MasterIntf.getDtc;
@@ -195,9 +197,9 @@ end;
 constructor TFB30Transaction.Create(api: TFBClientAPI; Attachment: IAttachment;
   aTransactionIntf: Firebird.ITransaction);
 begin
-  inherited Create(api,Attachment,nil,taCommit,'');
   FTransactionIntf := aTransactionIntf;
   FTransactionIntf.addRef();
+  inherited Create(api,Attachment,nil,taCommit,'');
 end;
 
 destructor TFB30Transaction.Destroy;
