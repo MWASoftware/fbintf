@@ -261,7 +261,7 @@ constructor TFB30StatusObject.Create(aOwner: TFBClientAPI;
   status: Firebird.IStatus; prefix: Ansistring);
 begin
   inherited Create(aOwner,prefix);
-  FStatus := status;
+  FStatus := status.clone;
 end;
 
 { TFB30Status }

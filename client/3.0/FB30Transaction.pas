@@ -199,6 +199,7 @@ constructor TFB30Transaction.Create(api: TFBClientAPI; Attachment: IAttachment;
 begin
   FTransactionIntf := aTransactionIntf;
   FTransactionIntf.addRef();
+  FForeignHandle := true;
   inherited Create(api,Attachment,nil,taCommit,'');
 end;
 

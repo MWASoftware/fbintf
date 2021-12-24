@@ -98,8 +98,8 @@ type
     FSQLSubType: integer;
     FSQLData: PByte; {Address of SQL Data in Message Buffer}
     FSQLNullIndicator: PShort; {Address of null indicator}
-    FDataLength: integer;
-    FMetadataSize: integer;
+    FDataLength: cardinal;
+    FMetadataSize: cardinal;
     FNullable: boolean;
     FScale: integer;
     FCharSetID: cardinal;
@@ -942,6 +942,10 @@ begin
       for i := 0 to Count - 1 do
       with TIBXSQLVar(Column[i]) do
       begin
+        Builder.setField(StatusIntf,i,PAnsiChar(Name));
+        Check4DataBaseError;
+        Builder.setAlias(StatusIntf,i,PAnsiChar(Name));
+        Check4DataBaseError;
         Builder.setType(StatusIntf,i,FSQLType);
         Check4DataBaseError;
         Builder.setSubType(StatusIntf,i,FSQLSubType);
@@ -1048,6 +1052,7 @@ procedure TIBXINPUTSQLDA.Bind(aMetaData: Firebird.IMessageMetadata);
 var i: integer;
 begin
   FMetaData := aMetaData;
+  FMetaData.AddRef;
   with FFirebird30ClientAPI do
   begin
     Count := aMetadata.getCount(StatusIntf);
@@ -1103,13 +1108,14 @@ var i: integer;
     MsgLen: cardinal;
 begin
   FMetaData := aMetaData;
+  FMetaData.AddRef;
   with FFirebird30ClientAPI do
   begin
-    Count := metadata.getCount(StatusIntf);
+    Count := aMetaData.getCount(StatusIntf);
     Check4DataBaseError;
     Initialize;
 
-    MsgLen := metaData.getMessageLength(StatusIntf);
+    MsgLen := aMetaData.getMessageLength(StatusIntf);
     Check4DataBaseError;
     AllocMessageBuffer(MsgLen);
 
@@ -1117,7 +1123,7 @@ begin
     with TIBXSQLVar(Column[i]) do
     begin
       InitColumnMetaData(aMetaData);
-      FSQLData := FMessageBuffer + metaData.getOffset(StatusIntf,i);
+      FSQLData := FMessageBuffer + aMetaData.getOffset(StatusIntf,i);
       Check4DataBaseError;
       if FNullable then
       begin
@@ -1341,6 +1347,7 @@ end;
 
 procedure TFB30Statement.InternalPrepare(CursorName: AnsiString);
 var GUID : TGUID;
+    metadata: Firebird.IMessageMetadata;
 begin
   if FPrepared then
     Exit;
@@ -1401,14 +1408,26 @@ begin
         SQLExecProcedure:
         begin
           {set up input sqlda}
-          FSQLParams.Bind(FStatementIntf.getInputMetadata(StatusIntf));
+          metadata := FStatementIntf.getInputMetadata(StatusIntf);
           Check4DataBaseError;
+          try
+            FSQLParams.Bind(metadata);
+          finally
+            metadata.release;
+          end;
 
           {setup output sqlda}
           if FSQLStatementType in [SQLSelect, SQLSelectForUpdate,
                           SQLExecProcedure] then
-            FSQLRecord.Bind(FStatementIntf.getOutputMetadata(StatusIntf));
-          Check4DataBaseError;
+          begin
+            metadata := FStatementIntf.getOutputMetadata(StatusIntf);
+            Check4DataBaseError;
+            try
+              FSQLRecord.Bind(metadata);
+            finally
+              metadata.release;
+            end;
+          end;
         end;
       end;
     end;

@@ -615,8 +615,12 @@ end;
 function TFBStatus.GetSQLMessage: Ansistring;
 var local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
 begin
-   FOwner.isc_sql_interprete(Getsqlcode, local_buffer, sizeof(local_buffer));
-  Result := strpas(local_buffer);
+  Result := '';
+  if (FOwner <> nil) and assigned(FOwner.isc_sql_interprete) then
+  begin
+     FOwner.isc_sql_interprete(Getsqlcode, local_buffer, sizeof(local_buffer));
+     Result := strpas(local_buffer);
+  end;
 end;
 
 constructor TFBStatus.Create(aOwner: TFBClientAPI; prefix: AnsiString);
@@ -634,7 +638,7 @@ end;
 
 function TFBStatus.Getsqlcode: TStatusCode;
 begin
-  if assigned(FOwner.isc_sqlcode) then
+  if (FOwner <> nil) and assigned(FOwner.isc_sqlcode) then
     Result := FOwner.isc_sqlcode(PISC_STATUS(StatusVector))
   else
     Result := -999; {generic SQL Code}

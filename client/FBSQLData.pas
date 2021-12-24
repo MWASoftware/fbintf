@@ -3192,7 +3192,8 @@ end;
 
 destructor TMetaData.Destroy;
 begin
-  (FStatement as TInterfaceOwner).Remove(self);
+  if FStatement <> nil then
+    (FStatement as TInterfaceOwner).Remove(self);
   inherited Destroy;
 end;
 
@@ -3258,7 +3259,8 @@ end;
 
 destructor TSQLParams.Destroy;
 begin
-  (FStatement as TInterfaceOwner).Remove(self);
+  if FStatement <> nil then
+    (FStatement as TInterfaceOwner).Remove(self);
   inherited Destroy;
 end;
 

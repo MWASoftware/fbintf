@@ -88,6 +88,7 @@ type
     FAttachments: array of IAttachment; {Keep reference to attachment - ensures
                                           attachment cannot be freed before transaction}
     FTransactionName: AnsiString;
+    FForeignHandle: boolean;
     procedure CheckHandle;
     function GetActivityIntf(att: IAttachment): IActivityMonitor; virtual; abstract;
     function GetJournalIntf(Attachment: IAttachment): IJournallingHook;
@@ -313,7 +314,7 @@ var i: integer;
     intf: IUnknown;
     user: ITransactionUser;
 begin
-  if InTransaction then
+  if InTransaction and not FForeignHandle then
   begin
     for i := 0 to InterfaceCount - 1 do
     begin
