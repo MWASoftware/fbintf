@@ -1757,6 +1757,8 @@ begin
       SQL_INT128:
         result := Int128ToStr(SQLData,scale);
 
+{      449:
+        result := '';}
       else
         IBError(ibxeInvalidDataConversion, [GetSQLTypeName]);
     end;

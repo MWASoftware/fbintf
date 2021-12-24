@@ -593,15 +593,13 @@ end;
 function TIBXSQLVAR.GetCodePage: TSystemCodePage;
 begin
   result := CP_NONE;
-  with GetAttachment do
-     CharSetID2CodePage(GetCharSetID,result);
+  GetAttachment.CharSetID2CodePage(GetCharSetID,result);
 end;
 
 function TIBXSQLVAR.GetCharSetWidth: integer;
 begin
   result := 1;
-  with GetAttachment DO
-    CharSetWidth(GetCharSetID,result);
+  GetAttachment.CharSetWidth(GetCharSetID,result);
 end;
 
 function TIBXSQLVAR.GetIsNull: Boolean;
@@ -944,7 +942,7 @@ begin
       for i := 0 to Count - 1 do
       with TIBXSQLVar(Column[i]) do
       begin
-        Builder.setType(StatusIntf,i,FSQLType+1);
+        Builder.setType(StatusIntf,i,FSQLType);
         Check4DataBaseError;
         Builder.setSubType(StatusIntf,i,FSQLSubType);
         Check4DataBaseError;
@@ -1822,7 +1820,7 @@ procedure TFB30Statement.AddToBatch;
 var BatchPB: TXPBParameterBlock;
 
 const SixteenMB = 16 * 1024 * 1024;
-      MB256 = 1024 *1024;
+      MB256 = 256* 1024 *1024;
 begin
   FBatchCompletion := nil;
   if not FPrepared then
