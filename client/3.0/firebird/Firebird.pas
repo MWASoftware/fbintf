@@ -3682,8 +3682,6 @@ end;
 function IReferenceCounted.release(): Integer;
 begin
 	Result := ReferenceCountedVTable(vTable).release(Self);
-        if Result < -1 then
-        writeln('Release ',REsult);
 end;
 
 procedure IDisposable.dispose();

@@ -52,6 +52,7 @@ type
     FUsingRemoteICU: boolean;
     FOwnsAttachmentHandle: boolean;
     procedure SetAttachmentIntf(AValue: Firebird.IAttachment);
+    procedure SetupAttachment(AValue: Firebird.IAttachment);
     procedure SetUseRemoteICU(aValue: boolean);
   protected
     procedure CheckHandle; override;
@@ -180,6 +181,11 @@ begin
   except {ignore - forced release}
   end;
   FOwnsAttachmentHandle := false;
+  SetupAttachment(AValue);
+end;
+
+procedure TFB30Attachment.SetupAttachment(AValue: Firebird.IAttachment);
+begin
   FHasDefaultCharSet := false;
   FCodePage := CP_NONE;
   FCharSetID := 0;
@@ -249,7 +255,7 @@ begin
         Connect;
       end
       else
-        AttachmentIntf := Intf;
+        SetupAttachment(Intf);
     end;
   end;
 end;
@@ -270,7 +276,7 @@ begin
     if InErrorState then
       Exit;
   end;
-  AttachmentIntf := Intf;
+  SetupAttachment(Intf);
   FOwnsAttachmentHandle:= true;
   ExtractConnectString(sql,FDatabaseName);
   DPBFromCreateSQL(sql);
@@ -314,7 +320,7 @@ begin
     if FRaiseExceptionOnConnectError then Check4DataBaseError;
     if not InErrorState then
     begin
-      AttachmentIntf := Intf;
+      SetupAttachment(Intf);
       FOwnsAttachmentHandle := true;
     end;
   end;
@@ -324,19 +330,17 @@ procedure TFB30Attachment.Disconnect(Force: boolean);
 begin
   inherited Disconnect(Force);
   if IsConnected then
+  begin
+    if FOwnsAttachmentHandle then
     with FFirebird30ClientAPI do
     begin
       EndAllTransactions;
-      if FOwnsAttachmentHandle then
-      begin
-        FAttachmentIntf.Detach(StatusIntf);
-        if not Force and InErrorState then
-          IBDataBaseError;
-      end
-      else
-        AttachmentIntf.release;
-      AttachmentIntf := nil;
+      FAttachmentIntf.Detach(StatusIntf);
+      if not Force and InErrorState then
+        IBDataBaseError;
     end;
+    AttachmentIntf := nil;
+  end;
 end;
 
 function TFB30Attachment.IsConnected: boolean;
@@ -354,10 +358,10 @@ begin
     begin
       EndAllTransactions;
       EndSession(false);
-      FAttachmentIntf.dropDatabase(StatusIntf); {releases Handle}
+      FAttachmentIntf.dropDatabase(StatusIntf);
       Check4DataBaseError;
-      AttachmentIntf := nil;
     end;
+    AttachmentIntf := nil;
   end;
 end;
 
