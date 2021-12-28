@@ -52,7 +52,6 @@ type
     FUsingRemoteICU: boolean;
     FOwnsAttachmentHandle: boolean;
     procedure SetAttachmentIntf(AValue: Firebird.IAttachment);
-    procedure SetupAttachment(AValue: Firebird.IAttachment);
     procedure SetUseRemoteICU(aValue: boolean);
   protected
     procedure CheckHandle; override;
@@ -65,7 +64,6 @@ type
     constructor CreateDatabase(api: TFB30ClientAPI; DatabaseName: AnsiString; aDPB: IDPB; RaiseExceptionOnError: boolean);  overload;
     constructor CreateDatabase(api: TFB30ClientAPI; sql: AnsiString; aSQLDialect: integer;
       RaiseExceptionOnError: boolean); overload;
-    destructor Destroy; override;
     function GetDBInfo(ReqBuffer: PByte; ReqBufLen: integer): IDBInformation;
       override;
     property AttachmentIntf: Firebird.IAttachment read FAttachmentIntf write SetAttachmentIntf;
@@ -181,11 +179,6 @@ begin
   except {ignore - forced release}
   end;
   FOwnsAttachmentHandle := false;
-  SetupAttachment(AValue);
-end;
-
-procedure TFB30Attachment.SetupAttachment(AValue: Firebird.IAttachment);
-begin
   FHasDefaultCharSet := false;
   FCodePage := CP_NONE;
   FCharSetID := 0;
@@ -255,7 +248,8 @@ begin
         Connect;
       end
       else
-        SetupAttachment(Intf);
+        AttachmentIntf := Intf;
+      FOwnsAttachmentHandle:= true;
     end;
   end;
 end;
@@ -276,17 +270,10 @@ begin
     if InErrorState then
       Exit;
   end;
-  SetupAttachment(Intf);
+  AttachmentIntf := Intf;
   FOwnsAttachmentHandle:= true;
   ExtractConnectString(sql,FDatabaseName);
   DPBFromCreateSQL(sql);
-end;
-
-destructor TFB30Attachment.Destroy;
-begin
-  if FAttachmentIntf <> nil then
-    FAttachmentIntf.release;
-  inherited Destroy;
 end;
 
 constructor TFB30Attachment.Create(api: TFB30ClientAPI;
@@ -295,7 +282,6 @@ begin
   inherited Create(api,aDatabaseName,nil,false);
   FFirebird30ClientAPI := api;
   AttachmentIntf := attachment;
-  AttachmentIntf.addRef;
 end;
 
 function TFB30Attachment.GetDBInfo(ReqBuffer: PByte; ReqBufLen: integer): IDBInformation;
@@ -320,7 +306,7 @@ begin
     if FRaiseExceptionOnConnectError then Check4DataBaseError;
     if not InErrorState then
     begin
-      SetupAttachment(Intf);
+      AttachmentIntf := Intf;
       FOwnsAttachmentHandle := true;
     end;
   end;

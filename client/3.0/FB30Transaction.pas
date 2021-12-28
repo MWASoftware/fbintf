@@ -118,6 +118,7 @@ begin
     FTransactionIntf  := (attachment as TFB30Attachment).AttachmentIntf.startTransaction(StatusIntf,
              (FTPB as TTPB).getDataLength,BytePtr((FTPB as TTPB).getBuffer));
     Check4DataBaseError;
+    FTransactionIntf.addRef();
   end;
   SignalActivity;
 end;
@@ -146,6 +147,7 @@ begin
 
     FTransactionIntf := DtcStart.start(StatusIntf);
     Check4DataBaseError;
+    FTransactionIntf.addRef();
     SignalActivity;
   end;
 end;

@@ -168,7 +168,8 @@ type
       ibxeBatchBufferSizeTooBig,
       ibxeNoScrollableCursors,
       ibxeUnableTosetaTextType,
-      ibxeCantDropAcquiredDB
+      ibxeCantDropAcquiredDB,
+      ibxeTransactionNotOwned
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -288,6 +289,7 @@ resourcestring
   SNoScrollableCursors = 'Scrollable cursors are not supported';
   SUnableTosetaTextType = 'Param[%d] "%s": Unable to change from a %s to a string type';
   SCantDropAcquiredDB = 'Drop database not allowed by acquired attachment';
+  STransactionNotOwned = 'Cannot Commit or Rollback a linked transaction';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -383,7 +385,8 @@ const
     SBatchBufferSizeTooBig,
     SNoScrollableCursors,
     SUnableTosetaTextType,
-    SCantDropAcquiredDB
+    SCantDropAcquiredDB,
+    STransactionNotOwned
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;

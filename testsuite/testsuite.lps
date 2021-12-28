@@ -378,9 +378,10 @@
       </Unit45>
       <Unit46>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="6"/>
-        <TopLine Value="329"/>
-        <CursorPos X="43" Y="338"/>
+        <TopLine Value="146"/>
+        <CursorPos X="35" Y="168"/>
         <UsageCount Value="19"/>
         <Loaded Value="True"/>
       </Unit46>
@@ -499,7 +500,6 @@
       </Unit61>
       <Unit62>
         <Filename Value="../client/3.0/firebird/Firebird.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="11"/>
         <TopLine Value="3664"/>
         <CursorPos Y="3685"/>
@@ -980,127 +980,122 @@
         <UsageCount Value="10"/>
       </Unit126>
     </Units>
-    <JumpHistory Count="30" HistoryIndex="29">
+    <JumpHistory Count="29" HistoryIndex="28">
       <Position1>
-        <Filename Value="../client/3.0/firebird/Firebird.pas"/>
-        <Caret Line="758" Column="28" TopLine="745"/>
+        <Filename Value="../client/3.0/FB30Attachment.pas"/>
+        <Caret Line="342" TopLine="328"/>
       </Position1>
       <Position2>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <Caret Line="343" TopLine="321"/>
+        <Caret Line="177" TopLine="164"/>
       </Position2>
       <Position3>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <Caret Line="177" TopLine="164"/>
+        <Caret Line="178" TopLine="164"/>
       </Position3>
       <Position4>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <Caret Line="185" TopLine="164"/>
+        <Caret Line="179" TopLine="164"/>
       </Position4>
       <Position5>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <Caret Line="341" TopLine="327"/>
+        <Caret Line="180" TopLine="164"/>
       </Position5>
       <Position6>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <Caret Line="189" TopLine="176"/>
+        <Caret Line="183" TopLine="164"/>
       </Position6>
       <Position7>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <Caret Line="190" TopLine="176"/>
+        <Caret Line="184" TopLine="164"/>
       </Position7>
       <Position8>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <Caret Line="191" TopLine="176"/>
+        <Caret Line="189" TopLine="167"/>
       </Position8>
       <Position9>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <Caret Line="192" TopLine="176"/>
+        <Caret Line="190" TopLine="168"/>
       </Position9>
       <Position10>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <Caret Line="193" TopLine="176"/>
+        <Caret Line="191" TopLine="169"/>
       </Position10>
       <Position11>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <Caret Line="194" TopLine="176"/>
+        <Caret Line="192" TopLine="170"/>
       </Position11>
       <Position12>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <Caret Line="199" TopLine="177"/>
+        <Caret Line="193" TopLine="171"/>
       </Position12>
       <Position13>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <Caret Line="343" TopLine="331"/>
+        <Caret Line="194" TopLine="172"/>
       </Position13>
       <Position14>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <Caret Line="177" TopLine="163"/>
+        <Caret Line="199" TopLine="186"/>
       </Position14>
       <Position15>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <Caret Line="185" TopLine="163"/>
+        <Caret Line="338" Column="43" TopLine="328"/>
       </Position15>
       <Position16>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <Caret Line="364" TopLine="343"/>
+        <Caret Line="68" Column="15" TopLine="66"/>
       </Position16>
       <Position17>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <Caret Line="342" TopLine="328"/>
+        <Caret Line="288" Column="30" TopLine="283"/>
       </Position17>
       <Position18>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <Caret Line="177" TopLine="164"/>
+        <Caret Line="55" Column="16" TopLine="53"/>
       </Position18>
       <Position19>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <Caret Line="178" TopLine="164"/>
+        <Caret Line="189" Column="3" TopLine="185"/>
       </Position19>
       <Position20>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <Caret Line="179" TopLine="164"/>
+        <Caret Line="54" Column="15" TopLine="42"/>
       </Position20>
       <Position21>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <Caret Line="180" TopLine="164"/>
+        <Caret Line="181" TopLine="175"/>
       </Position21>
       <Position22>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <Caret Line="183" TopLine="164"/>
+        <Caret Line="289" Column="28" TopLine="276"/>
       </Position22>
       <Position23>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <Caret Line="184" TopLine="164"/>
+        <Caret Line="181" TopLine="168"/>
       </Position23>
       <Position24>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <Caret Line="189" TopLine="167"/>
+        <Caret Line="184" TopLine="168"/>
       </Position24>
       <Position25>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <Caret Line="190" TopLine="168"/>
+        <Caret Line="181" TopLine="168"/>
       </Position25>
       <Position26>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <Caret Line="191" TopLine="169"/>
+        <Caret Line="178" TopLine="168"/>
       </Position26>
       <Position27>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <Caret Line="192" TopLine="170"/>
       </Position27>
       <Position28>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <Caret Line="193" TopLine="171"/>
+        <Caret Line="69" Column="77" TopLine="47"/>
       </Position28>
       <Position29>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <Caret Line="194" TopLine="172"/>
+        <Caret Line="166" Column="35" TopLine="144"/>
       </Position29>
-      <Position30>
-        <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <Caret Line="199" TopLine="186"/>
-      </Position30>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
@@ -1111,8 +1106,8 @@
         <Item1 Value="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </List0>
       <List1 Name="CommandLineParameters" Count="15">
-        <Item1 Value="-t 6"/>
-        <Item2 Value="-t 2"/>
+        <Item1 Value="-t 2"/>
+        <Item2 Value="-t 6"/>
         <Item3 Value="-t 3"/>
         <Item4 Value="-t 1"/>
         <Item5 Value="-t 19"/>
@@ -1127,7 +1122,6 @@
         <Item14 Value="-t 20"/>
         <Item15 Value="-t 17"/>
       </List1>
-      <List2 Name="WorkingDirectory" Type="File" Count="1"/>
     </HistoryLists>
   </ProjectSession>
 </CONFIG>

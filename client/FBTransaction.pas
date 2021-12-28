@@ -343,6 +343,9 @@ var i: integer;
 begin
   if not GetInTransaction then Exit;
 
+  if FForeignHandle then
+    IBError(ibxeTransactionNotOwned,[nil]);
+
   SetLength(TransactionEndNeeded,Length(FAttachments));
   TransactionID := GetTransactionID;
   for i := 0 to Length(FAttachments) - 1 do
@@ -424,6 +427,9 @@ var i: integer;
     TransactionEndNeeded: array of boolean;
 begin
   if not GetInTransaction then Exit;
+
+  if FForeignHandle then
+    IBError(ibxeTransactionNotOwned,[nil]);
 
   SetLength(TransactionEndNeeded,Length(FAttachments));
   TransactionID := GetTransactionID;
