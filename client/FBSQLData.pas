@@ -820,8 +820,11 @@ begin
   FVarString := aValue;
   if SQLType = SQL_BLOB then
     SetMetaSize(GetAttachment.GetInlineBlobLimit);
-  SQLType := GetDefaultTextSQLType;
+  if Parent.CanChangeMetaData then
+    SQLType := GetDefaultTextSQLType;
   Scale := 0;
+  if  (SQLType <> SQL_VARYING) and (SQLType <> SQL_TEXT) then
+    IBError(ibxeUnableTosetaTextType,[Index,Name,TSQLDataItem.GetSQLTypeName(SQLType)]);
   SetSQLData(PByte(PAnsiChar(FVarString)),Length(aValue));
 end;
 

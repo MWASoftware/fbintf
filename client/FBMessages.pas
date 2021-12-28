@@ -166,7 +166,9 @@ type
       ibxeInvalidBatchQuery,
       ibxeBatchRowBufferOverflow,
       ibxeBatchBufferSizeTooBig,
-      ibxeNoScrollableCursors
+      ibxeNoScrollableCursors,
+      ibxeUnableTosetaTextType,
+      ibxeCantDropAcquiredDB
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -284,6 +286,8 @@ resourcestring
   SBatchRowBufferOverflow = 'Adding Row No. %d - batch buffer size limit (%d bytes) exceeded';
   SBatchBufferSizeTooBig = 'Requested Batch Buffer Size (%d bytes) exceeds 256MB limit';
   SNoScrollableCursors = 'Scrollable cursors are not supported';
+  SUnableTosetaTextType = 'Param[%d] "%s": Unable to change from a %s to a string type';
+  SCantDropAcquiredDB = 'Drop database not allowed by acquired attachment';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -377,7 +381,9 @@ const
     SInvalidBatchQuery,
     SBatchRowBufferOverflow,
     SBatchBufferSizeTooBig,
-    SNoScrollableCursors
+    SNoScrollableCursors,
+    SUnableTosetaTextType,
+    SCantDropAcquiredDB
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;

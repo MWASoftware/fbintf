@@ -64,6 +64,7 @@ type
     constructor CreateDatabase(api: TFB30ClientAPI; DatabaseName: AnsiString; aDPB: IDPB; RaiseExceptionOnError: boolean);  overload;
     constructor CreateDatabase(api: TFB30ClientAPI; sql: AnsiString; aSQLDialect: integer;
       RaiseExceptionOnError: boolean); overload;
+    destructor Destroy; override;
     function GetDBInfo(ReqBuffer: PByte; ReqBufLen: integer): IDBInformation;
       override;
     property AttachmentIntf: Firebird.IAttachment read FAttachmentIntf write SetAttachmentIntf;
@@ -275,12 +276,20 @@ begin
   DPBFromCreateSQL(sql);
 end;
 
+destructor TFB30Attachment.Destroy;
+begin
+  if FAttachmentIntf <> nil then
+    FAttachmentIntf.release;
+  inherited Destroy;
+end;
+
 constructor TFB30Attachment.Create(api: TFB30ClientAPI;
   attachment: Firebird.IAttachment; aDatabaseName: AnsiString);
 begin
   inherited Create(api,aDatabaseName,nil,false);
   FFirebird30ClientAPI := api;
   AttachmentIntf := attachment;
+  AttachmentIntf.addRef;
 end;
 
 function TFB30Attachment.GetDBInfo(ReqBuffer: PByte; ReqBufLen: integer): IDBInformation;
@@ -323,7 +332,9 @@ begin
         FAttachmentIntf.Detach(StatusIntf);
         if not Force and InErrorState then
           IBDataBaseError;
-      end;
+      end
+      else
+        AttachmentIntf.release;
       AttachmentIntf := nil;
     end;
 end;
@@ -336,6 +347,9 @@ end;
 procedure TFB30Attachment.DropDatabase;
 begin
   if IsConnected then
+  begin
+    if not FOwnsAttachmentHandle then
+      IBError(ibxeCantDropAcquiredDB,[nil]);
     with FFirebird30ClientAPI do
     begin
       EndAllTransactions;
@@ -344,6 +358,7 @@ begin
       Check4DataBaseError;
       AttachmentIntf := nil;
     end;
+  end;
 end;
 
 function TFB30Attachment.StartTransaction(TPB: array of byte;

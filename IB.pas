@@ -1205,7 +1205,8 @@ type
     function HasDecFloatSupport: boolean;
     function HasBatchMode: boolean;
     function HasScollableCursors: boolean;
-    function HasTable(aTableName: AnsiString): boolean;
+    function HasTable(aTableName: AnsiString): boolean; {case sensitive}
+    function HasFunction(aFunctionName: AnsiString): boolean; {case sensitive}
 
     {Character Sets}
     function GetCharSetID: integer; {connection character set}
@@ -1588,7 +1589,7 @@ constructor EIBInterBaseError.Create(aStatus: IStatus);
 begin
   inherited Create(aStatus.Getsqlcode,aStatus.GetMessage);
   FIBErrorCode := aStatus.GetIBErrorCode;
-  FStatus := Status;
+  FStatus := aStatus;
 end;
 
 constructor EIBInterBaseError.Create(ASQLCode: Long; AIBErrorCode: Long;

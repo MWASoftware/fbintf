@@ -248,6 +248,7 @@ type
     procedure SetInlineBlobLimit(limit: integer);
     function HasBatchMode: boolean; virtual;
     function HasTable(aTableName: AnsiString): boolean;
+    function HasFunction(aFunctionName: AnsiString): boolean;
 
   public
     {Character Sets}
@@ -1340,6 +1341,13 @@ begin
   Result := OpenCursorAtStart(
        'Select count(*) From RDB$RELATIONS Where RDB$RELATION_NAME = ?',
           [aTableName])[0].AsInteger > 0;
+end;
+
+function TFBAttachment.HasFunction(aFunctionName: AnsiString): boolean;
+begin
+  Result := OpenCursorAtStart(
+       'Select count(*) From RDB$FUNCTIONS Where RDB$FUNCTION_NAME = ?',
+          [aFunctionName])[0].AsInteger > 0;
 end;
 
 function TFBAttachment.HasDefaultCharSet: boolean;
