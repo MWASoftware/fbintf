@@ -1071,7 +1071,7 @@ type
    {Journaling options. Default is [joReadWriteTransactions,joModifyQueries] }
 
    TJournalOption = (joReadOnlyTransactions, joReadWriteTransactions,
-                     joModifyQueries, joReadOnlyQueries);
+                     joModifyQueries, joReadOnlyQueries,joNoServerTable);
 
    TJournalOptions = set of TJournalOption;
 

@@ -16,7 +16,7 @@
  *
  *  The Initial Developer of the Original Code is Tony Whyman.
  *
- *  The Original Code is (C) 2016 Tony Whyman, MWA Software
+ *  The Original Code is (C) 2016-2021 Tony Whyman, MWA Software
  *  (http://www.mwasoftware.co.uk).
  *
  *  All Rights Reserved.
@@ -617,7 +617,7 @@ begin
   if JournalingActive and (FJournalFilePath <> '') then
   begin
     FreeAndNil(FJournalFileStream);
-    if not RetainJournal then
+    if not (joNoServerTable in FOptions) and not RetainJournal then
     try
         GetAttachment.ExecuteSQL([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],
              sqlCleanUpSession,[FSessionID]);
@@ -642,6 +642,7 @@ var LogEntry: AnsiString;
     TPBText: AnsiString;
 begin
   FDoNotJournal := true;
+  if not (joNoServerTable in FOptions) then
   try
     GetAttachment.ExecuteSQL(Tr,sqlRecordJournalEntry,[FSessionID,Tr.GetTransactionID,NULL]);
   finally
@@ -704,6 +705,7 @@ begin
       FJournalFileStream.Write(LogEntry[1],Length(LogEntry));
 
     FDoNotJournal := true;
+    if not (joNoServerTable in FOptions) then
     try
       GetAttachment.ExecuteSQL(Tr,sqlRecordJournalEntry,[FSessionID,Tr.GetTransactionID,OldTransactionID]);
     finally
@@ -754,9 +756,10 @@ function TFBJournaling.StartJournaling(S: TStream; Options: TJournalOptions
   ): integer;
 begin
   FOptions := Options;
+  if not (joNoServerTable in FOptions) then
   with GetAttachment do
   begin
-    if not HasTable(sJournalTableName) then
+    if  not HasTable(sJournalTableName) then
     begin
       ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateJournalTable);
       ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateSequence);
