@@ -431,7 +431,7 @@ begin
   SQL_LONG,
   SQL_INT64:
     if TryStrToNumeric(Value,Int64Value,aScale) then
-      SetAsNumeric(NumericFromRawValues(Int64Value,AScale))
+      SetAsNumeric(NumericFromRawValues(Int64Value,aScale))
     else
       SetAsCurrency(StrToCurr(Value));
 
@@ -543,11 +543,11 @@ begin
   CheckActive;
   case GetSQLType of
   SQL_LONG:
-    PLong(SQLData)^ := Value.getAsInteger;
+      PLong(SQLData)^ := SafeInteger(Value.clone(Scale).getRawValue);
   SQL_SHORT:
-    PShort(SQLData)^ := Value.getAsSmallInt;
+    PShort(SQLData)^ := SafeSmallInt(Value.clone(Scale).getRawValue);
   SQL_INT64:
-    PInt64(SQLData)^ := Value.getAsInt64;
+    PInt64(SQLData)^ := Value.clone(Scale).getRawValue;
   SQL_TEXT, SQL_VARYING:
    SetAsString(Value.getAsString);
   SQL_D_FLOAT,

@@ -150,10 +150,12 @@ type
      property FirebirdClientAPI: TFBClientAPI read FFirebirdClientAPI;
   public
      constructor Create(api: TFBClientAPI);
+     function CanChangeMetaData: boolean; virtual;
      function GetSQLType: cardinal; virtual; abstract; {Current Field Data SQL Type}
      function GetSQLTypeName: AnsiString; overload;
      class function GetSQLTypeName(SQLType: cardinal): AnsiString; overload;
      function GetStrDataLength: short;
+     function getColMetadata: IParamMetaData; virtual; abstract;
      function GetName: AnsiString; virtual; abstract;
      function GetScale: integer; virtual; abstract; {Current Field Data scale}
      function GetAsBoolean: boolean;
@@ -318,6 +320,7 @@ type
     procedure SetMetaSize(aValue: cardinal); virtual;
   public
     constructor Create(aParent: TSQLDataArea; aIndex: integer);
+    function CanChangeMetaData: boolean;
     procedure SetString(aValue: AnsiString);
     procedure Changed; virtual;
     procedure RowChange; virtual;
@@ -355,7 +358,7 @@ type
 
   { TColumnMetaData }
 
-  TColumnMetaData = class(TSQLDataItem,IColumnMetaData)
+  TColumnMetaData = class(TSQLDataItem,IColumnMetaData,IParamMetaData)
   private
     FIBXSQLVAR: TSQLVarData;
     FOwner: IUnknown;         {Keep reference to ensure Metadata/statement not discarded}
@@ -371,6 +374,7 @@ type
     constructor Create(aOwner: IUnknown; aIBXSQLVAR: TSQLVarData);
     destructor Destroy; override;
     function GetSQLDialect: integer; override;
+    function getColMetadata: IParamMetaData; override;
 
   public
     {IColumnMetaData}
@@ -452,7 +456,8 @@ type
     procedure SetSQLType(aValue: cardinal); override;
   public
     procedure Clear;
-    function getColMetadata: IParamMetaData;
+    function CanChangeMetaData: boolean; override;
+    function getColMetadata: IParamMetaData; override;
     function GetModified: boolean; override;
     function GetAsPointer: Pointer;
     function GetAsString: AnsiString; override;
@@ -532,6 +537,7 @@ type
     function GetStatement: IStatement;
     function GetTransaction: ITransaction;
     function GetAttachment: IAttachment;
+    procedure Clear;
   end;
 
   { TResults }
@@ -806,6 +812,11 @@ begin
   FUniqueName := true;
 end;
 
+function TSQLVarData.CanChangeMetaData: boolean;
+begin
+  Result := Parent.CanChangeMetaData;
+end;
+
 procedure TSQLVarData.SetString(aValue: AnsiString);
 begin
   {we take full advantage here of reference counted strings. When setting a string
@@ -816,7 +827,7 @@ begin
   FVarString := aValue;
   if SQLType = SQL_BLOB then
     SetMetaSize(GetAttachment.GetInlineBlobLimit);
-  if Parent.CanChangeMetaData then
+  if CanChangeMetaData then
     SQLType := GetDefaultTextSQLType;
   Scale := 0;
   if  (SQLType <> SQL_VARYING) and (SQLType <> SQL_TEXT) then
@@ -1061,6 +1072,11 @@ constructor TSQLDataItem.Create(api: TFBClientAPI);
 begin
   inherited Create;
   FFirebirdClientAPI := api;
+end;
+
+function TSQLDataItem.CanChangeMetaData: boolean;
+begin
+  Result := false;
 end;
 
 function TSQLDataItem.GetSQLTypeName: AnsiString;
@@ -1760,6 +1776,7 @@ begin
   if GetSQLDialect < 3 then
     AsDouble := Value
   else
+  if CanChangeMetaData then
   begin
     Changing;
     if IsNullable then
@@ -1769,7 +1786,9 @@ begin
     DataLength := SizeOf(Int64);
     PCurrency(SQLData)^ := Value;
     Changed;
-  end;
+  end
+  else
+    SetAsNumeric(NewNumeric(Value));
 end;
 
 procedure TSQLDataItem.SetAsInt64(Value: Int64);
@@ -1779,11 +1798,16 @@ begin
   if IsNullable then
     IsNull := False;
 
-  SQLType := SQL_INT64;
-  Scale := 0;
-  DataLength := SizeOf(Int64);
-  PInt64(SQLData)^ := Value;
-  Changed;
+  if CanChangeMetaData then
+  begin
+    SQLType := SQL_INT64;
+    Scale := 0;
+    DataLength := SizeOf(Int64);
+    PInt64(SQLData)^ := Value;
+    Changed;
+  end
+  else
+    SetAsNumeric(NewNumeric(Value));
 end;
 
 procedure TSQLDataItem.SetAsDate(Value: TDateTime);
@@ -1949,12 +1973,17 @@ begin
   if IsNullable then
     IsNull := False;
 
-  Changing;
-  SQLType := SQL_LONG;
-  DataLength := SizeOf(Long);
-  Scale := 0;
-  PLong(SQLData)^ := Value;
-  Changed;
+  if CanChangeMetaData then
+  begin
+    Changing;
+    SQLType := SQL_LONG;
+    DataLength := SizeOf(Long);
+    Scale := 0;
+    PLong(SQLData)^ := Value;
+    Changed;
+  end
+  else
+    SetAsNumeric(NewNumeric(Value));
 end;
 
 procedure TSQLDataItem.SetAsPointer(Value: Pointer);
@@ -1993,11 +2022,16 @@ begin
   if IsNullable then
     IsNull := False;
 
-  SQLType := SQL_SHORT;
-  DataLength := SizeOf(Short);
-  Scale := 0;
-  PShort(SQLData)^ := Value;
-  Changed;
+  if CanChangeMetaData then
+  begin
+    SQLType := SQL_SHORT;
+    DataLength := SizeOf(Short);
+    Scale := 0;
+    PShort(SQLData)^ := Value;
+    Changed;
+  end
+  else
+    SetAsNumeric(NewNumeric(Value));
 end;
 
 procedure TSQLDataItem.SetAsString(Value: AnsiString);
@@ -2017,14 +2051,12 @@ begin
     varEmpty, varNull:
       IsNull := True;
     varSmallint, varInteger, varByte,
-      varWord, varShortInt:
-      AsLong := Value;
-    varInt64:
-      AsInt64 := Value;
+      varWord, varShortInt, varInt64:
+        SetAsNumeric(NewNumeric(Int64(Value)));
     varSingle, varDouble:
-      AsDouble := Value;
+      SetAsNumeric(NewNumeric(Double(Value)));
     varCurrency:
-      AsCurrency := Value;
+      SetAsNumeric(NewNumeric(Currency(Value)));
     varBoolean:
       AsBoolean := Value;
     varDate:
@@ -2050,10 +2082,34 @@ begin
   if IsNullable then
     IsNull := False;
 
-  SQLType := SQL_INT64;
-  DataLength := SizeOf(Int64);
-  PInt64(SQLData)^ := Value.getRawValue;
-  Scale := Value.getScale;
+  SetSQLType(getColMetadata.GetSQLType);
+  SetScale(getColMetadata.getScale);
+  SetDataLength(getColMetadata.GetSize);
+
+  with FFirebirdClientAPI do
+  case GetSQLType of
+  SQL_LONG:
+      PLong(SQLData)^ := SafeInteger(Value.clone(Scale).getRawValue);
+  SQL_SHORT:
+    PShort(SQLData)^ := SafeSmallInt(Value.clone(Scale).getRawValue);
+  SQL_INT64:
+    PInt64(SQLData)^ := Value.clone(Scale).getRawValue;
+  SQL_TEXT, SQL_VARYING:
+   SetAsString(Value.getAsString);
+  SQL_D_FLOAT,
+  SQL_DOUBLE:
+    PDouble(SQLData)^ := Value.getAsDouble;
+  SQL_FLOAT:
+    PSingle(SQLData)^ := Value.getAsDouble;
+  SQL_DEC_FIXED,
+  SQL_DEC16,
+  SQL_DEC34:
+     SQLDecFloatEncode(Value.getAsBCD,SQLType,SQLData);
+  SQL_INT128:
+    StrToInt128(Scale,Value.getAsString,SQLData);
+  else
+    IBError(ibxeInvalidDataConversion, [nil]);
+  end;
   Changed;
 end;
 
@@ -2064,6 +2120,11 @@ begin
   if IsNullable then
     IsNull := False;
 
+  if not CanChangeMetaData then
+  begin
+    SetAsNumeric(NewNumeric(aValue));
+    Exit;
+  end;
 
   with FFirebirdClientAPI do
   if aValue.Precision <= 16 then
@@ -2170,6 +2231,11 @@ end;
 function TColumnMetaData.GetSQLDialect: integer;
 begin
   Result := FIBXSQLVAR.Statement.GetSQLDialect;
+end;
+
+function TColumnMetaData.getColMetadata: IParamMetaData;
+begin
+  Result := self;
 end;
 
 function TColumnMetaData.GetIndex: integer;
@@ -2391,7 +2457,7 @@ begin
   SQL_DEC34,
   SQL_INT128:
     if TryStrToBCD(Value,BCDValue) then
-      SetAsBCD(BCDValue)
+      SetAsNumeric(NewNumeric(BCDValue))
     else
       DoSetString;
 
@@ -2399,7 +2465,7 @@ begin
   SQL_DOUBLE,
   SQL_FLOAT:
     if TryStrToNumeric(Value,Int64Value,aScale) then
-      SetAsDouble(NumericToDouble(Int64Value,AScale))
+      SetAsNumeric(NumericFromRawValues(Int64Value,AScale))
     else
       DoSetString;
 
@@ -2472,6 +2538,11 @@ end;
 procedure TSQLParam.Clear;
 begin
   IsNull := true;
+end;
+
+function TSQLParam.CanChangeMetaData: boolean;
+begin
+  Result := FIBXSQLVAR.CanChangeMetaData;
 end;
 
 function TSQLParam.getColMetadata: IParamMetaData;
@@ -3210,6 +3281,13 @@ end;
 function TSQLParams.GetAttachment: IAttachment;
 begin
   Result := FSQLParams.GetAttachment;
+end;
+
+procedure TSQLParams.Clear;
+var i: integer;
+begin
+  for i := 0 to getCount - 1 do
+    getSQLParam(i).Clear;
 end;
 
 { TResults }

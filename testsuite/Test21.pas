@@ -146,7 +146,18 @@ begin
   except on E: Exception do
     writeln(Outfile,'Expected Error - ',E.Message);
   end;
-
+  writeln(OutFile,'Test Numeric Type');
+  with Statement.GetSQLParams do
+  begin
+    Clear;
+    Params[0].AsInteger := 7;
+    Params[1].AsNumeric := NewNumeric(1.0);
+    Params[2].AsVariant := 1234567;
+    Params[3].AsNumeric := NewNumeric(StrToFloat('2.3E-2'),-4);
+    Params[4].AsNumeric := NewNumeric('11e-4');
+    Params[5].AsVariant := 1234.25;
+  end;
+  Statement.Execute;
 end;
 
 procedure TTest21.QueryDatabase(Attachment: IAttachment);

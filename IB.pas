@@ -780,6 +780,7 @@ type
     function GetStatement: IStatement;
     function GetTransaction: ITransaction;
     function GetAttachment: IAttachment;
+    procedure Clear;
     property Modified: Boolean read GetModified;
     property Params[index: integer]: ISQLParam read getSQLParam; default;
     property Count: integer read getCount;
