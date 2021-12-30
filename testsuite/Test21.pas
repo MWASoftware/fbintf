@@ -53,6 +53,7 @@ type
     procedure UpdateDatabase(Attachment: IAttachment);
     procedure QueryDatabase(Attachment: IAttachment);
     procedure ValidateStrToNumeric;
+    procedure ValidateNumericInterface;
   public
     function TestTitle: AnsiString; override;
     procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
@@ -62,7 +63,7 @@ type
 
 implementation
 
-uses IBUtils;
+uses FBNumeric, FmtBCD;
 
 const
   sqlCreateTable =
@@ -179,6 +180,39 @@ begin
   end;
 end;
 
+procedure TTest21.ValidateNumericInterface;
+var numeric: IFBNumeric;
+begin
+  writeln(Outfile,'Validating Numeric Interface - IFBNumeric');
+  numeric := NewNumeric(StrToCurr('9999.123456780'));
+  writeln(Outfile,'Value from Currency = ',numeric.getAsString);
+  writeln(Outfile,'Raw Value = ',numeric.getRawValue,' Scale = ',numeric.getScale);
+  numeric := NewNumeric(StrToCurr('9999.123456780')).clone(-2);
+  writeln(Outfile,'Value from Currency(rescaled) = ',numeric.getAsString);
+  writeln(Outfile,'Raw Value = ',numeric.getRawValue,' Scale = ',numeric.getScale);
+  numeric := NewNumeric(StrToFloat('9999.123456780'),-8);
+  writeln(Outfile,'Value from Double = ',numeric.getAsString);
+  writeln(Outfile,'Raw Value = ',numeric.getRawValue,' Scale = ',numeric.getScale);
+  numeric := NewNumeric(StrToInt64('9223372036854775807'));
+  writeln(Outfile,'Value from Integer = ',numeric.getAsString);
+  writeln(Outfile,'Raw Value = ',numeric.getRawValue,' Scale = ',numeric.getScale);
+  numeric := NewNumeric('9223372036854775807');
+  writeln(Outfile,'Value from string = ',numeric.getAsString);
+  writeln(Outfile,'Raw Value = ',numeric.getRawValue,' Scale = ',numeric.getScale);
+  numeric := NewNumeric('9999.123456780');
+  writeln(Outfile,'Value from string = ',numeric.getAsString);
+  writeln(Outfile,'Raw Value = ',numeric.getRawValue,' Scale = ',numeric.getScale);
+  numeric := NewNumeric('-1.2e-02');
+  writeln(Outfile,'Value from string = ',numeric.getAsString);
+  writeln(Outfile,'Raw Value = ',numeric.getRawValue,' Scale = ',numeric.getScale);
+  numeric := NewNumeric(StrToBCD('9999.123456780'));
+  writeln(Outfile,'Value from BCD = ',numeric.getAsString);
+  writeln(Outfile,'Raw Value = ',numeric.getRawValue,' Scale = ',numeric.getScale);
+  numeric := NumericFromRawValues(9999123456780,-6);
+  writeln(Outfile,'Value from Raw Data = ',numeric.getAsString);
+  writeln(Outfile,'Raw Value = ',numeric.getRawValue,' Scale = ',numeric.getScale);
+end;
+
 function TTest21.TestTitle: AnsiString;
 begin
   Result := 'Test 21: Exercise setting and getting of numeric data types';
@@ -197,6 +231,7 @@ begin
   try
     Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable);
     ValidateStrToNumeric;
+    ValidateNumericInterface;
     SetFloatTemplate('#,###.00000000');
     UpdateDatabase(Attachment);
     QueryDatabase(Attachment);

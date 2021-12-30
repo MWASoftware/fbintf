@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
-  <Package Version="4">
+  <Package Version="5">
     <Name Value="fbintf"/>
     <Author Value="MWA Software"/>
     <CompilerOptions>
@@ -16,7 +16,7 @@
         </Checks>
       </CodeGeneration>
     </CompilerOptions>
-    <Description Value="This package provides MWA Software's Firebird Pascal API.
+    <Description Value="This package provides MWA Software&apos;s Firebird Pascal API.
 
 Two interface implementations are provided. One is for the new Firebird 3 Client API and the other for the legacy Firebird Client API used for Firebird 2.x and earlier. The Firebird 3 API implementation is used whenever possible and the older API only if the Firebird 3 API is not available"/>
     <License Value=" *  Firebird Interface (fbintf). The fbintf components provide a set of
@@ -26,7 +26,7 @@ Two interface implementations are provided. One is for the new Firebird 3 Client
  *  notice and license conditions from IBX.
  *
  *  Except for those parts dervied from IBX, contents of this file are subject
- *  to the Initial Developer's Public License Version 1.0 (the &quot;License&quot;); you
+ *  to the Initial Developer&apos;s Public License Version 1.0 (the &quot;License&quot;); you
  *  may not use this file except in compliance with the License. You may obtain a
  *  copy of the License here:
  *
@@ -46,8 +46,8 @@ Two interface implementations are provided. One is for the new Firebird 3 Client
  *
  *  Contributor(s): ______________________________________.
  *    "/>
-    <Version Major="1" Minor="4" Release = "0" Build="12952" />
-    <Files Count="36">
+    <Version Major="1" Minor="4" Build="9999"/>
+    <Files Count="37">
       <Item1>
         <Filename Value="client/3.0/firebird/Firebird.pas"/>
         <UnitName Value="Firebird"/>
@@ -193,7 +193,12 @@ Two interface implementations are provided. One is for the new Firebird 3 Client
         <Filename Value="FBClientLib.pas"/>
         <UnitName Value="FBClientLib"/>
       </Item36>
+      <Item37>
+        <Filename Value="client/FBNumeric.pas"/>
+        <UnitName Value="FBNumeric"/>
+      </Item37>
     </Files>
+    <CompatibilityMode Value="True"/>
     <RequiredPkgs Count="1">
       <Item1>
         <PackageName Value="FCL"/>

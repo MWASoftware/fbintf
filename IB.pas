@@ -253,11 +253,16 @@ type
 
   IFBNumeric = interface
     ['{8bdccfe9-d552-446b-bd82-844ca264455d}']
-    procedure getRawValue(var aValue: Int64; var aScale: integer);
+    function getRawValue: Int64;
+    function getScale: integer;
     function clone(aNewScale: integer): IFBNumeric;
     function getAsString: AnsiString;
     function getAsDouble: double;
     function getAsBCD: TBCD;
+    function getAsInt64: Int64; {scaled}
+    function getAsInteger: integer; {scaled - may be truncated}
+    function getAsSmallInt: SmallInt; {scaled - may be truncated}
+    function getAsCurrency: Currency;
   end;
 
   {The IParameterBlock interface provides the template for all parameter
@@ -579,6 +584,7 @@ type
     function GetAsBlob(BPB: IBPB): IBlob; overload;
     function GetAsArray: IArray;
     function GetAsBCD: tBCD;
+    function GetAsNumeric: IFBNumeric;
     property AsDate: TDateTime read GetAsDateTime;
     property AsBoolean:boolean read GetAsBoolean;
     property AsTime: TDateTime read GetAsDateTime;
@@ -597,6 +603,7 @@ type
     property AsBlob: IBlob read GetAsBlob;
     property AsArray: IArray read GetAsArray;
     property AsBCD: tBCD read GetAsBCD;
+    property AsNumeric: IFBNumeric read GetAsNumeric;
     property IsNull: Boolean read GetIsNull;
     property Value: Variant read GetAsVariant;
   end;
@@ -702,6 +709,7 @@ type
     function GetAsBlob: IBlob;
     function GetAsArray: IArray;
     function GetAsBCD: tBCD;
+    function GetAsNumeric: IFBNumeric;
     procedure Clear;
     function GetModified: boolean;
     procedure SetAsBoolean(AValue: boolean);
@@ -730,6 +738,7 @@ type
     procedure SetAsQuad(aValue: TISC_QUAD);
     procedure SetCharSetID(aValue: cardinal);
     procedure SetAsBcd(aValue: tBCD);
+    procedure SetAsNumeric(Value: IFBNumeric);
     property AsDate: TDateTime read GetAsDateTime write SetAsDate;
     property AsBoolean:boolean read GetAsBoolean write SetAsBoolean;
     property AsTime: TDateTime read GetAsDateTime write SetAsTime;
@@ -747,6 +756,7 @@ type
     property AsBlob: IBlob read GetAsBlob write SetAsBlob;
     property AsArray: IArray read GetAsArray write SetAsArray;
     property AsBCD: tBCD read GetAsBCD write SetAsBCD;
+    property AsNumeric: IFBNumeric read GetAsNumeric write SetAsNumeric;
     property AsQuad: TISC_QUAD read GetAsQuad write SetAsQuad;
     property Value: Variant read GetAsVariant write SetAsVariant;
     property IsNull: Boolean read GetIsNull write SetIsNull;

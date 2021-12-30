@@ -169,7 +169,9 @@ type
       ibxeNoScrollableCursors,
       ibxeUnableTosetaTextType,
       ibxeCantDropAcquiredDB,
-      ibxeTransactionNotOwned
+      ibxeTransactionNotOwned,
+      ibxeIntegerOverflow,
+      ibxIntegerUnderflow
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -290,6 +292,8 @@ resourcestring
   SUnableTosetaTextType = 'Param[%d] "%s": Unable to change from a %s to a string type';
   SCantDropAcquiredDB = 'Drop database not allowed by acquired attachment';
   STransactionNotOwned = 'Cannot Commit or Rollback a linked transaction';
+  SIntegerOverflow = 'Integer overflow when scaling numeric';
+  SIntegerUnderflow = 'Integer underflow when scaling numeric';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -386,7 +390,9 @@ const
     SNoScrollableCursors,
     SUnableTosetaTextType,
     SCantDropAcquiredDB,
-    STransactionNotOwned
+    STransactionNotOwned,
+    SIntegerOverflow,
+    SIntegerUnderflow
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;

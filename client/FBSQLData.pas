@@ -129,12 +129,6 @@ type
      procedure InternalGetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint;
        var aTimezone: AnsiString; var aTimeZoneID: TFBTimeZoneID);
   protected
-     function AdjustScale(Value: Int64; aScale: Integer): Double;
-     function AdjustScaleToInt64(Value: Int64; aScale: Integer): Int64;
-     function AdjustScaleToStr(Value: Int64; aScale: Integer): AnsiString;
-     function AdjustScaleToCurrency(Value: Int64; aScale: Integer): Currency;
-     function AdjustScaleFromCurrency(Value: Currency; aScale: Integer): Int64;
-     function AdjustScaleFromDouble(Value: Double; aScale: Integer): Int64;
      procedure CheckActive; virtual;
      procedure CheckTZSupport;
      function GetAttachment: IAttachment; virtual; abstract;
@@ -180,6 +174,7 @@ type
      function GetAsQuad: TISC_QUAD;
      function GetAsShort: short;
      function GetAsString: AnsiString; virtual;
+     function GetAsNumeric: IFBNumeric;
      function GetIsNull: Boolean; virtual;
      function GetIsNullable: boolean; virtual;
      function GetAsVariant: Variant;
@@ -207,7 +202,7 @@ type
      procedure SetAsShort(Value: short); virtual;
      procedure SetAsString(Value: AnsiString); virtual;
      procedure SetAsVariant(Value: Variant);
-     procedure SetAsNumeric(Value: Int64; aScale: integer); virtual;
+     procedure SetAsNumeric(Value: IFBNumeric); virtual;
      procedure SetAsBcd(aValue: tBCD); virtual;
      procedure SetIsNull(Value: Boolean); virtual;
      procedure SetIsNullable(Value: Boolean); virtual;
@@ -490,6 +485,7 @@ type
     procedure SetAsQuad(AValue: TISC_QUAD);
     procedure SetCharSetID(aValue: cardinal);
     procedure SetAsBcd(aValue: tBCD);
+    procedure SetAsNumeric(aValue: IFBNumeric);
 
     property AsBlob: IBlob read GetAsBlob write SetAsBlob;
     property IsNullable: Boolean read GetIsNullable write SetIsNullable;
@@ -565,7 +561,7 @@ type
 
 implementation
 
-uses FBMessages, variants, IBUtils, FBTransaction, DateUtils;
+uses FBMessages, variants, IBUtils, FBTransaction, FBNumeric, DateUtils;
 
 { TSQLParamMetaData }
 
@@ -904,127 +900,6 @@ end;
 
 {TSQLDataItem}
 
-function TSQLDataItem.AdjustScale(Value: Int64; aScale: Integer): Double;
-var
-  Scaling : Int64;
-  i: Integer;
-  Val: Double;
-begin
-  Scaling := 1; Val := Value;
-  if aScale > 0 then
-  begin
-    for i := 1 to aScale do
-      Scaling := Scaling * 10;
-    result := Val * Scaling;
-  end
-  else
-    if aScale < 0 then
-    begin
-      for i := -1 downto aScale do
-        Scaling := Scaling * 10;
-      result := Val / Scaling;
-    end
-    else
-      result := Val;
-end;
-
-function TSQLDataItem.AdjustScaleToInt64(Value: Int64; aScale: Integer): Int64;
-var
-  Scaling : Int64;
-  i: Integer;
-  Val: Int64;
-begin
-  Scaling := 1; Val := Value;
-  if aScale > 0 then begin
-    for i := 1 to aScale do Scaling := Scaling * 10;
-    result := Val * Scaling;
-  end else if aScale < 0 then begin
-    for i := -1 downto aScale do Scaling := Scaling * 10;
-    result := Val div Scaling;
-  end else
-    result := Val;
-end;
-
-function TSQLDataItem.AdjustScaleToStr(Value: Int64; aScale: Integer
-  ): AnsiString;
-var Scaling : AnsiString;
-    i: Integer;
-begin
-  Result := IntToStr(Value);
-  Scaling := '';
-  if aScale > 0 then
-  begin
-    for i := 1 to aScale do
-      Result := Result + '0';
-  end
-  else
-  if aScale < 0 then
-  {$IF declared(DefaultFormatSettings)}
-  with DefaultFormatSettings do
-  {$ELSE}
-  {$IF declared(FormatSettings)}
-  with FormatSettings do
-  {$IFEND}
-  {$IFEND}
-  begin
-    if Length(Result) > -aScale then
-      system.Insert(DecimalSeparator,Result,Length(Result) + aScale)
-    else
-    begin
-      Scaling := '0' + DecimalSeparator;
-      for i := -1 downto aScale + Length(Result) do
-        Scaling := Scaling + '0';
-      Result := Scaling + Result;
-    end;
-  end;
-end;
-
-function TSQLDataItem.AdjustScaleToCurrency(Value: Int64; aScale: Integer
-  ): Currency;
-var
-  Scaling : Int64;
-  i : Integer;
-  FractionText, PadText, CurrText: AnsiString;
-begin
-  Result := 0;
-  Scaling := 1;
-  PadText := '';
-  if aScale > 0 then
-  begin
-    for i := 1 to aScale do
-      Scaling := Scaling * 10;
-    result := Value * Scaling;
-  end
-  else
-    if aScale < 0 then
-    begin
-      for i := -1 downto aScale do
-        Scaling := Scaling * 10;
-      FractionText := IntToStr(abs(Value mod Scaling));
-      for i := Length(FractionText) to -aScale -1 do
-        PadText := '0' + PadText;
-      {$IF declared(DefaultFormatSettings)}
-      with DefaultFormatSettings do
-      {$ELSE}
-      {$IF declared(FormatSettings)}
-      with FormatSettings do
-      {$IFEND}
-      {$IFEND}
-      if Value < 0 then
-        CurrText := '-' + IntToStr(Abs(Value div Scaling)) + DecimalSeparator + PadText + FractionText
-      else
-        CurrText := IntToStr(Abs(Value div Scaling)) + DecimalSeparator + PadText + FractionText;
-      try
-        result := StrToCurr(CurrText);
-      except
-        on E: Exception do
-          IBError(ibxeInvalidDataConversion, [nil]);
-      end;
-    end
-    else
-      result := Value;
-end;
-
 function TSQLDataItem.GetDateFormatStr(IncludeTime: boolean): AnsiString;
 begin
   {$IF declared(DefaultFormatSettings)}
@@ -1120,57 +995,6 @@ begin
       else
         IBError(ibxeInvalidDataConversion, [nil]);
     end;
-end;
-
-function TSQLDataItem.AdjustScaleFromCurrency(Value: Currency; aScale: Integer
-  ): Int64;
-var
-  Scaling : Int64;
-  i : Integer;
-begin
-  Result := 0;
-  Scaling := 1;
-  if aScale < 0 then
-  begin
-    for i := -1 downto aScale do
-      Scaling := Scaling * 10;
-    result := trunc(Value * Scaling);
-  end
-  else
-  if aScale > 0 then
-  begin
-    for i := 1 to aScale do
-       Scaling := Scaling * 10;
-    result := trunc(Value / Scaling);
-  end
-  else
-    result := trunc(Value);
-end;
-
-function TSQLDataItem.AdjustScaleFromDouble(Value: Double; aScale: Integer
-  ): Int64;
-var
-  Scaling : Int64;
-  i : Integer;
-begin
-  Result := 0;
-  Scaling := 1;
-  if aScale < 0 then
-  begin
-    for i := -1 downto aScale do
-      Scaling := Scaling * 10;
-    result := trunc(Value * Scaling);
-  end
-  else
-  if aScale > 0 then
-  begin
-    for i := 1 to aScale do
-       Scaling := Scaling * 10;
-    result := trunc(Value / Scaling);
-  end
-  else
-    result := trunc(Value);
-//  writeln('Adjusted ',Value,' to ',Result);
 end;
 
 procedure TSQLDataItem.CheckActive;
@@ -1314,14 +1138,14 @@ begin
           end;
         end;
         SQL_SHORT:
-          result := AdjustScaleToCurrency(Int64(PShort(SQLData)^),
-                                      Scale);
+          result := NumericFromRawValues(Int64(PShort(SQLData)^),
+                                      Scale).getAsCurrency;
         SQL_LONG:
-          result := AdjustScaleToCurrency(Int64(PLong(SQLData)^),
-                                      Scale);
+          result := NumericFromRawValues(Int64(PLong(SQLData)^),
+                                      Scale).getAsCurrency;
         SQL_INT64:
-          result := AdjustScaleToCurrency(PInt64(SQLData)^,
-                                      Scale);
+          result := NumericFromRawValues(PInt64(SQLData)^,
+                                      Scale).getAsCurrency;
         SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT:
           result := Round(AsDouble);
 
@@ -1352,14 +1176,14 @@ begin
         end;
       end;
       SQL_SHORT:
-        result := AdjustScaleToInt64(Int64(PShort(SQLData)^),
-                                    Scale);
+        result := NumericFromRawValues(Int64(PShort(SQLData)^),
+                                    Scale).getAsInt64;
       SQL_LONG:
-        result := AdjustScaleToInt64(Int64(PLong(SQLData)^),
-                                    Scale);
+        result := NumericFromRawValues(Int64(PLong(SQLData)^),
+                                    Scale).getAsInt64;
       SQL_INT64:
-        result := AdjustScaleToInt64(PInt64(SQLData)^,
-                                    Scale);
+        result := NumericFromRawValues(PInt64(SQLData)^,
+                                    Scale).getAsInt64;
       SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT:
         result := Round(AsDouble);
       else
@@ -1488,13 +1312,13 @@ begin
         end;
       end;
       SQL_SHORT:
-        result := AdjustScale(Int64(PShort(SQLData)^),
-                              Scale);
+        result := NumericFromRawValues(Int64(PShort(SQLData)^),
+                              Scale).getAsDouble;
       SQL_LONG:
-        result := AdjustScale(Int64(PLong(SQLData)^),
-                              Scale);
+        result := NumericFromRawValues(Int64(PLong(SQLData)^),
+                              Scale).getAsDouble;
       SQL_INT64:
-        result := AdjustScale(PInt64(SQLData)^, Scale);
+        result := NumericFromRawValues(PInt64(SQLData)^, Scale).getAsDouble;
       SQL_FLOAT:
         result := PFloat(SQLData)^;
       SQL_DOUBLE, SQL_D_FLOAT:
@@ -1540,13 +1364,14 @@ begin
         end;
       end;
       SQL_SHORT:
-        result := Round(AdjustScale(Int64(PShort(SQLData)^),
-                                    Scale));
+        result := NumericFromRawValues(Int64(PShort(SQLData)^),
+                                    Scale).getAsInteger;
       SQL_LONG:
-        result := Round(AdjustScale(Int64(PLong(SQLData)^),
-                                    Scale));
+        result := NumericFromRawValues(Int64(PLong(SQLData)^),
+                                    Scale).getAsInteger;
       SQL_INT64:
-        result := Round(AdjustScale(PInt64(SQLData)^, Scale));
+        result := NumericFromRawValues(PInt64(SQLData)^, Scale).getAsInteger;
+
       SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT:
         result := Round(AsDouble);
       SQL_DEC_FIXED,
@@ -1765,6 +1590,36 @@ begin
       else
         IBError(ibxeInvalidDataConversion, [GetSQLTypeName]);
     end;
+end;
+
+function TSQLDataItem.GetAsNumeric: IFBNumeric;
+var aValue: Int64;
+begin
+  case SQLType of
+   SQL_TEXT, SQL_VARYING:
+     Result := NewNumeric(GetAsString);
+
+   SQL_SHORT:
+     Result := NumericFromRawValues(PShort(SQLData)^, Scale);
+
+   SQL_LONG:
+     Result := NumericFromRawValues(PLong(SQLData)^, Scale);
+
+   SQL_INT64:
+     Result := NumericFromRawValues(PInt64(SQLData)^, Scale);
+
+   SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT:
+     Result := NewNumeric(GetAsDouble);
+
+   SQL_DEC16,
+   SQL_DEC34,
+   SQL_DEC_FIXED,
+   SQL_INT128:
+     Result := NewNumeric(GetAsBCD);
+
+   else
+     IBError(ibxeInvalidDataConversion, [nil]);
+  end;
 end;
 
 function TSQLDataItem.GetIsNull: Boolean;
@@ -2188,7 +2043,7 @@ begin
   end;
 end;
 
-procedure TSQLDataItem.SetAsNumeric(Value: Int64; aScale: integer);
+procedure TSQLDataItem.SetAsNumeric(Value: IFBNumeric);
 begin
   CheckActive;
   Changing;
@@ -2196,9 +2051,9 @@ begin
     IsNull := False;
 
   SQLType := SQL_INT64;
-  Scale := aScale;
   DataLength := SizeOf(Int64);
-  PInt64(SQLData)^ := Value;
+  PInt64(SQLData)^ := Value.getRawValue;
+  Scale := Value.getScale;
   Changed;
 end;
 
@@ -2527,7 +2382,7 @@ begin
   SQL_LONG,
   SQL_INT64:
     if TryStrToNumeric(Value,Int64Value,aScale) then
-      SetAsNumeric(Int64Value,aScale)
+      SetAsNumeric(NumericFromRawValues(Int64Value,aScale))
     else
       DoSetString;
 
@@ -2544,7 +2399,7 @@ begin
   SQL_DOUBLE,
   SQL_FLOAT:
     if TryStrToNumeric(Value,Int64Value,aScale) then
-      SetAsDouble(NumericToDouble(Int64Value,aScale))
+      SetAsDouble(NumericToDouble(Int64Value,AScale))
     else
       DoSetString;
 
@@ -3167,6 +3022,29 @@ begin
         FIBXSQLVAR := Column[i];
         try
           inherited SetAsBcd(AValue);
+        finally
+          FIBXSQLVAR := OldSQLVar;
+        end;
+      end;
+  end;
+end;
+
+procedure TSQLParam.SetAsNumeric(aValue: IFBNumeric);
+var i: integer;
+    OldSQLVar: TSQLVarData;
+begin
+  if FIBXSQLVAR.UniqueName then
+    inherited SetAsNumeric(AValue)
+  else
+  with FIBXSQLVAR.Parent do
+  begin
+    for i := 0 to Count - 1 do
+      if Column[i].Name = Name then
+      begin
+        OldSQLVar := FIBXSQLVAR;
+        FIBXSQLVAR := Column[i];
+        try
+          inherited SetAsNumeric(AValue);
         finally
           FIBXSQLVAR := OldSQLVar;
         end;
