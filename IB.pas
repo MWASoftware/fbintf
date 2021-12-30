@@ -248,6 +248,18 @@ type
   ITransaction = interface;
   IStatement = interface;
 
+  {The IFBNumeric interface provides a managed type for Fixed Point integers
+   used to hold Firebird Numeric(m,n) types}
+
+  IFBNumeric = interface
+    ['{8bdccfe9-d552-446b-bd82-844ca264455d}']
+    procedure getRawValue(var aValue: Int64; var aScale: integer);
+    function clone(aNewScale: integer): IFBNumeric;
+    function getAsString: AnsiString;
+    function getAsDouble: double;
+    function getAsBCD: TBCD;
+  end;
+
   {The IParameterBlock interface provides the template for all parameter
    block interfaces}
 
@@ -1205,8 +1217,9 @@ type
     function HasDecFloatSupport: boolean;
     function HasBatchMode: boolean;
     function HasScollableCursors: boolean;
-    function HasTable(aTableName: AnsiString): boolean; {case sensitive}
+    function HasTable(aTableName: AnsiString): boolean;  {case sensitive}
     function HasFunction(aFunctionName: AnsiString): boolean; {case sensitive}
+    function HasProcedure(aProcName: AnsiString): boolean; {case sensitive}
 
     {Character Sets}
     function GetCharSetID: integer; {connection character set}
