@@ -1776,7 +1776,6 @@ begin
   if GetSQLDialect < 3 then
     AsDouble := Value
   else
-  if CanChangeMetaData then
   begin
     Changing;
     if IsNullable then
@@ -1786,9 +1785,7 @@ begin
     DataLength := SizeOf(Int64);
     PCurrency(SQLData)^ := Value;
     Changed;
-  end
-  else
-    SetAsNumeric(NewNumeric(Value));
+  end;
 end;
 
 procedure TSQLDataItem.SetAsInt64(Value: Int64);
@@ -1798,16 +1795,11 @@ begin
   if IsNullable then
     IsNull := False;
 
-  if CanChangeMetaData then
-  begin
-    SQLType := SQL_INT64;
-    Scale := 0;
-    DataLength := SizeOf(Int64);
-    PInt64(SQLData)^ := Value;
-    Changed;
-  end
-  else
-    SetAsNumeric(NewNumeric(Value));
+  SQLType := SQL_INT64;
+  Scale := 0;
+  DataLength := SizeOf(Int64);
+  PInt64(SQLData)^ := Value;
+  Changed;
 end;
 
 procedure TSQLDataItem.SetAsDate(Value: TDateTime);
@@ -1973,17 +1965,12 @@ begin
   if IsNullable then
     IsNull := False;
 
-  if CanChangeMetaData then
-  begin
-    Changing;
-    SQLType := SQL_LONG;
-    DataLength := SizeOf(Long);
-    Scale := 0;
-    PLong(SQLData)^ := Value;
-    Changed;
-  end
-  else
-    SetAsNumeric(NewNumeric(Value));
+  Changing;
+  SQLType := SQL_LONG;
+  DataLength := SizeOf(Long);
+  Scale := 0;
+  PLong(SQLData)^ := Value;
+  Changed;
 end;
 
 procedure TSQLDataItem.SetAsPointer(Value: Pointer);
@@ -2022,16 +2009,11 @@ begin
   if IsNullable then
     IsNull := False;
 
-  if CanChangeMetaData then
-  begin
-    SQLType := SQL_SHORT;
-    DataLength := SizeOf(Short);
-    Scale := 0;
-    PShort(SQLData)^ := Value;
-    Changed;
-  end
-  else
-    SetAsNumeric(NewNumeric(Value));
+  SQLType := SQL_SHORT;
+  DataLength := SizeOf(Short);
+  Scale := 0;
+  PShort(SQLData)^ := Value;
+  Changed;
 end;
 
 procedure TSQLDataItem.SetAsString(Value: AnsiString);
@@ -2082,9 +2064,13 @@ begin
   if IsNullable then
     IsNull := False;
 
-  SetSQLType(getColMetadata.GetSQLType);
-  SetScale(getColMetadata.getScale);
-  SetDataLength(getColMetadata.GetSize);
+  if CanChangeMetadata then
+  begin
+    {Restore original values}
+    SQLType := getColMetadata.GetSQLType;
+    Scale := getColMetadata.getScale;
+    SetDataLength(getColMetadata.GetSize);
+  end;
 
   with FFirebirdClientAPI do
   case GetSQLType of
@@ -2418,7 +2404,7 @@ begin
   if IsNullable then
     IsNull := False;
   with FFirebirdClientAPI do
-  case getColMetaData.SQLTYPE of
+  case SQLTYPE of
   SQL_BOOLEAN:
     if AnsiCompareText(Value,STrue) = 0 then
       AsBoolean := true
@@ -2520,18 +2506,28 @@ end;
 procedure TSQLParam.SetScale(aValue: integer);
 begin
   CheckActive;
+  if aValue = FIBXSQLVAR.Scale then
+    Exit;
+  if not CanChangeMetaData  then
+    IBError(ibxeScaleCannotBeChanged,[]);
   FIBXSQLVAR.Scale := aValue;
 end;
 
 procedure TSQLParam.SetDataLength(len: cardinal);
 begin
   CheckActive;
+  if len = FIBXSQLVAR.DataLength then
+    Exit;
   FIBXSQLVAR.DataLength := len;
 end;
 
 procedure TSQLParam.SetSQLType(aValue: cardinal);
 begin
   CheckActive;
+  if aValue = FIBXSQLVAR.SQLType then
+    Exit;
+  if not CanChangeMetaData then
+    IBError(ibxeSQLTypeUnchangeable,[GetSQLTypeName(FIBXSQLVAR.SQLType),GetSQLTypeName(aValue)]);
   FIBXSQLVAR.SQLType := aValue;
 end;
 

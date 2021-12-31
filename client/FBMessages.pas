@@ -171,7 +171,8 @@ type
       ibxeCantDropAcquiredDB,
       ibxeTransactionNotOwned,
       ibxeIntegerOverflow,
-      ibxIntegerUnderflow
+      ibxIntegerUnderflow,
+      ibxeScaleCannotBeChanged
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -294,6 +295,7 @@ resourcestring
   STransactionNotOwned = 'Cannot Commit or Rollback a linked transaction';
   SIntegerOverflow = 'Integer overflow when scaling numeric';
   SIntegerUnderflow = 'Integer underflow when scaling numeric';
+  SScaleCannotBeChanged = 'Unable to change numeric field scale';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -392,7 +394,8 @@ const
     SCantDropAcquiredDB,
     STransactionNotOwned,
     SIntegerOverflow,
-    SIntegerUnderflow
+    SIntegerUnderflow,
+    SScaleCannotBeChanged
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;

@@ -327,7 +327,7 @@ end;
 
 function TFBNumeric.clone(aNewScale: integer): IFBNumeric;
 begin
-  Result := TFBNumeric.Create(Trunc(FValue * IntPower(10,FScale-aNewScale)),aNewScale);
+  Result := TFBNumeric.Create(Round(FValue * IntPower(10,FScale-aNewScale)),aNewScale);
 end;
 
 function TFBNumeric.getAsString: AnsiString;
@@ -367,32 +367,19 @@ begin
 end;
 
 function TFBNumeric.getAsDouble: double;
-var
-  Scaling : Int64;
-  i: Integer;
-  Val: Double;
 begin
-  Scaling := 1;
-  Val := FValue;
-  if FScale > 0 then
-  begin
-    for i := 1 to FScale do
-      Scaling := Scaling * 10;
-    result := Val * Scaling;
-  end
-  else
-    if FScale < 0 then
-    begin
-      for i := -1 downto FScale do
-        Scaling := Scaling * 10;
-      result := Val / Scaling;
-    end
-    else
-      result := Val;
+  Result := NumericToDouble(FValue,FScale);
 end;
 
 function TFBNumeric.getAsCurrency: Currency;
-var
+begin
+  if FScale <> -4 then
+    Result := Currency(clone(-4).GetRawValue)
+  else
+    Result := Currency(FValue);
+end;
+
+(*var
   Scaling : Int64;
   i : Integer;
   FractionText, PadText, CurrText: AnsiString;
@@ -434,7 +421,7 @@ begin
     end
     else
       result := FValue;
-end;
+end; *)
 
 function TFBNumeric.getAsBCD: TBCD;
 begin
