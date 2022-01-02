@@ -1814,6 +1814,9 @@ begin
   if GetSQLDialect < 3 then
     AsDouble := Value
   else
+  if not CanChangeMetaData and (SQLType <> SQL_INT64) and (Scale <> -4) then
+    SetAsNumeric(NewNumeric(Value))
+  else
   begin
     Changing;
     if IsNullable then
@@ -1829,15 +1832,20 @@ end;
 procedure TSQLDataItem.SetAsInt64(Value: Int64);
 begin
   CheckActive;
-  Changing;
-  if IsNullable then
-    IsNull := False;
+  if not CanChangeMetaData and (SQLType <> SQL_INT64) and (Scale <> 0) then
+    SetAsNumeric(NewNumeric(Value))
+  else
+  begin
+    Changing;
+    if IsNullable then
+      IsNull := False;
 
-  SQLType := SQL_INT64;
-  Scale := 0;
-  DataLength := SizeOf(Int64);
-  PInt64(SQLData)^ := Value;
-  Changed;
+    SQLType := SQL_INT64;
+    Scale := 0;
+    DataLength := SizeOf(Int64);
+    PInt64(SQLData)^ := Value;
+    Changed;
+  end;
 end;
 
 procedure TSQLDataItem.SetAsDate(Value: TDateTime);
@@ -2000,15 +2008,20 @@ end;
 procedure TSQLDataItem.SetAsLong(Value: Long);
 begin
   CheckActive;
-  if IsNullable then
-    IsNull := False;
+  if not CanChangeMetaData and (SQLType <> SQL_LONG) and (Scale <> 0) then
+    SetAsNumeric(NewNumeric(Value))
+  else
+  begin
+    if IsNullable then
+      IsNull := False;
 
-  Changing;
-  SQLType := SQL_LONG;
-  DataLength := SizeOf(Long);
-  Scale := 0;
-  PLong(SQLData)^ := Value;
-  Changed;
+    Changing;
+    SQLType := SQL_LONG;
+    DataLength := SizeOf(Long);
+    Scale := 0;
+    PLong(SQLData)^ := Value;
+    Changed;
+  end;
 end;
 
 procedure TSQLDataItem.SetAsPointer(Value: Pointer);
@@ -2043,15 +2056,20 @@ end;
 procedure TSQLDataItem.SetAsShort(Value: short);
 begin
   CheckActive;
-  Changing;
-  if IsNullable then
-    IsNull := False;
+  if not CanChangeMetaData and (SQLType <> SQL_SHORT) and (Scale <> 0) then
+    SetAsNumeric(NewNumeric(Value))
+  else
+  begin
+    Changing;
+    if IsNullable then
+      IsNull := False;
 
-  SQLType := SQL_SHORT;
-  DataLength := SizeOf(Short);
-  Scale := 0;
-  PShort(SQLData)^ := Value;
-  Changed;
+    SQLType := SQL_SHORT;
+    DataLength := SizeOf(Short);
+    Scale := 0;
+    PShort(SQLData)^ := Value;
+    Changed;
+  end;
 end;
 
 procedure TSQLDataItem.SetAsString(Value: AnsiString);
@@ -2074,7 +2092,7 @@ begin
       varWord, varShortInt, varInt64:
         SetAsNumeric(NewNumeric(Int64(Value)));
     varSingle, varDouble:
-      SetAsNumeric(NewNumeric(Double(Value)));
+      AsDouble := Value;
     varCurrency:
       SetAsNumeric(NewNumeric(Currency(Value)));
     varBoolean:
