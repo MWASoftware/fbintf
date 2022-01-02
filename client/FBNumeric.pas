@@ -194,8 +194,13 @@ begin
     end
     else
     begin
-      if ds <> 0 then
+      if ds > 0 then
+      begin
+        {remove trailing zeroes}
+        while (ds < length(S)) and (S[length(S)] = '0') do {no need to check length as ds > 0}
+          system.delete(S,Length(S),1);
         scale := ds - Length(S) - 1;
+      end;
       Result := TryStrToInt64(S,Value);
     end;
   end;

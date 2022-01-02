@@ -116,8 +116,6 @@ type
      function GetRelationName: AnsiString;  override;
      function GetScale: integer; override;
      function GetCharSetID: cardinal; override;
-     function GetCodePage: TSystemCodePage; override;
-     function GetCharSetWidth: integer; override;
      function GetIsNull: Boolean;   override;
      function GetIsNullable: boolean; override;
      function GetSQLData: PByte;  override;
@@ -127,9 +125,9 @@ type
      procedure SetIsNull(Value: Boolean); override;
      procedure SetIsNullable(Value: Boolean);  override;
      procedure SetSQLData(AValue: PByte; len: cardinal); override;
-     procedure SetScale(aValue: integer); override;
-     procedure SetDataLength(len: cardinal); override;
-     procedure SetSQLType(aValue: cardinal); override;
+     procedure InternalSetScale(aValue: integer); override;
+     procedure InternalSetDataLength(len: cardinal); override;
+     procedure InternalSetSQLType(aValue: cardinal); override;
      procedure SetCharSetID(aValue: cardinal); override;
      procedure SetMetaSize(aValue: cardinal); override;
   public
@@ -601,18 +599,6 @@ begin
   end;
 end;
 
-function TIBXSQLVAR.GetCodePage: TSystemCodePage;
-begin
-  result := CP_NONE;
-  GetAttachment.CharSetID2CodePage(GetCharSetID,result);
-end;
-
-function TIBXSQLVAR.GetCharSetWidth: integer;
-begin
-  result := 1;
-  GetAttachment.CharSetWidth(GetCharSetID,result);
-end;
-
 function TIBXSQLVAR.GetIsNull: Boolean;
 begin
   Result := IsNullable and (FSQLNullIndicator^ = -1);
@@ -700,13 +686,13 @@ begin
   Changed;
 end;
 
-procedure TIBXSQLVAR.SetScale(aValue: integer);
+procedure TIBXSQLVAR.InternalSetScale(aValue: integer);
 begin
   FScale := aValue;
   Changed;
 end;
 
-procedure TIBXSQLVAR.SetDataLength(len: cardinal);
+procedure TIBXSQLVAR.InternalSetDataLength(len: cardinal);
 begin
   if not FOwnsSQLData then
     FSQLData := nil;
@@ -717,10 +703,8 @@ begin
   Changed;
 end;
 
-procedure TIBXSQLVAR.SetSQLType(aValue: cardinal);
+procedure TIBXSQLVAR.InternalSetSQLType(aValue: cardinal);
 begin
-  if (FSQLType <> aValue) and not CanChangeSQLType then
-    IBError(ibxeSQLTypeUnchangeable,[TSQLDataItem.GetSQLTypeName(FSQLType),TSQLDataItem.GetSQLTypeName(aValue)]);
   FSQLType := aValue;
   Changed;
 end;
@@ -945,6 +929,7 @@ end;
 procedure TIBXINPUTSQLDA.BuildMetadata;
 var Builder: Firebird.IMetadataBuilder;
     i: integer;
+    version: NativeInt;
 begin
   if (FCurMetaData = nil) and (Count > 0) then
   with FFirebird30ClientAPI do
@@ -955,10 +940,15 @@ begin
       for i := 0 to Count - 1 do
       with TIBXSQLVar(Column[i]) do
       begin
-        Builder.setField(StatusIntf,i,PAnsiChar(Name));
-        Check4DataBaseError;
-        Builder.setAlias(StatusIntf,i,PAnsiChar(Name));
-        Check4DataBaseError;
+        version := Builder.vtable.version;
+        if version >= 4 then
+        {Firebird 4 or later}
+        begin
+          Builder.setField(StatusIntf,i,PAnsiChar(Name));
+          Check4DataBaseError;
+          Builder.setAlias(StatusIntf,i,PAnsiChar(Name));
+          Check4DataBaseError;
+        end;
         Builder.setType(StatusIntf,i,FSQLType);
         Check4DataBaseError;
         Builder.setSubType(StatusIntf,i,FSQLSubType);

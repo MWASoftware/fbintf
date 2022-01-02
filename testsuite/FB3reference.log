@@ -650,13 +650,13 @@ Running Test 3: ad hoc queries
 Opening inet://localhost/employee
 Database Open
 Employee Count = 42
-Transaction ID = 5499
+Transaction ID = 5588
 Transaction is Read/Write
 Transaction Database Path = inet://localhost/employee
-Transaction ID = 5499
-Oldest Interesting = 5497
-Oldest Action = 5498
-Oldest Snapshot = 5498
+Transaction ID = 5588
+Oldest Interesting = 5586
+Oldest Action = 5587
+Oldest Snapshot = 5587
 Oldest Interesting = 0
 Employee Count = 41
 Employee Count = 42
@@ -691,7 +691,7 @@ FULL_NAME = Johnson, Leslie
 Current memory = 19,694,032
 Delta memory = 4,480
 Max memory = 19,755,888
-Elapsed time= 0.003 sec
+Elapsed time= 0.002 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
@@ -2729,7 +2729,7 @@ MYARRAY = Array: (0: 100) (1: 99) (2: 98) (3: 97) (4: 96) (5: 95) (6: 94) (7: 93
 
 MYARRAY2 = Array: (0: 01/5/2020 12:00:00) (1: 01/5/2020 12:01:00) (2: 01/5/2020 12:02:00) (3: 01/5/2020 12:03:00) (4: 01/5/2020 12:04:00) (5: 01/5/2020 12:05:00) (6: 01/5/2020 12:06:00) (7: 01/5/2020 12:07:00) (8: 01/5/2020 12:08:00) (9: 01/5/2020 12:09:00) (10: 01/5/2020 12:10:00) (11: 01/5/2020 12:11:00) (12: 01/5/2020 12:12:00) (13: 01/5/2020 12:13:00) (14: 01/5/2020 12:14:00) (15: 01/5/2020 12:15:00) (16: 01/5/2020 12:16:00) 
 
-MYARRAY3 = Array: (0: 0) (1: 1.04) (2: 2.09) (3: 3.15) (4: 4.19) (5: 5.25) (6: 6.3) (7: 7.34) (8: 8.39) (9: 9.44) (10: 10.5) (11: 11.55) (12: 12.6) (13: 13.64) (14: 0.42) (15: 42.45) (16: 4269) 
+MYARRAY3 = Array: (0: 0) (1: 1.04) (2: 2.09) (3: 3.15) (4: 4.19) (5: 5.25) (6: 6.3) (7: 7.34) (8: 8.39) (9: 9.44) (10: 10.5) (11: 11.55) (12: 12.6) (13: 13.64) (14: 0.42) (15: 42.46) (16: 4269) 
 
 
 Shrink to 2:10
@@ -2745,7 +2745,7 @@ MYARRAY = Array: (0: 100) (1: 99) (2: 1000) (3: 97) (4: 96) (5: 95) (6: 94) (7: 
 
 MYARRAY2 = Array: (0: 01/5/2020 12:00:00) (1: 01/5/2020 12:01:00) (2: 01/5/2020 12:02:00) (3: 01/5/2020 12:03:00) (4: 01/5/2020 12:04:00) (5: 01/5/2020 12:05:00) (6: 01/5/2020 12:06:00) (7: 01/5/2020 12:07:00) (8: 01/5/2020 12:08:00) (9: 01/5/2020 12:09:00) (10: 01/5/2020 12:10:00) (11: 01/5/2020 12:11:00) (12: 01/5/2020 12:12:00) (13: 01/5/2020 12:13:00) (14: 01/5/2020 12:14:00) (15: 01/5/2020 12:15:00) (16: 01/5/2020 12:16:00) 
 
-MYARRAY3 = Array: (0: 0) (1: 1.04) (2: 2.09) (3: 3.15) (4: 4.19) (5: 5.25) (6: 6.3) (7: 7.34) (8: 8.39) (9: 9.44) (10: 10.5) (11: 11.55) (12: 12.6) (13: 13.64) (14: 0.42) (15: 42.45) (16: 4269) 
+MYARRAY3 = Array: (0: 0) (1: 1.04) (2: 2.09) (3: 3.15) (4: 4.19) (5: 5.25) (6: 6.3) (7: 7.34) (8: 8.39) (9: 9.44) (10: 10.5) (11: 11.55) (12: 12.6) (13: 13.64) (14: 0.42) (15: 42.46) (16: 4269) 
 
 
 
@@ -2958,7 +2958,6 @@ Limbo Transactions
 
 
 Local Backup
-
 
 
 
@@ -3429,6 +3428,25 @@ Parsing of 1.2E1.2 failed
 Parsing of 1,000 failed
 Parsing of 1e1e1 failed
 Parsing of 1.2+3 failed
+Validating Numeric Interface - IFBNumeric
+Value from Currency = 9999.1235
+Raw Value = 99991235 Scale = -4
+Value from Currency(rescaled) = 9999.12
+Raw Value = 999912 Scale = -2
+Value from Double = 9999.12345678
+Raw Value = 999912345678 Scale = -8
+Value from Integer = 9223372036854775807
+Raw Value = 9223372036854775807 Scale = 0
+Value from string = 9223372036854775807
+Raw Value = 9223372036854775807 Scale = 0
+Value from string = 9999.12345678
+Raw Value = 999912345678 Scale = -8
+Value from string = -0.12
+Raw Value = -12 Scale = -3
+Value from BCD = 9999.12345678
+Raw Value = 999912345678 Scale = -8
+Value from Raw Data = 9999123.456780
+Raw Value = 9999123456780 Scale = -6
 SQL Params
 SQLType =SQL_LONG
 sub type = 0
@@ -3489,6 +3507,7 @@ Engine Code: 335544569 Incompatible column/host variable data type
 Dynamic SQL Error
 -SQL error code = -303
 -conversion error from string "10.0.0"
+Test Numeric Type
 ROWID = 1
 ITYPE = 101
 I64TYPE = 9223372036854775807
@@ -3513,6 +3532,12 @@ I64TYPE = 10
 CURRTYPE = .02300000
 DTYPE = .00110000
 FIXEDPOINT = 233.45600000
+ROWID = 7
+ITYPE = 1
+I64TYPE = 1234567
+CURRTYPE = .02300000
+DTYPE = .00110000
+FIXEDPOINT = 1,234.25000000
 
 
 
@@ -3679,16 +3704,16 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 9
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2021/12/20 11:45:55.6790
+IBX$CREATED = 2022/01/02 13:51:28.9780
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 11
 IBX$OLDTRANSACTIONID = 10
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2021/12/20 11:45:56.0640
+IBX$CREATED = 2022/01/02 13:51:29.3510
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)
-Timestamp = 2021/12/20 11:45:55.7040
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 6
 Session ID = 1
 Transaction ID = 9
@@ -3701,49 +3726,49 @@ TPB: Item Count = 3
 Default Completion = TACommit
 
 Journal Entry = jeQuery(Query)
-Timestamp = 2021/12/20 11:45:55.7910
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 6
 Session ID = 1
 Transaction ID = 9
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(1,101,9223372036854775807,10000.1234,9999.12345678,1234567890.12346)
 
 Journal Entry = jeQuery(Query)
-Timestamp = 2021/12/20 11:45:55.8070
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 6
 Session ID = 1
 Transaction ID = 9
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(2,-32457,-9223372036854775808,1000001.12,1.7E308,-1234567890.12346)
 
 Journal Entry = jeTransCommitRet(Commit Retaining)
-Timestamp = 2021/12/20 11:45:55.9460
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 6
 Session ID = 1
 Transaction ID = 10
 Old TransactionID = 9
 
 Journal Entry = jeQuery(Query)
-Timestamp = 2021/12/20 11:45:55.9690
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 6
 Session ID = 1
 Transaction ID = 10
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(3,0,0,0,0,0)
 
 Journal Entry = jeTransRollbackRet(Rollback Retaining)
-Timestamp = 2021/12/20 11:45:56.0600
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 6
 Session ID = 1
 Transaction ID = 11
 Old TransactionID = 10
 
 Journal Entry = jeQuery(Query)
-Timestamp = 2021/12/20 11:45:56.0850
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 6
 Session ID = 1
 Transaction ID = 11
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(4,1,10,0.023,0.0011,233.456)
 
 Journal Entry = jeTransStart(Transaction Start)
-Timestamp = 2021/12/20 11:45:56.1000
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 6
 Session ID = 1
 Transaction ID = 12
@@ -3756,13 +3781,13 @@ TPB: Item Count = 3
 Default Completion = TARollback
 
 Journal Entry = jeTransCommit(Commit)
-Timestamp = 2021/12/20 11:45:56.1510
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 6
 Session ID = 1
 Transaction ID = 11
 
 Journal Entry = jeQuery(Query)
-Timestamp = 2021/12/20 11:45:56.2250
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 6
 Session ID = 1
 Transaction ID = 12
@@ -3804,7 +3829,7 @@ Be all my sins remembered
 ')
 
 Journal Entry = jeQuery(Query)
-Timestamp = 2021/12/20 11:45:56.2470
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 6
 Session ID = 1
 Transaction ID = 12
@@ -3816,7 +3841,7 @@ FFD8FFE000104A46494600010101004800480000FFE11E0545786966000049492A00080000000C00
 )
 
 Journal Entry = jeQuery(Query)
-Timestamp = 2021/12/20 11:45:56.2720
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 6
 Session ID = 1
 Transaction ID = 12
@@ -3842,7 +3867,7 @@ Query = Insert into TestData(RowID,MyArray) Values (7,<array dim = "1" sqltype =
 )
 
 Journal Entry = jeTransRollback(Rollback)
-Timestamp = 2021/12/20 11:45:56.4090
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 6
 Session ID = 1
 Transaction ID = 12

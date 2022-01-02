@@ -138,8 +138,6 @@ type
     function GetRelationName: AnsiString;  override;
     function GetScale: integer; override;
     function GetCharSetID: cardinal; override;
-    function GetCodePage: TSystemCodePage; override;
-    function GetCharSetWidth: integer; override;
     function GetIsNull: Boolean;   override;
     function GetIsNullable: boolean; override;
     function GetSQLData: PByte;  override;
@@ -149,9 +147,9 @@ type
     procedure SetIsNull(Value: Boolean); override;
     procedure SetIsNullable(Value: Boolean);  override;
     procedure SetSQLData(AValue: PByte; len: cardinal); override;
-    procedure SetScale(aValue: integer); override;
-    procedure SetDataLength(len: cardinal); override;
-    procedure SetSQLType(aValue: cardinal); override;
+    procedure InternalSetScale(aValue: integer); override;
+    procedure InternalSetDataLength(len: cardinal); override;
+    procedure InternalSetSQLType(aValue: cardinal); override;
     procedure SetCharSetID(aValue: cardinal); override;
   public
     constructor Create(aParent: TIBXSQLDA; aIndex: integer);
@@ -359,20 +357,6 @@ begin
   end;
 end;
 
-function TIBXSQLVAR.GetCodePage: TSystemCodePage;
-begin
-  result := CP_NONE;
-  with Statement.GetAttachment do
-     CharSetID2CodePage(GetCharSetID,result);
-end;
-
-function TIBXSQLVAR.GetCharSetWidth: integer;
-begin
-  result := 1;
-  with Statement.GetAttachment DO
-    CharSetWidth(GetCharSetID,result);
-end;
-
 function TIBXSQLVAR.GetIsNull: Boolean;
 begin
   result := IsNullable and (FNullIndicator = -1);
@@ -545,13 +529,13 @@ begin
   Changed;
 end;
 
-procedure TIBXSQLVAR.SetScale(aValue: integer);
+procedure TIBXSQLVAR.InternalSetScale(aValue: integer);
 begin
   FXSQLVAR^.sqlscale := aValue;
   Changed;
 end;
 
-procedure TIBXSQLVAR.SetDataLength(len: cardinal);
+procedure TIBXSQLVAR.InternalSetDataLength(len: cardinal);
 begin
   if not FOwnsSQLData then
     FXSQLVAR^.sqldata := nil;
@@ -562,7 +546,7 @@ begin
   Changed;
 end;
 
-procedure TIBXSQLVAR.SetSQLType(aValue: cardinal);
+procedure TIBXSQLVAR.InternalSetSQLType(aValue: cardinal);
 begin
   FXSQLVAR^.sqltype := aValue or (FXSQLVAR^.sqltype and 1);
   Changed;

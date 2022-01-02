@@ -302,20 +302,23 @@ type
     function GetRelationName: AnsiString;  virtual; abstract;
     function GetScale: integer; virtual; abstract;
     function GetCharSetID: cardinal; virtual; abstract;
-    function GetCharSetWidth: integer; virtual; abstract;
-    function GetCodePage: TSystemCodePage; virtual; abstract;
+    function GetCharSetWidth: integer;
+    function GetCodePage: TSystemCodePage;
     function GetIsNull: Boolean;   virtual; abstract;
     function GetIsNullable: boolean; virtual; abstract;
     function GetSQLData: PByte;  virtual; abstract;
     function GetDataLength: cardinal; virtual; abstract; {current field length}
     function GetSize: cardinal; virtual; abstract; {field length as given by metadata}
     function GetDefaultTextSQLType: cardinal; virtual; abstract;
+    procedure InternalSetSQLType(aValue: cardinal); virtual; abstract;
+    procedure InternalSetScale(aValue: integer); virtual; abstract;
+    procedure InternalSetDataLength(len: cardinal); virtual; abstract;
     procedure SetIsNull(Value: Boolean); virtual; abstract;
     procedure SetIsNullable(Value: Boolean);  virtual; abstract;
     procedure SetSQLData(AValue: PByte; len: cardinal); virtual; abstract;
-    procedure SetScale(aValue: integer); virtual; abstract;
-    procedure SetDataLength(len: cardinal); virtual; abstract;
-    procedure SetSQLType(aValue: cardinal); virtual; abstract;
+    procedure SetScale(aValue: integer);
+    procedure SetDataLength(len: cardinal);
+    procedure SetSQLType(aValue: cardinal);
     procedure SetCharSetID(aValue: cardinal); virtual; abstract;
     procedure SetMetaSize(aValue: cardinal); virtual;
   public
@@ -787,6 +790,44 @@ end;
 function TSQLVarData.GetTransaction: ITransaction;
 begin
   Result := Parent.Transaction;
+end;
+
+function TSQLVarData.GetCharSetWidth: integer;
+begin
+  result := 1;
+  GetAttachment.CharSetWidth(GetCharSetID,result);
+end;
+
+function TSQLVarData.GetCodePage: TSystemCodePage;
+begin
+  result := CP_NONE;
+  GetAttachment.CharSetID2CodePage(GetCharSetID,result);
+end;
+
+procedure TSQLVarData.SetScale(aValue: integer);
+begin
+  if aValue = Scale then
+    Exit;
+  if not CanChangeMetaData  then
+    IBError(ibxeScaleCannotBeChanged,[]);
+  InternalSetScale(aValue);
+end;
+
+procedure TSQLVarData.SetDataLength(len: cardinal);
+begin
+  if len = DataLength then
+    Exit;
+  InternalSetDataLength(len);
+end;
+
+procedure TSQLVarData.SetSQLType(aValue: cardinal);
+begin
+  if aValue = SQLType then
+    Exit;
+  if not CanChangeMetaData then
+    IBError(ibxeSQLTypeUnchangeable,[TSQLDataItem.GetSQLTypeName(SQLType),
+                                          TSQLDataItem.GetSQLTypeName(aValue)]);
+  InternalSetSQLType(aValue);
 end;
 
 procedure TSQLVarData.SetMetaSize(aValue: cardinal);
@@ -1623,9 +1664,6 @@ begin
 
    SQL_INT64:
      Result := NumericFromRawValues(PInt64(SQLData)^, Scale);
-
-   SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT:
-     Result := NewNumeric(GetAsDouble);
 
    SQL_DEC16,
    SQL_DEC34,
@@ -2506,28 +2544,18 @@ end;
 procedure TSQLParam.SetScale(aValue: integer);
 begin
   CheckActive;
-  if aValue = FIBXSQLVAR.Scale then
-    Exit;
-  if not CanChangeMetaData  then
-    IBError(ibxeScaleCannotBeChanged,[]);
   FIBXSQLVAR.Scale := aValue;
 end;
 
 procedure TSQLParam.SetDataLength(len: cardinal);
 begin
   CheckActive;
-  if len = FIBXSQLVAR.DataLength then
-    Exit;
   FIBXSQLVAR.DataLength := len;
 end;
 
 procedure TSQLParam.SetSQLType(aValue: cardinal);
 begin
   CheckActive;
-  if aValue = FIBXSQLVAR.SQLType then
-    Exit;
-  if not CanChangeMetaData then
-    IBError(ibxeSQLTypeUnchangeable,[GetSQLTypeName(FIBXSQLVAR.SQLType),GetSQLTypeName(aValue)]);
   FIBXSQLVAR.SQLType := aValue;
 end;
 
