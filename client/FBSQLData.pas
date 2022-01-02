@@ -1814,7 +1814,7 @@ begin
   if GetSQLDialect < 3 then
     AsDouble := Value
   else
-  if not CanChangeMetaData and (SQLType <> SQL_INT64) and (Scale <> -4) then
+  if not CanChangeMetaData and ((SQLType <> SQL_INT64) or (Scale <> -4)) then
     SetAsNumeric(NewNumeric(Value))
   else
   begin
@@ -1832,7 +1832,7 @@ end;
 procedure TSQLDataItem.SetAsInt64(Value: Int64);
 begin
   CheckActive;
-  if not CanChangeMetaData and (SQLType <> SQL_INT64) and (Scale <> 0) then
+  if not CanChangeMetaData and )(SQLType <> SQL_INT64) or (Scale <> 0)) then
     SetAsNumeric(NewNumeric(Value))
   else
   begin
@@ -2008,7 +2008,7 @@ end;
 procedure TSQLDataItem.SetAsLong(Value: Long);
 begin
   CheckActive;
-  if not CanChangeMetaData and (SQLType <> SQL_LONG) and (Scale <> 0) then
+  if not CanChangeMetaData and ((SQLType <> SQL_LONG) or (Scale <> 0)) then
     SetAsNumeric(NewNumeric(Value))
   else
   begin
@@ -2056,7 +2056,7 @@ end;
 procedure TSQLDataItem.SetAsShort(Value: short);
 begin
   CheckActive;
-  if not CanChangeMetaData and (SQLType <> SQL_SHORT) and (Scale <> 0) then
+  if not CanChangeMetaData and ((SQLType <> SQL_SHORT) or (Scale <> 0)) then
     SetAsNumeric(NewNumeric(Value))
   else
   begin
@@ -2272,7 +2272,7 @@ end;
 
 function TColumnMetaData.GetSQLDialect: integer;
 begin
-  Result := FIBXSQLVAR.Statement.GetSQLDialect;
+  Result := FIBXSQLVAR.GetAttachment.GetSQLDialect;
 end;
 
 function TColumnMetaData.getColMetadata: IParamMetaData;
