@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Package Version="5">
+    <Name Value="fbudr"/>
+    <Type Value="RunTimeOnly"/>
+    <AddToProjectUsesSection Value="True"/>
+    <CompilerOptions>
+      <Version Value="11"/>
+      <SearchPaths>
+        <OtherUnitFiles Value="udr"/>
+        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
+    </CompilerOptions>
+    <Files Count="4">
+      <Item1>
+        <Filename Value="udr/FBUDRController.pas"/>
+        <UnitName Value="FBUDRController"/>
+      </Item1>
+      <Item2>
+        <Filename Value="udr/FBUDRIntf.pas"/>
+        <UnitName Value="FBUDRIntf"/>
+      </Item2>
+      <Item3>
+        <Filename Value="udr/FBUDRUtils.pas"/>
+        <UnitName Value="FBUDRUtils"/>
+      </Item3>
+      <Item4>
+        <Filename Value="udr/FBUDRMessage.pas"/>
+        <UnitName Value="FBUDRMessage"/>
+      </Item4>
+    </Files>
+    <CompatibilityMode Value="True"/>
+    <RequiredPkgs Count="2">
+      <Item1>
+        <PackageName Value="fbintf"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="FCL"/>
+      </Item2>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+      <UseFileFilters Value="True"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>
