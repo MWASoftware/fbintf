@@ -7,7 +7,6 @@
       <Unit>
         <Filename Value="testsuite.lpr"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <TopLine Value="31"/>
         <CursorPos X="12" Y="44"/>
         <UsageCount Value="20"/>
@@ -63,10 +62,65 @@
         <IsPartOfProject Value="True"/>
         <UsageCount Value="20"/>
       </Unit>
+      <Unit>
+        <Filename Value="../../IB.pas"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="1507"/>
+        <CursorPos X="6" Y="1520"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="../../fbudr.pas"/>
+        <EditorIndex Value="2"/>
+        <CursorPos X="3" Y="11"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="../source/FBUDRController.pas"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="243"/>
+        <CursorPos X="21" Y="255"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="../../fbudrTestbed.pas"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="4"/>
+        <CursorPos X="3" Y="11"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit>
     </Units>
-    <JumpHistory>
+    <JumpHistory HistoryIndex="6">
       <Position>
         <Filename Value="testsuite.lpr"/>
+      </Position>
+      <Position>
+        <Filename Value="testsuite.lpr"/>
+        <Caret Line="44" Column="12" TopLine="31"/>
+      </Position>
+      <Position>
+        <Filename Value="../../IB.pas"/>
+        <Caret Line="1520" Column="6" TopLine="1507"/>
+      </Position>
+      <Position>
+        <Filename Value="../../fbudr.pas"/>
+        <Caret Line="11" Column="3"/>
+      </Position>
+      <Position>
+        <Filename Value="../source/FBUDRController.pas"/>
+        <Caret Line="685" TopLine="671"/>
+      </Position>
+      <Position>
+        <Filename Value="../source/FBUDRController.pas"/>
+        <Caret Line="116" TopLine="103"/>
+      </Position>
+      <Position>
+        <Filename Value="../source/FBUDRController.pas"/>
+        <Caret Line="255" Column="21" TopLine="243"/>
       </Position>
     </JumpHistory>
     <RunParams>

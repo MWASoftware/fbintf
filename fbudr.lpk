@@ -7,25 +7,25 @@
     <CompilerOptions>
       <Version Value="11"/>
       <SearchPaths>
-        <OtherUnitFiles Value="udr"/>
+        <OtherUnitFiles Value="udr/source"/>
         <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
     </CompilerOptions>
     <Files Count="4">
       <Item1>
-        <Filename Value="udr/FBUDRController.pas"/>
+        <Filename Value="udr/source/FBUDRController.pas"/>
         <UnitName Value="FBUDRController"/>
       </Item1>
       <Item2>
-        <Filename Value="udr/FBUDRIntf.pas"/>
+        <Filename Value="udr/source/FBUDRIntf.pas"/>
         <UnitName Value="FBUDRIntf"/>
       </Item2>
       <Item3>
-        <Filename Value="udr/FBUDRUtils.pas"/>
+        <Filename Value="udr/source/FBUDRUtils.pas"/>
         <UnitName Value="FBUDRUtils"/>
       </Item3>
       <Item4>
-        <Filename Value="udr/FBUDRMessage.pas"/>
+        <Filename Value="udr/source/FBUDRMessage.pas"/>
         <UnitName Value="FBUDRMessage"/>
       </Item4>
     </Files>

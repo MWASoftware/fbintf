@@ -7,13 +7,13 @@
     <CompilerOptions>
       <Version Value="11"/>
       <SearchPaths>
-        <OtherUnitFiles Value="udr"/>
+        <OtherUnitFiles Value="udr/source"/>
         <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
     </CompilerOptions>
     <Files Count="1">
       <Item1>
-        <Filename Value="udr/FBUdrPlugin.pas"/>
+        <Filename Value="udr/source/FBUdrPlugin.pas"/>
         <UnitName Value="FBUdrPlugin"/>
       </Item1>
     </Files>

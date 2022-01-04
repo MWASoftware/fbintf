@@ -113,7 +113,6 @@ type
       ): AnsiString;
   private
     const sLogFormat = '@%s:%s';
-    const sFloatTpl = '#,###.00';
   private
     FTheirUnloadFlag: Firebird.BooleanPtr;
     FLogStream: TStream;
@@ -682,7 +681,6 @@ resourcestring
   STriggerRegister = 'Registering Trigger ';
   SBadLogOptionsStr = 'Malformed LogOptions Config string "%s" at position %d';
   SNoConfigFile = 'Unable to find/load configuration file';
-  SResultSQLType = 'Function Return Type = %s';
   SReadingConfigFile = 'Reading Configuration File: %s';
   SFuncNotOverridden = 'UDR Function %s is undefined';
   SNoReturnValue = 'Function %s does not have a return value!';
