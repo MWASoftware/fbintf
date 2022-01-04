@@ -63,10 +63,10 @@
 			</DelphiCompile>
 			<DCCReference Include="rtl.dcp"/>
 			<DCCReference Include="dbrtl.dcp"/>
-			<DCCReference Include="IBUtils.pas"/>
-			<DCCReference Include="IB.pas"/>
-			<DCCReference Include="IBErrorCodes.pas"/>
-			<DCCReference Include="IBExternals.pas"/>
+			<DCCReference Include="client\IBUtils.pas"/>
+			<DCCReference Include="client\IB.pas"/>
+			<DCCReference Include="client\IBErrorCodes.pas"/>
+			<DCCReference Include="client\IBExternals.pas"/>
 			<DCCReference Include="client\FBTransaction.pas"/>
 			<DCCReference Include="client\FBActivityMonitor.pas"/>
 			<DCCReference Include="client\FBArray.pas"/>
@@ -99,7 +99,7 @@
 			<DCCReference Include="client\3.0\firebird\Firebird.pas"/>
 			<DCCReference Include="client\FBMessages.pas"/>
 			<DCCReference Include="client\3.0\FB30TimeZoneServices.pas"/>
-			<DCCReference Include="FBClientLib.pas"/>
+			<DCCReference Include="client\FBClientLib.pas"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>

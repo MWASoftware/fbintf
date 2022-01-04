@@ -29,10 +29,10 @@ requires
   dbrtl;
 
 contains
-  IBUtils in 'IBUtils.pas',
-  IB in 'IB.pas',
-  IBErrorCodes in 'IBErrorCodes.pas',
-  IBExternals in 'IBExternals.pas',
+  IBUtils in 'client\IBUtils.pas',
+  IB in 'client\IB.pas',
+  IBErrorCodes in 'client\IBErrorCodes.pas',
+  IBExternals in 'client\IBExternals.pas',
   FBTransaction in 'client\FBTransaction.pas',
   FBActivityMonitor in 'client\FBActivityMonitor.pas',
   FBArray in 'client\FBArray.pas',
@@ -65,6 +65,6 @@ contains
   Firebird in 'client\3.0\firebird\Firebird.pas',
   FBMessages in 'client\FBMessages.pas',
   FB30TimeZoneServices in 'client\3.0\FB30TimeZoneServices.pas',
-  FBClientLib in 'FBClientLib.pas';
+  FBClientLib in 'client\FBClientLib.pas';
 
 end.
