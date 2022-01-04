@@ -86,7 +86,7 @@ type
     procedure CheckPlugins;
   public
     constructor Create(aFBLibrary: TFBLibrary); overload;
-    constructor Create(aMaster: Firebird.IMaster);
+    constructor Create(aMaster: Firebird.IMaster); overload;
     destructor Destroy; override;
 
     function StatusIntf: Firebird.IStatus;

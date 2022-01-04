@@ -307,7 +307,7 @@ end;
 constructor TFBNumeric.Create(aValue: Currency);
 begin
   inherited Create;
-  FValue := Int64(aValue);
+  Move(aValue,FValue,sizeof(Int64));
   FScale := -4;
 end;
 
@@ -377,11 +377,15 @@ begin
 end;
 
 function TFBNumeric.getAsCurrency: Currency;
+var value: int64;
 begin
   if FScale <> -4 then
-    Result := Currency(clone(-4).GetRawValue)
+  begin
+    value := clone(-4).GetRawValue;
+    Move(value,Result,sizeof(Currency));
+  end
   else
-    Result := Currency(FValue);
+    Move(FValue,Result,sizeof(Currency));
 end;
 
 (*var

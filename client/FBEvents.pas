@@ -230,7 +230,11 @@ begin
   begin
     IBAlloc(FEventBuffer,0,FEventBufferLen);
     if FEventBuffer = nil then Exit;
+    {$if declared(FillByte)}
     FillByte(FEventBuffer^,FEventBufferLen,0);
+    {$else}
+    FillChar(FEventBuffer^,FEventBufferLen,0);
+    {$ifend}
     IBAlloc(FResultBuffer,0,FEventBufferLen);
     if FResultBuffer = nil then
     begin
