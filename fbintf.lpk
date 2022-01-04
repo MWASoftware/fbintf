@@ -53,7 +53,7 @@ Two interface implementations are provided. One is for the new Firebird 3 Client
         <UnitName Value="Firebird"/>
       </Item1>
       <Item2>
-        <Filename Value="IB.pas"/>
+	      <Filename Value="client/IB.pas"/>
         <UnitName Value="IB"/>
       </Item2>
       <Item3>
@@ -85,11 +85,11 @@ Two interface implementations are provided. One is for the new Firebird 3 Client
         <UnitName Value="FB25Blob"/>
       </Item9>
       <Item10>
-        <Filename Value="IBExternals.pas"/>
+        <Filename Value="client/IBExternals.pas"/>
         <UnitName Value="IBExternals"/>
       </Item10>
       <Item11>
-        <Filename Value="IBErrorCodes.pas"/>
+        <Filename Value="client/IBErrorCodes.pas"/>
         <UnitName Value="IBErrorCodes"/>
       </Item11>
       <Item12>
@@ -97,7 +97,7 @@ Two interface implementations are provided. One is for the new Firebird 3 Client
         <UnitName Value="FB25Events"/>
       </Item12>
       <Item13>
-        <Filename Value="IBUtils.pas"/>
+        <Filename Value="client/IBUtils.pas"/>
         <UnitName Value="IBUtils"/>
       </Item13>
       <Item14>
@@ -190,7 +190,7 @@ Two interface implementations are provided. One is for the new Firebird 3 Client
         <UnitName Value="FBServices"/>
       </Item35>
       <Item36>
-        <Filename Value="FBClientLib.pas"/>
+        <Filename Value="client/FBClientLib.pas"/>
         <UnitName Value="FBClientLib"/>
       </Item36>
       <Item37>
