@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
-  <Package Version="5">
+  <Package Version="4">
     <Name Value="fbudr"/>
     <Type Value="RunTimeOnly"/>
     <AddToProjectUsesSection Value="True"/>
@@ -29,7 +29,6 @@
         <UnitName Value="FBUDRMessage"/>
       </Item4>
     </Files>
-    <CompatibilityMode Value="True"/>
     <RequiredPkgs Count="2">
       <Item1>
         <PackageName Value="fbintf"/>

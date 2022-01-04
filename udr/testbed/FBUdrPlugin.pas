@@ -266,9 +266,6 @@ uses FBClientLib, IBUtils, FB30Attachment, FB30Transaction,
 resourcestring
   SNoMasterInterface = 'A Master Interface is required - legacy API not supported';
   SNoAttachment = 'An attachment must be provided before a statement can be prepared';
-  SBadTriggerCharset = 'Bad Charset (%s) returned by Trigger %s';
-  SBadProcedureCharset = 'Bad Charset (%s) returned by Procedure %s';
-  SBadFunctionCharSet = 'Bad Charset (%s) returned by function %s';
 
 type
   { TProcedureResults }
