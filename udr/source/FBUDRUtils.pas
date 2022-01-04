@@ -49,6 +49,9 @@ const
   {$ELSE}
   NewLineTAB = #$0A'  ';
   {$ENDIF}
+  {$if not declared(LineEnding)}
+  LineEnding = #$0D#$0A;
+  {$ifend}
 
 type
 
@@ -217,10 +220,34 @@ type
      property Status: Firebird.IStatus read FStatus;
    end;
 
+{$IFDEF MSWINDOWS}
+function GetTempDir: AnsiString;
+{$ENDIF}
+
+function BooleanToStr(boolValue: boolean; ValTrue, ValFalse: AnsiString): AnsiString;
+
 implementation
 
 uses FBClientLib, FBClientAPI, FB30ClientAPI, FB30Attachment, FB30Transaction,
-     FBUDRMessage,  FBSQLData;
+     FBUDRMessage,  FBSQLData {$IFDEF MSWINDOWS}, Windows{$ENDIF};
+
+{$IFDEF MSWINDOWS}
+function GetTempDir: AnsiString;
+var
+  tempFolder: array[0..MAX_PATH] of Char;
+begin
+  GetTempPath(MAX_PATH, @tempFolder);
+  result := StrPas(tempFolder);
+end;
+{$ENDIF}
+
+function BooleanToStr(boolValue: boolean; ValTrue, ValFalse: AnsiString): AnsiString;
+begin
+  if boolValue then
+    Result := ValTrue
+  else
+    Result := ValFalse;
+end;
 
 { TFBUDRMessageMetadata }
 
@@ -264,7 +291,7 @@ begin
             Format('Relation Name = %s' + NewLineTAB,[getRelation(i)]) +
             Format('Alias Name = %s' + NewLineTAB,[getAlias(i)]) +
             Format('SQLType = %s' + NewLineTAB,[TSQLDataItem.GetSQLTypeName(getType(i))]) +
-            Format('IsNullable = %s' + NewLineTAB,[BoolToStr(isNullable(i),'yes','no')]) +
+            Format('IsNullable = %s' + NewLineTAB,[BoolToStr(isNullable(i){$ifdef FPC},'yes','no'{$endif})]) +
             Format('SubType = %d' + NewLineTAB,[getSubType(i)]) +
             Format('Length = %d' + NewLineTAB,[getLength(i)]) +
             Format('Scale = %d' + NewLineTAB,[getScale(i)]) +

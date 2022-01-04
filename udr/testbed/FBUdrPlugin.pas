@@ -481,7 +481,7 @@ begin
     if (getState and STATE_ERRORS) <> 0 then
     begin
       FManager.getMaster.getUtilInterface.formatStatus(@buffer,sizeof(buffer),FStatus);
-      raise Exception.Create(strpas(@buffer));
+      raise Exception.Create(strpas(PAnsiChar(@buffer)));
     end;
 end;
 
@@ -866,7 +866,7 @@ begin
     if (getState and STATE_ERRORS) <> 0 then
     begin
       getMaster.getUtilInterface.formatStatus(@buffer,sizeof(buffer),FStatus);
-      raise Exception.Create(strpas(@buffer));
+      raise Exception.Create(strpas(PAnsiChar(@buffer)));
     end;
 end;
 

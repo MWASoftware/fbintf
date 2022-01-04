@@ -30,6 +30,7 @@ unit FBUDRController;
 
 {$IFDEF MSWINDOWS}
 {$DEFINE WINDOWS}
+{$WRITEABLECONST ON}
 {$ENDIF}
 
 {$IFDEF FPC}
@@ -94,8 +95,10 @@ const FBUDRControllerOptions: TFBUDRControllerOptions = (
           LogOptions: [];
           ThreadSafeLogging: false);
 
+{$if declared(TStringArray)}
  FalseStrings: TStringArray = ['false','no'];
  TrueStrings: TStringArray = ['true','yes'];
+{$ifend}
 type
 
   { TFBUDRController }
@@ -276,9 +279,9 @@ type
     {IExternalFunction}
     procedure dispose(); override;
     procedure getCharSet(status: Firebird.IStatus; context: Firebird.IExternalContext;
-                                                   name: PAnsiChar; nameSize: Cardinal); override;
+                                                   name: PAnsiChar; nameSize: Cardinal); overload; override;
     procedure execute(status: Firebird.IStatus; context: Firebird.IExternalContext;
-                                                inMsg: Pointer; outMsg: Pointer); override;
+                                                inMsg: Pointer; outMsg: Pointer); overload; override;
   end;
 
   TFBUDRFunctionClass = class of TFBUDRFunction;
@@ -2027,8 +2030,10 @@ begin
   if (FConfigFile = nil) and FileExists(aConfigFileName) then
   begin
     FConfigFile := TIniFile.Create(aConfigFileName);
+    {$if declared(TStringArray)}
     FConfigFile.BoolFalseStrings := FalseStrings;
     FConfigFile.BoolTrueStrings := TrueStrings;
+    {$ifend}
     WriteToLog(Format(SReadingConfigFile,[aConfigFileName]));
     with FBUDRControllerOptions do
     if AllowConfigFileOverrides then
@@ -2036,9 +2041,9 @@ begin
       LogFileNameTemplate := FConfigFile.ReadString('Controller','LogFileNameTemplate',LogFileNameTemplate);
       WriteToLog('LogFileNameTemplate = ' + LogFileNameTemplate);
       ForceWriteJournalEntries := FConfigFile.ReadBool('Controller','ForceWriteJournalEntries',ForceWriteJournalEntries);
-      WriteToLog('ForceWriteJournalEntries = ' + BoolToStr(ForceWriteJournalEntries,'true','false'));
+      WriteToLog('ForceWriteJournalEntries = ' + BooleanToStr(ForceWriteJournalEntries ,'true','false'));
       ThreadSafeLogging := FConfigFile.ReadBool('Controller','ThreadSafeLogging',ThreadSafeLogging);
-      WriteToLog('ThreadSafeLogging = ' + BoolToStr(ThreadSafeLogging,'true','false'));
+      WriteToLog('ThreadSafeLogging = ' + BooleanToStr(ThreadSafeLogging,'true','false'));
       if GetLogOptions( FConfigFile.ReadString('Controller','LogOptions',''),aLogOptions) then
         LogOptions := aLogOptions;
       WriteToLog('LogOptions = ' + LogOptionsToStr(LogOptions));
@@ -2177,9 +2182,9 @@ begin
            'sub type = ' + IntToStr(getSubType) + NewLineTAB +
            'Scale = ' + IntToStr(getScale) + NewLineTAB +
            'Charset = '  + CharSetIDToText(Params.GetAttachment,getCharSetID) +  NewLineTAB +
-           BoolToStr(getIsNullable,'Nullable','Not Nullable') + NewLineTAB +
+           BooleanToStr(getIsNullable,'Nullable','Not Nullable') + NewLineTAB +
            'Size = ' + IntToStr(GetSize) + NewLineTAB +
-           'Value = ' + BoolToStr(IsNull,'NULL',GetStrValue(Params[i] as TColumnMetaData)) + LineEnding;
+           'Value = ' + BooleanToStr(IsNull,'NULL',GetStrValue(Params[i] as TColumnMetaData)) + LineEnding;
   end;
   WriteToLog(Msg);
 end;
@@ -2233,9 +2238,9 @@ begin
                  'sub type = ' + IntToStr(getSubType) + NewLineTAB +
                  'Scale = ' + IntToStr(getScale) + NewLineTAB +
                  'Charset = '  + CharSetIDToText(OutputData.GetAttachment,getCharSetID) +  NewLineTAB +
-                 BoolToStr(getIsNullable,'Nullable','Not Nullable') + NewLineTAB +
+                 BooleanToStr(getIsNullable,'Nullable','Not Nullable') + NewLineTAB +
                  'Size = ' + IntToStr(GetSize) + NewLineTAB +
-                 'Value = ' + BoolToStr(IsNull,'NULL', GetStrValue(OutputData[i] as TColumnMetaData)) + LineEnding;
+                 'Value = ' + BooleanToStr(IsNull,'NULL', GetStrValue(OutputData[i] as TColumnMetaData)) + LineEnding;
   end;
   WriteToLog(Msg);
 end;
