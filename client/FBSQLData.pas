@@ -268,7 +268,7 @@ type
                                             write FCaseSensitiveParams; {Only used when IsInputDataArea true}
     function CanChangeMetaData: boolean; virtual; abstract;
     property Count: integer read GetCount;
-    property Column[index: integer]: TSQLVarData read GetColumn;
+    property Column[index: integer]: TSQLVarData read GetColumn; default;
     property UniqueRelationName: AnsiString read FUniqueRelationName;
     property Statement: IStatement read GetStatement;
     property Attachment: IAttachment read GetAttachment;

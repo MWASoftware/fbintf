@@ -124,7 +124,6 @@ type
      function GetDefaultTextSQLType: cardinal; override;
      procedure SetIsNull(Value: Boolean); override;
      procedure SetIsNullable(Value: Boolean);  override;
-     procedure SetSQLData(AValue: PByte; len: cardinal); override;
      procedure InternalSetScale(aValue: integer); override;
      procedure InternalSetDataLength(len: cardinal); override;
      procedure InternalSetSQLType(aValue: cardinal); override;
@@ -142,6 +141,7 @@ type
     function GetArrayMetaData: IArrayMetaData; override;
     function GetBlobMetaData: IBlobMetaData; override;
     function CreateBlob: IBlob; override;
+    procedure SetSQLData(AValue: PByte; len: cardinal); override;
   end;
 
   { TIBXSQLDA }
