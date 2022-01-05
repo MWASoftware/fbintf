@@ -872,7 +872,7 @@ begin
   if CanChangeMetaData then
     SQLType := GetDefaultTextSQLType
   else
-  if Length(aValue) > DataLength then
+  if Length(aValue) > GetSize then
     IBError(ibxeStringOverflow,[Length(aValue),DataLength]);
   Scale := 0;
   if  (SQLType <> SQL_VARYING) and (SQLType <> SQL_TEXT) then
