@@ -346,6 +346,7 @@ type
     property Index: integer read FIndex;
     property Name: AnsiString read FName write SetName;
     property CharSetID: cardinal read GetCharSetID write SetCharSetID;
+    property CodePage: TSystemCodePage read GetCodePage;
     property SQLType: cardinal read GetSQLType write SetSQLType;
     property SQLSubtype: integer read GetSubtype;
     property SQLData: PByte read GetSQLData;

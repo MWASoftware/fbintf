@@ -730,6 +730,7 @@ var i: integer;
     SQLNullIndicator: PShort;
     data: PByte;
     strlen: integer;
+    rs: rawbytestring;
 begin
   inherited Create(context,aMetadata,aBuffer);
   for i := 0 to Count - 1 do
@@ -747,10 +748,14 @@ begin
       if SQLType = SQL_VARYING then
       begin
         strlen := (context.GetFirebirdAPI as TFBClientAPI).DecodeInteger(data,2);
-        SetSQLData((data+2),strlen)
+        DataLength := strlen;
+        setLength(rs,strlen);
+        Move((data+2)^,rs[1],strlen);
+        SetCodePage(rs,CodePage,false);
+        SetString(rs);
       end
       else
-        SetSQLData(data,DataLength)
+        Move(data^,SQLData^,DataLength);
     end;
   end;
 end;
