@@ -172,7 +172,8 @@ type
       ibxeTransactionNotOwned,
       ibxeIntegerOverflow,
       ibxIntegerUnderflow,
-      ibxeScaleCannotBeChanged
+      ibxeScaleCannotBeChanged,
+      ibxeStringOverflow
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -296,6 +297,7 @@ resourcestring
   SIntegerOverflow = 'Integer overflow when scaling numeric';
   SIntegerUnderflow = 'Integer underflow when scaling numeric';
   SScaleCannotBeChanged = 'Unable to change numeric field scale';
+  SStringOverflow = 'String overflow. String Length %d exceeds permitted maximum (%d)';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -395,7 +397,8 @@ const
     STransactionNotOwned,
     SIntegerOverflow,
     SIntegerUnderflow,
-    SScaleCannotBeChanged
+    SScaleCannotBeChanged,
+    SStringOverflow
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;

@@ -870,7 +870,10 @@ begin
   if SQLType = SQL_BLOB then
     SetMetaSize(GetAttachment.GetInlineBlobLimit);
   if CanChangeMetaData then
-    SQLType := GetDefaultTextSQLType;
+    SQLType := GetDefaultTextSQLType
+  else
+  if Length(aValue) > DataLength then
+    IBError(ibxeStringOverflow,[Length(aValue),DataLength]);
   Scale := 0;
   if  (SQLType <> SQL_VARYING) and (SQLType <> SQL_TEXT) then
     IBError(ibxeUnableTosetaTextType,[Index,Name,TSQLDataItem.GetSQLTypeName(SQLType)]);
