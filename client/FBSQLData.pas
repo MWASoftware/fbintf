@@ -535,7 +535,7 @@ type
     {ISQLParams}
     function getCount: integer;
     function getSQLParam(index: integer): ISQLParam;
-    function ByName(Idx: AnsiString): ISQLParam ;
+    function ByName(Idx: AnsiString): ISQLParam ; virtual;
     function GetModified: Boolean;
     function GetHasCaseSensitiveParams: Boolean;
     function GetStatement: IStatement;
@@ -560,7 +560,7 @@ type
      constructor Create(aResults: TSQLDataArea);
       {IResults}
      function getCount: integer;
-     function ByName(Idx: AnsiString): ISQLData;
+     function ByName(Idx: AnsiString): ISQLData; virtual;
      function getSQLData(index: integer): ISQLData;
      procedure GetData(index: integer; var IsNull:boolean; var len: short; var data: PByte);
      function GetStatement: IStatement;
@@ -870,13 +870,12 @@ begin
   if SQLType = SQL_BLOB then
     SetMetaSize(GetAttachment.GetInlineBlobLimit);
   if CanChangeMetaData then
-    SQLType := GetDefaultTextSQLType
-  else
-  if Length(aValue) > GetSize then
-    IBError(ibxeStringOverflow,[Length(aValue),DataLength]);
+    SQLType := GetDefaultTextSQLType;
   Scale := 0;
   if  (SQLType <> SQL_VARYING) and (SQLType <> SQL_TEXT) then
     IBError(ibxeUnableTosetaTextType,[Index,Name,TSQLDataItem.GetSQLTypeName(SQLType)]);
+  if not CanChangeMetaData and (Length(aValue) > GetSize) then
+    IBError(ibxeStringOverflow,[Length(aValue),DataLength]);
   SetSQLData(PByte(PAnsiChar(FVarString)),Length(aValue));
 end;
 

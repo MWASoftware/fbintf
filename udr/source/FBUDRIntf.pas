@@ -132,6 +132,7 @@ type
     procedure GetData(index: integer; var IsNull:boolean; var len: short; var data: PByte);
     function GetTransaction: ITransaction;
     function GetAttachment: IAttachment;
+    function ParamExists(Idx: AnsiString): boolean;
     function ByName(Idx: AnsiString): ISQLData;
     property Data[index: integer]: ISQLData read getSQLData; default;
     property Count: integer read getCount;

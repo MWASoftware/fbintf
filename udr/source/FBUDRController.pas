@@ -147,8 +147,21 @@ type
     function ReadConfigBool(Section, Ident: AnsiString; DefaultValue: boolean): boolean;
   end;
 
-   TFBUDRInputParams = class(TResults,IFBUDRInputParams);
-   TFBUDROutputParams = class(TSQLParams,IFBUDROutputData);
+   { TFBUDRInputParams }
+
+   TFBUDRInputParams = class(TResults,IFBUDRInputParams)
+   public
+    function ParamExists(Idx: AnsiString): boolean;
+    function ByName(Idx: AnsiString): ISQLData ; override;
+   end;
+
+   { TFBUDROutputParams }
+
+   TFBUDROutputParams = class(TSQLParams,IFBUDROutputData)
+   public
+     function ParamExists(Idx: AnsiString): boolean;
+     function ByName(Idx: AnsiString): ISQLParam ; override;
+   end;
 
    {TFBUDROutParamsSQLDA subclasses a TIBXINPUTSQLDA. TIBXINPUTSQLDA is defined
     in support of executable statements and is usually used to prepare the
@@ -304,11 +317,12 @@ type
     FFieldNames: TStringList;
     FFunction: TFBUDRFunctionClass;
     FFBContext: IFBUDRExternalContext;
+    procedure SetController(AValue: TFBUDRController);
     procedure UpdateFieldNames(att: IAttachment; aFunctionName: AnsiString);
   public
     constructor Create(aName: AnsiString; aFunction: TFBUDRFunctionClass);
     destructor Destroy; override;
-    property Controller: TFBUDRController read FController write FController;
+    property Controller: TFBUDRController read FController write SetController;
   public
     {IUdrFunctionFactory}
     procedure dispose(); override;
@@ -510,11 +524,12 @@ type
     FFBContext: IFBUDRExternalContext;
     FInArgNames: TStringList;
     FOutArgNames: TStringList;
+    procedure SetController(AValue: TFBUDRController);
     procedure UpdateArgNames(att: IAttachment; aProcName: AnsiString);
   public
     constructor Create(aName: AnsiString; aProcedure: TFBUDRProcedureClass);
     destructor Destroy; override;
-    property Controller: TFBUDRController read FController write FController;
+    property Controller: TFBUDRController read FController write SetController;
   public
     {IUdrProcedureFactory}
     procedure dispose(); override;
@@ -624,11 +639,12 @@ type
     FTrigger: TFBUDRTriggerClass;
     FFieldNames: TStringList;
     FFBContext: IFBUDRExternalContext;
+    procedure SetController(AValue: TFBUDRController);
     procedure UpdateFieldNames(att: IAttachment; aTableName: AnsiString);
   public
     constructor Create(aName: AnsiString; aTrigger: TFBUDRTriggerClass);
     destructor Destroy; override;
-    property Controller: TFBUDRController read FController write FController;
+    property Controller: TFBUDRController read FController write SetController;
   public
     procedure dispose(); override;
     procedure setup(status: Firebird.IStatus; context: Firebird.IExternalContext;
@@ -689,6 +705,7 @@ resourcestring
   SNoReturnValue = 'Function %s does not have a return value!';
   STriggerIsNotImplemented = 'Trigger %s is not implemented';
   STriggerNewAfter = 'New Field Values after trigger execution';
+  SUnknownFieldName = 'Unknown Field Name - %s';
 
 function firebird_udr_plugin(status: Firebird.IStatus;
   aTheirUnloadFlag: Firebird.BooleanPtr; udrPlugin: Firebird.IUdrPlugin
@@ -720,6 +737,34 @@ end;
 procedure FBRegisterUDRTrigger(aName: AnsiString; aTrigger: TFBUDRTriggerClass);
 begin
   RegisterUDRFactory(aName,TFBUDRTriggerFactory.Create(aName,aTrigger));
+end;
+
+{ TFBUDRInputParams }
+
+function TFBUDRInputParams.ParamExists(Idx: AnsiString): boolean;
+begin
+  Result := inherited ByName(Idx) <> nil;
+end;
+
+function TFBUDRInputParams.ByName(Idx: AnsiString): ISQLData;
+begin
+  Result := inherited ByName(Idx);
+  if Result = nil then
+    raise Exception.CreateFmt(SUnknownFieldName,[idx]);
+end;
+
+{ TFBUDROutputParams }
+
+function TFBUDROutputParams.ParamExists(Idx: AnsiString): boolean;
+begin
+  Result := inherited ByName(Idx) <> nil;
+end;
+
+function TFBUDROutputParams.ByName(Idx: AnsiString): ISQLParam;
+begin
+  Result := inherited ByName(Idx);
+  if Result = nil then
+    raise Exception.CreateFmt(SUnknownFieldName,[idx]);
 end;
 
 { TFBUDRTriggerNewValuesSQLDA }
@@ -937,7 +982,8 @@ begin
           InputParamsSQLDA := TFBUDRInParamsSQLDA.Create(FExternalContext,
                                              metadata,
                                              inMsg);
-        finally
+          SetFieldNames(InputParamsSQLDA);
+       finally
           metadata.release;
         end;
       end;
@@ -999,13 +1045,19 @@ begin
   end;
 end;
 
+procedure TFBUDRTriggerFactory.SetController(AValue: TFBUDRController);
+begin
+  if FController = AValue then Exit;
+  FController := AValue;
+  FFBContext := TFBUDRExternalContext.Create(FController);
+end;
+
 constructor TFBUDRTriggerFactory.Create(aName: AnsiString;
   aTrigger: TFBUDRTriggerClass);
 begin
   inherited Create;
   FName := aName;
   FTrigger := aTrigger;
-  FFBContext := TFBUDRExternalContext.Create(FController);
   FFieldNames := TStringList.Create;
 end;
 
@@ -1305,7 +1357,7 @@ const
     ' FROM RDB$PROCEDURE_PARAMETERS PRM JOIN RDB$FIELDS FLD ON ' +
     ' PRM.RDB$FIELD_SOURCE = FLD.RDB$FIELD_NAME ' +
     'WHERE ' +
-    '    PRM.RDB$PROCEDURE_NAME = ? AND ' +
+    '    Trim(PRM.RDB$PROCEDURE_NAME) = ? AND ' +
     '    PRM.RDB$PARAMETER_TYPE = ? ' +
     'ORDER BY PRM.RDB$PARAMETER_NUMBER';
 
@@ -1334,13 +1386,19 @@ begin
   UpdateFieldNames(1,FOutArgNames);
 end;
 
+procedure TFBUDRProcedureFactory.SetController(AValue: TFBUDRController);
+begin
+  if FController = AValue then Exit;
+  FController := AValue;
+  FFBContext := TFBUDRExternalContext.Create(Controller);
+end;
+
 constructor TFBUDRProcedureFactory.Create(aName: AnsiString;
   aProcedure: TFBUDRProcedureClass);
 begin
   inherited Create;
   FName := aName;
   FProcedure := aProcedure;
-  FFBContext := TFBUDRExternalContext.Create(Controller);
   FInArgNames := TStringList.Create;
   FOutArgNames := TStringList.Create;
 end;
@@ -1552,6 +1610,7 @@ end;
 
 procedure TFBUDROutParamsSQLDA.AllocMessageBuffer(len: integer);
 begin
+  FillChar(FBuffer^,len,0);
   FMessageBuffer := FBuffer;
   FMsgLength := len;
 end;
@@ -1777,13 +1836,19 @@ begin
   end;
 end;
 
+procedure TFBUDRFunctionFactory.SetController(AValue: TFBUDRController);
+begin
+  if FController = AValue then Exit;
+  FController := AValue;
+  FFBContext := TFBUDRExternalContext.Create(Controller);
+end;
+
 constructor TFBUDRFunctionFactory.Create(aName: AnsiString;
   aFunction: TFBUDRFunctionClass);
 begin
   inherited Create;
   FName := aName;
   FFunction := aFunction;
-  FFBContext := TFBUDRExternalContext.Create(Controller);
   FFieldNames := TStringList.Create;
 end;
 

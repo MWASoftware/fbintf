@@ -674,30 +674,30 @@ end;
 
 function TFBUDRExternalContext.HasConfigFile: boolean;
 begin
-
+  Result := Controller.HasConfigFile;
 end;
 
 function TFBUDRExternalContext.ReadConfigString(Section, Ident,
   DefaultValue: AnsiString): AnsiString;
 begin
-  Result := FController.ReadConfigString(Section, Ident, DefaultValue);
+  Result := Controller.ReadConfigString(Section, Ident, DefaultValue);
 end;
 
 function TFBUDRExternalContext.ReadConfigInteger(Section, Ident: AnsiString;
   DefaultValue: integer): integer;
 begin
-  Result := FController.ReadConfigInteger(Section, Ident, DefaultValue);
+  Result := Controller.ReadConfigInteger(Section, Ident, DefaultValue);
 end;
 
 function TFBUDRExternalContext.ReadConfigBool(Section, Ident: AnsiString;
   DefaultValue: boolean): boolean;
 begin
-  Result := FController.ReadConfigBool(Section, Ident, DefaultValue);
+  Result := Controller.ReadConfigBool(Section, Ident, DefaultValue);
 end;
 
 procedure TFBUDRExternalContext.WriteToLog(Msg: AnsiString);
 begin
-  FController.WriteToLog(Msg);
+  Controller.WriteToLog(Msg);
 end;
 
 

@@ -41,7 +41,7 @@ unit udr_test03;
 interface
 
 uses
-  Classes, SysUtils, IB, FBUDRController, FBUDRIntf;
+  Classes, SysUtils, IB, FBUDRController, FBUDRIntf, Streamex;
 
   {This unit provides the implementation of selected number of UDR Select
    procedures used to test out various aspects of the TFBUDRSelectProcedure class.
@@ -69,6 +69,29 @@ type
     function fetch(OutputData: IFBUDROutputData): boolean; override;
     procedure close; override;
   end;
+
+  {TReadTextFile is a select procedure that reads lines from a text file and
+   returns each line as successive rows.
+
+   create or alter procedure MyReadText (
+        path varchar(200) not null /*relative to udr directory */
+        ) returns (
+       text varchar(100) not null
+   )
+   external name 'fbudrtests!read_txt'
+   engine udr;
+}
+
+  TReadTextFile  = class(TFBUDRSelectProcedure)
+    private
+      FTextFile: TStreamReader;
+    public
+      procedure open(context: IFBUDRExternalContext;
+                       ProcMetadata: IFBUDRProcMetadata;
+                       InputParams: IFBUDRInputParams);  override;
+      function fetch(OutputData: IFBUDROutputData): boolean;  override;
+      procedure close; override;
+    end;
 
 implementation
 
@@ -109,9 +132,43 @@ begin
   FResults := nil;
 end;
 
+procedure TReadTextFile.open(context: IFBUDRExternalContext;
+                 ProcMetadata: IFBUDRProcMetadata;
+                 InputParams: IFBUDRInputParams);
+var aFileName: AnsiString;
+    {$IFDEF FPC}F: TFileStream;{$ENDIF}
+
+begin
+  context.WriteToLog('Read Text called in directory '+ GetCurrentDir);
+  aFileName := InputParams.ByName('path').AsString;
+  if not FileExists(aFileName) then
+    raise Exception.CreateFmt('Unable to find file "%s"',[aFileName]);
+  context.WriteToLog('Reading from ' + aFileName);
+  {$IFDEF FPC}
+  F := TFileStream.Create(aFileName,fmOpenRead);
+  FTextFile := TStreamReader.Create(F,8192,true);
+  {$ELSE}
+  FTextFile := TStreamReader.Create(InputParams.ByName('path').AsString, TEncoding.ANSI);
+  {$ENDIF}
+end;
+
+function TReadTextFile.fetch(OutputData: IFBUDROutputData): boolean;
+begin
+  Result := not FTextFile.{$IFDEF FPC}EOF{$ELSE}EndOfStream{$ENDIF};
+  if Result then
+    OutputData.ByName('text').AsString := FTextFile.ReadLine;
+end;
+
+procedure TReadTextFile.close;
+begin
+  if FTextFile <> nil then
+    FTextFile.Free;
+  FTextFile := nil;
+end;
+
 Initialization
   FBRegisterUDRProcedure('select_proc',TMySelectProcedure);
-
+  FBRegisterUDRProcedure('read_txt',TReadTextFile);
 
 end.
 

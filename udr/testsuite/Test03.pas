@@ -46,11 +46,12 @@ type
   { TTest03 }
 
   {Test 03 is used to perform client side testing (UDR engine emulation) for the
-   UDR Select procedure declared in udr_test03.pas.}
+   UDR Select procedures declared in udr_test03.pas.}
 
   TTest03 = class(TFBUDRTestBase)
   private
-    procedure DoQuery(Attachment: IAttachment);
+    procedure DoAccSalaries(Attachment: IAttachment);
+    procedure DoReadText(Attachment: IAttachment);
   protected
     function GetTestID: AnsiString; override;
     function GetTestTitle: AnsiString; override;
@@ -62,7 +63,7 @@ implementation
 
 { TTest03 }
 
-procedure TTest03.DoQuery(Attachment: IAttachment);
+procedure TTest03.DoAccSalaries(Attachment: IAttachment);
 var MyTestProc: TExternalProcedureWrapper;
     Transaction: ITransaction;
     Results: IProcedureResults;
@@ -85,6 +86,29 @@ begin
   end;
 end;
 
+procedure TTest03.DoReadText(Attachment: IAttachment);
+var MyReadText: TExternalProcedureWrapper;
+    Transaction: ITransaction;
+    Results: IProcedureResults;
+begin
+  UDRPlugin.Attachment := Attachment;
+  MyReadText := UDRPlugin.GetExternalProcedure('MYREADTEXT','','fbudrtests!read_txt');
+  try
+    MyReadText.InputParams[0].AsString := 'testsuite.conf';
+    writeln(OutFile,'Dump text file - testsuite.conf');
+    Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
+    Results := MyReadText.Execute(Transaction);
+    while Results.FetchNext do
+    begin
+      writeln(OutFile,Results[0].AsString);
+    end;
+    writeln(OutFile,'EOF');
+    writeln(OutFile);
+  finally
+    MyReadText.Free;
+  end;
+end;
+
 function TTest03.GetTestID: AnsiString;
 begin
   Result := '03';
@@ -96,12 +120,17 @@ begin
 end;
 
 const
-  DDL: array [0..0] of Ansistring = ('create or alter procedure MySelectProc () '+
+  DDL: array [0..1] of Ansistring = ('create or alter procedure MySelectProc () '+
                                      'returns (FullName VarChar(36), '+
-                                     'Salary Numeric(10,2), AccSalary Numeric(10,2) ) as begin SUSPEND;  end'
+                                     'Salary Numeric(10,2), AccSalary Numeric(10,2) ) as begin SUSPEND;  end',
+                                     'create or alter procedure MyReadText ('+
+                                     'path varchar(200) not null /*relative to udr directory */ '+
+                                     ') returns (text varchar(3000) not null) '+
+                                     'As Begin Suspend; End'
                                      );
 
-  CleanUpDDL: array [0..0] of Ansistring = ('Drop procedure MySelectProc');
+  CleanUpDDL: array [0..1] of Ansistring = ('Drop procedure MySelectProc',
+                                            'Drop procedure MyReadText');
 
 
 {The test is run using the employee database. Note that dummy versions of the
@@ -122,7 +151,8 @@ begin
   Attachment := FirebirdAPI.OpenDatabase(Owner.GetEmployeeDatabaseName,DPB);
   try
     ApplyDDL(Attachment,DDL);
-    DoQuery(Attachment);
+    DoAccSalaries(Attachment);
+    DoReadText(Attachment);
   finally
     ApplyDDL(Attachment,CleanUpDDL);
     Attachment.Disconnect;
