@@ -935,7 +935,7 @@ const
     'ORDER BY PRM.RDB$PARAMETER_NUMBER';
 
   sGetProcType = 'Select RDB$PROCEDURE_TYPE FROM RDB$PROCEDURES ' +
-                 'Where RDB$PROCEDURE_NAME = ?';
+                 'Where Trim(RDB$PROCEDURE_NAME) = ?';
 
 var args: IResultset;
     arglist: AnsiString;

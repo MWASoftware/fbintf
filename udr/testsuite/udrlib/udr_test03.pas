@@ -41,7 +41,7 @@ unit udr_test03;
 interface
 
 uses
-  Classes, SysUtils, IB, FBUDRController, FBUDRIntf, Streamex;
+  Classes, SysUtils, IB, FBUDRController, FBUDRIntf{$IFDEF FPC}, Streamex{$ENDIF};
 
   {This unit provides the implementation of selected number of UDR Select
    procedures used to test out various aspects of the TFBUDRSelectProcedure class.
@@ -148,7 +148,7 @@ begin
   F := TFileStream.Create(aFileName,fmOpenRead);
   FTextFile := TStreamReader.Create(F,8192,true);
   {$ELSE}
-  FTextFile := TStreamReader.Create(InputParams.ByName('path').AsString, TEncoding.ANSI);
+  FTextFile := TStreamReader.Create(aFileName, TEncoding.ANSI);
   {$ENDIF}
 end;
 

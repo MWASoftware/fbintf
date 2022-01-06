@@ -706,6 +706,7 @@ resourcestring
   STriggerIsNotImplemented = 'Trigger %s is not implemented';
   STriggerNewAfter = 'New Field Values after trigger execution';
   SUnknownFieldName = 'Unknown Field Name - %s';
+  SEof = 'No More Rows';
 
 function firebird_udr_plugin(status: Firebird.IStatus;
   aTheirUnloadFlag: Firebird.BooleanPtr; udrPlugin: Firebird.IUdrPlugin
@@ -825,7 +826,10 @@ begin
     begin
       Result := (FUDRProcedure as TFBUDRSelectProcedure).fetch(FOutputData);
       if [loLogFetches,loDetails] <= FBUDRControllerOptions.LogOptions then
-        FUDRProcedure.FController.WriteToLog(SOutputParams,FOutputData);
+        if Result then
+          FUDRProcedure.FController.WriteToLog(SOutputParams,FOutputData)
+        else
+          FUDRProcedure.FController.WriteToLog(SEof);
       FOutputDataSQLDA.Finalise;
     end
     else
