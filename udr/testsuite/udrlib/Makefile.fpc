@@ -7,7 +7,7 @@ options= -MObjFPC -Scghi -Cg -Cr -O1 -g -gl -gh -l -vewnhibq -dUseCThreads -dFIR
 
 unittargetdir=testunits/$(CPU_TARGET)-$(OS_TARGET)
 includedir=../../../client/3.0/firebird ../../../client/include 
-unitdir=../../../client ../../../client/3.0/firebird  . ../../../client/3.0 ../../source ../../.. ../../../client/2.5
+unitdir=../../../client ../../../client/3.0/firebird  . ../../../client/3.0 ../../source ../../.. 
 
 [target]
 programs=fbudrtests 

@@ -576,8 +576,6 @@ procedure TFBUDRExternalContext.Assign(src: Firebird.IExternalContext);
   end;
 
 begin
-  if src = FContext then Exit;
-
   if src = nil then
   begin
     FirebirdAPI := nil;
@@ -587,13 +585,13 @@ begin
   end
   else
   begin
-    if (FContext = nil) or (src.getMaster() <> FContext.getMaster) then
+//    if (FContext = nil) or (src.getMaster() <> FContext.getMaster) then
       FirebirdAPI := TFB30ClientAPI.Create(src.getMaster);
 
-    if not SameTransaction then
+//    if not SameTransaction then
       FTransaction := nil;
 
-    if not SameAttachment then
+//    if not SameAttachment then
       FAttachment := nil;
 
     FContext := src;

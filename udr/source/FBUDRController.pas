@@ -689,6 +689,7 @@ resourcestring
   sFuncCreated = 'Function %s created';
   SInputParams = 'Input Parameters';
   SOutputParams = 'Output Parameters';
+  SOutputData = 'Output Parameters with data';
   SFuncDispose = 'Function %s: dispose called';
   SFuncCharset = 'GetCharSet for Function %s charset name = "%s"';
   SFuncExecute =  'Execute Function ';
@@ -827,7 +828,7 @@ begin
       Result := (FUDRProcedure as TFBUDRSelectProcedure).fetch(FOutputData);
       if [loLogFetches,loDetails] <= FBUDRControllerOptions.LogOptions then
         if Result then
-          FUDRProcedure.FController.WriteToLog(SOutputParams,FOutputData)
+          FUDRProcedure.FController.WriteToLog(SOutputData,FOutputData)
         else
           FUDRProcedure.FController.WriteToLog(SEof);
       FOutputDataSQLDA.Finalise;
@@ -854,7 +855,7 @@ begin
   if FOutputDataSQLDA <> nil then
   begin
     if [loLogProcedures,loDetails] <= FBUDRControllerOptions.LogOptions then
-      FUDRProcedure.FController.WriteToLog(SOutputParams,FOutputData);
+      FUDRProcedure.FController.WriteToLog(SOutputData,FOutputData);
     FOutputDataSQLDA.Finalise; {copy output row to outMsg}
     Result := not FFetchCalled;
     FFetchCalled := true;
@@ -1095,6 +1096,8 @@ begin
 
     if fieldsBuilder <> nil then
       FBFieldsBuilder := TFBUDRMetadataBuilder.Create(FFBContext,fieldsBuilder);
+    if [loLogTriggers, loDetails] <= FBUDRControllerOptions.LogOptions then
+        FController.WriteToLog(SRoutineMetadata + LineEnding + (FBRoutineMetadata as TFBUDRRoutineMetadata).AsText);
     TFBUDRTrigger.setup(FFBContext,FBRoutineMetadata,FBFieldsBuilder)
   except on E: Exception do
     FController.FBSetStatusFromException(E,status);
@@ -1442,6 +1445,8 @@ begin
       FBInBuilder := TFBUDRMetadataBuilder.Create(FFBContext,inBuilder);
     if outBuilder <> nil then
       FBOutBuilder := TFBUDRMetadataBuilder.Create(FFBContext,outBuilder);
+      if [loLogProcedures, loDetails] <= FBUDRControllerOptions.LogOptions then
+        FController.WriteToLog(SRoutineMetadata + LineEnding + (FBRoutineMetadata as TFBUDRRoutineMetadata).AsText);
     TFBUDRProcedure.setup(FFBContext,FBRoutineMetadata,FBInBuilder,FBOutBuilder)
   except on E: Exception do
     FController.FBSetStatusFromException(E,status);
@@ -1799,7 +1804,7 @@ begin
         Execute(FExternalContext,aProcMetadata,InputParams,OutputData[0]);
 
         if [loLogFunctions,loDetails] <= FBUDRControllerOptions.LogOptions then
-          FController.WriteToLog(SOutputParams,OutputData);
+          FController.WriteToLog(SOutputData,OutputData);
 
         OutParamsSQLDA.Finalise; {copy result to OutMsg buffer}
       finally
