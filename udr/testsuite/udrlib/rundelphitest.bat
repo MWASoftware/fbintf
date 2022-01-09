@@ -35,21 +35,27 @@ if EXIST "%FPCBIN%\diff.exe" (
 )
 echo DIFF is %DIFF%
 
-set FIREBIRD=C:\Program Files (x86)\Firebird\Firebird_4_0
 
-if not Exist "%FIREBIRD%" (
-  echo "Unable to locate Firebird at %FIREBIRD%"
-  goto :EOF
-)
+set FIREBIRD=C:\Program Files (x86)\Firebird\Firebird_4_0
+echo Firebird set to %FIREBIRD%
+
+rem if not Exist ""%FIREBIRD%\firebird.exe"" (
+rem  echo Unable to locate Firebird at %FIREBIRD%
+rem  goto :EOF
+rem)
+
 
 set ISQL=%FIREBIRD%\isql.exe
 
-if not Exist "%ISQL%" (
-  echo "Unable to locate isql"
-  goto :EOF
-)
+rem if not Exist "%ISQL%" 
+rem  echo Unable to locate isql at %ISQL%"
+REM   goto :EOF
+REM)
+echo ISQL is %ISQL%
 
-set RUNISQL="%ISQL% -user SYSDBA -pass masterkey localhost:employee"
+set RUNISQL=%ISQL% -user SYSDBA -pass masterkey localhost:employee
+echo Run command is %RUNISQL%
+
 
 IF EXIST "%DELPHIBIN%\dcc32.exe" (
 rd /s /q testunits
@@ -68,12 +74,14 @@ IF ERRORLEVEL 1 (
   echo "Copy to udr directory failed"
   goto :EOF
 }
+echo "dll copied to Firebird udr directory"
 
 net stop "Firebird Server - DefaultInstance" && net start "Firebird Server - DefaultInstance"
 IF ERRORLEVEL 1 (
   echo "Unable to restart Firebird server"
   goto :EOF
 }
+echo "Server Restarted"
 
 echo( 
 echo Running Testsuite

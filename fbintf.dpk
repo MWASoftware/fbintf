@@ -48,7 +48,7 @@ contains
   FBServices in 'client\FBServices.pas',
   FBSQLData in 'client\FBSQLData.pas',
   FBStatement in 'client\FBStatement.pas',
-  IBHeader in 'client\2.5\IBHeader.pas',
+  IBHeader in 'client\IBHeader.pas',
   FB25Array in 'client\2.5\FB25Array.pas',
   FB25Attachment in 'client\2.5\FB25Attachment.pas',
   FB25Blob in 'client\2.5\FB25Blob.pas',

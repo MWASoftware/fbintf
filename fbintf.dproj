@@ -79,7 +79,7 @@
         <DCCReference Include="client\FBServices.pas"/>
         <DCCReference Include="client\FBSQLData.pas"/>
         <DCCReference Include="client\FBStatement.pas"/>
-        <DCCReference Include="client\2.5\IBHeader.pas"/>
+        <DCCReference Include="client\IBHeader.pas"/>
         <DCCReference Include="client\2.5\FB25Array.pas"/>
         <DCCReference Include="client\2.5\FB25Attachment.pas"/>
         <DCCReference Include="client\2.5\FB25Blob.pas"/>
