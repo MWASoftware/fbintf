@@ -332,6 +332,9 @@ end;
 
 function TFBNumeric.clone(aNewScale: integer): IFBNumeric;
 begin
+ if FScale = aNewScale then
+   Result := TFBNumeric.Create(FValue,FScale)
+ else
   Result := TFBNumeric.Create(Round(FValue * IntPower(10,FScale-aNewScale)),aNewScale);
 end;
 

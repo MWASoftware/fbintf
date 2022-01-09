@@ -5,6 +5,7 @@
     <Units Count="5">
       <Unit0>
         <Filename Value="../../IB.pas"/>
+        <IsVisibleTab Value="True"/>
         <TopLine Value="147"/>
         <CursorPos X="9" Y="159"/>
         <UsageCount Value="11"/>
@@ -33,11 +34,9 @@
       </Unit3>
       <Unit4>
         <Filename Value="udrlib/adddefs.sh"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="-1"/>
         <CursorPos X="32" Y="13"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Bash"/>
       </Unit4>
     </Units>

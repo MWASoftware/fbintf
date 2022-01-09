@@ -62,7 +62,8 @@
         <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
-        <Debugger_RunParams>-t 20 -X</Debugger_RunParams>
+        <Debugger_HostApplication>C:\Users\A User\projects\fbintf\testsuite\testsuite.exe</Debugger_HostApplication>
+        <Debugger_RunParams>-t 10 -X</Debugger_RunParams>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">
