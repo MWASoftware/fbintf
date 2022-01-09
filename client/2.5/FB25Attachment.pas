@@ -144,8 +144,6 @@ begin
     Disconnect;
     Connect;
   end
-  else
-    GetODSAndConnectionInfo;
 end;
 
 constructor TFB25Attachment.CreateDatabase(api: TFB25ClientAPI; sql: AnsiString; aSQLDialect: integer;
@@ -154,7 +152,7 @@ var tr_handle: TISC_TR_HANDLE;
 begin
   inherited Create(api,'',nil,RaiseExceptionOnError);
   FFirebird25ClientAPI := api;
-  FSQLDialect := aSQLDialect;
+  SetSQLDialect(aSQLDialect);
   tr_handle := nil;
   with FFirebird25ClientAPI do
   begin
@@ -163,7 +161,6 @@ begin
       IBDataBaseError;
 
   end;
-  GetODSAndConnectionInfo;
   ExtractConnectString(sql,FDatabaseName);
   DPBFromCreateSQL(sql);
 end;
@@ -180,7 +177,7 @@ end;
 
 procedure TFB25Attachment.Connect;
 begin
-  FSQLDialect := 3;
+  SetSQLDialect(3);
 
   with FFirebird25ClientAPI do
   if DPB = nil then
@@ -198,7 +195,6 @@ begin
       IBDatabaseError;
 
   end;
-  GetODSAndConnectionInfo;
 end;
 
 procedure TFB25Attachment.Disconnect(Force: boolean);
@@ -213,9 +209,6 @@ begin
     if (isc_detach_database(StatusVector, @FHandle) > 0) and not Force then
       IBDatabaseError;
   FHandle := nil;
-  FHasDefaultCharSet := false;
-  FCodePage := CP_NONE;
-  FCharSetID := 0;
 end;
 
 function TFB25Attachment.IsConnected: boolean;

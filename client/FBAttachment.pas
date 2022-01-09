@@ -141,28 +141,33 @@ type
     FSecDatabase: AnsiString;
     FInlineBlobLimit: integer;
     FAttachmentID: integer;
-  protected
-    FDatabaseName: AnsiString;
-    FRaiseExceptionOnConnectError: boolean;
     FSQLDialect: integer;
     FHasDefaultCharSet: boolean;
     FCharSetID: integer;
     FCodePage: TSystemCodePage;
     FRemoteProtocol: AnsiString;
     FAuthMethod: AnsiString;
+    FHasConnectionInfo: boolean;
+    procedure NeedDBInfo;
+    procedure NeedConnectionInfo;
+  protected
+    FDatabaseName: AnsiString;
+    FRaiseExceptionOnConnectError: boolean;
     constructor Create(api: TFBClientAPI; DatabaseName: AnsiString; DPB: IDPB;
       RaiseExceptionOnConnectError: boolean);
     procedure CheckHandle; virtual; abstract;
+    procedure ClearCachedInfo;
     function GenerateCreateDatabaseSQL(DatabaseName: AnsiString; aDPB: IDPB): AnsiString;
-    procedure GetODSAndConnectionInfo;
     function GetDBInfo(ReqBuffer: PByte; ReqBufLen: integer): IDBInformation; virtual; abstract;
     function IsConnected: boolean; virtual; abstract;
     procedure EndAllTransactions;
     procedure DPBFromCreateSQL(CreateSQL: AnsiString);
     procedure SetParameters(SQLParams: ISQLParams; params: array of const);
+    procedure SetSQLDialect(aValue: integer);
     procedure UseServerICUChanged; virtual;
   public
     destructor Destroy; override;
+    procedure Disconnect(Force: boolean); override;
     function getFirebirdAPI: IFirebirdAPI;
     function getDPB: IDPB;
     function AllocateBPB: IBPB;
@@ -230,7 +235,7 @@ type
     function CreateArray(transaction: ITransaction; ArrayMetaData: IArrayMetaData): IArray; overload; virtual; abstract;
     function OpenArray(transaction: ITransaction; RelationName, ColumnName: AnsiString; ArrayID: TISC_QUAD): IArray; overload;
     function OpenArray(transaction: ITransaction; ArrayMetaData: IArrayMetaData; ArrayID: TISC_QUAD): IArray; overload; virtual; abstract;
-    property SQLDialect: integer read FSQLDialect;
+    property SQLDialect: integer read GetSQLDialect;
     property DPB: IDPB read FDPB;
   public
     function GetDBInformation(Requests: array of byte): IDBInformation; overload;
@@ -264,7 +269,7 @@ type
       AllowReverseLookup:boolean; out CharSetID: integer);
     function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IBlobMetaData; virtual; abstract;
     function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IArrayMetaData; virtual; abstract;
-    property CharSetID: integer read FCharSetID;
+    property CharSetID: integer read GetCharSetID;
     property CodePage: TSystemCodePage read FCodePage;
 
   public
@@ -776,34 +781,15 @@ begin
   EndSession(RetainJournal);
 end;
 
-
-
-
 { TFBAttachment }
 
-procedure TFBAttachment.GetODSAndConnectionInfo;
-var DBInfo: IDBInformation;
-    i: integer;
-    Stmt: IStatement;
+procedure TFBAttachment.NeedConnectionInfo;
+var Stmt: IStatement;
     ResultSet: IResultSet;
     Param: IDPBItem;
 begin
-  if not IsConnected then Exit;
-  DBInfo := GetDBInformation([isc_info_db_id,isc_info_ods_version,isc_info_ods_minor_version,
-                               isc_info_db_SQL_Dialect, isc_info_attachment_id]);
-  for i := 0 to DBInfo.GetCount - 1 do
-    with DBInfo[i] do
-      case getItemType of
-      isc_info_ods_minor_version:
-        FODSMinorVersion := getAsInteger;
-      isc_info_ods_version:
-        FODSMajorVersion := getAsInteger;
-      isc_info_db_SQL_Dialect:
-        FSQLDialect := getAsInteger;
-      isc_info_attachment_id:
-        FAttachmentID := getAsInteger;
-      end;
-
+  if not IsConnected or FHasConnectionInfo then Exit;
+  NeedDBInfo;
   FCharSetID := 0;
   FRemoteProtocol := '';
   FAuthMethod := 'Legacy_Auth';
@@ -849,6 +835,28 @@ begin
     end;
   end;
   FHasDefaultCharSet := CharSetID2CodePage(FCharSetID,FCodePage) and (FCharSetID > 1);
+  FHasConnectionInfo := true;
+end;
+
+procedure TFBAttachment.NeedDBInfo;
+var DBInfo: IDBInformation;
+    i: integer;
+begin
+  if not IsConnected or (FAttachmentID > 0) then Exit;
+  DBInfo := GetDBInformation([isc_info_db_id,isc_info_ods_version,isc_info_ods_minor_version,
+                               isc_info_db_SQL_Dialect, isc_info_attachment_id]);
+  for i := 0 to DBInfo.GetCount - 1 do
+    with DBInfo[i] do
+      case getItemType of
+      isc_info_ods_minor_version:
+        FODSMinorVersion := getAsInteger;
+      isc_info_ods_version:
+        FODSMajorVersion := getAsInteger;
+      isc_info_db_SQL_Dialect:
+        FSQLDialect := getAsInteger;
+      isc_info_attachment_id:
+        FAttachmentID := getAsInteger;
+      end;
 end;
 
 constructor TFBAttachment.Create(api: TFBClientAPI; DatabaseName: AnsiString;
@@ -859,11 +867,24 @@ begin
   FSQLDialect := 3;
   FDatabaseName := DatabaseName;
   SetLength(FUserCharSetMap,0);
-  FODSMajorVersion := 0;
-  FODSMinorVersion := 0;
+  ClearCachedInfo;
   FInlineBlobLimit := DefaultMaxInlineBlobLimit;
   FDPB := DPB;
   FRaiseExceptionOnConnectError := RaiseExceptionOnConnectError;
+end;
+
+procedure TFBAttachment.ClearCachedInfo;
+begin
+  FHasDefaultCharSet := false;
+  FAttachmentID := 0;
+  FODSMajorVersion := 0;
+  FODSMinorVersion := 0;
+  FCodePage := CP_NONE;
+  FCharSetID := 0;
+  FRemoteProtocol := '';
+  FAuthMethod := '';
+  FSecDatabase := '';
+  FHasConnectionInfo := false;
 end;
 
 function TFBAttachment.GenerateCreateDatabaseSQL(DatabaseName: AnsiString;  aDPB: IDPB): AnsiString;
@@ -997,6 +1018,11 @@ begin
   end;
 end;
 
+procedure TFBAttachment.SetSQLDialect(aValue: integer);
+begin
+  FSQLDialect := aValue;
+end;
+
 procedure TFBAttachment.UseServerICUChanged;
 begin
   // Do nothing by default
@@ -1006,6 +1032,12 @@ destructor TFBAttachment.Destroy;
 begin
   Disconnect(true);
   inherited Destroy;
+end;
+
+procedure TFBAttachment.Disconnect(Force: boolean);
+begin
+  inherited Disconnect(Force);
+  ClearCachedInfo;
 end;
 
 function TFBAttachment.getFirebirdAPI: IFirebirdAPI;
@@ -1205,11 +1237,13 @@ end;
 
 function TFBAttachment.GetSQLDialect: integer;
 begin
+  NeedDBInfo;
   Result := FSQLDialect;
 end;
 
 function TFBAttachment.GetAttachmentID: integer;
 begin
+  NeedDBInfo;
   Result := FAttachmentID;
 end;
 
@@ -1289,31 +1323,37 @@ end;
 
 function TFBAttachment.GetRemoteProtocol: AnsiString;
 begin
+  NeedConnectionInfo;
   Result := FRemoteProtocol;
 end;
 
 function TFBAttachment.GetAuthenticationMethod: AnsiString;
 begin
+  NeedConnectionInfo;
   Result := FAuthMethod;
 end;
 
 function TFBAttachment.GetSecurityDatabase: AnsiString;
 begin
+  NeedConnectionInfo;
   Result := FSecDatabase;
 end;
 
 function TFBAttachment.GetODSMajorVersion: integer;
 begin
+  NeedDBInfo;
   Result := FODSMajorVersion;
 end;
 
 function TFBAttachment.GetODSMinorVersion: integer;
 begin
+  NeedDBInfo;
   Result := FODSMinorVersion;
 end;
 
 function TFBAttachment.GetCharSetID: integer;
 begin
+  NeedConnectionInfo;
   Result := FCharSetID;
 end;
 
@@ -1363,11 +1403,13 @@ end;
 
 function TFBAttachment.HasDefaultCharSet: boolean;
 begin
+  NeedConnectionInfo;
   Result := FHasDefaultCharSet
 end;
 
 function TFBAttachment.GetDefaultCharSetID: integer;
 begin
+  NeedConnectionInfo;
   Result := FCharsetID;
 end;
 

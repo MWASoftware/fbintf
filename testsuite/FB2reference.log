@@ -533,12 +533,12 @@ Running Test 3: ad hoc queries
 Opening localhost:employee
 Database Open
 Employee Count = 42
-Transaction ID = 5972
+Transaction ID = 6014
 Transaction is Read/Write
-Transaction ID = 5972
+Transaction ID = 6014
 Oldest Interesting = 5461
-Oldest Action = 5971
-Oldest Snapshot = 5971
+Oldest Action = 6013
+Oldest Snapshot = 6013
 Oldest Interesting = 0
 Employee Count = 41
 Employee Count = 42
@@ -570,11 +570,11 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 948,640
-Delta memory = 1,304
-Max memory = 992,560
+Current memory = 937,656
+Delta memory = 1,296
+Max memory = 965,720
 Elapsed time= 0.003 sec
-Cpu = 0.000 sec
+Cpu = 0.001 sec
 Buffers = 75
 Reads = 0
 Writes = 0
@@ -2724,17 +2724,17 @@ Database is Read/Write
 Database Created: 17/6/2019 19:37:08
 Unknown Response 3
 Unknown Response 3
-Server Memory = 841392
+Server Memory = 721912
 Forced Writes  = 1
-Max Memory  = 879440
+Max Memory  = 737792
 Num Buffers  = 75
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
 Active Transaction Count = 0
-Fetches  = 1040
-Writes  = 6
-Reads  = 84
-Page Writes  = 6
+Fetches  = 520
+Writes  = 4
+Reads  = 58
+Page Writes  = 4
 Record Version Removals Operation Counts
 
 Deletes Operation Counts
@@ -2746,20 +2746,16 @@ Insert Count Operation Counts
 Purge Count Countites Operation Counts
 
 Indexed Reads Count Operation Counts
-Table ID = 2
-Count = 14
-Table ID = 5
-Count = 28
 Table ID = 6
-Count = 58
+Count = 11
 Table ID = 11
-Count = 3
+Count = 1
 Table ID = 12
-Count = 36
+Count = 24
 Table ID = 28
-Count = 9
+Count = 4
 Table ID = 29
-Count = 7
+Count = 4
 
 Sequential Table Scans Operation Counts
 Table ID = 0
@@ -3563,22 +3559,22 @@ MYARRAY = NULL
 
 Journal Table
 IBX$SESSIONID = 1
-IBX$TRANSACTIONID = 8
+IBX$TRANSACTIONID = 7
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2022/01/02 13:50:08.4510
+IBX$CREATED = 2022/01/09 15:33:11.5220
 IBX$SESSIONID = 1
-IBX$TRANSACTIONID = 10
-IBX$OLDTRANSACTIONID = 9
+IBX$TRANSACTIONID = 9
+IBX$OLDTRANSACTIONID = 8
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2022/01/02 13:50:08.7550
+IBX$CREATED = 2022/01/09 15:33:11.8430
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 2
 Session ID = 1
-Transaction ID = 8
+Transaction ID = 7
 Transaction Name = "Transaction_29_1"
 TPB: Item Count = 3
   isc_tpb_write
@@ -3591,17 +3587,31 @@ Journal Entry = jeQuery(Query)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 2
 Session ID = 1
-Transaction ID = 8
+Transaction ID = 7
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(1,101,9223372036854775807,10000.1234,9999.12345678,1234567890.12346)
 
 Journal Entry = jeQuery(Query)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 2
 Session ID = 1
-Transaction ID = 8
+Transaction ID = 7
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(2,-32457,-9223372036854775808,1000001.12,1.7E308,-1234567890.12346)
 
 Journal Entry = jeTransCommitRet(Commit Retaining)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 2
+Session ID = 1
+Transaction ID = 8
+Old TransactionID = 7
+
+Journal Entry = jeQuery(Query)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 2
+Session ID = 1
+Transaction ID = 8
+Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(3,0,0,0,0,0)
+
+Journal Entry = jeTransRollbackRet(Rollback Retaining)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 2
 Session ID = 1
@@ -3613,27 +3623,13 @@ Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 2
 Session ID = 1
 Transaction ID = 9
-Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(3,0,0,0,0,0)
-
-Journal Entry = jeTransRollbackRet(Rollback Retaining)
-Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
-Attachment ID = 2
-Session ID = 1
-Transaction ID = 10
-Old TransactionID = 9
-
-Journal Entry = jeQuery(Query)
-Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
-Attachment ID = 2
-Session ID = 1
-Transaction ID = 10
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(4,1,10,0.023,0.0011,233.456)
 
 Journal Entry = jeTransStart(Transaction Start)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 2
 Session ID = 1
-Transaction ID = 11
+Transaction ID = 10
 Transaction Name = "Transaction_29_2"
 TPB: Item Count = 3
   isc_tpb_write
@@ -3646,13 +3642,13 @@ Journal Entry = jeTransCommit(Commit)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 2
 Session ID = 1
-Transaction ID = 10
+Transaction ID = 9
 
 Journal Entry = jeQuery(Query)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 2
 Session ID = 1
-Transaction ID = 11
+Transaction ID = 10
 Query = Insert into TestData(RowID, Str, TextBlob) Values(5,'It''s the quick brown fox jumps over the lazy dog','To be or not to be-that is the question:
 Whether ''tis nobler in the mind to suffer
 The slings and arrows of outrageous fortune,
@@ -3694,7 +3690,7 @@ Journal Entry = jeQuery(Query)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 2
 Session ID = 1
-Transaction ID = 11
+Transaction ID = 10
 Query = Insert into TestData(RowID,OtherBlob) Values (6,<blob subtype="0">
 FFD8FFE000104A46494600010101004800480000FFE11E0545786966000049492A00080000000C00
 0E010200200000009E0000000F01020014000000BE0000001001020008000000D200000012010300
@@ -3706,7 +3702,7 @@ Journal Entry = jeQuery(Query)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 2
 Session ID = 1
-Transaction ID = 11
+Transaction ID = 10
 Query = Insert into TestData(RowID,MyArray) Values (7,<array dim = "1" sqltype = "496" length = "4" relation_name = "TESTDATA" column_name = "MYARRAY" scale = "0" bounds="0:16">
  <elt ix="0">100</elt>
  <elt ix="1">99</elt>
@@ -3732,7 +3728,7 @@ Journal Entry = jeTransRollback(Rollback)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 2
 Session ID = 1
-Transaction ID = 11
+Transaction ID = 10
 
 
 

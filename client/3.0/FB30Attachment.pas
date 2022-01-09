@@ -179,16 +179,11 @@ begin
   except {ignore - forced release}
   end;
   FOwnsAttachmentHandle := false;
-  FHasDefaultCharSet := false;
-  FCodePage := CP_NONE;
-  FCharSetID := 0;
+  ClearCachedInfo;
   FTimeZoneServices := nil;
   FAttachmentIntf := AValue;
   if FAttachmentIntf <> nil then
-  begin
     FAttachmentIntf.AddRef;
-    GetODSAndConnectionInfo;
-  end;
 end;
 
 procedure TFB30Attachment.CheckHandle;
@@ -230,13 +225,13 @@ begin
   begin
     Param := aDPB.Find(isc_dpb_set_db_SQL_dialect);
     if Param <> nil then
-      FSQLDialect := Param.AsByte;
+      SetSQLDialect(Param.AsByte);
   end;
   sql := GenerateCreateDatabaseSQL(DatabaseName,aDPB);
   with FFirebird30ClientAPI do
   begin
     Intf := UtilIntf.executeCreateDatabase(StatusIntf,Length(sql),
-                                       PAnsiChar(sql),FSQLDialect,@IsCreateDB);
+                                       PAnsiChar(sql),SQLDialect,@IsCreateDB);
     if FRaiseExceptionOnConnectError then Check4DataBaseError;
     if not InErrorState then
     begin
@@ -261,7 +256,7 @@ var IsCreateDB: boolean;
 begin
   inherited Create(api,'',nil,RaiseExceptionOnError);
   FFirebird30ClientAPI := api;
-  FSQLDialect := aSQLDialect;
+  SetSQLDialect(aSQLDialect);
   with FFirebird30ClientAPI do
   begin
     Intf := UtilIntf.executeCreateDatabase(StatusIntf,Length(sql),
