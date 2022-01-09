@@ -1,11 +1,3 @@
-#!/bin/sh
-
-if [ -z "$FIREBIRD" ]; then
-  echo "FIREBIRD not defined"
-  exit
-fi
-
-$FIREBIRD/bin/isql -user SYSDBA -pass masterkey employee <<EOT
  create or alter function MyRowCount (
       table_name varchar(31)
     ) returns integer
@@ -40,5 +32,4 @@ Alter Table EMPLOYEE Add PREVIOUS_PHONE_EXT VarChar(4);
 Create or Alter Trigger MyEmployeeUpdate Active Before Update On  EMPLOYEE
    external name 'fbudrtests!my_employee_update'
     engine udr;       
-EOT
 
