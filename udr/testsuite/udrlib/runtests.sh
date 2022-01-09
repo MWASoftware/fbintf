@@ -45,6 +45,7 @@ RUNISQL="$ISQL -user SYSDBA -pass masterkey localhost:employee"
 if [ ! -d "$FIREBIRD" ]; then
   echo "$FIREBIRD not found"
 else
+  rm -r testunits
   fpcmake
   make
   if [ ! -f libfbudrtests.so ]; then

@@ -85,7 +85,7 @@ type
     FAttachment: IAttachment;
     FTransaction: ITransaction;
   public
-    procedure Assign(src: Firebird.IExternalContext);
+    constructor Create(aController: TFBUDRController; context: Firebird.IExternalContext);
     function AsText: AnsiString;
   public
     {IFBUDRExternalContext}
@@ -549,53 +549,12 @@ end;
 
 { TFBUDRExternalContext }
 
-procedure TFBUDRExternalContext.Assign(src: Firebird.IExternalContext);
-
-  function SameTransaction: boolean;
-  var tr1, tr2: Firebird.ITransaction;
-  begin
-    Result := false;
-    if FContext = nil then Exit;
-    tr1 := src.getTransaction(FStatus);
-    CheckStatus;
-    tr2 := FContext.getTransaction(FStatus);
-    CheckStatus;
-    Result := tr1 = tr2;
-  end;
-
-  function SameAttachment: boolean;
-  var at1, at2: Firebird.IAttachment;
-  begin
-    Result := false;
-    if FContext = nil then Exit;
-    at1 := src.getAttachment(FStatus);
-    CheckStatus;
-    at2 := FContext.getAttachment(FStatus);
-    CheckStatus;
-    Result := at1 = at2;
-  end;
-
+constructor TFBUDRExternalContext.Create(aController: TFBUDRController;
+  context: Firebird.IExternalContext);
 begin
-  if src = nil then
-  begin
-    FirebirdAPI := nil;
-    FTransaction := nil;
-    FAttachment := nil;
-    FContext := nil;
-  end
-  else
-  begin
-//    if (FContext = nil) or (src.getMaster() <> FContext.getMaster) then
-      FirebirdAPI := TFB30ClientAPI.Create(src.getMaster);
-
-//    if not SameTransaction then
-      FTransaction := nil;
-
-//    if not SameAttachment then
-      FAttachment := nil;
-
-    FContext := src;
-  end;
+  inherited Create(aController);
+  FContext := context;
+  FirebirdAPI := TFB30ClientAPI.Create(context.getMaster);
 end;
 
 function TFBUDRExternalContext.AsText: AnsiString;
