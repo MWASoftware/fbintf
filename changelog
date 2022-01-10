@@ -76,6 +76,9 @@ FBINTF Change Log  version          (1.4-0 Build 12952) Tue, 07 Dec 2021 11:53:4
 13. Connection Info (e.g. ODS Version, Remote Protocol) now retrieved on first
     request rather than on attachment connect.
 
+14. IColumnMetadata: new method:
+      function getIsComputedValue: boolean;
+
 
 FBINTF Change Log  version          (1.3-3 Build 12935) Mon, 06 Dec 2021 23:17:13 +0000
 

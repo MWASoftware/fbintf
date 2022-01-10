@@ -393,6 +393,7 @@ type
     function GetScale: integer; override;
     function getCharSetID: cardinal; override;
     function GetIsNullable: boolean; override;
+    function getIsComputedValue: boolean;
     function GetSize: cardinal; override;
     function GetCharSetWidth: integer; override;
     function GetArrayMetaData: IArrayMetaData;
@@ -2344,6 +2345,16 @@ function TColumnMetaData.GetIsNullable: boolean;
 begin
   CheckActive;
   result := FIBXSQLVAR.IsNullable;
+end;
+
+const sqlIsComputed =
+  'Select F.RDB$COMPUTED_BLR from RDB$RELATION_FIELDS R JOIN RDB$FIELDS F ' +
+  'on R.RDB$FIELD_SOURCE = F.RDB$FIELD_NAME Where R.RDB$RELATION_NAME = ? ' +
+  'and R.RDB$FIELD_NAME = ?';
+
+function TColumnMetaData.getIsComputedValue: boolean;
+begin
+  Result := not GetAttachment.OpenCursorAtStart(sqlIsComputed,[GetRelationName,GetName])[0].IsNull;
 end;
 
 function TColumnMetaData.GetSize: cardinal;

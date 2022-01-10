@@ -515,6 +515,7 @@ type
     function GetArrayMetaData: IArrayMetaData; {Valid only for Array SQL Type}
     function GetBlobMetaData: IBlobMetaData; {Valid only for Blob SQL Type}
     function GetDateTimeStrLength(DateTimeFormat: TIBDateTimeFormats): integer;
+    function getIsComputedValue: boolean;
     function GetStatement: IStatement;
     function GetTransaction: ITransaction;
     function GetAttachment: IAttachment;
