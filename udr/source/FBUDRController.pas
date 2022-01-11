@@ -78,7 +78,7 @@ type
     ThreadSafeLogging: boolean;
   end;
 
-  {LogFileNameTemplate, ConfigFileName and DebugLogTemplate macros:
+  {LogFileNameTemplate and ConfigFileName macros:
     $LOGDIR = Firebird log directory
     $UDRDIR = Firebird UDR directory
     $TEMP = System temp directory
@@ -130,12 +130,12 @@ type
                                          aName: AnsiString; factory: TObject);
     procedure FreeFactoryList;
     procedure LoadConfig;
+    function NeedLogStream: boolean;
   public
     constructor Create(status: Firebird.IStatus; udrPlugin: Firebird.IUdrPlugin;
                                          aTheirUnloadFlag: booleanPtr; var aMyUnloadFlag: booleanPtr);
     destructor Destroy; override;
     procedure FBSetStatusFromException(E: Exception; aStatus: Firebird.IStatus);
-    function GetLogStream: TStream;
     function ProcessTemplateMacros(aTemplate: AnsiString): AnsiString;
     procedure WriteToLog(Msg: AnsiString); overload;
     procedure WriteToLog(aTitle: AnsiString; Params: IFBUDRInputParams); overload;
@@ -2122,6 +2122,29 @@ begin
   end;
 end;
 
+function TFBUDRController.NeedLogStream: boolean;
+var FilePathName: AnsiString;
+begin
+  Result := false;
+  if FLogStream = nil then
+  begin
+    FilePathName := ProcessTemplateMacros(FBUDRControllerOptions.LogFileNameTemplate);
+    if FilePathName = '' then
+      Exit;
+    if FJnlOpenAppend then
+    begin
+      FLogStream := TFileStream.Create(FilePathName,fmOpenWrite or fmShareDenyNone);
+      FLogStream.Seek(0, soFromEnd);
+    end
+    else
+    begin
+      FLogStream := TFileStream.Create(FilePathName,fmCreate or fmShareDenyNone);
+      FJnlOpenAppend := true;
+    end;
+  end;
+  Result := true;
+end;
+
 function TFBUDRController.LogOptionsToStr(aLogOptions: TFBUDRControllerLogOptions): AnsiString;
 var i: TFBUDRControllerLogOption;
     separator: AnsiString;
@@ -2191,33 +2214,17 @@ begin
   WriteToLog(SExceptionRaised + LineEnding + E.Message);
 end;
 
-function TFBUDRController.GetLogStream: TStream;
-var FilePathName: AnsiString;
-begin
-  if FLogStream = nil then
-  begin
-    FilePathName := ProcessTemplateMacros(FBUDRControllerOptions.LogFileNameTemplate);
-    if FJnlOpenAppend then
-    begin
-      FLogStream := TFileStream.Create(FilePathName,fmOpenWrite or fmShareDenyNone);
-      FLogStream.Seek(0, soFromEnd);
-    end
-    else
-      FLogStream := TFileStream.Create(FilePathName,fmCreate or fmShareDenyNone);
-  end;
-  Result := FLogStream;
-  FJnlOpenAppend := true;
-end;
-
 procedure TFBUDRController.WriteToLog(Msg: AnsiString);
 var LogEntry: AnsiString;
 begin
+  if not NeedLogStream then
+    Exit; {no log file available}
   LogEntry := Format(sLogFormat,[FBFormatDateTime(GetDateTimeFmt,Now),Msg]) + LineEnding;
   if FBUDRControllerOptions.ThreadSafeLogging then
   begin
     FCriticalSection.Enter;
     try
-      GetLogStream.Write(LogEntry[1],Length(LogEntry));
+      FLogStream.Write(LogEntry[1],Length(LogEntry));
       if FBUDRControllerOptions.ForceWriteJournalEntries then
         FreeAndNil(FLogStream);
     finally
@@ -2225,7 +2232,7 @@ begin
     end;
   end
   else
-    GetLogStream.Write(LogEntry[1],Length(LogEntry));
+    FLogStream.Write(LogEntry[1],Length(LogEntry));
 end;
 
 function TFBUDRController.CharSetIDToText(att: IAttachment; id: integer): AnsiString;
@@ -2325,7 +2332,10 @@ begin
   if loReadOnlyQueries in FBUDRControllerOptions.LogOptions then
     JnlOptions := JnlOptions + [joReadOnlyQueries];
   if JnlOptions <> [] then
-    context.GetAttachment.StartJournaling(GetLogStream,JnlOptions);
+  begin
+    if NeedLogStream then
+      context.GetAttachment.StartJournaling(FLogStream,JnlOptions);
+  end;
 end;
 
 function TFBUDRController.HasConfigFile: boolean;

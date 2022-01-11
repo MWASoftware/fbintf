@@ -291,7 +291,7 @@ begin
             Format('Relation Name = %s' + NewLineTAB,[getRelation(i)]) +
             Format('Alias Name = %s' + NewLineTAB,[getAlias(i)]) +
             Format('SQLType = %s' + NewLineTAB,[TSQLDataItem.GetSQLTypeName(getType(i))]) +
-            Format('IsNullable = %s' + NewLineTAB,[BoolToStr(isNullable(i){$ifdef FPC},'yes','no'{$endif})]) +
+            Format('IsNullable = %s' + NewLineTAB,[BooleanToStr(isNullable(i),'yes','no')]) +
             Format('SubType = %d' + NewLineTAB,[getSubType(i)]) +
             Format('Length = %d' + NewLineTAB,[getLength(i)]) +
             Format('Scale = %d' + NewLineTAB,[getScale(i)]) +

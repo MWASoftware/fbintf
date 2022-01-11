@@ -2353,8 +2353,12 @@ const sqlIsComputed =
   'and R.RDB$FIELD_NAME = ?';
 
 function TColumnMetaData.getIsComputedValue: boolean;
+var Cursor: IResultSet;
 begin
-  Result := not GetAttachment.OpenCursorAtStart(sqlIsComputed,[GetRelationName,GetName])[0].IsNull;
+  Cursor := GetAttachment.OpenCursorAtStart(sqlIsComputed,[GetRelationName,GetName]);
+  Result := not Cursor.IsEof;
+  if Result then
+    Result := not Cursor[0].IsNull;
 end;
 
 function TColumnMetaData.GetSize: cardinal;
