@@ -232,10 +232,10 @@
       </Unit28>
       <Unit29>
         <Filename Value="../client/FBSQLData.pas"/>
-        <EditorIndex Value="-1"/>
-        <WindowIndex Value="1"/>
-        <TopLine Value="309"/>
-        <CursorPos X="36" Y="319"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="2354"/>
+        <CursorPos X="5" Y="2364"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
@@ -243,6 +243,7 @@
           <CursorPos X="38" Y="873"/>
         </ExtraEditor1>
         <UsageCount Value="25"/>
+        <Loaded Value="True"/>
       </Unit29>
       <Unit30>
         <Filename Value="../client/FBMessages.pas"/>
@@ -493,7 +494,6 @@
       </Unit60>
       <Unit61>
         <Filename Value="../changelog"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
         <TopLine Value="58"/>
         <CursorPos X="3" Y="80"/>
@@ -1044,14 +1044,14 @@
       </Unit135>
       <Unit136>
         <Filename Value="../client/IB.pas"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="4"/>
         <TopLine Value="505"/>
         <CursorPos Y="519"/>
         <UsageCount Value="11"/>
         <Loaded Value="True"/>
       </Unit136>
     </Units>
-    <JumpHistory Count="4" HistoryIndex="3">
+    <JumpHistory Count="7" HistoryIndex="6">
       <Position1>
         <Filename Value="testApp/TestApplication.pas"/>
         <Caret Line="699" TopLine="692"/>
@@ -1068,6 +1068,17 @@
         <Filename Value="testApp/TestApplication.pas"/>
         <Caret Line="556" Column="34" TopLine="538"/>
       </Position4>
+      <Position5>
+        <Filename Value="../client/FBSQLData.pas"/>
+        <Caret Line="315" Column="97" TopLine="303"/>
+      </Position5>
+      <Position6>
+        <Filename Value="../client/FBSQLData.pas"/>
+      </Position6>
+      <Position7>
+        <Filename Value="../client/FBSQLData.pas"/>
+        <Caret Line="396" Column="23" TopLine="375"/>
+      </Position7>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
@@ -1094,7 +1105,6 @@
         <Item14 Value="-t 5"/>
         <Item15 Value="-t 17"/>
       </List1>
-      <List2 Name="WorkingDirectory" Type="File" Count="1"/>
     </HistoryLists>
   </ProjectSession>
 </CONFIG>

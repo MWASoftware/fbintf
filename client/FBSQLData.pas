@@ -2355,10 +2355,14 @@ const sqlIsComputed =
 function TColumnMetaData.getIsComputedValue: boolean;
 var Cursor: IResultSet;
 begin
-  Cursor := GetAttachment.OpenCursorAtStart(sqlIsComputed,[GetRelationName,GetName]);
-  Result := not Cursor.IsEof;
+  Result := GetAttachment <> nil;
   if Result then
-    Result := not Cursor[0].IsNull;
+  begin
+    Cursor :=  GetAttachment.OpenCursorAtStart(sqlIsComputed,[GetRelationName,GetName]);
+    Result := not Cursor.IsEof;
+    if Result then
+      Result := not Cursor[0].IsNull;
+  end;
 end;
 
 function TColumnMetaData.GetSize: cardinal;
