@@ -24,6 +24,12 @@
         <CfgParent>Base</CfgParent>
         <Base>true</Base>
     </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Cfg_2)'=='true') or '$(Cfg_2_Win32)'!=''">
+        <Cfg_2_Win32>true</Cfg_2_Win32>
+        <CfgParent>Cfg_2</CfgParent>
+        <Cfg_2>true</Cfg_2>
+        <Base>true</Base>
+    </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
         <VerInfo_MinorVer>1</VerInfo_MinorVer>
         <SanitizedProjectName>fbintf</SanitizedProjectName>
@@ -34,7 +40,6 @@
         <VerInfo_Locale>2057</VerInfo_Locale>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <DCC_RangeChecking>true</DCC_RangeChecking>
-        <DesignOnlyPackage>false</DesignOnlyPackage>
         <DCC_BplOutput>.</DCC_BplOutput>
         <DCC_DcpOutput>.</DCC_DcpOutput>
         <DCC_ImageBase>00400000</DCC_ImageBase>
@@ -56,6 +61,13 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
+        <DCC_BplOutput>.\$(Platform)\$(Config)</DCC_BplOutput>
+        <DCC_DcpOutput>.\$(Platform)\$(Config)</DCC_DcpOutput>
+        <DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
+        <Debugger_RunParams>-X -t 10</Debugger_RunParams>
+        <Debugger_HostApplication>C:\Users\A User\projects\fbintf\testsuite\testsuite.exe</Debugger_HostApplication>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">

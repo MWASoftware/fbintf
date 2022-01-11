@@ -170,7 +170,7 @@ end;
 
 procedure TTest10.EventReport(Sender: IEvents);
 begin
-  FEventSignalled := true;
+  FEventSignalled := true; writeln('Signalled');
   TThread.Synchronize(nil,ShowEventReport);
 end;
 
