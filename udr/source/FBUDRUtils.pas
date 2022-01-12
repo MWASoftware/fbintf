@@ -280,9 +280,12 @@ function TFBUDRMessageMetadata.AsText: AnsiString;
 
 var i: integer;
 begin
-  Result := Format('Field Count = %d' + NewLineTAB,[getCount]) +
-            Format('Alignment = %d' + NewLineTAB,[getAlignment]) +
-            Format('Aligned Length = %d' + NewLineTAB,[getAlignedLength]);
+  Result := Format('Field Count = %d' + NewLineTAB,[getCount]);
+  if FMetadata.vTable.version >= 4 then
+  begin
+    Result := Result + Format('Alignment = %d' + NewLineTAB,[getAlignment]) +
+                Format('Aligned Length = %d' + NewLineTAB,[getAlignedLength]);
+  end;
   for i := 0 to getCount - 1 do
   begin
     Result := Result +
@@ -769,13 +772,16 @@ begin
   Result := Format('Package Name = %s' + NewLineTAB,[getPackage]) +
             Format('Name = %s' + NewLineTAB,[getName]) +
             Format('Entry Point = %s (%s,%s,%s)' + NewLineTAB,[getEntryPoint,getModuleName,getRoutineName,getInfo]) +
-            Format('Body = %s' + NewLineTAB,[getBody]) +
-            Format('Input Metadata:' + NewLineTAB + '%s',[MetadataToText(FInputMetaData)]) + LineEnding +
-            Format('Output Metadata:' + NewLineTAB + '%s',[MetadataToText(FOutputMetaData)]);
+            Format('Body = %s' + NewLineTAB,[getBody]);
+  if HasInputMetaData then
+    Result := Result + Format('Input Metadata:' + NewLineTAB + '%s',[MetadataToText(FInputMetaData)]) + LineEnding;
+  if HasOutputMetaData then
+    Result := Result + Format('Output Metadata:' + NewLineTAB + '%s',[MetadataToText(FOutputMetaData)]);
   if FRoutineMetadata.getTriggerType(FStatus) > 0 then
   begin
+    if HasTriggerMetaData then
+      Result := Result + Format('Trigger Metadata:' + NewLineTAB + '%s',[MetadataToText(FTriggerMetaData)]);
     Result := Result +
-    Format('Trigger Metadata:' + NewLineTAB + '%s',[MetadataToText(FTriggerMetaData)]) +
     Format('Trigger Table = %s' + NewLineTAB,[getTriggerTable]) +
     Format('Trigger Type = %s' + NewLineTAB,[TriggerTypeToText(getTriggerType)]);
   end;

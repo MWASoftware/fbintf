@@ -74,7 +74,7 @@ var MyTestProc: TExternalProcedureWrapper;
     Results: IProcedureResults;
 begin
   UDRPlugin.Attachment := Attachment;
-  MyTestProc := UDRPlugin.GetExternalProcedure('MYTESTPROC','','fbudrtests!test_proc');
+  MyTestProc := UDRPlugin.makeProcedure('MYTESTPROC','','fbudrtests!test_proc');
   try
     writeln(OutFile,'Salary and Name of Employee 24');
     MyTestProc.InputParams[0].AsInteger := 24;

@@ -103,7 +103,6 @@ type
     function getModuleName: AnsiString;
     function getRoutineName: AnsiString;
     function getInfo: AnsiString;
-    function getBody: AnsiString;
   end;
 
   {IFBUDRTriggerMetaData is a subset of IFBUDRRoutineMetadata and is used to provide
@@ -115,7 +114,6 @@ type
     function getModuleName: AnsiString;
     function getRoutineName: AnsiString;
     function getInfo: AnsiString;
-    function getBody: AnsiString;
     function getTriggerTable: AnsiString;
     function getTriggerType: TFBUDRTriggerType;
   end;
@@ -129,7 +127,6 @@ type
     ['{e49d096e-3a9c-4f75-bb39-db32b1897312}']
     function getCount: integer;
     function getSQLData(index: integer): ISQLData;
-    procedure GetData(index: integer; var IsNull:boolean; var len: short; var data: PByte);
     function GetTransaction: ITransaction;
     function GetAttachment: IAttachment;
     function ParamExists(Idx: AnsiString): boolean;

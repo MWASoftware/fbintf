@@ -74,7 +74,7 @@ begin
   {initialize the emulator with the database connection}
   UDRPlugin.Attachment := Attachment;
   {Get the emulator wrapper for the row_count function, declared as MyRowCount}
-  MyRowCount := UDRPlugin.GetExternalFunction('MYROWCOUNT','','fbudrtests!row_count');
+  MyRowCount := UDRPlugin.makeFunction('MYROWCOUNT','','fbudrtests!row_count');
   try
     writeln(OutFile,'Row Count for Employee');
     {set the input parameter to the EMPLOYEE table}
@@ -108,7 +108,7 @@ begin
 
   writeln(OutFile);
   {Now call the external version with an error}
-  MyRowCount := UDRPlugin.GetExternalFunction('BADROWCOUNT','','fbudrtests!bad_row_count');
+  MyRowCount := UDRPlugin.makeFunction('BADROWCOUNT','','fbudrtests!bad_row_count');
   try
     try
       writeln(OutFile,'Row Count for Employee');
@@ -132,7 +132,7 @@ var ReturnInfo: TExternalFunctionWrapper;
     Transaction: ITransaction;
 begin
   UDRPlugin.Attachment := Attachment;
-  ReturnInfo := UDRPlugin.GetExternalFunction('RETURNINFO','','fbudrtests!return_info!Hello World');
+  ReturnInfo := UDRPlugin.makeFunction('RETURNINFO','','fbudrtests!return_info!Hello World');
   try
     Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
     writeln(OutFile,'Info returned = ',ReturnInfo.Execute(Transaction).AsString);

@@ -69,7 +69,7 @@ var MyTestProc: TExternalProcedureWrapper;
     Results: IProcedureResults;
 begin
   UDRPlugin.Attachment := Attachment;
-  MyTestProc := UDRPlugin.GetExternalProcedure('MYSELECTPROC','','fbudrtests!select_proc');
+  MyTestProc := UDRPlugin.makeProcedure('MYSELECTPROC','','fbudrtests!select_proc');
   try
     writeln(OutFile,'List Employees, salaries and accumulated salary');
     Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
@@ -92,7 +92,7 @@ var MyReadText: TExternalProcedureWrapper;
     Results: IProcedureResults;
 begin
   UDRPlugin.Attachment := Attachment;
-  MyReadText := UDRPlugin.GetExternalProcedure('MYREADTEXT','','fbudrtests!read_txt');
+  MyReadText := UDRPlugin.makeProcedure('MYREADTEXT','','fbudrtests!read_txt');
   try
     MyReadText.InputParams[0].AsString := 'testsuite.conf';
     writeln(OutFile,'Dump text file - testsuite.conf');

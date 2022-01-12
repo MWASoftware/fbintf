@@ -44,7 +44,7 @@ uses
   Classes, SysUtils, Firebird, IB, FBUDRIntf, FBUDRController, FB30Statement;
 
 type
-  TFBUdrPlugin = class;
+  TFBUdrPluginEmulator = class;
 
   { TEmulatedExternalContext }
 
@@ -78,7 +78,7 @@ type
 
   TEmulatedRoutineMetadata = class(IRoutineMetadataImpl)
   private
-    FManager: TFBUdrPlugin;
+    FManager: TFBUdrPluginEmulator;
     FName: AnsiString;
     FPackageName: AnsiString;
     FStatement: IStatement;
@@ -89,10 +89,9 @@ type
     FOutputMetadata: firebird.IMessageMetadata;
     FTriggerMetadata: firebird.IMessageMetadata;
   public
-    constructor Create(aManager: TFBUdrPlugin; aName, aPackageName, aEntryPoint: AnsiString; aStatement: IStatement);
+    constructor Create(aManager: TFBUdrPluginEmulator; aName, aPackageName, aEntryPoint: AnsiString; aStatement: IStatement);
     destructor Destroy; override;
     procedure SetTriggerInfo(aTableName: AnsiString; aTriggerType: cardinal);
-    function AsText: AnsiString;
   public
     {IRoutineMetadata}
     function getPackage(status: Firebird.IStatus): PAnsiChar; override;
@@ -110,7 +109,7 @@ type
 
   TExternalWrapper = class
   protected
-    FManager: TFBUdrPlugin;
+    FManager: TFBUdrPluginEmulator;
     FName: AnsiString;
     FPreparedStatement: IStatement;
     FContext: TEmulatedExternalContext;
@@ -126,7 +125,7 @@ type
                       inBuilder: Firebird.IMetadataBuilder;
                       outBuilder: Firebird.IMetadataBuilder); virtual; abstract;
   public
-    constructor Create(aManager: TFBUdrPlugin; aName, aPackageName, aEntryPoint: AnsiString;
+    constructor Create(aManager: TFBUdrPluginEmulator; aName, aPackageName, aEntryPoint: AnsiString;
                                  preparedStmt: IStatement);
     destructor Destroy; override;
   end;
@@ -143,7 +142,7 @@ type
                       inBuilder: Firebird.IMetadataBuilder;
                       outBuilder: Firebird.IMetadataBuilder); override;
   public
-    constructor Create(aManager: TFBUdrPlugin;aName, aPackageName, aEntryPoint: AnsiString;
+    constructor Create(aManager: TFBUdrPluginEmulator;aName, aPackageName, aEntryPoint: AnsiString;
        aFunctionFactory: TFBUDRFunctionFactory;
        preparedStmt: IStatement);
     function Execute(aTransaction: ITransaction): ISQLData;
@@ -175,7 +174,7 @@ type
                       inBuilder: Firebird.IMetadataBuilder;
                       outBuilder: Firebird.IMetadataBuilder); override;
   public
-    constructor Create(aManager: TFBUdrPlugin; aName, aPackageName, aEntryPoint: AnsiString;
+    constructor Create(aManager: TFBUdrPluginEmulator; aName, aPackageName, aEntryPoint: AnsiString;
        aProcedureFactory: TFBUDRProcedureFactory;
        preparedStmt: IStatement);
     function Execute(aTransaction: ITransaction): IProcedureResults;
@@ -212,7 +211,7 @@ type
                       inBuilder: Firebird.IMetadataBuilder;
                       outBuilder: Firebird.IMetadataBuilder); override;
   public
-    constructor Create(aManager: TFBUdrPlugin; aName,  aTableName, aEntryPoint: AnsiString;
+    constructor Create(aManager: TFBUdrPluginEmulator; aName,  aTableName, aEntryPoint: AnsiString;
        aTriggerType: cardinal;
        aTriggerFactory: TFBUDRTriggerFactory;
        preparedStmt: IStatement);
@@ -222,9 +221,9 @@ type
     property NewValues: IFBUDROutputData read FNewValues;
   end;
 
-  { TFBUdrPlugin }
+  { TFBUdrPluginEmulator }
 
-  TFBUdrPlugin = class(Firebird.IUdrPluginImpl)
+  TFBUdrPluginEmulator = class(Firebird.IUdrPluginImpl)
   private
     FModuleName: AnsiString;
     FTheirUnloadFlag: booleanPtr;
@@ -248,12 +247,11 @@ type
   public
     constructor Create(aModuleName: AnsiString);
     destructor Destroy; override;
-    function GetExternalFunction(aFunctionName, aPackageName,
+    function makeFunction(aFunctionName, aPackageName,
       aEntryPoint: AnsiString): TExternalFunctionWrapper;
-    function GetExternalProcedure(aProcName, aPackageName, aEntryPoint: AnsiString): TExternalProcedureWrapper;
-    function GetExternalTrigger(aName, aEntryPoint, datasetName: AnsiString; aTriggerType: cardinal
+    function makeProcedure(aProcName, aPackageName, aEntryPoint: AnsiString): TExternalProcedureWrapper;
+    function makeTrigger(aName, aEntryPoint, datasetName: AnsiString; aTriggerType: cardinal
       ): TExternalTriggerWrapper;
-    function GetCharSetID: integer;
     property Attachment: IAttachment read FAttachment write SetAttachment;
     property ModuleName: AnsiString read FModuleName;
   end;
@@ -275,9 +273,9 @@ type
     FExternalResultSet: Firebird.IExternalResultSet;
     FResults: IResults;
     FIsEof: boolean;
-    FManager: TFBUDRPlugin;
+    FManager: TFBUdrPluginEmulator;
   public
-    constructor Create(aManager: TFBUDRPlugin;
+    constructor Create(aManager: TFBUdrPluginEmulator;
       aExternalResultSet: Firebird.IExternalResultSet;
   aSQLRecord: TIBXOUTPUTSQLDA);
     destructor Destroy; override;
@@ -324,7 +322,7 @@ begin
   FTriggerFactory.setup(status,context,metadata,outBuilder);
 end;
 
-constructor TExternalTriggerWrapper.Create(aManager: TFBUdrPlugin; aName,
+constructor TExternalTriggerWrapper.Create(aManager: TFBUdrPluginEmulator; aName,
   aTableName, aEntryPoint: AnsiString; aTriggerType: cardinal;
   aTriggerFactory: TFBUDRTriggerFactory; preparedStmt: IStatement);
 begin
@@ -386,7 +384,7 @@ begin
   FProcedureFactory.setup(status,context,metadata,inBuilder,outBuilder);
 end;
 
-constructor TExternalProcedureWrapper.Create(aManager: TFBUdrPlugin; aName,
+constructor TExternalProcedureWrapper.Create(aManager: TFBUdrPluginEmulator; aName,
   aPackageName, aEntryPoint: AnsiString;
   aProcedureFactory: TFBUDRProcedureFactory; preparedStmt: IStatement);
 begin
@@ -397,8 +395,6 @@ end;
 function TExternalProcedureWrapper.Execute(aTransaction: ITransaction
   ): IProcedureResults;
 var aProcedureInstance: Firebird.IExternalProcedure;
-    ConnectionCharSetID: integer;
-    ProcedureCharSetID: integer;
     Buffer: array [0..512] of AnsiChar;
     ResultsSet: IExternalResultSet;
     OutputData: IResults;
@@ -409,7 +405,6 @@ begin
     Setup;
     aProcedureInstance := FProcedureFactory.newItem(FStatus,FContext,FRoutineMetadata);
     try
-      ConnectionCharSetID := FManager.GetCharSetID;
       Buffer[0] := #0;
       aProcedureInstance.getCharSet(FStatus,FContext,@Buffer,sizeof(Buffer));
       CheckStatus;
@@ -429,7 +424,7 @@ end;
 
 { TProcedureResults }
 
-constructor TProcedureResults.Create(aManager: TFBUDRPlugin;
+constructor TProcedureResults.Create(aManager: TFBUdrPluginEmulator;
   aExternalResultSet: Firebird.IExternalResultSet; aSQLRecord: TIBXOUTPUTSQLDA);
 begin
   inherited Create;
@@ -527,7 +522,7 @@ begin
   CheckStatus;
 end;
 
-constructor TExternalWrapper.Create(aManager: TFBUdrPlugin; aName,
+constructor TExternalWrapper.Create(aManager: TFBUdrPluginEmulator; aName,
   aPackageName, aEntryPoint: AnsiString; preparedStmt: IStatement);
 begin
   inherited Create;
@@ -553,7 +548,7 @@ end;
 
 { TEmulatedRoutineMetadata }
 
-constructor TEmulatedRoutineMetadata.Create(aManager: TFBUdrPlugin; aName,
+constructor TEmulatedRoutineMetadata.Create(aManager: TFBUdrPluginEmulator; aName,
   aPackageName, aEntryPoint: AnsiString; aStatement: IStatement);
 begin
   inherited Create;
@@ -580,21 +575,6 @@ procedure TEmulatedRoutineMetadata.SetTriggerInfo(aTableName: AnsiString;
 begin
   FTableName := aTableName;
   FTriggerType := aTriggerType;
-end;
-
-function TEmulatedRoutineMetadata.AsText: AnsiString;
-var context: TEmulatedExternalContext;
-    fbcontext: IFBUDRExternalContext;
-begin
-  context := TEmulatedExternalContext.Create(FStatement);
-  try
-    fbcontext := TFBUDRExternalContext.Create(nil);
-    (fbcontext as TFBUDRExternalContext).Assign(context);
-    with TFBUDRRoutineMetadata.Create(fbcontext,self) do
-     Result := AsText;
-  finally
-    context.Free;
-  end;
 end;
 
 function TEmulatedRoutineMetadata.getPackage(status: Firebird.IStatus
@@ -663,7 +643,7 @@ end;
 
 { TExternalFunctionWrapper }
 
-constructor TExternalFunctionWrapper.Create(aManager: TFBUdrPlugin; aName,
+constructor TExternalFunctionWrapper.Create(aManager: TFBUdrPluginEmulator; aName,
   aPackageName, aEntryPoint: AnsiString;
   aFunctionFactory: TFBUDRFunctionFactory; preparedStmt: IStatement);
 begin
@@ -673,8 +653,6 @@ end;
 
 function TExternalFunctionWrapper.Execute(aTransaction: ITransaction): ISQLData;
 var aFunctionInstance: Firebird.IExternalFunction;
-    ConnectionCharSetID: integer;
-    FunctionCharSetID: integer;
     Buffer: array [0..512] of AnsiChar;
     CodePage: TSystemCodePage;
     OutputData: IResults;
@@ -684,7 +662,6 @@ begin
     Setup;
     aFunctionInstance := FFunctionFactory.newItem(FStatus,FContext,FRoutineMetadata);
     try
-      ConnectionCharSetID := FManager.GetCharSetID;
       Buffer[0] := #0;
       aFunctionInstance.getCharSet(FStatus,FContext,@Buffer,sizeof(Buffer));
       CheckStatus;
@@ -808,9 +785,9 @@ begin
   Result := nil;
 end;
 
-{ TFBUdrPlugin }
+{ TFBUdrPluginEmulator }
 
-function TFBUdrPlugin.getMaster(): IMaster;
+function TFBUdrPluginEmulator.getMaster(): IMaster;
 var MasterProvider: IFBIMasterProvider;
 begin
   if FirebirdAPI.HasMasterIntf and (FirebirdAPI.QueryInterface(IFBIMasterProvider,MasterProvider) = S_OK) then
@@ -819,25 +796,25 @@ begin
     Result := nil;
 end;
 
-procedure TFBUdrPlugin.registerFunction(status: Firebird.IStatus;
+procedure TFBUdrPluginEmulator.registerFunction(status: Firebird.IStatus;
   name: PAnsiChar; factory: Firebird.IUdrFunctionFactory);
 begin
   FFunctionFactories.AddObject(strpas(name),factory);
 end;
 
-procedure TFBUdrPlugin.registerProcedure(status: Firebird.IStatus;
+procedure TFBUdrPluginEmulator.registerProcedure(status: Firebird.IStatus;
   name: PAnsiChar; factory: Firebird.IUdrProcedureFactory);
 begin
   FProcedureFactories.AddObject(strpas(name),factory);
 end;
 
-procedure TFBUdrPlugin.registerTrigger(status: Firebird.IStatus;
+procedure TFBUdrPluginEmulator.registerTrigger(status: Firebird.IStatus;
   name: PAnsiChar; factory: Firebird.IUdrTriggerFactory);
 begin
   FTriggerFactories.AddObject(strpas(name),factory);
 end;
 
-constructor TFBUdrPlugin.Create(aModuleName: AnsiString);
+constructor TFBUdrPluginEmulator.Create(aModuleName: AnsiString);
 begin
   inherited Create;
   FModuleName := aModuleName;
@@ -849,7 +826,7 @@ begin
   CheckStatus;
 end;
 
-destructor TFBUdrPlugin.Destroy;
+destructor TFBUdrPluginEmulator.Destroy;
 begin
   FreeList(FFunctionFactories);
   FreeList(FProcedureFactories);
@@ -859,7 +836,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TFBUdrPlugin.CheckStatus;
+procedure TFBUdrPluginEmulator.CheckStatus;
 var buffer: array [0..4096] of AnsiChar;
 begin
   with FStatus do
@@ -870,7 +847,7 @@ begin
     end;
 end;
 
-procedure TFBUdrPlugin.FreeList(var list: TStringList);
+procedure TFBUdrPluginEmulator.FreeList(var list: TStringList);
 var i: integer;
     obj: TObject;
 begin
@@ -894,7 +871,7 @@ begin
   FreeAndNil(List);
 end;
 
-function TFBUdrPlugin.CreateSelectFunctionSQL(aFunctionName: AnsiString
+function TFBUdrPluginEmulator.CreateSelectFunctionSQL(aFunctionName: AnsiString
   ): AnsiString;
 const
   FunctionArgsSQL =
@@ -923,7 +900,7 @@ begin
   Result := 'Select ' + QuoteIdentifierIfNeeded(FAttachment.GetSQLDialect,aFunctionName) + '(' + arglist + ') From RDB$DATABASE';
 end;
 
-function TFBUdrPlugin.CreateExecProcedureSQL(aProcName: AnsiString): AnsiString;
+function TFBUdrPluginEmulator.CreateExecProcedureSQL(aProcName: AnsiString): AnsiString;
 const
   sGetProcArgsSQL =
     'SELECT * ' +
@@ -971,7 +948,7 @@ begin
   end;
 end;
 
-procedure TFBUdrPlugin.SetAttachment(AValue: IAttachment);
+procedure TFBUdrPluginEmulator.SetAttachment(AValue: IAttachment);
 begin
   if FAttachment = AValue then Exit;
   if (AValue = nil) or (AValue.getFirebirdAPI = nil) or not AValue.getFirebirdAPI.HasMasterIntf then
@@ -979,7 +956,8 @@ begin
   FAttachment := AValue;
 end;
 
-function TFBUdrPlugin.GetExternalFunction(aFunctionName, aPackageName, aEntryPoint: AnsiString): TExternalFunctionWrapper;
+function TFBUdrPluginEmulator.makeFunction(aFunctionName, aPackageName,
+  aEntryPoint: AnsiString): TExternalFunctionWrapper;
 var index: integer;
     aTransaction: ITransaction;
     aModuleName,aRoutineName,aInfo: AnsiString;
@@ -1000,7 +978,7 @@ begin
   end;
 end;
 
-function TFBUdrPlugin.GetExternalProcedure(aProcName, aPackageName,
+function TFBUdrPluginEmulator.makeProcedure(aProcName, aPackageName,
   aEntryPoint: AnsiString): TExternalProcedureWrapper;
 var index: integer;
     aTransaction: ITransaction;
@@ -1021,7 +999,7 @@ begin
   end;
 end;
 
-function TFBUdrPlugin.GetExternalTrigger(aName, aEntryPoint,
+function TFBUdrPluginEmulator.makeTrigger(aName, aEntryPoint,
   datasetName: AnsiString; aTriggerType: cardinal): TExternalTriggerWrapper;
 var index: integer;
     aTransaction: ITransaction;
@@ -1041,11 +1019,6 @@ begin
                    FTriggerFactories.Objects[index] as TFBUDRTriggerFactory,
                    FAttachment.PrepareWithNamedParameters(aTransaction,sql,true));
   end;
-end;
-
-function TFBUdrPlugin.GetCharSetID: integer;
-begin
-  Result := FAttachment.GetCharSetID;
 end;
 
 end.

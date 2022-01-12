@@ -73,7 +73,7 @@ type
     AllowConfigFileOverrides: boolean;
     LogFileNameTemplate: AnsiString;
     ConfigFileNameTemplate: AnsiString;
-    ForceWriteJournalEntries: boolean;
+    ForceWriteLogEntries: boolean;
     LogOptions: TFBUDRControllerLogOptions;
     ThreadSafeLogging: boolean;
   end;
@@ -91,7 +91,7 @@ const FBUDRControllerOptions: TFBUDRControllerOptions = (
           AllowConfigFileOverrides: false;
           LogFileNameTemplate:'$LOGDIR$TIMESTAMP$MODULE.log';
           ConfigFileNameTemplate: '$UDRDIR$MODULE.conf';
-          ForceWriteJournalEntries: false;
+          ForceWriteLogEntries: false;
           LogOptions: [];
           ThreadSafeLogging: false);
 
@@ -2098,7 +2098,7 @@ var aLogOptions: TFBUDRControllerLogOptions;
     aConfigFileName: Ansistring;
 begin
   aConfigFileName := ProcessTemplateMacros(FBUDRControllerOptions.ConfigFileNameTemplate);
-  if (FConfigFile = nil) and FileExists(aConfigFileName) then
+  if (FConfigFile = nil) and (aConfigFileName <> '') and FileExists(aConfigFileName) then
   begin
     FConfigFile := TIniFile.Create(aConfigFileName);
     {$if declared(TStringArray)}
@@ -2111,8 +2111,8 @@ begin
     begin
       LogFileNameTemplate := FConfigFile.ReadString('Controller','LogFileNameTemplate',LogFileNameTemplate);
       WriteToLog('LogFileNameTemplate = ' + LogFileNameTemplate);
-      ForceWriteJournalEntries := FConfigFile.ReadBool('Controller','ForceWriteJournalEntries',ForceWriteJournalEntries);
-      WriteToLog('ForceWriteJournalEntries = ' + BooleanToStr(ForceWriteJournalEntries ,'true','false'));
+      ForceWriteLogEntries := FConfigFile.ReadBool('Controller','ForceWriteLogEntries',ForceWriteLogEntries);
+      WriteToLog('ForceWriteLogEntries = ' + BooleanToStr(ForceWriteLogEntries ,'true','false'));
       ThreadSafeLogging := FConfigFile.ReadBool('Controller','ThreadSafeLogging',ThreadSafeLogging);
       WriteToLog('ThreadSafeLogging = ' + BooleanToStr(ThreadSafeLogging,'true','false'));
       if GetLogOptions( FConfigFile.ReadString('Controller','LogOptions',''),aLogOptions) then
@@ -2225,7 +2225,7 @@ begin
     FCriticalSection.Enter;
     try
       FLogStream.Write(LogEntry[1],Length(LogEntry));
-      if FBUDRControllerOptions.ForceWriteJournalEntries then
+      if FBUDRControllerOptions.ForceWriteLogEntries then
         FreeAndNil(FLogStream);
     finally
       FCriticalSection.Leave;

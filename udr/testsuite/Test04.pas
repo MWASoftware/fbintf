@@ -68,7 +68,7 @@ var MyTestTrigger: TExternalTriggerWrapper;
     Transaction: ITransaction;
 begin
   UDRPlugin.Attachment := Attachment;
-  MyTestTrigger := UDRPlugin.GetExternalTrigger('MyEmployeeUpdate','fbudrtests!my_employee_update','EMPLOYEE',1{trigger_before});
+  MyTestTrigger := UDRPlugin.makeTrigger('MyEmployeeUpdate','fbudrtests!my_employee_update','EMPLOYEE',1{trigger_before});
   try
     writeln(OutFile,'Update EMPLOYEE 2');
     Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taRollback);

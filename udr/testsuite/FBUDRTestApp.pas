@@ -48,23 +48,24 @@ type
   { TFBUDRTestApp }
 
   TFBUDRTestApp = class(TTestApplication)
+  private
+    FUDRPlugin: TFBUdrPluginEmulator;
   public
     constructor Create(TheOwner: TComponent); override;
+    destructor Destroy; override;
     function getModuleName: AnsiString; virtual;
+    property UDRPlugin: TFBUdrPluginEmulator read FUDRPlugin;
   end;
 
   { TFBUDRTestBase }
 
   TFBUDRTestBase = class(TTestBase)
-  private
-    FUDRPlugin: TFBUdrPlugin;
     function getModuleName: AnsiString;
-  protected
-    procedure CreateObjects(Application: TTestApplication); override;
+  private
+    function GetUDRPlugin: TFBUdrPluginEmulator;
   public
-    destructor Destroy; override;
     procedure ApplyDDL(attachment: IAttachment; sql: array of AnsiString);
-    property UDRPlugin: TFBUdrPlugin read FUDRPlugin;
+    property UDRPlugin: TFBUdrPluginEmulator read GetUDRPlugin;
   end;
 
 
@@ -77,18 +78,9 @@ begin
   Result := (Owner as TFBUDRTestApp).getModuleName;
 end;
 
-procedure TFBUDRTestBase.CreateObjects(Application: TTestApplication);
+function TFBUDRTestBase.GetUDRPlugin: TFBUdrPluginEmulator;
 begin
-  inherited CreateObjects(Application);
-  if FUDRPlugin = nil then
-    FUDRPlugin := TFBUdrPlugin.Create(getModuleName);
-end;
-
-destructor TFBUDRTestBase.Destroy;
-begin
-  if FUDRPlugin <> nil then
-    FUDRPlugin.Free;
-  inherited Destroy;
+  Result := (Owner as TFBUDRTestApp).UDRPlugin;
 end;
 
 procedure TFBUDRTestBase.ApplyDDL(attachment: IAttachment;
@@ -110,6 +102,15 @@ constructor TFBUDRTestApp.Create(TheOwner: TComponent);
 begin
   inherited Create(TheOwner);
   StopOnException := True;
+  if FUDRPlugin = nil then
+    FUDRPlugin := TFBUdrPluginEmulator.Create(getModuleName);
+end;
+
+destructor TFBUDRTestApp.Destroy;
+begin
+  if FUDRPlugin <> nil then
+    FUDRPlugin.Free;
+  inherited Destroy;
 end;
 
 function TFBUDRTestApp.getModuleName: AnsiString;
