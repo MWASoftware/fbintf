@@ -72,5 +72,8 @@ begin
     LogOptions := [loLogFunctions, loLogProcedures, loLogTriggers, loDetails];
   end;
   RunTest;
+  {$IFDEF WINDOWS}
+  readln; {force console window to stay open}
+  {$ENDIF}
 end.
 
