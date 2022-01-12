@@ -1,14 +1,8 @@
 program myudrtestbed;
 
-{$IFDEF MSWINDOWS}
-{$DEFINE WINDOWS}
-{$ENDIF}
-
-{$IFDEF FPC}
 {$mode delphi}
 {$codepage UTF8}
 {$interfaces COM}
-{$ENDIF}
 
 uses Classes, FBUDRController, FBUdrPlugin, IB, udr_myrowcount;
 

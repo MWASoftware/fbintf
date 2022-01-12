@@ -1,14 +1,8 @@
 library myudrlibrary;
 
-{$IFDEF MSWINDOWS}
-{$DEFINE WINDOWS}
-{$ENDIF}
-
-{$IFDEF FPC}
 {$mode delphi}
 {$codepage UTF8}
 {$interfaces COM}
-{$ENDIF}
 
 uses
   Classes, sysutils,  FBUDRController, udr_myrowcount;

@@ -2259,7 +2259,7 @@ begin
            'SQLType = ' + GetSQLTypeName + NewLineTAB +
            'sub type = ' + IntToStr(getSubType) + NewLineTAB +
            'Scale = ' + IntToStr(getScale) + NewLineTAB +
-           'Charset = '  + CharSetIDToText(Params.GetAttachment,getCharSetID) +  NewLineTAB +
+           'Charset = '  + CharSetIDToText((Params as TFBUDRInputParams).GetAttachment,getCharSetID) +  NewLineTAB +
            BooleanToStr(getIsNullable,'Nullable','Not Nullable') + NewLineTAB +
            'Size = ' + IntToStr(GetSize) + NewLineTAB +
            'Value = ' + BooleanToStr(IsNull,'NULL',GetStrValue(Params[i] as TColumnMetaData)) + LineEnding;
@@ -2315,7 +2315,7 @@ begin
                  'SQLType = ' + GetSQLTypeName + NewLineTAB +
                  'sub type = ' + IntToStr(getSubType) + NewLineTAB +
                  'Scale = ' + IntToStr(getScale) + NewLineTAB +
-                 'Charset = '  + CharSetIDToText(OutputData.GetAttachment,getCharSetID) +  NewLineTAB +
+                 'Charset = '  + CharSetIDToText((OutputData as TFBUDROutputParams).GetAttachment,getCharSetID) +  NewLineTAB +
                  BooleanToStr(getIsNullable,'Nullable','Not Nullable') + NewLineTAB +
                  'Size = ' + IntToStr(GetSize) + NewLineTAB +
                  'Value = ' + BooleanToStr(IsNull,'NULL', GetStrValue(OutputData[i] as TColumnMetaData)) + LineEnding;

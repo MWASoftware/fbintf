@@ -127,8 +127,6 @@ type
     ['{e49d096e-3a9c-4f75-bb39-db32b1897312}']
     function getCount: integer;
     function getSQLData(index: integer): ISQLData;
-    function GetTransaction: ITransaction;
-    function GetAttachment: IAttachment;
     function ParamExists(Idx: AnsiString): boolean;
     function ByName(Idx: AnsiString): ISQLData;
     property Data[index: integer]: ISQLData read getSQLData; default;
@@ -144,8 +142,6 @@ type
     function getSQLParam(index: integer): ISQLParam;
     function GetModified: Boolean;
     function GetHasCaseSensitiveParams: Boolean;
-    function GetTransaction: ITransaction;
-    function GetAttachment: IAttachment;
     function ByName(Idx: AnsiString): ISQLParam ;
     procedure Clear;
     property Modified: Boolean read GetModified;
