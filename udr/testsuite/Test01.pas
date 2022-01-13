@@ -83,13 +83,13 @@ begin
     ParamInfo(MyRowCount.InputParams);
     Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
     {invoke the function and print the result}
-    writeln('Employee Row Count = ',MyRowCount.Execute(Transaction).AsInteger);
+    writeln(Outfile,'Employee Row Count = ',MyRowCount.Execute(Transaction).AsInteger);
     writeln(OutFile);
 
     {Try again with the DEPARTMENT table}
     MyRowCount.InputParams[0].AsString := 'DEPARTMENT';
     ParamInfo(MyRowCount.InputParams);
-    writeln('Dept Row Count = ',MyRowCount.Execute(Transaction).AsInteger);
+    writeln(Outfile,'Dept Row Count = ',MyRowCount.Execute(Transaction).AsInteger);
     writeln(OutFile);
 
     {And again but demonstrate exception handling by using an invalid table name}
@@ -97,7 +97,7 @@ begin
     try
       ParamInfo(MyRowCount.InputParams);
       Rows := MyRowCount.Execute(Transaction).AsInteger;
-      writeln('Dept Row Count = ',Rows);
+      writeln(Outfile,'Dept Row Count = ',Rows);
       writeln(OutFile);
     except on E: Exception do
       writeln(Outfile,'Expected exception: ',E.Message);
@@ -115,7 +115,7 @@ begin
       MyRowCount.InputParams[0].AsString := 'EMPLOYEE';
       ParamInfo(MyRowCount.InputParams);
       Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
-      writeln('Employee Row Count = ',MyRowCount.Execute(Transaction).AsInteger);
+      writeln(Outfile,'Employee Row Count = ',MyRowCount.Execute(Transaction).AsInteger);
     except on E: Exception do
       writeln(Outfile,'Expected exception: ',E.Message);
     end;

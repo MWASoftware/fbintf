@@ -1,0 +1,1434 @@
+FB UDR Test Suite
+Copyright MWA Software 2016-2021
+
+Starting Tests
+Client API Version = 4.0
+Firebird Environment Variable = /opt/firebird4.0.1
+Firebird Bin Directory = /opt/firebird4.0.1/bin
+Firebird Conf Directory = /opt/firebird4.0.1/
+Firebird Client Library Path = /opt/firebird4.0.1/lib/libfbclient.so
+Running Test 01: Open the employee database and run a simple UDR Function
+Row Count for Employee
+SQL Params
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = TABLE_NAME
+Scale = 0
+Charset id = 0
+Not Null
+Size = 31
+Value = EMPLOYEE
+
+Employee Row Count = 42
+
+SQL Params
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = TABLE_NAME
+Scale = 0
+Charset id = 0
+Not Null
+Size = 31
+Value = DEPARTMENT
+
+Dept Row Count = 21
+
+SQL Params
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = TABLE_NAME
+Scale = 0
+Charset id = 0
+Not Null
+Size = 31
+Value = BAD
+
+Expected exception: Dynamic SQL Error
+-SQL error code = -204
+-Table unknown
+-BAD
+-At line 1, column 22
+
+Row Count for Employee
+SQL Params
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = TABLE_NAME
+Scale = 0
+Charset id = 0
+Not Null
+Size = 31
+Value = EMPLOYEE
+
+Employee Row Count = Expected exception: Empty query
+Info returned = Hello World
+
+
+------------------------------------------------------
+Running Test 02: Execute Procedure Tests
+Salary and Name of Employee 24
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = EMP_NO
+Scale = 0
+Charset id = 0
+Nullable
+Size = 2
+Value = 24
+
+Salary = 81810.19
+Fisher, Pete
+
+
+
+------------------------------------------------------
+Running Test 03: UDR Select Procedure Test
+List Employees, salaries and accumulated salary
+Nelson, Robert, Salary = 105900 Acc Salary = $105900
+Young, Bruce, Salary = 97500 Acc Salary = $203400
+Lambert, Kim, Salary = 102750 Acc Salary = $306150
+Johnson, Leslie, Salary = 64635 Acc Salary = $370785
+Forest, Phil, Salary = 75060 Acc Salary = $445845
+Weston, K. J., Salary = 86292.94 Acc Salary = $532137.94
+Lee, Terri, Salary = 53793 Acc Salary = $585930.94
+Hall, Stewart, Salary = 69482.63 Acc Salary = $655413.57
+Young, Katherine, Salary = 67241.25 Acc Salary = $722654.82
+Papadopoulos, Chris, Salary = 89655 Acc Salary = $812309.82
+Fisher, Pete, Salary = 81810.19 Acc Salary = $894120.01
+Bennet, Ann, Salary = 22935 Acc Salary = $917055.01
+De Souza, Roger, Salary = 69482.63 Acc Salary = $986537.64
+Baldwin, Janet, Salary = 61637.81 Acc Salary = $1048175.45
+Reeves, Roger, Salary = 33620.63 Acc Salary = $1081796.08
+Stansbury, Willie, Salary = 39224.06 Acc Salary = $1121020.14
+Phong, Leslie, Salary = 56034.38 Acc Salary = $1177054.52
+Ramanathan, Ashok, Salary = 80689.5 Acc Salary = $1257744.02
+Steadman, Walter, Salary = 116100 Acc Salary = $1373844.02
+Nordstrom, Carol, Salary = 42742.5 Acc Salary = $1416586.52
+Leung, Luke, Salary = 68805 Acc Salary = $1485391.52
+O'Brien, Sue Anne, Salary = 31275 Acc Salary = $1516666.52
+Burbank, Jennifer M., Salary = 53167.5 Acc Salary = $1569834.02
+Sutherland, Claudia, Salary = 100914 Acc Salary = $1670748.02
+Bishop, Dana, Salary = 62550 Acc Salary = $1733298.02
+MacDonald, Mary S., Salary = 111262.5 Acc Salary = $1844560.52
+Williams, Randy, Salary = 56295 Acc Salary = $1900855.52
+Bender, Oliver H., Salary = 212850 Acc Salary = $2113705.52
+Cook, Kevin, Salary = 111262.5 Acc Salary = $2224968.02
+Brown, Kelly, Salary = 27000 Acc Salary = $2251968.02
+Ichida, Yuki, Salary = 6000000 Acc Salary = $8251968.02
+Page, Mary, Salary = 48000 Acc Salary = $8299968.02
+Parker, Bill, Salary = 35000 Acc Salary = $8334968.02
+Yamamoto, Takashi, Salary = 7480000 Acc Salary = $15814968.02
+Ferrari, Roberto, Salary = 33000 Acc Salary = $15847968.02
+Yanowski, Michael, Salary = 44000 Acc Salary = $15891968.02
+Glon, Jacques, Salary = 38500 Acc Salary = $15930468.02
+Johnson, Scott, Salary = 60000 Acc Salary = $15990468.02
+Green, T.J., Salary = 36000 Acc Salary = $16026468.02
+Osborne, Pierre, Salary = 110000 Acc Salary = $16136468.02
+Montgomery, John, Salary = 35000 Acc Salary = $16171468.02
+Guckenheimer, Mark, Salary = 32000 Acc Salary = $16203468.02
+
+Dump text file - testsuite.conf
+[Controller]
+LogOptions = [loLogFunctions, loLogProcedures, loLogTriggers, loDetails,
+                                    loModifyQueries, loReadOnlyQueries]
+EOF
+
+
+
+------------------------------------------------------
+Running Test 04: UDR Trigger Test
+Update EMPLOYEE 2
+
+
+
+------------------------------------------------------
+Test Suite Ends
+Server Side Log
+---------------
+@dd-mm-yy hh:mm:ss.zzzz:Registering Function row_count
+@dd-mm-yy hh:mm:ss.zzzz:Registering Function bad_row_count
+@dd-mm-yy hh:mm:ss.zzzz:Registering Function return_info
+@dd-mm-yy hh:mm:ss.zzzz:Registering Procedure test_proc
+@dd-mm-yy hh:mm:ss.zzzz:Registering Procedure select_proc
+@dd-mm-yy hh:mm:ss.zzzz:Registering Procedure read_txt
+@dd-mm-yy hh:mm:ss.zzzz:Registering Trigger my_employee_update
+@dd-mm-yy hh:mm:ss.zzzz:Reading Configuration File: testsuite.conf
+@dd-mm-yy hh:mm:ss.zzzz:LogFileNameTemplate = serverside.log
+@dd-mm-yy hh:mm:ss.zzzz:ForceWriteLogEntries = false
+@dd-mm-yy hh:mm:ss.zzzz:ThreadSafeLogging = false
+@dd-mm-yy hh:mm:ss.zzzz:Malformed LogOptions Config string "[loLogFunctions, loLogProcedures, loLogTriggers, loDetails," at position 60
+@dd-mm-yy hh:mm:ss.zzzz:LogOptions = [loLogFunctions,loLogProcedures,loLogTriggers,loDetails]
+@13/1/2022 23:18:09.8100:Setup Function row_count
+@13/1/2022 23:18:09.8110:Routine Metadata
+Package Name = 
+  Name = MYROWCOUNT
+  Entry Point = fbudrtests!row_count (fbudrtests,row_count,)
+  Body = 
+  Input Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 36
+  Field No. 0
+  Field Name = TABLE_NAME
+  Relation Name = 
+  Alias Name = TABLE_NAME
+  SQLType = SQL_VARYING
+  IsNullable = no
+  SubType = 0
+  Length = 31
+  Scale = 0
+  Offset = 0
+  Null Offset = 34
+  Message Length = 31
+  
+Output Metadata:
+  Field Count = 1
+  Alignment = 4
+  Aligned Length = 8
+  Field No. 0
+  Field Name = MYROWCOUNT
+  Relation Name = 
+  Alias Name = MYROWCOUNT
+  SQLType = SQL_LONG
+  IsNullable = yes
+  SubType = 0
+  Length = 4
+  Scale = 0
+  Offset = 0
+  Null Offset = 4
+  Message Length = 4
+  
+@13/1/2022 23:18:09.8160:Function row_count created
+@13/1/2022 23:18:09.8160:Package Name = 
+  Name = MYROWCOUNT
+  Entry Point = fbudrtests!row_count (fbudrtests,row_count,)
+  Body = 
+  Input Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 36
+  Field No. 0
+  Field Name = TABLE_NAME
+  Relation Name = 
+  Alias Name = TABLE_NAME
+  SQLType = SQL_VARYING
+  IsNullable = no
+  SubType = 0
+  Length = 31
+  Scale = 0
+  Offset = 0
+  Null Offset = 34
+  Message Length = 31
+  
+Output Metadata:
+  Field Count = 1
+  Alignment = 4
+  Aligned Length = 8
+  Field No. 0
+  Field Name = MYROWCOUNT
+  Relation Name = 
+  Alias Name = MYROWCOUNT
+  SQLType = SQL_LONG
+  IsNullable = yes
+  SubType = 0
+  Length = 4
+  Scale = 0
+  Offset = 0
+  Null Offset = 4
+  Message Length = 4
+  
+@13/1/2022 23:18:09.8170:Execute Function row_count
+@13/1/2022 23:18:09.8180:External Context: 
+  Attachment ID = 2554
+  Transaction ID = 8098
+  User Name = SYSDBA
+  Database Name = employee
+  Client Character Set = UTF8
+  
+@13/1/2022 23:18:09.8180:Input Parameters
+Parameter 0:
+  Field Name = TABLE_NAME
+  Alias Name = TABLE_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 31
+  Value = EMPLOYEE
+
+@13/1/2022 23:18:09.8230:Output Parameters with data
+Column 0
+  Field Name = 
+  SQLType = SQL_LONG
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 4
+  Value = 42
+
+@13/1/2022 23:18:09.8230:Function row_count: dispose called
+@13/1/2022 23:18:09.8230:Setup Function row_count
+@13/1/2022 23:18:09.8240:Routine Metadata
+Package Name = 
+  Name = MYROWCOUNT
+  Entry Point = fbudrtests!row_count (fbudrtests,row_count,)
+  Body = 
+  Input Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 36
+  Field No. 0
+  Field Name = TABLE_NAME
+  Relation Name = 
+  Alias Name = TABLE_NAME
+  SQLType = SQL_VARYING
+  IsNullable = no
+  SubType = 0
+  Length = 31
+  Scale = 0
+  Offset = 0
+  Null Offset = 34
+  Message Length = 31
+  
+Output Metadata:
+  Field Count = 1
+  Alignment = 4
+  Aligned Length = 8
+  Field No. 0
+  Field Name = MYROWCOUNT
+  Relation Name = 
+  Alias Name = MYROWCOUNT
+  SQLType = SQL_LONG
+  IsNullable = yes
+  SubType = 0
+  Length = 4
+  Scale = 0
+  Offset = 0
+  Null Offset = 4
+  Message Length = 4
+  
+@13/1/2022 23:18:09.8280:Function row_count created
+@13/1/2022 23:18:09.8290:Package Name = 
+  Name = MYROWCOUNT
+  Entry Point = fbudrtests!row_count (fbudrtests,row_count,)
+  Body = 
+  Input Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 36
+  Field No. 0
+  Field Name = TABLE_NAME
+  Relation Name = 
+  Alias Name = TABLE_NAME
+  SQLType = SQL_VARYING
+  IsNullable = no
+  SubType = 0
+  Length = 31
+  Scale = 0
+  Offset = 0
+  Null Offset = 34
+  Message Length = 31
+  
+Output Metadata:
+  Field Count = 1
+  Alignment = 4
+  Aligned Length = 8
+  Field No. 0
+  Field Name = MYROWCOUNT
+  Relation Name = 
+  Alias Name = MYROWCOUNT
+  SQLType = SQL_LONG
+  IsNullable = yes
+  SubType = 0
+  Length = 4
+  Scale = 0
+  Offset = 0
+  Null Offset = 4
+  Message Length = 4
+  
+@13/1/2022 23:18:09.8300:Execute Function row_count
+@13/1/2022 23:18:09.8310:External Context: 
+  Attachment ID = 2554
+  Transaction ID = 8098
+  User Name = SYSDBA
+  Database Name = employee
+  Client Character Set = UTF8
+  
+@13/1/2022 23:18:09.8310:Input Parameters
+Parameter 0:
+  Field Name = TABLE_NAME
+  Alias Name = TABLE_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 31
+  Value = DEPARTMENT
+
+@13/1/2022 23:18:09.8340:Output Parameters with data
+Column 0
+  Field Name = 
+  SQLType = SQL_LONG
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 4
+  Value = 21
+
+@13/1/2022 23:18:09.8340:Function row_count: dispose called
+@13/1/2022 23:18:09.8340:Setup Function row_count
+@13/1/2022 23:18:09.8350:Routine Metadata
+Package Name = 
+  Name = MYROWCOUNT
+  Entry Point = fbudrtests!row_count (fbudrtests,row_count,)
+  Body = 
+  Input Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 36
+  Field No. 0
+  Field Name = TABLE_NAME
+  Relation Name = 
+  Alias Name = TABLE_NAME
+  SQLType = SQL_VARYING
+  IsNullable = no
+  SubType = 0
+  Length = 31
+  Scale = 0
+  Offset = 0
+  Null Offset = 34
+  Message Length = 31
+  
+Output Metadata:
+  Field Count = 1
+  Alignment = 4
+  Aligned Length = 8
+  Field No. 0
+  Field Name = MYROWCOUNT
+  Relation Name = 
+  Alias Name = MYROWCOUNT
+  SQLType = SQL_LONG
+  IsNullable = yes
+  SubType = 0
+  Length = 4
+  Scale = 0
+  Offset = 0
+  Null Offset = 4
+  Message Length = 4
+  
+@13/1/2022 23:18:09.8390:Function row_count created
+@13/1/2022 23:18:09.8400:Package Name = 
+  Name = MYROWCOUNT
+  Entry Point = fbudrtests!row_count (fbudrtests,row_count,)
+  Body = 
+  Input Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 36
+  Field No. 0
+  Field Name = TABLE_NAME
+  Relation Name = 
+  Alias Name = TABLE_NAME
+  SQLType = SQL_VARYING
+  IsNullable = no
+  SubType = 0
+  Length = 31
+  Scale = 0
+  Offset = 0
+  Null Offset = 34
+  Message Length = 31
+  
+Output Metadata:
+  Field Count = 1
+  Alignment = 4
+  Aligned Length = 8
+  Field No. 0
+  Field Name = MYROWCOUNT
+  Relation Name = 
+  Alias Name = MYROWCOUNT
+  SQLType = SQL_LONG
+  IsNullable = yes
+  SubType = 0
+  Length = 4
+  Scale = 0
+  Offset = 0
+  Null Offset = 4
+  Message Length = 4
+  
+@13/1/2022 23:18:09.8400:Execute Function row_count
+@13/1/2022 23:18:09.8410:External Context: 
+  Attachment ID = 2554
+  Transaction ID = 8098
+  User Name = SYSDBA
+  Database Name = employee
+  Client Character Set = UTF8
+  
+@13/1/2022 23:18:09.8410:Input Parameters
+Parameter 0:
+  Field Name = TABLE_NAME
+  Alias Name = TABLE_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 31
+  Value = BAD
+
+@13/1/2022 23:18:09.8430:Exception raised
+SQLCODE: -999
+Engine Code: 335544569 
+Dynamic SQL Error
+-SQL error code = -204
+-Table unknown
+-BAD
+-At line 1, column 22 When Executing: Select count(*) from BAD
+@13/1/2022 23:18:09.8430:Function row_count: dispose called
+@13/1/2022 23:18:09.8640:Setup Function bad_row_count
+@13/1/2022 23:18:09.8670:Routine Metadata
+Package Name = 
+  Name = BADROWCOUNT
+  Entry Point = fbudrtests!bad_row_count (fbudrtests,bad_row_count,)
+  Body = 
+  Input Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 36
+  Field No. 0
+  Field Name = TABLE_NAME
+  Relation Name = 
+  Alias Name = TABLE_NAME
+  SQLType = SQL_VARYING
+  IsNullable = no
+  SubType = 0
+  Length = 31
+  Scale = 0
+  Offset = 0
+  Null Offset = 34
+  Message Length = 31
+  
+Output Metadata:
+  Field Count = 1
+  Alignment = 4
+  Aligned Length = 8
+  Field No. 0
+  Field Name = BADROWCOUNT
+  Relation Name = 
+  Alias Name = BADROWCOUNT
+  SQLType = SQL_LONG
+  IsNullable = yes
+  SubType = 0
+  Length = 4
+  Scale = 0
+  Offset = 0
+  Null Offset = 4
+  Message Length = 4
+  
+@13/1/2022 23:18:09.8720:Function bad_row_count created
+@13/1/2022 23:18:09.8730:Package Name = 
+  Name = BADROWCOUNT
+  Entry Point = fbudrtests!bad_row_count (fbudrtests,bad_row_count,)
+  Body = 
+  Input Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 36
+  Field No. 0
+  Field Name = TABLE_NAME
+  Relation Name = 
+  Alias Name = TABLE_NAME
+  SQLType = SQL_VARYING
+  IsNullable = no
+  SubType = 0
+  Length = 31
+  Scale = 0
+  Offset = 0
+  Null Offset = 34
+  Message Length = 31
+  
+Output Metadata:
+  Field Count = 1
+  Alignment = 4
+  Aligned Length = 8
+  Field No. 0
+  Field Name = BADROWCOUNT
+  Relation Name = 
+  Alias Name = BADROWCOUNT
+  SQLType = SQL_LONG
+  IsNullable = yes
+  SubType = 0
+  Length = 4
+  Scale = 0
+  Offset = 0
+  Null Offset = 4
+  Message Length = 4
+  
+@13/1/2022 23:18:09.8740:Execute Function bad_row_count
+@13/1/2022 23:18:09.8750:External Context: 
+  Attachment ID = 2554
+  Transaction ID = 8105
+  User Name = SYSDBA
+  Database Name = employee
+  Client Character Set = UTF8
+  
+@13/1/2022 23:18:09.8760:Input Parameters
+Parameter 0:
+  Field Name = TABLE_NAME
+  Alias Name = TABLE_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 31
+  Value = EMPLOYEE
+
+@13/1/2022 23:18:09.8760:Exception raised
+Empty query
+@13/1/2022 23:18:09.8760:Function bad_row_count: dispose called
+@13/1/2022 23:18:09.8960:Setup Function return_info
+@13/1/2022 23:18:09.8970:Routine Metadata
+Package Name = 
+  Name = RETURNINFO
+  Entry Point = fbudrtests!return_info!Hello World (fbudrtests,return_info,Hello World)
+  Body = 
+  Output Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 36
+  Field No. 0
+  Field Name = RETURNINFO
+  Relation Name = 
+  Alias Name = RETURNINFO
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 32
+  Scale = 0
+  Offset = 0
+  Null Offset = 34
+  Message Length = 32
+  
+@13/1/2022 23:18:09.9000:Function return_info created
+@13/1/2022 23:18:09.9010:Package Name = 
+  Name = RETURNINFO
+  Entry Point = fbudrtests!return_info!Hello World (fbudrtests,return_info,Hello World)
+  Body = 
+  Output Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 36
+  Field No. 0
+  Field Name = RETURNINFO
+  Relation Name = 
+  Alias Name = RETURNINFO
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 32
+  Scale = 0
+  Offset = 0
+  Null Offset = 34
+  Message Length = 32
+  
+@13/1/2022 23:18:09.9010:Execute Function return_info
+@13/1/2022 23:18:09.9020:External Context: 
+  Attachment ID = 2554
+  Transaction ID = 8110
+  User Name = SYSDBA
+  Database Name = employee
+  Client Character Set = UTF8
+  
+@13/1/2022 23:18:09.9020:Output Parameters with data
+Column 0
+  Field Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 32
+  Value = Hello World
+
+@13/1/2022 23:18:09.9020:Function return_info: dispose called
+@13/1/2022 23:18:11.0170:Setup Procedure test_proc
+@13/1/2022 23:18:11.0180:Routine Metadata
+Package Name = 
+  Name = MYTESTPROC
+  Entry Point = fbudrtests!test_proc (fbudrtests,test_proc,)
+  Body = 
+  Input Metadata:
+  Field Count = 1
+  Alignment = 4
+  Aligned Length = 8
+  Field No. 0
+  Field Name = EMP_NO
+  Relation Name = 
+  Alias Name = EMP_NO
+  SQLType = SQL_LONG
+  IsNullable = no
+  SubType = 0
+  Length = 4
+  Scale = 0
+  Offset = 0
+  Null Offset = 4
+  Message Length = 4
+  
+Output Metadata:
+  Field Count = 2
+  Alignment = 8
+  Aligned Length = 56
+  Field No. 0
+  Field Name = SALARY
+  Relation Name = MYTESTPROC
+  Alias Name = SALARY
+  SQLType = SQL_INT64
+  IsNullable = yes
+  SubType = 1
+  Length = 8
+  Scale = -2
+  Offset = 0
+  Null Offset = 8
+  Message Length = 8
+  Field No. 1
+  Field Name = FULLNAME
+  Relation Name = MYTESTPROC
+  Alias Name = FULLNAME
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 36
+  Scale = 0
+  Offset = 10
+  Null Offset = 48
+  Message Length = 36
+  
+@13/1/2022 23:18:11.0280:Open Execute Procedure test_proc
+@13/1/2022 23:18:11.0290:External Context: 
+  Attachment ID = 2557
+  Transaction ID = 8122
+  User Name = SYSDBA
+  Database Name = employee
+  Client Character Set = UTF8
+  
+@13/1/2022 23:18:11.0290:Input Parameters
+Parameter 0:
+  Field Name = EMP_NO
+  Alias Name = EMP_NO
+  SQLType = SQL_LONG
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 4
+  Value = 24
+
+@13/1/2022 23:18:11.0300:Output Parameters
+Column 0
+  Field Name = SALARY
+  SQLType = SQL_INT64
+  sub type = 0
+  Scale = -2
+  Charset = NONE
+  Nullable
+  Size = 8
+  Value = NULL
+Column 1
+  Field Name = FULLNAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 36
+  Value = NULL
+
+@13/1/2022 23:18:11.0340:Procedure test_proc: dispose called with refcount = 2
+@13/1/2022 23:18:11.0350:Output Parameters with data
+Column 0
+  Field Name = SALARY
+  SQLType = SQL_INT64
+  sub type = 0
+  Scale = -2
+  Charset = NONE
+  Nullable
+  Size = 8
+  Value = 81810.19
+Column 1
+  Field Name = FULLNAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 36
+  Value = Fisher, Pete
+
+@13/1/2022 23:18:11.0350:Procedure test_proc: dispose called with refcount = 1
+@13/1/2022 23:18:12.0750:Setup Procedure select_proc
+@13/1/2022 23:18:12.0790:Routine Metadata
+Package Name = 
+  Name = MYSELECTPROC
+  Entry Point = fbudrtests!select_proc (fbudrtests,select_proc,)
+  Body = 
+  Output Metadata:
+  Field Count = 3
+  Alignment = 8
+  Aligned Length = 72
+  Field No. 0
+  Field Name = FULLNAME
+  Relation Name = MYSELECTPROC
+  Alias Name = FULLNAME
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 36
+  Scale = 0
+  Offset = 0
+  Null Offset = 38
+  Message Length = 36
+  Field No. 1
+  Field Name = SALARY
+  Relation Name = MYSELECTPROC
+  Alias Name = SALARY
+  SQLType = SQL_INT64
+  IsNullable = yes
+  SubType = 1
+  Length = 8
+  Scale = -2
+  Offset = 40
+  Null Offset = 48
+  Message Length = 8
+  Field No. 2
+  Field Name = ACCSALARY
+  Relation Name = MYSELECTPROC
+  Alias Name = ACCSALARY
+  SQLType = SQL_INT64
+  IsNullable = yes
+  SubType = 1
+  Length = 8
+  Scale = -2
+  Offset = 56
+  Null Offset = 64
+  Message Length = 8
+  
+@13/1/2022 23:18:12.0870:Open Select Procedure select_proc
+@13/1/2022 23:18:12.0880:External Context: 
+  Attachment ID = 2560
+  Transaction ID = 8132
+  User Name = SYSDBA
+  Database Name = employee
+  Client Character Set = UTF8
+  
+@13/1/2022 23:18:12.0920:Output Parameters
+Column 0
+  Field Name = FULLNAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 36
+  Value = NULL
+Column 1
+  Field Name = SALARY
+  SQLType = SQL_INT64
+  sub type = 0
+  Scale = -2
+  Charset = NONE
+  Nullable
+  Size = 8
+  Value = NULL
+Column 2
+  Field Name = ACCSALARY
+  SQLType = SQL_INT64
+  sub type = 0
+  Scale = -2
+  Charset = NONE
+  Nullable
+  Size = 8
+  Value = NULL
+
+@13/1/2022 23:18:12.0920:Procedure select_proc: dispose called with refcount = 2
+@13/1/2022 23:18:12.1000:Procedure select_proc: dispose called with refcount = 1
+@13/1/2022 23:18:12.1260:Setup Procedure read_txt
+@13/1/2022 23:18:12.1270:Routine Metadata
+Package Name = 
+  Name = MYREADTEXT
+  Entry Point = fbudrtests!read_txt (fbudrtests,read_txt,)
+  Body = 
+  Input Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 204
+  Field No. 0
+  Field Name = PATH
+  Relation Name = 
+  Alias Name = PATH
+  SQLType = SQL_VARYING
+  IsNullable = no
+  SubType = 0
+  Length = 200
+  Scale = 0
+  Offset = 0
+  Null Offset = 202
+  Message Length = 200
+  
+Output Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 3004
+  Field No. 0
+  Field Name = TEXT
+  Relation Name = MYREADTEXT
+  Alias Name = TEXT
+  SQLType = SQL_VARYING
+  IsNullable = no
+  SubType = 0
+  Length = 3000
+  Scale = 0
+  Offset = 0
+  Null Offset = 3002
+  Message Length = 3000
+  
+@13/1/2022 23:18:12.1360:Open Select Procedure read_txt
+@13/1/2022 23:18:12.1370:External Context: 
+  Attachment ID = 2560
+  Transaction ID = 8139
+  User Name = SYSDBA
+  Database Name = employee
+  Client Character Set = UTF8
+  
+@13/1/2022 23:18:12.1380:Input Parameters
+Parameter 0:
+  Field Name = PATH
+  Alias Name = PATH
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 200
+  Value = testsuite.conf
+
+@13/1/2022 23:18:12.1380:Read Text called in directory /home/tony/lazarus/2.2/otherComponents/fbintf/udr/testsuite
+@13/1/2022 23:18:12.1380:Reading from testsuite.conf
+@13/1/2022 23:18:12.1380:Output Parameters
+Column 0
+  Field Name = TEXT
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 3000
+  Value = 
+
+@13/1/2022 23:18:12.1380:Procedure read_txt: dispose called with refcount = 2
+@13/1/2022 23:18:12.1390:Procedure read_txt: dispose called with refcount = 1
+@13/1/2022 23:18:13.4310:Setup Trigger my_employee_update
+@13/1/2022 23:18:13.4410:Routine Metadata
+Package Name = 
+  Name = MyEmployeeUpdate
+  Entry Point = fbudrtests!my_employee_update (fbudrtests,my_employee_update,)
+  Body = 
+  Trigger Metadata:
+  Field Count = 12
+  Alignment = 8
+  Aligned Length = 176
+  Field No. 0
+  Field Name = EMP_NO
+  Relation Name = EMPLOYEE
+  Alias Name = EMP_NO
+  SQLType = SQL_SHORT
+  IsNullable = no
+  SubType = 0
+  Length = 2
+  Scale = 0
+  Offset = 0
+  Null Offset = 2
+  Message Length = 2
+  Field No. 1
+  Field Name = FIRST_NAME
+  Relation Name = EMPLOYEE
+  Alias Name = FIRST_NAME
+  SQLType = SQL_VARYING
+  IsNullable = no
+  SubType = 0
+  Length = 15
+  Scale = 0
+  Offset = 4
+  Null Offset = 22
+  Message Length = 15
+  Field No. 2
+  Field Name = LAST_NAME
+  Relation Name = EMPLOYEE
+  Alias Name = LAST_NAME
+  SQLType = SQL_VARYING
+  IsNullable = no
+  SubType = 0
+  Length = 20
+  Scale = 0
+  Offset = 24
+  Null Offset = 46
+  Message Length = 20
+  Field No. 3
+  Field Name = PHONE_EXT
+  Relation Name = EMPLOYEE
+  Alias Name = PHONE_EXT
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 4
+  Scale = 0
+  Offset = 48
+  Null Offset = 54
+  Message Length = 4
+  Field No. 4
+  Field Name = HIRE_DATE
+  Relation Name = EMPLOYEE
+  Alias Name = HIRE_DATE
+  SQLType = SQL_TIMESTAMP
+  IsNullable = no
+  SubType = 0
+  Length = 8
+  Scale = 0
+  Offset = 56
+  Null Offset = 64
+  Message Length = 8
+  Field No. 5
+  Field Name = DEPT_NO
+  Relation Name = EMPLOYEE
+  Alias Name = DEPT_NO
+  SQLType = SQL_TEXT
+  IsNullable = no
+  SubType = 0
+  Length = 3
+  Scale = 0
+  Offset = 66
+  Null Offset = 70
+  Message Length = 3
+  Field No. 6
+  Field Name = JOB_CODE
+  Relation Name = EMPLOYEE
+  Alias Name = JOB_CODE
+  SQLType = SQL_VARYING
+  IsNullable = no
+  SubType = 0
+  Length = 5
+  Scale = 0
+  Offset = 72
+  Null Offset = 80
+  Message Length = 5
+  Field No. 7
+  Field Name = JOB_GRADE
+  Relation Name = EMPLOYEE
+  Alias Name = JOB_GRADE
+  SQLType = SQL_SHORT
+  IsNullable = no
+  SubType = 0
+  Length = 2
+  Scale = 0
+  Offset = 82
+  Null Offset = 84
+  Message Length = 2
+  Field No. 8
+  Field Name = JOB_COUNTRY
+  Relation Name = EMPLOYEE
+  Alias Name = JOB_COUNTRY
+  SQLType = SQL_VARYING
+  IsNullable = no
+  SubType = 0
+  Length = 15
+  Scale = 0
+  Offset = 86
+  Null Offset = 104
+  Message Length = 15
+  Field No. 9
+  Field Name = SALARY
+  Relation Name = EMPLOYEE
+  Alias Name = SALARY
+  SQLType = SQL_INT64
+  IsNullable = no
+  SubType = 1
+  Length = 8
+  Scale = -2
+  Offset = 112
+  Null Offset = 120
+  Message Length = 8
+  Field No. 10
+  Field Name = FULL_NAME
+  Relation Name = EMPLOYEE
+  Alias Name = FULL_NAME
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 37
+  Scale = 0
+  Offset = 122
+  Null Offset = 162
+  Message Length = 37
+  Field No. 11
+  Field Name = PREVIOUS_PHONE_EXT
+  Relation Name = EMPLOYEE
+  Alias Name = PREVIOUS_PHONE_EXT
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 4
+  Scale = 0
+  Offset = 164
+  Null Offset = 170
+  Message Length = 4
+  Trigger Table = EMPLOYEE
+  Trigger Type = Before
+  
+@13/1/2022 23:18:13.4490:Execute Trigger my_employee_update
+@13/1/2022 23:18:13.4520:Old Field Values:
+Parameter 0:
+  Field Name = EMP_NO
+  Alias Name = EMP_NO
+  SQLType = SQL_SHORT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 2
+  Value = 2
+Parameter 1:
+  Field Name = FIRST_NAME
+  Alias Name = FIRST_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 15
+  Value = 
+Parameter 2:
+  Field Name = LAST_NAME
+  Alias Name = LAST_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 20
+  Value = 
+Parameter 3:
+  Field Name = PHONE_EXT
+  Alias Name = PHONE_EXT
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 4
+  Value = 250
+Parameter 4:
+  Field Name = HIRE_DATE
+  Alias Name = HIRE_DATE
+  SQLType = SQL_TIMESTAMP
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 8
+  Value = 17/11/1858 00:00:00.0000
+Parameter 5:
+  Field Name = DEPT_NO
+  Alias Name = DEPT_NO
+  SQLType = SQL_TEXT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 3
+  Value = 
+Parameter 6:
+  Field Name = JOB_CODE
+  Alias Name = JOB_CODE
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 5
+  Value = 
+Parameter 7:
+  Field Name = JOB_GRADE
+  Alias Name = JOB_GRADE
+  SQLType = SQL_SHORT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 2
+  Value = 0
+Parameter 8:
+  Field Name = JOB_COUNTRY
+  Alias Name = JOB_COUNTRY
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 15
+  Value = 
+Parameter 9:
+  Field Name = SALARY
+  Alias Name = SALARY
+  SQLType = SQL_INT64
+  sub type = 0
+  Scale = -2
+  Charset = NONE
+  Not Nullable
+  Size = 8
+  Value = 0
+Parameter 10:
+  Field Name = FULL_NAME
+  Alias Name = FULL_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 37
+  Value = NULL
+Parameter 11:
+  Field Name = PREVIOUS_PHONE_EXT
+  Alias Name = PREVIOUS_PHONE_EXT
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 4
+  Value = NULL
+
+@13/1/2022 23:18:13.4550:New Field Values:
+Column 0
+  Field Name = EMP_NO
+  SQLType = SQL_SHORT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 2
+  Value = NULL
+Column 1
+  Field Name = FIRST_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 15
+  Value = NULL
+Column 2
+  Field Name = LAST_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 20
+  Value = NULL
+Column 3
+  Field Name = PHONE_EXT
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 4
+  Value = 999
+Column 4
+  Field Name = HIRE_DATE
+  SQLType = SQL_TIMESTAMP
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 8
+  Value = NULL
+Column 5
+  Field Name = DEPT_NO
+  SQLType = SQL_TEXT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 3
+  Value = NULL
+Column 6
+  Field Name = JOB_CODE
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 5
+  Value = NULL
+Column 7
+  Field Name = JOB_GRADE
+  SQLType = SQL_SHORT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 2
+  Value = NULL
+Column 8
+  Field Name = JOB_COUNTRY
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 15
+  Value = NULL
+Column 9
+  Field Name = SALARY
+  SQLType = SQL_INT64
+  sub type = 0
+  Scale = -2
+  Charset = NONE
+  Nullable
+  Size = 8
+  Value = NULL
+Column 10
+  Field Name = FULL_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 37
+  Value = NULL
+Column 11
+  Field Name = PREVIOUS_PHONE_EXT
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 4
+  Value = NULL
+
+@13/1/2022 23:18:13.4590:New Field Values after trigger execution
+Column 0
+  Field Name = EMP_NO
+  SQLType = SQL_SHORT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 2
+  Value = NULL
+Column 1
+  Field Name = FIRST_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 15
+  Value = NULL
+Column 2
+  Field Name = LAST_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 20
+  Value = NULL
+Column 3
+  Field Name = PHONE_EXT
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 4
+  Value = 999
+Column 4
+  Field Name = HIRE_DATE
+  SQLType = SQL_TIMESTAMP
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 8
+  Value = NULL
+Column 5
+  Field Name = DEPT_NO
+  SQLType = SQL_TEXT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 3
+  Value = NULL
+Column 6
+  Field Name = JOB_CODE
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 5
+  Value = NULL
+Column 7
+  Field Name = JOB_GRADE
+  SQLType = SQL_SHORT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 2
+  Value = NULL
+Column 8
+  Field Name = JOB_COUNTRY
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 15
+  Value = NULL
+Column 9
+  Field Name = SALARY
+  SQLType = SQL_INT64
+  sub type = 0
+  Scale = -2
+  Charset = NONE
+  Nullable
+  Size = 8
+  Value = NULL
+Column 10
+  Field Name = FULL_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 37
+  Value = NULL
+Column 11
+  Field Name = PREVIOUS_PHONE_EXT
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 4
+  Value = 250
+
+@13/1/2022 23:18:13.4590:Trigger my_employee_update: dispose called

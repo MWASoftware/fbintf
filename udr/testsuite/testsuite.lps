@@ -13,8 +13,8 @@
         <Filename Value="TestApplication.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="3"/>
-        <TopLine Value="115"/>
-        <CursorPos X="3" Y="77"/>
+        <TopLine Value="96"/>
+        <CursorPos X="14" Y="106"/>
         <UsageCount Value="24"/>
         <Loaded Value="True"/>
       </Unit>
@@ -32,8 +32,8 @@
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="4"/>
-        <TopLine Value="170"/>
-        <CursorPos Y="188"/>
+        <TopLine Value="94"/>
+        <CursorPos X="23" Y="100"/>
         <UsageCount Value="24"/>
         <Loaded Value="True"/>
       </Unit>
@@ -74,8 +74,8 @@
         <Filename Value="Test04.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="9"/>
-        <TopLine Value="58"/>
-        <CursorPos X="34" Y="71"/>
+        <TopLine Value="64"/>
+        <CursorPos Y="80"/>
         <UsageCount Value="24"/>
         <Loaded Value="True"/>
       </Unit>
@@ -106,8 +106,8 @@
       <Unit>
         <Filename Value="../testbed/FBUdrPlugin.pas"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="236"/>
-        <CursorPos X="17" Y="248"/>
+        <TopLine Value="199"/>
+        <CursorPos X="3" Y="200"/>
         <UsageCount Value="12"/>
         <Loaded Value="True"/>
       </Unit>
@@ -166,27 +166,7 @@
         <Loaded Value="True"/>
       </Unit>
     </Units>
-    <JumpHistory HistoryIndex="29">
-      <Position>
-        <Filename Value="Test02.pas"/>
-        <Caret Line="80" TopLine="68"/>
-      </Position>
-      <Position>
-        <Filename Value="../../../../../../fpcsrc/3.2.2/rtl/inc/objpas.inc"/>
-        <Caret Line="57" TopLine="43"/>
-      </Position>
-      <Position>
-        <Filename Value="../../../../../../fpcsrc/3.2.2/rtl/inc/objpas.inc"/>
-        <Caret Line="62" TopLine="43"/>
-      </Position>
-      <Position>
-        <Filename Value="Test02.pas"/>
-        <Caret Line="77" TopLine="68"/>
-      </Position>
-      <Position>
-        <Filename Value="../testbed/FBUdrPlugin.pas"/>
-        <Caret Line="986" TopLine="973"/>
-      </Position>
+    <JumpHistory HistoryIndex="27">
       <Position>
         <Filename Value="../testbed/FBUdrPlugin.pas"/>
         <Caret Line="987" TopLine="973"/>
@@ -287,11 +267,26 @@
         <Filename Value="../testbed/FBUdrPlugin.pas"/>
         <Caret Line="819" Column="3" TopLine="816"/>
       </Position>
+      <Position>
+        <Filename Value="Test01.pas"/>
+        <Caret Line="188" TopLine="170"/>
+      </Position>
+      <Position>
+        <Filename Value="Test04.pas"/>
+        <Caret Line="82" Column="12" TopLine="58"/>
+      </Position>
+      <Position>
+        <Filename Value="Test04.pas"/>
+        <Caret Line="67" Column="33" TopLine="58"/>
+      </Position>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
       <Modes ActiveMode="default">
         <Mode Name="default">
+          <local>
+            <CommandLineParams Value="-t 4"/>
+          </local>
           <environment>
             <UserOverrides Count="2">
               <Variable0 Name="FIREBIRD" Value="/opt/firebird4.0.1"/>
@@ -305,8 +300,9 @@
       <List Name="LaunchingApplication" Type="File" Count="1">
         <Item1 Value="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </List>
-      <List Name="CommandLineParameters" Count="1">
-        <Item1 Value="-t 2"/>
+      <List Name="CommandLineParameters" Count="2">
+        <Item1 Value="-t 4"/>
+        <Item2 Value="-t 2"/>
       </List>
     </HistoryLists>
   </ProjectSession>
