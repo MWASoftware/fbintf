@@ -153,7 +153,7 @@ begin
     Params[0].AsInteger := 7;
     Params[1].AsNumeric := NewNumeric(1.0);
     Params[2].AsVariant := 1234567;
-    Params[3].AsNumeric := NewNumeric(StrToFloat('2.3E-2'),-4);
+    Params[3].AsNumeric := NewNumeric(StrToFloat('2.3E-2'));
     Params[4].AsNumeric := NewNumeric('11e-4');
     Params[5].AsVariant := 1234.25;
   end;
@@ -201,7 +201,7 @@ begin
   numeric := NewNumeric(StrToCurr('9999.123456780')).clone(-2);
   writeln(Outfile,'Value from Currency(rescaled) = ',numeric.getAsString);
   writeln(Outfile,'Raw Value = ',numeric.getRawValue,' Scale = ',numeric.getScale);
-  numeric := NewNumeric(StrToFloat('9999.123456780'),-8);
+  numeric := NewNumeric(StrToFloat('9999.123456780'));
   writeln(Outfile,'Value from Double = ',numeric.getAsString);
   writeln(Outfile,'Raw Value = ',numeric.getRawValue,' Scale = ',numeric.getScale);
   numeric := NewNumeric(StrToInt64('9223372036854775807'));
@@ -222,6 +222,24 @@ begin
   numeric := NumericFromRawValues(9999123456780,-6);
   writeln(Outfile,'Value from Raw Data = ',numeric.getAsString);
   writeln(Outfile,'Raw Value = ',numeric.getRawValue,' Scale = ',numeric.getScale);
+
+  writeln(outfile,'Numeric Operations');
+  writeln(Outfile,'Add 2.23 + 24.12345 = ',NumericAdd(NewNumeric('2.23'),NewNumeric('24.12345')).GetAsString);
+  writeln(Outfile,'Add Double 2.23 + 24.12645 = ',NumericAdd(NewNumeric('2.23'),24.12645).GetAsString);
+  writeln(Outfile,'Add integer 2.23 + 2412345 = ',NumericAdd(NewNumeric('2.23'),2412345).GetAsString);
+  writeln(Outfile,'Subtract 2.23 - 24.12345 = ',NumericSubtract(NewNumeric('2.23'),NewNumeric('24.12345')).GetAsString);
+  writeln(Outfile,'Subtract Double 24.12645 - 2.23 = ',NumericSubtract(NewNumeric('24.12645'),2.23).GetAsString);
+  writeln(Outfile,'Subtract integer 24123.45 - 223 = ',NumericSubtract(NewNumeric('24123.45'),223).GetAsString);
+  writeln(Outfile,'Multiply 2.23 * 24.12345 = ',NumericMultiply(NewNumeric('2.23'),NewNumeric('24.12345')).GetAsString);
+  writeln(Outfile,'Multiply Double 24.12645 * 2.23 = ',NumericMultiply(NewNumeric('24.12645'),2.23).GetAsString);
+  writeln(Outfile,'Multiply integer 241.2345 * 223 = ',NumericMultiply(NewNumeric('241.2345'),223).GetAsString);
+  writeln(Outfile,'Divide 24.12345 / 2.23 = ',NumericDivide(NewNumeric('24.12345'),NewNumeric('2.23')).GetAsString);
+  writeln(Outfile,'Divide Double 2.23 / 24.12645 = ',NumericDivide(NewNumeric('2.23'),24.12645).GetAsString);
+  writeln(Outfile,'Divide integer 241.2345 / 223 = ',NumericDivide(NewNumeric('241.2345'),223).GetAsString);
+  writeln(Outfile,'Compare 2.23, -24.12345 = ',NumericCompare(NewNumeric('2.23'),NewNumeric(-24.12645)));
+  writeln(Outfile,'Compare integer 2.23, 3 = ',NumericCompare(NewNumeric('2.23'),3));
+  writeln(Outfile,'Compare Double 2.23, 2.23 = ',NumericCompare(NewNumeric('2.23'),2.23));
+  writeln(Outfile,'Negate 24.12345 = ',NegateNumeric(NewNumeric('24.12345')).GetAsString);
 end;
 
 function TTest21.TestTitle: AnsiString;

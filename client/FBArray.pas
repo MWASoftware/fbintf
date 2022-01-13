@@ -474,17 +474,17 @@ begin
     PSingle(SQLData)^ := Value;
   SQL_SHORT:
     if Scale < 0 then
-      PShort(SQLData)^ := SafeSmallInt(NewNumeric(Value,Scale).getRawValue)
+      PShort(SQLData)^ := SafeSmallInt(NewNumeric(Value).getRawValue)
     else
       IBError(ibxeInvalidDataConversion, [nil]);
   SQL_LONG:
     if Scale < 0 then
-      PLong(SQLData)^ := SafeInteger(NewNumeric(Value,Scale).getRawValue)
+      PLong(SQLData)^ := SafeInteger(NewNumeric(Value).getRawValue)
     else
       IBError(ibxeInvalidDataConversion, [nil]);
   SQL_INT64:
     if Scale < 0 then
-      PInt64(SQLData)^ := NewNumeric(Value,Scale).getRawValue
+      PInt64(SQLData)^ := NewNumeric(Value).getRawValue
     else
       IBError(ibxeInvalidDataConversion, [nil]);
   SQL_TEXT, SQL_VARYING:

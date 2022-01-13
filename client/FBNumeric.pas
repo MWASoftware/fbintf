@@ -53,7 +53,7 @@ uses
 }
 
 function NewNumeric(aValue: AnsiString): IFBNumeric; overload;
-function NewNumeric(aValue: double; aScale: integer): IFBNumeric; overload;
+function NewNumeric(aValue: double): IFBNumeric; overload;
 function NewNumeric(aValue: TBCD): IFBNumeric; overload;
 function NewNumeric(aValue: currency): IFBNumeric; overload;
 function NewNumeric(aValue: Int64): IFBNumeric; overload;
@@ -65,6 +65,31 @@ function NumericToDouble(aValue: Int64; aScale: integer): double;
 function SafeSmallInt(aValue: Int64): Smallint;
 function SafeInteger(aValue: Int64): integer;
 
+{Numeric Arithmetic}
+function NumericAdd(x,y: IFBNumeric): IFBNumeric; overload; {returns x + y}
+function NumericSubtract(x,y: IFBNumeric): IFBNumeric; overload; {returns x - y}
+function NumericMultiply(x,y: IFBNumeric): IFBNumeric; overload; {returns x * y}
+function NumericDivide(x,y: IFBNumeric): IFBNumeric; overload; {returns x / y}
+function NumericCompare(x,y: IFBNumeric): integer; overload; {returns -1: x < y; 0: x = y; 1: x > y}
+function NegateNumeric(x: IFBNumeric): IFBNumeric; overload; {returns -x}
+
+{integer operations}
+function NumericAdd(x: IFBNumeric; y: int64): IFBNumeric; overload; {returns x + y}
+function NumericSubtract(x: IFBNumeric; y: int64): IFBNumeric; overload; {returns x - y}
+function NumericSubtract(x: int64; y: IFBNumeric): IFBNumeric; overload; {returns x - y}
+function NumericMultiply(x: IFBNumeric; y: int64): IFBNumeric; overload; {returns x * y}
+function NumericDivide(x: IFBNumeric; y: int64): IFBNumeric; overload; {returns x / y}
+function NumericDivide(x: int64; y: IFBNumeric): IFBNumeric; overload; {returns x / y}
+function NumericCompare(x: IFBNumeric; y: int64): integer; overload; {returns -1: x < y; 0: x = y; 1: x > y}
+
+{floating point operations}
+function NumericAdd(x: IFBNumeric; y: double): IFBNumeric; overload; {returns x + y}
+function NumericSubtract(x: IFBNumeric; y: double): IFBNumeric; overload; {returns x - y}
+function NumericSubtract(x: double; y: IFBNumeric): IFBNumeric; overload; {returns x - y}
+function NumericMultiply(x: IFBNumeric; y: double): IFBNumeric; overload; {returns x * y}
+function NumericDivide(x: IFBNumeric; y: double): IFBNumeric; overload; {returns x div y}
+function NumericDivide(x: double; y: IFBNumeric): IFBNumeric; overload; {returns x div y}
+function NumericCompare(x: IFBNumeric; y: double): integer; overload; {returns -1: x < y; 0: x = y; 1: x > y}
 
 implementation
 
@@ -80,12 +105,11 @@ type
   private
     FValue: Int64;
     FScale: integer;
-//    function AdjustScaleFromCurrency(Value: Currency; aScale: Integer): Int64;
   public
     constructor Create(aValue: Int64; aScale: integer); overload;
     constructor Create(aValue: Int64); overload;
     constructor Create(aValue: AnsiString); overload;
-    constructor Create(aValue: double; aScale: integer); overload;
+    constructor Create(aValue: double); overload;
     constructor Create(aValue: Currency); overload;
     constructor Create(aValue: TBCD); overload;
   public
@@ -107,9 +131,9 @@ begin
   Result :=  TFBNumeric.Create(aValue);
 end;
 
-function NewNumeric(aValue: double; aScale: integer): IFBNumeric;
+function NewNumeric(aValue: double): IFBNumeric;
 begin
-  Result :=  TFBNumeric.Create(aValue,aScale);
+  Result :=  TFBNumeric.Create(aValue);
 end;
 
 function NewNumeric(aValue: TBCD): IFBNumeric;
@@ -229,32 +253,148 @@ begin
   Result := aValue;
 end;
 
-{ TFBNumeric }
+{AdjustScale returns a raw int64 value derived from x but with aNewScale}
 
-(*function TFBNumeric.AdjustScaleFromCurrency(Value: Currency; aScale: Integer
-  ): Int64;
-var
-  Scaling : Int64;
-  i : Integer;
+function AdjustScale(x: IFBNumeric; aNewScale: integer): int64;
 begin
-  Result := 0;
-  Scaling := 1;
-  if aScale < 0 then
-  begin
-    for i := -1 downto aScale do
-      Scaling := Scaling * 10;
-    result := trunc(Value * Scaling);
-  end
+  Result := Round(x.getRawValue * IntPower(10,x.getScale-aNewScale));
+end;
+
+function CompareInt(a,b: integer): integer;
+begin
+  if a < b then
+    Result := -1
   else
-  if aScale > 0 then
-  begin
-    for i := 1 to aScale do
-       Scaling := Scaling * 10;
-    result := trunc(Value / Scaling);
-  end
+  if a = b then
+    Result := 0
   else
-    result := trunc(Value);
-end;*)
+    Result := 1;
+end;
+
+function NumericAdd(x, y: IFBNumeric): IFBNumeric;
+begin
+  case CompareInt(x.getScale,y.getScale) of
+  0:
+    Result := NumericFromRawValues(x.getRawValue + y.getRawValue,x.getScale);
+  1:
+    Result := NumericFromRawValues(AdjustScale(x,y.getscale) + y.getRawValue,y.getScale);
+  else
+    Result := NumericFromRawValues(AdjustScale(y,x.getscale)  + x.getRawValue,x.getScale);
+  end;
+end;
+
+function NumericSubtract(x, y: IFBNumeric): IFBNumeric;
+begin
+  case CompareInt(x.getScale,y.getScale) of
+  0:
+    Result := NumericFromRawValues(x.getRawValue - y.getRawValue,x.getScale);
+  1:
+    Result := NumericFromRawValues(AdjustScale(x,y.getscale) - y.getRawValue,y.getScale);
+  else
+    Result := NumericFromRawValues(AdjustScale(y,x.getscale) - x.getRawValue,x.getScale);
+  end;
+end;
+
+function NumericMultiply(x, y: IFBNumeric): IFBNumeric;
+begin
+  Result := NumericFromRawValues(x.getRawValue * y.getRawValue,x.getScale+y.getScale);
+end;
+
+function NumericDivide(x, y: IFBNumeric): IFBNumeric;
+var z: double;
+begin
+  {Compute actual value as a double}
+  z := (x.getRawValue / y.getRawValue) * IntPower(10, x.getScale - y.getScale);
+  {Return numeric at original no. of decimal places of numerator}
+  Result := NewNumeric(z).clone(x.getScale);
+end;
+
+function NumericCompare(x, y: IFBNumeric): integer;
+begin
+  case CompareInt(x.getScale,y.getScale) of
+  0:
+    Result := CompareInt(x.getRawValue,y.getRawValue);
+  1:
+    Result := CompareInt(AdjustScale(x,y.getscale),y.getRawValue);
+  else
+    Result := CompareInt(x.getRawValue,AdjustScale(y,x.getscale));
+  end;
+end;
+
+function NegateNumeric(x: IFBNumeric): IFBNumeric;
+begin
+  Result := NumericFromRawValues(-x.getRawValue,x.getScale);
+end;
+
+function NumericAdd(x: IFBNumeric; y: int64): IFBNumeric;
+begin
+  Result := NumericAdd(x,NewNumeric(y));
+end;
+
+function NumericSubtract(x: IFBNumeric; y: int64): IFBNumeric;
+begin
+  Result := NumericSubtract(x,NewNumeric(y));
+end;
+
+function NumericSubtract(x: int64; y: IFBNumeric): IFBNumeric;
+begin
+  Result := NumericSubtract(NewNumeric(x),y);
+end;
+
+function NumericMultiply(x: IFBNumeric; y: int64): IFBNumeric;
+begin
+  Result := NumericMultiply(x,NewNumeric(y));
+end;
+
+function NumericDivide(x: IFBNumeric; y: int64): IFBNumeric;
+begin
+  Result := NumericDivide(x,NewNumeric(y));
+end;
+
+function NumericDivide(x: int64; y: IFBNumeric): IFBNumeric;
+begin
+  Result := NumericDivide(NewNumeric(x),y);
+end;
+
+function NumericCompare(x: IFBNumeric; y: int64): integer;
+begin
+  Result := NumericCompare(x,NewNumeric(y));
+end;
+
+function NumericAdd(x: IFBNumeric; y: double): IFBNumeric;
+begin
+  Result := NumericAdd(x,NewNumeric(y));
+end;
+
+function NumericSubtract(x: IFBNumeric; y: double): IFBNumeric;
+begin
+  Result := NumericSubtract(x,NewNumeric(y));
+end;
+
+function NumericSubtract(x: double; y: IFBNumeric): IFBNumeric;
+begin
+  Result := NumericSubtract(NewNumeric(x),y);
+end;
+
+function NumericMultiply(x: IFBNumeric; y: double): IFBNumeric;
+begin
+  Result := NumericMultiply(x,NewNumeric(y));
+end;
+
+function NumericDivide(x: IFBNumeric; y: double): IFBNumeric;
+begin
+  Result := NumericDivide(x,NewNumeric(y));
+end;
+
+function NumericDivide(x: double; y: IFBNumeric): IFBNumeric;
+begin
+  Result := NumericDivide(NewNumeric(x),y);
+end;
+
+function NumericCompare(x: IFBNumeric; y: double): integer;
+begin
+  Result := NumericCompare(x,NewNumeric(y));
+end;
 
 constructor TFBNumeric.Create(aValue: Int64; aScale: integer);
 begin
@@ -277,31 +417,25 @@ begin
     IBError(ibxeInvalidDataConversion,[aValue]);
 end;
 
-constructor TFBNumeric.Create(aValue: double; aScale: integer);
-var
-  Scaling : Int64;
-  i : Integer;
+constructor TFBNumeric.Create(aValue: double);
+
+  function WithinLimits(a: double): boolean;
+  begin
+    a := abs(frac(a));
+    Result := (a > 0) and (a < 0.999); {avoid small rounding errors converting to decimal}
+  end;
+
+var aScale: integer;
+    i: int64;
 begin
-  inherited Create;
-  FScale := aScale;
-  FValue := 0;
-  Scaling := 1;
-  if aScale < 0 then
+  aScale := 0;
+  while WithinLimits(AValue) do
   begin
-    for i := -1 downto aScale do
-      Scaling := Scaling * 10;
-    FValue := trunc(aValue * Scaling);
-  end
-  else
-  if aScale > 0 then
-  begin
-    for i := 1 to aScale do
-       Scaling := Scaling * 10;
-    FValue := trunc(aValue / Scaling);
-  end
-  else
-    FValue := trunc(aValue);
-//  writeln('Adjusted ',Value,' to ',Result);
+    aValue := aValue * 10;
+    Inc(aScale);
+  end;
+  i := Round(aValue);
+  Create(i,-aScale);
 end;
 
 constructor TFBNumeric.Create(aValue: Currency);
@@ -335,7 +469,7 @@ begin
  if FScale = aNewScale then
    Result := TFBNumeric.Create(FValue,FScale)
  else
-  Result := TFBNumeric.Create(Round(FValue * IntPower(10,FScale-aNewScale)),aNewScale);
+  Result := TFBNumeric.Create(AdjustScale(self,aNewScale),aNewScale);
 end;
 
 function TFBNumeric.getAsString: AnsiString;
@@ -390,50 +524,6 @@ begin
   else
     Move(FValue,Result,sizeof(Currency));
 end;
-
-(*var
-  Scaling : Int64;
-  i : Integer;
-  FractionText, PadText, CurrText: AnsiString;
-begin
-  Result := 0;
-  Scaling := 1;
-  PadText := '';
-  if FScale > 0 then
-  begin
-    for i := 1 to FScale do
-      Scaling := Scaling * 10;
-    result := FValue * Scaling;
-  end
-  else
-    if FScale < 0 then
-    begin
-      for i := -1 downto FScale do
-        Scaling := Scaling * 10;
-      FractionText := IntToStr(abs(FValue mod Scaling));
-      for i := Length(FractionText) to -FScale -1 do
-        PadText := '0' + PadText;
-      {$IF declared(DefaultFormatSettings)}
-      with DefaultFormatSettings do
-      {$ELSE}
-      {$IF declared(FormatSettings)}
-      with FormatSettings do
-      {$IFEND}
-      {$IFEND}
-      if FValue < 0 then
-        CurrText := '-' + IntToStr(Abs(FValue div Scaling)) + DecimalSeparator + PadText + FractionText
-      else
-        CurrText := IntToStr(Abs(FValue div Scaling)) + DecimalSeparator + PadText + FractionText;
-      try
-        result := StrToCurr(CurrText);
-      except
-        on E: Exception do
-          IBError(ibxeInvalidDataConversion, [nil]);
-      end;
-    end
-    else
-      result := FValue;
-end; *)
 
 function TFBNumeric.getAsBCD: TBCD;
 begin
