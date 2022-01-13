@@ -651,13 +651,13 @@ Running Test 3: ad hoc queries
 Opening inet://localhost/employee
 Database Open
 Employee Count = 42
-Transaction ID = 5281
+Transaction ID = 7640
 Transaction is Read/Write
 Transaction Database Path = inet://localhost/employee
-Transaction ID = 5281
-Oldest Interesting = 1895
-Oldest Action = 5280
-Oldest Snapshot = 5280
+Transaction ID = 7640
+Oldest Interesting = 7638
+Oldest Action = 7639
+Oldest Snapshot = 7639
 Oldest Snapshot Number = 1
 Lock Timeout = 0
 Transaction Access = isc_info_tra_readwrite
@@ -692,9 +692,9 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 19,762,192
+Current memory = 19,761,888
 Delta memory = 4,464
-Max memory = 19,807,520
+Max memory = 19,807,216
 Elapsed time= 0.002 sec
 Cpu = 0.000 sec
 Buffers = 2048
@@ -2733,7 +2733,7 @@ MYARRAY = Array: (0: 100) (1: 99) (2: 98) (3: 97) (4: 96) (5: 95) (6: 94) (7: 93
 
 MYARRAY2 = Array: (0: 01/5/2020 12:00:00) (1: 01/5/2020 12:01:00) (2: 01/5/2020 12:02:00) (3: 01/5/2020 12:03:00) (4: 01/5/2020 12:04:00) (5: 01/5/2020 12:05:00) (6: 01/5/2020 12:06:00) (7: 01/5/2020 12:07:00) (8: 01/5/2020 12:08:00) (9: 01/5/2020 12:09:00) (10: 01/5/2020 12:10:00) (11: 01/5/2020 12:11:00) (12: 01/5/2020 12:12:00) (13: 01/5/2020 12:13:00) (14: 01/5/2020 12:14:00) (15: 01/5/2020 12:15:00) (16: 01/5/2020 12:16:00) 
 
-MYARRAY3 = Array: (0: 0) (1: 1.04) (2: 2.09) (3: 3.15) (4: 4.19) (5: 5.25) (6: 6.3) (7: 7.34) (8: 8.39) (9: 9.44) (10: 10.5) (11: 11.55) (12: 12.6) (13: 13.64) (14: 0.42) (15: 42.46) (16: 4269) 
+MYARRAY3 = Array: (0: 0) (1: 1.05) (2: 2.1) (3: 3.15) (4: 4.2) (5: 5.25) (6: 6.3) (7: 7.35) (8: 8.4) (9: 9.45) (10: 10.5) (11: 11.55) (12: 12.6) (13: 13.65) (14: 0.42) (15: 42.46) (16: 4269) 
 
 
 Shrink to 2:10
@@ -2749,7 +2749,7 @@ MYARRAY = Array: (0: 100) (1: 99) (2: 1000) (3: 97) (4: 96) (5: 95) (6: 94) (7: 
 
 MYARRAY2 = Array: (0: 01/5/2020 12:00:00) (1: 01/5/2020 12:01:00) (2: 01/5/2020 12:02:00) (3: 01/5/2020 12:03:00) (4: 01/5/2020 12:04:00) (5: 01/5/2020 12:05:00) (6: 01/5/2020 12:06:00) (7: 01/5/2020 12:07:00) (8: 01/5/2020 12:08:00) (9: 01/5/2020 12:09:00) (10: 01/5/2020 12:10:00) (11: 01/5/2020 12:11:00) (12: 01/5/2020 12:12:00) (13: 01/5/2020 12:13:00) (14: 01/5/2020 12:14:00) (15: 01/5/2020 12:15:00) (16: 01/5/2020 12:16:00) 
 
-MYARRAY3 = Array: (0: 0) (1: 1.04) (2: 2.09) (3: 3.15) (4: 4.19) (5: 5.25) (6: 6.3) (7: 7.34) (8: 8.39) (9: 9.44) (10: 10.5) (11: 11.55) (12: 12.6) (13: 13.64) (14: 0.42) (15: 42.46) (16: 4269) 
+MYARRAY3 = Array: (0: 0) (1: 1.05) (2: 2.1) (3: 3.15) (4: 4.2) (5: 5.25) (6: 6.3) (7: 7.35) (8: 8.4) (9: 9.45) (10: 10.5) (11: 11.55) (12: 12.6) (13: 13.65) (14: 0.42) (15: 42.46) (16: 4269) 
 
 
 
@@ -2853,7 +2853,7 @@ Num Buffers  = 2048
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
 Active Transaction Count = 0
-Fetches  = 1683
+Fetches  = 1686
 Writes  = 6
 Reads  = 97
 Page Writes  = 3
@@ -2879,7 +2879,7 @@ Count = 2
 Table ID = 12
 Count = 24
 Table ID = 18
-Count = 940
+Count = 943
 Table ID = 20
 Count = 5
 Table ID = 28
@@ -2968,7 +2968,6 @@ Limbo Transactions
 
 
 Local Backup
-
 
 
 
@@ -4669,6 +4668,23 @@ Value from BCD = 9999.12345678
 Raw Value = 999912345678 Scale = -8
 Value from Raw Data = 9999123.456780
 Raw Value = 9999123456780 Scale = -6
+Numeric Operations
+Add 2.23 + 24.12345 = 26.35345
+Add Double 2.23 + 24.12645 = 26.35645
+Add integer 2.23 + 2412345 = 2412347.23
+Subtract 2.23 - 24.12345 = -21.89345
+Subtract Double 24.12645 - 2.23 = -21.89645
+Subtract integer 24123.45 - 223 = -23900.45
+Multiply 2.23 * 24.12345 = 53.7952935
+Multiply Double 24.12645 * 2.23 = 53.8019835
+Multiply integer 241.2345 * 223 = 53795.2935
+Divide 24.12345 / 2.23 = 10.81769
+Divide Double 2.23 / 24.12645 = 0.09
+Divide integer 241.2345 / 223 = 1.0818
+Compare 2.23, -24.12345 = 1
+Compare integer 2.23, 3 = -1
+Compare Double 2.23, 2.23 = 0
+Negate 24.12345 = -24.12345
 SQL Params
 SQLType =SQL_LONG
 sub type = 0
@@ -4926,12 +4942,12 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 8
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2022/01/09 15:24:09.1790
+IBX$CREATED = 2022/01/13 22:49:33.6740
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 10
 IBX$OLDTRANSACTIONID = 9
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2022/01/09 15:24:09.5040
+IBX$CREATED = 2022/01/13 22:49:33.9990
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)

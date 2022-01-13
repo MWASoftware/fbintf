@@ -1981,29 +1981,39 @@ end;
 procedure TSQLDataItem.SetAsDouble(Value: Double);
 begin
   CheckActive;
-  if IsNullable then
-    IsNull := False;
+  if not CanChangeMetaData and (SQLType <> SQL_DOUBLE) then
+    SetAsNumeric(NewNumeric(Value))
+  else
+  begin
+    if IsNullable then
+      IsNull := False;
 
-  Changing;
-  SQLType := SQL_DOUBLE;
-  DataLength := SizeOf(Double);
-  Scale := 0;
-  PDouble(SQLData)^ := Value;
-  Changed;
+    Changing;
+    SQLType := SQL_DOUBLE;
+    DataLength := SizeOf(Double);
+    Scale := 0;
+    PDouble(SQLData)^ := Value;
+    Changed;
+  end;
 end;
 
 procedure TSQLDataItem.SetAsFloat(Value: Float);
 begin
   CheckActive;
-  if IsNullable then
-    IsNull := False;
+  if not CanChangeMetaData and (SQLType <> SQL_FLOAT) then
+    SetAsNumeric(NewNumeric(Value))
+  else
+  begin
+    if IsNullable then
+      IsNull := False;
 
-  Changing;
-  SQLType := SQL_FLOAT;
-  DataLength := SizeOf(Float);
-  Scale := 0;
-  PSingle(SQLData)^ := Value;
-  Changed;
+    Changing;
+    SQLType := SQL_FLOAT;
+    DataLength := SizeOf(Float);
+    Scale := 0;
+    PSingle(SQLData)^ := Value;
+    Changed;
+  end;
 end;
 
 procedure TSQLDataItem.SetAsLong(Value: Long);
@@ -2132,11 +2142,11 @@ begin
   with FFirebirdClientAPI do
   case GetSQLType of
   SQL_LONG:
-      PLong(SQLData)^ := SafeInteger(Value.clone(Scale).getRawValue);
+      PLong(SQLData)^ := SafeInteger(Value.AdjustScaleTo(Scale).getRawValue);
   SQL_SHORT:
-    PShort(SQLData)^ := SafeSmallInt(Value.clone(Scale).getRawValue);
+    PShort(SQLData)^ := SafeSmallInt(Value.AdjustScaleTo(Scale).getRawValue);
   SQL_INT64:
-    PInt64(SQLData)^ := Value.clone(Scale).getRawValue;
+    PInt64(SQLData)^ := Value.AdjustScaleTo(Scale).getRawValue;
   SQL_TEXT, SQL_VARYING:
    SetAsString(Value.getAsString);
   SQL_D_FLOAT,

@@ -198,7 +198,7 @@ begin
   numeric := NewNumeric(StrToCurr('9999.123456780'));
   writeln(Outfile,'Value from Currency = ',numeric.getAsString);
   writeln(Outfile,'Raw Value = ',numeric.getRawValue,' Scale = ',numeric.getScale);
-  numeric := NewNumeric(StrToCurr('9999.123456780')).clone(-2);
+  numeric := NewNumeric(StrToCurr('9999.123456780')).AdjustScaleTo(-2);
   writeln(Outfile,'Value from Currency(rescaled) = ',numeric.getAsString);
   writeln(Outfile,'Raw Value = ',numeric.getRawValue,' Scale = ',numeric.getScale);
   numeric := NewNumeric(StrToFloat('9999.123456780'));

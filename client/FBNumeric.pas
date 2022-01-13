@@ -116,7 +116,7 @@ type
     {IFBNumeric}
     function getRawValue: Int64;
     function getScale: integer;
-    function clone(aNewScale: integer): IFBNumeric;
+    function AdjustScaleTo(aNewScale: integer): IFBNumeric;
     function getAsString: AnsiString;
     function getAsDouble: double;
     function getAsCurrency: Currency;
@@ -306,7 +306,7 @@ begin
   {Compute actual value as a double}
   z := (x.getRawValue / y.getRawValue) * IntPower(10, x.getScale - y.getScale);
   {Return numeric at original no. of decimal places of numerator}
-  Result := NewNumeric(z).clone(x.getScale);
+  Result := NewNumeric(z).AdjustScaleTo(x.getScale);
 end;
 
 function NumericCompare(x, y: IFBNumeric): integer;
@@ -422,7 +422,7 @@ constructor TFBNumeric.Create(aValue: double);
   function WithinLimits(a: double): boolean;
   begin
     a := abs(frac(a));
-    Result := (a > 0) and (a < 0.999); {avoid small rounding errors converting to decimal}
+    Result := (a > 0.001) and (a < 0.999); {avoid small rounding errors converting to decimal}
   end;
 
 var aScale: integer;
@@ -464,7 +464,7 @@ begin
  Result := FScale;
 end;
 
-function TFBNumeric.clone(aNewScale: integer): IFBNumeric;
+function TFBNumeric.AdjustScaleTo(aNewScale: integer): IFBNumeric;
 begin
  if FScale = aNewScale then
    Result := TFBNumeric.Create(FValue,FScale)
@@ -518,7 +518,7 @@ var value: int64;
 begin
   if FScale <> -4 then
   begin
-    value := clone(-4).GetRawValue;
+    value := AdjustScaleTo(-4).GetRawValue;
     Move(value,Result,sizeof(Currency));
   end
   else

@@ -255,7 +255,7 @@ type
     ['{8bdccfe9-d552-446b-bd82-844ca264455d}']
     function getRawValue: Int64;
     function getScale: integer;
-    function clone(aNewScale: integer): IFBNumeric;
+    function AdjustScaleTo(aNewScale: integer): IFBNumeric;
     function getAsString: AnsiString;
     function getAsDouble: double;
     function getAsBCD: TBCD;

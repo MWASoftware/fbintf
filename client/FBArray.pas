@@ -474,17 +474,17 @@ begin
     PSingle(SQLData)^ := Value;
   SQL_SHORT:
     if Scale < 0 then
-      PShort(SQLData)^ := SafeSmallInt(NewNumeric(Value).getRawValue)
+      PShort(SQLData)^ := SafeSmallInt(NewNumeric(Value).AdjustScaleTo(Scale).getRawValue)
     else
       IBError(ibxeInvalidDataConversion, [nil]);
   SQL_LONG:
     if Scale < 0 then
-      PLong(SQLData)^ := SafeInteger(NewNumeric(Value).getRawValue)
+      PLong(SQLData)^ := SafeInteger(NewNumeric(Value).AdjustScaleTo(Scale).getRawValue)
     else
       IBError(ibxeInvalidDataConversion, [nil]);
   SQL_INT64:
     if Scale < 0 then
-      PInt64(SQLData)^ := NewNumeric(Value).getRawValue
+      PInt64(SQLData)^ := NewNumeric(Value).AdjustScaleTo(Scale).getRawValue
     else
       IBError(ibxeInvalidDataConversion, [nil]);
   SQL_TEXT, SQL_VARYING:
@@ -510,7 +510,7 @@ begin
     if Scale = -4 then
       PCurrency(SQLData)^ := Value
     else
-      PInt64(SQLData)^ := NewNumeric(Value).clone(Scale).getRawValue;
+      PInt64(SQLData)^ := NewNumeric(Value).AdjustScaleTo(Scale).getRawValue;
     Changed;
   end
 end;
@@ -543,11 +543,11 @@ begin
   CheckActive;
   case GetSQLType of
   SQL_LONG:
-      PLong(SQLData)^ := SafeInteger(Value.clone(Scale).getRawValue);
+      PLong(SQLData)^ := SafeInteger(Value.AdjustScaleTo(Scale).getRawValue);
   SQL_SHORT:
-    PShort(SQLData)^ := SafeSmallInt(Value.clone(Scale).getRawValue);
+    PShort(SQLData)^ := SafeSmallInt(Value.AdjustScaleTo(Scale).getRawValue);
   SQL_INT64:
-    PInt64(SQLData)^ := Value.clone(Scale).getRawValue;
+    PInt64(SQLData)^ := Value.AdjustScaleTo(Scale).getRawValue;
   SQL_TEXT, SQL_VARYING:
    SetAsString(Value.getAsString);
   SQL_D_FLOAT,

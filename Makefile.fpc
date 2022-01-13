@@ -10,8 +10,8 @@ version=0.0
 
 [compiler]
 unittargetdir=lib/$(CPU_TARGET)-$(OS_TARGET)
-unitdir=client client/3.0/firebird client/2.5 . client/3.0
-includedir=client/3.0/firebird client/include include
+unitdir=client client/3.0/firebird client/2.5 . client/3.0 client/3.0/firebird 
+includedir=client/include 
 options= -MObjFPC -Scghi -O3 -l -vewnhibq $(DBG_OPTIONS)
 
 [target]
