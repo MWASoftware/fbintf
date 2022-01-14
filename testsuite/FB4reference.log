@@ -651,13 +651,13 @@ Running Test 3: ad hoc queries
 Opening inet://localhost/employee
 Database Open
 Employee Count = 42
-Transaction ID = 7640
+Transaction ID = 8337
 Transaction is Read/Write
 Transaction Database Path = inet://localhost/employee
-Transaction ID = 7640
-Oldest Interesting = 7638
-Oldest Action = 7639
-Oldest Snapshot = 7639
+Transaction ID = 8337
+Oldest Interesting = 8335
+Oldest Action = 8336
+Oldest Snapshot = 8336
 Oldest Snapshot Number = 1
 Lock Timeout = 0
 Transaction Access = isc_info_tra_readwrite
@@ -692,14 +692,14 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 19,761,888
+Current memory = 19,762,400
 Delta memory = 4,464
-Max memory = 19,807,216
-Elapsed time= 0.002 sec
+Max memory = 19,807,728
+Elapsed time= 0.003 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
-Writes = 0
+Writes = 1
 Fetches = 3
 Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
 Relation Name = EMPLOYEE
@@ -2844,8 +2844,8 @@ Page Size = 8192
 Version = 1: LI-V6.3.1.2692 Firebird 4.0
 Database is Read/Write
 Database Created: 21/12/2021 10:52:59
-Pages Used = 351
-Pages Free = 62
+Pages Used = 352
+Pages Free = 61
 Server Memory = 19476112
 Forced Writes  = 1
 Max Memory  = 19506944
@@ -2853,7 +2853,7 @@ Num Buffers  = 2048
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
 Active Transaction Count = 0
-Fetches  = 1686
+Fetches  = 1698
 Writes  = 6
 Reads  = 97
 Page Writes  = 3
@@ -2879,7 +2879,7 @@ Count = 2
 Table ID = 12
 Count = 24
 Table ID = 18
-Count = 943
+Count = 952
 Table ID = 20
 Count = 5
 Table ID = 28
@@ -2907,11 +2907,11 @@ Async Wait Called
 Event Signalled
 First Event - usually ignored
 Signal Event
+Event Signalled
 Event Counts: TESTEVENT, Count = 1
 Two more events
 Call Async Wait
 Async Wait Called
-Event Signalled
 Event Signalled
 Deferred Events Caught
 Event Counts: TESTEVENT, Count = 2
@@ -4942,12 +4942,12 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 8
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2022/01/13 22:49:33.6740
+IBX$CREATED = 2022/01/14 22:58:12.7560
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 10
 IBX$OLDTRANSACTIONID = 9
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2022/01/13 22:49:33.9990
+IBX$CREATED = 2022/01/14 22:58:13.0520
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)

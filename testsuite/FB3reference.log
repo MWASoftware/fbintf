@@ -650,13 +650,13 @@ Running Test 3: ad hoc queries
 Opening inet://localhost/employee
 Database Open
 Employee Count = 42
-Transaction ID = 6101
+Transaction ID = 6142
 Transaction is Read/Write
 Transaction Database Path = inet://localhost/employee
-Transaction ID = 6101
-Oldest Interesting = 6099
-Oldest Action = 6100
-Oldest Snapshot = 6100
+Transaction ID = 6142
+Oldest Interesting = 6140
+Oldest Action = 6141
+Oldest Snapshot = 6141
 Oldest Interesting = 0
 Employee Count = 41
 Employee Count = 42
@@ -691,7 +691,7 @@ FULL_NAME = Johnson, Leslie
 Current memory = 19,689,792
 Delta memory = 4,480
 Max memory = 19,751,184
-Elapsed time= 0.002 sec
+Elapsed time= 0.001 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
@@ -2897,11 +2897,11 @@ Async Wait Called
 Event Signalled
 First Event - usually ignored
 Signal Event
+Event Signalled
 Event Counts: TESTEVENT, Count = 1
 Two more events
 Call Async Wait
 Async Wait Called
-Event Signalled
 Event Signalled
 Deferred Events Caught
 Event Counts: TESTEVENT, Count = 2
@@ -2914,7 +2914,7 @@ Event Cancelled
 Time Out - Cancel Worked!
 Sync wait
 Event Signalled
-Event Counts: TESTEVENT, Count = 1
+Event Counts: TESTEVENT, Count = 0
 
 
 ------------------------------------------------------
@@ -3721,12 +3721,12 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 8
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2022/01/13 22:53:07.0030
+IBX$CREATED = 2022/01/14 23:02:04.2320
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 10
 IBX$OLDTRANSACTIONID = 9
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2022/01/13 22:53:07.2940
+IBX$CREATED = 2022/01/14 23:02:04.6690
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)

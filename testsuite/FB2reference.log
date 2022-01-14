@@ -533,12 +533,12 @@ Running Test 3: ad hoc queries
 Opening localhost:employee
 Database Open
 Employee Count = 42
-Transaction ID = 6306
+Transaction ID = 6359
 Transaction is Read/Write
-Transaction ID = 6306
-Oldest Interesting = 6304
-Oldest Action = 6305
-Oldest Snapshot = 6305
+Transaction ID = 6359
+Oldest Interesting = 6318
+Oldest Action = 6358
+Oldest Snapshot = 6358
 Oldest Interesting = 0
 Employee Count = 41
 Employee Count = 42
@@ -570,10 +570,10 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 937,512
+Current memory = 937,536
 Delta memory = 1,288
 Max memory = 965,600
-Elapsed time= 0.002 sec
+Elapsed time= 0.000 sec
 Cpu = 0.000 sec
 Buffers = 75
 Reads = 0
@@ -3579,12 +3579,12 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 7
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2022/01/13 22:55:18.8340
+IBX$CREATED = 2022/01/14 23:03:42.7720
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 9
 IBX$OLDTRANSACTIONID = 8
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2022/01/13 22:55:19.1960
+IBX$CREATED = 2022/01/14 23:03:43.1080
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)
