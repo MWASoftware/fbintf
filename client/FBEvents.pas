@@ -108,7 +108,7 @@ type
     procedure CancelEvents(Force: boolean = false); virtual;
     procedure EventSignaled;
     function GetIEvents: IEvents; virtual; abstract;
-    procedure ProcessEventCounts;
+    function ProcessEventCounts: boolean;
   public
     const EPB_version1 = 1;
   public
@@ -123,6 +123,7 @@ type
     function ExtractEventCounts: TEventCounts;
     function GetAttachment: IAttachment;
     procedure AsyncWaitForEvent(EventHandler: TEventHandler); virtual; abstract;
+    procedure WaitForEvent; virtual; abstract;
   end;
 
 
@@ -279,12 +280,11 @@ begin
   FCriticalSection.Enter;
   try
     if not FInWaitState then Exit;
-    FInWaitState := false;
-    ProcessEventCounts;
-    if assigned(FEventHandler)  then
+    if ProcessEventCounts and assigned(FEventHandler)  then
     begin
       Handler := FEventHandler;
       FEventHandler := nil;
+      FInWaitState := false;
     end;
   finally
     FCriticalSection.Leave;
@@ -349,7 +349,7 @@ void API_ROUTINE isc_event_counts(ULONG* result_vector,
 
 {ProcessEventCounts effectively replaces isc_event_counts}
 
-procedure TFBEvents.ProcessEventCounts;
+function TFBEvents.ProcessEventCounts: boolean;
 
 var i: integer;
     P, Q: PByte;
@@ -357,6 +357,7 @@ var i: integer;
     new_count: Long;
     len: byte;
 begin
+  Result := false;
   P := FEventBuffer;
   Q := FResultBuffer;
   Inc(P); {skip past version byte}
@@ -373,6 +374,9 @@ begin
     new_count := DecodeInteger(Q,sizeof(Long));
     Inc(Q,sizeof(Long));
     FEventCounts[i].Count := new_count - initial_count;
+    if FEventCounts[i].Count > 0 then
+      Result := true;
+  //  writeln('Event Count[',i,'] = ',FEventCounts[i].Count);
   end;
   Move(FResultBuffer^,FEventBuffer^,FEventBufferLen);
 end;
@@ -427,7 +431,7 @@ begin
   end;
 end;
 
-procedure TFBEvents.SetEvents(Event: String);
+procedure TFBEvents.SetEvents(Event: string);
 var S: TStringList;
 begin
   S := TStringList.Create;

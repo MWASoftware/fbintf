@@ -89,7 +89,7 @@ type
     destructor Destroy; override;
 
     {IEvents}
-    procedure WaitForEvent;
+    procedure WaitForEvent; override;
     procedure AsyncWaitForEvent(EventHandler: TEventHandler); override;
   end;
 
@@ -104,7 +104,6 @@ type
   private
     FOwner: TFB30Events;
     FEventHandler: TEventhandlerInterface;
-    class var FRunning: boolean;
   protected
     procedure Execute; override;
   public
@@ -179,7 +178,7 @@ begin
   finally
     FOwner.FCriticalSection.Leave
   end;
-  { $IFDEF EVENTDEBUG}writeln(FName,' TEventhandlerInterface: Set Event Called'); { $ENDIF}
+  {$IFDEF EVENTDEBUG}writeln(FName,' TEventhandlerInterface: Set Event Called'); {$ENDIF}
   {$IFDEF WINDOWS}
   SetEvent(FEventHandler);
   {$ELSE}
@@ -211,22 +210,15 @@ end;
 
 procedure TEventHandlerThread.Execute;
 begin
-  if FRunning then Exit;   {guard against double running}
-  FRunning := true;
-  try
-    {$IFDEF EVENTDEBUG}  writeln('Event Handler Thread Starts'); {$ENDIF}
-    while not Terminated do
-    begin
-      FEventHandler.WaitForEvent;
-      { $IFDEF EVENTDEBUG}  writeln('Event Handler Ends Wait ',Terminated); { $ENDIF}
-
-      if not Terminated  then
-        FOwner.EventSignaled;
-    end;
-    { $IFDEF EVENTDEBUG}  writeln('Event Handler Thread Ends'); { $ENDIF}
-  finally
-    FRunning := false;
+  {$IFDEF EVENTDEBUG}  writeln('Event Handler Thread Starts'); {$ENDIF}
+  while not Terminated do
+  begin
+    FEventHandler.WaitForEvent;
+    {$IFDEF EVENTDEBUG}  writeln('Event Handler Ends Wait ',Terminated); {$ENDIF}
+    if not Terminated  then
+      FOwner.EventSignaled;
   end;
+  {$IFDEF EVENTDEBUG}  writeln('Event Handler Thread Ends'); {$ENDIF}
 end;
 
 constructor TEventHandlerThread.Create(Owner: TFB30Events;
@@ -309,6 +301,8 @@ begin
   FAttachmentIntf := DBAttachment.AttachmentIntf;
   FFirebird30ClientAPI := DBAttachment.Firebird30ClientAPI;
   FSyncEventCallback := TEventhandlerInterface.Create(self,'Sync');
+  FAsyncEventCallback := TEventhandlerInterface.Create(self,'Async');
+  FEventHandlerThread := TEventHandlerThread.Create(self,FAsyncEventCallback);
 end;
 
 destructor TFB30Events.Destroy;
@@ -324,12 +318,6 @@ end;
 
 procedure TFB30Events.AsyncWaitForEvent(EventHandler: TEventHandler);
 begin
-  {Seems like we have to create a new callback object each time to avoid empty events}
-  if assigned(FEventHandlerThread) then
-    TEventHandlerThread(FEventHandlerThread).Terminate;
-  if assigned(FAsyncEventCallback) then TEventhandlerInterface(FAsyncEventCallback).release;
-  FAsyncEventCallback := TEventhandlerInterface.Create(self,'Async');
-  FEventHandlerThread := TEventHandlerThread.Create(self,FAsyncEventCallback);
   InternalAsyncWaitForEvent(EventHandler,FAsyncEventCallback);
 end;
 
@@ -338,9 +326,6 @@ begin
   InternalAsyncWaitForEvent(nil,FSyncEventCallback);
   FSyncEventCallback.WaitForEvent;
 end;
-
-initialization
-  TEventHandlerThread.FRunning := false;
 
 end.
 
