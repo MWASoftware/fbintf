@@ -216,9 +216,13 @@ begin
   numeric := StrToNumeric('-1.2e-02');
   writeln(Outfile,'Value from string = ',numeric.getAsString);
   writeln(Outfile,'Raw Value = ',numeric.getRawValue,' Scale = ',numeric.getScale);
-  numeric := BCDToNumeric(StrToBCD('9999.123456780'));
-  writeln(Outfile,'Value from BCD = ',numeric.getAsString);
-  writeln(Outfile,'Raw Value = ',numeric.getRawValue,' Scale = ',numeric.getScale);
+  try
+    numeric := BCDToNumeric(StrToBCD('9999.123456780'));
+    writeln(Outfile,'Value from BCD = ',numeric.getAsString);
+    writeln(Outfile,'Raw Value = ',numeric.getRawValue,' Scale = ',numeric.getScale);
+  except on E:Exception do
+    writeln(OutFile,'Delphi has a problem with this number: ',E.Message);
+  end;
   numeric := NumericFromRawValues(9999123456780,-6);
   writeln(Outfile,'Value from Raw Data = ',numeric.getAsString);
   writeln(Outfile,'Raw Value = ',numeric.getRawValue,' Scale = ',numeric.getScale);
