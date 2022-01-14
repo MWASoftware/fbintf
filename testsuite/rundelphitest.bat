@@ -52,6 +52,13 @@ del testsuite.exe
 echo( 
 echo Starting Testsuite
 echo( 
+IF EXISTS "..\Win32\Debug\fbintf.bpl" (
+ copy  "..\Win32\Debug\fbintf.bpl" .
+)
+IF EXISTS "..\Win64\Debug\fbintf.bpl" (
+ copy  "..\Win64\Debug\fbintf.bpl" .
+)
+
 IF EXIST "testsuite.exe" (
 testsuite.exe -u %USERNAME% -p %PASSWORD% -e %EMPLOYEEDB% -n %NEWDBNAME% -s %NEWDBNAME2% -b %BAKFILE% -o testout.log %1
 if not EXIST "%DIFF%" (

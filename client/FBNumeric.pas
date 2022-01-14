@@ -53,7 +53,11 @@ uses
 }
 
 function NewNumeric(aValue: AnsiString): IFBNumeric; overload;
+{$IFDEF FPC}
 function NewNumeric(aValue: double): IFBNumeric; overload;
+{$ELSE}
+function NewNumericFromDouble(aValue: double): IFBNumeric; overload;
+{$ENDIF}
 function NewNumeric(aValue: TBCD): IFBNumeric; overload;
 function NewNumeric(aValue: currency): IFBNumeric; overload;
 function NewNumeric(aValue: Int64): IFBNumeric; overload;
@@ -131,7 +135,11 @@ begin
   Result :=  TFBNumeric.Create(aValue);
 end;
 
+{$IFDEF FPC}
 function NewNumeric(aValue: double): IFBNumeric;
+{$ELSE}
+function NewNumericFromDouble(aValue: double): IFBNumeric;
+{$ENDIF}
 begin
   Result :=  TFBNumeric.Create(aValue);
 end;
