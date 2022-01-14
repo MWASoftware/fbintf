@@ -726,9 +726,10 @@ type
  TJnlEntry = record
    JnlEntryType: TJnlEntryType;
    Timestamp: TDateTime;
-   SessionID: integer;
-   TransactionID: integer;
-   OldTransactionID: integer;
+   AttachmentID: cardinal;
+   SessionID: cardinal;
+   TransactionID: cardinal;
+   OldTransactionID: cardinal;
    TransactionName: AnsiString;
    TPB: ITPB;
    DefaultCompletion: TTransactionCompletion;
@@ -741,7 +742,8 @@ type
 
    TJournalProcessor = class(TSQLTokeniser)
     private
-      type TLineState = (lsInit, lsJnlFound, lsGotTimestamp, lsGotJnlType,  lsGotSessionID,
+      type TLineState = (lsInit, lsJnlFound, lsGotTimestamp, lsGotJnlType,
+                          lsGotAttachmentID, lsGotSessionID,
                           lsGotTransactionID,  lsGotOldTransactionID, lsGotText1Length,
                           lsGotText1, lsGotText2Length, lsGotText2);
     private
@@ -793,8 +795,6 @@ function FBFormatDateTime(fmt: AnsiString; aDateTime: TDateTime): AnsiString;
 function FormatTimeZoneOffset(EffectiveTimeOffsetMins: integer): AnsiString;
 function DecodeTimeZoneOffset(TZOffset: AnsiString; var dstOffset: integer): boolean;
 function StripLeadingZeros(Value: AnsiString): AnsiString;
-function TryStrToNumeric(S: Ansistring; out Value: int64; out scale: integer): boolean;
-function NumericToDouble(aValue: Int64; aScale: integer): double;
 function StringToHex(octetString: string; MaxLineLength: integer=0): string; overload;
 procedure StringToHex(octetString: string; TextOut: TStrings; MaxLineLength: integer=0); overload;
 
@@ -2015,81 +2015,6 @@ begin
     end;
 end;
 
-function TryStrToNumeric(S: Ansistring; out Value: int64; out scale: integer): boolean;
-var i: integer;
-    ds: integer;
-    exponent: integer;
-begin
-  Result := false;
-  ds := 0;
-  exponent := 0;
-  S := Trim(S);
-  Value := 0;
-  scale := 0;
-  if Length(S) = 0 then
-    Exit;
-  {$IF declared(DefaultFormatSettings)}
-  with DefaultFormatSettings do
-  {$ELSE}
-  {$IF declared(FormatSettings)}
-  with FormatSettings do
-  {$IFEND}
-  {$IFEND}
-  begin
-    for i := length(S) downto 1 do
-    begin
-      if S[i] = AnsiChar(DecimalSeparator) then
-      begin
-          if ds <> 0 then Exit; {only one allowed}
-          ds := i;
-          dec(exponent);
-          system.Delete(S,i,1);
-      end
-      else
-      if S[i] in ['+','-'] then
-      begin
-       if (i > 1) and not (S[i-1] in ['e','E']) then
-          Exit; {malformed}
-      end
-      else
-      if S[i] in ['e','E'] then {scientific notation}
-      begin
-        if ds <> 0 then Exit; {not permitted in exponent}
-        if exponent <> 0 then Exit; {only one allowed}
-        exponent := i;
-      end
-      else
-      if not (S[i] in ['0'..'9']) then
-      {Note: ThousandSeparator not allowed by Delphi specs}
-          Exit; {bad character}
-    end;
-
-    if exponent > 0 then
-    begin
-      Result := TryStrToInt(system.copy(S,exponent+1,maxint),Scale);
-      if Result then
-      begin
-        {adjust scale for decimal point}
-        if ds <> 0 then
-          Scale := Scale - (exponent - ds);
-        Result := TryStrToInt64(system.copy(S,1,exponent-1),Value);
-      end;
-    end
-    else
-    begin
-      if ds <> 0 then
-        scale := ds - Length(S) - 1;
-      Result := TryStrToInt64(S,Value);
-    end;
-  end;
-end;
-
-function NumericToDouble(aValue: Int64; aScale: integer): double;
-begin
-  Result := aValue * IntPower(10,aScale)
-end;
-
-
 function StringToHex(octetString: string; MaxLineLength: integer): string; overload;
 
   function ToHex(aValue: byte): string;
@@ -2870,12 +2795,18 @@ begin
     end;
 
    sqltComma:
-     if not (LineState in [lsGotTimestamp,lsGotSessionID,lsGotTransactionID,lsGotText1,lsGotText2]) then
+     if not (LineState in [lsGotTimestamp,lsGotAttachmentID,lsGotSessionID,lsGotTransactionID,lsGotText1,lsGotText2]) then
        LineState := lsInit;
 
    sqltNumberString:
      case LineState of
      lsGotTimestamp:
+       begin
+         AttachmentID := StrToInt(TokenText);
+         LineState := lsGotAttachmentID;
+       end;
+
+     lsGotAttachmentID:
        begin
          SessionID := StrToInt(TokenText);
          LineState := lsGotSessionID;

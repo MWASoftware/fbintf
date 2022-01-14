@@ -53,6 +53,7 @@ type
     procedure UpdateDatabase(Attachment: IAttachment);
     procedure QueryDatabase(Attachment: IAttachment);
     procedure ValidateStrToNumeric;
+    procedure ValidateNumericInterface;
   public
     function TestTitle: AnsiString; override;
     procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
@@ -62,7 +63,7 @@ type
 
 implementation
 
-uses IBUtils;
+uses FBNumeric, FmtBCD;
 
 const
   sqlCreateTable =
@@ -145,7 +146,18 @@ begin
   except on E: Exception do
     writeln(Outfile,'Expected Error - ',E.Message);
   end;
-
+  writeln(OutFile,'Test Numeric Type');
+  with Statement.GetSQLParams do
+  begin
+    Clear;
+    Params[0].AsInteger := 7;
+    Params[1].AsNumeric := DoubleToNumeric(1.0);
+    Params[2].AsVariant := 1234567;
+    Params[3].AsNumeric := DoubleToNumeric(StrToFloat('2.3E-2'));
+    Params[4].AsNumeric := StrToNumeric('11e-4');
+    Params[5].AsVariant := 1234.25;
+  end;
+  Statement.Execute;
 end;
 
 procedure TTest21.QueryDatabase(Attachment: IAttachment);
@@ -179,6 +191,61 @@ begin
   end;
 end;
 
+procedure TTest21.ValidateNumericInterface;
+var numeric: IFBNumeric;
+begin
+  writeln(Outfile,'Validating Numeric Interface - IFBNumeric');
+  numeric := CurrToNumeric(StrToCurr('9999.123456780'));
+  writeln(Outfile,'Value from Currency = ',numeric.getAsString);
+  writeln(Outfile,'Raw Value = ',numeric.getRawValue,' Scale = ',numeric.getScale);
+  numeric := CurrToNumeric(StrToCurr('9999.123456780')).AdjustScaleTo(-2);
+  writeln(Outfile,'Value from Currency(rescaled) = ',numeric.getAsString);
+  writeln(Outfile,'Raw Value = ',numeric.getRawValue,' Scale = ',numeric.getScale);
+  numeric := DoubleToNumeric(StrToFloat('9999.123456780'));
+  writeln(Outfile,'Value from Double = ',numeric.getAsString);
+  writeln(Outfile,'Raw Value = ',numeric.getRawValue,' Scale = ',numeric.getScale);
+  numeric := IntToNumeric(StrToInt64('9223372036854775807'));
+  writeln(Outfile,'Value from Integer = ',numeric.getAsString);
+  writeln(Outfile,'Raw Value = ',numeric.getRawValue,' Scale = ',numeric.getScale);
+  numeric := StrToNumeric('9223372036854775807');
+  writeln(Outfile,'Value from string = ',numeric.getAsString);
+  writeln(Outfile,'Raw Value = ',numeric.getRawValue,' Scale = ',numeric.getScale);
+  numeric := StrToNumeric('9999.123456780');
+  writeln(Outfile,'Value from string = ',numeric.getAsString);
+  writeln(Outfile,'Raw Value = ',numeric.getRawValue,' Scale = ',numeric.getScale);
+  numeric := StrToNumeric('-1.2e-02');
+  writeln(Outfile,'Value from string = ',numeric.getAsString);
+  writeln(Outfile,'Raw Value = ',numeric.getRawValue,' Scale = ',numeric.getScale);
+  try
+    numeric := BCDToNumeric(StrToBCD('9999.123456780'));
+    writeln(Outfile,'Value from BCD = ',numeric.getAsString);
+    writeln(Outfile,'Raw Value = ',numeric.getRawValue,' Scale = ',numeric.getScale);
+  except on E:Exception do
+    writeln(OutFile,'Delphi has a problem with this number: ',E.Message);
+  end;
+  numeric := NumericFromRawValues(9999123456780,-6);
+  writeln(Outfile,'Value from Raw Data = ',numeric.getAsString);
+  writeln(Outfile,'Raw Value = ',numeric.getRawValue,' Scale = ',numeric.getScale);
+
+  writeln(outfile,'Numeric Operations');
+  writeln(Outfile,'Add 2.23 + 24.12345 = ',NumericAdd(StrToNumeric('2.23'),StrToNumeric('24.12345')).GetAsString);
+  writeln(Outfile,'Add Double 2.23 + 24.12645 = ',NumericAdd(StrToNumeric('2.23'),24.12645).GetAsString);
+  writeln(Outfile,'Add integer 2.23 + 2412345 = ',NumericAdd(StrToNumeric('2.23'),2412345).GetAsString);
+  writeln(Outfile,'Subtract 2.23 - 24.12345 = ',NumericSubtract(StrToNumeric('2.23'),StrToNumeric('24.12345')).GetAsString);
+  writeln(Outfile,'Subtract Double 24.12645 - 2.23 = ',NumericSubtract(StrToNumeric('24.12645'),2.23).GetAsString);
+  writeln(Outfile,'Subtract integer 24123.45 - 223 = ',NumericSubtract(StrToNumeric('24123.45'),223).GetAsString);
+  writeln(Outfile,'Multiply 2.23 * 24.12345 = ',NumericMultiply(StrToNumeric('2.23'),StrToNumeric('24.12345')).GetAsString);
+  writeln(Outfile,'Multiply Double 24.12645 * 2.23 = ',NumericMultiply(StrToNumeric('24.12645'),2.23).GetAsString);
+  writeln(Outfile,'Multiply integer 241.2345 * 223 = ',NumericMultiply(StrToNumeric('241.2345'),223).GetAsString);
+  writeln(Outfile,'Divide 24.12345 / 2.23 = ',NumericDivide(StrToNumeric('24.12345'),StrToNumeric('2.23')).GetAsString);
+  writeln(Outfile,'Divide Double 2.23 / 24.12645 = ',NumericDivide(StrToNumeric('2.23'),24.12645).GetAsString);
+  writeln(Outfile,'Divide integer 241.2345 / 223 = ',NumericDivide(StrToNumeric('241.2345'),223).GetAsString);
+  writeln(Outfile,'Compare 2.23, -24.12345 = ',NumericCompare(StrToNumeric('2.23'),DoubleToNumeric(-24.12645)));
+  writeln(Outfile,'Compare integer 2.23, 3 = ',NumericCompare(StrToNumeric('2.23'),3));
+  writeln(Outfile,'Compare Double 2.23, 2.23 = ',NumericCompare(StrToNumeric('2.23'),2.23));
+  writeln(Outfile,'Negate 24.12345 = ',NegateNumeric(StrToNumeric('24.12345')).GetAsString);
+end;
+
 function TTest21.TestTitle: AnsiString;
 begin
   Result := 'Test 21: Exercise setting and getting of numeric data types';
@@ -197,6 +264,7 @@ begin
   try
     Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable);
     ValidateStrToNumeric;
+    ValidateNumericInterface;
     SetFloatTemplate('#,###.00000000');
     UpdateDatabase(Attachment);
     QueryDatabase(Attachment);

@@ -42,7 +42,7 @@ unit Test22;
 interface
 
 uses
-  Classes, SysUtils, TestApplication, FBTestApp, IB, IBUtils;
+  Classes, SysUtils, TestApplication, FBTestApp, IB;
 
 type
 
@@ -60,6 +60,8 @@ type
 
 
 implementation
+
+uses FBNumeric;
 
 const
   sqlCreateTable =

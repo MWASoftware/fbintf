@@ -1,14 +1,25 @@
-FBINTF Change Log  version          (1.4-0 Build 12952) Tue, 07 Dec 2021 11:53:46 +0000
+FBINTF Change Log  version          (1.4-0 Build 13090) Fri, 14 Jan 2022 23:07:28 +0000
 
-1. Client side journaling support added. Interface changes
+1. Support package fbudr added for support of User Defined Routines (UDRs), and package
+   fbudrtestbed for client side debugging of UDR libraries.
+
+2. Package layout changed with introduction of udr support. IB*.pas files moved from
+    root directory to "client". IBHeader move to "Client".
+
+3. Delphi packages: all packages now compile .dcp and .bpi files to either
+   fbintf\Win32\Debug or fbintf\Win64\Debug by default. Please remove any pre-existing
+   fbintf.dcp and fbintf.bpi files from other locations.
+
+4. Client side journaling support added. Interface changes
    IAttachment
     function JournalingActive: boolean;
     function GetJournalOptions: TJournalOptions;
     function StartJournaling(aJournalLogFile: AnsiString): integer; overload;
     function StartJournaling(aJournalLogFile: AnsiString; Options: TJournalOptions): integer; overload;
+    function StartJournaling(S: TStream; Options: TJournalOptions): integer; overload;
     procedure StopJournaling(RetainJournal: boolean);
 
-2. Transactions may now be given a local transaction name:
+5. Transactions may now be given a local transaction name:
    IFirebirdAPI
      function StartTransaction(Attachments: array of IAttachment;
              TPB: array of byte; DefaultCompletion: TTransactionCompletion=taCommit): ITransaction; overload;
@@ -33,16 +44,43 @@ FBINTF Change Log  version          (1.4-0 Build 12952) Tue, 07 Dec 2021 11:53:4
     function GetTransactionName: AnsiString;
     procedure SetTransactionName(aValue: AnsiString);
 
-3. Additional Transaction information
+6. Additional Transaction information
      ITPB.function AsText: AnsiString; {Returns TPB as a text string}
 
    ITransaction
      function GetDefaultCompletion: TTransactionCompletion;
      function GetJournalingActive(attachment: IAttachment): boolean; {attachment must be specified when multi-database transaction}
 
-4. New IAttachment helper functions
+7. New IAttachment helper functions
      function HasTable(aTableName: AnsiString): boolean;
+     function HasFunction(aFunctionName: AnsiString): boolean;
+     function HasProcedure(aProcName: AnsiString): boolean;
      function GetAttachmentID: integer;
+     function GetCharSetID: integer;
+
+8. IStatement: if the BatchRowLimit is set to maxint, the maximum possible buffer size
+   will be allocted for batch operations.
+
+9. IStatement, IColumnMetaData and ISQLParam all now consistently provide:
+    function GetStatement: IStatement;
+    function GetTransaction: ITransaction;
+    function GetAttachment: IAttachment;
+
+10. Internal: a more disciplined approach to the handling of Firebird.IReferenceCounted
+    interfaces.
+
+11. New interface type: IFBNumeric. IFBNumeric is implemented in the unit FBNumeric
+    and concentrates all handling of Fixed Point numbers. New ISQLItem and ISQLParam
+    functions getAsNumeric and setAsNumeric allow for direct retrival and manipulation
+    of numerics without loss of precision.
+
+12. TryStrToNumeric and NumericToDouble moved from IBUtils to FBNumeric.
+
+13. ISQLParams new method "Clear"
+
+14. Connection Info (e.g. ODS Version, Remote Protocol) now retrieved on first
+    request rather than on attachment connect.
+
 
 FBINTF Change Log  version          (1.3-3 Build 12935) Mon, 06 Dec 2021 23:17:13 +0000
 
@@ -83,6 +121,19 @@ FBINTF Change Log  version          (1.3-3 Build 12935) Mon, 06 Dec 2021 23:17:1
 
 8. ITransaction (Firebird 3 and later): An exception raised when freeing an underlying
    transaction handle is now ignored if Rollback/Commit is called with Force=true
+
+9. Tidy up of exception handling code. Under the legacy API, fb_interpret is now
+   used to get an IBError Message instead of isc_interprete.
+
+10. Internal tidyup. Native code now used for decoding integers and the events
+    buffer. Avoids dependencies on fbclient functions isc_portable_integer,
+    isc_event_block and isc_event_counts.
+
+11. New IAttachment function
+     function GetAttachmentID: integer;
+
+12. Internal changes to TFBClientAPI, TFBAttachment and TFBTransaction and TFB30
+    subclasses to enable UDR support.
 
 FBINTF Change Log  version          (1.3-2 Build 12889) Sun, 24 Oct 2021 13:49:28 +0100
 

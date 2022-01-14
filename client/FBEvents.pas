@@ -60,8 +60,8 @@
 {                                                                        }
 {************************************************************************}
 unit FBEvents;
-{$IFDEF MSWINDOWS} 
-{$DEFINE WINDOWS} 
+{$IFDEF MSWINDOWS}
+{$DEFINE WINDOWS}
 {$ENDIF}
 
 {$IFDEF FPC}
@@ -77,6 +77,19 @@ uses
 type
 
   { TFBEvents }
+
+  {Firebird Event and Result buffer syntax is:
+
+    record
+      version: byte;
+      event: array of packed record
+        strlen: byte;
+        strchars: array of AnsiChar; //no of chars given by strlen
+        EventCounts: long;
+      end;
+    end;
+
+  }
 
   TFBEvents = class(TActivityReporter)
   private
@@ -95,7 +108,9 @@ type
     procedure CancelEvents(Force: boolean = false); virtual;
     procedure EventSignaled;
     function GetIEvents: IEvents; virtual; abstract;
-    procedure ProcessEventCounts;
+    function ProcessEventCounts: boolean;
+  public
+    const EPB_version1 = 1;
   public
     constructor Create(DBAttachment: IAttachment; aMonitor: IActivityMonitor; Events: TStrings);
     destructor Destroy; override;
@@ -103,11 +118,12 @@ type
     {IEvents}
     procedure GetEvents(EventNames: TStrings);
     procedure SetEvents(EventNames: TStrings); overload;
-    procedure SetEvents(Event: AnsiString); overload;
+    procedure SetEvents(Event: string); overload;
     procedure Cancel;
     function ExtractEventCounts: TEventCounts;
     function GetAttachment: IAttachment;
     procedure AsyncWaitForEvent(EventHandler: TEventHandler); virtual; abstract;
+    procedure WaitForEvent; virtual; abstract;
   end;
 
 
@@ -120,41 +136,136 @@ const
 
 { TFBEvents }
 
+(* Original Firebird 'C' code
+
+SLONG API_ROUTINE_VARARG isc_event_block(UCHAR** event_buffer,
+  UCHAR** result_buffer,
+  USHORT count, ...)
+{
+/**************************************
+ *
+ *      i s c _ e v e n t _ b l o c k
+ *
+ **************************************
+ *
+ * Functional description
+ *      Create an initialized event parameter block from a
+ *      variable number of input arguments.
+ *      Return the size of the block.
+ *
+ *	Return 0 if any error occurs.
+ *
+ **************************************/
+	va_list ptr;
+
+	va_start(ptr, count);
+
+	// calculate length of event parameter block, setting initial length to include version
+	// and counts for each argument
+
+	SLONG length = 1;
+	USHORT i = count;
+	while (i--)
+	{
+		const char* q = va_arg(ptr, SCHAR * );
+		length += static_cast<SLONG>(strlen(q)) + 5;
+	}
+	va_end(ptr);
+
+	UCHAR* p = *event_buffer = (UCHAR * ) gds__alloc((SLONG) length);
+	// FREE: apparently never freed
+	if (!*event_buffer)			// NOMEM:
+		return 0;
+	if ((*result_buffer = (UCHAR * ) gds__alloc((SLONG) length)) == NULL)
+	{
+		// NOMEM:
+		// FREE: apparently never freed
+		gds__free(*event_buffer);
+		*event_buffer = NULL;
+		return 0;
+	}
+
+	// initialize the block with event names and counts
+
+	*p++ = EPB_version1;
+
+	va_start(ptr, count);
+
+	i = count;
+	while (i--)
+	{
+		const char* q = va_arg(ptr, SCHAR * );
+
+		// Strip the blanks from the ends
+		const char* end = q + strlen(q);
+		while (--end >= q && *end == ' ')
+			;
+		*p++ = end - q + 1;
+		while (q <= end)
+			*p++ = *q++;
+		*p++ = 0;
+		*p++ = 0;
+		*p++ = 0;
+		*p++ = 0;
+	}
+	va_end(ptr);
+
+	return static_cast<SLONG>(p - *event_buffer);
+}
+*)
+
+{CreateEventBlock effectively replaces isc_event_block}
+
 procedure TFBEvents.CreateEventBlock;
-var
-  i: integer;
-  EventNames: array of PAnsiChar;
-  EventName: AnsiString;
+var i: integer;
+    P: PByte;
+    var s: Ansistring;
 begin
+  {calculate length of event parameter block, setting initial length to include version
+   and counts for each argument}
+
+   if FEventBuffer <> nil then FreeAndNil(FEventBuffer);
+   if FResultBuffer <> nil then FreeAndNil(FResultBuffer);
+
+  FEventBufferLen := 1;
+  for i := 0 to FEvents.Count - 1 do
+  begin
+    s := FEvents[i];
+    FEventBufferLen := FEventBufferLen + length(s) + 1 + sizeof(Long);
+  end;
+
   with FFirebirdClientAPI do
   begin
-    if FEventBuffer <> nil then
-      isc_free( FEventBuffer);
-    FEventBuffer := nil;
-    if FResultBuffer <> nil then
-      isc_free( FResultBuffer);
-    FResultBuffer := nil;
+    IBAlloc(FEventBuffer,0,FEventBufferLen);
+    if FEventBuffer = nil then Exit;
+    FillChar(FEventBuffer^,FEventBufferLen,0);
+    IBAlloc(FResultBuffer,0,FEventBufferLen);
+    if FResultBuffer = nil then
+    begin
+      FreeAndNil(FEventBuffer);
+      Exit;
+    end;
+    FillChar(FResultBuffer^,FEventBufferLen,0);
 
-    setlength(EventNames,MaxEvents);
-    try
-      for i := 0 to FEvents.Count-1 do
-      begin
-        EventName := FEvents[i];
-        EventNames[i] := PAnsiChar(EventName);
-      end;
+    P := FEventBuffer;
+    P^ := EPB_version1;
+    Inc(P);
+    SetLength(FEventCounts,FEvents.Count);
 
-      FEventBufferlen := isc_event_block(@FEventBuffer,@FResultBuffer,
-                          FEvents.Count,
-                          EventNames[0],EventNames[1],EventNames[2],
-                          EventNames[3],EventNames[4],EventNames[5],
-                          EventNames[6],EventNames[7],EventNames[8],
-                          EventNames[9],EventNames[10],EventNames[11],
-                          EventNames[12],EventNames[13],EventNames[14]
-                          );
-    finally
-      SetLength(EventNames,0)
+    for i := 0 to FEvents.Count - 1 do
+    begin
+      s := FEvents[i];
+      P^ := Length(s);
+      Inc(P);
+      Move(s[1],P^,Length(s));
+      Inc(P,Length(s)+sizeof(Long));
+      FEventCounts[i].EventName := s;
     end;
   end;
+
+{  for i := 0 to FEventBufferLen - 1 do
+  write(Format('%x ', [FEventBuffer[i]]));
+   writeln; }
 end;
 
 procedure TFBEvents.CancelEvents(Force: boolean);
@@ -169,12 +280,11 @@ begin
   FCriticalSection.Enter;
   try
     if not FInWaitState then Exit;
-    FInWaitState := false;
-    ProcessEventCounts;
-    if assigned(FEventHandler)  then
+    if ProcessEventCounts and assigned(FEventHandler)  then
     begin
       Handler := FEventHandler;
       FEventHandler := nil;
+      FInWaitState := false;
     end;
   finally
     FCriticalSection.Leave;
@@ -183,33 +293,92 @@ begin
     Handler(GetIEvents);
 end;
 
-procedure TFBEvents.ProcessEventCounts;
-var P: PISC_LONG;
-    EventCountList: array[0..19] of ISC_LONG;
-    i: integer;
-    j: integer;
+(*
+  Original Firebird 'C' code for isc_event_counts
+
+void API_ROUTINE isc_event_counts(ULONG* result_vector,
+								  SSHORT buffer_length,
+								  UCHAR* event_buffer,
+								  const UCHAR* result_buffer)
+{
+/**************************************
+ *
+ *	g d s _ $ e v e n t _ c o u n t s
+ *
+ **************************************
+ *
+ * Functional description
+ *	Get the delta between two events in an event
+ *	parameter block.  Used to update gds_events
+ *	for GPRE support of events.
+ *
+ **************************************/
+	ULONG* vec = result_vector;
+	const UCHAR* p = event_buffer;
+	const UCHAR* q = result_buffer;
+	USHORT length = buffer_length;
+	const UCHAR* const end = p + length;
+
+	// analyze the event blocks, getting the delta for each event
+
+	p++;
+	q++;
+	while (p < end)
+	{
+		// skip over the event name
+
+		const USHORT i = (USHORT)* p++;
+		p += i;
+		q += i + 1;
+
+		// get the change in count
+
+		const ULONG initial_count = gds__vax_integer(p, sizeof(SLONG));
+		p += sizeof(SLONG);
+		const ULONG new_count = gds__vax_integer(q, sizeof(SLONG));
+		q += sizeof(SLONG);
+		*vec++ = new_count - initial_count;
+	}
+
+	// copy over the result to the initial block to prepare
+	// for the next call to gds__event_wait
+
+	memcpy(event_buffer, result_buffer, length);
+}
+*)
+
+{ProcessEventCounts effectively replaces isc_event_counts}
+
+function TFBEvents.ProcessEventCounts: boolean;
+
+var i: integer;
+    P, Q: PByte;
+    initial_count: Long;
+    new_count: Long;
+    len: byte;
 begin
-  SetLength(FEventCounts,0);
-  if FResultBuffer = nil then Exit;
-
-  FillChar(EventCountList,sizeof(EventCountList),0);
-
+  Result := false;
+  P := FEventBuffer;
+  Q := FResultBuffer;
+  Inc(P); {skip past version byte}
+  Inc(Q);
+  for i := 0 to Length(FEventCounts) - 1 do
   with FFirebirdClientAPI do
-     isc_event_counts( @EventCountList, FEventBufferLen, FEventBuffer, FResultBuffer);
-  j := 0;
-  P := @EventCountList;
-  for i := 0 to FEvents.Count - 1 do
   begin
-    if EventCountList[i] <> 0 then
-    begin
-      Inc(j);
-      SetLength(FEventCounts,j);
-      FEventCounts[j-1].EventName := FEvents[i];
-      FEventCounts[j-1].Count := P^;
-      Inc(P);
-//      writeln('Event: ',FEventCounts[j-1].EventName,' Count = ',FEventCounts[j-1].Count);
-    end;
+    {skip over the event name}
+    len := P^;
+    P := P + len + 1;
+    Q := Q + len + 1; {event name length in P^}
+    initial_count := DecodeInteger(P,sizeof(Long));
+    Inc(P,sizeof(Long));
+    new_count := DecodeInteger(Q,sizeof(Long));
+    Inc(Q,sizeof(Long));
+    FEventCounts[i].Count := new_count - initial_count;
+    if FEventCounts[i].Count > 0 then
+      Result := true;
+  //  writeln('Event Count[',i,'] = ',FEventCounts[i].Count);
   end;
+  Move(FResultBuffer^,FEventBuffer^,FEventBufferLen);
 end;
 
 constructor TFBEvents.Create(DBAttachment: IAttachment;
@@ -234,9 +403,9 @@ begin
   with FFirebirdClientAPI do
   begin
     if FEventBuffer <> nil then
-      isc_free( FEventBuffer);
+      FreeMem( FEventBuffer);
     if FResultBuffer <> nil then
-      isc_free( FResultBuffer);
+      FreeMem( FResultBuffer);
   end;
   inherited Destroy;
 end;
@@ -247,6 +416,7 @@ begin
 end;
 
 procedure TFBEvents.SetEvents(EventNames: TStrings);
+var i: integer;
 begin
   {$ifdef Unix}
   if (EventNames.Count > 0) and not IsMultiThread then
@@ -255,12 +425,13 @@ begin
   if EventNames.Text <> FEvents.Text then
   begin
     Cancel;
-    FEvents.Assign(EventNames);
+    for i := 0 to EventNames.Count - 1 do
+      FEvents[i] := Trim(EventNames[i]);
     CreateEventBlock;
   end;
 end;
 
-procedure TFBEvents.SetEvents(Event: AnsiString);
+procedure TFBEvents.SetEvents(Event: string);
 var S: TStringList;
 begin
   S := TStringList.Create;

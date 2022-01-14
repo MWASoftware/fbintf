@@ -1,0 +1,60 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{43FF33F1-E865-4A22-8790-F8AD9F7CF273}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="fbudrtests.dproj">
+            <Dependencies>..\..\..\fbintf.dproj;..\..\..\fbudr.dproj</Dependencies>
+        </Projects>
+        <Projects Include="..\..\..\fbudr.dproj">
+            <Dependencies>..\..\..\fbintf.dproj</Dependencies>
+        </Projects>
+        <Projects Include="..\..\..\fbintf.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="fbudrtests" DependsOnTargets="fbintf;fbudr">
+        <MSBuild Projects="fbudrtests.dproj"/>
+    </Target>
+    <Target Name="fbudrtests:Clean" DependsOnTargets="fbintf:Clean;fbudr:Clean">
+        <MSBuild Projects="fbudrtests.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="fbudrtests:Make" DependsOnTargets="fbintf:Make;fbudr:Make">
+        <MSBuild Projects="fbudrtests.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="fbudr" DependsOnTargets="fbintf">
+        <MSBuild Projects="..\..\..\fbudr.dproj"/>
+    </Target>
+    <Target Name="fbudr:Clean" DependsOnTargets="fbintf:Clean">
+        <MSBuild Projects="..\..\..\fbudr.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="fbudr:Make" DependsOnTargets="fbintf:Make">
+        <MSBuild Projects="..\..\..\fbudr.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="fbintf">
+        <MSBuild Projects="..\..\..\fbintf.dproj"/>
+    </Target>
+    <Target Name="fbintf:Clean">
+        <MSBuild Projects="..\..\..\fbintf.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="fbintf:Make">
+        <MSBuild Projects="..\..\..\fbintf.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="fbudrtests;fbudr;fbintf"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="fbudrtests:Clean;fbudr:Clean;fbintf:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="fbudrtests:Make;fbudr:Make;fbintf:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

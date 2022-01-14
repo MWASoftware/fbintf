@@ -60,6 +60,7 @@ type
     procedure InternalRollback(Force: boolean); override;
     procedure InternalRollbackRetaining; override;
   public
+    constructor Create(api: TFBClientAPI; Attachment: IAttachment; aTransactionIntf: Firebird.ITransaction); overload;
     destructor Destroy; override;
     property TransactionIntf: Firebird.ITransaction read FTransactionIntf;
     {ITransaction}
@@ -111,11 +112,13 @@ end;
 
 procedure TFB30Transaction.InternalStartSingle(attachment: IAttachment);
 begin
+  if FTransactionIntf = nil then
   with FFirebird30ClientAPI do
   begin
     FTransactionIntf  := (attachment as TFB30Attachment).AttachmentIntf.startTransaction(StatusIntf,
              (FTPB as TTPB).getDataLength,BytePtr((FTPB as TTPB).getBuffer));
     Check4DataBaseError;
+    FTransactionIntf.addRef();
   end;
   SignalActivity;
 end;
@@ -125,6 +128,7 @@ var Dtc: IDtc;
     DtcStart: IDtcStart;
     i: integer;
 begin
+  if FTransactionIntf = nil then
   with FFirebird30ClientAPI do
   begin
     Dtc := MasterIntf.getDtc;
@@ -143,6 +147,7 @@ begin
 
     FTransactionIntf := DtcStart.start(StatusIntf);
     Check4DataBaseError;
+    FTransactionIntf.addRef();
     SignalActivity;
   end;
 end;
@@ -189,6 +194,15 @@ begin
     Check4DataBaseError;
   end;
   SignalActivity;
+end;
+
+constructor TFB30Transaction.Create(api: TFBClientAPI; Attachment: IAttachment;
+  aTransactionIntf: Firebird.ITransaction);
+begin
+  FTransactionIntf := aTransactionIntf;
+  FTransactionIntf.addRef();
+  FForeignHandle := true;
+  inherited Create(api,Attachment,nil,taCommit,'');
 end;
 
 destructor TFB30Transaction.Destroy;

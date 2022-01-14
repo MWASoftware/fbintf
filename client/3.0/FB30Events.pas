@@ -89,7 +89,7 @@ type
     destructor Destroy; override;
 
     {IEvents}
-    procedure WaitForEvent;
+    procedure WaitForEvent; override;
     procedure AsyncWaitForEvent(EventHandler: TEventHandler); override;
   end;
 
@@ -215,7 +215,6 @@ begin
   begin
     FEventHandler.WaitForEvent;
     {$IFDEF EVENTDEBUG}  writeln('Event Handler Ends Wait ',Terminated); {$ENDIF}
-
     if not Terminated  then
       FOwner.EventSignaled;
   end;
@@ -302,6 +301,8 @@ begin
   FAttachmentIntf := DBAttachment.AttachmentIntf;
   FFirebird30ClientAPI := DBAttachment.Firebird30ClientAPI;
   FSyncEventCallback := TEventhandlerInterface.Create(self,'Sync');
+  FAsyncEventCallback := TEventhandlerInterface.Create(self,'Async');
+  FEventHandlerThread := TEventHandlerThread.Create(self,FAsyncEventCallback);
 end;
 
 destructor TFB30Events.Destroy;
@@ -317,12 +318,6 @@ end;
 
 procedure TFB30Events.AsyncWaitForEvent(EventHandler: TEventHandler);
 begin
-  {Seems like we have to create a new callback object each time to avoid empty events}
-  if assigned(FEventHandlerThread) then
-    TEventHandlerThread(FEventHandlerThread).Terminate;
-  if assigned(FAsyncEventCallback) then TEventhandlerInterface(FAsyncEventCallback).release;
-  FAsyncEventCallback := TEventhandlerInterface.Create(self,'Async');
-  FEventHandlerThread := TEventHandlerThread.Create(self,FAsyncEventCallback);
   InternalAsyncWaitForEvent(EventHandler,FAsyncEventCallback);
 end;
 

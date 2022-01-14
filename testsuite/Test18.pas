@@ -120,7 +120,11 @@ begin
   Statement.SQLParams[0].AsInteger := 3;
   Statement.SQLParams[1].AsBCD := StrToBCD('64100000000.011');
   Statement.SQLParams[2].AsCurrency := 12345678912.12;
-  Statement.SQLParams[3].AsString := '1234561234567.123456';
+  try
+    Statement.SQLParams[3].AsString := '1234561234567.123456';
+  except on E:Exception do
+    writeln(OutFile,'Delphi has a problem with this big a number: ',E.Message);
+  end;
   Statement.SQLParams[4].AsBCD := StrToBCD('11123456123456123456123456123456.123456'); {last digit should be dropped}
   Statement.Execute;
 

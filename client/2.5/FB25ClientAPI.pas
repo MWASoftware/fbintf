@@ -79,6 +79,8 @@ type
   { TFB25Status }
 
   TFB25Status = class(TFBStatus,IStatus)
+  protected
+    function GetIBMessage: Ansistring; override;
   public
     function StatusVector: PStatusVector; override;
   end;
@@ -164,6 +166,7 @@ type
     isc_prepare_transaction: Tisc_prepare_transaction;
     isc_version: Tisc_Version;
     isc_interprete: Tisc_interprete;
+    fb_interpret: Tfb_interpret;
 
   public
     {Helper Functions}
@@ -173,7 +176,6 @@ type
     function SQLDecodeTime(bufptr: PByte): TDateTime;  override;
     procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte); override;
     function SQLDecodeDateTime(bufptr: PByte): TDateTime; override;
-    function FormatStatus(Status: TFBStatus): AnsiString; override;
   public
     {IFirebirdAPI}
 
@@ -321,6 +323,28 @@ threadvar
 
 { TFB25ActivityReporter }
 
+function TFB25Status.GetIBMessage: Ansistring;
+var psb: PStatusVector;
+    local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
+begin
+  psb := StatusVector;
+  Result := '';
+  with FOwner as TFB25ClientAPI do
+  if assigned(fb_interpret) then
+  begin
+    if fb_interpret(@local_buffer,sizeof(local_buffer),@psb) > 0 then
+       Result := strpas(local_buffer);
+  end
+  else
+  if assigned(isc_interprete) then
+  while isc_interprete(@local_buffer,@psb) > 0 do
+  begin
+    if (Result <> '') and (Result[Length(Result)] <> LF) then
+      Result := Result + LineEnding + '-';
+    Result := Result + strpas(local_buffer);
+  end;
+end;
+
 function TFB25Status.StatusVector: PStatusVector;
 begin
   Result := @FStatusVector;
@@ -385,6 +409,7 @@ begin
   isc_prepare_transaction  := GetProcAddr('isc_prepare_transaction'); {do not localize}
   isc_version  := GetProcAddr('isc_version'); {do not localize}
   isc_interprete := GetProcAddr('isc_interprete'); {do not localize}
+  fb_interpret := GetProcAddr('fb_interpret'); {do not localize}
 
   FIBServiceAPIPresent := true;
   isc_rollback_retaining := GetProcAddress(FFBLibrary.IBLibrary, 'isc_rollback_retaining'); {do not localize}
@@ -667,20 +692,6 @@ begin
     on E: EConvertError do begin
       IBError(ibxeInvalidDataConversion, [nil]);
     end;
-  end;
-end;
-
-function TFB25ClientAPI.FormatStatus(Status: TFBStatus): AnsiString;
-var psb: PStatusVector;
-    local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
-begin
-  psb := Status.StatusVector;
-  Result := '';
-  while isc_interprete(@local_buffer,@psb) > 0 do
-  begin
-    if (Result <> '') and (Result[Length(Result)] <> LF) then
-      Result := Result + LineEnding + '-';
-    Result := Result + strpas(local_buffer);
   end;
 end;
 

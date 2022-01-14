@@ -248,6 +248,23 @@ type
   ITransaction = interface;
   IStatement = interface;
 
+  {The IFBNumeric interface provides a managed type for Fixed Point integers
+   used to hold Firebird Numeric(m,n) types}
+
+  IFBNumeric = interface
+    ['{8bdccfe9-d552-446b-bd82-844ca264455d}']
+    function getRawValue: Int64;
+    function getScale: integer;
+    function AdjustScaleTo(aNewScale: integer): IFBNumeric;
+    function getAsString: AnsiString;
+    function getAsDouble: double;
+    function getAsBCD: TBCD;
+    function getAsInt64: Int64; {scaled}
+    function getAsInteger: integer; {scaled - may be truncated}
+    function getAsSmallInt: SmallInt; {scaled - may be truncated}
+    function getAsCurrency: Currency;
+  end;
+
   {The IParameterBlock interface provides the template for all parameter
    block interfaces}
 
@@ -500,6 +517,7 @@ type
     function GetDateTimeStrLength(DateTimeFormat: TIBDateTimeFormats): integer;
     function GetStatement: IStatement;
     function GetTransaction: ITransaction;
+    function GetAttachment: IAttachment;
     property Name: AnsiString read GetName;
     property Size: cardinal read GetSize;
     property SQLType: cardinal read GetSQLType;
@@ -566,6 +584,7 @@ type
     function GetAsBlob(BPB: IBPB): IBlob; overload;
     function GetAsArray: IArray;
     function GetAsBCD: tBCD;
+    function GetAsNumeric: IFBNumeric;
     property AsDate: TDateTime read GetAsDateTime;
     property AsBoolean:boolean read GetAsBoolean;
     property AsTime: TDateTime read GetAsDateTime;
@@ -584,6 +603,7 @@ type
     property AsBlob: IBlob read GetAsBlob;
     property AsArray: IArray read GetAsArray;
     property AsBCD: tBCD read GetAsBCD;
+    property AsNumeric: IFBNumeric read GetAsNumeric;
     property IsNull: Boolean read GetIsNull;
     property Value: Variant read GetAsVariant;
   end;
@@ -599,6 +619,7 @@ type
    function getCount: integer;
    function GetStatement: IStatement;
    function GetTransaction: ITransaction;
+   function GetAttachment: IAttachment;
    function ByName(Idx: AnsiString): ISQLData;
    function getSQLData(index: integer): ISQLData;
    procedure GetData(index: integer; var IsNull:boolean; var len: short; var data: PByte);
@@ -660,6 +681,9 @@ type
   ISQLParam = interface(IParamMetaData)
     ['{b22b4578-6d41-4807-a9a9-d2ec8d1d5a14}']
     function getColMetadata: IParamMetaData;
+    function GetStatement: IStatement;
+    function GetTransaction: ITransaction;
+    function GetAttachment: IAttachment;
     function GetIndex: integer;
     function getName: AnsiString;
     function GetAsBoolean: boolean;
@@ -685,8 +709,7 @@ type
     function GetAsBlob: IBlob;
     function GetAsArray: IArray;
     function GetAsBCD: tBCD;
-    function GetStatement: IStatement;
-    function GetTransaction: ITransaction;
+    function GetAsNumeric: IFBNumeric;
     procedure Clear;
     function GetModified: boolean;
     procedure SetAsBoolean(AValue: boolean);
@@ -715,6 +738,7 @@ type
     procedure SetAsQuad(aValue: TISC_QUAD);
     procedure SetCharSetID(aValue: cardinal);
     procedure SetAsBcd(aValue: tBCD);
+    procedure SetAsNumeric(Value: IFBNumeric);
     property AsDate: TDateTime read GetAsDateTime write SetAsDate;
     property AsBoolean:boolean read GetAsBoolean write SetAsBoolean;
     property AsTime: TDateTime read GetAsDateTime write SetAsTime;
@@ -732,6 +756,7 @@ type
     property AsBlob: IBlob read GetAsBlob write SetAsBlob;
     property AsArray: IArray read GetAsArray write SetAsArray;
     property AsBCD: tBCD read GetAsBCD write SetAsBCD;
+    property AsNumeric: IFBNumeric read GetAsNumeric write SetAsNumeric;
     property AsQuad: TISC_QUAD read GetAsQuad write SetAsQuad;
     property Value: Variant read GetAsVariant write SetAsVariant;
     property IsNull: Boolean read GetIsNull write SetIsNull;
@@ -752,6 +777,10 @@ type
     function ByName(Idx: AnsiString): ISQLParam ;
     function GetModified: Boolean;
     function GetHasCaseSensitiveParams: Boolean;
+    function GetStatement: IStatement;
+    function GetTransaction: ITransaction;
+    function GetAttachment: IAttachment;
+    procedure Clear;
     property Modified: Boolean read GetModified;
     property Params[index: integer]: ISQLParam read getSQLParam; default;
     property Count: integer read getCount;
@@ -929,7 +958,7 @@ type
     ['{6a0be233-ed08-4524-889c-2e45d0c20e5f}']
     procedure GetEvents(EventNames: TStrings);
     procedure SetEvents(EventNames: TStrings); overload;
-    procedure SetEvents(EventName: AnsiString); overload;
+    procedure SetEvents(EventName: string); overload;
     procedure Cancel;
     function ExtractEventCounts: TEventCounts;
     procedure WaitForEvent;
@@ -1065,7 +1094,7 @@ type
    {Journaling options. Default is [joReadWriteTransactions,joModifyQueries] }
 
    TJournalOption = (joReadOnlyTransactions, joReadWriteTransactions,
-                     joModifyQueries, joReadOnlyQueries);
+                     joModifyQueries, joReadOnlyQueries,joNoServerTable);
 
    TJournalOptions = set of TJournalOption;
 
@@ -1199,9 +1228,12 @@ type
     function HasDecFloatSupport: boolean;
     function HasBatchMode: boolean;
     function HasScollableCursors: boolean;
-    function HasTable(aTableName: AnsiString): boolean;
+    function HasTable(aTableName: AnsiString): boolean;  {case sensitive}
+    function HasFunction(aFunctionName: AnsiString): boolean; {case sensitive}
+    function HasProcedure(aProcName: AnsiString): boolean; {case sensitive}
 
     {Character Sets}
+    function GetCharSetID: integer; {connection character set}
     function HasDefaultCharSet: boolean;
     function GetDefaultCharSetID: integer;
     function GetCharsetName(CharSetID: integer): AnsiString;
@@ -1221,6 +1253,7 @@ type
     function GetJournalOptions: TJournalOptions;
     function StartJournaling(aJournalLogFile: AnsiString): integer; overload;
     function StartJournaling(aJournalLogFile: AnsiString; Options: TJournalOptions): integer; overload;
+    function StartJournaling(S: TStream; Options: TJournalOptions): integer; overload;
     procedure StopJournaling(RetainJournal: boolean);
  end;
 
@@ -1443,10 +1476,12 @@ type
    EIBInterBaseError = class(EIBError)
    private
      FIBErrorCode: Long;
+     FStatus: IStatus;
    public
-     constructor Create(Status: IStatus); overload;
+     constructor Create(aStatus: IStatus); overload;
      constructor Create(ASQLCode: Long; AIBErrorCode: Long; Msg: AnsiString); overload;
      property IBErrorCode: Long read FIBErrorCode;
+     property Status: IStatus read FStatus;
    end;
 
    {IB Client Exceptions}
@@ -1475,7 +1510,7 @@ procedure CheckIBLoaded;
 
 function LoadFBLibrary(aLibPathName: string): IFirebirdLibrary;
 
-{$if not declared(NULL)} {Needed for Delphi}
+{$if not declared(Null)} {Needed for Delphi}
  function Null: Variant;       // Null standard constant
 {$define NEEDNULLFUNCTION}
 {$ifend}
@@ -1574,10 +1609,11 @@ end;
 
 { EIBInterBaseError }
 
-constructor EIBInterBaseError.Create(Status: IStatus);
+constructor EIBInterBaseError.Create(aStatus: IStatus);
 begin
-  inherited Create(Status.Getsqlcode,Status.GetMessage);
-  FIBErrorCode := Status.GetIBErrorCode;
+  inherited Create(aStatus.Getsqlcode,aStatus.GetMessage);
+  FIBErrorCode := aStatus.GetIBErrorCode;
+  FStatus := aStatus;
 end;
 
 constructor EIBInterBaseError.Create(ASQLCode: Long; AIBErrorCode: Long;

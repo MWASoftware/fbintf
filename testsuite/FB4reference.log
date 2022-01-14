@@ -3,13 +3,13 @@ Copyright MWA Software 2016-2021
 
 Starting Tests
 Client API Version = 4.0
-Firebird Environment Variable = /opt/firebird4.0.0
-Firebird Bin Directory = /opt/firebird4.0.0/bin
-Firebird Conf Directory = /opt/firebird4.0.0/
-Firebird Client Library Path = /opt/firebird4.0.0/lib/libfbclient.so
+Firebird Environment Variable = /opt/firebird4.0.1
+Firebird Bin Directory = /opt/firebird4.0.1/bin
+Firebird Conf Directory = /opt/firebird4.0.1/
+Firebird Client Library Path = /opt/firebird4.0.1/lib/libfbclient.so
 Running Test 1: Create and Drop a Database
 Creating a Database with empty parameters
-Create Database fails (as expected): I/O error during "open O_CREAT" operation for file ""
+Create Database fails (as expected): Engine Code: 335544344 I/O error during "open O_CREAT" operation for file ""
 -Error while trying to create file
 -No such file or directory
 Creating a Database using an SQL Statement
@@ -22,7 +22,7 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 13
 DB ODS Minor Version = 0
 User Authentication Method = Srp256
-Firebird Library Path = /opt/firebird4.0.0/lib/libfbclient.so
+Firebird Library Path = /opt/firebird4.0.1/lib/libfbclient.so
 DB Client Implementation Version = 4.0
 DPB: Item Count = 3
   isc_dpb_user_name = SYSDBA
@@ -30,9 +30,9 @@ DPB: Item Count = 3
   isc_dpb_set_db_sql_dialect = 3
 
 Firebird Server Version Info
-Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.0.2496 Firebird 4.0"
-Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V4.0.0.2496 Firebird 4.0/tcp (zeus)/P16:C"
-Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-V4.0.0.2496 Firebird 4.0/tcp (zeus)/P16:C"
+Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.1.2692 Firebird 4.0"
+Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V4.0.1.2692 Firebird 4.0/tcp (zeus)/P17:C"
+Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-V4.0.1.2692 Firebird 4.0/tcp (zeus)/P17:C"
 on disk structure version 13.0
 
 Dropping Database
@@ -44,7 +44,7 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 13
 DB ODS Minor Version = 0
 User Authentication Method = Srp256
-Firebird Library Path = /opt/firebird4.0.0/lib/libfbclient.so
+Firebird Library Path = /opt/firebird4.0.1/lib/libfbclient.so
 DB Client Implementation Version = 4.0
 Dropping Database
 DPB: Item Count = 4
@@ -65,7 +65,7 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 13
 DB ODS Minor Version = 0
 User Authentication Method = Srp256
-Firebird Library Path = /opt/firebird4.0.0/lib/libfbclient.so
+Firebird Library Path = /opt/firebird4.0.1/lib/libfbclient.so
 DB Client Implementation Version = 4.0
 RDB$DESCRIPTION = 
 RDB$RELATION_ID = 128
@@ -78,7 +78,7 @@ Dropping Database
 
 ------------------------------------------------------
 Running Test 2: Open the employee database and run a query
-Open Database fails Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Open Database fails Engine Code: 335544472 Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Opening inet://localhost/employee
 Database Open, SQL Dialect = 3
 TPB: Item Count = 3
@@ -316,7 +316,7 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 13
 DB ODS Minor Version = 0
 User Authentication Method = Srp256
-Firebird Library Path = /opt/firebird4.0.0/lib/libfbclient.so
+Firebird Library Path = /opt/firebird4.0.1/lib/libfbclient.so
 DB Client Implementation Version = 4.0
 Do Fetch Next:
 EMP_NO = 2
@@ -331,7 +331,7 @@ JOB_COUNTRY = USA
 SALARY = 105,900.00
 FULL_NAME = Nelson, Robert
 Do Fetch Last:
-Remote Scrollable cursors test fails feature is not supported
+Remote Scrollable cursors test fails Engine Code: 335544378 feature is not supported
 Now open the employee database as a local database
 TPB: Item Count = 3
   isc_tpb_read
@@ -568,7 +568,7 @@ DB Remote Protocol =
 DB ODS Major Version = 13
 DB ODS Minor Version = 0
 User Authentication Method = User name in DPB
-Firebird Library Path = /opt/firebird4.0.0/lib/libfbclient.so
+Firebird Library Path = /opt/firebird4.0.1/lib/libfbclient.so
 DB Client Implementation Version = 4.0
 Do Fetch Next:
 EMP_NO = 2
@@ -651,14 +651,14 @@ Running Test 3: ad hoc queries
 Opening inet://localhost/employee
 Database Open
 Employee Count = 42
-Transaction ID = 6547
+Transaction ID = 8337
 Transaction is Read/Write
 Transaction Database Path = inet://localhost/employee
-Transaction ID = 6547
-Oldest Interesting = 6545
-Oldest Action = 6546
-Oldest Snapshot = 6546
-Oldest Snapshot Number = 2
+Transaction ID = 8337
+Oldest Interesting = 8335
+Oldest Action = 8336
+Oldest Snapshot = 8336
+Oldest Snapshot Number = 1
 Lock Timeout = 0
 Transaction Access = isc_info_tra_readwrite
 Isolation Type = isc_info_tra_concurrency
@@ -675,9 +675,9 @@ Constrained Employee Count = 3
 Running Test 4: Update, Insert and Delete Queries
 Opening inet://localhost/employee
 Database Open
-Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.0.2496 Firebird 4.0"
-Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V4.0.0.2496 Firebird 4.0/tcp (zeus)/P16:CZ"
-Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-V4.0.0.2496 Firebird 4.0/tcp (zeus)/P16:CZ"
+Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.1.2692 Firebird 4.0"
+Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V4.0.1.2692 Firebird 4.0/tcp (zeus)/P17:CZ"
+Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-V4.0.1.2692 Firebird 4.0/tcp (zeus)/P17:CZ"
 on disk structure version 13.0
 Select Count = 1 InsertCount = 0 UpdateCount = 1 DeleteCount = 0
 EMP_NO = 8
@@ -692,14 +692,14 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 19,767,952
+Current memory = 19,762,400
 Delta memory = 4,464
-Max memory = 19,813,568
-Elapsed time= 0.001 sec
+Max memory = 19,807,728
+Elapsed time= 0.003 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
-Writes = 0
+Writes = 1
 Fetches = 3
 Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
 Relation Name = EMPLOYEE
@@ -2733,7 +2733,7 @@ MYARRAY = Array: (0: 100) (1: 99) (2: 98) (3: 97) (4: 96) (5: 95) (6: 94) (7: 93
 
 MYARRAY2 = Array: (0: 01/5/2020 12:00:00) (1: 01/5/2020 12:01:00) (2: 01/5/2020 12:02:00) (3: 01/5/2020 12:03:00) (4: 01/5/2020 12:04:00) (5: 01/5/2020 12:05:00) (6: 01/5/2020 12:06:00) (7: 01/5/2020 12:07:00) (8: 01/5/2020 12:08:00) (9: 01/5/2020 12:09:00) (10: 01/5/2020 12:10:00) (11: 01/5/2020 12:11:00) (12: 01/5/2020 12:12:00) (13: 01/5/2020 12:13:00) (14: 01/5/2020 12:14:00) (15: 01/5/2020 12:15:00) (16: 01/5/2020 12:16:00) 
 
-MYARRAY3 = Array: (0: 0) (1: 1.04) (2: 2.09) (3: 3.15) (4: 4.19) (5: 5.25) (6: 6.3) (7: 7.34) (8: 8.39) (9: 9.44) (10: 10.5) (11: 11.55) (12: 12.6) (13: 13.64) (14: 0.42) (15: 42.45) (16: 4269) 
+MYARRAY3 = Array: (0: 0) (1: 1.05) (2: 2.1) (3: 3.15) (4: 4.2) (5: 5.25) (6: 6.3) (7: 7.35) (8: 8.4) (9: 9.45) (10: 10.5) (11: 11.55) (12: 12.6) (13: 13.65) (14: 0.42) (15: 42.46) (16: 4269) 
 
 
 Shrink to 2:10
@@ -2749,7 +2749,7 @@ MYARRAY = Array: (0: 100) (1: 99) (2: 1000) (3: 97) (4: 96) (5: 95) (6: 94) (7: 
 
 MYARRAY2 = Array: (0: 01/5/2020 12:00:00) (1: 01/5/2020 12:01:00) (2: 01/5/2020 12:02:00) (3: 01/5/2020 12:03:00) (4: 01/5/2020 12:04:00) (5: 01/5/2020 12:05:00) (6: 01/5/2020 12:06:00) (7: 01/5/2020 12:07:00) (8: 01/5/2020 12:08:00) (9: 01/5/2020 12:09:00) (10: 01/5/2020 12:10:00) (11: 01/5/2020 12:11:00) (12: 01/5/2020 12:12:00) (13: 01/5/2020 12:13:00) (14: 01/5/2020 12:14:00) (15: 01/5/2020 12:15:00) (16: 01/5/2020 12:16:00) 
 
-MYARRAY3 = Array: (0: 0) (1: 1.04) (2: 2.09) (3: 3.15) (4: 4.19) (5: 5.25) (6: 6.3) (7: 7.34) (8: 8.39) (9: 9.44) (10: 10.5) (11: 11.55) (12: 12.6) (13: 13.64) (14: 0.42) (15: 42.45) (16: 4269) 
+MYARRAY3 = Array: (0: 0) (1: 1.05) (2: 2.1) (3: 3.15) (4: 4.2) (5: 5.25) (6: 6.3) (7: 7.35) (8: 8.4) (9: 9.45) (10: 10.5) (11: 11.55) (12: 12.6) (13: 13.65) (14: 0.42) (15: 42.46) (16: 4269) 
 
 
 
@@ -2833,30 +2833,30 @@ MYARRAY = Array: (0,-1: A50) (0,0: A51) (0,1: A52) (0,2: A53) (0,3: A54) (0,4: A
 
 ------------------------------------------------------
 Running Test 9: Database Information tests
-Database ID = 4 FB = /opt/firebird4.0.0/examples/empbuild/employee.fdb SN = zeus
-Pages =1075
+Database ID = 4 FB = /opt/firebird4.0.1/examples/empbuild/employee.fdb SN = zeus
+Pages =413
 Base Level = 13,4,0,3,
 Implementation = 11,7,0,3,66,1,66,
 Reserved = 0
 ODS minor = 0
 ODS major = 13
 Page Size = 8192
-Version = 1: LI-V6.3.0.2496 Firebird 4.0
+Version = 1: LI-V6.3.1.2692 Firebird 4.0
 Database is Read/Write
-Database Created: 29/5/2021 16:47:30
-Pages Used = 313
-Pages Free = 762
-Server Memory = 19484112
+Database Created: 21/12/2021 10:52:59
+Pages Used = 352
+Pages Free = 61
+Server Memory = 19476112
 Forced Writes  = 1
-Max Memory  = 19630384
+Max Memory  = 19506944
 Num Buffers  = 2048
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
 Active Transaction Count = 0
-Fetches  = 1653
-Writes  = 8
-Reads  = 92
-Page Writes  = 4
+Fetches  = 1698
+Writes  = 6
+Reads  = 97
+Page Writes  = 3
 Record Version Removals Operation Counts
 
 Deletes Operation Counts
@@ -2871,15 +2871,15 @@ Indexed Reads Count Operation Counts
 Table ID = 4
 Count = 63
 Table ID = 6
-Count = 23
+Count = 13
 Table ID = 9
-Count = 3
+Count = 1
 Table ID = 11
 Count = 2
 Table ID = 12
 Count = 24
 Table ID = 18
-Count = 821
+Count = 952
 Table ID = 20
 Count = 5
 Table ID = 28
@@ -2891,9 +2891,9 @@ Count = 1
 
 Sequential Table Scans Operation Counts
 Table ID = 0
-Count = 100
+Count = 98
 Table ID = 1
-Count = 24
+Count = 14
 
 Update Count Operation Counts
 
@@ -2907,11 +2907,11 @@ Async Wait Called
 Event Signalled
 First Event - usually ignored
 Signal Event
+Event Signalled
 Event Counts: TESTEVENT, Count = 1
 Two more events
 Call Async Wait
 Async Wait Called
-Event Signalled
 Event Signalled
 Deferred Events Caught
 Event Counts: TESTEVENT, Count = 2
@@ -2934,12 +2934,12 @@ SPB: Item Count = 2
   password = masterkey
 
 Service Manager Version = 2
-Server Version = LI-V4.0.0.2496 Firebird 4.0
+Server Version = LI-V4.0.1.2692 Firebird 4.0
 Implementation = Firebird/Linux/AMD/Intel/x64
 
 Lock Directory = /tmp/firebird/
-Message File = /opt/firebird4.0.0/
-Security File = /opt/firebird4.0.0/security4.fdb
+Message File = /opt/firebird4.0.1/
+Security File = /opt/firebird4.0.1/security4.fdb
 
 DB Attachments
 No. of Attachments = 0
@@ -2954,10 +2954,10 @@ User ID = 0
 Group ID = 0
 
 
-Licence Info: feature is not supported
+Licence Info: Engine Code: 335544378 feature is not supported
 -feature is not supported
 
-Licence Mask Info: feature is not supported
+Licence Mask Info: Engine Code: 335544378 feature is not supported
 
 Capabilities = 6
 
@@ -3244,21 +3244,31 @@ BLOBDATA (Charset Id = 4 Codepage = 65001)
 ------------------------------------------------------
 Running Test 16: Error handling
 Invalid Database Name Test
-Error Handled: I/O error during "open" operation for file "Malformed Name"
+Error Handled: SQLCODE: -902
+Engine Code: 335544344 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+I/O error during "open" operation for file "Malformed Name"
 -Error while trying to open file
 -No such file or directory
 Invalid User Name Test
-Error Handled: Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Error Handled: SQLCODE: -902
+Engine Code: 335544472 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Invalid password Test
-Error Handled: Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Error Handled: SQLCODE: -902
+Engine Code: 335544472 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Invalid Prepare SQL Test
-Error Handled: Dynamic SQL Error
+Error Handled: SQLCODE: -206
+Engine Code: 335544569 Column does not belong to referenced table
+Dynamic SQL Error
 -SQL error code = -206
 -Column unknown
 -UNKNOWN_DATE
 -At line 1, column 21 When Executing: Update Employee Set Unknown_Date = ? Where EMP_NO = ?
 Invalid Open Cursor SQL Test
-Error Handled: Dynamic SQL Error
+Error Handled: SQLCODE: -206
+Engine Code: 335544569 Column does not belong to referenced table
+Dynamic SQL Error
 -SQL error code = -206
 -Column unknown
 -X
@@ -3285,18 +3295,24 @@ New Transaction before Open Cursor
 COUNTER = 42
 
 Invalid Server Name Test
-Error Handled: Unable to complete network request to host "unknown".
+Error Handled: SQLCODE: -902
+Engine Code: 335544721 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Unable to complete network request to host "unknown".
 -Failed to locate host machine.
 -The specified name was not found in the hosts file or Domain Name Services
 Invalid User Name Test
-Error Handled: Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Error Handled: SQLCODE: -902
+Engine Code: 335544472 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Invalid password Test
-Error Handled: Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Error Handled: SQLCODE: -902
+Engine Code: 335544472 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 
 
 ------------------------------------------------------
 Running Test 17: Date/Time tests and Firebird 4 extensions
- FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.0.2496 Firebird 4.0"
+ FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.1.2692 Firebird 4.0"
 Has Local TZ DB = TRUE
 
 Testdata
@@ -4058,7 +4074,7 @@ TZ_MINUTE = 0
 
 ------------------------------------------------------
 Running Test 18: Firebird 4 Decfloat extensions
- FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.0.2496 Firebird 4.0"
+ FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.1.2692 Firebird 4.0"
 
 FB4 Testdata_DECFloat
 
@@ -4327,9 +4343,9 @@ BigNumber Array: (0: 123456123400.123456) (1: 123456123401.623456) (2: 123456123
 Running Test 19: Batch Update and Insert Queries
 Opening inet://localhost/employee
 Database Open
-Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.0.2496 Firebird 4.0"
-Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V4.0.0.2496 Firebird 4.0/tcp (zeus)/P16:CZ"
-Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-V4.0.0.2496 Firebird 4.0/tcp (zeus)/P16:CZ"
+Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.1.2692 Firebird 4.0"
+Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V4.0.1.2692 Firebird 4.0/tcp (zeus)/P17:CZ"
+Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-V4.0.1.2692 Firebird 4.0/tcp (zeus)/P17:CZ"
 on disk structure version 13.0
 Rows before update
 EMP_NO = 2
@@ -4560,11 +4576,13 @@ LANGUAGE_REQ = Array: (1: Eng) (2: Fra) (3: ) (4: ) (5: )
 
 
 Test Error Handling
-Error reported (as expected) when changing param type: Cannot change SQL Type from SQL_TIMESTAMP to SQL_VARYING
+Error reported (as expected) when changing param type: Param[0] "": Unable to change from a SQL_TIMESTAMP to a string type
 Test Error Handling - Update returning should fail
 Error reported (as expected) when defering update returning query: This query type (SQL_ExecProcedure) cannot be batched
 Error handling when Insert rows - duplicate key
-Error reported when inserting: Error Processing update/insert batch on row number 2 - violation of PRIMARY or UNIQUE KEY constraint "INTEG_27" on table "EMPLOYEE"
+Error reported when inserting: Error Processing update/insert batch on row number 2 - SQLCODE: -803
+Engine Code: 335544665 Invalid insert or update value(s): object columns are constrained - no 2 table rows can have duplicate column values
+violation of PRIMARY or UNIQUE KEY constraint "INTEG_27" on table "EMPLOYEE"
 -Problematic key value is ("EMP_NO" = 150)
 Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
 Batch Completion Info
@@ -4577,7 +4595,7 @@ Row 2 State = bcExecuteFailed Msg = violation of PRIMARY or UNIQUE KEY constrain
 
 ------------------------------------------------------
 Running Test 20: Stress Test IBatch interface
- FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.0.2496 Firebird 4.0"
+ FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.1.2692 Firebird 4.0"
 10000 rows added
 20000 rows added
 30000 rows added
@@ -4631,6 +4649,42 @@ Parsing of 1.2E1.2 failed
 Parsing of 1,000 failed
 Parsing of 1e1e1 failed
 Parsing of 1.2+3 failed
+Validating Numeric Interface - IFBNumeric
+Value from Currency = 9999.1235
+Raw Value = 99991235 Scale = -4
+Value from Currency(rescaled) = 9999.12
+Raw Value = 999912 Scale = -2
+Value from Double = 9999.12345678
+Raw Value = 999912345678 Scale = -8
+Value from Integer = 9223372036854775807
+Raw Value = 9223372036854775807 Scale = 0
+Value from string = 9223372036854775807
+Raw Value = 9223372036854775807 Scale = 0
+Value from string = 9999.12345678
+Raw Value = 999912345678 Scale = -8
+Value from string = -0.12
+Raw Value = -12 Scale = -3
+Value from BCD = 9999.12345678
+Raw Value = 999912345678 Scale = -8
+Value from Raw Data = 9999123.456780
+Raw Value = 9999123456780 Scale = -6
+Numeric Operations
+Add 2.23 + 24.12345 = 26.35345
+Add Double 2.23 + 24.12645 = 26.35645
+Add integer 2.23 + 2412345 = 2412347.23
+Subtract 2.23 - 24.12345 = -21.89345
+Subtract Double 24.12645 - 2.23 = -21.89645
+Subtract integer 24123.45 - 223 = -23900.45
+Multiply 2.23 * 24.12345 = 53.7952935
+Multiply Double 24.12645 * 2.23 = 53.8019835
+Multiply integer 241.2345 * 223 = 53795.2935
+Divide 24.12345 / 2.23 = 10.81769
+Divide Double 2.23 / 24.12645 = 0.09
+Divide integer 241.2345 / 223 = 1.0818
+Compare 2.23, -24.12345 = 1
+Compare integer 2.23, 3 = -1
+Compare Double 2.23, 2.23 = 0
+Negate 24.12345 = -24.12345
 SQL Params
 SQLType =SQL_LONG
 sub type = 0
@@ -4691,6 +4745,7 @@ Engine Code: 335544569 Incompatible column/host variable data type
 Dynamic SQL Error
 -SQL error code = -303
 -conversion error from string "10.0.0"
+Test Numeric Type
 ROWID = 1
 ITYPE = 101
 I64TYPE = 9223372036854775807
@@ -4715,12 +4770,18 @@ I64TYPE = 10
 CURRTYPE = .02300000
 DTYPE = .00110000
 FIXEDPOINT = 233.45600000
+ROWID = 7
+ITYPE = 1
+I64TYPE = 1234567
+CURRTYPE = .02300000
+DTYPE = .00110000
+FIXEDPOINT = 1,234.25000000
 
 
 
 ------------------------------------------------------
 Running Test 22: Journalling
-Start Journaling. Session ID = 1
+Start Journaling. Session ID = 0
 1234.567 parsed to 1234567 scale = -3
 As Float =  1.2345670000000000E+003
 -765.4321 parsed to -7654321 scale = -4
@@ -4878,21 +4939,22 @@ MYARRAY = NULL
 
 Journal Table
 IBX$SESSIONID = 1
-IBX$TRANSACTIONID = 9
+IBX$TRANSACTIONID = 8
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2021/12/07 09:50:08.4430
+IBX$CREATED = 2022/01/14 22:58:12.7560
 IBX$SESSIONID = 1
-IBX$TRANSACTIONID = 11
-IBX$OLDTRANSACTIONID = 10
+IBX$TRANSACTIONID = 10
+IBX$OLDTRANSACTIONID = 9
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2021/12/07 09:50:08.7940
+IBX$CREATED = 2022/01/14 22:58:13.0520
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)
-Timestamp = 2021/12/07 09:50:08.4700
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 4
 Session ID = 1
-Transaction ID = 9
+Transaction ID = 8
 Transaction Name = "Transaction_29_1"
 TPB: Item Count = 3
   isc_tpb_write
@@ -4902,45 +4964,52 @@ TPB: Item Count = 3
 Default Completion = TACommit
 
 Journal Entry = jeQuery(Query)
-Timestamp = 2021/12/07 09:50:08.5300
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 4
 Session ID = 1
-Transaction ID = 9
+Transaction ID = 8
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(1,101,9223372036854775807,10000.1234,9999.12345678,1234567890.12346)
 
 Journal Entry = jeQuery(Query)
-Timestamp = 2021/12/07 09:50:08.5510
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 4
 Session ID = 1
-Transaction ID = 9
+Transaction ID = 8
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(2,-32457,-9223372036854775808,1000001.12,1.7E308,-1234567890.12346)
 
 Journal Entry = jeTransCommitRet(Commit Retaining)
-Timestamp = 2021/12/07 09:50:08.6650
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 4
+Session ID = 1
+Transaction ID = 9
+Old TransactionID = 8
+
+Journal Entry = jeQuery(Query)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 4
+Session ID = 1
+Transaction ID = 9
+Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(3,0,0,0,0,0)
+
+Journal Entry = jeTransRollbackRet(Rollback Retaining)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 4
 Session ID = 1
 Transaction ID = 10
 Old TransactionID = 9
 
 Journal Entry = jeQuery(Query)
-Timestamp = 2021/12/07 09:50:08.6870
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 4
 Session ID = 1
 Transaction ID = 10
-Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(3,0,0,0,0,0)
-
-Journal Entry = jeTransRollbackRet(Rollback Retaining)
-Timestamp = 2021/12/07 09:50:08.7900
-Session ID = 1
-Transaction ID = 11
-Old TransactionID = 10
-
-Journal Entry = jeQuery(Query)
-Timestamp = 2021/12/07 09:50:08.8140
-Session ID = 1
-Transaction ID = 11
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(4,1,10,0.023,0.0011,233.456)
 
 Journal Entry = jeTransStart(Transaction Start)
-Timestamp = 2021/12/07 09:50:08.8260
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 4
 Session ID = 1
-Transaction ID = 12
+Transaction ID = 11
 Transaction Name = "Transaction_29_2"
 TPB: Item Count = 3
   isc_tpb_write
@@ -4950,14 +5019,16 @@ TPB: Item Count = 3
 Default Completion = TARollback
 
 Journal Entry = jeTransCommit(Commit)
-Timestamp = 2021/12/07 09:50:08.8860
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 4
 Session ID = 1
-Transaction ID = 11
+Transaction ID = 10
 
 Journal Entry = jeQuery(Query)
-Timestamp = 2021/12/07 09:50:08.9660
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 4
 Session ID = 1
-Transaction ID = 12
+Transaction ID = 11
 Query = Insert into TestData(RowID, Str, TextBlob) Values(5,'It''s the quick brown fox jumps over the lazy dog','To be or not to be-that is the question:
 Whether ''tis nobler in the mind to suffer
 The slings and arrows of outrageous fortune,
@@ -4996,9 +5067,10 @@ Be all my sins remembered
 ')
 
 Journal Entry = jeQuery(Query)
-Timestamp = 2021/12/07 09:50:09.0130
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 4
 Session ID = 1
-Transaction ID = 12
+Transaction ID = 11
 Query = Insert into TestData(RowID,OtherBlob) Values (6,<blob subtype="0">
 FFD8FFE000104A46494600010101004800480000FFE11E0545786966000049492A00080000000C00
 0E010200200000009E0000000F01020014000000BE0000001001020008000000D200000012010300
@@ -5007,9 +5079,10 @@ FFD8FFE000104A46494600010101004800480000FFE11E0545786966000049492A00080000000C00
 )
 
 Journal Entry = jeQuery(Query)
-Timestamp = 2021/12/07 09:50:09.0380
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 4
 Session ID = 1
-Transaction ID = 12
+Transaction ID = 11
 Query = Insert into TestData(RowID,MyArray) Values (7,<array dim = "1" sqltype = "496" length = "4" relation_name = "TESTDATA" column_name = "MYARRAY" scale = "0" bounds="0:16">
  <elt ix="0">100</elt>
  <elt ix="1">99</elt>
@@ -5032,9 +5105,10 @@ Query = Insert into TestData(RowID,MyArray) Values (7,<array dim = "1" sqltype =
 )
 
 Journal Entry = jeTransRollback(Rollback)
-Timestamp = 2021/12/07 09:50:09.1560
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 4
 Session ID = 1
-Transaction ID = 12
+Transaction ID = 11
 
 
 

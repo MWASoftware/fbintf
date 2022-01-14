@@ -250,6 +250,7 @@ end;
 
 procedure TTest16.RunTest(CharSet: AnsiString; SQLDialect: integer);
 begin
+  FirebirdAPI.GetStatus.SetIBDataBaseErrorMessages([ShowSQLCode,ShowSQLMessage,ShowIBMessage]);;
   DBTests(Charset,SQLDialect);
   ServiceTests(Charset,SQLDialect);
 end;

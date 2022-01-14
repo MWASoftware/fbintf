@@ -48,6 +48,7 @@ type
   protected
     FStatus: Firebird.IStatus;
     FDirty: boolean;
+    function GetIBMessage: Ansistring; override;
   public
     destructor Destroy; override;
     procedure Init;
@@ -84,12 +85,14 @@ type
                              goes out of scope.}
     procedure CheckPlugins;
   public
-    constructor Create(aFBLibrary: TFBLibrary);
+    constructor Create(aFBLibrary: TFBLibrary); overload;
+    constructor Create(aMaster: Firebird.IMaster); overload;
     destructor Destroy; override;
 
     function StatusIntf: Firebird.IStatus;
     procedure Check4DataBaseError; overload;
     procedure Check4DataBaseError(st: Firebird.IStatus); overload;
+    function FormatStatus(Status: Firebird.IStatus): AnsiString;
     function InErrorState: boolean;
     function LoadInterface: boolean; override;
     procedure FBShutdown; override;
@@ -146,8 +149,6 @@ type
     function SQLDecodeTime(bufptr: PByte): TDateTime;  override;
     procedure SQLEncodeDateTime(aDateTime: TDateTime; bufptr: PByte); override;
     function SQLDecodeDateTime(bufptr: PByte): TDateTime; override;
-    function FormatStatus(Status: TFBStatus): AnsiString; override;
-    function FormatFBStatus(Status: Firebird.IStatus): AnsiString;
 
     {Firebird 4 Extensions}
     procedure SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal; bufptr: PByte);
@@ -260,10 +261,15 @@ constructor TFB30StatusObject.Create(aOwner: TFBClientAPI;
   status: Firebird.IStatus; prefix: Ansistring);
 begin
   inherited Create(aOwner,prefix);
-  FStatus := status;
+  FStatus := status.clone;
 end;
 
 { TFB30Status }
+
+function TFB30Status.GetIBMessage: Ansistring;
+begin
+  Result := (FOwner as TFB30ClientAPI).FormatStatus(FStatus);
+end;
 
 destructor TFB30Status.Destroy;
 begin
@@ -364,10 +370,14 @@ var
   fb_get_master_interface: Tfb_get_master_interface;
 begin
   Result := inherited LoadInterface;
-  fb_get_master_interface := GetProcAddress(GetFBLibrary.GetHandle, 'fb_get_master_interface'); {do not localize}
-  if assigned(fb_get_master_interface) then
+  if (FMaster = nil) and (GetFBLibrary <> nil) then {get from library}
   begin
-    FMaster := fb_get_master_interface;
+    fb_get_master_interface := GetProcAddress(GetFBLibrary.GetHandle, 'fb_get_master_interface'); {do not localize}
+    if assigned(fb_get_master_interface) then
+      FMaster := fb_get_master_interface;
+  end;
+  if FMaster <> nil then
+  begin
     FUtil := FMaster.getUtilInterface;
     FProvider := FMaster.getDispatcher;
     FConfigManager := FMaster.getConfigManager;
@@ -402,6 +412,21 @@ begin
   FStatusIntf := FStatus;
 end;
 
+constructor TFB30ClientAPI.Create(aMaster: Firebird.IMaster);
+begin
+  inherited Create(nil);
+  FMaster := aMaster;
+  FStatus := TFB30Status.Create(self);
+  FStatusIntf := FStatus;
+  if FMaster <> nil then
+  begin
+    FUtil := FMaster.getUtilInterface;
+    FProvider := FMaster.getDispatcher;
+    FConfigManager := FMaster.getConfigManager;
+    CheckPlugins;
+  end;
+end;
+
 destructor TFB30ClientAPI.Destroy;
 begin
   FStatus.FreeHandle;
@@ -426,6 +451,14 @@ procedure TFB30ClientAPI.Check4DataBaseError(st: Firebird.IStatus);
 begin
   if ((st.getState and st.STATE_ERRORS) <> 0) then
     raise EIBInterBaseError.Create(TFB30StatusObject.Create(self,st));
+end;
+
+function TFB30ClientAPI.FormatStatus(Status: Firebird.IStatus): AnsiString;
+var local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
+begin
+  Result := '';
+  if UtilIntf.formatStatus(@local_buffer,sizeof(local_buffer) - 1,Status) > 0 then
+    Result := strpas(local_buffer);
 end;
 
 function TFB30ClientAPI.InErrorState: boolean;
@@ -598,19 +631,6 @@ begin
   Result := SQLDecodeDate(bufPtr);
   Inc(bufptr,sizeof(ISC_DATE));
   Result := Result + SQLDecodeTime(bufPtr);
-end;
-
-function TFB30ClientAPI.FormatStatus(Status: TFBStatus): AnsiString;
-begin
-  Result := FormatFBStatus((Status as TFB30Status).GetStatus);
-end;
-
-function TFB30ClientAPI.FormatFBStatus(Status: Firebird.IStatus): AnsiString;
-var local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
-begin
-  Result := '';
-  if UtilIntf.formatStatus(@local_buffer,sizeof(local_buffer) - 1,Status) > 0 then
-    Result := strpas(local_buffer);
 end;
 
 procedure TFB30ClientAPI.SQLDecFloatEncode(aValue: tBCD; SQLType: cardinal;
