@@ -104,6 +104,7 @@ type
   private
     FOwner: TFB30Events;
     FEventHandler: TEventhandlerInterface;
+    class var FRunning: boolean;
   protected
     procedure Execute; override;
   public
@@ -178,7 +179,7 @@ begin
   finally
     FOwner.FCriticalSection.Leave
   end;
-  {$IFDEF EVENTDEBUG}writeln(FName,' TEventhandlerInterface: Set Event Called'); {$ENDIF}
+  { $IFDEF EVENTDEBUG}writeln(FName,' TEventhandlerInterface: Set Event Called'); { $ENDIF}
   {$IFDEF WINDOWS}
   SetEvent(FEventHandler);
   {$ELSE}
@@ -210,16 +211,22 @@ end;
 
 procedure TEventHandlerThread.Execute;
 begin
-  {$IFDEF EVENTDEBUG}  writeln('Event Handler Thread Starts'); {$ENDIF}
-  while not Terminated do
-  begin
-    FEventHandler.WaitForEvent;
-    {$IFDEF EVENTDEBUG}  writeln('Event Handler Ends Wait ',Terminated); {$ENDIF}
+  if FRunning then Exit;   {guard against double running}
+  FRunning := true;
+  try
+    {$IFDEF EVENTDEBUG}  writeln('Event Handler Thread Starts'); {$ENDIF}
+    while not Terminated do
+    begin
+      FEventHandler.WaitForEvent;
+      { $IFDEF EVENTDEBUG}  writeln('Event Handler Ends Wait ',Terminated); { $ENDIF}
 
-    if not Terminated  then
-      FOwner.EventSignaled;
+      if not Terminated  then
+        FOwner.EventSignaled;
+    end;
+    { $IFDEF EVENTDEBUG}  writeln('Event Handler Thread Ends'); { $ENDIF}
+  finally
+    FRunning := false;
   end;
-  {$IFDEF EVENTDEBUG}  writeln('Event Handler Thread Ends'); {$ENDIF}
 end;
 
 constructor TEventHandlerThread.Create(Owner: TFB30Events;
@@ -331,6 +338,9 @@ begin
   InternalAsyncWaitForEvent(nil,FSyncEventCallback);
   FSyncEventCallback.WaitForEvent;
 end;
+
+initialization
+  TEventHandlerThread.FRunning := false;
 
 end.
 

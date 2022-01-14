@@ -958,7 +958,7 @@ type
     ['{6a0be233-ed08-4524-889c-2e45d0c20e5f}']
     procedure GetEvents(EventNames: TStrings);
     procedure SetEvents(EventNames: TStrings); overload;
-    procedure SetEvents(EventName: AnsiString); overload;
+    procedure SetEvents(EventName: string); overload;
     procedure Cancel;
     function ExtractEventCounts: TEventCounts;
     procedure WaitForEvent;
