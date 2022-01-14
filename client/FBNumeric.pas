@@ -256,8 +256,10 @@ end;
 {AdjustScale returns a raw int64 value derived from x but with aNewScale}
 
 function AdjustScale(x: IFBNumeric; aNewScale: integer): int64;
+var rValue: double;
 begin
-  Result := Round(x.getRawValue * IntPower(10,x.getScale-aNewScale));
+  rValue := x.getrawValue;
+  Result := Round(rValue * IntPower(10,x.getScale-aNewScale));
 end;
 
 function CompareInt(a,b: integer): integer;
