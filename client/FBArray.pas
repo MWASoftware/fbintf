@@ -474,17 +474,17 @@ begin
     PSingle(SQLData)^ := Value;
   SQL_SHORT:
     if Scale < 0 then
-      PShort(SQLData)^ := SafeSmallInt(NewNumeric(Value).AdjustScaleTo(Scale).getRawValue)
+      PShort(SQLData)^ := SafeSmallInt(DoubleToNumeric(Value).AdjustScaleTo(Scale).getRawValue)
     else
       IBError(ibxeInvalidDataConversion, [nil]);
   SQL_LONG:
     if Scale < 0 then
-      PLong(SQLData)^ := SafeInteger(NewNumeric(Value).AdjustScaleTo(Scale).getRawValue)
+      PLong(SQLData)^ := SafeInteger(DoubleToNumeric(Value).AdjustScaleTo(Scale).getRawValue)
     else
       IBError(ibxeInvalidDataConversion, [nil]);
   SQL_INT64:
     if Scale < 0 then
-      PInt64(SQLData)^ := NewNumeric(Value).AdjustScaleTo(Scale).getRawValue
+      PInt64(SQLData)^ := DoubleToNumeric(Value).AdjustScaleTo(Scale).getRawValue
     else
       IBError(ibxeInvalidDataConversion, [nil]);
   SQL_TEXT, SQL_VARYING:
@@ -510,7 +510,7 @@ begin
     if Scale = -4 then
       PCurrency(SQLData)^ := Value
     else
-      PInt64(SQLData)^ := NewNumeric(Value).AdjustScaleTo(Scale).getRawValue;
+      PInt64(SQLData)^ := CurrToNumeric(Value).AdjustScaleTo(Scale).getRawValue;
     Changed;
   end
 end;

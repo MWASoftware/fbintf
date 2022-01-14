@@ -1655,7 +1655,7 @@ var aValue: Int64;
 begin
   case SQLType of
    SQL_TEXT, SQL_VARYING:
-     Result := NewNumeric(GetAsString);
+     Result := StrToNumeric(GetAsString);
 
    SQL_SHORT:
      Result := NumericFromRawValues(PShort(SQLData)^, Scale);
@@ -1670,7 +1670,7 @@ begin
    SQL_DEC34,
    SQL_DEC_FIXED,
    SQL_INT128:
-     Result := NewNumeric(GetAsBCD);
+     Result := BCDToNumeric(GetAsBCD);
 
    else
      IBError(ibxeInvalidDataConversion, [nil]);
@@ -1816,7 +1816,7 @@ begin
     AsDouble := Value
   else
   if not CanChangeMetaData and ((SQLType <> SQL_INT64) or (Scale <> -4)) then
-    SetAsNumeric(NewNumeric(Value))
+    SetAsNumeric(CurrToNumeric(Value))
   else
   begin
     Changing;
@@ -1834,7 +1834,7 @@ procedure TSQLDataItem.SetAsInt64(Value: Int64);
 begin
   CheckActive;
   if not CanChangeMetaData and ((SQLType <> SQL_INT64) or (Scale <> 0)) then
-    SetAsNumeric(NewNumeric(Value))
+    SetAsNumeric(IntToNumeric(Value))
   else
   begin
     Changing;
@@ -1982,7 +1982,7 @@ procedure TSQLDataItem.SetAsDouble(Value: Double);
 begin
   CheckActive;
   if not CanChangeMetaData and (SQLType <> SQL_DOUBLE) then
-    SetAsNumeric(NewNumeric(Value))
+    SetAsNumeric(DoubleToNumeric(Value))
   else
   begin
     if IsNullable then
@@ -2001,7 +2001,7 @@ procedure TSQLDataItem.SetAsFloat(Value: Float);
 begin
   CheckActive;
   if not CanChangeMetaData and (SQLType <> SQL_FLOAT) then
-    SetAsNumeric(NewNumeric(Value))
+    SetAsNumeric(DoubleToNumeric(Value))
   else
   begin
     if IsNullable then
@@ -2020,7 +2020,7 @@ procedure TSQLDataItem.SetAsLong(Value: Long);
 begin
   CheckActive;
   if not CanChangeMetaData and ((SQLType <> SQL_LONG) or (Scale <> 0)) then
-    SetAsNumeric(NewNumeric(Value))
+    SetAsNumeric(IntToNumeric(Value))
   else
   begin
     if IsNullable then
@@ -2068,7 +2068,7 @@ procedure TSQLDataItem.SetAsShort(Value: short);
 begin
   CheckActive;
   if not CanChangeMetaData and ((SQLType <> SQL_SHORT) or (Scale <> 0)) then
-    SetAsNumeric(NewNumeric(Value))
+    SetAsNumeric(IntToNumeric(Value))
   else
   begin
     Changing;
@@ -2101,11 +2101,11 @@ begin
       IsNull := True;
     varSmallint, varInteger, varByte,
       varWord, varShortInt, varInt64:
-        SetAsNumeric(NewNumeric(Int64(Value)));
+        SetAsNumeric(IntToNumeric(Int64(Value)));
     varSingle, varDouble:
       AsDouble := Value;
     varCurrency:
-      SetAsNumeric(NewNumeric(Currency(Value)));
+      SetAsNumeric(CurrToNumeric(Currency(Value)));
     varBoolean:
       AsBoolean := Value;
     varDate:
@@ -2175,7 +2175,7 @@ begin
 
   if not CanChangeMetaData then
   begin
-    SetAsNumeric(NewNumeric(aValue));
+    SetAsNumeric(BCDToNumeric(aValue));
     Exit;
   end;
 
@@ -2510,7 +2510,7 @@ begin
   SQL_DEC34,
   SQL_INT128:
     if TryStrToBCD(Value,BCDValue) then
-      SetAsNumeric(NewNumeric(BCDValue))
+      SetAsNumeric(BCDToNumeric(BCDValue))
     else
       DoSetString;
 

@@ -52,19 +52,15 @@ uses
 
 }
 
-function NewNumeric(aValue: AnsiString): IFBNumeric; overload;
-{$IFDEF FPC}
-function NewNumeric(aValue: double): IFBNumeric; overload;
-{$ELSE}
-function NewNumericFromDouble(aValue: double): IFBNumeric; overload;
-{$ENDIF}
-function NewNumeric(aValue: TBCD): IFBNumeric; overload;
-function NewNumeric(aValue: currency): IFBNumeric; overload;
-function NewNumeric(aValue: Int64): IFBNumeric; overload;
+function StrToNumeric(aValue: AnsiString): IFBNumeric;
+function DoubleToNumeric(aValue: double): IFBNumeric;
+function BCDToNumeric(aValue: TBCD): IFBNumeric;
+function CurrToNumeric(aValue: currency): IFBNumeric;
+function IntToNumeric(aValue: Int64): IFBNumeric;
 function NumericFromRawValues(aValue: Int64; aScale: integer): IFBNumeric;
+function NumericToDouble(aValue: Int64; aScale: integer): double;
 
 function TryStrToNumeric(S: Ansistring; out Value: int64; out scale: integer): boolean;
-function NumericToDouble(aValue: Int64; aScale: integer): double;
 
 function SafeSmallInt(aValue: Int64): Smallint;
 function SafeInteger(aValue: Int64): integer;
@@ -110,12 +106,12 @@ type
     FValue: Int64;
     FScale: integer;
   public
-    constructor Create(aValue: Int64; aScale: integer); overload;
-    constructor Create(aValue: Int64); overload;
-    constructor Create(aValue: AnsiString); overload;
-    constructor Create(aValue: double); overload;
-    constructor Create(aValue: Currency); overload;
-    constructor Create(aValue: TBCD); overload;
+    constructor Create(aValue: Int64; aScale: integer);
+    constructor CreateFromInt(aValue: Int64);
+    constructor CreateFromStr(aValue: AnsiString);
+    constructor CreateFromDouble(aValue: double);
+    constructor CreateFromCurr(aValue: Currency);
+    constructor CreateFromBCD(aValue: TBCD);
   public
     {IFBNumeric}
     function getRawValue: Int64;
@@ -130,33 +126,29 @@ type
     function getAsSmallInt: SmallInt; {scaled - may be truncated}
   end;
 
-function NewNumeric(aValue: AnsiString): IFBNumeric;
+function StrToNumeric(aValue: AnsiString): IFBNumeric;
 begin
-  Result :=  TFBNumeric.Create(aValue);
+  Result :=  TFBNumeric.CreateFromStr(aValue);
 end;
 
-{$IFDEF FPC}
-function NewNumeric(aValue: double): IFBNumeric;
-{$ELSE}
-function NewNumericFromDouble(aValue: double): IFBNumeric;
-{$ENDIF}
+function DoubleToNumeric(aValue: double): IFBNumeric;
 begin
-  Result :=  TFBNumeric.Create(aValue);
+  Result :=  TFBNumeric.CreateFromDouble(aValue);
 end;
 
-function NewNumeric(aValue: TBCD): IFBNumeric;
+function BCDToNumeric(aValue: TBCD): IFBNumeric;
 begin
-  Result :=  TFBNumeric.Create(aValue);
+  Result :=  TFBNumeric.CreateFromBCD(aValue);
 end;
 
-function NewNumeric(aValue: currency): IFBNumeric;
+function CurrToNumeric(aValue: currency): IFBNumeric;
 begin
-  Result :=  TFBNumeric.Create(aValue);
+  Result :=  TFBNumeric.CreateFromCurr(aValue);
 end;
 
-function NewNumeric(aValue: Int64): IFBNumeric;
+function IntToNumeric(aValue: Int64): IFBNumeric;
 begin
-  Result :=  TFBNumeric.Create(aValue);
+  Result :=  TFBNumeric.CreateFromINT(aValue);
 end;
 
 function NumericFromRawValues(aValue: Int64; aScale: integer): IFBNumeric;
@@ -314,7 +306,7 @@ begin
   {Compute actual value as a double}
   z := (x.getRawValue / y.getRawValue) * IntPower(10, x.getScale - y.getScale);
   {Return numeric at original no. of decimal places of numerator}
-  Result := NewNumeric(z).AdjustScaleTo(x.getScale);
+  Result := DoubleTONumeric(z).AdjustScaleTo(x.getScale);
 end;
 
 function NumericCompare(x, y: IFBNumeric): integer;
@@ -336,72 +328,72 @@ end;
 
 function NumericAdd(x: IFBNumeric; y: int64): IFBNumeric;
 begin
-  Result := NumericAdd(x,NewNumeric(y));
+  Result := NumericAdd(x,IntToNumeric(y));
 end;
 
 function NumericSubtract(x: IFBNumeric; y: int64): IFBNumeric;
 begin
-  Result := NumericSubtract(x,NewNumeric(y));
+  Result := NumericSubtract(x,IntToNumeric(y));
 end;
 
 function NumericSubtract(x: int64; y: IFBNumeric): IFBNumeric;
 begin
-  Result := NumericSubtract(NewNumeric(x),y);
+  Result := NumericSubtract(IntToNumeric(x),y);
 end;
 
 function NumericMultiply(x: IFBNumeric; y: int64): IFBNumeric;
 begin
-  Result := NumericMultiply(x,NewNumeric(y));
+  Result := NumericMultiply(x,IntToNumeric(y));
 end;
 
 function NumericDivide(x: IFBNumeric; y: int64): IFBNumeric;
 begin
-  Result := NumericDivide(x,NewNumeric(y));
+  Result := NumericDivide(x,IntToNumeric(y));
 end;
 
 function NumericDivide(x: int64; y: IFBNumeric): IFBNumeric;
 begin
-  Result := NumericDivide(NewNumeric(x),y);
+  Result := NumericDivide(IntToNumeric(x),y);
 end;
 
 function NumericCompare(x: IFBNumeric; y: int64): integer;
 begin
-  Result := NumericCompare(x,NewNumeric(y));
+  Result := NumericCompare(x,IntToNumeric(y));
 end;
 
 function NumericAdd(x: IFBNumeric; y: double): IFBNumeric;
 begin
-  Result := NumericAdd(x,NewNumeric(y));
+  Result := NumericAdd(x,DoubleToNumeric(y));
 end;
 
 function NumericSubtract(x: IFBNumeric; y: double): IFBNumeric;
 begin
-  Result := NumericSubtract(x,NewNumeric(y));
+  Result := NumericSubtract(x,DoubleToNumeric(y));
 end;
 
 function NumericSubtract(x: double; y: IFBNumeric): IFBNumeric;
 begin
-  Result := NumericSubtract(NewNumeric(x),y);
+  Result := NumericSubtract(DoubleToNumeric(x),y);
 end;
 
 function NumericMultiply(x: IFBNumeric; y: double): IFBNumeric;
 begin
-  Result := NumericMultiply(x,NewNumeric(y));
+  Result := NumericMultiply(x,DoubleToNumeric(y));
 end;
 
 function NumericDivide(x: IFBNumeric; y: double): IFBNumeric;
 begin
-  Result := NumericDivide(x,NewNumeric(y));
+  Result := NumericDivide(x,DoubleToNumeric(y));
 end;
 
 function NumericDivide(x: double; y: IFBNumeric): IFBNumeric;
 begin
-  Result := NumericDivide(NewNumeric(x),y);
+  Result := NumericDivide(DoubleToNumeric(x),y);
 end;
 
 function NumericCompare(x: IFBNumeric; y: double): integer;
 begin
-  Result := NumericCompare(x,NewNumeric(y));
+  Result := NumericCompare(x,DoubleToNumeric(y));
 end;
 
 constructor TFBNumeric.Create(aValue: Int64; aScale: integer);
@@ -411,21 +403,21 @@ begin
   FScale := aScale;
 end;
 
-constructor TFBNumeric.Create(aValue: Int64);
+constructor TFBNumeric.CreateFromInt(aValue: Int64);
 begin
   inherited Create;
   FValue := aValue;
   FScale := 0;
 end;
 
-constructor TFBNumeric.Create(aValue: AnsiString);
+constructor TFBNumeric.CreateFromStr(aValue: AnsiString);
 begin
   inherited Create;
   if not TryStrToNumeric(aValue,FValue,FScale) then
     IBError(ibxeInvalidDataConversion,[aValue]);
 end;
 
-constructor TFBNumeric.Create(aValue: double);
+constructor TFBNumeric.CreateFromDouble(aValue: double);
 
   function WithinLimits(a: double): boolean;
   begin
@@ -446,14 +438,14 @@ begin
   Create(i,-aScale);
 end;
 
-constructor TFBNumeric.Create(aValue: Currency);
+constructor TFBNumeric.CreateFromCurr(aValue: Currency);
 begin
   inherited Create;
   Move(aValue,FValue,sizeof(Int64));
   FScale := -4;
 end;
 
-constructor TFBNumeric.Create(aValue: TBCD);
+constructor TFBNumeric.CreateFromBCD(aValue: TBCD);
 var ScaledBCD: TBCD;
 begin
   inherited Create;
