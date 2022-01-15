@@ -224,8 +224,16 @@ begin
   {calculate length of event parameter block, setting initial length to include version
    and counts for each argument}
 
-   if FEventBuffer <> nil then FreeAndNil(FEventBuffer);
-   if FResultBuffer <> nil then FreeAndNil(FResultBuffer);
+  if FEventBuffer <> nil then
+  begin
+    FreeMem( FEventBuffer);
+    FEventBuffer := nil;
+  end;
+  if FResultBuffer <> nil then
+  begin
+    FreeMem( FResultBuffer);
+    FResultBuffer := nil;
+  end;
 
   FEventBufferLen := 1;
   for i := 0 to FEvents.Count - 1 do
@@ -242,7 +250,8 @@ begin
     IBAlloc(FResultBuffer,0,FEventBufferLen);
     if FResultBuffer = nil then
     begin
-      FreeAndNil(FEventBuffer);
+      FreeMem(FEventBuffer);
+      FEventBuffer := nil;
       Exit;
     end;
     FillChar(FResultBuffer^,FEventBufferLen,0);
