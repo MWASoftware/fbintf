@@ -263,7 +263,7 @@ begin
   aNewScale := x.getScale - aNewScale;
   while aNewScale < 0 do
   begin
-    Result := Result div 10;
+    Result := Round(Result / 10);
     Inc(aNewScale);
   end;
   while aNewScale > 0 do
