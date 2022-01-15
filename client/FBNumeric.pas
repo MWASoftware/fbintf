@@ -231,8 +231,10 @@ begin
 end;
 
 function NumericToDouble(aValue: Int64; aScale: integer): double;
+var rValue: extended;
 begin
-  Result := aValue * IntPower(10,aScale);
+  rValue := aValue;
+  Result := rValue * IntPower(10,aScale);
 end;
 
 function SafeSmallInt(aValue: Int64): Smallint;
@@ -256,10 +258,19 @@ end;
 {AdjustScale returns a raw int64 value derived from x but with aNewScale}
 
 function AdjustScale(x: IFBNumeric; aNewScale: integer): int64;
-var rValue: double;
 begin
-  rValue := x.getrawValue;
-  Result := Round(rValue * IntPower(10,x.getScale-aNewScale));
+  Result := x.getRawValue;
+  aNewScale := x.getScale - aNewScale;
+  while aNewScale < 0 do
+  begin
+    Result := Result div 10;
+    Inc(aNewScale);
+  end;
+  while aNewScale > 0 do
+  begin
+    Result := Result * 10;
+    Dec(aNewScale);
+  end;
 end;
 
 function CompareInt(a,b: integer): integer;
