@@ -982,6 +982,7 @@ procedure TIBXINPUTSQLDA.PackBuffer;
 var i: integer;
     P: PByte;
     MsgLen: cardinal;
+    aNullIndicator: short;
 begin
   BuildMetadata;
 
@@ -1022,6 +1023,11 @@ begin
       begin
         Move(FNullIndicator,(FMessageBuffer + FCurMetaData.getNullOffset(StatusIntf,i))^,sizeof(FNullIndicator));
         Check4DataBaseError;
+      end
+      else
+      begin
+        aNullIndicator := 0;
+        Move(aNullIndicator,(FMessageBuffer + FCurMetaData.getNullOffset(StatusIntf,i))^,sizeof(aNullIndicator));
       end;
     end;
   end;
