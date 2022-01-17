@@ -931,7 +931,11 @@ begin
 
     end;
     except on E: Exception do
-      FController.FBSetStatusFromException(E,status);
+      begin
+        Result.dispose;
+        Result := nil;
+        FController.FBSetStatusFromException(E,status);
+      end;
     end;
 end;
 
@@ -1012,7 +1016,11 @@ begin
       end;
     end;
     except on E: Exception do
-      FController.FBSetStatusFromException(E,status);
+      begin
+        Result.dispose;
+        Result := nil;
+        FController.FBSetStatusFromException(E,status);
+      end;
     end;
 end;
 

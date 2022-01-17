@@ -119,6 +119,7 @@ type
   private
     FIBDataBaseErrorMessages: TIBDataBaseErrorMessages;
     FPrefix: AnsiString;
+    function SQLCodeSupported: boolean;
   protected
     FOwner: TFBClientAPI;
     function GetIBMessage: Ansistring; virtual; abstract;
@@ -612,6 +613,11 @@ end;
 
 { TFBStatus }
 
+function TFBStatus.SQLCodeSupported: boolean;
+begin
+  Result:= (FOwner <> nil) and assigned(FOwner.isc_sqlcode) and  assigned(FOwner.isc_sql_interprete);
+end;
+
 function TFBStatus.GetSQLMessage: Ansistring;
 var local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
 begin
@@ -649,24 +655,24 @@ var IBDataBaseErrorMessages: TIBDataBaseErrorMessages;
 begin
   Result := FPrefix;
   IBDataBaseErrorMessages := FIBDataBaseErrorMessages;
-  if (ShowSQLCode in IBDataBaseErrorMessages) then
-    Result := Result + 'SQLCODE: ' + IntToStr(Getsqlcode); {do not localize}
-
-  if [ShowSQLMessage, ShowIBMessage]*IBDataBaseErrorMessages <> [] then
+  if SQLCodeSupported then
   begin
-    if (ShowSQLCode in FIBDataBaseErrorMessages) then
-      Result := Result + LineEnding;
-    Result := Result + 'Engine Code: ' + IntToStr(GetIBErrorCode) + ' ';
-  end;
+    if (ShowSQLCode in IBDataBaseErrorMessages) then
+      Result := Result + 'SQLCODE: ' + IntToStr(Getsqlcode); {do not localize}
 
-  if (ShowSQLMessage in IBDataBaseErrorMessages) then
-    Result := Result + GetSQLMessage;
+    if (ShowSQLMessage in IBDataBaseErrorMessages) then
+    begin
+      if ShowSQLCode in IBDataBaseErrorMessages then
+        Result := Result + LineEnding;
+      Result := Result + GetSQLMessage;
+    end;
+  end;
 
   if (ShowIBMessage in IBDataBaseErrorMessages) then
   begin
-    if ShowSQLMessage in IBDataBaseErrorMessages then
+    if Result <> FPrefix then
       Result := Result + LineEnding;
-    Result := Result + GetIBMessage;
+    Result := Result + 'Engine Code: ' + IntToStr(GetIBErrorCode) + LineEnding + GetIBMessage;
   end;
   if (Result <> '') and (Result[Length(Result)] = '.') then
     Delete(Result, Length(Result), 1);
