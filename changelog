@@ -81,6 +81,11 @@ FBINTF Change Log  version          (1.4-0 Build 13090) Fri, 14 Jan 2022 23:07:2
 14. Connection Info (e.g. ODS Version, Remote Protocol) now retrieved on first
     request rather than on attachment connect.
 
+15. IStatus.IBDataBaseErrorMessages now defaults to [ShowIBMessage]. This reflects the
+    fact that SQLCodes are soon to be deprecated. In the future, the other options
+    will be silently ignored if SQLCode support is not present in the Firebird
+    Client library.
+
 
 FBINTF Change Log  version          (1.3-3 Build 12935) Mon, 06 Dec 2021 23:17:13 +0000
 

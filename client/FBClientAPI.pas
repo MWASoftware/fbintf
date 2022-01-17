@@ -628,7 +628,7 @@ begin
   inherited Create;
   FOwner := aOwner;
   FPrefix := prefix;
-  FIBDataBaseErrorMessages := [ShowSQLCode, ShowSQLMessage, ShowIBMessage];
+  FIBDataBaseErrorMessages := [ShowIBMessage];
 end;
 
 function TFBStatus.GetIBErrorCode: TStatusCode;
