@@ -195,10 +195,12 @@
       <Unit24>
         <Filename Value="Test21.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="223"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="8"/>
+        <TopLine Value="72"/>
         <CursorPos X="66" Y="242"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit24>
       <Unit25>
         <Filename Value="Test22.pas"/>
@@ -217,7 +219,6 @@
       </Unit26>
       <Unit27>
         <Filename Value="../client/FBClientAPI.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="7"/>
         <TopLine Value="651"/>
         <CursorPos X="25" Y="673"/>
@@ -286,7 +287,7 @@
       </Unit33>
       <Unit34>
         <Filename Value="../client/2.5/FB25ClientAPI.pas"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="11"/>
         <TopLine Value="158"/>
         <CursorPos X="17" Y="169"/>
         <UsageCount Value="11"/>
@@ -481,7 +482,7 @@
       </Unit58>
       <Unit59>
         <Filename Value="../changelog"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="10"/>
         <TopLine Value="64"/>
         <CursorPos X="20" Y="87"/>
         <UsageCount Value="35"/>
@@ -1047,7 +1048,7 @@
       </Unit135>
       <Unit136>
         <Filename Value="../fbintf.dpk"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="9"/>
         <UsageCount Value="11"/>
         <Loaded Value="True"/>
       </Unit136>
@@ -1177,13 +1178,13 @@
       <FormatVersion Value="2"/>
       <Modes ActiveMode="default"/>
     </RunParams>
-    <HistoryLists Count="2">
+    <HistoryLists Count="3">
       <List0 Name="LaunchingApplication" Type="File" Count="1">
         <Item1 Value="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </List0>
       <List1 Name="CommandLineParameters" Count="15">
-        <Item1 Value="-t 7"/>
-        <Item2 Value="-t 21"/>
+        <Item1 Value="-t 21"/>
+        <Item2 Value="-t 7"/>
         <Item3 Value="-t 10"/>
         <Item4 Value="-t 19"/>
         <Item5 Value="-t 2"/>
@@ -1198,6 +1199,7 @@
         <Item14 Value="-t 5"/>
         <Item15 Value="-t 17"/>
       </List1>
+      <List2 Name="WorkingDirectory" Type="File" Count="1"/>
     </HistoryLists>
   </ProjectSession>
 </CONFIG>

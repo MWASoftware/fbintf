@@ -115,7 +115,7 @@ type
 
   { TFBStatus }
 
-  TFBStatus = class(TFBInterfacedObject)
+  TFBStatus = class(TFBInterfacedObject, IStatus)
   private
     FIBDataBaseErrorMessages: TIBDataBaseErrorMessages;
     FPrefix: AnsiString;
@@ -127,6 +127,8 @@ type
   public
     constructor Create(aOwner: TFBClientAPI; prefix: AnsiString='');
     function StatusVector: PStatusVector; virtual; abstract;
+    procedure Assign(src: TFBStatus); virtual;
+    function Clone: IStatus; virtual; abstract;
 
     {IStatus}
     function GetIBErrorCode: TStatusCode;
@@ -635,6 +637,13 @@ begin
   FOwner := aOwner;
   FPrefix := prefix;
   FIBDataBaseErrorMessages := [ShowIBMessage];
+end;
+
+procedure TFBStatus.Assign(src: TFBStatus);
+begin
+  FOwner := src.FOwner;
+  FPrefix := src.FPrefix;
+  SetIBDataBaseErrorMessages(src.GetIBDataBaseErrorMessages);
 end;
 
 function TFBStatus.GetIBErrorCode: TStatusCode;

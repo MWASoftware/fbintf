@@ -327,6 +327,7 @@ type
     function GetMessage: AnsiString;
     function CheckStatusVector(ErrorCodes: array of TFBStatusCode): Boolean;
     function GetIBDataBaseErrorMessages: TIBDataBaseErrorMessages;
+    function Clone: IStatus;
     procedure SetIBDataBaseErrorMessages(Value: TIBDataBaseErrorMessages);
   end;
 
@@ -1613,7 +1614,7 @@ constructor EIBInterBaseError.Create(aStatus: IStatus);
 begin
   inherited Create(aStatus.Getsqlcode,aStatus.GetMessage);
   FIBErrorCode := aStatus.GetIBErrorCode;
-  FStatus := aStatus;
+  FStatus := aStatus.Clone;
 end;
 
 constructor EIBInterBaseError.Create(ASQLCode: Long; AIBErrorCode: Long;

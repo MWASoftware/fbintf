@@ -874,6 +874,7 @@ var aProcMetadata: IFBUDRProcMetadata;
 begin
   InputParams := nil;
   InputParamsSQLDA := nil;
+  Result := nil;
   try
     if loLogProcedures in FBUDRControllerOptions.LogOptions then
       FController.WriteToLog(SOpenExecuteProc + FName);
@@ -932,7 +933,8 @@ begin
     end;
     except on E: Exception do
       begin
-        Result.dispose;
+        if Result <> nil then
+          Result.dispose;
         Result := nil;
         FController.FBSetStatusFromException(E,status);
       end;
@@ -960,6 +962,7 @@ var aProcMetadata: IFBUDRProcMetadata;
     metadata: Firebird.IMessageMetadata;
     FBContext: IFBUDRExternalContext;
 begin
+  Result := nil;
   try
     if loLogProcedures in FBUDRControllerOptions.LogOptions then
       FController.WriteToLog(SOpenSelectProc + FName);
@@ -1017,7 +1020,8 @@ begin
     end;
     except on E: Exception do
       begin
-        Result.dispose;
+        if Result <> nil then
+          Result.dispose;
         Result := nil;
         FController.FBSetStatusFromException(E,status);
       end;
@@ -2203,12 +2207,16 @@ end;
 
 procedure TFBUDRController.FBSetStatusFromException(E: Exception; aStatus: Firebird.IStatus);
 var StatusVector: TStatusVector;
+    ErrorVector: NativeIntPtr;
 begin
   if E is EFBUDRException then
     aStatus.setErrors((E as EFBUDRException).Status.getErrors())
   else
   if E is EIBInterBaseError then
-    aStatus.setErrors(NativeIntPtr(((E as EIBInterBaseError).Status as TFB30Status).GetStatus.getErrors))
+  begin
+    ErrorVector := ((E as EIBInterBaseError).Status as TFB30Status).GetStatus.getErrors();
+    astatus.setErrors(ErrorVector);
+  end
   else
   begin
     FMessageBuffer := E.Message;

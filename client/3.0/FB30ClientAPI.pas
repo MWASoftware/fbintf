@@ -51,6 +51,8 @@ type
     function GetIBMessage: Ansistring; override;
   public
     destructor Destroy; override;
+    procedure Assign(src: TFBStatus); override;
+    function Clone: IStatus; override;
     procedure Init;
     procedure FreeHandle;
     function InErrorState: boolean;
@@ -275,6 +277,20 @@ destructor TFB30Status.Destroy;
 begin
   FreeHandle;
   inherited Destroy;
+end;
+
+procedure TFB30Status.Assign(src: TFBStatus);
+begin
+  inherited Assign(src);
+  FStatus := (src as TFB30Status).GetStatus.clone;
+end;
+
+function TFB30Status.Clone: IStatus;
+var aResult: TFB30Status;
+begin
+  aResult := TFB30Status.Create(nil);
+  aResult.Assign(self);
+  Result := aResult;
 end;
 
 procedure TFB30Status.Init;
