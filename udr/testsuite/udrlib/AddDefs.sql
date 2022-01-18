@@ -16,7 +16,11 @@ create or alter procedure MyTestProc (
       EMP_NO SMALLINT
     ) returns (Salary Numeric(10,2), FullName VarChar(36))
     external name 'fbudrtests!test_proc'
-    engine udr;  
+    engine udr;
+Create or Alter procedure MyErrorProc (
+      ErrorCase Smallint)
+    external name 'fbudrtests!error_proc'
+    engine udr;
 create or alter procedure MySelectProc ()
     returns (FullName VarChar(36), Salary Numeric(10,2), AccSalary Numeric(10,2) )
     external name 'fbudrtests!select_proc'
