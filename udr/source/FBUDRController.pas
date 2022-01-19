@@ -874,6 +874,7 @@ var aProcMetadata: IFBUDRProcMetadata;
 begin
   InputParams := nil;
   InputParamsSQLDA := nil;
+  Result := nil;
   try
     if loLogProcedures in FBUDRControllerOptions.LogOptions then
       FController.WriteToLog(SOpenExecuteProc + FName);
@@ -931,7 +932,12 @@ begin
 
     end;
     except on E: Exception do
-      FController.FBSetStatusFromException(E,status);
+      begin
+        if Result <> nil then
+          Result.dispose;
+        Result := nil;
+        FController.FBSetStatusFromException(E,status);
+      end;
     end;
 end;
 
@@ -956,6 +962,7 @@ var aProcMetadata: IFBUDRProcMetadata;
     metadata: Firebird.IMessageMetadata;
     FBContext: IFBUDRExternalContext;
 begin
+  Result := nil;
   try
     if loLogProcedures in FBUDRControllerOptions.LogOptions then
       FController.WriteToLog(SOpenSelectProc + FName);
@@ -1012,7 +1019,12 @@ begin
       end;
     end;
     except on E: Exception do
-      FController.FBSetStatusFromException(E,status);
+      begin
+        if Result <> nil then
+          Result.dispose;
+        Result := nil;
+        FController.FBSetStatusFromException(E,status);
+      end;
     end;
 end;
 
@@ -1080,7 +1092,6 @@ begin
       FController.WriteToLog(SSetupTrigger + FName);
 
     FBContext := TFBUDRExternalContext.Create(Controller,context);
-    FController.StartJournaling(FBContext);
 
     FBRoutineMetadata := TFBUDRRoutineMetadata.Create(FBContext,metadata);
 
@@ -1430,7 +1441,6 @@ begin
     FBInBuilder := nil;
     FBOutBuilder := nil;
     FBContext := TFBUDRExternalContext.Create(Controller,context);
-    FController.StartJournaling(FBContext);
 
     FBRoutineMetadata := TFBUDRRoutineMetadata.Create(FBContext,metadata);
     if inBuilder <> nil then
@@ -1879,8 +1889,6 @@ begin
 
     FBContext := TFBUDRExternalContext.Create(Controller,context);
 
-    FController.StartJournaling(FBContext);
-
     FBRoutineMetadata := TFBUDRRoutineMetadata.Create(FBContext,metadata);
 
     if inBuilder <> nil then
@@ -2195,12 +2203,16 @@ end;
 
 procedure TFBUDRController.FBSetStatusFromException(E: Exception; aStatus: Firebird.IStatus);
 var StatusVector: TStatusVector;
+    ErrorVector: NativeIntPtr;
 begin
   if E is EFBUDRException then
     aStatus.setErrors((E as EFBUDRException).Status.getErrors())
   else
   if E is EIBInterBaseError then
-    aStatus.setErrors(NativeIntPtr(((E as EIBInterBaseError).Status as TFB30Status).GetStatus.getErrors))
+  begin
+    ErrorVector := ((E as EIBInterBaseError).Status as TFB30Status).GetStatus.getErrors();
+    astatus.setErrors(ErrorVector);
+  end
   else
   begin
     FMessageBuffer := E.Message;
@@ -2326,7 +2338,7 @@ end;
 procedure TFBUDRController.StartJournaling(context: IFBUDRExternalContext);
 var JnlOptions: TJournalOptions;
 begin
-  JnlOptions := [joNoServerTable];
+  JnlOptions := [joNoServerTable,joReadWriteTransactions];
   if loModifyQueries in FBUDRControllerOptions.LogOptions then
     JnlOptions := JnlOptions + [joModifyQueries];
   if loReadOnlyQueries in FBUDRControllerOptions.LogOptions then

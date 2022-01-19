@@ -327,6 +327,7 @@ type
     function GetMessage: AnsiString;
     function CheckStatusVector(ErrorCodes: array of TFBStatusCode): Boolean;
     function GetIBDataBaseErrorMessages: TIBDataBaseErrorMessages;
+    function Clone: IStatus;
     procedure SetIBDataBaseErrorMessages(Value: TIBDataBaseErrorMessages);
   end;
 
@@ -905,6 +906,8 @@ type
 
   TTransactionAction  = (TARollback, TACommit, TACommitRetaining, TARollbackRetaining);
   TTransactionCompletion = TARollback.. TACommit;
+  TTrCompletionState = (trCommitted, trRolledback, trCommitFailed, trRollbackFailed);
+
 
   ITransaction = interface
     ['{30928d0e-a9d7-4c61-b7cf-14f4f38abe2a}']
@@ -916,10 +919,10 @@ type
     function GetJournalingActive(attachment: IAttachment): boolean;
     function GetDefaultCompletion: TTransactionCompletion;
     procedure PrepareForCommit; {Two phase commit - stage 1}
-    procedure Commit(Force: boolean=false);
+    function Commit(Force: boolean=false): TTrCompletionState;
     procedure CommitRetaining;
     function HasActivity: boolean;
-    procedure Rollback(Force: boolean=false);
+    function Rollback(Force: boolean=false): TTrCompletionState;
     procedure RollbackRetaining;
     function GetAttachmentCount: integer;
     function GetAttachment(index: integer): IAttachment;
@@ -1613,7 +1616,7 @@ constructor EIBInterBaseError.Create(aStatus: IStatus);
 begin
   inherited Create(aStatus.Getsqlcode,aStatus.GetMessage);
   FIBErrorCode := aStatus.GetIBErrorCode;
-  FStatus := aStatus;
+  FStatus := aStatus.Clone;
 end;
 
 constructor EIBInterBaseError.Create(ASQLCode: Long; AIBErrorCode: Long;

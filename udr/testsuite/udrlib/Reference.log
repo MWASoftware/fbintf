@@ -39,6 +39,17 @@ using dumb terminal settings.
 ===================== ==================================== 
              81810.19 Fisher, Pete                         
 
+Statement failed, SQLSTATE = 42S01
+unsuccessful metadata update
+-CREATE TABLE TESTME failed
+-Table TESTME already exists
+-At procedure 'MYERRORPROC'
+Statement failed, SQLSTATE = 23000
+validation error for column "EMPLOYEE"."FIRST_NAME", value "*** null ***"
+-At procedure 'MYERRORPROC'
+Statement failed, SQLSTATE = HY000
+You have a bug
+-At procedure 'MYERRORPROC'
 ------------------------
 Running Test03
 ------------------------
@@ -159,6 +170,7 @@ UDR Log Contents
 @dd-mm-yy hh:mm:ss.zzzz:Registering Function bad_row_count
 @dd-mm-yy hh:mm:ss.zzzz:Registering Function return_info
 @dd-mm-yy hh:mm:ss.zzzz:Registering Procedure test_proc
+@dd-mm-yy hh:mm:ss.zzzz:Registering Procedure error_proc
 @dd-mm-yy hh:mm:ss.zzzz:Registering Procedure select_proc
 @dd-mm-yy hh:mm:ss.zzzz:Registering Procedure read_txt
 @dd-mm-yy hh:mm:ss.zzzz:Registering Trigger my_employee_update
@@ -482,6 +494,62 @@ Output Metadata:
   Null Offset = 48
   Message Length = 36
   
+@dd-mm-yy hh:mm:ss.zzzz:Setup Procedure error_proc
+@dd-mm-yy hh:mm:ss.zzzz:Routine Metadata
+Package Name = 
+  Name = MYERRORPROC
+  Entry Point = fbudrtests!error_proc (fbudrtests,error_proc,)
+  Body = 
+  Input Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 4
+  Field No. 0
+  Field Name = ERRORCASE
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_SHORT
+  IsNullable = yes
+  SubType = 0
+  Length = 2
+  Scale = 0
+  Offset = 0
+  Null Offset = 2
+  Message Length = 2
+  
+Output Metadata:
+  Field Count = 0
+  Alignment = 2
+  Aligned Length = 0
+  
+@dd-mm-yy hh:mm:ss.zzzz:Setup Procedure error_proc
+@dd-mm-yy hh:mm:ss.zzzz:Routine Metadata
+Package Name = 
+  Name = MYERRORPROC
+  Entry Point = fbudrtests!error_proc (fbudrtests,error_proc,)
+  Body = 
+  Input Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 4
+  Field No. 0
+  Field Name = ERRORCASE
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_SHORT
+  IsNullable = yes
+  SubType = 0
+  Length = 2
+  Scale = 0
+  Offset = 0
+  Null Offset = 2
+  Message Length = 2
+  
+Output Metadata:
+  Field Count = 0
+  Alignment = 2
+  Aligned Length = 0
+  
 @dd-mm-yy hh:mm:ss.zzzz:Setup Procedure select_proc
 @dd-mm-yy hh:mm:ss.zzzz:Routine Metadata
 Package Name = 
@@ -747,8 +815,8 @@ Output Metadata:
   
 @dd-mm-yy hh:mm:ss.zzzz:Execute Function row_count
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 1374
-  Transaction ID = 4964
+  Attachment ID = 3436
+  Transaction ID = 10379
   User Name = SYSDBA
   Database Name = /opt/firebird4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -778,8 +846,8 @@ Column 0
 
 @dd-mm-yy hh:mm:ss.zzzz:Execute Function row_count
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 1374
-  Transaction ID = 4964
+  Attachment ID = 3436
+  Transaction ID = 10379
   User Name = SYSDBA
   Database Name = /opt/firebird4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -809,8 +877,8 @@ Column 0
 
 @dd-mm-yy hh:mm:ss.zzzz:Execute Function row_count
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 1374
-  Transaction ID = 4964
+  Attachment ID = 3436
+  Transaction ID = 10379
   User Name = SYSDBA
   Database Name = /opt/firebird4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -828,8 +896,7 @@ Parameter 0:
   Value = BAD
 
 @dd-mm-yy hh:mm:ss.zzzz:Exception raised
-SQLCODE: -999
-Engine Code: 335544569 
+Engine Code: 335544569
 Dynamic SQL Error
 -SQL error code = -204
 -Table unknown
@@ -892,8 +959,8 @@ Output Metadata:
   
 @dd-mm-yy hh:mm:ss.zzzz:Execute Function return_info
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 1374
-  Transaction ID = 4964
+  Attachment ID = 3436
+  Transaction ID = 10379
   User Name = SYSDBA
   Database Name = /opt/firebird4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -967,8 +1034,8 @@ Output Metadata:
   
 @dd-mm-yy hh:mm:ss.zzzz:Open Execute Procedure test_proc
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 1377
-  Transaction ID = 4976
+  Attachment ID = 3439
+  Transaction ID = 10383
   User Name = SYSDBA
   Database Name = /opt/firebird4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -1026,7 +1093,119 @@ Column 1
   Value = Fisher, Pete
 
 @dd-mm-yy hh:mm:ss.zzzz:Procedure test_proc: dispose called with refcount = 2
+@dd-mm-yy hh:mm:ss.zzzz:Setup Procedure error_proc
+@dd-mm-yy hh:mm:ss.zzzz:Routine Metadata
+Package Name = 
+  Name = MYERRORPROC
+  Entry Point = fbudrtests!error_proc (fbudrtests,error_proc,)
+  Body = 
+  Input Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 4
+  Field No. 0
+  Field Name = ERRORCASE
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_SHORT
+  IsNullable = yes
+  SubType = 0
+  Length = 2
+  Scale = 0
+  Offset = 0
+  Null Offset = 2
+  Message Length = 2
+  
+Output Metadata:
+  Field Count = 0
+  Alignment = 2
+  Aligned Length = 0
+  
+@dd-mm-yy hh:mm:ss.zzzz:Open Execute Procedure error_proc
+@dd-mm-yy hh:mm:ss.zzzz:External Context: 
+  Attachment ID = 3439
+  Transaction ID = 10383
+  User Name = SYSDBA
+  Database Name = /opt/firebird4.0.1/examples/empbuild/employee.fdb
+  Client Character Set = NONE
+  
+@dd-mm-yy hh:mm:ss.zzzz:Input Parameters
+Parameter 0:
+  Field Name = ERRORCASE
+  Alias Name = 
+  SQLType = SQL_SHORT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 2
+  Value = 0
+
+@dd-mm-yy hh:mm:ss.zzzz:Output Parameters
+
+*S:'dd-mm-yy hh:mm:ss.zzzz',3439,0,10389,0:,53:[isc_tpb_write,isc_tpb_nowait,isc_tpb_read_committed],1
+*R:'dd-mm-yy hh:mm:ss.zzzz',3439,0,10389
+@dd-mm-yy hh:mm:ss.zzzz:Procedure error_proc: dispose called with refcount = 2
+@dd-mm-yy hh:mm:ss.zzzz:Exception raised
+Engine Code: 335544351
+unsuccessful metadata update
+-CREATE TABLE TESTME failed
+-Table TESTME already exists
+@dd-mm-yy hh:mm:ss.zzzz:Open Execute Procedure error_proc
+@dd-mm-yy hh:mm:ss.zzzz:External Context: 
+  Attachment ID = 3439
+  Transaction ID = 10383
+  User Name = SYSDBA
+  Database Name = /opt/firebird4.0.1/examples/empbuild/employee.fdb
+  Client Character Set = NONE
+  
+@dd-mm-yy hh:mm:ss.zzzz:Input Parameters
+Parameter 0:
+  Field Name = ERRORCASE
+  Alias Name = 
+  SQLType = SQL_SHORT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 2
+  Value = 1
+
+@dd-mm-yy hh:mm:ss.zzzz:Output Parameters
+
+*S:'dd-mm-yy hh:mm:ss.zzzz',3439,0,10390,0:,53:[isc_tpb_write,isc_tpb_nowait,isc_tpb_read_committed],1
+*C:'dd-mm-yy hh:mm:ss.zzzz',3439,0,10390
+@dd-mm-yy hh:mm:ss.zzzz:Procedure error_proc: dispose called with refcount = 2
+@dd-mm-yy hh:mm:ss.zzzz:Exception raised
+Engine Code: 335544347
+validation error for column "EMPLOYEE"."FIRST_NAME", value "*** null ***"
+@dd-mm-yy hh:mm:ss.zzzz:Open Execute Procedure error_proc
+@dd-mm-yy hh:mm:ss.zzzz:External Context: 
+  Attachment ID = 3439
+  Transaction ID = 10383
+  User Name = SYSDBA
+  Database Name = /opt/firebird4.0.1/examples/empbuild/employee.fdb
+  Client Character Set = NONE
+  
+@dd-mm-yy hh:mm:ss.zzzz:Input Parameters
+Parameter 0:
+  Field Name = ERRORCASE
+  Alias Name = 
+  SQLType = SQL_SHORT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 2
+  Value = 2
+
+@dd-mm-yy hh:mm:ss.zzzz:Output Parameters
+
+@dd-mm-yy hh:mm:ss.zzzz:Procedure error_proc: dispose called with refcount = 2
+@dd-mm-yy hh:mm:ss.zzzz:Exception raised
+You have a bug
 @dd-mm-yy hh:mm:ss.zzzz:Procedure test_proc: dispose called with refcount = 1
+@dd-mm-yy hh:mm:ss.zzzz:Procedure error_proc: dispose called with refcount = 1
 @dd-mm-yy hh:mm:ss.zzzz:Setup Procedure select_proc
 @dd-mm-yy hh:mm:ss.zzzz:Routine Metadata
 Package Name = 
@@ -1081,8 +1260,8 @@ Output Metadata:
   
 @dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure select_proc
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 1380
-  Transaction ID = 4983
+  Attachment ID = 3442
+  Transaction ID = 10391
   User Name = SYSDBA
   Database Name = /opt/firebird4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -1161,8 +1340,8 @@ Output Metadata:
   
 @dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure read_txt
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 1380
-  Transaction ID = 4983
+  Attachment ID = 3442
+  Transaction ID = 10391
   User Name = SYSDBA
   Database Name = /opt/firebird4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -1193,18 +1372,15 @@ Column 0
   Value = 
 
 @dd-mm-yy hh:mm:ss.zzzz:Procedure read_txt: dispose called with refcount = 2
-@dd-mm-yy hh:mm:ss.zzzz:Procedure select_proc: dispose called with refcount = 1
 @dd-mm-yy hh:mm:ss.zzzz:Procedure read_txt: dispose called with refcount = 1
+@dd-mm-yy hh:mm:ss.zzzz:Procedure select_proc: dispose called with refcount = 1
 @dd-mm-yy hh:mm:ss.zzzz:Setup Trigger my_employee_update
 @dd-mm-yy hh:mm:ss.zzzz:Routine Metadata
 Package Name = 
   Name = MYEMPLOYEEUPDATE
   Entry Point = fbudrtests!my_employee_update (fbudrtests,my_employee_update,)
   Body = 
-  Input Metadata:
-  (nil)
-Output Metadata:
-  (nil)Trigger Metadata:
+  Trigger Metadata:
   Field Count = 12
   Alignment = 0
   Aligned Length = 0

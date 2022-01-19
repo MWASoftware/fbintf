@@ -199,16 +199,16 @@ end;
 
 procedure TFB25Attachment.Disconnect(Force: boolean);
 begin
+  if FHandle <> nil then
+  begin
+    EndAllTransactions;
+    {Disconnect}
+    with FFirebird25ClientAPI do
+      if (isc_detach_database(StatusVector, @FHandle) > 0) and not Force then
+        IBDatabaseError;
+    FHandle := nil;
+  end;
   inherited Disconnect(Force);
-  if FHandle = nil then
-    Exit;
-
-  EndAllTransactions;
-  {Disconnect}
-  with FFirebird25ClientAPI do
-    if (isc_detach_database(StatusVector, @FHandle) > 0) and not Force then
-      IBDatabaseError;
-  FHandle := nil;
 end;
 
 function TFB25Attachment.IsConnected: boolean;

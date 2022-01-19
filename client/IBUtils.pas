@@ -720,8 +720,8 @@ type
     property OnProgressEvent: TOnProgressEvent read FOnProgressEvent write FOnProgressEvent; {Progress Bar Support}
  end;
 
- TJnlEntryType = (jeTransStart, jeTransCommit, jeTransCommitRet, jeTransRollback,
-                   jeTransRollbackRet, jeTransEnd, jeQuery,jeUnknown);
+ TJnlEntryType = (jeTransStart, jeTransCommit, jeTransCommitFail, jeTransCommitRet, jeTransRollback,
+                   jeTransRollbackFail, jeTransRollbackRet, jeTransEnd, jeQuery,jeUnknown);
 
  TJnlEntry = record
    JnlEntryType: TJnlEntryType;
@@ -2815,7 +2815,7 @@ begin
      lsGotSessionID:
        begin
          TransactionID := StrToInt(TokenText);
-         if JnlEntryType in [jeTransCommit, jeTransRollback] then
+         if JnlEntryType in [jeTransCommit, jeTransCommitFail, jeTransRollback, jeTransRollbackFail] then
          begin
            if assigned(FOnNextJournalEntry) then
              OnNextJournalEntry(JnlEntry);
@@ -2841,6 +2841,8 @@ begin
            end;
 
          jeTransCommitRet,
+         jeTransCommitFail,
+         jeTransRollbackFail,
          jeTransRollbackRet:
            begin
              OldTransactionID := StrToInt(TokenText);
@@ -2897,6 +2899,10 @@ begin
     Result := jeTransEnd;
   'Q':
     Result := jeQuery;
+  'F':
+    Result := jeTransCommitFail;
+  'f':
+    Result := jeTransRollbackFail;
   end;
 end;
 
@@ -2907,10 +2913,14 @@ begin
     Result := 'Transaction Start';
   jeTransCommit:
     Result := 'Commit';
+  jeTransCommitFail:
+    Result := 'Commit (Failed)';
   jeTransCommitRet:
     Result := 'Commit Retaining';
   jeTransRollback:
     Result := 'Rollback';
+  jeTransRollbackFail:
+    Result := 'Rollback (Failed)';
   jeTransRollbackRet:
     Result := 'Rollback Retaining';
   jeTransEnd:

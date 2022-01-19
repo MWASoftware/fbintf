@@ -2099,7 +2099,7 @@ begin
   else case VarType(Value) of
     varEmpty, varNull:
       IsNull := True;
-    varSmallint, varInteger, varByte,
+    varSmallint, varInteger, varByte, varLongWord,
       varWord, varShortInt, varInt64:
         SetAsNumeric(IntToNumeric(Int64(Value)));
     varSingle, varDouble:

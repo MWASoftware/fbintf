@@ -82,6 +82,7 @@ type
   protected
     function GetIBMessage: Ansistring; override;
   public
+    function Clone: IStatus; override;
     function StatusVector: PStatusVector; override;
   end;
 
@@ -343,6 +344,14 @@ begin
       Result := Result + LineEnding + '-';
     Result := Result + strpas(local_buffer);
   end;
+end;
+
+function TFB25Status.Clone: IStatus;
+var aResult: TFB25Status;
+begin
+  aResult := TFB25Status.Create(nil);
+  aResult.Assign(self);
+  Result := aResult;
 end;
 
 function TFB25Status.StatusVector: PStatusVector;

@@ -115,10 +115,11 @@ type
 
   { TFBStatus }
 
-  TFBStatus = class(TFBInterfacedObject)
+  TFBStatus = class(TFBInterfacedObject, IStatus)
   private
     FIBDataBaseErrorMessages: TIBDataBaseErrorMessages;
     FPrefix: AnsiString;
+    function SQLCodeSupported: boolean;
   protected
     FOwner: TFBClientAPI;
     function GetIBMessage: Ansistring; virtual; abstract;
@@ -126,6 +127,8 @@ type
   public
     constructor Create(aOwner: TFBClientAPI; prefix: AnsiString='');
     function StatusVector: PStatusVector; virtual; abstract;
+    procedure Assign(src: TFBStatus); virtual;
+    function Clone: IStatus; virtual; abstract;
 
     {IStatus}
     function GetIBErrorCode: TStatusCode;
@@ -247,9 +250,10 @@ type
     IJournallingHook = interface
       ['{7d3e45e0-3628-416a-9e22-c20474825031}']
       procedure TransactionStart(Tr: ITransaction);
-      function TransactionEnd(TransactionID: integer; Action: TTransactionAction): boolean;
+      function TransactionEnd(TransactionID: integer; Completion: TTrCompletionState): boolean;
       procedure TransactionRetained(Tr: ITransaction; OldTransactionID: integer; Action: TTransactionAction);
       procedure ExecQuery(Stmt: IStatement);
+      procedure ExecImmediateJnl(sql: AnsiString; tr: ITransaction);
     end;
 
 implementation
@@ -612,6 +616,11 @@ end;
 
 { TFBStatus }
 
+function TFBStatus.SQLCodeSupported: boolean;
+begin
+  Result:= (FOwner <> nil) and assigned(FOwner.isc_sqlcode) and  assigned(FOwner.isc_sql_interprete);
+end;
+
 function TFBStatus.GetSQLMessage: Ansistring;
 var local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
 begin
@@ -628,7 +637,14 @@ begin
   inherited Create;
   FOwner := aOwner;
   FPrefix := prefix;
-  FIBDataBaseErrorMessages := [ShowSQLCode, ShowSQLMessage, ShowIBMessage];
+  FIBDataBaseErrorMessages := [ShowIBMessage];
+end;
+
+procedure TFBStatus.Assign(src: TFBStatus);
+begin
+  FOwner := src.FOwner;
+  FPrefix := src.FPrefix;
+  SetIBDataBaseErrorMessages(src.GetIBDataBaseErrorMessages);
 end;
 
 function TFBStatus.GetIBErrorCode: TStatusCode;
@@ -649,24 +665,24 @@ var IBDataBaseErrorMessages: TIBDataBaseErrorMessages;
 begin
   Result := FPrefix;
   IBDataBaseErrorMessages := FIBDataBaseErrorMessages;
-  if (ShowSQLCode in IBDataBaseErrorMessages) then
-    Result := Result + 'SQLCODE: ' + IntToStr(Getsqlcode); {do not localize}
-
-  if [ShowSQLMessage, ShowIBMessage]*IBDataBaseErrorMessages <> [] then
+  if SQLCodeSupported then
   begin
-    if (ShowSQLCode in FIBDataBaseErrorMessages) then
-      Result := Result + LineEnding;
-    Result := Result + 'Engine Code: ' + IntToStr(GetIBErrorCode) + ' ';
-  end;
+    if (ShowSQLCode in IBDataBaseErrorMessages) then
+      Result := Result + 'SQLCODE: ' + IntToStr(Getsqlcode); {do not localize}
 
-  if (ShowSQLMessage in IBDataBaseErrorMessages) then
-    Result := Result + GetSQLMessage;
+    if (ShowSQLMessage in IBDataBaseErrorMessages) then
+    begin
+      if ShowSQLCode in IBDataBaseErrorMessages then
+        Result := Result + LineEnding;
+      Result := Result + GetSQLMessage;
+    end;
+  end;
 
   if (ShowIBMessage in IBDataBaseErrorMessages) then
   begin
-    if ShowSQLMessage in IBDataBaseErrorMessages then
+    if Result <> FPrefix then
       Result := Result + LineEnding;
-    Result := Result + GetIBMessage;
+    Result := Result + 'Engine Code: ' + IntToStr(GetIBErrorCode) + LineEnding + GetIBMessage;
   end;
   if (Result <> '') and (Result[Length(Result)] = '.') then
     Delete(Result, Length(Result), 1);

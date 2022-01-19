@@ -68,7 +68,57 @@ type
                       OutputData: IFBUDROutputData); override;
   end;
 
+  {TMyErrorProc is intended to test out error handling for various error conditions}
+
+  {
+    Create or Alter procedure MyErrorProc (
+      ErrorCase Smallint)
+    external name 'fbudrtests!error_proc'
+    engine udr;
+  }
+
+  TMyErrorProc = class(TFBUDRExecuteProcedure)
+  public
+    procedure Execute(context: IFBUDRExternalContext;
+                      ProcMetadata: IFBUDRProcMetadata;
+                      InputParams: IFBUDRInputParams;
+                      OutputData: IFBUDROutputData); override;
+  end;
+
 implementation
+
+{ TMyErrorProc }
+
+procedure TMyErrorProc.Execute(context: IFBUDRExternalContext;
+  ProcMetadata: IFBUDRProcMetadata; InputParams: IFBUDRInputParams;
+  OutputData: IFBUDROutputData);
+var aResult: integer;
+    tr: ITransaction;
+begin
+  with context do
+  case InputParams.ByName('ErrorCase').AsInteger of
+  0:
+    {DDL error - duplicate table name}
+    begin
+      GetAttachment.ExecImmediate([isc_tpb_write, isc_tpb_nowait, isc_tpb_read_committed],
+            'Create Global Temporary Table TestMe(EMP_NO Integer)');
+      GetAttachment.ExecImmediate([isc_tpb_write, isc_tpb_nowait, isc_tpb_read_committed],
+            'Create Global Temporary Table TestMe(EMP_NO Integer)');
+    end;
+
+  1:
+    {limbo transaction}
+    begin
+      tr := GetAttachment.StartTransaction([isc_tpb_write, isc_tpb_nowait, isc_tpb_read_committed],taCommit);
+      GetAttachment.ExecuteSQL(tr,'Insert into EMPLOYEE(EMP_NO,LAST_NAME) Values (2,''No one'')',[]); {must fail duplicate key}
+    end;
+
+  2:
+    {General Exception handling}
+    raise Exception.Create('You have a bug');
+
+  end;
+end;
 
 { TMyTestProcedure }
 
@@ -90,6 +140,7 @@ end;
 
 Initialization
   FBRegisterUDRProcedure('test_proc',TMyTestProcedure);
+  FBRegisterUDRProcedure('error_proc',TMyErrorProc);
 
 end.
 
