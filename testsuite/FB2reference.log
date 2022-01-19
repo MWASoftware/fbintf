@@ -7,7 +7,8 @@ Firebird Environment Variable = /opt/firebird2.5.9
 Firebird Client Library Path = /opt/firebird2.5.9/lib/libfbembed.so
 Running Test 1: Create and Drop a Database
 Creating a Database with empty parameters
-Create Database fails (as expected): Engine Code: 335544344 I/O error during "open O_CREAT" operation for file ""
+Create Database fails (as expected): Engine Code: 335544344
+I/O error during "open O_CREAT" operation for file ""
 Creating a Database using an SQL Statement
 Database ID = 4 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = zeus
 SQL Dialect = 3
@@ -72,7 +73,8 @@ Dropping Database
 
 ------------------------------------------------------
 Running Test 2: Open the employee database and run a query
-Open Database fails Engine Code: 335544472 Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Open Database fails Engine Code: 335544472
+Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Opening localhost:employee
 Database Open, SQL Dialect = 3
 TPB: Item Count = 3
@@ -533,12 +535,12 @@ Running Test 3: ad hoc queries
 Opening localhost:employee
 Database Open
 Employee Count = 42
-Transaction ID = 6359
+Transaction ID = 6394
 Transaction is Read/Write
-Transaction ID = 6359
+Transaction ID = 6394
 Oldest Interesting = 6318
-Oldest Action = 6358
-Oldest Snapshot = 6358
+Oldest Action = 6393
+Oldest Snapshot = 6393
 Oldest Interesting = 0
 Employee Count = 41
 Employee Count = 42
@@ -2819,9 +2821,11 @@ User ID = 0
 Group ID = 0
 
 
-Licence Info: Engine Code: 335544378 feature is not supported
+Licence Info: Engine Code: 335544378
+feature is not supported
 
-Licence Mask Info: Engine Code: 335544378 feature is not supported
+Licence Mask Info: Engine Code: 335544378
+feature is not supported
 
 Capabilities = 260
 
@@ -3109,23 +3113,28 @@ BLOBDATA (Charset Id = 4 Codepage = 65001)
 Running Test 16: Error handling
 Invalid Database Name Test
 Error Handled: SQLCODE: -902
-Engine Code: 335544344 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Engine Code: 335544344
 I/O error during "open" operation for file "Malformed Name"
 Invalid User Name Test
 Error Handled: SQLCODE: -902
-Engine Code: 335544472 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Engine Code: 335544472
 Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Invalid password Test
 Error Handled: SQLCODE: -902
-Engine Code: 335544472 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Engine Code: 335544472
 Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Invalid Prepare SQL Test
 Error Handled: SQLCODE: -206
-Engine Code: 335544569 Column does not belong to referenced table
+Column does not belong to referenced table
+Engine Code: 335544569
 Dynamic SQL Error When Executing: Update Employee Set Unknown_Date = ? Where EMP_NO = ?
 Invalid Open Cursor SQL Test
 Error Handled: SQLCODE: -206
-Engine Code: 335544569 Column does not belong to referenced table
+Column does not belong to referenced table
+Engine Code: 335544569
 Dynamic SQL Error When Executing: Select X,count(*) As Counter from EMPLOYEE
 Transaction not started Test
 Error Handled: Transaction is not active
@@ -3150,15 +3159,18 @@ COUNTER = 42
 
 Invalid Server Name Test
 Error Handled: SQLCODE: -902
-Engine Code: 335544721 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Engine Code: 335544721
 Unable to complete network request to host "unknown"
 Invalid User Name Test
 Error Handled: SQLCODE: -902
-Engine Code: 335544472 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Engine Code: 335544472
 Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Invalid password Test
 Error Handled: SQLCODE: -902
-Engine Code: 335544472 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Engine Code: 335544472
 Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 
 
@@ -3377,10 +3389,12 @@ Nullable
 Size = 8
 
 Expected Error - SQLCODE: -303
-Engine Code: 335544569 Incompatible column/host variable data type
+Incompatible column/host variable data type
+Engine Code: 335544569
 Dynamic SQL Error
 Expected Error - SQLCODE: -303
-Engine Code: 335544569 Incompatible column/host variable data type
+Incompatible column/host variable data type
+Engine Code: 335544569
 Dynamic SQL Error
 Test Numeric Type
 ROWID = 1
@@ -3579,12 +3593,12 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 7
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2022/01/14 23:03:42.7720
+IBX$CREATED = 2022/01/19 12:07:12.6120
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 9
 IBX$OLDTRANSACTIONID = 8
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2022/01/14 23:03:43.1080
+IBX$CREATED = 2022/01/19 12:07:12.9170
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)

@@ -1092,7 +1092,6 @@ begin
       FController.WriteToLog(SSetupTrigger + FName);
 
     FBContext := TFBUDRExternalContext.Create(Controller,context);
-    FController.StartJournaling(FBContext);
 
     FBRoutineMetadata := TFBUDRRoutineMetadata.Create(FBContext,metadata);
 
@@ -1442,7 +1441,6 @@ begin
     FBInBuilder := nil;
     FBOutBuilder := nil;
     FBContext := TFBUDRExternalContext.Create(Controller,context);
-    FController.StartJournaling(FBContext);
 
     FBRoutineMetadata := TFBUDRRoutineMetadata.Create(FBContext,metadata);
     if inBuilder <> nil then
@@ -1890,8 +1888,6 @@ begin
       FController.WriteToLog(SFuncSetup + FName);
 
     FBContext := TFBUDRExternalContext.Create(Controller,context);
-
-    FController.StartJournaling(FBContext);
 
     FBRoutineMetadata := TFBUDRRoutineMetadata.Create(FBContext,metadata);
 
@@ -2342,7 +2338,7 @@ end;
 procedure TFBUDRController.StartJournaling(context: IFBUDRExternalContext);
 var JnlOptions: TJournalOptions;
 begin
-  JnlOptions := [joNoServerTable];
+  JnlOptions := [joNoServerTable,joReadWriteTransactions];
   if loModifyQueries in FBUDRControllerOptions.LogOptions then
     JnlOptions := JnlOptions + [joModifyQueries];
   if loReadOnlyQueries in FBUDRControllerOptions.LogOptions then

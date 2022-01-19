@@ -55,9 +55,9 @@ type
     function GetTrInfo(ReqBuffer: PByte; ReqBufLen: integer): ITrInformation; override;
     procedure InternalStartSingle(attachment: IAttachment); override;
     procedure InternalStartMultiple; override;
-    procedure InternalCommit(Force: boolean); override;
+    function InternalCommit(Force: boolean): TTrCompletionState; override;
     procedure InternalCommitRetaining; override;
-    procedure InternalRollback(Force: boolean); override;
+    function InternalRollback(Force: boolean): TTrCompletionState; override;
     procedure InternalRollbackRetaining; override;
   public
     constructor Create(api: TFBClientAPI; Attachment: IAttachment; aTransactionIntf: Firebird.ITransaction); overload;
@@ -152,13 +152,19 @@ begin
   end;
 end;
 
-procedure TFB30Transaction.InternalCommit(Force: boolean);
+function TFB30Transaction.InternalCommit(Force: boolean): TTrCompletionState;
 begin
   with FFirebird30ClientAPI do
   begin
+    Result := trCommitted;
     FTransactionIntf.commit(StatusIntf);
-    if not Force and InErrorState then
+    if InErrorState then
+    begin
+      if Force then
+        Result := trCommitFailed
+      else
        IBDataBaseError;
+    end;
   end;
   SignalActivity;
   FreeHandle(Force);
@@ -174,13 +180,19 @@ begin
   SignalActivity;
 end;
 
-procedure TFB30Transaction.InternalRollback(Force: boolean);
+function TFB30Transaction.InternalRollback(Force: boolean): TTrCompletionState;
 begin
   with FFirebird30ClientAPI do
   begin
     FTransactionIntf.rollback(StatusIntf);
-    if not Force and InErrorState then
+    Result := trRolledback;
+    if InErrorState then
+    begin
+      if Force then
+        Result := trRollbackFailed
+      else
        IBDataBaseError;
+    end;
   end;
   SignalActivity;
   FreeHandle(Force);

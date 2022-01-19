@@ -54,6 +54,7 @@ type
   TTest02 = class(TFBUDRTestBase)
   private
     procedure DoQuery(Attachment: IAttachment);
+    procedure DoErrorProcs(Attachment: IAttachment);
   protected
     function GetTestID: AnsiString; override;
     function GetTestTitle: AnsiString; override;
@@ -92,6 +93,31 @@ begin
   end;
 end;
 
+procedure TTest02.DoErrorProcs(Attachment: IAttachment);
+var i: integer;
+    ErrorProc: TExternalProcedureWrapper;
+    Transaction: ITransaction;
+    Results: IProcedureResults;
+begin
+  UDRPlugin.Attachment := Attachment;
+  for i := 0 to 2 do
+  begin
+    writeln(OutFile,'Error Proc ',i);
+    ErrorProc := UDRPlugin.makeProcedure('MYERRORPROC','','fbudrtests!error_proc');
+    try
+      ErrorProc.InputParams[0].AsInteger := i;
+      Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
+      try
+        Results := ErrorProc.Execute(Transaction);
+      except on E:Exception do
+        writeln(OutFile,'Error Proc ',i,' returns with: ',E.Message);
+      end;
+    finally
+      ErrorProc.Free;
+    end;
+  end;
+end;
+
 function TTest02.GetTestID: AnsiString;
 begin
   Result := '02';
@@ -103,12 +129,15 @@ begin
 end;
 
 const
-  DDL: array [0..0] of Ansistring = ('create or alter procedure MyTestProc ('+
+  DDL: array [0..1] of Ansistring = ('create or alter procedure MyTestProc ('+
                                      'EMP_NO SMALLINT '+
-                                     ') returns (Salary Numeric(10,2), FullName VarChar(36)) as begin end'
+                                     ') returns (Salary Numeric(10,2), FullName VarChar(36)) as begin end',
+                                     'Create or Alter procedure MyErrorProc ('+
+                                       'ErrorCase Smallint) as begin end'
                                      );
 
-  CleanUpDDL: array [0..0] of Ansistring = ('Drop procedure MyTestProc'
+  CleanUpDDL: array [0..1] of Ansistring = ('Drop procedure MyTestProc',
+                                            'Drop procedure MyErrorProc'
                                             );
   {The test is run using the employee database. Note that a dummy version of the
    UDR Execute procedure must be declared in the database in order to generate the input
@@ -132,6 +161,7 @@ begin
       ApplyDDL(Attachment,CleanUpDDL);
     ApplyDDL(Attachment,DDL);
     DoQuery(Attachment);
+    DoErrorProcs(Attachment);
   finally
     ApplyDDL(Attachment,CleanUpDDL);
     Attachment.Disconnect;

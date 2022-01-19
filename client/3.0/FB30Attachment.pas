@@ -309,19 +309,19 @@ end;
 
 procedure TFB30Attachment.Disconnect(Force: boolean);
 begin
-  inherited Disconnect(Force);
   if IsConnected then
   begin
+    EndAllTransactions;
     if FOwnsAttachmentHandle then
     with FFirebird30ClientAPI do
     begin
-      EndAllTransactions;
       FAttachmentIntf.Detach(StatusIntf);
       if not Force and InErrorState then
         IBDataBaseError;
     end;
     AttachmentIntf := nil;
   end;
+  inherited Disconnect(Force);
 end;
 
 function TFB30Attachment.IsConnected: boolean;
@@ -365,10 +365,15 @@ procedure TFB30Attachment.ExecImmediate(transaction: ITransaction; sql: AnsiStri
 begin
   CheckHandle;
   with FFirebird30ClientAPI do
-  begin
+  try
     FAttachmentIntf.execute(StatusIntf,(transaction as TFB30Transaction).TransactionIntf,
                     Length(sql),PAnsiChar(sql),aSQLDialect,nil,nil,nil,nil);
     Check4DataBaseError;
+  finally
+    if JournalingActive and
+      ((joReadOnlyQueries in GetJournalOptions)  or
+      (joModifyQueries in GetJournalOptions)) then
+      ExecImmediateJnl(sql,transaction);
   end;
 end;
 

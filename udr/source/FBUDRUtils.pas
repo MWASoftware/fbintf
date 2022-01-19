@@ -558,6 +558,7 @@ begin
   inherited Create(aController);
   FContext := context;
   FirebirdAPI := TFB30ClientAPI.Create(context.getMaster);
+  aController.StartJournaling(self);
 end;
 
 function TFBUDRExternalContext.AsText: AnsiString;

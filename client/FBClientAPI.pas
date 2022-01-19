@@ -250,9 +250,10 @@ type
     IJournallingHook = interface
       ['{7d3e45e0-3628-416a-9e22-c20474825031}']
       procedure TransactionStart(Tr: ITransaction);
-      function TransactionEnd(TransactionID: integer; Action: TTransactionAction): boolean;
+      function TransactionEnd(TransactionID: integer; Completion: TTrCompletionState): boolean;
       procedure TransactionRetained(Tr: ITransaction; OldTransactionID: integer; Action: TTransactionAction);
       procedure ExecQuery(Stmt: IStatement);
+      procedure ExecImmediateJnl(sql: AnsiString; tr: ITransaction);
     end;
 
 implementation

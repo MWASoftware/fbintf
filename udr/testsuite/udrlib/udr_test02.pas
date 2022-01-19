@@ -93,6 +93,7 @@ procedure TMyErrorProc.Execute(context: IFBUDRExternalContext;
   ProcMetadata: IFBUDRProcMetadata; InputParams: IFBUDRInputParams;
   OutputData: IFBUDROutputData);
 var aResult: integer;
+    tr: ITransaction;
 begin
   with context do
   case InputParams.ByName('ErrorCase').AsInteger of
@@ -106,15 +107,15 @@ begin
     end;
 
   1:
-    {General Exception handling}
-    raise Exception.Create('You have a bug');
+    {limbo transaction}
+    begin
+      tr := GetAttachment.StartTransaction([isc_tpb_write, isc_tpb_nowait, isc_tpb_read_committed],taCommit);
+      GetAttachment.ExecuteSQL(tr,'Insert into EMPLOYEE(EMP_NO,LAST_NAME) Values (2,''No one'')',[]); {must fail duplicate key}
+    end;
 
   2:
-    {arithmetic exception - divide by zero}
-    begin
-      aResult := 0;
-      aResult := Round(100/aResult);
-    end;
+    {General Exception handling}
+    raise Exception.Create('You have a bug');
 
   end;
 end;

@@ -89,8 +89,8 @@ type
     procedure SetInterface(api: TFBClientAPI); override;
     procedure InternalStartSingle(attachment: IAttachment); override;
     procedure InternalStartMultiple; override;
-    procedure InternalCommit(Force: boolean); override;
-    procedure InternalRollback(Force: boolean); override;
+    function InternalCommit(Force: boolean): TTrCompletionState; override;
+    function InternalRollback(Force: boolean): TTrCompletionState; override;
     procedure InternalCommitRetaining; override;
     procedure InternalRollbackRetaining; override;
   public
@@ -174,17 +174,21 @@ begin
   end;
 end;
 
-procedure TFB25Transaction.InternalCommit(Force: boolean);
+function TFB25Transaction.InternalCommit(Force: boolean): TTrCompletionState;
 begin
+  Result := trCommitted;
   with FFirebird25ClientAPI do
-    Call(isc_commit_transaction(StatusVector, @FHandle),not Force);
+    if Call(isc_commit_transaction(StatusVector, @FHandle),not Force) > 0 then
+      Result := trCommitFailed;
   FHandle := nil;
 end;
 
-procedure TFB25Transaction.InternalRollback(Force: boolean);
+function TFB25Transaction.InternalRollback(Force: boolean): TTrCompletionState;
 begin
+  Result := trRolledback;
   with FFirebird25ClientAPI do
-    Call(isc_rollback_transaction(StatusVector, @FHandle),not Force);
+    if Call(isc_rollback_transaction(StatusVector, @FHandle),not Force) > 0 then
+      Result := trRollbackFailed;
   FHandle := nil;
 end;
 

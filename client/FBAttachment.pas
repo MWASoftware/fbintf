@@ -96,8 +96,10 @@ type
     const sQueryJournal          = '*Q:''%s'',%d,%d,%d,%d:%s' + LineEnding;
     const sTransStartJnl         = '*S:''%s'',%d,%d,%d,%d:%s,%d:%s,%d' + LineEnding;
     const sTransCommitJnl        = '*C:''%s'',%d,%d,%d' + LineEnding;
+    const sTransCommitFailJnl    = '*F:''%s'',%d,%d,%d' + LineEnding;
     const sTransCommitRetJnl     = '*c:''%s'',%d,%d,%d,%d' + LineEnding;
     const sTransRollBackJnl      = '*R:''%s'',%d,%d,%d' + LineEnding;
+    const sTransRollBackFailJnl  = '*f:''%s'',%d,%d,%d' + LineEnding;
     const sTransRollBackRetJnl   = '*r:''%s'',%d,%d,%d,%d' + LineEnding;
   private
     FOptions: TJournalOptions;
@@ -115,10 +117,11 @@ type
   public
     {IJournallingHook}
     procedure TransactionStart(Tr: ITransaction);
-    function TransactionEnd( TransactionID: integer; Action: TTransactionAction): boolean;
+    function TransactionEnd( TransactionID: integer; Completion: TTrCompletionState): boolean;
     procedure TransactionRetained(Tr: ITransaction; OldTransactionID: integer;
       Action: TTransactionAction);
     procedure ExecQuery(Stmt: IStatement);
+    procedure ExecImmediateJnl(sql: AnsiString; tr: ITransaction);
   public
     {Client side Journaling}
     function JournalingActive: boolean;
@@ -647,9 +650,9 @@ procedure TFBJournaling.TransactionStart(Tr: ITransaction);
 var LogEntry: AnsiString;
     TPBText: AnsiString;
 begin
-  FDoNotJournal := true;
   if not (joNoServerTable in FOptions) then
   try
+    FDoNotJournal := true;
     GetAttachment.ExecuteSQL(Tr,sqlRecordJournalEntry,[FSessionID,Tr.GetTransactionID,NULL]);
   finally
     FDoNotJournal := false;
@@ -668,22 +671,39 @@ begin
 end;
 
 function TFBJournaling.TransactionEnd(TransactionID: integer;
-  Action: TTransactionAction): boolean;
+  Completion: TTrCompletionState): boolean;
 
 var LogEntry: AnsiString;
 begin
   Result := false;
-    case Action of
-    TARollback:
+    case Completion of
+    trRolledback:
       begin
         LogEntry := Format(sTransRollbackJnl,[FBFormatDateTime(GetDateTimeFmt,Now),
                                               GetAttachment.GetAttachmentID,
                                               FSessionID,TransactionID]);
         Result := true;
       end;
-    TACommit:
+
+    trRollbackFailed:
+      begin
+        LogEntry := Format(sTransRollbackFailJnl,[FBFormatDateTime(GetDateTimeFmt,Now),
+                                              GetAttachment.GetAttachmentID,
+                                              FSessionID,TransactionID]);
+        Result := true;
+      end;
+
+    trCommitted:
       begin
         LogEntry := Format(sTransCommitJnl,[FBFormatDateTime(GetDateTimeFmt,Now),
+                                            GetAttachment.GetAttachmentID,
+                                            FSessionID,TransactionID]);
+        Result := true;
+      end;
+
+    trCommitFailed:
+      begin
+        LogEntry := Format(sTransCommitFailJnl,[FBFormatDateTime(GetDateTimeFmt,Now),
                                             GetAttachment.GetAttachmentID,
                                             FSessionID,TransactionID]);
         Result := true;
@@ -710,9 +730,9 @@ begin
     if assigned(FJournalFileStream) then
       FJournalFileStream.Write(LogEntry[1],Length(LogEntry));
 
-    FDoNotJournal := true;
     if not (joNoServerTable in FOptions) then
     try
+      FDoNotJournal := true;
       GetAttachment.ExecuteSQL(Tr,sqlRecordJournalEntry,[FSessionID,Tr.GetTransactionID,OldTransactionID]);
     finally
       FDoNotJournal := false;
@@ -729,6 +749,18 @@ begin
                                       FSessionID,
                                       Stmt.GetTransaction.GetTransactionID,
                                       Length(SQL),SQL]);
+  if assigned(FJournalFileStream) then
+    FJournalFileStream.Write(LogEntry[1],Length(LogEntry));
+end;
+
+procedure TFBJournaling.ExecImmediateJnl(sql: AnsiString; tr: ITransaction);
+var LogEntry: AnsiString;
+begin
+  LogEntry := Format(sQueryJournal,[FBFormatDateTime(GetDateTimeFmt,Now),
+                                      GetAttachment.GetAttachmentID,
+                                      FSessionID,
+                                      tr.GetTransactionID,
+                                      Length(sql),sql]);
   if assigned(FJournalFileStream) then
     FJournalFileStream.Write(LogEntry[1],Length(LogEntry));
 end;
@@ -1062,8 +1094,15 @@ end;
 
 procedure TFBAttachment.ExecImmediate(TPB: array of byte; sql: AnsiString;
   aSQLDialect: integer);
+var tr: ITransaction;
 begin
-  ExecImmediate(StartTransaction(TPB,taCommit),sql,aSQLDialect);
+  tr := StartTransaction(TPB,taCommit);
+  try
+    ExecImmediate(tr,sql,aSQLDialect);
+  except
+    tr.Rollback(true);
+    raise;
+  end;
 end;
 
 procedure TFBAttachment.ExecImmediate(transaction: ITransaction; sql: AnsiString);
@@ -1073,13 +1112,20 @@ end;
 
 procedure TFBAttachment.ExecImmediate(TPB: array of byte; sql: AnsiString);
 begin
-  ExecImmediate(StartTransaction(TPB,taCommit),sql,FSQLDialect);
+  ExecImmediate(TPB,sql,FSQLDialect);
 end;
 
 function TFBAttachment.ExecuteSQL(TPB: array of byte; sql: AnsiString;
   SQLDialect: integer; params: array of const): IResults;
+var tr: ITransaction;
 begin
-  Result := ExecuteSQL(StartTransaction(TPB,taCommit),sql,SQLDialect,params);
+  tr := StartTransaction(TPB,taCommit);
+  try
+    Result := ExecuteSQL(tr,sql,SQLDialect,params);
+  except
+    tr.Rollback(true);
+    raise;
+  end;
 end;
 
 function TFBAttachment.ExecuteSQL(transaction: ITransaction; sql: AnsiString;
@@ -1095,17 +1141,13 @@ end;
 function TFBAttachment.ExecuteSQL(TPB: array of byte; sql: AnsiString;
   params: array of const): IResults;
 begin
-   Result := ExecuteSQL(StartTransaction(TPB,taCommit),sql,params);
+   Result := ExecuteSQL(TPB,sql,FSQLDialect,params);
 end;
 
 function TFBAttachment.ExecuteSQL(transaction: ITransaction; sql: AnsiString;
   params: array of const): IResults;
 begin
-  with Prepare(transaction,sql,FSQLDialect) do
-  begin
-    SetParameters(SQLParams,params);
-    Result := Execute;
-  end;
+  Result := ExecuteSQL(transaction,sql,FSQLDialect,params);
 end;
 
 function TFBAttachment.OpenCursor(transaction: ITransaction; sql: AnsiString;
@@ -1198,16 +1240,21 @@ end;
 
 function TFBAttachment.OpenCursorAtStart(sql: AnsiString; Scrollable: boolean;
   params: array of const): IResultSet;
+var tr: ITransaction;
 begin
-  Result := OpenCursorAtStart(StartTransaction([isc_tpb_read,isc_tpb_wait,isc_tpb_concurrency],taCommit),sql,FSQLDialect,
-                   Scrollable,params);
+  tr := StartTransaction([isc_tpb_read,isc_tpb_wait,isc_tpb_concurrency],taCommit);
+  try
+    Result := OpenCursorAtStart(tr,sql,FSQLDialect,Scrollable,params);
+  except
+    tr.Rollback(true);
+    raise;
+  end;
 end;
 
 function TFBAttachment.OpenCursorAtStart(sql: AnsiString;
   params: array of const): IResultSet;
 begin
-  Result := OpenCursorAtStart(StartTransaction([isc_tpb_read,isc_tpb_wait,isc_tpb_concurrency],taCommit),sql,FSQLDialect,
-                   false,params);
+  Result := OpenCursorAtStart(sql,false,params);
 end;
 
 function TFBAttachment.Prepare(transaction: ITransaction; sql: AnsiString;
