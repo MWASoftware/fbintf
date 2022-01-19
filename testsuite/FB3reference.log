@@ -653,13 +653,13 @@ Running Test 3: ad hoc queries
 Opening inet://localhost/employee
 Database Open
 Employee Count = 42
-Transaction ID = 6221
+Transaction ID = 6262
 Transaction is Read/Write
 Transaction Database Path = inet://localhost/employee
-Transaction ID = 6221
-Oldest Interesting = 6219
-Oldest Action = 6220
-Oldest Snapshot = 6220
+Transaction ID = 6262
+Oldest Interesting = 6260
+Oldest Action = 6261
+Oldest Snapshot = 6261
 Oldest Interesting = 0
 Employee Count = 41
 Employee Count = 42
@@ -694,7 +694,7 @@ FULL_NAME = Johnson, Leslie
 Current memory = 19,694,784
 Delta memory = 4,480
 Max memory = 19,756,256
-Elapsed time= 0.003 sec
+Elapsed time= 0.002 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
@@ -2843,8 +2843,8 @@ Page Size = 8192
 Version = 1: LI-V6.3.5.33220 Firebird 3.0
 Database is Read/Write
 Database Created: 09/1/2020 13:13:45
-Pages Used = 301
-Pages Free = 6
+Pages Used = 300
+Pages Free = 7
 Server Memory = 18987232
 Forced Writes  = 1
 Max Memory  = 19024416
@@ -2900,13 +2900,16 @@ Async Wait Called
 Event Signalled
 First Event - usually ignored
 Signal Event
+Event Signalled
 Event Counts: TESTEVENT, Count = 1
 Two more events
 Call Async Wait
 Async Wait Called
 Event Signalled
-Signal Event
+Deferred Events Caught
 Event Counts: TESTEVENT, Count = 2
+Signal Event
+Event Counts: TESTEVENT, Count = 1
 Async Wait: Test Cancel
 Event Signalled
 Async Wait Called
@@ -2914,7 +2917,7 @@ Event Cancelled
 Time Out - Cancel Worked!
 Sync wait
 Event Signalled
-Event Counts: TESTEVENT, Count = 2
+Event Counts: TESTEVENT, Count = 0
 
 
 ------------------------------------------------------
@@ -3733,12 +3736,12 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 8
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2022/01/19 12:04:41.1460
+IBX$CREATED = 2022/01/19 12:09:44.7630
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 10
 IBX$OLDTRANSACTIONID = 9
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2022/01/19 12:04:41.4650
+IBX$CREATED = 2022/01/19 12:09:45.1190
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)

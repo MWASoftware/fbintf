@@ -10,7 +10,7 @@
         <EditorIndex Value="2"/>
         <TopLine Value="39"/>
         <CursorPos Y="52"/>
-        <UsageCount Value="28"/>
+        <UsageCount Value="30"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -19,7 +19,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="96"/>
         <CursorPos X="14" Y="106"/>
-        <UsageCount Value="28"/>
+        <UsageCount Value="30"/>
       </Unit>
       <Unit>
         <Filename Value="FBUDRTestApp.pas"/>
@@ -27,7 +27,7 @@
         <EditorIndex Value="4"/>
         <TopLine Value="81"/>
         <CursorPos X="47" Y="83"/>
-        <UsageCount Value="28"/>
+        <UsageCount Value="30"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -36,12 +36,12 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="94"/>
         <CursorPos X="23" Y="100"/>
-        <UsageCount Value="28"/>
+        <UsageCount Value="30"/>
       </Unit>
       <Unit>
         <Filename Value="udrlib/udr_test01.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="28"/>
+        <UsageCount Value="30"/>
       </Unit>
       <Unit>
         <Filename Value="Test02.pas"/>
@@ -49,7 +49,7 @@
         <EditorIndex Value="5"/>
         <TopLine Value="93"/>
         <CursorPos Y="111"/>
-        <UsageCount Value="28"/>
+        <UsageCount Value="30"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -58,13 +58,13 @@
         <EditorIndex Value="7"/>
         <TopLine Value="85"/>
         <CursorPos Y="103"/>
-        <UsageCount Value="28"/>
+        <UsageCount Value="30"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="udrlib/udr_test03.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="28"/>
+        <UsageCount Value="30"/>
       </Unit>
       <Unit>
         <Filename Value="Test03.pas"/>
@@ -72,7 +72,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="82"/>
         <CursorPos X="31" Y="95"/>
-        <UsageCount Value="28"/>
+        <UsageCount Value="30"/>
       </Unit>
       <Unit>
         <Filename Value="Test04.pas"/>
@@ -80,12 +80,12 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="64"/>
         <CursorPos Y="80"/>
-        <UsageCount Value="28"/>
+        <UsageCount Value="30"/>
       </Unit>
       <Unit>
         <Filename Value="udrlib/udr_test04.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="28"/>
+        <UsageCount Value="30"/>
       </Unit>
       <Unit>
         <Filename Value="../../IB.pas"/>
@@ -98,7 +98,7 @@
         <Filename Value="../../client/FBClientAPI.pas"/>
         <TopLine Value="242"/>
         <CursorPos X="33" Y="256"/>
-        <UsageCount Value="14"/>
+        <UsageCount Value="15"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -139,7 +139,7 @@
         <EditorIndex Value="13"/>
         <TopLine Value="2337"/>
         <CursorPos X="21" Y="2342"/>
-        <UsageCount Value="14"/>
+        <UsageCount Value="15"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -168,7 +168,7 @@
         <EditorIndex Value="6"/>
         <TopLine Value="390"/>
         <CursorPos Y="411"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="12"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -182,8 +182,8 @@
         <Filename Value="../../client/IB.pas"/>
         <EditorIndex Value="12"/>
         <TopLine Value="323"/>
-        <CursorPos Y="331"/>
-        <UsageCount Value="12"/>
+        <CursorPos X="113" Y="330"/>
+        <UsageCount Value="13"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -198,7 +198,7 @@
         <EditorIndex Value="3"/>
         <TopLine Value="276"/>
         <CursorPos Y="294"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="13"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -212,9 +212,9 @@
         <Filename Value="../../client/FBAttachment.pas"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="8"/>
-        <TopLine Value="953"/>
-        <CursorPos Y="958"/>
-        <UsageCount Value="11"/>
+        <TopLine Value="465"/>
+        <CursorPos X="12" Y="489"/>
+        <UsageCount Value="12"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -229,7 +229,7 @@
         <EditorIndex Value="11"/>
         <TopLine Value="421"/>
         <CursorPos Y="441"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="12"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -244,7 +244,7 @@
         <EditorIndex Value="10"/>
         <TopLine Value="819"/>
         <CursorPos Y="837"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="12"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -252,7 +252,7 @@
         <EditorIndex Value="9"/>
         <TopLine Value="175"/>
         <CursorPos Y="197"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="12"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -260,31 +260,11 @@
         <EditorIndex Value="1"/>
         <TopLine Value="356"/>
         <CursorPos Y="373"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="12"/>
         <Loaded Value="True"/>
       </Unit>
     </Units>
     <JumpHistory HistoryIndex="29">
-      <Position>
-        <Filename Value="../../client/FBAttachment.pas"/>
-        <Caret Line="658" Column="18" TopLine="636"/>
-      </Position>
-      <Position>
-        <Filename Value="../../client/FBAttachment.pas"/>
-        <Caret Line="736" TopLine="711"/>
-      </Position>
-      <Position>
-        <Filename Value="../../client/FBAttachment.pas"/>
-        <Caret Line="738" Column="20" TopLine="716"/>
-      </Position>
-      <Position>
-        <Filename Value="../../client/FBAttachment.pas"/>
-        <Caret Line="770" Column="62" TopLine="770"/>
-      </Position>
-      <Position>
-        <Filename Value="../../client/FBAttachment.pas"/>
-        <Caret Line="186" Column="15" TopLine="174"/>
-      </Position>
       <Position>
         <Filename Value="../../client/FBAttachment.pas"/>
         <Caret Line="1115" Column="3" TopLine="1111"/>
@@ -384,6 +364,26 @@
         <Filename Value="../../client/FBAttachment.pas"/>
         <Caret Line="166" Column="15" TopLine="154"/>
       </Position>
+      <Position>
+        <Filename Value="../../client/FBAttachment.pas"/>
+        <Caret Line="958" TopLine="953"/>
+      </Position>
+      <Position>
+        <Filename Value="../../client/FBAttachment.pas"/>
+        <Caret Line="964" TopLine="953"/>
+      </Position>
+      <Position>
+        <Filename Value="../../client/FBAttachment.pas"/>
+        <Caret Line="958" TopLine="953"/>
+      </Position>
+      <Position>
+        <Filename Value="../../client/FBAttachment.pas"/>
+        <Caret Line="964" TopLine="953"/>
+      </Position>
+      <Position>
+        <Filename Value="../../client/FBAttachment.pas"/>
+        <Caret Line="958" TopLine="953"/>
+      </Position>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
@@ -412,22 +412,4 @@
       <List Name="WorkingDirectory" Type="File" Count="1"/>
     </HistoryLists>
   </ProjectSession>
-  <Debugging>
-    <BreakPoints>
-      <Item>
-        <Kind Value="bpkSource"/>
-        <WatchScope Value="wpsLocal"/>
-        <WatchKind Value="wpkWrite"/>
-        <Source Value="udrlib/udr_test02.pas"/>
-        <Line Value="103"/>
-      </Item>
-      <Item>
-        <Kind Value="bpkSource"/>
-        <WatchScope Value="wpsLocal"/>
-        <WatchKind Value="wpkWrite"/>
-        <Source Value="../../client/FBAttachment.pas"/>
-        <Line Value="958"/>
-      </Item>
-    </BreakPoints>
-  </Debugging>
 </CONFIG>
