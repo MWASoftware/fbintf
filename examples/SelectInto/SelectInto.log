@@ -1,6 +1,6 @@
-@20/01/2022 23:26:34.6350:Registering Procedure select_into
-@20/01/2022 23:26:34.6790:Setup Procedure select_into
-@20/01/2022 23:26:34.6790:Routine Metadata
+@20-1-22 22:52:46.5050:Registering Procedure select_into
+@20-1-22 22:52:46.5290:Setup Procedure select_into
+@20-1-22 22:52:46.5300:Routine Metadata
 Package Name = 
   Name = SELECT_INTO
   Entry Point = selectinto!select_into (selectinto,select_into,)
@@ -63,15 +63,15 @@ Output Metadata:
   Null Offset = 102
   Message Length = 100
   
-@20/01/2022 23:26:34.6930:Open Execute Procedure select_into
-@20/01/2022 23:26:34.6940:External Context: 
-  Attachment ID = 268
-  Transaction ID = 1334
+@20-1-22 22:52:46.5430:Open Execute Procedure select_into
+@20-1-22 22:52:46.5440:External Context: 
+  Attachment ID = 3594
+  Transaction ID = 10661
   User Name = SYSDBA
   Database Name = employee
   Client Character Set = UTF8
   
-@20/01/2022 23:26:34.6940:Input Parameters
+@20-1-22 22:52:46.5440:Input Parameters
 Parameter 0:
   Field Name = SELECT_STATEMENT
   Alias Name = SELECT_STATEMENT
@@ -103,7 +103,7 @@ Parameter 2:
   Size = 25
   Value = 
 
-@20/01/2022 23:26:34.6940:Output Parameters
+@20-1-22 22:52:46.5440:Output Parameters
 Column 0
   Field Name = STATUS
   SQLType = SQL_VARYING
@@ -114,10 +114,10 @@ Column 0
   Size = 100
   Value = NULL
 
-*S:'20/01/2022 23:26:34.7200',268,0,1338,0:,53:[isc_tpb_write,isc_tpb_nowait,isc_tpb_read_committed],1
-*C:'20/01/2022 23:26:34.7480',268,0,1338
-@20/01/2022 23:26:34.7500:Procedure select_into: dispose called with refcount = 2
-@20/01/2022 23:26:34.7500:Output Parameters with data
+*S:'20-1-22 22:52:46.5630',3594,0,10665,0:,53:[isc_tpb_write,isc_tpb_nowait,isc_tpb_read_committed],1
+*C:'20-1-22 22:52:47.0460',3594,0,10665
+@20-1-22 22:52:47.0500:Procedure select_into: dispose called with refcount = 2
+@20-1-22 22:52:47.0500:Output Parameters with data
 Column 0
   Field Name = STATUS
   SQLType = SQL_VARYING
@@ -128,4 +128,4 @@ Column 0
   Size = 100
   Value = ok
 
-@20/01/2022 23:26:35.0740:Procedure select_into: dispose called with refcount = 1
+@20-1-22 22:52:47.1630:Procedure select_into: dispose called with refcount = 1
