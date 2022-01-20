@@ -1123,7 +1123,6 @@ begin
   tr := StartTransaction(TPB,taCommit);
   try
     Result := ExecuteSQL(tr,sql,SQLDialect,params);
-    tr.Commit;
   except
     tr.Rollback(true);
     raise;
