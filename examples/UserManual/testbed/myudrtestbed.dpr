@@ -5,7 +5,7 @@ program myudrtestbed;
 {$R *.res}
 
 uses
-  Classes,
+  System.Classes,
   FBUDRController,
   FBUdrPlugin,
   IB,
