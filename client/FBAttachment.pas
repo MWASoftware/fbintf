@@ -1247,7 +1247,6 @@ begin
   tr := StartTransaction([isc_tpb_read,isc_tpb_wait,isc_tpb_concurrency],taCommit);
   try
     Result := OpenCursorAtStart(tr,sql,FSQLDialect,Scrollable,params);
-    tr.Commit;
   except
     tr.Rollback(true);
     raise;

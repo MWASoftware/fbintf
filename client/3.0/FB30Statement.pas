@@ -1749,6 +1749,7 @@ begin
           IBError(ibxeEOF,[nil]);
         { Go to the next record... }
         fetchResult := FResultSet.fetchNext(StatusIntf,FSQLRecord.MessageBuffer);
+        Check4DataBaseError;
         if fetchResult = Firebird.IStatus.RESULT_NO_DATA then
         begin
           FBOF := false;
@@ -1763,6 +1764,7 @@ begin
           IBError(ibxeBOF,[nil]);
         { Go to the next record... }
         fetchResult := FResultSet.fetchPrior(StatusIntf,FSQLRecord.MessageBuffer);
+        Check4DataBaseError;
         if fetchResult = Firebird.IStatus.RESULT_NO_DATA then
         begin
           FBOF := true;
@@ -1772,19 +1774,30 @@ begin
       end;
 
     ftFirst:
-      fetchResult := FResultSet.fetchFirst(StatusIntf,FSQLRecord.MessageBuffer);
+      begin
+        fetchResult := FResultSet.fetchFirst(StatusIntf,FSQLRecord.MessageBuffer);
+        Check4DataBaseError;
+      end;
 
     ftLast:
-      fetchResult := FResultSet.fetchLast(StatusIntf,FSQLRecord.MessageBuffer);
+      begin
+        fetchResult := FResultSet.fetchLast(StatusIntf,FSQLRecord.MessageBuffer);
+        Check4DataBaseError;
+      end;
 
     ftAbsolute:
-      fetchResult := FResultSet.fetchAbsolute(StatusIntf,PosOrOffset,FSQLRecord.MessageBuffer);
+      begin
+        fetchResult := FResultSet.fetchAbsolute(StatusIntf,PosOrOffset,FSQLRecord.MessageBuffer);
+        Check4DataBaseError;
+      end;
 
     ftRelative:
-      fetchResult := FResultSet.fetchRelative(StatusIntf,PosOrOffset,FSQLRecord.MessageBuffer);
+      begin
+        fetchResult := FResultSet.fetchRelative(StatusIntf,PosOrOffset,FSQLRecord.MessageBuffer);
+        Check4DataBaseError;
+      end;
     end;
 
-    Check4DataBaseError;
     if fetchResult <> Firebird.IStatus.RESULT_OK then
       exit; {result = false}
 

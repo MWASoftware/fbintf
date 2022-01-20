@@ -2223,7 +2223,11 @@ begin
     StatusVector[4] := isc_arg_end;
     astatus.setErrors(@StatusVector);
   end;
-  WriteToLog(SExceptionRaised + LineEnding + E.Message);
+  try
+    WriteToLog(SExceptionRaised + LineEnding + E.Message);
+  except
+    //ignore
+  end;
 end;
 
 procedure TFBUDRController.WriteToLog(Msg: AnsiString);
