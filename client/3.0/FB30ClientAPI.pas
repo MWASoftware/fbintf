@@ -25,8 +25,8 @@
  *
 *)
 unit FB30ClientAPI;
-{$IFDEF MSWINDOWS} 
-{$DEFINE WINDOWS} 
+{$IFDEF MSWINDOWS}
+{$DEFINE WINDOWS}
 {$ENDIF}
 
 {$IFDEF FPC}
@@ -41,12 +41,12 @@ uses
   FBActivityMonitor;
 
 type
-
   { TFB30Status }
 
   TFB30Status = class(TFBStatus,IStatus)
   protected
     FStatus: Firebird.IStatus;
+    FCloned: boolean;
     FDirty: boolean;
     function GetIBMessage: Ansistring; override;
   public
@@ -80,7 +80,11 @@ type
     FUtil: Firebird.IUtil;
     FProvider: Firebird.IProvider;
     FConfigManager: Firebird.IConfigManager;
+    FStatus: TFB30Status;
     FIsEmbeddedServer: boolean;
+    FStatusIntf: IStatus;   {Keep a reference to the interface - automatic destroy
+                             when this class is freed and last reference to IStatus
+                             goes out of scope.}
     procedure CheckPlugins;
   public
     constructor Create(aFBLibrary: TFBLibrary); overload;
@@ -189,6 +193,44 @@ type
   PISC_DATE = ^ISC_DATE;
   PISC_TIME = ^ISC_TIME;
 
+  {Allows the Firebird IStatus to be used as a Pascal Interface}
+  IFirebirdIStatus = interface
+    ['{7155f128-c094-4c8c-9968-c0683aaf479c}']
+    function StatusIntf: Firebird.IStatus;
+  end;
+
+  { TFirebirdIStatus }
+
+  TFirebirdIStatus = class(TInterfacedObject, IFirebirdIStatus)
+  private
+    FStatusIntf: Firebird.IStatus;
+  public
+    constructor Create(MasterIntf: Firebird.IMaster);
+    destructor Destroy; override;
+  public
+    function StatusIntf: Firebird.IStatus;
+  end;
+
+{ TFirebirdIStatus }
+
+constructor TFirebirdIStatus.Create(MasterIntf: Firebird.IMaster);
+begin
+  inherited Create;
+  FStatusIntf := MasterIntf.getStatus();
+end;
+
+destructor TFirebirdIStatus.Destroy;
+begin
+  if FStatusIntf <> nil then
+    FStatusIntf.dispose;
+  inherited Destroy;
+end;
+
+function TFirebirdIStatus.StatusIntf: Firebird.IStatus;
+begin
+  Result := FStatusIntf;
+end;
+
 { TXPBParameterBlock }
 
 constructor TXPBParameterBlock.Create(api: TFB30ClientAPI; kind: cardinal);
@@ -262,6 +304,10 @@ begin
   FStatus := status.clone;
 end;
 
+threadvar
+  PerThreadFirebirdStatusIntf: IFirebirdIStatus;
+  StatusIntfRefCount: integer;
+
 { TFB30Status }
 
 function TFB30Status.GetIBMessage: Ansistring;
@@ -286,6 +332,7 @@ var aResult: TFB30Status;
 begin
   aResult := TFB30Status.Create(nil);
   aResult.Assign(self);
+  aResult.FCloned := true;
   Result := aResult;
 end;
 
@@ -302,7 +349,14 @@ procedure TFB30Status.FreeHandle;
 begin
   if FStatus <> nil then
   begin
-    FStatus.dispose;
+    if FCloned then
+      FStatus.dispose
+    else
+    begin
+      Dec(StatusIntfRefCount);
+      if StatusIntfRefCount = 0 then
+        PerThreadFirebirdStatusIntf := nil;
+    end;
     FStatus := nil;
   end;
 end;
@@ -326,8 +380,16 @@ end;
 function TFB30Status.GetStatus: Firebird.IStatus;
 begin
   if FStatus = nil then
-    with FOwner do
-      FStatus := (FOwner as TFB30ClientAPI).MasterIntf.GetStatus;
+  begin
+    {Create the FStatus per thread}
+    if PerThreadFirebirdStatusIntf = nil then
+    begin
+      with FOwner do
+        PerThreadFirebirdStatusIntf :=  TFirebirdIStatus.Create((FOwner as TFB30ClientAPI).GetIMasterIntf);
+    end;
+    Inc(StatusIntfRefCount);
+    FStatus := PerThreadFirebirdStatusIntf.StatusIntf;
+  end;
   Result := FStatus;
 end;
 
@@ -337,10 +399,6 @@ begin
 end;
 
 { TFB30ClientAPI }
-
-threadvar
-  ThreadStatusIntf: IStatus; {a separate copy is needed per thread}
-  StatusIntfRefCount: integer;
 
 procedure TFB30ClientAPI.CheckPlugins;
 var FBConf: Firebird.IFirebirdConf;
@@ -406,7 +464,7 @@ procedure TFB30ClientAPI.FBShutdown;
 begin
   if assigned(fb_shutdown) then
   begin
-    ThreadStatusIntf := nil;
+    FStatus.FreeHandle;
     if assigned(FProvider) then
     begin
       FProvider.release;
@@ -424,22 +482,16 @@ end;
 constructor TFB30ClientAPI.Create(aFBLibrary: TFBLibrary);
 begin
   inherited Create(aFBLibrary);
-  if ThreadStatusIntf = nil then
-  begin
-    ThreadStatusIntf := TFB30Status.Create(self);
-    Inc(StatusIntfRefCount);
-  end;
+  FStatus := TFB30Status.Create(self);
+  FStatusIntf := FStatus;
 end;
 
 constructor TFB30ClientAPI.Create(aMaster: Firebird.IMaster);
 begin
   inherited Create(nil);
   FMaster := aMaster;
-  if ThreadStatusIntf = nil then
-  begin
-    ThreadStatusIntf := TFB30Status.Create(self);
-    Inc(StatusIntfRefCount);
-  end;
+  FStatus := TFB30Status.Create(self);
+  FStatusIntf := FStatus;
   if FMaster <> nil then
   begin
     FUtil := FMaster.getUtilInterface;
@@ -451,9 +503,7 @@ end;
 
 destructor TFB30ClientAPI.Destroy;
 begin
-  Dec(StatusIntfRefCount);
-  if StatusIntfRefCount = 0 then {last one out}
-    ThreadStatusIntf := nil;
+  FStatus.FreeHandle;
   if assigned(FProvider) then
     FProvider.release;
   inherited Destroy;
@@ -461,13 +511,13 @@ end;
 
 function TFB30ClientAPI.StatusIntf: Firebird.IStatus;
 begin
-  Result := (ThreadStatusIntf as TFB30Status).GetStatus;
+  Result := FStatus.GetStatus;
   Result.Init;
 end;
 
 procedure TFB30ClientAPI.Check4DataBaseError;
 begin
-  if (ThreadStatusIntf as TFB30Status).InErrorState then
+  if FStatus.InErrorState then
     IBDataBaseError;
 end;
 
@@ -487,12 +537,12 @@ end;
 
 function TFB30ClientAPI.InErrorState: boolean;
 begin
-  Result := (ThreadStatusIntf as TFB30Status).InErrorState;
+  Result := FStatus.InErrorState;
 end;
 
 function TFB30ClientAPI.GetStatus: IStatus;
 begin
-  Result := ThreadStatusIntf;
+  Result := FStatusIntf;
 end;
 
 function TFB30ClientAPI.AllocateDPB: IDPB;
@@ -846,8 +896,9 @@ begin
 end;
 
 initialization
-  ThreadStatusIntf := nil;
+  PerThreadFirebirdStatusIntf := nil;
   StatusIntfRefCount := 0;
 end.
+
 
 
