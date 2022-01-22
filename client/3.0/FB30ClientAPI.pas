@@ -50,7 +50,7 @@ type
     function GetIBMessage: Ansistring; override;
   public
     constructor Create(aOwner: TFBClientAPI; prefix: AnsiString=''); overload;
-    constructor Create(aOwner: TFBClientAPI; aStatus: Firebird.IStatus);
+    constructor Create(aOwner: TFBClientAPI; aStatus: Firebird.IStatus); overload;
     constructor Copy(src: TFB30Status);
     destructor Destroy; override;
     function Clone: IStatus; override;

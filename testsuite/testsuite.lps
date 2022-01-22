@@ -275,9 +275,10 @@
       </Unit32>
       <Unit33>
         <Filename Value="../client/3.0/FB30ClientAPI.pas"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="9"/>
-        <TopLine Value="486"/>
-        <CursorPos X="33" Y="504"/>
+        <TopLine Value="49"/>
+        <CursorPos X="83" Y="53"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
@@ -304,10 +305,9 @@
       </Unit35>
       <Unit36>
         <Filename Value="../client/FBAttachment.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="5"/>
         <TopLine Value="1118"/>
-        <CursorPos X="24" Y="1126"/>
+        <CursorPos X="21" Y="1140"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
