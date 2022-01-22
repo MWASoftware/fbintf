@@ -84,6 +84,7 @@ type
   public
     function Clone: IStatus; override;
     function StatusVector: PStatusVector; override;
+    function InErrorState: boolean; override;
   end;
 
   { TFB25ClientAPI }
@@ -347,16 +348,18 @@ begin
 end;
 
 function TFB25Status.Clone: IStatus;
-var aResult: TFB25Status;
 begin
-  aResult := TFB25Status.Create(nil);
-  aResult.Assign(self);
-  Result := aResult;
+  Result := TFB25Status.Copy(self);
 end;
 
 function TFB25Status.StatusVector: PStatusVector;
 begin
   Result := @FStatusVector;
+end;
+
+function TFB25Status.InErrorState: boolean;
+begin
+  Result := StatusVector^[0] > 0;
 end;
 
 

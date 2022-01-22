@@ -126,11 +126,12 @@ type
     function GetSQLMessage: Ansistring;
   public
     constructor Create(aOwner: TFBClientAPI; prefix: AnsiString='');
+    constructor Copy(src: TFBStatus);
     function StatusVector: PStatusVector; virtual; abstract;
-    procedure Assign(src: TFBStatus); virtual;
     function Clone: IStatus; virtual; abstract;
 
     {IStatus}
+    function InErrorState: boolean; virtual; abstract;
     function GetIBErrorCode: TStatusCode;
     function Getsqlcode: TStatusCode;
     function GetMessage: AnsiString;
@@ -640,8 +641,9 @@ begin
   FIBDataBaseErrorMessages := [ShowIBMessage];
 end;
 
-procedure TFBStatus.Assign(src: TFBStatus);
+constructor TFBStatus.Copy(src: TFBStatus);
 begin
+  inherited Create;
   FOwner := src.FOwner;
   FPrefix := src.FPrefix;
   SetIBDataBaseErrorMessages(src.GetIBDataBaseErrorMessages);

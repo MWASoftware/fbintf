@@ -322,6 +322,7 @@ type
 
   IStatus = interface
     ['{34167722-af38-4831-b08a-93162d58ede3}']
+    function InErrorState: boolean;
     function GetIBErrorCode: TStatusCode;
     function Getsqlcode: TStatusCode;
     function GetMessage: AnsiString;
