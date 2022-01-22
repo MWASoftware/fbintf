@@ -193,44 +193,6 @@ type
   PISC_DATE = ^ISC_DATE;
   PISC_TIME = ^ISC_TIME;
 
-  {Allows the Firebird IStatus to be used as a Pascal Interface}
-  IFirebirdIStatus = interface
-    ['{7155f128-c094-4c8c-9968-c0683aaf479c}']
-    function StatusIntf: Firebird.IStatus;
-  end;
-
-  { TFirebirdIStatus }
-
-  TFirebirdIStatus = class(TInterfacedObject, IFirebirdIStatus)
-  private
-    FStatusIntf: Firebird.IStatus;
-  public
-    constructor Create(MasterIntf: Firebird.IMaster);
-    destructor Destroy; override;
-  public
-    function StatusIntf: Firebird.IStatus;
-  end;
-
-{ TFirebirdIStatus }
-
-constructor TFirebirdIStatus.Create(MasterIntf: Firebird.IMaster);
-begin
-  inherited Create;
-  FStatusIntf := MasterIntf.getStatus();
-end;
-
-destructor TFirebirdIStatus.Destroy;
-begin
-  if FStatusIntf <> nil then
-    FStatusIntf.dispose;
-  inherited Destroy;
-end;
-
-function TFirebirdIStatus.StatusIntf: Firebird.IStatus;
-begin
-  Result := FStatusIntf;
-end;
-
 { TXPBParameterBlock }
 
 constructor TXPBParameterBlock.Create(api: TFB30ClientAPI; kind: cardinal);
@@ -305,7 +267,7 @@ begin
 end;
 
 threadvar
-  PerThreadFirebirdStatusIntf: IFirebirdIStatus;
+  PerThreadFirebirdStatusIntf: Firebird.IStatus;
   StatusIntfRefCount: integer;
 
 { TFB30Status }
@@ -355,7 +317,10 @@ begin
     begin
       Dec(StatusIntfRefCount);
       if StatusIntfRefCount = 0 then
+      begin
+        PerThreadFirebirdStatusIntf.dispose();
         PerThreadFirebirdStatusIntf := nil;
+      end;
     end;
     FStatus := nil;
   end;
@@ -385,10 +350,10 @@ begin
     if PerThreadFirebirdStatusIntf = nil then
     begin
       with FOwner do
-        PerThreadFirebirdStatusIntf :=  TFirebirdIStatus.Create((FOwner as TFB30ClientAPI).GetIMasterIntf);
+        PerThreadFirebirdStatusIntf :=  (FOwner as TFB30ClientAPI).GetIMasterIntf.getStatus();
     end;
     Inc(StatusIntfRefCount);
-    FStatus := PerThreadFirebirdStatusIntf.StatusIntf;
+    FStatus := PerThreadFirebirdStatusIntf;
   end;
   Result := FStatus;
 end;
