@@ -134,9 +134,9 @@ uses
 const
   {Interface version information}
   FBIntf_Major = 1;
-  FBIntf_Minor = 3;
-  FBIntf_Release = 3;
-  FBIntf_Version = '1.3.3';
+  FBIntf_Minor = 4;
+  FBIntf_Release = 0;
+  FBIntf_Version = '1.4.0';
 
 const
   {DPB, TPB and SPB Parameter Block Name Prefixes}
@@ -248,6 +248,23 @@ type
   ITransaction = interface;
   IStatement = interface;
 
+  {The IFBNumeric interface provides a managed type for Fixed Point integers
+   used to hold Firebird Numeric(m,n) types}
+
+  IFBNumeric = interface
+    ['{8bdccfe9-d552-446b-bd82-844ca264455d}']
+    function getRawValue: Int64;
+    function getScale: integer;
+    function AdjustScaleTo(aNewScale: integer): IFBNumeric;
+    function getAsString: AnsiString;
+    function getAsDouble: double;
+    function getAsBCD: TBCD;
+    function getAsInt64: Int64; {scaled}
+    function getAsInteger: integer; {scaled - may be truncated}
+    function getAsSmallInt: SmallInt; {scaled - may be truncated}
+    function getAsCurrency: Currency;
+  end;
+
   {The IParameterBlock interface provides the template for all parameter
    block interfaces}
 
@@ -305,11 +322,13 @@ type
 
   IStatus = interface
     ['{34167722-af38-4831-b08a-93162d58ede3}']
+    function InErrorState: boolean;
     function GetIBErrorCode: TStatusCode;
     function Getsqlcode: TStatusCode;
     function GetMessage: AnsiString;
     function CheckStatusVector(ErrorCodes: array of TFBStatusCode): Boolean;
     function GetIBDataBaseErrorMessages: TIBDataBaseErrorMessages;
+    function Clone: IStatus;
     procedure SetIBDataBaseErrorMessages(Value: TIBDataBaseErrorMessages);
   end;
 
@@ -500,6 +519,7 @@ type
     function GetDateTimeStrLength(DateTimeFormat: TIBDateTimeFormats): integer;
     function GetStatement: IStatement;
     function GetTransaction: ITransaction;
+    function GetAttachment: IAttachment;
     property Name: AnsiString read GetName;
     property Size: cardinal read GetSize;
     property SQLType: cardinal read GetSQLType;
@@ -566,6 +586,7 @@ type
     function GetAsBlob(BPB: IBPB): IBlob; overload;
     function GetAsArray: IArray;
     function GetAsBCD: tBCD;
+    function GetAsNumeric: IFBNumeric;
     property AsDate: TDateTime read GetAsDateTime;
     property AsBoolean:boolean read GetAsBoolean;
     property AsTime: TDateTime read GetAsDateTime;
@@ -584,6 +605,7 @@ type
     property AsBlob: IBlob read GetAsBlob;
     property AsArray: IArray read GetAsArray;
     property AsBCD: tBCD read GetAsBCD;
+    property AsNumeric: IFBNumeric read GetAsNumeric;
     property IsNull: Boolean read GetIsNull;
     property Value: Variant read GetAsVariant;
   end;
@@ -599,6 +621,7 @@ type
    function getCount: integer;
    function GetStatement: IStatement;
    function GetTransaction: ITransaction;
+   function GetAttachment: IAttachment;
    function ByName(Idx: AnsiString): ISQLData;
    function getSQLData(index: integer): ISQLData;
    procedure GetData(index: integer; var IsNull:boolean; var len: short; var data: PByte);
@@ -660,6 +683,9 @@ type
   ISQLParam = interface(IParamMetaData)
     ['{b22b4578-6d41-4807-a9a9-d2ec8d1d5a14}']
     function getColMetadata: IParamMetaData;
+    function GetStatement: IStatement;
+    function GetTransaction: ITransaction;
+    function GetAttachment: IAttachment;
     function GetIndex: integer;
     function getName: AnsiString;
     function GetAsBoolean: boolean;
@@ -685,8 +711,7 @@ type
     function GetAsBlob: IBlob;
     function GetAsArray: IArray;
     function GetAsBCD: tBCD;
-    function GetStatement: IStatement;
-    function GetTransaction: ITransaction;
+    function GetAsNumeric: IFBNumeric;
     procedure Clear;
     function GetModified: boolean;
     procedure SetAsBoolean(AValue: boolean);
@@ -715,6 +740,7 @@ type
     procedure SetAsQuad(aValue: TISC_QUAD);
     procedure SetCharSetID(aValue: cardinal);
     procedure SetAsBcd(aValue: tBCD);
+    procedure SetAsNumeric(Value: IFBNumeric);
     property AsDate: TDateTime read GetAsDateTime write SetAsDate;
     property AsBoolean:boolean read GetAsBoolean write SetAsBoolean;
     property AsTime: TDateTime read GetAsDateTime write SetAsTime;
@@ -732,6 +758,7 @@ type
     property AsBlob: IBlob read GetAsBlob write SetAsBlob;
     property AsArray: IArray read GetAsArray write SetAsArray;
     property AsBCD: tBCD read GetAsBCD write SetAsBCD;
+    property AsNumeric: IFBNumeric read GetAsNumeric write SetAsNumeric;
     property AsQuad: TISC_QUAD read GetAsQuad write SetAsQuad;
     property Value: Variant read GetAsVariant write SetAsVariant;
     property IsNull: Boolean read GetIsNull write SetIsNull;
@@ -752,6 +779,10 @@ type
     function ByName(Idx: AnsiString): ISQLParam ;
     function GetModified: Boolean;
     function GetHasCaseSensitiveParams: Boolean;
+    function GetStatement: IStatement;
+    function GetTransaction: ITransaction;
+    function GetAttachment: IAttachment;
+    procedure Clear;
     property Modified: Boolean read GetModified;
     property Params[index: integer]: ISQLParam read getSQLParam; default;
     property Count: integer read getCount;
@@ -859,11 +890,11 @@ type
 
   ITPBItem = interface(IParameterBlockItemWithTypeName)
     ['{544c1f2b-7c12-4a87-a4a5-face7ea72671}']
-    function getParamTypeName: AnsiString;
   end;
 
   ITPB = interface(IParameterBlockWithTypeNames<ITPBItem>)
     ['{7369b0ff-defe-437b-81fe-19b211d42d25}']
+    function AsText: AnsiString;
   end;
 
   {The ITransactionAction interface provides access to a Transaction once it
@@ -876,6 +907,8 @@ type
 
   TTransactionAction  = (TARollback, TACommit, TACommitRetaining, TARollbackRetaining);
   TTransactionCompletion = TARollback.. TACommit;
+  TTrCompletionState = (trCommitted, trRolledback, trCommitFailed, trRollbackFailed);
+
 
   ITransaction = interface
     ['{30928d0e-a9d7-4c61-b7cf-14f4f38abe2a}']
@@ -884,17 +917,22 @@ type
     function GetInTransaction: boolean;
     function GetIsReadOnly: boolean;
     function GetTransactionID: integer;
+    function GetJournalingActive(attachment: IAttachment): boolean;
+    function GetDefaultCompletion: TTransactionCompletion;
     procedure PrepareForCommit; {Two phase commit - stage 1}
-    procedure Commit(Force: boolean=false);
+    function Commit(Force: boolean=false): TTrCompletionState;
     procedure CommitRetaining;
     function HasActivity: boolean;
-    procedure Rollback(Force: boolean=false);
+    function Rollback(Force: boolean=false): TTrCompletionState;
     procedure RollbackRetaining;
     function GetAttachmentCount: integer;
     function GetAttachment(index: integer): IAttachment;
     function GetTrInformation(Requests: array of byte): ITrInformation; overload;
     function GetTrInformation(Request: byte): ITrInformation; overload;
+    function GetTransactionName: AnsiString;
+    procedure SetTransactionName(aValue: AnsiString);
     property InTransaction: boolean read GetInTransaction;
+    property TransactionName: AnsiString read GetTransactionName write SetTransactionName;
   end;
 
   { The IEvents Interface is used to handle events from a single database. The
@@ -924,7 +962,7 @@ type
     ['{6a0be233-ed08-4524-889c-2e45d0c20e5f}']
     procedure GetEvents(EventNames: TStrings);
     procedure SetEvents(EventNames: TStrings); overload;
-    procedure SetEvents(EventName: AnsiString); overload;
+    procedure SetEvents(EventName: string); overload;
     procedure Cancel;
     function ExtractEventCounts: TEventCounts;
     procedure WaitForEvent;
@@ -1057,6 +1095,13 @@ type
      ['{e676067b-1cf4-4eba-9256-9724f57e0d16}']
    end;
 
+   {Journaling options. Default is [joReadWriteTransactions,joModifyQueries] }
+
+   TJournalOption = (joReadOnlyTransactions, joReadWriteTransactions,
+                     joModifyQueries, joReadOnlyQueries,joNoServerTable);
+
+   TJournalOptions = set of TJournalOption;
+
   {The IAttachment interface provides access to a Database Connection. It may be
    used to:
 
@@ -1094,8 +1139,12 @@ type
     procedure Disconnect(Force: boolean=false);
     function IsConnected: boolean;
     procedure DropDatabase;
-    function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion=taCommit): ITransaction; overload;
-    function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionCompletion=taCommit): ITransaction; overload;
+    function StartTransaction(TPB: array of byte;
+                              DefaultCompletion: TTransactionCompletion=taCommit;
+                              aName: AnsiString=''): ITransaction; overload;
+    function StartTransaction(TPB: ITPB;
+                              DefaultCompletion: TTransactionCompletion=taCommit;
+                              aName: AnsiString=''): ITransaction; overload;
     procedure ExecImmediate(transaction: ITransaction; sql: AnsiString; SQLDialect: integer); overload;
     procedure ExecImmediate(TPB: array of byte; sql: AnsiString; SQLDialect: integer); overload;
     procedure ExecImmediate(transaction: ITransaction; sql: AnsiString); overload;
@@ -1183,8 +1232,12 @@ type
     function HasDecFloatSupport: boolean;
     function HasBatchMode: boolean;
     function HasScollableCursors: boolean;
+    function HasTable(aTableName: AnsiString): boolean;  {case sensitive}
+    function HasFunction(aFunctionName: AnsiString): boolean; {case sensitive}
+    function HasProcedure(aProcName: AnsiString): boolean; {case sensitive}
 
     {Character Sets}
+    function GetCharSetID: integer; {connection character set}
     function HasDefaultCharSet: boolean;
     function GetDefaultCharSetID: integer;
     function GetCharsetName(CharSetID: integer): AnsiString;
@@ -1198,6 +1251,14 @@ type
     {Time Zone Database}
     function GetTimeZoneServices: ITimeZoneServices;
     function HasTimeZoneSupport: boolean;
+
+    {Client side Journaling}
+    function JournalingActive: boolean;
+    function GetJournalOptions: TJournalOptions;
+    function StartJournaling(aJournalLogFile: AnsiString): integer; overload;
+    function StartJournaling(aJournalLogFile: AnsiString; Options: TJournalOptions): integer; overload;
+    function StartJournaling(S: TStream; Options: TJournalOptions): integer; overload;
+    procedure StopJournaling(RetainJournal: boolean);
  end;
 
   TProtocolAll = (TCP, SPX, NamedPipe, Local, inet, inet4, inet6, wnet, xnet, unknownProtocol);
@@ -1366,9 +1427,11 @@ type
     {Start Transaction against multiple databases}
     function AllocateTPB: ITPB;
     function StartTransaction(Attachments: array of IAttachment;
-             TPB: array of byte; DefaultCompletion: TTransactionCompletion=taCommit): ITransaction; overload;
+             TPB: array of byte; DefaultCompletion: TTransactionCompletion=taCommit;
+             aName: AnsiString=''): ITransaction; overload;
     function StartTransaction(Attachments: array of IAttachment;
-             TPB: ITPB; DefaultCompletion: TTransactionCompletion=taCommit): ITransaction; overload;
+             TPB: ITPB; DefaultCompletion: TTransactionCompletion=taCommit;
+             aName: AnsiString=''): ITransaction; overload;
 
     {Service Manager}
     function HasServiceAPI: boolean;
@@ -1451,10 +1514,14 @@ procedure CheckIBLoaded;
 
 function LoadFBLibrary(aLibPathName: string): IFirebirdLibrary;
 
+{$if not declared(Null)} {Needed for Delphi}
+ function Null: Variant;       // Null standard constant
+{$define NEEDNULLFUNCTION}
+{$ifend}
 
 implementation
 
-uses FBClientAPI
+uses FBClientAPI {$if not declared(NULL)}, Variants {$ifend}
   {$IFDEF USELEGACYFIREBIRDAPI}, FB25ClientAPI {$ENDIF}
   {$IFDEF USEFIREBIRD3API}, FB30ClientAPI {$ENDIF};
 
@@ -1550,7 +1617,7 @@ constructor EIBInterBaseError.Create(aStatus: IStatus);
 begin
   inherited Create(aStatus.Getsqlcode,aStatus.GetMessage);
   FIBErrorCode := aStatus.GetIBErrorCode;
-  FStatus := Status;
+  FStatus := aStatus.Clone;
 end;
 
 constructor EIBInterBaseError.Create(ASQLCode: Long; AIBErrorCode: Long;
@@ -1560,6 +1627,13 @@ begin
   FIBErrorCode := AIBErrorCode;
 end;
 
+{$ifdef NEEDNULLFUNCTION}
+ function Null: Variant;       // Null standard constant
+   begin
+     VarClearProc(TVarData(Result));
+     TVarData(Result).VType := varnull;
+   end;
+{$endif}
 
 initialization
   FDefaultFBLibrary := nil;

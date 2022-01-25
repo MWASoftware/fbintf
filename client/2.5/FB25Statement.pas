@@ -123,7 +123,6 @@ type
     FStatement: TFB25Statement;
     FFirebird25ClientAPI: TFB25ClientAPI;
     FBlob: IBlob;             {Cache references}
-    FArray: IArray;
     FNullIndicator: short;
     FOwnsSQLData: boolean;
     FBlobMetaData: IBlobMetaData;
@@ -139,27 +138,24 @@ type
     function GetRelationName: AnsiString;  override;
     function GetScale: integer; override;
     function GetCharSetID: cardinal; override;
-    function GetCodePage: TSystemCodePage; override;
-    function GetCharSetWidth: integer; override;
     function GetIsNull: Boolean;   override;
     function GetIsNullable: boolean; override;
     function GetSQLData: PByte;  override;
     function GetDataLength: cardinal; override;
     function GetSize: cardinal; override;
-    function GetAttachment: IAttachment; override;
     function GetDefaultTextSQLType: cardinal; override;
     procedure SetIsNull(Value: Boolean); override;
     procedure SetIsNullable(Value: Boolean);  override;
     procedure SetSQLData(AValue: PByte; len: cardinal); override;
-    procedure SetScale(aValue: integer); override;
-    procedure SetDataLength(len: cardinal); override;
-    procedure SetSQLType(aValue: cardinal); override;
+    procedure InternalSetScale(aValue: integer); override;
+    procedure InternalSetDataLength(len: cardinal); override;
+    procedure InternalSetSQLType(aValue: cardinal); override;
     procedure SetCharSetID(aValue: cardinal); override;
   public
     constructor Create(aParent: TIBXSQLDA; aIndex: integer);
     procedure FreeSQLData;
     procedure RowChange; override;
-    function GetAsArray(Array_ID: TISC_QUAD): IArray; override;
+    function GetAsArray: IArray; override;
     function GetAsBlob(Blob_ID: TISC_QUAD; BPB: IBPB): IBlob; override;
     function GetArrayMetaData: IArrayMetaData; override;
     function GetBlobMetaData: IBlobMetaData; override;
@@ -193,6 +189,7 @@ type
   public
     constructor Create(aStatement: TFB25Statement);
     destructor Destroy; override;
+    function CanChangeMetaData: boolean; override;
     function CheckStatementStatus(Request: TStatementStatus): boolean; override;
     function ColumnsInUseCount: integer; override;
     function GetTransaction: TFB25Transaction; virtual;
@@ -243,7 +240,6 @@ type
     function FetchAbsolute(position: Integer): boolean; {fetch record by its absolute position in result set}
     function FetchRelative(offset: Integer): boolean; {fetch record by position relative to current}
     function GetCursorName: AnsiString;
-    function GetTransaction: ITransaction; override;
     function IsEof: boolean;
     function IsBof: boolean;
     procedure Close;
@@ -264,6 +260,7 @@ type
   protected
     procedure CheckHandle; override;
     procedure GetDsqlInfo(info_request: byte; buffer: ISQLInfoResults); override;
+    function GetStatementIntf: IStatement; override;
     procedure InternalPrepare(CursorName: AnsiString=''); override;
     function InternalExecute(aTransaction: ITransaction): IResults; override;
     function InternalOpenCursor(aTransaction: ITransaction; Scrollable: boolean): IResultSet; override;
@@ -360,20 +357,6 @@ begin
   end;
 end;
 
-function TIBXSQLVAR.GetCodePage: TSystemCodePage;
-begin
-  result := CP_NONE;
-  with Statement.GetAttachment do
-     CharSetID2CodePage(GetCharSetID,result);
-end;
-
-function TIBXSQLVAR.GetCharSetWidth: integer;
-begin
-  result := 1;
-  with Statement.GetAttachment DO
-    CharSetWidth(GetCharSetID,result);
-end;
-
 function TIBXSQLVAR.GetIsNull: Boolean;
 begin
   result := IsNullable and (FNullIndicator = -1);
@@ -397,11 +380,6 @@ end;
 function TIBXSQLVAR.GetSize: cardinal;
 begin
   Result := FMetadataSize;
-end;
-
-function TIBXSQLVAR.GetAttachment: IAttachment;
-begin
-  Result := FStatement.GetAttachment;
 end;
 
 function TIBXSQLVAR.GetArrayMetaData: IArrayMetaData;
@@ -429,7 +407,7 @@ begin
   Result := FBlobMetaData;
 end;
 
-function TIBXSQLVAR.GetAsArray(Array_ID: TISC_QUAD): IArray;
+function TIBXSQLVAR.GetAsArray: IArray;
 begin
   if SQLType <> SQL_ARRAY then
     IBError(ibxeInvalidDataConversion,[nil]);
@@ -438,11 +416,11 @@ begin
     Result := nil
   else
   begin
-    if FArray = nil then
-      FArray := TFB25Array.Create(FStatement.GetAttachment as TFB25Attachment,
+    if FArrayIntf = nil then
+      FArrayIntf := TFB25Array.Create(FStatement.GetAttachment as TFB25Attachment,
                                   TIBXSQLDA(Parent).GetTransaction,
-                                  GetArrayMetaData,Array_ID);
-    Result := FArray;
+                                  GetArrayMetaData,PISC_QUAD(SQLData)^);
+    Result := FArrayIntf;
   end;
 end;
 
@@ -551,13 +529,13 @@ begin
   Changed;
 end;
 
-procedure TIBXSQLVAR.SetScale(aValue: integer);
+procedure TIBXSQLVAR.InternalSetScale(aValue: integer);
 begin
   FXSQLVAR^.sqlscale := aValue;
   Changed;
 end;
 
-procedure TIBXSQLVAR.SetDataLength(len: cardinal);
+procedure TIBXSQLVAR.InternalSetDataLength(len: cardinal);
 begin
   if not FOwnsSQLData then
     FXSQLVAR^.sqldata := nil;
@@ -568,7 +546,7 @@ begin
   Changed;
 end;
 
-procedure TIBXSQLVAR.SetSQLType(aValue: cardinal);
+procedure TIBXSQLVAR.InternalSetSQLType(aValue: cardinal);
 begin
   FXSQLVAR^.sqltype := aValue or (FXSQLVAR^.sqltype and 1);
   Changed;
@@ -614,7 +592,6 @@ procedure TIBXSQLVAR.RowChange;
 begin
   inherited RowChange;
   FBlob := nil;
-  FArray := nil;
 end;
 
 
@@ -671,11 +648,6 @@ end;
 function TResultSet.GetCursorName: AnsiString;
 begin
   Result := FResults.FStatement.FCursor;
-end;
-
-function TResultSet.GetTransaction: ITransaction;
-begin
-  Result := FResults.GetTransaction;
 end;
 
 function TResultSet.IsEof: boolean;
@@ -754,7 +726,10 @@ end;
 
 function TIBXOUTPUTSQLDA.GetTransaction: TFB25Transaction;
 begin
-  Result := FTransaction;
+  if FTransaction <> nil then
+    Result := FTransaction
+  else
+    Result := inherited GetTransaction;
 end;
 
 procedure TIBXOUTPUTSQLDA.GetData(index: integer; var aIsNull:boolean; var len: short;
@@ -794,6 +769,11 @@ begin
   FreeXSQLDA;
 //  writeln('Destroying ',ClassName);
   inherited Destroy;
+end;
+
+function TIBXSQLDA.CanChangeMetaData: boolean;
+begin
+  Result := true;
 end;
 
 function TIBXSQLDA.CheckStatementStatus(Request: TStatementStatus): boolean;
@@ -973,6 +953,11 @@ begin
   if isc_dsql_sql_info(StatusVector, @(FHandle), 1, @info_request,
                      GetBufSize, Buffer) > 0 then
     IBDatabaseError;
+end;
+
+function TFB25Statement.GetStatementIntf: IStatement;
+begin
+  Result := self;
 end;
 
 procedure TFB25Statement.InternalPrepare(CursorName: AnsiString);

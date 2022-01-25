@@ -9,7 +9,8 @@ Firebird Conf Directory = /opt/firebird3.0.5/
 Firebird Client Library Path = /opt/firebird3.0.5/lib/libfbclient.so
 Running Test 1: Create and Drop a Database
 Creating a Database with empty parameters
-Create Database fails (as expected): Engine Code: 335544344 I/O error during "open O_CREAT" operation for file ""
+Create Database fails (as expected): Engine Code: 335544344
+I/O error during "open O_CREAT" operation for file ""
 -Error while trying to create file
 -No such file or directory
 Creating a Database using an SQL Statement
@@ -57,6 +58,7 @@ Creating a Database with a DPD
 Database ID = 4 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = zeus
 ODS major = 12
 ODS minor = 0
+Attachment ID = 6
 DB Connect String = inet://localhost//tmp/fbintf-testsuite/testsuite1.fdb
 DB Charset ID = 4
 DB SQL Dialect = 3
@@ -76,7 +78,8 @@ Dropping Database
 
 ------------------------------------------------------
 Running Test 2: Open the employee database and run a query
-Open Database fails Engine Code: 335544472 Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Open Database fails Engine Code: 335544472
+Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Opening inet://localhost/employee
 Database Open, SQL Dialect = 3
 TPB: Item Count = 3
@@ -329,7 +332,8 @@ JOB_COUNTRY = USA
 SALARY = 105,900.00
 FULL_NAME = Nelson, Robert
 Do Fetch Last:
-Remote Scrollable cursors test fails Engine Code: 335544378 feature is not supported
+Remote Scrollable cursors test fails Engine Code: 335544378
+feature is not supported
 Now open the employee database as a local database
 TPB: Item Count = 3
   isc_tpb_read
@@ -649,13 +653,13 @@ Running Test 3: ad hoc queries
 Opening inet://localhost/employee
 Database Open
 Employee Count = 42
-Transaction ID = 5181
+Transaction ID = 6262
 Transaction is Read/Write
 Transaction Database Path = inet://localhost/employee
-Transaction ID = 5181
-Oldest Interesting = 5179
-Oldest Action = 5180
-Oldest Snapshot = 5180
+Transaction ID = 6262
+Oldest Interesting = 6260
+Oldest Action = 6261
+Oldest Snapshot = 6261
 Oldest Interesting = 0
 Employee Count = 41
 Employee Count = 42
@@ -687,11 +691,11 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 19,694,032
+Current memory = 19,694,784
 Delta memory = 4,480
-Max memory = 19,755,888
+Max memory = 19,756,256
 Elapsed time= 0.002 sec
-Cpu = 0.010 sec
+Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
 Writes = 0
@@ -2728,7 +2732,7 @@ MYARRAY = Array: (0: 100) (1: 99) (2: 98) (3: 97) (4: 96) (5: 95) (6: 94) (7: 93
 
 MYARRAY2 = Array: (0: 01/5/2020 12:00:00) (1: 01/5/2020 12:01:00) (2: 01/5/2020 12:02:00) (3: 01/5/2020 12:03:00) (4: 01/5/2020 12:04:00) (5: 01/5/2020 12:05:00) (6: 01/5/2020 12:06:00) (7: 01/5/2020 12:07:00) (8: 01/5/2020 12:08:00) (9: 01/5/2020 12:09:00) (10: 01/5/2020 12:10:00) (11: 01/5/2020 12:11:00) (12: 01/5/2020 12:12:00) (13: 01/5/2020 12:13:00) (14: 01/5/2020 12:14:00) (15: 01/5/2020 12:15:00) (16: 01/5/2020 12:16:00) 
 
-MYARRAY3 = Array: (0: 0) (1: 1.04) (2: 2.09) (3: 3.15) (4: 4.19) (5: 5.25) (6: 6.3) (7: 7.34) (8: 8.39) (9: 9.44) (10: 10.5) (11: 11.55) (12: 12.6) (13: 13.64) (14: 0.42) (15: 42.45) (16: 4269) 
+MYARRAY3 = Array: (0: 0) (1: 1.05) (2: 2.1) (3: 3.15) (4: 4.2) (5: 5.25) (6: 6.3) (7: 7.35) (8: 8.4) (9: 9.45) (10: 10.5) (11: 11.55) (12: 12.6) (13: 13.65) (14: 0.42) (15: 42.46) (16: 4269) 
 
 
 Shrink to 2:10
@@ -2744,7 +2748,7 @@ MYARRAY = Array: (0: 100) (1: 99) (2: 1000) (3: 97) (4: 96) (5: 95) (6: 94) (7: 
 
 MYARRAY2 = Array: (0: 01/5/2020 12:00:00) (1: 01/5/2020 12:01:00) (2: 01/5/2020 12:02:00) (3: 01/5/2020 12:03:00) (4: 01/5/2020 12:04:00) (5: 01/5/2020 12:05:00) (6: 01/5/2020 12:06:00) (7: 01/5/2020 12:07:00) (8: 01/5/2020 12:08:00) (9: 01/5/2020 12:09:00) (10: 01/5/2020 12:10:00) (11: 01/5/2020 12:11:00) (12: 01/5/2020 12:12:00) (13: 01/5/2020 12:13:00) (14: 01/5/2020 12:14:00) (15: 01/5/2020 12:15:00) (16: 01/5/2020 12:16:00) 
 
-MYARRAY3 = Array: (0: 0) (1: 1.04) (2: 2.09) (3: 3.15) (4: 4.19) (5: 5.25) (6: 6.3) (7: 7.34) (8: 8.39) (9: 9.44) (10: 10.5) (11: 11.55) (12: 12.6) (13: 13.64) (14: 0.42) (15: 42.45) (16: 4269) 
+MYARRAY3 = Array: (0: 0) (1: 1.05) (2: 2.1) (3: 3.15) (4: 4.2) (5: 5.25) (6: 6.3) (7: 7.35) (8: 8.4) (9: 9.45) (10: 10.5) (11: 11.55) (12: 12.6) (13: 13.65) (14: 0.42) (15: 42.46) (16: 4269) 
 
 
 
@@ -2839,19 +2843,19 @@ Page Size = 8192
 Version = 1: LI-V6.3.5.33220 Firebird 3.0
 Database is Read/Write
 Database Created: 09/1/2020 13:13:45
-Pages Used = 297
-Pages Free = 10
-Server Memory = 19196128
+Pages Used = 300
+Pages Free = 7
+Server Memory = 18987232
 Forced Writes  = 1
-Max Memory  = 19316896
+Max Memory  = 19024416
 Num Buffers  = 2048
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
 Active Transaction Count = 0
-Fetches  = 452
-Writes  = 8
-Reads  = 57
-Page Writes  = 4
+Fetches  = 409
+Writes  = 6
+Reads  = 55
+Page Writes  = 3
 Record Version Removals Operation Counts
 
 Deletes Operation Counts
@@ -2866,9 +2870,9 @@ Indexed Reads Count Operation Counts
 Table ID = 4
 Count = 28
 Table ID = 6
-Count = 15
+Count = 5
 Table ID = 9
-Count = 3
+Count = 1
 Table ID = 11
 Count = 1
 Table ID = 12
@@ -2880,7 +2884,7 @@ Count = 1
 
 Sequential Table Scans Operation Counts
 Table ID = 0
-Count = 94
+Count = 96
 Table ID = 1
 Count = 2
 
@@ -2896,11 +2900,11 @@ Async Wait Called
 Event Signalled
 First Event - usually ignored
 Signal Event
+Event Signalled
 Event Counts: TESTEVENT, Count = 1
 Two more events
 Call Async Wait
 Async Wait Called
-Event Signalled
 Event Signalled
 Deferred Events Caught
 Event Counts: TESTEVENT, Count = 2
@@ -2913,7 +2917,7 @@ Event Cancelled
 Time Out - Cancel Worked!
 Sync wait
 Event Signalled
-Event Counts: TESTEVENT, Count = 1
+Event Counts: TESTEVENT, Count = 0
 
 
 ------------------------------------------------------
@@ -2943,10 +2947,12 @@ User ID = 0
 Group ID = 0
 
 
-Licence Info: Engine Code: 335544378 feature is not supported
+Licence Info: Engine Code: 335544378
+feature is not supported
 -feature is not supported
 
-Licence Mask Info: Engine Code: 335544378 feature is not supported
+Licence Mask Info: Engine Code: 335544378
+feature is not supported
 
 Capabilities = 6
 
@@ -3234,21 +3240,25 @@ BLOBDATA (Charset Id = 4 Codepage = 65001)
 Running Test 16: Error handling
 Invalid Database Name Test
 Error Handled: SQLCODE: -902
-Engine Code: 335544344 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Engine Code: 335544344
 I/O error during "open" operation for file "Malformed Name"
 -Error while trying to open file
 -No such file or directory
 Invalid User Name Test
 Error Handled: SQLCODE: -902
-Engine Code: 335544472 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Engine Code: 335544472
 Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Invalid password Test
 Error Handled: SQLCODE: -902
-Engine Code: 335544472 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Engine Code: 335544472
 Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Invalid Prepare SQL Test
 Error Handled: SQLCODE: -206
-Engine Code: 335544569 Column does not belong to referenced table
+Column does not belong to referenced table
+Engine Code: 335544569
 Dynamic SQL Error
 -SQL error code = -206
 -Column unknown
@@ -3256,7 +3266,8 @@ Dynamic SQL Error
 -At line 1, column 21 When Executing: Update Employee Set Unknown_Date = ? Where EMP_NO = ?
 Invalid Open Cursor SQL Test
 Error Handled: SQLCODE: -206
-Engine Code: 335544569 Column does not belong to referenced table
+Column does not belong to referenced table
+Engine Code: 335544569
 Dynamic SQL Error
 -SQL error code = -206
 -Column unknown
@@ -3285,17 +3296,20 @@ COUNTER = 42
 
 Invalid Server Name Test
 Error Handled: SQLCODE: -902
-Engine Code: 335544721 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Engine Code: 335544721
 Unable to complete network request to host "unknown".
 -Failed to locate host machine.
 -The specified name was not found in the hosts file or Domain Name Services
 Invalid User Name Test
 Error Handled: SQLCODE: -902
-Engine Code: 335544472 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Engine Code: 335544472
 Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Invalid password Test
 Error Handled: SQLCODE: -902
-Engine Code: 335544472 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Engine Code: 335544472
 Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 
 
@@ -3427,6 +3441,42 @@ Parsing of 1.2E1.2 failed
 Parsing of 1,000 failed
 Parsing of 1e1e1 failed
 Parsing of 1.2+3 failed
+Validating Numeric Interface - IFBNumeric
+Value from Currency = 9999.1235
+Raw Value = 99991235 Scale = -4
+Value from Currency(rescaled) = 9999.12
+Raw Value = 999912 Scale = -2
+Value from Double = 9999.12345678
+Raw Value = 999912345678 Scale = -8
+Value from Integer = 9223372036854775807
+Raw Value = 9223372036854775807 Scale = 0
+Value from string = 9223372036854775807
+Raw Value = 9223372036854775807 Scale = 0
+Value from string = 9999.12345678
+Raw Value = 999912345678 Scale = -8
+Value from string = -0.12
+Raw Value = -12 Scale = -3
+Value from BCD = 9999.12345678
+Raw Value = 999912345678 Scale = -8
+Value from Raw Data = 9999123.456780
+Raw Value = 9999123456780 Scale = -6
+Numeric Operations
+Add 2.23 + 24.12345 = 26.35345
+Add Double 2.23 + 24.12645 = 26.35645
+Add integer 2.23 + 2412345 = 2412347.23
+Subtract 2.23 - 24.12345 = -21.89345
+Subtract Double 24.12645 - 2.23 = -21.89645
+Subtract integer 24123.45 - 223 = -23900.45
+Multiply 2.23 * 24.12345 = 53.7952935
+Multiply Double 24.12645 * 2.23 = 53.8019835
+Multiply integer 241.2345 * 223 = 53795.2935
+Divide 24.12345 / 2.23 = 10.81769
+Divide Double 2.23 / 24.12645 = 0.09
+Divide integer 241.2345 / 223 = 1.0818
+Compare 2.23, -24.12345 = 1
+Compare integer 2.23, 3 = -1
+Compare Double 2.23, 2.23 = 0
+Negate 24.12345 = -24.12345
 SQL Params
 SQLType =SQL_LONG
 sub type = 0
@@ -3478,15 +3528,18 @@ Nullable
 Size = 8
 
 Expected Error - SQLCODE: -303
-Engine Code: 335544569 Incompatible column/host variable data type
+Incompatible column/host variable data type
+Engine Code: 335544569
 Dynamic SQL Error
 -SQL error code = -303
 -conversion error from string "1,000"
 Expected Error - SQLCODE: -303
-Engine Code: 335544569 Incompatible column/host variable data type
+Incompatible column/host variable data type
+Engine Code: 335544569
 Dynamic SQL Error
 -SQL error code = -303
 -conversion error from string "10.0.0"
+Test Numeric Type
 ROWID = 1
 ITYPE = 101
 I64TYPE = 9223372036854775807
@@ -3511,6 +3564,345 @@ I64TYPE = 10
 CURRTYPE = .02300000
 DTYPE = .00110000
 FIXEDPOINT = 233.45600000
+ROWID = 7
+ITYPE = 1
+I64TYPE = 1234567
+CURRTYPE = .02300000
+DTYPE = .00110000
+FIXEDPOINT = 1,234.25000000
+
+
+
+------------------------------------------------------
+Running Test 22: Journalling
+Start Journaling. Session ID = 0
+1234.567 parsed to 1234567 scale = -3
+As Float =  1.2345670000000000E+003
+-765.4321 parsed to -7654321 scale = -4
+As Float = -7.6543209999999999E+002
+0.1 parsed to 1 scale = -1
+As Float =  1.0000000000000001E-001
+0.01 parsed to 1 scale = -2
+As Float =  1.0000000000000000E-002
++123 parsed to 123 scale = 0
+As Float =  1.2300000000000000E+002
+1.23456E308 parsed to 123456 scale = 303
+As Float =  1.2345600000000001E+308
+-1.2e-02 parsed to -12 scale = -3
+As Float = -1.2000000000000000E-002
+10. parsed to 10 scale = 0
+As Float =  1.0000000000000000E+001
+.12 parsed to 12 scale = -2
+As Float =  1.2000000000000000E-001
+0.12 parsed to 12 scale = -2
+As Float =  1.2000000000000000E-001
+Parsing of 1.2E1.2 failed
+Parsing of 1,000 failed
+Parsing of 1e1e1 failed
+Parsing of 1.2+3 failed
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+Value = 0
+
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_INT64
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+SQLType =SQL_INT64
+sub type = 0
+Field Name = 
+Scale = -4
+Charset id = 0
+Nullable
+Size = 8
+
+SQLType =SQL_DOUBLE
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+SQLType =SQL_INT64
+sub type = 0
+Field Name = 
+Scale = -6
+Charset id = 0
+Nullable
+Size = 8
+
+
+Text Tests
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+Value = 0
+
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 4
+Nullable
+Size = 1024
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = 
+Scale = 0
+Charset id = 4
+Nullable
+Size = 8
+
+
+Binary Blob Tests
+
+Array Test
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+Value = 0
+
+SQLType =SQL_ARRAY
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+ROWID = 1
+ITYPE = 101
+I64TYPE = 9223372036854775807
+CURRTYPE = 10,000.12340000
+DTYPE = 9,999.12345678
+FIXEDPOINT = 1,234,567,890.12345700
+STR = NULL
+TEXTBLOB = NULL
+OTHERBLOB = NULL
+MYARRAY = NULL
+ROWID = 2
+ITYPE = -32457
+I64TYPE = -9223372036854775808
+CURRTYPE = 1,000,001.12000000
+DTYPE = 1.7E308
+FIXEDPOINT = -1,234,567,890.12345700
+STR = NULL
+TEXTBLOB = NULL
+OTHERBLOB = NULL
+MYARRAY = NULL
+ROWID = 4
+ITYPE = 1
+I64TYPE = 10
+CURRTYPE = .02300000
+DTYPE = .00110000
+FIXEDPOINT = 233.45600000
+STR = NULL
+TEXTBLOB = NULL
+OTHERBLOB = NULL
+MYARRAY = NULL
+
+Journal Table
+IBX$SESSIONID = 1
+IBX$TRANSACTIONID = 8
+IBX$OLDTRANSACTIONID = NULL
+IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
+IBX$CREATED = 2022/01/19 12:09:44.7630
+IBX$SESSIONID = 1
+IBX$TRANSACTIONID = 10
+IBX$OLDTRANSACTIONID = 9
+IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
+IBX$CREATED = 2022/01/19 12:09:45.1190
+
+Journal Entries
+Journal Entry = jeTransStart(Transaction Start)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 6
+Session ID = 1
+Transaction ID = 8
+Transaction Name = "Transaction_29_1"
+TPB: Item Count = 3
+  isc_tpb_write
+  isc_tpb_nowait
+  isc_tpb_concurrency
+
+Default Completion = TACommit
+
+Journal Entry = jeQuery(Query)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 6
+Session ID = 1
+Transaction ID = 8
+Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(1,101,9223372036854775807,10000.1234,9999.12345678,1234567890.12346)
+
+Journal Entry = jeQuery(Query)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 6
+Session ID = 1
+Transaction ID = 8
+Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(2,-32457,-9223372036854775808,1000001.12,1.7E308,-1234567890.12346)
+
+Journal Entry = jeTransCommitRet(Commit Retaining)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 6
+Session ID = 1
+Transaction ID = 9
+Old TransactionID = 8
+
+Journal Entry = jeQuery(Query)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 6
+Session ID = 1
+Transaction ID = 9
+Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(3,0,0,0,0,0)
+
+Journal Entry = jeTransRollbackRet(Rollback Retaining)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 6
+Session ID = 1
+Transaction ID = 10
+Old TransactionID = 9
+
+Journal Entry = jeQuery(Query)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 6
+Session ID = 1
+Transaction ID = 10
+Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(4,1,10,0.023,0.0011,233.456)
+
+Journal Entry = jeTransStart(Transaction Start)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 6
+Session ID = 1
+Transaction ID = 11
+Transaction Name = "Transaction_29_2"
+TPB: Item Count = 3
+  isc_tpb_write
+  isc_tpb_nowait
+  isc_tpb_concurrency
+
+Default Completion = TARollback
+
+Journal Entry = jeTransCommit(Commit)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 6
+Session ID = 1
+Transaction ID = 10
+
+Journal Entry = jeQuery(Query)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 6
+Session ID = 1
+Transaction ID = 11
+Query = Insert into TestData(RowID, Str, TextBlob) Values(5,'It''s the quick brown fox jumps over the lazy dog','To be or not to be-that is the question:
+Whether ''tis nobler in the mind to suffer
+The slings and arrows of outrageous fortune,
+Or to take arms against a sea of troubles,
+And, by opposing, end them. To die, to sleep-
+No more-and by a sleep to say we end
+The heartache and the thousand natural shocks
+That flesh is heir to-''tis a consummation
+Devoutly to be wished. To die, to sleep-
+To sleep, perchance to dream. Aye, there''s the rub,
+For in that sleep of death what dreams may come,
+When we have shuffled off this mortal coil,
+Must give us pause. There''s the respect
+That makes calamity of so long life.
+For who would bear the whips and scorns of time,
+Th'' oppressor''s wrong, the proud man''s contumely, 
+The pangs of despised love, the law’s delay, 
+The insolence of office, and the spurns
+That patient merit of the unworthy takes,
+When he himself might his quietus make
+With a bare bodkin? Who would fardels bear, 
+To grunt and sweat under a weary life,
+But that the dread of something after death,
+The undiscovered country from whose bourn
+No traveler returns, puzzles the will
+And makes us rather bear those ills we have
+Than fly to others that we know not of?
+Thus conscience does make cowards of us all,
+And thus the native hue of resolution
+Is sicklied o''er with the pale cast of thought,
+And enterprises of great pitch and moment, 
+With this regard their currents turn awry, 
+And lose the name of action.-Soft you now,
+The fair Ophelia.-Nymph, in thy orisons
+Be all my sins remembered
+')
+
+Journal Entry = jeQuery(Query)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 6
+Session ID = 1
+Transaction ID = 11
+Query = Insert into TestData(RowID,OtherBlob) Values (6,<blob subtype="0">
+FFD8FFE000104A46494600010101004800480000FFE11E0545786966000049492A00080000000C00
+0E010200200000009E0000000F01020014000000BE0000001001020008000000D200000012010300
+01000000010000001A01050001000000DA000000
+</blob>
+)
+
+Journal Entry = jeQuery(Query)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 6
+Session ID = 1
+Transaction ID = 11
+Query = Insert into TestData(RowID,MyArray) Values (7,<array dim = "1" sqltype = "496" length = "4" relation_name = "TESTDATA" column_name = "MYARRAY" scale = "0" bounds="0:16">
+ <elt ix="0">100</elt>
+ <elt ix="1">99</elt>
+ <elt ix="2">98</elt>
+ <elt ix="3">97</elt>
+ <elt ix="4">96</elt>
+ <elt ix="5">95</elt>
+ <elt ix="6">94</elt>
+ <elt ix="7">93</elt>
+ <elt ix="8">92</elt>
+ <elt ix="9">91</elt>
+ <elt ix="10">90</elt>
+ <elt ix="11">89</elt>
+ <elt ix="12">88</elt>
+ <elt ix="13">87</elt>
+ <elt ix="14">86</elt>
+ <elt ix="15">85</elt>
+ <elt ix="16">84</elt>
+</array>
+)
+
+Journal Entry = jeTransRollback(Rollback)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 6
+Session ID = 1
+Transaction ID = 11
 
 
 

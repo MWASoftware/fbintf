@@ -82,7 +82,9 @@ type
   protected
     function GetIBMessage: Ansistring; override;
   public
+    function Clone: IStatus; override;
     function StatusVector: PStatusVector; override;
+    function InErrorState: boolean; override;
   end;
 
   { TFB25ClientAPI }
@@ -188,9 +190,9 @@ type
     {Start Transaction against multiple databases}
     function AllocateTPB: ITPB;
     function StartTransaction(Attachments: array of IAttachment;
-             TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction; overload;
+             TPB: array of byte; DefaultCompletion: TTransactionCompletion; aName: AnsiString=''): ITransaction; overload;
     function StartTransaction(Attachments: array of IAttachment;
-             TPB: ITPB; DefaultCompletion: TTransactionCompletion): ITransaction; overload;
+             TPB: ITPB; DefaultCompletion: TTransactionCompletion; aName: AnsiString=''): ITransaction; overload;
 
     {Service Manager}
     function AllocateSPB: ISPB;
@@ -345,9 +347,19 @@ begin
   end;
 end;
 
+function TFB25Status.Clone: IStatus;
+begin
+  Result := TFB25Status.Copy(self);
+end;
+
 function TFB25Status.StatusVector: PStatusVector;
 begin
   Result := @FStatusVector;
+end;
+
+function TFB25Status.InErrorState: boolean;
+begin
+  Result := StatusVector^[0] > 0;
 end;
 
 
@@ -530,15 +542,15 @@ begin
 end;
 
 function TFB25ClientAPI.StartTransaction(Attachments: array of IAttachment;
-  TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction;
+  TPB: array of byte; DefaultCompletion: TTransactionCompletion; aName: AnsiString): ITransaction;
 begin
-  Result := TFB25Transaction.Create(self,Attachments,TPB,DefaultCompletion);
+  Result := TFB25Transaction.Create(self,Attachments,TPB,DefaultCompletion,aName);
 end;
 
 function TFB25ClientAPI.StartTransaction(Attachments: array of IAttachment;
-  TPB: ITPB; DefaultCompletion: TTransactionCompletion): ITransaction;
+  TPB: ITPB; DefaultCompletion: TTransactionCompletion; aName: AnsiString): ITransaction;
 begin
-  Result := TFB25Transaction.Create(self,Attachments,TPB,DefaultCompletion);
+  Result := TFB25Transaction.Create(self,Attachments,TPB,DefaultCompletion, aName);
 end;
 
 function TFB25ClientAPI.HasServiceAPI: boolean;

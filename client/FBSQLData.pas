@@ -129,15 +129,10 @@ type
      procedure InternalGetAsDateTime(var aDateTime: TDateTime; var dstOffset: smallint;
        var aTimezone: AnsiString; var aTimeZoneID: TFBTimeZoneID);
   protected
-     function AdjustScale(Value: Int64; aScale: Integer): Double;
-     function AdjustScaleToInt64(Value: Int64; aScale: Integer): Int64;
-     function AdjustScaleToStr(Value: Int64; aScale: Integer): AnsiString;
-     function AdjustScaleToCurrency(Value: Int64; aScale: Integer): Currency;
-     function AdjustScaleFromCurrency(Value: Currency; aScale: Integer): Int64;
-     function AdjustScaleFromDouble(Value: Double; aScale: Integer): Int64;
      procedure CheckActive; virtual;
      procedure CheckTZSupport;
      function GetAttachment: IAttachment; virtual; abstract;
+     function GetTransaction: ITransaction; virtual; abstract;
      function GetSQLDialect: integer; virtual; abstract;
      function GetTimeZoneServices: IExTimeZoneServices; virtual;
      procedure Changed; virtual;
@@ -155,10 +150,12 @@ type
      property FirebirdClientAPI: TFBClientAPI read FFirebirdClientAPI;
   public
      constructor Create(api: TFBClientAPI);
+     function CanChangeMetaData: boolean; virtual;
      function GetSQLType: cardinal; virtual; abstract; {Current Field Data SQL Type}
      function GetSQLTypeName: AnsiString; overload;
      class function GetSQLTypeName(SQLType: cardinal): AnsiString; overload;
      function GetStrDataLength: short;
+     function getColMetadata: IParamMetaData; virtual; abstract;
      function GetName: AnsiString; virtual; abstract;
      function GetScale: integer; virtual; abstract; {Current Field Data scale}
      function GetAsBoolean: boolean;
@@ -179,6 +176,7 @@ type
      function GetAsQuad: TISC_QUAD;
      function GetAsShort: short;
      function GetAsString: AnsiString; virtual;
+     function GetAsNumeric: IFBNumeric;
      function GetIsNull: Boolean; virtual;
      function GetIsNullable: boolean; virtual;
      function GetAsVariant: Variant;
@@ -206,7 +204,7 @@ type
      procedure SetAsShort(Value: short); virtual;
      procedure SetAsString(Value: AnsiString); virtual;
      procedure SetAsVariant(Value: Variant);
-     procedure SetAsNumeric(Value: Int64; aScale: integer); virtual;
+     procedure SetAsNumeric(Value: IFBNumeric); virtual;
      procedure SetAsBcd(aValue: tBCD); virtual;
      procedure SetIsNull(Value: Boolean); virtual;
      procedure SetIsNullable(Value: Boolean); virtual;
@@ -248,6 +246,8 @@ type
     FUniqueRelationName: AnsiString;
     FColumnList: array of TSQLVarData;
     function GetStatement: IStatement; virtual; abstract;
+    function GetAttachment: IAttachment; virtual;
+    function GetTransaction: ITransaction; virtual;
     function GetPrepareSeqNo: integer; virtual; abstract;
     function GetTransactionSeqNo: integer; virtual; abstract;
     procedure SetCount(aValue: integer); virtual; abstract;
@@ -268,10 +268,12 @@ type
                                             write FCaseSensitiveParams; {Only used when IsInputDataArea true}
     function CanChangeMetaData: boolean; virtual; abstract;
     property Count: integer read GetCount;
-    property Column[index: integer]: TSQLVarData read GetColumn;
+    property Column[index: integer]: TSQLVarData read GetColumn; default;
     property UniqueRelationName: AnsiString read FUniqueRelationName;
     property Statement: IStatement read GetStatement;
+    property Attachment: IAttachment read GetAttachment;
     property PrepareSeqNo: integer read GetPrepareSeqNo;
+    property Transaction: ITransaction read GetTransaction;
     property TransactionSeqNo: integer read GetTransactionSeqNo;
   end;
 
@@ -289,7 +291,9 @@ type
     function GetStatement: IStatement;
     procedure SetName(AValue: AnsiString);
   protected
-    function GetAttachment: IAttachment; virtual; abstract;
+    FArrayIntf: IArray;
+    function GetAttachment: IAttachment;
+    function GetTransaction: ITransaction;
     function GetSQLType: cardinal; virtual; abstract;
     function GetSubtype: integer; virtual; abstract;
     function GetAliasName: AnsiString;  virtual; abstract;
@@ -298,28 +302,32 @@ type
     function GetRelationName: AnsiString;  virtual; abstract;
     function GetScale: integer; virtual; abstract;
     function GetCharSetID: cardinal; virtual; abstract;
-    function GetCharSetWidth: integer; virtual; abstract;
-    function GetCodePage: TSystemCodePage; virtual; abstract;
+    function GetCharSetWidth: integer;
+    function GetCodePage: TSystemCodePage;
     function GetIsNull: Boolean;   virtual; abstract;
     function GetIsNullable: boolean; virtual; abstract;
     function GetSQLData: PByte;  virtual; abstract;
     function GetDataLength: cardinal; virtual; abstract; {current field length}
     function GetSize: cardinal; virtual; abstract; {field length as given by metadata}
     function GetDefaultTextSQLType: cardinal; virtual; abstract;
+    procedure InternalSetSQLType(aValue: cardinal); virtual; abstract;
+    procedure InternalSetScale(aValue: integer); virtual; abstract;
+    procedure InternalSetDataLength(len: cardinal); virtual; abstract;
     procedure SetIsNull(Value: Boolean); virtual; abstract;
     procedure SetIsNullable(Value: Boolean);  virtual; abstract;
     procedure SetSQLData(AValue: PByte; len: cardinal); virtual; abstract;
-    procedure SetScale(aValue: integer); virtual; abstract;
-    procedure SetDataLength(len: cardinal); virtual; abstract;
-    procedure SetSQLType(aValue: cardinal); virtual; abstract;
+    procedure SetScale(aValue: integer);
+    procedure SetDataLength(len: cardinal);
+    procedure SetSQLType(aValue: cardinal);
     procedure SetCharSetID(aValue: cardinal); virtual; abstract;
     procedure SetMetaSize(aValue: cardinal); virtual;
   public
     constructor Create(aParent: TSQLDataArea; aIndex: integer);
+    function CanChangeMetaData: boolean;
     procedure SetString(aValue: AnsiString);
     procedure Changed; virtual;
     procedure RowChange; virtual;
-    function GetAsArray(Array_ID: TISC_QUAD): IArray; virtual; abstract;
+    function GetAsArray: IArray; virtual; abstract;
     function GetAsBlob(Blob_ID: TISC_QUAD; BPB: IBPB): IBlob; virtual; abstract;
     function CreateBlob: IBlob; virtual; abstract;
     function GetArrayMetaData: IArrayMetaData; virtual; abstract;
@@ -327,6 +335,7 @@ type
     function getColMetadata: IParamMetaData;
     procedure Initialize; virtual;
     procedure SaveMetaData;
+    procedure SetArray(AValue: IArray);
 
   public
     property AliasName: AnsiString read GetAliasName;
@@ -337,6 +346,7 @@ type
     property Index: integer read FIndex;
     property Name: AnsiString read FName write SetName;
     property CharSetID: cardinal read GetCharSetID write SetCharSetID;
+    property CodePage: TSystemCodePage read GetCodePage;
     property SQLType: cardinal read GetSQLType write SetSQLType;
     property SQLSubtype: integer read GetSubtype;
     property SQLData: PByte read GetSQLData;
@@ -352,7 +362,7 @@ type
 
   { TColumnMetaData }
 
-  TColumnMetaData = class(TSQLDataItem,IColumnMetaData)
+  TColumnMetaData = class(TSQLDataItem,IColumnMetaData,IParamMetaData)
   private
     FIBXSQLVAR: TSQLVarData;
     FOwner: IUnknown;         {Keep reference to ensure Metadata/statement not discarded}
@@ -360,7 +370,6 @@ type
     FChangeSeqNo: integer;
   protected
     procedure CheckActive; override;
-    function GetAttachment: IAttachment; override;
     function SQLData: PByte; override;
     function GetDataLength: cardinal; override;
     function GetCodePage: TSystemCodePage; override;
@@ -369,6 +378,7 @@ type
     constructor Create(aOwner: IUnknown; aIBXSQLVAR: TSQLVarData);
     destructor Destroy; override;
     function GetSQLDialect: integer; override;
+    function getColMetadata: IParamMetaData; override;
 
   public
     {IColumnMetaData}
@@ -388,7 +398,8 @@ type
     function GetArrayMetaData: IArrayMetaData;
     function GetBlobMetaData: IBlobMetaData;
     function GetStatement: IStatement;
-    function GetTransaction: ITransaction; virtual;
+    function GetTransaction: ITransaction; override;
+    function GetAttachment: IAttachment; override;
     property Name: AnsiString read GetName;
     property Size: cardinal read GetSize;
     property CharSetID: cardinal read getCharSetID;
@@ -401,12 +412,9 @@ type
   { TIBSQLData }
 
   TIBSQLData = class(TColumnMetaData,ISQLData)
-  private
-    FTransaction: ITransaction;
   protected
     procedure CheckActive; override;
   public
-    function GetTransaction: ITransaction; override;
     function GetIsNull: Boolean; override;
     function GetAsArray: IArray;
     function GetAsBlob: IBlob; overload;
@@ -452,7 +460,8 @@ type
     procedure SetSQLType(aValue: cardinal); override;
   public
     procedure Clear;
-    function getColMetadata: IParamMetaData;
+    function CanChangeMetaData: boolean; override;
+    function getColMetadata: IParamMetaData; override;
     function GetModified: boolean; override;
     function GetAsPointer: Pointer;
     function GetAsString: AnsiString; override;
@@ -485,6 +494,7 @@ type
     procedure SetAsQuad(AValue: TISC_QUAD);
     procedure SetCharSetID(aValue: cardinal);
     procedure SetAsBcd(aValue: tBCD);
+    procedure SetAsNumeric(aValue: IFBNumeric);
 
     property AsBlob: IBlob read GetAsBlob write SetAsBlob;
     property IsNullable: Boolean read GetIsNullable write SetIsNullable;
@@ -525,9 +535,13 @@ type
     {ISQLParams}
     function getCount: integer;
     function getSQLParam(index: integer): ISQLParam;
-    function ByName(Idx: AnsiString): ISQLParam ;
+    function ByName(Idx: AnsiString): ISQLParam ; virtual;
     function GetModified: Boolean;
     function GetHasCaseSensitiveParams: Boolean;
+    function GetStatement: IStatement;
+    function GetTransaction: ITransaction;
+    function GetAttachment: IAttachment;
+    procedure Clear;
   end;
 
   { TResults }
@@ -546,17 +560,18 @@ type
      constructor Create(aResults: TSQLDataArea);
       {IResults}
      function getCount: integer;
-     function ByName(Idx: AnsiString): ISQLData;
+     function ByName(Idx: AnsiString): ISQLData; virtual;
      function getSQLData(index: integer): ISQLData;
      procedure GetData(index: integer; var IsNull:boolean; var len: short; var data: PByte);
      function GetStatement: IStatement;
-     function GetTransaction: ITransaction; virtual;
+     function GetTransaction: ITransaction;
+     function GetAttachment: IAttachment;
      procedure SetRetainInterfaces(aValue: boolean);
  end;
 
 implementation
 
-uses FBMessages, variants, IBUtils, FBTransaction, DateUtils;
+uses FBMessages, variants, IBUtils, FBTransaction, FBNumeric, DateUtils;
 
 { TSQLParamMetaData }
 
@@ -624,6 +639,16 @@ end;
 function TSQLDataArea.GetCount: integer;
 begin
   Result := Length(FColumnList);
+end;
+
+function TSQLDataArea.GetTransaction: ITransaction;
+begin
+  Result := GetStatement.GetTransaction;
+end;
+
+function TSQLDataArea.GetAttachment: IAttachment;
+begin
+  Result := GetStatement.GetAttachment;
 end;
 
 procedure TSQLDataArea.SetUniqueRelationName;
@@ -758,6 +783,54 @@ begin
     FName := AValue;
 end;
 
+function TSQLVarData.GetAttachment: IAttachment;
+begin
+  Result := Parent.Attachment;
+end;
+
+function TSQLVarData.GetTransaction: ITransaction;
+begin
+  Result := Parent.Transaction;
+end;
+
+function TSQLVarData.GetCharSetWidth: integer;
+begin
+  result := 1;
+  GetAttachment.CharSetWidth(GetCharSetID,result);
+end;
+
+function TSQLVarData.GetCodePage: TSystemCodePage;
+begin
+  result := CP_NONE;
+  GetAttachment.CharSetID2CodePage(GetCharSetID,result);
+end;
+
+procedure TSQLVarData.SetScale(aValue: integer);
+begin
+  if aValue = Scale then
+    Exit;
+  if not CanChangeMetaData  then
+    IBError(ibxeScaleCannotBeChanged,[]);
+  InternalSetScale(aValue);
+end;
+
+procedure TSQLVarData.SetDataLength(len: cardinal);
+begin
+  if len = DataLength then
+    Exit;
+  InternalSetDataLength(len);
+end;
+
+procedure TSQLVarData.SetSQLType(aValue: cardinal);
+begin
+  if aValue = SQLType then
+    Exit;
+  if not CanChangeMetaData then
+    IBError(ibxeSQLTypeUnchangeable,[TSQLDataItem.GetSQLTypeName(SQLType),
+                                          TSQLDataItem.GetSQLTypeName(aValue)]);
+  InternalSetSQLType(aValue);
+end;
+
 procedure TSQLVarData.SetMetaSize(aValue: cardinal);
 begin
   //Ignore
@@ -768,12 +841,22 @@ begin
   FColMetaData := TSQLParamMetaData.Create(self);
 end;
 
+procedure TSQLVarData.SetArray(AValue: IArray);
+begin
+  FArrayIntf := AValue;
+end;
+
 constructor TSQLVarData.Create(aParent: TSQLDataArea; aIndex: integer);
 begin
   inherited Create;
   FParent := aParent;
   FIndex := aIndex;
   FUniqueName := true;
+end;
+
+function TSQLVarData.CanChangeMetaData: boolean;
+begin
+  Result := Parent.CanChangeMetaData;
 end;
 
 procedure TSQLVarData.SetString(aValue: AnsiString);
@@ -786,8 +869,13 @@ begin
   FVarString := aValue;
   if SQLType = SQL_BLOB then
     SetMetaSize(GetAttachment.GetInlineBlobLimit);
-  SQLType := GetDefaultTextSQLType;
+  if CanChangeMetaData then
+    SQLType := GetDefaultTextSQLType;
   Scale := 0;
+  if  (SQLType <> SQL_VARYING) and (SQLType <> SQL_TEXT) then
+    IBError(ibxeUnableTosetaTextType,[Index,Name,TSQLDataItem.GetSQLTypeName(SQLType)]);
+  if not CanChangeMetaData and (Length(aValue) > GetSize) then
+    IBError(ibxeStringOverflow,[Length(aValue),DataLength]);
   SetSQLData(PByte(PAnsiChar(FVarString)),Length(aValue));
 end;
 
@@ -798,6 +886,7 @@ end;
 
 procedure TSQLVarData.RowChange;
 begin
+  FArrayIntf := nil;
   FModified := false;
   FVarString := '';
 end;
@@ -865,127 +954,6 @@ begin
 end;
 
 {TSQLDataItem}
-
-function TSQLDataItem.AdjustScale(Value: Int64; aScale: Integer): Double;
-var
-  Scaling : Int64;
-  i: Integer;
-  Val: Double;
-begin
-  Scaling := 1; Val := Value;
-  if aScale > 0 then
-  begin
-    for i := 1 to aScale do
-      Scaling := Scaling * 10;
-    result := Val * Scaling;
-  end
-  else
-    if aScale < 0 then
-    begin
-      for i := -1 downto aScale do
-        Scaling := Scaling * 10;
-      result := Val / Scaling;
-    end
-    else
-      result := Val;
-end;
-
-function TSQLDataItem.AdjustScaleToInt64(Value: Int64; aScale: Integer): Int64;
-var
-  Scaling : Int64;
-  i: Integer;
-  Val: Int64;
-begin
-  Scaling := 1; Val := Value;
-  if aScale > 0 then begin
-    for i := 1 to aScale do Scaling := Scaling * 10;
-    result := Val * Scaling;
-  end else if aScale < 0 then begin
-    for i := -1 downto aScale do Scaling := Scaling * 10;
-    result := Val div Scaling;
-  end else
-    result := Val;
-end;
-
-function TSQLDataItem.AdjustScaleToStr(Value: Int64; aScale: Integer
-  ): AnsiString;
-var Scaling : AnsiString;
-    i: Integer;
-begin
-  Result := IntToStr(Value);
-  Scaling := '';
-  if aScale > 0 then
-  begin
-    for i := 1 to aScale do
-      Result := Result + '0';
-  end
-  else
-  if aScale < 0 then
-  {$IF declared(DefaultFormatSettings)}
-  with DefaultFormatSettings do
-  {$ELSE}
-  {$IF declared(FormatSettings)}
-  with FormatSettings do
-  {$IFEND}
-  {$IFEND}
-  begin
-    if Length(Result) > -aScale then
-      system.Insert(DecimalSeparator,Result,Length(Result) + aScale)
-    else
-    begin
-      Scaling := '0' + DecimalSeparator;
-      for i := -1 downto aScale + Length(Result) do
-        Scaling := Scaling + '0';
-      Result := Scaling + Result;
-    end;
-  end;
-end;
-
-function TSQLDataItem.AdjustScaleToCurrency(Value: Int64; aScale: Integer
-  ): Currency;
-var
-  Scaling : Int64;
-  i : Integer;
-  FractionText, PadText, CurrText: AnsiString;
-begin
-  Result := 0;
-  Scaling := 1;
-  PadText := '';
-  if aScale > 0 then
-  begin
-    for i := 1 to aScale do
-      Scaling := Scaling * 10;
-    result := Value * Scaling;
-  end
-  else
-    if aScale < 0 then
-    begin
-      for i := -1 downto aScale do
-        Scaling := Scaling * 10;
-      FractionText := IntToStr(abs(Value mod Scaling));
-      for i := Length(FractionText) to -aScale -1 do
-        PadText := '0' + PadText;
-      {$IF declared(DefaultFormatSettings)}
-      with DefaultFormatSettings do
-      {$ELSE}
-      {$IF declared(FormatSettings)}
-      with FormatSettings do
-      {$IFEND}
-      {$IFEND}
-      if Value < 0 then
-        CurrText := '-' + IntToStr(Abs(Value div Scaling)) + DecimalSeparator + PadText + FractionText
-      else
-        CurrText := IntToStr(Abs(Value div Scaling)) + DecimalSeparator + PadText + FractionText;
-      try
-        result := StrToCurr(CurrText);
-      except
-        on E: Exception do
-          IBError(ibxeInvalidDataConversion, [nil]);
-      end;
-    end
-    else
-      result := Value;
-end;
 
 function TSQLDataItem.GetDateFormatStr(IncludeTime: boolean): AnsiString;
 begin
@@ -1084,57 +1052,6 @@ begin
     end;
 end;
 
-function TSQLDataItem.AdjustScaleFromCurrency(Value: Currency; aScale: Integer
-  ): Int64;
-var
-  Scaling : Int64;
-  i : Integer;
-begin
-  Result := 0;
-  Scaling := 1;
-  if aScale < 0 then
-  begin
-    for i := -1 downto aScale do
-      Scaling := Scaling * 10;
-    result := trunc(Value * Scaling);
-  end
-  else
-  if aScale > 0 then
-  begin
-    for i := 1 to aScale do
-       Scaling := Scaling * 10;
-    result := trunc(Value / Scaling);
-  end
-  else
-    result := trunc(Value);
-end;
-
-function TSQLDataItem.AdjustScaleFromDouble(Value: Double; aScale: Integer
-  ): Int64;
-var
-  Scaling : Int64;
-  i : Integer;
-begin
-  Result := 0;
-  Scaling := 1;
-  if aScale < 0 then
-  begin
-    for i := -1 downto aScale do
-      Scaling := Scaling * 10;
-    result := trunc(Value * Scaling);
-  end
-  else
-  if aScale > 0 then
-  begin
-    for i := 1 to aScale do
-       Scaling := Scaling * 10;
-    result := trunc(Value / Scaling);
-  end
-  else
-    result := trunc(Value);
-//  writeln('Adjusted ',Value,' to ',Result);
-end;
-
 procedure TSQLDataItem.CheckActive;
 begin
   //Do nothing by default
@@ -1199,6 +1116,11 @@ constructor TSQLDataItem.Create(api: TFBClientAPI);
 begin
   inherited Create;
   FFirebirdClientAPI := api;
+end;
+
+function TSQLDataItem.CanChangeMetaData: boolean;
+begin
+  Result := false;
 end;
 
 function TSQLDataItem.GetSQLTypeName: AnsiString;
@@ -1276,14 +1198,14 @@ begin
           end;
         end;
         SQL_SHORT:
-          result := AdjustScaleToCurrency(Int64(PShort(SQLData)^),
-                                      Scale);
+          result := NumericFromRawValues(Int64(PShort(SQLData)^),
+                                      Scale).getAsCurrency;
         SQL_LONG:
-          result := AdjustScaleToCurrency(Int64(PLong(SQLData)^),
-                                      Scale);
+          result := NumericFromRawValues(Int64(PLong(SQLData)^),
+                                      Scale).getAsCurrency;
         SQL_INT64:
-          result := AdjustScaleToCurrency(PInt64(SQLData)^,
-                                      Scale);
+          result := NumericFromRawValues(PInt64(SQLData)^,
+                                      Scale).getAsCurrency;
         SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT:
           result := Round(AsDouble);
 
@@ -1314,14 +1236,14 @@ begin
         end;
       end;
       SQL_SHORT:
-        result := AdjustScaleToInt64(Int64(PShort(SQLData)^),
-                                    Scale);
+        result := NumericFromRawValues(Int64(PShort(SQLData)^),
+                                    Scale).getAsInt64;
       SQL_LONG:
-        result := AdjustScaleToInt64(Int64(PLong(SQLData)^),
-                                    Scale);
+        result := NumericFromRawValues(Int64(PLong(SQLData)^),
+                                    Scale).getAsInt64;
       SQL_INT64:
-        result := AdjustScaleToInt64(PInt64(SQLData)^,
-                                    Scale);
+        result := NumericFromRawValues(PInt64(SQLData)^,
+                                    Scale).getAsInt64;
       SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT:
         result := Round(AsDouble);
       else
@@ -1450,13 +1372,13 @@ begin
         end;
       end;
       SQL_SHORT:
-        result := AdjustScale(Int64(PShort(SQLData)^),
-                              Scale);
+        result := NumericFromRawValues(Int64(PShort(SQLData)^),
+                              Scale).getAsDouble;
       SQL_LONG:
-        result := AdjustScale(Int64(PLong(SQLData)^),
-                              Scale);
+        result := NumericFromRawValues(Int64(PLong(SQLData)^),
+                              Scale).getAsDouble;
       SQL_INT64:
-        result := AdjustScale(PInt64(SQLData)^, Scale);
+        result := NumericFromRawValues(PInt64(SQLData)^, Scale).getAsDouble;
       SQL_FLOAT:
         result := PFloat(SQLData)^;
       SQL_DOUBLE, SQL_D_FLOAT:
@@ -1502,13 +1424,14 @@ begin
         end;
       end;
       SQL_SHORT:
-        result := Round(AdjustScale(Int64(PShort(SQLData)^),
-                                    Scale));
+        result := NumericFromRawValues(Int64(PShort(SQLData)^),
+                                    Scale).getAsInteger;
       SQL_LONG:
-        result := Round(AdjustScale(Int64(PLong(SQLData)^),
-                                    Scale));
+        result := NumericFromRawValues(Int64(PLong(SQLData)^),
+                                    Scale).getAsInteger;
       SQL_INT64:
-        result := Round(AdjustScale(PInt64(SQLData)^, Scale));
+        result := NumericFromRawValues(PInt64(SQLData)^, Scale).getAsInteger;
+
       SQL_DOUBLE, SQL_FLOAT, SQL_D_FLOAT:
         result := Round(AsDouble);
       SQL_DEC_FIXED,
@@ -1605,10 +1528,8 @@ end;
 function GetStrLen(p: PAnsiChar; FieldWidth, MaxDataLength: cardinal): integer;
 var i: integer;
     cplen: integer;
-    s: AnsiString;
 begin
   Result := 0;
-  s := strpas(p);
   for i := 1 to FieldWidth do
   begin
     cplen := UTF8CodepointSizeFull(p);
@@ -1725,8 +1646,35 @@ begin
         result := Int128ToStr(SQLData,scale);
 
       else
-        IBError(ibxeInvalidDataConversion, [nil]);
+        IBError(ibxeInvalidDataConversion, [GetSQLTypeName]);
     end;
+end;
+
+function TSQLDataItem.GetAsNumeric: IFBNumeric;
+var aValue: Int64;
+begin
+  case SQLType of
+   SQL_TEXT, SQL_VARYING:
+     Result := StrToNumeric(GetAsString);
+
+   SQL_SHORT:
+     Result := NumericFromRawValues(PShort(SQLData)^, Scale);
+
+   SQL_LONG:
+     Result := NumericFromRawValues(PLong(SQLData)^, Scale);
+
+   SQL_INT64:
+     Result := NumericFromRawValues(PInt64(SQLData)^, Scale);
+
+   SQL_DEC16,
+   SQL_DEC34,
+   SQL_DEC_FIXED,
+   SQL_INT128:
+     Result := BCDToNumeric(GetAsBCD);
+
+   else
+     IBError(ibxeInvalidDataConversion, [nil]);
+  end;
 end;
 
 function TSQLDataItem.GetIsNull: Boolean;
@@ -1867,6 +1815,9 @@ begin
   if GetSQLDialect < 3 then
     AsDouble := Value
   else
+  if not CanChangeMetaData and ((SQLType <> SQL_INT64) or (Scale <> -4)) then
+    SetAsNumeric(CurrToNumeric(Value))
+  else
   begin
     Changing;
     if IsNullable then
@@ -1882,15 +1833,20 @@ end;
 procedure TSQLDataItem.SetAsInt64(Value: Int64);
 begin
   CheckActive;
-  Changing;
-  if IsNullable then
-    IsNull := False;
+  if not CanChangeMetaData and ((SQLType <> SQL_INT64) or (Scale <> 0)) then
+    SetAsNumeric(IntToNumeric(Value))
+  else
+  begin
+    Changing;
+    if IsNullable then
+      IsNull := False;
 
-  SQLType := SQL_INT64;
-  Scale := 0;
-  DataLength := SizeOf(Int64);
-  PInt64(SQLData)^ := Value;
-  Changed;
+    SQLType := SQL_INT64;
+    Scale := 0;
+    DataLength := SizeOf(Int64);
+    PInt64(SQLData)^ := Value;
+    Changed;
+  end;
 end;
 
 procedure TSQLDataItem.SetAsDate(Value: TDateTime);
@@ -2025,43 +1981,58 @@ end;
 procedure TSQLDataItem.SetAsDouble(Value: Double);
 begin
   CheckActive;
-  if IsNullable then
-    IsNull := False;
+  if not CanChangeMetaData and (SQLType <> SQL_DOUBLE) then
+    SetAsNumeric(DoubleToNumeric(Value))
+  else
+  begin
+    if IsNullable then
+      IsNull := False;
 
-  Changing;
-  SQLType := SQL_DOUBLE;
-  DataLength := SizeOf(Double);
-  Scale := 0;
-  PDouble(SQLData)^ := Value;
-  Changed;
+    Changing;
+    SQLType := SQL_DOUBLE;
+    DataLength := SizeOf(Double);
+    Scale := 0;
+    PDouble(SQLData)^ := Value;
+    Changed;
+  end;
 end;
 
 procedure TSQLDataItem.SetAsFloat(Value: Float);
 begin
   CheckActive;
-  if IsNullable then
-    IsNull := False;
+  if not CanChangeMetaData and (SQLType <> SQL_FLOAT) then
+    SetAsNumeric(DoubleToNumeric(Value))
+  else
+  begin
+    if IsNullable then
+      IsNull := False;
 
-  Changing;
-  SQLType := SQL_FLOAT;
-  DataLength := SizeOf(Float);
-  Scale := 0;
-  PSingle(SQLData)^ := Value;
-  Changed;
+    Changing;
+    SQLType := SQL_FLOAT;
+    DataLength := SizeOf(Float);
+    Scale := 0;
+    PSingle(SQLData)^ := Value;
+    Changed;
+  end;
 end;
 
 procedure TSQLDataItem.SetAsLong(Value: Long);
 begin
   CheckActive;
-  if IsNullable then
-    IsNull := False;
+  if not CanChangeMetaData and ((SQLType <> SQL_LONG) or (Scale <> 0)) then
+    SetAsNumeric(IntToNumeric(Value))
+  else
+  begin
+    if IsNullable then
+      IsNull := False;
 
-  Changing;
-  SQLType := SQL_LONG;
-  DataLength := SizeOf(Long);
-  Scale := 0;
-  PLong(SQLData)^ := Value;
-  Changed;
+    Changing;
+    SQLType := SQL_LONG;
+    DataLength := SizeOf(Long);
+    Scale := 0;
+    PLong(SQLData)^ := Value;
+    Changed;
+  end;
 end;
 
 procedure TSQLDataItem.SetAsPointer(Value: Pointer);
@@ -2096,15 +2067,20 @@ end;
 procedure TSQLDataItem.SetAsShort(Value: short);
 begin
   CheckActive;
-  Changing;
-  if IsNullable then
-    IsNull := False;
+  if not CanChangeMetaData and ((SQLType <> SQL_SHORT) or (Scale <> 0)) then
+    SetAsNumeric(IntToNumeric(Value))
+  else
+  begin
+    Changing;
+    if IsNullable then
+      IsNull := False;
 
-  SQLType := SQL_SHORT;
-  DataLength := SizeOf(Short);
-  Scale := 0;
-  PShort(SQLData)^ := Value;
-  Changed;
+    SQLType := SQL_SHORT;
+    DataLength := SizeOf(Short);
+    Scale := 0;
+    PShort(SQLData)^ := Value;
+    Changed;
+  end;
 end;
 
 procedure TSQLDataItem.SetAsString(Value: AnsiString);
@@ -2123,15 +2099,13 @@ begin
   else case VarType(Value) of
     varEmpty, varNull:
       IsNull := True;
-    varSmallint, varInteger, varByte,
-      varWord, varShortInt:
-      AsLong := Value;
-    varInt64:
-      AsInt64 := Value;
+    varSmallint, varInteger, varByte, varLongWord,
+      varWord, varShortInt, varInt64:
+        SetAsNumeric(IntToNumeric(Int64(Value)));
     varSingle, varDouble:
       AsDouble := Value;
     varCurrency:
-      AsCurrency := Value;
+      SetAsNumeric(CurrToNumeric(Currency(Value)));
     varBoolean:
       AsBoolean := Value;
     varDate:
@@ -2150,28 +2124,60 @@ begin
   end;
 end;
 
-procedure TSQLDataItem.SetAsNumeric(Value: Int64; aScale: integer);
+procedure TSQLDataItem.SetAsNumeric(Value: IFBNumeric);
 begin
   CheckActive;
   Changing;
   if IsNullable then
     IsNull := False;
 
-  SQLType := SQL_INT64;
-  Scale := aScale;
-  DataLength := SizeOf(Int64);
-  PInt64(SQLData)^ := Value;
+  if CanChangeMetadata then
+  begin
+    {Restore original values}
+    SQLType := getColMetadata.GetSQLType;
+    Scale := getColMetadata.getScale;
+    SetDataLength(getColMetadata.GetSize);
+  end;
+
+  with FFirebirdClientAPI do
+  case GetSQLType of
+  SQL_LONG:
+      PLong(SQLData)^ := SafeInteger(Value.AdjustScaleTo(Scale).getRawValue);
+  SQL_SHORT:
+    PShort(SQLData)^ := SafeSmallInt(Value.AdjustScaleTo(Scale).getRawValue);
+  SQL_INT64:
+    PInt64(SQLData)^ := Value.AdjustScaleTo(Scale).getRawValue;
+  SQL_TEXT, SQL_VARYING:
+   SetAsString(Value.getAsString);
+  SQL_D_FLOAT,
+  SQL_DOUBLE:
+    PDouble(SQLData)^ := Value.getAsDouble;
+  SQL_FLOAT:
+    PSingle(SQLData)^ := Value.getAsDouble;
+  SQL_DEC_FIXED,
+  SQL_DEC16,
+  SQL_DEC34:
+     SQLDecFloatEncode(Value.getAsBCD,SQLType,SQLData);
+  SQL_INT128:
+    StrToInt128(Scale,Value.getAsString,SQLData);
+  else
+    IBError(ibxeInvalidDataConversion, [nil]);
+  end;
   Changed;
 end;
 
 procedure TSQLDataItem.SetAsBcd(aValue: tBCD);
-var C: Currency;
 begin
   CheckActive;
   Changing;
   if IsNullable then
     IsNull := False;
 
+  if not CanChangeMetaData then
+  begin
+    SetAsNumeric(BCDToNumeric(aValue));
+    Exit;
+  end;
 
   with FFirebirdClientAPI do
   if aValue.Precision <= 16 then
@@ -2241,7 +2247,7 @@ end;
 
 function TColumnMetaData.GetAttachment: IAttachment;
 begin
-  Result := GetStatement.GetAttachment;
+  Result := FIBXSQLVAR.GetAttachment;
 end;
 
 function TColumnMetaData.SQLData: PByte;
@@ -2261,7 +2267,7 @@ end;
 
 constructor TColumnMetaData.Create(aOwner: IUnknown; aIBXSQLVAR: TSQLVarData);
 begin
-  inherited Create(aIBXSQLVAR.GetStatement.GetAttachment.getFirebirdAPI as TFBClientAPI);
+  inherited Create(aIBXSQLVAR.GetAttachment.getFirebirdAPI as TFBClientAPI);
   FIBXSQLVAR := aIBXSQLVAR;
   FOwner := aOwner;
   FPrepareSeqNo := FIBXSQLVAR.Parent.PrepareSeqNo;
@@ -2277,7 +2283,12 @@ end;
 
 function TColumnMetaData.GetSQLDialect: integer;
 begin
-  Result := FIBXSQLVAR.Statement.GetSQLDialect;
+  Result := FIBXSQLVAR.GetAttachment.GetSQLDialect;
+end;
+
+function TColumnMetaData.getColMetadata: IParamMetaData;
+begin
+  Result := self;
 end;
 
 function TColumnMetaData.GetIndex: integer;
@@ -2376,7 +2387,7 @@ end;
 
 function TColumnMetaData.GetTransaction: ITransaction;
 begin
-  Result := GetStatement.GetTransaction;
+  Result := FIBXSQLVAR.GetTransaction;
 end;
 
 { TIBSQLData }
@@ -2398,14 +2409,6 @@ begin
     IBError(ibxeBOF,[nil]);
 end;
 
-function TIBSQLData.GetTransaction: ITransaction;
-begin
-  if FTransaction = nil then
-    Result := inherited GetTransaction
-  else
-    Result := FTransaction;
-end;
-
 function TIBSQLData.GetIsNull: Boolean;
 begin
   CheckActive;
@@ -2415,7 +2418,7 @@ end;
 function TIBSQLData.GetAsArray: IArray;
 begin
   CheckActive;
-  result := FIBXSQLVAR.GetAsArray(AsQuad);
+  result := FIBXSQLVAR.GetAsArray;
 end;
 
 function TIBSQLData.GetAsBlob: IBlob;
@@ -2468,7 +2471,7 @@ begin
   if IsNullable then
     IsNull := False;
   with FFirebirdClientAPI do
-  case getColMetaData.SQLTYPE of
+  case SQLTYPE of
   SQL_BOOLEAN:
     if AnsiCompareText(Value,STrue) = 0 then
       AsBoolean := true
@@ -2498,7 +2501,7 @@ begin
   SQL_LONG,
   SQL_INT64:
     if TryStrToNumeric(Value,Int64Value,aScale) then
-      SetAsNumeric(Int64Value,aScale)
+      SetAsNumeric(NumericFromRawValues(Int64Value,aScale))
     else
       DoSetString;
 
@@ -2507,7 +2510,7 @@ begin
   SQL_DEC34,
   SQL_INT128:
     if TryStrToBCD(Value,BCDValue) then
-      SetAsBCD(BCDValue)
+      SetAsNumeric(BCDToNumeric(BCDValue))
     else
       DoSetString;
 
@@ -2515,7 +2518,7 @@ begin
   SQL_DOUBLE,
   SQL_FLOAT:
     if TryStrToNumeric(Value,Int64Value,aScale) then
-      SetAsDouble(NumericToDouble(Int64Value,aScale))
+      SetAsNumeric(NumericFromRawValues(Int64Value,AScale))
     else
       DoSetString;
 
@@ -2588,6 +2591,11 @@ end;
 procedure TSQLParam.Clear;
 begin
   IsNull := true;
+end;
+
+function TSQLParam.CanChangeMetaData: boolean;
+begin
+  Result := FIBXSQLVAR.CanChangeMetaData;
 end;
 
 function TSQLParam.getColMetadata: IParamMetaData;
@@ -2669,6 +2677,7 @@ begin
   if not FIBXSQLVAR.UniqueName then
     IBError(ibxeDuplicateParamName,[FIBXSQLVAR.Name]);
 
+  FIBXSQLVAR.SetArray(anArray); {save array interface}
   SetAsQuad(AnArray.GetArrayID);
 end;
 
@@ -3144,6 +3153,29 @@ begin
   end;
 end;
 
+procedure TSQLParam.SetAsNumeric(aValue: IFBNumeric);
+var i: integer;
+    OldSQLVar: TSQLVarData;
+begin
+  if FIBXSQLVAR.UniqueName then
+    inherited SetAsNumeric(AValue)
+  else
+  with FIBXSQLVAR.Parent do
+  begin
+    for i := 0 to Count - 1 do
+      if Column[i].Name = Name then
+      begin
+        OldSQLVar := FIBXSQLVAR;
+        FIBXSQLVAR := Column[i];
+        try
+          inherited SetAsNumeric(AValue);
+        finally
+          FIBXSQLVAR := OldSQLVar;
+        end;
+      end;
+  end;
+end;
+
 { TMetaData }
 
 procedure TMetaData.CheckActive;
@@ -3165,7 +3197,8 @@ end;
 
 destructor TMetaData.Destroy;
 begin
-  (FStatement as TInterfaceOwner).Remove(self);
+  if FStatement <> nil then
+    (FStatement as TInterfaceOwner).Remove(self);
   inherited Destroy;
 end;
 
@@ -3231,7 +3264,8 @@ end;
 
 destructor TSQLParams.Destroy;
 begin
-  (FStatement as TInterfaceOwner).Remove(self);
+  if FStatement <> nil then
+    (FStatement as TInterfaceOwner).Remove(self);
   inherited Destroy;
 end;
 
@@ -3287,6 +3321,28 @@ begin
   Result := FSQLParams.CaseSensitiveParams;
 end;
 
+function TSQLParams.GetStatement: IStatement;
+begin
+  Result := FSQLParams.GetStatement;
+end;
+
+function TSQLParams.GetTransaction: ITransaction;
+begin
+  Result := FSQLParams.GetTransaction;
+end;
+
+function TSQLParams.GetAttachment: IAttachment;
+begin
+  Result := FSQLParams.GetAttachment;
+end;
+
+procedure TSQLParams.Clear;
+var i: integer;
+begin
+  for i := 0 to getCount - 1 do
+    getSQLParam(i).Clear;
+end;
+
 { TResults }
 
 procedure TResults.CheckActive;
@@ -3311,9 +3367,12 @@ begin
     IBError(ibxeInvalidColumnIndex,[nil]);
 
   if not HasInterface(aIBXSQLVAR.Index) then
-    AddInterface(aIBXSQLVAR.Index, TIBSQLData.Create(self,aIBXSQLVAR));
-  col := TIBSQLData(GetInterface(aIBXSQLVAR.Index));
-  col.FTransaction := GetTransaction;
+  begin
+    col := TIBSQLData.Create(self,aIBXSQLVAR);
+    AddInterface(aIBXSQLVAR.Index, col);
+  end
+  else
+    col := TIBSQLData(GetInterface(aIBXSQLVAR.Index));
   Result := col;
 end;
 
@@ -3378,7 +3437,12 @@ end;
 
 function TResults.GetTransaction: ITransaction;
 begin
-  Result := FStatement.GetTransaction;
+  Result := FResults.GetTransaction;
+end;
+
+function TResults.GetAttachment: IAttachment;
+begin
+  Result := FResults.GetAttachment;
 end;
 
 procedure TResults.SetRetainInterfaces(aValue: boolean);

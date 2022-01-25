@@ -52,6 +52,7 @@ del testsuite.exe
 echo( 
 echo Starting Testsuite
 echo( 
+
 IF EXIST "testsuite.exe" (
 testsuite.exe -u %USERNAME% -p %PASSWORD% -e %EMPLOYEEDB% -n %NEWDBNAME% -s %NEWDBNAME2% -b %BAKFILE% -o testout.log %1
 if not EXIST "%DIFF%" (

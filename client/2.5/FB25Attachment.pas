@@ -49,6 +49,7 @@ type
     FFirebird25ClientAPI: TFB25ClientAPI;
   protected
     procedure CheckHandle; override;
+    function GetAttachment: IAttachment; override;
   public
     constructor Create(api: TFB25ClientAPI; DatabaseName: AnsiString; aDPB: IDPB;
       RaiseExceptionOnConnectError: boolean);
@@ -65,8 +66,8 @@ type
     procedure Disconnect(Force: boolean=false); override;
     function IsConnected: boolean; override;
     procedure DropDatabase;
-    function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction; override;
-    function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionCompletion): ITransaction; override;
+    function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion; aName: AnsiString): ITransaction; override;
+    function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionCompletion; aName: AnsiString): ITransaction; override;
     procedure ExecImmediate(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer); override;
     function Prepare(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer; CursorName: AnsiString=''): IStatement; override;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: AnsiString;
@@ -105,6 +106,11 @@ begin
     IBError(ibxeDatabaseClosed,[nil]);
 end;
 
+function TFB25Attachment.GetAttachment: IAttachment;
+begin
+  Result := self;
+end;
+
 constructor TFB25Attachment.Create(api: TFB25ClientAPI; DatabaseName: AnsiString; aDPB: IDPB;
   RaiseExceptionOnConnectError: boolean);
 begin
@@ -138,8 +144,6 @@ begin
     Disconnect;
     Connect;
   end
-  else
-    GetODSAndConnectionInfo;
 end;
 
 constructor TFB25Attachment.CreateDatabase(api: TFB25ClientAPI; sql: AnsiString; aSQLDialect: integer;
@@ -148,7 +152,7 @@ var tr_handle: TISC_TR_HANDLE;
 begin
   inherited Create(api,'',nil,RaiseExceptionOnError);
   FFirebird25ClientAPI := api;
-  FSQLDialect := aSQLDialect;
+  SetSQLDialect(aSQLDialect);
   tr_handle := nil;
   with FFirebird25ClientAPI do
   begin
@@ -157,7 +161,6 @@ begin
       IBDataBaseError;
 
   end;
-  GetODSAndConnectionInfo;
   ExtractConnectString(sql,FDatabaseName);
   DPBFromCreateSQL(sql);
 end;
@@ -174,7 +177,7 @@ end;
 
 procedure TFB25Attachment.Connect;
 begin
-  FSQLDialect := 3;
+  SetSQLDialect(3);
 
   with FFirebird25ClientAPI do
   if DPB = nil then
@@ -192,23 +195,20 @@ begin
       IBDatabaseError;
 
   end;
-  GetODSAndConnectionInfo;
 end;
 
 procedure TFB25Attachment.Disconnect(Force: boolean);
 begin
-  if FHandle = nil then
-    Exit;
-
-  EndAllTransactions;
-  {Disconnect}
-  with FFirebird25ClientAPI do
-    if (isc_detach_database(StatusVector, @FHandle) > 0) and not Force then
-      IBDatabaseError;
-  FHandle := nil;
-  FHasDefaultCharSet := false;
-  FCodePage := CP_NONE;
-  FCharSetID := 0;
+  if FHandle <> nil then
+  begin
+    EndAllTransactions;
+    {Disconnect}
+    with FFirebird25ClientAPI do
+      if (isc_detach_database(StatusVector, @FHandle) > 0) and not Force then
+        IBDatabaseError;
+    FHandle := nil;
+  end;
+  inherited Disconnect(Force);
 end;
 
 function TFB25Attachment.IsConnected: boolean;
@@ -218,26 +218,29 @@ end;
 
 procedure TFB25Attachment.DropDatabase;
 begin
-  CheckHandle;
-  EndAllTransactions;
-  with FFirebird25ClientAPI do
-    if isc_drop_database(StatusVector, @FHandle) > 0 then
-      IBDatabaseError;
-  FHandle := nil;
+  if IsConnected then
+  begin
+    EndAllTransactions;
+    EndSession(false);
+    with FFirebird25ClientAPI do
+      if isc_drop_database(StatusVector, @FHandle) > 0 then
+        IBDatabaseError;
+    FHandle := nil;
+  end;
 end;
 
 function TFB25Attachment.StartTransaction(TPB: array of byte;
-  DefaultCompletion: TTransactionCompletion): ITransaction;
+  DefaultCompletion: TTransactionCompletion; aName: AnsiString): ITransaction;
 begin
   CheckHandle;
-  Result := TFB25Transaction.Create(FFirebird25ClientAPI,self,TPB,DefaultCompletion);
+  Result := TFB25Transaction.Create(FFirebird25ClientAPI,self,TPB,DefaultCompletion,aName);
 end;
 
 function TFB25Attachment.StartTransaction(TPB: ITPB;
-  DefaultCompletion: TTransactionCompletion): ITransaction;
+  DefaultCompletion: TTransactionCompletion; aName: AnsiString): ITransaction;
 begin
   CheckHandle;
-  Result := TFB25Transaction.Create(FFirebird25ClientAPI,self,TPB,DefaultCompletion);
+  Result := TFB25Transaction.Create(FFirebird25ClientAPI,self,TPB,DefaultCompletion,aName);
 end;
 
 function TFB25Attachment.CreateBlob(transaction: ITransaction;

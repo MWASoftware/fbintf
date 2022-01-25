@@ -49,6 +49,15 @@ interface
 
 uses Classes, SysUtils, IB;
 
+{$IF not defined(LineEnding)}
+const
+  {$IFDEF WINDOWS}
+  LineEnding = #$0D#$0A;
+  {$ELSE}
+  LineEnding = #$0A;
+  {$ENDIF}
+{$IFEND}
+
 type
   TSQLTokens = (
 
@@ -300,10 +309,6 @@ const
   LF   = #10;
   TAB  = #9;
   NULL_TERMINATOR = #0;
-
-  {$IFNDEF FPC}
-  LineEnding = CRLF;
-  {$ENDIF}
 
   {SQL Reserved words in alphabetical order}
 
@@ -615,6 +620,147 @@ type
         var slNames: TStrings): AnsiString;
   end;
 
+  TOnProgressEvent = procedure (Sender: TObject; Reset: boolean; value: integer) of object;
+
+  { TSQLXMLReader - used to save and read back blob and array data in a pseudo XML format}
+
+  TSQLXMLReader = class(TSQLTokeniser)
+  private
+      type
+        TXMLStates =  (stNoXML, stInTag,stInTagBody,
+                       stAttribute,stAttributeValue,stQuotedAttributeValue,
+                       stInEndTag, stInEndTagBody,
+                       stXMLData);
+
+        TXMLTag    =   (xtNone,xtBlob,xtArray,xtElt);
+
+        TXMLTagDef = record
+          XMLTag: TXMLTag;
+          TagValue: string;
+        end;
+
+      const
+        XMLTagDefs: array [xtBlob..xtElt] of TXMLTagDef = (
+          (XMLTag: xtBlob;   TagValue: 'blob'),
+          (XMLTag: xtArray;  TagValue: 'array'),
+          (XMLTag: xtElt;    TagValue: 'elt')
+          );
+        MaxXMLTags = 20;
+        BlobLineLength = 40;
+
+    public
+      const
+        ibx_blob = 'IBX_BLOB';
+        ibx_array = 'IBX_ARRAY';
+
+      type
+        TBlobData = record
+          BlobIntf: IBlob;
+          SubType: cardinal;
+        end;
+
+        TArrayData = record
+          ArrayIntf: IArray;
+          SQLType: cardinal;
+          relationName: string;
+          columnName: string;
+          dim: cardinal;
+          Size: cardinal;
+          Scale: integer;
+          CharSet: string;
+          bounds: TArrayBounds;
+          CurrentRow: integer;
+          Index: array of integer;
+        end;
+
+  private
+    FOnProgressEvent: TOnProgressEvent;
+    FXMLState: TXMLStates;
+    FXMLTagStack: array [1..MaxXMLTags] of TXMLTag;
+    FXMLTagIndex: integer;
+    FAttributeName: string;
+    FBlobData: array of TBlobData;
+    FCurrentBlob: integer;
+    FBlobBuffer: PByte;
+    FArrayData: array of TArrayData;
+    FCurrentArray: integer;
+    FXMLString: string;
+    function FindTag(tag: string; var xmlTag: TXMLTag): boolean;
+    function GetArrayData(index: integer): TArrayData;
+    function GetArrayDataCount: integer;
+    function GetBlobData(index: integer): TBlobData;
+    function GetBlobDataCount: integer;
+    function GetTagName(xmltag: TXMLTag): string;
+    procedure ProcessAttributeValue(attrValue: string);
+    procedure ProcessBoundsList(boundsList: string);
+    procedure ProcessTagValue(tagValue: string);
+    procedure XMLTagInit(xmltag: TXMLTag);
+    function XMLTagEnd(var xmltag: TXMLTag): boolean;
+    procedure XMLTagEnter;
+  protected
+    function GetAttachment: IAttachment; virtual; abstract;
+    function GetTransaction: ITransaction; virtual; abstract;
+    function GetErrorPrefix: string; virtual; abstract;
+    function TokenFound(var token: TSQLTokens): boolean; override;
+    procedure Reset; override;
+    procedure ShowError(msg: string; params: array of const); overload; virtual;
+    procedure ShowError(msg: string); overload;
+  public
+    constructor Create;
+    procedure FreeDataObjects;
+    class function FormatBlob(Field: ISQLData): string; overload;
+    class function FormatBlob(contents: string; subtype:integer): string; overload;
+    class function FormatArray(ar: IArray): string;
+    property BlobData[index: integer]: TBlobData read GetBlobData;
+    property BlobDataCount: integer read GetBlobDataCount;
+    property ArrayData[index: integer]: TArrayData read GetArrayData;
+    property ArrayDataCount: integer read GetArrayDataCount;
+    property Attachment: IAttachment read GetAttachment;
+    property Transaction: ITransaction read GetTransaction;
+    property OnProgressEvent: TOnProgressEvent read FOnProgressEvent write FOnProgressEvent; {Progress Bar Support}
+ end;
+
+ TJnlEntryType = (jeTransStart, jeTransCommit, jeTransCommitFail, jeTransCommitRet, jeTransRollback,
+                   jeTransRollbackFail, jeTransRollbackRet, jeTransEnd, jeQuery,jeUnknown);
+
+ TJnlEntry = record
+   JnlEntryType: TJnlEntryType;
+   Timestamp: TDateTime;
+   AttachmentID: cardinal;
+   SessionID: cardinal;
+   TransactionID: cardinal;
+   OldTransactionID: cardinal;
+   TransactionName: AnsiString;
+   TPB: ITPB;
+   DefaultCompletion: TTransactionCompletion;
+   QueryText: AnsiString;
+ end;
+
+ TOnNextJournalEntry = procedure(JnlEntry: TJnlEntry) of object;
+
+ { TJournalProcessor - used to parse a client side journal}
+
+   TJournalProcessor = class(TSQLTokeniser)
+    private
+      type TLineState = (lsInit, lsJnlFound, lsGotTimestamp, lsGotJnlType,
+                          lsGotAttachmentID, lsGotSessionID,
+                          lsGotTransactionID,  lsGotOldTransactionID, lsGotText1Length,
+                          lsGotText1, lsGotText2Length, lsGotText2);
+    private
+      FOnNextJournalEntry: TOnNextJournalEntry;
+      FInStream: TStream;
+      FFirebirdClientAPI: IFirebirdAPI;
+      procedure DoExecute;
+      function IdentifyJnlEntry(aTokenText: AnsiString): TJnlEntryType;
+    protected
+      function GetChar: AnsiChar; override;
+      property OnNextJournalEntry: TOnNextJournalEntry read FOnNextJournalEntry write FOnNextJournalEntry;
+    public
+      destructor Destroy; override;
+      class procedure Execute( aFileName: string; api: IFirebirdAPI; aOnNextJournalEntry: TOnNextJournalEntry);
+      class function JnlEntryText(je: TJnlEntryType): string;
+    end;
+
 
 function Max(n1, n2: Integer): Integer;
 function Min(n1, n2: Integer): Integer;
@@ -649,8 +795,8 @@ function FBFormatDateTime(fmt: AnsiString; aDateTime: TDateTime): AnsiString;
 function FormatTimeZoneOffset(EffectiveTimeOffsetMins: integer): AnsiString;
 function DecodeTimeZoneOffset(TZOffset: AnsiString; var dstOffset: integer): boolean;
 function StripLeadingZeros(Value: AnsiString): AnsiString;
-function TryStrToNumeric(S: Ansistring; out Value: int64; out scale: integer): boolean;
-function NumericToDouble(aValue: Int64; aScale: integer): double;
+function StringToHex(octetString: string; MaxLineLength: integer=0): string; overload;
+procedure StringToHex(octetString: string; TextOut: TStrings; MaxLineLength: integer=0); overload;
 
 
 implementation
@@ -664,6 +810,19 @@ uses FBMessages, Math
 , RegularExpressions
 {$IFEND}
 {$ENDIF};
+
+resourcestring
+  sXMLStackUnderflow = 'XML Stack Underflow';
+  sInvalidEndTag = 'XML End Tag Mismatch - %s';
+  sBadEndTagClosing = 'XML End Tag incorrectly closed';
+  sXMLStackOverFlow = 'XML Stack Overflow';
+  sXMLAttributeError = 'Unexpected attribute - "%s" = "%s"';
+  sInvalidBoundsList = 'Invalid array bounds list - "%s"';
+  sBinaryBlockMustbeEven = 'Binary block must have an even number of characters';
+  sArrayIndexError = 'Array Index Error (%d)';
+  sBlobIndexError = 'Blob Index Error (%d)';
+  sNoDatabase = 'Missing database for xml tag import';
+  sNoTransaction = 'Missing transaction for xml tag import';
 
 
 function Max(n1, n2: Integer): Integer;
@@ -1458,9 +1617,10 @@ begin
   Result := FLastChar;
   for i := 2 to NumOfChars do
   begin
-    if GetNext = sqltEOF then break;
+    if GetNext = sqltEOF then Exit;
     Result := Result + FLastChar;
   end;
+  GetNext;
 end;
 
 function TSQLTokeniser.GetNextToken: TSQLTokens;
@@ -1855,78 +2015,948 @@ begin
     end;
 end;
 
-function TryStrToNumeric(S: Ansistring; out Value: int64; out scale: integer): boolean;
-var i: integer;
-    ds: integer;
-    exponent: integer;
+function StringToHex(octetString: string; MaxLineLength: integer): string; overload;
+
+  function ToHex(aValue: byte): string;
+  const
+    HexChars: array [0..15] of char = '0123456789ABCDEF';
+  begin
+    Result := HexChars[aValue shr 4] +
+               HexChars[(aValue and $0F)];
+  end;
+
+var i, j: integer;
+begin
+  i := 1;
+  Result := '';
+  if MaxLineLength = 0 then
+  while i <= Length(octetString) do
+  begin
+    Result := Result +  ToHex(byte(octetString[i]));
+    Inc(i);
+  end
+  else
+  while i <= Length(octetString) do
+  begin
+      for j := 1 to MaxLineLength do
+      begin
+        if i > Length(octetString) then
+          Exit
+        else
+          Result := Result + ToHex(byte(octetString[i]));
+        inc(i);
+      end;
+      Result := Result + LineEnding;
+  end;
+end;
+
+procedure StringToHex(octetString: string; TextOut: TStrings; MaxLineLength: integer); overload;
+begin
+    TextOut.Add(StringToHex(octetString,MaxLineLength));
+end;
+
+{ TSQLXMLReader }
+
+function TSQLXMLReader.FindTag(tag: string; var xmlTag: TXMLTag): boolean;
+var i: TXMLTag;
 begin
   Result := false;
-  ds := 0;
-  exponent := 0;
-  S := Trim(S);
-  Value := 0;
-  scale := 0;
-  if Length(S) = 0 then
-    Exit;
-  {$IF declared(DefaultFormatSettings)}
-  with DefaultFormatSettings do
-  {$ELSE}
-  {$IF declared(FormatSettings)}
-  with FormatSettings do
-  {$IFEND}
-  {$IFEND}
-  begin
-    for i := length(S) downto 1 do
+  for i := xtBlob to xtElt do
+    if XMLTagDefs[i].TagValue = tag then
     begin
-      if S[i] = AnsiChar(DecimalSeparator) then
+      xmlTag := XMLTagDefs[i].XMLTag;
+      Result := true;
+      break;
+    end;
+end;
+
+function TSQLXMLReader.GetArrayData(index: integer): TArrayData;
+begin
+  if (index < 0) or (index > ArrayDataCount) then
+    ShowError(sArrayIndexError,[index]);
+  Result := FArrayData[index];
+end;
+
+function TSQLXMLReader.GetArrayDataCount: integer;
+begin
+  Result := Length(FArrayData);
+end;
+
+function TSQLXMLReader.GetBlobData(index: integer): TBlobData;
+begin
+  if (index < 0) or (index > BlobDataCount) then
+    ShowError(sBlobIndexError,[index]);
+  Result := FBlobData[index];
+end;
+
+function TSQLXMLReader.GetBlobDataCount: integer;
+begin
+  Result := Length(FBlobData);
+end;
+
+function TSQLXMLReader.GetTagName(xmltag: TXMLTag): string;
+var i: TXMLTag;
+begin
+  Result := 'unknown';
+  for i := xtBlob to xtElt do
+    if XMLTagDefs[i].XMLTag = xmltag then
+    begin
+      Result := XMLTagDefs[i].TagValue;
+      Exit;
+    end;
+end;
+
+procedure TSQLXMLReader.ProcessAttributeValue(attrValue: string);
+begin
+  case FXMLTagStack[FXMLTagIndex] of
+  xtBlob:
+    if FAttributeName = 'subtype' then
+      FBlobData[FCurrentBlob].SubType := StrToInt(attrValue)
+    else
+      ShowError(sXMLAttributeError,[FAttributeName,attrValue]);
+
+  xtArray:
+    if FAttributeName = 'sqltype' then
+      FArrayData[FCurrentArray].SQLType := StrToInt(attrValue)
+    else
+    if FAttributeName = 'relation_name' then
+      FArrayData[FCurrentArray].relationName := attrValue
+    else
+    if FAttributeName = 'column_name' then
+      FArrayData[FCurrentArray].columnName := attrValue
+    else
+    if FAttributeName = 'dim' then
+      FArrayData[FCurrentArray].Dim := StrToInt(attrValue)
+    else
+    if FAttributeName = 'length' then
+      FArrayData[FCurrentArray].Size := StrToInt(attrValue)
+    else
+    if FAttributeName = 'scale' then
+      FArrayData[FCurrentArray].Scale := StrToInt(attrValue)
+    else
+    if FAttributeName = 'charset' then
+      FArrayData[FCurrentArray].CharSet := attrValue
+    else
+    if FAttributeName = 'bounds' then
+      ProcessBoundsList(attrValue)
+    else
+      ShowError(sXMLAttributeError,[FAttributeName,attrValue]);
+
+  xtElt:
+    if FAttributeName = 'ix' then
+      with FArrayData[FCurrentArray] do
+        Index[CurrentRow] :=  StrToInt(attrValue)
+     else
+        ShowError(sXMLAttributeError,[FAttributeName,attrValue]);
+  end;
+end;
+
+procedure TSQLXMLReader.ProcessBoundsList(boundsList: string);
+var list: TStringList;
+    i,j: integer;
+begin
+  list := TStringList.Create;
+  try
+    list.Delimiter := ',';
+    list.DelimitedText := boundsList;
+    with FArrayData[FCurrentArray] do
+    begin
+      if dim <> list.Count then
+        ShowError(sInvalidBoundsList,[boundsList]);
+      SetLength(bounds,dim);
+      for i := 0 to list.Count - 1 do
       begin
-          if ds <> 0 then Exit; {only one allowed}
-          ds := i;
-          dec(exponent);
-          system.Delete(S,i,1);
-      end
+        j := Pos(':',list[i]);
+        if j = 0 then
+          raise Exception.CreateFmt(sInvalidBoundsList,[boundsList]);
+        bounds[i].LowerBound := StrToInt(system.copy(list[i],1,j-1));
+        bounds[i].UpperBound := StrToInt(system.copy(list[i],j+1,length(list[i])-j));
+      end;
+    end;
+  finally
+    list.Free;
+  end;
+end;
+
+procedure TSQLXMLReader.ProcessTagValue(tagValue: string);
+
+  function nibble(hex: char): byte;
+  begin
+    case hex of
+    '0': Result := 0;
+    '1': Result := 1;
+    '2': Result := 2;
+    '3': Result := 3;
+    '4': Result := 4;
+    '5': Result := 5;
+    '6': Result := 6;
+    '7': Result := 7;
+    '8': Result := 8;
+    '9': Result := 9;
+    'a','A': Result := 10;
+    'b','B': Result := 11;
+    'c','C': Result := 12;
+    'd','D': Result := 13;
+    'e','E': Result := 14;
+    'f','F': Result := 15;
+    end;
+  end;
+
+  procedure RemoveWhiteSpace(var hexData: string);
+  var i: integer;
+  begin
+    {Remove White Space}
+    i := 1;
+    while i <= length(hexData) do
+    begin
+      case hexData[i] of
+      ' ',#9,#10,#13:
+        begin
+          if i < Length(hexData) then
+            Move(hexData[i+1],hexData[i],Length(hexData)-i);
+          SetLength(hexData,Length(hexData)-1);
+        end;
       else
-      if S[i] in ['+','-'] then
-      begin
-       if (i > 1) and not (S[i-1] in ['e','E']) then
-          Exit; {malformed}
-      end
-      else
-      if S[i] in ['e','E'] then {scientific notation}
-      begin
-        if ds <> 0 then Exit; {not permitted in exponent}
-        if exponent <> 0 then Exit; {only one allowed}
-        exponent := i;
-      end
-      else
-      if not (S[i] in ['0'..'9']) then
-      {Note: ThousandSeparator not allowed by Delphi specs}
-          Exit; {bad character}
+        Inc(i);
+      end;
+    end;
+  end;
+
+  procedure WriteToBlob(hexData: string);
+  var i,j : integer;
+      blength: integer;
+      P: PByte;
+  begin
+    RemoveWhiteSpace(hexData);
+    if odd(length(hexData)) then
+      ShowError(sBinaryBlockMustbeEven,[nil]);
+    blength := Length(hexData) div 2;
+    ReallocMem(FBlobBuffer,blength);
+    j := 1;
+    P := FBlobBuffer;
+    for i := 1 to blength do
+    begin
+      P^ := (nibble(hexData[j]) shl 4) or nibble(hexdata[j+1]);
+      Inc(j,2);
+      Inc(P);
+    end;
+    FBlobData[FCurrentBlob].BlobIntf.Write(FBlobBuffer^,blength);
+  end;
+
+begin
+  if tagValue = '' then Exit;
+  case FXMLTagStack[FXMLTagIndex] of
+  xtBlob:
+    WriteToBlob(tagValue);
+
+  xtElt:
+    with FArrayData[FCurrentArray] do
+      ArrayIntf.SetAsString(index,tagValue);
+
+  end;
+end;
+
+procedure TSQLXMLReader.XMLTagInit(xmltag: TXMLTag);
+begin
+  if FXMLTagIndex > MaxXMLTags then
+    ShowError(sXMLStackOverFlow,[nil]);
+  Inc(FXMLTagIndex);
+  FXMLTagStack[FXMLTagIndex] := xmltag;
+  FXMLString := '';
+
+  case xmltag of
+  xtBlob:
+    begin
+      Inc(FCurrentBlob);
+      SetLength(FBlobData,FCurrentBlob+1);
+      FBlobData[FCurrentBlob].BlobIntf := nil;
+      FBlobData[FCurrentBlob].SubType := 0;
     end;
 
-    if exponent > 0 then
+  xtArray:
     begin
-      Result := TryStrToInt(system.copy(S,exponent+1,maxint),Scale);
-      if Result then
+      Inc(FCurrentArray);
+      SetLength(FArrayData,FCurrentArray+1);
+      with FArrayData[FCurrentArray] do
       begin
-        {adjust scale for decimal point}
-        if ds <> 0 then
-          Scale := Scale - (exponent - ds);
-        Result := TryStrToInt64(system.copy(S,1,exponent-1),Value);
+        ArrayIntf := nil;
+        SQLType := 0;
+        dim := 0;
+        Size := 0;
+        Scale := 0;
+        CharSet := 'NONE';
+        SetLength(Index,0);
+        CurrentRow := -1;
       end;
-    end
-    else
+    end;
+
+  xtElt:
+      with FArrayData[FCurrentArray] do
+        Inc(CurrentRow)
+  end;
+end;
+
+function TSQLXMLReader.XMLTagEnd(var xmltag: TXMLTag): boolean;
+begin
+  if FXMLTagIndex = 0 then
+    ShowError(sXMLStackUnderflow,[nil]);
+
+  xmlTag := FXMLTagStack[FXMLTagIndex];
+  case FXMLTagStack[FXMLTagIndex] of
+  xtBlob:
+    FBlobData[FCurrentBlob].BlobIntf.Close;
+
+  xtArray:
+    FArrayData[FCurrentArray].ArrayIntf.SaveChanges;
+
+  xtElt:
+    Dec(FArrayData[FCurrentArray].CurrentRow);
+  end;
+  Dec(FXMLTagIndex);
+  Result := FXMLTagIndex = 0;
+end;
+
+procedure TSQLXMLReader.XMLTagEnter;
+var aCharSetID: integer;
+begin
+  if (Attachment = nil) or not Attachment.IsConnected then
+    ShowError(sNoDatabase);
+  if Transaction = nil then
+    ShowError(sNoTransaction);
+  case FXMLTagStack[FXMLTagIndex] of
+  xtBlob:
     begin
-      if ds <> 0 then
-        scale := ds - Length(S) - 1;
-      Result := TryStrToInt64(S,Value);
+      if not Transaction.InTransaction then
+        Transaction.Start;
+      FBlobData[FCurrentBlob].BlobIntf := Attachment.CreateBlob(
+        Transaction,FBlobData[FCurrentBlob].SubType);
+    end;
+
+  xtArray:
+    with FArrayData[FCurrentArray] do
+    begin
+      if not Transaction.InTransaction then
+        Transaction.Start;
+      Attachment.CharSetName2CharSetID(CharSet,aCharSetID);
+      SetLength(Index,dim);
+      ArrayIntf := Attachment.CreateArray(
+                     Transaction,
+                     Attachment.CreateArrayMetaData(SQLType,
+                       relationName,columnName,Scale,Size,
+                       aCharSetID,dim,bounds)
+                     );
     end;
   end;
 end;
 
-function NumericToDouble(aValue: Int64; aScale: integer): double;
+{This is where the XML tags are identified and the token stream modified in
+ consequence}
+
+function TSQLXMLReader.TokenFound(var token: TSQLTokens): boolean;
+
+ procedure NotAnXMLTag;
+ begin
+   begin
+     if FXMLTagIndex = 0 then
+     {nothing to do with XML so go back to processing SQL}
+     begin
+       QueueToken(token);
+       ReleaseQueue(token);
+       FXMLState := stNoXML
+     end
+     else
+     begin
+       {Not an XML tag, so just push back to XML Data}
+       FXMLState := stXMLData;
+       FXMLString := FXMLString + GetQueuedText;
+       ResetQueue;
+     end;
+   end;
+ end;
+
+var XMLTag: TXMLTag;
 begin
-  Result := aValue * IntPower(10,aScale)
+  Result := inherited TokenFound(token);
+  if not Result then Exit;
+
+  case FXMLState of
+  stNoXML:
+    if token = sqltLT then
+    begin
+      ResetQueue;
+      QueueToken(token); {save in case this is not XML}
+      FXMLState := stInTag;
+    end;
+
+  stInTag:
+    {Opening '<' found, now looking for tag name or end tag marker}
+    case token of
+    sqltIdentifier:
+      begin
+        if FindTag(TokenText,XMLTag) then
+        begin
+          XMLTagInit(XMLTag);
+          QueueToken(token);
+          FXMLState := stInTagBody;
+        end
+        else
+          NotAnXMLTag;
+      end;
+
+    sqltForwardSlash:
+      FXMLState := stInEndTag;
+
+    else
+      NotAnXMLTag;
+    end {case token};
+
+  stInTagBody:
+    {Tag name found. Now looking for attribute or closing '>'}
+    case token of
+    sqltIdentifier:
+      begin
+        FAttributeName := TokenText;
+        QueueToken(token);
+        FXMLState := stAttribute;
+      end;
+
+    sqltGT:
+      begin
+        ResetQueue;
+        XMLTagEnter;
+        FXMLState := stXMLData;
+      end;
+
+    sqltSpace,
+    sqltEOL:
+      QueueToken(token);
+
+    else
+      NotAnXMLTag;
+    end {case token};
+
+  stAttribute:
+    {Attribute name found. Must be followed by an '=', a '>' or another tag name}
+    case token of
+      sqltEquals:
+      begin
+        QueueToken(token);
+        FXMLState := stAttributeValue;
+      end;
+
+      sqltSpace,
+      sqltEOL:
+        QueueToken(token);
+
+      sqltIdentifier:
+        begin
+          ProcessAttributeValue('');
+          FAttributeName := TokenText;
+          QueueToken(token);
+          FXMLState := stAttribute;
+        end;
+
+      sqltGT:
+        begin
+          ProcessAttributeValue('');
+          ResetQueue;
+          XMLTagEnter;
+          FXMLState := stXMLData;
+        end;
+
+      else
+        NotAnXMLTag;
+    end; {case token}
+
+  stAttributeValue:
+    {Looking for attribute value as a single identifier or a double quoted value}
+    case token of
+    sqltIdentifier,sqltIdentifierInDoubleQuotes:
+      begin
+        ProcessAttributeValue(TokenText);
+        QueueToken(token);
+        FXMLState := stInTagBody;
+      end;
+
+    sqltSpace,
+    sqltEOL:
+      QueueToken(token);
+
+    else
+      NotAnXMLTag;
+    end; {case token}
+
+  stXMLData:
+    if token = sqltLT then
+    begin
+      QueueToken(token); {save in case this is not XML}
+      FXMLState := stInTag;
+    end
+    else
+      FXMLString := FXMLString + TokenText;
+
+  stInEndTag:
+    {Opening '</' found, now looking for tag name}
+    case token of
+    sqltIdentifier:
+      begin
+        if FindTag(TokenText,XMLTag) and (XMLTag = FXMLTagStack[FXMLTagIndex]) then
+        begin
+          QueueToken(token);
+          FXMLState := stInEndTagBody;
+        end
+        else
+          ShowError(sInvalidEndTag,[TokenText]);
+      end;
+    else
+      NotAnXMLTag;
+    end {case token};
+
+  stInEndTagBody:
+  {End tag name found, now looping for closing '>'}
+    case Token of
+    sqltGT:
+      begin
+        ProcessTagValue(FXMLString);
+        if XMLTagEnd(XMLTag) then
+        begin
+          ResetQueue;
+          QueueToken(sqltColon,':');
+          case XMLTag of
+            xtBlob:
+              QueueToken(sqltIdentifier,Format(ibx_blob+'%d',[FCurrentBlob]));
+
+            xtArray:
+              QueueToken(sqltIdentifier, Format(ibx_array+'%d',[FCurrentArray]));
+          end;
+          ReleaseQueue(token);
+          FXMLState := stNoXML;
+       end
+       else
+         FXMLState := stXMLData;
+      end;
+
+    sqltSpace,
+    sqltEOL:
+      QueueToken(token);
+
+    else
+      ShowError(sBadEndTagClosing);
+    end; {case token}
+
+  end {Case FState};
+
+  {Only allow token to be returned if not processing an XML tag}
+
+  Result := FXMLState = stNoXML;
 end;
+
+procedure TSQLXMLReader.ShowError(msg: string; params: array of const);
+begin
+  raise EIBClientError.CreateFmt(GetErrorPrefix + msg,params);
+end;
+
+procedure TSQLXMLReader.ShowError(msg: string);
+begin
+  ShowError(msg,[nil]);
+end;
+
+constructor TSQLXMLReader.Create;
+begin
+  inherited;
+  FXMLState := stNoXML;
+end;
+
+procedure TSQLXMLReader.FreeDataObjects;
+begin
+  FXMLTagIndex := 0;
+  SetLength(FBlobData,0);
+  FCurrentBlob := -1;
+  SetLength(FArrayData,0);
+  FCurrentArray := -1;
+end;
+
+class function TSQLXMLReader.FormatBlob(Field: ISQLData): string;
+begin
+  Result := FormatBlob(Field.AsString,Field.getSubtype);
+end;
+
+class function TSQLXMLReader.FormatBlob(contents: string; subtype: integer
+  ): string;
+var TextOut: TStrings;
+begin
+  TextOut := TStringList.Create;
+  try
+    TextOut.Add(Format('<blob subtype="%d">',[subtype]));
+    StringToHex(contents,TextOut,BlobLineLength);
+    TextOut.Add('</blob>');
+    Result := TextOut.Text;
+  finally
+    TextOut.Free;
+  end;
+end;
+
+
+class function TSQLXMLReader.FormatArray(ar: IArray
+  ): string;
+var index: array of integer;
+    TextOut: TStrings;
+
+    procedure AddElements(dim: integer; indent:string = ' ');
+    var i: integer;
+        recurse: boolean;
+    begin
+      SetLength(index,dim+1);
+      recurse := dim < ar.GetDimensions - 1;
+      with ar.GetBounds[dim] do
+      for i := LowerBound to UpperBound do
+      begin
+        index[dim] := i;
+        if recurse then
+        begin
+          TextOut.Add(Format('%s<elt id="%d">',[indent,i]));
+          AddElements(dim+1,indent + ' ');
+          TextOut.Add('</elt>');
+        end
+        else
+        if ((ar.GetSQLType = SQL_TEXT) or (ar.GetSQLType = SQL_VARYING)) and
+           (ar.GetCharSetID = 1) then
+           TextOut.Add(Format('%s<elt ix="%d">%s</elt>',[indent,i,StringToHex(ar.GetAsString(index))]))
+        else
+          TextOut.Add(Format('%s<elt ix="%d">%s</elt>',[indent,i,ar.GetAsString(index)]));
+      end;
+    end;
+
+var
+    s: string;
+    bounds: TArrayBounds;
+    i: integer;
+    boundsList: string;
+begin
+  TextOut := TStringList.Create;
+  try
+    if ar.GetCharSetWidth = 0 then
+      s := Format('<array dim = "%d" sqltype = "%d" length = "%d" relation_name = "%s" column_name = "%s"',
+                              [ar.GetDimensions,ar.GetSQLType,ar.GetSize,
+                               ar.GetTableName,ar.GetColumnName])
+    else
+      s := Format('<array dim = "%d" sqltype = "%d" length = "%d" relation_name = "%s" column_name = "%s"',
+                                [ar.GetDimensions,ar.GetSQLType,ar.GetSize div ar.GetCharSetWidth,
+                                 ar.GetTableName,ar.GetColumnName]);
+    case ar.GetSQLType of
+    SQL_DOUBLE, SQL_FLOAT, SQL_LONG, SQL_SHORT, SQL_D_FLOAT, SQL_INT64:
+       s := s + Format(' scale = "%d"',[ ar.GetScale]);
+    SQL_TEXT,
+    SQL_VARYING:
+      s := s + Format(' charset = "%s"',[ar.GetAttachment.GetCharsetName(ar.GetCharSetID)]);
+    end;
+    bounds := ar.GetBounds;
+    boundsList := '';
+    for i := 0 to length(bounds) - 1 do
+    begin
+      if i <> 0 then boundsList := boundsList + ',';
+      boundsList := boundsList + Format('%d:%d',[bounds[i].LowerBound,bounds[i].UpperBound]);
+    end;
+    s := s + Format(' bounds="%s"',[boundsList]);
+    s := s + '>';
+    TextOut.Add(s);
+
+    SetLength(index,0);
+    AddElements(0);
+    TextOut.Add('</array>');
+    Result := TextOut.Text;
+  finally
+    TextOut.Free;
+  end;
+end;
+
+procedure TSQLXMLReader.Reset;
+begin
+  inherited Reset;
+  FreeDataObjects;
+  FXMLString := '';
+  FreeMem(FBlobBuffer);
+end;
+
+{ TJournalProcessor }
+
+procedure TJournalProcessor.DoExecute;
+var token: TSQLTokens;
+    LineState: TLineState;
+    JnlEntry: TJnlEntry;
+    Len: integer;
+    tz: AnsiString;
+
+  procedure ClearJnlEntry;
+  begin
+    with JnlEntry do
+    begin
+      TransactionName := '';
+      TPB := nil;
+      QueryText :='';
+      JnlEntryType := jeUnknown;
+      SessionID := 0;
+      TransactionID := 0;
+      DefaultCompletion := taCommit;
+    end;
+  end;
+
+  function CreateTPB(TPBText: AnsiString): ITPB;
+  var index: integer;
+  begin
+    Result := nil;
+    if Length(TPBText) = 0 then
+      Exit;
+    Result := FFirebirdClientAPI.AllocateTPB;
+    try
+      index := Pos('[',TPBText);
+      if index > 0 then
+        system.Delete(TPBText,1,index);
+      repeat
+        index := Pos(',',TPBText);
+        if index = 0 then
+        begin
+          index := Pos(']',TPBText);
+          if index <> 0 then
+            system.Delete(TPBText,index,1);
+          Result.AddByTypeName(TPBText);
+          break;
+        end;
+        Result.AddByTypeName(system.copy(TPBText,1,index-1));
+        system.Delete(TPBText,1,index);
+      until false;
+    except
+      Result := nil;
+      raise;
+    end;
+  end;
+
+begin
+  LineState := lsInit;
+  JnlEntry.JnlEntryType := jeUnknown;
+  while not EOF do
+  begin
+    if LineState = lsInit then
+      ClearJnlEntry;
+    token := GetNextToken;
+    with JnlEntry do
+    case token of
+    sqltAsterisk:
+      if LineState = lsInit then
+        LineState := lsJnlFound;
+
+    sqltIdentifier:
+      if LineState = lsJnlFound then
+        begin
+          JnlEntryType := IdentifyJnlEntry(TokenText);
+          LineState := lsGotJnlType;
+        end
+      else
+        LineState := lsInit;
+
+    sqltQuotedString:
+      if (LineState = lsGotJnlType)
+          and ParseDateTimeTZString(TokenText,TimeStamp,tz) then
+            LineState := lsGotTimestamp
+      else
+        LineState := lsInit;
+
+    sqltColon:
+      case LineState of
+      lsGotText1Length:
+        begin
+          if Len > 0 then
+          begin
+            if JnlEntryType = jeTransStart then
+              TransactionName := ReadCharacters(Len)
+            else
+              QueryText := ReadCharacters(Len)
+          end;
+          if JnlEntryType = jeTransStart then
+             LineState := lsGotText1
+          else
+          begin
+            if assigned(FOnNextJournalEntry) then
+              OnNextJournalEntry(JnlEntry);
+            LineState := lsInit;
+          end
+        end;
+
+      lsGotText2Length:
+        begin
+          if Len > 0 then
+            TPB :=  CreateTPB(ReadCharacters(Len));
+          LineState := lsGotText2;
+        end;
+
+      else
+      if LineState <> lsGotJnlType then
+        LineState := lsInit;
+    end;
+
+   sqltComma:
+     if not (LineState in [lsGotTimestamp,lsGotAttachmentID,lsGotSessionID,lsGotTransactionID,lsGotText1,lsGotText2]) then
+       LineState := lsInit;
+
+   sqltNumberString:
+     case LineState of
+     lsGotTimestamp:
+       begin
+         AttachmentID := StrToInt(TokenText);
+         LineState := lsGotAttachmentID;
+       end;
+
+     lsGotAttachmentID:
+       begin
+         SessionID := StrToInt(TokenText);
+         LineState := lsGotSessionID;
+       end;
+
+     lsGotSessionID:
+       begin
+         TransactionID := StrToInt(TokenText);
+         if JnlEntryType in [jeTransCommit, jeTransCommitFail, jeTransRollback, jeTransRollbackFail] then
+         begin
+           if assigned(FOnNextJournalEntry) then
+             OnNextJournalEntry(JnlEntry);
+           LineState := lsInit;
+         end
+         else
+           LineState := lsGotTransactionID;
+       end;
+
+     lsGotTransactionID:
+       begin
+         case JnlEntryType of
+         jeTransStart:
+           begin
+             len := StrToInt(TokenText);
+             LineState := lsGotText1Length;
+           end;
+
+         jeQuery:
+           begin
+             len :=  StrToInt(TokenText);
+             LineState := lsGotText1Length;
+           end;
+
+         jeTransCommitRet,
+         jeTransCommitFail,
+         jeTransRollbackFail,
+         jeTransRollbackRet:
+           begin
+             OldTransactionID := StrToInt(TokenText);
+             if assigned(FOnNextJournalEntry) then
+               OnNextJournalEntry(JnlEntry);
+             LineState := lsInit;
+           end;
+
+           else
+             LineState := lsInit;
+         end; {case JnlEntryType}
+
+       end;
+
+     lsGotText1:
+       begin
+         len := StrToInt(TokenText);
+         LineState := lsGotText2Length;
+       end;
+
+     lsGotText2:
+        begin
+          if JnlEntryType = jeTransStart then
+          begin
+            DefaultCompletion := TTransactionCompletion(StrToInt(TokenText));
+            if assigned(FOnNextJournalEntry) then
+              OnNextJournalEntry(JnlEntry);
+          end;
+          LineState := lsInit;
+        end;
+     end; {case LineState}
+    end; {case token}
+  end; {while}
+  ClearJnlEntry;
+end;
+
+function TJournalProcessor.IdentifyJnlEntry(aTokenText: AnsiString
+  ): TJnlEntryType;
+begin
+  Result := jeUnknown;
+  if Length(aTokenText) > 0 then
+  case aTokenText[1] of
+  'S':
+    Result := jeTransStart;
+  'C':
+    Result := jeTransCommit;
+  'c':
+    Result := jeTransCommitRet;
+  'R':
+    Result := jeTransRollback;
+  'r':
+    Result := jeTransRollbackRet;
+  'E':
+    Result := jeTransEnd;
+  'Q':
+    Result := jeQuery;
+  'F':
+    Result := jeTransCommitFail;
+  'f':
+    Result := jeTransRollbackFail;
+  end;
+end;
+
+class function TJournalProcessor.JnlEntryText(je: TJnlEntryType): string;
+begin
+  case je of
+  jeTransStart:
+    Result := 'Transaction Start';
+  jeTransCommit:
+    Result := 'Commit';
+  jeTransCommitFail:
+    Result := 'Commit (Failed)';
+  jeTransCommitRet:
+    Result := 'Commit Retaining';
+  jeTransRollback:
+    Result := 'Rollback';
+  jeTransRollbackFail:
+    Result := 'Rollback (Failed)';
+  jeTransRollbackRet:
+    Result := 'Rollback Retaining';
+  jeTransEnd:
+    Result := 'Transaction End';
+  jeQuery:
+    Result := 'Query';
+  jeUnknown:
+    Result := 'Unknown';
+  end;
+end;
+
+function TJournalProcessor.GetChar: AnsiChar;
+begin
+  if FInStream.Read(Result,1) = 0 then
+    Result := #0;
+end;
+
+destructor TJournalProcessor.Destroy;
+begin
+  FInStream.Free;
+  inherited Destroy;
+end;
+
+class procedure TJournalProcessor.Execute(aFileName: string; api: IFirebirdAPI;
+  aOnNextJournalEntry: TOnNextJournalEntry);
+begin
+  with TJournalProcessor.Create do
+  try
+    FInStream := TFileStream.Create(aFileName,fmOpenRead);
+    FFirebirdClientAPI := api;
+    OnNextJournalEntry := aOnNextJournalEntry;
+    DoExecute;
+  finally
+    Free
+  end;
+end;
+
 
 end.

@@ -1,0 +1,72 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{591F8967-8310-45E9-806F-303932773D46}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="TestSelectInto.dproj">
+            <Dependencies>..\..\fbudrtestbed.dproj;..\..\fbudr.dproj;..\..\fbintf.dproj</Dependencies>
+        </Projects>
+        <Projects Include="..\..\fbudrtestbed.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\..\fbudr.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\..\fbintf.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="TestSelectInto" DependsOnTargets="fbudrtestbed;fbudr;fbintf">
+        <MSBuild Projects="TestSelectInto.dproj"/>
+    </Target>
+    <Target Name="TestSelectInto:Clean" DependsOnTargets="fbudrtestbed:Clean;fbudr:Clean;fbintf:Clean">
+        <MSBuild Projects="TestSelectInto.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="TestSelectInto:Make" DependsOnTargets="fbudrtestbed:Make;fbudr:Make;fbintf:Make">
+        <MSBuild Projects="TestSelectInto.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="fbudrtestbed">
+        <MSBuild Projects="..\..\fbudrtestbed.dproj"/>
+    </Target>
+    <Target Name="fbudrtestbed:Clean">
+        <MSBuild Projects="..\..\fbudrtestbed.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="fbudrtestbed:Make">
+        <MSBuild Projects="..\..\fbudrtestbed.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="fbudr">
+        <MSBuild Projects="..\..\fbudr.dproj"/>
+    </Target>
+    <Target Name="fbudr:Clean">
+        <MSBuild Projects="..\..\fbudr.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="fbudr:Make">
+        <MSBuild Projects="..\..\fbudr.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="fbintf">
+        <MSBuild Projects="..\..\fbintf.dproj"/>
+    </Target>
+    <Target Name="fbintf:Clean">
+        <MSBuild Projects="..\..\fbintf.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="fbintf:Make">
+        <MSBuild Projects="..\..\fbintf.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="TestSelectInto;fbudrtestbed;fbudr;fbintf"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="TestSelectInto:Clean;fbudrtestbed:Clean;fbudr:Clean;fbintf:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="TestSelectInto:Make;fbudrtestbed:Make;fbudr:Make;fbintf:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

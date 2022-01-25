@@ -29,6 +29,8 @@ if [ -x testsuite ]; then
   echo "Starting Testsuite"
   echo ""
   ./testsuite -u $USERNAME -p $PASSWORD -e $EMPLOYEEDB -n $NEWDBNAME -s $NEWDBNAME2 -b $BAKFILE -o testout.log $@
+  #normalise data/time
+  sed -i 's|Timestamp = [0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9].[0-9][0-9][0-9][0-9]|Timestamp = yyyy/mm/dd hh:mm:ss.zzzz|' testout.log
   echo "Comparing results with reference log"
   echo ""
   if grep 'ODS Major Version = 11' testout.log >/dev/null; then

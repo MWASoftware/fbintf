@@ -103,9 +103,9 @@ begin
                                                             isc_info_tra_oldest_snapshot,
                                                             fb_info_tra_snapshot_number,
                                                             isc_info_tra_lock_timeout,
-                                                            fb_info_tra_dbpath,
                                                             isc_info_tra_access,
-                                                            isc_info_tra_isolation]));
+                                                            isc_info_tra_isolation,
+                                                            fb_info_tra_dbpath]));
   Attachment.ExecuteSQL(Transaction, 'Execute Procedure DELETE_EMPLOYEE ?', [8]);
 
   ResultSet := Attachment.OpenCursorAtStart(

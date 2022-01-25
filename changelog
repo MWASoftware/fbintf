@@ -1,3 +1,110 @@
+FBINTF Change Log  version          (1.4-0 Build 13107) Wed, 19 Jan 2022 12:08:21 +0000
+
+1. Support package fbudr added for support of User Defined Routines (UDRs), and package
+   fbudrtestbed for client side debugging of UDR libraries.
+
+2. Package layout changed with introduction of udr support. IB*.pas files moved from
+    root directory to "client". IBHeader move to "Client".
+
+3. Delphi packages: all packages now compile .dcp and .bpi files to either
+   fbintf\Win32\Debug or fbintf\Win64\Debug by default. Please remove any pre-existing
+   fbintf.dcp and fbintf.bpi files from other locations.
+
+4. Client side journaling support added. Interface changes
+   IAttachment
+    function JournalingActive: boolean;
+    function GetJournalOptions: TJournalOptions;
+    function StartJournaling(aJournalLogFile: AnsiString): integer; overload;
+    function StartJournaling(aJournalLogFile: AnsiString; Options: TJournalOptions): integer; overload;
+    function StartJournaling(S: TStream; Options: TJournalOptions): integer; overload;
+    procedure StopJournaling(RetainJournal: boolean);
+
+5. Transactions may now be given a local transaction name:
+   IFirebirdAPI
+     function StartTransaction(Attachments: array of IAttachment;
+             TPB: array of byte; DefaultCompletion: TTransactionCompletion=taCommit): ITransaction; overload;
+             TPB: array of byte; DefaultCompletion: TTransactionCompletion=taCommit;
+             aName: AnsiString=''): ITransaction; overload;
+     function StartTransaction(Attachments: array of IAttachment;
+             TPB: ITPB; DefaultCompletion: TTransactionCompletion=taCommit): ITransaction; overload;
+             TPB: ITPB; DefaultCompletion: TTransactionCompletion=taCommit;
+             aName: AnsiString=''): ITransaction; overload;
+
+   IAttachment
+    function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion=taCommit): ITransaction; overload;
+    function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionCompletion=taCommit): ITransaction; overload;
+    function StartTransaction(TPB: array of byte;
+                              DefaultCompletion: TTransactionCompletion=taCommit;
+                              aName: AnsiString=''): ITransaction; overload;
+    function StartTransaction(TPB: ITPB;
+                              DefaultCompletion: TTransactionCompletion=taCommit;
+                              aName: AnsiString=''): ITransaction; overload;
+
+  ITransaction
+    function GetTransactionName: AnsiString;
+    procedure SetTransactionName(aValue: AnsiString);
+
+6. Additional Transaction information
+     ITPB.function AsText: AnsiString; {Returns TPB as a text string}
+
+   ITransaction
+     function GetDefaultCompletion: TTransactionCompletion;
+     function GetJournalingActive(attachment: IAttachment): boolean; {attachment must be specified when multi-database transaction}
+
+7. New IAttachment helper functions
+     function HasTable(aTableName: AnsiString): boolean;
+     function HasFunction(aFunctionName: AnsiString): boolean;
+     function HasProcedure(aProcName: AnsiString): boolean;
+     function GetAttachmentID: integer;
+     function GetCharSetID: integer;
+
+8. IStatement: if the BatchRowLimit is set to maxint, the maximum possible buffer size
+   will be allocted for batch operations.
+
+9. IStatement, IColumnMetaData and ISQLParam all now consistently provide:
+    function GetStatement: IStatement;
+    function GetTransaction: ITransaction;
+    function GetAttachment: IAttachment;
+
+10. Internal: a more disciplined approach to the handling of Firebird.IReferenceCounted
+    interfaces.
+
+11. New interface type: IFBNumeric. IFBNumeric is implemented in the unit FBNumeric
+    and concentrates all handling of Fixed Point numbers. New ISQLItem and ISQLParam
+    functions getAsNumeric and setAsNumeric allow for direct retrival and manipulation
+    of numerics without loss of precision.
+
+12. TryStrToNumeric and NumericToDouble moved from IBUtils to FBNumeric.
+
+13. ISQLParams new method "Clear"
+
+14. Connection Info (e.g. ODS Version, Remote Protocol) now retrieved on first
+    request rather than on attachment connect.
+
+15. IStatus.IBDataBaseErrorMessages now defaults to [ShowIBMessage]. This reflects the
+    fact that SQLCodes are soon to be deprecated. In the future, the other options
+    will be silently ignored if SQLCode support is not present in the Firebird
+    Client library.
+
+16. ITransaction changes Rollback and Commit from procedures to functions:
+      function Commit(Force: boolean=false): TTrCompletionState;
+      function Rollback(Force: boolean=false): TTrCompletionState;
+
+    Specifically, this is to allow the functions to report back a failed commit or
+    rollback when Force = true. In the case, the transaction handle has been
+    released, while the transaction remains in limbo.
+
+17. IAttachment ExecImmediate.
+    When the transaction parameters are provided as an array of const and the
+    statement fails, the transaction is rolledback (forced) before the exception
+    is raised.
+
+18. In Firebird 3 and later API: the status vector is now a thread var, as was
+    already the case with the legacy API. Avoids problems when calling underlying
+    Firebird API in multiple threads.
+
+
+
 FBINTF Change Log  version          (1.3-3 Build 12935) Mon, 06 Dec 2021 23:17:13 +0000
 
 1. Fix compile error with fpc trunk (3.3.1 and later), due to type change to tzname in "unix" unit.

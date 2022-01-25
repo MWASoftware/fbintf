@@ -55,14 +55,15 @@ type
     procedure SetUseRemoteICU(aValue: boolean);
   protected
     procedure CheckHandle; override;
+    function GetAttachment: IAttachment; override;
   public
     constructor Create(api: TFB30ClientAPI; DatabaseName: AnsiString; aDPB: IDPB;
-          RaiseExceptionOnConnectError: boolean);
+          RaiseExceptionOnConnectError: boolean); overload;
+    constructor Create(api: TFB30ClientAPI;
+      attachment: Firebird.IAttachment; aDatabaseName: AnsiString); overload;
     constructor CreateDatabase(api: TFB30ClientAPI; DatabaseName: AnsiString; aDPB: IDPB; RaiseExceptionOnError: boolean);  overload;
     constructor CreateDatabase(api: TFB30ClientAPI; sql: AnsiString; aSQLDialect: integer;
       RaiseExceptionOnError: boolean); overload;
-    constructor CreateExisting(api: TFB30ClientAPI;
-      attachment: Firebird.IAttachment; aDatabaseName: AnsiString);
     function GetDBInfo(ReqBuffer: PByte; ReqBufLen: integer): IDBInformation;
       override;
     property AttachmentIntf: Firebird.IAttachment read FAttachmentIntf write SetAttachmentIntf;
@@ -74,8 +75,8 @@ type
     procedure Disconnect(Force: boolean=false); override;
     function IsConnected: boolean; override;
     procedure DropDatabase;
-    function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion): ITransaction; override;
-    function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionCompletion): ITransaction; override;
+    function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion; aName: AnsiString=''): ITransaction; override;
+    function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionCompletion; aName: AnsiString=''): ITransaction; override;
     procedure ExecImmediate(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer); override;
     function Prepare(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer; CursorName: AnsiString=''): IStatement; override;
     function PrepareWithNamedParameters(transaction: ITransaction; sql: AnsiString;
@@ -140,17 +141,11 @@ begin
 end;
 
 procedure TVersionCallback.callback(status: Firebird.IStatus; text: PAnsiChar);
-var StatusObj: TFB30StatusObject;
+var aStatus: IStatus;
 begin
-  if ((status.getState and status.STATE_ERRORS) <> 0) then
-  begin
-    StatusObj := TFB30StatusObject.Create(FFirebirdClientAPI,status);
-    try
-      raise EIBInterBaseError.Create(StatusObj);
-    finally
-      StatusObj.Free;
-    end;
-  end;
+  aStatus := TFB30Status.Create(FFirebirdClientAPI,status);
+  if aStatus.InErrorState then
+      raise EIBInterBaseError.Create(aStatus);
   FOutput.Add(text);
 end;
 
@@ -178,22 +173,22 @@ begin
   except {ignore - forced release}
   end;
   FOwnsAttachmentHandle := false;
-  FHasDefaultCharSet := false;
-  FCodePage := CP_NONE;
-  FCharSetID := 0;
+  ClearCachedInfo;
   FTimeZoneServices := nil;
   FAttachmentIntf := AValue;
   if FAttachmentIntf <> nil then
-  begin
     FAttachmentIntf.AddRef;
-    GetODSAndConnectionInfo;
-  end;
 end;
 
 procedure TFB30Attachment.CheckHandle;
 begin
   if FAttachmentIntf = nil then
     IBError(ibxeDatabaseClosed,[nil]);
+end;
+
+function TFB30Attachment.GetAttachment: IAttachment;
+begin
+  Result := self;
 end;
 
 constructor TFB30Attachment.Create(api: TFB30ClientAPI; DatabaseName: AnsiString; aDPB: IDPB;
@@ -224,13 +219,13 @@ begin
   begin
     Param := aDPB.Find(isc_dpb_set_db_SQL_dialect);
     if Param <> nil then
-      FSQLDialect := Param.AsByte;
+      SetSQLDialect(Param.AsByte);
   end;
   sql := GenerateCreateDatabaseSQL(DatabaseName,aDPB);
   with FFirebird30ClientAPI do
   begin
     Intf := UtilIntf.executeCreateDatabase(StatusIntf,Length(sql),
-                                       PAnsiChar(sql),FSQLDialect,@IsCreateDB);
+                                       PAnsiChar(sql),SQLDialect,@IsCreateDB);
     if FRaiseExceptionOnConnectError then Check4DataBaseError;
     if not InErrorState then
     begin
@@ -243,6 +238,7 @@ begin
       end
       else
         AttachmentIntf := Intf;
+      FOwnsAttachmentHandle:= true;
     end;
   end;
 end;
@@ -254,7 +250,7 @@ var IsCreateDB: boolean;
 begin
   inherited Create(api,'',nil,RaiseExceptionOnError);
   FFirebird30ClientAPI := api;
-  FSQLDialect := aSQLDialect;
+  SetSQLDialect(aSQLDialect);
   with FFirebird30ClientAPI do
   begin
     Intf := UtilIntf.executeCreateDatabase(StatusIntf,Length(sql),
@@ -269,7 +265,7 @@ begin
   DPBFromCreateSQL(sql);
 end;
 
-constructor TFB30Attachment.CreateExisting(api: TFB30ClientAPI;
+constructor TFB30Attachment.Create(api: TFB30ClientAPI;
   attachment: Firebird.IAttachment; aDatabaseName: AnsiString);
 begin
   inherited Create(api,aDatabaseName,nil,false);
@@ -308,17 +304,18 @@ end;
 procedure TFB30Attachment.Disconnect(Force: boolean);
 begin
   if IsConnected then
+  begin
+    EndAllTransactions;
+    if FOwnsAttachmentHandle then
     with FFirebird30ClientAPI do
     begin
-      EndAllTransactions;
-      if FOwnsAttachmentHandle then
-      begin
-        FAttachmentIntf.Detach(StatusIntf);
-        if not Force and InErrorState then
-          IBDataBaseError;
-      end;
-      AttachmentIntf := nil;
+      FAttachmentIntf.Detach(StatusIntf);
+      if not Force and InErrorState then
+        IBDataBaseError;
     end;
+    AttachmentIntf := nil;
+  end;
+  inherited Disconnect(Force);
 end;
 
 function TFB30Attachment.IsConnected: boolean;
@@ -329,27 +326,32 @@ end;
 procedure TFB30Attachment.DropDatabase;
 begin
   if IsConnected then
+  begin
+    if not FOwnsAttachmentHandle then
+      IBError(ibxeCantDropAcquiredDB,[nil]);
     with FFirebird30ClientAPI do
     begin
       EndAllTransactions;
-      FAttachmentIntf.dropDatabase(StatusIntf); {releases Handle}
+      EndSession(false);
+      FAttachmentIntf.dropDatabase(StatusIntf);
       Check4DataBaseError;
-      AttachmentIntf := nil;
     end;
+    AttachmentIntf := nil;
+  end;
 end;
 
 function TFB30Attachment.StartTransaction(TPB: array of byte;
-  DefaultCompletion: TTransactionCompletion): ITransaction;
+  DefaultCompletion: TTransactionCompletion; aName: AnsiString): ITransaction;
 begin
   CheckHandle;
-  Result := TFB30Transaction.Create(FFirebird30ClientAPI,self,TPB,DefaultCompletion);
+  Result := TFB30Transaction.Create(FFirebird30ClientAPI,self,TPB,DefaultCompletion, aName);
 end;
 
 function TFB30Attachment.StartTransaction(TPB: ITPB;
-  DefaultCompletion: TTransactionCompletion): ITransaction;
+  DefaultCompletion: TTransactionCompletion; aName: AnsiString): ITransaction;
 begin
   CheckHandle;
-  Result := TFB30Transaction.Create(FFirebird30ClientAPI,self,TPB,DefaultCompletion);
+  Result := TFB30Transaction.Create(FFirebird30ClientAPI,self,TPB,DefaultCompletion,aName);
 end;
 
 procedure TFB30Attachment.ExecImmediate(transaction: ITransaction; sql: AnsiString;
@@ -357,10 +359,15 @@ procedure TFB30Attachment.ExecImmediate(transaction: ITransaction; sql: AnsiStri
 begin
   CheckHandle;
   with FFirebird30ClientAPI do
-  begin
+  try
     FAttachmentIntf.execute(StatusIntf,(transaction as TFB30Transaction).TransactionIntf,
                     Length(sql),PAnsiChar(sql),aSQLDialect,nil,nil,nil,nil);
     Check4DataBaseError;
+  finally
+    if JournalingActive and
+      ((joReadOnlyQueries in GetJournalOptions)  or
+      (joModifyQueries in GetJournalOptions)) then
+      ExecImmediateJnl(sql,transaction);
   end;
 end;
 

@@ -110,7 +110,11 @@ begin
   end;
   writeln(OutFile,'Signal Event');
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],sqlEvent);
-  while not FEventSignalled do Sleep(50);
+  while not FEventSignalled do
+  begin
+    Sleep(50);
+    CheckSynchronize;
+  end;
   ShowEventCounts(EventHandler);
   FEventSignalled := false;
 

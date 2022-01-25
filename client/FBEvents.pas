@@ -60,8 +60,8 @@
 {                                                                        }
 {************************************************************************}
 unit FBEvents;
-{$IFDEF MSWINDOWS} 
-{$DEFINE WINDOWS} 
+{$IFDEF MSWINDOWS}
+{$DEFINE WINDOWS}
 {$ENDIF}
 
 {$IFDEF FPC}
@@ -108,7 +108,7 @@ type
     procedure CancelEvents(Force: boolean = false); virtual;
     procedure EventSignaled;
     function GetIEvents: IEvents; virtual; abstract;
-    procedure ProcessEventCounts;
+    function ProcessEventCounts: boolean;
   public
     const EPB_version1 = 1;
   public
@@ -118,11 +118,12 @@ type
     {IEvents}
     procedure GetEvents(EventNames: TStrings);
     procedure SetEvents(EventNames: TStrings); overload;
-    procedure SetEvents(Event: AnsiString); overload;
+    procedure SetEvents(Event: string); overload;
     procedure Cancel;
     function ExtractEventCounts: TEventCounts;
     function GetAttachment: IAttachment;
     procedure AsyncWaitForEvent(EventHandler: TEventHandler); virtual; abstract;
+    procedure WaitForEvent; virtual; abstract;
   end;
 
 
@@ -218,25 +219,42 @@ SLONG API_ROUTINE_VARARG isc_event_block(UCHAR** event_buffer,
 procedure TFBEvents.CreateEventBlock;
 var i: integer;
     P: PByte;
+    var s: Ansistring;
 begin
   {calculate length of event parameter block, setting initial length to include version
    and counts for each argument}
 
+  if FEventBuffer <> nil then
+  begin
+    FreeMem( FEventBuffer);
+    FEventBuffer := nil;
+  end;
+  if FResultBuffer <> nil then
+  begin
+    FreeMem( FResultBuffer);
+    FResultBuffer := nil;
+  end;
+
   FEventBufferLen := 1;
   for i := 0 to FEvents.Count - 1 do
-    FEventBufferLen := FEventBufferLen + length(FEvents[i]) + 1 + sizeof(Long);
+  begin
+    s := FEvents[i];
+    FEventBufferLen := FEventBufferLen + length(s) + 1 + sizeof(Long);
+  end;
 
   with FFirebirdClientAPI do
   begin
     IBAlloc(FEventBuffer,0,FEventBufferLen);
     if FEventBuffer = nil then Exit;
-    FillByte(FEventBuffer^,FEventBufferLen,0);
+    FillChar(FEventBuffer^,FEventBufferLen,0);
     IBAlloc(FResultBuffer,0,FEventBufferLen);
     if FResultBuffer = nil then
     begin
       FreeMem(FEventBuffer);
+      FEventBuffer := nil;
       Exit;
     end;
+    FillChar(FResultBuffer^,FEventBufferLen,0);
 
     P := FEventBuffer;
     P^ := EPB_version1;
@@ -245,17 +263,18 @@ begin
 
     for i := 0 to FEvents.Count - 1 do
     begin
-      P^ := Length(FEvents[i]);
+      s := FEvents[i];
+      P^ := Length(s);
       Inc(P);
-      Move(FEvents[i][1],P^,Length(FEvents[i]));
-      Inc(P,Length(FEvents[i])+sizeof(Long));
-      FEventCounts[i].EventName := FEvents[i];
+      Move(s[1],P^,Length(s));
+      Inc(P,Length(s)+sizeof(Long));
+      FEventCounts[i].EventName := s;
     end;
   end;
 
 {  for i := 0 to FEventBufferLen - 1 do
   write(Format('%x ', [FEventBuffer[i]]));
-   writeln;}
+   writeln; }
 end;
 
 procedure TFBEvents.CancelEvents(Force: boolean);
@@ -270,12 +289,11 @@ begin
   FCriticalSection.Enter;
   try
     if not FInWaitState then Exit;
-    FInWaitState := false;
-    ProcessEventCounts;
-    if assigned(FEventHandler)  then
+    if ProcessEventCounts and assigned(FEventHandler)  then
     begin
       Handler := FEventHandler;
       FEventHandler := nil;
+      FInWaitState := false;
     end;
   finally
     FCriticalSection.Leave;
@@ -340,7 +358,7 @@ void API_ROUTINE isc_event_counts(ULONG* result_vector,
 
 {ProcessEventCounts effectively replaces isc_event_counts}
 
-procedure TFBEvents.ProcessEventCounts;
+function TFBEvents.ProcessEventCounts: boolean;
 
 var i: integer;
     P, Q: PByte;
@@ -348,6 +366,7 @@ var i: integer;
     new_count: Long;
     len: byte;
 begin
+  Result := false;
   P := FEventBuffer;
   Q := FResultBuffer;
   Inc(P); {skip past version byte}
@@ -364,6 +383,9 @@ begin
     new_count := DecodeInteger(Q,sizeof(Long));
     Inc(Q,sizeof(Long));
     FEventCounts[i].Count := new_count - initial_count;
+    if FEventCounts[i].Count > 0 then
+      Result := true;
+  //  writeln('Event Count[',i,'] = ',FEventCounts[i].Count);
   end;
   Move(FResultBuffer^,FEventBuffer^,FEventBufferLen);
 end;
@@ -418,7 +440,7 @@ begin
   end;
 end;
 
-procedure TFBEvents.SetEvents(Event: AnsiString);
+procedure TFBEvents.SetEvents(Event: string);
 var S: TStringList;
 begin
   S := TStringList.Create;

@@ -84,18 +84,27 @@ type
   protected
     FTPB: ITPB;
     FSeqNo: integer;
-    FDefaultCompletion: TTransactionAction;
+    FDefaultCompletion: TTransactionCompletion;
     FAttachments: array of IAttachment; {Keep reference to attachment - ensures
                                           attachment cannot be freed before transaction}
+    FTransactionName: AnsiString;
+    FForeignHandle: boolean;
     procedure CheckHandle;
     function GetActivityIntf(att: IAttachment): IActivityMonitor; virtual; abstract;
+    function GetJournalIntf(Attachment: IAttachment): IJournallingHook;
     procedure SetInterface(api: TFBClientAPI); virtual;
     function GetTrInfo(ReqBuffer: PByte; ReqBufLen: integer): ITrInformation; virtual; abstract;
+    procedure InternalStartSingle(attachment: IAttachment); virtual; abstract;
+    procedure InternalStartMultiple; virtual; abstract;
+    function InternalCommit(Force: boolean): TTrCompletionState; virtual; abstract;
+    procedure InternalCommitRetaining; virtual; abstract;
+    function InternalRollback(Force: boolean): TTrCompletionState; virtual; abstract;
+    procedure InternalRollbackRetaining; virtual; abstract;
   public
-    constructor Create(api: TFBClientAPI; Attachments: array of IAttachment; Params: array of byte; DefaultCompletion: TTransactionAction=TACommit); overload;
-    constructor Create(api: TFBClientAPI; Attachments: array of IAttachment; TPB: ITPB; DefaultCompletion: TTransactionAction=TACommit); overload;
-    constructor Create(api: TFBClientAPI; Attachment: IAttachment; Params: array of byte; DefaultCompletion: TTransactionAction=TACommit); overload;
-    constructor Create(api: TFBClientAPI; Attachment: IAttachment; TPB: ITPB; DefaultCompletion: TTransactionAction=TACommit); overload;
+    constructor Create(api: TFBClientAPI; Attachments: array of IAttachment; Params: array of byte; DefaultCompletion: TTransactionAction; aName: AnsiString); overload;
+    constructor Create(api: TFBClientAPI; Attachments: array of IAttachment; TPB: ITPB; DefaultCompletion: TTransactionAction; aName: AnsiString); overload;
+    constructor Create(api: TFBClientAPI; Attachment: IAttachment; Params: array of byte; DefaultCompletion: TTransactionAction; aName: AnsiString); overload;
+    constructor Create(api: TFBClientAPI; Attachment: IAttachment; TPB: ITPB; DefaultCompletion: TTransactionAction; aName: AnsiString); overload;
     destructor Destroy; override;
     procedure DoDefaultTransactionEnd(Force: boolean);
     property FirebirdAPI: TFBClientAPI read FFirebirdAPI;
@@ -104,19 +113,23 @@ type
     {ITransaction}
     function getTPB: ITPB;
     procedure PrepareForCommit;virtual; abstract;
-    procedure Commit(Force: boolean=false);  virtual; abstract;
-    procedure CommitRetaining;  virtual; abstract;
+    function Commit(Force: boolean=false): TTrCompletionState;
+    procedure CommitRetaining;
     function GetInTransaction: boolean; virtual; abstract;
     function GetIsReadOnly: boolean;
     function GetTransactionID: integer;
     function GetAttachmentCount: integer;
     function GetAttachment(index: integer): IAttachment;
-    procedure Rollback(Force: boolean=false);  virtual; abstract;
-    procedure RollbackRetaining;  virtual; abstract;
-    procedure Start(DefaultCompletion: TTransactionCompletion=taCommit); overload; virtual; abstract;
+    function GetJournalingActive(attachment: IAttachment): boolean;
+    function GetDefaultCompletion: TTransactionCompletion;
+    function Rollback(Force: boolean=false): TTrCompletionState;
+    procedure RollbackRetaining;
+    procedure Start(DefaultCompletion: TTransactionCompletion=taCommit); overload;
     procedure Start(TPB: ITPB; DefaultCompletion: TTransactionCompletion=taCommit); overload;
     function GetTrInformation(Requests: array of byte): ITrInformation; overload;
     function GetTrInformation(Request: byte): ITrInformation; overload;
+    function GetTransactionName: AnsiString;
+    procedure SetTransactionName(aValue: AnsiString);
 
     property InTransaction: boolean read GetInTransaction;
     property TransactionSeqNo: integer read FSeqNo;
@@ -150,6 +163,7 @@ type
     {$ELSE}
     function GetDPBParamTypeName(ParamType: byte): Ansistring;
     {$ENDIF}
+    function AsText: AnsiString;
 end;
 
   {$IFDEF FPC}
@@ -159,7 +173,7 @@ end;
 
   TTrInfoItem = class(TOutputBlockItemGroup<TTrInfoItem,ITrInfoItem>,ITrInfoItem)
   {$ELSE}
-    TTransInfoItem = class(TOutputBlockItemGroup<TOutputBlockItem,ITransInfoItem>,ITransInfoItem)
+    TTrInfoItem = class(TOutputBlockItemGroup<TOutputBlockItem,ITrInfoItem>,ITrInfoItem)
   {$ENDIF}
     public
       procedure DecodeTraIsolation(var IsolationType, RecVersion: byte);
@@ -173,9 +187,10 @@ end;
   public
     constructor Create(api: TFBClientAPI; aSize: integer = DefaultBufferSize);
     {$IFNDEF FPC}
-    function Find(ItemType: byte): ITransInfoItem;
+    function Find(ItemType: byte): ITrInfoItem;
     {$ENDIF}
   end;
+
 
 implementation
 
@@ -227,23 +242,29 @@ begin
     IBError(ibxeNotInTransaction,[]);
 end;
 
+function TFBTransaction.GetJournalIntf(Attachment: IAttachment): IJournallingHook;
+begin
+  Attachment.QueryInterface(IJournallingHook,Result)
+end;
+
 procedure TFBTransaction.SetInterface(api: TFBClientAPI);
 begin
   FFirebirdAPI := api;
 end;
 
 constructor TFBTransaction.Create(api: TFBClientAPI; Attachments: array of IAttachment;
-  Params: array of byte; DefaultCompletion: TTransactionAction);
+  Params: array of byte; DefaultCompletion: TTransactionAction; aName: AnsiString);
 begin
-  Create(api, Attachments,GenerateTPB(Params), DefaultCompletion);
+  Create(api, Attachments,GenerateTPB(Params), DefaultCompletion, aName);
 end;
 
 constructor TFBTransaction.Create(api: TFBClientAPI; Attachments: array of IAttachment; TPB: ITPB;
-  DefaultCompletion: TTransactionAction);
+  DefaultCompletion: TTransactionAction; aName: AnsiString);
 var
   i: Integer;
 begin
   inherited Create(nil);
+  FTransactionName := aName;
   SetInterface(api);
   if Length(Attachments) = 0 then
     IBError(ibxeEmptyAttachmentsList,[nil]);
@@ -264,13 +285,13 @@ begin
 end;
 
 constructor TFBTransaction.Create(api: TFBClientAPI; Attachment: IAttachment;
-  Params: array of byte; DefaultCompletion: TTransactionAction);
+  Params: array of byte; DefaultCompletion: TTransactionAction; aName: AnsiString);
 begin
-  Create(api,Attachment,GenerateTPB(Params),DefaultCompletion);
+  Create(api,Attachment,GenerateTPB(Params),DefaultCompletion,aName);
 end;
 
 constructor TFBTransaction.Create(api: TFBClientAPI; Attachment: IAttachment; TPB: ITPB;
-  DefaultCompletion: TTransactionAction);
+  DefaultCompletion: TTransactionAction; aName: AnsiString);
 begin
   inherited Create(nil);
   SetInterface(api);
@@ -278,6 +299,7 @@ begin
   SetLength(FAttachments,1);
   FAttachments[0] := Attachment;
   FTPB := TPB;
+  FTransactionName := aName;
   Start(DefaultCompletion);
 end;
 
@@ -292,7 +314,7 @@ var i: integer;
     intf: IUnknown;
     user: ITransactionUser;
 begin
-  if InTransaction then
+  if InTransaction and not FForeignHandle then
   begin
     for i := 0 to InterfaceCount - 1 do
     begin
@@ -312,6 +334,42 @@ end;
 function TFBTransaction.getTPB: ITPB;
 begin
   Result := FTPB;
+end;
+
+function TFBTransaction.Commit(Force: boolean): TTrCompletionState;
+var i: integer;
+    TransactionID: integer;
+    TransactionEndNeeded: array of boolean;
+begin
+  if not GetInTransaction then Exit;
+
+  if FForeignHandle then
+    IBError(ibxeTransactionNotOwned,[nil]);
+
+  SetLength(TransactionEndNeeded,Length(FAttachments));
+  TransactionID := GetTransactionID;
+  for i := 0 to Length(FAttachments) - 1 do
+    if (FAttachments[i] <> nil)  then
+      TransactionEndNeeded[i] := GetJournalingActive(FAttachments[i])
+    else
+      TransactionEndNeeded[i] := false;
+  Result := InternalCommit(Force);
+  for i := 0 to Length(FAttachments) - 1 do
+    if TransactionEndNeeded[i] then
+       GetJournalIntf(FAttachments[i]).TransactionEnd(TransactionID, Result);
+end;
+
+procedure TFBTransaction.CommitRetaining;
+var i: integer;
+    TransactionID: integer;
+begin
+  if not GetInTransaction then Exit;
+
+  TransactionID := GetTransactionID;
+  InternalCommitRetaining;
+  for i := 0 to Length(FAttachments) - 1 do
+    if (FAttachments[i] <> nil) and GetJournalingActive(FAttachments[i]) then
+       GetJournalIntf(FAttachments[i]).TransactionRetained(self,TransactionID, TACommitRetaining);
 end;
 
 function TFBTransaction.GetIsReadOnly: boolean;
@@ -344,6 +402,77 @@ begin
     Result := FAttachments[index]
   else
     IBError(ibxeAttachmentListIndexError,[index]);
+end;
+
+function TFBTransaction.GetJournalingActive(attachment: IAttachment): boolean;
+begin
+  Result := false;
+  if (attachment = nil) and (length(FAttachments) > 0) then
+    attachment := FAttachments[0];
+  if attachment <> nil then
+  with attachment do
+  Result := self.GetInTransaction and JournalingActive and
+     ((((joReadOnlyTransactions in GetJournalOptions) and self.GetIsReadOnly)) or
+     ((joReadWriteTransactions in GetJournalOptions) and not self.GetIsReadOnly));
+end;
+
+function TFBTransaction.GetDefaultCompletion: TTransactionCompletion;
+begin
+  Result := FDefaultCompletion;
+end;
+
+function TFBTransaction.Rollback(Force: boolean): TTrCompletionState;
+var i: integer;
+    TransactionID: integer;
+    TransactionEndNeeded: array of boolean;
+begin
+  if not GetInTransaction then Exit;
+
+  if FForeignHandle then
+    IBError(ibxeTransactionNotOwned,[nil]);
+
+  SetLength(TransactionEndNeeded,Length(FAttachments));
+  TransactionID := GetTransactionID;
+  for i := 0 to Length(FAttachments) - 1 do
+    if (FAttachments[i] <> nil)  then
+      TransactionEndNeeded[i] := GetJournalingActive(FAttachments[i])
+    else
+      TransactionEndNeeded[i] := false;
+  Result := InternalRollback(Force);
+  for i := 0 to Length(FAttachments) - 1 do
+    if TransactionEndNeeded[i] then
+       GetJournalIntf(FAttachments[i]).TransactionEnd(TransactionID, Result);
+end;
+
+procedure TFBTransaction.RollbackRetaining;
+var i: integer;
+    TransactionID: integer;
+begin
+  if not GetInTransaction then Exit;
+
+  TransactionID := GetTransactionID;
+  InternalRollbackRetaining;
+  for i := 0 to Length(FAttachments) - 1 do
+    if (FAttachments[i] <> nil) and GetJournalingActive(FAttachments[i]) then
+       GetJournalIntf(FAttachments[i]).TransactionRetained(self,TransactionID,TARollbackRetaining);
+end;
+
+procedure TFBTransaction.Start(DefaultCompletion: TTransactionCompletion);
+var i: integer;
+begin
+  if GetInTransaction then
+    Exit;
+
+  FDefaultCompletion := DefaultCompletion;
+
+  if Length(FAttachments) = 1 then
+    InternalStartSingle(FAttachments[0])
+  else
+    InternalStartMultiple;
+  for i := 0 to Length(FAttachments) - 1 do
+    if (FAttachments[i] <> nil) and GetJournalingActive(FAttachments[i]) then
+      GetJournalIntf(FAttachments[i]).TransactionStart(self);
+  Inc(FSeqNo);
 end;
 
 procedure TFBTransaction.Start(TPB: ITPB; DefaultCompletion: TTransactionCompletion
@@ -382,6 +511,16 @@ begin
   Result := GetTrInfo(@Request,1);
 end;
 
+function TFBTransaction.GetTransactionName: AnsiString;
+begin
+  Result := FTransactionName;
+end;
+
+procedure TFBTransaction.SetTransactionName(aValue: AnsiString);
+begin
+  FTransactionName := aValue;
+end;
+
 { TTPBItem }
 
 function TTPBItem.getParamTypeName: AnsiString;
@@ -402,9 +541,22 @@ end;
 function TTPB.GetParamTypeName(ParamType: byte): Ansistring;
 begin
   if ParamType <= isc_tpb_last_tpb_constant then
-    Result := TPBConstantNames[ParamType]
+    Result := TPBPrefix + TPBConstantNames[ParamType]
   else
     Result := '';
+end;
+
+function TTPB.AsText: AnsiString;
+var i: integer;
+begin
+  Result := '[';
+  for i := 0 to getCount - 1 do
+  begin
+    Result := Result + GetParamTypeName(getItems(i).getParamType);
+    if i < getCount - 1 then
+      Result := Result + ',';
+  end;
+  Result := Result + ']';
 end;
 
 {$IFNDEF FPC}
@@ -504,6 +656,15 @@ begin
   inherited Create(api,aSize);
   FIntegerType := dtInteger;
 end;
+
+{$IFNDEF FPC}
+function TTrInformation.Find(ItemType: byte): ITrInfoItem;
+begin
+  Result := inherited Find(ItemType);
+  if Result.GetSize = 0 then
+    Result := nil;
+end;
+{$ENDIF}
 
 end.
 

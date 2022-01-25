@@ -101,7 +101,7 @@ type
    procedure SetAsFloat(Value: Float); override;
    procedure SetAsCurrency(Value: Currency); override;
    procedure SetAsBcd(aValue: tBCD); override;
-   procedure SetAsNumeric(Value: Int64; aScale: integer); override;
+   procedure SetAsNumeric(Value: IFBNumeric); override;
   end;
 
   { TFBArrayMetaData }
@@ -247,7 +247,7 @@ type
 
 implementation
 
-uses FBMessages, IBUtils;
+uses FBMessages, IBUtils, FBNumeric;
 
 { TFBArrayElement }
 
@@ -367,11 +367,11 @@ begin
   CheckActive;
   case GetSQLType of
   SQL_LONG:
-    PLong(SQLData)^ := AdjustScaleToInt64(Value,getScale);
+    PLong(SQLData)^ := NumericFromRawValues(Value,getScale).getRawValue;
   SQL_SHORT:
-    PShort(SQLData)^ := AdjustScaleToInt64(Value,getScale);
+    PShort(SQLData)^ := NumericFromRawValues(Value,getScale).getRawValue;
   SQL_INT64:
-    PInt64(SQLData)^ := AdjustScaleToInt64(Value,getScale);
+    PInt64(SQLData)^ := NumericFromRawValues(Value,getScale).getRawValue;
   SQL_TEXT, SQL_VARYING:
     SetAsString(IntToStr(Value));
   SQL_D_FLOAT,
@@ -431,7 +431,7 @@ begin
   SQL_LONG,
   SQL_INT64:
     if TryStrToNumeric(Value,Int64Value,aScale) then
-      SetAsNumeric(Int64Value,AScale)
+      SetAsNumeric(NumericFromRawValues(Int64Value,aScale))
     else
       SetAsCurrency(StrToCurr(Value));
 
@@ -439,7 +439,7 @@ begin
   SQL_DOUBLE,
   SQL_FLOAT:
     if TryStrToNumeric(Value,Int64Value,aScale) then
-      SetAsDouble(NumericToDouble(Int64Value,aScale))
+      SetAsDouble(NumericToDouble(Int64Value,AScale))
     else
       IBError(ibxeInvalidDataConversion,[nil]);
 
@@ -474,17 +474,17 @@ begin
     PSingle(SQLData)^ := Value;
   SQL_SHORT:
     if Scale < 0 then
-      PShort(SQLData)^ := AdjustScaleFromDouble(Value,Scale)
+      PShort(SQLData)^ := SafeSmallInt(DoubleToNumeric(Value).AdjustScaleTo(Scale).getRawValue)
     else
       IBError(ibxeInvalidDataConversion, [nil]);
   SQL_LONG:
     if Scale < 0 then
-      PLong(SQLData)^ := AdjustScaleFromDouble(Value,Scale)
+      PLong(SQLData)^ := SafeInteger(DoubleToNumeric(Value).AdjustScaleTo(Scale).getRawValue)
     else
       IBError(ibxeInvalidDataConversion, [nil]);
   SQL_INT64:
     if Scale < 0 then
-      PInt64(SQLData)^ := AdjustScaleFromDouble(Value,Scale)
+      PInt64(SQLData)^ := DoubleToNumeric(Value).AdjustScaleTo(Scale).getRawValue
     else
       IBError(ibxeInvalidDataConversion, [nil]);
   SQL_TEXT, SQL_VARYING:
@@ -510,7 +510,7 @@ begin
     if Scale = -4 then
       PCurrency(SQLData)^ := Value
     else
-      PInt64(SQLData)^ := AdjustScaleFromCurrency(Value,Scale);
+      PInt64(SQLData)^ := CurrToNumeric(Value).AdjustScaleTo(Scale).getRawValue;
     Changed;
   end
 end;
@@ -538,23 +538,23 @@ begin
   Changed;
 end;
 
-procedure TFBArrayElement.SetAsNumeric(Value: Int64; aScale: integer);
+procedure TFBArrayElement.SetAsNumeric(Value: IFBNumeric);
 begin
   CheckActive;
   case GetSQLType of
   SQL_LONG:
-    PLong(SQLData)^ := AdjustScaleToInt64(Value,aScale - getScale);
+      PLong(SQLData)^ := SafeInteger(Value.AdjustScaleTo(Scale).getRawValue);
   SQL_SHORT:
-    PShort(SQLData)^ := AdjustScaleToInt64(Value,aScale - getScale);
+    PShort(SQLData)^ := SafeSmallInt(Value.AdjustScaleTo(Scale).getRawValue);
   SQL_INT64:
-    PInt64(SQLData)^ := AdjustScaleToInt64(Value,aScale - getScale);
+    PInt64(SQLData)^ := Value.AdjustScaleTo(Scale).getRawValue;
   SQL_TEXT, SQL_VARYING:
-   SetAsString(AdjustScaleToStr(Value,aScale));
+   SetAsString(Value.getAsString);
   SQL_D_FLOAT,
   SQL_DOUBLE:
-    PDouble(SQLData)^ := AdjustScale(Value,aScale);
+    PDouble(SQLData)^ := Value.getAsDouble;
   SQL_FLOAT:
-    PSingle(SQLData)^ := AdjustScale(Value,aScale);
+    PSingle(SQLData)^ := Value.getAsDouble;
   else
     IBError(ibxeInvalidDataConversion, [nil]);
   end;
@@ -822,6 +822,7 @@ begin
   InternalPutSlice(Force);
   FModified := false;
   FIsNew := false;
+  FLoaded := true;
 end;
 
 function TFBArray.GetOffset(index: array of integer): PByte;

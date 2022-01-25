@@ -5,8 +5,10 @@ program testsuite;
 {$R *.res}
 
 uses
-  SysUtils,
+  System.SysUtils,
+  FBTestApp in 'FBTestApp.pas',
   Test1 in 'Test1.pas',
+  Test2 in 'Test2.pas',
   Test3 in 'Test3.pas',
   Test4 in 'Test4.pas',
   Test5 in 'Test5.pas',
@@ -23,12 +25,11 @@ uses
   Test16 in 'Test16.pas',
   Test17 in 'Test17.pas',
   Test18 in 'Test18.pas',
-  Test2 in 'Test2.pas',
-  TestApplication in 'testApp\TestApplication.pas',
-  FBTestApp in 'FBTestApp.pas',
   Test19 in 'Test19.pas',
   Test20 in 'Test20.pas',
-  Test21 in 'Test21.pas';
+  Test21 in 'Test21.pas',
+  Test22 in 'Test22.pas',
+  TestApplication in 'testApp\TestApplication.pas';
 
 var
   Application: TTestApplication;

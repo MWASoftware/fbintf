@@ -115,7 +115,7 @@ type
     destructor Destroy; override;
 
     {IEvents}
-    procedure WaitForEvent;
+    procedure WaitForEvent; override;
     procedure AsyncWaitForEvent(EventHandler: TEventHandler); override;
   end;
 

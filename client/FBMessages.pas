@@ -166,7 +166,14 @@ type
       ibxeInvalidBatchQuery,
       ibxeBatchRowBufferOverflow,
       ibxeBatchBufferSizeTooBig,
-      ibxeNoScrollableCursors
+      ibxeNoScrollableCursors,
+      ibxeUnableTosetaTextType,
+      ibxeCantDropAcquiredDB,
+      ibxeTransactionNotOwned,
+      ibxeIntegerOverflow,
+      ibxIntegerUnderflow,
+      ibxeScaleCannotBeChanged,
+      ibxeStringOverflow
       );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
@@ -284,6 +291,13 @@ resourcestring
   SBatchRowBufferOverflow = 'Adding Row No. %d - batch buffer size limit (%d bytes) exceeded';
   SBatchBufferSizeTooBig = 'Requested Batch Buffer Size (%d bytes) exceeds 256MB limit';
   SNoScrollableCursors = 'Scrollable cursors are not supported';
+  SUnableTosetaTextType = 'Param[%d] "%s": Unable to change from a %s to a string type';
+  SCantDropAcquiredDB = 'Drop database not allowed by acquired attachment';
+  STransactionNotOwned = 'Cannot Commit or Rollback a linked transaction';
+  SIntegerOverflow = 'Integer overflow when scaling numeric';
+  SIntegerUnderflow = 'Integer underflow when scaling numeric';
+  SScaleCannotBeChanged = 'Unable to change numeric field scale';
+  SStringOverflow = 'String overflow. String Length %d exceeds permitted maximum (%d)';
 
 const
   IBErrorMessages: array[TIBClientError] of string = (
@@ -377,7 +391,14 @@ const
     SInvalidBatchQuery,
     SBatchRowBufferOverflow,
     SBatchBufferSizeTooBig,
-    SNoScrollableCursors
+    SNoScrollableCursors,
+    SUnableTosetaTextType,
+    SCantDropAcquiredDB,
+    STransactionNotOwned,
+    SIntegerOverflow,
+    SIntegerUnderflow,
+    SScaleCannotBeChanged,
+    SStringOverflow
   );
 
 function GetErrorMessage(ErrMess: TIBClientError): AnsiString;
