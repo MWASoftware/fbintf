@@ -159,7 +159,7 @@ type
 
    TFBUDROutputParams = class(TSQLParams,IFBUDROutputData)
    public
-     function ParamExists(Idx: AnsiString): boolean;
+     function FieldExists(Idx: AnsiString): boolean;
      function ByName(Idx: AnsiString): ISQLParam ; override;
    end;
 
@@ -739,7 +739,7 @@ end;
 
 function TFBUDRInputParams.ParamExists(Idx: AnsiString): boolean;
 begin
-  Result := inherited ByName(Idx) <> nil;
+  Result := FieldExists(Idx);
 end;
 
 function TFBUDRInputParams.ByName(Idx: AnsiString): ISQLData;
@@ -751,9 +751,9 @@ end;
 
 { TFBUDROutputParams }
 
-function TFBUDROutputParams.ParamExists(Idx: AnsiString): boolean;
+function TFBUDROutputParams.FieldExists(Idx: AnsiString): boolean;
 begin
-  Result := inherited ByName(Idx) <> nil;
+  Result := ParamExists(Idx);
 end;
 
 function TFBUDROutputParams.ByName(Idx: AnsiString): ISQLParam;
@@ -825,7 +825,8 @@ begin
           FUDRProcedure.FController.WriteToLog(SOutputData,FOutputData)
         else
           FUDRProcedure.FController.WriteToLog(SEof);
-      FOutputDataSQLDA.Finalise;
+      if Result then
+        FOutputDataSQLDA.Finalise;
     end
     else
       Result := false;

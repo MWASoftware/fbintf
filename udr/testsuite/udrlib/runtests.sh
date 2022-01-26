@@ -54,6 +54,7 @@ else
   fi
   cp libfbudrtests.so $FIREBIRD/plugins/udr
   sudo /opt/stopfb
+  sleep 1
   sudo /opt/startfb.sh
   
   echo "Running UDR Lib Testsuite" >testout.log
@@ -65,7 +66,7 @@ else
     echo "------------------------" >>testout.log
     echo "Running `basename -s .sql $FN`" >>testout.log
     echo "------------------------" >>testout.log
-    sed "s|\`pwd\`|`pwd`|" $FN| $RUNISQL  >>testout.log   2>&1
+    sed "s|\`pwd\`|`pwd`|" $FN| $RUNISQL  |tee -a testout.log   2>&1
     done
   echo "Dropping definitions"
   $RUNISQL < dropdefs.sql  

@@ -142,6 +142,7 @@ type
     function getSQLParam(index: integer): ISQLParam;
     function GetModified: Boolean;
     function GetHasCaseSensitiveParams: Boolean;
+    function FieldExists(Idx: AnsiString): boolean;
     function ByName(Idx: AnsiString): ISQLParam ;
     procedure Clear;
     property Modified: Boolean read GetModified;

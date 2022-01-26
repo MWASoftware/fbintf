@@ -155,7 +155,7 @@ end;
 function TReadTextFile.fetch(OutputData: IFBUDROutputData): boolean;
 begin
   Result := not FTextFile.{$IFDEF FPC}EOF{$ELSE}EndOfStream{$ENDIF};
-  if Result then
+  if Result  then
     OutputData.ByName('text').AsString := FTextFile.ReadLine;
 end;
 

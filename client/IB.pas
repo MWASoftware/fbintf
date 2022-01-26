@@ -622,6 +622,7 @@ type
    function GetStatement: IStatement;
    function GetTransaction: ITransaction;
    function GetAttachment: IAttachment;
+   function FieldExists(Idx: AnsiString): boolean;
    function ByName(Idx: AnsiString): ISQLData;
    function getSQLData(index: integer): ISQLData;
    procedure GetData(index: integer; var IsNull:boolean; var len: short; var data: PByte);
@@ -772,10 +773,13 @@ type
    for the input to an SQL Statement
   }
 
+  { ISQLParams }
+
   ISQLParams = interface
     ['{c6d95ac7-b2b7-461b-b890-afef0acbb077}']
     function getCount: integer;
     function getSQLParam(index: integer): ISQLParam;
+    function ParamExists(Idx: AnsiString): boolean;
     function ByName(Idx: AnsiString): ISQLParam ;
     function GetModified: Boolean;
     function GetHasCaseSensitiveParams: Boolean;
