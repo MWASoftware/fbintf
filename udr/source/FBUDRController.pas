@@ -847,16 +847,14 @@ end;
 function TFBUDRSingletonRow.fetch(status: Firebird.IStatus): Boolean;
 begin
   try
-  if FOutputDataSQLDA <> nil then
+  Result := (FOutputDataSQLDA <> nil) and not FFetchCalled;
+  if Result then
   begin
     if [loLogProcedures,loDetails] <= FBUDRControllerOptions.LogOptions then
-      FUDRProcedure.FController.WriteToLog(SOutputData,FOutputData);
+        FUDRProcedure.FController.WriteToLog(SOutputData,FOutputData);
     FOutputDataSQLDA.Finalise; {copy output row to outMsg}
-    Result := not FFetchCalled;
     FFetchCalled := true;
-  end
-  else
-    Result := false;
+  end;
   except on E: Exception do
     FUDRProcedure.FController.FBSetStatusFromException(E,status);
   end;
