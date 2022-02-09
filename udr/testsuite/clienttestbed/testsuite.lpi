@@ -46,7 +46,7 @@
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="udrlib/udr_test01.pas"/>
+        <Filename Value="../udrlib/udr_test01.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
@@ -54,11 +54,11 @@
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="udrlib/udr_test02.pas"/>
+        <Filename Value="../udrlib/udr_test02.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="udrlib/udr_test03.pas"/>
+        <Filename Value="../udrlib/udr_test03.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
@@ -70,7 +70,7 @@
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="udrlib/udr_test04.pas"/>
+        <Filename Value="../udrlib/udr_test04.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
     </Units>
@@ -82,7 +82,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="udrlib"/>
+      <OtherUnitFiles Value="../udrlib"/>
       <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Linking>
