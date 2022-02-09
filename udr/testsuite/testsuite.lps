@@ -71,10 +71,12 @@
       <Unit>
         <Filename Value="Test03.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="84"/>
-        <CursorPos X="43" Y="97"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="81"/>
+        <CursorPos Y="97"/>
         <UsageCount Value="33"/>
+        <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="Test04.pas"/>
@@ -126,7 +128,6 @@
       </Unit>
       <Unit>
         <Filename Value="../source/FBUDRUtils.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
         <TopLine Value="632"/>
         <CursorPos X="58" Y="653"/>
@@ -143,8 +144,8 @@
       <Unit>
         <Filename Value="../source/FBUDRController.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="740"/>
-        <CursorPos Y="757"/>
+        <TopLine Value="266"/>
+        <CursorPos X="3" Y="243"/>
         <UsageCount Value="15"/>
       </Unit>
       <Unit>
@@ -184,7 +185,7 @@
       </Unit>
       <Unit>
         <Filename Value="../../client/IB.pas"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="1421"/>
         <CursorPos X="104" Y="1443"/>
         <UsageCount Value="14"/>
@@ -278,7 +279,7 @@
       <Unit>
         <Filename Value="../serversectest/sectest.pas"/>
         <EditorIndex Value="3"/>
-        <TopLine Value="64"/>
+        <TopLine Value="61"/>
         <CursorPos X="17" Y="87"/>
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
@@ -303,12 +304,12 @@
       <Modes ActiveMode="default">
         <Mode Name="default">
           <local>
-            <CommandLineParams Value="-t 4"/>
+            <CommandLineParams Value="-t 3"/>
           </local>
           <environment>
             <UserOverrides Count="2">
-              <Variable0 Name="FIREBIRD" Value="/opt/firebird4.0.1"/>
-              <Variable1 Name="LD_LIBRARY_PATH" Value="/opt/firebird4.0.1/lib"/>
+              <Variable0 Name="FIREBIRD" Value="/opt/firebird/4.0.1"/>
+              <Variable1 Name="LD_LIBRARY_PATH" Value="/opt/firebird/4.0.1/lib"/>
             </UserOverrides>
           </environment>
         </Mode>
@@ -319,12 +320,11 @@
         <Item1 Value="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </List>
       <List Name="CommandLineParameters" Count="4">
-        <Item1 Value="-t 4"/>
-        <Item2 Value="-t 3"/>
+        <Item1 Value="-t 3"/>
+        <Item2 Value="-t 4"/>
         <Item3 Value="-t 1"/>
         <Item4 Value="-t 2"/>
       </List>
-      <List Name="WorkingDirectory" Type="File" Count="1"/>
     </HistoryLists>
   </ProjectSession>
 </CONFIG>

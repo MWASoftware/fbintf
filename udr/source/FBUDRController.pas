@@ -819,6 +819,7 @@ end;
 
 function TFBUDRResultsCursor.fetch(status: Firebird.IStatus): Boolean;
 begin
+  Result := false;
   try
     if loLogFetches in FBUDRControllerOptions.LogOptions then
       FUDRProcedure.FController.WriteToLog(SFetchCalled + FUDRProcedure.FName);
@@ -1111,6 +1112,8 @@ begin
     FBContext := TFBUDRExternalContext.Create(Controller,context);
 
     FBRoutineMetadata := TFBUDRRoutineMetadata.Create(FBContext,metadata);
+    {Now get the Field Names}
+    UpdateFieldNames(FBContext.GetAttachment,FBRoutineMetadata.getTriggerTable);
 
     if fieldsBuilder <> nil then
       FBFieldsBuilder := TFBUDRMetadataBuilder.Create(FBContext,fieldsBuilder);
@@ -1131,8 +1134,6 @@ begin
   try
     FBContext := TFBUDRExternalContext.Create(Controller,context);
     FBRoutineMetadata := TFBUDRRoutineMetadata.Create(FBContext,metadata);
-    {Now get the Field Names}
-    UpdateFieldNames(FBContext.GetAttachment,FBRoutineMetadata.getTriggerTable);
     Result := FTrigger.Create(FController,FName,FBRoutineMetadata,FFieldNames);
   except on E: Exception do
     FController.FBSetStatusFromException(E,status);
@@ -1466,6 +1467,8 @@ begin
     FBContext := TFBUDRExternalContext.Create(Controller,context);
 
     FBRoutineMetadata := TFBUDRRoutineMetadata.Create(FBContext,metadata);
+    {Now get the Field Names}
+    UpdateArgNames(FBContext.GetAttachment,FBRoutineMetadata.getName);
     if inBuilder <> nil then
       FBInBuilder := TFBUDRMetadataBuilder.Create(FBContext,inBuilder);
     if outBuilder <> nil then
@@ -1487,8 +1490,6 @@ begin
   try
     FBContext := TFBUDRExternalContext.Create(Controller,context);
     FBRoutineMetadata := TFBUDRRoutineMetadata.Create(FBContext,metadata);
-    {Now get the Field Names}
-    UpdateArgNames(FBContext.GetAttachment,FBRoutineMetadata.getName);
     Result := FProcedure.Create(FController,FName,FBRoutineMetadata,
                                  FInArgNames,FOutArgNames);
   except on E: Exception do
@@ -1925,6 +1926,8 @@ begin
     FBContext := TFBUDRExternalContext.Create(Controller,context);
 
     FBRoutineMetadata := TFBUDRRoutineMetadata.Create(FBContext,metadata);
+    {Now get the argument Names}
+    UpdateFieldNames(FBContext.GetAttachment,FBRoutineMetadata.getName);
 
     if inBuilder <> nil then
       FBInBuilder := TFBUDRMetadataBuilder.Create(FBContext,inBuilder);
@@ -1948,8 +1951,6 @@ begin
   try
     FBContext := TFBUDRExternalContext.Create(Controller,context);
     FBRoutineMetadata := TFBUDRRoutineMetadata.Create(FBContext,metadata);
-    {Now get the argument Names}
-    UpdateFieldNames(FBContext.GetAttachment,FBRoutineMetadata.getName);
     Result := FFunction.Create(FController,FName,FBRoutineMetadata,FFieldNames);
   except on E: Exception do
     FController.FBSetStatusFromException(E,status);

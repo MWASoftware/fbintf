@@ -8,6 +8,7 @@ usage()
 BUILD=
 #Parse Parameters
 TEMP=`getopt h34db:f: "$@"`
+FB="4.0.1"
 if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
 
 eval set -- "$TEMP"
@@ -20,7 +21,7 @@ while true ; do
 
         \-4) 	FB="4.0.1"; shift 1;;
 
-	-d)	FB="dev"; shift 1;;
+	-d)	FB="master"; shift 1;;
 
 	-f)	FB=$2; shift 2;;
         
@@ -31,7 +32,7 @@ while true ; do
         esac
 done
 
-export FIREBIRD=/opt/firebird$FB
+export FIREBIRD=/opt/firebird/$FB
 echo "FIREBIRD=$FIREBIRD"
 export LD_LIBRARY_PATH=$FIREBIRD/lib
 ISQL=$FIREBIRD/bin/isql
@@ -41,6 +42,8 @@ if [ ! -x $ISQL ]; then
 fi
 
 RUNISQL="$ISQL -user SYSDBA -pass masterkey localhost:employee"
+TESTISQL="$ISQL -user TESTER -pass testing localhost:employee"
+rm libfbudrtests.so
 
 if [ ! -d "$FIREBIRD" ]; then
   echo "$FIREBIRD not found"
@@ -53,10 +56,15 @@ else
     exit 1
   fi
   cp libfbudrtests.so $FIREBIRD/plugins/udr
-  sudo /opt/stopfb
+  PID=`ps ax|grep $FB/bin/fbguard|grep -v grep|awk '{print $1;}'`
+  if [ -n "$PID" ]; then
+    sudo kill -TERM $PID
+  fi
   sleep 1
-  sudo /opt/startfb.sh
-  
+  echo "starting $FB/bin/fbguard"
+  sudo $FIREBIRD/bin/fbguard&
+  sleep 2
+
   echo "Running UDR Lib Testsuite" >testout.log
   
   echo "Adding SQL Definitions"
@@ -66,7 +74,9 @@ else
     echo "------------------------" >>testout.log
     echo "Running `basename -s .sql $FN`" >>testout.log
     echo "------------------------" >>testout.log
-    sed "s|\`pwd\`|`pwd`|" $FN| $RUNISQL  |tee -a testout.log   2>&1
+    sed "s|\`pwd\`|`pwd`|" $FN| $RUNISQL  2>&1 |tee -a testout.log
+    echo "Repeat with USER=TESTER" >>testout.log
+    sed "s|\`pwd\`|`pwd`|" $FN| $TESTISQL  2>&1 |tee -a testout.log
     done
   echo "Dropping definitions"
   $RUNISQL < dropdefs.sql  

@@ -23,7 +23,7 @@ while true ; do
 
         \-4) 	FB="4.0.1"; shift 1;;
 
-	-d)	FB="dev"; shift 1;;
+	-d)	FB="master"; shift 1;;
 
 	-f)	FB=$2; shift 2;;
         
@@ -41,7 +41,7 @@ if [ -n "$BUILD" ]; then
   FB="4"
 fi
 
-export FIREBIRD=/opt/firebird$FB$BUILD
+export FIREBIRD=/opt/firebird/$FB$BUILD
 echo "FIREBIRD=$FIREBIRD"
 
 if [ ! -d "$FIREBIRD" ]; then
