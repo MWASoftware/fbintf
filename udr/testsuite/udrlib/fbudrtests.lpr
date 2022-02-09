@@ -40,7 +40,7 @@ library fbudrtests;
 
 uses
   Classes, sysutils, fbudr, FBUDRController, udr_test01, udr_test02, udr_test03,
-  udr_test04;
+  udr_test04, udr_test05;
 
 exports firebird_udr_plugin;
 

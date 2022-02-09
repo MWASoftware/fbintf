@@ -84,6 +84,7 @@
         <DCCReference Include="udr_test02.pas"/>
         <DCCReference Include="udr_test03.pas"/>
         <DCCReference Include="udr_test04.pas"/>
+        <DCCReference Include="udr_test05.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

@@ -101,7 +101,9 @@ end;
 constructor TFBUDRTestApp.Create(TheOwner: TComponent);
 begin
   inherited Create(TheOwner);
+  {$ifdef FPC}
   StopOnException := True;
+  {$endif}
   if FUDRPlugin = nil then
     FUDRPlugin := TFBUdrPluginEmulator.Create(getModuleName);
 end;

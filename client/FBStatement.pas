@@ -82,7 +82,7 @@ type
     procedure CheckChangeBatchRowLimit; virtual;
     procedure CheckHandle; virtual; abstract;
     procedure CheckTransaction(aTransaction: ITransaction);
-    procedure DoJournaling;
+    procedure DoJournaling(force: boolean);
     function GetJournalIntf: IJournallingHook;
     function GetStatementIntf: IStatement; virtual; abstract;
     procedure GetDsqlInfo(info_request: byte; buffer: ISQLInfoResults); overload; virtual; abstract;
@@ -174,7 +174,7 @@ begin
     IBError(ibxeNotInTransaction,[]);
 end;
 
-procedure TFBStatement.DoJournaling;
+procedure TFBStatement.DoJournaling(force: boolean);
   function doGetRowsAffected: integer;
   var a,i,u,d: integer;
   begin
@@ -186,9 +186,9 @@ var RowsAffected: integer;
 begin
   RowsAffected := doGetRowsAffected;
   with GetAttachment do
-    if JournalingActive and
+    if JournalingActive and (force or
       (((joReadOnlyQueries in GetJournalOptions) and (RowsAffected = 0)) or
-      ((joModifyQueries in GetJournalOptions) and (RowsAffected > 0))) then
+      ((joModifyQueries in GetJournalOptions) and (RowsAffected > 0)))) then
       GetJournalIntf.ExecQuery(GetStatementIntf);
 end;
 
@@ -356,11 +356,14 @@ end;
 
 function TFBStatement.Execute(aTransaction: ITransaction): IResults;
 begin
-  if aTransaction = nil then
-    Result :=  InternalExecute(FTransactionIntf)
-  else
-    Result := InternalExecute(aTransaction);
-  DoJournaling;
+  try
+    if aTransaction = nil then
+      Result :=  InternalExecute(FTransactionIntf)
+    else
+      Result := InternalExecute(aTransaction);
+  finally
+    DoJournaling(ExceptObject <> nil);
+  end;
 end;
 
 procedure TFBStatement.AddToBatch;
@@ -414,11 +417,14 @@ function TFBStatement.OpenCursor(Scrollable: boolean; aTransaction: ITransaction
   ): IResultSet;
 begin
   Close;
-  if aTransaction = nil then
-    Result := InternalOpenCursor(FTransactionIntf,Scrollable)
-  else
-    Result := InternalOpenCursor(aTransaction,Scrollable);
-  DoJournaling;
+  try
+    if aTransaction = nil then
+      Result := InternalOpenCursor(FTransactionIntf,Scrollable)
+    else
+      Result := InternalOpenCursor(aTransaction,Scrollable);
+  finally
+    DoJournaling(ExceptObject <> nil);
+  end;
 end;
 
 function TFBStatement.CreateBlob(paramName: AnsiString): IBlob;

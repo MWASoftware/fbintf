@@ -1,5 +1,5 @@
 (*
- *  Firebird UDR Support (fbudrtested). The fbudr components provide a set of
+ *  Firebird UDR Support (fbudrtestbed). The fbudr components provide a set of
  *  Pascal language bindings for the Firebird API in support of server
  *  side User Defined Routines (UDRs). The fbudr package is an extension
  *  to the Firebird Pascal API.
@@ -25,29 +25,40 @@
  *
  *  Contributor(s): ______________________________________.
  *
-*)
-library fbudrtests;
+*)program testsuite;
 
-uses
-  System.SysUtils,
-  System.Classes,
-  FBUDRController,
-  udr_test01 in 'udr_test01.pas',
-  udr_test02 in 'udr_test02.pas',
-  udr_test03 in 'udr_test03.pas',
-  udr_test04 in 'udr_test04.pas',
-  udr_test05 in 'udr_test05.pas';
+{$APPTYPE CONSOLE}
 
 {$R *.res}
 
-exports firebird_udr_plugin;
+uses
+  System.SysUtils,
+  Classes, FBUDRController,
+  FBUDRTestApp in 'FBUDRTestApp.pas',
+  Test01 in 'Test01.pas',
+  Test02 in 'Test02.pas',
+  Test03 in 'Test03.pas',
+  Test04 in 'Test04.pas',
+  TestApplication in 'TestApplication.pas',
+  udr_test01 in '..\udrlib\udr_test01.pas',
+  udr_test02 in '..\udrlib\udr_test02.pas',
+  udr_test03 in '..\udrlib\udr_test03.pas',
+  udr_test04 in '..\udrlib\udr_test04.pas';
 
+var
+  Application: TFBUDRTestApp;
 begin
   with FBUDRControllerOptions do
   begin
     ModuleName := 'fbudrtests';
     AllowConfigFileOverrides := true;
-    LogFileNameTemplate := '$LOGDIR$MODULE.log';
-    LogOptions := [loLogFunctions, loLogProcedures, loLogTriggers, loDetails];
+    LogFileNameTemplate := 'serverside.log';
+    ConfigFileNameTemplate := 'testsuite.conf';
+    LogOptions :=  [loLogFunctions, loLogProcedures, loLogTriggers, loDetails,
+                                    loModifyQueries, loReadOnlyQueries];
   end;
+  Application := TFBUDRTestApp.Create(nil);
+  Application.Title := 'FB UDR Test Suite';
+  Application.Run;
+  Application.Free;
 end.

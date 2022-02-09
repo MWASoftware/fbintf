@@ -1,0 +1,131 @@
+@20-1-22 22:52:46.5050:Registering Procedure select_into
+@20-1-22 22:52:46.5290:Setup Procedure select_into
+@20-1-22 22:52:46.5300:Routine Metadata
+Package Name = 
+  Name = SELECT_INTO
+  Entry Point = selectinto!select_into (selectinto,select_into,)
+  Body = 
+  Input Metadata:
+  Field Count = 3
+  Alignment = 2
+  Aligned Length = 8294
+  Field No. 0
+  Field Name = SELECT_STATEMENT
+  Relation Name = 
+  Alias Name = SELECT_STATEMENT
+  SQLType = SQL_VARYING
+  IsNullable = no
+  SubType = 1
+  Length = 8192
+  Scale = 0
+  Offset = 0
+  Null Offset = 8194
+  Message Length = 8192
+  Field No. 1
+  Field Name = TABLE_NAME
+  Relation Name = 
+  Alias Name = TABLE_NAME
+  SQLType = SQL_VARYING
+  IsNullable = no
+  SubType = 0
+  Length = 63
+  Scale = 0
+  Offset = 8196
+  Null Offset = 8262
+  Message Length = 63
+  Field No. 2
+  Field Name = TABLE_TYPE
+  Relation Name = 
+  Alias Name = TABLE_TYPE
+  SQLType = SQL_VARYING
+  IsNullable = no
+  SubType = 0
+  Length = 25
+  Scale = 0
+  Offset = 8264
+  Null Offset = 8292
+  Message Length = 25
+  
+Output Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 104
+  Field No. 0
+  Field Name = STATUS
+  Relation Name = SELECT_INTO
+  Alias Name = STATUS
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 100
+  Scale = 0
+  Offset = 0
+  Null Offset = 102
+  Message Length = 100
+  
+@20-1-22 22:52:46.5430:Open Execute Procedure select_into
+@20-1-22 22:52:46.5440:External Context: 
+  Attachment ID = 3594
+  Transaction ID = 10661
+  User Name = SYSDBA
+  Database Name = employee
+  Client Character Set = UTF8
+  
+@20-1-22 22:52:46.5440:Input Parameters
+Parameter 0:
+  Field Name = SELECT_STATEMENT
+  Alias Name = SELECT_STATEMENT
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 8192
+  Value = Select * From EMPLOYEE Where Salary < 50000
+Parameter 1:
+  Field Name = TABLE_NAME
+  Alias Name = TABLE_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 63
+  Value = LOWER_PAID
+Parameter 2:
+  Field Name = TABLE_TYPE
+  Alias Name = TABLE_TYPE
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 25
+  Value = 
+
+@20-1-22 22:52:46.5440:Output Parameters
+Column 0
+  Field Name = STATUS
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 100
+  Value = NULL
+
+*S:'20-1-22 22:52:46.5630',3594,0,10665,0:,53:[isc_tpb_write,isc_tpb_nowait,isc_tpb_read_committed],1
+*C:'20-1-22 22:52:47.0460',3594,0,10665
+@20-1-22 22:52:47.0500:Procedure select_into: dispose called with refcount = 2
+@20-1-22 22:52:47.0500:Output Parameters with data
+Column 0
+  Field Name = STATUS
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 100
+  Value = ok
+
+@20-1-22 22:52:47.1630:Procedure select_into: dispose called with refcount = 1

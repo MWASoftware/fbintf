@@ -159,7 +159,7 @@ type
 
    TFBUDROutputParams = class(TSQLParams,IFBUDROutputData)
    public
-     function ParamExists(Idx: AnsiString): boolean;
+     function FieldExists(Idx: AnsiString): boolean;
      function ByName(Idx: AnsiString): ISQLParam ; override;
    end;
 
@@ -246,6 +246,7 @@ type
     FName: AnsiString;
     FRoutineMetadata: IFBUDRRoutineMetadata;
     FFieldNames: TStrings;
+    FFirebirdAPI: IFirebirdAPI;
     procedure SetFieldNames(SQLDA: TFBUDRInParamsSQLDA);
   public
     constructor Create(aController: TFBUDRController;
@@ -287,6 +288,7 @@ type
                    outBuilder: IFBUDRMetadataBuilder); virtual;
      property Name: AnsiString read FName;
      property Controller: TFBUDRController read FController;
+     property FirebirdAPI: IFirebirdAPI read FFirebirdAPI;
    public
     {IExternalFunction}
     procedure dispose(); override;
@@ -345,6 +347,7 @@ type
       FName: AnsiString;
       FRoutineMetadata: IFBUDRRoutineMetadata;
       FRefCount: integer;
+      FFirebirdAPI: IFirebirdAPI;
     protected
       FInArgNames: TStrings;
       FOutArgNames: TStrings;
@@ -354,6 +357,7 @@ type
                        aName: AnsiString;
                        routineMetadata: IFBUDRRoutineMetadata;
                        aInArgNames, aOutArgNames: TStrings);
+      property FirebirdAPI: IFirebirdAPI read FFirebirdAPI;
     public
      {External Procedure Implementation}
 
@@ -553,6 +557,7 @@ type
     FName: AnsiString;
     FRoutineMetadata: IFBUDRRoutineMetadata;
     FFieldNames: TStrings;
+    FFirebirdAPI: IFirebirdAPI;
     procedure SetFieldNames(SQLDA: TSQLDataArea);
   public
     constructor Create(aController: TFBUDRController;
@@ -608,6 +613,7 @@ type
 
     property Name: AnsiString read FName;
     property Controller: TFBUDRController read FController;
+    property FirebirdAPI: IFirebirdAPI read FFirebirdAPI;
  public
     {IExternalTrigger}
     procedure dispose(); override;
@@ -739,7 +745,7 @@ end;
 
 function TFBUDRInputParams.ParamExists(Idx: AnsiString): boolean;
 begin
-  Result := inherited ByName(Idx) <> nil;
+  Result := FieldExists(Idx);
 end;
 
 function TFBUDRInputParams.ByName(Idx: AnsiString): ISQLData;
@@ -751,9 +757,9 @@ end;
 
 { TFBUDROutputParams }
 
-function TFBUDROutputParams.ParamExists(Idx: AnsiString): boolean;
+function TFBUDROutputParams.FieldExists(Idx: AnsiString): boolean;
 begin
-  Result := inherited ByName(Idx) <> nil;
+  Result := ParamExists(Idx);
 end;
 
 function TFBUDROutputParams.ByName(Idx: AnsiString): ISQLParam;
@@ -813,6 +819,7 @@ end;
 
 function TFBUDRResultsCursor.fetch(status: Firebird.IStatus): Boolean;
 begin
+  Result := false;
   try
     if loLogFetches in FBUDRControllerOptions.LogOptions then
       FUDRProcedure.FController.WriteToLog(SFetchCalled + FUDRProcedure.FName);
@@ -825,7 +832,8 @@ begin
           FUDRProcedure.FController.WriteToLog(SOutputData,FOutputData)
         else
           FUDRProcedure.FController.WriteToLog(SEof);
-      FOutputDataSQLDA.Finalise;
+      if Result then
+        FOutputDataSQLDA.Finalise;
     end
     else
       Result := false;
@@ -846,16 +854,14 @@ end;
 function TFBUDRSingletonRow.fetch(status: Firebird.IStatus): Boolean;
 begin
   try
-  if FOutputDataSQLDA <> nil then
+  Result := (FOutputDataSQLDA <> nil) and not FFetchCalled;
+  if Result then
   begin
     if [loLogProcedures,loDetails] <= FBUDRControllerOptions.LogOptions then
-      FUDRProcedure.FController.WriteToLog(SOutputData,FOutputData);
+        FUDRProcedure.FController.WriteToLog(SOutputData,FOutputData);
     FOutputDataSQLDA.Finalise; {copy output row to outMsg}
-    Result := not FFetchCalled;
     FFetchCalled := true;
-  end
-  else
-    Result := false;
+  end;
   except on E: Exception do
     FUDRProcedure.FController.FBSetStatusFromException(E,status);
   end;
@@ -884,50 +890,56 @@ begin
     else
     begin
       FBContext := TFBUDRExternalContext.Create(Controller,context);
-      if [loLogProcedures,loDetails] <= FBUDRControllerOptions.LogOptions  then
-           FController.WriteToLog((FBContext as TFBUDRExternalContext).AsText);
-
-      if FRoutineMetadata.HasInputMetadata then
-      begin
-        metadata := (FRoutineMetadata as TFBUDRRoutineMetadata).getInputMetadata;
-        try
-          InputParamsSQLDA := TFBUDRInParamsSQLDA.Create(FBContext,
-                                             metadata,
-                                             inMsg);
-          SetFieldNames(InputParamsSQLDA);
-        finally
-          metadata.release;
-        end;
-      end;
-
+      FFirebirdAPI := FBContext.GetFirebirdAPI;
       try
-        if InputParamsSQLDA <> nil then
-        begin
-          InputParams := TFBUDRInputParams.Create(InputParamsSQLDA);
-          if [loLogProcedures,loDetails] <= FBUDRControllerOptions.LogOptions then
-            FController.WriteToLog(SInputParams,InputParams);
-        end;
+        if [loLogProcedures,loDetails] <= FBUDRControllerOptions.LogOptions  then
+             FController.WriteToLog((FBContext as TFBUDRExternalContext).AsText);
 
-        metadata := nil;
-        if FRoutineMetadata.HasOutputMetadata then
-          metadata := (FRoutineMetadata as TFBUDRRoutineMetadata).getOutputMetadata;
+        if FRoutineMetadata.HasInputMetadata then
+        begin
+          metadata := (FRoutineMetadata as TFBUDRRoutineMetadata).getInputMetadata;
+          try
+            InputParamsSQLDA := TFBUDRInParamsSQLDA.Create(FBContext,
+                                               metadata,
+                                               inMsg);
+            SetFieldNames(InputParamsSQLDA);
+          finally
+            metadata.release;
+          end;
+        end;
 
         try
-          Result := TFBUDRSingletonRow.Create(self, FBContext, FOutArgNames,
-                                               metadata,
-                                               outMsg);
+          if InputParamsSQLDA <> nil then
+          begin
+            InputParams := TFBUDRInputParams.Create(InputParamsSQLDA);
+            if [loLogProcedures,loDetails] <= FBUDRControllerOptions.LogOptions then
+              FController.WriteToLog(SInputParams,InputParams);
+          end;
 
+          metadata := nil;
+          if FRoutineMetadata.HasOutputMetadata then
+            metadata := (FRoutineMetadata as TFBUDRRoutineMetadata).getOutputMetadata;
+
+          try
+            Result := TFBUDRSingletonRow.Create(self, FBContext, FOutArgNames,
+                                                 metadata,
+                                                 outMsg);
+
+          finally
+            if metadata <> nil then
+              metadata.release;
+          end;
+
+          Execute(FBContext,aProcMetadata,InputParams,
+                                    (Result as TFBUDRSingletonRow).OutputData);
         finally
-          if metadata <> nil then
-            metadata.release;
+          InputParams := nil;
+          if InputParamsSQLDA <> nil then
+            InputParamsSQLDA.Free;
         end;
 
-        Execute(FBContext,aProcMetadata,InputParams,
-                                  (Result as TFBUDRSingletonRow).OutputData);
       finally
-        InputParams := nil;
-        if InputParamsSQLDA <> nil then
-          InputParamsSQLDA.Free;
+        FFirebirdAPI := nil;
       end;
 
     end;
@@ -974,50 +986,56 @@ begin
     else
     begin
       FBContext := TFBUDRExternalContext.Create(Controller,context);
-      if [loLogProcedures,loDetails] <= FBUDRControllerOptions.LogOptions then
-           FController.WriteToLog((FBContext as TFBUDRExternalContext).AsText);
-
-      if FRoutineMetadata.HasInputMetadata then
-      begin
-        metadata := (FRoutineMetadata as TFBUDRRoutineMetadata).getInputMetadata;
-        try
-          InputParamsSQLDA := TFBUDRInParamsSQLDA.Create(FBContext,
-                                             metadata,
-                                             inMsg);
-          SetFieldNames(InputParamsSQLDA);
-       finally
-          metadata.release;
-        end;
-      end;
-
+      FFirebirdAPI := FBContext.GetFirebirdAPI;
       try
-        if InputParamsSQLDA <> nil then
+        if [loLogProcedures,loDetails] <= FBUDRControllerOptions.LogOptions then
+             FController.WriteToLog((FBContext as TFBUDRExternalContext).AsText);
+
+        if FRoutineMetadata.HasInputMetadata then
         begin
-          InputParams := TFBUDRInputParams.Create(InputParamsSQLDA);
-          if [loLogProcedures,loDetails] <= FBUDRControllerOptions.LogOptions then
-            FController.WriteToLog(SInputParams,InputParams);
+          metadata := (FRoutineMetadata as TFBUDRRoutineMetadata).getInputMetadata;
+          try
+            InputParamsSQLDA := TFBUDRInParamsSQLDA.Create(FBContext,
+                                               metadata,
+                                               inMsg);
+            SetFieldNames(InputParamsSQLDA);
+         finally
+            metadata.release;
+          end;
         end;
 
-        metadata := nil;
-        if FRoutineMetadata.HasOutputMetadata then
-          metadata := (FRoutineMetadata as TFBUDRRoutineMetadata).getOutputMetadata;
-
         try
-          open(FBContext,aProcMetadata,InputParams);
-          Result := TFBUDRResultsCursor.Create(self, FBContext,
-                                                 FOutArgNames,
-                                                 metadata,
-                                                 outMsg);
+          if InputParamsSQLDA <> nil then
+          begin
+            InputParams := TFBUDRInputParams.Create(InputParamsSQLDA);
+            if [loLogProcedures,loDetails] <= FBUDRControllerOptions.LogOptions then
+              FController.WriteToLog(SInputParams,InputParams);
+          end;
+
+          metadata := nil;
+          if FRoutineMetadata.HasOutputMetadata then
+            metadata := (FRoutineMetadata as TFBUDRRoutineMetadata).getOutputMetadata;
+
+          try
+            open(FBContext,aProcMetadata,InputParams);
+            Result := TFBUDRResultsCursor.Create(self, FBContext,
+                                                   FOutArgNames,
+                                                   metadata,
+                                                   outMsg);
+          finally
+            if metadata <> nil then
+              metadata.release;
+          end;
         finally
-          if metadata <> nil then
-            metadata.release;
+          InputParams := nil;
+          if InputParamsSQLDA <> nil then
+            InputParamsSQLDA.Free;
         end;
       finally
-        InputParams := nil;
-        if InputParamsSQLDA <> nil then
-          InputParamsSQLDA.Free;
+        FFirebirdAPI := nil;
       end;
     end;
+
     except on E: Exception do
       begin
         if Result <> nil then
@@ -1094,6 +1112,8 @@ begin
     FBContext := TFBUDRExternalContext.Create(Controller,context);
 
     FBRoutineMetadata := TFBUDRRoutineMetadata.Create(FBContext,metadata);
+    {Now get the Field Names}
+    UpdateFieldNames(FBContext.GetAttachment,FBRoutineMetadata.getTriggerTable);
 
     if fieldsBuilder <> nil then
       FBFieldsBuilder := TFBUDRMetadataBuilder.Create(FBContext,fieldsBuilder);
@@ -1114,8 +1134,6 @@ begin
   try
     FBContext := TFBUDRExternalContext.Create(Controller,context);
     FBRoutineMetadata := TFBUDRRoutineMetadata.Create(FBContext,metadata);
-    {Now get the Field Names}
-    UpdateFieldNames(FBContext.GetAttachment,FBRoutineMetadata.getTriggerTable);
     Result := FTrigger.Create(FController,FName,FBRoutineMetadata,FFieldNames);
   except on E: Exception do
     FController.FBSetStatusFromException(E,status);
@@ -1189,12 +1207,17 @@ var charset: AnsiString;
 begin
   try
     FBContext := TFBUDRExternalContext.Create(Controller,context);
-    charset := getCharSet(FBContext);
-    if charset <> '' then
-    begin
-      StrPLCopy(name,charset,nameSize);
-      if loLogTriggers in FBUDRControllerOptions.LogOptions then
-        FController.WriteToLog(Format(STriggerCharset,[FName,charset]));
+    FFirebirdAPI := FBContext.GetFirebirdAPI;
+    try
+      charset := getCharSet(FBContext);
+      if charset <> '' then
+      begin
+        StrPLCopy(name,charset,nameSize);
+        if loLogTriggers in FBUDRControllerOptions.LogOptions then
+          FController.WriteToLog(Format(STriggerCharset,[FName,charset]));
+      end;
+    finally
+      FFirebirdAPI := nil;
     end;
   except on E: Exception do
     FController.FBSetStatusFromException(E,status);
@@ -1287,32 +1310,32 @@ begin
     else
     begin
       FBContext := TFBUDRExternalContext.Create(Controller,context);
-
-      with Firebird.IExternalTrigger do
-      case action of
-      ACTION_INSERT:
-        TriggerAction := taInsert;
-      ACTION_UPDATE:
-        TriggerAction := taUpdate;
-      ACTION_DELETE:
-        TriggerAction := taDelete;
-      ACTION_CONNECT:
-        TriggerAction := taConnect;
-      ACTION_DISCONNECT:
-        TriggerAction := taDisconnect;
-      ACTION_TRANS_START:
-        TriggerAction := taTransactionStart;
-      ACTION_TRANS_COMMIT:
-        TriggerAction := taTransactionCommit;
-      ACTION_TRANS_ROLLBACK:
-        TriggerAction := taTransactionRollback;
-      ACTION_DDL:
-        TriggerAction := taDDL;
-      else
-        FBUDRError(ibxeUnknownTransactionAction,[action]);
-      end;
-
+      FFirebirdAPI := FBContext.GetFirebirdAPI;
       try
+        with Firebird.IExternalTrigger do
+        case action of
+        ACTION_INSERT:
+          TriggerAction := taInsert;
+        ACTION_UPDATE:
+          TriggerAction := taUpdate;
+        ACTION_DELETE:
+          TriggerAction := taDelete;
+        ACTION_CONNECT:
+          TriggerAction := taConnect;
+        ACTION_DISCONNECT:
+          TriggerAction := taDisconnect;
+        ACTION_TRANS_START:
+          TriggerAction := taTransactionStart;
+        ACTION_TRANS_COMMIT:
+          TriggerAction := taTransactionCommit;
+        ACTION_TRANS_ROLLBACK:
+          TriggerAction := taTransactionRollback;
+        ACTION_DDL:
+          TriggerAction := taDDL;
+        else
+          FBUDRError(ibxeUnknownTransactionAction,[action]);
+        end;
+
         case FRoutineMetadata.getTriggerType of
         ttBefore:
           begin
@@ -1354,6 +1377,7 @@ begin
           NewParamsSQLDA.Free;
         if WritableParamsSQLDA <> nil then
           WritableParamsSQLDA.Free;
+        FFirebirdAPI := nil;
         end;
       end;
     except on E: Exception do
@@ -1443,6 +1467,8 @@ begin
     FBContext := TFBUDRExternalContext.Create(Controller,context);
 
     FBRoutineMetadata := TFBUDRRoutineMetadata.Create(FBContext,metadata);
+    {Now get the Field Names}
+    UpdateArgNames(FBContext.GetAttachment,FBRoutineMetadata.getName);
     if inBuilder <> nil then
       FBInBuilder := TFBUDRMetadataBuilder.Create(FBContext,inBuilder);
     if outBuilder <> nil then
@@ -1464,8 +1490,6 @@ begin
   try
     FBContext := TFBUDRExternalContext.Create(Controller,context);
     FBRoutineMetadata := TFBUDRRoutineMetadata.Create(FBContext,metadata);
-    {Now get the Field Names}
-    UpdateArgNames(FBContext.GetAttachment,FBRoutineMetadata.getName);
     Result := FProcedure.Create(FController,FName,FBRoutineMetadata,
                                  FInArgNames,FOutArgNames);
   except on E: Exception do
@@ -1572,12 +1596,17 @@ var charset: AnsiString;
 begin
   try
     FBContext := TFBUDRExternalContext.Create(Controller,context);
-    charset := getCharSet(FBContext);
-    if charset <> '' then
-    begin
-      StrPLCopy(name,charset,nameSize);
-      if loLogProcedures in FBUDRControllerOptions.LogOptions then
-        FController.WriteToLog(Format(SProcCharset,[FName,charset]));
+    FFirebirdAPI := FBContext.GetFirebirdAPI;
+    try
+      charset := getCharSet(FBContext);
+      if charset <> '' then
+      begin
+        StrPLCopy(name,charset,nameSize);
+        if loLogProcedures in FBUDRControllerOptions.LogOptions then
+          FController.WriteToLog(Format(SProcCharset,[FName,charset]));
+      end;
+    finally
+      FFirebirdAPI := nil;
     end;
   except on E: Exception do
     FController.FBSetStatusFromException(E,status);
@@ -1731,12 +1760,17 @@ var charset: AnsiString;
 begin
   try
     FBContext := TFBUDRExternalContext.Create(Controller,context);
-    charset := getCharSet(FBContext);
-    if charset <> '' then
-    begin
-      StrPLCopy(name,charset,nameSize);
-      if loLogFunctions in FBUDRControllerOptions.LogOptions then
-        FController.WriteToLog(Format(SFuncCharset,[FName,charset]));
+    FFirebirdAPI := FBContext.GetFirebirdAPI;
+    try
+      charset := getCharSet(FBContext);
+      if charset <> '' then
+      begin
+        StrPLCopy(name,charset,nameSize);
+        if loLogFunctions in FBUDRControllerOptions.LogOptions then
+          FController.WriteToLog(Format(SFuncCharset,[FName,charset]));
+      end;
+    finally
+      FFirebirdAPI := nil;
     end;
   except on E: Exception do
     FController.FBSetStatusFromException(E,status);
@@ -1766,6 +1800,7 @@ begin
     else
     begin
       FBContext := TFBUDRExternalContext.Create(Controller,context);
+      FFirebirdAPI := FBContext.GetFirebirdAPI;
       if [loLogFunctions,loDetails] <= FBUDRControllerOptions.LogOptions  then
          FController.WriteToLog((FBContext as TFBUDRExternalContext).AsText);
 
@@ -1815,6 +1850,7 @@ begin
           OutParamsSQLDA.Free;
         if InParamsSQLDA <> nil then
           InParamsSQLDA.Free;
+        FFirebirdAPI := nil;
       end;
     end;
     except on E: Exception do
@@ -1890,6 +1926,8 @@ begin
     FBContext := TFBUDRExternalContext.Create(Controller,context);
 
     FBRoutineMetadata := TFBUDRRoutineMetadata.Create(FBContext,metadata);
+    {Now get the argument Names}
+    UpdateFieldNames(FBContext.GetAttachment,FBRoutineMetadata.getName);
 
     if inBuilder <> nil then
       FBInBuilder := TFBUDRMetadataBuilder.Create(FBContext,inBuilder);
@@ -1913,8 +1951,6 @@ begin
   try
     FBContext := TFBUDRExternalContext.Create(Controller,context);
     FBRoutineMetadata := TFBUDRRoutineMetadata.Create(FBContext,metadata);
-    {Now get the argument Names}
-    UpdateFieldNames(FBContext.GetAttachment,FBRoutineMetadata.getName);
     Result := FFunction.Create(FController,FName,FBRoutineMetadata,FFieldNames);
   except on E: Exception do
     FController.FBSetStatusFromException(E,status);
@@ -2223,7 +2259,11 @@ begin
     StatusVector[4] := isc_arg_end;
     astatus.setErrors(@StatusVector);
   end;
-  WriteToLog(SExceptionRaised + LineEnding + E.Message);
+  try
+    WriteToLog(SExceptionRaised + LineEnding + E.Message);
+  except
+    //ignore
+  end;
 end;
 
 procedure TFBUDRController.WriteToLog(Msg: AnsiString);

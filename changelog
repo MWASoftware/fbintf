@@ -1,4 +1,4 @@
-FBINTF Change Log  version          (1.4-0 Build 13107) Wed, 19 Jan 2022 12:08:21 +0000
+FBINTF Change Log  version          (1.4-0 Build 13139) Wed, 09 Feb 2022 16:12:05 +0000
 
 1. Support package fbudr added for support of User Defined Routines (UDRs), and package
    fbudrtestbed for client side debugging of UDR libraries.
@@ -94,10 +94,14 @@ FBINTF Change Log  version          (1.4-0 Build 13107) Wed, 19 Jan 2022 12:08:2
     rollback when Force = true. In the case, the transaction handle has been
     released, while the transaction remains in limbo.
 
-17. IAttachment ExecImmediate, ExecuteSQL and OpenCursorAtStart.
+17. IAttachment ExecImmediate.
     When the transaction parameters are provided as an array of const and the
     statement fails, the transaction is rolledback (forced) before the exception
     is raised.
+
+18. In Firebird 3 and later API: the status vector is now a thread var, as was
+    already the case with the legacy API. Avoids problems when calling underlying
+    Firebird API in multiple threads.
 
 
 

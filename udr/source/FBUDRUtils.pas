@@ -98,6 +98,8 @@ type
     function obtainInfoCode: Integer;
     function getInfo(code: Integer): Pointer;
     function setInfo(code: Integer; value: Pointer): Pointer;
+    function cloneAttachment: IAttachment;
+    function GetServiceManager: IServiceManager;
     function HasConfigFile: boolean;
     function ReadConfigString(Section, Ident, DefaultValue: AnsiString): AnsiString;
     function ReadConfigInteger(Section, Ident: AnsiString; DefaultValue: integer): integer;
@@ -631,6 +633,24 @@ end;
 function TFBUDRExternalContext.setInfo(code: Integer; value: Pointer): Pointer;
 begin
   Result := FContext.setInfo(code,value);
+end;
+
+function TFBUDRExternalContext.cloneAttachment: IAttachment;
+var DPB: IDPB;
+begin
+  DPB := GetFirebirdAPI.AllocateDPB;
+  DPB.Add(isc_dpb_user_name).setAsString(GetUserName);
+  DPB.Add(isc_dpb_lc_ctype).setAsString(GetClientCharSet);
+  DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(GetAttachment.GetSQLDialect);
+  Result := GetFirebirdAPI.OpenDatabase(GetDatabaseName,DPB);
+end;
+
+function TFBUDRExternalContext.GetServiceManager: IServiceManager;
+var SPB: ISPB;
+begin
+  SPB := FirebirdAPI.AllocateSPB;
+  SPB.Add(isc_spb_user_name).setAsString(GetUserName);
+  Result := GetFirebirdAPI.GetServiceManager('',Local,SPB);
 end;
 
 function TFBUDRExternalContext.HasConfigFile: boolean;

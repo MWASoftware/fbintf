@@ -9,7 +9,7 @@
         <MainUnitHasScaledStatement Value="False"/>
       </Flags>
       <SessionStorage Value="InProjectDir"/>
-      <Title Value="fbudrtests"/>
+      <Title Value="TestSelectInto"/>
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
     </General>
@@ -25,32 +25,16 @@
     </RunParams>
     <RequiredPackages>
       <Item>
-        <PackageName Value="fbudr"/>
+        <PackageName Value="fbudrTestbed"/>
       </Item>
     </RequiredPackages>
     <Units>
       <Unit>
-        <Filename Value="fbudrtests.lpr"/>
+        <Filename Value="TestSelectInto.lpr"/>
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="udr_test01.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="udr_test02.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="udr_test03.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="udr_test04.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
-        <Filename Value="udr_test05.pas"/>
+        <Filename Value="UdrSelectInto.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
     </Units>
@@ -58,26 +42,13 @@
   <CompilerOptions>
     <Version Value="11"/>
     <Target>
-      <Filename Value="fbudrtests"/>
+      <Filename Value="TestSelectInto"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
+      <OtherUnitFiles Value="."/>
       <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
-    <CodeGeneration>
-      <RelocatableUnit Value="True"/>
-    </CodeGeneration>
-    <Linking>
-      <Debugging>
-        <GenerateDebugInfo Value="False"/>
-      </Debugging>
-      <Options>
-        <ExecutableType Value="Library"/>
-      </Options>
-    </Linking>
-    <Other>
-      <CustomOptions Value="-dFIREBIRD3APIONLY"/>
-    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions>

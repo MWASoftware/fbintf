@@ -535,6 +535,7 @@ type
     {ISQLParams}
     function getCount: integer;
     function getSQLParam(index: integer): ISQLParam;
+    function ParamExists(Idx: AnsiString): boolean;
     function ByName(Idx: AnsiString): ISQLParam ; virtual;
     function GetModified: Boolean;
     function GetHasCaseSensitiveParams: Boolean;
@@ -561,6 +562,7 @@ type
       {IResults}
      function getCount: integer;
      function ByName(Idx: AnsiString): ISQLData; virtual;
+     function FieldExists(Idx: AnsiString): boolean;
      function getSQLData(index: integer): ISQLData;
      procedure GetData(index: integer; var IsNull:boolean; var len: short; var data: PByte);
      function GetStatement: IStatement;
@@ -3291,6 +3293,12 @@ begin
   end;
 end;
 
+function TSQLParams.ParamExists(Idx: AnsiString): boolean;
+begin
+  CheckActive;
+  Result := FSQLParams.ColumnByName(Idx) <> nil;
+end;
+
 function TSQLParams.ByName(Idx: AnsiString): ISQLParam;
 var aIBXSQLVAR: TSQLVarData;
 begin
@@ -3408,6 +3416,11 @@ begin
     if col <> nil then
       Result := GetISQLData(col);
   end;
+end;
+
+function TResults.FieldExists(Idx: AnsiString): boolean;
+begin
+  Result :=  FResults.ColumnByName(Idx) <> nil;
 end;
 
 function TResults.getSQLData(index: integer): ISQLData;

@@ -141,17 +141,11 @@ begin
 end;
 
 procedure TVersionCallback.callback(status: Firebird.IStatus; text: PAnsiChar);
-var StatusObj: TFB30StatusObject;
+var aStatus: IStatus;
 begin
-  if ((status.getState and status.STATE_ERRORS) <> 0) then
-  begin
-    StatusObj := TFB30StatusObject.Create(FFirebirdClientAPI,status);
-    try
-      raise EIBInterBaseError.Create(StatusObj);
-    finally
-      StatusObj.Free;
-    end;
-  end;
+  aStatus := TFB30Status.Create(FFirebirdClientAPI,status);
+  if aStatus.InErrorState then
+      raise EIBInterBaseError.Create(aStatus);
   FOutput.Add(text);
 end;
 

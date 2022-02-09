@@ -25,8 +25,8 @@
  *
 *)
 unit FB30ClientAPI;
-{$IFDEF MSWINDOWS} 
-{$DEFINE WINDOWS} 
+{$IFDEF MSWINDOWS}
+{$DEFINE WINDOWS}
 {$ENDIF}
 
 {$IFDEF FPC}
@@ -41,7 +41,6 @@ uses
   FBActivityMonitor;
 
 type
-
   { TFB30Status }
 
   TFB30Status = class(TFBStatus,IStatus)
@@ -50,23 +49,18 @@ type
     FDirty: boolean;
     function GetIBMessage: Ansistring; override;
   public
+    constructor Create(aOwner: TFBClientAPI; prefix: AnsiString=''); overload;
+    constructor Create(aOwner: TFBClientAPI; aStatus: Firebird.IStatus); overload;
+    constructor Copy(src: TFB30Status);
     destructor Destroy; override;
-    procedure Assign(src: TFBStatus); override;
     function Clone: IStatus; override;
     procedure Init;
     procedure FreeHandle;
-    function InErrorState: boolean;
+    function InErrorState: boolean; override;
     function Warning: boolean;
     function GetStatus: Firebird.IStatus;
     function StatusVector: PStatusVector; override;
     property Dirty: boolean read FDirty;
-  end;
-
-  { TFB30StatusObject }
-
-  TFB30StatusObject = class(TFB30Status)
-  public
-    constructor Create(aOwner: TFBClientAPI; status: Firebird.IStatus; prefix: Ansistring='');
   end;
 
   Tfb_get_master_interface = function: IMaster;
@@ -259,18 +253,36 @@ end;
 
 { TFB30StatusObject }
 
-constructor TFB30StatusObject.Create(aOwner: TFBClientAPI;
-  status: Firebird.IStatus; prefix: Ansistring);
-begin
-  inherited Create(aOwner,prefix);
-  FStatus := status.clone;
-end;
+threadvar
+  PerThreadFirebirdStatusIntf: Firebird.IStatus;
+  StatusIntfRefCount: integer;
 
 { TFB30Status }
 
 function TFB30Status.GetIBMessage: Ansistring;
 begin
-  Result := (FOwner as TFB30ClientAPI).FormatStatus(FStatus);
+  Result := (FOwner as TFB30ClientAPI).FormatStatus(GetStatus);
+end;
+
+constructor TFB30Status.Create(aOwner: TFBClientAPI; prefix: AnsiString);
+begin
+  inherited Create(aOwner,prefix);
+  if aOwner <> nil then
+  begin
+    Inc(StatusIntfRefCount);
+  end;
+end;
+
+constructor TFB30Status.Create(aOwner: TFBClientAPI; aStatus: Firebird.IStatus);
+begin
+  inherited Create(aOwner);
+  FStatus := aStatus.clone;
+end;
+
+constructor TFB30Status.Copy(src: TFB30Status);
+begin
+  inherited Copy(src);
+  FStatus := src.GetStatus.clone;
 end;
 
 destructor TFB30Status.Destroy;
@@ -279,25 +291,16 @@ begin
   inherited Destroy;
 end;
 
-procedure TFB30Status.Assign(src: TFBStatus);
-begin
-  inherited Assign(src);
-  FStatus := (src as TFB30Status).GetStatus.clone;
-end;
-
 function TFB30Status.Clone: IStatus;
-var aResult: TFB30Status;
 begin
-  aResult := TFB30Status.Create(nil);
-  aResult.Assign(self);
-  Result := aResult;
+  Result := TFB30Status.Copy(self);
 end;
 
 procedure TFB30Status.Init;
 begin
-  if assigned(FStatus) and Dirty then
+  if (GetStatus <> nil) and Dirty then
   begin
-    FStatus.Init;
+    GetStatus.Init;
     FDirty := false;
   end;
 end;
@@ -307,7 +310,16 @@ begin
   if FStatus <> nil then
   begin
     FStatus.dispose;
-    FStatus := nil;
+    FStatus := nil
+  end
+  else
+  begin
+    Dec(StatusIntfRefCount);
+    if (StatusIntfRefCount = 0) and (PerThreadFirebirdStatusIntf <> nil) then
+    begin
+      PerThreadFirebirdStatusIntf.dispose();
+      PerThreadFirebirdStatusIntf := nil;
+    end;
   end;
 end;
 
@@ -329,10 +341,18 @@ end;
 
 function TFB30Status.GetStatus: Firebird.IStatus;
 begin
-  if FStatus = nil then
-    with FOwner do
-      FStatus := (FOwner as TFB30ClientAPI).MasterIntf.GetStatus;
-  Result := FStatus;
+  if FStatus <> nil then
+    Result := FStatus
+  else
+  begin
+    {Create the FStatus per thread}
+    if PerThreadFirebirdStatusIntf = nil then
+    begin
+      with FOwner do
+        PerThreadFirebirdStatusIntf :=  (FOwner as TFB30ClientAPI).GetIMasterIntf.getStatus();
+    end;
+    Result := PerThreadFirebirdStatusIntf;
+  end;
 end;
 
 function TFB30Status.StatusVector: PStatusVector;
@@ -464,9 +484,11 @@ begin
 end;
 
 procedure TFB30ClientAPI.Check4DataBaseError(st: Firebird.IStatus);
+var aStatus: IStatus;
 begin
-  if ((st.getState and st.STATE_ERRORS) <> 0) then
-    raise EIBInterBaseError.Create(TFB30StatusObject.Create(self,st));
+  aStatus := TFB30Status.Create(self,st);
+  if aStatus.InErrorState then
+    raise EIBInterBaseError.Create(aStatus);
 end;
 
 function TFB30ClientAPI.FormatStatus(Status: Firebird.IStatus): AnsiString;
@@ -837,6 +859,10 @@ begin
   Result := true;
 end;
 
+initialization
+  PerThreadFirebirdStatusIntf := nil;
+  StatusIntfRefCount := 0;
 end.
+
 
 

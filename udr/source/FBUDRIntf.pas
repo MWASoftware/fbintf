@@ -58,6 +58,8 @@ type
     function obtainInfoCode: Integer;
     function getInfo(code: Integer): Pointer;
     function setInfo(code: Integer; value: Pointer): Pointer;
+    function cloneAttachment: IAttachment;
+    function GetServiceManager: IServiceManager;
     function getStatus: Firebird.IStatus;
     procedure CheckStatus;
     function HasConfigFile: boolean;
@@ -142,6 +144,7 @@ type
     function getSQLParam(index: integer): ISQLParam;
     function GetModified: Boolean;
     function GetHasCaseSensitiveParams: Boolean;
+    function FieldExists(Idx: AnsiString): boolean;
     function ByName(Idx: AnsiString): ISQLParam ;
     procedure Clear;
     property Modified: Boolean read GetModified;

@@ -29,6 +29,34 @@ UDRINFO
 =============================== 
 Hello World                     
 
+Repeat with USER=TESTER
+No entry for terminal type "xterm-256color";
+using dumb terminal settings.
+
+  MYROWCOUNT 
+============ 
+          42 
+
+
+  MYROWCOUNT 
+============ 
+          21 
+
+
+  MYROWCOUNT 
+============ 
+Statement failed, SQLSTATE = 42S02
+Dynamic SQL Error
+-SQL error code = -204
+-Table unknown
+-BAD
+-At line 1, column 22
+-At function 'MYROWCOUNT'
+
+UDRINFO                         
+=============================== 
+Hello World                     
+
 ------------------------
 Running Test02
 ------------------------
@@ -46,6 +74,26 @@ unsuccessful metadata update
 -At procedure 'MYERRORPROC'
 Statement failed, SQLSTATE = 23000
 validation error for column "EMPLOYEE"."FIRST_NAME", value "*** null ***"
+-At procedure 'MYERRORPROC'
+Statement failed, SQLSTATE = HY000
+You have a bug
+-At procedure 'MYERRORPROC'
+Repeat with USER=TESTER
+No entry for terminal type "xterm-256color";
+using dumb terminal settings.
+
+               SALARY FULLNAME                             
+===================== ==================================== 
+             81810.19 Fisher, Pete                         
+
+Statement failed, SQLSTATE = 42000
+unsuccessful metadata update
+-CREATE TABLE TESTME failed
+-No permission for CREATE TABLE operation
+-At procedure 'MYERRORPROC'
+Statement failed, SQLSTATE = 28000
+no permission for USAGE access to GENERATOR EMP_NO_GEN
+-Effective user is TESTER
 -At procedure 'MYERRORPROC'
 Statement failed, SQLSTATE = HY000
 You have a bug
@@ -149,6 +197,115 @@ And lose the name of action.-Soft you now,
 The fair Ophelia.-Nymph, in thy orisons                                                              
 Be all my sins remembered                                                                            
 
+
+TEXT                                                                                                 
+==================================================================================================== 
+Statement failed, SQLSTATE = 42000
+validation error for variable TEXT, value "*** null ***"
+-At procedure 'MYREADTEXT'
+Repeat with USER=TESTER
+No entry for terminal type "xterm-256color";
+using dumb terminal settings.
+
+FULLNAME                                            SALARY             ACCSALARY 
+==================================== ===================== ===================== 
+Nelson, Robert                                   105900.00             105900.00 
+Young, Bruce                                      97500.00             203400.00 
+Lambert, Kim                                     102750.00             306150.00 
+Johnson, Leslie                                   64635.00             370785.00 
+Forest, Phil                                      75060.00             445845.00 
+Weston, K. J.                                     86292.94             532137.94 
+Lee, Terri                                        53793.00             585930.94 
+Hall, Stewart                                     69482.63             655413.57 
+Young, Katherine                                  67241.25             722654.82 
+Papadopoulos, Chris                               89655.00             812309.82 
+Fisher, Pete                                      81810.19             894120.01 
+Bennet, Ann                                       22935.00             917055.01 
+De Souza, Roger                                   69482.63             986537.64 
+Baldwin, Janet                                    61637.81            1048175.45 
+Reeves, Roger                                     33620.63            1081796.08 
+Stansbury, Willie                                 39224.06            1121020.14 
+Phong, Leslie                                     56034.38            1177054.52 
+Ramanathan, Ashok                                 80689.50            1257744.02 
+Steadman, Walter                                 116100.00            1373844.02 
+Nordstrom, Carol                                  42742.50            1416586.52 
+
+FULLNAME                                            SALARY             ACCSALARY 
+==================================== ===================== ===================== 
+Leung, Luke                                       68805.00            1485391.52 
+O'Brien, Sue Anne                                 31275.00            1516666.52 
+Burbank, Jennifer M.                              53167.50            1569834.02 
+Sutherland, Claudia                              100914.00            1670748.02 
+Bishop, Dana                                      62550.00            1733298.02 
+MacDonald, Mary S.                               111262.50            1844560.52 
+Williams, Randy                                   56295.00            1900855.52 
+Bender, Oliver H.                                212850.00            2113705.52 
+Cook, Kevin                                      111262.50            2224968.02 
+Brown, Kelly                                      27000.00            2251968.02 
+Ichida, Yuki                                    6000000.00            8251968.02 
+Page, Mary                                        48000.00            8299968.02 
+Parker, Bill                                      35000.00            8334968.02 
+Yamamoto, Takashi                               7480000.00           15814968.02 
+Ferrari, Roberto                                  33000.00           15847968.02 
+Yanowski, Michael                                 44000.00           15891968.02 
+Glon, Jacques                                     38500.00           15930468.02 
+Johnson, Scott                                    60000.00           15990468.02 
+Green, T.J.                                       36000.00           16026468.02 
+Osborne, Pierre                                  110000.00           16136468.02 
+
+FULLNAME                                            SALARY             ACCSALARY 
+==================================== ===================== ===================== 
+Montgomery, John                                  35000.00           16171468.02 
+Guckenheimer, Mark                                32000.00           16203468.02 
+
+
+TEXT                                                                                                 
+==================================================================================================== 
+To be or not to be-that is the question:                                                             
+Whether 'tis nobler in the mind to suffer                                                            
+The slings and arrows of outrageous fortune,                                                         
+Or to take arms against a sea of troubles,                                                           
+And, by opposing, end them. To die, to sleep-                                                        
+No more-and by a sleep to say we end                                                                 
+The heartache and the thousand natural shocks                                                        
+That flesh is heir to-'tis a consummation                                                            
+Devoutly to be wished. To die, to sleep-                                                             
+To sleep, perchance to dream. Aye, there's the rub,                                                  
+For in that sleep of death what dreams may come,                                                     
+When we have shuffled off this mortal coil,                                                          
+Must give us pause. There's the respect                                                              
+That makes calamity of so long life.                                                                 
+For who would bear the whips and scorns of time,                                                     
+Th' oppressor's wrong, the proud man's contumely,                                                    
+The pangs of despised love, the law’s delay,                                                       
+The insolence of office, and the spurns                                                              
+That patient merit of the unworthy takes,                                                            
+When he himself might his quietus make                                                               
+
+TEXT                                                                                                 
+==================================================================================================== 
+With a bare bodkin? Who would fardels bear,                                                          
+To grunt and sweat under a weary life,                                                               
+But that the dread of something after death,                                                         
+The undiscovered country from whose bourn                                                            
+No traveler returns, puzzles the will                                                                
+And makes us rather bear those ills we have                                                          
+Than fly to others that we know not of?                                                              
+Thus conscience does make cowards of us all,                                                         
+And thus the native hue of resolution                                                                
+Is sicklied o'er with the pale cast of thought,                                                      
+And enterprises of great pitch and moment,                                                           
+With this regard their currents turn awry,                                                           
+And lose the name of action.-Soft you now,                                                           
+The fair Ophelia.-Nymph, in thy orisons                                                              
+Be all my sins remembered                                                                            
+
+
+TEXT                                                                                                 
+==================================================================================================== 
+Statement failed, SQLSTATE = 42000
+validation error for variable TEXT, value "*** null ***"
+-At procedure 'MYREADTEXT'
 ------------------------
 Running Test04
 ------------------------
@@ -164,6 +321,99 @@ PHONE_EXT PREVIOUS_PHONE_EXT
 ========= ================== 
 250       999                
 
+Repeat with USER=TESTER
+No entry for terminal type "xterm-256color";
+using dumb terminal settings.
+
+PHONE_EXT PREVIOUS_PHONE_EXT 
+========= ================== 
+999       250                
+
+
+PHONE_EXT PREVIOUS_PHONE_EXT 
+========= ================== 
+250       999                
+
+------------------------
+Running Test05
+------------------------
+No entry for terminal type "xterm-256color";
+using dumb terminal settings.
+
+    MON$ATTACHMENT_ID MON$ATTACHMENT_NAME                                                                                                                                                                                                                                             MON$USER                                                        MON$ROLE                                                        MON$REMOTE_HOST                                                                                                                                                                                                                                                 
+===================== =============================================================================================================================================================================================================================================================== =============================================================== =============================================================== =============================================================================================================================================================================================================================================================== 
+                  591 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              SYSDBA                                                                                                                          <null>                                                                                                                                                                                                                                                          
+                  590 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              Garbage Collector                                                                                                               <null>                                                                                                                                                                                                                                                          
+                  589 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              Cache Writer                                                                                                                    <null>                                                                                                                                                                                                                                                          
+                  588 employee                                                                                                                                                                                                                                                        SYSDBA                                                                                                                          <null>                                                                                                                                                                                                                                                          
+
+
+    MON$ATTACHMENT_ID MON$ATTACHMENT_NAME                                                                                                                                                                                                                                             MON$USER                                                        MON$ROLE                                                        MON$REMOTE_HOST                                                                                                                                                                                                                                                 
+===================== =============================================================================================================================================================================================================================================================== =============================================================== =============================================================== =============================================================================================================================================================================================================================================================== 
+                  590 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              Garbage Collector                                                                                                               <null>                                                                                                                                                                                                                                                          
+                  589 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              Cache Writer                                                                                                                    <null>                                                                                                                                                                                                                                                          
+                  588 employee                                                                                                                                                                                                                                                        SYSDBA                                                                                                                          <null>                                                                                                                                                                                                                                                          
+
+
+    MON$ATTACHMENT_ID MON$ATTACHMENT_NAME                                                                                                                                                                                                                                             MON$USER                                                        MON$ROLE                                                        MON$REMOTE_HOST                                                                                                                                                                                                                                                 
+===================== =============================================================================================================================================================================================================================================================== =============================================================== =============================================================== =============================================================================================================================================================================================================================================================== 
+                  592 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              TESTER                                                                                                                          <null>                                                                                                                                                                                                                                                          
+
+
+    MON$ATTACHMENT_ID MON$ATTACHMENT_NAME                                                                                                                                                                                                                                             MON$USER                                                        MON$ROLE                                                        MON$REMOTE_HOST                                                                                                                                                                                                                                                 
+===================== =============================================================================================================================================================================================================================================================== =============================================================== =============================================================== =============================================================================================================================================================================================================================================================== 
+                  593 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              SYSDBA                                                                                                                          <null>                                                                                                                                                                                                                                                          
+                  590 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              Garbage Collector                                                                                                               <null>                                                                                                                                                                                                                                                          
+                  589 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              Cache Writer                                                                                                                    <null>                                                                                                                                                                                                                                                          
+                  588 employee                                                                                                                                                                                                                                                        SYSDBA                                                                                                                          <null>                                                                                                                                                                                                                                                          
+
+
+SERVERINFO                                                                                                                                                                                                                                                       
+================================================================================================================================================================================================================================================================ 
+Service Manager Version = 2                                                                                                                                                                                                                                      
+Server Version = LI-V4.0.1.2692 Firebird 4.0                                                                                                                                                                                                                     
+Implementation = Firebird/Linux/AMD/Intel/x64                                                                                                                                                                                                                    
+Lock Directory = /tmp/firebird/                                                                                                                                                                                                                                  
+Message File = /opt/firebird/4.0.1/                                                                                                                                                                                                                              
+Security File = /opt/firebird/4.0.1/security4.fdb                                                                                                                                                                                                                
+
+Repeat with USER=TESTER
+No entry for terminal type "xterm-256color";
+using dumb terminal settings.
+
+    MON$ATTACHMENT_ID MON$ATTACHMENT_NAME                                                                                                                                                                                                                                             MON$USER                                                        MON$ROLE                                                        MON$REMOTE_HOST                                                                                                                                                                                                                                                 
+===================== =============================================================================================================================================================================================================================================================== =============================================================== =============================================================== =============================================================================================================================================================================================================================================================== 
+Statement failed, SQLSTATE = 28000
+Unable to perform operation
+-System privilege CHANGE_HEADER_SETTINGS is missing
+-At procedure 'SHOWATTACHMENTS'
+
+    MON$ATTACHMENT_ID MON$ATTACHMENT_NAME                                                                                                                                                                                                                                             MON$USER                                                        MON$ROLE                                                        MON$REMOTE_HOST                                                                                                                                                                                                                                                 
+===================== =============================================================================================================================================================================================================================================================== =============================================================== =============================================================== =============================================================================================================================================================================================================================================================== 
+                  594 employee                                                                                                                                                                                                                                                        TESTER                                                                                                                          <null>                                                                                                                                                                                                                                                          
+
+
+    MON$ATTACHMENT_ID MON$ATTACHMENT_NAME                                                                                                                                                                                                                                             MON$USER                                                        MON$ROLE                                                        MON$REMOTE_HOST                                                                                                                                                                                                                                                 
+===================== =============================================================================================================================================================================================================================================================== =============================================================== =============================================================== =============================================================================================================================================================================================================================================================== 
+                  598 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              TESTER                                                                                                                          <null>                                                                                                                                                                                                                                                          
+                  594 employee                                                                                                                                                                                                                                                        TESTER                                                                                                                          <null>                                                                                                                                                                                                                                                          
+
+
+    MON$ATTACHMENT_ID MON$ATTACHMENT_NAME                                                                                                                                                                                                                                             MON$USER                                                        MON$ROLE                                                        MON$REMOTE_HOST                                                                                                                                                                                                                                                 
+===================== =============================================================================================================================================================================================================================================================== =============================================================== =============================================================== =============================================================================================================================================================================================================================================================== 
+                  599 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              SYSDBA                                                                                                                          <null>                                                                                                                                                                                                                                                          
+                  596 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              Garbage Collector                                                                                                               <null>                                                                                                                                                                                                                                                          
+                  595 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              Cache Writer                                                                                                                    <null>                                                                                                                                                                                                                                                          
+                  594 employee                                                                                                                                                                                                                                                        TESTER                                                                                                                          <null>                                                                                                                                                                                                                                                          
+
+
+SERVERINFO                                                                                                                                                                                                                                                       
+================================================================================================================================================================================================================================================================ 
+Statement failed, SQLSTATE = 28000
+Service isc_info_svc_get_env requires SYSDBA permissions.  Reattach to the Service Manager using the SYSDBA account.
+-Service isc_info_svc_get_env requires SYSDBA permissions.  Reattach to the Service Manager using the SYSDBA account.
+-Service isc_info_svc_user_dbpath requires SYSDBA permissions.  Reattach to the Service Manager using the SYSDBA account.
+-At procedure 'GETSERVERINFO'
 UDR Log Contents
 ----------------
 @dd-mm-yy hh:mm:ss.zzzz:Registering Function row_count
@@ -174,6 +424,8 @@ UDR Log Contents
 @dd-mm-yy hh:mm:ss.zzzz:Registering Procedure select_proc
 @dd-mm-yy hh:mm:ss.zzzz:Registering Procedure read_txt
 @dd-mm-yy hh:mm:ss.zzzz:Registering Trigger my_employee_update
+@dd-mm-yy hh:mm:ss.zzzz:Registering Procedure show_att
+@dd-mm-yy hh:mm:ss.zzzz:Registering Procedure server_info
 @dd-mm-yy hh:mm:ss.zzzz:Setup Function row_count
 @dd-mm-yy hh:mm:ss.zzzz:Routine Metadata
 Package Name = 
@@ -733,6 +985,238 @@ Output Metadata:
   Offset = 0
   Null Offset = 102
   Message Length = 100
+  
+@dd-mm-yy hh:mm:ss.zzzz:Setup Procedure show_att
+@dd-mm-yy hh:mm:ss.zzzz:Routine Metadata
+Package Name = 
+  Name = SHOWATTACHMENTS
+  Entry Point = fbudrtests!show_att (fbudrtests,show_att,)
+  Body = 
+  Input Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 36
+  Field No. 0
+  Field Name = USER_NAME
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 32
+  Scale = 0
+  Offset = 0
+  Null Offset = 34
+  Message Length = 32
+  
+Output Metadata:
+  Field Count = 5
+  Alignment = 8
+  Aligned Length = 664
+  Field No. 0
+  Field Name = MON$ATTACHMENT_ID
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_INT64
+  IsNullable = yes
+  SubType = 0
+  Length = 8
+  Scale = 0
+  Offset = 0
+  Null Offset = 8
+  Message Length = 8
+  Field No. 1
+  Field Name = MON$ATTACHMENT_NAME
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 255
+  Scale = 0
+  Offset = 10
+  Null Offset = 268
+  Message Length = 255
+  Field No. 2
+  Field Name = MON$USER
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_TEXT
+  IsNullable = yes
+  SubType = 0
+  Length = 63
+  Scale = 0
+  Offset = 270
+  Null Offset = 334
+  Message Length = 63
+  Field No. 3
+  Field Name = MON$ROLE
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_TEXT
+  IsNullable = yes
+  SubType = 0
+  Length = 63
+  Scale = 0
+  Offset = 336
+  Null Offset = 400
+  Message Length = 63
+  Field No. 4
+  Field Name = MON$REMOTE_HOST
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 255
+  Scale = 0
+  Offset = 402
+  Null Offset = 660
+  Message Length = 255
+  
+@dd-mm-yy hh:mm:ss.zzzz:Setup Procedure show_att
+@dd-mm-yy hh:mm:ss.zzzz:Routine Metadata
+Package Name = 
+  Name = SHOWATTACHMENTS
+  Entry Point = fbudrtests!show_att (fbudrtests,show_att,)
+  Body = 
+  Input Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 36
+  Field No. 0
+  Field Name = USER_NAME
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 32
+  Scale = 0
+  Offset = 0
+  Null Offset = 34
+  Message Length = 32
+  
+Output Metadata:
+  Field Count = 5
+  Alignment = 8
+  Aligned Length = 664
+  Field No. 0
+  Field Name = MON$ATTACHMENT_ID
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_INT64
+  IsNullable = yes
+  SubType = 0
+  Length = 8
+  Scale = 0
+  Offset = 0
+  Null Offset = 8
+  Message Length = 8
+  Field No. 1
+  Field Name = MON$ATTACHMENT_NAME
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 255
+  Scale = 0
+  Offset = 10
+  Null Offset = 268
+  Message Length = 255
+  Field No. 2
+  Field Name = MON$USER
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_TEXT
+  IsNullable = yes
+  SubType = 0
+  Length = 63
+  Scale = 0
+  Offset = 270
+  Null Offset = 334
+  Message Length = 63
+  Field No. 3
+  Field Name = MON$ROLE
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_TEXT
+  IsNullable = yes
+  SubType = 0
+  Length = 63
+  Scale = 0
+  Offset = 336
+  Null Offset = 400
+  Message Length = 63
+  Field No. 4
+  Field Name = MON$REMOTE_HOST
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 255
+  Scale = 0
+  Offset = 402
+  Null Offset = 660
+  Message Length = 255
+  
+@dd-mm-yy hh:mm:ss.zzzz:Setup Procedure server_info
+@dd-mm-yy hh:mm:ss.zzzz:Routine Metadata
+Package Name = 
+  Name = GETSERVERINFO
+  Entry Point = fbudrtests!server_info (fbudrtests,server_info,)
+  Body = 
+  Input Metadata:
+  Field Count = 0
+  Alignment = 2
+  Aligned Length = 0
+  
+Output Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 260
+  Field No. 0
+  Field Name = SERVERINFO
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 256
+  Scale = 0
+  Offset = 0
+  Null Offset = 258
+  Message Length = 256
+  
+@dd-mm-yy hh:mm:ss.zzzz:Setup Procedure server_info
+@dd-mm-yy hh:mm:ss.zzzz:Routine Metadata
+Package Name = 
+  Name = GETSERVERINFO
+  Entry Point = fbudrtests!server_info (fbudrtests,server_info,)
+  Body = 
+  Input Metadata:
+  Field Count = 0
+  Alignment = 2
+  Aligned Length = 0
+  
+Output Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 260
+  Field No. 0
+  Field Name = SERVERINFO
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 256
+  Scale = 0
+  Offset = 0
+  Null Offset = 258
+  Message Length = 256
   
 @dd-mm-yy hh:mm:ss.zzzz:Setup Function row_count
 @dd-mm-yy hh:mm:ss.zzzz:Routine Metadata
@@ -815,10 +1299,10 @@ Output Metadata:
   
 @dd-mm-yy hh:mm:ss.zzzz:Execute Function row_count
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 3436
-  Transaction ID = 10379
+  Attachment ID = 564
+  Transaction ID = 1531
   User Name = SYSDBA
-  Database Name = /opt/firebird4.0.1/examples/empbuild/employee.fdb
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
   
 @dd-mm-yy hh:mm:ss.zzzz:Input Parameters
@@ -846,10 +1330,10 @@ Column 0
 
 @dd-mm-yy hh:mm:ss.zzzz:Execute Function row_count
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 3436
-  Transaction ID = 10379
+  Attachment ID = 564
+  Transaction ID = 1531
   User Name = SYSDBA
-  Database Name = /opt/firebird4.0.1/examples/empbuild/employee.fdb
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
   
 @dd-mm-yy hh:mm:ss.zzzz:Input Parameters
@@ -877,10 +1361,10 @@ Column 0
 
 @dd-mm-yy hh:mm:ss.zzzz:Execute Function row_count
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 3436
-  Transaction ID = 10379
+  Attachment ID = 564
+  Transaction ID = 1531
   User Name = SYSDBA
-  Database Name = /opt/firebird4.0.1/examples/empbuild/employee.fdb
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
   
 @dd-mm-yy hh:mm:ss.zzzz:Input Parameters
@@ -959,10 +1443,10 @@ Output Metadata:
   
 @dd-mm-yy hh:mm:ss.zzzz:Execute Function return_info
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 3436
-  Transaction ID = 10379
+  Attachment ID = 564
+  Transaction ID = 1531
   User Name = SYSDBA
-  Database Name = /opt/firebird4.0.1/examples/empbuild/employee.fdb
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
   
 @dd-mm-yy hh:mm:ss.zzzz:Input Parameters
@@ -980,6 +1464,252 @@ Column 0
 
 @dd-mm-yy hh:mm:ss.zzzz:Function return_info: dispose called
 @dd-mm-yy hh:mm:ss.zzzz:Function row_count: dispose called
+@dd-mm-yy hh:mm:ss.zzzz:Setup Function row_count
+@dd-mm-yy hh:mm:ss.zzzz:Routine Metadata
+Package Name = 
+  Name = MYROWCOUNT
+  Entry Point = fbudrtests!row_count (fbudrtests,row_count,)
+  Body = 
+  Input Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 36
+  Field No. 0
+  Field Name = TABLE_NAME
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 31
+  Scale = 0
+  Offset = 0
+  Null Offset = 34
+  Message Length = 31
+  
+Output Metadata:
+  Field Count = 1
+  Alignment = 4
+  Aligned Length = 8
+  Field No. 0
+  Field Name = 
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_LONG
+  IsNullable = yes
+  SubType = 0
+  Length = 4
+  Scale = 0
+  Offset = 0
+  Null Offset = 4
+  Message Length = 4
+  
+@dd-mm-yy hh:mm:ss.zzzz:Function row_count created
+@dd-mm-yy hh:mm:ss.zzzz:Package Name = 
+  Name = MYROWCOUNT
+  Entry Point = fbudrtests!row_count (fbudrtests,row_count,)
+  Body = 
+  Input Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 36
+  Field No. 0
+  Field Name = TABLE_NAME
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 31
+  Scale = 0
+  Offset = 0
+  Null Offset = 34
+  Message Length = 31
+  
+Output Metadata:
+  Field Count = 1
+  Alignment = 4
+  Aligned Length = 8
+  Field No. 0
+  Field Name = 
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_LONG
+  IsNullable = yes
+  SubType = 0
+  Length = 4
+  Scale = 0
+  Offset = 0
+  Null Offset = 4
+  Message Length = 4
+  
+@dd-mm-yy hh:mm:ss.zzzz:Execute Function row_count
+@dd-mm-yy hh:mm:ss.zzzz:External Context: 
+  Attachment ID = 567
+  Transaction ID = 1535
+  User Name = TESTER
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
+  Client Character Set = NONE
+  
+@dd-mm-yy hh:mm:ss.zzzz:Input Parameters
+Parameter 0:
+  Field Name = TABLE_NAME
+  Alias Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 31
+  Value = EMPLOYEE
+
+@dd-mm-yy hh:mm:ss.zzzz:Output Parameters with data
+Column 0
+  Field Name = 
+  SQLType = SQL_LONG
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 4
+  Value = 42
+
+@dd-mm-yy hh:mm:ss.zzzz:Execute Function row_count
+@dd-mm-yy hh:mm:ss.zzzz:External Context: 
+  Attachment ID = 567
+  Transaction ID = 1535
+  User Name = TESTER
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
+  Client Character Set = NONE
+  
+@dd-mm-yy hh:mm:ss.zzzz:Input Parameters
+Parameter 0:
+  Field Name = TABLE_NAME
+  Alias Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 31
+  Value = DEPARTMENT
+
+@dd-mm-yy hh:mm:ss.zzzz:Output Parameters with data
+Column 0
+  Field Name = 
+  SQLType = SQL_LONG
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 4
+  Value = 21
+
+@dd-mm-yy hh:mm:ss.zzzz:Execute Function row_count
+@dd-mm-yy hh:mm:ss.zzzz:External Context: 
+  Attachment ID = 567
+  Transaction ID = 1535
+  User Name = TESTER
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
+  Client Character Set = NONE
+  
+@dd-mm-yy hh:mm:ss.zzzz:Input Parameters
+Parameter 0:
+  Field Name = TABLE_NAME
+  Alias Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 31
+  Value = BAD
+
+@dd-mm-yy hh:mm:ss.zzzz:Exception raised
+Engine Code: 335544569
+Dynamic SQL Error
+-SQL error code = -204
+-Table unknown
+-BAD
+-At line 1, column 22 When Executing: Select count(*) from BAD
+@dd-mm-yy hh:mm:ss.zzzz:Setup Function return_info
+@dd-mm-yy hh:mm:ss.zzzz:Routine Metadata
+Package Name = 
+  Name = UDRINFO
+  Entry Point = fbudrtests!return_info!Hello World (fbudrtests,return_info,Hello World)
+  Body = 
+  Input Metadata:
+  Field Count = 0
+  Alignment = 2
+  Aligned Length = 0
+  
+Output Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 36
+  Field No. 0
+  Field Name = 
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 31
+  Scale = 0
+  Offset = 0
+  Null Offset = 34
+  Message Length = 31
+  
+@dd-mm-yy hh:mm:ss.zzzz:Function return_info created
+@dd-mm-yy hh:mm:ss.zzzz:Package Name = 
+  Name = UDRINFO
+  Entry Point = fbudrtests!return_info!Hello World (fbudrtests,return_info,Hello World)
+  Body = 
+  Input Metadata:
+  Field Count = 0
+  Alignment = 2
+  Aligned Length = 0
+  
+Output Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 36
+  Field No. 0
+  Field Name = 
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 31
+  Scale = 0
+  Offset = 0
+  Null Offset = 34
+  Message Length = 31
+  
+@dd-mm-yy hh:mm:ss.zzzz:Execute Function return_info
+@dd-mm-yy hh:mm:ss.zzzz:External Context: 
+  Attachment ID = 567
+  Transaction ID = 1535
+  User Name = TESTER
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
+  Client Character Set = NONE
+  
+@dd-mm-yy hh:mm:ss.zzzz:Input Parameters
+
+@dd-mm-yy hh:mm:ss.zzzz:Output Parameters with data
+Column 0
+  Field Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 31
+  Value = Hello World
+
+@dd-mm-yy hh:mm:ss.zzzz:Function row_count: dispose called
+@dd-mm-yy hh:mm:ss.zzzz:Function return_info: dispose called
 @dd-mm-yy hh:mm:ss.zzzz:Setup Procedure test_proc
 @dd-mm-yy hh:mm:ss.zzzz:Routine Metadata
 Package Name = 
@@ -1034,10 +1764,10 @@ Output Metadata:
   
 @dd-mm-yy hh:mm:ss.zzzz:Open Execute Procedure test_proc
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 3439
-  Transaction ID = 10383
+  Attachment ID = 570
+  Transaction ID = 1539
   User Name = SYSDBA
-  Database Name = /opt/firebird4.0.1/examples/empbuild/employee.fdb
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
   
 @dd-mm-yy hh:mm:ss.zzzz:Input Parameters
@@ -1123,10 +1853,10 @@ Output Metadata:
   
 @dd-mm-yy hh:mm:ss.zzzz:Open Execute Procedure error_proc
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 3439
-  Transaction ID = 10383
+  Attachment ID = 570
+  Transaction ID = 1539
   User Name = SYSDBA
-  Database Name = /opt/firebird4.0.1/examples/empbuild/employee.fdb
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
   
 @dd-mm-yy hh:mm:ss.zzzz:Input Parameters
@@ -1143,8 +1873,8 @@ Parameter 0:
 
 @dd-mm-yy hh:mm:ss.zzzz:Output Parameters
 
-*S:'dd-mm-yy hh:mm:ss.zzzz',3439,0,10389,0:,53:[isc_tpb_write,isc_tpb_nowait,isc_tpb_read_committed],1
-*R:'dd-mm-yy hh:mm:ss.zzzz',3439,0,10389
+*S:'dd-mm-yy hh:mm:ss.zzzz',570,0,1545,0:,53:[isc_tpb_write,isc_tpb_nowait,isc_tpb_read_committed],1
+*R:'dd-mm-yy hh:mm:ss.zzzz',570,0,1545
 @dd-mm-yy hh:mm:ss.zzzz:Procedure error_proc: dispose called with refcount = 2
 @dd-mm-yy hh:mm:ss.zzzz:Exception raised
 Engine Code: 335544351
@@ -1153,10 +1883,10 @@ unsuccessful metadata update
 -Table TESTME already exists
 @dd-mm-yy hh:mm:ss.zzzz:Open Execute Procedure error_proc
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 3439
-  Transaction ID = 10383
+  Attachment ID = 570
+  Transaction ID = 1539
   User Name = SYSDBA
-  Database Name = /opt/firebird4.0.1/examples/empbuild/employee.fdb
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
   
 @dd-mm-yy hh:mm:ss.zzzz:Input Parameters
@@ -1173,18 +1903,246 @@ Parameter 0:
 
 @dd-mm-yy hh:mm:ss.zzzz:Output Parameters
 
-*S:'dd-mm-yy hh:mm:ss.zzzz',3439,0,10390,0:,53:[isc_tpb_write,isc_tpb_nowait,isc_tpb_read_committed],1
-*C:'dd-mm-yy hh:mm:ss.zzzz',3439,0,10390
+*S:'dd-mm-yy hh:mm:ss.zzzz',570,0,1546,0:,53:[isc_tpb_write,isc_tpb_nowait,isc_tpb_read_committed],1
+*Q:'dd-mm-yy hh:mm:ss.zzzz',570,0,1546,56:Insert into EMPLOYEE(EMP_NO,LAST_NAME) Values (2,No one)
+*C:'dd-mm-yy hh:mm:ss.zzzz',570,0,1546
 @dd-mm-yy hh:mm:ss.zzzz:Procedure error_proc: dispose called with refcount = 2
 @dd-mm-yy hh:mm:ss.zzzz:Exception raised
 Engine Code: 335544347
 validation error for column "EMPLOYEE"."FIRST_NAME", value "*** null ***"
 @dd-mm-yy hh:mm:ss.zzzz:Open Execute Procedure error_proc
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 3439
-  Transaction ID = 10383
+  Attachment ID = 570
+  Transaction ID = 1539
   User Name = SYSDBA
-  Database Name = /opt/firebird4.0.1/examples/empbuild/employee.fdb
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
+  Client Character Set = NONE
+  
+@dd-mm-yy hh:mm:ss.zzzz:Input Parameters
+Parameter 0:
+  Field Name = ERRORCASE
+  Alias Name = 
+  SQLType = SQL_SHORT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 2
+  Value = 2
+
+@dd-mm-yy hh:mm:ss.zzzz:Output Parameters
+
+@dd-mm-yy hh:mm:ss.zzzz:Procedure error_proc: dispose called with refcount = 2
+@dd-mm-yy hh:mm:ss.zzzz:Exception raised
+You have a bug
+@dd-mm-yy hh:mm:ss.zzzz:Procedure error_proc: dispose called with refcount = 1
+@dd-mm-yy hh:mm:ss.zzzz:Procedure test_proc: dispose called with refcount = 1
+@dd-mm-yy hh:mm:ss.zzzz:Setup Procedure test_proc
+@dd-mm-yy hh:mm:ss.zzzz:Routine Metadata
+Package Name = 
+  Name = MYTESTPROC
+  Entry Point = fbudrtests!test_proc (fbudrtests,test_proc,)
+  Body = 
+  Input Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 4
+  Field No. 0
+  Field Name = EMP_NO
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_SHORT
+  IsNullable = yes
+  SubType = 0
+  Length = 2
+  Scale = 0
+  Offset = 0
+  Null Offset = 2
+  Message Length = 2
+  
+Output Metadata:
+  Field Count = 2
+  Alignment = 8
+  Aligned Length = 56
+  Field No. 0
+  Field Name = SALARY
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_INT64
+  IsNullable = yes
+  SubType = 1
+  Length = 8
+  Scale = -2
+  Offset = 0
+  Null Offset = 8
+  Message Length = 8
+  Field No. 1
+  Field Name = FULLNAME
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 36
+  Scale = 0
+  Offset = 10
+  Null Offset = 48
+  Message Length = 36
+  
+@dd-mm-yy hh:mm:ss.zzzz:Open Execute Procedure test_proc
+@dd-mm-yy hh:mm:ss.zzzz:External Context: 
+  Attachment ID = 573
+  Transaction ID = 1547
+  User Name = TESTER
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
+  Client Character Set = NONE
+  
+@dd-mm-yy hh:mm:ss.zzzz:Input Parameters
+Parameter 0:
+  Field Name = EMP_NO
+  Alias Name = 
+  SQLType = SQL_SHORT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 2
+  Value = 24
+
+@dd-mm-yy hh:mm:ss.zzzz:Output Parameters
+Column 0
+  Field Name = SALARY
+  SQLType = SQL_INT64
+  sub type = 0
+  Scale = -2
+  Charset = NONE
+  Nullable
+  Size = 8
+  Value = NULL
+Column 1
+  Field Name = FULLNAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 36
+  Value = NULL
+
+@dd-mm-yy hh:mm:ss.zzzz:Output Parameters with data
+Column 0
+  Field Name = SALARY
+  SQLType = SQL_INT64
+  sub type = 0
+  Scale = -2
+  Charset = NONE
+  Nullable
+  Size = 8
+  Value = 81810.19
+Column 1
+  Field Name = FULLNAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 36
+  Value = Fisher, Pete
+
+@dd-mm-yy hh:mm:ss.zzzz:Procedure test_proc: dispose called with refcount = 2
+@dd-mm-yy hh:mm:ss.zzzz:Setup Procedure error_proc
+@dd-mm-yy hh:mm:ss.zzzz:Routine Metadata
+Package Name = 
+  Name = MYERRORPROC
+  Entry Point = fbudrtests!error_proc (fbudrtests,error_proc,)
+  Body = 
+  Input Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 4
+  Field No. 0
+  Field Name = ERRORCASE
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_SHORT
+  IsNullable = yes
+  SubType = 0
+  Length = 2
+  Scale = 0
+  Offset = 0
+  Null Offset = 2
+  Message Length = 2
+  
+Output Metadata:
+  Field Count = 0
+  Alignment = 2
+  Aligned Length = 0
+  
+@dd-mm-yy hh:mm:ss.zzzz:Open Execute Procedure error_proc
+@dd-mm-yy hh:mm:ss.zzzz:External Context: 
+  Attachment ID = 573
+  Transaction ID = 1547
+  User Name = TESTER
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
+  Client Character Set = NONE
+  
+@dd-mm-yy hh:mm:ss.zzzz:Input Parameters
+Parameter 0:
+  Field Name = ERRORCASE
+  Alias Name = 
+  SQLType = SQL_SHORT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 2
+  Value = 0
+
+@dd-mm-yy hh:mm:ss.zzzz:Output Parameters
+
+*S:'dd-mm-yy hh:mm:ss.zzzz',573,0,1553,0:,53:[isc_tpb_write,isc_tpb_nowait,isc_tpb_read_committed],1
+*R:'dd-mm-yy hh:mm:ss.zzzz',573,0,1553
+@dd-mm-yy hh:mm:ss.zzzz:Procedure error_proc: dispose called with refcount = 2
+@dd-mm-yy hh:mm:ss.zzzz:Exception raised
+Engine Code: 335544351
+unsuccessful metadata update
+-CREATE TABLE TESTME failed
+-No permission for CREATE TABLE operation
+@dd-mm-yy hh:mm:ss.zzzz:Open Execute Procedure error_proc
+@dd-mm-yy hh:mm:ss.zzzz:External Context: 
+  Attachment ID = 573
+  Transaction ID = 1547
+  User Name = TESTER
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
+  Client Character Set = NONE
+  
+@dd-mm-yy hh:mm:ss.zzzz:Input Parameters
+Parameter 0:
+  Field Name = ERRORCASE
+  Alias Name = 
+  SQLType = SQL_SHORT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 2
+  Value = 1
+
+@dd-mm-yy hh:mm:ss.zzzz:Output Parameters
+
+*S:'dd-mm-yy hh:mm:ss.zzzz',573,0,1554,0:,53:[isc_tpb_write,isc_tpb_nowait,isc_tpb_read_committed],1
+*C:'dd-mm-yy hh:mm:ss.zzzz',573,0,1554
+@dd-mm-yy hh:mm:ss.zzzz:Procedure error_proc: dispose called with refcount = 2
+@dd-mm-yy hh:mm:ss.zzzz:Exception raised
+Engine Code: 335544352
+no permission for USAGE access to GENERATOR EMP_NO_GEN
+-Effective user is TESTER When Executing: Insert into EMPLOYEE(EMP_NO,LAST_NAME) Values (2,'No one')
+@dd-mm-yy hh:mm:ss.zzzz:Open Execute Procedure error_proc
+@dd-mm-yy hh:mm:ss.zzzz:External Context: 
+  Attachment ID = 573
+  Transaction ID = 1547
+  User Name = TESTER
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
   
 @dd-mm-yy hh:mm:ss.zzzz:Input Parameters
@@ -1260,10 +2218,10 @@ Output Metadata:
   
 @dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure select_proc
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 3442
-  Transaction ID = 10391
+  Attachment ID = 576
+  Transaction ID = 1555
   User Name = SYSDBA
-  Database Name = /opt/firebird4.0.1/examples/empbuild/employee.fdb
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
   
 @dd-mm-yy hh:mm:ss.zzzz:Input Parameters
@@ -1340,10 +2298,10 @@ Output Metadata:
   
 @dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure read_txt
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 3442
-  Transaction ID = 10391
+  Attachment ID = 576
+  Transaction ID = 1555
   User Name = SYSDBA
-  Database Name = /opt/firebird4.0.1/examples/empbuild/employee.fdb
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
   
 @dd-mm-yy hh:mm:ss.zzzz:Input Parameters
@@ -1372,8 +2330,244 @@ Column 0
   Value = 
 
 @dd-mm-yy hh:mm:ss.zzzz:Procedure read_txt: dispose called with refcount = 2
+@dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure read_txt
+@dd-mm-yy hh:mm:ss.zzzz:External Context: 
+  Attachment ID = 576
+  Transaction ID = 1555
+  User Name = SYSDBA
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
+  Client Character Set = NONE
+  
+@dd-mm-yy hh:mm:ss.zzzz:Input Parameters
+Parameter 0:
+  Field Name = PATH
+  Alias Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 200
+  Value = /home/tony/lazarus/2.2/otherComponents/fbintf/udr/testsuite/udrlib/test.empty
+
+@dd-mm-yy hh:mm:ss.zzzz:Read Text called in directory /tmp
+@dd-mm-yy hh:mm:ss.zzzz:Reading from /home/tony/lazarus/2.2/otherComponents/fbintf/udr/testsuite/udrlib/test.empty
+@dd-mm-yy hh:mm:ss.zzzz:Output Parameters
+Column 0
+  Field Name = TEXT
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 100
+  Value = 
+
+@dd-mm-yy hh:mm:ss.zzzz:Procedure read_txt: dispose called with refcount = 2
 @dd-mm-yy hh:mm:ss.zzzz:Procedure read_txt: dispose called with refcount = 1
 @dd-mm-yy hh:mm:ss.zzzz:Procedure select_proc: dispose called with refcount = 1
+@dd-mm-yy hh:mm:ss.zzzz:Setup Procedure select_proc
+@dd-mm-yy hh:mm:ss.zzzz:Routine Metadata
+Package Name = 
+  Name = MYSELECTPROC
+  Entry Point = fbudrtests!select_proc (fbudrtests,select_proc,)
+  Body = 
+  Input Metadata:
+  Field Count = 0
+  Alignment = 2
+  Aligned Length = 0
+  
+Output Metadata:
+  Field Count = 3
+  Alignment = 8
+  Aligned Length = 72
+  Field No. 0
+  Field Name = FULLNAME
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 36
+  Scale = 0
+  Offset = 0
+  Null Offset = 38
+  Message Length = 36
+  Field No. 1
+  Field Name = SALARY
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_INT64
+  IsNullable = yes
+  SubType = 1
+  Length = 8
+  Scale = -2
+  Offset = 40
+  Null Offset = 48
+  Message Length = 8
+  Field No. 2
+  Field Name = ACCSALARY
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_INT64
+  IsNullable = yes
+  SubType = 1
+  Length = 8
+  Scale = -2
+  Offset = 56
+  Null Offset = 64
+  Message Length = 8
+  
+@dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure select_proc
+@dd-mm-yy hh:mm:ss.zzzz:External Context: 
+  Attachment ID = 579
+  Transaction ID = 1561
+  User Name = TESTER
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
+  Client Character Set = NONE
+  
+@dd-mm-yy hh:mm:ss.zzzz:Input Parameters
+
+@dd-mm-yy hh:mm:ss.zzzz:Output Parameters
+Column 0
+  Field Name = FULLNAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 36
+  Value = NULL
+Column 1
+  Field Name = SALARY
+  SQLType = SQL_INT64
+  sub type = 0
+  Scale = -2
+  Charset = NONE
+  Nullable
+  Size = 8
+  Value = NULL
+Column 2
+  Field Name = ACCSALARY
+  SQLType = SQL_INT64
+  sub type = 0
+  Scale = -2
+  Charset = NONE
+  Nullable
+  Size = 8
+  Value = NULL
+
+@dd-mm-yy hh:mm:ss.zzzz:Procedure select_proc: dispose called with refcount = 2
+@dd-mm-yy hh:mm:ss.zzzz:Setup Procedure read_txt
+@dd-mm-yy hh:mm:ss.zzzz:Routine Metadata
+Package Name = 
+  Name = MYREADTEXT
+  Entry Point = fbudrtests!read_txt (fbudrtests,read_txt,)
+  Body = 
+  Input Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 204
+  Field No. 0
+  Field Name = PATH
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = no
+  SubType = 0
+  Length = 200
+  Scale = 0
+  Offset = 0
+  Null Offset = 202
+  Message Length = 200
+  
+Output Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 104
+  Field No. 0
+  Field Name = TEXT
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = no
+  SubType = 0
+  Length = 100
+  Scale = 0
+  Offset = 0
+  Null Offset = 102
+  Message Length = 100
+  
+@dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure read_txt
+@dd-mm-yy hh:mm:ss.zzzz:External Context: 
+  Attachment ID = 579
+  Transaction ID = 1561
+  User Name = TESTER
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
+  Client Character Set = NONE
+  
+@dd-mm-yy hh:mm:ss.zzzz:Input Parameters
+Parameter 0:
+  Field Name = PATH
+  Alias Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 200
+  Value = /home/tony/lazarus/2.2/otherComponents/fbintf/udr/testsuite/udrlib/testtext.txt
+
+@dd-mm-yy hh:mm:ss.zzzz:Read Text called in directory /tmp
+@dd-mm-yy hh:mm:ss.zzzz:Reading from /home/tony/lazarus/2.2/otherComponents/fbintf/udr/testsuite/udrlib/testtext.txt
+@dd-mm-yy hh:mm:ss.zzzz:Output Parameters
+Column 0
+  Field Name = TEXT
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 100
+  Value = 
+
+@dd-mm-yy hh:mm:ss.zzzz:Procedure read_txt: dispose called with refcount = 2
+@dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure read_txt
+@dd-mm-yy hh:mm:ss.zzzz:External Context: 
+  Attachment ID = 579
+  Transaction ID = 1561
+  User Name = TESTER
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
+  Client Character Set = NONE
+  
+@dd-mm-yy hh:mm:ss.zzzz:Input Parameters
+Parameter 0:
+  Field Name = PATH
+  Alias Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 200
+  Value = /home/tony/lazarus/2.2/otherComponents/fbintf/udr/testsuite/udrlib/test.empty
+
+@dd-mm-yy hh:mm:ss.zzzz:Read Text called in directory /tmp
+@dd-mm-yy hh:mm:ss.zzzz:Reading from /home/tony/lazarus/2.2/otherComponents/fbintf/udr/testsuite/udrlib/test.empty
+@dd-mm-yy hh:mm:ss.zzzz:Output Parameters
+Column 0
+  Field Name = TEXT
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 100
+  Value = 
+
+@dd-mm-yy hh:mm:ss.zzzz:Procedure read_txt: dispose called with refcount = 2
+@dd-mm-yy hh:mm:ss.zzzz:Procedure select_proc: dispose called with refcount = 1
+@dd-mm-yy hh:mm:ss.zzzz:Procedure read_txt: dispose called with refcount = 1
 @dd-mm-yy hh:mm:ss.zzzz:Setup Trigger my_employee_update
 @dd-mm-yy hh:mm:ss.zzzz:Routine Metadata
 Package Name = 
@@ -2218,3 +3412,1620 @@ Column 11
   Value = 999
 
 @dd-mm-yy hh:mm:ss.zzzz:Trigger my_employee_update: dispose called
+@dd-mm-yy hh:mm:ss.zzzz:Setup Trigger my_employee_update
+@dd-mm-yy hh:mm:ss.zzzz:Routine Metadata
+Package Name = 
+  Name = MYEMPLOYEEUPDATE
+  Entry Point = fbudrtests!my_employee_update (fbudrtests,my_employee_update,)
+  Body = 
+  Trigger Metadata:
+  Field Count = 12
+  Alignment = 0
+  Aligned Length = 0
+  Field No. 0
+  Field Name = EMP_NO
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_SHORT
+  IsNullable = no
+  SubType = 0
+  Length = 2
+  Scale = 0
+  Offset = 0
+  Null Offset = 0
+  Message Length = 2
+  Field No. 1
+  Field Name = FIRST_NAME
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = no
+  SubType = 0
+  Length = 15
+  Scale = 0
+  Offset = 0
+  Null Offset = 0
+  Message Length = 15
+  Field No. 2
+  Field Name = LAST_NAME
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = no
+  SubType = 0
+  Length = 20
+  Scale = 0
+  Offset = 0
+  Null Offset = 0
+  Message Length = 20
+  Field No. 3
+  Field Name = PHONE_EXT
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 4
+  Scale = 0
+  Offset = 0
+  Null Offset = 0
+  Message Length = 4
+  Field No. 4
+  Field Name = HIRE_DATE
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_TIMESTAMP
+  IsNullable = no
+  SubType = 0
+  Length = 8
+  Scale = 0
+  Offset = 0
+  Null Offset = 0
+  Message Length = 8
+  Field No. 5
+  Field Name = DEPT_NO
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_TEXT
+  IsNullable = no
+  SubType = 0
+  Length = 3
+  Scale = 0
+  Offset = 0
+  Null Offset = 0
+  Message Length = 3
+  Field No. 6
+  Field Name = JOB_CODE
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = no
+  SubType = 0
+  Length = 5
+  Scale = 0
+  Offset = 0
+  Null Offset = 0
+  Message Length = 5
+  Field No. 7
+  Field Name = JOB_GRADE
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_SHORT
+  IsNullable = no
+  SubType = 0
+  Length = 2
+  Scale = 0
+  Offset = 0
+  Null Offset = 0
+  Message Length = 2
+  Field No. 8
+  Field Name = JOB_COUNTRY
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = no
+  SubType = 0
+  Length = 15
+  Scale = 0
+  Offset = 0
+  Null Offset = 0
+  Message Length = 15
+  Field No. 9
+  Field Name = SALARY
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_INT64
+  IsNullable = no
+  SubType = 1
+  Length = 8
+  Scale = -2
+  Offset = 0
+  Null Offset = 0
+  Message Length = 8
+  Field No. 10
+  Field Name = FULL_NAME
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 37
+  Scale = 0
+  Offset = 0
+  Null Offset = 0
+  Message Length = 37
+  Field No. 11
+  Field Name = PREVIOUS_PHONE_EXT
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 4
+  Scale = 0
+  Offset = 0
+  Null Offset = 0
+  Message Length = 4
+  Trigger Table = EMPLOYEE
+  Trigger Type = Before
+  
+@dd-mm-yy hh:mm:ss.zzzz:Execute Trigger my_employee_update
+@dd-mm-yy hh:mm:ss.zzzz:Old Field Values:
+Parameter 0:
+  Field Name = EMP_NO
+  Alias Name = 
+  SQLType = SQL_SHORT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 2
+  Value = 2
+Parameter 1:
+  Field Name = FIRST_NAME
+  Alias Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 15
+  Value = Robert
+Parameter 2:
+  Field Name = LAST_NAME
+  Alias Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 20
+  Value = Nelson
+Parameter 3:
+  Field Name = PHONE_EXT
+  Alias Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 4
+  Value = 250
+Parameter 4:
+  Field Name = HIRE_DATE
+  Alias Name = 
+  SQLType = SQL_TIMESTAMP
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 8
+  Value = dd-mm-yy hh:mm:ss.zzzz
+Parameter 5:
+  Field Name = DEPT_NO
+  Alias Name = 
+  SQLType = SQL_TEXT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 3
+  Value = 600
+Parameter 6:
+  Field Name = JOB_CODE
+  Alias Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 5
+  Value = VP
+Parameter 7:
+  Field Name = JOB_GRADE
+  Alias Name = 
+  SQLType = SQL_SHORT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 2
+  Value = 2
+Parameter 8:
+  Field Name = JOB_COUNTRY
+  Alias Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 15
+  Value = USA
+Parameter 9:
+  Field Name = SALARY
+  Alias Name = 
+  SQLType = SQL_INT64
+  sub type = 0
+  Scale = -2
+  Charset = NONE
+  Not Nullable
+  Size = 8
+  Value = 105900
+Parameter 10:
+  Field Name = FULL_NAME
+  Alias Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 37
+  Value = Nelson, Robert
+Parameter 11:
+  Field Name = PREVIOUS_PHONE_EXT
+  Alias Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 4
+  Value = 999
+
+@dd-mm-yy hh:mm:ss.zzzz:New Field Values:
+Column 0
+  Field Name = EMP_NO
+  SQLType = SQL_SHORT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 2
+  Value = 2
+Column 1
+  Field Name = FIRST_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 15
+  Value = Robert
+Column 2
+  Field Name = LAST_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 20
+  Value = Nelson
+Column 3
+  Field Name = PHONE_EXT
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 4
+  Value = 999
+Column 4
+  Field Name = HIRE_DATE
+  SQLType = SQL_TIMESTAMP
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 8
+  Value = dd-mm-yy hh:mm:ss.zzzz
+Column 5
+  Field Name = DEPT_NO
+  SQLType = SQL_TEXT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 3
+  Value = 600
+Column 6
+  Field Name = JOB_CODE
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 5
+  Value = VP
+Column 7
+  Field Name = JOB_GRADE
+  SQLType = SQL_SHORT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 2
+  Value = 2
+Column 8
+  Field Name = JOB_COUNTRY
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 15
+  Value = USA
+Column 9
+  Field Name = SALARY
+  SQLType = SQL_INT64
+  sub type = 0
+  Scale = -2
+  Charset = NONE
+  Not Nullable
+  Size = 8
+  Value = 105900
+Column 10
+  Field Name = FULL_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 37
+  Value = Nelson, Robert
+Column 11
+  Field Name = PREVIOUS_PHONE_EXT
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 4
+  Value = 999
+
+@dd-mm-yy hh:mm:ss.zzzz:New Field Values after trigger execution
+Column 0
+  Field Name = EMP_NO
+  SQLType = SQL_SHORT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 2
+  Value = 2
+Column 1
+  Field Name = FIRST_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 15
+  Value = Robert
+Column 2
+  Field Name = LAST_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 20
+  Value = Nelson
+Column 3
+  Field Name = PHONE_EXT
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 4
+  Value = 999
+Column 4
+  Field Name = HIRE_DATE
+  SQLType = SQL_TIMESTAMP
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 8
+  Value = dd-mm-yy hh:mm:ss.zzzz
+Column 5
+  Field Name = DEPT_NO
+  SQLType = SQL_TEXT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 3
+  Value = 600
+Column 6
+  Field Name = JOB_CODE
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 5
+  Value = VP
+Column 7
+  Field Name = JOB_GRADE
+  SQLType = SQL_SHORT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 2
+  Value = 2
+Column 8
+  Field Name = JOB_COUNTRY
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 15
+  Value = USA
+Column 9
+  Field Name = SALARY
+  SQLType = SQL_INT64
+  sub type = 0
+  Scale = -2
+  Charset = NONE
+  Not Nullable
+  Size = 8
+  Value = 105900
+Column 10
+  Field Name = FULL_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 37
+  Value = Nelson, Robert
+Column 11
+  Field Name = PREVIOUS_PHONE_EXT
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 4
+  Value = 250
+
+@dd-mm-yy hh:mm:ss.zzzz:Execute Trigger my_employee_update
+@dd-mm-yy hh:mm:ss.zzzz:Old Field Values:
+Parameter 0:
+  Field Name = EMP_NO
+  Alias Name = 
+  SQLType = SQL_SHORT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 2
+  Value = 2
+Parameter 1:
+  Field Name = FIRST_NAME
+  Alias Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 15
+  Value = Robert
+Parameter 2:
+  Field Name = LAST_NAME
+  Alias Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 20
+  Value = Nelson
+Parameter 3:
+  Field Name = PHONE_EXT
+  Alias Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 4
+  Value = 999
+Parameter 4:
+  Field Name = HIRE_DATE
+  Alias Name = 
+  SQLType = SQL_TIMESTAMP
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 8
+  Value = dd-mm-yy hh:mm:ss.zzzz
+Parameter 5:
+  Field Name = DEPT_NO
+  Alias Name = 
+  SQLType = SQL_TEXT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 3
+  Value = 600
+Parameter 6:
+  Field Name = JOB_CODE
+  Alias Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 5
+  Value = VP
+Parameter 7:
+  Field Name = JOB_GRADE
+  Alias Name = 
+  SQLType = SQL_SHORT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 2
+  Value = 2
+Parameter 8:
+  Field Name = JOB_COUNTRY
+  Alias Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 15
+  Value = USA
+Parameter 9:
+  Field Name = SALARY
+  Alias Name = 
+  SQLType = SQL_INT64
+  sub type = 0
+  Scale = -2
+  Charset = NONE
+  Not Nullable
+  Size = 8
+  Value = 105900
+Parameter 10:
+  Field Name = FULL_NAME
+  Alias Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 37
+  Value = Nelson, Robert
+Parameter 11:
+  Field Name = PREVIOUS_PHONE_EXT
+  Alias Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 4
+  Value = 250
+
+@dd-mm-yy hh:mm:ss.zzzz:New Field Values:
+Column 0
+  Field Name = EMP_NO
+  SQLType = SQL_SHORT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 2
+  Value = 2
+Column 1
+  Field Name = FIRST_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 15
+  Value = Robert
+Column 2
+  Field Name = LAST_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 20
+  Value = Nelson
+Column 3
+  Field Name = PHONE_EXT
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 4
+  Value = 250
+Column 4
+  Field Name = HIRE_DATE
+  SQLType = SQL_TIMESTAMP
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 8
+  Value = dd-mm-yy hh:mm:ss.zzzz
+Column 5
+  Field Name = DEPT_NO
+  SQLType = SQL_TEXT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 3
+  Value = 600
+Column 6
+  Field Name = JOB_CODE
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 5
+  Value = VP
+Column 7
+  Field Name = JOB_GRADE
+  SQLType = SQL_SHORT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 2
+  Value = 2
+Column 8
+  Field Name = JOB_COUNTRY
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 15
+  Value = USA
+Column 9
+  Field Name = SALARY
+  SQLType = SQL_INT64
+  sub type = 0
+  Scale = -2
+  Charset = NONE
+  Not Nullable
+  Size = 8
+  Value = 105900
+Column 10
+  Field Name = FULL_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 37
+  Value = Nelson, Robert
+Column 11
+  Field Name = PREVIOUS_PHONE_EXT
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 4
+  Value = 250
+
+@dd-mm-yy hh:mm:ss.zzzz:New Field Values after trigger execution
+Column 0
+  Field Name = EMP_NO
+  SQLType = SQL_SHORT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 2
+  Value = 2
+Column 1
+  Field Name = FIRST_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 15
+  Value = Robert
+Column 2
+  Field Name = LAST_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 20
+  Value = Nelson
+Column 3
+  Field Name = PHONE_EXT
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 4
+  Value = 250
+Column 4
+  Field Name = HIRE_DATE
+  SQLType = SQL_TIMESTAMP
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 8
+  Value = dd-mm-yy hh:mm:ss.zzzz
+Column 5
+  Field Name = DEPT_NO
+  SQLType = SQL_TEXT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 3
+  Value = 600
+Column 6
+  Field Name = JOB_CODE
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 5
+  Value = VP
+Column 7
+  Field Name = JOB_GRADE
+  SQLType = SQL_SHORT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 2
+  Value = 2
+Column 8
+  Field Name = JOB_COUNTRY
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Not Nullable
+  Size = 15
+  Value = USA
+Column 9
+  Field Name = SALARY
+  SQLType = SQL_INT64
+  sub type = 0
+  Scale = -2
+  Charset = NONE
+  Not Nullable
+  Size = 8
+  Value = 105900
+Column 10
+  Field Name = FULL_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 37
+  Value = Nelson, Robert
+Column 11
+  Field Name = PREVIOUS_PHONE_EXT
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 4
+  Value = 999
+
+@dd-mm-yy hh:mm:ss.zzzz:Trigger my_employee_update: dispose called
+@dd-mm-yy hh:mm:ss.zzzz:Setup Procedure show_att
+@dd-mm-yy hh:mm:ss.zzzz:Routine Metadata
+Package Name = 
+  Name = SHOWATTACHMENTS
+  Entry Point = fbudrtests!show_att (fbudrtests,show_att,)
+  Body = 
+  Input Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 36
+  Field No. 0
+  Field Name = USER_NAME
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 32
+  Scale = 0
+  Offset = 0
+  Null Offset = 34
+  Message Length = 32
+  
+Output Metadata:
+  Field Count = 5
+  Alignment = 8
+  Aligned Length = 664
+  Field No. 0
+  Field Name = MON$ATTACHMENT_ID
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_INT64
+  IsNullable = yes
+  SubType = 0
+  Length = 8
+  Scale = 0
+  Offset = 0
+  Null Offset = 8
+  Message Length = 8
+  Field No. 1
+  Field Name = MON$ATTACHMENT_NAME
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 255
+  Scale = 0
+  Offset = 10
+  Null Offset = 268
+  Message Length = 255
+  Field No. 2
+  Field Name = MON$USER
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_TEXT
+  IsNullable = yes
+  SubType = 0
+  Length = 63
+  Scale = 0
+  Offset = 270
+  Null Offset = 334
+  Message Length = 63
+  Field No. 3
+  Field Name = MON$ROLE
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_TEXT
+  IsNullable = yes
+  SubType = 0
+  Length = 63
+  Scale = 0
+  Offset = 336
+  Null Offset = 400
+  Message Length = 63
+  Field No. 4
+  Field Name = MON$REMOTE_HOST
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 255
+  Scale = 0
+  Offset = 402
+  Null Offset = 660
+  Message Length = 255
+  
+@dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure show_att
+@dd-mm-yy hh:mm:ss.zzzz:External Context: 
+  Attachment ID = 588
+  Transaction ID = 1573
+  User Name = SYSDBA
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
+  Client Character Set = NONE
+  
+@dd-mm-yy hh:mm:ss.zzzz:Input Parameters
+Parameter 0:
+  Field Name = USER_NAME
+  Alias Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 32
+  Value = NULL
+
+@dd-mm-yy hh:mm:ss.zzzz:Output Parameters
+Column 0
+  Field Name = MON$ATTACHMENT_ID
+  SQLType = SQL_INT64
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 8
+  Value = NULL
+Column 1
+  Field Name = MON$ATTACHMENT_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 255
+  Value = NULL
+Column 2
+  Field Name = MON$USER
+  SQLType = SQL_TEXT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 63
+  Value = NULL
+Column 3
+  Field Name = MON$ROLE
+  SQLType = SQL_TEXT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 63
+  Value = NULL
+Column 4
+  Field Name = MON$REMOTE_HOST
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 255
+  Value = NULL
+
+@dd-mm-yy hh:mm:ss.zzzz:Procedure show_att: dispose called with refcount = 2
+@dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure show_att
+@dd-mm-yy hh:mm:ss.zzzz:External Context: 
+  Attachment ID = 588
+  Transaction ID = 1573
+  User Name = SYSDBA
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
+  Client Character Set = NONE
+  
+@dd-mm-yy hh:mm:ss.zzzz:Input Parameters
+Parameter 0:
+  Field Name = USER_NAME
+  Alias Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 32
+  Value = 
+
+@dd-mm-yy hh:mm:ss.zzzz:Output Parameters
+Column 0
+  Field Name = MON$ATTACHMENT_ID
+  SQLType = SQL_INT64
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 8
+  Value = NULL
+Column 1
+  Field Name = MON$ATTACHMENT_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 255
+  Value = NULL
+Column 2
+  Field Name = MON$USER
+  SQLType = SQL_TEXT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 63
+  Value = NULL
+Column 3
+  Field Name = MON$ROLE
+  SQLType = SQL_TEXT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 63
+  Value = NULL
+Column 4
+  Field Name = MON$REMOTE_HOST
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 255
+  Value = NULL
+
+@dd-mm-yy hh:mm:ss.zzzz:Procedure show_att: dispose called with refcount = 2
+@dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure show_att
+@dd-mm-yy hh:mm:ss.zzzz:External Context: 
+  Attachment ID = 588
+  Transaction ID = 1573
+  User Name = SYSDBA
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
+  Client Character Set = NONE
+  
+@dd-mm-yy hh:mm:ss.zzzz:Input Parameters
+Parameter 0:
+  Field Name = USER_NAME
+  Alias Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 32
+  Value = TESTER
+
+@dd-mm-yy hh:mm:ss.zzzz:Output Parameters
+Column 0
+  Field Name = MON$ATTACHMENT_ID
+  SQLType = SQL_INT64
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 8
+  Value = NULL
+Column 1
+  Field Name = MON$ATTACHMENT_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 255
+  Value = NULL
+Column 2
+  Field Name = MON$USER
+  SQLType = SQL_TEXT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 63
+  Value = NULL
+Column 3
+  Field Name = MON$ROLE
+  SQLType = SQL_TEXT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 63
+  Value = NULL
+Column 4
+  Field Name = MON$REMOTE_HOST
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 255
+  Value = NULL
+
+@dd-mm-yy hh:mm:ss.zzzz:Procedure show_att: dispose called with refcount = 2
+@dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure show_att
+@dd-mm-yy hh:mm:ss.zzzz:External Context: 
+  Attachment ID = 588
+  Transaction ID = 1573
+  User Name = SYSDBA
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
+  Client Character Set = NONE
+  
+@dd-mm-yy hh:mm:ss.zzzz:Input Parameters
+Parameter 0:
+  Field Name = USER_NAME
+  Alias Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 32
+  Value = SYSDBA
+
+@dd-mm-yy hh:mm:ss.zzzz:Output Parameters
+Column 0
+  Field Name = MON$ATTACHMENT_ID
+  SQLType = SQL_INT64
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 8
+  Value = NULL
+Column 1
+  Field Name = MON$ATTACHMENT_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 255
+  Value = NULL
+Column 2
+  Field Name = MON$USER
+  SQLType = SQL_TEXT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 63
+  Value = NULL
+Column 3
+  Field Name = MON$ROLE
+  SQLType = SQL_TEXT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 63
+  Value = NULL
+Column 4
+  Field Name = MON$REMOTE_HOST
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 255
+  Value = NULL
+
+@dd-mm-yy hh:mm:ss.zzzz:Procedure show_att: dispose called with refcount = 2
+@dd-mm-yy hh:mm:ss.zzzz:Setup Procedure server_info
+@dd-mm-yy hh:mm:ss.zzzz:Routine Metadata
+Package Name = 
+  Name = GETSERVERINFO
+  Entry Point = fbudrtests!server_info (fbudrtests,server_info,)
+  Body = 
+  Input Metadata:
+  Field Count = 0
+  Alignment = 2
+  Aligned Length = 0
+  
+Output Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 260
+  Field No. 0
+  Field Name = SERVERINFO
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 256
+  Scale = 0
+  Offset = 0
+  Null Offset = 258
+  Message Length = 256
+  
+@dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure server_info
+@dd-mm-yy hh:mm:ss.zzzz:External Context: 
+  Attachment ID = 588
+  Transaction ID = 1573
+  User Name = SYSDBA
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
+  Client Character Set = NONE
+  
+@dd-mm-yy hh:mm:ss.zzzz:Input Parameters
+
+@dd-mm-yy hh:mm:ss.zzzz:Output Parameters
+Column 0
+  Field Name = SERVERINFO
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 256
+  Value = NULL
+
+@dd-mm-yy hh:mm:ss.zzzz:Procedure server_info: dispose called with refcount = 2
+@dd-mm-yy hh:mm:ss.zzzz:Procedure server_info: dispose called with refcount = 1
+@dd-mm-yy hh:mm:ss.zzzz:Procedure show_att: dispose called with refcount = 1
+@dd-mm-yy hh:mm:ss.zzzz:Setup Procedure show_att
+@dd-mm-yy hh:mm:ss.zzzz:Routine Metadata
+Package Name = 
+  Name = SHOWATTACHMENTS
+  Entry Point = fbudrtests!show_att (fbudrtests,show_att,)
+  Body = 
+  Input Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 36
+  Field No. 0
+  Field Name = USER_NAME
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 32
+  Scale = 0
+  Offset = 0
+  Null Offset = 34
+  Message Length = 32
+  
+Output Metadata:
+  Field Count = 5
+  Alignment = 8
+  Aligned Length = 664
+  Field No. 0
+  Field Name = MON$ATTACHMENT_ID
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_INT64
+  IsNullable = yes
+  SubType = 0
+  Length = 8
+  Scale = 0
+  Offset = 0
+  Null Offset = 8
+  Message Length = 8
+  Field No. 1
+  Field Name = MON$ATTACHMENT_NAME
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 255
+  Scale = 0
+  Offset = 10
+  Null Offset = 268
+  Message Length = 255
+  Field No. 2
+  Field Name = MON$USER
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_TEXT
+  IsNullable = yes
+  SubType = 0
+  Length = 63
+  Scale = 0
+  Offset = 270
+  Null Offset = 334
+  Message Length = 63
+  Field No. 3
+  Field Name = MON$ROLE
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_TEXT
+  IsNullable = yes
+  SubType = 0
+  Length = 63
+  Scale = 0
+  Offset = 336
+  Null Offset = 400
+  Message Length = 63
+  Field No. 4
+  Field Name = MON$REMOTE_HOST
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 255
+  Scale = 0
+  Offset = 402
+  Null Offset = 660
+  Message Length = 255
+  
+@dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure show_att
+@dd-mm-yy hh:mm:ss.zzzz:External Context: 
+  Attachment ID = 594
+  Transaction ID = 1583
+  User Name = TESTER
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
+  Client Character Set = NONE
+  
+@dd-mm-yy hh:mm:ss.zzzz:Input Parameters
+Parameter 0:
+  Field Name = USER_NAME
+  Alias Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 32
+  Value = NULL
+
+@dd-mm-yy hh:mm:ss.zzzz:Exception raised
+Engine Code: 335544788
+Unable to perform operation
+-System privilege CHANGE_HEADER_SETTINGS is missing
+@dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure show_att
+@dd-mm-yy hh:mm:ss.zzzz:External Context: 
+  Attachment ID = 594
+  Transaction ID = 1583
+  User Name = TESTER
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
+  Client Character Set = NONE
+  
+@dd-mm-yy hh:mm:ss.zzzz:Input Parameters
+Parameter 0:
+  Field Name = USER_NAME
+  Alias Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 32
+  Value = 
+
+@dd-mm-yy hh:mm:ss.zzzz:Output Parameters
+Column 0
+  Field Name = MON$ATTACHMENT_ID
+  SQLType = SQL_INT64
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 8
+  Value = NULL
+Column 1
+  Field Name = MON$ATTACHMENT_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 255
+  Value = NULL
+Column 2
+  Field Name = MON$USER
+  SQLType = SQL_TEXT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 63
+  Value = NULL
+Column 3
+  Field Name = MON$ROLE
+  SQLType = SQL_TEXT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 63
+  Value = NULL
+Column 4
+  Field Name = MON$REMOTE_HOST
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 255
+  Value = NULL
+
+@dd-mm-yy hh:mm:ss.zzzz:Procedure show_att: dispose called with refcount = 2
+@dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure show_att
+@dd-mm-yy hh:mm:ss.zzzz:External Context: 
+  Attachment ID = 594
+  Transaction ID = 1583
+  User Name = TESTER
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
+  Client Character Set = NONE
+  
+@dd-mm-yy hh:mm:ss.zzzz:Input Parameters
+Parameter 0:
+  Field Name = USER_NAME
+  Alias Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 32
+  Value = TESTER
+
+@dd-mm-yy hh:mm:ss.zzzz:Output Parameters
+Column 0
+  Field Name = MON$ATTACHMENT_ID
+  SQLType = SQL_INT64
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 8
+  Value = NULL
+Column 1
+  Field Name = MON$ATTACHMENT_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 255
+  Value = NULL
+Column 2
+  Field Name = MON$USER
+  SQLType = SQL_TEXT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 63
+  Value = NULL
+Column 3
+  Field Name = MON$ROLE
+  SQLType = SQL_TEXT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 63
+  Value = NULL
+Column 4
+  Field Name = MON$REMOTE_HOST
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 255
+  Value = NULL
+
+@dd-mm-yy hh:mm:ss.zzzz:Procedure show_att: dispose called with refcount = 2
+@dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure show_att
+@dd-mm-yy hh:mm:ss.zzzz:External Context: 
+  Attachment ID = 594
+  Transaction ID = 1583
+  User Name = TESTER
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
+  Client Character Set = NONE
+  
+@dd-mm-yy hh:mm:ss.zzzz:Input Parameters
+Parameter 0:
+  Field Name = USER_NAME
+  Alias Name = 
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 32
+  Value = SYSDBA
+
+@dd-mm-yy hh:mm:ss.zzzz:Output Parameters
+Column 0
+  Field Name = MON$ATTACHMENT_ID
+  SQLType = SQL_INT64
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 8
+  Value = NULL
+Column 1
+  Field Name = MON$ATTACHMENT_NAME
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 255
+  Value = NULL
+Column 2
+  Field Name = MON$USER
+  SQLType = SQL_TEXT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 63
+  Value = NULL
+Column 3
+  Field Name = MON$ROLE
+  SQLType = SQL_TEXT
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 63
+  Value = NULL
+Column 4
+  Field Name = MON$REMOTE_HOST
+  SQLType = SQL_VARYING
+  sub type = 0
+  Scale = 0
+  Charset = NONE
+  Nullable
+  Size = 255
+  Value = NULL
+
+@dd-mm-yy hh:mm:ss.zzzz:Procedure show_att: dispose called with refcount = 2
+@dd-mm-yy hh:mm:ss.zzzz:Setup Procedure server_info
+@dd-mm-yy hh:mm:ss.zzzz:Routine Metadata
+Package Name = 
+  Name = GETSERVERINFO
+  Entry Point = fbudrtests!server_info (fbudrtests,server_info,)
+  Body = 
+  Input Metadata:
+  Field Count = 0
+  Alignment = 2
+  Aligned Length = 0
+  
+Output Metadata:
+  Field Count = 1
+  Alignment = 2
+  Aligned Length = 260
+  Field No. 0
+  Field Name = SERVERINFO
+  Relation Name = 
+  Alias Name = 
+  SQLType = SQL_VARYING
+  IsNullable = yes
+  SubType = 0
+  Length = 256
+  Scale = 0
+  Offset = 0
+  Null Offset = 258
+  Message Length = 256
+  
+@dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure server_info
+@dd-mm-yy hh:mm:ss.zzzz:External Context: 
+  Attachment ID = 594
+  Transaction ID = 1583
+  User Name = TESTER
+  Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
+  Client Character Set = NONE
+  
+@dd-mm-yy hh:mm:ss.zzzz:Input Parameters
+
+@dd-mm-yy hh:mm:ss.zzzz:Exception raised
+Engine Code: 335544790
+Service isc_info_svc_get_env requires SYSDBA permissions.  Reattach to the Service Manager using the SYSDBA account.
+-Service isc_info_svc_get_env requires SYSDBA permissions.  Reattach to the Service Manager using the SYSDBA account.
+-Service isc_info_svc_user_dbpath requires SYSDBA permissions.  Reattach to the Service Manager using the SYSDBA account
+@dd-mm-yy hh:mm:ss.zzzz:Procedure show_att: dispose called with refcount = 1
+@dd-mm-yy hh:mm:ss.zzzz:Procedure server_info: dispose called with refcount = 1
