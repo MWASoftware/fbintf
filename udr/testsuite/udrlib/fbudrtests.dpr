@@ -35,7 +35,8 @@ uses
   udr_test01 in 'udr_test01.pas',
   udr_test02 in 'udr_test02.pas',
   udr_test03 in 'udr_test03.pas',
-  udr_test04 in 'udr_test04.pas';
+  udr_test04 in 'udr_test04.pas',
+  udr_test05 in 'udr_test05.pas';
 
 {$R *.res}
 
