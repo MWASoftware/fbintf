@@ -182,6 +182,7 @@ type
      procedure FreeMessageBuffer; override;
      function GetAttachment: IAttachment; override;
      function GetTransaction: ITransaction; override;
+     function IsInputDataArea: boolean; override;
    public
      {created with the UDR output metadata and a pointer to the outMsg buffer.}
      constructor Create(context: IFBUDRExternalContext; aMetadata: Firebird.IMessageMetaData; aBuffer: PByte);
@@ -224,6 +225,7 @@ type
      procedure FreeMessageBuffer; override;
      function GetAttachment: IAttachment; override;
      function GetTransaction: ITransaction; override;
+     function IsInputDataArea: boolean; override;
    public
      {created with the input messge metadata and a pointer to the inMsg buffer}
      constructor Create(context: IFBUDRExternalContext;
@@ -245,14 +247,11 @@ type
     FController: TFBUDRController;
     FName: AnsiString;
     FRoutineMetadata: IFBUDRRoutineMetadata;
-    FFieldNames: TStrings;
     FFirebirdAPI: IFirebirdAPI;
-    procedure SetFieldNames(SQLDA: TFBUDRInParamsSQLDA);
   public
     constructor Create(aController: TFBUDRController;
                        aName: AnsiString;
-                       routineMetadata: IFBUDRRoutineMetadata;
-                       aFieldNames: TStrings);
+                       routineMetadata: IFBUDRRoutineMetadata);
   public
     {External Function Implementation}
 
@@ -315,13 +314,10 @@ type
   private
     FController: TFBUDRController;
     FName: AnsiString;
-    FFieldNames: TStringList;
     FFunction: TFBUDRFunctionClass;
     procedure SetController(AValue: TFBUDRController);
-    procedure UpdateFieldNames(att: IAttachment; aFunctionName: AnsiString);
   public
     constructor Create(aName: AnsiString; aFunction: TFBUDRFunctionClass);
-    destructor Destroy; override;
     property Controller: TFBUDRController read FController write SetController;
   public
     {IUdrFunctionFactory}
@@ -348,15 +344,10 @@ type
       FRoutineMetadata: IFBUDRRoutineMetadata;
       FRefCount: integer;
       FFirebirdAPI: IFirebirdAPI;
-    protected
-      FInArgNames: TStrings;
-      FOutArgNames: TStrings;
-      procedure SetFieldNames(SQLDA: TSQLDataArea);
    public
       constructor Create(aController: TFBUDRController;
                        aName: AnsiString;
-                       routineMetadata: IFBUDRRoutineMetadata;
-                       aInArgNames, aOutArgNames: TStrings);
+                       routineMetadata: IFBUDRRoutineMetadata);
       property FirebirdAPI: IFirebirdAPI read FFirebirdAPI;
     public
      {External Procedure Implementation}
@@ -398,13 +389,10 @@ type
     FUDRProcedure: TFBUDRProcedure;
     FOutputDataSQLDA: TFBUDROutParamsSQLDA;
     FOutputData: IFBUDROutputData;
-    FOutArgNames: TStrings;
-    procedure SetFieldNames(SQLDA: TSQLDataArea);
   protected
     procedure Close; virtual;
   public
     constructor Create(UDRProcedure: TFBUDRProcedure; context: IFBUDRExternalContext;
-                       aOutArgNames: TStrings;
                        metadata: Firebird.IMessageMetadata;
                        outMsg: pointer);
     destructor Destroy; override;
@@ -522,13 +510,9 @@ type
     FController: TFBUDRController;
     FName: AnsiString;
     FProcedure: TFBUDRProcedureClass;
-    FInArgNames: TStringList;
-    FOutArgNames: TStringList;
     procedure SetController(AValue: TFBUDRController);
-    procedure UpdateArgNames(att: IAttachment; aProcName: AnsiString);
   public
     constructor Create(aName: AnsiString; aProcedure: TFBUDRProcedureClass);
-    destructor Destroy; override;
     property Controller: TFBUDRController read FController write SetController;
   public
     {IUdrProcedureFactory}
@@ -556,14 +540,11 @@ type
     FController: TFBUDRController;
     FName: AnsiString;
     FRoutineMetadata: IFBUDRRoutineMetadata;
-    FFieldNames: TStrings;
     FFirebirdAPI: IFirebirdAPI;
-    procedure SetFieldNames(SQLDA: TSQLDataArea);
   public
     constructor Create(aController: TFBUDRController;
                        aName: AnsiString;
-                       routineMetadata: IFBUDRRoutineMetadata;
-                       aFieldNames: TStrings);
+                       routineMetadata: IFBUDRRoutineMetadata);
   public
     {External Trigger Implementation}
 
@@ -638,12 +619,9 @@ type
     FController: TFBUDRController;
     FName: AnsiString;
     FTrigger: TFBUDRTriggerClass;
-    FFieldNames: TStringList;
     procedure SetController(AValue: TFBUDRController);
-    procedure UpdateFieldNames(att: IAttachment; aTableName: AnsiString);
   public
     constructor Create(aName: AnsiString; aTrigger: TFBUDRTriggerClass);
-    destructor Destroy; override;
     property Controller: TFBUDRController read FController write SetController;
   public
     procedure dispose(); override;
@@ -902,7 +880,6 @@ begin
             InputParamsSQLDA := TFBUDRInParamsSQLDA.Create(FBContext,
                                                metadata,
                                                inMsg);
-            SetFieldNames(InputParamsSQLDA);
           finally
             metadata.release;
           end;
@@ -921,7 +898,7 @@ begin
             metadata := (FRoutineMetadata as TFBUDRRoutineMetadata).getOutputMetadata;
 
           try
-            Result := TFBUDRSingletonRow.Create(self, FBContext, FOutArgNames,
+            Result := TFBUDRSingletonRow.Create(self, FBContext,
                                                  metadata,
                                                  outMsg);
 
@@ -998,7 +975,6 @@ begin
             InputParamsSQLDA := TFBUDRInParamsSQLDA.Create(FBContext,
                                                metadata,
                                                inMsg);
-            SetFieldNames(InputParamsSQLDA);
          finally
             metadata.release;
           end;
@@ -1019,7 +995,6 @@ begin
           try
             open(FBContext,aProcMetadata,InputParams);
             Result := TFBUDRResultsCursor.Create(self, FBContext,
-                                                   FOutArgNames,
                                                    metadata,
                                                    outMsg);
           finally
@@ -1046,29 +1021,7 @@ begin
     end;
 end;
 
-const
-  sGetFieldNamesSQL = 'Select Trim(RF.RDB$FIELD_NAME) as ColumnName '+
-  'FROM RDB$RELATION_FIELDS RF '+
-  'JOIN RDB$FIELDS B On B.RDB$FIELD_NAME = RF.RDB$FIELD_SOURCE '+
-  'Where RF.RDB$RELATION_NAME = ?  ' +
-  'order by RF.RDB$FIELD_POSITION asc';
-
   { TFBUDRTriggerFactory }
-
-procedure TFBUDRTriggerFactory.UpdateFieldNames(att: IAttachment;
-  aTableName: AnsiString);
-var FieldNames: IResultSet;
-begin
-  FFieldNames.Clear;
-  if aTableName = '' then
-    Exit;
-  FieldNames := att.OpenCursorAtStart(sGetFieldNamesSQL,[aTableName]);
-  while not FieldNames.IsEOF do
-  begin
-    FFieldNames.Add(FieldNames[0].AsString);
-    FieldNames.FetchNext;
-  end;
-end;
 
 procedure TFBUDRTriggerFactory.SetController(AValue: TFBUDRController);
 begin
@@ -1082,14 +1035,6 @@ begin
   inherited Create;
   FName := aName;
   FTrigger := aTrigger;
-  FFieldNames := TStringList.Create;
-end;
-
-destructor TFBUDRTriggerFactory.Destroy;
-begin
-  if FFieldNames <> nil then
-    FFieldNames.Free;
-  inherited Destroy;
 end;
 
 procedure TFBUDRTriggerFactory.dispose();
@@ -1112,14 +1057,11 @@ begin
     FBContext := TFBUDRExternalContext.Create(Controller,context);
 
     FBRoutineMetadata := TFBUDRRoutineMetadata.Create(FBContext,metadata);
-    {Now get the Field Names}
-    UpdateFieldNames(FBContext.GetAttachment,FBRoutineMetadata.getTriggerTable);
-
     if fieldsBuilder <> nil then
       FBFieldsBuilder := TFBUDRMetadataBuilder.Create(FBContext,fieldsBuilder);
     if [loLogTriggers, loDetails] <= FBUDRControllerOptions.LogOptions then
         FController.WriteToLog(SRoutineMetadata + LineEnding + (FBRoutineMetadata as TFBUDRRoutineMetadata).AsText);
-    TFBUDRTrigger.setup(FBContext,FBRoutineMetadata,FBFieldsBuilder)
+    TFBUDRTrigger.setup(FBContext,FBRoutineMetadata,FBFieldsBuilder);
   except on E: Exception do
     FController.FBSetStatusFromException(E,status);
   end;
@@ -1134,7 +1076,7 @@ begin
   try
     FBContext := TFBUDRExternalContext.Create(Controller,context);
     FBRoutineMetadata := TFBUDRRoutineMetadata.Create(FBContext,metadata);
-    Result := FTrigger.Create(FController,FName,FBRoutineMetadata,FFieldNames);
+    Result := FTrigger.Create(FController,FName,FBRoutineMetadata);
   except on E: Exception do
     FController.FBSetStatusFromException(E,status);
   end;
@@ -1142,23 +1084,13 @@ end;
 
 { TFBUDRTrigger }
 
-procedure TFBUDRTrigger.SetFieldNames(SQLDA: TSQLDataArea);
-var i: integer;
-begin
-  for i := 0 to FFieldNames.Count - 1 do
-    if i < SQLDA.Count then
-      SQLDA[i].Name := FFieldNames[i];
-end;
-
 constructor TFBUDRTrigger.Create(aController: TFBUDRController;
-  aName: AnsiString; routineMetadata: IFBUDRRoutineMetadata;
-  aFieldNames: TStrings);
+  aName: AnsiString; routineMetadata: IFBUDRRoutineMetadata);
 begin
   inherited Create;
   FName := aName;
   FController := aController;
   FRoutineMetaData := routineMetadata;
-  FFieldNames := aFieldNames;
 end;
 
 function TFBUDRTrigger.getCharSet(context: IFBUDRExternalContext): AnsiString;
@@ -1245,7 +1177,6 @@ var aTriggerMetadata: IFBUDRTriggerMetaData;
       OldParamsSQLDA := TFBUDRInParamsSQLDA.Create(FBContext,
                                             metadata,
                                             oldMsg);
-      SetFieldNames(OldParamsSQLDA);
       OldParams := TFBUDRInputParams.Create(OldParamsSQLDA);
       if [loLogTriggers,loDetails] <= FBUDRControllerOptions.LogOptions then
       begin
@@ -1264,7 +1195,6 @@ var aTriggerMetadata: IFBUDRTriggerMetaData;
       NewParamsSQLDA := TFBUDRInParamsSQLDA.Create(FBContext,
                                               metadata,
                                               newMsg);
-      SetFieldNames(NewParamsSQLDA);
       NewParams := TFBUDRInputParams.Create(NewParamsSQLDA);
       if [loLogTriggers,loDetails] <= FBUDRControllerOptions.LogOptions then
       begin
@@ -1283,7 +1213,6 @@ var aTriggerMetadata: IFBUDRTriggerMetaData;
       WritableParamsSQLDA := TFBUDRTriggerNewValuesSQLDA.Create(FBContext,
                                           metadata,
                                           newMsg);
-      SetFieldNames(WritableParamsSQLDA);
       NewWritableParams := TFBUDROutputParams.Create(WritableParamsSQLDA);
       if [loLogTriggers,loDetails] <= FBUDRControllerOptions.LogOptions then
       begin
@@ -1344,13 +1273,13 @@ begin
               if TriggerAction in [taUpdate, taDelete] then
                 SetUpOldParams;
               if TriggerAction in [taInsert,taUpdate] then
-                SetupWritableNewParams;
+              SetupWritableNewParams;
             end;
             BeforeTrigger(FBContext,aTriggerMetadata,TriggerAction,OldParams,NewWritableParams);
             WritableParamsSQLDA.Finalise;
             if [loLogTriggers,loDetails] <= FBUDRControllerOptions.LogOptions then
               FController.WriteToLog(STriggerNewAfter,NewWritableParams);
-         end;
+          end;
         ttAfter:
           begin
             if FRoutineMetadata.HasTriggerMetadata then
@@ -1385,40 +1314,7 @@ begin
     end;
 end;
 
-const
-  sGetProcArgsSQL =
-    'SELECT Trim(RDB$PARAMETER_NAME) ' +
-    ' FROM RDB$PROCEDURE_PARAMETERS PRM JOIN RDB$FIELDS FLD ON ' +
-    ' PRM.RDB$FIELD_SOURCE = FLD.RDB$FIELD_NAME ' +
-    'WHERE ' +
-    '    Trim(PRM.RDB$PROCEDURE_NAME) = ? AND ' +
-    '    PRM.RDB$PARAMETER_TYPE = ? ' +
-    'ORDER BY PRM.RDB$PARAMETER_NUMBER';
-
-
 { TFBUDRProcedureFactory }
-
-procedure TFBUDRProcedureFactory.UpdateArgNames(att: IAttachment;
-  aProcName: AnsiString);
-
-  procedure UpdateFieldNames(paramType: integer; list: TStrings);
-  var FieldNames: IResultSet;
-  begin
-    list.Clear;
-    if aProcName = '' then
-      Exit;
-    FieldNames := att.OpenCursorAtStart(sGetProcArgsSQL,[aProcName,paramType]);
-    while not FieldNames.IsEOF do
-    begin
-      list.Add(FieldNames[0].AsString);
-      FieldNames.FetchNext;
-    end;
-  end;
-
-begin
-  UpdateFieldNames(0,FInArgNames);
-  UpdateFieldNames(1,FOutArgNames);
-end;
 
 procedure TFBUDRProcedureFactory.SetController(AValue: TFBUDRController);
 begin
@@ -1432,17 +1328,6 @@ begin
   inherited Create;
   FName := aName;
   FProcedure := aProcedure;
-  FInArgNames := TStringList.Create;
-  FOutArgNames := TStringList.Create;
-end;
-
-destructor TFBUDRProcedureFactory.Destroy;
-begin
-  if FInArgNames <> nil then
-    FInArgNames.Free;
-  if FOutArgNames <> nil then
-     FOutArgNames.Free;
-  inherited Destroy;
 end;
 
 procedure TFBUDRProcedureFactory.dispose();
@@ -1467,15 +1352,13 @@ begin
     FBContext := TFBUDRExternalContext.Create(Controller,context);
 
     FBRoutineMetadata := TFBUDRRoutineMetadata.Create(FBContext,metadata);
-    {Now get the Field Names}
-    UpdateArgNames(FBContext.GetAttachment,FBRoutineMetadata.getName);
     if inBuilder <> nil then
       FBInBuilder := TFBUDRMetadataBuilder.Create(FBContext,inBuilder);
     if outBuilder <> nil then
       FBOutBuilder := TFBUDRMetadataBuilder.Create(FBContext,outBuilder);
       if [loLogProcedures, loDetails] <= FBUDRControllerOptions.LogOptions then
         FController.WriteToLog(SRoutineMetadata + LineEnding + (FBRoutineMetadata as TFBUDRRoutineMetadata).AsText);
-    TFBUDRProcedure.setup(FBContext,FBRoutineMetadata,FBInBuilder,FBOutBuilder)
+    TFBUDRProcedure.setup(FBContext,FBRoutineMetadata,FBInBuilder,FBOutBuilder);
   except on E: Exception do
     FController.FBSetStatusFromException(E,status);
   end;
@@ -1490,8 +1373,7 @@ begin
   try
     FBContext := TFBUDRExternalContext.Create(Controller,context);
     FBRoutineMetadata := TFBUDRRoutineMetadata.Create(FBContext,metadata);
-    Result := FProcedure.Create(FController,FName,FBRoutineMetadata,
-                                 FInArgNames,FOutArgNames);
+    Result := FProcedure.Create(FController,FName,FBRoutineMetadata);
   except on E: Exception do
     FController.FBSetStatusFromException(E,status);
   end;
@@ -1499,31 +1381,21 @@ end;
 
 { TFBUDRExternalResultsSet }
 
-procedure TFBUDRExternalResultsSet.SetFieldNames(SQLDA: TSQLDataArea);
-var i: integer;
-begin
-  for i := 0 to FOutArgNames.Count - 1 do
-    if i < SQLDA.Count then
-      SQLDA[i].Name := FOutArgNames[i];
-end;
-
 procedure TFBUDRExternalResultsSet.Close;
 begin
   //do nothing by default
 end;
 
 constructor TFBUDRExternalResultsSet.Create(UDRProcedure: TFBUDRProcedure;
-  context: IFBUDRExternalContext; aOutArgNames: TStrings;
-  metadata: Firebird.IMessageMetadata; outMsg: pointer);
+  context: IFBUDRExternalContext; metadata: Firebird.IMessageMetadata;
+  outMsg: pointer);
 begin
   inherited Create;
   FUDRProcedure := UDRProcedure;
-  FOutArgNames := aOutArgNames;
   Inc(FUDRProcedure.FRefCount);
   if metadata <> nil then
   begin
     FOutputDataSQLDA := TFBUDROutParamsSQLDA.Create(context,metadata,outMsg);
-    SetFieldNames(FOutputDataSQLDA);
     FOutputData :=  TFBUDROutputParams.Create(FOutputDataSQLDA);
     if [loLogProcedures,loDetails] <= FBUDRControllerOptions.LogOptions then
       FUDRProcedure.FController.WriteToLog(SOutputParams,FOutputData);
@@ -1547,25 +1419,14 @@ end;
 
 { TFBUDRProcedure }
 
-procedure TFBUDRProcedure.SetFieldNames(SQLDA: TSQLDataArea);
-var i: integer;
-begin
-  for i := 0 to FInArgNames.Count - 1 do
-    if i < SQLDA.Count then
-      SQLDA[i].Name := FInArgNames[i];
-end;
-
 constructor TFBUDRProcedure.Create(aController: TFBUDRController;
-  aName: AnsiString; routineMetadata: IFBUDRRoutineMetadata; aInArgNames,
-  aOutArgNames: TStrings);
+  aName: AnsiString; routineMetadata: IFBUDRRoutineMetadata);
 begin
   inherited Create;
   FController := aController;
   FName := aName;
   FRefCount := 1;
   FRoutineMetaData := routineMetadata;
-  FInArgNames := aInArgNames;
-  FOutArgNames := aOutArgNames;
 end;
 
 function TFBUDRProcedure.getCharSet(context: IFBUDRExternalContext): AnsiString;
@@ -1637,6 +1498,11 @@ begin
   Result := FTransaction;
 end;
 
+function TFBUDRInParamsSQLDA.IsInputDataArea: boolean;
+begin
+  Result := true;
+end;
+
 constructor TFBUDRInParamsSQLDA.Create(context: IFBUDRExternalContext;
   aMetadata: Firebird.IMessageMetaData; aBuffer: PByte);
 begin
@@ -1672,6 +1538,11 @@ begin
   Result := FTransaction;
 end;
 
+function TFBUDROutParamsSQLDA.IsInputDataArea: boolean;
+begin
+  Result := true;
+end;
+
 constructor TFBUDROutParamsSQLDA.Create(context: IFBUDRExternalContext;
   aMetadata: Firebird.IMessageMetaData; aBuffer: PByte);
 begin
@@ -1694,22 +1565,12 @@ end;
 
 { TFBUDRFunction }
 
-procedure TFBUDRFunction.SetFieldNames(SQLDA: TFBUDRInParamsSQLDA);
-var i: integer;
-begin
-  for i := 0 to FFieldNames.Count - 1 do
-    if i < SQLDA.Count then
-      SQLDA[i].Name := FFieldNames[i];
-end;
-
 constructor TFBUDRFunction.Create(aController: TFBUDRController;
-  aName: AnsiString; routineMetadata: IFBUDRRoutineMetadata;
-  aFieldNames: TStrings);
+  aName: AnsiString; routineMetadata: IFBUDRRoutineMetadata);
 begin
   inherited Create;
   FController := aController;
   FName := aName;
-  FFieldNames := aFieldNames;
   FRoutineMetaData := routineMetadata;
   if loLogFunctions in FBUDRControllerOptions.LogOptions then
   begin
@@ -1812,7 +1673,6 @@ begin
             InParamsSQLDA := TFBUDRInParamsSQLDA.Create(FBContext,
                                  metadata,
                                  inMsg);
-            SetFieldNames(InParamsSQLDA);
           finally
             metadata.release;
           end;
@@ -1860,28 +1720,6 @@ end;
 
 { TFBUDRFunctionFactory }
 
-const
-  FunctionArgsSQL =
-    'SELECT Trim(RDB$ARGUMENT_NAME) FROM RDB$FUNCTION_ARGUMENTS RFA JOIN RDB$FIELDS FLD ' +
-    'ON RFA.RDB$FIELD_SOURCE = FLD.RDB$FIELD_NAME '+
-    'WHERE RDB$FUNCTION_NAME = ? AND RDB$ARGUMENT_POSITION > 0' +
-    'ORDER BY RDB$ARGUMENT_POSITION';
-
-procedure TFBUDRFunctionFactory.UpdateFieldNames(att: IAttachment;
-  aFunctionName: AnsiString);
-var FieldNames: IResultSet;
-begin
-  FFieldNames.Clear;
-  if aFunctionName = '' then
-    Exit;
-  FieldNames := att.OpenCursorAtStart(FunctionArgsSQL,[aFunctionName]);
-  while not FieldNames.IsEOF do
-  begin
-    FFieldNames.Add(FieldNames[0].AsString);
-    FieldNames.FetchNext;
-  end;
-end;
-
 procedure TFBUDRFunctionFactory.SetController(AValue: TFBUDRController);
 begin
   if FController = AValue then Exit;
@@ -1894,14 +1732,6 @@ begin
   inherited Create;
   FName := aName;
   FFunction := aFunction;
-  FFieldNames := TStringList.Create;
-end;
-
-destructor TFBUDRFunctionFactory.Destroy;
-begin
-  if FFieldNames <> nil then
-    FFieldNames.Free;
-  inherited Destroy;
 end;
 
 procedure TFBUDRFunctionFactory.dispose();
@@ -1926,8 +1756,6 @@ begin
     FBContext := TFBUDRExternalContext.Create(Controller,context);
 
     FBRoutineMetadata := TFBUDRRoutineMetadata.Create(FBContext,metadata);
-    {Now get the argument Names}
-    UpdateFieldNames(FBContext.GetAttachment,FBRoutineMetadata.getName);
 
     if inBuilder <> nil then
       FBInBuilder := TFBUDRMetadataBuilder.Create(FBContext,inBuilder);
@@ -1936,7 +1764,7 @@ begin
     if [loLogFunctions, loDetails] <= FBUDRControllerOptions.LogOptions then
       FController.WriteToLog(SRoutineMetadata + LineEnding + (FBRoutineMetadata as TFBUDRRoutineMetadata).AsText);
 
-    TFBUDRFunction.setup(FBContext,FBRoutineMetadata,FBInBuilder,FBOutBuilder)
+    TFBUDRFunction.setup(FBContext,FBRoutineMetadata,FBInBuilder,FBOutBuilder);
   except on E: Exception do
     FController.FBSetStatusFromException(E,status);
   end;
@@ -1951,7 +1779,7 @@ begin
   try
     FBContext := TFBUDRExternalContext.Create(Controller,context);
     FBRoutineMetadata := TFBUDRRoutineMetadata.Create(FBContext,metadata);
-    Result := FFunction.Create(FController,FName,FBRoutineMetadata,FFieldNames);
+    Result := FFunction.Create(FController,FName,FBRoutineMetadata);
   except on E: Exception do
     FController.FBSetStatusFromException(E,status);
   end;

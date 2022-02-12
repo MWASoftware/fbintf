@@ -479,6 +479,8 @@ begin
     FCharSetID :=  aMetaData.getCharSet(StatusIntf,Index) and $FF;
     Check4DataBaseError;
   end;
+  if Name = '' then
+    Name := FFieldName;
 end;
 
 procedure TIBXSQLVAR.ColumnSQLDataInit;

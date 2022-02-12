@@ -721,7 +721,7 @@ type
  end;
 
  TJnlEntryType = (jeTransStart, jeTransCommit, jeTransCommitFail, jeTransCommitRet, jeTransRollback,
-                   jeTransRollbackFail, jeTransRollbackRet, jeTransEnd, jeQuery,jeUnknown);
+                   jeTransRollbackFail, jeTransRollbackRet, jeQuery,jeUnknown);
 
  TJnlEntry = record
    JnlEntryType: TJnlEntryType;
@@ -2895,8 +2895,6 @@ begin
     Result := jeTransRollback;
   'r':
     Result := jeTransRollbackRet;
-  'E':
-    Result := jeTransEnd;
   'Q':
     Result := jeQuery;
   'F':
@@ -2923,8 +2921,6 @@ begin
     Result := 'Rollback (Failed)';
   jeTransRollbackRet:
     Result := 'Rollback Retaining';
-  jeTransEnd:
-    Result := 'Transaction End';
   jeQuery:
     Result := 'Query';
   jeUnknown:
