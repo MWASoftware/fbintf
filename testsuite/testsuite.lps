@@ -155,10 +155,12 @@
       <Unit19>
         <Filename Value="testApp/TestApplication.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="618"/>
-        <CursorPos Y="632"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="1325"/>
+        <CursorPos Y="1338"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit19>
       <Unit20>
         <Filename Value="FBTestApp.pas"/>
@@ -231,7 +233,6 @@
       </Unit28>
       <Unit29>
         <Filename Value="../client/FBSQLData.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <TopLine Value="768"/>
         <CursorPos Y="782"/>
@@ -366,7 +367,7 @@
       </Unit43>
       <Unit44>
         <Filename Value="../client/3.0/FB30Attachment.pas"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="3"/>
         <TopLine Value="364"/>
         <CursorPos Y="378"/>
         <UsageCount Value="20"/>
@@ -437,7 +438,7 @@
       </Unit53>
       <Unit54>
         <Filename Value="../client/3.0/FB30Statement.pas"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="4"/>
         <TopLine Value="1416"/>
         <CursorPos Y="1422"/>
         <ExtraEditorCount Value="1"/>
@@ -1059,7 +1060,7 @@
         <UsageCount Value="9"/>
       </Unit138>
     </Units>
-    <JumpHistory Count="13" HistoryIndex="12">
+    <JumpHistory Count="16" HistoryIndex="15">
       <Position1>
         <Filename Value="../client/IB.pas"/>
         <Caret Line="846" Column="34" TopLine="834"/>
@@ -1112,6 +1113,18 @@
         <Filename Value="../client/3.0/FB30Statement.pas"/>
         <Caret Line="1422" TopLine="1416"/>
       </Position13>
+      <Position14>
+        <Filename Value="testApp/TestApplication.pas"/>
+        <Caret Line="630" Column="25" TopLine="618"/>
+      </Position14>
+      <Position15>
+        <Filename Value="testApp/TestApplication.pas"/>
+        <Caret Line="1336" TopLine="1325"/>
+      </Position15>
+      <Position16>
+        <Filename Value="testApp/TestApplication.pas"/>
+        <Caret Line="1337" TopLine="1325"/>
+      </Position16>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
@@ -1121,24 +1134,35 @@
       <List0 Name="LaunchingApplication" Type="File" Count="2">
         <Item2 Value="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </List0>
-      <List1 Name="CommandLineParameters" Count="15">
-        <Item1 Value="-t 2"/>
-        <Item2 Value="-t 19"/>
-        <Item3 Value="-t 10"/>
-        <Item4 Value="-t 17"/>
-        <Item5 Value="-t 21"/>
-        <Item6 Value="-t 22"/>
-        <Item7 Value="-t 7"/>
-        <Item8 Value="-t 1"/>
-        <Item9 Value="-t 20"/>
-        <Item10 Value="-t 11"/>
-        <Item11 Value="-t 6"/>
-        <Item12 Value="-t 3"/>
-        <Item13 Value="-t 16"/>
-        <Item14 Value="-t 4"/>
-        <Item15 Value="-t 5"/>
+      <List1 Name="CommandLineParameters" Count="16">
+        <Item2 Value="-t 2"/>
+        <Item3 Value="-t 19"/>
+        <Item4 Value="-t 10"/>
+        <Item5 Value="-t 17"/>
+        <Item6 Value="-t 21"/>
+        <Item7 Value="-t 22"/>
+        <Item8 Value="-t 7"/>
+        <Item9 Value="-t 1"/>
+        <Item10 Value="-t 20"/>
+        <Item11 Value="-t 11"/>
+        <Item12 Value="-t 6"/>
+        <Item13 Value="-t 3"/>
+        <Item14 Value="-t 16"/>
+        <Item15 Value="-t 4"/>
+        <Item16 Value="-t 5"/>
       </List1>
       <List2 Name="WorkingDirectory" Type="File" Count="1"/>
     </HistoryLists>
   </ProjectSession>
+  <Debugging>
+    <BreakPoints>
+      <Item>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="testApp/TestApplication.pas"/>
+        <Line Value="1338"/>
+      </Item>
+    </BreakPoints>
+  </Debugging>
 </CONFIG>

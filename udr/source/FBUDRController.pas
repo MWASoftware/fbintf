@@ -285,6 +285,8 @@ type
                    metadata: IFBUDRRoutineMetadata;
                    inBuilder: IFBUDRMetadataBuilder;
                    outBuilder: IFBUDRMetadataBuilder); virtual;
+
+     procedure InitFunction; virtual;
      property Name: AnsiString read FName;
      property Controller: TFBUDRController read FController;
      property FirebirdAPI: IFirebirdAPI read FFirebirdAPI;
@@ -365,6 +367,7 @@ type
                      metadata: IFBUDRRoutineMetadata;
                      inBuilder: IFBUDRMetadataBuilder;
                      outBuilder: IFBUDRMetadataBuilder); virtual;
+     procedure InitProcedure; virtual;
      property Name: AnsiString read FName;
      property Controller: TFBUDRController read FController;
    public
@@ -592,6 +595,8 @@ type
                    metadata: IFBUDRRoutineMetadata;
                    fieldsBuilder: IFBUDRMetadataBuilder); virtual;
 
+    procedure InitTrigger; virtual;
+
     property Name: AnsiString read FName;
     property Controller: TFBUDRController read FController;
     property FirebirdAPI: IFirebirdAPI read FFirebirdAPI;
@@ -665,6 +670,8 @@ resourcestring
   SProcDispose = 'Procedure %s: dispose called with refcount = %d';
   SProcCharset = 'GetCharSet for Procedure %s charset name = "%s"';
   sFuncCreated = 'Function %s created';
+  sProcCreated = 'Procedure %s created';
+  sTriggerCreated = 'Trigger %s created';
   SInputParams = 'Input Parameters';
   SOutputParams = 'Output Parameters';
   SOutputData = 'Output Parameters with data';
@@ -1091,6 +1098,13 @@ begin
   FName := aName;
   FController := aController;
   FRoutineMetaData := routineMetadata;
+  InitTrigger;
+  if loLogTriggers in FBUDRControllerOptions.LogOptions then
+  begin
+    FController.WriteToLog(Format(sTriggerCreated,[aName]));
+    if loDetails in FBUDRControllerOptions.LogOptions then
+       FController.WriteToLog((FRoutineMetaData as TFBUDRRoutineMetadata).AsText);
+  end;
 end;
 
 function TFBUDRTrigger.getCharSet(context: IFBUDRExternalContext): AnsiString;
@@ -1122,6 +1136,11 @@ class procedure TFBUDRTrigger.setup(context: IFBUDRExternalContext;
   metadata: IFBUDRRoutineMetadata; fieldsBuilder: IFBUDRMetadataBuilder);
 begin
   //Override in subclass
+end;
+
+procedure TFBUDRTrigger.InitTrigger;
+begin
+  //override in subclass if necessary
 end;
 
 procedure TFBUDRTrigger.dispose();
@@ -1427,6 +1446,13 @@ begin
   FName := aName;
   FRefCount := 1;
   FRoutineMetaData := routineMetadata;
+  InitProcedure;
+  if loLogProcedures in FBUDRControllerOptions.LogOptions then
+  begin
+    FController.WriteToLog(Format(sProcCreated,[aName]));
+    if loDetails in FBUDRControllerOptions.LogOptions then
+       FController.WriteToLog((FRoutineMetaData as TFBUDRRoutineMetadata).AsText);
+  end;
 end;
 
 function TFBUDRProcedure.getCharSet(context: IFBUDRExternalContext): AnsiString;
@@ -1439,6 +1465,11 @@ class procedure TFBUDRProcedure.setup(context: IFBUDRExternalContext;
   outBuilder: IFBUDRMetadataBuilder);
 begin
   //Override in subclass
+end;
+
+procedure TFBUDRProcedure.InitProcedure;
+begin
+  //override in sublass if necessary
 end;
 
 procedure TFBUDRProcedure.dispose();
@@ -1572,6 +1603,7 @@ begin
   FController := aController;
   FName := aName;
   FRoutineMetaData := routineMetadata;
+  InitFunction;
   if loLogFunctions in FBUDRControllerOptions.LogOptions then
   begin
     FController.WriteToLog(Format(sFuncCreated,[aName]));
@@ -1604,6 +1636,11 @@ class procedure TFBUDRFunction.setup(context: IFBUDRExternalContext;
   outBuilder: IFBUDRMetadataBuilder);
 begin
   //Do nothing be default
+end;
+
+procedure TFBUDRFunction.InitFunction;
+begin
+  //override if necessary
 end;
 
 procedure TFBUDRFunction.dispose();

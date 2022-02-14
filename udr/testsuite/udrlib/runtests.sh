@@ -61,7 +61,7 @@ else
     sudo kill -TERM $PID
   fi
   sleep 1
-  echo "starting $FB/bin/fbguard"
+  sudo echo "starting $FB/bin/fbguard"
   sudo $FIREBIRD/bin/fbguard&
   sleep 2
 
