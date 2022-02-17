@@ -155,7 +155,6 @@ begin
   DPB := FirebirdAPI.AllocateDPB;
   DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
   DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);
-  DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
   Attachment := FirebirdAPI.OpenDatabase(Owner.GetNewDatabaseName,DPB);
   QueryDatabase(Attachment);
   Attachment.Disconnect;
@@ -166,7 +165,6 @@ begin
   DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
   DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);
   DPB.Add(isc_dpb_lc_ctype).setAsString('WIN1252');
-  DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
   Attachment := FirebirdAPI.OpenDatabase(Owner.GetNewDatabaseName,DPB);
   QueryDatabase(Attachment);
 

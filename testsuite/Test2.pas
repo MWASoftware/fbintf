@@ -157,7 +157,6 @@ begin
   DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
   DPB.Add(isc_dpb_password).setAsString(' ');
   DPB.Add(isc_dpb_lc_ctype).setAsString(CharSet);
-  DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
   try
     Attachment := FirebirdAPI.OpenDatabase(Owner.GetEmployeeDatabaseName,DPB);
   except on e: Exception do
@@ -178,7 +177,6 @@ begin
   writeln(OutFile,'Now open the employee database as a local database');
   DPB := FirebirdAPI.AllocateDPB;
   DPB.Add(isc_dpb_lc_ctype).setAsString(CharSet);
-  DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
   DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
   if FirebirdAPI.GetClientMajor < 3 then
     DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);

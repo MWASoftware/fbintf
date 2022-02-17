@@ -24,6 +24,9 @@
       <Version Value="2"/>
     </PublishOptions>
     <RunParams>
+      <local>
+        <CommandLineParams Value="-t 2"/>
+      </local>
       <environment>
         <UserOverrides Count="3">
           <Variable0 Name="PROMPT_AT_END" Value="YES"/>
@@ -34,6 +37,9 @@
       <FormatVersion Value="2"/>
       <Modes Count="1">
         <Mode0 Name="default">
+          <local>
+            <CommandLineParams Value="-t 2"/>
+          </local>
           <environment>
             <UserOverrides Count="3">
               <Variable0 Name="PROMPT_AT_END" Value="YES"/>

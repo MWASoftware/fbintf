@@ -641,7 +641,6 @@ begin
   DPB := GetFirebirdAPI.AllocateDPB;
   DPB.Add(isc_dpb_user_name).setAsString(GetUserName);
   DPB.Add(isc_dpb_lc_ctype).setAsString(GetClientCharSet);
-  DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(GetAttachment.GetSQLDialect);
   Result := GetFirebirdAPI.OpenDatabase(GetDatabaseName,DPB);
 end;
 

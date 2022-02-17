@@ -169,7 +169,6 @@ begin
   DPB.Add(isc_dpb_user_name).AsString := Owner.GetUserName;
   DPB.Add(isc_dpb_password).AsString := Owner.GetPassword;
   DPB.Add(isc_dpb_lc_ctype).AsString := CharSet;
-  DPB.Add(isc_dpb_set_db_SQL_dialect).AsByte := SQLDialect;
 
   writeln(OutFile,'Opening ',Owner.GetEmployeeDatabaseName);
   Attachment := FirebirdAPI.OpenDatabase(Owner.GetEmployeeDatabaseName,DPB);

@@ -85,7 +85,6 @@ begin
   DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
   DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);
   DPB.Add(isc_dpb_lc_ctype).setAsString('UTF8');
-  DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
   try
     writeln(OutFile,'Invalid Database Name Test');
     Attachment := FirebirdAPI.OpenDatabase('localhost:Malformed Name',DPB);
