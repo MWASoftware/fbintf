@@ -50,10 +50,13 @@
         </Mode0>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="1">
+    <RequiredPackages Count="2">
       <Item1>
-        <PackageName Value="fbintf"/>
+        <PackageName Value="LCL"/>
       </Item1>
+      <Item2>
+        <PackageName Value="fbintf"/>
+      </Item2>
     </RequiredPackages>
     <Units Count="26">
       <Unit0>

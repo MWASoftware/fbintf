@@ -2,7 +2,7 @@
 usage()
 {
   echo "Run UDR tests"
-  echo "dotest.sh  [-3] [-4] "
+  echo "runtests.sh  [-3] [-4] "
 }
 
 BUILD=

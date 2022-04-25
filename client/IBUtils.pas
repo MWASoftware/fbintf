@@ -723,6 +723,7 @@ type
  TJnlEntryType = (jeTransStart, jeTransCommit, jeTransCommitFail, jeTransCommitRet, jeTransRollback,
                    jeTransRollbackFail, jeTransRollbackRet, jeQuery,jeUnknown);
 
+ PJnlEntry = ^TJnlEntry;
  TJnlEntry = record
    JnlEntryType: TJnlEntryType;
    Timestamp: TDateTime;
@@ -738,9 +739,9 @@ type
 
  TOnNextJournalEntry = procedure(JnlEntry: TJnlEntry) of object;
 
- { TJournalProcessor - used to parse a client side journal}
+ { TCustomJournalProcessor - used to parse a client side journal}
 
-   TJournalProcessor = class(TSQLTokeniser)
+   TCustomJournalProcessor = class(TSQLTokeniser)
     private
       type TLineState = (lsInit, lsJnlFound, lsGotTimestamp, lsGotJnlType,
                           lsGotAttachmentID, lsGotSessionID,
@@ -748,17 +749,28 @@ type
                           lsGotText1, lsGotText2Length, lsGotText2);
     private
       FOnNextJournalEntry: TOnNextJournalEntry;
-      FInStream: TStream;
       FFirebirdClientAPI: IFirebirdAPI;
-      procedure DoExecute;
       function IdentifyJnlEntry(aTokenText: AnsiString): TJnlEntryType;
     protected
-      function GetChar: AnsiChar; override;
+      procedure DoExecute;
+      procedure DoNextJournalEntry(JnlEntry: TJnlEntry); virtual;
       property OnNextJournalEntry: TOnNextJournalEntry read FOnNextJournalEntry write FOnNextJournalEntry;
     public
-      destructor Destroy; override;
-      class procedure Execute( aFileName: string; api: IFirebirdAPI; aOnNextJournalEntry: TOnNextJournalEntry);
+      constructor Create(api: IFirebirdAPI);
       class function JnlEntryText(je: TJnlEntryType): string;
+    end;
+
+    { TJournalProcessor }
+
+    TJournalProcessor = class(TCustomJournalProcessor)
+    private
+      FInStream: TStream;
+    protected
+      function GetChar: AnsiChar; override;
+    public
+      destructor Destroy; override;
+      class procedure Execute( aFileName: string; api: IFirebirdAPI; aOnNextJournalEntry: TOnNextJournalEntry); overload;
+      class procedure Execute( S: TStream; api: IFirebirdAPI; aOnNextJournalEntry: TOnNextJournalEntry); overload;
     end;
 
 
@@ -2678,9 +2690,9 @@ begin
   FreeMem(FBlobBuffer);
 end;
 
-{ TJournalProcessor }
+{ TCustomJournalProcessor }
 
-procedure TJournalProcessor.DoExecute;
+procedure TCustomJournalProcessor.DoExecute;
 var token: TSQLTokens;
     LineState: TLineState;
     JnlEntry: TJnlEntry;
@@ -2689,6 +2701,7 @@ var token: TSQLTokens;
 
   procedure ClearJnlEntry;
   begin
+    LineState := lsInit;
     with JnlEntry do
     begin
       TransactionName := '';
@@ -2732,12 +2745,9 @@ var token: TSQLTokens;
   end;
 
 begin
-  LineState := lsInit;
-  JnlEntry.JnlEntryType := jeUnknown;
+  ClearJnlEntry;
   while not EOF do
   begin
-    if LineState = lsInit then
-      ClearJnlEntry;
     token := GetNextToken;
     with JnlEntry do
     case token of
@@ -2752,14 +2762,14 @@ begin
           LineState := lsGotJnlType;
         end
       else
-        LineState := lsInit;
+        ClearJnlEntry;
 
     sqltQuotedString:
       if (LineState = lsGotJnlType)
           and ParseDateTimeTZString(TokenText,TimeStamp,tz) then
             LineState := lsGotTimestamp
       else
-        LineState := lsInit;
+        ClearJnlEntry;
 
     sqltColon:
       case LineState of
@@ -2776,9 +2786,8 @@ begin
              LineState := lsGotText1
           else
           begin
-            if assigned(FOnNextJournalEntry) then
-              OnNextJournalEntry(JnlEntry);
-            LineState := lsInit;
+            DoNextJournalEntry(JnlEntry);
+            ClearJnlEntry;
           end
         end;
 
@@ -2791,12 +2800,12 @@ begin
 
       else
       if LineState <> lsGotJnlType then
-        LineState := lsInit;
+        ClearJnlEntry;
     end;
 
    sqltComma:
      if not (LineState in [lsGotTimestamp,lsGotAttachmentID,lsGotSessionID,lsGotTransactionID,lsGotText1,lsGotText2]) then
-       LineState := lsInit;
+       ClearJnlEntry;
 
    sqltNumberString:
      case LineState of
@@ -2817,9 +2826,8 @@ begin
          TransactionID := StrToInt(TokenText);
          if JnlEntryType in [jeTransCommit, jeTransCommitFail, jeTransRollback, jeTransRollbackFail] then
          begin
-           if assigned(FOnNextJournalEntry) then
-             OnNextJournalEntry(JnlEntry);
-           LineState := lsInit;
+           DoNextJournalEntry(JnlEntry);
+           ClearJnlEntry;
          end
          else
            LineState := lsGotTransactionID;
@@ -2846,13 +2854,12 @@ begin
          jeTransRollbackRet:
            begin
              OldTransactionID := StrToInt(TokenText);
-             if assigned(FOnNextJournalEntry) then
-               OnNextJournalEntry(JnlEntry);
-             LineState := lsInit;
+             DoNextJournalEntry(JnlEntry);
+             ClearJnlEntry;
            end;
 
            else
-             LineState := lsInit;
+             ClearJnlEntry;
          end; {case JnlEntryType}
 
        end;
@@ -2868,10 +2875,9 @@ begin
           if JnlEntryType = jeTransStart then
           begin
             DefaultCompletion := TTransactionCompletion(StrToInt(TokenText));
-            if assigned(FOnNextJournalEntry) then
-              OnNextJournalEntry(JnlEntry);
+            DoNextJournalEntry(JnlEntry);
           end;
-          LineState := lsInit;
+          ClearJnlEntry;
         end;
      end; {case LineState}
     end; {case token}
@@ -2879,7 +2885,7 @@ begin
   ClearJnlEntry;
 end;
 
-function TJournalProcessor.IdentifyJnlEntry(aTokenText: AnsiString
+function TCustomJournalProcessor.IdentifyJnlEntry(aTokenText: AnsiString
   ): TJnlEntryType;
 begin
   Result := jeUnknown;
@@ -2904,7 +2910,19 @@ begin
   end;
 end;
 
-class function TJournalProcessor.JnlEntryText(je: TJnlEntryType): string;
+procedure TCustomJournalProcessor.DoNextJournalEntry(JnlEntry: TJnlEntry);
+begin
+  if assigned(FOnNextJournalEntry) then
+    FOnNextJournalEntry(JnlEntry);
+end;
+
+constructor TCustomJournalProcessor.Create(api: IFirebirdAPI);
+begin
+  inherited Create;
+  FFirebirdClientAPI := api;
+end;
+
+class function TCustomJournalProcessor.JnlEntryText(je: TJnlEntryType): string;
 begin
   case je of
   jeTransStart:
@@ -2928,6 +2946,8 @@ begin
   end;
 end;
 
+{TJournalProcessor}
+
 function TJournalProcessor.GetChar: AnsiChar;
 begin
   if FInStream.Read(Result,1) = 0 then
@@ -2943,10 +2963,15 @@ end;
 class procedure TJournalProcessor.Execute(aFileName: string; api: IFirebirdAPI;
   aOnNextJournalEntry: TOnNextJournalEntry);
 begin
-  with TJournalProcessor.Create do
+  Execute(TFileStream.Create(aFileName,fmOpenRead),api,aOnNextJournalEntry);
+end;
+
+class procedure TJournalProcessor.Execute(S: TStream; api: IFirebirdAPI;
+  aOnNextJournalEntry: TOnNextJournalEntry);
+begin
+  with TJournalProcessor.Create(api) do
   try
-    FInStream := TFileStream.Create(aFileName,fmOpenRead);
-    FFirebirdClientAPI := api;
+    FInStream := S;
     OnNextJournalEntry := aOnNextJournalEntry;
     DoExecute;
   finally

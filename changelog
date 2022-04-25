@@ -4,7 +4,7 @@ FBINTF Change Log  version          (1.4-0 Build 13139) Wed, 09 Feb 2022 16:12:0
    fbudrtestbed for client side debugging of UDR libraries.
 
 2. Package layout changed with introduction of udr support. IB*.pas files moved from
-    root directory to "client". IBHeader move to "Client".
+    root directory to "client". IBHeader moved to "Client".
 
 3. Delphi packages: all packages now compile .dcp and .bpi files to either
    fbintf\Win32\Debug or fbintf\Win64\Debug by default. Please remove any pre-existing
@@ -59,7 +59,7 @@ FBINTF Change Log  version          (1.4-0 Build 13139) Wed, 09 Feb 2022 16:12:0
      function GetCharSetID: integer;
 
 8. IStatement: if the BatchRowLimit is set to maxint, the maximum possible buffer size
-   will be allocted for batch operations.
+   will be allocated for batch operations.
 
 9. IStatement, IColumnMetaData and ISQLParam all now consistently provide:
     function GetStatement: IStatement;
