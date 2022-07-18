@@ -960,7 +960,7 @@ procedure TDBInfoItem.DecodeVersionString(var Version: byte;
 var  P: PByte;
 begin
   with ItemData^ do
-  if FBufPtr^ = isc_info_version then
+  if (FBufPtr^ = isc_info_version) or (FBufPtr^ = isc_info_firebird_version) then
   begin
    P := FBufPtr+3;
    VersionString := '';

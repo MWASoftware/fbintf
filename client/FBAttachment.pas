@@ -623,14 +623,15 @@ end;
 
 procedure TFBJournaling.EndSession(RetainJournal: boolean);
 begin
-  if JournalingActive and (FJournalFilePath <> '') then
+  if JournalingActive and (FJournalFileStream <> nil) then
   begin
     FreeAndNil(FJournalFileStream);
     if not (joNoServerTable in FOptions) and not RetainJournal then
     try
         GetAttachment.ExecuteSQL([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],
              sqlCleanUpSession,[FSessionID]);
-        sysutils.DeleteFile(FJournalFilePath);
+        if FileExists(FJournalFilePath) then
+          sysutils.DeleteFile(FJournalFilePath);
     except On E: EIBInterBaseError do
       if E.IBErrorCode <> isc_lost_db_connection then
         raise;

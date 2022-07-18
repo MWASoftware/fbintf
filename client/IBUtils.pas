@@ -636,7 +636,7 @@ type
 
         TXMLTagDef = record
           XMLTag: TXMLTag;
-          TagValue: string;
+          TagValue: AnsiString;
         end;
 
       const
@@ -662,12 +662,12 @@ type
         TArrayData = record
           ArrayIntf: IArray;
           SQLType: cardinal;
-          relationName: string;
-          columnName: string;
+          relationName: AnsiString;
+          columnName: AnsiString;
           dim: cardinal;
           Size: cardinal;
           Scale: integer;
-          CharSet: string;
+          CharSet: AnsiString;
           bounds: TArrayBounds;
           CurrentRow: integer;
           Index: array of integer;
@@ -678,39 +678,39 @@ type
     FXMLState: TXMLStates;
     FXMLTagStack: array [1..MaxXMLTags] of TXMLTag;
     FXMLTagIndex: integer;
-    FAttributeName: string;
+    FAttributeName: AnsiString;
     FBlobData: array of TBlobData;
     FCurrentBlob: integer;
     FBlobBuffer: PByte;
     FArrayData: array of TArrayData;
     FCurrentArray: integer;
-    FXMLString: string;
-    function FindTag(tag: string; var xmlTag: TXMLTag): boolean;
+    FXMLString: AnsiString;
+    function FindTag(tag: AnsiString; var xmlTag: TXMLTag): boolean;
     function GetArrayData(index: integer): TArrayData;
     function GetArrayDataCount: integer;
     function GetBlobData(index: integer): TBlobData;
     function GetBlobDataCount: integer;
-    function GetTagName(xmltag: TXMLTag): string;
-    procedure ProcessAttributeValue(attrValue: string);
-    procedure ProcessBoundsList(boundsList: string);
-    procedure ProcessTagValue(tagValue: string);
+    function GetTagName(xmltag: TXMLTag): AnsiString;
+    procedure ProcessAttributeValue(attrValue: AnsiString);
+    procedure ProcessBoundsList(boundsList: AnsiString);
+    procedure ProcessTagValue(tagValue: AnsiString);
     procedure XMLTagInit(xmltag: TXMLTag);
     function XMLTagEnd(var xmltag: TXMLTag): boolean;
     procedure XMLTagEnter;
   protected
     function GetAttachment: IAttachment; virtual; abstract;
     function GetTransaction: ITransaction; virtual; abstract;
-    function GetErrorPrefix: string; virtual; abstract;
+    function GetErrorPrefix: AnsiString; virtual; abstract;
     function TokenFound(var token: TSQLTokens): boolean; override;
     procedure Reset; override;
-    procedure ShowError(msg: string; params: array of const); overload; virtual;
-    procedure ShowError(msg: string); overload;
+    procedure ShowError(msg: AnsiString; params: array of const); overload; virtual;
+    procedure ShowError(msg: AnsiString); overload;
   public
     constructor Create;
     procedure FreeDataObjects;
-    class function FormatBlob(Field: ISQLData): string; overload;
-    class function FormatBlob(contents: string; subtype:integer): string; overload;
-    class function FormatArray(ar: IArray): string;
+    class function FormatBlob(Field: ISQLData): AnsiString; overload;
+    class function FormatBlob(contents: AnsiString; subtype:integer): AnsiString; overload;
+    class function FormatArray(ar: IArray): AnsiString;
     property BlobData[index: integer]: TBlobData read GetBlobData;
     property BlobDataCount: integer read GetBlobDataCount;
     property ArrayData[index: integer]: TArrayData read GetArrayData;
@@ -2069,7 +2069,7 @@ end;
 
 { TSQLXMLReader }
 
-function TSQLXMLReader.FindTag(tag: string; var xmlTag: TXMLTag): boolean;
+function TSQLXMLReader.FindTag(tag: AnsiString; var xmlTag: TXMLTag): boolean;
 var i: TXMLTag;
 begin
   Result := false;
@@ -2106,7 +2106,7 @@ begin
   Result := Length(FBlobData);
 end;
 
-function TSQLXMLReader.GetTagName(xmltag: TXMLTag): string;
+function TSQLXMLReader.GetTagName(xmltag: TXMLTag): AnsiString;
 var i: TXMLTag;
 begin
   Result := 'unknown';
@@ -2118,7 +2118,7 @@ begin
     end;
 end;
 
-procedure TSQLXMLReader.ProcessAttributeValue(attrValue: string);
+procedure TSQLXMLReader.ProcessAttributeValue(attrValue: AnsiString);
 begin
   case FXMLTagStack[FXMLTagIndex] of
   xtBlob:
@@ -2163,7 +2163,7 @@ begin
   end;
 end;
 
-procedure TSQLXMLReader.ProcessBoundsList(boundsList: string);
+procedure TSQLXMLReader.ProcessBoundsList(boundsList: AnsiString);
 var list: TStringList;
     i,j: integer;
 begin
@@ -2190,7 +2190,7 @@ begin
   end;
 end;
 
-procedure TSQLXMLReader.ProcessTagValue(tagValue: string);
+procedure TSQLXMLReader.ProcessTagValue(tagValue: AnsiString);
 
   function nibble(hex: char): byte;
   begin
@@ -2214,7 +2214,7 @@ procedure TSQLXMLReader.ProcessTagValue(tagValue: string);
     end;
   end;
 
-  procedure RemoveWhiteSpace(var hexData: string);
+  procedure RemoveWhiteSpace(var hexData: AnsiString);
   var i: integer;
   begin
     {Remove White Space}
@@ -2234,7 +2234,7 @@ procedure TSQLXMLReader.ProcessTagValue(tagValue: string);
     end;
   end;
 
-  procedure WriteToBlob(hexData: string);
+  procedure WriteToBlob(hexData: AnsiString);
   var i,j : integer;
       blength: integer;
       P: PByte;
@@ -2563,12 +2563,12 @@ begin
   Result := FXMLState = stNoXML;
 end;
 
-procedure TSQLXMLReader.ShowError(msg: string; params: array of const);
+procedure TSQLXMLReader.ShowError(msg: AnsiString; params: array of const);
 begin
   raise EIBClientError.CreateFmt(GetErrorPrefix + msg,params);
 end;
 
-procedure TSQLXMLReader.ShowError(msg: string);
+procedure TSQLXMLReader.ShowError(msg: AnsiString);
 begin
   ShowError(msg,[nil]);
 end;
@@ -2588,13 +2588,13 @@ begin
   FCurrentArray := -1;
 end;
 
-class function TSQLXMLReader.FormatBlob(Field: ISQLData): string;
+class function TSQLXMLReader.FormatBlob(Field: ISQLData): AnsiString;
 begin
   Result := FormatBlob(Field.AsString,Field.getSubtype);
 end;
 
-class function TSQLXMLReader.FormatBlob(contents: string; subtype: integer
-  ): string;
+class function TSQLXMLReader.FormatBlob(contents: AnsiString; subtype: integer
+  ): AnsiString;
 var TextOut: TStrings;
 begin
   TextOut := TStringList.Create;
@@ -2610,11 +2610,11 @@ end;
 
 
 class function TSQLXMLReader.FormatArray(ar: IArray
-  ): string;
+  ): AnsiString;
 var index: array of integer;
     TextOut: TStrings;
 
-    procedure AddElements(dim: integer; indent:string = ' ');
+    procedure AddElements(dim: integer; indent:AnsiString = ' ');
     var i: integer;
         recurse: boolean;
     begin
@@ -2640,10 +2640,10 @@ var index: array of integer;
     end;
 
 var
-    s: string;
+    s: AnsiString;
     bounds: TArrayBounds;
     i: integer;
-    boundsList: string;
+    boundsList: AnsiString;
 begin
   TextOut := TStringList.Create;
   try
