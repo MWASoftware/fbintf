@@ -35,6 +35,7 @@ done
 export FIREBIRD=/opt/firebird/$FB
 echo "FIREBIRD=$FIREBIRD"
 export LD_LIBRARY_PATH=$FIREBIRD/lib
+export FBINTFROOT=../../..
 ISQL=$FIREBIRD/bin/isql
 if [ ! -x $ISQL ]; then
   echo "Unable to find isql utility"
@@ -42,6 +43,12 @@ if [ ! -x $ISQL ]; then
 fi
 
 RUNISQL="$ISQL -user SYSDBA -pass masterkey localhost:employee"
+
+#Create Test User
+$RUNISQL <<EOT
+CREATE OR ALTER USER TESTER PASSWORD 'testing';
+EOT
+
 TESTISQL="$ISQL -user TESTER -pass testing localhost:employee"
 rm libfbudrtests.so
 
@@ -69,6 +76,7 @@ else
   
   echo "Adding SQL Definitions"
   $RUNISQL < AddDefs.sql
+  sleep 1
   for FN in `ls Test*.sql`; do
     echo "Running `basename -s .sql $FN`"
     echo "------------------------" >>testout.log
@@ -80,9 +88,11 @@ else
     done
   echo "Dropping definitions"
   $RUNISQL < dropdefs.sql  
+  echo "Drop user tester;" |$RUNSQL
   
   
   echo "Tests Completed"
+  exit 1
   echo "UDR Log Contents"  >>testout.log
   echo "----------------"  >>testout.log
   cat $FIREBIRD/fbudrtests.log |sed 's|[0-9]\+-[0-9]\+-[0-9]\+ [0-9]\+:[0-9]\+:[0-9]\+\.[0-9]\+|dd-mm-yy hh:mm:ss.zzzz|' >>testout.log

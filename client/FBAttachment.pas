@@ -107,6 +107,7 @@ type
     FJournalFileStream: TStream;
     FSessionID: integer;
     FDoNotJournal: boolean;
+    FOwnsJournal: boolean;
     function GetDateTimeFmt: AnsiString;
   protected
     procedure EndSession(RetainJournal: boolean);
@@ -623,7 +624,7 @@ end;
 
 procedure TFBJournaling.EndSession(RetainJournal: boolean);
 begin
-  if JournalingActive and (FJournalFileStream <> nil) then
+  if JournalingActive and FOwnsJournal and (FJournalFileStream <> nil) then
   begin
     FreeAndNil(FJournalFileStream);
     if not (joNoServerTable in FOptions) and not RetainJournal then
@@ -786,6 +787,7 @@ function TFBJournaling.StartJournaling(aJournalLogFile: AnsiString;
 begin
   try
     StartJournaling(TFileStream.Create(aJournalLogFile,fmCreate),Options);
+    FOwnsJournal := true;
   finally
     FJournalFilePath := aJournalLogFile;
   end;
@@ -806,6 +808,7 @@ begin
     FSessionID := OpenCursorAtStart(sqlGetNextSessionID)[0].AsInteger;
   end;
   FJournalFileStream := S;
+  FOwnsJournal := false;
   Result := FSessionID;
 end;
 

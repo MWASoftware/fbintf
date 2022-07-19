@@ -9,16 +9,16 @@
         <IsPartOfProject Value="True"/>
         <TopLine Value="38"/>
         <CursorPos Y="52"/>
-        <UsageCount Value="38"/>
+        <UsageCount Value="39"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="TestApplication.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="10"/>
         <TopLine Value="56"/>
         <CursorPos Y="53"/>
-        <UsageCount Value="38"/>
+        <UsageCount Value="39"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -27,21 +27,22 @@
         <EditorIndex Value="2"/>
         <TopLine Value="28"/>
         <CursorPos X="6" Y="42"/>
-        <UsageCount Value="38"/>
+        <UsageCount Value="39"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="Test01.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="174"/>
-        <CursorPos Y="187"/>
-        <UsageCount Value="38"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="63"/>
+        <CursorPos X="35" Y="77"/>
+        <UsageCount Value="39"/>
+        <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="../udrlib/udr_test01.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="25"/>
+        <UsageCount Value="26"/>
       </Unit>
       <Unit>
         <Filename Value="Test02.pas"/>
@@ -49,17 +50,17 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="93"/>
         <CursorPos Y="111"/>
-        <UsageCount Value="38"/>
+        <UsageCount Value="39"/>
       </Unit>
       <Unit>
         <Filename Value="../udrlib/udr_test02.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="25"/>
+        <UsageCount Value="26"/>
       </Unit>
       <Unit>
         <Filename Value="../udrlib/udr_test03.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="25"/>
+        <UsageCount Value="26"/>
       </Unit>
       <Unit>
         <Filename Value="Test03.pas"/>
@@ -67,16 +68,17 @@
         <EditorIndex Value="1"/>
         <TopLine Value="81"/>
         <CursorPos Y="97"/>
-        <UsageCount Value="38"/>
+        <UsageCount Value="39"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="Test04.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="88"/>
-        <CursorPos Y="80"/>
-        <UsageCount Value="38"/>
+        <EditorIndex Value="9"/>
+        <TopLine Value="104"/>
+        <CursorPos Y="125"/>
+        <UsageCount Value="39"/>
+        <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="../udrlib/udr_test04.pas"/>
@@ -84,7 +86,7 @@
         <EditorIndex Value="3"/>
         <TopLine Value="67"/>
         <CursorPos X="97" Y="67"/>
-        <UsageCount Value="25"/>
+        <UsageCount Value="26"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -304,7 +306,7 @@
       <Unit>
         <Filename Value="/usr/share/fpcsrc/packages/fcl-base/src/custapp.pp"/>
         <UnitName Value="CustApp"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="11"/>
         <TopLine Value="84"/>
         <CursorPos X="14" Y="101"/>
         <UsageCount Value="13"/>
@@ -314,8 +316,8 @@
         <Filename Value="../../source/FBUDRController.pas"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="4"/>
-        <TopLine Value="1092"/>
-        <CursorPos X="50" Y="1104"/>
+        <TopLine Value="2228"/>
+        <CursorPos X="69" Y="2254"/>
         <UsageCount Value="11"/>
         <Loaded Value="True"/>
       </Unit>
@@ -333,127 +335,149 @@
         <CursorPos X="3" Y="2299"/>
         <UsageCount Value="10"/>
       </Unit>
+      <Unit>
+        <Filename Value="../../../../../../../fpcsrc/3.2.2/rtl/objpas/sysutils/sysstr.inc"/>
+        <EditorIndex Value="7"/>
+        <TopLine Value="1137"/>
+        <CursorPos Y="1154"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="../../../../../../../fpcsrc/3.2.2/rtl/objpas/sysutils/sysformt.inc"/>
+        <EditorIndex Value="8"/>
+        <TopLine Value="230"/>
+        <CursorPos Y="246"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="../../testbed/FBUdrPlugin.pas"/>
+        <EditorIndex Value="6"/>
+        <TopLine Value="232"/>
+        <CursorPos X="14" Y="250"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit>
     </Units>
-    <JumpHistory HistoryIndex="28">
+    <JumpHistory HistoryIndex="29">
       <Position>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="717" Column="67" TopLine="697"/>
-      </Position>
-      <Position>
-        <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="607" Column="48" TopLine="607"/>
+        <Caret Line="2137" TopLine="2133"/>
       </Position>
       <Position>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="252" Column="39" TopLine="238"/>
+        <Caret Line="2078" TopLine="2062"/>
       </Position>
       <Position>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="1577" Column="29" TopLine="1568"/>
+        <Caret Line="2137" TopLine="2121"/>
       </Position>
       <Position>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="289" Column="28" TopLine="272"/>
-      </Position>
-      <Position>
-        <Filename Value="FBUDRTestApp.pas"/>
-        <Caret Line="105" Column="52" TopLine="93"/>
-      </Position>
-      <Position>
-        <Filename Value="FBUDRTestApp.pas"/>
-        <Caret Line="42" Column="6" TopLine="28"/>
+        <Caret Line="1813" Column="33" TopLine="1803"/>
       </Position>
       <Position>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="1582" Column="42" TopLine="1567"/>
+        <Caret Line="2136" Column="26" TopLine="2119"/>
       </Position>
       <Position>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="253" Column="27" TopLine="247"/>
+        <Caret Line="2139" TopLine="2119"/>
       </Position>
       <Position>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="1585" Column="44" TopLine="1569"/>
+        <Caret Line="2140" TopLine="2119"/>
       </Position>
       <Position>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="370" Column="39" TopLine="358"/>
+        <Caret Line="2152" TopLine="2137"/>
       </Position>
       <Position>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="1447" Column="40" TopLine="1445"/>
+        <Caret Line="2153" TopLine="2137"/>
       </Position>
       <Position>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="350" Column="16" TopLine="347"/>
+        <Caret Line="2137" TopLine="2120"/>
       </Position>
       <Position>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="1433" Column="17" TopLine="1424"/>
+        <Caret Line="1820" Column="37" TopLine="1803"/>
       </Position>
       <Position>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="350" Column="19" TopLine="392"/>
+        <Caret Line="2138" Column="75" TopLine="2119"/>
       </Position>
       <Position>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="450" Column="38" TopLine="464"/>
       </Position>
       <Position>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="252" Column="17" TopLine="239"/>
+        <Caret Line="121" Column="15" TopLine="94"/>
       </Position>
       <Position>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="302" Column="17" TopLine="289"/>
+        <Caret Line="2038" Column="16" TopLine="2011"/>
       </Position>
       <Position>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="351" Column="28" TopLine="347"/>
+        <Caret Line="2045" Column="17" TopLine="2018"/>
       </Position>
       <Position>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="1434" Column="13" TopLine="1424"/>
+        <Caret Line="2046" Column="17" TopLine="2019"/>
       </Position>
       <Position>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="1436" Column="40" TopLine="1424"/>
+        <Caret Line="2050" Column="17" TopLine="2023"/>
       </Position>
       <Position>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="1435" Column="33" TopLine="1424"/>
+        <Caret Line="2096" Column="15" TopLine="2069"/>
       </Position>
       <Position>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="350" Column="19" TopLine="422"/>
+        <Caret Line="2144" Column="17" TopLine="2117"/>
       </Position>
       <Position>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="598" Column="36" TopLine="583"/>
+        <Caret Line="2146" Column="30" TopLine="2119"/>
       </Position>
       <Position>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="1133" Column="36" TopLine="1131"/>
+        <Caret Line="2152" Column="15" TopLine="2125"/>
       </Position>
       <Position>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="548" Column="15" TopLine="547"/>
+        <Caret Line="2247" Column="53" TopLine="2227"/>
       </Position>
       <Position>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="1100" Column="15" TopLine="1092"/>
+        <Caret Line="2137" TopLine="2121"/>
       </Position>
       <Position>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="1101" Column="17" TopLine="1092"/>
+        <Caret Line="2254" TopLine="2238"/>
       </Position>
       <Position>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="1103" Column="40" TopLine="1092"/>
+        <Caret Line="2256" TopLine="2238"/>
       </Position>
       <Position>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="674" Column="18" TopLine="673"/>
+        <Caret Line="2252" Column="19" TopLine="2238"/>
+      </Position>
+      <Position>
+        <Filename Value="../../source/FBUDRController.pas"/>
+        <Caret Line="1817" Column="41" TopLine="1803"/>
+      </Position>
+      <Position>
+        <Filename Value="../../source/FBUDRController.pas"/>
+      </Position>
+      <Position>
+        <Filename Value="../../source/FBUDRController.pas"/>
+        <Caret Line="143" Column="21" TopLine="117"/>
       </Position>
     </JumpHistory>
     <RunParams>
@@ -461,7 +485,7 @@
       <Modes ActiveMode="default">
         <Mode Name="default">
           <local>
-            <CommandLineParams Value="-t 4"/>
+            <CommandLineParams Value="-t 1"/>
           </local>
           <environment>
             <UserOverrides Count="2">
@@ -473,15 +497,16 @@
       </Modes>
     </RunParams>
     <HistoryLists>
-      <List Name="LaunchingApplication" Type="File" Count="1">
-        <Item1 Value="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+      <List Name="LaunchingApplication" Type="File" Count="2">
+        <Item2 Value="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </List>
       <List Name="CommandLineParameters" Count="4">
-        <Item1 Value="-t 4"/>
-        <Item2 Value="-t 1"/>
+        <Item1 Value="-t 1"/>
+        <Item2 Value="-t 4"/>
         <Item3 Value="-t 3"/>
         <Item4 Value="-t 2"/>
       </List>
+      <List Name="WorkingDirectory" Type="File" Count="1"/>
     </HistoryLists>
   </ProjectSession>
 </CONFIG>
