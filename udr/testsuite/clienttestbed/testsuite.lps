@@ -9,16 +9,16 @@
         <IsPartOfProject Value="True"/>
         <TopLine Value="38"/>
         <CursorPos Y="52"/>
-        <UsageCount Value="39"/>
+        <UsageCount Value="40"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="TestApplication.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="11"/>
         <TopLine Value="56"/>
         <CursorPos Y="53"/>
-        <UsageCount Value="39"/>
+        <UsageCount Value="40"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -27,40 +27,42 @@
         <EditorIndex Value="2"/>
         <TopLine Value="28"/>
         <CursorPos X="6" Y="42"/>
-        <UsageCount Value="39"/>
+        <UsageCount Value="40"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="Test01.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="63"/>
         <CursorPos X="35" Y="77"/>
-        <UsageCount Value="39"/>
+        <UsageCount Value="40"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="../udrlib/udr_test01.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="26"/>
+        <UsageCount Value="27"/>
       </Unit>
       <Unit>
         <Filename Value="Test02.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="93"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="84"/>
         <CursorPos Y="111"/>
-        <UsageCount Value="39"/>
+        <UsageCount Value="40"/>
+        <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="../udrlib/udr_test02.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="26"/>
+        <UsageCount Value="27"/>
       </Unit>
       <Unit>
         <Filename Value="../udrlib/udr_test03.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="26"/>
+        <UsageCount Value="27"/>
       </Unit>
       <Unit>
         <Filename Value="Test03.pas"/>
@@ -68,16 +70,16 @@
         <EditorIndex Value="1"/>
         <TopLine Value="81"/>
         <CursorPos Y="97"/>
-        <UsageCount Value="39"/>
+        <UsageCount Value="40"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="Test04.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="10"/>
         <TopLine Value="104"/>
         <CursorPos Y="125"/>
-        <UsageCount Value="39"/>
+        <UsageCount Value="40"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -86,7 +88,7 @@
         <EditorIndex Value="3"/>
         <TopLine Value="67"/>
         <CursorPos X="97" Y="67"/>
-        <UsageCount Value="26"/>
+        <UsageCount Value="27"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -306,7 +308,7 @@
       <Unit>
         <Filename Value="/usr/share/fpcsrc/packages/fcl-base/src/custapp.pp"/>
         <UnitName Value="CustApp"/>
-        <EditorIndex Value="11"/>
+        <EditorIndex Value="12"/>
         <TopLine Value="84"/>
         <CursorPos X="14" Y="101"/>
         <UsageCount Value="13"/>
@@ -314,7 +316,6 @@
       </Unit>
       <Unit>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="4"/>
         <TopLine Value="2228"/>
         <CursorPos X="69" Y="2254"/>
@@ -337,7 +338,7 @@
       </Unit>
       <Unit>
         <Filename Value="../../../../../../../fpcsrc/3.2.2/rtl/objpas/sysutils/sysstr.inc"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="8"/>
         <TopLine Value="1137"/>
         <CursorPos Y="1154"/>
         <UsageCount Value="10"/>
@@ -345,7 +346,7 @@
       </Unit>
       <Unit>
         <Filename Value="../../../../../../../fpcsrc/3.2.2/rtl/objpas/sysutils/sysformt.inc"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="9"/>
         <TopLine Value="230"/>
         <CursorPos Y="246"/>
         <UsageCount Value="10"/>
@@ -353,7 +354,7 @@
       </Unit>
       <Unit>
         <Filename Value="../../testbed/FBUdrPlugin.pas"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="7"/>
         <TopLine Value="232"/>
         <CursorPos X="14" Y="250"/>
         <UsageCount Value="10"/>
@@ -497,8 +498,8 @@
       </Modes>
     </RunParams>
     <HistoryLists>
-      <List Name="LaunchingApplication" Type="File" Count="2">
-        <Item2 Value="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+      <List Name="LaunchingApplication" Type="File" Count="1">
+        <Item1 Value="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </List>
       <List Name="CommandLineParameters" Count="4">
         <Item1 Value="-t 1"/>
@@ -506,7 +507,6 @@
         <Item3 Value="-t 3"/>
         <Item4 Value="-t 2"/>
       </List>
-      <List Name="WorkingDirectory" Type="File" Count="1"/>
     </HistoryLists>
   </ProjectSession>
 </CONFIG>

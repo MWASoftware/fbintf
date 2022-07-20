@@ -92,12 +92,12 @@ else
   
   
   echo "Tests Completed"
-  exit 1
   echo "UDR Log Contents"  >>testout.log
   echo "----------------"  >>testout.log
   cat $FIREBIRD/fbudrtests.log |sed 's|[0-9]\+-[0-9]\+-[0-9]\+ [0-9]\+:[0-9]\+:[0-9]\+\.[0-9]\+|dd-mm-yy hh:mm:ss.zzzz|' >>testout.log
   if [ -f Reference.log ] ; then
     echo "Diff output is"
-    diff Reference.log testout.log
+    diff Reference.log testout.log >diff.log
+    cat diff.log
   fi
 fi
