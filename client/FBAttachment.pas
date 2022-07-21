@@ -543,6 +543,9 @@ begin
         Result := Result + GetParamValue(ParamIndex);
         Inc(ParamIndex);
       end;
+
+    sqltIdentifierInDoubleQuotes:
+      Result := Result + '"' + TokenText + '"';
     else
       Result := Result + TokenText;
     end;
@@ -550,6 +553,27 @@ begin
 end;
 
 function TQueryProcessor.GetParamValue(ParamIndex: integer): AnsiString;
+
+  function formatWithTZ(fmt: AnsiString): AnsiString;
+  var aDateTime: TDateTime;
+      aTimeZone: AnsiString;
+      dstOffset: smallint;
+  begin
+    with FStmt.GetAttachment.GetTimeZoneServices, FStmt.SQLParams[ParamIndex] do
+    begin
+      if GetTZTextOption = tzGMT then
+        Result := FBFormatDateTime(fmt,GetAsUTCDateTime)
+      else
+      begin
+        GetAsDateTime(aDateTime,dstOffset,aTimeZone);
+        if GetTZTextOption = tzOffset then
+          Result := FBFormatDateTime(fmt,aDateTime) + ' ' + FormatTimeZoneOffset(dstOffset)
+        else
+          Result := FBFormatDateTime(fmt,aDateTime) + ' ' + aTimeZone;
+      end;
+    end;
+  end;
+
 begin
   with FStmt.SQLParams[ParamIndex] do
   begin
@@ -567,15 +591,26 @@ begin
         Result := TSQLXMLReader.FormatArray(getAsArray);
 
     SQL_VARYING,
-    SQL_TEXT,
-    SQL_TIMESTAMP,
-    SQL_TYPE_DATE,
-    SQL_TYPE_TIME,
-    SQL_TIMESTAMP_TZ_EX,
-    SQL_TIME_TZ_EX,
-    SQL_TIMESTAMP_TZ,
-    SQL_TIME_TZ:
+    SQL_TEXT:
       Result := '''' + SQLSafeString(GetAsString) + '''';
+
+    SQL_TYPE_DATE:
+      Result := '''' + SQLSafeString(FormatDateTime('yyyy-mm-dd',GetAsDateTime)) + '''';
+
+    SQL_TIMESTAMP:
+      Result := '''' + SQLSafeString(FBFormatDateTime('yyyy-mm-dd hh:mm:ss.zzzz',GetAsDateTime)) + '''';
+
+    SQL_TYPE_TIME:
+      Result := '''' + SQLSafeString(FBFormatDateTime('hh:mm:ss.zzzz',GetAsDateTime)) + '''';
+
+    SQL_TIMESTAMP_TZ_EX,
+    SQL_TIMESTAMP_TZ:
+        Result := '''' + SQLSafeString(formatWithTZ('yyyy-mm-dd hh:mm:ss.zzzz')) + '''';
+
+    SQL_TIME_TZ_EX,
+    SQL_TIME_TZ:
+      Result := '''' + SQLSafeString(formatWithTZ('hh:mm:ss.zzzz')) + '''';
+
     else
       Result := GetAsString;
     end;
@@ -624,9 +659,12 @@ end;
 
 procedure TFBJournaling.EndSession(RetainJournal: boolean);
 begin
-  if JournalingActive and FOwnsJournal and (FJournalFileStream <> nil) then
+  if JournalingActive and (FJournalFileStream <> nil) then
   begin
-    FreeAndNil(FJournalFileStream);
+    if FOwnsJournal then
+      FJournalFileStream.Free;
+    FJournalFileStream := nil;
+
     if not (joNoServerTable in FOptions) and not RetainJournal then
     try
         GetAttachment.ExecuteSQL([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],
@@ -636,7 +674,7 @@ begin
     except On E: EIBInterBaseError do
       if E.IBErrorCode <> isc_lost_db_connection then
         raise;
-      {ignore - do not delete journal if database gone away}
+        {ignore - do not delete journal if database gone away}
     end;
     FSessionID := -1;
   end;

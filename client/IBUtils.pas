@@ -2403,6 +2403,7 @@ begin
   stInTag:
     {Opening '<' found, now looking for tag name or end tag marker}
     case token of
+    sqltBlob,
     sqltIdentifier:
       begin
         if FindTag(TokenText,XMLTag) then
@@ -2510,6 +2511,7 @@ begin
   stInEndTag:
     {Opening '</' found, now looking for tag name}
     case token of
+    sqltBlob,
     sqltIdentifier:
       begin
         if FindTag(TokenText,XMLTag) and (XMLTag = FXMLTagStack[FXMLTagIndex]) then
