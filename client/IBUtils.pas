@@ -681,7 +681,6 @@ type
     FAttributeName: AnsiString;
     FBlobData: array of TBlobData;
     FCurrentBlob: integer;
-    FBlobBuffer: PByte;
     FArrayData: array of TArrayData;
     FCurrentArray: integer;
     FXMLString: AnsiString;
@@ -707,6 +706,7 @@ type
     procedure ShowError(msg: AnsiString); overload;
   public
     constructor Create;
+    destructor Destroy; override;
     procedure FreeDataObjects;
     class function FormatBlob(Field: ISQLData): AnsiString; overload;
     class function FormatBlob(contents: AnsiString; subtype:integer): AnsiString; overload;
@@ -2238,21 +2238,26 @@ procedure TSQLXMLReader.ProcessTagValue(tagValue: AnsiString);
   var i,j : integer;
       blength: integer;
       P: PByte;
+      BlobBuffer: PByte;
   begin
     RemoveWhiteSpace(hexData);
     if odd(length(hexData)) then
       ShowError(sBinaryBlockMustbeEven,[nil]);
     blength := Length(hexData) div 2;
-    ReallocMem(FBlobBuffer,blength);
-    j := 1;
-    P := FBlobBuffer;
-    for i := 1 to blength do
-    begin
-      P^ := (nibble(hexData[j]) shl 4) or nibble(hexdata[j+1]);
-      Inc(j,2);
-      Inc(P);
+    BlobBuffer := GetMem(blength);
+    try
+      j := 1;
+      P := BlobBuffer;
+      for i := 1 to blength do
+      begin
+        P^ := (nibble(hexData[j]) shl 4) or nibble(hexdata[j+1]);
+        Inc(j,2);
+        Inc(P);
+      end;
+      FBlobData[FCurrentBlob].BlobIntf.Write(BlobBuffer^,blength);
+    finally
+      FreeMem(BlobBuffer);
     end;
-    FBlobData[FCurrentBlob].BlobIntf.Write(FBlobBuffer^,blength);
   end;
 
 begin
@@ -2581,6 +2586,12 @@ begin
   FXMLState := stNoXML;
 end;
 
+destructor TSQLXMLReader.Destroy;
+begin
+  Reset;
+  inherited Destroy;
+end;
+
 procedure TSQLXMLReader.FreeDataObjects;
 begin
   FXMLTagIndex := 0;
@@ -2689,7 +2700,6 @@ begin
   inherited Reset;
   FreeDataObjects;
   FXMLString := '';
-  FreeMem(FBlobBuffer);
 end;
 
 { TCustomJournalProcessor }

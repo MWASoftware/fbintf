@@ -580,12 +580,17 @@ begin
     if IsNull then
       Result := 'NULL'
     else
-    case GetSQLType of
+    case getColMetadata.GetSQLType of
     SQL_BLOB:
-      if getSubType = 1 then {string}
-        Result := '''' + SQLSafeString(GetAsString) + ''''
+      if  GetSQLType = SQL_BLOB then
+      begin
+        if getSubType = 1 then {string}
+          Result := '''' + SQLSafeString(GetAsString) + ''''
+        else
+          Result := TSQLXMLReader.FormatBlob(GetAsString,getSubType);
+      end
       else
-        Result := TSQLXMLReader.FormatBlob(GetAsString,getSubType);
+        Result := '''' + SQLSafeString(GetAsString) + '''';
 
     SQL_ARRAY:
         Result := TSQLXMLReader.FormatArray(getAsArray);
