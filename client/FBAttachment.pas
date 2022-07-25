@@ -39,7 +39,7 @@ interface
 
 uses
   Classes, SysUtils, {$IFDEF WINDOWS} windows, {$ENDIF} IB,  FBParamBlock,
-  FBActivityMonitor, FBClientAPI, IBUtils;
+  FBActivityMonitor, FBClientAPI, IBUtils, SyncObjs;
 
 const
   DefaultMaxInlineBlobLimit = 8192;
@@ -107,7 +107,10 @@ type
     FJournalFileStream: TStream;
     FSessionID: integer;
     FDoNotJournal: boolean;
+    FOwnsJournal: boolean;
+    FCriticalSection: TCriticalSection;
     function GetDateTimeFmt: AnsiString;
+    procedure WriteJnlEntry(LogEntry: AnsiString);
   protected
     procedure EndSession(RetainJournal: boolean);
     function GetAttachment: IAttachment; virtual; abstract;
@@ -123,6 +126,8 @@ type
     procedure ExecQuery(Stmt: IStatement);
     procedure ExecImmediateJnl(sql: AnsiString; tr: ITransaction);
   public
+    constructor Create;
+    destructor Destroy; override;
     {Client side Journaling}
     function JournalingActive: boolean;
     function GetJournalOptions: TJournalOptions;
@@ -542,6 +547,9 @@ begin
         Result := Result + GetParamValue(ParamIndex);
         Inc(ParamIndex);
       end;
+
+    sqltIdentifierInDoubleQuotes:
+      Result := Result + '"' + TokenText + '"';
     else
       Result := Result + TokenText;
     end;
@@ -549,32 +557,69 @@ begin
 end;
 
 function TQueryProcessor.GetParamValue(ParamIndex: integer): AnsiString;
+
+  function formatWithTZ(fmt: AnsiString): AnsiString;
+  var aDateTime: TDateTime;
+      aTimeZone: AnsiString;
+      dstOffset: smallint;
+  begin
+    with FStmt.GetAttachment.GetTimeZoneServices, FStmt.SQLParams[ParamIndex] do
+    begin
+      if GetTZTextOption = tzGMT then
+        Result := FBFormatDateTime(fmt,GetAsUTCDateTime)
+      else
+      begin
+        GetAsDateTime(aDateTime,dstOffset,aTimeZone);
+        if GetTZTextOption = tzOffset then
+          Result := FBFormatDateTime(fmt,aDateTime) + ' ' + FormatTimeZoneOffset(dstOffset)
+        else
+          Result := FBFormatDateTime(fmt,aDateTime) + ' ' + aTimeZone;
+      end;
+    end;
+  end;
+
 begin
   with FStmt.SQLParams[ParamIndex] do
   begin
     if IsNull then
       Result := 'NULL'
     else
-    case GetSQLType of
+    case getColMetadata.GetSQLType of
     SQL_BLOB:
-      if getSubType = 1 then {string}
-        Result := '''' + SQLSafeString(GetAsString) + ''''
+      if  GetSQLType = SQL_BLOB then
+      begin
+        if getSubType = 1 then {string}
+          Result := '''' + SQLSafeString(GetAsString) + ''''
+        else
+          Result := TSQLXMLReader.FormatBlob(GetAsString,getSubType);
+      end
       else
-        Result := TSQLXMLReader.FormatBlob(GetAsString,getSubType);
+        Result := '''' + SQLSafeString(GetAsString) + '''';
 
     SQL_ARRAY:
         Result := TSQLXMLReader.FormatArray(getAsArray);
 
     SQL_VARYING,
-    SQL_TEXT,
-    SQL_TIMESTAMP,
-    SQL_TYPE_DATE,
-    SQL_TYPE_TIME,
-    SQL_TIMESTAMP_TZ_EX,
-    SQL_TIME_TZ_EX,
-    SQL_TIMESTAMP_TZ,
-    SQL_TIME_TZ:
+    SQL_TEXT:
       Result := '''' + SQLSafeString(GetAsString) + '''';
+
+    SQL_TYPE_DATE:
+      Result := '''' + SQLSafeString(FormatDateTime('yyyy-mm-dd',GetAsDateTime)) + '''';
+
+    SQL_TIMESTAMP:
+      Result := '''' + SQLSafeString(FBFormatDateTime('yyyy-mm-dd hh:mm:ss.zzzz',GetAsDateTime)) + '''';
+
+    SQL_TYPE_TIME:
+      Result := '''' + SQLSafeString(FBFormatDateTime('hh:mm:ss.zzzz',GetAsDateTime)) + '''';
+
+    SQL_TIMESTAMP_TZ_EX,
+    SQL_TIMESTAMP_TZ:
+        Result := '''' + SQLSafeString(formatWithTZ('yyyy-mm-dd hh:mm:ss.zzzz')) + '''';
+
+    SQL_TIME_TZ_EX,
+    SQL_TIME_TZ:
+      Result := '''' + SQLSafeString(formatWithTZ('hh:mm:ss.zzzz')) + '''';
+
     else
       Result := GetAsString;
     end;
@@ -621,22 +666,41 @@ begin
   Result := ShortDateFormat + ' ' + LongTimeFormat + '.zzzz'
 end;
 
+procedure TFBJournaling.WriteJnlEntry(LogEntry: AnsiString);
+begin
+  if assigned(FJournalFileStream) then
+  begin
+    FCriticalSection.Acquire;
+    try
+        FJournalFileStream.Write(LogEntry[1],Length(LogEntry));
+    finally
+      FCriticalSection.Release;
+    end;
+  end;
+
+end;
+
 procedure TFBJournaling.EndSession(RetainJournal: boolean);
 begin
-  if JournalingActive and (FJournalFilePath <> '') then
+  if JournalingActive and (FJournalFileStream <> nil) then
   begin
-    FreeAndNil(FJournalFileStream);
+    if FOwnsJournal then
+      FJournalFileStream.Free;
+    FJournalFileStream := nil;
+
     if not (joNoServerTable in FOptions) and not RetainJournal then
     try
         GetAttachment.ExecuteSQL([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],
              sqlCleanUpSession,[FSessionID]);
-        sysutils.DeleteFile(FJournalFilePath);
+        if FileExists(FJournalFilePath) then
+          sysutils.DeleteFile(FJournalFilePath);
     except On E: EIBInterBaseError do
       if E.IBErrorCode <> isc_lost_db_connection then
         raise;
-      {ignore - do not delete journal if database gone away}
+        {ignore - do not delete journal if database gone away}
     end;
     FSessionID := -1;
+    FJournalFilePath := '';
   end;
 end;
 
@@ -666,8 +730,7 @@ begin
                                      Tr.TransactionName,
                                      Length(TPBText),TPBText,
                                      ord(tr.GetDefaultCompletion)]);
-  if assigned(FJournalFileStream) then
-    FJournalFileStream.Write(LogEntry[1],Length(LogEntry));
+  WriteJnlEntry(LogEntry);
 end;
 
 function TFBJournaling.TransactionEnd(TransactionID: integer;
@@ -709,8 +772,7 @@ begin
         Result := true;
       end;
     end;
-    if assigned(FJournalFileStream) then
-      FJournalFileStream.Write(LogEntry[1],Length(LogEntry));
+    WriteJnlEntry(LogEntry);
 end;
 
 procedure TFBJournaling.TransactionRetained(Tr: ITransaction;
@@ -727,8 +789,7 @@ begin
                                       GetAttachment.GetAttachmentID,
                                       FSessionID,Tr.GetTransactionID,OldTransactionID]);
     end;
-    if assigned(FJournalFileStream) then
-      FJournalFileStream.Write(LogEntry[1],Length(LogEntry));
+    WriteJnlEntry(LogEntry);
 
     if not (joNoServerTable in FOptions) then
     try
@@ -749,8 +810,7 @@ begin
                                       FSessionID,
                                       Stmt.GetTransaction.GetTransactionID,
                                       Length(SQL),SQL]);
-  if assigned(FJournalFileStream) then
-    FJournalFileStream.Write(LogEntry[1],Length(LogEntry));
+  WriteJnlEntry(LogEntry);
 end;
 
 procedure TFBJournaling.ExecImmediateJnl(sql: AnsiString; tr: ITransaction);
@@ -761,8 +821,20 @@ begin
                                       FSessionID,
                                       tr.GetTransactionID,
                                       Length(sql),sql]);
-  if assigned(FJournalFileStream) then
-    FJournalFileStream.Write(LogEntry[1],Length(LogEntry));
+  WriteJnlEntry(LogEntry);
+end;
+
+constructor TFBJournaling.Create;
+begin
+  inherited;
+  FCriticalSection := TCriticalSection.Create;
+end;
+
+destructor TFBJournaling.Destroy;
+begin
+  if FCriticalSection <> nil then
+    FCriticalSection.Free;
+  inherited Destroy;
 end;
 
 function TFBJournaling.JournalingActive: boolean;
@@ -785,6 +857,7 @@ function TFBJournaling.StartJournaling(aJournalLogFile: AnsiString;
 begin
   try
     StartJournaling(TFileStream.Create(aJournalLogFile,fmCreate),Options);
+    FOwnsJournal := true;
   finally
     FJournalFilePath := aJournalLogFile;
   end;
@@ -805,6 +878,7 @@ begin
     FSessionID := OpenCursorAtStart(sqlGetNextSessionID)[0].AsInteger;
   end;
   FJournalFileStream := S;
+  FOwnsJournal := false;
   Result := FSessionID;
 end;
 

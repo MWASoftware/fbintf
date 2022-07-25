@@ -3,8 +3,8 @@ Copyright MWA Software 2016-2021
 
 Starting Tests
 Client API Version = 2.5
-Firebird Environment Variable = /opt/firebird2.5.9
-Firebird Client Library Path = /opt/firebird2.5.9/lib/libfbembed.so
+Firebird Environment Variable = /opt/firebird/2.5.9
+Firebird Client Library Path = /opt/firebird/2.5.9/lib/libfbembed.so
 Running Test 1: Create and Drop a Database
 Creating a Database with empty parameters
 Create Database fails (as expected): Engine Code: 335544344
@@ -19,7 +19,7 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 11
 DB ODS Minor Version = 2
 User Authentication Method = Legacy_Auth
-Firebird Library Path = /opt/firebird2.5.9/lib/libfbembed.so
+Firebird Library Path = /opt/firebird/2.5.9/lib/libfbembed.so
 DB Client Implementation Version = 2.5
 DPB: Item Count = 3
   isc_dpb_user_name = SYSDBA
@@ -41,7 +41,7 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 11
 DB ODS Minor Version = 2
 User Authentication Method = Legacy_Auth
-Firebird Library Path = /opt/firebird2.5.9/lib/libfbembed.so
+Firebird Library Path = /opt/firebird/2.5.9/lib/libfbembed.so
 DB Client Implementation Version = 2.5
 Dropping Database
 DPB: Item Count = 4
@@ -62,7 +62,7 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 11
 DB ODS Minor Version = 2
 User Authentication Method = Legacy_Auth
-Firebird Library Path = /opt/firebird2.5.9/lib/libfbembed.so
+Firebird Library Path = /opt/firebird/2.5.9/lib/libfbembed.so
 DB Client Implementation Version = 2.5
 RDB$DESCRIPTION = 
 RDB$RELATION_ID = 128
@@ -535,12 +535,12 @@ Running Test 3: ad hoc queries
 Opening localhost:employee
 Database Open
 Employee Count = 42
-Transaction ID = 6394
+Transaction ID = 6470
 Transaction is Read/Write
-Transaction ID = 6394
+Transaction ID = 6470
 Oldest Interesting = 6318
-Oldest Action = 6393
-Oldest Snapshot = 6393
+Oldest Action = 6469
+Oldest Snapshot = 6469
 Oldest Interesting = 0
 Employee Count = 41
 Employee Count = 42
@@ -572,10 +572,10 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 937,536
+Current memory = 937,552
 Delta memory = 1,288
-Max memory = 965,600
-Elapsed time= 0.000 sec
+Max memory = 965,624
+Elapsed time= 0.001 sec
 Cpu = 0.000 sec
 Buffers = 75
 Reads = 0
@@ -2713,7 +2713,7 @@ MYARRAY = Array: (0,-1: A50) (0,0: A51) (0,1: A52) (0,2: A53) (0,3: A54) (0,4: A
 
 ------------------------------------------------------
 Running Test 9: Database Information tests
-Database ID = 4 FB = /opt/firebird2.5.9/examples/empbuild/employee.fdb SN = zeus
+Database ID = 4 FB = /opt/firebird/2.5.9/examples/empbuild/employee.fdb SN = zeus
 Pages =272
 Base Level = 13,4,0,3,
 Implementation = 11,7,0,3,66,1,66,
@@ -2733,10 +2733,10 @@ Num Buffers  = 75
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
 Active Transaction Count = 0
-Fetches  = 520
-Writes  = 4
-Reads  = 58
-Page Writes  = 4
+Fetches  = 519
+Writes  = 3
+Reads  = 57
+Page Writes  = 3
 Record Version Removals Operation Counts
 
 Deletes Operation Counts
@@ -2777,13 +2777,16 @@ Async Wait Called
 Event Signalled
 First Event - usually ignored
 Signal Event
+Event Signalled
 Event Counts: TESTEVENT, Count = 1
 Two more events
 Call Async Wait
 Async Wait Called
 Event Signalled
-Signal Event
+Deferred Events Caught
 Event Counts: TESTEVENT, Count = 2
+Signal Event
+Event Counts: TESTEVENT, Count = 1
 Async Wait: Test Cancel
 Event Signalled
 Async Wait Called
@@ -2791,7 +2794,7 @@ Event Cancelled
 Time Out - Cancel Worked!
 Sync wait
 Event Signalled
-Event Counts: TESTEVENT, Count = 2
+Event Counts: TESTEVENT, Count = 1
 
 
 ------------------------------------------------------
@@ -2805,8 +2808,8 @@ Server Version = LI-V2.5.9.27139 Firebird 2.5
 Implementation = Firebird/linux AMD64
 
 Lock Directory = /tmp/firebird/
-Message File = /opt/firebird2.5.9/
-Security File = /opt/firebird2.5.9/security2.fdb
+Message File = /opt/firebird/2.5.9/
+Security File = /opt/firebird/2.5.9/security2.fdb
 
 DB Attachments
 No. of Attachments = 0
@@ -3590,22 +3593,22 @@ MYARRAY = NULL
 
 Journal Table
 IBX$SESSIONID = 1
-IBX$TRANSACTIONID = 7
+IBX$TRANSACTIONID = 8
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2022/01/19 12:07:12.6120
+IBX$CREATED = 2022/07/18 14:42:19.7840
 IBX$SESSIONID = 1
-IBX$TRANSACTIONID = 9
-IBX$OLDTRANSACTIONID = 8
+IBX$TRANSACTIONID = 10
+IBX$OLDTRANSACTIONID = 9
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2022/01/19 12:07:12.9170
+IBX$CREATED = 2022/07/18 14:42:19.8630
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 2
 Session ID = 1
-Transaction ID = 7
+Transaction ID = 8
 Transaction Name = "Transaction_29_1"
 TPB: Item Count = 3
   isc_tpb_write
@@ -3618,31 +3621,17 @@ Journal Entry = jeQuery(Query)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 2
 Session ID = 1
-Transaction ID = 7
+Transaction ID = 8
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(1,101,9223372036854775807,10000.1234,9999.12345678,1234567890.12346)
 
 Journal Entry = jeQuery(Query)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 2
 Session ID = 1
-Transaction ID = 7
+Transaction ID = 8
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(2,-32457,-9223372036854775808,1000001.12,1.7E308,-1234567890.12346)
 
 Journal Entry = jeTransCommitRet(Commit Retaining)
-Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
-Attachment ID = 2
-Session ID = 1
-Transaction ID = 8
-Old TransactionID = 7
-
-Journal Entry = jeQuery(Query)
-Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
-Attachment ID = 2
-Session ID = 1
-Transaction ID = 8
-Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(3,0,0,0,0,0)
-
-Journal Entry = jeTransRollbackRet(Rollback Retaining)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 2
 Session ID = 1
@@ -3654,13 +3643,27 @@ Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 2
 Session ID = 1
 Transaction ID = 9
+Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(3,0,0,0,0,0)
+
+Journal Entry = jeTransRollbackRet(Rollback Retaining)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 2
+Session ID = 1
+Transaction ID = 10
+Old TransactionID = 9
+
+Journal Entry = jeQuery(Query)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 2
+Session ID = 1
+Transaction ID = 10
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(4,1,10,0.023,0.0011,233.456)
 
 Journal Entry = jeTransStart(Transaction Start)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 2
 Session ID = 1
-Transaction ID = 10
+Transaction ID = 11
 Transaction Name = "Transaction_29_2"
 TPB: Item Count = 3
   isc_tpb_write
@@ -3673,13 +3676,13 @@ Journal Entry = jeTransCommit(Commit)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 2
 Session ID = 1
-Transaction ID = 9
+Transaction ID = 10
 
 Journal Entry = jeQuery(Query)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 2
 Session ID = 1
-Transaction ID = 10
+Transaction ID = 11
 Query = Insert into TestData(RowID, Str, TextBlob) Values(5,'It''s the quick brown fox jumps over the lazy dog','To be or not to be-that is the question:
 Whether ''tis nobler in the mind to suffer
 The slings and arrows of outrageous fortune,
@@ -3721,7 +3724,7 @@ Journal Entry = jeQuery(Query)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 2
 Session ID = 1
-Transaction ID = 10
+Transaction ID = 11
 Query = Insert into TestData(RowID,OtherBlob) Values (6,<blob subtype="0">
 FFD8FFE000104A46494600010101004800480000FFE11E0545786966000049492A00080000000C00
 0E010200200000009E0000000F01020014000000BE0000001001020008000000D200000012010300
@@ -3733,7 +3736,7 @@ Journal Entry = jeQuery(Query)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 2
 Session ID = 1
-Transaction ID = 10
+Transaction ID = 11
 Query = Insert into TestData(RowID,MyArray) Values (7,<array dim = "1" sqltype = "496" length = "4" relation_name = "TESTDATA" column_name = "MYARRAY" scale = "0" bounds="0:16">
  <elt ix="0">100</elt>
  <elt ix="1">99</elt>
@@ -3759,7 +3762,7 @@ Journal Entry = jeTransRollback(Rollback)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 2
 Session ID = 1
-Transaction ID = 10
+Transaction ID = 11
 
 
 

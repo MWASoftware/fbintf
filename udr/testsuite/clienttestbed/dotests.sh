@@ -31,9 +31,10 @@ while true ; do
         esac
 done
 
-export FIREBIRD=/opt/firebird$FB
+export FIREBIRD=/opt/firebird/$FB
 echo "FIREBIRD=$FIREBIRD"
 export LD_LIBRARY_PATH=$FIREBIRD/lib
+export FBINTFROOT=../../..
 
 if [ ! -d "$FIREBIRD" ]; then
   echo "$FIREBIRD not found"

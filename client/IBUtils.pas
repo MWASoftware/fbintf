@@ -636,7 +636,7 @@ type
 
         TXMLTagDef = record
           XMLTag: TXMLTag;
-          TagValue: string;
+          TagValue: AnsiString;
         end;
 
       const
@@ -662,12 +662,12 @@ type
         TArrayData = record
           ArrayIntf: IArray;
           SQLType: cardinal;
-          relationName: string;
-          columnName: string;
+          relationName: AnsiString;
+          columnName: AnsiString;
           dim: cardinal;
           Size: cardinal;
           Scale: integer;
-          CharSet: string;
+          CharSet: AnsiString;
           bounds: TArrayBounds;
           CurrentRow: integer;
           Index: array of integer;
@@ -678,39 +678,39 @@ type
     FXMLState: TXMLStates;
     FXMLTagStack: array [1..MaxXMLTags] of TXMLTag;
     FXMLTagIndex: integer;
-    FAttributeName: string;
+    FAttributeName: AnsiString;
     FBlobData: array of TBlobData;
     FCurrentBlob: integer;
-    FBlobBuffer: PByte;
     FArrayData: array of TArrayData;
     FCurrentArray: integer;
-    FXMLString: string;
-    function FindTag(tag: string; var xmlTag: TXMLTag): boolean;
+    FXMLString: AnsiString;
+    function FindTag(tag: AnsiString; var xmlTag: TXMLTag): boolean;
     function GetArrayData(index: integer): TArrayData;
     function GetArrayDataCount: integer;
     function GetBlobData(index: integer): TBlobData;
     function GetBlobDataCount: integer;
-    function GetTagName(xmltag: TXMLTag): string;
-    procedure ProcessAttributeValue(attrValue: string);
-    procedure ProcessBoundsList(boundsList: string);
-    procedure ProcessTagValue(tagValue: string);
+    function GetTagName(xmltag: TXMLTag): AnsiString;
+    procedure ProcessAttributeValue(attrValue: AnsiString);
+    procedure ProcessBoundsList(boundsList: AnsiString);
+    procedure ProcessTagValue(tagValue: AnsiString);
     procedure XMLTagInit(xmltag: TXMLTag);
     function XMLTagEnd(var xmltag: TXMLTag): boolean;
     procedure XMLTagEnter;
   protected
     function GetAttachment: IAttachment; virtual; abstract;
     function GetTransaction: ITransaction; virtual; abstract;
-    function GetErrorPrefix: string; virtual; abstract;
+    function GetErrorPrefix: AnsiString; virtual; abstract;
     function TokenFound(var token: TSQLTokens): boolean; override;
     procedure Reset; override;
-    procedure ShowError(msg: string; params: array of const); overload; virtual;
-    procedure ShowError(msg: string); overload;
+    procedure ShowError(msg: AnsiString; params: array of const); overload; virtual;
+    procedure ShowError(msg: AnsiString); overload;
   public
     constructor Create;
+    destructor Destroy; override;
     procedure FreeDataObjects;
-    class function FormatBlob(Field: ISQLData): string; overload;
-    class function FormatBlob(contents: string; subtype:integer): string; overload;
-    class function FormatArray(ar: IArray): string;
+    class function FormatBlob(Field: ISQLData): AnsiString; overload;
+    class function FormatBlob(contents: AnsiString; subtype:integer): AnsiString; overload;
+    class function FormatArray(ar: IArray): AnsiString;
     property BlobData[index: integer]: TBlobData read GetBlobData;
     property BlobDataCount: integer read GetBlobDataCount;
     property ArrayData[index: integer]: TArrayData read GetArrayData;
@@ -721,8 +721,9 @@ type
  end;
 
  TJnlEntryType = (jeTransStart, jeTransCommit, jeTransCommitFail, jeTransCommitRet, jeTransRollback,
-                   jeTransRollbackFail, jeTransRollbackRet, jeTransEnd, jeQuery,jeUnknown);
+                   jeTransRollbackFail, jeTransRollbackRet, jeQuery,jeUnknown);
 
+ PJnlEntry = ^TJnlEntry;
  TJnlEntry = record
    JnlEntryType: TJnlEntryType;
    Timestamp: TDateTime;
@@ -738,9 +739,9 @@ type
 
  TOnNextJournalEntry = procedure(JnlEntry: TJnlEntry) of object;
 
- { TJournalProcessor - used to parse a client side journal}
+ { TCustomJournalProcessor - used to parse a client side journal}
 
-   TJournalProcessor = class(TSQLTokeniser)
+   TCustomJournalProcessor = class(TSQLTokeniser)
     private
       type TLineState = (lsInit, lsJnlFound, lsGotTimestamp, lsGotJnlType,
                           lsGotAttachmentID, lsGotSessionID,
@@ -748,17 +749,28 @@ type
                           lsGotText1, lsGotText2Length, lsGotText2);
     private
       FOnNextJournalEntry: TOnNextJournalEntry;
-      FInStream: TStream;
       FFirebirdClientAPI: IFirebirdAPI;
-      procedure DoExecute;
       function IdentifyJnlEntry(aTokenText: AnsiString): TJnlEntryType;
     protected
-      function GetChar: AnsiChar; override;
+      procedure DoExecute;
+      procedure DoNextJournalEntry(JnlEntry: TJnlEntry); virtual;
       property OnNextJournalEntry: TOnNextJournalEntry read FOnNextJournalEntry write FOnNextJournalEntry;
     public
-      destructor Destroy; override;
-      class procedure Execute( aFileName: string; api: IFirebirdAPI; aOnNextJournalEntry: TOnNextJournalEntry);
+      constructor Create(api: IFirebirdAPI);
       class function JnlEntryText(je: TJnlEntryType): string;
+    end;
+
+    { TJournalProcessor }
+
+    TJournalProcessor = class(TCustomJournalProcessor)
+    private
+      FInStream: TStream;
+    protected
+      function GetChar: AnsiChar; override;
+    public
+      destructor Destroy; override;
+      class procedure Execute( aFileName: string; api: IFirebirdAPI; aOnNextJournalEntry: TOnNextJournalEntry); overload;
+      class procedure Execute( S: TStream; api: IFirebirdAPI; aOnNextJournalEntry: TOnNextJournalEntry); overload;
     end;
 
 
@@ -2057,7 +2069,7 @@ end;
 
 { TSQLXMLReader }
 
-function TSQLXMLReader.FindTag(tag: string; var xmlTag: TXMLTag): boolean;
+function TSQLXMLReader.FindTag(tag: AnsiString; var xmlTag: TXMLTag): boolean;
 var i: TXMLTag;
 begin
   Result := false;
@@ -2094,7 +2106,7 @@ begin
   Result := Length(FBlobData);
 end;
 
-function TSQLXMLReader.GetTagName(xmltag: TXMLTag): string;
+function TSQLXMLReader.GetTagName(xmltag: TXMLTag): AnsiString;
 var i: TXMLTag;
 begin
   Result := 'unknown';
@@ -2106,7 +2118,7 @@ begin
     end;
 end;
 
-procedure TSQLXMLReader.ProcessAttributeValue(attrValue: string);
+procedure TSQLXMLReader.ProcessAttributeValue(attrValue: AnsiString);
 begin
   case FXMLTagStack[FXMLTagIndex] of
   xtBlob:
@@ -2151,7 +2163,7 @@ begin
   end;
 end;
 
-procedure TSQLXMLReader.ProcessBoundsList(boundsList: string);
+procedure TSQLXMLReader.ProcessBoundsList(boundsList: AnsiString);
 var list: TStringList;
     i,j: integer;
 begin
@@ -2178,7 +2190,7 @@ begin
   end;
 end;
 
-procedure TSQLXMLReader.ProcessTagValue(tagValue: string);
+procedure TSQLXMLReader.ProcessTagValue(tagValue: AnsiString);
 
   function nibble(hex: char): byte;
   begin
@@ -2202,7 +2214,7 @@ procedure TSQLXMLReader.ProcessTagValue(tagValue: string);
     end;
   end;
 
-  procedure RemoveWhiteSpace(var hexData: string);
+  procedure RemoveWhiteSpace(var hexData: AnsiString);
   var i: integer;
   begin
     {Remove White Space}
@@ -2222,25 +2234,30 @@ procedure TSQLXMLReader.ProcessTagValue(tagValue: string);
     end;
   end;
 
-  procedure WriteToBlob(hexData: string);
+  procedure WriteToBlob(hexData: AnsiString);
   var i,j : integer;
       blength: integer;
       P: PByte;
+      BlobBuffer: PByte;
   begin
     RemoveWhiteSpace(hexData);
     if odd(length(hexData)) then
       ShowError(sBinaryBlockMustbeEven,[nil]);
     blength := Length(hexData) div 2;
-    ReallocMem(FBlobBuffer,blength);
-    j := 1;
-    P := FBlobBuffer;
-    for i := 1 to blength do
-    begin
-      P^ := (nibble(hexData[j]) shl 4) or nibble(hexdata[j+1]);
-      Inc(j,2);
-      Inc(P);
+    BlobBuffer := GetMem(blength);
+    try
+      j := 1;
+      P := BlobBuffer;
+      for i := 1 to blength do
+      begin
+        P^ := (nibble(hexData[j]) shl 4) or nibble(hexdata[j+1]);
+        Inc(j,2);
+        Inc(P);
+      end;
+      FBlobData[FCurrentBlob].BlobIntf.Write(BlobBuffer^,blength);
+    finally
+      FreeMem(BlobBuffer);
     end;
-    FBlobData[FCurrentBlob].BlobIntf.Write(FBlobBuffer^,blength);
   end;
 
 begin
@@ -2391,6 +2408,7 @@ begin
   stInTag:
     {Opening '<' found, now looking for tag name or end tag marker}
     case token of
+    sqltBlob,
     sqltIdentifier:
       begin
         if FindTag(TokenText,XMLTag) then
@@ -2498,6 +2516,7 @@ begin
   stInEndTag:
     {Opening '</' found, now looking for tag name}
     case token of
+    sqltBlob,
     sqltIdentifier:
       begin
         if FindTag(TokenText,XMLTag) and (XMLTag = FXMLTagStack[FXMLTagIndex]) then
@@ -2551,12 +2570,12 @@ begin
   Result := FXMLState = stNoXML;
 end;
 
-procedure TSQLXMLReader.ShowError(msg: string; params: array of const);
+procedure TSQLXMLReader.ShowError(msg: AnsiString; params: array of const);
 begin
   raise EIBClientError.CreateFmt(GetErrorPrefix + msg,params);
 end;
 
-procedure TSQLXMLReader.ShowError(msg: string);
+procedure TSQLXMLReader.ShowError(msg: AnsiString);
 begin
   ShowError(msg,[nil]);
 end;
@@ -2565,6 +2584,12 @@ constructor TSQLXMLReader.Create;
 begin
   inherited;
   FXMLState := stNoXML;
+end;
+
+destructor TSQLXMLReader.Destroy;
+begin
+  Reset;
+  inherited Destroy;
 end;
 
 procedure TSQLXMLReader.FreeDataObjects;
@@ -2576,13 +2601,13 @@ begin
   FCurrentArray := -1;
 end;
 
-class function TSQLXMLReader.FormatBlob(Field: ISQLData): string;
+class function TSQLXMLReader.FormatBlob(Field: ISQLData): AnsiString;
 begin
   Result := FormatBlob(Field.AsString,Field.getSubtype);
 end;
 
-class function TSQLXMLReader.FormatBlob(contents: string; subtype: integer
-  ): string;
+class function TSQLXMLReader.FormatBlob(contents: AnsiString; subtype: integer
+  ): AnsiString;
 var TextOut: TStrings;
 begin
   TextOut := TStringList.Create;
@@ -2598,11 +2623,11 @@ end;
 
 
 class function TSQLXMLReader.FormatArray(ar: IArray
-  ): string;
+  ): AnsiString;
 var index: array of integer;
     TextOut: TStrings;
 
-    procedure AddElements(dim: integer; indent:string = ' ');
+    procedure AddElements(dim: integer; indent:AnsiString = ' ');
     var i: integer;
         recurse: boolean;
     begin
@@ -2628,10 +2653,10 @@ var index: array of integer;
     end;
 
 var
-    s: string;
+    s: AnsiString;
     bounds: TArrayBounds;
     i: integer;
-    boundsList: string;
+    boundsList: AnsiString;
 begin
   TextOut := TStringList.Create;
   try
@@ -2675,12 +2700,11 @@ begin
   inherited Reset;
   FreeDataObjects;
   FXMLString := '';
-  FreeMem(FBlobBuffer);
 end;
 
-{ TJournalProcessor }
+{ TCustomJournalProcessor }
 
-procedure TJournalProcessor.DoExecute;
+procedure TCustomJournalProcessor.DoExecute;
 var token: TSQLTokens;
     LineState: TLineState;
     JnlEntry: TJnlEntry;
@@ -2689,6 +2713,7 @@ var token: TSQLTokens;
 
   procedure ClearJnlEntry;
   begin
+    LineState := lsInit;
     with JnlEntry do
     begin
       TransactionName := '';
@@ -2732,12 +2757,9 @@ var token: TSQLTokens;
   end;
 
 begin
-  LineState := lsInit;
-  JnlEntry.JnlEntryType := jeUnknown;
+  ClearJnlEntry;
   while not EOF do
   begin
-    if LineState = lsInit then
-      ClearJnlEntry;
     token := GetNextToken;
     with JnlEntry do
     case token of
@@ -2752,14 +2774,14 @@ begin
           LineState := lsGotJnlType;
         end
       else
-        LineState := lsInit;
+        ClearJnlEntry;
 
     sqltQuotedString:
       if (LineState = lsGotJnlType)
           and ParseDateTimeTZString(TokenText,TimeStamp,tz) then
             LineState := lsGotTimestamp
       else
-        LineState := lsInit;
+        ClearJnlEntry;
 
     sqltColon:
       case LineState of
@@ -2776,9 +2798,8 @@ begin
              LineState := lsGotText1
           else
           begin
-            if assigned(FOnNextJournalEntry) then
-              OnNextJournalEntry(JnlEntry);
-            LineState := lsInit;
+            DoNextJournalEntry(JnlEntry);
+            ClearJnlEntry;
           end
         end;
 
@@ -2791,12 +2812,12 @@ begin
 
       else
       if LineState <> lsGotJnlType then
-        LineState := lsInit;
+        ClearJnlEntry;
     end;
 
    sqltComma:
      if not (LineState in [lsGotTimestamp,lsGotAttachmentID,lsGotSessionID,lsGotTransactionID,lsGotText1,lsGotText2]) then
-       LineState := lsInit;
+       ClearJnlEntry;
 
    sqltNumberString:
      case LineState of
@@ -2817,9 +2838,8 @@ begin
          TransactionID := StrToInt(TokenText);
          if JnlEntryType in [jeTransCommit, jeTransCommitFail, jeTransRollback, jeTransRollbackFail] then
          begin
-           if assigned(FOnNextJournalEntry) then
-             OnNextJournalEntry(JnlEntry);
-           LineState := lsInit;
+           DoNextJournalEntry(JnlEntry);
+           ClearJnlEntry;
          end
          else
            LineState := lsGotTransactionID;
@@ -2846,13 +2866,12 @@ begin
          jeTransRollbackRet:
            begin
              OldTransactionID := StrToInt(TokenText);
-             if assigned(FOnNextJournalEntry) then
-               OnNextJournalEntry(JnlEntry);
-             LineState := lsInit;
+             DoNextJournalEntry(JnlEntry);
+             ClearJnlEntry;
            end;
 
            else
-             LineState := lsInit;
+             ClearJnlEntry;
          end; {case JnlEntryType}
 
        end;
@@ -2868,10 +2887,9 @@ begin
           if JnlEntryType = jeTransStart then
           begin
             DefaultCompletion := TTransactionCompletion(StrToInt(TokenText));
-            if assigned(FOnNextJournalEntry) then
-              OnNextJournalEntry(JnlEntry);
+            DoNextJournalEntry(JnlEntry);
           end;
-          LineState := lsInit;
+          ClearJnlEntry;
         end;
      end; {case LineState}
     end; {case token}
@@ -2879,7 +2897,7 @@ begin
   ClearJnlEntry;
 end;
 
-function TJournalProcessor.IdentifyJnlEntry(aTokenText: AnsiString
+function TCustomJournalProcessor.IdentifyJnlEntry(aTokenText: AnsiString
   ): TJnlEntryType;
 begin
   Result := jeUnknown;
@@ -2895,8 +2913,6 @@ begin
     Result := jeTransRollback;
   'r':
     Result := jeTransRollbackRet;
-  'E':
-    Result := jeTransEnd;
   'Q':
     Result := jeQuery;
   'F':
@@ -2906,7 +2922,19 @@ begin
   end;
 end;
 
-class function TJournalProcessor.JnlEntryText(je: TJnlEntryType): string;
+procedure TCustomJournalProcessor.DoNextJournalEntry(JnlEntry: TJnlEntry);
+begin
+  if assigned(FOnNextJournalEntry) then
+    FOnNextJournalEntry(JnlEntry);
+end;
+
+constructor TCustomJournalProcessor.Create(api: IFirebirdAPI);
+begin
+  inherited Create;
+  FFirebirdClientAPI := api;
+end;
+
+class function TCustomJournalProcessor.JnlEntryText(je: TJnlEntryType): string;
 begin
   case je of
   jeTransStart:
@@ -2923,14 +2951,14 @@ begin
     Result := 'Rollback (Failed)';
   jeTransRollbackRet:
     Result := 'Rollback Retaining';
-  jeTransEnd:
-    Result := 'Transaction End';
   jeQuery:
     Result := 'Query';
   jeUnknown:
     Result := 'Unknown';
   end;
 end;
+
+{TJournalProcessor}
 
 function TJournalProcessor.GetChar: AnsiChar;
 begin
@@ -2947,10 +2975,15 @@ end;
 class procedure TJournalProcessor.Execute(aFileName: string; api: IFirebirdAPI;
   aOnNextJournalEntry: TOnNextJournalEntry);
 begin
-  with TJournalProcessor.Create do
+  Execute(TFileStream.Create(aFileName,fmOpenRead),api,aOnNextJournalEntry);
+end;
+
+class procedure TJournalProcessor.Execute(S: TStream; api: IFirebirdAPI;
+  aOnNextJournalEntry: TOnNextJournalEntry);
+begin
+  with TJournalProcessor.Create(api) do
   try
-    FInStream := TFileStream.Create(aFileName,fmOpenRead);
-    FFirebirdClientAPI := api;
+    FInStream := S;
     OnNextJournalEntry := aOnNextJournalEntry;
     DoExecute;
   finally
