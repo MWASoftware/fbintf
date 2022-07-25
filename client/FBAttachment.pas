@@ -39,7 +39,7 @@ interface
 
 uses
   Classes, SysUtils, {$IFDEF WINDOWS} windows, {$ENDIF} IB,  FBParamBlock,
-  FBActivityMonitor, FBClientAPI, IBUtils;
+  FBActivityMonitor, FBClientAPI, IBUtils, SyncObjs;
 
 const
   DefaultMaxInlineBlobLimit = 8192;
@@ -108,7 +108,9 @@ type
     FSessionID: integer;
     FDoNotJournal: boolean;
     FOwnsJournal: boolean;
+    FCriticalSection: TCriticalSection;
     function GetDateTimeFmt: AnsiString;
+    procedure WriteJnlEntry(LogEntry: AnsiString);
   protected
     procedure EndSession(RetainJournal: boolean);
     function GetAttachment: IAttachment; virtual; abstract;
@@ -124,6 +126,8 @@ type
     procedure ExecQuery(Stmt: IStatement);
     procedure ExecImmediateJnl(sql: AnsiString; tr: ITransaction);
   public
+    constructor Create;
+    destructor Destroy; override;
     {Client side Journaling}
     function JournalingActive: boolean;
     function GetJournalOptions: TJournalOptions;
@@ -662,6 +666,20 @@ begin
   Result := ShortDateFormat + ' ' + LongTimeFormat + '.zzzz'
 end;
 
+procedure TFBJournaling.WriteJnlEntry(LogEntry: AnsiString);
+begin
+  if assigned(FJournalFileStream) then
+  begin
+    FCriticalSection.Acquire;
+    try
+        FJournalFileStream.Write(LogEntry[1],Length(LogEntry));
+    finally
+      FCriticalSection.Release;
+    end;
+  end;
+
+end;
+
 procedure TFBJournaling.EndSession(RetainJournal: boolean);
 begin
   if JournalingActive and (FJournalFileStream <> nil) then
@@ -682,6 +700,7 @@ begin
         {ignore - do not delete journal if database gone away}
     end;
     FSessionID := -1;
+    FJournalFilePath := '';
   end;
 end;
 
@@ -711,8 +730,7 @@ begin
                                      Tr.TransactionName,
                                      Length(TPBText),TPBText,
                                      ord(tr.GetDefaultCompletion)]);
-  if assigned(FJournalFileStream) then
-    FJournalFileStream.Write(LogEntry[1],Length(LogEntry));
+  WriteJnlEntry(LogEntry);
 end;
 
 function TFBJournaling.TransactionEnd(TransactionID: integer;
@@ -754,8 +772,7 @@ begin
         Result := true;
       end;
     end;
-    if assigned(FJournalFileStream) then
-      FJournalFileStream.Write(LogEntry[1],Length(LogEntry));
+    WriteJnlEntry(LogEntry);
 end;
 
 procedure TFBJournaling.TransactionRetained(Tr: ITransaction;
@@ -772,8 +789,7 @@ begin
                                       GetAttachment.GetAttachmentID,
                                       FSessionID,Tr.GetTransactionID,OldTransactionID]);
     end;
-    if assigned(FJournalFileStream) then
-      FJournalFileStream.Write(LogEntry[1],Length(LogEntry));
+    WriteJnlEntry(LogEntry);
 
     if not (joNoServerTable in FOptions) then
     try
@@ -794,8 +810,7 @@ begin
                                       FSessionID,
                                       Stmt.GetTransaction.GetTransactionID,
                                       Length(SQL),SQL]);
-  if assigned(FJournalFileStream) then
-    FJournalFileStream.Write(LogEntry[1],Length(LogEntry));
+  WriteJnlEntry(LogEntry);
 end;
 
 procedure TFBJournaling.ExecImmediateJnl(sql: AnsiString; tr: ITransaction);
@@ -806,8 +821,20 @@ begin
                                       FSessionID,
                                       tr.GetTransactionID,
                                       Length(sql),sql]);
-  if assigned(FJournalFileStream) then
-    FJournalFileStream.Write(LogEntry[1],Length(LogEntry));
+  WriteJnlEntry(LogEntry);
+end;
+
+constructor TFBJournaling.Create;
+begin
+  inherited;
+  FCriticalSection := TCriticalSection.Create;
+end;
+
+destructor TFBJournaling.Destroy;
+begin
+  if FCriticalSection <> nil then
+    FCriticalSection.Free;
+  inherited Destroy;
 end;
 
 function TFBJournaling.JournalingActive: boolean;
