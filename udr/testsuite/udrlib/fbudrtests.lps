@@ -7,7 +7,6 @@
       <Unit>
         <Filename Value="fbudrtests.lpr"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <TopLine Value="24"/>
         <CursorPos X="93" Y="53"/>
         <UsageCount Value="88"/>
@@ -25,9 +24,10 @@
       <Unit>
         <Filename Value="udr_test02.pas"/>
         <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
-        <TopLine Value="111"/>
-        <CursorPos Y="49"/>
+        <TopLine Value="88"/>
+        <CursorPos X="31" Y="108"/>
         <UsageCount Value="84"/>
         <Loaded Value="True"/>
       </Unit>
@@ -409,7 +409,7 @@
         <DefaultSyntaxHighlighter Value="SQL"/>
       </Unit>
     </Units>
-    <JumpHistory HistoryIndex="29">
+    <JumpHistory HistoryIndex="28">
       <Position>
         <Filename Value="../../source/FBUDRController.pas"/>
         <Caret Line="1343" Column="33" TopLine="1334"/>
@@ -496,10 +496,6 @@
       <Position>
         <Filename Value="../../source/FBUDRController.pas"/>
         <Caret Line="673" Column="7" TopLine="645"/>
-      </Position>
-      <Position>
-        <Filename Value="udr_test02.pas"/>
-        <Caret Line="110" Column="51" TopLine="114"/>
       </Position>
       <Position>
         <Filename Value="fbudrtests.lpr"/>

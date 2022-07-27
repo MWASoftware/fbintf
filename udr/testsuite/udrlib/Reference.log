@@ -342,30 +342,30 @@ using dumb terminal settings.
 
     MON$ATTACHMENT_ID MON$ATTACHMENT_NAME                                                                                                                                                                                                                                             MON$USER                                                        MON$ROLE                                                        MON$REMOTE_HOST                                                                                                                                                                                                                                                 
 ===================== =============================================================================================================================================================================================================================================================== =============================================================== =============================================================== =============================================================================================================================================================================================================================================================== 
-                  603 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              SYSDBA                                                                                                                          <null>                                                                                                                                                                                                                                                          
-                  602 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              Garbage Collector                                                                                                               <null>                                                                                                                                                                                                                                                          
-                  601 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              Cache Writer                                                                                                                    <null>                                                                                                                                                                                                                                                          
-                  600 employee                                                                                                                                                                                                                                                        SYSDBA                                                                                                                          <null>                                                                                                                                                                                                                                                          
+                 1026 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              SYSDBA                                                                                                                          <null>                                                                                                                                                                                                                                                          
+                 1025 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              Garbage Collector                                                                                                               <null>                                                                                                                                                                                                                                                          
+                 1024 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              Cache Writer                                                                                                                    <null>                                                                                                                                                                                                                                                          
+                 1023 employee                                                                                                                                                                                                                                                        SYSDBA                                                                                                                          <null>                                                                                                                                                                                                                                                          
 
 
     MON$ATTACHMENT_ID MON$ATTACHMENT_NAME                                                                                                                                                                                                                                             MON$USER                                                        MON$ROLE                                                        MON$REMOTE_HOST                                                                                                                                                                                                                                                 
 ===================== =============================================================================================================================================================================================================================================================== =============================================================== =============================================================== =============================================================================================================================================================================================================================================================== 
-                  602 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              Garbage Collector                                                                                                               <null>                                                                                                                                                                                                                                                          
-                  601 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              Cache Writer                                                                                                                    <null>                                                                                                                                                                                                                                                          
-                  600 employee                                                                                                                                                                                                                                                        SYSDBA                                                                                                                          <null>                                                                                                                                                                                                                                                          
+                 1025 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              Garbage Collector                                                                                                               <null>                                                                                                                                                                                                                                                          
+                 1024 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              Cache Writer                                                                                                                    <null>                                                                                                                                                                                                                                                          
+                 1023 employee                                                                                                                                                                                                                                                        SYSDBA                                                                                                                          <null>                                                                                                                                                                                                                                                          
 
 
     MON$ATTACHMENT_ID MON$ATTACHMENT_NAME                                                                                                                                                                                                                                             MON$USER                                                        MON$ROLE                                                        MON$REMOTE_HOST                                                                                                                                                                                                                                                 
 ===================== =============================================================================================================================================================================================================================================================== =============================================================== =============================================================== =============================================================================================================================================================================================================================================================== 
-                  604 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              TESTER                                                                                                                          <null>                                                                                                                                                                                                                                                          
+                 1027 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              TESTER                                                                                                                          <null>                                                                                                                                                                                                                                                          
 
 
     MON$ATTACHMENT_ID MON$ATTACHMENT_NAME                                                                                                                                                                                                                                             MON$USER                                                        MON$ROLE                                                        MON$REMOTE_HOST                                                                                                                                                                                                                                                 
 ===================== =============================================================================================================================================================================================================================================================== =============================================================== =============================================================== =============================================================================================================================================================================================================================================================== 
-                  605 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              SYSDBA                                                                                                                          <null>                                                                                                                                                                                                                                                          
-                  602 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              Garbage Collector                                                                                                               <null>                                                                                                                                                                                                                                                          
-                  601 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              Cache Writer                                                                                                                    <null>                                                                                                                                                                                                                                                          
-                  600 employee                                                                                                                                                                                                                                                        SYSDBA                                                                                                                          <null>                                                                                                                                                                                                                                                          
+                 1028 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              SYSDBA                                                                                                                          <null>                                                                                                                                                                                                                                                          
+                 1025 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              Garbage Collector                                                                                                               <null>                                                                                                                                                                                                                                                          
+                 1024 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              Cache Writer                                                                                                                    <null>                                                                                                                                                                                                                                                          
+                 1023 employee                                                                                                                                                                                                                                                        SYSDBA                                                                                                                          <null>                                                                                                                                                                                                                                                          
 
 
 SERVERINFO                                                                                                                                                                                                                                                       
@@ -383,27 +383,27 @@ using dumb terminal settings.
 
     MON$ATTACHMENT_ID MON$ATTACHMENT_NAME                                                                                                                                                                                                                                             MON$USER                                                        MON$ROLE                                                        MON$REMOTE_HOST                                                                                                                                                                                                                                                 
 ===================== =============================================================================================================================================================================================================================================================== =============================================================== =============================================================== =============================================================================================================================================================================================================================================================== 
-                  609 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              TESTER                                                                                                                          <null>                                                                                                                                                                                                                                                          
-                  606 employee                                                                                                                                                                                                                                                        TESTER                                                                                                                          <null>                                                                                                                                                                                                                                                          
+                 1032 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              TESTER                                                                                                                          <null>                                                                                                                                                                                                                                                          
+                 1029 employee                                                                                                                                                                                                                                                        TESTER                                                                                                                          <null>                                                                                                                                                                                                                                                          
 
 
     MON$ATTACHMENT_ID MON$ATTACHMENT_NAME                                                                                                                                                                                                                                             MON$USER                                                        MON$ROLE                                                        MON$REMOTE_HOST                                                                                                                                                                                                                                                 
 ===================== =============================================================================================================================================================================================================================================================== =============================================================== =============================================================== =============================================================================================================================================================================================================================================================== 
-                  606 employee                                                                                                                                                                                                                                                        TESTER                                                                                                                          <null>                                                                                                                                                                                                                                                          
+                 1029 employee                                                                                                                                                                                                                                                        TESTER                                                                                                                          <null>                                                                                                                                                                                                                                                          
 
 
     MON$ATTACHMENT_ID MON$ATTACHMENT_NAME                                                                                                                                                                                                                                             MON$USER                                                        MON$ROLE                                                        MON$REMOTE_HOST                                                                                                                                                                                                                                                 
 ===================== =============================================================================================================================================================================================================================================================== =============================================================== =============================================================== =============================================================================================================================================================================================================================================================== 
-                  610 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              TESTER                                                                                                                          <null>                                                                                                                                                                                                                                                          
-                  606 employee                                                                                                                                                                                                                                                        TESTER                                                                                                                          <null>                                                                                                                                                                                                                                                          
+                 1033 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              TESTER                                                                                                                          <null>                                                                                                                                                                                                                                                          
+                 1029 employee                                                                                                                                                                                                                                                        TESTER                                                                                                                          <null>                                                                                                                                                                                                                                                          
 
 
     MON$ATTACHMENT_ID MON$ATTACHMENT_NAME                                                                                                                                                                                                                                             MON$USER                                                        MON$ROLE                                                        MON$REMOTE_HOST                                                                                                                                                                                                                                                 
 ===================== =============================================================================================================================================================================================================================================================== =============================================================== =============================================================== =============================================================================================================================================================================================================================================================== 
-                  611 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              SYSDBA                                                                                                                          <null>                                                                                                                                                                                                                                                          
-                  608 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              Garbage Collector                                                                                                               <null>                                                                                                                                                                                                                                                          
-                  607 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              Cache Writer                                                                                                                    <null>                                                                                                                                                                                                                                                          
-                  606 employee                                                                                                                                                                                                                                                        TESTER                                                                                                                          <null>                                                                                                                                                                                                                                                          
+                 1034 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              SYSDBA                                                                                                                          <null>                                                                                                                                                                                                                                                          
+                 1031 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              Garbage Collector                                                                                                               <null>                                                                                                                                                                                                                                                          
+                 1030 /opt/firebird/4.0.1/examples/empbuild/employee.fdb                                                                                                                                                                                                              Cache Writer                                                                                                                    <null>                                                                                                                                                                                                                                                          
+                 1029 employee                                                                                                                                                                                                                                                        TESTER                                                                                                                          <null>                                                                                                                                                                                                                                                          
 
 
 SERVERINFO                                                                                                                                                                                                                                                       
@@ -1298,8 +1298,8 @@ Output Metadata:
   
 @dd-mm-yy hh:mm:ss.zzzz:Execute Function row_count
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 576
-  Transaction ID = 774
+  Attachment ID = 999
+  Transaction ID = 1517
   User Name = SYSDBA
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -1329,8 +1329,8 @@ Column 0
 
 @dd-mm-yy hh:mm:ss.zzzz:Execute Function row_count
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 576
-  Transaction ID = 774
+  Attachment ID = 999
+  Transaction ID = 1517
   User Name = SYSDBA
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -1360,8 +1360,8 @@ Column 0
 
 @dd-mm-yy hh:mm:ss.zzzz:Execute Function row_count
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 576
-  Transaction ID = 774
+  Attachment ID = 999
+  Transaction ID = 1517
   User Name = SYSDBA
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -1442,8 +1442,8 @@ Output Metadata:
   
 @dd-mm-yy hh:mm:ss.zzzz:Execute Function return_info
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 576
-  Transaction ID = 774
+  Attachment ID = 999
+  Transaction ID = 1517
   User Name = SYSDBA
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -1544,8 +1544,8 @@ Output Metadata:
   
 @dd-mm-yy hh:mm:ss.zzzz:Execute Function row_count
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 579
-  Transaction ID = 776
+  Attachment ID = 1002
+  Transaction ID = 1519
   User Name = TESTER
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -1575,8 +1575,8 @@ Column 0
 
 @dd-mm-yy hh:mm:ss.zzzz:Execute Function row_count
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 579
-  Transaction ID = 776
+  Attachment ID = 1002
+  Transaction ID = 1519
   User Name = TESTER
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -1606,8 +1606,8 @@ Column 0
 
 @dd-mm-yy hh:mm:ss.zzzz:Execute Function row_count
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 579
-  Transaction ID = 776
+  Attachment ID = 1002
+  Transaction ID = 1519
   User Name = TESTER
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -1688,8 +1688,8 @@ Output Metadata:
   
 @dd-mm-yy hh:mm:ss.zzzz:Execute Function return_info
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 579
-  Transaction ID = 776
+  Attachment ID = 1002
+  Transaction ID = 1519
   User Name = TESTER
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -1814,8 +1814,8 @@ Output Metadata:
   
 @dd-mm-yy hh:mm:ss.zzzz:Open Execute Procedure test_proc
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 582
-  Transaction ID = 778
+  Attachment ID = 1005
+  Transaction ID = 1521
   User Name = SYSDBA
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -1930,8 +1930,8 @@ Output Metadata:
   
 @dd-mm-yy hh:mm:ss.zzzz:Open Execute Procedure error_proc
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 582
-  Transaction ID = 778
+  Attachment ID = 1005
+  Transaction ID = 1521
   User Name = SYSDBA
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -1950,9 +1950,15 @@ Parameter 0:
 
 @dd-mm-yy hh:mm:ss.zzzz:Output Parameters
 
-*S:'dd-mm-yy hh:mm:ss.zzzz',582,0,780,0:,53:[isc_tpb_write,isc_tpb_nowait,isc_tpb_read_committed],1
-*Q:'dd-mm-yy hh:mm:ss.zzzz',582,0,780,52:Create Global Temporary Table TestMe(EMP_NO Integer)
-*R:'dd-mm-yy hh:mm:ss.zzzz',582,0,780
+*S:'dd-mm-yy hh:mm:ss.zzzz',1005,0,1523,0:,53:[isc_tpb_write,isc_tpb_nowait,isc_tpb_read_committed],1
+*Q:'dd-mm-yy hh:mm:ss.zzzz',1005,0,1523,52:Create Global Temporary Table TestMe(EMP_NO Integer)
+*C:'dd-mm-yy hh:mm:ss.zzzz',1005,0,1523
+*S:'dd-mm-yy hh:mm:ss.zzzz',1005,0,1524,0:,53:[isc_tpb_write,isc_tpb_nowait,isc_tpb_read_committed],1
+*Q:'dd-mm-yy hh:mm:ss.zzzz',1005,0,1524,52:Create Global Temporary Table TestMe(EMP_NO Integer)
+*R:'dd-mm-yy hh:mm:ss.zzzz',1005,0,1524
+*S:'dd-mm-yy hh:mm:ss.zzzz',1005,0,1525,0:,53:[isc_tpb_write,isc_tpb_nowait,isc_tpb_read_committed],1
+*Q:'dd-mm-yy hh:mm:ss.zzzz',1005,0,1525,17:Drop Table TestMe
+*C:'dd-mm-yy hh:mm:ss.zzzz',1005,0,1525
 @dd-mm-yy hh:mm:ss.zzzz:Procedure error_proc: dispose called with refcount = 2
 @dd-mm-yy hh:mm:ss.zzzz:Exception raised
 Engine Code: 335544351
@@ -1961,8 +1967,8 @@ unsuccessful metadata update
 -Table TESTME already exists
 @dd-mm-yy hh:mm:ss.zzzz:Open Execute Procedure error_proc
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 582
-  Transaction ID = 778
+  Attachment ID = 1005
+  Transaction ID = 1521
   User Name = SYSDBA
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -1981,17 +1987,17 @@ Parameter 0:
 
 @dd-mm-yy hh:mm:ss.zzzz:Output Parameters
 
-*S:'dd-mm-yy hh:mm:ss.zzzz',582,0,781,0:,53:[isc_tpb_write,isc_tpb_nowait,isc_tpb_read_committed],1
-*Q:'dd-mm-yy hh:mm:ss.zzzz',582,0,781,56:Insert into EMPLOYEE(EMP_NO,LAST_NAME) Values (2,No one)
-*C:'dd-mm-yy hh:mm:ss.zzzz',582,0,781
+*S:'dd-mm-yy hh:mm:ss.zzzz',1005,0,1526,0:,53:[isc_tpb_write,isc_tpb_nowait,isc_tpb_read_committed],1
+*Q:'dd-mm-yy hh:mm:ss.zzzz',1005,0,1526,56:Insert into EMPLOYEE(EMP_NO,LAST_NAME) Values (2,No one)
+*C:'dd-mm-yy hh:mm:ss.zzzz',1005,0,1526
 @dd-mm-yy hh:mm:ss.zzzz:Procedure error_proc: dispose called with refcount = 2
 @dd-mm-yy hh:mm:ss.zzzz:Exception raised
 Engine Code: 335544347
 validation error for column "EMPLOYEE"."FIRST_NAME", value "*** null ***"
 @dd-mm-yy hh:mm:ss.zzzz:Open Execute Procedure error_proc
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 582
-  Transaction ID = 778
+  Attachment ID = 1005
+  Transaction ID = 1521
   User Name = SYSDBA
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -2120,8 +2126,8 @@ Output Metadata:
   
 @dd-mm-yy hh:mm:ss.zzzz:Open Execute Procedure test_proc
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 585
-  Transaction ID = 782
+  Attachment ID = 1008
+  Transaction ID = 1527
   User Name = TESTER
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -2236,8 +2242,8 @@ Output Metadata:
   
 @dd-mm-yy hh:mm:ss.zzzz:Open Execute Procedure error_proc
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 585
-  Transaction ID = 782
+  Attachment ID = 1008
+  Transaction ID = 1527
   User Name = TESTER
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -2256,9 +2262,9 @@ Parameter 0:
 
 @dd-mm-yy hh:mm:ss.zzzz:Output Parameters
 
-*S:'dd-mm-yy hh:mm:ss.zzzz',585,0,784,0:,53:[isc_tpb_write,isc_tpb_nowait,isc_tpb_read_committed],1
-*Q:'dd-mm-yy hh:mm:ss.zzzz',585,0,784,52:Create Global Temporary Table TestMe(EMP_NO Integer)
-*R:'dd-mm-yy hh:mm:ss.zzzz',585,0,784
+*S:'dd-mm-yy hh:mm:ss.zzzz',1008,0,1529,0:,53:[isc_tpb_write,isc_tpb_nowait,isc_tpb_read_committed],1
+*Q:'dd-mm-yy hh:mm:ss.zzzz',1008,0,1529,52:Create Global Temporary Table TestMe(EMP_NO Integer)
+*R:'dd-mm-yy hh:mm:ss.zzzz',1008,0,1529
 @dd-mm-yy hh:mm:ss.zzzz:Procedure error_proc: dispose called with refcount = 2
 @dd-mm-yy hh:mm:ss.zzzz:Exception raised
 Engine Code: 335544351
@@ -2267,8 +2273,8 @@ unsuccessful metadata update
 -No permission for CREATE TABLE operation
 @dd-mm-yy hh:mm:ss.zzzz:Open Execute Procedure error_proc
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 585
-  Transaction ID = 782
+  Attachment ID = 1008
+  Transaction ID = 1527
   User Name = TESTER
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -2287,8 +2293,8 @@ Parameter 0:
 
 @dd-mm-yy hh:mm:ss.zzzz:Output Parameters
 
-*S:'dd-mm-yy hh:mm:ss.zzzz',585,0,785,0:,53:[isc_tpb_write,isc_tpb_nowait,isc_tpb_read_committed],1
-*C:'dd-mm-yy hh:mm:ss.zzzz',585,0,785
+*S:'dd-mm-yy hh:mm:ss.zzzz',1008,0,1530,0:,53:[isc_tpb_write,isc_tpb_nowait,isc_tpb_read_committed],1
+*C:'dd-mm-yy hh:mm:ss.zzzz',1008,0,1530
 @dd-mm-yy hh:mm:ss.zzzz:Procedure error_proc: dispose called with refcount = 2
 @dd-mm-yy hh:mm:ss.zzzz:Exception raised
 Engine Code: 335544352
@@ -2296,8 +2302,8 @@ no permission for USAGE access to GENERATOR EMP_NO_GEN
 -Effective user is TESTER When Executing: Insert into EMPLOYEE(EMP_NO,LAST_NAME) Values (2,'No one')
 @dd-mm-yy hh:mm:ss.zzzz:Open Execute Procedure error_proc
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 585
-  Transaction ID = 782
+  Attachment ID = 1008
+  Transaction ID = 1527
   User Name = TESTER
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -2426,8 +2432,8 @@ Output Metadata:
   
 @dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure select_proc
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 588
-  Transaction ID = 786
+  Attachment ID = 1011
+  Transaction ID = 1531
   User Name = SYSDBA
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -2545,8 +2551,8 @@ Output Metadata:
   
 @dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure read_txt
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 588
-  Transaction ID = 786
+  Attachment ID = 1011
+  Transaction ID = 1531
   User Name = SYSDBA
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -2579,8 +2585,8 @@ Column 0
 @dd-mm-yy hh:mm:ss.zzzz:Procedure read_txt: dispose called with refcount = 2
 @dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure read_txt
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 588
-  Transaction ID = 786
+  Attachment ID = 1011
+  Transaction ID = 1531
   User Name = SYSDBA
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -2718,8 +2724,8 @@ Output Metadata:
   
 @dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure select_proc
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 591
-  Transaction ID = 788
+  Attachment ID = 1014
+  Transaction ID = 1533
   User Name = TESTER
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -2837,8 +2843,8 @@ Output Metadata:
   
 @dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure read_txt
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 591
-  Transaction ID = 788
+  Attachment ID = 1014
+  Transaction ID = 1533
   User Name = TESTER
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -2871,8 +2877,8 @@ Column 0
 @dd-mm-yy hh:mm:ss.zzzz:Procedure read_txt: dispose called with refcount = 2
 @dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure read_txt
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 591
-  Transaction ID = 788
+  Attachment ID = 1014
+  Transaction ID = 1533
   User Name = TESTER
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -5082,8 +5088,8 @@ Output Metadata:
   
 @dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure show_att
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 600
-  Transaction ID = 794
+  Attachment ID = 1023
+  Transaction ID = 1539
   User Name = SYSDBA
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -5150,8 +5156,8 @@ Column 4
 @dd-mm-yy hh:mm:ss.zzzz:Procedure show_att: dispose called with refcount = 2
 @dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure show_att
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 600
-  Transaction ID = 794
+  Attachment ID = 1023
+  Transaction ID = 1539
   User Name = SYSDBA
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -5218,8 +5224,8 @@ Column 4
 @dd-mm-yy hh:mm:ss.zzzz:Procedure show_att: dispose called with refcount = 2
 @dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure show_att
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 600
-  Transaction ID = 794
+  Attachment ID = 1023
+  Transaction ID = 1539
   User Name = SYSDBA
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -5286,8 +5292,8 @@ Column 4
 @dd-mm-yy hh:mm:ss.zzzz:Procedure show_att: dispose called with refcount = 2
 @dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure show_att
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 600
-  Transaction ID = 794
+  Attachment ID = 1023
+  Transaction ID = 1539
   User Name = SYSDBA
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -5409,8 +5415,8 @@ Output Metadata:
   
 @dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure server_info
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 600
-  Transaction ID = 794
+  Attachment ID = 1023
+  Transaction ID = 1539
   User Name = SYSDBA
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -5608,8 +5614,8 @@ Output Metadata:
   
 @dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure show_att
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 606
-  Transaction ID = 800
+  Attachment ID = 1029
+  Transaction ID = 1545
   User Name = TESTER
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -5676,8 +5682,8 @@ Column 4
 @dd-mm-yy hh:mm:ss.zzzz:Procedure show_att: dispose called with refcount = 2
 @dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure show_att
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 606
-  Transaction ID = 800
+  Attachment ID = 1029
+  Transaction ID = 1545
   User Name = TESTER
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -5744,8 +5750,8 @@ Column 4
 @dd-mm-yy hh:mm:ss.zzzz:Procedure show_att: dispose called with refcount = 2
 @dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure show_att
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 606
-  Transaction ID = 800
+  Attachment ID = 1029
+  Transaction ID = 1545
   User Name = TESTER
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -5812,8 +5818,8 @@ Column 4
 @dd-mm-yy hh:mm:ss.zzzz:Procedure show_att: dispose called with refcount = 2
 @dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure show_att
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 606
-  Transaction ID = 800
+  Attachment ID = 1029
+  Transaction ID = 1545
   User Name = TESTER
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE
@@ -5935,8 +5941,8 @@ Output Metadata:
   
 @dd-mm-yy hh:mm:ss.zzzz:Open Select Procedure server_info
 @dd-mm-yy hh:mm:ss.zzzz:External Context: 
-  Attachment ID = 606
-  Transaction ID = 800
+  Attachment ID = 1029
+  Transaction ID = 1545
   User Name = TESTER
   Database Name = /opt/firebird/4.0.1/examples/empbuild/employee.fdb
   Client Character Set = NONE

@@ -102,8 +102,13 @@ begin
     begin
       GetAttachment.ExecImmediate([isc_tpb_write, isc_tpb_nowait, isc_tpb_read_committed],
             'Create Global Temporary Table TestMe(EMP_NO Integer)');
-      GetAttachment.ExecImmediate([isc_tpb_write, isc_tpb_nowait, isc_tpb_read_committed],
-            'Create Global Temporary Table TestMe(EMP_NO Integer)');
+        try
+        GetAttachment.ExecImmediate([isc_tpb_write, isc_tpb_nowait, isc_tpb_read_committed],
+              'Create Global Temporary Table TestMe(EMP_NO Integer)');
+      finally
+        GetAttachment.ExecImmediate([isc_tpb_write, isc_tpb_nowait, isc_tpb_read_committed],
+            'Drop Table TestMe');
+      end;
     end;
 
   1:
