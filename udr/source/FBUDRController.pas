@@ -2243,13 +2243,14 @@ end;
 procedure TFBUDRController.StartJournaling(context: IFBUDRExternalContext);
 var JnlOptions: TJournalOptions;
 begin
-  JnlOptions := [joNoServerTable,joReadWriteTransactions];
+  JnlOptions := [];
   if loModifyQueries in FBUDRControllerOptions.LogOptions then
     JnlOptions := JnlOptions + [joModifyQueries];
   if loReadOnlyQueries in FBUDRControllerOptions.LogOptions then
     JnlOptions := JnlOptions + [joReadOnlyQueries];
   if JnlOptions <> [] then
   begin
+    JnlOptions := JnlOptions + [joNoServerTable,joReadWriteTransactions];
     if NeedLogStream then
       context.GetAttachment.StartJournaling(FLogStream,JnlOptions);
   end;

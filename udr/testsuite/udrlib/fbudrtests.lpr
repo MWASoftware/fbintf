@@ -50,7 +50,7 @@ begin
     ModuleName := 'fbudrtests';
     AllowConfigFileOverrides := true;
     LogFileNameTemplate := '$LOGDIR$MODULE.log';
-    LogOptions := [loLogFunctions, loLogProcedures, loLogTriggers, loDetails];
+    LogOptions := [loLogFunctions, loLogProcedures, loLogTriggers, loDetails,loModifyQueries];
   end;
 end.
 
