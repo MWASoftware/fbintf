@@ -47,7 +47,6 @@
       <Unit>
         <Filename Value="Test02.pas"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="5"/>
         <TopLine Value="84"/>
         <CursorPos Y="111"/>
@@ -76,8 +75,9 @@
       <Unit>
         <Filename Value="Test04.pas"/>
         <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="10"/>
-        <TopLine Value="104"/>
+        <TopLine Value="93"/>
         <CursorPos Y="125"/>
         <UsageCount Value="40"/>
         <Loaded Value="True"/>
@@ -485,9 +485,6 @@
       <FormatVersion Value="2"/>
       <Modes ActiveMode="default">
         <Mode Name="default">
-          <local>
-            <CommandLineParams Value="-t 1"/>
-          </local>
           <environment>
             <UserOverrides Count="2">
               <Variable0 Name="FIREBIRD" Value="/opt/firebird/4.0.1"/>
@@ -498,15 +495,16 @@
       </Modes>
     </RunParams>
     <HistoryLists>
-      <List Name="LaunchingApplication" Type="File" Count="1">
-        <Item1 Value="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+      <List Name="LaunchingApplication" Type="File" Count="2">
+        <Item2 Value="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </List>
-      <List Name="CommandLineParameters" Count="4">
-        <Item1 Value="-t 1"/>
-        <Item2 Value="-t 4"/>
-        <Item3 Value="-t 3"/>
-        <Item4 Value="-t 2"/>
+      <List Name="CommandLineParameters" Count="5">
+        <Item2 Value="-t 1"/>
+        <Item3 Value="-t 4"/>
+        <Item4 Value="-t 3"/>
+        <Item5 Value="-t 2"/>
       </List>
+      <List Name="WorkingDirectory" Type="File" Count="1"/>
     </HistoryLists>
   </ProjectSession>
 </CONFIG>
