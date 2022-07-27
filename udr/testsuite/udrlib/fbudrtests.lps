@@ -24,9 +24,8 @@
       <Unit>
         <Filename Value="udr_test02.pas"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
-        <TopLine Value="88"/>
+        <TopLine Value="119"/>
         <CursorPos X="31" Y="108"/>
         <UsageCount Value="84"/>
         <Loaded Value="True"/>
@@ -34,8 +33,9 @@
       <Unit>
         <Filename Value="udr_test03.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="4"/>
-        <TopLine Value="43"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="125"/>
         <CursorPos X="3" Y="157"/>
         <UsageCount Value="83"/>
         <Loaded Value="True"/>
@@ -334,9 +334,10 @@
       </Unit>
       <Unit>
         <Filename Value="Test02.sql"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="4"/>
         <CursorPos Y="5"/>
         <UsageCount Value="11"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="SQL"/>
       </Unit>
       <Unit>
@@ -384,7 +385,7 @@
       <Unit>
         <Filename Value="runtests.sh"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="65"/>
+        <TopLine Value="71"/>
         <CursorPos X="23" Y="77"/>
         <UsageCount Value="11"/>
         <DefaultSyntaxHighlighter Value="Bash"/>
