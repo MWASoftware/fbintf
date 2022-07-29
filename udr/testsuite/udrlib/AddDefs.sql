@@ -12,6 +12,10 @@ create or alter function UDRInfo (
     ) returns VarChar(31)
     external name 'fbudrtests!return_info!Hello World'
     engine udr;
+create or alter function GetCurDir (
+    ) returns VarChar(64)
+    external name 'fbudrtests!return_info'
+    engine udr;
 create or alter procedure MyTestProc (
       EMP_NO SMALLINT
     ) returns (Salary Numeric(10,2), FullName VarChar(36))
@@ -55,6 +59,7 @@ create or alter user TESTER password 'testing';
 grant Execute on function MyRowCount to TESTER;
 grant Execute on function BadRowCount to TESTER;
 grant Execute on function UDRInfo to TESTER;
+grant Execute on function GetCurDir to TESTER;
 grant Execute on Procedure MyTestProc to TESTER;
 grant Execute on Procedure MyErrorProc to TESTER;
 grant Execute on Procedure MySelectProc to TESTER;

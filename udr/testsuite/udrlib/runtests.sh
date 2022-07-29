@@ -44,11 +44,6 @@ fi
 
 RUNISQL="$ISQL -user SYSDBA -pass masterkey localhost:employee"
 
-#Create Test User
-$RUNISQL <<EOT
-CREATE OR ALTER USER TESTER PASSWORD 'testing';
-EOT
-
 TESTISQL="$ISQL -user TESTER -pass testing localhost:employee"
 rm libfbudrtests.so
 
@@ -88,7 +83,7 @@ else
     done
   echo "Dropping definitions"
   $RUNISQL < dropdefs.sql  
-  echo "Drop user tester;" |$RUNSQL
+
   
   
   echo "Tests Completed"

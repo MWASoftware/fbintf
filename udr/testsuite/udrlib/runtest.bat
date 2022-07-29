@@ -5,10 +5,10 @@ REM These may be modified if needed to suite local requirements
 REM Test suite Configuration parameters (FPCDIR and FPCBIN)
 REM These may be modified if needed to suite local requirements
 
-set DELPHIBIN=C:\Program Files\Embarcadero\RAD Studio\7.0\bin
+REM This script will typically need to be run as "administrator"
+
 set FBINTFROOT=..\..\..
 set FIREBIRD=
-
 FOR %%G in (4_0 3_0) do (
   if EXIST "C:\Program Files\Firebird\Firebird_%%G\firebird.exe" (
     set FIREBIRD=C:\Program Files\Firebird\Firebird_%%G
@@ -25,6 +25,7 @@ goto :EOF
 
 :FBFOUND
 echo Firebird set to %FIREBIRD%
+
 
 FOR %%V in (3.2.2 3.2.0 3.0.4 3.0.2 3.0.0) do (
   if EXIST C:\lazarus\fpc\%%V\bin\i386-win32\fpc.exe (
@@ -43,35 +44,38 @@ FOR %%V in (3.2.2 3.2.0 3.0.4 3.0.2 3.0.0) do (
     Goto COMPILE
   )
 )
+echo FPC not found
+goto :EOF
 
 :COMPILE
 
-if EXIST "%FPCBIN%\diff.exe" (
+if EXIST %FPCBIN%\diff.exe (
   set DIFF=%FPCBIN%\diff.exe
 ) ELSE (
   set DIFF=C:\Program Files\GnuWin32\bin\diff.exe
 )
 echo DIFF is %DIFF%
 
+
+
 set ISQL="%FIREBIRD%\isql.exe"
 
-if not Exist "%ISQL%" (
-  echo Unable to locate isql at %ISQL%"
-   goto :EOF
+if not Exist %ISQL% (
+  echo Unable to locate isql at %ISQL%
+  goto :EOF
 )
 echo ISQL is %ISQL%
 
-set RUNISQL="%ISQL%" -user SYSDBA -pass masterkey localhost:employee
-set RUNTESTERISQL="%ISQL%" -user TESTER -pass testing localhost:employee
+set RUNISQL=%ISQL% -user SYSDBA -pass masterkey localhost:employee
+set RUNTESTERISQL=%ISQL% -user TESTER -pass testing localhost:employee
 echo Run command is %RUNISQL%
 
-
-IF EXIST "%DELPHIBIN%\dcc32.exe" (
 rd /s /q testunits
 mkdir testunits
 del fbudrtests.dll
-"%DELPHIBIN%\dcc32" -B -E. -N0testunits -I../../../client/3.0/firebird ../../../client/include  -U../../../client ../../../client/3.0/firebird  . ../../../client/3.0 ../../source ../../.. fbudrtests.dpr
-)
+%FPCBIN%\fpcmake
+%FPCBIN%\make clean
+%FPCBIN%\make
 
 if not Exist fbudrtests.dll (
   echo Unable to find fbudrtests.dll
@@ -109,6 +113,7 @@ for %%f in (Test*.sql) do (
    %RUNISQL%  >>testout.log 2>&1 < %%f
    echo(
    echo Running with User TESTER
+   echo Running with User TESTER  >>testout.log
    %RUNTESTERISQL%  >>testout.log 2>&1 < %%f
 )
 echo Dropping definitions
@@ -118,7 +123,7 @@ echo Tests Completed
 echo UDR Log Contents  >>testout.log
 echo ----------------  >>testout.log
 copy /b testout.log+"%FIREBIRD%\fbudrtests.log" testout2.log
-  
+
 
 echo Comparing results with reference log
 
@@ -126,8 +131,6 @@ echo Comparing results with reference log
 
 type diff.log
 
-IF EXIST "%DELPHIBIN%\dcc32" (
 rd /s /q testunits
 
-)
 

@@ -123,7 +123,10 @@ function TReturnInfoFunction.Execute(context: IFBUDRExternalContext;
   ProcMetadata: IFBUDRProcMetadata; InputParams: IFBUDRInputParams;
   ResultSQLType: cardinal): variant;
 begin
-  Result := ProcMetadata.getInfo;
+  if ProcMetadata.getInfo <> '' then
+    Result := ProcMetadata.getInfo
+  else
+    Result := GetCurrentDir;
 end;
 
 { TBadRowCountFunction }
