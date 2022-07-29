@@ -150,7 +150,7 @@ procedure TReadTextFile.InitProcedure;
 begin
   inherited InitProcedure;
   {$ifdef unix}
-  FDefaultDir := GetCurrentDir;
+  FDefaultDir := GetTempDir;
   {$else}
   if FDefaultDir = '' then
     FDefaultDir := GetSpecialFolder(CSIDL_COMMON_APPDATA);
