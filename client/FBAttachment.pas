@@ -826,7 +826,7 @@ end;
 
 constructor TFBJournaling.Create;
 begin
-  inherited;
+  inherited Create;
   FCriticalSection := TCriticalSection.Create;
 end;
 

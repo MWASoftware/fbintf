@@ -10,12 +10,12 @@ set FBINTFROOT=..\..\..
 set FIREBIRD=
 
 FOR %%G in (4_0 3_0) do (
-  if EXIST "C:\Program Files\Firebird\Firebird_%%G\firebird.exe" (
-    set FIREBIRD=C:\Program Files\Firebird\Firebird_%%G
+  if EXIST "%ProgramFiles%\Firebird\Firebird_%%G\firebird.exe" (
+    set FIREBIRD="%ProgramFiles%\Firebird\Firebird_%%G"
     goto FBFOUND
   )
-  if EXIST "C:\Program Files (x86)\Firebird\Firebird_%%G\firebird.exe" (
-    set FIREBIRD=C:\Program Files ^(x86^)\Firebird\Firebird_%%G
+  if EXIST "%ProgramFiles(x86)%\Firebird\Firebird_%%G\firebird.exe" (
+    set FIREBIRD="%ProgramFiles(x86)%\Firebird\Firebird_%%G"
     goto FBFOUND
  )
 )
@@ -24,6 +24,8 @@ echo Unable to locate Firebird
 goto :EOF
 
 :FBFOUND
+rem remove double quotes
+set FIREBIRD=%FIREBIRD:~1,-1%
 echo Firebird set to %FIREBIRD%
 
 FOR %%V in (3.2.2 3.2.0 3.0.4 3.0.2 3.0.0) do (
@@ -55,14 +57,14 @@ echo DIFF is %DIFF%
 
 set ISQL="%FIREBIRD%\isql.exe"
 
-if not Exist "%ISQL%" (
-  echo Unable to locate isql at %ISQL%"
+if not Exist %ISQL% (
+  echo Unable to locate isql at %ISQL%
    goto :EOF
 )
 echo ISQL is %ISQL%
 
-set RUNISQL="%ISQL%" -user SYSDBA -pass masterkey localhost:employee
-set RUNTESTERISQL="%ISQL%" -user TESTER -pass testing localhost:employee
+set RUNISQL=%ISQL% -user SYSDBA -pass masterkey localhost:employee
+set RUNTESTERISQL=%ISQL% -user TESTER -pass testing localhost:employee
 echo Run command is %RUNISQL%
 
 
@@ -79,7 +81,10 @@ if not Exist fbudrtests.dll (
 )
 
 net stop "Firebird Server - DefaultInstance"
+copy /y testtext.txt  "%ProgramData%"
+copy /y test.empty "%ProgramData%"
 copy /y fbudrtests.dll "%FIREBIRD%\plugins\udr"
+
 IF ERRORLEVEL 1 (
   echo Copy to udr directory failed
   goto :EOF
@@ -130,4 +135,6 @@ IF EXIST "%DELPHIBIN%\dcc32" (
 rd /s /q testunits
 
 )
+del "%ProgramData%\testtext.txt"
+del  "%ProgramData%\test.empty"
 

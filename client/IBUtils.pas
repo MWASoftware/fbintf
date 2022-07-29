@@ -2192,7 +2192,7 @@ end;
 
 procedure TSQLXMLReader.ProcessTagValue(tagValue: AnsiString);
 
-  function nibble(hex: char): byte;
+  function nibble(hex: AnsiChar): byte;
   begin
     case hex of
     '0': Result := 0;
@@ -2244,7 +2244,11 @@ procedure TSQLXMLReader.ProcessTagValue(tagValue: AnsiString);
     if odd(length(hexData)) then
       ShowError(sBinaryBlockMustbeEven,[nil]);
     blength := Length(hexData) div 2;
+    {$ifdef FPC}
     BlobBuffer := GetMem(blength);
+    {$else}
+    GetMem(BlobBuffer,blength);
+    {$endif}
     try
       j := 1;
       P := BlobBuffer;

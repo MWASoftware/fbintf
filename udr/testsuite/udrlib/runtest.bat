@@ -9,13 +9,14 @@ REM This script will typically need to be run as "administrator"
 
 set FBINTFROOT=..\..\..
 set FIREBIRD=
+
 FOR %%G in (4_0 3_0) do (
   if EXIST "%ProgramFiles%\Firebird\Firebird_%%G\firebird.exe" (
-    set FIREBIRD=%ProgramFiles%\Firebird\Firebird_%%G
+    set FIREBIRD="%ProgramFiles%\Firebird\Firebird_%%G"
     goto FBFOUND
   )
   if EXIST "%ProgramFiles(x86)%\Firebird\Firebird_%%G\firebird.exe" (
-    set FIREBIRD=%ProgramFiles(x86)%\Firebird\Firebird_%%G
+    set FIREBIRD="%ProgramFiles(x86)%\Firebird\Firebird_%%G"
     goto FBFOUND
  )
 )
@@ -24,6 +25,8 @@ echo Unable to locate Firebird
 goto :EOF
 
 :FBFOUND
+rem remove double quotes
+set FIREBIRD=%FIREBIRD:~1,-1%
 echo Firebird set to %FIREBIRD%
 
 
@@ -83,8 +86,11 @@ if not Exist fbudrtests.dll (
 )
 
 net stop "Firebird Server - DefaultInstance"
-copy /y fbudrtests.dll testtext.txt test.empty "%FIREBIRD%\plugins\udr"
+copy /y testtext.txt  "%ProgramData%"
+copy /y test.empty "%ProgramData%"
+copy /y fbudrtests.dll "%FIREBIRD%\plugins\udr"
 IF ERRORLEVEL 1 (
+
   echo Copy to udr directory failed
   goto :EOF
 )
@@ -132,6 +138,7 @@ echo Comparing results with reference log
 type diff.log
 
 rd /s /q testunits
-del "%FIREBIRD%\plugins\udr"\testtext.txt "%FIREBIRD%\plugins\udr"\test.empty
+del "%ProgramData%\testtext.txt"
+del  "%ProgramData%\test.empty"
 
 

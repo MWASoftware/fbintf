@@ -139,6 +139,13 @@ begin
   finally
     ReturnInfo.Free;
   end;
+  ReturnInfo := UDRPlugin.makeFunction('GETCURDIR','','fbudrtests!return_info');
+  try
+    Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
+    writeln(OutFile,'Info returned = ',ReturnInfo.Execute(Transaction).AsString);
+  finally
+    ReturnInfo.Free;
+  end;
 end;
 
 function TTest01.GetTestID: AnsiString;

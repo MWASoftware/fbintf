@@ -4,7 +4,7 @@
     </PropertyGroup>
     <ItemGroup>
         <Projects Include="fbudrtests.dproj">
-            <Dependencies>..\..\..\fbintf.dproj;..\..\..\fbudr.dproj</Dependencies>
+            <Dependencies>..\..\..\fbudr.dproj;..\..\..\fbintf.dproj</Dependencies>
         </Projects>
         <Projects Include="..\..\..\fbudr.dproj">
             <Dependencies>..\..\..\fbintf.dproj</Dependencies>
@@ -20,13 +20,13 @@
             <Default.Personality/>
         </BorlandProject>
     </ProjectExtensions>
-    <Target Name="fbudrtests" DependsOnTargets="fbintf;fbudr">
+    <Target Name="fbudrtests" DependsOnTargets="fbudr;fbintf">
         <MSBuild Projects="fbudrtests.dproj"/>
     </Target>
-    <Target Name="fbudrtests:Clean" DependsOnTargets="fbintf:Clean;fbudr:Clean">
+    <Target Name="fbudrtests:Clean" DependsOnTargets="fbudr:Clean;fbintf:Clean">
         <MSBuild Projects="fbudrtests.dproj" Targets="Clean"/>
     </Target>
-    <Target Name="fbudrtests:Make" DependsOnTargets="fbintf:Make;fbudr:Make">
+    <Target Name="fbudrtests:Make" DependsOnTargets="fbudr:Make;fbintf:Make">
         <MSBuild Projects="fbudrtests.dproj" Targets="Make"/>
     </Target>
     <Target Name="fbudr" DependsOnTargets="fbintf">

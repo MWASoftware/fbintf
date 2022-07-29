@@ -2112,7 +2112,7 @@ begin
       AsBoolean := Value;
     varDate:
       AsDateTime := Value;
-    varOleStr, varString:
+    varOleStr, varString {$if declared(varUString)}, varUString {$ifend}:
       AsString := Value;
     varArray:
       IBError(ibxeNotSupported, [nil]);
