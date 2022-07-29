@@ -35,7 +35,7 @@
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
-        <UsePackages>true</UsePackages>
+        <VerInfo_Locale>2057</VerInfo_Locale>
         <GenDll>true</GenDll>
         <SanitizedProjectName>fbudrtests</SanitizedProjectName>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;$(DCC_Namespace)</DCC_Namespace>
@@ -63,8 +63,10 @@
         <DCC_RemoteDebug>true</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+        <DCC_BplOutput>..\..\..\$(Platform)\$(Config)</DCC_BplOutput>
+        <DCC_UnitSearchPath>..\..\..\$(Platform)\$(Config);.;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <DCC_ExeOutput>.</DCC_ExeOutput>
-        <DCC_DcpOutput>.\$(Platform)\$(Config)</DCC_DcpOutput>
+        <DCC_DcpOutput>..\..\..\$(Platform)\$(Config)</DCC_DcpOutput>
         <Manifest_File>(None)</Manifest_File>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>

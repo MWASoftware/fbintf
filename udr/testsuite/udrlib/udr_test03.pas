@@ -164,6 +164,9 @@ begin
   Result := GetWindowsSpecialDir(CSIDL);
 end;
 {$ELSE}
+{$if not declared(MAX_PATH)}
+const MAX_PATH=25;
+{$ifend}
 var
   RecPath : PChar;
 begin

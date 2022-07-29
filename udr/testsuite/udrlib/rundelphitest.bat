@@ -11,11 +11,11 @@ set FIREBIRD=
 
 FOR %%G in (4_0 3_0) do (
   if EXIST "%ProgramFiles%\Firebird\Firebird_%%G\firebird.exe" (
-    set FIREBIRD=%ProgramFiles%\Firebird\Firebird_%%G
+    set FIREBIRD="%ProgramFiles%\Firebird\Firebird_%%G"
     goto FBFOUND
   )
   if EXIST "%ProgramFiles(x86)%\Firebird\Firebird_%%G\firebird.exe" (
-    set FIREBIRD=%ProgramFiles^(x86^)%\Firebird\Firebird_%%G
+    set FIREBIRD="%ProgramFiles(x86)%\Firebird\Firebird_%%G"
     goto FBFOUND
  )
 )
@@ -24,6 +24,8 @@ echo Unable to locate Firebird
 goto :EOF
 
 :FBFOUND
+rem remove double quotes
+set FIREBIRD=%FIREBIRD:~1,-1%
 echo Firebird set to %FIREBIRD%
 
 FOR %%V in (3.2.2 3.2.0 3.0.4 3.0.2 3.0.0) do (
@@ -55,14 +57,14 @@ echo DIFF is %DIFF%
 
 set ISQL="%FIREBIRD%\isql.exe"
 
-if not Exist "%ISQL%" (
-  echo Unable to locate isql at %ISQL%"
+if not Exist %ISQL% (
+  echo Unable to locate isql at %ISQL%
    goto :EOF
 )
 echo ISQL is %ISQL%
 
-set RUNISQL="%ISQL%" -user SYSDBA -pass masterkey localhost:employee
-set RUNTESTERISQL="%ISQL%" -user TESTER -pass testing localhost:employee
+set RUNISQL=%ISQL% -user SYSDBA -pass masterkey localhost:employee
+set RUNTESTERISQL=%ISQL% -user TESTER -pass testing localhost:employee
 echo Run command is %RUNISQL%
 
 
