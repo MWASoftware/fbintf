@@ -41,6 +41,8 @@ if [ ! -x $ISQL ]; then
   echo "Unable to find isql utility"
   exit 1
 fi
+TMP=$(dirname $(mktemp -u))
+cp testtext.txt test.empty $TMP
 
 RUNISQL="$ISQL -user SYSDBA -pass masterkey localhost:employee"
 
@@ -83,7 +85,7 @@ else
     done
   echo "Dropping definitions"
   $RUNISQL < dropdefs.sql  
-
+rm -f $TMP/testtext.txt $TMP/test.empty
   
   
   echo "Tests Completed"
