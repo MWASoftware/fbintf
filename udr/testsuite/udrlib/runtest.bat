@@ -15,7 +15,7 @@ FOR %%G in (4_0 3_0) do (
     goto FBFOUND
   )
   if EXIST "%ProgramFiles(x86)%\Firebird\Firebird_%%G\firebird.exe" (
-    set FIREBIRD=%ProgramFiles(x86)%\Firebird\Firebird_%%G
+    set FIREBIRD=%ProgramFiles^(x86^)%\Firebird\Firebird_%%G
     goto FBFOUND
  )
 )
@@ -83,8 +83,11 @@ if not Exist fbudrtests.dll (
 )
 
 net stop "Firebird Server - DefaultInstance"
+copy /y testtext.txt  "%ProgramData%"
+copy /y test.empty "%ProgramData%"
 copy /y fbudrtests.dll testtext.txt test.empty "%FIREBIRD%\plugins\udr"
 IF ERRORLEVEL 1 (
+
   echo Copy to udr directory failed
   goto :EOF
 )
@@ -132,6 +135,7 @@ echo Comparing results with reference log
 type diff.log
 
 rd /s /q testunits
-del "%FIREBIRD%\plugins\udr"\testtext.txt "%FIREBIRD%\plugins\udr"\test.empty
+del "%ProgramData%\testtext.txt"
+del  "%ProgramData%\test.empty"
 
 

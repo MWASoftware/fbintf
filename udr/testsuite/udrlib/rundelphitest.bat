@@ -10,12 +10,12 @@ set FBINTFROOT=..\..\..
 set FIREBIRD=
 
 FOR %%G in (4_0 3_0) do (
-  if EXIST "C:\Program Files\Firebird\Firebird_%%G\firebird.exe" (
-    set FIREBIRD=C:\Program Files\Firebird\Firebird_%%G
+  if EXIST "%ProgramFiles%\Firebird\Firebird_%%G\firebird.exe" (
+    set FIREBIRD=%ProgramFiles%\Firebird\Firebird_%%G
     goto FBFOUND
   )
-  if EXIST "C:\Program Files (x86)\Firebird\Firebird_%%G\firebird.exe" (
-    set FIREBIRD=C:\Program Files ^(x86^)\Firebird\Firebird_%%G
+  if EXIST "%ProgramFiles(x86)%\Firebird\Firebird_%%G\firebird.exe" (
+    set FIREBIRD=%ProgramFiles^(x86^)%\Firebird\Firebird_%%G
     goto FBFOUND
  )
 )
@@ -79,7 +79,10 @@ if not Exist fbudrtests.dll (
 )
 
 net stop "Firebird Server - DefaultInstance"
+copy /y testtext.txt  "%ProgramData%"
+copy /y test.empty "%ProgramData%"
 copy /y fbudrtests.dll "%FIREBIRD%\plugins\udr"
+
 IF ERRORLEVEL 1 (
   echo Copy to udr directory failed
   goto :EOF
@@ -130,4 +133,6 @@ IF EXIST "%DELPHIBIN%\dcc32" (
 rd /s /q testunits
 
 )
+del "%ProgramData%\testtext.txt"
+del  "%ProgramData%\test.empty"
 

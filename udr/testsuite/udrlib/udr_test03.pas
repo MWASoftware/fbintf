@@ -85,7 +85,12 @@ type
   TReadTextFile  = class(TFBUDRSelectProcedure)
     private
       FTextFile: TStreamReader;
+      FDefaultDir: string;
+      {$ifndef unix}
+      function GetSpecialFolder(const CSIDL: integer) : string;
+      {$endif}
     public
+      procedure InitProcedure; override;
       procedure open(context: IFBUDRExternalContext;
                        ProcMetadata: IFBUDRProcMetadata;
                        InputParams: IFBUDRInputParams);  override;
@@ -94,6 +99,15 @@ type
     end;
 
 implementation
+
+{$IFDEF FPC}
+{$IFDEF WINDOWS }
+uses WinDirs;
+{$ENDIF}
+{$ELSE}
+uses ShlObj;
+{$ENDIF}
+
 
 { TMySelectProcedure }
 
@@ -132,6 +146,40 @@ begin
   FResults := nil;
 end;
 
+procedure TReadTextFile.InitProcedure;
+begin
+  inherited InitProcedure;
+  {$ifdef unix}
+  FDefaultDir := GetCurrentDir;
+  {$else}
+  if FDefaultDir = '' then
+    FDefaultDir := GetSpecialFolder(CSIDL_COMMON_APPDATA);
+  {$endif}
+end;
+
+{$ifndef unix}
+function TReadTextFile.GetSpecialFolder(const CSIDL: integer): string;
+{$IFDEF FPC}
+begin
+  Result := GetWindowsSpecialDir(CSIDL);
+end;
+{$ELSE}
+var
+  RecPath : PChar;
+begin
+  RecPath := StrAlloc(MAX_PATH);
+  try
+  FillChar(RecPath^, MAX_PATH, 0);
+  if SHGetSpecialFolderPath(0, RecPath, CSIDL, false)
+    then result := RecPath
+    else result := '';
+  finally
+    StrDispose(RecPath);
+  end;
+end;
+{$ENDIF}
+{$endif}
+
 procedure TReadTextFile.open(context: IFBUDRExternalContext;
                  ProcMetadata: IFBUDRProcMetadata;
                  InputParams: IFBUDRInputParams);
@@ -140,7 +188,7 @@ var aFileName: AnsiString;
 
 begin
   context.WriteToLog('Read Text called in directory '+ GetCurrentDir);
-  aFileName := InputParams.ByName('path').AsString;
+  aFileName := FDefaultDir + DirectorySeparator + InputParams.ByName('path').AsString;
   if not FileExists(aFileName) then
     raise Exception.CreateFmt('Unable to find file "%s"',[aFileName]);
   context.WriteToLog('Reading from ' + aFileName);
