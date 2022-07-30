@@ -205,7 +205,7 @@
       <Unit25>
         <Filename Value="Test22.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="3"/>
         <TopLine Value="202"/>
         <CursorPos X="63" Y="211"/>
         <UsageCount Value="137"/>
@@ -234,9 +234,10 @@
       </Unit28>
       <Unit29>
         <Filename Value="../client/FBSQLData.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="768"/>
-        <CursorPos Y="782"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="1689"/>
+        <CursorPos X="3" Y="1699"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
@@ -244,6 +245,7 @@
           <CursorPos X="3" Y="1658"/>
         </ExtraEditor1>
         <UsageCount Value="37"/>
+        <Loaded Value="True"/>
       </Unit29>
       <Unit30>
         <Filename Value="../client/FBMessages.pas"/>
@@ -301,9 +303,8 @@
       </Unit35>
       <Unit36>
         <Filename Value="../client/FBAttachment.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="665"/>
+        <TopLine Value="671"/>
         <CursorPos X="24" Y="703"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
@@ -1067,7 +1068,7 @@
         <UsageCount Value="9"/>
       </Unit139>
     </Units>
-    <JumpHistory Count="15" HistoryIndex="14">
+    <JumpHistory Count="19" HistoryIndex="18">
       <Position1>
         <Filename Value="../client/FBAttachment.pas"/>
         <Caret Line="627" Column="40" TopLine="625"/>
@@ -1128,12 +1129,27 @@
         <Filename Value="../client/FBAttachment.pas"/>
         <Caret Line="115" Column="15" TopLine="115"/>
       </Position15>
+      <Position16>
+        <Filename Value="../client/FBSQLData.pas"/>
+        <Caret Line="779" Column="27" TopLine="768"/>
+      </Position16>
+      <Position17>
+        <Filename Value="../client/FBSQLData.pas"/>
+        <Caret Line="2099" Column="42" TopLine="2091"/>
+      </Position17>
+      <Position18>
+        <Filename Value="../client/FBSQLData.pas"/>
+      </Position18>
+      <Position19>
+        <Filename Value="../client/FBSQLData.pas"/>
+        <Caret Line="182" Column="27" TopLine="157"/>
+      </Position19>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
       <Modes ActiveMode="default"/>
     </RunParams>
-    <HistoryLists Count="3">
+    <HistoryLists Count="2">
       <List0 Name="LaunchingApplication" Type="File" Count="1">
         <Item1 Value="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </List0>

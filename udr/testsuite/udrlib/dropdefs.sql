@@ -1,6 +1,7 @@
 drop function MyRowCount;
 drop function BadRowCount;
 drop function UDRInfo;
+drop function GetCurDir;
 drop procedure MyTestProc;
 drop procedure MyErrorProc;
 drop procedure MySelectProc;
