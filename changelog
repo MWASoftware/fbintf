@@ -1,4 +1,4 @@
-FBINTF Change Log  version          (1.4-0 Build 13871) Fri, 29 Jul 2022 23:29:51 +0100
+FBINTF Change Log  version          (1.4-0 Build 13959) Sat, 30 Jul 2022 15:05:54 +0100
 
 1. Support package fbudr added for support of User Defined Routines (UDRs), and package
    fbudrtestbed for client side debugging of UDR libraries.
@@ -109,6 +109,8 @@ FBINTF Change Log  version          (1.4-0 Build 13871) Fri, 29 Jul 2022 23:29:5
 20. IDBInformation.DecodeVersionString now supported isc_info_firebird_version.
 
 21. TSQLXMLReader: handle 'blob' as a reserved word
+
+22. ISQLParam.SetAsVariant now accepts a vartype of varUString (UnicodeString).
 
 
 FBINTF Change Log  version          (1.3-3 Build 12935) Mon, 06 Dec 2021 23:17:13 +0000
