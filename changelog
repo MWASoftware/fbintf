@@ -1,4 +1,4 @@
-FBINTF Change Log  version          (1.4-0 Build 13979) Sat, 17 Jun 2023 15:14:25 +0100
+FBINTF Change Log  version          (1.4-0 Build 13987) Thu, 22 Jun 2023 13:49:39 +0100
 
 1. Support package fbudr added for support of User Defined Routines (UDRs), and package
    fbudrtestbed for client side debugging of UDR libraries.
