@@ -1,4 +1,4 @@
-FBINTF Change Log  version          (1.4-1 Build 14011) Sat, 05 Aug 2023 11:09:09 +0100
+FBINTF Change Log  version          (1.4-1 Build 14019) Sat, 05 Aug 2023 13:21:51 +0100
 
 1. FBSQLData: ensure that TResults.getSQLData and TResults.GetData use same error
    checks for range checking.
