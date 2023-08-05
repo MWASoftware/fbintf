@@ -3440,6 +3440,13 @@ procedure TResults.GetData(index: integer; var IsNull: boolean; var len: short;
   var data: PByte);
 begin
   CheckActive;
+  if FResults.CheckStatementStatus(ssBOF) then
+    IBError(ibxeBOF,[nil]);
+  if FResults.CheckStatementStatus(ssEOF) then
+    IBError(ibxeEOF,[nil]);
+  if (index < 0) or (index >= FResults.Count) then
+    IBError(ibxeInvalidColumnIndex,[nil]);
+
   FResults.GetData(index,IsNull, len,data);
 end;
 
