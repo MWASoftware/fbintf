@@ -9,6 +9,8 @@ Running Test 1: Create and Drop a Database
 Creating a Database with empty parameters
 Create Database fails (as expected): Engine Code: 335544344
 I/O error during "open O_CREAT" operation for file ""
+-Error while trying to create file
+-No such file or directory
 Creating a Database using an SQL Statement
 Database ID = 4 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = zeus
 SQL Dialect = 3
@@ -535,12 +537,12 @@ Running Test 3: ad hoc queries
 Opening localhost:employee
 Database Open
 Employee Count = 42
-Transaction ID = 6470
+Transaction ID = 7188
 Transaction is Read/Write
-Transaction ID = 6470
-Oldest Interesting = 6318
-Oldest Action = 6469
-Oldest Snapshot = 6469
+Transaction ID = 7188
+Oldest Interesting = 7165
+Oldest Action = 7187
+Oldest Snapshot = 7187
 Oldest Interesting = 0
 Employee Count = 41
 Employee Count = 42
@@ -572,10 +574,10 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 937,552
+Current memory = 937,536
 Delta memory = 1,288
-Max memory = 965,624
-Elapsed time= 0.001 sec
+Max memory = 965,600
+Elapsed time= 0.002 sec
 Cpu = 0.000 sec
 Buffers = 75
 Reads = 0
@@ -2777,16 +2779,13 @@ Async Wait Called
 Event Signalled
 First Event - usually ignored
 Signal Event
-Event Signalled
 Event Counts: TESTEVENT, Count = 1
 Two more events
 Call Async Wait
 Async Wait Called
 Event Signalled
-Deferred Events Caught
-Event Counts: TESTEVENT, Count = 2
 Signal Event
-Event Counts: TESTEVENT, Count = 1
+Event Counts: TESTEVENT, Count = 2
 Async Wait: Test Cancel
 Event Signalled
 Async Wait Called
@@ -2794,7 +2793,7 @@ Event Cancelled
 Time Out - Cancel Worked!
 Sync wait
 Event Signalled
-Event Counts: TESTEVENT, Count = 1
+Event Counts: TESTEVENT, Count = 2
 
 
 ------------------------------------------------------
@@ -2826,6 +2825,7 @@ Group ID = 0
 
 Licence Info: Engine Code: 335544378
 feature is not supported
+-feature is not supported
 
 Licence Mask Info: Engine Code: 335544378
 feature is not supported
@@ -3119,6 +3119,8 @@ Error Handled: SQLCODE: -902
 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
 Engine Code: 335544344
 I/O error during "open" operation for file "Malformed Name"
+-Error while trying to open file
+-No such file or directory
 Invalid User Name Test
 Error Handled: SQLCODE: -902
 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
@@ -3133,12 +3135,20 @@ Invalid Prepare SQL Test
 Error Handled: SQLCODE: -206
 Column does not belong to referenced table
 Engine Code: 335544569
-Dynamic SQL Error When Executing: Update Employee Set Unknown_Date = ? Where EMP_NO = ?
+Dynamic SQL Error
+-SQL error code = -206
+-Column unknown
+-UNKNOWN_DATE
+-At line 1, column 21 When Executing: Update Employee Set Unknown_Date = ? Where EMP_NO = ?
 Invalid Open Cursor SQL Test
 Error Handled: SQLCODE: -206
 Column does not belong to referenced table
 Engine Code: 335544569
-Dynamic SQL Error When Executing: Select X,count(*) As Counter from EMPLOYEE
+Dynamic SQL Error
+-SQL error code = -206
+-Column unknown
+-X
+-At line 1, column 8 When Executing: Select X,count(*) As Counter from EMPLOYEE
 Transaction not started Test
 Error Handled: Transaction is not active
 Invalid Param SQL Type Test
@@ -3164,7 +3174,8 @@ Invalid Server Name Test
 Error Handled: SQLCODE: -902
 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
 Engine Code: 335544721
-Unable to complete network request to host "unknown"
+Unable to complete network request to host "unknown".
+-Failed to locate host machine
 Invalid User Name Test
 Error Handled: SQLCODE: -902
 Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
@@ -3395,10 +3406,14 @@ Expected Error - SQLCODE: -303
 Incompatible column/host variable data type
 Engine Code: 335544569
 Dynamic SQL Error
+-SQL error code = -303
+-conversion error from string "1,000"
 Expected Error - SQLCODE: -303
 Incompatible column/host variable data type
 Engine Code: 335544569
 Dynamic SQL Error
+-SQL error code = -303
+-conversion error from string "10.0.0"
 Test Numeric Type
 ROWID = 1
 ITYPE = 101
@@ -3596,12 +3611,12 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 8
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2022/07/18 14:42:19.7840
+IBX$CREATED = 2023/09/11 14:36:04.2480
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 10
 IBX$OLDTRANSACTIONID = 9
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2022/07/18 14:42:19.8630
+IBX$CREATED = 2023/09/11 14:36:04.3260
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)

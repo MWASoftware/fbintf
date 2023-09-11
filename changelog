@@ -3,6 +3,9 @@ FBINTF Change Log  version          (1.4-1 Build 14019) Sat, 05 Aug 2023 13:21:5
 1. FBSQLData: ensure that TResults.getSQLData and TResults.GetData use same error
    checks for range checking.
 
+2. FB25Client: In GetIBMessage, fb_interpret is now called multiple times such that
+   any additional error information is decoded.
+
 FBINTF Change Log  version          (1.4-0 Build 14011) Sat, 05 Aug 2023 11:09:09 +0100
 
 1. Support package fbudr added for support of User Defined Routines (UDRs), and package

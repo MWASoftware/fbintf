@@ -334,8 +334,12 @@ begin
   with FOwner as TFB25ClientAPI do
   if assigned(fb_interpret) then
   begin
-    if fb_interpret(@local_buffer,sizeof(local_buffer),@psb) > 0 then
-       Result := strpas(local_buffer);
+    while fb_interpret(@local_buffer,sizeof(local_buffer),@psb) > 0 do
+    begin
+      if (Result <> '') and (Result[Length(Result)] <> LF) then
+        Result := Result + LineEnding + '-';
+      Result := Result + strpas(local_buffer);
+    end;
   end
   else
   if assigned(isc_interprete) then
