@@ -124,7 +124,6 @@ type
     FOwner: TFBClientAPI;
     function GetIBMessage: Ansistring; virtual; abstract;
     function GetSQLMessage: Ansistring;
-    procedure GuessCodePage(s: RawByteString);
   public
     constructor Create(aOwner: TFBClientAPI; prefix: AnsiString='');
     constructor Copy(src: TFBStatus);
@@ -632,15 +631,6 @@ begin
      FOwner.isc_sql_interprete(Getsqlcode, local_buffer, sizeof(local_buffer));
      Result := strpas(local_buffer);
   end;
-end;
-
-procedure TFBStatus.GuessCodePage(s: RawByteString);
-{$I 'include/lazutf8.inc'}
-begin
-  if FindInvalidUTF8Codepoint(PAnsiChar(s),length(s),true) = -1 then
-    SetCodePage(s,cp_utf8,false)
-  else
-    SetCodePage(s,cp_acp,false);
 end;
 
 constructor TFBStatus.Create(aOwner: TFBClientAPI; prefix: AnsiString);

@@ -499,7 +499,7 @@ var local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
 begin
   Result := '';
   if UtilIntf.formatStatus(@local_buffer,sizeof(local_buffer) - 1,Status) > 0 then
-    Result := strpas(local_buffer);
+    Result := BufferToString(local_buffer);
 end;
 
 function TFB30ClientAPI.InErrorState: boolean;

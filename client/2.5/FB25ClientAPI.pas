@@ -328,30 +328,27 @@ threadvar
 function TFB25Status.GetIBMessage: Ansistring;
 var psb: PStatusVector;
     local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
-    msg: RawByteString;
 begin
   psb := StatusVector;
-  msg := '';
+  Result := '';
   with FOwner as TFB25ClientAPI do
   if assigned(fb_interpret) then
   begin
     while fb_interpret(@local_buffer,sizeof(local_buffer),@psb) > 0 do
     begin
-      if (msg <> '') and (msg[Length(msg)] <> LF) then
-        msg := msg + LineEnding + '-';
-      msg := msg + strpas(local_buffer);
+      if (Result <> '') and (Result[Length(Result)] <> LF) then
+        Result := Result + LineEnding + '-';
+      Result := Result + BufferToString(local_buffer);
     end;
   end
   else
   if assigned(isc_interprete) then
   while isc_interprete(@local_buffer,@psb) > 0 do
   begin
-    if (msg <> '') and (msg[Length(msg)] <> LF) then
-      msg := msg + LineEnding + '-';
-    msg := msg + strpas(local_buffer);
+    if (Result <> '') and (Result[Length(Result)] <> LF) then
+      Result := Result + LineEnding + '-';
+    Result := Result + BufferToString(local_buffer);
   end;
-  GuessCodePage(msg);
-  Result := msg;
 end;
 
 function TFB25Status.Clone: IStatus;

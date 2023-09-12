@@ -809,6 +809,8 @@ function DecodeTimeZoneOffset(TZOffset: AnsiString; var dstOffset: integer): boo
 function StripLeadingZeros(Value: AnsiString): AnsiString;
 function StringToHex(octetString: string; MaxLineLength: integer=0): string; overload;
 procedure StringToHex(octetString: string; TextOut: TStrings; MaxLineLength: integer=0); overload;
+procedure GuessCodePage(s: RawByteString);
+function BufferToString(buff: PAnsiChar): AnsiString;
 
 
 implementation
@@ -2065,6 +2067,24 @@ end;
 procedure StringToHex(octetString: string; TextOut: TStrings; MaxLineLength: integer); overload;
 begin
     TextOut.Add(StringToHex(octetString,MaxLineLength));
+end;
+
+procedure GuessCodePage(s: RawByteString);
+{$I 'include/lazutf8.inc'}
+begin
+  if FindInvalidUTF8Codepoint(PAnsiChar(s),length(s),true) = -1 then
+    SetCodePage(s,cp_utf8,false)
+  else
+    SetCodePage(s,cp_acp,false);
+end;
+
+function BufferToString(buff: PAnsiChar): AnsiString;
+var s: RawByteString;
+begin
+  SetLength(s,strlen(buff));
+  Move(buff,s[1],strlen(buff));
+  GuessCodePage(s);
+  Result := s;
 end;
 
 { TSQLXMLReader }
