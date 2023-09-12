@@ -127,6 +127,9 @@ begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   Statement := Attachment.Prepare(Transaction,'Select * from TestData');
   ReportResults(Statement);
+  write(Outfile,'Test Exception Message = ');
+  PrintHexString(Attachment.OpenCursorAtStart(Transaction,'Select RDB$MESSAGE From RDB$EXCEPTIONS Where RDB$EXCEPTION_NAME = ''CHARSETTEST''',[])[0].AsString);
+  writeln(OutFile);
   try
     Attachment.ExecuteSQL([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],'Execute Procedure DoException',[]);
   except On E:Exception do
