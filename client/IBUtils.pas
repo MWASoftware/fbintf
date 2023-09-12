@@ -2082,7 +2082,7 @@ function BufferToString(buff: PAnsiChar): AnsiString;
 var s: RawByteString;
 begin
   SetLength(s,strlen(buff));
-  Move(buff,s[1],strlen(buff));
+  Move(buff^,s[1],strlen(buff));
   GuessCodePage(s);
   Result := s;
 end;
