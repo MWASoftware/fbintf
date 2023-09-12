@@ -130,6 +130,7 @@ type
     FMetadataSize: short; {size of field from metadata}
     FXSQLVAR: PXSQLVAR;       { Points to the PXSQLVAR in the owner object }
   protected
+    function CanChangeSQLType: boolean;
     function GetSQLType: cardinal; override;
     function GetSubtype: integer; override;
     function GetAliasName: AnsiString;  override;
@@ -145,6 +146,7 @@ type
     function GetSize: cardinal; override;
     function GetDefaultTextSQLType: cardinal; override;
     procedure SetIsNull(Value: Boolean); override;
+    procedure SetMetaSize(aValue: cardinal); override;
     procedure SetIsNullable(Value: Boolean);  override;
     procedure SetSQLData(AValue: PByte; len: cardinal); override;
     procedure InternalSetScale(aValue: integer); override;
@@ -296,6 +298,11 @@ uses IBUtils, FBMessages, FBBlob, FB25Blob, variants, IBErrorCodes, FBArray, FB2
 
 
 { TIBXSQLVAR }
+
+function TIBXSQLVAR.CanChangeSQLType: boolean;
+begin
+  Result := Parent.CanChangeMetaData;
+end;
 
 function TIBXSQLVAR.GetSQLType: cardinal;
 begin
@@ -500,6 +507,13 @@ begin
     end;
 end;
 
+procedure TIBXSQLVAR.SetMetaSize(aValue: cardinal);
+begin
+  if (aValue > FMetaDataSize) and not CanChangeSQLType then
+    IBError(ibxeCannotIncreaseMetadatasize,[FMetaDataSize,aValue]);
+  FMetaDataSize := aValue;
+end;
+
 procedure TIBXSQLVAR.SetIsNullable(Value: Boolean);
 begin
   if (Value <> IsNullable) then
@@ -547,8 +561,11 @@ begin
 end;
 
 procedure TIBXSQLVAR.InternalSetSQLType(aValue: cardinal);
+var tmpCharSetID: cardinal;
 begin
+  tmpCharSetID := GetCharSetID;
   FXSQLVAR^.sqltype := aValue or (FXSQLVAR^.sqltype and 1);
+  SetCharSetID(tmpCharSetID); {Needed when changing Blob to SQL_VARYING/SQL_TEXT}
   Changed;
 end;
 

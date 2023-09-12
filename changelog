@@ -9,6 +9,10 @@ FBINTF Change Log  version          (1.4-1 Build 14019) Sat, 05 Aug 2023 13:21:5
 3. FBClient: Windows only: In GetMessage, if error message is not UTF8 then assume
    string is encoded using local default code page and convert to UTF.
 
+4. FB25Statement: When changing a param type from Blob sub_type 1 to SQL_TEXT or SQL_VARYING
+   charsetid is now preserved and size is set to default blob size. Now aligns with
+   FB3 and later.
+
 FBINTF Change Log  version          (1.4-0 Build 14011) Sat, 05 Aug 2023 11:09:09 +0100
 
 1. Support package fbudr added for support of User Defined Routines (UDRs), and package

@@ -3,10 +3,10 @@ Copyright MWA Software 2016-2021
 
 Starting Tests
 Client API Version = 4.0
-Firebird Environment Variable = /opt/firebird/4.0.1
-Firebird Bin Directory = /opt/firebird/4.0.1/bin
-Firebird Conf Directory = /opt/firebird/4.0.1/
-Firebird Client Library Path = /opt/firebird/4.0.1/lib/libfbclient.so
+Firebird Environment Variable = /opt/firebird/4.0.2
+Firebird Bin Directory = /opt/firebird/4.0.2/bin
+Firebird Conf Directory = /opt/firebird/4.0.2/
+Firebird Client Library Path = /opt/firebird/4.0.2/lib/libfbclient.so
 Running Test 1: Create and Drop a Database
 Creating a Database with empty parameters
 Create Database fails (as expected): Engine Code: 335544344
@@ -23,7 +23,7 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 13
 DB ODS Minor Version = 0
 User Authentication Method = Srp256
-Firebird Library Path = /opt/firebird/4.0.1/lib/libfbclient.so
+Firebird Library Path = /opt/firebird/4.0.2/lib/libfbclient.so
 DB Client Implementation Version = 4.0
 DPB: Item Count = 3
   isc_dpb_user_name = SYSDBA
@@ -31,9 +31,9 @@ DPB: Item Count = 3
   isc_dpb_set_db_sql_dialect = 3
 
 Firebird Server Version Info
-Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.1.2692 Firebird 4.0"
-Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V4.0.1.2692 Firebird 4.0/tcp (zeus)/P17:C"
-Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-V4.0.1.2692 Firebird 4.0/tcp (zeus)/P17:C"
+Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.2.2816 Firebird 4.0"
+Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V4.0.2.2816 Firebird 4.0/tcp (zeus)/P17:C"
+Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-V4.0.2.2816 Firebird 4.0/tcp (zeus)/P17:C"
 on disk structure version 13.0
 
 Dropping Database
@@ -45,7 +45,7 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 13
 DB ODS Minor Version = 0
 User Authentication Method = Srp256
-Firebird Library Path = /opt/firebird/4.0.1/lib/libfbclient.so
+Firebird Library Path = /opt/firebird/4.0.2/lib/libfbclient.so
 DB Client Implementation Version = 4.0
 Dropping Database
 DPB: Item Count = 4
@@ -66,7 +66,7 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 13
 DB ODS Minor Version = 0
 User Authentication Method = Srp256
-Firebird Library Path = /opt/firebird/4.0.1/lib/libfbclient.so
+Firebird Library Path = /opt/firebird/4.0.2/lib/libfbclient.so
 DB Client Implementation Version = 4.0
 RDB$DESCRIPTION = 
 RDB$RELATION_ID = 128
@@ -318,7 +318,7 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 13
 DB ODS Minor Version = 0
 User Authentication Method = Srp256
-Firebird Library Path = /opt/firebird/4.0.1/lib/libfbclient.so
+Firebird Library Path = /opt/firebird/4.0.2/lib/libfbclient.so
 DB Client Implementation Version = 4.0
 Do Fetch Next:
 EMP_NO = 2
@@ -571,7 +571,7 @@ DB Remote Protocol =
 DB ODS Major Version = 13
 DB ODS Minor Version = 0
 User Authentication Method = User name in DPB
-Firebird Library Path = /opt/firebird/4.0.1/lib/libfbclient.so
+Firebird Library Path = /opt/firebird/4.0.2/lib/libfbclient.so
 DB Client Implementation Version = 4.0
 Do Fetch Next:
 EMP_NO = 2
@@ -654,13 +654,13 @@ Running Test 3: ad hoc queries
 Opening inet://localhost/employee
 Database Open
 Employee Count = 42
-Transaction ID = 3369
+Transaction ID = 1894
 Transaction is Read/Write
 Transaction Database Path = inet://localhost/employee
-Transaction ID = 3369
-Oldest Interesting = 3367
-Oldest Action = 3368
-Oldest Snapshot = 3368
+Transaction ID = 1894
+Oldest Interesting = 1892
+Oldest Action = 1893
+Oldest Snapshot = 1893
 Oldest Snapshot Number = 1
 Lock Timeout = 0
 Transaction Access = isc_info_tra_readwrite
@@ -678,9 +678,9 @@ Constrained Employee Count = 3
 Running Test 4: Update, Insert and Delete Queries
 Opening inet://localhost/employee
 Database Open
-Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.1.2692 Firebird 4.0"
-Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V4.0.1.2692 Firebird 4.0/tcp (zeus)/P17:CZ"
-Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-V4.0.1.2692 Firebird 4.0/tcp (zeus)/P17:CZ"
+Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.2.2816 Firebird 4.0"
+Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V4.0.2.2816 Firebird 4.0/tcp (zeus)/P17:CZ"
+Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-V4.0.2.2816 Firebird 4.0/tcp (zeus)/P17:CZ"
 on disk structure version 13.0
 Select Count = 1 InsertCount = 0 UpdateCount = 1 DeleteCount = 0
 EMP_NO = 8
@@ -695,9 +695,9 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 19,763,968
+Current memory = 19,758,656
 Delta memory = 4,464
-Max memory = 19,809,296
+Max memory = 19,803,808
 Elapsed time= 0.002 sec
 Cpu = 0.000 sec
 Buffers = 2048
@@ -2836,29 +2836,29 @@ MYARRAY = Array: (0,-1: A50) (0,0: A51) (0,1: A52) (0,2: A53) (0,3: A54) (0,4: A
 
 ------------------------------------------------------
 Running Test 9: Database Information tests
-Database ID = 4 FB = /opt/firebird/4.0.1/examples/empbuild/employee.fdb SN = zeus
-Pages =389
+Database ID = 4 FB = /opt/firebird/4.0.2/examples/empbuild/employee.fdb SN = zeus
+Pages =346
 Base Level = 13,4,0,3,
 Implementation = 11,7,0,3,66,1,66,
 Reserved = 0
 ODS minor = 0
 ODS major = 13
 Page Size = 8192
-Version = 1: LI-V6.3.1.2692 Firebird 4.0
+Version = 1: LI-V6.3.2.2816 Firebird 4.0
 Database is Read/Write
-Database Created: 21/12/2021 10:52:59
-Pages Used = 334
-Pages Free = 55
-Server Memory = 19477952
+Database Created: 10/8/2022 11:51:50
+Pages Used = 310
+Pages Free = 36
+Server Memory = 19476192
 Forced Writes  = 1
-Max Memory  = 19508784
+Max Memory  = 19507024
 Num Buffers  = 2048
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
 Active Transaction Count = 0
-Fetches  = 1597
+Fetches  = 1661
 Writes  = 5
-Reads  = 96
+Reads  = 90
 Page Writes  = 2
 Record Version Removals Operation Counts
 
@@ -2882,7 +2882,7 @@ Count = 2
 Table ID = 12
 Count = 24
 Table ID = 18
-Count = 854
+Count = 924
 Table ID = 20
 Count = 5
 Table ID = 28
@@ -2894,7 +2894,7 @@ Count = 1
 
 Sequential Table Scans Operation Counts
 Table ID = 0
-Count = 100
+Count = 98
 Table ID = 1
 Count = 14
 
@@ -2910,13 +2910,16 @@ Async Wait Called
 Event Signalled
 First Event - usually ignored
 Signal Event
+Event Signalled
 Event Counts: TESTEVENT, Count = 1
 Two more events
 Call Async Wait
 Async Wait Called
 Event Signalled
-Signal Event
+Deferred Events Caught
 Event Counts: TESTEVENT, Count = 2
+Signal Event
+Event Counts: TESTEVENT, Count = 1
 Async Wait: Test Cancel
 Event Signalled
 Async Wait Called
@@ -2924,7 +2927,7 @@ Event Cancelled
 Time Out - Cancel Worked!
 Sync wait
 Event Signalled
-Event Counts: TESTEVENT, Count = 2
+Event Counts: TESTEVENT, Count = 1
 
 
 ------------------------------------------------------
@@ -2934,12 +2937,12 @@ SPB: Item Count = 2
   password = masterkey
 
 Service Manager Version = 2
-Server Version = LI-V4.0.1.2692 Firebird 4.0
+Server Version = LI-V4.0.2.2816 Firebird 4.0
 Implementation = Firebird/Linux/AMD/Intel/x64
 
 Lock Directory = /tmp/firebird/
-Message File = /opt/firebird/4.0.1/
-Security File = /opt/firebird/4.0.1/security4.fdb
+Message File = /opt/firebird/4.0.2/
+Security File = /opt/firebird/4.0.2/security4.fdb
 
 DB Attachments
 No. of Attachments = 0
@@ -2970,7 +2973,6 @@ Limbo Transactions
 
 
 Local Backup
-
 
 
 
@@ -3104,7 +3106,7 @@ Scale = 0
 Charset id = 1
 Nullable
 Size = 16
-Value = TestÃ
+1 54 65 73 74 D C3 
 
 SQLType =SQL_VARYING
 sub type = 0
@@ -3323,7 +3325,7 @@ Your user name and password are not defined. Ask your database administrator to 
 
 ------------------------------------------------------
 Running Test 17: Date/Time tests and Firebird 4 extensions
- FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.1.2692 Firebird 4.0"
+ FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.2.2816 Firebird 4.0"
 Has Local TZ DB = TRUE
 
 Testdata
@@ -4085,7 +4087,7 @@ TZ_MINUTE = 0
 
 ------------------------------------------------------
 Running Test 18: Firebird 4 Decfloat extensions
- FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.1.2692 Firebird 4.0"
+ FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.2.2816 Firebird 4.0"
 
 FB4 Testdata_DECFloat
 
@@ -4354,9 +4356,9 @@ BigNumber Array: (0: 123456123400.123456) (1: 123456123401.623456) (2: 123456123
 Running Test 19: Batch Update and Insert Queries
 Opening inet://localhost/employee
 Database Open
-Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.1.2692 Firebird 4.0"
-Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V4.0.1.2692 Firebird 4.0/tcp (zeus)/P17:CZ"
-Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-V4.0.1.2692 Firebird 4.0/tcp (zeus)/P17:CZ"
+Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.2.2816 Firebird 4.0"
+Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V4.0.2.2816 Firebird 4.0/tcp (zeus)/P17:CZ"
+Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-V4.0.2.2816 Firebird 4.0/tcp (zeus)/P17:CZ"
 on disk structure version 13.0
 Rows before update
 EMP_NO = 2
@@ -4607,7 +4609,7 @@ Row 2 State = bcExecuteFailed Msg = violation of PRIMARY or UNIQUE KEY constrain
 
 ------------------------------------------------------
 Running Test 20: Stress Test IBatch interface
- FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.1.2692 Firebird 4.0"
+ FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.2.2816 Firebird 4.0"
 10000 rows added
 20000 rows added
 30000 rows added
@@ -4953,22 +4955,22 @@ MYARRAY = NULL
 
 Journal Table
 IBX$SESSIONID = 1
-IBX$TRANSACTIONID = 9
+IBX$TRANSACTIONID = 10
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2022/07/18 14:38:49.8050
+IBX$CREATED = 2023/09/12 10:53:37.5340
 IBX$SESSIONID = 1
-IBX$TRANSACTIONID = 11
-IBX$OLDTRANSACTIONID = 10
+IBX$TRANSACTIONID = 12
+IBX$OLDTRANSACTIONID = 11
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2022/07/18 14:38:49.8830
+IBX$CREATED = 2023/09/12 10:53:37.6150
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 4
 Session ID = 1
-Transaction ID = 9
+Transaction ID = 10
 Transaction Name = "Transaction_29_1"
 TPB: Item Count = 3
   isc_tpb_write
@@ -4981,31 +4983,17 @@ Journal Entry = jeQuery(Query)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 4
 Session ID = 1
-Transaction ID = 9
+Transaction ID = 10
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(1,101,9223372036854775807,10000.1234,9999.12345678,1234567890.12346)
 
 Journal Entry = jeQuery(Query)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 4
 Session ID = 1
-Transaction ID = 9
+Transaction ID = 10
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(2,-32457,-9223372036854775808,1000001.12,1.7E308,-1234567890.12346)
 
 Journal Entry = jeTransCommitRet(Commit Retaining)
-Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
-Attachment ID = 4
-Session ID = 1
-Transaction ID = 10
-Old TransactionID = 9
-
-Journal Entry = jeQuery(Query)
-Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
-Attachment ID = 4
-Session ID = 1
-Transaction ID = 10
-Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(3,0,0,0,0,0)
-
-Journal Entry = jeTransRollbackRet(Rollback Retaining)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 4
 Session ID = 1
@@ -5017,13 +5005,27 @@ Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 4
 Session ID = 1
 Transaction ID = 11
+Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(3,0,0,0,0,0)
+
+Journal Entry = jeTransRollbackRet(Rollback Retaining)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 4
+Session ID = 1
+Transaction ID = 12
+Old TransactionID = 11
+
+Journal Entry = jeQuery(Query)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 4
+Session ID = 1
+Transaction ID = 12
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(4,1,10,0.023,0.0011,233.456)
 
 Journal Entry = jeTransStart(Transaction Start)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 4
 Session ID = 1
-Transaction ID = 12
+Transaction ID = 13
 Transaction Name = "Transaction_29_2"
 TPB: Item Count = 3
   isc_tpb_write
@@ -5036,13 +5038,13 @@ Journal Entry = jeTransCommit(Commit)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 4
 Session ID = 1
-Transaction ID = 11
+Transaction ID = 12
 
 Journal Entry = jeQuery(Query)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 4
 Session ID = 1
-Transaction ID = 12
+Transaction ID = 13
 Query = Insert into TestData(RowID, Str, TextBlob) Values(5,'It''s the quick brown fox jumps over the lazy dog','To be or not to be-that is the question:
 Whether ''tis nobler in the mind to suffer
 The slings and arrows of outrageous fortune,
@@ -5084,7 +5086,7 @@ Journal Entry = jeQuery(Query)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 4
 Session ID = 1
-Transaction ID = 12
+Transaction ID = 13
 Query = Insert into TestData(RowID,OtherBlob) Values (6,<blob subtype="0">
 FFD8FFE000104A46494600010101004800480000FFE11E0545786966000049492A00080000000C00
 0E010200200000009E0000000F01020014000000BE0000001001020008000000D200000012010300
@@ -5096,7 +5098,7 @@ Journal Entry = jeQuery(Query)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 4
 Session ID = 1
-Transaction ID = 12
+Transaction ID = 13
 Query = Insert into TestData(RowID,MyArray) Values (7,<array dim = "1" sqltype = "496" length = "4" relation_name = "TESTDATA" column_name = "MYARRAY" scale = "0" bounds="0:16">
  <elt ix="0">100</elt>
  <elt ix="1">99</elt>
@@ -5122,7 +5124,7 @@ Journal Entry = jeTransRollback(Rollback)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 4
 Session ID = 1
-Transaction ID = 12
+Transaction ID = 13
 
 
 

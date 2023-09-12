@@ -537,12 +537,12 @@ Running Test 3: ad hoc queries
 Opening localhost:employee
 Database Open
 Employee Count = 42
-Transaction ID = 7188
+Transaction ID = 7258
 Transaction is Read/Write
-Transaction ID = 7188
+Transaction ID = 7258
 Oldest Interesting = 7165
-Oldest Action = 7187
-Oldest Snapshot = 7187
+Oldest Action = 7257
+Oldest Snapshot = 7257
 Oldest Interesting = 0
 Employee Count = 41
 Employee Count = 42
@@ -576,8 +576,8 @@ FULL_NAME = Johnson, Leslie
 
 Current memory = 937,536
 Delta memory = 1,288
-Max memory = 965,600
-Elapsed time= 0.002 sec
+Max memory = 965,608
+Elapsed time= 0.000 sec
 Cpu = 0.000 sec
 Buffers = 75
 Reads = 0
@@ -2951,9 +2951,9 @@ SQLType =SQL_TEXT
 sub type = 0
 Field Name = BLOBDATA
 Scale = 0
-Charset id = 1
+Charset id = 4
 Nullable
-Size = 8
+Size = 8192
 Value = Some German Special Characters like ÖÄÜöäüß
 
 SQLType =SQL_BLOB
@@ -2972,7 +2972,7 @@ Scale = 0
 Charset id = 1
 Nullable
 Size = 16
-Value = Test�
+1 54 65 73 74 D C3 
 
 SQLType =SQL_TEXT
 sub type = 0
@@ -3611,12 +3611,12 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 8
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2023/09/11 14:36:04.2480
+IBX$CREATED = 2023/09/12 11:29:44.4580
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 10
 IBX$OLDTRANSACTIONID = 9
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2023/09/11 14:36:04.3260
+IBX$CREATED = 2023/09/12 11:29:44.5330
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)
