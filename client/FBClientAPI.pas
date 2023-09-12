@@ -667,7 +667,7 @@ end;
 
 function ValidUTF8(s: AnsiString): boolean;
 begin
-  Result := FindInvalidUTF8Codepoint(@s,length(s),true) = -1;
+  Result := FindInvalidUTF8Codepoint(PAnsiChar(s),length(s),true) = -1;
 end;
 
 function ConvertFromDefaultCodePageIfNeeded(s: AnsiString): RawByteString;
