@@ -78,6 +78,10 @@ const
     'Primary Key(RowID)'+
     ')';
 
+  sqlCreateException = 'Create Exception CharSetTest ''Some German Special Characters like ÖÄÜöäüß''';
+
+  sqlCreateProc = 'Create Procedure DoException As Begin Exception CharSetTest; End';
+
   sqlGetCharSets = 'Select RDB$CHARACTER_SET_NAME,RDB$CHARACTER_SET_ID from RDB$CHARACTER_SETS order by 2';
 
   sqlInsert = 'Insert into TestData(RowID,Title,Notes, BlobData,BlobData2,InClear,FixedWidth) '+
@@ -123,6 +127,11 @@ begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   Statement := Attachment.Prepare(Transaction,'Select * from TestData');
   ReportResults(Statement);
+  try
+    Attachment.ExecuteSQL([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],'Execute Procedure DoException',[]);
+  except On E:Exception do
+    writeln(Outfile,'Exception returned: ',E.Message);
+  end;
 end;
 
 function TTest12.TestTitle: AnsiString;
@@ -138,11 +147,19 @@ begin
   DPB := FirebirdAPI.AllocateDPB;
   DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
   DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);
-  DPB.Add(isc_dpb_lc_ctype).setAsString('UTF8');
+  DPB.Add(isc_dpb_lc_ctype).setAsString('NONE');
   DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
   Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable);
+  Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateException);
+  Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateProc);
+  Attachment.Disconnect;
 
+  DPB := FirebirdAPI.AllocateDPB;
+  DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
+  DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);
+  DPB.Add(isc_dpb_lc_ctype).setAsString('UTF8');
+  Attachment := FirebirdAPI.OpenDatabase(Owner.GetNewDatabaseName,DPB);
   UpdateDatabase(Attachment);
 
   writeln(OutFile,'Connection Character Set UTF8');

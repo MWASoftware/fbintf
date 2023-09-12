@@ -3,6 +3,8 @@
   for details about the license.
 }
 
+{Modified for Delphi compatibility}
+
 function FindInvalidUTF8Codepoint(p: PAnsiChar; Count: integer; StopOnNonUTF8: Boolean): integer;
 // return -1 if ok
 var
