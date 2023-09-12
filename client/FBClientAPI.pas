@@ -124,6 +124,7 @@ type
     FOwner: TFBClientAPI;
     function GetIBMessage: Ansistring; virtual; abstract;
     function GetSQLMessage: Ansistring;
+    procedure GuessCodePage(s: RawByteString);
   public
     constructor Create(aOwner: TFBClientAPI; prefix: AnsiString='');
     constructor Copy(src: TFBStatus);
@@ -633,6 +634,15 @@ begin
   end;
 end;
 
+procedure TFBStatus.GuessCodePage(s: RawByteString);
+{$I 'include/lazutf8.inc'}
+begin
+  if FindInvalidUTF8Codepoint(PAnsiChar(s),length(s),true) = -1 then
+    SetCodePage(s,cp_utf8,false)
+  else
+    SetCodePage(s,cp_acp,false);
+end;
+
 constructor TFBStatus.Create(aOwner: TFBClientAPI; prefix: AnsiString);
 begin
   inherited Create;
@@ -662,25 +672,6 @@ begin
     Result := -999; {generic SQL Code}
 end;
 
-{$IFDEF WINDOWS}
-{$I 'include/lazutf8.inc'}
-
-function ValidUTF8(s: AnsiString): boolean;
-begin
-  Result := FindInvalidUTF8Codepoint(PAnsiChar(s),length(s),true) = -1;
-end;
-
-function ConvertFromDefaultCodePageIfNeeded(s: AnsiString): RawByteString;
-begin
-  Result := s;
-  if not ValidUTF8(Result) then
-  begin
-    SetCodePage(Result,cp_acp,false); {assume default system code page encoding}
-    Result := AnsiToUtf8(Result);
-  end;
-end;
-{$ENDIF}
-
 function TFBStatus.GetMessage: AnsiString;
 var IBDataBaseErrorMessages: TIBDataBaseErrorMessages;
 begin
@@ -704,11 +695,7 @@ begin
     if Result <> FPrefix then
       Result := Result + LineEnding;
     Result := Result + 'Engine Code: ' + IntToStr(GetIBErrorCode) + LineEnding
-    {$IFDEF WINDOWS}
-       + ConvertFromDefaultCodePageIfNeeded(GetIBMessage);
-    {$ELSE}
        + GetIBMessage;
-    {$ENDIF}
   end;
   if (Result <> '') and (Result[Length(Result)] = '.') then
     Delete(Result, Length(Result), 1);

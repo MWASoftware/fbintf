@@ -47,7 +47,7 @@ type
   protected
     FStatus: Firebird.IStatus;
     FDirty: boolean;
-    function GetIBMessage: Ansistring; override;
+    function GetIBMessage: AnsiString; override;
   public
     constructor Create(aOwner: TFBClientAPI; prefix: AnsiString=''); overload;
     constructor Create(aOwner: TFBClientAPI; aStatus: Firebird.IStatus); overload;
@@ -259,9 +259,12 @@ threadvar
 
 { TFB30Status }
 
-function TFB30Status.GetIBMessage: Ansistring;
+function TFB30Status.GetIBMessage: AnsiString;
+var msg: RawByteString;
 begin
-  Result := (FOwner as TFB30ClientAPI).FormatStatus(GetStatus);
+  msg := (FOwner as TFB30ClientAPI).FormatStatus(GetStatus);
+  GuessCodePage(msg);
+  Result := msg;
 end;
 
 constructor TFB30Status.Create(aOwner: TFBClientAPI; prefix: AnsiString);
