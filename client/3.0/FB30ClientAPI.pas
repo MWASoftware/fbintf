@@ -260,11 +260,8 @@ threadvar
 { TFB30Status }
 
 function TFB30Status.GetIBMessage: AnsiString;
-var msg: RawByteString;
 begin
-  msg := (FOwner as TFB30ClientAPI).FormatStatus(GetStatus);
-  GuessCodePage(msg);
-  Result := msg;
+  Result := (FOwner as TFB30ClientAPI).FormatStatus(GetStatus);
 end;
 
 constructor TFB30Status.Create(aOwner: TFBClientAPI; prefix: AnsiString);
@@ -499,7 +496,7 @@ var local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
 begin
   Result := '';
   if UtilIntf.formatStatus(@local_buffer,sizeof(local_buffer) - 1,Status) > 0 then
-    Result := BufferToString(local_buffer);
+    Result := PCharToAnsiString(local_buffer);
 end;
 
 function TFB30ClientAPI.InErrorState: boolean;

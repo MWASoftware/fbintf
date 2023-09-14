@@ -809,8 +809,7 @@ function DecodeTimeZoneOffset(TZOffset: AnsiString; var dstOffset: integer): boo
 function StripLeadingZeros(Value: AnsiString): AnsiString;
 function StringToHex(octetString: string; MaxLineLength: integer=0): string; overload;
 procedure StringToHex(octetString: string; TextOut: TStrings; MaxLineLength: integer=0); overload;
-procedure GuessCodePage(s: RawByteString);
-function BufferToString(buff: PAnsiChar): AnsiString;
+function PCharToAnsiString(buff: PAnsiChar): AnsiString;
 
 
 implementation
@@ -2069,21 +2068,21 @@ begin
     TextOut.Add(StringToHex(octetString,MaxLineLength));
 end;
 
-procedure GuessCodePage(s: RawByteString);
 {$I 'include/lazutf8.inc'}
-begin
-  if FindInvalidUTF8Codepoint(PAnsiChar(s),length(s),true) = -1 then
-    SetCodePage(s,cp_utf8,false)
-  else
-    SetCodePage(s,cp_acp,false);
-end;
 
-function BufferToString(buff: PAnsiChar): AnsiString;
+{PChar to Ansistring replaces strpas and avoids widestring conversions. It
+ also attempts to guess the encoding. By default this is UTF8, but if the
+ UTF8 encoding check fails, it assumes the current codepage.}
+
+function PCharToAnsiString(buff: PAnsiChar): AnsiString;
 var s: RawByteString;
 begin
   SetLength(s,strlen(buff));
   Move(buff^,s[1],strlen(buff));
-  GuessCodePage(s);
+  if FindInvalidUTF8Codepoint(PAnsiChar(s),length(s),true) = -1 then
+    SetCodePage(s,cp_utf8,false)
+  else
+    SetCodePage(s,cp_acp,false);
   Result := s;
 end;
 

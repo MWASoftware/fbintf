@@ -338,7 +338,7 @@ begin
     begin
       if (Result <> '') and (Result[Length(Result)] <> LF) then
         Result := Result + LineEnding + '-';
-      Result := Result + BufferToString(local_buffer);
+      Result := Result + PCharToAnsiString(local_buffer);
     end;
   end
   else
@@ -347,7 +347,7 @@ begin
   begin
     if (Result <> '') and (Result[Length(Result)] <> LF) then
       Result := Result + LineEnding + '-';
-    Result := Result + BufferToString(local_buffer);
+    Result := Result + PCharToAnsiString(local_buffer);
   end;
 end;
 
