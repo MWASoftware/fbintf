@@ -142,7 +142,6 @@ type
      function GetDataLength: cardinal; virtual; abstract;
      function GetCodePage: TSystemCodePage; virtual; abstract;
      function getCharSetID: cardinal; virtual; abstract;
-     function Transliterate(s: AnsiString; CodePage: TSystemCodePage): RawByteString;
      procedure SetScale(aValue: integer); virtual;
      procedure SetDataLength(len: cardinal); virtual;
      procedure SetSQLType(aValue: cardinal); virtual;
@@ -731,6 +730,7 @@ begin
   finally
     slNames.Free;
   end;
+
 end;
 
 function TSQLDataArea.ColumnsInUseCount: integer;
@@ -1089,14 +1089,6 @@ end;
 procedure TSQLDataItem.InternalSetAsString(Value: AnsiString);
 begin
   //Do nothing by default
-end;
-
-function TSQLDataItem.Transliterate(s: AnsiString; CodePage: TSystemCodePage
-  ): RawByteString;
-begin
-  Result := s;
-  if StringCodePage(Result) <> CodePage then
-    SetCodePage(Result,CodePage,CodePage <> CP_NONE);
 end;
 
 procedure TSQLDataItem.SetScale(aValue: integer);

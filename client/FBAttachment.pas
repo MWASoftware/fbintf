@@ -256,6 +256,7 @@ type
     function GetODSMajorVersion: integer;
     function GetODSMinorVersion: integer;
     function GetCharSetID: integer;
+    function GetCodePage: TSystemCodePage;
     function HasDecFloatSupport: boolean; virtual;
     function GetInlineBlobLimit: integer;
     procedure SetInlineBlobLimit(limit: integer);
@@ -278,7 +279,7 @@ type
     function GetBlobMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IBlobMetaData; virtual; abstract;
     function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IArrayMetaData; virtual; abstract;
     property CharSetID: integer read GetCharSetID;
-    property CodePage: TSystemCodePage read FCodePage;
+    property CodePage: TSystemCodePage read GetCodePage;
 
   public
     {Time Zone Support}
@@ -890,6 +891,13 @@ end;
 { TFBAttachment }
 
 procedure TFBAttachment.NeedConnectionInfo;
+
+  function AsCP_NONE(s: RawByteString): RawByteString;
+  begin
+    Result := s;
+    SetCodePage(Result,CP_NONE,false);
+  end;
+
 var Stmt: IStatement;
     ResultSet: IResultSet;
     Param: IDPBItem;
@@ -903,8 +911,8 @@ begin
   if FODSMajorVersion > 11 then
   begin
     Stmt := Prepare(StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit),
-                    'Select MON$CHARACTER_SET_ID, MON$REMOTE_PROTOCOL, MON$AUTH_METHOD, MON$SEC_DATABASE From MON$ATTACHMENTS, MON$DATABASE '+
-                    'Where MON$ATTACHMENT_ID = CURRENT_CONNECTION ');
+                    AsCP_NONE('Select MON$CHARACTER_SET_ID, MON$REMOTE_PROTOCOL, MON$AUTH_METHOD, MON$SEC_DATABASE From MON$ATTACHMENTS, MON$DATABASE '+
+                    'Where MON$ATTACHMENT_ID = CURRENT_CONNECTION '));
     ResultSet := Stmt.OpenCursor;
     if ResultSet.FetchNext then
     begin
@@ -918,8 +926,8 @@ begin
   if (FODSMajorVersion = 11) and (FODSMinorVersion >= 1) then
   begin
     Stmt := Prepare(StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit),
-                    'Select MON$CHARACTER_SET_ID, MON$REMOTE_PROTOCOL From MON$ATTACHMENTS '+
-                    'Where MON$ATTACHMENT_ID = CURRENT_CONNECTION');
+                    AsCP_NONE('Select MON$CHARACTER_SET_ID, MON$REMOTE_PROTOCOL From MON$ATTACHMENTS '+
+                    'Where MON$ATTACHMENT_ID = CURRENT_CONNECTION'));
     ResultSet := Stmt.OpenCursor;
     if ResultSet.FetchNext then
     begin
@@ -965,6 +973,12 @@ begin
       end;
 end;
 
+function TFBAttachment.GetCodePage: TSystemCodePage;
+begin
+  NeedConnectionInfo;
+  Result := FCodePage;
+end;
+
 constructor TFBAttachment.Create(api: TFBClientAPI; DatabaseName: AnsiString;
   DPB: IDPB; RaiseExceptionOnConnectError: boolean);
 begin
@@ -976,6 +990,7 @@ begin
   ClearCachedInfo;
   FInlineBlobLimit := DefaultMaxInlineBlobLimit;
   FDPB := DPB;
+  FCodePage := CP_NONE;
   FRaiseExceptionOnConnectError := RaiseExceptionOnConnectError;
 end;
 

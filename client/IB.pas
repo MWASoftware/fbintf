@@ -1242,6 +1242,7 @@ type
 
     {Character Sets}
     function GetCharSetID: integer; {connection character set}
+    function GetCodePage: TSystemCodePage;
     function HasDefaultCharSet: boolean;
     function GetDefaultCharSetID: integer;
     function GetCharsetName(CharSetID: integer): AnsiString;

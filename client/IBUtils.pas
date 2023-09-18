@@ -810,6 +810,8 @@ function StripLeadingZeros(Value: AnsiString): AnsiString;
 function StringToHex(octetString: string; MaxLineLength: integer=0): string; overload;
 procedure StringToHex(octetString: string; TextOut: TStrings; MaxLineLength: integer=0); overload;
 function PCharToAnsiString(buff: PAnsiChar): AnsiString;
+function Transliterate(s: AnsiString; ToCodePage: TSystemCodePage
+  ): RawByteString;
 
 
 implementation
@@ -2085,6 +2087,19 @@ begin
     SetCodePage(s,cp_acp,false);
   Result := s;
 end;
+
+function Transliterate(s: AnsiString; ToCodePage: TSystemCodePage
+  ): RawByteString;
+var FromCodePage: TSystemCodePage;
+begin
+  Result := s;
+  FromCodePage := StringCodePage(Result);
+  if (FromCodePage = ToCodePage) or (FromCodePage = CP_NONE) or (ToCodePage = CP_NONE) then
+    Exit;
+  SetCodePage(Result,ToCodePage,true);
+end;
+
+
 
 { TSQLXMLReader }
 

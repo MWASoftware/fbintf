@@ -982,6 +982,7 @@ var
   GUID: TGUID;
   RB: ISQLInfoResults;
   TRHandle: TISC_TR_HANDLE;
+  sql: AnsiString;
 begin
   if FPrepared then
     Exit;
@@ -1007,12 +1008,16 @@ begin
       begin
         if FProcessedSQL = '' then
           ProcessSQL(FSQL,FGenerateParamNames,FProcessedSQL);
-        Call(isc_dsql_prepare(StatusVector, @(TRHandle), @FHandle, 0,
-                 PAnsiChar(FProcessedSQL), FSQLDialect, nil), True);
+        sql := FProcessedSQL;
       end
       else
-        Call(isc_dsql_prepare(StatusVector, @(TRHandle), @FHandle, 0,
-                 PAnsiChar(FSQL), FSQLDialect, nil), True);
+        sql := FSQL;
+
+      if StringCodePage(sql) <> CP_NONE then
+        sql := Transliterate(sql,GetAttachment.GetCodePage);
+
+      Call(isc_dsql_prepare(StatusVector, @(TRHandle), @FHandle, 0,
+                 PAnsiChar(sql), FSQLDialect, nil), True);
     end;
 
     { After preparing the statement, query the stmt type and possibly

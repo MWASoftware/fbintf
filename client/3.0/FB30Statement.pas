@@ -1358,6 +1358,7 @@ end;
 procedure TFB30Statement.InternalPrepare(CursorName: AnsiString);
 var GUID : TGUID;
     metadata: Firebird.IMessageMetadata;
+    sql: AnsiString;
 begin
   if FPrepared then
     Exit;
@@ -1379,18 +1380,17 @@ begin
       begin
         if FProcessedSQL = '' then
           ProcessSQL(FSQL,FGenerateParamNames,FProcessedSQL);
-        FStatementIntf := (GetAttachment as TFB30Attachment).AttachmentIntf.prepare(StatusIntf,
-                            (FTransactionIntf as TFB30Transaction).TransactionIntf,
-                            Length(FProcessedSQL),
-                            PAnsiChar(FProcessedSQL),
-                            FSQLDialect,
-                            Firebird.IStatement.PREPARE_PREFETCH_METADATA);
+        sql := FProcessedSQL;
       end
       else
+        sql := FSQL;
+
+      if StringCodePage(sql) <> CP_NONE then
+        sql := Transliterate(sql,GetAttachment.GetCodePage);
       FStatementIntf := (GetAttachment as TFB30Attachment).AttachmentIntf.prepare(StatusIntf,
                           (FTransactionIntf as TFB30Transaction).TransactionIntf,
-                          Length(FSQL),
-                          PAnsiChar(FSQL),
+                          Length(sql),
+                          PAnsiChar(sql),
                           FSQLDialect,
                           Firebird.IStatement.PREPARE_PREFETCH_METADATA);
       Check4DataBaseError;
