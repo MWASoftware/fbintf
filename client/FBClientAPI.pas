@@ -122,8 +122,8 @@ type
     function SQLCodeSupported: boolean;
   protected
     FOwner: TFBClientAPI;
-    function GetIBMessage: Ansistring; virtual; abstract;
-    function GetSQLMessage: Ansistring;
+    function GetIBMessage(CodePage: TSystemCodePage): Ansistring; virtual; abstract;
+    function GetSQLMessage(CodePage: TSystemCodePage): Ansistring;
   public
     constructor Create(aOwner: TFBClientAPI; prefix: AnsiString='');
     constructor Copy(src: TFBStatus);
@@ -134,7 +134,7 @@ type
     function InErrorState: boolean; virtual; abstract;
     function GetIBErrorCode: TStatusCode;
     function Getsqlcode: TStatusCode;
-    function GetMessage: AnsiString;
+    function GetMessage(CodePage: TSystemCodePage): AnsiString;
     function CheckStatusVector(ErrorCodes: array of TFBStatusCode): Boolean;
     function GetIBDataBaseErrorMessages: TIBDataBaseErrorMessages;
     procedure SetIBDataBaseErrorMessages(Value: TIBDataBaseErrorMessages);
@@ -194,6 +194,9 @@ type
     Tfb_shutdown = function (timeout: uint;
                                  const reason: int): int;
                    {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
+
+    Tfb_sqlstate = procedure(s: PAnsiChar; status_vector: PISC_STATUS);
+                   {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
   protected
     {FB Shutdown API}
     fb_shutdown: Tfb_shutdown;
@@ -202,10 +205,10 @@ type
     {Taken from legacy API}
     isc_sql_interprete: Tisc_sql_interprete;
     isc_sqlcode: Tisc_sqlcode;
+    fb_sqlstate: Tfb_sqlstate;
 
     constructor Create(aFBLibrary: TFBLibrary);
     procedure IBAlloc(var P; OldSize, NewSize: Integer);
-    procedure IBDataBaseError;
     function LoadInterface: boolean; virtual;
     procedure FBShutdown; virtual;
     function GetAPI: IFirebirdAPI; virtual; abstract;
@@ -408,11 +411,6 @@ begin
   for i := OldSize to NewSize - 1 do PAnsiChar(P)[i] := #0;
 end;
 
-procedure TFBClientAPI.IBDataBaseError;
-begin
-  raise EIBInterBaseError.Create(GetStatus);
-end;
-
 procedure TFBClientAPI.EncodeInteger(aValue: int64; len: integer; buffer: PByte);
 begin
   while len > 0 do
@@ -606,6 +604,7 @@ begin
   isc_sqlcode := GetProcAddr('isc_sqlcode'); {do not localize}
   isc_sql_interprete := GetProcAddr('isc_sql_interprete'); {do not localize}
   fb_shutdown := GetProcAddr('fb_shutdown'); {do not localize}
+  fb_sqlstate := GetProcAddr('fb_sqlstate'); {do not localize}
   Result := true; {don't case if these fail to load}
 end;
 
@@ -622,14 +621,14 @@ begin
   Result:= (FOwner <> nil) and assigned(FOwner.isc_sqlcode) and  assigned(FOwner.isc_sql_interprete);
 end;
 
-function TFBStatus.GetSQLMessage: Ansistring;
+function TFBStatus.GetSQLMessage(CodePage: TSystemCodePage): Ansistring;
 var local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
 begin
   Result := '';
   if (FOwner <> nil) and assigned(FOwner.isc_sql_interprete) then
   begin
      FOwner.isc_sql_interprete(Getsqlcode, local_buffer, sizeof(local_buffer));
-     Result := strpas(local_buffer);
+     Result := PCharToAnsiString(local_buffer,CodePage);
   end;
 end;
 
@@ -662,7 +661,7 @@ begin
     Result := -999; {generic SQL Code}
 end;
 
-function TFBStatus.GetMessage: AnsiString;
+function TFBStatus.GetMessage(CodePage: TSystemCodePage): AnsiString;
 var IBDataBaseErrorMessages: TIBDataBaseErrorMessages;
 begin
   Result := FPrefix;
@@ -676,7 +675,7 @@ begin
     begin
       if ShowSQLCode in IBDataBaseErrorMessages then
         Result := Result + LineEnding;
-      Result := Result + GetSQLMessage;
+      Result := Result + GetSQLMessage(CodePage);
     end;
   end;
 
@@ -685,8 +684,9 @@ begin
     if Result <> FPrefix then
       Result := Result + LineEnding;
     Result := Result + 'Engine Code: ' + IntToStr(GetIBErrorCode) + LineEnding
-       + GetIBMessage;
+       + GetIBMessage(CodePage);
   end;
+  Result := Transliterate(PAnsiChar(Result),cp_acp);
   if (Result <> '') and (Result[Length(Result)] = '.') then
     Delete(Result, Length(Result), 1);
 end;

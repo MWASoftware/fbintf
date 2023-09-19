@@ -79,6 +79,7 @@ type
 
   TFBTransaction = class(TActivityReporter, IActivityMonitor,ITransaction)
   private
+    FConnectionCodePage: TSystemCodePage;
     FFirebirdAPI: TFBClientAPI;
     function GenerateTPB(sl: array of byte): ITPB;
   protected
@@ -93,6 +94,7 @@ type
     function GetActivityIntf(att: IAttachment): IActivityMonitor; virtual; abstract;
     function GetJournalIntf(Attachment: IAttachment): IJournallingHook;
     procedure SetInterface(api: TFBClientAPI); virtual;
+    procedure SetErrorHandler(Attachment: IAttachment); virtual;
     function GetTrInfo(ReqBuffer: PByte; ReqBufLen: integer): ITrInformation; virtual; abstract;
     procedure InternalStartSingle(attachment: IAttachment); virtual; abstract;
     procedure InternalStartMultiple; virtual; abstract;
@@ -108,6 +110,7 @@ type
     destructor Destroy; override;
     procedure DoDefaultTransactionEnd(Force: boolean);
     property FirebirdAPI: TFBClientAPI read FFirebirdAPI;
+    property ConnectionCodePage: TSystemCodePage read FConnectionCodePage;
 
   public
     {ITransaction}
@@ -252,6 +255,11 @@ begin
   FFirebirdAPI := api;
 end;
 
+procedure TFBTransaction.SetErrorHandler(Attachment: IAttachment);
+begin
+  //Do nothing
+end;
+
 constructor TFBTransaction.Create(api: TFBClientAPI; Attachments: array of IAttachment;
   Params: array of byte; DefaultCompletion: TTransactionAction; aName: AnsiString);
 begin
@@ -281,6 +289,8 @@ begin
     FAttachments[i] := Attachments[i];
   end;
   FTPB := TPB;
+  FConnectionCodePage := FAttachments[0].GetCodePage; {Use first attachment}
+  SetErrorHandler(FAttachments[0]);
   Start(DefaultCompletion);
 end;
 
@@ -300,6 +310,8 @@ begin
   FAttachments[0] := Attachment;
   FTPB := TPB;
   FTransactionName := aName;
+  FConnectionCodePage := Attachment.GetCodePage;
+  SetErrorHandler(Attachment);
   Start(DefaultCompletion);
 end;
 

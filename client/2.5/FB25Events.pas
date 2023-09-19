@@ -263,7 +263,7 @@ begin
     if not FInWaitState then Exit;
     with FFirebird25ClientAPI do
       if (Call(isc_Cancel_events( StatusVector, @FDBHandle, @FEventID),false) > 0) and not Force then
-        IBDatabaseError;
+        raise EIBInterBaseError.Create(GetStatus,ConnectionCodePage);
 
     FInWaitState := false;
     inherited CancelEvents(Force);
@@ -282,7 +282,7 @@ begin
   inherited Create(DBAttachment,DBAttachment,Events);
   FDBHandle := DBAttachment.Handle;
   FFirebird25ClientAPI := DBAttachment.Firebird25ClientAPI;
-  OnDatabaseError := FFirebird25ClientAPI.IBDataBaseError;
+  OnDatabaseError := DBAttachment.IBDataBaseError;
   FAsyncEventCallback := TEventhandlerInterface.Create(self);
   FEventHandlerThread := TEventHandlerThread.Create(self,FAsyncEventCallback);
 end;

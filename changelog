@@ -13,6 +13,11 @@ FBINTF Change Log  version          (1.4-1 Build 14019) Sat, 05 Aug 2023 13:21:5
    charsetid is now preserved and size is set to default blob size. Now aligns with
    FB3 and later.
 
+5. DDL and DML string literals are now explicitly set to the connection character
+   set rather than the default character set provided by the compiler.
+
+6. Codepage for Character set NONE changed from cp_acp to cp_none.
+
 5. User defined Firebird exception messages are encoded using the character set NONE.
    In practice, this means that the actual character set will be the one used by
    the client system from which the DDL that creates the exception was run. For

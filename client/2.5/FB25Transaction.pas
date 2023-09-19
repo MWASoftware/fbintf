@@ -87,6 +87,7 @@ type
     function GetActivityIntf(att: IAttachment): IActivityMonitor; override;
     function GetTrInfo(ReqBuffer: PByte; ReqBufLen: integer): ITrInformation; override;
     procedure SetInterface(api: TFBClientAPI); override;
+    procedure SetErrorHandler(Attachment: IAttachment); override;
     procedure InternalStartSingle(attachment: IAttachment); override;
     procedure InternalStartMultiple; override;
     function InternalCommit(Force: boolean): TTrCompletionState; override;
@@ -118,16 +119,23 @@ function TFB25Transaction.GetTrInfo(ReqBuffer: PByte; ReqBufLen: integer
 begin
   Result := TTrInformation.Create(FFirebird25ClientAPI);
   with FFirebird25ClientAPI, Result as TTrInformation do
+  begin
      if isc_transaction_info(StatusVector, @(FHandle), ReqBufLen, ReqBuffer,
                                getBufSize, Buffer) > 0 then
-          IBDataBaseError;
+     raise EIBInterBaseError.Create(GetStatus,ConnectionCodePage);
+  end;
 end;
 
 procedure TFB25Transaction.SetInterface(api: TFBClientAPI);
 begin
   inherited SetInterface(api);
   FFirebird25ClientAPI := api as TFB25ClientAPI;
-  OnDatabaseError := FFirebird25ClientAPI.IBDataBaseError;
+end;
+
+procedure TFB25Transaction.SetErrorHandler(Attachment: IAttachment);
+begin
+  if Attachment <> nil then
+       OnDatabaseError := (Attachment as TFB25Attachment).IBDataBaseError;
 end;
 
 procedure TFB25Transaction.InternalStartSingle(attachment: IAttachment);

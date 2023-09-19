@@ -276,7 +276,7 @@ begin
                           0,nil,
                           FBufSize,BytePtr(FBuffer)
                           );
-    Check4DataBaseError;
+    Check4DataBaseError(ConnectionCodePage);
   end;
   SignalActivity;
 end;
@@ -292,7 +292,7 @@ begin
                           FBufSize,BytePtr(FBuffer)
                           );
     if not Force then
-      Check4DataBaseError;
+      Check4DataBaseError(ConnectionCodePage);
   end;
   SignalActivity;
 end;

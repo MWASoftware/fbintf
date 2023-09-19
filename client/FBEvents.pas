@@ -93,6 +93,7 @@ type
 
   TFBEvents = class(TActivityReporter)
   private
+    FConnectionCodePage: TSystemCodePage;
     FEvents: TStringList;
     FAttachment: IAttachment;
     FEventCounts: TEventCounts;
@@ -114,6 +115,7 @@ type
   public
     constructor Create(DBAttachment: IAttachment; aMonitor: IActivityMonitor; Events: TStrings);
     destructor Destroy; override;
+    property ConnectionCodePage: TSystemCodePage read FConnectionCodePage;
 
     {IEvents}
     procedure GetEvents(EventNames: TStrings);
@@ -396,6 +398,7 @@ begin
   inherited Create(aMonitor);
   FAttachment := DBAttachment;
   FFirebirdClientAPI := DBAttachment.getFirebirdAPI as TFBClientAPI;
+  FConnectionCodePage := DBAttachment.GetCodePage;
   if Events.Count > MaxEvents then
     IBError(ibxeMaximumEvents, [nil]);
 

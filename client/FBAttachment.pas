@@ -156,6 +156,7 @@ type
     FRemoteProtocol: AnsiString;
     FAuthMethod: AnsiString;
     FHasConnectionInfo: boolean;
+    FInNeedConnectionInfo: boolean;
     procedure NeedDBInfo;
     procedure NeedConnectionInfo;
   protected
@@ -176,6 +177,7 @@ type
   public
     destructor Destroy; override;
     procedure Disconnect(Force: boolean); override;
+    procedure IBDataBaseError;
     function getFirebirdAPI: IFirebirdAPI;
     function getDPB: IDPB;
     function AllocateBPB: IBPB;
@@ -340,7 +342,7 @@ const
 
 const
   CharSetMap: array [0..69] of TCharsetMap = (
-  (CharsetID: 0; CharSetName: 'NONE'; CharSetWidth: 1; CodePage: CP_ACP; AllowReverseLookup: true),
+  (CharsetID: 0; CharSetName: 'NONE'; CharSetWidth: 1; CodePage: CP_NONE; AllowReverseLookup: true),
   (CharsetID: 1; CharSetName: 'OCTETS'; CharSetWidth: 1; CodePage: CP_NONE; AllowReverseLookup: true),
   (CharsetID: 2; CharSetName: 'ASCII'; CharSetWidth: 1; CodePage: CP_ASCII; AllowReverseLookup: true),
   (CharsetID: 3; CharSetName: 'UNICODE_FSS'; CharSetWidth: 3; CodePage: CP_UTF8; AllowReverseLookup: false),
@@ -902,54 +904,59 @@ var Stmt: IStatement;
     ResultSet: IResultSet;
     Param: IDPBItem;
 begin
-  if not IsConnected or FHasConnectionInfo then Exit;
-  NeedDBInfo;
-  FCharSetID := 0;
-  FRemoteProtocol := '';
-  FAuthMethod := 'Legacy_Auth';
-  FSecDatabase := 'Default';
-  if FODSMajorVersion > 11 then
-  begin
-    Stmt := Prepare(StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit),
-                    AsCP_NONE('Select MON$CHARACTER_SET_ID, MON$REMOTE_PROTOCOL, MON$AUTH_METHOD, MON$SEC_DATABASE From MON$ATTACHMENTS, MON$DATABASE '+
-                    'Where MON$ATTACHMENT_ID = CURRENT_CONNECTION '));
-    ResultSet := Stmt.OpenCursor;
-    if ResultSet.FetchNext then
+  if not IsConnected or FHasConnectionInfo or FInNeedConnectionInfo then Exit;
+  FInNeedConnectionInfo := true;
+  try
+    NeedDBInfo;
+    FCharSetID := 0;
+    FRemoteProtocol := '';
+    FAuthMethod := 'Legacy_Auth';
+    FSecDatabase := 'Default';
+    if FODSMajorVersion > 11 then
     begin
-      FCharSetID := ResultSet[0].AsInteger;
-      FRemoteProtocol := Trim(ResultSet[1].AsString);
-      FAuthMethod := Trim(ResultSet[2].AsString);
-      FSecDatabase := Trim(ResultSet[3].AsString);
+      Stmt := Prepare(StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit),
+                      AsCP_NONE('Select MON$CHARACTER_SET_ID, MON$REMOTE_PROTOCOL, MON$AUTH_METHOD, MON$SEC_DATABASE From MON$ATTACHMENTS, MON$DATABASE '+
+                      'Where MON$ATTACHMENT_ID = CURRENT_CONNECTION '));
+      ResultSet := Stmt.OpenCursor;
+      if ResultSet.FetchNext then
+      begin
+        FCharSetID := ResultSet[0].AsInteger;
+        FRemoteProtocol := Trim(ResultSet[1].AsString);
+        FAuthMethod := Trim(ResultSet[2].AsString);
+        FSecDatabase := Trim(ResultSet[3].AsString);
+      end
     end
-  end
-  else
-  if (FODSMajorVersion = 11) and (FODSMinorVersion >= 1) then
-  begin
-    Stmt := Prepare(StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit),
-                    AsCP_NONE('Select MON$CHARACTER_SET_ID, MON$REMOTE_PROTOCOL From MON$ATTACHMENTS '+
-                    'Where MON$ATTACHMENT_ID = CURRENT_CONNECTION'));
-    ResultSet := Stmt.OpenCursor;
-    if ResultSet.FetchNext then
+    else
+    if (FODSMajorVersion = 11) and (FODSMinorVersion >= 1) then
     begin
-      FCharSetID := ResultSet[0].AsInteger;
-      FRemoteProtocol := Trim(ResultSet[1].AsString);
+      Stmt := Prepare(StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit),
+                      AsCP_NONE('Select MON$CHARACTER_SET_ID, MON$REMOTE_PROTOCOL From MON$ATTACHMENTS '+
+                      'Where MON$ATTACHMENT_ID = CURRENT_CONNECTION'));
+      ResultSet := Stmt.OpenCursor;
+      if ResultSet.FetchNext then
+      begin
+        FCharSetID := ResultSet[0].AsInteger;
+        FRemoteProtocol := Trim(ResultSet[1].AsString);
+      end
     end
-  end
-  else
-  if DPB <> nil then
-  begin
-    Param :=  DPB.Find(isc_dpb_lc_ctype);
-    if (Param = nil) or not CharSetName2CharSetID(Param.AsString,FCharSetID) then
-      FCharSetID := 0;
-    case GetProtocol(FDatabaseName) of
-    TCP:       FRemoteProtocol := 'TCPv4';
-    Local:     FRemoteProtocol := '';
-    NamedPipe: FRemoteProtocol := 'Netbui';
-    SPX:       FRemoteProtocol := 'SPX'
+    else
+    if DPB <> nil then
+    begin
+      Param :=  DPB.Find(isc_dpb_lc_ctype);
+      if (Param = nil) or not CharSetName2CharSetID(Param.AsString,FCharSetID) then
+        FCharSetID := 0;
+      case GetProtocol(FDatabaseName) of
+      TCP:       FRemoteProtocol := 'TCPv4';
+      Local:     FRemoteProtocol := '';
+      NamedPipe: FRemoteProtocol := 'Netbui';
+      SPX:       FRemoteProtocol := 'SPX'
+      end;
     end;
+    FHasDefaultCharSet := CharSetID2CodePage(FCharSetID,FCodePage) and (FCharSetID > 1);
+    FHasConnectionInfo := true;
+  finally
+    FInNeedConnectionInfo := false;
   end;
-  FHasDefaultCharSet := CharSetID2CodePage(FCharSetID,FCodePage) and (FCharSetID > 1);
-  FHasConnectionInfo := true;
 end;
 
 procedure TFBAttachment.NeedDBInfo;
@@ -1147,6 +1154,11 @@ end;
 procedure TFBAttachment.UseServerICUChanged;
 begin
   // Do nothing by default
+end;
+
+procedure TFBAttachment.IBDataBaseError;
+begin
+  raise EIBInterBaseError.Create(getFirebirdAPI.GetStatus,CodePage);
 end;
 
 destructor TFBAttachment.Destroy;

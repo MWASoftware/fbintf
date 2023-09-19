@@ -320,12 +320,14 @@ type
 
    TStatusCode = long;
 
+  { IStatus }
+
   IStatus = interface
     ['{34167722-af38-4831-b08a-93162d58ede3}']
     function InErrorState: boolean;
     function GetIBErrorCode: TStatusCode;
     function Getsqlcode: TStatusCode;
-    function GetMessage: AnsiString;
+    function GetMessage(CodePage: TSystemCodePage): AnsiString;
     function CheckStatusVector(ErrorCodes: array of TFBStatusCode): Boolean;
     function GetIBDataBaseErrorMessages: TIBDataBaseErrorMessages;
     function Clone: IStatus;
@@ -1487,7 +1489,7 @@ type
      FIBErrorCode: Long;
      FStatus: IStatus;
    public
-     constructor Create(aStatus: IStatus); overload;
+     constructor Create(aStatus: IStatus; CodePage: TSystemCodePage); overload;
      constructor Create(ASQLCode: Long; AIBErrorCode: Long; Msg: AnsiString); overload;
      property IBErrorCode: Long read FIBErrorCode;
      property Status: IStatus read FStatus;
@@ -1618,9 +1620,10 @@ end;
 
 { EIBInterBaseError }
 
-constructor EIBInterBaseError.Create(aStatus: IStatus);
+constructor EIBInterBaseError.Create(aStatus: IStatus; CodePage: TSystemCodePage
+  );
 begin
-  inherited Create(aStatus.Getsqlcode,aStatus.GetMessage);
+  inherited Create(aStatus.Getsqlcode,aStatus.GetMessage(CodePage));
   FIBErrorCode := aStatus.GetIBErrorCode;
   FStatus := aStatus.Clone;
 end;

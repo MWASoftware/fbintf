@@ -809,9 +809,11 @@ function DecodeTimeZoneOffset(TZOffset: AnsiString; var dstOffset: integer): boo
 function StripLeadingZeros(Value: AnsiString): AnsiString;
 function StringToHex(octetString: string; MaxLineLength: integer=0): string; overload;
 procedure StringToHex(octetString: string; TextOut: TStrings; MaxLineLength: integer=0); overload;
-function PCharToAnsiString(buff: PAnsiChar): AnsiString;
+function PCharToAnsiString(buff: PAnsiChar; CodePage: TSystemCodePage): AnsiString;
+function GetCodePageFromString(const s: AnsiString): TSystemCodePage;
 function Transliterate(s: AnsiString; ToCodePage: TSystemCodePage
   ): RawByteString;
+function TransliterateToSystemCodePage(s: RawByteString): AnsiString;
 
 
 implementation
@@ -2070,22 +2072,47 @@ begin
     TextOut.Add(StringToHex(octetString,MaxLineLength));
 end;
 
-{$I 'include/lazutf8.inc'}
 
 {PChar to Ansistring replaces strpas and avoids widestring conversions. It
- also attempts to guess the encoding. By default this is UTF8, but if the
- UTF8 encoding check fails, it assumes the current codepage.}
+ also sets the current codepage - typically to the database connection codepage.}
 
-function PCharToAnsiString(buff: PAnsiChar): AnsiString;
+function PCharToAnsiString(buff: PAnsiChar; CodePage: TSystemCodePage
+  ): AnsiString;
 var s: RawByteString;
 begin
   SetLength(s,strlen(buff));
   Move(buff^,s[1],strlen(buff));
-  if FindInvalidUTF8Codepoint(PAnsiChar(s),length(s),true) = -1 then
-    SetCodePage(s,cp_utf8,false)
-  else
-    SetCodePage(s,cp_acp,false);
+  SetCodePage(s,CodePage,false);
   Result := s;
+end;
+
+function GetSystemCodePage: TSystemCodePage;
+begin
+  {$ifdef WINDOWS}
+    Result := GetACP;
+  {$else}
+  {$ifdef DARWIN}
+    Result := cp_utf8;
+  {$else}
+    Result := DefaultSystemCodePage;
+    if Result = cp_acp then
+      {why do we need to do this? The FPC docs say "DefaultSystemCodePage is used
+       to determine how CP_ACP is interpreted; it is what the program considers to
+       be the current system codepage. If it also says cp_acp then it is not giving
+       useful information. Just assume utf8 - which is typical of most unixes today.}
+      Result := cp_utf8;
+  {$endif}
+  {$endif}
+end;
+
+{stringcodepage tells us the codepage associated with the string. However, if
+ it is cp_acp then we have more work to do}
+
+function GetCodePageFromString(const s: AnsiString): TSystemCodePage;
+begin
+  Result := StringCodePage(s);
+  if Result = CP_ACP then
+    Result := GetSystemCodePage;
 end;
 
 function Transliterate(s: AnsiString; ToCodePage: TSystemCodePage
@@ -2093,13 +2120,43 @@ function Transliterate(s: AnsiString; ToCodePage: TSystemCodePage
 var FromCodePage: TSystemCodePage;
 begin
   Result := s;
-  FromCodePage := StringCodePage(Result);
+  FromCodePage := GetCodePageFromString(Result);
+  if ToCodePage = cp_acp then
+    ToCodePage := GetSystemCodePage;
   if (FromCodePage = ToCodePage) or (FromCodePage = CP_NONE) or (ToCodePage = CP_NONE) then
     Exit;
-  SetCodePage(Result,ToCodePage,true);
+  if (FromCodePage = CP_UTF8) then
+  begin
+    Result := UTF8ToAnsi(Result);
+    SetCodePage(Result,ToCodePage,false);
+  end
+  else
+    SetCodePage(Result,ToCodePage,true);
 end;
 
-
+function TransliterateToSystemCodePage(s: RawByteString): AnsiString;
+var CodePage: TSystemCodePage;
+begin
+  Codepage := GetCodePageFromString(s);
+  if (DefaultSystemCodePage = cp_utf8) or (DefaultSystemCodePage = cp_acp) then
+  begin
+    if (CodePage = cp_utf8) or (CodePage = CP_NONE) then
+      Result := s
+    else
+      {transliterate to UTF8}
+      Result := AnsiToUtf8(s)
+  end
+  else
+  if CodePage = cp_utf8 then
+    {If Default System Code page is not utf8 and s is utf8 then transliterate}
+    Result := utf8ToAnsi(s)
+  else
+  begin
+    {Connection code page and Default System Code page are both ANSI}
+    SetCodePage(s,cp_acp,true);
+    Result := s;
+  end;
+end;
 
 { TSQLXMLReader }
 

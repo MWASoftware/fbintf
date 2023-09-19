@@ -694,14 +694,15 @@ begin
     if (FXSQLDA <> nil) then
        if isc_dsql_describe_bind(StatusVector, @(FStatement.Handle), FStatement.SQLDialect,
                                     FXSQLDA) > 0 then
-         IBDataBaseError;
+         raise EIBInterBaseError.Create(GetStatus,GetAttachment.GetCodePage);
 
     if FXSQLDA^.sqld > FXSQLDA^.sqln then
     begin
       Count := FXSQLDA^.sqld;
       if isc_dsql_describe_bind(StatusVector, @(FStatement.Handle), FStatement.SQLDialect,
                                    FXSQLDA) > 0 then
-        IBDataBaseError;
+        raise EIBInterBaseError.Create(GetStatus,GetAttachment.GetCodePage);
+;
     end
     else
     if FXSQLDA^.sqld = 0 then
@@ -725,13 +726,15 @@ begin
   begin
     { Using isc_dsql_describe, get the right size for the columns... }
     if isc_dsql_describe(StatusVector, @(FStatement.Handle), FStatement.SQLDialect, FXSQLDA) > 0 then
-      IBDataBaseError;
+      raise EIBInterBaseError.Create(GetStatus,GetAttachment.GetCodePage);
+;
 
     if FXSQLDA^.sqld > FXSQLDA^.sqln then
     begin
       Count := FXSQLDA^.sqld;
       if isc_dsql_describe(StatusVector, @(FStatement.Handle), FStatement.SQLDialect, FXSQLDA) > 0 then
-        IBDataBaseError;
+         raise EIBInterBaseError.Create(GetStatus,GetAttachment.GetCodePage);
+;
     end
     else
     if FXSQLDA^.sqld = 0 then
@@ -969,7 +972,7 @@ begin
   with FFirebird25ClientAPI, buffer as TSQLInfoResultsBuffer do
   if isc_dsql_sql_info(StatusVector, @(FHandle), 1, @info_request,
                      GetBufSize, Buffer) > 0 then
-    IBDatabaseError;
+    raise EIBInterBaseError.Create(GetStatus,ConnectionCodePage);
 end;
 
 function TFB25Statement.GetStatementIntf: IStatement;
@@ -1014,7 +1017,7 @@ begin
         sql := FSQL;
 
       if StringCodePage(sql) <> CP_NONE then
-        sql := Transliterate(sql,GetAttachment.GetCodePage);
+        sql := Transliterate(sql,ConnectionCodePage);
 
       Call(isc_dsql_prepare(StatusVector, @(TRHandle), @FHandle, 0,
                  PAnsiChar(sql), FSQLDialect, nil), True);
@@ -1213,7 +1216,7 @@ begin
       isc_res :=
         Call(isc_dsql_free_statement(StatusVector, @FHandle, DSQL_drop), False);
       if (StatusVector^ = 1) and (isc_res > 0) and (isc_res <> isc_bad_stmt_handle) then
-        IBDataBaseError;
+        raise EIBInterBaseError.Create(GetStatus,ConnectionCodePage);
     end;
   finally
     FHandle := nil;
@@ -1236,7 +1239,7 @@ begin
       if not Force and (StatusVector^ = 1) and (isc_res > 0) and
         not getStatus.CheckStatusVector(
               [isc_bad_stmt_handle, isc_dsql_cursor_close_err]) then
-        IBDatabaseError;
+        raise EIBInterBaseError.Create(GetStatus,ConnectionCodePage);
     end;
   finally
     if (FSQLRecord.FTransaction <> nil) and (FSQLRecord.FTransaction <> (FTransactionIntf as TFB25Transaction)) then
@@ -1255,7 +1258,7 @@ begin
   inherited Create(Attachment,Transaction,sql,aSQLDialect);
   FDBHandle := Attachment.Handle;
   FFirebird25ClientAPI := Attachment.Firebird25ClientAPI;
-  OnDatabaseError := FFirebird25ClientAPI.IBDataBaseError;
+  OnDatabaseError := Attachment.IBDataBaseError;
   FSQLParams := TIBXINPUTSQLDA.Create(self);
   FSQLRecord := TIBXOUTPUTSQLDA.Create(self);
   InternalPrepare(CursorName);
@@ -1269,7 +1272,7 @@ begin
   inherited CreateWithParameterNames(Attachment,Transaction,sql,aSQLDialect,GenerateParamNames);
   FDBHandle := Attachment.Handle;
   FFirebird25ClientAPI := Attachment.Firebird25ClientAPI;
-  OnDatabaseError := FFirebird25ClientAPI.IBDataBaseError;
+  OnDatabaseError := Attachment.IBDataBaseError;
   FSQLParams := TIBXINPUTSQLDA.Create(self);
   FSQLParams.CaseSensitiveParams := CaseSensitiveParams;
   FSQLRecord := TIBXOUTPUTSQLDA.Create(self);
@@ -1308,7 +1311,7 @@ begin
     if (fetch_res > 0) then
     begin
       try
-        IBDataBaseError;
+        raise EIBInterBaseError.Create(GetStatus,ConnectionCodePage);
       except
         Close;
         raise;

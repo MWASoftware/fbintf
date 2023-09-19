@@ -31,7 +31,7 @@ unit FB30Statement;
 
 {$IFDEF FPC}
 {$mode delphi}
-{$codepage UTF8}
+{$ConnectionCodePage UTF8}
 {$interfaces COM}
 {$ENDIF}
 
@@ -105,6 +105,7 @@ type
     FCharSetID: cardinal;
     FRelationName: AnsiString;
     FFieldName: AnsiString;
+    function GetConnectionCodePage: TSystemCodePage;
 
     protected
      function CanChangeSQLType: boolean;
@@ -142,6 +143,7 @@ type
     function GetBlobMetaData: IBlobMetaData; override;
     function CreateBlob: IBlob; override;
     procedure SetSQLData(AValue: PByte; len: cardinal); override;
+    property ConnectionCodePage: TSystemCodePage read GetConnectionCodePage;
   end;
 
   { TIBXSQLDA }
@@ -152,6 +154,7 @@ type
     FSize: Integer;  {Number of TIBXSQLVARs in column list}
     FMetaData: Firebird.IMessageMetadata;
     FTransactionSeqNo: integer;
+    function GetConnectionCodePage: TSystemCodePage;
  protected
     FStatement: TFB30Statement;
     FFirebird30ClientAPI: TFB30ClientAPI;
@@ -177,6 +180,7 @@ type
     function CanChangeMetaData: boolean; override;
     property Count: Integer read FCount write SetCount;
     property Statement: TFB30Statement read FStatement;
+    property ConnectionCodePage: TSystemCodePage read GetConnectionCodePage;
   end;
 
   { TIBXINPUTSQLDA }
@@ -249,11 +253,14 @@ type
   TBatchCompletion = class(TInterfaceOwner,IBatchCompletion)
   private
     FCompletionState: Firebird.IBatchCompletionState;
+    FConnectionCodePage: TSystemCodePage;
     FFirebird30ClientAPI: TFB30ClientAPI;
     FStatus: IStatus;
   public
-    constructor Create(api: TFB30ClientAPI; cs: IBatchCompletionState);
+    constructor Create(api: TFB30ClientAPI; cs: IBatchCompletionState;
+                aConnectionCodePage: TSystemCodePage);
     destructor Destroy; override;
+    property ConnectionCodePage: TSystemCodePage read FConnectionCodePage;
     {IBatchCompletion}
     function getErrorStatus(var RowNo: integer; var status: IStatus): boolean;
     function getTotalProcessed: cardinal;
@@ -337,12 +344,13 @@ const
 { TBatchCompletion }
 
 constructor TBatchCompletion.Create(api: TFB30ClientAPI;
-  cs: IBatchCompletionState);
+  cs: IBatchCompletionState; aConnectionCodePage: TSystemCodePage);
 begin
   inherited Create;
   FFirebird30ClientAPI := api;
   FCompletionState := cs;
   FStatus := api.GetStatus.clone;
+  FConnectionCodePage := aConnectionCodePage;
 end;
 
 destructor TBatchCompletion.Destroy;
@@ -366,7 +374,7 @@ begin
   with FFirebird30ClientAPI do
   begin
     upcount := FCompletionState.getSize(StatusIntf);
-    Check4DataBaseError;
+    Check4DataBaseError(ConnectionCodePage);
     for i := 0 to upcount - 1 do
     begin
       state := FCompletionState.getState(StatusIntf,i);
@@ -374,7 +382,7 @@ begin
       begin
         RowNo := i+1;
         FCompletionState.getStatus(StatusIntf,(FStatus as TFB30Status).GetStatus,i);
-        Check4DataBaseError;
+        Check4DataBaseError(ConnectionCodePage);
         status := FStatus;
         Result := true;
         break;
@@ -388,7 +396,7 @@ begin
   with FFirebird30ClientAPI do
   begin
     Result := FCompletionState.getsize(StatusIntf);
-    Check4DataBaseError;
+    Check4DataBaseError(ConnectionCodePage);
   end;
 end;
 
@@ -398,7 +406,7 @@ begin
   with FFirebird30ClientAPI do
   begin
     state := FCompletionState.getState(StatusIntf,updateNo);
-    Check4DataBaseError;
+    Check4DataBaseError(ConnectionCodePage);
     case state of
       Firebird.IBatchCompletionState.EXECUTE_FAILED:
         Result := bcExecuteFailed;
@@ -419,8 +427,8 @@ begin
   begin
     status := MasterIntf.getStatus;
     FCompletionState.getStatus(StatusIntf,status,updateNo);
-    Check4DataBaseError;
-    Result := FormatStatus(status);
+    Check4DataBaseError(ConnectionCodePage);
+    Result := FormatStatus(status,ConnectionCodePage);
   end;
 end;
 
@@ -433,7 +441,7 @@ begin
   with FFirebird30ClientAPI do
   begin
     upcount := FCompletionState.getSize(StatusIntf);
-    Check4DataBaseError;
+    Check4DataBaseError(ConnectionCodePage);
     for i := 0 to upcount -1  do
     begin
       state := FCompletionState.getState(StatusIntf,i);
@@ -457,27 +465,27 @@ begin
   with FFirebird30ClientAPI do
   begin
     FSQLType := aMetaData.getType(StatusIntf,Index);
-    Check4DataBaseError;
+    Check4DataBaseError(ConnectionCodePage);
     if FSQLType = SQL_BLOB then
     begin
       FSQLSubType := aMetaData.getSubType(StatusIntf,Index);
-      Check4DataBaseError;
+      Check4DataBaseError(ConnectionCodePage);
     end
     else
       FSQLSubType := 0;
     FDataLength := aMetaData.getLength(StatusIntf,Index);
-    Check4DataBaseError;
+    Check4DataBaseError(ConnectionCodePage);
     FMetadataSize := FDataLength;
     FRelationName := strpas(aMetaData.getRelation(StatusIntf,Index));
-    Check4DataBaseError;
+    Check4DataBaseError(ConnectionCodePage);
     FFieldName := strpas(aMetaData.getField(StatusIntf,Index));
-    Check4DataBaseError;
+    Check4DataBaseError(ConnectionCodePage);
     FNullable := aMetaData.isNullable(StatusIntf,Index);
-    Check4DataBaseError;
+    Check4DataBaseError(ConnectionCodePage);
     FScale := aMetaData.getScale(StatusIntf,Index);
-    Check4DataBaseError;
+    Check4DataBaseError(ConnectionCodePage);
     FCharSetID :=  aMetaData.getCharSet(StatusIntf,Index) and $FF;
-    Check4DataBaseError;
+    Check4DataBaseError(ConnectionCodePage);
   end;
   if Name = '' then
     Name := FFieldName;
@@ -512,6 +520,11 @@ begin
   end;
 end;
 
+function TIBXSQLVAR.GetConnectionCodePage: TSystemCodePage;
+begin
+  Result := FStatement.ConnectionCodePage;
+end;
+
 function TIBXSQLVAR.CanChangeSQLType: boolean;
 begin
   Result := Parent.CanChangeMetaData;
@@ -535,7 +548,7 @@ begin
     with FFirebird30ClientAPI do
     begin
       result := strpas(metaData.getAlias(StatusIntf,Index));
-      Check4DataBaseError;
+      Check4DataBaseError(ConnectionCodePage);
     end;
   finally
     metadata.release;
@@ -555,7 +568,7 @@ begin
     with FFirebird30ClientAPI do
     begin
       result := strpas(metaData.getOwner(StatusIntf,Index));
-      Check4DataBaseError;
+      Check4DataBaseError(ConnectionCodePage);
     end;
   finally
     metadata.release;
@@ -929,7 +942,7 @@ begin
   with FFirebird30ClientAPI do
   begin
     Builder := FFirebird30ClientAPI.MasterIntf.getMetadataBuilder(StatusIntf,Count);
-    Check4DataBaseError;
+    Check4DataBaseError(ConnectionCodePage);
     try
       for i := 0 to Count - 1 do
       with TIBXSQLVar(Column[i]) do
@@ -939,14 +952,14 @@ begin
         {Firebird 4 or later}
         begin
           Builder.setField(StatusIntf,i,PAnsiChar(Name));
-          Check4DataBaseError;
+          Check4DataBaseError(ConnectionCodePage);
           Builder.setAlias(StatusIntf,i,PAnsiChar(Name));
-          Check4DataBaseError;
+          Check4DataBaseError(ConnectionCodePage);
         end;
         Builder.setType(StatusIntf,i,FSQLType);
-        Check4DataBaseError;
+        Check4DataBaseError(ConnectionCodePage);
         Builder.setSubType(StatusIntf,i,FSQLSubType);
-        Check4DataBaseError;
+        Check4DataBaseError(ConnectionCodePage);
 //        writeln('Column ',Name,' Type = ',TSQLDataItem.GetSQLTypeName(FSQLType),' Size = ',GetSize,' DataLength = ',GetDataLength);
         if FSQLType = SQL_VARYING then
         begin
@@ -958,14 +971,14 @@ begin
         end
         else
           Builder.setLength(StatusIntf,i,GetDataLength);
-        Check4DataBaseError;
+        Check4DataBaseError(ConnectionCodePage);
         Builder.setCharSet(StatusIntf,i,GetCharSetID);
-        Check4DataBaseError;
+        Check4DataBaseError(ConnectionCodePage);
         Builder.setScale(StatusIntf,i,FScale);
-        Check4DataBaseError;
+        Check4DataBaseError(ConnectionCodePage);
       end;
       FCurMetaData := Builder.getMetadata(StatusIntf);
-      Check4DataBaseError;
+      Check4DataBaseError(ConnectionCodePage);
     finally
       Builder.release;
     end;
@@ -984,7 +997,7 @@ begin
   with FFirebird30ClientAPI do
   begin
     MsgLen := FCurMetaData.getMessageLength(StatusIntf);
-    Check4DataBaseError;
+    Check4DataBaseError(ConnectionCodePage);
 
     AllocMessageBuffer(MsgLen);
 
@@ -1009,14 +1022,14 @@ begin
         if (SQLType = SQL_BLOB) and (FStatement.FBatch <> nil) then
         begin
           FStatement.FBatch.registerBlob(Statusintf,ISC_QUADPtr(FSQLData),ISC_QUADPtr(FSQLData));
-          Check4DatabaseError;
+          Check4DataBaseError(ConnectionCodePage);
         end;
         Move(FSQLData^,P^,FDataLength);
       end;
       if IsNullable then
       begin
         Move(FNullIndicator,(FMessageBuffer + FCurMetaData.getNullOffset(StatusIntf,i))^,sizeof(FNullIndicator));
-        Check4DataBaseError;
+        Check4DataBaseError(ConnectionCodePage);
       end
       else
       begin
@@ -1059,7 +1072,7 @@ begin
   with FFirebird30ClientAPI do
   begin
     Count := aMetadata.getCount(StatusIntf);
-    Check4DataBaseError;
+    Check4DataBaseError(ConnectionCodePage);
     Initialize;
 
     for i := 0 to Count - 1 do
@@ -1115,11 +1128,11 @@ begin
   with FFirebird30ClientAPI do
   begin
     Count := aMetaData.getCount(StatusIntf);
-    Check4DataBaseError;
+    Check4DataBaseError(ConnectionCodePage);
     Initialize;
 
     MsgLen := aMetaData.getMessageLength(StatusIntf);
-    Check4DataBaseError;
+    Check4DataBaseError(ConnectionCodePage);
     AllocMessageBuffer(MsgLen);
 
     for i := 0 to Count - 1 do
@@ -1127,11 +1140,11 @@ begin
     begin
       InitColumnMetaData(aMetaData);
       FSQLData := FMessageBuffer + aMetaData.getOffset(StatusIntf,i);
-      Check4DataBaseError;
+      Check4DataBaseError(ConnectionCodePage);
       if FNullable then
       begin
         FSQLNullIndicator := PShort(FMessageBuffer + aMetaData.getNullOffset(StatusIntf,i));
-        Check4DataBaseError;
+        Check4DataBaseError(ConnectionCodePage);
       end
       else
         FSQLNullIndicator := nil;
@@ -1279,6 +1292,11 @@ begin
     Result.addRef;
 end;
 
+function TIBXSQLDA.GetConnectionCodePage: TSystemCodePage;
+begin
+  Result := Statement.ConnectionCodePage;
+end;
+
 function TIBXSQLDA.GetTransactionSeqNo: integer;
 begin
   Result := FTransactionSeqNo;
@@ -1346,7 +1364,7 @@ begin
   begin
     StatementIntf.getInfo(StatusIntf,1,BytePtr(@info_request),
                      GetBufSize, BytePtr(Buffer));
-    Check4DataBaseError;
+    Check4DataBaseError(ConnectionCodePage);
   end;
 end;
 
@@ -1386,21 +1404,21 @@ begin
         sql := FSQL;
 
       if StringCodePage(sql) <> CP_NONE then
-        sql := Transliterate(sql,GetAttachment.GetCodePage);
+        sql := Transliterate(sql,ConnectionCodePage);
       FStatementIntf := (GetAttachment as TFB30Attachment).AttachmentIntf.prepare(StatusIntf,
                           (FTransactionIntf as TFB30Transaction).TransactionIntf,
                           Length(sql),
                           PAnsiChar(sql),
                           FSQLDialect,
                           Firebird.IStatement.PREPARE_PREFETCH_METADATA);
-      Check4DataBaseError;
+      Check4DataBaseError(ConnectionCodePage);
       FSQLStatementType := TIBSQLStatementTypes(FStatementIntf.getType(StatusIntf));
-      Check4DataBaseError;
+      Check4DataBaseError(ConnectionCodePage);
 
       if FSQLStatementType = SQLSelect then
       begin
         FStatementIntf.setCursorName(StatusIntf,PAnsiChar(FCursor));
-        Check4DataBaseError;
+        Check4DataBaseError(ConnectionCodePage);
       end;
       { Done getting the type }
       case FSQLStatementType of
@@ -1419,7 +1437,7 @@ begin
         begin
           {set up input sqlda}
           metadata := FStatementIntf.getInputMetadata(StatusIntf);
-          Check4DataBaseError;
+          Check4DataBaseError(ConnectionCodePage);
           try
             FSQLParams.Bind(metadata);
           finally
@@ -1431,7 +1449,7 @@ begin
                           SQLExecProcedure] then
           begin
             metadata := FStatementIntf.getOutputMetadata(StatusIntf);
-            Check4DataBaseError;
+            Check4DataBaseError(ConnectionCodePage);
             try
               FSQLRecord.Bind(metadata);
             finally
@@ -1484,7 +1502,7 @@ function TFB30Statement.InternalExecute(aTransaction: ITransaction): IResults;
                                FSQLParams.MessageBuffer,
                                outMetaData,
                                outBuffer);
-        Check4DataBaseError;
+        Check4DataBaseError(ConnectionCodePage);
       finally
         if inMetadata <> nil then
           inMetadata.release;
@@ -1587,7 +1605,7 @@ begin
      UtilIntf.getPerfCounters(StatusIntf,
                              (GetAttachment as TFB30Attachment).AttachmentIntf,
                               ISQL_COUNTERS, @FBeforeStats);
-     Check4DataBaseError;
+     Check4DataBaseError(ConnectionCodePage);
    end;
 
    inMetadata := FSQLParams.GetMetaData;
@@ -1599,7 +1617,7 @@ begin
                           FSQLParams.MessageBuffer,
                           outMetaData,
                           flags);
-     Check4DataBaseError;
+     Check4DataBaseError(ConnectionCodePage);
    finally
      if inMetadata <> nil then
        inMetadata.release;
@@ -1612,7 +1630,7 @@ begin
      UtilIntf.getPerfCounters(StatusIntf,
                              (GetAttachment as TFB30Attachment).AttachmentIntf,
                              ISQL_COUNTERS,@FAfterStats);
-     Check4DataBaseError;
+     Check4DataBaseError(ConnectionCodePage);
      FStatisticsAvailable := true;
    end;
  end;
@@ -1668,7 +1686,7 @@ begin
           FResultSet.release;
       end;
       FResultSet := nil;
-      if not Force then Check4DataBaseError;
+      if not Force then Check4DataBaseError(ConnectionCodePage);
     end;
   finally
     if (FSQLRecord.FTransaction <> nil) and (FSQLRecord.FTransaction <> (FTransactionIntf as TFB30Transaction)) then
@@ -1690,7 +1708,7 @@ begin
     UtilIntf.getPerfCounters(StatusIntf,
               (GetAttachment as TFB30Attachment).AttachmentIntf,
               ISQL_COUNTERS, @Stats);
-    Check4DataBaseError;
+    Check4DataBaseError(ConnectionCodePage);
     Result := true;
   end;
 end;
@@ -1743,7 +1761,7 @@ begin
           IBError(ibxeEOF,[nil]);
         { Go to the next record... }
         fetchResult := FResultSet.fetchNext(StatusIntf,FSQLRecord.MessageBuffer);
-        Check4DataBaseError;
+        Check4DataBaseError(ConnectionCodePage);
         if fetchResult = Firebird.IStatus.RESULT_NO_DATA then
         begin
           FBOF := false;
@@ -1758,7 +1776,7 @@ begin
           IBError(ibxeBOF,[nil]);
         { Go to the next record... }
         fetchResult := FResultSet.fetchPrior(StatusIntf,FSQLRecord.MessageBuffer);
-        Check4DataBaseError;
+        Check4DataBaseError(ConnectionCodePage);
         if fetchResult = Firebird.IStatus.RESULT_NO_DATA then
         begin
           FBOF := true;
@@ -1770,25 +1788,25 @@ begin
     ftFirst:
       begin
         fetchResult := FResultSet.fetchFirst(StatusIntf,FSQLRecord.MessageBuffer);
-        Check4DataBaseError;
+        Check4DataBaseError(ConnectionCodePage);
       end;
 
     ftLast:
       begin
         fetchResult := FResultSet.fetchLast(StatusIntf,FSQLRecord.MessageBuffer);
-        Check4DataBaseError;
+        Check4DataBaseError(ConnectionCodePage);
       end;
 
     ftAbsolute:
       begin
         fetchResult := FResultSet.fetchAbsolute(StatusIntf,PosOrOffset,FSQLRecord.MessageBuffer);
-        Check4DataBaseError;
+        Check4DataBaseError(ConnectionCodePage);
       end;
 
     ftRelative:
       begin
         fetchResult := FResultSet.fetchRelative(StatusIntf,PosOrOffset,FSQLRecord.MessageBuffer);
-        Check4DataBaseError;
+        Check4DataBaseError(ConnectionCodePage);
       end;
     end;
 
@@ -1805,7 +1823,7 @@ begin
       UtilIntf.getPerfCounters(StatusIntf,
                               (GetAttachment as TFB30Attachment).AttachmentIntf,
                               ISQL_COUNTERS,@FAfterStats);
-      Check4DataBaseError;
+      Check4DataBaseError(ConnectionCodePage);
       FStatisticsAvailable := true;
     end;
   end;
@@ -1842,7 +1860,7 @@ begin
   with FFirebird30ClientAPI do
   begin
     Result := FStatementIntf.getPlan(StatusIntf,true);
-    Check4DataBaseError;
+    Check4DataBaseError(ConnectionCodePage);
   end;
 end;
 
@@ -1910,7 +1928,7 @@ begin
           else
           begin
             FBatchBufferSize := FBatchRowLimit * inMetadata.getAlignedLength(StatusIntf);
-            Check4DatabaseError;
+            Check4DataBaseError(ConnectionCodePage);
             if FBatchBufferSize < SixteenMB then
               FBatchBufferSize := SixteenMB;
             if FBatchBufferSize > MB256 {assumed limit} then
@@ -1922,7 +1940,7 @@ begin
                                                inMetadata,
                                                BatchPB.getDataLength,
                                                BatchPB.getBuffer);
-          Check4DataBaseError;
+          Check4DataBaseError(ConnectionCodePage);
 
         finally
           BatchPB.Free;
@@ -1933,14 +1951,14 @@ begin
 
       Inc(FBatchRowCount);
       Inc(FBatchBufferUsed,inMetadata.getAlignedLength(StatusIntf));
-      Check4DataBaseError;
+      Check4DataBaseError(ConnectionCodePage);
       if FBatchBufferUsed > FBatchBufferSize then
         raise EIBBatchBufferOverflow.Create(Ord(ibxeBatchRowBufferOverflow),
                                 Format(GetErrorMessage(ibxeBatchRowBufferOverflow),
                                 [FBatchRowCount,FBatchBufferSize]));
 
       FBatch.Add(StatusIntf,1,FSQLParams.GetMessageBuffer);
-        Check4DataBaseError
+        Check4DataBaseError(ConnectionCodePage)
     end;
   finally
     if inMetadata <> nil then
@@ -1958,7 +1976,7 @@ begin
   status := nil;
   {Raise an exception if there was an error reported in the BatchCompletion}
   if (bc <> nil) and bc.getErrorStatus(RowNo,status) then
-    raise EIBInterbaseError.Create(status);
+    raise EIBInterbaseError.Create(status,ConnectionCodePage);
 end;
 
 var cs: Firebird.IBatchCompletionState;
@@ -1975,8 +1993,8 @@ begin
       cs := FBatch.execute(StatusIntf,(FTransactionIntf as TFB30Transaction).TransactionIntf)
     else
       cs := FBatch.execute(StatusIntf,(aTransaction as TFB30Transaction).TransactionIntf);
-    Check4DataBaseError;
-    FBatchCompletion := TBatchCompletion.Create(FFirebird30ClientAPI,cs);
+    Check4DataBaseError(ConnectionCodePage);
+    FBatchCompletion := TBatchCompletion.Create(FFirebird30ClientAPI,cs,ConnectionCodePage);
     FStatisticsAvailable := SavePerfStats(FAfterStats);
     FBatch.release;
     FBatch := nil;
@@ -2011,7 +2029,7 @@ begin
   with FFirebird30ClientAPI do
   begin
     flags := FStatementIntf.getFlags(StatusIntf);
-    Check4DataBaseError;
+    Check4DataBaseError(ConnectionCodePage);
   end;
   if flags and Firebird.IStatement.FLAG_HAS_CURSOR <> 0 then
     Result := Result + [stHasCursor];

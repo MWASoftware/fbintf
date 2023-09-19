@@ -55,6 +55,7 @@ type
   TFBStatement = class(TActivityReporter,ITransactionUser)
   private
     FAttachmentIntf: IAttachment;
+    FConnectionCodePage: TSystemCodePage;
     FFirebirdClientAPI: TFBClientAPI;
   protected
     FTransactionIntf: ITransaction;
@@ -104,6 +105,7 @@ type
     procedure TransactionEnding(aTransaction: ITransaction; Force: boolean);
     property SQLDialect: integer read FSQLDialect;
     property FirebirdClientAPI: TFBClientAPI read FFirebirdClientAPI;
+    property ConnectionCodePage: TSystemCodePage read FConnectionCodePage;
 
   public
     function GetSQLParams: ISQLParams; virtual; abstract;
@@ -213,6 +215,7 @@ begin
   FSQL := sql;
   FBatchRowLimit := DefaultBatchRowLimit;
   FStaleReferenceChecks := true;
+  FConnectionCodePage := Attachment.GetCodePage;
 end;
 
 constructor TFBStatement.CreateWithParameterNames(Attachment: IAttachment;

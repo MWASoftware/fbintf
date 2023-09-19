@@ -177,7 +177,7 @@ begin
   FAttachment := Attachment;
   FTransaction := Transaction;
   FFirebird25ClientAPI := Attachment.Firebird25ClientAPI;
-  OnDatabaseError := FFirebird25ClientAPI.IBDataBaseError;
+  OnDatabaseError := Attachment.IBDataBaseError;
 end;
 
 constructor TFB25BlobMetaData.Create(Attachment: TFB25Attachment;
@@ -245,7 +245,7 @@ begin
   DBHandle := Attachment.Handle;
   TRHandle := Transaction.Handle;
   FFirebird25ClientAPI := Attachment.Firebird25ClientAPI;
-  OnDatabaseError := FFirebird25ClientAPI.IBDataBaseError;
+  OnDatabaseError := Attachment.IBDataBaseError;
   with FFirebird25ClientAPI do
   if BPB = nil then
     Call(isc_create_blob2(StatusVector, @DBHandle, @TRHandle, @FHandle, @FBlobID,
@@ -270,7 +270,7 @@ begin
   DBHandle := Attachment.Handle;
   TRHandle := Transaction.Handle;
   FFirebird25ClientAPI := Attachment.Firebird25ClientAPI;
-  OnDatabaseError := FFirebird25ClientAPI.IBDataBaseError;
+  OnDatabaseError := Attachment.IBDataBaseError;
   with FFirebird25ClientAPI do
   if BPB = nil then
     Call(isc_create_blob2(StatusVector, @DBHandle, @TRHandle, @FHandle, @FBlobID,
@@ -290,7 +290,7 @@ begin
   DBHandle := Attachment.Handle;
   TRHandle := Transaction.Handle;
   FFirebird25ClientAPI := Attachment.Firebird25ClientAPI;
-  OnDatabaseError := FFirebird25ClientAPI.IBDataBaseError;
+  OnDatabaseError := Attachment.IBDataBaseError;
   if (BlobID.gds_quad_high = 0) and (BlobID.gds_quad_low = 0) then
     Exit;
 
@@ -333,7 +333,7 @@ begin
   FEOB := returnCode = isc_segstr_eof;
   ClearStringCache;
   if (returnCode <> 0) and (returnCode <> isc_segment) and (returnCode <> isc_segstr_eof) then
-    FFirebird25ClientAPI.IBDataBaseError
+    raise EIBInterBaseError.Create(FFirebird25ClientAPI.GetStatus,ConnectionCodePage);
 end;
 
 function TFB25Blob.Write(const Buffer; Count: Longint): Longint;
