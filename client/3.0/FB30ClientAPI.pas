@@ -261,7 +261,7 @@ threadvar
 
 function TFB30Status.GetIBMessage(CodePage: TSystemCodePage): AnsiString;
 begin
-  Result := TransliterateToSystemCodePage((FOwner as TFB30ClientAPI).FormatStatus(GetStatus,Codepage));
+  Result := TransliterateToCodePage((FOwner as TFB30ClientAPI).FormatStatus(GetStatus,Codepage),CP_ACP);
 end;
 
 constructor TFB30Status.Create(aOwner: TFBClientAPI; prefix: AnsiString);

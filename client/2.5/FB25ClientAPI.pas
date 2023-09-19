@@ -355,7 +355,7 @@ begin
     begin
       if (Result <> '') and (Result[Length(Result)] <> LF) then
         Result := Result + LineEnding + '-';
-      Result := Result + PCharToAnsiString(local_buffer,GuessCodePage(local_buffer));
+      Result := Result + TransliterateToCodePage(PCharToAnsiString(local_buffer,GuessCodePage(local_buffer)),CP_ACP);
     end;
   end
   else
@@ -364,7 +364,7 @@ begin
   begin
     if (Result <> '') and (Result[Length(Result)] <> LF) then
       Result := Result + LineEnding + '-';
-    Result := Result + PCharToAnsiString(local_buffer,GuessCodePage(local_buffer));
+    Result := Result + TransliterateToCodePage(PCharToAnsiString(local_buffer,GuessCodePage(local_buffer)),CP_ACP);
   end;
 end;
 

@@ -2450,7 +2450,7 @@ procedure TSQLParam.InternalSetAsString(Value: AnsiString);
 procedure DoSetString;
 begin
   Changing;
-  FIBXSQLVar.SetString(Transliterate(Value,GetCodePage));
+  FIBXSQLVar.SetString(TransliterateToCodePage(Value,GetCodePage));
   Changed;
 end;
 

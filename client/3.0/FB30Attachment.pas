@@ -363,7 +363,7 @@ procedure TFB30Attachment.ExecImmediate(transaction: ITransaction; sql: AnsiStri
 begin
   CheckHandle;
   if StringCodePage(sql) <> CP_NONE then
-    sql := Transliterate(sql,CodePage);
+    sql := TransliterateToCodePage(sql,CodePage);
   with FFirebird30ClientAPI do
   try
     FAttachmentIntf.execute(StatusIntf,(transaction as TFB30Transaction).TransactionIntf,

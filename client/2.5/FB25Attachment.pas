@@ -271,7 +271,7 @@ begin
   CheckHandle;
   TRHandle := (Transaction as TFB25Transaction).Handle;
   if StringCodePage(sql) <> CP_NONE then
-    sql := Transliterate(sql,CodePage);
+    sql := TransliterateToCodePage(sql,CodePage);
   with FFirebird25ClientAPI do
     if isc_dsql_execute_immediate(StatusVector, @fHandle, @TRHandle, 0,PAnsiChar(sql), aSQLDialect, nil) > 0 then
       IBDatabaseError;

@@ -1017,7 +1017,7 @@ begin
         sql := FSQL;
 
       if StringCodePage(sql) <> CP_NONE then
-        sql := Transliterate(sql,ConnectionCodePage);
+        sql := TransliterateToCodePage(sql,ConnectionCodePage);
 
       Call(isc_dsql_prepare(StatusVector, @(TRHandle), @FHandle, 0,
                  PAnsiChar(sql), FSQLDialect, nil), True);

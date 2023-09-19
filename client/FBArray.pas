@@ -406,7 +406,7 @@ begin
 
   SQL_VARYING:
     begin
-      Value := Transliterate(Value,GetCodePage);
+      Value := TransliterateToCodePage(Value,GetCodePage);
       len := Length(Value);
       ElementSize := GetDataLength;
       if len > ElementSize - 2 then
@@ -420,7 +420,7 @@ begin
 
   SQL_TEXT:
     begin
-      Value := Transliterate(Value,GetCodePage);
+      Value := TransliterateToCodePage(Value,GetCodePage);
       ElementSize := GetDataLength;
       FillChar(FBufPtr^,ElementSize,' ');
       len := Length(Value);

@@ -391,7 +391,7 @@ begin
 
   if (GetSubType = 1) and  (StringCodePage(aValue) <> GetCodePage) and
            (GetCodePage <> CP_NONE) and (FBPB = nil) then
-    aValue := Transliterate(aValue,GetCodePage);
+    aValue := TransliterateToCodePage(aValue,GetCodePage);
   ss := TStringStream.Create(aValue);
   try
     LoadFromStream(ss);

@@ -810,18 +810,19 @@ function StripLeadingZeros(Value: AnsiString): AnsiString;
 function StringToHex(octetString: string; MaxLineLength: integer=0): string; overload;
 procedure StringToHex(octetString: string; TextOut: TStrings; MaxLineLength: integer=0); overload;
 function PCharToAnsiString(buff: PAnsiChar; CodePage: TSystemCodePage): AnsiString;
+function TransliterateToCodePage(const s: AnsiString; ToCodePage: TSystemCodePage): RawByteString;
 function GetCodePageFromString(const s: AnsiString): TSystemCodePage;
-function Transliterate(s: AnsiString; ToCodePage: TSystemCodePage
-  ): RawByteString;
-function TransliterateToSystemCodePage(s: RawByteString): AnsiString;
 
 
 implementation
 
-uses FBMessages, Math
+uses FBMessages, Math {$ifdef WINDOWS},Windows {$endif}
 
 {$IFDEF FPC}
 ,RegExpr
+{$IFDEF UNIX}
+,unixcp
+{$ENDIF}
 {$ELSE}
 {$IF declared(CompilerVersion) and (CompilerVersion >= 22)}
 , RegularExpressions
@@ -2086,22 +2087,12 @@ begin
   Result := s;
 end;
 
-function GetSystemCodePage: TSystemCodePage;
+function FBGetSystemCodePage: TSystemCodePage;
 begin
   {$ifdef WINDOWS}
     Result := GetACP;
   {$else}
-  {$ifdef DARWIN}
-    Result := cp_utf8;
-  {$else}
-    Result := DefaultSystemCodePage;
-    if Result = cp_acp then
-      {why do we need to do this? The FPC docs say "DefaultSystemCodePage is used
-       to determine how CP_ACP is interpreted; it is what the program considers to
-       be the current system codepage. If it also says cp_acp then it is not giving
-       useful information. Just assume utf8 - which is typical of most unixes today.}
-      Result := cp_utf8;
-  {$endif}
+    Result :=  UnixCP.GetSystemCodepage;
   {$endif}
 end;
 
@@ -2112,49 +2103,70 @@ function GetCodePageFromString(const s: AnsiString): TSystemCodePage;
 begin
   Result := StringCodePage(s);
   if Result = CP_ACP then
-    Result := GetSystemCodePage;
+    Result := FBGetSystemCodePage;
 end;
 
-function Transliterate(s: AnsiString; ToCodePage: TSystemCodePage
-  ): RawByteString;
+function TransliterateToCodePage(const s: AnsiString; ToCodePage: TSystemCodePage): RawByteString;
 var FromCodePage: TSystemCodePage;
+    OldCodePage: TSystemCodePage;
+    u: UnicodeString;
 begin
   Result := s;
-  FromCodePage := GetCodePageFromString(Result);
-  if ToCodePage = cp_acp then
-    ToCodePage := GetSystemCodePage;
-  if (FromCodePage = ToCodePage) or (FromCodePage = CP_NONE) or (ToCodePage = CP_NONE) then
+  if ToCodePage = CP_NONE then
+  begin
+    SetCodePage(Result,CP_NONE,false);
     Exit;
-  if (FromCodePage = CP_UTF8) then
-  begin
-    Result := UTF8ToAnsi(Result);
-    SetCodePage(Result,ToCodePage,false);
-  end
-  else
-    SetCodePage(Result,ToCodePage,true);
-end;
+  end;
 
-function TransliterateToSystemCodePage(s: RawByteString): AnsiString;
-var CodePage: TSystemCodePage;
-begin
-  Codepage := GetCodePageFromString(s);
-  if (DefaultSystemCodePage = cp_utf8) or (DefaultSystemCodePage = cp_acp) then
+  if ToCodePage = CP_ACP then
+    ToCodePage := FBGetSystemCodePage;
+
+  FromCodePage := GetCodePageFromString(Result);
+  if FromCodePage = CP_UTF8 then
   begin
-    if (CodePage = cp_utf8) or (CodePage = CP_NONE) then
-      Result := s
-    else
-      {transliterate to UTF8}
-      Result := AnsiToUtf8(s)
+    if ToCodePage = CP_UTF8 then
+       Exit; {Nothing to do here}
+
+    {Transliterate to ANSI code page}
+    OldCodePage := DefaultSystemCodePage;
+    try
+      SetMultiByteConversionCodePage(ToCodePage);
+      Result :=  utf8ToAnsi(Result);
+    finally
+      SetMultiByteConversionCodePage(OldCodePage);
+    end;
   end
   else
-  if CodePage = cp_utf8 then
-    {If Default System Code page is not utf8 and s is utf8 then transliterate}
-    Result := utf8ToAnsi(s)
+  if FromCodePage = CP_NONE then
+    SetCodePage(Result,ToCodePage,false)
   else
   begin
-    {Connection code page and Default System Code page are both ANSI}
-    SetCodePage(s,cp_acp,true);
-    Result := s;
+    if ToCodePage = FromCodePage then
+      Exit;
+
+    if ToCodePage = CP_UTF8 then
+    begin
+      OldCodePage := DefaultSystemCodePage;
+      try
+        SetMultiByteConversionCodePage(FromCodePage);
+        Result := AnsiToUTF8(Result);
+      finally
+        SetMultiByteConversionCodePage(OldCodePage);
+      end;
+    end
+    else
+    begin
+      {Transliterate from one ANSI Code Page to another}
+      OldCodePage := DefaultSystemCodePage;
+      try
+        SetMultiByteConversionCodePage(FromCodePage);
+        u := UnicodeString(Result);
+        SetMultiByteConversionCodePage(ToCodePage);
+        Result := RawByteString(u);
+      finally
+        SetMultiByteConversionCodePage(OldCodePage);
+      end;
+    end;
   end;
 end;
 
