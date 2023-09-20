@@ -58,12 +58,15 @@ type
   private
     procedure UpdateDatabase(Attachment: IAttachment);
     procedure QueryDatabase(Attachment: IAttachment);
+    procedure TransliterationTest;
   public
     function TestTitle: AnsiString; override;
     procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
   end;
 
 implementation
+
+uses IBUtils;
 
 const
   sqlCreateTable =
@@ -137,6 +140,46 @@ begin
   end;
 end;
 
+procedure TTest12.TransliterationTest;
+const
+  Win1252Test1: UTF8String = 'WIN1252 Characters ÖÄÜöäüß';
+  Win1252Test2: UTF8String = 'Я Écoute moi';
+
+var
+ str: AnsiString;
+begin
+  writeln(Outfile,'Transliteration Tests');
+  writeln('Default System Code Page = ',DefaultSystemCodePage);
+  writeln(Outfile,'Actual System Code Page = ',FBGetSystemCodePage);
+  writeln(Outfile,'Input String = ', Win1252Test1,', Character Set = ',StringCodePage(Win1252Test1),' Hex Values:');
+  PrintHexString(Win1252Test1);
+  writeln(OutFile);
+  str := TransliterateToCodePage(Win1252Test1,1252);
+  writeln(Outfile,'Code Page = ',StringCodePage(str));
+  PrintHexString(str);
+  writeln(OutFile);
+  writeln(Outfile,'Back to UTF8');
+  str := TransliterateToCodePage(str,CP_UTF8);
+  writeln(Outfile,'Code Page = ',StringCodePage(str));
+  writeln(Outfile,str);
+  PrintHexString(str);
+  writeln(OutFile);
+  writeln(Outfile,'ANSI(1252) to ANSI(1251) Test');
+  writeln(Outfile,'Input String = ', Win1252Test2,', Character Set = ',StringCodePage(Win1252Test2),' Hex Values:');
+  PrintHexString(Win1252Test2);
+  writeln(OutFile);
+  str := TransliterateToCodePage(Win1252Test2,1251);
+  writeln(Outfile,'After conversion to 1251');
+  writeln(Outfile,'Code Page = ',StringCodePage(str));
+  PrintHexString(str);
+  writeln(OutFile);
+  writeln(Outfile,'Now Transliterate to WIN1252');
+  str := TransliterateToCodePage(str,1252);
+  writeln(Outfile,'Code Page = ',StringCodePage(str));
+  PrintHexString(str);
+  writeln(OutFile);
+end;
+
 function TTest12.TestTitle: AnsiString;
 begin
   Result := 'Test 12: Character Sets';
@@ -146,6 +189,7 @@ procedure TTest12.RunTest(CharSet: AnsiString; SQLDialect: integer);
 var DPB: IDPB;
     Attachment: IAttachment;
 begin
+  TransliterationTest;
   FHexStrings := true;
   DPB := FirebirdAPI.AllocateDPB;
   DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);

@@ -810,8 +810,8 @@ function StripLeadingZeros(Value: AnsiString): AnsiString;
 function StringToHex(octetString: string; MaxLineLength: integer=0): string; overload;
 procedure StringToHex(octetString: string; TextOut: TStrings; MaxLineLength: integer=0); overload;
 function PCharToAnsiString(buff: PAnsiChar; CodePage: TSystemCodePage): AnsiString;
+function FBGetSystemCodePage: TSystemCodePage;
 function TransliterateToCodePage(const s: AnsiString; ToCodePage: TSystemCodePage): RawByteString;
-function GetCodePageFromString(const s: AnsiString): TSystemCodePage;
 
 
 implementation
@@ -819,7 +819,7 @@ implementation
 uses FBMessages, Math {$ifdef WINDOWS},Windows {$endif}
 
 {$IFDEF FPC}
-,RegExpr
+,RegExpr, fpWidestring, cpall
 {$IFDEF UNIX}
 ,unixcp
 {$ENDIF}
@@ -2087,87 +2087,151 @@ begin
   Result := s;
 end;
 
+const FSystemCodePage: TSystemCodePage = CP_ACP;
+
 function FBGetSystemCodePage: TSystemCodePage;
 begin
+  if DefaultSystemCodePage <> CP_ACP then
+  begin
+    Result := DefaultSystemCodePage;
+    Exit;
+  end;
+
+  if FSystemCodePage = CP_ACP then
   {$ifdef WINDOWS}
-    Result := GetACP;
+    FSystemCodePage := GetACP;
   {$else}
-    Result :=  UnixCP.GetSystemCodepage;
+  {$ifdef UNIX}
+    FSystemCodePage :=  UnixCP.GetSystemCodepage;
+  {$else}
+    FSystemCodePage := DefaultSystemCodePage;
   {$endif}
+  {$endif}
+  Result := FSystemCodePage;
 end;
 
-{stringcodepage tells us the codepage associated with the string. However, if
- it is cp_acp then we have more work to do}
-
-function GetCodePageFromString(const s: AnsiString): TSystemCodePage;
+{$ifdef WINDOWS}
+function WinWideStringToAnsi(u: UnicodeString; CodePage: TSystemCodePage): RawBytestring;
+var Len: integer;
+    Len2: integer;
 begin
-  Result := StringCodePage(s);
-  if Result = CP_ACP then
-    Result := FBGetSystemCodePage;
+  Result := '';
+  Len := WideCharToMultiByte(CodePage,0,PWideChar(u),Length(u),nil,0,nil,nil);
+  if Len < 0 then
+    Exit;
+  SetLength(Result,Len);
+  Len2 := WideCharToMultiByte(CodePage,0,PWideChar(u),Length(u),PAnsiChar(Result),Len,nil,nil);
+  if Len <> Len2 then
+    SetLength(Result,Len2);
+  SetCodePage(Result,CodePage,false);
 end;
+
+function WinAnsiToWideString(const s: RawByteString; CodePage: TSystemCodePage): UnicodeString;
+var Len: integer;
+    Len2: integer;
+begin
+  Result := '';
+  Len :=  MultiByteToWideChar(CodePage, 0, PAnsiChar(s), Length(s), nil, 0);
+  if Len < 0 then
+    Exit;
+  SetLength(Result,Len);
+  Len2 :=  MultiByteToWideChar(CodePage, 0, PAnsiChar(s), Length(s), PWhideChar(Result), I);
+  if Len <> Len2 then
+    SetLength(Result,Len2);
+end;
+{$endif}
+
+{This is a general purpose transliteration from the code page associated with the
+ input string to the requested code page. Note that UTF8 to ANSI transliterations,
+ and ANSI to ANSI may result in information loss if a character in the input code
+ page does not appear in the output code page: character is replaced by a ?}
+
+ {Note: Relies on  fpWidestring unit}
 
 function TransliterateToCodePage(const s: AnsiString; ToCodePage: TSystemCodePage): RawByteString;
 var FromCodePage: TSystemCodePage;
     OldCodePage: TSystemCodePage;
     u: UnicodeString;
+    tmp: UTF8String;
 begin
   Result := s;
+
+  if ToCodePage = CP_ACP then
+    ToCodePage := FBGetSystemCodePage
+  else
   if ToCodePage = CP_NONE then
   begin
     SetCodePage(Result,CP_NONE,false);
     Exit;
   end;
 
-  if ToCodePage = CP_ACP then
-    ToCodePage := FBGetSystemCodePage;
+  FromCodePage := StringCodePage(Result);
+  if FromCodePage = CP_ACP then
+  begin
+    FromCodepage := FBGetSystemCodePage;
+    SetCodePage(Result,FromCodePage,false);{make explicit}
+  end;
 
-  FromCodePage := GetCodePageFromString(Result);
+  if ToCodePage = FromCodePage then
+    Exit; {Nothing to do here}
+
+  SetCodepage(Result,ToCodePage,true);
+(*
   if FromCodePage = CP_UTF8 then
   begin
-    if ToCodePage = CP_UTF8 then
-       Exit; {Nothing to do here}
-
     {Transliterate to ANSI code page}
+    {$ifdef windows}
+    Result := WinWideStringToAnsi(UnicodeString(Result),ToCodePage);
+    {$else}
     OldCodePage := DefaultSystemCodePage;
     try
       SetMultiByteConversionCodePage(ToCodePage);
-      Result :=  utf8ToAnsi(Result);
+      Result :=  utf8ToAnsi(Result);  {may result in information loss}
     finally
       SetMultiByteConversionCodePage(OldCodePage);
     end;
+    {$endif}
   end
   else
   if FromCodePage = CP_NONE then
     SetCodePage(Result,ToCodePage,false)
   else
+  {FromCodePage must be ANSI - now work on ToCodePage}
+  if ToCodePage = CP_UTF8 then
+  {$ifdef Windows}
+    Result := UTF8Encode(WinAnsiToWideString(Result,FromCodePage));
+  {$else}
   begin
-    if ToCodePage = FromCodePage then
-      Exit;
-
-    if ToCodePage = CP_UTF8 then
-    begin
-      OldCodePage := DefaultSystemCodePage;
-      try
-        SetMultiByteConversionCodePage(FromCodePage);
-        Result := AnsiToUTF8(Result);
-      finally
-        SetMultiByteConversionCodePage(OldCodePage);
-      end;
-    end
-    else
-    begin
-      {Transliterate from one ANSI Code Page to another}
-      OldCodePage := DefaultSystemCodePage;
-      try
-        SetMultiByteConversionCodePage(FromCodePage);
-        u := UnicodeString(Result);
-        SetMultiByteConversionCodePage(ToCodePage);
-        Result := RawByteString(u);
-      finally
-        SetMultiByteConversionCodePage(OldCodePage);
-      end;
+    OldCodePage := DefaultSystemCodePage;
+    try
+      SetMultiByteConversionCodePage(FromCodePage);
+      Result := AnsiToUTF8(Result);
+    finally
+      SetMultiByteConversionCodePage(OldCodePage);
     end;
-  end;
+    {$endif}
+  end
+  else
+  if ToCodePage = CP_NONE then
+    SetCodePage(Result,CP_NONE,false)
+  else
+  begin
+    {Transliterate from one ANSI Code Page to another}
+    {$ifdef Windows}
+      u := WinAnsiToWideString(Result,FromCodePage));
+      Result := WinWideStringToAnsi(u,ToCodePage);
+    {$else}
+    OldCodePage := DefaultSystemCodePage;
+    try
+      SetMultiByteConversionCodePage(FromCodePage);
+      tmp := AnsiToUTF8(Result);
+      SetMultiByteConversionCodePage(ToCodePage);
+      Result := UTF8ToAnsi(tmp); {may result in information loss}
+    finally
+      SetMultiByteConversionCodePage(OldCodePage);
+    end;
+    {$endif}
+  end;*)
 end;
 
 { TSQLXMLReader }
