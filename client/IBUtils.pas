@@ -819,7 +819,7 @@ implementation
 uses FBMessages, Math {$ifdef WINDOWS},Windows {$endif}
 
 {$IFDEF FPC}
-,RegExpr, {cpall,} fpWidestring, cp1251, cp1252
+,RegExpr
 {$IFDEF UNIX}
 ,unixcp
 {$ENDIF}
