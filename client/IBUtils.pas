@@ -819,7 +819,7 @@ implementation
 uses FBMessages, Math {$ifdef WINDOWS},Windows {$endif}
 
 {$IFDEF FPC}
-,RegExpr, fpWidestring, cpall
+,RegExpr, {cpall,} fpWidestring, cp1251, cp1252
 {$IFDEF UNIX}
 ,unixcp
 {$ENDIF}
@@ -2087,7 +2087,7 @@ begin
   Result := s;
 end;
 
-const FSystemCodePage: TSystemCodePage = CP_ACP;
+var FSystemCodePage: TSystemCodePage ;
 
 function FBGetSystemCodePage: TSystemCodePage;
 begin
@@ -2135,7 +2135,7 @@ begin
   if Len < 0 then
     Exit;
   SetLength(Result,Len);
-  Len2 :=  MultiByteToWideChar(CodePage, 0, PAnsiChar(s), Length(s), PWhideChar(Result), I);
+  Len2 :=  MultiByteToWideChar(CodePage, 0, PAnsiChar(s), Length(s), PWideChar(Result), Len);
   if Len <> Len2 then
     SetLength(Result,Len2);
 end;
@@ -3162,5 +3162,7 @@ begin
   end;
 end;
 
+initialization
+  FSystemCodePage := CP_ACP;
 
 end.
