@@ -2097,6 +2097,7 @@ begin
     Exit;
   end;
 
+  {if we get here then fpWidestring is not loaded}
   if FSystemCodePage = CP_ACP then
   {$ifdef WINDOWS}
     FSystemCodePage := GetACP;

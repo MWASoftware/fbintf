@@ -66,7 +66,7 @@
         <DCC_BplOutput>.\$(Platform)\$(Config)</DCC_BplOutput>
         <DCC_DcpOutput>.\$(Platform)\$(Config)</DCC_DcpOutput>
         <DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
-        <Debugger_RunParams>-X -t 10</Debugger_RunParams>
+        <Debugger_RunParams>-X -t 12</Debugger_RunParams>
         <Debugger_HostApplication>C:\Users\A User\projects\fbintf\testsuite\testsuite.exe</Debugger_HostApplication>
     </PropertyGroup>
     <ItemGroup>

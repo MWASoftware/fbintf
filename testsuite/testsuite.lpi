@@ -13,6 +13,9 @@
       <Title Value="Firebird API Test Suite"/>
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
+      <XPManifest>
+        <AnsiUTF8 Value="True"/>
+      </XPManifest>
     </General>
     <i18n>
       <EnableI18N LFM="False"/>
@@ -185,7 +188,7 @@
     </CodeGeneration>
     <Linking>
       <Debugging>
-        <DebugInfoType Value="dsDwarf2Set"/>
+        <DebugInfoType Value="dsDwarf2"/>
         <UseHeaptrc Value="True"/>
       </Debugging>
     </Linking>
