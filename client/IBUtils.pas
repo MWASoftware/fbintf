@@ -810,6 +810,7 @@ function StripLeadingZeros(Value: AnsiString): AnsiString;
 function StringToHex(octetString: string; MaxLineLength: integer=0): string; overload;
 procedure StringToHex(octetString: string; TextOut: TStrings; MaxLineLength: integer=0); overload;
 function PCharToAnsiString(buff: PAnsiChar; CodePage: TSystemCodePage): AnsiString;
+procedure FixUTF8(var s: RawByteString);
 function GuessCodePage(s: PAnsiChar; ConnectionCodePage: TSystemCodePage): TSystemCodePage;
 function FBGetSystemCodePage: TSystemCodePage;
 function TransliterateToCodePage(const s: AnsiString; ToCodePage: TSystemCodePage): RawByteString;
@@ -2075,20 +2076,35 @@ begin
 end;
 
 
+{$I include/lazutf8.inc}
+
 {PChar to Ansistring replaces strpas and avoids widestring conversions. It
  also sets the current codepage - typically to the database connection codepage.}
 
 function PCharToAnsiString(buff: PAnsiChar; CodePage: TSystemCodePage
   ): AnsiString;
 var s: RawByteString;
+    ix: integer;
 begin
   SetLength(s,strlen(buff));
   Move(buff^,s[1],strlen(buff));
   SetCodePage(s,CodePage,false);
+  if CodePage = CP_UTF8 then
+    {Make sure no invalid UTF8 Characters}
+    FixUTF8(s);
   Result := s;
 end;
 
-{$I include/lazutf8.inc}
+{Fix any UTF8 invalid codepoints and replace with a '?'}
+procedure FixUTF8(var s: RawByteString);
+var ix : integer;
+begin
+  repeat
+    ix := FindInvalidUTF8Codepoint(PAnsiChar(s),Length(s),true);
+    if ix <> -1 then
+      s[ix+1] := '?';
+  until ix = -1;
+end;
 
 { GuessCharacterSet is used for CP_NONE connections and whenever we do not
   know the character set. If the input string is not UTF8 then assume the
@@ -2134,7 +2150,7 @@ end;
  and ANSI to ANSI may result in information loss if a character in the input code
  page does not appear in the output code page: character is replaced by a ?}
 
- {Note: Relies on  fpWidestring unit}
+ {FPC Note: Relies on  fpWidestring unit}
 
 function TransliterateToCodePage(const s: AnsiString; ToCodePage: TSystemCodePage): RawByteString;
 var FromCodePage: TSystemCodePage;
@@ -2162,6 +2178,10 @@ begin
 
   if ToCodePage = FromCodePage then
     Exit; {Nothing to do here}
+
+  if (FromCodePage = CP_NONE) and (ToCodePage = CP_UTF8) then
+    {Make sure no invalid UTF8 Characters}
+     FixUTF8(Result);
 
   SetCodepage(Result,ToCodePage,true);
 end;

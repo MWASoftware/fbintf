@@ -88,7 +88,8 @@ type
     function StatusIntf: Firebird.IStatus;
     procedure Check4DataBaseError(CodePage: TSystemCodePage=cp_acp); overload;
     procedure Check4DataBaseError(st: Firebird.IStatus; CodePage: TSystemCodePage=cp_acp); overload;
-    function FormatStatus(Status: Firebird.IStatus; CodePage: TSystemCodePage): AnsiString;
+    function FormatStatus(Status: Firebird.IStatus;
+      ConnectionCodePage: TSystemCodePage): AnsiString;
     function InErrorState: boolean;
     function LoadInterface: boolean; override;
     procedure FBShutdown; override;
@@ -493,12 +494,16 @@ begin
 end;
 
 function TFB30ClientAPI.FormatStatus(Status: Firebird.IStatus;
-  CodePage: TSystemCodePage): AnsiString;
+  ConnectionCodePage: TSystemCodePage): AnsiString;
 var local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
+    CodePage: TSystemCodePage;
 begin
   Result := '';
-  if CodePage = CP_NONE then
-    CodePage := GuessCodePage(@local_buffer,CodePage);
+  {if ConnectionCodePage = CP_NONE then
+    CodePage := GuessCodePage(@local_buffer,CodePage)
+  else}
+    CodePage := ConnectionCodePage;
+
   if UtilIntf.formatStatus(@local_buffer,sizeof(local_buffer) - 1,Status) > 0 then
     Result := PCharToAnsiString(local_buffer,CodePage);
 end;

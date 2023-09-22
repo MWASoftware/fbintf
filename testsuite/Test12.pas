@@ -202,6 +202,7 @@ begin
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateProc);
   Attachment.Disconnect;
 
+  {Query with UTF8}
   DPB := FirebirdAPI.AllocateDPB;
   DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
   DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);
@@ -210,7 +211,52 @@ begin
   UpdateDatabase(Attachment);
 
   writeln(OutFile,'Connection Character Set UTF8');
+  QueryDatabase(Attachment);
+  Attachment.Disconnect;
+
+  writeln(OutFile,'Connection Character Set NONE');
+  {Query with No character set}
+  DPB := FirebirdAPI.AllocateDPB;
+  DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
+  DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);
+  Attachment := FirebirdAPI.OpenDatabase(Owner.GetNewDatabaseName,DPB);
+  QueryDatabase(Attachment);
+  Attachment.Disconnect;
+
+  writeln(OutFile,'Connection Character Set WIN1252');
+  {Query with WIN1252}
+  DPB := FirebirdAPI.AllocateDPB;
+  DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
+  DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);
+  DPB.Add(isc_dpb_lc_ctype).setAsString('WIN1252');
+  Attachment := FirebirdAPI.OpenDatabase(Owner.GetNewDatabaseName,DPB);
+  QueryDatabase(Attachment);
+
+  Attachment.DropDatabase;
+
+  writeln(Outfile,'Recreate Database with WIN1252 as the connection character set');
+  DPB := FirebirdAPI.AllocateDPB;
+  DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
+  DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);
+  DPB.Add(isc_dpb_lc_ctype).setAsString('WIN1252');
+  DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
+  Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
+  Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable);
+  Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateException);
+  Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateProc);
+  Attachment.Disconnect;
+
+  writeln(OutFile,'Query Database with UTF8, NONE and WIN1252 connections');
+
   {Query with UTF8}
+  DPB := FirebirdAPI.AllocateDPB;
+  DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
+  DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);
+  DPB.Add(isc_dpb_lc_ctype).setAsString('UTF8');
+  Attachment := FirebirdAPI.OpenDatabase(Owner.GetNewDatabaseName,DPB);
+  UpdateDatabase(Attachment);
+
+  writeln(OutFile,'Connection Character Set UTF8');
   QueryDatabase(Attachment);
   Attachment.Disconnect;
 
