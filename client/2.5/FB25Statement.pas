@@ -294,7 +294,7 @@ end;
 implementation
 
 uses IBUtils, FBMessages, FBBlob, FB25Blob, variants, IBErrorCodes, FBArray, FB25Array
-  {$IFDEF UNIX}, BaseUnix {$ENDIF};
+  {$IFDEF UNIX}, BaseUnix {$ENDIF}{$ifdef WINDOWS}, Windows{$endif};
 
 
 { TIBXSQLVAR }

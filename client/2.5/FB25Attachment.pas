@@ -96,7 +96,8 @@ type
 implementation
 
 uses FB25Events,FB25Transaction, FBMessages, FB25Blob,
-  FB25Statement, FB25Array, IBUtils, IBExternals;
+  FB25Statement, FB25Array, IBUtils, IBExternals
+  {$ifdef WINDOWS}, Windows{$endif};
 
   { TFB25Attachment }
 

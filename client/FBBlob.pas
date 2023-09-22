@@ -144,7 +144,7 @@ type
 
 implementation
 
-uses IBUtils;
+uses IBUtils {$ifdef WINDOWS}, Windows{$endif};
 
 { TFBBlob }
 

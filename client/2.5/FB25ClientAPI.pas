@@ -323,25 +323,9 @@ end;
 threadvar
   FStatusVector: TStatusVector;
 
-{$I ../include/lazutf8.inc}
-
 { TFB25ActivityReporter }
 
 function TFB25Status.GetIBMessage(CodePage: TSystemCodePage): Ansistring;
-
-{Firebird 2.5 does not transliterate exceptions to the connection character
- set hence we need to guess the character set. If not UTF8 then assume the
- connection character set - unless it is also utf8 when we go for cp_acp}
-function GuessCodePage(s: PAnsiChar): TSystemCodePage;
-begin
-  if FindInvalidUTF8Codepoint(s,strlen(s),true) = -1 then
-     Result := cp_utf8
-  else
-  if CodePage = cp_utf8 then
-    Result := cp_acp
-  else
-    Result := CodePage;
-end;
 
 var psb: PStatusVector;
     local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
@@ -355,7 +339,9 @@ begin
     begin
       if (Result <> '') and (Result[Length(Result)] <> LF) then
         Result := Result + LineEnding + '-';
-      Result := Result + TransliterateToCodePage(PCharToAnsiString(local_buffer,GuessCodePage(local_buffer)),CP_ACP);
+      {Firebird 2.5 does not transliterate exceptions to the connection character
+       set hence we need to guess the character set.}
+       Result := Result + TransliterateToCodePage(PCharToAnsiString(local_buffer,GuessCodePage(local_buffer,CodePage)),CP_ACP);
     end;
   end
   else
@@ -364,7 +350,7 @@ begin
   begin
     if (Result <> '') and (Result[Length(Result)] <> LF) then
       Result := Result + LineEnding + '-';
-    Result := Result + TransliterateToCodePage(PCharToAnsiString(local_buffer,GuessCodePage(local_buffer)),CP_ACP);
+    Result := Result + TransliterateToCodePage(PCharToAnsiString(local_buffer,GuessCodePage(local_buffer,CodePage)),CP_ACP);
   end;
 end;
 

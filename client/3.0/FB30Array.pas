@@ -100,7 +100,7 @@ type
 
 implementation
 
-uses FBAttachment, FB30Statement;
+uses FBAttachment, FB30Statement{$ifdef WINDOWS}, Windows{$endif};
 
 const
   sGetArrayMetaData = 'Select F.RDB$FIELD_LENGTH, F.RDB$FIELD_SCALE, F.RDB$FIELD_TYPE, '+

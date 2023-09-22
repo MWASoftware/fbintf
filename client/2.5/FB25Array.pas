@@ -75,7 +75,7 @@ type
 
 implementation
 
-uses FBAttachment;
+uses FBAttachment{$ifdef WINDOWS}, Windows{$endif};
 
 const
   sGetArrayMetaData = 'Select F.RDB$CHARACTER_SET_ID '+

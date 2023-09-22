@@ -216,12 +216,7 @@ const
 
 {Delphi only seems to define CP_UTF8 and CP_UTF16}
 const
-  CP_ACP     = 0;     // default to ANSI code page
-  CP_OEMCP   = 1;     // default to OEM (console) code page
-  CP_UTF16BE = 1201;  // unicodeFFFE
-  CP_UTF7    = 65000; // utf-7
   CP_ASCII   = 20127; // us-ascii
-  CP_NONE    = $FFFF; // rawbytestring encoding
 
 {$ENDIF}
 

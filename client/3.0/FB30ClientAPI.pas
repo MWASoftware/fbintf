@@ -497,6 +497,8 @@ function TFB30ClientAPI.FormatStatus(Status: Firebird.IStatus;
 var local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
 begin
   Result := '';
+  if CodePage = CP_NONE then
+    CodePage := GuessCodePage(@local_buffer,CodePage);
   if UtilIntf.formatStatus(@local_buffer,sizeof(local_buffer) - 1,Status) > 0 then
     Result := PCharToAnsiString(local_buffer,CodePage);
 end;

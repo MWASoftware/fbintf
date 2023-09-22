@@ -686,7 +686,6 @@ begin
     Result := Result + 'Engine Code: ' + IntToStr(GetIBErrorCode) + LineEnding
        + GetIBMessage(CodePage);
   end;
-  Result := TransliterateToCodePage(PAnsiChar(Result),cp_acp);
   if (Result <> '') and (Result[Length(Result)] = '.') then
     Delete(Result, Length(Result), 1);
 end;

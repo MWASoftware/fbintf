@@ -75,7 +75,7 @@ interface
 
 uses
   Classes, SysUtils, Firebird, IB,  FBStatement, FB30ClientAPI, FB30Transaction,
-  FB30Attachment,IBExternals, FBSQLData, FBOutputBlock, FBActivityMonitor;
+  FB30Attachment{$ifdef WINDOWS}, Windows{$endif},IBExternals, FBSQLData, FBOutputBlock, FBActivityMonitor;
 
 type
   TFB30Statement = class;

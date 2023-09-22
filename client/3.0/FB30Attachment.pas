@@ -116,7 +116,8 @@ type
 implementation
 
 uses FB30Transaction, FB30Statement, FB30Array, FB30Blob, FBMessages,
-  FBOutputBlock, FB30Events, IBUtils, FB30TimeZoneServices;
+  FBOutputBlock, FB30Events, IBUtils, FB30TimeZoneServices
+  {$ifdef WINDOWS}, Windows{$endif};
 
 type
   { TVersionCallback }
