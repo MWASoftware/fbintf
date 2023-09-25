@@ -149,7 +149,7 @@ var
  str: AnsiString;
 begin
   writeln(Outfile,'Transliteration Tests');
-  writeln('Default System Code Page = ',DefaultSystemCodePage);
+  writeln(Outfile,'Default System Code Page = ',DefaultSystemCodePage);
   writeln(Outfile,'Actual System Code Page = ',FBGetSystemCodePage);
   writeln(Outfile,'Input String = ', Win1252Test1,', Character Set = ',StringCodePage(Win1252Test1),' Hex Values:');
   PrintHexString(Win1252Test1);

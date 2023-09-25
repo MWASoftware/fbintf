@@ -814,6 +814,7 @@ procedure FixUTF8(var s: RawByteString);
 function GuessCodePage(s: PAnsiChar; ConnectionCodePage: TSystemCodePage): TSystemCodePage;
 function FBGetSystemCodePage: TSystemCodePage;
 function TransliterateToCodePage(const s: AnsiString; ToCodePage: TSystemCodePage): RawByteString;
+function SafeAnsiUpperCase(const s: AnsiString): AnsiString;
 
 
 implementation
@@ -892,7 +893,7 @@ function ExtractIdentifier(Dialect: Integer; Value: AnsiString): AnsiString;
 begin
   Value := Trim(Value);
   if Dialect = 1 then
-    Value := AnsiUpperCase(Value)  
+    Value := SafeAnsiUpperCase(Value)  
   else
   begin
     if (Value <> '') and (Value[1] = '"') then
@@ -902,7 +903,7 @@ begin
       Value := StringReplace (Value, '""', '"', [rfReplaceAll]);
     end
     else
-      Value := AnsiUpperCase(Value);
+      Value := SafeAnsiUpperCase(Value);
   end;
   Result := Value;
 end;
@@ -914,7 +915,7 @@ function FindReservedWord(w: AnsiString; var token: TSQLTokens): boolean;
 var i: TSQLTokens;
 begin
    Result := true;
-   w := AnsiUpperCase(Trim(w));
+   w := SafeAnsiUpperCase(Trim(w));
    for i := Low(TSQLReservedWords) to High(TSQLReservedWords) do
    begin
        if w = sqlReservedWords[i] then
@@ -942,7 +943,7 @@ function QuoteIdentifier(Dialect: Integer; Value: AnsiString): AnsiString;
 begin
   Value := TrimRight(Value);
   if Dialect = 1 then
-    Value := AnsiUpperCase(Value)
+    Value := SafeAnsiUpperCase(Value)
   else
     Value := '"' + StringReplace (Value, '""', '"', [rfReplaceAll]) + '"';
   Result := Value;
@@ -964,7 +965,7 @@ end;
 
 function SchemeToProtocol(scheme: AnsiString): TProtocolAll;
 begin
-  scheme := AnsiUpperCase(scheme);
+  scheme := SafeAnsiUpperCase(scheme);
   if scheme = 'INET' then
     Result := inet
   else
@@ -1262,7 +1263,7 @@ function QuoteIdentifierIfNeeded(Dialect: Integer; Value: AnsiString): AnsiStrin
 begin
   Value := TrimRight(Value);
   if (Dialect = 3) and
-    (IsReservedWord(Value) or not IsSQLIdentifier(Value) or (AnsiUpperCase(Value) <> Value)) then
+    (IsReservedWord(Value) or not IsSQLIdentifier(Value) or (SafeAnsiUpperCase(Value) <> Value)) then
      Result := '"' + StringReplace (TrimRight(Value), '"', '""', [rfReplaceAll]) + '"'
   else
     Result := Value
@@ -2085,10 +2086,14 @@ function PCharToAnsiString(buff: PAnsiChar; CodePage: TSystemCodePage
   ): AnsiString;
 var s: RawByteString;
     ix: integer;
+    Len: integer;
 begin
-  SetLength(s,strlen(buff));
-  Move(buff^,s[1],strlen(buff));
+  Len := strlen(buff);
+  SetLength(s,Len);
+  if Len > 0 then
+    Move(buff^,s[1],Len);
   SetCodePage(s,CodePage,false);
+//  writeln('''',s,'''','(',length(s),',',strlen(PANsiChar(s)),')');
   if CodePage = CP_UTF8 then
     {Make sure no invalid UTF8 Characters}
     FixUTF8(s);
@@ -2116,7 +2121,7 @@ begin
      Result := cp_utf8
   else
   if (ConnectionCodePage = cp_utf8) or (ConnectionCodePage = CP_NONE) then
-    Result := cp_acp
+    Result := FBGetSystemCodePage
   else
     Result := ConnectionCodePage;
 end;
@@ -2184,6 +2189,14 @@ begin
      FixUTF8(Result);
 
   SetCodepage(Result,ToCodePage,true);
+end;
+
+function SafeAnsiUpperCase(const s: AnsiString): AnsiString;
+begin
+  {Guard against string length being increased by 1 and the trailing zero
+   being incorporated in the string - see
+   https://gitlab.com/freepascal.org/fpc/source/-/issues/39746}
+  Result := Trim(AnsiUpperCase(s));
 end;
 
 { TSQLXMLReader }

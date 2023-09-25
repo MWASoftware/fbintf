@@ -75,7 +75,7 @@ type
 
 implementation
 
-uses FBAttachment{$ifdef WINDOWS}, Windows{$endif};
+uses IBUtils, FBAttachment{$ifdef WINDOWS}, Windows{$endif};
 
 const
   sGetArrayMetaData = 'Select F.RDB$CHARACTER_SET_ID '+
@@ -102,8 +102,8 @@ var
 begin
   DBHandle := (aAttachment as TFB25Attachment).Handle;
   TRHandle := (aTransaction as TFB25Transaction).Handle;
-  RelName := AnsiUpperCase(relationName);
-  ColName := AnsiUpperCase(columnName);
+  RelName := SafeAnsiUpperCase(relationName);
+  ColName := SafeAnsiUpperCase(columnName);
   with (aAttachment as TFB25Attachment), Firebird25ClientAPI do
     if isc_array_lookup_bounds(StatusVector,@(DBHandle),@(TRHandle),
         PAnsiChar(RelName),PAnsiChar(ColName),@FArrayDesc) > 0 then

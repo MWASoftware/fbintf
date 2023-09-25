@@ -499,9 +499,9 @@ var local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
     CodePage: TSystemCodePage;
 begin
   Result := '';
-  {if ConnectionCodePage = CP_NONE then
-    CodePage := GuessCodePage(@local_buffer,CodePage)
-  else}
+  if ConnectionCodePage = CP_NONE then
+    CodePage := GuessCodePage(@local_buffer,ConnectionCodePage)
+  else
     CodePage := ConnectionCodePage;
 
   if UtilIntf.formatStatus(@local_buffer,sizeof(local_buffer) - 1,Status) > 0 then

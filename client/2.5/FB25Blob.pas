@@ -126,7 +126,7 @@ type
 
 implementation
 
-uses IBErrorCodes, FBMessages, FBParamBlock;
+uses IBErrorCodes, FBMessages, FBParamBlock, IBUtils;
 
 { TFB25BlobMetaData }
 
@@ -145,8 +145,8 @@ begin
   if FHasFullMetaData then Exit;
 
   FSegmentSize := 80;
-  RelName := AnsiUpperCase(GetRelationName);
-  ColName := AnsiUpperCase(GetColumnName);
+  RelName := SafeAnsiUpperCase(GetRelationName);
+  ColName := SafeAnsiUpperCase(GetColumnName);
   if (ColName <> '') and (RelName <> '') then
   begin
     with FFirebird25ClientAPI do

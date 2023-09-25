@@ -744,7 +744,7 @@ var
   i: Integer;
 begin
   if not IsInputDataArea or not CaseSensitiveParams then
-   s := AnsiUpperCase(Idx)
+   s := SafeAnsiUpperCase(Idx)
   else
    s := Idx;
 
@@ -780,7 +780,7 @@ end;
 procedure TSQLVarData.SetName(AValue: AnsiString);
 begin
   if not Parent.IsInputDataArea or not Parent.CaseSensitiveParams then
-    FName := AnsiUpperCase(AValue)
+    FName := SafeAnsiUpperCase(AValue)
   else
     FName := AValue;
 end;
@@ -926,7 +926,7 @@ begin
 
    if not Parent.IsInputDataArea then
    begin
-     st := Space2Underscore(AnsiUppercase(AliasName));
+     st := Space2Underscore(SafeAnsiUpperCase(AliasName));
      if st = '' then
      begin
        sBaseName := 'F_'; {do not localize}
@@ -2329,7 +2329,7 @@ end;
 function TColumnMetaData.GetName: AnsiString;
 begin
   CheckActive;
-  Result := FIBXSQLVAR. Name;
+  Result := FIBXSQLVAR.Name;
 end;
 
 function TColumnMetaData.GetScale: integer;

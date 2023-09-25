@@ -1692,7 +1692,7 @@ begin
   SetLength(FUserCharSetMap,idx+1);
   FUserCharSetMap[idx].AllowReverseLookup := AllowReverseLookup;
   FUserCharSetMap[idx].CharSetID := CharSets[0].AsInteger;
-  FUserCharSetMap[idx].CharSetName := AnsiUpperCase(CharSetName);
+  FUserCharSetMap[idx].CharSetName := SafeAnsiUpperCase(CharSetName);
   FUserCharSetMap[idx].CharSetWidth := CharSets[1].AsInteger;
   FUserCharSetMap[idx].CodePage := CodePage;
   CharSetID := CharSets[0].AsInteger;

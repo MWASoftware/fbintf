@@ -476,9 +476,9 @@ begin
     FDataLength := aMetaData.getLength(StatusIntf,Index);
     Check4DataBaseError(ConnectionCodePage);
     FMetadataSize := FDataLength;
-    FRelationName := strpas(aMetaData.getRelation(StatusIntf,Index));
+    FRelationName := PCharToAnsiString(aMetaData.getRelation(StatusIntf,Index),ConnectionCodePage);
     Check4DataBaseError(ConnectionCodePage);
-    FFieldName := strpas(aMetaData.getField(StatusIntf,Index));
+    FFieldName := PCharToAnsiString(aMetaData.getField(StatusIntf,Index),ConnectionCodePage);
     Check4DataBaseError(ConnectionCodePage);
     FNullable := aMetaData.isNullable(StatusIntf,Index);
     Check4DataBaseError(ConnectionCodePage);
@@ -547,7 +547,7 @@ begin
   try
     with FFirebird30ClientAPI do
     begin
-      result := strpas(metaData.getAlias(StatusIntf,Index));
+      result := PCharToAnsiString(metaData.getAlias(StatusIntf,Index),ConnectionCodePage);
       Check4DataBaseError(ConnectionCodePage);
     end;
   finally
@@ -567,7 +567,7 @@ begin
   try
     with FFirebird30ClientAPI do
     begin
-      result := strpas(metaData.getOwner(StatusIntf,Index));
+      result := PCharToAnsiString(metaData.getOwner(StatusIntf,Index),ConnectionCodePage);
       Check4DataBaseError(ConnectionCodePage);
     end;
   finally
