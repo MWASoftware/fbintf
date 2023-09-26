@@ -2093,7 +2093,6 @@ begin
   if Len > 0 then
     Move(buff^,s[1],Len);
   SetCodePage(s,CodePage,false);
-//  writeln('''',s,'''','(',length(s),',',strlen(PANsiChar(s)),')');
   if CodePage = CP_UTF8 then
     {Make sure no invalid UTF8 Characters}
     FixUTF8(s);
@@ -2120,7 +2119,7 @@ begin
   if FindInvalidUTF8Codepoint(s,strlen(s),true) = -1 then
      Result := cp_utf8
   else
-  if (ConnectionCodePage = cp_utf8) or (ConnectionCodePage = CP_NONE) then
+  if (ConnectionCodePage = cp_acp) or (ConnectionCodePage = CP_NONE) then
     Result := FBGetSystemCodePage
   else
     Result := ConnectionCodePage;
@@ -2196,7 +2195,7 @@ begin
   {Guard against string length being increased by 1 and the trailing zero
    being incorporated in the string - see
    https://gitlab.com/freepascal.org/fpc/source/-/issues/39746}
-  Result := Trim(AnsiUpperCase(s));
+  Result := TrimRight(AnsiUpperCase(s));
 end;
 
 { TSQLXMLReader }

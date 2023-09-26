@@ -500,7 +500,7 @@ var local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
 begin
   Result := '';
   if ConnectionCodePage = CP_NONE then
-    CodePage := GuessCodePage(@local_buffer,ConnectionCodePage)
+    CodePage := GuessCodePage(@local_buffer,CP_ACP)
   else
     CodePage := ConnectionCodePage;
 

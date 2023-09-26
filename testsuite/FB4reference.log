@@ -654,14 +654,14 @@ Running Test 3: ad hoc queries
 Opening inet://localhost/employee
 Database Open
 Employee Count = 42
-Transaction ID = 1894
+Transaction ID = 2425
 Transaction is Read/Write
 Transaction Database Path = inet://localhost/employee
-Transaction ID = 1894
-Oldest Interesting = 1892
-Oldest Action = 1893
-Oldest Snapshot = 1893
-Oldest Snapshot Number = 1
+Transaction ID = 2425
+Oldest Interesting = 2423
+Oldest Action = 2424
+Oldest Snapshot = 2424
+Oldest Snapshot Number = 2
 Lock Timeout = 0
 Transaction Access = isc_info_tra_readwrite
 Isolation Type = isc_info_tra_concurrency
@@ -695,9 +695,9 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 19,758,656
+Current memory = 19,764,512
 Delta memory = 4,464
-Max memory = 19,803,808
+Max memory = 19,810,128
 Elapsed time= 0.002 sec
 Cpu = 0.000 sec
 Buffers = 2048
@@ -1748,7 +1748,7 @@ Must give us pause. There's the respect
 That makes calamity of so long life.
 For who would bear the whips and scorns of time,
 Th' oppressor's wrong, the proud man's contumely, 
-The pangs of despised love, the law’s delay, 
+The pangs of despised love, the lawâ€™s delay, 
 The insolence of office, and the spurns
 That patient merit of the unworthy takes,
 When he himself might his quietus make
@@ -1825,7 +1825,7 @@ Must give us pause. There's the respect
 That makes calamity of so long life.
 For who would bear the whips and scorns of time,
 Th' oppressor's wrong, the proud man's contumely, 
-The pangs of despised love, the law’s delay, 
+The pangs of despised love, the lawâ€™s delay, 
 The insolence of office, and the spurns
 That patient merit of the unworthy takes,
 When he himself might his quietus make
@@ -1867,7 +1867,7 @@ Must give us pause. There's the respect
 That makes calamity of so long life.
 For who would bear the whips and scorns of time,
 Th' oppressor's wrong, the proud man's contumely, 
-The pangs of despised love, the law’s delay, 
+The pangs of despised love, the lawâ€™s delay, 
 The insolence of office, and the spurns
 That patient merit of the unworthy takes,
 When he himself might his quietus make
@@ -1928,7 +1928,7 @@ Must give us pause. There's the respect
 That makes calamity of so long life.
 For who would bear the whips and scorns of time,
 Th' oppressor's wrong, the proud man's contumely, 
-The pangs of despised love, the law’s delay, 
+The pangs of despised love, the lawâ€™s delay, 
 The insolence of office, and the spurns
 That patient merit of the unworthy takes,
 When he himself might his quietus make
@@ -2910,16 +2910,13 @@ Async Wait Called
 Event Signalled
 First Event - usually ignored
 Signal Event
-Event Signalled
 Event Counts: TESTEVENT, Count = 1
 Two more events
 Call Async Wait
 Async Wait Called
 Event Signalled
-Deferred Events Caught
-Event Counts: TESTEVENT, Count = 2
 Signal Event
-Event Counts: TESTEVENT, Count = 1
+Event Counts: TESTEVENT, Count = 2
 Async Wait: Test Cancel
 Event Signalled
 Async Wait Called
@@ -2927,7 +2924,7 @@ Event Cancelled
 Time Out - Cancel Worked!
 Sync wait
 Event Signalled
-Event Counts: TESTEVENT, Count = 1
+Event Counts: TESTEVENT, Count = 2
 
 
 ------------------------------------------------------
@@ -2994,6 +2991,26 @@ Database Dropped
 
 ------------------------------------------------------
 Running Test 12: Character Sets
+Transliteration Tests
+Default System Code Page = 65001
+Actual System Code Page = 65001
+Input String = WIN1252 Characters ÖÄÜöäüß, Character Set = 65001 Hex Values:
+57 49 4E 31 32 35 32 20 43 68 61 72 61 63 74 65 72 73 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
+Code Page = 1252
+57 49 4E 31 32 35 32 20 43 68 61 72 61 63 74 65 72 73 20 D6 C4 DC F6 E4 FC DF 
+Back to UTF8
+Code Page = 65001
+WIN1252 Characters ÖÄÜöäüß
+57 49 4E 31 32 35 32 20 43 68 61 72 61 63 74 65 72 73 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
+ANSI(1252) to ANSI(1251) Test
+Input String = Я Écoute moi, Character Set = 65001 Hex Values:
+D0 AF 20 C3 89 63 6F 75 74 65 20 6D 6F 69 
+After conversion to 1251
+Code Page = 1251
+DF 20 3F 63 6F 75 74 65 20 6D 6F 69 
+Now Transliterate to WIN1252
+Code Page = 1252
+3F 20 3F 63 6F 75 74 65 20 6D 6F 69 
 SQL Params
 SQLType =SQL_LONG
 sub type = 0
@@ -3126,6 +3143,12 @@ BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61
 INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
 FIXEDWIDTH = C3 89  (Charset Id = 4 Codepage = 65001)
 
+Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
+Exception returned: Engine Code: 335544517
+exception 1
+-CHARSETTEST
+-Some German Special Characters like ÖÄÜöäüß
+-At procedure 'DOEXCEPTION' line: 1, col: 39
 Connection Character Set NONE
 ROWID = 1
 TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage = 65001)
@@ -3135,6 +3158,12 @@ BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61
 INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
 FIXEDWIDTH = C3 89  (Charset Id = 4 Codepage = 65001)
 
+Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
+Exception returned: Engine Code: 335544517
+exception 1
+-CHARSETTEST
+-Some German Special Characters like ÖÄÜöäüß
+-At procedure 'DOEXCEPTION' line: 1, col: 39
 Connection Character Set WIN1252
 ROWID = 1
 TITLE = 42 6C 6F 62 20 54 65 73 74 20 A9 80  (Charset Id = 53 Codepage = 1252)
@@ -3144,6 +3173,182 @@ BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61
 INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
 FIXEDWIDTH = C9  (Charset Id = 53 Codepage = 1252)
 
+Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
+Exception returned: Engine Code: 335544517
+exception 1
+-CHARSETTEST
+-Some German Special Characters like ÖÄÜöäüß
+-At procedure 'DOEXCEPTION' line: 1, col: 39
+Recreate Database with WIN1252 as the connection character set
+Query Database with UTF8, NONE and WIN1252 connections
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+Value = 0
+
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = TITLE
+Scale = 0
+Charset id = 4
+Nullable
+Size = 128
+
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = NOTES
+Scale = 0
+Charset id = 4
+Nullable
+Size = 256
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = BLOBDATA
+Scale = 0
+Charset id = 4
+Nullable
+Size = 8
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = BLOBDATA2
+Scale = 0
+Charset id = 4
+Nullable
+Size = 8
+
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = INCLEAR
+Scale = 0
+Charset id = 1
+Nullable
+Size = 16
+
+SQLType =SQL_TEXT
+sub type = 0
+Field Name = FIXEDWIDTH
+Scale = 0
+Charset id = 4
+Nullable
+Size = 16
+
+Show Param Values
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+Value = 1
+
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = TITLE
+Scale = 0
+Charset id = 4
+Nullable
+Size = 128
+Value = Blob Test ©€
+
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = NOTES
+Scale = 0
+Charset id = 4
+Nullable
+Size = 256
+Value = Écoute moi
+
+SQLType =SQL_VARYING
+sub type = 1
+Field Name = BLOBDATA
+Scale = 0
+Charset id = 4
+Nullable
+Size = 8192
+Value = Some German Special Characters like ÖÄÜöäüß
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = BLOBDATA2
+Scale = 0
+Charset id = 4
+Nullable
+Size = 8
+Value = Some German Special Characters like ÖÄÜöäüß
+
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = INCLEAR
+Scale = 0
+Charset id = 1
+Nullable
+Size = 16
+1 54 65 73 74 D C3 
+
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = FIXEDWIDTH
+Scale = 0
+Charset id = 4
+Nullable
+Size = 16
+Value = É
+
+Connection Character Set UTF8
+ROWID = 1
+TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage = 65001)
+NOTES = C3 89 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 4 Codepage = 65001)
+BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
+BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
+INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
+FIXEDWIDTH = C3 89  (Charset Id = 4 Codepage = 65001)
+
+Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 D6 C4 DC F6 E4 FC DF 
+Exception returned: Engine Code: 335544517
+exception 1
+-CHARSETTEST
+-Some German Special Characters like ???????
+-At procedure 'DOEXCEPTION' line: 1, col: 39
+Connection Character Set NONE
+ROWID = 1
+TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage = 65001)
+NOTES = C9 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 21 Codepage = 28591)
+BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 D6 C4 DC F6 E4 FC DF  (Charset Id = 53 Codepage = 1252)
+BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
+INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
+FIXEDWIDTH = C3 89  (Charset Id = 4 Codepage = 65001)
+
+Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 D6 C4 DC F6 E4 FC DF 
+Exception returned: Engine Code: 335544517
+exception 1
+-CHARSETTEST
+-Some German Special Characters like ???????
+-At procedure 'DOEXCEPTION' line: 1, col: 39
+Connection Character Set WIN1252
+ROWID = 1
+TITLE = 42 6C 6F 62 20 54 65 73 74 20 A9 80  (Charset Id = 53 Codepage = 1252)
+NOTES = C9 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 53 Codepage = 1252)
+BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 D6 C4 DC F6 E4 FC DF  (Charset Id = 53 Codepage = 1252)
+BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 D6 C4 DC F6 E4 FC DF  (Charset Id = 53 Codepage = 1252)
+INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
+FIXEDWIDTH = C9  (Charset Id = 53 Codepage = 1252)
+
+Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 D6 C4 DC F6 E4 FC DF 
+Exception returned: Engine Code: 335544517
+exception 1
+-CHARSETTEST
+-Some German Special Characters like ÖÄÜöäüß
+-At procedure 'DOEXCEPTION' line: 1, col: 39
 
 
 ------------------------------------------------------
@@ -4539,7 +4744,7 @@ JOB_COUNTRY = England
 JOB_TITLE = Chief Tester
 MIN_SALARY = 21,000.00
 MAX_SALARY = 24,000.99
-JOB_REQUIREMENT (Charset Id = 0 Codepage = 0)
+JOB_REQUIREMENT (Charset Id = 0 Codepage = 65535)
 
 The quick brown fox jumped over the lazy dog
 LANGUAGE_REQ = Array: (1: Eng) (2: ) (3: ) (4: ) (5: ) 
@@ -4550,7 +4755,7 @@ JOB_COUNTRY = England
 JOB_TITLE = Deputy Tester
 MIN_SALARY = 21,000.00
 MAX_SALARY = 24,000.99
-JOB_REQUIREMENT (Charset Id = 0 Codepage = 0)
+JOB_REQUIREMENT (Charset Id = 0 Codepage = 65535)
 
 The quick brown fox jumped over the running dog
 LANGUAGE_REQ = Array: (1: Eng) (2: Fra) (3: ) (4: ) (5: ) 
@@ -4571,7 +4776,7 @@ JOB_COUNTRY = England
 JOB_TITLE = Chief Tester
 MIN_SALARY = 21,000.00
 MAX_SALARY = 24,000.99
-JOB_REQUIREMENT (Charset Id = 0 Codepage = 0)
+JOB_REQUIREMENT (Charset Id = 0 Codepage = 65535)
 
 The quick brown fox jumped over the lazy dog
 LANGUAGE_REQ = Array: (1: Eng) (2: ) (3: ) (4: ) (5: ) 
@@ -4582,7 +4787,7 @@ JOB_COUNTRY = England
 JOB_TITLE = Deputy Tester
 MIN_SALARY = 21,000.00
 MAX_SALARY = 24,000.99
-JOB_REQUIREMENT (Charset Id = 0 Codepage = 0)
+JOB_REQUIREMENT (Charset Id = 0 Codepage = 65535)
 
 The quick brown fox jumped over the running dog
 LANGUAGE_REQ = Array: (1: Eng) (2: Fra) (3: ) (4: ) (5: ) 
@@ -4955,22 +5160,22 @@ MYARRAY = NULL
 
 Journal Table
 IBX$SESSIONID = 1
-IBX$TRANSACTIONID = 10
+IBX$TRANSACTIONID = 11
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2023/09/12 10:53:37.5340
+IBX$CREATED = 2023/09/26 10:37:18.9360
 IBX$SESSIONID = 1
-IBX$TRANSACTIONID = 12
-IBX$OLDTRANSACTIONID = 11
+IBX$TRANSACTIONID = 13
+IBX$OLDTRANSACTIONID = 12
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2023/09/12 10:53:37.6150
+IBX$CREATED = 2023/09/26 10:37:18.9630
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 4
 Session ID = 1
-Transaction ID = 10
+Transaction ID = 11
 Transaction Name = "Transaction_29_1"
 TPB: Item Count = 3
   isc_tpb_write
@@ -4983,31 +5188,17 @@ Journal Entry = jeQuery(Query)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 4
 Session ID = 1
-Transaction ID = 10
+Transaction ID = 11
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(1,101,9223372036854775807,10000.1234,9999.12345678,1234567890.12346)
 
 Journal Entry = jeQuery(Query)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 4
 Session ID = 1
-Transaction ID = 10
+Transaction ID = 11
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(2,-32457,-9223372036854775808,1000001.12,1.7E308,-1234567890.12346)
 
 Journal Entry = jeTransCommitRet(Commit Retaining)
-Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
-Attachment ID = 4
-Session ID = 1
-Transaction ID = 11
-Old TransactionID = 10
-
-Journal Entry = jeQuery(Query)
-Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
-Attachment ID = 4
-Session ID = 1
-Transaction ID = 11
-Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(3,0,0,0,0,0)
-
-Journal Entry = jeTransRollbackRet(Rollback Retaining)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 4
 Session ID = 1
@@ -5019,13 +5210,27 @@ Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 4
 Session ID = 1
 Transaction ID = 12
+Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(3,0,0,0,0,0)
+
+Journal Entry = jeTransRollbackRet(Rollback Retaining)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 4
+Session ID = 1
+Transaction ID = 13
+Old TransactionID = 12
+
+Journal Entry = jeQuery(Query)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 4
+Session ID = 1
+Transaction ID = 13
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(4,1,10,0.023,0.0011,233.456)
 
 Journal Entry = jeTransStart(Transaction Start)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 4
 Session ID = 1
-Transaction ID = 13
+Transaction ID = 14
 Transaction Name = "Transaction_29_2"
 TPB: Item Count = 3
   isc_tpb_write
@@ -5038,13 +5243,13 @@ Journal Entry = jeTransCommit(Commit)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 4
 Session ID = 1
-Transaction ID = 12
+Transaction ID = 13
 
 Journal Entry = jeQuery(Query)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 4
 Session ID = 1
-Transaction ID = 13
+Transaction ID = 14
 Query = Insert into TestData(RowID, Str, TextBlob) Values(5,'It''s the quick brown fox jumps over the lazy dog','To be or not to be-that is the question:
 Whether ''tis nobler in the mind to suffer
 The slings and arrows of outrageous fortune,
@@ -5086,7 +5291,7 @@ Journal Entry = jeQuery(Query)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 4
 Session ID = 1
-Transaction ID = 13
+Transaction ID = 14
 Query = Insert into TestData(RowID,OtherBlob) Values (6,<blob subtype="0">
 FFD8FFE000104A46494600010101004800480000FFE11E0545786966000049492A00080000000C00
 0E010200200000009E0000000F01020014000000BE0000001001020008000000D200000012010300
@@ -5098,7 +5303,7 @@ Journal Entry = jeQuery(Query)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 4
 Session ID = 1
-Transaction ID = 13
+Transaction ID = 14
 Query = Insert into TestData(RowID,MyArray) Values (7,<array dim = "1" sqltype = "496" length = "4" relation_name = "TESTDATA" column_name = "MYARRAY" scale = "0" bounds="0:16">
  <elt ix="0">100</elt>
  <elt ix="1">99</elt>
@@ -5124,7 +5329,7 @@ Journal Entry = jeTransRollback(Rollback)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 4
 Session ID = 1
-Transaction ID = 13
+Transaction ID = 14
 
 
 
