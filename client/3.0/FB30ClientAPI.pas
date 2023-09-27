@@ -499,13 +499,15 @@ var local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
     CodePage: TSystemCodePage;
 begin
   Result := '';
-  if ConnectionCodePage = CP_NONE then
-    CodePage := GuessCodePage(@local_buffer,CP_ACP)
-  else
-    CodePage := ConnectionCodePage;
-
   if UtilIntf.formatStatus(@local_buffer,sizeof(local_buffer) - 1,Status) > 0 then
+  begin
+    if ConnectionCodePage = CP_NONE then
+      CodePage := GuessCodePage(@local_buffer,CP_ACP)
+    else
+      CodePage := ConnectionCodePage;
+
     Result := PCharToAnsiString(local_buffer,CodePage);
+  end;
 end;
 
 function TFB30ClientAPI.InErrorState: boolean;
