@@ -75,7 +75,7 @@ type
 
 implementation
 
-uses FBAttachment;
+uses IBUtils, FBAttachment{$ifdef WINDOWS}, Windows{$endif};
 
 const
   sGetArrayMetaData = 'Select F.RDB$CHARACTER_SET_ID '+
@@ -102,9 +102,9 @@ var
 begin
   DBHandle := (aAttachment as TFB25Attachment).Handle;
   TRHandle := (aTransaction as TFB25Transaction).Handle;
-  RelName := AnsiUpperCase(relationName);
-  ColName := AnsiUpperCase(columnName);
-  with (aAttachment as TFB25Attachment).Firebird25ClientAPI do
+  RelName := SafeAnsiUpperCase(relationName);
+  ColName := SafeAnsiUpperCase(columnName);
+  with (aAttachment as TFB25Attachment), Firebird25ClientAPI do
     if isc_array_lookup_bounds(StatusVector,@(DBHandle),@(TRHandle),
         PAnsiChar(RelName),PAnsiChar(ColName),@FArrayDesc) > 0 then
           IBDatabaseError;
@@ -179,7 +179,7 @@ begin
      if (isc_array_put_slice(StatusVector, @(FDBHandle),@(FTRHandle),
                                 @FArrayID, GetArrayDesc,
                                 Pointer(FBuffer),@FBufSize) > 0) and not Force then
-       IBDatabaseError;
+       OnDatabaseError;
   SignalActivity;
 end;
 
@@ -190,7 +190,7 @@ begin
   FDBHandle := aAttachment.Handle;
   FTRHandle := aTransaction.Handle;
   FFirebird25ClientAPI := aAttachment.Firebird25ClientAPI;
-  OnDatabaseError := FFirebird25ClientAPI.IBDataBaseError;
+  OnDatabaseError := aAttachment.IBDataBaseError;
 end;
 
 constructor TFB25Array.Create(aAttachment: TFB25Attachment;
@@ -200,7 +200,7 @@ begin
   FDBHandle := aAttachment.Handle;
   FTRHandle := aTransaction.Handle;
   FFirebird25ClientAPI := aAttachment.Firebird25ClientAPI;
-  OnDatabaseError := FFirebird25ClientAPI.IBDataBaseError;
+  OnDatabaseError := aAttachment.IBDataBaseError;
 end;
 
 end.

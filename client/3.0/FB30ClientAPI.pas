@@ -47,7 +47,7 @@ type
   protected
     FStatus: Firebird.IStatus;
     FDirty: boolean;
-    function GetIBMessage: Ansistring; override;
+    function GetIBMessage(CodePage: TSystemCodePage): AnsiString; override;
   public
     constructor Create(aOwner: TFBClientAPI; prefix: AnsiString=''); overload;
     constructor Create(aOwner: TFBClientAPI; aStatus: Firebird.IStatus); overload;
@@ -86,9 +86,10 @@ type
     destructor Destroy; override;
 
     function StatusIntf: Firebird.IStatus;
-    procedure Check4DataBaseError; overload;
-    procedure Check4DataBaseError(st: Firebird.IStatus); overload;
-    function FormatStatus(Status: Firebird.IStatus): AnsiString;
+    procedure Check4DataBaseError(CodePage: TSystemCodePage=cp_acp); overload;
+    procedure Check4DataBaseError(st: Firebird.IStatus; CodePage: TSystemCodePage=cp_acp); overload;
+    function FormatStatus(Status: Firebird.IStatus;
+      ConnectionCodePage: TSystemCodePage): AnsiString;
     function InErrorState: boolean;
     function LoadInterface: boolean; override;
     procedure FBShutdown; override;
@@ -259,9 +260,9 @@ threadvar
 
 { TFB30Status }
 
-function TFB30Status.GetIBMessage: Ansistring;
+function TFB30Status.GetIBMessage(CodePage: TSystemCodePage): AnsiString;
 begin
-  Result := (FOwner as TFB30ClientAPI).FormatStatus(GetStatus);
+  Result := TransliterateToCodePage((FOwner as TFB30ClientAPI).FormatStatus(GetStatus,Codepage),CP_ACP);
 end;
 
 constructor TFB30Status.Create(aOwner: TFBClientAPI; prefix: AnsiString);
@@ -477,26 +478,36 @@ begin
   Result.Init;
 end;
 
-procedure TFB30ClientAPI.Check4DataBaseError;
+procedure TFB30ClientAPI.Check4DataBaseError(CodePage: TSystemCodePage);
 begin
   if FStatus.InErrorState then
-    IBDataBaseError;
+    raise EIBInterBaseError.Create(GetStatus,CodePage);
 end;
 
-procedure TFB30ClientAPI.Check4DataBaseError(st: Firebird.IStatus);
+procedure TFB30ClientAPI.Check4DataBaseError(st: Firebird.IStatus;
+  CodePage: TSystemCodePage);
 var aStatus: IStatus;
 begin
   aStatus := TFB30Status.Create(self,st);
   if aStatus.InErrorState then
-    raise EIBInterBaseError.Create(aStatus);
+    raise EIBInterBaseError.Create(aStatus,CodePage);
 end;
 
-function TFB30ClientAPI.FormatStatus(Status: Firebird.IStatus): AnsiString;
+function TFB30ClientAPI.FormatStatus(Status: Firebird.IStatus;
+  ConnectionCodePage: TSystemCodePage): AnsiString;
 var local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
+    CodePage: TSystemCodePage;
 begin
   Result := '';
   if UtilIntf.formatStatus(@local_buffer,sizeof(local_buffer) - 1,Status) > 0 then
-    Result := strpas(local_buffer);
+  begin
+    if ConnectionCodePage = CP_NONE then
+      CodePage := GuessCodePage(@local_buffer,CP_ACP)
+    else
+      CodePage := ConnectionCodePage;
+
+    Result := PCharToAnsiString(local_buffer,CodePage);
+  end;
 end;
 
 function TFB30ClientAPI.InErrorState: boolean;

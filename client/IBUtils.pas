@@ -809,14 +809,23 @@ function DecodeTimeZoneOffset(TZOffset: AnsiString; var dstOffset: integer): boo
 function StripLeadingZeros(Value: AnsiString): AnsiString;
 function StringToHex(octetString: string; MaxLineLength: integer=0): string; overload;
 procedure StringToHex(octetString: string; TextOut: TStrings; MaxLineLength: integer=0); overload;
+function PCharToAnsiString(buff: PAnsiChar; CodePage: TSystemCodePage): AnsiString;
+procedure FixUTF8(var s: RawByteString);
+function GuessCodePage(s: PAnsiChar; ConnectionCodePage: TSystemCodePage): TSystemCodePage;
+function FBGetSystemCodePage: TSystemCodePage;
+function TransliterateToCodePage(const s: AnsiString; ToCodePage: TSystemCodePage): RawByteString;
+function SafeAnsiUpperCase(const s: AnsiString): AnsiString;
 
 
 implementation
 
-uses FBMessages, Math
+uses FBMessages, Math {$ifdef WINDOWS},Windows {$endif}
 
 {$IFDEF FPC}
 ,RegExpr
+{$IFDEF UNIX}
+,unixcp
+{$ENDIF}
 {$ELSE}
 {$IF declared(CompilerVersion) and (CompilerVersion >= 22)}
 , RegularExpressions
@@ -884,7 +893,7 @@ function ExtractIdentifier(Dialect: Integer; Value: AnsiString): AnsiString;
 begin
   Value := Trim(Value);
   if Dialect = 1 then
-    Value := AnsiUpperCase(Value)  
+    Value := SafeAnsiUpperCase(Value)  
   else
   begin
     if (Value <> '') and (Value[1] = '"') then
@@ -894,7 +903,7 @@ begin
       Value := StringReplace (Value, '""', '"', [rfReplaceAll]);
     end
     else
-      Value := AnsiUpperCase(Value);
+      Value := SafeAnsiUpperCase(Value);
   end;
   Result := Value;
 end;
@@ -906,7 +915,7 @@ function FindReservedWord(w: AnsiString; var token: TSQLTokens): boolean;
 var i: TSQLTokens;
 begin
    Result := true;
-   w := AnsiUpperCase(Trim(w));
+   w := SafeAnsiUpperCase(Trim(w));
    for i := Low(TSQLReservedWords) to High(TSQLReservedWords) do
    begin
        if w = sqlReservedWords[i] then
@@ -934,7 +943,7 @@ function QuoteIdentifier(Dialect: Integer; Value: AnsiString): AnsiString;
 begin
   Value := TrimRight(Value);
   if Dialect = 1 then
-    Value := AnsiUpperCase(Value)
+    Value := SafeAnsiUpperCase(Value)
   else
     Value := '"' + StringReplace (Value, '""', '"', [rfReplaceAll]) + '"';
   Result := Value;
@@ -956,7 +965,7 @@ end;
 
 function SchemeToProtocol(scheme: AnsiString): TProtocolAll;
 begin
-  scheme := AnsiUpperCase(scheme);
+  scheme := SafeAnsiUpperCase(scheme);
   if scheme = 'INET' then
     Result := inet
   else
@@ -1254,7 +1263,7 @@ function QuoteIdentifierIfNeeded(Dialect: Integer; Value: AnsiString): AnsiStrin
 begin
   Value := TrimRight(Value);
   if (Dialect = 3) and
-    (IsReservedWord(Value) or not IsSQLIdentifier(Value) or (AnsiUpperCase(Value) <> Value)) then
+    (IsReservedWord(Value) or not IsSQLIdentifier(Value) or (SafeAnsiUpperCase(Value) <> Value)) then
      Result := '"' + StringReplace (TrimRight(Value), '"', '""', [rfReplaceAll]) + '"'
   else
     Result := Value
@@ -2065,6 +2074,132 @@ end;
 procedure StringToHex(octetString: string; TextOut: TStrings; MaxLineLength: integer); overload;
 begin
     TextOut.Add(StringToHex(octetString,MaxLineLength));
+end;
+
+
+{$I include/lazutf8.inc}
+
+{PChar to Ansistring replaces strpas and avoids widestring conversions. It
+ also sets the current codepage - typically to the database connection codepage.}
+
+function PCharToAnsiString(buff: PAnsiChar; CodePage: TSystemCodePage
+  ): AnsiString;
+var s: RawByteString;
+    ix: integer;
+    Len: integer;
+begin
+  Len := strlen(buff);
+  SetLength(s,Len);
+  if Len > 0 then
+    Move(buff^,s[1],Len);
+  SetCodePage(s,CodePage,false);
+  if CodePage = CP_UTF8 then
+    {Make sure no invalid UTF8 Characters}
+    FixUTF8(s);
+  Result := s;
+end;
+
+{Fix any UTF8 invalid codepoints and replace with a '?'}
+procedure FixUTF8(var s: RawByteString);
+var ix : integer;
+begin
+  repeat
+    ix := FindInvalidUTF8Codepoint(PAnsiChar(s),Length(s),true);
+    if ix <> -1 then
+      s[ix+1] := '?';
+  until ix = -1;
+end;
+
+{ GuessCharacterSet is used for CP_NONE connections and whenever we do not
+  know the character set. If the input string is not UTF8 then assume the
+ connection character set - unless it is also utf8 when we go for cp_acp}
+
+function GuessCodePage(s: PAnsiChar; ConnectionCodePage: TSystemCodePage): TSystemCodePage;
+begin
+  if FindInvalidUTF8Codepoint(s,strlen(s),true) = -1 then
+     Result := cp_utf8
+  else
+  if (ConnectionCodePage = cp_acp) or (ConnectionCodePage = CP_NONE) then
+    Result := FBGetSystemCodePage
+  else
+    Result := ConnectionCodePage;
+end;
+
+var FSystemCodePage: TSystemCodePage ;
+
+function FBGetSystemCodePage: TSystemCodePage;
+begin
+  if DefaultSystemCodePage <> CP_ACP then
+  begin
+    Result := DefaultSystemCodePage;
+    Exit;
+  end;
+
+  {if we get here then fpWidestring is not loaded}
+  if FSystemCodePage = CP_ACP then
+  {$ifdef WINDOWS}
+    FSystemCodePage := GetACP;
+  {$else}
+  {$ifdef UNIX}
+    FSystemCodePage :=  UnixCP.GetSystemCodepage;
+  {$else}
+    FSystemCodePage := DefaultSystemCodePage;
+  {$endif}
+  {$endif}
+  Result := FSystemCodePage;
+end;
+
+{This is a general purpose transliteration from the code page associated with the
+ input string to the requested code page. Note that UTF8 to ANSI transliterations,
+ and ANSI to ANSI may result in information loss if a character in the input code
+ page does not appear in the output code page: character is replaced by a ?}
+
+ {FPC Note: Relies on  fpWidestring unit}
+
+function TransliterateToCodePage(const s: AnsiString; ToCodePage: TSystemCodePage): RawByteString;
+var FromCodePage: TSystemCodePage;
+    OldCodePage: TSystemCodePage;
+    u: UnicodeString;
+    tmp: UTF8String;
+begin
+  Result := s;
+
+  if ToCodePage = CP_ACP then
+    ToCodePage := FBGetSystemCodePage
+  else
+  if ToCodePage = CP_NONE then
+  begin
+    SetCodePage(Result,CP_NONE,false);
+    Exit;
+  end;
+
+  FromCodePage := StringCodePage(Result);
+  if FromCodePage = CP_ACP then
+  begin
+    FromCodepage := FBGetSystemCodePage;
+    SetCodePage(Result,FromCodePage,false);{make explicit}
+  end;
+
+  if ToCodePage = FromCodePage then
+    Exit; {Nothing to do here}
+
+  if (FromCodePage = CP_NONE) and (ToCodePage = CP_UTF8) then
+    {Make sure no invalid UTF8 Characters}
+     FixUTF8(Result);
+
+  SetCodepage(Result,ToCodePage,true);
+end;
+
+function SafeAnsiUpperCase(const s: AnsiString): AnsiString;
+var i: integer;
+begin
+  {Guard against string length being increased by 1 and the trailing zero
+   being incorporated in the string - see
+   https://gitlab.com/freepascal.org/fpc/source/-/issues/39746}
+  Result := AnsiUpperCase(s);
+  i := length(Result);
+  while (i > 0) and (Result[i] = #0) do Dec(i);
+  SetLength(Result,i);
 end;
 
 { TSQLXMLReader }
@@ -2995,5 +3130,7 @@ begin
   end;
 end;
 
+initialization
+  FSystemCodePage := CP_ACP;
 
 end.

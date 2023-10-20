@@ -61,8 +61,9 @@
         <DCC_RemoteDebug>true</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+        <Debugger_DebugSourcePath>C:\Users\A User\projects\fbintf\client\include\;$(Debugger_DebugSourcePath)</Debugger_DebugSourcePath>
         <Debugger_HostApplication>C:\Users\A User\projects\fbintf\testsuite\testsuite.exe</Debugger_HostApplication>
-        <Debugger_RunParams>-t 21 -X </Debugger_RunParams>
+        <Debugger_RunParams>-t  12 -X </Debugger_RunParams>
         <DCC_UnitSearchPath>..\$(Platform)\$(Config);$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <DCC_ExeOutput>.</DCC_ExeOutput>
         <Manifest_File>(None)</Manifest_File>

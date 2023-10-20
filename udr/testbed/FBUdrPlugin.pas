@@ -884,7 +884,7 @@ var args: IResultset;
     separator: AnsiString;
 begin
   if not FAttachment.HasFunction(aFunctionName) then
-    aFunctionName := AnsiUpperCase(aFunctionName);
+    aFunctionName := SafeAnsiUpperCase(aFunctionName);
   args := FAttachment.OpenCursorAtStart(FunctionArgsSQL,[aFunctionName]);
   arglist := '';
   separator := ':';
@@ -920,7 +920,7 @@ var args: IResultset;
     ProcType: integer;
 begin
   if not FAttachment.HasProcedure(aProcName) then
-    aProcName := AnsiUpperCase(aProcName);
+    aProcName := SafeAnsiUpperCase(aProcName);
   args := FAttachment.OpenCursorAtStart(sGetProcArgsSQL,[aProcName]);
   arglist := '';
   separator := ':';

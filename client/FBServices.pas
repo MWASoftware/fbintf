@@ -56,6 +56,7 @@ type
   protected
     FSPB: ISPB;
     procedure InternalAttach(ConnectString: AnsiString); virtual; abstract;
+    procedure IBDatabaseError;
   public
     constructor Create(api: TFBClientAPI; ServerName: AnsiString; Protocol: TProtocol; SPB: ISPB; Port: AnsiString = '');
     destructor Destroy; override;
@@ -157,6 +158,11 @@ procedure TFBServiceManager.CheckServerName;
 begin
   if (FServerName = '') and (FProtocol <> Local) then
     IBError(ibxeServerNameMissing, [nil]);
+end;
+
+procedure TFBServiceManager.IBDatabaseError;
+begin
+  raise EIBInterBaseError.Create(FFirebirdAPI.GetStatus,cp_utf8);
 end;
 
 constructor TFBServiceManager.Create(api: TFBClientAPI; ServerName: AnsiString;

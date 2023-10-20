@@ -249,7 +249,7 @@ begin
     begin
       FEventsIntf.Cancel(StatusIntf);
       if not Force then
-        Check4DataBaseError;
+        Check4DataBaseError(ConnectionCodePage);
     end;
     FInWaitState := false;
     ReleaseIntf;
@@ -279,7 +279,7 @@ begin
       FEventsIntf := FAttachmentIntf.queEvents(
                                 StatusIntf,EventCallBack,
                                 FEventBufferLen, BytePtr(FEventBuffer));
-      Check4DataBaseError;
+      Check4DataBaseError(ConnectionCodePage);
     end;
     FInWaitState := true;
 

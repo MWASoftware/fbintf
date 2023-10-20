@@ -121,7 +121,7 @@ begin
   writeln(OutFile,'Creating a Database with empty parameters');
   Attachment := FirebirdAPI.CreateDatabase('',nil,false);
   if Attachment = nil then
-    writeln(OutFile,'Create Database fails (as expected): ',FirebirdAPI.GetStatus.GetMessage)
+    writeln(OutFile,'Create Database fails (as expected): ',FirebirdAPI.GetStatus.GetMessage(cp_acp))
   else
     Attachment.DropDatabase;
 

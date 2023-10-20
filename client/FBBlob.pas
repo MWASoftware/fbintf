@@ -79,6 +79,7 @@ type
 
   TFBBlob = class(TActivityReporter,ITransactionUser)
   private
+    FConnectionCodePage: TSystemCodePage;
     FMetaData: IBlobMetaData;
     FAttachment: IAttachment;
     FTransaction: ITransaction;
@@ -101,6 +102,7 @@ type
     constructor Create(Attachment: IAttachment; Transaction: TFBTransaction;
                        MetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB); overload;
     destructor Destroy; override;
+    property ConnectionCodePage: TSystemCodePage read FConnectionCodePage;
 
   public
     {ITransactionUser}
@@ -142,6 +144,8 @@ type
 
 implementation
 
+uses IBUtils {$ifdef WINDOWS}, Windows{$endif};
+
 { TFBBlob }
 
 procedure TFBBlob.ClearStringCache;
@@ -159,6 +163,7 @@ begin
   FMetaData := MetaData;
   FBPB := BPB;
   FCreating := true;
+  FConnectionCodePage := Attachment.GetCodePage;
 end;
 
 constructor TFBBlob.Create(Attachment: IAttachment;
@@ -386,7 +391,7 @@ begin
 
   if (GetSubType = 1) and  (StringCodePage(aValue) <> GetCodePage) and
            (GetCodePage <> CP_NONE) and (FBPB = nil) then
-    SetCodePage(aValue,GetCodePage,true);
+    aValue := TransliterateToCodePage(aValue,GetCodePage);
   ss := TStringStream.Create(aValue);
   try
     LoadFromStream(ss);

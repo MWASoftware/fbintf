@@ -100,7 +100,7 @@ type
 
 implementation
 
-uses FBAttachment, FB30Statement;
+uses IBUtils, FBAttachment, FB30Statement{$ifdef WINDOWS}, Windows{$endif};
 
 const
   sGetArrayMetaData = 'Select F.RDB$FIELD_LENGTH, F.RDB$FIELD_SCALE, F.RDB$FIELD_TYPE, '+
@@ -131,8 +131,8 @@ var stmt: IStatement;
     CharWidth: integer;
 begin
   CharWidth := 0;
-  RelationName := AnsiUpperCase(RelationName);
-  ColumnName := AnsiUpperCase(ColumnName);
+  RelationName := SafeAnsiUpperCase(RelationName);
+  ColumnName := SafeAnsiUpperCase(ColumnName);
   stmt := TFB30Statement.Create(aAttachment as TFB30Attachment,aTransaction,
                                sGetArrayMetaData ,aAttachment.GetSQLDialect);
   with stmt do
@@ -276,7 +276,7 @@ begin
                           0,nil,
                           FBufSize,BytePtr(FBuffer)
                           );
-    Check4DataBaseError;
+    Check4DataBaseError(ConnectionCodePage);
   end;
   SignalActivity;
 end;
@@ -292,7 +292,7 @@ begin
                           FBufSize,BytePtr(FBuffer)
                           );
     if not Force then
-      Check4DataBaseError;
+      Check4DataBaseError(ConnectionCodePage);
   end;
   SignalActivity;
 end;

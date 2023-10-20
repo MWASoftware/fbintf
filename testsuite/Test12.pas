@@ -58,12 +58,15 @@ type
   private
     procedure UpdateDatabase(Attachment: IAttachment);
     procedure QueryDatabase(Attachment: IAttachment);
+    procedure TransliterationTest;
   public
     function TestTitle: AnsiString; override;
     procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
   end;
 
 implementation
+
+uses IBUtils;
 
 const
   sqlCreateTable =
@@ -77,6 +80,10 @@ const
     'FixedWidth Char(4) Character set UTF8, '+
     'Primary Key(RowID)'+
     ')';
+
+  sqlCreateException = 'Create Exception CharSetTest ''Some German Special Characters like ÖÄÜöäüß''';
+
+  sqlCreateProc = 'Create Procedure DoException As Begin Exception CharSetTest; End';
 
   sqlGetCharSets = 'Select RDB$CHARACTER_SET_NAME,RDB$CHARACTER_SET_ID from RDB$CHARACTER_SETS order by 2';
 
@@ -123,6 +130,54 @@ begin
   Transaction := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
   Statement := Attachment.Prepare(Transaction,'Select * from TestData');
   ReportResults(Statement);
+  write(Outfile,'Test Exception Message = ');
+  PrintHexString(Attachment.OpenCursorAtStart(Transaction,'Select RDB$MESSAGE From RDB$EXCEPTIONS Where RDB$EXCEPTION_NAME = ''CHARSETTEST''',[])[0].AsString);
+  writeln(OutFile);
+  try
+    Attachment.ExecuteSQL([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],'Execute Procedure DoException',[]);
+  except On E:Exception do
+    writeln(Outfile,'Exception returned: ',E.Message);
+  end;
+end;
+
+procedure TTest12.TransliterationTest;
+const
+  Win1252Test1: UTF8String = 'WIN1252 Characters ÖÄÜöäüß';
+  Win1252Test2: UTF8String = 'Я Écoute moi';
+
+var
+ str: AnsiString;
+begin
+  writeln(Outfile,'Transliteration Tests');
+  writeln(Outfile,'Default System Code Page = ',DefaultSystemCodePage);
+  writeln(Outfile,'Actual System Code Page = ',FBGetSystemCodePage);
+  writeln(Outfile,'Input String = ', Win1252Test1,', Character Set = ',StringCodePage(Win1252Test1),' Hex Values:');
+  PrintHexString(Win1252Test1);
+  writeln(OutFile);
+  str := TransliterateToCodePage(Win1252Test1,1252);
+  writeln(Outfile,'Code Page = ',StringCodePage(str));
+  PrintHexString(str);
+  writeln(OutFile);
+  writeln(Outfile,'Back to UTF8');
+  str := TransliterateToCodePage(str,CP_UTF8);
+  writeln(Outfile,'Code Page = ',StringCodePage(str));
+  writeln(Outfile,str);
+  PrintHexString(str);
+  writeln(OutFile);
+  writeln(Outfile,'ANSI(1252) to ANSI(1251) Test');
+  writeln(Outfile,'Input String = ', Win1252Test2,', Character Set = ',StringCodePage(Win1252Test2),' Hex Values:');
+  PrintHexString(Win1252Test2);
+  writeln(OutFile);
+  str := TransliterateToCodePage(Win1252Test2,1251);
+  writeln(Outfile,'After conversion to 1251');
+  writeln(Outfile,'Code Page = ',StringCodePage(str));
+  PrintHexString(str);
+  writeln(OutFile);
+  writeln(Outfile,'Now Transliterate to WIN1252');
+  str := TransliterateToCodePage(str,1252);
+  writeln(Outfile,'Code Page = ',StringCodePage(str));
+  PrintHexString(str);
+  writeln(OutFile);
 end;
 
 function TTest12.TestTitle: AnsiString;
@@ -134,6 +189,7 @@ procedure TTest12.RunTest(CharSet: AnsiString; SQLDialect: integer);
 var DPB: IDPB;
     Attachment: IAttachment;
 begin
+  TransliterationTest;
   FHexStrings := true;
   DPB := FirebirdAPI.AllocateDPB;
   DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
@@ -142,11 +198,65 @@ begin
   DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
   Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable);
+  Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateException);
+  Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateProc);
+  Attachment.Disconnect;
 
+  {Query with UTF8}
+  DPB := FirebirdAPI.AllocateDPB;
+  DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
+  DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);
+  DPB.Add(isc_dpb_lc_ctype).setAsString('UTF8');
+  Attachment := FirebirdAPI.OpenDatabase(Owner.GetNewDatabaseName,DPB);
   UpdateDatabase(Attachment);
 
   writeln(OutFile,'Connection Character Set UTF8');
+  QueryDatabase(Attachment);
+  Attachment.Disconnect;
+
+  writeln(OutFile,'Connection Character Set NONE');
+  {Query with No character set}
+  DPB := FirebirdAPI.AllocateDPB;
+  DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
+  DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);
+  Attachment := FirebirdAPI.OpenDatabase(Owner.GetNewDatabaseName,DPB);
+  QueryDatabase(Attachment);
+  Attachment.Disconnect;
+
+  writeln(OutFile,'Connection Character Set WIN1252');
+  {Query with WIN1252}
+  DPB := FirebirdAPI.AllocateDPB;
+  DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
+  DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);
+  DPB.Add(isc_dpb_lc_ctype).setAsString('WIN1252');
+  Attachment := FirebirdAPI.OpenDatabase(Owner.GetNewDatabaseName,DPB);
+  QueryDatabase(Attachment);
+
+  Attachment.DropDatabase;
+
+  writeln(Outfile,'Recreate Database with WIN1252 as the connection character set');
+  DPB := FirebirdAPI.AllocateDPB;
+  DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
+  DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);
+  DPB.Add(isc_dpb_lc_ctype).setAsString('WIN1252');
+  DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
+  Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
+  Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable);
+  Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateException);
+  Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateProc);
+  Attachment.Disconnect;
+
+  writeln(OutFile,'Query Database with UTF8, NONE and WIN1252 connections');
+
   {Query with UTF8}
+  DPB := FirebirdAPI.AllocateDPB;
+  DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);
+  DPB.Add(isc_dpb_password).setAsString(Owner.GetPassword);
+  DPB.Add(isc_dpb_lc_ctype).setAsString('UTF8');
+  Attachment := FirebirdAPI.OpenDatabase(Owner.GetNewDatabaseName,DPB);
+  UpdateDatabase(Attachment);
+
+  writeln(OutFile,'Connection Character Set UTF8');
   QueryDatabase(Attachment);
   Attachment.Disconnect;
 

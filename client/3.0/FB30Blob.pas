@@ -196,7 +196,7 @@ begin
   begin
     FBlobIntf.getInfo(StatusIntf,Length(Request),BytePtr(@Request),
                                                GetBufSize, BytePtr(Buffer));
-    Check4DataBaseError;
+    Check4DataBaseError(ConnectionCodePage);
     SignalActivity;
   end;
 end;
@@ -208,7 +208,7 @@ begin
   with FFirebird30ClientAPI do
   begin
     FBlobIntf.close(StatusIntf);
-    if not Force then Check4DataBaseError;
+    if not Force then Check4DataBaseError(ConnectionCodePage);
   end;
   FBlobIntf.release;
   FBlobIntf := nil;
@@ -221,7 +221,7 @@ begin
   with FFirebird30ClientAPI do
   begin
     FBlobIntf.cancel(StatusIntf);
-    if not Force then Check4DataBaseError;
+    if not Force then Check4DataBaseError(ConnectionCodePage);
   end;
   FBlobIntf.release;
   FBlobIntf := nil;
@@ -241,7 +241,7 @@ begin
       with BPB as TBPB do
         FBlobIntf := Attachment.AttachmentIntf.createBlob(StatusIntf,Transaction.TransactionIntf,
                       @FBlobID,getDataLength, BytePtr(getBuffer));
-      Check4DataBaseError;
+      Check4DataBaseError(ConnectionCodePage);
     end;
 end;
 
@@ -264,7 +264,7 @@ begin
     with BPB as TBPB do
       FBlobIntf := Attachment.AttachmentIntf.createBlob(StatusIntf,Transaction.TransactionIntf,
                     @FBlobID,getDataLength, BytePtr(getBuffer));
-    Check4DataBaseError;
+    Check4DataBaseError(ConnectionCodePage);
   end;
 end;
 
@@ -285,7 +285,7 @@ begin
     with BPB as TBPB do
     FBlobIntf := Attachment.AttachmentIntf.openBlob(StatusIntf,(Transaction as TFB30Transaction).TransactionIntf,
                    @FBlobID, getDataLength, BytePtr(getBuffer));
-    Check4DataBaseError;
+    Check4DataBaseError(ConnectionCodePage);
   end;
 end;
 
@@ -317,7 +317,7 @@ begin
   if (returnCode <> Firebird.IStatus.Result_OK) and
      (returnCode <> Firebird.IStatus.Result_SEGMENT) and
      (returnCode <> Firebird.IStatus.RESULT_NO_DATA) then
-    FFirebird30ClientAPI.IBDataBaseError
+     raise EIBInterBaseError.Create(FFirebird30ClientAPI.GetStatus,ConnectionCodePage);
 end;
 
 function TFB30Blob.Write(const Buffer; Count: Longint): Longint;
@@ -335,7 +335,7 @@ begin
     with FFirebird30ClientAPI do
     begin
       FBlobIntf.putSegment(StatusIntf,localCount,LocalBuffer);
-      Check4DataBaseError;
+      Check4DataBaseError(ConnectionCodePage);
     end;
     Inc(LocalBuffer,localCount);
     Inc(Result,localCount);

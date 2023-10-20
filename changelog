@@ -1,7 +1,30 @@
-FBINTF Change Log  version          (1.4-1 Build 14019) Sat, 05 Aug 2023 13:21:51 +0100
+FBINTF Change Log  version          (1.4-1 Build 14075) Fri, 20 Oct 2023 11:06:05 +0100
 
 1. FBSQLData: ensure that TResults.getSQLData and TResults.GetData use same error
    checks for range checking.
+
+2. FB25Client: In GetIBMessage, fb_interpret is now called multiple times such that
+   any additional error information is decoded.
+
+3. FB25Statement: When changing a param type from Blob sub_type 1 to SQL_TEXT or SQL_VARYING
+   charsetid is now preserved and size is set to default blob size. Now aligns with
+   FB3 and later.
+
+4. DDL and DML string literals are now explicitly set to the connection character
+   set rather than the default character set provided by the compiler.
+
+5. General tidy up of transliteration functions, now centralised in IBUtils. FPC testing
+   now makes use of the RTL fpwidestring unit for support of international character
+   sets.
+
+6. Database exception handling (see section 9.3 in user guide).
+    * For FB3 and later API: Connection Character set now applied to message returned
+      by fb_interpret and message then transliterated if necessary to the system character set.
+    * For Legacy API: The message character set is guessed as UTF8 unless invalid
+      UTF8 characters found when connection character set is assumed. Message then
+      transliterated if necessary to system character set.
+      Note: this difference of behaviour is because legacy API presents exception messages
+      "as is", while FB3 server attempts to transliterate to connection character set.
 
 FBINTF Change Log  version          (1.4-0 Build 14011) Sat, 05 Aug 2023 11:09:09 +0100
 

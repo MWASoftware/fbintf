@@ -303,7 +303,7 @@ type
 
 implementation
 
-uses FBMessages {$IFNDEF FPC}, TypInfo {$ENDIF};
+uses FBMessages {$IFNDEF FPC}, TypInfo, Windows {$ENDIF};
 
 function BufToStr(P: PByte; Len: integer):AnsiString;
 begin

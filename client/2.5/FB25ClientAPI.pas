@@ -80,7 +80,7 @@ type
 
   TFB25Status = class(TFBStatus,IStatus)
   protected
-    function GetIBMessage: Ansistring; override;
+    function GetIBMessage(CodePage: TSystemCodePage): Ansistring; override;
   public
     function Clone: IStatus; override;
     function StatusVector: PStatusVector; override;
@@ -325,7 +325,8 @@ threadvar
 
 { TFB25ActivityReporter }
 
-function TFB25Status.GetIBMessage: Ansistring;
+function TFB25Status.GetIBMessage(CodePage: TSystemCodePage): Ansistring;
+
 var psb: PStatusVector;
     local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
 begin
@@ -334,8 +335,14 @@ begin
   with FOwner as TFB25ClientAPI do
   if assigned(fb_interpret) then
   begin
-    if fb_interpret(@local_buffer,sizeof(local_buffer),@psb) > 0 then
-       Result := strpas(local_buffer);
+    while fb_interpret(@local_buffer,sizeof(local_buffer),@psb) > 0 do
+    begin
+      if (Result <> '') and (Result[Length(Result)] <> LF) then
+        Result := Result + LineEnding + '-';
+      {Firebird 2.5 does not transliterate exceptions to the connection character
+       set hence we need to guess the character set.}
+       Result := Result + TransliterateToCodePage(PCharToAnsiString(local_buffer,GuessCodePage(local_buffer,CodePage)),CP_ACP);
+    end;
   end
   else
   if assigned(isc_interprete) then
@@ -343,7 +350,7 @@ begin
   begin
     if (Result <> '') and (Result[Length(Result)] <> LF) then
       Result := Result + LineEnding + '-';
-    Result := Result + strpas(local_buffer);
+    Result := Result + TransliterateToCodePage(PCharToAnsiString(local_buffer,GuessCodePage(local_buffer,CodePage)),CP_ACP);
   end;
 end;
 

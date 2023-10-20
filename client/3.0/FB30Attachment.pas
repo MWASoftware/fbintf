@@ -116,28 +116,33 @@ type
 implementation
 
 uses FB30Transaction, FB30Statement, FB30Array, FB30Blob, FBMessages,
-  FBOutputBlock, FB30Events, IBUtils, FB30TimeZoneServices;
+  FBOutputBlock, FB30Events, IBUtils, FB30TimeZoneServices
+  {$ifdef WINDOWS}, Windows{$endif};
 
 type
   { TVersionCallback }
 
   TVersionCallback = class(Firebird.IVersionCallbackImpl)
   private
+    FConnectionCodePage: TSystemCodePage;
     FOutput: TStrings;
     FFirebirdClientAPI: TFBClientAPI;
   public
-    constructor Create(FirebirdClientAPI: TFBClientAPI; output: TStrings);
+    constructor Create(FirebirdClientAPI: TFBClientAPI; output: TStrings;
+      aConnectionCodePage: TSystemCodePage);
     procedure callback(status: Firebird.IStatus; text: PAnsiChar); override;
+    property ConnectionCodePage: TSystemCodePage read FConnectionCodePage;
   end;
 
 { TVersionCallback }
 
 constructor TVersionCallback.Create(FirebirdClientAPI: TFBClientAPI;
-  output: TStrings);
+  output: TStrings; aConnectionCodePage: TSystemCodePage);
 begin
   inherited Create;
   FFirebirdClientAPI := FirebirdClientAPI;
   FOutput := output;
+  FConnectionCodePage := aConnectionCodePage;
 end;
 
 procedure TVersionCallback.callback(status: Firebird.IStatus; text: PAnsiChar);
@@ -145,7 +150,7 @@ var aStatus: IStatus;
 begin
   aStatus := TFB30Status.Create(FFirebirdClientAPI,status);
   if aStatus.InErrorState then
-      raise EIBInterBaseError.Create(aStatus);
+      raise EIBInterBaseError.Create(aStatus,ConnectionCodePage);
   FOutput.Add(text);
 end;
 
@@ -358,6 +363,8 @@ procedure TFB30Attachment.ExecImmediate(transaction: ITransaction; sql: AnsiStri
   aSQLDialect: integer);
 begin
   CheckHandle;
+  if StringCodePage(sql) <> CP_NONE then
+    sql := TransliterateToCodePage(sql,CodePage);
   with FFirebird30ClientAPI do
   try
     FAttachmentIntf.execute(StatusIntf,(transaction as TFB30Transaction).TransactionIntf,
@@ -454,12 +461,12 @@ procedure TFB30Attachment.getFBVersion(version: TStrings);
 var bufferObj: TVersionCallback;
 begin
   version.Clear;
-  bufferObj := TVersionCallback.Create(Firebird30ClientAPI,version);
+  bufferObj := TVersionCallback.Create(Firebird30ClientAPI,version,CodePage);
   try
     with FFirebird30ClientAPI do
     begin
        UtilIntf.getFbVersion(StatusIntf,FAttachmentIntf,bufferObj);
-       Check4DataBaseError;
+       Check4DataBaseError(CodePage);
     end;
   finally
     bufferObj.Free;

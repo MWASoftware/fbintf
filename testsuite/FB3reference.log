@@ -3,10 +3,10 @@ Copyright MWA Software 2016-2021
 
 Starting Tests
 Client API Version = 3.0
-Firebird Environment Variable = /opt/firebird/3.0.5
-Firebird Bin Directory = /opt/firebird/3.0.5/bin
-Firebird Conf Directory = /opt/firebird/3.0.5/
-Firebird Client Library Path = /opt/firebird/3.0.5/lib/libfbclient.so
+Firebird Environment Variable = /opt/firebird/3.0.10
+Firebird Bin Directory = /opt/firebird/3.0.10/bin
+Firebird Conf Directory = /opt/firebird/3.0.10/
+Firebird Client Library Path = /opt/firebird/3.0.10/lib/libfbclient.so
 Running Test 1: Create and Drop a Database
 Creating a Database with empty parameters
 Create Database fails (as expected): Engine Code: 335544344
@@ -23,7 +23,7 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 12
 DB ODS Minor Version = 0
 User Authentication Method = Srp
-Firebird Library Path = /opt/firebird/3.0.5/lib/libfbclient.so
+Firebird Library Path = /opt/firebird/3.0.10/lib/libfbclient.so
 DB Client Implementation Version = 3.0
 DPB: Item Count = 3
   isc_dpb_user_name = SYSDBA
@@ -31,9 +31,9 @@ DPB: Item Count = 3
   isc_dpb_set_db_sql_dialect = 3
 
 Firebird Server Version Info
-Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V3.0.5.33220 Firebird 3.0"
-Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V3.0.5.33220 Firebird 3.0/tcp (zeus)/P15:C"
-Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-V3.0.5.33220 Firebird 3.0/tcp (zeus)/P15:C"
+Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V3.0.10.33601 Firebird 3.0"
+Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V3.0.10.33601 Firebird 3.0/tcp (zeus)/P15:C"
+Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-V3.0.10.33601 Firebird 3.0/tcp (zeus)/P15:C"
 on disk structure version 12.0
 
 Dropping Database
@@ -45,7 +45,7 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 12
 DB ODS Minor Version = 0
 User Authentication Method = Srp
-Firebird Library Path = /opt/firebird/3.0.5/lib/libfbclient.so
+Firebird Library Path = /opt/firebird/3.0.10/lib/libfbclient.so
 DB Client Implementation Version = 3.0
 Dropping Database
 DPB: Item Count = 4
@@ -58,7 +58,7 @@ Creating a Database with a DPD
 Database ID = 4 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = zeus
 ODS major = 12
 ODS minor = 0
-Attachment ID = 6
+Attachment ID = 8
 DB Connect String = inet://localhost//tmp/fbintf-testsuite/testsuite1.fdb
 DB Charset ID = 4
 DB SQL Dialect = 3
@@ -66,11 +66,11 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 12
 DB ODS Minor Version = 0
 User Authentication Method = Srp
-Firebird Library Path = /opt/firebird/3.0.5/lib/libfbclient.so
+Firebird Library Path = /opt/firebird/3.0.10/lib/libfbclient.so
 DB Client Implementation Version = 3.0
 RDB$DESCRIPTION = 
 RDB$RELATION_ID = 128
-RDB$SECURITY_CLASS = SQL$363
+RDB$SECURITY_CLASS = SQL$364
 RDB$CHARACTER_SET_NAME = UTF8
 RDB$LINGER = 
 Dropping Database
@@ -317,7 +317,7 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 12
 DB ODS Minor Version = 0
 User Authentication Method = Srp
-Firebird Library Path = /opt/firebird/3.0.5/lib/libfbclient.so
+Firebird Library Path = /opt/firebird/3.0.10/lib/libfbclient.so
 DB Client Implementation Version = 3.0
 Do Fetch Next:
 EMP_NO = 2
@@ -570,7 +570,7 @@ DB Remote Protocol =
 DB ODS Major Version = 12
 DB ODS Minor Version = 0
 User Authentication Method = User name in DPB
-Firebird Library Path = /opt/firebird/3.0.5/lib/libfbclient.so
+Firebird Library Path = /opt/firebird/3.0.10/lib/libfbclient.so
 DB Client Implementation Version = 3.0
 Do Fetch Next:
 EMP_NO = 2
@@ -653,13 +653,13 @@ Running Test 3: ad hoc queries
 Opening inet://localhost/employee
 Database Open
 Employee Count = 42
-Transaction ID = 6513
+Transaction ID = 947
 Transaction is Read/Write
 Transaction Database Path = inet://localhost/employee
-Transaction ID = 6513
-Oldest Interesting = 6511
-Oldest Action = 6512
-Oldest Snapshot = 6512
+Transaction ID = 947
+Oldest Interesting = 945
+Oldest Action = 946
+Oldest Snapshot = 946
 Oldest Interesting = 0
 Employee Count = 41
 Employee Count = 42
@@ -674,9 +674,9 @@ Constrained Employee Count = 3
 Running Test 4: Update, Insert and Delete Queries
 Opening inet://localhost/employee
 Database Open
-Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V3.0.5.33220 Firebird 3.0"
-Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V3.0.5.33220 Firebird 3.0/tcp (zeus)/P15:CZ"
-Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-V3.0.5.33220 Firebird 3.0/tcp (zeus)/P15:CZ"
+Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V3.0.10.33601 Firebird 3.0"
+Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V3.0.10.33601 Firebird 3.0/tcp (zeus)/P15:CZ"
+Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-V3.0.10.33601 Firebird 3.0/tcp (zeus)/P15:CZ"
 on disk structure version 12.0
 Select Count = 1 InsertCount = 0 UpdateCount = 1 DeleteCount = 0
 EMP_NO = 8
@@ -691,10 +691,10 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 19,694,800
+Current memory = 19,490,704
 Delta memory = 4,480
-Max memory = 19,756,272
-Elapsed time= 0.002 sec
+Max memory = 19,553,120
+Elapsed time= 0.001 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
@@ -1744,7 +1744,7 @@ Must give us pause. There's the respect
 That makes calamity of so long life.
 For who would bear the whips and scorns of time,
 Th' oppressor's wrong, the proud man's contumely, 
-The pangs of despised love, the law’s delay, 
+The pangs of despised love, the lawâ€™s delay, 
 The insolence of office, and the spurns
 That patient merit of the unworthy takes,
 When he himself might his quietus make
@@ -1821,7 +1821,7 @@ Must give us pause. There's the respect
 That makes calamity of so long life.
 For who would bear the whips and scorns of time,
 Th' oppressor's wrong, the proud man's contumely, 
-The pangs of despised love, the law’s delay, 
+The pangs of despised love, the lawâ€™s delay, 
 The insolence of office, and the spurns
 That patient merit of the unworthy takes,
 When he himself might his quietus make
@@ -1863,7 +1863,7 @@ Must give us pause. There's the respect
 That makes calamity of so long life.
 For who would bear the whips and scorns of time,
 Th' oppressor's wrong, the proud man's contumely, 
-The pangs of despised love, the law’s delay, 
+The pangs of despised love, the lawâ€™s delay, 
 The insolence of office, and the spurns
 That patient merit of the unworthy takes,
 When he himself might his quietus make
@@ -1924,7 +1924,7 @@ Must give us pause. There's the respect
 That makes calamity of so long life.
 For who would bear the whips and scorns of time,
 Th' oppressor's wrong, the proud man's contumely, 
-The pangs of despised love, the law’s delay, 
+The pangs of despised love, the lawâ€™s delay, 
 The insolence of office, and the spurns
 That patient merit of the unworthy takes,
 When he himself might his quietus make
@@ -2832,7 +2832,7 @@ MYARRAY = Array: (0,-1: A50) (0,0: A51) (0,1: A52) (0,2: A53) (0,3: A54) (0,4: A
 
 ------------------------------------------------------
 Running Test 9: Database Information tests
-Database ID = 4 FB = /opt/firebird/3.0.5/examples/empbuild/employee.fdb SN = zeus
+Database ID = 4 FB = /opt/firebird/3.0.10/examples/empbuild/employee.fdb SN = zeus
 Pages =307
 Base Level = 13,4,0,3,
 Implementation = 11,7,0,3,65,1,65,
@@ -2840,19 +2840,19 @@ Reserved = 0
 ODS minor = 0
 ODS major = 12
 Page Size = 8192
-Version = 1: LI-V6.3.5.33220 Firebird 3.0
+Version = 1: LI-V6.3.10.33601 Firebird 3.0
 Database is Read/Write
-Database Created: 09/1/2020 13:13:45
-Pages Used = 300
-Pages Free = 7
-Server Memory = 18987232
+Database Created: 07/6/2022 12:50:29
+Pages Used = 298
+Pages Free = 9
+Server Memory = 18918224
 Forced Writes  = 1
-Max Memory  = 19024416
+Max Memory  = 18949568
 Num Buffers  = 2048
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
 Active Transaction Count = 0
-Fetches  = 408
+Fetches  = 406
 Writes  = 5
 Reads  = 55
 Page Writes  = 2
@@ -2884,7 +2884,7 @@ Count = 1
 
 Sequential Table Scans Operation Counts
 Table ID = 0
-Count = 96
+Count = 94
 Table ID = 1
 Count = 2
 
@@ -2900,16 +2900,13 @@ Async Wait Called
 Event Signalled
 First Event - usually ignored
 Signal Event
-Event Signalled
 Event Counts: TESTEVENT, Count = 1
 Two more events
 Call Async Wait
 Async Wait Called
 Event Signalled
-Deferred Events Caught
-Event Counts: TESTEVENT, Count = 2
 Signal Event
-Event Counts: TESTEVENT, Count = 1
+Event Counts: TESTEVENT, Count = 2
 Async Wait: Test Cancel
 Event Signalled
 Async Wait Called
@@ -2917,7 +2914,7 @@ Event Cancelled
 Time Out - Cancel Worked!
 Sync wait
 Event Signalled
-Event Counts: TESTEVENT, Count = 0
+Event Counts: TESTEVENT, Count = 2
 
 
 ------------------------------------------------------
@@ -2927,12 +2924,12 @@ SPB: Item Count = 2
   password = masterkey
 
 Service Manager Version = 2
-Server Version = LI-V3.0.5.33220 Firebird 3.0
+Server Version = LI-V3.0.10.33601 Firebird 3.0
 Implementation = Firebird/Linux/AMD/Intel/x64
 
 Lock Directory = /tmp/firebird/
-Message File = /opt/firebird/3.0.5/
-Security File = security.db
+Message File = /opt/firebird/3.0.10/
+Security File = /opt/firebird/3.0.10/security3.fdb
 
 DB Attachments
 No. of Attachments = 0
@@ -2984,6 +2981,26 @@ Database Dropped
 
 ------------------------------------------------------
 Running Test 12: Character Sets
+Transliteration Tests
+Default System Code Page = 65001
+Actual System Code Page = 65001
+Input String = WIN1252 Characters ÖÄÜöäüß, Character Set = 65001 Hex Values:
+57 49 4E 31 32 35 32 20 43 68 61 72 61 63 74 65 72 73 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
+Code Page = 1252
+57 49 4E 31 32 35 32 20 43 68 61 72 61 63 74 65 72 73 20 D6 C4 DC F6 E4 FC DF 
+Back to UTF8
+Code Page = 65001
+WIN1252 Characters ÖÄÜöäüß
+57 49 4E 31 32 35 32 20 43 68 61 72 61 63 74 65 72 73 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
+ANSI(1252) to ANSI(1251) Test
+Input String = Я Écoute moi, Character Set = 65001 Hex Values:
+D0 AF 20 C3 89 63 6F 75 74 65 20 6D 6F 69 
+After conversion to 1251
+Code Page = 1251
+DF 20 3F 63 6F 75 74 65 20 6D 6F 69 
+Now Transliterate to WIN1252
+Code Page = 1252
+3F 20 3F 63 6F 75 74 65 20 6D 6F 69 
 SQL Params
 SQLType =SQL_LONG
 sub type = 0
@@ -3096,7 +3113,7 @@ Scale = 0
 Charset id = 1
 Nullable
 Size = 16
-Value = Test�
+1 54 65 73 74 D C3 
 
 SQLType =SQL_VARYING
 sub type = 0
@@ -3116,6 +3133,12 @@ BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61
 INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
 FIXEDWIDTH = C3 89  (Charset Id = 4 Codepage = 65001)
 
+Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
+Exception returned: Engine Code: 335544517
+exception 1
+-CHARSETTEST
+-Some German Special Characters like ÖÄÜöäüß
+-At procedure 'DOEXCEPTION' line: 1, col: 39
 Connection Character Set NONE
 ROWID = 1
 TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage = 65001)
@@ -3125,6 +3148,12 @@ BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61
 INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
 FIXEDWIDTH = C3 89  (Charset Id = 4 Codepage = 65001)
 
+Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
+Exception returned: Engine Code: 335544517
+exception 1
+-CHARSETTEST
+-Some German Special Characters like ÖÄÜöäüß
+-At procedure 'DOEXCEPTION' line: 1, col: 39
 Connection Character Set WIN1252
 ROWID = 1
 TITLE = 42 6C 6F 62 20 54 65 73 74 20 A9 80  (Charset Id = 53 Codepage = 1252)
@@ -3134,6 +3163,182 @@ BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61
 INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
 FIXEDWIDTH = C9  (Charset Id = 53 Codepage = 1252)
 
+Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
+Exception returned: Engine Code: 335544517
+exception 1
+-CHARSETTEST
+-Some German Special Characters like ÖÄÜöäüß
+-At procedure 'DOEXCEPTION' line: 1, col: 39
+Recreate Database with WIN1252 as the connection character set
+Query Database with UTF8, NONE and WIN1252 connections
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+Value = 0
+
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = TITLE
+Scale = 0
+Charset id = 4
+Nullable
+Size = 128
+
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = NOTES
+Scale = 0
+Charset id = 4
+Nullable
+Size = 256
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = BLOBDATA
+Scale = 0
+Charset id = 4
+Nullable
+Size = 8
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = BLOBDATA2
+Scale = 0
+Charset id = 4
+Nullable
+Size = 8
+
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = INCLEAR
+Scale = 0
+Charset id = 1
+Nullable
+Size = 16
+
+SQLType =SQL_TEXT
+sub type = 0
+Field Name = FIXEDWIDTH
+Scale = 0
+Charset id = 4
+Nullable
+Size = 16
+
+Show Param Values
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+Value = 1
+
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = TITLE
+Scale = 0
+Charset id = 4
+Nullable
+Size = 128
+Value = Blob Test ©€
+
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = NOTES
+Scale = 0
+Charset id = 4
+Nullable
+Size = 256
+Value = Écoute moi
+
+SQLType =SQL_VARYING
+sub type = 1
+Field Name = BLOBDATA
+Scale = 0
+Charset id = 4
+Nullable
+Size = 8192
+Value = Some German Special Characters like ÖÄÜöäüß
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = BLOBDATA2
+Scale = 0
+Charset id = 4
+Nullable
+Size = 8
+Value = Some German Special Characters like ÖÄÜöäüß
+
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = INCLEAR
+Scale = 0
+Charset id = 1
+Nullable
+Size = 16
+1 54 65 73 74 D C3 
+
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = FIXEDWIDTH
+Scale = 0
+Charset id = 4
+Nullable
+Size = 16
+Value = É
+
+Connection Character Set UTF8
+ROWID = 1
+TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage = 65001)
+NOTES = C3 89 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 4 Codepage = 65001)
+BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
+BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
+INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
+FIXEDWIDTH = C3 89  (Charset Id = 4 Codepage = 65001)
+
+Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 D6 C4 DC F6 E4 FC DF 
+Exception returned: Engine Code: 335544517
+exception 1
+-CHARSETTEST
+-Some German Special Characters like ???????
+-At procedure 'DOEXCEPTION' line: 1, col: 39
+Connection Character Set NONE
+ROWID = 1
+TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage = 65001)
+NOTES = C9 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 21 Codepage = 28591)
+BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 D6 C4 DC F6 E4 FC DF  (Charset Id = 53 Codepage = 1252)
+BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 4 Codepage = 65001)
+INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
+FIXEDWIDTH = C3 89  (Charset Id = 4 Codepage = 65001)
+
+Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 D6 C4 DC F6 E4 FC DF 
+Exception returned: Engine Code: 335544517
+exception 1
+-CHARSETTEST
+-Some German Special Characters like ???????
+-At procedure 'DOEXCEPTION' line: 1, col: 39
+Connection Character Set WIN1252
+ROWID = 1
+TITLE = 42 6C 6F 62 20 54 65 73 74 20 A9 80  (Charset Id = 53 Codepage = 1252)
+NOTES = C9 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 53 Codepage = 1252)
+BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 D6 C4 DC F6 E4 FC DF  (Charset Id = 53 Codepage = 1252)
+BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 D6 C4 DC F6 E4 FC DF  (Charset Id = 53 Codepage = 1252)
+INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
+FIXEDWIDTH = C9  (Charset Id = 53 Codepage = 1252)
+
+Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 D6 C4 DC F6 E4 FC DF 
+Exception returned: Engine Code: 335544517
+exception 1
+-CHARSETTEST
+-Some German Special Characters like ÖÄÜöäüß
+-At procedure 'DOEXCEPTION' line: 1, col: 39
 
 
 ------------------------------------------------------
@@ -3315,7 +3520,7 @@ Your user name and password are not defined. Ask your database administrator to 
 
 ------------------------------------------------------
 Running Test 17: Date/Time tests and Firebird 4 extensions
- FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V3.0.5.33220 Firebird 3.0"
+ FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V3.0.10.33601 Firebird 3.0"
 Has Local TZ DB = FALSE
 
 Testdata
@@ -3399,7 +3604,7 @@ Skipping Firebird 4 and later test part
 
 ------------------------------------------------------
 Running Test 18: Firebird 4 Decfloat extensions
- FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V3.0.5.33220 Firebird 3.0"
+ FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V3.0.10.33601 Firebird 3.0"
 Skipping test for Firebird 4 and later
 
 
@@ -3411,7 +3616,7 @@ Skipping test for Firebird 4 and later
 
 ------------------------------------------------------
 Running Test 20: Stress Test IBatch interface
- FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V3.0.5.33220 Firebird 3.0"
+ FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V3.0.10.33601 Firebird 3.0"
 Skipping test for Firebird 4 and later
 
 
@@ -3733,22 +3938,22 @@ MYARRAY = NULL
 
 Journal Table
 IBX$SESSIONID = 1
-IBX$TRANSACTIONID = 9
+IBX$TRANSACTIONID = 11
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2022/07/18 14:41:19.5000
+IBX$CREATED = 2023/09/26 10:40:39.6260
 IBX$SESSIONID = 1
-IBX$TRANSACTIONID = 11
-IBX$OLDTRANSACTIONID = 10
+IBX$TRANSACTIONID = 13
+IBX$OLDTRANSACTIONID = 12
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2022/07/18 14:41:19.5800
+IBX$CREATED = 2023/09/26 10:40:39.6510
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
-Attachment ID = 6
+Attachment ID = 8
 Session ID = 1
-Transaction ID = 9
+Transaction ID = 11
 Transaction Name = "Transaction_29_1"
 TPB: Item Count = 3
   isc_tpb_write
@@ -3759,51 +3964,51 @@ Default Completion = TACommit
 
 Journal Entry = jeQuery(Query)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
-Attachment ID = 6
+Attachment ID = 8
 Session ID = 1
-Transaction ID = 9
+Transaction ID = 11
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(1,101,9223372036854775807,10000.1234,9999.12345678,1234567890.12346)
 
 Journal Entry = jeQuery(Query)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
-Attachment ID = 6
+Attachment ID = 8
 Session ID = 1
-Transaction ID = 9
+Transaction ID = 11
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(2,-32457,-9223372036854775808,1000001.12,1.7E308,-1234567890.12346)
 
 Journal Entry = jeTransCommitRet(Commit Retaining)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
-Attachment ID = 6
+Attachment ID = 8
 Session ID = 1
-Transaction ID = 10
-Old TransactionID = 9
+Transaction ID = 12
+Old TransactionID = 11
 
 Journal Entry = jeQuery(Query)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
-Attachment ID = 6
+Attachment ID = 8
 Session ID = 1
-Transaction ID = 10
+Transaction ID = 12
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(3,0,0,0,0,0)
 
 Journal Entry = jeTransRollbackRet(Rollback Retaining)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
-Attachment ID = 6
+Attachment ID = 8
 Session ID = 1
-Transaction ID = 11
-Old TransactionID = 10
+Transaction ID = 13
+Old TransactionID = 12
 
 Journal Entry = jeQuery(Query)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
-Attachment ID = 6
+Attachment ID = 8
 Session ID = 1
-Transaction ID = 11
+Transaction ID = 13
 Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(4,1,10,0.023,0.0011,233.456)
 
 Journal Entry = jeTransStart(Transaction Start)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
-Attachment ID = 6
+Attachment ID = 8
 Session ID = 1
-Transaction ID = 12
+Transaction ID = 14
 Transaction Name = "Transaction_29_2"
 TPB: Item Count = 3
   isc_tpb_write
@@ -3814,15 +4019,15 @@ Default Completion = TARollback
 
 Journal Entry = jeTransCommit(Commit)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
-Attachment ID = 6
+Attachment ID = 8
 Session ID = 1
-Transaction ID = 11
+Transaction ID = 13
 
 Journal Entry = jeQuery(Query)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
-Attachment ID = 6
+Attachment ID = 8
 Session ID = 1
-Transaction ID = 12
+Transaction ID = 14
 Query = Insert into TestData(RowID, Str, TextBlob) Values(5,'It''s the quick brown fox jumps over the lazy dog','To be or not to be-that is the question:
 Whether ''tis nobler in the mind to suffer
 The slings and arrows of outrageous fortune,
@@ -3862,9 +4067,9 @@ Be all my sins remembered
 
 Journal Entry = jeQuery(Query)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
-Attachment ID = 6
+Attachment ID = 8
 Session ID = 1
-Transaction ID = 12
+Transaction ID = 14
 Query = Insert into TestData(RowID,OtherBlob) Values (6,<blob subtype="0">
 FFD8FFE000104A46494600010101004800480000FFE11E0545786966000049492A00080000000C00
 0E010200200000009E0000000F01020014000000BE0000001001020008000000D200000012010300
@@ -3874,9 +4079,9 @@ FFD8FFE000104A46494600010101004800480000FFE11E0545786966000049492A00080000000C00
 
 Journal Entry = jeQuery(Query)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
-Attachment ID = 6
+Attachment ID = 8
 Session ID = 1
-Transaction ID = 12
+Transaction ID = 14
 Query = Insert into TestData(RowID,MyArray) Values (7,<array dim = "1" sqltype = "496" length = "4" relation_name = "TESTDATA" column_name = "MYARRAY" scale = "0" bounds="0:16">
  <elt ix="0">100</elt>
  <elt ix="1">99</elt>
@@ -3900,9 +4105,9 @@ Query = Insert into TestData(RowID,MyArray) Values (7,<array dim = "1" sqltype =
 
 Journal Entry = jeTransRollback(Rollback)
 Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
-Attachment ID = 6
+Attachment ID = 8
 Session ID = 1
-Transaction ID = 12
+Transaction ID = 14
 
 
 

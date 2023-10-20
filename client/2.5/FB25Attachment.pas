@@ -96,7 +96,8 @@ type
 implementation
 
 uses FB25Events,FB25Transaction, FBMessages, FB25Blob,
-  FB25Statement, FB25Array, IBUtils, IBExternals;
+  FB25Statement, FB25Array, IBUtils, IBExternals
+  {$ifdef WINDOWS}, Windows{$endif};
 
   { TFB25Attachment }
 
@@ -270,6 +271,8 @@ var TRHandle: TISC_TR_HANDLE;
 begin
   CheckHandle;
   TRHandle := (Transaction as TFB25Transaction).Handle;
+  if StringCodePage(sql) <> CP_NONE then
+    sql := TransliterateToCodePage(sql,CodePage);
   with FFirebird25ClientAPI do
     if isc_dsql_execute_immediate(StatusVector, @fHandle, @TRHandle, 0,PAnsiChar(sql), aSQLDialect, nil) > 0 then
       IBDatabaseError;

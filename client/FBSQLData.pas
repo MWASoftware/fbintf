@@ -142,7 +142,6 @@ type
      function GetDataLength: cardinal; virtual; abstract;
      function GetCodePage: TSystemCodePage; virtual; abstract;
      function getCharSetID: cardinal; virtual; abstract;
-     function Transliterate(s: AnsiString; CodePage: TSystemCodePage): RawByteString;
      procedure SetScale(aValue: integer); virtual;
      procedure SetDataLength(len: cardinal); virtual;
      procedure SetSQLType(aValue: cardinal); virtual;
@@ -731,6 +730,7 @@ begin
   finally
     slNames.Free;
   end;
+
 end;
 
 function TSQLDataArea.ColumnsInUseCount: integer;
@@ -744,7 +744,7 @@ var
   i: Integer;
 begin
   if not IsInputDataArea or not CaseSensitiveParams then
-   s := AnsiUpperCase(Idx)
+   s := SafeAnsiUpperCase(Idx)
   else
    s := Idx;
 
@@ -780,7 +780,7 @@ end;
 procedure TSQLVarData.SetName(AValue: AnsiString);
 begin
   if not Parent.IsInputDataArea or not Parent.CaseSensitiveParams then
-    FName := AnsiUpperCase(AValue)
+    FName := SafeAnsiUpperCase(AValue)
   else
     FName := AValue;
 end;
@@ -926,7 +926,7 @@ begin
 
    if not Parent.IsInputDataArea then
    begin
-     st := Space2Underscore(AnsiUppercase(AliasName));
+     st := Space2Underscore(SafeAnsiUpperCase(AliasName));
      if st = '' then
      begin
        sBaseName := 'F_'; {do not localize}
@@ -1089,14 +1089,6 @@ end;
 procedure TSQLDataItem.InternalSetAsString(Value: AnsiString);
 begin
   //Do nothing by default
-end;
-
-function TSQLDataItem.Transliterate(s: AnsiString; CodePage: TSystemCodePage
-  ): RawByteString;
-begin
-  Result := s;
-  if StringCodePage(Result) <> CodePage then
-    SetCodePage(Result,CodePage,CodePage <> CP_NONE);
 end;
 
 procedure TSQLDataItem.SetScale(aValue: integer);
@@ -2337,7 +2329,7 @@ end;
 function TColumnMetaData.GetName: AnsiString;
 begin
   CheckActive;
-  Result := FIBXSQLVAR. Name;
+  Result := FIBXSQLVAR.Name;
 end;
 
 function TColumnMetaData.GetScale: integer;
@@ -2458,7 +2450,7 @@ procedure TSQLParam.InternalSetAsString(Value: AnsiString);
 procedure DoSetString;
 begin
   Changing;
-  FIBXSQLVar.SetString(Transliterate(Value,GetCodePage));
+  FIBXSQLVar.SetString(TransliterateToCodePage(Value,GetCodePage));
   Changed;
 end;
 

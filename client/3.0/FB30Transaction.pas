@@ -142,11 +142,11 @@ begin
                           (FAttachments[i] as TFB30Attachment).AttachmentIntf,
                           (FTPB as TTPB).getDataLength,
                           BytePtr((FTPB as TTPB).getBuffer));
-      Check4DataBaseError;
+      Check4DataBaseError(ConnectionCodePage);
     end;
 
     FTransactionIntf := DtcStart.start(StatusIntf);
-    Check4DataBaseError;
+    Check4DataBaseError(ConnectionCodePage);
     FTransactionIntf.addRef();
     SignalActivity;
   end;
@@ -163,7 +163,7 @@ begin
       if Force then
         Result := trCommitFailed
       else
-       IBDataBaseError;
+       raise EIBInterBaseError.Create(GetStatus,ConnectionCodePage);
     end;
   end;
   SignalActivity;
@@ -175,7 +175,7 @@ begin
   with FFirebird30ClientAPI do
   begin
     FTransactionIntf.commitRetaining(StatusIntf);
-    Check4DataBaseError;
+    Check4DataBaseError(ConnectionCodePage);
   end;
   SignalActivity;
 end;
@@ -191,7 +191,7 @@ begin
       if Force then
         Result := trRollbackFailed
       else
-       IBDataBaseError;
+       raise EIBInterBaseError.Create(GetStatus,ConnectionCodePage);
     end;
   end;
   SignalActivity;
@@ -203,7 +203,7 @@ begin
   with FFirebird30ClientAPI do
   begin
     FTransactionIntf.rollbackRetaining(StatusIntf);
-    Check4DataBaseError;
+    Check4DataBaseError(ConnectionCodePage);
   end;
   SignalActivity;
 end;
@@ -237,7 +237,7 @@ begin
   with FFirebird30ClientAPI do
   begin
     FTransactionIntf.prepare(StatusIntf,0,nil);
-    Check4DataBaseError;
+    Check4DataBaseError(ConnectionCodePage);
   end;
   SignalActivity;
 end;

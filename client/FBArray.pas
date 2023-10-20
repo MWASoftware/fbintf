@@ -143,6 +143,7 @@ type
 
   TFBArray = class(TActivityReporter,IArray,ITransactionUser)
   private
+    FConnectionCodePage: TSystemCodePage;
     FFirebirdClientAPI: TFBClientAPI;
     FMetaData: IArrayMetaData;
     FIsNew: boolean;
@@ -178,6 +179,7 @@ type
       aField: IArrayMetaData; ArrayID: TISC_QUAD); overload;
     destructor Destroy; override;
     function GetSQLDialect: integer;
+    property ConnectionCodePage: TSystemCodePage read FConnectionCodePage;
 
   public
     {ITransactionUser}
@@ -404,7 +406,7 @@ begin
 
   SQL_VARYING:
     begin
-      Value := Transliterate(Value,GetCodePage);
+      Value := TransliterateToCodePage(Value,GetCodePage);
       len := Length(Value);
       ElementSize := GetDataLength;
       if len > ElementSize - 2 then
@@ -418,7 +420,7 @@ begin
 
   SQL_TEXT:
     begin
-      Value := Transliterate(Value,GetCodePage);
+      Value := TransliterateToCodePage(Value,GetCodePage);
       ElementSize := GetDataLength;
       FillChar(FBufPtr^,ElementSize,' ');
       len := Length(Value);
@@ -869,6 +871,7 @@ begin
   AllocateBuffer;
   FElement := TFBArrayElement.Create(self,FBuffer);
   FElementIntf := FElement;
+  FConnectionCodePage := aAttachment.GetCodePage;
   Setlength(FEventHandlers,0);
 end;
 
@@ -888,6 +891,7 @@ begin
   AllocateBuffer;
   FElement := TFBArrayElement.Create(self,FBuffer);
   FElementIntf := FElement;
+  FConnectionCodePage := aAttachment.GetCodePage;
   Setlength(FEventHandlers,0);
 end;
 
