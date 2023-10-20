@@ -2191,11 +2191,15 @@ begin
 end;
 
 function SafeAnsiUpperCase(const s: AnsiString): AnsiString;
+var i: integer;
 begin
   {Guard against string length being increased by 1 and the trailing zero
    being incorporated in the string - see
    https://gitlab.com/freepascal.org/fpc/source/-/issues/39746}
-  Result := TrimRight(AnsiUpperCase(s));
+  Result := AnsiUpperCase(s);
+  i := length(Result);
+  while (i > 0) and (Result[i] = #0) do Dec(i);
+  SetLength(Result,i);
 end;
 
 { TSQLXMLReader }

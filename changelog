@@ -13,7 +13,9 @@ FBINTF Change Log  version          (1.4-1 Build 14019) Sat, 05 Aug 2023 13:21:5
 4. DDL and DML string literals are now explicitly set to the connection character
    set rather than the default character set provided by the compiler.
 
-5. General tidy up of transliteration functions, now centralised in IBUtils.
+5. General tidy up of transliteration functions, now centralised in IBUtils. FPC testing
+   now makes use of the RTL fpwidestring unit for support of international character
+   sets.
 
 6. Database exception handling (see section 9.3 in user guide).
     * For FB3 and later API: Connection Character set now applied to message returned
