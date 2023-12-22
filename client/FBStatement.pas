@@ -186,11 +186,13 @@ procedure TFBStatement.DoJournaling(force: boolean);
 
 var RowsAffected: integer;
 begin
+  if not GetAttachment.JournalingActive then
+    Exit;
   RowsAffected := doGetRowsAffected;
   with GetAttachment do
-    if JournalingActive and (force or
+    if force or
       (((joReadOnlyQueries in GetJournalOptions) and (RowsAffected = 0)) or
-      ((joModifyQueries in GetJournalOptions) and (RowsAffected > 0)))) then
+      ((joModifyQueries in GetJournalOptions) and (RowsAffected > 0))) then
       GetJournalIntf.ExecQuery(GetStatementIntf);
 end;
 

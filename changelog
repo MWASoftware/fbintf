@@ -1,3 +1,21 @@
+FBINTF Change Log  version          (1.4-2 Build 14103) Mon, 27 Nov 2023 14:26:35 +0000
+
+1. IBUtils.FormatTimeZoneOffset A zero offset now includes a preceding '+' sign.
+
+2. TFBStatement.DoJournaling now exits immediately if journaling is not active. The
+   motivation for this is to avoid calling the Firebird API function 'getInfo'
+   unnecesarily. This function can return an error if an incompatible parameter type was
+   applied to the statement and hence can confuse resolving the bug. Note: a 
+   specific case is in (e.g.) OpenCursorAtStart method when the array of const includes a
+   TDateTime. In this case, the param is set to a floating point type rather than
+   a Firebird datetime (array of const loses the distinction).
+
+3. TFBAttachment.SetParameters. if an attempt is made to set a parameter with a float
+   value, the metadata type is checked to see if the parameter is a Date/Time type. If so then
+   the value is assumed to be a TDateTime and the parameter is set using the AsDateTime
+   property. Otherwise, the value is assumed to be a floating point type and the AsDouble
+   property is used to set the property. This avoids the specific example given above.
+
 FBINTF Change Log  version          (1.4-1 Build 14103) Mon, 27 Nov 2023 14:26:35 +0000
 
 1. FBSQLData: ensure that TResults.getSQLData and TResults.GetData use same error

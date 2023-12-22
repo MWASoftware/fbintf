@@ -1995,7 +1995,7 @@ end;
 
 function FormatTimeZoneOffset(EffectiveTimeOffsetMins: integer): AnsiString;
 begin
-  if EffectiveTimeOffsetMins > 0 then
+  if EffectiveTimeOffsetMins >= 0 then
     Result := Format('+%.2d:%.2d',[EffectiveTimeOffsetMins div 60,abs(EffectiveTimeOffsetMins mod 60)])
   else
     Result := Format('%.2d:%.2d',[EffectiveTimeOffsetMins div 60,abs(EffectiveTimeOffsetMins mod 60)]);

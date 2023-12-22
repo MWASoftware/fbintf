@@ -1121,7 +1121,14 @@ begin
       vtchar       :
         SQLParams[i].AsString := params[i].vchar;
       vtextended   :
-        SQLParams[i].AsDouble := params[i].VExtended^;
+        case SQLParams[i].getColMetadata.SQLType of
+          SQL_TYPE_DATE, SQL_TYPE_TIME,SQL_TIMESTAMP,
+          SQL_TIMESTAMP_TZ_EX,SQL_TIME_TZ_EX,
+          SQL_TIMESTAMP_TZ,SQL_TIME_TZ:
+            SQLParams[i].AsDateTime := params[i].VExtended^;
+        else
+          SQLParams[i].AsDouble := params[i].VExtended^;
+        end;
       vtCurrency:
         SQLParams[i].AsDouble := params[i].VCurrency^;
       vtString     :
