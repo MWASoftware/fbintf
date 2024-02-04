@@ -693,10 +693,11 @@ Tisc_start_multiple = function  (status_vector             : PISC_STATUS;
 
 Tisc_start_transaction = function (status_vector           : PISC_STATUS;
                                  tran_handle               : PISC_TR_HANDLE;
-                                 db_handle_count           : Short;
-                                 db_handle                 : PISC_DB_HANDLE;
+                                 db_handle_count           : Short       {number of triples that follow}
+                                { db_handle                 : PISC_DB_HANDLE;
                                  tpb_length                : UShort;
-                                 tpb_address               : PByte): ISC_STATUS;
+                                 tpb_address               : PByte}
+                                 ): ISC_STATUS; varargs;
                                 cdecl;
 
 Tisc_sqlcode = function        (status_vector             : PISC_STATUS): ISC_LONG;

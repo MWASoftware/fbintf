@@ -219,7 +219,7 @@
       </Unit26>
       <Unit27>
         <Filename Value="../client/FBClientAPI.pas"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="7"/>
         <TopLine Value="660"/>
         <CursorPos X="41" Y="680"/>
         <UsageCount Value="100"/>
@@ -274,7 +274,7 @@
       </Unit32>
       <Unit33>
         <Filename Value="../client/3.0/FB30ClientAPI.pas"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="343"/>
         <CursorPos X="3" Y="345"/>
         <ExtraEditorCount Value="1"/>
@@ -424,10 +424,12 @@
       </Unit51>
       <Unit52>
         <Filename Value="../client/3.0/FB30Array.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="82"/>
-        <CursorPos X="15" Y="103"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="26"/>
+        <CursorPos X="18" Y="43"/>
         <UsageCount Value="27"/>
+        <Loaded Value="True"/>
       </Unit52>
       <Unit53>
         <Filename Value="../client/2.5/FB25Array.pas"/>
@@ -438,7 +440,7 @@
       </Unit53>
       <Unit54>
         <Filename Value="../client/3.0/FB30Statement.pas"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="1395"/>
         <CursorPos X="76" Y="1415"/>
         <ExtraEditorCount Value="1"/>
@@ -515,7 +517,7 @@
       </Unit62>
       <Unit63>
         <Filename Value="/usr/share/fpcsrc/rtl/objpas/sysutils/sysstrh.inc"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="8"/>
         <TopLine Value="89"/>
         <CursorPos X="10" Y="107"/>
         <UsageCount Value="13"/>
@@ -691,7 +693,7 @@
       </Unit87>
       <Unit88>
         <Filename Value="/usr/share/fpcsrc/rtl/objpas/sysutils/sysstr.inc"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="9"/>
         <TopLine Value="618"/>
         <CursorPos X="7" Y="624"/>
         <UsageCount Value="12"/>
@@ -1015,7 +1017,6 @@
       </Unit131>
       <Unit132>
         <Filename Value="../client/IB.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
         <TopLine Value="1471"/>
         <CursorPos X="68" Y="1487"/>
@@ -1038,10 +1039,11 @@
       </Unit134>
       <Unit135>
         <Filename Value="../client/IBHeader.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="693"/>
-        <CursorPos X="72" Y="702"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="683"/>
+        <CursorPos X="34" Y="687"/>
         <UsageCount Value="10"/>
+        <Loaded Value="True"/>
       </Unit135>
       <Unit136>
         <Filename Value="../fbintf.dpk"/>
@@ -1268,7 +1270,7 @@
         <UsageCount Value="11"/>
       </Unit167>
     </Units>
-    <JumpHistory Count="25" HistoryIndex="24">
+    <JumpHistory Count="27" HistoryIndex="26">
       <Position1>
         <Filename Value="../client/IBUtils.pas"/>
         <Caret Line="2176" TopLine="2150"/>
@@ -1368,12 +1370,20 @@
         <Filename Value="../client/3.0/FB30ClientAPI.pas"/>
         <Caret Line="61" Column="14" TopLine="61"/>
       </Position25>
+      <Position26>
+        <Filename Value="../client/IB.pas"/>
+        <Caret Line="1487" Column="68" TopLine="1471"/>
+      </Position26>
+      <Position27>
+        <Filename Value="../client/IBHeader.pas"/>
+        <Caret Line="687" Column="34" TopLine="683"/>
+      </Position27>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
       <Modes ActiveMode="default"/>
     </RunParams>
-    <HistoryLists Count="3">
+    <HistoryLists Count="2">
       <List0 Name="LaunchingApplication" Type="File" Count="3">
         <Item1 Value="C:\Windows\system32\cmd.exe \C ${TargetCmdLine}"/>
         <Item2 Value="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>

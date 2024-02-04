@@ -16,6 +16,9 @@ FBINTF Change Log  version          (1.4-2 Build 14191) Sun, 07 Jan 2024 16:15:3
    property. Otherwise, the value is assumed to be a floating point type and the AsDouble
    property is used to set the property. This avoids the specific example given above.
 
+4. IBHeader (legacy interface only) Definition of Start_Transaction changed to use
+   varargs - win64 compatibility issue.
+
 FBINTF Change Log  version          (1.4-1 Build 14103) Mon, 27 Nov 2023 14:26:35 +0000
 
 1. FBSQLData: ensure that TResults.getSQLData and TResults.GetData use same error
