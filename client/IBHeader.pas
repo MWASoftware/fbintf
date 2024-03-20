@@ -349,7 +349,7 @@ Tisc_blob_lookup_desc = function (status_vector           : PISC_STATUS;
                                  table_name,
                                  column_name              : PAnsiChar;
                                  descriptor               : PISC_BLOB_DESC;
-                                 global                   : PUChar): ISC_STATUS;
+                                 global                   : PAnsiChar): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
 Tisc_blob_set_desc = function   (status_vector            : PISC_STATUS;

@@ -138,7 +138,6 @@ end;
 procedure TFB25BlobMetaData.NeedFullMetadata;
 var
   BlobDesc: TISC_BLOB_DESC;
-  Global: array [0..31] of char;
   RelName: AnsiString;
   ColName: AnsiString;
 begin
@@ -152,7 +151,7 @@ begin
     with FFirebird25ClientAPI do
       Call(isc_blob_lookup_desc(StatusVector,@(FAttachment.Handle),
                                             @(FTransaction.Handle),
-                PAnsiChar(RelName),PAnsiChar(ColName),@BlobDesc,@Global));
+                PAnsiChar(RelName),PAnsiChar(ColName),@BlobDesc,nil));
     if FUnconfirmedCharacterSet then
       FCharSetID := BlobDesc.blob_desc_charset;
     FSubType := BlobDesc.blob_desc_subtype;
