@@ -1,4 +1,4 @@
-FBINTF Change Log  version          (1.4-2 Build 14191) Sun, 07 Jan 2024 16:15:38 +0000
+FBINTF Change Log  version          (1.4-2 Build 14340) Wed, 20 Mar 2024 11:13:10 +0000
 
 1. IBUtils.FormatTimeZoneOffset A zero offset now includes a preceding '+' sign.
 
@@ -15,6 +15,12 @@ FBINTF Change Log  version          (1.4-2 Build 14191) Sun, 07 Jan 2024 16:15:3
    the value is assumed to be a TDateTime and the parameter is set using the AsDateTime
    property. Otherwise, the value is assumed to be a floating point type and the AsDouble
    property is used to set the property. This avoids the specific example given above.
+
+4. IBHeader (legacy interface only) Definition of Start_Transaction changed to use
+   varargs - win64 compatibility issue.
+
+5. FB25Blob: last parameter of call to isc_blob_lookup_desc is now set to nil. This
+   avoids memory corruption with Firebird 4 when using the legacy interface.
 
 FBINTF Change Log  version          (1.4-1 Build 14103) Mon, 27 Nov 2023 14:26:35 +0000
 
