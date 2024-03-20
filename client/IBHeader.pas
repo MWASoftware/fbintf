@@ -697,7 +697,7 @@ Tisc_start_transaction = function (status_vector           : PISC_STATUS;
                                 { db_handle                 : PISC_DB_HANDLE;
                                  tpb_length                : UShort;
                                  tpb_address               : PByte}
-                                 ): ISC_STATUS; varargs;
+                                 ): ISC_STATUS varargs;
                                 cdecl;
 
 Tisc_sqlcode = function        (status_vector             : PISC_STATUS): ISC_LONG;
