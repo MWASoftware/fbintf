@@ -43,20 +43,7 @@ uses
 
 type
 
-  ISDLItem = interface(IParameterBlockItem)
-    ['{a34b6064-5ae9-4fc1-85c3-f145f069b607}']
-    procedure addByte(aValue: byte);
-    procedure addShortInt(aValue: ShortInt);
-    procedure addShortInteger(aValue: integer);
-    procedure SetAsShortInteger(aValue: integer);
-    procedure SetAsTinyInteger(aValue: integer);
-  end;
-
-  ISDL = interface(IParameterBlock<ISDLItem>)
-    ['{52ae1f5f-657b-4b14-81aa-7b3658454f4c}']
-  end;
-
-  { TFB30ArrayMetaData }
+   { TFB30ArrayMetaData }
 
   TFB30ArrayMetaData = class(TFBArrayMetaData,IArrayMetaData)
   private

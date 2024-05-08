@@ -134,7 +134,6 @@ type
 
     {Firebird 3 API}
     function HasMasterIntf: boolean;
-    function GetIMaster: TObject;
 
     {IFBIMasterProvider}
     function GetIMasterIntf: Firebird.IMaster;
@@ -381,7 +380,8 @@ begin
   try
     PluginsList.CommaText := Plugins;
     FIsEmbeddedServer := (PluginsList.IndexOf('Engine12') <> -1) or {Firebird 3}
-                         (PluginsList.IndexOf('Engine13') <> -1); {Firebird 4}
+                         (PluginsList.IndexOf('Engine13') <> -1) or {Firebird 4}
+                         (PluginsList.IndexOf('Engine14') <> -1);   {Firebird 5}
   finally
     PluginsList.Free;
   end;
@@ -428,7 +428,7 @@ begin
   if assigned(fb_shutdown) then
   begin
     FStatus.FreeHandle;
-    if assigned(FProvider) then
+    if FProvider <> nil then
     begin
       FProvider.release;
       FProvider := nil;
@@ -467,7 +467,7 @@ end;
 destructor TFB30ClientAPI.Destroy;
 begin
   FStatus.FreeHandle;
-  if assigned(FProvider) then
+  if FProvider <> nil then
     FProvider.release;
   inherited Destroy;
 end;
@@ -591,11 +591,6 @@ end;
 function TFB30ClientAPI.HasMasterIntf: boolean;
 begin
   Result := MasterIntf <> nil;
-end;
-
-function TFB30ClientAPI.GetIMaster: TObject;
-begin
-  Result := FMaster;
 end;
 
 function TFB30ClientAPI.GetIMasterIntf: Firebird.IMaster;
@@ -812,10 +807,12 @@ end;
 
 procedure TFB30ClientAPI.StrToInt128(scale: integer; aValue: AnsiString;
   bufptr: PByte);
+var int128: IInt128;
 begin
   inherited StrToInt128(scale,aValue,bufPtr);
 
-  UtilIntf.getInt128(StatusIntf).fromString(StatusIntf,scale,PAnsiChar(aValue),FB_I128Ptr(bufptr));
+  int128 := UtilIntf.getInt128(StatusIntf);
+  int128.fromString(StatusIntf,scale,PAnsiChar(aValue),FB_I128Ptr(bufptr));
   Check4DatabaseError;
 end;
 
@@ -824,10 +821,12 @@ function TFB30ClientAPI.Int128ToStr(bufptr: PByte; scale: integer
 const
   bufLength = 64;
 var Buffer: array[ 0.. bufLength] of AnsiChar;
+   int128: IInt128;
 begin
   Result := inherited Int128ToStr(bufPtr,scale);
 
-  UtilIntf.getInt128(StatusIntf).toString(StatusIntf,FB_I128Ptr(bufptr),scale,buflength,PAnsiChar(@Buffer));
+  int128 := UtilIntf.getInt128(StatusIntf);
+  int128.toString(StatusIntf,FB_I128Ptr(bufptr),scale,buflength,PAnsiChar(@Buffer));
   Check4DatabaseError;
   Result := strpas(PAnsiChar(@Buffer));
 end;

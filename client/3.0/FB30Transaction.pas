@@ -77,7 +77,7 @@ uses FBMessages;
 
 procedure TFB30Transaction.FreeHandle(Force: boolean);
 begin
-  if assigned(FTransactionIntf) then
+  if FTransactionIntf <> nil then
   try
     FTransactionIntf.release;
   except

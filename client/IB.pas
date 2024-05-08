@@ -423,6 +423,19 @@ type
     procedure RemoveEventHandler(Handler: TArrayEventHandler);
   end;
 
+  ISDLItem = interface(IParameterBlockItem)
+    ['{a34b6064-5ae9-4fc1-85c3-f145f069b607}']
+    procedure addByte(aValue: byte);
+    procedure addShortInt(aValue: ShortInt);
+    procedure addShortInteger(aValue: integer);
+    procedure SetAsShortInteger(aValue: integer);
+    procedure SetAsTinyInteger(aValue: integer);
+  end;
+
+  ISDL = interface(IParameterBlock<ISDLItem>)
+    ['{52ae1f5f-657b-4b14-81aa-7b3658454f4c}']
+  end;
+
   { The Blob metadata interface provides access to the metadata used to describe
     a blob column in a Firebird table.
   }
@@ -1455,7 +1468,6 @@ type
 
     {Firebird 3 API}
     function HasMasterIntf: boolean;
-    function GetIMaster: TObject;  deprecated 'Use FirebirdAPI.QueryInterface and FBClientLib.pas IFBIMasterProvider instead';
     function GetFBLibrary: IFirebirdLibrary;
 end;
 

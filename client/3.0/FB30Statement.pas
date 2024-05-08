@@ -947,7 +947,7 @@ begin
       for i := 0 to Count - 1 do
       with TIBXSQLVar(Column[i]) do
       begin
-        version := Builder.vtable.version;
+        version := Builder.vtable^.version;
         if version >= 4 then
         {Firebird 4 or later}
         begin
@@ -1488,7 +1488,7 @@ end;
 
 function TFB30Statement.InternalExecute(aTransaction: ITransaction): IResults;
 
-  procedure ExecuteQuery(outMetaData: Firebird.IMessageMetaData=nil; outBuffer: pointer=nil);
+  procedure ExecuteQuery(outMetaData: Firebird.IMessageMetaData; outBuffer: pointer=nil);
   var inMetadata: Firebird.IMessageMetaData;
   begin
     with FFirebird30ClientAPI do
@@ -1521,6 +1521,7 @@ begin
   FEOF := false;
   FSingleResults := false;
   FStatisticsAvailable := false;
+  outMetadata := nil;
   if IsInBatchMode then
     IBerror(ibxeInBatchMode,[]);
   CheckTransaction(aTransaction);
@@ -1561,7 +1562,7 @@ begin
       end;
 
       else
-        ExecuteQuery;
+        ExecuteQuery(outMetaData);
       end;
     end;
   finally

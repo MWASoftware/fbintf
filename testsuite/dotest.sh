@@ -3,12 +3,12 @@
 
 usage()
 {
-  echo "dotest.sh [-2] [-3] [-4 b1|b2] [-t <testid>]"
+  echo "dotest.sh [-2] [-3] [-4 b1|b2] [-t <testid>] [-p <fpc version>]"
 }
 
 BUILD=
 #Parse Parameters
-TEMP=`getopt h234db:t:f: "$@"`
+TEMP=`getopt h234db:t:f:p: "$@"`
 if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
 
 eval set -- "$TEMP"
@@ -30,6 +30,8 @@ while true ; do
         -t)    TEST="-t $2"; shift 2;;
 
 	-b)	BUILD="$2"; shift 2;;
+	
+	-p) export FPCDIR=/usr/lib/fpc/$2; shift 2;;
 
         --)    shift; break;; 
 
@@ -43,6 +45,10 @@ fi
 
 export FIREBIRD=/opt/firebird/$FB$BUILD
 echo "FIREBIRD=$FIREBIRD"
+
+if [ -n "$FPCDIR" ]  && [ -d "$FPCDIR" ]; then
+  export FPC=$FPCDIR/ppcx64
+fi
 
 if [ ! -d "$FIREBIRD" ]; then
   echo "$FIREBIRD not found"

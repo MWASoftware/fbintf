@@ -209,7 +209,6 @@ type
 
     {Firebird 3 API}
     function HasMasterIntf: boolean;
-    function GetIMaster: TObject;
 
    end;
 
@@ -594,11 +593,6 @@ end;
 function TFB25ClientAPI.HasMasterIntf: boolean;
 begin
   Result := false;
-end;
-
-function TFB25ClientAPI.GetIMaster: TObject;
-begin
-  Result := nil;
 end;
 
 procedure TFB25ClientAPI.SQLEncodeDate(aDate: TDateTime; bufptr: PByte);
