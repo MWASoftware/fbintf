@@ -918,13 +918,12 @@ var TriggerType: cardinal;
 begin
   TriggerType := FRoutineMetadata.getTriggerType(FStatus);
   CheckStatus;
-  with Firebird.IExternalTrigger do
   case TriggerType of
-  TYPE_BEFORE:
+  Firebird.IExternalTrigger.TYPE_BEFORE:
     Result := ttBefore;
-  TYPE_AFTER:
+  Firebird.IExternalTrigger.TYPE_AFTER:
     Result := ttAfter;
-  TYPE_DATABASE:
+  Firebird.IExternalTrigger.TYPE_DATABASE:
     Result := ttDatabase;
   else
     FBUDRError(ibxeUnknownTriggerType,[TriggerType]);

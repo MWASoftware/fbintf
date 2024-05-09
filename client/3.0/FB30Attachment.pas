@@ -130,7 +130,7 @@ type
   public
     constructor Create(FirebirdClientAPI: TFBClientAPI; output: TStrings;
       aConnectionCodePage: TSystemCodePage);
-    procedure callback(status: Firebird.PStatusToken; text: PAnsiChar); override;
+    procedure callback(status: Firebird.IStatus; text: PAnsiChar); override;
     property ConnectionCodePage: TSystemCodePage read FConnectionCodePage;
   end;
 
@@ -145,8 +145,8 @@ begin
   FConnectionCodePage := aConnectionCodePage;
 end;
 
-procedure TVersionCallback.callback(status : Firebird.PStatusToken;
-  text : PAnsiChar);
+procedure TVersionCallback.callback(status : Firebird.IStatus; text : PAnsiChar
+  );
 var aStatus: IStatus;
 begin
   aStatus := TFB30Status.Create(FFirebirdClientAPI,status);
@@ -466,7 +466,7 @@ begin
   try
     with FFirebird30ClientAPI do
     begin
-       UtilIntf.getFbVersion(StatusIntf,FAttachmentIntf,bufferObj.getInterfaceToken);
+       UtilIntf.getFbVersion(StatusIntf,FAttachmentIntf,bufferObj);
        Check4DataBaseError(CodePage);
     end;
   finally

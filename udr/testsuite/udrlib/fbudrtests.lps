@@ -7,16 +7,15 @@
       <Unit>
         <Filename Value="fbudrtests.lpr"/>
         <IsPartOfProject Value="True"/>
-        <TopLine Value="24"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="25"/>
         <CursorPos X="93" Y="53"/>
         <UsageCount Value="99"/>
-        <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="udr_test01.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="1"/>
-        <TopLine Value="86"/>
+        <TopLine Value="87"/>
         <CursorPos X="65" Y="115"/>
         <UsageCount Value="99"/>
         <Loaded Value="True"/>
@@ -24,7 +23,7 @@
       <Unit>
         <Filename Value="udr_test02.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="4"/>
         <TopLine Value="119"/>
         <CursorPos X="31" Y="108"/>
         <UsageCount Value="95"/>
@@ -33,7 +32,7 @@
       <Unit>
         <Filename Value="udr_test03.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="8"/>
         <TopLine Value="149"/>
         <CursorPos X="28" Y="153"/>
         <UsageCount Value="94"/>
@@ -42,7 +41,7 @@
       <Unit>
         <Filename Value="udr_test04.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="10"/>
         <TopLine Value="53"/>
         <CursorPos X="43" Y="64"/>
         <UsageCount Value="93"/>
@@ -51,7 +50,7 @@
       <Unit>
         <Filename Value="udr_test05.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="11"/>
         <TopLine Value="54"/>
         <CursorPos X="74" Y="218"/>
         <UsageCount Value="54"/>
@@ -59,9 +58,10 @@
       </Unit>
       <Unit>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <EditorIndex Value="2"/>
-        <TopLine Value="345"/>
-        <CursorPos X="29" Y="370"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="898"/>
+        <CursorPos X="45" Y="918"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
@@ -96,10 +96,11 @@
       </Unit>
       <Unit>
         <Filename Value="../../source/FBUDRUtils.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="637"/>
-        <CursorPos Y="644"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="907"/>
+        <CursorPos X="29" Y="926"/>
         <UsageCount Value="31"/>
+        <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="../../../fbintf/client/3.0/firebird/Firebird.pas"/>
@@ -227,8 +228,7 @@
       </Unit>
       <Unit>
         <Filename Value="../../../client/FBSQLData.pas"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="9"/>
         <TopLine Value="2091"/>
         <CursorPos X="59" Y="2115"/>
         <UsageCount Value="16"/>
@@ -250,14 +250,15 @@
       </Unit>
       <Unit>
         <Filename Value="../../../client/3.0/firebird/Firebird.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="748"/>
-        <CursorPos X="26" Y="767"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="2599"/>
+        <CursorPos X="17" Y="2607"/>
         <UsageCount Value="19"/>
+        <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="../../../client/FBClientAPI.pas"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="7"/>
         <UsageCount Value="13"/>
         <Loaded Value="True"/>
       </Unit>
@@ -335,7 +336,7 @@
       </Unit>
       <Unit>
         <Filename Value="Test02.sql"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="5"/>
         <CursorPos Y="5"/>
         <UsageCount Value="17"/>
         <Loaded Value="True"/>
@@ -400,7 +401,7 @@
       </Unit>
       <Unit>
         <Filename Value="Test03.sql"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="6"/>
         <UsageCount Value="25"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="SQL"/>
@@ -433,45 +434,6 @@
       </Unit>
     </Units>
     <JumpHistory HistoryIndex="29">
-      <Position>
-        <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="673" Column="7" TopLine="645"/>
-      </Position>
-      <Position>
-        <Filename Value="fbudrtests.lpr"/>
-        <Caret Line="53" Column="26" TopLine="24"/>
-      </Position>
-      <Position>
-        <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="63" Column="71" TopLine="40"/>
-      </Position>
-      <Position>
-        <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="815" Column="33" TopLine="788"/>
-      </Position>
-      <Position>
-        <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="845" Column="34" TopLine="818"/>
-      </Position>
-      <Position>
-        <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="880" Column="38" TopLine="853"/>
-      </Position>
-      <Position>
-        <Filename Value="../../source/FBUDRController.pas"/>
-      </Position>
-      <Position>
-        <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="143" Column="27" TopLine="117"/>
-      </Position>
-      <Position>
-        <Filename Value="udr_test01.pas"/>
-        <Caret Line="90" Column="19" TopLine="79"/>
-      </Position>
-      <Position>
-        <Filename Value="udr_test01.pas"/>
-        <Caret Line="135" Column="3" TopLine="128"/>
-      </Position>
       <Position>
         <Filename Value="udr_test01.pas"/>
         <Caret Line="111" Column="15" TopLine="93"/>
@@ -551,6 +513,46 @@
       <Position>
         <Filename Value="../../../client/FBSQLData.pas"/>
         <Caret Line="2115" Column="59" TopLine="2095"/>
+      </Position>
+      <Position>
+        <Filename Value="udr_test01.pas"/>
+        <Caret Line="115" Column="65" TopLine="87"/>
+      </Position>
+      <Position>
+        <Filename Value="../../source/FBUDRUtils.pas"/>
+        <Caret Line="921" Column="26" TopLine="906"/>
+      </Position>
+      <Position>
+        <Filename Value="../../../client/3.0/firebird/Firebird.pas"/>
+        <Caret Line="2626" Column="31" TopLine="2607"/>
+      </Position>
+      <Position>
+        <Filename Value="../../../client/3.0/firebird/Firebird.pas"/>
+        <Caret Line="5345" Column="24" TopLine="5324"/>
+      </Position>
+      <Position>
+        <Filename Value="../../source/FBUDRUtils.pas"/>
+        <Caret Line="923" Column="11" TopLine="907"/>
+      </Position>
+      <Position>
+        <Filename Value="../../../client/3.0/firebird/Firebird.pas"/>
+        <Caret Line="2607" Column="10" TopLine="2599"/>
+      </Position>
+      <Position>
+        <Filename Value="../../source/FBUDRUtils.pas"/>
+        <Caret Line="926" Column="29" TopLine="907"/>
+      </Position>
+      <Position>
+        <Filename Value="../../source/FBUDRController.pas"/>
+        <Caret Line="918" Column="54" TopLine="904"/>
+      </Position>
+      <Position>
+        <Filename Value="../../source/FBUDRController.pas"/>
+        <Caret Line="417" Column="36" TopLine="411"/>
+      </Position>
+      <Position>
+        <Filename Value="../../source/FBUDRController.pas"/>
+        <Caret Line="390" Column="3" TopLine="390"/>
       </Position>
     </JumpHistory>
     <RunParams>

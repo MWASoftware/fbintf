@@ -296,7 +296,6 @@ type
 	Int64Ptr = ^Int64;
 	IntegerPtr = ^Integer;
 	NativeIntPtr = ^NativeInt;
-	PKeyHolderPluginTokenPtr = ^PKeyHolderPluginToken;
 	PerformanceInfoPtr = ^PerformanceInfo;
 	dscPtr = ^dsc;
 
@@ -569,7 +568,7 @@ type
 	IKeyHolderPlugin_useOnlyOwnKeysPtr = function(this: PKeyHolderPluginToken; status: PStatusToken): Boolean; cdecl;
 	IKeyHolderPlugin_chainHandlePtr = function(this: PKeyHolderPluginToken; status: PStatusToken): PCryptKeyCallbackToken; cdecl;
 	IDbCryptInfo_getDatabaseFullPathPtr = function(this: PDbCryptInfoToken; status: PStatusToken): PAnsiChar; cdecl;
-	IDbCryptPlugin_setKeyPtr = procedure(this: PDbCryptPluginToken; status: PStatusToken; length: Cardinal; sources: PKeyHolderPluginTokenPtr; keyName: PAnsiChar); cdecl;
+	IDbCryptPlugin_setKeyPtr = procedure(this: PDbCryptPluginToken; status: PStatusToken; length: Cardinal; sources: PKeyHolderPluginToken; keyName: PAnsiChar); cdecl;
 	IDbCryptPlugin_encryptPtr = procedure(this: PDbCryptPluginToken; status: PStatusToken; length: Cardinal; from: Pointer; to_: Pointer); cdecl;
 	IDbCryptPlugin_decryptPtr = procedure(this: PDbCryptPluginToken; status: PStatusToken; length: Cardinal; from: Pointer; to_: Pointer); cdecl;
 	IDbCryptPlugin_setInfoPtr = procedure(this: PDbCryptPluginToken; status: PStatusToken; info: PDbCryptInfoToken); cdecl;
@@ -805,27 +804,12 @@ type
 	  token: PVersionedToken;
 	public
 	  const VERSION = 0;
-
 	  function vTable: PVersionedVTable inline;
 	  class operator := (aToken:  PVersionedToken): IVersioned;
 	  class operator := (intf: IVersioned): PVersionedToken;
 	  class operator := (impl: IVersionedImpl): IVersioned;
 	  class operator = (a: IVersioned; b: pointer): boolean;
-class operator = (a,b: IVersioned): boolean;
-	end;
-
-	IVersionedImpl = class
-	private
-	  class var vTable: VersionedVTable; 
-	  class var FInitialized: boolean;
-	  intf: IVersioned;
-	  class procedure Initialize;
-	protected
-	  token: TFBImplementationToken;
-	public
-	  constructor create;
-	  function getInterfaceToken: PVersionedToken inline;
-	  function getInterface: IVersioned inline;
+	  class operator = (a,b: IVersioned): boolean;
 	end;
 
 	PReferenceCountedVTable = ^ReferenceCountedVTable;
@@ -843,29 +827,15 @@ class operator = (a,b: IVersioned): boolean;
 	  token: PReferenceCountedToken;
 	public
 	  const VERSION = 2;
-
 	  function vTable: PReferenceCountedVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
 	  class operator := (aToken:  PReferenceCountedToken): IReferenceCounted;
 	  class operator := (intf: IReferenceCounted): PReferenceCountedToken;
 	  class operator := (impl: IReferenceCountedImpl): IReferenceCounted;
 	  class operator = (a: IReferenceCounted; b: pointer): boolean;
-class operator = (a,b: IReferenceCounted): boolean;
-	end;
+	  class operator = (a,b: IReferenceCounted): boolean;
 
-	IReferenceCountedImpl = class(IVersionedImpl)
-	private
-	  class var vTable: ReferenceCountedVTable; 
-	  class var FInitialized: boolean;
-	  intf: IReferenceCounted;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PReferenceCountedToken inline;
-	  function getInterface: IReferenceCounted inline;
-		procedure addRef(); virtual; abstract;
-		function release(): Integer; virtual; abstract;
+	  {see IReferenceCountedHelper record helper for interface methods}
+
 	end;
 
 	PDisposableVTable = ^DisposableVTable;
@@ -882,27 +852,15 @@ class operator = (a,b: IReferenceCounted): boolean;
 	  token: PDisposableToken;
 	public
 	  const VERSION = 1;
-
 	  function vTable: PDisposableVTable inline;
-	  procedure dispose();
 	  class operator := (aToken:  PDisposableToken): IDisposable;
 	  class operator := (intf: IDisposable): PDisposableToken;
 	  class operator := (impl: IDisposableImpl): IDisposable;
 	  class operator = (a: IDisposable; b: pointer): boolean;
-class operator = (a,b: IDisposable): boolean;
-	end;
+	  class operator = (a,b: IDisposable): boolean;
 
-	IDisposableImpl = class(IVersionedImpl)
-	private
-	  class var vTable: DisposableVTable; 
-	  class var FInitialized: boolean;
-	  intf: IDisposable;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PDisposableToken inline;
-	  function getInterface: IDisposable inline;
-		procedure dispose(); virtual; abstract;
+	  {see IDisposableHelper record helper for interface methods}
+
 	end;
 
 	PStatusVTable = ^StatusVTable;
@@ -934,44 +892,15 @@ class operator = (a,b: IDisposable): boolean;
 	  const RESULT_OK = Integer(0);
 	  const RESULT_NO_DATA = Integer(1);
 	  const RESULT_SEGMENT = Integer(2);
-
 	  function vTable: PStatusVTable inline;
-	  procedure dispose();
-	  procedure init();
-	  function getState(): Cardinal;
-	  procedure setErrors2(length: Cardinal; value: NativeIntPtr);
-	  procedure setWarnings2(length: Cardinal; value: NativeIntPtr);
-	  procedure setErrors(value: NativeIntPtr);
-	  procedure setWarnings(value: NativeIntPtr);
-	  function getErrors(): NativeIntPtr;
-	  function getWarnings(): NativeIntPtr;
-	  function clone(): PStatusToken;
 	  class operator := (aToken:  PStatusToken): IStatus;
 	  class operator := (intf: IStatus): PStatusToken;
 	  class operator := (impl: IStatusImpl): IStatus;
 	  class operator = (a: IStatus; b: pointer): boolean;
-class operator = (a,b: IStatus): boolean;
-	end;
+	  class operator = (a,b: IStatus): boolean;
 
-	IStatusImpl = class(IDisposableImpl)
-	private
-	  class var vTable: StatusVTable; 
-	  class var FInitialized: boolean;
-	  intf: IStatus;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PStatusToken inline;
-	  function getInterface: IStatus inline;
-		procedure init(); virtual; abstract;
-		function getState(): Cardinal; virtual; abstract;
-		procedure setErrors2(length: Cardinal; value: NativeIntPtr); virtual; abstract;
-		procedure setWarnings2(length: Cardinal; value: NativeIntPtr); virtual; abstract;
-		procedure setErrors(value: NativeIntPtr); virtual; abstract;
-		procedure setWarnings(value: NativeIntPtr); virtual; abstract;
-		function getErrors(): NativeIntPtr; virtual; abstract;
-		function getWarnings(): NativeIntPtr; virtual; abstract;
-		function clone(): PStatusToken; virtual; abstract;
+	  {see IStatusHelper record helper for interface methods}
+
 	end;
 
 	PMasterVTable = ^MasterVTable;
@@ -999,49 +928,15 @@ class operator = (a,b: IStatus): boolean;
 	  token: PMasterToken;
 	public
 	  const VERSION = 12;
-
 	  function vTable: PMasterVTable inline;
-	  function getStatus(): PStatusToken;
-	  function getDispatcher(): PProviderToken;
-	  function getPluginManager(): PPluginManagerToken;
-	  function getTimerControl(): PTimerControlToken;
-	  function getDtc(): PDtcToken;
-	  function registerAttachment(provider: PProviderToken; attachment: PAttachmentToken): PAttachmentToken;
-	  function registerTransaction(attachment: PAttachmentToken; transaction: PTransactionToken): PTransactionToken;
-	  function getMetadataBuilder(status: PStatusToken; fieldCount: Cardinal): PMetadataBuilderToken;
-	  function serverMode(mode: Integer): Integer;
-	  function getUtilInterface(): PUtilToken;
-	  function getConfigManager(): PConfigManagerToken;
-	  function getProcessExiting(): Boolean;
 	  class operator := (aToken:  PMasterToken): IMaster;
 	  class operator := (intf: IMaster): PMasterToken;
 	  class operator := (impl: IMasterImpl): IMaster;
 	  class operator = (a: IMaster; b: pointer): boolean;
-class operator = (a,b: IMaster): boolean;
-	end;
+	  class operator = (a,b: IMaster): boolean;
 
-	IMasterImpl = class(IVersionedImpl)
-	private
-	  class var vTable: MasterVTable; 
-	  class var FInitialized: boolean;
-	  intf: IMaster;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PMasterToken inline;
-	  function getInterface: IMaster inline;
-		function getStatus(): PStatusToken; virtual; abstract;
-		function getDispatcher(): PProviderToken; virtual; abstract;
-		function getPluginManager(): PPluginManagerToken; virtual; abstract;
-		function getTimerControl(): PTimerControlToken; virtual; abstract;
-		function getDtc(): PDtcToken; virtual; abstract;
-		function registerAttachment(provider: PProviderToken; attachment: PAttachmentToken): PAttachmentToken; virtual; abstract;
-		function registerTransaction(attachment: PAttachmentToken; transaction: PTransactionToken): PTransactionToken; virtual; abstract;
-		function getMetadataBuilder(status: PStatusToken; fieldCount: Cardinal): PMetadataBuilderToken; virtual; abstract;
-		function serverMode(mode: Integer): Integer; virtual; abstract;
-		function getUtilInterface(): PUtilToken; virtual; abstract;
-		function getConfigManager(): PConfigManagerToken; virtual; abstract;
-		function getProcessExiting(): Boolean; virtual; abstract;
+	  {see IMasterHelper record helper for interface methods}
+
 	end;
 
 	PPluginBaseVTable = ^PluginBaseVTable;
@@ -1061,31 +956,15 @@ class operator = (a,b: IMaster): boolean;
 	  token: PPluginBaseToken;
 	public
 	  const VERSION = 4;
-
 	  function vTable: PPluginBaseVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  procedure setOwner(r: PReferenceCountedToken);
-	  function getOwner(): PReferenceCountedToken;
 	  class operator := (aToken:  PPluginBaseToken): IPluginBase;
 	  class operator := (intf: IPluginBase): PPluginBaseToken;
 	  class operator := (impl: IPluginBaseImpl): IPluginBase;
 	  class operator = (a: IPluginBase; b: pointer): boolean;
-class operator = (a,b: IPluginBase): boolean;
-	end;
+	  class operator = (a,b: IPluginBase): boolean;
 
-	IPluginBaseImpl = class(IReferenceCountedImpl)
-	private
-	  class var vTable: PluginBaseVTable; 
-	  class var FInitialized: boolean;
-	  intf: IPluginBase;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PPluginBaseToken inline;
-	  function getInterface: IPluginBase inline;
-		procedure setOwner(r: PReferenceCountedToken); virtual; abstract;
-		function getOwner(): PReferenceCountedToken; virtual; abstract;
+	  {see IPluginBaseHelper record helper for interface methods}
+
 	end;
 
 	PPluginSetVTable = ^PluginSetVTable;
@@ -1108,37 +987,15 @@ class operator = (a,b: IPluginBase): boolean;
 	  token: PPluginSetToken;
 	public
 	  const VERSION = 7;
-
 	  function vTable: PPluginSetVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  function getName(): PAnsiChar;
-	  function getModuleName(): PAnsiChar;
-	  function getPlugin(status: PStatusToken): PPluginBaseToken;
-	  procedure next(status: PStatusToken);
-	  procedure set_(status: PStatusToken; s: PAnsiChar);
 	  class operator := (aToken:  PPluginSetToken): IPluginSet;
 	  class operator := (intf: IPluginSet): PPluginSetToken;
 	  class operator := (impl: IPluginSetImpl): IPluginSet;
 	  class operator = (a: IPluginSet; b: pointer): boolean;
-class operator = (a,b: IPluginSet): boolean;
-	end;
+	  class operator = (a,b: IPluginSet): boolean;
 
-	IPluginSetImpl = class(IReferenceCountedImpl)
-	private
-	  class var vTable: PluginSetVTable; 
-	  class var FInitialized: boolean;
-	  intf: IPluginSet;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PPluginSetToken inline;
-	  function getInterface: IPluginSet inline;
-		function getName(): PAnsiChar; virtual; abstract;
-		function getModuleName(): PAnsiChar; virtual; abstract;
-		function getPlugin(status: PStatusToken): PPluginBaseToken; virtual; abstract;
-		procedure next(status: PStatusToken); virtual; abstract;
-		procedure set_(status: PStatusToken; s: PAnsiChar); virtual; abstract;
+	  {see IPluginSetHelper record helper for interface methods}
+
 	end;
 
 	PConfigEntryVTable = ^ConfigEntryVTable;
@@ -1161,37 +1018,15 @@ class operator = (a,b: IPluginSet): boolean;
 	  token: PConfigEntryToken;
 	public
 	  const VERSION = 7;
-
 	  function vTable: PConfigEntryVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  function getName(): PAnsiChar;
-	  function getValue(): PAnsiChar;
-	  function getIntValue(): Int64;
-	  function getBoolValue(): Boolean;
-	  function getSubConfig(status: PStatusToken): PConfigToken;
 	  class operator := (aToken:  PConfigEntryToken): IConfigEntry;
 	  class operator := (intf: IConfigEntry): PConfigEntryToken;
 	  class operator := (impl: IConfigEntryImpl): IConfigEntry;
 	  class operator = (a: IConfigEntry; b: pointer): boolean;
-class operator = (a,b: IConfigEntry): boolean;
-	end;
+	  class operator = (a,b: IConfigEntry): boolean;
 
-	IConfigEntryImpl = class(IReferenceCountedImpl)
-	private
-	  class var vTable: ConfigEntryVTable; 
-	  class var FInitialized: boolean;
-	  intf: IConfigEntry;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PConfigEntryToken inline;
-	  function getInterface: IConfigEntry inline;
-		function getName(): PAnsiChar; virtual; abstract;
-		function getValue(): PAnsiChar; virtual; abstract;
-		function getIntValue(): Int64; virtual; abstract;
-		function getBoolValue(): Boolean; virtual; abstract;
-		function getSubConfig(status: PStatusToken): PConfigToken; virtual; abstract;
+	  {see IConfigEntryHelper record helper for interface methods}
+
 	end;
 
 	PConfigVTable = ^ConfigVTable;
@@ -1212,33 +1047,15 @@ class operator = (a,b: IConfigEntry): boolean;
 	  token: PConfigToken;
 	public
 	  const VERSION = 5;
-
 	  function vTable: PConfigVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  function find(status: PStatusToken; name: PAnsiChar): PConfigEntryToken;
-	  function findValue(status: PStatusToken; name: PAnsiChar; value: PAnsiChar): PConfigEntryToken;
-	  function findPos(status: PStatusToken; name: PAnsiChar; pos: Cardinal): PConfigEntryToken;
 	  class operator := (aToken:  PConfigToken): IConfig;
 	  class operator := (intf: IConfig): PConfigToken;
 	  class operator := (impl: IConfigImpl): IConfig;
 	  class operator = (a: IConfig; b: pointer): boolean;
-class operator = (a,b: IConfig): boolean;
-	end;
+	  class operator = (a,b: IConfig): boolean;
 
-	IConfigImpl = class(IReferenceCountedImpl)
-	private
-	  class var vTable: ConfigVTable; 
-	  class var FInitialized: boolean;
-	  intf: IConfig;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PConfigToken inline;
-	  function getInterface: IConfig inline;
-		function find(status: PStatusToken; name: PAnsiChar): PConfigEntryToken; virtual; abstract;
-		function findValue(status: PStatusToken; name: PAnsiChar; value: PAnsiChar): PConfigEntryToken; virtual; abstract;
-		function findPos(status: PStatusToken; name: PAnsiChar; pos: Cardinal): PConfigEntryToken; virtual; abstract;
+	  {see IConfigHelper record helper for interface methods}
+
 	end;
 
 	PFirebirdConfVTable = ^FirebirdConfVTable;
@@ -1261,37 +1078,15 @@ class operator = (a,b: IConfig): boolean;
 	  token: PFirebirdConfToken;
 	public
 	  const VERSION = 7;
-
 	  function vTable: PFirebirdConfVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  function getKey(name: PAnsiChar): Cardinal;
-	  function asInteger(key: Cardinal): Int64;
-	  function asString(key: Cardinal): PAnsiChar;
-	  function asBoolean(key: Cardinal): Boolean;
-	  function getVersion(status: PStatusToken): Cardinal;
 	  class operator := (aToken:  PFirebirdConfToken): IFirebirdConf;
 	  class operator := (intf: IFirebirdConf): PFirebirdConfToken;
 	  class operator := (impl: IFirebirdConfImpl): IFirebirdConf;
 	  class operator = (a: IFirebirdConf; b: pointer): boolean;
-class operator = (a,b: IFirebirdConf): boolean;
-	end;
+	  class operator = (a,b: IFirebirdConf): boolean;
 
-	IFirebirdConfImpl = class(IReferenceCountedImpl)
-	private
-	  class var vTable: FirebirdConfVTable; 
-	  class var FInitialized: boolean;
-	  intf: IFirebirdConf;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PFirebirdConfToken inline;
-	  function getInterface: IFirebirdConf inline;
-		function getKey(name: PAnsiChar): Cardinal; virtual; abstract;
-		function asInteger(key: Cardinal): Int64; virtual; abstract;
-		function asString(key: Cardinal): PAnsiChar; virtual; abstract;
-		function asBoolean(key: Cardinal): Boolean; virtual; abstract;
-		function getVersion(status: PStatusToken): Cardinal; virtual; abstract;
+	  {see IFirebirdConfHelper record helper for interface methods}
+
 	end;
 
 	PPluginConfigVTable = ^PluginConfigVTable;
@@ -1313,35 +1108,15 @@ class operator = (a,b: IFirebirdConf): boolean;
 	  token: PPluginConfigToken;
 	public
 	  const VERSION = 6;
-
 	  function vTable: PPluginConfigVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  function getConfigFileName(): PAnsiChar;
-	  function getDefaultConfig(status: PStatusToken): PConfigToken;
-	  function getFirebirdConf(status: PStatusToken): PFirebirdConfToken;
-	  procedure setReleaseDelay(status: PStatusToken; microSeconds: QWord);
 	  class operator := (aToken:  PPluginConfigToken): IPluginConfig;
 	  class operator := (intf: IPluginConfig): PPluginConfigToken;
 	  class operator := (impl: IPluginConfigImpl): IPluginConfig;
 	  class operator = (a: IPluginConfig; b: pointer): boolean;
-class operator = (a,b: IPluginConfig): boolean;
-	end;
+	  class operator = (a,b: IPluginConfig): boolean;
 
-	IPluginConfigImpl = class(IReferenceCountedImpl)
-	private
-	  class var vTable: PluginConfigVTable; 
-	  class var FInitialized: boolean;
-	  intf: IPluginConfig;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PPluginConfigToken inline;
-	  function getInterface: IPluginConfig inline;
-		function getConfigFileName(): PAnsiChar; virtual; abstract;
-		function getDefaultConfig(status: PStatusToken): PConfigToken; virtual; abstract;
-		function getFirebirdConf(status: PStatusToken): PFirebirdConfToken; virtual; abstract;
-		procedure setReleaseDelay(status: PStatusToken; microSeconds: QWord); virtual; abstract;
+	  {see IPluginConfigHelper record helper for interface methods}
+
 	end;
 
 	PPluginFactoryVTable = ^PluginFactoryVTable;
@@ -1358,27 +1133,15 @@ class operator = (a,b: IPluginConfig): boolean;
 	  token: PPluginFactoryToken;
 	public
 	  const VERSION = 1;
-
 	  function vTable: PPluginFactoryVTable inline;
-	  function createPlugin(status: PStatusToken; factoryParameter: PPluginConfigToken): PPluginBaseToken;
 	  class operator := (aToken:  PPluginFactoryToken): IPluginFactory;
 	  class operator := (intf: IPluginFactory): PPluginFactoryToken;
 	  class operator := (impl: IPluginFactoryImpl): IPluginFactory;
 	  class operator = (a: IPluginFactory; b: pointer): boolean;
-class operator = (a,b: IPluginFactory): boolean;
-	end;
+	  class operator = (a,b: IPluginFactory): boolean;
 
-	IPluginFactoryImpl = class(IVersionedImpl)
-	private
-	  class var vTable: PluginFactoryVTable; 
-	  class var FInitialized: boolean;
-	  intf: IPluginFactory;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PPluginFactoryToken inline;
-	  function getInterface: IPluginFactory inline;
-		function createPlugin(status: PStatusToken; factoryParameter: PPluginConfigToken): PPluginBaseToken; virtual; abstract;
+	  {see IPluginFactoryHelper record helper for interface methods}
+
 	end;
 
 	PPluginModuleVTable = ^PluginModuleVTable;
@@ -1396,29 +1159,15 @@ class operator = (a,b: IPluginFactory): boolean;
 	  token: PPluginModuleToken;
 	public
 	  const VERSION = 2;
-
 	  function vTable: PPluginModuleVTable inline;
-	  procedure doClean();
-	  procedure threadDetach();
 	  class operator := (aToken:  PPluginModuleToken): IPluginModule;
 	  class operator := (intf: IPluginModule): PPluginModuleToken;
 	  class operator := (impl: IPluginModuleImpl): IPluginModule;
 	  class operator = (a: IPluginModule; b: pointer): boolean;
-class operator = (a,b: IPluginModule): boolean;
-	end;
+	  class operator = (a,b: IPluginModule): boolean;
 
-	IPluginModuleImpl = class(IVersionedImpl)
-	private
-	  class var vTable: PluginModuleVTable; 
-	  class var FInitialized: boolean;
-	  intf: IPluginModule;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PPluginModuleToken inline;
-	  function getInterface: IPluginModule inline;
-		procedure doClean(); virtual; abstract;
-		procedure threadDetach(); virtual; abstract;
+	  {see IPluginModuleHelper record helper for interface methods}
+
 	end;
 
 	PPluginManagerVTable = ^PluginManagerVTable;
@@ -1452,37 +1201,15 @@ class operator = (a,b: IPluginModule): boolean;
 	  const TYPE_KEY_HOLDER = Cardinal(10);
 	  const TYPE_REPLICATOR = Cardinal(11);
 	  const TYPE_COUNT = Cardinal(12);
-
 	  function vTable: PPluginManagerVTable inline;
-	  procedure registerPluginFactory(pluginType: Cardinal; defaultName: PAnsiChar; factory: PPluginFactoryToken);
-	  procedure registerModule(cleanup: PPluginModuleToken);
-	  procedure unregisterModule(cleanup: PPluginModuleToken);
-	  function getPlugins(status: PStatusToken; pluginType: Cardinal; namesList: PAnsiChar; firebirdConf: PFirebirdConfToken): PPluginSetToken;
-	  function getConfig(status: PStatusToken; filename: PAnsiChar): PConfigToken;
-	  procedure releasePlugin(plugin: PPluginBaseToken);
 	  class operator := (aToken:  PPluginManagerToken): IPluginManager;
 	  class operator := (intf: IPluginManager): PPluginManagerToken;
 	  class operator := (impl: IPluginManagerImpl): IPluginManager;
 	  class operator = (a: IPluginManager; b: pointer): boolean;
-class operator = (a,b: IPluginManager): boolean;
-	end;
+	  class operator = (a,b: IPluginManager): boolean;
 
-	IPluginManagerImpl = class(IVersionedImpl)
-	private
-	  class var vTable: PluginManagerVTable; 
-	  class var FInitialized: boolean;
-	  intf: IPluginManager;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PPluginManagerToken inline;
-	  function getInterface: IPluginManager inline;
-		procedure registerPluginFactory(pluginType: Cardinal; defaultName: PAnsiChar; factory: PPluginFactoryToken); virtual; abstract;
-		procedure registerModule(cleanup: PPluginModuleToken); virtual; abstract;
-		procedure unregisterModule(cleanup: PPluginModuleToken); virtual; abstract;
-		function getPlugins(status: PStatusToken; pluginType: Cardinal; namesList: PAnsiChar; firebirdConf: PFirebirdConfToken): PPluginSetToken; virtual; abstract;
-		function getConfig(status: PStatusToken; filename: PAnsiChar): PConfigToken; virtual; abstract;
-		procedure releasePlugin(plugin: PPluginBaseToken); virtual; abstract;
+	  {see IPluginManagerHelper record helper for interface methods}
+
 	end;
 
 	PCryptKeyVTable = ^CryptKeyVTable;
@@ -1502,33 +1229,15 @@ class operator = (a,b: IPluginManager): boolean;
 	  token: PCryptKeyToken;
 	public
 	  const VERSION = 4;
-
 	  function vTable: PCryptKeyVTable inline;
-	  procedure setSymmetric(status: PStatusToken; type_: PAnsiChar; keyLength: Cardinal; key: Pointer);
-	  procedure setAsymmetric(status: PStatusToken; type_: PAnsiChar; encryptKeyLength: Cardinal; encryptKey: Pointer; decryptKeyLength: Cardinal; decryptKey: Pointer);
-	  function getEncryptKey(length: CardinalPtr): Pointer;
-	  function getDecryptKey(length: CardinalPtr): Pointer;
 	  class operator := (aToken:  PCryptKeyToken): ICryptKey;
 	  class operator := (intf: ICryptKey): PCryptKeyToken;
 	  class operator := (impl: ICryptKeyImpl): ICryptKey;
 	  class operator = (a: ICryptKey; b: pointer): boolean;
-class operator = (a,b: ICryptKey): boolean;
-	end;
+	  class operator = (a,b: ICryptKey): boolean;
 
-	ICryptKeyImpl = class(IVersionedImpl)
-	private
-	  class var vTable: CryptKeyVTable; 
-	  class var FInitialized: boolean;
-	  intf: ICryptKey;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PCryptKeyToken inline;
-	  function getInterface: ICryptKey inline;
-		procedure setSymmetric(status: PStatusToken; type_: PAnsiChar; keyLength: Cardinal; key: Pointer); virtual; abstract;
-		procedure setAsymmetric(status: PStatusToken; type_: PAnsiChar; encryptKeyLength: Cardinal; encryptKey: Pointer; decryptKeyLength: Cardinal; decryptKey: Pointer); virtual; abstract;
-		function getEncryptKey(length: CardinalPtr): Pointer; virtual; abstract;
-		function getDecryptKey(length: CardinalPtr): Pointer; virtual; abstract;
+	  {see ICryptKeyHelper record helper for interface methods}
+
 	end;
 
 	PConfigManagerVTable = ^ConfigManagerVTable;
@@ -1570,39 +1279,15 @@ class operator = (a,b: ICryptKey): boolean;
 	  const DIR_PLUGINS = Cardinal(16);
 	  const DIR_TZDATA = Cardinal(17);
 	  const DIR_COUNT = Cardinal(18);
-
 	  function vTable: PConfigManagerVTable inline;
-	  function getDirectory(code: Cardinal): PAnsiChar;
-	  function getFirebirdConf(): PFirebirdConfToken;
-	  function getDatabaseConf(dbName: PAnsiChar): PFirebirdConfToken;
-	  function getPluginConfig(configuredPlugin: PAnsiChar): PConfigToken;
-	  function getInstallDirectory(): PAnsiChar;
-	  function getRootDirectory(): PAnsiChar;
-	  function getDefaultSecurityDb(): PAnsiChar;
 	  class operator := (aToken:  PConfigManagerToken): IConfigManager;
 	  class operator := (intf: IConfigManager): PConfigManagerToken;
 	  class operator := (impl: IConfigManagerImpl): IConfigManager;
 	  class operator = (a: IConfigManager; b: pointer): boolean;
-class operator = (a,b: IConfigManager): boolean;
-	end;
+	  class operator = (a,b: IConfigManager): boolean;
 
-	IConfigManagerImpl = class(IVersionedImpl)
-	private
-	  class var vTable: ConfigManagerVTable; 
-	  class var FInitialized: boolean;
-	  intf: IConfigManager;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PConfigManagerToken inline;
-	  function getInterface: IConfigManager inline;
-		function getDirectory(code: Cardinal): PAnsiChar; virtual; abstract;
-		function getFirebirdConf(): PFirebirdConfToken; virtual; abstract;
-		function getDatabaseConf(dbName: PAnsiChar): PFirebirdConfToken; virtual; abstract;
-		function getPluginConfig(configuredPlugin: PAnsiChar): PConfigToken; virtual; abstract;
-		function getInstallDirectory(): PAnsiChar; virtual; abstract;
-		function getRootDirectory(): PAnsiChar; virtual; abstract;
-		function getDefaultSecurityDb(): PAnsiChar; virtual; abstract;
+	  {see IConfigManagerHelper record helper for interface methods}
+
 	end;
 
 	PEventCallbackVTable = ^EventCallbackVTable;
@@ -1621,29 +1306,15 @@ class operator = (a,b: IConfigManager): boolean;
 	  token: PEventCallbackToken;
 	public
 	  const VERSION = 3;
-
 	  function vTable: PEventCallbackVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  procedure eventCallbackFunction(length: Cardinal; events: BytePtr);
 	  class operator := (aToken:  PEventCallbackToken): IEventCallback;
 	  class operator := (intf: IEventCallback): PEventCallbackToken;
 	  class operator := (impl: IEventCallbackImpl): IEventCallback;
 	  class operator = (a: IEventCallback; b: pointer): boolean;
-class operator = (a,b: IEventCallback): boolean;
-	end;
+	  class operator = (a,b: IEventCallback): boolean;
 
-	IEventCallbackImpl = class(IReferenceCountedImpl)
-	private
-	  class var vTable: EventCallbackVTable; 
-	  class var FInitialized: boolean;
-	  intf: IEventCallback;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PEventCallbackToken inline;
-	  function getInterface: IEventCallback inline;
-		procedure eventCallbackFunction(length: Cardinal; events: BytePtr); virtual; abstract;
+	  {see IEventCallbackHelper record helper for interface methods}
+
 	end;
 
 	PBlobVTable = ^BlobVTable;
@@ -1667,39 +1338,15 @@ class operator = (a,b: IEventCallback): boolean;
 	  token: PBlobToken;
 	public
 	  const VERSION = 8;
-
 	  function vTable: PBlobVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  procedure getInfo(status: PStatusToken; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
-	  function getSegment(status: PStatusToken; bufferLength: Cardinal; buffer: Pointer; segmentLength: CardinalPtr): Integer;
-	  procedure putSegment(status: PStatusToken; length: Cardinal; buffer: Pointer);
-	  procedure cancel(status: PStatusToken);
-	  procedure close(status: PStatusToken);
-	  function seek(status: PStatusToken; mode: Integer; offset: Integer): Integer;
 	  class operator := (aToken:  PBlobToken): IBlob;
 	  class operator := (intf: IBlob): PBlobToken;
 	  class operator := (impl: IBlobImpl): IBlob;
 	  class operator = (a: IBlob; b: pointer): boolean;
-class operator = (a,b: IBlob): boolean;
-	end;
+	  class operator = (a,b: IBlob): boolean;
 
-	IBlobImpl = class(IReferenceCountedImpl)
-	private
-	  class var vTable: BlobVTable; 
-	  class var FInitialized: boolean;
-	  intf: IBlob;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PBlobToken inline;
-	  function getInterface: IBlob inline;
-		procedure getInfo(status: PStatusToken; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); virtual; abstract;
-		function getSegment(status: PStatusToken; bufferLength: Cardinal; buffer: Pointer; segmentLength: CardinalPtr): Integer; virtual; abstract;
-		procedure putSegment(status: PStatusToken; length: Cardinal; buffer: Pointer); virtual; abstract;
-		procedure cancel(status: PStatusToken); virtual; abstract;
-		procedure close(status: PStatusToken); virtual; abstract;
-		function seek(status: PStatusToken; mode: Integer; offset: Integer): Integer; virtual; abstract;
+	  {see IBlobHelper record helper for interface methods}
+
 	end;
 
 	PTransactionVTable = ^TransactionVTable;
@@ -1727,47 +1374,15 @@ class operator = (a,b: IBlob): boolean;
 	  token: PTransactionToken;
 	public
 	  const VERSION = 12;
-
 	  function vTable: PTransactionVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  procedure getInfo(status: PStatusToken; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
-	  procedure prepare(status: PStatusToken; msgLength: Cardinal; message: BytePtr);
-	  procedure commit(status: PStatusToken);
-	  procedure commitRetaining(status: PStatusToken);
-	  procedure rollback(status: PStatusToken);
-	  procedure rollbackRetaining(status: PStatusToken);
-	  procedure disconnect(status: PStatusToken);
-	  function join(status: PStatusToken; transaction: PTransactionToken): PTransactionToken;
-	  function validate(status: PStatusToken; attachment: PAttachmentToken): PTransactionToken;
-	  function enterDtc(status: PStatusToken): PTransactionToken;
 	  class operator := (aToken:  PTransactionToken): ITransaction;
 	  class operator := (intf: ITransaction): PTransactionToken;
 	  class operator := (impl: ITransactionImpl): ITransaction;
 	  class operator = (a: ITransaction; b: pointer): boolean;
-class operator = (a,b: ITransaction): boolean;
-	end;
+	  class operator = (a,b: ITransaction): boolean;
 
-	ITransactionImpl = class(IReferenceCountedImpl)
-	private
-	  class var vTable: TransactionVTable; 
-	  class var FInitialized: boolean;
-	  intf: ITransaction;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PTransactionToken inline;
-	  function getInterface: ITransaction inline;
-		procedure getInfo(status: PStatusToken; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); virtual; abstract;
-		procedure prepare(status: PStatusToken; msgLength: Cardinal; message: BytePtr); virtual; abstract;
-		procedure commit(status: PStatusToken); virtual; abstract;
-		procedure commitRetaining(status: PStatusToken); virtual; abstract;
-		procedure rollback(status: PStatusToken); virtual; abstract;
-		procedure rollbackRetaining(status: PStatusToken); virtual; abstract;
-		procedure disconnect(status: PStatusToken); virtual; abstract;
-		function join(status: PStatusToken; transaction: PTransactionToken): PTransactionToken; virtual; abstract;
-		function validate(status: PStatusToken; attachment: PAttachmentToken): PTransactionToken; virtual; abstract;
-		function enterDtc(status: PStatusToken): PTransactionToken; virtual; abstract;
+	  {see ITransactionHelper record helper for interface methods}
+
 	end;
 
 	PMessageMetadataVTable = ^MessageMetadataVTable;
@@ -1802,61 +1417,15 @@ class operator = (a,b: ITransaction): boolean;
 	  token: PMessageMetadataToken;
 	public
 	  const VERSION = 19;
-
 	  function vTable: PMessageMetadataVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  function getCount(status: PStatusToken): Cardinal;
-	  function getField(status: PStatusToken; index: Cardinal): PAnsiChar;
-	  function getRelation(status: PStatusToken; index: Cardinal): PAnsiChar;
-	  function getOwner(status: PStatusToken; index: Cardinal): PAnsiChar;
-	  function getAlias(status: PStatusToken; index: Cardinal): PAnsiChar;
-	  function getType(status: PStatusToken; index: Cardinal): Cardinal;
-	  function isNullable(status: PStatusToken; index: Cardinal): Boolean;
-	  function getSubType(status: PStatusToken; index: Cardinal): Integer;
-	  function getLength(status: PStatusToken; index: Cardinal): Cardinal;
-	  function getScale(status: PStatusToken; index: Cardinal): Integer;
-	  function getCharSet(status: PStatusToken; index: Cardinal): Cardinal;
-	  function getOffset(status: PStatusToken; index: Cardinal): Cardinal;
-	  function getNullOffset(status: PStatusToken; index: Cardinal): Cardinal;
-	  function getBuilder(status: PStatusToken): PMetadataBuilderToken;
-	  function getMessageLength(status: PStatusToken): Cardinal;
-	  function getAlignment(status: PStatusToken): Cardinal;
-	  function getAlignedLength(status: PStatusToken): Cardinal;
 	  class operator := (aToken:  PMessageMetadataToken): IMessageMetadata;
 	  class operator := (intf: IMessageMetadata): PMessageMetadataToken;
 	  class operator := (impl: IMessageMetadataImpl): IMessageMetadata;
 	  class operator = (a: IMessageMetadata; b: pointer): boolean;
-class operator = (a,b: IMessageMetadata): boolean;
-	end;
+	  class operator = (a,b: IMessageMetadata): boolean;
 
-	IMessageMetadataImpl = class(IReferenceCountedImpl)
-	private
-	  class var vTable: MessageMetadataVTable; 
-	  class var FInitialized: boolean;
-	  intf: IMessageMetadata;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PMessageMetadataToken inline;
-	  function getInterface: IMessageMetadata inline;
-		function getCount(status: PStatusToken): Cardinal; virtual; abstract;
-		function getField(status: PStatusToken; index: Cardinal): PAnsiChar; virtual; abstract;
-		function getRelation(status: PStatusToken; index: Cardinal): PAnsiChar; virtual; abstract;
-		function getOwner(status: PStatusToken; index: Cardinal): PAnsiChar; virtual; abstract;
-		function getAlias(status: PStatusToken; index: Cardinal): PAnsiChar; virtual; abstract;
-		function getType(status: PStatusToken; index: Cardinal): Cardinal; virtual; abstract;
-		function isNullable(status: PStatusToken; index: Cardinal): Boolean; virtual; abstract;
-		function getSubType(status: PStatusToken; index: Cardinal): Integer; virtual; abstract;
-		function getLength(status: PStatusToken; index: Cardinal): Cardinal; virtual; abstract;
-		function getScale(status: PStatusToken; index: Cardinal): Integer; virtual; abstract;
-		function getCharSet(status: PStatusToken; index: Cardinal): Cardinal; virtual; abstract;
-		function getOffset(status: PStatusToken; index: Cardinal): Cardinal; virtual; abstract;
-		function getNullOffset(status: PStatusToken; index: Cardinal): Cardinal; virtual; abstract;
-		function getBuilder(status: PStatusToken): PMetadataBuilderToken; virtual; abstract;
-		function getMessageLength(status: PStatusToken): Cardinal; virtual; abstract;
-		function getAlignment(status: PStatusToken): Cardinal; virtual; abstract;
-		function getAlignedLength(status: PStatusToken): Cardinal; virtual; abstract;
+	  {see IMessageMetadataHelper record helper for interface methods}
+
 	end;
 
 	PMetadataBuilderVTable = ^MetadataBuilderVTable;
@@ -1888,55 +1457,15 @@ class operator = (a,b: IMessageMetadata): boolean;
 	  token: PMetadataBuilderToken;
 	public
 	  const VERSION = 16;
-
 	  function vTable: PMetadataBuilderVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  procedure setType(status: PStatusToken; index: Cardinal; type_: Cardinal);
-	  procedure setSubType(status: PStatusToken; index: Cardinal; subType: Integer);
-	  procedure setLength(status: PStatusToken; index: Cardinal; length: Cardinal);
-	  procedure setCharSet(status: PStatusToken; index: Cardinal; charSet: Cardinal);
-	  procedure setScale(status: PStatusToken; index: Cardinal; scale: Integer);
-	  procedure truncate(status: PStatusToken; count: Cardinal);
-	  procedure moveNameToIndex(status: PStatusToken; name: PAnsiChar; index: Cardinal);
-	  procedure remove(status: PStatusToken; index: Cardinal);
-	  function addField(status: PStatusToken): Cardinal;
-	  function getMetadata(status: PStatusToken): PMessageMetadataToken;
-	  procedure setField(status: PStatusToken; index: Cardinal; field: PAnsiChar);
-	  procedure setRelation(status: PStatusToken; index: Cardinal; relation: PAnsiChar);
-	  procedure setOwner(status: PStatusToken; index: Cardinal; owner: PAnsiChar);
-	  procedure setAlias(status: PStatusToken; index: Cardinal; alias: PAnsiChar);
 	  class operator := (aToken:  PMetadataBuilderToken): IMetadataBuilder;
 	  class operator := (intf: IMetadataBuilder): PMetadataBuilderToken;
 	  class operator := (impl: IMetadataBuilderImpl): IMetadataBuilder;
 	  class operator = (a: IMetadataBuilder; b: pointer): boolean;
-class operator = (a,b: IMetadataBuilder): boolean;
-	end;
+	  class operator = (a,b: IMetadataBuilder): boolean;
 
-	IMetadataBuilderImpl = class(IReferenceCountedImpl)
-	private
-	  class var vTable: MetadataBuilderVTable; 
-	  class var FInitialized: boolean;
-	  intf: IMetadataBuilder;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PMetadataBuilderToken inline;
-	  function getInterface: IMetadataBuilder inline;
-		procedure setType(status: PStatusToken; index: Cardinal; type_: Cardinal); virtual; abstract;
-		procedure setSubType(status: PStatusToken; index: Cardinal; subType: Integer); virtual; abstract;
-		procedure setLength(status: PStatusToken; index: Cardinal; length: Cardinal); virtual; abstract;
-		procedure setCharSet(status: PStatusToken; index: Cardinal; charSet: Cardinal); virtual; abstract;
-		procedure setScale(status: PStatusToken; index: Cardinal; scale: Integer); virtual; abstract;
-		procedure truncate(status: PStatusToken; count: Cardinal); virtual; abstract;
-		procedure moveNameToIndex(status: PStatusToken; name: PAnsiChar; index: Cardinal); virtual; abstract;
-		procedure remove(status: PStatusToken; index: Cardinal); virtual; abstract;
-		function addField(status: PStatusToken): Cardinal; virtual; abstract;
-		function getMetadata(status: PStatusToken): PMessageMetadataToken; virtual; abstract;
-		procedure setField(status: PStatusToken; index: Cardinal; field: PAnsiChar); virtual; abstract;
-		procedure setRelation(status: PStatusToken; index: Cardinal; relation: PAnsiChar); virtual; abstract;
-		procedure setOwner(status: PStatusToken; index: Cardinal; owner: PAnsiChar); virtual; abstract;
-		procedure setAlias(status: PStatusToken; index: Cardinal; alias: PAnsiChar); virtual; abstract;
+	  {see IMetadataBuilderHelper record helper for interface methods}
+
 	end;
 
 	PResultSetVTable = ^ResultSetVTable;
@@ -1965,49 +1494,15 @@ class operator = (a,b: IMetadataBuilder): boolean;
 	  token: PResultSetToken;
 	public
 	  const VERSION = 13;
-
 	  function vTable: PResultSetVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  function fetchNext(status: PStatusToken; message: Pointer): Integer;
-	  function fetchPrior(status: PStatusToken; message: Pointer): Integer;
-	  function fetchFirst(status: PStatusToken; message: Pointer): Integer;
-	  function fetchLast(status: PStatusToken; message: Pointer): Integer;
-	  function fetchAbsolute(status: PStatusToken; position: Integer; message: Pointer): Integer;
-	  function fetchRelative(status: PStatusToken; offset: Integer; message: Pointer): Integer;
-	  function isEof(status: PStatusToken): Boolean;
-	  function isBof(status: PStatusToken): Boolean;
-	  function getMetadata(status: PStatusToken): PMessageMetadataToken;
-	  procedure close(status: PStatusToken);
-	  procedure setDelayedOutputFormat(status: PStatusToken; format: PMessageMetadataToken);
 	  class operator := (aToken:  PResultSetToken): IResultSet;
 	  class operator := (intf: IResultSet): PResultSetToken;
 	  class operator := (impl: IResultSetImpl): IResultSet;
 	  class operator = (a: IResultSet; b: pointer): boolean;
-class operator = (a,b: IResultSet): boolean;
-	end;
+	  class operator = (a,b: IResultSet): boolean;
 
-	IResultSetImpl = class(IReferenceCountedImpl)
-	private
-	  class var vTable: ResultSetVTable; 
-	  class var FInitialized: boolean;
-	  intf: IResultSet;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PResultSetToken inline;
-	  function getInterface: IResultSet inline;
-		function fetchNext(status: PStatusToken; message: Pointer): Integer; virtual; abstract;
-		function fetchPrior(status: PStatusToken; message: Pointer): Integer; virtual; abstract;
-		function fetchFirst(status: PStatusToken; message: Pointer): Integer; virtual; abstract;
-		function fetchLast(status: PStatusToken; message: Pointer): Integer; virtual; abstract;
-		function fetchAbsolute(status: PStatusToken; position: Integer; message: Pointer): Integer; virtual; abstract;
-		function fetchRelative(status: PStatusToken; offset: Integer; message: Pointer): Integer; virtual; abstract;
-		function isEof(status: PStatusToken): Boolean; virtual; abstract;
-		function isBof(status: PStatusToken): Boolean; virtual; abstract;
-		function getMetadata(status: PStatusToken): PMessageMetadataToken; virtual; abstract;
-		procedure close(status: PStatusToken); virtual; abstract;
-		procedure setDelayedOutputFormat(status: PStatusToken; format: PMessageMetadataToken); virtual; abstract;
+	  {see IResultSetHelper record helper for interface methods}
+
 	end;
 
 	PStatementVTable = ^StatementVTable;
@@ -2052,55 +1547,15 @@ class operator = (a,b: IResultSet): boolean;
 	  const FLAG_HAS_CURSOR = Cardinal($1);
 	  const FLAG_REPEAT_EXECUTE = Cardinal($2);
 	  const CURSOR_TYPE_SCROLLABLE = Cardinal($1);
-
 	  function vTable: PStatementVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  procedure getInfo(status: PStatusToken; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
-	  function getType(status: PStatusToken): Cardinal;
-	  function getPlan(status: PStatusToken; detailed: Boolean): PAnsiChar;
-	  function getAffectedRecords(status: PStatusToken): QWord;
-	  function getInputMetadata(status: PStatusToken): PMessageMetadataToken;
-	  function getOutputMetadata(status: PStatusToken): PMessageMetadataToken;
-	  function execute(status: PStatusToken; transaction: PTransactionToken; inMetadata: PMessageMetadataToken; inBuffer: Pointer; outMetadata: PMessageMetadataToken; outBuffer: Pointer): PTransactionToken;
-	  function openCursor(status: PStatusToken; transaction: PTransactionToken; inMetadata: PMessageMetadataToken; inBuffer: Pointer; outMetadata: PMessageMetadataToken; flags: Cardinal): PResultSetToken;
-	  procedure setCursorName(status: PStatusToken; name: PAnsiChar);
-	  procedure free(status: PStatusToken);
-	  function getFlags(status: PStatusToken): Cardinal;
-	  function getTimeout(status: PStatusToken): Cardinal;
-	  procedure setTimeout(status: PStatusToken; timeOut: Cardinal);
-	  function createBatch(status: PStatusToken; inMetadata: PMessageMetadataToken; parLength: Cardinal; par: BytePtr): PBatchToken;
 	  class operator := (aToken:  PStatementToken): IStatement;
 	  class operator := (intf: IStatement): PStatementToken;
 	  class operator := (impl: IStatementImpl): IStatement;
 	  class operator = (a: IStatement; b: pointer): boolean;
-class operator = (a,b: IStatement): boolean;
-	end;
+	  class operator = (a,b: IStatement): boolean;
 
-	IStatementImpl = class(IReferenceCountedImpl)
-	private
-	  class var vTable: StatementVTable; 
-	  class var FInitialized: boolean;
-	  intf: IStatement;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PStatementToken inline;
-	  function getInterface: IStatement inline;
-		procedure getInfo(status: PStatusToken; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); virtual; abstract;
-		function getType(status: PStatusToken): Cardinal; virtual; abstract;
-		function getPlan(status: PStatusToken; detailed: Boolean): PAnsiChar; virtual; abstract;
-		function getAffectedRecords(status: PStatusToken): QWord; virtual; abstract;
-		function getInputMetadata(status: PStatusToken): PMessageMetadataToken; virtual; abstract;
-		function getOutputMetadata(status: PStatusToken): PMessageMetadataToken; virtual; abstract;
-		function execute(status: PStatusToken; transaction: PTransactionToken; inMetadata: PMessageMetadataToken; inBuffer: Pointer; outMetadata: PMessageMetadataToken; outBuffer: Pointer): PTransactionToken; virtual; abstract;
-		function openCursor(status: PStatusToken; transaction: PTransactionToken; inMetadata: PMessageMetadataToken; inBuffer: Pointer; outMetadata: PMessageMetadataToken; flags: Cardinal): PResultSetToken; virtual; abstract;
-		procedure setCursorName(status: PStatusToken; name: PAnsiChar); virtual; abstract;
-		procedure free(status: PStatusToken); virtual; abstract;
-		function getFlags(status: PStatusToken): Cardinal; virtual; abstract;
-		function getTimeout(status: PStatusToken): Cardinal; virtual; abstract;
-		procedure setTimeout(status: PStatusToken; timeOut: Cardinal); virtual; abstract;
-		function createBatch(status: PStatusToken; inMetadata: PMessageMetadataToken; parLength: Cardinal; par: BytePtr): PBatchToken; virtual; abstract;
+	  {see IStatementHelper record helper for interface methods}
+
 	end;
 
 	PBatchVTable = ^BatchVTable;
@@ -2140,49 +1595,15 @@ class operator = (a,b: IStatement): boolean;
 	  const BLOB_ID_USER = Byte(2);
 	  const BLOB_STREAM = Byte(3);
 	  const BLOB_SEGHDR_ALIGN = Cardinal(2);
-
 	  function vTable: PBatchVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  procedure add(status: PStatusToken; count: Cardinal; inBuffer: Pointer);
-	  procedure addBlob(status: PStatusToken; length: Cardinal; inBuffer: Pointer; blobId: ISC_QUADPtr; parLength: Cardinal; par: BytePtr);
-	  procedure appendBlobData(status: PStatusToken; length: Cardinal; inBuffer: Pointer);
-	  procedure addBlobStream(status: PStatusToken; length: Cardinal; inBuffer: Pointer);
-	  procedure registerBlob(status: PStatusToken; existingBlob: ISC_QUADPtr; blobId: ISC_QUADPtr);
-	  function execute(status: PStatusToken; transaction: PTransactionToken): PBatchCompletionStateToken;
-	  procedure cancel(status: PStatusToken);
-	  function getBlobAlignment(status: PStatusToken): Cardinal;
-	  function getMetadata(status: PStatusToken): PMessageMetadataToken;
-	  procedure setDefaultBpb(status: PStatusToken; parLength: Cardinal; par: BytePtr);
-	  procedure close(status: PStatusToken);
 	  class operator := (aToken:  PBatchToken): IBatch;
 	  class operator := (intf: IBatch): PBatchToken;
 	  class operator := (impl: IBatchImpl): IBatch;
 	  class operator = (a: IBatch; b: pointer): boolean;
-class operator = (a,b: IBatch): boolean;
-	end;
+	  class operator = (a,b: IBatch): boolean;
 
-	IBatchImpl = class(IReferenceCountedImpl)
-	private
-	  class var vTable: BatchVTable; 
-	  class var FInitialized: boolean;
-	  intf: IBatch;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PBatchToken inline;
-	  function getInterface: IBatch inline;
-		procedure add(status: PStatusToken; count: Cardinal; inBuffer: Pointer); virtual; abstract;
-		procedure addBlob(status: PStatusToken; length: Cardinal; inBuffer: Pointer; blobId: ISC_QUADPtr; parLength: Cardinal; par: BytePtr); virtual; abstract;
-		procedure appendBlobData(status: PStatusToken; length: Cardinal; inBuffer: Pointer); virtual; abstract;
-		procedure addBlobStream(status: PStatusToken; length: Cardinal; inBuffer: Pointer); virtual; abstract;
-		procedure registerBlob(status: PStatusToken; existingBlob: ISC_QUADPtr; blobId: ISC_QUADPtr); virtual; abstract;
-		function execute(status: PStatusToken; transaction: PTransactionToken): PBatchCompletionStateToken; virtual; abstract;
-		procedure cancel(status: PStatusToken); virtual; abstract;
-		function getBlobAlignment(status: PStatusToken): Cardinal; virtual; abstract;
-		function getMetadata(status: PStatusToken): PMessageMetadataToken; virtual; abstract;
-		procedure setDefaultBpb(status: PStatusToken; parLength: Cardinal; par: BytePtr); virtual; abstract;
-		procedure close(status: PStatusToken); virtual; abstract;
+	  {see IBatchHelper record helper for interface methods}
+
 	end;
 
 	PBatchCompletionStateVTable = ^BatchCompletionStateVTable;
@@ -2206,34 +1627,15 @@ class operator = (a,b: IBatch): boolean;
 	  const EXECUTE_FAILED = Integer(-1);
 	  const SUCCESS_NO_INFO = Integer(-2);
 	  const NO_MORE_ERRORS = Cardinal($ffffffff);
-
 	  function vTable: PBatchCompletionStateVTable inline;
-	  procedure dispose();
-	  function getSize(status: PStatusToken): Cardinal;
-	  function getState(status: PStatusToken; pos: Cardinal): Integer;
-	  function findError(status: PStatusToken; pos: Cardinal): Cardinal;
-	  procedure getStatus(status: PStatusToken; to_: PStatusToken; pos: Cardinal);
 	  class operator := (aToken:  PBatchCompletionStateToken): IBatchCompletionState;
 	  class operator := (intf: IBatchCompletionState): PBatchCompletionStateToken;
 	  class operator := (impl: IBatchCompletionStateImpl): IBatchCompletionState;
 	  class operator = (a: IBatchCompletionState; b: pointer): boolean;
-class operator = (a,b: IBatchCompletionState): boolean;
-	end;
+	  class operator = (a,b: IBatchCompletionState): boolean;
 
-	IBatchCompletionStateImpl = class(IDisposableImpl)
-	private
-	  class var vTable: BatchCompletionStateVTable; 
-	  class var FInitialized: boolean;
-	  intf: IBatchCompletionState;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PBatchCompletionStateToken inline;
-	  function getInterface: IBatchCompletionState inline;
-		function getSize(status: PStatusToken): Cardinal; virtual; abstract;
-		function getState(status: PStatusToken; pos: Cardinal): Integer; virtual; abstract;
-		function findError(status: PStatusToken; pos: Cardinal): Cardinal; virtual; abstract;
-		procedure getStatus(status: PStatusToken; to_: PStatusToken; pos: Cardinal); virtual; abstract;
+	  {see IBatchCompletionStateHelper record helper for interface methods}
+
 	end;
 
 	PReplicatorVTable = ^ReplicatorVTable;
@@ -2253,31 +1655,15 @@ class operator = (a,b: IBatchCompletionState): boolean;
 	  token: PReplicatorToken;
 	public
 	  const VERSION = 4;
-
 	  function vTable: PReplicatorVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  procedure process(status: PStatusToken; length: Cardinal; data: BytePtr);
-	  procedure close(status: PStatusToken);
 	  class operator := (aToken:  PReplicatorToken): IReplicator;
 	  class operator := (intf: IReplicator): PReplicatorToken;
 	  class operator := (impl: IReplicatorImpl): IReplicator;
 	  class operator = (a: IReplicator; b: pointer): boolean;
-class operator = (a,b: IReplicator): boolean;
-	end;
+	  class operator = (a,b: IReplicator): boolean;
 
-	IReplicatorImpl = class(IReferenceCountedImpl)
-	private
-	  class var vTable: ReplicatorVTable; 
-	  class var FInitialized: boolean;
-	  intf: IReplicator;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PReplicatorToken inline;
-	  function getInterface: IReplicator inline;
-		procedure process(status: PStatusToken; length: Cardinal; data: BytePtr); virtual; abstract;
-		procedure close(status: PStatusToken); virtual; abstract;
+	  {see IReplicatorHelper record helper for interface methods}
+
 	end;
 
 	PRequestVTable = ^RequestVTable;
@@ -2302,41 +1688,15 @@ class operator = (a,b: IReplicator): boolean;
 	  token: PRequestToken;
 	public
 	  const VERSION = 9;
-
 	  function vTable: PRequestVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  procedure receive(status: PStatusToken; level: Integer; msgType: Cardinal; length: Cardinal; message: Pointer);
-	  procedure send(status: PStatusToken; level: Integer; msgType: Cardinal; length: Cardinal; message: Pointer);
-	  procedure getInfo(status: PStatusToken; level: Integer; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
-	  procedure start(status: PStatusToken; tra: PTransactionToken; level: Integer);
-	  procedure startAndSend(status: PStatusToken; tra: PTransactionToken; level: Integer; msgType: Cardinal; length: Cardinal; message: Pointer);
-	  procedure unwind(status: PStatusToken; level: Integer);
-	  procedure free(status: PStatusToken);
 	  class operator := (aToken:  PRequestToken): IRequest;
 	  class operator := (intf: IRequest): PRequestToken;
 	  class operator := (impl: IRequestImpl): IRequest;
 	  class operator = (a: IRequest; b: pointer): boolean;
-class operator = (a,b: IRequest): boolean;
-	end;
+	  class operator = (a,b: IRequest): boolean;
 
-	IRequestImpl = class(IReferenceCountedImpl)
-	private
-	  class var vTable: RequestVTable; 
-	  class var FInitialized: boolean;
-	  intf: IRequest;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PRequestToken inline;
-	  function getInterface: IRequest inline;
-		procedure receive(status: PStatusToken; level: Integer; msgType: Cardinal; length: Cardinal; message: Pointer); virtual; abstract;
-		procedure send(status: PStatusToken; level: Integer; msgType: Cardinal; length: Cardinal; message: Pointer); virtual; abstract;
-		procedure getInfo(status: PStatusToken; level: Integer; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); virtual; abstract;
-		procedure start(status: PStatusToken; tra: PTransactionToken; level: Integer); virtual; abstract;
-		procedure startAndSend(status: PStatusToken; tra: PTransactionToken; level: Integer; msgType: Cardinal; length: Cardinal; message: Pointer); virtual; abstract;
-		procedure unwind(status: PStatusToken; level: Integer); virtual; abstract;
-		procedure free(status: PStatusToken); virtual; abstract;
+	  {see IRequestHelper record helper for interface methods}
+
 	end;
 
 	PEventsVTable = ^EventsVTable;
@@ -2355,29 +1715,15 @@ class operator = (a,b: IRequest): boolean;
 	  token: PEventsToken;
 	public
 	  const VERSION = 3;
-
 	  function vTable: PEventsVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  procedure cancel(status: PStatusToken);
 	  class operator := (aToken:  PEventsToken): IEvents;
 	  class operator := (intf: IEvents): PEventsToken;
 	  class operator := (impl: IEventsImpl): IEvents;
 	  class operator = (a: IEvents; b: pointer): boolean;
-class operator = (a,b: IEvents): boolean;
-	end;
+	  class operator = (a,b: IEvents): boolean;
 
-	IEventsImpl = class(IReferenceCountedImpl)
-	private
-	  class var vTable: EventsVTable; 
-	  class var FInitialized: boolean;
-	  intf: IEvents;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PEventsToken inline;
-	  function getInterface: IEvents inline;
-		procedure cancel(status: PStatusToken); virtual; abstract;
+	  {see IEventsHelper record helper for interface methods}
+
 	end;
 
 	PAttachmentVTable = ^AttachmentVTable;
@@ -2419,75 +1765,15 @@ class operator = (a,b: IEvents): boolean;
 	  token: PAttachmentToken;
 	public
 	  const VERSION = 26;
-
 	  function vTable: PAttachmentVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  procedure getInfo(status: PStatusToken; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
-	  function startTransaction(status: PStatusToken; tpbLength: Cardinal; tpb: BytePtr): PTransactionToken;
-	  function reconnectTransaction(status: PStatusToken; length: Cardinal; id: BytePtr): PTransactionToken;
-	  function compileRequest(status: PStatusToken; blrLength: Cardinal; blr: BytePtr): PRequestToken;
-	  procedure transactRequest(status: PStatusToken; transaction: PTransactionToken; blrLength: Cardinal; blr: BytePtr; inMsgLength: Cardinal; inMsg: BytePtr; outMsgLength: Cardinal; outMsg: BytePtr);
-	  function createBlob(status: PStatusToken; transaction: PTransactionToken; id: ISC_QUADPtr; bpbLength: Cardinal; bpb: BytePtr): PBlobToken;
-	  function openBlob(status: PStatusToken; transaction: PTransactionToken; id: ISC_QUADPtr; bpbLength: Cardinal; bpb: BytePtr): PBlobToken;
-	  function getSlice(status: PStatusToken; transaction: PTransactionToken; id: ISC_QUADPtr; sdlLength: Cardinal; sdl: BytePtr; paramLength: Cardinal; param: BytePtr; sliceLength: Integer; slice: BytePtr): Integer;
-	  procedure putSlice(status: PStatusToken; transaction: PTransactionToken; id: ISC_QUADPtr; sdlLength: Cardinal; sdl: BytePtr; paramLength: Cardinal; param: BytePtr; sliceLength: Integer; slice: BytePtr);
-	  procedure executeDyn(status: PStatusToken; transaction: PTransactionToken; length: Cardinal; dyn: BytePtr);
-	  function prepare(status: PStatusToken; tra: PTransactionToken; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; flags: Cardinal): PStatementToken;
-	  function execute(status: PStatusToken; transaction: PTransactionToken; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: PMessageMetadataToken; inBuffer: Pointer; outMetadata: PMessageMetadataToken; outBuffer: Pointer): PTransactionToken;
-	  function openCursor(status: PStatusToken; transaction: PTransactionToken; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: PMessageMetadataToken; inBuffer: Pointer; outMetadata: PMessageMetadataToken; cursorName: PAnsiChar; cursorFlags: Cardinal): PResultSetToken;
-	  function queEvents(status: PStatusToken; callback: PEventCallbackToken; length: Cardinal; events: BytePtr): PEventsToken;
-	  procedure cancelOperation(status: PStatusToken; option: Integer);
-	  procedure ping(status: PStatusToken);
-	  procedure detach(status: PStatusToken);
-	  procedure dropDatabase(status: PStatusToken);
-	  function getIdleTimeout(status: PStatusToken): Cardinal;
-	  procedure setIdleTimeout(status: PStatusToken; timeOut: Cardinal);
-	  function getStatementTimeout(status: PStatusToken): Cardinal;
-	  procedure setStatementTimeout(status: PStatusToken; timeOut: Cardinal);
-	  function createBatch(status: PStatusToken; transaction: PTransactionToken; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: PMessageMetadataToken; parLength: Cardinal; par: BytePtr): PBatchToken;
-	  function createReplicator(status: PStatusToken): PReplicatorToken;
 	  class operator := (aToken:  PAttachmentToken): IAttachment;
 	  class operator := (intf: IAttachment): PAttachmentToken;
 	  class operator := (impl: IAttachmentImpl): IAttachment;
 	  class operator = (a: IAttachment; b: pointer): boolean;
-class operator = (a,b: IAttachment): boolean;
-	end;
+	  class operator = (a,b: IAttachment): boolean;
 
-	IAttachmentImpl = class(IReferenceCountedImpl)
-	private
-	  class var vTable: AttachmentVTable; 
-	  class var FInitialized: boolean;
-	  intf: IAttachment;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PAttachmentToken inline;
-	  function getInterface: IAttachment inline;
-		procedure getInfo(status: PStatusToken; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); virtual; abstract;
-		function startTransaction(status: PStatusToken; tpbLength: Cardinal; tpb: BytePtr): PTransactionToken; virtual; abstract;
-		function reconnectTransaction(status: PStatusToken; length: Cardinal; id: BytePtr): PTransactionToken; virtual; abstract;
-		function compileRequest(status: PStatusToken; blrLength: Cardinal; blr: BytePtr): PRequestToken; virtual; abstract;
-		procedure transactRequest(status: PStatusToken; transaction: PTransactionToken; blrLength: Cardinal; blr: BytePtr; inMsgLength: Cardinal; inMsg: BytePtr; outMsgLength: Cardinal; outMsg: BytePtr); virtual; abstract;
-		function createBlob(status: PStatusToken; transaction: PTransactionToken; id: ISC_QUADPtr; bpbLength: Cardinal; bpb: BytePtr): PBlobToken; virtual; abstract;
-		function openBlob(status: PStatusToken; transaction: PTransactionToken; id: ISC_QUADPtr; bpbLength: Cardinal; bpb: BytePtr): PBlobToken; virtual; abstract;
-		function getSlice(status: PStatusToken; transaction: PTransactionToken; id: ISC_QUADPtr; sdlLength: Cardinal; sdl: BytePtr; paramLength: Cardinal; param: BytePtr; sliceLength: Integer; slice: BytePtr): Integer; virtual; abstract;
-		procedure putSlice(status: PStatusToken; transaction: PTransactionToken; id: ISC_QUADPtr; sdlLength: Cardinal; sdl: BytePtr; paramLength: Cardinal; param: BytePtr; sliceLength: Integer; slice: BytePtr); virtual; abstract;
-		procedure executeDyn(status: PStatusToken; transaction: PTransactionToken; length: Cardinal; dyn: BytePtr); virtual; abstract;
-		function prepare(status: PStatusToken; tra: PTransactionToken; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; flags: Cardinal): PStatementToken; virtual; abstract;
-		function execute(status: PStatusToken; transaction: PTransactionToken; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: PMessageMetadataToken; inBuffer: Pointer; outMetadata: PMessageMetadataToken; outBuffer: Pointer): PTransactionToken; virtual; abstract;
-		function openCursor(status: PStatusToken; transaction: PTransactionToken; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: PMessageMetadataToken; inBuffer: Pointer; outMetadata: PMessageMetadataToken; cursorName: PAnsiChar; cursorFlags: Cardinal): PResultSetToken; virtual; abstract;
-		function queEvents(status: PStatusToken; callback: PEventCallbackToken; length: Cardinal; events: BytePtr): PEventsToken; virtual; abstract;
-		procedure cancelOperation(status: PStatusToken; option: Integer); virtual; abstract;
-		procedure ping(status: PStatusToken); virtual; abstract;
-		procedure detach(status: PStatusToken); virtual; abstract;
-		procedure dropDatabase(status: PStatusToken); virtual; abstract;
-		function getIdleTimeout(status: PStatusToken): Cardinal; virtual; abstract;
-		procedure setIdleTimeout(status: PStatusToken; timeOut: Cardinal); virtual; abstract;
-		function getStatementTimeout(status: PStatusToken): Cardinal; virtual; abstract;
-		procedure setStatementTimeout(status: PStatusToken; timeOut: Cardinal); virtual; abstract;
-		function createBatch(status: PStatusToken; transaction: PTransactionToken; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: PMessageMetadataToken; parLength: Cardinal; par: BytePtr): PBatchToken; virtual; abstract;
-		function createReplicator(status: PStatusToken): PReplicatorToken; virtual; abstract;
+	  {see IAttachmentHelper record helper for interface methods}
+
 	end;
 
 	PServiceVTable = ^ServiceVTable;
@@ -2508,33 +1794,15 @@ class operator = (a,b: IAttachment): boolean;
 	  token: PServiceToken;
 	public
 	  const VERSION = 5;
-
 	  function vTable: PServiceVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  procedure detach(status: PStatusToken);
-	  procedure query(status: PStatusToken; sendLength: Cardinal; sendItems: BytePtr; receiveLength: Cardinal; receiveItems: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
-	  procedure start(status: PStatusToken; spbLength: Cardinal; spb: BytePtr);
 	  class operator := (aToken:  PServiceToken): IService;
 	  class operator := (intf: IService): PServiceToken;
 	  class operator := (impl: IServiceImpl): IService;
 	  class operator = (a: IService; b: pointer): boolean;
-class operator = (a,b: IService): boolean;
-	end;
+	  class operator = (a,b: IService): boolean;
 
-	IServiceImpl = class(IReferenceCountedImpl)
-	private
-	  class var vTable: ServiceVTable; 
-	  class var FInitialized: boolean;
-	  intf: IService;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PServiceToken inline;
-	  function getInterface: IService inline;
-		procedure detach(status: PStatusToken); virtual; abstract;
-		procedure query(status: PStatusToken; sendLength: Cardinal; sendItems: BytePtr; receiveLength: Cardinal; receiveItems: BytePtr; bufferLength: Cardinal; buffer: BytePtr); virtual; abstract;
-		procedure start(status: PStatusToken; spbLength: Cardinal; spb: BytePtr); virtual; abstract;
+	  {see IServiceHelper record helper for interface methods}
+
 	end;
 
 	PProviderVTable = ^ProviderVTable;
@@ -2559,39 +1827,15 @@ class operator = (a,b: IService): boolean;
 	  token: PProviderToken;
 	public
 	  const VERSION = 9;
-
 	  function vTable: PProviderVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  procedure setOwner(r: PReferenceCountedToken);
-	  function getOwner(): PReferenceCountedToken;
-	  function attachDatabase(status: PStatusToken; fileName: PAnsiChar; dpbLength: Cardinal; dpb: BytePtr): PAttachmentToken;
-	  function createDatabase(status: PStatusToken; fileName: PAnsiChar; dpbLength: Cardinal; dpb: BytePtr): PAttachmentToken;
-	  function attachServiceManager(status: PStatusToken; service: PAnsiChar; spbLength: Cardinal; spb: BytePtr): PServiceToken;
-	  procedure shutdown(status: PStatusToken; timeout: Cardinal; reason: Integer);
-	  procedure setDbCryptCallback(status: PStatusToken; cryptCallback: PCryptKeyCallbackToken);
 	  class operator := (aToken:  PProviderToken): IProvider;
 	  class operator := (intf: IProvider): PProviderToken;
 	  class operator := (impl: IProviderImpl): IProvider;
 	  class operator = (a: IProvider; b: pointer): boolean;
-class operator = (a,b: IProvider): boolean;
-	end;
+	  class operator = (a,b: IProvider): boolean;
 
-	IProviderImpl = class(IPluginBaseImpl)
-	private
-	  class var vTable: ProviderVTable; 
-	  class var FInitialized: boolean;
-	  intf: IProvider;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PProviderToken inline;
-	  function getInterface: IProvider inline;
-		function attachDatabase(status: PStatusToken; fileName: PAnsiChar; dpbLength: Cardinal; dpb: BytePtr): PAttachmentToken; virtual; abstract;
-		function createDatabase(status: PStatusToken; fileName: PAnsiChar; dpbLength: Cardinal; dpb: BytePtr): PAttachmentToken; virtual; abstract;
-		function attachServiceManager(status: PStatusToken; service: PAnsiChar; spbLength: Cardinal; spb: BytePtr): PServiceToken; virtual; abstract;
-		procedure shutdown(status: PStatusToken; timeout: Cardinal; reason: Integer); virtual; abstract;
-		procedure setDbCryptCallback(status: PStatusToken; cryptCallback: PCryptKeyCallbackToken); virtual; abstract;
+	  {see IProviderHelper record helper for interface methods}
+
 	end;
 
 	PDtcStartVTable = ^DtcStartVTable;
@@ -2611,32 +1855,15 @@ class operator = (a,b: IProvider): boolean;
 	  token: PDtcStartToken;
 	public
 	  const VERSION = 4;
-
 	  function vTable: PDtcStartVTable inline;
-	  procedure dispose();
-	  procedure addAttachment(status: PStatusToken; att: PAttachmentToken);
-	  procedure addWithTpb(status: PStatusToken; att: PAttachmentToken; length: Cardinal; tpb: BytePtr);
-	  function start(status: PStatusToken): PTransactionToken;
 	  class operator := (aToken:  PDtcStartToken): IDtcStart;
 	  class operator := (intf: IDtcStart): PDtcStartToken;
 	  class operator := (impl: IDtcStartImpl): IDtcStart;
 	  class operator = (a: IDtcStart; b: pointer): boolean;
-class operator = (a,b: IDtcStart): boolean;
-	end;
+	  class operator = (a,b: IDtcStart): boolean;
 
-	IDtcStartImpl = class(IDisposableImpl)
-	private
-	  class var vTable: DtcStartVTable; 
-	  class var FInitialized: boolean;
-	  intf: IDtcStart;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PDtcStartToken inline;
-	  function getInterface: IDtcStart inline;
-		procedure addAttachment(status: PStatusToken; att: PAttachmentToken); virtual; abstract;
-		procedure addWithTpb(status: PStatusToken; att: PAttachmentToken; length: Cardinal; tpb: BytePtr); virtual; abstract;
-		function start(status: PStatusToken): PTransactionToken; virtual; abstract;
+	  {see IDtcStartHelper record helper for interface methods}
+
 	end;
 
 	PDtcVTable = ^DtcVTable;
@@ -2654,29 +1881,15 @@ class operator = (a,b: IDtcStart): boolean;
 	  token: PDtcToken;
 	public
 	  const VERSION = 2;
-
 	  function vTable: PDtcVTable inline;
-	  function join(status: PStatusToken; one: PTransactionToken; two: PTransactionToken): PTransactionToken;
-	  function startBuilder(status: PStatusToken): PDtcStartToken;
 	  class operator := (aToken:  PDtcToken): IDtc;
 	  class operator := (intf: IDtc): PDtcToken;
 	  class operator := (impl: IDtcImpl): IDtc;
 	  class operator = (a: IDtc; b: pointer): boolean;
-class operator = (a,b: IDtc): boolean;
-	end;
+	  class operator = (a,b: IDtc): boolean;
 
-	IDtcImpl = class(IVersionedImpl)
-	private
-	  class var vTable: DtcVTable; 
-	  class var FInitialized: boolean;
-	  intf: IDtc;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PDtcToken inline;
-	  function getInterface: IDtc inline;
-		function join(status: PStatusToken; one: PTransactionToken; two: PTransactionToken): PTransactionToken; virtual; abstract;
-		function startBuilder(status: PStatusToken): PDtcStartToken; virtual; abstract;
+	  {see IDtcHelper record helper for interface methods}
+
 	end;
 
 	PAuthVTable = ^AuthVTable;
@@ -2700,29 +1913,15 @@ class operator = (a,b: IDtc): boolean;
 	  const AUTH_SUCCESS = Integer(0);
 	  const AUTH_MORE_DATA = Integer(1);
 	  const AUTH_CONTINUE = Integer(2);
-
 	  function vTable: PAuthVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  procedure setOwner(r: PReferenceCountedToken);
-	  function getOwner(): PReferenceCountedToken;
 	  class operator := (aToken:  PAuthToken): IAuth;
 	  class operator := (intf: IAuth): PAuthToken;
 	  class operator := (impl: IAuthImpl): IAuth;
 	  class operator = (a: IAuth; b: pointer): boolean;
-class operator = (a,b: IAuth): boolean;
-	end;
+	  class operator = (a,b: IAuth): boolean;
 
-	IAuthImpl = class(IPluginBaseImpl)
-	private
-	  class var vTable: AuthVTable; 
-	  class var FInitialized: boolean;
-	  intf: IAuth;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PAuthToken inline;
-	  function getInterface: IAuth inline;
+	  {see IAuthHelper record helper for interface methods}
+
 	end;
 
 	PWriterVTable = ^WriterVTable;
@@ -2742,33 +1941,15 @@ class operator = (a,b: IAuth): boolean;
 	  token: PWriterToken;
 	public
 	  const VERSION = 4;
-
 	  function vTable: PWriterVTable inline;
-	  procedure reset();
-	  procedure add(status: PStatusToken; name: PAnsiChar);
-	  procedure setType(status: PStatusToken; value: PAnsiChar);
-	  procedure setDb(status: PStatusToken; value: PAnsiChar);
 	  class operator := (aToken:  PWriterToken): IWriter;
 	  class operator := (intf: IWriter): PWriterToken;
 	  class operator := (impl: IWriterImpl): IWriter;
 	  class operator = (a: IWriter; b: pointer): boolean;
-class operator = (a,b: IWriter): boolean;
-	end;
+	  class operator = (a,b: IWriter): boolean;
 
-	IWriterImpl = class(IVersionedImpl)
-	private
-	  class var vTable: WriterVTable; 
-	  class var FInitialized: boolean;
-	  intf: IWriter;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PWriterToken inline;
-	  function getInterface: IWriter inline;
-		procedure reset(); virtual; abstract;
-		procedure add(status: PStatusToken; name: PAnsiChar); virtual; abstract;
-		procedure setType(status: PStatusToken; value: PAnsiChar); virtual; abstract;
-		procedure setDb(status: PStatusToken; value: PAnsiChar); virtual; abstract;
+	  {see IWriterHelper record helper for interface methods}
+
 	end;
 
 	PServerBlockVTable = ^ServerBlockVTable;
@@ -2788,33 +1969,15 @@ class operator = (a,b: IWriter): boolean;
 	  token: PServerBlockToken;
 	public
 	  const VERSION = 4;
-
 	  function vTable: PServerBlockVTable inline;
-	  function getLogin(): PAnsiChar;
-	  function getData(length: CardinalPtr): BytePtr;
-	  procedure putData(status: PStatusToken; length: Cardinal; data: Pointer);
-	  function newKey(status: PStatusToken): PCryptKeyToken;
 	  class operator := (aToken:  PServerBlockToken): IServerBlock;
 	  class operator := (intf: IServerBlock): PServerBlockToken;
 	  class operator := (impl: IServerBlockImpl): IServerBlock;
 	  class operator = (a: IServerBlock; b: pointer): boolean;
-class operator = (a,b: IServerBlock): boolean;
-	end;
+	  class operator = (a,b: IServerBlock): boolean;
 
-	IServerBlockImpl = class(IVersionedImpl)
-	private
-	  class var vTable: ServerBlockVTable; 
-	  class var FInitialized: boolean;
-	  intf: IServerBlock;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PServerBlockToken inline;
-	  function getInterface: IServerBlock inline;
-		function getLogin(): PAnsiChar; virtual; abstract;
-		function getData(length: CardinalPtr): BytePtr; virtual; abstract;
-		procedure putData(status: PStatusToken; length: Cardinal; data: Pointer); virtual; abstract;
-		function newKey(status: PStatusToken): PCryptKeyToken; virtual; abstract;
+	  {see IServerBlockHelper record helper for interface methods}
+
 	end;
 
 	PClientBlockVTable = ^ClientBlockVTable;
@@ -2838,39 +2001,15 @@ class operator = (a,b: IServerBlock): boolean;
 	  token: PClientBlockToken;
 	public
 	  const VERSION = 8;
-
 	  function vTable: PClientBlockVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  function getLogin(): PAnsiChar;
-	  function getPassword(): PAnsiChar;
-	  function getData(length: CardinalPtr): BytePtr;
-	  procedure putData(status: PStatusToken; length: Cardinal; data: Pointer);
-	  function newKey(status: PStatusToken): PCryptKeyToken;
-	  function getAuthBlock(status: PStatusToken): PAuthBlockToken;
 	  class operator := (aToken:  PClientBlockToken): IClientBlock;
 	  class operator := (intf: IClientBlock): PClientBlockToken;
 	  class operator := (impl: IClientBlockImpl): IClientBlock;
 	  class operator = (a: IClientBlock; b: pointer): boolean;
-class operator = (a,b: IClientBlock): boolean;
-	end;
+	  class operator = (a,b: IClientBlock): boolean;
 
-	IClientBlockImpl = class(IReferenceCountedImpl)
-	private
-	  class var vTable: ClientBlockVTable; 
-	  class var FInitialized: boolean;
-	  intf: IClientBlock;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PClientBlockToken inline;
-	  function getInterface: IClientBlock inline;
-		function getLogin(): PAnsiChar; virtual; abstract;
-		function getPassword(): PAnsiChar; virtual; abstract;
-		function getData(length: CardinalPtr): BytePtr; virtual; abstract;
-		procedure putData(status: PStatusToken; length: Cardinal; data: Pointer); virtual; abstract;
-		function newKey(status: PStatusToken): PCryptKeyToken; virtual; abstract;
-		function getAuthBlock(status: PStatusToken): PAuthBlockToken; virtual; abstract;
+	  {see IClientBlockHelper record helper for interface methods}
+
 	end;
 
 	PServerVTable = ^ServerVTable;
@@ -2896,33 +2035,15 @@ class operator = (a,b: IClientBlock): boolean;
 	  const AUTH_SUCCESS = Integer(0);
 	  const AUTH_MORE_DATA = Integer(1);
 	  const AUTH_CONTINUE = Integer(2);
-
 	  function vTable: PServerVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  procedure setOwner(r: PReferenceCountedToken);
-	  function getOwner(): PReferenceCountedToken;
-	  function authenticate(status: PStatusToken; sBlock: PServerBlockToken; writerInterface: PWriterToken): Integer;
-	  procedure setDbCryptCallback(status: PStatusToken; cryptCallback: PCryptKeyCallbackToken);
 	  class operator := (aToken:  PServerToken): IServer;
 	  class operator := (intf: IServer): PServerToken;
 	  class operator := (impl: IServerImpl): IServer;
 	  class operator = (a: IServer; b: pointer): boolean;
-class operator = (a,b: IServer): boolean;
-	end;
+	  class operator = (a,b: IServer): boolean;
 
-	IServerImpl = class(IAuthImpl)
-	private
-	  class var vTable: ServerVTable; 
-	  class var FInitialized: boolean;
-	  intf: IServer;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PServerToken inline;
-	  function getInterface: IServer inline;
-		function authenticate(status: PStatusToken; sBlock: PServerBlockToken; writerInterface: PWriterToken): Integer; virtual; abstract;
-		procedure setDbCryptCallback(status: PStatusToken; cryptCallback: PCryptKeyCallbackToken); virtual; abstract;
+	  {see IServerHelper record helper for interface methods}
+
 	end;
 
 	PClientVTable = ^ClientVTable;
@@ -2947,31 +2068,15 @@ class operator = (a,b: IServer): boolean;
 	  const AUTH_SUCCESS = Integer(0);
 	  const AUTH_MORE_DATA = Integer(1);
 	  const AUTH_CONTINUE = Integer(2);
-
 	  function vTable: PClientVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  procedure setOwner(r: PReferenceCountedToken);
-	  function getOwner(): PReferenceCountedToken;
-	  function authenticate(status: PStatusToken; cBlock: PClientBlockToken): Integer;
 	  class operator := (aToken:  PClientToken): IClient;
 	  class operator := (intf: IClient): PClientToken;
 	  class operator := (impl: IClientImpl): IClient;
 	  class operator = (a: IClient; b: pointer): boolean;
-class operator = (a,b: IClient): boolean;
-	end;
+	  class operator = (a,b: IClient): boolean;
 
-	IClientImpl = class(IAuthImpl)
-	private
-	  class var vTable: ClientVTable; 
-	  class var FInitialized: boolean;
-	  intf: IClient;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PClientToken inline;
-	  function getInterface: IClient inline;
-		function authenticate(status: PStatusToken; cBlock: PClientBlockToken): Integer; virtual; abstract;
+	  {see IClientHelper record helper for interface methods}
+
 	end;
 
 	PUserFieldVTable = ^UserFieldVTable;
@@ -2990,31 +2095,15 @@ class operator = (a,b: IClient): boolean;
 	  token: PUserFieldToken;
 	public
 	  const VERSION = 3;
-
 	  function vTable: PUserFieldVTable inline;
-	  function entered(): Integer;
-	  function specified(): Integer;
-	  procedure setEntered(status: PStatusToken; newValue: Integer);
 	  class operator := (aToken:  PUserFieldToken): IUserField;
 	  class operator := (intf: IUserField): PUserFieldToken;
 	  class operator := (impl: IUserFieldImpl): IUserField;
 	  class operator = (a: IUserField; b: pointer): boolean;
-class operator = (a,b: IUserField): boolean;
-	end;
+	  class operator = (a,b: IUserField): boolean;
 
-	IUserFieldImpl = class(IVersionedImpl)
-	private
-	  class var vTable: UserFieldVTable; 
-	  class var FInitialized: boolean;
-	  intf: IUserField;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PUserFieldToken inline;
-	  function getInterface: IUserField inline;
-		function entered(): Integer; virtual; abstract;
-		function specified(): Integer; virtual; abstract;
-		procedure setEntered(status: PStatusToken; newValue: Integer); virtual; abstract;
+	  {see IUserFieldHelper record helper for interface methods}
+
 	end;
 
 	PCharUserFieldVTable = ^CharUserFieldVTable;
@@ -3035,32 +2124,15 @@ class operator = (a,b: IUserField): boolean;
 	  token: PCharUserFieldToken;
 	public
 	  const VERSION = 5;
-
 	  function vTable: PCharUserFieldVTable inline;
-	  function entered(): Integer;
-	  function specified(): Integer;
-	  procedure setEntered(status: PStatusToken; newValue: Integer);
-	  function get(): PAnsiChar;
-	  procedure set_(status: PStatusToken; newValue: PAnsiChar);
 	  class operator := (aToken:  PCharUserFieldToken): ICharUserField;
 	  class operator := (intf: ICharUserField): PCharUserFieldToken;
 	  class operator := (impl: ICharUserFieldImpl): ICharUserField;
 	  class operator = (a: ICharUserField; b: pointer): boolean;
-class operator = (a,b: ICharUserField): boolean;
-	end;
+	  class operator = (a,b: ICharUserField): boolean;
 
-	ICharUserFieldImpl = class(IUserFieldImpl)
-	private
-	  class var vTable: CharUserFieldVTable; 
-	  class var FInitialized: boolean;
-	  intf: ICharUserField;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PCharUserFieldToken inline;
-	  function getInterface: ICharUserField inline;
-		function get(): PAnsiChar; virtual; abstract;
-		procedure set_(status: PStatusToken; newValue: PAnsiChar); virtual; abstract;
+	  {see ICharUserFieldHelper record helper for interface methods}
+
 	end;
 
 	PIntUserFieldVTable = ^IntUserFieldVTable;
@@ -3081,32 +2153,15 @@ class operator = (a,b: ICharUserField): boolean;
 	  token: PIntUserFieldToken;
 	public
 	  const VERSION = 5;
-
 	  function vTable: PIntUserFieldVTable inline;
-	  function entered(): Integer;
-	  function specified(): Integer;
-	  procedure setEntered(status: PStatusToken; newValue: Integer);
-	  function get(): Integer;
-	  procedure set_(status: PStatusToken; newValue: Integer);
 	  class operator := (aToken:  PIntUserFieldToken): IIntUserField;
 	  class operator := (intf: IIntUserField): PIntUserFieldToken;
 	  class operator := (impl: IIntUserFieldImpl): IIntUserField;
 	  class operator = (a: IIntUserField; b: pointer): boolean;
-class operator = (a,b: IIntUserField): boolean;
-	end;
+	  class operator = (a,b: IIntUserField): boolean;
 
-	IIntUserFieldImpl = class(IUserFieldImpl)
-	private
-	  class var vTable: IntUserFieldVTable; 
-	  class var FInitialized: boolean;
-	  intf: IIntUserField;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PIntUserFieldToken inline;
-	  function getInterface: IIntUserField inline;
-		function get(): Integer; virtual; abstract;
-		procedure set_(status: PStatusToken; newValue: Integer); virtual; abstract;
+	  {see IIntUserFieldHelper record helper for interface methods}
+
 	end;
 
 	PUserVTable = ^UserVTable;
@@ -3139,47 +2194,15 @@ class operator = (a,b: IIntUserField): boolean;
 	  const OP_USER_DISPLAY = Cardinal(4);
 	  const OP_USER_SET_MAP = Cardinal(5);
 	  const OP_USER_DROP_MAP = Cardinal(6);
-
 	  function vTable: PUserVTable inline;
-	  function operation(): Cardinal;
-	  function userName(): PCharUserFieldToken;
-	  function password(): PCharUserFieldToken;
-	  function firstName(): PCharUserFieldToken;
-	  function lastName(): PCharUserFieldToken;
-	  function middleName(): PCharUserFieldToken;
-	  function comment(): PCharUserFieldToken;
-	  function attributes(): PCharUserFieldToken;
-	  function active(): PIntUserFieldToken;
-	  function admin(): PIntUserFieldToken;
-	  procedure clear(status: PStatusToken);
 	  class operator := (aToken:  PUserToken): IUser;
 	  class operator := (intf: IUser): PUserToken;
 	  class operator := (impl: IUserImpl): IUser;
 	  class operator = (a: IUser; b: pointer): boolean;
-class operator = (a,b: IUser): boolean;
-	end;
+	  class operator = (a,b: IUser): boolean;
 
-	IUserImpl = class(IVersionedImpl)
-	private
-	  class var vTable: UserVTable; 
-	  class var FInitialized: boolean;
-	  intf: IUser;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PUserToken inline;
-	  function getInterface: IUser inline;
-		function operation(): Cardinal; virtual; abstract;
-		function userName(): PCharUserFieldToken; virtual; abstract;
-		function password(): PCharUserFieldToken; virtual; abstract;
-		function firstName(): PCharUserFieldToken; virtual; abstract;
-		function lastName(): PCharUserFieldToken; virtual; abstract;
-		function middleName(): PCharUserFieldToken; virtual; abstract;
-		function comment(): PCharUserFieldToken; virtual; abstract;
-		function attributes(): PCharUserFieldToken; virtual; abstract;
-		function active(): PIntUserFieldToken; virtual; abstract;
-		function admin(): PIntUserFieldToken; virtual; abstract;
-		procedure clear(status: PStatusToken); virtual; abstract;
+	  {see IUserHelper record helper for interface methods}
+
 	end;
 
 	PListUsersVTable = ^ListUsersVTable;
@@ -3196,27 +2219,15 @@ class operator = (a,b: IUser): boolean;
 	  token: PListUsersToken;
 	public
 	  const VERSION = 1;
-
 	  function vTable: PListUsersVTable inline;
-	  procedure list(status: PStatusToken; user: PUserToken);
 	  class operator := (aToken:  PListUsersToken): IListUsers;
 	  class operator := (intf: IListUsers): PListUsersToken;
 	  class operator := (impl: IListUsersImpl): IListUsers;
 	  class operator = (a: IListUsers; b: pointer): boolean;
-class operator = (a,b: IListUsers): boolean;
-	end;
+	  class operator = (a,b: IListUsers): boolean;
 
-	IListUsersImpl = class(IVersionedImpl)
-	private
-	  class var vTable: ListUsersVTable; 
-	  class var FInitialized: boolean;
-	  intf: IListUsers;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PListUsersToken inline;
-	  function getInterface: IListUsers inline;
-		procedure list(status: PStatusToken; user: PUserToken); virtual; abstract;
+	  {see IListUsersHelper record helper for interface methods}
+
 	end;
 
 	PLogonInfoVTable = ^LogonInfoVTable;
@@ -3239,39 +2250,15 @@ class operator = (a,b: IListUsers): boolean;
 	  token: PLogonInfoToken;
 	public
 	  const VERSION = 7;
-
 	  function vTable: PLogonInfoVTable inline;
-	  function name(): PAnsiChar;
-	  function role(): PAnsiChar;
-	  function networkProtocol(): PAnsiChar;
-	  function remoteAddress(): PAnsiChar;
-	  function authBlock(length: CardinalPtr): BytePtr;
-	  function attachment(status: PStatusToken): PAttachmentToken;
-	  function transaction(status: PStatusToken): PTransactionToken;
 	  class operator := (aToken:  PLogonInfoToken): ILogonInfo;
 	  class operator := (intf: ILogonInfo): PLogonInfoToken;
 	  class operator := (impl: ILogonInfoImpl): ILogonInfo;
 	  class operator = (a: ILogonInfo; b: pointer): boolean;
-class operator = (a,b: ILogonInfo): boolean;
-	end;
+	  class operator = (a,b: ILogonInfo): boolean;
 
-	ILogonInfoImpl = class(IVersionedImpl)
-	private
-	  class var vTable: LogonInfoVTable; 
-	  class var FInitialized: boolean;
-	  intf: ILogonInfo;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PLogonInfoToken inline;
-	  function getInterface: ILogonInfo inline;
-		function name(): PAnsiChar; virtual; abstract;
-		function role(): PAnsiChar; virtual; abstract;
-		function networkProtocol(): PAnsiChar; virtual; abstract;
-		function remoteAddress(): PAnsiChar; virtual; abstract;
-		function authBlock(length: CardinalPtr): BytePtr; virtual; abstract;
-		function attachment(status: PStatusToken): PAttachmentToken; virtual; abstract;
-		function transaction(status: PStatusToken): PTransactionToken; virtual; abstract;
+	  {see ILogonInfoHelper record helper for interface methods}
+
 	end;
 
 	PManagementVTable = ^ManagementVTable;
@@ -3295,37 +2282,15 @@ class operator = (a,b: ILogonInfo): boolean;
 	  token: PManagementToken;
 	public
 	  const VERSION = 8;
-
 	  function vTable: PManagementVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  procedure setOwner(r: PReferenceCountedToken);
-	  function getOwner(): PReferenceCountedToken;
-	  procedure start(status: PStatusToken; logonInfo: PLogonInfoToken);
-	  function execute(status: PStatusToken; user: PUserToken; callback: PListUsersToken): Integer;
-	  procedure commit(status: PStatusToken);
-	  procedure rollback(status: PStatusToken);
 	  class operator := (aToken:  PManagementToken): IManagement;
 	  class operator := (intf: IManagement): PManagementToken;
 	  class operator := (impl: IManagementImpl): IManagement;
 	  class operator = (a: IManagement; b: pointer): boolean;
-class operator = (a,b: IManagement): boolean;
-	end;
+	  class operator = (a,b: IManagement): boolean;
 
-	IManagementImpl = class(IPluginBaseImpl)
-	private
-	  class var vTable: ManagementVTable; 
-	  class var FInitialized: boolean;
-	  intf: IManagement;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PManagementToken inline;
-	  function getInterface: IManagement inline;
-		procedure start(status: PStatusToken; logonInfo: PLogonInfoToken); virtual; abstract;
-		function execute(status: PStatusToken; user: PUserToken; callback: PListUsersToken): Integer; virtual; abstract;
-		procedure commit(status: PStatusToken); virtual; abstract;
-		procedure rollback(status: PStatusToken); virtual; abstract;
+	  {see IManagementHelper record helper for interface methods}
+
 	end;
 
 	PAuthBlockVTable = ^AuthBlockVTable;
@@ -3348,39 +2313,15 @@ class operator = (a,b: IManagement): boolean;
 	  token: PAuthBlockToken;
 	public
 	  const VERSION = 7;
-
 	  function vTable: PAuthBlockVTable inline;
-	  function getType(): PAnsiChar;
-	  function getName(): PAnsiChar;
-	  function getPlugin(): PAnsiChar;
-	  function getSecurityDb(): PAnsiChar;
-	  function getOriginalPlugin(): PAnsiChar;
-	  function next(status: PStatusToken): Boolean;
-	  function first(status: PStatusToken): Boolean;
 	  class operator := (aToken:  PAuthBlockToken): IAuthBlock;
 	  class operator := (intf: IAuthBlock): PAuthBlockToken;
 	  class operator := (impl: IAuthBlockImpl): IAuthBlock;
 	  class operator = (a: IAuthBlock; b: pointer): boolean;
-class operator = (a,b: IAuthBlock): boolean;
-	end;
+	  class operator = (a,b: IAuthBlock): boolean;
 
-	IAuthBlockImpl = class(IVersionedImpl)
-	private
-	  class var vTable: AuthBlockVTable; 
-	  class var FInitialized: boolean;
-	  intf: IAuthBlock;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PAuthBlockToken inline;
-	  function getInterface: IAuthBlock inline;
-		function getType(): PAnsiChar; virtual; abstract;
-		function getName(): PAnsiChar; virtual; abstract;
-		function getPlugin(): PAnsiChar; virtual; abstract;
-		function getSecurityDb(): PAnsiChar; virtual; abstract;
-		function getOriginalPlugin(): PAnsiChar; virtual; abstract;
-		function next(status: PStatusToken): Boolean; virtual; abstract;
-		function first(status: PStatusToken): Boolean; virtual; abstract;
+	  {see IAuthBlockHelper record helper for interface methods}
+
 	end;
 
 	PWireCryptPluginVTable = ^WireCryptPluginVTable;
@@ -3406,41 +2347,15 @@ class operator = (a,b: IAuthBlock): boolean;
 	  token: PWireCryptPluginToken;
 	public
 	  const VERSION = 10;
-
 	  function vTable: PWireCryptPluginVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  procedure setOwner(r: PReferenceCountedToken);
-	  function getOwner(): PReferenceCountedToken;
-	  function getKnownTypes(status: PStatusToken): PAnsiChar;
-	  procedure setKey(status: PStatusToken; key: PCryptKeyToken);
-	  procedure encrypt(status: PStatusToken; length: Cardinal; from: Pointer; to_: Pointer);
-	  procedure decrypt(status: PStatusToken; length: Cardinal; from: Pointer; to_: Pointer);
-	  function getSpecificData(status: PStatusToken; keyType: PAnsiChar; length: CardinalPtr): BytePtr;
-	  procedure setSpecificData(status: PStatusToken; keyType: PAnsiChar; length: Cardinal; data: BytePtr);
 	  class operator := (aToken:  PWireCryptPluginToken): IWireCryptPlugin;
 	  class operator := (intf: IWireCryptPlugin): PWireCryptPluginToken;
 	  class operator := (impl: IWireCryptPluginImpl): IWireCryptPlugin;
 	  class operator = (a: IWireCryptPlugin; b: pointer): boolean;
-class operator = (a,b: IWireCryptPlugin): boolean;
-	end;
+	  class operator = (a,b: IWireCryptPlugin): boolean;
 
-	IWireCryptPluginImpl = class(IPluginBaseImpl)
-	private
-	  class var vTable: WireCryptPluginVTable; 
-	  class var FInitialized: boolean;
-	  intf: IWireCryptPlugin;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PWireCryptPluginToken inline;
-	  function getInterface: IWireCryptPlugin inline;
-		function getKnownTypes(status: PStatusToken): PAnsiChar; virtual; abstract;
-		procedure setKey(status: PStatusToken; key: PCryptKeyToken); virtual; abstract;
-		procedure encrypt(status: PStatusToken; length: Cardinal; from: Pointer; to_: Pointer); virtual; abstract;
-		procedure decrypt(status: PStatusToken; length: Cardinal; from: Pointer; to_: Pointer); virtual; abstract;
-		function getSpecificData(status: PStatusToken; keyType: PAnsiChar; length: CardinalPtr): BytePtr; virtual; abstract;
-		procedure setSpecificData(status: PStatusToken; keyType: PAnsiChar; length: Cardinal; data: BytePtr); virtual; abstract;
+	  {see IWireCryptPluginHelper record helper for interface methods}
+
 	end;
 
 	PCryptKeyCallbackVTable = ^CryptKeyCallbackVTable;
@@ -3457,27 +2372,15 @@ class operator = (a,b: IWireCryptPlugin): boolean;
 	  token: PCryptKeyCallbackToken;
 	public
 	  const VERSION = 1;
-
 	  function vTable: PCryptKeyCallbackVTable inline;
-	  function callback(dataLength: Cardinal; data: Pointer; bufferLength: Cardinal; buffer: Pointer): Cardinal;
 	  class operator := (aToken:  PCryptKeyCallbackToken): ICryptKeyCallback;
 	  class operator := (intf: ICryptKeyCallback): PCryptKeyCallbackToken;
 	  class operator := (impl: ICryptKeyCallbackImpl): ICryptKeyCallback;
 	  class operator = (a: ICryptKeyCallback; b: pointer): boolean;
-class operator = (a,b: ICryptKeyCallback): boolean;
-	end;
+	  class operator = (a,b: ICryptKeyCallback): boolean;
 
-	ICryptKeyCallbackImpl = class(IVersionedImpl)
-	private
-	  class var vTable: CryptKeyCallbackVTable; 
-	  class var FInitialized: boolean;
-	  intf: ICryptKeyCallback;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PCryptKeyCallbackToken inline;
-	  function getInterface: ICryptKeyCallback inline;
-		function callback(dataLength: Cardinal; data: Pointer; bufferLength: Cardinal; buffer: Pointer): Cardinal; virtual; abstract;
+	  {see ICryptKeyCallbackHelper record helper for interface methods}
+
 	end;
 
 	PKeyHolderPluginVTable = ^KeyHolderPluginVTable;
@@ -3501,37 +2404,15 @@ class operator = (a,b: ICryptKeyCallback): boolean;
 	  token: PKeyHolderPluginToken;
 	public
 	  const VERSION = 8;
-
 	  function vTable: PKeyHolderPluginVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  procedure setOwner(r: PReferenceCountedToken);
-	  function getOwner(): PReferenceCountedToken;
-	  function keyCallback(status: PStatusToken; callback: PCryptKeyCallbackToken): Integer;
-	  function keyHandle(status: PStatusToken; keyName: PAnsiChar): PCryptKeyCallbackToken;
-	  function useOnlyOwnKeys(status: PStatusToken): Boolean;
-	  function chainHandle(status: PStatusToken): PCryptKeyCallbackToken;
 	  class operator := (aToken:  PKeyHolderPluginToken): IKeyHolderPlugin;
 	  class operator := (intf: IKeyHolderPlugin): PKeyHolderPluginToken;
 	  class operator := (impl: IKeyHolderPluginImpl): IKeyHolderPlugin;
 	  class operator = (a: IKeyHolderPlugin; b: pointer): boolean;
-class operator = (a,b: IKeyHolderPlugin): boolean;
-	end;
+	  class operator = (a,b: IKeyHolderPlugin): boolean;
 
-	IKeyHolderPluginImpl = class(IPluginBaseImpl)
-	private
-	  class var vTable: KeyHolderPluginVTable; 
-	  class var FInitialized: boolean;
-	  intf: IKeyHolderPlugin;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PKeyHolderPluginToken inline;
-	  function getInterface: IKeyHolderPlugin inline;
-		function keyCallback(status: PStatusToken; callback: PCryptKeyCallbackToken): Integer; virtual; abstract;
-		function keyHandle(status: PStatusToken; keyName: PAnsiChar): PCryptKeyCallbackToken; virtual; abstract;
-		function useOnlyOwnKeys(status: PStatusToken): Boolean; virtual; abstract;
-		function chainHandle(status: PStatusToken): PCryptKeyCallbackToken; virtual; abstract;
+	  {see IKeyHolderPluginHelper record helper for interface methods}
+
 	end;
 
 	PDbCryptInfoVTable = ^DbCryptInfoVTable;
@@ -3550,29 +2431,15 @@ class operator = (a,b: IKeyHolderPlugin): boolean;
 	  token: PDbCryptInfoToken;
 	public
 	  const VERSION = 3;
-
 	  function vTable: PDbCryptInfoVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  function getDatabaseFullPath(status: PStatusToken): PAnsiChar;
 	  class operator := (aToken:  PDbCryptInfoToken): IDbCryptInfo;
 	  class operator := (intf: IDbCryptInfo): PDbCryptInfoToken;
 	  class operator := (impl: IDbCryptInfoImpl): IDbCryptInfo;
 	  class operator = (a: IDbCryptInfo; b: pointer): boolean;
-class operator = (a,b: IDbCryptInfo): boolean;
-	end;
+	  class operator = (a,b: IDbCryptInfo): boolean;
 
-	IDbCryptInfoImpl = class(IReferenceCountedImpl)
-	private
-	  class var vTable: DbCryptInfoVTable; 
-	  class var FInitialized: boolean;
-	  intf: IDbCryptInfo;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PDbCryptInfoToken inline;
-	  function getInterface: IDbCryptInfo inline;
-		function getDatabaseFullPath(status: PStatusToken): PAnsiChar; virtual; abstract;
+	  {see IDbCryptInfoHelper record helper for interface methods}
+
 	end;
 
 	PDbCryptPluginVTable = ^DbCryptPluginVTable;
@@ -3596,37 +2463,15 @@ class operator = (a,b: IDbCryptInfo): boolean;
 	  token: PDbCryptPluginToken;
 	public
 	  const VERSION = 8;
-
 	  function vTable: PDbCryptPluginVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  procedure setOwner(r: PReferenceCountedToken);
-	  function getOwner(): PReferenceCountedToken;
-	  procedure setKey(status: PStatusToken; length: Cardinal; sources: PKeyHolderPluginTokenPtr; keyName: PAnsiChar);
-	  procedure encrypt(status: PStatusToken; length: Cardinal; from: Pointer; to_: Pointer);
-	  procedure decrypt(status: PStatusToken; length: Cardinal; from: Pointer; to_: Pointer);
-	  procedure setInfo(status: PStatusToken; info: PDbCryptInfoToken);
 	  class operator := (aToken:  PDbCryptPluginToken): IDbCryptPlugin;
 	  class operator := (intf: IDbCryptPlugin): PDbCryptPluginToken;
 	  class operator := (impl: IDbCryptPluginImpl): IDbCryptPlugin;
 	  class operator = (a: IDbCryptPlugin; b: pointer): boolean;
-class operator = (a,b: IDbCryptPlugin): boolean;
-	end;
+	  class operator = (a,b: IDbCryptPlugin): boolean;
 
-	IDbCryptPluginImpl = class(IPluginBaseImpl)
-	private
-	  class var vTable: DbCryptPluginVTable; 
-	  class var FInitialized: boolean;
-	  intf: IDbCryptPlugin;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PDbCryptPluginToken inline;
-	  function getInterface: IDbCryptPlugin inline;
-		procedure setKey(status: PStatusToken; length: Cardinal; sources: PKeyHolderPluginTokenPtr; keyName: PAnsiChar); virtual; abstract;
-		procedure encrypt(status: PStatusToken; length: Cardinal; from: Pointer; to_: Pointer); virtual; abstract;
-		procedure decrypt(status: PStatusToken; length: Cardinal; from: Pointer; to_: Pointer); virtual; abstract;
-		procedure setInfo(status: PStatusToken; info: PDbCryptInfoToken); virtual; abstract;
+	  {see IDbCryptPluginHelper record helper for interface methods}
+
 	end;
 
 	PExternalContextVTable = ^ExternalContextVTable;
@@ -3652,45 +2497,15 @@ class operator = (a,b: IDbCryptPlugin): boolean;
 	  token: PExternalContextToken;
 	public
 	  const VERSION = 10;
-
 	  function vTable: PExternalContextVTable inline;
-	  function getMaster(): PMasterToken;
-	  function getEngine(status: PStatusToken): PExternalEngineToken;
-	  function getAttachment(status: PStatusToken): PAttachmentToken;
-	  function getTransaction(status: PStatusToken): PTransactionToken;
-	  function getUserName(): PAnsiChar;
-	  function getDatabaseName(): PAnsiChar;
-	  function getClientCharSet(): PAnsiChar;
-	  function obtainInfoCode(): Integer;
-	  function getInfo(code: Integer): Pointer;
-	  function setInfo(code: Integer; value: Pointer): Pointer;
 	  class operator := (aToken:  PExternalContextToken): IExternalContext;
 	  class operator := (intf: IExternalContext): PExternalContextToken;
 	  class operator := (impl: IExternalContextImpl): IExternalContext;
 	  class operator = (a: IExternalContext; b: pointer): boolean;
-class operator = (a,b: IExternalContext): boolean;
-	end;
+	  class operator = (a,b: IExternalContext): boolean;
 
-	IExternalContextImpl = class(IVersionedImpl)
-	private
-	  class var vTable: ExternalContextVTable; 
-	  class var FInitialized: boolean;
-	  intf: IExternalContext;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PExternalContextToken inline;
-	  function getInterface: IExternalContext inline;
-		function getMaster(): PMasterToken; virtual; abstract;
-		function getEngine(status: PStatusToken): PExternalEngineToken; virtual; abstract;
-		function getAttachment(status: PStatusToken): PAttachmentToken; virtual; abstract;
-		function getTransaction(status: PStatusToken): PTransactionToken; virtual; abstract;
-		function getUserName(): PAnsiChar; virtual; abstract;
-		function getDatabaseName(): PAnsiChar; virtual; abstract;
-		function getClientCharSet(): PAnsiChar; virtual; abstract;
-		function obtainInfoCode(): Integer; virtual; abstract;
-		function getInfo(code: Integer): Pointer; virtual; abstract;
-		function setInfo(code: Integer; value: Pointer): Pointer; virtual; abstract;
+	  {see IExternalContextHelper record helper for interface methods}
+
 	end;
 
 	PExternalResultSetVTable = ^ExternalResultSetVTable;
@@ -3708,28 +2523,15 @@ class operator = (a,b: IExternalContext): boolean;
 	  token: PExternalResultSetToken;
 	public
 	  const VERSION = 2;
-
 	  function vTable: PExternalResultSetVTable inline;
-	  procedure dispose();
-	  function fetch(status: PStatusToken): Boolean;
 	  class operator := (aToken:  PExternalResultSetToken): IExternalResultSet;
 	  class operator := (intf: IExternalResultSet): PExternalResultSetToken;
 	  class operator := (impl: IExternalResultSetImpl): IExternalResultSet;
 	  class operator = (a: IExternalResultSet; b: pointer): boolean;
-class operator = (a,b: IExternalResultSet): boolean;
-	end;
+	  class operator = (a,b: IExternalResultSet): boolean;
 
-	IExternalResultSetImpl = class(IDisposableImpl)
-	private
-	  class var vTable: ExternalResultSetVTable; 
-	  class var FInitialized: boolean;
-	  intf: IExternalResultSet;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PExternalResultSetToken inline;
-	  function getInterface: IExternalResultSet inline;
-		function fetch(status: PStatusToken): Boolean; virtual; abstract;
+	  {see IExternalResultSetHelper record helper for interface methods}
+
 	end;
 
 	PExternalFunctionVTable = ^ExternalFunctionVTable;
@@ -3748,30 +2550,15 @@ class operator = (a,b: IExternalResultSet): boolean;
 	  token: PExternalFunctionToken;
 	public
 	  const VERSION = 3;
-
 	  function vTable: PExternalFunctionVTable inline;
-	  procedure dispose();
-	  procedure getCharSet(status: PStatusToken; context: PExternalContextToken; name: PAnsiChar; nameSize: Cardinal);
-	  procedure execute(status: PStatusToken; context: PExternalContextToken; inMsg: Pointer; outMsg: Pointer);
 	  class operator := (aToken:  PExternalFunctionToken): IExternalFunction;
 	  class operator := (intf: IExternalFunction): PExternalFunctionToken;
 	  class operator := (impl: IExternalFunctionImpl): IExternalFunction;
 	  class operator = (a: IExternalFunction; b: pointer): boolean;
-class operator = (a,b: IExternalFunction): boolean;
-	end;
+	  class operator = (a,b: IExternalFunction): boolean;
 
-	IExternalFunctionImpl = class(IDisposableImpl)
-	private
-	  class var vTable: ExternalFunctionVTable; 
-	  class var FInitialized: boolean;
-	  intf: IExternalFunction;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PExternalFunctionToken inline;
-	  function getInterface: IExternalFunction inline;
-		procedure getCharSet(status: PStatusToken; context: PExternalContextToken; name: PAnsiChar; nameSize: Cardinal); virtual; abstract;
-		procedure execute(status: PStatusToken; context: PExternalContextToken; inMsg: Pointer; outMsg: Pointer); virtual; abstract;
+	  {see IExternalFunctionHelper record helper for interface methods}
+
 	end;
 
 	PExternalProcedureVTable = ^ExternalProcedureVTable;
@@ -3790,30 +2577,15 @@ class operator = (a,b: IExternalFunction): boolean;
 	  token: PExternalProcedureToken;
 	public
 	  const VERSION = 3;
-
 	  function vTable: PExternalProcedureVTable inline;
-	  procedure dispose();
-	  procedure getCharSet(status: PStatusToken; context: PExternalContextToken; name: PAnsiChar; nameSize: Cardinal);
-	  function open(status: PStatusToken; context: PExternalContextToken; inMsg: Pointer; outMsg: Pointer): PExternalResultSetToken;
 	  class operator := (aToken:  PExternalProcedureToken): IExternalProcedure;
 	  class operator := (intf: IExternalProcedure): PExternalProcedureToken;
 	  class operator := (impl: IExternalProcedureImpl): IExternalProcedure;
 	  class operator = (a: IExternalProcedure; b: pointer): boolean;
-class operator = (a,b: IExternalProcedure): boolean;
-	end;
+	  class operator = (a,b: IExternalProcedure): boolean;
 
-	IExternalProcedureImpl = class(IDisposableImpl)
-	private
-	  class var vTable: ExternalProcedureVTable; 
-	  class var FInitialized: boolean;
-	  intf: IExternalProcedure;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PExternalProcedureToken inline;
-	  function getInterface: IExternalProcedure inline;
-		procedure getCharSet(status: PStatusToken; context: PExternalContextToken; name: PAnsiChar; nameSize: Cardinal); virtual; abstract;
-		function open(status: PStatusToken; context: PExternalContextToken; inMsg: Pointer; outMsg: Pointer): PExternalResultSetToken; virtual; abstract;
+	  {see IExternalProcedureHelper record helper for interface methods}
+
 	end;
 
 	PExternalTriggerVTable = ^ExternalTriggerVTable;
@@ -3844,30 +2616,15 @@ class operator = (a,b: IExternalProcedure): boolean;
 	  const ACTION_TRANS_COMMIT = Cardinal(7);
 	  const ACTION_TRANS_ROLLBACK = Cardinal(8);
 	  const ACTION_DDL = Cardinal(9);
-
 	  function vTable: PExternalTriggerVTable inline;
-	  procedure dispose();
-	  procedure getCharSet(status: PStatusToken; context: PExternalContextToken; name: PAnsiChar; nameSize: Cardinal);
-	  procedure execute(status: PStatusToken; context: PExternalContextToken; action: Cardinal; oldMsg: Pointer; newMsg: Pointer);
 	  class operator := (aToken:  PExternalTriggerToken): IExternalTrigger;
 	  class operator := (intf: IExternalTrigger): PExternalTriggerToken;
 	  class operator := (impl: IExternalTriggerImpl): IExternalTrigger;
 	  class operator = (a: IExternalTrigger; b: pointer): boolean;
-class operator = (a,b: IExternalTrigger): boolean;
-	end;
+	  class operator = (a,b: IExternalTrigger): boolean;
 
-	IExternalTriggerImpl = class(IDisposableImpl)
-	private
-	  class var vTable: ExternalTriggerVTable; 
-	  class var FInitialized: boolean;
-	  intf: IExternalTrigger;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PExternalTriggerToken inline;
-	  function getInterface: IExternalTrigger inline;
-		procedure getCharSet(status: PStatusToken; context: PExternalContextToken; name: PAnsiChar; nameSize: Cardinal); virtual; abstract;
-		procedure execute(status: PStatusToken; context: PExternalContextToken; action: Cardinal; oldMsg: Pointer; newMsg: Pointer); virtual; abstract;
+	  {see IExternalTriggerHelper record helper for interface methods}
+
 	end;
 
 	PRoutineMetadataVTable = ^RoutineMetadataVTable;
@@ -3892,43 +2649,15 @@ class operator = (a,b: IExternalTrigger): boolean;
 	  token: PRoutineMetadataToken;
 	public
 	  const VERSION = 9;
-
 	  function vTable: PRoutineMetadataVTable inline;
-	  function getPackage(status: PStatusToken): PAnsiChar;
-	  function getName(status: PStatusToken): PAnsiChar;
-	  function getEntryPoint(status: PStatusToken): PAnsiChar;
-	  function getBody(status: PStatusToken): PAnsiChar;
-	  function getInputMetadata(status: PStatusToken): PMessageMetadataToken;
-	  function getOutputMetadata(status: PStatusToken): PMessageMetadataToken;
-	  function getTriggerMetadata(status: PStatusToken): PMessageMetadataToken;
-	  function getTriggerTable(status: PStatusToken): PAnsiChar;
-	  function getTriggerType(status: PStatusToken): Cardinal;
 	  class operator := (aToken:  PRoutineMetadataToken): IRoutineMetadata;
 	  class operator := (intf: IRoutineMetadata): PRoutineMetadataToken;
 	  class operator := (impl: IRoutineMetadataImpl): IRoutineMetadata;
 	  class operator = (a: IRoutineMetadata; b: pointer): boolean;
-class operator = (a,b: IRoutineMetadata): boolean;
-	end;
+	  class operator = (a,b: IRoutineMetadata): boolean;
 
-	IRoutineMetadataImpl = class(IVersionedImpl)
-	private
-	  class var vTable: RoutineMetadataVTable; 
-	  class var FInitialized: boolean;
-	  intf: IRoutineMetadata;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PRoutineMetadataToken inline;
-	  function getInterface: IRoutineMetadata inline;
-		function getPackage(status: PStatusToken): PAnsiChar; virtual; abstract;
-		function getName(status: PStatusToken): PAnsiChar; virtual; abstract;
-		function getEntryPoint(status: PStatusToken): PAnsiChar; virtual; abstract;
-		function getBody(status: PStatusToken): PAnsiChar; virtual; abstract;
-		function getInputMetadata(status: PStatusToken): PMessageMetadataToken; virtual; abstract;
-		function getOutputMetadata(status: PStatusToken): PMessageMetadataToken; virtual; abstract;
-		function getTriggerMetadata(status: PStatusToken): PMessageMetadataToken; virtual; abstract;
-		function getTriggerTable(status: PStatusToken): PAnsiChar; virtual; abstract;
-		function getTriggerType(status: PStatusToken): Cardinal; virtual; abstract;
+	  {see IRoutineMetadataHelper record helper for interface methods}
+
 	end;
 
 	PExternalEngineVTable = ^ExternalEngineVTable;
@@ -3954,41 +2683,15 @@ class operator = (a,b: IRoutineMetadata): boolean;
 	  token: PExternalEngineToken;
 	public
 	  const VERSION = 10;
-
 	  function vTable: PExternalEngineVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  procedure setOwner(r: PReferenceCountedToken);
-	  function getOwner(): PReferenceCountedToken;
-	  procedure open(status: PStatusToken; context: PExternalContextToken; charSet: PAnsiChar; charSetSize: Cardinal);
-	  procedure openAttachment(status: PStatusToken; context: PExternalContextToken);
-	  procedure closeAttachment(status: PStatusToken; context: PExternalContextToken);
-	  function makeFunction(status: PStatusToken; context: PExternalContextToken; metadata: PRoutineMetadataToken; inBuilder: PMetadataBuilderToken; outBuilder: PMetadataBuilderToken): PExternalFunctionToken;
-	  function makeProcedure(status: PStatusToken; context: PExternalContextToken; metadata: PRoutineMetadataToken; inBuilder: PMetadataBuilderToken; outBuilder: PMetadataBuilderToken): PExternalProcedureToken;
-	  function makeTrigger(status: PStatusToken; context: PExternalContextToken; metadata: PRoutineMetadataToken; fieldsBuilder: PMetadataBuilderToken): PExternalTriggerToken;
 	  class operator := (aToken:  PExternalEngineToken): IExternalEngine;
 	  class operator := (intf: IExternalEngine): PExternalEngineToken;
 	  class operator := (impl: IExternalEngineImpl): IExternalEngine;
 	  class operator = (a: IExternalEngine; b: pointer): boolean;
-class operator = (a,b: IExternalEngine): boolean;
-	end;
+	  class operator = (a,b: IExternalEngine): boolean;
 
-	IExternalEngineImpl = class(IPluginBaseImpl)
-	private
-	  class var vTable: ExternalEngineVTable; 
-	  class var FInitialized: boolean;
-	  intf: IExternalEngine;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PExternalEngineToken inline;
-	  function getInterface: IExternalEngine inline;
-		procedure open(status: PStatusToken; context: PExternalContextToken; charSet: PAnsiChar; charSetSize: Cardinal); virtual; abstract;
-		procedure openAttachment(status: PStatusToken; context: PExternalContextToken); virtual; abstract;
-		procedure closeAttachment(status: PStatusToken; context: PExternalContextToken); virtual; abstract;
-		function makeFunction(status: PStatusToken; context: PExternalContextToken; metadata: PRoutineMetadataToken; inBuilder: PMetadataBuilderToken; outBuilder: PMetadataBuilderToken): PExternalFunctionToken; virtual; abstract;
-		function makeProcedure(status: PStatusToken; context: PExternalContextToken; metadata: PRoutineMetadataToken; inBuilder: PMetadataBuilderToken; outBuilder: PMetadataBuilderToken): PExternalProcedureToken; virtual; abstract;
-		function makeTrigger(status: PStatusToken; context: PExternalContextToken; metadata: PRoutineMetadataToken; fieldsBuilder: PMetadataBuilderToken): PExternalTriggerToken; virtual; abstract;
+	  {see IExternalEngineHelper record helper for interface methods}
+
 	end;
 
 	PTimerVTable = ^TimerVTable;
@@ -4007,29 +2710,15 @@ class operator = (a,b: IExternalEngine): boolean;
 	  token: PTimerToken;
 	public
 	  const VERSION = 3;
-
 	  function vTable: PTimerVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  procedure handler();
 	  class operator := (aToken:  PTimerToken): ITimer;
 	  class operator := (intf: ITimer): PTimerToken;
 	  class operator := (impl: ITimerImpl): ITimer;
 	  class operator = (a: ITimer; b: pointer): boolean;
-class operator = (a,b: ITimer): boolean;
-	end;
+	  class operator = (a,b: ITimer): boolean;
 
-	ITimerImpl = class(IReferenceCountedImpl)
-	private
-	  class var vTable: TimerVTable; 
-	  class var FInitialized: boolean;
-	  intf: ITimer;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PTimerToken inline;
-	  function getInterface: ITimer inline;
-		procedure handler(); virtual; abstract;
+	  {see ITimerHelper record helper for interface methods}
+
 	end;
 
 	PTimerControlVTable = ^TimerControlVTable;
@@ -4047,29 +2736,15 @@ class operator = (a,b: ITimer): boolean;
 	  token: PTimerControlToken;
 	public
 	  const VERSION = 2;
-
 	  function vTable: PTimerControlVTable inline;
-	  procedure start(status: PStatusToken; timer: PTimerToken; microSeconds: QWord);
-	  procedure stop(status: PStatusToken; timer: PTimerToken);
 	  class operator := (aToken:  PTimerControlToken): ITimerControl;
 	  class operator := (intf: ITimerControl): PTimerControlToken;
 	  class operator := (impl: ITimerControlImpl): ITimerControl;
 	  class operator = (a: ITimerControl; b: pointer): boolean;
-class operator = (a,b: ITimerControl): boolean;
-	end;
+	  class operator = (a,b: ITimerControl): boolean;
 
-	ITimerControlImpl = class(IVersionedImpl)
-	private
-	  class var vTable: TimerControlVTable; 
-	  class var FInitialized: boolean;
-	  intf: ITimerControl;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PTimerControlToken inline;
-	  function getInterface: ITimerControl inline;
-		procedure start(status: PStatusToken; timer: PTimerToken; microSeconds: QWord); virtual; abstract;
-		procedure stop(status: PStatusToken; timer: PTimerToken); virtual; abstract;
+	  {see ITimerControlHelper record helper for interface methods}
+
 	end;
 
 	PVersionCallbackVTable = ^VersionCallbackVTable;
@@ -4086,27 +2761,15 @@ class operator = (a,b: ITimerControl): boolean;
 	  token: PVersionCallbackToken;
 	public
 	  const VERSION = 1;
-
 	  function vTable: PVersionCallbackVTable inline;
-	  procedure callback(status: PStatusToken; text: PAnsiChar);
 	  class operator := (aToken:  PVersionCallbackToken): IVersionCallback;
 	  class operator := (intf: IVersionCallback): PVersionCallbackToken;
 	  class operator := (impl: IVersionCallbackImpl): IVersionCallback;
 	  class operator = (a: IVersionCallback; b: pointer): boolean;
-class operator = (a,b: IVersionCallback): boolean;
-	end;
+	  class operator = (a,b: IVersionCallback): boolean;
 
-	IVersionCallbackImpl = class(IVersionedImpl)
-	private
-	  class var vTable: VersionCallbackVTable; 
-	  class var FInitialized: boolean;
-	  intf: IVersionCallback;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PVersionCallbackToken inline;
-	  function getInterface: IVersionCallback inline;
-		procedure callback(status: PStatusToken; text: PAnsiChar); virtual; abstract;
+	  {see IVersionCallbackHelper record helper for interface methods}
+
 	end;
 
 	PUtilVTable = ^UtilVTable;
@@ -4144,69 +2807,15 @@ class operator = (a,b: IVersionCallback): boolean;
 	  token: PUtilToken;
 	public
 	  const VERSION = 22;
-
 	  function vTable: PUtilVTable inline;
-	  procedure getFbVersion(status: PStatusToken; att: PAttachmentToken; callback: PVersionCallbackToken);
-	  procedure loadBlob(status: PStatusToken; blobId: ISC_QUADPtr; att: PAttachmentToken; tra: PTransactionToken; file_: PAnsiChar; txt: Boolean);
-	  procedure dumpBlob(status: PStatusToken; blobId: ISC_QUADPtr; att: PAttachmentToken; tra: PTransactionToken; file_: PAnsiChar; txt: Boolean);
-	  procedure getPerfCounters(status: PStatusToken; att: PAttachmentToken; countersSet: PAnsiChar; counters: Int64Ptr);
-	  function executeCreateDatabase(status: PStatusToken; stmtLength: Cardinal; creatDBstatement: PAnsiChar; dialect: Cardinal; stmtIsCreateDb: BooleanPtr): PAttachmentToken;
-	  procedure decodeDate(date: ISC_DATE; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr);
-	  procedure decodeTime(time: ISC_TIME; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr);
-	  function encodeDate(year: Cardinal; month: Cardinal; day: Cardinal): ISC_DATE;
-	  function encodeTime(hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal): ISC_TIME;
-	  function formatStatus(buffer: PAnsiChar; bufferSize: Cardinal; status: PStatusToken): Cardinal;
-	  function getClientVersion(): Cardinal;
-	  function getXpbBuilder(status: PStatusToken; kind: Cardinal; buf: BytePtr; len: Cardinal): PXpbBuilderToken;
-	  function setOffsets(status: PStatusToken; metadata: PMessageMetadataToken; callback: POffsetsCallbackToken): Cardinal;
-	  function getDecFloat16(status: PStatusToken): PDecFloat16Token;
-	  function getDecFloat34(status: PStatusToken): PDecFloat34Token;
-	  procedure decodeTimeTz(status: PStatusToken; timeTz: ISC_TIME_TZPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar);
-	  procedure decodeTimeStampTz(status: PStatusToken; timeStampTz: ISC_TIMESTAMP_TZPtr; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar);
-	  procedure encodeTimeTz(status: PStatusToken; timeTz: ISC_TIME_TZPtr; hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal; timeZone: PAnsiChar);
-	  procedure encodeTimeStampTz(status: PStatusToken; timeStampTz: ISC_TIMESTAMP_TZPtr; year: Cardinal; month: Cardinal; day: Cardinal; hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal; timeZone: PAnsiChar);
-	  function getInt128(status: PStatusToken): PInt128Token;
-	  procedure decodeTimeTzEx(status: PStatusToken; timeTz: ISC_TIME_TZ_EXPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar);
-	  procedure decodeTimeStampTzEx(status: PStatusToken; timeStampTz: ISC_TIMESTAMP_TZ_EXPtr; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar);
 	  class operator := (aToken:  PUtilToken): IUtil;
 	  class operator := (intf: IUtil): PUtilToken;
 	  class operator := (impl: IUtilImpl): IUtil;
 	  class operator = (a: IUtil; b: pointer): boolean;
-class operator = (a,b: IUtil): boolean;
-	end;
+	  class operator = (a,b: IUtil): boolean;
 
-	IUtilImpl = class(IVersionedImpl)
-	private
-	  class var vTable: UtilVTable; 
-	  class var FInitialized: boolean;
-	  intf: IUtil;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PUtilToken inline;
-	  function getInterface: IUtil inline;
-		procedure getFbVersion(status: PStatusToken; att: PAttachmentToken; callback: PVersionCallbackToken); virtual; abstract;
-		procedure loadBlob(status: PStatusToken; blobId: ISC_QUADPtr; att: PAttachmentToken; tra: PTransactionToken; file_: PAnsiChar; txt: Boolean); virtual; abstract;
-		procedure dumpBlob(status: PStatusToken; blobId: ISC_QUADPtr; att: PAttachmentToken; tra: PTransactionToken; file_: PAnsiChar; txt: Boolean); virtual; abstract;
-		procedure getPerfCounters(status: PStatusToken; att: PAttachmentToken; countersSet: PAnsiChar; counters: Int64Ptr); virtual; abstract;
-		function executeCreateDatabase(status: PStatusToken; stmtLength: Cardinal; creatDBstatement: PAnsiChar; dialect: Cardinal; stmtIsCreateDb: BooleanPtr): PAttachmentToken; virtual; abstract;
-		procedure decodeDate(date: ISC_DATE; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr); virtual; abstract;
-		procedure decodeTime(time: ISC_TIME; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr); virtual; abstract;
-		function encodeDate(year: Cardinal; month: Cardinal; day: Cardinal): ISC_DATE; virtual; abstract;
-		function encodeTime(hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal): ISC_TIME; virtual; abstract;
-		function formatStatus(buffer: PAnsiChar; bufferSize: Cardinal; status: PStatusToken): Cardinal; virtual; abstract;
-		function getClientVersion(): Cardinal; virtual; abstract;
-		function getXpbBuilder(status: PStatusToken; kind: Cardinal; buf: BytePtr; len: Cardinal): PXpbBuilderToken; virtual; abstract;
-		function setOffsets(status: PStatusToken; metadata: PMessageMetadataToken; callback: POffsetsCallbackToken): Cardinal; virtual; abstract;
-		function getDecFloat16(status: PStatusToken): PDecFloat16Token; virtual; abstract;
-		function getDecFloat34(status: PStatusToken): PDecFloat34Token; virtual; abstract;
-		procedure decodeTimeTz(status: PStatusToken; timeTz: ISC_TIME_TZPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar); virtual; abstract;
-		procedure decodeTimeStampTz(status: PStatusToken; timeStampTz: ISC_TIMESTAMP_TZPtr; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar); virtual; abstract;
-		procedure encodeTimeTz(status: PStatusToken; timeTz: ISC_TIME_TZPtr; hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal; timeZone: PAnsiChar); virtual; abstract;
-		procedure encodeTimeStampTz(status: PStatusToken; timeStampTz: ISC_TIMESTAMP_TZPtr; year: Cardinal; month: Cardinal; day: Cardinal; hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal; timeZone: PAnsiChar); virtual; abstract;
-		function getInt128(status: PStatusToken): PInt128Token; virtual; abstract;
-		procedure decodeTimeTzEx(status: PStatusToken; timeTz: ISC_TIME_TZ_EXPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar); virtual; abstract;
-		procedure decodeTimeStampTzEx(status: PStatusToken; timeStampTz: ISC_TIMESTAMP_TZ_EXPtr; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar); virtual; abstract;
+	  {see IUtilHelper record helper for interface methods}
+
 	end;
 
 	POffsetsCallbackVTable = ^OffsetsCallbackVTable;
@@ -4223,27 +2832,15 @@ class operator = (a,b: IUtil): boolean;
 	  token: POffsetsCallbackToken;
 	public
 	  const VERSION = 1;
-
 	  function vTable: POffsetsCallbackVTable inline;
-	  procedure setOffset(status: PStatusToken; index: Cardinal; offset: Cardinal; nullOffset: Cardinal);
 	  class operator := (aToken:  POffsetsCallbackToken): IOffsetsCallback;
 	  class operator := (intf: IOffsetsCallback): POffsetsCallbackToken;
 	  class operator := (impl: IOffsetsCallbackImpl): IOffsetsCallback;
 	  class operator = (a: IOffsetsCallback; b: pointer): boolean;
-class operator = (a,b: IOffsetsCallback): boolean;
-	end;
+	  class operator = (a,b: IOffsetsCallback): boolean;
 
-	IOffsetsCallbackImpl = class(IVersionedImpl)
-	private
-	  class var vTable: OffsetsCallbackVTable; 
-	  class var FInitialized: boolean;
-	  intf: IOffsetsCallback;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: POffsetsCallbackToken inline;
-	  function getInterface: IOffsetsCallback inline;
-		procedure setOffset(status: PStatusToken; index: Cardinal; offset: Cardinal; nullOffset: Cardinal); virtual; abstract;
+	  {see IOffsetsCallbackHelper record helper for interface methods}
+
 	end;
 
 	PXpbBuilderVTable = ^XpbBuilderVTable;
@@ -4289,66 +2886,15 @@ class operator = (a,b: IOffsetsCallback): boolean;
 	  const SPB_SEND = Cardinal(7);
 	  const SPB_RECEIVE = Cardinal(8);
 	  const SPB_RESPONSE = Cardinal(9);
-
 	  function vTable: PXpbBuilderVTable inline;
-	  procedure dispose();
-	  procedure clear(status: PStatusToken);
-	  procedure removeCurrent(status: PStatusToken);
-	  procedure insertInt(status: PStatusToken; tag: Byte; value: Integer);
-	  procedure insertBigInt(status: PStatusToken; tag: Byte; value: Int64);
-	  procedure insertBytes(status: PStatusToken; tag: Byte; bytes: Pointer; length: Cardinal);
-	  procedure insertString(status: PStatusToken; tag: Byte; str: PAnsiChar);
-	  procedure insertTag(status: PStatusToken; tag: Byte);
-	  function isEof(status: PStatusToken): Boolean;
-	  procedure moveNext(status: PStatusToken);
-	  procedure rewind(status: PStatusToken);
-	  function findFirst(status: PStatusToken; tag: Byte): Boolean;
-	  function findNext(status: PStatusToken): Boolean;
-	  function getTag(status: PStatusToken): Byte;
-	  function getLength(status: PStatusToken): Cardinal;
-	  function getInt(status: PStatusToken): Integer;
-	  function getBigInt(status: PStatusToken): Int64;
-	  function getString(status: PStatusToken): PAnsiChar;
-	  function getBytes(status: PStatusToken): BytePtr;
-	  function getBufferLength(status: PStatusToken): Cardinal;
-	  function getBuffer(status: PStatusToken): BytePtr;
 	  class operator := (aToken:  PXpbBuilderToken): IXpbBuilder;
 	  class operator := (intf: IXpbBuilder): PXpbBuilderToken;
 	  class operator := (impl: IXpbBuilderImpl): IXpbBuilder;
 	  class operator = (a: IXpbBuilder; b: pointer): boolean;
-class operator = (a,b: IXpbBuilder): boolean;
-	end;
+	  class operator = (a,b: IXpbBuilder): boolean;
 
-	IXpbBuilderImpl = class(IDisposableImpl)
-	private
-	  class var vTable: XpbBuilderVTable; 
-	  class var FInitialized: boolean;
-	  intf: IXpbBuilder;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PXpbBuilderToken inline;
-	  function getInterface: IXpbBuilder inline;
-		procedure clear(status: PStatusToken); virtual; abstract;
-		procedure removeCurrent(status: PStatusToken); virtual; abstract;
-		procedure insertInt(status: PStatusToken; tag: Byte; value: Integer); virtual; abstract;
-		procedure insertBigInt(status: PStatusToken; tag: Byte; value: Int64); virtual; abstract;
-		procedure insertBytes(status: PStatusToken; tag: Byte; bytes: Pointer; length: Cardinal); virtual; abstract;
-		procedure insertString(status: PStatusToken; tag: Byte; str: PAnsiChar); virtual; abstract;
-		procedure insertTag(status: PStatusToken; tag: Byte); virtual; abstract;
-		function isEof(status: PStatusToken): Boolean; virtual; abstract;
-		procedure moveNext(status: PStatusToken); virtual; abstract;
-		procedure rewind(status: PStatusToken); virtual; abstract;
-		function findFirst(status: PStatusToken; tag: Byte): Boolean; virtual; abstract;
-		function findNext(status: PStatusToken): Boolean; virtual; abstract;
-		function getTag(status: PStatusToken): Byte; virtual; abstract;
-		function getLength(status: PStatusToken): Cardinal; virtual; abstract;
-		function getInt(status: PStatusToken): Integer; virtual; abstract;
-		function getBigInt(status: PStatusToken): Int64; virtual; abstract;
-		function getString(status: PStatusToken): PAnsiChar; virtual; abstract;
-		function getBytes(status: PStatusToken): BytePtr; virtual; abstract;
-		function getBufferLength(status: PStatusToken): Cardinal; virtual; abstract;
-		function getBuffer(status: PStatusToken): BytePtr; virtual; abstract;
+	  {see IXpbBuilderHelper record helper for interface methods}
+
 	end;
 
 	PTraceConnectionVTable = ^TraceConnectionVTable;
@@ -4375,43 +2921,15 @@ class operator = (a,b: IXpbBuilder): boolean;
 	  const VERSION = 9;
 	  const KIND_DATABASE = Cardinal(1);
 	  const KIND_SERVICE = Cardinal(2);
-
 	  function vTable: PTraceConnectionVTable inline;
-	  function getKind(): Cardinal;
-	  function getProcessID(): Integer;
-	  function getUserName(): PAnsiChar;
-	  function getRoleName(): PAnsiChar;
-	  function getCharSet(): PAnsiChar;
-	  function getRemoteProtocol(): PAnsiChar;
-	  function getRemoteAddress(): PAnsiChar;
-	  function getRemoteProcessID(): Integer;
-	  function getRemoteProcessName(): PAnsiChar;
 	  class operator := (aToken:  PTraceConnectionToken): ITraceConnection;
 	  class operator := (intf: ITraceConnection): PTraceConnectionToken;
 	  class operator := (impl: ITraceConnectionImpl): ITraceConnection;
 	  class operator = (a: ITraceConnection; b: pointer): boolean;
-class operator = (a,b: ITraceConnection): boolean;
-	end;
+	  class operator = (a,b: ITraceConnection): boolean;
 
-	ITraceConnectionImpl = class(IVersionedImpl)
-	private
-	  class var vTable: TraceConnectionVTable; 
-	  class var FInitialized: boolean;
-	  intf: ITraceConnection;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PTraceConnectionToken inline;
-	  function getInterface: ITraceConnection inline;
-		function getKind(): Cardinal; virtual; abstract;
-		function getProcessID(): Integer; virtual; abstract;
-		function getUserName(): PAnsiChar; virtual; abstract;
-		function getRoleName(): PAnsiChar; virtual; abstract;
-		function getCharSet(): PAnsiChar; virtual; abstract;
-		function getRemoteProtocol(): PAnsiChar; virtual; abstract;
-		function getRemoteAddress(): PAnsiChar; virtual; abstract;
-		function getRemoteProcessID(): Integer; virtual; abstract;
-		function getRemoteProcessName(): PAnsiChar; virtual; abstract;
+	  {see ITraceConnectionHelper record helper for interface methods}
+
 	end;
 
 	PTraceDatabaseConnectionVTable = ^TraceDatabaseConnectionVTable;
@@ -4440,38 +2958,15 @@ class operator = (a,b: ITraceConnection): boolean;
 	  const VERSION = 11;
 	  const KIND_DATABASE = Cardinal(1);
 	  const KIND_SERVICE = Cardinal(2);
-
 	  function vTable: PTraceDatabaseConnectionVTable inline;
-	  function getKind(): Cardinal;
-	  function getProcessID(): Integer;
-	  function getUserName(): PAnsiChar;
-	  function getRoleName(): PAnsiChar;
-	  function getCharSet(): PAnsiChar;
-	  function getRemoteProtocol(): PAnsiChar;
-	  function getRemoteAddress(): PAnsiChar;
-	  function getRemoteProcessID(): Integer;
-	  function getRemoteProcessName(): PAnsiChar;
-	  function getConnectionID(): Int64;
-	  function getDatabaseName(): PAnsiChar;
 	  class operator := (aToken:  PTraceDatabaseConnectionToken): ITraceDatabaseConnection;
 	  class operator := (intf: ITraceDatabaseConnection): PTraceDatabaseConnectionToken;
 	  class operator := (impl: ITraceDatabaseConnectionImpl): ITraceDatabaseConnection;
 	  class operator = (a: ITraceDatabaseConnection; b: pointer): boolean;
-class operator = (a,b: ITraceDatabaseConnection): boolean;
-	end;
+	  class operator = (a,b: ITraceDatabaseConnection): boolean;
 
-	ITraceDatabaseConnectionImpl = class(ITraceConnectionImpl)
-	private
-	  class var vTable: TraceDatabaseConnectionVTable; 
-	  class var FInitialized: boolean;
-	  intf: ITraceDatabaseConnection;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PTraceDatabaseConnectionToken inline;
-	  function getInterface: ITraceDatabaseConnection inline;
-		function getConnectionID(): Int64; virtual; abstract;
-		function getDatabaseName(): PAnsiChar; virtual; abstract;
+	  {see ITraceDatabaseConnectionHelper record helper for interface methods}
+
 	end;
 
 	PTraceTransactionVTable = ^TraceTransactionVTable;
@@ -4499,39 +2994,15 @@ class operator = (a,b: ITraceDatabaseConnection): boolean;
 	  const ISOLATION_READ_COMMITTED_RECVER = Cardinal(3);
 	  const ISOLATION_READ_COMMITTED_NORECVER = Cardinal(4);
 	  const ISOLATION_READ_COMMITTED_READ_CONSISTENCY = Cardinal(5);
-
 	  function vTable: PTraceTransactionVTable inline;
-	  function getTransactionID(): Int64;
-	  function getReadOnly(): Boolean;
-	  function getWait(): Integer;
-	  function getIsolation(): Cardinal;
-	  function getPerf(): PerformanceInfoPtr;
-	  function getInitialID(): Int64;
-	  function getPreviousID(): Int64;
 	  class operator := (aToken:  PTraceTransactionToken): ITraceTransaction;
 	  class operator := (intf: ITraceTransaction): PTraceTransactionToken;
 	  class operator := (impl: ITraceTransactionImpl): ITraceTransaction;
 	  class operator = (a: ITraceTransaction; b: pointer): boolean;
-class operator = (a,b: ITraceTransaction): boolean;
-	end;
+	  class operator = (a,b: ITraceTransaction): boolean;
 
-	ITraceTransactionImpl = class(IVersionedImpl)
-	private
-	  class var vTable: TraceTransactionVTable; 
-	  class var FInitialized: boolean;
-	  intf: ITraceTransaction;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PTraceTransactionToken inline;
-	  function getInterface: ITraceTransaction inline;
-		function getTransactionID(): Int64; virtual; abstract;
-		function getReadOnly(): Boolean; virtual; abstract;
-		function getWait(): Integer; virtual; abstract;
-		function getIsolation(): Cardinal; virtual; abstract;
-		function getPerf(): PerformanceInfoPtr; virtual; abstract;
-		function getInitialID(): Int64; virtual; abstract;
-		function getPreviousID(): Int64; virtual; abstract;
+	  {see ITraceTransactionHelper record helper for interface methods}
+
 	end;
 
 	PTraceParamsVTable = ^TraceParamsVTable;
@@ -4550,31 +3021,15 @@ class operator = (a,b: ITraceTransaction): boolean;
 	  token: PTraceParamsToken;
 	public
 	  const VERSION = 3;
-
 	  function vTable: PTraceParamsVTable inline;
-	  function getCount(): Cardinal;
-	  function getParam(idx: Cardinal): dscPtr;
-	  function getTextUTF8(status: PStatusToken; idx: Cardinal): PAnsiChar;
 	  class operator := (aToken:  PTraceParamsToken): ITraceParams;
 	  class operator := (intf: ITraceParams): PTraceParamsToken;
 	  class operator := (impl: ITraceParamsImpl): ITraceParams;
 	  class operator = (a: ITraceParams; b: pointer): boolean;
-class operator = (a,b: ITraceParams): boolean;
-	end;
+	  class operator = (a,b: ITraceParams): boolean;
 
-	ITraceParamsImpl = class(IVersionedImpl)
-	private
-	  class var vTable: TraceParamsVTable; 
-	  class var FInitialized: boolean;
-	  intf: ITraceParams;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PTraceParamsToken inline;
-	  function getInterface: ITraceParams inline;
-		function getCount(): Cardinal; virtual; abstract;
-		function getParam(idx: Cardinal): dscPtr; virtual; abstract;
-		function getTextUTF8(status: PStatusToken; idx: Cardinal): PAnsiChar; virtual; abstract;
+	  {see ITraceParamsHelper record helper for interface methods}
+
 	end;
 
 	PTraceStatementVTable = ^TraceStatementVTable;
@@ -4592,29 +3047,15 @@ class operator = (a,b: ITraceParams): boolean;
 	  token: PTraceStatementToken;
 	public
 	  const VERSION = 2;
-
 	  function vTable: PTraceStatementVTable inline;
-	  function getStmtID(): Int64;
-	  function getPerf(): PerformanceInfoPtr;
 	  class operator := (aToken:  PTraceStatementToken): ITraceStatement;
 	  class operator := (intf: ITraceStatement): PTraceStatementToken;
 	  class operator := (impl: ITraceStatementImpl): ITraceStatement;
 	  class operator = (a: ITraceStatement; b: pointer): boolean;
-class operator = (a,b: ITraceStatement): boolean;
-	end;
+	  class operator = (a,b: ITraceStatement): boolean;
 
-	ITraceStatementImpl = class(IVersionedImpl)
-	private
-	  class var vTable: TraceStatementVTable; 
-	  class var FInitialized: boolean;
-	  intf: ITraceStatement;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PTraceStatementToken inline;
-	  function getInterface: ITraceStatement inline;
-		function getStmtID(): Int64; virtual; abstract;
-		function getPerf(): PerformanceInfoPtr; virtual; abstract;
+	  {see ITraceStatementHelper record helper for interface methods}
+
 	end;
 
 	PTraceSQLStatementVTable = ^TraceSQLStatementVTable;
@@ -4637,37 +3078,15 @@ class operator = (a,b: ITraceStatement): boolean;
 	  token: PTraceSQLStatementToken;
 	public
 	  const VERSION = 7;
-
 	  function vTable: PTraceSQLStatementVTable inline;
-	  function getStmtID(): Int64;
-	  function getPerf(): PerformanceInfoPtr;
-	  function getText(): PAnsiChar;
-	  function getPlan(): PAnsiChar;
-	  function getInputs(): PTraceParamsToken;
-	  function getTextUTF8(): PAnsiChar;
-	  function getExplainedPlan(): PAnsiChar;
 	  class operator := (aToken:  PTraceSQLStatementToken): ITraceSQLStatement;
 	  class operator := (intf: ITraceSQLStatement): PTraceSQLStatementToken;
 	  class operator := (impl: ITraceSQLStatementImpl): ITraceSQLStatement;
 	  class operator = (a: ITraceSQLStatement; b: pointer): boolean;
-class operator = (a,b: ITraceSQLStatement): boolean;
-	end;
+	  class operator = (a,b: ITraceSQLStatement): boolean;
 
-	ITraceSQLStatementImpl = class(ITraceStatementImpl)
-	private
-	  class var vTable: TraceSQLStatementVTable; 
-	  class var FInitialized: boolean;
-	  intf: ITraceSQLStatement;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PTraceSQLStatementToken inline;
-	  function getInterface: ITraceSQLStatement inline;
-		function getText(): PAnsiChar; virtual; abstract;
-		function getPlan(): PAnsiChar; virtual; abstract;
-		function getInputs(): PTraceParamsToken; virtual; abstract;
-		function getTextUTF8(): PAnsiChar; virtual; abstract;
-		function getExplainedPlan(): PAnsiChar; virtual; abstract;
+	  {see ITraceSQLStatementHelper record helper for interface methods}
+
 	end;
 
 	PTraceBLRStatementVTable = ^TraceBLRStatementVTable;
@@ -4688,33 +3107,15 @@ class operator = (a,b: ITraceSQLStatement): boolean;
 	  token: PTraceBLRStatementToken;
 	public
 	  const VERSION = 5;
-
 	  function vTable: PTraceBLRStatementVTable inline;
-	  function getStmtID(): Int64;
-	  function getPerf(): PerformanceInfoPtr;
-	  function getData(): BytePtr;
-	  function getDataLength(): Cardinal;
-	  function getText(): PAnsiChar;
 	  class operator := (aToken:  PTraceBLRStatementToken): ITraceBLRStatement;
 	  class operator := (intf: ITraceBLRStatement): PTraceBLRStatementToken;
 	  class operator := (impl: ITraceBLRStatementImpl): ITraceBLRStatement;
 	  class operator = (a: ITraceBLRStatement; b: pointer): boolean;
-class operator = (a,b: ITraceBLRStatement): boolean;
-	end;
+	  class operator = (a,b: ITraceBLRStatement): boolean;
 
-	ITraceBLRStatementImpl = class(ITraceStatementImpl)
-	private
-	  class var vTable: TraceBLRStatementVTable; 
-	  class var FInitialized: boolean;
-	  intf: ITraceBLRStatement;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PTraceBLRStatementToken inline;
-	  function getInterface: ITraceBLRStatement inline;
-		function getData(): BytePtr; virtual; abstract;
-		function getDataLength(): Cardinal; virtual; abstract;
-		function getText(): PAnsiChar; virtual; abstract;
+	  {see ITraceBLRStatementHelper record helper for interface methods}
+
 	end;
 
 	PTraceDYNRequestVTable = ^TraceDYNRequestVTable;
@@ -4733,31 +3134,15 @@ class operator = (a,b: ITraceBLRStatement): boolean;
 	  token: PTraceDYNRequestToken;
 	public
 	  const VERSION = 3;
-
 	  function vTable: PTraceDYNRequestVTable inline;
-	  function getData(): BytePtr;
-	  function getDataLength(): Cardinal;
-	  function getText(): PAnsiChar;
 	  class operator := (aToken:  PTraceDYNRequestToken): ITraceDYNRequest;
 	  class operator := (intf: ITraceDYNRequest): PTraceDYNRequestToken;
 	  class operator := (impl: ITraceDYNRequestImpl): ITraceDYNRequest;
 	  class operator = (a: ITraceDYNRequest; b: pointer): boolean;
-class operator = (a,b: ITraceDYNRequest): boolean;
-	end;
+	  class operator = (a,b: ITraceDYNRequest): boolean;
 
-	ITraceDYNRequestImpl = class(IVersionedImpl)
-	private
-	  class var vTable: TraceDYNRequestVTable; 
-	  class var FInitialized: boolean;
-	  intf: ITraceDYNRequest;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PTraceDYNRequestToken inline;
-	  function getInterface: ITraceDYNRequest inline;
-		function getData(): BytePtr; virtual; abstract;
-		function getDataLength(): Cardinal; virtual; abstract;
-		function getText(): PAnsiChar; virtual; abstract;
+	  {see ITraceDYNRequestHelper record helper for interface methods}
+
 	end;
 
 	PTraceContextVariableVTable = ^TraceContextVariableVTable;
@@ -4776,31 +3161,15 @@ class operator = (a,b: ITraceDYNRequest): boolean;
 	  token: PTraceContextVariableToken;
 	public
 	  const VERSION = 3;
-
 	  function vTable: PTraceContextVariableVTable inline;
-	  function getNameSpace(): PAnsiChar;
-	  function getVarName(): PAnsiChar;
-	  function getVarValue(): PAnsiChar;
 	  class operator := (aToken:  PTraceContextVariableToken): ITraceContextVariable;
 	  class operator := (intf: ITraceContextVariable): PTraceContextVariableToken;
 	  class operator := (impl: ITraceContextVariableImpl): ITraceContextVariable;
 	  class operator = (a: ITraceContextVariable; b: pointer): boolean;
-class operator = (a,b: ITraceContextVariable): boolean;
-	end;
+	  class operator = (a,b: ITraceContextVariable): boolean;
 
-	ITraceContextVariableImpl = class(IVersionedImpl)
-	private
-	  class var vTable: TraceContextVariableVTable; 
-	  class var FInitialized: boolean;
-	  intf: ITraceContextVariable;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PTraceContextVariableToken inline;
-	  function getInterface: ITraceContextVariable inline;
-		function getNameSpace(): PAnsiChar; virtual; abstract;
-		function getVarName(): PAnsiChar; virtual; abstract;
-		function getVarValue(): PAnsiChar; virtual; abstract;
+	  {see ITraceContextVariableHelper record helper for interface methods}
+
 	end;
 
 	PTraceProcedureVTable = ^TraceProcedureVTable;
@@ -4819,31 +3188,15 @@ class operator = (a,b: ITraceContextVariable): boolean;
 	  token: PTraceProcedureToken;
 	public
 	  const VERSION = 3;
-
 	  function vTable: PTraceProcedureVTable inline;
-	  function getProcName(): PAnsiChar;
-	  function getInputs(): PTraceParamsToken;
-	  function getPerf(): PerformanceInfoPtr;
 	  class operator := (aToken:  PTraceProcedureToken): ITraceProcedure;
 	  class operator := (intf: ITraceProcedure): PTraceProcedureToken;
 	  class operator := (impl: ITraceProcedureImpl): ITraceProcedure;
 	  class operator = (a: ITraceProcedure; b: pointer): boolean;
-class operator = (a,b: ITraceProcedure): boolean;
-	end;
+	  class operator = (a,b: ITraceProcedure): boolean;
 
-	ITraceProcedureImpl = class(IVersionedImpl)
-	private
-	  class var vTable: TraceProcedureVTable; 
-	  class var FInitialized: boolean;
-	  intf: ITraceProcedure;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PTraceProcedureToken inline;
-	  function getInterface: ITraceProcedure inline;
-		function getProcName(): PAnsiChar; virtual; abstract;
-		function getInputs(): PTraceParamsToken; virtual; abstract;
-		function getPerf(): PerformanceInfoPtr; virtual; abstract;
+	  {see ITraceProcedureHelper record helper for interface methods}
+
 	end;
 
 	PTraceFunctionVTable = ^TraceFunctionVTable;
@@ -4863,33 +3216,15 @@ class operator = (a,b: ITraceProcedure): boolean;
 	  token: PTraceFunctionToken;
 	public
 	  const VERSION = 4;
-
 	  function vTable: PTraceFunctionVTable inline;
-	  function getFuncName(): PAnsiChar;
-	  function getInputs(): PTraceParamsToken;
-	  function getResult(): PTraceParamsToken;
-	  function getPerf(): PerformanceInfoPtr;
 	  class operator := (aToken:  PTraceFunctionToken): ITraceFunction;
 	  class operator := (intf: ITraceFunction): PTraceFunctionToken;
 	  class operator := (impl: ITraceFunctionImpl): ITraceFunction;
 	  class operator = (a: ITraceFunction; b: pointer): boolean;
-class operator = (a,b: ITraceFunction): boolean;
-	end;
+	  class operator = (a,b: ITraceFunction): boolean;
 
-	ITraceFunctionImpl = class(IVersionedImpl)
-	private
-	  class var vTable: TraceFunctionVTable; 
-	  class var FInitialized: boolean;
-	  intf: ITraceFunction;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PTraceFunctionToken inline;
-	  function getInterface: ITraceFunction inline;
-		function getFuncName(): PAnsiChar; virtual; abstract;
-		function getInputs(): PTraceParamsToken; virtual; abstract;
-		function getResult(): PTraceParamsToken; virtual; abstract;
-		function getPerf(): PerformanceInfoPtr; virtual; abstract;
+	  {see ITraceFunctionHelper record helper for interface methods}
+
 	end;
 
 	PTraceTriggerVTable = ^TraceTriggerVTable;
@@ -4913,35 +3248,15 @@ class operator = (a,b: ITraceFunction): boolean;
 	  const TYPE_ALL = Cardinal(0);
 	  const TYPE_BEFORE = Cardinal(1);
 	  const TYPE_AFTER = Cardinal(2);
-
 	  function vTable: PTraceTriggerVTable inline;
-	  function getTriggerName(): PAnsiChar;
-	  function getRelationName(): PAnsiChar;
-	  function getAction(): Integer;
-	  function getWhich(): Integer;
-	  function getPerf(): PerformanceInfoPtr;
 	  class operator := (aToken:  PTraceTriggerToken): ITraceTrigger;
 	  class operator := (intf: ITraceTrigger): PTraceTriggerToken;
 	  class operator := (impl: ITraceTriggerImpl): ITraceTrigger;
 	  class operator = (a: ITraceTrigger; b: pointer): boolean;
-class operator = (a,b: ITraceTrigger): boolean;
-	end;
+	  class operator = (a,b: ITraceTrigger): boolean;
 
-	ITraceTriggerImpl = class(IVersionedImpl)
-	private
-	  class var vTable: TraceTriggerVTable; 
-	  class var FInitialized: boolean;
-	  intf: ITraceTrigger;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PTraceTriggerToken inline;
-	  function getInterface: ITraceTrigger inline;
-		function getTriggerName(): PAnsiChar; virtual; abstract;
-		function getRelationName(): PAnsiChar; virtual; abstract;
-		function getAction(): Integer; virtual; abstract;
-		function getWhich(): Integer; virtual; abstract;
-		function getPerf(): PerformanceInfoPtr; virtual; abstract;
+	  {see ITraceTriggerHelper record helper for interface methods}
+
 	end;
 
 	PTraceServiceConnectionVTable = ^TraceServiceConnectionVTable;
@@ -4971,40 +3286,15 @@ class operator = (a,b: ITraceTrigger): boolean;
 	  const VERSION = 12;
 	  const KIND_DATABASE = Cardinal(1);
 	  const KIND_SERVICE = Cardinal(2);
-
 	  function vTable: PTraceServiceConnectionVTable inline;
-	  function getKind(): Cardinal;
-	  function getProcessID(): Integer;
-	  function getUserName(): PAnsiChar;
-	  function getRoleName(): PAnsiChar;
-	  function getCharSet(): PAnsiChar;
-	  function getRemoteProtocol(): PAnsiChar;
-	  function getRemoteAddress(): PAnsiChar;
-	  function getRemoteProcessID(): Integer;
-	  function getRemoteProcessName(): PAnsiChar;
-	  function getServiceID(): Pointer;
-	  function getServiceMgr(): PAnsiChar;
-	  function getServiceName(): PAnsiChar;
 	  class operator := (aToken:  PTraceServiceConnectionToken): ITraceServiceConnection;
 	  class operator := (intf: ITraceServiceConnection): PTraceServiceConnectionToken;
 	  class operator := (impl: ITraceServiceConnectionImpl): ITraceServiceConnection;
 	  class operator = (a: ITraceServiceConnection; b: pointer): boolean;
-class operator = (a,b: ITraceServiceConnection): boolean;
-	end;
+	  class operator = (a,b: ITraceServiceConnection): boolean;
 
-	ITraceServiceConnectionImpl = class(ITraceConnectionImpl)
-	private
-	  class var vTable: TraceServiceConnectionVTable; 
-	  class var FInitialized: boolean;
-	  intf: ITraceServiceConnection;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PTraceServiceConnectionToken inline;
-	  function getInterface: ITraceServiceConnection inline;
-		function getServiceID(): Pointer; virtual; abstract;
-		function getServiceMgr(): PAnsiChar; virtual; abstract;
-		function getServiceName(): PAnsiChar; virtual; abstract;
+	  {see ITraceServiceConnectionHelper record helper for interface methods}
+
 	end;
 
 	PTraceStatusVectorVTable = ^TraceStatusVectorVTable;
@@ -5024,33 +3314,15 @@ class operator = (a,b: ITraceServiceConnection): boolean;
 	  token: PTraceStatusVectorToken;
 	public
 	  const VERSION = 4;
-
 	  function vTable: PTraceStatusVectorVTable inline;
-	  function hasError(): Boolean;
-	  function hasWarning(): Boolean;
-	  function getStatus(): PStatusToken;
-	  function getText(): PAnsiChar;
 	  class operator := (aToken:  PTraceStatusVectorToken): ITraceStatusVector;
 	  class operator := (intf: ITraceStatusVector): PTraceStatusVectorToken;
 	  class operator := (impl: ITraceStatusVectorImpl): ITraceStatusVector;
 	  class operator = (a: ITraceStatusVector; b: pointer): boolean;
-class operator = (a,b: ITraceStatusVector): boolean;
-	end;
+	  class operator = (a,b: ITraceStatusVector): boolean;
 
-	ITraceStatusVectorImpl = class(IVersionedImpl)
-	private
-	  class var vTable: TraceStatusVectorVTable; 
-	  class var FInitialized: boolean;
-	  intf: ITraceStatusVector;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PTraceStatusVectorToken inline;
-	  function getInterface: ITraceStatusVector inline;
-		function hasError(): Boolean; virtual; abstract;
-		function hasWarning(): Boolean; virtual; abstract;
-		function getStatus(): PStatusToken; virtual; abstract;
-		function getText(): PAnsiChar; virtual; abstract;
+	  {see ITraceStatusVectorHelper record helper for interface methods}
+
 	end;
 
 	PTraceSweepInfoVTable = ^TraceSweepInfoVTable;
@@ -5071,35 +3343,15 @@ class operator = (a,b: ITraceStatusVector): boolean;
 	  token: PTraceSweepInfoToken;
 	public
 	  const VERSION = 5;
-
 	  function vTable: PTraceSweepInfoVTable inline;
-	  function getOIT(): Int64;
-	  function getOST(): Int64;
-	  function getOAT(): Int64;
-	  function getNext(): Int64;
-	  function getPerf(): PerformanceInfoPtr;
 	  class operator := (aToken:  PTraceSweepInfoToken): ITraceSweepInfo;
 	  class operator := (intf: ITraceSweepInfo): PTraceSweepInfoToken;
 	  class operator := (impl: ITraceSweepInfoImpl): ITraceSweepInfo;
 	  class operator = (a: ITraceSweepInfo; b: pointer): boolean;
-class operator = (a,b: ITraceSweepInfo): boolean;
-	end;
+	  class operator = (a,b: ITraceSweepInfo): boolean;
 
-	ITraceSweepInfoImpl = class(IVersionedImpl)
-	private
-	  class var vTable: TraceSweepInfoVTable; 
-	  class var FInitialized: boolean;
-	  intf: ITraceSweepInfo;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PTraceSweepInfoToken inline;
-	  function getInterface: ITraceSweepInfo inline;
-		function getOIT(): Int64; virtual; abstract;
-		function getOST(): Int64; virtual; abstract;
-		function getOAT(): Int64; virtual; abstract;
-		function getNext(): Int64; virtual; abstract;
-		function getPerf(): PerformanceInfoPtr; virtual; abstract;
+	  {see ITraceSweepInfoHelper record helper for interface methods}
+
 	end;
 
 	PTraceLogWriterVTable = ^TraceLogWriterVTable;
@@ -5119,31 +3371,15 @@ class operator = (a,b: ITraceSweepInfo): boolean;
 	  token: PTraceLogWriterToken;
 	public
 	  const VERSION = 4;
-
 	  function vTable: PTraceLogWriterVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  function write(buf: Pointer; size: Cardinal): Cardinal;
-	  function write_s(status: PStatusToken; buf: Pointer; size: Cardinal): Cardinal;
 	  class operator := (aToken:  PTraceLogWriterToken): ITraceLogWriter;
 	  class operator := (intf: ITraceLogWriter): PTraceLogWriterToken;
 	  class operator := (impl: ITraceLogWriterImpl): ITraceLogWriter;
 	  class operator = (a: ITraceLogWriter; b: pointer): boolean;
-class operator = (a,b: ITraceLogWriter): boolean;
-	end;
+	  class operator = (a,b: ITraceLogWriter): boolean;
 
-	ITraceLogWriterImpl = class(IReferenceCountedImpl)
-	private
-	  class var vTable: TraceLogWriterVTable; 
-	  class var FInitialized: boolean;
-	  intf: ITraceLogWriter;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PTraceLogWriterToken inline;
-	  function getInterface: ITraceLogWriter inline;
-		function write(buf: Pointer; size: Cardinal): Cardinal; virtual; abstract;
-		function write_s(status: PStatusToken; buf: Pointer; size: Cardinal): Cardinal; virtual; abstract;
+	  {see ITraceLogWriterHelper record helper for interface methods}
+
 	end;
 
 	PTraceInitInfoVTable = ^TraceInitInfoVTable;
@@ -5166,39 +3402,15 @@ class operator = (a,b: ITraceLogWriter): boolean;
 	  token: PTraceInitInfoToken;
 	public
 	  const VERSION = 7;
-
 	  function vTable: PTraceInitInfoVTable inline;
-	  function getConfigText(): PAnsiChar;
-	  function getTraceSessionID(): Integer;
-	  function getTraceSessionName(): PAnsiChar;
-	  function getFirebirdRootDirectory(): PAnsiChar;
-	  function getDatabaseName(): PAnsiChar;
-	  function getConnection(): PTraceDatabaseConnectionToken;
-	  function getLogWriter(): PTraceLogWriterToken;
 	  class operator := (aToken:  PTraceInitInfoToken): ITraceInitInfo;
 	  class operator := (intf: ITraceInitInfo): PTraceInitInfoToken;
 	  class operator := (impl: ITraceInitInfoImpl): ITraceInitInfo;
 	  class operator = (a: ITraceInitInfo; b: pointer): boolean;
-class operator = (a,b: ITraceInitInfo): boolean;
-	end;
+	  class operator = (a,b: ITraceInitInfo): boolean;
 
-	ITraceInitInfoImpl = class(IVersionedImpl)
-	private
-	  class var vTable: TraceInitInfoVTable; 
-	  class var FInitialized: boolean;
-	  intf: ITraceInitInfo;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PTraceInitInfoToken inline;
-	  function getInterface: ITraceInitInfo inline;
-		function getConfigText(): PAnsiChar; virtual; abstract;
-		function getTraceSessionID(): Integer; virtual; abstract;
-		function getTraceSessionName(): PAnsiChar; virtual; abstract;
-		function getFirebirdRootDirectory(): PAnsiChar; virtual; abstract;
-		function getDatabaseName(): PAnsiChar; virtual; abstract;
-		function getConnection(): PTraceDatabaseConnectionToken; virtual; abstract;
-		function getLogWriter(): PTraceLogWriterToken; virtual; abstract;
+	  {see ITraceInitInfoHelper record helper for interface methods}
+
 	end;
 
 	PTracePluginVTable = ^TracePluginVTable;
@@ -5244,69 +3456,15 @@ class operator = (a,b: ITraceInitInfo): boolean;
 	  const SWEEP_STATE_FINISHED = Cardinal(2);
 	  const SWEEP_STATE_FAILED = Cardinal(3);
 	  const SWEEP_STATE_PROGRESS = Cardinal(4);
-
 	  function vTable: PTracePluginVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  function trace_get_error(): PAnsiChar;
-	  function trace_attach(connection: PTraceDatabaseConnectionToken; create_db: Boolean; att_result: Cardinal): Boolean;
-	  function trace_detach(connection: PTraceDatabaseConnectionToken; drop_db: Boolean): Boolean;
-	  function trace_transaction_start(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; tpb_length: Cardinal; tpb: BytePtr; tra_result: Cardinal): Boolean;
-	  function trace_transaction_end(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; commit: Boolean; retain_context: Boolean; tra_result: Cardinal): Boolean;
-	  function trace_proc_execute(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; procedure_: PTraceProcedureToken; started: Boolean; proc_result: Cardinal): Boolean;
-	  function trace_trigger_execute(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; trigger: PTraceTriggerToken; started: Boolean; trig_result: Cardinal): Boolean;
-	  function trace_set_context(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; variable: PTraceContextVariableToken): Boolean;
-	  function trace_dsql_prepare(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; statement: PTraceSQLStatementToken; time_millis: Int64; req_result: Cardinal): Boolean;
-	  function trace_dsql_free(connection: PTraceDatabaseConnectionToken; statement: PTraceSQLStatementToken; option: Cardinal): Boolean;
-	  function trace_dsql_execute(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; statement: PTraceSQLStatementToken; started: Boolean; req_result: Cardinal): Boolean;
-	  function trace_blr_compile(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; statement: PTraceBLRStatementToken; time_millis: Int64; req_result: Cardinal): Boolean;
-	  function trace_blr_execute(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; statement: PTraceBLRStatementToken; req_result: Cardinal): Boolean;
-	  function trace_dyn_execute(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; request: PTraceDYNRequestToken; time_millis: Int64; req_result: Cardinal): Boolean;
-	  function trace_service_attach(service: PTraceServiceConnectionToken; att_result: Cardinal): Boolean;
-	  function trace_service_start(service: PTraceServiceConnectionToken; switches_length: Cardinal; switches: PAnsiChar; start_result: Cardinal): Boolean;
-	  function trace_service_query(service: PTraceServiceConnectionToken; send_item_length: Cardinal; send_items: BytePtr; recv_item_length: Cardinal; recv_items: BytePtr; query_result: Cardinal): Boolean;
-	  function trace_service_detach(service: PTraceServiceConnectionToken; detach_result: Cardinal): Boolean;
-	  function trace_event_error(connection: PTraceConnectionToken; status: PTraceStatusVectorToken; function_: PAnsiChar): Boolean;
-	  function trace_event_sweep(connection: PTraceDatabaseConnectionToken; sweep: PTraceSweepInfoToken; sweep_state: Cardinal): Boolean;
-	  function trace_func_execute(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; function_: PTraceFunctionToken; started: Boolean; func_result: Cardinal): Boolean;
 	  class operator := (aToken:  PTracePluginToken): ITracePlugin;
 	  class operator := (intf: ITracePlugin): PTracePluginToken;
 	  class operator := (impl: ITracePluginImpl): ITracePlugin;
 	  class operator = (a: ITracePlugin; b: pointer): boolean;
-class operator = (a,b: ITracePlugin): boolean;
-	end;
+	  class operator = (a,b: ITracePlugin): boolean;
 
-	ITracePluginImpl = class(IReferenceCountedImpl)
-	private
-	  class var vTable: TracePluginVTable; 
-	  class var FInitialized: boolean;
-	  intf: ITracePlugin;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PTracePluginToken inline;
-	  function getInterface: ITracePlugin inline;
-		function trace_get_error(): PAnsiChar; virtual; abstract;
-		function trace_attach(connection: PTraceDatabaseConnectionToken; create_db: Boolean; att_result: Cardinal): Boolean; virtual; abstract;
-		function trace_detach(connection: PTraceDatabaseConnectionToken; drop_db: Boolean): Boolean; virtual; abstract;
-		function trace_transaction_start(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; tpb_length: Cardinal; tpb: BytePtr; tra_result: Cardinal): Boolean; virtual; abstract;
-		function trace_transaction_end(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; commit: Boolean; retain_context: Boolean; tra_result: Cardinal): Boolean; virtual; abstract;
-		function trace_proc_execute(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; procedure_: PTraceProcedureToken; started: Boolean; proc_result: Cardinal): Boolean; virtual; abstract;
-		function trace_trigger_execute(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; trigger: PTraceTriggerToken; started: Boolean; trig_result: Cardinal): Boolean; virtual; abstract;
-		function trace_set_context(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; variable: PTraceContextVariableToken): Boolean; virtual; abstract;
-		function trace_dsql_prepare(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; statement: PTraceSQLStatementToken; time_millis: Int64; req_result: Cardinal): Boolean; virtual; abstract;
-		function trace_dsql_free(connection: PTraceDatabaseConnectionToken; statement: PTraceSQLStatementToken; option: Cardinal): Boolean; virtual; abstract;
-		function trace_dsql_execute(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; statement: PTraceSQLStatementToken; started: Boolean; req_result: Cardinal): Boolean; virtual; abstract;
-		function trace_blr_compile(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; statement: PTraceBLRStatementToken; time_millis: Int64; req_result: Cardinal): Boolean; virtual; abstract;
-		function trace_blr_execute(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; statement: PTraceBLRStatementToken; req_result: Cardinal): Boolean; virtual; abstract;
-		function trace_dyn_execute(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; request: PTraceDYNRequestToken; time_millis: Int64; req_result: Cardinal): Boolean; virtual; abstract;
-		function trace_service_attach(service: PTraceServiceConnectionToken; att_result: Cardinal): Boolean; virtual; abstract;
-		function trace_service_start(service: PTraceServiceConnectionToken; switches_length: Cardinal; switches: PAnsiChar; start_result: Cardinal): Boolean; virtual; abstract;
-		function trace_service_query(service: PTraceServiceConnectionToken; send_item_length: Cardinal; send_items: BytePtr; recv_item_length: Cardinal; recv_items: BytePtr; query_result: Cardinal): Boolean; virtual; abstract;
-		function trace_service_detach(service: PTraceServiceConnectionToken; detach_result: Cardinal): Boolean; virtual; abstract;
-		function trace_event_error(connection: PTraceConnectionToken; status: PTraceStatusVectorToken; function_: PAnsiChar): Boolean; virtual; abstract;
-		function trace_event_sweep(connection: PTraceDatabaseConnectionToken; sweep: PTraceSweepInfoToken; sweep_state: Cardinal): Boolean; virtual; abstract;
-		function trace_func_execute(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; function_: PTraceFunctionToken; started: Boolean; func_result: Cardinal): Boolean; virtual; abstract;
+	  {see ITracePluginHelper record helper for interface methods}
+
 	end;
 
 	PTraceFactoryVTable = ^TraceFactoryVTable;
@@ -5349,33 +3507,15 @@ class operator = (a,b: ITracePlugin): boolean;
 	  const TRACE_EVENT_SWEEP = Cardinal(18);
 	  const TRACE_EVENT_FUNC_EXECUTE = Cardinal(19);
 	  const TRACE_EVENT_MAX = Cardinal(20);
-
 	  function vTable: PTraceFactoryVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  procedure setOwner(r: PReferenceCountedToken);
-	  function getOwner(): PReferenceCountedToken;
-	  function trace_needs(): QWord;
-	  function trace_create(status: PStatusToken; init_info: PTraceInitInfoToken): PTracePluginToken;
 	  class operator := (aToken:  PTraceFactoryToken): ITraceFactory;
 	  class operator := (intf: ITraceFactory): PTraceFactoryToken;
 	  class operator := (impl: ITraceFactoryImpl): ITraceFactory;
 	  class operator = (a: ITraceFactory; b: pointer): boolean;
-class operator = (a,b: ITraceFactory): boolean;
-	end;
+	  class operator = (a,b: ITraceFactory): boolean;
 
-	ITraceFactoryImpl = class(IPluginBaseImpl)
-	private
-	  class var vTable: TraceFactoryVTable; 
-	  class var FInitialized: boolean;
-	  intf: ITraceFactory;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PTraceFactoryToken inline;
-	  function getInterface: ITraceFactory inline;
-		function trace_needs(): QWord; virtual; abstract;
-		function trace_create(status: PStatusToken; init_info: PTraceInitInfoToken): PTracePluginToken; virtual; abstract;
+	  {see ITraceFactoryHelper record helper for interface methods}
+
 	end;
 
 	PUdrFunctionFactoryVTable = ^UdrFunctionFactoryVTable;
@@ -5394,30 +3534,15 @@ class operator = (a,b: ITraceFactory): boolean;
 	  token: PUdrFunctionFactoryToken;
 	public
 	  const VERSION = 3;
-
 	  function vTable: PUdrFunctionFactoryVTable inline;
-	  procedure dispose();
-	  procedure setup(status: PStatusToken; context: PExternalContextToken; metadata: PRoutineMetadataToken; inBuilder: PMetadataBuilderToken; outBuilder: PMetadataBuilderToken);
-	  function newItem(status: PStatusToken; context: PExternalContextToken; metadata: PRoutineMetadataToken): PExternalFunctionToken;
 	  class operator := (aToken:  PUdrFunctionFactoryToken): IUdrFunctionFactory;
 	  class operator := (intf: IUdrFunctionFactory): PUdrFunctionFactoryToken;
 	  class operator := (impl: IUdrFunctionFactoryImpl): IUdrFunctionFactory;
 	  class operator = (a: IUdrFunctionFactory; b: pointer): boolean;
-class operator = (a,b: IUdrFunctionFactory): boolean;
-	end;
+	  class operator = (a,b: IUdrFunctionFactory): boolean;
 
-	IUdrFunctionFactoryImpl = class(IDisposableImpl)
-	private
-	  class var vTable: UdrFunctionFactoryVTable; 
-	  class var FInitialized: boolean;
-	  intf: IUdrFunctionFactory;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PUdrFunctionFactoryToken inline;
-	  function getInterface: IUdrFunctionFactory inline;
-		procedure setup(status: PStatusToken; context: PExternalContextToken; metadata: PRoutineMetadataToken; inBuilder: PMetadataBuilderToken; outBuilder: PMetadataBuilderToken); virtual; abstract;
-		function newItem(status: PStatusToken; context: PExternalContextToken; metadata: PRoutineMetadataToken): PExternalFunctionToken; virtual; abstract;
+	  {see IUdrFunctionFactoryHelper record helper for interface methods}
+
 	end;
 
 	PUdrProcedureFactoryVTable = ^UdrProcedureFactoryVTable;
@@ -5436,30 +3561,15 @@ class operator = (a,b: IUdrFunctionFactory): boolean;
 	  token: PUdrProcedureFactoryToken;
 	public
 	  const VERSION = 3;
-
 	  function vTable: PUdrProcedureFactoryVTable inline;
-	  procedure dispose();
-	  procedure setup(status: PStatusToken; context: PExternalContextToken; metadata: PRoutineMetadataToken; inBuilder: PMetadataBuilderToken; outBuilder: PMetadataBuilderToken);
-	  function newItem(status: PStatusToken; context: PExternalContextToken; metadata: PRoutineMetadataToken): PExternalProcedureToken;
 	  class operator := (aToken:  PUdrProcedureFactoryToken): IUdrProcedureFactory;
 	  class operator := (intf: IUdrProcedureFactory): PUdrProcedureFactoryToken;
 	  class operator := (impl: IUdrProcedureFactoryImpl): IUdrProcedureFactory;
 	  class operator = (a: IUdrProcedureFactory; b: pointer): boolean;
-class operator = (a,b: IUdrProcedureFactory): boolean;
-	end;
+	  class operator = (a,b: IUdrProcedureFactory): boolean;
 
-	IUdrProcedureFactoryImpl = class(IDisposableImpl)
-	private
-	  class var vTable: UdrProcedureFactoryVTable; 
-	  class var FInitialized: boolean;
-	  intf: IUdrProcedureFactory;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PUdrProcedureFactoryToken inline;
-	  function getInterface: IUdrProcedureFactory inline;
-		procedure setup(status: PStatusToken; context: PExternalContextToken; metadata: PRoutineMetadataToken; inBuilder: PMetadataBuilderToken; outBuilder: PMetadataBuilderToken); virtual; abstract;
-		function newItem(status: PStatusToken; context: PExternalContextToken; metadata: PRoutineMetadataToken): PExternalProcedureToken; virtual; abstract;
+	  {see IUdrProcedureFactoryHelper record helper for interface methods}
+
 	end;
 
 	PUdrTriggerFactoryVTable = ^UdrTriggerFactoryVTable;
@@ -5478,30 +3588,15 @@ class operator = (a,b: IUdrProcedureFactory): boolean;
 	  token: PUdrTriggerFactoryToken;
 	public
 	  const VERSION = 3;
-
 	  function vTable: PUdrTriggerFactoryVTable inline;
-	  procedure dispose();
-	  procedure setup(status: PStatusToken; context: PExternalContextToken; metadata: PRoutineMetadataToken; fieldsBuilder: PMetadataBuilderToken);
-	  function newItem(status: PStatusToken; context: PExternalContextToken; metadata: PRoutineMetadataToken): PExternalTriggerToken;
 	  class operator := (aToken:  PUdrTriggerFactoryToken): IUdrTriggerFactory;
 	  class operator := (intf: IUdrTriggerFactory): PUdrTriggerFactoryToken;
 	  class operator := (impl: IUdrTriggerFactoryImpl): IUdrTriggerFactory;
 	  class operator = (a: IUdrTriggerFactory; b: pointer): boolean;
-class operator = (a,b: IUdrTriggerFactory): boolean;
-	end;
+	  class operator = (a,b: IUdrTriggerFactory): boolean;
 
-	IUdrTriggerFactoryImpl = class(IDisposableImpl)
-	private
-	  class var vTable: UdrTriggerFactoryVTable; 
-	  class var FInitialized: boolean;
-	  intf: IUdrTriggerFactory;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PUdrTriggerFactoryToken inline;
-	  function getInterface: IUdrTriggerFactory inline;
-		procedure setup(status: PStatusToken; context: PExternalContextToken; metadata: PRoutineMetadataToken; fieldsBuilder: PMetadataBuilderToken); virtual; abstract;
-		function newItem(status: PStatusToken; context: PExternalContextToken; metadata: PRoutineMetadataToken): PExternalTriggerToken; virtual; abstract;
+	  {see IUdrTriggerFactoryHelper record helper for interface methods}
+
 	end;
 
 	PUdrPluginVTable = ^UdrPluginVTable;
@@ -5521,33 +3616,15 @@ class operator = (a,b: IUdrTriggerFactory): boolean;
 	  token: PUdrPluginToken;
 	public
 	  const VERSION = 4;
-
 	  function vTable: PUdrPluginVTable inline;
-	  function getMaster(): PMasterToken;
-	  procedure registerFunction(status: PStatusToken; name: PAnsiChar; factory: PUdrFunctionFactoryToken);
-	  procedure registerProcedure(status: PStatusToken; name: PAnsiChar; factory: PUdrProcedureFactoryToken);
-	  procedure registerTrigger(status: PStatusToken; name: PAnsiChar; factory: PUdrTriggerFactoryToken);
 	  class operator := (aToken:  PUdrPluginToken): IUdrPlugin;
 	  class operator := (intf: IUdrPlugin): PUdrPluginToken;
 	  class operator := (impl: IUdrPluginImpl): IUdrPlugin;
 	  class operator = (a: IUdrPlugin; b: pointer): boolean;
-class operator = (a,b: IUdrPlugin): boolean;
-	end;
+	  class operator = (a,b: IUdrPlugin): boolean;
 
-	IUdrPluginImpl = class(IVersionedImpl)
-	private
-	  class var vTable: UdrPluginVTable; 
-	  class var FInitialized: boolean;
-	  intf: IUdrPlugin;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PUdrPluginToken inline;
-	  function getInterface: IUdrPlugin inline;
-		function getMaster(): PMasterToken; virtual; abstract;
-		procedure registerFunction(status: PStatusToken; name: PAnsiChar; factory: PUdrFunctionFactoryToken); virtual; abstract;
-		procedure registerProcedure(status: PStatusToken; name: PAnsiChar; factory: PUdrProcedureFactoryToken); virtual; abstract;
-		procedure registerTrigger(status: PStatusToken; name: PAnsiChar; factory: PUdrTriggerFactoryToken); virtual; abstract;
+	  {see IUdrPluginHelper record helper for interface methods}
+
 	end;
 
 	PDecFloat16VTable = ^DecFloat16VTable;
@@ -5569,33 +3646,15 @@ class operator = (a,b: IUdrPlugin): boolean;
 	  const VERSION = 4;
 	  const BCD_SIZE = Cardinal(16);
 	  const STRING_SIZE = Cardinal(24);
-
 	  function vTable: PDecFloat16VTable inline;
-	  procedure toBcd(from: FB_DEC16Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr);
-	  procedure toString(status: PStatusToken; from: FB_DEC16Ptr; bufferLength: Cardinal; buffer: PAnsiChar);
-	  procedure fromBcd(sign: Integer; bcd: BytePtr; exp: Integer; to_: FB_DEC16Ptr);
-	  procedure fromString(status: PStatusToken; from: PAnsiChar; to_: FB_DEC16Ptr);
 	  class operator := (aToken:  PDecFloat16Token): IDecFloat16;
 	  class operator := (intf: IDecFloat16): PDecFloat16Token;
 	  class operator := (impl: IDecFloat16Impl): IDecFloat16;
 	  class operator = (a: IDecFloat16; b: pointer): boolean;
-class operator = (a,b: IDecFloat16): boolean;
-	end;
+	  class operator = (a,b: IDecFloat16): boolean;
 
-	IDecFloat16Impl = class(IVersionedImpl)
-	private
-	  class var vTable: DecFloat16VTable; 
-	  class var FInitialized: boolean;
-	  intf: IDecFloat16;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PDecFloat16Token inline;
-	  function getInterface: IDecFloat16 inline;
-		procedure toBcd(from: FB_DEC16Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr); virtual; abstract;
-		procedure toString(status: PStatusToken; from: FB_DEC16Ptr; bufferLength: Cardinal; buffer: PAnsiChar); virtual; abstract;
-		procedure fromBcd(sign: Integer; bcd: BytePtr; exp: Integer; to_: FB_DEC16Ptr); virtual; abstract;
-		procedure fromString(status: PStatusToken; from: PAnsiChar; to_: FB_DEC16Ptr); virtual; abstract;
+	  {see IDecFloat16Helper record helper for interface methods}
+
 	end;
 
 	PDecFloat34VTable = ^DecFloat34VTable;
@@ -5617,33 +3676,15 @@ class operator = (a,b: IDecFloat16): boolean;
 	  const VERSION = 4;
 	  const BCD_SIZE = Cardinal(34);
 	  const STRING_SIZE = Cardinal(43);
-
 	  function vTable: PDecFloat34VTable inline;
-	  procedure toBcd(from: FB_DEC34Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr);
-	  procedure toString(status: PStatusToken; from: FB_DEC34Ptr; bufferLength: Cardinal; buffer: PAnsiChar);
-	  procedure fromBcd(sign: Integer; bcd: BytePtr; exp: Integer; to_: FB_DEC34Ptr);
-	  procedure fromString(status: PStatusToken; from: PAnsiChar; to_: FB_DEC34Ptr);
 	  class operator := (aToken:  PDecFloat34Token): IDecFloat34;
 	  class operator := (intf: IDecFloat34): PDecFloat34Token;
 	  class operator := (impl: IDecFloat34Impl): IDecFloat34;
 	  class operator = (a: IDecFloat34; b: pointer): boolean;
-class operator = (a,b: IDecFloat34): boolean;
-	end;
+	  class operator = (a,b: IDecFloat34): boolean;
 
-	IDecFloat34Impl = class(IVersionedImpl)
-	private
-	  class var vTable: DecFloat34VTable; 
-	  class var FInitialized: boolean;
-	  intf: IDecFloat34;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PDecFloat34Token inline;
-	  function getInterface: IDecFloat34 inline;
-		procedure toBcd(from: FB_DEC34Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr); virtual; abstract;
-		procedure toString(status: PStatusToken; from: FB_DEC34Ptr; bufferLength: Cardinal; buffer: PAnsiChar); virtual; abstract;
-		procedure fromBcd(sign: Integer; bcd: BytePtr; exp: Integer; to_: FB_DEC34Ptr); virtual; abstract;
-		procedure fromString(status: PStatusToken; from: PAnsiChar; to_: FB_DEC34Ptr); virtual; abstract;
+	  {see IDecFloat34Helper record helper for interface methods}
+
 	end;
 
 	PInt128VTable = ^Int128VTable;
@@ -5662,29 +3703,15 @@ class operator = (a,b: IDecFloat34): boolean;
 	public
 	  const VERSION = 2;
 	  const STRING_SIZE = Cardinal(46);
-
 	  function vTable: PInt128VTable inline;
-	  procedure toString(status: PStatusToken; from: FB_I128Ptr; scale: Integer; bufferLength: Cardinal; buffer: PAnsiChar);
-	  procedure fromString(status: PStatusToken; scale: Integer; from: PAnsiChar; to_: FB_I128Ptr);
 	  class operator := (aToken:  PInt128Token): IInt128;
 	  class operator := (intf: IInt128): PInt128Token;
 	  class operator := (impl: IInt128Impl): IInt128;
 	  class operator = (a: IInt128; b: pointer): boolean;
-class operator = (a,b: IInt128): boolean;
-	end;
+	  class operator = (a,b: IInt128): boolean;
 
-	IInt128Impl = class(IVersionedImpl)
-	private
-	  class var vTable: Int128VTable; 
-	  class var FInitialized: boolean;
-	  intf: IInt128;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PInt128Token inline;
-	  function getInterface: IInt128 inline;
-		procedure toString(status: PStatusToken; from: FB_I128Ptr; scale: Integer; bufferLength: Cardinal; buffer: PAnsiChar); virtual; abstract;
-		procedure fromString(status: PStatusToken; scale: Integer; from: PAnsiChar; to_: FB_I128Ptr); virtual; abstract;
+	  {see IInt128Helper record helper for interface methods}
+
 	end;
 
 	PReplicatedFieldVTable = ^ReplicatedFieldVTable;
@@ -5707,39 +3734,15 @@ class operator = (a,b: IInt128): boolean;
 	  token: PReplicatedFieldToken;
 	public
 	  const VERSION = 7;
-
 	  function vTable: PReplicatedFieldVTable inline;
-	  function getName(): PAnsiChar;
-	  function getType(): Cardinal;
-	  function getSubType(): Integer;
-	  function getScale(): Integer;
-	  function getLength(): Cardinal;
-	  function getCharSet(): Cardinal;
-	  function getData(): Pointer;
 	  class operator := (aToken:  PReplicatedFieldToken): IReplicatedField;
 	  class operator := (intf: IReplicatedField): PReplicatedFieldToken;
 	  class operator := (impl: IReplicatedFieldImpl): IReplicatedField;
 	  class operator = (a: IReplicatedField; b: pointer): boolean;
-class operator = (a,b: IReplicatedField): boolean;
-	end;
+	  class operator = (a,b: IReplicatedField): boolean;
 
-	IReplicatedFieldImpl = class(IVersionedImpl)
-	private
-	  class var vTable: ReplicatedFieldVTable; 
-	  class var FInitialized: boolean;
-	  intf: IReplicatedField;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PReplicatedFieldToken inline;
-	  function getInterface: IReplicatedField inline;
-		function getName(): PAnsiChar; virtual; abstract;
-		function getType(): Cardinal; virtual; abstract;
-		function getSubType(): Integer; virtual; abstract;
-		function getScale(): Integer; virtual; abstract;
-		function getLength(): Cardinal; virtual; abstract;
-		function getCharSet(): Cardinal; virtual; abstract;
-		function getData(): Pointer; virtual; abstract;
+	  {see IReplicatedFieldHelper record helper for interface methods}
+
 	end;
 
 	PReplicatedRecordVTable = ^ReplicatedRecordVTable;
@@ -5759,33 +3762,15 @@ class operator = (a,b: IReplicatedField): boolean;
 	  token: PReplicatedRecordToken;
 	public
 	  const VERSION = 4;
-
 	  function vTable: PReplicatedRecordVTable inline;
-	  function getCount(): Cardinal;
-	  function getField(index: Cardinal): PReplicatedFieldToken;
-	  function getRawLength(): Cardinal;
-	  function getRawData(): BytePtr;
 	  class operator := (aToken:  PReplicatedRecordToken): IReplicatedRecord;
 	  class operator := (intf: IReplicatedRecord): PReplicatedRecordToken;
 	  class operator := (impl: IReplicatedRecordImpl): IReplicatedRecord;
 	  class operator = (a: IReplicatedRecord; b: pointer): boolean;
-class operator = (a,b: IReplicatedRecord): boolean;
-	end;
+	  class operator = (a,b: IReplicatedRecord): boolean;
 
-	IReplicatedRecordImpl = class(IVersionedImpl)
-	private
-	  class var vTable: ReplicatedRecordVTable; 
-	  class var FInitialized: boolean;
-	  intf: IReplicatedRecord;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PReplicatedRecordToken inline;
-	  function getInterface: IReplicatedRecord inline;
-		function getCount(): Cardinal; virtual; abstract;
-		function getField(index: Cardinal): PReplicatedFieldToken; virtual; abstract;
-		function getRawLength(): Cardinal; virtual; abstract;
-		function getRawData(): BytePtr; virtual; abstract;
+	  {see IReplicatedRecordHelper record helper for interface methods}
+
 	end;
 
 	PReplicatedTransactionVTable = ^ReplicatedTransactionVTable;
@@ -5813,48 +3798,15 @@ class operator = (a,b: IReplicatedRecord): boolean;
 	  token: PReplicatedTransactionToken;
 	public
 	  const VERSION = 12;
-
 	  function vTable: PReplicatedTransactionVTable inline;
-	  procedure dispose();
-	  procedure prepare(status: PStatusToken);
-	  procedure commit(status: PStatusToken);
-	  procedure rollback(status: PStatusToken);
-	  procedure startSavepoint(status: PStatusToken);
-	  procedure releaseSavepoint(status: PStatusToken);
-	  procedure rollbackSavepoint(status: PStatusToken);
-	  procedure insertRecord(status: PStatusToken; name: PAnsiChar; record_: PReplicatedRecordToken);
-	  procedure updateRecord(status: PStatusToken; name: PAnsiChar; orgRecord: PReplicatedRecordToken; newRecord: PReplicatedRecordToken);
-	  procedure deleteRecord(status: PStatusToken; name: PAnsiChar; record_: PReplicatedRecordToken);
-	  procedure executeSql(status: PStatusToken; sql: PAnsiChar);
-	  procedure executeSqlIntl(status: PStatusToken; charset: Cardinal; sql: PAnsiChar);
 	  class operator := (aToken:  PReplicatedTransactionToken): IReplicatedTransaction;
 	  class operator := (intf: IReplicatedTransaction): PReplicatedTransactionToken;
 	  class operator := (impl: IReplicatedTransactionImpl): IReplicatedTransaction;
 	  class operator = (a: IReplicatedTransaction; b: pointer): boolean;
-class operator = (a,b: IReplicatedTransaction): boolean;
-	end;
+	  class operator = (a,b: IReplicatedTransaction): boolean;
 
-	IReplicatedTransactionImpl = class(IDisposableImpl)
-	private
-	  class var vTable: ReplicatedTransactionVTable; 
-	  class var FInitialized: boolean;
-	  intf: IReplicatedTransaction;
-	  class procedure Initialize;
-	public
-	  constructor create;
-	  function getInterfaceToken: PReplicatedTransactionToken inline;
-	  function getInterface: IReplicatedTransaction inline;
-		procedure prepare(status: PStatusToken); virtual; abstract;
-		procedure commit(status: PStatusToken); virtual; abstract;
-		procedure rollback(status: PStatusToken); virtual; abstract;
-		procedure startSavepoint(status: PStatusToken); virtual; abstract;
-		procedure releaseSavepoint(status: PStatusToken); virtual; abstract;
-		procedure rollbackSavepoint(status: PStatusToken); virtual; abstract;
-		procedure insertRecord(status: PStatusToken; name: PAnsiChar; record_: PReplicatedRecordToken); virtual; abstract;
-		procedure updateRecord(status: PStatusToken; name: PAnsiChar; orgRecord: PReplicatedRecordToken; newRecord: PReplicatedRecordToken); virtual; abstract;
-		procedure deleteRecord(status: PStatusToken; name: PAnsiChar; record_: PReplicatedRecordToken); virtual; abstract;
-		procedure executeSql(status: PStatusToken; sql: PAnsiChar); virtual; abstract;
-		procedure executeSqlIntl(status: PStatusToken; charset: Cardinal; sql: PAnsiChar); virtual; abstract;
+	  {see IReplicatedTransactionHelper record helper for interface methods}
+
 	end;
 
 	PReplicatedSessionVTable = ^ReplicatedSessionVTable;
@@ -5878,37 +3830,2553 @@ class operator = (a,b: IReplicatedTransaction): boolean;
 	  token: PReplicatedSessionToken;
 	public
 	  const VERSION = 8;
-
 	  function vTable: PReplicatedSessionVTable inline;
-	  procedure addRef();
-	  function release(): Integer;
-	  procedure setOwner(r: PReferenceCountedToken);
-	  function getOwner(): PReferenceCountedToken;
-	  function init(status: PStatusToken; attachment: PAttachmentToken): Boolean;
-	  function startTransaction(status: PStatusToken; transaction: PTransactionToken; number: Int64): PReplicatedTransactionToken;
-	  procedure cleanupTransaction(status: PStatusToken; number: Int64);
-	  procedure setSequence(status: PStatusToken; name: PAnsiChar; value: Int64);
 	  class operator := (aToken:  PReplicatedSessionToken): IReplicatedSession;
 	  class operator := (intf: IReplicatedSession): PReplicatedSessionToken;
 	  class operator := (impl: IReplicatedSessionImpl): IReplicatedSession;
 	  class operator = (a: IReplicatedSession; b: pointer): boolean;
-class operator = (a,b: IReplicatedSession): boolean;
+	  class operator = (a,b: IReplicatedSession): boolean;
+
+	  {see IReplicatedSessionHelper record helper for interface methods}
+
+	end;
+
+
+	IVersionedImpl = class
+	private
+	  class var vTable: VersionedVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IVersioned;
+	protected
+	  token: TFBImplementationToken;
+	public
+	  constructor create;
+	end;
+
+	IReferenceCountedHelper = record helper for IReferenceCounted
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	end;
+
+	IReferenceCountedImpl = class(IVersionedImpl)
+	private
+	  class var vTable: ReferenceCountedVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IReferenceCounted;
+	public
+	  constructor create;
+	  procedure addRef(); virtual; abstract;
+	  function release(): Integer; virtual; abstract;
+	end;
+
+	IDisposableHelper = record helper for IDisposable
+	public
+	  procedure dispose();
+	end;
+
+	IDisposableImpl = class(IVersionedImpl)
+	private
+	  class var vTable: DisposableVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IDisposable;
+	public
+	  constructor create;
+	  procedure dispose(); virtual; abstract;
+	end;
+
+	IStatusHelper = record helper for IStatus
+	public
+	  procedure dispose();
+	  procedure init();
+	  function getState(): Cardinal;
+	  procedure setErrors2(length: Cardinal; value: NativeIntPtr);
+	  procedure setWarnings2(length: Cardinal; value: NativeIntPtr);
+	  procedure setErrors(value: NativeIntPtr);
+	  procedure setWarnings(value: NativeIntPtr);
+	  function getErrors(): NativeIntPtr;
+	  function getWarnings(): NativeIntPtr;
+	  function clone(): IStatus;
+	end;
+
+	IStatusImpl = class(IDisposableImpl)
+	private
+	  class var vTable: StatusVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IStatus;
+	public
+	  constructor create;
+	  procedure init(); virtual; abstract;
+	  function getState(): Cardinal; virtual; abstract;
+	  procedure setErrors2(length: Cardinal; value: NativeIntPtr); virtual; abstract;
+	  procedure setWarnings2(length: Cardinal; value: NativeIntPtr); virtual; abstract;
+	  procedure setErrors(value: NativeIntPtr); virtual; abstract;
+	  procedure setWarnings(value: NativeIntPtr); virtual; abstract;
+	  function getErrors(): NativeIntPtr; virtual; abstract;
+	  function getWarnings(): NativeIntPtr; virtual; abstract;
+	  function clone(): IStatus; virtual; abstract;
+	end;
+
+	IMasterHelper = record helper for IMaster
+	public
+	  function getStatus(): IStatus;
+	  function getDispatcher(): IProvider;
+	  function getPluginManager(): IPluginManager;
+	  function getTimerControl(): ITimerControl;
+	  function getDtc(): IDtc;
+	  function registerAttachment(provider: IProvider; attachment: IAttachment): IAttachment;
+	  function registerTransaction(attachment: IAttachment; transaction: ITransaction): ITransaction;
+	  function getMetadataBuilder(status: IStatus; fieldCount: Cardinal): IMetadataBuilder;
+	  function serverMode(mode: Integer): Integer;
+	  function getUtilInterface(): IUtil;
+	  function getConfigManager(): IConfigManager;
+	  function getProcessExiting(): Boolean;
+	end;
+
+	IMasterImpl = class(IVersionedImpl)
+	private
+	  class var vTable: MasterVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IMaster;
+	public
+	  constructor create;
+	  function getStatus(): IStatus; virtual; abstract;
+	  function getDispatcher(): IProvider; virtual; abstract;
+	  function getPluginManager(): IPluginManager; virtual; abstract;
+	  function getTimerControl(): ITimerControl; virtual; abstract;
+	  function getDtc(): IDtc; virtual; abstract;
+	  function registerAttachment(provider: IProvider; attachment: IAttachment): IAttachment; virtual; abstract;
+	  function registerTransaction(attachment: IAttachment; transaction: ITransaction): ITransaction; virtual; abstract;
+	  function getMetadataBuilder(status: IStatus; fieldCount: Cardinal): IMetadataBuilder; virtual; abstract;
+	  function serverMode(mode: Integer): Integer; virtual; abstract;
+	  function getUtilInterface(): IUtil; virtual; abstract;
+	  function getConfigManager(): IConfigManager; virtual; abstract;
+	  function getProcessExiting(): Boolean; virtual; abstract;
+	end;
+
+	IPluginBaseHelper = record helper for IPluginBase
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  procedure setOwner(r: IReferenceCounted);
+	  function getOwner(): IReferenceCounted;
+	end;
+
+	IPluginBaseImpl = class(IReferenceCountedImpl)
+	private
+	  class var vTable: PluginBaseVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IPluginBase;
+	public
+	  constructor create;
+	  procedure setOwner(r: IReferenceCounted); virtual; abstract;
+	  function getOwner(): IReferenceCounted; virtual; abstract;
+	end;
+
+	IPluginSetHelper = record helper for IPluginSet
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  function getName(): PAnsiChar;
+	  function getModuleName(): PAnsiChar;
+	  function getPlugin(status: IStatus): IPluginBase;
+	  procedure next(status: IStatus);
+	  procedure set_(status: IStatus; s: PAnsiChar);
+	end;
+
+	IPluginSetImpl = class(IReferenceCountedImpl)
+	private
+	  class var vTable: PluginSetVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IPluginSet;
+	public
+	  constructor create;
+	  function getName(): PAnsiChar; virtual; abstract;
+	  function getModuleName(): PAnsiChar; virtual; abstract;
+	  function getPlugin(status: IStatus): IPluginBase; virtual; abstract;
+	  procedure next(status: IStatus); virtual; abstract;
+	  procedure set_(status: IStatus; s: PAnsiChar); virtual; abstract;
+	end;
+
+	IConfigEntryHelper = record helper for IConfigEntry
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  function getName(): PAnsiChar;
+	  function getValue(): PAnsiChar;
+	  function getIntValue(): Int64;
+	  function getBoolValue(): Boolean;
+	  function getSubConfig(status: IStatus): IConfig;
+	end;
+
+	IConfigEntryImpl = class(IReferenceCountedImpl)
+	private
+	  class var vTable: ConfigEntryVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IConfigEntry;
+	public
+	  constructor create;
+	  function getName(): PAnsiChar; virtual; abstract;
+	  function getValue(): PAnsiChar; virtual; abstract;
+	  function getIntValue(): Int64; virtual; abstract;
+	  function getBoolValue(): Boolean; virtual; abstract;
+	  function getSubConfig(status: IStatus): IConfig; virtual; abstract;
+	end;
+
+	IConfigHelper = record helper for IConfig
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  function find(status: IStatus; name: PAnsiChar): IConfigEntry;
+	  function findValue(status: IStatus; name: PAnsiChar; value: PAnsiChar): IConfigEntry;
+	  function findPos(status: IStatus; name: PAnsiChar; pos: Cardinal): IConfigEntry;
+	end;
+
+	IConfigImpl = class(IReferenceCountedImpl)
+	private
+	  class var vTable: ConfigVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IConfig;
+	public
+	  constructor create;
+	  function find(status: IStatus; name: PAnsiChar): IConfigEntry; virtual; abstract;
+	  function findValue(status: IStatus; name: PAnsiChar; value: PAnsiChar): IConfigEntry; virtual; abstract;
+	  function findPos(status: IStatus; name: PAnsiChar; pos: Cardinal): IConfigEntry; virtual; abstract;
+	end;
+
+	IFirebirdConfHelper = record helper for IFirebirdConf
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  function getKey(name: PAnsiChar): Cardinal;
+	  function asInteger(key: Cardinal): Int64;
+	  function asString(key: Cardinal): PAnsiChar;
+	  function asBoolean(key: Cardinal): Boolean;
+	  function getVersion(status: IStatus): Cardinal;
+	end;
+
+	IFirebirdConfImpl = class(IReferenceCountedImpl)
+	private
+	  class var vTable: FirebirdConfVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IFirebirdConf;
+	public
+	  constructor create;
+	  function getKey(name: PAnsiChar): Cardinal; virtual; abstract;
+	  function asInteger(key: Cardinal): Int64; virtual; abstract;
+	  function asString(key: Cardinal): PAnsiChar; virtual; abstract;
+	  function asBoolean(key: Cardinal): Boolean; virtual; abstract;
+	  function getVersion(status: IStatus): Cardinal; virtual; abstract;
+	end;
+
+	IPluginConfigHelper = record helper for IPluginConfig
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  function getConfigFileName(): PAnsiChar;
+	  function getDefaultConfig(status: IStatus): IConfig;
+	  function getFirebirdConf(status: IStatus): IFirebirdConf;
+	  procedure setReleaseDelay(status: IStatus; microSeconds: QWord);
+	end;
+
+	IPluginConfigImpl = class(IReferenceCountedImpl)
+	private
+	  class var vTable: PluginConfigVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IPluginConfig;
+	public
+	  constructor create;
+	  function getConfigFileName(): PAnsiChar; virtual; abstract;
+	  function getDefaultConfig(status: IStatus): IConfig; virtual; abstract;
+	  function getFirebirdConf(status: IStatus): IFirebirdConf; virtual; abstract;
+	  procedure setReleaseDelay(status: IStatus; microSeconds: QWord); virtual; abstract;
+	end;
+
+	IPluginFactoryHelper = record helper for IPluginFactory
+	public
+	  function createPlugin(status: IStatus; factoryParameter: IPluginConfig): IPluginBase;
+	end;
+
+	IPluginFactoryImpl = class(IVersionedImpl)
+	private
+	  class var vTable: PluginFactoryVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IPluginFactory;
+	public
+	  constructor create;
+	  function createPlugin(status: IStatus; factoryParameter: IPluginConfig): IPluginBase; virtual; abstract;
+	end;
+
+	IPluginModuleHelper = record helper for IPluginModule
+	public
+	  procedure doClean();
+	  procedure threadDetach();
+	end;
+
+	IPluginModuleImpl = class(IVersionedImpl)
+	private
+	  class var vTable: PluginModuleVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IPluginModule;
+	public
+	  constructor create;
+	  procedure doClean(); virtual; abstract;
+	  procedure threadDetach(); virtual; abstract;
+	end;
+
+	IPluginManagerHelper = record helper for IPluginManager
+	public
+	  procedure registerPluginFactory(pluginType: Cardinal; defaultName: PAnsiChar; factory: IPluginFactory);
+	  procedure registerModule(cleanup: IPluginModule);
+	  procedure unregisterModule(cleanup: IPluginModule);
+	  function getPlugins(status: IStatus; pluginType: Cardinal; namesList: PAnsiChar; firebirdConf: IFirebirdConf): IPluginSet;
+	  function getConfig(status: IStatus; filename: PAnsiChar): IConfig;
+	  procedure releasePlugin(plugin: IPluginBase);
+	end;
+
+	IPluginManagerImpl = class(IVersionedImpl)
+	private
+	  class var vTable: PluginManagerVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IPluginManager;
+	public
+	  constructor create;
+	  procedure registerPluginFactory(pluginType: Cardinal; defaultName: PAnsiChar; factory: IPluginFactory); virtual; abstract;
+	  procedure registerModule(cleanup: IPluginModule); virtual; abstract;
+	  procedure unregisterModule(cleanup: IPluginModule); virtual; abstract;
+	  function getPlugins(status: IStatus; pluginType: Cardinal; namesList: PAnsiChar; firebirdConf: IFirebirdConf): IPluginSet; virtual; abstract;
+	  function getConfig(status: IStatus; filename: PAnsiChar): IConfig; virtual; abstract;
+	  procedure releasePlugin(plugin: IPluginBase); virtual; abstract;
+	end;
+
+	ICryptKeyHelper = record helper for ICryptKey
+	public
+	  procedure setSymmetric(status: IStatus; type_: PAnsiChar; keyLength: Cardinal; key: Pointer);
+	  procedure setAsymmetric(status: IStatus; type_: PAnsiChar; encryptKeyLength: Cardinal; encryptKey: Pointer; decryptKeyLength: Cardinal; decryptKey: Pointer);
+	  function getEncryptKey(length: CardinalPtr): Pointer;
+	  function getDecryptKey(length: CardinalPtr): Pointer;
+	end;
+
+	ICryptKeyImpl = class(IVersionedImpl)
+	private
+	  class var vTable: CryptKeyVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: ICryptKey;
+	public
+	  constructor create;
+	  procedure setSymmetric(status: IStatus; type_: PAnsiChar; keyLength: Cardinal; key: Pointer); virtual; abstract;
+	  procedure setAsymmetric(status: IStatus; type_: PAnsiChar; encryptKeyLength: Cardinal; encryptKey: Pointer; decryptKeyLength: Cardinal; decryptKey: Pointer); virtual; abstract;
+	  function getEncryptKey(length: CardinalPtr): Pointer; virtual; abstract;
+	  function getDecryptKey(length: CardinalPtr): Pointer; virtual; abstract;
+	end;
+
+	IConfigManagerHelper = record helper for IConfigManager
+	public
+	  function getDirectory(code: Cardinal): PAnsiChar;
+	  function getFirebirdConf(): IFirebirdConf;
+	  function getDatabaseConf(dbName: PAnsiChar): IFirebirdConf;
+	  function getPluginConfig(configuredPlugin: PAnsiChar): IConfig;
+	  function getInstallDirectory(): PAnsiChar;
+	  function getRootDirectory(): PAnsiChar;
+	  function getDefaultSecurityDb(): PAnsiChar;
+	end;
+
+	IConfigManagerImpl = class(IVersionedImpl)
+	private
+	  class var vTable: ConfigManagerVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IConfigManager;
+	public
+	  constructor create;
+	  function getDirectory(code: Cardinal): PAnsiChar; virtual; abstract;
+	  function getFirebirdConf(): IFirebirdConf; virtual; abstract;
+	  function getDatabaseConf(dbName: PAnsiChar): IFirebirdConf; virtual; abstract;
+	  function getPluginConfig(configuredPlugin: PAnsiChar): IConfig; virtual; abstract;
+	  function getInstallDirectory(): PAnsiChar; virtual; abstract;
+	  function getRootDirectory(): PAnsiChar; virtual; abstract;
+	  function getDefaultSecurityDb(): PAnsiChar; virtual; abstract;
+	end;
+
+	IEventCallbackHelper = record helper for IEventCallback
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  procedure eventCallbackFunction(length: Cardinal; events: BytePtr);
+	end;
+
+	IEventCallbackImpl = class(IReferenceCountedImpl)
+	private
+	  class var vTable: EventCallbackVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IEventCallback;
+	public
+	  constructor create;
+	  procedure eventCallbackFunction(length: Cardinal; events: BytePtr); virtual; abstract;
+	end;
+
+	IBlobHelper = record helper for IBlob
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  procedure getInfo(status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
+	  function getSegment(status: IStatus; bufferLength: Cardinal; buffer: Pointer; segmentLength: CardinalPtr): Integer;
+	  procedure putSegment(status: IStatus; length: Cardinal; buffer: Pointer);
+	  procedure cancel(status: IStatus);
+	  procedure close(status: IStatus);
+	  function seek(status: IStatus; mode: Integer; offset: Integer): Integer;
+	end;
+
+	IBlobImpl = class(IReferenceCountedImpl)
+	private
+	  class var vTable: BlobVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IBlob;
+	public
+	  constructor create;
+	  procedure getInfo(status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); virtual; abstract;
+	  function getSegment(status: IStatus; bufferLength: Cardinal; buffer: Pointer; segmentLength: CardinalPtr): Integer; virtual; abstract;
+	  procedure putSegment(status: IStatus; length: Cardinal; buffer: Pointer); virtual; abstract;
+	  procedure cancel(status: IStatus); virtual; abstract;
+	  procedure close(status: IStatus); virtual; abstract;
+	  function seek(status: IStatus; mode: Integer; offset: Integer): Integer; virtual; abstract;
+	end;
+
+	ITransactionHelper = record helper for ITransaction
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  procedure getInfo(status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
+	  procedure prepare(status: IStatus; msgLength: Cardinal; message: BytePtr);
+	  procedure commit(status: IStatus);
+	  procedure commitRetaining(status: IStatus);
+	  procedure rollback(status: IStatus);
+	  procedure rollbackRetaining(status: IStatus);
+	  procedure disconnect(status: IStatus);
+	  function join(status: IStatus; transaction: ITransaction): ITransaction;
+	  function validate(status: IStatus; attachment: IAttachment): ITransaction;
+	  function enterDtc(status: IStatus): ITransaction;
+	end;
+
+	ITransactionImpl = class(IReferenceCountedImpl)
+	private
+	  class var vTable: TransactionVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: ITransaction;
+	public
+	  constructor create;
+	  procedure getInfo(status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); virtual; abstract;
+	  procedure prepare(status: IStatus; msgLength: Cardinal; message: BytePtr); virtual; abstract;
+	  procedure commit(status: IStatus); virtual; abstract;
+	  procedure commitRetaining(status: IStatus); virtual; abstract;
+	  procedure rollback(status: IStatus); virtual; abstract;
+	  procedure rollbackRetaining(status: IStatus); virtual; abstract;
+	  procedure disconnect(status: IStatus); virtual; abstract;
+	  function join(status: IStatus; transaction: ITransaction): ITransaction; virtual; abstract;
+	  function validate(status: IStatus; attachment: IAttachment): ITransaction; virtual; abstract;
+	  function enterDtc(status: IStatus): ITransaction; virtual; abstract;
+	end;
+
+	IMessageMetadataHelper = record helper for IMessageMetadata
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  function getCount(status: IStatus): Cardinal;
+	  function getField(status: IStatus; index: Cardinal): PAnsiChar;
+	  function getRelation(status: IStatus; index: Cardinal): PAnsiChar;
+	  function getOwner(status: IStatus; index: Cardinal): PAnsiChar;
+	  function getAlias(status: IStatus; index: Cardinal): PAnsiChar;
+	  function getType(status: IStatus; index: Cardinal): Cardinal;
+	  function isNullable(status: IStatus; index: Cardinal): Boolean;
+	  function getSubType(status: IStatus; index: Cardinal): Integer;
+	  function getLength(status: IStatus; index: Cardinal): Cardinal;
+	  function getScale(status: IStatus; index: Cardinal): Integer;
+	  function getCharSet(status: IStatus; index: Cardinal): Cardinal;
+	  function getOffset(status: IStatus; index: Cardinal): Cardinal;
+	  function getNullOffset(status: IStatus; index: Cardinal): Cardinal;
+	  function getBuilder(status: IStatus): IMetadataBuilder;
+	  function getMessageLength(status: IStatus): Cardinal;
+	  function getAlignment(status: IStatus): Cardinal;
+	  function getAlignedLength(status: IStatus): Cardinal;
+	end;
+
+	IMessageMetadataImpl = class(IReferenceCountedImpl)
+	private
+	  class var vTable: MessageMetadataVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IMessageMetadata;
+	public
+	  constructor create;
+	  function getCount(status: IStatus): Cardinal; virtual; abstract;
+	  function getField(status: IStatus; index: Cardinal): PAnsiChar; virtual; abstract;
+	  function getRelation(status: IStatus; index: Cardinal): PAnsiChar; virtual; abstract;
+	  function getOwner(status: IStatus; index: Cardinal): PAnsiChar; virtual; abstract;
+	  function getAlias(status: IStatus; index: Cardinal): PAnsiChar; virtual; abstract;
+	  function getType(status: IStatus; index: Cardinal): Cardinal; virtual; abstract;
+	  function isNullable(status: IStatus; index: Cardinal): Boolean; virtual; abstract;
+	  function getSubType(status: IStatus; index: Cardinal): Integer; virtual; abstract;
+	  function getLength(status: IStatus; index: Cardinal): Cardinal; virtual; abstract;
+	  function getScale(status: IStatus; index: Cardinal): Integer; virtual; abstract;
+	  function getCharSet(status: IStatus; index: Cardinal): Cardinal; virtual; abstract;
+	  function getOffset(status: IStatus; index: Cardinal): Cardinal; virtual; abstract;
+	  function getNullOffset(status: IStatus; index: Cardinal): Cardinal; virtual; abstract;
+	  function getBuilder(status: IStatus): IMetadataBuilder; virtual; abstract;
+	  function getMessageLength(status: IStatus): Cardinal; virtual; abstract;
+	  function getAlignment(status: IStatus): Cardinal; virtual; abstract;
+	  function getAlignedLength(status: IStatus): Cardinal; virtual; abstract;
+	end;
+
+	IMetadataBuilderHelper = record helper for IMetadataBuilder
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  procedure setType(status: IStatus; index: Cardinal; type_: Cardinal);
+	  procedure setSubType(status: IStatus; index: Cardinal; subType: Integer);
+	  procedure setLength(status: IStatus; index: Cardinal; length: Cardinal);
+	  procedure setCharSet(status: IStatus; index: Cardinal; charSet: Cardinal);
+	  procedure setScale(status: IStatus; index: Cardinal; scale: Integer);
+	  procedure truncate(status: IStatus; count: Cardinal);
+	  procedure moveNameToIndex(status: IStatus; name: PAnsiChar; index: Cardinal);
+	  procedure remove(status: IStatus; index: Cardinal);
+	  function addField(status: IStatus): Cardinal;
+	  function getMetadata(status: IStatus): IMessageMetadata;
+	  procedure setField(status: IStatus; index: Cardinal; field: PAnsiChar);
+	  procedure setRelation(status: IStatus; index: Cardinal; relation: PAnsiChar);
+	  procedure setOwner(status: IStatus; index: Cardinal; owner: PAnsiChar);
+	  procedure setAlias(status: IStatus; index: Cardinal; alias: PAnsiChar);
+	end;
+
+	IMetadataBuilderImpl = class(IReferenceCountedImpl)
+	private
+	  class var vTable: MetadataBuilderVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IMetadataBuilder;
+	public
+	  constructor create;
+	  procedure setType(status: IStatus; index: Cardinal; type_: Cardinal); virtual; abstract;
+	  procedure setSubType(status: IStatus; index: Cardinal; subType: Integer); virtual; abstract;
+	  procedure setLength(status: IStatus; index: Cardinal; length: Cardinal); virtual; abstract;
+	  procedure setCharSet(status: IStatus; index: Cardinal; charSet: Cardinal); virtual; abstract;
+	  procedure setScale(status: IStatus; index: Cardinal; scale: Integer); virtual; abstract;
+	  procedure truncate(status: IStatus; count: Cardinal); virtual; abstract;
+	  procedure moveNameToIndex(status: IStatus; name: PAnsiChar; index: Cardinal); virtual; abstract;
+	  procedure remove(status: IStatus; index: Cardinal); virtual; abstract;
+	  function addField(status: IStatus): Cardinal; virtual; abstract;
+	  function getMetadata(status: IStatus): IMessageMetadata; virtual; abstract;
+	  procedure setField(status: IStatus; index: Cardinal; field: PAnsiChar); virtual; abstract;
+	  procedure setRelation(status: IStatus; index: Cardinal; relation: PAnsiChar); virtual; abstract;
+	  procedure setOwner(status: IStatus; index: Cardinal; owner: PAnsiChar); virtual; abstract;
+	  procedure setAlias(status: IStatus; index: Cardinal; alias: PAnsiChar); virtual; abstract;
+	end;
+
+	IResultSetHelper = record helper for IResultSet
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  function fetchNext(status: IStatus; message: Pointer): Integer;
+	  function fetchPrior(status: IStatus; message: Pointer): Integer;
+	  function fetchFirst(status: IStatus; message: Pointer): Integer;
+	  function fetchLast(status: IStatus; message: Pointer): Integer;
+	  function fetchAbsolute(status: IStatus; position: Integer; message: Pointer): Integer;
+	  function fetchRelative(status: IStatus; offset: Integer; message: Pointer): Integer;
+	  function isEof(status: IStatus): Boolean;
+	  function isBof(status: IStatus): Boolean;
+	  function getMetadata(status: IStatus): IMessageMetadata;
+	  procedure close(status: IStatus);
+	  procedure setDelayedOutputFormat(status: IStatus; format: IMessageMetadata);
+	end;
+
+	IResultSetImpl = class(IReferenceCountedImpl)
+	private
+	  class var vTable: ResultSetVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IResultSet;
+	public
+	  constructor create;
+	  function fetchNext(status: IStatus; message: Pointer): Integer; virtual; abstract;
+	  function fetchPrior(status: IStatus; message: Pointer): Integer; virtual; abstract;
+	  function fetchFirst(status: IStatus; message: Pointer): Integer; virtual; abstract;
+	  function fetchLast(status: IStatus; message: Pointer): Integer; virtual; abstract;
+	  function fetchAbsolute(status: IStatus; position: Integer; message: Pointer): Integer; virtual; abstract;
+	  function fetchRelative(status: IStatus; offset: Integer; message: Pointer): Integer; virtual; abstract;
+	  function isEof(status: IStatus): Boolean; virtual; abstract;
+	  function isBof(status: IStatus): Boolean; virtual; abstract;
+	  function getMetadata(status: IStatus): IMessageMetadata; virtual; abstract;
+	  procedure close(status: IStatus); virtual; abstract;
+	  procedure setDelayedOutputFormat(status: IStatus; format: IMessageMetadata); virtual; abstract;
+	end;
+
+	IStatementHelper = record helper for IStatement
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  procedure getInfo(status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
+	  function getType(status: IStatus): Cardinal;
+	  function getPlan(status: IStatus; detailed: Boolean): PAnsiChar;
+	  function getAffectedRecords(status: IStatus): QWord;
+	  function getInputMetadata(status: IStatus): IMessageMetadata;
+	  function getOutputMetadata(status: IStatus): IMessageMetadata;
+	  function execute(status: IStatus; transaction: ITransaction; inMetadata: IMessageMetadata; inBuffer: Pointer; outMetadata: IMessageMetadata; outBuffer: Pointer): ITransaction;
+	  function openCursor(status: IStatus; transaction: ITransaction; inMetadata: IMessageMetadata; inBuffer: Pointer; outMetadata: IMessageMetadata; flags: Cardinal): IResultSet;
+	  procedure setCursorName(status: IStatus; name: PAnsiChar);
+	  procedure free(status: IStatus);
+	  function getFlags(status: IStatus): Cardinal;
+	  function getTimeout(status: IStatus): Cardinal;
+	  procedure setTimeout(status: IStatus; timeOut: Cardinal);
+	  function createBatch(status: IStatus; inMetadata: IMessageMetadata; parLength: Cardinal; par: BytePtr): IBatch;
+	end;
+
+	IStatementImpl = class(IReferenceCountedImpl)
+	private
+	  class var vTable: StatementVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IStatement;
+	public
+	  constructor create;
+	  procedure getInfo(status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); virtual; abstract;
+	  function getType(status: IStatus): Cardinal; virtual; abstract;
+	  function getPlan(status: IStatus; detailed: Boolean): PAnsiChar; virtual; abstract;
+	  function getAffectedRecords(status: IStatus): QWord; virtual; abstract;
+	  function getInputMetadata(status: IStatus): IMessageMetadata; virtual; abstract;
+	  function getOutputMetadata(status: IStatus): IMessageMetadata; virtual; abstract;
+	  function execute(status: IStatus; transaction: ITransaction; inMetadata: IMessageMetadata; inBuffer: Pointer; outMetadata: IMessageMetadata; outBuffer: Pointer): ITransaction; virtual; abstract;
+	  function openCursor(status: IStatus; transaction: ITransaction; inMetadata: IMessageMetadata; inBuffer: Pointer; outMetadata: IMessageMetadata; flags: Cardinal): IResultSet; virtual; abstract;
+	  procedure setCursorName(status: IStatus; name: PAnsiChar); virtual; abstract;
+	  procedure free(status: IStatus); virtual; abstract;
+	  function getFlags(status: IStatus): Cardinal; virtual; abstract;
+	  function getTimeout(status: IStatus): Cardinal; virtual; abstract;
+	  procedure setTimeout(status: IStatus; timeOut: Cardinal); virtual; abstract;
+	  function createBatch(status: IStatus; inMetadata: IMessageMetadata; parLength: Cardinal; par: BytePtr): IBatch; virtual; abstract;
+	end;
+
+	IBatchHelper = record helper for IBatch
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  procedure add(status: IStatus; count: Cardinal; inBuffer: Pointer);
+	  procedure addBlob(status: IStatus; length: Cardinal; inBuffer: Pointer; blobId: ISC_QUADPtr; parLength: Cardinal; par: BytePtr);
+	  procedure appendBlobData(status: IStatus; length: Cardinal; inBuffer: Pointer);
+	  procedure addBlobStream(status: IStatus; length: Cardinal; inBuffer: Pointer);
+	  procedure registerBlob(status: IStatus; existingBlob: ISC_QUADPtr; blobId: ISC_QUADPtr);
+	  function execute(status: IStatus; transaction: ITransaction): IBatchCompletionState;
+	  procedure cancel(status: IStatus);
+	  function getBlobAlignment(status: IStatus): Cardinal;
+	  function getMetadata(status: IStatus): IMessageMetadata;
+	  procedure setDefaultBpb(status: IStatus; parLength: Cardinal; par: BytePtr);
+	  procedure close(status: IStatus);
+	end;
+
+	IBatchImpl = class(IReferenceCountedImpl)
+	private
+	  class var vTable: BatchVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IBatch;
+	public
+	  constructor create;
+	  procedure add(status: IStatus; count: Cardinal; inBuffer: Pointer); virtual; abstract;
+	  procedure addBlob(status: IStatus; length: Cardinal; inBuffer: Pointer; blobId: ISC_QUADPtr; parLength: Cardinal; par: BytePtr); virtual; abstract;
+	  procedure appendBlobData(status: IStatus; length: Cardinal; inBuffer: Pointer); virtual; abstract;
+	  procedure addBlobStream(status: IStatus; length: Cardinal; inBuffer: Pointer); virtual; abstract;
+	  procedure registerBlob(status: IStatus; existingBlob: ISC_QUADPtr; blobId: ISC_QUADPtr); virtual; abstract;
+	  function execute(status: IStatus; transaction: ITransaction): IBatchCompletionState; virtual; abstract;
+	  procedure cancel(status: IStatus); virtual; abstract;
+	  function getBlobAlignment(status: IStatus): Cardinal; virtual; abstract;
+	  function getMetadata(status: IStatus): IMessageMetadata; virtual; abstract;
+	  procedure setDefaultBpb(status: IStatus; parLength: Cardinal; par: BytePtr); virtual; abstract;
+	  procedure close(status: IStatus); virtual; abstract;
+	end;
+
+	IBatchCompletionStateHelper = record helper for IBatchCompletionState
+	public
+	  procedure dispose();
+	  function getSize(status: IStatus): Cardinal;
+	  function getState(status: IStatus; pos: Cardinal): Integer;
+	  function findError(status: IStatus; pos: Cardinal): Cardinal;
+	  procedure getStatus(status: IStatus; to_: IStatus; pos: Cardinal);
+	end;
+
+	IBatchCompletionStateImpl = class(IDisposableImpl)
+	private
+	  class var vTable: BatchCompletionStateVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IBatchCompletionState;
+	public
+	  constructor create;
+	  function getSize(status: IStatus): Cardinal; virtual; abstract;
+	  function getState(status: IStatus; pos: Cardinal): Integer; virtual; abstract;
+	  function findError(status: IStatus; pos: Cardinal): Cardinal; virtual; abstract;
+	  procedure getStatus(status: IStatus; to_: IStatus; pos: Cardinal); virtual; abstract;
+	end;
+
+	IReplicatorHelper = record helper for IReplicator
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  procedure process(status: IStatus; length: Cardinal; data: BytePtr);
+	  procedure close(status: IStatus);
+	end;
+
+	IReplicatorImpl = class(IReferenceCountedImpl)
+	private
+	  class var vTable: ReplicatorVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IReplicator;
+	public
+	  constructor create;
+	  procedure process(status: IStatus; length: Cardinal; data: BytePtr); virtual; abstract;
+	  procedure close(status: IStatus); virtual; abstract;
+	end;
+
+	IRequestHelper = record helper for IRequest
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  procedure receive(status: IStatus; level: Integer; msgType: Cardinal; length: Cardinal; message: Pointer);
+	  procedure send(status: IStatus; level: Integer; msgType: Cardinal; length: Cardinal; message: Pointer);
+	  procedure getInfo(status: IStatus; level: Integer; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
+	  procedure start(status: IStatus; tra: ITransaction; level: Integer);
+	  procedure startAndSend(status: IStatus; tra: ITransaction; level: Integer; msgType: Cardinal; length: Cardinal; message: Pointer);
+	  procedure unwind(status: IStatus; level: Integer);
+	  procedure free(status: IStatus);
+	end;
+
+	IRequestImpl = class(IReferenceCountedImpl)
+	private
+	  class var vTable: RequestVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IRequest;
+	public
+	  constructor create;
+	  procedure receive(status: IStatus; level: Integer; msgType: Cardinal; length: Cardinal; message: Pointer); virtual; abstract;
+	  procedure send(status: IStatus; level: Integer; msgType: Cardinal; length: Cardinal; message: Pointer); virtual; abstract;
+	  procedure getInfo(status: IStatus; level: Integer; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); virtual; abstract;
+	  procedure start(status: IStatus; tra: ITransaction; level: Integer); virtual; abstract;
+	  procedure startAndSend(status: IStatus; tra: ITransaction; level: Integer; msgType: Cardinal; length: Cardinal; message: Pointer); virtual; abstract;
+	  procedure unwind(status: IStatus; level: Integer); virtual; abstract;
+	  procedure free(status: IStatus); virtual; abstract;
+	end;
+
+	IEventsHelper = record helper for IEvents
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  procedure cancel(status: IStatus);
+	end;
+
+	IEventsImpl = class(IReferenceCountedImpl)
+	private
+	  class var vTable: EventsVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IEvents;
+	public
+	  constructor create;
+	  procedure cancel(status: IStatus); virtual; abstract;
+	end;
+
+	IAttachmentHelper = record helper for IAttachment
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  procedure getInfo(status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
+	  function startTransaction(status: IStatus; tpbLength: Cardinal; tpb: BytePtr): ITransaction;
+	  function reconnectTransaction(status: IStatus; length: Cardinal; id: BytePtr): ITransaction;
+	  function compileRequest(status: IStatus; blrLength: Cardinal; blr: BytePtr): IRequest;
+	  procedure transactRequest(status: IStatus; transaction: ITransaction; blrLength: Cardinal; blr: BytePtr; inMsgLength: Cardinal; inMsg: BytePtr; outMsgLength: Cardinal; outMsg: BytePtr);
+	  function createBlob(status: IStatus; transaction: ITransaction; id: ISC_QUADPtr; bpbLength: Cardinal; bpb: BytePtr): IBlob;
+	  function openBlob(status: IStatus; transaction: ITransaction; id: ISC_QUADPtr; bpbLength: Cardinal; bpb: BytePtr): IBlob;
+	  function getSlice(status: IStatus; transaction: ITransaction; id: ISC_QUADPtr; sdlLength: Cardinal; sdl: BytePtr; paramLength: Cardinal; param: BytePtr; sliceLength: Integer; slice: BytePtr): Integer;
+	  procedure putSlice(status: IStatus; transaction: ITransaction; id: ISC_QUADPtr; sdlLength: Cardinal; sdl: BytePtr; paramLength: Cardinal; param: BytePtr; sliceLength: Integer; slice: BytePtr);
+	  procedure executeDyn(status: IStatus; transaction: ITransaction; length: Cardinal; dyn: BytePtr);
+	  function prepare(status: IStatus; tra: ITransaction; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; flags: Cardinal): IStatement;
+	  function execute(status: IStatus; transaction: ITransaction; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: IMessageMetadata; inBuffer: Pointer; outMetadata: IMessageMetadata; outBuffer: Pointer): ITransaction;
+	  function openCursor(status: IStatus; transaction: ITransaction; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: IMessageMetadata; inBuffer: Pointer; outMetadata: IMessageMetadata; cursorName: PAnsiChar; cursorFlags: Cardinal): IResultSet;
+	  function queEvents(status: IStatus; callback: IEventCallback; length: Cardinal; events: BytePtr): IEvents;
+	  procedure cancelOperation(status: IStatus; option: Integer);
+	  procedure ping(status: IStatus);
+	  procedure detach(status: IStatus);
+	  procedure dropDatabase(status: IStatus);
+	  function getIdleTimeout(status: IStatus): Cardinal;
+	  procedure setIdleTimeout(status: IStatus; timeOut: Cardinal);
+	  function getStatementTimeout(status: IStatus): Cardinal;
+	  procedure setStatementTimeout(status: IStatus; timeOut: Cardinal);
+	  function createBatch(status: IStatus; transaction: ITransaction; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: IMessageMetadata; parLength: Cardinal; par: BytePtr): IBatch;
+	  function createReplicator(status: IStatus): IReplicator;
+	end;
+
+	IAttachmentImpl = class(IReferenceCountedImpl)
+	private
+	  class var vTable: AttachmentVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IAttachment;
+	public
+	  constructor create;
+	  procedure getInfo(status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); virtual; abstract;
+	  function startTransaction(status: IStatus; tpbLength: Cardinal; tpb: BytePtr): ITransaction; virtual; abstract;
+	  function reconnectTransaction(status: IStatus; length: Cardinal; id: BytePtr): ITransaction; virtual; abstract;
+	  function compileRequest(status: IStatus; blrLength: Cardinal; blr: BytePtr): IRequest; virtual; abstract;
+	  procedure transactRequest(status: IStatus; transaction: ITransaction; blrLength: Cardinal; blr: BytePtr; inMsgLength: Cardinal; inMsg: BytePtr; outMsgLength: Cardinal; outMsg: BytePtr); virtual; abstract;
+	  function createBlob(status: IStatus; transaction: ITransaction; id: ISC_QUADPtr; bpbLength: Cardinal; bpb: BytePtr): IBlob; virtual; abstract;
+	  function openBlob(status: IStatus; transaction: ITransaction; id: ISC_QUADPtr; bpbLength: Cardinal; bpb: BytePtr): IBlob; virtual; abstract;
+	  function getSlice(status: IStatus; transaction: ITransaction; id: ISC_QUADPtr; sdlLength: Cardinal; sdl: BytePtr; paramLength: Cardinal; param: BytePtr; sliceLength: Integer; slice: BytePtr): Integer; virtual; abstract;
+	  procedure putSlice(status: IStatus; transaction: ITransaction; id: ISC_QUADPtr; sdlLength: Cardinal; sdl: BytePtr; paramLength: Cardinal; param: BytePtr; sliceLength: Integer; slice: BytePtr); virtual; abstract;
+	  procedure executeDyn(status: IStatus; transaction: ITransaction; length: Cardinal; dyn: BytePtr); virtual; abstract;
+	  function prepare(status: IStatus; tra: ITransaction; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; flags: Cardinal): IStatement; virtual; abstract;
+	  function execute(status: IStatus; transaction: ITransaction; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: IMessageMetadata; inBuffer: Pointer; outMetadata: IMessageMetadata; outBuffer: Pointer): ITransaction; virtual; abstract;
+	  function openCursor(status: IStatus; transaction: ITransaction; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: IMessageMetadata; inBuffer: Pointer; outMetadata: IMessageMetadata; cursorName: PAnsiChar; cursorFlags: Cardinal): IResultSet; virtual; abstract;
+	  function queEvents(status: IStatus; callback: IEventCallback; length: Cardinal; events: BytePtr): IEvents; virtual; abstract;
+	  procedure cancelOperation(status: IStatus; option: Integer); virtual; abstract;
+	  procedure ping(status: IStatus); virtual; abstract;
+	  procedure detach(status: IStatus); virtual; abstract;
+	  procedure dropDatabase(status: IStatus); virtual; abstract;
+	  function getIdleTimeout(status: IStatus): Cardinal; virtual; abstract;
+	  procedure setIdleTimeout(status: IStatus; timeOut: Cardinal); virtual; abstract;
+	  function getStatementTimeout(status: IStatus): Cardinal; virtual; abstract;
+	  procedure setStatementTimeout(status: IStatus; timeOut: Cardinal); virtual; abstract;
+	  function createBatch(status: IStatus; transaction: ITransaction; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: IMessageMetadata; parLength: Cardinal; par: BytePtr): IBatch; virtual; abstract;
+	  function createReplicator(status: IStatus): IReplicator; virtual; abstract;
+	end;
+
+	IServiceHelper = record helper for IService
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  procedure detach(status: IStatus);
+	  procedure query(status: IStatus; sendLength: Cardinal; sendItems: BytePtr; receiveLength: Cardinal; receiveItems: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
+	  procedure start(status: IStatus; spbLength: Cardinal; spb: BytePtr);
+	end;
+
+	IServiceImpl = class(IReferenceCountedImpl)
+	private
+	  class var vTable: ServiceVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IService;
+	public
+	  constructor create;
+	  procedure detach(status: IStatus); virtual; abstract;
+	  procedure query(status: IStatus; sendLength: Cardinal; sendItems: BytePtr; receiveLength: Cardinal; receiveItems: BytePtr; bufferLength: Cardinal; buffer: BytePtr); virtual; abstract;
+	  procedure start(status: IStatus; spbLength: Cardinal; spb: BytePtr); virtual; abstract;
+	end;
+
+	IProviderHelper = record helper for IProvider
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  procedure setOwner(r: IReferenceCounted);
+	  function getOwner(): IReferenceCounted;
+	  function attachDatabase(status: IStatus; fileName: PAnsiChar; dpbLength: Cardinal; dpb: BytePtr): IAttachment;
+	  function createDatabase(status: IStatus; fileName: PAnsiChar; dpbLength: Cardinal; dpb: BytePtr): IAttachment;
+	  function attachServiceManager(status: IStatus; service: PAnsiChar; spbLength: Cardinal; spb: BytePtr): IService;
+	  procedure shutdown(status: IStatus; timeout: Cardinal; reason: Integer);
+	  procedure setDbCryptCallback(status: IStatus; cryptCallback: ICryptKeyCallback);
+	end;
+
+	IProviderImpl = class(IPluginBaseImpl)
+	private
+	  class var vTable: ProviderVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IProvider;
+	public
+	  constructor create;
+	  function attachDatabase(status: IStatus; fileName: PAnsiChar; dpbLength: Cardinal; dpb: BytePtr): IAttachment; virtual; abstract;
+	  function createDatabase(status: IStatus; fileName: PAnsiChar; dpbLength: Cardinal; dpb: BytePtr): IAttachment; virtual; abstract;
+	  function attachServiceManager(status: IStatus; service: PAnsiChar; spbLength: Cardinal; spb: BytePtr): IService; virtual; abstract;
+	  procedure shutdown(status: IStatus; timeout: Cardinal; reason: Integer); virtual; abstract;
+	  procedure setDbCryptCallback(status: IStatus; cryptCallback: ICryptKeyCallback); virtual; abstract;
+	end;
+
+	IDtcStartHelper = record helper for IDtcStart
+	public
+	  procedure dispose();
+	  procedure addAttachment(status: IStatus; att: IAttachment);
+	  procedure addWithTpb(status: IStatus; att: IAttachment; length: Cardinal; tpb: BytePtr);
+	  function start(status: IStatus): ITransaction;
+	end;
+
+	IDtcStartImpl = class(IDisposableImpl)
+	private
+	  class var vTable: DtcStartVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IDtcStart;
+	public
+	  constructor create;
+	  procedure addAttachment(status: IStatus; att: IAttachment); virtual; abstract;
+	  procedure addWithTpb(status: IStatus; att: IAttachment; length: Cardinal; tpb: BytePtr); virtual; abstract;
+	  function start(status: IStatus): ITransaction; virtual; abstract;
+	end;
+
+	IDtcHelper = record helper for IDtc
+	public
+	  function join(status: IStatus; one: ITransaction; two: ITransaction): ITransaction;
+	  function startBuilder(status: IStatus): IDtcStart;
+	end;
+
+	IDtcImpl = class(IVersionedImpl)
+	private
+	  class var vTable: DtcVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IDtc;
+	public
+	  constructor create;
+	  function join(status: IStatus; one: ITransaction; two: ITransaction): ITransaction; virtual; abstract;
+	  function startBuilder(status: IStatus): IDtcStart; virtual; abstract;
+	end;
+
+	IAuthHelper = record helper for IAuth
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  procedure setOwner(r: IReferenceCounted);
+	  function getOwner(): IReferenceCounted;
+	end;
+
+	IAuthImpl = class(IPluginBaseImpl)
+	private
+	  class var vTable: AuthVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IAuth;
+	public
+	  constructor create;
+	end;
+
+	IWriterHelper = record helper for IWriter
+	public
+	  procedure reset();
+	  procedure add(status: IStatus; name: PAnsiChar);
+	  procedure setType(status: IStatus; value: PAnsiChar);
+	  procedure setDb(status: IStatus; value: PAnsiChar);
+	end;
+
+	IWriterImpl = class(IVersionedImpl)
+	private
+	  class var vTable: WriterVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IWriter;
+	public
+	  constructor create;
+	  procedure reset(); virtual; abstract;
+	  procedure add(status: IStatus; name: PAnsiChar); virtual; abstract;
+	  procedure setType(status: IStatus; value: PAnsiChar); virtual; abstract;
+	  procedure setDb(status: IStatus; value: PAnsiChar); virtual; abstract;
+	end;
+
+	IServerBlockHelper = record helper for IServerBlock
+	public
+	  function getLogin(): PAnsiChar;
+	  function getData(length: CardinalPtr): BytePtr;
+	  procedure putData(status: IStatus; length: Cardinal; data: Pointer);
+	  function newKey(status: IStatus): ICryptKey;
+	end;
+
+	IServerBlockImpl = class(IVersionedImpl)
+	private
+	  class var vTable: ServerBlockVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IServerBlock;
+	public
+	  constructor create;
+	  function getLogin(): PAnsiChar; virtual; abstract;
+	  function getData(length: CardinalPtr): BytePtr; virtual; abstract;
+	  procedure putData(status: IStatus; length: Cardinal; data: Pointer); virtual; abstract;
+	  function newKey(status: IStatus): ICryptKey; virtual; abstract;
+	end;
+
+	IClientBlockHelper = record helper for IClientBlock
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  function getLogin(): PAnsiChar;
+	  function getPassword(): PAnsiChar;
+	  function getData(length: CardinalPtr): BytePtr;
+	  procedure putData(status: IStatus; length: Cardinal; data: Pointer);
+	  function newKey(status: IStatus): ICryptKey;
+	  function getAuthBlock(status: IStatus): IAuthBlock;
+	end;
+
+	IClientBlockImpl = class(IReferenceCountedImpl)
+	private
+	  class var vTable: ClientBlockVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IClientBlock;
+	public
+	  constructor create;
+	  function getLogin(): PAnsiChar; virtual; abstract;
+	  function getPassword(): PAnsiChar; virtual; abstract;
+	  function getData(length: CardinalPtr): BytePtr; virtual; abstract;
+	  procedure putData(status: IStatus; length: Cardinal; data: Pointer); virtual; abstract;
+	  function newKey(status: IStatus): ICryptKey; virtual; abstract;
+	  function getAuthBlock(status: IStatus): IAuthBlock; virtual; abstract;
+	end;
+
+	IServerHelper = record helper for IServer
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  procedure setOwner(r: IReferenceCounted);
+	  function getOwner(): IReferenceCounted;
+	  function authenticate(status: IStatus; sBlock: IServerBlock; writerInterface: IWriter): Integer;
+	  procedure setDbCryptCallback(status: IStatus; cryptCallback: ICryptKeyCallback);
+	end;
+
+	IServerImpl = class(IAuthImpl)
+	private
+	  class var vTable: ServerVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IServer;
+	public
+	  constructor create;
+	  function authenticate(status: IStatus; sBlock: IServerBlock; writerInterface: IWriter): Integer; virtual; abstract;
+	  procedure setDbCryptCallback(status: IStatus; cryptCallback: ICryptKeyCallback); virtual; abstract;
+	end;
+
+	IClientHelper = record helper for IClient
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  procedure setOwner(r: IReferenceCounted);
+	  function getOwner(): IReferenceCounted;
+	  function authenticate(status: IStatus; cBlock: IClientBlock): Integer;
+	end;
+
+	IClientImpl = class(IAuthImpl)
+	private
+	  class var vTable: ClientVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IClient;
+	public
+	  constructor create;
+	  function authenticate(status: IStatus; cBlock: IClientBlock): Integer; virtual; abstract;
+	end;
+
+	IUserFieldHelper = record helper for IUserField
+	public
+	  function entered(): Integer;
+	  function specified(): Integer;
+	  procedure setEntered(status: IStatus; newValue: Integer);
+	end;
+
+	IUserFieldImpl = class(IVersionedImpl)
+	private
+	  class var vTable: UserFieldVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IUserField;
+	public
+	  constructor create;
+	  function entered(): Integer; virtual; abstract;
+	  function specified(): Integer; virtual; abstract;
+	  procedure setEntered(status: IStatus; newValue: Integer); virtual; abstract;
+	end;
+
+	ICharUserFieldHelper = record helper for ICharUserField
+	public
+	  function entered(): Integer;
+	  function specified(): Integer;
+	  procedure setEntered(status: IStatus; newValue: Integer);
+	  function get(): PAnsiChar;
+	  procedure set_(status: IStatus; newValue: PAnsiChar);
+	end;
+
+	ICharUserFieldImpl = class(IUserFieldImpl)
+	private
+	  class var vTable: CharUserFieldVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: ICharUserField;
+	public
+	  constructor create;
+	  function get(): PAnsiChar; virtual; abstract;
+	  procedure set_(status: IStatus; newValue: PAnsiChar); virtual; abstract;
+	end;
+
+	IIntUserFieldHelper = record helper for IIntUserField
+	public
+	  function entered(): Integer;
+	  function specified(): Integer;
+	  procedure setEntered(status: IStatus; newValue: Integer);
+	  function get(): Integer;
+	  procedure set_(status: IStatus; newValue: Integer);
+	end;
+
+	IIntUserFieldImpl = class(IUserFieldImpl)
+	private
+	  class var vTable: IntUserFieldVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IIntUserField;
+	public
+	  constructor create;
+	  function get(): Integer; virtual; abstract;
+	  procedure set_(status: IStatus; newValue: Integer); virtual; abstract;
+	end;
+
+	IUserHelper = record helper for IUser
+	public
+	  function operation(): Cardinal;
+	  function userName(): ICharUserField;
+	  function password(): ICharUserField;
+	  function firstName(): ICharUserField;
+	  function lastName(): ICharUserField;
+	  function middleName(): ICharUserField;
+	  function comment(): ICharUserField;
+	  function attributes(): ICharUserField;
+	  function active(): IIntUserField;
+	  function admin(): IIntUserField;
+	  procedure clear(status: IStatus);
+	end;
+
+	IUserImpl = class(IVersionedImpl)
+	private
+	  class var vTable: UserVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IUser;
+	public
+	  constructor create;
+	  function operation(): Cardinal; virtual; abstract;
+	  function userName(): ICharUserField; virtual; abstract;
+	  function password(): ICharUserField; virtual; abstract;
+	  function firstName(): ICharUserField; virtual; abstract;
+	  function lastName(): ICharUserField; virtual; abstract;
+	  function middleName(): ICharUserField; virtual; abstract;
+	  function comment(): ICharUserField; virtual; abstract;
+	  function attributes(): ICharUserField; virtual; abstract;
+	  function active(): IIntUserField; virtual; abstract;
+	  function admin(): IIntUserField; virtual; abstract;
+	  procedure clear(status: IStatus); virtual; abstract;
+	end;
+
+	IListUsersHelper = record helper for IListUsers
+	public
+	  procedure list(status: IStatus; user: IUser);
+	end;
+
+	IListUsersImpl = class(IVersionedImpl)
+	private
+	  class var vTable: ListUsersVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IListUsers;
+	public
+	  constructor create;
+	  procedure list(status: IStatus; user: IUser); virtual; abstract;
+	end;
+
+	ILogonInfoHelper = record helper for ILogonInfo
+	public
+	  function name(): PAnsiChar;
+	  function role(): PAnsiChar;
+	  function networkProtocol(): PAnsiChar;
+	  function remoteAddress(): PAnsiChar;
+	  function authBlock(length: CardinalPtr): BytePtr;
+	  function attachment(status: IStatus): IAttachment;
+	  function transaction(status: IStatus): ITransaction;
+	end;
+
+	ILogonInfoImpl = class(IVersionedImpl)
+	private
+	  class var vTable: LogonInfoVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: ILogonInfo;
+	public
+	  constructor create;
+	  function name(): PAnsiChar; virtual; abstract;
+	  function role(): PAnsiChar; virtual; abstract;
+	  function networkProtocol(): PAnsiChar; virtual; abstract;
+	  function remoteAddress(): PAnsiChar; virtual; abstract;
+	  function authBlock(length: CardinalPtr): BytePtr; virtual; abstract;
+	  function attachment(status: IStatus): IAttachment; virtual; abstract;
+	  function transaction(status: IStatus): ITransaction; virtual; abstract;
+	end;
+
+	IManagementHelper = record helper for IManagement
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  procedure setOwner(r: IReferenceCounted);
+	  function getOwner(): IReferenceCounted;
+	  procedure start(status: IStatus; logonInfo: ILogonInfo);
+	  function execute(status: IStatus; user: IUser; callback: IListUsers): Integer;
+	  procedure commit(status: IStatus);
+	  procedure rollback(status: IStatus);
+	end;
+
+	IManagementImpl = class(IPluginBaseImpl)
+	private
+	  class var vTable: ManagementVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IManagement;
+	public
+	  constructor create;
+	  procedure start(status: IStatus; logonInfo: ILogonInfo); virtual; abstract;
+	  function execute(status: IStatus; user: IUser; callback: IListUsers): Integer; virtual; abstract;
+	  procedure commit(status: IStatus); virtual; abstract;
+	  procedure rollback(status: IStatus); virtual; abstract;
+	end;
+
+	IAuthBlockHelper = record helper for IAuthBlock
+	public
+	  function getType(): PAnsiChar;
+	  function getName(): PAnsiChar;
+	  function getPlugin(): PAnsiChar;
+	  function getSecurityDb(): PAnsiChar;
+	  function getOriginalPlugin(): PAnsiChar;
+	  function next(status: IStatus): Boolean;
+	  function first(status: IStatus): Boolean;
+	end;
+
+	IAuthBlockImpl = class(IVersionedImpl)
+	private
+	  class var vTable: AuthBlockVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IAuthBlock;
+	public
+	  constructor create;
+	  function getType(): PAnsiChar; virtual; abstract;
+	  function getName(): PAnsiChar; virtual; abstract;
+	  function getPlugin(): PAnsiChar; virtual; abstract;
+	  function getSecurityDb(): PAnsiChar; virtual; abstract;
+	  function getOriginalPlugin(): PAnsiChar; virtual; abstract;
+	  function next(status: IStatus): Boolean; virtual; abstract;
+	  function first(status: IStatus): Boolean; virtual; abstract;
+	end;
+
+	IWireCryptPluginHelper = record helper for IWireCryptPlugin
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  procedure setOwner(r: IReferenceCounted);
+	  function getOwner(): IReferenceCounted;
+	  function getKnownTypes(status: IStatus): PAnsiChar;
+	  procedure setKey(status: IStatus; key: ICryptKey);
+	  procedure encrypt(status: IStatus; length: Cardinal; from: Pointer; to_: Pointer);
+	  procedure decrypt(status: IStatus; length: Cardinal; from: Pointer; to_: Pointer);
+	  function getSpecificData(status: IStatus; keyType: PAnsiChar; length: CardinalPtr): BytePtr;
+	  procedure setSpecificData(status: IStatus; keyType: PAnsiChar; length: Cardinal; data: BytePtr);
+	end;
+
+	IWireCryptPluginImpl = class(IPluginBaseImpl)
+	private
+	  class var vTable: WireCryptPluginVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IWireCryptPlugin;
+	public
+	  constructor create;
+	  function getKnownTypes(status: IStatus): PAnsiChar; virtual; abstract;
+	  procedure setKey(status: IStatus; key: ICryptKey); virtual; abstract;
+	  procedure encrypt(status: IStatus; length: Cardinal; from: Pointer; to_: Pointer); virtual; abstract;
+	  procedure decrypt(status: IStatus; length: Cardinal; from: Pointer; to_: Pointer); virtual; abstract;
+	  function getSpecificData(status: IStatus; keyType: PAnsiChar; length: CardinalPtr): BytePtr; virtual; abstract;
+	  procedure setSpecificData(status: IStatus; keyType: PAnsiChar; length: Cardinal; data: BytePtr); virtual; abstract;
+	end;
+
+	ICryptKeyCallbackHelper = record helper for ICryptKeyCallback
+	public
+	  function callback(dataLength: Cardinal; data: Pointer; bufferLength: Cardinal; buffer: Pointer): Cardinal;
+	end;
+
+	ICryptKeyCallbackImpl = class(IVersionedImpl)
+	private
+	  class var vTable: CryptKeyCallbackVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: ICryptKeyCallback;
+	public
+	  constructor create;
+	  function callback(dataLength: Cardinal; data: Pointer; bufferLength: Cardinal; buffer: Pointer): Cardinal; virtual; abstract;
+	end;
+
+	IKeyHolderPluginHelper = record helper for IKeyHolderPlugin
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  procedure setOwner(r: IReferenceCounted);
+	  function getOwner(): IReferenceCounted;
+	  function keyCallback(status: IStatus; callback: ICryptKeyCallback): Integer;
+	  function keyHandle(status: IStatus; keyName: PAnsiChar): ICryptKeyCallback;
+	  function useOnlyOwnKeys(status: IStatus): Boolean;
+	  function chainHandle(status: IStatus): ICryptKeyCallback;
+	end;
+
+	IKeyHolderPluginImpl = class(IPluginBaseImpl)
+	private
+	  class var vTable: KeyHolderPluginVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IKeyHolderPlugin;
+	public
+	  constructor create;
+	  function keyCallback(status: IStatus; callback: ICryptKeyCallback): Integer; virtual; abstract;
+	  function keyHandle(status: IStatus; keyName: PAnsiChar): ICryptKeyCallback; virtual; abstract;
+	  function useOnlyOwnKeys(status: IStatus): Boolean; virtual; abstract;
+	  function chainHandle(status: IStatus): ICryptKeyCallback; virtual; abstract;
+	end;
+
+	IDbCryptInfoHelper = record helper for IDbCryptInfo
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  function getDatabaseFullPath(status: IStatus): PAnsiChar;
+	end;
+
+	IDbCryptInfoImpl = class(IReferenceCountedImpl)
+	private
+	  class var vTable: DbCryptInfoVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IDbCryptInfo;
+	public
+	  constructor create;
+	  function getDatabaseFullPath(status: IStatus): PAnsiChar; virtual; abstract;
+	end;
+
+	IDbCryptPluginHelper = record helper for IDbCryptPlugin
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  procedure setOwner(r: IReferenceCounted);
+	  function getOwner(): IReferenceCounted;
+	  procedure setKey(status: IStatus; length: Cardinal; sources: IKeyHolderPlugin; keyName: PAnsiChar);
+	  procedure encrypt(status: IStatus; length: Cardinal; from: Pointer; to_: Pointer);
+	  procedure decrypt(status: IStatus; length: Cardinal; from: Pointer; to_: Pointer);
+	  procedure setInfo(status: IStatus; info: IDbCryptInfo);
+	end;
+
+	IDbCryptPluginImpl = class(IPluginBaseImpl)
+	private
+	  class var vTable: DbCryptPluginVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IDbCryptPlugin;
+	public
+	  constructor create;
+	  procedure setKey(status: IStatus; length: Cardinal; sources: IKeyHolderPlugin; keyName: PAnsiChar); virtual; abstract;
+	  procedure encrypt(status: IStatus; length: Cardinal; from: Pointer; to_: Pointer); virtual; abstract;
+	  procedure decrypt(status: IStatus; length: Cardinal; from: Pointer; to_: Pointer); virtual; abstract;
+	  procedure setInfo(status: IStatus; info: IDbCryptInfo); virtual; abstract;
+	end;
+
+	IExternalContextHelper = record helper for IExternalContext
+	public
+	  function getMaster(): IMaster;
+	  function getEngine(status: IStatus): IExternalEngine;
+	  function getAttachment(status: IStatus): IAttachment;
+	  function getTransaction(status: IStatus): ITransaction;
+	  function getUserName(): PAnsiChar;
+	  function getDatabaseName(): PAnsiChar;
+	  function getClientCharSet(): PAnsiChar;
+	  function obtainInfoCode(): Integer;
+	  function getInfo(code: Integer): Pointer;
+	  function setInfo(code: Integer; value: Pointer): Pointer;
+	end;
+
+	IExternalContextImpl = class(IVersionedImpl)
+	private
+	  class var vTable: ExternalContextVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IExternalContext;
+	public
+	  constructor create;
+	  function getMaster(): IMaster; virtual; abstract;
+	  function getEngine(status: IStatus): IExternalEngine; virtual; abstract;
+	  function getAttachment(status: IStatus): IAttachment; virtual; abstract;
+	  function getTransaction(status: IStatus): ITransaction; virtual; abstract;
+	  function getUserName(): PAnsiChar; virtual; abstract;
+	  function getDatabaseName(): PAnsiChar; virtual; abstract;
+	  function getClientCharSet(): PAnsiChar; virtual; abstract;
+	  function obtainInfoCode(): Integer; virtual; abstract;
+	  function getInfo(code: Integer): Pointer; virtual; abstract;
+	  function setInfo(code: Integer; value: Pointer): Pointer; virtual; abstract;
+	end;
+
+	IExternalResultSetHelper = record helper for IExternalResultSet
+	public
+	  procedure dispose();
+	  function fetch(status: IStatus): Boolean;
+	end;
+
+	IExternalResultSetImpl = class(IDisposableImpl)
+	private
+	  class var vTable: ExternalResultSetVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IExternalResultSet;
+	public
+	  constructor create;
+	  function fetch(status: IStatus): Boolean; virtual; abstract;
+	end;
+
+	IExternalFunctionHelper = record helper for IExternalFunction
+	public
+	  procedure dispose();
+	  procedure getCharSet(status: IStatus; context: IExternalContext; name: PAnsiChar; nameSize: Cardinal);
+	  procedure execute(status: IStatus; context: IExternalContext; inMsg: Pointer; outMsg: Pointer);
+	end;
+
+	IExternalFunctionImpl = class(IDisposableImpl)
+	private
+	  class var vTable: ExternalFunctionVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IExternalFunction;
+	public
+	  constructor create;
+	  procedure getCharSet(status: IStatus; context: IExternalContext; name: PAnsiChar; nameSize: Cardinal); virtual; abstract;
+	  procedure execute(status: IStatus; context: IExternalContext; inMsg: Pointer; outMsg: Pointer); virtual; abstract;
+	end;
+
+	IExternalProcedureHelper = record helper for IExternalProcedure
+	public
+	  procedure dispose();
+	  procedure getCharSet(status: IStatus; context: IExternalContext; name: PAnsiChar; nameSize: Cardinal);
+	  function open(status: IStatus; context: IExternalContext; inMsg: Pointer; outMsg: Pointer): IExternalResultSet;
+	end;
+
+	IExternalProcedureImpl = class(IDisposableImpl)
+	private
+	  class var vTable: ExternalProcedureVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IExternalProcedure;
+	public
+	  constructor create;
+	  procedure getCharSet(status: IStatus; context: IExternalContext; name: PAnsiChar; nameSize: Cardinal); virtual; abstract;
+	  function open(status: IStatus; context: IExternalContext; inMsg: Pointer; outMsg: Pointer): IExternalResultSet; virtual; abstract;
+	end;
+
+	IExternalTriggerHelper = record helper for IExternalTrigger
+	public
+	  procedure dispose();
+	  procedure getCharSet(status: IStatus; context: IExternalContext; name: PAnsiChar; nameSize: Cardinal);
+	  procedure execute(status: IStatus; context: IExternalContext; action: Cardinal; oldMsg: Pointer; newMsg: Pointer);
+	end;
+
+	IExternalTriggerImpl = class(IDisposableImpl)
+	private
+	  class var vTable: ExternalTriggerVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IExternalTrigger;
+	public
+	  constructor create;
+	  procedure getCharSet(status: IStatus; context: IExternalContext; name: PAnsiChar; nameSize: Cardinal); virtual; abstract;
+	  procedure execute(status: IStatus; context: IExternalContext; action: Cardinal; oldMsg: Pointer; newMsg: Pointer); virtual; abstract;
+	end;
+
+	IRoutineMetadataHelper = record helper for IRoutineMetadata
+	public
+	  function getPackage(status: IStatus): PAnsiChar;
+	  function getName(status: IStatus): PAnsiChar;
+	  function getEntryPoint(status: IStatus): PAnsiChar;
+	  function getBody(status: IStatus): PAnsiChar;
+	  function getInputMetadata(status: IStatus): IMessageMetadata;
+	  function getOutputMetadata(status: IStatus): IMessageMetadata;
+	  function getTriggerMetadata(status: IStatus): IMessageMetadata;
+	  function getTriggerTable(status: IStatus): PAnsiChar;
+	  function getTriggerType(status: IStatus): Cardinal;
+	end;
+
+	IRoutineMetadataImpl = class(IVersionedImpl)
+	private
+	  class var vTable: RoutineMetadataVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IRoutineMetadata;
+	public
+	  constructor create;
+	  function getPackage(status: IStatus): PAnsiChar; virtual; abstract;
+	  function getName(status: IStatus): PAnsiChar; virtual; abstract;
+	  function getEntryPoint(status: IStatus): PAnsiChar; virtual; abstract;
+	  function getBody(status: IStatus): PAnsiChar; virtual; abstract;
+	  function getInputMetadata(status: IStatus): IMessageMetadata; virtual; abstract;
+	  function getOutputMetadata(status: IStatus): IMessageMetadata; virtual; abstract;
+	  function getTriggerMetadata(status: IStatus): IMessageMetadata; virtual; abstract;
+	  function getTriggerTable(status: IStatus): PAnsiChar; virtual; abstract;
+	  function getTriggerType(status: IStatus): Cardinal; virtual; abstract;
+	end;
+
+	IExternalEngineHelper = record helper for IExternalEngine
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  procedure setOwner(r: IReferenceCounted);
+	  function getOwner(): IReferenceCounted;
+	  procedure open(status: IStatus; context: IExternalContext; charSet: PAnsiChar; charSetSize: Cardinal);
+	  procedure openAttachment(status: IStatus; context: IExternalContext);
+	  procedure closeAttachment(status: IStatus; context: IExternalContext);
+	  function makeFunction(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder): IExternalFunction;
+	  function makeProcedure(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder): IExternalProcedure;
+	  function makeTrigger(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; fieldsBuilder: IMetadataBuilder): IExternalTrigger;
+	end;
+
+	IExternalEngineImpl = class(IPluginBaseImpl)
+	private
+	  class var vTable: ExternalEngineVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IExternalEngine;
+	public
+	  constructor create;
+	  procedure open(status: IStatus; context: IExternalContext; charSet: PAnsiChar; charSetSize: Cardinal); virtual; abstract;
+	  procedure openAttachment(status: IStatus; context: IExternalContext); virtual; abstract;
+	  procedure closeAttachment(status: IStatus; context: IExternalContext); virtual; abstract;
+	  function makeFunction(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder): IExternalFunction; virtual; abstract;
+	  function makeProcedure(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder): IExternalProcedure; virtual; abstract;
+	  function makeTrigger(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; fieldsBuilder: IMetadataBuilder): IExternalTrigger; virtual; abstract;
+	end;
+
+	ITimerHelper = record helper for ITimer
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  procedure handler();
+	end;
+
+	ITimerImpl = class(IReferenceCountedImpl)
+	private
+	  class var vTable: TimerVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: ITimer;
+	public
+	  constructor create;
+	  procedure handler(); virtual; abstract;
+	end;
+
+	ITimerControlHelper = record helper for ITimerControl
+	public
+	  procedure start(status: IStatus; timer: ITimer; microSeconds: QWord);
+	  procedure stop(status: IStatus; timer: ITimer);
+	end;
+
+	ITimerControlImpl = class(IVersionedImpl)
+	private
+	  class var vTable: TimerControlVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: ITimerControl;
+	public
+	  constructor create;
+	  procedure start(status: IStatus; timer: ITimer; microSeconds: QWord); virtual; abstract;
+	  procedure stop(status: IStatus; timer: ITimer); virtual; abstract;
+	end;
+
+	IVersionCallbackHelper = record helper for IVersionCallback
+	public
+	  procedure callback(status: IStatus; text: PAnsiChar);
+	end;
+
+	IVersionCallbackImpl = class(IVersionedImpl)
+	private
+	  class var vTable: VersionCallbackVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IVersionCallback;
+	public
+	  constructor create;
+	  procedure callback(status: IStatus; text: PAnsiChar); virtual; abstract;
+	end;
+
+	IUtilHelper = record helper for IUtil
+	public
+	  procedure getFbVersion(status: IStatus; att: IAttachment; callback: IVersionCallback);
+	  procedure loadBlob(status: IStatus; blobId: ISC_QUADPtr; att: IAttachment; tra: ITransaction; file_: PAnsiChar; txt: Boolean);
+	  procedure dumpBlob(status: IStatus; blobId: ISC_QUADPtr; att: IAttachment; tra: ITransaction; file_: PAnsiChar; txt: Boolean);
+	  procedure getPerfCounters(status: IStatus; att: IAttachment; countersSet: PAnsiChar; counters: Int64Ptr);
+	  function executeCreateDatabase(status: IStatus; stmtLength: Cardinal; creatDBstatement: PAnsiChar; dialect: Cardinal; stmtIsCreateDb: BooleanPtr): IAttachment;
+	  procedure decodeDate(date: ISC_DATE; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr);
+	  procedure decodeTime(time: ISC_TIME; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr);
+	  function encodeDate(year: Cardinal; month: Cardinal; day: Cardinal): ISC_DATE;
+	  function encodeTime(hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal): ISC_TIME;
+	  function formatStatus(buffer: PAnsiChar; bufferSize: Cardinal; status: IStatus): Cardinal;
+	  function getClientVersion(): Cardinal;
+	  function getXpbBuilder(status: IStatus; kind: Cardinal; buf: BytePtr; len: Cardinal): IXpbBuilder;
+	  function setOffsets(status: IStatus; metadata: IMessageMetadata; callback: IOffsetsCallback): Cardinal;
+	  function getDecFloat16(status: IStatus): IDecFloat16;
+	  function getDecFloat34(status: IStatus): IDecFloat34;
+	  procedure decodeTimeTz(status: IStatus; timeTz: ISC_TIME_TZPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar);
+	  procedure decodeTimeStampTz(status: IStatus; timeStampTz: ISC_TIMESTAMP_TZPtr; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar);
+	  procedure encodeTimeTz(status: IStatus; timeTz: ISC_TIME_TZPtr; hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal; timeZone: PAnsiChar);
+	  procedure encodeTimeStampTz(status: IStatus; timeStampTz: ISC_TIMESTAMP_TZPtr; year: Cardinal; month: Cardinal; day: Cardinal; hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal; timeZone: PAnsiChar);
+	  function getInt128(status: IStatus): IInt128;
+	  procedure decodeTimeTzEx(status: IStatus; timeTz: ISC_TIME_TZ_EXPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar);
+	  procedure decodeTimeStampTzEx(status: IStatus; timeStampTz: ISC_TIMESTAMP_TZ_EXPtr; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar);
+	end;
+
+	IUtilImpl = class(IVersionedImpl)
+	private
+	  class var vTable: UtilVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IUtil;
+	public
+	  constructor create;
+	  procedure getFbVersion(status: IStatus; att: IAttachment; callback: IVersionCallback); virtual; abstract;
+	  procedure loadBlob(status: IStatus; blobId: ISC_QUADPtr; att: IAttachment; tra: ITransaction; file_: PAnsiChar; txt: Boolean); virtual; abstract;
+	  procedure dumpBlob(status: IStatus; blobId: ISC_QUADPtr; att: IAttachment; tra: ITransaction; file_: PAnsiChar; txt: Boolean); virtual; abstract;
+	  procedure getPerfCounters(status: IStatus; att: IAttachment; countersSet: PAnsiChar; counters: Int64Ptr); virtual; abstract;
+	  function executeCreateDatabase(status: IStatus; stmtLength: Cardinal; creatDBstatement: PAnsiChar; dialect: Cardinal; stmtIsCreateDb: BooleanPtr): IAttachment; virtual; abstract;
+	  procedure decodeDate(date: ISC_DATE; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr); virtual; abstract;
+	  procedure decodeTime(time: ISC_TIME; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr); virtual; abstract;
+	  function encodeDate(year: Cardinal; month: Cardinal; day: Cardinal): ISC_DATE; virtual; abstract;
+	  function encodeTime(hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal): ISC_TIME; virtual; abstract;
+	  function formatStatus(buffer: PAnsiChar; bufferSize: Cardinal; status: IStatus): Cardinal; virtual; abstract;
+	  function getClientVersion(): Cardinal; virtual; abstract;
+	  function getXpbBuilder(status: IStatus; kind: Cardinal; buf: BytePtr; len: Cardinal): IXpbBuilder; virtual; abstract;
+	  function setOffsets(status: IStatus; metadata: IMessageMetadata; callback: IOffsetsCallback): Cardinal; virtual; abstract;
+	  function getDecFloat16(status: IStatus): IDecFloat16; virtual; abstract;
+	  function getDecFloat34(status: IStatus): IDecFloat34; virtual; abstract;
+	  procedure decodeTimeTz(status: IStatus; timeTz: ISC_TIME_TZPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar); virtual; abstract;
+	  procedure decodeTimeStampTz(status: IStatus; timeStampTz: ISC_TIMESTAMP_TZPtr; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar); virtual; abstract;
+	  procedure encodeTimeTz(status: IStatus; timeTz: ISC_TIME_TZPtr; hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal; timeZone: PAnsiChar); virtual; abstract;
+	  procedure encodeTimeStampTz(status: IStatus; timeStampTz: ISC_TIMESTAMP_TZPtr; year: Cardinal; month: Cardinal; day: Cardinal; hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal; timeZone: PAnsiChar); virtual; abstract;
+	  function getInt128(status: IStatus): IInt128; virtual; abstract;
+	  procedure decodeTimeTzEx(status: IStatus; timeTz: ISC_TIME_TZ_EXPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar); virtual; abstract;
+	  procedure decodeTimeStampTzEx(status: IStatus; timeStampTz: ISC_TIMESTAMP_TZ_EXPtr; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar); virtual; abstract;
+	end;
+
+	IOffsetsCallbackHelper = record helper for IOffsetsCallback
+	public
+	  procedure setOffset(status: IStatus; index: Cardinal; offset: Cardinal; nullOffset: Cardinal);
+	end;
+
+	IOffsetsCallbackImpl = class(IVersionedImpl)
+	private
+	  class var vTable: OffsetsCallbackVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IOffsetsCallback;
+	public
+	  constructor create;
+	  procedure setOffset(status: IStatus; index: Cardinal; offset: Cardinal; nullOffset: Cardinal); virtual; abstract;
+	end;
+
+	IXpbBuilderHelper = record helper for IXpbBuilder
+	public
+	  procedure dispose();
+	  procedure clear(status: IStatus);
+	  procedure removeCurrent(status: IStatus);
+	  procedure insertInt(status: IStatus; tag: Byte; value: Integer);
+	  procedure insertBigInt(status: IStatus; tag: Byte; value: Int64);
+	  procedure insertBytes(status: IStatus; tag: Byte; bytes: Pointer; length: Cardinal);
+	  procedure insertString(status: IStatus; tag: Byte; str: PAnsiChar);
+	  procedure insertTag(status: IStatus; tag: Byte);
+	  function isEof(status: IStatus): Boolean;
+	  procedure moveNext(status: IStatus);
+	  procedure rewind(status: IStatus);
+	  function findFirst(status: IStatus; tag: Byte): Boolean;
+	  function findNext(status: IStatus): Boolean;
+	  function getTag(status: IStatus): Byte;
+	  function getLength(status: IStatus): Cardinal;
+	  function getInt(status: IStatus): Integer;
+	  function getBigInt(status: IStatus): Int64;
+	  function getString(status: IStatus): PAnsiChar;
+	  function getBytes(status: IStatus): BytePtr;
+	  function getBufferLength(status: IStatus): Cardinal;
+	  function getBuffer(status: IStatus): BytePtr;
+	end;
+
+	IXpbBuilderImpl = class(IDisposableImpl)
+	private
+	  class var vTable: XpbBuilderVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IXpbBuilder;
+	public
+	  constructor create;
+	  procedure clear(status: IStatus); virtual; abstract;
+	  procedure removeCurrent(status: IStatus); virtual; abstract;
+	  procedure insertInt(status: IStatus; tag: Byte; value: Integer); virtual; abstract;
+	  procedure insertBigInt(status: IStatus; tag: Byte; value: Int64); virtual; abstract;
+	  procedure insertBytes(status: IStatus; tag: Byte; bytes: Pointer; length: Cardinal); virtual; abstract;
+	  procedure insertString(status: IStatus; tag: Byte; str: PAnsiChar); virtual; abstract;
+	  procedure insertTag(status: IStatus; tag: Byte); virtual; abstract;
+	  function isEof(status: IStatus): Boolean; virtual; abstract;
+	  procedure moveNext(status: IStatus); virtual; abstract;
+	  procedure rewind(status: IStatus); virtual; abstract;
+	  function findFirst(status: IStatus; tag: Byte): Boolean; virtual; abstract;
+	  function findNext(status: IStatus): Boolean; virtual; abstract;
+	  function getTag(status: IStatus): Byte; virtual; abstract;
+	  function getLength(status: IStatus): Cardinal; virtual; abstract;
+	  function getInt(status: IStatus): Integer; virtual; abstract;
+	  function getBigInt(status: IStatus): Int64; virtual; abstract;
+	  function getString(status: IStatus): PAnsiChar; virtual; abstract;
+	  function getBytes(status: IStatus): BytePtr; virtual; abstract;
+	  function getBufferLength(status: IStatus): Cardinal; virtual; abstract;
+	  function getBuffer(status: IStatus): BytePtr; virtual; abstract;
+	end;
+
+	ITraceConnectionHelper = record helper for ITraceConnection
+	public
+	  function getKind(): Cardinal;
+	  function getProcessID(): Integer;
+	  function getUserName(): PAnsiChar;
+	  function getRoleName(): PAnsiChar;
+	  function getCharSet(): PAnsiChar;
+	  function getRemoteProtocol(): PAnsiChar;
+	  function getRemoteAddress(): PAnsiChar;
+	  function getRemoteProcessID(): Integer;
+	  function getRemoteProcessName(): PAnsiChar;
+	end;
+
+	ITraceConnectionImpl = class(IVersionedImpl)
+	private
+	  class var vTable: TraceConnectionVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: ITraceConnection;
+	public
+	  constructor create;
+	  function getKind(): Cardinal; virtual; abstract;
+	  function getProcessID(): Integer; virtual; abstract;
+	  function getUserName(): PAnsiChar; virtual; abstract;
+	  function getRoleName(): PAnsiChar; virtual; abstract;
+	  function getCharSet(): PAnsiChar; virtual; abstract;
+	  function getRemoteProtocol(): PAnsiChar; virtual; abstract;
+	  function getRemoteAddress(): PAnsiChar; virtual; abstract;
+	  function getRemoteProcessID(): Integer; virtual; abstract;
+	  function getRemoteProcessName(): PAnsiChar; virtual; abstract;
+	end;
+
+	ITraceDatabaseConnectionHelper = record helper for ITraceDatabaseConnection
+	public
+	  function getKind(): Cardinal;
+	  function getProcessID(): Integer;
+	  function getUserName(): PAnsiChar;
+	  function getRoleName(): PAnsiChar;
+	  function getCharSet(): PAnsiChar;
+	  function getRemoteProtocol(): PAnsiChar;
+	  function getRemoteAddress(): PAnsiChar;
+	  function getRemoteProcessID(): Integer;
+	  function getRemoteProcessName(): PAnsiChar;
+	  function getConnectionID(): Int64;
+	  function getDatabaseName(): PAnsiChar;
+	end;
+
+	ITraceDatabaseConnectionImpl = class(ITraceConnectionImpl)
+	private
+	  class var vTable: TraceDatabaseConnectionVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: ITraceDatabaseConnection;
+	public
+	  constructor create;
+	  function getConnectionID(): Int64; virtual; abstract;
+	  function getDatabaseName(): PAnsiChar; virtual; abstract;
+	end;
+
+	ITraceTransactionHelper = record helper for ITraceTransaction
+	public
+	  function getTransactionID(): Int64;
+	  function getReadOnly(): Boolean;
+	  function getWait(): Integer;
+	  function getIsolation(): Cardinal;
+	  function getPerf(): PerformanceInfoPtr;
+	  function getInitialID(): Int64;
+	  function getPreviousID(): Int64;
+	end;
+
+	ITraceTransactionImpl = class(IVersionedImpl)
+	private
+	  class var vTable: TraceTransactionVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: ITraceTransaction;
+	public
+	  constructor create;
+	  function getTransactionID(): Int64; virtual; abstract;
+	  function getReadOnly(): Boolean; virtual; abstract;
+	  function getWait(): Integer; virtual; abstract;
+	  function getIsolation(): Cardinal; virtual; abstract;
+	  function getPerf(): PerformanceInfoPtr; virtual; abstract;
+	  function getInitialID(): Int64; virtual; abstract;
+	  function getPreviousID(): Int64; virtual; abstract;
+	end;
+
+	ITraceParamsHelper = record helper for ITraceParams
+	public
+	  function getCount(): Cardinal;
+	  function getParam(idx: Cardinal): dscPtr;
+	  function getTextUTF8(status: IStatus; idx: Cardinal): PAnsiChar;
+	end;
+
+	ITraceParamsImpl = class(IVersionedImpl)
+	private
+	  class var vTable: TraceParamsVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: ITraceParams;
+	public
+	  constructor create;
+	  function getCount(): Cardinal; virtual; abstract;
+	  function getParam(idx: Cardinal): dscPtr; virtual; abstract;
+	  function getTextUTF8(status: IStatus; idx: Cardinal): PAnsiChar; virtual; abstract;
+	end;
+
+	ITraceStatementHelper = record helper for ITraceStatement
+	public
+	  function getStmtID(): Int64;
+	  function getPerf(): PerformanceInfoPtr;
+	end;
+
+	ITraceStatementImpl = class(IVersionedImpl)
+	private
+	  class var vTable: TraceStatementVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: ITraceStatement;
+	public
+	  constructor create;
+	  function getStmtID(): Int64; virtual; abstract;
+	  function getPerf(): PerformanceInfoPtr; virtual; abstract;
+	end;
+
+	ITraceSQLStatementHelper = record helper for ITraceSQLStatement
+	public
+	  function getStmtID(): Int64;
+	  function getPerf(): PerformanceInfoPtr;
+	  function getText(): PAnsiChar;
+	  function getPlan(): PAnsiChar;
+	  function getInputs(): ITraceParams;
+	  function getTextUTF8(): PAnsiChar;
+	  function getExplainedPlan(): PAnsiChar;
+	end;
+
+	ITraceSQLStatementImpl = class(ITraceStatementImpl)
+	private
+	  class var vTable: TraceSQLStatementVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: ITraceSQLStatement;
+	public
+	  constructor create;
+	  function getText(): PAnsiChar; virtual; abstract;
+	  function getPlan(): PAnsiChar; virtual; abstract;
+	  function getInputs(): ITraceParams; virtual; abstract;
+	  function getTextUTF8(): PAnsiChar; virtual; abstract;
+	  function getExplainedPlan(): PAnsiChar; virtual; abstract;
+	end;
+
+	ITraceBLRStatementHelper = record helper for ITraceBLRStatement
+	public
+	  function getStmtID(): Int64;
+	  function getPerf(): PerformanceInfoPtr;
+	  function getData(): BytePtr;
+	  function getDataLength(): Cardinal;
+	  function getText(): PAnsiChar;
+	end;
+
+	ITraceBLRStatementImpl = class(ITraceStatementImpl)
+	private
+	  class var vTable: TraceBLRStatementVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: ITraceBLRStatement;
+	public
+	  constructor create;
+	  function getData(): BytePtr; virtual; abstract;
+	  function getDataLength(): Cardinal; virtual; abstract;
+	  function getText(): PAnsiChar; virtual; abstract;
+	end;
+
+	ITraceDYNRequestHelper = record helper for ITraceDYNRequest
+	public
+	  function getData(): BytePtr;
+	  function getDataLength(): Cardinal;
+	  function getText(): PAnsiChar;
+	end;
+
+	ITraceDYNRequestImpl = class(IVersionedImpl)
+	private
+	  class var vTable: TraceDYNRequestVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: ITraceDYNRequest;
+	public
+	  constructor create;
+	  function getData(): BytePtr; virtual; abstract;
+	  function getDataLength(): Cardinal; virtual; abstract;
+	  function getText(): PAnsiChar; virtual; abstract;
+	end;
+
+	ITraceContextVariableHelper = record helper for ITraceContextVariable
+	public
+	  function getNameSpace(): PAnsiChar;
+	  function getVarName(): PAnsiChar;
+	  function getVarValue(): PAnsiChar;
+	end;
+
+	ITraceContextVariableImpl = class(IVersionedImpl)
+	private
+	  class var vTable: TraceContextVariableVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: ITraceContextVariable;
+	public
+	  constructor create;
+	  function getNameSpace(): PAnsiChar; virtual; abstract;
+	  function getVarName(): PAnsiChar; virtual; abstract;
+	  function getVarValue(): PAnsiChar; virtual; abstract;
+	end;
+
+	ITraceProcedureHelper = record helper for ITraceProcedure
+	public
+	  function getProcName(): PAnsiChar;
+	  function getInputs(): ITraceParams;
+	  function getPerf(): PerformanceInfoPtr;
+	end;
+
+	ITraceProcedureImpl = class(IVersionedImpl)
+	private
+	  class var vTable: TraceProcedureVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: ITraceProcedure;
+	public
+	  constructor create;
+	  function getProcName(): PAnsiChar; virtual; abstract;
+	  function getInputs(): ITraceParams; virtual; abstract;
+	  function getPerf(): PerformanceInfoPtr; virtual; abstract;
+	end;
+
+	ITraceFunctionHelper = record helper for ITraceFunction
+	public
+	  function getFuncName(): PAnsiChar;
+	  function getInputs(): ITraceParams;
+	  function getResult(): ITraceParams;
+	  function getPerf(): PerformanceInfoPtr;
+	end;
+
+	ITraceFunctionImpl = class(IVersionedImpl)
+	private
+	  class var vTable: TraceFunctionVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: ITraceFunction;
+	public
+	  constructor create;
+	  function getFuncName(): PAnsiChar; virtual; abstract;
+	  function getInputs(): ITraceParams; virtual; abstract;
+	  function getResult(): ITraceParams; virtual; abstract;
+	  function getPerf(): PerformanceInfoPtr; virtual; abstract;
+	end;
+
+	ITraceTriggerHelper = record helper for ITraceTrigger
+	public
+	  function getTriggerName(): PAnsiChar;
+	  function getRelationName(): PAnsiChar;
+	  function getAction(): Integer;
+	  function getWhich(): Integer;
+	  function getPerf(): PerformanceInfoPtr;
+	end;
+
+	ITraceTriggerImpl = class(IVersionedImpl)
+	private
+	  class var vTable: TraceTriggerVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: ITraceTrigger;
+	public
+	  constructor create;
+	  function getTriggerName(): PAnsiChar; virtual; abstract;
+	  function getRelationName(): PAnsiChar; virtual; abstract;
+	  function getAction(): Integer; virtual; abstract;
+	  function getWhich(): Integer; virtual; abstract;
+	  function getPerf(): PerformanceInfoPtr; virtual; abstract;
+	end;
+
+	ITraceServiceConnectionHelper = record helper for ITraceServiceConnection
+	public
+	  function getKind(): Cardinal;
+	  function getProcessID(): Integer;
+	  function getUserName(): PAnsiChar;
+	  function getRoleName(): PAnsiChar;
+	  function getCharSet(): PAnsiChar;
+	  function getRemoteProtocol(): PAnsiChar;
+	  function getRemoteAddress(): PAnsiChar;
+	  function getRemoteProcessID(): Integer;
+	  function getRemoteProcessName(): PAnsiChar;
+	  function getServiceID(): Pointer;
+	  function getServiceMgr(): PAnsiChar;
+	  function getServiceName(): PAnsiChar;
+	end;
+
+	ITraceServiceConnectionImpl = class(ITraceConnectionImpl)
+	private
+	  class var vTable: TraceServiceConnectionVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: ITraceServiceConnection;
+	public
+	  constructor create;
+	  function getServiceID(): Pointer; virtual; abstract;
+	  function getServiceMgr(): PAnsiChar; virtual; abstract;
+	  function getServiceName(): PAnsiChar; virtual; abstract;
+	end;
+
+	ITraceStatusVectorHelper = record helper for ITraceStatusVector
+	public
+	  function hasError(): Boolean;
+	  function hasWarning(): Boolean;
+	  function getStatus(): IStatus;
+	  function getText(): PAnsiChar;
+	end;
+
+	ITraceStatusVectorImpl = class(IVersionedImpl)
+	private
+	  class var vTable: TraceStatusVectorVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: ITraceStatusVector;
+	public
+	  constructor create;
+	  function hasError(): Boolean; virtual; abstract;
+	  function hasWarning(): Boolean; virtual; abstract;
+	  function getStatus(): IStatus; virtual; abstract;
+	  function getText(): PAnsiChar; virtual; abstract;
+	end;
+
+	ITraceSweepInfoHelper = record helper for ITraceSweepInfo
+	public
+	  function getOIT(): Int64;
+	  function getOST(): Int64;
+	  function getOAT(): Int64;
+	  function getNext(): Int64;
+	  function getPerf(): PerformanceInfoPtr;
+	end;
+
+	ITraceSweepInfoImpl = class(IVersionedImpl)
+	private
+	  class var vTable: TraceSweepInfoVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: ITraceSweepInfo;
+	public
+	  constructor create;
+	  function getOIT(): Int64; virtual; abstract;
+	  function getOST(): Int64; virtual; abstract;
+	  function getOAT(): Int64; virtual; abstract;
+	  function getNext(): Int64; virtual; abstract;
+	  function getPerf(): PerformanceInfoPtr; virtual; abstract;
+	end;
+
+	ITraceLogWriterHelper = record helper for ITraceLogWriter
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  function write(buf: Pointer; size: Cardinal): Cardinal;
+	  function write_s(status: IStatus; buf: Pointer; size: Cardinal): Cardinal;
+	end;
+
+	ITraceLogWriterImpl = class(IReferenceCountedImpl)
+	private
+	  class var vTable: TraceLogWriterVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: ITraceLogWriter;
+	public
+	  constructor create;
+	  function write(buf: Pointer; size: Cardinal): Cardinal; virtual; abstract;
+	  function write_s(status: IStatus; buf: Pointer; size: Cardinal): Cardinal; virtual; abstract;
+	end;
+
+	ITraceInitInfoHelper = record helper for ITraceInitInfo
+	public
+	  function getConfigText(): PAnsiChar;
+	  function getTraceSessionID(): Integer;
+	  function getTraceSessionName(): PAnsiChar;
+	  function getFirebirdRootDirectory(): PAnsiChar;
+	  function getDatabaseName(): PAnsiChar;
+	  function getConnection(): ITraceDatabaseConnection;
+	  function getLogWriter(): ITraceLogWriter;
+	end;
+
+	ITraceInitInfoImpl = class(IVersionedImpl)
+	private
+	  class var vTable: TraceInitInfoVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: ITraceInitInfo;
+	public
+	  constructor create;
+	  function getConfigText(): PAnsiChar; virtual; abstract;
+	  function getTraceSessionID(): Integer; virtual; abstract;
+	  function getTraceSessionName(): PAnsiChar; virtual; abstract;
+	  function getFirebirdRootDirectory(): PAnsiChar; virtual; abstract;
+	  function getDatabaseName(): PAnsiChar; virtual; abstract;
+	  function getConnection(): ITraceDatabaseConnection; virtual; abstract;
+	  function getLogWriter(): ITraceLogWriter; virtual; abstract;
+	end;
+
+	ITracePluginHelper = record helper for ITracePlugin
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  function trace_get_error(): PAnsiChar;
+	  function trace_attach(connection: ITraceDatabaseConnection; create_db: Boolean; att_result: Cardinal): Boolean;
+	  function trace_detach(connection: ITraceDatabaseConnection; drop_db: Boolean): Boolean;
+	  function trace_transaction_start(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; tpb_length: Cardinal; tpb: BytePtr; tra_result: Cardinal): Boolean;
+	  function trace_transaction_end(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; commit: Boolean; retain_context: Boolean; tra_result: Cardinal): Boolean;
+	  function trace_proc_execute(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; procedure_: ITraceProcedure; started: Boolean; proc_result: Cardinal): Boolean;
+	  function trace_trigger_execute(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; trigger: ITraceTrigger; started: Boolean; trig_result: Cardinal): Boolean;
+	  function trace_set_context(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; variable: ITraceContextVariable): Boolean;
+	  function trace_dsql_prepare(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; statement: ITraceSQLStatement; time_millis: Int64; req_result: Cardinal): Boolean;
+	  function trace_dsql_free(connection: ITraceDatabaseConnection; statement: ITraceSQLStatement; option: Cardinal): Boolean;
+	  function trace_dsql_execute(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; statement: ITraceSQLStatement; started: Boolean; req_result: Cardinal): Boolean;
+	  function trace_blr_compile(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; statement: ITraceBLRStatement; time_millis: Int64; req_result: Cardinal): Boolean;
+	  function trace_blr_execute(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; statement: ITraceBLRStatement; req_result: Cardinal): Boolean;
+	  function trace_dyn_execute(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; request: ITraceDYNRequest; time_millis: Int64; req_result: Cardinal): Boolean;
+	  function trace_service_attach(service: ITraceServiceConnection; att_result: Cardinal): Boolean;
+	  function trace_service_start(service: ITraceServiceConnection; switches_length: Cardinal; switches: PAnsiChar; start_result: Cardinal): Boolean;
+	  function trace_service_query(service: ITraceServiceConnection; send_item_length: Cardinal; send_items: BytePtr; recv_item_length: Cardinal; recv_items: BytePtr; query_result: Cardinal): Boolean;
+	  function trace_service_detach(service: ITraceServiceConnection; detach_result: Cardinal): Boolean;
+	  function trace_event_error(connection: ITraceConnection; status: ITraceStatusVector; function_: PAnsiChar): Boolean;
+	  function trace_event_sweep(connection: ITraceDatabaseConnection; sweep: ITraceSweepInfo; sweep_state: Cardinal): Boolean;
+	  function trace_func_execute(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; function_: ITraceFunction; started: Boolean; func_result: Cardinal): Boolean;
+	end;
+
+	ITracePluginImpl = class(IReferenceCountedImpl)
+	private
+	  class var vTable: TracePluginVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: ITracePlugin;
+	public
+	  constructor create;
+	  function trace_get_error(): PAnsiChar; virtual; abstract;
+	  function trace_attach(connection: ITraceDatabaseConnection; create_db: Boolean; att_result: Cardinal): Boolean; virtual; abstract;
+	  function trace_detach(connection: ITraceDatabaseConnection; drop_db: Boolean): Boolean; virtual; abstract;
+	  function trace_transaction_start(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; tpb_length: Cardinal; tpb: BytePtr; tra_result: Cardinal): Boolean; virtual; abstract;
+	  function trace_transaction_end(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; commit: Boolean; retain_context: Boolean; tra_result: Cardinal): Boolean; virtual; abstract;
+	  function trace_proc_execute(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; procedure_: ITraceProcedure; started: Boolean; proc_result: Cardinal): Boolean; virtual; abstract;
+	  function trace_trigger_execute(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; trigger: ITraceTrigger; started: Boolean; trig_result: Cardinal): Boolean; virtual; abstract;
+	  function trace_set_context(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; variable: ITraceContextVariable): Boolean; virtual; abstract;
+	  function trace_dsql_prepare(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; statement: ITraceSQLStatement; time_millis: Int64; req_result: Cardinal): Boolean; virtual; abstract;
+	  function trace_dsql_free(connection: ITraceDatabaseConnection; statement: ITraceSQLStatement; option: Cardinal): Boolean; virtual; abstract;
+	  function trace_dsql_execute(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; statement: ITraceSQLStatement; started: Boolean; req_result: Cardinal): Boolean; virtual; abstract;
+	  function trace_blr_compile(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; statement: ITraceBLRStatement; time_millis: Int64; req_result: Cardinal): Boolean; virtual; abstract;
+	  function trace_blr_execute(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; statement: ITraceBLRStatement; req_result: Cardinal): Boolean; virtual; abstract;
+	  function trace_dyn_execute(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; request: ITraceDYNRequest; time_millis: Int64; req_result: Cardinal): Boolean; virtual; abstract;
+	  function trace_service_attach(service: ITraceServiceConnection; att_result: Cardinal): Boolean; virtual; abstract;
+	  function trace_service_start(service: ITraceServiceConnection; switches_length: Cardinal; switches: PAnsiChar; start_result: Cardinal): Boolean; virtual; abstract;
+	  function trace_service_query(service: ITraceServiceConnection; send_item_length: Cardinal; send_items: BytePtr; recv_item_length: Cardinal; recv_items: BytePtr; query_result: Cardinal): Boolean; virtual; abstract;
+	  function trace_service_detach(service: ITraceServiceConnection; detach_result: Cardinal): Boolean; virtual; abstract;
+	  function trace_event_error(connection: ITraceConnection; status: ITraceStatusVector; function_: PAnsiChar): Boolean; virtual; abstract;
+	  function trace_event_sweep(connection: ITraceDatabaseConnection; sweep: ITraceSweepInfo; sweep_state: Cardinal): Boolean; virtual; abstract;
+	  function trace_func_execute(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; function_: ITraceFunction; started: Boolean; func_result: Cardinal): Boolean; virtual; abstract;
+	end;
+
+	ITraceFactoryHelper = record helper for ITraceFactory
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  procedure setOwner(r: IReferenceCounted);
+	  function getOwner(): IReferenceCounted;
+	  function trace_needs(): QWord;
+	  function trace_create(status: IStatus; init_info: ITraceInitInfo): ITracePlugin;
+	end;
+
+	ITraceFactoryImpl = class(IPluginBaseImpl)
+	private
+	  class var vTable: TraceFactoryVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: ITraceFactory;
+	public
+	  constructor create;
+	  function trace_needs(): QWord; virtual; abstract;
+	  function trace_create(status: IStatus; init_info: ITraceInitInfo): ITracePlugin; virtual; abstract;
+	end;
+
+	IUdrFunctionFactoryHelper = record helper for IUdrFunctionFactory
+	public
+	  procedure dispose();
+	  procedure setup(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder);
+	  function newItem(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata): IExternalFunction;
+	end;
+
+	IUdrFunctionFactoryImpl = class(IDisposableImpl)
+	private
+	  class var vTable: UdrFunctionFactoryVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IUdrFunctionFactory;
+	public
+	  constructor create;
+	  procedure setup(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder); virtual; abstract;
+	  function newItem(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata): IExternalFunction; virtual; abstract;
+	end;
+
+	IUdrProcedureFactoryHelper = record helper for IUdrProcedureFactory
+	public
+	  procedure dispose();
+	  procedure setup(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder);
+	  function newItem(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata): IExternalProcedure;
+	end;
+
+	IUdrProcedureFactoryImpl = class(IDisposableImpl)
+	private
+	  class var vTable: UdrProcedureFactoryVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IUdrProcedureFactory;
+	public
+	  constructor create;
+	  procedure setup(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder); virtual; abstract;
+	  function newItem(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata): IExternalProcedure; virtual; abstract;
+	end;
+
+	IUdrTriggerFactoryHelper = record helper for IUdrTriggerFactory
+	public
+	  procedure dispose();
+	  procedure setup(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; fieldsBuilder: IMetadataBuilder);
+	  function newItem(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata): IExternalTrigger;
+	end;
+
+	IUdrTriggerFactoryImpl = class(IDisposableImpl)
+	private
+	  class var vTable: UdrTriggerFactoryVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IUdrTriggerFactory;
+	public
+	  constructor create;
+	  procedure setup(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; fieldsBuilder: IMetadataBuilder); virtual; abstract;
+	  function newItem(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata): IExternalTrigger; virtual; abstract;
+	end;
+
+	IUdrPluginHelper = record helper for IUdrPlugin
+	public
+	  function getMaster(): IMaster;
+	  procedure registerFunction(status: IStatus; name: PAnsiChar; factory: IUdrFunctionFactory);
+	  procedure registerProcedure(status: IStatus; name: PAnsiChar; factory: IUdrProcedureFactory);
+	  procedure registerTrigger(status: IStatus; name: PAnsiChar; factory: IUdrTriggerFactory);
+	end;
+
+	IUdrPluginImpl = class(IVersionedImpl)
+	private
+	  class var vTable: UdrPluginVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IUdrPlugin;
+	public
+	  constructor create;
+	  function getMaster(): IMaster; virtual; abstract;
+	  procedure registerFunction(status: IStatus; name: PAnsiChar; factory: IUdrFunctionFactory); virtual; abstract;
+	  procedure registerProcedure(status: IStatus; name: PAnsiChar; factory: IUdrProcedureFactory); virtual; abstract;
+	  procedure registerTrigger(status: IStatus; name: PAnsiChar; factory: IUdrTriggerFactory); virtual; abstract;
+	end;
+
+	IDecFloat16Helper = record helper for IDecFloat16
+	public
+	  procedure toBcd(from: FB_DEC16Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr);
+	  procedure toString(status: IStatus; from: FB_DEC16Ptr; bufferLength: Cardinal; buffer: PAnsiChar);
+	  procedure fromBcd(sign: Integer; bcd: BytePtr; exp: Integer; to_: FB_DEC16Ptr);
+	  procedure fromString(status: IStatus; from: PAnsiChar; to_: FB_DEC16Ptr);
+	end;
+
+	IDecFloat16Impl = class(IVersionedImpl)
+	private
+	  class var vTable: DecFloat16VTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IDecFloat16;
+	public
+	  constructor create;
+	  procedure toBcd(from: FB_DEC16Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr); virtual; abstract;
+	  procedure toString(status: IStatus; from: FB_DEC16Ptr; bufferLength: Cardinal; buffer: PAnsiChar); virtual; abstract;
+	  procedure fromBcd(sign: Integer; bcd: BytePtr; exp: Integer; to_: FB_DEC16Ptr); virtual; abstract;
+	  procedure fromString(status: IStatus; from: PAnsiChar; to_: FB_DEC16Ptr); virtual; abstract;
+	end;
+
+	IDecFloat34Helper = record helper for IDecFloat34
+	public
+	  procedure toBcd(from: FB_DEC34Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr);
+	  procedure toString(status: IStatus; from: FB_DEC34Ptr; bufferLength: Cardinal; buffer: PAnsiChar);
+	  procedure fromBcd(sign: Integer; bcd: BytePtr; exp: Integer; to_: FB_DEC34Ptr);
+	  procedure fromString(status: IStatus; from: PAnsiChar; to_: FB_DEC34Ptr);
+	end;
+
+	IDecFloat34Impl = class(IVersionedImpl)
+	private
+	  class var vTable: DecFloat34VTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IDecFloat34;
+	public
+	  constructor create;
+	  procedure toBcd(from: FB_DEC34Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr); virtual; abstract;
+	  procedure toString(status: IStatus; from: FB_DEC34Ptr; bufferLength: Cardinal; buffer: PAnsiChar); virtual; abstract;
+	  procedure fromBcd(sign: Integer; bcd: BytePtr; exp: Integer; to_: FB_DEC34Ptr); virtual; abstract;
+	  procedure fromString(status: IStatus; from: PAnsiChar; to_: FB_DEC34Ptr); virtual; abstract;
+	end;
+
+	IInt128Helper = record helper for IInt128
+	public
+	  procedure toString(status: IStatus; from: FB_I128Ptr; scale: Integer; bufferLength: Cardinal; buffer: PAnsiChar);
+	  procedure fromString(status: IStatus; scale: Integer; from: PAnsiChar; to_: FB_I128Ptr);
+	end;
+
+	IInt128Impl = class(IVersionedImpl)
+	private
+	  class var vTable: Int128VTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IInt128;
+	public
+	  constructor create;
+	  procedure toString(status: IStatus; from: FB_I128Ptr; scale: Integer; bufferLength: Cardinal; buffer: PAnsiChar); virtual; abstract;
+	  procedure fromString(status: IStatus; scale: Integer; from: PAnsiChar; to_: FB_I128Ptr); virtual; abstract;
+	end;
+
+	IReplicatedFieldHelper = record helper for IReplicatedField
+	public
+	  function getName(): PAnsiChar;
+	  function getType(): Cardinal;
+	  function getSubType(): Integer;
+	  function getScale(): Integer;
+	  function getLength(): Cardinal;
+	  function getCharSet(): Cardinal;
+	  function getData(): Pointer;
+	end;
+
+	IReplicatedFieldImpl = class(IVersionedImpl)
+	private
+	  class var vTable: ReplicatedFieldVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IReplicatedField;
+	public
+	  constructor create;
+	  function getName(): PAnsiChar; virtual; abstract;
+	  function getType(): Cardinal; virtual; abstract;
+	  function getSubType(): Integer; virtual; abstract;
+	  function getScale(): Integer; virtual; abstract;
+	  function getLength(): Cardinal; virtual; abstract;
+	  function getCharSet(): Cardinal; virtual; abstract;
+	  function getData(): Pointer; virtual; abstract;
+	end;
+
+	IReplicatedRecordHelper = record helper for IReplicatedRecord
+	public
+	  function getCount(): Cardinal;
+	  function getField(index: Cardinal): IReplicatedField;
+	  function getRawLength(): Cardinal;
+	  function getRawData(): BytePtr;
+	end;
+
+	IReplicatedRecordImpl = class(IVersionedImpl)
+	private
+	  class var vTable: ReplicatedRecordVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IReplicatedRecord;
+	public
+	  constructor create;
+	  function getCount(): Cardinal; virtual; abstract;
+	  function getField(index: Cardinal): IReplicatedField; virtual; abstract;
+	  function getRawLength(): Cardinal; virtual; abstract;
+	  function getRawData(): BytePtr; virtual; abstract;
+	end;
+
+	IReplicatedTransactionHelper = record helper for IReplicatedTransaction
+	public
+	  procedure dispose();
+	  procedure prepare(status: IStatus);
+	  procedure commit(status: IStatus);
+	  procedure rollback(status: IStatus);
+	  procedure startSavepoint(status: IStatus);
+	  procedure releaseSavepoint(status: IStatus);
+	  procedure rollbackSavepoint(status: IStatus);
+	  procedure insertRecord(status: IStatus; name: PAnsiChar; record_: IReplicatedRecord);
+	  procedure updateRecord(status: IStatus; name: PAnsiChar; orgRecord: IReplicatedRecord; newRecord: IReplicatedRecord);
+	  procedure deleteRecord(status: IStatus; name: PAnsiChar; record_: IReplicatedRecord);
+	  procedure executeSql(status: IStatus; sql: PAnsiChar);
+	  procedure executeSqlIntl(status: IStatus; charset: Cardinal; sql: PAnsiChar);
+	end;
+
+	IReplicatedTransactionImpl = class(IDisposableImpl)
+	private
+	  class var vTable: ReplicatedTransactionVTable; 
+	  class var FInitialized: boolean;
+	  class procedure Initialize;
+	private
+	  intf: IReplicatedTransaction;
+	public
+	  constructor create;
+	  procedure prepare(status: IStatus); virtual; abstract;
+	  procedure commit(status: IStatus); virtual; abstract;
+	  procedure rollback(status: IStatus); virtual; abstract;
+	  procedure startSavepoint(status: IStatus); virtual; abstract;
+	  procedure releaseSavepoint(status: IStatus); virtual; abstract;
+	  procedure rollbackSavepoint(status: IStatus); virtual; abstract;
+	  procedure insertRecord(status: IStatus; name: PAnsiChar; record_: IReplicatedRecord); virtual; abstract;
+	  procedure updateRecord(status: IStatus; name: PAnsiChar; orgRecord: IReplicatedRecord; newRecord: IReplicatedRecord); virtual; abstract;
+	  procedure deleteRecord(status: IStatus; name: PAnsiChar; record_: IReplicatedRecord); virtual; abstract;
+	  procedure executeSql(status: IStatus; sql: PAnsiChar); virtual; abstract;
+	  procedure executeSqlIntl(status: IStatus; charset: Cardinal; sql: PAnsiChar); virtual; abstract;
+	end;
+
+	IReplicatedSessionHelper = record helper for IReplicatedSession
+	public
+	  procedure addRef();
+	  function release(): Integer;
+	  procedure setOwner(r: IReferenceCounted);
+	  function getOwner(): IReferenceCounted;
+	  function init(status: IStatus; attachment: IAttachment): Boolean;
+	  function startTransaction(status: IStatus; transaction: ITransaction; number: Int64): IReplicatedTransaction;
+	  procedure cleanupTransaction(status: IStatus; number: Int64);
+	  procedure setSequence(status: IStatus; name: PAnsiChar; value: Int64);
 	end;
 
 	IReplicatedSessionImpl = class(IPluginBaseImpl)
 	private
 	  class var vTable: ReplicatedSessionVTable; 
 	  class var FInitialized: boolean;
-	  intf: IReplicatedSession;
 	  class procedure Initialize;
+	private
+	  intf: IReplicatedSession;
 	public
 	  constructor create;
-	  function getInterfaceToken: PReplicatedSessionToken inline;
-	  function getInterface: IReplicatedSession inline;
-		function init(status: PStatusToken; attachment: PAttachmentToken): Boolean; virtual; abstract;
-		function startTransaction(status: PStatusToken; transaction: PTransactionToken; number: Int64): PReplicatedTransactionToken; virtual; abstract;
-		procedure cleanupTransaction(status: PStatusToken; number: Int64); virtual; abstract;
-		procedure setSequence(status: PStatusToken; name: PAnsiChar; value: Int64); virtual; abstract;
+	  function init(status: IStatus; attachment: IAttachment): Boolean; virtual; abstract;
+	  function startTransaction(status: IStatus; transaction: ITransaction; number: Int64): IReplicatedTransaction; virtual; abstract;
+	  procedure cleanupTransaction(status: IStatus; number: Int64); virtual; abstract;
+	  procedure setSequence(status: IStatus; name: PAnsiChar; value: Int64); virtual; abstract;
 	end;
 
 	FbException = class(Exception)
@@ -5988,12 +6456,12 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IReferenceCounted.addRef();
+procedure IReferenceCountedHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IReferenceCounted.release(): Integer;
+function IReferenceCountedHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
@@ -6028,7 +6496,7 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IDisposable.dispose();
+procedure IDisposableHelper.dispose();
 begin
 	vTable^.dispose(PDisposableToken(token));
 end;
@@ -6063,52 +6531,52 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IStatus.dispose();
+procedure IStatusHelper.dispose();
 begin
 	vTable^.dispose(PDisposableToken(token));
 end;
 
-procedure IStatus.init();
+procedure IStatusHelper.init();
 begin
 	vTable^.init(PStatusToken(token));
 end;
 
-function IStatus.getState(): Cardinal;
+function IStatusHelper.getState(): Cardinal;
 begin
 	Result := vTable^.getState(PStatusToken(token));
 end;
 
-procedure IStatus.setErrors2(length: Cardinal; value: NativeIntPtr);
+procedure IStatusHelper.setErrors2(length: Cardinal; value: NativeIntPtr);
 begin
 	vTable^.setErrors2(PStatusToken(token), length, value);
 end;
 
-procedure IStatus.setWarnings2(length: Cardinal; value: NativeIntPtr);
+procedure IStatusHelper.setWarnings2(length: Cardinal; value: NativeIntPtr);
 begin
 	vTable^.setWarnings2(PStatusToken(token), length, value);
 end;
 
-procedure IStatus.setErrors(value: NativeIntPtr);
+procedure IStatusHelper.setErrors(value: NativeIntPtr);
 begin
 	vTable^.setErrors(PStatusToken(token), value);
 end;
 
-procedure IStatus.setWarnings(value: NativeIntPtr);
+procedure IStatusHelper.setWarnings(value: NativeIntPtr);
 begin
 	vTable^.setWarnings(PStatusToken(token), value);
 end;
 
-function IStatus.getErrors(): NativeIntPtr;
+function IStatusHelper.getErrors(): NativeIntPtr;
 begin
 	Result := vTable^.getErrors(PStatusToken(token));
 end;
 
-function IStatus.getWarnings(): NativeIntPtr;
+function IStatusHelper.getWarnings(): NativeIntPtr;
 begin
 	Result := vTable^.getWarnings(PStatusToken(token));
 end;
 
-function IStatus.clone(): PStatusToken;
+function IStatusHelper.clone(): IStatus;
 begin
 	Result := vTable^.clone(PStatusToken(token));
 end;
@@ -6143,63 +6611,63 @@ begin
   Result := a.token = b.token;
 end;
 
-function IMaster.getStatus(): PStatusToken;
+function IMasterHelper.getStatus(): IStatus;
 begin
 	Result := vTable^.getStatus(PMasterToken(token));
 end;
 
-function IMaster.getDispatcher(): PProviderToken;
+function IMasterHelper.getDispatcher(): IProvider;
 begin
 	Result := vTable^.getDispatcher(PMasterToken(token));
 end;
 
-function IMaster.getPluginManager(): PPluginManagerToken;
+function IMasterHelper.getPluginManager(): IPluginManager;
 begin
 	Result := vTable^.getPluginManager(PMasterToken(token));
 end;
 
-function IMaster.getTimerControl(): PTimerControlToken;
+function IMasterHelper.getTimerControl(): ITimerControl;
 begin
 	Result := vTable^.getTimerControl(PMasterToken(token));
 end;
 
-function IMaster.getDtc(): PDtcToken;
+function IMasterHelper.getDtc(): IDtc;
 begin
 	Result := vTable^.getDtc(PMasterToken(token));
 end;
 
-function IMaster.registerAttachment(provider: PProviderToken; attachment: PAttachmentToken): PAttachmentToken;
+function IMasterHelper.registerAttachment(provider: IProvider; attachment: IAttachment): IAttachment;
 begin
 	Result := vTable^.registerAttachment(PMasterToken(token), provider, attachment);
 end;
 
-function IMaster.registerTransaction(attachment: PAttachmentToken; transaction: PTransactionToken): PTransactionToken;
+function IMasterHelper.registerTransaction(attachment: IAttachment; transaction: ITransaction): ITransaction;
 begin
 	Result := vTable^.registerTransaction(PMasterToken(token), attachment, transaction);
 end;
 
-function IMaster.getMetadataBuilder(status: PStatusToken; fieldCount: Cardinal): PMetadataBuilderToken;
+function IMasterHelper.getMetadataBuilder(status: IStatus; fieldCount: Cardinal): IMetadataBuilder;
 begin
 	Result := vTable^.getMetadataBuilder(PMasterToken(token), status, fieldCount);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IMaster.serverMode(mode: Integer): Integer;
+function IMasterHelper.serverMode(mode: Integer): Integer;
 begin
 	Result := vTable^.serverMode(PMasterToken(token), mode);
 end;
 
-function IMaster.getUtilInterface(): PUtilToken;
+function IMasterHelper.getUtilInterface(): IUtil;
 begin
 	Result := vTable^.getUtilInterface(PMasterToken(token));
 end;
 
-function IMaster.getConfigManager(): PConfigManagerToken;
+function IMasterHelper.getConfigManager(): IConfigManager;
 begin
 	Result := vTable^.getConfigManager(PMasterToken(token));
 end;
 
-function IMaster.getProcessExiting(): Boolean;
+function IMasterHelper.getProcessExiting(): Boolean;
 begin
 	Result := vTable^.getProcessExiting(PMasterToken(token));
 end;
@@ -6234,22 +6702,22 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IPluginBase.addRef();
+procedure IPluginBaseHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IPluginBase.release(): Integer;
+function IPluginBaseHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-procedure IPluginBase.setOwner(r: PReferenceCountedToken);
+procedure IPluginBaseHelper.setOwner(r: IReferenceCounted);
 begin
 	vTable^.setOwner(PPluginBaseToken(token), r);
 end;
 
-function IPluginBase.getOwner(): PReferenceCountedToken;
+function IPluginBaseHelper.getOwner(): IReferenceCounted;
 begin
 	Result := vTable^.getOwner(PPluginBaseToken(token));
 end;
@@ -6284,39 +6752,39 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IPluginSet.addRef();
+procedure IPluginSetHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IPluginSet.release(): Integer;
+function IPluginSetHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-function IPluginSet.getName(): PAnsiChar;
+function IPluginSetHelper.getName(): PAnsiChar;
 begin
 	Result := vTable^.getName(PPluginSetToken(token));
 end;
 
-function IPluginSet.getModuleName(): PAnsiChar;
+function IPluginSetHelper.getModuleName(): PAnsiChar;
 begin
 	Result := vTable^.getModuleName(PPluginSetToken(token));
 end;
 
-function IPluginSet.getPlugin(status: PStatusToken): PPluginBaseToken;
+function IPluginSetHelper.getPlugin(status: IStatus): IPluginBase;
 begin
 	Result := vTable^.getPlugin(PPluginSetToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IPluginSet.next(status: PStatusToken);
+procedure IPluginSetHelper.next(status: IStatus);
 begin
 	vTable^.next(PPluginSetToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IPluginSet.set_(status: PStatusToken; s: PAnsiChar);
+procedure IPluginSetHelper.set_(status: IStatus; s: PAnsiChar);
 begin
 	vTable^.set_(PPluginSetToken(token), status, s);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -6352,37 +6820,37 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IConfigEntry.addRef();
+procedure IConfigEntryHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IConfigEntry.release(): Integer;
+function IConfigEntryHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-function IConfigEntry.getName(): PAnsiChar;
+function IConfigEntryHelper.getName(): PAnsiChar;
 begin
 	Result := vTable^.getName(PConfigEntryToken(token));
 end;
 
-function IConfigEntry.getValue(): PAnsiChar;
+function IConfigEntryHelper.getValue(): PAnsiChar;
 begin
 	Result := vTable^.getValue(PConfigEntryToken(token));
 end;
 
-function IConfigEntry.getIntValue(): Int64;
+function IConfigEntryHelper.getIntValue(): Int64;
 begin
 	Result := vTable^.getIntValue(PConfigEntryToken(token));
 end;
 
-function IConfigEntry.getBoolValue(): Boolean;
+function IConfigEntryHelper.getBoolValue(): Boolean;
 begin
 	Result := vTable^.getBoolValue(PConfigEntryToken(token));
 end;
 
-function IConfigEntry.getSubConfig(status: PStatusToken): PConfigToken;
+function IConfigEntryHelper.getSubConfig(status: IStatus): IConfig;
 begin
 	Result := vTable^.getSubConfig(PConfigEntryToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -6418,29 +6886,29 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IConfig.addRef();
+procedure IConfigHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IConfig.release(): Integer;
+function IConfigHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-function IConfig.find(status: PStatusToken; name: PAnsiChar): PConfigEntryToken;
+function IConfigHelper.find(status: IStatus; name: PAnsiChar): IConfigEntry;
 begin
 	Result := vTable^.find(PConfigToken(token), status, name);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IConfig.findValue(status: PStatusToken; name: PAnsiChar; value: PAnsiChar): PConfigEntryToken;
+function IConfigHelper.findValue(status: IStatus; name: PAnsiChar; value: PAnsiChar): IConfigEntry;
 begin
 	Result := vTable^.findValue(PConfigToken(token), status, name, value);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IConfig.findPos(status: PStatusToken; name: PAnsiChar; pos: Cardinal): PConfigEntryToken;
+function IConfigHelper.findPos(status: IStatus; name: PAnsiChar; pos: Cardinal): IConfigEntry;
 begin
 	Result := vTable^.findPos(PConfigToken(token), status, name, pos);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -6476,37 +6944,37 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IFirebirdConf.addRef();
+procedure IFirebirdConfHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IFirebirdConf.release(): Integer;
+function IFirebirdConfHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-function IFirebirdConf.getKey(name: PAnsiChar): Cardinal;
+function IFirebirdConfHelper.getKey(name: PAnsiChar): Cardinal;
 begin
 	Result := vTable^.getKey(PFirebirdConfToken(token), name);
 end;
 
-function IFirebirdConf.asInteger(key: Cardinal): Int64;
+function IFirebirdConfHelper.asInteger(key: Cardinal): Int64;
 begin
 	Result := vTable^.asInteger(PFirebirdConfToken(token), key);
 end;
 
-function IFirebirdConf.asString(key: Cardinal): PAnsiChar;
+function IFirebirdConfHelper.asString(key: Cardinal): PAnsiChar;
 begin
 	Result := vTable^.asString(PFirebirdConfToken(token), key);
 end;
 
-function IFirebirdConf.asBoolean(key: Cardinal): Boolean;
+function IFirebirdConfHelper.asBoolean(key: Cardinal): Boolean;
 begin
 	Result := vTable^.asBoolean(PFirebirdConfToken(token), key);
 end;
 
-function IFirebirdConf.getVersion(status: PStatusToken): Cardinal;
+function IFirebirdConfHelper.getVersion(status: IStatus): Cardinal;
 begin
 	Result := vTable^.getVersion(PFirebirdConfToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -6542,34 +7010,34 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IPluginConfig.addRef();
+procedure IPluginConfigHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IPluginConfig.release(): Integer;
+function IPluginConfigHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-function IPluginConfig.getConfigFileName(): PAnsiChar;
+function IPluginConfigHelper.getConfigFileName(): PAnsiChar;
 begin
 	Result := vTable^.getConfigFileName(PPluginConfigToken(token));
 end;
 
-function IPluginConfig.getDefaultConfig(status: PStatusToken): PConfigToken;
+function IPluginConfigHelper.getDefaultConfig(status: IStatus): IConfig;
 begin
 	Result := vTable^.getDefaultConfig(PPluginConfigToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IPluginConfig.getFirebirdConf(status: PStatusToken): PFirebirdConfToken;
+function IPluginConfigHelper.getFirebirdConf(status: IStatus): IFirebirdConf;
 begin
 	Result := vTable^.getFirebirdConf(PPluginConfigToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IPluginConfig.setReleaseDelay(status: PStatusToken; microSeconds: QWord);
+procedure IPluginConfigHelper.setReleaseDelay(status: IStatus; microSeconds: QWord);
 begin
 	vTable^.setReleaseDelay(PPluginConfigToken(token), status, microSeconds);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -6605,7 +7073,7 @@ begin
   Result := a.token = b.token;
 end;
 
-function IPluginFactory.createPlugin(status: PStatusToken; factoryParameter: PPluginConfigToken): PPluginBaseToken;
+function IPluginFactoryHelper.createPlugin(status: IStatus; factoryParameter: IPluginConfig): IPluginBase;
 begin
 	Result := vTable^.createPlugin(PPluginFactoryToken(token), status, factoryParameter);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -6641,12 +7109,12 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IPluginModule.doClean();
+procedure IPluginModuleHelper.doClean();
 begin
 	vTable^.doClean(PPluginModuleToken(token));
 end;
 
-procedure IPluginModule.threadDetach();
+procedure IPluginModuleHelper.threadDetach();
 begin
 	vTable^.threadDetach(PPluginModuleToken(token));
 end;
@@ -6681,34 +7149,34 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IPluginManager.registerPluginFactory(pluginType: Cardinal; defaultName: PAnsiChar; factory: PPluginFactoryToken);
+procedure IPluginManagerHelper.registerPluginFactory(pluginType: Cardinal; defaultName: PAnsiChar; factory: IPluginFactory);
 begin
 	vTable^.registerPluginFactory(PPluginManagerToken(token), pluginType, defaultName, factory);
 end;
 
-procedure IPluginManager.registerModule(cleanup: PPluginModuleToken);
+procedure IPluginManagerHelper.registerModule(cleanup: IPluginModule);
 begin
 	vTable^.registerModule(PPluginManagerToken(token), cleanup);
 end;
 
-procedure IPluginManager.unregisterModule(cleanup: PPluginModuleToken);
+procedure IPluginManagerHelper.unregisterModule(cleanup: IPluginModule);
 begin
 	vTable^.unregisterModule(PPluginManagerToken(token), cleanup);
 end;
 
-function IPluginManager.getPlugins(status: PStatusToken; pluginType: Cardinal; namesList: PAnsiChar; firebirdConf: PFirebirdConfToken): PPluginSetToken;
+function IPluginManagerHelper.getPlugins(status: IStatus; pluginType: Cardinal; namesList: PAnsiChar; firebirdConf: IFirebirdConf): IPluginSet;
 begin
 	Result := vTable^.getPlugins(PPluginManagerToken(token), status, pluginType, namesList, firebirdConf);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IPluginManager.getConfig(status: PStatusToken; filename: PAnsiChar): PConfigToken;
+function IPluginManagerHelper.getConfig(status: IStatus; filename: PAnsiChar): IConfig;
 begin
 	Result := vTable^.getConfig(PPluginManagerToken(token), status, filename);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IPluginManager.releasePlugin(plugin: PPluginBaseToken);
+procedure IPluginManagerHelper.releasePlugin(plugin: IPluginBase);
 begin
 	vTable^.releasePlugin(PPluginManagerToken(token), plugin);
 end;
@@ -6743,24 +7211,24 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure ICryptKey.setSymmetric(status: PStatusToken; type_: PAnsiChar; keyLength: Cardinal; key: Pointer);
+procedure ICryptKeyHelper.setSymmetric(status: IStatus; type_: PAnsiChar; keyLength: Cardinal; key: Pointer);
 begin
 	vTable^.setSymmetric(PCryptKeyToken(token), status, type_, keyLength, key);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure ICryptKey.setAsymmetric(status: PStatusToken; type_: PAnsiChar; encryptKeyLength: Cardinal; encryptKey: Pointer; decryptKeyLength: Cardinal; decryptKey: Pointer);
+procedure ICryptKeyHelper.setAsymmetric(status: IStatus; type_: PAnsiChar; encryptKeyLength: Cardinal; encryptKey: Pointer; decryptKeyLength: Cardinal; decryptKey: Pointer);
 begin
 	vTable^.setAsymmetric(PCryptKeyToken(token), status, type_, encryptKeyLength, encryptKey, decryptKeyLength, decryptKey);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function ICryptKey.getEncryptKey(length: CardinalPtr): Pointer;
+function ICryptKeyHelper.getEncryptKey(length: CardinalPtr): Pointer;
 begin
 	Result := vTable^.getEncryptKey(PCryptKeyToken(token), length);
 end;
 
-function ICryptKey.getDecryptKey(length: CardinalPtr): Pointer;
+function ICryptKeyHelper.getDecryptKey(length: CardinalPtr): Pointer;
 begin
 	Result := vTable^.getDecryptKey(PCryptKeyToken(token), length);
 end;
@@ -6795,37 +7263,37 @@ begin
   Result := a.token = b.token;
 end;
 
-function IConfigManager.getDirectory(code: Cardinal): PAnsiChar;
+function IConfigManagerHelper.getDirectory(code: Cardinal): PAnsiChar;
 begin
 	Result := vTable^.getDirectory(PConfigManagerToken(token), code);
 end;
 
-function IConfigManager.getFirebirdConf(): PFirebirdConfToken;
+function IConfigManagerHelper.getFirebirdConf(): IFirebirdConf;
 begin
 	Result := vTable^.getFirebirdConf(PConfigManagerToken(token));
 end;
 
-function IConfigManager.getDatabaseConf(dbName: PAnsiChar): PFirebirdConfToken;
+function IConfigManagerHelper.getDatabaseConf(dbName: PAnsiChar): IFirebirdConf;
 begin
 	Result := vTable^.getDatabaseConf(PConfigManagerToken(token), dbName);
 end;
 
-function IConfigManager.getPluginConfig(configuredPlugin: PAnsiChar): PConfigToken;
+function IConfigManagerHelper.getPluginConfig(configuredPlugin: PAnsiChar): IConfig;
 begin
 	Result := vTable^.getPluginConfig(PConfigManagerToken(token), configuredPlugin);
 end;
 
-function IConfigManager.getInstallDirectory(): PAnsiChar;
+function IConfigManagerHelper.getInstallDirectory(): PAnsiChar;
 begin
 	Result := vTable^.getInstallDirectory(PConfigManagerToken(token));
 end;
 
-function IConfigManager.getRootDirectory(): PAnsiChar;
+function IConfigManagerHelper.getRootDirectory(): PAnsiChar;
 begin
 	Result := vTable^.getRootDirectory(PConfigManagerToken(token));
 end;
 
-function IConfigManager.getDefaultSecurityDb(): PAnsiChar;
+function IConfigManagerHelper.getDefaultSecurityDb(): PAnsiChar;
 begin
 	Result := vTable^.getDefaultSecurityDb(PConfigManagerToken(token));
 end;
@@ -6860,17 +7328,17 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IEventCallback.addRef();
+procedure IEventCallbackHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IEventCallback.release(): Integer;
+function IEventCallbackHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-procedure IEventCallback.eventCallbackFunction(length: Cardinal; events: BytePtr);
+procedure IEventCallbackHelper.eventCallbackFunction(length: Cardinal; events: BytePtr);
 begin
 	vTable^.eventCallbackFunction(PEventCallbackToken(token), length, events);
 end;
@@ -6905,47 +7373,47 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IBlob.addRef();
+procedure IBlobHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IBlob.release(): Integer;
+function IBlobHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-procedure IBlob.getInfo(status: PStatusToken; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
+procedure IBlobHelper.getInfo(status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
 begin
 	vTable^.getInfo(PBlobToken(token), status, itemsLength, items, bufferLength, buffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IBlob.getSegment(status: PStatusToken; bufferLength: Cardinal; buffer: Pointer; segmentLength: CardinalPtr): Integer;
+function IBlobHelper.getSegment(status: IStatus; bufferLength: Cardinal; buffer: Pointer; segmentLength: CardinalPtr): Integer;
 begin
 	Result := vTable^.getSegment(PBlobToken(token), status, bufferLength, buffer, segmentLength);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IBlob.putSegment(status: PStatusToken; length: Cardinal; buffer: Pointer);
+procedure IBlobHelper.putSegment(status: IStatus; length: Cardinal; buffer: Pointer);
 begin
 	vTable^.putSegment(PBlobToken(token), status, length, buffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IBlob.cancel(status: PStatusToken);
+procedure IBlobHelper.cancel(status: IStatus);
 begin
 	vTable^.cancel(PBlobToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IBlob.close(status: PStatusToken);
+procedure IBlobHelper.close(status: IStatus);
 begin
 	vTable^.close(PBlobToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IBlob.seek(status: PStatusToken; mode: Integer; offset: Integer): Integer;
+function IBlobHelper.seek(status: IStatus; mode: Integer; offset: Integer): Integer;
 begin
 	Result := vTable^.seek(PBlobToken(token), status, mode, offset);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -6981,71 +7449,71 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure ITransaction.addRef();
+procedure ITransactionHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function ITransaction.release(): Integer;
+function ITransactionHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-procedure ITransaction.getInfo(status: PStatusToken; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
+procedure ITransactionHelper.getInfo(status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
 begin
 	vTable^.getInfo(PTransactionToken(token), status, itemsLength, items, bufferLength, buffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure ITransaction.prepare(status: PStatusToken; msgLength: Cardinal; message: BytePtr);
+procedure ITransactionHelper.prepare(status: IStatus; msgLength: Cardinal; message: BytePtr);
 begin
 	vTable^.prepare(PTransactionToken(token), status, msgLength, message);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure ITransaction.commit(status: PStatusToken);
+procedure ITransactionHelper.commit(status: IStatus);
 begin
 	vTable^.commit(PTransactionToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure ITransaction.commitRetaining(status: PStatusToken);
+procedure ITransactionHelper.commitRetaining(status: IStatus);
 begin
 	vTable^.commitRetaining(PTransactionToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure ITransaction.rollback(status: PStatusToken);
+procedure ITransactionHelper.rollback(status: IStatus);
 begin
 	vTable^.rollback(PTransactionToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure ITransaction.rollbackRetaining(status: PStatusToken);
+procedure ITransactionHelper.rollbackRetaining(status: IStatus);
 begin
 	vTable^.rollbackRetaining(PTransactionToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure ITransaction.disconnect(status: PStatusToken);
+procedure ITransactionHelper.disconnect(status: IStatus);
 begin
 	vTable^.disconnect(PTransactionToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function ITransaction.join(status: PStatusToken; transaction: PTransactionToken): PTransactionToken;
+function ITransactionHelper.join(status: IStatus; transaction: ITransaction): ITransaction;
 begin
 	Result := vTable^.join(PTransactionToken(token), status, transaction);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function ITransaction.validate(status: PStatusToken; attachment: PAttachmentToken): PTransactionToken;
+function ITransactionHelper.validate(status: IStatus; attachment: IAttachment): ITransaction;
 begin
 	Result := vTable^.validate(PTransactionToken(token), status, attachment);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function ITransaction.enterDtc(status: PStatusToken): PTransactionToken;
+function ITransactionHelper.enterDtc(status: IStatus): ITransaction;
 begin
 	Result := vTable^.enterDtc(PTransactionToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -7081,113 +7549,113 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IMessageMetadata.addRef();
+procedure IMessageMetadataHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IMessageMetadata.release(): Integer;
+function IMessageMetadataHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-function IMessageMetadata.getCount(status: PStatusToken): Cardinal;
+function IMessageMetadataHelper.getCount(status: IStatus): Cardinal;
 begin
 	Result := vTable^.getCount(PMessageMetadataToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IMessageMetadata.getField(status: PStatusToken; index: Cardinal): PAnsiChar;
+function IMessageMetadataHelper.getField(status: IStatus; index: Cardinal): PAnsiChar;
 begin
 	Result := vTable^.getField(PMessageMetadataToken(token), status, index);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IMessageMetadata.getRelation(status: PStatusToken; index: Cardinal): PAnsiChar;
+function IMessageMetadataHelper.getRelation(status: IStatus; index: Cardinal): PAnsiChar;
 begin
 	Result := vTable^.getRelation(PMessageMetadataToken(token), status, index);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IMessageMetadata.getOwner(status: PStatusToken; index: Cardinal): PAnsiChar;
+function IMessageMetadataHelper.getOwner(status: IStatus; index: Cardinal): PAnsiChar;
 begin
 	Result := vTable^.getOwner(PMessageMetadataToken(token), status, index);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IMessageMetadata.getAlias(status: PStatusToken; index: Cardinal): PAnsiChar;
+function IMessageMetadataHelper.getAlias(status: IStatus; index: Cardinal): PAnsiChar;
 begin
 	Result := vTable^.getAlias(PMessageMetadataToken(token), status, index);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IMessageMetadata.getType(status: PStatusToken; index: Cardinal): Cardinal;
+function IMessageMetadataHelper.getType(status: IStatus; index: Cardinal): Cardinal;
 begin
 	Result := vTable^.getType(PMessageMetadataToken(token), status, index);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IMessageMetadata.isNullable(status: PStatusToken; index: Cardinal): Boolean;
+function IMessageMetadataHelper.isNullable(status: IStatus; index: Cardinal): Boolean;
 begin
 	Result := vTable^.isNullable(PMessageMetadataToken(token), status, index);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IMessageMetadata.getSubType(status: PStatusToken; index: Cardinal): Integer;
+function IMessageMetadataHelper.getSubType(status: IStatus; index: Cardinal): Integer;
 begin
 	Result := vTable^.getSubType(PMessageMetadataToken(token), status, index);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IMessageMetadata.getLength(status: PStatusToken; index: Cardinal): Cardinal;
+function IMessageMetadataHelper.getLength(status: IStatus; index: Cardinal): Cardinal;
 begin
 	Result := vTable^.getLength(PMessageMetadataToken(token), status, index);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IMessageMetadata.getScale(status: PStatusToken; index: Cardinal): Integer;
+function IMessageMetadataHelper.getScale(status: IStatus; index: Cardinal): Integer;
 begin
 	Result := vTable^.getScale(PMessageMetadataToken(token), status, index);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IMessageMetadata.getCharSet(status: PStatusToken; index: Cardinal): Cardinal;
+function IMessageMetadataHelper.getCharSet(status: IStatus; index: Cardinal): Cardinal;
 begin
 	Result := vTable^.getCharSet(PMessageMetadataToken(token), status, index);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IMessageMetadata.getOffset(status: PStatusToken; index: Cardinal): Cardinal;
+function IMessageMetadataHelper.getOffset(status: IStatus; index: Cardinal): Cardinal;
 begin
 	Result := vTable^.getOffset(PMessageMetadataToken(token), status, index);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IMessageMetadata.getNullOffset(status: PStatusToken; index: Cardinal): Cardinal;
+function IMessageMetadataHelper.getNullOffset(status: IStatus; index: Cardinal): Cardinal;
 begin
 	Result := vTable^.getNullOffset(PMessageMetadataToken(token), status, index);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IMessageMetadata.getBuilder(status: PStatusToken): PMetadataBuilderToken;
+function IMessageMetadataHelper.getBuilder(status: IStatus): IMetadataBuilder;
 begin
 	Result := vTable^.getBuilder(PMessageMetadataToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IMessageMetadata.getMessageLength(status: PStatusToken): Cardinal;
+function IMessageMetadataHelper.getMessageLength(status: IStatus): Cardinal;
 begin
 	Result := vTable^.getMessageLength(PMessageMetadataToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IMessageMetadata.getAlignment(status: PStatusToken): Cardinal;
+function IMessageMetadataHelper.getAlignment(status: IStatus): Cardinal;
 begin
 	Result := vTable^.getAlignment(PMessageMetadataToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IMessageMetadata.getAlignedLength(status: PStatusToken): Cardinal;
+function IMessageMetadataHelper.getAlignedLength(status: IStatus): Cardinal;
 begin
 	Result := vTable^.getAlignedLength(PMessageMetadataToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -7223,95 +7691,95 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IMetadataBuilder.addRef();
+procedure IMetadataBuilderHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IMetadataBuilder.release(): Integer;
+function IMetadataBuilderHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-procedure IMetadataBuilder.setType(status: PStatusToken; index: Cardinal; type_: Cardinal);
+procedure IMetadataBuilderHelper.setType(status: IStatus; index: Cardinal; type_: Cardinal);
 begin
 	vTable^.setType(PMetadataBuilderToken(token), status, index, type_);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IMetadataBuilder.setSubType(status: PStatusToken; index: Cardinal; subType: Integer);
+procedure IMetadataBuilderHelper.setSubType(status: IStatus; index: Cardinal; subType: Integer);
 begin
 	vTable^.setSubType(PMetadataBuilderToken(token), status, index, subType);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IMetadataBuilder.setLength(status: PStatusToken; index: Cardinal; length: Cardinal);
+procedure IMetadataBuilderHelper.setLength(status: IStatus; index: Cardinal; length: Cardinal);
 begin
 	vTable^.setLength(PMetadataBuilderToken(token), status, index, length);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IMetadataBuilder.setCharSet(status: PStatusToken; index: Cardinal; charSet: Cardinal);
+procedure IMetadataBuilderHelper.setCharSet(status: IStatus; index: Cardinal; charSet: Cardinal);
 begin
 	vTable^.setCharSet(PMetadataBuilderToken(token), status, index, charSet);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IMetadataBuilder.setScale(status: PStatusToken; index: Cardinal; scale: Integer);
+procedure IMetadataBuilderHelper.setScale(status: IStatus; index: Cardinal; scale: Integer);
 begin
 	vTable^.setScale(PMetadataBuilderToken(token), status, index, scale);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IMetadataBuilder.truncate(status: PStatusToken; count: Cardinal);
+procedure IMetadataBuilderHelper.truncate(status: IStatus; count: Cardinal);
 begin
 	vTable^.truncate(PMetadataBuilderToken(token), status, count);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IMetadataBuilder.moveNameToIndex(status: PStatusToken; name: PAnsiChar; index: Cardinal);
+procedure IMetadataBuilderHelper.moveNameToIndex(status: IStatus; name: PAnsiChar; index: Cardinal);
 begin
 	vTable^.moveNameToIndex(PMetadataBuilderToken(token), status, name, index);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IMetadataBuilder.remove(status: PStatusToken; index: Cardinal);
+procedure IMetadataBuilderHelper.remove(status: IStatus; index: Cardinal);
 begin
 	vTable^.remove(PMetadataBuilderToken(token), status, index);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IMetadataBuilder.addField(status: PStatusToken): Cardinal;
+function IMetadataBuilderHelper.addField(status: IStatus): Cardinal;
 begin
 	Result := vTable^.addField(PMetadataBuilderToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IMetadataBuilder.getMetadata(status: PStatusToken): PMessageMetadataToken;
+function IMetadataBuilderHelper.getMetadata(status: IStatus): IMessageMetadata;
 begin
 	Result := vTable^.getMetadata(PMetadataBuilderToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IMetadataBuilder.setField(status: PStatusToken; index: Cardinal; field: PAnsiChar);
+procedure IMetadataBuilderHelper.setField(status: IStatus; index: Cardinal; field: PAnsiChar);
 begin
 	vTable^.setField(PMetadataBuilderToken(token), status, index, field);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IMetadataBuilder.setRelation(status: PStatusToken; index: Cardinal; relation: PAnsiChar);
+procedure IMetadataBuilderHelper.setRelation(status: IStatus; index: Cardinal; relation: PAnsiChar);
 begin
 	vTable^.setRelation(PMetadataBuilderToken(token), status, index, relation);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IMetadataBuilder.setOwner(status: PStatusToken; index: Cardinal; owner: PAnsiChar);
+procedure IMetadataBuilderHelper.setOwner(status: IStatus; index: Cardinal; owner: PAnsiChar);
 begin
 	vTable^.setOwner(PMetadataBuilderToken(token), status, index, owner);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IMetadataBuilder.setAlias(status: PStatusToken; index: Cardinal; alias: PAnsiChar);
+procedure IMetadataBuilderHelper.setAlias(status: IStatus; index: Cardinal; alias: PAnsiChar);
 begin
 	vTable^.setAlias(PMetadataBuilderToken(token), status, index, alias);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -7347,77 +7815,77 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IResultSet.addRef();
+procedure IResultSetHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IResultSet.release(): Integer;
+function IResultSetHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-function IResultSet.fetchNext(status: PStatusToken; message: Pointer): Integer;
+function IResultSetHelper.fetchNext(status: IStatus; message: Pointer): Integer;
 begin
 	Result := vTable^.fetchNext(PResultSetToken(token), status, message);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IResultSet.fetchPrior(status: PStatusToken; message: Pointer): Integer;
+function IResultSetHelper.fetchPrior(status: IStatus; message: Pointer): Integer;
 begin
 	Result := vTable^.fetchPrior(PResultSetToken(token), status, message);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IResultSet.fetchFirst(status: PStatusToken; message: Pointer): Integer;
+function IResultSetHelper.fetchFirst(status: IStatus; message: Pointer): Integer;
 begin
 	Result := vTable^.fetchFirst(PResultSetToken(token), status, message);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IResultSet.fetchLast(status: PStatusToken; message: Pointer): Integer;
+function IResultSetHelper.fetchLast(status: IStatus; message: Pointer): Integer;
 begin
 	Result := vTable^.fetchLast(PResultSetToken(token), status, message);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IResultSet.fetchAbsolute(status: PStatusToken; position: Integer; message: Pointer): Integer;
+function IResultSetHelper.fetchAbsolute(status: IStatus; position: Integer; message: Pointer): Integer;
 begin
 	Result := vTable^.fetchAbsolute(PResultSetToken(token), status, position, message);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IResultSet.fetchRelative(status: PStatusToken; offset: Integer; message: Pointer): Integer;
+function IResultSetHelper.fetchRelative(status: IStatus; offset: Integer; message: Pointer): Integer;
 begin
 	Result := vTable^.fetchRelative(PResultSetToken(token), status, offset, message);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IResultSet.isEof(status: PStatusToken): Boolean;
+function IResultSetHelper.isEof(status: IStatus): Boolean;
 begin
 	Result := vTable^.isEof(PResultSetToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IResultSet.isBof(status: PStatusToken): Boolean;
+function IResultSetHelper.isBof(status: IStatus): Boolean;
 begin
 	Result := vTable^.isBof(PResultSetToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IResultSet.getMetadata(status: PStatusToken): PMessageMetadataToken;
+function IResultSetHelper.getMetadata(status: IStatus): IMessageMetadata;
 begin
 	Result := vTable^.getMetadata(PResultSetToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IResultSet.close(status: PStatusToken);
+procedure IResultSetHelper.close(status: IStatus);
 begin
 	vTable^.close(PResultSetToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IResultSet.setDelayedOutputFormat(status: PStatusToken; format: PMessageMetadataToken);
+procedure IResultSetHelper.setDelayedOutputFormat(status: IStatus; format: IMessageMetadata);
 begin
 	vTable^.setDelayedOutputFormat(PResultSetToken(token), status, format);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -7453,95 +7921,95 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IStatement.addRef();
+procedure IStatementHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IStatement.release(): Integer;
+function IStatementHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-procedure IStatement.getInfo(status: PStatusToken; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
+procedure IStatementHelper.getInfo(status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
 begin
 	vTable^.getInfo(PStatementToken(token), status, itemsLength, items, bufferLength, buffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IStatement.getType(status: PStatusToken): Cardinal;
+function IStatementHelper.getType(status: IStatus): Cardinal;
 begin
 	Result := vTable^.getType(PStatementToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IStatement.getPlan(status: PStatusToken; detailed: Boolean): PAnsiChar;
+function IStatementHelper.getPlan(status: IStatus; detailed: Boolean): PAnsiChar;
 begin
 	Result := vTable^.getPlan(PStatementToken(token), status, detailed);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IStatement.getAffectedRecords(status: PStatusToken): QWord;
+function IStatementHelper.getAffectedRecords(status: IStatus): QWord;
 begin
 	Result := vTable^.getAffectedRecords(PStatementToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IStatement.getInputMetadata(status: PStatusToken): PMessageMetadataToken;
+function IStatementHelper.getInputMetadata(status: IStatus): IMessageMetadata;
 begin
 	Result := vTable^.getInputMetadata(PStatementToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IStatement.getOutputMetadata(status: PStatusToken): PMessageMetadataToken;
+function IStatementHelper.getOutputMetadata(status: IStatus): IMessageMetadata;
 begin
 	Result := vTable^.getOutputMetadata(PStatementToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IStatement.execute(status: PStatusToken; transaction: PTransactionToken; inMetadata: PMessageMetadataToken; inBuffer: Pointer; outMetadata: PMessageMetadataToken; outBuffer: Pointer): PTransactionToken;
+function IStatementHelper.execute(status: IStatus; transaction: ITransaction; inMetadata: IMessageMetadata; inBuffer: Pointer; outMetadata: IMessageMetadata; outBuffer: Pointer): ITransaction;
 begin
 	Result := vTable^.execute(PStatementToken(token), status, transaction, inMetadata, inBuffer, outMetadata, outBuffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IStatement.openCursor(status: PStatusToken; transaction: PTransactionToken; inMetadata: PMessageMetadataToken; inBuffer: Pointer; outMetadata: PMessageMetadataToken; flags: Cardinal): PResultSetToken;
+function IStatementHelper.openCursor(status: IStatus; transaction: ITransaction; inMetadata: IMessageMetadata; inBuffer: Pointer; outMetadata: IMessageMetadata; flags: Cardinal): IResultSet;
 begin
 	Result := vTable^.openCursor(PStatementToken(token), status, transaction, inMetadata, inBuffer, outMetadata, flags);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IStatement.setCursorName(status: PStatusToken; name: PAnsiChar);
+procedure IStatementHelper.setCursorName(status: IStatus; name: PAnsiChar);
 begin
 	vTable^.setCursorName(PStatementToken(token), status, name);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IStatement.free(status: PStatusToken);
+procedure IStatementHelper.free(status: IStatus);
 begin
 	vTable^.free(PStatementToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IStatement.getFlags(status: PStatusToken): Cardinal;
+function IStatementHelper.getFlags(status: IStatus): Cardinal;
 begin
 	Result := vTable^.getFlags(PStatementToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IStatement.getTimeout(status: PStatusToken): Cardinal;
+function IStatementHelper.getTimeout(status: IStatus): Cardinal;
 begin
 	Result := vTable^.getTimeout(PStatementToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IStatement.setTimeout(status: PStatusToken; timeOut: Cardinal);
+procedure IStatementHelper.setTimeout(status: IStatus; timeOut: Cardinal);
 begin
 	vTable^.setTimeout(PStatementToken(token), status, timeOut);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IStatement.createBatch(status: PStatusToken; inMetadata: PMessageMetadataToken; parLength: Cardinal; par: BytePtr): PBatchToken;
+function IStatementHelper.createBatch(status: IStatus; inMetadata: IMessageMetadata; parLength: Cardinal; par: BytePtr): IBatch;
 begin
 	Result := vTable^.createBatch(PStatementToken(token), status, inMetadata, parLength, par);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -7577,77 +8045,77 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IBatch.addRef();
+procedure IBatchHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IBatch.release(): Integer;
+function IBatchHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-procedure IBatch.add(status: PStatusToken; count: Cardinal; inBuffer: Pointer);
+procedure IBatchHelper.add(status: IStatus; count: Cardinal; inBuffer: Pointer);
 begin
 	vTable^.add(PBatchToken(token), status, count, inBuffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IBatch.addBlob(status: PStatusToken; length: Cardinal; inBuffer: Pointer; blobId: ISC_QUADPtr; parLength: Cardinal; par: BytePtr);
+procedure IBatchHelper.addBlob(status: IStatus; length: Cardinal; inBuffer: Pointer; blobId: ISC_QUADPtr; parLength: Cardinal; par: BytePtr);
 begin
 	vTable^.addBlob(PBatchToken(token), status, length, inBuffer, blobId, parLength, par);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IBatch.appendBlobData(status: PStatusToken; length: Cardinal; inBuffer: Pointer);
+procedure IBatchHelper.appendBlobData(status: IStatus; length: Cardinal; inBuffer: Pointer);
 begin
 	vTable^.appendBlobData(PBatchToken(token), status, length, inBuffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IBatch.addBlobStream(status: PStatusToken; length: Cardinal; inBuffer: Pointer);
+procedure IBatchHelper.addBlobStream(status: IStatus; length: Cardinal; inBuffer: Pointer);
 begin
 	vTable^.addBlobStream(PBatchToken(token), status, length, inBuffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IBatch.registerBlob(status: PStatusToken; existingBlob: ISC_QUADPtr; blobId: ISC_QUADPtr);
+procedure IBatchHelper.registerBlob(status: IStatus; existingBlob: ISC_QUADPtr; blobId: ISC_QUADPtr);
 begin
 	vTable^.registerBlob(PBatchToken(token), status, existingBlob, blobId);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IBatch.execute(status: PStatusToken; transaction: PTransactionToken): PBatchCompletionStateToken;
+function IBatchHelper.execute(status: IStatus; transaction: ITransaction): IBatchCompletionState;
 begin
 	Result := vTable^.execute(PBatchToken(token), status, transaction);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IBatch.cancel(status: PStatusToken);
+procedure IBatchHelper.cancel(status: IStatus);
 begin
 	vTable^.cancel(PBatchToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IBatch.getBlobAlignment(status: PStatusToken): Cardinal;
+function IBatchHelper.getBlobAlignment(status: IStatus): Cardinal;
 begin
 	Result := vTable^.getBlobAlignment(PBatchToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IBatch.getMetadata(status: PStatusToken): PMessageMetadataToken;
+function IBatchHelper.getMetadata(status: IStatus): IMessageMetadata;
 begin
 	Result := vTable^.getMetadata(PBatchToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IBatch.setDefaultBpb(status: PStatusToken; parLength: Cardinal; par: BytePtr);
+procedure IBatchHelper.setDefaultBpb(status: IStatus; parLength: Cardinal; par: BytePtr);
 begin
 	vTable^.setDefaultBpb(PBatchToken(token), status, parLength, par);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IBatch.close(status: PStatusToken);
+procedure IBatchHelper.close(status: IStatus);
 begin
 	vTable^.close(PBatchToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -7683,30 +8151,30 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IBatchCompletionState.dispose();
+procedure IBatchCompletionStateHelper.dispose();
 begin
 	vTable^.dispose(PDisposableToken(token));
 end;
 
-function IBatchCompletionState.getSize(status: PStatusToken): Cardinal;
+function IBatchCompletionStateHelper.getSize(status: IStatus): Cardinal;
 begin
 	Result := vTable^.getSize(PBatchCompletionStateToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IBatchCompletionState.getState(status: PStatusToken; pos: Cardinal): Integer;
+function IBatchCompletionStateHelper.getState(status: IStatus; pos: Cardinal): Integer;
 begin
 	Result := vTable^.getState(PBatchCompletionStateToken(token), status, pos);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IBatchCompletionState.findError(status: PStatusToken; pos: Cardinal): Cardinal;
+function IBatchCompletionStateHelper.findError(status: IStatus; pos: Cardinal): Cardinal;
 begin
 	Result := vTable^.findError(PBatchCompletionStateToken(token), status, pos);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IBatchCompletionState.getStatus(status: PStatusToken; to_: PStatusToken; pos: Cardinal);
+procedure IBatchCompletionStateHelper.getStatus(status: IStatus; to_: IStatus; pos: Cardinal);
 begin
 	vTable^.getStatus(PBatchCompletionStateToken(token), status, to_, pos);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -7742,23 +8210,23 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IReplicator.addRef();
+procedure IReplicatorHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IReplicator.release(): Integer;
+function IReplicatorHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-procedure IReplicator.process(status: PStatusToken; length: Cardinal; data: BytePtr);
+procedure IReplicatorHelper.process(status: IStatus; length: Cardinal; data: BytePtr);
 begin
 	vTable^.process(PReplicatorToken(token), status, length, data);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IReplicator.close(status: PStatusToken);
+procedure IReplicatorHelper.close(status: IStatus);
 begin
 	vTable^.close(PReplicatorToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -7794,53 +8262,53 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IRequest.addRef();
+procedure IRequestHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IRequest.release(): Integer;
+function IRequestHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-procedure IRequest.receive(status: PStatusToken; level: Integer; msgType: Cardinal; length: Cardinal; message: Pointer);
+procedure IRequestHelper.receive(status: IStatus; level: Integer; msgType: Cardinal; length: Cardinal; message: Pointer);
 begin
 	vTable^.receive(PRequestToken(token), status, level, msgType, length, message);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IRequest.send(status: PStatusToken; level: Integer; msgType: Cardinal; length: Cardinal; message: Pointer);
+procedure IRequestHelper.send(status: IStatus; level: Integer; msgType: Cardinal; length: Cardinal; message: Pointer);
 begin
 	vTable^.send(PRequestToken(token), status, level, msgType, length, message);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IRequest.getInfo(status: PStatusToken; level: Integer; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
+procedure IRequestHelper.getInfo(status: IStatus; level: Integer; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
 begin
 	vTable^.getInfo(PRequestToken(token), status, level, itemsLength, items, bufferLength, buffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IRequest.start(status: PStatusToken; tra: PTransactionToken; level: Integer);
+procedure IRequestHelper.start(status: IStatus; tra: ITransaction; level: Integer);
 begin
 	vTable^.start(PRequestToken(token), status, tra, level);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IRequest.startAndSend(status: PStatusToken; tra: PTransactionToken; level: Integer; msgType: Cardinal; length: Cardinal; message: Pointer);
+procedure IRequestHelper.startAndSend(status: IStatus; tra: ITransaction; level: Integer; msgType: Cardinal; length: Cardinal; message: Pointer);
 begin
 	vTable^.startAndSend(PRequestToken(token), status, tra, level, msgType, length, message);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IRequest.unwind(status: PStatusToken; level: Integer);
+procedure IRequestHelper.unwind(status: IStatus; level: Integer);
 begin
 	vTable^.unwind(PRequestToken(token), status, level);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IRequest.free(status: PStatusToken);
+procedure IRequestHelper.free(status: IStatus);
 begin
 	vTable^.free(PRequestToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -7876,17 +8344,17 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IEvents.addRef();
+procedure IEventsHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IEvents.release(): Integer;
+function IEventsHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-procedure IEvents.cancel(status: PStatusToken);
+procedure IEventsHelper.cancel(status: IStatus);
 begin
 	vTable^.cancel(PEventsToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -7922,155 +8390,155 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IAttachment.addRef();
+procedure IAttachmentHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IAttachment.release(): Integer;
+function IAttachmentHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-procedure IAttachment.getInfo(status: PStatusToken; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
+procedure IAttachmentHelper.getInfo(status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
 begin
 	vTable^.getInfo(PAttachmentToken(token), status, itemsLength, items, bufferLength, buffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IAttachment.startTransaction(status: PStatusToken; tpbLength: Cardinal; tpb: BytePtr): PTransactionToken;
+function IAttachmentHelper.startTransaction(status: IStatus; tpbLength: Cardinal; tpb: BytePtr): ITransaction;
 begin
 	Result := vTable^.startTransaction(PAttachmentToken(token), status, tpbLength, tpb);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IAttachment.reconnectTransaction(status: PStatusToken; length: Cardinal; id: BytePtr): PTransactionToken;
+function IAttachmentHelper.reconnectTransaction(status: IStatus; length: Cardinal; id: BytePtr): ITransaction;
 begin
 	Result := vTable^.reconnectTransaction(PAttachmentToken(token), status, length, id);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IAttachment.compileRequest(status: PStatusToken; blrLength: Cardinal; blr: BytePtr): PRequestToken;
+function IAttachmentHelper.compileRequest(status: IStatus; blrLength: Cardinal; blr: BytePtr): IRequest;
 begin
 	Result := vTable^.compileRequest(PAttachmentToken(token), status, blrLength, blr);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IAttachment.transactRequest(status: PStatusToken; transaction: PTransactionToken; blrLength: Cardinal; blr: BytePtr; inMsgLength: Cardinal; inMsg: BytePtr; outMsgLength: Cardinal; outMsg: BytePtr);
+procedure IAttachmentHelper.transactRequest(status: IStatus; transaction: ITransaction; blrLength: Cardinal; blr: BytePtr; inMsgLength: Cardinal; inMsg: BytePtr; outMsgLength: Cardinal; outMsg: BytePtr);
 begin
 	vTable^.transactRequest(PAttachmentToken(token), status, transaction, blrLength, blr, inMsgLength, inMsg, outMsgLength, outMsg);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IAttachment.createBlob(status: PStatusToken; transaction: PTransactionToken; id: ISC_QUADPtr; bpbLength: Cardinal; bpb: BytePtr): PBlobToken;
+function IAttachmentHelper.createBlob(status: IStatus; transaction: ITransaction; id: ISC_QUADPtr; bpbLength: Cardinal; bpb: BytePtr): IBlob;
 begin
 	Result := vTable^.createBlob(PAttachmentToken(token), status, transaction, id, bpbLength, bpb);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IAttachment.openBlob(status: PStatusToken; transaction: PTransactionToken; id: ISC_QUADPtr; bpbLength: Cardinal; bpb: BytePtr): PBlobToken;
+function IAttachmentHelper.openBlob(status: IStatus; transaction: ITransaction; id: ISC_QUADPtr; bpbLength: Cardinal; bpb: BytePtr): IBlob;
 begin
 	Result := vTable^.openBlob(PAttachmentToken(token), status, transaction, id, bpbLength, bpb);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IAttachment.getSlice(status: PStatusToken; transaction: PTransactionToken; id: ISC_QUADPtr; sdlLength: Cardinal; sdl: BytePtr; paramLength: Cardinal; param: BytePtr; sliceLength: Integer; slice: BytePtr): Integer;
+function IAttachmentHelper.getSlice(status: IStatus; transaction: ITransaction; id: ISC_QUADPtr; sdlLength: Cardinal; sdl: BytePtr; paramLength: Cardinal; param: BytePtr; sliceLength: Integer; slice: BytePtr): Integer;
 begin
 	Result := vTable^.getSlice(PAttachmentToken(token), status, transaction, id, sdlLength, sdl, paramLength, param, sliceLength, slice);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IAttachment.putSlice(status: PStatusToken; transaction: PTransactionToken; id: ISC_QUADPtr; sdlLength: Cardinal; sdl: BytePtr; paramLength: Cardinal; param: BytePtr; sliceLength: Integer; slice: BytePtr);
+procedure IAttachmentHelper.putSlice(status: IStatus; transaction: ITransaction; id: ISC_QUADPtr; sdlLength: Cardinal; sdl: BytePtr; paramLength: Cardinal; param: BytePtr; sliceLength: Integer; slice: BytePtr);
 begin
 	vTable^.putSlice(PAttachmentToken(token), status, transaction, id, sdlLength, sdl, paramLength, param, sliceLength, slice);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IAttachment.executeDyn(status: PStatusToken; transaction: PTransactionToken; length: Cardinal; dyn: BytePtr);
+procedure IAttachmentHelper.executeDyn(status: IStatus; transaction: ITransaction; length: Cardinal; dyn: BytePtr);
 begin
 	vTable^.executeDyn(PAttachmentToken(token), status, transaction, length, dyn);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IAttachment.prepare(status: PStatusToken; tra: PTransactionToken; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; flags: Cardinal): PStatementToken;
+function IAttachmentHelper.prepare(status: IStatus; tra: ITransaction; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; flags: Cardinal): IStatement;
 begin
 	Result := vTable^.prepare(PAttachmentToken(token), status, tra, stmtLength, sqlStmt, dialect, flags);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IAttachment.execute(status: PStatusToken; transaction: PTransactionToken; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: PMessageMetadataToken; inBuffer: Pointer; outMetadata: PMessageMetadataToken; outBuffer: Pointer): PTransactionToken;
+function IAttachmentHelper.execute(status: IStatus; transaction: ITransaction; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: IMessageMetadata; inBuffer: Pointer; outMetadata: IMessageMetadata; outBuffer: Pointer): ITransaction;
 begin
 	Result := vTable^.execute(PAttachmentToken(token), status, transaction, stmtLength, sqlStmt, dialect, inMetadata, inBuffer, outMetadata, outBuffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IAttachment.openCursor(status: PStatusToken; transaction: PTransactionToken; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: PMessageMetadataToken; inBuffer: Pointer; outMetadata: PMessageMetadataToken; cursorName: PAnsiChar; cursorFlags: Cardinal): PResultSetToken;
+function IAttachmentHelper.openCursor(status: IStatus; transaction: ITransaction; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: IMessageMetadata; inBuffer: Pointer; outMetadata: IMessageMetadata; cursorName: PAnsiChar; cursorFlags: Cardinal): IResultSet;
 begin
 	Result := vTable^.openCursor(PAttachmentToken(token), status, transaction, stmtLength, sqlStmt, dialect, inMetadata, inBuffer, outMetadata, cursorName, cursorFlags);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IAttachment.queEvents(status: PStatusToken; callback: PEventCallbackToken; length: Cardinal; events: BytePtr): PEventsToken;
+function IAttachmentHelper.queEvents(status: IStatus; callback: IEventCallback; length: Cardinal; events: BytePtr): IEvents;
 begin
 	Result := vTable^.queEvents(PAttachmentToken(token), status, callback, length, events);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IAttachment.cancelOperation(status: PStatusToken; option: Integer);
+procedure IAttachmentHelper.cancelOperation(status: IStatus; option: Integer);
 begin
 	vTable^.cancelOperation(PAttachmentToken(token), status, option);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IAttachment.ping(status: PStatusToken);
+procedure IAttachmentHelper.ping(status: IStatus);
 begin
 	vTable^.ping(PAttachmentToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IAttachment.detach(status: PStatusToken);
+procedure IAttachmentHelper.detach(status: IStatus);
 begin
 	vTable^.detach(PAttachmentToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IAttachment.dropDatabase(status: PStatusToken);
+procedure IAttachmentHelper.dropDatabase(status: IStatus);
 begin
 	vTable^.dropDatabase(PAttachmentToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IAttachment.getIdleTimeout(status: PStatusToken): Cardinal;
+function IAttachmentHelper.getIdleTimeout(status: IStatus): Cardinal;
 begin
 	Result := vTable^.getIdleTimeout(PAttachmentToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IAttachment.setIdleTimeout(status: PStatusToken; timeOut: Cardinal);
+procedure IAttachmentHelper.setIdleTimeout(status: IStatus; timeOut: Cardinal);
 begin
 	vTable^.setIdleTimeout(PAttachmentToken(token), status, timeOut);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IAttachment.getStatementTimeout(status: PStatusToken): Cardinal;
+function IAttachmentHelper.getStatementTimeout(status: IStatus): Cardinal;
 begin
 	Result := vTable^.getStatementTimeout(PAttachmentToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IAttachment.setStatementTimeout(status: PStatusToken; timeOut: Cardinal);
+procedure IAttachmentHelper.setStatementTimeout(status: IStatus; timeOut: Cardinal);
 begin
 	vTable^.setStatementTimeout(PAttachmentToken(token), status, timeOut);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IAttachment.createBatch(status: PStatusToken; transaction: PTransactionToken; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: PMessageMetadataToken; parLength: Cardinal; par: BytePtr): PBatchToken;
+function IAttachmentHelper.createBatch(status: IStatus; transaction: ITransaction; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: IMessageMetadata; parLength: Cardinal; par: BytePtr): IBatch;
 begin
 	Result := vTable^.createBatch(PAttachmentToken(token), status, transaction, stmtLength, sqlStmt, dialect, inMetadata, parLength, par);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IAttachment.createReplicator(status: PStatusToken): PReplicatorToken;
+function IAttachmentHelper.createReplicator(status: IStatus): IReplicator;
 begin
 	Result := vTable^.createReplicator(PAttachmentToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -8106,29 +8574,29 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IService.addRef();
+procedure IServiceHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IService.release(): Integer;
+function IServiceHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-procedure IService.detach(status: PStatusToken);
+procedure IServiceHelper.detach(status: IStatus);
 begin
 	vTable^.detach(PServiceToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IService.query(status: PStatusToken; sendLength: Cardinal; sendItems: BytePtr; receiveLength: Cardinal; receiveItems: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
+procedure IServiceHelper.query(status: IStatus; sendLength: Cardinal; sendItems: BytePtr; receiveLength: Cardinal; receiveItems: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
 begin
 	vTable^.query(PServiceToken(token), status, sendLength, sendItems, receiveLength, receiveItems, bufferLength, buffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IService.start(status: PStatusToken; spbLength: Cardinal; spb: BytePtr);
+procedure IServiceHelper.start(status: IStatus; spbLength: Cardinal; spb: BytePtr);
 begin
 	vTable^.start(PServiceToken(token), status, spbLength, spb);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -8164,51 +8632,51 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IProvider.addRef();
+procedure IProviderHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IProvider.release(): Integer;
+function IProviderHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-procedure IProvider.setOwner(r: PReferenceCountedToken);
+procedure IProviderHelper.setOwner(r: IReferenceCounted);
 begin
 	vTable^.setOwner(PPluginBaseToken(token), r);
 end;
 
-function IProvider.getOwner(): PReferenceCountedToken;
+function IProviderHelper.getOwner(): IReferenceCounted;
 begin
 	Result := vTable^.getOwner(PPluginBaseToken(token));
 end;
 
-function IProvider.attachDatabase(status: PStatusToken; fileName: PAnsiChar; dpbLength: Cardinal; dpb: BytePtr): PAttachmentToken;
+function IProviderHelper.attachDatabase(status: IStatus; fileName: PAnsiChar; dpbLength: Cardinal; dpb: BytePtr): IAttachment;
 begin
 	Result := vTable^.attachDatabase(PProviderToken(token), status, fileName, dpbLength, dpb);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IProvider.createDatabase(status: PStatusToken; fileName: PAnsiChar; dpbLength: Cardinal; dpb: BytePtr): PAttachmentToken;
+function IProviderHelper.createDatabase(status: IStatus; fileName: PAnsiChar; dpbLength: Cardinal; dpb: BytePtr): IAttachment;
 begin
 	Result := vTable^.createDatabase(PProviderToken(token), status, fileName, dpbLength, dpb);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IProvider.attachServiceManager(status: PStatusToken; service: PAnsiChar; spbLength: Cardinal; spb: BytePtr): PServiceToken;
+function IProviderHelper.attachServiceManager(status: IStatus; service: PAnsiChar; spbLength: Cardinal; spb: BytePtr): IService;
 begin
 	Result := vTable^.attachServiceManager(PProviderToken(token), status, service, spbLength, spb);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IProvider.shutdown(status: PStatusToken; timeout: Cardinal; reason: Integer);
+procedure IProviderHelper.shutdown(status: IStatus; timeout: Cardinal; reason: Integer);
 begin
 	vTable^.shutdown(PProviderToken(token), status, timeout, reason);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IProvider.setDbCryptCallback(status: PStatusToken; cryptCallback: PCryptKeyCallbackToken);
+procedure IProviderHelper.setDbCryptCallback(status: IStatus; cryptCallback: ICryptKeyCallback);
 begin
 	vTable^.setDbCryptCallback(PProviderToken(token), status, cryptCallback);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -8244,24 +8712,24 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IDtcStart.dispose();
+procedure IDtcStartHelper.dispose();
 begin
 	vTable^.dispose(PDisposableToken(token));
 end;
 
-procedure IDtcStart.addAttachment(status: PStatusToken; att: PAttachmentToken);
+procedure IDtcStartHelper.addAttachment(status: IStatus; att: IAttachment);
 begin
 	vTable^.addAttachment(PDtcStartToken(token), status, att);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IDtcStart.addWithTpb(status: PStatusToken; att: PAttachmentToken; length: Cardinal; tpb: BytePtr);
+procedure IDtcStartHelper.addWithTpb(status: IStatus; att: IAttachment; length: Cardinal; tpb: BytePtr);
 begin
 	vTable^.addWithTpb(PDtcStartToken(token), status, att, length, tpb);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IDtcStart.start(status: PStatusToken): PTransactionToken;
+function IDtcStartHelper.start(status: IStatus): ITransaction;
 begin
 	Result := vTable^.start(PDtcStartToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -8297,13 +8765,13 @@ begin
   Result := a.token = b.token;
 end;
 
-function IDtc.join(status: PStatusToken; one: PTransactionToken; two: PTransactionToken): PTransactionToken;
+function IDtcHelper.join(status: IStatus; one: ITransaction; two: ITransaction): ITransaction;
 begin
 	Result := vTable^.join(PDtcToken(token), status, one, two);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IDtc.startBuilder(status: PStatusToken): PDtcStartToken;
+function IDtcHelper.startBuilder(status: IStatus): IDtcStart;
 begin
 	Result := vTable^.startBuilder(PDtcToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -8339,22 +8807,22 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IAuth.addRef();
+procedure IAuthHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IAuth.release(): Integer;
+function IAuthHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-procedure IAuth.setOwner(r: PReferenceCountedToken);
+procedure IAuthHelper.setOwner(r: IReferenceCounted);
 begin
 	vTable^.setOwner(PPluginBaseToken(token), r);
 end;
 
-function IAuth.getOwner(): PReferenceCountedToken;
+function IAuthHelper.getOwner(): IReferenceCounted;
 begin
 	Result := vTable^.getOwner(PPluginBaseToken(token));
 end;
@@ -8389,24 +8857,24 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IWriter.reset();
+procedure IWriterHelper.reset();
 begin
 	vTable^.reset(PWriterToken(token));
 end;
 
-procedure IWriter.add(status: PStatusToken; name: PAnsiChar);
+procedure IWriterHelper.add(status: IStatus; name: PAnsiChar);
 begin
 	vTable^.add(PWriterToken(token), status, name);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IWriter.setType(status: PStatusToken; value: PAnsiChar);
+procedure IWriterHelper.setType(status: IStatus; value: PAnsiChar);
 begin
 	vTable^.setType(PWriterToken(token), status, value);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IWriter.setDb(status: PStatusToken; value: PAnsiChar);
+procedure IWriterHelper.setDb(status: IStatus; value: PAnsiChar);
 begin
 	vTable^.setDb(PWriterToken(token), status, value);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -8442,23 +8910,23 @@ begin
   Result := a.token = b.token;
 end;
 
-function IServerBlock.getLogin(): PAnsiChar;
+function IServerBlockHelper.getLogin(): PAnsiChar;
 begin
 	Result := vTable^.getLogin(PServerBlockToken(token));
 end;
 
-function IServerBlock.getData(length: CardinalPtr): BytePtr;
+function IServerBlockHelper.getData(length: CardinalPtr): BytePtr;
 begin
 	Result := vTable^.getData(PServerBlockToken(token), length);
 end;
 
-procedure IServerBlock.putData(status: PStatusToken; length: Cardinal; data: Pointer);
+procedure IServerBlockHelper.putData(status: IStatus; length: Cardinal; data: Pointer);
 begin
 	vTable^.putData(PServerBlockToken(token), status, length, data);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IServerBlock.newKey(status: PStatusToken): PCryptKeyToken;
+function IServerBlockHelper.newKey(status: IStatus): ICryptKey;
 begin
 	Result := vTable^.newKey(PServerBlockToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -8494,44 +8962,44 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IClientBlock.addRef();
+procedure IClientBlockHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IClientBlock.release(): Integer;
+function IClientBlockHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-function IClientBlock.getLogin(): PAnsiChar;
+function IClientBlockHelper.getLogin(): PAnsiChar;
 begin
 	Result := vTable^.getLogin(PClientBlockToken(token));
 end;
 
-function IClientBlock.getPassword(): PAnsiChar;
+function IClientBlockHelper.getPassword(): PAnsiChar;
 begin
 	Result := vTable^.getPassword(PClientBlockToken(token));
 end;
 
-function IClientBlock.getData(length: CardinalPtr): BytePtr;
+function IClientBlockHelper.getData(length: CardinalPtr): BytePtr;
 begin
 	Result := vTable^.getData(PClientBlockToken(token), length);
 end;
 
-procedure IClientBlock.putData(status: PStatusToken; length: Cardinal; data: Pointer);
+procedure IClientBlockHelper.putData(status: IStatus; length: Cardinal; data: Pointer);
 begin
 	vTable^.putData(PClientBlockToken(token), status, length, data);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IClientBlock.newKey(status: PStatusToken): PCryptKeyToken;
+function IClientBlockHelper.newKey(status: IStatus): ICryptKey;
 begin
 	Result := vTable^.newKey(PClientBlockToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IClientBlock.getAuthBlock(status: PStatusToken): PAuthBlockToken;
+function IClientBlockHelper.getAuthBlock(status: IStatus): IAuthBlock;
 begin
 	Result := vTable^.getAuthBlock(PClientBlockToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -8567,33 +9035,33 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IServer.addRef();
+procedure IServerHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IServer.release(): Integer;
+function IServerHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-procedure IServer.setOwner(r: PReferenceCountedToken);
+procedure IServerHelper.setOwner(r: IReferenceCounted);
 begin
 	vTable^.setOwner(PPluginBaseToken(token), r);
 end;
 
-function IServer.getOwner(): PReferenceCountedToken;
+function IServerHelper.getOwner(): IReferenceCounted;
 begin
 	Result := vTable^.getOwner(PPluginBaseToken(token));
 end;
 
-function IServer.authenticate(status: PStatusToken; sBlock: PServerBlockToken; writerInterface: PWriterToken): Integer;
+function IServerHelper.authenticate(status: IStatus; sBlock: IServerBlock; writerInterface: IWriter): Integer;
 begin
 	Result := vTable^.authenticate(PServerToken(token), status, sBlock, writerInterface);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IServer.setDbCryptCallback(status: PStatusToken; cryptCallback: PCryptKeyCallbackToken);
+procedure IServerHelper.setDbCryptCallback(status: IStatus; cryptCallback: ICryptKeyCallback);
 begin
 	vTable^.setDbCryptCallback(PServerToken(token), status, cryptCallback);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -8629,27 +9097,27 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IClient.addRef();
+procedure IClientHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IClient.release(): Integer;
+function IClientHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-procedure IClient.setOwner(r: PReferenceCountedToken);
+procedure IClientHelper.setOwner(r: IReferenceCounted);
 begin
 	vTable^.setOwner(PPluginBaseToken(token), r);
 end;
 
-function IClient.getOwner(): PReferenceCountedToken;
+function IClientHelper.getOwner(): IReferenceCounted;
 begin
 	Result := vTable^.getOwner(PPluginBaseToken(token));
 end;
 
-function IClient.authenticate(status: PStatusToken; cBlock: PClientBlockToken): Integer;
+function IClientHelper.authenticate(status: IStatus; cBlock: IClientBlock): Integer;
 begin
 	Result := vTable^.authenticate(PClientToken(token), status, cBlock);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -8685,17 +9153,17 @@ begin
   Result := a.token = b.token;
 end;
 
-function IUserField.entered(): Integer;
+function IUserFieldHelper.entered(): Integer;
 begin
 	Result := vTable^.entered(PUserFieldToken(token));
 end;
 
-function IUserField.specified(): Integer;
+function IUserFieldHelper.specified(): Integer;
 begin
 	Result := vTable^.specified(PUserFieldToken(token));
 end;
 
-procedure IUserField.setEntered(status: PStatusToken; newValue: Integer);
+procedure IUserFieldHelper.setEntered(status: IStatus; newValue: Integer);
 begin
 	vTable^.setEntered(PUserFieldToken(token), status, newValue);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -8731,28 +9199,28 @@ begin
   Result := a.token = b.token;
 end;
 
-function ICharUserField.entered(): Integer;
+function ICharUserFieldHelper.entered(): Integer;
 begin
 	Result := vTable^.entered(PUserFieldToken(token));
 end;
 
-function ICharUserField.specified(): Integer;
+function ICharUserFieldHelper.specified(): Integer;
 begin
 	Result := vTable^.specified(PUserFieldToken(token));
 end;
 
-procedure ICharUserField.setEntered(status: PStatusToken; newValue: Integer);
+procedure ICharUserFieldHelper.setEntered(status: IStatus; newValue: Integer);
 begin
 	vTable^.setEntered(PUserFieldToken(token), status, newValue);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function ICharUserField.get(): PAnsiChar;
+function ICharUserFieldHelper.get(): PAnsiChar;
 begin
 	Result := vTable^.get(PCharUserFieldToken(token));
 end;
 
-procedure ICharUserField.set_(status: PStatusToken; newValue: PAnsiChar);
+procedure ICharUserFieldHelper.set_(status: IStatus; newValue: PAnsiChar);
 begin
 	vTable^.set_(PCharUserFieldToken(token), status, newValue);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -8788,28 +9256,28 @@ begin
   Result := a.token = b.token;
 end;
 
-function IIntUserField.entered(): Integer;
+function IIntUserFieldHelper.entered(): Integer;
 begin
 	Result := vTable^.entered(PUserFieldToken(token));
 end;
 
-function IIntUserField.specified(): Integer;
+function IIntUserFieldHelper.specified(): Integer;
 begin
 	Result := vTable^.specified(PUserFieldToken(token));
 end;
 
-procedure IIntUserField.setEntered(status: PStatusToken; newValue: Integer);
+procedure IIntUserFieldHelper.setEntered(status: IStatus; newValue: Integer);
 begin
 	vTable^.setEntered(PUserFieldToken(token), status, newValue);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IIntUserField.get(): Integer;
+function IIntUserFieldHelper.get(): Integer;
 begin
 	Result := vTable^.get(PIntUserFieldToken(token));
 end;
 
-procedure IIntUserField.set_(status: PStatusToken; newValue: Integer);
+procedure IIntUserFieldHelper.set_(status: IStatus; newValue: Integer);
 begin
 	vTable^.set_(PIntUserFieldToken(token), status, newValue);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -8845,57 +9313,57 @@ begin
   Result := a.token = b.token;
 end;
 
-function IUser.operation(): Cardinal;
+function IUserHelper.operation(): Cardinal;
 begin
 	Result := vTable^.operation(PUserToken(token));
 end;
 
-function IUser.userName(): PCharUserFieldToken;
+function IUserHelper.userName(): ICharUserField;
 begin
 	Result := vTable^.userName(PUserToken(token));
 end;
 
-function IUser.password(): PCharUserFieldToken;
+function IUserHelper.password(): ICharUserField;
 begin
 	Result := vTable^.password(PUserToken(token));
 end;
 
-function IUser.firstName(): PCharUserFieldToken;
+function IUserHelper.firstName(): ICharUserField;
 begin
 	Result := vTable^.firstName(PUserToken(token));
 end;
 
-function IUser.lastName(): PCharUserFieldToken;
+function IUserHelper.lastName(): ICharUserField;
 begin
 	Result := vTable^.lastName(PUserToken(token));
 end;
 
-function IUser.middleName(): PCharUserFieldToken;
+function IUserHelper.middleName(): ICharUserField;
 begin
 	Result := vTable^.middleName(PUserToken(token));
 end;
 
-function IUser.comment(): PCharUserFieldToken;
+function IUserHelper.comment(): ICharUserField;
 begin
 	Result := vTable^.comment(PUserToken(token));
 end;
 
-function IUser.attributes(): PCharUserFieldToken;
+function IUserHelper.attributes(): ICharUserField;
 begin
 	Result := vTable^.attributes(PUserToken(token));
 end;
 
-function IUser.active(): PIntUserFieldToken;
+function IUserHelper.active(): IIntUserField;
 begin
 	Result := vTable^.active(PUserToken(token));
 end;
 
-function IUser.admin(): PIntUserFieldToken;
+function IUserHelper.admin(): IIntUserField;
 begin
 	Result := vTable^.admin(PUserToken(token));
 end;
 
-procedure IUser.clear(status: PStatusToken);
+procedure IUserHelper.clear(status: IStatus);
 begin
 	vTable^.clear(PUserToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -8931,7 +9399,7 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IListUsers.list(status: PStatusToken; user: PUserToken);
+procedure IListUsersHelper.list(status: IStatus; user: IUser);
 begin
 	vTable^.list(PListUsersToken(token), status, user);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -8967,38 +9435,38 @@ begin
   Result := a.token = b.token;
 end;
 
-function ILogonInfo.name(): PAnsiChar;
+function ILogonInfoHelper.name(): PAnsiChar;
 begin
 	Result := vTable^.name(PLogonInfoToken(token));
 end;
 
-function ILogonInfo.role(): PAnsiChar;
+function ILogonInfoHelper.role(): PAnsiChar;
 begin
 	Result := vTable^.role(PLogonInfoToken(token));
 end;
 
-function ILogonInfo.networkProtocol(): PAnsiChar;
+function ILogonInfoHelper.networkProtocol(): PAnsiChar;
 begin
 	Result := vTable^.networkProtocol(PLogonInfoToken(token));
 end;
 
-function ILogonInfo.remoteAddress(): PAnsiChar;
+function ILogonInfoHelper.remoteAddress(): PAnsiChar;
 begin
 	Result := vTable^.remoteAddress(PLogonInfoToken(token));
 end;
 
-function ILogonInfo.authBlock(length: CardinalPtr): BytePtr;
+function ILogonInfoHelper.authBlock(length: CardinalPtr): BytePtr;
 begin
 	Result := vTable^.authBlock(PLogonInfoToken(token), length);
 end;
 
-function ILogonInfo.attachment(status: PStatusToken): PAttachmentToken;
+function ILogonInfoHelper.attachment(status: IStatus): IAttachment;
 begin
 	Result := vTable^.attachment(PLogonInfoToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function ILogonInfo.transaction(status: PStatusToken): PTransactionToken;
+function ILogonInfoHelper.transaction(status: IStatus): ITransaction;
 begin
 	Result := vTable^.transaction(PLogonInfoToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -9034,45 +9502,45 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IManagement.addRef();
+procedure IManagementHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IManagement.release(): Integer;
+function IManagementHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-procedure IManagement.setOwner(r: PReferenceCountedToken);
+procedure IManagementHelper.setOwner(r: IReferenceCounted);
 begin
 	vTable^.setOwner(PPluginBaseToken(token), r);
 end;
 
-function IManagement.getOwner(): PReferenceCountedToken;
+function IManagementHelper.getOwner(): IReferenceCounted;
 begin
 	Result := vTable^.getOwner(PPluginBaseToken(token));
 end;
 
-procedure IManagement.start(status: PStatusToken; logonInfo: PLogonInfoToken);
+procedure IManagementHelper.start(status: IStatus; logonInfo: ILogonInfo);
 begin
 	vTable^.start(PManagementToken(token), status, logonInfo);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IManagement.execute(status: PStatusToken; user: PUserToken; callback: PListUsersToken): Integer;
+function IManagementHelper.execute(status: IStatus; user: IUser; callback: IListUsers): Integer;
 begin
 	Result := vTable^.execute(PManagementToken(token), status, user, callback);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IManagement.commit(status: PStatusToken);
+procedure IManagementHelper.commit(status: IStatus);
 begin
 	vTable^.commit(PManagementToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IManagement.rollback(status: PStatusToken);
+procedure IManagementHelper.rollback(status: IStatus);
 begin
 	vTable^.rollback(PManagementToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -9108,38 +9576,38 @@ begin
   Result := a.token = b.token;
 end;
 
-function IAuthBlock.getType(): PAnsiChar;
+function IAuthBlockHelper.getType(): PAnsiChar;
 begin
 	Result := vTable^.getType(PAuthBlockToken(token));
 end;
 
-function IAuthBlock.getName(): PAnsiChar;
+function IAuthBlockHelper.getName(): PAnsiChar;
 begin
 	Result := vTable^.getName(PAuthBlockToken(token));
 end;
 
-function IAuthBlock.getPlugin(): PAnsiChar;
+function IAuthBlockHelper.getPlugin(): PAnsiChar;
 begin
 	Result := vTable^.getPlugin(PAuthBlockToken(token));
 end;
 
-function IAuthBlock.getSecurityDb(): PAnsiChar;
+function IAuthBlockHelper.getSecurityDb(): PAnsiChar;
 begin
 	Result := vTable^.getSecurityDb(PAuthBlockToken(token));
 end;
 
-function IAuthBlock.getOriginalPlugin(): PAnsiChar;
+function IAuthBlockHelper.getOriginalPlugin(): PAnsiChar;
 begin
 	Result := vTable^.getOriginalPlugin(PAuthBlockToken(token));
 end;
 
-function IAuthBlock.next(status: PStatusToken): Boolean;
+function IAuthBlockHelper.next(status: IStatus): Boolean;
 begin
 	Result := vTable^.next(PAuthBlockToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IAuthBlock.first(status: PStatusToken): Boolean;
+function IAuthBlockHelper.first(status: IStatus): Boolean;
 begin
 	Result := vTable^.first(PAuthBlockToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -9175,57 +9643,57 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IWireCryptPlugin.addRef();
+procedure IWireCryptPluginHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IWireCryptPlugin.release(): Integer;
+function IWireCryptPluginHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-procedure IWireCryptPlugin.setOwner(r: PReferenceCountedToken);
+procedure IWireCryptPluginHelper.setOwner(r: IReferenceCounted);
 begin
 	vTable^.setOwner(PPluginBaseToken(token), r);
 end;
 
-function IWireCryptPlugin.getOwner(): PReferenceCountedToken;
+function IWireCryptPluginHelper.getOwner(): IReferenceCounted;
 begin
 	Result := vTable^.getOwner(PPluginBaseToken(token));
 end;
 
-function IWireCryptPlugin.getKnownTypes(status: PStatusToken): PAnsiChar;
+function IWireCryptPluginHelper.getKnownTypes(status: IStatus): PAnsiChar;
 begin
 	Result := vTable^.getKnownTypes(PWireCryptPluginToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IWireCryptPlugin.setKey(status: PStatusToken; key: PCryptKeyToken);
+procedure IWireCryptPluginHelper.setKey(status: IStatus; key: ICryptKey);
 begin
 	vTable^.setKey(PWireCryptPluginToken(token), status, key);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IWireCryptPlugin.encrypt(status: PStatusToken; length: Cardinal; from: Pointer; to_: Pointer);
+procedure IWireCryptPluginHelper.encrypt(status: IStatus; length: Cardinal; from: Pointer; to_: Pointer);
 begin
 	vTable^.encrypt(PWireCryptPluginToken(token), status, length, from, to_);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IWireCryptPlugin.decrypt(status: PStatusToken; length: Cardinal; from: Pointer; to_: Pointer);
+procedure IWireCryptPluginHelper.decrypt(status: IStatus; length: Cardinal; from: Pointer; to_: Pointer);
 begin
 	vTable^.decrypt(PWireCryptPluginToken(token), status, length, from, to_);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IWireCryptPlugin.getSpecificData(status: PStatusToken; keyType: PAnsiChar; length: CardinalPtr): BytePtr;
+function IWireCryptPluginHelper.getSpecificData(status: IStatus; keyType: PAnsiChar; length: CardinalPtr): BytePtr;
 begin
 	Result := vTable^.getSpecificData(PWireCryptPluginToken(token), status, keyType, length);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IWireCryptPlugin.setSpecificData(status: PStatusToken; keyType: PAnsiChar; length: Cardinal; data: BytePtr);
+procedure IWireCryptPluginHelper.setSpecificData(status: IStatus; keyType: PAnsiChar; length: Cardinal; data: BytePtr);
 begin
 	vTable^.setSpecificData(PWireCryptPluginToken(token), status, keyType, length, data);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -9261,7 +9729,7 @@ begin
   Result := a.token = b.token;
 end;
 
-function ICryptKeyCallback.callback(dataLength: Cardinal; data: Pointer; bufferLength: Cardinal; buffer: Pointer): Cardinal;
+function ICryptKeyCallbackHelper.callback(dataLength: Cardinal; data: Pointer; bufferLength: Cardinal; buffer: Pointer): Cardinal;
 begin
 	Result := vTable^.callback(PCryptKeyCallbackToken(token), dataLength, data, bufferLength, buffer);
 end;
@@ -9296,45 +9764,45 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IKeyHolderPlugin.addRef();
+procedure IKeyHolderPluginHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IKeyHolderPlugin.release(): Integer;
+function IKeyHolderPluginHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-procedure IKeyHolderPlugin.setOwner(r: PReferenceCountedToken);
+procedure IKeyHolderPluginHelper.setOwner(r: IReferenceCounted);
 begin
 	vTable^.setOwner(PPluginBaseToken(token), r);
 end;
 
-function IKeyHolderPlugin.getOwner(): PReferenceCountedToken;
+function IKeyHolderPluginHelper.getOwner(): IReferenceCounted;
 begin
 	Result := vTable^.getOwner(PPluginBaseToken(token));
 end;
 
-function IKeyHolderPlugin.keyCallback(status: PStatusToken; callback: PCryptKeyCallbackToken): Integer;
+function IKeyHolderPluginHelper.keyCallback(status: IStatus; callback: ICryptKeyCallback): Integer;
 begin
 	Result := vTable^.keyCallback(PKeyHolderPluginToken(token), status, callback);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IKeyHolderPlugin.keyHandle(status: PStatusToken; keyName: PAnsiChar): PCryptKeyCallbackToken;
+function IKeyHolderPluginHelper.keyHandle(status: IStatus; keyName: PAnsiChar): ICryptKeyCallback;
 begin
 	Result := vTable^.keyHandle(PKeyHolderPluginToken(token), status, keyName);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IKeyHolderPlugin.useOnlyOwnKeys(status: PStatusToken): Boolean;
+function IKeyHolderPluginHelper.useOnlyOwnKeys(status: IStatus): Boolean;
 begin
 	Result := vTable^.useOnlyOwnKeys(PKeyHolderPluginToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IKeyHolderPlugin.chainHandle(status: PStatusToken): PCryptKeyCallbackToken;
+function IKeyHolderPluginHelper.chainHandle(status: IStatus): ICryptKeyCallback;
 begin
 	Result := vTable^.chainHandle(PKeyHolderPluginToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -9370,17 +9838,17 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IDbCryptInfo.addRef();
+procedure IDbCryptInfoHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IDbCryptInfo.release(): Integer;
+function IDbCryptInfoHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-function IDbCryptInfo.getDatabaseFullPath(status: PStatusToken): PAnsiChar;
+function IDbCryptInfoHelper.getDatabaseFullPath(status: IStatus): PAnsiChar;
 begin
 	Result := vTable^.getDatabaseFullPath(PDbCryptInfoToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -9416,45 +9884,45 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IDbCryptPlugin.addRef();
+procedure IDbCryptPluginHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IDbCryptPlugin.release(): Integer;
+function IDbCryptPluginHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-procedure IDbCryptPlugin.setOwner(r: PReferenceCountedToken);
+procedure IDbCryptPluginHelper.setOwner(r: IReferenceCounted);
 begin
 	vTable^.setOwner(PPluginBaseToken(token), r);
 end;
 
-function IDbCryptPlugin.getOwner(): PReferenceCountedToken;
+function IDbCryptPluginHelper.getOwner(): IReferenceCounted;
 begin
 	Result := vTable^.getOwner(PPluginBaseToken(token));
 end;
 
-procedure IDbCryptPlugin.setKey(status: PStatusToken; length: Cardinal; sources: PKeyHolderPluginTokenPtr; keyName: PAnsiChar);
+procedure IDbCryptPluginHelper.setKey(status: IStatus; length: Cardinal; sources: IKeyHolderPlugin; keyName: PAnsiChar);
 begin
 	vTable^.setKey(PDbCryptPluginToken(token), status, length, sources, keyName);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IDbCryptPlugin.encrypt(status: PStatusToken; length: Cardinal; from: Pointer; to_: Pointer);
+procedure IDbCryptPluginHelper.encrypt(status: IStatus; length: Cardinal; from: Pointer; to_: Pointer);
 begin
 	vTable^.encrypt(PDbCryptPluginToken(token), status, length, from, to_);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IDbCryptPlugin.decrypt(status: PStatusToken; length: Cardinal; from: Pointer; to_: Pointer);
+procedure IDbCryptPluginHelper.decrypt(status: IStatus; length: Cardinal; from: Pointer; to_: Pointer);
 begin
 	vTable^.decrypt(PDbCryptPluginToken(token), status, length, from, to_);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IDbCryptPlugin.setInfo(status: PStatusToken; info: PDbCryptInfoToken);
+procedure IDbCryptPluginHelper.setInfo(status: IStatus; info: IDbCryptInfo);
 begin
 	vTable^.setInfo(PDbCryptPluginToken(token), status, info);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -9490,55 +9958,55 @@ begin
   Result := a.token = b.token;
 end;
 
-function IExternalContext.getMaster(): PMasterToken;
+function IExternalContextHelper.getMaster(): IMaster;
 begin
 	Result := vTable^.getMaster(PExternalContextToken(token));
 end;
 
-function IExternalContext.getEngine(status: PStatusToken): PExternalEngineToken;
+function IExternalContextHelper.getEngine(status: IStatus): IExternalEngine;
 begin
 	Result := vTable^.getEngine(PExternalContextToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IExternalContext.getAttachment(status: PStatusToken): PAttachmentToken;
+function IExternalContextHelper.getAttachment(status: IStatus): IAttachment;
 begin
 	Result := vTable^.getAttachment(PExternalContextToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IExternalContext.getTransaction(status: PStatusToken): PTransactionToken;
+function IExternalContextHelper.getTransaction(status: IStatus): ITransaction;
 begin
 	Result := vTable^.getTransaction(PExternalContextToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IExternalContext.getUserName(): PAnsiChar;
+function IExternalContextHelper.getUserName(): PAnsiChar;
 begin
 	Result := vTable^.getUserName(PExternalContextToken(token));
 end;
 
-function IExternalContext.getDatabaseName(): PAnsiChar;
+function IExternalContextHelper.getDatabaseName(): PAnsiChar;
 begin
 	Result := vTable^.getDatabaseName(PExternalContextToken(token));
 end;
 
-function IExternalContext.getClientCharSet(): PAnsiChar;
+function IExternalContextHelper.getClientCharSet(): PAnsiChar;
 begin
 	Result := vTable^.getClientCharSet(PExternalContextToken(token));
 end;
 
-function IExternalContext.obtainInfoCode(): Integer;
+function IExternalContextHelper.obtainInfoCode(): Integer;
 begin
 	Result := vTable^.obtainInfoCode(PExternalContextToken(token));
 end;
 
-function IExternalContext.getInfo(code: Integer): Pointer;
+function IExternalContextHelper.getInfo(code: Integer): Pointer;
 begin
 	Result := vTable^.getInfo(PExternalContextToken(token), code);
 end;
 
-function IExternalContext.setInfo(code: Integer; value: Pointer): Pointer;
+function IExternalContextHelper.setInfo(code: Integer; value: Pointer): Pointer;
 begin
 	Result := vTable^.setInfo(PExternalContextToken(token), code, value);
 end;
@@ -9573,12 +10041,12 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IExternalResultSet.dispose();
+procedure IExternalResultSetHelper.dispose();
 begin
 	vTable^.dispose(PDisposableToken(token));
 end;
 
-function IExternalResultSet.fetch(status: PStatusToken): Boolean;
+function IExternalResultSetHelper.fetch(status: IStatus): Boolean;
 begin
 	Result := vTable^.fetch(PExternalResultSetToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -9614,18 +10082,18 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IExternalFunction.dispose();
+procedure IExternalFunctionHelper.dispose();
 begin
 	vTable^.dispose(PDisposableToken(token));
 end;
 
-procedure IExternalFunction.getCharSet(status: PStatusToken; context: PExternalContextToken; name: PAnsiChar; nameSize: Cardinal);
+procedure IExternalFunctionHelper.getCharSet(status: IStatus; context: IExternalContext; name: PAnsiChar; nameSize: Cardinal);
 begin
 	vTable^.getCharSet(PExternalFunctionToken(token), status, context, name, nameSize);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IExternalFunction.execute(status: PStatusToken; context: PExternalContextToken; inMsg: Pointer; outMsg: Pointer);
+procedure IExternalFunctionHelper.execute(status: IStatus; context: IExternalContext; inMsg: Pointer; outMsg: Pointer);
 begin
 	vTable^.execute(PExternalFunctionToken(token), status, context, inMsg, outMsg);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -9661,18 +10129,18 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IExternalProcedure.dispose();
+procedure IExternalProcedureHelper.dispose();
 begin
 	vTable^.dispose(PDisposableToken(token));
 end;
 
-procedure IExternalProcedure.getCharSet(status: PStatusToken; context: PExternalContextToken; name: PAnsiChar; nameSize: Cardinal);
+procedure IExternalProcedureHelper.getCharSet(status: IStatus; context: IExternalContext; name: PAnsiChar; nameSize: Cardinal);
 begin
 	vTable^.getCharSet(PExternalProcedureToken(token), status, context, name, nameSize);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IExternalProcedure.open(status: PStatusToken; context: PExternalContextToken; inMsg: Pointer; outMsg: Pointer): PExternalResultSetToken;
+function IExternalProcedureHelper.open(status: IStatus; context: IExternalContext; inMsg: Pointer; outMsg: Pointer): IExternalResultSet;
 begin
 	Result := vTable^.open(PExternalProcedureToken(token), status, context, inMsg, outMsg);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -9708,18 +10176,18 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IExternalTrigger.dispose();
+procedure IExternalTriggerHelper.dispose();
 begin
 	vTable^.dispose(PDisposableToken(token));
 end;
 
-procedure IExternalTrigger.getCharSet(status: PStatusToken; context: PExternalContextToken; name: PAnsiChar; nameSize: Cardinal);
+procedure IExternalTriggerHelper.getCharSet(status: IStatus; context: IExternalContext; name: PAnsiChar; nameSize: Cardinal);
 begin
 	vTable^.getCharSet(PExternalTriggerToken(token), status, context, name, nameSize);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IExternalTrigger.execute(status: PStatusToken; context: PExternalContextToken; action: Cardinal; oldMsg: Pointer; newMsg: Pointer);
+procedure IExternalTriggerHelper.execute(status: IStatus; context: IExternalContext; action: Cardinal; oldMsg: Pointer; newMsg: Pointer);
 begin
 	vTable^.execute(PExternalTriggerToken(token), status, context, action, oldMsg, newMsg);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -9755,55 +10223,55 @@ begin
   Result := a.token = b.token;
 end;
 
-function IRoutineMetadata.getPackage(status: PStatusToken): PAnsiChar;
+function IRoutineMetadataHelper.getPackage(status: IStatus): PAnsiChar;
 begin
 	Result := vTable^.getPackage(PRoutineMetadataToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IRoutineMetadata.getName(status: PStatusToken): PAnsiChar;
+function IRoutineMetadataHelper.getName(status: IStatus): PAnsiChar;
 begin
 	Result := vTable^.getName(PRoutineMetadataToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IRoutineMetadata.getEntryPoint(status: PStatusToken): PAnsiChar;
+function IRoutineMetadataHelper.getEntryPoint(status: IStatus): PAnsiChar;
 begin
 	Result := vTable^.getEntryPoint(PRoutineMetadataToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IRoutineMetadata.getBody(status: PStatusToken): PAnsiChar;
+function IRoutineMetadataHelper.getBody(status: IStatus): PAnsiChar;
 begin
 	Result := vTable^.getBody(PRoutineMetadataToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IRoutineMetadata.getInputMetadata(status: PStatusToken): PMessageMetadataToken;
+function IRoutineMetadataHelper.getInputMetadata(status: IStatus): IMessageMetadata;
 begin
 	Result := vTable^.getInputMetadata(PRoutineMetadataToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IRoutineMetadata.getOutputMetadata(status: PStatusToken): PMessageMetadataToken;
+function IRoutineMetadataHelper.getOutputMetadata(status: IStatus): IMessageMetadata;
 begin
 	Result := vTable^.getOutputMetadata(PRoutineMetadataToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IRoutineMetadata.getTriggerMetadata(status: PStatusToken): PMessageMetadataToken;
+function IRoutineMetadataHelper.getTriggerMetadata(status: IStatus): IMessageMetadata;
 begin
 	Result := vTable^.getTriggerMetadata(PRoutineMetadataToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IRoutineMetadata.getTriggerTable(status: PStatusToken): PAnsiChar;
+function IRoutineMetadataHelper.getTriggerTable(status: IStatus): PAnsiChar;
 begin
 	Result := vTable^.getTriggerTable(PRoutineMetadataToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IRoutineMetadata.getTriggerType(status: PStatusToken): Cardinal;
+function IRoutineMetadataHelper.getTriggerType(status: IStatus): Cardinal;
 begin
 	Result := vTable^.getTriggerType(PRoutineMetadataToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -9839,57 +10307,57 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IExternalEngine.addRef();
+procedure IExternalEngineHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IExternalEngine.release(): Integer;
+function IExternalEngineHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-procedure IExternalEngine.setOwner(r: PReferenceCountedToken);
+procedure IExternalEngineHelper.setOwner(r: IReferenceCounted);
 begin
 	vTable^.setOwner(PPluginBaseToken(token), r);
 end;
 
-function IExternalEngine.getOwner(): PReferenceCountedToken;
+function IExternalEngineHelper.getOwner(): IReferenceCounted;
 begin
 	Result := vTable^.getOwner(PPluginBaseToken(token));
 end;
 
-procedure IExternalEngine.open(status: PStatusToken; context: PExternalContextToken; charSet: PAnsiChar; charSetSize: Cardinal);
+procedure IExternalEngineHelper.open(status: IStatus; context: IExternalContext; charSet: PAnsiChar; charSetSize: Cardinal);
 begin
 	vTable^.open(PExternalEngineToken(token), status, context, charSet, charSetSize);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IExternalEngine.openAttachment(status: PStatusToken; context: PExternalContextToken);
+procedure IExternalEngineHelper.openAttachment(status: IStatus; context: IExternalContext);
 begin
 	vTable^.openAttachment(PExternalEngineToken(token), status, context);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IExternalEngine.closeAttachment(status: PStatusToken; context: PExternalContextToken);
+procedure IExternalEngineHelper.closeAttachment(status: IStatus; context: IExternalContext);
 begin
 	vTable^.closeAttachment(PExternalEngineToken(token), status, context);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IExternalEngine.makeFunction(status: PStatusToken; context: PExternalContextToken; metadata: PRoutineMetadataToken; inBuilder: PMetadataBuilderToken; outBuilder: PMetadataBuilderToken): PExternalFunctionToken;
+function IExternalEngineHelper.makeFunction(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder): IExternalFunction;
 begin
 	Result := vTable^.makeFunction(PExternalEngineToken(token), status, context, metadata, inBuilder, outBuilder);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IExternalEngine.makeProcedure(status: PStatusToken; context: PExternalContextToken; metadata: PRoutineMetadataToken; inBuilder: PMetadataBuilderToken; outBuilder: PMetadataBuilderToken): PExternalProcedureToken;
+function IExternalEngineHelper.makeProcedure(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder): IExternalProcedure;
 begin
 	Result := vTable^.makeProcedure(PExternalEngineToken(token), status, context, metadata, inBuilder, outBuilder);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IExternalEngine.makeTrigger(status: PStatusToken; context: PExternalContextToken; metadata: PRoutineMetadataToken; fieldsBuilder: PMetadataBuilderToken): PExternalTriggerToken;
+function IExternalEngineHelper.makeTrigger(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; fieldsBuilder: IMetadataBuilder): IExternalTrigger;
 begin
 	Result := vTable^.makeTrigger(PExternalEngineToken(token), status, context, metadata, fieldsBuilder);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -9925,17 +10393,17 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure ITimer.addRef();
+procedure ITimerHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function ITimer.release(): Integer;
+function ITimerHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-procedure ITimer.handler();
+procedure ITimerHelper.handler();
 begin
 	vTable^.handler(PTimerToken(token));
 end;
@@ -9970,13 +10438,13 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure ITimerControl.start(status: PStatusToken; timer: PTimerToken; microSeconds: QWord);
+procedure ITimerControlHelper.start(status: IStatus; timer: ITimer; microSeconds: QWord);
 begin
 	vTable^.start(PTimerControlToken(token), status, timer, microSeconds);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure ITimerControl.stop(status: PStatusToken; timer: PTimerToken);
+procedure ITimerControlHelper.stop(status: IStatus; timer: ITimer);
 begin
 	vTable^.stop(PTimerControlToken(token), status, timer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -10012,7 +10480,7 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IVersionCallback.callback(status: PStatusToken; text: PAnsiChar);
+procedure IVersionCallbackHelper.callback(status: IStatus; text: PAnsiChar);
 begin
 	vTable^.callback(PVersionCallbackToken(token), status, text);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -10048,127 +10516,127 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IUtil.getFbVersion(status: PStatusToken; att: PAttachmentToken; callback: PVersionCallbackToken);
+procedure IUtilHelper.getFbVersion(status: IStatus; att: IAttachment; callback: IVersionCallback);
 begin
 	vTable^.getFbVersion(PUtilToken(token), status, att, callback);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IUtil.loadBlob(status: PStatusToken; blobId: ISC_QUADPtr; att: PAttachmentToken; tra: PTransactionToken; file_: PAnsiChar; txt: Boolean);
+procedure IUtilHelper.loadBlob(status: IStatus; blobId: ISC_QUADPtr; att: IAttachment; tra: ITransaction; file_: PAnsiChar; txt: Boolean);
 begin
 	vTable^.loadBlob(PUtilToken(token), status, blobId, att, tra, file_, txt);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IUtil.dumpBlob(status: PStatusToken; blobId: ISC_QUADPtr; att: PAttachmentToken; tra: PTransactionToken; file_: PAnsiChar; txt: Boolean);
+procedure IUtilHelper.dumpBlob(status: IStatus; blobId: ISC_QUADPtr; att: IAttachment; tra: ITransaction; file_: PAnsiChar; txt: Boolean);
 begin
 	vTable^.dumpBlob(PUtilToken(token), status, blobId, att, tra, file_, txt);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IUtil.getPerfCounters(status: PStatusToken; att: PAttachmentToken; countersSet: PAnsiChar; counters: Int64Ptr);
+procedure IUtilHelper.getPerfCounters(status: IStatus; att: IAttachment; countersSet: PAnsiChar; counters: Int64Ptr);
 begin
 	vTable^.getPerfCounters(PUtilToken(token), status, att, countersSet, counters);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IUtil.executeCreateDatabase(status: PStatusToken; stmtLength: Cardinal; creatDBstatement: PAnsiChar; dialect: Cardinal; stmtIsCreateDb: BooleanPtr): PAttachmentToken;
+function IUtilHelper.executeCreateDatabase(status: IStatus; stmtLength: Cardinal; creatDBstatement: PAnsiChar; dialect: Cardinal; stmtIsCreateDb: BooleanPtr): IAttachment;
 begin
 	Result := vTable^.executeCreateDatabase(PUtilToken(token), status, stmtLength, creatDBstatement, dialect, stmtIsCreateDb);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IUtil.decodeDate(date: ISC_DATE; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr);
+procedure IUtilHelper.decodeDate(date: ISC_DATE; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr);
 begin
 	vTable^.decodeDate(PUtilToken(token), date, year, month, day);
 end;
 
-procedure IUtil.decodeTime(time: ISC_TIME; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr);
+procedure IUtilHelper.decodeTime(time: ISC_TIME; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr);
 begin
 	vTable^.decodeTime(PUtilToken(token), time, hours, minutes, seconds, fractions);
 end;
 
-function IUtil.encodeDate(year: Cardinal; month: Cardinal; day: Cardinal): ISC_DATE;
+function IUtilHelper.encodeDate(year: Cardinal; month: Cardinal; day: Cardinal): ISC_DATE;
 begin
 	Result := vTable^.encodeDate(PUtilToken(token), year, month, day);
 end;
 
-function IUtil.encodeTime(hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal): ISC_TIME;
+function IUtilHelper.encodeTime(hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal): ISC_TIME;
 begin
 	Result := vTable^.encodeTime(PUtilToken(token), hours, minutes, seconds, fractions);
 end;
 
-function IUtil.formatStatus(buffer: PAnsiChar; bufferSize: Cardinal; status: PStatusToken): Cardinal;
+function IUtilHelper.formatStatus(buffer: PAnsiChar; bufferSize: Cardinal; status: IStatus): Cardinal;
 begin
 	Result := vTable^.formatStatus(PUtilToken(token), buffer, bufferSize, status);
 end;
 
-function IUtil.getClientVersion(): Cardinal;
+function IUtilHelper.getClientVersion(): Cardinal;
 begin
 	Result := vTable^.getClientVersion(PUtilToken(token));
 end;
 
-function IUtil.getXpbBuilder(status: PStatusToken; kind: Cardinal; buf: BytePtr; len: Cardinal): PXpbBuilderToken;
+function IUtilHelper.getXpbBuilder(status: IStatus; kind: Cardinal; buf: BytePtr; len: Cardinal): IXpbBuilder;
 begin
 	Result := vTable^.getXpbBuilder(PUtilToken(token), status, kind, buf, len);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IUtil.setOffsets(status: PStatusToken; metadata: PMessageMetadataToken; callback: POffsetsCallbackToken): Cardinal;
+function IUtilHelper.setOffsets(status: IStatus; metadata: IMessageMetadata; callback: IOffsetsCallback): Cardinal;
 begin
 	Result := vTable^.setOffsets(PUtilToken(token), status, metadata, callback);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IUtil.getDecFloat16(status: PStatusToken): PDecFloat16Token;
+function IUtilHelper.getDecFloat16(status: IStatus): IDecFloat16;
 begin
 	Result := vTable^.getDecFloat16(PUtilToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IUtil.getDecFloat34(status: PStatusToken): PDecFloat34Token;
+function IUtilHelper.getDecFloat34(status: IStatus): IDecFloat34;
 begin
 	Result := vTable^.getDecFloat34(PUtilToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IUtil.decodeTimeTz(status: PStatusToken; timeTz: ISC_TIME_TZPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar);
+procedure IUtilHelper.decodeTimeTz(status: IStatus; timeTz: ISC_TIME_TZPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar);
 begin
 	vTable^.decodeTimeTz(PUtilToken(token), status, timeTz, hours, minutes, seconds, fractions, timeZoneBufferLength, timeZoneBuffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IUtil.decodeTimeStampTz(status: PStatusToken; timeStampTz: ISC_TIMESTAMP_TZPtr; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar);
+procedure IUtilHelper.decodeTimeStampTz(status: IStatus; timeStampTz: ISC_TIMESTAMP_TZPtr; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar);
 begin
 	vTable^.decodeTimeStampTz(PUtilToken(token), status, timeStampTz, year, month, day, hours, minutes, seconds, fractions, timeZoneBufferLength, timeZoneBuffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IUtil.encodeTimeTz(status: PStatusToken; timeTz: ISC_TIME_TZPtr; hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal; timeZone: PAnsiChar);
+procedure IUtilHelper.encodeTimeTz(status: IStatus; timeTz: ISC_TIME_TZPtr; hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal; timeZone: PAnsiChar);
 begin
 	vTable^.encodeTimeTz(PUtilToken(token), status, timeTz, hours, minutes, seconds, fractions, timeZone);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IUtil.encodeTimeStampTz(status: PStatusToken; timeStampTz: ISC_TIMESTAMP_TZPtr; year: Cardinal; month: Cardinal; day: Cardinal; hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal; timeZone: PAnsiChar);
+procedure IUtilHelper.encodeTimeStampTz(status: IStatus; timeStampTz: ISC_TIMESTAMP_TZPtr; year: Cardinal; month: Cardinal; day: Cardinal; hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal; timeZone: PAnsiChar);
 begin
 	vTable^.encodeTimeStampTz(PUtilToken(token), status, timeStampTz, year, month, day, hours, minutes, seconds, fractions, timeZone);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IUtil.getInt128(status: PStatusToken): PInt128Token;
+function IUtilHelper.getInt128(status: IStatus): IInt128;
 begin
 	Result := vTable^.getInt128(PUtilToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IUtil.decodeTimeTzEx(status: PStatusToken; timeTz: ISC_TIME_TZ_EXPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar);
+procedure IUtilHelper.decodeTimeTzEx(status: IStatus; timeTz: ISC_TIME_TZ_EXPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar);
 begin
 	vTable^.decodeTimeTzEx(PUtilToken(token), status, timeTz, hours, minutes, seconds, fractions, timeZoneBufferLength, timeZoneBuffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IUtil.decodeTimeStampTzEx(status: PStatusToken; timeStampTz: ISC_TIMESTAMP_TZ_EXPtr; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar);
+procedure IUtilHelper.decodeTimeStampTzEx(status: IStatus; timeStampTz: ISC_TIMESTAMP_TZ_EXPtr; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar);
 begin
 	vTable^.decodeTimeStampTzEx(PUtilToken(token), status, timeStampTz, year, month, day, hours, minutes, seconds, fractions, timeZoneBufferLength, timeZoneBuffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -10204,7 +10672,7 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IOffsetsCallback.setOffset(status: PStatusToken; index: Cardinal; offset: Cardinal; nullOffset: Cardinal);
+procedure IOffsetsCallbackHelper.setOffset(status: IStatus; index: Cardinal; offset: Cardinal; nullOffset: Cardinal);
 begin
 	vTable^.setOffset(POffsetsCallbackToken(token), status, index, offset, nullOffset);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -10240,126 +10708,126 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IXpbBuilder.dispose();
+procedure IXpbBuilderHelper.dispose();
 begin
 	vTable^.dispose(PDisposableToken(token));
 end;
 
-procedure IXpbBuilder.clear(status: PStatusToken);
+procedure IXpbBuilderHelper.clear(status: IStatus);
 begin
 	vTable^.clear(PXpbBuilderToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IXpbBuilder.removeCurrent(status: PStatusToken);
+procedure IXpbBuilderHelper.removeCurrent(status: IStatus);
 begin
 	vTable^.removeCurrent(PXpbBuilderToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IXpbBuilder.insertInt(status: PStatusToken; tag: Byte; value: Integer);
+procedure IXpbBuilderHelper.insertInt(status: IStatus; tag: Byte; value: Integer);
 begin
 	vTable^.insertInt(PXpbBuilderToken(token), status, tag, value);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IXpbBuilder.insertBigInt(status: PStatusToken; tag: Byte; value: Int64);
+procedure IXpbBuilderHelper.insertBigInt(status: IStatus; tag: Byte; value: Int64);
 begin
 	vTable^.insertBigInt(PXpbBuilderToken(token), status, tag, value);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IXpbBuilder.insertBytes(status: PStatusToken; tag: Byte; bytes: Pointer; length: Cardinal);
+procedure IXpbBuilderHelper.insertBytes(status: IStatus; tag: Byte; bytes: Pointer; length: Cardinal);
 begin
 	vTable^.insertBytes(PXpbBuilderToken(token), status, tag, bytes, length);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IXpbBuilder.insertString(status: PStatusToken; tag: Byte; str: PAnsiChar);
+procedure IXpbBuilderHelper.insertString(status: IStatus; tag: Byte; str: PAnsiChar);
 begin
 	vTable^.insertString(PXpbBuilderToken(token), status, tag, str);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IXpbBuilder.insertTag(status: PStatusToken; tag: Byte);
+procedure IXpbBuilderHelper.insertTag(status: IStatus; tag: Byte);
 begin
 	vTable^.insertTag(PXpbBuilderToken(token), status, tag);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IXpbBuilder.isEof(status: PStatusToken): Boolean;
+function IXpbBuilderHelper.isEof(status: IStatus): Boolean;
 begin
 	Result := vTable^.isEof(PXpbBuilderToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IXpbBuilder.moveNext(status: PStatusToken);
+procedure IXpbBuilderHelper.moveNext(status: IStatus);
 begin
 	vTable^.moveNext(PXpbBuilderToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IXpbBuilder.rewind(status: PStatusToken);
+procedure IXpbBuilderHelper.rewind(status: IStatus);
 begin
 	vTable^.rewind(PXpbBuilderToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IXpbBuilder.findFirst(status: PStatusToken; tag: Byte): Boolean;
+function IXpbBuilderHelper.findFirst(status: IStatus; tag: Byte): Boolean;
 begin
 	Result := vTable^.findFirst(PXpbBuilderToken(token), status, tag);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IXpbBuilder.findNext(status: PStatusToken): Boolean;
+function IXpbBuilderHelper.findNext(status: IStatus): Boolean;
 begin
 	Result := vTable^.findNext(PXpbBuilderToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IXpbBuilder.getTag(status: PStatusToken): Byte;
+function IXpbBuilderHelper.getTag(status: IStatus): Byte;
 begin
 	Result := vTable^.getTag(PXpbBuilderToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IXpbBuilder.getLength(status: PStatusToken): Cardinal;
+function IXpbBuilderHelper.getLength(status: IStatus): Cardinal;
 begin
 	Result := vTable^.getLength(PXpbBuilderToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IXpbBuilder.getInt(status: PStatusToken): Integer;
+function IXpbBuilderHelper.getInt(status: IStatus): Integer;
 begin
 	Result := vTable^.getInt(PXpbBuilderToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IXpbBuilder.getBigInt(status: PStatusToken): Int64;
+function IXpbBuilderHelper.getBigInt(status: IStatus): Int64;
 begin
 	Result := vTable^.getBigInt(PXpbBuilderToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IXpbBuilder.getString(status: PStatusToken): PAnsiChar;
+function IXpbBuilderHelper.getString(status: IStatus): PAnsiChar;
 begin
 	Result := vTable^.getString(PXpbBuilderToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IXpbBuilder.getBytes(status: PStatusToken): BytePtr;
+function IXpbBuilderHelper.getBytes(status: IStatus): BytePtr;
 begin
 	Result := vTable^.getBytes(PXpbBuilderToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IXpbBuilder.getBufferLength(status: PStatusToken): Cardinal;
+function IXpbBuilderHelper.getBufferLength(status: IStatus): Cardinal;
 begin
 	Result := vTable^.getBufferLength(PXpbBuilderToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IXpbBuilder.getBuffer(status: PStatusToken): BytePtr;
+function IXpbBuilderHelper.getBuffer(status: IStatus): BytePtr;
 begin
 	Result := vTable^.getBuffer(PXpbBuilderToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -10395,47 +10863,47 @@ begin
   Result := a.token = b.token;
 end;
 
-function ITraceConnection.getKind(): Cardinal;
+function ITraceConnectionHelper.getKind(): Cardinal;
 begin
 	Result := vTable^.getKind(PTraceConnectionToken(token));
 end;
 
-function ITraceConnection.getProcessID(): Integer;
+function ITraceConnectionHelper.getProcessID(): Integer;
 begin
 	Result := vTable^.getProcessID(PTraceConnectionToken(token));
 end;
 
-function ITraceConnection.getUserName(): PAnsiChar;
+function ITraceConnectionHelper.getUserName(): PAnsiChar;
 begin
 	Result := vTable^.getUserName(PTraceConnectionToken(token));
 end;
 
-function ITraceConnection.getRoleName(): PAnsiChar;
+function ITraceConnectionHelper.getRoleName(): PAnsiChar;
 begin
 	Result := vTable^.getRoleName(PTraceConnectionToken(token));
 end;
 
-function ITraceConnection.getCharSet(): PAnsiChar;
+function ITraceConnectionHelper.getCharSet(): PAnsiChar;
 begin
 	Result := vTable^.getCharSet(PTraceConnectionToken(token));
 end;
 
-function ITraceConnection.getRemoteProtocol(): PAnsiChar;
+function ITraceConnectionHelper.getRemoteProtocol(): PAnsiChar;
 begin
 	Result := vTable^.getRemoteProtocol(PTraceConnectionToken(token));
 end;
 
-function ITraceConnection.getRemoteAddress(): PAnsiChar;
+function ITraceConnectionHelper.getRemoteAddress(): PAnsiChar;
 begin
 	Result := vTable^.getRemoteAddress(PTraceConnectionToken(token));
 end;
 
-function ITraceConnection.getRemoteProcessID(): Integer;
+function ITraceConnectionHelper.getRemoteProcessID(): Integer;
 begin
 	Result := vTable^.getRemoteProcessID(PTraceConnectionToken(token));
 end;
 
-function ITraceConnection.getRemoteProcessName(): PAnsiChar;
+function ITraceConnectionHelper.getRemoteProcessName(): PAnsiChar;
 begin
 	Result := vTable^.getRemoteProcessName(PTraceConnectionToken(token));
 end;
@@ -10470,57 +10938,57 @@ begin
   Result := a.token = b.token;
 end;
 
-function ITraceDatabaseConnection.getKind(): Cardinal;
+function ITraceDatabaseConnectionHelper.getKind(): Cardinal;
 begin
 	Result := vTable^.getKind(PTraceConnectionToken(token));
 end;
 
-function ITraceDatabaseConnection.getProcessID(): Integer;
+function ITraceDatabaseConnectionHelper.getProcessID(): Integer;
 begin
 	Result := vTable^.getProcessID(PTraceConnectionToken(token));
 end;
 
-function ITraceDatabaseConnection.getUserName(): PAnsiChar;
+function ITraceDatabaseConnectionHelper.getUserName(): PAnsiChar;
 begin
 	Result := vTable^.getUserName(PTraceConnectionToken(token));
 end;
 
-function ITraceDatabaseConnection.getRoleName(): PAnsiChar;
+function ITraceDatabaseConnectionHelper.getRoleName(): PAnsiChar;
 begin
 	Result := vTable^.getRoleName(PTraceConnectionToken(token));
 end;
 
-function ITraceDatabaseConnection.getCharSet(): PAnsiChar;
+function ITraceDatabaseConnectionHelper.getCharSet(): PAnsiChar;
 begin
 	Result := vTable^.getCharSet(PTraceConnectionToken(token));
 end;
 
-function ITraceDatabaseConnection.getRemoteProtocol(): PAnsiChar;
+function ITraceDatabaseConnectionHelper.getRemoteProtocol(): PAnsiChar;
 begin
 	Result := vTable^.getRemoteProtocol(PTraceConnectionToken(token));
 end;
 
-function ITraceDatabaseConnection.getRemoteAddress(): PAnsiChar;
+function ITraceDatabaseConnectionHelper.getRemoteAddress(): PAnsiChar;
 begin
 	Result := vTable^.getRemoteAddress(PTraceConnectionToken(token));
 end;
 
-function ITraceDatabaseConnection.getRemoteProcessID(): Integer;
+function ITraceDatabaseConnectionHelper.getRemoteProcessID(): Integer;
 begin
 	Result := vTable^.getRemoteProcessID(PTraceConnectionToken(token));
 end;
 
-function ITraceDatabaseConnection.getRemoteProcessName(): PAnsiChar;
+function ITraceDatabaseConnectionHelper.getRemoteProcessName(): PAnsiChar;
 begin
 	Result := vTable^.getRemoteProcessName(PTraceConnectionToken(token));
 end;
 
-function ITraceDatabaseConnection.getConnectionID(): Int64;
+function ITraceDatabaseConnectionHelper.getConnectionID(): Int64;
 begin
 	Result := vTable^.getConnectionID(PTraceDatabaseConnectionToken(token));
 end;
 
-function ITraceDatabaseConnection.getDatabaseName(): PAnsiChar;
+function ITraceDatabaseConnectionHelper.getDatabaseName(): PAnsiChar;
 begin
 	Result := vTable^.getDatabaseName(PTraceDatabaseConnectionToken(token));
 end;
@@ -10555,37 +11023,37 @@ begin
   Result := a.token = b.token;
 end;
 
-function ITraceTransaction.getTransactionID(): Int64;
+function ITraceTransactionHelper.getTransactionID(): Int64;
 begin
 	Result := vTable^.getTransactionID(PTraceTransactionToken(token));
 end;
 
-function ITraceTransaction.getReadOnly(): Boolean;
+function ITraceTransactionHelper.getReadOnly(): Boolean;
 begin
 	Result := vTable^.getReadOnly(PTraceTransactionToken(token));
 end;
 
-function ITraceTransaction.getWait(): Integer;
+function ITraceTransactionHelper.getWait(): Integer;
 begin
 	Result := vTable^.getWait(PTraceTransactionToken(token));
 end;
 
-function ITraceTransaction.getIsolation(): Cardinal;
+function ITraceTransactionHelper.getIsolation(): Cardinal;
 begin
 	Result := vTable^.getIsolation(PTraceTransactionToken(token));
 end;
 
-function ITraceTransaction.getPerf(): PerformanceInfoPtr;
+function ITraceTransactionHelper.getPerf(): PerformanceInfoPtr;
 begin
 	Result := vTable^.getPerf(PTraceTransactionToken(token));
 end;
 
-function ITraceTransaction.getInitialID(): Int64;
+function ITraceTransactionHelper.getInitialID(): Int64;
 begin
 	Result := vTable^.getInitialID(PTraceTransactionToken(token));
 end;
 
-function ITraceTransaction.getPreviousID(): Int64;
+function ITraceTransactionHelper.getPreviousID(): Int64;
 begin
 	Result := vTable^.getPreviousID(PTraceTransactionToken(token));
 end;
@@ -10620,17 +11088,17 @@ begin
   Result := a.token = b.token;
 end;
 
-function ITraceParams.getCount(): Cardinal;
+function ITraceParamsHelper.getCount(): Cardinal;
 begin
 	Result := vTable^.getCount(PTraceParamsToken(token));
 end;
 
-function ITraceParams.getParam(idx: Cardinal): dscPtr;
+function ITraceParamsHelper.getParam(idx: Cardinal): dscPtr;
 begin
 	Result := vTable^.getParam(PTraceParamsToken(token), idx);
 end;
 
-function ITraceParams.getTextUTF8(status: PStatusToken; idx: Cardinal): PAnsiChar;
+function ITraceParamsHelper.getTextUTF8(status: IStatus; idx: Cardinal): PAnsiChar;
 begin
 	Result := vTable^.getTextUTF8(PTraceParamsToken(token), status, idx);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -10666,12 +11134,12 @@ begin
   Result := a.token = b.token;
 end;
 
-function ITraceStatement.getStmtID(): Int64;
+function ITraceStatementHelper.getStmtID(): Int64;
 begin
 	Result := vTable^.getStmtID(PTraceStatementToken(token));
 end;
 
-function ITraceStatement.getPerf(): PerformanceInfoPtr;
+function ITraceStatementHelper.getPerf(): PerformanceInfoPtr;
 begin
 	Result := vTable^.getPerf(PTraceStatementToken(token));
 end;
@@ -10706,37 +11174,37 @@ begin
   Result := a.token = b.token;
 end;
 
-function ITraceSQLStatement.getStmtID(): Int64;
+function ITraceSQLStatementHelper.getStmtID(): Int64;
 begin
 	Result := vTable^.getStmtID(PTraceStatementToken(token));
 end;
 
-function ITraceSQLStatement.getPerf(): PerformanceInfoPtr;
+function ITraceSQLStatementHelper.getPerf(): PerformanceInfoPtr;
 begin
 	Result := vTable^.getPerf(PTraceStatementToken(token));
 end;
 
-function ITraceSQLStatement.getText(): PAnsiChar;
+function ITraceSQLStatementHelper.getText(): PAnsiChar;
 begin
 	Result := vTable^.getText(PTraceSQLStatementToken(token));
 end;
 
-function ITraceSQLStatement.getPlan(): PAnsiChar;
+function ITraceSQLStatementHelper.getPlan(): PAnsiChar;
 begin
 	Result := vTable^.getPlan(PTraceSQLStatementToken(token));
 end;
 
-function ITraceSQLStatement.getInputs(): PTraceParamsToken;
+function ITraceSQLStatementHelper.getInputs(): ITraceParams;
 begin
 	Result := vTable^.getInputs(PTraceSQLStatementToken(token));
 end;
 
-function ITraceSQLStatement.getTextUTF8(): PAnsiChar;
+function ITraceSQLStatementHelper.getTextUTF8(): PAnsiChar;
 begin
 	Result := vTable^.getTextUTF8(PTraceSQLStatementToken(token));
 end;
 
-function ITraceSQLStatement.getExplainedPlan(): PAnsiChar;
+function ITraceSQLStatementHelper.getExplainedPlan(): PAnsiChar;
 begin
 	Result := vTable^.getExplainedPlan(PTraceSQLStatementToken(token));
 end;
@@ -10771,27 +11239,27 @@ begin
   Result := a.token = b.token;
 end;
 
-function ITraceBLRStatement.getStmtID(): Int64;
+function ITraceBLRStatementHelper.getStmtID(): Int64;
 begin
 	Result := vTable^.getStmtID(PTraceStatementToken(token));
 end;
 
-function ITraceBLRStatement.getPerf(): PerformanceInfoPtr;
+function ITraceBLRStatementHelper.getPerf(): PerformanceInfoPtr;
 begin
 	Result := vTable^.getPerf(PTraceStatementToken(token));
 end;
 
-function ITraceBLRStatement.getData(): BytePtr;
+function ITraceBLRStatementHelper.getData(): BytePtr;
 begin
 	Result := vTable^.getData(PTraceBLRStatementToken(token));
 end;
 
-function ITraceBLRStatement.getDataLength(): Cardinal;
+function ITraceBLRStatementHelper.getDataLength(): Cardinal;
 begin
 	Result := vTable^.getDataLength(PTraceBLRStatementToken(token));
 end;
 
-function ITraceBLRStatement.getText(): PAnsiChar;
+function ITraceBLRStatementHelper.getText(): PAnsiChar;
 begin
 	Result := vTable^.getText(PTraceBLRStatementToken(token));
 end;
@@ -10826,17 +11294,17 @@ begin
   Result := a.token = b.token;
 end;
 
-function ITraceDYNRequest.getData(): BytePtr;
+function ITraceDYNRequestHelper.getData(): BytePtr;
 begin
 	Result := vTable^.getData(PTraceDYNRequestToken(token));
 end;
 
-function ITraceDYNRequest.getDataLength(): Cardinal;
+function ITraceDYNRequestHelper.getDataLength(): Cardinal;
 begin
 	Result := vTable^.getDataLength(PTraceDYNRequestToken(token));
 end;
 
-function ITraceDYNRequest.getText(): PAnsiChar;
+function ITraceDYNRequestHelper.getText(): PAnsiChar;
 begin
 	Result := vTable^.getText(PTraceDYNRequestToken(token));
 end;
@@ -10871,17 +11339,17 @@ begin
   Result := a.token = b.token;
 end;
 
-function ITraceContextVariable.getNameSpace(): PAnsiChar;
+function ITraceContextVariableHelper.getNameSpace(): PAnsiChar;
 begin
 	Result := vTable^.getNameSpace(PTraceContextVariableToken(token));
 end;
 
-function ITraceContextVariable.getVarName(): PAnsiChar;
+function ITraceContextVariableHelper.getVarName(): PAnsiChar;
 begin
 	Result := vTable^.getVarName(PTraceContextVariableToken(token));
 end;
 
-function ITraceContextVariable.getVarValue(): PAnsiChar;
+function ITraceContextVariableHelper.getVarValue(): PAnsiChar;
 begin
 	Result := vTable^.getVarValue(PTraceContextVariableToken(token));
 end;
@@ -10916,17 +11384,17 @@ begin
   Result := a.token = b.token;
 end;
 
-function ITraceProcedure.getProcName(): PAnsiChar;
+function ITraceProcedureHelper.getProcName(): PAnsiChar;
 begin
 	Result := vTable^.getProcName(PTraceProcedureToken(token));
 end;
 
-function ITraceProcedure.getInputs(): PTraceParamsToken;
+function ITraceProcedureHelper.getInputs(): ITraceParams;
 begin
 	Result := vTable^.getInputs(PTraceProcedureToken(token));
 end;
 
-function ITraceProcedure.getPerf(): PerformanceInfoPtr;
+function ITraceProcedureHelper.getPerf(): PerformanceInfoPtr;
 begin
 	Result := vTable^.getPerf(PTraceProcedureToken(token));
 end;
@@ -10961,22 +11429,22 @@ begin
   Result := a.token = b.token;
 end;
 
-function ITraceFunction.getFuncName(): PAnsiChar;
+function ITraceFunctionHelper.getFuncName(): PAnsiChar;
 begin
 	Result := vTable^.getFuncName(PTraceFunctionToken(token));
 end;
 
-function ITraceFunction.getInputs(): PTraceParamsToken;
+function ITraceFunctionHelper.getInputs(): ITraceParams;
 begin
 	Result := vTable^.getInputs(PTraceFunctionToken(token));
 end;
 
-function ITraceFunction.getResult(): PTraceParamsToken;
+function ITraceFunctionHelper.getResult(): ITraceParams;
 begin
 	Result := vTable^.getResult(PTraceFunctionToken(token));
 end;
 
-function ITraceFunction.getPerf(): PerformanceInfoPtr;
+function ITraceFunctionHelper.getPerf(): PerformanceInfoPtr;
 begin
 	Result := vTable^.getPerf(PTraceFunctionToken(token));
 end;
@@ -11011,27 +11479,27 @@ begin
   Result := a.token = b.token;
 end;
 
-function ITraceTrigger.getTriggerName(): PAnsiChar;
+function ITraceTriggerHelper.getTriggerName(): PAnsiChar;
 begin
 	Result := vTable^.getTriggerName(PTraceTriggerToken(token));
 end;
 
-function ITraceTrigger.getRelationName(): PAnsiChar;
+function ITraceTriggerHelper.getRelationName(): PAnsiChar;
 begin
 	Result := vTable^.getRelationName(PTraceTriggerToken(token));
 end;
 
-function ITraceTrigger.getAction(): Integer;
+function ITraceTriggerHelper.getAction(): Integer;
 begin
 	Result := vTable^.getAction(PTraceTriggerToken(token));
 end;
 
-function ITraceTrigger.getWhich(): Integer;
+function ITraceTriggerHelper.getWhich(): Integer;
 begin
 	Result := vTable^.getWhich(PTraceTriggerToken(token));
 end;
 
-function ITraceTrigger.getPerf(): PerformanceInfoPtr;
+function ITraceTriggerHelper.getPerf(): PerformanceInfoPtr;
 begin
 	Result := vTable^.getPerf(PTraceTriggerToken(token));
 end;
@@ -11066,62 +11534,62 @@ begin
   Result := a.token = b.token;
 end;
 
-function ITraceServiceConnection.getKind(): Cardinal;
+function ITraceServiceConnectionHelper.getKind(): Cardinal;
 begin
 	Result := vTable^.getKind(PTraceConnectionToken(token));
 end;
 
-function ITraceServiceConnection.getProcessID(): Integer;
+function ITraceServiceConnectionHelper.getProcessID(): Integer;
 begin
 	Result := vTable^.getProcessID(PTraceConnectionToken(token));
 end;
 
-function ITraceServiceConnection.getUserName(): PAnsiChar;
+function ITraceServiceConnectionHelper.getUserName(): PAnsiChar;
 begin
 	Result := vTable^.getUserName(PTraceConnectionToken(token));
 end;
 
-function ITraceServiceConnection.getRoleName(): PAnsiChar;
+function ITraceServiceConnectionHelper.getRoleName(): PAnsiChar;
 begin
 	Result := vTable^.getRoleName(PTraceConnectionToken(token));
 end;
 
-function ITraceServiceConnection.getCharSet(): PAnsiChar;
+function ITraceServiceConnectionHelper.getCharSet(): PAnsiChar;
 begin
 	Result := vTable^.getCharSet(PTraceConnectionToken(token));
 end;
 
-function ITraceServiceConnection.getRemoteProtocol(): PAnsiChar;
+function ITraceServiceConnectionHelper.getRemoteProtocol(): PAnsiChar;
 begin
 	Result := vTable^.getRemoteProtocol(PTraceConnectionToken(token));
 end;
 
-function ITraceServiceConnection.getRemoteAddress(): PAnsiChar;
+function ITraceServiceConnectionHelper.getRemoteAddress(): PAnsiChar;
 begin
 	Result := vTable^.getRemoteAddress(PTraceConnectionToken(token));
 end;
 
-function ITraceServiceConnection.getRemoteProcessID(): Integer;
+function ITraceServiceConnectionHelper.getRemoteProcessID(): Integer;
 begin
 	Result := vTable^.getRemoteProcessID(PTraceConnectionToken(token));
 end;
 
-function ITraceServiceConnection.getRemoteProcessName(): PAnsiChar;
+function ITraceServiceConnectionHelper.getRemoteProcessName(): PAnsiChar;
 begin
 	Result := vTable^.getRemoteProcessName(PTraceConnectionToken(token));
 end;
 
-function ITraceServiceConnection.getServiceID(): Pointer;
+function ITraceServiceConnectionHelper.getServiceID(): Pointer;
 begin
 	Result := vTable^.getServiceID(PTraceServiceConnectionToken(token));
 end;
 
-function ITraceServiceConnection.getServiceMgr(): PAnsiChar;
+function ITraceServiceConnectionHelper.getServiceMgr(): PAnsiChar;
 begin
 	Result := vTable^.getServiceMgr(PTraceServiceConnectionToken(token));
 end;
 
-function ITraceServiceConnection.getServiceName(): PAnsiChar;
+function ITraceServiceConnectionHelper.getServiceName(): PAnsiChar;
 begin
 	Result := vTable^.getServiceName(PTraceServiceConnectionToken(token));
 end;
@@ -11156,22 +11624,22 @@ begin
   Result := a.token = b.token;
 end;
 
-function ITraceStatusVector.hasError(): Boolean;
+function ITraceStatusVectorHelper.hasError(): Boolean;
 begin
 	Result := vTable^.hasError(PTraceStatusVectorToken(token));
 end;
 
-function ITraceStatusVector.hasWarning(): Boolean;
+function ITraceStatusVectorHelper.hasWarning(): Boolean;
 begin
 	Result := vTable^.hasWarning(PTraceStatusVectorToken(token));
 end;
 
-function ITraceStatusVector.getStatus(): PStatusToken;
+function ITraceStatusVectorHelper.getStatus(): IStatus;
 begin
 	Result := vTable^.getStatus(PTraceStatusVectorToken(token));
 end;
 
-function ITraceStatusVector.getText(): PAnsiChar;
+function ITraceStatusVectorHelper.getText(): PAnsiChar;
 begin
 	Result := vTable^.getText(PTraceStatusVectorToken(token));
 end;
@@ -11206,27 +11674,27 @@ begin
   Result := a.token = b.token;
 end;
 
-function ITraceSweepInfo.getOIT(): Int64;
+function ITraceSweepInfoHelper.getOIT(): Int64;
 begin
 	Result := vTable^.getOIT(PTraceSweepInfoToken(token));
 end;
 
-function ITraceSweepInfo.getOST(): Int64;
+function ITraceSweepInfoHelper.getOST(): Int64;
 begin
 	Result := vTable^.getOST(PTraceSweepInfoToken(token));
 end;
 
-function ITraceSweepInfo.getOAT(): Int64;
+function ITraceSweepInfoHelper.getOAT(): Int64;
 begin
 	Result := vTable^.getOAT(PTraceSweepInfoToken(token));
 end;
 
-function ITraceSweepInfo.getNext(): Int64;
+function ITraceSweepInfoHelper.getNext(): Int64;
 begin
 	Result := vTable^.getNext(PTraceSweepInfoToken(token));
 end;
 
-function ITraceSweepInfo.getPerf(): PerformanceInfoPtr;
+function ITraceSweepInfoHelper.getPerf(): PerformanceInfoPtr;
 begin
 	Result := vTable^.getPerf(PTraceSweepInfoToken(token));
 end;
@@ -11261,22 +11729,22 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure ITraceLogWriter.addRef();
+procedure ITraceLogWriterHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function ITraceLogWriter.release(): Integer;
+function ITraceLogWriterHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-function ITraceLogWriter.write(buf: Pointer; size: Cardinal): Cardinal;
+function ITraceLogWriterHelper.write(buf: Pointer; size: Cardinal): Cardinal;
 begin
 	Result := vTable^.write(PTraceLogWriterToken(token), buf, size);
 end;
 
-function ITraceLogWriter.write_s(status: PStatusToken; buf: Pointer; size: Cardinal): Cardinal;
+function ITraceLogWriterHelper.write_s(status: IStatus; buf: Pointer; size: Cardinal): Cardinal;
 begin
 	Result := vTable^.write_s(PTraceLogWriterToken(token), status, buf, size);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -11312,37 +11780,37 @@ begin
   Result := a.token = b.token;
 end;
 
-function ITraceInitInfo.getConfigText(): PAnsiChar;
+function ITraceInitInfoHelper.getConfigText(): PAnsiChar;
 begin
 	Result := vTable^.getConfigText(PTraceInitInfoToken(token));
 end;
 
-function ITraceInitInfo.getTraceSessionID(): Integer;
+function ITraceInitInfoHelper.getTraceSessionID(): Integer;
 begin
 	Result := vTable^.getTraceSessionID(PTraceInitInfoToken(token));
 end;
 
-function ITraceInitInfo.getTraceSessionName(): PAnsiChar;
+function ITraceInitInfoHelper.getTraceSessionName(): PAnsiChar;
 begin
 	Result := vTable^.getTraceSessionName(PTraceInitInfoToken(token));
 end;
 
-function ITraceInitInfo.getFirebirdRootDirectory(): PAnsiChar;
+function ITraceInitInfoHelper.getFirebirdRootDirectory(): PAnsiChar;
 begin
 	Result := vTable^.getFirebirdRootDirectory(PTraceInitInfoToken(token));
 end;
 
-function ITraceInitInfo.getDatabaseName(): PAnsiChar;
+function ITraceInitInfoHelper.getDatabaseName(): PAnsiChar;
 begin
 	Result := vTable^.getDatabaseName(PTraceInitInfoToken(token));
 end;
 
-function ITraceInitInfo.getConnection(): PTraceDatabaseConnectionToken;
+function ITraceInitInfoHelper.getConnection(): ITraceDatabaseConnection;
 begin
 	Result := vTable^.getConnection(PTraceInitInfoToken(token));
 end;
 
-function ITraceInitInfo.getLogWriter(): PTraceLogWriterToken;
+function ITraceInitInfoHelper.getLogWriter(): ITraceLogWriter;
 begin
 	Result := vTable^.getLogWriter(PTraceInitInfoToken(token));
 end;
@@ -11377,117 +11845,117 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure ITracePlugin.addRef();
+procedure ITracePluginHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function ITracePlugin.release(): Integer;
+function ITracePluginHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-function ITracePlugin.trace_get_error(): PAnsiChar;
+function ITracePluginHelper.trace_get_error(): PAnsiChar;
 begin
 	Result := vTable^.trace_get_error(PTracePluginToken(token));
 end;
 
-function ITracePlugin.trace_attach(connection: PTraceDatabaseConnectionToken; create_db: Boolean; att_result: Cardinal): Boolean;
+function ITracePluginHelper.trace_attach(connection: ITraceDatabaseConnection; create_db: Boolean; att_result: Cardinal): Boolean;
 begin
 	Result := vTable^.trace_attach(PTracePluginToken(token), connection, create_db, att_result);
 end;
 
-function ITracePlugin.trace_detach(connection: PTraceDatabaseConnectionToken; drop_db: Boolean): Boolean;
+function ITracePluginHelper.trace_detach(connection: ITraceDatabaseConnection; drop_db: Boolean): Boolean;
 begin
 	Result := vTable^.trace_detach(PTracePluginToken(token), connection, drop_db);
 end;
 
-function ITracePlugin.trace_transaction_start(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; tpb_length: Cardinal; tpb: BytePtr; tra_result: Cardinal): Boolean;
+function ITracePluginHelper.trace_transaction_start(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; tpb_length: Cardinal; tpb: BytePtr; tra_result: Cardinal): Boolean;
 begin
 	Result := vTable^.trace_transaction_start(PTracePluginToken(token), connection, transaction, tpb_length, tpb, tra_result);
 end;
 
-function ITracePlugin.trace_transaction_end(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; commit: Boolean; retain_context: Boolean; tra_result: Cardinal): Boolean;
+function ITracePluginHelper.trace_transaction_end(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; commit: Boolean; retain_context: Boolean; tra_result: Cardinal): Boolean;
 begin
 	Result := vTable^.trace_transaction_end(PTracePluginToken(token), connection, transaction, commit, retain_context, tra_result);
 end;
 
-function ITracePlugin.trace_proc_execute(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; procedure_: PTraceProcedureToken; started: Boolean; proc_result: Cardinal): Boolean;
+function ITracePluginHelper.trace_proc_execute(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; procedure_: ITraceProcedure; started: Boolean; proc_result: Cardinal): Boolean;
 begin
 	Result := vTable^.trace_proc_execute(PTracePluginToken(token), connection, transaction, procedure_, started, proc_result);
 end;
 
-function ITracePlugin.trace_trigger_execute(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; trigger: PTraceTriggerToken; started: Boolean; trig_result: Cardinal): Boolean;
+function ITracePluginHelper.trace_trigger_execute(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; trigger: ITraceTrigger; started: Boolean; trig_result: Cardinal): Boolean;
 begin
 	Result := vTable^.trace_trigger_execute(PTracePluginToken(token), connection, transaction, trigger, started, trig_result);
 end;
 
-function ITracePlugin.trace_set_context(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; variable: PTraceContextVariableToken): Boolean;
+function ITracePluginHelper.trace_set_context(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; variable: ITraceContextVariable): Boolean;
 begin
 	Result := vTable^.trace_set_context(PTracePluginToken(token), connection, transaction, variable);
 end;
 
-function ITracePlugin.trace_dsql_prepare(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; statement: PTraceSQLStatementToken; time_millis: Int64; req_result: Cardinal): Boolean;
+function ITracePluginHelper.trace_dsql_prepare(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; statement: ITraceSQLStatement; time_millis: Int64; req_result: Cardinal): Boolean;
 begin
 	Result := vTable^.trace_dsql_prepare(PTracePluginToken(token), connection, transaction, statement, time_millis, req_result);
 end;
 
-function ITracePlugin.trace_dsql_free(connection: PTraceDatabaseConnectionToken; statement: PTraceSQLStatementToken; option: Cardinal): Boolean;
+function ITracePluginHelper.trace_dsql_free(connection: ITraceDatabaseConnection; statement: ITraceSQLStatement; option: Cardinal): Boolean;
 begin
 	Result := vTable^.trace_dsql_free(PTracePluginToken(token), connection, statement, option);
 end;
 
-function ITracePlugin.trace_dsql_execute(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; statement: PTraceSQLStatementToken; started: Boolean; req_result: Cardinal): Boolean;
+function ITracePluginHelper.trace_dsql_execute(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; statement: ITraceSQLStatement; started: Boolean; req_result: Cardinal): Boolean;
 begin
 	Result := vTable^.trace_dsql_execute(PTracePluginToken(token), connection, transaction, statement, started, req_result);
 end;
 
-function ITracePlugin.trace_blr_compile(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; statement: PTraceBLRStatementToken; time_millis: Int64; req_result: Cardinal): Boolean;
+function ITracePluginHelper.trace_blr_compile(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; statement: ITraceBLRStatement; time_millis: Int64; req_result: Cardinal): Boolean;
 begin
 	Result := vTable^.trace_blr_compile(PTracePluginToken(token), connection, transaction, statement, time_millis, req_result);
 end;
 
-function ITracePlugin.trace_blr_execute(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; statement: PTraceBLRStatementToken; req_result: Cardinal): Boolean;
+function ITracePluginHelper.trace_blr_execute(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; statement: ITraceBLRStatement; req_result: Cardinal): Boolean;
 begin
 	Result := vTable^.trace_blr_execute(PTracePluginToken(token), connection, transaction, statement, req_result);
 end;
 
-function ITracePlugin.trace_dyn_execute(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; request: PTraceDYNRequestToken; time_millis: Int64; req_result: Cardinal): Boolean;
+function ITracePluginHelper.trace_dyn_execute(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; request: ITraceDYNRequest; time_millis: Int64; req_result: Cardinal): Boolean;
 begin
 	Result := vTable^.trace_dyn_execute(PTracePluginToken(token), connection, transaction, request, time_millis, req_result);
 end;
 
-function ITracePlugin.trace_service_attach(service: PTraceServiceConnectionToken; att_result: Cardinal): Boolean;
+function ITracePluginHelper.trace_service_attach(service: ITraceServiceConnection; att_result: Cardinal): Boolean;
 begin
 	Result := vTable^.trace_service_attach(PTracePluginToken(token), service, att_result);
 end;
 
-function ITracePlugin.trace_service_start(service: PTraceServiceConnectionToken; switches_length: Cardinal; switches: PAnsiChar; start_result: Cardinal): Boolean;
+function ITracePluginHelper.trace_service_start(service: ITraceServiceConnection; switches_length: Cardinal; switches: PAnsiChar; start_result: Cardinal): Boolean;
 begin
 	Result := vTable^.trace_service_start(PTracePluginToken(token), service, switches_length, switches, start_result);
 end;
 
-function ITracePlugin.trace_service_query(service: PTraceServiceConnectionToken; send_item_length: Cardinal; send_items: BytePtr; recv_item_length: Cardinal; recv_items: BytePtr; query_result: Cardinal): Boolean;
+function ITracePluginHelper.trace_service_query(service: ITraceServiceConnection; send_item_length: Cardinal; send_items: BytePtr; recv_item_length: Cardinal; recv_items: BytePtr; query_result: Cardinal): Boolean;
 begin
 	Result := vTable^.trace_service_query(PTracePluginToken(token), service, send_item_length, send_items, recv_item_length, recv_items, query_result);
 end;
 
-function ITracePlugin.trace_service_detach(service: PTraceServiceConnectionToken; detach_result: Cardinal): Boolean;
+function ITracePluginHelper.trace_service_detach(service: ITraceServiceConnection; detach_result: Cardinal): Boolean;
 begin
 	Result := vTable^.trace_service_detach(PTracePluginToken(token), service, detach_result);
 end;
 
-function ITracePlugin.trace_event_error(connection: PTraceConnectionToken; status: PTraceStatusVectorToken; function_: PAnsiChar): Boolean;
+function ITracePluginHelper.trace_event_error(connection: ITraceConnection; status: ITraceStatusVector; function_: PAnsiChar): Boolean;
 begin
 	Result := vTable^.trace_event_error(PTracePluginToken(token), connection, status, function_);
 end;
 
-function ITracePlugin.trace_event_sweep(connection: PTraceDatabaseConnectionToken; sweep: PTraceSweepInfoToken; sweep_state: Cardinal): Boolean;
+function ITracePluginHelper.trace_event_sweep(connection: ITraceDatabaseConnection; sweep: ITraceSweepInfo; sweep_state: Cardinal): Boolean;
 begin
 	Result := vTable^.trace_event_sweep(PTracePluginToken(token), connection, sweep, sweep_state);
 end;
 
-function ITracePlugin.trace_func_execute(connection: PTraceDatabaseConnectionToken; transaction: PTraceTransactionToken; function_: PTraceFunctionToken; started: Boolean; func_result: Cardinal): Boolean;
+function ITracePluginHelper.trace_func_execute(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; function_: ITraceFunction; started: Boolean; func_result: Cardinal): Boolean;
 begin
 	Result := vTable^.trace_func_execute(PTracePluginToken(token), connection, transaction, function_, started, func_result);
 end;
@@ -11522,32 +11990,32 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure ITraceFactory.addRef();
+procedure ITraceFactoryHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function ITraceFactory.release(): Integer;
+function ITraceFactoryHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-procedure ITraceFactory.setOwner(r: PReferenceCountedToken);
+procedure ITraceFactoryHelper.setOwner(r: IReferenceCounted);
 begin
 	vTable^.setOwner(PPluginBaseToken(token), r);
 end;
 
-function ITraceFactory.getOwner(): PReferenceCountedToken;
+function ITraceFactoryHelper.getOwner(): IReferenceCounted;
 begin
 	Result := vTable^.getOwner(PPluginBaseToken(token));
 end;
 
-function ITraceFactory.trace_needs(): QWord;
+function ITraceFactoryHelper.trace_needs(): QWord;
 begin
 	Result := vTable^.trace_needs(PTraceFactoryToken(token));
 end;
 
-function ITraceFactory.trace_create(status: PStatusToken; init_info: PTraceInitInfoToken): PTracePluginToken;
+function ITraceFactoryHelper.trace_create(status: IStatus; init_info: ITraceInitInfo): ITracePlugin;
 begin
 	Result := vTable^.trace_create(PTraceFactoryToken(token), status, init_info);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -11583,18 +12051,18 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IUdrFunctionFactory.dispose();
+procedure IUdrFunctionFactoryHelper.dispose();
 begin
 	vTable^.dispose(PDisposableToken(token));
 end;
 
-procedure IUdrFunctionFactory.setup(status: PStatusToken; context: PExternalContextToken; metadata: PRoutineMetadataToken; inBuilder: PMetadataBuilderToken; outBuilder: PMetadataBuilderToken);
+procedure IUdrFunctionFactoryHelper.setup(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder);
 begin
 	vTable^.setup(PUdrFunctionFactoryToken(token), status, context, metadata, inBuilder, outBuilder);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IUdrFunctionFactory.newItem(status: PStatusToken; context: PExternalContextToken; metadata: PRoutineMetadataToken): PExternalFunctionToken;
+function IUdrFunctionFactoryHelper.newItem(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata): IExternalFunction;
 begin
 	Result := vTable^.newItem(PUdrFunctionFactoryToken(token), status, context, metadata);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -11630,18 +12098,18 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IUdrProcedureFactory.dispose();
+procedure IUdrProcedureFactoryHelper.dispose();
 begin
 	vTable^.dispose(PDisposableToken(token));
 end;
 
-procedure IUdrProcedureFactory.setup(status: PStatusToken; context: PExternalContextToken; metadata: PRoutineMetadataToken; inBuilder: PMetadataBuilderToken; outBuilder: PMetadataBuilderToken);
+procedure IUdrProcedureFactoryHelper.setup(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder);
 begin
 	vTable^.setup(PUdrProcedureFactoryToken(token), status, context, metadata, inBuilder, outBuilder);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IUdrProcedureFactory.newItem(status: PStatusToken; context: PExternalContextToken; metadata: PRoutineMetadataToken): PExternalProcedureToken;
+function IUdrProcedureFactoryHelper.newItem(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata): IExternalProcedure;
 begin
 	Result := vTable^.newItem(PUdrProcedureFactoryToken(token), status, context, metadata);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -11677,18 +12145,18 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IUdrTriggerFactory.dispose();
+procedure IUdrTriggerFactoryHelper.dispose();
 begin
 	vTable^.dispose(PDisposableToken(token));
 end;
 
-procedure IUdrTriggerFactory.setup(status: PStatusToken; context: PExternalContextToken; metadata: PRoutineMetadataToken; fieldsBuilder: PMetadataBuilderToken);
+procedure IUdrTriggerFactoryHelper.setup(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; fieldsBuilder: IMetadataBuilder);
 begin
 	vTable^.setup(PUdrTriggerFactoryToken(token), status, context, metadata, fieldsBuilder);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IUdrTriggerFactory.newItem(status: PStatusToken; context: PExternalContextToken; metadata: PRoutineMetadataToken): PExternalTriggerToken;
+function IUdrTriggerFactoryHelper.newItem(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata): IExternalTrigger;
 begin
 	Result := vTable^.newItem(PUdrTriggerFactoryToken(token), status, context, metadata);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -11724,24 +12192,24 @@ begin
   Result := a.token = b.token;
 end;
 
-function IUdrPlugin.getMaster(): PMasterToken;
+function IUdrPluginHelper.getMaster(): IMaster;
 begin
 	Result := vTable^.getMaster(PUdrPluginToken(token));
 end;
 
-procedure IUdrPlugin.registerFunction(status: PStatusToken; name: PAnsiChar; factory: PUdrFunctionFactoryToken);
+procedure IUdrPluginHelper.registerFunction(status: IStatus; name: PAnsiChar; factory: IUdrFunctionFactory);
 begin
 	vTable^.registerFunction(PUdrPluginToken(token), status, name, factory);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IUdrPlugin.registerProcedure(status: PStatusToken; name: PAnsiChar; factory: PUdrProcedureFactoryToken);
+procedure IUdrPluginHelper.registerProcedure(status: IStatus; name: PAnsiChar; factory: IUdrProcedureFactory);
 begin
 	vTable^.registerProcedure(PUdrPluginToken(token), status, name, factory);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IUdrPlugin.registerTrigger(status: PStatusToken; name: PAnsiChar; factory: PUdrTriggerFactoryToken);
+procedure IUdrPluginHelper.registerTrigger(status: IStatus; name: PAnsiChar; factory: IUdrTriggerFactory);
 begin
 	vTable^.registerTrigger(PUdrPluginToken(token), status, name, factory);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -11777,23 +12245,23 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IDecFloat16.toBcd(from: FB_DEC16Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr);
+procedure IDecFloat16Helper.toBcd(from: FB_DEC16Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr);
 begin
 	vTable^.toBcd(PDecFloat16Token(token), from, sign, bcd, exp);
 end;
 
-procedure IDecFloat16.toString(status: PStatusToken; from: FB_DEC16Ptr; bufferLength: Cardinal; buffer: PAnsiChar);
+procedure IDecFloat16Helper.toString(status: IStatus; from: FB_DEC16Ptr; bufferLength: Cardinal; buffer: PAnsiChar);
 begin
 	vTable^.toString(PDecFloat16Token(token), status, from, bufferLength, buffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IDecFloat16.fromBcd(sign: Integer; bcd: BytePtr; exp: Integer; to_: FB_DEC16Ptr);
+procedure IDecFloat16Helper.fromBcd(sign: Integer; bcd: BytePtr; exp: Integer; to_: FB_DEC16Ptr);
 begin
 	vTable^.fromBcd(PDecFloat16Token(token), sign, bcd, exp, to_);
 end;
 
-procedure IDecFloat16.fromString(status: PStatusToken; from: PAnsiChar; to_: FB_DEC16Ptr);
+procedure IDecFloat16Helper.fromString(status: IStatus; from: PAnsiChar; to_: FB_DEC16Ptr);
 begin
 	vTable^.fromString(PDecFloat16Token(token), status, from, to_);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -11829,23 +12297,23 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IDecFloat34.toBcd(from: FB_DEC34Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr);
+procedure IDecFloat34Helper.toBcd(from: FB_DEC34Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr);
 begin
 	vTable^.toBcd(PDecFloat34Token(token), from, sign, bcd, exp);
 end;
 
-procedure IDecFloat34.toString(status: PStatusToken; from: FB_DEC34Ptr; bufferLength: Cardinal; buffer: PAnsiChar);
+procedure IDecFloat34Helper.toString(status: IStatus; from: FB_DEC34Ptr; bufferLength: Cardinal; buffer: PAnsiChar);
 begin
 	vTable^.toString(PDecFloat34Token(token), status, from, bufferLength, buffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IDecFloat34.fromBcd(sign: Integer; bcd: BytePtr; exp: Integer; to_: FB_DEC34Ptr);
+procedure IDecFloat34Helper.fromBcd(sign: Integer; bcd: BytePtr; exp: Integer; to_: FB_DEC34Ptr);
 begin
 	vTable^.fromBcd(PDecFloat34Token(token), sign, bcd, exp, to_);
 end;
 
-procedure IDecFloat34.fromString(status: PStatusToken; from: PAnsiChar; to_: FB_DEC34Ptr);
+procedure IDecFloat34Helper.fromString(status: IStatus; from: PAnsiChar; to_: FB_DEC34Ptr);
 begin
 	vTable^.fromString(PDecFloat34Token(token), status, from, to_);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -11881,13 +12349,13 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IInt128.toString(status: PStatusToken; from: FB_I128Ptr; scale: Integer; bufferLength: Cardinal; buffer: PAnsiChar);
+procedure IInt128Helper.toString(status: IStatus; from: FB_I128Ptr; scale: Integer; bufferLength: Cardinal; buffer: PAnsiChar);
 begin
 	vTable^.toString(PInt128Token(token), status, from, scale, bufferLength, buffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IInt128.fromString(status: PStatusToken; scale: Integer; from: PAnsiChar; to_: FB_I128Ptr);
+procedure IInt128Helper.fromString(status: IStatus; scale: Integer; from: PAnsiChar; to_: FB_I128Ptr);
 begin
 	vTable^.fromString(PInt128Token(token), status, scale, from, to_);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -11923,37 +12391,37 @@ begin
   Result := a.token = b.token;
 end;
 
-function IReplicatedField.getName(): PAnsiChar;
+function IReplicatedFieldHelper.getName(): PAnsiChar;
 begin
 	Result := vTable^.getName(PReplicatedFieldToken(token));
 end;
 
-function IReplicatedField.getType(): Cardinal;
+function IReplicatedFieldHelper.getType(): Cardinal;
 begin
 	Result := vTable^.getType(PReplicatedFieldToken(token));
 end;
 
-function IReplicatedField.getSubType(): Integer;
+function IReplicatedFieldHelper.getSubType(): Integer;
 begin
 	Result := vTable^.getSubType(PReplicatedFieldToken(token));
 end;
 
-function IReplicatedField.getScale(): Integer;
+function IReplicatedFieldHelper.getScale(): Integer;
 begin
 	Result := vTable^.getScale(PReplicatedFieldToken(token));
 end;
 
-function IReplicatedField.getLength(): Cardinal;
+function IReplicatedFieldHelper.getLength(): Cardinal;
 begin
 	Result := vTable^.getLength(PReplicatedFieldToken(token));
 end;
 
-function IReplicatedField.getCharSet(): Cardinal;
+function IReplicatedFieldHelper.getCharSet(): Cardinal;
 begin
 	Result := vTable^.getCharSet(PReplicatedFieldToken(token));
 end;
 
-function IReplicatedField.getData(): Pointer;
+function IReplicatedFieldHelper.getData(): Pointer;
 begin
 	Result := vTable^.getData(PReplicatedFieldToken(token));
 end;
@@ -11988,22 +12456,22 @@ begin
   Result := a.token = b.token;
 end;
 
-function IReplicatedRecord.getCount(): Cardinal;
+function IReplicatedRecordHelper.getCount(): Cardinal;
 begin
 	Result := vTable^.getCount(PReplicatedRecordToken(token));
 end;
 
-function IReplicatedRecord.getField(index: Cardinal): PReplicatedFieldToken;
+function IReplicatedRecordHelper.getField(index: Cardinal): IReplicatedField;
 begin
 	Result := vTable^.getField(PReplicatedRecordToken(token), index);
 end;
 
-function IReplicatedRecord.getRawLength(): Cardinal;
+function IReplicatedRecordHelper.getRawLength(): Cardinal;
 begin
 	Result := vTable^.getRawLength(PReplicatedRecordToken(token));
 end;
 
-function IReplicatedRecord.getRawData(): BytePtr;
+function IReplicatedRecordHelper.getRawData(): BytePtr;
 begin
 	Result := vTable^.getRawData(PReplicatedRecordToken(token));
 end;
@@ -12038,72 +12506,72 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IReplicatedTransaction.dispose();
+procedure IReplicatedTransactionHelper.dispose();
 begin
 	vTable^.dispose(PDisposableToken(token));
 end;
 
-procedure IReplicatedTransaction.prepare(status: PStatusToken);
+procedure IReplicatedTransactionHelper.prepare(status: IStatus);
 begin
 	vTable^.prepare(PReplicatedTransactionToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IReplicatedTransaction.commit(status: PStatusToken);
+procedure IReplicatedTransactionHelper.commit(status: IStatus);
 begin
 	vTable^.commit(PReplicatedTransactionToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IReplicatedTransaction.rollback(status: PStatusToken);
+procedure IReplicatedTransactionHelper.rollback(status: IStatus);
 begin
 	vTable^.rollback(PReplicatedTransactionToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IReplicatedTransaction.startSavepoint(status: PStatusToken);
+procedure IReplicatedTransactionHelper.startSavepoint(status: IStatus);
 begin
 	vTable^.startSavepoint(PReplicatedTransactionToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IReplicatedTransaction.releaseSavepoint(status: PStatusToken);
+procedure IReplicatedTransactionHelper.releaseSavepoint(status: IStatus);
 begin
 	vTable^.releaseSavepoint(PReplicatedTransactionToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IReplicatedTransaction.rollbackSavepoint(status: PStatusToken);
+procedure IReplicatedTransactionHelper.rollbackSavepoint(status: IStatus);
 begin
 	vTable^.rollbackSavepoint(PReplicatedTransactionToken(token), status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IReplicatedTransaction.insertRecord(status: PStatusToken; name: PAnsiChar; record_: PReplicatedRecordToken);
+procedure IReplicatedTransactionHelper.insertRecord(status: IStatus; name: PAnsiChar; record_: IReplicatedRecord);
 begin
 	vTable^.insertRecord(PReplicatedTransactionToken(token), status, name, record_);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IReplicatedTransaction.updateRecord(status: PStatusToken; name: PAnsiChar; orgRecord: PReplicatedRecordToken; newRecord: PReplicatedRecordToken);
+procedure IReplicatedTransactionHelper.updateRecord(status: IStatus; name: PAnsiChar; orgRecord: IReplicatedRecord; newRecord: IReplicatedRecord);
 begin
 	vTable^.updateRecord(PReplicatedTransactionToken(token), status, name, orgRecord, newRecord);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IReplicatedTransaction.deleteRecord(status: PStatusToken; name: PAnsiChar; record_: PReplicatedRecordToken);
+procedure IReplicatedTransactionHelper.deleteRecord(status: IStatus; name: PAnsiChar; record_: IReplicatedRecord);
 begin
 	vTable^.deleteRecord(PReplicatedTransactionToken(token), status, name, record_);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IReplicatedTransaction.executeSql(status: PStatusToken; sql: PAnsiChar);
+procedure IReplicatedTransactionHelper.executeSql(status: IStatus; sql: PAnsiChar);
 begin
 	vTable^.executeSql(PReplicatedTransactionToken(token), status, sql);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IReplicatedTransaction.executeSqlIntl(status: PStatusToken; charset: Cardinal; sql: PAnsiChar);
+procedure IReplicatedTransactionHelper.executeSqlIntl(status: IStatus; charset: Cardinal; sql: PAnsiChar);
 begin
 	vTable^.executeSqlIntl(PReplicatedTransactionToken(token), status, charset, sql);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -12139,45 +12607,45 @@ begin
   Result := a.token = b.token;
 end;
 
-procedure IReplicatedSession.addRef();
+procedure IReplicatedSessionHelper.addRef();
 begin
 	vTable^.addRef(PReferenceCountedToken(token));
 end;
 
-function IReplicatedSession.release(): Integer;
+function IReplicatedSessionHelper.release(): Integer;
 begin
 	Result := vTable^.release(PReferenceCountedToken(token));
 end;
 
-procedure IReplicatedSession.setOwner(r: PReferenceCountedToken);
+procedure IReplicatedSessionHelper.setOwner(r: IReferenceCounted);
 begin
 	vTable^.setOwner(PPluginBaseToken(token), r);
 end;
 
-function IReplicatedSession.getOwner(): PReferenceCountedToken;
+function IReplicatedSessionHelper.getOwner(): IReferenceCounted;
 begin
 	Result := vTable^.getOwner(PPluginBaseToken(token));
 end;
 
-function IReplicatedSession.init(status: PStatusToken; attachment: PAttachmentToken): Boolean;
+function IReplicatedSessionHelper.init(status: IStatus; attachment: IAttachment): Boolean;
 begin
 	Result := vTable^.init(PReplicatedSessionToken(token), status, attachment);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IReplicatedSession.startTransaction(status: PStatusToken; transaction: PTransactionToken; number: Int64): PReplicatedTransactionToken;
+function IReplicatedSessionHelper.startTransaction(status: IStatus; transaction: ITransaction; number: Int64): IReplicatedTransaction;
 begin
 	Result := vTable^.startTransaction(PReplicatedSessionToken(token), status, transaction, number);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IReplicatedSession.cleanupTransaction(status: PStatusToken; number: Int64);
+procedure IReplicatedSessionHelper.cleanupTransaction(status: IStatus; number: Int64);
 begin
 	vTable^.cleanupTransaction(PReplicatedSessionToken(token), status, number);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-procedure IReplicatedSession.setSequence(status: PStatusToken; name: PAnsiChar; value: Int64);
+procedure IReplicatedSessionHelper.setSequence(status: IStatus; name: PAnsiChar; value: Int64);
 begin
 	vTable^.setSequence(PReplicatedSessionToken(token), status, name, value);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
@@ -12188,16 +12656,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IVersionedImpl.getInterfaceToken: PVersionedToken;
-begin
-  Result := PVersionedToken(@token);
-end;
-
-function IVersionedImpl.getInterface: IVersioned;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 class procedure IVersionedImpl.Initialize;
@@ -12217,16 +12676,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IReferenceCountedImpl.getInterfaceToken: PReferenceCountedToken;
-begin
-  Result := PReferenceCountedToken(@token);
-end;
-
-function IReferenceCountedImpl.getInterface: IReferenceCounted;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IReferenceCountedImpl_addRefDispatcher(this: PReferenceCountedToken); cdecl;
@@ -12266,16 +12716,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IDisposableImpl.getInterfaceToken: PDisposableToken;
-begin
-  Result := PDisposableToken(@token);
-end;
-
-function IDisposableImpl.getInterface: IDisposable;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IDisposableImpl_disposeDispatcher(this: PDisposableToken); cdecl;
@@ -12305,16 +12746,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IStatusImpl.getInterfaceToken: PStatusToken;
-begin
-  Result := PStatusToken(@token);
-end;
-
-function IStatusImpl.getInterface: IStatus;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IStatusImpl_disposeDispatcher(this: PStatusToken); cdecl;
@@ -12434,16 +12866,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IMasterImpl.getInterfaceToken: PMasterToken;
-begin
-  Result := PMasterToken(@token);
-end;
-
-function IMasterImpl.getInterface: IMaster;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function IMasterImpl_getStatusDispatcher(this: PMasterToken): PStatusToken; cdecl;
@@ -12583,16 +13006,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IPluginBaseImpl.getInterfaceToken: PPluginBaseToken;
-begin
-  Result := PPluginBaseToken(@token);
-end;
-
-function IPluginBaseImpl.getInterface: IPluginBase;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IPluginBaseImpl_addRefDispatcher(this: PPluginBaseToken); cdecl;
@@ -12652,16 +13066,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IPluginSetImpl.getInterfaceToken: PPluginSetToken;
-begin
-  Result := PPluginSetToken(@token);
-end;
-
-function IPluginSetImpl.getInterface: IPluginSet;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IPluginSetImpl_addRefDispatcher(this: PPluginSetToken); cdecl;
@@ -12751,16 +13156,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IConfigEntryImpl.getInterfaceToken: PConfigEntryToken;
-begin
-  Result := PConfigEntryToken(@token);
-end;
-
-function IConfigEntryImpl.getInterface: IConfigEntry;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IConfigEntryImpl_addRefDispatcher(this: PConfigEntryToken); cdecl;
@@ -12850,16 +13246,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IConfigImpl.getInterfaceToken: PConfigToken;
-begin
-  Result := PConfigToken(@token);
-end;
-
-function IConfigImpl.getInterface: IConfig;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IConfigImpl_addRefDispatcher(this: PConfigToken); cdecl;
@@ -12929,16 +13316,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IFirebirdConfImpl.getInterfaceToken: PFirebirdConfToken;
-begin
-  Result := PFirebirdConfToken(@token);
-end;
-
-function IFirebirdConfImpl.getInterface: IFirebirdConf;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IFirebirdConfImpl_addRefDispatcher(this: PFirebirdConfToken); cdecl;
@@ -13028,16 +13406,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IPluginConfigImpl.getInterfaceToken: PPluginConfigToken;
-begin
-  Result := PPluginConfigToken(@token);
-end;
-
-function IPluginConfigImpl.getInterface: IPluginConfig;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IPluginConfigImpl_addRefDispatcher(this: PPluginConfigToken); cdecl;
@@ -13117,16 +13486,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IPluginFactoryImpl.getInterfaceToken: PPluginFactoryToken;
-begin
-  Result := PPluginFactoryToken(@token);
-end;
-
-function IPluginFactoryImpl.getInterface: IPluginFactory;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function IPluginFactoryImpl_createPluginDispatcher(this: PPluginFactoryToken; status: PStatusToken; factoryParameter: PPluginConfigToken): PPluginBaseToken; cdecl;
@@ -13156,16 +13516,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IPluginModuleImpl.getInterfaceToken: PPluginModuleToken;
-begin
-  Result := PPluginModuleToken(@token);
-end;
-
-function IPluginModuleImpl.getInterface: IPluginModule;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IPluginModuleImpl_doCleanDispatcher(this: PPluginModuleToken); cdecl;
@@ -13205,16 +13556,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IPluginManagerImpl.getInterfaceToken: PPluginManagerToken;
-begin
-  Result := PPluginManagerToken(@token);
-end;
-
-function IPluginManagerImpl.getInterface: IPluginManager;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IPluginManagerImpl_registerPluginFactoryDispatcher(this: PPluginManagerToken; pluginType: Cardinal; defaultName: PAnsiChar; factory: PPluginFactoryToken); cdecl;
@@ -13294,16 +13636,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function ICryptKeyImpl.getInterfaceToken: PCryptKeyToken;
-begin
-  Result := PCryptKeyToken(@token);
-end;
-
-function ICryptKeyImpl.getInterface: ICryptKey;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure ICryptKeyImpl_setSymmetricDispatcher(this: PCryptKeyToken; status: PStatusToken; type_: PAnsiChar; keyLength: Cardinal; key: Pointer); cdecl;
@@ -13363,16 +13696,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IConfigManagerImpl.getInterfaceToken: PConfigManagerToken;
-begin
-  Result := PConfigManagerToken(@token);
-end;
-
-function IConfigManagerImpl.getInterface: IConfigManager;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function IConfigManagerImpl_getDirectoryDispatcher(this: PConfigManagerToken; code: Cardinal): PAnsiChar; cdecl;
@@ -13462,16 +13786,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IEventCallbackImpl.getInterfaceToken: PEventCallbackToken;
-begin
-  Result := PEventCallbackToken(@token);
-end;
-
-function IEventCallbackImpl.getInterface: IEventCallback;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IEventCallbackImpl_addRefDispatcher(this: PEventCallbackToken); cdecl;
@@ -13521,16 +13836,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IBlobImpl.getInterfaceToken: PBlobToken;
-begin
-  Result := PBlobToken(@token);
-end;
-
-function IBlobImpl.getInterface: IBlob;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IBlobImpl_addRefDispatcher(this: PBlobToken); cdecl;
@@ -13630,16 +13936,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function ITransactionImpl.getInterfaceToken: PTransactionToken;
-begin
-  Result := PTransactionToken(@token);
-end;
-
-function ITransactionImpl.getInterface: ITransaction;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure ITransactionImpl_addRefDispatcher(this: PTransactionToken); cdecl;
@@ -13779,16 +14076,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IMessageMetadataImpl.getInterfaceToken: PMessageMetadataToken;
-begin
-  Result := PMessageMetadataToken(@token);
-end;
-
-function IMessageMetadataImpl.getInterface: IMessageMetadata;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IMessageMetadataImpl_addRefDispatcher(this: PMessageMetadataToken); cdecl;
@@ -13998,16 +14286,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IMetadataBuilderImpl.getInterfaceToken: PMetadataBuilderToken;
-begin
-  Result := PMetadataBuilderToken(@token);
-end;
-
-function IMetadataBuilderImpl.getInterface: IMetadataBuilder;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IMetadataBuilderImpl_addRefDispatcher(this: PMetadataBuilderToken); cdecl;
@@ -14187,16 +14466,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IResultSetImpl.getInterfaceToken: PResultSetToken;
-begin
-  Result := PResultSetToken(@token);
-end;
-
-function IResultSetImpl.getInterface: IResultSet;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IResultSetImpl_addRefDispatcher(this: PResultSetToken); cdecl;
@@ -14346,16 +14616,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IStatementImpl.getInterfaceToken: PStatementToken;
-begin
-  Result := PStatementToken(@token);
-end;
-
-function IStatementImpl.getInterface: IStatement;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IStatementImpl_addRefDispatcher(this: PStatementToken); cdecl;
@@ -14535,16 +14796,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IBatchImpl.getInterfaceToken: PBatchToken;
-begin
-  Result := PBatchToken(@token);
-end;
-
-function IBatchImpl.getInterface: IBatch;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IBatchImpl_addRefDispatcher(this: PBatchToken); cdecl;
@@ -14694,16 +14946,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IBatchCompletionStateImpl.getInterfaceToken: PBatchCompletionStateToken;
-begin
-  Result := PBatchCompletionStateToken(@token);
-end;
-
-function IBatchCompletionStateImpl.getInterface: IBatchCompletionState;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IBatchCompletionStateImpl_disposeDispatcher(this: PBatchCompletionStateToken); cdecl;
@@ -14773,16 +15016,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IReplicatorImpl.getInterfaceToken: PReplicatorToken;
-begin
-  Result := PReplicatorToken(@token);
-end;
-
-function IReplicatorImpl.getInterface: IReplicator;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IReplicatorImpl_addRefDispatcher(this: PReplicatorToken); cdecl;
@@ -14842,16 +15076,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IRequestImpl.getInterfaceToken: PRequestToken;
-begin
-  Result := PRequestToken(@token);
-end;
-
-function IRequestImpl.getInterface: IRequest;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IRequestImpl_addRefDispatcher(this: PRequestToken); cdecl;
@@ -14961,16 +15186,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IEventsImpl.getInterfaceToken: PEventsToken;
-begin
-  Result := PEventsToken(@token);
-end;
-
-function IEventsImpl.getInterface: IEvents;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IEventsImpl_addRefDispatcher(this: PEventsToken); cdecl;
@@ -15020,16 +15236,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IAttachmentImpl.getInterfaceToken: PAttachmentToken;
-begin
-  Result := PAttachmentToken(@token);
-end;
-
-function IAttachmentImpl.getInterface: IAttachment;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IAttachmentImpl_addRefDispatcher(this: PAttachmentToken); cdecl;
@@ -15309,16 +15516,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IServiceImpl.getInterfaceToken: PServiceToken;
-begin
-  Result := PServiceToken(@token);
-end;
-
-function IServiceImpl.getInterface: IService;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IServiceImpl_addRefDispatcher(this: PServiceToken); cdecl;
@@ -15388,16 +15586,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IProviderImpl.getInterfaceToken: PProviderToken;
-begin
-  Result := PProviderToken(@token);
-end;
-
-function IProviderImpl.getInterface: IProvider;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IProviderImpl_addRefDispatcher(this: PProviderToken); cdecl;
@@ -15507,16 +15696,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IDtcStartImpl.getInterfaceToken: PDtcStartToken;
-begin
-  Result := PDtcStartToken(@token);
-end;
-
-function IDtcStartImpl.getInterface: IDtcStart;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IDtcStartImpl_disposeDispatcher(this: PDtcStartToken); cdecl;
@@ -15576,16 +15756,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IDtcImpl.getInterfaceToken: PDtcToken;
-begin
-  Result := PDtcToken(@token);
-end;
-
-function IDtcImpl.getInterface: IDtc;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function IDtcImpl_joinDispatcher(this: PDtcToken; status: PStatusToken; one: PTransactionToken; two: PTransactionToken): PTransactionToken; cdecl;
@@ -15625,16 +15796,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IAuthImpl.getInterfaceToken: PAuthToken;
-begin
-  Result := PAuthToken(@token);
-end;
-
-function IAuthImpl.getInterface: IAuth;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IAuthImpl_addRefDispatcher(this: PAuthToken); cdecl;
@@ -15694,16 +15856,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IWriterImpl.getInterfaceToken: PWriterToken;
-begin
-  Result := PWriterToken(@token);
-end;
-
-function IWriterImpl.getInterface: IWriter;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IWriterImpl_resetDispatcher(this: PWriterToken); cdecl;
@@ -15763,16 +15916,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IServerBlockImpl.getInterfaceToken: PServerBlockToken;
-begin
-  Result := PServerBlockToken(@token);
-end;
-
-function IServerBlockImpl.getInterface: IServerBlock;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function IServerBlockImpl_getLoginDispatcher(this: PServerBlockToken): PAnsiChar; cdecl;
@@ -15832,16 +15976,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IClientBlockImpl.getInterfaceToken: PClientBlockToken;
-begin
-  Result := PClientBlockToken(@token);
-end;
-
-function IClientBlockImpl.getInterface: IClientBlock;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IClientBlockImpl_addRefDispatcher(this: PClientBlockToken); cdecl;
@@ -15941,16 +16076,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IServerImpl.getInterfaceToken: PServerToken;
-begin
-  Result := PServerToken(@token);
-end;
-
-function IServerImpl.getInterface: IServer;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IServerImpl_addRefDispatcher(this: PServerToken); cdecl;
@@ -16030,16 +16156,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IClientImpl.getInterfaceToken: PClientToken;
-begin
-  Result := PClientToken(@token);
-end;
-
-function IClientImpl.getInterface: IClient;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IClientImpl_addRefDispatcher(this: PClientToken); cdecl;
@@ -16109,16 +16226,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IUserFieldImpl.getInterfaceToken: PUserFieldToken;
-begin
-  Result := PUserFieldToken(@token);
-end;
-
-function IUserFieldImpl.getInterface: IUserField;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function IUserFieldImpl_enteredDispatcher(this: PUserFieldToken): Integer; cdecl;
@@ -16168,16 +16276,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function ICharUserFieldImpl.getInterfaceToken: PCharUserFieldToken;
-begin
-  Result := PCharUserFieldToken(@token);
-end;
-
-function ICharUserFieldImpl.getInterface: ICharUserField;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function ICharUserFieldImpl_enteredDispatcher(this: PCharUserFieldToken): Integer; cdecl;
@@ -16247,16 +16346,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IIntUserFieldImpl.getInterfaceToken: PIntUserFieldToken;
-begin
-  Result := PIntUserFieldToken(@token);
-end;
-
-function IIntUserFieldImpl.getInterface: IIntUserField;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function IIntUserFieldImpl_enteredDispatcher(this: PIntUserFieldToken): Integer; cdecl;
@@ -16326,16 +16416,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IUserImpl.getInterfaceToken: PUserToken;
-begin
-  Result := PUserToken(@token);
-end;
-
-function IUserImpl.getInterface: IUser;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function IUserImpl_operationDispatcher(this: PUserToken): Cardinal; cdecl;
@@ -16465,16 +16546,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IListUsersImpl.getInterfaceToken: PListUsersToken;
-begin
-  Result := PListUsersToken(@token);
-end;
-
-function IListUsersImpl.getInterface: IListUsers;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IListUsersImpl_listDispatcher(this: PListUsersToken; status: PStatusToken; user: PUserToken); cdecl;
@@ -16504,16 +16576,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function ILogonInfoImpl.getInterfaceToken: PLogonInfoToken;
-begin
-  Result := PLogonInfoToken(@token);
-end;
-
-function ILogonInfoImpl.getInterface: ILogonInfo;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function ILogonInfoImpl_nameDispatcher(this: PLogonInfoToken): PAnsiChar; cdecl;
@@ -16603,16 +16666,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IManagementImpl.getInterfaceToken: PManagementToken;
-begin
-  Result := PManagementToken(@token);
-end;
-
-function IManagementImpl.getInterface: IManagement;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IManagementImpl_addRefDispatcher(this: PManagementToken); cdecl;
@@ -16712,16 +16766,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IAuthBlockImpl.getInterfaceToken: PAuthBlockToken;
-begin
-  Result := PAuthBlockToken(@token);
-end;
-
-function IAuthBlockImpl.getInterface: IAuthBlock;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function IAuthBlockImpl_getTypeDispatcher(this: PAuthBlockToken): PAnsiChar; cdecl;
@@ -16811,16 +16856,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IWireCryptPluginImpl.getInterfaceToken: PWireCryptPluginToken;
-begin
-  Result := PWireCryptPluginToken(@token);
-end;
-
-function IWireCryptPluginImpl.getInterface: IWireCryptPlugin;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IWireCryptPluginImpl_addRefDispatcher(this: PWireCryptPluginToken); cdecl;
@@ -16940,16 +16976,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function ICryptKeyCallbackImpl.getInterfaceToken: PCryptKeyCallbackToken;
-begin
-  Result := PCryptKeyCallbackToken(@token);
-end;
-
-function ICryptKeyCallbackImpl.getInterface: ICryptKeyCallback;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function ICryptKeyCallbackImpl_callbackDispatcher(this: PCryptKeyCallbackToken; dataLength: Cardinal; data: Pointer; bufferLength: Cardinal; buffer: Pointer): Cardinal; cdecl;
@@ -16979,16 +17006,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IKeyHolderPluginImpl.getInterfaceToken: PKeyHolderPluginToken;
-begin
-  Result := PKeyHolderPluginToken(@token);
-end;
-
-function IKeyHolderPluginImpl.getInterface: IKeyHolderPlugin;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IKeyHolderPluginImpl_addRefDispatcher(this: PKeyHolderPluginToken); cdecl;
@@ -17088,16 +17106,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IDbCryptInfoImpl.getInterfaceToken: PDbCryptInfoToken;
-begin
-  Result := PDbCryptInfoToken(@token);
-end;
-
-function IDbCryptInfoImpl.getInterface: IDbCryptInfo;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IDbCryptInfoImpl_addRefDispatcher(this: PDbCryptInfoToken); cdecl;
@@ -17147,16 +17156,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IDbCryptPluginImpl.getInterfaceToken: PDbCryptPluginToken;
-begin
-  Result := PDbCryptPluginToken(@token);
-end;
-
-function IDbCryptPluginImpl.getInterface: IDbCryptPlugin;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IDbCryptPluginImpl_addRefDispatcher(this: PDbCryptPluginToken); cdecl;
@@ -17195,7 +17195,7 @@ begin
 	end
 end;
 
-procedure IDbCryptPluginImpl_setKeyDispatcher(this: PDbCryptPluginToken; status: PStatusToken; length: Cardinal; sources: PKeyHolderPluginTokenPtr; keyName: PAnsiChar); cdecl;
+procedure IDbCryptPluginImpl_setKeyDispatcher(this: PDbCryptPluginToken; status: PStatusToken; length: Cardinal; sources: PKeyHolderPluginToken; keyName: PAnsiChar); cdecl;
 begin
 	try
 		IDbCryptPluginImpl(PFBImplementationToken(this).Owner).setKey(status, length, sources, keyName);
@@ -17256,16 +17256,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IExternalContextImpl.getInterfaceToken: PExternalContextToken;
-begin
-  Result := PExternalContextToken(@token);
-end;
-
-function IExternalContextImpl.getInterface: IExternalContext;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function IExternalContextImpl_getMasterDispatcher(this: PExternalContextToken): PMasterToken; cdecl;
@@ -17385,16 +17376,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IExternalResultSetImpl.getInterfaceToken: PExternalResultSetToken;
-begin
-  Result := PExternalResultSetToken(@token);
-end;
-
-function IExternalResultSetImpl.getInterface: IExternalResultSet;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IExternalResultSetImpl_disposeDispatcher(this: PExternalResultSetToken); cdecl;
@@ -17434,16 +17416,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IExternalFunctionImpl.getInterfaceToken: PExternalFunctionToken;
-begin
-  Result := PExternalFunctionToken(@token);
-end;
-
-function IExternalFunctionImpl.getInterface: IExternalFunction;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IExternalFunctionImpl_disposeDispatcher(this: PExternalFunctionToken); cdecl;
@@ -17493,16 +17466,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IExternalProcedureImpl.getInterfaceToken: PExternalProcedureToken;
-begin
-  Result := PExternalProcedureToken(@token);
-end;
-
-function IExternalProcedureImpl.getInterface: IExternalProcedure;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IExternalProcedureImpl_disposeDispatcher(this: PExternalProcedureToken); cdecl;
@@ -17552,16 +17516,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IExternalTriggerImpl.getInterfaceToken: PExternalTriggerToken;
-begin
-  Result := PExternalTriggerToken(@token);
-end;
-
-function IExternalTriggerImpl.getInterface: IExternalTrigger;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IExternalTriggerImpl_disposeDispatcher(this: PExternalTriggerToken); cdecl;
@@ -17611,16 +17566,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IRoutineMetadataImpl.getInterfaceToken: PRoutineMetadataToken;
-begin
-  Result := PRoutineMetadataToken(@token);
-end;
-
-function IRoutineMetadataImpl.getInterface: IRoutineMetadata;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function IRoutineMetadataImpl_getPackageDispatcher(this: PRoutineMetadataToken; status: PStatusToken): PAnsiChar; cdecl;
@@ -17730,16 +17676,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IExternalEngineImpl.getInterfaceToken: PExternalEngineToken;
-begin
-  Result := PExternalEngineToken(@token);
-end;
-
-function IExternalEngineImpl.getInterface: IExternalEngine;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IExternalEngineImpl_addRefDispatcher(this: PExternalEngineToken); cdecl;
@@ -17859,16 +17796,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function ITimerImpl.getInterfaceToken: PTimerToken;
-begin
-  Result := PTimerToken(@token);
-end;
-
-function ITimerImpl.getInterface: ITimer;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure ITimerImpl_addRefDispatcher(this: PTimerToken); cdecl;
@@ -17918,16 +17846,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function ITimerControlImpl.getInterfaceToken: PTimerControlToken;
-begin
-  Result := PTimerControlToken(@token);
-end;
-
-function ITimerControlImpl.getInterface: ITimerControl;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure ITimerControlImpl_startDispatcher(this: PTimerControlToken; status: PStatusToken; timer: PTimerToken; microSeconds: QWord); cdecl;
@@ -17967,16 +17886,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IVersionCallbackImpl.getInterfaceToken: PVersionCallbackToken;
-begin
-  Result := PVersionCallbackToken(@token);
-end;
-
-function IVersionCallbackImpl.getInterface: IVersionCallback;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IVersionCallbackImpl_callbackDispatcher(this: PVersionCallbackToken; status: PStatusToken; text: PAnsiChar); cdecl;
@@ -18006,16 +17916,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IUtilImpl.getInterfaceToken: PUtilToken;
-begin
-  Result := PUtilToken(@token);
-end;
-
-function IUtilImpl.getInterface: IUtil;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IUtilImpl_getFbVersionDispatcher(this: PUtilToken; status: PStatusToken; att: PAttachmentToken; callback: PVersionCallbackToken); cdecl;
@@ -18255,16 +18156,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IOffsetsCallbackImpl.getInterfaceToken: POffsetsCallbackToken;
-begin
-  Result := POffsetsCallbackToken(@token);
-end;
-
-function IOffsetsCallbackImpl.getInterface: IOffsetsCallback;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IOffsetsCallbackImpl_setOffsetDispatcher(this: POffsetsCallbackToken; status: PStatusToken; index: Cardinal; offset: Cardinal; nullOffset: Cardinal); cdecl;
@@ -18294,16 +18186,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IXpbBuilderImpl.getInterfaceToken: PXpbBuilderToken;
-begin
-  Result := PXpbBuilderToken(@token);
-end;
-
-function IXpbBuilderImpl.getInterface: IXpbBuilder;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IXpbBuilderImpl_disposeDispatcher(this: PXpbBuilderToken); cdecl;
@@ -18533,16 +18416,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function ITraceConnectionImpl.getInterfaceToken: PTraceConnectionToken;
-begin
-  Result := PTraceConnectionToken(@token);
-end;
-
-function ITraceConnectionImpl.getInterface: ITraceConnection;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function ITraceConnectionImpl_getKindDispatcher(this: PTraceConnectionToken): Cardinal; cdecl;
@@ -18652,16 +18526,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function ITraceDatabaseConnectionImpl.getInterfaceToken: PTraceDatabaseConnectionToken;
-begin
-  Result := PTraceDatabaseConnectionToken(@token);
-end;
-
-function ITraceDatabaseConnectionImpl.getInterface: ITraceDatabaseConnection;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function ITraceDatabaseConnectionImpl_getKindDispatcher(this: PTraceDatabaseConnectionToken): Cardinal; cdecl;
@@ -18791,16 +18656,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function ITraceTransactionImpl.getInterfaceToken: PTraceTransactionToken;
-begin
-  Result := PTraceTransactionToken(@token);
-end;
-
-function ITraceTransactionImpl.getInterface: ITraceTransaction;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function ITraceTransactionImpl_getTransactionIDDispatcher(this: PTraceTransactionToken): Int64; cdecl;
@@ -18890,16 +18746,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function ITraceParamsImpl.getInterfaceToken: PTraceParamsToken;
-begin
-  Result := PTraceParamsToken(@token);
-end;
-
-function ITraceParamsImpl.getInterface: ITraceParams;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function ITraceParamsImpl_getCountDispatcher(this: PTraceParamsToken): Cardinal; cdecl;
@@ -18949,16 +18796,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function ITraceStatementImpl.getInterfaceToken: PTraceStatementToken;
-begin
-  Result := PTraceStatementToken(@token);
-end;
-
-function ITraceStatementImpl.getInterface: ITraceStatement;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function ITraceStatementImpl_getStmtIDDispatcher(this: PTraceStatementToken): Int64; cdecl;
@@ -18998,16 +18836,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function ITraceSQLStatementImpl.getInterfaceToken: PTraceSQLStatementToken;
-begin
-  Result := PTraceSQLStatementToken(@token);
-end;
-
-function ITraceSQLStatementImpl.getInterface: ITraceSQLStatement;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function ITraceSQLStatementImpl_getStmtIDDispatcher(this: PTraceSQLStatementToken): Int64; cdecl;
@@ -19097,16 +18926,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function ITraceBLRStatementImpl.getInterfaceToken: PTraceBLRStatementToken;
-begin
-  Result := PTraceBLRStatementToken(@token);
-end;
-
-function ITraceBLRStatementImpl.getInterface: ITraceBLRStatement;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function ITraceBLRStatementImpl_getStmtIDDispatcher(this: PTraceBLRStatementToken): Int64; cdecl;
@@ -19176,16 +18996,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function ITraceDYNRequestImpl.getInterfaceToken: PTraceDYNRequestToken;
-begin
-  Result := PTraceDYNRequestToken(@token);
-end;
-
-function ITraceDYNRequestImpl.getInterface: ITraceDYNRequest;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function ITraceDYNRequestImpl_getDataDispatcher(this: PTraceDYNRequestToken): BytePtr; cdecl;
@@ -19235,16 +19046,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function ITraceContextVariableImpl.getInterfaceToken: PTraceContextVariableToken;
-begin
-  Result := PTraceContextVariableToken(@token);
-end;
-
-function ITraceContextVariableImpl.getInterface: ITraceContextVariable;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function ITraceContextVariableImpl_getNameSpaceDispatcher(this: PTraceContextVariableToken): PAnsiChar; cdecl;
@@ -19294,16 +19096,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function ITraceProcedureImpl.getInterfaceToken: PTraceProcedureToken;
-begin
-  Result := PTraceProcedureToken(@token);
-end;
-
-function ITraceProcedureImpl.getInterface: ITraceProcedure;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function ITraceProcedureImpl_getProcNameDispatcher(this: PTraceProcedureToken): PAnsiChar; cdecl;
@@ -19353,16 +19146,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function ITraceFunctionImpl.getInterfaceToken: PTraceFunctionToken;
-begin
-  Result := PTraceFunctionToken(@token);
-end;
-
-function ITraceFunctionImpl.getInterface: ITraceFunction;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function ITraceFunctionImpl_getFuncNameDispatcher(this: PTraceFunctionToken): PAnsiChar; cdecl;
@@ -19422,16 +19206,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function ITraceTriggerImpl.getInterfaceToken: PTraceTriggerToken;
-begin
-  Result := PTraceTriggerToken(@token);
-end;
-
-function ITraceTriggerImpl.getInterface: ITraceTrigger;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function ITraceTriggerImpl_getTriggerNameDispatcher(this: PTraceTriggerToken): PAnsiChar; cdecl;
@@ -19501,16 +19276,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function ITraceServiceConnectionImpl.getInterfaceToken: PTraceServiceConnectionToken;
-begin
-  Result := PTraceServiceConnectionToken(@token);
-end;
-
-function ITraceServiceConnectionImpl.getInterface: ITraceServiceConnection;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function ITraceServiceConnectionImpl_getKindDispatcher(this: PTraceServiceConnectionToken): Cardinal; cdecl;
@@ -19650,16 +19416,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function ITraceStatusVectorImpl.getInterfaceToken: PTraceStatusVectorToken;
-begin
-  Result := PTraceStatusVectorToken(@token);
-end;
-
-function ITraceStatusVectorImpl.getInterface: ITraceStatusVector;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function ITraceStatusVectorImpl_hasErrorDispatcher(this: PTraceStatusVectorToken): Boolean; cdecl;
@@ -19719,16 +19476,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function ITraceSweepInfoImpl.getInterfaceToken: PTraceSweepInfoToken;
-begin
-  Result := PTraceSweepInfoToken(@token);
-end;
-
-function ITraceSweepInfoImpl.getInterface: ITraceSweepInfo;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function ITraceSweepInfoImpl_getOITDispatcher(this: PTraceSweepInfoToken): Int64; cdecl;
@@ -19798,16 +19546,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function ITraceLogWriterImpl.getInterfaceToken: PTraceLogWriterToken;
-begin
-  Result := PTraceLogWriterToken(@token);
-end;
-
-function ITraceLogWriterImpl.getInterface: ITraceLogWriter;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure ITraceLogWriterImpl_addRefDispatcher(this: PTraceLogWriterToken); cdecl;
@@ -19867,16 +19606,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function ITraceInitInfoImpl.getInterfaceToken: PTraceInitInfoToken;
-begin
-  Result := PTraceInitInfoToken(@token);
-end;
-
-function ITraceInitInfoImpl.getInterface: ITraceInitInfo;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function ITraceInitInfoImpl_getConfigTextDispatcher(this: PTraceInitInfoToken): PAnsiChar; cdecl;
@@ -19966,16 +19696,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function ITracePluginImpl.getInterfaceToken: PTracePluginToken;
-begin
-  Result := PTracePluginToken(@token);
-end;
-
-function ITracePluginImpl.getInterface: ITracePlugin;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure ITracePluginImpl_addRefDispatcher(this: PTracePluginToken); cdecl;
@@ -20225,16 +19946,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function ITraceFactoryImpl.getInterfaceToken: PTraceFactoryToken;
-begin
-  Result := PTraceFactoryToken(@token);
-end;
-
-function ITraceFactoryImpl.getInterface: ITraceFactory;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure ITraceFactoryImpl_addRefDispatcher(this: PTraceFactoryToken); cdecl;
@@ -20314,16 +20026,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IUdrFunctionFactoryImpl.getInterfaceToken: PUdrFunctionFactoryToken;
-begin
-  Result := PUdrFunctionFactoryToken(@token);
-end;
-
-function IUdrFunctionFactoryImpl.getInterface: IUdrFunctionFactory;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IUdrFunctionFactoryImpl_disposeDispatcher(this: PUdrFunctionFactoryToken); cdecl;
@@ -20373,16 +20076,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IUdrProcedureFactoryImpl.getInterfaceToken: PUdrProcedureFactoryToken;
-begin
-  Result := PUdrProcedureFactoryToken(@token);
-end;
-
-function IUdrProcedureFactoryImpl.getInterface: IUdrProcedureFactory;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IUdrProcedureFactoryImpl_disposeDispatcher(this: PUdrProcedureFactoryToken); cdecl;
@@ -20432,16 +20126,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IUdrTriggerFactoryImpl.getInterfaceToken: PUdrTriggerFactoryToken;
-begin
-  Result := PUdrTriggerFactoryToken(@token);
-end;
-
-function IUdrTriggerFactoryImpl.getInterface: IUdrTriggerFactory;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IUdrTriggerFactoryImpl_disposeDispatcher(this: PUdrTriggerFactoryToken); cdecl;
@@ -20491,16 +20176,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IUdrPluginImpl.getInterfaceToken: PUdrPluginToken;
-begin
-  Result := PUdrPluginToken(@token);
-end;
-
-function IUdrPluginImpl.getInterface: IUdrPlugin;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function IUdrPluginImpl_getMasterDispatcher(this: PUdrPluginToken): PMasterToken; cdecl;
@@ -20560,16 +20236,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IDecFloat16Impl.getInterfaceToken: PDecFloat16Token;
-begin
-  Result := PDecFloat16Token(@token);
-end;
-
-function IDecFloat16Impl.getInterface: IDecFloat16;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IDecFloat16Impl_toBcdDispatcher(this: PDecFloat16Token; from: FB_DEC16Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr); cdecl;
@@ -20629,16 +20296,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IDecFloat34Impl.getInterfaceToken: PDecFloat34Token;
-begin
-  Result := PDecFloat34Token(@token);
-end;
-
-function IDecFloat34Impl.getInterface: IDecFloat34;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IDecFloat34Impl_toBcdDispatcher(this: PDecFloat34Token; from: FB_DEC34Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr); cdecl;
@@ -20698,16 +20356,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IInt128Impl.getInterfaceToken: PInt128Token;
-begin
-  Result := PInt128Token(@token);
-end;
-
-function IInt128Impl.getInterface: IInt128;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IInt128Impl_toStringDispatcher(this: PInt128Token; status: PStatusToken; from: FB_I128Ptr; scale: Integer; bufferLength: Cardinal; buffer: PAnsiChar); cdecl;
@@ -20747,16 +20396,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IReplicatedFieldImpl.getInterfaceToken: PReplicatedFieldToken;
-begin
-  Result := PReplicatedFieldToken(@token);
-end;
-
-function IReplicatedFieldImpl.getInterface: IReplicatedField;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function IReplicatedFieldImpl_getNameDispatcher(this: PReplicatedFieldToken): PAnsiChar; cdecl;
@@ -20846,16 +20486,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IReplicatedRecordImpl.getInterfaceToken: PReplicatedRecordToken;
-begin
-  Result := PReplicatedRecordToken(@token);
-end;
-
-function IReplicatedRecordImpl.getInterface: IReplicatedRecord;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 function IReplicatedRecordImpl_getCountDispatcher(this: PReplicatedRecordToken): Cardinal; cdecl;
@@ -20915,16 +20546,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IReplicatedTransactionImpl.getInterfaceToken: PReplicatedTransactionToken;
-begin
-  Result := PReplicatedTransactionToken(@token);
-end;
-
-function IReplicatedTransactionImpl.getInterface: IReplicatedTransaction;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IReplicatedTransactionImpl_disposeDispatcher(this: PReplicatedTransactionToken); cdecl;
@@ -21064,16 +20686,7 @@ begin
 	Initialize;
 	token.vTable := @vTable;
 	token.Owner := self;
-end;
-
-function IReplicatedSessionImpl.getInterfaceToken: PReplicatedSessionToken;
-begin
-  Result := PReplicatedSessionToken(@token);
-end;
-
-function IReplicatedSessionImpl.getInterface: IReplicatedSession;
-begin
-  Result := intf;
+	intf.token := @token;
 end;
 
 procedure IReplicatedSessionImpl_addRefDispatcher(this: PReplicatedSessionToken); cdecl;

@@ -165,6 +165,7 @@ begin
   writeln(OutFile,'Sync wait');
   CheckSynchronize;
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],sqlEvent);
+  CheckSynchronize;
   EventHandler.WaitForEvent;
   writeln(OutFile,'Event Signalled');
   ShowEventCounts(EventHandler);
