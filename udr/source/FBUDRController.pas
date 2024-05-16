@@ -862,10 +862,12 @@ var aProcMetadata: IFBUDRProcMetadata;
     InputParams: IFBUDRInputParams;
     metadata: Firebird.IMessageMetadata;
     FBContext: IFBUDRExternalContext;
+    singletonRow: TFBUDRSingletonRow;
 begin
   InputParams := nil;
   InputParamsSQLDA := nil;
   Result := nil;
+  singletonRow := nil;
   try
     if loLogProcedures in FBUDRControllerOptions.LogOptions then
       FController.WriteToLog(SOpenExecuteProc + FName);
@@ -905,7 +907,7 @@ begin
             metadata := (FRoutineMetadata as TFBUDRRoutineMetadata).getOutputMetadata;
 
           try
-            Result := TFBUDRSingletonRow.Create(self, FBContext,
+            singletonRow := TFBUDRSingletonRow.Create(self, FBContext,
                                                  metadata,
                                                  outMsg);
 
@@ -915,7 +917,7 @@ begin
           end;
 
           Execute(FBContext,aProcMetadata,InputParams,
-                                    (Result as TFBUDRSingletonRow).OutputData);
+                                    singletonRow.OutputData);
         finally
           InputParams := nil;
           if InputParamsSQLDA <> nil then
@@ -929,12 +931,13 @@ begin
     end;
     except on E: Exception do
       begin
-        if Result <> nil then
-          Result.dispose;
-        Result := nil;
+        if singletonRow <> nil then
+          singletonRow.dispose;
+        singletonRow := nil;
         FController.FBSetStatusFromException(E,status);
       end;
     end;
+    Result := singletonRow;
 end;
 
 { TFBUDRSelectProcedure }
@@ -1242,6 +1245,8 @@ var aTriggerMetadata: IFBUDRTriggerMetaData;
     end;
   end;
 
+var exTrigger: Firebird.IExternalTrigger; {for with statement & const labels only}
+
 begin
   try
     if loLogTriggers in FBUDRControllerOptions.LogOptions then
@@ -1260,7 +1265,7 @@ begin
       FBContext := TFBUDRExternalContext.Create(Controller,context);
       FFirebirdAPI := FBContext.GetFirebirdAPI;
       try
-        with Firebird.IExternalTrigger do
+        with exTrigger do
         case action of
         ACTION_INSERT:
           TriggerAction := taInsert;
@@ -1855,7 +1860,7 @@ var udr_config: Firebird.IConfig;
     config_entry: Firebird.IConfigEntry;
     aStatus: Firebird.IStatus;
 begin
-  if assigned(FMaster) then
+  if FMaster <> nil then
   with FMaster.getConfigManager do
   begin
     Result := StringReplace(aTemplate,'$LOGDIR',CleanDirName(getDirectory(DIR_LOG)),[rfReplaceAll, rfIgnoreCase]);
@@ -1910,7 +1915,7 @@ begin
     begin
       if loLogFunctions in FBUDRControllerOptions.LogOptions then
         WriteToLog(SFuncRegister + aName);
-      udrPlugin.registerFunction(status,PAnsiChar(aName),Firebird.IUdrFunctionFactory(factory));
+      udrPlugin.registerFunction(status,PAnsiChar(aName),Firebird.IUdrFunctionFactoryImpl(factory));
       TFBUDRFunctionFactory(factory).Controller := self;
     end
     else
@@ -1918,7 +1923,7 @@ begin
     begin
       if loLogProcedures in FBUDRControllerOptions.LogOptions then
         WriteToLog(SProcRegister + aName);
-      udrPlugin.registerProcedure(status,PAnsiChar(aName),Firebird.IUdrProcedureFactory(factory));
+      udrPlugin.registerProcedure(status,PAnsiChar(aName),Firebird.IUdrProcedureFactoryImpl(factory));
       TFBUDRProcedureFactory(factory).Controller := self;
     end
     else
@@ -1926,7 +1931,7 @@ begin
     begin
       if loLogTriggers in FBUDRControllerOptions.LogOptions then
         WriteToLog(STriggerRegister + aName);
-      udrPlugin.registerTrigger(status,PAnsiChar(aName),Firebird.IUdrTriggerFactory(factory));
+      udrPlugin.registerTrigger(status,PAnsiChar(aName),Firebird.IUdrTriggerFactoryImpl(factory));
       TFBUDRTriggerFactory(factory).Controller := self;
     end
     else

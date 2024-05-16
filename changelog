@@ -22,6 +22,9 @@ FBINTF Change Log  version          (1.4-2 Build 14340) Wed, 20 Mar 2024 11:13:1
 5. FB25Blob: last parameter of call to isc_blob_lookup_desc is now set to nil. This
    avoids memory corruption with Firebird 4 when using the legacy interface.
 
+6. ISDL interface moved from FB30Array to IB. This is to avoid internal FPC compiler errors
+   consequential on the use of generics across units.
+
 FBINTF Change Log  version          (1.4-1 Build 14103) Mon, 27 Nov 2023 14:26:35 +0000
 
 1. FBSQLData: ensure that TResults.getSQLData and TResults.GetData use same error

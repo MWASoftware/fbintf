@@ -403,16 +403,10 @@ end;
 {$ENDIF}
 
 function TFB30ClientAPI.LoadInterface: boolean;
-var
-  fb_get_master_interface: Tfb_get_master_interface;
 begin
   Result := inherited LoadInterface;
   if (FMaster = nil) and (GetFBLibrary <> nil) then {get from library}
-  begin
-    fb_get_master_interface := GetProcAddress(GetFBLibrary.GetHandle, 'fb_get_master_interface'); {do not localize}
-    if assigned(fb_get_master_interface) then
-      FMaster := fb_get_master_interface;
-  end;
+    FMaster := Firebird.GetIMaster(GetFBLibrary.GetHandle);
   if FMaster <> nil then
   begin
     FUtil := FMaster.getUtilInterface;

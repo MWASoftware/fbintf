@@ -798,20 +798,26 @@ end;
 
 procedure TFBUdrPluginEmulator.registerFunction(status: Firebird.IStatus;
   name: PAnsiChar; factory: Firebird.IUdrFunctionFactory);
+var factoryImpl: Firebird.IUdrFunctionFactoryImpl;
 begin
-  FFunctionFactories.AddObject(strpas(name),factory);
+  factoryImpl := factory;
+  FFunctionFactories.AddObject(strpas(name),factoryImpl);
 end;
 
 procedure TFBUdrPluginEmulator.registerProcedure(status: Firebird.IStatus;
   name: PAnsiChar; factory: Firebird.IUdrProcedureFactory);
+var factoryImpl: Firebird.IUdrProcedureFactoryImpl;
 begin
-  FProcedureFactories.AddObject(strpas(name),factory);
+  factoryImpl := factory;
+  FProcedureFactories.AddObject(strpas(name),factoryImpl);
 end;
 
 procedure TFBUdrPluginEmulator.registerTrigger(status: Firebird.IStatus;
   name: PAnsiChar; factory: Firebird.IUdrTriggerFactory);
+var factoryImpl: Firebird.IUdrTriggerFactoryImpl;
 begin
-  FTriggerFactories.AddObject(strpas(name),factory);
+  factoryImpl := factory;
+  FTriggerFactories.AddObject(strpas(name),factoryImpl);
 end;
 
 constructor TFBUdrPluginEmulator.Create(aModuleName: AnsiString);
