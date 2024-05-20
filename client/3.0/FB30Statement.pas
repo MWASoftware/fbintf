@@ -31,7 +31,7 @@ unit FB30Statement;
 
 {$IFDEF FPC}
 {$mode delphi}
-{$ConnectionCodePage UTF8}
+{$CodePage UTF8}
 {$interfaces COM}
 {$ENDIF}
 
@@ -378,7 +378,7 @@ begin
     for i := 0 to upcount - 1 do
     begin
       state := FCompletionState.getState(StatusIntf,i);
-      if state = Firebird.IBatchCompletionState.EXECUTE_FAILED then
+      if state = Firebird.IBatchCompletionStateImpl.EXECUTE_FAILED then
       begin
         RowNo := i+1;
         FCompletionState.getStatus(StatusIntf,(FStatus as TFB30Status).GetStatus,i);
@@ -408,10 +408,10 @@ begin
     state := FCompletionState.getState(StatusIntf,updateNo);
     Check4DataBaseError(ConnectionCodePage);
     case state of
-      Firebird.IBatchCompletionState.EXECUTE_FAILED:
+      Firebird.IBatchCompletionStateImpl.EXECUTE_FAILED:
         Result := bcExecuteFailed;
 
-      Firebird.IBatchCompletionState.SUCCESS_NO_INFO:
+      Firebird.IBatchCompletionStateImpl.SUCCESS_NO_INFO:
         Result := bcSuccessNoInfo;
 
      else
@@ -445,7 +445,7 @@ begin
     for i := 0 to upcount -1  do
     begin
       state := FCompletionState.getState(StatusIntf,i);
-      if state = Firebird.IBatchCompletionState.EXECUTE_FAILED then
+      if state = Firebird.IBatchCompletionStateImpl.EXECUTE_FAILED then
           break;
       Inc(Result);
     end;
@@ -947,7 +947,7 @@ begin
       for i := 0 to Count - 1 do
       with TIBXSQLVar(Column[i]) do
       begin
-        version := Builder.vtable^.version;
+        version := Builder.getvTableversion;
         if version >= 4 then
         {Firebird 4 or later}
         begin
@@ -1410,7 +1410,7 @@ begin
                           Length(sql),
                           PAnsiChar(sql),
                           FSQLDialect,
-                          Firebird.IStatement.PREPARE_PREFETCH_METADATA);
+                          Firebird.IStatementImpl.PREPARE_PREFETCH_METADATA);
       Check4DataBaseError(ConnectionCodePage);
       FSQLStatementType := TIBSQLStatementTypes(FStatementIntf.getType(StatusIntf));
       Check4DataBaseError(ConnectionCodePage);
@@ -1597,7 +1597,7 @@ begin
     IBError(ibxeInterfaceOutofDate,[nil]);
 
  if Scrollable then
-   flags := Firebird.IStatement.CURSOR_TYPE_SCROLLABLE;
+   flags := Firebird.IStatementImpl.CURSOR_TYPE_SCROLLABLE;
 
  with FFirebird30ClientAPI do
  begin
@@ -1753,7 +1753,7 @@ begin
   if not FOpen then
     IBError(ibxeSQLClosed, [nil]);
 
-  with FFirebird30ClientAPI do
+  with FFirebird30ClientAPI, Firebird.IStatusImpl do
   begin
     case FetchType of
     ftNext:
@@ -1763,7 +1763,7 @@ begin
         { Go to the next record... }
         fetchResult := FResultSet.fetchNext(StatusIntf,FSQLRecord.MessageBuffer);
         Check4DataBaseError(ConnectionCodePage);
-        if fetchResult = Firebird.IStatus.RESULT_NO_DATA then
+        if fetchResult = RESULT_NO_DATA then
         begin
           FBOF := false;
           FEOF := true;
@@ -1778,7 +1778,7 @@ begin
         { Go to the next record... }
         fetchResult := FResultSet.fetchPrior(StatusIntf,FSQLRecord.MessageBuffer);
         Check4DataBaseError(ConnectionCodePage);
-        if fetchResult = Firebird.IStatus.RESULT_NO_DATA then
+        if fetchResult = RESULT_NO_DATA then
         begin
           FBOF := true;
           FEOF := false;
@@ -1811,7 +1811,7 @@ begin
       end;
     end;
 
-    if fetchResult <> Firebird.IStatus.RESULT_OK then
+    if fetchResult <> RESULT_OK then
       exit; {result = false}
 
     {Result OK}
@@ -1921,7 +1921,7 @@ begin
       if FBatch = nil then
       begin
         {Start Batch}
-        BatchPB := TXPBParameterBlock.Create(FFirebird30ClientAPI,Firebird.IXpbBuilder.BATCH);
+        BatchPB := TXPBParameterBlock.Create(FFirebird30ClientAPI,Firebird.IXpbBuilderImpl.BATCH);
         with FFirebird30ClientAPI do
         try
           if FBatchRowLimit = maxint then
@@ -1935,8 +1935,8 @@ begin
             if FBatchBufferSize > MB256 {assumed limit} then
               IBError(ibxeBatchBufferSizeTooBig,[FBatchBufferSize]);
           end;
-          BatchPB.insertInt(Firebird.IBatch.TAG_RECORD_COUNTS,1);
-          BatchPB.insertInt(Firebird.IBatch.TAG_BUFFER_BYTES_SIZE,FBatchBufferSize);
+          BatchPB.insertInt(Firebird.IBatchImpl.TAG_RECORD_COUNTS,1);
+          BatchPB.insertInt(Firebird.IBatchImpl.TAG_BUFFER_BYTES_SIZE,FBatchBufferSize);
           FBatch := FStatementIntf.createBatch(StatusIntf,
                                                inMetadata,
                                                BatchPB.getDataLength,
@@ -2032,11 +2032,11 @@ begin
     flags := FStatementIntf.getFlags(StatusIntf);
     Check4DataBaseError(ConnectionCodePage);
   end;
-  if flags and Firebird.IStatement.FLAG_HAS_CURSOR <> 0 then
+  if flags and Firebird.IStatementImpl.FLAG_HAS_CURSOR <> 0 then
     Result := Result + [stHasCursor];
-  if flags and Firebird.IStatement.FLAG_REPEAT_EXECUTE <> 0 then
+  if flags and Firebird.IStatementImpl.FLAG_REPEAT_EXECUTE <> 0 then
     Result := Result + [stRepeatExecute];
-  if flags and Firebird.IStatement.CURSOR_TYPE_SCROLLABLE <> 0 then
+  if flags and Firebird.IStatementImpl.CURSOR_TYPE_SCROLLABLE <> 0 then
     Result := Result + [stScrollable];
 end;
 

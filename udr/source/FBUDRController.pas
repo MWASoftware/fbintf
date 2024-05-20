@@ -641,7 +641,7 @@ type
    library.}
 
 function firebird_udr_plugin(status: Firebird.IStatus; aTheirUnloadFlag: Firebird.BooleanPtr;
-                                              udrPlugin: Firebird.IUdrPlugin): Firebird.BooleanPtr; cdecl;
+                                              udrPlugin: PUdrPluginToken): Firebird.BooleanPtr; cdecl;
 
 {The register functions are called at initialisation time to register each function,
  procedure and trigger defined by the library. Note: "aName" is the routine name
@@ -695,7 +695,7 @@ resourcestring
   SEof = 'No More Rows';
 
 function firebird_udr_plugin(status: Firebird.IStatus;
-  aTheirUnloadFlag: Firebird.BooleanPtr; udrPlugin: Firebird.IUdrPlugin
+  aTheirUnloadFlag: Firebird.BooleanPtr; udrPlugin: PUdrPluginToken
   ): Firebird.BooleanPtr; cdecl;
 begin
   if TFBUDRController.FFBController = nil then

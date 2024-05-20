@@ -325,16 +325,14 @@ end;
 
 function TFB30Status.InErrorState: boolean;
 begin
-  with GetStatus do
-    Result := ((getState and STATE_ERRORS) <> 0);
+  Result := ((GetStatus.getState and Firebird.IStatusImpl.STATE_ERRORS) <> 0);
   if Result then
     FDirty := true;
 end;
 
 function TFB30Status.Warning: boolean;
 begin
-  with GetStatus do
-    Result := ((getState and STATE_WARNINGS) <> 0);
+  Result := ((GetStatus.getState and Firebird.IStatusImpl.STATE_WARNINGS) <> 0);
   if Result then
     FDirty := true;
 end;
@@ -390,9 +388,9 @@ end;
 function TFB30ClientAPI.Firebird4orLater: boolean;
 begin
   Result :=  (GetClientMajor > 4) or (
-    (GetClientMajor = 4) and (UtilIntf.vtable.version >= 4)
-    and (UtilIntf.vtable.version <> 21) {ignore FB4 Beta1}
-    and (UtilIntf.vtable.version <> 24)) {ignore FB4 Beta2}
+    (GetClientMajor = 4) and (UtilIntf.getvTableversion >= 4)
+    and (UtilIntf.getvTableversion <> 21) {ignore FB4 Beta1}
+    and (UtilIntf.getvTableversion <> 24)) {ignore FB4 Beta2}
 end;
 
 {$IFDEF UNIX}

@@ -466,7 +466,7 @@ begin
   try
     with FFirebird30ClientAPI do
     begin
-       UtilIntf.getFbVersion(StatusIntf,FAttachmentIntf,bufferObj);
+       UtilIntf.getFbVersion(StatusIntf,FAttachmentIntf,bufferObj.getInterface);
        Check4DataBaseError(CodePage);
     end;
   finally

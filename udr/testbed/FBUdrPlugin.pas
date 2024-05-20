@@ -657,7 +657,7 @@ var aFunctionInstance: Firebird.IExternalFunction;
     CodePage: TSystemCodePage;
     OutputData: IResults;
 begin
-  (FContext as TEmulatedExternalContext).Transaction := aTransaction;
+  FContext.Transaction := aTransaction;
   try
     Setup;
     aFunctionInstance := FFunctionFactory.newItem(FStatus,FContext,FRoutineMetadata);
@@ -821,6 +821,7 @@ begin
 end;
 
 constructor TFBUdrPluginEmulator.Create(aModuleName: AnsiString);
+var tmp: Firebird.IUDRPlugin;
 begin
   inherited Create;
   FModuleName := aModuleName;
@@ -828,7 +829,8 @@ begin
   FFunctionFactories := TStringList.Create;
   FProcedureFactories := TStringList.Create;
   FTriggerFactories := TStringList.Create;
-  FTheirUnloadFlag := firebird_udr_plugin(FStatus,@FMyUnloadFlag,self);
+  tmp := self;
+  FTheirUnloadFlag := firebird_udr_plugin(FStatus,@FMyUnloadFlag,tmp);
   CheckStatus;
 end;
 

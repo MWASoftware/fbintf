@@ -302,22 +302,25 @@ begin
     Exit;
 
   LocalBuffer := PAnsiChar(@Buffer);
-  repeat
-    localCount := Min(Count,MaxuShort);
-    with FFirebird30ClientAPI do
-      returnCode := FBlobIntf.getSegment(StatusIntf,localCount, LocalBuffer, @BytesRead);
-    SignalActivity;
-    Inc(LocalBuffer,BytesRead);
-    Inc(Result,BytesRead);
-    Dec(Count,BytesRead);
-  until ((returncode <> Firebird.IStatus.Result_OK) and (returnCode <> Firebird.IStatus.Result_SEGMENT)) or (Count = 0);
+  with Firebird.IStatusImpl do
+  begin
+    repeat
+      localCount := Min(Count,MaxuShort);
+      with FFirebird30ClientAPI do
+        returnCode := FBlobIntf.getSegment(StatusIntf,localCount, LocalBuffer, @BytesRead);
+      SignalActivity;
+      Inc(LocalBuffer,BytesRead);
+      Inc(Result,BytesRead);
+      Dec(Count,BytesRead);
+    until ((returncode <> Result_OK) and (returnCode <> Result_SEGMENT)) or (Count = 0);
 
-  FEOB := returnCode = Firebird.IStatus.RESULT_NO_DATA;
-  ClearStringCache;
-  if (returnCode <> Firebird.IStatus.Result_OK) and
-     (returnCode <> Firebird.IStatus.Result_SEGMENT) and
-     (returnCode <> Firebird.IStatus.RESULT_NO_DATA) then
-     raise EIBInterBaseError.Create(FFirebird30ClientAPI.GetStatus,ConnectionCodePage);
+    FEOB := returnCode = RESULT_NO_DATA;
+    ClearStringCache;
+    if (returnCode <> Result_OK) and
+       (returnCode <> Result_SEGMENT) and
+       (returnCode <> RESULT_NO_DATA) then
+       raise EIBInterBaseError.Create(FFirebird30ClientAPI.GetStatus,ConnectionCodePage);
+  end;
 end;
 
 function TFB30Blob.Write(const Buffer; Count: Longint): Longint;

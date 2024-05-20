@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
-  <Package Version="4">
+  <Package Version="5">
     <Name Value="fbudr"/>
     <Type Value="RunTimeOnly"/>
     <AddToProjectUsesSection Value="True"/>
@@ -10,6 +10,11 @@
         <OtherUnitFiles Value="udr/source"/>
         <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
+      <Linking>
+        <Debugging>
+          <DebugInfoType Value="dsDwarf3"/>
+        </Debugging>
+      </Linking>
     </CompilerOptions>
     <Files Count="4">
       <Item1>
@@ -29,6 +34,7 @@
         <UnitName Value="FBUDRMessage"/>
       </Item4>
     </Files>
+    <CompatibilityMode Value="True"/>
     <RequiredPkgs Count="2">
       <Item1>
         <PackageName Value="fbintf"/>
