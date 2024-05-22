@@ -126,6 +126,7 @@ var objectType: TFirebirdImplementationClass;
     intf: Firebird.IVersionCallback;
     TestObj:  TVersionCallback;
 begin
+  if not FirebirdAPI.HasMasterIntf then Exit; {Only if OOAPI available}
   writeln(OutFile,'Test Firebird Helper function "IsImplementationObject"');
   TestObj := TVersionCallback.Create;
   try

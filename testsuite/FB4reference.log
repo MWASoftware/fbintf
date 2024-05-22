@@ -74,6 +74,8 @@ RDB$SECURITY_CLASS = SQL$385
 RDB$CHARACTER_SET_NAME = UTF8
 RDB$LINGER = 
 RDB$SQL_SECURITY = 
+Test Firebird Helper function "IsImplementationObject"
+Success: implementation class name is IVersionCallbackImpl, returned object is a TVersionCallback
 Dropping Database
 
 
@@ -654,13 +656,13 @@ Running Test 3: ad hoc queries
 Opening inet://localhost/employee
 Database Open
 Employee Count = 42
-Transaction ID = 2425
+Transaction ID = 5699
 Transaction is Read/Write
 Transaction Database Path = inet://localhost/employee
-Transaction ID = 2425
-Oldest Interesting = 2423
-Oldest Action = 2424
-Oldest Snapshot = 2424
+Transaction ID = 5699
+Oldest Interesting = 5697
+Oldest Action = 5698
+Oldest Snapshot = 5698
 Oldest Snapshot Number = 2
 Lock Timeout = 0
 Transaction Access = isc_info_tra_readwrite
@@ -698,7 +700,7 @@ FULL_NAME = Johnson, Leslie
 Current memory = 19,764,512
 Delta memory = 4,464
 Max memory = 19,810,128
-Elapsed time= 0.002 sec
+Elapsed time= 0.001 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
@@ -2910,13 +2912,16 @@ Async Wait Called
 Event Signalled
 First Event - usually ignored
 Signal Event
+Event Signalled
 Event Counts: TESTEVENT, Count = 1
 Two more events
 Call Async Wait
 Async Wait Called
 Event Signalled
-Signal Event
+Deferred Events Caught
 Event Counts: TESTEVENT, Count = 2
+Signal Event
+Event Counts: TESTEVENT, Count = 1
 Async Wait: Test Cancel
 Event Signalled
 Async Wait Called
@@ -2924,7 +2929,7 @@ Event Cancelled
 Time Out - Cancel Worked!
 Sync wait
 Event Signalled
-Event Counts: TESTEVENT, Count = 2
+Event Counts: TESTEVENT, Count = 1
 
 
 ------------------------------------------------------
@@ -3734,7 +3739,7 @@ TIMECOL =
   UTC Time = 22:02:10
   DST Offset = -480
 TIMESTAMPCOL =
-  AsString  = 11/11/1918 11:11:00.0000 00:00
+  AsString  = 11/11/1918 11:11:00.0000 +00:00
   Formatted = 1918/11/11 11:11:00.0000 Europe/London
   TimeZoneID = 65071
   Time Zone Name = Europe/London
@@ -3768,7 +3773,7 @@ TIMECOL =
   UTC Time = 22:02:10
   DST Offset = -480
 TIMESTAMPCOL =
-  AsString  = 11/11/1918 11:11:00.0000 00:00
+  AsString  = 11/11/1918 11:11:00.0000 +00:00
   Formatted = 1918/11/11 11:11:00.0000 Europe/London
   TimeZoneID = 65071
   Time Zone Name = Europe/London
@@ -3965,7 +3970,7 @@ TIMECOL =
   UTC Time = 22:02:10
   DST Offset = -480
 TIMESTAMPCOL =
-  AsString  = 11/11/1918 11:11:00.0000 00:00
+  AsString  = 11/11/1918 11:11:00.0000 +00:00
   Formatted = 1918/11/11 11:11:00.0000 Europe/London
   TimeZoneID = 65071
   Time Zone Name = Europe/London
@@ -3999,7 +4004,7 @@ TIMECOL =
   UTC Time = 22:02:10
   DST Offset = -480
 TIMESTAMPCOL =
-  AsString  = 11/11/1918 11:11:00.0000 00:00
+  AsString  = 11/11/1918 11:11:00.0000 +00:00
   Formatted = 1918/11/11 11:11:00.0000 Europe/London
   TimeZoneID = 65071
   Time Zone Name = Europe/London
@@ -4177,7 +4182,7 @@ TIMECOL =
   UTC Time = 22:02:10
   DST Offset = -480
 TIMESTAMPCOL =
-  AsString  = 11/11/1918 11:11:00.0000 00:00
+  AsString  = 11/11/1918 11:11:00.0000 +00:00
   Formatted = 1918/11/11 11:11:00.0000 Europe/London
   TimeZoneID = 65071
   Time Zone Name = Europe/London
@@ -4211,7 +4216,7 @@ TIMECOL =
   UTC Time = 22:02:10
   DST Offset = -480
 TIMESTAMPCOL =
-  AsString  = 11/11/1918 11:11:00.0000 00:00
+  AsString  = 11/11/1918 11:11:00.0000 +00:00
   Formatted = 1918/11/11 11:11:00.0000 Europe/London
   TimeZoneID = 65071
   Time Zone Name = Europe/London
@@ -5163,12 +5168,12 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 11
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2023/09/26 10:37:18.9360
+IBX$CREATED = 2024/05/22 15:04:56.3710
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 13
 IBX$OLDTRANSACTIONID = 12
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2023/09/26 10:37:18.9630
+IBX$CREATED = 2024/05/22 15:04:56.3960
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)

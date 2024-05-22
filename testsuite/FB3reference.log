@@ -73,6 +73,8 @@ RDB$RELATION_ID = 128
 RDB$SECURITY_CLASS = SQL$364
 RDB$CHARACTER_SET_NAME = UTF8
 RDB$LINGER = 
+Test Firebird Helper function "IsImplementationObject"
+Success: implementation class name is IVersionCallbackImpl, returned object is a TVersionCallback
 Dropping Database
 
 
@@ -653,13 +655,13 @@ Running Test 3: ad hoc queries
 Opening inet://localhost/employee
 Database Open
 Employee Count = 42
-Transaction ID = 947
+Transaction ID = 1371
 Transaction is Read/Write
 Transaction Database Path = inet://localhost/employee
-Transaction ID = 947
-Oldest Interesting = 945
-Oldest Action = 946
-Oldest Snapshot = 946
+Transaction ID = 1371
+Oldest Interesting = 1369
+Oldest Action = 1370
+Oldest Snapshot = 1370
 Oldest Interesting = 0
 Employee Count = 41
 Employee Count = 42
@@ -693,7 +695,7 @@ FULL_NAME = Johnson, Leslie
 
 Current memory = 19,490,704
 Delta memory = 4,480
-Max memory = 19,553,120
+Max memory = 19,541,376
 Elapsed time= 0.001 sec
 Cpu = 0.000 sec
 Buffers = 2048
@@ -2900,13 +2902,16 @@ Async Wait Called
 Event Signalled
 First Event - usually ignored
 Signal Event
+Event Signalled
 Event Counts: TESTEVENT, Count = 1
 Two more events
 Call Async Wait
 Async Wait Called
 Event Signalled
-Signal Event
+Deferred Events Caught
 Event Counts: TESTEVENT, Count = 2
+Signal Event
+Event Counts: TESTEVENT, Count = 1
 Async Wait: Test Cancel
 Event Signalled
 Async Wait Called
@@ -2914,7 +2919,7 @@ Event Cancelled
 Time Out - Cancel Worked!
 Sync wait
 Event Signalled
-Event Counts: TESTEVENT, Count = 2
+Event Counts: TESTEVENT, Count = 1
 
 
 ------------------------------------------------------
@@ -3941,12 +3946,12 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 11
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2023/09/26 10:40:39.6260
+IBX$CREATED = 2024/05/22 15:06:02.0100
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 13
 IBX$OLDTRANSACTIONID = 12
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2023/09/26 10:40:39.6510
+IBX$CREATED = 2024/05/22 15:06:02.0360
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)
