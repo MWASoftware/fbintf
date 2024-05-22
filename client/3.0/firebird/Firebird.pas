@@ -191,7 +191,7 @@ type
 	end;
 
 	BooleanPtr = ^Boolean;
-	BytePtr = ^Byte;
+	BytePtr = PByte;
 	CardinalPtr = ^Cardinal;
 	FB_DEC16Ptr = ^FB_DEC16;
 	FB_DEC34Ptr = ^FB_DEC34;
