@@ -33,8 +33,8 @@
       <environment>
         <UserOverrides Count="3">
           <Variable0 Name="PROMPT_AT_END" Value="YES"/>
-          <Variable1 Name="FIREBIRD" Value="/opt/firebird/4.0.2"/>
-          <Variable2 Name="LD_LIBRARY_PATH" Value="/opt/firebird/4.0.2/lib"/>
+          <Variable1 Name="FIREBIRD" Value="/opt/firebird/5.0.0"/>
+          <Variable2 Name="LD_LIBRARY_PATH" Value="/opt/firebird/5.0.0/lib"/>
         </UserOverrides>
       </environment>
       <FormatVersion Value="2"/>
@@ -46,8 +46,8 @@
           <environment>
             <UserOverrides Count="3">
               <Variable0 Name="PROMPT_AT_END" Value="YES"/>
-              <Variable1 Name="FIREBIRD" Value="/opt/firebird/4.0.2"/>
-              <Variable2 Name="LD_LIBRARY_PATH" Value="/opt/firebird/4.0.2/lib"/>
+              <Variable1 Name="FIREBIRD" Value="/opt/firebird/5.0.0"/>
+              <Variable2 Name="LD_LIBRARY_PATH" Value="/opt/firebird/5.0.0/lib"/>
             </UserOverrides>
           </environment>
         </Mode0>

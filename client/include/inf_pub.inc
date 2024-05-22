@@ -155,7 +155,9 @@
       fb_info_db_guid = 144;
       fb_info_db_file_id = 145;
       fb_info_replica_mode = 146;
-      isc_info_db_last_value = 147;
+      fb_info_username = 147;
+      fb_info_sqlrole = 148;
+      isc_info_db_last_value = 149;
 
   { flags set in fb_info_crypt_state  }
 
@@ -437,6 +439,8 @@
     isc_info_sql_stmt_timeout_user = 28;    
     isc_info_sql_stmt_timeout_run = 29;    
     isc_info_sql_stmt_blob_align = 30;    
+    isc_info_sql_exec_path_blr_bytes = 31;    
+    isc_info_sql_exec_path_blr_text = 32;    
   {******************************* }
   { SQL information return values  }
   {******************************* }

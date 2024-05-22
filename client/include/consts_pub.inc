@@ -133,6 +133,7 @@
     isc_dpb_set_bind = 93;    
     isc_dpb_decfloat_round = 94;    
     isc_dpb_decfloat_traps = 95;    
+    isc_dpb_clear_map = 96;    
   {************************************************ }
   { clumplet tags used inside isc_dpb_address_path  }
   {						 and isc_spb_address_path  }
@@ -591,6 +592,9 @@
     isc_spb_nbk_file = 6;    
     isc_spb_nbk_direct = 7;    
     isc_spb_nbk_guid = 8;    
+    isc_spb_nbk_clean_history = 9;    
+    isc_spb_nbk_keep_days = 10;    
+    isc_spb_nbk_keep_rows = 11;    
     isc_spb_nbk_no_triggers = $01;    
     isc_spb_nbk_inplace = $02;    
     isc_spb_nbk_sequence = $04;    
