@@ -707,7 +707,7 @@ type
 
 	IVersionedImpl = class;
 
-	TOOAPIImplementationClass = class of IVersionedImpl;
+	TFirebirdImplementationClass = class of IVersionedImpl;
 
 	TVersioned = record
 	private
@@ -5714,14 +5714,14 @@ type
 
  Example:
 
- var objectType: TOOAPIImplementationClass;
+ var objectType: TFirebirdImplementationClass;
      impl: TObject;
      apiInterface: IMaster;
  begin
    if IsImplementationObject(apiInterface,objectType,impl) then
    ...if returns true then objectType is set to IMasterImpl and impl may be coerced to IMasterImpl}
 
-function IsImplementationObject(OOAPIInterface: pointer; var classType: TOOAPIImplementationClass; var impl: TObject): boolean;
+function IsImplementationObject(OOAPIInterface: pointer; var classType: TFirebirdImplementationClass; var impl: TObject): boolean;
 
 {$IFDEF STATIC_LINK_TO_FIREBIRD_LIBRARY}
 function fb_get_master_interface : IMaster; {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}; external 'fbclient';
@@ -17748,7 +17748,7 @@ begin
   Result := PReplicatedSessionVTable(FvTable);
 end;
 
-function IsImplementationObject(OOAPIInterface: pointer; var classType: TOOAPIImplementationClass; var impl: TObject): boolean;
+function IsImplementationObject(OOAPIInterface: pointer; var classType: TFirebirdImplementationClass; var impl: TObject): boolean;
 begin
   Result := false;
   impl := nil;

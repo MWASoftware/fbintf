@@ -16,8 +16,8 @@
         <Filename Value="Test1.pas"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="114"/>
-        <CursorPos X="79" Y="134"/>
+        <TopLine Value="120"/>
+        <CursorPos X="45" Y="124"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit1>
@@ -496,7 +496,7 @@
         <Filename Value="../client/3.0/firebird/Firebird.pas"/>
         <EditorIndex Value="10"/>
         <TopLine Value="5710"/>
-        <CursorPos X="22" Y="5718"/>
+        <CursorPos X="101" Y="5724"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
@@ -1469,7 +1469,7 @@
       <FormatVersion Value="2"/>
       <Modes ActiveMode="default"/>
     </RunParams>
-    <HistoryLists Count="3">
+    <HistoryLists Count="2">
       <List0 Name="LaunchingApplication" Type="File" Count="3">
         <Item1 Value="C:\Windows\system32\cmd.exe \C ${TargetCmdLine}"/>
         <Item2 Value="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>

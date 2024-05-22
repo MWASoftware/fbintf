@@ -121,19 +121,19 @@ begin
 end;
 
 procedure TTest1.TestIsImplementationObject;
-var objectType: TOOAPIImplementationClass;
+var objectType: TFirebirdImplementationClass;
     impl: TObject;
     intf: Firebird.IVersionCallback;
     TestObj:  TVersionCallback;
 begin
-  writeln('Test Firebird Helper function "IsImplementationObject"');
+  writeln(OutFile,'Test Firebird Helper function "IsImplementationObject"');
   TestObj := TVersionCallback.Create;
   try
     intf := TestObj.asIVersionCallback;
     if Firebird.IsImplementationObject(intf,objectType,impl) then
-      writeln('Success: implementation class name is ',objectType.ClassName,', returned object is a ',impl.ClassName)
+      writeln(OutFile,'Success: implementation class name is ',objectType.ClassName,', returned object is a ',impl.ClassName)
     else
-      writeln('IsImplementationObject failed');
+      writeln(OutFile,'IsImplementationObject failed');
   finally
     TestObj.Free;
   end;

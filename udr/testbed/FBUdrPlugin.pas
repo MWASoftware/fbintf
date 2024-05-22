@@ -799,7 +799,7 @@ end;
 procedure TFBUdrPluginEmulator.registerFunction(status: Firebird.IStatus;
   name: PAnsiChar; factory: Firebird.IUdrFunctionFactory);
 var factoryImpl: TObject;
-    objectType: TOOAPIImplementationClass;
+    objectType: TFirebirdImplementationClass;
 begin
   if Firebird.IsImplementationObject(factory,objectType,factoryImpl) and
     (factoryImpl is IUdrFunctionFactoryImpl) then
@@ -811,7 +811,7 @@ end;
 procedure TFBUdrPluginEmulator.registerProcedure(status: Firebird.IStatus;
   name: PAnsiChar; factory: Firebird.IUdrProcedureFactory);
 var factoryImpl: TObject;
-    objectType: TOOAPIImplementationClass;
+    objectType: TFirebirdImplementationClass;
 begin
   if Firebird.IsImplementationObject(factory,objectType,factoryImpl) and
     (factoryImpl is IUdrProcedureFactoryImpl) then
@@ -823,7 +823,7 @@ end;
 procedure TFBUdrPluginEmulator.registerTrigger(status: Firebird.IStatus;
   name: PAnsiChar; factory: Firebird.IUdrTriggerFactory);
 var factoryImpl: TObject;
-    objectType: TOOAPIImplementationClass;
+    objectType: TFirebirdImplementationClass;
 begin
   if Firebird.IsImplementationObject(factory,objectType,factoryImpl) and
     (factoryImpl is IUdrTriggerFactoryImpl) then
