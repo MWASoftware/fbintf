@@ -798,36 +798,27 @@ end;
 
 procedure TFBUdrPluginEmulator.registerFunction(status: Firebird.IStatus;
   name: PAnsiChar; factory: Firebird.IUdrFunctionFactory);
-var factoryImpl: TObject;
-    objectType: TFirebirdImplementationClass;
 begin
-  if Firebird.IsImplementationObject(factory,objectType,factoryImpl) and
-    (factoryImpl is IUdrFunctionFactoryImpl) then
-    FFunctionFactories.AddObject(strpas(name),factoryImpl)
+  if factory.isIUdrFunctionFactoryImpl then
+    FFunctionFactories.AddObject(strpas(name),factory.asIUdrFunctionFactoryImpl)
   else
     raise Exception.Create('Invalid factory for registerFunction');
 end;
 
 procedure TFBUdrPluginEmulator.registerProcedure(status: Firebird.IStatus;
   name: PAnsiChar; factory: Firebird.IUdrProcedureFactory);
-var factoryImpl: TObject;
-    objectType: TFirebirdImplementationClass;
 begin
-  if Firebird.IsImplementationObject(factory,objectType,factoryImpl) and
-    (factoryImpl is IUdrProcedureFactoryImpl) then
-    FProcedureFactories.AddObject(strpas(name),factoryImpl)
+  if factory.isIUdrProcedureFactoryImpl then
+    FProcedureFactories.AddObject(strpas(name),factory.asIUdrProcedureFactoryImpl)
   else
     raise Exception.Create('Invalid factory for registerProcedure');
 end;
 
 procedure TFBUdrPluginEmulator.registerTrigger(status: Firebird.IStatus;
   name: PAnsiChar; factory: Firebird.IUdrTriggerFactory);
-var factoryImpl: TObject;
-    objectType: TFirebirdImplementationClass;
 begin
-  if Firebird.IsImplementationObject(factory,objectType,factoryImpl) and
-    (factoryImpl is IUdrTriggerFactoryImpl) then
-    FTriggerFactories.AddObject(strpas(name),factoryImpl)
+  if factory.isIUdrTriggerFactoryImpl then
+    FTriggerFactories.AddObject(strpas(name),factory.asIUdrTriggerFactoryImpl)
     else
       raise Exception.Create('Invalid factory for registerTrigger');
 end;

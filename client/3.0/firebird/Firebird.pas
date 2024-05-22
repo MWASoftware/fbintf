@@ -716,6 +716,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IVersioned; inline;
 	public
+	  function isIVersionedImpl: boolean;
+	  function asIVersionedImpl: IVersionedImpl;
 	  property vTable: PVersionedVTable read FvTable;
 	end;
 
@@ -730,6 +732,7 @@ type
 	public
 	  constructor create;
 	  function asIVersioned: IVersioned;
+	  class function isIVersionedImpl(intf: IVersioned): boolean;
 	  property vTable: PVersionedVTable read getVTable;
 	end;
 
@@ -750,6 +753,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IReferenceCounted; inline;
 	public
+	  function isIReferenceCountedImpl: boolean;
+	  function asIReferenceCountedImpl: IReferenceCountedImpl;
 	  property vTable: PReferenceCountedVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -765,6 +770,7 @@ type
 	public
 	  constructor create;
 	  function asIReferenceCounted: IReferenceCounted;
+	  class function isIReferenceCountedImpl(intf: IReferenceCounted): boolean;
 	  property vTable: PReferenceCountedVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -788,6 +794,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IDisposable; inline;
 	public
+	  function isIDisposableImpl: boolean;
+	  function asIDisposableImpl: IDisposableImpl;
 	  property vTable: PDisposableVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -802,6 +810,7 @@ type
 	public
 	  constructor create;
 	  function asIDisposable: IDisposable;
+	  class function isIDisposableImpl(intf: IDisposable): boolean;
 	  property vTable: PDisposableVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -833,6 +842,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IStatus; inline;
 	public
+	  function isIStatusImpl: boolean;
+	  function asIStatusImpl: IStatusImpl;
 	  property vTable: PStatusVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -862,6 +873,7 @@ type
 	public
 	  constructor create;
 	  function asIStatus: IStatus;
+	  class function isIStatusImpl(intf: IStatus): boolean;
 	  property vTable: PStatusVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -903,6 +915,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IMaster; inline;
 	public
+	  function isIMasterImpl: boolean;
+	  function asIMasterImpl: IMasterImpl;
 	  property vTable: PMasterVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -928,6 +942,7 @@ type
 	public
 	  constructor create;
 	  function asIMaster: IMaster;
+	  class function isIMasterImpl(intf: IMaster): boolean;
 	  property vTable: PMasterVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -964,6 +979,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IPluginBase; inline;
 	public
+	  function isIPluginBaseImpl: boolean;
+	  function asIPluginBaseImpl: IPluginBaseImpl;
 	  property vTable: PPluginBaseVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -981,6 +998,7 @@ type
 	public
 	  constructor create;
 	  function asIPluginBase: IPluginBase;
+	  class function isIPluginBaseImpl(intf: IPluginBase): boolean;
 	  property vTable: PPluginBaseVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -1010,6 +1028,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IPluginSet; inline;
 	public
+	  function isIPluginSetImpl: boolean;
+	  function asIPluginSetImpl: IPluginSetImpl;
 	  property vTable: PPluginSetVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -1030,6 +1050,7 @@ type
 	public
 	  constructor create;
 	  function asIPluginSet: IPluginSet;
+	  class function isIPluginSetImpl(intf: IPluginSet): boolean;
 	  property vTable: PPluginSetVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -1062,6 +1083,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IConfigEntry; inline;
 	public
+	  function isIConfigEntryImpl: boolean;
+	  function asIConfigEntryImpl: IConfigEntryImpl;
 	  property vTable: PConfigEntryVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -1082,6 +1105,7 @@ type
 	public
 	  constructor create;
 	  function asIConfigEntry: IConfigEntry;
+	  class function isIConfigEntryImpl(intf: IConfigEntry): boolean;
 	  property vTable: PConfigEntryVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -1112,6 +1136,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IConfig; inline;
 	public
+	  function isIConfigImpl: boolean;
+	  function asIConfigImpl: IConfigImpl;
 	  property vTable: PConfigVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -1130,6 +1156,7 @@ type
 	public
 	  constructor create;
 	  function asIConfig: IConfig;
+	  class function isIConfigImpl(intf: IConfig): boolean;
 	  property vTable: PConfigVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -1160,6 +1187,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IFirebirdConf; inline;
 	public
+	  function isIFirebirdConfImpl: boolean;
+	  function asIFirebirdConfImpl: IFirebirdConfImpl;
 	  property vTable: PFirebirdConfVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -1180,6 +1209,7 @@ type
 	public
 	  constructor create;
 	  function asIFirebirdConf: IFirebirdConf;
+	  class function isIFirebirdConfImpl(intf: IFirebirdConf): boolean;
 	  property vTable: PFirebirdConfVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -1211,6 +1241,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IPluginConfig; inline;
 	public
+	  function isIPluginConfigImpl: boolean;
+	  function asIPluginConfigImpl: IPluginConfigImpl;
 	  property vTable: PPluginConfigVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -1230,6 +1262,7 @@ type
 	public
 	  constructor create;
 	  function asIPluginConfig: IPluginConfig;
+	  class function isIPluginConfigImpl(intf: IPluginConfig): boolean;
 	  property vTable: PPluginConfigVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -1255,6 +1288,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IPluginFactory; inline;
 	public
+	  function isIPluginFactoryImpl: boolean;
+	  function asIPluginFactoryImpl: IPluginFactoryImpl;
 	  property vTable: PPluginFactoryVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -1269,6 +1304,7 @@ type
 	public
 	  constructor create;
 	  function asIPluginFactory: IPluginFactory;
+	  class function isIPluginFactoryImpl(intf: IPluginFactory): boolean;
 	  property vTable: PPluginFactoryVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -1292,6 +1328,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IPluginModule; inline;
 	public
+	  function isIPluginModuleImpl: boolean;
+	  function asIPluginModuleImpl: IPluginModuleImpl;
 	  property vTable: PPluginModuleVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -1307,6 +1345,7 @@ type
 	public
 	  constructor create;
 	  function asIPluginModule: IPluginModule;
+	  class function isIPluginModuleImpl(intf: IPluginModule): boolean;
 	  property vTable: PPluginModuleVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -1335,6 +1374,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IPluginManager; inline;
 	public
+	  function isIPluginManagerImpl: boolean;
+	  function asIPluginManagerImpl: IPluginManagerImpl;
 	  property vTable: PPluginManagerVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -1366,6 +1407,7 @@ type
 	public
 	  constructor create;
 	  function asIPluginManager: IPluginManager;
+	  class function isIPluginManagerImpl(intf: IPluginManager): boolean;
 	  property vTable: PPluginManagerVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -1396,6 +1438,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: ICryptKey; inline;
 	public
+	  function isICryptKeyImpl: boolean;
+	  function asICryptKeyImpl: ICryptKeyImpl;
 	  property vTable: PCryptKeyVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -1413,6 +1457,7 @@ type
 	public
 	  constructor create;
 	  function asICryptKey: ICryptKey;
+	  class function isICryptKeyImpl(intf: ICryptKey): boolean;
 	  property vTable: PCryptKeyVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -1444,6 +1489,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IConfigManager; inline;
 	public
+	  function isIConfigManagerImpl: boolean;
+	  function asIConfigManagerImpl: IConfigManagerImpl;
 	  property vTable: PConfigManagerVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -1483,6 +1530,7 @@ type
 	public
 	  constructor create;
 	  function asIConfigManager: IConfigManager;
+	  class function isIConfigManagerImpl(intf: IConfigManager): boolean;
 	  property vTable: PConfigManagerVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -1513,6 +1561,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IEventCallback; inline;
 	public
+	  function isIEventCallbackImpl: boolean;
+	  function asIEventCallbackImpl: IEventCallbackImpl;
 	  property vTable: PEventCallbackVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -1529,6 +1579,7 @@ type
 	public
 	  constructor create;
 	  function asIEventCallback: IEventCallback;
+	  class function isIEventCallbackImpl(intf: IEventCallback): boolean;
 	  property vTable: PEventCallbackVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -1558,6 +1609,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IBlob; inline;
 	public
+	  function isIBlobImpl: boolean;
+	  function asIBlobImpl: IBlobImpl;
 	  property vTable: PBlobVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -1579,6 +1632,7 @@ type
 	public
 	  constructor create;
 	  function asIBlob: IBlob;
+	  class function isIBlobImpl(intf: IBlob): boolean;
 	  property vTable: PBlobVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -1617,6 +1671,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: ITransaction; inline;
 	public
+	  function isITransactionImpl: boolean;
+	  function asITransactionImpl: ITransactionImpl;
 	  property vTable: PTransactionVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -1642,6 +1698,7 @@ type
 	public
 	  constructor create;
 	  function asITransaction: ITransaction;
+	  class function isITransactionImpl(intf: ITransaction): boolean;
 	  property vTable: PTransactionVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -1691,6 +1748,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IMessageMetadata; inline;
 	public
+	  function isIMessageMetadataImpl: boolean;
+	  function asIMessageMetadataImpl: IMessageMetadataImpl;
 	  property vTable: PMessageMetadataVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -1723,6 +1782,7 @@ type
 	public
 	  constructor create;
 	  function asIMessageMetadata: IMessageMetadata;
+	  class function isIMessageMetadataImpl(intf: IMessageMetadata): boolean;
 	  property vTable: PMessageMetadataVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -1776,6 +1836,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IMetadataBuilder; inline;
 	public
+	  function isIMetadataBuilderImpl: boolean;
+	  function asIMetadataBuilderImpl: IMetadataBuilderImpl;
 	  property vTable: PMetadataBuilderVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -1805,6 +1867,7 @@ type
 	public
 	  constructor create;
 	  function asIMetadataBuilder: IMetadataBuilder;
+	  class function isIMetadataBuilderImpl(intf: IMetadataBuilder): boolean;
 	  property vTable: PMetadataBuilderVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -1852,6 +1915,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IResultSet; inline;
 	public
+	  function isIResultSetImpl: boolean;
+	  function asIResultSetImpl: IResultSetImpl;
 	  property vTable: PResultSetVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -1878,6 +1943,7 @@ type
 	public
 	  constructor create;
 	  function asIResultSet: IResultSet;
+	  class function isIResultSetImpl(intf: IResultSet): boolean;
 	  property vTable: PResultSetVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -1925,6 +1991,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IStatement; inline;
 	public
+	  function isIStatementImpl: boolean;
+	  function asIStatementImpl: IStatementImpl;
 	  property vTable: PStatementVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -1967,6 +2035,7 @@ type
 	public
 	  constructor create;
 	  function asIStatement: IStatement;
+	  class function isIStatementImpl(intf: IStatement): boolean;
 	  property vTable: PStatementVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -2014,6 +2083,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IBatch; inline;
 	public
+	  function isIBatchImpl: boolean;
+	  function asIBatchImpl: IBatchImpl;
 	  property vTable: PBatchVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -2051,6 +2122,7 @@ type
 	public
 	  constructor create;
 	  function asIBatch: IBatch;
+	  class function isIBatchImpl(intf: IBatch): boolean;
 	  property vTable: PBatchVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -2087,6 +2159,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IBatchCompletionState; inline;
 	public
+	  function isIBatchCompletionStateImpl: boolean;
+	  function asIBatchCompletionStateImpl: IBatchCompletionStateImpl;
 	  property vTable: PBatchCompletionStateVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -2108,6 +2182,7 @@ type
 	public
 	  constructor create;
 	  function asIBatchCompletionState: IBatchCompletionState;
+	  class function isIBatchCompletionStateImpl(intf: IBatchCompletionState): boolean;
 	  property vTable: PBatchCompletionStateVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -2136,6 +2211,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IReplicator; inline;
 	public
+	  function isIReplicatorImpl: boolean;
+	  function asIReplicatorImpl: IReplicatorImpl;
 	  property vTable: PReplicatorVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -2153,6 +2230,7 @@ type
 	public
 	  constructor create;
 	  function asIReplicator: IReplicator;
+	  class function isIReplicatorImpl(intf: IReplicator): boolean;
 	  property vTable: PReplicatorVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -2184,6 +2262,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IRequest; inline;
 	public
+	  function isIRequestImpl: boolean;
+	  function asIRequestImpl: IRequestImpl;
 	  property vTable: PRequestVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -2206,6 +2286,7 @@ type
 	public
 	  constructor create;
 	  function asIRequest: IRequest;
+	  class function isIRequestImpl(intf: IRequest): boolean;
 	  property vTable: PRequestVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -2236,6 +2317,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IEvents; inline;
 	public
+	  function isIEventsImpl: boolean;
+	  function asIEventsImpl: IEventsImpl;
 	  property vTable: PEventsVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -2252,6 +2335,7 @@ type
 	public
 	  constructor create;
 	  function asIEvents: IEvents;
+	  class function isIEventsImpl(intf: IEvents): boolean;
 	  property vTable: PEventsVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -2299,6 +2383,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IAttachment; inline;
 	public
+	  function isIAttachmentImpl: boolean;
+	  function asIAttachmentImpl: IAttachmentImpl;
 	  property vTable: PAttachmentVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -2338,6 +2424,7 @@ type
 	public
 	  constructor create;
 	  function asIAttachment: IAttachment;
+	  class function isIAttachmentImpl(intf: IAttachment): boolean;
 	  property vTable: PAttachmentVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -2387,6 +2474,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IService; inline;
 	public
+	  function isIServiceImpl: boolean;
+	  function asIServiceImpl: IServiceImpl;
 	  property vTable: PServiceVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -2405,6 +2494,7 @@ type
 	public
 	  constructor create;
 	  function asIService: IService;
+	  class function isIServiceImpl(intf: IService): boolean;
 	  property vTable: PServiceVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -2437,6 +2527,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IProvider; inline;
 	public
+	  function isIProviderImpl: boolean;
+	  function asIProviderImpl: IProviderImpl;
 	  property vTable: PProviderVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -2459,6 +2551,7 @@ type
 	public
 	  constructor create;
 	  function asIProvider: IProvider;
+	  class function isIProviderImpl(intf: IProvider): boolean;
 	  property vTable: PProviderVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -2488,6 +2581,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IDtcStart; inline;
 	public
+	  function isIDtcStartImpl: boolean;
+	  function asIDtcStartImpl: IDtcStartImpl;
 	  property vTable: PDtcStartVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -2505,6 +2600,7 @@ type
 	public
 	  constructor create;
 	  function asIDtcStart: IDtcStart;
+	  class function isIDtcStartImpl(intf: IDtcStart): boolean;
 	  property vTable: PDtcStartVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -2530,6 +2626,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IDtc; inline;
 	public
+	  function isIDtcImpl: boolean;
+	  function asIDtcImpl: IDtcImpl;
 	  property vTable: PDtcVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -2545,6 +2643,7 @@ type
 	public
 	  constructor create;
 	  function asIDtc: IDtc;
+	  class function isIDtcImpl(intf: IDtc): boolean;
 	  property vTable: PDtcVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -2571,6 +2670,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IAuth; inline;
 	public
+	  function isIAuthImpl: boolean;
+	  function asIAuthImpl: IAuthImpl;
 	  property vTable: PAuthVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -2592,6 +2693,7 @@ type
 	public
 	  constructor create;
 	  function asIAuth: IAuth;
+	  class function isIAuthImpl(intf: IAuth): boolean;
 	  property vTable: PAuthVTable read getVTable;
 	end;
 
@@ -2614,6 +2716,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IWriter; inline;
 	public
+	  function isIWriterImpl: boolean;
+	  function asIWriterImpl: IWriterImpl;
 	  property vTable: PWriterVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -2631,6 +2735,7 @@ type
 	public
 	  constructor create;
 	  function asIWriter: IWriter;
+	  class function isIWriterImpl(intf: IWriter): boolean;
 	  property vTable: PWriterVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -2659,6 +2764,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IServerBlock; inline;
 	public
+	  function isIServerBlockImpl: boolean;
+	  function asIServerBlockImpl: IServerBlockImpl;
 	  property vTable: PServerBlockVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -2676,6 +2783,7 @@ type
 	public
 	  constructor create;
 	  function asIServerBlock: IServerBlock;
+	  class function isIServerBlockImpl(intf: IServerBlock): boolean;
 	  property vTable: PServerBlockVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -2708,6 +2816,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IClientBlock; inline;
 	public
+	  function isIClientBlockImpl: boolean;
+	  function asIClientBlockImpl: IClientBlockImpl;
 	  property vTable: PClientBlockVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -2729,6 +2839,7 @@ type
 	public
 	  constructor create;
 	  function asIClientBlock: IClientBlock;
+	  class function isIClientBlockImpl(intf: IClientBlock): boolean;
 	  property vTable: PClientBlockVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -2761,6 +2872,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IServer; inline;
 	public
+	  function isIServerImpl: boolean;
+	  function asIServerImpl: IServerImpl;
 	  property vTable: PServerVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -2780,6 +2893,7 @@ type
 	public
 	  constructor create;
 	  function asIServer: IServer;
+	  class function isIServerImpl(intf: IServer): boolean;
 	  property vTable: PServerVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -2807,6 +2921,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IClient; inline;
 	public
+	  function isIClientImpl: boolean;
+	  function asIClientImpl: IClientImpl;
 	  property vTable: PClientVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -2825,6 +2941,7 @@ type
 	public
 	  constructor create;
 	  function asIClient: IClient;
+	  class function isIClientImpl(intf: IClient): boolean;
 	  property vTable: PClientVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -2849,6 +2966,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IUserField; inline;
 	public
+	  function isIUserFieldImpl: boolean;
+	  function asIUserFieldImpl: IUserFieldImpl;
 	  property vTable: PUserFieldVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -2865,6 +2984,7 @@ type
 	public
 	  constructor create;
 	  function asIUserField: IUserField;
+	  class function isIUserFieldImpl(intf: IUserField): boolean;
 	  property vTable: PUserFieldVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -2893,6 +3013,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: ICharUserField; inline;
 	public
+	  function isICharUserFieldImpl: boolean;
+	  function asICharUserFieldImpl: ICharUserFieldImpl;
 	  property vTable: PCharUserFieldVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -2911,6 +3033,7 @@ type
 	public
 	  constructor create;
 	  function asICharUserField: ICharUserField;
+	  class function isICharUserFieldImpl(intf: ICharUserField): boolean;
 	  property vTable: PCharUserFieldVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -2938,6 +3061,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IIntUserField; inline;
 	public
+	  function isIIntUserFieldImpl: boolean;
+	  function asIIntUserFieldImpl: IIntUserFieldImpl;
 	  property vTable: PIntUserFieldVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -2956,6 +3081,7 @@ type
 	public
 	  constructor create;
 	  function asIIntUserField: IIntUserField;
+	  class function isIIntUserFieldImpl(intf: IIntUserField): boolean;
 	  property vTable: PIntUserFieldVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -2989,6 +3115,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IUser; inline;
 	public
+	  function isIUserImpl: boolean;
+	  function asIUserImpl: IUserImpl;
 	  property vTable: PUserVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -3019,6 +3147,7 @@ type
 	public
 	  constructor create;
 	  function asIUser: IUser;
+	  class function isIUserImpl(intf: IUser): boolean;
 	  property vTable: PUserVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -3051,6 +3180,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IListUsers; inline;
 	public
+	  function isIListUsersImpl: boolean;
+	  function asIListUsersImpl: IListUsersImpl;
 	  property vTable: PListUsersVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -3065,6 +3196,7 @@ type
 	public
 	  constructor create;
 	  function asIListUsers: IListUsers;
+	  class function isIListUsersImpl(intf: IListUsers): boolean;
 	  property vTable: PListUsersVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -3093,6 +3225,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: ILogonInfo; inline;
 	public
+	  function isILogonInfoImpl: boolean;
+	  function asILogonInfoImpl: ILogonInfoImpl;
 	  property vTable: PLogonInfoVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -3113,6 +3247,7 @@ type
 	public
 	  constructor create;
 	  function asILogonInfo: ILogonInfo;
+	  class function isILogonInfoImpl(intf: ILogonInfo): boolean;
 	  property vTable: PLogonInfoVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -3148,6 +3283,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IManagement; inline;
 	public
+	  function isIManagementImpl: boolean;
+	  function asIManagementImpl: IManagementImpl;
 	  property vTable: PManagementVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -3169,6 +3306,7 @@ type
 	public
 	  constructor create;
 	  function asIManagement: IManagement;
+	  class function isIManagementImpl(intf: IManagement): boolean;
 	  property vTable: PManagementVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -3200,6 +3338,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IAuthBlock; inline;
 	public
+	  function isIAuthBlockImpl: boolean;
+	  function asIAuthBlockImpl: IAuthBlockImpl;
 	  property vTable: PAuthBlockVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -3220,6 +3360,7 @@ type
 	public
 	  constructor create;
 	  function asIAuthBlock: IAuthBlock;
+	  class function isIAuthBlockImpl(intf: IAuthBlock): boolean;
 	  property vTable: PAuthBlockVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -3257,6 +3398,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IWireCryptPlugin; inline;
 	public
+	  function isIWireCryptPluginImpl: boolean;
+	  function asIWireCryptPluginImpl: IWireCryptPluginImpl;
 	  property vTable: PWireCryptPluginVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -3280,6 +3423,7 @@ type
 	public
 	  constructor create;
 	  function asIWireCryptPlugin: IWireCryptPlugin;
+	  class function isIWireCryptPluginImpl(intf: IWireCryptPlugin): boolean;
 	  property vTable: PWireCryptPluginVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -3307,6 +3451,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: ICryptKeyCallback; inline;
 	public
+	  function isICryptKeyCallbackImpl: boolean;
+	  function asICryptKeyCallbackImpl: ICryptKeyCallbackImpl;
 	  property vTable: PCryptKeyCallbackVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -3321,6 +3467,7 @@ type
 	public
 	  constructor create;
 	  function asICryptKeyCallback: ICryptKeyCallback;
+	  class function isICryptKeyCallbackImpl(intf: ICryptKeyCallback): boolean;
 	  property vTable: PCryptKeyCallbackVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -3350,6 +3497,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IKeyHolderPlugin; inline;
 	public
+	  function isIKeyHolderPluginImpl: boolean;
+	  function asIKeyHolderPluginImpl: IKeyHolderPluginImpl;
 	  property vTable: PKeyHolderPluginVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -3371,6 +3520,7 @@ type
 	public
 	  constructor create;
 	  function asIKeyHolderPlugin: IKeyHolderPlugin;
+	  class function isIKeyHolderPluginImpl(intf: IKeyHolderPlugin): boolean;
 	  property vTable: PKeyHolderPluginVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -3398,6 +3548,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IDbCryptInfo; inline;
 	public
+	  function isIDbCryptInfoImpl: boolean;
+	  function asIDbCryptInfoImpl: IDbCryptInfoImpl;
 	  property vTable: PDbCryptInfoVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -3414,6 +3566,7 @@ type
 	public
 	  constructor create;
 	  function asIDbCryptInfo: IDbCryptInfo;
+	  class function isIDbCryptInfoImpl(intf: IDbCryptInfo): boolean;
 	  property vTable: PDbCryptInfoVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -3443,6 +3596,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IDbCryptPlugin; inline;
 	public
+	  function isIDbCryptPluginImpl: boolean;
+	  function asIDbCryptPluginImpl: IDbCryptPluginImpl;
 	  property vTable: PDbCryptPluginVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -3464,6 +3619,7 @@ type
 	public
 	  constructor create;
 	  function asIDbCryptPlugin: IDbCryptPlugin;
+	  class function isIDbCryptPluginImpl(intf: IDbCryptPlugin): boolean;
 	  property vTable: PDbCryptPluginVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -3498,6 +3654,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IExternalContext; inline;
 	public
+	  function isIExternalContextImpl: boolean;
+	  function asIExternalContextImpl: IExternalContextImpl;
 	  property vTable: PExternalContextVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -3521,6 +3679,7 @@ type
 	public
 	  constructor create;
 	  function asIExternalContext: IExternalContext;
+	  class function isIExternalContextImpl(intf: IExternalContext): boolean;
 	  property vTable: PExternalContextVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -3553,6 +3712,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IExternalResultSet; inline;
 	public
+	  function isIExternalResultSetImpl: boolean;
+	  function asIExternalResultSetImpl: IExternalResultSetImpl;
 	  property vTable: PExternalResultSetVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -3568,6 +3729,7 @@ type
 	public
 	  constructor create;
 	  function asIExternalResultSet: IExternalResultSet;
+	  class function isIExternalResultSetImpl(intf: IExternalResultSet): boolean;
 	  property vTable: PExternalResultSetVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -3592,6 +3754,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IExternalFunction; inline;
 	public
+	  function isIExternalFunctionImpl: boolean;
+	  function asIExternalFunctionImpl: IExternalFunctionImpl;
 	  property vTable: PExternalFunctionVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -3608,6 +3772,7 @@ type
 	public
 	  constructor create;
 	  function asIExternalFunction: IExternalFunction;
+	  class function isIExternalFunctionImpl(intf: IExternalFunction): boolean;
 	  property vTable: PExternalFunctionVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -3633,6 +3798,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IExternalProcedure; inline;
 	public
+	  function isIExternalProcedureImpl: boolean;
+	  function asIExternalProcedureImpl: IExternalProcedureImpl;
 	  property vTable: PExternalProcedureVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -3649,6 +3816,7 @@ type
 	public
 	  constructor create;
 	  function asIExternalProcedure: IExternalProcedure;
+	  class function isIExternalProcedureImpl(intf: IExternalProcedure): boolean;
 	  property vTable: PExternalProcedureVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -3674,6 +3842,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IExternalTrigger; inline;
 	public
+	  function isIExternalTriggerImpl: boolean;
+	  function asIExternalTriggerImpl: IExternalTriggerImpl;
 	  property vTable: PExternalTriggerVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -3702,6 +3872,7 @@ type
 	public
 	  constructor create;
 	  function asIExternalTrigger: IExternalTrigger;
+	  class function isIExternalTriggerImpl(intf: IExternalTrigger): boolean;
 	  property vTable: PExternalTriggerVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -3733,6 +3904,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IRoutineMetadata; inline;
 	public
+	  function isIRoutineMetadataImpl: boolean;
+	  function asIRoutineMetadataImpl: IRoutineMetadataImpl;
 	  property vTable: PRoutineMetadataVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -3755,6 +3928,7 @@ type
 	public
 	  constructor create;
 	  function asIRoutineMetadata: IRoutineMetadata;
+	  class function isIRoutineMetadataImpl(intf: IRoutineMetadata): boolean;
 	  property vTable: PRoutineMetadataVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -3794,6 +3968,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IExternalEngine; inline;
 	public
+	  function isIExternalEngineImpl: boolean;
+	  function asIExternalEngineImpl: IExternalEngineImpl;
 	  property vTable: PExternalEngineVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -3817,6 +3993,7 @@ type
 	public
 	  constructor create;
 	  function asIExternalEngine: IExternalEngine;
+	  class function isIExternalEngineImpl(intf: IExternalEngine): boolean;
 	  property vTable: PExternalEngineVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -3846,6 +4023,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: ITimer; inline;
 	public
+	  function isITimerImpl: boolean;
+	  function asITimerImpl: ITimerImpl;
 	  property vTable: PTimerVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -3862,6 +4041,7 @@ type
 	public
 	  constructor create;
 	  function asITimer: ITimer;
+	  class function isITimerImpl(intf: ITimer): boolean;
 	  property vTable: PTimerVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -3885,6 +4065,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: ITimerControl; inline;
 	public
+	  function isITimerControlImpl: boolean;
+	  function asITimerControlImpl: ITimerControlImpl;
 	  property vTable: PTimerControlVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -3900,6 +4082,7 @@ type
 	public
 	  constructor create;
 	  function asITimerControl: ITimerControl;
+	  class function isITimerControlImpl(intf: ITimerControl): boolean;
 	  property vTable: PTimerControlVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -3923,6 +4106,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IVersionCallback; inline;
 	public
+	  function isIVersionCallbackImpl: boolean;
+	  function asIVersionCallbackImpl: IVersionCallbackImpl;
 	  property vTable: PVersionCallbackVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -3937,6 +4122,7 @@ type
 	public
 	  constructor create;
 	  function asIVersionCallback: IVersionCallback;
+	  class function isIVersionCallbackImpl(intf: IVersionCallback): boolean;
 	  property vTable: PVersionCallbackVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -3980,6 +4166,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IUtil; inline;
 	public
+	  function isIUtilImpl: boolean;
+	  function asIUtilImpl: IUtilImpl;
 	  property vTable: PUtilVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -4015,6 +4203,7 @@ type
 	public
 	  constructor create;
 	  function asIUtil: IUtil;
+	  class function isIUtilImpl(intf: IUtil): boolean;
 	  property vTable: PUtilVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -4058,6 +4247,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IOffsetsCallback; inline;
 	public
+	  function isIOffsetsCallbackImpl: boolean;
+	  function asIOffsetsCallbackImpl: IOffsetsCallbackImpl;
 	  property vTable: POffsetsCallbackVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -4072,6 +4263,7 @@ type
 	public
 	  constructor create;
 	  function asIOffsetsCallback: IOffsetsCallback;
+	  class function isIOffsetsCallbackImpl(intf: IOffsetsCallback): boolean;
 	  property vTable: POffsetsCallbackVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -4114,6 +4306,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IXpbBuilder; inline;
 	public
+	  function isIXpbBuilderImpl: boolean;
+	  function asIXpbBuilderImpl: IXpbBuilderImpl;
 	  property vTable: PXpbBuilderVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -4157,6 +4351,7 @@ type
 	public
 	  constructor create;
 	  function asIXpbBuilder: IXpbBuilder;
+	  class function isIXpbBuilderImpl(intf: IXpbBuilder): boolean;
 	  property vTable: PXpbBuilderVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -4206,6 +4401,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: ITraceConnection; inline;
 	public
+	  function isITraceConnectionImpl: boolean;
+	  function asITraceConnectionImpl: ITraceConnectionImpl;
 	  property vTable: PTraceConnectionVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -4230,6 +4427,7 @@ type
 	public
 	  constructor create;
 	  function asITraceConnection: ITraceConnection;
+	  class function isITraceConnectionImpl(intf: ITraceConnection): boolean;
 	  property vTable: PTraceConnectionVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -4270,6 +4468,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: ITraceDatabaseConnection; inline;
 	public
+	  function isITraceDatabaseConnectionImpl: boolean;
+	  function asITraceDatabaseConnectionImpl: ITraceDatabaseConnectionImpl;
 	  property vTable: PTraceDatabaseConnectionVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -4294,6 +4494,7 @@ type
 	public
 	  constructor create;
 	  function asITraceDatabaseConnection: ITraceDatabaseConnection;
+	  class function isITraceDatabaseConnectionImpl(intf: ITraceDatabaseConnection): boolean;
 	  property vTable: PTraceDatabaseConnectionVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -4323,6 +4524,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: ITraceTransaction; inline;
 	public
+	  function isITraceTransactionImpl: boolean;
+	  function asITraceTransactionImpl: ITraceTransactionImpl;
 	  property vTable: PTraceTransactionVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -4348,6 +4551,7 @@ type
 	public
 	  constructor create;
 	  function asITraceTransaction: ITraceTransaction;
+	  class function isITraceTransactionImpl(intf: ITraceTransaction): boolean;
 	  property vTable: PTraceTransactionVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -4378,6 +4582,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: ITraceParams; inline;
 	public
+	  function isITraceParamsImpl: boolean;
+	  function asITraceParamsImpl: ITraceParamsImpl;
 	  property vTable: PTraceParamsVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -4394,6 +4600,7 @@ type
 	public
 	  constructor create;
 	  function asITraceParams: ITraceParams;
+	  class function isITraceParamsImpl(intf: ITraceParams): boolean;
 	  property vTable: PTraceParamsVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -4419,6 +4626,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: ITraceStatement; inline;
 	public
+	  function isITraceStatementImpl: boolean;
+	  function asITraceStatementImpl: ITraceStatementImpl;
 	  property vTable: PTraceStatementVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -4434,6 +4643,7 @@ type
 	public
 	  constructor create;
 	  function asITraceStatement: ITraceStatement;
+	  class function isITraceStatementImpl(intf: ITraceStatement): boolean;
 	  property vTable: PTraceStatementVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -4463,6 +4673,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: ITraceSQLStatement; inline;
 	public
+	  function isITraceSQLStatementImpl: boolean;
+	  function asITraceSQLStatementImpl: ITraceSQLStatementImpl;
 	  property vTable: PTraceSQLStatementVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -4483,6 +4695,7 @@ type
 	public
 	  constructor create;
 	  function asITraceSQLStatement: ITraceSQLStatement;
+	  class function isITraceSQLStatementImpl(intf: ITraceSQLStatement): boolean;
 	  property vTable: PTraceSQLStatementVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -4513,6 +4726,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: ITraceBLRStatement; inline;
 	public
+	  function isITraceBLRStatementImpl: boolean;
+	  function asITraceBLRStatementImpl: ITraceBLRStatementImpl;
 	  property vTable: PTraceBLRStatementVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -4531,6 +4746,7 @@ type
 	public
 	  constructor create;
 	  function asITraceBLRStatement: ITraceBLRStatement;
+	  class function isITraceBLRStatementImpl(intf: ITraceBLRStatement): boolean;
 	  property vTable: PTraceBLRStatementVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -4557,6 +4773,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: ITraceDYNRequest; inline;
 	public
+	  function isITraceDYNRequestImpl: boolean;
+	  function asITraceDYNRequestImpl: ITraceDYNRequestImpl;
 	  property vTable: PTraceDYNRequestVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -4573,6 +4791,7 @@ type
 	public
 	  constructor create;
 	  function asITraceDYNRequest: ITraceDYNRequest;
+	  class function isITraceDYNRequestImpl(intf: ITraceDYNRequest): boolean;
 	  property vTable: PTraceDYNRequestVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -4599,6 +4818,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: ITraceContextVariable; inline;
 	public
+	  function isITraceContextVariableImpl: boolean;
+	  function asITraceContextVariableImpl: ITraceContextVariableImpl;
 	  property vTable: PTraceContextVariableVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -4615,6 +4836,7 @@ type
 	public
 	  constructor create;
 	  function asITraceContextVariable: ITraceContextVariable;
+	  class function isITraceContextVariableImpl(intf: ITraceContextVariable): boolean;
 	  property vTable: PTraceContextVariableVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -4641,6 +4863,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: ITraceProcedure; inline;
 	public
+	  function isITraceProcedureImpl: boolean;
+	  function asITraceProcedureImpl: ITraceProcedureImpl;
 	  property vTable: PTraceProcedureVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -4657,6 +4881,7 @@ type
 	public
 	  constructor create;
 	  function asITraceProcedure: ITraceProcedure;
+	  class function isITraceProcedureImpl(intf: ITraceProcedure): boolean;
 	  property vTable: PTraceProcedureVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -4684,6 +4909,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: ITraceFunction; inline;
 	public
+	  function isITraceFunctionImpl: boolean;
+	  function asITraceFunctionImpl: ITraceFunctionImpl;
 	  property vTable: PTraceFunctionVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -4701,6 +4928,7 @@ type
 	public
 	  constructor create;
 	  function asITraceFunction: ITraceFunction;
+	  class function isITraceFunctionImpl(intf: ITraceFunction): boolean;
 	  property vTable: PTraceFunctionVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -4730,6 +4958,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: ITraceTrigger; inline;
 	public
+	  function isITraceTriggerImpl: boolean;
+	  function asITraceTriggerImpl: ITraceTriggerImpl;
 	  property vTable: PTraceTriggerVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -4751,6 +4981,7 @@ type
 	public
 	  constructor create;
 	  function asITraceTrigger: ITraceTrigger;
+	  class function isITraceTriggerImpl(intf: ITraceTrigger): boolean;
 	  property vTable: PTraceTriggerVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -4788,6 +5019,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: ITraceServiceConnection; inline;
 	public
+	  function isITraceServiceConnectionImpl: boolean;
+	  function asITraceServiceConnectionImpl: ITraceServiceConnectionImpl;
 	  property vTable: PTraceServiceConnectionVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -4813,6 +5046,7 @@ type
 	public
 	  constructor create;
 	  function asITraceServiceConnection: ITraceServiceConnection;
+	  class function isITraceServiceConnectionImpl(intf: ITraceServiceConnection): boolean;
 	  property vTable: PTraceServiceConnectionVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -4840,6 +5074,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: ITraceStatusVector; inline;
 	public
+	  function isITraceStatusVectorImpl: boolean;
+	  function asITraceStatusVectorImpl: ITraceStatusVectorImpl;
 	  property vTable: PTraceStatusVectorVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -4857,6 +5093,7 @@ type
 	public
 	  constructor create;
 	  function asITraceStatusVector: ITraceStatusVector;
+	  class function isITraceStatusVectorImpl(intf: ITraceStatusVector): boolean;
 	  property vTable: PTraceStatusVectorVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -4886,6 +5123,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: ITraceSweepInfo; inline;
 	public
+	  function isITraceSweepInfoImpl: boolean;
+	  function asITraceSweepInfoImpl: ITraceSweepInfoImpl;
 	  property vTable: PTraceSweepInfoVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -4904,6 +5143,7 @@ type
 	public
 	  constructor create;
 	  function asITraceSweepInfo: ITraceSweepInfo;
+	  class function isITraceSweepInfoImpl(intf: ITraceSweepInfo): boolean;
 	  property vTable: PTraceSweepInfoVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -4933,6 +5173,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: ITraceLogWriter; inline;
 	public
+	  function isITraceLogWriterImpl: boolean;
+	  function asITraceLogWriterImpl: ITraceLogWriterImpl;
 	  property vTable: PTraceLogWriterVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -4950,6 +5192,7 @@ type
 	public
 	  constructor create;
 	  function asITraceLogWriter: ITraceLogWriter;
+	  class function isITraceLogWriterImpl(intf: ITraceLogWriter): boolean;
 	  property vTable: PTraceLogWriterVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -4979,6 +5222,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: ITraceInitInfo; inline;
 	public
+	  function isITraceInitInfoImpl: boolean;
+	  function asITraceInitInfoImpl: ITraceInitInfoImpl;
 	  property vTable: PTraceInitInfoVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -4999,6 +5244,7 @@ type
 	public
 	  constructor create;
 	  function asITraceInitInfo: ITraceInitInfo;
+	  class function isITraceInitInfoImpl(intf: ITraceInitInfo): boolean;
 	  property vTable: PTraceInitInfoVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -5049,6 +5295,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: ITracePlugin; inline;
 	public
+	  function isITracePluginImpl: boolean;
+	  function asITracePluginImpl: ITracePluginImpl;
 	  property vTable: PTracePluginVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -5092,6 +5340,7 @@ type
 	public
 	  constructor create;
 	  function asITracePlugin: ITracePlugin;
+	  class function isITracePluginImpl(intf: ITracePlugin): boolean;
 	  property vTable: PTracePluginVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -5139,6 +5388,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: ITraceFactory; inline;
 	public
+	  function isITraceFactoryImpl: boolean;
+	  function asITraceFactoryImpl: ITraceFactoryImpl;
 	  property vTable: PTraceFactoryVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -5179,6 +5430,7 @@ type
 	public
 	  constructor create;
 	  function asITraceFactory: ITraceFactory;
+	  class function isITraceFactoryImpl(intf: ITraceFactory): boolean;
 	  property vTable: PTraceFactoryVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -5204,6 +5456,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IUdrFunctionFactory; inline;
 	public
+	  function isIUdrFunctionFactoryImpl: boolean;
+	  function asIUdrFunctionFactoryImpl: IUdrFunctionFactoryImpl;
 	  property vTable: PUdrFunctionFactoryVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -5220,6 +5474,7 @@ type
 	public
 	  constructor create;
 	  function asIUdrFunctionFactory: IUdrFunctionFactory;
+	  class function isIUdrFunctionFactoryImpl(intf: IUdrFunctionFactory): boolean;
 	  property vTable: PUdrFunctionFactoryVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -5245,6 +5500,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IUdrProcedureFactory; inline;
 	public
+	  function isIUdrProcedureFactoryImpl: boolean;
+	  function asIUdrProcedureFactoryImpl: IUdrProcedureFactoryImpl;
 	  property vTable: PUdrProcedureFactoryVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -5261,6 +5518,7 @@ type
 	public
 	  constructor create;
 	  function asIUdrProcedureFactory: IUdrProcedureFactory;
+	  class function isIUdrProcedureFactoryImpl(intf: IUdrProcedureFactory): boolean;
 	  property vTable: PUdrProcedureFactoryVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -5286,6 +5544,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IUdrTriggerFactory; inline;
 	public
+	  function isIUdrTriggerFactoryImpl: boolean;
+	  function asIUdrTriggerFactoryImpl: IUdrTriggerFactoryImpl;
 	  property vTable: PUdrTriggerFactoryVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -5302,6 +5562,7 @@ type
 	public
 	  constructor create;
 	  function asIUdrTriggerFactory: IUdrTriggerFactory;
+	  class function isIUdrTriggerFactoryImpl(intf: IUdrTriggerFactory): boolean;
 	  property vTable: PUdrTriggerFactoryVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -5328,6 +5589,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IUdrPlugin; inline;
 	public
+	  function isIUdrPluginImpl: boolean;
+	  function asIUdrPluginImpl: IUdrPluginImpl;
 	  property vTable: PUdrPluginVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -5345,6 +5608,7 @@ type
 	public
 	  constructor create;
 	  function asIUdrPlugin: IUdrPlugin;
+	  class function isIUdrPluginImpl(intf: IUdrPlugin): boolean;
 	  property vTable: PUdrPluginVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -5373,6 +5637,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IDecFloat16; inline;
 	public
+	  function isIDecFloat16Impl: boolean;
+	  function asIDecFloat16Impl: IDecFloat16Impl;
 	  property vTable: PDecFloat16VTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -5392,6 +5658,7 @@ type
 	public
 	  constructor create;
 	  function asIDecFloat16: IDecFloat16;
+	  class function isIDecFloat16Impl(intf: IDecFloat16): boolean;
 	  property vTable: PDecFloat16VTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -5420,6 +5687,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IDecFloat34; inline;
 	public
+	  function isIDecFloat34Impl: boolean;
+	  function asIDecFloat34Impl: IDecFloat34Impl;
 	  property vTable: PDecFloat34VTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -5439,6 +5708,7 @@ type
 	public
 	  constructor create;
 	  function asIDecFloat34: IDecFloat34;
+	  class function isIDecFloat34Impl(intf: IDecFloat34): boolean;
 	  property vTable: PDecFloat34VTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -5465,6 +5735,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IInt128; inline;
 	public
+	  function isIInt128Impl: boolean;
+	  function asIInt128Impl: IInt128Impl;
 	  property vTable: PInt128VTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -5481,6 +5753,7 @@ type
 	public
 	  constructor create;
 	  function asIInt128: IInt128;
+	  class function isIInt128Impl(intf: IInt128): boolean;
 	  property vTable: PInt128VTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -5510,6 +5783,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IReplicatedField; inline;
 	public
+	  function isIReplicatedFieldImpl: boolean;
+	  function asIReplicatedFieldImpl: IReplicatedFieldImpl;
 	  property vTable: PReplicatedFieldVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -5530,6 +5805,7 @@ type
 	public
 	  constructor create;
 	  function asIReplicatedField: IReplicatedField;
+	  class function isIReplicatedFieldImpl(intf: IReplicatedField): boolean;
 	  property vTable: PReplicatedFieldVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -5561,6 +5837,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IReplicatedRecord; inline;
 	public
+	  function isIReplicatedRecordImpl: boolean;
+	  function asIReplicatedRecordImpl: IReplicatedRecordImpl;
 	  property vTable: PReplicatedRecordVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -5578,6 +5856,7 @@ type
 	public
 	  constructor create;
 	  function asIReplicatedRecord: IReplicatedRecord;
+	  class function isIReplicatedRecordImpl(intf: IReplicatedRecord): boolean;
 	  property vTable: PReplicatedRecordVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -5614,6 +5893,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IReplicatedTransaction; inline;
 	public
+	  function isIReplicatedTransactionImpl: boolean;
+	  function asIReplicatedTransactionImpl: IReplicatedTransactionImpl;
 	  property vTable: PReplicatedTransactionVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -5639,6 +5920,7 @@ type
 	public
 	  constructor create;
 	  function asIReplicatedTransaction: IReplicatedTransaction;
+	  class function isIReplicatedTransactionImpl(intf: IReplicatedTransaction): boolean;
 	  property vTable: PReplicatedTransactionVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -5678,6 +5960,8 @@ type
 	  FObject: TObject; {Only valid when interface provided by an implementation class }
 	  function this: IReplicatedSession; inline;
 	public
+	  function isIReplicatedSessionImpl: boolean;
+	  function asIReplicatedSessionImpl: IReplicatedSessionImpl;
 	  property vTable: PReplicatedSessionVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
@@ -5699,6 +5983,7 @@ type
 	public
 	  constructor create;
 	  function asIReplicatedSession: IReplicatedSession;
+	  class function isIReplicatedSessionImpl(intf: IReplicatedSession): boolean;
 	  property vTable: PReplicatedSessionVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
@@ -5708,20 +5993,6 @@ type
 	  procedure setSequence(status: IStatus; name: PAnsiChar; value: Int64); virtual; abstract;
 	end;
 
-
-{Use IsImplementationObject to test any interface (e.g. IMaster) to see if 
- it is derived from an implmentation class (e.g. IMasterImpl).
-
- Example:
-
- var objectType: TFirebirdImplementationClass;
-     impl: TObject;
-     apiInterface: IMaster;
- begin
-   if IsImplementationObject(apiInterface,objectType,impl) then
-   ...if returns true then objectType is set to IMasterImpl and impl may be coerced to IMasterImpl}
-
-function IsImplementationObject(OOAPIInterface: pointer; var classType: TFirebirdImplementationClass; var impl: TObject): boolean;
 
 {$IFDEF STATIC_LINK_TO_FIREBIRD_LIBRARY}
 function fb_get_master_interface : IMaster; {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}; external 'fbclient';
@@ -5742,9 +6013,35 @@ begin
   Result := IVersioned(@FNullPtr);
 end;
 
+function TVersioned.isIVersionedImpl: boolean inline;
+begin
+  Result := IVersionedImpl.isIVersionedImpl(this);
+end;
+
+function TVersioned.asIVersionedImpl: IVersionedImpl;
+begin
+  if isIVersionedImpl then
+    Result := FObject as IVersionedImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 function TReferenceCounted.this: IReferenceCounted;
 begin
   Result := IReferenceCounted(@FNullPtr);
+end;
+
+function TReferenceCounted.isIReferenceCountedImpl: boolean inline;
+begin
+  Result := IReferenceCountedImpl.isIReferenceCountedImpl(this);
+end;
+
+function TReferenceCounted.asIReferenceCountedImpl: IReferenceCountedImpl;
+begin
+  if isIReferenceCountedImpl then
+    Result := FObject as IReferenceCountedImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 procedure TReferenceCounted.addRef();
@@ -5762,6 +6059,19 @@ begin
   Result := IDisposable(@FNullPtr);
 end;
 
+function TDisposable.isIDisposableImpl: boolean inline;
+begin
+  Result := IDisposableImpl.isIDisposableImpl(this);
+end;
+
+function TDisposable.asIDisposableImpl: IDisposableImpl;
+begin
+  if isIDisposableImpl then
+    Result := FObject as IDisposableImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TDisposable.dispose();
 begin
 	vTable^.dispose(this);
@@ -5770,6 +6080,19 @@ end;
 function TStatus.this: IStatus;
 begin
   Result := IStatus(@FNullPtr);
+end;
+
+function TStatus.isIStatusImpl: boolean inline;
+begin
+  Result := IStatusImpl.isIStatusImpl(this);
+end;
+
+function TStatus.asIStatusImpl: IStatusImpl;
+begin
+  if isIStatusImpl then
+    Result := FObject as IStatusImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 procedure TStatus.dispose();
@@ -5825,6 +6148,19 @@ end;
 function TMaster.this: IMaster;
 begin
   Result := IMaster(@FNullPtr);
+end;
+
+function TMaster.isIMasterImpl: boolean inline;
+begin
+  Result := IMasterImpl.isIMasterImpl(this);
+end;
+
+function TMaster.asIMasterImpl: IMasterImpl;
+begin
+  if isIMasterImpl then
+    Result := FObject as IMasterImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 function TMaster.getStatus(): IStatus;
@@ -5893,6 +6229,19 @@ begin
   Result := IPluginBase(@FNullPtr);
 end;
 
+function TPluginBase.isIPluginBaseImpl: boolean inline;
+begin
+  Result := IPluginBaseImpl.isIPluginBaseImpl(this);
+end;
+
+function TPluginBase.asIPluginBaseImpl: IPluginBaseImpl;
+begin
+  if isIPluginBaseImpl then
+    Result := FObject as IPluginBaseImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TPluginBase.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -5916,6 +6265,19 @@ end;
 function TPluginSet.this: IPluginSet;
 begin
   Result := IPluginSet(@FNullPtr);
+end;
+
+function TPluginSet.isIPluginSetImpl: boolean inline;
+begin
+  Result := IPluginSetImpl.isIPluginSetImpl(this);
+end;
+
+function TPluginSet.asIPluginSetImpl: IPluginSetImpl;
+begin
+  if isIPluginSetImpl then
+    Result := FObject as IPluginSetImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 procedure TPluginSet.addRef();
@@ -5961,6 +6323,19 @@ begin
   Result := IConfigEntry(@FNullPtr);
 end;
 
+function TConfigEntry.isIConfigEntryImpl: boolean inline;
+begin
+  Result := IConfigEntryImpl.isIConfigEntryImpl(this);
+end;
+
+function TConfigEntry.asIConfigEntryImpl: IConfigEntryImpl;
+begin
+  if isIConfigEntryImpl then
+    Result := FObject as IConfigEntryImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TConfigEntry.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -6002,6 +6377,19 @@ begin
   Result := IConfig(@FNullPtr);
 end;
 
+function TConfig.isIConfigImpl: boolean inline;
+begin
+  Result := IConfigImpl.isIConfigImpl(this);
+end;
+
+function TConfig.asIConfigImpl: IConfigImpl;
+begin
+  if isIConfigImpl then
+    Result := FObject as IConfigImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TConfig.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -6033,6 +6421,19 @@ end;
 function TFirebirdConf.this: IFirebirdConf;
 begin
   Result := IFirebirdConf(@FNullPtr);
+end;
+
+function TFirebirdConf.isIFirebirdConfImpl: boolean inline;
+begin
+  Result := IFirebirdConfImpl.isIFirebirdConfImpl(this);
+end;
+
+function TFirebirdConf.asIFirebirdConfImpl: IFirebirdConfImpl;
+begin
+  if isIFirebirdConfImpl then
+    Result := FObject as IFirebirdConfImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 procedure TFirebirdConf.addRef();
@@ -6076,6 +6477,19 @@ begin
   Result := IPluginConfig(@FNullPtr);
 end;
 
+function TPluginConfig.isIPluginConfigImpl: boolean inline;
+begin
+  Result := IPluginConfigImpl.isIPluginConfigImpl(this);
+end;
+
+function TPluginConfig.asIPluginConfigImpl: IPluginConfigImpl;
+begin
+  if isIPluginConfigImpl then
+    Result := FObject as IPluginConfigImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TPluginConfig.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -6114,6 +6528,19 @@ begin
   Result := IPluginFactory(@FNullPtr);
 end;
 
+function TPluginFactory.isIPluginFactoryImpl: boolean inline;
+begin
+  Result := IPluginFactoryImpl.isIPluginFactoryImpl(this);
+end;
+
+function TPluginFactory.asIPluginFactoryImpl: IPluginFactoryImpl;
+begin
+  if isIPluginFactoryImpl then
+    Result := FObject as IPluginFactoryImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 function TPluginFactory.createPlugin(status: IStatus; factoryParameter: IPluginConfig): IPluginBase;
 begin
 	Result := vTable^.createPlugin(this, status, factoryParameter);
@@ -6123,6 +6550,19 @@ end;
 function TPluginModule.this: IPluginModule;
 begin
   Result := IPluginModule(@FNullPtr);
+end;
+
+function TPluginModule.isIPluginModuleImpl: boolean inline;
+begin
+  Result := IPluginModuleImpl.isIPluginModuleImpl(this);
+end;
+
+function TPluginModule.asIPluginModuleImpl: IPluginModuleImpl;
+begin
+  if isIPluginModuleImpl then
+    Result := FObject as IPluginModuleImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 procedure TPluginModule.doClean();
@@ -6138,6 +6578,19 @@ end;
 function TPluginManager.this: IPluginManager;
 begin
   Result := IPluginManager(@FNullPtr);
+end;
+
+function TPluginManager.isIPluginManagerImpl: boolean inline;
+begin
+  Result := IPluginManagerImpl.isIPluginManagerImpl(this);
+end;
+
+function TPluginManager.asIPluginManagerImpl: IPluginManagerImpl;
+begin
+  if isIPluginManagerImpl then
+    Result := FObject as IPluginManagerImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 procedure TPluginManager.registerPluginFactory(pluginType: Cardinal; defaultName: PAnsiChar; factory: IPluginFactory);
@@ -6177,6 +6630,19 @@ begin
   Result := ICryptKey(@FNullPtr);
 end;
 
+function TCryptKey.isICryptKeyImpl: boolean inline;
+begin
+  Result := ICryptKeyImpl.isICryptKeyImpl(this);
+end;
+
+function TCryptKey.asICryptKeyImpl: ICryptKeyImpl;
+begin
+  if isICryptKeyImpl then
+    Result := FObject as ICryptKeyImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TCryptKey.setSymmetric(status: IStatus; type_: PAnsiChar; keyLength: Cardinal; key: Pointer);
 begin
 	vTable^.setSymmetric(this, status, type_, keyLength, key);
@@ -6202,6 +6668,19 @@ end;
 function TConfigManager.this: IConfigManager;
 begin
   Result := IConfigManager(@FNullPtr);
+end;
+
+function TConfigManager.isIConfigManagerImpl: boolean inline;
+begin
+  Result := IConfigManagerImpl.isIConfigManagerImpl(this);
+end;
+
+function TConfigManager.asIConfigManagerImpl: IConfigManagerImpl;
+begin
+  if isIConfigManagerImpl then
+    Result := FObject as IConfigManagerImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 function TConfigManager.getDirectory(code: Cardinal): PAnsiChar;
@@ -6244,6 +6723,19 @@ begin
   Result := IEventCallback(@FNullPtr);
 end;
 
+function TEventCallback.isIEventCallbackImpl: boolean inline;
+begin
+  Result := IEventCallbackImpl.isIEventCallbackImpl(this);
+end;
+
+function TEventCallback.asIEventCallbackImpl: IEventCallbackImpl;
+begin
+  if isIEventCallbackImpl then
+    Result := FObject as IEventCallbackImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TEventCallback.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -6262,6 +6754,19 @@ end;
 function TBlob.this: IBlob;
 begin
   Result := IBlob(@FNullPtr);
+end;
+
+function TBlob.isIBlobImpl: boolean inline;
+begin
+  Result := IBlobImpl.isIBlobImpl(this);
+end;
+
+function TBlob.asIBlobImpl: IBlobImpl;
+begin
+  if isIBlobImpl then
+    Result := FObject as IBlobImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 procedure TBlob.addRef();
@@ -6313,6 +6818,19 @@ end;
 function TTransaction.this: ITransaction;
 begin
   Result := ITransaction(@FNullPtr);
+end;
+
+function TTransaction.isITransactionImpl: boolean inline;
+begin
+  Result := ITransactionImpl.isITransactionImpl(this);
+end;
+
+function TTransaction.asITransactionImpl: ITransactionImpl;
+begin
+  if isITransactionImpl then
+    Result := FObject as ITransactionImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 procedure TTransaction.addRef();
@@ -6388,6 +6906,19 @@ end;
 function TMessageMetadata.this: IMessageMetadata;
 begin
   Result := IMessageMetadata(@FNullPtr);
+end;
+
+function TMessageMetadata.isIMessageMetadataImpl: boolean inline;
+begin
+  Result := IMessageMetadataImpl.isIMessageMetadataImpl(this);
+end;
+
+function TMessageMetadata.asIMessageMetadataImpl: IMessageMetadataImpl;
+begin
+  if isIMessageMetadataImpl then
+    Result := FObject as IMessageMetadataImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 procedure TMessageMetadata.addRef();
@@ -6507,6 +7038,19 @@ begin
   Result := IMetadataBuilder(@FNullPtr);
 end;
 
+function TMetadataBuilder.isIMetadataBuilderImpl: boolean inline;
+begin
+  Result := IMetadataBuilderImpl.isIMetadataBuilderImpl(this);
+end;
+
+function TMetadataBuilder.asIMetadataBuilderImpl: IMetadataBuilderImpl;
+begin
+  if isIMetadataBuilderImpl then
+    Result := FObject as IMetadataBuilderImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TMetadataBuilder.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -6606,6 +7150,19 @@ begin
   Result := IResultSet(@FNullPtr);
 end;
 
+function TResultSet.isIResultSetImpl: boolean inline;
+begin
+  Result := IResultSetImpl.isIResultSetImpl(this);
+end;
+
+function TResultSet.asIResultSetImpl: IResultSetImpl;
+begin
+  if isIResultSetImpl then
+    Result := FObject as IResultSetImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TResultSet.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -6685,6 +7242,19 @@ end;
 function TStatement.this: IStatement;
 begin
   Result := IStatement(@FNullPtr);
+end;
+
+function TStatement.isIStatementImpl: boolean inline;
+begin
+  Result := IStatementImpl.isIStatementImpl(this);
+end;
+
+function TStatement.asIStatementImpl: IStatementImpl;
+begin
+  if isIStatementImpl then
+    Result := FObject as IStatementImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 procedure TStatement.addRef();
@@ -6786,6 +7356,19 @@ begin
   Result := IBatch(@FNullPtr);
 end;
 
+function TBatch.isIBatchImpl: boolean inline;
+begin
+  Result := IBatchImpl.isIBatchImpl(this);
+end;
+
+function TBatch.asIBatchImpl: IBatchImpl;
+begin
+  if isIBatchImpl then
+    Result := FObject as IBatchImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TBatch.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -6867,6 +7450,19 @@ begin
   Result := IBatchCompletionState(@FNullPtr);
 end;
 
+function TBatchCompletionState.isIBatchCompletionStateImpl: boolean inline;
+begin
+  Result := IBatchCompletionStateImpl.isIBatchCompletionStateImpl(this);
+end;
+
+function TBatchCompletionState.asIBatchCompletionStateImpl: IBatchCompletionStateImpl;
+begin
+  if isIBatchCompletionStateImpl then
+    Result := FObject as IBatchCompletionStateImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TBatchCompletionState.dispose();
 begin
 	vTable^.dispose(IDisposable(this));
@@ -6901,6 +7497,19 @@ begin
   Result := IReplicator(@FNullPtr);
 end;
 
+function TReplicator.isIReplicatorImpl: boolean inline;
+begin
+  Result := IReplicatorImpl.isIReplicatorImpl(this);
+end;
+
+function TReplicator.asIReplicatorImpl: IReplicatorImpl;
+begin
+  if isIReplicatorImpl then
+    Result := FObject as IReplicatorImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TReplicator.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -6926,6 +7535,19 @@ end;
 function TRequest.this: IRequest;
 begin
   Result := IRequest(@FNullPtr);
+end;
+
+function TRequest.isIRequestImpl: boolean inline;
+begin
+  Result := IRequestImpl.isIRequestImpl(this);
+end;
+
+function TRequest.asIRequestImpl: IRequestImpl;
+begin
+  if isIRequestImpl then
+    Result := FObject as IRequestImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 procedure TRequest.addRef();
@@ -6985,6 +7607,19 @@ begin
   Result := IEvents(@FNullPtr);
 end;
 
+function TEvents.isIEventsImpl: boolean inline;
+begin
+  Result := IEventsImpl.isIEventsImpl(this);
+end;
+
+function TEvents.asIEventsImpl: IEventsImpl;
+begin
+  if isIEventsImpl then
+    Result := FObject as IEventsImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TEvents.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -7004,6 +7639,19 @@ end;
 function TAttachment.this: IAttachment;
 begin
   Result := IAttachment(@FNullPtr);
+end;
+
+function TAttachment.isIAttachmentImpl: boolean inline;
+begin
+  Result := IAttachmentImpl.isIAttachmentImpl(this);
+end;
+
+function TAttachment.asIAttachmentImpl: IAttachmentImpl;
+begin
+  if isIAttachmentImpl then
+    Result := FObject as IAttachmentImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 procedure TAttachment.addRef();
@@ -7165,6 +7813,19 @@ begin
   Result := IService(@FNullPtr);
 end;
 
+function TService.isIServiceImpl: boolean inline;
+begin
+  Result := IServiceImpl.isIServiceImpl(this);
+end;
+
+function TService.asIServiceImpl: IServiceImpl;
+begin
+  if isIServiceImpl then
+    Result := FObject as IServiceImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TService.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -7196,6 +7857,19 @@ end;
 function TProvider.this: IProvider;
 begin
   Result := IProvider(@FNullPtr);
+end;
+
+function TProvider.isIProviderImpl: boolean inline;
+begin
+  Result := IProviderImpl.isIProviderImpl(this);
+end;
+
+function TProvider.asIProviderImpl: IProviderImpl;
+begin
+  if isIProviderImpl then
+    Result := FObject as IProviderImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 procedure TProvider.addRef();
@@ -7253,6 +7927,19 @@ begin
   Result := IDtcStart(@FNullPtr);
 end;
 
+function TDtcStart.isIDtcStartImpl: boolean inline;
+begin
+  Result := IDtcStartImpl.isIDtcStartImpl(this);
+end;
+
+function TDtcStart.asIDtcStartImpl: IDtcStartImpl;
+begin
+  if isIDtcStartImpl then
+    Result := FObject as IDtcStartImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TDtcStart.dispose();
 begin
 	vTable^.dispose(IDisposable(this));
@@ -7281,6 +7968,19 @@ begin
   Result := IDtc(@FNullPtr);
 end;
 
+function TDtc.isIDtcImpl: boolean inline;
+begin
+  Result := IDtcImpl.isIDtcImpl(this);
+end;
+
+function TDtc.asIDtcImpl: IDtcImpl;
+begin
+  if isIDtcImpl then
+    Result := FObject as IDtcImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 function TDtc.join(status: IStatus; one: ITransaction; two: ITransaction): ITransaction;
 begin
 	Result := vTable^.join(this, status, one, two);
@@ -7296,6 +7996,19 @@ end;
 function TAuth.this: IAuth;
 begin
   Result := IAuth(@FNullPtr);
+end;
+
+function TAuth.isIAuthImpl: boolean inline;
+begin
+  Result := IAuthImpl.isIAuthImpl(this);
+end;
+
+function TAuth.asIAuthImpl: IAuthImpl;
+begin
+  if isIAuthImpl then
+    Result := FObject as IAuthImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 procedure TAuth.addRef();
@@ -7321,6 +8034,19 @@ end;
 function TWriter.this: IWriter;
 begin
   Result := IWriter(@FNullPtr);
+end;
+
+function TWriter.isIWriterImpl: boolean inline;
+begin
+  Result := IWriterImpl.isIWriterImpl(this);
+end;
+
+function TWriter.asIWriterImpl: IWriterImpl;
+begin
+  if isIWriterImpl then
+    Result := FObject as IWriterImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 procedure TWriter.reset();
@@ -7351,6 +8077,19 @@ begin
   Result := IServerBlock(@FNullPtr);
 end;
 
+function TServerBlock.isIServerBlockImpl: boolean inline;
+begin
+  Result := IServerBlockImpl.isIServerBlockImpl(this);
+end;
+
+function TServerBlock.asIServerBlockImpl: IServerBlockImpl;
+begin
+  if isIServerBlockImpl then
+    Result := FObject as IServerBlockImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 function TServerBlock.getLogin(): PAnsiChar;
 begin
 	Result := vTable^.getLogin(this);
@@ -7376,6 +8115,19 @@ end;
 function TClientBlock.this: IClientBlock;
 begin
   Result := IClientBlock(@FNullPtr);
+end;
+
+function TClientBlock.isIClientBlockImpl: boolean inline;
+begin
+  Result := IClientBlockImpl.isIClientBlockImpl(this);
+end;
+
+function TClientBlock.asIClientBlockImpl: IClientBlockImpl;
+begin
+  if isIClientBlockImpl then
+    Result := FObject as IClientBlockImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 procedure TClientBlock.addRef();
@@ -7426,6 +8178,19 @@ begin
   Result := IServer(@FNullPtr);
 end;
 
+function TServer.isIServerImpl: boolean inline;
+begin
+  Result := IServerImpl.isIServerImpl(this);
+end;
+
+function TServer.asIServerImpl: IServerImpl;
+begin
+  if isIServerImpl then
+    Result := FObject as IServerImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TServer.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -7463,6 +8228,19 @@ begin
   Result := IClient(@FNullPtr);
 end;
 
+function TClient.isIClientImpl: boolean inline;
+begin
+  Result := IClientImpl.isIClientImpl(this);
+end;
+
+function TClient.asIClientImpl: IClientImpl;
+begin
+  if isIClientImpl then
+    Result := FObject as IClientImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TClient.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -7494,6 +8272,19 @@ begin
   Result := IUserField(@FNullPtr);
 end;
 
+function TUserField.isIUserFieldImpl: boolean inline;
+begin
+  Result := IUserFieldImpl.isIUserFieldImpl(this);
+end;
+
+function TUserField.asIUserFieldImpl: IUserFieldImpl;
+begin
+  if isIUserFieldImpl then
+    Result := FObject as IUserFieldImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 function TUserField.entered(): Integer;
 begin
 	Result := vTable^.entered(this);
@@ -7513,6 +8304,19 @@ end;
 function TCharUserField.this: ICharUserField;
 begin
   Result := ICharUserField(@FNullPtr);
+end;
+
+function TCharUserField.isICharUserFieldImpl: boolean inline;
+begin
+  Result := ICharUserFieldImpl.isICharUserFieldImpl(this);
+end;
+
+function TCharUserField.asICharUserFieldImpl: ICharUserFieldImpl;
+begin
+  if isICharUserFieldImpl then
+    Result := FObject as ICharUserFieldImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 function TCharUserField.entered(): Integer;
@@ -7547,6 +8351,19 @@ begin
   Result := IIntUserField(@FNullPtr);
 end;
 
+function TIntUserField.isIIntUserFieldImpl: boolean inline;
+begin
+  Result := IIntUserFieldImpl.isIIntUserFieldImpl(this);
+end;
+
+function TIntUserField.asIIntUserFieldImpl: IIntUserFieldImpl;
+begin
+  if isIIntUserFieldImpl then
+    Result := FObject as IIntUserFieldImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 function TIntUserField.entered(): Integer;
 begin
 	Result := vTable^.entered(IUserField(this));
@@ -7577,6 +8394,19 @@ end;
 function TUser.this: IUser;
 begin
   Result := IUser(@FNullPtr);
+end;
+
+function TUser.isIUserImpl: boolean inline;
+begin
+  Result := IUserImpl.isIUserImpl(this);
+end;
+
+function TUser.asIUserImpl: IUserImpl;
+begin
+  if isIUserImpl then
+    Result := FObject as IUserImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 function TUser.operation(): Cardinal;
@@ -7640,6 +8470,19 @@ begin
   Result := IListUsers(@FNullPtr);
 end;
 
+function TListUsers.isIListUsersImpl: boolean inline;
+begin
+  Result := IListUsersImpl.isIListUsersImpl(this);
+end;
+
+function TListUsers.asIListUsersImpl: IListUsersImpl;
+begin
+  if isIListUsersImpl then
+    Result := FObject as IListUsersImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TListUsers.list(status: IStatus; user: IUser);
 begin
 	vTable^.list(this, status, user);
@@ -7649,6 +8492,19 @@ end;
 function TLogonInfo.this: ILogonInfo;
 begin
   Result := ILogonInfo(@FNullPtr);
+end;
+
+function TLogonInfo.isILogonInfoImpl: boolean inline;
+begin
+  Result := ILogonInfoImpl.isILogonInfoImpl(this);
+end;
+
+function TLogonInfo.asILogonInfoImpl: ILogonInfoImpl;
+begin
+  if isILogonInfoImpl then
+    Result := FObject as ILogonInfoImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 function TLogonInfo.name(): PAnsiChar;
@@ -7691,6 +8547,19 @@ end;
 function TManagement.this: IManagement;
 begin
   Result := IManagement(@FNullPtr);
+end;
+
+function TManagement.isIManagementImpl: boolean inline;
+begin
+  Result := IManagementImpl.isIManagementImpl(this);
+end;
+
+function TManagement.asIManagementImpl: IManagementImpl;
+begin
+  if isIManagementImpl then
+    Result := FObject as IManagementImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 procedure TManagement.addRef();
@@ -7742,6 +8611,19 @@ begin
   Result := IAuthBlock(@FNullPtr);
 end;
 
+function TAuthBlock.isIAuthBlockImpl: boolean inline;
+begin
+  Result := IAuthBlockImpl.isIAuthBlockImpl(this);
+end;
+
+function TAuthBlock.asIAuthBlockImpl: IAuthBlockImpl;
+begin
+  if isIAuthBlockImpl then
+    Result := FObject as IAuthBlockImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 function TAuthBlock.getType(): PAnsiChar;
 begin
 	Result := vTable^.getType(this);
@@ -7782,6 +8664,19 @@ end;
 function TWireCryptPlugin.this: IWireCryptPlugin;
 begin
   Result := IWireCryptPlugin(@FNullPtr);
+end;
+
+function TWireCryptPlugin.isIWireCryptPluginImpl: boolean inline;
+begin
+  Result := IWireCryptPluginImpl.isIWireCryptPluginImpl(this);
+end;
+
+function TWireCryptPlugin.asIWireCryptPluginImpl: IWireCryptPluginImpl;
+begin
+  if isIWireCryptPluginImpl then
+    Result := FObject as IWireCryptPluginImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 procedure TWireCryptPlugin.addRef();
@@ -7845,6 +8740,19 @@ begin
   Result := ICryptKeyCallback(@FNullPtr);
 end;
 
+function TCryptKeyCallback.isICryptKeyCallbackImpl: boolean inline;
+begin
+  Result := ICryptKeyCallbackImpl.isICryptKeyCallbackImpl(this);
+end;
+
+function TCryptKeyCallback.asICryptKeyCallbackImpl: ICryptKeyCallbackImpl;
+begin
+  if isICryptKeyCallbackImpl then
+    Result := FObject as ICryptKeyCallbackImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 function TCryptKeyCallback.callback(dataLength: Cardinal; data: Pointer; bufferLength: Cardinal; buffer: Pointer): Cardinal;
 begin
 	Result := vTable^.callback(this, dataLength, data, bufferLength, buffer);
@@ -7853,6 +8761,19 @@ end;
 function TKeyHolderPlugin.this: IKeyHolderPlugin;
 begin
   Result := IKeyHolderPlugin(@FNullPtr);
+end;
+
+function TKeyHolderPlugin.isIKeyHolderPluginImpl: boolean inline;
+begin
+  Result := IKeyHolderPluginImpl.isIKeyHolderPluginImpl(this);
+end;
+
+function TKeyHolderPlugin.asIKeyHolderPluginImpl: IKeyHolderPluginImpl;
+begin
+  if isIKeyHolderPluginImpl then
+    Result := FObject as IKeyHolderPluginImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 procedure TKeyHolderPlugin.addRef();
@@ -7904,6 +8825,19 @@ begin
   Result := IDbCryptInfo(@FNullPtr);
 end;
 
+function TDbCryptInfo.isIDbCryptInfoImpl: boolean inline;
+begin
+  Result := IDbCryptInfoImpl.isIDbCryptInfoImpl(this);
+end;
+
+function TDbCryptInfo.asIDbCryptInfoImpl: IDbCryptInfoImpl;
+begin
+  if isIDbCryptInfoImpl then
+    Result := FObject as IDbCryptInfoImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TDbCryptInfo.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -7923,6 +8857,19 @@ end;
 function TDbCryptPlugin.this: IDbCryptPlugin;
 begin
   Result := IDbCryptPlugin(@FNullPtr);
+end;
+
+function TDbCryptPlugin.isIDbCryptPluginImpl: boolean inline;
+begin
+  Result := IDbCryptPluginImpl.isIDbCryptPluginImpl(this);
+end;
+
+function TDbCryptPlugin.asIDbCryptPluginImpl: IDbCryptPluginImpl;
+begin
+  if isIDbCryptPluginImpl then
+    Result := FObject as IDbCryptPluginImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 procedure TDbCryptPlugin.addRef();
@@ -7972,6 +8919,19 @@ end;
 function TExternalContext.this: IExternalContext;
 begin
   Result := IExternalContext(@FNullPtr);
+end;
+
+function TExternalContext.isIExternalContextImpl: boolean inline;
+begin
+  Result := IExternalContextImpl.isIExternalContextImpl(this);
+end;
+
+function TExternalContext.asIExternalContextImpl: IExternalContextImpl;
+begin
+  if isIExternalContextImpl then
+    Result := FObject as IExternalContextImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 function TExternalContext.getMaster(): IMaster;
@@ -8032,6 +8992,19 @@ begin
   Result := IExternalResultSet(@FNullPtr);
 end;
 
+function TExternalResultSet.isIExternalResultSetImpl: boolean inline;
+begin
+  Result := IExternalResultSetImpl.isIExternalResultSetImpl(this);
+end;
+
+function TExternalResultSet.asIExternalResultSetImpl: IExternalResultSetImpl;
+begin
+  if isIExternalResultSetImpl then
+    Result := FObject as IExternalResultSetImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TExternalResultSet.dispose();
 begin
 	vTable^.dispose(IDisposable(this));
@@ -8046,6 +9019,19 @@ end;
 function TExternalFunction.this: IExternalFunction;
 begin
   Result := IExternalFunction(@FNullPtr);
+end;
+
+function TExternalFunction.isIExternalFunctionImpl: boolean inline;
+begin
+  Result := IExternalFunctionImpl.isIExternalFunctionImpl(this);
+end;
+
+function TExternalFunction.asIExternalFunctionImpl: IExternalFunctionImpl;
+begin
+  if isIExternalFunctionImpl then
+    Result := FObject as IExternalFunctionImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 procedure TExternalFunction.dispose();
@@ -8070,6 +9056,19 @@ begin
   Result := IExternalProcedure(@FNullPtr);
 end;
 
+function TExternalProcedure.isIExternalProcedureImpl: boolean inline;
+begin
+  Result := IExternalProcedureImpl.isIExternalProcedureImpl(this);
+end;
+
+function TExternalProcedure.asIExternalProcedureImpl: IExternalProcedureImpl;
+begin
+  if isIExternalProcedureImpl then
+    Result := FObject as IExternalProcedureImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TExternalProcedure.dispose();
 begin
 	vTable^.dispose(IDisposable(this));
@@ -8092,6 +9091,19 @@ begin
   Result := IExternalTrigger(@FNullPtr);
 end;
 
+function TExternalTrigger.isIExternalTriggerImpl: boolean inline;
+begin
+  Result := IExternalTriggerImpl.isIExternalTriggerImpl(this);
+end;
+
+function TExternalTrigger.asIExternalTriggerImpl: IExternalTriggerImpl;
+begin
+  if isIExternalTriggerImpl then
+    Result := FObject as IExternalTriggerImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TExternalTrigger.dispose();
 begin
 	vTable^.dispose(IDisposable(this));
@@ -8112,6 +9124,19 @@ end;
 function TRoutineMetadata.this: IRoutineMetadata;
 begin
   Result := IRoutineMetadata(@FNullPtr);
+end;
+
+function TRoutineMetadata.isIRoutineMetadataImpl: boolean inline;
+begin
+  Result := IRoutineMetadataImpl.isIRoutineMetadataImpl(this);
+end;
+
+function TRoutineMetadata.asIRoutineMetadataImpl: IRoutineMetadataImpl;
+begin
+  if isIRoutineMetadataImpl then
+    Result := FObject as IRoutineMetadataImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 function TRoutineMetadata.getPackage(status: IStatus): PAnsiChar;
@@ -8171,6 +9196,19 @@ end;
 function TExternalEngine.this: IExternalEngine;
 begin
   Result := IExternalEngine(@FNullPtr);
+end;
+
+function TExternalEngine.isIExternalEngineImpl: boolean inline;
+begin
+  Result := IExternalEngineImpl.isIExternalEngineImpl(this);
+end;
+
+function TExternalEngine.asIExternalEngineImpl: IExternalEngineImpl;
+begin
+  if isIExternalEngineImpl then
+    Result := FObject as IExternalEngineImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 procedure TExternalEngine.addRef();
@@ -8234,6 +9272,19 @@ begin
   Result := ITimer(@FNullPtr);
 end;
 
+function TTimer.isITimerImpl: boolean inline;
+begin
+  Result := ITimerImpl.isITimerImpl(this);
+end;
+
+function TTimer.asITimerImpl: ITimerImpl;
+begin
+  if isITimerImpl then
+    Result := FObject as ITimerImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TTimer.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -8254,6 +9305,19 @@ begin
   Result := ITimerControl(@FNullPtr);
 end;
 
+function TTimerControl.isITimerControlImpl: boolean inline;
+begin
+  Result := ITimerControlImpl.isITimerControlImpl(this);
+end;
+
+function TTimerControl.asITimerControlImpl: ITimerControlImpl;
+begin
+  if isITimerControlImpl then
+    Result := FObject as ITimerControlImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TTimerControl.start(status: IStatus; timer: ITimer; microSeconds: QWord);
 begin
 	vTable^.start(this, status, timer, microSeconds);
@@ -8271,6 +9335,19 @@ begin
   Result := IVersionCallback(@FNullPtr);
 end;
 
+function TVersionCallback.isIVersionCallbackImpl: boolean inline;
+begin
+  Result := IVersionCallbackImpl.isIVersionCallbackImpl(this);
+end;
+
+function TVersionCallback.asIVersionCallbackImpl: IVersionCallbackImpl;
+begin
+  if isIVersionCallbackImpl then
+    Result := FObject as IVersionCallbackImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TVersionCallback.callback(status: IStatus; text: PAnsiChar);
 begin
 	vTable^.callback(this, status, text);
@@ -8280,6 +9357,19 @@ end;
 function TUtil.this: IUtil;
 begin
   Result := IUtil(@FNullPtr);
+end;
+
+function TUtil.isIUtilImpl: boolean inline;
+begin
+  Result := IUtilImpl.isIUtilImpl(this);
+end;
+
+function TUtil.asIUtilImpl: IUtilImpl;
+begin
+  if isIUtilImpl then
+    Result := FObject as IUtilImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 procedure TUtil.getFbVersion(status: IStatus; att: IAttachment; callback: IVersionCallback);
@@ -8413,6 +9503,19 @@ begin
   Result := IOffsetsCallback(@FNullPtr);
 end;
 
+function TOffsetsCallback.isIOffsetsCallbackImpl: boolean inline;
+begin
+  Result := IOffsetsCallbackImpl.isIOffsetsCallbackImpl(this);
+end;
+
+function TOffsetsCallback.asIOffsetsCallbackImpl: IOffsetsCallbackImpl;
+begin
+  if isIOffsetsCallbackImpl then
+    Result := FObject as IOffsetsCallbackImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TOffsetsCallback.setOffset(status: IStatus; index: Cardinal; offset: Cardinal; nullOffset: Cardinal);
 begin
 	vTable^.setOffset(this, status, index, offset, nullOffset);
@@ -8422,6 +9525,19 @@ end;
 function TXpbBuilder.this: IXpbBuilder;
 begin
   Result := IXpbBuilder(@FNullPtr);
+end;
+
+function TXpbBuilder.isIXpbBuilderImpl: boolean inline;
+begin
+  Result := IXpbBuilderImpl.isIXpbBuilderImpl(this);
+end;
+
+function TXpbBuilder.asIXpbBuilderImpl: IXpbBuilderImpl;
+begin
+  if isIXpbBuilderImpl then
+    Result := FObject as IXpbBuilderImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 procedure TXpbBuilder.dispose();
@@ -8554,6 +9670,19 @@ begin
   Result := ITraceConnection(@FNullPtr);
 end;
 
+function TTraceConnection.isITraceConnectionImpl: boolean inline;
+begin
+  Result := ITraceConnectionImpl.isITraceConnectionImpl(this);
+end;
+
+function TTraceConnection.asITraceConnectionImpl: ITraceConnectionImpl;
+begin
+  if isITraceConnectionImpl then
+    Result := FObject as ITraceConnectionImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 function TTraceConnection.getKind(): Cardinal;
 begin
 	Result := vTable^.getKind(this);
@@ -8602,6 +9731,19 @@ end;
 function TTraceDatabaseConnection.this: ITraceDatabaseConnection;
 begin
   Result := ITraceDatabaseConnection(@FNullPtr);
+end;
+
+function TTraceDatabaseConnection.isITraceDatabaseConnectionImpl: boolean inline;
+begin
+  Result := ITraceDatabaseConnectionImpl.isITraceDatabaseConnectionImpl(this);
+end;
+
+function TTraceDatabaseConnection.asITraceDatabaseConnectionImpl: ITraceDatabaseConnectionImpl;
+begin
+  if isITraceDatabaseConnectionImpl then
+    Result := FObject as ITraceDatabaseConnectionImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 function TTraceDatabaseConnection.getKind(): Cardinal;
@@ -8664,6 +9806,19 @@ begin
   Result := ITraceTransaction(@FNullPtr);
 end;
 
+function TTraceTransaction.isITraceTransactionImpl: boolean inline;
+begin
+  Result := ITraceTransactionImpl.isITraceTransactionImpl(this);
+end;
+
+function TTraceTransaction.asITraceTransactionImpl: ITraceTransactionImpl;
+begin
+  if isITraceTransactionImpl then
+    Result := FObject as ITraceTransactionImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 function TTraceTransaction.getTransactionID(): Int64;
 begin
 	Result := vTable^.getTransactionID(this);
@@ -8704,6 +9859,19 @@ begin
   Result := ITraceParams(@FNullPtr);
 end;
 
+function TTraceParams.isITraceParamsImpl: boolean inline;
+begin
+  Result := ITraceParamsImpl.isITraceParamsImpl(this);
+end;
+
+function TTraceParams.asITraceParamsImpl: ITraceParamsImpl;
+begin
+  if isITraceParamsImpl then
+    Result := FObject as ITraceParamsImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 function TTraceParams.getCount(): Cardinal;
 begin
 	Result := vTable^.getCount(this);
@@ -8725,6 +9893,19 @@ begin
   Result := ITraceStatement(@FNullPtr);
 end;
 
+function TTraceStatement.isITraceStatementImpl: boolean inline;
+begin
+  Result := ITraceStatementImpl.isITraceStatementImpl(this);
+end;
+
+function TTraceStatement.asITraceStatementImpl: ITraceStatementImpl;
+begin
+  if isITraceStatementImpl then
+    Result := FObject as ITraceStatementImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 function TTraceStatement.getStmtID(): Int64;
 begin
 	Result := vTable^.getStmtID(this);
@@ -8738,6 +9919,19 @@ end;
 function TTraceSQLStatement.this: ITraceSQLStatement;
 begin
   Result := ITraceSQLStatement(@FNullPtr);
+end;
+
+function TTraceSQLStatement.isITraceSQLStatementImpl: boolean inline;
+begin
+  Result := ITraceSQLStatementImpl.isITraceSQLStatementImpl(this);
+end;
+
+function TTraceSQLStatement.asITraceSQLStatementImpl: ITraceSQLStatementImpl;
+begin
+  if isITraceSQLStatementImpl then
+    Result := FObject as ITraceSQLStatementImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 function TTraceSQLStatement.getStmtID(): Int64;
@@ -8780,6 +9974,19 @@ begin
   Result := ITraceBLRStatement(@FNullPtr);
 end;
 
+function TTraceBLRStatement.isITraceBLRStatementImpl: boolean inline;
+begin
+  Result := ITraceBLRStatementImpl.isITraceBLRStatementImpl(this);
+end;
+
+function TTraceBLRStatement.asITraceBLRStatementImpl: ITraceBLRStatementImpl;
+begin
+  if isITraceBLRStatementImpl then
+    Result := FObject as ITraceBLRStatementImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 function TTraceBLRStatement.getStmtID(): Int64;
 begin
 	Result := vTable^.getStmtID(ITraceStatement(this));
@@ -8810,6 +10017,19 @@ begin
   Result := ITraceDYNRequest(@FNullPtr);
 end;
 
+function TTraceDYNRequest.isITraceDYNRequestImpl: boolean inline;
+begin
+  Result := ITraceDYNRequestImpl.isITraceDYNRequestImpl(this);
+end;
+
+function TTraceDYNRequest.asITraceDYNRequestImpl: ITraceDYNRequestImpl;
+begin
+  if isITraceDYNRequestImpl then
+    Result := FObject as ITraceDYNRequestImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 function TTraceDYNRequest.getData(): BytePtr;
 begin
 	Result := vTable^.getData(this);
@@ -8828,6 +10048,19 @@ end;
 function TTraceContextVariable.this: ITraceContextVariable;
 begin
   Result := ITraceContextVariable(@FNullPtr);
+end;
+
+function TTraceContextVariable.isITraceContextVariableImpl: boolean inline;
+begin
+  Result := ITraceContextVariableImpl.isITraceContextVariableImpl(this);
+end;
+
+function TTraceContextVariable.asITraceContextVariableImpl: ITraceContextVariableImpl;
+begin
+  if isITraceContextVariableImpl then
+    Result := FObject as ITraceContextVariableImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 function TTraceContextVariable.getNameSpace(): PAnsiChar;
@@ -8850,6 +10083,19 @@ begin
   Result := ITraceProcedure(@FNullPtr);
 end;
 
+function TTraceProcedure.isITraceProcedureImpl: boolean inline;
+begin
+  Result := ITraceProcedureImpl.isITraceProcedureImpl(this);
+end;
+
+function TTraceProcedure.asITraceProcedureImpl: ITraceProcedureImpl;
+begin
+  if isITraceProcedureImpl then
+    Result := FObject as ITraceProcedureImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 function TTraceProcedure.getProcName(): PAnsiChar;
 begin
 	Result := vTable^.getProcName(this);
@@ -8868,6 +10114,19 @@ end;
 function TTraceFunction.this: ITraceFunction;
 begin
   Result := ITraceFunction(@FNullPtr);
+end;
+
+function TTraceFunction.isITraceFunctionImpl: boolean inline;
+begin
+  Result := ITraceFunctionImpl.isITraceFunctionImpl(this);
+end;
+
+function TTraceFunction.asITraceFunctionImpl: ITraceFunctionImpl;
+begin
+  if isITraceFunctionImpl then
+    Result := FObject as ITraceFunctionImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 function TTraceFunction.getFuncName(): PAnsiChar;
@@ -8893,6 +10152,19 @@ end;
 function TTraceTrigger.this: ITraceTrigger;
 begin
   Result := ITraceTrigger(@FNullPtr);
+end;
+
+function TTraceTrigger.isITraceTriggerImpl: boolean inline;
+begin
+  Result := ITraceTriggerImpl.isITraceTriggerImpl(this);
+end;
+
+function TTraceTrigger.asITraceTriggerImpl: ITraceTriggerImpl;
+begin
+  if isITraceTriggerImpl then
+    Result := FObject as ITraceTriggerImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 function TTraceTrigger.getTriggerName(): PAnsiChar;
@@ -8923,6 +10195,19 @@ end;
 function TTraceServiceConnection.this: ITraceServiceConnection;
 begin
   Result := ITraceServiceConnection(@FNullPtr);
+end;
+
+function TTraceServiceConnection.isITraceServiceConnectionImpl: boolean inline;
+begin
+  Result := ITraceServiceConnectionImpl.isITraceServiceConnectionImpl(this);
+end;
+
+function TTraceServiceConnection.asITraceServiceConnectionImpl: ITraceServiceConnectionImpl;
+begin
+  if isITraceServiceConnectionImpl then
+    Result := FObject as ITraceServiceConnectionImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 function TTraceServiceConnection.getKind(): Cardinal;
@@ -8990,6 +10275,19 @@ begin
   Result := ITraceStatusVector(@FNullPtr);
 end;
 
+function TTraceStatusVector.isITraceStatusVectorImpl: boolean inline;
+begin
+  Result := ITraceStatusVectorImpl.isITraceStatusVectorImpl(this);
+end;
+
+function TTraceStatusVector.asITraceStatusVectorImpl: ITraceStatusVectorImpl;
+begin
+  if isITraceStatusVectorImpl then
+    Result := FObject as ITraceStatusVectorImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 function TTraceStatusVector.hasError(): Boolean;
 begin
 	Result := vTable^.hasError(this);
@@ -9013,6 +10311,19 @@ end;
 function TTraceSweepInfo.this: ITraceSweepInfo;
 begin
   Result := ITraceSweepInfo(@FNullPtr);
+end;
+
+function TTraceSweepInfo.isITraceSweepInfoImpl: boolean inline;
+begin
+  Result := ITraceSweepInfoImpl.isITraceSweepInfoImpl(this);
+end;
+
+function TTraceSweepInfo.asITraceSweepInfoImpl: ITraceSweepInfoImpl;
+begin
+  if isITraceSweepInfoImpl then
+    Result := FObject as ITraceSweepInfoImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 function TTraceSweepInfo.getOIT(): Int64;
@@ -9045,6 +10356,19 @@ begin
   Result := ITraceLogWriter(@FNullPtr);
 end;
 
+function TTraceLogWriter.isITraceLogWriterImpl: boolean inline;
+begin
+  Result := ITraceLogWriterImpl.isITraceLogWriterImpl(this);
+end;
+
+function TTraceLogWriter.asITraceLogWriterImpl: ITraceLogWriterImpl;
+begin
+  if isITraceLogWriterImpl then
+    Result := FObject as ITraceLogWriterImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TTraceLogWriter.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -9069,6 +10393,19 @@ end;
 function TTraceInitInfo.this: ITraceInitInfo;
 begin
   Result := ITraceInitInfo(@FNullPtr);
+end;
+
+function TTraceInitInfo.isITraceInitInfoImpl: boolean inline;
+begin
+  Result := ITraceInitInfoImpl.isITraceInitInfoImpl(this);
+end;
+
+function TTraceInitInfo.asITraceInitInfoImpl: ITraceInitInfoImpl;
+begin
+  if isITraceInitInfoImpl then
+    Result := FObject as ITraceInitInfoImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 function TTraceInitInfo.getConfigText(): PAnsiChar;
@@ -9109,6 +10446,19 @@ end;
 function TTracePlugin.this: ITracePlugin;
 begin
   Result := ITracePlugin(@FNullPtr);
+end;
+
+function TTracePlugin.isITracePluginImpl: boolean inline;
+begin
+  Result := ITracePluginImpl.isITracePluginImpl(this);
+end;
+
+function TTracePlugin.asITracePluginImpl: ITracePluginImpl;
+begin
+  if isITracePluginImpl then
+    Result := FObject as ITracePluginImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 procedure TTracePlugin.addRef();
@@ -9231,6 +10581,19 @@ begin
   Result := ITraceFactory(@FNullPtr);
 end;
 
+function TTraceFactory.isITraceFactoryImpl: boolean inline;
+begin
+  Result := ITraceFactoryImpl.isITraceFactoryImpl(this);
+end;
+
+function TTraceFactory.asITraceFactoryImpl: ITraceFactoryImpl;
+begin
+  if isITraceFactoryImpl then
+    Result := FObject as ITraceFactoryImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TTraceFactory.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -9267,6 +10630,19 @@ begin
   Result := IUdrFunctionFactory(@FNullPtr);
 end;
 
+function TUdrFunctionFactory.isIUdrFunctionFactoryImpl: boolean inline;
+begin
+  Result := IUdrFunctionFactoryImpl.isIUdrFunctionFactoryImpl(this);
+end;
+
+function TUdrFunctionFactory.asIUdrFunctionFactoryImpl: IUdrFunctionFactoryImpl;
+begin
+  if isIUdrFunctionFactoryImpl then
+    Result := FObject as IUdrFunctionFactoryImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TUdrFunctionFactory.dispose();
 begin
 	vTable^.dispose(IDisposable(this));
@@ -9287,6 +10663,19 @@ end;
 function TUdrProcedureFactory.this: IUdrProcedureFactory;
 begin
   Result := IUdrProcedureFactory(@FNullPtr);
+end;
+
+function TUdrProcedureFactory.isIUdrProcedureFactoryImpl: boolean inline;
+begin
+  Result := IUdrProcedureFactoryImpl.isIUdrProcedureFactoryImpl(this);
+end;
+
+function TUdrProcedureFactory.asIUdrProcedureFactoryImpl: IUdrProcedureFactoryImpl;
+begin
+  if isIUdrProcedureFactoryImpl then
+    Result := FObject as IUdrProcedureFactoryImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 procedure TUdrProcedureFactory.dispose();
@@ -9311,6 +10700,19 @@ begin
   Result := IUdrTriggerFactory(@FNullPtr);
 end;
 
+function TUdrTriggerFactory.isIUdrTriggerFactoryImpl: boolean inline;
+begin
+  Result := IUdrTriggerFactoryImpl.isIUdrTriggerFactoryImpl(this);
+end;
+
+function TUdrTriggerFactory.asIUdrTriggerFactoryImpl: IUdrTriggerFactoryImpl;
+begin
+  if isIUdrTriggerFactoryImpl then
+    Result := FObject as IUdrTriggerFactoryImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TUdrTriggerFactory.dispose();
 begin
 	vTable^.dispose(IDisposable(this));
@@ -9331,6 +10733,19 @@ end;
 function TUdrPlugin.this: IUdrPlugin;
 begin
   Result := IUdrPlugin(@FNullPtr);
+end;
+
+function TUdrPlugin.isIUdrPluginImpl: boolean inline;
+begin
+  Result := IUdrPluginImpl.isIUdrPluginImpl(this);
+end;
+
+function TUdrPlugin.asIUdrPluginImpl: IUdrPluginImpl;
+begin
+  if isIUdrPluginImpl then
+    Result := FObject as IUdrPluginImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 function TUdrPlugin.getMaster(): IMaster;
@@ -9361,6 +10776,19 @@ begin
   Result := IDecFloat16(@FNullPtr);
 end;
 
+function TDecFloat16.isIDecFloat16Impl: boolean inline;
+begin
+  Result := IDecFloat16Impl.isIDecFloat16Impl(this);
+end;
+
+function TDecFloat16.asIDecFloat16Impl: IDecFloat16Impl;
+begin
+  if isIDecFloat16Impl then
+    Result := FObject as IDecFloat16Impl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TDecFloat16.toBcd(from: FB_DEC16Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr);
 begin
 	vTable^.toBcd(this, from, sign, bcd, exp);
@@ -9386,6 +10814,19 @@ end;
 function TDecFloat34.this: IDecFloat34;
 begin
   Result := IDecFloat34(@FNullPtr);
+end;
+
+function TDecFloat34.isIDecFloat34Impl: boolean inline;
+begin
+  Result := IDecFloat34Impl.isIDecFloat34Impl(this);
+end;
+
+function TDecFloat34.asIDecFloat34Impl: IDecFloat34Impl;
+begin
+  if isIDecFloat34Impl then
+    Result := FObject as IDecFloat34Impl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 procedure TDecFloat34.toBcd(from: FB_DEC34Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr);
@@ -9415,6 +10856,19 @@ begin
   Result := IInt128(@FNullPtr);
 end;
 
+function TInt128.isIInt128Impl: boolean inline;
+begin
+  Result := IInt128Impl.isIInt128Impl(this);
+end;
+
+function TInt128.asIInt128Impl: IInt128Impl;
+begin
+  if isIInt128Impl then
+    Result := FObject as IInt128Impl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TInt128.toString(status: IStatus; from: FB_I128Ptr; scale: Integer; bufferLength: Cardinal; buffer: PAnsiChar);
 begin
 	vTable^.toString(this, status, from, scale, bufferLength, buffer);
@@ -9430,6 +10884,19 @@ end;
 function TReplicatedField.this: IReplicatedField;
 begin
   Result := IReplicatedField(@FNullPtr);
+end;
+
+function TReplicatedField.isIReplicatedFieldImpl: boolean inline;
+begin
+  Result := IReplicatedFieldImpl.isIReplicatedFieldImpl(this);
+end;
+
+function TReplicatedField.asIReplicatedFieldImpl: IReplicatedFieldImpl;
+begin
+  if isIReplicatedFieldImpl then
+    Result := FObject as IReplicatedFieldImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 function TReplicatedField.getName(): PAnsiChar;
@@ -9472,6 +10939,19 @@ begin
   Result := IReplicatedRecord(@FNullPtr);
 end;
 
+function TReplicatedRecord.isIReplicatedRecordImpl: boolean inline;
+begin
+  Result := IReplicatedRecordImpl.isIReplicatedRecordImpl(this);
+end;
+
+function TReplicatedRecord.asIReplicatedRecordImpl: IReplicatedRecordImpl;
+begin
+  if isIReplicatedRecordImpl then
+    Result := FObject as IReplicatedRecordImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 function TReplicatedRecord.getCount(): Cardinal;
 begin
 	Result := vTable^.getCount(this);
@@ -9495,6 +10975,19 @@ end;
 function TReplicatedTransaction.this: IReplicatedTransaction;
 begin
   Result := IReplicatedTransaction(@FNullPtr);
+end;
+
+function TReplicatedTransaction.isIReplicatedTransactionImpl: boolean inline;
+begin
+  Result := IReplicatedTransactionImpl.isIReplicatedTransactionImpl(this);
+end;
+
+function TReplicatedTransaction.asIReplicatedTransactionImpl: IReplicatedTransactionImpl;
+begin
+  if isIReplicatedTransactionImpl then
+    Result := FObject as IReplicatedTransactionImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
 procedure TReplicatedTransaction.dispose();
@@ -9573,6 +11066,19 @@ begin
   Result := IReplicatedSession(@FNullPtr);
 end;
 
+function TReplicatedSession.isIReplicatedSessionImpl: boolean inline;
+begin
+  Result := IReplicatedSessionImpl.isIReplicatedSessionImpl(this);
+end;
+
+function TReplicatedSession.asIReplicatedSessionImpl: IReplicatedSessionImpl;
+begin
+  if isIReplicatedSessionImpl then
+    Result := FObject as IReplicatedSessionImpl
+  else
+    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+end;
+
 procedure TReplicatedSession.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -9638,6 +11144,52 @@ begin
   Result := PVersionedVTable(FvTable);
 end;
 
+class function IVersionedImpl.isIVersionedImpl(intf: IVersioned): boolean;
+begin
+  Result := (intf.vTable = @IVersionedImpl_vTable) or
+    IReferenceCountedImpl.isIReferenceCountedImpl(IReferenceCounted(intf)) or
+    IDisposableImpl.isIDisposableImpl(IDisposable(intf)) or
+    IMasterImpl.isIMasterImpl(IMaster(intf)) or
+    IPluginFactoryImpl.isIPluginFactoryImpl(IPluginFactory(intf)) or
+    IPluginModuleImpl.isIPluginModuleImpl(IPluginModule(intf)) or
+    IPluginManagerImpl.isIPluginManagerImpl(IPluginManager(intf)) or
+    ICryptKeyImpl.isICryptKeyImpl(ICryptKey(intf)) or
+    IConfigManagerImpl.isIConfigManagerImpl(IConfigManager(intf)) or
+    IDtcImpl.isIDtcImpl(IDtc(intf)) or
+    IWriterImpl.isIWriterImpl(IWriter(intf)) or
+    IServerBlockImpl.isIServerBlockImpl(IServerBlock(intf)) or
+    IUserFieldImpl.isIUserFieldImpl(IUserField(intf)) or
+    IUserImpl.isIUserImpl(IUser(intf)) or
+    IListUsersImpl.isIListUsersImpl(IListUsers(intf)) or
+    ILogonInfoImpl.isILogonInfoImpl(ILogonInfo(intf)) or
+    IAuthBlockImpl.isIAuthBlockImpl(IAuthBlock(intf)) or
+    ICryptKeyCallbackImpl.isICryptKeyCallbackImpl(ICryptKeyCallback(intf)) or
+    IExternalContextImpl.isIExternalContextImpl(IExternalContext(intf)) or
+    IRoutineMetadataImpl.isIRoutineMetadataImpl(IRoutineMetadata(intf)) or
+    ITimerControlImpl.isITimerControlImpl(ITimerControl(intf)) or
+    IVersionCallbackImpl.isIVersionCallbackImpl(IVersionCallback(intf)) or
+    IUtilImpl.isIUtilImpl(IUtil(intf)) or
+    IOffsetsCallbackImpl.isIOffsetsCallbackImpl(IOffsetsCallback(intf)) or
+    ITraceConnectionImpl.isITraceConnectionImpl(ITraceConnection(intf)) or
+    ITraceTransactionImpl.isITraceTransactionImpl(ITraceTransaction(intf)) or
+    ITraceParamsImpl.isITraceParamsImpl(ITraceParams(intf)) or
+    ITraceStatementImpl.isITraceStatementImpl(ITraceStatement(intf)) or
+    ITraceDYNRequestImpl.isITraceDYNRequestImpl(ITraceDYNRequest(intf)) or
+    ITraceContextVariableImpl.isITraceContextVariableImpl(ITraceContextVariable(intf)) or
+    ITraceProcedureImpl.isITraceProcedureImpl(ITraceProcedure(intf)) or
+    ITraceFunctionImpl.isITraceFunctionImpl(ITraceFunction(intf)) or
+    ITraceTriggerImpl.isITraceTriggerImpl(ITraceTrigger(intf)) or
+    ITraceStatusVectorImpl.isITraceStatusVectorImpl(ITraceStatusVector(intf)) or
+    ITraceSweepInfoImpl.isITraceSweepInfoImpl(ITraceSweepInfo(intf)) or
+    ITraceInitInfoImpl.isITraceInitInfoImpl(ITraceInitInfo(intf)) or
+    IUdrPluginImpl.isIUdrPluginImpl(IUdrPlugin(intf)) or
+    IDecFloat16Impl.isIDecFloat16Impl(IDecFloat16(intf)) or
+    IDecFloat34Impl.isIDecFloat34Impl(IDecFloat34(intf)) or
+    IInt128Impl.isIInt128Impl(IInt128(intf)) or
+    IReplicatedFieldImpl.isIReplicatedFieldImpl(IReplicatedField(intf)) or
+    IReplicatedRecordImpl.isIReplicatedRecordImpl(IReplicatedRecord(intf));
+end;
+
 function IReferenceCountedImpl.asIReferenceCounted:IReferenceCounted;
 begin
   Result := IReferenceCounted(@FNullPtr);
@@ -9678,6 +11230,35 @@ begin
   Result := PReferenceCountedVTable(FvTable);
 end;
 
+class function IReferenceCountedImpl.isIReferenceCountedImpl(intf: IReferenceCounted): boolean;
+begin
+  Result := (intf.vTable = @IReferenceCountedImpl_vTable) or
+    IPluginBaseImpl.isIPluginBaseImpl(IPluginBase(intf)) or
+    IPluginSetImpl.isIPluginSetImpl(IPluginSet(intf)) or
+    IConfigEntryImpl.isIConfigEntryImpl(IConfigEntry(intf)) or
+    IConfigImpl.isIConfigImpl(IConfig(intf)) or
+    IFirebirdConfImpl.isIFirebirdConfImpl(IFirebirdConf(intf)) or
+    IPluginConfigImpl.isIPluginConfigImpl(IPluginConfig(intf)) or
+    IEventCallbackImpl.isIEventCallbackImpl(IEventCallback(intf)) or
+    IBlobImpl.isIBlobImpl(IBlob(intf)) or
+    ITransactionImpl.isITransactionImpl(ITransaction(intf)) or
+    IMessageMetadataImpl.isIMessageMetadataImpl(IMessageMetadata(intf)) or
+    IMetadataBuilderImpl.isIMetadataBuilderImpl(IMetadataBuilder(intf)) or
+    IResultSetImpl.isIResultSetImpl(IResultSet(intf)) or
+    IStatementImpl.isIStatementImpl(IStatement(intf)) or
+    IBatchImpl.isIBatchImpl(IBatch(intf)) or
+    IReplicatorImpl.isIReplicatorImpl(IReplicator(intf)) or
+    IRequestImpl.isIRequestImpl(IRequest(intf)) or
+    IEventsImpl.isIEventsImpl(IEvents(intf)) or
+    IAttachmentImpl.isIAttachmentImpl(IAttachment(intf)) or
+    IServiceImpl.isIServiceImpl(IService(intf)) or
+    IClientBlockImpl.isIClientBlockImpl(IClientBlock(intf)) or
+    IDbCryptInfoImpl.isIDbCryptInfoImpl(IDbCryptInfo(intf)) or
+    ITimerImpl.isITimerImpl(ITimer(intf)) or
+    ITraceLogWriterImpl.isITraceLogWriterImpl(ITraceLogWriter(intf)) or
+    ITracePluginImpl.isITracePluginImpl(ITracePlugin(intf));
+end;
+
 function IDisposableImpl.asIDisposable:IDisposable;
 begin
   Result := IDisposable(@FNullPtr);
@@ -9706,6 +11287,23 @@ end;
 function IDisposableImpl.getVTable: PDisposableVTable;
 begin
   Result := PDisposableVTable(FvTable);
+end;
+
+class function IDisposableImpl.isIDisposableImpl(intf: IDisposable): boolean;
+begin
+  Result := (intf.vTable = @IDisposableImpl_vTable) or
+    IStatusImpl.isIStatusImpl(IStatus(intf)) or
+    IBatchCompletionStateImpl.isIBatchCompletionStateImpl(IBatchCompletionState(intf)) or
+    IDtcStartImpl.isIDtcStartImpl(IDtcStart(intf)) or
+    IExternalResultSetImpl.isIExternalResultSetImpl(IExternalResultSet(intf)) or
+    IExternalFunctionImpl.isIExternalFunctionImpl(IExternalFunction(intf)) or
+    IExternalProcedureImpl.isIExternalProcedureImpl(IExternalProcedure(intf)) or
+    IExternalTriggerImpl.isIExternalTriggerImpl(IExternalTrigger(intf)) or
+    IXpbBuilderImpl.isIXpbBuilderImpl(IXpbBuilder(intf)) or
+    IUdrFunctionFactoryImpl.isIUdrFunctionFactoryImpl(IUdrFunctionFactory(intf)) or
+    IUdrProcedureFactoryImpl.isIUdrProcedureFactoryImpl(IUdrProcedureFactory(intf)) or
+    IUdrTriggerFactoryImpl.isIUdrTriggerFactoryImpl(IUdrTriggerFactory(intf)) or
+    IReplicatedTransactionImpl.isIReplicatedTransactionImpl(IReplicatedTransaction(intf));
 end;
 
 function IStatusImpl.asIStatus:IStatus;
@@ -9826,6 +11424,11 @@ end;
 function IStatusImpl.getVTable: PStatusVTable;
 begin
   Result := PStatusVTable(FvTable);
+end;
+
+class function IStatusImpl.isIStatusImpl(intf: IStatus): boolean;
+begin
+  Result := (intf.vTable = @IStatusImpl_vTable);
 end;
 
 function IMasterImpl.asIMaster:IMaster;
@@ -9968,6 +11571,11 @@ begin
   Result := PMasterVTable(FvTable);
 end;
 
+class function IMasterImpl.isIMasterImpl(intf: IMaster): boolean;
+begin
+  Result := (intf.vTable = @IMasterImpl_vTable);
+end;
+
 function IPluginBaseImpl.asIPluginBase:IPluginBase;
 begin
   Result := IPluginBase(@FNullPtr);
@@ -10026,6 +11634,20 @@ end;
 function IPluginBaseImpl.getVTable: PPluginBaseVTable;
 begin
   Result := PPluginBaseVTable(FvTable);
+end;
+
+class function IPluginBaseImpl.isIPluginBaseImpl(intf: IPluginBase): boolean;
+begin
+  Result := (intf.vTable = @IPluginBaseImpl_vTable) or
+    IProviderImpl.isIProviderImpl(IProvider(intf)) or
+    IAuthImpl.isIAuthImpl(IAuth(intf)) or
+    IManagementImpl.isIManagementImpl(IManagement(intf)) or
+    IWireCryptPluginImpl.isIWireCryptPluginImpl(IWireCryptPlugin(intf)) or
+    IKeyHolderPluginImpl.isIKeyHolderPluginImpl(IKeyHolderPlugin(intf)) or
+    IDbCryptPluginImpl.isIDbCryptPluginImpl(IDbCryptPlugin(intf)) or
+    IExternalEngineImpl.isIExternalEngineImpl(IExternalEngine(intf)) or
+    ITraceFactoryImpl.isITraceFactoryImpl(ITraceFactory(intf)) or
+    IReplicatedSessionImpl.isIReplicatedSessionImpl(IReplicatedSession(intf));
 end;
 
 function IPluginSetImpl.asIPluginSet:IPluginSet;
@@ -10118,6 +11740,11 @@ begin
   Result := PPluginSetVTable(FvTable);
 end;
 
+class function IPluginSetImpl.isIPluginSetImpl(intf: IPluginSet): boolean;
+begin
+  Result := (intf.vTable = @IPluginSetImpl_vTable);
+end;
+
 function IConfigEntryImpl.asIConfigEntry:IConfigEntry;
 begin
   Result := IConfigEntry(@FNullPtr);
@@ -10208,6 +11835,11 @@ begin
   Result := PConfigEntryVTable(FvTable);
 end;
 
+class function IConfigEntryImpl.isIConfigEntryImpl(intf: IConfigEntry): boolean;
+begin
+  Result := (intf.vTable = @IConfigEntryImpl_vTable);
+end;
+
 function IConfigImpl.asIConfig:IConfig;
 begin
   Result := IConfig(@FNullPtr);
@@ -10276,6 +11908,11 @@ end;
 function IConfigImpl.getVTable: PConfigVTable;
 begin
   Result := PConfigVTable(FvTable);
+end;
+
+class function IConfigImpl.isIConfigImpl(intf: IConfig): boolean;
+begin
+  Result := (intf.vTable = @IConfigImpl_vTable);
 end;
 
 function IFirebirdConfImpl.asIFirebirdConf:IFirebirdConf;
@@ -10368,6 +12005,11 @@ begin
   Result := PFirebirdConfVTable(FvTable);
 end;
 
+class function IFirebirdConfImpl.isIFirebirdConfImpl(intf: IFirebirdConf): boolean;
+begin
+  Result := (intf.vTable = @IFirebirdConfImpl_vTable);
+end;
+
 function IPluginConfigImpl.asIPluginConfig:IPluginConfig;
 begin
   Result := IPluginConfig(@FNullPtr);
@@ -10448,6 +12090,11 @@ begin
   Result := PPluginConfigVTable(FvTable);
 end;
 
+class function IPluginConfigImpl.isIPluginConfigImpl(intf: IPluginConfig): boolean;
+begin
+  Result := (intf.vTable = @IPluginConfigImpl_vTable);
+end;
+
 function IPluginFactoryImpl.asIPluginFactory:IPluginFactory;
 begin
   Result := IPluginFactory(@FNullPtr);
@@ -10476,6 +12123,11 @@ end;
 function IPluginFactoryImpl.getVTable: PPluginFactoryVTable;
 begin
   Result := PPluginFactoryVTable(FvTable);
+end;
+
+class function IPluginFactoryImpl.isIPluginFactoryImpl(intf: IPluginFactory): boolean;
+begin
+  Result := (intf.vTable = @IPluginFactoryImpl_vTable);
 end;
 
 function IPluginModuleImpl.asIPluginModule:IPluginModule;
@@ -10516,6 +12168,11 @@ end;
 function IPluginModuleImpl.getVTable: PPluginModuleVTable;
 begin
   Result := PPluginModuleVTable(FvTable);
+end;
+
+class function IPluginModuleImpl.isIPluginModuleImpl(intf: IPluginModule): boolean;
+begin
+  Result := (intf.vTable = @IPluginModuleImpl_vTable);
 end;
 
 function IPluginManagerImpl.asIPluginManager:IPluginManager;
@@ -10598,6 +12255,11 @@ begin
   Result := PPluginManagerVTable(FvTable);
 end;
 
+class function IPluginManagerImpl.isIPluginManagerImpl(intf: IPluginManager): boolean;
+begin
+  Result := (intf.vTable = @IPluginManagerImpl_vTable);
+end;
+
 function ICryptKeyImpl.asICryptKey:ICryptKey;
 begin
   Result := ICryptKey(@FNullPtr);
@@ -10656,6 +12318,11 @@ end;
 function ICryptKeyImpl.getVTable: PCryptKeyVTable;
 begin
   Result := PCryptKeyVTable(FvTable);
+end;
+
+class function ICryptKeyImpl.isICryptKeyImpl(intf: ICryptKey): boolean;
+begin
+  Result := (intf.vTable = @ICryptKeyImpl_vTable);
 end;
 
 function IConfigManagerImpl.asIConfigManager:IConfigManager;
@@ -10748,6 +12415,11 @@ begin
   Result := PConfigManagerVTable(FvTable);
 end;
 
+class function IConfigManagerImpl.isIConfigManagerImpl(intf: IConfigManager): boolean;
+begin
+  Result := (intf.vTable = @IConfigManagerImpl_vTable);
+end;
+
 function IEventCallbackImpl.asIEventCallback:IEventCallback;
 begin
   Result := IEventCallback(@FNullPtr);
@@ -10796,6 +12468,11 @@ end;
 function IEventCallbackImpl.getVTable: PEventCallbackVTable;
 begin
   Result := PEventCallbackVTable(FvTable);
+end;
+
+class function IEventCallbackImpl.isIEventCallbackImpl(intf: IEventCallback): boolean;
+begin
+  Result := (intf.vTable = @IEventCallbackImpl_vTable);
 end;
 
 function IBlobImpl.asIBlob:IBlob;
@@ -10896,6 +12573,11 @@ end;
 function IBlobImpl.getVTable: PBlobVTable;
 begin
   Result := PBlobVTable(FvTable);
+end;
+
+class function IBlobImpl.isIBlobImpl(intf: IBlob): boolean;
+begin
+  Result := (intf.vTable = @IBlobImpl_vTable);
 end;
 
 function ITransactionImpl.asITransaction:ITransaction;
@@ -11036,6 +12718,11 @@ end;
 function ITransactionImpl.getVTable: PTransactionVTable;
 begin
   Result := PTransactionVTable(FvTable);
+end;
+
+class function ITransactionImpl.isITransactionImpl(intf: ITransaction): boolean;
+begin
+  Result := (intf.vTable = @ITransactionImpl_vTable);
 end;
 
 function IMessageMetadataImpl.asIMessageMetadata:IMessageMetadata;
@@ -11248,6 +12935,11 @@ begin
   Result := PMessageMetadataVTable(FvTable);
 end;
 
+class function IMessageMetadataImpl.isIMessageMetadataImpl(intf: IMessageMetadata): boolean;
+begin
+  Result := (intf.vTable = @IMessageMetadataImpl_vTable);
+end;
+
 function IMetadataBuilderImpl.asIMetadataBuilder:IMetadataBuilder;
 begin
   Result := IMetadataBuilder(@FNullPtr);
@@ -11428,6 +13120,11 @@ begin
   Result := PMetadataBuilderVTable(FvTable);
 end;
 
+class function IMetadataBuilderImpl.isIMetadataBuilderImpl(intf: IMetadataBuilder): boolean;
+begin
+  Result := (intf.vTable = @IMetadataBuilderImpl_vTable);
+end;
+
 function IResultSetImpl.asIResultSet:IResultSet;
 begin
   Result := IResultSet(@FNullPtr);
@@ -11576,6 +13273,11 @@ end;
 function IResultSetImpl.getVTable: PResultSetVTable;
 begin
   Result := PResultSetVTable(FvTable);
+end;
+
+class function IResultSetImpl.isIResultSetImpl(intf: IResultSet): boolean;
+begin
+  Result := (intf.vTable = @IResultSetImpl_vTable);
 end;
 
 function IStatementImpl.asIStatement:IStatement;
@@ -11758,6 +13460,11 @@ begin
   Result := PStatementVTable(FvTable);
 end;
 
+class function IStatementImpl.isIStatementImpl(intf: IStatement): boolean;
+begin
+  Result := (intf.vTable = @IStatementImpl_vTable);
+end;
+
 function IBatchImpl.asIBatch:IBatch;
 begin
   Result := IBatch(@FNullPtr);
@@ -11908,6 +13615,11 @@ begin
   Result := PBatchVTable(FvTable);
 end;
 
+class function IBatchImpl.isIBatchImpl(intf: IBatch): boolean;
+begin
+  Result := (intf.vTable = @IBatchImpl_vTable);
+end;
+
 function IBatchCompletionStateImpl.asIBatchCompletionState:IBatchCompletionState;
 begin
   Result := IBatchCompletionState(@FNullPtr);
@@ -11978,6 +13690,11 @@ begin
   Result := PBatchCompletionStateVTable(FvTable);
 end;
 
+class function IBatchCompletionStateImpl.isIBatchCompletionStateImpl(intf: IBatchCompletionState): boolean;
+begin
+  Result := (intf.vTable = @IBatchCompletionStateImpl_vTable);
+end;
+
 function IReplicatorImpl.asIReplicator:IReplicator;
 begin
   Result := IReplicator(@FNullPtr);
@@ -12036,6 +13753,11 @@ end;
 function IReplicatorImpl.getVTable: PReplicatorVTable;
 begin
   Result := PReplicatorVTable(FvTable);
+end;
+
+class function IReplicatorImpl.isIReplicatorImpl(intf: IReplicator): boolean;
+begin
+  Result := (intf.vTable = @IReplicatorImpl_vTable);
 end;
 
 function IRequestImpl.asIRequest:IRequest;
@@ -12148,6 +13870,11 @@ begin
   Result := PRequestVTable(FvTable);
 end;
 
+class function IRequestImpl.isIRequestImpl(intf: IRequest): boolean;
+begin
+  Result := (intf.vTable = @IRequestImpl_vTable);
+end;
+
 function IEventsImpl.asIEvents:IEvents;
 begin
   Result := IEvents(@FNullPtr);
@@ -12196,6 +13923,11 @@ end;
 function IEventsImpl.getVTable: PEventsVTable;
 begin
   Result := PEventsVTable(FvTable);
+end;
+
+class function IEventsImpl.isIEventsImpl(intf: IEvents): boolean;
+begin
+  Result := (intf.vTable = @IEventsImpl_vTable);
 end;
 
 function IAttachmentImpl.asIAttachment:IAttachment;
@@ -12478,6 +14210,11 @@ begin
   Result := PAttachmentVTable(FvTable);
 end;
 
+class function IAttachmentImpl.isIAttachmentImpl(intf: IAttachment): boolean;
+begin
+  Result := (intf.vTable = @IAttachmentImpl_vTable);
+end;
+
 function IServiceImpl.asIService:IService;
 begin
   Result := IService(@FNullPtr);
@@ -12546,6 +14283,11 @@ end;
 function IServiceImpl.getVTable: PServiceVTable;
 begin
   Result := PServiceVTable(FvTable);
+end;
+
+class function IServiceImpl.isIServiceImpl(intf: IService): boolean;
+begin
+  Result := (intf.vTable = @IServiceImpl_vTable);
 end;
 
 function IProviderImpl.asIProvider:IProvider;
@@ -12658,6 +14400,11 @@ begin
   Result := PProviderVTable(FvTable);
 end;
 
+class function IProviderImpl.isIProviderImpl(intf: IProvider): boolean;
+begin
+  Result := (intf.vTable = @IProviderImpl_vTable);
+end;
+
 function IDtcStartImpl.asIDtcStart:IDtcStart;
 begin
   Result := IDtcStart(@FNullPtr);
@@ -12718,6 +14465,11 @@ begin
   Result := PDtcStartVTable(FvTable);
 end;
 
+class function IDtcStartImpl.isIDtcStartImpl(intf: IDtcStart): boolean;
+begin
+  Result := (intf.vTable = @IDtcStartImpl_vTable);
+end;
+
 function IDtcImpl.asIDtc:IDtc;
 begin
   Result := IDtc(@FNullPtr);
@@ -12756,6 +14508,11 @@ end;
 function IDtcImpl.getVTable: PDtcVTable;
 begin
   Result := PDtcVTable(FvTable);
+end;
+
+class function IDtcImpl.isIDtcImpl(intf: IDtc): boolean;
+begin
+  Result := (intf.vTable = @IDtcImpl_vTable);
 end;
 
 function IAuthImpl.asIAuth:IAuth;
@@ -12818,6 +14575,13 @@ begin
   Result := PAuthVTable(FvTable);
 end;
 
+class function IAuthImpl.isIAuthImpl(intf: IAuth): boolean;
+begin
+  Result := (intf.vTable = @IAuthImpl_vTable) or
+    IServerImpl.isIServerImpl(IServer(intf)) or
+    IClientImpl.isIClientImpl(IClient(intf));
+end;
+
 function IWriterImpl.asIWriter:IWriter;
 begin
   Result := IWriter(@FNullPtr);
@@ -12878,6 +14642,11 @@ begin
   Result := PWriterVTable(FvTable);
 end;
 
+class function IWriterImpl.isIWriterImpl(intf: IWriter): boolean;
+begin
+  Result := (intf.vTable = @IWriterImpl_vTable);
+end;
+
 function IServerBlockImpl.asIServerBlock:IServerBlock;
 begin
   Result := IServerBlock(@FNullPtr);
@@ -12936,6 +14705,11 @@ end;
 function IServerBlockImpl.getVTable: PServerBlockVTable;
 begin
   Result := PServerBlockVTable(FvTable);
+end;
+
+class function IServerBlockImpl.isIServerBlockImpl(intf: IServerBlock): boolean;
+begin
+  Result := (intf.vTable = @IServerBlockImpl_vTable);
 end;
 
 function IClientBlockImpl.asIClientBlock:IClientBlock;
@@ -13038,6 +14812,11 @@ begin
   Result := PClientBlockVTable(FvTable);
 end;
 
+class function IClientBlockImpl.isIClientBlockImpl(intf: IClientBlock): boolean;
+begin
+  Result := (intf.vTable = @IClientBlockImpl_vTable);
+end;
+
 function IServerImpl.asIServer:IServer;
 begin
   Result := IServer(@FNullPtr);
@@ -13118,6 +14897,11 @@ begin
   Result := PServerVTable(FvTable);
 end;
 
+class function IServerImpl.isIServerImpl(intf: IServer): boolean;
+begin
+  Result := (intf.vTable = @IServerImpl_vTable);
+end;
+
 function IClientImpl.asIClient:IClient;
 begin
   Result := IClient(@FNullPtr);
@@ -13188,6 +14972,11 @@ begin
   Result := PClientVTable(FvTable);
 end;
 
+class function IClientImpl.isIClientImpl(intf: IClient): boolean;
+begin
+  Result := (intf.vTable = @IClientImpl_vTable);
+end;
+
 function IUserFieldImpl.asIUserField:IUserField;
 begin
   Result := IUserField(@FNullPtr);
@@ -13236,6 +15025,13 @@ end;
 function IUserFieldImpl.getVTable: PUserFieldVTable;
 begin
   Result := PUserFieldVTable(FvTable);
+end;
+
+class function IUserFieldImpl.isIUserFieldImpl(intf: IUserField): boolean;
+begin
+  Result := (intf.vTable = @IUserFieldImpl_vTable) or
+    ICharUserFieldImpl.isICharUserFieldImpl(ICharUserField(intf)) or
+    IIntUserFieldImpl.isIIntUserFieldImpl(IIntUserField(intf));
 end;
 
 function ICharUserFieldImpl.asICharUserField:ICharUserField;
@@ -13308,6 +15104,11 @@ begin
   Result := PCharUserFieldVTable(FvTable);
 end;
 
+class function ICharUserFieldImpl.isICharUserFieldImpl(intf: ICharUserField): boolean;
+begin
+  Result := (intf.vTable = @ICharUserFieldImpl_vTable);
+end;
+
 function IIntUserFieldImpl.asIIntUserField:IIntUserField;
 begin
   Result := IIntUserField(@FNullPtr);
@@ -13376,6 +15177,11 @@ end;
 function IIntUserFieldImpl.getVTable: PIntUserFieldVTable;
 begin
   Result := PIntUserFieldVTable(FvTable);
+end;
+
+class function IIntUserFieldImpl.isIIntUserFieldImpl(intf: IIntUserField): boolean;
+begin
+  Result := (intf.vTable = @IIntUserFieldImpl_vTable);
 end;
 
 function IUserImpl.asIUser:IUser;
@@ -13508,6 +15314,11 @@ begin
   Result := PUserVTable(FvTable);
 end;
 
+class function IUserImpl.isIUserImpl(intf: IUser): boolean;
+begin
+  Result := (intf.vTable = @IUserImpl_vTable);
+end;
+
 function IListUsersImpl.asIListUsers:IListUsers;
 begin
   Result := IListUsers(@FNullPtr);
@@ -13536,6 +15347,11 @@ end;
 function IListUsersImpl.getVTable: PListUsersVTable;
 begin
   Result := PListUsersVTable(FvTable);
+end;
+
+class function IListUsersImpl.isIListUsersImpl(intf: IListUsers): boolean;
+begin
+  Result := (intf.vTable = @IListUsersImpl_vTable);
 end;
 
 function ILogonInfoImpl.asILogonInfo:ILogonInfo;
@@ -13626,6 +15442,11 @@ end;
 function ILogonInfoImpl.getVTable: PLogonInfoVTable;
 begin
   Result := PLogonInfoVTable(FvTable);
+end;
+
+class function ILogonInfoImpl.isILogonInfoImpl(intf: ILogonInfo): boolean;
+begin
+  Result := (intf.vTable = @ILogonInfoImpl_vTable);
 end;
 
 function IManagementImpl.asIManagement:IManagement;
@@ -13728,6 +15549,11 @@ begin
   Result := PManagementVTable(FvTable);
 end;
 
+class function IManagementImpl.isIManagementImpl(intf: IManagement): boolean;
+begin
+  Result := (intf.vTable = @IManagementImpl_vTable);
+end;
+
 function IAuthBlockImpl.asIAuthBlock:IAuthBlock;
 begin
   Result := IAuthBlock(@FNullPtr);
@@ -13816,6 +15642,11 @@ end;
 function IAuthBlockImpl.getVTable: PAuthBlockVTable;
 begin
   Result := PAuthBlockVTable(FvTable);
+end;
+
+class function IAuthBlockImpl.isIAuthBlockImpl(intf: IAuthBlock): boolean;
+begin
+  Result := (intf.vTable = @IAuthBlockImpl_vTable);
 end;
 
 function IWireCryptPluginImpl.asIWireCryptPlugin:IWireCryptPlugin;
@@ -13938,6 +15769,11 @@ begin
   Result := PWireCryptPluginVTable(FvTable);
 end;
 
+class function IWireCryptPluginImpl.isIWireCryptPluginImpl(intf: IWireCryptPlugin): boolean;
+begin
+  Result := (intf.vTable = @IWireCryptPluginImpl_vTable);
+end;
+
 function ICryptKeyCallbackImpl.asICryptKeyCallback:ICryptKeyCallback;
 begin
   Result := ICryptKeyCallback(@FNullPtr);
@@ -13966,6 +15802,11 @@ end;
 function ICryptKeyCallbackImpl.getVTable: PCryptKeyCallbackVTable;
 begin
   Result := PCryptKeyCallbackVTable(FvTable);
+end;
+
+class function ICryptKeyCallbackImpl.isICryptKeyCallbackImpl(intf: ICryptKeyCallback): boolean;
+begin
+  Result := (intf.vTable = @ICryptKeyCallbackImpl_vTable);
 end;
 
 function IKeyHolderPluginImpl.asIKeyHolderPlugin:IKeyHolderPlugin;
@@ -14068,6 +15909,11 @@ begin
   Result := PKeyHolderPluginVTable(FvTable);
 end;
 
+class function IKeyHolderPluginImpl.isIKeyHolderPluginImpl(intf: IKeyHolderPlugin): boolean;
+begin
+  Result := (intf.vTable = @IKeyHolderPluginImpl_vTable);
+end;
+
 function IDbCryptInfoImpl.asIDbCryptInfo:IDbCryptInfo;
 begin
   Result := IDbCryptInfo(@FNullPtr);
@@ -14116,6 +15962,11 @@ end;
 function IDbCryptInfoImpl.getVTable: PDbCryptInfoVTable;
 begin
   Result := PDbCryptInfoVTable(FvTable);
+end;
+
+class function IDbCryptInfoImpl.isIDbCryptInfoImpl(intf: IDbCryptInfo): boolean;
+begin
+  Result := (intf.vTable = @IDbCryptInfoImpl_vTable);
 end;
 
 function IDbCryptPluginImpl.asIDbCryptPlugin:IDbCryptPlugin;
@@ -14216,6 +16067,11 @@ end;
 function IDbCryptPluginImpl.getVTable: PDbCryptPluginVTable;
 begin
   Result := PDbCryptPluginVTable(FvTable);
+end;
+
+class function IDbCryptPluginImpl.isIDbCryptPluginImpl(intf: IDbCryptPlugin): boolean;
+begin
+  Result := (intf.vTable = @IDbCryptPluginImpl_vTable);
 end;
 
 function IExternalContextImpl.asIExternalContext:IExternalContext;
@@ -14338,6 +16194,11 @@ begin
   Result := PExternalContextVTable(FvTable);
 end;
 
+class function IExternalContextImpl.isIExternalContextImpl(intf: IExternalContext): boolean;
+begin
+  Result := (intf.vTable = @IExternalContextImpl_vTable);
+end;
+
 function IExternalResultSetImpl.asIExternalResultSet:IExternalResultSet;
 begin
   Result := IExternalResultSet(@FNullPtr);
@@ -14376,6 +16237,11 @@ end;
 function IExternalResultSetImpl.getVTable: PExternalResultSetVTable;
 begin
   Result := PExternalResultSetVTable(FvTable);
+end;
+
+class function IExternalResultSetImpl.isIExternalResultSetImpl(intf: IExternalResultSet): boolean;
+begin
+  Result := (intf.vTable = @IExternalResultSetImpl_vTable);
 end;
 
 function IExternalFunctionImpl.asIExternalFunction:IExternalFunction;
@@ -14428,6 +16294,11 @@ begin
   Result := PExternalFunctionVTable(FvTable);
 end;
 
+class function IExternalFunctionImpl.isIExternalFunctionImpl(intf: IExternalFunction): boolean;
+begin
+  Result := (intf.vTable = @IExternalFunctionImpl_vTable);
+end;
+
 function IExternalProcedureImpl.asIExternalProcedure:IExternalProcedure;
 begin
   Result := IExternalProcedure(@FNullPtr);
@@ -14478,6 +16349,11 @@ begin
   Result := PExternalProcedureVTable(FvTable);
 end;
 
+class function IExternalProcedureImpl.isIExternalProcedureImpl(intf: IExternalProcedure): boolean;
+begin
+  Result := (intf.vTable = @IExternalProcedureImpl_vTable);
+end;
+
 function IExternalTriggerImpl.asIExternalTrigger:IExternalTrigger;
 begin
   Result := IExternalTrigger(@FNullPtr);
@@ -14526,6 +16402,11 @@ end;
 function IExternalTriggerImpl.getVTable: PExternalTriggerVTable;
 begin
   Result := PExternalTriggerVTable(FvTable);
+end;
+
+class function IExternalTriggerImpl.isIExternalTriggerImpl(intf: IExternalTrigger): boolean;
+begin
+  Result := (intf.vTable = @IExternalTriggerImpl_vTable);
 end;
 
 function IRoutineMetadataImpl.asIRoutineMetadata:IRoutineMetadata;
@@ -14636,6 +16517,11 @@ end;
 function IRoutineMetadataImpl.getVTable: PRoutineMetadataVTable;
 begin
   Result := PRoutineMetadataVTable(FvTable);
+end;
+
+class function IRoutineMetadataImpl.isIRoutineMetadataImpl(intf: IRoutineMetadata): boolean;
+begin
+  Result := (intf.vTable = @IRoutineMetadataImpl_vTable);
 end;
 
 function IExternalEngineImpl.asIExternalEngine:IExternalEngine;
@@ -14758,6 +16644,11 @@ begin
   Result := PExternalEngineVTable(FvTable);
 end;
 
+class function IExternalEngineImpl.isIExternalEngineImpl(intf: IExternalEngine): boolean;
+begin
+  Result := (intf.vTable = @IExternalEngineImpl_vTable);
+end;
+
 function ITimerImpl.asITimer:ITimer;
 begin
   Result := ITimer(@FNullPtr);
@@ -14808,6 +16699,11 @@ begin
   Result := PTimerVTable(FvTable);
 end;
 
+class function ITimerImpl.isITimerImpl(intf: ITimer): boolean;
+begin
+  Result := (intf.vTable = @ITimerImpl_vTable);
+end;
+
 function ITimerControlImpl.asITimerControl:ITimerControl;
 begin
   Result := ITimerControl(@FNullPtr);
@@ -14848,6 +16744,11 @@ begin
   Result := PTimerControlVTable(FvTable);
 end;
 
+class function ITimerControlImpl.isITimerControlImpl(intf: ITimerControl): boolean;
+begin
+  Result := (intf.vTable = @ITimerControlImpl_vTable);
+end;
+
 function IVersionCallbackImpl.asIVersionCallback:IVersionCallback;
 begin
   Result := IVersionCallback(@FNullPtr);
@@ -14876,6 +16777,11 @@ end;
 function IVersionCallbackImpl.getVTable: PVersionCallbackVTable;
 begin
   Result := PVersionCallbackVTable(FvTable);
+end;
+
+class function IVersionCallbackImpl.isIVersionCallbackImpl(intf: IVersionCallback): boolean;
+begin
+  Result := (intf.vTable = @IVersionCallbackImpl_vTable);
 end;
 
 function IUtilImpl.asIUtil:IUtil;
@@ -15118,6 +17024,11 @@ begin
   Result := PUtilVTable(FvTable);
 end;
 
+class function IUtilImpl.isIUtilImpl(intf: IUtil): boolean;
+begin
+  Result := (intf.vTable = @IUtilImpl_vTable);
+end;
+
 function IOffsetsCallbackImpl.asIOffsetsCallback:IOffsetsCallback;
 begin
   Result := IOffsetsCallback(@FNullPtr);
@@ -15146,6 +17057,11 @@ end;
 function IOffsetsCallbackImpl.getVTable: POffsetsCallbackVTable;
 begin
   Result := POffsetsCallbackVTable(FvTable);
+end;
+
+class function IOffsetsCallbackImpl.isIOffsetsCallbackImpl(intf: IOffsetsCallback): boolean;
+begin
+  Result := (intf.vTable = @IOffsetsCallbackImpl_vTable);
 end;
 
 function IXpbBuilderImpl.asIXpbBuilder:IXpbBuilder;
@@ -15378,6 +17294,11 @@ begin
   Result := PXpbBuilderVTable(FvTable);
 end;
 
+class function IXpbBuilderImpl.isIXpbBuilderImpl(intf: IXpbBuilder): boolean;
+begin
+  Result := (intf.vTable = @IXpbBuilderImpl_vTable);
+end;
+
 function ITraceConnectionImpl.asITraceConnection:ITraceConnection;
 begin
   Result := ITraceConnection(@FNullPtr);
@@ -15486,6 +17407,13 @@ end;
 function ITraceConnectionImpl.getVTable: PTraceConnectionVTable;
 begin
   Result := PTraceConnectionVTable(FvTable);
+end;
+
+class function ITraceConnectionImpl.isITraceConnectionImpl(intf: ITraceConnection): boolean;
+begin
+  Result := (intf.vTable = @ITraceConnectionImpl_vTable) or
+    ITraceDatabaseConnectionImpl.isITraceDatabaseConnectionImpl(ITraceDatabaseConnection(intf)) or
+    ITraceServiceConnectionImpl.isITraceServiceConnectionImpl(ITraceServiceConnection(intf));
 end;
 
 function ITraceDatabaseConnectionImpl.asITraceDatabaseConnection:ITraceDatabaseConnection;
@@ -15618,6 +17546,11 @@ begin
   Result := PTraceDatabaseConnectionVTable(FvTable);
 end;
 
+class function ITraceDatabaseConnectionImpl.isITraceDatabaseConnectionImpl(intf: ITraceDatabaseConnection): boolean;
+begin
+  Result := (intf.vTable = @ITraceDatabaseConnectionImpl_vTable);
+end;
+
 function ITraceTransactionImpl.asITraceTransaction:ITraceTransaction;
 begin
   Result := ITraceTransaction(@FNullPtr);
@@ -15708,6 +17641,11 @@ begin
   Result := PTraceTransactionVTable(FvTable);
 end;
 
+class function ITraceTransactionImpl.isITraceTransactionImpl(intf: ITraceTransaction): boolean;
+begin
+  Result := (intf.vTable = @ITraceTransactionImpl_vTable);
+end;
+
 function ITraceParamsImpl.asITraceParams:ITraceParams;
 begin
   Result := ITraceParams(@FNullPtr);
@@ -15758,6 +17696,11 @@ begin
   Result := PTraceParamsVTable(FvTable);
 end;
 
+class function ITraceParamsImpl.isITraceParamsImpl(intf: ITraceParams): boolean;
+begin
+  Result := (intf.vTable = @ITraceParamsImpl_vTable);
+end;
+
 function ITraceStatementImpl.asITraceStatement:ITraceStatement;
 begin
   Result := ITraceStatement(@FNullPtr);
@@ -15796,6 +17739,13 @@ end;
 function ITraceStatementImpl.getVTable: PTraceStatementVTable;
 begin
   Result := PTraceStatementVTable(FvTable);
+end;
+
+class function ITraceStatementImpl.isITraceStatementImpl(intf: ITraceStatement): boolean;
+begin
+  Result := (intf.vTable = @ITraceStatementImpl_vTable) or
+    ITraceSQLStatementImpl.isITraceSQLStatementImpl(ITraceSQLStatement(intf)) or
+    ITraceBLRStatementImpl.isITraceBLRStatementImpl(ITraceBLRStatement(intf));
 end;
 
 function ITraceSQLStatementImpl.asITraceSQLStatement:ITraceSQLStatement;
@@ -15888,6 +17838,11 @@ begin
   Result := PTraceSQLStatementVTable(FvTable);
 end;
 
+class function ITraceSQLStatementImpl.isITraceSQLStatementImpl(intf: ITraceSQLStatement): boolean;
+begin
+  Result := (intf.vTable = @ITraceSQLStatementImpl_vTable);
+end;
+
 function ITraceBLRStatementImpl.asITraceBLRStatement:ITraceBLRStatement;
 begin
   Result := ITraceBLRStatement(@FNullPtr);
@@ -15958,6 +17913,11 @@ begin
   Result := PTraceBLRStatementVTable(FvTable);
 end;
 
+class function ITraceBLRStatementImpl.isITraceBLRStatementImpl(intf: ITraceBLRStatement): boolean;
+begin
+  Result := (intf.vTable = @ITraceBLRStatementImpl_vTable);
+end;
+
 function ITraceDYNRequestImpl.asITraceDYNRequest:ITraceDYNRequest;
 begin
   Result := ITraceDYNRequest(@FNullPtr);
@@ -16006,6 +17966,11 @@ end;
 function ITraceDYNRequestImpl.getVTable: PTraceDYNRequestVTable;
 begin
   Result := PTraceDYNRequestVTable(FvTable);
+end;
+
+class function ITraceDYNRequestImpl.isITraceDYNRequestImpl(intf: ITraceDYNRequest): boolean;
+begin
+  Result := (intf.vTable = @ITraceDYNRequestImpl_vTable);
 end;
 
 function ITraceContextVariableImpl.asITraceContextVariable:ITraceContextVariable;
@@ -16058,6 +18023,11 @@ begin
   Result := PTraceContextVariableVTable(FvTable);
 end;
 
+class function ITraceContextVariableImpl.isITraceContextVariableImpl(intf: ITraceContextVariable): boolean;
+begin
+  Result := (intf.vTable = @ITraceContextVariableImpl_vTable);
+end;
+
 function ITraceProcedureImpl.asITraceProcedure:ITraceProcedure;
 begin
   Result := ITraceProcedure(@FNullPtr);
@@ -16106,6 +18076,11 @@ end;
 function ITraceProcedureImpl.getVTable: PTraceProcedureVTable;
 begin
   Result := PTraceProcedureVTable(FvTable);
+end;
+
+class function ITraceProcedureImpl.isITraceProcedureImpl(intf: ITraceProcedure): boolean;
+begin
+  Result := (intf.vTable = @ITraceProcedureImpl_vTable);
 end;
 
 function ITraceFunctionImpl.asITraceFunction:ITraceFunction;
@@ -16166,6 +18141,11 @@ end;
 function ITraceFunctionImpl.getVTable: PTraceFunctionVTable;
 begin
   Result := PTraceFunctionVTable(FvTable);
+end;
+
+class function ITraceFunctionImpl.isITraceFunctionImpl(intf: ITraceFunction): boolean;
+begin
+  Result := (intf.vTable = @ITraceFunctionImpl_vTable);
 end;
 
 function ITraceTriggerImpl.asITraceTrigger:ITraceTrigger;
@@ -16236,6 +18216,11 @@ end;
 function ITraceTriggerImpl.getVTable: PTraceTriggerVTable;
 begin
   Result := PTraceTriggerVTable(FvTable);
+end;
+
+class function ITraceTriggerImpl.isITraceTriggerImpl(intf: ITraceTrigger): boolean;
+begin
+  Result := (intf.vTable = @ITraceTriggerImpl_vTable);
 end;
 
 function ITraceServiceConnectionImpl.asITraceServiceConnection:ITraceServiceConnection;
@@ -16378,6 +18363,11 @@ begin
   Result := PTraceServiceConnectionVTable(FvTable);
 end;
 
+class function ITraceServiceConnectionImpl.isITraceServiceConnectionImpl(intf: ITraceServiceConnection): boolean;
+begin
+  Result := (intf.vTable = @ITraceServiceConnectionImpl_vTable);
+end;
+
 function ITraceStatusVectorImpl.asITraceStatusVector:ITraceStatusVector;
 begin
   Result := ITraceStatusVector(@FNullPtr);
@@ -16436,6 +18426,11 @@ end;
 function ITraceStatusVectorImpl.getVTable: PTraceStatusVectorVTable;
 begin
   Result := PTraceStatusVectorVTable(FvTable);
+end;
+
+class function ITraceStatusVectorImpl.isITraceStatusVectorImpl(intf: ITraceStatusVector): boolean;
+begin
+  Result := (intf.vTable = @ITraceStatusVectorImpl_vTable);
 end;
 
 function ITraceSweepInfoImpl.asITraceSweepInfo:ITraceSweepInfo;
@@ -16508,6 +18503,11 @@ begin
   Result := PTraceSweepInfoVTable(FvTable);
 end;
 
+class function ITraceSweepInfoImpl.isITraceSweepInfoImpl(intf: ITraceSweepInfo): boolean;
+begin
+  Result := (intf.vTable = @ITraceSweepInfoImpl_vTable);
+end;
+
 function ITraceLogWriterImpl.asITraceLogWriter:ITraceLogWriter;
 begin
   Result := ITraceLogWriter(@FNullPtr);
@@ -16566,6 +18566,11 @@ end;
 function ITraceLogWriterImpl.getVTable: PTraceLogWriterVTable;
 begin
   Result := PTraceLogWriterVTable(FvTable);
+end;
+
+class function ITraceLogWriterImpl.isITraceLogWriterImpl(intf: ITraceLogWriter): boolean;
+begin
+  Result := (intf.vTable = @ITraceLogWriterImpl_vTable);
 end;
 
 function ITraceInitInfoImpl.asITraceInitInfo:ITraceInitInfo;
@@ -16656,6 +18661,11 @@ end;
 function ITraceInitInfoImpl.getVTable: PTraceInitInfoVTable;
 begin
   Result := PTraceInitInfoVTable(FvTable);
+end;
+
+class function ITraceInitInfoImpl.isITraceInitInfoImpl(intf: ITraceInitInfo): boolean;
+begin
+  Result := (intf.vTable = @ITraceInitInfoImpl_vTable);
 end;
 
 function ITracePluginImpl.asITracePlugin:ITracePlugin;
@@ -16908,6 +18918,11 @@ begin
   Result := PTracePluginVTable(FvTable);
 end;
 
+class function ITracePluginImpl.isITracePluginImpl(intf: ITracePlugin): boolean;
+begin
+  Result := (intf.vTable = @ITracePluginImpl_vTable);
+end;
+
 function ITraceFactoryImpl.asITraceFactory:ITraceFactory;
 begin
   Result := ITraceFactory(@FNullPtr);
@@ -16988,6 +19003,11 @@ begin
   Result := PTraceFactoryVTable(FvTable);
 end;
 
+class function ITraceFactoryImpl.isITraceFactoryImpl(intf: ITraceFactory): boolean;
+begin
+  Result := (intf.vTable = @ITraceFactoryImpl_vTable);
+end;
+
 function IUdrFunctionFactoryImpl.asIUdrFunctionFactory:IUdrFunctionFactory;
 begin
   Result := IUdrFunctionFactory(@FNullPtr);
@@ -17036,6 +19056,11 @@ end;
 function IUdrFunctionFactoryImpl.getVTable: PUdrFunctionFactoryVTable;
 begin
   Result := PUdrFunctionFactoryVTable(FvTable);
+end;
+
+class function IUdrFunctionFactoryImpl.isIUdrFunctionFactoryImpl(intf: IUdrFunctionFactory): boolean;
+begin
+  Result := (intf.vTable = @IUdrFunctionFactoryImpl_vTable);
 end;
 
 function IUdrProcedureFactoryImpl.asIUdrProcedureFactory:IUdrProcedureFactory;
@@ -17088,6 +19113,11 @@ begin
   Result := PUdrProcedureFactoryVTable(FvTable);
 end;
 
+class function IUdrProcedureFactoryImpl.isIUdrProcedureFactoryImpl(intf: IUdrProcedureFactory): boolean;
+begin
+  Result := (intf.vTable = @IUdrProcedureFactoryImpl_vTable);
+end;
+
 function IUdrTriggerFactoryImpl.asIUdrTriggerFactory:IUdrTriggerFactory;
 begin
   Result := IUdrTriggerFactory(@FNullPtr);
@@ -17136,6 +19166,11 @@ end;
 function IUdrTriggerFactoryImpl.getVTable: PUdrTriggerFactoryVTable;
 begin
   Result := PUdrTriggerFactoryVTable(FvTable);
+end;
+
+class function IUdrTriggerFactoryImpl.isIUdrTriggerFactoryImpl(intf: IUdrTriggerFactory): boolean;
+begin
+  Result := (intf.vTable = @IUdrTriggerFactoryImpl_vTable);
 end;
 
 function IUdrPluginImpl.asIUdrPlugin:IUdrPlugin;
@@ -17198,6 +19233,11 @@ begin
   Result := PUdrPluginVTable(FvTable);
 end;
 
+class function IUdrPluginImpl.isIUdrPluginImpl(intf: IUdrPlugin): boolean;
+begin
+  Result := (intf.vTable = @IUdrPluginImpl_vTable);
+end;
+
 function IDecFloat16Impl.asIDecFloat16:IDecFloat16;
 begin
   Result := IDecFloat16(@FNullPtr);
@@ -17256,6 +19296,11 @@ end;
 function IDecFloat16Impl.getVTable: PDecFloat16VTable;
 begin
   Result := PDecFloat16VTable(FvTable);
+end;
+
+class function IDecFloat16Impl.isIDecFloat16Impl(intf: IDecFloat16): boolean;
+begin
+  Result := (intf.vTable = @IDecFloat16Impl_vTable);
 end;
 
 function IDecFloat34Impl.asIDecFloat34:IDecFloat34;
@@ -17318,6 +19363,11 @@ begin
   Result := PDecFloat34VTable(FvTable);
 end;
 
+class function IDecFloat34Impl.isIDecFloat34Impl(intf: IDecFloat34): boolean;
+begin
+  Result := (intf.vTable = @IDecFloat34Impl_vTable);
+end;
+
 function IInt128Impl.asIInt128:IInt128;
 begin
   Result := IInt128(@FNullPtr);
@@ -17356,6 +19406,11 @@ end;
 function IInt128Impl.getVTable: PInt128VTable;
 begin
   Result := PInt128VTable(FvTable);
+end;
+
+class function IInt128Impl.isIInt128Impl(intf: IInt128): boolean;
+begin
+  Result := (intf.vTable = @IInt128Impl_vTable);
 end;
 
 function IReplicatedFieldImpl.asIReplicatedField:IReplicatedField;
@@ -17448,6 +19503,11 @@ begin
   Result := PReplicatedFieldVTable(FvTable);
 end;
 
+class function IReplicatedFieldImpl.isIReplicatedFieldImpl(intf: IReplicatedField): boolean;
+begin
+  Result := (intf.vTable = @IReplicatedFieldImpl_vTable);
+end;
+
 function IReplicatedRecordImpl.asIReplicatedRecord:IReplicatedRecord;
 begin
   Result := IReplicatedRecord(@FNullPtr);
@@ -17506,6 +19566,11 @@ end;
 function IReplicatedRecordImpl.getVTable: PReplicatedRecordVTable;
 begin
   Result := PReplicatedRecordVTable(FvTable);
+end;
+
+class function IReplicatedRecordImpl.isIReplicatedRecordImpl(intf: IReplicatedRecord): boolean;
+begin
+  Result := (intf.vTable = @IReplicatedRecordImpl_vTable);
 end;
 
 function IReplicatedTransactionImpl.asIReplicatedTransaction:IReplicatedTransaction;
@@ -17648,6 +19713,11 @@ begin
   Result := PReplicatedTransactionVTable(FvTable);
 end;
 
+class function IReplicatedTransactionImpl.isIReplicatedTransactionImpl(intf: IReplicatedTransaction): boolean;
+begin
+  Result := (intf.vTable = @IReplicatedTransactionImpl_vTable);
+end;
+
 function IReplicatedSessionImpl.asIReplicatedSession:IReplicatedSession;
 begin
   Result := IReplicatedSession(@FNullPtr);
@@ -17748,676 +19818,9 @@ begin
   Result := PReplicatedSessionVTable(FvTable);
 end;
 
-function IsImplementationObject(OOAPIInterface: pointer; var classType: TFirebirdImplementationClass; var impl: TObject): boolean;
+class function IReplicatedSessionImpl.isIReplicatedSessionImpl(intf: IReplicatedSession): boolean;
 begin
-  Result := false;
-  impl := nil;
-  with IVersioned(OOAPIInterface)^ do
-  if (FvTable = @IVersionedImpl_vTable) and (FObject is IVersionedImpl) then
-  begin
-    classType := IVersionedImpl;
-    impl := IVersionedImpl(FObject);
-  end
-  else
-  with IReferenceCounted(OOAPIInterface)^ do
-  if (FvTable = @IReferenceCountedImpl_vTable) and (FObject is IReferenceCountedImpl) then
-  begin
-    classType := IReferenceCountedImpl;
-    impl := IReferenceCountedImpl(FObject);
-  end
-  else
-  with IDisposable(OOAPIInterface)^ do
-  if (FvTable = @IDisposableImpl_vTable) and (FObject is IDisposableImpl) then
-  begin
-    classType := IDisposableImpl;
-    impl := IDisposableImpl(FObject);
-  end
-  else
-  with IStatus(OOAPIInterface)^ do
-  if (FvTable = @IStatusImpl_vTable) and (FObject is IStatusImpl) then
-  begin
-    classType := IStatusImpl;
-    impl := IStatusImpl(FObject);
-  end
-  else
-  with IMaster(OOAPIInterface)^ do
-  if (FvTable = @IMasterImpl_vTable) and (FObject is IMasterImpl) then
-  begin
-    classType := IMasterImpl;
-    impl := IMasterImpl(FObject);
-  end
-  else
-  with IPluginBase(OOAPIInterface)^ do
-  if (FvTable = @IPluginBaseImpl_vTable) and (FObject is IPluginBaseImpl) then
-  begin
-    classType := IPluginBaseImpl;
-    impl := IPluginBaseImpl(FObject);
-  end
-  else
-  with IPluginSet(OOAPIInterface)^ do
-  if (FvTable = @IPluginSetImpl_vTable) and (FObject is IPluginSetImpl) then
-  begin
-    classType := IPluginSetImpl;
-    impl := IPluginSetImpl(FObject);
-  end
-  else
-  with IConfigEntry(OOAPIInterface)^ do
-  if (FvTable = @IConfigEntryImpl_vTable) and (FObject is IConfigEntryImpl) then
-  begin
-    classType := IConfigEntryImpl;
-    impl := IConfigEntryImpl(FObject);
-  end
-  else
-  with IConfig(OOAPIInterface)^ do
-  if (FvTable = @IConfigImpl_vTable) and (FObject is IConfigImpl) then
-  begin
-    classType := IConfigImpl;
-    impl := IConfigImpl(FObject);
-  end
-  else
-  with IFirebirdConf(OOAPIInterface)^ do
-  if (FvTable = @IFirebirdConfImpl_vTable) and (FObject is IFirebirdConfImpl) then
-  begin
-    classType := IFirebirdConfImpl;
-    impl := IFirebirdConfImpl(FObject);
-  end
-  else
-  with IPluginConfig(OOAPIInterface)^ do
-  if (FvTable = @IPluginConfigImpl_vTable) and (FObject is IPluginConfigImpl) then
-  begin
-    classType := IPluginConfigImpl;
-    impl := IPluginConfigImpl(FObject);
-  end
-  else
-  with IPluginFactory(OOAPIInterface)^ do
-  if (FvTable = @IPluginFactoryImpl_vTable) and (FObject is IPluginFactoryImpl) then
-  begin
-    classType := IPluginFactoryImpl;
-    impl := IPluginFactoryImpl(FObject);
-  end
-  else
-  with IPluginModule(OOAPIInterface)^ do
-  if (FvTable = @IPluginModuleImpl_vTable) and (FObject is IPluginModuleImpl) then
-  begin
-    classType := IPluginModuleImpl;
-    impl := IPluginModuleImpl(FObject);
-  end
-  else
-  with IPluginManager(OOAPIInterface)^ do
-  if (FvTable = @IPluginManagerImpl_vTable) and (FObject is IPluginManagerImpl) then
-  begin
-    classType := IPluginManagerImpl;
-    impl := IPluginManagerImpl(FObject);
-  end
-  else
-  with ICryptKey(OOAPIInterface)^ do
-  if (FvTable = @ICryptKeyImpl_vTable) and (FObject is ICryptKeyImpl) then
-  begin
-    classType := ICryptKeyImpl;
-    impl := ICryptKeyImpl(FObject);
-  end
-  else
-  with IConfigManager(OOAPIInterface)^ do
-  if (FvTable = @IConfigManagerImpl_vTable) and (FObject is IConfigManagerImpl) then
-  begin
-    classType := IConfigManagerImpl;
-    impl := IConfigManagerImpl(FObject);
-  end
-  else
-  with IEventCallback(OOAPIInterface)^ do
-  if (FvTable = @IEventCallbackImpl_vTable) and (FObject is IEventCallbackImpl) then
-  begin
-    classType := IEventCallbackImpl;
-    impl := IEventCallbackImpl(FObject);
-  end
-  else
-  with IBlob(OOAPIInterface)^ do
-  if (FvTable = @IBlobImpl_vTable) and (FObject is IBlobImpl) then
-  begin
-    classType := IBlobImpl;
-    impl := IBlobImpl(FObject);
-  end
-  else
-  with ITransaction(OOAPIInterface)^ do
-  if (FvTable = @ITransactionImpl_vTable) and (FObject is ITransactionImpl) then
-  begin
-    classType := ITransactionImpl;
-    impl := ITransactionImpl(FObject);
-  end
-  else
-  with IMessageMetadata(OOAPIInterface)^ do
-  if (FvTable = @IMessageMetadataImpl_vTable) and (FObject is IMessageMetadataImpl) then
-  begin
-    classType := IMessageMetadataImpl;
-    impl := IMessageMetadataImpl(FObject);
-  end
-  else
-  with IMetadataBuilder(OOAPIInterface)^ do
-  if (FvTable = @IMetadataBuilderImpl_vTable) and (FObject is IMetadataBuilderImpl) then
-  begin
-    classType := IMetadataBuilderImpl;
-    impl := IMetadataBuilderImpl(FObject);
-  end
-  else
-  with IResultSet(OOAPIInterface)^ do
-  if (FvTable = @IResultSetImpl_vTable) and (FObject is IResultSetImpl) then
-  begin
-    classType := IResultSetImpl;
-    impl := IResultSetImpl(FObject);
-  end
-  else
-  with IStatement(OOAPIInterface)^ do
-  if (FvTable = @IStatementImpl_vTable) and (FObject is IStatementImpl) then
-  begin
-    classType := IStatementImpl;
-    impl := IStatementImpl(FObject);
-  end
-  else
-  with IBatch(OOAPIInterface)^ do
-  if (FvTable = @IBatchImpl_vTable) and (FObject is IBatchImpl) then
-  begin
-    classType := IBatchImpl;
-    impl := IBatchImpl(FObject);
-  end
-  else
-  with IBatchCompletionState(OOAPIInterface)^ do
-  if (FvTable = @IBatchCompletionStateImpl_vTable) and (FObject is IBatchCompletionStateImpl) then
-  begin
-    classType := IBatchCompletionStateImpl;
-    impl := IBatchCompletionStateImpl(FObject);
-  end
-  else
-  with IReplicator(OOAPIInterface)^ do
-  if (FvTable = @IReplicatorImpl_vTable) and (FObject is IReplicatorImpl) then
-  begin
-    classType := IReplicatorImpl;
-    impl := IReplicatorImpl(FObject);
-  end
-  else
-  with IRequest(OOAPIInterface)^ do
-  if (FvTable = @IRequestImpl_vTable) and (FObject is IRequestImpl) then
-  begin
-    classType := IRequestImpl;
-    impl := IRequestImpl(FObject);
-  end
-  else
-  with IEvents(OOAPIInterface)^ do
-  if (FvTable = @IEventsImpl_vTable) and (FObject is IEventsImpl) then
-  begin
-    classType := IEventsImpl;
-    impl := IEventsImpl(FObject);
-  end
-  else
-  with IAttachment(OOAPIInterface)^ do
-  if (FvTable = @IAttachmentImpl_vTable) and (FObject is IAttachmentImpl) then
-  begin
-    classType := IAttachmentImpl;
-    impl := IAttachmentImpl(FObject);
-  end
-  else
-  with IService(OOAPIInterface)^ do
-  if (FvTable = @IServiceImpl_vTable) and (FObject is IServiceImpl) then
-  begin
-    classType := IServiceImpl;
-    impl := IServiceImpl(FObject);
-  end
-  else
-  with IProvider(OOAPIInterface)^ do
-  if (FvTable = @IProviderImpl_vTable) and (FObject is IProviderImpl) then
-  begin
-    classType := IProviderImpl;
-    impl := IProviderImpl(FObject);
-  end
-  else
-  with IDtcStart(OOAPIInterface)^ do
-  if (FvTable = @IDtcStartImpl_vTable) and (FObject is IDtcStartImpl) then
-  begin
-    classType := IDtcStartImpl;
-    impl := IDtcStartImpl(FObject);
-  end
-  else
-  with IDtc(OOAPIInterface)^ do
-  if (FvTable = @IDtcImpl_vTable) and (FObject is IDtcImpl) then
-  begin
-    classType := IDtcImpl;
-    impl := IDtcImpl(FObject);
-  end
-  else
-  with IAuth(OOAPIInterface)^ do
-  if (FvTable = @IAuthImpl_vTable) and (FObject is IAuthImpl) then
-  begin
-    classType := IAuthImpl;
-    impl := IAuthImpl(FObject);
-  end
-  else
-  with IWriter(OOAPIInterface)^ do
-  if (FvTable = @IWriterImpl_vTable) and (FObject is IWriterImpl) then
-  begin
-    classType := IWriterImpl;
-    impl := IWriterImpl(FObject);
-  end
-  else
-  with IServerBlock(OOAPIInterface)^ do
-  if (FvTable = @IServerBlockImpl_vTable) and (FObject is IServerBlockImpl) then
-  begin
-    classType := IServerBlockImpl;
-    impl := IServerBlockImpl(FObject);
-  end
-  else
-  with IClientBlock(OOAPIInterface)^ do
-  if (FvTable = @IClientBlockImpl_vTable) and (FObject is IClientBlockImpl) then
-  begin
-    classType := IClientBlockImpl;
-    impl := IClientBlockImpl(FObject);
-  end
-  else
-  with IServer(OOAPIInterface)^ do
-  if (FvTable = @IServerImpl_vTable) and (FObject is IServerImpl) then
-  begin
-    classType := IServerImpl;
-    impl := IServerImpl(FObject);
-  end
-  else
-  with IClient(OOAPIInterface)^ do
-  if (FvTable = @IClientImpl_vTable) and (FObject is IClientImpl) then
-  begin
-    classType := IClientImpl;
-    impl := IClientImpl(FObject);
-  end
-  else
-  with IUserField(OOAPIInterface)^ do
-  if (FvTable = @IUserFieldImpl_vTable) and (FObject is IUserFieldImpl) then
-  begin
-    classType := IUserFieldImpl;
-    impl := IUserFieldImpl(FObject);
-  end
-  else
-  with ICharUserField(OOAPIInterface)^ do
-  if (FvTable = @ICharUserFieldImpl_vTable) and (FObject is ICharUserFieldImpl) then
-  begin
-    classType := ICharUserFieldImpl;
-    impl := ICharUserFieldImpl(FObject);
-  end
-  else
-  with IIntUserField(OOAPIInterface)^ do
-  if (FvTable = @IIntUserFieldImpl_vTable) and (FObject is IIntUserFieldImpl) then
-  begin
-    classType := IIntUserFieldImpl;
-    impl := IIntUserFieldImpl(FObject);
-  end
-  else
-  with IUser(OOAPIInterface)^ do
-  if (FvTable = @IUserImpl_vTable) and (FObject is IUserImpl) then
-  begin
-    classType := IUserImpl;
-    impl := IUserImpl(FObject);
-  end
-  else
-  with IListUsers(OOAPIInterface)^ do
-  if (FvTable = @IListUsersImpl_vTable) and (FObject is IListUsersImpl) then
-  begin
-    classType := IListUsersImpl;
-    impl := IListUsersImpl(FObject);
-  end
-  else
-  with ILogonInfo(OOAPIInterface)^ do
-  if (FvTable = @ILogonInfoImpl_vTable) and (FObject is ILogonInfoImpl) then
-  begin
-    classType := ILogonInfoImpl;
-    impl := ILogonInfoImpl(FObject);
-  end
-  else
-  with IManagement(OOAPIInterface)^ do
-  if (FvTable = @IManagementImpl_vTable) and (FObject is IManagementImpl) then
-  begin
-    classType := IManagementImpl;
-    impl := IManagementImpl(FObject);
-  end
-  else
-  with IAuthBlock(OOAPIInterface)^ do
-  if (FvTable = @IAuthBlockImpl_vTable) and (FObject is IAuthBlockImpl) then
-  begin
-    classType := IAuthBlockImpl;
-    impl := IAuthBlockImpl(FObject);
-  end
-  else
-  with IWireCryptPlugin(OOAPIInterface)^ do
-  if (FvTable = @IWireCryptPluginImpl_vTable) and (FObject is IWireCryptPluginImpl) then
-  begin
-    classType := IWireCryptPluginImpl;
-    impl := IWireCryptPluginImpl(FObject);
-  end
-  else
-  with ICryptKeyCallback(OOAPIInterface)^ do
-  if (FvTable = @ICryptKeyCallbackImpl_vTable) and (FObject is ICryptKeyCallbackImpl) then
-  begin
-    classType := ICryptKeyCallbackImpl;
-    impl := ICryptKeyCallbackImpl(FObject);
-  end
-  else
-  with IKeyHolderPlugin(OOAPIInterface)^ do
-  if (FvTable = @IKeyHolderPluginImpl_vTable) and (FObject is IKeyHolderPluginImpl) then
-  begin
-    classType := IKeyHolderPluginImpl;
-    impl := IKeyHolderPluginImpl(FObject);
-  end
-  else
-  with IDbCryptInfo(OOAPIInterface)^ do
-  if (FvTable = @IDbCryptInfoImpl_vTable) and (FObject is IDbCryptInfoImpl) then
-  begin
-    classType := IDbCryptInfoImpl;
-    impl := IDbCryptInfoImpl(FObject);
-  end
-  else
-  with IDbCryptPlugin(OOAPIInterface)^ do
-  if (FvTable = @IDbCryptPluginImpl_vTable) and (FObject is IDbCryptPluginImpl) then
-  begin
-    classType := IDbCryptPluginImpl;
-    impl := IDbCryptPluginImpl(FObject);
-  end
-  else
-  with IExternalContext(OOAPIInterface)^ do
-  if (FvTable = @IExternalContextImpl_vTable) and (FObject is IExternalContextImpl) then
-  begin
-    classType := IExternalContextImpl;
-    impl := IExternalContextImpl(FObject);
-  end
-  else
-  with IExternalResultSet(OOAPIInterface)^ do
-  if (FvTable = @IExternalResultSetImpl_vTable) and (FObject is IExternalResultSetImpl) then
-  begin
-    classType := IExternalResultSetImpl;
-    impl := IExternalResultSetImpl(FObject);
-  end
-  else
-  with IExternalFunction(OOAPIInterface)^ do
-  if (FvTable = @IExternalFunctionImpl_vTable) and (FObject is IExternalFunctionImpl) then
-  begin
-    classType := IExternalFunctionImpl;
-    impl := IExternalFunctionImpl(FObject);
-  end
-  else
-  with IExternalProcedure(OOAPIInterface)^ do
-  if (FvTable = @IExternalProcedureImpl_vTable) and (FObject is IExternalProcedureImpl) then
-  begin
-    classType := IExternalProcedureImpl;
-    impl := IExternalProcedureImpl(FObject);
-  end
-  else
-  with IExternalTrigger(OOAPIInterface)^ do
-  if (FvTable = @IExternalTriggerImpl_vTable) and (FObject is IExternalTriggerImpl) then
-  begin
-    classType := IExternalTriggerImpl;
-    impl := IExternalTriggerImpl(FObject);
-  end
-  else
-  with IRoutineMetadata(OOAPIInterface)^ do
-  if (FvTable = @IRoutineMetadataImpl_vTable) and (FObject is IRoutineMetadataImpl) then
-  begin
-    classType := IRoutineMetadataImpl;
-    impl := IRoutineMetadataImpl(FObject);
-  end
-  else
-  with IExternalEngine(OOAPIInterface)^ do
-  if (FvTable = @IExternalEngineImpl_vTable) and (FObject is IExternalEngineImpl) then
-  begin
-    classType := IExternalEngineImpl;
-    impl := IExternalEngineImpl(FObject);
-  end
-  else
-  with ITimer(OOAPIInterface)^ do
-  if (FvTable = @ITimerImpl_vTable) and (FObject is ITimerImpl) then
-  begin
-    classType := ITimerImpl;
-    impl := ITimerImpl(FObject);
-  end
-  else
-  with ITimerControl(OOAPIInterface)^ do
-  if (FvTable = @ITimerControlImpl_vTable) and (FObject is ITimerControlImpl) then
-  begin
-    classType := ITimerControlImpl;
-    impl := ITimerControlImpl(FObject);
-  end
-  else
-  with IVersionCallback(OOAPIInterface)^ do
-  if (FvTable = @IVersionCallbackImpl_vTable) and (FObject is IVersionCallbackImpl) then
-  begin
-    classType := IVersionCallbackImpl;
-    impl := IVersionCallbackImpl(FObject);
-  end
-  else
-  with IUtil(OOAPIInterface)^ do
-  if (FvTable = @IUtilImpl_vTable) and (FObject is IUtilImpl) then
-  begin
-    classType := IUtilImpl;
-    impl := IUtilImpl(FObject);
-  end
-  else
-  with IOffsetsCallback(OOAPIInterface)^ do
-  if (FvTable = @IOffsetsCallbackImpl_vTable) and (FObject is IOffsetsCallbackImpl) then
-  begin
-    classType := IOffsetsCallbackImpl;
-    impl := IOffsetsCallbackImpl(FObject);
-  end
-  else
-  with IXpbBuilder(OOAPIInterface)^ do
-  if (FvTable = @IXpbBuilderImpl_vTable) and (FObject is IXpbBuilderImpl) then
-  begin
-    classType := IXpbBuilderImpl;
-    impl := IXpbBuilderImpl(FObject);
-  end
-  else
-  with ITraceConnection(OOAPIInterface)^ do
-  if (FvTable = @ITraceConnectionImpl_vTable) and (FObject is ITraceConnectionImpl) then
-  begin
-    classType := ITraceConnectionImpl;
-    impl := ITraceConnectionImpl(FObject);
-  end
-  else
-  with ITraceDatabaseConnection(OOAPIInterface)^ do
-  if (FvTable = @ITraceDatabaseConnectionImpl_vTable) and (FObject is ITraceDatabaseConnectionImpl) then
-  begin
-    classType := ITraceDatabaseConnectionImpl;
-    impl := ITraceDatabaseConnectionImpl(FObject);
-  end
-  else
-  with ITraceTransaction(OOAPIInterface)^ do
-  if (FvTable = @ITraceTransactionImpl_vTable) and (FObject is ITraceTransactionImpl) then
-  begin
-    classType := ITraceTransactionImpl;
-    impl := ITraceTransactionImpl(FObject);
-  end
-  else
-  with ITraceParams(OOAPIInterface)^ do
-  if (FvTable = @ITraceParamsImpl_vTable) and (FObject is ITraceParamsImpl) then
-  begin
-    classType := ITraceParamsImpl;
-    impl := ITraceParamsImpl(FObject);
-  end
-  else
-  with ITraceStatement(OOAPIInterface)^ do
-  if (FvTable = @ITraceStatementImpl_vTable) and (FObject is ITraceStatementImpl) then
-  begin
-    classType := ITraceStatementImpl;
-    impl := ITraceStatementImpl(FObject);
-  end
-  else
-  with ITraceSQLStatement(OOAPIInterface)^ do
-  if (FvTable = @ITraceSQLStatementImpl_vTable) and (FObject is ITraceSQLStatementImpl) then
-  begin
-    classType := ITraceSQLStatementImpl;
-    impl := ITraceSQLStatementImpl(FObject);
-  end
-  else
-  with ITraceBLRStatement(OOAPIInterface)^ do
-  if (FvTable = @ITraceBLRStatementImpl_vTable) and (FObject is ITraceBLRStatementImpl) then
-  begin
-    classType := ITraceBLRStatementImpl;
-    impl := ITraceBLRStatementImpl(FObject);
-  end
-  else
-  with ITraceDYNRequest(OOAPIInterface)^ do
-  if (FvTable = @ITraceDYNRequestImpl_vTable) and (FObject is ITraceDYNRequestImpl) then
-  begin
-    classType := ITraceDYNRequestImpl;
-    impl := ITraceDYNRequestImpl(FObject);
-  end
-  else
-  with ITraceContextVariable(OOAPIInterface)^ do
-  if (FvTable = @ITraceContextVariableImpl_vTable) and (FObject is ITraceContextVariableImpl) then
-  begin
-    classType := ITraceContextVariableImpl;
-    impl := ITraceContextVariableImpl(FObject);
-  end
-  else
-  with ITraceProcedure(OOAPIInterface)^ do
-  if (FvTable = @ITraceProcedureImpl_vTable) and (FObject is ITraceProcedureImpl) then
-  begin
-    classType := ITraceProcedureImpl;
-    impl := ITraceProcedureImpl(FObject);
-  end
-  else
-  with ITraceFunction(OOAPIInterface)^ do
-  if (FvTable = @ITraceFunctionImpl_vTable) and (FObject is ITraceFunctionImpl) then
-  begin
-    classType := ITraceFunctionImpl;
-    impl := ITraceFunctionImpl(FObject);
-  end
-  else
-  with ITraceTrigger(OOAPIInterface)^ do
-  if (FvTable = @ITraceTriggerImpl_vTable) and (FObject is ITraceTriggerImpl) then
-  begin
-    classType := ITraceTriggerImpl;
-    impl := ITraceTriggerImpl(FObject);
-  end
-  else
-  with ITraceServiceConnection(OOAPIInterface)^ do
-  if (FvTable = @ITraceServiceConnectionImpl_vTable) and (FObject is ITraceServiceConnectionImpl) then
-  begin
-    classType := ITraceServiceConnectionImpl;
-    impl := ITraceServiceConnectionImpl(FObject);
-  end
-  else
-  with ITraceStatusVector(OOAPIInterface)^ do
-  if (FvTable = @ITraceStatusVectorImpl_vTable) and (FObject is ITraceStatusVectorImpl) then
-  begin
-    classType := ITraceStatusVectorImpl;
-    impl := ITraceStatusVectorImpl(FObject);
-  end
-  else
-  with ITraceSweepInfo(OOAPIInterface)^ do
-  if (FvTable = @ITraceSweepInfoImpl_vTable) and (FObject is ITraceSweepInfoImpl) then
-  begin
-    classType := ITraceSweepInfoImpl;
-    impl := ITraceSweepInfoImpl(FObject);
-  end
-  else
-  with ITraceLogWriter(OOAPIInterface)^ do
-  if (FvTable = @ITraceLogWriterImpl_vTable) and (FObject is ITraceLogWriterImpl) then
-  begin
-    classType := ITraceLogWriterImpl;
-    impl := ITraceLogWriterImpl(FObject);
-  end
-  else
-  with ITraceInitInfo(OOAPIInterface)^ do
-  if (FvTable = @ITraceInitInfoImpl_vTable) and (FObject is ITraceInitInfoImpl) then
-  begin
-    classType := ITraceInitInfoImpl;
-    impl := ITraceInitInfoImpl(FObject);
-  end
-  else
-  with ITracePlugin(OOAPIInterface)^ do
-  if (FvTable = @ITracePluginImpl_vTable) and (FObject is ITracePluginImpl) then
-  begin
-    classType := ITracePluginImpl;
-    impl := ITracePluginImpl(FObject);
-  end
-  else
-  with ITraceFactory(OOAPIInterface)^ do
-  if (FvTable = @ITraceFactoryImpl_vTable) and (FObject is ITraceFactoryImpl) then
-  begin
-    classType := ITraceFactoryImpl;
-    impl := ITraceFactoryImpl(FObject);
-  end
-  else
-  with IUdrFunctionFactory(OOAPIInterface)^ do
-  if (FvTable = @IUdrFunctionFactoryImpl_vTable) and (FObject is IUdrFunctionFactoryImpl) then
-  begin
-    classType := IUdrFunctionFactoryImpl;
-    impl := IUdrFunctionFactoryImpl(FObject);
-  end
-  else
-  with IUdrProcedureFactory(OOAPIInterface)^ do
-  if (FvTable = @IUdrProcedureFactoryImpl_vTable) and (FObject is IUdrProcedureFactoryImpl) then
-  begin
-    classType := IUdrProcedureFactoryImpl;
-    impl := IUdrProcedureFactoryImpl(FObject);
-  end
-  else
-  with IUdrTriggerFactory(OOAPIInterface)^ do
-  if (FvTable = @IUdrTriggerFactoryImpl_vTable) and (FObject is IUdrTriggerFactoryImpl) then
-  begin
-    classType := IUdrTriggerFactoryImpl;
-    impl := IUdrTriggerFactoryImpl(FObject);
-  end
-  else
-  with IUdrPlugin(OOAPIInterface)^ do
-  if (FvTable = @IUdrPluginImpl_vTable) and (FObject is IUdrPluginImpl) then
-  begin
-    classType := IUdrPluginImpl;
-    impl := IUdrPluginImpl(FObject);
-  end
-  else
-  with IDecFloat16(OOAPIInterface)^ do
-  if (FvTable = @IDecFloat16Impl_vTable) and (FObject is IDecFloat16Impl) then
-  begin
-    classType := IDecFloat16Impl;
-    impl := IDecFloat16Impl(FObject);
-  end
-  else
-  with IDecFloat34(OOAPIInterface)^ do
-  if (FvTable = @IDecFloat34Impl_vTable) and (FObject is IDecFloat34Impl) then
-  begin
-    classType := IDecFloat34Impl;
-    impl := IDecFloat34Impl(FObject);
-  end
-  else
-  with IInt128(OOAPIInterface)^ do
-  if (FvTable = @IInt128Impl_vTable) and (FObject is IInt128Impl) then
-  begin
-    classType := IInt128Impl;
-    impl := IInt128Impl(FObject);
-  end
-  else
-  with IReplicatedField(OOAPIInterface)^ do
-  if (FvTable = @IReplicatedFieldImpl_vTable) and (FObject is IReplicatedFieldImpl) then
-  begin
-    classType := IReplicatedFieldImpl;
-    impl := IReplicatedFieldImpl(FObject);
-  end
-  else
-  with IReplicatedRecord(OOAPIInterface)^ do
-  if (FvTable = @IReplicatedRecordImpl_vTable) and (FObject is IReplicatedRecordImpl) then
-  begin
-    classType := IReplicatedRecordImpl;
-    impl := IReplicatedRecordImpl(FObject);
-  end
-  else
-  with IReplicatedTransaction(OOAPIInterface)^ do
-  if (FvTable = @IReplicatedTransactionImpl_vTable) and (FObject is IReplicatedTransactionImpl) then
-  begin
-    classType := IReplicatedTransactionImpl;
-    impl := IReplicatedTransactionImpl(FObject);
-  end
-  else
-  with IReplicatedSession(OOAPIInterface)^ do
-  if (FvTable = @IReplicatedSessionImpl_vTable) and (FObject is IReplicatedSessionImpl) then
-  begin
-    classType := IReplicatedSessionImpl;
-    impl := IReplicatedSessionImpl(FObject);
-  end;
-
-  Result := (impl <> nil);
+  Result := (intf.vTable = @IReplicatedSessionImpl_vTable);
 end;
 
 constructor FbException.create(status: IStatus);

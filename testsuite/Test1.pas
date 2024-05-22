@@ -122,19 +122,22 @@ end;
 
 procedure TTest1.TestIsImplementationObject;
 var objectType: TFirebirdImplementationClass;
-    impl: TObject;
+    impl: Firebird.IVersionCallbackImpl;
     intf: Firebird.IVersionCallback;
     TestObj:  TVersionCallback;
 begin
   if not FirebirdAPI.HasMasterIntf then Exit; {Only if OOAPI available}
-  writeln(OutFile,'Test Firebird Helper function "IsImplementationObject"');
+  writeln(OutFile,'Test Firebird coercion of implementation object from interface');
   TestObj := TVersionCallback.Create;
   try
     intf := TestObj.asIVersionCallback;
-    if Firebird.IsImplementationObject(intf,objectType,impl) then
-      writeln(OutFile,'Success: implementation class name is ',objectType.ClassName,', returned object is a ',impl.ClassName)
+    if intf.isIVersionCallbackImpl then
+    begin
+      impl := intf.asIVersionCallbackImpl;
+      writeln(OutFile,'Success: returned object is a ',impl.ClassName)
+    end
     else
-      writeln(OutFile,'IsImplementationObject failed');
+      writeln(OutFile,'isIVersionCallbackImpl failed');
   finally
     TestObj.Free;
   end;

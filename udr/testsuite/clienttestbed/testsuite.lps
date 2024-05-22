@@ -359,10 +359,9 @@
       </Unit>
       <Unit>
         <Filename Value="../../testbed/FBUdrPlugin.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="15"/>
-        <TopLine Value="802"/>
-        <CursorPos X="45" Y="826"/>
+        <TopLine Value="798"/>
+        <CursorPos X="23" Y="802"/>
         <UsageCount Value="16"/>
         <Loaded Value="True"/>
       </Unit>
@@ -392,9 +391,10 @@
       </Unit>
       <Unit>
         <Filename Value="../../../client/3.0/firebird/Firebird.pas"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="14"/>
-        <TopLine Value="5724"/>
-        <CursorPos X="98" Y="5724"/>
+        <TopLine Value="11292"/>
+        <CursorPos X="3" Y="11294"/>
         <UsageCount Value="16"/>
         <Loaded Value="True"/>
       </Unit>
@@ -529,38 +529,6 @@
     </Units>
     <JumpHistory HistoryIndex="29">
       <Position>
-        <Filename Value="../../../client/FBSQLData.pas"/>
-        <Caret Line="2492" TopLine="2478"/>
-      </Position>
-      <Position>
-        <Filename Value="../../../client/FBSQLData.pas"/>
-        <Caret Line="2453" TopLine="2438"/>
-      </Position>
-      <Position>
-        <Filename Value="../udrlib/udr_test01.pas"/>
-        <Caret Line="101" Column="25" TopLine="75"/>
-      </Position>
-      <Position>
-        <Filename Value="../../source/FBUDRUtils.pas"/>
-        <Caret Line="927" Column="3" TopLine="824"/>
-      </Position>
-      <Position>
-        <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="1547" TopLine="1532"/>
-      </Position>
-      <Position>
-        <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="284" Column="22" TopLine="272"/>
-      </Position>
-      <Position>
-        <Filename Value="../../source/FBUDRController.pas"/>
-        <Caret Line="1641" Column="3" TopLine="1635"/>
-      </Position>
-      <Position>
-        <Filename Value="../udrlib/udr_test01.pas"/>
-        <Caret Line="123" Column="37" TopLine="99"/>
-      </Position>
-      <Position>
         <Filename Value="../udrlib/udr_test01.pas"/>
         <Caret Line="109" Column="38" TopLine="99"/>
       </Position>
@@ -648,6 +616,38 @@
         <Filename Value="../../../client/3.0/firebird/Firebird.pas"/>
         <Caret Line="5724" Column="98" TopLine="5724"/>
       </Position>
+      <Position>
+        <Filename Value="../../testbed/FBUdrPlugin.pas"/>
+        <Caret Line="826" Column="45" TopLine="802"/>
+      </Position>
+      <Position>
+        <Filename Value="../../testbed/FBUdrPlugin.pas"/>
+        <Caret Line="802" Column="23" TopLine="798"/>
+      </Position>
+      <Position>
+        <Filename Value="../../../client/3.0/firebird/Firebird.pas"/>
+        <Caret Line="5459" Column="13" TopLine="5445"/>
+      </Position>
+      <Position>
+        <Filename Value="../../../client/3.0/firebird/Firebird.pas"/>
+        <Caret Line="10635" Column="43" TopLine="10633"/>
+      </Position>
+      <Position>
+        <Filename Value="../../../client/3.0/firebird/Firebird.pas"/>
+        <Caret Line="5477" Column="19" TopLine="5477"/>
+      </Position>
+      <Position>
+        <Filename Value="../../../client/3.0/firebird/Firebird.pas"/>
+        <Caret Line="19063" Column="3" TopLine="19061"/>
+      </Position>
+      <Position>
+        <Filename Value="../../../client/3.0/firebird/Firebird.pas"/>
+        <Caret Line="5469" Column="43" TopLine="5463"/>
+      </Position>
+      <Position>
+        <Filename Value="../../../client/3.0/firebird/Firebird.pas"/>
+        <Caret Line="813" Column="2" TopLine="805"/>
+      </Position>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
@@ -666,8 +666,8 @@
       </Modes>
     </RunParams>
     <HistoryLists>
-      <List Name="LaunchingApplication" Type="File" Count="1">
-        <Item1 Value="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+      <List Name="LaunchingApplication" Type="File" Count="2">
+        <Item2 Value="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
       </List>
       <List Name="CommandLineParameters" Count="4">
         <Item1 Value="-t 1"/>
@@ -675,6 +675,7 @@
         <Item3 Value="-t 4"/>
         <Item4 Value="-t 3"/>
       </List>
+      <List Name="WorkingDirectory" Type="File" Count="1"/>
     </HistoryLists>
   </ProjectSession>
   <Debugging>
