@@ -6013,7 +6013,7 @@ begin
   Result := IVersioned(@FNullPtr);
 end;
 
-function TVersioned.isIVersionedImpl: boolean inline;
+function TVersioned.isIVersionedImpl: boolean;
 begin
   Result := IVersionedImpl.isIVersionedImpl(this);
 end;
@@ -6031,7 +6031,7 @@ begin
   Result := IReferenceCounted(@FNullPtr);
 end;
 
-function TReferenceCounted.isIReferenceCountedImpl: boolean inline;
+function TReferenceCounted.isIReferenceCountedImpl: boolean;
 begin
   Result := IReferenceCountedImpl.isIReferenceCountedImpl(this);
 end;
@@ -6059,7 +6059,7 @@ begin
   Result := IDisposable(@FNullPtr);
 end;
 
-function TDisposable.isIDisposableImpl: boolean inline;
+function TDisposable.isIDisposableImpl: boolean;
 begin
   Result := IDisposableImpl.isIDisposableImpl(this);
 end;
@@ -6082,7 +6082,7 @@ begin
   Result := IStatus(@FNullPtr);
 end;
 
-function TStatus.isIStatusImpl: boolean inline;
+function TStatus.isIStatusImpl: boolean;
 begin
   Result := IStatusImpl.isIStatusImpl(this);
 end;
@@ -6150,7 +6150,7 @@ begin
   Result := IMaster(@FNullPtr);
 end;
 
-function TMaster.isIMasterImpl: boolean inline;
+function TMaster.isIMasterImpl: boolean;
 begin
   Result := IMasterImpl.isIMasterImpl(this);
 end;
@@ -6229,7 +6229,7 @@ begin
   Result := IPluginBase(@FNullPtr);
 end;
 
-function TPluginBase.isIPluginBaseImpl: boolean inline;
+function TPluginBase.isIPluginBaseImpl: boolean;
 begin
   Result := IPluginBaseImpl.isIPluginBaseImpl(this);
 end;
@@ -6267,7 +6267,7 @@ begin
   Result := IPluginSet(@FNullPtr);
 end;
 
-function TPluginSet.isIPluginSetImpl: boolean inline;
+function TPluginSet.isIPluginSetImpl: boolean;
 begin
   Result := IPluginSetImpl.isIPluginSetImpl(this);
 end;
@@ -6323,7 +6323,7 @@ begin
   Result := IConfigEntry(@FNullPtr);
 end;
 
-function TConfigEntry.isIConfigEntryImpl: boolean inline;
+function TConfigEntry.isIConfigEntryImpl: boolean;
 begin
   Result := IConfigEntryImpl.isIConfigEntryImpl(this);
 end;
@@ -6377,7 +6377,7 @@ begin
   Result := IConfig(@FNullPtr);
 end;
 
-function TConfig.isIConfigImpl: boolean inline;
+function TConfig.isIConfigImpl: boolean;
 begin
   Result := IConfigImpl.isIConfigImpl(this);
 end;
@@ -6423,7 +6423,7 @@ begin
   Result := IFirebirdConf(@FNullPtr);
 end;
 
-function TFirebirdConf.isIFirebirdConfImpl: boolean inline;
+function TFirebirdConf.isIFirebirdConfImpl: boolean;
 begin
   Result := IFirebirdConfImpl.isIFirebirdConfImpl(this);
 end;
@@ -6477,7 +6477,7 @@ begin
   Result := IPluginConfig(@FNullPtr);
 end;
 
-function TPluginConfig.isIPluginConfigImpl: boolean inline;
+function TPluginConfig.isIPluginConfigImpl: boolean;
 begin
   Result := IPluginConfigImpl.isIPluginConfigImpl(this);
 end;
@@ -6528,7 +6528,7 @@ begin
   Result := IPluginFactory(@FNullPtr);
 end;
 
-function TPluginFactory.isIPluginFactoryImpl: boolean inline;
+function TPluginFactory.isIPluginFactoryImpl: boolean;
 begin
   Result := IPluginFactoryImpl.isIPluginFactoryImpl(this);
 end;
@@ -6552,7 +6552,7 @@ begin
   Result := IPluginModule(@FNullPtr);
 end;
 
-function TPluginModule.isIPluginModuleImpl: boolean inline;
+function TPluginModule.isIPluginModuleImpl: boolean;
 begin
   Result := IPluginModuleImpl.isIPluginModuleImpl(this);
 end;
@@ -6580,7 +6580,7 @@ begin
   Result := IPluginManager(@FNullPtr);
 end;
 
-function TPluginManager.isIPluginManagerImpl: boolean inline;
+function TPluginManager.isIPluginManagerImpl: boolean;
 begin
   Result := IPluginManagerImpl.isIPluginManagerImpl(this);
 end;
@@ -6630,7 +6630,7 @@ begin
   Result := ICryptKey(@FNullPtr);
 end;
 
-function TCryptKey.isICryptKeyImpl: boolean inline;
+function TCryptKey.isICryptKeyImpl: boolean;
 begin
   Result := ICryptKeyImpl.isICryptKeyImpl(this);
 end;
@@ -6670,7 +6670,7 @@ begin
   Result := IConfigManager(@FNullPtr);
 end;
 
-function TConfigManager.isIConfigManagerImpl: boolean inline;
+function TConfigManager.isIConfigManagerImpl: boolean;
 begin
   Result := IConfigManagerImpl.isIConfigManagerImpl(this);
 end;
@@ -6723,7 +6723,7 @@ begin
   Result := IEventCallback(@FNullPtr);
 end;
 
-function TEventCallback.isIEventCallbackImpl: boolean inline;
+function TEventCallback.isIEventCallbackImpl: boolean;
 begin
   Result := IEventCallbackImpl.isIEventCallbackImpl(this);
 end;
@@ -6756,7 +6756,7 @@ begin
   Result := IBlob(@FNullPtr);
 end;
 
-function TBlob.isIBlobImpl: boolean inline;
+function TBlob.isIBlobImpl: boolean;
 begin
   Result := IBlobImpl.isIBlobImpl(this);
 end;
@@ -6820,7 +6820,7 @@ begin
   Result := ITransaction(@FNullPtr);
 end;
 
-function TTransaction.isITransactionImpl: boolean inline;
+function TTransaction.isITransactionImpl: boolean;
 begin
   Result := ITransactionImpl.isITransactionImpl(this);
 end;
@@ -6908,7 +6908,7 @@ begin
   Result := IMessageMetadata(@FNullPtr);
 end;
 
-function TMessageMetadata.isIMessageMetadataImpl: boolean inline;
+function TMessageMetadata.isIMessageMetadataImpl: boolean;
 begin
   Result := IMessageMetadataImpl.isIMessageMetadataImpl(this);
 end;
@@ -7038,7 +7038,7 @@ begin
   Result := IMetadataBuilder(@FNullPtr);
 end;
 
-function TMetadataBuilder.isIMetadataBuilderImpl: boolean inline;
+function TMetadataBuilder.isIMetadataBuilderImpl: boolean;
 begin
   Result := IMetadataBuilderImpl.isIMetadataBuilderImpl(this);
 end;
@@ -7150,7 +7150,7 @@ begin
   Result := IResultSet(@FNullPtr);
 end;
 
-function TResultSet.isIResultSetImpl: boolean inline;
+function TResultSet.isIResultSetImpl: boolean;
 begin
   Result := IResultSetImpl.isIResultSetImpl(this);
 end;
@@ -7244,7 +7244,7 @@ begin
   Result := IStatement(@FNullPtr);
 end;
 
-function TStatement.isIStatementImpl: boolean inline;
+function TStatement.isIStatementImpl: boolean;
 begin
   Result := IStatementImpl.isIStatementImpl(this);
 end;
@@ -7356,7 +7356,7 @@ begin
   Result := IBatch(@FNullPtr);
 end;
 
-function TBatch.isIBatchImpl: boolean inline;
+function TBatch.isIBatchImpl: boolean;
 begin
   Result := IBatchImpl.isIBatchImpl(this);
 end;
@@ -7450,7 +7450,7 @@ begin
   Result := IBatchCompletionState(@FNullPtr);
 end;
 
-function TBatchCompletionState.isIBatchCompletionStateImpl: boolean inline;
+function TBatchCompletionState.isIBatchCompletionStateImpl: boolean;
 begin
   Result := IBatchCompletionStateImpl.isIBatchCompletionStateImpl(this);
 end;
@@ -7497,7 +7497,7 @@ begin
   Result := IReplicator(@FNullPtr);
 end;
 
-function TReplicator.isIReplicatorImpl: boolean inline;
+function TReplicator.isIReplicatorImpl: boolean;
 begin
   Result := IReplicatorImpl.isIReplicatorImpl(this);
 end;
@@ -7537,7 +7537,7 @@ begin
   Result := IRequest(@FNullPtr);
 end;
 
-function TRequest.isIRequestImpl: boolean inline;
+function TRequest.isIRequestImpl: boolean;
 begin
   Result := IRequestImpl.isIRequestImpl(this);
 end;
@@ -7607,7 +7607,7 @@ begin
   Result := IEvents(@FNullPtr);
 end;
 
-function TEvents.isIEventsImpl: boolean inline;
+function TEvents.isIEventsImpl: boolean;
 begin
   Result := IEventsImpl.isIEventsImpl(this);
 end;
@@ -7641,7 +7641,7 @@ begin
   Result := IAttachment(@FNullPtr);
 end;
 
-function TAttachment.isIAttachmentImpl: boolean inline;
+function TAttachment.isIAttachmentImpl: boolean;
 begin
   Result := IAttachmentImpl.isIAttachmentImpl(this);
 end;
@@ -7813,7 +7813,7 @@ begin
   Result := IService(@FNullPtr);
 end;
 
-function TService.isIServiceImpl: boolean inline;
+function TService.isIServiceImpl: boolean;
 begin
   Result := IServiceImpl.isIServiceImpl(this);
 end;
@@ -7859,7 +7859,7 @@ begin
   Result := IProvider(@FNullPtr);
 end;
 
-function TProvider.isIProviderImpl: boolean inline;
+function TProvider.isIProviderImpl: boolean;
 begin
   Result := IProviderImpl.isIProviderImpl(this);
 end;
@@ -7927,7 +7927,7 @@ begin
   Result := IDtcStart(@FNullPtr);
 end;
 
-function TDtcStart.isIDtcStartImpl: boolean inline;
+function TDtcStart.isIDtcStartImpl: boolean;
 begin
   Result := IDtcStartImpl.isIDtcStartImpl(this);
 end;
@@ -7968,7 +7968,7 @@ begin
   Result := IDtc(@FNullPtr);
 end;
 
-function TDtc.isIDtcImpl: boolean inline;
+function TDtc.isIDtcImpl: boolean;
 begin
   Result := IDtcImpl.isIDtcImpl(this);
 end;
@@ -7998,7 +7998,7 @@ begin
   Result := IAuth(@FNullPtr);
 end;
 
-function TAuth.isIAuthImpl: boolean inline;
+function TAuth.isIAuthImpl: boolean;
 begin
   Result := IAuthImpl.isIAuthImpl(this);
 end;
@@ -8036,7 +8036,7 @@ begin
   Result := IWriter(@FNullPtr);
 end;
 
-function TWriter.isIWriterImpl: boolean inline;
+function TWriter.isIWriterImpl: boolean;
 begin
   Result := IWriterImpl.isIWriterImpl(this);
 end;
@@ -8077,7 +8077,7 @@ begin
   Result := IServerBlock(@FNullPtr);
 end;
 
-function TServerBlock.isIServerBlockImpl: boolean inline;
+function TServerBlock.isIServerBlockImpl: boolean;
 begin
   Result := IServerBlockImpl.isIServerBlockImpl(this);
 end;
@@ -8117,7 +8117,7 @@ begin
   Result := IClientBlock(@FNullPtr);
 end;
 
-function TClientBlock.isIClientBlockImpl: boolean inline;
+function TClientBlock.isIClientBlockImpl: boolean;
 begin
   Result := IClientBlockImpl.isIClientBlockImpl(this);
 end;
@@ -8178,7 +8178,7 @@ begin
   Result := IServer(@FNullPtr);
 end;
 
-function TServer.isIServerImpl: boolean inline;
+function TServer.isIServerImpl: boolean;
 begin
   Result := IServerImpl.isIServerImpl(this);
 end;
@@ -8228,7 +8228,7 @@ begin
   Result := IClient(@FNullPtr);
 end;
 
-function TClient.isIClientImpl: boolean inline;
+function TClient.isIClientImpl: boolean;
 begin
   Result := IClientImpl.isIClientImpl(this);
 end;
@@ -8272,7 +8272,7 @@ begin
   Result := IUserField(@FNullPtr);
 end;
 
-function TUserField.isIUserFieldImpl: boolean inline;
+function TUserField.isIUserFieldImpl: boolean;
 begin
   Result := IUserFieldImpl.isIUserFieldImpl(this);
 end;
@@ -8306,7 +8306,7 @@ begin
   Result := ICharUserField(@FNullPtr);
 end;
 
-function TCharUserField.isICharUserFieldImpl: boolean inline;
+function TCharUserField.isICharUserFieldImpl: boolean;
 begin
   Result := ICharUserFieldImpl.isICharUserFieldImpl(this);
 end;
@@ -8351,7 +8351,7 @@ begin
   Result := IIntUserField(@FNullPtr);
 end;
 
-function TIntUserField.isIIntUserFieldImpl: boolean inline;
+function TIntUserField.isIIntUserFieldImpl: boolean;
 begin
   Result := IIntUserFieldImpl.isIIntUserFieldImpl(this);
 end;
@@ -8396,7 +8396,7 @@ begin
   Result := IUser(@FNullPtr);
 end;
 
-function TUser.isIUserImpl: boolean inline;
+function TUser.isIUserImpl: boolean;
 begin
   Result := IUserImpl.isIUserImpl(this);
 end;
@@ -8470,7 +8470,7 @@ begin
   Result := IListUsers(@FNullPtr);
 end;
 
-function TListUsers.isIListUsersImpl: boolean inline;
+function TListUsers.isIListUsersImpl: boolean;
 begin
   Result := IListUsersImpl.isIListUsersImpl(this);
 end;
@@ -8494,7 +8494,7 @@ begin
   Result := ILogonInfo(@FNullPtr);
 end;
 
-function TLogonInfo.isILogonInfoImpl: boolean inline;
+function TLogonInfo.isILogonInfoImpl: boolean;
 begin
   Result := ILogonInfoImpl.isILogonInfoImpl(this);
 end;
@@ -8549,7 +8549,7 @@ begin
   Result := IManagement(@FNullPtr);
 end;
 
-function TManagement.isIManagementImpl: boolean inline;
+function TManagement.isIManagementImpl: boolean;
 begin
   Result := IManagementImpl.isIManagementImpl(this);
 end;
@@ -8611,7 +8611,7 @@ begin
   Result := IAuthBlock(@FNullPtr);
 end;
 
-function TAuthBlock.isIAuthBlockImpl: boolean inline;
+function TAuthBlock.isIAuthBlockImpl: boolean;
 begin
   Result := IAuthBlockImpl.isIAuthBlockImpl(this);
 end;
@@ -8666,7 +8666,7 @@ begin
   Result := IWireCryptPlugin(@FNullPtr);
 end;
 
-function TWireCryptPlugin.isIWireCryptPluginImpl: boolean inline;
+function TWireCryptPlugin.isIWireCryptPluginImpl: boolean;
 begin
   Result := IWireCryptPluginImpl.isIWireCryptPluginImpl(this);
 end;
@@ -8740,7 +8740,7 @@ begin
   Result := ICryptKeyCallback(@FNullPtr);
 end;
 
-function TCryptKeyCallback.isICryptKeyCallbackImpl: boolean inline;
+function TCryptKeyCallback.isICryptKeyCallbackImpl: boolean;
 begin
   Result := ICryptKeyCallbackImpl.isICryptKeyCallbackImpl(this);
 end;
@@ -8763,7 +8763,7 @@ begin
   Result := IKeyHolderPlugin(@FNullPtr);
 end;
 
-function TKeyHolderPlugin.isIKeyHolderPluginImpl: boolean inline;
+function TKeyHolderPlugin.isIKeyHolderPluginImpl: boolean;
 begin
   Result := IKeyHolderPluginImpl.isIKeyHolderPluginImpl(this);
 end;
@@ -8825,7 +8825,7 @@ begin
   Result := IDbCryptInfo(@FNullPtr);
 end;
 
-function TDbCryptInfo.isIDbCryptInfoImpl: boolean inline;
+function TDbCryptInfo.isIDbCryptInfoImpl: boolean;
 begin
   Result := IDbCryptInfoImpl.isIDbCryptInfoImpl(this);
 end;
@@ -8859,7 +8859,7 @@ begin
   Result := IDbCryptPlugin(@FNullPtr);
 end;
 
-function TDbCryptPlugin.isIDbCryptPluginImpl: boolean inline;
+function TDbCryptPlugin.isIDbCryptPluginImpl: boolean;
 begin
   Result := IDbCryptPluginImpl.isIDbCryptPluginImpl(this);
 end;
@@ -8921,7 +8921,7 @@ begin
   Result := IExternalContext(@FNullPtr);
 end;
 
-function TExternalContext.isIExternalContextImpl: boolean inline;
+function TExternalContext.isIExternalContextImpl: boolean;
 begin
   Result := IExternalContextImpl.isIExternalContextImpl(this);
 end;
@@ -8992,7 +8992,7 @@ begin
   Result := IExternalResultSet(@FNullPtr);
 end;
 
-function TExternalResultSet.isIExternalResultSetImpl: boolean inline;
+function TExternalResultSet.isIExternalResultSetImpl: boolean;
 begin
   Result := IExternalResultSetImpl.isIExternalResultSetImpl(this);
 end;
@@ -9021,7 +9021,7 @@ begin
   Result := IExternalFunction(@FNullPtr);
 end;
 
-function TExternalFunction.isIExternalFunctionImpl: boolean inline;
+function TExternalFunction.isIExternalFunctionImpl: boolean;
 begin
   Result := IExternalFunctionImpl.isIExternalFunctionImpl(this);
 end;
@@ -9056,7 +9056,7 @@ begin
   Result := IExternalProcedure(@FNullPtr);
 end;
 
-function TExternalProcedure.isIExternalProcedureImpl: boolean inline;
+function TExternalProcedure.isIExternalProcedureImpl: boolean;
 begin
   Result := IExternalProcedureImpl.isIExternalProcedureImpl(this);
 end;
@@ -9091,7 +9091,7 @@ begin
   Result := IExternalTrigger(@FNullPtr);
 end;
 
-function TExternalTrigger.isIExternalTriggerImpl: boolean inline;
+function TExternalTrigger.isIExternalTriggerImpl: boolean;
 begin
   Result := IExternalTriggerImpl.isIExternalTriggerImpl(this);
 end;
@@ -9126,7 +9126,7 @@ begin
   Result := IRoutineMetadata(@FNullPtr);
 end;
 
-function TRoutineMetadata.isIRoutineMetadataImpl: boolean inline;
+function TRoutineMetadata.isIRoutineMetadataImpl: boolean;
 begin
   Result := IRoutineMetadataImpl.isIRoutineMetadataImpl(this);
 end;
@@ -9198,7 +9198,7 @@ begin
   Result := IExternalEngine(@FNullPtr);
 end;
 
-function TExternalEngine.isIExternalEngineImpl: boolean inline;
+function TExternalEngine.isIExternalEngineImpl: boolean;
 begin
   Result := IExternalEngineImpl.isIExternalEngineImpl(this);
 end;
@@ -9272,7 +9272,7 @@ begin
   Result := ITimer(@FNullPtr);
 end;
 
-function TTimer.isITimerImpl: boolean inline;
+function TTimer.isITimerImpl: boolean;
 begin
   Result := ITimerImpl.isITimerImpl(this);
 end;
@@ -9305,7 +9305,7 @@ begin
   Result := ITimerControl(@FNullPtr);
 end;
 
-function TTimerControl.isITimerControlImpl: boolean inline;
+function TTimerControl.isITimerControlImpl: boolean;
 begin
   Result := ITimerControlImpl.isITimerControlImpl(this);
 end;
@@ -9335,7 +9335,7 @@ begin
   Result := IVersionCallback(@FNullPtr);
 end;
 
-function TVersionCallback.isIVersionCallbackImpl: boolean inline;
+function TVersionCallback.isIVersionCallbackImpl: boolean;
 begin
   Result := IVersionCallbackImpl.isIVersionCallbackImpl(this);
 end;
@@ -9359,7 +9359,7 @@ begin
   Result := IUtil(@FNullPtr);
 end;
 
-function TUtil.isIUtilImpl: boolean inline;
+function TUtil.isIUtilImpl: boolean;
 begin
   Result := IUtilImpl.isIUtilImpl(this);
 end;
@@ -9503,7 +9503,7 @@ begin
   Result := IOffsetsCallback(@FNullPtr);
 end;
 
-function TOffsetsCallback.isIOffsetsCallbackImpl: boolean inline;
+function TOffsetsCallback.isIOffsetsCallbackImpl: boolean;
 begin
   Result := IOffsetsCallbackImpl.isIOffsetsCallbackImpl(this);
 end;
@@ -9527,7 +9527,7 @@ begin
   Result := IXpbBuilder(@FNullPtr);
 end;
 
-function TXpbBuilder.isIXpbBuilderImpl: boolean inline;
+function TXpbBuilder.isIXpbBuilderImpl: boolean;
 begin
   Result := IXpbBuilderImpl.isIXpbBuilderImpl(this);
 end;
@@ -9670,7 +9670,7 @@ begin
   Result := ITraceConnection(@FNullPtr);
 end;
 
-function TTraceConnection.isITraceConnectionImpl: boolean inline;
+function TTraceConnection.isITraceConnectionImpl: boolean;
 begin
   Result := ITraceConnectionImpl.isITraceConnectionImpl(this);
 end;
@@ -9733,7 +9733,7 @@ begin
   Result := ITraceDatabaseConnection(@FNullPtr);
 end;
 
-function TTraceDatabaseConnection.isITraceDatabaseConnectionImpl: boolean inline;
+function TTraceDatabaseConnection.isITraceDatabaseConnectionImpl: boolean;
 begin
   Result := ITraceDatabaseConnectionImpl.isITraceDatabaseConnectionImpl(this);
 end;
@@ -9806,7 +9806,7 @@ begin
   Result := ITraceTransaction(@FNullPtr);
 end;
 
-function TTraceTransaction.isITraceTransactionImpl: boolean inline;
+function TTraceTransaction.isITraceTransactionImpl: boolean;
 begin
   Result := ITraceTransactionImpl.isITraceTransactionImpl(this);
 end;
@@ -9859,7 +9859,7 @@ begin
   Result := ITraceParams(@FNullPtr);
 end;
 
-function TTraceParams.isITraceParamsImpl: boolean inline;
+function TTraceParams.isITraceParamsImpl: boolean;
 begin
   Result := ITraceParamsImpl.isITraceParamsImpl(this);
 end;
@@ -9893,7 +9893,7 @@ begin
   Result := ITraceStatement(@FNullPtr);
 end;
 
-function TTraceStatement.isITraceStatementImpl: boolean inline;
+function TTraceStatement.isITraceStatementImpl: boolean;
 begin
   Result := ITraceStatementImpl.isITraceStatementImpl(this);
 end;
@@ -9921,7 +9921,7 @@ begin
   Result := ITraceSQLStatement(@FNullPtr);
 end;
 
-function TTraceSQLStatement.isITraceSQLStatementImpl: boolean inline;
+function TTraceSQLStatement.isITraceSQLStatementImpl: boolean;
 begin
   Result := ITraceSQLStatementImpl.isITraceSQLStatementImpl(this);
 end;
@@ -9974,7 +9974,7 @@ begin
   Result := ITraceBLRStatement(@FNullPtr);
 end;
 
-function TTraceBLRStatement.isITraceBLRStatementImpl: boolean inline;
+function TTraceBLRStatement.isITraceBLRStatementImpl: boolean;
 begin
   Result := ITraceBLRStatementImpl.isITraceBLRStatementImpl(this);
 end;
@@ -10017,7 +10017,7 @@ begin
   Result := ITraceDYNRequest(@FNullPtr);
 end;
 
-function TTraceDYNRequest.isITraceDYNRequestImpl: boolean inline;
+function TTraceDYNRequest.isITraceDYNRequestImpl: boolean;
 begin
   Result := ITraceDYNRequestImpl.isITraceDYNRequestImpl(this);
 end;
@@ -10050,7 +10050,7 @@ begin
   Result := ITraceContextVariable(@FNullPtr);
 end;
 
-function TTraceContextVariable.isITraceContextVariableImpl: boolean inline;
+function TTraceContextVariable.isITraceContextVariableImpl: boolean;
 begin
   Result := ITraceContextVariableImpl.isITraceContextVariableImpl(this);
 end;
@@ -10083,7 +10083,7 @@ begin
   Result := ITraceProcedure(@FNullPtr);
 end;
 
-function TTraceProcedure.isITraceProcedureImpl: boolean inline;
+function TTraceProcedure.isITraceProcedureImpl: boolean;
 begin
   Result := ITraceProcedureImpl.isITraceProcedureImpl(this);
 end;
@@ -10116,7 +10116,7 @@ begin
   Result := ITraceFunction(@FNullPtr);
 end;
 
-function TTraceFunction.isITraceFunctionImpl: boolean inline;
+function TTraceFunction.isITraceFunctionImpl: boolean;
 begin
   Result := ITraceFunctionImpl.isITraceFunctionImpl(this);
 end;
@@ -10154,7 +10154,7 @@ begin
   Result := ITraceTrigger(@FNullPtr);
 end;
 
-function TTraceTrigger.isITraceTriggerImpl: boolean inline;
+function TTraceTrigger.isITraceTriggerImpl: boolean;
 begin
   Result := ITraceTriggerImpl.isITraceTriggerImpl(this);
 end;
@@ -10197,7 +10197,7 @@ begin
   Result := ITraceServiceConnection(@FNullPtr);
 end;
 
-function TTraceServiceConnection.isITraceServiceConnectionImpl: boolean inline;
+function TTraceServiceConnection.isITraceServiceConnectionImpl: boolean;
 begin
   Result := ITraceServiceConnectionImpl.isITraceServiceConnectionImpl(this);
 end;
@@ -10275,7 +10275,7 @@ begin
   Result := ITraceStatusVector(@FNullPtr);
 end;
 
-function TTraceStatusVector.isITraceStatusVectorImpl: boolean inline;
+function TTraceStatusVector.isITraceStatusVectorImpl: boolean;
 begin
   Result := ITraceStatusVectorImpl.isITraceStatusVectorImpl(this);
 end;
@@ -10313,7 +10313,7 @@ begin
   Result := ITraceSweepInfo(@FNullPtr);
 end;
 
-function TTraceSweepInfo.isITraceSweepInfoImpl: boolean inline;
+function TTraceSweepInfo.isITraceSweepInfoImpl: boolean;
 begin
   Result := ITraceSweepInfoImpl.isITraceSweepInfoImpl(this);
 end;
@@ -10356,7 +10356,7 @@ begin
   Result := ITraceLogWriter(@FNullPtr);
 end;
 
-function TTraceLogWriter.isITraceLogWriterImpl: boolean inline;
+function TTraceLogWriter.isITraceLogWriterImpl: boolean;
 begin
   Result := ITraceLogWriterImpl.isITraceLogWriterImpl(this);
 end;
@@ -10395,7 +10395,7 @@ begin
   Result := ITraceInitInfo(@FNullPtr);
 end;
 
-function TTraceInitInfo.isITraceInitInfoImpl: boolean inline;
+function TTraceInitInfo.isITraceInitInfoImpl: boolean;
 begin
   Result := ITraceInitInfoImpl.isITraceInitInfoImpl(this);
 end;
@@ -10448,7 +10448,7 @@ begin
   Result := ITracePlugin(@FNullPtr);
 end;
 
-function TTracePlugin.isITracePluginImpl: boolean inline;
+function TTracePlugin.isITracePluginImpl: boolean;
 begin
   Result := ITracePluginImpl.isITracePluginImpl(this);
 end;
@@ -10581,7 +10581,7 @@ begin
   Result := ITraceFactory(@FNullPtr);
 end;
 
-function TTraceFactory.isITraceFactoryImpl: boolean inline;
+function TTraceFactory.isITraceFactoryImpl: boolean;
 begin
   Result := ITraceFactoryImpl.isITraceFactoryImpl(this);
 end;
@@ -10630,7 +10630,7 @@ begin
   Result := IUdrFunctionFactory(@FNullPtr);
 end;
 
-function TUdrFunctionFactory.isIUdrFunctionFactoryImpl: boolean inline;
+function TUdrFunctionFactory.isIUdrFunctionFactoryImpl: boolean;
 begin
   Result := IUdrFunctionFactoryImpl.isIUdrFunctionFactoryImpl(this);
 end;
@@ -10665,7 +10665,7 @@ begin
   Result := IUdrProcedureFactory(@FNullPtr);
 end;
 
-function TUdrProcedureFactory.isIUdrProcedureFactoryImpl: boolean inline;
+function TUdrProcedureFactory.isIUdrProcedureFactoryImpl: boolean;
 begin
   Result := IUdrProcedureFactoryImpl.isIUdrProcedureFactoryImpl(this);
 end;
@@ -10700,7 +10700,7 @@ begin
   Result := IUdrTriggerFactory(@FNullPtr);
 end;
 
-function TUdrTriggerFactory.isIUdrTriggerFactoryImpl: boolean inline;
+function TUdrTriggerFactory.isIUdrTriggerFactoryImpl: boolean;
 begin
   Result := IUdrTriggerFactoryImpl.isIUdrTriggerFactoryImpl(this);
 end;
@@ -10735,7 +10735,7 @@ begin
   Result := IUdrPlugin(@FNullPtr);
 end;
 
-function TUdrPlugin.isIUdrPluginImpl: boolean inline;
+function TUdrPlugin.isIUdrPluginImpl: boolean;
 begin
   Result := IUdrPluginImpl.isIUdrPluginImpl(this);
 end;
@@ -10776,7 +10776,7 @@ begin
   Result := IDecFloat16(@FNullPtr);
 end;
 
-function TDecFloat16.isIDecFloat16Impl: boolean inline;
+function TDecFloat16.isIDecFloat16Impl: boolean;
 begin
   Result := IDecFloat16Impl.isIDecFloat16Impl(this);
 end;
@@ -10816,7 +10816,7 @@ begin
   Result := IDecFloat34(@FNullPtr);
 end;
 
-function TDecFloat34.isIDecFloat34Impl: boolean inline;
+function TDecFloat34.isIDecFloat34Impl: boolean;
 begin
   Result := IDecFloat34Impl.isIDecFloat34Impl(this);
 end;
@@ -10856,7 +10856,7 @@ begin
   Result := IInt128(@FNullPtr);
 end;
 
-function TInt128.isIInt128Impl: boolean inline;
+function TInt128.isIInt128Impl: boolean;
 begin
   Result := IInt128Impl.isIInt128Impl(this);
 end;
@@ -10886,7 +10886,7 @@ begin
   Result := IReplicatedField(@FNullPtr);
 end;
 
-function TReplicatedField.isIReplicatedFieldImpl: boolean inline;
+function TReplicatedField.isIReplicatedFieldImpl: boolean;
 begin
   Result := IReplicatedFieldImpl.isIReplicatedFieldImpl(this);
 end;
@@ -10939,7 +10939,7 @@ begin
   Result := IReplicatedRecord(@FNullPtr);
 end;
 
-function TReplicatedRecord.isIReplicatedRecordImpl: boolean inline;
+function TReplicatedRecord.isIReplicatedRecordImpl: boolean;
 begin
   Result := IReplicatedRecordImpl.isIReplicatedRecordImpl(this);
 end;
@@ -10977,7 +10977,7 @@ begin
   Result := IReplicatedTransaction(@FNullPtr);
 end;
 
-function TReplicatedTransaction.isIReplicatedTransactionImpl: boolean inline;
+function TReplicatedTransaction.isIReplicatedTransactionImpl: boolean;
 begin
   Result := IReplicatedTransactionImpl.isIReplicatedTransactionImpl(this);
 end;
@@ -11066,7 +11066,7 @@ begin
   Result := IReplicatedSession(@FNullPtr);
 end;
 
-function TReplicatedSession.isIReplicatedSessionImpl: boolean inline;
+function TReplicatedSession.isIReplicatedSessionImpl: boolean;
 begin
   Result := IReplicatedSessionImpl.isIReplicatedSessionImpl(this);
 end;
