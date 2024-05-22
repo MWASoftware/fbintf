@@ -712,7 +712,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PVersionedVTable;
 	  FIVersionedImpl: IVersionedImpl; {Only valid if isIVersionedImpl returns true }
-	  function this: IVersioned inline;
+	  function this: IVersioned; inline;
 	public
 	  function isIVersionedImpl: boolean;
 	  function asIVersionedImpl: IVersionedImpl;
@@ -748,7 +748,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PReferenceCountedVTable;
 	  FIReferenceCountedImpl: IReferenceCountedImpl; {Only valid if isIReferenceCountedImpl returns true }
-	  function this: IReferenceCounted inline;
+	  function this: IReferenceCounted; inline;
 	public
 	  function isIReferenceCountedImpl: boolean;
 	  function asIReferenceCountedImpl: IReferenceCountedImpl;
@@ -788,7 +788,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PDisposableVTable;
 	  FIDisposableImpl: IDisposableImpl; {Only valid if isIDisposableImpl returns true }
-	  function this: IDisposable inline;
+	  function this: IDisposable; inline;
 	public
 	  function isIDisposableImpl: boolean;
 	  function asIDisposableImpl: IDisposableImpl;
@@ -835,7 +835,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PStatusVTable;
 	  FIStatusImpl: IStatusImpl; {Only valid if isIStatusImpl returns true }
-	  function this: IStatus inline;
+	  function this: IStatus; inline;
 	public
 	  function isIStatusImpl: boolean;
 	  function asIStatusImpl: IStatusImpl;
@@ -907,7 +907,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PMasterVTable;
 	  FIMasterImpl: IMasterImpl; {Only valid if isIMasterImpl returns true }
-	  function this: IMaster inline;
+	  function this: IMaster; inline;
 	public
 	  function isIMasterImpl: boolean;
 	  function asIMasterImpl: IMasterImpl;
@@ -970,7 +970,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PPluginBaseVTable;
 	  FIPluginBaseImpl: IPluginBaseImpl; {Only valid if isIPluginBaseImpl returns true }
-	  function this: IPluginBase inline;
+	  function this: IPluginBase; inline;
 	public
 	  function isIPluginBaseImpl: boolean;
 	  function asIPluginBaseImpl: IPluginBaseImpl;
@@ -1018,7 +1018,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PPluginSetVTable;
 	  FIPluginSetImpl: IPluginSetImpl; {Only valid if isIPluginSetImpl returns true }
-	  function this: IPluginSet inline;
+	  function this: IPluginSet; inline;
 	public
 	  function isIPluginSetImpl: boolean;
 	  function asIPluginSetImpl: IPluginSetImpl;
@@ -1072,7 +1072,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PConfigEntryVTable;
 	  FIConfigEntryImpl: IConfigEntryImpl; {Only valid if isIConfigEntryImpl returns true }
-	  function this: IConfigEntry inline;
+	  function this: IConfigEntry; inline;
 	public
 	  function isIConfigEntryImpl: boolean;
 	  function asIConfigEntryImpl: IConfigEntryImpl;
@@ -1124,7 +1124,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PConfigVTable;
 	  FIConfigImpl: IConfigImpl; {Only valid if isIConfigImpl returns true }
-	  function this: IConfig inline;
+	  function this: IConfig; inline;
 	public
 	  function isIConfigImpl: boolean;
 	  function asIConfigImpl: IConfigImpl;
@@ -1174,7 +1174,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PFirebirdConfVTable;
 	  FIFirebirdConfImpl: IFirebirdConfImpl; {Only valid if isIFirebirdConfImpl returns true }
-	  function this: IFirebirdConf inline;
+	  function this: IFirebirdConf; inline;
 	public
 	  function isIFirebirdConfImpl: boolean;
 	  function asIFirebirdConfImpl: IFirebirdConfImpl;
@@ -1227,7 +1227,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PPluginConfigVTable;
 	  FIPluginConfigImpl: IPluginConfigImpl; {Only valid if isIPluginConfigImpl returns true }
-	  function this: IPluginConfig inline;
+	  function this: IPluginConfig; inline;
 	public
 	  function isIPluginConfigImpl: boolean;
 	  function asIPluginConfigImpl: IPluginConfigImpl;
@@ -1273,7 +1273,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PPluginFactoryVTable;
 	  FIPluginFactoryImpl: IPluginFactoryImpl; {Only valid if isIPluginFactoryImpl returns true }
-	  function this: IPluginFactory inline;
+	  function this: IPluginFactory; inline;
 	public
 	  function isIPluginFactoryImpl: boolean;
 	  function asIPluginFactoryImpl: IPluginFactoryImpl;
@@ -1312,7 +1312,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PPluginModuleVTable;
 	  FIPluginModuleImpl: IPluginModuleImpl; {Only valid if isIPluginModuleImpl returns true }
-	  function this: IPluginModule inline;
+	  function this: IPluginModule; inline;
 	public
 	  function isIPluginModuleImpl: boolean;
 	  function asIPluginModuleImpl: IPluginModuleImpl;
@@ -1357,7 +1357,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PPluginManagerVTable;
 	  FIPluginManagerImpl: IPluginManagerImpl; {Only valid if isIPluginManagerImpl returns true }
-	  function this: IPluginManager inline;
+	  function this: IPluginManager; inline;
 	public
 	  function isIPluginManagerImpl: boolean;
 	  function asIPluginManagerImpl: IPluginManagerImpl;
@@ -1420,7 +1420,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PCryptKeyVTable;
 	  FICryptKeyImpl: ICryptKeyImpl; {Only valid if isICryptKeyImpl returns true }
-	  function this: ICryptKey inline;
+	  function this: ICryptKey; inline;
 	public
 	  function isICryptKeyImpl: boolean;
 	  function asICryptKeyImpl: ICryptKeyImpl;
@@ -1470,7 +1470,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PConfigManagerVTable;
 	  FIConfigManagerImpl: IConfigManagerImpl; {Only valid if isIConfigManagerImpl returns true }
-	  function this: IConfigManager inline;
+	  function this: IConfigManager; inline;
 	public
 	  function isIConfigManagerImpl: boolean;
 	  function asIConfigManagerImpl: IConfigManagerImpl;
@@ -1541,7 +1541,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PEventCallbackVTable;
 	  FIEventCallbackImpl: IEventCallbackImpl; {Only valid if isIEventCallbackImpl returns true }
-	  function this: IEventCallback inline;
+	  function this: IEventCallback; inline;
 	public
 	  function isIEventCallbackImpl: boolean;
 	  function asIEventCallbackImpl: IEventCallbackImpl;
@@ -1588,7 +1588,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PBlobVTable;
 	  FIBlobImpl: IBlobImpl; {Only valid if isIBlobImpl returns true }
-	  function this: IBlob inline;
+	  function this: IBlob; inline;
 	public
 	  function isIBlobImpl: boolean;
 	  function asIBlobImpl: IBlobImpl;
@@ -1649,7 +1649,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PTransactionVTable;
 	  FITransactionImpl: ITransactionImpl; {Only valid if isITransactionImpl returns true }
-	  function this: ITransaction inline;
+	  function this: ITransaction; inline;
 	public
 	  function isITransactionImpl: boolean;
 	  function asITransactionImpl: ITransactionImpl;
@@ -1725,7 +1725,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PMessageMetadataVTable;
 	  FIMessageMetadataImpl: IMessageMetadataImpl; {Only valid if isIMessageMetadataImpl returns true }
-	  function this: IMessageMetadata inline;
+	  function this: IMessageMetadata; inline;
 	public
 	  function isIMessageMetadataImpl: boolean;
 	  function asIMessageMetadataImpl: IMessageMetadataImpl;
@@ -1812,7 +1812,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PMetadataBuilderVTable;
 	  FIMetadataBuilderImpl: IMetadataBuilderImpl; {Only valid if isIMetadataBuilderImpl returns true }
-	  function this: IMetadataBuilder inline;
+	  function this: IMetadataBuilder; inline;
 	public
 	  function isIMetadataBuilderImpl: boolean;
 	  function asIMetadataBuilderImpl: IMetadataBuilderImpl;
@@ -1890,7 +1890,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PResultSetVTable;
 	  FIResultSetImpl: IResultSetImpl; {Only valid if isIResultSetImpl returns true }
-	  function this: IResultSet inline;
+	  function this: IResultSet; inline;
 	public
 	  function isIResultSetImpl: boolean;
 	  function asIResultSetImpl: IResultSetImpl;
@@ -1965,7 +1965,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PStatementVTable;
 	  FIStatementImpl: IStatementImpl; {Only valid if isIStatementImpl returns true }
-	  function this: IStatement inline;
+	  function this: IStatement; inline;
 	public
 	  function isIStatementImpl: boolean;
 	  function asIStatementImpl: IStatementImpl;
@@ -2056,7 +2056,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PBatchVTable;
 	  FIBatchImpl: IBatchImpl; {Only valid if isIBatchImpl returns true }
-	  function this: IBatch inline;
+	  function this: IBatch; inline;
 	public
 	  function isIBatchImpl: boolean;
 	  function asIBatchImpl: IBatchImpl;
@@ -2131,7 +2131,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PBatchCompletionStateVTable;
 	  FIBatchCompletionStateImpl: IBatchCompletionStateImpl; {Only valid if isIBatchCompletionStateImpl returns true }
-	  function this: IBatchCompletionState inline;
+	  function this: IBatchCompletionState; inline;
 	public
 	  function isIBatchCompletionStateImpl: boolean;
 	  function asIBatchCompletionStateImpl: IBatchCompletionStateImpl;
@@ -2182,7 +2182,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PReplicatorVTable;
 	  FIReplicatorImpl: IReplicatorImpl; {Only valid if isIReplicatorImpl returns true }
-	  function this: IReplicator inline;
+	  function this: IReplicator; inline;
 	public
 	  function isIReplicatorImpl: boolean;
 	  function asIReplicatorImpl: IReplicatorImpl;
@@ -2232,7 +2232,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PRequestVTable;
 	  FIRequestImpl: IRequestImpl; {Only valid if isIRequestImpl returns true }
-	  function this: IRequest inline;
+	  function this: IRequest; inline;
 	public
 	  function isIRequestImpl: boolean;
 	  function asIRequestImpl: IRequestImpl;
@@ -2286,7 +2286,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PEventsVTable;
 	  FIEventsImpl: IEventsImpl; {Only valid if isIEventsImpl returns true }
-	  function this: IEvents inline;
+	  function this: IEvents; inline;
 	public
 	  function isIEventsImpl: boolean;
 	  function asIEventsImpl: IEventsImpl;
@@ -2351,7 +2351,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PAttachmentVTable;
 	  FIAttachmentImpl: IAttachmentImpl; {Only valid if isIAttachmentImpl returns true }
-	  function this: IAttachment inline;
+	  function this: IAttachment; inline;
 	public
 	  function isIAttachmentImpl: boolean;
 	  function asIAttachmentImpl: IAttachmentImpl;
@@ -2441,7 +2441,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PServiceVTable;
 	  FIServiceImpl: IServiceImpl; {Only valid if isIServiceImpl returns true }
-	  function this: IService inline;
+	  function this: IService; inline;
 	public
 	  function isIServiceImpl: boolean;
 	  function asIServiceImpl: IServiceImpl;
@@ -2493,7 +2493,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PProviderVTable;
 	  FIProviderImpl: IProviderImpl; {Only valid if isIProviderImpl returns true }
-	  function this: IProvider inline;
+	  function this: IProvider; inline;
 	public
 	  function isIProviderImpl: boolean;
 	  function asIProviderImpl: IProviderImpl;
@@ -2546,7 +2546,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PDtcStartVTable;
 	  FIDtcStartImpl: IDtcStartImpl; {Only valid if isIDtcStartImpl returns true }
-	  function this: IDtcStart inline;
+	  function this: IDtcStart; inline;
 	public
 	  function isIDtcStartImpl: boolean;
 	  function asIDtcStartImpl: IDtcStartImpl;
@@ -2590,7 +2590,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PDtcVTable;
 	  FIDtcImpl: IDtcImpl; {Only valid if isIDtcImpl returns true }
-	  function this: IDtc inline;
+	  function this: IDtc; inline;
 	public
 	  function isIDtcImpl: boolean;
 	  function asIDtcImpl: IDtcImpl;
@@ -2633,7 +2633,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PAuthVTable;
 	  FIAuthImpl: IAuthImpl; {Only valid if isIAuthImpl returns true }
-	  function this: IAuth inline;
+	  function this: IAuth; inline;
 	public
 	  function isIAuthImpl: boolean;
 	  function asIAuthImpl: IAuthImpl;
@@ -2678,7 +2678,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PWriterVTable;
 	  FIWriterImpl: IWriterImpl; {Only valid if isIWriterImpl returns true }
-	  function this: IWriter inline;
+	  function this: IWriter; inline;
 	public
 	  function isIWriterImpl: boolean;
 	  function asIWriterImpl: IWriterImpl;
@@ -2725,7 +2725,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PServerBlockVTable;
 	  FIServerBlockImpl: IServerBlockImpl; {Only valid if isIServerBlockImpl returns true }
-	  function this: IServerBlock inline;
+	  function this: IServerBlock; inline;
 	public
 	  function isIServerBlockImpl: boolean;
 	  function asIServerBlockImpl: IServerBlockImpl;
@@ -2776,7 +2776,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PClientBlockVTable;
 	  FIClientBlockImpl: IClientBlockImpl; {Only valid if isIClientBlockImpl returns true }
-	  function this: IClientBlock inline;
+	  function this: IClientBlock; inline;
 	public
 	  function isIClientBlockImpl: boolean;
 	  function asIClientBlockImpl: IClientBlockImpl;
@@ -2831,7 +2831,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PServerVTable;
 	  FIServerImpl: IServerImpl; {Only valid if isIServerImpl returns true }
-	  function this: IServer inline;
+	  function this: IServer; inline;
 	public
 	  function isIServerImpl: boolean;
 	  function asIServerImpl: IServerImpl;
@@ -2879,7 +2879,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PClientVTable;
 	  FIClientImpl: IClientImpl; {Only valid if isIClientImpl returns true }
-	  function this: IClient inline;
+	  function this: IClient; inline;
 	public
 	  function isIClientImpl: boolean;
 	  function asIClientImpl: IClientImpl;
@@ -2923,7 +2923,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PUserFieldVTable;
 	  FIUserFieldImpl: IUserFieldImpl; {Only valid if isIUserFieldImpl returns true }
-	  function this: IUserField inline;
+	  function this: IUserField; inline;
 	public
 	  function isIUserFieldImpl: boolean;
 	  function asIUserFieldImpl: IUserFieldImpl;
@@ -2969,7 +2969,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PCharUserFieldVTable;
 	  FICharUserFieldImpl: ICharUserFieldImpl; {Only valid if isICharUserFieldImpl returns true }
-	  function this: ICharUserField inline;
+	  function this: ICharUserField; inline;
 	public
 	  function isICharUserFieldImpl: boolean;
 	  function asICharUserFieldImpl: ICharUserFieldImpl;
@@ -3016,7 +3016,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PIntUserFieldVTable;
 	  FIIntUserFieldImpl: IIntUserFieldImpl; {Only valid if isIIntUserFieldImpl returns true }
-	  function this: IIntUserField inline;
+	  function this: IIntUserField; inline;
 	public
 	  function isIIntUserFieldImpl: boolean;
 	  function asIIntUserFieldImpl: IIntUserFieldImpl;
@@ -3069,7 +3069,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PUserVTable;
 	  FIUserImpl: IUserImpl; {Only valid if isIUserImpl returns true }
-	  function this: IUser inline;
+	  function this: IUser; inline;
 	public
 	  function isIUserImpl: boolean;
 	  function asIUserImpl: IUserImpl;
@@ -3133,7 +3133,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PListUsersVTable;
 	  FIListUsersImpl: IListUsersImpl; {Only valid if isIListUsersImpl returns true }
-	  function this: IListUsers inline;
+	  function this: IListUsers; inline;
 	public
 	  function isIListUsersImpl: boolean;
 	  function asIListUsersImpl: IListUsersImpl;
@@ -3177,7 +3177,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PLogonInfoVTable;
 	  FILogonInfoImpl: ILogonInfoImpl; {Only valid if isILogonInfoImpl returns true }
-	  function this: ILogonInfo inline;
+	  function this: ILogonInfo; inline;
 	public
 	  function isILogonInfoImpl: boolean;
 	  function asILogonInfoImpl: ILogonInfoImpl;
@@ -3234,7 +3234,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PManagementVTable;
 	  FIManagementImpl: IManagementImpl; {Only valid if isIManagementImpl returns true }
-	  function this: IManagement inline;
+	  function this: IManagement; inline;
 	public
 	  function isIManagementImpl: boolean;
 	  function asIManagementImpl: IManagementImpl;
@@ -3288,7 +3288,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PAuthBlockVTable;
 	  FIAuthBlockImpl: IAuthBlockImpl; {Only valid if isIAuthBlockImpl returns true }
-	  function this: IAuthBlock inline;
+	  function this: IAuthBlock; inline;
 	public
 	  function isIAuthBlockImpl: boolean;
 	  function asIAuthBlockImpl: IAuthBlockImpl;
@@ -3347,7 +3347,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PWireCryptPluginVTable;
 	  FIWireCryptPluginImpl: IWireCryptPluginImpl; {Only valid if isIWireCryptPluginImpl returns true }
-	  function this: IWireCryptPlugin inline;
+	  function this: IWireCryptPlugin; inline;
 	public
 	  function isIWireCryptPluginImpl: boolean;
 	  function asIWireCryptPluginImpl: IWireCryptPluginImpl;
@@ -3399,7 +3399,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PCryptKeyCallbackVTable;
 	  FICryptKeyCallbackImpl: ICryptKeyCallbackImpl; {Only valid if isICryptKeyCallbackImpl returns true }
-	  function this: ICryptKeyCallback inline;
+	  function this: ICryptKeyCallback; inline;
 	public
 	  function isICryptKeyCallbackImpl: boolean;
 	  function asICryptKeyCallbackImpl: ICryptKeyCallbackImpl;
@@ -3444,7 +3444,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PKeyHolderPluginVTable;
 	  FIKeyHolderPluginImpl: IKeyHolderPluginImpl; {Only valid if isIKeyHolderPluginImpl returns true }
-	  function this: IKeyHolderPlugin inline;
+	  function this: IKeyHolderPlugin; inline;
 	public
 	  function isIKeyHolderPluginImpl: boolean;
 	  function asIKeyHolderPluginImpl: IKeyHolderPluginImpl;
@@ -3494,7 +3494,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PDbCryptInfoVTable;
 	  FIDbCryptInfoImpl: IDbCryptInfoImpl; {Only valid if isIDbCryptInfoImpl returns true }
-	  function this: IDbCryptInfo inline;
+	  function this: IDbCryptInfo; inline;
 	public
 	  function isIDbCryptInfoImpl: boolean;
 	  function asIDbCryptInfoImpl: IDbCryptInfoImpl;
@@ -3541,7 +3541,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PDbCryptPluginVTable;
 	  FIDbCryptPluginImpl: IDbCryptPluginImpl; {Only valid if isIDbCryptPluginImpl returns true }
-	  function this: IDbCryptPlugin inline;
+	  function this: IDbCryptPlugin; inline;
 	public
 	  function isIDbCryptPluginImpl: boolean;
 	  function asIDbCryptPluginImpl: IDbCryptPluginImpl;
@@ -3598,7 +3598,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PExternalContextVTable;
 	  FIExternalContextImpl: IExternalContextImpl; {Only valid if isIExternalContextImpl returns true }
-	  function this: IExternalContext inline;
+	  function this: IExternalContext; inline;
 	public
 	  function isIExternalContextImpl: boolean;
 	  function asIExternalContextImpl: IExternalContextImpl;
@@ -3655,7 +3655,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PExternalResultSetVTable;
 	  FIExternalResultSetImpl: IExternalResultSetImpl; {Only valid if isIExternalResultSetImpl returns true }
-	  function this: IExternalResultSet inline;
+	  function this: IExternalResultSet; inline;
 	public
 	  function isIExternalResultSetImpl: boolean;
 	  function asIExternalResultSetImpl: IExternalResultSetImpl;
@@ -3696,7 +3696,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PExternalFunctionVTable;
 	  FIExternalFunctionImpl: IExternalFunctionImpl; {Only valid if isIExternalFunctionImpl returns true }
-	  function this: IExternalFunction inline;
+	  function this: IExternalFunction; inline;
 	public
 	  function isIExternalFunctionImpl: boolean;
 	  function asIExternalFunctionImpl: IExternalFunctionImpl;
@@ -3739,7 +3739,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PExternalProcedureVTable;
 	  FIExternalProcedureImpl: IExternalProcedureImpl; {Only valid if isIExternalProcedureImpl returns true }
-	  function this: IExternalProcedure inline;
+	  function this: IExternalProcedure; inline;
 	public
 	  function isIExternalProcedureImpl: boolean;
 	  function asIExternalProcedureImpl: IExternalProcedureImpl;
@@ -3782,7 +3782,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PExternalTriggerVTable;
 	  FIExternalTriggerImpl: IExternalTriggerImpl; {Only valid if isIExternalTriggerImpl returns true }
-	  function this: IExternalTrigger inline;
+	  function this: IExternalTrigger; inline;
 	public
 	  function isIExternalTriggerImpl: boolean;
 	  function asIExternalTriggerImpl: IExternalTriggerImpl;
@@ -3843,7 +3843,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PRoutineMetadataVTable;
 	  FIRoutineMetadataImpl: IRoutineMetadataImpl; {Only valid if isIRoutineMetadataImpl returns true }
-	  function this: IRoutineMetadata inline;
+	  function this: IRoutineMetadata; inline;
 	public
 	  function isIRoutineMetadataImpl: boolean;
 	  function asIRoutineMetadataImpl: IRoutineMetadataImpl;
@@ -3906,7 +3906,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PExternalEngineVTable;
 	  FIExternalEngineImpl: IExternalEngineImpl; {Only valid if isIExternalEngineImpl returns true }
-	  function this: IExternalEngine inline;
+	  function this: IExternalEngine; inline;
 	public
 	  function isIExternalEngineImpl: boolean;
 	  function asIExternalEngineImpl: IExternalEngineImpl;
@@ -3960,7 +3960,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PTimerVTable;
 	  FITimerImpl: ITimerImpl; {Only valid if isITimerImpl returns true }
-	  function this: ITimer inline;
+	  function this: ITimer; inline;
 	public
 	  function isITimerImpl: boolean;
 	  function asITimerImpl: ITimerImpl;
@@ -4001,7 +4001,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PTimerControlVTable;
 	  FITimerControlImpl: ITimerControlImpl; {Only valid if isITimerControlImpl returns true }
-	  function this: ITimerControl inline;
+	  function this: ITimerControl; inline;
 	public
 	  function isITimerControlImpl: boolean;
 	  function asITimerControlImpl: ITimerControlImpl;
@@ -4041,7 +4041,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PVersionCallbackVTable;
 	  FIVersionCallbackImpl: IVersionCallbackImpl; {Only valid if isIVersionCallbackImpl returns true }
-	  function this: IVersionCallback inline;
+	  function this: IVersionCallback; inline;
 	public
 	  function isIVersionCallbackImpl: boolean;
 	  function asIVersionCallbackImpl: IVersionCallbackImpl;
@@ -4100,7 +4100,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PUtilVTable;
 	  FIUtilImpl: IUtilImpl; {Only valid if isIUtilImpl returns true }
-	  function this: IUtil inline;
+	  function this: IUtil; inline;
 	public
 	  function isIUtilImpl: boolean;
 	  function asIUtilImpl: IUtilImpl;
@@ -4180,7 +4180,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: POffsetsCallbackVTable;
 	  FIOffsetsCallbackImpl: IOffsetsCallbackImpl; {Only valid if isIOffsetsCallbackImpl returns true }
-	  function this: IOffsetsCallback inline;
+	  function this: IOffsetsCallback; inline;
 	public
 	  function isIOffsetsCallbackImpl: boolean;
 	  function asIOffsetsCallbackImpl: IOffsetsCallbackImpl;
@@ -4238,7 +4238,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PXpbBuilderVTable;
 	  FIXpbBuilderImpl: IXpbBuilderImpl; {Only valid if isIXpbBuilderImpl returns true }
-	  function this: IXpbBuilder inline;
+	  function this: IXpbBuilder; inline;
 	public
 	  function isIXpbBuilderImpl: boolean;
 	  function asIXpbBuilderImpl: IXpbBuilderImpl;
@@ -4332,7 +4332,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PTraceConnectionVTable;
 	  FITraceConnectionImpl: ITraceConnectionImpl; {Only valid if isITraceConnectionImpl returns true }
-	  function this: ITraceConnection inline;
+	  function this: ITraceConnection; inline;
 	public
 	  function isITraceConnectionImpl: boolean;
 	  function asITraceConnectionImpl: ITraceConnectionImpl;
@@ -4398,7 +4398,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PTraceDatabaseConnectionVTable;
 	  FITraceDatabaseConnectionImpl: ITraceDatabaseConnectionImpl; {Only valid if isITraceDatabaseConnectionImpl returns true }
-	  function this: ITraceDatabaseConnection inline;
+	  function this: ITraceDatabaseConnection; inline;
 	public
 	  function isITraceDatabaseConnectionImpl: boolean;
 	  function asITraceDatabaseConnectionImpl: ITraceDatabaseConnectionImpl;
@@ -4453,7 +4453,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PTraceTransactionVTable;
 	  FITraceTransactionImpl: ITraceTransactionImpl; {Only valid if isITraceTransactionImpl returns true }
-	  function this: ITraceTransaction inline;
+	  function this: ITraceTransaction; inline;
 	public
 	  function isITraceTransactionImpl: boolean;
 	  function asITraceTransactionImpl: ITraceTransactionImpl;
@@ -4510,7 +4510,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PTraceParamsVTable;
 	  FITraceParamsImpl: ITraceParamsImpl; {Only valid if isITraceParamsImpl returns true }
-	  function this: ITraceParams inline;
+	  function this: ITraceParams; inline;
 	public
 	  function isITraceParamsImpl: boolean;
 	  function asITraceParamsImpl: ITraceParamsImpl;
@@ -4553,7 +4553,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PTraceStatementVTable;
 	  FITraceStatementImpl: ITraceStatementImpl; {Only valid if isITraceStatementImpl returns true }
-	  function this: ITraceStatement inline;
+	  function this: ITraceStatement; inline;
 	public
 	  function isITraceStatementImpl: boolean;
 	  function asITraceStatementImpl: ITraceStatementImpl;
@@ -4599,7 +4599,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PTraceSQLStatementVTable;
 	  FITraceSQLStatementImpl: ITraceSQLStatementImpl; {Only valid if isITraceSQLStatementImpl returns true }
-	  function this: ITraceSQLStatement inline;
+	  function this: ITraceSQLStatement; inline;
 	public
 	  function isITraceSQLStatementImpl: boolean;
 	  function asITraceSQLStatementImpl: ITraceSQLStatementImpl;
@@ -4651,7 +4651,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PTraceBLRStatementVTable;
 	  FITraceBLRStatementImpl: ITraceBLRStatementImpl; {Only valid if isITraceBLRStatementImpl returns true }
-	  function this: ITraceBLRStatement inline;
+	  function this: ITraceBLRStatement; inline;
 	public
 	  function isITraceBLRStatementImpl: boolean;
 	  function asITraceBLRStatementImpl: ITraceBLRStatementImpl;
@@ -4697,7 +4697,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PTraceDYNRequestVTable;
 	  FITraceDYNRequestImpl: ITraceDYNRequestImpl; {Only valid if isITraceDYNRequestImpl returns true }
-	  function this: ITraceDYNRequest inline;
+	  function this: ITraceDYNRequest; inline;
 	public
 	  function isITraceDYNRequestImpl: boolean;
 	  function asITraceDYNRequestImpl: ITraceDYNRequestImpl;
@@ -4741,7 +4741,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PTraceContextVariableVTable;
 	  FITraceContextVariableImpl: ITraceContextVariableImpl; {Only valid if isITraceContextVariableImpl returns true }
-	  function this: ITraceContextVariable inline;
+	  function this: ITraceContextVariable; inline;
 	public
 	  function isITraceContextVariableImpl: boolean;
 	  function asITraceContextVariableImpl: ITraceContextVariableImpl;
@@ -4785,7 +4785,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PTraceProcedureVTable;
 	  FITraceProcedureImpl: ITraceProcedureImpl; {Only valid if isITraceProcedureImpl returns true }
-	  function this: ITraceProcedure inline;
+	  function this: ITraceProcedure; inline;
 	public
 	  function isITraceProcedureImpl: boolean;
 	  function asITraceProcedureImpl: ITraceProcedureImpl;
@@ -4830,7 +4830,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PTraceFunctionVTable;
 	  FITraceFunctionImpl: ITraceFunctionImpl; {Only valid if isITraceFunctionImpl returns true }
-	  function this: ITraceFunction inline;
+	  function this: ITraceFunction; inline;
 	public
 	  function isITraceFunctionImpl: boolean;
 	  function asITraceFunctionImpl: ITraceFunctionImpl;
@@ -4878,7 +4878,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PTraceTriggerVTable;
 	  FITraceTriggerImpl: ITraceTriggerImpl; {Only valid if isITraceTriggerImpl returns true }
-	  function this: ITraceTrigger inline;
+	  function this: ITraceTrigger; inline;
 	public
 	  function isITraceTriggerImpl: boolean;
 	  function asITraceTriggerImpl: ITraceTriggerImpl;
@@ -4938,7 +4938,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PTraceServiceConnectionVTable;
 	  FITraceServiceConnectionImpl: ITraceServiceConnectionImpl; {Only valid if isITraceServiceConnectionImpl returns true }
-	  function this: ITraceServiceConnection inline;
+	  function this: ITraceServiceConnection; inline;
 	public
 	  function isITraceServiceConnectionImpl: boolean;
 	  function asITraceServiceConnectionImpl: ITraceServiceConnectionImpl;
@@ -4992,7 +4992,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PTraceStatusVectorVTable;
 	  FITraceStatusVectorImpl: ITraceStatusVectorImpl; {Only valid if isITraceStatusVectorImpl returns true }
-	  function this: ITraceStatusVector inline;
+	  function this: ITraceStatusVector; inline;
 	public
 	  function isITraceStatusVectorImpl: boolean;
 	  function asITraceStatusVectorImpl: ITraceStatusVectorImpl;
@@ -5040,7 +5040,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PTraceSweepInfoVTable;
 	  FITraceSweepInfoImpl: ITraceSweepInfoImpl; {Only valid if isITraceSweepInfoImpl returns true }
-	  function this: ITraceSweepInfo inline;
+	  function this: ITraceSweepInfo; inline;
 	public
 	  function isITraceSweepInfoImpl: boolean;
 	  function asITraceSweepInfoImpl: ITraceSweepInfoImpl;
@@ -5089,7 +5089,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PTraceLogWriterVTable;
 	  FITraceLogWriterImpl: ITraceLogWriterImpl; {Only valid if isITraceLogWriterImpl returns true }
-	  function this: ITraceLogWriter inline;
+	  function this: ITraceLogWriter; inline;
 	public
 	  function isITraceLogWriterImpl: boolean;
 	  function asITraceLogWriterImpl: ITraceLogWriterImpl;
@@ -5137,7 +5137,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PTraceInitInfoVTable;
 	  FITraceInitInfoImpl: ITraceInitInfoImpl; {Only valid if isITraceInitInfoImpl returns true }
-	  function this: ITraceInitInfo inline;
+	  function this: ITraceInitInfo; inline;
 	public
 	  function isITraceInitInfoImpl: boolean;
 	  function asITraceInitInfoImpl: ITraceInitInfoImpl;
@@ -5209,7 +5209,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PTracePluginVTable;
 	  FITracePluginImpl: ITracePluginImpl; {Only valid if isITracePluginImpl returns true }
-	  function this: ITracePlugin inline;
+	  function this: ITracePlugin; inline;
 	public
 	  function isITracePluginImpl: boolean;
 	  function asITracePluginImpl: ITracePluginImpl;
@@ -5301,7 +5301,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PTraceFactoryVTable;
 	  FITraceFactoryImpl: ITraceFactoryImpl; {Only valid if isITraceFactoryImpl returns true }
-	  function this: ITraceFactory inline;
+	  function this: ITraceFactory; inline;
 	public
 	  function isITraceFactoryImpl: boolean;
 	  function asITraceFactoryImpl: ITraceFactoryImpl;
@@ -5368,7 +5368,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PUdrFunctionFactoryVTable;
 	  FIUdrFunctionFactoryImpl: IUdrFunctionFactoryImpl; {Only valid if isIUdrFunctionFactoryImpl returns true }
-	  function this: IUdrFunctionFactory inline;
+	  function this: IUdrFunctionFactory; inline;
 	public
 	  function isIUdrFunctionFactoryImpl: boolean;
 	  function asIUdrFunctionFactoryImpl: IUdrFunctionFactoryImpl;
@@ -5411,7 +5411,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PUdrProcedureFactoryVTable;
 	  FIUdrProcedureFactoryImpl: IUdrProcedureFactoryImpl; {Only valid if isIUdrProcedureFactoryImpl returns true }
-	  function this: IUdrProcedureFactory inline;
+	  function this: IUdrProcedureFactory; inline;
 	public
 	  function isIUdrProcedureFactoryImpl: boolean;
 	  function asIUdrProcedureFactoryImpl: IUdrProcedureFactoryImpl;
@@ -5454,7 +5454,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PUdrTriggerFactoryVTable;
 	  FIUdrTriggerFactoryImpl: IUdrTriggerFactoryImpl; {Only valid if isIUdrTriggerFactoryImpl returns true }
-	  function this: IUdrTriggerFactory inline;
+	  function this: IUdrTriggerFactory; inline;
 	public
 	  function isIUdrTriggerFactoryImpl: boolean;
 	  function asIUdrTriggerFactoryImpl: IUdrTriggerFactoryImpl;
@@ -5498,7 +5498,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PUdrPluginVTable;
 	  FIUdrPluginImpl: IUdrPluginImpl; {Only valid if isIUdrPluginImpl returns true }
-	  function this: IUdrPlugin inline;
+	  function this: IUdrPlugin; inline;
 	public
 	  function isIUdrPluginImpl: boolean;
 	  function asIUdrPluginImpl: IUdrPluginImpl;
@@ -5545,7 +5545,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PDecFloat16VTable;
 	  FIDecFloat16Impl: IDecFloat16Impl; {Only valid if isIDecFloat16Impl returns true }
-	  function this: IDecFloat16 inline;
+	  function this: IDecFloat16; inline;
 	public
 	  function isIDecFloat16Impl: boolean;
 	  function asIDecFloat16Impl: IDecFloat16Impl;
@@ -5594,7 +5594,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PDecFloat34VTable;
 	  FIDecFloat34Impl: IDecFloat34Impl; {Only valid if isIDecFloat34Impl returns true }
-	  function this: IDecFloat34 inline;
+	  function this: IDecFloat34; inline;
 	public
 	  function isIDecFloat34Impl: boolean;
 	  function asIDecFloat34Impl: IDecFloat34Impl;
@@ -5641,7 +5641,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PInt128VTable;
 	  FIInt128Impl: IInt128Impl; {Only valid if isIInt128Impl returns true }
-	  function this: IInt128 inline;
+	  function this: IInt128; inline;
 	public
 	  function isIInt128Impl: boolean;
 	  function asIInt128Impl: IInt128Impl;
@@ -5688,7 +5688,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PReplicatedFieldVTable;
 	  FIReplicatedFieldImpl: IReplicatedFieldImpl; {Only valid if isIReplicatedFieldImpl returns true }
-	  function this: IReplicatedField inline;
+	  function this: IReplicatedField; inline;
 	public
 	  function isIReplicatedFieldImpl: boolean;
 	  function asIReplicatedFieldImpl: IReplicatedFieldImpl;
@@ -5741,7 +5741,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PReplicatedRecordVTable;
 	  FIReplicatedRecordImpl: IReplicatedRecordImpl; {Only valid if isIReplicatedRecordImpl returns true }
-	  function this: IReplicatedRecord inline;
+	  function this: IReplicatedRecord; inline;
 	public
 	  function isIReplicatedRecordImpl: boolean;
 	  function asIReplicatedRecordImpl: IReplicatedRecordImpl;
@@ -5796,7 +5796,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PReplicatedTransactionVTable;
 	  FIReplicatedTransactionImpl: IReplicatedTransactionImpl; {Only valid if isIReplicatedTransactionImpl returns true }
-	  function this: IReplicatedTransaction inline;
+	  function this: IReplicatedTransaction; inline;
 	public
 	  function isIReplicatedTransactionImpl: boolean;
 	  function asIReplicatedTransactionImpl: IReplicatedTransactionImpl;
@@ -5862,7 +5862,7 @@ type
 	  FNullPtr: pointer;
 	  FvTable: PReplicatedSessionVTable;
 	  FIReplicatedSessionImpl: IReplicatedSessionImpl; {Only valid if isIReplicatedSessionImpl returns true }
-	  function this: IReplicatedSession inline;
+	  function this: IReplicatedSession; inline;
 	public
 	  function isIReplicatedSessionImpl: boolean;
 	  function asIReplicatedSessionImpl: IReplicatedSessionImpl;
