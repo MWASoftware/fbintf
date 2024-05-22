@@ -7,7 +7,7 @@ usage()
 
 BUILD=
 #Parse Parameters
-TEMP=`getopt h34db:f: "$@"`
+TEMP=`getopt h34db:f:p: "$@"`
 FB="4.0.1"
 if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
 
@@ -22,6 +22,8 @@ while true ; do
         \-4) 	FB="4.0.4"; shift 1;;
 
 	-d)	FB="master"; shift 1;;
+	
+	-p) export FPCDIR=/usr/lib/fpc/$2; shift 2;;	
 
 	-f)	FB=$2; shift 2;;
         
@@ -31,6 +33,10 @@ while true ; do
         
         esac
 done
+
+if [ -n "$FPCDIR" ]  && [ -d "$FPCDIR" ]; then
+  export FPC=$FPCDIR/ppcx64
+fi
 
 export FIREBIRD=/opt/firebird/$FB
 echo "FIREBIRD=$FIREBIRD"

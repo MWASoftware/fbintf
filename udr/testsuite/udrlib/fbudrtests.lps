@@ -7,10 +7,12 @@
       <Unit>
         <Filename Value="fbudrtests.lpr"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="25"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="28"/>
         <CursorPos X="93" Y="53"/>
         <UsageCount Value="99"/>
+        <Loaded Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="udr_test01.pas"/>
@@ -23,7 +25,7 @@
       <Unit>
         <Filename Value="udr_test02.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="119"/>
         <CursorPos X="31" Y="108"/>
         <UsageCount Value="95"/>
@@ -32,7 +34,7 @@
       <Unit>
         <Filename Value="udr_test03.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="9"/>
         <TopLine Value="149"/>
         <CursorPos X="28" Y="153"/>
         <UsageCount Value="94"/>
@@ -41,7 +43,7 @@
       <Unit>
         <Filename Value="udr_test04.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="11"/>
         <TopLine Value="53"/>
         <CursorPos X="43" Y="64"/>
         <UsageCount Value="93"/>
@@ -50,7 +52,7 @@
       <Unit>
         <Filename Value="udr_test05.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="11"/>
+        <EditorIndex Value="12"/>
         <TopLine Value="54"/>
         <CursorPos X="74" Y="218"/>
         <UsageCount Value="54"/>
@@ -58,7 +60,6 @@
       </Unit>
       <Unit>
         <Filename Value="../../source/FBUDRController.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
         <TopLine Value="898"/>
         <CursorPos X="45" Y="918"/>
@@ -228,7 +229,7 @@
       </Unit>
       <Unit>
         <Filename Value="../../../client/FBSQLData.pas"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="10"/>
         <TopLine Value="2091"/>
         <CursorPos X="59" Y="2115"/>
         <UsageCount Value="16"/>
@@ -258,7 +259,7 @@
       </Unit>
       <Unit>
         <Filename Value="../../../client/FBClientAPI.pas"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="8"/>
         <UsageCount Value="13"/>
         <Loaded Value="True"/>
       </Unit>
@@ -336,7 +337,7 @@
       </Unit>
       <Unit>
         <Filename Value="Test02.sql"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="6"/>
         <CursorPos Y="5"/>
         <UsageCount Value="17"/>
         <Loaded Value="True"/>
@@ -401,7 +402,7 @@
       </Unit>
       <Unit>
         <Filename Value="Test03.sql"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="7"/>
         <UsageCount Value="25"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="SQL"/>

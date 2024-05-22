@@ -709,27 +709,28 @@ type
 
 	TVersioned = record
 	private
-	  nullPtr: pointer;
-	  vTable: PVersionedVTable;
-	  owner: IVersionedImpl; {Only valid if isIVersionedImpl returns true }
-	  function thisRecord: IVersioned inline;
+	  FNullPtr: pointer;
+	  FvTable: PVersionedVTable;
+	  FIVersionedImpl: IVersionedImpl; {Only valid if isIVersionedImpl returns true }
+	  function this: IVersioned inline;
 	public
 	  function isIVersionedImpl: boolean;
-	  function getIVersionedImpl: IVersionedImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIVersionedImpl: IVersionedImpl;
+	  property vTable: PVersionedVTable read FvTable;
 	end;
 
 	IVersionedImpl = class
-	protected
-	  nullPtr: pointer;
-	  vTable: pointer;
-	  owner: TObject;
+	private
+	  FNullPtr: pointer;
+	  FvTable: pointer;
+	  FObject: TObject;
+	  function getVTable: PVersionedVTable;
 	public
 	  const VERSION = 0;
 	public
 	  constructor create;
-	  function getInterface: IVersioned;
-	  function getvTableVersion: NativeInt virtual;
+	  function asIVersioned: IVersioned;
+	  property vTable: PVersionedVTable read getVTable;
 	end;
 
 	PReferenceCountedVTable = ^ReferenceCountedVTable;
@@ -744,14 +745,14 @@ type
 
 	TReferenceCounted = record
 	private
-	  nullPtr: pointer;
-	  vTable: PReferenceCountedVTable;
-	  owner: IReferenceCountedImpl; {Only valid if isIReferenceCountedImpl returns true }
-	  function thisRecord: IReferenceCounted inline;
+	  FNullPtr: pointer;
+	  FvTable: PReferenceCountedVTable;
+	  FIReferenceCountedImpl: IReferenceCountedImpl; {Only valid if isIReferenceCountedImpl returns true }
+	  function this: IReferenceCounted inline;
 	public
 	  function isIReferenceCountedImpl: boolean;
-	  function getIReferenceCountedImpl: IReferenceCountedImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIReferenceCountedImpl: IReferenceCountedImpl;
+	  property vTable: PReferenceCountedVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -759,12 +760,14 @@ type
 	end;
 
 	IReferenceCountedImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PReferenceCountedVTable;
 	public
 	  const VERSION = 2;
 	public
 	  constructor create;
-	  function getInterface: IReferenceCounted;
-	  function getvTableVersion: NativeInt override;
+	  function asIReferenceCounted: IReferenceCounted;
+	  property vTable: PReferenceCountedVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure addRef(); virtual; abstract;
@@ -782,26 +785,28 @@ type
 
 	TDisposable = record
 	private
-	  nullPtr: pointer;
-	  vTable: PDisposableVTable;
-	  owner: IDisposableImpl; {Only valid if isIDisposableImpl returns true }
-	  function thisRecord: IDisposable inline;
+	  FNullPtr: pointer;
+	  FvTable: PDisposableVTable;
+	  FIDisposableImpl: IDisposableImpl; {Only valid if isIDisposableImpl returns true }
+	  function this: IDisposable inline;
 	public
 	  function isIDisposableImpl: boolean;
-	  function getIDisposableImpl: IDisposableImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIDisposableImpl: IDisposableImpl;
+	  property vTable: PDisposableVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure dispose();
 	end;
 
 	IDisposableImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PDisposableVTable;
 	public
 	  const VERSION = 1;
 	public
 	  constructor create;
-	  function getInterface: IDisposable;
-	  function getvTableVersion: NativeInt override;
+	  function asIDisposable: IDisposable;
+	  property vTable: PDisposableVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure dispose(); virtual; abstract;
@@ -827,14 +832,14 @@ type
 
 	TStatus = record
 	private
-	  nullPtr: pointer;
-	  vTable: PStatusVTable;
-	  owner: IStatusImpl; {Only valid if isIStatusImpl returns true }
-	  function thisRecord: IStatus inline;
+	  FNullPtr: pointer;
+	  FvTable: PStatusVTable;
+	  FIStatusImpl: IStatusImpl; {Only valid if isIStatusImpl returns true }
+	  function this: IStatus inline;
 	public
 	  function isIStatusImpl: boolean;
-	  function getIStatusImpl: IStatusImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIStatusImpl: IStatusImpl;
+	  property vTable: PStatusVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure dispose();
@@ -850,6 +855,8 @@ type
 	end;
 
 	IStatusImpl = class(IDisposableImpl)
+	private
+	  function getVTable: PStatusVTable;
 	public
 	  const VERSION = 10;
 	  const STATE_WARNINGS = Cardinal($1);
@@ -860,8 +867,8 @@ type
 	  const RESULT_SEGMENT = Integer(2);
 	public
 	  constructor create;
-	  function getInterface: IStatus;
-	  function getvTableVersion: NativeInt override;
+	  function asIStatus: IStatus;
+	  property vTable: PStatusVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure init(); virtual; abstract;
@@ -897,14 +904,14 @@ type
 
 	TMaster = record
 	private
-	  nullPtr: pointer;
-	  vTable: PMasterVTable;
-	  owner: IMasterImpl; {Only valid if isIMasterImpl returns true }
-	  function thisRecord: IMaster inline;
+	  FNullPtr: pointer;
+	  FvTable: PMasterVTable;
+	  FIMasterImpl: IMasterImpl; {Only valid if isIMasterImpl returns true }
+	  function this: IMaster inline;
 	public
 	  function isIMasterImpl: boolean;
-	  function getIMasterImpl: IMasterImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIMasterImpl: IMasterImpl;
+	  property vTable: PMasterVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function getStatus(): IStatus;
@@ -922,12 +929,14 @@ type
 	end;
 
 	IMasterImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PMasterVTable;
 	public
 	  const VERSION = 12;
 	public
 	  constructor create;
-	  function getInterface: IMaster;
-	  function getvTableVersion: NativeInt override;
+	  function asIMaster: IMaster;
+	  property vTable: PMasterVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getStatus(): IStatus; virtual; abstract;
@@ -958,14 +967,14 @@ type
 
 	TPluginBase = record
 	private
-	  nullPtr: pointer;
-	  vTable: PPluginBaseVTable;
-	  owner: IPluginBaseImpl; {Only valid if isIPluginBaseImpl returns true }
-	  function thisRecord: IPluginBase inline;
+	  FNullPtr: pointer;
+	  FvTable: PPluginBaseVTable;
+	  FIPluginBaseImpl: IPluginBaseImpl; {Only valid if isIPluginBaseImpl returns true }
+	  function this: IPluginBase inline;
 	public
 	  function isIPluginBaseImpl: boolean;
-	  function getIPluginBaseImpl: IPluginBaseImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIPluginBaseImpl: IPluginBaseImpl;
+	  property vTable: PPluginBaseVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -975,12 +984,14 @@ type
 	end;
 
 	IPluginBaseImpl = class(IReferenceCountedImpl)
+	private
+	  function getVTable: PPluginBaseVTable;
 	public
 	  const VERSION = 4;
 	public
 	  constructor create;
-	  function getInterface: IPluginBase;
-	  function getvTableVersion: NativeInt override;
+	  function asIPluginBase: IPluginBase;
+	  property vTable: PPluginBaseVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure setOwner(r: IReferenceCounted); virtual; abstract;
@@ -1004,14 +1015,14 @@ type
 
 	TPluginSet = record
 	private
-	  nullPtr: pointer;
-	  vTable: PPluginSetVTable;
-	  owner: IPluginSetImpl; {Only valid if isIPluginSetImpl returns true }
-	  function thisRecord: IPluginSet inline;
+	  FNullPtr: pointer;
+	  FvTable: PPluginSetVTable;
+	  FIPluginSetImpl: IPluginSetImpl; {Only valid if isIPluginSetImpl returns true }
+	  function this: IPluginSet inline;
 	public
 	  function isIPluginSetImpl: boolean;
-	  function getIPluginSetImpl: IPluginSetImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIPluginSetImpl: IPluginSetImpl;
+	  property vTable: PPluginSetVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -1024,12 +1035,14 @@ type
 	end;
 
 	IPluginSetImpl = class(IReferenceCountedImpl)
+	private
+	  function getVTable: PPluginSetVTable;
 	public
 	  const VERSION = 7;
 	public
 	  constructor create;
-	  function getInterface: IPluginSet;
-	  function getvTableVersion: NativeInt override;
+	  function asIPluginSet: IPluginSet;
+	  property vTable: PPluginSetVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getName(): PAnsiChar; virtual; abstract;
@@ -1056,14 +1069,14 @@ type
 
 	TConfigEntry = record
 	private
-	  nullPtr: pointer;
-	  vTable: PConfigEntryVTable;
-	  owner: IConfigEntryImpl; {Only valid if isIConfigEntryImpl returns true }
-	  function thisRecord: IConfigEntry inline;
+	  FNullPtr: pointer;
+	  FvTable: PConfigEntryVTable;
+	  FIConfigEntryImpl: IConfigEntryImpl; {Only valid if isIConfigEntryImpl returns true }
+	  function this: IConfigEntry inline;
 	public
 	  function isIConfigEntryImpl: boolean;
-	  function getIConfigEntryImpl: IConfigEntryImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIConfigEntryImpl: IConfigEntryImpl;
+	  property vTable: PConfigEntryVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -1076,12 +1089,14 @@ type
 	end;
 
 	IConfigEntryImpl = class(IReferenceCountedImpl)
+	private
+	  function getVTable: PConfigEntryVTable;
 	public
 	  const VERSION = 7;
 	public
 	  constructor create;
-	  function getInterface: IConfigEntry;
-	  function getvTableVersion: NativeInt override;
+	  function asIConfigEntry: IConfigEntry;
+	  property vTable: PConfigEntryVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getName(): PAnsiChar; virtual; abstract;
@@ -1106,14 +1121,14 @@ type
 
 	TConfig = record
 	private
-	  nullPtr: pointer;
-	  vTable: PConfigVTable;
-	  owner: IConfigImpl; {Only valid if isIConfigImpl returns true }
-	  function thisRecord: IConfig inline;
+	  FNullPtr: pointer;
+	  FvTable: PConfigVTable;
+	  FIConfigImpl: IConfigImpl; {Only valid if isIConfigImpl returns true }
+	  function this: IConfig inline;
 	public
 	  function isIConfigImpl: boolean;
-	  function getIConfigImpl: IConfigImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIConfigImpl: IConfigImpl;
+	  property vTable: PConfigVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -1124,12 +1139,14 @@ type
 	end;
 
 	IConfigImpl = class(IReferenceCountedImpl)
+	private
+	  function getVTable: PConfigVTable;
 	public
 	  const VERSION = 5;
 	public
 	  constructor create;
-	  function getInterface: IConfig;
-	  function getvTableVersion: NativeInt override;
+	  function asIConfig: IConfig;
+	  property vTable: PConfigVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function find(status: IStatus; name: PAnsiChar): IConfigEntry; virtual; abstract;
@@ -1154,14 +1171,14 @@ type
 
 	TFirebirdConf = record
 	private
-	  nullPtr: pointer;
-	  vTable: PFirebirdConfVTable;
-	  owner: IFirebirdConfImpl; {Only valid if isIFirebirdConfImpl returns true }
-	  function thisRecord: IFirebirdConf inline;
+	  FNullPtr: pointer;
+	  FvTable: PFirebirdConfVTable;
+	  FIFirebirdConfImpl: IFirebirdConfImpl; {Only valid if isIFirebirdConfImpl returns true }
+	  function this: IFirebirdConf inline;
 	public
 	  function isIFirebirdConfImpl: boolean;
-	  function getIFirebirdConfImpl: IFirebirdConfImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIFirebirdConfImpl: IFirebirdConfImpl;
+	  property vTable: PFirebirdConfVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -1174,12 +1191,14 @@ type
 	end;
 
 	IFirebirdConfImpl = class(IReferenceCountedImpl)
+	private
+	  function getVTable: PFirebirdConfVTable;
 	public
 	  const VERSION = 7;
 	public
 	  constructor create;
-	  function getInterface: IFirebirdConf;
-	  function getvTableVersion: NativeInt override;
+	  function asIFirebirdConf: IFirebirdConf;
+	  property vTable: PFirebirdConfVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getKey(name: PAnsiChar): Cardinal; virtual; abstract;
@@ -1205,14 +1224,14 @@ type
 
 	TPluginConfig = record
 	private
-	  nullPtr: pointer;
-	  vTable: PPluginConfigVTable;
-	  owner: IPluginConfigImpl; {Only valid if isIPluginConfigImpl returns true }
-	  function thisRecord: IPluginConfig inline;
+	  FNullPtr: pointer;
+	  FvTable: PPluginConfigVTable;
+	  FIPluginConfigImpl: IPluginConfigImpl; {Only valid if isIPluginConfigImpl returns true }
+	  function this: IPluginConfig inline;
 	public
 	  function isIPluginConfigImpl: boolean;
-	  function getIPluginConfigImpl: IPluginConfigImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIPluginConfigImpl: IPluginConfigImpl;
+	  property vTable: PPluginConfigVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -1224,12 +1243,14 @@ type
 	end;
 
 	IPluginConfigImpl = class(IReferenceCountedImpl)
+	private
+	  function getVTable: PPluginConfigVTable;
 	public
 	  const VERSION = 6;
 	public
 	  constructor create;
-	  function getInterface: IPluginConfig;
-	  function getvTableVersion: NativeInt override;
+	  function asIPluginConfig: IPluginConfig;
+	  property vTable: PPluginConfigVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getConfigFileName(): PAnsiChar; virtual; abstract;
@@ -1249,26 +1270,28 @@ type
 
 	TPluginFactory = record
 	private
-	  nullPtr: pointer;
-	  vTable: PPluginFactoryVTable;
-	  owner: IPluginFactoryImpl; {Only valid if isIPluginFactoryImpl returns true }
-	  function thisRecord: IPluginFactory inline;
+	  FNullPtr: pointer;
+	  FvTable: PPluginFactoryVTable;
+	  FIPluginFactoryImpl: IPluginFactoryImpl; {Only valid if isIPluginFactoryImpl returns true }
+	  function this: IPluginFactory inline;
 	public
 	  function isIPluginFactoryImpl: boolean;
-	  function getIPluginFactoryImpl: IPluginFactoryImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIPluginFactoryImpl: IPluginFactoryImpl;
+	  property vTable: PPluginFactoryVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function createPlugin(status: IStatus; factoryParameter: IPluginConfig): IPluginBase;
 	end;
 
 	IPluginFactoryImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PPluginFactoryVTable;
 	public
 	  const VERSION = 1;
 	public
 	  constructor create;
-	  function getInterface: IPluginFactory;
-	  function getvTableVersion: NativeInt override;
+	  function asIPluginFactory: IPluginFactory;
+	  property vTable: PPluginFactoryVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function createPlugin(status: IStatus; factoryParameter: IPluginConfig): IPluginBase; virtual; abstract;
@@ -1286,14 +1309,14 @@ type
 
 	TPluginModule = record
 	private
-	  nullPtr: pointer;
-	  vTable: PPluginModuleVTable;
-	  owner: IPluginModuleImpl; {Only valid if isIPluginModuleImpl returns true }
-	  function thisRecord: IPluginModule inline;
+	  FNullPtr: pointer;
+	  FvTable: PPluginModuleVTable;
+	  FIPluginModuleImpl: IPluginModuleImpl; {Only valid if isIPluginModuleImpl returns true }
+	  function this: IPluginModule inline;
 	public
 	  function isIPluginModuleImpl: boolean;
-	  function getIPluginModuleImpl: IPluginModuleImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIPluginModuleImpl: IPluginModuleImpl;
+	  property vTable: PPluginModuleVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure doClean();
@@ -1301,12 +1324,14 @@ type
 	end;
 
 	IPluginModuleImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PPluginModuleVTable;
 	public
 	  const VERSION = 2;
 	public
 	  constructor create;
-	  function getInterface: IPluginModule;
-	  function getvTableVersion: NativeInt override;
+	  function asIPluginModule: IPluginModule;
+	  property vTable: PPluginModuleVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure doClean(); virtual; abstract;
@@ -1329,14 +1354,14 @@ type
 
 	TPluginManager = record
 	private
-	  nullPtr: pointer;
-	  vTable: PPluginManagerVTable;
-	  owner: IPluginManagerImpl; {Only valid if isIPluginManagerImpl returns true }
-	  function thisRecord: IPluginManager inline;
+	  FNullPtr: pointer;
+	  FvTable: PPluginManagerVTable;
+	  FIPluginManagerImpl: IPluginManagerImpl; {Only valid if isIPluginManagerImpl returns true }
+	  function this: IPluginManager inline;
 	public
 	  function isIPluginManagerImpl: boolean;
-	  function getIPluginManagerImpl: IPluginManagerImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIPluginManagerImpl: IPluginManagerImpl;
+	  property vTable: PPluginManagerVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure registerPluginFactory(pluginType: Cardinal; defaultName: PAnsiChar; factory: IPluginFactory);
@@ -1348,6 +1373,8 @@ type
 	end;
 
 	IPluginManagerImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PPluginManagerVTable;
 	public
 	  const VERSION = 6;
 	  const TYPE_PROVIDER = Cardinal(1);
@@ -1364,8 +1391,8 @@ type
 	  const TYPE_COUNT = Cardinal(12);
 	public
 	  constructor create;
-	  function getInterface: IPluginManager;
-	  function getvTableVersion: NativeInt override;
+	  function asIPluginManager: IPluginManager;
+	  property vTable: PPluginManagerVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure registerPluginFactory(pluginType: Cardinal; defaultName: PAnsiChar; factory: IPluginFactory); virtual; abstract;
@@ -1390,14 +1417,14 @@ type
 
 	TCryptKey = record
 	private
-	  nullPtr: pointer;
-	  vTable: PCryptKeyVTable;
-	  owner: ICryptKeyImpl; {Only valid if isICryptKeyImpl returns true }
-	  function thisRecord: ICryptKey inline;
+	  FNullPtr: pointer;
+	  FvTable: PCryptKeyVTable;
+	  FICryptKeyImpl: ICryptKeyImpl; {Only valid if isICryptKeyImpl returns true }
+	  function this: ICryptKey inline;
 	public
 	  function isICryptKeyImpl: boolean;
-	  function getICryptKeyImpl: ICryptKeyImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asICryptKeyImpl: ICryptKeyImpl;
+	  property vTable: PCryptKeyVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure setSymmetric(status: IStatus; type_: PAnsiChar; keyLength: Cardinal; key: Pointer);
@@ -1407,12 +1434,14 @@ type
 	end;
 
 	ICryptKeyImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PCryptKeyVTable;
 	public
 	  const VERSION = 4;
 	public
 	  constructor create;
-	  function getInterface: ICryptKey;
-	  function getvTableVersion: NativeInt override;
+	  function asICryptKey: ICryptKey;
+	  property vTable: PCryptKeyVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure setSymmetric(status: IStatus; type_: PAnsiChar; keyLength: Cardinal; key: Pointer); virtual; abstract;
@@ -1438,14 +1467,14 @@ type
 
 	TConfigManager = record
 	private
-	  nullPtr: pointer;
-	  vTable: PConfigManagerVTable;
-	  owner: IConfigManagerImpl; {Only valid if isIConfigManagerImpl returns true }
-	  function thisRecord: IConfigManager inline;
+	  FNullPtr: pointer;
+	  FvTable: PConfigManagerVTable;
+	  FIConfigManagerImpl: IConfigManagerImpl; {Only valid if isIConfigManagerImpl returns true }
+	  function this: IConfigManager inline;
 	public
 	  function isIConfigManagerImpl: boolean;
-	  function getIConfigManagerImpl: IConfigManagerImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIConfigManagerImpl: IConfigManagerImpl;
+	  property vTable: PConfigManagerVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function getDirectory(code: Cardinal): PAnsiChar;
@@ -1458,6 +1487,8 @@ type
 	end;
 
 	IConfigManagerImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PConfigManagerVTable;
 	public
 	  const VERSION = 7;
 	  const DIR_BIN = Cardinal(0);
@@ -1481,8 +1512,8 @@ type
 	  const DIR_COUNT = Cardinal(18);
 	public
 	  constructor create;
-	  function getInterface: IConfigManager;
-	  function getvTableVersion: NativeInt override;
+	  function asIConfigManager: IConfigManager;
+	  property vTable: PConfigManagerVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getDirectory(code: Cardinal): PAnsiChar; virtual; abstract;
@@ -1507,14 +1538,14 @@ type
 
 	TEventCallback = record
 	private
-	  nullPtr: pointer;
-	  vTable: PEventCallbackVTable;
-	  owner: IEventCallbackImpl; {Only valid if isIEventCallbackImpl returns true }
-	  function thisRecord: IEventCallback inline;
+	  FNullPtr: pointer;
+	  FvTable: PEventCallbackVTable;
+	  FIEventCallbackImpl: IEventCallbackImpl; {Only valid if isIEventCallbackImpl returns true }
+	  function this: IEventCallback inline;
 	public
 	  function isIEventCallbackImpl: boolean;
-	  function getIEventCallbackImpl: IEventCallbackImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIEventCallbackImpl: IEventCallbackImpl;
+	  property vTable: PEventCallbackVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -1523,12 +1554,14 @@ type
 	end;
 
 	IEventCallbackImpl = class(IReferenceCountedImpl)
+	private
+	  function getVTable: PEventCallbackVTable;
 	public
 	  const VERSION = 3;
 	public
 	  constructor create;
-	  function getInterface: IEventCallback;
-	  function getvTableVersion: NativeInt override;
+	  function asIEventCallback: IEventCallback;
+	  property vTable: PEventCallbackVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure eventCallbackFunction(length: Cardinal; events: BytePtr); virtual; abstract;
@@ -1552,14 +1585,14 @@ type
 
 	TBlob = record
 	private
-	  nullPtr: pointer;
-	  vTable: PBlobVTable;
-	  owner: IBlobImpl; {Only valid if isIBlobImpl returns true }
-	  function thisRecord: IBlob inline;
+	  FNullPtr: pointer;
+	  FvTable: PBlobVTable;
+	  FIBlobImpl: IBlobImpl; {Only valid if isIBlobImpl returns true }
+	  function this: IBlob inline;
 	public
 	  function isIBlobImpl: boolean;
-	  function getIBlobImpl: IBlobImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIBlobImpl: IBlobImpl;
+	  property vTable: PBlobVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -1573,12 +1606,14 @@ type
 	end;
 
 	IBlobImpl = class(IReferenceCountedImpl)
+	private
+	  function getVTable: PBlobVTable;
 	public
 	  const VERSION = 8;
 	public
 	  constructor create;
-	  function getInterface: IBlob;
-	  function getvTableVersion: NativeInt override;
+	  function asIBlob: IBlob;
+	  property vTable: PBlobVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure getInfo(status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); virtual; abstract;
@@ -1611,14 +1646,14 @@ type
 
 	TTransaction = record
 	private
-	  nullPtr: pointer;
-	  vTable: PTransactionVTable;
-	  owner: ITransactionImpl; {Only valid if isITransactionImpl returns true }
-	  function thisRecord: ITransaction inline;
+	  FNullPtr: pointer;
+	  FvTable: PTransactionVTable;
+	  FITransactionImpl: ITransactionImpl; {Only valid if isITransactionImpl returns true }
+	  function this: ITransaction inline;
 	public
 	  function isITransactionImpl: boolean;
-	  function getITransactionImpl: ITransactionImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asITransactionImpl: ITransactionImpl;
+	  property vTable: PTransactionVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -1636,12 +1671,14 @@ type
 	end;
 
 	ITransactionImpl = class(IReferenceCountedImpl)
+	private
+	  function getVTable: PTransactionVTable;
 	public
 	  const VERSION = 12;
 	public
 	  constructor create;
-	  function getInterface: ITransaction;
-	  function getvTableVersion: NativeInt override;
+	  function asITransaction: ITransaction;
+	  property vTable: PTransactionVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure getInfo(status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); virtual; abstract;
@@ -1685,14 +1722,14 @@ type
 
 	TMessageMetadata = record
 	private
-	  nullPtr: pointer;
-	  vTable: PMessageMetadataVTable;
-	  owner: IMessageMetadataImpl; {Only valid if isIMessageMetadataImpl returns true }
-	  function thisRecord: IMessageMetadata inline;
+	  FNullPtr: pointer;
+	  FvTable: PMessageMetadataVTable;
+	  FIMessageMetadataImpl: IMessageMetadataImpl; {Only valid if isIMessageMetadataImpl returns true }
+	  function this: IMessageMetadata inline;
 	public
 	  function isIMessageMetadataImpl: boolean;
-	  function getIMessageMetadataImpl: IMessageMetadataImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIMessageMetadataImpl: IMessageMetadataImpl;
+	  property vTable: PMessageMetadataVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -1717,12 +1754,14 @@ type
 	end;
 
 	IMessageMetadataImpl = class(IReferenceCountedImpl)
+	private
+	  function getVTable: PMessageMetadataVTable;
 	public
 	  const VERSION = 19;
 	public
 	  constructor create;
-	  function getInterface: IMessageMetadata;
-	  function getvTableVersion: NativeInt override;
+	  function asIMessageMetadata: IMessageMetadata;
+	  property vTable: PMessageMetadataVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getCount(status: IStatus): Cardinal; virtual; abstract;
@@ -1770,14 +1809,14 @@ type
 
 	TMetadataBuilder = record
 	private
-	  nullPtr: pointer;
-	  vTable: PMetadataBuilderVTable;
-	  owner: IMetadataBuilderImpl; {Only valid if isIMetadataBuilderImpl returns true }
-	  function thisRecord: IMetadataBuilder inline;
+	  FNullPtr: pointer;
+	  FvTable: PMetadataBuilderVTable;
+	  FIMetadataBuilderImpl: IMetadataBuilderImpl; {Only valid if isIMetadataBuilderImpl returns true }
+	  function this: IMetadataBuilder inline;
 	public
 	  function isIMetadataBuilderImpl: boolean;
-	  function getIMetadataBuilderImpl: IMetadataBuilderImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIMetadataBuilderImpl: IMetadataBuilderImpl;
+	  property vTable: PMetadataBuilderVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -1799,12 +1838,14 @@ type
 	end;
 
 	IMetadataBuilderImpl = class(IReferenceCountedImpl)
+	private
+	  function getVTable: PMetadataBuilderVTable;
 	public
 	  const VERSION = 16;
 	public
 	  constructor create;
-	  function getInterface: IMetadataBuilder;
-	  function getvTableVersion: NativeInt override;
+	  function asIMetadataBuilder: IMetadataBuilder;
+	  property vTable: PMetadataBuilderVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure setType(status: IStatus; index: Cardinal; type_: Cardinal); virtual; abstract;
@@ -1846,14 +1887,14 @@ type
 
 	TResultSet = record
 	private
-	  nullPtr: pointer;
-	  vTable: PResultSetVTable;
-	  owner: IResultSetImpl; {Only valid if isIResultSetImpl returns true }
-	  function thisRecord: IResultSet inline;
+	  FNullPtr: pointer;
+	  FvTable: PResultSetVTable;
+	  FIResultSetImpl: IResultSetImpl; {Only valid if isIResultSetImpl returns true }
+	  function this: IResultSet inline;
 	public
 	  function isIResultSetImpl: boolean;
-	  function getIResultSetImpl: IResultSetImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIResultSetImpl: IResultSetImpl;
+	  property vTable: PResultSetVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -1872,12 +1913,14 @@ type
 	end;
 
 	IResultSetImpl = class(IReferenceCountedImpl)
+	private
+	  function getVTable: PResultSetVTable;
 	public
 	  const VERSION = 13;
 	public
 	  constructor create;
-	  function getInterface: IResultSet;
-	  function getvTableVersion: NativeInt override;
+	  function asIResultSet: IResultSet;
+	  property vTable: PResultSetVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function fetchNext(status: IStatus; message: Pointer): Integer; virtual; abstract;
@@ -1919,14 +1962,14 @@ type
 
 	TStatement = record
 	private
-	  nullPtr: pointer;
-	  vTable: PStatementVTable;
-	  owner: IStatementImpl; {Only valid if isIStatementImpl returns true }
-	  function thisRecord: IStatement inline;
+	  FNullPtr: pointer;
+	  FvTable: PStatementVTable;
+	  FIStatementImpl: IStatementImpl; {Only valid if isIStatementImpl returns true }
+	  function this: IStatement inline;
 	public
 	  function isIStatementImpl: boolean;
-	  function getIStatementImpl: IStatementImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIStatementImpl: IStatementImpl;
+	  property vTable: PStatementVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -1948,6 +1991,8 @@ type
 	end;
 
 	IStatementImpl = class(IReferenceCountedImpl)
+	private
+	  function getVTable: PStatementVTable;
 	public
 	  const VERSION = 16;
 	  const PREPARE_PREFETCH_NONE = Cardinal($0);
@@ -1965,8 +2010,8 @@ type
 	  const CURSOR_TYPE_SCROLLABLE = Cardinal($1);
 	public
 	  constructor create;
-	  function getInterface: IStatement;
-	  function getvTableVersion: NativeInt override;
+	  function asIStatement: IStatement;
+	  property vTable: PStatementVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure getInfo(status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); virtual; abstract;
@@ -2008,14 +2053,14 @@ type
 
 	TBatch = record
 	private
-	  nullPtr: pointer;
-	  vTable: PBatchVTable;
-	  owner: IBatchImpl; {Only valid if isIBatchImpl returns true }
-	  function thisRecord: IBatch inline;
+	  FNullPtr: pointer;
+	  FvTable: PBatchVTable;
+	  FIBatchImpl: IBatchImpl; {Only valid if isIBatchImpl returns true }
+	  function this: IBatch inline;
 	public
 	  function isIBatchImpl: boolean;
-	  function getIBatchImpl: IBatchImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIBatchImpl: IBatchImpl;
+	  property vTable: PBatchVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -2034,6 +2079,8 @@ type
 	end;
 
 	IBatchImpl = class(IReferenceCountedImpl)
+	private
+	  function getVTable: PBatchVTable;
 	public
 	  const VERSION = 13;
 	  const VERSION1 = Byte(1);
@@ -2049,8 +2096,8 @@ type
 	  const BLOB_SEGHDR_ALIGN = Cardinal(2);
 	public
 	  constructor create;
-	  function getInterface: IBatch;
-	  function getvTableVersion: NativeInt override;
+	  function asIBatch: IBatch;
+	  property vTable: PBatchVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure add(status: IStatus; count: Cardinal; inBuffer: Pointer); virtual; abstract;
@@ -2081,14 +2128,14 @@ type
 
 	TBatchCompletionState = record
 	private
-	  nullPtr: pointer;
-	  vTable: PBatchCompletionStateVTable;
-	  owner: IBatchCompletionStateImpl; {Only valid if isIBatchCompletionStateImpl returns true }
-	  function thisRecord: IBatchCompletionState inline;
+	  FNullPtr: pointer;
+	  FvTable: PBatchCompletionStateVTable;
+	  FIBatchCompletionStateImpl: IBatchCompletionStateImpl; {Only valid if isIBatchCompletionStateImpl returns true }
+	  function this: IBatchCompletionState inline;
 	public
 	  function isIBatchCompletionStateImpl: boolean;
-	  function getIBatchCompletionStateImpl: IBatchCompletionStateImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIBatchCompletionStateImpl: IBatchCompletionStateImpl;
+	  property vTable: PBatchCompletionStateVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure dispose();
@@ -2099,6 +2146,8 @@ type
 	end;
 
 	IBatchCompletionStateImpl = class(IDisposableImpl)
+	private
+	  function getVTable: PBatchCompletionStateVTable;
 	public
 	  const VERSION = 5;
 	  const EXECUTE_FAILED = Integer(-1);
@@ -2106,8 +2155,8 @@ type
 	  const NO_MORE_ERRORS = Cardinal($ffffffff);
 	public
 	  constructor create;
-	  function getInterface: IBatchCompletionState;
-	  function getvTableVersion: NativeInt override;
+	  function asIBatchCompletionState: IBatchCompletionState;
+	  property vTable: PBatchCompletionStateVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getSize(status: IStatus): Cardinal; virtual; abstract;
@@ -2130,14 +2179,14 @@ type
 
 	TReplicator = record
 	private
-	  nullPtr: pointer;
-	  vTable: PReplicatorVTable;
-	  owner: IReplicatorImpl; {Only valid if isIReplicatorImpl returns true }
-	  function thisRecord: IReplicator inline;
+	  FNullPtr: pointer;
+	  FvTable: PReplicatorVTable;
+	  FIReplicatorImpl: IReplicatorImpl; {Only valid if isIReplicatorImpl returns true }
+	  function this: IReplicator inline;
 	public
 	  function isIReplicatorImpl: boolean;
-	  function getIReplicatorImpl: IReplicatorImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIReplicatorImpl: IReplicatorImpl;
+	  property vTable: PReplicatorVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -2147,12 +2196,14 @@ type
 	end;
 
 	IReplicatorImpl = class(IReferenceCountedImpl)
+	private
+	  function getVTable: PReplicatorVTable;
 	public
 	  const VERSION = 4;
 	public
 	  constructor create;
-	  function getInterface: IReplicator;
-	  function getvTableVersion: NativeInt override;
+	  function asIReplicator: IReplicator;
+	  property vTable: PReplicatorVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure process(status: IStatus; length: Cardinal; data: BytePtr); virtual; abstract;
@@ -2178,14 +2229,14 @@ type
 
 	TRequest = record
 	private
-	  nullPtr: pointer;
-	  vTable: PRequestVTable;
-	  owner: IRequestImpl; {Only valid if isIRequestImpl returns true }
-	  function thisRecord: IRequest inline;
+	  FNullPtr: pointer;
+	  FvTable: PRequestVTable;
+	  FIRequestImpl: IRequestImpl; {Only valid if isIRequestImpl returns true }
+	  function this: IRequest inline;
 	public
 	  function isIRequestImpl: boolean;
-	  function getIRequestImpl: IRequestImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIRequestImpl: IRequestImpl;
+	  property vTable: PRequestVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -2200,12 +2251,14 @@ type
 	end;
 
 	IRequestImpl = class(IReferenceCountedImpl)
+	private
+	  function getVTable: PRequestVTable;
 	public
 	  const VERSION = 9;
 	public
 	  constructor create;
-	  function getInterface: IRequest;
-	  function getvTableVersion: NativeInt override;
+	  function asIRequest: IRequest;
+	  property vTable: PRequestVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure receive(status: IStatus; level: Integer; msgType: Cardinal; length: Cardinal; message: Pointer); virtual; abstract;
@@ -2230,14 +2283,14 @@ type
 
 	TEvents = record
 	private
-	  nullPtr: pointer;
-	  vTable: PEventsVTable;
-	  owner: IEventsImpl; {Only valid if isIEventsImpl returns true }
-	  function thisRecord: IEvents inline;
+	  FNullPtr: pointer;
+	  FvTable: PEventsVTable;
+	  FIEventsImpl: IEventsImpl; {Only valid if isIEventsImpl returns true }
+	  function this: IEvents inline;
 	public
 	  function isIEventsImpl: boolean;
-	  function getIEventsImpl: IEventsImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIEventsImpl: IEventsImpl;
+	  property vTable: PEventsVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -2246,12 +2299,14 @@ type
 	end;
 
 	IEventsImpl = class(IReferenceCountedImpl)
+	private
+	  function getVTable: PEventsVTable;
 	public
 	  const VERSION = 3;
 	public
 	  constructor create;
-	  function getInterface: IEvents;
-	  function getvTableVersion: NativeInt override;
+	  function asIEvents: IEvents;
+	  property vTable: PEventsVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure cancel(status: IStatus); virtual; abstract;
@@ -2293,14 +2348,14 @@ type
 
 	TAttachment = record
 	private
-	  nullPtr: pointer;
-	  vTable: PAttachmentVTable;
-	  owner: IAttachmentImpl; {Only valid if isIAttachmentImpl returns true }
-	  function thisRecord: IAttachment inline;
+	  FNullPtr: pointer;
+	  FvTable: PAttachmentVTable;
+	  FIAttachmentImpl: IAttachmentImpl; {Only valid if isIAttachmentImpl returns true }
+	  function this: IAttachment inline;
 	public
 	  function isIAttachmentImpl: boolean;
-	  function getIAttachmentImpl: IAttachmentImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIAttachmentImpl: IAttachmentImpl;
+	  property vTable: PAttachmentVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -2332,12 +2387,14 @@ type
 	end;
 
 	IAttachmentImpl = class(IReferenceCountedImpl)
+	private
+	  function getVTable: PAttachmentVTable;
 	public
 	  const VERSION = 26;
 	public
 	  constructor create;
-	  function getInterface: IAttachment;
-	  function getvTableVersion: NativeInt override;
+	  function asIAttachment: IAttachment;
+	  property vTable: PAttachmentVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure getInfo(status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); virtual; abstract;
@@ -2381,14 +2438,14 @@ type
 
 	TService = record
 	private
-	  nullPtr: pointer;
-	  vTable: PServiceVTable;
-	  owner: IServiceImpl; {Only valid if isIServiceImpl returns true }
-	  function thisRecord: IService inline;
+	  FNullPtr: pointer;
+	  FvTable: PServiceVTable;
+	  FIServiceImpl: IServiceImpl; {Only valid if isIServiceImpl returns true }
+	  function this: IService inline;
 	public
 	  function isIServiceImpl: boolean;
-	  function getIServiceImpl: IServiceImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIServiceImpl: IServiceImpl;
+	  property vTable: PServiceVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -2399,12 +2456,14 @@ type
 	end;
 
 	IServiceImpl = class(IReferenceCountedImpl)
+	private
+	  function getVTable: PServiceVTable;
 	public
 	  const VERSION = 5;
 	public
 	  constructor create;
-	  function getInterface: IService;
-	  function getvTableVersion: NativeInt override;
+	  function asIService: IService;
+	  property vTable: PServiceVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure detach(status: IStatus); virtual; abstract;
@@ -2431,14 +2490,14 @@ type
 
 	TProvider = record
 	private
-	  nullPtr: pointer;
-	  vTable: PProviderVTable;
-	  owner: IProviderImpl; {Only valid if isIProviderImpl returns true }
-	  function thisRecord: IProvider inline;
+	  FNullPtr: pointer;
+	  FvTable: PProviderVTable;
+	  FIProviderImpl: IProviderImpl; {Only valid if isIProviderImpl returns true }
+	  function this: IProvider inline;
 	public
 	  function isIProviderImpl: boolean;
-	  function getIProviderImpl: IProviderImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIProviderImpl: IProviderImpl;
+	  property vTable: PProviderVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -2453,12 +2512,14 @@ type
 	end;
 
 	IProviderImpl = class(IPluginBaseImpl)
+	private
+	  function getVTable: PProviderVTable;
 	public
 	  const VERSION = 9;
 	public
 	  constructor create;
-	  function getInterface: IProvider;
-	  function getvTableVersion: NativeInt override;
+	  function asIProvider: IProvider;
+	  property vTable: PProviderVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function attachDatabase(status: IStatus; fileName: PAnsiChar; dpbLength: Cardinal; dpb: BytePtr): IAttachment; virtual; abstract;
@@ -2482,14 +2543,14 @@ type
 
 	TDtcStart = record
 	private
-	  nullPtr: pointer;
-	  vTable: PDtcStartVTable;
-	  owner: IDtcStartImpl; {Only valid if isIDtcStartImpl returns true }
-	  function thisRecord: IDtcStart inline;
+	  FNullPtr: pointer;
+	  FvTable: PDtcStartVTable;
+	  FIDtcStartImpl: IDtcStartImpl; {Only valid if isIDtcStartImpl returns true }
+	  function this: IDtcStart inline;
 	public
 	  function isIDtcStartImpl: boolean;
-	  function getIDtcStartImpl: IDtcStartImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIDtcStartImpl: IDtcStartImpl;
+	  property vTable: PDtcStartVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure dispose();
@@ -2499,12 +2560,14 @@ type
 	end;
 
 	IDtcStartImpl = class(IDisposableImpl)
+	private
+	  function getVTable: PDtcStartVTable;
 	public
 	  const VERSION = 4;
 	public
 	  constructor create;
-	  function getInterface: IDtcStart;
-	  function getvTableVersion: NativeInt override;
+	  function asIDtcStart: IDtcStart;
+	  property vTable: PDtcStartVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure addAttachment(status: IStatus; att: IAttachment); virtual; abstract;
@@ -2524,14 +2587,14 @@ type
 
 	TDtc = record
 	private
-	  nullPtr: pointer;
-	  vTable: PDtcVTable;
-	  owner: IDtcImpl; {Only valid if isIDtcImpl returns true }
-	  function thisRecord: IDtc inline;
+	  FNullPtr: pointer;
+	  FvTable: PDtcVTable;
+	  FIDtcImpl: IDtcImpl; {Only valid if isIDtcImpl returns true }
+	  function this: IDtc inline;
 	public
 	  function isIDtcImpl: boolean;
-	  function getIDtcImpl: IDtcImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIDtcImpl: IDtcImpl;
+	  property vTable: PDtcVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function join(status: IStatus; one: ITransaction; two: ITransaction): ITransaction;
@@ -2539,12 +2602,14 @@ type
 	end;
 
 	IDtcImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PDtcVTable;
 	public
 	  const VERSION = 2;
 	public
 	  constructor create;
-	  function getInterface: IDtc;
-	  function getvTableVersion: NativeInt override;
+	  function asIDtc: IDtc;
+	  property vTable: PDtcVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function join(status: IStatus; one: ITransaction; two: ITransaction): ITransaction; virtual; abstract;
@@ -2565,14 +2630,14 @@ type
 
 	TAuth = record
 	private
-	  nullPtr: pointer;
-	  vTable: PAuthVTable;
-	  owner: IAuthImpl; {Only valid if isIAuthImpl returns true }
-	  function thisRecord: IAuth inline;
+	  FNullPtr: pointer;
+	  FvTable: PAuthVTable;
+	  FIAuthImpl: IAuthImpl; {Only valid if isIAuthImpl returns true }
+	  function this: IAuth inline;
 	public
 	  function isIAuthImpl: boolean;
-	  function getIAuthImpl: IAuthImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIAuthImpl: IAuthImpl;
+	  property vTable: PAuthVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -2582,6 +2647,8 @@ type
 	end;
 
 	IAuthImpl = class(IPluginBaseImpl)
+	private
+	  function getVTable: PAuthVTable;
 	public
 	  const VERSION = 4;
 	  const AUTH_FAILED = Integer(-1);
@@ -2590,8 +2657,8 @@ type
 	  const AUTH_CONTINUE = Integer(2);
 	public
 	  constructor create;
-	  function getInterface: IAuth;
-	  function getvTableVersion: NativeInt override;
+	  function asIAuth: IAuth;
+	  property vTable: PAuthVTable read getVTable;
 	end;
 
 	PWriterVTable = ^WriterVTable;
@@ -2608,14 +2675,14 @@ type
 
 	TWriter = record
 	private
-	  nullPtr: pointer;
-	  vTable: PWriterVTable;
-	  owner: IWriterImpl; {Only valid if isIWriterImpl returns true }
-	  function thisRecord: IWriter inline;
+	  FNullPtr: pointer;
+	  FvTable: PWriterVTable;
+	  FIWriterImpl: IWriterImpl; {Only valid if isIWriterImpl returns true }
+	  function this: IWriter inline;
 	public
 	  function isIWriterImpl: boolean;
-	  function getIWriterImpl: IWriterImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIWriterImpl: IWriterImpl;
+	  property vTable: PWriterVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure reset();
@@ -2625,12 +2692,14 @@ type
 	end;
 
 	IWriterImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PWriterVTable;
 	public
 	  const VERSION = 4;
 	public
 	  constructor create;
-	  function getInterface: IWriter;
-	  function getvTableVersion: NativeInt override;
+	  function asIWriter: IWriter;
+	  property vTable: PWriterVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure reset(); virtual; abstract;
@@ -2653,14 +2722,14 @@ type
 
 	TServerBlock = record
 	private
-	  nullPtr: pointer;
-	  vTable: PServerBlockVTable;
-	  owner: IServerBlockImpl; {Only valid if isIServerBlockImpl returns true }
-	  function thisRecord: IServerBlock inline;
+	  FNullPtr: pointer;
+	  FvTable: PServerBlockVTable;
+	  FIServerBlockImpl: IServerBlockImpl; {Only valid if isIServerBlockImpl returns true }
+	  function this: IServerBlock inline;
 	public
 	  function isIServerBlockImpl: boolean;
-	  function getIServerBlockImpl: IServerBlockImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIServerBlockImpl: IServerBlockImpl;
+	  property vTable: PServerBlockVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function getLogin(): PAnsiChar;
@@ -2670,12 +2739,14 @@ type
 	end;
 
 	IServerBlockImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PServerBlockVTable;
 	public
 	  const VERSION = 4;
 	public
 	  constructor create;
-	  function getInterface: IServerBlock;
-	  function getvTableVersion: NativeInt override;
+	  function asIServerBlock: IServerBlock;
+	  property vTable: PServerBlockVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getLogin(): PAnsiChar; virtual; abstract;
@@ -2702,14 +2773,14 @@ type
 
 	TClientBlock = record
 	private
-	  nullPtr: pointer;
-	  vTable: PClientBlockVTable;
-	  owner: IClientBlockImpl; {Only valid if isIClientBlockImpl returns true }
-	  function thisRecord: IClientBlock inline;
+	  FNullPtr: pointer;
+	  FvTable: PClientBlockVTable;
+	  FIClientBlockImpl: IClientBlockImpl; {Only valid if isIClientBlockImpl returns true }
+	  function this: IClientBlock inline;
 	public
 	  function isIClientBlockImpl: boolean;
-	  function getIClientBlockImpl: IClientBlockImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIClientBlockImpl: IClientBlockImpl;
+	  property vTable: PClientBlockVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -2723,12 +2794,14 @@ type
 	end;
 
 	IClientBlockImpl = class(IReferenceCountedImpl)
+	private
+	  function getVTable: PClientBlockVTable;
 	public
 	  const VERSION = 8;
 	public
 	  constructor create;
-	  function getInterface: IClientBlock;
-	  function getvTableVersion: NativeInt override;
+	  function asIClientBlock: IClientBlock;
+	  property vTable: PClientBlockVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getLogin(): PAnsiChar; virtual; abstract;
@@ -2755,14 +2828,14 @@ type
 
 	TServer = record
 	private
-	  nullPtr: pointer;
-	  vTable: PServerVTable;
-	  owner: IServerImpl; {Only valid if isIServerImpl returns true }
-	  function thisRecord: IServer inline;
+	  FNullPtr: pointer;
+	  FvTable: PServerVTable;
+	  FIServerImpl: IServerImpl; {Only valid if isIServerImpl returns true }
+	  function this: IServer inline;
 	public
 	  function isIServerImpl: boolean;
-	  function getIServerImpl: IServerImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIServerImpl: IServerImpl;
+	  property vTable: PServerVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -2774,12 +2847,14 @@ type
 	end;
 
 	IServerImpl = class(IAuthImpl)
+	private
+	  function getVTable: PServerVTable;
 	public
 	  const VERSION = 6;
 	public
 	  constructor create;
-	  function getInterface: IServer;
-	  function getvTableVersion: NativeInt override;
+	  function asIServer: IServer;
+	  property vTable: PServerVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function authenticate(status: IStatus; sBlock: IServerBlock; writerInterface: IWriter): Integer; virtual; abstract;
@@ -2801,14 +2876,14 @@ type
 
 	TClient = record
 	private
-	  nullPtr: pointer;
-	  vTable: PClientVTable;
-	  owner: IClientImpl; {Only valid if isIClientImpl returns true }
-	  function thisRecord: IClient inline;
+	  FNullPtr: pointer;
+	  FvTable: PClientVTable;
+	  FIClientImpl: IClientImpl; {Only valid if isIClientImpl returns true }
+	  function this: IClient inline;
 	public
 	  function isIClientImpl: boolean;
-	  function getIClientImpl: IClientImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIClientImpl: IClientImpl;
+	  property vTable: PClientVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -2819,12 +2894,14 @@ type
 	end;
 
 	IClientImpl = class(IAuthImpl)
+	private
+	  function getVTable: PClientVTable;
 	public
 	  const VERSION = 5;
 	public
 	  constructor create;
-	  function getInterface: IClient;
-	  function getvTableVersion: NativeInt override;
+	  function asIClient: IClient;
+	  property vTable: PClientVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function authenticate(status: IStatus; cBlock: IClientBlock): Integer; virtual; abstract;
@@ -2843,14 +2920,14 @@ type
 
 	TUserField = record
 	private
-	  nullPtr: pointer;
-	  vTable: PUserFieldVTable;
-	  owner: IUserFieldImpl; {Only valid if isIUserFieldImpl returns true }
-	  function thisRecord: IUserField inline;
+	  FNullPtr: pointer;
+	  FvTable: PUserFieldVTable;
+	  FIUserFieldImpl: IUserFieldImpl; {Only valid if isIUserFieldImpl returns true }
+	  function this: IUserField inline;
 	public
 	  function isIUserFieldImpl: boolean;
-	  function getIUserFieldImpl: IUserFieldImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIUserFieldImpl: IUserFieldImpl;
+	  property vTable: PUserFieldVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function entered(): Integer;
@@ -2859,12 +2936,14 @@ type
 	end;
 
 	IUserFieldImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PUserFieldVTable;
 	public
 	  const VERSION = 3;
 	public
 	  constructor create;
-	  function getInterface: IUserField;
-	  function getvTableVersion: NativeInt override;
+	  function asIUserField: IUserField;
+	  property vTable: PUserFieldVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function entered(): Integer; virtual; abstract;
@@ -2887,14 +2966,14 @@ type
 
 	TCharUserField = record
 	private
-	  nullPtr: pointer;
-	  vTable: PCharUserFieldVTable;
-	  owner: ICharUserFieldImpl; {Only valid if isICharUserFieldImpl returns true }
-	  function thisRecord: ICharUserField inline;
+	  FNullPtr: pointer;
+	  FvTable: PCharUserFieldVTable;
+	  FICharUserFieldImpl: ICharUserFieldImpl; {Only valid if isICharUserFieldImpl returns true }
+	  function this: ICharUserField inline;
 	public
 	  function isICharUserFieldImpl: boolean;
-	  function getICharUserFieldImpl: ICharUserFieldImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asICharUserFieldImpl: ICharUserFieldImpl;
+	  property vTable: PCharUserFieldVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function entered(): Integer;
@@ -2905,12 +2984,14 @@ type
 	end;
 
 	ICharUserFieldImpl = class(IUserFieldImpl)
+	private
+	  function getVTable: PCharUserFieldVTable;
 	public
 	  const VERSION = 5;
 	public
 	  constructor create;
-	  function getInterface: ICharUserField;
-	  function getvTableVersion: NativeInt override;
+	  function asICharUserField: ICharUserField;
+	  property vTable: PCharUserFieldVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function get(): PAnsiChar; virtual; abstract;
@@ -2932,14 +3013,14 @@ type
 
 	TIntUserField = record
 	private
-	  nullPtr: pointer;
-	  vTable: PIntUserFieldVTable;
-	  owner: IIntUserFieldImpl; {Only valid if isIIntUserFieldImpl returns true }
-	  function thisRecord: IIntUserField inline;
+	  FNullPtr: pointer;
+	  FvTable: PIntUserFieldVTable;
+	  FIIntUserFieldImpl: IIntUserFieldImpl; {Only valid if isIIntUserFieldImpl returns true }
+	  function this: IIntUserField inline;
 	public
 	  function isIIntUserFieldImpl: boolean;
-	  function getIIntUserFieldImpl: IIntUserFieldImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIIntUserFieldImpl: IIntUserFieldImpl;
+	  property vTable: PIntUserFieldVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function entered(): Integer;
@@ -2950,12 +3031,14 @@ type
 	end;
 
 	IIntUserFieldImpl = class(IUserFieldImpl)
+	private
+	  function getVTable: PIntUserFieldVTable;
 	public
 	  const VERSION = 5;
 	public
 	  constructor create;
-	  function getInterface: IIntUserField;
-	  function getvTableVersion: NativeInt override;
+	  function asIIntUserField: IIntUserField;
+	  property vTable: PIntUserFieldVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function get(): Integer; virtual; abstract;
@@ -2983,14 +3066,14 @@ type
 
 	TUser = record
 	private
-	  nullPtr: pointer;
-	  vTable: PUserVTable;
-	  owner: IUserImpl; {Only valid if isIUserImpl returns true }
-	  function thisRecord: IUser inline;
+	  FNullPtr: pointer;
+	  FvTable: PUserVTable;
+	  FIUserImpl: IUserImpl; {Only valid if isIUserImpl returns true }
+	  function this: IUser inline;
 	public
 	  function isIUserImpl: boolean;
-	  function getIUserImpl: IUserImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIUserImpl: IUserImpl;
+	  property vTable: PUserVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function operation(): Cardinal;
@@ -3007,6 +3090,8 @@ type
 	end;
 
 	IUserImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PUserVTable;
 	public
 	  const VERSION = 11;
 	  const OP_USER_ADD = Cardinal(1);
@@ -3017,8 +3102,8 @@ type
 	  const OP_USER_DROP_MAP = Cardinal(6);
 	public
 	  constructor create;
-	  function getInterface: IUser;
-	  function getvTableVersion: NativeInt override;
+	  function asIUser: IUser;
+	  property vTable: PUserVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function operation(): Cardinal; virtual; abstract;
@@ -3045,26 +3130,28 @@ type
 
 	TListUsers = record
 	private
-	  nullPtr: pointer;
-	  vTable: PListUsersVTable;
-	  owner: IListUsersImpl; {Only valid if isIListUsersImpl returns true }
-	  function thisRecord: IListUsers inline;
+	  FNullPtr: pointer;
+	  FvTable: PListUsersVTable;
+	  FIListUsersImpl: IListUsersImpl; {Only valid if isIListUsersImpl returns true }
+	  function this: IListUsers inline;
 	public
 	  function isIListUsersImpl: boolean;
-	  function getIListUsersImpl: IListUsersImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIListUsersImpl: IListUsersImpl;
+	  property vTable: PListUsersVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure list(status: IStatus; user: IUser);
 	end;
 
 	IListUsersImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PListUsersVTable;
 	public
 	  const VERSION = 1;
 	public
 	  constructor create;
-	  function getInterface: IListUsers;
-	  function getvTableVersion: NativeInt override;
+	  function asIListUsers: IListUsers;
+	  property vTable: PListUsersVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure list(status: IStatus; user: IUser); virtual; abstract;
@@ -3087,14 +3174,14 @@ type
 
 	TLogonInfo = record
 	private
-	  nullPtr: pointer;
-	  vTable: PLogonInfoVTable;
-	  owner: ILogonInfoImpl; {Only valid if isILogonInfoImpl returns true }
-	  function thisRecord: ILogonInfo inline;
+	  FNullPtr: pointer;
+	  FvTable: PLogonInfoVTable;
+	  FILogonInfoImpl: ILogonInfoImpl; {Only valid if isILogonInfoImpl returns true }
+	  function this: ILogonInfo inline;
 	public
 	  function isILogonInfoImpl: boolean;
-	  function getILogonInfoImpl: ILogonInfoImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asILogonInfoImpl: ILogonInfoImpl;
+	  property vTable: PLogonInfoVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function name(): PAnsiChar;
@@ -3107,12 +3194,14 @@ type
 	end;
 
 	ILogonInfoImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PLogonInfoVTable;
 	public
 	  const VERSION = 7;
 	public
 	  constructor create;
-	  function getInterface: ILogonInfo;
-	  function getvTableVersion: NativeInt override;
+	  function asILogonInfo: ILogonInfo;
+	  property vTable: PLogonInfoVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function name(): PAnsiChar; virtual; abstract;
@@ -3142,14 +3231,14 @@ type
 
 	TManagement = record
 	private
-	  nullPtr: pointer;
-	  vTable: PManagementVTable;
-	  owner: IManagementImpl; {Only valid if isIManagementImpl returns true }
-	  function thisRecord: IManagement inline;
+	  FNullPtr: pointer;
+	  FvTable: PManagementVTable;
+	  FIManagementImpl: IManagementImpl; {Only valid if isIManagementImpl returns true }
+	  function this: IManagement inline;
 	public
 	  function isIManagementImpl: boolean;
-	  function getIManagementImpl: IManagementImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIManagementImpl: IManagementImpl;
+	  property vTable: PManagementVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -3163,12 +3252,14 @@ type
 	end;
 
 	IManagementImpl = class(IPluginBaseImpl)
+	private
+	  function getVTable: PManagementVTable;
 	public
 	  const VERSION = 8;
 	public
 	  constructor create;
-	  function getInterface: IManagement;
-	  function getvTableVersion: NativeInt override;
+	  function asIManagement: IManagement;
+	  property vTable: PManagementVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure start(status: IStatus; logonInfo: ILogonInfo); virtual; abstract;
@@ -3194,14 +3285,14 @@ type
 
 	TAuthBlock = record
 	private
-	  nullPtr: pointer;
-	  vTable: PAuthBlockVTable;
-	  owner: IAuthBlockImpl; {Only valid if isIAuthBlockImpl returns true }
-	  function thisRecord: IAuthBlock inline;
+	  FNullPtr: pointer;
+	  FvTable: PAuthBlockVTable;
+	  FIAuthBlockImpl: IAuthBlockImpl; {Only valid if isIAuthBlockImpl returns true }
+	  function this: IAuthBlock inline;
 	public
 	  function isIAuthBlockImpl: boolean;
-	  function getIAuthBlockImpl: IAuthBlockImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIAuthBlockImpl: IAuthBlockImpl;
+	  property vTable: PAuthBlockVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function getType(): PAnsiChar;
@@ -3214,12 +3305,14 @@ type
 	end;
 
 	IAuthBlockImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PAuthBlockVTable;
 	public
 	  const VERSION = 7;
 	public
 	  constructor create;
-	  function getInterface: IAuthBlock;
-	  function getvTableVersion: NativeInt override;
+	  function asIAuthBlock: IAuthBlock;
+	  property vTable: PAuthBlockVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getType(): PAnsiChar; virtual; abstract;
@@ -3251,14 +3344,14 @@ type
 
 	TWireCryptPlugin = record
 	private
-	  nullPtr: pointer;
-	  vTable: PWireCryptPluginVTable;
-	  owner: IWireCryptPluginImpl; {Only valid if isIWireCryptPluginImpl returns true }
-	  function thisRecord: IWireCryptPlugin inline;
+	  FNullPtr: pointer;
+	  FvTable: PWireCryptPluginVTable;
+	  FIWireCryptPluginImpl: IWireCryptPluginImpl; {Only valid if isIWireCryptPluginImpl returns true }
+	  function this: IWireCryptPlugin inline;
 	public
 	  function isIWireCryptPluginImpl: boolean;
-	  function getIWireCryptPluginImpl: IWireCryptPluginImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIWireCryptPluginImpl: IWireCryptPluginImpl;
+	  property vTable: PWireCryptPluginVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -3274,12 +3367,14 @@ type
 	end;
 
 	IWireCryptPluginImpl = class(IPluginBaseImpl)
+	private
+	  function getVTable: PWireCryptPluginVTable;
 	public
 	  const VERSION = 10;
 	public
 	  constructor create;
-	  function getInterface: IWireCryptPlugin;
-	  function getvTableVersion: NativeInt override;
+	  function asIWireCryptPlugin: IWireCryptPlugin;
+	  property vTable: PWireCryptPluginVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getKnownTypes(status: IStatus): PAnsiChar; virtual; abstract;
@@ -3301,26 +3396,28 @@ type
 
 	TCryptKeyCallback = record
 	private
-	  nullPtr: pointer;
-	  vTable: PCryptKeyCallbackVTable;
-	  owner: ICryptKeyCallbackImpl; {Only valid if isICryptKeyCallbackImpl returns true }
-	  function thisRecord: ICryptKeyCallback inline;
+	  FNullPtr: pointer;
+	  FvTable: PCryptKeyCallbackVTable;
+	  FICryptKeyCallbackImpl: ICryptKeyCallbackImpl; {Only valid if isICryptKeyCallbackImpl returns true }
+	  function this: ICryptKeyCallback inline;
 	public
 	  function isICryptKeyCallbackImpl: boolean;
-	  function getICryptKeyCallbackImpl: ICryptKeyCallbackImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asICryptKeyCallbackImpl: ICryptKeyCallbackImpl;
+	  property vTable: PCryptKeyCallbackVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function callback(dataLength: Cardinal; data: Pointer; bufferLength: Cardinal; buffer: Pointer): Cardinal;
 	end;
 
 	ICryptKeyCallbackImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PCryptKeyCallbackVTable;
 	public
 	  const VERSION = 1;
 	public
 	  constructor create;
-	  function getInterface: ICryptKeyCallback;
-	  function getvTableVersion: NativeInt override;
+	  function asICryptKeyCallback: ICryptKeyCallback;
+	  property vTable: PCryptKeyCallbackVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function callback(dataLength: Cardinal; data: Pointer; bufferLength: Cardinal; buffer: Pointer): Cardinal; virtual; abstract;
@@ -3344,14 +3441,14 @@ type
 
 	TKeyHolderPlugin = record
 	private
-	  nullPtr: pointer;
-	  vTable: PKeyHolderPluginVTable;
-	  owner: IKeyHolderPluginImpl; {Only valid if isIKeyHolderPluginImpl returns true }
-	  function thisRecord: IKeyHolderPlugin inline;
+	  FNullPtr: pointer;
+	  FvTable: PKeyHolderPluginVTable;
+	  FIKeyHolderPluginImpl: IKeyHolderPluginImpl; {Only valid if isIKeyHolderPluginImpl returns true }
+	  function this: IKeyHolderPlugin inline;
 	public
 	  function isIKeyHolderPluginImpl: boolean;
-	  function getIKeyHolderPluginImpl: IKeyHolderPluginImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIKeyHolderPluginImpl: IKeyHolderPluginImpl;
+	  property vTable: PKeyHolderPluginVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -3365,12 +3462,14 @@ type
 	end;
 
 	IKeyHolderPluginImpl = class(IPluginBaseImpl)
+	private
+	  function getVTable: PKeyHolderPluginVTable;
 	public
 	  const VERSION = 8;
 	public
 	  constructor create;
-	  function getInterface: IKeyHolderPlugin;
-	  function getvTableVersion: NativeInt override;
+	  function asIKeyHolderPlugin: IKeyHolderPlugin;
+	  property vTable: PKeyHolderPluginVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function keyCallback(status: IStatus; callback: ICryptKeyCallback): Integer; virtual; abstract;
@@ -3392,14 +3491,14 @@ type
 
 	TDbCryptInfo = record
 	private
-	  nullPtr: pointer;
-	  vTable: PDbCryptInfoVTable;
-	  owner: IDbCryptInfoImpl; {Only valid if isIDbCryptInfoImpl returns true }
-	  function thisRecord: IDbCryptInfo inline;
+	  FNullPtr: pointer;
+	  FvTable: PDbCryptInfoVTable;
+	  FIDbCryptInfoImpl: IDbCryptInfoImpl; {Only valid if isIDbCryptInfoImpl returns true }
+	  function this: IDbCryptInfo inline;
 	public
 	  function isIDbCryptInfoImpl: boolean;
-	  function getIDbCryptInfoImpl: IDbCryptInfoImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIDbCryptInfoImpl: IDbCryptInfoImpl;
+	  property vTable: PDbCryptInfoVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -3408,12 +3507,14 @@ type
 	end;
 
 	IDbCryptInfoImpl = class(IReferenceCountedImpl)
+	private
+	  function getVTable: PDbCryptInfoVTable;
 	public
 	  const VERSION = 3;
 	public
 	  constructor create;
-	  function getInterface: IDbCryptInfo;
-	  function getvTableVersion: NativeInt override;
+	  function asIDbCryptInfo: IDbCryptInfo;
+	  property vTable: PDbCryptInfoVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getDatabaseFullPath(status: IStatus): PAnsiChar; virtual; abstract;
@@ -3437,14 +3538,14 @@ type
 
 	TDbCryptPlugin = record
 	private
-	  nullPtr: pointer;
-	  vTable: PDbCryptPluginVTable;
-	  owner: IDbCryptPluginImpl; {Only valid if isIDbCryptPluginImpl returns true }
-	  function thisRecord: IDbCryptPlugin inline;
+	  FNullPtr: pointer;
+	  FvTable: PDbCryptPluginVTable;
+	  FIDbCryptPluginImpl: IDbCryptPluginImpl; {Only valid if isIDbCryptPluginImpl returns true }
+	  function this: IDbCryptPlugin inline;
 	public
 	  function isIDbCryptPluginImpl: boolean;
-	  function getIDbCryptPluginImpl: IDbCryptPluginImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIDbCryptPluginImpl: IDbCryptPluginImpl;
+	  property vTable: PDbCryptPluginVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -3458,12 +3559,14 @@ type
 	end;
 
 	IDbCryptPluginImpl = class(IPluginBaseImpl)
+	private
+	  function getVTable: PDbCryptPluginVTable;
 	public
 	  const VERSION = 8;
 	public
 	  constructor create;
-	  function getInterface: IDbCryptPlugin;
-	  function getvTableVersion: NativeInt override;
+	  function asIDbCryptPlugin: IDbCryptPlugin;
+	  property vTable: PDbCryptPluginVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure setKey(status: IStatus; length: Cardinal; sources: IKeyHolderPlugin; keyName: PAnsiChar); virtual; abstract;
@@ -3492,14 +3595,14 @@ type
 
 	TExternalContext = record
 	private
-	  nullPtr: pointer;
-	  vTable: PExternalContextVTable;
-	  owner: IExternalContextImpl; {Only valid if isIExternalContextImpl returns true }
-	  function thisRecord: IExternalContext inline;
+	  FNullPtr: pointer;
+	  FvTable: PExternalContextVTable;
+	  FIExternalContextImpl: IExternalContextImpl; {Only valid if isIExternalContextImpl returns true }
+	  function this: IExternalContext inline;
 	public
 	  function isIExternalContextImpl: boolean;
-	  function getIExternalContextImpl: IExternalContextImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIExternalContextImpl: IExternalContextImpl;
+	  property vTable: PExternalContextVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function getMaster(): IMaster;
@@ -3515,12 +3618,14 @@ type
 	end;
 
 	IExternalContextImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PExternalContextVTable;
 	public
 	  const VERSION = 10;
 	public
 	  constructor create;
-	  function getInterface: IExternalContext;
-	  function getvTableVersion: NativeInt override;
+	  function asIExternalContext: IExternalContext;
+	  property vTable: PExternalContextVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getMaster(): IMaster; virtual; abstract;
@@ -3547,14 +3652,14 @@ type
 
 	TExternalResultSet = record
 	private
-	  nullPtr: pointer;
-	  vTable: PExternalResultSetVTable;
-	  owner: IExternalResultSetImpl; {Only valid if isIExternalResultSetImpl returns true }
-	  function thisRecord: IExternalResultSet inline;
+	  FNullPtr: pointer;
+	  FvTable: PExternalResultSetVTable;
+	  FIExternalResultSetImpl: IExternalResultSetImpl; {Only valid if isIExternalResultSetImpl returns true }
+	  function this: IExternalResultSet inline;
 	public
 	  function isIExternalResultSetImpl: boolean;
-	  function getIExternalResultSetImpl: IExternalResultSetImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIExternalResultSetImpl: IExternalResultSetImpl;
+	  property vTable: PExternalResultSetVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure dispose();
@@ -3562,12 +3667,14 @@ type
 	end;
 
 	IExternalResultSetImpl = class(IDisposableImpl)
+	private
+	  function getVTable: PExternalResultSetVTable;
 	public
 	  const VERSION = 2;
 	public
 	  constructor create;
-	  function getInterface: IExternalResultSet;
-	  function getvTableVersion: NativeInt override;
+	  function asIExternalResultSet: IExternalResultSet;
+	  property vTable: PExternalResultSetVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function fetch(status: IStatus): Boolean; virtual; abstract;
@@ -3586,14 +3693,14 @@ type
 
 	TExternalFunction = record
 	private
-	  nullPtr: pointer;
-	  vTable: PExternalFunctionVTable;
-	  owner: IExternalFunctionImpl; {Only valid if isIExternalFunctionImpl returns true }
-	  function thisRecord: IExternalFunction inline;
+	  FNullPtr: pointer;
+	  FvTable: PExternalFunctionVTable;
+	  FIExternalFunctionImpl: IExternalFunctionImpl; {Only valid if isIExternalFunctionImpl returns true }
+	  function this: IExternalFunction inline;
 	public
 	  function isIExternalFunctionImpl: boolean;
-	  function getIExternalFunctionImpl: IExternalFunctionImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIExternalFunctionImpl: IExternalFunctionImpl;
+	  property vTable: PExternalFunctionVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure dispose();
@@ -3602,12 +3709,14 @@ type
 	end;
 
 	IExternalFunctionImpl = class(IDisposableImpl)
+	private
+	  function getVTable: PExternalFunctionVTable;
 	public
 	  const VERSION = 3;
 	public
 	  constructor create;
-	  function getInterface: IExternalFunction;
-	  function getvTableVersion: NativeInt override;
+	  function asIExternalFunction: IExternalFunction;
+	  property vTable: PExternalFunctionVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure getCharSet(status: IStatus; context: IExternalContext; name: PAnsiChar; nameSize: Cardinal); virtual; abstract;
@@ -3627,14 +3736,14 @@ type
 
 	TExternalProcedure = record
 	private
-	  nullPtr: pointer;
-	  vTable: PExternalProcedureVTable;
-	  owner: IExternalProcedureImpl; {Only valid if isIExternalProcedureImpl returns true }
-	  function thisRecord: IExternalProcedure inline;
+	  FNullPtr: pointer;
+	  FvTable: PExternalProcedureVTable;
+	  FIExternalProcedureImpl: IExternalProcedureImpl; {Only valid if isIExternalProcedureImpl returns true }
+	  function this: IExternalProcedure inline;
 	public
 	  function isIExternalProcedureImpl: boolean;
-	  function getIExternalProcedureImpl: IExternalProcedureImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIExternalProcedureImpl: IExternalProcedureImpl;
+	  property vTable: PExternalProcedureVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure dispose();
@@ -3643,12 +3752,14 @@ type
 	end;
 
 	IExternalProcedureImpl = class(IDisposableImpl)
+	private
+	  function getVTable: PExternalProcedureVTable;
 	public
 	  const VERSION = 3;
 	public
 	  constructor create;
-	  function getInterface: IExternalProcedure;
-	  function getvTableVersion: NativeInt override;
+	  function asIExternalProcedure: IExternalProcedure;
+	  property vTable: PExternalProcedureVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure getCharSet(status: IStatus; context: IExternalContext; name: PAnsiChar; nameSize: Cardinal); virtual; abstract;
@@ -3668,14 +3779,14 @@ type
 
 	TExternalTrigger = record
 	private
-	  nullPtr: pointer;
-	  vTable: PExternalTriggerVTable;
-	  owner: IExternalTriggerImpl; {Only valid if isIExternalTriggerImpl returns true }
-	  function thisRecord: IExternalTrigger inline;
+	  FNullPtr: pointer;
+	  FvTable: PExternalTriggerVTable;
+	  FIExternalTriggerImpl: IExternalTriggerImpl; {Only valid if isIExternalTriggerImpl returns true }
+	  function this: IExternalTrigger inline;
 	public
 	  function isIExternalTriggerImpl: boolean;
-	  function getIExternalTriggerImpl: IExternalTriggerImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIExternalTriggerImpl: IExternalTriggerImpl;
+	  property vTable: PExternalTriggerVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure dispose();
@@ -3684,6 +3795,8 @@ type
 	end;
 
 	IExternalTriggerImpl = class(IDisposableImpl)
+	private
+	  function getVTable: PExternalTriggerVTable;
 	public
 	  const VERSION = 3;
 	  const TYPE_BEFORE = Cardinal(1);
@@ -3700,8 +3813,8 @@ type
 	  const ACTION_DDL = Cardinal(9);
 	public
 	  constructor create;
-	  function getInterface: IExternalTrigger;
-	  function getvTableVersion: NativeInt override;
+	  function asIExternalTrigger: IExternalTrigger;
+	  property vTable: PExternalTriggerVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure getCharSet(status: IStatus; context: IExternalContext; name: PAnsiChar; nameSize: Cardinal); virtual; abstract;
@@ -3727,14 +3840,14 @@ type
 
 	TRoutineMetadata = record
 	private
-	  nullPtr: pointer;
-	  vTable: PRoutineMetadataVTable;
-	  owner: IRoutineMetadataImpl; {Only valid if isIRoutineMetadataImpl returns true }
-	  function thisRecord: IRoutineMetadata inline;
+	  FNullPtr: pointer;
+	  FvTable: PRoutineMetadataVTable;
+	  FIRoutineMetadataImpl: IRoutineMetadataImpl; {Only valid if isIRoutineMetadataImpl returns true }
+	  function this: IRoutineMetadata inline;
 	public
 	  function isIRoutineMetadataImpl: boolean;
-	  function getIRoutineMetadataImpl: IRoutineMetadataImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIRoutineMetadataImpl: IRoutineMetadataImpl;
+	  property vTable: PRoutineMetadataVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function getPackage(status: IStatus): PAnsiChar;
@@ -3749,12 +3862,14 @@ type
 	end;
 
 	IRoutineMetadataImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PRoutineMetadataVTable;
 	public
 	  const VERSION = 9;
 	public
 	  constructor create;
-	  function getInterface: IRoutineMetadata;
-	  function getvTableVersion: NativeInt override;
+	  function asIRoutineMetadata: IRoutineMetadata;
+	  property vTable: PRoutineMetadataVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getPackage(status: IStatus): PAnsiChar; virtual; abstract;
@@ -3788,14 +3903,14 @@ type
 
 	TExternalEngine = record
 	private
-	  nullPtr: pointer;
-	  vTable: PExternalEngineVTable;
-	  owner: IExternalEngineImpl; {Only valid if isIExternalEngineImpl returns true }
-	  function thisRecord: IExternalEngine inline;
+	  FNullPtr: pointer;
+	  FvTable: PExternalEngineVTable;
+	  FIExternalEngineImpl: IExternalEngineImpl; {Only valid if isIExternalEngineImpl returns true }
+	  function this: IExternalEngine inline;
 	public
 	  function isIExternalEngineImpl: boolean;
-	  function getIExternalEngineImpl: IExternalEngineImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIExternalEngineImpl: IExternalEngineImpl;
+	  property vTable: PExternalEngineVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -3811,12 +3926,14 @@ type
 	end;
 
 	IExternalEngineImpl = class(IPluginBaseImpl)
+	private
+	  function getVTable: PExternalEngineVTable;
 	public
 	  const VERSION = 10;
 	public
 	  constructor create;
-	  function getInterface: IExternalEngine;
-	  function getvTableVersion: NativeInt override;
+	  function asIExternalEngine: IExternalEngine;
+	  property vTable: PExternalEngineVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure open(status: IStatus; context: IExternalContext; charSet: PAnsiChar; charSetSize: Cardinal); virtual; abstract;
@@ -3840,14 +3957,14 @@ type
 
 	TTimer = record
 	private
-	  nullPtr: pointer;
-	  vTable: PTimerVTable;
-	  owner: ITimerImpl; {Only valid if isITimerImpl returns true }
-	  function thisRecord: ITimer inline;
+	  FNullPtr: pointer;
+	  FvTable: PTimerVTable;
+	  FITimerImpl: ITimerImpl; {Only valid if isITimerImpl returns true }
+	  function this: ITimer inline;
 	public
 	  function isITimerImpl: boolean;
-	  function getITimerImpl: ITimerImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asITimerImpl: ITimerImpl;
+	  property vTable: PTimerVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -3856,12 +3973,14 @@ type
 	end;
 
 	ITimerImpl = class(IReferenceCountedImpl)
+	private
+	  function getVTable: PTimerVTable;
 	public
 	  const VERSION = 3;
 	public
 	  constructor create;
-	  function getInterface: ITimer;
-	  function getvTableVersion: NativeInt override;
+	  function asITimer: ITimer;
+	  property vTable: PTimerVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure handler(); virtual; abstract;
@@ -3879,14 +3998,14 @@ type
 
 	TTimerControl = record
 	private
-	  nullPtr: pointer;
-	  vTable: PTimerControlVTable;
-	  owner: ITimerControlImpl; {Only valid if isITimerControlImpl returns true }
-	  function thisRecord: ITimerControl inline;
+	  FNullPtr: pointer;
+	  FvTable: PTimerControlVTable;
+	  FITimerControlImpl: ITimerControlImpl; {Only valid if isITimerControlImpl returns true }
+	  function this: ITimerControl inline;
 	public
 	  function isITimerControlImpl: boolean;
-	  function getITimerControlImpl: ITimerControlImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asITimerControlImpl: ITimerControlImpl;
+	  property vTable: PTimerControlVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure start(status: IStatus; timer: ITimer; microSeconds: QWord);
@@ -3894,12 +4013,14 @@ type
 	end;
 
 	ITimerControlImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PTimerControlVTable;
 	public
 	  const VERSION = 2;
 	public
 	  constructor create;
-	  function getInterface: ITimerControl;
-	  function getvTableVersion: NativeInt override;
+	  function asITimerControl: ITimerControl;
+	  property vTable: PTimerControlVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure start(status: IStatus; timer: ITimer; microSeconds: QWord); virtual; abstract;
@@ -3917,26 +4038,28 @@ type
 
 	TVersionCallback = record
 	private
-	  nullPtr: pointer;
-	  vTable: PVersionCallbackVTable;
-	  owner: IVersionCallbackImpl; {Only valid if isIVersionCallbackImpl returns true }
-	  function thisRecord: IVersionCallback inline;
+	  FNullPtr: pointer;
+	  FvTable: PVersionCallbackVTable;
+	  FIVersionCallbackImpl: IVersionCallbackImpl; {Only valid if isIVersionCallbackImpl returns true }
+	  function this: IVersionCallback inline;
 	public
 	  function isIVersionCallbackImpl: boolean;
-	  function getIVersionCallbackImpl: IVersionCallbackImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIVersionCallbackImpl: IVersionCallbackImpl;
+	  property vTable: PVersionCallbackVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure callback(status: IStatus; text: PAnsiChar);
 	end;
 
 	IVersionCallbackImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PVersionCallbackVTable;
 	public
 	  const VERSION = 1;
 	public
 	  constructor create;
-	  function getInterface: IVersionCallback;
-	  function getvTableVersion: NativeInt override;
+	  function asIVersionCallback: IVersionCallback;
+	  property vTable: PVersionCallbackVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure callback(status: IStatus; text: PAnsiChar); virtual; abstract;
@@ -3974,14 +4097,14 @@ type
 
 	TUtil = record
 	private
-	  nullPtr: pointer;
-	  vTable: PUtilVTable;
-	  owner: IUtilImpl; {Only valid if isIUtilImpl returns true }
-	  function thisRecord: IUtil inline;
+	  FNullPtr: pointer;
+	  FvTable: PUtilVTable;
+	  FIUtilImpl: IUtilImpl; {Only valid if isIUtilImpl returns true }
+	  function this: IUtil inline;
 	public
 	  function isIUtilImpl: boolean;
-	  function getIUtilImpl: IUtilImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIUtilImpl: IUtilImpl;
+	  property vTable: PUtilVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure getFbVersion(status: IStatus; att: IAttachment; callback: IVersionCallback);
@@ -4009,12 +4132,14 @@ type
 	end;
 
 	IUtilImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PUtilVTable;
 	public
 	  const VERSION = 22;
 	public
 	  constructor create;
-	  function getInterface: IUtil;
-	  function getvTableVersion: NativeInt override;
+	  function asIUtil: IUtil;
+	  property vTable: PUtilVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure getFbVersion(status: IStatus; att: IAttachment; callback: IVersionCallback); virtual; abstract;
@@ -4052,26 +4177,28 @@ type
 
 	TOffsetsCallback = record
 	private
-	  nullPtr: pointer;
-	  vTable: POffsetsCallbackVTable;
-	  owner: IOffsetsCallbackImpl; {Only valid if isIOffsetsCallbackImpl returns true }
-	  function thisRecord: IOffsetsCallback inline;
+	  FNullPtr: pointer;
+	  FvTable: POffsetsCallbackVTable;
+	  FIOffsetsCallbackImpl: IOffsetsCallbackImpl; {Only valid if isIOffsetsCallbackImpl returns true }
+	  function this: IOffsetsCallback inline;
 	public
 	  function isIOffsetsCallbackImpl: boolean;
-	  function getIOffsetsCallbackImpl: IOffsetsCallbackImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIOffsetsCallbackImpl: IOffsetsCallbackImpl;
+	  property vTable: POffsetsCallbackVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure setOffset(status: IStatus; index: Cardinal; offset: Cardinal; nullOffset: Cardinal);
 	end;
 
 	IOffsetsCallbackImpl = class(IVersionedImpl)
+	private
+	  function getVTable: POffsetsCallbackVTable;
 	public
 	  const VERSION = 1;
 	public
 	  constructor create;
-	  function getInterface: IOffsetsCallback;
-	  function getvTableVersion: NativeInt override;
+	  function asIOffsetsCallback: IOffsetsCallback;
+	  property vTable: POffsetsCallbackVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure setOffset(status: IStatus; index: Cardinal; offset: Cardinal; nullOffset: Cardinal); virtual; abstract;
@@ -4108,14 +4235,14 @@ type
 
 	TXpbBuilder = record
 	private
-	  nullPtr: pointer;
-	  vTable: PXpbBuilderVTable;
-	  owner: IXpbBuilderImpl; {Only valid if isIXpbBuilderImpl returns true }
-	  function thisRecord: IXpbBuilder inline;
+	  FNullPtr: pointer;
+	  FvTable: PXpbBuilderVTable;
+	  FIXpbBuilderImpl: IXpbBuilderImpl; {Only valid if isIXpbBuilderImpl returns true }
+	  function this: IXpbBuilder inline;
 	public
 	  function isIXpbBuilderImpl: boolean;
-	  function getIXpbBuilderImpl: IXpbBuilderImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIXpbBuilderImpl: IXpbBuilderImpl;
+	  property vTable: PXpbBuilderVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure dispose();
@@ -4142,6 +4269,8 @@ type
 	end;
 
 	IXpbBuilderImpl = class(IDisposableImpl)
+	private
+	  function getVTable: PXpbBuilderVTable;
 	public
 	  const VERSION = 21;
 	  const DPB = Cardinal(1);
@@ -4155,8 +4284,8 @@ type
 	  const SPB_RESPONSE = Cardinal(9);
 	public
 	  constructor create;
-	  function getInterface: IXpbBuilder;
-	  function getvTableVersion: NativeInt override;
+	  function asIXpbBuilder: IXpbBuilder;
+	  property vTable: PXpbBuilderVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure clear(status: IStatus); virtual; abstract;
@@ -4200,14 +4329,14 @@ type
 
 	TTraceConnection = record
 	private
-	  nullPtr: pointer;
-	  vTable: PTraceConnectionVTable;
-	  owner: ITraceConnectionImpl; {Only valid if isITraceConnectionImpl returns true }
-	  function thisRecord: ITraceConnection inline;
+	  FNullPtr: pointer;
+	  FvTable: PTraceConnectionVTable;
+	  FITraceConnectionImpl: ITraceConnectionImpl; {Only valid if isITraceConnectionImpl returns true }
+	  function this: ITraceConnection inline;
 	public
 	  function isITraceConnectionImpl: boolean;
-	  function getITraceConnectionImpl: ITraceConnectionImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asITraceConnectionImpl: ITraceConnectionImpl;
+	  property vTable: PTraceConnectionVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function getKind(): Cardinal;
@@ -4222,14 +4351,16 @@ type
 	end;
 
 	ITraceConnectionImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PTraceConnectionVTable;
 	public
 	  const VERSION = 9;
 	  const KIND_DATABASE = Cardinal(1);
 	  const KIND_SERVICE = Cardinal(2);
 	public
 	  constructor create;
-	  function getInterface: ITraceConnection;
-	  function getvTableVersion: NativeInt override;
+	  function asITraceConnection: ITraceConnection;
+	  property vTable: PTraceConnectionVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getKind(): Cardinal; virtual; abstract;
@@ -4264,14 +4395,14 @@ type
 
 	TTraceDatabaseConnection = record
 	private
-	  nullPtr: pointer;
-	  vTable: PTraceDatabaseConnectionVTable;
-	  owner: ITraceDatabaseConnectionImpl; {Only valid if isITraceDatabaseConnectionImpl returns true }
-	  function thisRecord: ITraceDatabaseConnection inline;
+	  FNullPtr: pointer;
+	  FvTable: PTraceDatabaseConnectionVTable;
+	  FITraceDatabaseConnectionImpl: ITraceDatabaseConnectionImpl; {Only valid if isITraceDatabaseConnectionImpl returns true }
+	  function this: ITraceDatabaseConnection inline;
 	public
 	  function isITraceDatabaseConnectionImpl: boolean;
-	  function getITraceDatabaseConnectionImpl: ITraceDatabaseConnectionImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asITraceDatabaseConnectionImpl: ITraceDatabaseConnectionImpl;
+	  property vTable: PTraceDatabaseConnectionVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function getKind(): Cardinal;
@@ -4288,12 +4419,14 @@ type
 	end;
 
 	ITraceDatabaseConnectionImpl = class(ITraceConnectionImpl)
+	private
+	  function getVTable: PTraceDatabaseConnectionVTable;
 	public
 	  const VERSION = 11;
 	public
 	  constructor create;
-	  function getInterface: ITraceDatabaseConnection;
-	  function getvTableVersion: NativeInt override;
+	  function asITraceDatabaseConnection: ITraceDatabaseConnection;
+	  property vTable: PTraceDatabaseConnectionVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getConnectionID(): Int64; virtual; abstract;
@@ -4317,14 +4450,14 @@ type
 
 	TTraceTransaction = record
 	private
-	  nullPtr: pointer;
-	  vTable: PTraceTransactionVTable;
-	  owner: ITraceTransactionImpl; {Only valid if isITraceTransactionImpl returns true }
-	  function thisRecord: ITraceTransaction inline;
+	  FNullPtr: pointer;
+	  FvTable: PTraceTransactionVTable;
+	  FITraceTransactionImpl: ITraceTransactionImpl; {Only valid if isITraceTransactionImpl returns true }
+	  function this: ITraceTransaction inline;
 	public
 	  function isITraceTransactionImpl: boolean;
-	  function getITraceTransactionImpl: ITraceTransactionImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asITraceTransactionImpl: ITraceTransactionImpl;
+	  property vTable: PTraceTransactionVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function getTransactionID(): Int64;
@@ -4337,6 +4470,8 @@ type
 	end;
 
 	ITraceTransactionImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PTraceTransactionVTable;
 	public
 	  const VERSION = 7;
 	  const ISOLATION_CONSISTENCY = Cardinal(1);
@@ -4346,8 +4481,8 @@ type
 	  const ISOLATION_READ_COMMITTED_READ_CONSISTENCY = Cardinal(5);
 	public
 	  constructor create;
-	  function getInterface: ITraceTransaction;
-	  function getvTableVersion: NativeInt override;
+	  function asITraceTransaction: ITraceTransaction;
+	  property vTable: PTraceTransactionVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getTransactionID(): Int64; virtual; abstract;
@@ -4372,14 +4507,14 @@ type
 
 	TTraceParams = record
 	private
-	  nullPtr: pointer;
-	  vTable: PTraceParamsVTable;
-	  owner: ITraceParamsImpl; {Only valid if isITraceParamsImpl returns true }
-	  function thisRecord: ITraceParams inline;
+	  FNullPtr: pointer;
+	  FvTable: PTraceParamsVTable;
+	  FITraceParamsImpl: ITraceParamsImpl; {Only valid if isITraceParamsImpl returns true }
+	  function this: ITraceParams inline;
 	public
 	  function isITraceParamsImpl: boolean;
-	  function getITraceParamsImpl: ITraceParamsImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asITraceParamsImpl: ITraceParamsImpl;
+	  property vTable: PTraceParamsVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function getCount(): Cardinal;
@@ -4388,12 +4523,14 @@ type
 	end;
 
 	ITraceParamsImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PTraceParamsVTable;
 	public
 	  const VERSION = 3;
 	public
 	  constructor create;
-	  function getInterface: ITraceParams;
-	  function getvTableVersion: NativeInt override;
+	  function asITraceParams: ITraceParams;
+	  property vTable: PTraceParamsVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getCount(): Cardinal; virtual; abstract;
@@ -4413,14 +4550,14 @@ type
 
 	TTraceStatement = record
 	private
-	  nullPtr: pointer;
-	  vTable: PTraceStatementVTable;
-	  owner: ITraceStatementImpl; {Only valid if isITraceStatementImpl returns true }
-	  function thisRecord: ITraceStatement inline;
+	  FNullPtr: pointer;
+	  FvTable: PTraceStatementVTable;
+	  FITraceStatementImpl: ITraceStatementImpl; {Only valid if isITraceStatementImpl returns true }
+	  function this: ITraceStatement inline;
 	public
 	  function isITraceStatementImpl: boolean;
-	  function getITraceStatementImpl: ITraceStatementImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asITraceStatementImpl: ITraceStatementImpl;
+	  property vTable: PTraceStatementVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function getStmtID(): Int64;
@@ -4428,12 +4565,14 @@ type
 	end;
 
 	ITraceStatementImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PTraceStatementVTable;
 	public
 	  const VERSION = 2;
 	public
 	  constructor create;
-	  function getInterface: ITraceStatement;
-	  function getvTableVersion: NativeInt override;
+	  function asITraceStatement: ITraceStatement;
+	  property vTable: PTraceStatementVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getStmtID(): Int64; virtual; abstract;
@@ -4457,14 +4596,14 @@ type
 
 	TTraceSQLStatement = record
 	private
-	  nullPtr: pointer;
-	  vTable: PTraceSQLStatementVTable;
-	  owner: ITraceSQLStatementImpl; {Only valid if isITraceSQLStatementImpl returns true }
-	  function thisRecord: ITraceSQLStatement inline;
+	  FNullPtr: pointer;
+	  FvTable: PTraceSQLStatementVTable;
+	  FITraceSQLStatementImpl: ITraceSQLStatementImpl; {Only valid if isITraceSQLStatementImpl returns true }
+	  function this: ITraceSQLStatement inline;
 	public
 	  function isITraceSQLStatementImpl: boolean;
-	  function getITraceSQLStatementImpl: ITraceSQLStatementImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asITraceSQLStatementImpl: ITraceSQLStatementImpl;
+	  property vTable: PTraceSQLStatementVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function getStmtID(): Int64;
@@ -4477,12 +4616,14 @@ type
 	end;
 
 	ITraceSQLStatementImpl = class(ITraceStatementImpl)
+	private
+	  function getVTable: PTraceSQLStatementVTable;
 	public
 	  const VERSION = 7;
 	public
 	  constructor create;
-	  function getInterface: ITraceSQLStatement;
-	  function getvTableVersion: NativeInt override;
+	  function asITraceSQLStatement: ITraceSQLStatement;
+	  property vTable: PTraceSQLStatementVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getText(): PAnsiChar; virtual; abstract;
@@ -4507,14 +4648,14 @@ type
 
 	TTraceBLRStatement = record
 	private
-	  nullPtr: pointer;
-	  vTable: PTraceBLRStatementVTable;
-	  owner: ITraceBLRStatementImpl; {Only valid if isITraceBLRStatementImpl returns true }
-	  function thisRecord: ITraceBLRStatement inline;
+	  FNullPtr: pointer;
+	  FvTable: PTraceBLRStatementVTable;
+	  FITraceBLRStatementImpl: ITraceBLRStatementImpl; {Only valid if isITraceBLRStatementImpl returns true }
+	  function this: ITraceBLRStatement inline;
 	public
 	  function isITraceBLRStatementImpl: boolean;
-	  function getITraceBLRStatementImpl: ITraceBLRStatementImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asITraceBLRStatementImpl: ITraceBLRStatementImpl;
+	  property vTable: PTraceBLRStatementVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function getStmtID(): Int64;
@@ -4525,12 +4666,14 @@ type
 	end;
 
 	ITraceBLRStatementImpl = class(ITraceStatementImpl)
+	private
+	  function getVTable: PTraceBLRStatementVTable;
 	public
 	  const VERSION = 5;
 	public
 	  constructor create;
-	  function getInterface: ITraceBLRStatement;
-	  function getvTableVersion: NativeInt override;
+	  function asITraceBLRStatement: ITraceBLRStatement;
+	  property vTable: PTraceBLRStatementVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getData(): BytePtr; virtual; abstract;
@@ -4551,14 +4694,14 @@ type
 
 	TTraceDYNRequest = record
 	private
-	  nullPtr: pointer;
-	  vTable: PTraceDYNRequestVTable;
-	  owner: ITraceDYNRequestImpl; {Only valid if isITraceDYNRequestImpl returns true }
-	  function thisRecord: ITraceDYNRequest inline;
+	  FNullPtr: pointer;
+	  FvTable: PTraceDYNRequestVTable;
+	  FITraceDYNRequestImpl: ITraceDYNRequestImpl; {Only valid if isITraceDYNRequestImpl returns true }
+	  function this: ITraceDYNRequest inline;
 	public
 	  function isITraceDYNRequestImpl: boolean;
-	  function getITraceDYNRequestImpl: ITraceDYNRequestImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asITraceDYNRequestImpl: ITraceDYNRequestImpl;
+	  property vTable: PTraceDYNRequestVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function getData(): BytePtr;
@@ -4567,12 +4710,14 @@ type
 	end;
 
 	ITraceDYNRequestImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PTraceDYNRequestVTable;
 	public
 	  const VERSION = 3;
 	public
 	  constructor create;
-	  function getInterface: ITraceDYNRequest;
-	  function getvTableVersion: NativeInt override;
+	  function asITraceDYNRequest: ITraceDYNRequest;
+	  property vTable: PTraceDYNRequestVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getData(): BytePtr; virtual; abstract;
@@ -4593,14 +4738,14 @@ type
 
 	TTraceContextVariable = record
 	private
-	  nullPtr: pointer;
-	  vTable: PTraceContextVariableVTable;
-	  owner: ITraceContextVariableImpl; {Only valid if isITraceContextVariableImpl returns true }
-	  function thisRecord: ITraceContextVariable inline;
+	  FNullPtr: pointer;
+	  FvTable: PTraceContextVariableVTable;
+	  FITraceContextVariableImpl: ITraceContextVariableImpl; {Only valid if isITraceContextVariableImpl returns true }
+	  function this: ITraceContextVariable inline;
 	public
 	  function isITraceContextVariableImpl: boolean;
-	  function getITraceContextVariableImpl: ITraceContextVariableImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asITraceContextVariableImpl: ITraceContextVariableImpl;
+	  property vTable: PTraceContextVariableVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function getNameSpace(): PAnsiChar;
@@ -4609,12 +4754,14 @@ type
 	end;
 
 	ITraceContextVariableImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PTraceContextVariableVTable;
 	public
 	  const VERSION = 3;
 	public
 	  constructor create;
-	  function getInterface: ITraceContextVariable;
-	  function getvTableVersion: NativeInt override;
+	  function asITraceContextVariable: ITraceContextVariable;
+	  property vTable: PTraceContextVariableVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getNameSpace(): PAnsiChar; virtual; abstract;
@@ -4635,14 +4782,14 @@ type
 
 	TTraceProcedure = record
 	private
-	  nullPtr: pointer;
-	  vTable: PTraceProcedureVTable;
-	  owner: ITraceProcedureImpl; {Only valid if isITraceProcedureImpl returns true }
-	  function thisRecord: ITraceProcedure inline;
+	  FNullPtr: pointer;
+	  FvTable: PTraceProcedureVTable;
+	  FITraceProcedureImpl: ITraceProcedureImpl; {Only valid if isITraceProcedureImpl returns true }
+	  function this: ITraceProcedure inline;
 	public
 	  function isITraceProcedureImpl: boolean;
-	  function getITraceProcedureImpl: ITraceProcedureImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asITraceProcedureImpl: ITraceProcedureImpl;
+	  property vTable: PTraceProcedureVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function getProcName(): PAnsiChar;
@@ -4651,12 +4798,14 @@ type
 	end;
 
 	ITraceProcedureImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PTraceProcedureVTable;
 	public
 	  const VERSION = 3;
 	public
 	  constructor create;
-	  function getInterface: ITraceProcedure;
-	  function getvTableVersion: NativeInt override;
+	  function asITraceProcedure: ITraceProcedure;
+	  property vTable: PTraceProcedureVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getProcName(): PAnsiChar; virtual; abstract;
@@ -4678,14 +4827,14 @@ type
 
 	TTraceFunction = record
 	private
-	  nullPtr: pointer;
-	  vTable: PTraceFunctionVTable;
-	  owner: ITraceFunctionImpl; {Only valid if isITraceFunctionImpl returns true }
-	  function thisRecord: ITraceFunction inline;
+	  FNullPtr: pointer;
+	  FvTable: PTraceFunctionVTable;
+	  FITraceFunctionImpl: ITraceFunctionImpl; {Only valid if isITraceFunctionImpl returns true }
+	  function this: ITraceFunction inline;
 	public
 	  function isITraceFunctionImpl: boolean;
-	  function getITraceFunctionImpl: ITraceFunctionImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asITraceFunctionImpl: ITraceFunctionImpl;
+	  property vTable: PTraceFunctionVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function getFuncName(): PAnsiChar;
@@ -4695,12 +4844,14 @@ type
 	end;
 
 	ITraceFunctionImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PTraceFunctionVTable;
 	public
 	  const VERSION = 4;
 	public
 	  constructor create;
-	  function getInterface: ITraceFunction;
-	  function getvTableVersion: NativeInt override;
+	  function asITraceFunction: ITraceFunction;
+	  property vTable: PTraceFunctionVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getFuncName(): PAnsiChar; virtual; abstract;
@@ -4724,14 +4875,14 @@ type
 
 	TTraceTrigger = record
 	private
-	  nullPtr: pointer;
-	  vTable: PTraceTriggerVTable;
-	  owner: ITraceTriggerImpl; {Only valid if isITraceTriggerImpl returns true }
-	  function thisRecord: ITraceTrigger inline;
+	  FNullPtr: pointer;
+	  FvTable: PTraceTriggerVTable;
+	  FITraceTriggerImpl: ITraceTriggerImpl; {Only valid if isITraceTriggerImpl returns true }
+	  function this: ITraceTrigger inline;
 	public
 	  function isITraceTriggerImpl: boolean;
-	  function getITraceTriggerImpl: ITraceTriggerImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asITraceTriggerImpl: ITraceTriggerImpl;
+	  property vTable: PTraceTriggerVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function getTriggerName(): PAnsiChar;
@@ -4742,6 +4893,8 @@ type
 	end;
 
 	ITraceTriggerImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PTraceTriggerVTable;
 	public
 	  const VERSION = 5;
 	  const TYPE_ALL = Cardinal(0);
@@ -4749,8 +4902,8 @@ type
 	  const TYPE_AFTER = Cardinal(2);
 	public
 	  constructor create;
-	  function getInterface: ITraceTrigger;
-	  function getvTableVersion: NativeInt override;
+	  function asITraceTrigger: ITraceTrigger;
+	  property vTable: PTraceTriggerVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getTriggerName(): PAnsiChar; virtual; abstract;
@@ -4782,14 +4935,14 @@ type
 
 	TTraceServiceConnection = record
 	private
-	  nullPtr: pointer;
-	  vTable: PTraceServiceConnectionVTable;
-	  owner: ITraceServiceConnectionImpl; {Only valid if isITraceServiceConnectionImpl returns true }
-	  function thisRecord: ITraceServiceConnection inline;
+	  FNullPtr: pointer;
+	  FvTable: PTraceServiceConnectionVTable;
+	  FITraceServiceConnectionImpl: ITraceServiceConnectionImpl; {Only valid if isITraceServiceConnectionImpl returns true }
+	  function this: ITraceServiceConnection inline;
 	public
 	  function isITraceServiceConnectionImpl: boolean;
-	  function getITraceServiceConnectionImpl: ITraceServiceConnectionImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asITraceServiceConnectionImpl: ITraceServiceConnectionImpl;
+	  property vTable: PTraceServiceConnectionVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function getKind(): Cardinal;
@@ -4807,12 +4960,14 @@ type
 	end;
 
 	ITraceServiceConnectionImpl = class(ITraceConnectionImpl)
+	private
+	  function getVTable: PTraceServiceConnectionVTable;
 	public
 	  const VERSION = 12;
 	public
 	  constructor create;
-	  function getInterface: ITraceServiceConnection;
-	  function getvTableVersion: NativeInt override;
+	  function asITraceServiceConnection: ITraceServiceConnection;
+	  property vTable: PTraceServiceConnectionVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getServiceID(): Pointer; virtual; abstract;
@@ -4834,14 +4989,14 @@ type
 
 	TTraceStatusVector = record
 	private
-	  nullPtr: pointer;
-	  vTable: PTraceStatusVectorVTable;
-	  owner: ITraceStatusVectorImpl; {Only valid if isITraceStatusVectorImpl returns true }
-	  function thisRecord: ITraceStatusVector inline;
+	  FNullPtr: pointer;
+	  FvTable: PTraceStatusVectorVTable;
+	  FITraceStatusVectorImpl: ITraceStatusVectorImpl; {Only valid if isITraceStatusVectorImpl returns true }
+	  function this: ITraceStatusVector inline;
 	public
 	  function isITraceStatusVectorImpl: boolean;
-	  function getITraceStatusVectorImpl: ITraceStatusVectorImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asITraceStatusVectorImpl: ITraceStatusVectorImpl;
+	  property vTable: PTraceStatusVectorVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function hasError(): Boolean;
@@ -4851,12 +5006,14 @@ type
 	end;
 
 	ITraceStatusVectorImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PTraceStatusVectorVTable;
 	public
 	  const VERSION = 4;
 	public
 	  constructor create;
-	  function getInterface: ITraceStatusVector;
-	  function getvTableVersion: NativeInt override;
+	  function asITraceStatusVector: ITraceStatusVector;
+	  property vTable: PTraceStatusVectorVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function hasError(): Boolean; virtual; abstract;
@@ -4880,14 +5037,14 @@ type
 
 	TTraceSweepInfo = record
 	private
-	  nullPtr: pointer;
-	  vTable: PTraceSweepInfoVTable;
-	  owner: ITraceSweepInfoImpl; {Only valid if isITraceSweepInfoImpl returns true }
-	  function thisRecord: ITraceSweepInfo inline;
+	  FNullPtr: pointer;
+	  FvTable: PTraceSweepInfoVTable;
+	  FITraceSweepInfoImpl: ITraceSweepInfoImpl; {Only valid if isITraceSweepInfoImpl returns true }
+	  function this: ITraceSweepInfo inline;
 	public
 	  function isITraceSweepInfoImpl: boolean;
-	  function getITraceSweepInfoImpl: ITraceSweepInfoImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asITraceSweepInfoImpl: ITraceSweepInfoImpl;
+	  property vTable: PTraceSweepInfoVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function getOIT(): Int64;
@@ -4898,12 +5055,14 @@ type
 	end;
 
 	ITraceSweepInfoImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PTraceSweepInfoVTable;
 	public
 	  const VERSION = 5;
 	public
 	  constructor create;
-	  function getInterface: ITraceSweepInfo;
-	  function getvTableVersion: NativeInt override;
+	  function asITraceSweepInfo: ITraceSweepInfo;
+	  property vTable: PTraceSweepInfoVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getOIT(): Int64; virtual; abstract;
@@ -4927,14 +5086,14 @@ type
 
 	TTraceLogWriter = record
 	private
-	  nullPtr: pointer;
-	  vTable: PTraceLogWriterVTable;
-	  owner: ITraceLogWriterImpl; {Only valid if isITraceLogWriterImpl returns true }
-	  function thisRecord: ITraceLogWriter inline;
+	  FNullPtr: pointer;
+	  FvTable: PTraceLogWriterVTable;
+	  FITraceLogWriterImpl: ITraceLogWriterImpl; {Only valid if isITraceLogWriterImpl returns true }
+	  function this: ITraceLogWriter inline;
 	public
 	  function isITraceLogWriterImpl: boolean;
-	  function getITraceLogWriterImpl: ITraceLogWriterImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asITraceLogWriterImpl: ITraceLogWriterImpl;
+	  property vTable: PTraceLogWriterVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -4944,12 +5103,14 @@ type
 	end;
 
 	ITraceLogWriterImpl = class(IReferenceCountedImpl)
+	private
+	  function getVTable: PTraceLogWriterVTable;
 	public
 	  const VERSION = 4;
 	public
 	  constructor create;
-	  function getInterface: ITraceLogWriter;
-	  function getvTableVersion: NativeInt override;
+	  function asITraceLogWriter: ITraceLogWriter;
+	  property vTable: PTraceLogWriterVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function write(buf: Pointer; size: Cardinal): Cardinal; virtual; abstract;
@@ -4973,14 +5134,14 @@ type
 
 	TTraceInitInfo = record
 	private
-	  nullPtr: pointer;
-	  vTable: PTraceInitInfoVTable;
-	  owner: ITraceInitInfoImpl; {Only valid if isITraceInitInfoImpl returns true }
-	  function thisRecord: ITraceInitInfo inline;
+	  FNullPtr: pointer;
+	  FvTable: PTraceInitInfoVTable;
+	  FITraceInitInfoImpl: ITraceInitInfoImpl; {Only valid if isITraceInitInfoImpl returns true }
+	  function this: ITraceInitInfo inline;
 	public
 	  function isITraceInitInfoImpl: boolean;
-	  function getITraceInitInfoImpl: ITraceInitInfoImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asITraceInitInfoImpl: ITraceInitInfoImpl;
+	  property vTable: PTraceInitInfoVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function getConfigText(): PAnsiChar;
@@ -4993,12 +5154,14 @@ type
 	end;
 
 	ITraceInitInfoImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PTraceInitInfoVTable;
 	public
 	  const VERSION = 7;
 	public
 	  constructor create;
-	  function getInterface: ITraceInitInfo;
-	  function getvTableVersion: NativeInt override;
+	  function asITraceInitInfo: ITraceInitInfo;
+	  property vTable: PTraceInitInfoVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getConfigText(): PAnsiChar; virtual; abstract;
@@ -5043,14 +5206,14 @@ type
 
 	TTracePlugin = record
 	private
-	  nullPtr: pointer;
-	  vTable: PTracePluginVTable;
-	  owner: ITracePluginImpl; {Only valid if isITracePluginImpl returns true }
-	  function thisRecord: ITracePlugin inline;
+	  FNullPtr: pointer;
+	  FvTable: PTracePluginVTable;
+	  FITracePluginImpl: ITracePluginImpl; {Only valid if isITracePluginImpl returns true }
+	  function this: ITracePlugin inline;
 	public
 	  function isITracePluginImpl: boolean;
-	  function getITracePluginImpl: ITracePluginImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asITracePluginImpl: ITracePluginImpl;
+	  property vTable: PTracePluginVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -5079,6 +5242,8 @@ type
 	end;
 
 	ITracePluginImpl = class(IReferenceCountedImpl)
+	private
+	  function getVTable: PTracePluginVTable;
 	public
 	  const VERSION = 23;
 	  const RESULT_SUCCESS = Cardinal(0);
@@ -5090,8 +5255,8 @@ type
 	  const SWEEP_STATE_PROGRESS = Cardinal(4);
 	public
 	  constructor create;
-	  function getInterface: ITracePlugin;
-	  function getvTableVersion: NativeInt override;
+	  function asITracePlugin: ITracePlugin;
+	  property vTable: PTracePluginVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function trace_get_error(): PAnsiChar; virtual; abstract;
@@ -5133,14 +5298,14 @@ type
 
 	TTraceFactory = record
 	private
-	  nullPtr: pointer;
-	  vTable: PTraceFactoryVTable;
-	  owner: ITraceFactoryImpl; {Only valid if isITraceFactoryImpl returns true }
-	  function thisRecord: ITraceFactory inline;
+	  FNullPtr: pointer;
+	  FvTable: PTraceFactoryVTable;
+	  FITraceFactoryImpl: ITraceFactoryImpl; {Only valid if isITraceFactoryImpl returns true }
+	  function this: ITraceFactory inline;
 	public
 	  function isITraceFactoryImpl: boolean;
-	  function getITraceFactoryImpl: ITraceFactoryImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asITraceFactoryImpl: ITraceFactoryImpl;
+	  property vTable: PTraceFactoryVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -5152,6 +5317,8 @@ type
 	end;
 
 	ITraceFactoryImpl = class(IPluginBaseImpl)
+	private
+	  function getVTable: PTraceFactoryVTable;
 	public
 	  const VERSION = 6;
 	  const TRACE_EVENT_ATTACH = Cardinal(0);
@@ -5177,8 +5344,8 @@ type
 	  const TRACE_EVENT_MAX = Cardinal(20);
 	public
 	  constructor create;
-	  function getInterface: ITraceFactory;
-	  function getvTableVersion: NativeInt override;
+	  function asITraceFactory: ITraceFactory;
+	  property vTable: PTraceFactoryVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function trace_needs(): QWord; virtual; abstract;
@@ -5198,14 +5365,14 @@ type
 
 	TUdrFunctionFactory = record
 	private
-	  nullPtr: pointer;
-	  vTable: PUdrFunctionFactoryVTable;
-	  owner: IUdrFunctionFactoryImpl; {Only valid if isIUdrFunctionFactoryImpl returns true }
-	  function thisRecord: IUdrFunctionFactory inline;
+	  FNullPtr: pointer;
+	  FvTable: PUdrFunctionFactoryVTable;
+	  FIUdrFunctionFactoryImpl: IUdrFunctionFactoryImpl; {Only valid if isIUdrFunctionFactoryImpl returns true }
+	  function this: IUdrFunctionFactory inline;
 	public
 	  function isIUdrFunctionFactoryImpl: boolean;
-	  function getIUdrFunctionFactoryImpl: IUdrFunctionFactoryImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIUdrFunctionFactoryImpl: IUdrFunctionFactoryImpl;
+	  property vTable: PUdrFunctionFactoryVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure dispose();
@@ -5214,12 +5381,14 @@ type
 	end;
 
 	IUdrFunctionFactoryImpl = class(IDisposableImpl)
+	private
+	  function getVTable: PUdrFunctionFactoryVTable;
 	public
 	  const VERSION = 3;
 	public
 	  constructor create;
-	  function getInterface: IUdrFunctionFactory;
-	  function getvTableVersion: NativeInt override;
+	  function asIUdrFunctionFactory: IUdrFunctionFactory;
+	  property vTable: PUdrFunctionFactoryVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure setup(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder); virtual; abstract;
@@ -5239,14 +5408,14 @@ type
 
 	TUdrProcedureFactory = record
 	private
-	  nullPtr: pointer;
-	  vTable: PUdrProcedureFactoryVTable;
-	  owner: IUdrProcedureFactoryImpl; {Only valid if isIUdrProcedureFactoryImpl returns true }
-	  function thisRecord: IUdrProcedureFactory inline;
+	  FNullPtr: pointer;
+	  FvTable: PUdrProcedureFactoryVTable;
+	  FIUdrProcedureFactoryImpl: IUdrProcedureFactoryImpl; {Only valid if isIUdrProcedureFactoryImpl returns true }
+	  function this: IUdrProcedureFactory inline;
 	public
 	  function isIUdrProcedureFactoryImpl: boolean;
-	  function getIUdrProcedureFactoryImpl: IUdrProcedureFactoryImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIUdrProcedureFactoryImpl: IUdrProcedureFactoryImpl;
+	  property vTable: PUdrProcedureFactoryVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure dispose();
@@ -5255,12 +5424,14 @@ type
 	end;
 
 	IUdrProcedureFactoryImpl = class(IDisposableImpl)
+	private
+	  function getVTable: PUdrProcedureFactoryVTable;
 	public
 	  const VERSION = 3;
 	public
 	  constructor create;
-	  function getInterface: IUdrProcedureFactory;
-	  function getvTableVersion: NativeInt override;
+	  function asIUdrProcedureFactory: IUdrProcedureFactory;
+	  property vTable: PUdrProcedureFactoryVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure setup(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder); virtual; abstract;
@@ -5280,14 +5451,14 @@ type
 
 	TUdrTriggerFactory = record
 	private
-	  nullPtr: pointer;
-	  vTable: PUdrTriggerFactoryVTable;
-	  owner: IUdrTriggerFactoryImpl; {Only valid if isIUdrTriggerFactoryImpl returns true }
-	  function thisRecord: IUdrTriggerFactory inline;
+	  FNullPtr: pointer;
+	  FvTable: PUdrTriggerFactoryVTable;
+	  FIUdrTriggerFactoryImpl: IUdrTriggerFactoryImpl; {Only valid if isIUdrTriggerFactoryImpl returns true }
+	  function this: IUdrTriggerFactory inline;
 	public
 	  function isIUdrTriggerFactoryImpl: boolean;
-	  function getIUdrTriggerFactoryImpl: IUdrTriggerFactoryImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIUdrTriggerFactoryImpl: IUdrTriggerFactoryImpl;
+	  property vTable: PUdrTriggerFactoryVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure dispose();
@@ -5296,12 +5467,14 @@ type
 	end;
 
 	IUdrTriggerFactoryImpl = class(IDisposableImpl)
+	private
+	  function getVTable: PUdrTriggerFactoryVTable;
 	public
 	  const VERSION = 3;
 	public
 	  constructor create;
-	  function getInterface: IUdrTriggerFactory;
-	  function getvTableVersion: NativeInt override;
+	  function asIUdrTriggerFactory: IUdrTriggerFactory;
+	  property vTable: PUdrTriggerFactoryVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure setup(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; fieldsBuilder: IMetadataBuilder); virtual; abstract;
@@ -5322,14 +5495,14 @@ type
 
 	TUdrPlugin = record
 	private
-	  nullPtr: pointer;
-	  vTable: PUdrPluginVTable;
-	  owner: IUdrPluginImpl; {Only valid if isIUdrPluginImpl returns true }
-	  function thisRecord: IUdrPlugin inline;
+	  FNullPtr: pointer;
+	  FvTable: PUdrPluginVTable;
+	  FIUdrPluginImpl: IUdrPluginImpl; {Only valid if isIUdrPluginImpl returns true }
+	  function this: IUdrPlugin inline;
 	public
 	  function isIUdrPluginImpl: boolean;
-	  function getIUdrPluginImpl: IUdrPluginImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIUdrPluginImpl: IUdrPluginImpl;
+	  property vTable: PUdrPluginVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function getMaster(): IMaster;
@@ -5339,12 +5512,14 @@ type
 	end;
 
 	IUdrPluginImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PUdrPluginVTable;
 	public
 	  const VERSION = 4;
 	public
 	  constructor create;
-	  function getInterface: IUdrPlugin;
-	  function getvTableVersion: NativeInt override;
+	  function asIUdrPlugin: IUdrPlugin;
+	  property vTable: PUdrPluginVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getMaster(): IMaster; virtual; abstract;
@@ -5367,14 +5542,14 @@ type
 
 	TDecFloat16 = record
 	private
-	  nullPtr: pointer;
-	  vTable: PDecFloat16VTable;
-	  owner: IDecFloat16Impl; {Only valid if isIDecFloat16Impl returns true }
-	  function thisRecord: IDecFloat16 inline;
+	  FNullPtr: pointer;
+	  FvTable: PDecFloat16VTable;
+	  FIDecFloat16Impl: IDecFloat16Impl; {Only valid if isIDecFloat16Impl returns true }
+	  function this: IDecFloat16 inline;
 	public
 	  function isIDecFloat16Impl: boolean;
-	  function getIDecFloat16Impl: IDecFloat16Impl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIDecFloat16Impl: IDecFloat16Impl;
+	  property vTable: PDecFloat16VTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure toBcd(from: FB_DEC16Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr);
@@ -5384,14 +5559,16 @@ type
 	end;
 
 	IDecFloat16Impl = class(IVersionedImpl)
+	private
+	  function getVTable: PDecFloat16VTable;
 	public
 	  const VERSION = 4;
 	  const BCD_SIZE = Cardinal(16);
 	  const STRING_SIZE = Cardinal(24);
 	public
 	  constructor create;
-	  function getInterface: IDecFloat16;
-	  function getvTableVersion: NativeInt override;
+	  function asIDecFloat16: IDecFloat16;
+	  property vTable: PDecFloat16VTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure toBcd(from: FB_DEC16Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr); virtual; abstract;
@@ -5414,14 +5591,14 @@ type
 
 	TDecFloat34 = record
 	private
-	  nullPtr: pointer;
-	  vTable: PDecFloat34VTable;
-	  owner: IDecFloat34Impl; {Only valid if isIDecFloat34Impl returns true }
-	  function thisRecord: IDecFloat34 inline;
+	  FNullPtr: pointer;
+	  FvTable: PDecFloat34VTable;
+	  FIDecFloat34Impl: IDecFloat34Impl; {Only valid if isIDecFloat34Impl returns true }
+	  function this: IDecFloat34 inline;
 	public
 	  function isIDecFloat34Impl: boolean;
-	  function getIDecFloat34Impl: IDecFloat34Impl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIDecFloat34Impl: IDecFloat34Impl;
+	  property vTable: PDecFloat34VTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure toBcd(from: FB_DEC34Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr);
@@ -5431,14 +5608,16 @@ type
 	end;
 
 	IDecFloat34Impl = class(IVersionedImpl)
+	private
+	  function getVTable: PDecFloat34VTable;
 	public
 	  const VERSION = 4;
 	  const BCD_SIZE = Cardinal(34);
 	  const STRING_SIZE = Cardinal(43);
 	public
 	  constructor create;
-	  function getInterface: IDecFloat34;
-	  function getvTableVersion: NativeInt override;
+	  function asIDecFloat34: IDecFloat34;
+	  property vTable: PDecFloat34VTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure toBcd(from: FB_DEC34Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr); virtual; abstract;
@@ -5459,14 +5638,14 @@ type
 
 	TInt128 = record
 	private
-	  nullPtr: pointer;
-	  vTable: PInt128VTable;
-	  owner: IInt128Impl; {Only valid if isIInt128Impl returns true }
-	  function thisRecord: IInt128 inline;
+	  FNullPtr: pointer;
+	  FvTable: PInt128VTable;
+	  FIInt128Impl: IInt128Impl; {Only valid if isIInt128Impl returns true }
+	  function this: IInt128 inline;
 	public
 	  function isIInt128Impl: boolean;
-	  function getIInt128Impl: IInt128Impl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIInt128Impl: IInt128Impl;
+	  property vTable: PInt128VTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure toString(status: IStatus; from: FB_I128Ptr; scale: Integer; bufferLength: Cardinal; buffer: PAnsiChar);
@@ -5474,13 +5653,15 @@ type
 	end;
 
 	IInt128Impl = class(IVersionedImpl)
+	private
+	  function getVTable: PInt128VTable;
 	public
 	  const VERSION = 2;
 	  const STRING_SIZE = Cardinal(46);
 	public
 	  constructor create;
-	  function getInterface: IInt128;
-	  function getvTableVersion: NativeInt override;
+	  function asIInt128: IInt128;
+	  property vTable: PInt128VTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure toString(status: IStatus; from: FB_I128Ptr; scale: Integer; bufferLength: Cardinal; buffer: PAnsiChar); virtual; abstract;
@@ -5504,14 +5685,14 @@ type
 
 	TReplicatedField = record
 	private
-	  nullPtr: pointer;
-	  vTable: PReplicatedFieldVTable;
-	  owner: IReplicatedFieldImpl; {Only valid if isIReplicatedFieldImpl returns true }
-	  function thisRecord: IReplicatedField inline;
+	  FNullPtr: pointer;
+	  FvTable: PReplicatedFieldVTable;
+	  FIReplicatedFieldImpl: IReplicatedFieldImpl; {Only valid if isIReplicatedFieldImpl returns true }
+	  function this: IReplicatedField inline;
 	public
 	  function isIReplicatedFieldImpl: boolean;
-	  function getIReplicatedFieldImpl: IReplicatedFieldImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIReplicatedFieldImpl: IReplicatedFieldImpl;
+	  property vTable: PReplicatedFieldVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function getName(): PAnsiChar;
@@ -5524,12 +5705,14 @@ type
 	end;
 
 	IReplicatedFieldImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PReplicatedFieldVTable;
 	public
 	  const VERSION = 7;
 	public
 	  constructor create;
-	  function getInterface: IReplicatedField;
-	  function getvTableVersion: NativeInt override;
+	  function asIReplicatedField: IReplicatedField;
+	  property vTable: PReplicatedFieldVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getName(): PAnsiChar; virtual; abstract;
@@ -5555,14 +5738,14 @@ type
 
 	TReplicatedRecord = record
 	private
-	  nullPtr: pointer;
-	  vTable: PReplicatedRecordVTable;
-	  owner: IReplicatedRecordImpl; {Only valid if isIReplicatedRecordImpl returns true }
-	  function thisRecord: IReplicatedRecord inline;
+	  FNullPtr: pointer;
+	  FvTable: PReplicatedRecordVTable;
+	  FIReplicatedRecordImpl: IReplicatedRecordImpl; {Only valid if isIReplicatedRecordImpl returns true }
+	  function this: IReplicatedRecord inline;
 	public
 	  function isIReplicatedRecordImpl: boolean;
-	  function getIReplicatedRecordImpl: IReplicatedRecordImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIReplicatedRecordImpl: IReplicatedRecordImpl;
+	  property vTable: PReplicatedRecordVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  function getCount(): Cardinal;
@@ -5572,12 +5755,14 @@ type
 	end;
 
 	IReplicatedRecordImpl = class(IVersionedImpl)
+	private
+	  function getVTable: PReplicatedRecordVTable;
 	public
 	  const VERSION = 4;
 	public
 	  constructor create;
-	  function getInterface: IReplicatedRecord;
-	  function getvTableVersion: NativeInt override;
+	  function asIReplicatedRecord: IReplicatedRecord;
+	  property vTable: PReplicatedRecordVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function getCount(): Cardinal; virtual; abstract;
@@ -5608,14 +5793,14 @@ type
 
 	TReplicatedTransaction = record
 	private
-	  nullPtr: pointer;
-	  vTable: PReplicatedTransactionVTable;
-	  owner: IReplicatedTransactionImpl; {Only valid if isIReplicatedTransactionImpl returns true }
-	  function thisRecord: IReplicatedTransaction inline;
+	  FNullPtr: pointer;
+	  FvTable: PReplicatedTransactionVTable;
+	  FIReplicatedTransactionImpl: IReplicatedTransactionImpl; {Only valid if isIReplicatedTransactionImpl returns true }
+	  function this: IReplicatedTransaction inline;
 	public
 	  function isIReplicatedTransactionImpl: boolean;
-	  function getIReplicatedTransactionImpl: IReplicatedTransactionImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIReplicatedTransactionImpl: IReplicatedTransactionImpl;
+	  property vTable: PReplicatedTransactionVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure dispose();
@@ -5633,12 +5818,14 @@ type
 	end;
 
 	IReplicatedTransactionImpl = class(IDisposableImpl)
+	private
+	  function getVTable: PReplicatedTransactionVTable;
 	public
 	  const VERSION = 12;
 	public
 	  constructor create;
-	  function getInterface: IReplicatedTransaction;
-	  function getvTableVersion: NativeInt override;
+	  function asIReplicatedTransaction: IReplicatedTransaction;
+	  property vTable: PReplicatedTransactionVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  procedure prepare(status: IStatus); virtual; abstract;
@@ -5672,14 +5859,14 @@ type
 
 	TReplicatedSession = record
 	private
-	  nullPtr: pointer;
-	  vTable: PReplicatedSessionVTable;
-	  owner: IReplicatedSessionImpl; {Only valid if isIReplicatedSessionImpl returns true }
-	  function thisRecord: IReplicatedSession inline;
+	  FNullPtr: pointer;
+	  FvTable: PReplicatedSessionVTable;
+	  FIReplicatedSessionImpl: IReplicatedSessionImpl; {Only valid if isIReplicatedSessionImpl returns true }
+	  function this: IReplicatedSession inline;
 	public
 	  function isIReplicatedSessionImpl: boolean;
-	  function getIReplicatedSessionImpl: IReplicatedSessionImpl;
-	  function getvTableVersion: NativeInt inline;
+	  function asIReplicatedSessionImpl: IReplicatedSessionImpl;
+	  property vTable: PReplicatedSessionVTable read FvTable;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -5693,12 +5880,14 @@ type
 	end;
 
 	IReplicatedSessionImpl = class(IPluginBaseImpl)
+	private
+	  function getVTable: PReplicatedSessionVTable;
 	public
 	  const VERSION = 8;
 	public
 	  constructor create;
-	  function getInterface: IReplicatedSession;
-	  function getvTableVersion: NativeInt override;
+	  function asIReplicatedSession: IReplicatedSession;
+	  property vTable: PReplicatedSessionVTable read getVTable;
 	public
 	  {Firebird OOAPI interface}
 	  function init(status: IStatus; attachment: IAttachment): Boolean; virtual; abstract;
@@ -5719,5131 +5908,4656 @@ implementation
 resourcestring
 	errNotImplementationObject = 'interface is not an implementation of %s';
 
-function TVersioned.thisRecord: IVersioned;
+function TVersioned.this: IVersioned;
 begin
-  Result := IVersioned(@nullPtr);
+  Result := IVersioned(@FNullPtr);
 end;
 
-function TVersioned.getIVersionedImpl: IVersionedImpl;
+function TVersioned.asIVersionedImpl: IVersionedImpl;
 begin
   if isIVersionedImpl then
-    Result := owner
+    Result := FIVersionedImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TVersioned.getvTableVersion: NativeInt;
+function TReferenceCounted.this: IReferenceCounted;
 begin
-  Result := vTable^.version
+  Result := IReferenceCounted(@FNullPtr);
 end;
 
-function TReferenceCounted.thisRecord: IReferenceCounted;
-begin
-  Result := IReferenceCounted(@nullPtr);
-end;
-
-function TReferenceCounted.getIReferenceCountedImpl: IReferenceCountedImpl;
+function TReferenceCounted.asIReferenceCountedImpl: IReferenceCountedImpl;
 begin
   if isIReferenceCountedImpl then
-    Result := owner
+    Result := FIReferenceCountedImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TReferenceCounted.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 procedure TReferenceCounted.addRef();
 begin
-	vTable^.addRef(thisRecord);
+	vTable^.addRef(this);
 end;
 
 function TReferenceCounted.release(): Integer;
 begin
-	Result := vTable^.release(thisRecord);
+	Result := vTable^.release(this);
 end;
 
-function TDisposable.thisRecord: IDisposable;
+function TDisposable.this: IDisposable;
 begin
-  Result := IDisposable(@nullPtr);
+  Result := IDisposable(@FNullPtr);
 end;
 
-function TDisposable.getIDisposableImpl: IDisposableImpl;
+function TDisposable.asIDisposableImpl: IDisposableImpl;
 begin
   if isIDisposableImpl then
-    Result := owner
+    Result := FIDisposableImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TDisposable.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 procedure TDisposable.dispose();
 begin
-	vTable^.dispose(thisRecord);
+	vTable^.dispose(this);
 end;
 
-function TStatus.thisRecord: IStatus;
+function TStatus.this: IStatus;
 begin
-  Result := IStatus(@nullPtr);
+  Result := IStatus(@FNullPtr);
 end;
 
-function TStatus.getIStatusImpl: IStatusImpl;
+function TStatus.asIStatusImpl: IStatusImpl;
 begin
   if isIStatusImpl then
-    Result := owner
+    Result := FIStatusImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TStatus.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 procedure TStatus.dispose();
 begin
-	vTable^.dispose(IDisposable(thisRecord));
+	vTable^.dispose(IDisposable(this));
 end;
 
 procedure TStatus.init();
 begin
-	vTable^.init(thisRecord);
+	vTable^.init(this);
 end;
 
 function TStatus.getState(): Cardinal;
 begin
-	Result := vTable^.getState(thisRecord);
+	Result := vTable^.getState(this);
 end;
 
 procedure TStatus.setErrors2(length: Cardinal; value: NativeIntPtr);
 begin
-	vTable^.setErrors2(thisRecord, length, value);
+	vTable^.setErrors2(this, length, value);
 end;
 
 procedure TStatus.setWarnings2(length: Cardinal; value: NativeIntPtr);
 begin
-	vTable^.setWarnings2(thisRecord, length, value);
+	vTable^.setWarnings2(this, length, value);
 end;
 
 procedure TStatus.setErrors(value: NativeIntPtr);
 begin
-	vTable^.setErrors(thisRecord, value);
+	vTable^.setErrors(this, value);
 end;
 
 procedure TStatus.setWarnings(value: NativeIntPtr);
 begin
-	vTable^.setWarnings(thisRecord, value);
+	vTable^.setWarnings(this, value);
 end;
 
 function TStatus.getErrors(): NativeIntPtr;
 begin
-	Result := vTable^.getErrors(thisRecord);
+	Result := vTable^.getErrors(this);
 end;
 
 function TStatus.getWarnings(): NativeIntPtr;
 begin
-	Result := vTable^.getWarnings(thisRecord);
+	Result := vTable^.getWarnings(this);
 end;
 
 function TStatus.clone(): IStatus;
 begin
-	Result := vTable^.clone(thisRecord);
+	Result := vTable^.clone(this);
 end;
 
-function TMaster.thisRecord: IMaster;
+function TMaster.this: IMaster;
 begin
-  Result := IMaster(@nullPtr);
+  Result := IMaster(@FNullPtr);
 end;
 
-function TMaster.getIMasterImpl: IMasterImpl;
+function TMaster.asIMasterImpl: IMasterImpl;
 begin
   if isIMasterImpl then
-    Result := owner
+    Result := FIMasterImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TMaster.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 function TMaster.getStatus(): IStatus;
 begin
-	Result := vTable^.getStatus(thisRecord);
+	Result := vTable^.getStatus(this);
 end;
 
 function TMaster.getDispatcher(): IProvider;
 begin
-	Result := vTable^.getDispatcher(thisRecord);
+	Result := vTable^.getDispatcher(this);
 end;
 
 function TMaster.getPluginManager(): IPluginManager;
 begin
-	Result := vTable^.getPluginManager(thisRecord);
+	Result := vTable^.getPluginManager(this);
 end;
 
 function TMaster.getTimerControl(): ITimerControl;
 begin
-	Result := vTable^.getTimerControl(thisRecord);
+	Result := vTable^.getTimerControl(this);
 end;
 
 function TMaster.getDtc(): IDtc;
 begin
-	Result := vTable^.getDtc(thisRecord);
+	Result := vTable^.getDtc(this);
 end;
 
 function TMaster.registerAttachment(provider: IProvider; attachment: IAttachment): IAttachment;
 begin
-	Result := vTable^.registerAttachment(thisRecord, provider, attachment);
+	Result := vTable^.registerAttachment(this, provider, attachment);
 end;
 
 function TMaster.registerTransaction(attachment: IAttachment; transaction: ITransaction): ITransaction;
 begin
-	Result := vTable^.registerTransaction(thisRecord, attachment, transaction);
+	Result := vTable^.registerTransaction(this, attachment, transaction);
 end;
 
 function TMaster.getMetadataBuilder(status: IStatus; fieldCount: Cardinal): IMetadataBuilder;
 begin
-	Result := vTable^.getMetadataBuilder(thisRecord, status, fieldCount);
+	Result := vTable^.getMetadataBuilder(this, status, fieldCount);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TMaster.serverMode(mode: Integer): Integer;
 begin
-	Result := vTable^.serverMode(thisRecord, mode);
+	Result := vTable^.serverMode(this, mode);
 end;
 
 function TMaster.getUtilInterface(): IUtil;
 begin
-	Result := vTable^.getUtilInterface(thisRecord);
+	Result := vTable^.getUtilInterface(this);
 end;
 
 function TMaster.getConfigManager(): IConfigManager;
 begin
-	Result := vTable^.getConfigManager(thisRecord);
+	Result := vTable^.getConfigManager(this);
 end;
 
 function TMaster.getProcessExiting(): Boolean;
 begin
-	Result := vTable^.getProcessExiting(thisRecord);
+	Result := vTable^.getProcessExiting(this);
 end;
 
-function TPluginBase.thisRecord: IPluginBase;
+function TPluginBase.this: IPluginBase;
 begin
-  Result := IPluginBase(@nullPtr);
+  Result := IPluginBase(@FNullPtr);
 end;
 
-function TPluginBase.getIPluginBaseImpl: IPluginBaseImpl;
+function TPluginBase.asIPluginBaseImpl: IPluginBaseImpl;
 begin
   if isIPluginBaseImpl then
-    Result := owner
+    Result := FIPluginBaseImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TPluginBase.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 procedure TPluginBase.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TPluginBase.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 procedure TPluginBase.setOwner(r: IReferenceCounted);
 begin
-	vTable^.setOwner(thisRecord, r);
+	vTable^.setOwner(this, r);
 end;
 
 function TPluginBase.getOwner(): IReferenceCounted;
 begin
-	Result := vTable^.getOwner(thisRecord);
+	Result := vTable^.getOwner(this);
 end;
 
-function TPluginSet.thisRecord: IPluginSet;
+function TPluginSet.this: IPluginSet;
 begin
-  Result := IPluginSet(@nullPtr);
+  Result := IPluginSet(@FNullPtr);
 end;
 
-function TPluginSet.getIPluginSetImpl: IPluginSetImpl;
+function TPluginSet.asIPluginSetImpl: IPluginSetImpl;
 begin
   if isIPluginSetImpl then
-    Result := owner
+    Result := FIPluginSetImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TPluginSet.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TPluginSet.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TPluginSet.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 function TPluginSet.getName(): PAnsiChar;
 begin
-	Result := vTable^.getName(thisRecord);
+	Result := vTable^.getName(this);
 end;
 
 function TPluginSet.getModuleName(): PAnsiChar;
 begin
-	Result := vTable^.getModuleName(thisRecord);
+	Result := vTable^.getModuleName(this);
 end;
 
 function TPluginSet.getPlugin(status: IStatus): IPluginBase;
 begin
-	Result := vTable^.getPlugin(thisRecord, status);
+	Result := vTable^.getPlugin(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TPluginSet.next(status: IStatus);
 begin
-	vTable^.next(thisRecord, status);
+	vTable^.next(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TPluginSet.set_(status: IStatus; s: PAnsiChar);
 begin
-	vTable^.set_(thisRecord, status, s);
+	vTable^.set_(this, status, s);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TConfigEntry.thisRecord: IConfigEntry;
+function TConfigEntry.this: IConfigEntry;
 begin
-  Result := IConfigEntry(@nullPtr);
+  Result := IConfigEntry(@FNullPtr);
 end;
 
-function TConfigEntry.getIConfigEntryImpl: IConfigEntryImpl;
+function TConfigEntry.asIConfigEntryImpl: IConfigEntryImpl;
 begin
   if isIConfigEntryImpl then
-    Result := owner
+    Result := FIConfigEntryImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TConfigEntry.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 procedure TConfigEntry.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TConfigEntry.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 function TConfigEntry.getName(): PAnsiChar;
 begin
-	Result := vTable^.getName(thisRecord);
+	Result := vTable^.getName(this);
 end;
 
 function TConfigEntry.getValue(): PAnsiChar;
 begin
-	Result := vTable^.getValue(thisRecord);
+	Result := vTable^.getValue(this);
 end;
 
 function TConfigEntry.getIntValue(): Int64;
 begin
-	Result := vTable^.getIntValue(thisRecord);
+	Result := vTable^.getIntValue(this);
 end;
 
 function TConfigEntry.getBoolValue(): Boolean;
 begin
-	Result := vTable^.getBoolValue(thisRecord);
+	Result := vTable^.getBoolValue(this);
 end;
 
 function TConfigEntry.getSubConfig(status: IStatus): IConfig;
 begin
-	Result := vTable^.getSubConfig(thisRecord, status);
+	Result := vTable^.getSubConfig(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TConfig.thisRecord: IConfig;
+function TConfig.this: IConfig;
 begin
-  Result := IConfig(@nullPtr);
+  Result := IConfig(@FNullPtr);
 end;
 
-function TConfig.getIConfigImpl: IConfigImpl;
+function TConfig.asIConfigImpl: IConfigImpl;
 begin
   if isIConfigImpl then
-    Result := owner
+    Result := FIConfigImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TConfig.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TConfig.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TConfig.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 function TConfig.find(status: IStatus; name: PAnsiChar): IConfigEntry;
 begin
-	Result := vTable^.find(thisRecord, status, name);
+	Result := vTable^.find(this, status, name);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TConfig.findValue(status: IStatus; name: PAnsiChar; value: PAnsiChar): IConfigEntry;
 begin
-	Result := vTable^.findValue(thisRecord, status, name, value);
+	Result := vTable^.findValue(this, status, name, value);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TConfig.findPos(status: IStatus; name: PAnsiChar; pos: Cardinal): IConfigEntry;
 begin
-	Result := vTable^.findPos(thisRecord, status, name, pos);
+	Result := vTable^.findPos(this, status, name, pos);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TFirebirdConf.thisRecord: IFirebirdConf;
+function TFirebirdConf.this: IFirebirdConf;
 begin
-  Result := IFirebirdConf(@nullPtr);
+  Result := IFirebirdConf(@FNullPtr);
 end;
 
-function TFirebirdConf.getIFirebirdConfImpl: IFirebirdConfImpl;
+function TFirebirdConf.asIFirebirdConfImpl: IFirebirdConfImpl;
 begin
   if isIFirebirdConfImpl then
-    Result := owner
+    Result := FIFirebirdConfImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TFirebirdConf.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 procedure TFirebirdConf.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TFirebirdConf.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 function TFirebirdConf.getKey(name: PAnsiChar): Cardinal;
 begin
-	Result := vTable^.getKey(thisRecord, name);
+	Result := vTable^.getKey(this, name);
 end;
 
 function TFirebirdConf.asInteger(key: Cardinal): Int64;
 begin
-	Result := vTable^.asInteger(thisRecord, key);
+	Result := vTable^.asInteger(this, key);
 end;
 
 function TFirebirdConf.asString(key: Cardinal): PAnsiChar;
 begin
-	Result := vTable^.asString(thisRecord, key);
+	Result := vTable^.asString(this, key);
 end;
 
 function TFirebirdConf.asBoolean(key: Cardinal): Boolean;
 begin
-	Result := vTable^.asBoolean(thisRecord, key);
+	Result := vTable^.asBoolean(this, key);
 end;
 
 function TFirebirdConf.getVersion(status: IStatus): Cardinal;
 begin
-	Result := vTable^.getVersion(thisRecord, status);
+	Result := vTable^.getVersion(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TPluginConfig.thisRecord: IPluginConfig;
+function TPluginConfig.this: IPluginConfig;
 begin
-  Result := IPluginConfig(@nullPtr);
+  Result := IPluginConfig(@FNullPtr);
 end;
 
-function TPluginConfig.getIPluginConfigImpl: IPluginConfigImpl;
+function TPluginConfig.asIPluginConfigImpl: IPluginConfigImpl;
 begin
   if isIPluginConfigImpl then
-    Result := owner
+    Result := FIPluginConfigImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TPluginConfig.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TPluginConfig.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TPluginConfig.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 function TPluginConfig.getConfigFileName(): PAnsiChar;
 begin
-	Result := vTable^.getConfigFileName(thisRecord);
+	Result := vTable^.getConfigFileName(this);
 end;
 
 function TPluginConfig.getDefaultConfig(status: IStatus): IConfig;
 begin
-	Result := vTable^.getDefaultConfig(thisRecord, status);
+	Result := vTable^.getDefaultConfig(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TPluginConfig.getFirebirdConf(status: IStatus): IFirebirdConf;
 begin
-	Result := vTable^.getFirebirdConf(thisRecord, status);
+	Result := vTable^.getFirebirdConf(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TPluginConfig.setReleaseDelay(status: IStatus; microSeconds: QWord);
 begin
-	vTable^.setReleaseDelay(thisRecord, status, microSeconds);
+	vTable^.setReleaseDelay(this, status, microSeconds);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TPluginFactory.thisRecord: IPluginFactory;
+function TPluginFactory.this: IPluginFactory;
 begin
-  Result := IPluginFactory(@nullPtr);
+  Result := IPluginFactory(@FNullPtr);
 end;
 
-function TPluginFactory.getIPluginFactoryImpl: IPluginFactoryImpl;
+function TPluginFactory.asIPluginFactoryImpl: IPluginFactoryImpl;
 begin
   if isIPluginFactoryImpl then
-    Result := owner
+    Result := FIPluginFactoryImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TPluginFactory.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 function TPluginFactory.createPlugin(status: IStatus; factoryParameter: IPluginConfig): IPluginBase;
 begin
-	Result := vTable^.createPlugin(thisRecord, status, factoryParameter);
+	Result := vTable^.createPlugin(this, status, factoryParameter);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TPluginModule.thisRecord: IPluginModule;
+function TPluginModule.this: IPluginModule;
 begin
-  Result := IPluginModule(@nullPtr);
+  Result := IPluginModule(@FNullPtr);
 end;
 
-function TPluginModule.getIPluginModuleImpl: IPluginModuleImpl;
+function TPluginModule.asIPluginModuleImpl: IPluginModuleImpl;
 begin
   if isIPluginModuleImpl then
-    Result := owner
+    Result := FIPluginModuleImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TPluginModule.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 procedure TPluginModule.doClean();
 begin
-	vTable^.doClean(thisRecord);
+	vTable^.doClean(this);
 end;
 
 procedure TPluginModule.threadDetach();
 begin
-	vTable^.threadDetach(thisRecord);
+	vTable^.threadDetach(this);
 end;
 
-function TPluginManager.thisRecord: IPluginManager;
+function TPluginManager.this: IPluginManager;
 begin
-  Result := IPluginManager(@nullPtr);
+  Result := IPluginManager(@FNullPtr);
 end;
 
-function TPluginManager.getIPluginManagerImpl: IPluginManagerImpl;
+function TPluginManager.asIPluginManagerImpl: IPluginManagerImpl;
 begin
   if isIPluginManagerImpl then
-    Result := owner
+    Result := FIPluginManagerImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TPluginManager.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TPluginManager.registerPluginFactory(pluginType: Cardinal; defaultName: PAnsiChar; factory: IPluginFactory);
 begin
-	vTable^.registerPluginFactory(thisRecord, pluginType, defaultName, factory);
+	vTable^.registerPluginFactory(this, pluginType, defaultName, factory);
 end;
 
 procedure TPluginManager.registerModule(cleanup: IPluginModule);
 begin
-	vTable^.registerModule(thisRecord, cleanup);
+	vTable^.registerModule(this, cleanup);
 end;
 
 procedure TPluginManager.unregisterModule(cleanup: IPluginModule);
 begin
-	vTable^.unregisterModule(thisRecord, cleanup);
+	vTable^.unregisterModule(this, cleanup);
 end;
 
 function TPluginManager.getPlugins(status: IStatus; pluginType: Cardinal; namesList: PAnsiChar; firebirdConf: IFirebirdConf): IPluginSet;
 begin
-	Result := vTable^.getPlugins(thisRecord, status, pluginType, namesList, firebirdConf);
+	Result := vTable^.getPlugins(this, status, pluginType, namesList, firebirdConf);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TPluginManager.getConfig(status: IStatus; filename: PAnsiChar): IConfig;
 begin
-	Result := vTable^.getConfig(thisRecord, status, filename);
+	Result := vTable^.getConfig(this, status, filename);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TPluginManager.releasePlugin(plugin: IPluginBase);
 begin
-	vTable^.releasePlugin(thisRecord, plugin);
+	vTable^.releasePlugin(this, plugin);
 end;
 
-function TCryptKey.thisRecord: ICryptKey;
+function TCryptKey.this: ICryptKey;
 begin
-  Result := ICryptKey(@nullPtr);
+  Result := ICryptKey(@FNullPtr);
 end;
 
-function TCryptKey.getICryptKeyImpl: ICryptKeyImpl;
+function TCryptKey.asICryptKeyImpl: ICryptKeyImpl;
 begin
   if isICryptKeyImpl then
-    Result := owner
+    Result := FICryptKeyImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TCryptKey.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TCryptKey.setSymmetric(status: IStatus; type_: PAnsiChar; keyLength: Cardinal; key: Pointer);
 begin
-	vTable^.setSymmetric(thisRecord, status, type_, keyLength, key);
+	vTable^.setSymmetric(this, status, type_, keyLength, key);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TCryptKey.setAsymmetric(status: IStatus; type_: PAnsiChar; encryptKeyLength: Cardinal; encryptKey: Pointer; decryptKeyLength: Cardinal; decryptKey: Pointer);
 begin
-	vTable^.setAsymmetric(thisRecord, status, type_, encryptKeyLength, encryptKey, decryptKeyLength, decryptKey);
+	vTable^.setAsymmetric(this, status, type_, encryptKeyLength, encryptKey, decryptKeyLength, decryptKey);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TCryptKey.getEncryptKey(length: CardinalPtr): Pointer;
 begin
-	Result := vTable^.getEncryptKey(thisRecord, length);
+	Result := vTable^.getEncryptKey(this, length);
 end;
 
 function TCryptKey.getDecryptKey(length: CardinalPtr): Pointer;
 begin
-	Result := vTable^.getDecryptKey(thisRecord, length);
+	Result := vTable^.getDecryptKey(this, length);
 end;
 
-function TConfigManager.thisRecord: IConfigManager;
+function TConfigManager.this: IConfigManager;
 begin
-  Result := IConfigManager(@nullPtr);
+  Result := IConfigManager(@FNullPtr);
 end;
 
-function TConfigManager.getIConfigManagerImpl: IConfigManagerImpl;
+function TConfigManager.asIConfigManagerImpl: IConfigManagerImpl;
 begin
   if isIConfigManagerImpl then
-    Result := owner
+    Result := FIConfigManagerImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TConfigManager.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 function TConfigManager.getDirectory(code: Cardinal): PAnsiChar;
 begin
-	Result := vTable^.getDirectory(thisRecord, code);
+	Result := vTable^.getDirectory(this, code);
 end;
 
 function TConfigManager.getFirebirdConf(): IFirebirdConf;
 begin
-	Result := vTable^.getFirebirdConf(thisRecord);
+	Result := vTable^.getFirebirdConf(this);
 end;
 
 function TConfigManager.getDatabaseConf(dbName: PAnsiChar): IFirebirdConf;
 begin
-	Result := vTable^.getDatabaseConf(thisRecord, dbName);
+	Result := vTable^.getDatabaseConf(this, dbName);
 end;
 
 function TConfigManager.getPluginConfig(configuredPlugin: PAnsiChar): IConfig;
 begin
-	Result := vTable^.getPluginConfig(thisRecord, configuredPlugin);
+	Result := vTable^.getPluginConfig(this, configuredPlugin);
 end;
 
 function TConfigManager.getInstallDirectory(): PAnsiChar;
 begin
-	Result := vTable^.getInstallDirectory(thisRecord);
+	Result := vTable^.getInstallDirectory(this);
 end;
 
 function TConfigManager.getRootDirectory(): PAnsiChar;
 begin
-	Result := vTable^.getRootDirectory(thisRecord);
+	Result := vTable^.getRootDirectory(this);
 end;
 
 function TConfigManager.getDefaultSecurityDb(): PAnsiChar;
 begin
-	Result := vTable^.getDefaultSecurityDb(thisRecord);
+	Result := vTable^.getDefaultSecurityDb(this);
 end;
 
-function TEventCallback.thisRecord: IEventCallback;
+function TEventCallback.this: IEventCallback;
 begin
-  Result := IEventCallback(@nullPtr);
+  Result := IEventCallback(@FNullPtr);
 end;
 
-function TEventCallback.getIEventCallbackImpl: IEventCallbackImpl;
+function TEventCallback.asIEventCallbackImpl: IEventCallbackImpl;
 begin
   if isIEventCallbackImpl then
-    Result := owner
+    Result := FIEventCallbackImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TEventCallback.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 procedure TEventCallback.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TEventCallback.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 procedure TEventCallback.eventCallbackFunction(length: Cardinal; events: BytePtr);
 begin
-	vTable^.eventCallbackFunction(thisRecord, length, events);
+	vTable^.eventCallbackFunction(this, length, events);
 end;
 
-function TBlob.thisRecord: IBlob;
+function TBlob.this: IBlob;
 begin
-  Result := IBlob(@nullPtr);
+  Result := IBlob(@FNullPtr);
 end;
 
-function TBlob.getIBlobImpl: IBlobImpl;
+function TBlob.asIBlobImpl: IBlobImpl;
 begin
   if isIBlobImpl then
-    Result := owner
+    Result := FIBlobImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TBlob.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TBlob.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TBlob.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 procedure TBlob.getInfo(status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
 begin
-	vTable^.getInfo(thisRecord, status, itemsLength, items, bufferLength, buffer);
+	vTable^.getInfo(this, status, itemsLength, items, bufferLength, buffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TBlob.getSegment(status: IStatus; bufferLength: Cardinal; buffer: Pointer; segmentLength: CardinalPtr): Integer;
 begin
-	Result := vTable^.getSegment(thisRecord, status, bufferLength, buffer, segmentLength);
+	Result := vTable^.getSegment(this, status, bufferLength, buffer, segmentLength);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TBlob.putSegment(status: IStatus; length: Cardinal; buffer: Pointer);
 begin
-	vTable^.putSegment(thisRecord, status, length, buffer);
+	vTable^.putSegment(this, status, length, buffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TBlob.cancel(status: IStatus);
 begin
-	vTable^.cancel(thisRecord, status);
+	vTable^.cancel(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TBlob.close(status: IStatus);
 begin
-	vTable^.close(thisRecord, status);
+	vTable^.close(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TBlob.seek(status: IStatus; mode: Integer; offset: Integer): Integer;
 begin
-	Result := vTable^.seek(thisRecord, status, mode, offset);
+	Result := vTable^.seek(this, status, mode, offset);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TTransaction.thisRecord: ITransaction;
+function TTransaction.this: ITransaction;
 begin
-  Result := ITransaction(@nullPtr);
+  Result := ITransaction(@FNullPtr);
 end;
 
-function TTransaction.getITransactionImpl: ITransactionImpl;
+function TTransaction.asITransactionImpl: ITransactionImpl;
 begin
   if isITransactionImpl then
-    Result := owner
+    Result := FITransactionImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TTransaction.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TTransaction.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TTransaction.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 procedure TTransaction.getInfo(status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
 begin
-	vTable^.getInfo(thisRecord, status, itemsLength, items, bufferLength, buffer);
+	vTable^.getInfo(this, status, itemsLength, items, bufferLength, buffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TTransaction.prepare(status: IStatus; msgLength: Cardinal; message: BytePtr);
 begin
-	vTable^.prepare(thisRecord, status, msgLength, message);
+	vTable^.prepare(this, status, msgLength, message);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TTransaction.commit(status: IStatus);
 begin
-	vTable^.commit(thisRecord, status);
+	vTable^.commit(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TTransaction.commitRetaining(status: IStatus);
 begin
-	vTable^.commitRetaining(thisRecord, status);
+	vTable^.commitRetaining(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TTransaction.rollback(status: IStatus);
 begin
-	vTable^.rollback(thisRecord, status);
+	vTable^.rollback(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TTransaction.rollbackRetaining(status: IStatus);
 begin
-	vTable^.rollbackRetaining(thisRecord, status);
+	vTable^.rollbackRetaining(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TTransaction.disconnect(status: IStatus);
 begin
-	vTable^.disconnect(thisRecord, status);
+	vTable^.disconnect(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TTransaction.join(status: IStatus; transaction: ITransaction): ITransaction;
 begin
-	Result := vTable^.join(thisRecord, status, transaction);
+	Result := vTable^.join(this, status, transaction);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TTransaction.validate(status: IStatus; attachment: IAttachment): ITransaction;
 begin
-	Result := vTable^.validate(thisRecord, status, attachment);
+	Result := vTable^.validate(this, status, attachment);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TTransaction.enterDtc(status: IStatus): ITransaction;
 begin
-	Result := vTable^.enterDtc(thisRecord, status);
+	Result := vTable^.enterDtc(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TMessageMetadata.thisRecord: IMessageMetadata;
+function TMessageMetadata.this: IMessageMetadata;
 begin
-  Result := IMessageMetadata(@nullPtr);
+  Result := IMessageMetadata(@FNullPtr);
 end;
 
-function TMessageMetadata.getIMessageMetadataImpl: IMessageMetadataImpl;
+function TMessageMetadata.asIMessageMetadataImpl: IMessageMetadataImpl;
 begin
   if isIMessageMetadataImpl then
-    Result := owner
+    Result := FIMessageMetadataImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TMessageMetadata.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TMessageMetadata.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TMessageMetadata.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 function TMessageMetadata.getCount(status: IStatus): Cardinal;
 begin
-	Result := vTable^.getCount(thisRecord, status);
+	Result := vTable^.getCount(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TMessageMetadata.getField(status: IStatus; index: Cardinal): PAnsiChar;
 begin
-	Result := vTable^.getField(thisRecord, status, index);
+	Result := vTable^.getField(this, status, index);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TMessageMetadata.getRelation(status: IStatus; index: Cardinal): PAnsiChar;
 begin
-	Result := vTable^.getRelation(thisRecord, status, index);
+	Result := vTable^.getRelation(this, status, index);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TMessageMetadata.getOwner(status: IStatus; index: Cardinal): PAnsiChar;
 begin
-	Result := vTable^.getOwner(thisRecord, status, index);
+	Result := vTable^.getOwner(this, status, index);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TMessageMetadata.getAlias(status: IStatus; index: Cardinal): PAnsiChar;
 begin
-	Result := vTable^.getAlias(thisRecord, status, index);
+	Result := vTable^.getAlias(this, status, index);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TMessageMetadata.getType(status: IStatus; index: Cardinal): Cardinal;
 begin
-	Result := vTable^.getType(thisRecord, status, index);
+	Result := vTable^.getType(this, status, index);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TMessageMetadata.isNullable(status: IStatus; index: Cardinal): Boolean;
 begin
-	Result := vTable^.isNullable(thisRecord, status, index);
+	Result := vTable^.isNullable(this, status, index);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TMessageMetadata.getSubType(status: IStatus; index: Cardinal): Integer;
 begin
-	Result := vTable^.getSubType(thisRecord, status, index);
+	Result := vTable^.getSubType(this, status, index);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TMessageMetadata.getLength(status: IStatus; index: Cardinal): Cardinal;
 begin
-	Result := vTable^.getLength(thisRecord, status, index);
+	Result := vTable^.getLength(this, status, index);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TMessageMetadata.getScale(status: IStatus; index: Cardinal): Integer;
 begin
-	Result := vTable^.getScale(thisRecord, status, index);
+	Result := vTable^.getScale(this, status, index);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TMessageMetadata.getCharSet(status: IStatus; index: Cardinal): Cardinal;
 begin
-	Result := vTable^.getCharSet(thisRecord, status, index);
+	Result := vTable^.getCharSet(this, status, index);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TMessageMetadata.getOffset(status: IStatus; index: Cardinal): Cardinal;
 begin
-	Result := vTable^.getOffset(thisRecord, status, index);
+	Result := vTable^.getOffset(this, status, index);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TMessageMetadata.getNullOffset(status: IStatus; index: Cardinal): Cardinal;
 begin
-	Result := vTable^.getNullOffset(thisRecord, status, index);
+	Result := vTable^.getNullOffset(this, status, index);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TMessageMetadata.getBuilder(status: IStatus): IMetadataBuilder;
 begin
-	Result := vTable^.getBuilder(thisRecord, status);
+	Result := vTable^.getBuilder(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TMessageMetadata.getMessageLength(status: IStatus): Cardinal;
 begin
-	Result := vTable^.getMessageLength(thisRecord, status);
+	Result := vTable^.getMessageLength(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TMessageMetadata.getAlignment(status: IStatus): Cardinal;
 begin
-	Result := vTable^.getAlignment(thisRecord, status);
+	Result := vTable^.getAlignment(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TMessageMetadata.getAlignedLength(status: IStatus): Cardinal;
 begin
-	Result := vTable^.getAlignedLength(thisRecord, status);
+	Result := vTable^.getAlignedLength(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TMetadataBuilder.thisRecord: IMetadataBuilder;
+function TMetadataBuilder.this: IMetadataBuilder;
 begin
-  Result := IMetadataBuilder(@nullPtr);
+  Result := IMetadataBuilder(@FNullPtr);
 end;
 
-function TMetadataBuilder.getIMetadataBuilderImpl: IMetadataBuilderImpl;
+function TMetadataBuilder.asIMetadataBuilderImpl: IMetadataBuilderImpl;
 begin
   if isIMetadataBuilderImpl then
-    Result := owner
+    Result := FIMetadataBuilderImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TMetadataBuilder.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TMetadataBuilder.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TMetadataBuilder.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 procedure TMetadataBuilder.setType(status: IStatus; index: Cardinal; type_: Cardinal);
 begin
-	vTable^.setType(thisRecord, status, index, type_);
+	vTable^.setType(this, status, index, type_);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TMetadataBuilder.setSubType(status: IStatus; index: Cardinal; subType: Integer);
 begin
-	vTable^.setSubType(thisRecord, status, index, subType);
+	vTable^.setSubType(this, status, index, subType);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TMetadataBuilder.setLength(status: IStatus; index: Cardinal; length: Cardinal);
 begin
-	vTable^.setLength(thisRecord, status, index, length);
+	vTable^.setLength(this, status, index, length);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TMetadataBuilder.setCharSet(status: IStatus; index: Cardinal; charSet: Cardinal);
 begin
-	vTable^.setCharSet(thisRecord, status, index, charSet);
+	vTable^.setCharSet(this, status, index, charSet);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TMetadataBuilder.setScale(status: IStatus; index: Cardinal; scale: Integer);
 begin
-	vTable^.setScale(thisRecord, status, index, scale);
+	vTable^.setScale(this, status, index, scale);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TMetadataBuilder.truncate(status: IStatus; count: Cardinal);
 begin
-	vTable^.truncate(thisRecord, status, count);
+	vTable^.truncate(this, status, count);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TMetadataBuilder.moveNameToIndex(status: IStatus; name: PAnsiChar; index: Cardinal);
 begin
-	vTable^.moveNameToIndex(thisRecord, status, name, index);
+	vTable^.moveNameToIndex(this, status, name, index);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TMetadataBuilder.remove(status: IStatus; index: Cardinal);
 begin
-	vTable^.remove(thisRecord, status, index);
+	vTable^.remove(this, status, index);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TMetadataBuilder.addField(status: IStatus): Cardinal;
 begin
-	Result := vTable^.addField(thisRecord, status);
+	Result := vTable^.addField(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TMetadataBuilder.getMetadata(status: IStatus): IMessageMetadata;
 begin
-	Result := vTable^.getMetadata(thisRecord, status);
+	Result := vTable^.getMetadata(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TMetadataBuilder.setField(status: IStatus; index: Cardinal; field: PAnsiChar);
 begin
-	vTable^.setField(thisRecord, status, index, field);
+	vTable^.setField(this, status, index, field);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TMetadataBuilder.setRelation(status: IStatus; index: Cardinal; relation: PAnsiChar);
 begin
-	vTable^.setRelation(thisRecord, status, index, relation);
+	vTable^.setRelation(this, status, index, relation);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TMetadataBuilder.setOwner(status: IStatus; index: Cardinal; owner: PAnsiChar);
 begin
-	vTable^.setOwner(thisRecord, status, index, owner);
+	vTable^.setOwner(this, status, index, owner);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TMetadataBuilder.setAlias(status: IStatus; index: Cardinal; alias: PAnsiChar);
 begin
-	vTable^.setAlias(thisRecord, status, index, alias);
+	vTable^.setAlias(this, status, index, alias);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TResultSet.thisRecord: IResultSet;
+function TResultSet.this: IResultSet;
 begin
-  Result := IResultSet(@nullPtr);
+  Result := IResultSet(@FNullPtr);
 end;
 
-function TResultSet.getIResultSetImpl: IResultSetImpl;
+function TResultSet.asIResultSetImpl: IResultSetImpl;
 begin
   if isIResultSetImpl then
-    Result := owner
+    Result := FIResultSetImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TResultSet.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TResultSet.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TResultSet.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 function TResultSet.fetchNext(status: IStatus; message: Pointer): Integer;
 begin
-	Result := vTable^.fetchNext(thisRecord, status, message);
+	Result := vTable^.fetchNext(this, status, message);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TResultSet.fetchPrior(status: IStatus; message: Pointer): Integer;
 begin
-	Result := vTable^.fetchPrior(thisRecord, status, message);
+	Result := vTable^.fetchPrior(this, status, message);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TResultSet.fetchFirst(status: IStatus; message: Pointer): Integer;
 begin
-	Result := vTable^.fetchFirst(thisRecord, status, message);
+	Result := vTable^.fetchFirst(this, status, message);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TResultSet.fetchLast(status: IStatus; message: Pointer): Integer;
 begin
-	Result := vTable^.fetchLast(thisRecord, status, message);
+	Result := vTable^.fetchLast(this, status, message);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TResultSet.fetchAbsolute(status: IStatus; position: Integer; message: Pointer): Integer;
 begin
-	Result := vTable^.fetchAbsolute(thisRecord, status, position, message);
+	Result := vTable^.fetchAbsolute(this, status, position, message);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TResultSet.fetchRelative(status: IStatus; offset: Integer; message: Pointer): Integer;
 begin
-	Result := vTable^.fetchRelative(thisRecord, status, offset, message);
+	Result := vTable^.fetchRelative(this, status, offset, message);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TResultSet.isEof(status: IStatus): Boolean;
 begin
-	Result := vTable^.isEof(thisRecord, status);
+	Result := vTable^.isEof(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TResultSet.isBof(status: IStatus): Boolean;
 begin
-	Result := vTable^.isBof(thisRecord, status);
+	Result := vTable^.isBof(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TResultSet.getMetadata(status: IStatus): IMessageMetadata;
 begin
-	Result := vTable^.getMetadata(thisRecord, status);
+	Result := vTable^.getMetadata(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TResultSet.close(status: IStatus);
 begin
-	vTable^.close(thisRecord, status);
+	vTable^.close(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TResultSet.setDelayedOutputFormat(status: IStatus; format: IMessageMetadata);
 begin
-	vTable^.setDelayedOutputFormat(thisRecord, status, format);
+	vTable^.setDelayedOutputFormat(this, status, format);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TStatement.thisRecord: IStatement;
+function TStatement.this: IStatement;
 begin
-  Result := IStatement(@nullPtr);
+  Result := IStatement(@FNullPtr);
 end;
 
-function TStatement.getIStatementImpl: IStatementImpl;
+function TStatement.asIStatementImpl: IStatementImpl;
 begin
   if isIStatementImpl then
-    Result := owner
+    Result := FIStatementImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TStatement.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TStatement.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TStatement.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 procedure TStatement.getInfo(status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
 begin
-	vTable^.getInfo(thisRecord, status, itemsLength, items, bufferLength, buffer);
+	vTable^.getInfo(this, status, itemsLength, items, bufferLength, buffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TStatement.getType(status: IStatus): Cardinal;
 begin
-	Result := vTable^.getType(thisRecord, status);
+	Result := vTable^.getType(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TStatement.getPlan(status: IStatus; detailed: Boolean): PAnsiChar;
 begin
-	Result := vTable^.getPlan(thisRecord, status, detailed);
+	Result := vTable^.getPlan(this, status, detailed);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TStatement.getAffectedRecords(status: IStatus): QWord;
 begin
-	Result := vTable^.getAffectedRecords(thisRecord, status);
+	Result := vTable^.getAffectedRecords(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TStatement.getInputMetadata(status: IStatus): IMessageMetadata;
 begin
-	Result := vTable^.getInputMetadata(thisRecord, status);
+	Result := vTable^.getInputMetadata(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TStatement.getOutputMetadata(status: IStatus): IMessageMetadata;
 begin
-	Result := vTable^.getOutputMetadata(thisRecord, status);
+	Result := vTable^.getOutputMetadata(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TStatement.execute(status: IStatus; transaction: ITransaction; inMetadata: IMessageMetadata; inBuffer: Pointer; outMetadata: IMessageMetadata; outBuffer: Pointer): ITransaction;
 begin
-	Result := vTable^.execute(thisRecord, status, transaction, inMetadata, inBuffer, outMetadata, outBuffer);
+	Result := vTable^.execute(this, status, transaction, inMetadata, inBuffer, outMetadata, outBuffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TStatement.openCursor(status: IStatus; transaction: ITransaction; inMetadata: IMessageMetadata; inBuffer: Pointer; outMetadata: IMessageMetadata; flags: Cardinal): IResultSet;
 begin
-	Result := vTable^.openCursor(thisRecord, status, transaction, inMetadata, inBuffer, outMetadata, flags);
+	Result := vTable^.openCursor(this, status, transaction, inMetadata, inBuffer, outMetadata, flags);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TStatement.setCursorName(status: IStatus; name: PAnsiChar);
 begin
-	vTable^.setCursorName(thisRecord, status, name);
+	vTable^.setCursorName(this, status, name);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TStatement.free(status: IStatus);
 begin
-	vTable^.free(thisRecord, status);
+	vTable^.free(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TStatement.getFlags(status: IStatus): Cardinal;
 begin
-	Result := vTable^.getFlags(thisRecord, status);
+	Result := vTable^.getFlags(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TStatement.getTimeout(status: IStatus): Cardinal;
 begin
-	Result := vTable^.getTimeout(thisRecord, status);
+	Result := vTable^.getTimeout(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TStatement.setTimeout(status: IStatus; timeOut: Cardinal);
 begin
-	vTable^.setTimeout(thisRecord, status, timeOut);
+	vTable^.setTimeout(this, status, timeOut);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TStatement.createBatch(status: IStatus; inMetadata: IMessageMetadata; parLength: Cardinal; par: BytePtr): IBatch;
 begin
-	Result := vTable^.createBatch(thisRecord, status, inMetadata, parLength, par);
+	Result := vTable^.createBatch(this, status, inMetadata, parLength, par);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TBatch.thisRecord: IBatch;
+function TBatch.this: IBatch;
 begin
-  Result := IBatch(@nullPtr);
+  Result := IBatch(@FNullPtr);
 end;
 
-function TBatch.getIBatchImpl: IBatchImpl;
+function TBatch.asIBatchImpl: IBatchImpl;
 begin
   if isIBatchImpl then
-    Result := owner
+    Result := FIBatchImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TBatch.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TBatch.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TBatch.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 procedure TBatch.add(status: IStatus; count: Cardinal; inBuffer: Pointer);
 begin
-	vTable^.add(thisRecord, status, count, inBuffer);
+	vTable^.add(this, status, count, inBuffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TBatch.addBlob(status: IStatus; length: Cardinal; inBuffer: Pointer; blobId: ISC_QUADPtr; parLength: Cardinal; par: BytePtr);
 begin
-	vTable^.addBlob(thisRecord, status, length, inBuffer, blobId, parLength, par);
+	vTable^.addBlob(this, status, length, inBuffer, blobId, parLength, par);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TBatch.appendBlobData(status: IStatus; length: Cardinal; inBuffer: Pointer);
 begin
-	vTable^.appendBlobData(thisRecord, status, length, inBuffer);
+	vTable^.appendBlobData(this, status, length, inBuffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TBatch.addBlobStream(status: IStatus; length: Cardinal; inBuffer: Pointer);
 begin
-	vTable^.addBlobStream(thisRecord, status, length, inBuffer);
+	vTable^.addBlobStream(this, status, length, inBuffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TBatch.registerBlob(status: IStatus; existingBlob: ISC_QUADPtr; blobId: ISC_QUADPtr);
 begin
-	vTable^.registerBlob(thisRecord, status, existingBlob, blobId);
+	vTable^.registerBlob(this, status, existingBlob, blobId);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TBatch.execute(status: IStatus; transaction: ITransaction): IBatchCompletionState;
 begin
-	Result := vTable^.execute(thisRecord, status, transaction);
+	Result := vTable^.execute(this, status, transaction);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TBatch.cancel(status: IStatus);
 begin
-	vTable^.cancel(thisRecord, status);
+	vTable^.cancel(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TBatch.getBlobAlignment(status: IStatus): Cardinal;
 begin
-	Result := vTable^.getBlobAlignment(thisRecord, status);
+	Result := vTable^.getBlobAlignment(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TBatch.getMetadata(status: IStatus): IMessageMetadata;
 begin
-	Result := vTable^.getMetadata(thisRecord, status);
+	Result := vTable^.getMetadata(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TBatch.setDefaultBpb(status: IStatus; parLength: Cardinal; par: BytePtr);
 begin
-	vTable^.setDefaultBpb(thisRecord, status, parLength, par);
+	vTable^.setDefaultBpb(this, status, parLength, par);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TBatch.close(status: IStatus);
 begin
-	vTable^.close(thisRecord, status);
+	vTable^.close(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TBatchCompletionState.thisRecord: IBatchCompletionState;
+function TBatchCompletionState.this: IBatchCompletionState;
 begin
-  Result := IBatchCompletionState(@nullPtr);
+  Result := IBatchCompletionState(@FNullPtr);
 end;
 
-function TBatchCompletionState.getIBatchCompletionStateImpl: IBatchCompletionStateImpl;
+function TBatchCompletionState.asIBatchCompletionStateImpl: IBatchCompletionStateImpl;
 begin
   if isIBatchCompletionStateImpl then
-    Result := owner
+    Result := FIBatchCompletionStateImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TBatchCompletionState.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TBatchCompletionState.dispose();
 begin
-	vTable^.dispose(IDisposable(thisRecord));
+	vTable^.dispose(IDisposable(this));
 end;
 
 function TBatchCompletionState.getSize(status: IStatus): Cardinal;
 begin
-	Result := vTable^.getSize(thisRecord, status);
+	Result := vTable^.getSize(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TBatchCompletionState.getState(status: IStatus; pos: Cardinal): Integer;
 begin
-	Result := vTable^.getState(thisRecord, status, pos);
+	Result := vTable^.getState(this, status, pos);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TBatchCompletionState.findError(status: IStatus; pos: Cardinal): Cardinal;
 begin
-	Result := vTable^.findError(thisRecord, status, pos);
+	Result := vTable^.findError(this, status, pos);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TBatchCompletionState.getStatus(status: IStatus; to_: IStatus; pos: Cardinal);
 begin
-	vTable^.getStatus(thisRecord, status, to_, pos);
+	vTable^.getStatus(this, status, to_, pos);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TReplicator.thisRecord: IReplicator;
+function TReplicator.this: IReplicator;
 begin
-  Result := IReplicator(@nullPtr);
+  Result := IReplicator(@FNullPtr);
 end;
 
-function TReplicator.getIReplicatorImpl: IReplicatorImpl;
+function TReplicator.asIReplicatorImpl: IReplicatorImpl;
 begin
   if isIReplicatorImpl then
-    Result := owner
+    Result := FIReplicatorImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TReplicator.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TReplicator.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TReplicator.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 procedure TReplicator.process(status: IStatus; length: Cardinal; data: BytePtr);
 begin
-	vTable^.process(thisRecord, status, length, data);
+	vTable^.process(this, status, length, data);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TReplicator.close(status: IStatus);
 begin
-	vTable^.close(thisRecord, status);
+	vTable^.close(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TRequest.thisRecord: IRequest;
+function TRequest.this: IRequest;
 begin
-  Result := IRequest(@nullPtr);
+  Result := IRequest(@FNullPtr);
 end;
 
-function TRequest.getIRequestImpl: IRequestImpl;
+function TRequest.asIRequestImpl: IRequestImpl;
 begin
   if isIRequestImpl then
-    Result := owner
+    Result := FIRequestImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TRequest.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TRequest.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TRequest.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 procedure TRequest.receive(status: IStatus; level: Integer; msgType: Cardinal; length: Cardinal; message: Pointer);
 begin
-	vTable^.receive(thisRecord, status, level, msgType, length, message);
+	vTable^.receive(this, status, level, msgType, length, message);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TRequest.send(status: IStatus; level: Integer; msgType: Cardinal; length: Cardinal; message: Pointer);
 begin
-	vTable^.send(thisRecord, status, level, msgType, length, message);
+	vTable^.send(this, status, level, msgType, length, message);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TRequest.getInfo(status: IStatus; level: Integer; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
 begin
-	vTable^.getInfo(thisRecord, status, level, itemsLength, items, bufferLength, buffer);
+	vTable^.getInfo(this, status, level, itemsLength, items, bufferLength, buffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TRequest.start(status: IStatus; tra: ITransaction; level: Integer);
 begin
-	vTable^.start(thisRecord, status, tra, level);
+	vTable^.start(this, status, tra, level);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TRequest.startAndSend(status: IStatus; tra: ITransaction; level: Integer; msgType: Cardinal; length: Cardinal; message: Pointer);
 begin
-	vTable^.startAndSend(thisRecord, status, tra, level, msgType, length, message);
+	vTable^.startAndSend(this, status, tra, level, msgType, length, message);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TRequest.unwind(status: IStatus; level: Integer);
 begin
-	vTable^.unwind(thisRecord, status, level);
+	vTable^.unwind(this, status, level);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TRequest.free(status: IStatus);
 begin
-	vTable^.free(thisRecord, status);
+	vTable^.free(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TEvents.thisRecord: IEvents;
+function TEvents.this: IEvents;
 begin
-  Result := IEvents(@nullPtr);
+  Result := IEvents(@FNullPtr);
 end;
 
-function TEvents.getIEventsImpl: IEventsImpl;
+function TEvents.asIEventsImpl: IEventsImpl;
 begin
   if isIEventsImpl then
-    Result := owner
+    Result := FIEventsImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TEvents.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 procedure TEvents.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TEvents.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 procedure TEvents.cancel(status: IStatus);
 begin
-	vTable^.cancel(thisRecord, status);
+	vTable^.cancel(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TAttachment.thisRecord: IAttachment;
+function TAttachment.this: IAttachment;
 begin
-  Result := IAttachment(@nullPtr);
+  Result := IAttachment(@FNullPtr);
 end;
 
-function TAttachment.getIAttachmentImpl: IAttachmentImpl;
+function TAttachment.asIAttachmentImpl: IAttachmentImpl;
 begin
   if isIAttachmentImpl then
-    Result := owner
+    Result := FIAttachmentImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TAttachment.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TAttachment.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TAttachment.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 procedure TAttachment.getInfo(status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
 begin
-	vTable^.getInfo(thisRecord, status, itemsLength, items, bufferLength, buffer);
+	vTable^.getInfo(this, status, itemsLength, items, bufferLength, buffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TAttachment.startTransaction(status: IStatus; tpbLength: Cardinal; tpb: BytePtr): ITransaction;
 begin
-	Result := vTable^.startTransaction(thisRecord, status, tpbLength, tpb);
+	Result := vTable^.startTransaction(this, status, tpbLength, tpb);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TAttachment.reconnectTransaction(status: IStatus; length: Cardinal; id: BytePtr): ITransaction;
 begin
-	Result := vTable^.reconnectTransaction(thisRecord, status, length, id);
+	Result := vTable^.reconnectTransaction(this, status, length, id);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TAttachment.compileRequest(status: IStatus; blrLength: Cardinal; blr: BytePtr): IRequest;
 begin
-	Result := vTable^.compileRequest(thisRecord, status, blrLength, blr);
+	Result := vTable^.compileRequest(this, status, blrLength, blr);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TAttachment.transactRequest(status: IStatus; transaction: ITransaction; blrLength: Cardinal; blr: BytePtr; inMsgLength: Cardinal; inMsg: BytePtr; outMsgLength: Cardinal; outMsg: BytePtr);
 begin
-	vTable^.transactRequest(thisRecord, status, transaction, blrLength, blr, inMsgLength, inMsg, outMsgLength, outMsg);
+	vTable^.transactRequest(this, status, transaction, blrLength, blr, inMsgLength, inMsg, outMsgLength, outMsg);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TAttachment.createBlob(status: IStatus; transaction: ITransaction; id: ISC_QUADPtr; bpbLength: Cardinal; bpb: BytePtr): IBlob;
 begin
-	Result := vTable^.createBlob(thisRecord, status, transaction, id, bpbLength, bpb);
+	Result := vTable^.createBlob(this, status, transaction, id, bpbLength, bpb);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TAttachment.openBlob(status: IStatus; transaction: ITransaction; id: ISC_QUADPtr; bpbLength: Cardinal; bpb: BytePtr): IBlob;
 begin
-	Result := vTable^.openBlob(thisRecord, status, transaction, id, bpbLength, bpb);
+	Result := vTable^.openBlob(this, status, transaction, id, bpbLength, bpb);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TAttachment.getSlice(status: IStatus; transaction: ITransaction; id: ISC_QUADPtr; sdlLength: Cardinal; sdl: BytePtr; paramLength: Cardinal; param: BytePtr; sliceLength: Integer; slice: BytePtr): Integer;
 begin
-	Result := vTable^.getSlice(thisRecord, status, transaction, id, sdlLength, sdl, paramLength, param, sliceLength, slice);
+	Result := vTable^.getSlice(this, status, transaction, id, sdlLength, sdl, paramLength, param, sliceLength, slice);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TAttachment.putSlice(status: IStatus; transaction: ITransaction; id: ISC_QUADPtr; sdlLength: Cardinal; sdl: BytePtr; paramLength: Cardinal; param: BytePtr; sliceLength: Integer; slice: BytePtr);
 begin
-	vTable^.putSlice(thisRecord, status, transaction, id, sdlLength, sdl, paramLength, param, sliceLength, slice);
+	vTable^.putSlice(this, status, transaction, id, sdlLength, sdl, paramLength, param, sliceLength, slice);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TAttachment.executeDyn(status: IStatus; transaction: ITransaction; length: Cardinal; dyn: BytePtr);
 begin
-	vTable^.executeDyn(thisRecord, status, transaction, length, dyn);
+	vTable^.executeDyn(this, status, transaction, length, dyn);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TAttachment.prepare(status: IStatus; tra: ITransaction; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; flags: Cardinal): IStatement;
 begin
-	Result := vTable^.prepare(thisRecord, status, tra, stmtLength, sqlStmt, dialect, flags);
+	Result := vTable^.prepare(this, status, tra, stmtLength, sqlStmt, dialect, flags);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TAttachment.execute(status: IStatus; transaction: ITransaction; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: IMessageMetadata; inBuffer: Pointer; outMetadata: IMessageMetadata; outBuffer: Pointer): ITransaction;
 begin
-	Result := vTable^.execute(thisRecord, status, transaction, stmtLength, sqlStmt, dialect, inMetadata, inBuffer, outMetadata, outBuffer);
+	Result := vTable^.execute(this, status, transaction, stmtLength, sqlStmt, dialect, inMetadata, inBuffer, outMetadata, outBuffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TAttachment.openCursor(status: IStatus; transaction: ITransaction; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: IMessageMetadata; inBuffer: Pointer; outMetadata: IMessageMetadata; cursorName: PAnsiChar; cursorFlags: Cardinal): IResultSet;
 begin
-	Result := vTable^.openCursor(thisRecord, status, transaction, stmtLength, sqlStmt, dialect, inMetadata, inBuffer, outMetadata, cursorName, cursorFlags);
+	Result := vTable^.openCursor(this, status, transaction, stmtLength, sqlStmt, dialect, inMetadata, inBuffer, outMetadata, cursorName, cursorFlags);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TAttachment.queEvents(status: IStatus; callback: IEventCallback; length: Cardinal; events: BytePtr): IEvents;
 begin
-	Result := vTable^.queEvents(thisRecord, status, callback, length, events);
+	Result := vTable^.queEvents(this, status, callback, length, events);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TAttachment.cancelOperation(status: IStatus; option: Integer);
 begin
-	vTable^.cancelOperation(thisRecord, status, option);
+	vTable^.cancelOperation(this, status, option);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TAttachment.ping(status: IStatus);
 begin
-	vTable^.ping(thisRecord, status);
+	vTable^.ping(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TAttachment.detach(status: IStatus);
 begin
-	vTable^.detach(thisRecord, status);
+	vTable^.detach(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TAttachment.dropDatabase(status: IStatus);
 begin
-	vTable^.dropDatabase(thisRecord, status);
+	vTable^.dropDatabase(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TAttachment.getIdleTimeout(status: IStatus): Cardinal;
 begin
-	Result := vTable^.getIdleTimeout(thisRecord, status);
+	Result := vTable^.getIdleTimeout(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TAttachment.setIdleTimeout(status: IStatus; timeOut: Cardinal);
 begin
-	vTable^.setIdleTimeout(thisRecord, status, timeOut);
+	vTable^.setIdleTimeout(this, status, timeOut);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TAttachment.getStatementTimeout(status: IStatus): Cardinal;
 begin
-	Result := vTable^.getStatementTimeout(thisRecord, status);
+	Result := vTable^.getStatementTimeout(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TAttachment.setStatementTimeout(status: IStatus; timeOut: Cardinal);
 begin
-	vTable^.setStatementTimeout(thisRecord, status, timeOut);
+	vTable^.setStatementTimeout(this, status, timeOut);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TAttachment.createBatch(status: IStatus; transaction: ITransaction; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: IMessageMetadata; parLength: Cardinal; par: BytePtr): IBatch;
 begin
-	Result := vTable^.createBatch(thisRecord, status, transaction, stmtLength, sqlStmt, dialect, inMetadata, parLength, par);
+	Result := vTable^.createBatch(this, status, transaction, stmtLength, sqlStmt, dialect, inMetadata, parLength, par);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TAttachment.createReplicator(status: IStatus): IReplicator;
 begin
-	Result := vTable^.createReplicator(thisRecord, status);
+	Result := vTable^.createReplicator(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TService.thisRecord: IService;
+function TService.this: IService;
 begin
-  Result := IService(@nullPtr);
+  Result := IService(@FNullPtr);
 end;
 
-function TService.getIServiceImpl: IServiceImpl;
+function TService.asIServiceImpl: IServiceImpl;
 begin
   if isIServiceImpl then
-    Result := owner
+    Result := FIServiceImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TService.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TService.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TService.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 procedure TService.detach(status: IStatus);
 begin
-	vTable^.detach(thisRecord, status);
+	vTable^.detach(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TService.query(status: IStatus; sendLength: Cardinal; sendItems: BytePtr; receiveLength: Cardinal; receiveItems: BytePtr; bufferLength: Cardinal; buffer: BytePtr);
 begin
-	vTable^.query(thisRecord, status, sendLength, sendItems, receiveLength, receiveItems, bufferLength, buffer);
+	vTable^.query(this, status, sendLength, sendItems, receiveLength, receiveItems, bufferLength, buffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TService.start(status: IStatus; spbLength: Cardinal; spb: BytePtr);
 begin
-	vTable^.start(thisRecord, status, spbLength, spb);
+	vTable^.start(this, status, spbLength, spb);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TProvider.thisRecord: IProvider;
+function TProvider.this: IProvider;
 begin
-  Result := IProvider(@nullPtr);
+  Result := IProvider(@FNullPtr);
 end;
 
-function TProvider.getIProviderImpl: IProviderImpl;
+function TProvider.asIProviderImpl: IProviderImpl;
 begin
   if isIProviderImpl then
-    Result := owner
+    Result := FIProviderImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TProvider.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TProvider.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TProvider.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 procedure TProvider.setOwner(r: IReferenceCounted);
 begin
-	vTable^.setOwner(IPluginBase(thisRecord), r);
+	vTable^.setOwner(IPluginBase(this), r);
 end;
 
 function TProvider.getOwner(): IReferenceCounted;
 begin
-	Result := vTable^.getOwner(IPluginBase(thisRecord));
+	Result := vTable^.getOwner(IPluginBase(this));
 end;
 
 function TProvider.attachDatabase(status: IStatus; fileName: PAnsiChar; dpbLength: Cardinal; dpb: BytePtr): IAttachment;
 begin
-	Result := vTable^.attachDatabase(thisRecord, status, fileName, dpbLength, dpb);
+	Result := vTable^.attachDatabase(this, status, fileName, dpbLength, dpb);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TProvider.createDatabase(status: IStatus; fileName: PAnsiChar; dpbLength: Cardinal; dpb: BytePtr): IAttachment;
 begin
-	Result := vTable^.createDatabase(thisRecord, status, fileName, dpbLength, dpb);
+	Result := vTable^.createDatabase(this, status, fileName, dpbLength, dpb);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TProvider.attachServiceManager(status: IStatus; service: PAnsiChar; spbLength: Cardinal; spb: BytePtr): IService;
 begin
-	Result := vTable^.attachServiceManager(thisRecord, status, service, spbLength, spb);
+	Result := vTable^.attachServiceManager(this, status, service, spbLength, spb);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TProvider.shutdown(status: IStatus; timeout: Cardinal; reason: Integer);
 begin
-	vTable^.shutdown(thisRecord, status, timeout, reason);
+	vTable^.shutdown(this, status, timeout, reason);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TProvider.setDbCryptCallback(status: IStatus; cryptCallback: ICryptKeyCallback);
 begin
-	vTable^.setDbCryptCallback(thisRecord, status, cryptCallback);
+	vTable^.setDbCryptCallback(this, status, cryptCallback);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TDtcStart.thisRecord: IDtcStart;
+function TDtcStart.this: IDtcStart;
 begin
-  Result := IDtcStart(@nullPtr);
+  Result := IDtcStart(@FNullPtr);
 end;
 
-function TDtcStart.getIDtcStartImpl: IDtcStartImpl;
+function TDtcStart.asIDtcStartImpl: IDtcStartImpl;
 begin
   if isIDtcStartImpl then
-    Result := owner
+    Result := FIDtcStartImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TDtcStart.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TDtcStart.dispose();
 begin
-	vTable^.dispose(IDisposable(thisRecord));
+	vTable^.dispose(IDisposable(this));
 end;
 
 procedure TDtcStart.addAttachment(status: IStatus; att: IAttachment);
 begin
-	vTable^.addAttachment(thisRecord, status, att);
+	vTable^.addAttachment(this, status, att);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TDtcStart.addWithTpb(status: IStatus; att: IAttachment; length: Cardinal; tpb: BytePtr);
 begin
-	vTable^.addWithTpb(thisRecord, status, att, length, tpb);
+	vTable^.addWithTpb(this, status, att, length, tpb);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TDtcStart.start(status: IStatus): ITransaction;
 begin
-	Result := vTable^.start(thisRecord, status);
+	Result := vTable^.start(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TDtc.thisRecord: IDtc;
+function TDtc.this: IDtc;
 begin
-  Result := IDtc(@nullPtr);
+  Result := IDtc(@FNullPtr);
 end;
 
-function TDtc.getIDtcImpl: IDtcImpl;
+function TDtc.asIDtcImpl: IDtcImpl;
 begin
   if isIDtcImpl then
-    Result := owner
+    Result := FIDtcImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TDtc.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 function TDtc.join(status: IStatus; one: ITransaction; two: ITransaction): ITransaction;
 begin
-	Result := vTable^.join(thisRecord, status, one, two);
+	Result := vTable^.join(this, status, one, two);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TDtc.startBuilder(status: IStatus): IDtcStart;
 begin
-	Result := vTable^.startBuilder(thisRecord, status);
+	Result := vTable^.startBuilder(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TAuth.thisRecord: IAuth;
+function TAuth.this: IAuth;
 begin
-  Result := IAuth(@nullPtr);
+  Result := IAuth(@FNullPtr);
 end;
 
-function TAuth.getIAuthImpl: IAuthImpl;
+function TAuth.asIAuthImpl: IAuthImpl;
 begin
   if isIAuthImpl then
-    Result := owner
+    Result := FIAuthImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TAuth.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 procedure TAuth.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TAuth.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 procedure TAuth.setOwner(r: IReferenceCounted);
 begin
-	vTable^.setOwner(IPluginBase(thisRecord), r);
+	vTable^.setOwner(IPluginBase(this), r);
 end;
 
 function TAuth.getOwner(): IReferenceCounted;
 begin
-	Result := vTable^.getOwner(IPluginBase(thisRecord));
+	Result := vTable^.getOwner(IPluginBase(this));
 end;
 
-function TWriter.thisRecord: IWriter;
+function TWriter.this: IWriter;
 begin
-  Result := IWriter(@nullPtr);
+  Result := IWriter(@FNullPtr);
 end;
 
-function TWriter.getIWriterImpl: IWriterImpl;
+function TWriter.asIWriterImpl: IWriterImpl;
 begin
   if isIWriterImpl then
-    Result := owner
+    Result := FIWriterImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TWriter.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TWriter.reset();
 begin
-	vTable^.reset(thisRecord);
+	vTable^.reset(this);
 end;
 
 procedure TWriter.add(status: IStatus; name: PAnsiChar);
 begin
-	vTable^.add(thisRecord, status, name);
+	vTable^.add(this, status, name);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TWriter.setType(status: IStatus; value: PAnsiChar);
 begin
-	vTable^.setType(thisRecord, status, value);
+	vTable^.setType(this, status, value);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TWriter.setDb(status: IStatus; value: PAnsiChar);
 begin
-	vTable^.setDb(thisRecord, status, value);
+	vTable^.setDb(this, status, value);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TServerBlock.thisRecord: IServerBlock;
+function TServerBlock.this: IServerBlock;
 begin
-  Result := IServerBlock(@nullPtr);
+  Result := IServerBlock(@FNullPtr);
 end;
 
-function TServerBlock.getIServerBlockImpl: IServerBlockImpl;
+function TServerBlock.asIServerBlockImpl: IServerBlockImpl;
 begin
   if isIServerBlockImpl then
-    Result := owner
+    Result := FIServerBlockImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TServerBlock.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 function TServerBlock.getLogin(): PAnsiChar;
 begin
-	Result := vTable^.getLogin(thisRecord);
+	Result := vTable^.getLogin(this);
 end;
 
 function TServerBlock.getData(length: CardinalPtr): BytePtr;
 begin
-	Result := vTable^.getData(thisRecord, length);
+	Result := vTable^.getData(this, length);
 end;
 
 procedure TServerBlock.putData(status: IStatus; length: Cardinal; data: Pointer);
 begin
-	vTable^.putData(thisRecord, status, length, data);
+	vTable^.putData(this, status, length, data);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TServerBlock.newKey(status: IStatus): ICryptKey;
 begin
-	Result := vTable^.newKey(thisRecord, status);
+	Result := vTable^.newKey(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TClientBlock.thisRecord: IClientBlock;
+function TClientBlock.this: IClientBlock;
 begin
-  Result := IClientBlock(@nullPtr);
+  Result := IClientBlock(@FNullPtr);
 end;
 
-function TClientBlock.getIClientBlockImpl: IClientBlockImpl;
+function TClientBlock.asIClientBlockImpl: IClientBlockImpl;
 begin
   if isIClientBlockImpl then
-    Result := owner
+    Result := FIClientBlockImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TClientBlock.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TClientBlock.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TClientBlock.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 function TClientBlock.getLogin(): PAnsiChar;
 begin
-	Result := vTable^.getLogin(thisRecord);
+	Result := vTable^.getLogin(this);
 end;
 
 function TClientBlock.getPassword(): PAnsiChar;
 begin
-	Result := vTable^.getPassword(thisRecord);
+	Result := vTable^.getPassword(this);
 end;
 
 function TClientBlock.getData(length: CardinalPtr): BytePtr;
 begin
-	Result := vTable^.getData(thisRecord, length);
+	Result := vTable^.getData(this, length);
 end;
 
 procedure TClientBlock.putData(status: IStatus; length: Cardinal; data: Pointer);
 begin
-	vTable^.putData(thisRecord, status, length, data);
+	vTable^.putData(this, status, length, data);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TClientBlock.newKey(status: IStatus): ICryptKey;
 begin
-	Result := vTable^.newKey(thisRecord, status);
+	Result := vTable^.newKey(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TClientBlock.getAuthBlock(status: IStatus): IAuthBlock;
 begin
-	Result := vTable^.getAuthBlock(thisRecord, status);
+	Result := vTable^.getAuthBlock(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TServer.thisRecord: IServer;
+function TServer.this: IServer;
 begin
-  Result := IServer(@nullPtr);
+  Result := IServer(@FNullPtr);
 end;
 
-function TServer.getIServerImpl: IServerImpl;
+function TServer.asIServerImpl: IServerImpl;
 begin
   if isIServerImpl then
-    Result := owner
+    Result := FIServerImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TServer.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TServer.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TServer.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 procedure TServer.setOwner(r: IReferenceCounted);
 begin
-	vTable^.setOwner(IPluginBase(thisRecord), r);
+	vTable^.setOwner(IPluginBase(this), r);
 end;
 
 function TServer.getOwner(): IReferenceCounted;
 begin
-	Result := vTable^.getOwner(IPluginBase(thisRecord));
+	Result := vTable^.getOwner(IPluginBase(this));
 end;
 
 function TServer.authenticate(status: IStatus; sBlock: IServerBlock; writerInterface: IWriter): Integer;
 begin
-	Result := vTable^.authenticate(thisRecord, status, sBlock, writerInterface);
+	Result := vTable^.authenticate(this, status, sBlock, writerInterface);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TServer.setDbCryptCallback(status: IStatus; cryptCallback: ICryptKeyCallback);
 begin
-	vTable^.setDbCryptCallback(thisRecord, status, cryptCallback);
+	vTable^.setDbCryptCallback(this, status, cryptCallback);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TClient.thisRecord: IClient;
+function TClient.this: IClient;
 begin
-  Result := IClient(@nullPtr);
+  Result := IClient(@FNullPtr);
 end;
 
-function TClient.getIClientImpl: IClientImpl;
+function TClient.asIClientImpl: IClientImpl;
 begin
   if isIClientImpl then
-    Result := owner
+    Result := FIClientImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TClient.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 procedure TClient.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TClient.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 procedure TClient.setOwner(r: IReferenceCounted);
 begin
-	vTable^.setOwner(IPluginBase(thisRecord), r);
+	vTable^.setOwner(IPluginBase(this), r);
 end;
 
 function TClient.getOwner(): IReferenceCounted;
 begin
-	Result := vTable^.getOwner(IPluginBase(thisRecord));
+	Result := vTable^.getOwner(IPluginBase(this));
 end;
 
 function TClient.authenticate(status: IStatus; cBlock: IClientBlock): Integer;
 begin
-	Result := vTable^.authenticate(thisRecord, status, cBlock);
+	Result := vTable^.authenticate(this, status, cBlock);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TUserField.thisRecord: IUserField;
+function TUserField.this: IUserField;
 begin
-  Result := IUserField(@nullPtr);
+  Result := IUserField(@FNullPtr);
 end;
 
-function TUserField.getIUserFieldImpl: IUserFieldImpl;
+function TUserField.asIUserFieldImpl: IUserFieldImpl;
 begin
   if isIUserFieldImpl then
-    Result := owner
+    Result := FIUserFieldImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TUserField.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 function TUserField.entered(): Integer;
 begin
-	Result := vTable^.entered(thisRecord);
+	Result := vTable^.entered(this);
 end;
 
 function TUserField.specified(): Integer;
 begin
-	Result := vTable^.specified(thisRecord);
+	Result := vTable^.specified(this);
 end;
 
 procedure TUserField.setEntered(status: IStatus; newValue: Integer);
 begin
-	vTable^.setEntered(thisRecord, status, newValue);
+	vTable^.setEntered(this, status, newValue);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TCharUserField.thisRecord: ICharUserField;
+function TCharUserField.this: ICharUserField;
 begin
-  Result := ICharUserField(@nullPtr);
+  Result := ICharUserField(@FNullPtr);
 end;
 
-function TCharUserField.getICharUserFieldImpl: ICharUserFieldImpl;
+function TCharUserField.asICharUserFieldImpl: ICharUserFieldImpl;
 begin
   if isICharUserFieldImpl then
-    Result := owner
+    Result := FICharUserFieldImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TCharUserField.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 function TCharUserField.entered(): Integer;
 begin
-	Result := vTable^.entered(IUserField(thisRecord));
+	Result := vTable^.entered(IUserField(this));
 end;
 
 function TCharUserField.specified(): Integer;
 begin
-	Result := vTable^.specified(IUserField(thisRecord));
+	Result := vTable^.specified(IUserField(this));
 end;
 
 procedure TCharUserField.setEntered(status: IStatus; newValue: Integer);
 begin
-	vTable^.setEntered(IUserField(thisRecord), status, newValue);
+	vTable^.setEntered(IUserField(this), status, newValue);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TCharUserField.get(): PAnsiChar;
 begin
-	Result := vTable^.get(thisRecord);
+	Result := vTable^.get(this);
 end;
 
 procedure TCharUserField.set_(status: IStatus; newValue: PAnsiChar);
 begin
-	vTable^.set_(thisRecord, status, newValue);
+	vTable^.set_(this, status, newValue);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TIntUserField.thisRecord: IIntUserField;
+function TIntUserField.this: IIntUserField;
 begin
-  Result := IIntUserField(@nullPtr);
+  Result := IIntUserField(@FNullPtr);
 end;
 
-function TIntUserField.getIIntUserFieldImpl: IIntUserFieldImpl;
+function TIntUserField.asIIntUserFieldImpl: IIntUserFieldImpl;
 begin
   if isIIntUserFieldImpl then
-    Result := owner
+    Result := FIIntUserFieldImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TIntUserField.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 function TIntUserField.entered(): Integer;
 begin
-	Result := vTable^.entered(IUserField(thisRecord));
+	Result := vTable^.entered(IUserField(this));
 end;
 
 function TIntUserField.specified(): Integer;
 begin
-	Result := vTable^.specified(IUserField(thisRecord));
+	Result := vTable^.specified(IUserField(this));
 end;
 
 procedure TIntUserField.setEntered(status: IStatus; newValue: Integer);
 begin
-	vTable^.setEntered(IUserField(thisRecord), status, newValue);
+	vTable^.setEntered(IUserField(this), status, newValue);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TIntUserField.get(): Integer;
 begin
-	Result := vTable^.get(thisRecord);
+	Result := vTable^.get(this);
 end;
 
 procedure TIntUserField.set_(status: IStatus; newValue: Integer);
 begin
-	vTable^.set_(thisRecord, status, newValue);
+	vTable^.set_(this, status, newValue);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TUser.thisRecord: IUser;
+function TUser.this: IUser;
 begin
-  Result := IUser(@nullPtr);
+  Result := IUser(@FNullPtr);
 end;
 
-function TUser.getIUserImpl: IUserImpl;
+function TUser.asIUserImpl: IUserImpl;
 begin
   if isIUserImpl then
-    Result := owner
+    Result := FIUserImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TUser.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 function TUser.operation(): Cardinal;
 begin
-	Result := vTable^.operation(thisRecord);
+	Result := vTable^.operation(this);
 end;
 
 function TUser.userName(): ICharUserField;
 begin
-	Result := vTable^.userName(thisRecord);
+	Result := vTable^.userName(this);
 end;
 
 function TUser.password(): ICharUserField;
 begin
-	Result := vTable^.password(thisRecord);
+	Result := vTable^.password(this);
 end;
 
 function TUser.firstName(): ICharUserField;
 begin
-	Result := vTable^.firstName(thisRecord);
+	Result := vTable^.firstName(this);
 end;
 
 function TUser.lastName(): ICharUserField;
 begin
-	Result := vTable^.lastName(thisRecord);
+	Result := vTable^.lastName(this);
 end;
 
 function TUser.middleName(): ICharUserField;
 begin
-	Result := vTable^.middleName(thisRecord);
+	Result := vTable^.middleName(this);
 end;
 
 function TUser.comment(): ICharUserField;
 begin
-	Result := vTable^.comment(thisRecord);
+	Result := vTable^.comment(this);
 end;
 
 function TUser.attributes(): ICharUserField;
 begin
-	Result := vTable^.attributes(thisRecord);
+	Result := vTable^.attributes(this);
 end;
 
 function TUser.active(): IIntUserField;
 begin
-	Result := vTable^.active(thisRecord);
+	Result := vTable^.active(this);
 end;
 
 function TUser.admin(): IIntUserField;
 begin
-	Result := vTable^.admin(thisRecord);
+	Result := vTable^.admin(this);
 end;
 
 procedure TUser.clear(status: IStatus);
 begin
-	vTable^.clear(thisRecord, status);
+	vTable^.clear(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TListUsers.thisRecord: IListUsers;
+function TListUsers.this: IListUsers;
 begin
-  Result := IListUsers(@nullPtr);
+  Result := IListUsers(@FNullPtr);
 end;
 
-function TListUsers.getIListUsersImpl: IListUsersImpl;
+function TListUsers.asIListUsersImpl: IListUsersImpl;
 begin
   if isIListUsersImpl then
-    Result := owner
+    Result := FIListUsersImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TListUsers.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 procedure TListUsers.list(status: IStatus; user: IUser);
 begin
-	vTable^.list(thisRecord, status, user);
+	vTable^.list(this, status, user);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TLogonInfo.thisRecord: ILogonInfo;
+function TLogonInfo.this: ILogonInfo;
 begin
-  Result := ILogonInfo(@nullPtr);
+  Result := ILogonInfo(@FNullPtr);
 end;
 
-function TLogonInfo.getILogonInfoImpl: ILogonInfoImpl;
+function TLogonInfo.asILogonInfoImpl: ILogonInfoImpl;
 begin
   if isILogonInfoImpl then
-    Result := owner
+    Result := FILogonInfoImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TLogonInfo.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 function TLogonInfo.name(): PAnsiChar;
 begin
-	Result := vTable^.name(thisRecord);
+	Result := vTable^.name(this);
 end;
 
 function TLogonInfo.role(): PAnsiChar;
 begin
-	Result := vTable^.role(thisRecord);
+	Result := vTable^.role(this);
 end;
 
 function TLogonInfo.networkProtocol(): PAnsiChar;
 begin
-	Result := vTable^.networkProtocol(thisRecord);
+	Result := vTable^.networkProtocol(this);
 end;
 
 function TLogonInfo.remoteAddress(): PAnsiChar;
 begin
-	Result := vTable^.remoteAddress(thisRecord);
+	Result := vTable^.remoteAddress(this);
 end;
 
 function TLogonInfo.authBlock(length: CardinalPtr): BytePtr;
 begin
-	Result := vTable^.authBlock(thisRecord, length);
+	Result := vTable^.authBlock(this, length);
 end;
 
 function TLogonInfo.attachment(status: IStatus): IAttachment;
 begin
-	Result := vTable^.attachment(thisRecord, status);
+	Result := vTable^.attachment(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TLogonInfo.transaction(status: IStatus): ITransaction;
 begin
-	Result := vTable^.transaction(thisRecord, status);
+	Result := vTable^.transaction(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TManagement.thisRecord: IManagement;
+function TManagement.this: IManagement;
 begin
-  Result := IManagement(@nullPtr);
+  Result := IManagement(@FNullPtr);
 end;
 
-function TManagement.getIManagementImpl: IManagementImpl;
+function TManagement.asIManagementImpl: IManagementImpl;
 begin
   if isIManagementImpl then
-    Result := owner
+    Result := FIManagementImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TManagement.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TManagement.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TManagement.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 procedure TManagement.setOwner(r: IReferenceCounted);
 begin
-	vTable^.setOwner(IPluginBase(thisRecord), r);
+	vTable^.setOwner(IPluginBase(this), r);
 end;
 
 function TManagement.getOwner(): IReferenceCounted;
 begin
-	Result := vTable^.getOwner(IPluginBase(thisRecord));
+	Result := vTable^.getOwner(IPluginBase(this));
 end;
 
 procedure TManagement.start(status: IStatus; logonInfo: ILogonInfo);
 begin
-	vTable^.start(thisRecord, status, logonInfo);
+	vTable^.start(this, status, logonInfo);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TManagement.execute(status: IStatus; user: IUser; callback: IListUsers): Integer;
 begin
-	Result := vTable^.execute(thisRecord, status, user, callback);
+	Result := vTable^.execute(this, status, user, callback);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TManagement.commit(status: IStatus);
 begin
-	vTable^.commit(thisRecord, status);
+	vTable^.commit(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TManagement.rollback(status: IStatus);
 begin
-	vTable^.rollback(thisRecord, status);
+	vTable^.rollback(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TAuthBlock.thisRecord: IAuthBlock;
+function TAuthBlock.this: IAuthBlock;
 begin
-  Result := IAuthBlock(@nullPtr);
+  Result := IAuthBlock(@FNullPtr);
 end;
 
-function TAuthBlock.getIAuthBlockImpl: IAuthBlockImpl;
+function TAuthBlock.asIAuthBlockImpl: IAuthBlockImpl;
 begin
   if isIAuthBlockImpl then
-    Result := owner
+    Result := FIAuthBlockImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TAuthBlock.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 function TAuthBlock.getType(): PAnsiChar;
 begin
-	Result := vTable^.getType(thisRecord);
+	Result := vTable^.getType(this);
 end;
 
 function TAuthBlock.getName(): PAnsiChar;
 begin
-	Result := vTable^.getName(thisRecord);
+	Result := vTable^.getName(this);
 end;
 
 function TAuthBlock.getPlugin(): PAnsiChar;
 begin
-	Result := vTable^.getPlugin(thisRecord);
+	Result := vTable^.getPlugin(this);
 end;
 
 function TAuthBlock.getSecurityDb(): PAnsiChar;
 begin
-	Result := vTable^.getSecurityDb(thisRecord);
+	Result := vTable^.getSecurityDb(this);
 end;
 
 function TAuthBlock.getOriginalPlugin(): PAnsiChar;
 begin
-	Result := vTable^.getOriginalPlugin(thisRecord);
+	Result := vTable^.getOriginalPlugin(this);
 end;
 
 function TAuthBlock.next(status: IStatus): Boolean;
 begin
-	Result := vTable^.next(thisRecord, status);
+	Result := vTable^.next(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TAuthBlock.first(status: IStatus): Boolean;
 begin
-	Result := vTable^.first(thisRecord, status);
+	Result := vTable^.first(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TWireCryptPlugin.thisRecord: IWireCryptPlugin;
+function TWireCryptPlugin.this: IWireCryptPlugin;
 begin
-  Result := IWireCryptPlugin(@nullPtr);
+  Result := IWireCryptPlugin(@FNullPtr);
 end;
 
-function TWireCryptPlugin.getIWireCryptPluginImpl: IWireCryptPluginImpl;
+function TWireCryptPlugin.asIWireCryptPluginImpl: IWireCryptPluginImpl;
 begin
   if isIWireCryptPluginImpl then
-    Result := owner
+    Result := FIWireCryptPluginImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TWireCryptPlugin.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TWireCryptPlugin.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TWireCryptPlugin.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 procedure TWireCryptPlugin.setOwner(r: IReferenceCounted);
 begin
-	vTable^.setOwner(IPluginBase(thisRecord), r);
+	vTable^.setOwner(IPluginBase(this), r);
 end;
 
 function TWireCryptPlugin.getOwner(): IReferenceCounted;
 begin
-	Result := vTable^.getOwner(IPluginBase(thisRecord));
+	Result := vTable^.getOwner(IPluginBase(this));
 end;
 
 function TWireCryptPlugin.getKnownTypes(status: IStatus): PAnsiChar;
 begin
-	Result := vTable^.getKnownTypes(thisRecord, status);
+	Result := vTable^.getKnownTypes(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TWireCryptPlugin.setKey(status: IStatus; key: ICryptKey);
 begin
-	vTable^.setKey(thisRecord, status, key);
+	vTable^.setKey(this, status, key);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TWireCryptPlugin.encrypt(status: IStatus; length: Cardinal; from: Pointer; to_: Pointer);
 begin
-	vTable^.encrypt(thisRecord, status, length, from, to_);
+	vTable^.encrypt(this, status, length, from, to_);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TWireCryptPlugin.decrypt(status: IStatus; length: Cardinal; from: Pointer; to_: Pointer);
 begin
-	vTable^.decrypt(thisRecord, status, length, from, to_);
+	vTable^.decrypt(this, status, length, from, to_);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TWireCryptPlugin.getSpecificData(status: IStatus; keyType: PAnsiChar; length: CardinalPtr): BytePtr;
 begin
-	Result := vTable^.getSpecificData(thisRecord, status, keyType, length);
+	Result := vTable^.getSpecificData(this, status, keyType, length);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TWireCryptPlugin.setSpecificData(status: IStatus; keyType: PAnsiChar; length: Cardinal; data: BytePtr);
 begin
-	vTable^.setSpecificData(thisRecord, status, keyType, length, data);
+	vTable^.setSpecificData(this, status, keyType, length, data);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TCryptKeyCallback.thisRecord: ICryptKeyCallback;
+function TCryptKeyCallback.this: ICryptKeyCallback;
 begin
-  Result := ICryptKeyCallback(@nullPtr);
+  Result := ICryptKeyCallback(@FNullPtr);
 end;
 
-function TCryptKeyCallback.getICryptKeyCallbackImpl: ICryptKeyCallbackImpl;
+function TCryptKeyCallback.asICryptKeyCallbackImpl: ICryptKeyCallbackImpl;
 begin
   if isICryptKeyCallbackImpl then
-    Result := owner
+    Result := FICryptKeyCallbackImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TCryptKeyCallback.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 function TCryptKeyCallback.callback(dataLength: Cardinal; data: Pointer; bufferLength: Cardinal; buffer: Pointer): Cardinal;
 begin
-	Result := vTable^.callback(thisRecord, dataLength, data, bufferLength, buffer);
+	Result := vTable^.callback(this, dataLength, data, bufferLength, buffer);
 end;
 
-function TKeyHolderPlugin.thisRecord: IKeyHolderPlugin;
+function TKeyHolderPlugin.this: IKeyHolderPlugin;
 begin
-  Result := IKeyHolderPlugin(@nullPtr);
+  Result := IKeyHolderPlugin(@FNullPtr);
 end;
 
-function TKeyHolderPlugin.getIKeyHolderPluginImpl: IKeyHolderPluginImpl;
+function TKeyHolderPlugin.asIKeyHolderPluginImpl: IKeyHolderPluginImpl;
 begin
   if isIKeyHolderPluginImpl then
-    Result := owner
+    Result := FIKeyHolderPluginImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TKeyHolderPlugin.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TKeyHolderPlugin.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TKeyHolderPlugin.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 procedure TKeyHolderPlugin.setOwner(r: IReferenceCounted);
 begin
-	vTable^.setOwner(IPluginBase(thisRecord), r);
+	vTable^.setOwner(IPluginBase(this), r);
 end;
 
 function TKeyHolderPlugin.getOwner(): IReferenceCounted;
 begin
-	Result := vTable^.getOwner(IPluginBase(thisRecord));
+	Result := vTable^.getOwner(IPluginBase(this));
 end;
 
 function TKeyHolderPlugin.keyCallback(status: IStatus; callback: ICryptKeyCallback): Integer;
 begin
-	Result := vTable^.keyCallback(thisRecord, status, callback);
+	Result := vTable^.keyCallback(this, status, callback);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TKeyHolderPlugin.keyHandle(status: IStatus; keyName: PAnsiChar): ICryptKeyCallback;
 begin
-	Result := vTable^.keyHandle(thisRecord, status, keyName);
+	Result := vTable^.keyHandle(this, status, keyName);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TKeyHolderPlugin.useOnlyOwnKeys(status: IStatus): Boolean;
 begin
-	Result := vTable^.useOnlyOwnKeys(thisRecord, status);
+	Result := vTable^.useOnlyOwnKeys(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TKeyHolderPlugin.chainHandle(status: IStatus): ICryptKeyCallback;
 begin
-	Result := vTable^.chainHandle(thisRecord, status);
+	Result := vTable^.chainHandle(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TDbCryptInfo.thisRecord: IDbCryptInfo;
+function TDbCryptInfo.this: IDbCryptInfo;
 begin
-  Result := IDbCryptInfo(@nullPtr);
+  Result := IDbCryptInfo(@FNullPtr);
 end;
 
-function TDbCryptInfo.getIDbCryptInfoImpl: IDbCryptInfoImpl;
+function TDbCryptInfo.asIDbCryptInfoImpl: IDbCryptInfoImpl;
 begin
   if isIDbCryptInfoImpl then
-    Result := owner
+    Result := FIDbCryptInfoImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TDbCryptInfo.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 procedure TDbCryptInfo.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TDbCryptInfo.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 function TDbCryptInfo.getDatabaseFullPath(status: IStatus): PAnsiChar;
 begin
-	Result := vTable^.getDatabaseFullPath(thisRecord, status);
+	Result := vTable^.getDatabaseFullPath(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TDbCryptPlugin.thisRecord: IDbCryptPlugin;
+function TDbCryptPlugin.this: IDbCryptPlugin;
 begin
-  Result := IDbCryptPlugin(@nullPtr);
+  Result := IDbCryptPlugin(@FNullPtr);
 end;
 
-function TDbCryptPlugin.getIDbCryptPluginImpl: IDbCryptPluginImpl;
+function TDbCryptPlugin.asIDbCryptPluginImpl: IDbCryptPluginImpl;
 begin
   if isIDbCryptPluginImpl then
-    Result := owner
+    Result := FIDbCryptPluginImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TDbCryptPlugin.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TDbCryptPlugin.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TDbCryptPlugin.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 procedure TDbCryptPlugin.setOwner(r: IReferenceCounted);
 begin
-	vTable^.setOwner(IPluginBase(thisRecord), r);
+	vTable^.setOwner(IPluginBase(this), r);
 end;
 
 function TDbCryptPlugin.getOwner(): IReferenceCounted;
 begin
-	Result := vTable^.getOwner(IPluginBase(thisRecord));
+	Result := vTable^.getOwner(IPluginBase(this));
 end;
 
 procedure TDbCryptPlugin.setKey(status: IStatus; length: Cardinal; sources: IKeyHolderPlugin; keyName: PAnsiChar);
 begin
-	vTable^.setKey(thisRecord, status, length, sources, keyName);
+	vTable^.setKey(this, status, length, sources, keyName);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TDbCryptPlugin.encrypt(status: IStatus; length: Cardinal; from: Pointer; to_: Pointer);
 begin
-	vTable^.encrypt(thisRecord, status, length, from, to_);
+	vTable^.encrypt(this, status, length, from, to_);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TDbCryptPlugin.decrypt(status: IStatus; length: Cardinal; from: Pointer; to_: Pointer);
 begin
-	vTable^.decrypt(thisRecord, status, length, from, to_);
+	vTable^.decrypt(this, status, length, from, to_);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TDbCryptPlugin.setInfo(status: IStatus; info: IDbCryptInfo);
 begin
-	vTable^.setInfo(thisRecord, status, info);
+	vTable^.setInfo(this, status, info);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TExternalContext.thisRecord: IExternalContext;
+function TExternalContext.this: IExternalContext;
 begin
-  Result := IExternalContext(@nullPtr);
+  Result := IExternalContext(@FNullPtr);
 end;
 
-function TExternalContext.getIExternalContextImpl: IExternalContextImpl;
+function TExternalContext.asIExternalContextImpl: IExternalContextImpl;
 begin
   if isIExternalContextImpl then
-    Result := owner
+    Result := FIExternalContextImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TExternalContext.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 function TExternalContext.getMaster(): IMaster;
 begin
-	Result := vTable^.getMaster(thisRecord);
+	Result := vTable^.getMaster(this);
 end;
 
 function TExternalContext.getEngine(status: IStatus): IExternalEngine;
 begin
-	Result := vTable^.getEngine(thisRecord, status);
+	Result := vTable^.getEngine(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TExternalContext.getAttachment(status: IStatus): IAttachment;
 begin
-	Result := vTable^.getAttachment(thisRecord, status);
+	Result := vTable^.getAttachment(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TExternalContext.getTransaction(status: IStatus): ITransaction;
 begin
-	Result := vTable^.getTransaction(thisRecord, status);
+	Result := vTable^.getTransaction(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TExternalContext.getUserName(): PAnsiChar;
 begin
-	Result := vTable^.getUserName(thisRecord);
+	Result := vTable^.getUserName(this);
 end;
 
 function TExternalContext.getDatabaseName(): PAnsiChar;
 begin
-	Result := vTable^.getDatabaseName(thisRecord);
+	Result := vTable^.getDatabaseName(this);
 end;
 
 function TExternalContext.getClientCharSet(): PAnsiChar;
 begin
-	Result := vTable^.getClientCharSet(thisRecord);
+	Result := vTable^.getClientCharSet(this);
 end;
 
 function TExternalContext.obtainInfoCode(): Integer;
 begin
-	Result := vTable^.obtainInfoCode(thisRecord);
+	Result := vTable^.obtainInfoCode(this);
 end;
 
 function TExternalContext.getInfo(code: Integer): Pointer;
 begin
-	Result := vTable^.getInfo(thisRecord, code);
+	Result := vTable^.getInfo(this, code);
 end;
 
 function TExternalContext.setInfo(code: Integer; value: Pointer): Pointer;
 begin
-	Result := vTable^.setInfo(thisRecord, code, value);
+	Result := vTable^.setInfo(this, code, value);
 end;
 
-function TExternalResultSet.thisRecord: IExternalResultSet;
+function TExternalResultSet.this: IExternalResultSet;
 begin
-  Result := IExternalResultSet(@nullPtr);
+  Result := IExternalResultSet(@FNullPtr);
 end;
 
-function TExternalResultSet.getIExternalResultSetImpl: IExternalResultSetImpl;
+function TExternalResultSet.asIExternalResultSetImpl: IExternalResultSetImpl;
 begin
   if isIExternalResultSetImpl then
-    Result := owner
+    Result := FIExternalResultSetImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TExternalResultSet.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 procedure TExternalResultSet.dispose();
 begin
-	vTable^.dispose(IDisposable(thisRecord));
+	vTable^.dispose(IDisposable(this));
 end;
 
 function TExternalResultSet.fetch(status: IStatus): Boolean;
 begin
-	Result := vTable^.fetch(thisRecord, status);
+	Result := vTable^.fetch(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TExternalFunction.thisRecord: IExternalFunction;
+function TExternalFunction.this: IExternalFunction;
 begin
-  Result := IExternalFunction(@nullPtr);
+  Result := IExternalFunction(@FNullPtr);
 end;
 
-function TExternalFunction.getIExternalFunctionImpl: IExternalFunctionImpl;
+function TExternalFunction.asIExternalFunctionImpl: IExternalFunctionImpl;
 begin
   if isIExternalFunctionImpl then
-    Result := owner
+    Result := FIExternalFunctionImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TExternalFunction.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TExternalFunction.dispose();
 begin
-	vTable^.dispose(IDisposable(thisRecord));
+	vTable^.dispose(IDisposable(this));
 end;
 
 procedure TExternalFunction.getCharSet(status: IStatus; context: IExternalContext; name: PAnsiChar; nameSize: Cardinal);
 begin
-	vTable^.getCharSet(thisRecord, status, context, name, nameSize);
+	vTable^.getCharSet(this, status, context, name, nameSize);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TExternalFunction.execute(status: IStatus; context: IExternalContext; inMsg: Pointer; outMsg: Pointer);
 begin
-	vTable^.execute(thisRecord, status, context, inMsg, outMsg);
+	vTable^.execute(this, status, context, inMsg, outMsg);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TExternalProcedure.thisRecord: IExternalProcedure;
+function TExternalProcedure.this: IExternalProcedure;
 begin
-  Result := IExternalProcedure(@nullPtr);
+  Result := IExternalProcedure(@FNullPtr);
 end;
 
-function TExternalProcedure.getIExternalProcedureImpl: IExternalProcedureImpl;
+function TExternalProcedure.asIExternalProcedureImpl: IExternalProcedureImpl;
 begin
   if isIExternalProcedureImpl then
-    Result := owner
+    Result := FIExternalProcedureImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TExternalProcedure.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TExternalProcedure.dispose();
 begin
-	vTable^.dispose(IDisposable(thisRecord));
+	vTable^.dispose(IDisposable(this));
 end;
 
 procedure TExternalProcedure.getCharSet(status: IStatus; context: IExternalContext; name: PAnsiChar; nameSize: Cardinal);
 begin
-	vTable^.getCharSet(thisRecord, status, context, name, nameSize);
+	vTable^.getCharSet(this, status, context, name, nameSize);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TExternalProcedure.open(status: IStatus; context: IExternalContext; inMsg: Pointer; outMsg: Pointer): IExternalResultSet;
 begin
-	Result := vTable^.open(thisRecord, status, context, inMsg, outMsg);
+	Result := vTable^.open(this, status, context, inMsg, outMsg);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TExternalTrigger.thisRecord: IExternalTrigger;
+function TExternalTrigger.this: IExternalTrigger;
 begin
-  Result := IExternalTrigger(@nullPtr);
+  Result := IExternalTrigger(@FNullPtr);
 end;
 
-function TExternalTrigger.getIExternalTriggerImpl: IExternalTriggerImpl;
+function TExternalTrigger.asIExternalTriggerImpl: IExternalTriggerImpl;
 begin
   if isIExternalTriggerImpl then
-    Result := owner
+    Result := FIExternalTriggerImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TExternalTrigger.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TExternalTrigger.dispose();
 begin
-	vTable^.dispose(IDisposable(thisRecord));
+	vTable^.dispose(IDisposable(this));
 end;
 
 procedure TExternalTrigger.getCharSet(status: IStatus; context: IExternalContext; name: PAnsiChar; nameSize: Cardinal);
 begin
-	vTable^.getCharSet(thisRecord, status, context, name, nameSize);
+	vTable^.getCharSet(this, status, context, name, nameSize);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TExternalTrigger.execute(status: IStatus; context: IExternalContext; action: Cardinal; oldMsg: Pointer; newMsg: Pointer);
 begin
-	vTable^.execute(thisRecord, status, context, action, oldMsg, newMsg);
+	vTable^.execute(this, status, context, action, oldMsg, newMsg);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TRoutineMetadata.thisRecord: IRoutineMetadata;
+function TRoutineMetadata.this: IRoutineMetadata;
 begin
-  Result := IRoutineMetadata(@nullPtr);
+  Result := IRoutineMetadata(@FNullPtr);
 end;
 
-function TRoutineMetadata.getIRoutineMetadataImpl: IRoutineMetadataImpl;
+function TRoutineMetadata.asIRoutineMetadataImpl: IRoutineMetadataImpl;
 begin
   if isIRoutineMetadataImpl then
-    Result := owner
+    Result := FIRoutineMetadataImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TRoutineMetadata.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 function TRoutineMetadata.getPackage(status: IStatus): PAnsiChar;
 begin
-	Result := vTable^.getPackage(thisRecord, status);
+	Result := vTable^.getPackage(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TRoutineMetadata.getName(status: IStatus): PAnsiChar;
 begin
-	Result := vTable^.getName(thisRecord, status);
+	Result := vTable^.getName(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TRoutineMetadata.getEntryPoint(status: IStatus): PAnsiChar;
 begin
-	Result := vTable^.getEntryPoint(thisRecord, status);
+	Result := vTable^.getEntryPoint(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TRoutineMetadata.getBody(status: IStatus): PAnsiChar;
 begin
-	Result := vTable^.getBody(thisRecord, status);
+	Result := vTable^.getBody(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TRoutineMetadata.getInputMetadata(status: IStatus): IMessageMetadata;
 begin
-	Result := vTable^.getInputMetadata(thisRecord, status);
+	Result := vTable^.getInputMetadata(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TRoutineMetadata.getOutputMetadata(status: IStatus): IMessageMetadata;
 begin
-	Result := vTable^.getOutputMetadata(thisRecord, status);
+	Result := vTable^.getOutputMetadata(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TRoutineMetadata.getTriggerMetadata(status: IStatus): IMessageMetadata;
 begin
-	Result := vTable^.getTriggerMetadata(thisRecord, status);
+	Result := vTable^.getTriggerMetadata(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TRoutineMetadata.getTriggerTable(status: IStatus): PAnsiChar;
 begin
-	Result := vTable^.getTriggerTable(thisRecord, status);
+	Result := vTable^.getTriggerTable(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TRoutineMetadata.getTriggerType(status: IStatus): Cardinal;
 begin
-	Result := vTable^.getTriggerType(thisRecord, status);
+	Result := vTable^.getTriggerType(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TExternalEngine.thisRecord: IExternalEngine;
+function TExternalEngine.this: IExternalEngine;
 begin
-  Result := IExternalEngine(@nullPtr);
+  Result := IExternalEngine(@FNullPtr);
 end;
 
-function TExternalEngine.getIExternalEngineImpl: IExternalEngineImpl;
+function TExternalEngine.asIExternalEngineImpl: IExternalEngineImpl;
 begin
   if isIExternalEngineImpl then
-    Result := owner
+    Result := FIExternalEngineImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TExternalEngine.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TExternalEngine.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TExternalEngine.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 procedure TExternalEngine.setOwner(r: IReferenceCounted);
 begin
-	vTable^.setOwner(IPluginBase(thisRecord), r);
+	vTable^.setOwner(IPluginBase(this), r);
 end;
 
 function TExternalEngine.getOwner(): IReferenceCounted;
 begin
-	Result := vTable^.getOwner(IPluginBase(thisRecord));
+	Result := vTable^.getOwner(IPluginBase(this));
 end;
 
 procedure TExternalEngine.open(status: IStatus; context: IExternalContext; charSet: PAnsiChar; charSetSize: Cardinal);
 begin
-	vTable^.open(thisRecord, status, context, charSet, charSetSize);
+	vTable^.open(this, status, context, charSet, charSetSize);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TExternalEngine.openAttachment(status: IStatus; context: IExternalContext);
 begin
-	vTable^.openAttachment(thisRecord, status, context);
+	vTable^.openAttachment(this, status, context);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TExternalEngine.closeAttachment(status: IStatus; context: IExternalContext);
 begin
-	vTable^.closeAttachment(thisRecord, status, context);
+	vTable^.closeAttachment(this, status, context);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TExternalEngine.makeFunction(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder): IExternalFunction;
 begin
-	Result := vTable^.makeFunction(thisRecord, status, context, metadata, inBuilder, outBuilder);
+	Result := vTable^.makeFunction(this, status, context, metadata, inBuilder, outBuilder);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TExternalEngine.makeProcedure(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder): IExternalProcedure;
 begin
-	Result := vTable^.makeProcedure(thisRecord, status, context, metadata, inBuilder, outBuilder);
+	Result := vTable^.makeProcedure(this, status, context, metadata, inBuilder, outBuilder);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TExternalEngine.makeTrigger(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; fieldsBuilder: IMetadataBuilder): IExternalTrigger;
 begin
-	Result := vTable^.makeTrigger(thisRecord, status, context, metadata, fieldsBuilder);
+	Result := vTable^.makeTrigger(this, status, context, metadata, fieldsBuilder);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TTimer.thisRecord: ITimer;
+function TTimer.this: ITimer;
 begin
-  Result := ITimer(@nullPtr);
+  Result := ITimer(@FNullPtr);
 end;
 
-function TTimer.getITimerImpl: ITimerImpl;
+function TTimer.asITimerImpl: ITimerImpl;
 begin
   if isITimerImpl then
-    Result := owner
+    Result := FITimerImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TTimer.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 procedure TTimer.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TTimer.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 procedure TTimer.handler();
 begin
-	vTable^.handler(thisRecord);
+	vTable^.handler(this);
 end;
 
-function TTimerControl.thisRecord: ITimerControl;
+function TTimerControl.this: ITimerControl;
 begin
-  Result := ITimerControl(@nullPtr);
+  Result := ITimerControl(@FNullPtr);
 end;
 
-function TTimerControl.getITimerControlImpl: ITimerControlImpl;
+function TTimerControl.asITimerControlImpl: ITimerControlImpl;
 begin
   if isITimerControlImpl then
-    Result := owner
+    Result := FITimerControlImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TTimerControl.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TTimerControl.start(status: IStatus; timer: ITimer; microSeconds: QWord);
 begin
-	vTable^.start(thisRecord, status, timer, microSeconds);
+	vTable^.start(this, status, timer, microSeconds);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TTimerControl.stop(status: IStatus; timer: ITimer);
 begin
-	vTable^.stop(thisRecord, status, timer);
+	vTable^.stop(this, status, timer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TVersionCallback.thisRecord: IVersionCallback;
+function TVersionCallback.this: IVersionCallback;
 begin
-  Result := IVersionCallback(@nullPtr);
+  Result := IVersionCallback(@FNullPtr);
 end;
 
-function TVersionCallback.getIVersionCallbackImpl: IVersionCallbackImpl;
+function TVersionCallback.asIVersionCallbackImpl: IVersionCallbackImpl;
 begin
   if isIVersionCallbackImpl then
-    Result := owner
+    Result := FIVersionCallbackImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TVersionCallback.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 procedure TVersionCallback.callback(status: IStatus; text: PAnsiChar);
 begin
-	vTable^.callback(thisRecord, status, text);
+	vTable^.callback(this, status, text);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TUtil.thisRecord: IUtil;
+function TUtil.this: IUtil;
 begin
-  Result := IUtil(@nullPtr);
+  Result := IUtil(@FNullPtr);
 end;
 
-function TUtil.getIUtilImpl: IUtilImpl;
+function TUtil.asIUtilImpl: IUtilImpl;
 begin
   if isIUtilImpl then
-    Result := owner
+    Result := FIUtilImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TUtil.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TUtil.getFbVersion(status: IStatus; att: IAttachment; callback: IVersionCallback);
 begin
-	vTable^.getFbVersion(thisRecord, status, att, callback);
+	vTable^.getFbVersion(this, status, att, callback);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TUtil.loadBlob(status: IStatus; blobId: ISC_QUADPtr; att: IAttachment; tra: ITransaction; file_: PAnsiChar; txt: Boolean);
 begin
-	vTable^.loadBlob(thisRecord, status, blobId, att, tra, file_, txt);
+	vTable^.loadBlob(this, status, blobId, att, tra, file_, txt);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TUtil.dumpBlob(status: IStatus; blobId: ISC_QUADPtr; att: IAttachment; tra: ITransaction; file_: PAnsiChar; txt: Boolean);
 begin
-	vTable^.dumpBlob(thisRecord, status, blobId, att, tra, file_, txt);
+	vTable^.dumpBlob(this, status, blobId, att, tra, file_, txt);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TUtil.getPerfCounters(status: IStatus; att: IAttachment; countersSet: PAnsiChar; counters: Int64Ptr);
 begin
-	vTable^.getPerfCounters(thisRecord, status, att, countersSet, counters);
+	vTable^.getPerfCounters(this, status, att, countersSet, counters);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TUtil.executeCreateDatabase(status: IStatus; stmtLength: Cardinal; creatDBstatement: PAnsiChar; dialect: Cardinal; stmtIsCreateDb: BooleanPtr): IAttachment;
 begin
-	Result := vTable^.executeCreateDatabase(thisRecord, status, stmtLength, creatDBstatement, dialect, stmtIsCreateDb);
+	Result := vTable^.executeCreateDatabase(this, status, stmtLength, creatDBstatement, dialect, stmtIsCreateDb);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TUtil.decodeDate(date: ISC_DATE; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr);
 begin
-	vTable^.decodeDate(thisRecord, date, year, month, day);
+	vTable^.decodeDate(this, date, year, month, day);
 end;
 
 procedure TUtil.decodeTime(time: ISC_TIME; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr);
 begin
-	vTable^.decodeTime(thisRecord, time, hours, minutes, seconds, fractions);
+	vTable^.decodeTime(this, time, hours, minutes, seconds, fractions);
 end;
 
 function TUtil.encodeDate(year: Cardinal; month: Cardinal; day: Cardinal): ISC_DATE;
 begin
-	Result := vTable^.encodeDate(thisRecord, year, month, day);
+	Result := vTable^.encodeDate(this, year, month, day);
 end;
 
 function TUtil.encodeTime(hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal): ISC_TIME;
 begin
-	Result := vTable^.encodeTime(thisRecord, hours, minutes, seconds, fractions);
+	Result := vTable^.encodeTime(this, hours, minutes, seconds, fractions);
 end;
 
 function TUtil.formatStatus(buffer: PAnsiChar; bufferSize: Cardinal; status: IStatus): Cardinal;
 begin
-	Result := vTable^.formatStatus(thisRecord, buffer, bufferSize, status);
+	Result := vTable^.formatStatus(this, buffer, bufferSize, status);
 end;
 
 function TUtil.getClientVersion(): Cardinal;
 begin
-	Result := vTable^.getClientVersion(thisRecord);
+	Result := vTable^.getClientVersion(this);
 end;
 
 function TUtil.getXpbBuilder(status: IStatus; kind: Cardinal; buf: BytePtr; len: Cardinal): IXpbBuilder;
 begin
-	Result := vTable^.getXpbBuilder(thisRecord, status, kind, buf, len);
+	Result := vTable^.getXpbBuilder(this, status, kind, buf, len);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TUtil.setOffsets(status: IStatus; metadata: IMessageMetadata; callback: IOffsetsCallback): Cardinal;
 begin
-	Result := vTable^.setOffsets(thisRecord, status, metadata, callback);
+	Result := vTable^.setOffsets(this, status, metadata, callback);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TUtil.getDecFloat16(status: IStatus): IDecFloat16;
 begin
-	Result := vTable^.getDecFloat16(thisRecord, status);
+	Result := vTable^.getDecFloat16(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TUtil.getDecFloat34(status: IStatus): IDecFloat34;
 begin
-	Result := vTable^.getDecFloat34(thisRecord, status);
+	Result := vTable^.getDecFloat34(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TUtil.decodeTimeTz(status: IStatus; timeTz: ISC_TIME_TZPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar);
 begin
-	vTable^.decodeTimeTz(thisRecord, status, timeTz, hours, minutes, seconds, fractions, timeZoneBufferLength, timeZoneBuffer);
+	vTable^.decodeTimeTz(this, status, timeTz, hours, minutes, seconds, fractions, timeZoneBufferLength, timeZoneBuffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TUtil.decodeTimeStampTz(status: IStatus; timeStampTz: ISC_TIMESTAMP_TZPtr; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar);
 begin
-	vTable^.decodeTimeStampTz(thisRecord, status, timeStampTz, year, month, day, hours, minutes, seconds, fractions, timeZoneBufferLength, timeZoneBuffer);
+	vTable^.decodeTimeStampTz(this, status, timeStampTz, year, month, day, hours, minutes, seconds, fractions, timeZoneBufferLength, timeZoneBuffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TUtil.encodeTimeTz(status: IStatus; timeTz: ISC_TIME_TZPtr; hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal; timeZone: PAnsiChar);
 begin
-	vTable^.encodeTimeTz(thisRecord, status, timeTz, hours, minutes, seconds, fractions, timeZone);
+	vTable^.encodeTimeTz(this, status, timeTz, hours, minutes, seconds, fractions, timeZone);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TUtil.encodeTimeStampTz(status: IStatus; timeStampTz: ISC_TIMESTAMP_TZPtr; year: Cardinal; month: Cardinal; day: Cardinal; hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal; timeZone: PAnsiChar);
 begin
-	vTable^.encodeTimeStampTz(thisRecord, status, timeStampTz, year, month, day, hours, minutes, seconds, fractions, timeZone);
+	vTable^.encodeTimeStampTz(this, status, timeStampTz, year, month, day, hours, minutes, seconds, fractions, timeZone);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TUtil.getInt128(status: IStatus): IInt128;
 begin
-	Result := vTable^.getInt128(thisRecord, status);
+	Result := vTable^.getInt128(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TUtil.decodeTimeTzEx(status: IStatus; timeTz: ISC_TIME_TZ_EXPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar);
 begin
-	vTable^.decodeTimeTzEx(thisRecord, status, timeTz, hours, minutes, seconds, fractions, timeZoneBufferLength, timeZoneBuffer);
+	vTable^.decodeTimeTzEx(this, status, timeTz, hours, minutes, seconds, fractions, timeZoneBufferLength, timeZoneBuffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TUtil.decodeTimeStampTzEx(status: IStatus; timeStampTz: ISC_TIMESTAMP_TZ_EXPtr; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar);
 begin
-	vTable^.decodeTimeStampTzEx(thisRecord, status, timeStampTz, year, month, day, hours, minutes, seconds, fractions, timeZoneBufferLength, timeZoneBuffer);
+	vTable^.decodeTimeStampTzEx(this, status, timeStampTz, year, month, day, hours, minutes, seconds, fractions, timeZoneBufferLength, timeZoneBuffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TOffsetsCallback.thisRecord: IOffsetsCallback;
+function TOffsetsCallback.this: IOffsetsCallback;
 begin
-  Result := IOffsetsCallback(@nullPtr);
+  Result := IOffsetsCallback(@FNullPtr);
 end;
 
-function TOffsetsCallback.getIOffsetsCallbackImpl: IOffsetsCallbackImpl;
+function TOffsetsCallback.asIOffsetsCallbackImpl: IOffsetsCallbackImpl;
 begin
   if isIOffsetsCallbackImpl then
-    Result := owner
+    Result := FIOffsetsCallbackImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TOffsetsCallback.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 procedure TOffsetsCallback.setOffset(status: IStatus; index: Cardinal; offset: Cardinal; nullOffset: Cardinal);
 begin
-	vTable^.setOffset(thisRecord, status, index, offset, nullOffset);
+	vTable^.setOffset(this, status, index, offset, nullOffset);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TXpbBuilder.thisRecord: IXpbBuilder;
+function TXpbBuilder.this: IXpbBuilder;
 begin
-  Result := IXpbBuilder(@nullPtr);
+  Result := IXpbBuilder(@FNullPtr);
 end;
 
-function TXpbBuilder.getIXpbBuilderImpl: IXpbBuilderImpl;
+function TXpbBuilder.asIXpbBuilderImpl: IXpbBuilderImpl;
 begin
   if isIXpbBuilderImpl then
-    Result := owner
+    Result := FIXpbBuilderImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TXpbBuilder.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TXpbBuilder.dispose();
 begin
-	vTable^.dispose(IDisposable(thisRecord));
+	vTable^.dispose(IDisposable(this));
 end;
 
 procedure TXpbBuilder.clear(status: IStatus);
 begin
-	vTable^.clear(thisRecord, status);
+	vTable^.clear(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TXpbBuilder.removeCurrent(status: IStatus);
 begin
-	vTable^.removeCurrent(thisRecord, status);
+	vTable^.removeCurrent(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TXpbBuilder.insertInt(status: IStatus; tag: Byte; value: Integer);
 begin
-	vTable^.insertInt(thisRecord, status, tag, value);
+	vTable^.insertInt(this, status, tag, value);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TXpbBuilder.insertBigInt(status: IStatus; tag: Byte; value: Int64);
 begin
-	vTable^.insertBigInt(thisRecord, status, tag, value);
+	vTable^.insertBigInt(this, status, tag, value);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TXpbBuilder.insertBytes(status: IStatus; tag: Byte; bytes: Pointer; length: Cardinal);
 begin
-	vTable^.insertBytes(thisRecord, status, tag, bytes, length);
+	vTable^.insertBytes(this, status, tag, bytes, length);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TXpbBuilder.insertString(status: IStatus; tag: Byte; str: PAnsiChar);
 begin
-	vTable^.insertString(thisRecord, status, tag, str);
+	vTable^.insertString(this, status, tag, str);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TXpbBuilder.insertTag(status: IStatus; tag: Byte);
 begin
-	vTable^.insertTag(thisRecord, status, tag);
+	vTable^.insertTag(this, status, tag);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TXpbBuilder.isEof(status: IStatus): Boolean;
 begin
-	Result := vTable^.isEof(thisRecord, status);
+	Result := vTable^.isEof(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TXpbBuilder.moveNext(status: IStatus);
 begin
-	vTable^.moveNext(thisRecord, status);
+	vTable^.moveNext(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TXpbBuilder.rewind(status: IStatus);
 begin
-	vTable^.rewind(thisRecord, status);
+	vTable^.rewind(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TXpbBuilder.findFirst(status: IStatus; tag: Byte): Boolean;
 begin
-	Result := vTable^.findFirst(thisRecord, status, tag);
+	Result := vTable^.findFirst(this, status, tag);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TXpbBuilder.findNext(status: IStatus): Boolean;
 begin
-	Result := vTable^.findNext(thisRecord, status);
+	Result := vTable^.findNext(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TXpbBuilder.getTag(status: IStatus): Byte;
 begin
-	Result := vTable^.getTag(thisRecord, status);
+	Result := vTable^.getTag(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TXpbBuilder.getLength(status: IStatus): Cardinal;
 begin
-	Result := vTable^.getLength(thisRecord, status);
+	Result := vTable^.getLength(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TXpbBuilder.getInt(status: IStatus): Integer;
 begin
-	Result := vTable^.getInt(thisRecord, status);
+	Result := vTable^.getInt(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TXpbBuilder.getBigInt(status: IStatus): Int64;
 begin
-	Result := vTable^.getBigInt(thisRecord, status);
+	Result := vTable^.getBigInt(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TXpbBuilder.getString(status: IStatus): PAnsiChar;
 begin
-	Result := vTable^.getString(thisRecord, status);
+	Result := vTable^.getString(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TXpbBuilder.getBytes(status: IStatus): BytePtr;
 begin
-	Result := vTable^.getBytes(thisRecord, status);
+	Result := vTable^.getBytes(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TXpbBuilder.getBufferLength(status: IStatus): Cardinal;
 begin
-	Result := vTable^.getBufferLength(thisRecord, status);
+	Result := vTable^.getBufferLength(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TXpbBuilder.getBuffer(status: IStatus): BytePtr;
 begin
-	Result := vTable^.getBuffer(thisRecord, status);
+	Result := vTable^.getBuffer(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TTraceConnection.thisRecord: ITraceConnection;
+function TTraceConnection.this: ITraceConnection;
 begin
-  Result := ITraceConnection(@nullPtr);
+  Result := ITraceConnection(@FNullPtr);
 end;
 
-function TTraceConnection.getITraceConnectionImpl: ITraceConnectionImpl;
+function TTraceConnection.asITraceConnectionImpl: ITraceConnectionImpl;
 begin
   if isITraceConnectionImpl then
-    Result := owner
+    Result := FITraceConnectionImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TTraceConnection.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 function TTraceConnection.getKind(): Cardinal;
 begin
-	Result := vTable^.getKind(thisRecord);
+	Result := vTable^.getKind(this);
 end;
 
 function TTraceConnection.getProcessID(): Integer;
 begin
-	Result := vTable^.getProcessID(thisRecord);
+	Result := vTable^.getProcessID(this);
 end;
 
 function TTraceConnection.getUserName(): PAnsiChar;
 begin
-	Result := vTable^.getUserName(thisRecord);
+	Result := vTable^.getUserName(this);
 end;
 
 function TTraceConnection.getRoleName(): PAnsiChar;
 begin
-	Result := vTable^.getRoleName(thisRecord);
+	Result := vTable^.getRoleName(this);
 end;
 
 function TTraceConnection.getCharSet(): PAnsiChar;
 begin
-	Result := vTable^.getCharSet(thisRecord);
+	Result := vTable^.getCharSet(this);
 end;
 
 function TTraceConnection.getRemoteProtocol(): PAnsiChar;
 begin
-	Result := vTable^.getRemoteProtocol(thisRecord);
+	Result := vTable^.getRemoteProtocol(this);
 end;
 
 function TTraceConnection.getRemoteAddress(): PAnsiChar;
 begin
-	Result := vTable^.getRemoteAddress(thisRecord);
+	Result := vTable^.getRemoteAddress(this);
 end;
 
 function TTraceConnection.getRemoteProcessID(): Integer;
 begin
-	Result := vTable^.getRemoteProcessID(thisRecord);
+	Result := vTable^.getRemoteProcessID(this);
 end;
 
 function TTraceConnection.getRemoteProcessName(): PAnsiChar;
 begin
-	Result := vTable^.getRemoteProcessName(thisRecord);
+	Result := vTable^.getRemoteProcessName(this);
 end;
 
-function TTraceDatabaseConnection.thisRecord: ITraceDatabaseConnection;
+function TTraceDatabaseConnection.this: ITraceDatabaseConnection;
 begin
-  Result := ITraceDatabaseConnection(@nullPtr);
+  Result := ITraceDatabaseConnection(@FNullPtr);
 end;
 
-function TTraceDatabaseConnection.getITraceDatabaseConnectionImpl: ITraceDatabaseConnectionImpl;
+function TTraceDatabaseConnection.asITraceDatabaseConnectionImpl: ITraceDatabaseConnectionImpl;
 begin
   if isITraceDatabaseConnectionImpl then
-    Result := owner
+    Result := FITraceDatabaseConnectionImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TTraceDatabaseConnection.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 function TTraceDatabaseConnection.getKind(): Cardinal;
 begin
-	Result := vTable^.getKind(ITraceConnection(thisRecord));
+	Result := vTable^.getKind(ITraceConnection(this));
 end;
 
 function TTraceDatabaseConnection.getProcessID(): Integer;
 begin
-	Result := vTable^.getProcessID(ITraceConnection(thisRecord));
+	Result := vTable^.getProcessID(ITraceConnection(this));
 end;
 
 function TTraceDatabaseConnection.getUserName(): PAnsiChar;
 begin
-	Result := vTable^.getUserName(ITraceConnection(thisRecord));
+	Result := vTable^.getUserName(ITraceConnection(this));
 end;
 
 function TTraceDatabaseConnection.getRoleName(): PAnsiChar;
 begin
-	Result := vTable^.getRoleName(ITraceConnection(thisRecord));
+	Result := vTable^.getRoleName(ITraceConnection(this));
 end;
 
 function TTraceDatabaseConnection.getCharSet(): PAnsiChar;
 begin
-	Result := vTable^.getCharSet(ITraceConnection(thisRecord));
+	Result := vTable^.getCharSet(ITraceConnection(this));
 end;
 
 function TTraceDatabaseConnection.getRemoteProtocol(): PAnsiChar;
 begin
-	Result := vTable^.getRemoteProtocol(ITraceConnection(thisRecord));
+	Result := vTable^.getRemoteProtocol(ITraceConnection(this));
 end;
 
 function TTraceDatabaseConnection.getRemoteAddress(): PAnsiChar;
 begin
-	Result := vTable^.getRemoteAddress(ITraceConnection(thisRecord));
+	Result := vTable^.getRemoteAddress(ITraceConnection(this));
 end;
 
 function TTraceDatabaseConnection.getRemoteProcessID(): Integer;
 begin
-	Result := vTable^.getRemoteProcessID(ITraceConnection(thisRecord));
+	Result := vTable^.getRemoteProcessID(ITraceConnection(this));
 end;
 
 function TTraceDatabaseConnection.getRemoteProcessName(): PAnsiChar;
 begin
-	Result := vTable^.getRemoteProcessName(ITraceConnection(thisRecord));
+	Result := vTable^.getRemoteProcessName(ITraceConnection(this));
 end;
 
 function TTraceDatabaseConnection.getConnectionID(): Int64;
 begin
-	Result := vTable^.getConnectionID(thisRecord);
+	Result := vTable^.getConnectionID(this);
 end;
 
 function TTraceDatabaseConnection.getDatabaseName(): PAnsiChar;
 begin
-	Result := vTable^.getDatabaseName(thisRecord);
+	Result := vTable^.getDatabaseName(this);
 end;
 
-function TTraceTransaction.thisRecord: ITraceTransaction;
+function TTraceTransaction.this: ITraceTransaction;
 begin
-  Result := ITraceTransaction(@nullPtr);
+  Result := ITraceTransaction(@FNullPtr);
 end;
 
-function TTraceTransaction.getITraceTransactionImpl: ITraceTransactionImpl;
+function TTraceTransaction.asITraceTransactionImpl: ITraceTransactionImpl;
 begin
   if isITraceTransactionImpl then
-    Result := owner
+    Result := FITraceTransactionImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TTraceTransaction.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 function TTraceTransaction.getTransactionID(): Int64;
 begin
-	Result := vTable^.getTransactionID(thisRecord);
+	Result := vTable^.getTransactionID(this);
 end;
 
 function TTraceTransaction.getReadOnly(): Boolean;
 begin
-	Result := vTable^.getReadOnly(thisRecord);
+	Result := vTable^.getReadOnly(this);
 end;
 
 function TTraceTransaction.getWait(): Integer;
 begin
-	Result := vTable^.getWait(thisRecord);
+	Result := vTable^.getWait(this);
 end;
 
 function TTraceTransaction.getIsolation(): Cardinal;
 begin
-	Result := vTable^.getIsolation(thisRecord);
+	Result := vTable^.getIsolation(this);
 end;
 
 function TTraceTransaction.getPerf(): PerformanceInfoPtr;
 begin
-	Result := vTable^.getPerf(thisRecord);
+	Result := vTable^.getPerf(this);
 end;
 
 function TTraceTransaction.getInitialID(): Int64;
 begin
-	Result := vTable^.getInitialID(thisRecord);
+	Result := vTable^.getInitialID(this);
 end;
 
 function TTraceTransaction.getPreviousID(): Int64;
 begin
-	Result := vTable^.getPreviousID(thisRecord);
+	Result := vTable^.getPreviousID(this);
 end;
 
-function TTraceParams.thisRecord: ITraceParams;
+function TTraceParams.this: ITraceParams;
 begin
-  Result := ITraceParams(@nullPtr);
+  Result := ITraceParams(@FNullPtr);
 end;
 
-function TTraceParams.getITraceParamsImpl: ITraceParamsImpl;
+function TTraceParams.asITraceParamsImpl: ITraceParamsImpl;
 begin
   if isITraceParamsImpl then
-    Result := owner
+    Result := FITraceParamsImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TTraceParams.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 function TTraceParams.getCount(): Cardinal;
 begin
-	Result := vTable^.getCount(thisRecord);
+	Result := vTable^.getCount(this);
 end;
 
 function TTraceParams.getParam(idx: Cardinal): dscPtr;
 begin
-	Result := vTable^.getParam(thisRecord, idx);
+	Result := vTable^.getParam(this, idx);
 end;
 
 function TTraceParams.getTextUTF8(status: IStatus; idx: Cardinal): PAnsiChar;
 begin
-	Result := vTable^.getTextUTF8(thisRecord, status, idx);
+	Result := vTable^.getTextUTF8(this, status, idx);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TTraceStatement.thisRecord: ITraceStatement;
+function TTraceStatement.this: ITraceStatement;
 begin
-  Result := ITraceStatement(@nullPtr);
+  Result := ITraceStatement(@FNullPtr);
 end;
 
-function TTraceStatement.getITraceStatementImpl: ITraceStatementImpl;
+function TTraceStatement.asITraceStatementImpl: ITraceStatementImpl;
 begin
   if isITraceStatementImpl then
-    Result := owner
+    Result := FITraceStatementImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TTraceStatement.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 function TTraceStatement.getStmtID(): Int64;
 begin
-	Result := vTable^.getStmtID(thisRecord);
+	Result := vTable^.getStmtID(this);
 end;
 
 function TTraceStatement.getPerf(): PerformanceInfoPtr;
 begin
-	Result := vTable^.getPerf(thisRecord);
+	Result := vTable^.getPerf(this);
 end;
 
-function TTraceSQLStatement.thisRecord: ITraceSQLStatement;
+function TTraceSQLStatement.this: ITraceSQLStatement;
 begin
-  Result := ITraceSQLStatement(@nullPtr);
+  Result := ITraceSQLStatement(@FNullPtr);
 end;
 
-function TTraceSQLStatement.getITraceSQLStatementImpl: ITraceSQLStatementImpl;
+function TTraceSQLStatement.asITraceSQLStatementImpl: ITraceSQLStatementImpl;
 begin
   if isITraceSQLStatementImpl then
-    Result := owner
+    Result := FITraceSQLStatementImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TTraceSQLStatement.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 function TTraceSQLStatement.getStmtID(): Int64;
 begin
-	Result := vTable^.getStmtID(ITraceStatement(thisRecord));
+	Result := vTable^.getStmtID(ITraceStatement(this));
 end;
 
 function TTraceSQLStatement.getPerf(): PerformanceInfoPtr;
 begin
-	Result := vTable^.getPerf(ITraceStatement(thisRecord));
+	Result := vTable^.getPerf(ITraceStatement(this));
 end;
 
 function TTraceSQLStatement.getText(): PAnsiChar;
 begin
-	Result := vTable^.getText(thisRecord);
+	Result := vTable^.getText(this);
 end;
 
 function TTraceSQLStatement.getPlan(): PAnsiChar;
 begin
-	Result := vTable^.getPlan(thisRecord);
+	Result := vTable^.getPlan(this);
 end;
 
 function TTraceSQLStatement.getInputs(): ITraceParams;
 begin
-	Result := vTable^.getInputs(thisRecord);
+	Result := vTable^.getInputs(this);
 end;
 
 function TTraceSQLStatement.getTextUTF8(): PAnsiChar;
 begin
-	Result := vTable^.getTextUTF8(thisRecord);
+	Result := vTable^.getTextUTF8(this);
 end;
 
 function TTraceSQLStatement.getExplainedPlan(): PAnsiChar;
 begin
-	Result := vTable^.getExplainedPlan(thisRecord);
+	Result := vTable^.getExplainedPlan(this);
 end;
 
-function TTraceBLRStatement.thisRecord: ITraceBLRStatement;
+function TTraceBLRStatement.this: ITraceBLRStatement;
 begin
-  Result := ITraceBLRStatement(@nullPtr);
+  Result := ITraceBLRStatement(@FNullPtr);
 end;
 
-function TTraceBLRStatement.getITraceBLRStatementImpl: ITraceBLRStatementImpl;
+function TTraceBLRStatement.asITraceBLRStatementImpl: ITraceBLRStatementImpl;
 begin
   if isITraceBLRStatementImpl then
-    Result := owner
+    Result := FITraceBLRStatementImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TTraceBLRStatement.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 function TTraceBLRStatement.getStmtID(): Int64;
 begin
-	Result := vTable^.getStmtID(ITraceStatement(thisRecord));
+	Result := vTable^.getStmtID(ITraceStatement(this));
 end;
 
 function TTraceBLRStatement.getPerf(): PerformanceInfoPtr;
 begin
-	Result := vTable^.getPerf(ITraceStatement(thisRecord));
+	Result := vTable^.getPerf(ITraceStatement(this));
 end;
 
 function TTraceBLRStatement.getData(): BytePtr;
 begin
-	Result := vTable^.getData(thisRecord);
+	Result := vTable^.getData(this);
 end;
 
 function TTraceBLRStatement.getDataLength(): Cardinal;
 begin
-	Result := vTable^.getDataLength(thisRecord);
+	Result := vTable^.getDataLength(this);
 end;
 
 function TTraceBLRStatement.getText(): PAnsiChar;
 begin
-	Result := vTable^.getText(thisRecord);
+	Result := vTable^.getText(this);
 end;
 
-function TTraceDYNRequest.thisRecord: ITraceDYNRequest;
+function TTraceDYNRequest.this: ITraceDYNRequest;
 begin
-  Result := ITraceDYNRequest(@nullPtr);
+  Result := ITraceDYNRequest(@FNullPtr);
 end;
 
-function TTraceDYNRequest.getITraceDYNRequestImpl: ITraceDYNRequestImpl;
+function TTraceDYNRequest.asITraceDYNRequestImpl: ITraceDYNRequestImpl;
 begin
   if isITraceDYNRequestImpl then
-    Result := owner
+    Result := FITraceDYNRequestImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TTraceDYNRequest.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 function TTraceDYNRequest.getData(): BytePtr;
 begin
-	Result := vTable^.getData(thisRecord);
+	Result := vTable^.getData(this);
 end;
 
 function TTraceDYNRequest.getDataLength(): Cardinal;
 begin
-	Result := vTable^.getDataLength(thisRecord);
+	Result := vTable^.getDataLength(this);
 end;
 
 function TTraceDYNRequest.getText(): PAnsiChar;
 begin
-	Result := vTable^.getText(thisRecord);
+	Result := vTable^.getText(this);
 end;
 
-function TTraceContextVariable.thisRecord: ITraceContextVariable;
+function TTraceContextVariable.this: ITraceContextVariable;
 begin
-  Result := ITraceContextVariable(@nullPtr);
+  Result := ITraceContextVariable(@FNullPtr);
 end;
 
-function TTraceContextVariable.getITraceContextVariableImpl: ITraceContextVariableImpl;
+function TTraceContextVariable.asITraceContextVariableImpl: ITraceContextVariableImpl;
 begin
   if isITraceContextVariableImpl then
-    Result := owner
+    Result := FITraceContextVariableImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TTraceContextVariable.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 function TTraceContextVariable.getNameSpace(): PAnsiChar;
 begin
-	Result := vTable^.getNameSpace(thisRecord);
+	Result := vTable^.getNameSpace(this);
 end;
 
 function TTraceContextVariable.getVarName(): PAnsiChar;
 begin
-	Result := vTable^.getVarName(thisRecord);
+	Result := vTable^.getVarName(this);
 end;
 
 function TTraceContextVariable.getVarValue(): PAnsiChar;
 begin
-	Result := vTable^.getVarValue(thisRecord);
+	Result := vTable^.getVarValue(this);
 end;
 
-function TTraceProcedure.thisRecord: ITraceProcedure;
+function TTraceProcedure.this: ITraceProcedure;
 begin
-  Result := ITraceProcedure(@nullPtr);
+  Result := ITraceProcedure(@FNullPtr);
 end;
 
-function TTraceProcedure.getITraceProcedureImpl: ITraceProcedureImpl;
+function TTraceProcedure.asITraceProcedureImpl: ITraceProcedureImpl;
 begin
   if isITraceProcedureImpl then
-    Result := owner
+    Result := FITraceProcedureImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TTraceProcedure.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 function TTraceProcedure.getProcName(): PAnsiChar;
 begin
-	Result := vTable^.getProcName(thisRecord);
+	Result := vTable^.getProcName(this);
 end;
 
 function TTraceProcedure.getInputs(): ITraceParams;
 begin
-	Result := vTable^.getInputs(thisRecord);
+	Result := vTable^.getInputs(this);
 end;
 
 function TTraceProcedure.getPerf(): PerformanceInfoPtr;
 begin
-	Result := vTable^.getPerf(thisRecord);
+	Result := vTable^.getPerf(this);
 end;
 
-function TTraceFunction.thisRecord: ITraceFunction;
+function TTraceFunction.this: ITraceFunction;
 begin
-  Result := ITraceFunction(@nullPtr);
+  Result := ITraceFunction(@FNullPtr);
 end;
 
-function TTraceFunction.getITraceFunctionImpl: ITraceFunctionImpl;
+function TTraceFunction.asITraceFunctionImpl: ITraceFunctionImpl;
 begin
   if isITraceFunctionImpl then
-    Result := owner
+    Result := FITraceFunctionImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TTraceFunction.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 function TTraceFunction.getFuncName(): PAnsiChar;
 begin
-	Result := vTable^.getFuncName(thisRecord);
+	Result := vTable^.getFuncName(this);
 end;
 
 function TTraceFunction.getInputs(): ITraceParams;
 begin
-	Result := vTable^.getInputs(thisRecord);
+	Result := vTable^.getInputs(this);
 end;
 
 function TTraceFunction.getResult(): ITraceParams;
 begin
-	Result := vTable^.getResult(thisRecord);
+	Result := vTable^.getResult(this);
 end;
 
 function TTraceFunction.getPerf(): PerformanceInfoPtr;
 begin
-	Result := vTable^.getPerf(thisRecord);
+	Result := vTable^.getPerf(this);
 end;
 
-function TTraceTrigger.thisRecord: ITraceTrigger;
+function TTraceTrigger.this: ITraceTrigger;
 begin
-  Result := ITraceTrigger(@nullPtr);
+  Result := ITraceTrigger(@FNullPtr);
 end;
 
-function TTraceTrigger.getITraceTriggerImpl: ITraceTriggerImpl;
+function TTraceTrigger.asITraceTriggerImpl: ITraceTriggerImpl;
 begin
   if isITraceTriggerImpl then
-    Result := owner
+    Result := FITraceTriggerImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TTraceTrigger.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 function TTraceTrigger.getTriggerName(): PAnsiChar;
 begin
-	Result := vTable^.getTriggerName(thisRecord);
+	Result := vTable^.getTriggerName(this);
 end;
 
 function TTraceTrigger.getRelationName(): PAnsiChar;
 begin
-	Result := vTable^.getRelationName(thisRecord);
+	Result := vTable^.getRelationName(this);
 end;
 
 function TTraceTrigger.getAction(): Integer;
 begin
-	Result := vTable^.getAction(thisRecord);
+	Result := vTable^.getAction(this);
 end;
 
 function TTraceTrigger.getWhich(): Integer;
 begin
-	Result := vTable^.getWhich(thisRecord);
+	Result := vTable^.getWhich(this);
 end;
 
 function TTraceTrigger.getPerf(): PerformanceInfoPtr;
 begin
-	Result := vTable^.getPerf(thisRecord);
+	Result := vTable^.getPerf(this);
 end;
 
-function TTraceServiceConnection.thisRecord: ITraceServiceConnection;
+function TTraceServiceConnection.this: ITraceServiceConnection;
 begin
-  Result := ITraceServiceConnection(@nullPtr);
+  Result := ITraceServiceConnection(@FNullPtr);
 end;
 
-function TTraceServiceConnection.getITraceServiceConnectionImpl: ITraceServiceConnectionImpl;
+function TTraceServiceConnection.asITraceServiceConnectionImpl: ITraceServiceConnectionImpl;
 begin
   if isITraceServiceConnectionImpl then
-    Result := owner
+    Result := FITraceServiceConnectionImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TTraceServiceConnection.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 function TTraceServiceConnection.getKind(): Cardinal;
 begin
-	Result := vTable^.getKind(ITraceConnection(thisRecord));
+	Result := vTable^.getKind(ITraceConnection(this));
 end;
 
 function TTraceServiceConnection.getProcessID(): Integer;
 begin
-	Result := vTable^.getProcessID(ITraceConnection(thisRecord));
+	Result := vTable^.getProcessID(ITraceConnection(this));
 end;
 
 function TTraceServiceConnection.getUserName(): PAnsiChar;
 begin
-	Result := vTable^.getUserName(ITraceConnection(thisRecord));
+	Result := vTable^.getUserName(ITraceConnection(this));
 end;
 
 function TTraceServiceConnection.getRoleName(): PAnsiChar;
 begin
-	Result := vTable^.getRoleName(ITraceConnection(thisRecord));
+	Result := vTable^.getRoleName(ITraceConnection(this));
 end;
 
 function TTraceServiceConnection.getCharSet(): PAnsiChar;
 begin
-	Result := vTable^.getCharSet(ITraceConnection(thisRecord));
+	Result := vTable^.getCharSet(ITraceConnection(this));
 end;
 
 function TTraceServiceConnection.getRemoteProtocol(): PAnsiChar;
 begin
-	Result := vTable^.getRemoteProtocol(ITraceConnection(thisRecord));
+	Result := vTable^.getRemoteProtocol(ITraceConnection(this));
 end;
 
 function TTraceServiceConnection.getRemoteAddress(): PAnsiChar;
 begin
-	Result := vTable^.getRemoteAddress(ITraceConnection(thisRecord));
+	Result := vTable^.getRemoteAddress(ITraceConnection(this));
 end;
 
 function TTraceServiceConnection.getRemoteProcessID(): Integer;
 begin
-	Result := vTable^.getRemoteProcessID(ITraceConnection(thisRecord));
+	Result := vTable^.getRemoteProcessID(ITraceConnection(this));
 end;
 
 function TTraceServiceConnection.getRemoteProcessName(): PAnsiChar;
 begin
-	Result := vTable^.getRemoteProcessName(ITraceConnection(thisRecord));
+	Result := vTable^.getRemoteProcessName(ITraceConnection(this));
 end;
 
 function TTraceServiceConnection.getServiceID(): Pointer;
 begin
-	Result := vTable^.getServiceID(thisRecord);
+	Result := vTable^.getServiceID(this);
 end;
 
 function TTraceServiceConnection.getServiceMgr(): PAnsiChar;
 begin
-	Result := vTable^.getServiceMgr(thisRecord);
+	Result := vTable^.getServiceMgr(this);
 end;
 
 function TTraceServiceConnection.getServiceName(): PAnsiChar;
 begin
-	Result := vTable^.getServiceName(thisRecord);
+	Result := vTable^.getServiceName(this);
 end;
 
-function TTraceStatusVector.thisRecord: ITraceStatusVector;
+function TTraceStatusVector.this: ITraceStatusVector;
 begin
-  Result := ITraceStatusVector(@nullPtr);
+  Result := ITraceStatusVector(@FNullPtr);
 end;
 
-function TTraceStatusVector.getITraceStatusVectorImpl: ITraceStatusVectorImpl;
+function TTraceStatusVector.asITraceStatusVectorImpl: ITraceStatusVectorImpl;
 begin
   if isITraceStatusVectorImpl then
-    Result := owner
+    Result := FITraceStatusVectorImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TTraceStatusVector.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 function TTraceStatusVector.hasError(): Boolean;
 begin
-	Result := vTable^.hasError(thisRecord);
+	Result := vTable^.hasError(this);
 end;
 
 function TTraceStatusVector.hasWarning(): Boolean;
 begin
-	Result := vTable^.hasWarning(thisRecord);
+	Result := vTable^.hasWarning(this);
 end;
 
 function TTraceStatusVector.getStatus(): IStatus;
 begin
-	Result := vTable^.getStatus(thisRecord);
+	Result := vTable^.getStatus(this);
 end;
 
 function TTraceStatusVector.getText(): PAnsiChar;
 begin
-	Result := vTable^.getText(thisRecord);
+	Result := vTable^.getText(this);
 end;
 
-function TTraceSweepInfo.thisRecord: ITraceSweepInfo;
+function TTraceSweepInfo.this: ITraceSweepInfo;
 begin
-  Result := ITraceSweepInfo(@nullPtr);
+  Result := ITraceSweepInfo(@FNullPtr);
 end;
 
-function TTraceSweepInfo.getITraceSweepInfoImpl: ITraceSweepInfoImpl;
+function TTraceSweepInfo.asITraceSweepInfoImpl: ITraceSweepInfoImpl;
 begin
   if isITraceSweepInfoImpl then
-    Result := owner
+    Result := FITraceSweepInfoImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TTraceSweepInfo.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 function TTraceSweepInfo.getOIT(): Int64;
 begin
-	Result := vTable^.getOIT(thisRecord);
+	Result := vTable^.getOIT(this);
 end;
 
 function TTraceSweepInfo.getOST(): Int64;
 begin
-	Result := vTable^.getOST(thisRecord);
+	Result := vTable^.getOST(this);
 end;
 
 function TTraceSweepInfo.getOAT(): Int64;
 begin
-	Result := vTable^.getOAT(thisRecord);
+	Result := vTable^.getOAT(this);
 end;
 
 function TTraceSweepInfo.getNext(): Int64;
 begin
-	Result := vTable^.getNext(thisRecord);
+	Result := vTable^.getNext(this);
 end;
 
 function TTraceSweepInfo.getPerf(): PerformanceInfoPtr;
 begin
-	Result := vTable^.getPerf(thisRecord);
+	Result := vTable^.getPerf(this);
 end;
 
-function TTraceLogWriter.thisRecord: ITraceLogWriter;
+function TTraceLogWriter.this: ITraceLogWriter;
 begin
-  Result := ITraceLogWriter(@nullPtr);
+  Result := ITraceLogWriter(@FNullPtr);
 end;
 
-function TTraceLogWriter.getITraceLogWriterImpl: ITraceLogWriterImpl;
+function TTraceLogWriter.asITraceLogWriterImpl: ITraceLogWriterImpl;
 begin
   if isITraceLogWriterImpl then
-    Result := owner
+    Result := FITraceLogWriterImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TTraceLogWriter.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 procedure TTraceLogWriter.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TTraceLogWriter.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 function TTraceLogWriter.write(buf: Pointer; size: Cardinal): Cardinal;
 begin
-	Result := vTable^.write(thisRecord, buf, size);
+	Result := vTable^.write(this, buf, size);
 end;
 
 function TTraceLogWriter.write_s(status: IStatus; buf: Pointer; size: Cardinal): Cardinal;
 begin
-	Result := vTable^.write_s(thisRecord, status, buf, size);
+	Result := vTable^.write_s(this, status, buf, size);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TTraceInitInfo.thisRecord: ITraceInitInfo;
+function TTraceInitInfo.this: ITraceInitInfo;
 begin
-  Result := ITraceInitInfo(@nullPtr);
+  Result := ITraceInitInfo(@FNullPtr);
 end;
 
-function TTraceInitInfo.getITraceInitInfoImpl: ITraceInitInfoImpl;
+function TTraceInitInfo.asITraceInitInfoImpl: ITraceInitInfoImpl;
 begin
   if isITraceInitInfoImpl then
-    Result := owner
+    Result := FITraceInitInfoImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TTraceInitInfo.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 function TTraceInitInfo.getConfigText(): PAnsiChar;
 begin
-	Result := vTable^.getConfigText(thisRecord);
+	Result := vTable^.getConfigText(this);
 end;
 
 function TTraceInitInfo.getTraceSessionID(): Integer;
 begin
-	Result := vTable^.getTraceSessionID(thisRecord);
+	Result := vTable^.getTraceSessionID(this);
 end;
 
 function TTraceInitInfo.getTraceSessionName(): PAnsiChar;
 begin
-	Result := vTable^.getTraceSessionName(thisRecord);
+	Result := vTable^.getTraceSessionName(this);
 end;
 
 function TTraceInitInfo.getFirebirdRootDirectory(): PAnsiChar;
 begin
-	Result := vTable^.getFirebirdRootDirectory(thisRecord);
+	Result := vTable^.getFirebirdRootDirectory(this);
 end;
 
 function TTraceInitInfo.getDatabaseName(): PAnsiChar;
 begin
-	Result := vTable^.getDatabaseName(thisRecord);
+	Result := vTable^.getDatabaseName(this);
 end;
 
 function TTraceInitInfo.getConnection(): ITraceDatabaseConnection;
 begin
-	Result := vTable^.getConnection(thisRecord);
+	Result := vTable^.getConnection(this);
 end;
 
 function TTraceInitInfo.getLogWriter(): ITraceLogWriter;
 begin
-	Result := vTable^.getLogWriter(thisRecord);
+	Result := vTable^.getLogWriter(this);
 end;
 
-function TTracePlugin.thisRecord: ITracePlugin;
+function TTracePlugin.this: ITracePlugin;
 begin
-  Result := ITracePlugin(@nullPtr);
+  Result := ITracePlugin(@FNullPtr);
 end;
 
-function TTracePlugin.getITracePluginImpl: ITracePluginImpl;
+function TTracePlugin.asITracePluginImpl: ITracePluginImpl;
 begin
   if isITracePluginImpl then
-    Result := owner
+    Result := FITracePluginImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TTracePlugin.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 procedure TTracePlugin.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TTracePlugin.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 function TTracePlugin.trace_get_error(): PAnsiChar;
 begin
-	Result := vTable^.trace_get_error(thisRecord);
+	Result := vTable^.trace_get_error(this);
 end;
 
 function TTracePlugin.trace_attach(connection: ITraceDatabaseConnection; create_db: Boolean; att_result: Cardinal): Boolean;
 begin
-	Result := vTable^.trace_attach(thisRecord, connection, create_db, att_result);
+	Result := vTable^.trace_attach(this, connection, create_db, att_result);
 end;
 
 function TTracePlugin.trace_detach(connection: ITraceDatabaseConnection; drop_db: Boolean): Boolean;
 begin
-	Result := vTable^.trace_detach(thisRecord, connection, drop_db);
+	Result := vTable^.trace_detach(this, connection, drop_db);
 end;
 
 function TTracePlugin.trace_transaction_start(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; tpb_length: Cardinal; tpb: BytePtr; tra_result: Cardinal): Boolean;
 begin
-	Result := vTable^.trace_transaction_start(thisRecord, connection, transaction, tpb_length, tpb, tra_result);
+	Result := vTable^.trace_transaction_start(this, connection, transaction, tpb_length, tpb, tra_result);
 end;
 
 function TTracePlugin.trace_transaction_end(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; commit: Boolean; retain_context: Boolean; tra_result: Cardinal): Boolean;
 begin
-	Result := vTable^.trace_transaction_end(thisRecord, connection, transaction, commit, retain_context, tra_result);
+	Result := vTable^.trace_transaction_end(this, connection, transaction, commit, retain_context, tra_result);
 end;
 
 function TTracePlugin.trace_proc_execute(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; procedure_: ITraceProcedure; started: Boolean; proc_result: Cardinal): Boolean;
 begin
-	Result := vTable^.trace_proc_execute(thisRecord, connection, transaction, procedure_, started, proc_result);
+	Result := vTable^.trace_proc_execute(this, connection, transaction, procedure_, started, proc_result);
 end;
 
 function TTracePlugin.trace_trigger_execute(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; trigger: ITraceTrigger; started: Boolean; trig_result: Cardinal): Boolean;
 begin
-	Result := vTable^.trace_trigger_execute(thisRecord, connection, transaction, trigger, started, trig_result);
+	Result := vTable^.trace_trigger_execute(this, connection, transaction, trigger, started, trig_result);
 end;
 
 function TTracePlugin.trace_set_context(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; variable: ITraceContextVariable): Boolean;
 begin
-	Result := vTable^.trace_set_context(thisRecord, connection, transaction, variable);
+	Result := vTable^.trace_set_context(this, connection, transaction, variable);
 end;
 
 function TTracePlugin.trace_dsql_prepare(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; statement: ITraceSQLStatement; time_millis: Int64; req_result: Cardinal): Boolean;
 begin
-	Result := vTable^.trace_dsql_prepare(thisRecord, connection, transaction, statement, time_millis, req_result);
+	Result := vTable^.trace_dsql_prepare(this, connection, transaction, statement, time_millis, req_result);
 end;
 
 function TTracePlugin.trace_dsql_free(connection: ITraceDatabaseConnection; statement: ITraceSQLStatement; option: Cardinal): Boolean;
 begin
-	Result := vTable^.trace_dsql_free(thisRecord, connection, statement, option);
+	Result := vTable^.trace_dsql_free(this, connection, statement, option);
 end;
 
 function TTracePlugin.trace_dsql_execute(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; statement: ITraceSQLStatement; started: Boolean; req_result: Cardinal): Boolean;
 begin
-	Result := vTable^.trace_dsql_execute(thisRecord, connection, transaction, statement, started, req_result);
+	Result := vTable^.trace_dsql_execute(this, connection, transaction, statement, started, req_result);
 end;
 
 function TTracePlugin.trace_blr_compile(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; statement: ITraceBLRStatement; time_millis: Int64; req_result: Cardinal): Boolean;
 begin
-	Result := vTable^.trace_blr_compile(thisRecord, connection, transaction, statement, time_millis, req_result);
+	Result := vTable^.trace_blr_compile(this, connection, transaction, statement, time_millis, req_result);
 end;
 
 function TTracePlugin.trace_blr_execute(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; statement: ITraceBLRStatement; req_result: Cardinal): Boolean;
 begin
-	Result := vTable^.trace_blr_execute(thisRecord, connection, transaction, statement, req_result);
+	Result := vTable^.trace_blr_execute(this, connection, transaction, statement, req_result);
 end;
 
 function TTracePlugin.trace_dyn_execute(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; request: ITraceDYNRequest; time_millis: Int64; req_result: Cardinal): Boolean;
 begin
-	Result := vTable^.trace_dyn_execute(thisRecord, connection, transaction, request, time_millis, req_result);
+	Result := vTable^.trace_dyn_execute(this, connection, transaction, request, time_millis, req_result);
 end;
 
 function TTracePlugin.trace_service_attach(service: ITraceServiceConnection; att_result: Cardinal): Boolean;
 begin
-	Result := vTable^.trace_service_attach(thisRecord, service, att_result);
+	Result := vTable^.trace_service_attach(this, service, att_result);
 end;
 
 function TTracePlugin.trace_service_start(service: ITraceServiceConnection; switches_length: Cardinal; switches: PAnsiChar; start_result: Cardinal): Boolean;
 begin
-	Result := vTable^.trace_service_start(thisRecord, service, switches_length, switches, start_result);
+	Result := vTable^.trace_service_start(this, service, switches_length, switches, start_result);
 end;
 
 function TTracePlugin.trace_service_query(service: ITraceServiceConnection; send_item_length: Cardinal; send_items: BytePtr; recv_item_length: Cardinal; recv_items: BytePtr; query_result: Cardinal): Boolean;
 begin
-	Result := vTable^.trace_service_query(thisRecord, service, send_item_length, send_items, recv_item_length, recv_items, query_result);
+	Result := vTable^.trace_service_query(this, service, send_item_length, send_items, recv_item_length, recv_items, query_result);
 end;
 
 function TTracePlugin.trace_service_detach(service: ITraceServiceConnection; detach_result: Cardinal): Boolean;
 begin
-	Result := vTable^.trace_service_detach(thisRecord, service, detach_result);
+	Result := vTable^.trace_service_detach(this, service, detach_result);
 end;
 
 function TTracePlugin.trace_event_error(connection: ITraceConnection; status: ITraceStatusVector; function_: PAnsiChar): Boolean;
 begin
-	Result := vTable^.trace_event_error(thisRecord, connection, status, function_);
+	Result := vTable^.trace_event_error(this, connection, status, function_);
 end;
 
 function TTracePlugin.trace_event_sweep(connection: ITraceDatabaseConnection; sweep: ITraceSweepInfo; sweep_state: Cardinal): Boolean;
 begin
-	Result := vTable^.trace_event_sweep(thisRecord, connection, sweep, sweep_state);
+	Result := vTable^.trace_event_sweep(this, connection, sweep, sweep_state);
 end;
 
 function TTracePlugin.trace_func_execute(connection: ITraceDatabaseConnection; transaction: ITraceTransaction; function_: ITraceFunction; started: Boolean; func_result: Cardinal): Boolean;
 begin
-	Result := vTable^.trace_func_execute(thisRecord, connection, transaction, function_, started, func_result);
+	Result := vTable^.trace_func_execute(this, connection, transaction, function_, started, func_result);
 end;
 
-function TTraceFactory.thisRecord: ITraceFactory;
+function TTraceFactory.this: ITraceFactory;
 begin
-  Result := ITraceFactory(@nullPtr);
+  Result := ITraceFactory(@FNullPtr);
 end;
 
-function TTraceFactory.getITraceFactoryImpl: ITraceFactoryImpl;
+function TTraceFactory.asITraceFactoryImpl: ITraceFactoryImpl;
 begin
   if isITraceFactoryImpl then
-    Result := owner
+    Result := FITraceFactoryImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TTraceFactory.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 procedure TTraceFactory.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TTraceFactory.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 procedure TTraceFactory.setOwner(r: IReferenceCounted);
 begin
-	vTable^.setOwner(IPluginBase(thisRecord), r);
+	vTable^.setOwner(IPluginBase(this), r);
 end;
 
 function TTraceFactory.getOwner(): IReferenceCounted;
 begin
-	Result := vTable^.getOwner(IPluginBase(thisRecord));
+	Result := vTable^.getOwner(IPluginBase(this));
 end;
 
 function TTraceFactory.trace_needs(): QWord;
 begin
-	Result := vTable^.trace_needs(thisRecord);
+	Result := vTable^.trace_needs(this);
 end;
 
 function TTraceFactory.trace_create(status: IStatus; init_info: ITraceInitInfo): ITracePlugin;
 begin
-	Result := vTable^.trace_create(thisRecord, status, init_info);
+	Result := vTable^.trace_create(this, status, init_info);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TUdrFunctionFactory.thisRecord: IUdrFunctionFactory;
+function TUdrFunctionFactory.this: IUdrFunctionFactory;
 begin
-  Result := IUdrFunctionFactory(@nullPtr);
+  Result := IUdrFunctionFactory(@FNullPtr);
 end;
 
-function TUdrFunctionFactory.getIUdrFunctionFactoryImpl: IUdrFunctionFactoryImpl;
+function TUdrFunctionFactory.asIUdrFunctionFactoryImpl: IUdrFunctionFactoryImpl;
 begin
   if isIUdrFunctionFactoryImpl then
-    Result := owner
+    Result := FIUdrFunctionFactoryImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TUdrFunctionFactory.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TUdrFunctionFactory.dispose();
 begin
-	vTable^.dispose(IDisposable(thisRecord));
+	vTable^.dispose(IDisposable(this));
 end;
 
 procedure TUdrFunctionFactory.setup(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder);
 begin
-	vTable^.setup(thisRecord, status, context, metadata, inBuilder, outBuilder);
+	vTable^.setup(this, status, context, metadata, inBuilder, outBuilder);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TUdrFunctionFactory.newItem(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata): IExternalFunction;
 begin
-	Result := vTable^.newItem(thisRecord, status, context, metadata);
+	Result := vTable^.newItem(this, status, context, metadata);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TUdrProcedureFactory.thisRecord: IUdrProcedureFactory;
+function TUdrProcedureFactory.this: IUdrProcedureFactory;
 begin
-  Result := IUdrProcedureFactory(@nullPtr);
+  Result := IUdrProcedureFactory(@FNullPtr);
 end;
 
-function TUdrProcedureFactory.getIUdrProcedureFactoryImpl: IUdrProcedureFactoryImpl;
+function TUdrProcedureFactory.asIUdrProcedureFactoryImpl: IUdrProcedureFactoryImpl;
 begin
   if isIUdrProcedureFactoryImpl then
-    Result := owner
+    Result := FIUdrProcedureFactoryImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TUdrProcedureFactory.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TUdrProcedureFactory.dispose();
 begin
-	vTable^.dispose(IDisposable(thisRecord));
+	vTable^.dispose(IDisposable(this));
 end;
 
 procedure TUdrProcedureFactory.setup(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder);
 begin
-	vTable^.setup(thisRecord, status, context, metadata, inBuilder, outBuilder);
+	vTable^.setup(this, status, context, metadata, inBuilder, outBuilder);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TUdrProcedureFactory.newItem(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata): IExternalProcedure;
 begin
-	Result := vTable^.newItem(thisRecord, status, context, metadata);
+	Result := vTable^.newItem(this, status, context, metadata);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TUdrTriggerFactory.thisRecord: IUdrTriggerFactory;
+function TUdrTriggerFactory.this: IUdrTriggerFactory;
 begin
-  Result := IUdrTriggerFactory(@nullPtr);
+  Result := IUdrTriggerFactory(@FNullPtr);
 end;
 
-function TUdrTriggerFactory.getIUdrTriggerFactoryImpl: IUdrTriggerFactoryImpl;
+function TUdrTriggerFactory.asIUdrTriggerFactoryImpl: IUdrTriggerFactoryImpl;
 begin
   if isIUdrTriggerFactoryImpl then
-    Result := owner
+    Result := FIUdrTriggerFactoryImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TUdrTriggerFactory.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TUdrTriggerFactory.dispose();
 begin
-	vTable^.dispose(IDisposable(thisRecord));
+	vTable^.dispose(IDisposable(this));
 end;
 
 procedure TUdrTriggerFactory.setup(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; fieldsBuilder: IMetadataBuilder);
 begin
-	vTable^.setup(thisRecord, status, context, metadata, fieldsBuilder);
+	vTable^.setup(this, status, context, metadata, fieldsBuilder);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TUdrTriggerFactory.newItem(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata): IExternalTrigger;
 begin
-	Result := vTable^.newItem(thisRecord, status, context, metadata);
+	Result := vTable^.newItem(this, status, context, metadata);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TUdrPlugin.thisRecord: IUdrPlugin;
+function TUdrPlugin.this: IUdrPlugin;
 begin
-  Result := IUdrPlugin(@nullPtr);
+  Result := IUdrPlugin(@FNullPtr);
 end;
 
-function TUdrPlugin.getIUdrPluginImpl: IUdrPluginImpl;
+function TUdrPlugin.asIUdrPluginImpl: IUdrPluginImpl;
 begin
   if isIUdrPluginImpl then
-    Result := owner
+    Result := FIUdrPluginImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TUdrPlugin.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 function TUdrPlugin.getMaster(): IMaster;
 begin
-	Result := vTable^.getMaster(thisRecord);
+	Result := vTable^.getMaster(this);
 end;
 
 procedure TUdrPlugin.registerFunction(status: IStatus; name: PAnsiChar; factory: IUdrFunctionFactory);
 begin
-	vTable^.registerFunction(thisRecord, status, name, factory);
+	vTable^.registerFunction(this, status, name, factory);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TUdrPlugin.registerProcedure(status: IStatus; name: PAnsiChar; factory: IUdrProcedureFactory);
 begin
-	vTable^.registerProcedure(thisRecord, status, name, factory);
+	vTable^.registerProcedure(this, status, name, factory);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TUdrPlugin.registerTrigger(status: IStatus; name: PAnsiChar; factory: IUdrTriggerFactory);
 begin
-	vTable^.registerTrigger(thisRecord, status, name, factory);
+	vTable^.registerTrigger(this, status, name, factory);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TDecFloat16.thisRecord: IDecFloat16;
+function TDecFloat16.this: IDecFloat16;
 begin
-  Result := IDecFloat16(@nullPtr);
+  Result := IDecFloat16(@FNullPtr);
 end;
 
-function TDecFloat16.getIDecFloat16Impl: IDecFloat16Impl;
+function TDecFloat16.asIDecFloat16Impl: IDecFloat16Impl;
 begin
   if isIDecFloat16Impl then
-    Result := owner
+    Result := FIDecFloat16Impl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TDecFloat16.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TDecFloat16.toBcd(from: FB_DEC16Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr);
 begin
-	vTable^.toBcd(thisRecord, from, sign, bcd, exp);
+	vTable^.toBcd(this, from, sign, bcd, exp);
 end;
 
 procedure TDecFloat16.toString(status: IStatus; from: FB_DEC16Ptr; bufferLength: Cardinal; buffer: PAnsiChar);
 begin
-	vTable^.toString(thisRecord, status, from, bufferLength, buffer);
+	vTable^.toString(this, status, from, bufferLength, buffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TDecFloat16.fromBcd(sign: Integer; bcd: BytePtr; exp: Integer; to_: FB_DEC16Ptr);
 begin
-	vTable^.fromBcd(thisRecord, sign, bcd, exp, to_);
+	vTable^.fromBcd(this, sign, bcd, exp, to_);
 end;
 
 procedure TDecFloat16.fromString(status: IStatus; from: PAnsiChar; to_: FB_DEC16Ptr);
 begin
-	vTable^.fromString(thisRecord, status, from, to_);
+	vTable^.fromString(this, status, from, to_);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TDecFloat34.thisRecord: IDecFloat34;
+function TDecFloat34.this: IDecFloat34;
 begin
-  Result := IDecFloat34(@nullPtr);
+  Result := IDecFloat34(@FNullPtr);
 end;
 
-function TDecFloat34.getIDecFloat34Impl: IDecFloat34Impl;
+function TDecFloat34.asIDecFloat34Impl: IDecFloat34Impl;
 begin
   if isIDecFloat34Impl then
-    Result := owner
+    Result := FIDecFloat34Impl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TDecFloat34.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TDecFloat34.toBcd(from: FB_DEC34Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr);
 begin
-	vTable^.toBcd(thisRecord, from, sign, bcd, exp);
+	vTable^.toBcd(this, from, sign, bcd, exp);
 end;
 
 procedure TDecFloat34.toString(status: IStatus; from: FB_DEC34Ptr; bufferLength: Cardinal; buffer: PAnsiChar);
 begin
-	vTable^.toString(thisRecord, status, from, bufferLength, buffer);
+	vTable^.toString(this, status, from, bufferLength, buffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TDecFloat34.fromBcd(sign: Integer; bcd: BytePtr; exp: Integer; to_: FB_DEC34Ptr);
 begin
-	vTable^.fromBcd(thisRecord, sign, bcd, exp, to_);
+	vTable^.fromBcd(this, sign, bcd, exp, to_);
 end;
 
 procedure TDecFloat34.fromString(status: IStatus; from: PAnsiChar; to_: FB_DEC34Ptr);
 begin
-	vTable^.fromString(thisRecord, status, from, to_);
+	vTable^.fromString(this, status, from, to_);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TInt128.thisRecord: IInt128;
+function TInt128.this: IInt128;
 begin
-  Result := IInt128(@nullPtr);
+  Result := IInt128(@FNullPtr);
 end;
 
-function TInt128.getIInt128Impl: IInt128Impl;
+function TInt128.asIInt128Impl: IInt128Impl;
 begin
   if isIInt128Impl then
-    Result := owner
+    Result := FIInt128Impl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TInt128.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TInt128.toString(status: IStatus; from: FB_I128Ptr; scale: Integer; bufferLength: Cardinal; buffer: PAnsiChar);
 begin
-	vTable^.toString(thisRecord, status, from, scale, bufferLength, buffer);
+	vTable^.toString(this, status, from, scale, bufferLength, buffer);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TInt128.fromString(status: IStatus; scale: Integer; from: PAnsiChar; to_: FB_I128Ptr);
 begin
-	vTable^.fromString(thisRecord, status, scale, from, to_);
+	vTable^.fromString(this, status, scale, from, to_);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TReplicatedField.thisRecord: IReplicatedField;
+function TReplicatedField.this: IReplicatedField;
 begin
-  Result := IReplicatedField(@nullPtr);
+  Result := IReplicatedField(@FNullPtr);
 end;
 
-function TReplicatedField.getIReplicatedFieldImpl: IReplicatedFieldImpl;
+function TReplicatedField.asIReplicatedFieldImpl: IReplicatedFieldImpl;
 begin
   if isIReplicatedFieldImpl then
-    Result := owner
+    Result := FIReplicatedFieldImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TReplicatedField.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 function TReplicatedField.getName(): PAnsiChar;
 begin
-	Result := vTable^.getName(thisRecord);
+	Result := vTable^.getName(this);
 end;
 
 function TReplicatedField.getType(): Cardinal;
 begin
-	Result := vTable^.getType(thisRecord);
+	Result := vTable^.getType(this);
 end;
 
 function TReplicatedField.getSubType(): Integer;
 begin
-	Result := vTable^.getSubType(thisRecord);
+	Result := vTable^.getSubType(this);
 end;
 
 function TReplicatedField.getScale(): Integer;
 begin
-	Result := vTable^.getScale(thisRecord);
+	Result := vTable^.getScale(this);
 end;
 
 function TReplicatedField.getLength(): Cardinal;
 begin
-	Result := vTable^.getLength(thisRecord);
+	Result := vTable^.getLength(this);
 end;
 
 function TReplicatedField.getCharSet(): Cardinal;
 begin
-	Result := vTable^.getCharSet(thisRecord);
+	Result := vTable^.getCharSet(this);
 end;
 
 function TReplicatedField.getData(): Pointer;
 begin
-	Result := vTable^.getData(thisRecord);
+	Result := vTable^.getData(this);
 end;
 
-function TReplicatedRecord.thisRecord: IReplicatedRecord;
+function TReplicatedRecord.this: IReplicatedRecord;
 begin
-  Result := IReplicatedRecord(@nullPtr);
+  Result := IReplicatedRecord(@FNullPtr);
 end;
 
-function TReplicatedRecord.getIReplicatedRecordImpl: IReplicatedRecordImpl;
+function TReplicatedRecord.asIReplicatedRecordImpl: IReplicatedRecordImpl;
 begin
   if isIReplicatedRecordImpl then
-    Result := owner
+    Result := FIReplicatedRecordImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
-end;
-
-function TReplicatedRecord.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
 end;
 
 function TReplicatedRecord.getCount(): Cardinal;
 begin
-	Result := vTable^.getCount(thisRecord);
+	Result := vTable^.getCount(this);
 end;
 
 function TReplicatedRecord.getField(index: Cardinal): IReplicatedField;
 begin
-	Result := vTable^.getField(thisRecord, index);
+	Result := vTable^.getField(this, index);
 end;
 
 function TReplicatedRecord.getRawLength(): Cardinal;
 begin
-	Result := vTable^.getRawLength(thisRecord);
+	Result := vTable^.getRawLength(this);
 end;
 
 function TReplicatedRecord.getRawData(): BytePtr;
 begin
-	Result := vTable^.getRawData(thisRecord);
+	Result := vTable^.getRawData(this);
 end;
 
-function TReplicatedTransaction.thisRecord: IReplicatedTransaction;
+function TReplicatedTransaction.this: IReplicatedTransaction;
 begin
-  Result := IReplicatedTransaction(@nullPtr);
+  Result := IReplicatedTransaction(@FNullPtr);
 end;
 
-function TReplicatedTransaction.getIReplicatedTransactionImpl: IReplicatedTransactionImpl;
+function TReplicatedTransaction.asIReplicatedTransactionImpl: IReplicatedTransactionImpl;
 begin
   if isIReplicatedTransactionImpl then
-    Result := owner
+    Result := FIReplicatedTransactionImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TReplicatedTransaction.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TReplicatedTransaction.dispose();
 begin
-	vTable^.dispose(IDisposable(thisRecord));
+	vTable^.dispose(IDisposable(this));
 end;
 
 procedure TReplicatedTransaction.prepare(status: IStatus);
 begin
-	vTable^.prepare(thisRecord, status);
+	vTable^.prepare(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TReplicatedTransaction.commit(status: IStatus);
 begin
-	vTable^.commit(thisRecord, status);
+	vTable^.commit(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TReplicatedTransaction.rollback(status: IStatus);
 begin
-	vTable^.rollback(thisRecord, status);
+	vTable^.rollback(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TReplicatedTransaction.startSavepoint(status: IStatus);
 begin
-	vTable^.startSavepoint(thisRecord, status);
+	vTable^.startSavepoint(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TReplicatedTransaction.releaseSavepoint(status: IStatus);
 begin
-	vTable^.releaseSavepoint(thisRecord, status);
+	vTable^.releaseSavepoint(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TReplicatedTransaction.rollbackSavepoint(status: IStatus);
 begin
-	vTable^.rollbackSavepoint(thisRecord, status);
+	vTable^.rollbackSavepoint(this, status);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TReplicatedTransaction.insertRecord(status: IStatus; name: PAnsiChar; record_: IReplicatedRecord);
 begin
-	vTable^.insertRecord(thisRecord, status, name, record_);
+	vTable^.insertRecord(this, status, name, record_);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TReplicatedTransaction.updateRecord(status: IStatus; name: PAnsiChar; orgRecord: IReplicatedRecord; newRecord: IReplicatedRecord);
 begin
-	vTable^.updateRecord(thisRecord, status, name, orgRecord, newRecord);
+	vTable^.updateRecord(this, status, name, orgRecord, newRecord);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TReplicatedTransaction.deleteRecord(status: IStatus; name: PAnsiChar; record_: IReplicatedRecord);
 begin
-	vTable^.deleteRecord(thisRecord, status, name, record_);
+	vTable^.deleteRecord(this, status, name, record_);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TReplicatedTransaction.executeSql(status: IStatus; sql: PAnsiChar);
 begin
-	vTable^.executeSql(thisRecord, status, sql);
+	vTable^.executeSql(this, status, sql);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TReplicatedTransaction.executeSqlIntl(status: IStatus; charset: Cardinal; sql: PAnsiChar);
 begin
-	vTable^.executeSqlIntl(thisRecord, status, charset, sql);
+	vTable^.executeSqlIntl(this, status, charset, sql);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function TReplicatedSession.thisRecord: IReplicatedSession;
+function TReplicatedSession.this: IReplicatedSession;
 begin
-  Result := IReplicatedSession(@nullPtr);
+  Result := IReplicatedSession(@FNullPtr);
 end;
 
-function TReplicatedSession.getIReplicatedSessionImpl: IReplicatedSessionImpl;
+function TReplicatedSession.asIReplicatedSessionImpl: IReplicatedSessionImpl;
 begin
   if isIReplicatedSessionImpl then
-    Result := owner
+    Result := FIReplicatedSessionImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
 end;
 
-function TReplicatedSession.getvTableVersion: NativeInt;
-begin
-  Result := vTable^.version
-end;
-
 procedure TReplicatedSession.addRef();
 begin
-	vTable^.addRef(IReferenceCounted(thisRecord));
+	vTable^.addRef(IReferenceCounted(this));
 end;
 
 function TReplicatedSession.release(): Integer;
 begin
-	Result := vTable^.release(IReferenceCounted(thisRecord));
+	Result := vTable^.release(IReferenceCounted(this));
 end;
 
 procedure TReplicatedSession.setOwner(r: IReferenceCounted);
 begin
-	vTable^.setOwner(IPluginBase(thisRecord), r);
+	vTable^.setOwner(IPluginBase(this), r);
 end;
 
 function TReplicatedSession.getOwner(): IReferenceCounted;
 begin
-	Result := vTable^.getOwner(IPluginBase(thisRecord));
+	Result := vTable^.getOwner(IPluginBase(this));
 end;
 
 function TReplicatedSession.init(status: IStatus; attachment: IAttachment): Boolean;
 begin
-	Result := vTable^.init(thisRecord, status, attachment);
+	Result := vTable^.init(this, status, attachment);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 function TReplicatedSession.startTransaction(status: IStatus; transaction: ITransaction; number: Int64): IReplicatedTransaction;
 begin
-	Result := vTable^.startTransaction(thisRecord, status, transaction, number);
+	Result := vTable^.startTransaction(this, status, transaction, number);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TReplicatedSession.cleanupTransaction(status: IStatus; number: Int64);
 begin
-	vTable^.cleanupTransaction(thisRecord, status, number);
+	vTable^.cleanupTransaction(this, status, number);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
 procedure TReplicatedSession.setSequence(status: IStatus; name: PAnsiChar; value: Int64);
 begin
-	vTable^.setSequence(thisRecord, status, name, value);
+	vTable^.setSequence(this, status, name, value);
 	{$IFDEF USEFBEXCEPTION}FbException.checkException(status);{$ENDIF}
 end;
 
-function IVersionedImpl.getInterface:IVersioned;
+function IVersionedImpl.asIVersioned:IVersioned;
 begin
-  Result := IVersioned(@nullPtr);
+  Result := IVersioned(@FNullPtr);
 end;
 
 var IVersionedImpl_vTable: VersionedVTable = (
      NullPtr: nil;
      version: 0);
 
-function TVersioned.isIVersionedImpl: boolean inline;
+function TVersioned.isIVersionedImpl: boolean;
 begin
   Result := (vTable = @IVersionedImpl_vTable);
 end;
@@ -10851,24 +10565,24 @@ end;
 constructor IVersionedImpl.create;
 begin
   inherited Create;
-  Owner := self;
-  vTable := @IVersionedImpl_vTable;
+  FObject := self;
+  FvTable := @IVersionedImpl_vTable;
 end;
 
-function IVersionedImpl.getvTableVersion: NativeInt;
+function IVersionedImpl.getVTable: PVersionedVTable;
 begin
-  Result := PVersionedVTable(vTable)^.version
+  Result := PVersionedVTable(FvTable);
 end;
 
-function IReferenceCountedImpl.getInterface:IReferenceCounted;
+function IReferenceCountedImpl.asIReferenceCounted:IReferenceCounted;
 begin
-  Result := IReferenceCounted(@nullPtr);
+  Result := IReferenceCounted(@FNullPtr);
 end;
 
 procedure IReferenceCountedImpl_addRefDispatcher(this: IReferenceCounted); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIReferenceCountedImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -10877,7 +10591,7 @@ end;
 function IReferenceCountedImpl_releaseDispatcher(this: IReferenceCounted): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIReferenceCountedImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -10889,7 +10603,7 @@ var IReferenceCountedImpl_vTable: ReferenceCountedVTable = (
      addRef: @IReferenceCountedImpl_addRefDispatcher;
      release: @IReferenceCountedImpl_releaseDispatcher);
 
-function TReferenceCounted.isIReferenceCountedImpl: boolean inline;
+function TReferenceCounted.isIReferenceCountedImpl: boolean;
 begin
   Result := (vTable = @IReferenceCountedImpl_vTable);
 end;
@@ -10897,23 +10611,23 @@ end;
 constructor IReferenceCountedImpl.create;
 begin
   inherited Create;
-  vTable := @IReferenceCountedImpl_vTable;
+  FvTable := @IReferenceCountedImpl_vTable;
 end;
 
-function IReferenceCountedImpl.getvTableVersion: NativeInt;
+function IReferenceCountedImpl.getVTable: PReferenceCountedVTable;
 begin
-  Result := PReferenceCountedVTable(vTable)^.version
+  Result := PReferenceCountedVTable(FvTable);
 end;
 
-function IDisposableImpl.getInterface:IDisposable;
+function IDisposableImpl.asIDisposable:IDisposable;
 begin
-  Result := IDisposable(@nullPtr);
+  Result := IDisposable(@FNullPtr);
 end;
 
 procedure IDisposableImpl_disposeDispatcher(this: IDisposable); cdecl;
 begin
 	try
-		this.owner.dispose();
+		this.FIDisposableImpl.dispose();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -10924,7 +10638,7 @@ var IDisposableImpl_vTable: DisposableVTable = (
      version: 1;
      dispose: @IDisposableImpl_disposeDispatcher);
 
-function TDisposable.isIDisposableImpl: boolean inline;
+function TDisposable.isIDisposableImpl: boolean;
 begin
   Result := (vTable = @IDisposableImpl_vTable);
 end;
@@ -10932,23 +10646,23 @@ end;
 constructor IDisposableImpl.create;
 begin
   inherited Create;
-  vTable := @IDisposableImpl_vTable;
+  FvTable := @IDisposableImpl_vTable;
 end;
 
-function IDisposableImpl.getvTableVersion: NativeInt;
+function IDisposableImpl.getVTable: PDisposableVTable;
 begin
-  Result := PDisposableVTable(vTable)^.version
+  Result := PDisposableVTable(FvTable);
 end;
 
-function IStatusImpl.getInterface:IStatus;
+function IStatusImpl.asIStatus:IStatus;
 begin
-  Result := IStatus(@nullPtr);
+  Result := IStatus(@FNullPtr);
 end;
 
 procedure IStatusImpl_disposeDispatcher(this: IStatus); cdecl;
 begin
 	try
-		this.owner.dispose();
+		this.FIStatusImpl.dispose();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -10957,7 +10671,7 @@ end;
 procedure IStatusImpl_initDispatcher(this: IStatus); cdecl;
 begin
 	try
-		this.owner.init();
+		this.FIStatusImpl.init();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -10966,7 +10680,7 @@ end;
 function IStatusImpl_getStateDispatcher(this: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getState();
+		Result := this.FIStatusImpl.getState();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -10975,7 +10689,7 @@ end;
 procedure IStatusImpl_setErrors2Dispatcher(this: IStatus; length: Cardinal; value: NativeIntPtr); cdecl;
 begin
 	try
-		this.owner.setErrors2(length, value);
+		this.FIStatusImpl.setErrors2(length, value);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -10984,7 +10698,7 @@ end;
 procedure IStatusImpl_setWarnings2Dispatcher(this: IStatus; length: Cardinal; value: NativeIntPtr); cdecl;
 begin
 	try
-		this.owner.setWarnings2(length, value);
+		this.FIStatusImpl.setWarnings2(length, value);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -10993,7 +10707,7 @@ end;
 procedure IStatusImpl_setErrorsDispatcher(this: IStatus; value: NativeIntPtr); cdecl;
 begin
 	try
-		this.owner.setErrors(value);
+		this.FIStatusImpl.setErrors(value);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11002,7 +10716,7 @@ end;
 procedure IStatusImpl_setWarningsDispatcher(this: IStatus; value: NativeIntPtr); cdecl;
 begin
 	try
-		this.owner.setWarnings(value);
+		this.FIStatusImpl.setWarnings(value);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11011,7 +10725,7 @@ end;
 function IStatusImpl_getErrorsDispatcher(this: IStatus): NativeIntPtr; cdecl;
 begin
 	try
-		Result := this.owner.getErrors();
+		Result := this.FIStatusImpl.getErrors();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11020,7 +10734,7 @@ end;
 function IStatusImpl_getWarningsDispatcher(this: IStatus): NativeIntPtr; cdecl;
 begin
 	try
-		Result := this.owner.getWarnings();
+		Result := this.FIStatusImpl.getWarnings();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11029,7 +10743,7 @@ end;
 function IStatusImpl_cloneDispatcher(this: IStatus): IStatus; cdecl;
 begin
 	try
-		Result := this.owner.clone();
+		Result := this.FIStatusImpl.clone();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11049,7 +10763,7 @@ var IStatusImpl_vTable: StatusVTable = (
      getWarnings: @IStatusImpl_getWarningsDispatcher;
      clone: @IStatusImpl_cloneDispatcher);
 
-function TStatus.isIStatusImpl: boolean inline;
+function TStatus.isIStatusImpl: boolean;
 begin
   Result := (vTable = @IStatusImpl_vTable);
 end;
@@ -11057,23 +10771,23 @@ end;
 constructor IStatusImpl.create;
 begin
   inherited Create;
-  vTable := @IStatusImpl_vTable;
+  FvTable := @IStatusImpl_vTable;
 end;
 
-function IStatusImpl.getvTableVersion: NativeInt;
+function IStatusImpl.getVTable: PStatusVTable;
 begin
-  Result := PStatusVTable(vTable)^.version
+  Result := PStatusVTable(FvTable);
 end;
 
-function IMasterImpl.getInterface:IMaster;
+function IMasterImpl.asIMaster:IMaster;
 begin
-  Result := IMaster(@nullPtr);
+  Result := IMaster(@FNullPtr);
 end;
 
 function IMasterImpl_getStatusDispatcher(this: IMaster): IStatus; cdecl;
 begin
 	try
-		Result := this.owner.getStatus();
+		Result := this.FIMasterImpl.getStatus();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11082,7 +10796,7 @@ end;
 function IMasterImpl_getDispatcherDispatcher(this: IMaster): IProvider; cdecl;
 begin
 	try
-		Result := this.owner.getDispatcher();
+		Result := this.FIMasterImpl.getDispatcher();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11091,7 +10805,7 @@ end;
 function IMasterImpl_getPluginManagerDispatcher(this: IMaster): IPluginManager; cdecl;
 begin
 	try
-		Result := this.owner.getPluginManager();
+		Result := this.FIMasterImpl.getPluginManager();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11100,7 +10814,7 @@ end;
 function IMasterImpl_getTimerControlDispatcher(this: IMaster): ITimerControl; cdecl;
 begin
 	try
-		Result := this.owner.getTimerControl();
+		Result := this.FIMasterImpl.getTimerControl();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11109,7 +10823,7 @@ end;
 function IMasterImpl_getDtcDispatcher(this: IMaster): IDtc; cdecl;
 begin
 	try
-		Result := this.owner.getDtc();
+		Result := this.FIMasterImpl.getDtc();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11118,7 +10832,7 @@ end;
 function IMasterImpl_registerAttachmentDispatcher(this: IMaster; provider: IProvider; attachment: IAttachment): IAttachment; cdecl;
 begin
 	try
-		Result := this.owner.registerAttachment(provider, attachment);
+		Result := this.FIMasterImpl.registerAttachment(provider, attachment);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11127,7 +10841,7 @@ end;
 function IMasterImpl_registerTransactionDispatcher(this: IMaster; attachment: IAttachment; transaction: ITransaction): ITransaction; cdecl;
 begin
 	try
-		Result := this.owner.registerTransaction(attachment, transaction);
+		Result := this.FIMasterImpl.registerTransaction(attachment, transaction);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11136,7 +10850,7 @@ end;
 function IMasterImpl_getMetadataBuilderDispatcher(this: IMaster; status: IStatus; fieldCount: Cardinal): IMetadataBuilder; cdecl;
 begin
 	try
-		Result := this.owner.getMetadataBuilder(status, fieldCount);
+		Result := this.FIMasterImpl.getMetadataBuilder(status, fieldCount);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -11145,7 +10859,7 @@ end;
 function IMasterImpl_serverModeDispatcher(this: IMaster; mode: Integer): Integer; cdecl;
 begin
 	try
-		Result := this.owner.serverMode(mode);
+		Result := this.FIMasterImpl.serverMode(mode);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11154,7 +10868,7 @@ end;
 function IMasterImpl_getUtilInterfaceDispatcher(this: IMaster): IUtil; cdecl;
 begin
 	try
-		Result := this.owner.getUtilInterface();
+		Result := this.FIMasterImpl.getUtilInterface();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11163,7 +10877,7 @@ end;
 function IMasterImpl_getConfigManagerDispatcher(this: IMaster): IConfigManager; cdecl;
 begin
 	try
-		Result := this.owner.getConfigManager();
+		Result := this.FIMasterImpl.getConfigManager();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11172,7 +10886,7 @@ end;
 function IMasterImpl_getProcessExitingDispatcher(this: IMaster): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.getProcessExiting();
+		Result := this.FIMasterImpl.getProcessExiting();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11194,7 +10908,7 @@ var IMasterImpl_vTable: MasterVTable = (
      getConfigManager: @IMasterImpl_getConfigManagerDispatcher;
      getProcessExiting: @IMasterImpl_getProcessExitingDispatcher);
 
-function TMaster.isIMasterImpl: boolean inline;
+function TMaster.isIMasterImpl: boolean;
 begin
   Result := (vTable = @IMasterImpl_vTable);
 end;
@@ -11202,23 +10916,23 @@ end;
 constructor IMasterImpl.create;
 begin
   inherited Create;
-  vTable := @IMasterImpl_vTable;
+  FvTable := @IMasterImpl_vTable;
 end;
 
-function IMasterImpl.getvTableVersion: NativeInt;
+function IMasterImpl.getVTable: PMasterVTable;
 begin
-  Result := PMasterVTable(vTable)^.version
+  Result := PMasterVTable(FvTable);
 end;
 
-function IPluginBaseImpl.getInterface:IPluginBase;
+function IPluginBaseImpl.asIPluginBase:IPluginBase;
 begin
-  Result := IPluginBase(@nullPtr);
+  Result := IPluginBase(@FNullPtr);
 end;
 
 procedure IPluginBaseImpl_addRefDispatcher(this: IPluginBase); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIPluginBaseImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11227,7 +10941,7 @@ end;
 function IPluginBaseImpl_releaseDispatcher(this: IPluginBase): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIPluginBaseImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11236,7 +10950,7 @@ end;
 procedure IPluginBaseImpl_setOwnerDispatcher(this: IPluginBase; r: IReferenceCounted); cdecl;
 begin
 	try
-		this.owner.setOwner(r);
+		this.FIPluginBaseImpl.setOwner(r);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11245,7 +10959,7 @@ end;
 function IPluginBaseImpl_getOwnerDispatcher(this: IPluginBase): IReferenceCounted; cdecl;
 begin
 	try
-		Result := this.owner.getOwner();
+		Result := this.FIPluginBaseImpl.getOwner();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11259,7 +10973,7 @@ var IPluginBaseImpl_vTable: PluginBaseVTable = (
      setOwner: @IPluginBaseImpl_setOwnerDispatcher;
      getOwner: @IPluginBaseImpl_getOwnerDispatcher);
 
-function TPluginBase.isIPluginBaseImpl: boolean inline;
+function TPluginBase.isIPluginBaseImpl: boolean;
 begin
   Result := (vTable = @IPluginBaseImpl_vTable);
 end;
@@ -11267,23 +10981,23 @@ end;
 constructor IPluginBaseImpl.create;
 begin
   inherited Create;
-  vTable := @IPluginBaseImpl_vTable;
+  FvTable := @IPluginBaseImpl_vTable;
 end;
 
-function IPluginBaseImpl.getvTableVersion: NativeInt;
+function IPluginBaseImpl.getVTable: PPluginBaseVTable;
 begin
-  Result := PPluginBaseVTable(vTable)^.version
+  Result := PPluginBaseVTable(FvTable);
 end;
 
-function IPluginSetImpl.getInterface:IPluginSet;
+function IPluginSetImpl.asIPluginSet:IPluginSet;
 begin
-  Result := IPluginSet(@nullPtr);
+  Result := IPluginSet(@FNullPtr);
 end;
 
 procedure IPluginSetImpl_addRefDispatcher(this: IPluginSet); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIPluginSetImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11292,7 +11006,7 @@ end;
 function IPluginSetImpl_releaseDispatcher(this: IPluginSet): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIPluginSetImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11301,7 +11015,7 @@ end;
 function IPluginSetImpl_getNameDispatcher(this: IPluginSet): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getName();
+		Result := this.FIPluginSetImpl.getName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11310,7 +11024,7 @@ end;
 function IPluginSetImpl_getModuleNameDispatcher(this: IPluginSet): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getModuleName();
+		Result := this.FIPluginSetImpl.getModuleName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11319,7 +11033,7 @@ end;
 function IPluginSetImpl_getPluginDispatcher(this: IPluginSet; status: IStatus): IPluginBase; cdecl;
 begin
 	try
-		Result := this.owner.getPlugin(status);
+		Result := this.FIPluginSetImpl.getPlugin(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -11328,7 +11042,7 @@ end;
 procedure IPluginSetImpl_nextDispatcher(this: IPluginSet; status: IStatus); cdecl;
 begin
 	try
-		this.owner.next(status);
+		this.FIPluginSetImpl.next(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -11337,7 +11051,7 @@ end;
 procedure IPluginSetImpl_set_Dispatcher(this: IPluginSet; status: IStatus; s: PAnsiChar); cdecl;
 begin
 	try
-		this.owner.set_(status, s);
+		this.FIPluginSetImpl.set_(status, s);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -11354,7 +11068,7 @@ var IPluginSetImpl_vTable: PluginSetVTable = (
      next: @IPluginSetImpl_nextDispatcher;
      set_: @IPluginSetImpl_set_Dispatcher);
 
-function TPluginSet.isIPluginSetImpl: boolean inline;
+function TPluginSet.isIPluginSetImpl: boolean;
 begin
   Result := (vTable = @IPluginSetImpl_vTable);
 end;
@@ -11362,23 +11076,23 @@ end;
 constructor IPluginSetImpl.create;
 begin
   inherited Create;
-  vTable := @IPluginSetImpl_vTable;
+  FvTable := @IPluginSetImpl_vTable;
 end;
 
-function IPluginSetImpl.getvTableVersion: NativeInt;
+function IPluginSetImpl.getVTable: PPluginSetVTable;
 begin
-  Result := PPluginSetVTable(vTable)^.version
+  Result := PPluginSetVTable(FvTable);
 end;
 
-function IConfigEntryImpl.getInterface:IConfigEntry;
+function IConfigEntryImpl.asIConfigEntry:IConfigEntry;
 begin
-  Result := IConfigEntry(@nullPtr);
+  Result := IConfigEntry(@FNullPtr);
 end;
 
 procedure IConfigEntryImpl_addRefDispatcher(this: IConfigEntry); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIConfigEntryImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11387,7 +11101,7 @@ end;
 function IConfigEntryImpl_releaseDispatcher(this: IConfigEntry): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIConfigEntryImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11396,7 +11110,7 @@ end;
 function IConfigEntryImpl_getNameDispatcher(this: IConfigEntry): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getName();
+		Result := this.FIConfigEntryImpl.getName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11405,7 +11119,7 @@ end;
 function IConfigEntryImpl_getValueDispatcher(this: IConfigEntry): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getValue();
+		Result := this.FIConfigEntryImpl.getValue();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11414,7 +11128,7 @@ end;
 function IConfigEntryImpl_getIntValueDispatcher(this: IConfigEntry): Int64; cdecl;
 begin
 	try
-		Result := this.owner.getIntValue();
+		Result := this.FIConfigEntryImpl.getIntValue();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11423,7 +11137,7 @@ end;
 function IConfigEntryImpl_getBoolValueDispatcher(this: IConfigEntry): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.getBoolValue();
+		Result := this.FIConfigEntryImpl.getBoolValue();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11432,7 +11146,7 @@ end;
 function IConfigEntryImpl_getSubConfigDispatcher(this: IConfigEntry; status: IStatus): IConfig; cdecl;
 begin
 	try
-		Result := this.owner.getSubConfig(status);
+		Result := this.FIConfigEntryImpl.getSubConfig(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -11449,7 +11163,7 @@ var IConfigEntryImpl_vTable: ConfigEntryVTable = (
      getBoolValue: @IConfigEntryImpl_getBoolValueDispatcher;
      getSubConfig: @IConfigEntryImpl_getSubConfigDispatcher);
 
-function TConfigEntry.isIConfigEntryImpl: boolean inline;
+function TConfigEntry.isIConfigEntryImpl: boolean;
 begin
   Result := (vTable = @IConfigEntryImpl_vTable);
 end;
@@ -11457,23 +11171,23 @@ end;
 constructor IConfigEntryImpl.create;
 begin
   inherited Create;
-  vTable := @IConfigEntryImpl_vTable;
+  FvTable := @IConfigEntryImpl_vTable;
 end;
 
-function IConfigEntryImpl.getvTableVersion: NativeInt;
+function IConfigEntryImpl.getVTable: PConfigEntryVTable;
 begin
-  Result := PConfigEntryVTable(vTable)^.version
+  Result := PConfigEntryVTable(FvTable);
 end;
 
-function IConfigImpl.getInterface:IConfig;
+function IConfigImpl.asIConfig:IConfig;
 begin
-  Result := IConfig(@nullPtr);
+  Result := IConfig(@FNullPtr);
 end;
 
 procedure IConfigImpl_addRefDispatcher(this: IConfig); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIConfigImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11482,7 +11196,7 @@ end;
 function IConfigImpl_releaseDispatcher(this: IConfig): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIConfigImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11491,7 +11205,7 @@ end;
 function IConfigImpl_findDispatcher(this: IConfig; status: IStatus; name: PAnsiChar): IConfigEntry; cdecl;
 begin
 	try
-		Result := this.owner.find(status, name);
+		Result := this.FIConfigImpl.find(status, name);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -11500,7 +11214,7 @@ end;
 function IConfigImpl_findValueDispatcher(this: IConfig; status: IStatus; name: PAnsiChar; value: PAnsiChar): IConfigEntry; cdecl;
 begin
 	try
-		Result := this.owner.findValue(status, name, value);
+		Result := this.FIConfigImpl.findValue(status, name, value);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -11509,7 +11223,7 @@ end;
 function IConfigImpl_findPosDispatcher(this: IConfig; status: IStatus; name: PAnsiChar; pos: Cardinal): IConfigEntry; cdecl;
 begin
 	try
-		Result := this.owner.findPos(status, name, pos);
+		Result := this.FIConfigImpl.findPos(status, name, pos);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -11524,7 +11238,7 @@ var IConfigImpl_vTable: ConfigVTable = (
      findValue: @IConfigImpl_findValueDispatcher;
      findPos: @IConfigImpl_findPosDispatcher);
 
-function TConfig.isIConfigImpl: boolean inline;
+function TConfig.isIConfigImpl: boolean;
 begin
   Result := (vTable = @IConfigImpl_vTable);
 end;
@@ -11532,23 +11246,23 @@ end;
 constructor IConfigImpl.create;
 begin
   inherited Create;
-  vTable := @IConfigImpl_vTable;
+  FvTable := @IConfigImpl_vTable;
 end;
 
-function IConfigImpl.getvTableVersion: NativeInt;
+function IConfigImpl.getVTable: PConfigVTable;
 begin
-  Result := PConfigVTable(vTable)^.version
+  Result := PConfigVTable(FvTable);
 end;
 
-function IFirebirdConfImpl.getInterface:IFirebirdConf;
+function IFirebirdConfImpl.asIFirebirdConf:IFirebirdConf;
 begin
-  Result := IFirebirdConf(@nullPtr);
+  Result := IFirebirdConf(@FNullPtr);
 end;
 
 procedure IFirebirdConfImpl_addRefDispatcher(this: IFirebirdConf); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIFirebirdConfImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11557,7 +11271,7 @@ end;
 function IFirebirdConfImpl_releaseDispatcher(this: IFirebirdConf): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIFirebirdConfImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11566,7 +11280,7 @@ end;
 function IFirebirdConfImpl_getKeyDispatcher(this: IFirebirdConf; name: PAnsiChar): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getKey(name);
+		Result := this.FIFirebirdConfImpl.getKey(name);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11575,7 +11289,7 @@ end;
 function IFirebirdConfImpl_asIntegerDispatcher(this: IFirebirdConf; key: Cardinal): Int64; cdecl;
 begin
 	try
-		Result := this.owner.asInteger(key);
+		Result := this.FIFirebirdConfImpl.asInteger(key);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11584,7 +11298,7 @@ end;
 function IFirebirdConfImpl_asStringDispatcher(this: IFirebirdConf; key: Cardinal): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.asString(key);
+		Result := this.FIFirebirdConfImpl.asString(key);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11593,7 +11307,7 @@ end;
 function IFirebirdConfImpl_asBooleanDispatcher(this: IFirebirdConf; key: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.asBoolean(key);
+		Result := this.FIFirebirdConfImpl.asBoolean(key);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11602,7 +11316,7 @@ end;
 function IFirebirdConfImpl_getVersionDispatcher(this: IFirebirdConf; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getVersion(status);
+		Result := this.FIFirebirdConfImpl.getVersion(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -11619,7 +11333,7 @@ var IFirebirdConfImpl_vTable: FirebirdConfVTable = (
      asBoolean: @IFirebirdConfImpl_asBooleanDispatcher;
      getVersion: @IFirebirdConfImpl_getVersionDispatcher);
 
-function TFirebirdConf.isIFirebirdConfImpl: boolean inline;
+function TFirebirdConf.isIFirebirdConfImpl: boolean;
 begin
   Result := (vTable = @IFirebirdConfImpl_vTable);
 end;
@@ -11627,23 +11341,23 @@ end;
 constructor IFirebirdConfImpl.create;
 begin
   inherited Create;
-  vTable := @IFirebirdConfImpl_vTable;
+  FvTable := @IFirebirdConfImpl_vTable;
 end;
 
-function IFirebirdConfImpl.getvTableVersion: NativeInt;
+function IFirebirdConfImpl.getVTable: PFirebirdConfVTable;
 begin
-  Result := PFirebirdConfVTable(vTable)^.version
+  Result := PFirebirdConfVTable(FvTable);
 end;
 
-function IPluginConfigImpl.getInterface:IPluginConfig;
+function IPluginConfigImpl.asIPluginConfig:IPluginConfig;
 begin
-  Result := IPluginConfig(@nullPtr);
+  Result := IPluginConfig(@FNullPtr);
 end;
 
 procedure IPluginConfigImpl_addRefDispatcher(this: IPluginConfig); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIPluginConfigImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11652,7 +11366,7 @@ end;
 function IPluginConfigImpl_releaseDispatcher(this: IPluginConfig): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIPluginConfigImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11661,7 +11375,7 @@ end;
 function IPluginConfigImpl_getConfigFileNameDispatcher(this: IPluginConfig): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getConfigFileName();
+		Result := this.FIPluginConfigImpl.getConfigFileName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11670,7 +11384,7 @@ end;
 function IPluginConfigImpl_getDefaultConfigDispatcher(this: IPluginConfig; status: IStatus): IConfig; cdecl;
 begin
 	try
-		Result := this.owner.getDefaultConfig(status);
+		Result := this.FIPluginConfigImpl.getDefaultConfig(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -11679,7 +11393,7 @@ end;
 function IPluginConfigImpl_getFirebirdConfDispatcher(this: IPluginConfig; status: IStatus): IFirebirdConf; cdecl;
 begin
 	try
-		Result := this.owner.getFirebirdConf(status);
+		Result := this.FIPluginConfigImpl.getFirebirdConf(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -11688,7 +11402,7 @@ end;
 procedure IPluginConfigImpl_setReleaseDelayDispatcher(this: IPluginConfig; status: IStatus; microSeconds: QWord); cdecl;
 begin
 	try
-		this.owner.setReleaseDelay(status, microSeconds);
+		this.FIPluginConfigImpl.setReleaseDelay(status, microSeconds);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -11704,7 +11418,7 @@ var IPluginConfigImpl_vTable: PluginConfigVTable = (
      getFirebirdConf: @IPluginConfigImpl_getFirebirdConfDispatcher;
      setReleaseDelay: @IPluginConfigImpl_setReleaseDelayDispatcher);
 
-function TPluginConfig.isIPluginConfigImpl: boolean inline;
+function TPluginConfig.isIPluginConfigImpl: boolean;
 begin
   Result := (vTable = @IPluginConfigImpl_vTable);
 end;
@@ -11712,23 +11426,23 @@ end;
 constructor IPluginConfigImpl.create;
 begin
   inherited Create;
-  vTable := @IPluginConfigImpl_vTable;
+  FvTable := @IPluginConfigImpl_vTable;
 end;
 
-function IPluginConfigImpl.getvTableVersion: NativeInt;
+function IPluginConfigImpl.getVTable: PPluginConfigVTable;
 begin
-  Result := PPluginConfigVTable(vTable)^.version
+  Result := PPluginConfigVTable(FvTable);
 end;
 
-function IPluginFactoryImpl.getInterface:IPluginFactory;
+function IPluginFactoryImpl.asIPluginFactory:IPluginFactory;
 begin
-  Result := IPluginFactory(@nullPtr);
+  Result := IPluginFactory(@FNullPtr);
 end;
 
 function IPluginFactoryImpl_createPluginDispatcher(this: IPluginFactory; status: IStatus; factoryParameter: IPluginConfig): IPluginBase; cdecl;
 begin
 	try
-		Result := this.owner.createPlugin(status, factoryParameter);
+		Result := this.FIPluginFactoryImpl.createPlugin(status, factoryParameter);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -11739,7 +11453,7 @@ var IPluginFactoryImpl_vTable: PluginFactoryVTable = (
      version: 1;
      createPlugin: @IPluginFactoryImpl_createPluginDispatcher);
 
-function TPluginFactory.isIPluginFactoryImpl: boolean inline;
+function TPluginFactory.isIPluginFactoryImpl: boolean;
 begin
   Result := (vTable = @IPluginFactoryImpl_vTable);
 end;
@@ -11747,23 +11461,23 @@ end;
 constructor IPluginFactoryImpl.create;
 begin
   inherited Create;
-  vTable := @IPluginFactoryImpl_vTable;
+  FvTable := @IPluginFactoryImpl_vTable;
 end;
 
-function IPluginFactoryImpl.getvTableVersion: NativeInt;
+function IPluginFactoryImpl.getVTable: PPluginFactoryVTable;
 begin
-  Result := PPluginFactoryVTable(vTable)^.version
+  Result := PPluginFactoryVTable(FvTable);
 end;
 
-function IPluginModuleImpl.getInterface:IPluginModule;
+function IPluginModuleImpl.asIPluginModule:IPluginModule;
 begin
-  Result := IPluginModule(@nullPtr);
+  Result := IPluginModule(@FNullPtr);
 end;
 
 procedure IPluginModuleImpl_doCleanDispatcher(this: IPluginModule); cdecl;
 begin
 	try
-		this.owner.doClean();
+		this.FIPluginModuleImpl.doClean();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11772,7 +11486,7 @@ end;
 procedure IPluginModuleImpl_threadDetachDispatcher(this: IPluginModule); cdecl;
 begin
 	try
-		this.owner.threadDetach();
+		this.FIPluginModuleImpl.threadDetach();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11784,7 +11498,7 @@ var IPluginModuleImpl_vTable: PluginModuleVTable = (
      doClean: @IPluginModuleImpl_doCleanDispatcher;
      threadDetach: @IPluginModuleImpl_threadDetachDispatcher);
 
-function TPluginModule.isIPluginModuleImpl: boolean inline;
+function TPluginModule.isIPluginModuleImpl: boolean;
 begin
   Result := (vTable = @IPluginModuleImpl_vTable);
 end;
@@ -11792,23 +11506,23 @@ end;
 constructor IPluginModuleImpl.create;
 begin
   inherited Create;
-  vTable := @IPluginModuleImpl_vTable;
+  FvTable := @IPluginModuleImpl_vTable;
 end;
 
-function IPluginModuleImpl.getvTableVersion: NativeInt;
+function IPluginModuleImpl.getVTable: PPluginModuleVTable;
 begin
-  Result := PPluginModuleVTable(vTable)^.version
+  Result := PPluginModuleVTable(FvTable);
 end;
 
-function IPluginManagerImpl.getInterface:IPluginManager;
+function IPluginManagerImpl.asIPluginManager:IPluginManager;
 begin
-  Result := IPluginManager(@nullPtr);
+  Result := IPluginManager(@FNullPtr);
 end;
 
 procedure IPluginManagerImpl_registerPluginFactoryDispatcher(this: IPluginManager; pluginType: Cardinal; defaultName: PAnsiChar; factory: IPluginFactory); cdecl;
 begin
 	try
-		this.owner.registerPluginFactory(pluginType, defaultName, factory);
+		this.FIPluginManagerImpl.registerPluginFactory(pluginType, defaultName, factory);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11817,7 +11531,7 @@ end;
 procedure IPluginManagerImpl_registerModuleDispatcher(this: IPluginManager; cleanup: IPluginModule); cdecl;
 begin
 	try
-		this.owner.registerModule(cleanup);
+		this.FIPluginManagerImpl.registerModule(cleanup);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11826,7 +11540,7 @@ end;
 procedure IPluginManagerImpl_unregisterModuleDispatcher(this: IPluginManager; cleanup: IPluginModule); cdecl;
 begin
 	try
-		this.owner.unregisterModule(cleanup);
+		this.FIPluginManagerImpl.unregisterModule(cleanup);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11835,7 +11549,7 @@ end;
 function IPluginManagerImpl_getPluginsDispatcher(this: IPluginManager; status: IStatus; pluginType: Cardinal; namesList: PAnsiChar; firebirdConf: IFirebirdConf): IPluginSet; cdecl;
 begin
 	try
-		Result := this.owner.getPlugins(status, pluginType, namesList, firebirdConf);
+		Result := this.FIPluginManagerImpl.getPlugins(status, pluginType, namesList, firebirdConf);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -11844,7 +11558,7 @@ end;
 function IPluginManagerImpl_getConfigDispatcher(this: IPluginManager; status: IStatus; filename: PAnsiChar): IConfig; cdecl;
 begin
 	try
-		Result := this.owner.getConfig(status, filename);
+		Result := this.FIPluginManagerImpl.getConfig(status, filename);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -11853,7 +11567,7 @@ end;
 procedure IPluginManagerImpl_releasePluginDispatcher(this: IPluginManager; plugin: IPluginBase); cdecl;
 begin
 	try
-		this.owner.releasePlugin(plugin);
+		this.FIPluginManagerImpl.releasePlugin(plugin);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11869,7 +11583,7 @@ var IPluginManagerImpl_vTable: PluginManagerVTable = (
      getConfig: @IPluginManagerImpl_getConfigDispatcher;
      releasePlugin: @IPluginManagerImpl_releasePluginDispatcher);
 
-function TPluginManager.isIPluginManagerImpl: boolean inline;
+function TPluginManager.isIPluginManagerImpl: boolean;
 begin
   Result := (vTable = @IPluginManagerImpl_vTable);
 end;
@@ -11877,23 +11591,23 @@ end;
 constructor IPluginManagerImpl.create;
 begin
   inherited Create;
-  vTable := @IPluginManagerImpl_vTable;
+  FvTable := @IPluginManagerImpl_vTable;
 end;
 
-function IPluginManagerImpl.getvTableVersion: NativeInt;
+function IPluginManagerImpl.getVTable: PPluginManagerVTable;
 begin
-  Result := PPluginManagerVTable(vTable)^.version
+  Result := PPluginManagerVTable(FvTable);
 end;
 
-function ICryptKeyImpl.getInterface:ICryptKey;
+function ICryptKeyImpl.asICryptKey:ICryptKey;
 begin
-  Result := ICryptKey(@nullPtr);
+  Result := ICryptKey(@FNullPtr);
 end;
 
 procedure ICryptKeyImpl_setSymmetricDispatcher(this: ICryptKey; status: IStatus; type_: PAnsiChar; keyLength: Cardinal; key: Pointer); cdecl;
 begin
 	try
-		this.owner.setSymmetric(status, type_, keyLength, key);
+		this.FICryptKeyImpl.setSymmetric(status, type_, keyLength, key);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -11902,7 +11616,7 @@ end;
 procedure ICryptKeyImpl_setAsymmetricDispatcher(this: ICryptKey; status: IStatus; type_: PAnsiChar; encryptKeyLength: Cardinal; encryptKey: Pointer; decryptKeyLength: Cardinal; decryptKey: Pointer); cdecl;
 begin
 	try
-		this.owner.setAsymmetric(status, type_, encryptKeyLength, encryptKey, decryptKeyLength, decryptKey);
+		this.FICryptKeyImpl.setAsymmetric(status, type_, encryptKeyLength, encryptKey, decryptKeyLength, decryptKey);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -11911,7 +11625,7 @@ end;
 function ICryptKeyImpl_getEncryptKeyDispatcher(this: ICryptKey; length: CardinalPtr): Pointer; cdecl;
 begin
 	try
-		Result := this.owner.getEncryptKey(length);
+		Result := this.FICryptKeyImpl.getEncryptKey(length);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11920,7 +11634,7 @@ end;
 function ICryptKeyImpl_getDecryptKeyDispatcher(this: ICryptKey; length: CardinalPtr): Pointer; cdecl;
 begin
 	try
-		Result := this.owner.getDecryptKey(length);
+		Result := this.FICryptKeyImpl.getDecryptKey(length);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11934,7 +11648,7 @@ var ICryptKeyImpl_vTable: CryptKeyVTable = (
      getEncryptKey: @ICryptKeyImpl_getEncryptKeyDispatcher;
      getDecryptKey: @ICryptKeyImpl_getDecryptKeyDispatcher);
 
-function TCryptKey.isICryptKeyImpl: boolean inline;
+function TCryptKey.isICryptKeyImpl: boolean;
 begin
   Result := (vTable = @ICryptKeyImpl_vTable);
 end;
@@ -11942,23 +11656,23 @@ end;
 constructor ICryptKeyImpl.create;
 begin
   inherited Create;
-  vTable := @ICryptKeyImpl_vTable;
+  FvTable := @ICryptKeyImpl_vTable;
 end;
 
-function ICryptKeyImpl.getvTableVersion: NativeInt;
+function ICryptKeyImpl.getVTable: PCryptKeyVTable;
 begin
-  Result := PCryptKeyVTable(vTable)^.version
+  Result := PCryptKeyVTable(FvTable);
 end;
 
-function IConfigManagerImpl.getInterface:IConfigManager;
+function IConfigManagerImpl.asIConfigManager:IConfigManager;
 begin
-  Result := IConfigManager(@nullPtr);
+  Result := IConfigManager(@FNullPtr);
 end;
 
 function IConfigManagerImpl_getDirectoryDispatcher(this: IConfigManager; code: Cardinal): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getDirectory(code);
+		Result := this.FIConfigManagerImpl.getDirectory(code);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11967,7 +11681,7 @@ end;
 function IConfigManagerImpl_getFirebirdConfDispatcher(this: IConfigManager): IFirebirdConf; cdecl;
 begin
 	try
-		Result := this.owner.getFirebirdConf();
+		Result := this.FIConfigManagerImpl.getFirebirdConf();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11976,7 +11690,7 @@ end;
 function IConfigManagerImpl_getDatabaseConfDispatcher(this: IConfigManager; dbName: PAnsiChar): IFirebirdConf; cdecl;
 begin
 	try
-		Result := this.owner.getDatabaseConf(dbName);
+		Result := this.FIConfigManagerImpl.getDatabaseConf(dbName);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11985,7 +11699,7 @@ end;
 function IConfigManagerImpl_getPluginConfigDispatcher(this: IConfigManager; configuredPlugin: PAnsiChar): IConfig; cdecl;
 begin
 	try
-		Result := this.owner.getPluginConfig(configuredPlugin);
+		Result := this.FIConfigManagerImpl.getPluginConfig(configuredPlugin);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -11994,7 +11708,7 @@ end;
 function IConfigManagerImpl_getInstallDirectoryDispatcher(this: IConfigManager): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getInstallDirectory();
+		Result := this.FIConfigManagerImpl.getInstallDirectory();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -12003,7 +11717,7 @@ end;
 function IConfigManagerImpl_getRootDirectoryDispatcher(this: IConfigManager): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getRootDirectory();
+		Result := this.FIConfigManagerImpl.getRootDirectory();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -12012,7 +11726,7 @@ end;
 function IConfigManagerImpl_getDefaultSecurityDbDispatcher(this: IConfigManager): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getDefaultSecurityDb();
+		Result := this.FIConfigManagerImpl.getDefaultSecurityDb();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -12029,7 +11743,7 @@ var IConfigManagerImpl_vTable: ConfigManagerVTable = (
      getRootDirectory: @IConfigManagerImpl_getRootDirectoryDispatcher;
      getDefaultSecurityDb: @IConfigManagerImpl_getDefaultSecurityDbDispatcher);
 
-function TConfigManager.isIConfigManagerImpl: boolean inline;
+function TConfigManager.isIConfigManagerImpl: boolean;
 begin
   Result := (vTable = @IConfigManagerImpl_vTable);
 end;
@@ -12037,23 +11751,23 @@ end;
 constructor IConfigManagerImpl.create;
 begin
   inherited Create;
-  vTable := @IConfigManagerImpl_vTable;
+  FvTable := @IConfigManagerImpl_vTable;
 end;
 
-function IConfigManagerImpl.getvTableVersion: NativeInt;
+function IConfigManagerImpl.getVTable: PConfigManagerVTable;
 begin
-  Result := PConfigManagerVTable(vTable)^.version
+  Result := PConfigManagerVTable(FvTable);
 end;
 
-function IEventCallbackImpl.getInterface:IEventCallback;
+function IEventCallbackImpl.asIEventCallback:IEventCallback;
 begin
-  Result := IEventCallback(@nullPtr);
+  Result := IEventCallback(@FNullPtr);
 end;
 
 procedure IEventCallbackImpl_addRefDispatcher(this: IEventCallback); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIEventCallbackImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -12062,7 +11776,7 @@ end;
 function IEventCallbackImpl_releaseDispatcher(this: IEventCallback): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIEventCallbackImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -12071,7 +11785,7 @@ end;
 procedure IEventCallbackImpl_eventCallbackFunctionDispatcher(this: IEventCallback; length: Cardinal; events: BytePtr); cdecl;
 begin
 	try
-		this.owner.eventCallbackFunction(length, events);
+		this.FIEventCallbackImpl.eventCallbackFunction(length, events);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -12084,7 +11798,7 @@ var IEventCallbackImpl_vTable: EventCallbackVTable = (
      release: @IReferenceCountedImpl_releaseDispatcher;
      eventCallbackFunction: @IEventCallbackImpl_eventCallbackFunctionDispatcher);
 
-function TEventCallback.isIEventCallbackImpl: boolean inline;
+function TEventCallback.isIEventCallbackImpl: boolean;
 begin
   Result := (vTable = @IEventCallbackImpl_vTable);
 end;
@@ -12092,23 +11806,23 @@ end;
 constructor IEventCallbackImpl.create;
 begin
   inherited Create;
-  vTable := @IEventCallbackImpl_vTable;
+  FvTable := @IEventCallbackImpl_vTable;
 end;
 
-function IEventCallbackImpl.getvTableVersion: NativeInt;
+function IEventCallbackImpl.getVTable: PEventCallbackVTable;
 begin
-  Result := PEventCallbackVTable(vTable)^.version
+  Result := PEventCallbackVTable(FvTable);
 end;
 
-function IBlobImpl.getInterface:IBlob;
+function IBlobImpl.asIBlob:IBlob;
 begin
-  Result := IBlob(@nullPtr);
+  Result := IBlob(@FNullPtr);
 end;
 
 procedure IBlobImpl_addRefDispatcher(this: IBlob); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIBlobImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -12117,7 +11831,7 @@ end;
 function IBlobImpl_releaseDispatcher(this: IBlob): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIBlobImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -12126,7 +11840,7 @@ end;
 procedure IBlobImpl_getInfoDispatcher(this: IBlob; status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); cdecl;
 begin
 	try
-		this.owner.getInfo(status, itemsLength, items, bufferLength, buffer);
+		this.FIBlobImpl.getInfo(status, itemsLength, items, bufferLength, buffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12135,7 +11849,7 @@ end;
 function IBlobImpl_getSegmentDispatcher(this: IBlob; status: IStatus; bufferLength: Cardinal; buffer: Pointer; segmentLength: CardinalPtr): Integer; cdecl;
 begin
 	try
-		Result := this.owner.getSegment(status, bufferLength, buffer, segmentLength);
+		Result := this.FIBlobImpl.getSegment(status, bufferLength, buffer, segmentLength);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12144,7 +11858,7 @@ end;
 procedure IBlobImpl_putSegmentDispatcher(this: IBlob; status: IStatus; length: Cardinal; buffer: Pointer); cdecl;
 begin
 	try
-		this.owner.putSegment(status, length, buffer);
+		this.FIBlobImpl.putSegment(status, length, buffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12153,7 +11867,7 @@ end;
 procedure IBlobImpl_cancelDispatcher(this: IBlob; status: IStatus); cdecl;
 begin
 	try
-		this.owner.cancel(status);
+		this.FIBlobImpl.cancel(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12162,7 +11876,7 @@ end;
 procedure IBlobImpl_closeDispatcher(this: IBlob; status: IStatus); cdecl;
 begin
 	try
-		this.owner.close(status);
+		this.FIBlobImpl.close(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12171,7 +11885,7 @@ end;
 function IBlobImpl_seekDispatcher(this: IBlob; status: IStatus; mode: Integer; offset: Integer): Integer; cdecl;
 begin
 	try
-		Result := this.owner.seek(status, mode, offset);
+		Result := this.FIBlobImpl.seek(status, mode, offset);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12189,7 +11903,7 @@ var IBlobImpl_vTable: BlobVTable = (
      close: @IBlobImpl_closeDispatcher;
      seek: @IBlobImpl_seekDispatcher);
 
-function TBlob.isIBlobImpl: boolean inline;
+function TBlob.isIBlobImpl: boolean;
 begin
   Result := (vTable = @IBlobImpl_vTable);
 end;
@@ -12197,23 +11911,23 @@ end;
 constructor IBlobImpl.create;
 begin
   inherited Create;
-  vTable := @IBlobImpl_vTable;
+  FvTable := @IBlobImpl_vTable;
 end;
 
-function IBlobImpl.getvTableVersion: NativeInt;
+function IBlobImpl.getVTable: PBlobVTable;
 begin
-  Result := PBlobVTable(vTable)^.version
+  Result := PBlobVTable(FvTable);
 end;
 
-function ITransactionImpl.getInterface:ITransaction;
+function ITransactionImpl.asITransaction:ITransaction;
 begin
-  Result := ITransaction(@nullPtr);
+  Result := ITransaction(@FNullPtr);
 end;
 
 procedure ITransactionImpl_addRefDispatcher(this: ITransaction); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FITransactionImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -12222,7 +11936,7 @@ end;
 function ITransactionImpl_releaseDispatcher(this: ITransaction): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FITransactionImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -12231,7 +11945,7 @@ end;
 procedure ITransactionImpl_getInfoDispatcher(this: ITransaction; status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); cdecl;
 begin
 	try
-		this.owner.getInfo(status, itemsLength, items, bufferLength, buffer);
+		this.FITransactionImpl.getInfo(status, itemsLength, items, bufferLength, buffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12240,7 +11954,7 @@ end;
 procedure ITransactionImpl_prepareDispatcher(this: ITransaction; status: IStatus; msgLength: Cardinal; message: BytePtr); cdecl;
 begin
 	try
-		this.owner.prepare(status, msgLength, message);
+		this.FITransactionImpl.prepare(status, msgLength, message);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12249,7 +11963,7 @@ end;
 procedure ITransactionImpl_commitDispatcher(this: ITransaction; status: IStatus); cdecl;
 begin
 	try
-		this.owner.commit(status);
+		this.FITransactionImpl.commit(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12258,7 +11972,7 @@ end;
 procedure ITransactionImpl_commitRetainingDispatcher(this: ITransaction; status: IStatus); cdecl;
 begin
 	try
-		this.owner.commitRetaining(status);
+		this.FITransactionImpl.commitRetaining(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12267,7 +11981,7 @@ end;
 procedure ITransactionImpl_rollbackDispatcher(this: ITransaction; status: IStatus); cdecl;
 begin
 	try
-		this.owner.rollback(status);
+		this.FITransactionImpl.rollback(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12276,7 +11990,7 @@ end;
 procedure ITransactionImpl_rollbackRetainingDispatcher(this: ITransaction; status: IStatus); cdecl;
 begin
 	try
-		this.owner.rollbackRetaining(status);
+		this.FITransactionImpl.rollbackRetaining(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12285,7 +11999,7 @@ end;
 procedure ITransactionImpl_disconnectDispatcher(this: ITransaction; status: IStatus); cdecl;
 begin
 	try
-		this.owner.disconnect(status);
+		this.FITransactionImpl.disconnect(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12294,7 +12008,7 @@ end;
 function ITransactionImpl_joinDispatcher(this: ITransaction; status: IStatus; transaction: ITransaction): ITransaction; cdecl;
 begin
 	try
-		Result := this.owner.join(status, transaction);
+		Result := this.FITransactionImpl.join(status, transaction);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12303,7 +12017,7 @@ end;
 function ITransactionImpl_validateDispatcher(this: ITransaction; status: IStatus; attachment: IAttachment): ITransaction; cdecl;
 begin
 	try
-		Result := this.owner.validate(status, attachment);
+		Result := this.FITransactionImpl.validate(status, attachment);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12312,7 +12026,7 @@ end;
 function ITransactionImpl_enterDtcDispatcher(this: ITransaction; status: IStatus): ITransaction; cdecl;
 begin
 	try
-		Result := this.owner.enterDtc(status);
+		Result := this.FITransactionImpl.enterDtc(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12334,7 +12048,7 @@ var ITransactionImpl_vTable: TransactionVTable = (
      validate: @ITransactionImpl_validateDispatcher;
      enterDtc: @ITransactionImpl_enterDtcDispatcher);
 
-function TTransaction.isITransactionImpl: boolean inline;
+function TTransaction.isITransactionImpl: boolean;
 begin
   Result := (vTable = @ITransactionImpl_vTable);
 end;
@@ -12342,23 +12056,23 @@ end;
 constructor ITransactionImpl.create;
 begin
   inherited Create;
-  vTable := @ITransactionImpl_vTable;
+  FvTable := @ITransactionImpl_vTable;
 end;
 
-function ITransactionImpl.getvTableVersion: NativeInt;
+function ITransactionImpl.getVTable: PTransactionVTable;
 begin
-  Result := PTransactionVTable(vTable)^.version
+  Result := PTransactionVTable(FvTable);
 end;
 
-function IMessageMetadataImpl.getInterface:IMessageMetadata;
+function IMessageMetadataImpl.asIMessageMetadata:IMessageMetadata;
 begin
-  Result := IMessageMetadata(@nullPtr);
+  Result := IMessageMetadata(@FNullPtr);
 end;
 
 procedure IMessageMetadataImpl_addRefDispatcher(this: IMessageMetadata); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIMessageMetadataImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -12367,7 +12081,7 @@ end;
 function IMessageMetadataImpl_releaseDispatcher(this: IMessageMetadata): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIMessageMetadataImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -12376,7 +12090,7 @@ end;
 function IMessageMetadataImpl_getCountDispatcher(this: IMessageMetadata; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getCount(status);
+		Result := this.FIMessageMetadataImpl.getCount(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12385,7 +12099,7 @@ end;
 function IMessageMetadataImpl_getFieldDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getField(status, index);
+		Result := this.FIMessageMetadataImpl.getField(status, index);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12394,7 +12108,7 @@ end;
 function IMessageMetadataImpl_getRelationDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getRelation(status, index);
+		Result := this.FIMessageMetadataImpl.getRelation(status, index);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12403,7 +12117,7 @@ end;
 function IMessageMetadataImpl_getOwnerDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getOwner(status, index);
+		Result := this.FIMessageMetadataImpl.getOwner(status, index);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12412,7 +12126,7 @@ end;
 function IMessageMetadataImpl_getAliasDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getAlias(status, index);
+		Result := this.FIMessageMetadataImpl.getAlias(status, index);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12421,7 +12135,7 @@ end;
 function IMessageMetadataImpl_getTypeDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getType(status, index);
+		Result := this.FIMessageMetadataImpl.getType(status, index);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12430,7 +12144,7 @@ end;
 function IMessageMetadataImpl_isNullableDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.isNullable(status, index);
+		Result := this.FIMessageMetadataImpl.isNullable(status, index);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12439,7 +12153,7 @@ end;
 function IMessageMetadataImpl_getSubTypeDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): Integer; cdecl;
 begin
 	try
-		Result := this.owner.getSubType(status, index);
+		Result := this.FIMessageMetadataImpl.getSubType(status, index);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12448,7 +12162,7 @@ end;
 function IMessageMetadataImpl_getLengthDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getLength(status, index);
+		Result := this.FIMessageMetadataImpl.getLength(status, index);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12457,7 +12171,7 @@ end;
 function IMessageMetadataImpl_getScaleDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): Integer; cdecl;
 begin
 	try
-		Result := this.owner.getScale(status, index);
+		Result := this.FIMessageMetadataImpl.getScale(status, index);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12466,7 +12180,7 @@ end;
 function IMessageMetadataImpl_getCharSetDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getCharSet(status, index);
+		Result := this.FIMessageMetadataImpl.getCharSet(status, index);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12475,7 +12189,7 @@ end;
 function IMessageMetadataImpl_getOffsetDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getOffset(status, index);
+		Result := this.FIMessageMetadataImpl.getOffset(status, index);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12484,7 +12198,7 @@ end;
 function IMessageMetadataImpl_getNullOffsetDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getNullOffset(status, index);
+		Result := this.FIMessageMetadataImpl.getNullOffset(status, index);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12493,7 +12207,7 @@ end;
 function IMessageMetadataImpl_getBuilderDispatcher(this: IMessageMetadata; status: IStatus): IMetadataBuilder; cdecl;
 begin
 	try
-		Result := this.owner.getBuilder(status);
+		Result := this.FIMessageMetadataImpl.getBuilder(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12502,7 +12216,7 @@ end;
 function IMessageMetadataImpl_getMessageLengthDispatcher(this: IMessageMetadata; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getMessageLength(status);
+		Result := this.FIMessageMetadataImpl.getMessageLength(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12511,7 +12225,7 @@ end;
 function IMessageMetadataImpl_getAlignmentDispatcher(this: IMessageMetadata; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getAlignment(status);
+		Result := this.FIMessageMetadataImpl.getAlignment(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12520,7 +12234,7 @@ end;
 function IMessageMetadataImpl_getAlignedLengthDispatcher(this: IMessageMetadata; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getAlignedLength(status);
+		Result := this.FIMessageMetadataImpl.getAlignedLength(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12549,7 +12263,7 @@ var IMessageMetadataImpl_vTable: MessageMetadataVTable = (
      getAlignment: @IMessageMetadataImpl_getAlignmentDispatcher;
      getAlignedLength: @IMessageMetadataImpl_getAlignedLengthDispatcher);
 
-function TMessageMetadata.isIMessageMetadataImpl: boolean inline;
+function TMessageMetadata.isIMessageMetadataImpl: boolean;
 begin
   Result := (vTable = @IMessageMetadataImpl_vTable);
 end;
@@ -12557,23 +12271,23 @@ end;
 constructor IMessageMetadataImpl.create;
 begin
   inherited Create;
-  vTable := @IMessageMetadataImpl_vTable;
+  FvTable := @IMessageMetadataImpl_vTable;
 end;
 
-function IMessageMetadataImpl.getvTableVersion: NativeInt;
+function IMessageMetadataImpl.getVTable: PMessageMetadataVTable;
 begin
-  Result := PMessageMetadataVTable(vTable)^.version
+  Result := PMessageMetadataVTable(FvTable);
 end;
 
-function IMetadataBuilderImpl.getInterface:IMetadataBuilder;
+function IMetadataBuilderImpl.asIMetadataBuilder:IMetadataBuilder;
 begin
-  Result := IMetadataBuilder(@nullPtr);
+  Result := IMetadataBuilder(@FNullPtr);
 end;
 
 procedure IMetadataBuilderImpl_addRefDispatcher(this: IMetadataBuilder); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIMetadataBuilderImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -12582,7 +12296,7 @@ end;
 function IMetadataBuilderImpl_releaseDispatcher(this: IMetadataBuilder): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIMetadataBuilderImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -12591,7 +12305,7 @@ end;
 procedure IMetadataBuilderImpl_setTypeDispatcher(this: IMetadataBuilder; status: IStatus; index: Cardinal; type_: Cardinal); cdecl;
 begin
 	try
-		this.owner.setType(status, index, type_);
+		this.FIMetadataBuilderImpl.setType(status, index, type_);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12600,7 +12314,7 @@ end;
 procedure IMetadataBuilderImpl_setSubTypeDispatcher(this: IMetadataBuilder; status: IStatus; index: Cardinal; subType: Integer); cdecl;
 begin
 	try
-		this.owner.setSubType(status, index, subType);
+		this.FIMetadataBuilderImpl.setSubType(status, index, subType);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12609,7 +12323,7 @@ end;
 procedure IMetadataBuilderImpl_setLengthDispatcher(this: IMetadataBuilder; status: IStatus; index: Cardinal; length: Cardinal); cdecl;
 begin
 	try
-		this.owner.setLength(status, index, length);
+		this.FIMetadataBuilderImpl.setLength(status, index, length);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12618,7 +12332,7 @@ end;
 procedure IMetadataBuilderImpl_setCharSetDispatcher(this: IMetadataBuilder; status: IStatus; index: Cardinal; charSet: Cardinal); cdecl;
 begin
 	try
-		this.owner.setCharSet(status, index, charSet);
+		this.FIMetadataBuilderImpl.setCharSet(status, index, charSet);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12627,7 +12341,7 @@ end;
 procedure IMetadataBuilderImpl_setScaleDispatcher(this: IMetadataBuilder; status: IStatus; index: Cardinal; scale: Integer); cdecl;
 begin
 	try
-		this.owner.setScale(status, index, scale);
+		this.FIMetadataBuilderImpl.setScale(status, index, scale);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12636,7 +12350,7 @@ end;
 procedure IMetadataBuilderImpl_truncateDispatcher(this: IMetadataBuilder; status: IStatus; count: Cardinal); cdecl;
 begin
 	try
-		this.owner.truncate(status, count);
+		this.FIMetadataBuilderImpl.truncate(status, count);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12645,7 +12359,7 @@ end;
 procedure IMetadataBuilderImpl_moveNameToIndexDispatcher(this: IMetadataBuilder; status: IStatus; name: PAnsiChar; index: Cardinal); cdecl;
 begin
 	try
-		this.owner.moveNameToIndex(status, name, index);
+		this.FIMetadataBuilderImpl.moveNameToIndex(status, name, index);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12654,7 +12368,7 @@ end;
 procedure IMetadataBuilderImpl_removeDispatcher(this: IMetadataBuilder; status: IStatus; index: Cardinal); cdecl;
 begin
 	try
-		this.owner.remove(status, index);
+		this.FIMetadataBuilderImpl.remove(status, index);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12663,7 +12377,7 @@ end;
 function IMetadataBuilderImpl_addFieldDispatcher(this: IMetadataBuilder; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.addField(status);
+		Result := this.FIMetadataBuilderImpl.addField(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12672,7 +12386,7 @@ end;
 function IMetadataBuilderImpl_getMetadataDispatcher(this: IMetadataBuilder; status: IStatus): IMessageMetadata; cdecl;
 begin
 	try
-		Result := this.owner.getMetadata(status);
+		Result := this.FIMetadataBuilderImpl.getMetadata(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12681,7 +12395,7 @@ end;
 procedure IMetadataBuilderImpl_setFieldDispatcher(this: IMetadataBuilder; status: IStatus; index: Cardinal; field: PAnsiChar); cdecl;
 begin
 	try
-		this.owner.setField(status, index, field);
+		this.FIMetadataBuilderImpl.setField(status, index, field);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12690,7 +12404,7 @@ end;
 procedure IMetadataBuilderImpl_setRelationDispatcher(this: IMetadataBuilder; status: IStatus; index: Cardinal; relation: PAnsiChar); cdecl;
 begin
 	try
-		this.owner.setRelation(status, index, relation);
+		this.FIMetadataBuilderImpl.setRelation(status, index, relation);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12699,7 +12413,7 @@ end;
 procedure IMetadataBuilderImpl_setOwnerDispatcher(this: IMetadataBuilder; status: IStatus; index: Cardinal; owner: PAnsiChar); cdecl;
 begin
 	try
-		this.owner.setOwner(status, index, owner);
+		this.FIMetadataBuilderImpl.setOwner(status, index, owner);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12708,7 +12422,7 @@ end;
 procedure IMetadataBuilderImpl_setAliasDispatcher(this: IMetadataBuilder; status: IStatus; index: Cardinal; alias: PAnsiChar); cdecl;
 begin
 	try
-		this.owner.setAlias(status, index, alias);
+		this.FIMetadataBuilderImpl.setAlias(status, index, alias);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12734,7 +12448,7 @@ var IMetadataBuilderImpl_vTable: MetadataBuilderVTable = (
      setOwner: @IMetadataBuilderImpl_setOwnerDispatcher;
      setAlias: @IMetadataBuilderImpl_setAliasDispatcher);
 
-function TMetadataBuilder.isIMetadataBuilderImpl: boolean inline;
+function TMetadataBuilder.isIMetadataBuilderImpl: boolean;
 begin
   Result := (vTable = @IMetadataBuilderImpl_vTable);
 end;
@@ -12742,23 +12456,23 @@ end;
 constructor IMetadataBuilderImpl.create;
 begin
   inherited Create;
-  vTable := @IMetadataBuilderImpl_vTable;
+  FvTable := @IMetadataBuilderImpl_vTable;
 end;
 
-function IMetadataBuilderImpl.getvTableVersion: NativeInt;
+function IMetadataBuilderImpl.getVTable: PMetadataBuilderVTable;
 begin
-  Result := PMetadataBuilderVTable(vTable)^.version
+  Result := PMetadataBuilderVTable(FvTable);
 end;
 
-function IResultSetImpl.getInterface:IResultSet;
+function IResultSetImpl.asIResultSet:IResultSet;
 begin
-  Result := IResultSet(@nullPtr);
+  Result := IResultSet(@FNullPtr);
 end;
 
 procedure IResultSetImpl_addRefDispatcher(this: IResultSet); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIResultSetImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -12767,7 +12481,7 @@ end;
 function IResultSetImpl_releaseDispatcher(this: IResultSet): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIResultSetImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -12776,7 +12490,7 @@ end;
 function IResultSetImpl_fetchNextDispatcher(this: IResultSet; status: IStatus; message: Pointer): Integer; cdecl;
 begin
 	try
-		Result := this.owner.fetchNext(status, message);
+		Result := this.FIResultSetImpl.fetchNext(status, message);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12785,7 +12499,7 @@ end;
 function IResultSetImpl_fetchPriorDispatcher(this: IResultSet; status: IStatus; message: Pointer): Integer; cdecl;
 begin
 	try
-		Result := this.owner.fetchPrior(status, message);
+		Result := this.FIResultSetImpl.fetchPrior(status, message);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12794,7 +12508,7 @@ end;
 function IResultSetImpl_fetchFirstDispatcher(this: IResultSet; status: IStatus; message: Pointer): Integer; cdecl;
 begin
 	try
-		Result := this.owner.fetchFirst(status, message);
+		Result := this.FIResultSetImpl.fetchFirst(status, message);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12803,7 +12517,7 @@ end;
 function IResultSetImpl_fetchLastDispatcher(this: IResultSet; status: IStatus; message: Pointer): Integer; cdecl;
 begin
 	try
-		Result := this.owner.fetchLast(status, message);
+		Result := this.FIResultSetImpl.fetchLast(status, message);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12812,7 +12526,7 @@ end;
 function IResultSetImpl_fetchAbsoluteDispatcher(this: IResultSet; status: IStatus; position: Integer; message: Pointer): Integer; cdecl;
 begin
 	try
-		Result := this.owner.fetchAbsolute(status, position, message);
+		Result := this.FIResultSetImpl.fetchAbsolute(status, position, message);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12821,7 +12535,7 @@ end;
 function IResultSetImpl_fetchRelativeDispatcher(this: IResultSet; status: IStatus; offset: Integer; message: Pointer): Integer; cdecl;
 begin
 	try
-		Result := this.owner.fetchRelative(status, offset, message);
+		Result := this.FIResultSetImpl.fetchRelative(status, offset, message);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12830,7 +12544,7 @@ end;
 function IResultSetImpl_isEofDispatcher(this: IResultSet; status: IStatus): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.isEof(status);
+		Result := this.FIResultSetImpl.isEof(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12839,7 +12553,7 @@ end;
 function IResultSetImpl_isBofDispatcher(this: IResultSet; status: IStatus): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.isBof(status);
+		Result := this.FIResultSetImpl.isBof(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12848,7 +12562,7 @@ end;
 function IResultSetImpl_getMetadataDispatcher(this: IResultSet; status: IStatus): IMessageMetadata; cdecl;
 begin
 	try
-		Result := this.owner.getMetadata(status);
+		Result := this.FIResultSetImpl.getMetadata(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12857,7 +12571,7 @@ end;
 procedure IResultSetImpl_closeDispatcher(this: IResultSet; status: IStatus); cdecl;
 begin
 	try
-		this.owner.close(status);
+		this.FIResultSetImpl.close(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12866,7 +12580,7 @@ end;
 procedure IResultSetImpl_setDelayedOutputFormatDispatcher(this: IResultSet; status: IStatus; format: IMessageMetadata); cdecl;
 begin
 	try
-		this.owner.setDelayedOutputFormat(status, format);
+		this.FIResultSetImpl.setDelayedOutputFormat(status, format);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12889,7 +12603,7 @@ var IResultSetImpl_vTable: ResultSetVTable = (
      close: @IResultSetImpl_closeDispatcher;
      setDelayedOutputFormat: @IResultSetImpl_setDelayedOutputFormatDispatcher);
 
-function TResultSet.isIResultSetImpl: boolean inline;
+function TResultSet.isIResultSetImpl: boolean;
 begin
   Result := (vTable = @IResultSetImpl_vTable);
 end;
@@ -12897,23 +12611,23 @@ end;
 constructor IResultSetImpl.create;
 begin
   inherited Create;
-  vTable := @IResultSetImpl_vTable;
+  FvTable := @IResultSetImpl_vTable;
 end;
 
-function IResultSetImpl.getvTableVersion: NativeInt;
+function IResultSetImpl.getVTable: PResultSetVTable;
 begin
-  Result := PResultSetVTable(vTable)^.version
+  Result := PResultSetVTable(FvTable);
 end;
 
-function IStatementImpl.getInterface:IStatement;
+function IStatementImpl.asIStatement:IStatement;
 begin
-  Result := IStatement(@nullPtr);
+  Result := IStatement(@FNullPtr);
 end;
 
 procedure IStatementImpl_addRefDispatcher(this: IStatement); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIStatementImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -12922,7 +12636,7 @@ end;
 function IStatementImpl_releaseDispatcher(this: IStatement): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIStatementImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -12931,7 +12645,7 @@ end;
 procedure IStatementImpl_getInfoDispatcher(this: IStatement; status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); cdecl;
 begin
 	try
-		this.owner.getInfo(status, itemsLength, items, bufferLength, buffer);
+		this.FIStatementImpl.getInfo(status, itemsLength, items, bufferLength, buffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12940,7 +12654,7 @@ end;
 function IStatementImpl_getTypeDispatcher(this: IStatement; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getType(status);
+		Result := this.FIStatementImpl.getType(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12949,7 +12663,7 @@ end;
 function IStatementImpl_getPlanDispatcher(this: IStatement; status: IStatus; detailed: Boolean): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getPlan(status, detailed);
+		Result := this.FIStatementImpl.getPlan(status, detailed);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12958,7 +12672,7 @@ end;
 function IStatementImpl_getAffectedRecordsDispatcher(this: IStatement; status: IStatus): QWord; cdecl;
 begin
 	try
-		Result := this.owner.getAffectedRecords(status);
+		Result := this.FIStatementImpl.getAffectedRecords(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12967,7 +12681,7 @@ end;
 function IStatementImpl_getInputMetadataDispatcher(this: IStatement; status: IStatus): IMessageMetadata; cdecl;
 begin
 	try
-		Result := this.owner.getInputMetadata(status);
+		Result := this.FIStatementImpl.getInputMetadata(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12976,7 +12690,7 @@ end;
 function IStatementImpl_getOutputMetadataDispatcher(this: IStatement; status: IStatus): IMessageMetadata; cdecl;
 begin
 	try
-		Result := this.owner.getOutputMetadata(status);
+		Result := this.FIStatementImpl.getOutputMetadata(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12985,7 +12699,7 @@ end;
 function IStatementImpl_executeDispatcher(this: IStatement; status: IStatus; transaction: ITransaction; inMetadata: IMessageMetadata; inBuffer: Pointer; outMetadata: IMessageMetadata; outBuffer: Pointer): ITransaction; cdecl;
 begin
 	try
-		Result := this.owner.execute(status, transaction, inMetadata, inBuffer, outMetadata, outBuffer);
+		Result := this.FIStatementImpl.execute(status, transaction, inMetadata, inBuffer, outMetadata, outBuffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -12994,7 +12708,7 @@ end;
 function IStatementImpl_openCursorDispatcher(this: IStatement; status: IStatus; transaction: ITransaction; inMetadata: IMessageMetadata; inBuffer: Pointer; outMetadata: IMessageMetadata; flags: Cardinal): IResultSet; cdecl;
 begin
 	try
-		Result := this.owner.openCursor(status, transaction, inMetadata, inBuffer, outMetadata, flags);
+		Result := this.FIStatementImpl.openCursor(status, transaction, inMetadata, inBuffer, outMetadata, flags);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13003,7 +12717,7 @@ end;
 procedure IStatementImpl_setCursorNameDispatcher(this: IStatement; status: IStatus; name: PAnsiChar); cdecl;
 begin
 	try
-		this.owner.setCursorName(status, name);
+		this.FIStatementImpl.setCursorName(status, name);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13012,7 +12726,7 @@ end;
 procedure IStatementImpl_freeDispatcher(this: IStatement; status: IStatus); cdecl;
 begin
 	try
-		this.owner.free(status);
+		this.FIStatementImpl.free(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13021,7 +12735,7 @@ end;
 function IStatementImpl_getFlagsDispatcher(this: IStatement; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getFlags(status);
+		Result := this.FIStatementImpl.getFlags(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13030,7 +12744,7 @@ end;
 function IStatementImpl_getTimeoutDispatcher(this: IStatement; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getTimeout(status);
+		Result := this.FIStatementImpl.getTimeout(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13039,7 +12753,7 @@ end;
 procedure IStatementImpl_setTimeoutDispatcher(this: IStatement; status: IStatus; timeOut: Cardinal); cdecl;
 begin
 	try
-		this.owner.setTimeout(status, timeOut);
+		this.FIStatementImpl.setTimeout(status, timeOut);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13048,7 +12762,7 @@ end;
 function IStatementImpl_createBatchDispatcher(this: IStatement; status: IStatus; inMetadata: IMessageMetadata; parLength: Cardinal; par: BytePtr): IBatch; cdecl;
 begin
 	try
-		Result := this.owner.createBatch(status, inMetadata, parLength, par);
+		Result := this.FIStatementImpl.createBatch(status, inMetadata, parLength, par);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13074,7 +12788,7 @@ var IStatementImpl_vTable: StatementVTable = (
      setTimeout: @IStatementImpl_setTimeoutDispatcher;
      createBatch: @IStatementImpl_createBatchDispatcher);
 
-function TStatement.isIStatementImpl: boolean inline;
+function TStatement.isIStatementImpl: boolean;
 begin
   Result := (vTable = @IStatementImpl_vTable);
 end;
@@ -13082,23 +12796,23 @@ end;
 constructor IStatementImpl.create;
 begin
   inherited Create;
-  vTable := @IStatementImpl_vTable;
+  FvTable := @IStatementImpl_vTable;
 end;
 
-function IStatementImpl.getvTableVersion: NativeInt;
+function IStatementImpl.getVTable: PStatementVTable;
 begin
-  Result := PStatementVTable(vTable)^.version
+  Result := PStatementVTable(FvTable);
 end;
 
-function IBatchImpl.getInterface:IBatch;
+function IBatchImpl.asIBatch:IBatch;
 begin
-  Result := IBatch(@nullPtr);
+  Result := IBatch(@FNullPtr);
 end;
 
 procedure IBatchImpl_addRefDispatcher(this: IBatch); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIBatchImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13107,7 +12821,7 @@ end;
 function IBatchImpl_releaseDispatcher(this: IBatch): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIBatchImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13116,7 +12830,7 @@ end;
 procedure IBatchImpl_addDispatcher(this: IBatch; status: IStatus; count: Cardinal; inBuffer: Pointer); cdecl;
 begin
 	try
-		this.owner.add(status, count, inBuffer);
+		this.FIBatchImpl.add(status, count, inBuffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13125,7 +12839,7 @@ end;
 procedure IBatchImpl_addBlobDispatcher(this: IBatch; status: IStatus; length: Cardinal; inBuffer: Pointer; blobId: ISC_QUADPtr; parLength: Cardinal; par: BytePtr); cdecl;
 begin
 	try
-		this.owner.addBlob(status, length, inBuffer, blobId, parLength, par);
+		this.FIBatchImpl.addBlob(status, length, inBuffer, blobId, parLength, par);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13134,7 +12848,7 @@ end;
 procedure IBatchImpl_appendBlobDataDispatcher(this: IBatch; status: IStatus; length: Cardinal; inBuffer: Pointer); cdecl;
 begin
 	try
-		this.owner.appendBlobData(status, length, inBuffer);
+		this.FIBatchImpl.appendBlobData(status, length, inBuffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13143,7 +12857,7 @@ end;
 procedure IBatchImpl_addBlobStreamDispatcher(this: IBatch; status: IStatus; length: Cardinal; inBuffer: Pointer); cdecl;
 begin
 	try
-		this.owner.addBlobStream(status, length, inBuffer);
+		this.FIBatchImpl.addBlobStream(status, length, inBuffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13152,7 +12866,7 @@ end;
 procedure IBatchImpl_registerBlobDispatcher(this: IBatch; status: IStatus; existingBlob: ISC_QUADPtr; blobId: ISC_QUADPtr); cdecl;
 begin
 	try
-		this.owner.registerBlob(status, existingBlob, blobId);
+		this.FIBatchImpl.registerBlob(status, existingBlob, blobId);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13161,7 +12875,7 @@ end;
 function IBatchImpl_executeDispatcher(this: IBatch; status: IStatus; transaction: ITransaction): IBatchCompletionState; cdecl;
 begin
 	try
-		Result := this.owner.execute(status, transaction);
+		Result := this.FIBatchImpl.execute(status, transaction);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13170,7 +12884,7 @@ end;
 procedure IBatchImpl_cancelDispatcher(this: IBatch; status: IStatus); cdecl;
 begin
 	try
-		this.owner.cancel(status);
+		this.FIBatchImpl.cancel(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13179,7 +12893,7 @@ end;
 function IBatchImpl_getBlobAlignmentDispatcher(this: IBatch; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getBlobAlignment(status);
+		Result := this.FIBatchImpl.getBlobAlignment(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13188,7 +12902,7 @@ end;
 function IBatchImpl_getMetadataDispatcher(this: IBatch; status: IStatus): IMessageMetadata; cdecl;
 begin
 	try
-		Result := this.owner.getMetadata(status);
+		Result := this.FIBatchImpl.getMetadata(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13197,7 +12911,7 @@ end;
 procedure IBatchImpl_setDefaultBpbDispatcher(this: IBatch; status: IStatus; parLength: Cardinal; par: BytePtr); cdecl;
 begin
 	try
-		this.owner.setDefaultBpb(status, parLength, par);
+		this.FIBatchImpl.setDefaultBpb(status, parLength, par);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13206,7 +12920,7 @@ end;
 procedure IBatchImpl_closeDispatcher(this: IBatch; status: IStatus); cdecl;
 begin
 	try
-		this.owner.close(status);
+		this.FIBatchImpl.close(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13229,7 +12943,7 @@ var IBatchImpl_vTable: BatchVTable = (
      setDefaultBpb: @IBatchImpl_setDefaultBpbDispatcher;
      close: @IBatchImpl_closeDispatcher);
 
-function TBatch.isIBatchImpl: boolean inline;
+function TBatch.isIBatchImpl: boolean;
 begin
   Result := (vTable = @IBatchImpl_vTable);
 end;
@@ -13237,23 +12951,23 @@ end;
 constructor IBatchImpl.create;
 begin
   inherited Create;
-  vTable := @IBatchImpl_vTable;
+  FvTable := @IBatchImpl_vTable;
 end;
 
-function IBatchImpl.getvTableVersion: NativeInt;
+function IBatchImpl.getVTable: PBatchVTable;
 begin
-  Result := PBatchVTable(vTable)^.version
+  Result := PBatchVTable(FvTable);
 end;
 
-function IBatchCompletionStateImpl.getInterface:IBatchCompletionState;
+function IBatchCompletionStateImpl.asIBatchCompletionState:IBatchCompletionState;
 begin
-  Result := IBatchCompletionState(@nullPtr);
+  Result := IBatchCompletionState(@FNullPtr);
 end;
 
 procedure IBatchCompletionStateImpl_disposeDispatcher(this: IBatchCompletionState); cdecl;
 begin
 	try
-		this.owner.dispose();
+		this.FIBatchCompletionStateImpl.dispose();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13262,7 +12976,7 @@ end;
 function IBatchCompletionStateImpl_getSizeDispatcher(this: IBatchCompletionState; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getSize(status);
+		Result := this.FIBatchCompletionStateImpl.getSize(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13271,7 +12985,7 @@ end;
 function IBatchCompletionStateImpl_getStateDispatcher(this: IBatchCompletionState; status: IStatus; pos: Cardinal): Integer; cdecl;
 begin
 	try
-		Result := this.owner.getState(status, pos);
+		Result := this.FIBatchCompletionStateImpl.getState(status, pos);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13280,7 +12994,7 @@ end;
 function IBatchCompletionStateImpl_findErrorDispatcher(this: IBatchCompletionState; status: IStatus; pos: Cardinal): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.findError(status, pos);
+		Result := this.FIBatchCompletionStateImpl.findError(status, pos);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13289,7 +13003,7 @@ end;
 procedure IBatchCompletionStateImpl_getStatusDispatcher(this: IBatchCompletionState; status: IStatus; to_: IStatus; pos: Cardinal); cdecl;
 begin
 	try
-		this.owner.getStatus(status, to_, pos);
+		this.FIBatchCompletionStateImpl.getStatus(status, to_, pos);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13304,7 +13018,7 @@ var IBatchCompletionStateImpl_vTable: BatchCompletionStateVTable = (
      findError: @IBatchCompletionStateImpl_findErrorDispatcher;
      getStatus: @IBatchCompletionStateImpl_getStatusDispatcher);
 
-function TBatchCompletionState.isIBatchCompletionStateImpl: boolean inline;
+function TBatchCompletionState.isIBatchCompletionStateImpl: boolean;
 begin
   Result := (vTable = @IBatchCompletionStateImpl_vTable);
 end;
@@ -13312,23 +13026,23 @@ end;
 constructor IBatchCompletionStateImpl.create;
 begin
   inherited Create;
-  vTable := @IBatchCompletionStateImpl_vTable;
+  FvTable := @IBatchCompletionStateImpl_vTable;
 end;
 
-function IBatchCompletionStateImpl.getvTableVersion: NativeInt;
+function IBatchCompletionStateImpl.getVTable: PBatchCompletionStateVTable;
 begin
-  Result := PBatchCompletionStateVTable(vTable)^.version
+  Result := PBatchCompletionStateVTable(FvTable);
 end;
 
-function IReplicatorImpl.getInterface:IReplicator;
+function IReplicatorImpl.asIReplicator:IReplicator;
 begin
-  Result := IReplicator(@nullPtr);
+  Result := IReplicator(@FNullPtr);
 end;
 
 procedure IReplicatorImpl_addRefDispatcher(this: IReplicator); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIReplicatorImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13337,7 +13051,7 @@ end;
 function IReplicatorImpl_releaseDispatcher(this: IReplicator): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIReplicatorImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13346,7 +13060,7 @@ end;
 procedure IReplicatorImpl_processDispatcher(this: IReplicator; status: IStatus; length: Cardinal; data: BytePtr); cdecl;
 begin
 	try
-		this.owner.process(status, length, data);
+		this.FIReplicatorImpl.process(status, length, data);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13355,7 +13069,7 @@ end;
 procedure IReplicatorImpl_closeDispatcher(this: IReplicator; status: IStatus); cdecl;
 begin
 	try
-		this.owner.close(status);
+		this.FIReplicatorImpl.close(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13369,7 +13083,7 @@ var IReplicatorImpl_vTable: ReplicatorVTable = (
      process: @IReplicatorImpl_processDispatcher;
      close: @IReplicatorImpl_closeDispatcher);
 
-function TReplicator.isIReplicatorImpl: boolean inline;
+function TReplicator.isIReplicatorImpl: boolean;
 begin
   Result := (vTable = @IReplicatorImpl_vTable);
 end;
@@ -13377,23 +13091,23 @@ end;
 constructor IReplicatorImpl.create;
 begin
   inherited Create;
-  vTable := @IReplicatorImpl_vTable;
+  FvTable := @IReplicatorImpl_vTable;
 end;
 
-function IReplicatorImpl.getvTableVersion: NativeInt;
+function IReplicatorImpl.getVTable: PReplicatorVTable;
 begin
-  Result := PReplicatorVTable(vTable)^.version
+  Result := PReplicatorVTable(FvTable);
 end;
 
-function IRequestImpl.getInterface:IRequest;
+function IRequestImpl.asIRequest:IRequest;
 begin
-  Result := IRequest(@nullPtr);
+  Result := IRequest(@FNullPtr);
 end;
 
 procedure IRequestImpl_addRefDispatcher(this: IRequest); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIRequestImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13402,7 +13116,7 @@ end;
 function IRequestImpl_releaseDispatcher(this: IRequest): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIRequestImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13411,7 +13125,7 @@ end;
 procedure IRequestImpl_receiveDispatcher(this: IRequest; status: IStatus; level: Integer; msgType: Cardinal; length: Cardinal; message: Pointer); cdecl;
 begin
 	try
-		this.owner.receive(status, level, msgType, length, message);
+		this.FIRequestImpl.receive(status, level, msgType, length, message);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13420,7 +13134,7 @@ end;
 procedure IRequestImpl_sendDispatcher(this: IRequest; status: IStatus; level: Integer; msgType: Cardinal; length: Cardinal; message: Pointer); cdecl;
 begin
 	try
-		this.owner.send(status, level, msgType, length, message);
+		this.FIRequestImpl.send(status, level, msgType, length, message);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13429,7 +13143,7 @@ end;
 procedure IRequestImpl_getInfoDispatcher(this: IRequest; status: IStatus; level: Integer; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); cdecl;
 begin
 	try
-		this.owner.getInfo(status, level, itemsLength, items, bufferLength, buffer);
+		this.FIRequestImpl.getInfo(status, level, itemsLength, items, bufferLength, buffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13438,7 +13152,7 @@ end;
 procedure IRequestImpl_startDispatcher(this: IRequest; status: IStatus; tra: ITransaction; level: Integer); cdecl;
 begin
 	try
-		this.owner.start(status, tra, level);
+		this.FIRequestImpl.start(status, tra, level);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13447,7 +13161,7 @@ end;
 procedure IRequestImpl_startAndSendDispatcher(this: IRequest; status: IStatus; tra: ITransaction; level: Integer; msgType: Cardinal; length: Cardinal; message: Pointer); cdecl;
 begin
 	try
-		this.owner.startAndSend(status, tra, level, msgType, length, message);
+		this.FIRequestImpl.startAndSend(status, tra, level, msgType, length, message);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13456,7 +13170,7 @@ end;
 procedure IRequestImpl_unwindDispatcher(this: IRequest; status: IStatus; level: Integer); cdecl;
 begin
 	try
-		this.owner.unwind(status, level);
+		this.FIRequestImpl.unwind(status, level);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13465,7 +13179,7 @@ end;
 procedure IRequestImpl_freeDispatcher(this: IRequest; status: IStatus); cdecl;
 begin
 	try
-		this.owner.free(status);
+		this.FIRequestImpl.free(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13484,7 +13198,7 @@ var IRequestImpl_vTable: RequestVTable = (
      unwind: @IRequestImpl_unwindDispatcher;
      free: @IRequestImpl_freeDispatcher);
 
-function TRequest.isIRequestImpl: boolean inline;
+function TRequest.isIRequestImpl: boolean;
 begin
   Result := (vTable = @IRequestImpl_vTable);
 end;
@@ -13492,23 +13206,23 @@ end;
 constructor IRequestImpl.create;
 begin
   inherited Create;
-  vTable := @IRequestImpl_vTable;
+  FvTable := @IRequestImpl_vTable;
 end;
 
-function IRequestImpl.getvTableVersion: NativeInt;
+function IRequestImpl.getVTable: PRequestVTable;
 begin
-  Result := PRequestVTable(vTable)^.version
+  Result := PRequestVTable(FvTable);
 end;
 
-function IEventsImpl.getInterface:IEvents;
+function IEventsImpl.asIEvents:IEvents;
 begin
-  Result := IEvents(@nullPtr);
+  Result := IEvents(@FNullPtr);
 end;
 
 procedure IEventsImpl_addRefDispatcher(this: IEvents); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIEventsImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13517,7 +13231,7 @@ end;
 function IEventsImpl_releaseDispatcher(this: IEvents): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIEventsImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13526,7 +13240,7 @@ end;
 procedure IEventsImpl_cancelDispatcher(this: IEvents; status: IStatus); cdecl;
 begin
 	try
-		this.owner.cancel(status);
+		this.FIEventsImpl.cancel(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13539,7 +13253,7 @@ var IEventsImpl_vTable: EventsVTable = (
      release: @IReferenceCountedImpl_releaseDispatcher;
      cancel: @IEventsImpl_cancelDispatcher);
 
-function TEvents.isIEventsImpl: boolean inline;
+function TEvents.isIEventsImpl: boolean;
 begin
   Result := (vTable = @IEventsImpl_vTable);
 end;
@@ -13547,23 +13261,23 @@ end;
 constructor IEventsImpl.create;
 begin
   inherited Create;
-  vTable := @IEventsImpl_vTable;
+  FvTable := @IEventsImpl_vTable;
 end;
 
-function IEventsImpl.getvTableVersion: NativeInt;
+function IEventsImpl.getVTable: PEventsVTable;
 begin
-  Result := PEventsVTable(vTable)^.version
+  Result := PEventsVTable(FvTable);
 end;
 
-function IAttachmentImpl.getInterface:IAttachment;
+function IAttachmentImpl.asIAttachment:IAttachment;
 begin
-  Result := IAttachment(@nullPtr);
+  Result := IAttachment(@FNullPtr);
 end;
 
 procedure IAttachmentImpl_addRefDispatcher(this: IAttachment); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIAttachmentImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13572,7 +13286,7 @@ end;
 function IAttachmentImpl_releaseDispatcher(this: IAttachment): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIAttachmentImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13581,7 +13295,7 @@ end;
 procedure IAttachmentImpl_getInfoDispatcher(this: IAttachment; status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); cdecl;
 begin
 	try
-		this.owner.getInfo(status, itemsLength, items, bufferLength, buffer);
+		this.FIAttachmentImpl.getInfo(status, itemsLength, items, bufferLength, buffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13590,7 +13304,7 @@ end;
 function IAttachmentImpl_startTransactionDispatcher(this: IAttachment; status: IStatus; tpbLength: Cardinal; tpb: BytePtr): ITransaction; cdecl;
 begin
 	try
-		Result := this.owner.startTransaction(status, tpbLength, tpb);
+		Result := this.FIAttachmentImpl.startTransaction(status, tpbLength, tpb);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13599,7 +13313,7 @@ end;
 function IAttachmentImpl_reconnectTransactionDispatcher(this: IAttachment; status: IStatus; length: Cardinal; id: BytePtr): ITransaction; cdecl;
 begin
 	try
-		Result := this.owner.reconnectTransaction(status, length, id);
+		Result := this.FIAttachmentImpl.reconnectTransaction(status, length, id);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13608,7 +13322,7 @@ end;
 function IAttachmentImpl_compileRequestDispatcher(this: IAttachment; status: IStatus; blrLength: Cardinal; blr: BytePtr): IRequest; cdecl;
 begin
 	try
-		Result := this.owner.compileRequest(status, blrLength, blr);
+		Result := this.FIAttachmentImpl.compileRequest(status, blrLength, blr);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13617,7 +13331,7 @@ end;
 procedure IAttachmentImpl_transactRequestDispatcher(this: IAttachment; status: IStatus; transaction: ITransaction; blrLength: Cardinal; blr: BytePtr; inMsgLength: Cardinal; inMsg: BytePtr; outMsgLength: Cardinal; outMsg: BytePtr); cdecl;
 begin
 	try
-		this.owner.transactRequest(status, transaction, blrLength, blr, inMsgLength, inMsg, outMsgLength, outMsg);
+		this.FIAttachmentImpl.transactRequest(status, transaction, blrLength, blr, inMsgLength, inMsg, outMsgLength, outMsg);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13626,7 +13340,7 @@ end;
 function IAttachmentImpl_createBlobDispatcher(this: IAttachment; status: IStatus; transaction: ITransaction; id: ISC_QUADPtr; bpbLength: Cardinal; bpb: BytePtr): IBlob; cdecl;
 begin
 	try
-		Result := this.owner.createBlob(status, transaction, id, bpbLength, bpb);
+		Result := this.FIAttachmentImpl.createBlob(status, transaction, id, bpbLength, bpb);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13635,7 +13349,7 @@ end;
 function IAttachmentImpl_openBlobDispatcher(this: IAttachment; status: IStatus; transaction: ITransaction; id: ISC_QUADPtr; bpbLength: Cardinal; bpb: BytePtr): IBlob; cdecl;
 begin
 	try
-		Result := this.owner.openBlob(status, transaction, id, bpbLength, bpb);
+		Result := this.FIAttachmentImpl.openBlob(status, transaction, id, bpbLength, bpb);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13644,7 +13358,7 @@ end;
 function IAttachmentImpl_getSliceDispatcher(this: IAttachment; status: IStatus; transaction: ITransaction; id: ISC_QUADPtr; sdlLength: Cardinal; sdl: BytePtr; paramLength: Cardinal; param: BytePtr; sliceLength: Integer; slice: BytePtr): Integer; cdecl;
 begin
 	try
-		Result := this.owner.getSlice(status, transaction, id, sdlLength, sdl, paramLength, param, sliceLength, slice);
+		Result := this.FIAttachmentImpl.getSlice(status, transaction, id, sdlLength, sdl, paramLength, param, sliceLength, slice);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13653,7 +13367,7 @@ end;
 procedure IAttachmentImpl_putSliceDispatcher(this: IAttachment; status: IStatus; transaction: ITransaction; id: ISC_QUADPtr; sdlLength: Cardinal; sdl: BytePtr; paramLength: Cardinal; param: BytePtr; sliceLength: Integer; slice: BytePtr); cdecl;
 begin
 	try
-		this.owner.putSlice(status, transaction, id, sdlLength, sdl, paramLength, param, sliceLength, slice);
+		this.FIAttachmentImpl.putSlice(status, transaction, id, sdlLength, sdl, paramLength, param, sliceLength, slice);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13662,7 +13376,7 @@ end;
 procedure IAttachmentImpl_executeDynDispatcher(this: IAttachment; status: IStatus; transaction: ITransaction; length: Cardinal; dyn: BytePtr); cdecl;
 begin
 	try
-		this.owner.executeDyn(status, transaction, length, dyn);
+		this.FIAttachmentImpl.executeDyn(status, transaction, length, dyn);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13671,7 +13385,7 @@ end;
 function IAttachmentImpl_prepareDispatcher(this: IAttachment; status: IStatus; tra: ITransaction; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; flags: Cardinal): IStatement; cdecl;
 begin
 	try
-		Result := this.owner.prepare(status, tra, stmtLength, sqlStmt, dialect, flags);
+		Result := this.FIAttachmentImpl.prepare(status, tra, stmtLength, sqlStmt, dialect, flags);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13680,7 +13394,7 @@ end;
 function IAttachmentImpl_executeDispatcher(this: IAttachment; status: IStatus; transaction: ITransaction; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: IMessageMetadata; inBuffer: Pointer; outMetadata: IMessageMetadata; outBuffer: Pointer): ITransaction; cdecl;
 begin
 	try
-		Result := this.owner.execute(status, transaction, stmtLength, sqlStmt, dialect, inMetadata, inBuffer, outMetadata, outBuffer);
+		Result := this.FIAttachmentImpl.execute(status, transaction, stmtLength, sqlStmt, dialect, inMetadata, inBuffer, outMetadata, outBuffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13689,7 +13403,7 @@ end;
 function IAttachmentImpl_openCursorDispatcher(this: IAttachment; status: IStatus; transaction: ITransaction; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: IMessageMetadata; inBuffer: Pointer; outMetadata: IMessageMetadata; cursorName: PAnsiChar; cursorFlags: Cardinal): IResultSet; cdecl;
 begin
 	try
-		Result := this.owner.openCursor(status, transaction, stmtLength, sqlStmt, dialect, inMetadata, inBuffer, outMetadata, cursorName, cursorFlags);
+		Result := this.FIAttachmentImpl.openCursor(status, transaction, stmtLength, sqlStmt, dialect, inMetadata, inBuffer, outMetadata, cursorName, cursorFlags);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13698,7 +13412,7 @@ end;
 function IAttachmentImpl_queEventsDispatcher(this: IAttachment; status: IStatus; callback: IEventCallback; length: Cardinal; events: BytePtr): IEvents; cdecl;
 begin
 	try
-		Result := this.owner.queEvents(status, callback, length, events);
+		Result := this.FIAttachmentImpl.queEvents(status, callback, length, events);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13707,7 +13421,7 @@ end;
 procedure IAttachmentImpl_cancelOperationDispatcher(this: IAttachment; status: IStatus; option: Integer); cdecl;
 begin
 	try
-		this.owner.cancelOperation(status, option);
+		this.FIAttachmentImpl.cancelOperation(status, option);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13716,7 +13430,7 @@ end;
 procedure IAttachmentImpl_pingDispatcher(this: IAttachment; status: IStatus); cdecl;
 begin
 	try
-		this.owner.ping(status);
+		this.FIAttachmentImpl.ping(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13725,7 +13439,7 @@ end;
 procedure IAttachmentImpl_detachDispatcher(this: IAttachment; status: IStatus); cdecl;
 begin
 	try
-		this.owner.detach(status);
+		this.FIAttachmentImpl.detach(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13734,7 +13448,7 @@ end;
 procedure IAttachmentImpl_dropDatabaseDispatcher(this: IAttachment; status: IStatus); cdecl;
 begin
 	try
-		this.owner.dropDatabase(status);
+		this.FIAttachmentImpl.dropDatabase(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13743,7 +13457,7 @@ end;
 function IAttachmentImpl_getIdleTimeoutDispatcher(this: IAttachment; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getIdleTimeout(status);
+		Result := this.FIAttachmentImpl.getIdleTimeout(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13752,7 +13466,7 @@ end;
 procedure IAttachmentImpl_setIdleTimeoutDispatcher(this: IAttachment; status: IStatus; timeOut: Cardinal); cdecl;
 begin
 	try
-		this.owner.setIdleTimeout(status, timeOut);
+		this.FIAttachmentImpl.setIdleTimeout(status, timeOut);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13761,7 +13475,7 @@ end;
 function IAttachmentImpl_getStatementTimeoutDispatcher(this: IAttachment; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getStatementTimeout(status);
+		Result := this.FIAttachmentImpl.getStatementTimeout(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13770,7 +13484,7 @@ end;
 procedure IAttachmentImpl_setStatementTimeoutDispatcher(this: IAttachment; status: IStatus; timeOut: Cardinal); cdecl;
 begin
 	try
-		this.owner.setStatementTimeout(status, timeOut);
+		this.FIAttachmentImpl.setStatementTimeout(status, timeOut);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13779,7 +13493,7 @@ end;
 function IAttachmentImpl_createBatchDispatcher(this: IAttachment; status: IStatus; transaction: ITransaction; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: IMessageMetadata; parLength: Cardinal; par: BytePtr): IBatch; cdecl;
 begin
 	try
-		Result := this.owner.createBatch(status, transaction, stmtLength, sqlStmt, dialect, inMetadata, parLength, par);
+		Result := this.FIAttachmentImpl.createBatch(status, transaction, stmtLength, sqlStmt, dialect, inMetadata, parLength, par);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13788,7 +13502,7 @@ end;
 function IAttachmentImpl_createReplicatorDispatcher(this: IAttachment; status: IStatus): IReplicator; cdecl;
 begin
 	try
-		Result := this.owner.createReplicator(status);
+		Result := this.FIAttachmentImpl.createReplicator(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13824,7 +13538,7 @@ var IAttachmentImpl_vTable: AttachmentVTable = (
      createBatch: @IAttachmentImpl_createBatchDispatcher;
      createReplicator: @IAttachmentImpl_createReplicatorDispatcher);
 
-function TAttachment.isIAttachmentImpl: boolean inline;
+function TAttachment.isIAttachmentImpl: boolean;
 begin
   Result := (vTable = @IAttachmentImpl_vTable);
 end;
@@ -13832,23 +13546,23 @@ end;
 constructor IAttachmentImpl.create;
 begin
   inherited Create;
-  vTable := @IAttachmentImpl_vTable;
+  FvTable := @IAttachmentImpl_vTable;
 end;
 
-function IAttachmentImpl.getvTableVersion: NativeInt;
+function IAttachmentImpl.getVTable: PAttachmentVTable;
 begin
-  Result := PAttachmentVTable(vTable)^.version
+  Result := PAttachmentVTable(FvTable);
 end;
 
-function IServiceImpl.getInterface:IService;
+function IServiceImpl.asIService:IService;
 begin
-  Result := IService(@nullPtr);
+  Result := IService(@FNullPtr);
 end;
 
 procedure IServiceImpl_addRefDispatcher(this: IService); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIServiceImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13857,7 +13571,7 @@ end;
 function IServiceImpl_releaseDispatcher(this: IService): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIServiceImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13866,7 +13580,7 @@ end;
 procedure IServiceImpl_detachDispatcher(this: IService; status: IStatus); cdecl;
 begin
 	try
-		this.owner.detach(status);
+		this.FIServiceImpl.detach(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13875,7 +13589,7 @@ end;
 procedure IServiceImpl_queryDispatcher(this: IService; status: IStatus; sendLength: Cardinal; sendItems: BytePtr; receiveLength: Cardinal; receiveItems: BytePtr; bufferLength: Cardinal; buffer: BytePtr); cdecl;
 begin
 	try
-		this.owner.query(status, sendLength, sendItems, receiveLength, receiveItems, bufferLength, buffer);
+		this.FIServiceImpl.query(status, sendLength, sendItems, receiveLength, receiveItems, bufferLength, buffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13884,7 +13598,7 @@ end;
 procedure IServiceImpl_startDispatcher(this: IService; status: IStatus; spbLength: Cardinal; spb: BytePtr); cdecl;
 begin
 	try
-		this.owner.start(status, spbLength, spb);
+		this.FIServiceImpl.start(status, spbLength, spb);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13899,7 +13613,7 @@ var IServiceImpl_vTable: ServiceVTable = (
      query: @IServiceImpl_queryDispatcher;
      start: @IServiceImpl_startDispatcher);
 
-function TService.isIServiceImpl: boolean inline;
+function TService.isIServiceImpl: boolean;
 begin
   Result := (vTable = @IServiceImpl_vTable);
 end;
@@ -13907,23 +13621,23 @@ end;
 constructor IServiceImpl.create;
 begin
   inherited Create;
-  vTable := @IServiceImpl_vTable;
+  FvTable := @IServiceImpl_vTable;
 end;
 
-function IServiceImpl.getvTableVersion: NativeInt;
+function IServiceImpl.getVTable: PServiceVTable;
 begin
-  Result := PServiceVTable(vTable)^.version
+  Result := PServiceVTable(FvTable);
 end;
 
-function IProviderImpl.getInterface:IProvider;
+function IProviderImpl.asIProvider:IProvider;
 begin
-  Result := IProvider(@nullPtr);
+  Result := IProvider(@FNullPtr);
 end;
 
 procedure IProviderImpl_addRefDispatcher(this: IProvider); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIProviderImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13932,7 +13646,7 @@ end;
 function IProviderImpl_releaseDispatcher(this: IProvider): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIProviderImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13941,7 +13655,7 @@ end;
 procedure IProviderImpl_setOwnerDispatcher(this: IProvider; r: IReferenceCounted); cdecl;
 begin
 	try
-		this.owner.setOwner(r);
+		this.FIProviderImpl.setOwner(r);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13950,7 +13664,7 @@ end;
 function IProviderImpl_getOwnerDispatcher(this: IProvider): IReferenceCounted; cdecl;
 begin
 	try
-		Result := this.owner.getOwner();
+		Result := this.FIProviderImpl.getOwner();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13959,7 +13673,7 @@ end;
 function IProviderImpl_attachDatabaseDispatcher(this: IProvider; status: IStatus; fileName: PAnsiChar; dpbLength: Cardinal; dpb: BytePtr): IAttachment; cdecl;
 begin
 	try
-		Result := this.owner.attachDatabase(status, fileName, dpbLength, dpb);
+		Result := this.FIProviderImpl.attachDatabase(status, fileName, dpbLength, dpb);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13968,7 +13682,7 @@ end;
 function IProviderImpl_createDatabaseDispatcher(this: IProvider; status: IStatus; fileName: PAnsiChar; dpbLength: Cardinal; dpb: BytePtr): IAttachment; cdecl;
 begin
 	try
-		Result := this.owner.createDatabase(status, fileName, dpbLength, dpb);
+		Result := this.FIProviderImpl.createDatabase(status, fileName, dpbLength, dpb);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13977,7 +13691,7 @@ end;
 function IProviderImpl_attachServiceManagerDispatcher(this: IProvider; status: IStatus; service: PAnsiChar; spbLength: Cardinal; spb: BytePtr): IService; cdecl;
 begin
 	try
-		Result := this.owner.attachServiceManager(status, service, spbLength, spb);
+		Result := this.FIProviderImpl.attachServiceManager(status, service, spbLength, spb);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13986,7 +13700,7 @@ end;
 procedure IProviderImpl_shutdownDispatcher(this: IProvider; status: IStatus; timeout: Cardinal; reason: Integer); cdecl;
 begin
 	try
-		this.owner.shutdown(status, timeout, reason);
+		this.FIProviderImpl.shutdown(status, timeout, reason);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13995,7 +13709,7 @@ end;
 procedure IProviderImpl_setDbCryptCallbackDispatcher(this: IProvider; status: IStatus; cryptCallback: ICryptKeyCallback); cdecl;
 begin
 	try
-		this.owner.setDbCryptCallback(status, cryptCallback);
+		this.FIProviderImpl.setDbCryptCallback(status, cryptCallback);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14014,7 +13728,7 @@ var IProviderImpl_vTable: ProviderVTable = (
      shutdown: @IProviderImpl_shutdownDispatcher;
      setDbCryptCallback: @IProviderImpl_setDbCryptCallbackDispatcher);
 
-function TProvider.isIProviderImpl: boolean inline;
+function TProvider.isIProviderImpl: boolean;
 begin
   Result := (vTable = @IProviderImpl_vTable);
 end;
@@ -14022,23 +13736,23 @@ end;
 constructor IProviderImpl.create;
 begin
   inherited Create;
-  vTable := @IProviderImpl_vTable;
+  FvTable := @IProviderImpl_vTable;
 end;
 
-function IProviderImpl.getvTableVersion: NativeInt;
+function IProviderImpl.getVTable: PProviderVTable;
 begin
-  Result := PProviderVTable(vTable)^.version
+  Result := PProviderVTable(FvTable);
 end;
 
-function IDtcStartImpl.getInterface:IDtcStart;
+function IDtcStartImpl.asIDtcStart:IDtcStart;
 begin
-  Result := IDtcStart(@nullPtr);
+  Result := IDtcStart(@FNullPtr);
 end;
 
 procedure IDtcStartImpl_disposeDispatcher(this: IDtcStart); cdecl;
 begin
 	try
-		this.owner.dispose();
+		this.FIDtcStartImpl.dispose();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14047,7 +13761,7 @@ end;
 procedure IDtcStartImpl_addAttachmentDispatcher(this: IDtcStart; status: IStatus; att: IAttachment); cdecl;
 begin
 	try
-		this.owner.addAttachment(status, att);
+		this.FIDtcStartImpl.addAttachment(status, att);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14056,7 +13770,7 @@ end;
 procedure IDtcStartImpl_addWithTpbDispatcher(this: IDtcStart; status: IStatus; att: IAttachment; length: Cardinal; tpb: BytePtr); cdecl;
 begin
 	try
-		this.owner.addWithTpb(status, att, length, tpb);
+		this.FIDtcStartImpl.addWithTpb(status, att, length, tpb);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14065,7 +13779,7 @@ end;
 function IDtcStartImpl_startDispatcher(this: IDtcStart; status: IStatus): ITransaction; cdecl;
 begin
 	try
-		Result := this.owner.start(status);
+		Result := this.FIDtcStartImpl.start(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14079,7 +13793,7 @@ var IDtcStartImpl_vTable: DtcStartVTable = (
      addWithTpb: @IDtcStartImpl_addWithTpbDispatcher;
      start: @IDtcStartImpl_startDispatcher);
 
-function TDtcStart.isIDtcStartImpl: boolean inline;
+function TDtcStart.isIDtcStartImpl: boolean;
 begin
   Result := (vTable = @IDtcStartImpl_vTable);
 end;
@@ -14087,23 +13801,23 @@ end;
 constructor IDtcStartImpl.create;
 begin
   inherited Create;
-  vTable := @IDtcStartImpl_vTable;
+  FvTable := @IDtcStartImpl_vTable;
 end;
 
-function IDtcStartImpl.getvTableVersion: NativeInt;
+function IDtcStartImpl.getVTable: PDtcStartVTable;
 begin
-  Result := PDtcStartVTable(vTable)^.version
+  Result := PDtcStartVTable(FvTable);
 end;
 
-function IDtcImpl.getInterface:IDtc;
+function IDtcImpl.asIDtc:IDtc;
 begin
-  Result := IDtc(@nullPtr);
+  Result := IDtc(@FNullPtr);
 end;
 
 function IDtcImpl_joinDispatcher(this: IDtc; status: IStatus; one: ITransaction; two: ITransaction): ITransaction; cdecl;
 begin
 	try
-		Result := this.owner.join(status, one, two);
+		Result := this.FIDtcImpl.join(status, one, two);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14112,7 +13826,7 @@ end;
 function IDtcImpl_startBuilderDispatcher(this: IDtc; status: IStatus): IDtcStart; cdecl;
 begin
 	try
-		Result := this.owner.startBuilder(status);
+		Result := this.FIDtcImpl.startBuilder(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14124,7 +13838,7 @@ var IDtcImpl_vTable: DtcVTable = (
      join: @IDtcImpl_joinDispatcher;
      startBuilder: @IDtcImpl_startBuilderDispatcher);
 
-function TDtc.isIDtcImpl: boolean inline;
+function TDtc.isIDtcImpl: boolean;
 begin
   Result := (vTable = @IDtcImpl_vTable);
 end;
@@ -14132,23 +13846,23 @@ end;
 constructor IDtcImpl.create;
 begin
   inherited Create;
-  vTable := @IDtcImpl_vTable;
+  FvTable := @IDtcImpl_vTable;
 end;
 
-function IDtcImpl.getvTableVersion: NativeInt;
+function IDtcImpl.getVTable: PDtcVTable;
 begin
-  Result := PDtcVTable(vTable)^.version
+  Result := PDtcVTable(FvTable);
 end;
 
-function IAuthImpl.getInterface:IAuth;
+function IAuthImpl.asIAuth:IAuth;
 begin
-  Result := IAuth(@nullPtr);
+  Result := IAuth(@FNullPtr);
 end;
 
 procedure IAuthImpl_addRefDispatcher(this: IAuth); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIAuthImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14157,7 +13871,7 @@ end;
 function IAuthImpl_releaseDispatcher(this: IAuth): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIAuthImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14166,7 +13880,7 @@ end;
 procedure IAuthImpl_setOwnerDispatcher(this: IAuth; r: IReferenceCounted); cdecl;
 begin
 	try
-		this.owner.setOwner(r);
+		this.FIAuthImpl.setOwner(r);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14175,7 +13889,7 @@ end;
 function IAuthImpl_getOwnerDispatcher(this: IAuth): IReferenceCounted; cdecl;
 begin
 	try
-		Result := this.owner.getOwner();
+		Result := this.FIAuthImpl.getOwner();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14189,7 +13903,7 @@ var IAuthImpl_vTable: AuthVTable = (
      setOwner: @IPluginBaseImpl_setOwnerDispatcher;
      getOwner: @IPluginBaseImpl_getOwnerDispatcher);
 
-function TAuth.isIAuthImpl: boolean inline;
+function TAuth.isIAuthImpl: boolean;
 begin
   Result := (vTable = @IAuthImpl_vTable);
 end;
@@ -14197,23 +13911,23 @@ end;
 constructor IAuthImpl.create;
 begin
   inherited Create;
-  vTable := @IAuthImpl_vTable;
+  FvTable := @IAuthImpl_vTable;
 end;
 
-function IAuthImpl.getvTableVersion: NativeInt;
+function IAuthImpl.getVTable: PAuthVTable;
 begin
-  Result := PAuthVTable(vTable)^.version
+  Result := PAuthVTable(FvTable);
 end;
 
-function IWriterImpl.getInterface:IWriter;
+function IWriterImpl.asIWriter:IWriter;
 begin
-  Result := IWriter(@nullPtr);
+  Result := IWriter(@FNullPtr);
 end;
 
 procedure IWriterImpl_resetDispatcher(this: IWriter); cdecl;
 begin
 	try
-		this.owner.reset();
+		this.FIWriterImpl.reset();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14222,7 +13936,7 @@ end;
 procedure IWriterImpl_addDispatcher(this: IWriter; status: IStatus; name: PAnsiChar); cdecl;
 begin
 	try
-		this.owner.add(status, name);
+		this.FIWriterImpl.add(status, name);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14231,7 +13945,7 @@ end;
 procedure IWriterImpl_setTypeDispatcher(this: IWriter; status: IStatus; value: PAnsiChar); cdecl;
 begin
 	try
-		this.owner.setType(status, value);
+		this.FIWriterImpl.setType(status, value);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14240,7 +13954,7 @@ end;
 procedure IWriterImpl_setDbDispatcher(this: IWriter; status: IStatus; value: PAnsiChar); cdecl;
 begin
 	try
-		this.owner.setDb(status, value);
+		this.FIWriterImpl.setDb(status, value);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14254,7 +13968,7 @@ var IWriterImpl_vTable: WriterVTable = (
      setType: @IWriterImpl_setTypeDispatcher;
      setDb: @IWriterImpl_setDbDispatcher);
 
-function TWriter.isIWriterImpl: boolean inline;
+function TWriter.isIWriterImpl: boolean;
 begin
   Result := (vTable = @IWriterImpl_vTable);
 end;
@@ -14262,23 +13976,23 @@ end;
 constructor IWriterImpl.create;
 begin
   inherited Create;
-  vTable := @IWriterImpl_vTable;
+  FvTable := @IWriterImpl_vTable;
 end;
 
-function IWriterImpl.getvTableVersion: NativeInt;
+function IWriterImpl.getVTable: PWriterVTable;
 begin
-  Result := PWriterVTable(vTable)^.version
+  Result := PWriterVTable(FvTable);
 end;
 
-function IServerBlockImpl.getInterface:IServerBlock;
+function IServerBlockImpl.asIServerBlock:IServerBlock;
 begin
-  Result := IServerBlock(@nullPtr);
+  Result := IServerBlock(@FNullPtr);
 end;
 
 function IServerBlockImpl_getLoginDispatcher(this: IServerBlock): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getLogin();
+		Result := this.FIServerBlockImpl.getLogin();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14287,7 +14001,7 @@ end;
 function IServerBlockImpl_getDataDispatcher(this: IServerBlock; length: CardinalPtr): BytePtr; cdecl;
 begin
 	try
-		Result := this.owner.getData(length);
+		Result := this.FIServerBlockImpl.getData(length);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14296,7 +14010,7 @@ end;
 procedure IServerBlockImpl_putDataDispatcher(this: IServerBlock; status: IStatus; length: Cardinal; data: Pointer); cdecl;
 begin
 	try
-		this.owner.putData(status, length, data);
+		this.FIServerBlockImpl.putData(status, length, data);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14305,7 +14019,7 @@ end;
 function IServerBlockImpl_newKeyDispatcher(this: IServerBlock; status: IStatus): ICryptKey; cdecl;
 begin
 	try
-		Result := this.owner.newKey(status);
+		Result := this.FIServerBlockImpl.newKey(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14319,7 +14033,7 @@ var IServerBlockImpl_vTable: ServerBlockVTable = (
      putData: @IServerBlockImpl_putDataDispatcher;
      newKey: @IServerBlockImpl_newKeyDispatcher);
 
-function TServerBlock.isIServerBlockImpl: boolean inline;
+function TServerBlock.isIServerBlockImpl: boolean;
 begin
   Result := (vTable = @IServerBlockImpl_vTable);
 end;
@@ -14327,23 +14041,23 @@ end;
 constructor IServerBlockImpl.create;
 begin
   inherited Create;
-  vTable := @IServerBlockImpl_vTable;
+  FvTable := @IServerBlockImpl_vTable;
 end;
 
-function IServerBlockImpl.getvTableVersion: NativeInt;
+function IServerBlockImpl.getVTable: PServerBlockVTable;
 begin
-  Result := PServerBlockVTable(vTable)^.version
+  Result := PServerBlockVTable(FvTable);
 end;
 
-function IClientBlockImpl.getInterface:IClientBlock;
+function IClientBlockImpl.asIClientBlock:IClientBlock;
 begin
-  Result := IClientBlock(@nullPtr);
+  Result := IClientBlock(@FNullPtr);
 end;
 
 procedure IClientBlockImpl_addRefDispatcher(this: IClientBlock); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIClientBlockImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14352,7 +14066,7 @@ end;
 function IClientBlockImpl_releaseDispatcher(this: IClientBlock): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIClientBlockImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14361,7 +14075,7 @@ end;
 function IClientBlockImpl_getLoginDispatcher(this: IClientBlock): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getLogin();
+		Result := this.FIClientBlockImpl.getLogin();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14370,7 +14084,7 @@ end;
 function IClientBlockImpl_getPasswordDispatcher(this: IClientBlock): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getPassword();
+		Result := this.FIClientBlockImpl.getPassword();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14379,7 +14093,7 @@ end;
 function IClientBlockImpl_getDataDispatcher(this: IClientBlock; length: CardinalPtr): BytePtr; cdecl;
 begin
 	try
-		Result := this.owner.getData(length);
+		Result := this.FIClientBlockImpl.getData(length);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14388,7 +14102,7 @@ end;
 procedure IClientBlockImpl_putDataDispatcher(this: IClientBlock; status: IStatus; length: Cardinal; data: Pointer); cdecl;
 begin
 	try
-		this.owner.putData(status, length, data);
+		this.FIClientBlockImpl.putData(status, length, data);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14397,7 +14111,7 @@ end;
 function IClientBlockImpl_newKeyDispatcher(this: IClientBlock; status: IStatus): ICryptKey; cdecl;
 begin
 	try
-		Result := this.owner.newKey(status);
+		Result := this.FIClientBlockImpl.newKey(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14406,7 +14120,7 @@ end;
 function IClientBlockImpl_getAuthBlockDispatcher(this: IClientBlock; status: IStatus): IAuthBlock; cdecl;
 begin
 	try
-		Result := this.owner.getAuthBlock(status);
+		Result := this.FIClientBlockImpl.getAuthBlock(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14424,7 +14138,7 @@ var IClientBlockImpl_vTable: ClientBlockVTable = (
      newKey: @IClientBlockImpl_newKeyDispatcher;
      getAuthBlock: @IClientBlockImpl_getAuthBlockDispatcher);
 
-function TClientBlock.isIClientBlockImpl: boolean inline;
+function TClientBlock.isIClientBlockImpl: boolean;
 begin
   Result := (vTable = @IClientBlockImpl_vTable);
 end;
@@ -14432,23 +14146,23 @@ end;
 constructor IClientBlockImpl.create;
 begin
   inherited Create;
-  vTable := @IClientBlockImpl_vTable;
+  FvTable := @IClientBlockImpl_vTable;
 end;
 
-function IClientBlockImpl.getvTableVersion: NativeInt;
+function IClientBlockImpl.getVTable: PClientBlockVTable;
 begin
-  Result := PClientBlockVTable(vTable)^.version
+  Result := PClientBlockVTable(FvTable);
 end;
 
-function IServerImpl.getInterface:IServer;
+function IServerImpl.asIServer:IServer;
 begin
-  Result := IServer(@nullPtr);
+  Result := IServer(@FNullPtr);
 end;
 
 procedure IServerImpl_addRefDispatcher(this: IServer); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIServerImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14457,7 +14171,7 @@ end;
 function IServerImpl_releaseDispatcher(this: IServer): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIServerImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14466,7 +14180,7 @@ end;
 procedure IServerImpl_setOwnerDispatcher(this: IServer; r: IReferenceCounted); cdecl;
 begin
 	try
-		this.owner.setOwner(r);
+		this.FIServerImpl.setOwner(r);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14475,7 +14189,7 @@ end;
 function IServerImpl_getOwnerDispatcher(this: IServer): IReferenceCounted; cdecl;
 begin
 	try
-		Result := this.owner.getOwner();
+		Result := this.FIServerImpl.getOwner();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14484,7 +14198,7 @@ end;
 function IServerImpl_authenticateDispatcher(this: IServer; status: IStatus; sBlock: IServerBlock; writerInterface: IWriter): Integer; cdecl;
 begin
 	try
-		Result := this.owner.authenticate(status, sBlock, writerInterface);
+		Result := this.FIServerImpl.authenticate(status, sBlock, writerInterface);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14493,7 +14207,7 @@ end;
 procedure IServerImpl_setDbCryptCallbackDispatcher(this: IServer; status: IStatus; cryptCallback: ICryptKeyCallback); cdecl;
 begin
 	try
-		this.owner.setDbCryptCallback(status, cryptCallback);
+		this.FIServerImpl.setDbCryptCallback(status, cryptCallback);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14509,7 +14223,7 @@ var IServerImpl_vTable: ServerVTable = (
      authenticate: @IServerImpl_authenticateDispatcher;
      setDbCryptCallback: @IServerImpl_setDbCryptCallbackDispatcher);
 
-function TServer.isIServerImpl: boolean inline;
+function TServer.isIServerImpl: boolean;
 begin
   Result := (vTable = @IServerImpl_vTable);
 end;
@@ -14517,23 +14231,23 @@ end;
 constructor IServerImpl.create;
 begin
   inherited Create;
-  vTable := @IServerImpl_vTable;
+  FvTable := @IServerImpl_vTable;
 end;
 
-function IServerImpl.getvTableVersion: NativeInt;
+function IServerImpl.getVTable: PServerVTable;
 begin
-  Result := PServerVTable(vTable)^.version
+  Result := PServerVTable(FvTable);
 end;
 
-function IClientImpl.getInterface:IClient;
+function IClientImpl.asIClient:IClient;
 begin
-  Result := IClient(@nullPtr);
+  Result := IClient(@FNullPtr);
 end;
 
 procedure IClientImpl_addRefDispatcher(this: IClient); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIClientImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14542,7 +14256,7 @@ end;
 function IClientImpl_releaseDispatcher(this: IClient): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIClientImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14551,7 +14265,7 @@ end;
 procedure IClientImpl_setOwnerDispatcher(this: IClient; r: IReferenceCounted); cdecl;
 begin
 	try
-		this.owner.setOwner(r);
+		this.FIClientImpl.setOwner(r);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14560,7 +14274,7 @@ end;
 function IClientImpl_getOwnerDispatcher(this: IClient): IReferenceCounted; cdecl;
 begin
 	try
-		Result := this.owner.getOwner();
+		Result := this.FIClientImpl.getOwner();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14569,7 +14283,7 @@ end;
 function IClientImpl_authenticateDispatcher(this: IClient; status: IStatus; cBlock: IClientBlock): Integer; cdecl;
 begin
 	try
-		Result := this.owner.authenticate(status, cBlock);
+		Result := this.FIClientImpl.authenticate(status, cBlock);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14584,7 +14298,7 @@ var IClientImpl_vTable: ClientVTable = (
      getOwner: @IPluginBaseImpl_getOwnerDispatcher;
      authenticate: @IClientImpl_authenticateDispatcher);
 
-function TClient.isIClientImpl: boolean inline;
+function TClient.isIClientImpl: boolean;
 begin
   Result := (vTable = @IClientImpl_vTable);
 end;
@@ -14592,23 +14306,23 @@ end;
 constructor IClientImpl.create;
 begin
   inherited Create;
-  vTable := @IClientImpl_vTable;
+  FvTable := @IClientImpl_vTable;
 end;
 
-function IClientImpl.getvTableVersion: NativeInt;
+function IClientImpl.getVTable: PClientVTable;
 begin
-  Result := PClientVTable(vTable)^.version
+  Result := PClientVTable(FvTable);
 end;
 
-function IUserFieldImpl.getInterface:IUserField;
+function IUserFieldImpl.asIUserField:IUserField;
 begin
-  Result := IUserField(@nullPtr);
+  Result := IUserField(@FNullPtr);
 end;
 
 function IUserFieldImpl_enteredDispatcher(this: IUserField): Integer; cdecl;
 begin
 	try
-		Result := this.owner.entered();
+		Result := this.FIUserFieldImpl.entered();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14617,7 +14331,7 @@ end;
 function IUserFieldImpl_specifiedDispatcher(this: IUserField): Integer; cdecl;
 begin
 	try
-		Result := this.owner.specified();
+		Result := this.FIUserFieldImpl.specified();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14626,7 +14340,7 @@ end;
 procedure IUserFieldImpl_setEnteredDispatcher(this: IUserField; status: IStatus; newValue: Integer); cdecl;
 begin
 	try
-		this.owner.setEntered(status, newValue);
+		this.FIUserFieldImpl.setEntered(status, newValue);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14639,7 +14353,7 @@ var IUserFieldImpl_vTable: UserFieldVTable = (
      specified: @IUserFieldImpl_specifiedDispatcher;
      setEntered: @IUserFieldImpl_setEnteredDispatcher);
 
-function TUserField.isIUserFieldImpl: boolean inline;
+function TUserField.isIUserFieldImpl: boolean;
 begin
   Result := (vTable = @IUserFieldImpl_vTable);
 end;
@@ -14647,23 +14361,23 @@ end;
 constructor IUserFieldImpl.create;
 begin
   inherited Create;
-  vTable := @IUserFieldImpl_vTable;
+  FvTable := @IUserFieldImpl_vTable;
 end;
 
-function IUserFieldImpl.getvTableVersion: NativeInt;
+function IUserFieldImpl.getVTable: PUserFieldVTable;
 begin
-  Result := PUserFieldVTable(vTable)^.version
+  Result := PUserFieldVTable(FvTable);
 end;
 
-function ICharUserFieldImpl.getInterface:ICharUserField;
+function ICharUserFieldImpl.asICharUserField:ICharUserField;
 begin
-  Result := ICharUserField(@nullPtr);
+  Result := ICharUserField(@FNullPtr);
 end;
 
 function ICharUserFieldImpl_enteredDispatcher(this: ICharUserField): Integer; cdecl;
 begin
 	try
-		Result := this.owner.entered();
+		Result := this.FICharUserFieldImpl.entered();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14672,7 +14386,7 @@ end;
 function ICharUserFieldImpl_specifiedDispatcher(this: ICharUserField): Integer; cdecl;
 begin
 	try
-		Result := this.owner.specified();
+		Result := this.FICharUserFieldImpl.specified();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14681,7 +14395,7 @@ end;
 procedure ICharUserFieldImpl_setEnteredDispatcher(this: ICharUserField; status: IStatus; newValue: Integer); cdecl;
 begin
 	try
-		this.owner.setEntered(status, newValue);
+		this.FICharUserFieldImpl.setEntered(status, newValue);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14690,7 +14404,7 @@ end;
 function ICharUserFieldImpl_getDispatcher(this: ICharUserField): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.get();
+		Result := this.FICharUserFieldImpl.get();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14699,7 +14413,7 @@ end;
 procedure ICharUserFieldImpl_set_Dispatcher(this: ICharUserField; status: IStatus; newValue: PAnsiChar); cdecl;
 begin
 	try
-		this.owner.set_(status, newValue);
+		this.FICharUserFieldImpl.set_(status, newValue);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14714,7 +14428,7 @@ var ICharUserFieldImpl_vTable: CharUserFieldVTable = (
      get: @ICharUserFieldImpl_getDispatcher;
      set_: @ICharUserFieldImpl_set_Dispatcher);
 
-function TCharUserField.isICharUserFieldImpl: boolean inline;
+function TCharUserField.isICharUserFieldImpl: boolean;
 begin
   Result := (vTable = @ICharUserFieldImpl_vTable);
 end;
@@ -14722,23 +14436,23 @@ end;
 constructor ICharUserFieldImpl.create;
 begin
   inherited Create;
-  vTable := @ICharUserFieldImpl_vTable;
+  FvTable := @ICharUserFieldImpl_vTable;
 end;
 
-function ICharUserFieldImpl.getvTableVersion: NativeInt;
+function ICharUserFieldImpl.getVTable: PCharUserFieldVTable;
 begin
-  Result := PCharUserFieldVTable(vTable)^.version
+  Result := PCharUserFieldVTable(FvTable);
 end;
 
-function IIntUserFieldImpl.getInterface:IIntUserField;
+function IIntUserFieldImpl.asIIntUserField:IIntUserField;
 begin
-  Result := IIntUserField(@nullPtr);
+  Result := IIntUserField(@FNullPtr);
 end;
 
 function IIntUserFieldImpl_enteredDispatcher(this: IIntUserField): Integer; cdecl;
 begin
 	try
-		Result := this.owner.entered();
+		Result := this.FIIntUserFieldImpl.entered();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14747,7 +14461,7 @@ end;
 function IIntUserFieldImpl_specifiedDispatcher(this: IIntUserField): Integer; cdecl;
 begin
 	try
-		Result := this.owner.specified();
+		Result := this.FIIntUserFieldImpl.specified();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14756,7 +14470,7 @@ end;
 procedure IIntUserFieldImpl_setEnteredDispatcher(this: IIntUserField; status: IStatus; newValue: Integer); cdecl;
 begin
 	try
-		this.owner.setEntered(status, newValue);
+		this.FIIntUserFieldImpl.setEntered(status, newValue);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14765,7 +14479,7 @@ end;
 function IIntUserFieldImpl_getDispatcher(this: IIntUserField): Integer; cdecl;
 begin
 	try
-		Result := this.owner.get();
+		Result := this.FIIntUserFieldImpl.get();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14774,7 +14488,7 @@ end;
 procedure IIntUserFieldImpl_set_Dispatcher(this: IIntUserField; status: IStatus; newValue: Integer); cdecl;
 begin
 	try
-		this.owner.set_(status, newValue);
+		this.FIIntUserFieldImpl.set_(status, newValue);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14789,7 +14503,7 @@ var IIntUserFieldImpl_vTable: IntUserFieldVTable = (
      get: @IIntUserFieldImpl_getDispatcher;
      set_: @IIntUserFieldImpl_set_Dispatcher);
 
-function TIntUserField.isIIntUserFieldImpl: boolean inline;
+function TIntUserField.isIIntUserFieldImpl: boolean;
 begin
   Result := (vTable = @IIntUserFieldImpl_vTable);
 end;
@@ -14797,23 +14511,23 @@ end;
 constructor IIntUserFieldImpl.create;
 begin
   inherited Create;
-  vTable := @IIntUserFieldImpl_vTable;
+  FvTable := @IIntUserFieldImpl_vTable;
 end;
 
-function IIntUserFieldImpl.getvTableVersion: NativeInt;
+function IIntUserFieldImpl.getVTable: PIntUserFieldVTable;
 begin
-  Result := PIntUserFieldVTable(vTable)^.version
+  Result := PIntUserFieldVTable(FvTable);
 end;
 
-function IUserImpl.getInterface:IUser;
+function IUserImpl.asIUser:IUser;
 begin
-  Result := IUser(@nullPtr);
+  Result := IUser(@FNullPtr);
 end;
 
 function IUserImpl_operationDispatcher(this: IUser): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.operation();
+		Result := this.FIUserImpl.operation();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14822,7 +14536,7 @@ end;
 function IUserImpl_userNameDispatcher(this: IUser): ICharUserField; cdecl;
 begin
 	try
-		Result := this.owner.userName();
+		Result := this.FIUserImpl.userName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14831,7 +14545,7 @@ end;
 function IUserImpl_passwordDispatcher(this: IUser): ICharUserField; cdecl;
 begin
 	try
-		Result := this.owner.password();
+		Result := this.FIUserImpl.password();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14840,7 +14554,7 @@ end;
 function IUserImpl_firstNameDispatcher(this: IUser): ICharUserField; cdecl;
 begin
 	try
-		Result := this.owner.firstName();
+		Result := this.FIUserImpl.firstName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14849,7 +14563,7 @@ end;
 function IUserImpl_lastNameDispatcher(this: IUser): ICharUserField; cdecl;
 begin
 	try
-		Result := this.owner.lastName();
+		Result := this.FIUserImpl.lastName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14858,7 +14572,7 @@ end;
 function IUserImpl_middleNameDispatcher(this: IUser): ICharUserField; cdecl;
 begin
 	try
-		Result := this.owner.middleName();
+		Result := this.FIUserImpl.middleName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14867,7 +14581,7 @@ end;
 function IUserImpl_commentDispatcher(this: IUser): ICharUserField; cdecl;
 begin
 	try
-		Result := this.owner.comment();
+		Result := this.FIUserImpl.comment();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14876,7 +14590,7 @@ end;
 function IUserImpl_attributesDispatcher(this: IUser): ICharUserField; cdecl;
 begin
 	try
-		Result := this.owner.attributes();
+		Result := this.FIUserImpl.attributes();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14885,7 +14599,7 @@ end;
 function IUserImpl_activeDispatcher(this: IUser): IIntUserField; cdecl;
 begin
 	try
-		Result := this.owner.active();
+		Result := this.FIUserImpl.active();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14894,7 +14608,7 @@ end;
 function IUserImpl_adminDispatcher(this: IUser): IIntUserField; cdecl;
 begin
 	try
-		Result := this.owner.admin();
+		Result := this.FIUserImpl.admin();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14903,7 +14617,7 @@ end;
 procedure IUserImpl_clearDispatcher(this: IUser; status: IStatus); cdecl;
 begin
 	try
-		this.owner.clear(status);
+		this.FIUserImpl.clear(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14924,7 +14638,7 @@ var IUserImpl_vTable: UserVTable = (
      admin: @IUserImpl_adminDispatcher;
      clear: @IUserImpl_clearDispatcher);
 
-function TUser.isIUserImpl: boolean inline;
+function TUser.isIUserImpl: boolean;
 begin
   Result := (vTable = @IUserImpl_vTable);
 end;
@@ -14932,23 +14646,23 @@ end;
 constructor IUserImpl.create;
 begin
   inherited Create;
-  vTable := @IUserImpl_vTable;
+  FvTable := @IUserImpl_vTable;
 end;
 
-function IUserImpl.getvTableVersion: NativeInt;
+function IUserImpl.getVTable: PUserVTable;
 begin
-  Result := PUserVTable(vTable)^.version
+  Result := PUserVTable(FvTable);
 end;
 
-function IListUsersImpl.getInterface:IListUsers;
+function IListUsersImpl.asIListUsers:IListUsers;
 begin
-  Result := IListUsers(@nullPtr);
+  Result := IListUsers(@FNullPtr);
 end;
 
 procedure IListUsersImpl_listDispatcher(this: IListUsers; status: IStatus; user: IUser); cdecl;
 begin
 	try
-		this.owner.list(status, user);
+		this.FIListUsersImpl.list(status, user);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14959,7 +14673,7 @@ var IListUsersImpl_vTable: ListUsersVTable = (
      version: 1;
      list: @IListUsersImpl_listDispatcher);
 
-function TListUsers.isIListUsersImpl: boolean inline;
+function TListUsers.isIListUsersImpl: boolean;
 begin
   Result := (vTable = @IListUsersImpl_vTable);
 end;
@@ -14967,23 +14681,23 @@ end;
 constructor IListUsersImpl.create;
 begin
   inherited Create;
-  vTable := @IListUsersImpl_vTable;
+  FvTable := @IListUsersImpl_vTable;
 end;
 
-function IListUsersImpl.getvTableVersion: NativeInt;
+function IListUsersImpl.getVTable: PListUsersVTable;
 begin
-  Result := PListUsersVTable(vTable)^.version
+  Result := PListUsersVTable(FvTable);
 end;
 
-function ILogonInfoImpl.getInterface:ILogonInfo;
+function ILogonInfoImpl.asILogonInfo:ILogonInfo;
 begin
-  Result := ILogonInfo(@nullPtr);
+  Result := ILogonInfo(@FNullPtr);
 end;
 
 function ILogonInfoImpl_nameDispatcher(this: ILogonInfo): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.name();
+		Result := this.FILogonInfoImpl.name();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14992,7 +14706,7 @@ end;
 function ILogonInfoImpl_roleDispatcher(this: ILogonInfo): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.role();
+		Result := this.FILogonInfoImpl.role();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15001,7 +14715,7 @@ end;
 function ILogonInfoImpl_networkProtocolDispatcher(this: ILogonInfo): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.networkProtocol();
+		Result := this.FILogonInfoImpl.networkProtocol();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15010,7 +14724,7 @@ end;
 function ILogonInfoImpl_remoteAddressDispatcher(this: ILogonInfo): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.remoteAddress();
+		Result := this.FILogonInfoImpl.remoteAddress();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15019,7 +14733,7 @@ end;
 function ILogonInfoImpl_authBlockDispatcher(this: ILogonInfo; length: CardinalPtr): BytePtr; cdecl;
 begin
 	try
-		Result := this.owner.authBlock(length);
+		Result := this.FILogonInfoImpl.authBlock(length);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15028,7 +14742,7 @@ end;
 function ILogonInfoImpl_attachmentDispatcher(this: ILogonInfo; status: IStatus): IAttachment; cdecl;
 begin
 	try
-		Result := this.owner.attachment(status);
+		Result := this.FILogonInfoImpl.attachment(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15037,7 +14751,7 @@ end;
 function ILogonInfoImpl_transactionDispatcher(this: ILogonInfo; status: IStatus): ITransaction; cdecl;
 begin
 	try
-		Result := this.owner.transaction(status);
+		Result := this.FILogonInfoImpl.transaction(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15054,7 +14768,7 @@ var ILogonInfoImpl_vTable: LogonInfoVTable = (
      attachment: @ILogonInfoImpl_attachmentDispatcher;
      transaction: @ILogonInfoImpl_transactionDispatcher);
 
-function TLogonInfo.isILogonInfoImpl: boolean inline;
+function TLogonInfo.isILogonInfoImpl: boolean;
 begin
   Result := (vTable = @ILogonInfoImpl_vTable);
 end;
@@ -15062,23 +14776,23 @@ end;
 constructor ILogonInfoImpl.create;
 begin
   inherited Create;
-  vTable := @ILogonInfoImpl_vTable;
+  FvTable := @ILogonInfoImpl_vTable;
 end;
 
-function ILogonInfoImpl.getvTableVersion: NativeInt;
+function ILogonInfoImpl.getVTable: PLogonInfoVTable;
 begin
-  Result := PLogonInfoVTable(vTable)^.version
+  Result := PLogonInfoVTable(FvTable);
 end;
 
-function IManagementImpl.getInterface:IManagement;
+function IManagementImpl.asIManagement:IManagement;
 begin
-  Result := IManagement(@nullPtr);
+  Result := IManagement(@FNullPtr);
 end;
 
 procedure IManagementImpl_addRefDispatcher(this: IManagement); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIManagementImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15087,7 +14801,7 @@ end;
 function IManagementImpl_releaseDispatcher(this: IManagement): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIManagementImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15096,7 +14810,7 @@ end;
 procedure IManagementImpl_setOwnerDispatcher(this: IManagement; r: IReferenceCounted); cdecl;
 begin
 	try
-		this.owner.setOwner(r);
+		this.FIManagementImpl.setOwner(r);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15105,7 +14819,7 @@ end;
 function IManagementImpl_getOwnerDispatcher(this: IManagement): IReferenceCounted; cdecl;
 begin
 	try
-		Result := this.owner.getOwner();
+		Result := this.FIManagementImpl.getOwner();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15114,7 +14828,7 @@ end;
 procedure IManagementImpl_startDispatcher(this: IManagement; status: IStatus; logonInfo: ILogonInfo); cdecl;
 begin
 	try
-		this.owner.start(status, logonInfo);
+		this.FIManagementImpl.start(status, logonInfo);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15123,7 +14837,7 @@ end;
 function IManagementImpl_executeDispatcher(this: IManagement; status: IStatus; user: IUser; callback: IListUsers): Integer; cdecl;
 begin
 	try
-		Result := this.owner.execute(status, user, callback);
+		Result := this.FIManagementImpl.execute(status, user, callback);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15132,7 +14846,7 @@ end;
 procedure IManagementImpl_commitDispatcher(this: IManagement; status: IStatus); cdecl;
 begin
 	try
-		this.owner.commit(status);
+		this.FIManagementImpl.commit(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15141,7 +14855,7 @@ end;
 procedure IManagementImpl_rollbackDispatcher(this: IManagement; status: IStatus); cdecl;
 begin
 	try
-		this.owner.rollback(status);
+		this.FIManagementImpl.rollback(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15159,7 +14873,7 @@ var IManagementImpl_vTable: ManagementVTable = (
      commit: @IManagementImpl_commitDispatcher;
      rollback: @IManagementImpl_rollbackDispatcher);
 
-function TManagement.isIManagementImpl: boolean inline;
+function TManagement.isIManagementImpl: boolean;
 begin
   Result := (vTable = @IManagementImpl_vTable);
 end;
@@ -15167,23 +14881,23 @@ end;
 constructor IManagementImpl.create;
 begin
   inherited Create;
-  vTable := @IManagementImpl_vTable;
+  FvTable := @IManagementImpl_vTable;
 end;
 
-function IManagementImpl.getvTableVersion: NativeInt;
+function IManagementImpl.getVTable: PManagementVTable;
 begin
-  Result := PManagementVTable(vTable)^.version
+  Result := PManagementVTable(FvTable);
 end;
 
-function IAuthBlockImpl.getInterface:IAuthBlock;
+function IAuthBlockImpl.asIAuthBlock:IAuthBlock;
 begin
-  Result := IAuthBlock(@nullPtr);
+  Result := IAuthBlock(@FNullPtr);
 end;
 
 function IAuthBlockImpl_getTypeDispatcher(this: IAuthBlock): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getType();
+		Result := this.FIAuthBlockImpl.getType();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15192,7 +14906,7 @@ end;
 function IAuthBlockImpl_getNameDispatcher(this: IAuthBlock): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getName();
+		Result := this.FIAuthBlockImpl.getName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15201,7 +14915,7 @@ end;
 function IAuthBlockImpl_getPluginDispatcher(this: IAuthBlock): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getPlugin();
+		Result := this.FIAuthBlockImpl.getPlugin();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15210,7 +14924,7 @@ end;
 function IAuthBlockImpl_getSecurityDbDispatcher(this: IAuthBlock): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getSecurityDb();
+		Result := this.FIAuthBlockImpl.getSecurityDb();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15219,7 +14933,7 @@ end;
 function IAuthBlockImpl_getOriginalPluginDispatcher(this: IAuthBlock): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getOriginalPlugin();
+		Result := this.FIAuthBlockImpl.getOriginalPlugin();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15228,7 +14942,7 @@ end;
 function IAuthBlockImpl_nextDispatcher(this: IAuthBlock; status: IStatus): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.next(status);
+		Result := this.FIAuthBlockImpl.next(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15237,7 +14951,7 @@ end;
 function IAuthBlockImpl_firstDispatcher(this: IAuthBlock; status: IStatus): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.first(status);
+		Result := this.FIAuthBlockImpl.first(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15254,7 +14968,7 @@ var IAuthBlockImpl_vTable: AuthBlockVTable = (
      next: @IAuthBlockImpl_nextDispatcher;
      first: @IAuthBlockImpl_firstDispatcher);
 
-function TAuthBlock.isIAuthBlockImpl: boolean inline;
+function TAuthBlock.isIAuthBlockImpl: boolean;
 begin
   Result := (vTable = @IAuthBlockImpl_vTable);
 end;
@@ -15262,23 +14976,23 @@ end;
 constructor IAuthBlockImpl.create;
 begin
   inherited Create;
-  vTable := @IAuthBlockImpl_vTable;
+  FvTable := @IAuthBlockImpl_vTable;
 end;
 
-function IAuthBlockImpl.getvTableVersion: NativeInt;
+function IAuthBlockImpl.getVTable: PAuthBlockVTable;
 begin
-  Result := PAuthBlockVTable(vTable)^.version
+  Result := PAuthBlockVTable(FvTable);
 end;
 
-function IWireCryptPluginImpl.getInterface:IWireCryptPlugin;
+function IWireCryptPluginImpl.asIWireCryptPlugin:IWireCryptPlugin;
 begin
-  Result := IWireCryptPlugin(@nullPtr);
+  Result := IWireCryptPlugin(@FNullPtr);
 end;
 
 procedure IWireCryptPluginImpl_addRefDispatcher(this: IWireCryptPlugin); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIWireCryptPluginImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15287,7 +15001,7 @@ end;
 function IWireCryptPluginImpl_releaseDispatcher(this: IWireCryptPlugin): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIWireCryptPluginImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15296,7 +15010,7 @@ end;
 procedure IWireCryptPluginImpl_setOwnerDispatcher(this: IWireCryptPlugin; r: IReferenceCounted); cdecl;
 begin
 	try
-		this.owner.setOwner(r);
+		this.FIWireCryptPluginImpl.setOwner(r);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15305,7 +15019,7 @@ end;
 function IWireCryptPluginImpl_getOwnerDispatcher(this: IWireCryptPlugin): IReferenceCounted; cdecl;
 begin
 	try
-		Result := this.owner.getOwner();
+		Result := this.FIWireCryptPluginImpl.getOwner();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15314,7 +15028,7 @@ end;
 function IWireCryptPluginImpl_getKnownTypesDispatcher(this: IWireCryptPlugin; status: IStatus): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getKnownTypes(status);
+		Result := this.FIWireCryptPluginImpl.getKnownTypes(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15323,7 +15037,7 @@ end;
 procedure IWireCryptPluginImpl_setKeyDispatcher(this: IWireCryptPlugin; status: IStatus; key: ICryptKey); cdecl;
 begin
 	try
-		this.owner.setKey(status, key);
+		this.FIWireCryptPluginImpl.setKey(status, key);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15332,7 +15046,7 @@ end;
 procedure IWireCryptPluginImpl_encryptDispatcher(this: IWireCryptPlugin; status: IStatus; length: Cardinal; from: Pointer; to_: Pointer); cdecl;
 begin
 	try
-		this.owner.encrypt(status, length, from, to_);
+		this.FIWireCryptPluginImpl.encrypt(status, length, from, to_);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15341,7 +15055,7 @@ end;
 procedure IWireCryptPluginImpl_decryptDispatcher(this: IWireCryptPlugin; status: IStatus; length: Cardinal; from: Pointer; to_: Pointer); cdecl;
 begin
 	try
-		this.owner.decrypt(status, length, from, to_);
+		this.FIWireCryptPluginImpl.decrypt(status, length, from, to_);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15350,7 +15064,7 @@ end;
 function IWireCryptPluginImpl_getSpecificDataDispatcher(this: IWireCryptPlugin; status: IStatus; keyType: PAnsiChar; length: CardinalPtr): BytePtr; cdecl;
 begin
 	try
-		Result := this.owner.getSpecificData(status, keyType, length);
+		Result := this.FIWireCryptPluginImpl.getSpecificData(status, keyType, length);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15359,7 +15073,7 @@ end;
 procedure IWireCryptPluginImpl_setSpecificDataDispatcher(this: IWireCryptPlugin; status: IStatus; keyType: PAnsiChar; length: Cardinal; data: BytePtr); cdecl;
 begin
 	try
-		this.owner.setSpecificData(status, keyType, length, data);
+		this.FIWireCryptPluginImpl.setSpecificData(status, keyType, length, data);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15379,7 +15093,7 @@ var IWireCryptPluginImpl_vTable: WireCryptPluginVTable = (
      getSpecificData: @IWireCryptPluginImpl_getSpecificDataDispatcher;
      setSpecificData: @IWireCryptPluginImpl_setSpecificDataDispatcher);
 
-function TWireCryptPlugin.isIWireCryptPluginImpl: boolean inline;
+function TWireCryptPlugin.isIWireCryptPluginImpl: boolean;
 begin
   Result := (vTable = @IWireCryptPluginImpl_vTable);
 end;
@@ -15387,23 +15101,23 @@ end;
 constructor IWireCryptPluginImpl.create;
 begin
   inherited Create;
-  vTable := @IWireCryptPluginImpl_vTable;
+  FvTable := @IWireCryptPluginImpl_vTable;
 end;
 
-function IWireCryptPluginImpl.getvTableVersion: NativeInt;
+function IWireCryptPluginImpl.getVTable: PWireCryptPluginVTable;
 begin
-  Result := PWireCryptPluginVTable(vTable)^.version
+  Result := PWireCryptPluginVTable(FvTable);
 end;
 
-function ICryptKeyCallbackImpl.getInterface:ICryptKeyCallback;
+function ICryptKeyCallbackImpl.asICryptKeyCallback:ICryptKeyCallback;
 begin
-  Result := ICryptKeyCallback(@nullPtr);
+  Result := ICryptKeyCallback(@FNullPtr);
 end;
 
 function ICryptKeyCallbackImpl_callbackDispatcher(this: ICryptKeyCallback; dataLength: Cardinal; data: Pointer; bufferLength: Cardinal; buffer: Pointer): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.callback(dataLength, data, bufferLength, buffer);
+		Result := this.FICryptKeyCallbackImpl.callback(dataLength, data, bufferLength, buffer);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15414,7 +15128,7 @@ var ICryptKeyCallbackImpl_vTable: CryptKeyCallbackVTable = (
      version: 1;
      callback: @ICryptKeyCallbackImpl_callbackDispatcher);
 
-function TCryptKeyCallback.isICryptKeyCallbackImpl: boolean inline;
+function TCryptKeyCallback.isICryptKeyCallbackImpl: boolean;
 begin
   Result := (vTable = @ICryptKeyCallbackImpl_vTable);
 end;
@@ -15422,23 +15136,23 @@ end;
 constructor ICryptKeyCallbackImpl.create;
 begin
   inherited Create;
-  vTable := @ICryptKeyCallbackImpl_vTable;
+  FvTable := @ICryptKeyCallbackImpl_vTable;
 end;
 
-function ICryptKeyCallbackImpl.getvTableVersion: NativeInt;
+function ICryptKeyCallbackImpl.getVTable: PCryptKeyCallbackVTable;
 begin
-  Result := PCryptKeyCallbackVTable(vTable)^.version
+  Result := PCryptKeyCallbackVTable(FvTable);
 end;
 
-function IKeyHolderPluginImpl.getInterface:IKeyHolderPlugin;
+function IKeyHolderPluginImpl.asIKeyHolderPlugin:IKeyHolderPlugin;
 begin
-  Result := IKeyHolderPlugin(@nullPtr);
+  Result := IKeyHolderPlugin(@FNullPtr);
 end;
 
 procedure IKeyHolderPluginImpl_addRefDispatcher(this: IKeyHolderPlugin); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIKeyHolderPluginImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15447,7 +15161,7 @@ end;
 function IKeyHolderPluginImpl_releaseDispatcher(this: IKeyHolderPlugin): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIKeyHolderPluginImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15456,7 +15170,7 @@ end;
 procedure IKeyHolderPluginImpl_setOwnerDispatcher(this: IKeyHolderPlugin; r: IReferenceCounted); cdecl;
 begin
 	try
-		this.owner.setOwner(r);
+		this.FIKeyHolderPluginImpl.setOwner(r);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15465,7 +15179,7 @@ end;
 function IKeyHolderPluginImpl_getOwnerDispatcher(this: IKeyHolderPlugin): IReferenceCounted; cdecl;
 begin
 	try
-		Result := this.owner.getOwner();
+		Result := this.FIKeyHolderPluginImpl.getOwner();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15474,7 +15188,7 @@ end;
 function IKeyHolderPluginImpl_keyCallbackDispatcher(this: IKeyHolderPlugin; status: IStatus; callback: ICryptKeyCallback): Integer; cdecl;
 begin
 	try
-		Result := this.owner.keyCallback(status, callback);
+		Result := this.FIKeyHolderPluginImpl.keyCallback(status, callback);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15483,7 +15197,7 @@ end;
 function IKeyHolderPluginImpl_keyHandleDispatcher(this: IKeyHolderPlugin; status: IStatus; keyName: PAnsiChar): ICryptKeyCallback; cdecl;
 begin
 	try
-		Result := this.owner.keyHandle(status, keyName);
+		Result := this.FIKeyHolderPluginImpl.keyHandle(status, keyName);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15492,7 +15206,7 @@ end;
 function IKeyHolderPluginImpl_useOnlyOwnKeysDispatcher(this: IKeyHolderPlugin; status: IStatus): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.useOnlyOwnKeys(status);
+		Result := this.FIKeyHolderPluginImpl.useOnlyOwnKeys(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15501,7 +15215,7 @@ end;
 function IKeyHolderPluginImpl_chainHandleDispatcher(this: IKeyHolderPlugin; status: IStatus): ICryptKeyCallback; cdecl;
 begin
 	try
-		Result := this.owner.chainHandle(status);
+		Result := this.FIKeyHolderPluginImpl.chainHandle(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15519,7 +15233,7 @@ var IKeyHolderPluginImpl_vTable: KeyHolderPluginVTable = (
      useOnlyOwnKeys: @IKeyHolderPluginImpl_useOnlyOwnKeysDispatcher;
      chainHandle: @IKeyHolderPluginImpl_chainHandleDispatcher);
 
-function TKeyHolderPlugin.isIKeyHolderPluginImpl: boolean inline;
+function TKeyHolderPlugin.isIKeyHolderPluginImpl: boolean;
 begin
   Result := (vTable = @IKeyHolderPluginImpl_vTable);
 end;
@@ -15527,23 +15241,23 @@ end;
 constructor IKeyHolderPluginImpl.create;
 begin
   inherited Create;
-  vTable := @IKeyHolderPluginImpl_vTable;
+  FvTable := @IKeyHolderPluginImpl_vTable;
 end;
 
-function IKeyHolderPluginImpl.getvTableVersion: NativeInt;
+function IKeyHolderPluginImpl.getVTable: PKeyHolderPluginVTable;
 begin
-  Result := PKeyHolderPluginVTable(vTable)^.version
+  Result := PKeyHolderPluginVTable(FvTable);
 end;
 
-function IDbCryptInfoImpl.getInterface:IDbCryptInfo;
+function IDbCryptInfoImpl.asIDbCryptInfo:IDbCryptInfo;
 begin
-  Result := IDbCryptInfo(@nullPtr);
+  Result := IDbCryptInfo(@FNullPtr);
 end;
 
 procedure IDbCryptInfoImpl_addRefDispatcher(this: IDbCryptInfo); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIDbCryptInfoImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15552,7 +15266,7 @@ end;
 function IDbCryptInfoImpl_releaseDispatcher(this: IDbCryptInfo): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIDbCryptInfoImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15561,7 +15275,7 @@ end;
 function IDbCryptInfoImpl_getDatabaseFullPathDispatcher(this: IDbCryptInfo; status: IStatus): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getDatabaseFullPath(status);
+		Result := this.FIDbCryptInfoImpl.getDatabaseFullPath(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15574,7 +15288,7 @@ var IDbCryptInfoImpl_vTable: DbCryptInfoVTable = (
      release: @IReferenceCountedImpl_releaseDispatcher;
      getDatabaseFullPath: @IDbCryptInfoImpl_getDatabaseFullPathDispatcher);
 
-function TDbCryptInfo.isIDbCryptInfoImpl: boolean inline;
+function TDbCryptInfo.isIDbCryptInfoImpl: boolean;
 begin
   Result := (vTable = @IDbCryptInfoImpl_vTable);
 end;
@@ -15582,23 +15296,23 @@ end;
 constructor IDbCryptInfoImpl.create;
 begin
   inherited Create;
-  vTable := @IDbCryptInfoImpl_vTable;
+  FvTable := @IDbCryptInfoImpl_vTable;
 end;
 
-function IDbCryptInfoImpl.getvTableVersion: NativeInt;
+function IDbCryptInfoImpl.getVTable: PDbCryptInfoVTable;
 begin
-  Result := PDbCryptInfoVTable(vTable)^.version
+  Result := PDbCryptInfoVTable(FvTable);
 end;
 
-function IDbCryptPluginImpl.getInterface:IDbCryptPlugin;
+function IDbCryptPluginImpl.asIDbCryptPlugin:IDbCryptPlugin;
 begin
-  Result := IDbCryptPlugin(@nullPtr);
+  Result := IDbCryptPlugin(@FNullPtr);
 end;
 
 procedure IDbCryptPluginImpl_addRefDispatcher(this: IDbCryptPlugin); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIDbCryptPluginImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15607,7 +15321,7 @@ end;
 function IDbCryptPluginImpl_releaseDispatcher(this: IDbCryptPlugin): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIDbCryptPluginImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15616,7 +15330,7 @@ end;
 procedure IDbCryptPluginImpl_setOwnerDispatcher(this: IDbCryptPlugin; r: IReferenceCounted); cdecl;
 begin
 	try
-		this.owner.setOwner(r);
+		this.FIDbCryptPluginImpl.setOwner(r);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15625,7 +15339,7 @@ end;
 function IDbCryptPluginImpl_getOwnerDispatcher(this: IDbCryptPlugin): IReferenceCounted; cdecl;
 begin
 	try
-		Result := this.owner.getOwner();
+		Result := this.FIDbCryptPluginImpl.getOwner();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15634,7 +15348,7 @@ end;
 procedure IDbCryptPluginImpl_setKeyDispatcher(this: IDbCryptPlugin; status: IStatus; length: Cardinal; sources: IKeyHolderPlugin; keyName: PAnsiChar); cdecl;
 begin
 	try
-		this.owner.setKey(status, length, sources, keyName);
+		this.FIDbCryptPluginImpl.setKey(status, length, sources, keyName);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15643,7 +15357,7 @@ end;
 procedure IDbCryptPluginImpl_encryptDispatcher(this: IDbCryptPlugin; status: IStatus; length: Cardinal; from: Pointer; to_: Pointer); cdecl;
 begin
 	try
-		this.owner.encrypt(status, length, from, to_);
+		this.FIDbCryptPluginImpl.encrypt(status, length, from, to_);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15652,7 +15366,7 @@ end;
 procedure IDbCryptPluginImpl_decryptDispatcher(this: IDbCryptPlugin; status: IStatus; length: Cardinal; from: Pointer; to_: Pointer); cdecl;
 begin
 	try
-		this.owner.decrypt(status, length, from, to_);
+		this.FIDbCryptPluginImpl.decrypt(status, length, from, to_);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15661,7 +15375,7 @@ end;
 procedure IDbCryptPluginImpl_setInfoDispatcher(this: IDbCryptPlugin; status: IStatus; info: IDbCryptInfo); cdecl;
 begin
 	try
-		this.owner.setInfo(status, info);
+		this.FIDbCryptPluginImpl.setInfo(status, info);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15679,7 +15393,7 @@ var IDbCryptPluginImpl_vTable: DbCryptPluginVTable = (
      decrypt: @IDbCryptPluginImpl_decryptDispatcher;
      setInfo: @IDbCryptPluginImpl_setInfoDispatcher);
 
-function TDbCryptPlugin.isIDbCryptPluginImpl: boolean inline;
+function TDbCryptPlugin.isIDbCryptPluginImpl: boolean;
 begin
   Result := (vTable = @IDbCryptPluginImpl_vTable);
 end;
@@ -15687,23 +15401,23 @@ end;
 constructor IDbCryptPluginImpl.create;
 begin
   inherited Create;
-  vTable := @IDbCryptPluginImpl_vTable;
+  FvTable := @IDbCryptPluginImpl_vTable;
 end;
 
-function IDbCryptPluginImpl.getvTableVersion: NativeInt;
+function IDbCryptPluginImpl.getVTable: PDbCryptPluginVTable;
 begin
-  Result := PDbCryptPluginVTable(vTable)^.version
+  Result := PDbCryptPluginVTable(FvTable);
 end;
 
-function IExternalContextImpl.getInterface:IExternalContext;
+function IExternalContextImpl.asIExternalContext:IExternalContext;
 begin
-  Result := IExternalContext(@nullPtr);
+  Result := IExternalContext(@FNullPtr);
 end;
 
 function IExternalContextImpl_getMasterDispatcher(this: IExternalContext): IMaster; cdecl;
 begin
 	try
-		Result := this.owner.getMaster();
+		Result := this.FIExternalContextImpl.getMaster();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15712,7 +15426,7 @@ end;
 function IExternalContextImpl_getEngineDispatcher(this: IExternalContext; status: IStatus): IExternalEngine; cdecl;
 begin
 	try
-		Result := this.owner.getEngine(status);
+		Result := this.FIExternalContextImpl.getEngine(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15721,7 +15435,7 @@ end;
 function IExternalContextImpl_getAttachmentDispatcher(this: IExternalContext; status: IStatus): IAttachment; cdecl;
 begin
 	try
-		Result := this.owner.getAttachment(status);
+		Result := this.FIExternalContextImpl.getAttachment(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15730,7 +15444,7 @@ end;
 function IExternalContextImpl_getTransactionDispatcher(this: IExternalContext; status: IStatus): ITransaction; cdecl;
 begin
 	try
-		Result := this.owner.getTransaction(status);
+		Result := this.FIExternalContextImpl.getTransaction(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15739,7 +15453,7 @@ end;
 function IExternalContextImpl_getUserNameDispatcher(this: IExternalContext): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getUserName();
+		Result := this.FIExternalContextImpl.getUserName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15748,7 +15462,7 @@ end;
 function IExternalContextImpl_getDatabaseNameDispatcher(this: IExternalContext): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getDatabaseName();
+		Result := this.FIExternalContextImpl.getDatabaseName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15757,7 +15471,7 @@ end;
 function IExternalContextImpl_getClientCharSetDispatcher(this: IExternalContext): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getClientCharSet();
+		Result := this.FIExternalContextImpl.getClientCharSet();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15766,7 +15480,7 @@ end;
 function IExternalContextImpl_obtainInfoCodeDispatcher(this: IExternalContext): Integer; cdecl;
 begin
 	try
-		Result := this.owner.obtainInfoCode();
+		Result := this.FIExternalContextImpl.obtainInfoCode();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15775,7 +15489,7 @@ end;
 function IExternalContextImpl_getInfoDispatcher(this: IExternalContext; code: Integer): Pointer; cdecl;
 begin
 	try
-		Result := this.owner.getInfo(code);
+		Result := this.FIExternalContextImpl.getInfo(code);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15784,7 +15498,7 @@ end;
 function IExternalContextImpl_setInfoDispatcher(this: IExternalContext; code: Integer; value: Pointer): Pointer; cdecl;
 begin
 	try
-		Result := this.owner.setInfo(code, value);
+		Result := this.FIExternalContextImpl.setInfo(code, value);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15804,7 +15518,7 @@ var IExternalContextImpl_vTable: ExternalContextVTable = (
      getInfo: @IExternalContextImpl_getInfoDispatcher;
      setInfo: @IExternalContextImpl_setInfoDispatcher);
 
-function TExternalContext.isIExternalContextImpl: boolean inline;
+function TExternalContext.isIExternalContextImpl: boolean;
 begin
   Result := (vTable = @IExternalContextImpl_vTable);
 end;
@@ -15812,23 +15526,23 @@ end;
 constructor IExternalContextImpl.create;
 begin
   inherited Create;
-  vTable := @IExternalContextImpl_vTable;
+  FvTable := @IExternalContextImpl_vTable;
 end;
 
-function IExternalContextImpl.getvTableVersion: NativeInt;
+function IExternalContextImpl.getVTable: PExternalContextVTable;
 begin
-  Result := PExternalContextVTable(vTable)^.version
+  Result := PExternalContextVTable(FvTable);
 end;
 
-function IExternalResultSetImpl.getInterface:IExternalResultSet;
+function IExternalResultSetImpl.asIExternalResultSet:IExternalResultSet;
 begin
-  Result := IExternalResultSet(@nullPtr);
+  Result := IExternalResultSet(@FNullPtr);
 end;
 
 procedure IExternalResultSetImpl_disposeDispatcher(this: IExternalResultSet); cdecl;
 begin
 	try
-		this.owner.dispose();
+		this.FIExternalResultSetImpl.dispose();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15837,7 +15551,7 @@ end;
 function IExternalResultSetImpl_fetchDispatcher(this: IExternalResultSet; status: IStatus): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.fetch(status);
+		Result := this.FIExternalResultSetImpl.fetch(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15849,7 +15563,7 @@ var IExternalResultSetImpl_vTable: ExternalResultSetVTable = (
      dispose: @IDisposableImpl_disposeDispatcher;
      fetch: @IExternalResultSetImpl_fetchDispatcher);
 
-function TExternalResultSet.isIExternalResultSetImpl: boolean inline;
+function TExternalResultSet.isIExternalResultSetImpl: boolean;
 begin
   Result := (vTable = @IExternalResultSetImpl_vTable);
 end;
@@ -15857,23 +15571,23 @@ end;
 constructor IExternalResultSetImpl.create;
 begin
   inherited Create;
-  vTable := @IExternalResultSetImpl_vTable;
+  FvTable := @IExternalResultSetImpl_vTable;
 end;
 
-function IExternalResultSetImpl.getvTableVersion: NativeInt;
+function IExternalResultSetImpl.getVTable: PExternalResultSetVTable;
 begin
-  Result := PExternalResultSetVTable(vTable)^.version
+  Result := PExternalResultSetVTable(FvTable);
 end;
 
-function IExternalFunctionImpl.getInterface:IExternalFunction;
+function IExternalFunctionImpl.asIExternalFunction:IExternalFunction;
 begin
-  Result := IExternalFunction(@nullPtr);
+  Result := IExternalFunction(@FNullPtr);
 end;
 
 procedure IExternalFunctionImpl_disposeDispatcher(this: IExternalFunction); cdecl;
 begin
 	try
-		this.owner.dispose();
+		this.FIExternalFunctionImpl.dispose();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15882,7 +15596,7 @@ end;
 procedure IExternalFunctionImpl_getCharSetDispatcher(this: IExternalFunction; status: IStatus; context: IExternalContext; name: PAnsiChar; nameSize: Cardinal); cdecl;
 begin
 	try
-		this.owner.getCharSet(status, context, name, nameSize);
+		this.FIExternalFunctionImpl.getCharSet(status, context, name, nameSize);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15891,7 +15605,7 @@ end;
 procedure IExternalFunctionImpl_executeDispatcher(this: IExternalFunction; status: IStatus; context: IExternalContext; inMsg: Pointer; outMsg: Pointer); cdecl;
 begin
 	try
-		this.owner.execute(status, context, inMsg, outMsg);
+		this.FIExternalFunctionImpl.execute(status, context, inMsg, outMsg);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15904,7 +15618,7 @@ var IExternalFunctionImpl_vTable: ExternalFunctionVTable = (
      getCharSet: @IExternalFunctionImpl_getCharSetDispatcher;
      execute: @IExternalFunctionImpl_executeDispatcher);
 
-function TExternalFunction.isIExternalFunctionImpl: boolean inline;
+function TExternalFunction.isIExternalFunctionImpl: boolean;
 begin
   Result := (vTable = @IExternalFunctionImpl_vTable);
 end;
@@ -15912,23 +15626,23 @@ end;
 constructor IExternalFunctionImpl.create;
 begin
   inherited Create;
-  vTable := @IExternalFunctionImpl_vTable;
+  FvTable := @IExternalFunctionImpl_vTable;
 end;
 
-function IExternalFunctionImpl.getvTableVersion: NativeInt;
+function IExternalFunctionImpl.getVTable: PExternalFunctionVTable;
 begin
-  Result := PExternalFunctionVTable(vTable)^.version
+  Result := PExternalFunctionVTable(FvTable);
 end;
 
-function IExternalProcedureImpl.getInterface:IExternalProcedure;
+function IExternalProcedureImpl.asIExternalProcedure:IExternalProcedure;
 begin
-  Result := IExternalProcedure(@nullPtr);
+  Result := IExternalProcedure(@FNullPtr);
 end;
 
 procedure IExternalProcedureImpl_disposeDispatcher(this: IExternalProcedure); cdecl;
 begin
 	try
-		this.owner.dispose();
+		this.FIExternalProcedureImpl.dispose();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15937,7 +15651,7 @@ end;
 procedure IExternalProcedureImpl_getCharSetDispatcher(this: IExternalProcedure; status: IStatus; context: IExternalContext; name: PAnsiChar; nameSize: Cardinal); cdecl;
 begin
 	try
-		this.owner.getCharSet(status, context, name, nameSize);
+		this.FIExternalProcedureImpl.getCharSet(status, context, name, nameSize);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15946,7 +15660,7 @@ end;
 function IExternalProcedureImpl_openDispatcher(this: IExternalProcedure; status: IStatus; context: IExternalContext; inMsg: Pointer; outMsg: Pointer): IExternalResultSet; cdecl;
 begin
 	try
-		Result := this.owner.open(status, context, inMsg, outMsg);
+		Result := this.FIExternalProcedureImpl.open(status, context, inMsg, outMsg);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15959,7 +15673,7 @@ var IExternalProcedureImpl_vTable: ExternalProcedureVTable = (
      getCharSet: @IExternalProcedureImpl_getCharSetDispatcher;
      open: @IExternalProcedureImpl_openDispatcher);
 
-function TExternalProcedure.isIExternalProcedureImpl: boolean inline;
+function TExternalProcedure.isIExternalProcedureImpl: boolean;
 begin
   Result := (vTable = @IExternalProcedureImpl_vTable);
 end;
@@ -15967,23 +15681,23 @@ end;
 constructor IExternalProcedureImpl.create;
 begin
   inherited Create;
-  vTable := @IExternalProcedureImpl_vTable;
+  FvTable := @IExternalProcedureImpl_vTable;
 end;
 
-function IExternalProcedureImpl.getvTableVersion: NativeInt;
+function IExternalProcedureImpl.getVTable: PExternalProcedureVTable;
 begin
-  Result := PExternalProcedureVTable(vTable)^.version
+  Result := PExternalProcedureVTable(FvTable);
 end;
 
-function IExternalTriggerImpl.getInterface:IExternalTrigger;
+function IExternalTriggerImpl.asIExternalTrigger:IExternalTrigger;
 begin
-  Result := IExternalTrigger(@nullPtr);
+  Result := IExternalTrigger(@FNullPtr);
 end;
 
 procedure IExternalTriggerImpl_disposeDispatcher(this: IExternalTrigger); cdecl;
 begin
 	try
-		this.owner.dispose();
+		this.FIExternalTriggerImpl.dispose();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15992,7 +15706,7 @@ end;
 procedure IExternalTriggerImpl_getCharSetDispatcher(this: IExternalTrigger; status: IStatus; context: IExternalContext; name: PAnsiChar; nameSize: Cardinal); cdecl;
 begin
 	try
-		this.owner.getCharSet(status, context, name, nameSize);
+		this.FIExternalTriggerImpl.getCharSet(status, context, name, nameSize);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16001,7 +15715,7 @@ end;
 procedure IExternalTriggerImpl_executeDispatcher(this: IExternalTrigger; status: IStatus; context: IExternalContext; action: Cardinal; oldMsg: Pointer; newMsg: Pointer); cdecl;
 begin
 	try
-		this.owner.execute(status, context, action, oldMsg, newMsg);
+		this.FIExternalTriggerImpl.execute(status, context, action, oldMsg, newMsg);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16014,7 +15728,7 @@ var IExternalTriggerImpl_vTable: ExternalTriggerVTable = (
      getCharSet: @IExternalTriggerImpl_getCharSetDispatcher;
      execute: @IExternalTriggerImpl_executeDispatcher);
 
-function TExternalTrigger.isIExternalTriggerImpl: boolean inline;
+function TExternalTrigger.isIExternalTriggerImpl: boolean;
 begin
   Result := (vTable = @IExternalTriggerImpl_vTable);
 end;
@@ -16022,23 +15736,23 @@ end;
 constructor IExternalTriggerImpl.create;
 begin
   inherited Create;
-  vTable := @IExternalTriggerImpl_vTable;
+  FvTable := @IExternalTriggerImpl_vTable;
 end;
 
-function IExternalTriggerImpl.getvTableVersion: NativeInt;
+function IExternalTriggerImpl.getVTable: PExternalTriggerVTable;
 begin
-  Result := PExternalTriggerVTable(vTable)^.version
+  Result := PExternalTriggerVTable(FvTable);
 end;
 
-function IRoutineMetadataImpl.getInterface:IRoutineMetadata;
+function IRoutineMetadataImpl.asIRoutineMetadata:IRoutineMetadata;
 begin
-  Result := IRoutineMetadata(@nullPtr);
+  Result := IRoutineMetadata(@FNullPtr);
 end;
 
 function IRoutineMetadataImpl_getPackageDispatcher(this: IRoutineMetadata; status: IStatus): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getPackage(status);
+		Result := this.FIRoutineMetadataImpl.getPackage(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16047,7 +15761,7 @@ end;
 function IRoutineMetadataImpl_getNameDispatcher(this: IRoutineMetadata; status: IStatus): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getName(status);
+		Result := this.FIRoutineMetadataImpl.getName(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16056,7 +15770,7 @@ end;
 function IRoutineMetadataImpl_getEntryPointDispatcher(this: IRoutineMetadata; status: IStatus): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getEntryPoint(status);
+		Result := this.FIRoutineMetadataImpl.getEntryPoint(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16065,7 +15779,7 @@ end;
 function IRoutineMetadataImpl_getBodyDispatcher(this: IRoutineMetadata; status: IStatus): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getBody(status);
+		Result := this.FIRoutineMetadataImpl.getBody(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16074,7 +15788,7 @@ end;
 function IRoutineMetadataImpl_getInputMetadataDispatcher(this: IRoutineMetadata; status: IStatus): IMessageMetadata; cdecl;
 begin
 	try
-		Result := this.owner.getInputMetadata(status);
+		Result := this.FIRoutineMetadataImpl.getInputMetadata(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16083,7 +15797,7 @@ end;
 function IRoutineMetadataImpl_getOutputMetadataDispatcher(this: IRoutineMetadata; status: IStatus): IMessageMetadata; cdecl;
 begin
 	try
-		Result := this.owner.getOutputMetadata(status);
+		Result := this.FIRoutineMetadataImpl.getOutputMetadata(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16092,7 +15806,7 @@ end;
 function IRoutineMetadataImpl_getTriggerMetadataDispatcher(this: IRoutineMetadata; status: IStatus): IMessageMetadata; cdecl;
 begin
 	try
-		Result := this.owner.getTriggerMetadata(status);
+		Result := this.FIRoutineMetadataImpl.getTriggerMetadata(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16101,7 +15815,7 @@ end;
 function IRoutineMetadataImpl_getTriggerTableDispatcher(this: IRoutineMetadata; status: IStatus): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getTriggerTable(status);
+		Result := this.FIRoutineMetadataImpl.getTriggerTable(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16110,7 +15824,7 @@ end;
 function IRoutineMetadataImpl_getTriggerTypeDispatcher(this: IRoutineMetadata; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getTriggerType(status);
+		Result := this.FIRoutineMetadataImpl.getTriggerType(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16129,7 +15843,7 @@ var IRoutineMetadataImpl_vTable: RoutineMetadataVTable = (
      getTriggerTable: @IRoutineMetadataImpl_getTriggerTableDispatcher;
      getTriggerType: @IRoutineMetadataImpl_getTriggerTypeDispatcher);
 
-function TRoutineMetadata.isIRoutineMetadataImpl: boolean inline;
+function TRoutineMetadata.isIRoutineMetadataImpl: boolean;
 begin
   Result := (vTable = @IRoutineMetadataImpl_vTable);
 end;
@@ -16137,23 +15851,23 @@ end;
 constructor IRoutineMetadataImpl.create;
 begin
   inherited Create;
-  vTable := @IRoutineMetadataImpl_vTable;
+  FvTable := @IRoutineMetadataImpl_vTable;
 end;
 
-function IRoutineMetadataImpl.getvTableVersion: NativeInt;
+function IRoutineMetadataImpl.getVTable: PRoutineMetadataVTable;
 begin
-  Result := PRoutineMetadataVTable(vTable)^.version
+  Result := PRoutineMetadataVTable(FvTable);
 end;
 
-function IExternalEngineImpl.getInterface:IExternalEngine;
+function IExternalEngineImpl.asIExternalEngine:IExternalEngine;
 begin
-  Result := IExternalEngine(@nullPtr);
+  Result := IExternalEngine(@FNullPtr);
 end;
 
 procedure IExternalEngineImpl_addRefDispatcher(this: IExternalEngine); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIExternalEngineImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16162,7 +15876,7 @@ end;
 function IExternalEngineImpl_releaseDispatcher(this: IExternalEngine): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIExternalEngineImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16171,7 +15885,7 @@ end;
 procedure IExternalEngineImpl_setOwnerDispatcher(this: IExternalEngine; r: IReferenceCounted); cdecl;
 begin
 	try
-		this.owner.setOwner(r);
+		this.FIExternalEngineImpl.setOwner(r);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16180,7 +15894,7 @@ end;
 function IExternalEngineImpl_getOwnerDispatcher(this: IExternalEngine): IReferenceCounted; cdecl;
 begin
 	try
-		Result := this.owner.getOwner();
+		Result := this.FIExternalEngineImpl.getOwner();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16189,7 +15903,7 @@ end;
 procedure IExternalEngineImpl_openDispatcher(this: IExternalEngine; status: IStatus; context: IExternalContext; charSet: PAnsiChar; charSetSize: Cardinal); cdecl;
 begin
 	try
-		this.owner.open(status, context, charSet, charSetSize);
+		this.FIExternalEngineImpl.open(status, context, charSet, charSetSize);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16198,7 +15912,7 @@ end;
 procedure IExternalEngineImpl_openAttachmentDispatcher(this: IExternalEngine; status: IStatus; context: IExternalContext); cdecl;
 begin
 	try
-		this.owner.openAttachment(status, context);
+		this.FIExternalEngineImpl.openAttachment(status, context);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16207,7 +15921,7 @@ end;
 procedure IExternalEngineImpl_closeAttachmentDispatcher(this: IExternalEngine; status: IStatus; context: IExternalContext); cdecl;
 begin
 	try
-		this.owner.closeAttachment(status, context);
+		this.FIExternalEngineImpl.closeAttachment(status, context);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16216,7 +15930,7 @@ end;
 function IExternalEngineImpl_makeFunctionDispatcher(this: IExternalEngine; status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder): IExternalFunction; cdecl;
 begin
 	try
-		Result := this.owner.makeFunction(status, context, metadata, inBuilder, outBuilder);
+		Result := this.FIExternalEngineImpl.makeFunction(status, context, metadata, inBuilder, outBuilder);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16225,7 +15939,7 @@ end;
 function IExternalEngineImpl_makeProcedureDispatcher(this: IExternalEngine; status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder): IExternalProcedure; cdecl;
 begin
 	try
-		Result := this.owner.makeProcedure(status, context, metadata, inBuilder, outBuilder);
+		Result := this.FIExternalEngineImpl.makeProcedure(status, context, metadata, inBuilder, outBuilder);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16234,7 +15948,7 @@ end;
 function IExternalEngineImpl_makeTriggerDispatcher(this: IExternalEngine; status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; fieldsBuilder: IMetadataBuilder): IExternalTrigger; cdecl;
 begin
 	try
-		Result := this.owner.makeTrigger(status, context, metadata, fieldsBuilder);
+		Result := this.FIExternalEngineImpl.makeTrigger(status, context, metadata, fieldsBuilder);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16254,7 +15968,7 @@ var IExternalEngineImpl_vTable: ExternalEngineVTable = (
      makeProcedure: @IExternalEngineImpl_makeProcedureDispatcher;
      makeTrigger: @IExternalEngineImpl_makeTriggerDispatcher);
 
-function TExternalEngine.isIExternalEngineImpl: boolean inline;
+function TExternalEngine.isIExternalEngineImpl: boolean;
 begin
   Result := (vTable = @IExternalEngineImpl_vTable);
 end;
@@ -16262,23 +15976,23 @@ end;
 constructor IExternalEngineImpl.create;
 begin
   inherited Create;
-  vTable := @IExternalEngineImpl_vTable;
+  FvTable := @IExternalEngineImpl_vTable;
 end;
 
-function IExternalEngineImpl.getvTableVersion: NativeInt;
+function IExternalEngineImpl.getVTable: PExternalEngineVTable;
 begin
-  Result := PExternalEngineVTable(vTable)^.version
+  Result := PExternalEngineVTable(FvTable);
 end;
 
-function ITimerImpl.getInterface:ITimer;
+function ITimerImpl.asITimer:ITimer;
 begin
-  Result := ITimer(@nullPtr);
+  Result := ITimer(@FNullPtr);
 end;
 
 procedure ITimerImpl_addRefDispatcher(this: ITimer); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FITimerImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16287,7 +16001,7 @@ end;
 function ITimerImpl_releaseDispatcher(this: ITimer): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FITimerImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16296,7 +16010,7 @@ end;
 procedure ITimerImpl_handlerDispatcher(this: ITimer); cdecl;
 begin
 	try
-		this.owner.handler();
+		this.FITimerImpl.handler();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16309,7 +16023,7 @@ var ITimerImpl_vTable: TimerVTable = (
      release: @IReferenceCountedImpl_releaseDispatcher;
      handler: @ITimerImpl_handlerDispatcher);
 
-function TTimer.isITimerImpl: boolean inline;
+function TTimer.isITimerImpl: boolean;
 begin
   Result := (vTable = @ITimerImpl_vTable);
 end;
@@ -16317,23 +16031,23 @@ end;
 constructor ITimerImpl.create;
 begin
   inherited Create;
-  vTable := @ITimerImpl_vTable;
+  FvTable := @ITimerImpl_vTable;
 end;
 
-function ITimerImpl.getvTableVersion: NativeInt;
+function ITimerImpl.getVTable: PTimerVTable;
 begin
-  Result := PTimerVTable(vTable)^.version
+  Result := PTimerVTable(FvTable);
 end;
 
-function ITimerControlImpl.getInterface:ITimerControl;
+function ITimerControlImpl.asITimerControl:ITimerControl;
 begin
-  Result := ITimerControl(@nullPtr);
+  Result := ITimerControl(@FNullPtr);
 end;
 
 procedure ITimerControlImpl_startDispatcher(this: ITimerControl; status: IStatus; timer: ITimer; microSeconds: QWord); cdecl;
 begin
 	try
-		this.owner.start(status, timer, microSeconds);
+		this.FITimerControlImpl.start(status, timer, microSeconds);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16342,7 +16056,7 @@ end;
 procedure ITimerControlImpl_stopDispatcher(this: ITimerControl; status: IStatus; timer: ITimer); cdecl;
 begin
 	try
-		this.owner.stop(status, timer);
+		this.FITimerControlImpl.stop(status, timer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16354,7 +16068,7 @@ var ITimerControlImpl_vTable: TimerControlVTable = (
      start: @ITimerControlImpl_startDispatcher;
      stop: @ITimerControlImpl_stopDispatcher);
 
-function TTimerControl.isITimerControlImpl: boolean inline;
+function TTimerControl.isITimerControlImpl: boolean;
 begin
   Result := (vTable = @ITimerControlImpl_vTable);
 end;
@@ -16362,23 +16076,23 @@ end;
 constructor ITimerControlImpl.create;
 begin
   inherited Create;
-  vTable := @ITimerControlImpl_vTable;
+  FvTable := @ITimerControlImpl_vTable;
 end;
 
-function ITimerControlImpl.getvTableVersion: NativeInt;
+function ITimerControlImpl.getVTable: PTimerControlVTable;
 begin
-  Result := PTimerControlVTable(vTable)^.version
+  Result := PTimerControlVTable(FvTable);
 end;
 
-function IVersionCallbackImpl.getInterface:IVersionCallback;
+function IVersionCallbackImpl.asIVersionCallback:IVersionCallback;
 begin
-  Result := IVersionCallback(@nullPtr);
+  Result := IVersionCallback(@FNullPtr);
 end;
 
 procedure IVersionCallbackImpl_callbackDispatcher(this: IVersionCallback; status: IStatus; text: PAnsiChar); cdecl;
 begin
 	try
-		this.owner.callback(status, text);
+		this.FIVersionCallbackImpl.callback(status, text);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16389,7 +16103,7 @@ var IVersionCallbackImpl_vTable: VersionCallbackVTable = (
      version: 1;
      callback: @IVersionCallbackImpl_callbackDispatcher);
 
-function TVersionCallback.isIVersionCallbackImpl: boolean inline;
+function TVersionCallback.isIVersionCallbackImpl: boolean;
 begin
   Result := (vTable = @IVersionCallbackImpl_vTable);
 end;
@@ -16397,23 +16111,23 @@ end;
 constructor IVersionCallbackImpl.create;
 begin
   inherited Create;
-  vTable := @IVersionCallbackImpl_vTable;
+  FvTable := @IVersionCallbackImpl_vTable;
 end;
 
-function IVersionCallbackImpl.getvTableVersion: NativeInt;
+function IVersionCallbackImpl.getVTable: PVersionCallbackVTable;
 begin
-  Result := PVersionCallbackVTable(vTable)^.version
+  Result := PVersionCallbackVTable(FvTable);
 end;
 
-function IUtilImpl.getInterface:IUtil;
+function IUtilImpl.asIUtil:IUtil;
 begin
-  Result := IUtil(@nullPtr);
+  Result := IUtil(@FNullPtr);
 end;
 
 procedure IUtilImpl_getFbVersionDispatcher(this: IUtil; status: IStatus; att: IAttachment; callback: IVersionCallback); cdecl;
 begin
 	try
-		this.owner.getFbVersion(status, att, callback);
+		this.FIUtilImpl.getFbVersion(status, att, callback);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16422,7 +16136,7 @@ end;
 procedure IUtilImpl_loadBlobDispatcher(this: IUtil; status: IStatus; blobId: ISC_QUADPtr; att: IAttachment; tra: ITransaction; file_: PAnsiChar; txt: Boolean); cdecl;
 begin
 	try
-		this.owner.loadBlob(status, blobId, att, tra, file_, txt);
+		this.FIUtilImpl.loadBlob(status, blobId, att, tra, file_, txt);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16431,7 +16145,7 @@ end;
 procedure IUtilImpl_dumpBlobDispatcher(this: IUtil; status: IStatus; blobId: ISC_QUADPtr; att: IAttachment; tra: ITransaction; file_: PAnsiChar; txt: Boolean); cdecl;
 begin
 	try
-		this.owner.dumpBlob(status, blobId, att, tra, file_, txt);
+		this.FIUtilImpl.dumpBlob(status, blobId, att, tra, file_, txt);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16440,7 +16154,7 @@ end;
 procedure IUtilImpl_getPerfCountersDispatcher(this: IUtil; status: IStatus; att: IAttachment; countersSet: PAnsiChar; counters: Int64Ptr); cdecl;
 begin
 	try
-		this.owner.getPerfCounters(status, att, countersSet, counters);
+		this.FIUtilImpl.getPerfCounters(status, att, countersSet, counters);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16449,7 +16163,7 @@ end;
 function IUtilImpl_executeCreateDatabaseDispatcher(this: IUtil; status: IStatus; stmtLength: Cardinal; creatDBstatement: PAnsiChar; dialect: Cardinal; stmtIsCreateDb: BooleanPtr): IAttachment; cdecl;
 begin
 	try
-		Result := this.owner.executeCreateDatabase(status, stmtLength, creatDBstatement, dialect, stmtIsCreateDb);
+		Result := this.FIUtilImpl.executeCreateDatabase(status, stmtLength, creatDBstatement, dialect, stmtIsCreateDb);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16458,7 +16172,7 @@ end;
 procedure IUtilImpl_decodeDateDispatcher(this: IUtil; date: ISC_DATE; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr); cdecl;
 begin
 	try
-		this.owner.decodeDate(date, year, month, day);
+		this.FIUtilImpl.decodeDate(date, year, month, day);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16467,7 +16181,7 @@ end;
 procedure IUtilImpl_decodeTimeDispatcher(this: IUtil; time: ISC_TIME; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr); cdecl;
 begin
 	try
-		this.owner.decodeTime(time, hours, minutes, seconds, fractions);
+		this.FIUtilImpl.decodeTime(time, hours, minutes, seconds, fractions);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16476,7 +16190,7 @@ end;
 function IUtilImpl_encodeDateDispatcher(this: IUtil; year: Cardinal; month: Cardinal; day: Cardinal): ISC_DATE; cdecl;
 begin
 	try
-		Result := this.owner.encodeDate(year, month, day);
+		Result := this.FIUtilImpl.encodeDate(year, month, day);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16485,7 +16199,7 @@ end;
 function IUtilImpl_encodeTimeDispatcher(this: IUtil; hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal): ISC_TIME; cdecl;
 begin
 	try
-		Result := this.owner.encodeTime(hours, minutes, seconds, fractions);
+		Result := this.FIUtilImpl.encodeTime(hours, minutes, seconds, fractions);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16494,7 +16208,7 @@ end;
 function IUtilImpl_formatStatusDispatcher(this: IUtil; buffer: PAnsiChar; bufferSize: Cardinal; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.formatStatus(buffer, bufferSize, status);
+		Result := this.FIUtilImpl.formatStatus(buffer, bufferSize, status);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16503,7 +16217,7 @@ end;
 function IUtilImpl_getClientVersionDispatcher(this: IUtil): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getClientVersion();
+		Result := this.FIUtilImpl.getClientVersion();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16512,7 +16226,7 @@ end;
 function IUtilImpl_getXpbBuilderDispatcher(this: IUtil; status: IStatus; kind: Cardinal; buf: BytePtr; len: Cardinal): IXpbBuilder; cdecl;
 begin
 	try
-		Result := this.owner.getXpbBuilder(status, kind, buf, len);
+		Result := this.FIUtilImpl.getXpbBuilder(status, kind, buf, len);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16521,7 +16235,7 @@ end;
 function IUtilImpl_setOffsetsDispatcher(this: IUtil; status: IStatus; metadata: IMessageMetadata; callback: IOffsetsCallback): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.setOffsets(status, metadata, callback);
+		Result := this.FIUtilImpl.setOffsets(status, metadata, callback);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16530,7 +16244,7 @@ end;
 function IUtilImpl_getDecFloat16Dispatcher(this: IUtil; status: IStatus): IDecFloat16; cdecl;
 begin
 	try
-		Result := this.owner.getDecFloat16(status);
+		Result := this.FIUtilImpl.getDecFloat16(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16539,7 +16253,7 @@ end;
 function IUtilImpl_getDecFloat34Dispatcher(this: IUtil; status: IStatus): IDecFloat34; cdecl;
 begin
 	try
-		Result := this.owner.getDecFloat34(status);
+		Result := this.FIUtilImpl.getDecFloat34(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16548,7 +16262,7 @@ end;
 procedure IUtilImpl_decodeTimeTzDispatcher(this: IUtil; status: IStatus; timeTz: ISC_TIME_TZPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar); cdecl;
 begin
 	try
-		this.owner.decodeTimeTz(status, timeTz, hours, minutes, seconds, fractions, timeZoneBufferLength, timeZoneBuffer);
+		this.FIUtilImpl.decodeTimeTz(status, timeTz, hours, minutes, seconds, fractions, timeZoneBufferLength, timeZoneBuffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16557,7 +16271,7 @@ end;
 procedure IUtilImpl_decodeTimeStampTzDispatcher(this: IUtil; status: IStatus; timeStampTz: ISC_TIMESTAMP_TZPtr; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar); cdecl;
 begin
 	try
-		this.owner.decodeTimeStampTz(status, timeStampTz, year, month, day, hours, minutes, seconds, fractions, timeZoneBufferLength, timeZoneBuffer);
+		this.FIUtilImpl.decodeTimeStampTz(status, timeStampTz, year, month, day, hours, minutes, seconds, fractions, timeZoneBufferLength, timeZoneBuffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16566,7 +16280,7 @@ end;
 procedure IUtilImpl_encodeTimeTzDispatcher(this: IUtil; status: IStatus; timeTz: ISC_TIME_TZPtr; hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal; timeZone: PAnsiChar); cdecl;
 begin
 	try
-		this.owner.encodeTimeTz(status, timeTz, hours, minutes, seconds, fractions, timeZone);
+		this.FIUtilImpl.encodeTimeTz(status, timeTz, hours, minutes, seconds, fractions, timeZone);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16575,7 +16289,7 @@ end;
 procedure IUtilImpl_encodeTimeStampTzDispatcher(this: IUtil; status: IStatus; timeStampTz: ISC_TIMESTAMP_TZPtr; year: Cardinal; month: Cardinal; day: Cardinal; hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal; timeZone: PAnsiChar); cdecl;
 begin
 	try
-		this.owner.encodeTimeStampTz(status, timeStampTz, year, month, day, hours, minutes, seconds, fractions, timeZone);
+		this.FIUtilImpl.encodeTimeStampTz(status, timeStampTz, year, month, day, hours, minutes, seconds, fractions, timeZone);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16584,7 +16298,7 @@ end;
 function IUtilImpl_getInt128Dispatcher(this: IUtil; status: IStatus): IInt128; cdecl;
 begin
 	try
-		Result := this.owner.getInt128(status);
+		Result := this.FIUtilImpl.getInt128(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16593,7 +16307,7 @@ end;
 procedure IUtilImpl_decodeTimeTzExDispatcher(this: IUtil; status: IStatus; timeTz: ISC_TIME_TZ_EXPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar); cdecl;
 begin
 	try
-		this.owner.decodeTimeTzEx(status, timeTz, hours, minutes, seconds, fractions, timeZoneBufferLength, timeZoneBuffer);
+		this.FIUtilImpl.decodeTimeTzEx(status, timeTz, hours, minutes, seconds, fractions, timeZoneBufferLength, timeZoneBuffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16602,7 +16316,7 @@ end;
 procedure IUtilImpl_decodeTimeStampTzExDispatcher(this: IUtil; status: IStatus; timeStampTz: ISC_TIMESTAMP_TZ_EXPtr; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar); cdecl;
 begin
 	try
-		this.owner.decodeTimeStampTzEx(status, timeStampTz, year, month, day, hours, minutes, seconds, fractions, timeZoneBufferLength, timeZoneBuffer);
+		this.FIUtilImpl.decodeTimeStampTzEx(status, timeStampTz, year, month, day, hours, minutes, seconds, fractions, timeZoneBufferLength, timeZoneBuffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16634,7 +16348,7 @@ var IUtilImpl_vTable: UtilVTable = (
      decodeTimeTzEx: @IUtilImpl_decodeTimeTzExDispatcher;
      decodeTimeStampTzEx: @IUtilImpl_decodeTimeStampTzExDispatcher);
 
-function TUtil.isIUtilImpl: boolean inline;
+function TUtil.isIUtilImpl: boolean;
 begin
   Result := (vTable = @IUtilImpl_vTable);
 end;
@@ -16642,23 +16356,23 @@ end;
 constructor IUtilImpl.create;
 begin
   inherited Create;
-  vTable := @IUtilImpl_vTable;
+  FvTable := @IUtilImpl_vTable;
 end;
 
-function IUtilImpl.getvTableVersion: NativeInt;
+function IUtilImpl.getVTable: PUtilVTable;
 begin
-  Result := PUtilVTable(vTable)^.version
+  Result := PUtilVTable(FvTable);
 end;
 
-function IOffsetsCallbackImpl.getInterface:IOffsetsCallback;
+function IOffsetsCallbackImpl.asIOffsetsCallback:IOffsetsCallback;
 begin
-  Result := IOffsetsCallback(@nullPtr);
+  Result := IOffsetsCallback(@FNullPtr);
 end;
 
 procedure IOffsetsCallbackImpl_setOffsetDispatcher(this: IOffsetsCallback; status: IStatus; index: Cardinal; offset: Cardinal; nullOffset: Cardinal); cdecl;
 begin
 	try
-		this.owner.setOffset(status, index, offset, nullOffset);
+		this.FIOffsetsCallbackImpl.setOffset(status, index, offset, nullOffset);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16669,7 +16383,7 @@ var IOffsetsCallbackImpl_vTable: OffsetsCallbackVTable = (
      version: 1;
      setOffset: @IOffsetsCallbackImpl_setOffsetDispatcher);
 
-function TOffsetsCallback.isIOffsetsCallbackImpl: boolean inline;
+function TOffsetsCallback.isIOffsetsCallbackImpl: boolean;
 begin
   Result := (vTable = @IOffsetsCallbackImpl_vTable);
 end;
@@ -16677,23 +16391,23 @@ end;
 constructor IOffsetsCallbackImpl.create;
 begin
   inherited Create;
-  vTable := @IOffsetsCallbackImpl_vTable;
+  FvTable := @IOffsetsCallbackImpl_vTable;
 end;
 
-function IOffsetsCallbackImpl.getvTableVersion: NativeInt;
+function IOffsetsCallbackImpl.getVTable: POffsetsCallbackVTable;
 begin
-  Result := POffsetsCallbackVTable(vTable)^.version
+  Result := POffsetsCallbackVTable(FvTable);
 end;
 
-function IXpbBuilderImpl.getInterface:IXpbBuilder;
+function IXpbBuilderImpl.asIXpbBuilder:IXpbBuilder;
 begin
-  Result := IXpbBuilder(@nullPtr);
+  Result := IXpbBuilder(@FNullPtr);
 end;
 
 procedure IXpbBuilderImpl_disposeDispatcher(this: IXpbBuilder); cdecl;
 begin
 	try
-		this.owner.dispose();
+		this.FIXpbBuilderImpl.dispose();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16702,7 +16416,7 @@ end;
 procedure IXpbBuilderImpl_clearDispatcher(this: IXpbBuilder; status: IStatus); cdecl;
 begin
 	try
-		this.owner.clear(status);
+		this.FIXpbBuilderImpl.clear(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16711,7 +16425,7 @@ end;
 procedure IXpbBuilderImpl_removeCurrentDispatcher(this: IXpbBuilder; status: IStatus); cdecl;
 begin
 	try
-		this.owner.removeCurrent(status);
+		this.FIXpbBuilderImpl.removeCurrent(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16720,7 +16434,7 @@ end;
 procedure IXpbBuilderImpl_insertIntDispatcher(this: IXpbBuilder; status: IStatus; tag: Byte; value: Integer); cdecl;
 begin
 	try
-		this.owner.insertInt(status, tag, value);
+		this.FIXpbBuilderImpl.insertInt(status, tag, value);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16729,7 +16443,7 @@ end;
 procedure IXpbBuilderImpl_insertBigIntDispatcher(this: IXpbBuilder; status: IStatus; tag: Byte; value: Int64); cdecl;
 begin
 	try
-		this.owner.insertBigInt(status, tag, value);
+		this.FIXpbBuilderImpl.insertBigInt(status, tag, value);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16738,7 +16452,7 @@ end;
 procedure IXpbBuilderImpl_insertBytesDispatcher(this: IXpbBuilder; status: IStatus; tag: Byte; bytes: Pointer; length: Cardinal); cdecl;
 begin
 	try
-		this.owner.insertBytes(status, tag, bytes, length);
+		this.FIXpbBuilderImpl.insertBytes(status, tag, bytes, length);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16747,7 +16461,7 @@ end;
 procedure IXpbBuilderImpl_insertStringDispatcher(this: IXpbBuilder; status: IStatus; tag: Byte; str: PAnsiChar); cdecl;
 begin
 	try
-		this.owner.insertString(status, tag, str);
+		this.FIXpbBuilderImpl.insertString(status, tag, str);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16756,7 +16470,7 @@ end;
 procedure IXpbBuilderImpl_insertTagDispatcher(this: IXpbBuilder; status: IStatus; tag: Byte); cdecl;
 begin
 	try
-		this.owner.insertTag(status, tag);
+		this.FIXpbBuilderImpl.insertTag(status, tag);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16765,7 +16479,7 @@ end;
 function IXpbBuilderImpl_isEofDispatcher(this: IXpbBuilder; status: IStatus): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.isEof(status);
+		Result := this.FIXpbBuilderImpl.isEof(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16774,7 +16488,7 @@ end;
 procedure IXpbBuilderImpl_moveNextDispatcher(this: IXpbBuilder; status: IStatus); cdecl;
 begin
 	try
-		this.owner.moveNext(status);
+		this.FIXpbBuilderImpl.moveNext(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16783,7 +16497,7 @@ end;
 procedure IXpbBuilderImpl_rewindDispatcher(this: IXpbBuilder; status: IStatus); cdecl;
 begin
 	try
-		this.owner.rewind(status);
+		this.FIXpbBuilderImpl.rewind(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16792,7 +16506,7 @@ end;
 function IXpbBuilderImpl_findFirstDispatcher(this: IXpbBuilder; status: IStatus; tag: Byte): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.findFirst(status, tag);
+		Result := this.FIXpbBuilderImpl.findFirst(status, tag);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16801,7 +16515,7 @@ end;
 function IXpbBuilderImpl_findNextDispatcher(this: IXpbBuilder; status: IStatus): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.findNext(status);
+		Result := this.FIXpbBuilderImpl.findNext(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16810,7 +16524,7 @@ end;
 function IXpbBuilderImpl_getTagDispatcher(this: IXpbBuilder; status: IStatus): Byte; cdecl;
 begin
 	try
-		Result := this.owner.getTag(status);
+		Result := this.FIXpbBuilderImpl.getTag(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16819,7 +16533,7 @@ end;
 function IXpbBuilderImpl_getLengthDispatcher(this: IXpbBuilder; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getLength(status);
+		Result := this.FIXpbBuilderImpl.getLength(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16828,7 +16542,7 @@ end;
 function IXpbBuilderImpl_getIntDispatcher(this: IXpbBuilder; status: IStatus): Integer; cdecl;
 begin
 	try
-		Result := this.owner.getInt(status);
+		Result := this.FIXpbBuilderImpl.getInt(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16837,7 +16551,7 @@ end;
 function IXpbBuilderImpl_getBigIntDispatcher(this: IXpbBuilder; status: IStatus): Int64; cdecl;
 begin
 	try
-		Result := this.owner.getBigInt(status);
+		Result := this.FIXpbBuilderImpl.getBigInt(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16846,7 +16560,7 @@ end;
 function IXpbBuilderImpl_getStringDispatcher(this: IXpbBuilder; status: IStatus): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getString(status);
+		Result := this.FIXpbBuilderImpl.getString(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16855,7 +16569,7 @@ end;
 function IXpbBuilderImpl_getBytesDispatcher(this: IXpbBuilder; status: IStatus): BytePtr; cdecl;
 begin
 	try
-		Result := this.owner.getBytes(status);
+		Result := this.FIXpbBuilderImpl.getBytes(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16864,7 +16578,7 @@ end;
 function IXpbBuilderImpl_getBufferLengthDispatcher(this: IXpbBuilder; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getBufferLength(status);
+		Result := this.FIXpbBuilderImpl.getBufferLength(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16873,7 +16587,7 @@ end;
 function IXpbBuilderImpl_getBufferDispatcher(this: IXpbBuilder; status: IStatus): BytePtr; cdecl;
 begin
 	try
-		Result := this.owner.getBuffer(status);
+		Result := this.FIXpbBuilderImpl.getBuffer(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16904,7 +16618,7 @@ var IXpbBuilderImpl_vTable: XpbBuilderVTable = (
      getBufferLength: @IXpbBuilderImpl_getBufferLengthDispatcher;
      getBuffer: @IXpbBuilderImpl_getBufferDispatcher);
 
-function TXpbBuilder.isIXpbBuilderImpl: boolean inline;
+function TXpbBuilder.isIXpbBuilderImpl: boolean;
 begin
   Result := (vTable = @IXpbBuilderImpl_vTable);
 end;
@@ -16912,23 +16626,23 @@ end;
 constructor IXpbBuilderImpl.create;
 begin
   inherited Create;
-  vTable := @IXpbBuilderImpl_vTable;
+  FvTable := @IXpbBuilderImpl_vTable;
 end;
 
-function IXpbBuilderImpl.getvTableVersion: NativeInt;
+function IXpbBuilderImpl.getVTable: PXpbBuilderVTable;
 begin
-  Result := PXpbBuilderVTable(vTable)^.version
+  Result := PXpbBuilderVTable(FvTable);
 end;
 
-function ITraceConnectionImpl.getInterface:ITraceConnection;
+function ITraceConnectionImpl.asITraceConnection:ITraceConnection;
 begin
-  Result := ITraceConnection(@nullPtr);
+  Result := ITraceConnection(@FNullPtr);
 end;
 
 function ITraceConnectionImpl_getKindDispatcher(this: ITraceConnection): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getKind();
+		Result := this.FITraceConnectionImpl.getKind();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16937,7 +16651,7 @@ end;
 function ITraceConnectionImpl_getProcessIDDispatcher(this: ITraceConnection): Integer; cdecl;
 begin
 	try
-		Result := this.owner.getProcessID();
+		Result := this.FITraceConnectionImpl.getProcessID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16946,7 +16660,7 @@ end;
 function ITraceConnectionImpl_getUserNameDispatcher(this: ITraceConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getUserName();
+		Result := this.FITraceConnectionImpl.getUserName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16955,7 +16669,7 @@ end;
 function ITraceConnectionImpl_getRoleNameDispatcher(this: ITraceConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getRoleName();
+		Result := this.FITraceConnectionImpl.getRoleName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16964,7 +16678,7 @@ end;
 function ITraceConnectionImpl_getCharSetDispatcher(this: ITraceConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getCharSet();
+		Result := this.FITraceConnectionImpl.getCharSet();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16973,7 +16687,7 @@ end;
 function ITraceConnectionImpl_getRemoteProtocolDispatcher(this: ITraceConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getRemoteProtocol();
+		Result := this.FITraceConnectionImpl.getRemoteProtocol();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16982,7 +16696,7 @@ end;
 function ITraceConnectionImpl_getRemoteAddressDispatcher(this: ITraceConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getRemoteAddress();
+		Result := this.FITraceConnectionImpl.getRemoteAddress();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16991,7 +16705,7 @@ end;
 function ITraceConnectionImpl_getRemoteProcessIDDispatcher(this: ITraceConnection): Integer; cdecl;
 begin
 	try
-		Result := this.owner.getRemoteProcessID();
+		Result := this.FITraceConnectionImpl.getRemoteProcessID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17000,7 +16714,7 @@ end;
 function ITraceConnectionImpl_getRemoteProcessNameDispatcher(this: ITraceConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getRemoteProcessName();
+		Result := this.FITraceConnectionImpl.getRemoteProcessName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17019,7 +16733,7 @@ var ITraceConnectionImpl_vTable: TraceConnectionVTable = (
      getRemoteProcessID: @ITraceConnectionImpl_getRemoteProcessIDDispatcher;
      getRemoteProcessName: @ITraceConnectionImpl_getRemoteProcessNameDispatcher);
 
-function TTraceConnection.isITraceConnectionImpl: boolean inline;
+function TTraceConnection.isITraceConnectionImpl: boolean;
 begin
   Result := (vTable = @ITraceConnectionImpl_vTable);
 end;
@@ -17027,23 +16741,23 @@ end;
 constructor ITraceConnectionImpl.create;
 begin
   inherited Create;
-  vTable := @ITraceConnectionImpl_vTable;
+  FvTable := @ITraceConnectionImpl_vTable;
 end;
 
-function ITraceConnectionImpl.getvTableVersion: NativeInt;
+function ITraceConnectionImpl.getVTable: PTraceConnectionVTable;
 begin
-  Result := PTraceConnectionVTable(vTable)^.version
+  Result := PTraceConnectionVTable(FvTable);
 end;
 
-function ITraceDatabaseConnectionImpl.getInterface:ITraceDatabaseConnection;
+function ITraceDatabaseConnectionImpl.asITraceDatabaseConnection:ITraceDatabaseConnection;
 begin
-  Result := ITraceDatabaseConnection(@nullPtr);
+  Result := ITraceDatabaseConnection(@FNullPtr);
 end;
 
 function ITraceDatabaseConnectionImpl_getKindDispatcher(this: ITraceDatabaseConnection): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getKind();
+		Result := this.FITraceDatabaseConnectionImpl.getKind();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17052,7 +16766,7 @@ end;
 function ITraceDatabaseConnectionImpl_getProcessIDDispatcher(this: ITraceDatabaseConnection): Integer; cdecl;
 begin
 	try
-		Result := this.owner.getProcessID();
+		Result := this.FITraceDatabaseConnectionImpl.getProcessID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17061,7 +16775,7 @@ end;
 function ITraceDatabaseConnectionImpl_getUserNameDispatcher(this: ITraceDatabaseConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getUserName();
+		Result := this.FITraceDatabaseConnectionImpl.getUserName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17070,7 +16784,7 @@ end;
 function ITraceDatabaseConnectionImpl_getRoleNameDispatcher(this: ITraceDatabaseConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getRoleName();
+		Result := this.FITraceDatabaseConnectionImpl.getRoleName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17079,7 +16793,7 @@ end;
 function ITraceDatabaseConnectionImpl_getCharSetDispatcher(this: ITraceDatabaseConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getCharSet();
+		Result := this.FITraceDatabaseConnectionImpl.getCharSet();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17088,7 +16802,7 @@ end;
 function ITraceDatabaseConnectionImpl_getRemoteProtocolDispatcher(this: ITraceDatabaseConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getRemoteProtocol();
+		Result := this.FITraceDatabaseConnectionImpl.getRemoteProtocol();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17097,7 +16811,7 @@ end;
 function ITraceDatabaseConnectionImpl_getRemoteAddressDispatcher(this: ITraceDatabaseConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getRemoteAddress();
+		Result := this.FITraceDatabaseConnectionImpl.getRemoteAddress();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17106,7 +16820,7 @@ end;
 function ITraceDatabaseConnectionImpl_getRemoteProcessIDDispatcher(this: ITraceDatabaseConnection): Integer; cdecl;
 begin
 	try
-		Result := this.owner.getRemoteProcessID();
+		Result := this.FITraceDatabaseConnectionImpl.getRemoteProcessID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17115,7 +16829,7 @@ end;
 function ITraceDatabaseConnectionImpl_getRemoteProcessNameDispatcher(this: ITraceDatabaseConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getRemoteProcessName();
+		Result := this.FITraceDatabaseConnectionImpl.getRemoteProcessName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17124,7 +16838,7 @@ end;
 function ITraceDatabaseConnectionImpl_getConnectionIDDispatcher(this: ITraceDatabaseConnection): Int64; cdecl;
 begin
 	try
-		Result := this.owner.getConnectionID();
+		Result := this.FITraceDatabaseConnectionImpl.getConnectionID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17133,7 +16847,7 @@ end;
 function ITraceDatabaseConnectionImpl_getDatabaseNameDispatcher(this: ITraceDatabaseConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getDatabaseName();
+		Result := this.FITraceDatabaseConnectionImpl.getDatabaseName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17154,7 +16868,7 @@ var ITraceDatabaseConnectionImpl_vTable: TraceDatabaseConnectionVTable = (
      getConnectionID: @ITraceDatabaseConnectionImpl_getConnectionIDDispatcher;
      getDatabaseName: @ITraceDatabaseConnectionImpl_getDatabaseNameDispatcher);
 
-function TTraceDatabaseConnection.isITraceDatabaseConnectionImpl: boolean inline;
+function TTraceDatabaseConnection.isITraceDatabaseConnectionImpl: boolean;
 begin
   Result := (vTable = @ITraceDatabaseConnectionImpl_vTable);
 end;
@@ -17162,23 +16876,23 @@ end;
 constructor ITraceDatabaseConnectionImpl.create;
 begin
   inherited Create;
-  vTable := @ITraceDatabaseConnectionImpl_vTable;
+  FvTable := @ITraceDatabaseConnectionImpl_vTable;
 end;
 
-function ITraceDatabaseConnectionImpl.getvTableVersion: NativeInt;
+function ITraceDatabaseConnectionImpl.getVTable: PTraceDatabaseConnectionVTable;
 begin
-  Result := PTraceDatabaseConnectionVTable(vTable)^.version
+  Result := PTraceDatabaseConnectionVTable(FvTable);
 end;
 
-function ITraceTransactionImpl.getInterface:ITraceTransaction;
+function ITraceTransactionImpl.asITraceTransaction:ITraceTransaction;
 begin
-  Result := ITraceTransaction(@nullPtr);
+  Result := ITraceTransaction(@FNullPtr);
 end;
 
 function ITraceTransactionImpl_getTransactionIDDispatcher(this: ITraceTransaction): Int64; cdecl;
 begin
 	try
-		Result := this.owner.getTransactionID();
+		Result := this.FITraceTransactionImpl.getTransactionID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17187,7 +16901,7 @@ end;
 function ITraceTransactionImpl_getReadOnlyDispatcher(this: ITraceTransaction): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.getReadOnly();
+		Result := this.FITraceTransactionImpl.getReadOnly();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17196,7 +16910,7 @@ end;
 function ITraceTransactionImpl_getWaitDispatcher(this: ITraceTransaction): Integer; cdecl;
 begin
 	try
-		Result := this.owner.getWait();
+		Result := this.FITraceTransactionImpl.getWait();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17205,7 +16919,7 @@ end;
 function ITraceTransactionImpl_getIsolationDispatcher(this: ITraceTransaction): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getIsolation();
+		Result := this.FITraceTransactionImpl.getIsolation();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17214,7 +16928,7 @@ end;
 function ITraceTransactionImpl_getPerfDispatcher(this: ITraceTransaction): PerformanceInfoPtr; cdecl;
 begin
 	try
-		Result := this.owner.getPerf();
+		Result := this.FITraceTransactionImpl.getPerf();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17223,7 +16937,7 @@ end;
 function ITraceTransactionImpl_getInitialIDDispatcher(this: ITraceTransaction): Int64; cdecl;
 begin
 	try
-		Result := this.owner.getInitialID();
+		Result := this.FITraceTransactionImpl.getInitialID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17232,7 +16946,7 @@ end;
 function ITraceTransactionImpl_getPreviousIDDispatcher(this: ITraceTransaction): Int64; cdecl;
 begin
 	try
-		Result := this.owner.getPreviousID();
+		Result := this.FITraceTransactionImpl.getPreviousID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17249,7 +16963,7 @@ var ITraceTransactionImpl_vTable: TraceTransactionVTable = (
      getInitialID: @ITraceTransactionImpl_getInitialIDDispatcher;
      getPreviousID: @ITraceTransactionImpl_getPreviousIDDispatcher);
 
-function TTraceTransaction.isITraceTransactionImpl: boolean inline;
+function TTraceTransaction.isITraceTransactionImpl: boolean;
 begin
   Result := (vTable = @ITraceTransactionImpl_vTable);
 end;
@@ -17257,23 +16971,23 @@ end;
 constructor ITraceTransactionImpl.create;
 begin
   inherited Create;
-  vTable := @ITraceTransactionImpl_vTable;
+  FvTable := @ITraceTransactionImpl_vTable;
 end;
 
-function ITraceTransactionImpl.getvTableVersion: NativeInt;
+function ITraceTransactionImpl.getVTable: PTraceTransactionVTable;
 begin
-  Result := PTraceTransactionVTable(vTable)^.version
+  Result := PTraceTransactionVTable(FvTable);
 end;
 
-function ITraceParamsImpl.getInterface:ITraceParams;
+function ITraceParamsImpl.asITraceParams:ITraceParams;
 begin
-  Result := ITraceParams(@nullPtr);
+  Result := ITraceParams(@FNullPtr);
 end;
 
 function ITraceParamsImpl_getCountDispatcher(this: ITraceParams): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getCount();
+		Result := this.FITraceParamsImpl.getCount();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17282,7 +16996,7 @@ end;
 function ITraceParamsImpl_getParamDispatcher(this: ITraceParams; idx: Cardinal): dscPtr; cdecl;
 begin
 	try
-		Result := this.owner.getParam(idx);
+		Result := this.FITraceParamsImpl.getParam(idx);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17291,7 +17005,7 @@ end;
 function ITraceParamsImpl_getTextUTF8Dispatcher(this: ITraceParams; status: IStatus; idx: Cardinal): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getTextUTF8(status, idx);
+		Result := this.FITraceParamsImpl.getTextUTF8(status, idx);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17304,7 +17018,7 @@ var ITraceParamsImpl_vTable: TraceParamsVTable = (
      getParam: @ITraceParamsImpl_getParamDispatcher;
      getTextUTF8: @ITraceParamsImpl_getTextUTF8Dispatcher);
 
-function TTraceParams.isITraceParamsImpl: boolean inline;
+function TTraceParams.isITraceParamsImpl: boolean;
 begin
   Result := (vTable = @ITraceParamsImpl_vTable);
 end;
@@ -17312,23 +17026,23 @@ end;
 constructor ITraceParamsImpl.create;
 begin
   inherited Create;
-  vTable := @ITraceParamsImpl_vTable;
+  FvTable := @ITraceParamsImpl_vTable;
 end;
 
-function ITraceParamsImpl.getvTableVersion: NativeInt;
+function ITraceParamsImpl.getVTable: PTraceParamsVTable;
 begin
-  Result := PTraceParamsVTable(vTable)^.version
+  Result := PTraceParamsVTable(FvTable);
 end;
 
-function ITraceStatementImpl.getInterface:ITraceStatement;
+function ITraceStatementImpl.asITraceStatement:ITraceStatement;
 begin
-  Result := ITraceStatement(@nullPtr);
+  Result := ITraceStatement(@FNullPtr);
 end;
 
 function ITraceStatementImpl_getStmtIDDispatcher(this: ITraceStatement): Int64; cdecl;
 begin
 	try
-		Result := this.owner.getStmtID();
+		Result := this.FITraceStatementImpl.getStmtID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17337,7 +17051,7 @@ end;
 function ITraceStatementImpl_getPerfDispatcher(this: ITraceStatement): PerformanceInfoPtr; cdecl;
 begin
 	try
-		Result := this.owner.getPerf();
+		Result := this.FITraceStatementImpl.getPerf();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17349,7 +17063,7 @@ var ITraceStatementImpl_vTable: TraceStatementVTable = (
      getStmtID: @ITraceStatementImpl_getStmtIDDispatcher;
      getPerf: @ITraceStatementImpl_getPerfDispatcher);
 
-function TTraceStatement.isITraceStatementImpl: boolean inline;
+function TTraceStatement.isITraceStatementImpl: boolean;
 begin
   Result := (vTable = @ITraceStatementImpl_vTable);
 end;
@@ -17357,23 +17071,23 @@ end;
 constructor ITraceStatementImpl.create;
 begin
   inherited Create;
-  vTable := @ITraceStatementImpl_vTable;
+  FvTable := @ITraceStatementImpl_vTable;
 end;
 
-function ITraceStatementImpl.getvTableVersion: NativeInt;
+function ITraceStatementImpl.getVTable: PTraceStatementVTable;
 begin
-  Result := PTraceStatementVTable(vTable)^.version
+  Result := PTraceStatementVTable(FvTable);
 end;
 
-function ITraceSQLStatementImpl.getInterface:ITraceSQLStatement;
+function ITraceSQLStatementImpl.asITraceSQLStatement:ITraceSQLStatement;
 begin
-  Result := ITraceSQLStatement(@nullPtr);
+  Result := ITraceSQLStatement(@FNullPtr);
 end;
 
 function ITraceSQLStatementImpl_getStmtIDDispatcher(this: ITraceSQLStatement): Int64; cdecl;
 begin
 	try
-		Result := this.owner.getStmtID();
+		Result := this.FITraceSQLStatementImpl.getStmtID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17382,7 +17096,7 @@ end;
 function ITraceSQLStatementImpl_getPerfDispatcher(this: ITraceSQLStatement): PerformanceInfoPtr; cdecl;
 begin
 	try
-		Result := this.owner.getPerf();
+		Result := this.FITraceSQLStatementImpl.getPerf();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17391,7 +17105,7 @@ end;
 function ITraceSQLStatementImpl_getTextDispatcher(this: ITraceSQLStatement): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getText();
+		Result := this.FITraceSQLStatementImpl.getText();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17400,7 +17114,7 @@ end;
 function ITraceSQLStatementImpl_getPlanDispatcher(this: ITraceSQLStatement): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getPlan();
+		Result := this.FITraceSQLStatementImpl.getPlan();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17409,7 +17123,7 @@ end;
 function ITraceSQLStatementImpl_getInputsDispatcher(this: ITraceSQLStatement): ITraceParams; cdecl;
 begin
 	try
-		Result := this.owner.getInputs();
+		Result := this.FITraceSQLStatementImpl.getInputs();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17418,7 +17132,7 @@ end;
 function ITraceSQLStatementImpl_getTextUTF8Dispatcher(this: ITraceSQLStatement): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getTextUTF8();
+		Result := this.FITraceSQLStatementImpl.getTextUTF8();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17427,7 +17141,7 @@ end;
 function ITraceSQLStatementImpl_getExplainedPlanDispatcher(this: ITraceSQLStatement): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getExplainedPlan();
+		Result := this.FITraceSQLStatementImpl.getExplainedPlan();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17444,7 +17158,7 @@ var ITraceSQLStatementImpl_vTable: TraceSQLStatementVTable = (
      getTextUTF8: @ITraceSQLStatementImpl_getTextUTF8Dispatcher;
      getExplainedPlan: @ITraceSQLStatementImpl_getExplainedPlanDispatcher);
 
-function TTraceSQLStatement.isITraceSQLStatementImpl: boolean inline;
+function TTraceSQLStatement.isITraceSQLStatementImpl: boolean;
 begin
   Result := (vTable = @ITraceSQLStatementImpl_vTable);
 end;
@@ -17452,23 +17166,23 @@ end;
 constructor ITraceSQLStatementImpl.create;
 begin
   inherited Create;
-  vTable := @ITraceSQLStatementImpl_vTable;
+  FvTable := @ITraceSQLStatementImpl_vTable;
 end;
 
-function ITraceSQLStatementImpl.getvTableVersion: NativeInt;
+function ITraceSQLStatementImpl.getVTable: PTraceSQLStatementVTable;
 begin
-  Result := PTraceSQLStatementVTable(vTable)^.version
+  Result := PTraceSQLStatementVTable(FvTable);
 end;
 
-function ITraceBLRStatementImpl.getInterface:ITraceBLRStatement;
+function ITraceBLRStatementImpl.asITraceBLRStatement:ITraceBLRStatement;
 begin
-  Result := ITraceBLRStatement(@nullPtr);
+  Result := ITraceBLRStatement(@FNullPtr);
 end;
 
 function ITraceBLRStatementImpl_getStmtIDDispatcher(this: ITraceBLRStatement): Int64; cdecl;
 begin
 	try
-		Result := this.owner.getStmtID();
+		Result := this.FITraceBLRStatementImpl.getStmtID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17477,7 +17191,7 @@ end;
 function ITraceBLRStatementImpl_getPerfDispatcher(this: ITraceBLRStatement): PerformanceInfoPtr; cdecl;
 begin
 	try
-		Result := this.owner.getPerf();
+		Result := this.FITraceBLRStatementImpl.getPerf();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17486,7 +17200,7 @@ end;
 function ITraceBLRStatementImpl_getDataDispatcher(this: ITraceBLRStatement): BytePtr; cdecl;
 begin
 	try
-		Result := this.owner.getData();
+		Result := this.FITraceBLRStatementImpl.getData();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17495,7 +17209,7 @@ end;
 function ITraceBLRStatementImpl_getDataLengthDispatcher(this: ITraceBLRStatement): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getDataLength();
+		Result := this.FITraceBLRStatementImpl.getDataLength();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17504,7 +17218,7 @@ end;
 function ITraceBLRStatementImpl_getTextDispatcher(this: ITraceBLRStatement): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getText();
+		Result := this.FITraceBLRStatementImpl.getText();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17519,7 +17233,7 @@ var ITraceBLRStatementImpl_vTable: TraceBLRStatementVTable = (
      getDataLength: @ITraceBLRStatementImpl_getDataLengthDispatcher;
      getText: @ITraceBLRStatementImpl_getTextDispatcher);
 
-function TTraceBLRStatement.isITraceBLRStatementImpl: boolean inline;
+function TTraceBLRStatement.isITraceBLRStatementImpl: boolean;
 begin
   Result := (vTable = @ITraceBLRStatementImpl_vTable);
 end;
@@ -17527,23 +17241,23 @@ end;
 constructor ITraceBLRStatementImpl.create;
 begin
   inherited Create;
-  vTable := @ITraceBLRStatementImpl_vTable;
+  FvTable := @ITraceBLRStatementImpl_vTable;
 end;
 
-function ITraceBLRStatementImpl.getvTableVersion: NativeInt;
+function ITraceBLRStatementImpl.getVTable: PTraceBLRStatementVTable;
 begin
-  Result := PTraceBLRStatementVTable(vTable)^.version
+  Result := PTraceBLRStatementVTable(FvTable);
 end;
 
-function ITraceDYNRequestImpl.getInterface:ITraceDYNRequest;
+function ITraceDYNRequestImpl.asITraceDYNRequest:ITraceDYNRequest;
 begin
-  Result := ITraceDYNRequest(@nullPtr);
+  Result := ITraceDYNRequest(@FNullPtr);
 end;
 
 function ITraceDYNRequestImpl_getDataDispatcher(this: ITraceDYNRequest): BytePtr; cdecl;
 begin
 	try
-		Result := this.owner.getData();
+		Result := this.FITraceDYNRequestImpl.getData();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17552,7 +17266,7 @@ end;
 function ITraceDYNRequestImpl_getDataLengthDispatcher(this: ITraceDYNRequest): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getDataLength();
+		Result := this.FITraceDYNRequestImpl.getDataLength();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17561,7 +17275,7 @@ end;
 function ITraceDYNRequestImpl_getTextDispatcher(this: ITraceDYNRequest): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getText();
+		Result := this.FITraceDYNRequestImpl.getText();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17574,7 +17288,7 @@ var ITraceDYNRequestImpl_vTable: TraceDYNRequestVTable = (
      getDataLength: @ITraceDYNRequestImpl_getDataLengthDispatcher;
      getText: @ITraceDYNRequestImpl_getTextDispatcher);
 
-function TTraceDYNRequest.isITraceDYNRequestImpl: boolean inline;
+function TTraceDYNRequest.isITraceDYNRequestImpl: boolean;
 begin
   Result := (vTable = @ITraceDYNRequestImpl_vTable);
 end;
@@ -17582,23 +17296,23 @@ end;
 constructor ITraceDYNRequestImpl.create;
 begin
   inherited Create;
-  vTable := @ITraceDYNRequestImpl_vTable;
+  FvTable := @ITraceDYNRequestImpl_vTable;
 end;
 
-function ITraceDYNRequestImpl.getvTableVersion: NativeInt;
+function ITraceDYNRequestImpl.getVTable: PTraceDYNRequestVTable;
 begin
-  Result := PTraceDYNRequestVTable(vTable)^.version
+  Result := PTraceDYNRequestVTable(FvTable);
 end;
 
-function ITraceContextVariableImpl.getInterface:ITraceContextVariable;
+function ITraceContextVariableImpl.asITraceContextVariable:ITraceContextVariable;
 begin
-  Result := ITraceContextVariable(@nullPtr);
+  Result := ITraceContextVariable(@FNullPtr);
 end;
 
 function ITraceContextVariableImpl_getNameSpaceDispatcher(this: ITraceContextVariable): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getNameSpace();
+		Result := this.FITraceContextVariableImpl.getNameSpace();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17607,7 +17321,7 @@ end;
 function ITraceContextVariableImpl_getVarNameDispatcher(this: ITraceContextVariable): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getVarName();
+		Result := this.FITraceContextVariableImpl.getVarName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17616,7 +17330,7 @@ end;
 function ITraceContextVariableImpl_getVarValueDispatcher(this: ITraceContextVariable): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getVarValue();
+		Result := this.FITraceContextVariableImpl.getVarValue();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17629,7 +17343,7 @@ var ITraceContextVariableImpl_vTable: TraceContextVariableVTable = (
      getVarName: @ITraceContextVariableImpl_getVarNameDispatcher;
      getVarValue: @ITraceContextVariableImpl_getVarValueDispatcher);
 
-function TTraceContextVariable.isITraceContextVariableImpl: boolean inline;
+function TTraceContextVariable.isITraceContextVariableImpl: boolean;
 begin
   Result := (vTable = @ITraceContextVariableImpl_vTable);
 end;
@@ -17637,23 +17351,23 @@ end;
 constructor ITraceContextVariableImpl.create;
 begin
   inherited Create;
-  vTable := @ITraceContextVariableImpl_vTable;
+  FvTable := @ITraceContextVariableImpl_vTable;
 end;
 
-function ITraceContextVariableImpl.getvTableVersion: NativeInt;
+function ITraceContextVariableImpl.getVTable: PTraceContextVariableVTable;
 begin
-  Result := PTraceContextVariableVTable(vTable)^.version
+  Result := PTraceContextVariableVTable(FvTable);
 end;
 
-function ITraceProcedureImpl.getInterface:ITraceProcedure;
+function ITraceProcedureImpl.asITraceProcedure:ITraceProcedure;
 begin
-  Result := ITraceProcedure(@nullPtr);
+  Result := ITraceProcedure(@FNullPtr);
 end;
 
 function ITraceProcedureImpl_getProcNameDispatcher(this: ITraceProcedure): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getProcName();
+		Result := this.FITraceProcedureImpl.getProcName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17662,7 +17376,7 @@ end;
 function ITraceProcedureImpl_getInputsDispatcher(this: ITraceProcedure): ITraceParams; cdecl;
 begin
 	try
-		Result := this.owner.getInputs();
+		Result := this.FITraceProcedureImpl.getInputs();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17671,7 +17385,7 @@ end;
 function ITraceProcedureImpl_getPerfDispatcher(this: ITraceProcedure): PerformanceInfoPtr; cdecl;
 begin
 	try
-		Result := this.owner.getPerf();
+		Result := this.FITraceProcedureImpl.getPerf();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17684,7 +17398,7 @@ var ITraceProcedureImpl_vTable: TraceProcedureVTable = (
      getInputs: @ITraceProcedureImpl_getInputsDispatcher;
      getPerf: @ITraceProcedureImpl_getPerfDispatcher);
 
-function TTraceProcedure.isITraceProcedureImpl: boolean inline;
+function TTraceProcedure.isITraceProcedureImpl: boolean;
 begin
   Result := (vTable = @ITraceProcedureImpl_vTable);
 end;
@@ -17692,23 +17406,23 @@ end;
 constructor ITraceProcedureImpl.create;
 begin
   inherited Create;
-  vTable := @ITraceProcedureImpl_vTable;
+  FvTable := @ITraceProcedureImpl_vTable;
 end;
 
-function ITraceProcedureImpl.getvTableVersion: NativeInt;
+function ITraceProcedureImpl.getVTable: PTraceProcedureVTable;
 begin
-  Result := PTraceProcedureVTable(vTable)^.version
+  Result := PTraceProcedureVTable(FvTable);
 end;
 
-function ITraceFunctionImpl.getInterface:ITraceFunction;
+function ITraceFunctionImpl.asITraceFunction:ITraceFunction;
 begin
-  Result := ITraceFunction(@nullPtr);
+  Result := ITraceFunction(@FNullPtr);
 end;
 
 function ITraceFunctionImpl_getFuncNameDispatcher(this: ITraceFunction): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getFuncName();
+		Result := this.FITraceFunctionImpl.getFuncName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17717,7 +17431,7 @@ end;
 function ITraceFunctionImpl_getInputsDispatcher(this: ITraceFunction): ITraceParams; cdecl;
 begin
 	try
-		Result := this.owner.getInputs();
+		Result := this.FITraceFunctionImpl.getInputs();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17726,7 +17440,7 @@ end;
 function ITraceFunctionImpl_getResultDispatcher(this: ITraceFunction): ITraceParams; cdecl;
 begin
 	try
-		Result := this.owner.getResult();
+		Result := this.FITraceFunctionImpl.getResult();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17735,7 +17449,7 @@ end;
 function ITraceFunctionImpl_getPerfDispatcher(this: ITraceFunction): PerformanceInfoPtr; cdecl;
 begin
 	try
-		Result := this.owner.getPerf();
+		Result := this.FITraceFunctionImpl.getPerf();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17749,7 +17463,7 @@ var ITraceFunctionImpl_vTable: TraceFunctionVTable = (
      getResult: @ITraceFunctionImpl_getResultDispatcher;
      getPerf: @ITraceFunctionImpl_getPerfDispatcher);
 
-function TTraceFunction.isITraceFunctionImpl: boolean inline;
+function TTraceFunction.isITraceFunctionImpl: boolean;
 begin
   Result := (vTable = @ITraceFunctionImpl_vTable);
 end;
@@ -17757,23 +17471,23 @@ end;
 constructor ITraceFunctionImpl.create;
 begin
   inherited Create;
-  vTable := @ITraceFunctionImpl_vTable;
+  FvTable := @ITraceFunctionImpl_vTable;
 end;
 
-function ITraceFunctionImpl.getvTableVersion: NativeInt;
+function ITraceFunctionImpl.getVTable: PTraceFunctionVTable;
 begin
-  Result := PTraceFunctionVTable(vTable)^.version
+  Result := PTraceFunctionVTable(FvTable);
 end;
 
-function ITraceTriggerImpl.getInterface:ITraceTrigger;
+function ITraceTriggerImpl.asITraceTrigger:ITraceTrigger;
 begin
-  Result := ITraceTrigger(@nullPtr);
+  Result := ITraceTrigger(@FNullPtr);
 end;
 
 function ITraceTriggerImpl_getTriggerNameDispatcher(this: ITraceTrigger): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getTriggerName();
+		Result := this.FITraceTriggerImpl.getTriggerName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17782,7 +17496,7 @@ end;
 function ITraceTriggerImpl_getRelationNameDispatcher(this: ITraceTrigger): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getRelationName();
+		Result := this.FITraceTriggerImpl.getRelationName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17791,7 +17505,7 @@ end;
 function ITraceTriggerImpl_getActionDispatcher(this: ITraceTrigger): Integer; cdecl;
 begin
 	try
-		Result := this.owner.getAction();
+		Result := this.FITraceTriggerImpl.getAction();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17800,7 +17514,7 @@ end;
 function ITraceTriggerImpl_getWhichDispatcher(this: ITraceTrigger): Integer; cdecl;
 begin
 	try
-		Result := this.owner.getWhich();
+		Result := this.FITraceTriggerImpl.getWhich();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17809,7 +17523,7 @@ end;
 function ITraceTriggerImpl_getPerfDispatcher(this: ITraceTrigger): PerformanceInfoPtr; cdecl;
 begin
 	try
-		Result := this.owner.getPerf();
+		Result := this.FITraceTriggerImpl.getPerf();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17824,7 +17538,7 @@ var ITraceTriggerImpl_vTable: TraceTriggerVTable = (
      getWhich: @ITraceTriggerImpl_getWhichDispatcher;
      getPerf: @ITraceTriggerImpl_getPerfDispatcher);
 
-function TTraceTrigger.isITraceTriggerImpl: boolean inline;
+function TTraceTrigger.isITraceTriggerImpl: boolean;
 begin
   Result := (vTable = @ITraceTriggerImpl_vTable);
 end;
@@ -17832,23 +17546,23 @@ end;
 constructor ITraceTriggerImpl.create;
 begin
   inherited Create;
-  vTable := @ITraceTriggerImpl_vTable;
+  FvTable := @ITraceTriggerImpl_vTable;
 end;
 
-function ITraceTriggerImpl.getvTableVersion: NativeInt;
+function ITraceTriggerImpl.getVTable: PTraceTriggerVTable;
 begin
-  Result := PTraceTriggerVTable(vTable)^.version
+  Result := PTraceTriggerVTable(FvTable);
 end;
 
-function ITraceServiceConnectionImpl.getInterface:ITraceServiceConnection;
+function ITraceServiceConnectionImpl.asITraceServiceConnection:ITraceServiceConnection;
 begin
-  Result := ITraceServiceConnection(@nullPtr);
+  Result := ITraceServiceConnection(@FNullPtr);
 end;
 
 function ITraceServiceConnectionImpl_getKindDispatcher(this: ITraceServiceConnection): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getKind();
+		Result := this.FITraceServiceConnectionImpl.getKind();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17857,7 +17571,7 @@ end;
 function ITraceServiceConnectionImpl_getProcessIDDispatcher(this: ITraceServiceConnection): Integer; cdecl;
 begin
 	try
-		Result := this.owner.getProcessID();
+		Result := this.FITraceServiceConnectionImpl.getProcessID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17866,7 +17580,7 @@ end;
 function ITraceServiceConnectionImpl_getUserNameDispatcher(this: ITraceServiceConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getUserName();
+		Result := this.FITraceServiceConnectionImpl.getUserName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17875,7 +17589,7 @@ end;
 function ITraceServiceConnectionImpl_getRoleNameDispatcher(this: ITraceServiceConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getRoleName();
+		Result := this.FITraceServiceConnectionImpl.getRoleName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17884,7 +17598,7 @@ end;
 function ITraceServiceConnectionImpl_getCharSetDispatcher(this: ITraceServiceConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getCharSet();
+		Result := this.FITraceServiceConnectionImpl.getCharSet();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17893,7 +17607,7 @@ end;
 function ITraceServiceConnectionImpl_getRemoteProtocolDispatcher(this: ITraceServiceConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getRemoteProtocol();
+		Result := this.FITraceServiceConnectionImpl.getRemoteProtocol();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17902,7 +17616,7 @@ end;
 function ITraceServiceConnectionImpl_getRemoteAddressDispatcher(this: ITraceServiceConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getRemoteAddress();
+		Result := this.FITraceServiceConnectionImpl.getRemoteAddress();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17911,7 +17625,7 @@ end;
 function ITraceServiceConnectionImpl_getRemoteProcessIDDispatcher(this: ITraceServiceConnection): Integer; cdecl;
 begin
 	try
-		Result := this.owner.getRemoteProcessID();
+		Result := this.FITraceServiceConnectionImpl.getRemoteProcessID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17920,7 +17634,7 @@ end;
 function ITraceServiceConnectionImpl_getRemoteProcessNameDispatcher(this: ITraceServiceConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getRemoteProcessName();
+		Result := this.FITraceServiceConnectionImpl.getRemoteProcessName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17929,7 +17643,7 @@ end;
 function ITraceServiceConnectionImpl_getServiceIDDispatcher(this: ITraceServiceConnection): Pointer; cdecl;
 begin
 	try
-		Result := this.owner.getServiceID();
+		Result := this.FITraceServiceConnectionImpl.getServiceID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17938,7 +17652,7 @@ end;
 function ITraceServiceConnectionImpl_getServiceMgrDispatcher(this: ITraceServiceConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getServiceMgr();
+		Result := this.FITraceServiceConnectionImpl.getServiceMgr();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17947,7 +17661,7 @@ end;
 function ITraceServiceConnectionImpl_getServiceNameDispatcher(this: ITraceServiceConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getServiceName();
+		Result := this.FITraceServiceConnectionImpl.getServiceName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17969,7 +17683,7 @@ var ITraceServiceConnectionImpl_vTable: TraceServiceConnectionVTable = (
      getServiceMgr: @ITraceServiceConnectionImpl_getServiceMgrDispatcher;
      getServiceName: @ITraceServiceConnectionImpl_getServiceNameDispatcher);
 
-function TTraceServiceConnection.isITraceServiceConnectionImpl: boolean inline;
+function TTraceServiceConnection.isITraceServiceConnectionImpl: boolean;
 begin
   Result := (vTable = @ITraceServiceConnectionImpl_vTable);
 end;
@@ -17977,23 +17691,23 @@ end;
 constructor ITraceServiceConnectionImpl.create;
 begin
   inherited Create;
-  vTable := @ITraceServiceConnectionImpl_vTable;
+  FvTable := @ITraceServiceConnectionImpl_vTable;
 end;
 
-function ITraceServiceConnectionImpl.getvTableVersion: NativeInt;
+function ITraceServiceConnectionImpl.getVTable: PTraceServiceConnectionVTable;
 begin
-  Result := PTraceServiceConnectionVTable(vTable)^.version
+  Result := PTraceServiceConnectionVTable(FvTable);
 end;
 
-function ITraceStatusVectorImpl.getInterface:ITraceStatusVector;
+function ITraceStatusVectorImpl.asITraceStatusVector:ITraceStatusVector;
 begin
-  Result := ITraceStatusVector(@nullPtr);
+  Result := ITraceStatusVector(@FNullPtr);
 end;
 
 function ITraceStatusVectorImpl_hasErrorDispatcher(this: ITraceStatusVector): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.hasError();
+		Result := this.FITraceStatusVectorImpl.hasError();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18002,7 +17716,7 @@ end;
 function ITraceStatusVectorImpl_hasWarningDispatcher(this: ITraceStatusVector): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.hasWarning();
+		Result := this.FITraceStatusVectorImpl.hasWarning();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18011,7 +17725,7 @@ end;
 function ITraceStatusVectorImpl_getStatusDispatcher(this: ITraceStatusVector): IStatus; cdecl;
 begin
 	try
-		Result := this.owner.getStatus();
+		Result := this.FITraceStatusVectorImpl.getStatus();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18020,7 +17734,7 @@ end;
 function ITraceStatusVectorImpl_getTextDispatcher(this: ITraceStatusVector): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getText();
+		Result := this.FITraceStatusVectorImpl.getText();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18034,7 +17748,7 @@ var ITraceStatusVectorImpl_vTable: TraceStatusVectorVTable = (
      getStatus: @ITraceStatusVectorImpl_getStatusDispatcher;
      getText: @ITraceStatusVectorImpl_getTextDispatcher);
 
-function TTraceStatusVector.isITraceStatusVectorImpl: boolean inline;
+function TTraceStatusVector.isITraceStatusVectorImpl: boolean;
 begin
   Result := (vTable = @ITraceStatusVectorImpl_vTable);
 end;
@@ -18042,23 +17756,23 @@ end;
 constructor ITraceStatusVectorImpl.create;
 begin
   inherited Create;
-  vTable := @ITraceStatusVectorImpl_vTable;
+  FvTable := @ITraceStatusVectorImpl_vTable;
 end;
 
-function ITraceStatusVectorImpl.getvTableVersion: NativeInt;
+function ITraceStatusVectorImpl.getVTable: PTraceStatusVectorVTable;
 begin
-  Result := PTraceStatusVectorVTable(vTable)^.version
+  Result := PTraceStatusVectorVTable(FvTable);
 end;
 
-function ITraceSweepInfoImpl.getInterface:ITraceSweepInfo;
+function ITraceSweepInfoImpl.asITraceSweepInfo:ITraceSweepInfo;
 begin
-  Result := ITraceSweepInfo(@nullPtr);
+  Result := ITraceSweepInfo(@FNullPtr);
 end;
 
 function ITraceSweepInfoImpl_getOITDispatcher(this: ITraceSweepInfo): Int64; cdecl;
 begin
 	try
-		Result := this.owner.getOIT();
+		Result := this.FITraceSweepInfoImpl.getOIT();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18067,7 +17781,7 @@ end;
 function ITraceSweepInfoImpl_getOSTDispatcher(this: ITraceSweepInfo): Int64; cdecl;
 begin
 	try
-		Result := this.owner.getOST();
+		Result := this.FITraceSweepInfoImpl.getOST();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18076,7 +17790,7 @@ end;
 function ITraceSweepInfoImpl_getOATDispatcher(this: ITraceSweepInfo): Int64; cdecl;
 begin
 	try
-		Result := this.owner.getOAT();
+		Result := this.FITraceSweepInfoImpl.getOAT();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18085,7 +17799,7 @@ end;
 function ITraceSweepInfoImpl_getNextDispatcher(this: ITraceSweepInfo): Int64; cdecl;
 begin
 	try
-		Result := this.owner.getNext();
+		Result := this.FITraceSweepInfoImpl.getNext();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18094,7 +17808,7 @@ end;
 function ITraceSweepInfoImpl_getPerfDispatcher(this: ITraceSweepInfo): PerformanceInfoPtr; cdecl;
 begin
 	try
-		Result := this.owner.getPerf();
+		Result := this.FITraceSweepInfoImpl.getPerf();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18109,7 +17823,7 @@ var ITraceSweepInfoImpl_vTable: TraceSweepInfoVTable = (
      getNext: @ITraceSweepInfoImpl_getNextDispatcher;
      getPerf: @ITraceSweepInfoImpl_getPerfDispatcher);
 
-function TTraceSweepInfo.isITraceSweepInfoImpl: boolean inline;
+function TTraceSweepInfo.isITraceSweepInfoImpl: boolean;
 begin
   Result := (vTable = @ITraceSweepInfoImpl_vTable);
 end;
@@ -18117,23 +17831,23 @@ end;
 constructor ITraceSweepInfoImpl.create;
 begin
   inherited Create;
-  vTable := @ITraceSweepInfoImpl_vTable;
+  FvTable := @ITraceSweepInfoImpl_vTable;
 end;
 
-function ITraceSweepInfoImpl.getvTableVersion: NativeInt;
+function ITraceSweepInfoImpl.getVTable: PTraceSweepInfoVTable;
 begin
-  Result := PTraceSweepInfoVTable(vTable)^.version
+  Result := PTraceSweepInfoVTable(FvTable);
 end;
 
-function ITraceLogWriterImpl.getInterface:ITraceLogWriter;
+function ITraceLogWriterImpl.asITraceLogWriter:ITraceLogWriter;
 begin
-  Result := ITraceLogWriter(@nullPtr);
+  Result := ITraceLogWriter(@FNullPtr);
 end;
 
 procedure ITraceLogWriterImpl_addRefDispatcher(this: ITraceLogWriter); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FITraceLogWriterImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18142,7 +17856,7 @@ end;
 function ITraceLogWriterImpl_releaseDispatcher(this: ITraceLogWriter): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FITraceLogWriterImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18151,7 +17865,7 @@ end;
 function ITraceLogWriterImpl_writeDispatcher(this: ITraceLogWriter; buf: Pointer; size: Cardinal): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.write(buf, size);
+		Result := this.FITraceLogWriterImpl.write(buf, size);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18160,7 +17874,7 @@ end;
 function ITraceLogWriterImpl_write_sDispatcher(this: ITraceLogWriter; status: IStatus; buf: Pointer; size: Cardinal): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.write_s(status, buf, size);
+		Result := this.FITraceLogWriterImpl.write_s(status, buf, size);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18174,7 +17888,7 @@ var ITraceLogWriterImpl_vTable: TraceLogWriterVTable = (
      write: @ITraceLogWriterImpl_writeDispatcher;
      write_s: @ITraceLogWriterImpl_write_sDispatcher);
 
-function TTraceLogWriter.isITraceLogWriterImpl: boolean inline;
+function TTraceLogWriter.isITraceLogWriterImpl: boolean;
 begin
   Result := (vTable = @ITraceLogWriterImpl_vTable);
 end;
@@ -18182,23 +17896,23 @@ end;
 constructor ITraceLogWriterImpl.create;
 begin
   inherited Create;
-  vTable := @ITraceLogWriterImpl_vTable;
+  FvTable := @ITraceLogWriterImpl_vTable;
 end;
 
-function ITraceLogWriterImpl.getvTableVersion: NativeInt;
+function ITraceLogWriterImpl.getVTable: PTraceLogWriterVTable;
 begin
-  Result := PTraceLogWriterVTable(vTable)^.version
+  Result := PTraceLogWriterVTable(FvTable);
 end;
 
-function ITraceInitInfoImpl.getInterface:ITraceInitInfo;
+function ITraceInitInfoImpl.asITraceInitInfo:ITraceInitInfo;
 begin
-  Result := ITraceInitInfo(@nullPtr);
+  Result := ITraceInitInfo(@FNullPtr);
 end;
 
 function ITraceInitInfoImpl_getConfigTextDispatcher(this: ITraceInitInfo): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getConfigText();
+		Result := this.FITraceInitInfoImpl.getConfigText();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18207,7 +17921,7 @@ end;
 function ITraceInitInfoImpl_getTraceSessionIDDispatcher(this: ITraceInitInfo): Integer; cdecl;
 begin
 	try
-		Result := this.owner.getTraceSessionID();
+		Result := this.FITraceInitInfoImpl.getTraceSessionID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18216,7 +17930,7 @@ end;
 function ITraceInitInfoImpl_getTraceSessionNameDispatcher(this: ITraceInitInfo): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getTraceSessionName();
+		Result := this.FITraceInitInfoImpl.getTraceSessionName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18225,7 +17939,7 @@ end;
 function ITraceInitInfoImpl_getFirebirdRootDirectoryDispatcher(this: ITraceInitInfo): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getFirebirdRootDirectory();
+		Result := this.FITraceInitInfoImpl.getFirebirdRootDirectory();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18234,7 +17948,7 @@ end;
 function ITraceInitInfoImpl_getDatabaseNameDispatcher(this: ITraceInitInfo): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getDatabaseName();
+		Result := this.FITraceInitInfoImpl.getDatabaseName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18243,7 +17957,7 @@ end;
 function ITraceInitInfoImpl_getConnectionDispatcher(this: ITraceInitInfo): ITraceDatabaseConnection; cdecl;
 begin
 	try
-		Result := this.owner.getConnection();
+		Result := this.FITraceInitInfoImpl.getConnection();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18252,7 +17966,7 @@ end;
 function ITraceInitInfoImpl_getLogWriterDispatcher(this: ITraceInitInfo): ITraceLogWriter; cdecl;
 begin
 	try
-		Result := this.owner.getLogWriter();
+		Result := this.FITraceInitInfoImpl.getLogWriter();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18269,7 +17983,7 @@ var ITraceInitInfoImpl_vTable: TraceInitInfoVTable = (
      getConnection: @ITraceInitInfoImpl_getConnectionDispatcher;
      getLogWriter: @ITraceInitInfoImpl_getLogWriterDispatcher);
 
-function TTraceInitInfo.isITraceInitInfoImpl: boolean inline;
+function TTraceInitInfo.isITraceInitInfoImpl: boolean;
 begin
   Result := (vTable = @ITraceInitInfoImpl_vTable);
 end;
@@ -18277,23 +17991,23 @@ end;
 constructor ITraceInitInfoImpl.create;
 begin
   inherited Create;
-  vTable := @ITraceInitInfoImpl_vTable;
+  FvTable := @ITraceInitInfoImpl_vTable;
 end;
 
-function ITraceInitInfoImpl.getvTableVersion: NativeInt;
+function ITraceInitInfoImpl.getVTable: PTraceInitInfoVTable;
 begin
-  Result := PTraceInitInfoVTable(vTable)^.version
+  Result := PTraceInitInfoVTable(FvTable);
 end;
 
-function ITracePluginImpl.getInterface:ITracePlugin;
+function ITracePluginImpl.asITracePlugin:ITracePlugin;
 begin
-  Result := ITracePlugin(@nullPtr);
+  Result := ITracePlugin(@FNullPtr);
 end;
 
 procedure ITracePluginImpl_addRefDispatcher(this: ITracePlugin); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FITracePluginImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18302,7 +18016,7 @@ end;
 function ITracePluginImpl_releaseDispatcher(this: ITracePlugin): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FITracePluginImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18311,7 +18025,7 @@ end;
 function ITracePluginImpl_trace_get_errorDispatcher(this: ITracePlugin): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.trace_get_error();
+		Result := this.FITracePluginImpl.trace_get_error();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18320,7 +18034,7 @@ end;
 function ITracePluginImpl_trace_attachDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; create_db: Boolean; att_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.trace_attach(connection, create_db, att_result);
+		Result := this.FITracePluginImpl.trace_attach(connection, create_db, att_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18329,7 +18043,7 @@ end;
 function ITracePluginImpl_trace_detachDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; drop_db: Boolean): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.trace_detach(connection, drop_db);
+		Result := this.FITracePluginImpl.trace_detach(connection, drop_db);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18338,7 +18052,7 @@ end;
 function ITracePluginImpl_trace_transaction_startDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; tpb_length: Cardinal; tpb: BytePtr; tra_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.trace_transaction_start(connection, transaction, tpb_length, tpb, tra_result);
+		Result := this.FITracePluginImpl.trace_transaction_start(connection, transaction, tpb_length, tpb, tra_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18347,7 +18061,7 @@ end;
 function ITracePluginImpl_trace_transaction_endDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; commit: Boolean; retain_context: Boolean; tra_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.trace_transaction_end(connection, transaction, commit, retain_context, tra_result);
+		Result := this.FITracePluginImpl.trace_transaction_end(connection, transaction, commit, retain_context, tra_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18356,7 +18070,7 @@ end;
 function ITracePluginImpl_trace_proc_executeDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; procedure_: ITraceProcedure; started: Boolean; proc_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.trace_proc_execute(connection, transaction, procedure_, started, proc_result);
+		Result := this.FITracePluginImpl.trace_proc_execute(connection, transaction, procedure_, started, proc_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18365,7 +18079,7 @@ end;
 function ITracePluginImpl_trace_trigger_executeDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; trigger: ITraceTrigger; started: Boolean; trig_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.trace_trigger_execute(connection, transaction, trigger, started, trig_result);
+		Result := this.FITracePluginImpl.trace_trigger_execute(connection, transaction, trigger, started, trig_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18374,7 +18088,7 @@ end;
 function ITracePluginImpl_trace_set_contextDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; variable: ITraceContextVariable): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.trace_set_context(connection, transaction, variable);
+		Result := this.FITracePluginImpl.trace_set_context(connection, transaction, variable);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18383,7 +18097,7 @@ end;
 function ITracePluginImpl_trace_dsql_prepareDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; statement: ITraceSQLStatement; time_millis: Int64; req_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.trace_dsql_prepare(connection, transaction, statement, time_millis, req_result);
+		Result := this.FITracePluginImpl.trace_dsql_prepare(connection, transaction, statement, time_millis, req_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18392,7 +18106,7 @@ end;
 function ITracePluginImpl_trace_dsql_freeDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; statement: ITraceSQLStatement; option: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.trace_dsql_free(connection, statement, option);
+		Result := this.FITracePluginImpl.trace_dsql_free(connection, statement, option);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18401,7 +18115,7 @@ end;
 function ITracePluginImpl_trace_dsql_executeDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; statement: ITraceSQLStatement; started: Boolean; req_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.trace_dsql_execute(connection, transaction, statement, started, req_result);
+		Result := this.FITracePluginImpl.trace_dsql_execute(connection, transaction, statement, started, req_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18410,7 +18124,7 @@ end;
 function ITracePluginImpl_trace_blr_compileDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; statement: ITraceBLRStatement; time_millis: Int64; req_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.trace_blr_compile(connection, transaction, statement, time_millis, req_result);
+		Result := this.FITracePluginImpl.trace_blr_compile(connection, transaction, statement, time_millis, req_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18419,7 +18133,7 @@ end;
 function ITracePluginImpl_trace_blr_executeDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; statement: ITraceBLRStatement; req_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.trace_blr_execute(connection, transaction, statement, req_result);
+		Result := this.FITracePluginImpl.trace_blr_execute(connection, transaction, statement, req_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18428,7 +18142,7 @@ end;
 function ITracePluginImpl_trace_dyn_executeDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; request: ITraceDYNRequest; time_millis: Int64; req_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.trace_dyn_execute(connection, transaction, request, time_millis, req_result);
+		Result := this.FITracePluginImpl.trace_dyn_execute(connection, transaction, request, time_millis, req_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18437,7 +18151,7 @@ end;
 function ITracePluginImpl_trace_service_attachDispatcher(this: ITracePlugin; service: ITraceServiceConnection; att_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.trace_service_attach(service, att_result);
+		Result := this.FITracePluginImpl.trace_service_attach(service, att_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18446,7 +18160,7 @@ end;
 function ITracePluginImpl_trace_service_startDispatcher(this: ITracePlugin; service: ITraceServiceConnection; switches_length: Cardinal; switches: PAnsiChar; start_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.trace_service_start(service, switches_length, switches, start_result);
+		Result := this.FITracePluginImpl.trace_service_start(service, switches_length, switches, start_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18455,7 +18169,7 @@ end;
 function ITracePluginImpl_trace_service_queryDispatcher(this: ITracePlugin; service: ITraceServiceConnection; send_item_length: Cardinal; send_items: BytePtr; recv_item_length: Cardinal; recv_items: BytePtr; query_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.trace_service_query(service, send_item_length, send_items, recv_item_length, recv_items, query_result);
+		Result := this.FITracePluginImpl.trace_service_query(service, send_item_length, send_items, recv_item_length, recv_items, query_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18464,7 +18178,7 @@ end;
 function ITracePluginImpl_trace_service_detachDispatcher(this: ITracePlugin; service: ITraceServiceConnection; detach_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.trace_service_detach(service, detach_result);
+		Result := this.FITracePluginImpl.trace_service_detach(service, detach_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18473,7 +18187,7 @@ end;
 function ITracePluginImpl_trace_event_errorDispatcher(this: ITracePlugin; connection: ITraceConnection; status: ITraceStatusVector; function_: PAnsiChar): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.trace_event_error(connection, status, function_);
+		Result := this.FITracePluginImpl.trace_event_error(connection, status, function_);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18482,7 +18196,7 @@ end;
 function ITracePluginImpl_trace_event_sweepDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; sweep: ITraceSweepInfo; sweep_state: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.trace_event_sweep(connection, sweep, sweep_state);
+		Result := this.FITracePluginImpl.trace_event_sweep(connection, sweep, sweep_state);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18491,7 +18205,7 @@ end;
 function ITracePluginImpl_trace_func_executeDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; function_: ITraceFunction; started: Boolean; func_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.trace_func_execute(connection, transaction, function_, started, func_result);
+		Result := this.FITracePluginImpl.trace_func_execute(connection, transaction, function_, started, func_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18524,7 +18238,7 @@ var ITracePluginImpl_vTable: TracePluginVTable = (
      trace_event_sweep: @ITracePluginImpl_trace_event_sweepDispatcher;
      trace_func_execute: @ITracePluginImpl_trace_func_executeDispatcher);
 
-function TTracePlugin.isITracePluginImpl: boolean inline;
+function TTracePlugin.isITracePluginImpl: boolean;
 begin
   Result := (vTable = @ITracePluginImpl_vTable);
 end;
@@ -18532,23 +18246,23 @@ end;
 constructor ITracePluginImpl.create;
 begin
   inherited Create;
-  vTable := @ITracePluginImpl_vTable;
+  FvTable := @ITracePluginImpl_vTable;
 end;
 
-function ITracePluginImpl.getvTableVersion: NativeInt;
+function ITracePluginImpl.getVTable: PTracePluginVTable;
 begin
-  Result := PTracePluginVTable(vTable)^.version
+  Result := PTracePluginVTable(FvTable);
 end;
 
-function ITraceFactoryImpl.getInterface:ITraceFactory;
+function ITraceFactoryImpl.asITraceFactory:ITraceFactory;
 begin
-  Result := ITraceFactory(@nullPtr);
+  Result := ITraceFactory(@FNullPtr);
 end;
 
 procedure ITraceFactoryImpl_addRefDispatcher(this: ITraceFactory); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FITraceFactoryImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18557,7 +18271,7 @@ end;
 function ITraceFactoryImpl_releaseDispatcher(this: ITraceFactory): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FITraceFactoryImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18566,7 +18280,7 @@ end;
 procedure ITraceFactoryImpl_setOwnerDispatcher(this: ITraceFactory; r: IReferenceCounted); cdecl;
 begin
 	try
-		this.owner.setOwner(r);
+		this.FITraceFactoryImpl.setOwner(r);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18575,7 +18289,7 @@ end;
 function ITraceFactoryImpl_getOwnerDispatcher(this: ITraceFactory): IReferenceCounted; cdecl;
 begin
 	try
-		Result := this.owner.getOwner();
+		Result := this.FITraceFactoryImpl.getOwner();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18584,7 +18298,7 @@ end;
 function ITraceFactoryImpl_trace_needsDispatcher(this: ITraceFactory): QWord; cdecl;
 begin
 	try
-		Result := this.owner.trace_needs();
+		Result := this.FITraceFactoryImpl.trace_needs();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18593,7 +18307,7 @@ end;
 function ITraceFactoryImpl_trace_createDispatcher(this: ITraceFactory; status: IStatus; init_info: ITraceInitInfo): ITracePlugin; cdecl;
 begin
 	try
-		Result := this.owner.trace_create(status, init_info);
+		Result := this.FITraceFactoryImpl.trace_create(status, init_info);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18609,7 +18323,7 @@ var ITraceFactoryImpl_vTable: TraceFactoryVTable = (
      trace_needs: @ITraceFactoryImpl_trace_needsDispatcher;
      trace_create: @ITraceFactoryImpl_trace_createDispatcher);
 
-function TTraceFactory.isITraceFactoryImpl: boolean inline;
+function TTraceFactory.isITraceFactoryImpl: boolean;
 begin
   Result := (vTable = @ITraceFactoryImpl_vTable);
 end;
@@ -18617,23 +18331,23 @@ end;
 constructor ITraceFactoryImpl.create;
 begin
   inherited Create;
-  vTable := @ITraceFactoryImpl_vTable;
+  FvTable := @ITraceFactoryImpl_vTable;
 end;
 
-function ITraceFactoryImpl.getvTableVersion: NativeInt;
+function ITraceFactoryImpl.getVTable: PTraceFactoryVTable;
 begin
-  Result := PTraceFactoryVTable(vTable)^.version
+  Result := PTraceFactoryVTable(FvTable);
 end;
 
-function IUdrFunctionFactoryImpl.getInterface:IUdrFunctionFactory;
+function IUdrFunctionFactoryImpl.asIUdrFunctionFactory:IUdrFunctionFactory;
 begin
-  Result := IUdrFunctionFactory(@nullPtr);
+  Result := IUdrFunctionFactory(@FNullPtr);
 end;
 
 procedure IUdrFunctionFactoryImpl_disposeDispatcher(this: IUdrFunctionFactory); cdecl;
 begin
 	try
-		this.owner.dispose();
+		this.FIUdrFunctionFactoryImpl.dispose();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18642,7 +18356,7 @@ end;
 procedure IUdrFunctionFactoryImpl_setupDispatcher(this: IUdrFunctionFactory; status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder); cdecl;
 begin
 	try
-		this.owner.setup(status, context, metadata, inBuilder, outBuilder);
+		this.FIUdrFunctionFactoryImpl.setup(status, context, metadata, inBuilder, outBuilder);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18651,7 +18365,7 @@ end;
 function IUdrFunctionFactoryImpl_newItemDispatcher(this: IUdrFunctionFactory; status: IStatus; context: IExternalContext; metadata: IRoutineMetadata): IExternalFunction; cdecl;
 begin
 	try
-		Result := this.owner.newItem(status, context, metadata);
+		Result := this.FIUdrFunctionFactoryImpl.newItem(status, context, metadata);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18664,7 +18378,7 @@ var IUdrFunctionFactoryImpl_vTable: UdrFunctionFactoryVTable = (
      setup: @IUdrFunctionFactoryImpl_setupDispatcher;
      newItem: @IUdrFunctionFactoryImpl_newItemDispatcher);
 
-function TUdrFunctionFactory.isIUdrFunctionFactoryImpl: boolean inline;
+function TUdrFunctionFactory.isIUdrFunctionFactoryImpl: boolean;
 begin
   Result := (vTable = @IUdrFunctionFactoryImpl_vTable);
 end;
@@ -18672,23 +18386,23 @@ end;
 constructor IUdrFunctionFactoryImpl.create;
 begin
   inherited Create;
-  vTable := @IUdrFunctionFactoryImpl_vTable;
+  FvTable := @IUdrFunctionFactoryImpl_vTable;
 end;
 
-function IUdrFunctionFactoryImpl.getvTableVersion: NativeInt;
+function IUdrFunctionFactoryImpl.getVTable: PUdrFunctionFactoryVTable;
 begin
-  Result := PUdrFunctionFactoryVTable(vTable)^.version
+  Result := PUdrFunctionFactoryVTable(FvTable);
 end;
 
-function IUdrProcedureFactoryImpl.getInterface:IUdrProcedureFactory;
+function IUdrProcedureFactoryImpl.asIUdrProcedureFactory:IUdrProcedureFactory;
 begin
-  Result := IUdrProcedureFactory(@nullPtr);
+  Result := IUdrProcedureFactory(@FNullPtr);
 end;
 
 procedure IUdrProcedureFactoryImpl_disposeDispatcher(this: IUdrProcedureFactory); cdecl;
 begin
 	try
-		this.owner.dispose();
+		this.FIUdrProcedureFactoryImpl.dispose();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18697,7 +18411,7 @@ end;
 procedure IUdrProcedureFactoryImpl_setupDispatcher(this: IUdrProcedureFactory; status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder); cdecl;
 begin
 	try
-		this.owner.setup(status, context, metadata, inBuilder, outBuilder);
+		this.FIUdrProcedureFactoryImpl.setup(status, context, metadata, inBuilder, outBuilder);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18706,7 +18420,7 @@ end;
 function IUdrProcedureFactoryImpl_newItemDispatcher(this: IUdrProcedureFactory; status: IStatus; context: IExternalContext; metadata: IRoutineMetadata): IExternalProcedure; cdecl;
 begin
 	try
-		Result := this.owner.newItem(status, context, metadata);
+		Result := this.FIUdrProcedureFactoryImpl.newItem(status, context, metadata);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18719,7 +18433,7 @@ var IUdrProcedureFactoryImpl_vTable: UdrProcedureFactoryVTable = (
      setup: @IUdrProcedureFactoryImpl_setupDispatcher;
      newItem: @IUdrProcedureFactoryImpl_newItemDispatcher);
 
-function TUdrProcedureFactory.isIUdrProcedureFactoryImpl: boolean inline;
+function TUdrProcedureFactory.isIUdrProcedureFactoryImpl: boolean;
 begin
   Result := (vTable = @IUdrProcedureFactoryImpl_vTable);
 end;
@@ -18727,23 +18441,23 @@ end;
 constructor IUdrProcedureFactoryImpl.create;
 begin
   inherited Create;
-  vTable := @IUdrProcedureFactoryImpl_vTable;
+  FvTable := @IUdrProcedureFactoryImpl_vTable;
 end;
 
-function IUdrProcedureFactoryImpl.getvTableVersion: NativeInt;
+function IUdrProcedureFactoryImpl.getVTable: PUdrProcedureFactoryVTable;
 begin
-  Result := PUdrProcedureFactoryVTable(vTable)^.version
+  Result := PUdrProcedureFactoryVTable(FvTable);
 end;
 
-function IUdrTriggerFactoryImpl.getInterface:IUdrTriggerFactory;
+function IUdrTriggerFactoryImpl.asIUdrTriggerFactory:IUdrTriggerFactory;
 begin
-  Result := IUdrTriggerFactory(@nullPtr);
+  Result := IUdrTriggerFactory(@FNullPtr);
 end;
 
 procedure IUdrTriggerFactoryImpl_disposeDispatcher(this: IUdrTriggerFactory); cdecl;
 begin
 	try
-		this.owner.dispose();
+		this.FIUdrTriggerFactoryImpl.dispose();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18752,7 +18466,7 @@ end;
 procedure IUdrTriggerFactoryImpl_setupDispatcher(this: IUdrTriggerFactory; status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; fieldsBuilder: IMetadataBuilder); cdecl;
 begin
 	try
-		this.owner.setup(status, context, metadata, fieldsBuilder);
+		this.FIUdrTriggerFactoryImpl.setup(status, context, metadata, fieldsBuilder);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18761,7 +18475,7 @@ end;
 function IUdrTriggerFactoryImpl_newItemDispatcher(this: IUdrTriggerFactory; status: IStatus; context: IExternalContext; metadata: IRoutineMetadata): IExternalTrigger; cdecl;
 begin
 	try
-		Result := this.owner.newItem(status, context, metadata);
+		Result := this.FIUdrTriggerFactoryImpl.newItem(status, context, metadata);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18774,7 +18488,7 @@ var IUdrTriggerFactoryImpl_vTable: UdrTriggerFactoryVTable = (
      setup: @IUdrTriggerFactoryImpl_setupDispatcher;
      newItem: @IUdrTriggerFactoryImpl_newItemDispatcher);
 
-function TUdrTriggerFactory.isIUdrTriggerFactoryImpl: boolean inline;
+function TUdrTriggerFactory.isIUdrTriggerFactoryImpl: boolean;
 begin
   Result := (vTable = @IUdrTriggerFactoryImpl_vTable);
 end;
@@ -18782,23 +18496,23 @@ end;
 constructor IUdrTriggerFactoryImpl.create;
 begin
   inherited Create;
-  vTable := @IUdrTriggerFactoryImpl_vTable;
+  FvTable := @IUdrTriggerFactoryImpl_vTable;
 end;
 
-function IUdrTriggerFactoryImpl.getvTableVersion: NativeInt;
+function IUdrTriggerFactoryImpl.getVTable: PUdrTriggerFactoryVTable;
 begin
-  Result := PUdrTriggerFactoryVTable(vTable)^.version
+  Result := PUdrTriggerFactoryVTable(FvTable);
 end;
 
-function IUdrPluginImpl.getInterface:IUdrPlugin;
+function IUdrPluginImpl.asIUdrPlugin:IUdrPlugin;
 begin
-  Result := IUdrPlugin(@nullPtr);
+  Result := IUdrPlugin(@FNullPtr);
 end;
 
 function IUdrPluginImpl_getMasterDispatcher(this: IUdrPlugin): IMaster; cdecl;
 begin
 	try
-		Result := this.owner.getMaster();
+		Result := this.FIUdrPluginImpl.getMaster();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18807,7 +18521,7 @@ end;
 procedure IUdrPluginImpl_registerFunctionDispatcher(this: IUdrPlugin; status: IStatus; name: PAnsiChar; factory: IUdrFunctionFactory); cdecl;
 begin
 	try
-		this.owner.registerFunction(status, name, factory);
+		this.FIUdrPluginImpl.registerFunction(status, name, factory);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18816,7 +18530,7 @@ end;
 procedure IUdrPluginImpl_registerProcedureDispatcher(this: IUdrPlugin; status: IStatus; name: PAnsiChar; factory: IUdrProcedureFactory); cdecl;
 begin
 	try
-		this.owner.registerProcedure(status, name, factory);
+		this.FIUdrPluginImpl.registerProcedure(status, name, factory);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18825,7 +18539,7 @@ end;
 procedure IUdrPluginImpl_registerTriggerDispatcher(this: IUdrPlugin; status: IStatus; name: PAnsiChar; factory: IUdrTriggerFactory); cdecl;
 begin
 	try
-		this.owner.registerTrigger(status, name, factory);
+		this.FIUdrPluginImpl.registerTrigger(status, name, factory);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18839,7 +18553,7 @@ var IUdrPluginImpl_vTable: UdrPluginVTable = (
      registerProcedure: @IUdrPluginImpl_registerProcedureDispatcher;
      registerTrigger: @IUdrPluginImpl_registerTriggerDispatcher);
 
-function TUdrPlugin.isIUdrPluginImpl: boolean inline;
+function TUdrPlugin.isIUdrPluginImpl: boolean;
 begin
   Result := (vTable = @IUdrPluginImpl_vTable);
 end;
@@ -18847,23 +18561,23 @@ end;
 constructor IUdrPluginImpl.create;
 begin
   inherited Create;
-  vTable := @IUdrPluginImpl_vTable;
+  FvTable := @IUdrPluginImpl_vTable;
 end;
 
-function IUdrPluginImpl.getvTableVersion: NativeInt;
+function IUdrPluginImpl.getVTable: PUdrPluginVTable;
 begin
-  Result := PUdrPluginVTable(vTable)^.version
+  Result := PUdrPluginVTable(FvTable);
 end;
 
-function IDecFloat16Impl.getInterface:IDecFloat16;
+function IDecFloat16Impl.asIDecFloat16:IDecFloat16;
 begin
-  Result := IDecFloat16(@nullPtr);
+  Result := IDecFloat16(@FNullPtr);
 end;
 
 procedure IDecFloat16Impl_toBcdDispatcher(this: IDecFloat16; from: FB_DEC16Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr); cdecl;
 begin
 	try
-		this.owner.toBcd(from, sign, bcd, exp);
+		this.FIDecFloat16Impl.toBcd(from, sign, bcd, exp);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18872,7 +18586,7 @@ end;
 procedure IDecFloat16Impl_toStringDispatcher(this: IDecFloat16; status: IStatus; from: FB_DEC16Ptr; bufferLength: Cardinal; buffer: PAnsiChar); cdecl;
 begin
 	try
-		this.owner.toString(status, from, bufferLength, buffer);
+		this.FIDecFloat16Impl.toString(status, from, bufferLength, buffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18881,7 +18595,7 @@ end;
 procedure IDecFloat16Impl_fromBcdDispatcher(this: IDecFloat16; sign: Integer; bcd: BytePtr; exp: Integer; to_: FB_DEC16Ptr); cdecl;
 begin
 	try
-		this.owner.fromBcd(sign, bcd, exp, to_);
+		this.FIDecFloat16Impl.fromBcd(sign, bcd, exp, to_);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18890,7 +18604,7 @@ end;
 procedure IDecFloat16Impl_fromStringDispatcher(this: IDecFloat16; status: IStatus; from: PAnsiChar; to_: FB_DEC16Ptr); cdecl;
 begin
 	try
-		this.owner.fromString(status, from, to_);
+		this.FIDecFloat16Impl.fromString(status, from, to_);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18904,7 +18618,7 @@ var IDecFloat16Impl_vTable: DecFloat16VTable = (
      fromBcd: @IDecFloat16Impl_fromBcdDispatcher;
      fromString: @IDecFloat16Impl_fromStringDispatcher);
 
-function TDecFloat16.isIDecFloat16Impl: boolean inline;
+function TDecFloat16.isIDecFloat16Impl: boolean;
 begin
   Result := (vTable = @IDecFloat16Impl_vTable);
 end;
@@ -18912,23 +18626,23 @@ end;
 constructor IDecFloat16Impl.create;
 begin
   inherited Create;
-  vTable := @IDecFloat16Impl_vTable;
+  FvTable := @IDecFloat16Impl_vTable;
 end;
 
-function IDecFloat16Impl.getvTableVersion: NativeInt;
+function IDecFloat16Impl.getVTable: PDecFloat16VTable;
 begin
-  Result := PDecFloat16VTable(vTable)^.version
+  Result := PDecFloat16VTable(FvTable);
 end;
 
-function IDecFloat34Impl.getInterface:IDecFloat34;
+function IDecFloat34Impl.asIDecFloat34:IDecFloat34;
 begin
-  Result := IDecFloat34(@nullPtr);
+  Result := IDecFloat34(@FNullPtr);
 end;
 
 procedure IDecFloat34Impl_toBcdDispatcher(this: IDecFloat34; from: FB_DEC34Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr); cdecl;
 begin
 	try
-		this.owner.toBcd(from, sign, bcd, exp);
+		this.FIDecFloat34Impl.toBcd(from, sign, bcd, exp);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18937,7 +18651,7 @@ end;
 procedure IDecFloat34Impl_toStringDispatcher(this: IDecFloat34; status: IStatus; from: FB_DEC34Ptr; bufferLength: Cardinal; buffer: PAnsiChar); cdecl;
 begin
 	try
-		this.owner.toString(status, from, bufferLength, buffer);
+		this.FIDecFloat34Impl.toString(status, from, bufferLength, buffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18946,7 +18660,7 @@ end;
 procedure IDecFloat34Impl_fromBcdDispatcher(this: IDecFloat34; sign: Integer; bcd: BytePtr; exp: Integer; to_: FB_DEC34Ptr); cdecl;
 begin
 	try
-		this.owner.fromBcd(sign, bcd, exp, to_);
+		this.FIDecFloat34Impl.fromBcd(sign, bcd, exp, to_);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18955,7 +18669,7 @@ end;
 procedure IDecFloat34Impl_fromStringDispatcher(this: IDecFloat34; status: IStatus; from: PAnsiChar; to_: FB_DEC34Ptr); cdecl;
 begin
 	try
-		this.owner.fromString(status, from, to_);
+		this.FIDecFloat34Impl.fromString(status, from, to_);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18969,7 +18683,7 @@ var IDecFloat34Impl_vTable: DecFloat34VTable = (
      fromBcd: @IDecFloat34Impl_fromBcdDispatcher;
      fromString: @IDecFloat34Impl_fromStringDispatcher);
 
-function TDecFloat34.isIDecFloat34Impl: boolean inline;
+function TDecFloat34.isIDecFloat34Impl: boolean;
 begin
   Result := (vTable = @IDecFloat34Impl_vTable);
 end;
@@ -18977,23 +18691,23 @@ end;
 constructor IDecFloat34Impl.create;
 begin
   inherited Create;
-  vTable := @IDecFloat34Impl_vTable;
+  FvTable := @IDecFloat34Impl_vTable;
 end;
 
-function IDecFloat34Impl.getvTableVersion: NativeInt;
+function IDecFloat34Impl.getVTable: PDecFloat34VTable;
 begin
-  Result := PDecFloat34VTable(vTable)^.version
+  Result := PDecFloat34VTable(FvTable);
 end;
 
-function IInt128Impl.getInterface:IInt128;
+function IInt128Impl.asIInt128:IInt128;
 begin
-  Result := IInt128(@nullPtr);
+  Result := IInt128(@FNullPtr);
 end;
 
 procedure IInt128Impl_toStringDispatcher(this: IInt128; status: IStatus; from: FB_I128Ptr; scale: Integer; bufferLength: Cardinal; buffer: PAnsiChar); cdecl;
 begin
 	try
-		this.owner.toString(status, from, scale, bufferLength, buffer);
+		this.FIInt128Impl.toString(status, from, scale, bufferLength, buffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -19002,7 +18716,7 @@ end;
 procedure IInt128Impl_fromStringDispatcher(this: IInt128; status: IStatus; scale: Integer; from: PAnsiChar; to_: FB_I128Ptr); cdecl;
 begin
 	try
-		this.owner.fromString(status, scale, from, to_);
+		this.FIInt128Impl.fromString(status, scale, from, to_);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -19014,7 +18728,7 @@ var IInt128Impl_vTable: Int128VTable = (
      toString: @IInt128Impl_toStringDispatcher;
      fromString: @IInt128Impl_fromStringDispatcher);
 
-function TInt128.isIInt128Impl: boolean inline;
+function TInt128.isIInt128Impl: boolean;
 begin
   Result := (vTable = @IInt128Impl_vTable);
 end;
@@ -19022,23 +18736,23 @@ end;
 constructor IInt128Impl.create;
 begin
   inherited Create;
-  vTable := @IInt128Impl_vTable;
+  FvTable := @IInt128Impl_vTable;
 end;
 
-function IInt128Impl.getvTableVersion: NativeInt;
+function IInt128Impl.getVTable: PInt128VTable;
 begin
-  Result := PInt128VTable(vTable)^.version
+  Result := PInt128VTable(FvTable);
 end;
 
-function IReplicatedFieldImpl.getInterface:IReplicatedField;
+function IReplicatedFieldImpl.asIReplicatedField:IReplicatedField;
 begin
-  Result := IReplicatedField(@nullPtr);
+  Result := IReplicatedField(@FNullPtr);
 end;
 
 function IReplicatedFieldImpl_getNameDispatcher(this: IReplicatedField): PAnsiChar; cdecl;
 begin
 	try
-		Result := this.owner.getName();
+		Result := this.FIReplicatedFieldImpl.getName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19047,7 +18761,7 @@ end;
 function IReplicatedFieldImpl_getTypeDispatcher(this: IReplicatedField): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getType();
+		Result := this.FIReplicatedFieldImpl.getType();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19056,7 +18770,7 @@ end;
 function IReplicatedFieldImpl_getSubTypeDispatcher(this: IReplicatedField): Integer; cdecl;
 begin
 	try
-		Result := this.owner.getSubType();
+		Result := this.FIReplicatedFieldImpl.getSubType();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19065,7 +18779,7 @@ end;
 function IReplicatedFieldImpl_getScaleDispatcher(this: IReplicatedField): Integer; cdecl;
 begin
 	try
-		Result := this.owner.getScale();
+		Result := this.FIReplicatedFieldImpl.getScale();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19074,7 +18788,7 @@ end;
 function IReplicatedFieldImpl_getLengthDispatcher(this: IReplicatedField): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getLength();
+		Result := this.FIReplicatedFieldImpl.getLength();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19083,7 +18797,7 @@ end;
 function IReplicatedFieldImpl_getCharSetDispatcher(this: IReplicatedField): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getCharSet();
+		Result := this.FIReplicatedFieldImpl.getCharSet();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19092,7 +18806,7 @@ end;
 function IReplicatedFieldImpl_getDataDispatcher(this: IReplicatedField): Pointer; cdecl;
 begin
 	try
-		Result := this.owner.getData();
+		Result := this.FIReplicatedFieldImpl.getData();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19109,7 +18823,7 @@ var IReplicatedFieldImpl_vTable: ReplicatedFieldVTable = (
      getCharSet: @IReplicatedFieldImpl_getCharSetDispatcher;
      getData: @IReplicatedFieldImpl_getDataDispatcher);
 
-function TReplicatedField.isIReplicatedFieldImpl: boolean inline;
+function TReplicatedField.isIReplicatedFieldImpl: boolean;
 begin
   Result := (vTable = @IReplicatedFieldImpl_vTable);
 end;
@@ -19117,23 +18831,23 @@ end;
 constructor IReplicatedFieldImpl.create;
 begin
   inherited Create;
-  vTable := @IReplicatedFieldImpl_vTable;
+  FvTable := @IReplicatedFieldImpl_vTable;
 end;
 
-function IReplicatedFieldImpl.getvTableVersion: NativeInt;
+function IReplicatedFieldImpl.getVTable: PReplicatedFieldVTable;
 begin
-  Result := PReplicatedFieldVTable(vTable)^.version
+  Result := PReplicatedFieldVTable(FvTable);
 end;
 
-function IReplicatedRecordImpl.getInterface:IReplicatedRecord;
+function IReplicatedRecordImpl.asIReplicatedRecord:IReplicatedRecord;
 begin
-  Result := IReplicatedRecord(@nullPtr);
+  Result := IReplicatedRecord(@FNullPtr);
 end;
 
 function IReplicatedRecordImpl_getCountDispatcher(this: IReplicatedRecord): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getCount();
+		Result := this.FIReplicatedRecordImpl.getCount();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19142,7 +18856,7 @@ end;
 function IReplicatedRecordImpl_getFieldDispatcher(this: IReplicatedRecord; index: Cardinal): IReplicatedField; cdecl;
 begin
 	try
-		Result := this.owner.getField(index);
+		Result := this.FIReplicatedRecordImpl.getField(index);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19151,7 +18865,7 @@ end;
 function IReplicatedRecordImpl_getRawLengthDispatcher(this: IReplicatedRecord): Cardinal; cdecl;
 begin
 	try
-		Result := this.owner.getRawLength();
+		Result := this.FIReplicatedRecordImpl.getRawLength();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19160,7 +18874,7 @@ end;
 function IReplicatedRecordImpl_getRawDataDispatcher(this: IReplicatedRecord): BytePtr; cdecl;
 begin
 	try
-		Result := this.owner.getRawData();
+		Result := this.FIReplicatedRecordImpl.getRawData();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19174,7 +18888,7 @@ var IReplicatedRecordImpl_vTable: ReplicatedRecordVTable = (
      getRawLength: @IReplicatedRecordImpl_getRawLengthDispatcher;
      getRawData: @IReplicatedRecordImpl_getRawDataDispatcher);
 
-function TReplicatedRecord.isIReplicatedRecordImpl: boolean inline;
+function TReplicatedRecord.isIReplicatedRecordImpl: boolean;
 begin
   Result := (vTable = @IReplicatedRecordImpl_vTable);
 end;
@@ -19182,23 +18896,23 @@ end;
 constructor IReplicatedRecordImpl.create;
 begin
   inherited Create;
-  vTable := @IReplicatedRecordImpl_vTable;
+  FvTable := @IReplicatedRecordImpl_vTable;
 end;
 
-function IReplicatedRecordImpl.getvTableVersion: NativeInt;
+function IReplicatedRecordImpl.getVTable: PReplicatedRecordVTable;
 begin
-  Result := PReplicatedRecordVTable(vTable)^.version
+  Result := PReplicatedRecordVTable(FvTable);
 end;
 
-function IReplicatedTransactionImpl.getInterface:IReplicatedTransaction;
+function IReplicatedTransactionImpl.asIReplicatedTransaction:IReplicatedTransaction;
 begin
-  Result := IReplicatedTransaction(@nullPtr);
+  Result := IReplicatedTransaction(@FNullPtr);
 end;
 
 procedure IReplicatedTransactionImpl_disposeDispatcher(this: IReplicatedTransaction); cdecl;
 begin
 	try
-		this.owner.dispose();
+		this.FIReplicatedTransactionImpl.dispose();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19207,7 +18921,7 @@ end;
 procedure IReplicatedTransactionImpl_prepareDispatcher(this: IReplicatedTransaction; status: IStatus); cdecl;
 begin
 	try
-		this.owner.prepare(status);
+		this.FIReplicatedTransactionImpl.prepare(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -19216,7 +18930,7 @@ end;
 procedure IReplicatedTransactionImpl_commitDispatcher(this: IReplicatedTransaction; status: IStatus); cdecl;
 begin
 	try
-		this.owner.commit(status);
+		this.FIReplicatedTransactionImpl.commit(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -19225,7 +18939,7 @@ end;
 procedure IReplicatedTransactionImpl_rollbackDispatcher(this: IReplicatedTransaction; status: IStatus); cdecl;
 begin
 	try
-		this.owner.rollback(status);
+		this.FIReplicatedTransactionImpl.rollback(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -19234,7 +18948,7 @@ end;
 procedure IReplicatedTransactionImpl_startSavepointDispatcher(this: IReplicatedTransaction; status: IStatus); cdecl;
 begin
 	try
-		this.owner.startSavepoint(status);
+		this.FIReplicatedTransactionImpl.startSavepoint(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -19243,7 +18957,7 @@ end;
 procedure IReplicatedTransactionImpl_releaseSavepointDispatcher(this: IReplicatedTransaction; status: IStatus); cdecl;
 begin
 	try
-		this.owner.releaseSavepoint(status);
+		this.FIReplicatedTransactionImpl.releaseSavepoint(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -19252,7 +18966,7 @@ end;
 procedure IReplicatedTransactionImpl_rollbackSavepointDispatcher(this: IReplicatedTransaction; status: IStatus); cdecl;
 begin
 	try
-		this.owner.rollbackSavepoint(status);
+		this.FIReplicatedTransactionImpl.rollbackSavepoint(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -19261,7 +18975,7 @@ end;
 procedure IReplicatedTransactionImpl_insertRecordDispatcher(this: IReplicatedTransaction; status: IStatus; name: PAnsiChar; record_: IReplicatedRecord); cdecl;
 begin
 	try
-		this.owner.insertRecord(status, name, record_);
+		this.FIReplicatedTransactionImpl.insertRecord(status, name, record_);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -19270,7 +18984,7 @@ end;
 procedure IReplicatedTransactionImpl_updateRecordDispatcher(this: IReplicatedTransaction; status: IStatus; name: PAnsiChar; orgRecord: IReplicatedRecord; newRecord: IReplicatedRecord); cdecl;
 begin
 	try
-		this.owner.updateRecord(status, name, orgRecord, newRecord);
+		this.FIReplicatedTransactionImpl.updateRecord(status, name, orgRecord, newRecord);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -19279,7 +18993,7 @@ end;
 procedure IReplicatedTransactionImpl_deleteRecordDispatcher(this: IReplicatedTransaction; status: IStatus; name: PAnsiChar; record_: IReplicatedRecord); cdecl;
 begin
 	try
-		this.owner.deleteRecord(status, name, record_);
+		this.FIReplicatedTransactionImpl.deleteRecord(status, name, record_);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -19288,7 +19002,7 @@ end;
 procedure IReplicatedTransactionImpl_executeSqlDispatcher(this: IReplicatedTransaction; status: IStatus; sql: PAnsiChar); cdecl;
 begin
 	try
-		this.owner.executeSql(status, sql);
+		this.FIReplicatedTransactionImpl.executeSql(status, sql);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -19297,7 +19011,7 @@ end;
 procedure IReplicatedTransactionImpl_executeSqlIntlDispatcher(this: IReplicatedTransaction; status: IStatus; charset: Cardinal; sql: PAnsiChar); cdecl;
 begin
 	try
-		this.owner.executeSqlIntl(status, charset, sql);
+		this.FIReplicatedTransactionImpl.executeSqlIntl(status, charset, sql);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -19319,7 +19033,7 @@ var IReplicatedTransactionImpl_vTable: ReplicatedTransactionVTable = (
      executeSql: @IReplicatedTransactionImpl_executeSqlDispatcher;
      executeSqlIntl: @IReplicatedTransactionImpl_executeSqlIntlDispatcher);
 
-function TReplicatedTransaction.isIReplicatedTransactionImpl: boolean inline;
+function TReplicatedTransaction.isIReplicatedTransactionImpl: boolean;
 begin
   Result := (vTable = @IReplicatedTransactionImpl_vTable);
 end;
@@ -19327,23 +19041,23 @@ end;
 constructor IReplicatedTransactionImpl.create;
 begin
   inherited Create;
-  vTable := @IReplicatedTransactionImpl_vTable;
+  FvTable := @IReplicatedTransactionImpl_vTable;
 end;
 
-function IReplicatedTransactionImpl.getvTableVersion: NativeInt;
+function IReplicatedTransactionImpl.getVTable: PReplicatedTransactionVTable;
 begin
-  Result := PReplicatedTransactionVTable(vTable)^.version
+  Result := PReplicatedTransactionVTable(FvTable);
 end;
 
-function IReplicatedSessionImpl.getInterface:IReplicatedSession;
+function IReplicatedSessionImpl.asIReplicatedSession:IReplicatedSession;
 begin
-  Result := IReplicatedSession(@nullPtr);
+  Result := IReplicatedSession(@FNullPtr);
 end;
 
 procedure IReplicatedSessionImpl_addRefDispatcher(this: IReplicatedSession); cdecl;
 begin
 	try
-		this.owner.addRef();
+		this.FIReplicatedSessionImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19352,7 +19066,7 @@ end;
 function IReplicatedSessionImpl_releaseDispatcher(this: IReplicatedSession): Integer; cdecl;
 begin
 	try
-		Result := this.owner.release();
+		Result := this.FIReplicatedSessionImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19361,7 +19075,7 @@ end;
 procedure IReplicatedSessionImpl_setOwnerDispatcher(this: IReplicatedSession; r: IReferenceCounted); cdecl;
 begin
 	try
-		this.owner.setOwner(r);
+		this.FIReplicatedSessionImpl.setOwner(r);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19370,7 +19084,7 @@ end;
 function IReplicatedSessionImpl_getOwnerDispatcher(this: IReplicatedSession): IReferenceCounted; cdecl;
 begin
 	try
-		Result := this.owner.getOwner();
+		Result := this.FIReplicatedSessionImpl.getOwner();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19379,7 +19093,7 @@ end;
 function IReplicatedSessionImpl_initDispatcher(this: IReplicatedSession; status: IStatus; attachment: IAttachment): Boolean; cdecl;
 begin
 	try
-		Result := this.owner.init(status, attachment);
+		Result := this.FIReplicatedSessionImpl.init(status, attachment);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -19388,7 +19102,7 @@ end;
 function IReplicatedSessionImpl_startTransactionDispatcher(this: IReplicatedSession; status: IStatus; transaction: ITransaction; number: Int64): IReplicatedTransaction; cdecl;
 begin
 	try
-		Result := this.owner.startTransaction(status, transaction, number);
+		Result := this.FIReplicatedSessionImpl.startTransaction(status, transaction, number);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -19397,7 +19111,7 @@ end;
 procedure IReplicatedSessionImpl_cleanupTransactionDispatcher(this: IReplicatedSession; status: IStatus; number: Int64); cdecl;
 begin
 	try
-		this.owner.cleanupTransaction(status, number);
+		this.FIReplicatedSessionImpl.cleanupTransaction(status, number);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -19406,7 +19120,7 @@ end;
 procedure IReplicatedSessionImpl_setSequenceDispatcher(this: IReplicatedSession; status: IStatus; name: PAnsiChar; value: Int64); cdecl;
 begin
 	try
-		this.owner.setSequence(status, name, value);
+		this.FIReplicatedSessionImpl.setSequence(status, name, value);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -19424,7 +19138,7 @@ var IReplicatedSessionImpl_vTable: ReplicatedSessionVTable = (
      cleanupTransaction: @IReplicatedSessionImpl_cleanupTransactionDispatcher;
      setSequence: @IReplicatedSessionImpl_setSequenceDispatcher);
 
-function TReplicatedSession.isIReplicatedSessionImpl: boolean inline;
+function TReplicatedSession.isIReplicatedSessionImpl: boolean;
 begin
   Result := (vTable = @IReplicatedSessionImpl_vTable);
 end;
@@ -19432,12 +19146,12 @@ end;
 constructor IReplicatedSessionImpl.create;
 begin
   inherited Create;
-  vTable := @IReplicatedSessionImpl_vTable;
+  FvTable := @IReplicatedSessionImpl_vTable;
 end;
 
-function IReplicatedSessionImpl.getvTableVersion: NativeInt;
+function IReplicatedSessionImpl.getVTable: PReplicatedSessionVTable;
 begin
-  Result := PReplicatedSessionVTable(vTable)^.version
+  Result := PReplicatedSessionVTable(FvTable);
 end;
 
 constructor FbException.create(status: IStatus);

@@ -523,8 +523,8 @@ end;
 
 procedure TFBUDRObject.CheckStatus;
 begin
-  with FStatus do
-  if (getState and STATE_ERRORS) <> 0 then
+  with FStatus^ do
+  if (getState and Firebird.IStatusImpl.STATE_ERRORS) <> 0 then
     raise EFBUDRException.Create(FStatus);
 end;
 
@@ -918,12 +918,13 @@ var TriggerType: cardinal;
 begin
   TriggerType := FRoutineMetadata.getTriggerType(FStatus);
   CheckStatus;
+  with Firebird.IExternalTriggerImpl do
   case TriggerType of
-  Firebird.IExternalTrigger.TYPE_BEFORE:
+  TYPE_BEFORE:
     Result := ttBefore;
-  Firebird.IExternalTrigger.TYPE_AFTER:
+  TYPE_AFTER:
     Result := ttAfter;
-  Firebird.IExternalTrigger.TYPE_DATABASE:
+  TYPE_DATABASE:
     Result := ttDatabase;
   else
     FBUDRError(ibxeUnknownTriggerType,[TriggerType]);

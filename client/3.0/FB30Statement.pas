@@ -522,7 +522,10 @@ end;
 
 function TIBXSQLVAR.GetConnectionCodePage: TSystemCodePage;
 begin
-  Result := FStatement.ConnectionCodePage;
+  if FStatement = nil then
+    Result := CP_NONE
+  else
+    Result := FStatement.ConnectionCodePage;
 end;
 
 function TIBXSQLVAR.CanChangeSQLType: boolean;
@@ -947,7 +950,7 @@ begin
       for i := 0 to Count - 1 do
       with TIBXSQLVar(Column[i]) do
       begin
-        version := Builder.getvTableversion;
+        version := Builder.vTable.version;
         if version >= 4 then
         {Firebird 4 or later}
         begin
@@ -1294,7 +1297,10 @@ end;
 
 function TIBXSQLDA.GetConnectionCodePage: TSystemCodePage;
 begin
-  Result := Statement.ConnectionCodePage;
+  if Statement = nil then
+    Result := CP_NONE
+  else
+    Result := Statement.ConnectionCodePage;
 end;
 
 function TIBXSQLDA.GetTransactionSeqNo: integer;

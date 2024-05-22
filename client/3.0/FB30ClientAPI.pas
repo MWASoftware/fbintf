@@ -388,9 +388,9 @@ end;
 function TFB30ClientAPI.Firebird4orLater: boolean;
 begin
   Result :=  (GetClientMajor > 4) or (
-    (GetClientMajor = 4) and (UtilIntf.getvTableversion >= 4)
-    and (UtilIntf.getvTableversion <> 21) {ignore FB4 Beta1}
-    and (UtilIntf.getvTableversion <> 24)) {ignore FB4 Beta2}
+    (GetClientMajor = 4) and (UtilIntf.vTable.version >= 4)
+    and (UtilIntf.vTable.version <> 21) {ignore FB4 Beta1}
+    and (UtilIntf.vTable.version <> 24)) {ignore FB4 Beta2}
 end;
 
 {$IFDEF UNIX}

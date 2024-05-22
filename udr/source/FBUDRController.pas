@@ -641,7 +641,7 @@ type
    library.}
 
 function firebird_udr_plugin(status: Firebird.IStatus; aTheirUnloadFlag: Firebird.BooleanPtr;
-                                              udrPlugin: PUdrPluginToken): Firebird.BooleanPtr; cdecl;
+                                              udrPlugin: IUdrPlugin): Firebird.BooleanPtr; cdecl;
 
 {The register functions are called at initialisation time to register each function,
  procedure and trigger defined by the library. Note: "aName" is the routine name
@@ -694,9 +694,9 @@ resourcestring
   SUnknownFieldName = 'Unknown Field Name - %s';
   SEof = 'No More Rows';
 
-function firebird_udr_plugin(status: Firebird.IStatus;
-  aTheirUnloadFlag: Firebird.BooleanPtr; udrPlugin: PUdrPluginToken
-  ): Firebird.BooleanPtr; cdecl;
+function firebird_udr_plugin(status : Firebird.IStatus;
+  aTheirUnloadFlag : Firebird.BooleanPtr; udrPlugin : IUdrPlugin
+  ) : Firebird.BooleanPtr; cdecl;
 begin
   if TFBUDRController.FFBController = nil then
     TFBUDRController.Create(status,udrPlugin,aTheirUnloadFlag,Result); {create a default instance}
@@ -937,7 +937,7 @@ begin
         FController.FBSetStatusFromException(E,status);
       end;
     end;
-    Result := singletonRow;
+    Result := singletonRow.asIExternalResultSet;
 end;
 
 { TFBUDRSelectProcedure }
@@ -1006,7 +1006,7 @@ begin
             open(FBContext,aProcMetadata,InputParams);
             Result := TFBUDRResultsCursor.Create(self, FBContext,
                                                    metadata,
-                                                   outMsg);
+                                                   outMsg).asIExternalResultSet;
           finally
             if metadata <> nil then
               metadata.release;
@@ -1086,7 +1086,7 @@ begin
   try
     FBContext := TFBUDRExternalContext.Create(Controller,context);
     FBRoutineMetadata := TFBUDRRoutineMetadata.Create(FBContext,metadata);
-    Result := FTrigger.Create(FController,FName,FBRoutineMetadata);
+    Result := FTrigger.Create(FController,FName,FBRoutineMetadata).asIExternalTrigger;
   except on E: Exception do
     FController.FBSetStatusFromException(E,status);
   end;
@@ -1245,8 +1245,6 @@ var aTriggerMetadata: IFBUDRTriggerMetaData;
     end;
   end;
 
-var exTrigger: Firebird.IExternalTrigger; {for with statement & const labels only}
-
 begin
   try
     if loLogTriggers in FBUDRControllerOptions.LogOptions then
@@ -1265,7 +1263,7 @@ begin
       FBContext := TFBUDRExternalContext.Create(Controller,context);
       FFirebirdAPI := FBContext.GetFirebirdAPI;
       try
-        with exTrigger do
+        with Firebird.IExternalTriggerImpl do
         case action of
         ACTION_INSERT:
           TriggerAction := taInsert;
@@ -1397,7 +1395,7 @@ begin
   try
     FBContext := TFBUDRExternalContext.Create(Controller,context);
     FBRoutineMetadata := TFBUDRRoutineMetadata.Create(FBContext,metadata);
-    Result := FProcedure.Create(FController,FName,FBRoutineMetadata);
+    Result := FProcedure.Create(FController,FName,FBRoutineMetadata).asIExternalProcedure;
   except on E: Exception do
     FController.FBSetStatusFromException(E,status);
   end;
@@ -1821,7 +1819,7 @@ begin
   try
     FBContext := TFBUDRExternalContext.Create(Controller,context);
     FBRoutineMetadata := TFBUDRRoutineMetadata.Create(FBContext,metadata);
-    Result := FFunction.Create(FController,FName,FBRoutineMetadata);
+    Result := FFunction.Create(FController,FName,FBRoutineMetadata).asIExternalFunction;
   except on E: Exception do
     FController.FBSetStatusFromException(E,status);
   end;
@@ -1861,17 +1859,17 @@ var udr_config: Firebird.IConfig;
     aStatus: Firebird.IStatus;
 begin
   if FMaster <> nil then
-  with FMaster.getConfigManager do
+  with FMaster.getConfigManager^ do
   begin
-    Result := StringReplace(aTemplate,'$LOGDIR',CleanDirName(getDirectory(DIR_LOG)),[rfReplaceAll, rfIgnoreCase]);
+    Result := StringReplace(aTemplate,'$LOGDIR',CleanDirName(getDirectory(Firebird.IConfigManagerImpl.DIR_LOG)),[rfReplaceAll, rfIgnoreCase]);
     udr_config := getPluginConfig('UDR');
     if udr_config <> nil then
     try
       aStatus := FMaster.getStatus;
       try
         config_entry := udr_config.find(aStatus,'path');
-        with aStatus do
-          if (getState and STATE_ERRORS) <> 0 then
+        with aStatus^ do
+          if (getState and Firebird.IStatusImpl.STATE_ERRORS) <> 0 then
             raise EFBUDRException.Create(aStatus);
       finally
         aStatus.dispose;
@@ -1879,7 +1877,7 @@ begin
 
       if config_entry <> nil then
       try
-        with config_entry do
+        with config_entry^ do
           Result := StringReplace(Result,'$UDRDIR',CleanDirName(config_entry.getValue),[rfReplaceAll, rfIgnoreCase]);
       finally
         config_entry.release;
@@ -1901,8 +1899,8 @@ begin
   for i := 0 to FUDRFactoryList.Count - 1 do
   try
     RegisterUDRFactory(status,udrPlugin,FUDRFactoryList[i], FUDRFactoryList.Objects[i]);
-    with status do
-      if (getState and STATE_ERRORS) <> 0 then break;
+    with status^ do
+      if (getState and Firebird.IStatusImpl.STATE_ERRORS) <> 0 then break;
   except on E: Exception do
     FBSetStatusFromException(E,status);
   end;
@@ -1915,7 +1913,7 @@ begin
     begin
       if loLogFunctions in FBUDRControllerOptions.LogOptions then
         WriteToLog(SFuncRegister + aName);
-      udrPlugin.registerFunction(status,PAnsiChar(aName),Firebird.IUdrFunctionFactoryImpl(factory));
+      udrPlugin.registerFunction(status,PAnsiChar(aName),Firebird.IUdrFunctionFactoryImpl(factory).asIUdrFunctionFactory);
       TFBUDRFunctionFactory(factory).Controller := self;
     end
     else
@@ -1923,7 +1921,7 @@ begin
     begin
       if loLogProcedures in FBUDRControllerOptions.LogOptions then
         WriteToLog(SProcRegister + aName);
-      udrPlugin.registerProcedure(status,PAnsiChar(aName),Firebird.IUdrProcedureFactoryImpl(factory));
+      udrPlugin.registerProcedure(status,PAnsiChar(aName),Firebird.IUdrProcedureFactoryImpl(factory).asIUdrProcedureFactory);
       TFBUDRProcedureFactory(factory).Controller := self;
     end
     else
@@ -1931,7 +1929,7 @@ begin
     begin
       if loLogTriggers in FBUDRControllerOptions.LogOptions then
         WriteToLog(STriggerRegister + aName);
-      udrPlugin.registerTrigger(status,PAnsiChar(aName),Firebird.IUdrTriggerFactoryImpl(factory));
+      udrPlugin.registerTrigger(status,PAnsiChar(aName),Firebird.IUdrTriggerFactoryImpl(factory).asIUdrTriggerFactory);
       TFBUDRTriggerFactory(factory).Controller := self;
     end
     else

@@ -137,7 +137,7 @@ begin
   end;
 end;
 
-{close is called after fetch returned EOF. Here is is used to explicitly close
+{close is called after fetch returned EOF. Here it is used to explicitly close
  the cursor. Although this will be closed automatically when the class is
  freed, or open called again.}
 

@@ -356,14 +356,14 @@ begin
   (FContext as TEmulatedExternalContext).Transaction := aTransaction;
   try
     Setup;
-    aTriggerInstance := FTriggerFactory.newItem(FStatus,FContext,FRoutineMetadata);
+    aTriggerInstance := FTriggerFactory.newItem(FStatus,FContext.asIExternalContext,FRoutineMetadata.asIRoutineMetadata);
     try
     Buffer[0] := #0;
-    aTriggerInstance.getCharSet(FStatus,FContext,@Buffer,sizeof(Buffer)); {The UDR engine does this thus so do we}
+    aTriggerInstance.getCharSet(FStatus,FContext.asIExternalContext,@Buffer,sizeof(Buffer)); {The UDR engine does this thus so do we}
     CheckStatus;
     FTriggerOldSQLDA.Finalise;
     FTriggerNewSQLDA.Finalise;
-    aTriggerInstance.execute(FStatus,FContext,action,
+    aTriggerInstance.execute(FStatus,FContext.asIExternalContext,action,
                              FTriggerOldSQLDA.MessageBuffer,
                              FTriggerNewSQLDA.MessageBuffer
                              );
@@ -403,12 +403,12 @@ begin
   (FContext as TEmulatedExternalContext).Transaction := aTransaction;
   try
     Setup;
-    aProcedureInstance := FProcedureFactory.newItem(FStatus,FContext,FRoutineMetadata);
+    aProcedureInstance := FProcedureFactory.newItem(FStatus,FContext.asIExternalContext,FRoutineMetadata.asIRoutineMetadata);
     try
       Buffer[0] := #0;
-      aProcedureInstance.getCharSet(FStatus,FContext,@Buffer,sizeof(Buffer));
+      aProcedureInstance.getCharSet(FStatus,FContext.asIExternalContext,@Buffer,sizeof(Buffer));
       CheckStatus;
-      ResultsSet := aProcedureInstance.open(FStatus,FContext,
+      ResultsSet := aProcedureInstance.open(FStatus,FContext.asIExternalContext,
                         (FPreparedStatement as TFB30Statement).SQLParams.MessageBuffer,
                         (FPreparedStatement as TFB30Statement).SQLRecord.MessageBuffer);
       CheckStatus;
@@ -472,8 +472,8 @@ end;
 procedure TExternalWrapper.CheckStatus;
 var buffer: array [0..4096] of AnsiChar;
 begin
-  with FStatus do
-    if (getState and STATE_ERRORS) <> 0 then
+  with FStatus^ do
+    if (getState and Firebird.IStatusImpl.STATE_ERRORS) <> 0 then
     begin
       FManager.getMaster.getUtilInterface.formatStatus(@buffer,sizeof(buffer),FStatus);
       raise Exception.Create(strpas(PAnsiChar(@buffer)));
@@ -518,7 +518,7 @@ begin
   end
   else
     outBuilder := nil;
-  DoSetup(FStatus,FContext,FRoutineMetadata,inBuilder,outBuilder);
+  DoSetup(FStatus,FContext.asIExternalContext,FRoutineMetadata.asIRoutineMetadata,inBuilder,outBuilder);
   CheckStatus;
 end;
 
@@ -660,12 +660,12 @@ begin
   FContext.Transaction := aTransaction;
   try
     Setup;
-    aFunctionInstance := FFunctionFactory.newItem(FStatus,FContext,FRoutineMetadata);
+    aFunctionInstance := FFunctionFactory.newItem(FStatus,FContext.asIExternalContext,FRoutineMetadata.asIRoutineMetadata);
     try
       Buffer[0] := #0;
-      aFunctionInstance.getCharSet(FStatus,FContext,@Buffer,sizeof(Buffer));
+      aFunctionInstance.getCharSet(FStatus,FContext.asIExternalContext,@Buffer,sizeof(Buffer));
       CheckStatus;
-      aFunctionInstance.execute(FStatus,FContext,
+      aFunctionInstance.execute(FStatus,FContext.asIExternalContext,
                         (FPreparedStatement as TFB30Statement).SQLParams.MessageBuffer,
                         (FPreparedStatement as TFB30Statement).SQLRecord.MessageBuffer);
       CheckStatus;
@@ -798,30 +798,23 @@ end;
 
 procedure TFBUdrPluginEmulator.registerFunction(status: Firebird.IStatus;
   name: PAnsiChar; factory: Firebird.IUdrFunctionFactory);
-var factoryImpl: Firebird.IUdrFunctionFactoryImpl;
 begin
-  factoryImpl := factory;
-  FFunctionFactories.AddObject(strpas(name),factoryImpl);
+  FFunctionFactories.AddObject(strpas(name),factory.asIUdrFunctionFactoryImpl);
 end;
 
 procedure TFBUdrPluginEmulator.registerProcedure(status: Firebird.IStatus;
   name: PAnsiChar; factory: Firebird.IUdrProcedureFactory);
-var factoryImpl: Firebird.IUdrProcedureFactoryImpl;
 begin
-  factoryImpl := factory;
-  FProcedureFactories.AddObject(strpas(name),factoryImpl);
+  FProcedureFactories.AddObject(strpas(name),factory.asIUdrProcedureFactoryImpl);
 end;
 
 procedure TFBUdrPluginEmulator.registerTrigger(status: Firebird.IStatus;
   name: PAnsiChar; factory: Firebird.IUdrTriggerFactory);
-var factoryImpl: Firebird.IUdrTriggerFactoryImpl;
 begin
-  factoryImpl := factory;
-  FTriggerFactories.AddObject(strpas(name),factoryImpl);
+  FTriggerFactories.AddObject(strpas(name),factory.asIUdrTriggerFactoryImpl);
 end;
 
 constructor TFBUdrPluginEmulator.Create(aModuleName: AnsiString);
-var tmp: Firebird.IUDRPlugin;
 begin
   inherited Create;
   FModuleName := aModuleName;
@@ -829,8 +822,7 @@ begin
   FFunctionFactories := TStringList.Create;
   FProcedureFactories := TStringList.Create;
   FTriggerFactories := TStringList.Create;
-  tmp := self;
-  FTheirUnloadFlag := firebird_udr_plugin(FStatus,@FMyUnloadFlag,tmp);
+  FTheirUnloadFlag := firebird_udr_plugin(FStatus,@FMyUnloadFlag,self.asIUdrPlugin);
   CheckStatus;
 end;
 
@@ -847,8 +839,8 @@ end;
 procedure TFBUdrPluginEmulator.CheckStatus;
 var buffer: array [0..4096] of AnsiChar;
 begin
-  with FStatus do
-    if (getState and STATE_ERRORS) <> 0 then
+  with FStatus^ do
+    if (getState and Firebird.IStatusImpl.STATE_ERRORS) <> 0 then
     begin
       getMaster.getUtilInterface.formatStatus(@buffer,sizeof(buffer),FStatus);
       raise Exception.Create(strpas(PAnsiChar(@buffer)));

@@ -277,7 +277,7 @@ begin
     with FFirebird30ClientAPI do
     begin
       FEventsIntf := FAttachmentIntf.queEvents(
-                                StatusIntf,EventCallBack.getInterface,
+                                StatusIntf,EventCallBack.asIEventCallBack,
                                 FEventBufferLen, BytePtr(FEventBuffer));
       Check4DataBaseError(ConnectionCodePage);
     end;
