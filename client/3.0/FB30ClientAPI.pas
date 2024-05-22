@@ -63,9 +63,6 @@ type
     property Dirty: boolean read FDirty;
   end;
 
-  Tfb_get_master_interface = function: IMaster;
-                              {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
-
   { TFB30ClientAPI }
 
   TFB30ClientAPI = class(TFBClientAPI,IFirebirdAPI,IFBIMasterProvider)
@@ -401,10 +398,16 @@ end;
 {$ENDIF}
 
 function TFB30ClientAPI.LoadInterface: boolean;
+var
+  fb_get_master_interface: Tfb_get_master_interface;
 begin
   Result := inherited LoadInterface;
   if (FMaster = nil) and (GetFBLibrary <> nil) then {get from library}
-    FMaster := Firebird.GetIMaster(GetFBLibrary.GetHandle);
+  begin
+    fb_get_master_interface := GetProcAddress(GetFBLibrary.GetHandle, 'fb_get_master_interface'); {do not localize}
+    if assigned(fb_get_master_interface) then
+      FMaster := fb_get_master_interface;
+  end;
   if FMaster <> nil then
   begin
     FUtil := FMaster.getUtilInterface;
