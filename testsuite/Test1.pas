@@ -121,8 +121,7 @@ begin
 end;
 
 procedure TTest1.TestIsImplementationObject;
-var objectType: TFirebirdImplementationClass;
-    impl: FirebirdOOAPI.IVersionCallbackImpl;
+var impl: FirebirdOOAPI.IVersionCallbackImpl;
     intf: FirebirdOOAPI.IVersionCallback;
     TestObj:  TVersionCallback;
 begin

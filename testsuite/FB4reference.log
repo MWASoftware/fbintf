@@ -3,10 +3,10 @@ Copyright MWA Software 2016-2021
 
 Starting Tests
 Client API Version = 4.0
-Firebird Environment Variable = /opt/firebird/4.0.2
-Firebird Bin Directory = /opt/firebird/4.0.2/bin
-Firebird Conf Directory = /opt/firebird/4.0.2/
-Firebird Client Library Path = /opt/firebird/4.0.2/lib/libfbclient.so
+Firebird Environment Variable = /opt/firebird/4.0.4
+Firebird Bin Directory = /opt/firebird/4.0.4/bin
+Firebird Conf Directory = /opt/firebird/4.0.4/
+Firebird Client Library Path = /opt/firebird/4.0.4/lib/libfbclient.so
 Running Test 1: Create and Drop a Database
 Creating a Database with empty parameters
 Create Database fails (as expected): Engine Code: 335544344
@@ -23,7 +23,7 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 13
 DB ODS Minor Version = 0
 User Authentication Method = Srp256
-Firebird Library Path = /opt/firebird/4.0.2/lib/libfbclient.so
+Firebird Library Path = /opt/firebird/4.0.4/lib/libfbclient.so
 DB Client Implementation Version = 4.0
 DPB: Item Count = 3
   isc_dpb_user_name = SYSDBA
@@ -31,9 +31,9 @@ DPB: Item Count = 3
   isc_dpb_set_db_sql_dialect = 3
 
 Firebird Server Version Info
-Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.2.2816 Firebird 4.0"
-Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V4.0.2.2816 Firebird 4.0/tcp (zeus)/P17:C"
-Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-V4.0.2.2816 Firebird 4.0/tcp (zeus)/P17:C"
+Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.4.3010 Firebird 4.0"
+Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V4.0.4.3010 Firebird 4.0/tcp (zeus)/P17:C"
+Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-V4.0.4.3010 Firebird 4.0/tcp (zeus)/P17:C"
 on disk structure version 13.0
 
 Dropping Database
@@ -45,7 +45,7 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 13
 DB ODS Minor Version = 0
 User Authentication Method = Srp256
-Firebird Library Path = /opt/firebird/4.0.2/lib/libfbclient.so
+Firebird Library Path = /opt/firebird/4.0.4/lib/libfbclient.so
 DB Client Implementation Version = 4.0
 Dropping Database
 DPB: Item Count = 4
@@ -66,7 +66,7 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 13
 DB ODS Minor Version = 0
 User Authentication Method = Srp256
-Firebird Library Path = /opt/firebird/4.0.2/lib/libfbclient.so
+Firebird Library Path = /opt/firebird/4.0.4/lib/libfbclient.so
 DB Client Implementation Version = 4.0
 RDB$DESCRIPTION = 
 RDB$RELATION_ID = 128
@@ -74,8 +74,8 @@ RDB$SECURITY_CLASS = SQL$385
 RDB$CHARACTER_SET_NAME = UTF8
 RDB$LINGER = 
 RDB$SQL_SECURITY = 
-Test Firebird Helper function "IsImplementationObject"
-Success: implementation class name is IVersionCallbackImpl, returned object is a TVersionCallback
+Test Firebird coercion of implementation object from interface
+Success: returned object is a TVersionCallback
 Dropping Database
 
 
@@ -320,7 +320,7 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 13
 DB ODS Minor Version = 0
 User Authentication Method = Srp256
-Firebird Library Path = /opt/firebird/4.0.2/lib/libfbclient.so
+Firebird Library Path = /opt/firebird/4.0.4/lib/libfbclient.so
 DB Client Implementation Version = 4.0
 Do Fetch Next:
 EMP_NO = 2
@@ -573,7 +573,7 @@ DB Remote Protocol =
 DB ODS Major Version = 13
 DB ODS Minor Version = 0
 User Authentication Method = User name in DPB
-Firebird Library Path = /opt/firebird/4.0.2/lib/libfbclient.so
+Firebird Library Path = /opt/firebird/4.0.4/lib/libfbclient.so
 DB Client Implementation Version = 4.0
 Do Fetch Next:
 EMP_NO = 2
@@ -656,13 +656,13 @@ Running Test 3: ad hoc queries
 Opening inet://localhost/employee
 Database Open
 Employee Count = 42
-Transaction ID = 5699
+Transaction ID = 2420
 Transaction is Read/Write
 Transaction Database Path = inet://localhost/employee
-Transaction ID = 5699
-Oldest Interesting = 5697
-Oldest Action = 5698
-Oldest Snapshot = 5698
+Transaction ID = 2420
+Oldest Interesting = 172
+Oldest Action = 2419
+Oldest Snapshot = 2419
 Oldest Snapshot Number = 2
 Lock Timeout = 0
 Transaction Access = isc_info_tra_readwrite
@@ -680,9 +680,9 @@ Constrained Employee Count = 3
 Running Test 4: Update, Insert and Delete Queries
 Opening inet://localhost/employee
 Database Open
-Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.2.2816 Firebird 4.0"
-Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V4.0.2.2816 Firebird 4.0/tcp (zeus)/P17:CZ"
-Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-V4.0.2.2816 Firebird 4.0/tcp (zeus)/P17:CZ"
+Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.4.3010 Firebird 4.0"
+Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V4.0.4.3010 Firebird 4.0/tcp (zeus)/P17:CZ"
+Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-V4.0.4.3010 Firebird 4.0/tcp (zeus)/P17:CZ"
 on disk structure version 13.0
 Select Count = 1 InsertCount = 0 UpdateCount = 1 DeleteCount = 0
 EMP_NO = 8
@@ -697,9 +697,9 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 19,764,512
+Current memory = 19,766,592
 Delta memory = 4,464
-Max memory = 19,810,128
+Max memory = 19,812,384
 Elapsed time= 0.001 sec
 Cpu = 0.000 sec
 Buffers = 2048
@@ -2838,7 +2838,7 @@ MYARRAY = Array: (0,-1: A50) (0,0: A51) (0,1: A52) (0,2: A53) (0,3: A54) (0,4: A
 
 ------------------------------------------------------
 Running Test 9: Database Information tests
-Database ID = 4 FB = /opt/firebird/4.0.2/examples/empbuild/employee.fdb SN = zeus
+Database ID = 4 FB = /opt/firebird/4.0.4/examples/empbuild/employee.fdb SN = zeus
 Pages =346
 Base Level = 13,4,0,3,
 Implementation = 11,7,0,3,66,1,66,
@@ -2846,21 +2846,21 @@ Reserved = 0
 ODS minor = 0
 ODS major = 13
 Page Size = 8192
-Version = 1: LI-V6.3.2.2816 Firebird 4.0
+Version = 1: LI-V6.3.4.3010 Firebird 4.0
 Database is Read/Write
-Database Created: 10/8/2022 11:51:50
-Pages Used = 310
-Pages Free = 36
-Server Memory = 19476192
+Database Created: 08/11/2023 12:11:40
+Pages Used = 314
+Pages Free = 32
+Server Memory = 19476800
 Forced Writes  = 1
-Max Memory  = 19507024
+Max Memory  = 19507632
 Num Buffers  = 2048
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
 Active Transaction Count = 0
-Fetches  = 1661
+Fetches  = 1824
 Writes  = 5
-Reads  = 90
+Reads  = 93
 Page Writes  = 2
 Record Version Removals Operation Counts
 
@@ -2884,7 +2884,7 @@ Count = 2
 Table ID = 12
 Count = 24
 Table ID = 18
-Count = 924
+Count = 947
 Table ID = 20
 Count = 5
 Table ID = 28
@@ -2929,7 +2929,7 @@ Event Cancelled
 Time Out - Cancel Worked!
 Sync wait
 Event Signalled
-Event Counts: TESTEVENT, Count = 1
+Event Counts: TESTEVENT, Count = 0
 
 
 ------------------------------------------------------
@@ -2939,12 +2939,12 @@ SPB: Item Count = 2
   password = masterkey
 
 Service Manager Version = 2
-Server Version = LI-V4.0.2.2816 Firebird 4.0
+Server Version = LI-V4.0.4.3010 Firebird 4.0
 Implementation = Firebird/Linux/AMD/Intel/x64
 
 Lock Directory = /tmp/firebird/
-Message File = /opt/firebird/4.0.2/
-Security File = /opt/firebird/4.0.2/security4.fdb
+Message File = /opt/firebird/4.0.4/
+Security File = /opt/firebird/4.0.4/security4.fdb
 
 DB Attachments
 No. of Attachments = 0
@@ -3535,7 +3535,7 @@ Your user name and password are not defined. Ask your database administrator to 
 
 ------------------------------------------------------
 Running Test 17: Date/Time tests and Firebird 4 extensions
- FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.2.2816 Firebird 4.0"
+ FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.4.3010 Firebird 4.0"
 Has Local TZ DB = TRUE
 
 Testdata
@@ -4297,7 +4297,7 @@ TZ_MINUTE = 0
 
 ------------------------------------------------------
 Running Test 18: Firebird 4 Decfloat extensions
- FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.2.2816 Firebird 4.0"
+ FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.4.3010 Firebird 4.0"
 
 FB4 Testdata_DECFloat
 
@@ -4566,9 +4566,9 @@ BigNumber Array: (0: 123456123400.123456) (1: 123456123401.623456) (2: 123456123
 Running Test 19: Batch Update and Insert Queries
 Opening inet://localhost/employee
 Database Open
-Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.2.2816 Firebird 4.0"
-Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V4.0.2.2816 Firebird 4.0/tcp (zeus)/P17:CZ"
-Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-V4.0.2.2816 Firebird 4.0/tcp (zeus)/P17:CZ"
+Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.4.3010 Firebird 4.0"
+Firebird/Linux/AMD/Intel/x64 (remote server), version "LI-V4.0.4.3010 Firebird 4.0/tcp (zeus)/P17:CZ"
+Firebird/Linux/AMD/Intel/x64 (remote interface), version "LI-V4.0.4.3010 Firebird 4.0/tcp (zeus)/P17:CZ"
 on disk structure version 13.0
 Rows before update
 EMP_NO = 2
@@ -4819,7 +4819,7 @@ Row 2 State = bcExecuteFailed Msg = violation of PRIMARY or UNIQUE KEY constrain
 
 ------------------------------------------------------
 Running Test 20: Stress Test IBatch interface
- FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.2.2816 Firebird 4.0"
+ FBVersion = Firebird/Linux/AMD/Intel/x64 (access method), version "LI-V4.0.4.3010 Firebird 4.0"
 10000 rows added
 20000 rows added
 30000 rows added
@@ -5168,12 +5168,12 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 11
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2024/05/22 15:04:56.3710
+IBX$CREATED = 2024/05/23 12:28:50.0000
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 13
 IBX$OLDTRANSACTIONID = 12
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2024/05/22 15:04:56.3960
+IBX$CREATED = 2024/05/23 12:28:50.0270
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)
