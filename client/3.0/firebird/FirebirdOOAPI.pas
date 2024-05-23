@@ -707,7 +707,7 @@ type
 
 	IVersionedImpl = class;
 
-	TFirebirdImplementationClass = class of IVersionedImpl;
+	TFirebirdOOAPIImplementationClass = class of IVersionedImpl;
 
 	TVersioned = record
 	private
@@ -6023,7 +6023,7 @@ begin
   if isIVersionedImpl then
     Result := FObject as IVersionedImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IVersionedImpl']);
 end;
 
 function TReferenceCounted.this: IReferenceCounted;
@@ -6041,7 +6041,7 @@ begin
   if isIReferenceCountedImpl then
     Result := FObject as IReferenceCountedImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IReferenceCountedImpl']);
 end;
 
 procedure TReferenceCounted.addRef();
@@ -6069,7 +6069,7 @@ begin
   if isIDisposableImpl then
     Result := FObject as IDisposableImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IDisposableImpl']);
 end;
 
 procedure TDisposable.dispose();
@@ -6092,7 +6092,7 @@ begin
   if isIStatusImpl then
     Result := FObject as IStatusImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IStatusImpl']);
 end;
 
 procedure TStatus.dispose();
@@ -6160,7 +6160,7 @@ begin
   if isIMasterImpl then
     Result := FObject as IMasterImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IMasterImpl']);
 end;
 
 function TMaster.getStatus(): IStatus;
@@ -6239,7 +6239,7 @@ begin
   if isIPluginBaseImpl then
     Result := FObject as IPluginBaseImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IPluginBaseImpl']);
 end;
 
 procedure TPluginBase.addRef();
@@ -6277,7 +6277,7 @@ begin
   if isIPluginSetImpl then
     Result := FObject as IPluginSetImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IPluginSetImpl']);
 end;
 
 procedure TPluginSet.addRef();
@@ -6333,7 +6333,7 @@ begin
   if isIConfigEntryImpl then
     Result := FObject as IConfigEntryImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IConfigEntryImpl']);
 end;
 
 procedure TConfigEntry.addRef();
@@ -6387,7 +6387,7 @@ begin
   if isIConfigImpl then
     Result := FObject as IConfigImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IConfigImpl']);
 end;
 
 procedure TConfig.addRef();
@@ -6433,7 +6433,7 @@ begin
   if isIFirebirdConfImpl then
     Result := FObject as IFirebirdConfImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IFirebirdConfImpl']);
 end;
 
 procedure TFirebirdConf.addRef();
@@ -6487,7 +6487,7 @@ begin
   if isIPluginConfigImpl then
     Result := FObject as IPluginConfigImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IPluginConfigImpl']);
 end;
 
 procedure TPluginConfig.addRef();
@@ -6538,7 +6538,7 @@ begin
   if isIPluginFactoryImpl then
     Result := FObject as IPluginFactoryImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IPluginFactoryImpl']);
 end;
 
 function TPluginFactory.createPlugin(status: IStatus; factoryParameter: IPluginConfig): IPluginBase;
@@ -6562,7 +6562,7 @@ begin
   if isIPluginModuleImpl then
     Result := FObject as IPluginModuleImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IPluginModuleImpl']);
 end;
 
 procedure TPluginModule.doClean();
@@ -6590,7 +6590,7 @@ begin
   if isIPluginManagerImpl then
     Result := FObject as IPluginManagerImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IPluginManagerImpl']);
 end;
 
 procedure TPluginManager.registerPluginFactory(pluginType: Cardinal; defaultName: PAnsiChar; factory: IPluginFactory);
@@ -6640,7 +6640,7 @@ begin
   if isICryptKeyImpl then
     Result := FObject as ICryptKeyImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['ICryptKeyImpl']);
 end;
 
 procedure TCryptKey.setSymmetric(status: IStatus; type_: PAnsiChar; keyLength: Cardinal; key: Pointer);
@@ -6680,7 +6680,7 @@ begin
   if isIConfigManagerImpl then
     Result := FObject as IConfigManagerImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IConfigManagerImpl']);
 end;
 
 function TConfigManager.getDirectory(code: Cardinal): PAnsiChar;
@@ -6733,7 +6733,7 @@ begin
   if isIEventCallbackImpl then
     Result := FObject as IEventCallbackImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IEventCallbackImpl']);
 end;
 
 procedure TEventCallback.addRef();
@@ -6766,7 +6766,7 @@ begin
   if isIBlobImpl then
     Result := FObject as IBlobImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IBlobImpl']);
 end;
 
 procedure TBlob.addRef();
@@ -6830,7 +6830,7 @@ begin
   if isITransactionImpl then
     Result := FObject as ITransactionImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['ITransactionImpl']);
 end;
 
 procedure TTransaction.addRef();
@@ -6918,7 +6918,7 @@ begin
   if isIMessageMetadataImpl then
     Result := FObject as IMessageMetadataImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IMessageMetadataImpl']);
 end;
 
 procedure TMessageMetadata.addRef();
@@ -7048,7 +7048,7 @@ begin
   if isIMetadataBuilderImpl then
     Result := FObject as IMetadataBuilderImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IMetadataBuilderImpl']);
 end;
 
 procedure TMetadataBuilder.addRef();
@@ -7160,7 +7160,7 @@ begin
   if isIResultSetImpl then
     Result := FObject as IResultSetImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IResultSetImpl']);
 end;
 
 procedure TResultSet.addRef();
@@ -7254,7 +7254,7 @@ begin
   if isIStatementImpl then
     Result := FObject as IStatementImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IStatementImpl']);
 end;
 
 procedure TStatement.addRef();
@@ -7366,7 +7366,7 @@ begin
   if isIBatchImpl then
     Result := FObject as IBatchImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IBatchImpl']);
 end;
 
 procedure TBatch.addRef();
@@ -7460,7 +7460,7 @@ begin
   if isIBatchCompletionStateImpl then
     Result := FObject as IBatchCompletionStateImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IBatchCompletionStateImpl']);
 end;
 
 procedure TBatchCompletionState.dispose();
@@ -7507,7 +7507,7 @@ begin
   if isIReplicatorImpl then
     Result := FObject as IReplicatorImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IReplicatorImpl']);
 end;
 
 procedure TReplicator.addRef();
@@ -7547,7 +7547,7 @@ begin
   if isIRequestImpl then
     Result := FObject as IRequestImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IRequestImpl']);
 end;
 
 procedure TRequest.addRef();
@@ -7617,7 +7617,7 @@ begin
   if isIEventsImpl then
     Result := FObject as IEventsImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IEventsImpl']);
 end;
 
 procedure TEvents.addRef();
@@ -7651,7 +7651,7 @@ begin
   if isIAttachmentImpl then
     Result := FObject as IAttachmentImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IAttachmentImpl']);
 end;
 
 procedure TAttachment.addRef();
@@ -7823,7 +7823,7 @@ begin
   if isIServiceImpl then
     Result := FObject as IServiceImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IServiceImpl']);
 end;
 
 procedure TService.addRef();
@@ -7869,7 +7869,7 @@ begin
   if isIProviderImpl then
     Result := FObject as IProviderImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IProviderImpl']);
 end;
 
 procedure TProvider.addRef();
@@ -7937,7 +7937,7 @@ begin
   if isIDtcStartImpl then
     Result := FObject as IDtcStartImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IDtcStartImpl']);
 end;
 
 procedure TDtcStart.dispose();
@@ -7978,7 +7978,7 @@ begin
   if isIDtcImpl then
     Result := FObject as IDtcImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IDtcImpl']);
 end;
 
 function TDtc.join(status: IStatus; one: ITransaction; two: ITransaction): ITransaction;
@@ -8008,7 +8008,7 @@ begin
   if isIAuthImpl then
     Result := FObject as IAuthImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IAuthImpl']);
 end;
 
 procedure TAuth.addRef();
@@ -8046,7 +8046,7 @@ begin
   if isIWriterImpl then
     Result := FObject as IWriterImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IWriterImpl']);
 end;
 
 procedure TWriter.reset();
@@ -8087,7 +8087,7 @@ begin
   if isIServerBlockImpl then
     Result := FObject as IServerBlockImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IServerBlockImpl']);
 end;
 
 function TServerBlock.getLogin(): PAnsiChar;
@@ -8127,7 +8127,7 @@ begin
   if isIClientBlockImpl then
     Result := FObject as IClientBlockImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IClientBlockImpl']);
 end;
 
 procedure TClientBlock.addRef();
@@ -8188,7 +8188,7 @@ begin
   if isIServerImpl then
     Result := FObject as IServerImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IServerImpl']);
 end;
 
 procedure TServer.addRef();
@@ -8238,7 +8238,7 @@ begin
   if isIClientImpl then
     Result := FObject as IClientImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IClientImpl']);
 end;
 
 procedure TClient.addRef();
@@ -8282,7 +8282,7 @@ begin
   if isIUserFieldImpl then
     Result := FObject as IUserFieldImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IUserFieldImpl']);
 end;
 
 function TUserField.entered(): Integer;
@@ -8316,7 +8316,7 @@ begin
   if isICharUserFieldImpl then
     Result := FObject as ICharUserFieldImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['ICharUserFieldImpl']);
 end;
 
 function TCharUserField.entered(): Integer;
@@ -8361,7 +8361,7 @@ begin
   if isIIntUserFieldImpl then
     Result := FObject as IIntUserFieldImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IIntUserFieldImpl']);
 end;
 
 function TIntUserField.entered(): Integer;
@@ -8406,7 +8406,7 @@ begin
   if isIUserImpl then
     Result := FObject as IUserImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IUserImpl']);
 end;
 
 function TUser.operation(): Cardinal;
@@ -8480,7 +8480,7 @@ begin
   if isIListUsersImpl then
     Result := FObject as IListUsersImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IListUsersImpl']);
 end;
 
 procedure TListUsers.list(status: IStatus; user: IUser);
@@ -8504,7 +8504,7 @@ begin
   if isILogonInfoImpl then
     Result := FObject as ILogonInfoImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['ILogonInfoImpl']);
 end;
 
 function TLogonInfo.name(): PAnsiChar;
@@ -8559,7 +8559,7 @@ begin
   if isIManagementImpl then
     Result := FObject as IManagementImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IManagementImpl']);
 end;
 
 procedure TManagement.addRef();
@@ -8621,7 +8621,7 @@ begin
   if isIAuthBlockImpl then
     Result := FObject as IAuthBlockImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IAuthBlockImpl']);
 end;
 
 function TAuthBlock.getType(): PAnsiChar;
@@ -8676,7 +8676,7 @@ begin
   if isIWireCryptPluginImpl then
     Result := FObject as IWireCryptPluginImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IWireCryptPluginImpl']);
 end;
 
 procedure TWireCryptPlugin.addRef();
@@ -8750,7 +8750,7 @@ begin
   if isICryptKeyCallbackImpl then
     Result := FObject as ICryptKeyCallbackImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['ICryptKeyCallbackImpl']);
 end;
 
 function TCryptKeyCallback.callback(dataLength: Cardinal; data: Pointer; bufferLength: Cardinal; buffer: Pointer): Cardinal;
@@ -8773,7 +8773,7 @@ begin
   if isIKeyHolderPluginImpl then
     Result := FObject as IKeyHolderPluginImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IKeyHolderPluginImpl']);
 end;
 
 procedure TKeyHolderPlugin.addRef();
@@ -8835,7 +8835,7 @@ begin
   if isIDbCryptInfoImpl then
     Result := FObject as IDbCryptInfoImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IDbCryptInfoImpl']);
 end;
 
 procedure TDbCryptInfo.addRef();
@@ -8869,7 +8869,7 @@ begin
   if isIDbCryptPluginImpl then
     Result := FObject as IDbCryptPluginImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IDbCryptPluginImpl']);
 end;
 
 procedure TDbCryptPlugin.addRef();
@@ -8931,7 +8931,7 @@ begin
   if isIExternalContextImpl then
     Result := FObject as IExternalContextImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IExternalContextImpl']);
 end;
 
 function TExternalContext.getMaster(): IMaster;
@@ -9002,7 +9002,7 @@ begin
   if isIExternalResultSetImpl then
     Result := FObject as IExternalResultSetImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IExternalResultSetImpl']);
 end;
 
 procedure TExternalResultSet.dispose();
@@ -9031,7 +9031,7 @@ begin
   if isIExternalFunctionImpl then
     Result := FObject as IExternalFunctionImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IExternalFunctionImpl']);
 end;
 
 procedure TExternalFunction.dispose();
@@ -9066,7 +9066,7 @@ begin
   if isIExternalProcedureImpl then
     Result := FObject as IExternalProcedureImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IExternalProcedureImpl']);
 end;
 
 procedure TExternalProcedure.dispose();
@@ -9101,7 +9101,7 @@ begin
   if isIExternalTriggerImpl then
     Result := FObject as IExternalTriggerImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IExternalTriggerImpl']);
 end;
 
 procedure TExternalTrigger.dispose();
@@ -9136,7 +9136,7 @@ begin
   if isIRoutineMetadataImpl then
     Result := FObject as IRoutineMetadataImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IRoutineMetadataImpl']);
 end;
 
 function TRoutineMetadata.getPackage(status: IStatus): PAnsiChar;
@@ -9208,7 +9208,7 @@ begin
   if isIExternalEngineImpl then
     Result := FObject as IExternalEngineImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IExternalEngineImpl']);
 end;
 
 procedure TExternalEngine.addRef();
@@ -9282,7 +9282,7 @@ begin
   if isITimerImpl then
     Result := FObject as ITimerImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['ITimerImpl']);
 end;
 
 procedure TTimer.addRef();
@@ -9315,7 +9315,7 @@ begin
   if isITimerControlImpl then
     Result := FObject as ITimerControlImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['ITimerControlImpl']);
 end;
 
 procedure TTimerControl.start(status: IStatus; timer: ITimer; microSeconds: QWord);
@@ -9345,7 +9345,7 @@ begin
   if isIVersionCallbackImpl then
     Result := FObject as IVersionCallbackImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IVersionCallbackImpl']);
 end;
 
 procedure TVersionCallback.callback(status: IStatus; text: PAnsiChar);
@@ -9369,7 +9369,7 @@ begin
   if isIUtilImpl then
     Result := FObject as IUtilImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IUtilImpl']);
 end;
 
 procedure TUtil.getFbVersion(status: IStatus; att: IAttachment; callback: IVersionCallback);
@@ -9513,7 +9513,7 @@ begin
   if isIOffsetsCallbackImpl then
     Result := FObject as IOffsetsCallbackImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IOffsetsCallbackImpl']);
 end;
 
 procedure TOffsetsCallback.setOffset(status: IStatus; index: Cardinal; offset: Cardinal; nullOffset: Cardinal);
@@ -9537,7 +9537,7 @@ begin
   if isIXpbBuilderImpl then
     Result := FObject as IXpbBuilderImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IXpbBuilderImpl']);
 end;
 
 procedure TXpbBuilder.dispose();
@@ -9680,7 +9680,7 @@ begin
   if isITraceConnectionImpl then
     Result := FObject as ITraceConnectionImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['ITraceConnectionImpl']);
 end;
 
 function TTraceConnection.getKind(): Cardinal;
@@ -9743,7 +9743,7 @@ begin
   if isITraceDatabaseConnectionImpl then
     Result := FObject as ITraceDatabaseConnectionImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['ITraceDatabaseConnectionImpl']);
 end;
 
 function TTraceDatabaseConnection.getKind(): Cardinal;
@@ -9816,7 +9816,7 @@ begin
   if isITraceTransactionImpl then
     Result := FObject as ITraceTransactionImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['ITraceTransactionImpl']);
 end;
 
 function TTraceTransaction.getTransactionID(): Int64;
@@ -9869,7 +9869,7 @@ begin
   if isITraceParamsImpl then
     Result := FObject as ITraceParamsImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['ITraceParamsImpl']);
 end;
 
 function TTraceParams.getCount(): Cardinal;
@@ -9903,7 +9903,7 @@ begin
   if isITraceStatementImpl then
     Result := FObject as ITraceStatementImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['ITraceStatementImpl']);
 end;
 
 function TTraceStatement.getStmtID(): Int64;
@@ -9931,7 +9931,7 @@ begin
   if isITraceSQLStatementImpl then
     Result := FObject as ITraceSQLStatementImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['ITraceSQLStatementImpl']);
 end;
 
 function TTraceSQLStatement.getStmtID(): Int64;
@@ -9984,7 +9984,7 @@ begin
   if isITraceBLRStatementImpl then
     Result := FObject as ITraceBLRStatementImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['ITraceBLRStatementImpl']);
 end;
 
 function TTraceBLRStatement.getStmtID(): Int64;
@@ -10027,7 +10027,7 @@ begin
   if isITraceDYNRequestImpl then
     Result := FObject as ITraceDYNRequestImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['ITraceDYNRequestImpl']);
 end;
 
 function TTraceDYNRequest.getData(): BytePtr;
@@ -10060,7 +10060,7 @@ begin
   if isITraceContextVariableImpl then
     Result := FObject as ITraceContextVariableImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['ITraceContextVariableImpl']);
 end;
 
 function TTraceContextVariable.getNameSpace(): PAnsiChar;
@@ -10093,7 +10093,7 @@ begin
   if isITraceProcedureImpl then
     Result := FObject as ITraceProcedureImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['ITraceProcedureImpl']);
 end;
 
 function TTraceProcedure.getProcName(): PAnsiChar;
@@ -10126,7 +10126,7 @@ begin
   if isITraceFunctionImpl then
     Result := FObject as ITraceFunctionImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['ITraceFunctionImpl']);
 end;
 
 function TTraceFunction.getFuncName(): PAnsiChar;
@@ -10164,7 +10164,7 @@ begin
   if isITraceTriggerImpl then
     Result := FObject as ITraceTriggerImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['ITraceTriggerImpl']);
 end;
 
 function TTraceTrigger.getTriggerName(): PAnsiChar;
@@ -10207,7 +10207,7 @@ begin
   if isITraceServiceConnectionImpl then
     Result := FObject as ITraceServiceConnectionImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['ITraceServiceConnectionImpl']);
 end;
 
 function TTraceServiceConnection.getKind(): Cardinal;
@@ -10285,7 +10285,7 @@ begin
   if isITraceStatusVectorImpl then
     Result := FObject as ITraceStatusVectorImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['ITraceStatusVectorImpl']);
 end;
 
 function TTraceStatusVector.hasError(): Boolean;
@@ -10323,7 +10323,7 @@ begin
   if isITraceSweepInfoImpl then
     Result := FObject as ITraceSweepInfoImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['ITraceSweepInfoImpl']);
 end;
 
 function TTraceSweepInfo.getOIT(): Int64;
@@ -10366,7 +10366,7 @@ begin
   if isITraceLogWriterImpl then
     Result := FObject as ITraceLogWriterImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['ITraceLogWriterImpl']);
 end;
 
 procedure TTraceLogWriter.addRef();
@@ -10405,7 +10405,7 @@ begin
   if isITraceInitInfoImpl then
     Result := FObject as ITraceInitInfoImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['ITraceInitInfoImpl']);
 end;
 
 function TTraceInitInfo.getConfigText(): PAnsiChar;
@@ -10458,7 +10458,7 @@ begin
   if isITracePluginImpl then
     Result := FObject as ITracePluginImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['ITracePluginImpl']);
 end;
 
 procedure TTracePlugin.addRef();
@@ -10591,7 +10591,7 @@ begin
   if isITraceFactoryImpl then
     Result := FObject as ITraceFactoryImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['ITraceFactoryImpl']);
 end;
 
 procedure TTraceFactory.addRef();
@@ -10640,7 +10640,7 @@ begin
   if isIUdrFunctionFactoryImpl then
     Result := FObject as IUdrFunctionFactoryImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IUdrFunctionFactoryImpl']);
 end;
 
 procedure TUdrFunctionFactory.dispose();
@@ -10675,7 +10675,7 @@ begin
   if isIUdrProcedureFactoryImpl then
     Result := FObject as IUdrProcedureFactoryImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IUdrProcedureFactoryImpl']);
 end;
 
 procedure TUdrProcedureFactory.dispose();
@@ -10710,7 +10710,7 @@ begin
   if isIUdrTriggerFactoryImpl then
     Result := FObject as IUdrTriggerFactoryImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IUdrTriggerFactoryImpl']);
 end;
 
 procedure TUdrTriggerFactory.dispose();
@@ -10745,7 +10745,7 @@ begin
   if isIUdrPluginImpl then
     Result := FObject as IUdrPluginImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IUdrPluginImpl']);
 end;
 
 function TUdrPlugin.getMaster(): IMaster;
@@ -10786,7 +10786,7 @@ begin
   if isIDecFloat16Impl then
     Result := FObject as IDecFloat16Impl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IDecFloat16Impl']);
 end;
 
 procedure TDecFloat16.toBcd(from: FB_DEC16Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr);
@@ -10826,7 +10826,7 @@ begin
   if isIDecFloat34Impl then
     Result := FObject as IDecFloat34Impl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IDecFloat34Impl']);
 end;
 
 procedure TDecFloat34.toBcd(from: FB_DEC34Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr);
@@ -10866,7 +10866,7 @@ begin
   if isIInt128Impl then
     Result := FObject as IInt128Impl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IInt128Impl']);
 end;
 
 procedure TInt128.toString(status: IStatus; from: FB_I128Ptr; scale: Integer; bufferLength: Cardinal; buffer: PAnsiChar);
@@ -10896,7 +10896,7 @@ begin
   if isIReplicatedFieldImpl then
     Result := FObject as IReplicatedFieldImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IReplicatedFieldImpl']);
 end;
 
 function TReplicatedField.getName(): PAnsiChar;
@@ -10949,7 +10949,7 @@ begin
   if isIReplicatedRecordImpl then
     Result := FObject as IReplicatedRecordImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IReplicatedRecordImpl']);
 end;
 
 function TReplicatedRecord.getCount(): Cardinal;
@@ -10987,7 +10987,7 @@ begin
   if isIReplicatedTransactionImpl then
     Result := FObject as IReplicatedTransactionImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IReplicatedTransactionImpl']);
 end;
 
 procedure TReplicatedTransaction.dispose();
@@ -11076,7 +11076,7 @@ begin
   if isIReplicatedSessionImpl then
     Result := FObject as IReplicatedSessionImpl
   else
-    raise FbException.CreateFmt(errNotImplementationObject,[Result.ClassName]);
+    raise FbException.CreateFmt(errNotImplementationObject,['IReplicatedSessionImpl']);
 end;
 
 procedure TReplicatedSession.addRef();

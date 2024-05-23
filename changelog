@@ -29,6 +29,9 @@ FBINTF Change Log  version          (1.4-2 Build 14340) Wed, 20 Mar 2024 11:13:1
 
 8. Firebird 5 support tested.
 
+9. Firebird.pas renamed to FirebirdOOAPI.pas in order to avoid confusion with
+version distributed with Firebird.
+
 FBINTF Change Log  version          (1.4-1 Build 14103) Mon, 27 Nov 2023 14:26:35 +0000
 
 1. FBSQLData: ensure that TResults.getSQLData and TResults.GetData use same error
