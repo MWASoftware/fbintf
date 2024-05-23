@@ -8,6 +8,10 @@
 {$MODE DELPHI}
 {$ENDIF}
 
+{$IFDEF MSWINDOWS}
+{$DEFINE WINDOWS}
+{$ENDIF}
+
 unit FirebirdOOAPI;
 
 interface
@@ -706,8 +710,6 @@ type
 	end;
 
 	IVersionedImpl = class;
-
-	TFirebirdOOAPIImplementationClass = class of IVersionedImpl;
 
 	TVersioned = record
 	private
