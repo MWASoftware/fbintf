@@ -66,7 +66,7 @@
         <DCC_BplOutput>.\$(Platform)\$(Config)</DCC_BplOutput>
         <DCC_DcpOutput>.\$(Platform)\$(Config)</DCC_DcpOutput>
         <DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
-        <Debugger_RunParams>-X -t 12</Debugger_RunParams>
+        <Debugger_RunParams>-X -t 1</Debugger_RunParams>
         <Debugger_HostApplication>C:\Users\A User\projects\fbintf\testsuite\testsuite.exe</Debugger_HostApplication>
     </PropertyGroup>
     <ItemGroup>
@@ -108,11 +108,11 @@
         <DCCReference Include="client\3.0\FB30Events.pas"/>
         <DCCReference Include="client\3.0\FB30Services.pas"/>
         <DCCReference Include="client\3.0\FB30Statement.pas"/>
-        <DCCReference Include="client\3.0\firebird\Firebird.pas"/>
         <DCCReference Include="client\FBMessages.pas"/>
         <DCCReference Include="client\3.0\FB30TimeZoneServices.pas"/>
         <DCCReference Include="client\FBClientLib.pas"/>
         <DCCReference Include="client\FBNumeric.pas"/>
+        <DCCReference Include="client\3.0\firebird\FirebirdOOAPI.pas"/>
         <BuildConfiguration Include="Debug">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

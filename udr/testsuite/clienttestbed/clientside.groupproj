@@ -10,7 +10,7 @@
             <Dependencies/>
         </Projects>
         <Projects Include="..\..\..\fbudr.dproj">
-            <Dependencies/>
+            <Dependencies>..\..\..\fbintf.dproj</Dependencies>
         </Projects>
         <Projects Include="..\..\..\fbintf.dproj">
             <Dependencies/>
@@ -41,13 +41,13 @@
     <Target Name="fbudrtestbed:Make">
         <MSBuild Projects="..\..\..\fbudrtestbed.dproj" Targets="Make"/>
     </Target>
-    <Target Name="fbudr">
+    <Target Name="fbudr" DependsOnTargets="fbintf">
         <MSBuild Projects="..\..\..\fbudr.dproj"/>
     </Target>
-    <Target Name="fbudr:Clean">
+    <Target Name="fbudr:Clean" DependsOnTargets="fbintf:Clean">
         <MSBuild Projects="..\..\..\fbudr.dproj" Targets="Clean"/>
     </Target>
-    <Target Name="fbudr:Make">
+    <Target Name="fbudr:Make" DependsOnTargets="fbintf:Make">
         <MSBuild Projects="..\..\..\fbudr.dproj" Targets="Make"/>
     </Target>
     <Target Name="fbintf">
