@@ -8,7 +8,7 @@
 {$MODE DELPHI}
 {$ENDIF}
 
-unit Firebird;
+unit FirebirdOOAPI;
 
 interface
 

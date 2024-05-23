@@ -51,7 +51,7 @@ unit Test1;
 interface
 
 uses
-  Classes, SysUtils, TestApplication, FBTestApp, Firebird, IB;
+  Classes, SysUtils, TestApplication, FBTestApp, FirebirdOOAPI, IB;
 
 type
 
@@ -108,22 +108,22 @@ begin
 end;
 
 type
-TVersionCallback = class(Firebird.IVersionCallbackImpl)
+TVersionCallback = class(FirebirdOOAPI.IVersionCallbackImpl)
 public
-  procedure callback(status: Firebird.IStatus; text: PAnsiChar); override;
+  procedure callback(status: FirebirdOOAPI.IStatus; text: PAnsiChar); override;
 end;
 
 { TVersionCallback }
 
-procedure TVersionCallback.callback(status : Firebird.IStatus; text : PAnsiChar
+procedure TVersionCallback.callback(status : FirebirdOOAPI.IStatus; text : PAnsiChar
 );
 begin
 end;
 
 procedure TTest1.TestIsImplementationObject;
 var objectType: TFirebirdImplementationClass;
-    impl: Firebird.IVersionCallbackImpl;
-    intf: Firebird.IVersionCallback;
+    impl: FirebirdOOAPI.IVersionCallbackImpl;
+    intf: FirebirdOOAPI.IVersionCallback;
     TestObj:  TVersionCallback;
 begin
   if not FirebirdAPI.HasMasterIntf then Exit; {Only if OOAPI available}

@@ -42,7 +42,7 @@ unit FBUDRController;
 interface
 
 uses
-  Classes, SysUtils, SyncObjs,Firebird, IB, FBUDRIntf, FBSQLData,
+  Classes, SysUtils, SyncObjs,FirebirdOOAPI, IB, FBUDRIntf, FBSQLData,
   FB30Statement, IniFiles;
 
 type
@@ -117,7 +117,7 @@ type
   private
     const sLogFormat = '@%s:%s';
   private
-    FTheirUnloadFlag: Firebird.BooleanPtr;
+    FTheirUnloadFlag: FirebirdOOAPI.BooleanPtr;
     FLogStream: TStream;
     FCriticalSection: TCriticalSection;
     FMaster: IMaster;
@@ -125,17 +125,17 @@ type
     FConfigFile: TIniFile;
     FJnlOpenAppend: boolean;
     function GetDateTimeFmt: AnsiString;
-    procedure RegisterUDRFactories(status: Firebird.IStatus; udrPlugin: Firebird.IUdrPlugin);
-    procedure RegisterUDRFactory(status: Firebird.IStatus; udrPlugin: Firebird.IUdrPlugin;
+    procedure RegisterUDRFactories(status: FirebirdOOAPI.IStatus; udrPlugin: FirebirdOOAPI.IUdrPlugin);
+    procedure RegisterUDRFactory(status: FirebirdOOAPI.IStatus; udrPlugin: FirebirdOOAPI.IUdrPlugin;
                                          aName: AnsiString; factory: TObject);
     procedure FreeFactoryList;
     procedure LoadConfig;
     function NeedLogStream: boolean;
   public
-    constructor Create(status: Firebird.IStatus; udrPlugin: Firebird.IUdrPlugin;
+    constructor Create(status: FirebirdOOAPI.IStatus; udrPlugin: FirebirdOOAPI.IUdrPlugin;
                                          aTheirUnloadFlag: booleanPtr; var aMyUnloadFlag: booleanPtr);
     destructor Destroy; override;
-    procedure FBSetStatusFromException(E: Exception; aStatus: Firebird.IStatus);
+    procedure FBSetStatusFromException(E: Exception; aStatus: FirebirdOOAPI.IStatus);
     function ProcessTemplateMacros(aTemplate: AnsiString): AnsiString;
     procedure WriteToLog(Msg: AnsiString); overload;
     procedure WriteToLog(aTitle: AnsiString; Params: IFBUDRInputParams); overload;
@@ -185,7 +185,7 @@ type
      function IsInputDataArea: boolean; override;
    public
      {created with the UDR output metadata and a pointer to the outMsg buffer.}
-     constructor Create(context: IFBUDRExternalContext; aMetadata: Firebird.IMessageMetaData; aBuffer: PByte);
+     constructor Create(context: IFBUDRExternalContext; aMetadata: FirebirdOOAPI.IMessageMetaData; aBuffer: PByte);
 
      {We override CanChangeMetaData to stop a UDR writer trying to change the output
      metadata and hence invalidate the outMsg buffer.}
@@ -203,7 +203,7 @@ type
    TFBUDRTriggerNewValuesSQLDA = class(TFBUDROutParamsSQLDA)
    public
      {created with the UDR output metadata and a pointer to the outMsg buffer.}
-     constructor Create(context: IFBUDRExternalContext; aMetadata: Firebird.IMessageMetaData; aBuffer: PByte);
+     constructor Create(context: IFBUDRExternalContext; aMetadata: FirebirdOOAPI.IMessageMetaData; aBuffer: PByte);
    end;
 
    {TFBUDRInParamsSQLDA subclasses TIBXOUTPUTSQLDA. TIBXOUTPUTSQLDA is defined
@@ -229,7 +229,7 @@ type
    public
      {created with the input messge metadata and a pointer to the inMsg buffer}
      constructor Create(context: IFBUDRExternalContext;
-       aMetadata: Firebird.IMessageMetaData; aBuffer: PByte);
+       aMetadata: FirebirdOOAPI.IMessageMetaData; aBuffer: PByte);
    end;
 
   {A TFBUDRFunction object is instantiated by a TUDRFunctionFactory when a
@@ -242,7 +242,7 @@ type
 
   { TFBUDRFunction }
 
-  TFBUDRFunction = class(Firebird.IExternalFunctionImpl)
+  TFBUDRFunction = class(FirebirdOOAPI.IExternalFunctionImpl)
   private
     FController: TFBUDRController;
     FName: AnsiString;
@@ -293,9 +293,9 @@ type
    public
     {IExternalFunction}
     procedure dispose(); override;
-    procedure getCharSet(status: Firebird.IStatus; context: Firebird.IExternalContext;
+    procedure getCharSet(status: FirebirdOOAPI.IStatus; context: FirebirdOOAPI.IExternalContext;
                                                    name: PAnsiChar; nameSize: Cardinal); overload; override;
-    procedure execute(status: Firebird.IStatus; context: Firebird.IExternalContext;
+    procedure execute(status: FirebirdOOAPI.IStatus; context: FirebirdOOAPI.IExternalContext;
                                                 inMsg: Pointer; outMsg: Pointer); overload; override;
   end;
 
@@ -312,7 +312,7 @@ type
 
   { TFBUDRFunctionFactory }
 
-  TFBUDRFunctionFactory = class(Firebird.IUdrFunctionFactoryImpl)
+  TFBUDRFunctionFactory = class(FirebirdOOAPI.IUdrFunctionFactoryImpl)
   private
     FController: TFBUDRController;
     FName: AnsiString;
@@ -324,12 +324,12 @@ type
   public
     {IUdrFunctionFactory}
     procedure dispose(); override;
-    procedure setup(status: Firebird.IStatus; context: Firebird.IExternalContext;
-                    metadata: Firebird.IRoutineMetadata;
-                    inBuilder: Firebird.IMetadataBuilder;
-                    outBuilder: Firebird.IMetadataBuilder); override;
-    function newItem(status: Firebird.IStatus; context: Firebird.IExternalContext; metadata:
-                                               Firebird.IRoutineMetadata): Firebird.IExternalFunction; override;
+    procedure setup(status: FirebirdOOAPI.IStatus; context: FirebirdOOAPI.IExternalContext;
+                    metadata: FirebirdOOAPI.IRoutineMetadata;
+                    inBuilder: FirebirdOOAPI.IMetadataBuilder;
+                    outBuilder: FirebirdOOAPI.IMetadataBuilder); override;
+    function newItem(status: FirebirdOOAPI.IStatus; context: FirebirdOOAPI.IExternalContext; metadata:
+                                               FirebirdOOAPI.IRoutineMetadata): FirebirdOOAPI.IExternalFunction; override;
   end;
 
   {A TFBUDRProcedure object is instantiated by a TUDRPRocedureFactory when a
@@ -339,7 +339,7 @@ type
 
   { TFBUDRProcedure }
 
-  TFBUDRProcedure = class(Firebird.IExternalProcedureImpl)
+  TFBUDRProcedure = class(FirebirdOOAPI.IExternalProcedureImpl)
     private
       FController: TFBUDRController;
       FName: AnsiString;
@@ -373,21 +373,21 @@ type
    public
       {IExternalProcedure}
       procedure dispose(); override;
-      procedure getCharSet(status: Firebird.IStatus; context: Firebird.IExternalContext;
+      procedure getCharSet(status: FirebirdOOAPI.IStatus; context: FirebirdOOAPI.IExternalContext;
                                                      name: PAnsiChar; nameSize: Cardinal); overload; override;
     end;
 
   TFBUDRProcedureClass = class of TFBUDRProcedure;
 
   {The Firebird UDR model requires that a procedure's "open" function returns a
-   Firebird.IExternalResultSet object. The TFBUDRExternalResultsSet is used to implement
+   FirebirdOOAPI.IExternalResultSet object. The TFBUDRExternalResultsSet is used to implement
    this object and is subclassed separately to provide the results set for
    Execute and Select Procedures.
   }
 
   { TFBUDRExternalResultsSet }
 
-  TFBUDRExternalResultsSet = class(Firebird.IExternalResultSetImpl)
+  TFBUDRExternalResultsSet = class(FirebirdOOAPI.IExternalResultSetImpl)
   private
     FUDRProcedure: TFBUDRProcedure;
     FOutputDataSQLDA: TFBUDROutParamsSQLDA;
@@ -396,7 +396,7 @@ type
     procedure Close; virtual;
   public
     constructor Create(UDRProcedure: TFBUDRProcedure; context: IFBUDRExternalContext;
-                       metadata: Firebird.IMessageMetadata;
+                       metadata: FirebirdOOAPI.IMessageMetadata;
                        outMsg: pointer);
     destructor Destroy; override;
     property OutputData: IFBUDROutputData read FOutputData;
@@ -406,7 +406,7 @@ type
   end;
 
   {TFBUDRSingletonRow subclasses TFBUDRExternalResultsSet in order to provide the
-   Firebird.IExternalResultSet object returned by an Execute procedure. In a
+   FirebirdOOAPI.IExternalResultSet object returned by an Execute procedure. In a
    TFBUDRExecuteProcedure, the output parameters are set in the main body of
    the UDR writer's Execute procedure and are returned to the Firebird engine
    via the "fetch" function implemented by this object.
@@ -419,11 +419,11 @@ type
     FFetchCalled: boolean;
   public
     {IExternalResultSetImpl}
-    function fetch(status: Firebird.IStatus): Boolean; override;
+    function fetch(status: FirebirdOOAPI.IStatus): Boolean; override;
   end;
 
   {TFBUDRResultsCursor subclasses TFBUDRExternalResultsSet in order to provide the
-   Firebird.IExternalResultSet object returned by s Select procedure. In a
+   FirebirdOOAPI.IExternalResultSet object returned by s Select procedure. In a
    TUDRSelectProcedure, the work is divided into two methods "open" and "fetch".
    The former initialises procedure, while "fetch" is called to return each row
    in the output dataset. A "close" nethod may also be provided to perform any
@@ -439,7 +439,7 @@ type
      procedure Close; override;
   public
     {IExternalResultSetImpl}
-    function fetch(status: Firebird.IStatus): Boolean; override;
+    function fetch(status: FirebirdOOAPI.IStatus): Boolean; override;
   end;
 
   {TFBUDRExecuteProcedure subclasses a TFBUDRProcedure for a UDR Execute Procedure.
@@ -464,8 +464,8 @@ type
                       OutputData: IFBUDROutputData); virtual; abstract;
   public
     {IExternalProcedure}
-    function open(status: Firebird.IStatus; context: Firebird.IExternalContext;
-                 inMsg: Pointer; outMsg: Pointer): Firebird.IExternalResultSet; override;
+    function open(status: FirebirdOOAPI.IStatus; context: FirebirdOOAPI.IExternalContext;
+                 inMsg: Pointer; outMsg: Pointer): FirebirdOOAPI.IExternalResultSet; override;
   end;
 
   {TFBUDRSelectProcedure subclasses a TFBUDRProcedure for a UDR Select Procedure.
@@ -496,8 +496,8 @@ type
     procedure close; virtual;
   public
     {IExternalProcedure}
-    function open(status: Firebird.IStatus; context: Firebird.IExternalContext;
-                 inMsg: Pointer; outMsg: Pointer): Firebird.IExternalResultSet; overload; override;
+    function open(status: FirebirdOOAPI.IStatus; context: FirebirdOOAPI.IExternalContext;
+                 inMsg: Pointer; outMsg: Pointer): FirebirdOOAPI.IExternalResultSet; overload; override;
   end;
 
     {A new instance of TFBUDRProcedureFactory is instantiated for each UDR procedure
@@ -508,7 +508,7 @@ type
 
   { TFBUDRProcedureFactory }
 
-  TFBUDRProcedureFactory = class(Firebird.IUdrProcedureFactoryImpl)
+  TFBUDRProcedureFactory = class(FirebirdOOAPI.IUdrProcedureFactoryImpl)
   private
     FController: TFBUDRController;
     FName: AnsiString;
@@ -520,11 +520,11 @@ type
   public
     {IUdrProcedureFactory}
     procedure dispose(); override;
-    procedure setup(status: Firebird.IStatus; context: Firebird.IExternalContext;
-                    metadata:Firebird.IRoutineMetadata; inBuilder: Firebird.IMetadataBuilder;
-                    outBuilder: Firebird.IMetadataBuilder); override;
-    function newItem(status: Firebird.IStatus; context: Firebird.IExternalContext;
-                     metadata: Firebird.IRoutineMetadata): IExternalProcedure; override;
+    procedure setup(status: FirebirdOOAPI.IStatus; context: FirebirdOOAPI.IExternalContext;
+                    metadata:FirebirdOOAPI.IRoutineMetadata; inBuilder: FirebirdOOAPI.IMetadataBuilder;
+                    outBuilder: FirebirdOOAPI.IMetadataBuilder); override;
+    function newItem(status: FirebirdOOAPI.IStatus; context: FirebirdOOAPI.IExternalContext;
+                     metadata: FirebirdOOAPI.IRoutineMetadata): IExternalProcedure; override;
   end;
 
   TFBUDRTriggerAction = (taInsert, taUpdate, taDelete, taConnect, taDisconnect,
@@ -538,7 +538,7 @@ type
 
   { TFBUDRTrigger }
 
-  TFBUDRTrigger = class(Firebird.IExternalTriggerImpl)
+  TFBUDRTrigger = class(FirebirdOOAPI.IExternalTriggerImpl)
   private
     FController: TFBUDRController;
     FName: AnsiString;
@@ -603,9 +603,9 @@ type
  public
     {IExternalTrigger}
     procedure dispose(); override;
-    procedure getCharSet(status: Firebird.IStatus; context: Firebird.IExternalContext;
+    procedure getCharSet(status: FirebirdOOAPI.IStatus; context: FirebirdOOAPI.IExternalContext;
                    name: PAnsiChar; nameSize: Cardinal); overload; override;
-    procedure execute(status: Firebird.IStatus; context: Firebird.IExternalContext;
+    procedure execute(status: FirebirdOOAPI.IStatus; context: FirebirdOOAPI.IExternalContext;
                    action: Cardinal; oldMsg: Pointer; newMsg: Pointer);  overload; override;
   end;
 
@@ -619,7 +619,7 @@ type
 
   { TFBUDRTriggerFactory }
 
-  TFBUDRTriggerFactory = class(Firebird.IUdrTriggerFactoryImpl)
+  TFBUDRTriggerFactory = class(FirebirdOOAPI.IUdrTriggerFactoryImpl)
   private
     FController: TFBUDRController;
     FName: AnsiString;
@@ -630,18 +630,18 @@ type
     property Controller: TFBUDRController read FController write SetController;
   public
     procedure dispose(); override;
-    procedure setup(status: Firebird.IStatus; context: Firebird.IExternalContext;
-                                              metadata: Firebird.IRoutineMetadata;
-                                              fieldsBuilder: Firebird.IMetadataBuilder); override;
-    function newItem(status: Firebird.IStatus; context: Firebird.IExternalContext;
-                                              metadata: Firebird.IRoutineMetadata): Firebird.IExternalTrigger; override;
+    procedure setup(status: FirebirdOOAPI.IStatus; context: FirebirdOOAPI.IExternalContext;
+                                              metadata: FirebirdOOAPI.IRoutineMetadata;
+                                              fieldsBuilder: FirebirdOOAPI.IMetadataBuilder); override;
+    function newItem(status: FirebirdOOAPI.IStatus; context: FirebirdOOAPI.IExternalContext;
+                                              metadata: FirebirdOOAPI.IRoutineMetadata): FirebirdOOAPI.IExternalTrigger; override;
   end;
 
   {firebird_udr_plugin is the UDR library entry point and must be exported by the
    library.}
 
-function firebird_udr_plugin(status: Firebird.IStatus; aTheirUnloadFlag: Firebird.BooleanPtr;
-                                              udrPlugin: IUdrPlugin): Firebird.BooleanPtr; cdecl;
+function firebird_udr_plugin(status: FirebirdOOAPI.IStatus; aTheirUnloadFlag: FirebirdOOAPI.BooleanPtr;
+                                              udrPlugin: IUdrPlugin): FirebirdOOAPI.BooleanPtr; cdecl;
 
 {The register functions are called at initialisation time to register each function,
  procedure and trigger defined by the library. Note: "aName" is the routine name
@@ -694,9 +694,9 @@ resourcestring
   SUnknownFieldName = 'Unknown Field Name - %s';
   SEof = 'No More Rows';
 
-function firebird_udr_plugin(status : Firebird.IStatus;
-  aTheirUnloadFlag : Firebird.BooleanPtr; udrPlugin : IUdrPlugin
-  ) : Firebird.BooleanPtr; cdecl;
+function firebird_udr_plugin(status : FirebirdOOAPI.IStatus;
+  aTheirUnloadFlag : FirebirdOOAPI.BooleanPtr; udrPlugin : IUdrPlugin
+  ) : FirebirdOOAPI.BooleanPtr; cdecl;
 begin
   if TFBUDRController.FFBController = nil then
     TFBUDRController.Create(status,udrPlugin,aTheirUnloadFlag,Result); {create a default instance}
@@ -757,7 +757,7 @@ end;
 { TFBUDRTriggerNewValuesSQLDA }
 
 constructor TFBUDRTriggerNewValuesSQLDA.Create(context: IFBUDRExternalContext;
-  aMetadata: Firebird.IMessageMetaData; aBuffer: PByte);
+  aMetadata: FirebirdOOAPI.IMessageMetaData; aBuffer: PByte);
 var i: integer;
     SQLNullIndicator: PShort;
     data: PByte;
@@ -802,7 +802,7 @@ begin
     FDone := true;
 end;
 
-function TFBUDRResultsCursor.fetch(status: Firebird.IStatus): Boolean;
+function TFBUDRResultsCursor.fetch(status: FirebirdOOAPI.IStatus): Boolean;
 begin
   Result := false;
   try
@@ -836,7 +836,7 @@ end;
 
 { TFBUDRSingletonRow }
 
-function TFBUDRSingletonRow.fetch(status: Firebird.IStatus): Boolean;
+function TFBUDRSingletonRow.fetch(status: FirebirdOOAPI.IStatus): Boolean;
 begin
   try
   Result := (FOutputDataSQLDA <> nil) and not FFetchCalled;
@@ -854,13 +854,13 @@ end;
 
 { TFBUDRExecuteProcedure }
 
-function TFBUDRExecuteProcedure.open(status: Firebird.IStatus;
-  context: Firebird.IExternalContext; inMsg: Pointer; outMsg: Pointer
-  ): Firebird.IExternalResultSet;
+function TFBUDRExecuteProcedure.open(status: FirebirdOOAPI.IStatus;
+  context: FirebirdOOAPI.IExternalContext; inMsg: Pointer; outMsg: Pointer
+  ): FirebirdOOAPI.IExternalResultSet;
 var aProcMetadata: IFBUDRProcMetadata;
     InputParamsSQLDA: TFBUDRInParamsSQLDA;
     InputParams: IFBUDRInputParams;
-    metadata: Firebird.IMessageMetadata;
+    metadata: FirebirdOOAPI.IMessageMetadata;
     FBContext: IFBUDRExternalContext;
     singletonRow: TFBUDRSingletonRow;
 begin
@@ -952,13 +952,13 @@ begin
   //override this method to tidy up once all rows have been returned
 end;
 
-function TFBUDRSelectProcedure.open(status: Firebird.IStatus;
-  context: Firebird.IExternalContext; inMsg: Pointer; outMsg: Pointer
-  ): Firebird.IExternalResultSet;
+function TFBUDRSelectProcedure.open(status: FirebirdOOAPI.IStatus;
+  context: FirebirdOOAPI.IExternalContext; inMsg: Pointer; outMsg: Pointer
+  ): FirebirdOOAPI.IExternalResultSet;
 var aProcMetadata: IFBUDRProcMetadata;
     InputParamsSQLDA: TFBUDRInParamsSQLDA;
     InputParams: IFBUDRInputParams;
-    metadata: Firebird.IMessageMetadata;
+    metadata: FirebirdOOAPI.IMessageMetadata;
     FBContext: IFBUDRExternalContext;
 begin
   Result := nil;
@@ -1052,9 +1052,9 @@ begin
   Free;
 end;
 
-procedure TFBUDRTriggerFactory.setup(status: Firebird.IStatus;
-  context: Firebird.IExternalContext; metadata: Firebird.IRoutineMetadata;
-  fieldsBuilder: Firebird.IMetadataBuilder);
+procedure TFBUDRTriggerFactory.setup(status: FirebirdOOAPI.IStatus;
+  context: FirebirdOOAPI.IExternalContext; metadata: FirebirdOOAPI.IRoutineMetadata;
+  fieldsBuilder: FirebirdOOAPI.IMetadataBuilder);
 var FBRoutineMetadata: IFBUDRRoutineMetadata;
     FBFieldsBuilder: IFBUDRMetadataBuilder;
     FBContext: IFBUDRExternalContext;
@@ -1077,9 +1077,9 @@ begin
   end;
 end;
 
-function TFBUDRTriggerFactory.newItem(status: Firebird.IStatus;
-  context: Firebird.IExternalContext; metadata: Firebird.IRoutineMetadata
-  ): Firebird.IExternalTrigger;
+function TFBUDRTriggerFactory.newItem(status: FirebirdOOAPI.IStatus;
+  context: FirebirdOOAPI.IExternalContext; metadata: FirebirdOOAPI.IRoutineMetadata
+  ): FirebirdOOAPI.IExternalTrigger;
 var FBRoutineMetadata: IFBUDRRoutineMetadata;
     FBContext: IFBUDRExternalContext;
 begin
@@ -1154,8 +1154,8 @@ begin
   Free;
 end;
 
-procedure TFBUDRTrigger.getCharSet(status: Firebird.IStatus;
-  context: Firebird.IExternalContext; name: PAnsiChar; nameSize: Cardinal);
+procedure TFBUDRTrigger.getCharSet(status: FirebirdOOAPI.IStatus;
+  context: FirebirdOOAPI.IExternalContext; name: PAnsiChar; nameSize: Cardinal);
 var charset: AnsiString;
     FBContext: IFBUDRExternalContext;
 begin
@@ -1178,8 +1178,8 @@ begin
   end;
 end;
 
-procedure TFBUDRTrigger.execute(status: Firebird.IStatus;
-  context: Firebird.IExternalContext; action: Cardinal; oldMsg: Pointer;
+procedure TFBUDRTrigger.execute(status: FirebirdOOAPI.IStatus;
+  context: FirebirdOOAPI.IExternalContext; action: Cardinal; oldMsg: Pointer;
   newMsg: Pointer);
 var aTriggerMetadata: IFBUDRTriggerMetaData;
     OldParamsSQLDA: TFBUDRInParamsSQLDA;
@@ -1192,7 +1192,7 @@ var aTriggerMetadata: IFBUDRTriggerMetaData;
     FBContext: IFBUDRExternalContext;
 
   procedure SetUpOldParams;
-  var metadata: Firebird.IMessageMetadata;
+  var metadata: FirebirdOOAPI.IMessageMetadata;
   begin
     metadata := (FRoutineMetadata as TFBUDRRoutineMetadata).getTriggerMetadata;
     try
@@ -1210,7 +1210,7 @@ var aTriggerMetadata: IFBUDRTriggerMetaData;
   end;
 
   procedure SetupNewParams;
-  var metadata: Firebird.IMessageMetadata;
+  var metadata: FirebirdOOAPI.IMessageMetadata;
   begin
     metadata := (FRoutineMetadata as TFBUDRRoutineMetadata).getTriggerMetadata;
     try
@@ -1228,7 +1228,7 @@ var aTriggerMetadata: IFBUDRTriggerMetaData;
   end;
 
   procedure SetupWritableNewParams;
-  var metadata: Firebird.IMessageMetadata;
+  var metadata: FirebirdOOAPI.IMessageMetadata;
   begin
     metadata := (FRoutineMetadata as TFBUDRRoutineMetadata).getTriggerMetadata;
     try
@@ -1263,7 +1263,7 @@ begin
       FBContext := TFBUDRExternalContext.Create(Controller,context);
       FFirebirdAPI := FBContext.GetFirebirdAPI;
       try
-        with Firebird.IExternalTriggerImpl do
+        with FirebirdOOAPI.IExternalTriggerImpl do
         case action of
         ACTION_INSERT:
           TriggerAction := taInsert;
@@ -1357,9 +1357,9 @@ begin
   Free;
 end;
 
-procedure TFBUDRProcedureFactory.setup(status: Firebird.IStatus;
-  context: Firebird.IExternalContext; metadata: Firebird.IRoutineMetadata;
-  inBuilder: Firebird.IMetadataBuilder; outBuilder: Firebird.IMetadataBuilder);
+procedure TFBUDRProcedureFactory.setup(status: FirebirdOOAPI.IStatus;
+  context: FirebirdOOAPI.IExternalContext; metadata: FirebirdOOAPI.IRoutineMetadata;
+  inBuilder: FirebirdOOAPI.IMetadataBuilder; outBuilder: FirebirdOOAPI.IMetadataBuilder);
 var FBRoutineMetadata: IFBUDRRoutineMetadata;
     FBInBuilder: IFBUDRMetadataBuilder;
     FBOutBuilder: IFBUDRMetadataBuilder;
@@ -1386,8 +1386,8 @@ begin
   end;
 end;
 
-function TFBUDRProcedureFactory.newItem(status: Firebird.IStatus;
-  context: Firebird.IExternalContext; metadata: Firebird.IRoutineMetadata
+function TFBUDRProcedureFactory.newItem(status: FirebirdOOAPI.IStatus;
+  context: FirebirdOOAPI.IExternalContext; metadata: FirebirdOOAPI.IRoutineMetadata
   ): IExternalProcedure;
 var FBRoutineMetadata: IFBUDRRoutineMetadata;
     FBContext: IFBUDRExternalContext;
@@ -1409,7 +1409,7 @@ begin
 end;
 
 constructor TFBUDRExternalResultsSet.Create(UDRProcedure: TFBUDRProcedure;
-  context: IFBUDRExternalContext; metadata: Firebird.IMessageMetadata;
+  context: IFBUDRExternalContext; metadata: FirebirdOOAPI.IMessageMetadata;
   outMsg: pointer);
 begin
   inherited Create;
@@ -1484,8 +1484,8 @@ begin
   if FRefCount = 0 then Free;
 end;
 
-procedure TFBUDRProcedure.getCharSet(status: Firebird.IStatus;
-  context: Firebird.IExternalContext; name: PAnsiChar; nameSize: Cardinal);
+procedure TFBUDRProcedure.getCharSet(status: FirebirdOOAPI.IStatus;
+  context: FirebirdOOAPI.IExternalContext; name: PAnsiChar; nameSize: Cardinal);
 var charset: AnsiString;
     FBContext: IFBUDRExternalContext;
 begin
@@ -1538,7 +1538,7 @@ begin
 end;
 
 constructor TFBUDRInParamsSQLDA.Create(context: IFBUDRExternalContext;
-  aMetadata: Firebird.IMessageMetaData; aBuffer: PByte);
+  aMetadata: FirebirdOOAPI.IMessageMetaData; aBuffer: PByte);
 begin
   inherited Create(context.GetFirebirdAPI);
   FAttachment := context.GetAttachment;
@@ -1578,7 +1578,7 @@ begin
 end;
 
 constructor TFBUDROutParamsSQLDA.Create(context: IFBUDRExternalContext;
-  aMetadata: Firebird.IMessageMetaData; aBuffer: PByte);
+  aMetadata: FirebirdOOAPI.IMessageMetaData; aBuffer: PByte);
 begin
   inherited Create(context.GetFirebirdAPI);
   FAttachment := context.GetAttachment;
@@ -1654,8 +1654,8 @@ begin
   Free;
 end;
 
-procedure TFBUDRFunction.getCharSet(status: Firebird.IStatus;
-  context: Firebird.IExternalContext; name: PAnsiChar; nameSize: Cardinal);
+procedure TFBUDRFunction.getCharSet(status: FirebirdOOAPI.IStatus;
+  context: FirebirdOOAPI.IExternalContext; name: PAnsiChar; nameSize: Cardinal);
 var charset: AnsiString;
     FBContext: IFBUDRExternalContext;
 begin
@@ -1678,14 +1678,14 @@ begin
   end;
 end;
 
-procedure TFBUDRFunction.execute(status: Firebird.IStatus;
-  context: Firebird.IExternalContext; inMsg: Pointer; outMsg: Pointer);
+procedure TFBUDRFunction.execute(status: FirebirdOOAPI.IStatus;
+  context: FirebirdOOAPI.IExternalContext; inMsg: Pointer; outMsg: Pointer);
 var aProcMetadata: IFBUDRProcMetadata;
     OutParamsSQLDA: TFBUDROutParamsSQLDA;
     InParamsSQLDA: TFBUDRInParamsSQLDA;
     InputParams: IFBUDRInputParams;
     OutputData: IFBUDROutputData;
-    metadata: Firebird.IMessageMetadata;
+    metadata: FirebirdOOAPI.IMessageMetadata;
     FBContext: IFBUDRExternalContext;
 begin
   try
@@ -1779,9 +1779,9 @@ begin
   Free;
 end;
 
-procedure TFBUDRFunctionFactory.setup(status: Firebird.IStatus;
-  context: Firebird.IExternalContext; metadata: Firebird.IRoutineMetadata;
-  inBuilder: Firebird.IMetadataBuilder; outBuilder: Firebird.IMetadataBuilder);
+procedure TFBUDRFunctionFactory.setup(status: FirebirdOOAPI.IStatus;
+  context: FirebirdOOAPI.IExternalContext; metadata: FirebirdOOAPI.IRoutineMetadata;
+  inBuilder: FirebirdOOAPI.IMetadataBuilder; outBuilder: FirebirdOOAPI.IMetadataBuilder);
 var FBRoutineMetadata: IFBUDRRoutineMetadata;
     FBInBuilder: IFBUDRMetadataBuilder;
     FBOutBuilder: IFBUDRMetadataBuilder;
@@ -1810,9 +1810,9 @@ begin
   end;
 end;
 
-function TFBUDRFunctionFactory.newItem(status: Firebird.IStatus;
-  context: Firebird.IExternalContext; metadata: Firebird.IRoutineMetadata
-  ): Firebird.IExternalFunction;
+function TFBUDRFunctionFactory.newItem(status: FirebirdOOAPI.IStatus;
+  context: FirebirdOOAPI.IExternalContext; metadata: FirebirdOOAPI.IRoutineMetadata
+  ): FirebirdOOAPI.IExternalFunction;
 var FBRoutineMetadata: IFBUDRRoutineMetadata;
     FBContext: IFBUDRExternalContext;
 begin
@@ -1854,14 +1854,14 @@ function TFBUDRController.ProcessTemplateMacros(aTemplate: AnsiString
       Result := Result + DirectorySeparator;
   end;
 
-var udr_config: Firebird.IConfig;
-    config_entry: Firebird.IConfigEntry;
-    aStatus: Firebird.IStatus;
+var udr_config: FirebirdOOAPI.IConfig;
+    config_entry: FirebirdOOAPI.IConfigEntry;
+    aStatus: FirebirdOOAPI.IStatus;
 begin
   if FMaster <> nil then
   with FMaster.getConfigManager^ do
   begin
-    Result := StringReplace(aTemplate,'$LOGDIR',CleanDirName(getDirectory(Firebird.IConfigManagerImpl.DIR_LOG)),[rfReplaceAll, rfIgnoreCase]);
+    Result := StringReplace(aTemplate,'$LOGDIR',CleanDirName(getDirectory(FirebirdOOAPI.IConfigManagerImpl.DIR_LOG)),[rfReplaceAll, rfIgnoreCase]);
     udr_config := getPluginConfig('UDR');
     if udr_config <> nil then
     try
@@ -1869,7 +1869,7 @@ begin
       try
         config_entry := udr_config.find(aStatus,'path');
         with aStatus^ do
-          if (getState and Firebird.IStatusImpl.STATE_ERRORS) <> 0 then
+          if (getState and FirebirdOOAPI.IStatusImpl.STATE_ERRORS) <> 0 then
             raise EFBUDRException.Create(aStatus);
       finally
         aStatus.dispose;
@@ -1891,8 +1891,8 @@ begin
   Result := StringReplace(Result,'$TIMESTAMP',FormatDateTime('yyyymmddhhnnss',Now),[rfReplaceAll, rfIgnoreCase]);
 end;
 
-procedure TFBUDRController.RegisterUDRFactories(status: Firebird.IStatus;
-  udrPlugin: Firebird.IUdrPlugin);
+procedure TFBUDRController.RegisterUDRFactories(status: FirebirdOOAPI.IStatus;
+  udrPlugin: FirebirdOOAPI.IUdrPlugin);
 var i: integer;
 begin
   if FUDRFactoryList <> nil then
@@ -1900,20 +1900,20 @@ begin
   try
     RegisterUDRFactory(status,udrPlugin,FUDRFactoryList[i], FUDRFactoryList.Objects[i]);
     with status^ do
-      if (getState and Firebird.IStatusImpl.STATE_ERRORS) <> 0 then break;
+      if (getState and FirebirdOOAPI.IStatusImpl.STATE_ERRORS) <> 0 then break;
   except on E: Exception do
     FBSetStatusFromException(E,status);
   end;
 end;
 
-procedure TFBUDRController.RegisterUDRFactory(status: Firebird.IStatus;
-  udrPlugin: Firebird.IUdrPlugin; aName: AnsiString; factory: TObject);
+procedure TFBUDRController.RegisterUDRFactory(status: FirebirdOOAPI.IStatus;
+  udrPlugin: FirebirdOOAPI.IUdrPlugin; aName: AnsiString; factory: TObject);
 begin
     if factory is TFBUDRFunctionFactory then
     begin
       if loLogFunctions in FBUDRControllerOptions.LogOptions then
         WriteToLog(SFuncRegister + aName);
-      udrPlugin.registerFunction(status,PAnsiChar(aName),Firebird.IUdrFunctionFactoryImpl(factory).asIUdrFunctionFactory);
+      udrPlugin.registerFunction(status,PAnsiChar(aName),FirebirdOOAPI.IUdrFunctionFactoryImpl(factory).asIUdrFunctionFactory);
       TFBUDRFunctionFactory(factory).Controller := self;
     end
     else
@@ -1921,7 +1921,7 @@ begin
     begin
       if loLogProcedures in FBUDRControllerOptions.LogOptions then
         WriteToLog(SProcRegister + aName);
-      udrPlugin.registerProcedure(status,PAnsiChar(aName),Firebird.IUdrProcedureFactoryImpl(factory).asIUdrProcedureFactory);
+      udrPlugin.registerProcedure(status,PAnsiChar(aName),FirebirdOOAPI.IUdrProcedureFactoryImpl(factory).asIUdrProcedureFactory);
       TFBUDRProcedureFactory(factory).Controller := self;
     end
     else
@@ -1929,7 +1929,7 @@ begin
     begin
       if loLogTriggers in FBUDRControllerOptions.LogOptions then
         WriteToLog(STriggerRegister + aName);
-      udrPlugin.registerTrigger(status,PAnsiChar(aName),Firebird.IUdrTriggerFactoryImpl(factory).asIUdrTriggerFactory);
+      udrPlugin.registerTrigger(status,PAnsiChar(aName),FirebirdOOAPI.IUdrTriggerFactoryImpl(factory).asIUdrTriggerFactory);
       TFBUDRTriggerFactory(factory).Controller := self;
     end
     else
@@ -2072,8 +2072,8 @@ begin
   Result := Result + ']';
 end;
 
-constructor TFBUDRController.Create(status: Firebird.IStatus;
-  udrPlugin: Firebird.IUdrPlugin; aTheirUnloadFlag: booleanPtr;
+constructor TFBUDRController.Create(status: FirebirdOOAPI.IStatus;
+  udrPlugin: FirebirdOOAPI.IUdrPlugin; aTheirUnloadFlag: booleanPtr;
   var aMyUnloadFlag: booleanPtr);
 begin
   try
@@ -2105,7 +2105,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TFBUDRController.FBSetStatusFromException(E: Exception; aStatus: Firebird.IStatus);
+procedure TFBUDRController.FBSetStatusFromException(E: Exception; aStatus: FirebirdOOAPI.IStatus);
 var StatusVector: TStatusVector;
     ErrorVector: NativeIntPtr;
 begin

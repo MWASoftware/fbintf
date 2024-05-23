@@ -37,7 +37,7 @@ unit FB30Attachment;
 interface
 
 uses
-  Classes, SysUtils, FBAttachment, FBClientAPI, FB30ClientAPI, Firebird, IB,
+  Classes, SysUtils, FBAttachment, FBClientAPI, FB30ClientAPI, FirebirdOOAPI, IB,
   FBActivityMonitor, FBParamBlock;
 
 type
@@ -46,12 +46,12 @@ type
 
   TFB30Attachment = class(TFBAttachment,IAttachment, IActivityMonitor)
   private
-    FAttachmentIntf: Firebird.IAttachment;
+    FAttachmentIntf: FirebirdOOAPI.IAttachment;
     FFirebird30ClientAPI: TFB30ClientAPI;
     FTimeZoneServices: ITimeZoneServices;
     FUsingRemoteICU: boolean;
     FOwnsAttachmentHandle: boolean;
-    procedure SetAttachmentIntf(AValue: Firebird.IAttachment);
+    procedure SetAttachmentIntf(AValue: FirebirdOOAPI.IAttachment);
     procedure SetUseRemoteICU(aValue: boolean);
   protected
     procedure CheckHandle; override;
@@ -60,13 +60,13 @@ type
     constructor Create(api: TFB30ClientAPI; DatabaseName: AnsiString; aDPB: IDPB;
           RaiseExceptionOnConnectError: boolean); overload;
     constructor Create(api: TFB30ClientAPI;
-      attachment: Firebird.IAttachment; aDatabaseName: AnsiString); overload;
+      attachment: FirebirdOOAPI.IAttachment; aDatabaseName: AnsiString); overload;
     constructor CreateDatabase(api: TFB30ClientAPI; DatabaseName: AnsiString; aDPB: IDPB; RaiseExceptionOnError: boolean);  overload;
     constructor CreateDatabase(api: TFB30ClientAPI; sql: AnsiString; aSQLDialect: integer;
       RaiseExceptionOnError: boolean); overload;
     function GetDBInfo(ReqBuffer: PByte; ReqBufLen: integer): IDBInformation;
       override;
-    property AttachmentIntf: Firebird.IAttachment read FAttachmentIntf write SetAttachmentIntf;
+    property AttachmentIntf: FirebirdOOAPI.IAttachment read FAttachmentIntf write SetAttachmentIntf;
     property Firebird30ClientAPI: TFB30ClientAPI read FFirebird30ClientAPI;
 
   public
@@ -122,7 +122,7 @@ uses FB30Transaction, FB30Statement, FB30Array, FB30Blob, FBMessages,
 type
   { TVersionCallback }
 
-  TVersionCallback = class(Firebird.IVersionCallbackImpl)
+  TVersionCallback = class(FirebirdOOAPI.IVersionCallbackImpl)
   private
     FConnectionCodePage: TSystemCodePage;
     FOutput: TStrings;
@@ -130,7 +130,7 @@ type
   public
     constructor Create(FirebirdClientAPI: TFBClientAPI; output: TStrings;
       aConnectionCodePage: TSystemCodePage);
-    procedure callback(status: Firebird.IStatus; text: PAnsiChar); override;
+    procedure callback(status: FirebirdOOAPI.IStatus; text: PAnsiChar); override;
     property ConnectionCodePage: TSystemCodePage read FConnectionCodePage;
   end;
 
@@ -145,7 +145,7 @@ begin
   FConnectionCodePage := aConnectionCodePage;
 end;
 
-procedure TVersionCallback.callback(status : Firebird.IStatus; text : PAnsiChar
+procedure TVersionCallback.callback(status : FirebirdOOAPI.IStatus; text : PAnsiChar
   );
 var aStatus: IStatus;
 begin
@@ -170,7 +170,7 @@ begin
   end;
 end;
 
-procedure TFB30Attachment.SetAttachmentIntf(AValue: Firebird.IAttachment);
+procedure TFB30Attachment.SetAttachmentIntf(AValue: FirebirdOOAPI.IAttachment);
 begin
   if FAttachmentIntf = AValue then Exit;
   if FAttachmentIntf <> nil then
@@ -216,7 +216,7 @@ constructor TFB30Attachment.CreateDatabase(api: TFB30ClientAPI; DatabaseName: An
 var Param: IDPBItem;
     sql: AnsiString;
     IsCreateDB: boolean;
-    Intf: Firebird.IAttachment;
+    Intf: FirebirdOOAPI.IAttachment;
 begin
   inherited Create(api,DatabaseName,aDPB,RaiseExceptionOnError);
   FFirebird30ClientAPI := api;
@@ -252,7 +252,7 @@ end;
 constructor TFB30Attachment.CreateDatabase(api: TFB30ClientAPI; sql: AnsiString; aSQLDialect: integer;
   RaiseExceptionOnError: boolean);
 var IsCreateDB: boolean;
-    Intf: Firebird.IAttachment;
+    Intf: FirebirdOOAPI.IAttachment;
 begin
   inherited Create(api,'',nil,RaiseExceptionOnError);
   FFirebird30ClientAPI := api;
@@ -272,7 +272,7 @@ begin
 end;
 
 constructor TFB30Attachment.Create(api: TFB30ClientAPI;
-  attachment: Firebird.IAttachment; aDatabaseName: AnsiString);
+  attachment: FirebirdOOAPI.IAttachment; aDatabaseName: AnsiString);
 begin
   inherited Create(api,aDatabaseName,nil,false);
   FFirebird30ClientAPI := api;
@@ -291,7 +291,7 @@ begin
 end;
 
 procedure TFB30Attachment.Connect;
-var Intf: Firebird.IAttachment;
+var Intf: FirebirdOOAPI.IAttachment;
 begin
   with FFirebird30ClientAPI do
   begin

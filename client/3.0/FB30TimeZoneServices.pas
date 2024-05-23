@@ -46,7 +46,7 @@ unit FB30TimeZoneServices;
 interface
 
 uses
-  Classes, SysUtils, Firebird, IB, IBExternals, FBActivityMonitor, FBClientAPI,
+  Classes, SysUtils, FirebirdOOAPI, IB, IBExternals, FBActivityMonitor, FBClientAPI,
   FB30ClientAPI, FBAttachment, FB30Attachment, FBTransaction, FBSQLData,
   {$IFDEF FPC} contnrs; {$ELSE} Generics.Collections; {$ENDIF}
 

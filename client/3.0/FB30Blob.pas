@@ -37,7 +37,7 @@ unit FB30Blob;
 interface
 
 uses
-  Classes, SysUtils, Firebird, IB, IBHeader, IBExternals, FBClientAPI, FB30ClientAPI, FB30Attachment,
+  Classes, SysUtils, FirebirdOOAPI, IB, IBHeader, IBExternals, FBClientAPI, FB30ClientAPI, FB30Attachment,
   FBTransaction, FB30Transaction,  FBBlob, FBOutputBlock;
 
 type
@@ -65,7 +65,7 @@ type
 
   TFB30Blob = class(TFBBlob,IBlob)
   private
-    FBlobIntf: Firebird.IBlob;
+    FBlobIntf: FirebirdOOAPI.IBlob;
     FEOB: boolean;
     FFirebird30ClientAPI: TFB30ClientAPI;
   protected
@@ -82,7 +82,7 @@ type
                        SubType: integer; CharSetID: cardinal; BPB: IBPB); overload;
     constructor Create(Attachment: TFB30Attachment; Transaction: TFBTransaction;
                        MetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB); overload;
-    property BlobIntf: Firebird.IBlob read FBlobIntf;
+    property BlobIntf: FirebirdOOAPI.IBlob read FBlobIntf;
 
   {IBlob}
   public
@@ -302,7 +302,7 @@ begin
     Exit;
 
   LocalBuffer := PAnsiChar(@Buffer);
-  with Firebird.IStatusImpl do
+  with FirebirdOOAPI.IStatusImpl do
   begin
     repeat
       localCount := Min(Count,MaxuShort);

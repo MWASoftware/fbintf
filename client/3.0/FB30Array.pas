@@ -38,7 +38,7 @@ unit FB30Array;
 interface
 
 uses
-  Classes, SysUtils, Firebird, IB, FBArray, IBHeader, FB30Attachment, FBClientAPI,
+  Classes, SysUtils, FirebirdOOAPI, IB, FBArray, IBHeader, FB30Attachment, FBClientAPI,
   FB30Transaction, FBParamBlock, FB30ClientAPI;
 
 type
@@ -62,8 +62,8 @@ type
 
   TFB30Array = class(TFBArray,IArray)
   private
-    FAttachmentIntf: Firebird.IAttachment;
-    FTransactionIntf: Firebird.ITransaction;
+    FAttachmentIntf: FirebirdOOAPI.IAttachment;
+    FTransactionIntf: FirebirdOOAPI.ITransaction;
     FFirebird30ClientAPI: TFB30ClientAPI;
     FSDL: ISDL;
     procedure GenerateSDL;

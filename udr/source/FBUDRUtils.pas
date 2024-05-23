@@ -41,7 +41,7 @@ unit FBUDRUtils;
 interface
 
 uses
-  Classes, SysUtils, Firebird, FBActivityMonitor, IB, FBUDRController, FBUDRIntf;
+  Classes, SysUtils, FirebirdOOAPI, FBActivityMonitor, IB, FBUDRController, FBUDRIntf;
 
 const
   {$IFDEF WINDOWS}
@@ -63,13 +63,13 @@ type
      FController: TFBUDRController;
      procedure SetFirebirdAPI(AValue: IFirebirdAPI);
    protected
-     FStatus: Firebird.IStatus;
+     FStatus: FirebirdOOAPI.IStatus;
    public
      constructor Create(aController: TFBUDRController);
      destructor Destroy; override;
      procedure Clear; {IStatus}
      procedure CheckStatus;
-     function getStatus: Firebird.IStatus;
+     function getStatus: FirebirdOOAPI.IStatus;
      property FirebirdAPI: IFirebirdAPI read FFirebirdAPI write SetFirebirdAPI;
      property Controller: TFBUDRController read FController;
    end;
@@ -81,11 +81,11 @@ type
 
   TFBUDRExternalContext = class(TFBUDRObject, IFBUDRExternalContext)
   private
-    FContext: Firebird.IExternalContext;
+    FContext: FirebirdOOAPI.IExternalContext;
     FAttachment: IAttachment;
     FTransaction: ITransaction;
   public
-    constructor Create(aController: TFBUDRController; context: Firebird.IExternalContext);
+    constructor Create(aController: TFBUDRController; context: FirebirdOOAPI.IExternalContext);
     function AsText: AnsiString;
   public
     {IFBUDRExternalContext}
@@ -115,10 +115,10 @@ type
 
    TFBUDRRoutineMetadata = class(TFBUDRObject,IFBUDRRoutineMetadata,IFBUDRProcMetadata,IFBUDRTriggerMetaData)
    private
-     FRoutineMetadata: firebird.IRoutineMetadata;
-     FInputMetadata: firebird.IMessageMetadata;
-     FOutputMetadata: firebird.IMessageMetadata;
-     FTriggerMetadata: firebird.IMessageMetadata;
+     FRoutineMetadata: FirebirdOOAPI.IRoutineMetadata;
+     FInputMetadata: FirebirdOOAPI.IMessageMetadata;
+     FOutputMetadata: FirebirdOOAPI.IMessageMetadata;
+     FTriggerMetadata: FirebirdOOAPI.IMessageMetadata;
      FContext: IFBUDRExternalContext;
      FFBInputMetadata: IFBUDRMessageMetadata;
      FFBOutputMetadata: IFBUDRMessageMetadata;
@@ -127,12 +127,12 @@ type
      FRoutineName: AnsiString;
      FInfo: AnsiString;
    public
-     constructor Create(context: IFBUDRExternalContext; routineMetadata: firebird.IRoutineMetadata);
+     constructor Create(context: IFBUDRExternalContext; routineMetadata: FirebirdOOAPI.IRoutineMetadata);
      destructor Destroy; override;
      function AsText: AnsiString;
-     function getInputMetadata: firebird.IMessageMetadata;
-     function getOutputMetadata: firebird.IMessageMetadata;
-     function getTriggerMetadata: firebird.IMessageMetadata;
+     function getInputMetadata: FirebirdOOAPI.IMessageMetadata;
+     function getOutputMetadata: FirebirdOOAPI.IMessageMetadata;
+     function getTriggerMetadata: FirebirdOOAPI.IMessageMetadata;
      class procedure ParseEntryPoint(aEntryPoint: AnsiString; var aModuleName, aRoutineName, aInfo: AnsiString);
    public
      {IFBUDRRoutineMetadata}
@@ -157,12 +157,12 @@ type
 
    TFBUDRMetadataBuilder = class(TFBUDRObject,IFBUDRMetadataBuilder)
    private
-     FMetadataBuilder: Firebird.IMetadataBuilder;
+     FMetadataBuilder: FirebirdOOAPI.IMetadataBuilder;
    public
      constructor Create(context: IFBUDRExternalContext;
-                        metadataBuilder: Firebird.IMetadataBuilder);
+                        metadataBuilder: FirebirdOOAPI.IMetadataBuilder);
      destructor Destroy; override;
-     property Builder: Firebird.IMetadataBuilder read FMetadataBuilder;
+     property Builder: FirebirdOOAPI.IMetadataBuilder read FMetadataBuilder;
    public
      {IFBUDRMetadataBuilder}
      procedure setType(index: Cardinal; type_: Cardinal);
@@ -184,11 +184,11 @@ type
 
    TFBUDRMessageMetadata = class(TFBUDRObject,IFBUDRMessageMetadata)
    private
-     FMetadata: Firebird.IMessageMetadata;
+     FMetadata: FirebirdOOAPI.IMessageMetadata;
      FContext: IFBUDRExternalContext;
    public
      constructor Create(context: IFBUDRExternalContext;
-                        metadata: Firebird.IMessageMetadata);
+                        metadata: FirebirdOOAPI.IMessageMetadata);
      destructor Destroy; override;
      function AsText: AnsiString;
   public
@@ -215,11 +215,11 @@ type
 
    EFBUDRException = class(Exception)
    private
-     FStatus: Firebird.IStatus;
+     FStatus: FirebirdOOAPI.IStatus;
    public
-     constructor Create(aStatus: Firebird.IStatus);
+     constructor Create(aStatus: FirebirdOOAPI.IStatus);
      destructor Destroy; override;
-     property Status: Firebird.IStatus read FStatus;
+     property Status: FirebirdOOAPI.IStatus read FStatus;
    end;
 
 {$IFDEF MSWINDOWS}
@@ -254,7 +254,7 @@ end;
 { TFBUDRMessageMetadata }
 
 constructor TFBUDRMessageMetadata.Create(context: IFBUDRExternalContext;
-  metadata: Firebird.IMessageMetadata);
+  metadata: FirebirdOOAPI.IMessageMetadata);
 begin
   inherited Create((context as TFBUDRExternalContext).Controller);
   FirebirdAPI := context.GetFirebirdAPI;
@@ -385,7 +385,7 @@ begin
 end;
 
 function TFBUDRMessageMetadata.getBuilder: IFBUDRMetadataBuilder;
-var builder: Firebird.IMetadataBuilder;
+var builder: FirebirdOOAPI.IMetadataBuilder;
 begin
   builder := FMetadata.getBuilder(FStatus);
   try
@@ -417,7 +417,7 @@ end;
 { TFBUDRMetadataBuilder }
 
 constructor TFBUDRMetadataBuilder.Create(context: IFBUDRExternalContext;
-  metadataBuilder: Firebird.IMetadataBuilder);
+  metadataBuilder: FirebirdOOAPI.IMetadataBuilder);
 begin
   inherited Create((context as TFBUDRExternalContext).Controller);
   FirebirdAPI := context.GetFirebirdAPI;
@@ -524,11 +524,11 @@ end;
 procedure TFBUDRObject.CheckStatus;
 begin
   with FStatus^ do
-  if (getState and Firebird.IStatusImpl.STATE_ERRORS) <> 0 then
+  if (getState and FirebirdOOAPI.IStatusImpl.STATE_ERRORS) <> 0 then
     raise EFBUDRException.Create(FStatus);
 end;
 
-function TFBUDRObject.getStatus: Firebird.IStatus;
+function TFBUDRObject.getStatus: FirebirdOOAPI.IStatus;
 begin
   Result := FStatus;
 end;
@@ -555,7 +555,7 @@ end;
 { TFBUDRExternalContext }
 
 constructor TFBUDRExternalContext.Create(aController: TFBUDRController;
-  context: Firebird.IExternalContext);
+  context: FirebirdOOAPI.IExternalContext);
 begin
   inherited Create(aController);
   FContext := context;
@@ -579,7 +579,7 @@ begin
 end;
 
 function TFBUDRExternalContext.GetAttachment: IAttachment;
-var att: Firebird.IAttachment;
+var att: FirebirdOOAPI.IAttachment;
 begin
   if FAttachment = nil then
   begin
@@ -593,7 +593,7 @@ begin
 end;
 
 function TFBUDRExternalContext.GetTransaction: ITransaction;
-var tr: Firebird.ITransaction;
+var tr: FirebirdOOAPI.ITransaction;
 begin
   Result := nil;
   if FTransaction = nil then
@@ -714,7 +714,7 @@ begin
 end;
 
 constructor TFBUDRRoutineMetadata.Create(context: IFBUDRExternalContext;
-  routineMetadata: firebird.IRoutineMetadata);
+  routineMetadata: FirebirdOOAPI.IRoutineMetadata);
 var TriggerType: cardinal;
 begin
   inherited Create((context as TFBUDRExternalContext).Controller);
@@ -760,7 +760,7 @@ end;
 
 function TFBUDRRoutineMetadata.AsText: AnsiString;
 
-  function MetadataToText(metadata: Firebird.IMessageMetadata): AnsiString;
+  function MetadataToText(metadata: FirebirdOOAPI.IMessageMetadata): AnsiString;
   var fbMetadata: TFBUDRMessageMetadata;
   begin
     if metadata = nil then
@@ -886,21 +886,21 @@ begin
   Result := FFBTriggerMetadata;
 end;
 
-function TFBUDRRoutineMetadata.getInputMetadata: firebird.IMessageMetadata;
+function TFBUDRRoutineMetadata.getInputMetadata: FirebirdOOAPI.IMessageMetadata;
 begin
   Result := FInputMetaData;
   if Result <> nil then
     Result.addRef;
 end;
 
-function TFBUDRRoutineMetadata.getOutputMetadata: firebird.IMessageMetadata;
+function TFBUDRRoutineMetadata.getOutputMetadata: FirebirdOOAPI.IMessageMetadata;
 begin
   Result := FOutputMetadata;
   if Result <> nil then
     Result.addRef;
 end;
 
-function TFBUDRRoutineMetadata.getTriggerMetadata: firebird.IMessageMetadata;
+function TFBUDRRoutineMetadata.getTriggerMetadata: FirebirdOOAPI.IMessageMetadata;
 begin
   Result := FTriggerMetadata;
   if Result <> nil then
@@ -918,7 +918,7 @@ var TriggerType: cardinal;
 begin
   TriggerType := FRoutineMetadata.getTriggerType(FStatus);
   CheckStatus;
-  with Firebird.IExternalTriggerImpl do
+  with FirebirdOOAPI.IExternalTriggerImpl do
   case TriggerType of
   TYPE_BEFORE:
     Result := ttBefore;
@@ -933,7 +933,7 @@ end;
 
 { EFBUDRException }
 
-constructor EFBUDRException.Create(aStatus: Firebird.IStatus);
+constructor EFBUDRException.Create(aStatus: FirebirdOOAPI.IStatus);
 begin
   inherited Create(SFirebirdStatusError);
   FStatus := aStatus.clone;

@@ -42,17 +42,17 @@ unit FBClientLib;
 interface
 
 uses
-  Classes, SysUtils, Firebird;
+  Classes, SysUtils, FirebirdOOAPI;
 
   {IFBIMasterProvider may be coerced from an IFirebirdAPI when the Firebird 3 API
    is provided and itself provides type safe access to the underlying Firebird
-   IMaster interface - see Firebird.pas}
+   IMaster interface - see FirebirdOOAPI.pas}
 
 type
   IFBIMasterProvider = interface
     ['{c0202c92-5d2d-4130-b4df-427469aa42cf}']
     {Firebird 3 API}
-    function GetIMasterIntf: Firebird.IMaster;
+    function GetIMasterIntf: FirebirdOOAPI.IMaster;
   end;
 
   {Example Code:

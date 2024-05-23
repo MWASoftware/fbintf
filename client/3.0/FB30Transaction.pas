@@ -37,7 +37,7 @@ unit FB30Transaction;
 interface
 
 uses
-  Classes, SysUtils, Firebird, IB, FBClientAPI, FB30ClientAPI,
+  Classes, SysUtils, FirebirdOOAPI, IB, FBClientAPI, FB30ClientAPI,
   FB30Attachment, FBParamBlock, FBActivityMonitor, FBTransaction;
 
 type
@@ -46,7 +46,7 @@ type
 
   TFB30Transaction = class(TFBTransaction,ITransaction, IActivityMonitor)
   private
-    FTransactionIntf: Firebird.ITransaction;
+    FTransactionIntf: FirebirdOOAPI.ITransaction;
     FFirebird30ClientAPI: TFB30ClientAPI;
     procedure FreeHandle(Force: boolean);
   protected
@@ -60,9 +60,9 @@ type
     function InternalRollback(Force: boolean): TTrCompletionState; override;
     procedure InternalRollbackRetaining; override;
   public
-    constructor Create(api: TFBClientAPI; Attachment: IAttachment; aTransactionIntf: Firebird.ITransaction); overload;
+    constructor Create(api: TFBClientAPI; Attachment: IAttachment; aTransactionIntf: FirebirdOOAPI.ITransaction); overload;
     destructor Destroy; override;
-    property TransactionIntf: Firebird.ITransaction read FTransactionIntf;
+    property TransactionIntf: FirebirdOOAPI.ITransaction read FTransactionIntf;
     {ITransaction}
     function GetInTransaction: boolean; override;
     procedure PrepareForCommit; override;
@@ -209,7 +209,7 @@ begin
 end;
 
 constructor TFB30Transaction.Create(api: TFBClientAPI; Attachment: IAttachment;
-  aTransactionIntf: Firebird.ITransaction);
+  aTransactionIntf: FirebirdOOAPI.ITransaction);
 begin
   FTransactionIntf := aTransactionIntf;
   FTransactionIntf.addRef();
