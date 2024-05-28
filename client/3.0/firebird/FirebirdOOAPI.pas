@@ -721,6 +721,9 @@ type
 	  function isIVersionedImpl: boolean;
 	  function asIVersionedImpl: IVersionedImpl;
 	  property vTable: PVersionedVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	end;
 
 	IVersionedImpl = class
@@ -758,6 +761,9 @@ type
 	  function isIReferenceCountedImpl: boolean;
 	  function asIReferenceCountedImpl: IReferenceCountedImpl;
 	  property vTable: PReferenceCountedVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -799,6 +805,9 @@ type
 	  function isIDisposableImpl: boolean;
 	  function asIDisposableImpl: IDisposableImpl;
 	  property vTable: PDisposableVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure dispose();
@@ -847,6 +856,15 @@ type
 	  function isIStatusImpl: boolean;
 	  function asIStatusImpl: IStatusImpl;
 	  property vTable: PStatusVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	  function STATE_WARNINGS: Cardinal; inline;
+	  function STATE_ERRORS: Cardinal; inline;
+	  function RESULT_ERROR: Integer; inline;
+	  function RESULT_OK: Integer; inline;
+	  function RESULT_NO_DATA: Integer; inline;
+	  function RESULT_SEGMENT: Integer; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure dispose();
@@ -921,6 +939,9 @@ type
 	  function asIMasterImpl: IMasterImpl;
 	  property vTable: PMasterVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  function getStatus(): IStatus;
 	  function getDispatcher(): IProvider;
@@ -985,6 +1006,9 @@ type
 	  function asIPluginBaseImpl: IPluginBaseImpl;
 	  property vTable: PPluginBaseVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
 	  function release(): Integer;
@@ -1033,6 +1057,9 @@ type
 	  function isIPluginSetImpl: boolean;
 	  function asIPluginSetImpl: IPluginSetImpl;
 	  property vTable: PPluginSetVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -1089,6 +1116,9 @@ type
 	  function asIConfigEntryImpl: IConfigEntryImpl;
 	  property vTable: PConfigEntryVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
 	  function release(): Integer;
@@ -1142,6 +1172,9 @@ type
 	  function asIConfigImpl: IConfigImpl;
 	  property vTable: PConfigVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
 	  function release(): Integer;
@@ -1192,6 +1225,9 @@ type
 	  function isIFirebirdConfImpl: boolean;
 	  function asIFirebirdConfImpl: IFirebirdConfImpl;
 	  property vTable: PFirebirdConfVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -1247,6 +1283,9 @@ type
 	  function asIPluginConfigImpl: IPluginConfigImpl;
 	  property vTable: PPluginConfigVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
 	  function release(): Integer;
@@ -1294,6 +1333,9 @@ type
 	  function asIPluginFactoryImpl: IPluginFactoryImpl;
 	  property vTable: PPluginFactoryVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  function createPlugin(status: IStatus; factoryParameter: IPluginConfig): IPluginBase;
 	end;
@@ -1333,6 +1375,9 @@ type
 	  function isIPluginModuleImpl: boolean;
 	  function asIPluginModuleImpl: IPluginModuleImpl;
 	  property vTable: PPluginModuleVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure doClean();
@@ -1379,6 +1424,21 @@ type
 	  function isIPluginManagerImpl: boolean;
 	  function asIPluginManagerImpl: IPluginManagerImpl;
 	  property vTable: PPluginManagerVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	  function TYPE_PROVIDER: Cardinal; inline;
+	  function TYPE_FIRST_NON_LIB: Cardinal; inline;
+	  function TYPE_AUTH_SERVER: Cardinal; inline;
+	  function TYPE_AUTH_CLIENT: Cardinal; inline;
+	  function TYPE_AUTH_USER_MANAGEMENT: Cardinal; inline;
+	  function TYPE_EXTERNAL_ENGINE: Cardinal; inline;
+	  function TYPE_TRACE: Cardinal; inline;
+	  function TYPE_WIRE_CRYPT: Cardinal; inline;
+	  function TYPE_DB_CRYPT: Cardinal; inline;
+	  function TYPE_KEY_HOLDER: Cardinal; inline;
+	  function TYPE_REPLICATOR: Cardinal; inline;
+	  function TYPE_COUNT: Cardinal; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure registerPluginFactory(pluginType: Cardinal; defaultName: PAnsiChar; factory: IPluginFactory);
@@ -1444,6 +1504,9 @@ type
 	  function asICryptKeyImpl: ICryptKeyImpl;
 	  property vTable: PCryptKeyVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure setSymmetric(status: IStatus; type_: PAnsiChar; keyLength: Cardinal; key: Pointer);
 	  procedure setAsymmetric(status: IStatus; type_: PAnsiChar; encryptKeyLength: Cardinal; encryptKey: Pointer; decryptKeyLength: Cardinal; decryptKey: Pointer);
@@ -1494,6 +1557,28 @@ type
 	  function isIConfigManagerImpl: boolean;
 	  function asIConfigManagerImpl: IConfigManagerImpl;
 	  property vTable: PConfigManagerVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	  function DIR_BIN: Cardinal; inline;
+	  function DIR_SBIN: Cardinal; inline;
+	  function DIR_CONF: Cardinal; inline;
+	  function DIR_LIB: Cardinal; inline;
+	  function DIR_INC: Cardinal; inline;
+	  function DIR_DOC: Cardinal; inline;
+	  function DIR_UDF: Cardinal; inline;
+	  function DIR_SAMPLE: Cardinal; inline;
+	  function DIR_SAMPLEDB: Cardinal; inline;
+	  function DIR_HELP: Cardinal; inline;
+	  function DIR_INTL: Cardinal; inline;
+	  function DIR_MISC: Cardinal; inline;
+	  function DIR_SECDB: Cardinal; inline;
+	  function DIR_MSG: Cardinal; inline;
+	  function DIR_LOG: Cardinal; inline;
+	  function DIR_GUARD: Cardinal; inline;
+	  function DIR_PLUGINS: Cardinal; inline;
+	  function DIR_TZDATA: Cardinal; inline;
+	  function DIR_COUNT: Cardinal; inline;
 	public
 	  {Firebird OOAPI methods}
 	  function getDirectory(code: Cardinal): PAnsiChar;
@@ -1567,6 +1652,9 @@ type
 	  function asIEventCallbackImpl: IEventCallbackImpl;
 	  property vTable: PEventCallbackVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
 	  function release(): Integer;
@@ -1614,6 +1702,9 @@ type
 	  function isIBlobImpl: boolean;
 	  function asIBlobImpl: IBlobImpl;
 	  property vTable: PBlobVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -1676,6 +1767,9 @@ type
 	  function isITransactionImpl: boolean;
 	  function asITransactionImpl: ITransactionImpl;
 	  property vTable: PTransactionVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -1753,6 +1847,9 @@ type
 	  function isIMessageMetadataImpl: boolean;
 	  function asIMessageMetadataImpl: IMessageMetadataImpl;
 	  property vTable: PMessageMetadataVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -1842,6 +1939,9 @@ type
 	  function asIMetadataBuilderImpl: IMetadataBuilderImpl;
 	  property vTable: PMetadataBuilderVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
 	  function release(): Integer;
@@ -1921,6 +2021,9 @@ type
 	  function asIResultSetImpl: IResultSetImpl;
 	  property vTable: PResultSetVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
 	  function release(): Integer;
@@ -1996,6 +2099,22 @@ type
 	  function isIStatementImpl: boolean;
 	  function asIStatementImpl: IStatementImpl;
 	  property vTable: PStatementVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	  function PREPARE_PREFETCH_NONE: Cardinal; inline;
+	  function PREPARE_PREFETCH_TYPE: Cardinal; inline;
+	  function PREPARE_PREFETCH_INPUT_PARAMETERS: Cardinal; inline;
+	  function PREPARE_PREFETCH_OUTPUT_PARAMETERS: Cardinal; inline;
+	  function PREPARE_PREFETCH_LEGACY_PLAN: Cardinal; inline;
+	  function PREPARE_PREFETCH_DETAILED_PLAN: Cardinal; inline;
+	  function PREPARE_PREFETCH_AFFECTED_RECORDS: Cardinal; inline;
+	  function PREPARE_PREFETCH_FLAGS: Cardinal; inline;
+	  function PREPARE_PREFETCH_METADATA: Cardinal; inline;
+	  function PREPARE_PREFETCH_ALL: Cardinal; inline;
+	  function FLAG_HAS_CURSOR: Cardinal; inline;
+	  function FLAG_REPEAT_EXECUTE: Cardinal; inline;
+	  function CURSOR_TYPE_SCROLLABLE: Cardinal; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -2089,6 +2208,20 @@ type
 	  function asIBatchImpl: IBatchImpl;
 	  property vTable: PBatchVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	  function VERSION1: Byte; inline;
+	  function TAG_MULTIERROR: Byte; inline;
+	  function TAG_RECORD_COUNTS: Byte; inline;
+	  function TAG_BUFFER_BYTES_SIZE: Byte; inline;
+	  function TAG_BLOB_POLICY: Byte; inline;
+	  function TAG_DETAILED_ERRORS: Byte; inline;
+	  function BLOB_NONE: Byte; inline;
+	  function BLOB_ID_ENGINE: Byte; inline;
+	  function BLOB_ID_USER: Byte; inline;
+	  function BLOB_STREAM: Byte; inline;
+	  function BLOB_SEGHDR_ALIGN: Cardinal; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
 	  function release(): Integer;
@@ -2165,6 +2298,12 @@ type
 	  function asIBatchCompletionStateImpl: IBatchCompletionStateImpl;
 	  property vTable: PBatchCompletionStateVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	  function EXECUTE_FAILED: Integer; inline;
+	  function SUCCESS_NO_INFO: Integer; inline;
+	  function NO_MORE_ERRORS: Cardinal; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure dispose();
 	  function getSize(status: IStatus): Cardinal;
@@ -2217,6 +2356,9 @@ type
 	  function asIReplicatorImpl: IReplicatorImpl;
 	  property vTable: PReplicatorVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
 	  function release(): Integer;
@@ -2267,6 +2409,9 @@ type
 	  function isIRequestImpl: boolean;
 	  function asIRequestImpl: IRequestImpl;
 	  property vTable: PRequestVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -2322,6 +2467,9 @@ type
 	  function isIEventsImpl: boolean;
 	  function asIEventsImpl: IEventsImpl;
 	  property vTable: PEventsVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -2388,6 +2536,9 @@ type
 	  function isIAttachmentImpl: boolean;
 	  function asIAttachmentImpl: IAttachmentImpl;
 	  property vTable: PAttachmentVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -2480,6 +2631,9 @@ type
 	  function asIServiceImpl: IServiceImpl;
 	  property vTable: PServiceVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
 	  function release(): Integer;
@@ -2532,6 +2686,9 @@ type
 	  function isIProviderImpl: boolean;
 	  function asIProviderImpl: IProviderImpl;
 	  property vTable: PProviderVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -2587,6 +2744,9 @@ type
 	  function asIDtcStartImpl: IDtcStartImpl;
 	  property vTable: PDtcStartVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure dispose();
 	  procedure addAttachment(status: IStatus; att: IAttachment);
@@ -2632,6 +2792,9 @@ type
 	  function asIDtcImpl: IDtcImpl;
 	  property vTable: PDtcVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  function join(status: IStatus; one: ITransaction; two: ITransaction): ITransaction;
 	  function startBuilder(status: IStatus): IDtcStart;
@@ -2675,6 +2838,13 @@ type
 	  function isIAuthImpl: boolean;
 	  function asIAuthImpl: IAuthImpl;
 	  property vTable: PAuthVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	  function AUTH_FAILED: Integer; inline;
+	  function AUTH_SUCCESS: Integer; inline;
+	  function AUTH_MORE_DATA: Integer; inline;
+	  function AUTH_CONTINUE: Integer; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -2721,6 +2891,9 @@ type
 	  function isIWriterImpl: boolean;
 	  function asIWriterImpl: IWriterImpl;
 	  property vTable: PWriterVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure reset();
@@ -2769,6 +2942,9 @@ type
 	  function isIServerBlockImpl: boolean;
 	  function asIServerBlockImpl: IServerBlockImpl;
 	  property vTable: PServerBlockVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  function getLogin(): PAnsiChar;
@@ -2821,6 +2997,9 @@ type
 	  function isIClientBlockImpl: boolean;
 	  function asIClientBlockImpl: IClientBlockImpl;
 	  property vTable: PClientBlockVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -2878,6 +3057,9 @@ type
 	  function asIServerImpl: IServerImpl;
 	  property vTable: PServerVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
 	  function release(): Integer;
@@ -2927,6 +3109,9 @@ type
 	  function asIClientImpl: IClientImpl;
 	  property vTable: PClientVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
 	  function release(): Integer;
@@ -2971,6 +3156,9 @@ type
 	  function isIUserFieldImpl: boolean;
 	  function asIUserFieldImpl: IUserFieldImpl;
 	  property vTable: PUserFieldVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  function entered(): Integer;
@@ -3019,6 +3207,9 @@ type
 	  function asICharUserFieldImpl: ICharUserFieldImpl;
 	  property vTable: PCharUserFieldVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  function entered(): Integer;
 	  function specified(): Integer;
@@ -3066,6 +3257,9 @@ type
 	  function isIIntUserFieldImpl: boolean;
 	  function asIIntUserFieldImpl: IIntUserFieldImpl;
 	  property vTable: PIntUserFieldVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  function entered(): Integer;
@@ -3120,6 +3314,15 @@ type
 	  function isIUserImpl: boolean;
 	  function asIUserImpl: IUserImpl;
 	  property vTable: PUserVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	  function OP_USER_ADD: Cardinal; inline;
+	  function OP_USER_MODIFY: Cardinal; inline;
+	  function OP_USER_DELETE: Cardinal; inline;
+	  function OP_USER_DISPLAY: Cardinal; inline;
+	  function OP_USER_SET_MAP: Cardinal; inline;
+	  function OP_USER_DROP_MAP: Cardinal; inline;
 	public
 	  {Firebird OOAPI methods}
 	  function operation(): Cardinal;
@@ -3186,6 +3389,9 @@ type
 	  function asIListUsersImpl: IListUsersImpl;
 	  property vTable: PListUsersVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure list(status: IStatus; user: IUser);
 	end;
@@ -3230,6 +3436,9 @@ type
 	  function isILogonInfoImpl: boolean;
 	  function asILogonInfoImpl: ILogonInfoImpl;
 	  property vTable: PLogonInfoVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  function name(): PAnsiChar;
@@ -3289,6 +3498,9 @@ type
 	  function asIManagementImpl: IManagementImpl;
 	  property vTable: PManagementVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
 	  function release(): Integer;
@@ -3343,6 +3555,9 @@ type
 	  function isIAuthBlockImpl: boolean;
 	  function asIAuthBlockImpl: IAuthBlockImpl;
 	  property vTable: PAuthBlockVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  function getType(): PAnsiChar;
@@ -3404,6 +3619,9 @@ type
 	  function asIWireCryptPluginImpl: IWireCryptPluginImpl;
 	  property vTable: PWireCryptPluginVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
 	  function release(): Integer;
@@ -3457,6 +3675,9 @@ type
 	  function asICryptKeyCallbackImpl: ICryptKeyCallbackImpl;
 	  property vTable: PCryptKeyCallbackVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  function callback(dataLength: Cardinal; data: Pointer; bufferLength: Cardinal; buffer: Pointer): Cardinal;
 	end;
@@ -3502,6 +3723,9 @@ type
 	  function isIKeyHolderPluginImpl: boolean;
 	  function asIKeyHolderPluginImpl: IKeyHolderPluginImpl;
 	  property vTable: PKeyHolderPluginVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -3554,6 +3778,9 @@ type
 	  function asIDbCryptInfoImpl: IDbCryptInfoImpl;
 	  property vTable: PDbCryptInfoVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
 	  function release(): Integer;
@@ -3601,6 +3828,9 @@ type
 	  function isIDbCryptPluginImpl: boolean;
 	  function asIDbCryptPluginImpl: IDbCryptPluginImpl;
 	  property vTable: PDbCryptPluginVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -3660,6 +3890,9 @@ type
 	  function asIExternalContextImpl: IExternalContextImpl;
 	  property vTable: PExternalContextVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  function getMaster(): IMaster;
 	  function getEngine(status: IStatus): IExternalEngine;
@@ -3718,6 +3951,9 @@ type
 	  function asIExternalResultSetImpl: IExternalResultSetImpl;
 	  property vTable: PExternalResultSetVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure dispose();
 	  function fetch(status: IStatus): Boolean;
@@ -3759,6 +3995,9 @@ type
 	  function isIExternalFunctionImpl: boolean;
 	  function asIExternalFunctionImpl: IExternalFunctionImpl;
 	  property vTable: PExternalFunctionVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure dispose();
@@ -3804,6 +4043,9 @@ type
 	  function asIExternalProcedureImpl: IExternalProcedureImpl;
 	  property vTable: PExternalProcedureVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure dispose();
 	  procedure getCharSet(status: IStatus; context: IExternalContext; name: PAnsiChar; nameSize: Cardinal);
@@ -3847,6 +4089,21 @@ type
 	  function isIExternalTriggerImpl: boolean;
 	  function asIExternalTriggerImpl: IExternalTriggerImpl;
 	  property vTable: PExternalTriggerVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	  function TYPE_BEFORE: Cardinal; inline;
+	  function TYPE_AFTER: Cardinal; inline;
+	  function TYPE_DATABASE: Cardinal; inline;
+	  function ACTION_INSERT: Cardinal; inline;
+	  function ACTION_UPDATE: Cardinal; inline;
+	  function ACTION_DELETE: Cardinal; inline;
+	  function ACTION_CONNECT: Cardinal; inline;
+	  function ACTION_DISCONNECT: Cardinal; inline;
+	  function ACTION_TRANS_START: Cardinal; inline;
+	  function ACTION_TRANS_COMMIT: Cardinal; inline;
+	  function ACTION_TRANS_ROLLBACK: Cardinal; inline;
+	  function ACTION_DDL: Cardinal; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure dispose();
@@ -3909,6 +4166,9 @@ type
 	  function isIRoutineMetadataImpl: boolean;
 	  function asIRoutineMetadataImpl: IRoutineMetadataImpl;
 	  property vTable: PRoutineMetadataVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  function getPackage(status: IStatus): PAnsiChar;
@@ -3974,6 +4234,9 @@ type
 	  function asIExternalEngineImpl: IExternalEngineImpl;
 	  property vTable: PExternalEngineVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
 	  function release(): Integer;
@@ -4029,6 +4292,9 @@ type
 	  function asITimerImpl: ITimerImpl;
 	  property vTable: PTimerVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
 	  function release(): Integer;
@@ -4071,6 +4337,9 @@ type
 	  function asITimerControlImpl: ITimerControlImpl;
 	  property vTable: PTimerControlVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure start(status: IStatus; timer: ITimer; microSeconds: QWord);
 	  procedure stop(status: IStatus; timer: ITimer);
@@ -4111,6 +4380,9 @@ type
 	  function isIVersionCallbackImpl: boolean;
 	  function asIVersionCallbackImpl: IVersionCallbackImpl;
 	  property vTable: PVersionCallbackVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure callback(status: IStatus; text: PAnsiChar);
@@ -4171,6 +4443,9 @@ type
 	  function isIUtilImpl: boolean;
 	  function asIUtilImpl: IUtilImpl;
 	  property vTable: PUtilVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure getFbVersion(status: IStatus; att: IAttachment; callback: IVersionCallback);
@@ -4253,6 +4528,9 @@ type
 	  function asIOffsetsCallbackImpl: IOffsetsCallbackImpl;
 	  property vTable: POffsetsCallbackVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure setOffset(status: IStatus; index: Cardinal; offset: Cardinal; nullOffset: Cardinal);
 	end;
@@ -4311,6 +4589,18 @@ type
 	  function isIXpbBuilderImpl: boolean;
 	  function asIXpbBuilderImpl: IXpbBuilderImpl;
 	  property vTable: PXpbBuilderVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	  function DPB: Cardinal; inline;
+	  function SPB_ATTACH: Cardinal; inline;
+	  function SPB_START: Cardinal; inline;
+	  function TPB: Cardinal; inline;
+	  function BATCH: Cardinal; inline;
+	  function BPB: Cardinal; inline;
+	  function SPB_SEND: Cardinal; inline;
+	  function SPB_RECEIVE: Cardinal; inline;
+	  function SPB_RESPONSE: Cardinal; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure dispose();
@@ -4407,6 +4697,11 @@ type
 	  function asITraceConnectionImpl: ITraceConnectionImpl;
 	  property vTable: PTraceConnectionVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	  function KIND_DATABASE: Cardinal; inline;
+	  function KIND_SERVICE: Cardinal; inline;
+	public
 	  {Firebird OOAPI methods}
 	  function getKind(): Cardinal;
 	  function getProcessID(): Integer;
@@ -4474,6 +4769,9 @@ type
 	  function asITraceDatabaseConnectionImpl: ITraceDatabaseConnectionImpl;
 	  property vTable: PTraceDatabaseConnectionVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  function getKind(): Cardinal;
 	  function getProcessID(): Integer;
@@ -4529,6 +4827,14 @@ type
 	  function isITraceTransactionImpl: boolean;
 	  function asITraceTransactionImpl: ITraceTransactionImpl;
 	  property vTable: PTraceTransactionVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	  function ISOLATION_CONSISTENCY: Cardinal; inline;
+	  function ISOLATION_CONCURRENCY: Cardinal; inline;
+	  function ISOLATION_READ_COMMITTED_RECVER: Cardinal; inline;
+	  function ISOLATION_READ_COMMITTED_NORECVER: Cardinal; inline;
+	  function ISOLATION_READ_COMMITTED_READ_CONSISTENCY: Cardinal; inline;
 	public
 	  {Firebird OOAPI methods}
 	  function getTransactionID(): Int64;
@@ -4588,6 +4894,9 @@ type
 	  function asITraceParamsImpl: ITraceParamsImpl;
 	  property vTable: PTraceParamsVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  function getCount(): Cardinal;
 	  function getParam(idx: Cardinal): dscPtr;
@@ -4631,6 +4940,9 @@ type
 	  function isITraceStatementImpl: boolean;
 	  function asITraceStatementImpl: ITraceStatementImpl;
 	  property vTable: PTraceStatementVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  function getStmtID(): Int64;
@@ -4678,6 +4990,9 @@ type
 	  function isITraceSQLStatementImpl: boolean;
 	  function asITraceSQLStatementImpl: ITraceSQLStatementImpl;
 	  property vTable: PTraceSQLStatementVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  function getStmtID(): Int64;
@@ -4732,6 +5047,9 @@ type
 	  function asITraceBLRStatementImpl: ITraceBLRStatementImpl;
 	  property vTable: PTraceBLRStatementVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  function getStmtID(): Int64;
 	  function getPerf(): PerformanceInfoPtr;
@@ -4779,6 +5097,9 @@ type
 	  function asITraceDYNRequestImpl: ITraceDYNRequestImpl;
 	  property vTable: PTraceDYNRequestVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  function getData(): BytePtr;
 	  function getDataLength(): Cardinal;
@@ -4823,6 +5144,9 @@ type
 	  function isITraceContextVariableImpl: boolean;
 	  function asITraceContextVariableImpl: ITraceContextVariableImpl;
 	  property vTable: PTraceContextVariableVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  function getNameSpace(): PAnsiChar;
@@ -4869,6 +5193,9 @@ type
 	  function asITraceProcedureImpl: ITraceProcedureImpl;
 	  property vTable: PTraceProcedureVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  function getProcName(): PAnsiChar;
 	  function getInputs(): ITraceParams;
@@ -4914,6 +5241,9 @@ type
 	  function isITraceFunctionImpl: boolean;
 	  function asITraceFunctionImpl: ITraceFunctionImpl;
 	  property vTable: PTraceFunctionVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  function getFuncName(): PAnsiChar;
@@ -4963,6 +5293,12 @@ type
 	  function isITraceTriggerImpl: boolean;
 	  function asITraceTriggerImpl: ITraceTriggerImpl;
 	  property vTable: PTraceTriggerVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	  function TYPE_ALL: Cardinal; inline;
+	  function TYPE_BEFORE: Cardinal; inline;
+	  function TYPE_AFTER: Cardinal; inline;
 	public
 	  {Firebird OOAPI methods}
 	  function getTriggerName(): PAnsiChar;
@@ -5025,6 +5361,9 @@ type
 	  function asITraceServiceConnectionImpl: ITraceServiceConnectionImpl;
 	  property vTable: PTraceServiceConnectionVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  function getKind(): Cardinal;
 	  function getProcessID(): Integer;
@@ -5080,6 +5419,9 @@ type
 	  function asITraceStatusVectorImpl: ITraceStatusVectorImpl;
 	  property vTable: PTraceStatusVectorVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  function hasError(): Boolean;
 	  function hasWarning(): Boolean;
@@ -5128,6 +5470,9 @@ type
 	  function isITraceSweepInfoImpl: boolean;
 	  function asITraceSweepInfoImpl: ITraceSweepInfoImpl;
 	  property vTable: PTraceSweepInfoVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  function getOIT(): Int64;
@@ -5179,6 +5524,9 @@ type
 	  function asITraceLogWriterImpl: ITraceLogWriterImpl;
 	  property vTable: PTraceLogWriterVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
 	  function release(): Integer;
@@ -5227,6 +5575,9 @@ type
 	  function isITraceInitInfoImpl: boolean;
 	  function asITraceInitInfoImpl: ITraceInitInfoImpl;
 	  property vTable: PTraceInitInfoVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  function getConfigText(): PAnsiChar;
@@ -5300,6 +5651,16 @@ type
 	  function isITracePluginImpl: boolean;
 	  function asITracePluginImpl: ITracePluginImpl;
 	  property vTable: PTracePluginVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	  function RESULT_SUCCESS: Cardinal; inline;
+	  function RESULT_FAILED: Cardinal; inline;
+	  function RESULT_UNAUTHORIZED: Cardinal; inline;
+	  function SWEEP_STATE_STARTED: Cardinal; inline;
+	  function SWEEP_STATE_FINISHED: Cardinal; inline;
+	  function SWEEP_STATE_FAILED: Cardinal; inline;
+	  function SWEEP_STATE_PROGRESS: Cardinal; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -5394,6 +5755,30 @@ type
 	  function asITraceFactoryImpl: ITraceFactoryImpl;
 	  property vTable: PTraceFactoryVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	  function TRACE_EVENT_ATTACH: Cardinal; inline;
+	  function TRACE_EVENT_DETACH: Cardinal; inline;
+	  function TRACE_EVENT_TRANSACTION_START: Cardinal; inline;
+	  function TRACE_EVENT_TRANSACTION_END: Cardinal; inline;
+	  function TRACE_EVENT_SET_CONTEXT: Cardinal; inline;
+	  function TRACE_EVENT_PROC_EXECUTE: Cardinal; inline;
+	  function TRACE_EVENT_TRIGGER_EXECUTE: Cardinal; inline;
+	  function TRACE_EVENT_DSQL_PREPARE: Cardinal; inline;
+	  function TRACE_EVENT_DSQL_FREE: Cardinal; inline;
+	  function TRACE_EVENT_DSQL_EXECUTE: Cardinal; inline;
+	  function TRACE_EVENT_BLR_COMPILE: Cardinal; inline;
+	  function TRACE_EVENT_BLR_EXECUTE: Cardinal; inline;
+	  function TRACE_EVENT_DYN_EXECUTE: Cardinal; inline;
+	  function TRACE_EVENT_SERVICE_ATTACH: Cardinal; inline;
+	  function TRACE_EVENT_SERVICE_START: Cardinal; inline;
+	  function TRACE_EVENT_SERVICE_QUERY: Cardinal; inline;
+	  function TRACE_EVENT_SERVICE_DETACH: Cardinal; inline;
+	  function TRACE_EVENT_ERROR: Cardinal; inline;
+	  function TRACE_EVENT_SWEEP: Cardinal; inline;
+	  function TRACE_EVENT_FUNC_EXECUTE: Cardinal; inline;
+	  function TRACE_EVENT_MAX: Cardinal; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
 	  function release(): Integer;
@@ -5462,6 +5847,9 @@ type
 	  function asIUdrFunctionFactoryImpl: IUdrFunctionFactoryImpl;
 	  property vTable: PUdrFunctionFactoryVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure dispose();
 	  procedure setup(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder);
@@ -5505,6 +5893,9 @@ type
 	  function isIUdrProcedureFactoryImpl: boolean;
 	  function asIUdrProcedureFactoryImpl: IUdrProcedureFactoryImpl;
 	  property vTable: PUdrProcedureFactoryVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure dispose();
@@ -5550,6 +5941,9 @@ type
 	  function asIUdrTriggerFactoryImpl: IUdrTriggerFactoryImpl;
 	  property vTable: PUdrTriggerFactoryVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure dispose();
 	  procedure setup(status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; fieldsBuilder: IMetadataBuilder);
@@ -5594,6 +5988,9 @@ type
 	  function isIUdrPluginImpl: boolean;
 	  function asIUdrPluginImpl: IUdrPluginImpl;
 	  property vTable: PUdrPluginVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  function getMaster(): IMaster;
@@ -5642,6 +6039,11 @@ type
 	  function isIDecFloat16Impl: boolean;
 	  function asIDecFloat16Impl: IDecFloat16Impl;
 	  property vTable: PDecFloat16VTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	  function BCD_SIZE: Cardinal; inline;
+	  function STRING_SIZE: Cardinal; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure toBcd(from: FB_DEC16Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr);
@@ -5693,6 +6095,11 @@ type
 	  function asIDecFloat34Impl: IDecFloat34Impl;
 	  property vTable: PDecFloat34VTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	  function BCD_SIZE: Cardinal; inline;
+	  function STRING_SIZE: Cardinal; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure toBcd(from: FB_DEC34Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr);
 	  procedure toString(status: IStatus; from: FB_DEC34Ptr; bufferLength: Cardinal; buffer: PAnsiChar);
@@ -5741,6 +6148,10 @@ type
 	  function asIInt128Impl: IInt128Impl;
 	  property vTable: PInt128VTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	  function STRING_SIZE: Cardinal; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure toString(status: IStatus; from: FB_I128Ptr; scale: Integer; bufferLength: Cardinal; buffer: PAnsiChar);
 	  procedure fromString(status: IStatus; scale: Integer; from: PAnsiChar; to_: FB_I128Ptr);
@@ -5788,6 +6199,9 @@ type
 	  function isIReplicatedFieldImpl: boolean;
 	  function asIReplicatedFieldImpl: IReplicatedFieldImpl;
 	  property vTable: PReplicatedFieldVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  function getName(): PAnsiChar;
@@ -5842,6 +6256,9 @@ type
 	  function isIReplicatedRecordImpl: boolean;
 	  function asIReplicatedRecordImpl: IReplicatedRecordImpl;
 	  property vTable: PReplicatedRecordVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  function getCount(): Cardinal;
@@ -5898,6 +6315,9 @@ type
 	  function isIReplicatedTransactionImpl: boolean;
 	  function asIReplicatedTransactionImpl: IReplicatedTransactionImpl;
 	  property vTable: PReplicatedTransactionVTable read FvTable;
+	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure dispose();
@@ -5966,6 +6386,9 @@ type
 	  function asIReplicatedSessionImpl: IReplicatedSessionImpl;
 	  property vTable: PReplicatedSessionVTable read FvTable;
 	public
+	  {interface constants accessed using inline functions}
+	  function VERSION: NativeInt; inline;
+	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
 	  function release(): Integer;
@@ -6028,6 +6451,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IVersionedImpl']);
 end;
 
+function TVersioned.VERSION: NativeInt;
+begin
+  Result := IVersionedImpl.VERSION;
+end;
+
 function TReferenceCounted.this: IReferenceCounted;
 begin
   Result := IReferenceCounted(@FNullPtr);
@@ -6044,6 +6472,11 @@ begin
     Result := FObject as IReferenceCountedImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IReferenceCountedImpl']);
+end;
+
+function TReferenceCounted.VERSION: NativeInt;
+begin
+  Result := IReferenceCountedImpl.VERSION;
 end;
 
 procedure TReferenceCounted.addRef();
@@ -6074,6 +6507,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IDisposableImpl']);
 end;
 
+function TDisposable.VERSION: NativeInt;
+begin
+  Result := IDisposableImpl.VERSION;
+end;
+
 procedure TDisposable.dispose();
 begin
 	vTable^.dispose(this);
@@ -6095,6 +6533,41 @@ begin
     Result := FObject as IStatusImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IStatusImpl']);
+end;
+
+function TStatus.VERSION: NativeInt;
+begin
+  Result := IStatusImpl.VERSION;
+end;
+
+function TStatus.STATE_WARNINGS: Cardinal;
+begin
+  Result := IStatusImpl.STATE_WARNINGS;
+end;
+
+function TStatus.STATE_ERRORS: Cardinal;
+begin
+  Result := IStatusImpl.STATE_ERRORS;
+end;
+
+function TStatus.RESULT_ERROR: Integer;
+begin
+  Result := IStatusImpl.RESULT_ERROR;
+end;
+
+function TStatus.RESULT_OK: Integer;
+begin
+  Result := IStatusImpl.RESULT_OK;
+end;
+
+function TStatus.RESULT_NO_DATA: Integer;
+begin
+  Result := IStatusImpl.RESULT_NO_DATA;
+end;
+
+function TStatus.RESULT_SEGMENT: Integer;
+begin
+  Result := IStatusImpl.RESULT_SEGMENT;
 end;
 
 procedure TStatus.dispose();
@@ -6163,6 +6636,11 @@ begin
     Result := FObject as IMasterImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IMasterImpl']);
+end;
+
+function TMaster.VERSION: NativeInt;
+begin
+  Result := IMasterImpl.VERSION;
 end;
 
 function TMaster.getStatus(): IStatus;
@@ -6244,6 +6722,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IPluginBaseImpl']);
 end;
 
+function TPluginBase.VERSION: NativeInt;
+begin
+  Result := IPluginBaseImpl.VERSION;
+end;
+
 procedure TPluginBase.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -6280,6 +6763,11 @@ begin
     Result := FObject as IPluginSetImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IPluginSetImpl']);
+end;
+
+function TPluginSet.VERSION: NativeInt;
+begin
+  Result := IPluginSetImpl.VERSION;
 end;
 
 procedure TPluginSet.addRef();
@@ -6338,6 +6826,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IConfigEntryImpl']);
 end;
 
+function TConfigEntry.VERSION: NativeInt;
+begin
+  Result := IConfigEntryImpl.VERSION;
+end;
+
 procedure TConfigEntry.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -6392,6 +6885,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IConfigImpl']);
 end;
 
+function TConfig.VERSION: NativeInt;
+begin
+  Result := IConfigImpl.VERSION;
+end;
+
 procedure TConfig.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -6436,6 +6934,11 @@ begin
     Result := FObject as IFirebirdConfImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IFirebirdConfImpl']);
+end;
+
+function TFirebirdConf.VERSION: NativeInt;
+begin
+  Result := IFirebirdConfImpl.VERSION;
 end;
 
 procedure TFirebirdConf.addRef();
@@ -6492,6 +6995,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IPluginConfigImpl']);
 end;
 
+function TPluginConfig.VERSION: NativeInt;
+begin
+  Result := IPluginConfigImpl.VERSION;
+end;
+
 procedure TPluginConfig.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -6543,6 +7051,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IPluginFactoryImpl']);
 end;
 
+function TPluginFactory.VERSION: NativeInt;
+begin
+  Result := IPluginFactoryImpl.VERSION;
+end;
+
 function TPluginFactory.createPlugin(status: IStatus; factoryParameter: IPluginConfig): IPluginBase;
 begin
 	Result := vTable^.createPlugin(this, status, factoryParameter);
@@ -6565,6 +7078,11 @@ begin
     Result := FObject as IPluginModuleImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IPluginModuleImpl']);
+end;
+
+function TPluginModule.VERSION: NativeInt;
+begin
+  Result := IPluginModuleImpl.VERSION;
 end;
 
 procedure TPluginModule.doClean();
@@ -6593,6 +7111,71 @@ begin
     Result := FObject as IPluginManagerImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IPluginManagerImpl']);
+end;
+
+function TPluginManager.VERSION: NativeInt;
+begin
+  Result := IPluginManagerImpl.VERSION;
+end;
+
+function TPluginManager.TYPE_PROVIDER: Cardinal;
+begin
+  Result := IPluginManagerImpl.TYPE_PROVIDER;
+end;
+
+function TPluginManager.TYPE_FIRST_NON_LIB: Cardinal;
+begin
+  Result := IPluginManagerImpl.TYPE_FIRST_NON_LIB;
+end;
+
+function TPluginManager.TYPE_AUTH_SERVER: Cardinal;
+begin
+  Result := IPluginManagerImpl.TYPE_AUTH_SERVER;
+end;
+
+function TPluginManager.TYPE_AUTH_CLIENT: Cardinal;
+begin
+  Result := IPluginManagerImpl.TYPE_AUTH_CLIENT;
+end;
+
+function TPluginManager.TYPE_AUTH_USER_MANAGEMENT: Cardinal;
+begin
+  Result := IPluginManagerImpl.TYPE_AUTH_USER_MANAGEMENT;
+end;
+
+function TPluginManager.TYPE_EXTERNAL_ENGINE: Cardinal;
+begin
+  Result := IPluginManagerImpl.TYPE_EXTERNAL_ENGINE;
+end;
+
+function TPluginManager.TYPE_TRACE: Cardinal;
+begin
+  Result := IPluginManagerImpl.TYPE_TRACE;
+end;
+
+function TPluginManager.TYPE_WIRE_CRYPT: Cardinal;
+begin
+  Result := IPluginManagerImpl.TYPE_WIRE_CRYPT;
+end;
+
+function TPluginManager.TYPE_DB_CRYPT: Cardinal;
+begin
+  Result := IPluginManagerImpl.TYPE_DB_CRYPT;
+end;
+
+function TPluginManager.TYPE_KEY_HOLDER: Cardinal;
+begin
+  Result := IPluginManagerImpl.TYPE_KEY_HOLDER;
+end;
+
+function TPluginManager.TYPE_REPLICATOR: Cardinal;
+begin
+  Result := IPluginManagerImpl.TYPE_REPLICATOR;
+end;
+
+function TPluginManager.TYPE_COUNT: Cardinal;
+begin
+  Result := IPluginManagerImpl.TYPE_COUNT;
 end;
 
 procedure TPluginManager.registerPluginFactory(pluginType: Cardinal; defaultName: PAnsiChar; factory: IPluginFactory);
@@ -6645,6 +7228,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['ICryptKeyImpl']);
 end;
 
+function TCryptKey.VERSION: NativeInt;
+begin
+  Result := ICryptKeyImpl.VERSION;
+end;
+
 procedure TCryptKey.setSymmetric(status: IStatus; type_: PAnsiChar; keyLength: Cardinal; key: Pointer);
 begin
 	vTable^.setSymmetric(this, status, type_, keyLength, key);
@@ -6683,6 +7271,106 @@ begin
     Result := FObject as IConfigManagerImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IConfigManagerImpl']);
+end;
+
+function TConfigManager.VERSION: NativeInt;
+begin
+  Result := IConfigManagerImpl.VERSION;
+end;
+
+function TConfigManager.DIR_BIN: Cardinal;
+begin
+  Result := IConfigManagerImpl.DIR_BIN;
+end;
+
+function TConfigManager.DIR_SBIN: Cardinal;
+begin
+  Result := IConfigManagerImpl.DIR_SBIN;
+end;
+
+function TConfigManager.DIR_CONF: Cardinal;
+begin
+  Result := IConfigManagerImpl.DIR_CONF;
+end;
+
+function TConfigManager.DIR_LIB: Cardinal;
+begin
+  Result := IConfigManagerImpl.DIR_LIB;
+end;
+
+function TConfigManager.DIR_INC: Cardinal;
+begin
+  Result := IConfigManagerImpl.DIR_INC;
+end;
+
+function TConfigManager.DIR_DOC: Cardinal;
+begin
+  Result := IConfigManagerImpl.DIR_DOC;
+end;
+
+function TConfigManager.DIR_UDF: Cardinal;
+begin
+  Result := IConfigManagerImpl.DIR_UDF;
+end;
+
+function TConfigManager.DIR_SAMPLE: Cardinal;
+begin
+  Result := IConfigManagerImpl.DIR_SAMPLE;
+end;
+
+function TConfigManager.DIR_SAMPLEDB: Cardinal;
+begin
+  Result := IConfigManagerImpl.DIR_SAMPLEDB;
+end;
+
+function TConfigManager.DIR_HELP: Cardinal;
+begin
+  Result := IConfigManagerImpl.DIR_HELP;
+end;
+
+function TConfigManager.DIR_INTL: Cardinal;
+begin
+  Result := IConfigManagerImpl.DIR_INTL;
+end;
+
+function TConfigManager.DIR_MISC: Cardinal;
+begin
+  Result := IConfigManagerImpl.DIR_MISC;
+end;
+
+function TConfigManager.DIR_SECDB: Cardinal;
+begin
+  Result := IConfigManagerImpl.DIR_SECDB;
+end;
+
+function TConfigManager.DIR_MSG: Cardinal;
+begin
+  Result := IConfigManagerImpl.DIR_MSG;
+end;
+
+function TConfigManager.DIR_LOG: Cardinal;
+begin
+  Result := IConfigManagerImpl.DIR_LOG;
+end;
+
+function TConfigManager.DIR_GUARD: Cardinal;
+begin
+  Result := IConfigManagerImpl.DIR_GUARD;
+end;
+
+function TConfigManager.DIR_PLUGINS: Cardinal;
+begin
+  Result := IConfigManagerImpl.DIR_PLUGINS;
+end;
+
+function TConfigManager.DIR_TZDATA: Cardinal;
+begin
+  Result := IConfigManagerImpl.DIR_TZDATA;
+end;
+
+function TConfigManager.DIR_COUNT: Cardinal;
+begin
+  Result := IConfigManagerImpl.DIR_COUNT;
 end;
 
 function TConfigManager.getDirectory(code: Cardinal): PAnsiChar;
@@ -6738,6 +7426,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IEventCallbackImpl']);
 end;
 
+function TEventCallback.VERSION: NativeInt;
+begin
+  Result := IEventCallbackImpl.VERSION;
+end;
+
 procedure TEventCallback.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -6769,6 +7462,11 @@ begin
     Result := FObject as IBlobImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IBlobImpl']);
+end;
+
+function TBlob.VERSION: NativeInt;
+begin
+  Result := IBlobImpl.VERSION;
 end;
 
 procedure TBlob.addRef();
@@ -6833,6 +7531,11 @@ begin
     Result := FObject as ITransactionImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['ITransactionImpl']);
+end;
+
+function TTransaction.VERSION: NativeInt;
+begin
+  Result := ITransactionImpl.VERSION;
 end;
 
 procedure TTransaction.addRef();
@@ -6921,6 +7624,11 @@ begin
     Result := FObject as IMessageMetadataImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IMessageMetadataImpl']);
+end;
+
+function TMessageMetadata.VERSION: NativeInt;
+begin
+  Result := IMessageMetadataImpl.VERSION;
 end;
 
 procedure TMessageMetadata.addRef();
@@ -7053,6 +7761,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IMetadataBuilderImpl']);
 end;
 
+function TMetadataBuilder.VERSION: NativeInt;
+begin
+  Result := IMetadataBuilderImpl.VERSION;
+end;
+
 procedure TMetadataBuilder.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -7165,6 +7878,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IResultSetImpl']);
 end;
 
+function TResultSet.VERSION: NativeInt;
+begin
+  Result := IResultSetImpl.VERSION;
+end;
+
 procedure TResultSet.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -7257,6 +7975,76 @@ begin
     Result := FObject as IStatementImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IStatementImpl']);
+end;
+
+function TStatement.VERSION: NativeInt;
+begin
+  Result := IStatementImpl.VERSION;
+end;
+
+function TStatement.PREPARE_PREFETCH_NONE: Cardinal;
+begin
+  Result := IStatementImpl.PREPARE_PREFETCH_NONE;
+end;
+
+function TStatement.PREPARE_PREFETCH_TYPE: Cardinal;
+begin
+  Result := IStatementImpl.PREPARE_PREFETCH_TYPE;
+end;
+
+function TStatement.PREPARE_PREFETCH_INPUT_PARAMETERS: Cardinal;
+begin
+  Result := IStatementImpl.PREPARE_PREFETCH_INPUT_PARAMETERS;
+end;
+
+function TStatement.PREPARE_PREFETCH_OUTPUT_PARAMETERS: Cardinal;
+begin
+  Result := IStatementImpl.PREPARE_PREFETCH_OUTPUT_PARAMETERS;
+end;
+
+function TStatement.PREPARE_PREFETCH_LEGACY_PLAN: Cardinal;
+begin
+  Result := IStatementImpl.PREPARE_PREFETCH_LEGACY_PLAN;
+end;
+
+function TStatement.PREPARE_PREFETCH_DETAILED_PLAN: Cardinal;
+begin
+  Result := IStatementImpl.PREPARE_PREFETCH_DETAILED_PLAN;
+end;
+
+function TStatement.PREPARE_PREFETCH_AFFECTED_RECORDS: Cardinal;
+begin
+  Result := IStatementImpl.PREPARE_PREFETCH_AFFECTED_RECORDS;
+end;
+
+function TStatement.PREPARE_PREFETCH_FLAGS: Cardinal;
+begin
+  Result := IStatementImpl.PREPARE_PREFETCH_FLAGS;
+end;
+
+function TStatement.PREPARE_PREFETCH_METADATA: Cardinal;
+begin
+  Result := IStatementImpl.PREPARE_PREFETCH_METADATA;
+end;
+
+function TStatement.PREPARE_PREFETCH_ALL: Cardinal;
+begin
+  Result := IStatementImpl.PREPARE_PREFETCH_ALL;
+end;
+
+function TStatement.FLAG_HAS_CURSOR: Cardinal;
+begin
+  Result := IStatementImpl.FLAG_HAS_CURSOR;
+end;
+
+function TStatement.FLAG_REPEAT_EXECUTE: Cardinal;
+begin
+  Result := IStatementImpl.FLAG_REPEAT_EXECUTE;
+end;
+
+function TStatement.CURSOR_TYPE_SCROLLABLE: Cardinal;
+begin
+  Result := IStatementImpl.CURSOR_TYPE_SCROLLABLE;
 end;
 
 procedure TStatement.addRef();
@@ -7371,6 +8159,66 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IBatchImpl']);
 end;
 
+function TBatch.VERSION: NativeInt;
+begin
+  Result := IBatchImpl.VERSION;
+end;
+
+function TBatch.VERSION1: Byte;
+begin
+  Result := IBatchImpl.VERSION1;
+end;
+
+function TBatch.TAG_MULTIERROR: Byte;
+begin
+  Result := IBatchImpl.TAG_MULTIERROR;
+end;
+
+function TBatch.TAG_RECORD_COUNTS: Byte;
+begin
+  Result := IBatchImpl.TAG_RECORD_COUNTS;
+end;
+
+function TBatch.TAG_BUFFER_BYTES_SIZE: Byte;
+begin
+  Result := IBatchImpl.TAG_BUFFER_BYTES_SIZE;
+end;
+
+function TBatch.TAG_BLOB_POLICY: Byte;
+begin
+  Result := IBatchImpl.TAG_BLOB_POLICY;
+end;
+
+function TBatch.TAG_DETAILED_ERRORS: Byte;
+begin
+  Result := IBatchImpl.TAG_DETAILED_ERRORS;
+end;
+
+function TBatch.BLOB_NONE: Byte;
+begin
+  Result := IBatchImpl.BLOB_NONE;
+end;
+
+function TBatch.BLOB_ID_ENGINE: Byte;
+begin
+  Result := IBatchImpl.BLOB_ID_ENGINE;
+end;
+
+function TBatch.BLOB_ID_USER: Byte;
+begin
+  Result := IBatchImpl.BLOB_ID_USER;
+end;
+
+function TBatch.BLOB_STREAM: Byte;
+begin
+  Result := IBatchImpl.BLOB_STREAM;
+end;
+
+function TBatch.BLOB_SEGHDR_ALIGN: Cardinal;
+begin
+  Result := IBatchImpl.BLOB_SEGHDR_ALIGN;
+end;
+
 procedure TBatch.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -7465,6 +8313,26 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IBatchCompletionStateImpl']);
 end;
 
+function TBatchCompletionState.VERSION: NativeInt;
+begin
+  Result := IBatchCompletionStateImpl.VERSION;
+end;
+
+function TBatchCompletionState.EXECUTE_FAILED: Integer;
+begin
+  Result := IBatchCompletionStateImpl.EXECUTE_FAILED;
+end;
+
+function TBatchCompletionState.SUCCESS_NO_INFO: Integer;
+begin
+  Result := IBatchCompletionStateImpl.SUCCESS_NO_INFO;
+end;
+
+function TBatchCompletionState.NO_MORE_ERRORS: Cardinal;
+begin
+  Result := IBatchCompletionStateImpl.NO_MORE_ERRORS;
+end;
+
 procedure TBatchCompletionState.dispose();
 begin
 	vTable^.dispose(IDisposable(this));
@@ -7512,6 +8380,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IReplicatorImpl']);
 end;
 
+function TReplicator.VERSION: NativeInt;
+begin
+  Result := IReplicatorImpl.VERSION;
+end;
+
 procedure TReplicator.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -7550,6 +8423,11 @@ begin
     Result := FObject as IRequestImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IRequestImpl']);
+end;
+
+function TRequest.VERSION: NativeInt;
+begin
+  Result := IRequestImpl.VERSION;
 end;
 
 procedure TRequest.addRef();
@@ -7622,6 +8500,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IEventsImpl']);
 end;
 
+function TEvents.VERSION: NativeInt;
+begin
+  Result := IEventsImpl.VERSION;
+end;
+
 procedure TEvents.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -7654,6 +8537,11 @@ begin
     Result := FObject as IAttachmentImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IAttachmentImpl']);
+end;
+
+function TAttachment.VERSION: NativeInt;
+begin
+  Result := IAttachmentImpl.VERSION;
 end;
 
 procedure TAttachment.addRef();
@@ -7828,6 +8716,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IServiceImpl']);
 end;
 
+function TService.VERSION: NativeInt;
+begin
+  Result := IServiceImpl.VERSION;
+end;
+
 procedure TService.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -7872,6 +8765,11 @@ begin
     Result := FObject as IProviderImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IProviderImpl']);
+end;
+
+function TProvider.VERSION: NativeInt;
+begin
+  Result := IProviderImpl.VERSION;
 end;
 
 procedure TProvider.addRef();
@@ -7942,6 +8840,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IDtcStartImpl']);
 end;
 
+function TDtcStart.VERSION: NativeInt;
+begin
+  Result := IDtcStartImpl.VERSION;
+end;
+
 procedure TDtcStart.dispose();
 begin
 	vTable^.dispose(IDisposable(this));
@@ -7983,6 +8886,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IDtcImpl']);
 end;
 
+function TDtc.VERSION: NativeInt;
+begin
+  Result := IDtcImpl.VERSION;
+end;
+
 function TDtc.join(status: IStatus; one: ITransaction; two: ITransaction): ITransaction;
 begin
 	Result := vTable^.join(this, status, one, two);
@@ -8011,6 +8919,31 @@ begin
     Result := FObject as IAuthImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IAuthImpl']);
+end;
+
+function TAuth.VERSION: NativeInt;
+begin
+  Result := IAuthImpl.VERSION;
+end;
+
+function TAuth.AUTH_FAILED: Integer;
+begin
+  Result := IAuthImpl.AUTH_FAILED;
+end;
+
+function TAuth.AUTH_SUCCESS: Integer;
+begin
+  Result := IAuthImpl.AUTH_SUCCESS;
+end;
+
+function TAuth.AUTH_MORE_DATA: Integer;
+begin
+  Result := IAuthImpl.AUTH_MORE_DATA;
+end;
+
+function TAuth.AUTH_CONTINUE: Integer;
+begin
+  Result := IAuthImpl.AUTH_CONTINUE;
 end;
 
 procedure TAuth.addRef();
@@ -8049,6 +8982,11 @@ begin
     Result := FObject as IWriterImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IWriterImpl']);
+end;
+
+function TWriter.VERSION: NativeInt;
+begin
+  Result := IWriterImpl.VERSION;
 end;
 
 procedure TWriter.reset();
@@ -8092,6 +9030,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IServerBlockImpl']);
 end;
 
+function TServerBlock.VERSION: NativeInt;
+begin
+  Result := IServerBlockImpl.VERSION;
+end;
+
 function TServerBlock.getLogin(): PAnsiChar;
 begin
 	Result := vTable^.getLogin(this);
@@ -8130,6 +9073,11 @@ begin
     Result := FObject as IClientBlockImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IClientBlockImpl']);
+end;
+
+function TClientBlock.VERSION: NativeInt;
+begin
+  Result := IClientBlockImpl.VERSION;
 end;
 
 procedure TClientBlock.addRef();
@@ -8193,6 +9141,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IServerImpl']);
 end;
 
+function TServer.VERSION: NativeInt;
+begin
+  Result := IServerImpl.VERSION;
+end;
+
 procedure TServer.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -8243,6 +9196,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IClientImpl']);
 end;
 
+function TClient.VERSION: NativeInt;
+begin
+  Result := IClientImpl.VERSION;
+end;
+
 procedure TClient.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -8287,6 +9245,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IUserFieldImpl']);
 end;
 
+function TUserField.VERSION: NativeInt;
+begin
+  Result := IUserFieldImpl.VERSION;
+end;
+
 function TUserField.entered(): Integer;
 begin
 	Result := vTable^.entered(this);
@@ -8319,6 +9282,11 @@ begin
     Result := FObject as ICharUserFieldImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['ICharUserFieldImpl']);
+end;
+
+function TCharUserField.VERSION: NativeInt;
+begin
+  Result := ICharUserFieldImpl.VERSION;
 end;
 
 function TCharUserField.entered(): Integer;
@@ -8366,6 +9334,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IIntUserFieldImpl']);
 end;
 
+function TIntUserField.VERSION: NativeInt;
+begin
+  Result := IIntUserFieldImpl.VERSION;
+end;
+
 function TIntUserField.entered(): Integer;
 begin
 	Result := vTable^.entered(IUserField(this));
@@ -8409,6 +9382,41 @@ begin
     Result := FObject as IUserImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IUserImpl']);
+end;
+
+function TUser.VERSION: NativeInt;
+begin
+  Result := IUserImpl.VERSION;
+end;
+
+function TUser.OP_USER_ADD: Cardinal;
+begin
+  Result := IUserImpl.OP_USER_ADD;
+end;
+
+function TUser.OP_USER_MODIFY: Cardinal;
+begin
+  Result := IUserImpl.OP_USER_MODIFY;
+end;
+
+function TUser.OP_USER_DELETE: Cardinal;
+begin
+  Result := IUserImpl.OP_USER_DELETE;
+end;
+
+function TUser.OP_USER_DISPLAY: Cardinal;
+begin
+  Result := IUserImpl.OP_USER_DISPLAY;
+end;
+
+function TUser.OP_USER_SET_MAP: Cardinal;
+begin
+  Result := IUserImpl.OP_USER_SET_MAP;
+end;
+
+function TUser.OP_USER_DROP_MAP: Cardinal;
+begin
+  Result := IUserImpl.OP_USER_DROP_MAP;
 end;
 
 function TUser.operation(): Cardinal;
@@ -8485,6 +9493,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IListUsersImpl']);
 end;
 
+function TListUsers.VERSION: NativeInt;
+begin
+  Result := IListUsersImpl.VERSION;
+end;
+
 procedure TListUsers.list(status: IStatus; user: IUser);
 begin
 	vTable^.list(this, status, user);
@@ -8507,6 +9520,11 @@ begin
     Result := FObject as ILogonInfoImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['ILogonInfoImpl']);
+end;
+
+function TLogonInfo.VERSION: NativeInt;
+begin
+  Result := ILogonInfoImpl.VERSION;
 end;
 
 function TLogonInfo.name(): PAnsiChar;
@@ -8562,6 +9580,11 @@ begin
     Result := FObject as IManagementImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IManagementImpl']);
+end;
+
+function TManagement.VERSION: NativeInt;
+begin
+  Result := IManagementImpl.VERSION;
 end;
 
 procedure TManagement.addRef();
@@ -8626,6 +9649,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IAuthBlockImpl']);
 end;
 
+function TAuthBlock.VERSION: NativeInt;
+begin
+  Result := IAuthBlockImpl.VERSION;
+end;
+
 function TAuthBlock.getType(): PAnsiChar;
 begin
 	Result := vTable^.getType(this);
@@ -8679,6 +9707,11 @@ begin
     Result := FObject as IWireCryptPluginImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IWireCryptPluginImpl']);
+end;
+
+function TWireCryptPlugin.VERSION: NativeInt;
+begin
+  Result := IWireCryptPluginImpl.VERSION;
 end;
 
 procedure TWireCryptPlugin.addRef();
@@ -8755,6 +9788,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['ICryptKeyCallbackImpl']);
 end;
 
+function TCryptKeyCallback.VERSION: NativeInt;
+begin
+  Result := ICryptKeyCallbackImpl.VERSION;
+end;
+
 function TCryptKeyCallback.callback(dataLength: Cardinal; data: Pointer; bufferLength: Cardinal; buffer: Pointer): Cardinal;
 begin
 	Result := vTable^.callback(this, dataLength, data, bufferLength, buffer);
@@ -8776,6 +9814,11 @@ begin
     Result := FObject as IKeyHolderPluginImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IKeyHolderPluginImpl']);
+end;
+
+function TKeyHolderPlugin.VERSION: NativeInt;
+begin
+  Result := IKeyHolderPluginImpl.VERSION;
 end;
 
 procedure TKeyHolderPlugin.addRef();
@@ -8840,6 +9883,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IDbCryptInfoImpl']);
 end;
 
+function TDbCryptInfo.VERSION: NativeInt;
+begin
+  Result := IDbCryptInfoImpl.VERSION;
+end;
+
 procedure TDbCryptInfo.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -8872,6 +9920,11 @@ begin
     Result := FObject as IDbCryptPluginImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IDbCryptPluginImpl']);
+end;
+
+function TDbCryptPlugin.VERSION: NativeInt;
+begin
+  Result := IDbCryptPluginImpl.VERSION;
 end;
 
 procedure TDbCryptPlugin.addRef();
@@ -8934,6 +9987,11 @@ begin
     Result := FObject as IExternalContextImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IExternalContextImpl']);
+end;
+
+function TExternalContext.VERSION: NativeInt;
+begin
+  Result := IExternalContextImpl.VERSION;
 end;
 
 function TExternalContext.getMaster(): IMaster;
@@ -9007,6 +10065,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IExternalResultSetImpl']);
 end;
 
+function TExternalResultSet.VERSION: NativeInt;
+begin
+  Result := IExternalResultSetImpl.VERSION;
+end;
+
 procedure TExternalResultSet.dispose();
 begin
 	vTable^.dispose(IDisposable(this));
@@ -9034,6 +10097,11 @@ begin
     Result := FObject as IExternalFunctionImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IExternalFunctionImpl']);
+end;
+
+function TExternalFunction.VERSION: NativeInt;
+begin
+  Result := IExternalFunctionImpl.VERSION;
 end;
 
 procedure TExternalFunction.dispose();
@@ -9071,6 +10139,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IExternalProcedureImpl']);
 end;
 
+function TExternalProcedure.VERSION: NativeInt;
+begin
+  Result := IExternalProcedureImpl.VERSION;
+end;
+
 procedure TExternalProcedure.dispose();
 begin
 	vTable^.dispose(IDisposable(this));
@@ -9106,6 +10179,71 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IExternalTriggerImpl']);
 end;
 
+function TExternalTrigger.VERSION: NativeInt;
+begin
+  Result := IExternalTriggerImpl.VERSION;
+end;
+
+function TExternalTrigger.TYPE_BEFORE: Cardinal;
+begin
+  Result := IExternalTriggerImpl.TYPE_BEFORE;
+end;
+
+function TExternalTrigger.TYPE_AFTER: Cardinal;
+begin
+  Result := IExternalTriggerImpl.TYPE_AFTER;
+end;
+
+function TExternalTrigger.TYPE_DATABASE: Cardinal;
+begin
+  Result := IExternalTriggerImpl.TYPE_DATABASE;
+end;
+
+function TExternalTrigger.ACTION_INSERT: Cardinal;
+begin
+  Result := IExternalTriggerImpl.ACTION_INSERT;
+end;
+
+function TExternalTrigger.ACTION_UPDATE: Cardinal;
+begin
+  Result := IExternalTriggerImpl.ACTION_UPDATE;
+end;
+
+function TExternalTrigger.ACTION_DELETE: Cardinal;
+begin
+  Result := IExternalTriggerImpl.ACTION_DELETE;
+end;
+
+function TExternalTrigger.ACTION_CONNECT: Cardinal;
+begin
+  Result := IExternalTriggerImpl.ACTION_CONNECT;
+end;
+
+function TExternalTrigger.ACTION_DISCONNECT: Cardinal;
+begin
+  Result := IExternalTriggerImpl.ACTION_DISCONNECT;
+end;
+
+function TExternalTrigger.ACTION_TRANS_START: Cardinal;
+begin
+  Result := IExternalTriggerImpl.ACTION_TRANS_START;
+end;
+
+function TExternalTrigger.ACTION_TRANS_COMMIT: Cardinal;
+begin
+  Result := IExternalTriggerImpl.ACTION_TRANS_COMMIT;
+end;
+
+function TExternalTrigger.ACTION_TRANS_ROLLBACK: Cardinal;
+begin
+  Result := IExternalTriggerImpl.ACTION_TRANS_ROLLBACK;
+end;
+
+function TExternalTrigger.ACTION_DDL: Cardinal;
+begin
+  Result := IExternalTriggerImpl.ACTION_DDL;
+end;
+
 procedure TExternalTrigger.dispose();
 begin
 	vTable^.dispose(IDisposable(this));
@@ -9139,6 +10277,11 @@ begin
     Result := FObject as IRoutineMetadataImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IRoutineMetadataImpl']);
+end;
+
+function TRoutineMetadata.VERSION: NativeInt;
+begin
+  Result := IRoutineMetadataImpl.VERSION;
 end;
 
 function TRoutineMetadata.getPackage(status: IStatus): PAnsiChar;
@@ -9211,6 +10354,11 @@ begin
     Result := FObject as IExternalEngineImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IExternalEngineImpl']);
+end;
+
+function TExternalEngine.VERSION: NativeInt;
+begin
+  Result := IExternalEngineImpl.VERSION;
 end;
 
 procedure TExternalEngine.addRef();
@@ -9287,6 +10435,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['ITimerImpl']);
 end;
 
+function TTimer.VERSION: NativeInt;
+begin
+  Result := ITimerImpl.VERSION;
+end;
+
 procedure TTimer.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -9320,6 +10473,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['ITimerControlImpl']);
 end;
 
+function TTimerControl.VERSION: NativeInt;
+begin
+  Result := ITimerControlImpl.VERSION;
+end;
+
 procedure TTimerControl.start(status: IStatus; timer: ITimer; microSeconds: QWord);
 begin
 	vTable^.start(this, status, timer, microSeconds);
@@ -9350,6 +10508,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IVersionCallbackImpl']);
 end;
 
+function TVersionCallback.VERSION: NativeInt;
+begin
+  Result := IVersionCallbackImpl.VERSION;
+end;
+
 procedure TVersionCallback.callback(status: IStatus; text: PAnsiChar);
 begin
 	vTable^.callback(this, status, text);
@@ -9372,6 +10535,11 @@ begin
     Result := FObject as IUtilImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IUtilImpl']);
+end;
+
+function TUtil.VERSION: NativeInt;
+begin
+  Result := IUtilImpl.VERSION;
 end;
 
 procedure TUtil.getFbVersion(status: IStatus; att: IAttachment; callback: IVersionCallback);
@@ -9518,6 +10686,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IOffsetsCallbackImpl']);
 end;
 
+function TOffsetsCallback.VERSION: NativeInt;
+begin
+  Result := IOffsetsCallbackImpl.VERSION;
+end;
+
 procedure TOffsetsCallback.setOffset(status: IStatus; index: Cardinal; offset: Cardinal; nullOffset: Cardinal);
 begin
 	vTable^.setOffset(this, status, index, offset, nullOffset);
@@ -9540,6 +10713,56 @@ begin
     Result := FObject as IXpbBuilderImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IXpbBuilderImpl']);
+end;
+
+function TXpbBuilder.VERSION: NativeInt;
+begin
+  Result := IXpbBuilderImpl.VERSION;
+end;
+
+function TXpbBuilder.DPB: Cardinal;
+begin
+  Result := IXpbBuilderImpl.DPB;
+end;
+
+function TXpbBuilder.SPB_ATTACH: Cardinal;
+begin
+  Result := IXpbBuilderImpl.SPB_ATTACH;
+end;
+
+function TXpbBuilder.SPB_START: Cardinal;
+begin
+  Result := IXpbBuilderImpl.SPB_START;
+end;
+
+function TXpbBuilder.TPB: Cardinal;
+begin
+  Result := IXpbBuilderImpl.TPB;
+end;
+
+function TXpbBuilder.BATCH: Cardinal;
+begin
+  Result := IXpbBuilderImpl.BATCH;
+end;
+
+function TXpbBuilder.BPB: Cardinal;
+begin
+  Result := IXpbBuilderImpl.BPB;
+end;
+
+function TXpbBuilder.SPB_SEND: Cardinal;
+begin
+  Result := IXpbBuilderImpl.SPB_SEND;
+end;
+
+function TXpbBuilder.SPB_RECEIVE: Cardinal;
+begin
+  Result := IXpbBuilderImpl.SPB_RECEIVE;
+end;
+
+function TXpbBuilder.SPB_RESPONSE: Cardinal;
+begin
+  Result := IXpbBuilderImpl.SPB_RESPONSE;
 end;
 
 procedure TXpbBuilder.dispose();
@@ -9685,6 +10908,21 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['ITraceConnectionImpl']);
 end;
 
+function TTraceConnection.VERSION: NativeInt;
+begin
+  Result := ITraceConnectionImpl.VERSION;
+end;
+
+function TTraceConnection.KIND_DATABASE: Cardinal;
+begin
+  Result := ITraceConnectionImpl.KIND_DATABASE;
+end;
+
+function TTraceConnection.KIND_SERVICE: Cardinal;
+begin
+  Result := ITraceConnectionImpl.KIND_SERVICE;
+end;
+
 function TTraceConnection.getKind(): Cardinal;
 begin
 	Result := vTable^.getKind(this);
@@ -9746,6 +10984,11 @@ begin
     Result := FObject as ITraceDatabaseConnectionImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['ITraceDatabaseConnectionImpl']);
+end;
+
+function TTraceDatabaseConnection.VERSION: NativeInt;
+begin
+  Result := ITraceDatabaseConnectionImpl.VERSION;
 end;
 
 function TTraceDatabaseConnection.getKind(): Cardinal;
@@ -9821,6 +11064,36 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['ITraceTransactionImpl']);
 end;
 
+function TTraceTransaction.VERSION: NativeInt;
+begin
+  Result := ITraceTransactionImpl.VERSION;
+end;
+
+function TTraceTransaction.ISOLATION_CONSISTENCY: Cardinal;
+begin
+  Result := ITraceTransactionImpl.ISOLATION_CONSISTENCY;
+end;
+
+function TTraceTransaction.ISOLATION_CONCURRENCY: Cardinal;
+begin
+  Result := ITraceTransactionImpl.ISOLATION_CONCURRENCY;
+end;
+
+function TTraceTransaction.ISOLATION_READ_COMMITTED_RECVER: Cardinal;
+begin
+  Result := ITraceTransactionImpl.ISOLATION_READ_COMMITTED_RECVER;
+end;
+
+function TTraceTransaction.ISOLATION_READ_COMMITTED_NORECVER: Cardinal;
+begin
+  Result := ITraceTransactionImpl.ISOLATION_READ_COMMITTED_NORECVER;
+end;
+
+function TTraceTransaction.ISOLATION_READ_COMMITTED_READ_CONSISTENCY: Cardinal;
+begin
+  Result := ITraceTransactionImpl.ISOLATION_READ_COMMITTED_READ_CONSISTENCY;
+end;
+
 function TTraceTransaction.getTransactionID(): Int64;
 begin
 	Result := vTable^.getTransactionID(this);
@@ -9874,6 +11147,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['ITraceParamsImpl']);
 end;
 
+function TTraceParams.VERSION: NativeInt;
+begin
+  Result := ITraceParamsImpl.VERSION;
+end;
+
 function TTraceParams.getCount(): Cardinal;
 begin
 	Result := vTable^.getCount(this);
@@ -9908,6 +11186,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['ITraceStatementImpl']);
 end;
 
+function TTraceStatement.VERSION: NativeInt;
+begin
+  Result := ITraceStatementImpl.VERSION;
+end;
+
 function TTraceStatement.getStmtID(): Int64;
 begin
 	Result := vTable^.getStmtID(this);
@@ -9934,6 +11217,11 @@ begin
     Result := FObject as ITraceSQLStatementImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['ITraceSQLStatementImpl']);
+end;
+
+function TTraceSQLStatement.VERSION: NativeInt;
+begin
+  Result := ITraceSQLStatementImpl.VERSION;
 end;
 
 function TTraceSQLStatement.getStmtID(): Int64;
@@ -9989,6 +11277,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['ITraceBLRStatementImpl']);
 end;
 
+function TTraceBLRStatement.VERSION: NativeInt;
+begin
+  Result := ITraceBLRStatementImpl.VERSION;
+end;
+
 function TTraceBLRStatement.getStmtID(): Int64;
 begin
 	Result := vTable^.getStmtID(ITraceStatement(this));
@@ -10032,6 +11325,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['ITraceDYNRequestImpl']);
 end;
 
+function TTraceDYNRequest.VERSION: NativeInt;
+begin
+  Result := ITraceDYNRequestImpl.VERSION;
+end;
+
 function TTraceDYNRequest.getData(): BytePtr;
 begin
 	Result := vTable^.getData(this);
@@ -10063,6 +11361,11 @@ begin
     Result := FObject as ITraceContextVariableImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['ITraceContextVariableImpl']);
+end;
+
+function TTraceContextVariable.VERSION: NativeInt;
+begin
+  Result := ITraceContextVariableImpl.VERSION;
 end;
 
 function TTraceContextVariable.getNameSpace(): PAnsiChar;
@@ -10098,6 +11401,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['ITraceProcedureImpl']);
 end;
 
+function TTraceProcedure.VERSION: NativeInt;
+begin
+  Result := ITraceProcedureImpl.VERSION;
+end;
+
 function TTraceProcedure.getProcName(): PAnsiChar;
 begin
 	Result := vTable^.getProcName(this);
@@ -10129,6 +11437,11 @@ begin
     Result := FObject as ITraceFunctionImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['ITraceFunctionImpl']);
+end;
+
+function TTraceFunction.VERSION: NativeInt;
+begin
+  Result := ITraceFunctionImpl.VERSION;
 end;
 
 function TTraceFunction.getFuncName(): PAnsiChar;
@@ -10167,6 +11480,26 @@ begin
     Result := FObject as ITraceTriggerImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['ITraceTriggerImpl']);
+end;
+
+function TTraceTrigger.VERSION: NativeInt;
+begin
+  Result := ITraceTriggerImpl.VERSION;
+end;
+
+function TTraceTrigger.TYPE_ALL: Cardinal;
+begin
+  Result := ITraceTriggerImpl.TYPE_ALL;
+end;
+
+function TTraceTrigger.TYPE_BEFORE: Cardinal;
+begin
+  Result := ITraceTriggerImpl.TYPE_BEFORE;
+end;
+
+function TTraceTrigger.TYPE_AFTER: Cardinal;
+begin
+  Result := ITraceTriggerImpl.TYPE_AFTER;
 end;
 
 function TTraceTrigger.getTriggerName(): PAnsiChar;
@@ -10210,6 +11543,11 @@ begin
     Result := FObject as ITraceServiceConnectionImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['ITraceServiceConnectionImpl']);
+end;
+
+function TTraceServiceConnection.VERSION: NativeInt;
+begin
+  Result := ITraceServiceConnectionImpl.VERSION;
 end;
 
 function TTraceServiceConnection.getKind(): Cardinal;
@@ -10290,6 +11628,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['ITraceStatusVectorImpl']);
 end;
 
+function TTraceStatusVector.VERSION: NativeInt;
+begin
+  Result := ITraceStatusVectorImpl.VERSION;
+end;
+
 function TTraceStatusVector.hasError(): Boolean;
 begin
 	Result := vTable^.hasError(this);
@@ -10326,6 +11669,11 @@ begin
     Result := FObject as ITraceSweepInfoImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['ITraceSweepInfoImpl']);
+end;
+
+function TTraceSweepInfo.VERSION: NativeInt;
+begin
+  Result := ITraceSweepInfoImpl.VERSION;
 end;
 
 function TTraceSweepInfo.getOIT(): Int64;
@@ -10371,6 +11719,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['ITraceLogWriterImpl']);
 end;
 
+function TTraceLogWriter.VERSION: NativeInt;
+begin
+  Result := ITraceLogWriterImpl.VERSION;
+end;
+
 procedure TTraceLogWriter.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -10408,6 +11761,11 @@ begin
     Result := FObject as ITraceInitInfoImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['ITraceInitInfoImpl']);
+end;
+
+function TTraceInitInfo.VERSION: NativeInt;
+begin
+  Result := ITraceInitInfoImpl.VERSION;
 end;
 
 function TTraceInitInfo.getConfigText(): PAnsiChar;
@@ -10461,6 +11819,46 @@ begin
     Result := FObject as ITracePluginImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['ITracePluginImpl']);
+end;
+
+function TTracePlugin.VERSION: NativeInt;
+begin
+  Result := ITracePluginImpl.VERSION;
+end;
+
+function TTracePlugin.RESULT_SUCCESS: Cardinal;
+begin
+  Result := ITracePluginImpl.RESULT_SUCCESS;
+end;
+
+function TTracePlugin.RESULT_FAILED: Cardinal;
+begin
+  Result := ITracePluginImpl.RESULT_FAILED;
+end;
+
+function TTracePlugin.RESULT_UNAUTHORIZED: Cardinal;
+begin
+  Result := ITracePluginImpl.RESULT_UNAUTHORIZED;
+end;
+
+function TTracePlugin.SWEEP_STATE_STARTED: Cardinal;
+begin
+  Result := ITracePluginImpl.SWEEP_STATE_STARTED;
+end;
+
+function TTracePlugin.SWEEP_STATE_FINISHED: Cardinal;
+begin
+  Result := ITracePluginImpl.SWEEP_STATE_FINISHED;
+end;
+
+function TTracePlugin.SWEEP_STATE_FAILED: Cardinal;
+begin
+  Result := ITracePluginImpl.SWEEP_STATE_FAILED;
+end;
+
+function TTracePlugin.SWEEP_STATE_PROGRESS: Cardinal;
+begin
+  Result := ITracePluginImpl.SWEEP_STATE_PROGRESS;
 end;
 
 procedure TTracePlugin.addRef();
@@ -10596,6 +11994,116 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['ITraceFactoryImpl']);
 end;
 
+function TTraceFactory.VERSION: NativeInt;
+begin
+  Result := ITraceFactoryImpl.VERSION;
+end;
+
+function TTraceFactory.TRACE_EVENT_ATTACH: Cardinal;
+begin
+  Result := ITraceFactoryImpl.TRACE_EVENT_ATTACH;
+end;
+
+function TTraceFactory.TRACE_EVENT_DETACH: Cardinal;
+begin
+  Result := ITraceFactoryImpl.TRACE_EVENT_DETACH;
+end;
+
+function TTraceFactory.TRACE_EVENT_TRANSACTION_START: Cardinal;
+begin
+  Result := ITraceFactoryImpl.TRACE_EVENT_TRANSACTION_START;
+end;
+
+function TTraceFactory.TRACE_EVENT_TRANSACTION_END: Cardinal;
+begin
+  Result := ITraceFactoryImpl.TRACE_EVENT_TRANSACTION_END;
+end;
+
+function TTraceFactory.TRACE_EVENT_SET_CONTEXT: Cardinal;
+begin
+  Result := ITraceFactoryImpl.TRACE_EVENT_SET_CONTEXT;
+end;
+
+function TTraceFactory.TRACE_EVENT_PROC_EXECUTE: Cardinal;
+begin
+  Result := ITraceFactoryImpl.TRACE_EVENT_PROC_EXECUTE;
+end;
+
+function TTraceFactory.TRACE_EVENT_TRIGGER_EXECUTE: Cardinal;
+begin
+  Result := ITraceFactoryImpl.TRACE_EVENT_TRIGGER_EXECUTE;
+end;
+
+function TTraceFactory.TRACE_EVENT_DSQL_PREPARE: Cardinal;
+begin
+  Result := ITraceFactoryImpl.TRACE_EVENT_DSQL_PREPARE;
+end;
+
+function TTraceFactory.TRACE_EVENT_DSQL_FREE: Cardinal;
+begin
+  Result := ITraceFactoryImpl.TRACE_EVENT_DSQL_FREE;
+end;
+
+function TTraceFactory.TRACE_EVENT_DSQL_EXECUTE: Cardinal;
+begin
+  Result := ITraceFactoryImpl.TRACE_EVENT_DSQL_EXECUTE;
+end;
+
+function TTraceFactory.TRACE_EVENT_BLR_COMPILE: Cardinal;
+begin
+  Result := ITraceFactoryImpl.TRACE_EVENT_BLR_COMPILE;
+end;
+
+function TTraceFactory.TRACE_EVENT_BLR_EXECUTE: Cardinal;
+begin
+  Result := ITraceFactoryImpl.TRACE_EVENT_BLR_EXECUTE;
+end;
+
+function TTraceFactory.TRACE_EVENT_DYN_EXECUTE: Cardinal;
+begin
+  Result := ITraceFactoryImpl.TRACE_EVENT_DYN_EXECUTE;
+end;
+
+function TTraceFactory.TRACE_EVENT_SERVICE_ATTACH: Cardinal;
+begin
+  Result := ITraceFactoryImpl.TRACE_EVENT_SERVICE_ATTACH;
+end;
+
+function TTraceFactory.TRACE_EVENT_SERVICE_START: Cardinal;
+begin
+  Result := ITraceFactoryImpl.TRACE_EVENT_SERVICE_START;
+end;
+
+function TTraceFactory.TRACE_EVENT_SERVICE_QUERY: Cardinal;
+begin
+  Result := ITraceFactoryImpl.TRACE_EVENT_SERVICE_QUERY;
+end;
+
+function TTraceFactory.TRACE_EVENT_SERVICE_DETACH: Cardinal;
+begin
+  Result := ITraceFactoryImpl.TRACE_EVENT_SERVICE_DETACH;
+end;
+
+function TTraceFactory.TRACE_EVENT_ERROR: Cardinal;
+begin
+  Result := ITraceFactoryImpl.TRACE_EVENT_ERROR;
+end;
+
+function TTraceFactory.TRACE_EVENT_SWEEP: Cardinal;
+begin
+  Result := ITraceFactoryImpl.TRACE_EVENT_SWEEP;
+end;
+
+function TTraceFactory.TRACE_EVENT_FUNC_EXECUTE: Cardinal;
+begin
+  Result := ITraceFactoryImpl.TRACE_EVENT_FUNC_EXECUTE;
+end;
+
+function TTraceFactory.TRACE_EVENT_MAX: Cardinal;
+begin
+  Result := ITraceFactoryImpl.TRACE_EVENT_MAX;
+end;
+
 procedure TTraceFactory.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -10645,6 +12153,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IUdrFunctionFactoryImpl']);
 end;
 
+function TUdrFunctionFactory.VERSION: NativeInt;
+begin
+  Result := IUdrFunctionFactoryImpl.VERSION;
+end;
+
 procedure TUdrFunctionFactory.dispose();
 begin
 	vTable^.dispose(IDisposable(this));
@@ -10678,6 +12191,11 @@ begin
     Result := FObject as IUdrProcedureFactoryImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IUdrProcedureFactoryImpl']);
+end;
+
+function TUdrProcedureFactory.VERSION: NativeInt;
+begin
+  Result := IUdrProcedureFactoryImpl.VERSION;
 end;
 
 procedure TUdrProcedureFactory.dispose();
@@ -10715,6 +12233,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IUdrTriggerFactoryImpl']);
 end;
 
+function TUdrTriggerFactory.VERSION: NativeInt;
+begin
+  Result := IUdrTriggerFactoryImpl.VERSION;
+end;
+
 procedure TUdrTriggerFactory.dispose();
 begin
 	vTable^.dispose(IDisposable(this));
@@ -10748,6 +12271,11 @@ begin
     Result := FObject as IUdrPluginImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IUdrPluginImpl']);
+end;
+
+function TUdrPlugin.VERSION: NativeInt;
+begin
+  Result := IUdrPluginImpl.VERSION;
 end;
 
 function TUdrPlugin.getMaster(): IMaster;
@@ -10791,6 +12319,21 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IDecFloat16Impl']);
 end;
 
+function TDecFloat16.VERSION: NativeInt;
+begin
+  Result := IDecFloat16Impl.VERSION;
+end;
+
+function TDecFloat16.BCD_SIZE: Cardinal;
+begin
+  Result := IDecFloat16Impl.BCD_SIZE;
+end;
+
+function TDecFloat16.STRING_SIZE: Cardinal;
+begin
+  Result := IDecFloat16Impl.STRING_SIZE;
+end;
+
 procedure TDecFloat16.toBcd(from: FB_DEC16Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr);
 begin
 	vTable^.toBcd(this, from, sign, bcd, exp);
@@ -10829,6 +12372,21 @@ begin
     Result := FObject as IDecFloat34Impl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IDecFloat34Impl']);
+end;
+
+function TDecFloat34.VERSION: NativeInt;
+begin
+  Result := IDecFloat34Impl.VERSION;
+end;
+
+function TDecFloat34.BCD_SIZE: Cardinal;
+begin
+  Result := IDecFloat34Impl.BCD_SIZE;
+end;
+
+function TDecFloat34.STRING_SIZE: Cardinal;
+begin
+  Result := IDecFloat34Impl.STRING_SIZE;
 end;
 
 procedure TDecFloat34.toBcd(from: FB_DEC34Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr);
@@ -10871,6 +12429,16 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IInt128Impl']);
 end;
 
+function TInt128.VERSION: NativeInt;
+begin
+  Result := IInt128Impl.VERSION;
+end;
+
+function TInt128.STRING_SIZE: Cardinal;
+begin
+  Result := IInt128Impl.STRING_SIZE;
+end;
+
 procedure TInt128.toString(status: IStatus; from: FB_I128Ptr; scale: Integer; bufferLength: Cardinal; buffer: PAnsiChar);
 begin
 	vTable^.toString(this, status, from, scale, bufferLength, buffer);
@@ -10899,6 +12467,11 @@ begin
     Result := FObject as IReplicatedFieldImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IReplicatedFieldImpl']);
+end;
+
+function TReplicatedField.VERSION: NativeInt;
+begin
+  Result := IReplicatedFieldImpl.VERSION;
 end;
 
 function TReplicatedField.getName(): PAnsiChar;
@@ -10954,6 +12527,11 @@ begin
     raise FbException.CreateFmt(errNotImplementationObject,['IReplicatedRecordImpl']);
 end;
 
+function TReplicatedRecord.VERSION: NativeInt;
+begin
+  Result := IReplicatedRecordImpl.VERSION;
+end;
+
 function TReplicatedRecord.getCount(): Cardinal;
 begin
 	Result := vTable^.getCount(this);
@@ -10990,6 +12568,11 @@ begin
     Result := FObject as IReplicatedTransactionImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IReplicatedTransactionImpl']);
+end;
+
+function TReplicatedTransaction.VERSION: NativeInt;
+begin
+  Result := IReplicatedTransactionImpl.VERSION;
 end;
 
 procedure TReplicatedTransaction.dispose();
@@ -11079,6 +12662,11 @@ begin
     Result := FObject as IReplicatedSessionImpl
   else
     raise FbException.CreateFmt(errNotImplementationObject,['IReplicatedSessionImpl']);
+end;
+
+function TReplicatedSession.VERSION: NativeInt;
+begin
+  Result := IReplicatedSessionImpl.VERSION;
 end;
 
 procedure TReplicatedSession.addRef();

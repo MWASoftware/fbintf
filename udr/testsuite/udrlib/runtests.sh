@@ -2,12 +2,12 @@
 usage()
 {
   echo "Run UDR tests"
-  echo "runtests.sh  [-3] [-4] "
+  echo "runtests.sh  [-3] [-4] [-5]"
 }
 
 BUILD=
 #Parse Parameters
-TEMP=`getopt h34db:f:p: "$@"`
+TEMP=`getopt h345db:f:p: "$@"`
 FB="4.0.1"
 if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
 
@@ -20,6 +20,8 @@ while true ; do
         \-3) 	FB="3.0.10"; shift 1;;
 
         \-4) 	FB="4.0.4"; shift 1;;
+        
+	\-5) 	FB="5.0.0"; shift 1;;
 
 	-d)	FB="master"; shift 1;;
 	

@@ -322,14 +322,16 @@ end;
 
 function TFB30Status.InErrorState: boolean;
 begin
-  Result := ((GetStatus.getState and FirebirdOOAPI.IStatusImpl.STATE_ERRORS) <> 0);
+  with GetStatus^ do
+    Result := ((getState and STATE_ERRORS) <> 0);
   if Result then
     FDirty := true;
 end;
 
 function TFB30Status.Warning: boolean;
 begin
-  Result := ((GetStatus.getState and FirebirdOOAPI.IStatusImpl.STATE_WARNINGS) <> 0);
+  with GetStatus^ do
+    Result := ((getState and STATE_WARNINGS) <> 0);
   if Result then
     FDirty := true;
 end;
