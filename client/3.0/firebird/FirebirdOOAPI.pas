@@ -3059,6 +3059,10 @@ type
 	public
 	  {interface constants accessed using inline functions}
 	  function VERSION: NativeInt; inline;
+	  function AUTH_FAILED: Integer; inline;
+	  function AUTH_SUCCESS: Integer; inline;
+	  function AUTH_MORE_DATA: Integer; inline;
+	  function AUTH_CONTINUE: Integer; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -3111,6 +3115,10 @@ type
 	public
 	  {interface constants accessed using inline functions}
 	  function VERSION: NativeInt; inline;
+	  function AUTH_FAILED: Integer; inline;
+	  function AUTH_SUCCESS: Integer; inline;
+	  function AUTH_MORE_DATA: Integer; inline;
+	  function AUTH_CONTINUE: Integer; inline;
 	public
 	  {Firebird OOAPI methods}
 	  procedure addRef();
@@ -4771,6 +4779,8 @@ type
 	public
 	  {interface constants accessed using inline functions}
 	  function VERSION: NativeInt; inline;
+	  function KIND_DATABASE: Cardinal; inline;
+	  function KIND_SERVICE: Cardinal; inline;
 	public
 	  {Firebird OOAPI methods}
 	  function getKind(): Cardinal;
@@ -5363,6 +5373,8 @@ type
 	public
 	  {interface constants accessed using inline functions}
 	  function VERSION: NativeInt; inline;
+	  function KIND_DATABASE: Cardinal; inline;
+	  function KIND_SERVICE: Cardinal; inline;
 	public
 	  {Firebird OOAPI methods}
 	  function getKind(): Cardinal;
@@ -9146,6 +9158,26 @@ begin
   Result := IServerImpl.VERSION;
 end;
 
+function TServer.AUTH_FAILED: Integer;
+begin
+  Result := IAuthImpl.AUTH_FAILED;
+end;
+
+function TServer.AUTH_SUCCESS: Integer;
+begin
+  Result := IAuthImpl.AUTH_SUCCESS;
+end;
+
+function TServer.AUTH_MORE_DATA: Integer;
+begin
+  Result := IAuthImpl.AUTH_MORE_DATA;
+end;
+
+function TServer.AUTH_CONTINUE: Integer;
+begin
+  Result := IAuthImpl.AUTH_CONTINUE;
+end;
+
 procedure TServer.addRef();
 begin
 	vTable^.addRef(IReferenceCounted(this));
@@ -9199,6 +9231,26 @@ end;
 function TClient.VERSION: NativeInt;
 begin
   Result := IClientImpl.VERSION;
+end;
+
+function TClient.AUTH_FAILED: Integer;
+begin
+  Result := IAuthImpl.AUTH_FAILED;
+end;
+
+function TClient.AUTH_SUCCESS: Integer;
+begin
+  Result := IAuthImpl.AUTH_SUCCESS;
+end;
+
+function TClient.AUTH_MORE_DATA: Integer;
+begin
+  Result := IAuthImpl.AUTH_MORE_DATA;
+end;
+
+function TClient.AUTH_CONTINUE: Integer;
+begin
+  Result := IAuthImpl.AUTH_CONTINUE;
 end;
 
 procedure TClient.addRef();
@@ -10991,6 +11043,16 @@ begin
   Result := ITraceDatabaseConnectionImpl.VERSION;
 end;
 
+function TTraceDatabaseConnection.KIND_DATABASE: Cardinal;
+begin
+  Result := ITraceConnectionImpl.KIND_DATABASE;
+end;
+
+function TTraceDatabaseConnection.KIND_SERVICE: Cardinal;
+begin
+  Result := ITraceConnectionImpl.KIND_SERVICE;
+end;
+
 function TTraceDatabaseConnection.getKind(): Cardinal;
 begin
 	Result := vTable^.getKind(ITraceConnection(this));
@@ -11548,6 +11610,16 @@ end;
 function TTraceServiceConnection.VERSION: NativeInt;
 begin
   Result := ITraceServiceConnectionImpl.VERSION;
+end;
+
+function TTraceServiceConnection.KIND_DATABASE: Cardinal;
+begin
+  Result := ITraceConnectionImpl.KIND_DATABASE;
+end;
+
+function TTraceServiceConnection.KIND_SERVICE: Cardinal;
+begin
+  Result := ITraceConnectionImpl.KIND_SERVICE;
 end;
 
 function TTraceServiceConnection.getKind(): Cardinal;
