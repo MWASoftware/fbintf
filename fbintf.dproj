@@ -145,7 +145,7 @@
                     <VersionInfo Name="MajorVer">1</VersionInfo>
                     <VersionInfo Name="MinorVer">4</VersionInfo>
                     <VersionInfo Name="Release">2</VersionInfo>
-                    <VersionInfo Name="Build">14340</VersionInfo>
+                    <VersionInfo Name="Build">15718</VersionInfo>
                     <VersionInfo Name="Debug">False</VersionInfo>
                     <VersionInfo Name="PreRelease">False</VersionInfo>
                     <VersionInfo Name="Special">False</VersionInfo>
@@ -157,13 +157,13 @@
                 <VersionInfoKeys>
                     <VersionInfoKeys Name="CompanyName">MWA Software</VersionInfoKeys>
                     <VersionInfoKeys Name="FileDescription"/>
-                    <VersionInfoKeys Name="FileVersion">1.4.2.14340</VersionInfoKeys>
+                    <VersionInfoKeys Name="FileVersion">1.4.2.15718</VersionInfoKeys>
                     <VersionInfoKeys Name="InternalName"/>
                     <VersionInfoKeys Name="LegalCopyright"/>
                     <VersionInfoKeys Name="LegalTrademarks"/>
                     <VersionInfoKeys Name="OriginalFilename"/>
                     <VersionInfoKeys Name="ProductName">Firebird Pascal Client API</VersionInfoKeys>
-                    <VersionInfoKeys Name="ProductVersion">1.4.2.14340</VersionInfoKeys>
+                    <VersionInfoKeys Name="ProductVersion">1.4.2.15718</VersionInfoKeys>
                     <VersionInfoKeys Name="Comments"/>
                 </VersionInfoKeys>
             </Delphi.Personality>
