@@ -12860,7 +12860,7 @@ end;
 procedure IReferenceCountedImpl_addRefDispatcher(this: IReferenceCounted); cdecl;
 begin
 	try
-		IReferenceCountedImpl(this.FObject).addRef();
+		this.asIReferenceCountedImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -12869,7 +12869,7 @@ end;
 function IReferenceCountedImpl_releaseDispatcher(this: IReferenceCounted): Integer; cdecl;
 begin
 	try
-		Result := IReferenceCountedImpl(this.FObject).release();
+		Result := this.asIReferenceCountedImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -12929,7 +12929,7 @@ end;
 procedure IDisposableImpl_disposeDispatcher(this: IDisposable); cdecl;
 begin
 	try
-		IDisposableImpl(this.FObject).dispose();
+		this.asIDisposableImpl.dispose();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -12976,7 +12976,7 @@ end;
 procedure IStatusImpl_disposeDispatcher(this: IStatus); cdecl;
 begin
 	try
-		IStatusImpl(this.FObject).dispose();
+		this.asIStatusImpl.dispose();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -12985,7 +12985,7 @@ end;
 procedure IStatusImpl_initDispatcher(this: IStatus); cdecl;
 begin
 	try
-		IStatusImpl(this.FObject).init();
+		this.asIStatusImpl.init();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -12994,7 +12994,7 @@ end;
 function IStatusImpl_getStateDispatcher(this: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := IStatusImpl(this.FObject).getState();
+		Result := this.asIStatusImpl.getState();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13003,7 +13003,7 @@ end;
 procedure IStatusImpl_setErrors2Dispatcher(this: IStatus; length: Cardinal; value: NativeIntPtr); cdecl;
 begin
 	try
-		IStatusImpl(this.FObject).setErrors2(length, value);
+		this.asIStatusImpl.setErrors2(length, value);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13012,7 +13012,7 @@ end;
 procedure IStatusImpl_setWarnings2Dispatcher(this: IStatus; length: Cardinal; value: NativeIntPtr); cdecl;
 begin
 	try
-		IStatusImpl(this.FObject).setWarnings2(length, value);
+		this.asIStatusImpl.setWarnings2(length, value);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13021,7 +13021,7 @@ end;
 procedure IStatusImpl_setErrorsDispatcher(this: IStatus; value: NativeIntPtr); cdecl;
 begin
 	try
-		IStatusImpl(this.FObject).setErrors(value);
+		this.asIStatusImpl.setErrors(value);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13030,7 +13030,7 @@ end;
 procedure IStatusImpl_setWarningsDispatcher(this: IStatus; value: NativeIntPtr); cdecl;
 begin
 	try
-		IStatusImpl(this.FObject).setWarnings(value);
+		this.asIStatusImpl.setWarnings(value);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13039,7 +13039,7 @@ end;
 function IStatusImpl_getErrorsDispatcher(this: IStatus): NativeIntPtr; cdecl;
 begin
 	try
-		Result := IStatusImpl(this.FObject).getErrors();
+		Result := this.asIStatusImpl.getErrors();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13048,7 +13048,7 @@ end;
 function IStatusImpl_getWarningsDispatcher(this: IStatus): NativeIntPtr; cdecl;
 begin
 	try
-		Result := IStatusImpl(this.FObject).getWarnings();
+		Result := this.asIStatusImpl.getWarnings();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13057,7 +13057,7 @@ end;
 function IStatusImpl_cloneDispatcher(this: IStatus): IStatus; cdecl;
 begin
 	try
-		Result := IStatusImpl(this.FObject).clone();
+		Result := this.asIStatusImpl.clone();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13101,7 +13101,7 @@ end;
 function IMasterImpl_getStatusDispatcher(this: IMaster): IStatus; cdecl;
 begin
 	try
-		Result := IMasterImpl(this.FObject).getStatus();
+		Result := this.asIMasterImpl.getStatus();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13110,7 +13110,7 @@ end;
 function IMasterImpl_getDispatcherDispatcher(this: IMaster): IProvider; cdecl;
 begin
 	try
-		Result := IMasterImpl(this.FObject).getDispatcher();
+		Result := this.asIMasterImpl.getDispatcher();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13119,7 +13119,7 @@ end;
 function IMasterImpl_getPluginManagerDispatcher(this: IMaster): IPluginManager; cdecl;
 begin
 	try
-		Result := IMasterImpl(this.FObject).getPluginManager();
+		Result := this.asIMasterImpl.getPluginManager();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13128,7 +13128,7 @@ end;
 function IMasterImpl_getTimerControlDispatcher(this: IMaster): ITimerControl; cdecl;
 begin
 	try
-		Result := IMasterImpl(this.FObject).getTimerControl();
+		Result := this.asIMasterImpl.getTimerControl();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13137,7 +13137,7 @@ end;
 function IMasterImpl_getDtcDispatcher(this: IMaster): IDtc; cdecl;
 begin
 	try
-		Result := IMasterImpl(this.FObject).getDtc();
+		Result := this.asIMasterImpl.getDtc();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13146,7 +13146,7 @@ end;
 function IMasterImpl_registerAttachmentDispatcher(this: IMaster; provider: IProvider; attachment: IAttachment): IAttachment; cdecl;
 begin
 	try
-		Result := IMasterImpl(this.FObject).registerAttachment(provider, attachment);
+		Result := this.asIMasterImpl.registerAttachment(provider, attachment);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13155,7 +13155,7 @@ end;
 function IMasterImpl_registerTransactionDispatcher(this: IMaster; attachment: IAttachment; transaction: ITransaction): ITransaction; cdecl;
 begin
 	try
-		Result := IMasterImpl(this.FObject).registerTransaction(attachment, transaction);
+		Result := this.asIMasterImpl.registerTransaction(attachment, transaction);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13164,7 +13164,7 @@ end;
 function IMasterImpl_getMetadataBuilderDispatcher(this: IMaster; status: IStatus; fieldCount: Cardinal): IMetadataBuilder; cdecl;
 begin
 	try
-		Result := IMasterImpl(this.FObject).getMetadataBuilder(status, fieldCount);
+		Result := this.asIMasterImpl.getMetadataBuilder(status, fieldCount);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13173,7 +13173,7 @@ end;
 function IMasterImpl_serverModeDispatcher(this: IMaster; mode: Integer): Integer; cdecl;
 begin
 	try
-		Result := IMasterImpl(this.FObject).serverMode(mode);
+		Result := this.asIMasterImpl.serverMode(mode);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13182,7 +13182,7 @@ end;
 function IMasterImpl_getUtilInterfaceDispatcher(this: IMaster): IUtil; cdecl;
 begin
 	try
-		Result := IMasterImpl(this.FObject).getUtilInterface();
+		Result := this.asIMasterImpl.getUtilInterface();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13191,7 +13191,7 @@ end;
 function IMasterImpl_getConfigManagerDispatcher(this: IMaster): IConfigManager; cdecl;
 begin
 	try
-		Result := IMasterImpl(this.FObject).getConfigManager();
+		Result := this.asIMasterImpl.getConfigManager();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13200,7 +13200,7 @@ end;
 function IMasterImpl_getProcessExitingDispatcher(this: IMaster): Boolean; cdecl;
 begin
 	try
-		Result := IMasterImpl(this.FObject).getProcessExiting();
+		Result := this.asIMasterImpl.getProcessExiting();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13246,7 +13246,7 @@ end;
 procedure IPluginBaseImpl_addRefDispatcher(this: IPluginBase); cdecl;
 begin
 	try
-		IPluginBaseImpl(this.FObject).addRef();
+		this.asIPluginBaseImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13255,7 +13255,7 @@ end;
 function IPluginBaseImpl_releaseDispatcher(this: IPluginBase): Integer; cdecl;
 begin
 	try
-		Result := IPluginBaseImpl(this.FObject).release();
+		Result := this.asIPluginBaseImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13264,7 +13264,7 @@ end;
 procedure IPluginBaseImpl_setOwnerDispatcher(this: IPluginBase; r: IReferenceCounted); cdecl;
 begin
 	try
-		IPluginBaseImpl(this.FObject).setOwner(r);
+		this.asIPluginBaseImpl.setOwner(r);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13273,7 +13273,7 @@ end;
 function IPluginBaseImpl_getOwnerDispatcher(this: IPluginBase): IReferenceCounted; cdecl;
 begin
 	try
-		Result := IPluginBaseImpl(this.FObject).getOwner();
+		Result := this.asIPluginBaseImpl.getOwner();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13320,7 +13320,7 @@ end;
 procedure IPluginSetImpl_addRefDispatcher(this: IPluginSet); cdecl;
 begin
 	try
-		IPluginSetImpl(this.FObject).addRef();
+		this.asIPluginSetImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13329,7 +13329,7 @@ end;
 function IPluginSetImpl_releaseDispatcher(this: IPluginSet): Integer; cdecl;
 begin
 	try
-		Result := IPluginSetImpl(this.FObject).release();
+		Result := this.asIPluginSetImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13338,7 +13338,7 @@ end;
 function IPluginSetImpl_getNameDispatcher(this: IPluginSet): PAnsiChar; cdecl;
 begin
 	try
-		Result := IPluginSetImpl(this.FObject).getName();
+		Result := this.asIPluginSetImpl.getName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13347,7 +13347,7 @@ end;
 function IPluginSetImpl_getModuleNameDispatcher(this: IPluginSet): PAnsiChar; cdecl;
 begin
 	try
-		Result := IPluginSetImpl(this.FObject).getModuleName();
+		Result := this.asIPluginSetImpl.getModuleName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13356,7 +13356,7 @@ end;
 function IPluginSetImpl_getPluginDispatcher(this: IPluginSet; status: IStatus): IPluginBase; cdecl;
 begin
 	try
-		Result := IPluginSetImpl(this.FObject).getPlugin(status);
+		Result := this.asIPluginSetImpl.getPlugin(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13365,7 +13365,7 @@ end;
 procedure IPluginSetImpl_nextDispatcher(this: IPluginSet; status: IStatus); cdecl;
 begin
 	try
-		IPluginSetImpl(this.FObject).next(status);
+		this.asIPluginSetImpl.next(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13374,7 +13374,7 @@ end;
 procedure IPluginSetImpl_set_Dispatcher(this: IPluginSet; status: IStatus; s: PAnsiChar); cdecl;
 begin
 	try
-		IPluginSetImpl(this.FObject).set_(status, s);
+		this.asIPluginSetImpl.set_(status, s);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13415,7 +13415,7 @@ end;
 procedure IConfigEntryImpl_addRefDispatcher(this: IConfigEntry); cdecl;
 begin
 	try
-		IConfigEntryImpl(this.FObject).addRef();
+		this.asIConfigEntryImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13424,7 +13424,7 @@ end;
 function IConfigEntryImpl_releaseDispatcher(this: IConfigEntry): Integer; cdecl;
 begin
 	try
-		Result := IConfigEntryImpl(this.FObject).release();
+		Result := this.asIConfigEntryImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13433,7 +13433,7 @@ end;
 function IConfigEntryImpl_getNameDispatcher(this: IConfigEntry): PAnsiChar; cdecl;
 begin
 	try
-		Result := IConfigEntryImpl(this.FObject).getName();
+		Result := this.asIConfigEntryImpl.getName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13442,7 +13442,7 @@ end;
 function IConfigEntryImpl_getValueDispatcher(this: IConfigEntry): PAnsiChar; cdecl;
 begin
 	try
-		Result := IConfigEntryImpl(this.FObject).getValue();
+		Result := this.asIConfigEntryImpl.getValue();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13451,7 +13451,7 @@ end;
 function IConfigEntryImpl_getIntValueDispatcher(this: IConfigEntry): Int64; cdecl;
 begin
 	try
-		Result := IConfigEntryImpl(this.FObject).getIntValue();
+		Result := this.asIConfigEntryImpl.getIntValue();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13460,7 +13460,7 @@ end;
 function IConfigEntryImpl_getBoolValueDispatcher(this: IConfigEntry): Boolean; cdecl;
 begin
 	try
-		Result := IConfigEntryImpl(this.FObject).getBoolValue();
+		Result := this.asIConfigEntryImpl.getBoolValue();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13469,7 +13469,7 @@ end;
 function IConfigEntryImpl_getSubConfigDispatcher(this: IConfigEntry; status: IStatus): IConfig; cdecl;
 begin
 	try
-		Result := IConfigEntryImpl(this.FObject).getSubConfig(status);
+		Result := this.asIConfigEntryImpl.getSubConfig(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13510,7 +13510,7 @@ end;
 procedure IConfigImpl_addRefDispatcher(this: IConfig); cdecl;
 begin
 	try
-		IConfigImpl(this.FObject).addRef();
+		this.asIConfigImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13519,7 +13519,7 @@ end;
 function IConfigImpl_releaseDispatcher(this: IConfig): Integer; cdecl;
 begin
 	try
-		Result := IConfigImpl(this.FObject).release();
+		Result := this.asIConfigImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13528,7 +13528,7 @@ end;
 function IConfigImpl_findDispatcher(this: IConfig; status: IStatus; name: PAnsiChar): IConfigEntry; cdecl;
 begin
 	try
-		Result := IConfigImpl(this.FObject).find(status, name);
+		Result := this.asIConfigImpl.find(status, name);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13537,7 +13537,7 @@ end;
 function IConfigImpl_findValueDispatcher(this: IConfig; status: IStatus; name: PAnsiChar; value: PAnsiChar): IConfigEntry; cdecl;
 begin
 	try
-		Result := IConfigImpl(this.FObject).findValue(status, name, value);
+		Result := this.asIConfigImpl.findValue(status, name, value);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13546,7 +13546,7 @@ end;
 function IConfigImpl_findPosDispatcher(this: IConfig; status: IStatus; name: PAnsiChar; pos: Cardinal): IConfigEntry; cdecl;
 begin
 	try
-		Result := IConfigImpl(this.FObject).findPos(status, name, pos);
+		Result := this.asIConfigImpl.findPos(status, name, pos);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13585,7 +13585,7 @@ end;
 procedure IFirebirdConfImpl_addRefDispatcher(this: IFirebirdConf); cdecl;
 begin
 	try
-		IFirebirdConfImpl(this.FObject).addRef();
+		this.asIFirebirdConfImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13594,7 +13594,7 @@ end;
 function IFirebirdConfImpl_releaseDispatcher(this: IFirebirdConf): Integer; cdecl;
 begin
 	try
-		Result := IFirebirdConfImpl(this.FObject).release();
+		Result := this.asIFirebirdConfImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13603,7 +13603,7 @@ end;
 function IFirebirdConfImpl_getKeyDispatcher(this: IFirebirdConf; name: PAnsiChar): Cardinal; cdecl;
 begin
 	try
-		Result := IFirebirdConfImpl(this.FObject).getKey(name);
+		Result := this.asIFirebirdConfImpl.getKey(name);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13612,7 +13612,7 @@ end;
 function IFirebirdConfImpl_asIntegerDispatcher(this: IFirebirdConf; key: Cardinal): Int64; cdecl;
 begin
 	try
-		Result := IFirebirdConfImpl(this.FObject).asInteger(key);
+		Result := this.asIFirebirdConfImpl.asInteger(key);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13621,7 +13621,7 @@ end;
 function IFirebirdConfImpl_asStringDispatcher(this: IFirebirdConf; key: Cardinal): PAnsiChar; cdecl;
 begin
 	try
-		Result := IFirebirdConfImpl(this.FObject).asString(key);
+		Result := this.asIFirebirdConfImpl.asString(key);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13630,7 +13630,7 @@ end;
 function IFirebirdConfImpl_asBooleanDispatcher(this: IFirebirdConf; key: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := IFirebirdConfImpl(this.FObject).asBoolean(key);
+		Result := this.asIFirebirdConfImpl.asBoolean(key);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13639,7 +13639,7 @@ end;
 function IFirebirdConfImpl_getVersionDispatcher(this: IFirebirdConf; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := IFirebirdConfImpl(this.FObject).getVersion(status);
+		Result := this.asIFirebirdConfImpl.getVersion(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13680,7 +13680,7 @@ end;
 procedure IPluginConfigImpl_addRefDispatcher(this: IPluginConfig); cdecl;
 begin
 	try
-		IPluginConfigImpl(this.FObject).addRef();
+		this.asIPluginConfigImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13689,7 +13689,7 @@ end;
 function IPluginConfigImpl_releaseDispatcher(this: IPluginConfig): Integer; cdecl;
 begin
 	try
-		Result := IPluginConfigImpl(this.FObject).release();
+		Result := this.asIPluginConfigImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13698,7 +13698,7 @@ end;
 function IPluginConfigImpl_getConfigFileNameDispatcher(this: IPluginConfig): PAnsiChar; cdecl;
 begin
 	try
-		Result := IPluginConfigImpl(this.FObject).getConfigFileName();
+		Result := this.asIPluginConfigImpl.getConfigFileName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13707,7 +13707,7 @@ end;
 function IPluginConfigImpl_getDefaultConfigDispatcher(this: IPluginConfig; status: IStatus): IConfig; cdecl;
 begin
 	try
-		Result := IPluginConfigImpl(this.FObject).getDefaultConfig(status);
+		Result := this.asIPluginConfigImpl.getDefaultConfig(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13716,7 +13716,7 @@ end;
 function IPluginConfigImpl_getFirebirdConfDispatcher(this: IPluginConfig; status: IStatus): IFirebirdConf; cdecl;
 begin
 	try
-		Result := IPluginConfigImpl(this.FObject).getFirebirdConf(status);
+		Result := this.asIPluginConfigImpl.getFirebirdConf(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13725,7 +13725,7 @@ end;
 procedure IPluginConfigImpl_setReleaseDelayDispatcher(this: IPluginConfig; status: IStatus; microSeconds: QWord); cdecl;
 begin
 	try
-		IPluginConfigImpl(this.FObject).setReleaseDelay(status, microSeconds);
+		this.asIPluginConfigImpl.setReleaseDelay(status, microSeconds);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13765,7 +13765,7 @@ end;
 function IPluginFactoryImpl_createPluginDispatcher(this: IPluginFactory; status: IStatus; factoryParameter: IPluginConfig): IPluginBase; cdecl;
 begin
 	try
-		Result := IPluginFactoryImpl(this.FObject).createPlugin(status, factoryParameter);
+		Result := this.asIPluginFactoryImpl.createPlugin(status, factoryParameter);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13800,7 +13800,7 @@ end;
 procedure IPluginModuleImpl_doCleanDispatcher(this: IPluginModule); cdecl;
 begin
 	try
-		IPluginModuleImpl(this.FObject).doClean();
+		this.asIPluginModuleImpl.doClean();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13809,7 +13809,7 @@ end;
 procedure IPluginModuleImpl_threadDetachDispatcher(this: IPluginModule); cdecl;
 begin
 	try
-		IPluginModuleImpl(this.FObject).threadDetach();
+		this.asIPluginModuleImpl.threadDetach();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13845,7 +13845,7 @@ end;
 procedure IPluginManagerImpl_registerPluginFactoryDispatcher(this: IPluginManager; pluginType: Cardinal; defaultName: PAnsiChar; factory: IPluginFactory); cdecl;
 begin
 	try
-		IPluginManagerImpl(this.FObject).registerPluginFactory(pluginType, defaultName, factory);
+		this.asIPluginManagerImpl.registerPluginFactory(pluginType, defaultName, factory);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13854,7 +13854,7 @@ end;
 procedure IPluginManagerImpl_registerModuleDispatcher(this: IPluginManager; cleanup: IPluginModule); cdecl;
 begin
 	try
-		IPluginManagerImpl(this.FObject).registerModule(cleanup);
+		this.asIPluginManagerImpl.registerModule(cleanup);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13863,7 +13863,7 @@ end;
 procedure IPluginManagerImpl_unregisterModuleDispatcher(this: IPluginManager; cleanup: IPluginModule); cdecl;
 begin
 	try
-		IPluginManagerImpl(this.FObject).unregisterModule(cleanup);
+		this.asIPluginManagerImpl.unregisterModule(cleanup);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13872,7 +13872,7 @@ end;
 function IPluginManagerImpl_getPluginsDispatcher(this: IPluginManager; status: IStatus; pluginType: Cardinal; namesList: PAnsiChar; firebirdConf: IFirebirdConf): IPluginSet; cdecl;
 begin
 	try
-		Result := IPluginManagerImpl(this.FObject).getPlugins(status, pluginType, namesList, firebirdConf);
+		Result := this.asIPluginManagerImpl.getPlugins(status, pluginType, namesList, firebirdConf);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13881,7 +13881,7 @@ end;
 function IPluginManagerImpl_getConfigDispatcher(this: IPluginManager; status: IStatus; filename: PAnsiChar): IConfig; cdecl;
 begin
 	try
-		Result := IPluginManagerImpl(this.FObject).getConfig(status, filename);
+		Result := this.asIPluginManagerImpl.getConfig(status, filename);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13890,7 +13890,7 @@ end;
 procedure IPluginManagerImpl_releasePluginDispatcher(this: IPluginManager; plugin: IPluginBase); cdecl;
 begin
 	try
-		IPluginManagerImpl(this.FObject).releasePlugin(plugin);
+		this.asIPluginManagerImpl.releasePlugin(plugin);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13930,7 +13930,7 @@ end;
 procedure ICryptKeyImpl_setSymmetricDispatcher(this: ICryptKey; status: IStatus; type_: PAnsiChar; keyLength: Cardinal; key: Pointer); cdecl;
 begin
 	try
-		ICryptKeyImpl(this.FObject).setSymmetric(status, type_, keyLength, key);
+		this.asICryptKeyImpl.setSymmetric(status, type_, keyLength, key);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13939,7 +13939,7 @@ end;
 procedure ICryptKeyImpl_setAsymmetricDispatcher(this: ICryptKey; status: IStatus; type_: PAnsiChar; encryptKeyLength: Cardinal; encryptKey: Pointer; decryptKeyLength: Cardinal; decryptKey: Pointer); cdecl;
 begin
 	try
-		ICryptKeyImpl(this.FObject).setAsymmetric(status, type_, encryptKeyLength, encryptKey, decryptKeyLength, decryptKey);
+		this.asICryptKeyImpl.setAsymmetric(status, type_, encryptKeyLength, encryptKey, decryptKeyLength, decryptKey);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -13948,7 +13948,7 @@ end;
 function ICryptKeyImpl_getEncryptKeyDispatcher(this: ICryptKey; length: CardinalPtr): Pointer; cdecl;
 begin
 	try
-		Result := ICryptKeyImpl(this.FObject).getEncryptKey(length);
+		Result := this.asICryptKeyImpl.getEncryptKey(length);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13957,7 +13957,7 @@ end;
 function ICryptKeyImpl_getDecryptKeyDispatcher(this: ICryptKey; length: CardinalPtr): Pointer; cdecl;
 begin
 	try
-		Result := ICryptKeyImpl(this.FObject).getDecryptKey(length);
+		Result := this.asICryptKeyImpl.getDecryptKey(length);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -13995,7 +13995,7 @@ end;
 function IConfigManagerImpl_getDirectoryDispatcher(this: IConfigManager; code: Cardinal): PAnsiChar; cdecl;
 begin
 	try
-		Result := IConfigManagerImpl(this.FObject).getDirectory(code);
+		Result := this.asIConfigManagerImpl.getDirectory(code);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14004,7 +14004,7 @@ end;
 function IConfigManagerImpl_getFirebirdConfDispatcher(this: IConfigManager): IFirebirdConf; cdecl;
 begin
 	try
-		Result := IConfigManagerImpl(this.FObject).getFirebirdConf();
+		Result := this.asIConfigManagerImpl.getFirebirdConf();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14013,7 +14013,7 @@ end;
 function IConfigManagerImpl_getDatabaseConfDispatcher(this: IConfigManager; dbName: PAnsiChar): IFirebirdConf; cdecl;
 begin
 	try
-		Result := IConfigManagerImpl(this.FObject).getDatabaseConf(dbName);
+		Result := this.asIConfigManagerImpl.getDatabaseConf(dbName);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14022,7 +14022,7 @@ end;
 function IConfigManagerImpl_getPluginConfigDispatcher(this: IConfigManager; configuredPlugin: PAnsiChar): IConfig; cdecl;
 begin
 	try
-		Result := IConfigManagerImpl(this.FObject).getPluginConfig(configuredPlugin);
+		Result := this.asIConfigManagerImpl.getPluginConfig(configuredPlugin);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14031,7 +14031,7 @@ end;
 function IConfigManagerImpl_getInstallDirectoryDispatcher(this: IConfigManager): PAnsiChar; cdecl;
 begin
 	try
-		Result := IConfigManagerImpl(this.FObject).getInstallDirectory();
+		Result := this.asIConfigManagerImpl.getInstallDirectory();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14040,7 +14040,7 @@ end;
 function IConfigManagerImpl_getRootDirectoryDispatcher(this: IConfigManager): PAnsiChar; cdecl;
 begin
 	try
-		Result := IConfigManagerImpl(this.FObject).getRootDirectory();
+		Result := this.asIConfigManagerImpl.getRootDirectory();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14049,7 +14049,7 @@ end;
 function IConfigManagerImpl_getDefaultSecurityDbDispatcher(this: IConfigManager): PAnsiChar; cdecl;
 begin
 	try
-		Result := IConfigManagerImpl(this.FObject).getDefaultSecurityDb();
+		Result := this.asIConfigManagerImpl.getDefaultSecurityDb();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14090,7 +14090,7 @@ end;
 procedure IEventCallbackImpl_addRefDispatcher(this: IEventCallback); cdecl;
 begin
 	try
-		IEventCallbackImpl(this.FObject).addRef();
+		this.asIEventCallbackImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14099,7 +14099,7 @@ end;
 function IEventCallbackImpl_releaseDispatcher(this: IEventCallback): Integer; cdecl;
 begin
 	try
-		Result := IEventCallbackImpl(this.FObject).release();
+		Result := this.asIEventCallbackImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14108,7 +14108,7 @@ end;
 procedure IEventCallbackImpl_eventCallbackFunctionDispatcher(this: IEventCallback; length: Cardinal; events: BytePtr); cdecl;
 begin
 	try
-		IEventCallbackImpl(this.FObject).eventCallbackFunction(length, events);
+		this.asIEventCallbackImpl.eventCallbackFunction(length, events);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14145,7 +14145,7 @@ end;
 procedure IBlobImpl_addRefDispatcher(this: IBlob); cdecl;
 begin
 	try
-		IBlobImpl(this.FObject).addRef();
+		this.asIBlobImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14154,7 +14154,7 @@ end;
 function IBlobImpl_releaseDispatcher(this: IBlob): Integer; cdecl;
 begin
 	try
-		Result := IBlobImpl(this.FObject).release();
+		Result := this.asIBlobImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14163,7 +14163,7 @@ end;
 procedure IBlobImpl_getInfoDispatcher(this: IBlob; status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); cdecl;
 begin
 	try
-		IBlobImpl(this.FObject).getInfo(status, itemsLength, items, bufferLength, buffer);
+		this.asIBlobImpl.getInfo(status, itemsLength, items, bufferLength, buffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14172,7 +14172,7 @@ end;
 function IBlobImpl_getSegmentDispatcher(this: IBlob; status: IStatus; bufferLength: Cardinal; buffer: Pointer; segmentLength: CardinalPtr): Integer; cdecl;
 begin
 	try
-		Result := IBlobImpl(this.FObject).getSegment(status, bufferLength, buffer, segmentLength);
+		Result := this.asIBlobImpl.getSegment(status, bufferLength, buffer, segmentLength);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14181,7 +14181,7 @@ end;
 procedure IBlobImpl_putSegmentDispatcher(this: IBlob; status: IStatus; length: Cardinal; buffer: Pointer); cdecl;
 begin
 	try
-		IBlobImpl(this.FObject).putSegment(status, length, buffer);
+		this.asIBlobImpl.putSegment(status, length, buffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14190,7 +14190,7 @@ end;
 procedure IBlobImpl_cancelDispatcher(this: IBlob; status: IStatus); cdecl;
 begin
 	try
-		IBlobImpl(this.FObject).cancel(status);
+		this.asIBlobImpl.cancel(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14199,7 +14199,7 @@ end;
 procedure IBlobImpl_closeDispatcher(this: IBlob; status: IStatus); cdecl;
 begin
 	try
-		IBlobImpl(this.FObject).close(status);
+		this.asIBlobImpl.close(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14208,7 +14208,7 @@ end;
 function IBlobImpl_seekDispatcher(this: IBlob; status: IStatus; mode: Integer; offset: Integer): Integer; cdecl;
 begin
 	try
-		Result := IBlobImpl(this.FObject).seek(status, mode, offset);
+		Result := this.asIBlobImpl.seek(status, mode, offset);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14250,7 +14250,7 @@ end;
 procedure ITransactionImpl_addRefDispatcher(this: ITransaction); cdecl;
 begin
 	try
-		ITransactionImpl(this.FObject).addRef();
+		this.asITransactionImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14259,7 +14259,7 @@ end;
 function ITransactionImpl_releaseDispatcher(this: ITransaction): Integer; cdecl;
 begin
 	try
-		Result := ITransactionImpl(this.FObject).release();
+		Result := this.asITransactionImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14268,7 +14268,7 @@ end;
 procedure ITransactionImpl_getInfoDispatcher(this: ITransaction; status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); cdecl;
 begin
 	try
-		ITransactionImpl(this.FObject).getInfo(status, itemsLength, items, bufferLength, buffer);
+		this.asITransactionImpl.getInfo(status, itemsLength, items, bufferLength, buffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14277,7 +14277,7 @@ end;
 procedure ITransactionImpl_prepareDispatcher(this: ITransaction; status: IStatus; msgLength: Cardinal; message: BytePtr); cdecl;
 begin
 	try
-		ITransactionImpl(this.FObject).prepare(status, msgLength, message);
+		this.asITransactionImpl.prepare(status, msgLength, message);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14286,7 +14286,7 @@ end;
 procedure ITransactionImpl_commitDispatcher(this: ITransaction; status: IStatus); cdecl;
 begin
 	try
-		ITransactionImpl(this.FObject).commit(status);
+		this.asITransactionImpl.commit(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14295,7 +14295,7 @@ end;
 procedure ITransactionImpl_commitRetainingDispatcher(this: ITransaction; status: IStatus); cdecl;
 begin
 	try
-		ITransactionImpl(this.FObject).commitRetaining(status);
+		this.asITransactionImpl.commitRetaining(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14304,7 +14304,7 @@ end;
 procedure ITransactionImpl_rollbackDispatcher(this: ITransaction; status: IStatus); cdecl;
 begin
 	try
-		ITransactionImpl(this.FObject).rollback(status);
+		this.asITransactionImpl.rollback(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14313,7 +14313,7 @@ end;
 procedure ITransactionImpl_rollbackRetainingDispatcher(this: ITransaction; status: IStatus); cdecl;
 begin
 	try
-		ITransactionImpl(this.FObject).rollbackRetaining(status);
+		this.asITransactionImpl.rollbackRetaining(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14322,7 +14322,7 @@ end;
 procedure ITransactionImpl_disconnectDispatcher(this: ITransaction; status: IStatus); cdecl;
 begin
 	try
-		ITransactionImpl(this.FObject).disconnect(status);
+		this.asITransactionImpl.disconnect(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14331,7 +14331,7 @@ end;
 function ITransactionImpl_joinDispatcher(this: ITransaction; status: IStatus; transaction: ITransaction): ITransaction; cdecl;
 begin
 	try
-		Result := ITransactionImpl(this.FObject).join(status, transaction);
+		Result := this.asITransactionImpl.join(status, transaction);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14340,7 +14340,7 @@ end;
 function ITransactionImpl_validateDispatcher(this: ITransaction; status: IStatus; attachment: IAttachment): ITransaction; cdecl;
 begin
 	try
-		Result := ITransactionImpl(this.FObject).validate(status, attachment);
+		Result := this.asITransactionImpl.validate(status, attachment);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14349,7 +14349,7 @@ end;
 function ITransactionImpl_enterDtcDispatcher(this: ITransaction; status: IStatus): ITransaction; cdecl;
 begin
 	try
-		Result := ITransactionImpl(this.FObject).enterDtc(status);
+		Result := this.asITransactionImpl.enterDtc(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14395,7 +14395,7 @@ end;
 procedure IMessageMetadataImpl_addRefDispatcher(this: IMessageMetadata); cdecl;
 begin
 	try
-		IMessageMetadataImpl(this.FObject).addRef();
+		this.asIMessageMetadataImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14404,7 +14404,7 @@ end;
 function IMessageMetadataImpl_releaseDispatcher(this: IMessageMetadata): Integer; cdecl;
 begin
 	try
-		Result := IMessageMetadataImpl(this.FObject).release();
+		Result := this.asIMessageMetadataImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14413,7 +14413,7 @@ end;
 function IMessageMetadataImpl_getCountDispatcher(this: IMessageMetadata; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := IMessageMetadataImpl(this.FObject).getCount(status);
+		Result := this.asIMessageMetadataImpl.getCount(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14422,7 +14422,7 @@ end;
 function IMessageMetadataImpl_getFieldDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): PAnsiChar; cdecl;
 begin
 	try
-		Result := IMessageMetadataImpl(this.FObject).getField(status, index);
+		Result := this.asIMessageMetadataImpl.getField(status, index);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14431,7 +14431,7 @@ end;
 function IMessageMetadataImpl_getRelationDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): PAnsiChar; cdecl;
 begin
 	try
-		Result := IMessageMetadataImpl(this.FObject).getRelation(status, index);
+		Result := this.asIMessageMetadataImpl.getRelation(status, index);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14440,7 +14440,7 @@ end;
 function IMessageMetadataImpl_getOwnerDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): PAnsiChar; cdecl;
 begin
 	try
-		Result := IMessageMetadataImpl(this.FObject).getOwner(status, index);
+		Result := this.asIMessageMetadataImpl.getOwner(status, index);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14449,7 +14449,7 @@ end;
 function IMessageMetadataImpl_getAliasDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): PAnsiChar; cdecl;
 begin
 	try
-		Result := IMessageMetadataImpl(this.FObject).getAlias(status, index);
+		Result := this.asIMessageMetadataImpl.getAlias(status, index);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14458,7 +14458,7 @@ end;
 function IMessageMetadataImpl_getTypeDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): Cardinal; cdecl;
 begin
 	try
-		Result := IMessageMetadataImpl(this.FObject).getType(status, index);
+		Result := this.asIMessageMetadataImpl.getType(status, index);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14467,7 +14467,7 @@ end;
 function IMessageMetadataImpl_isNullableDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := IMessageMetadataImpl(this.FObject).isNullable(status, index);
+		Result := this.asIMessageMetadataImpl.isNullable(status, index);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14476,7 +14476,7 @@ end;
 function IMessageMetadataImpl_getSubTypeDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): Integer; cdecl;
 begin
 	try
-		Result := IMessageMetadataImpl(this.FObject).getSubType(status, index);
+		Result := this.asIMessageMetadataImpl.getSubType(status, index);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14485,7 +14485,7 @@ end;
 function IMessageMetadataImpl_getLengthDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): Cardinal; cdecl;
 begin
 	try
-		Result := IMessageMetadataImpl(this.FObject).getLength(status, index);
+		Result := this.asIMessageMetadataImpl.getLength(status, index);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14494,7 +14494,7 @@ end;
 function IMessageMetadataImpl_getScaleDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): Integer; cdecl;
 begin
 	try
-		Result := IMessageMetadataImpl(this.FObject).getScale(status, index);
+		Result := this.asIMessageMetadataImpl.getScale(status, index);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14503,7 +14503,7 @@ end;
 function IMessageMetadataImpl_getCharSetDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): Cardinal; cdecl;
 begin
 	try
-		Result := IMessageMetadataImpl(this.FObject).getCharSet(status, index);
+		Result := this.asIMessageMetadataImpl.getCharSet(status, index);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14512,7 +14512,7 @@ end;
 function IMessageMetadataImpl_getOffsetDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): Cardinal; cdecl;
 begin
 	try
-		Result := IMessageMetadataImpl(this.FObject).getOffset(status, index);
+		Result := this.asIMessageMetadataImpl.getOffset(status, index);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14521,7 +14521,7 @@ end;
 function IMessageMetadataImpl_getNullOffsetDispatcher(this: IMessageMetadata; status: IStatus; index: Cardinal): Cardinal; cdecl;
 begin
 	try
-		Result := IMessageMetadataImpl(this.FObject).getNullOffset(status, index);
+		Result := this.asIMessageMetadataImpl.getNullOffset(status, index);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14530,7 +14530,7 @@ end;
 function IMessageMetadataImpl_getBuilderDispatcher(this: IMessageMetadata; status: IStatus): IMetadataBuilder; cdecl;
 begin
 	try
-		Result := IMessageMetadataImpl(this.FObject).getBuilder(status);
+		Result := this.asIMessageMetadataImpl.getBuilder(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14539,7 +14539,7 @@ end;
 function IMessageMetadataImpl_getMessageLengthDispatcher(this: IMessageMetadata; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := IMessageMetadataImpl(this.FObject).getMessageLength(status);
+		Result := this.asIMessageMetadataImpl.getMessageLength(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14548,7 +14548,7 @@ end;
 function IMessageMetadataImpl_getAlignmentDispatcher(this: IMessageMetadata; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := IMessageMetadataImpl(this.FObject).getAlignment(status);
+		Result := this.asIMessageMetadataImpl.getAlignment(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14557,7 +14557,7 @@ end;
 function IMessageMetadataImpl_getAlignedLengthDispatcher(this: IMessageMetadata; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := IMessageMetadataImpl(this.FObject).getAlignedLength(status);
+		Result := this.asIMessageMetadataImpl.getAlignedLength(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14610,7 +14610,7 @@ end;
 procedure IMetadataBuilderImpl_addRefDispatcher(this: IMetadataBuilder); cdecl;
 begin
 	try
-		IMetadataBuilderImpl(this.FObject).addRef();
+		this.asIMetadataBuilderImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14619,7 +14619,7 @@ end;
 function IMetadataBuilderImpl_releaseDispatcher(this: IMetadataBuilder): Integer; cdecl;
 begin
 	try
-		Result := IMetadataBuilderImpl(this.FObject).release();
+		Result := this.asIMetadataBuilderImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14628,7 +14628,7 @@ end;
 procedure IMetadataBuilderImpl_setTypeDispatcher(this: IMetadataBuilder; status: IStatus; index: Cardinal; type_: Cardinal); cdecl;
 begin
 	try
-		IMetadataBuilderImpl(this.FObject).setType(status, index, type_);
+		this.asIMetadataBuilderImpl.setType(status, index, type_);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14637,7 +14637,7 @@ end;
 procedure IMetadataBuilderImpl_setSubTypeDispatcher(this: IMetadataBuilder; status: IStatus; index: Cardinal; subType: Integer); cdecl;
 begin
 	try
-		IMetadataBuilderImpl(this.FObject).setSubType(status, index, subType);
+		this.asIMetadataBuilderImpl.setSubType(status, index, subType);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14646,7 +14646,7 @@ end;
 procedure IMetadataBuilderImpl_setLengthDispatcher(this: IMetadataBuilder; status: IStatus; index: Cardinal; length: Cardinal); cdecl;
 begin
 	try
-		IMetadataBuilderImpl(this.FObject).setLength(status, index, length);
+		this.asIMetadataBuilderImpl.setLength(status, index, length);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14655,7 +14655,7 @@ end;
 procedure IMetadataBuilderImpl_setCharSetDispatcher(this: IMetadataBuilder; status: IStatus; index: Cardinal; charSet: Cardinal); cdecl;
 begin
 	try
-		IMetadataBuilderImpl(this.FObject).setCharSet(status, index, charSet);
+		this.asIMetadataBuilderImpl.setCharSet(status, index, charSet);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14664,7 +14664,7 @@ end;
 procedure IMetadataBuilderImpl_setScaleDispatcher(this: IMetadataBuilder; status: IStatus; index: Cardinal; scale: Integer); cdecl;
 begin
 	try
-		IMetadataBuilderImpl(this.FObject).setScale(status, index, scale);
+		this.asIMetadataBuilderImpl.setScale(status, index, scale);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14673,7 +14673,7 @@ end;
 procedure IMetadataBuilderImpl_truncateDispatcher(this: IMetadataBuilder; status: IStatus; count: Cardinal); cdecl;
 begin
 	try
-		IMetadataBuilderImpl(this.FObject).truncate(status, count);
+		this.asIMetadataBuilderImpl.truncate(status, count);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14682,7 +14682,7 @@ end;
 procedure IMetadataBuilderImpl_moveNameToIndexDispatcher(this: IMetadataBuilder; status: IStatus; name: PAnsiChar; index: Cardinal); cdecl;
 begin
 	try
-		IMetadataBuilderImpl(this.FObject).moveNameToIndex(status, name, index);
+		this.asIMetadataBuilderImpl.moveNameToIndex(status, name, index);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14691,7 +14691,7 @@ end;
 procedure IMetadataBuilderImpl_removeDispatcher(this: IMetadataBuilder; status: IStatus; index: Cardinal); cdecl;
 begin
 	try
-		IMetadataBuilderImpl(this.FObject).remove(status, index);
+		this.asIMetadataBuilderImpl.remove(status, index);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14700,7 +14700,7 @@ end;
 function IMetadataBuilderImpl_addFieldDispatcher(this: IMetadataBuilder; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := IMetadataBuilderImpl(this.FObject).addField(status);
+		Result := this.asIMetadataBuilderImpl.addField(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14709,7 +14709,7 @@ end;
 function IMetadataBuilderImpl_getMetadataDispatcher(this: IMetadataBuilder; status: IStatus): IMessageMetadata; cdecl;
 begin
 	try
-		Result := IMetadataBuilderImpl(this.FObject).getMetadata(status);
+		Result := this.asIMetadataBuilderImpl.getMetadata(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14718,7 +14718,7 @@ end;
 procedure IMetadataBuilderImpl_setFieldDispatcher(this: IMetadataBuilder; status: IStatus; index: Cardinal; field: PAnsiChar); cdecl;
 begin
 	try
-		IMetadataBuilderImpl(this.FObject).setField(status, index, field);
+		this.asIMetadataBuilderImpl.setField(status, index, field);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14727,7 +14727,7 @@ end;
 procedure IMetadataBuilderImpl_setRelationDispatcher(this: IMetadataBuilder; status: IStatus; index: Cardinal; relation: PAnsiChar); cdecl;
 begin
 	try
-		IMetadataBuilderImpl(this.FObject).setRelation(status, index, relation);
+		this.asIMetadataBuilderImpl.setRelation(status, index, relation);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14736,7 +14736,7 @@ end;
 procedure IMetadataBuilderImpl_setOwnerDispatcher(this: IMetadataBuilder; status: IStatus; index: Cardinal; owner: PAnsiChar); cdecl;
 begin
 	try
-		IMetadataBuilderImpl(this.FObject).setOwner(status, index, owner);
+		this.asIMetadataBuilderImpl.setOwner(status, index, owner);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14745,7 +14745,7 @@ end;
 procedure IMetadataBuilderImpl_setAliasDispatcher(this: IMetadataBuilder; status: IStatus; index: Cardinal; alias: PAnsiChar); cdecl;
 begin
 	try
-		IMetadataBuilderImpl(this.FObject).setAlias(status, index, alias);
+		this.asIMetadataBuilderImpl.setAlias(status, index, alias);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14795,7 +14795,7 @@ end;
 procedure IResultSetImpl_addRefDispatcher(this: IResultSet); cdecl;
 begin
 	try
-		IResultSetImpl(this.FObject).addRef();
+		this.asIResultSetImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14804,7 +14804,7 @@ end;
 function IResultSetImpl_releaseDispatcher(this: IResultSet): Integer; cdecl;
 begin
 	try
-		Result := IResultSetImpl(this.FObject).release();
+		Result := this.asIResultSetImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14813,7 +14813,7 @@ end;
 function IResultSetImpl_fetchNextDispatcher(this: IResultSet; status: IStatus; message: Pointer): Integer; cdecl;
 begin
 	try
-		Result := IResultSetImpl(this.FObject).fetchNext(status, message);
+		Result := this.asIResultSetImpl.fetchNext(status, message);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14822,7 +14822,7 @@ end;
 function IResultSetImpl_fetchPriorDispatcher(this: IResultSet; status: IStatus; message: Pointer): Integer; cdecl;
 begin
 	try
-		Result := IResultSetImpl(this.FObject).fetchPrior(status, message);
+		Result := this.asIResultSetImpl.fetchPrior(status, message);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14831,7 +14831,7 @@ end;
 function IResultSetImpl_fetchFirstDispatcher(this: IResultSet; status: IStatus; message: Pointer): Integer; cdecl;
 begin
 	try
-		Result := IResultSetImpl(this.FObject).fetchFirst(status, message);
+		Result := this.asIResultSetImpl.fetchFirst(status, message);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14840,7 +14840,7 @@ end;
 function IResultSetImpl_fetchLastDispatcher(this: IResultSet; status: IStatus; message: Pointer): Integer; cdecl;
 begin
 	try
-		Result := IResultSetImpl(this.FObject).fetchLast(status, message);
+		Result := this.asIResultSetImpl.fetchLast(status, message);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14849,7 +14849,7 @@ end;
 function IResultSetImpl_fetchAbsoluteDispatcher(this: IResultSet; status: IStatus; position: Integer; message: Pointer): Integer; cdecl;
 begin
 	try
-		Result := IResultSetImpl(this.FObject).fetchAbsolute(status, position, message);
+		Result := this.asIResultSetImpl.fetchAbsolute(status, position, message);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14858,7 +14858,7 @@ end;
 function IResultSetImpl_fetchRelativeDispatcher(this: IResultSet; status: IStatus; offset: Integer; message: Pointer): Integer; cdecl;
 begin
 	try
-		Result := IResultSetImpl(this.FObject).fetchRelative(status, offset, message);
+		Result := this.asIResultSetImpl.fetchRelative(status, offset, message);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14867,7 +14867,7 @@ end;
 function IResultSetImpl_isEofDispatcher(this: IResultSet; status: IStatus): Boolean; cdecl;
 begin
 	try
-		Result := IResultSetImpl(this.FObject).isEof(status);
+		Result := this.asIResultSetImpl.isEof(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14876,7 +14876,7 @@ end;
 function IResultSetImpl_isBofDispatcher(this: IResultSet; status: IStatus): Boolean; cdecl;
 begin
 	try
-		Result := IResultSetImpl(this.FObject).isBof(status);
+		Result := this.asIResultSetImpl.isBof(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14885,7 +14885,7 @@ end;
 function IResultSetImpl_getMetadataDispatcher(this: IResultSet; status: IStatus): IMessageMetadata; cdecl;
 begin
 	try
-		Result := IResultSetImpl(this.FObject).getMetadata(status);
+		Result := this.asIResultSetImpl.getMetadata(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14894,7 +14894,7 @@ end;
 procedure IResultSetImpl_closeDispatcher(this: IResultSet; status: IStatus); cdecl;
 begin
 	try
-		IResultSetImpl(this.FObject).close(status);
+		this.asIResultSetImpl.close(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14903,7 +14903,7 @@ end;
 procedure IResultSetImpl_setDelayedOutputFormatDispatcher(this: IResultSet; status: IStatus; format: IMessageMetadata); cdecl;
 begin
 	try
-		IResultSetImpl(this.FObject).setDelayedOutputFormat(status, format);
+		this.asIResultSetImpl.setDelayedOutputFormat(status, format);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14950,7 +14950,7 @@ end;
 procedure IStatementImpl_addRefDispatcher(this: IStatement); cdecl;
 begin
 	try
-		IStatementImpl(this.FObject).addRef();
+		this.asIStatementImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14959,7 +14959,7 @@ end;
 function IStatementImpl_releaseDispatcher(this: IStatement): Integer; cdecl;
 begin
 	try
-		Result := IStatementImpl(this.FObject).release();
+		Result := this.asIStatementImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -14968,7 +14968,7 @@ end;
 procedure IStatementImpl_getInfoDispatcher(this: IStatement; status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); cdecl;
 begin
 	try
-		IStatementImpl(this.FObject).getInfo(status, itemsLength, items, bufferLength, buffer);
+		this.asIStatementImpl.getInfo(status, itemsLength, items, bufferLength, buffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14977,7 +14977,7 @@ end;
 function IStatementImpl_getTypeDispatcher(this: IStatement; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := IStatementImpl(this.FObject).getType(status);
+		Result := this.asIStatementImpl.getType(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14986,7 +14986,7 @@ end;
 function IStatementImpl_getPlanDispatcher(this: IStatement; status: IStatus; detailed: Boolean): PAnsiChar; cdecl;
 begin
 	try
-		Result := IStatementImpl(this.FObject).getPlan(status, detailed);
+		Result := this.asIStatementImpl.getPlan(status, detailed);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -14995,7 +14995,7 @@ end;
 function IStatementImpl_getAffectedRecordsDispatcher(this: IStatement; status: IStatus): QWord; cdecl;
 begin
 	try
-		Result := IStatementImpl(this.FObject).getAffectedRecords(status);
+		Result := this.asIStatementImpl.getAffectedRecords(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15004,7 +15004,7 @@ end;
 function IStatementImpl_getInputMetadataDispatcher(this: IStatement; status: IStatus): IMessageMetadata; cdecl;
 begin
 	try
-		Result := IStatementImpl(this.FObject).getInputMetadata(status);
+		Result := this.asIStatementImpl.getInputMetadata(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15013,7 +15013,7 @@ end;
 function IStatementImpl_getOutputMetadataDispatcher(this: IStatement; status: IStatus): IMessageMetadata; cdecl;
 begin
 	try
-		Result := IStatementImpl(this.FObject).getOutputMetadata(status);
+		Result := this.asIStatementImpl.getOutputMetadata(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15022,7 +15022,7 @@ end;
 function IStatementImpl_executeDispatcher(this: IStatement; status: IStatus; transaction: ITransaction; inMetadata: IMessageMetadata; inBuffer: Pointer; outMetadata: IMessageMetadata; outBuffer: Pointer): ITransaction; cdecl;
 begin
 	try
-		Result := IStatementImpl(this.FObject).execute(status, transaction, inMetadata, inBuffer, outMetadata, outBuffer);
+		Result := this.asIStatementImpl.execute(status, transaction, inMetadata, inBuffer, outMetadata, outBuffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15031,7 +15031,7 @@ end;
 function IStatementImpl_openCursorDispatcher(this: IStatement; status: IStatus; transaction: ITransaction; inMetadata: IMessageMetadata; inBuffer: Pointer; outMetadata: IMessageMetadata; flags: Cardinal): IResultSet; cdecl;
 begin
 	try
-		Result := IStatementImpl(this.FObject).openCursor(status, transaction, inMetadata, inBuffer, outMetadata, flags);
+		Result := this.asIStatementImpl.openCursor(status, transaction, inMetadata, inBuffer, outMetadata, flags);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15040,7 +15040,7 @@ end;
 procedure IStatementImpl_setCursorNameDispatcher(this: IStatement; status: IStatus; name: PAnsiChar); cdecl;
 begin
 	try
-		IStatementImpl(this.FObject).setCursorName(status, name);
+		this.asIStatementImpl.setCursorName(status, name);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15049,7 +15049,7 @@ end;
 procedure IStatementImpl_freeDispatcher(this: IStatement; status: IStatus); cdecl;
 begin
 	try
-		IStatementImpl(this.FObject).free(status);
+		this.asIStatementImpl.free(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15058,7 +15058,7 @@ end;
 function IStatementImpl_getFlagsDispatcher(this: IStatement; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := IStatementImpl(this.FObject).getFlags(status);
+		Result := this.asIStatementImpl.getFlags(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15067,7 +15067,7 @@ end;
 function IStatementImpl_getTimeoutDispatcher(this: IStatement; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := IStatementImpl(this.FObject).getTimeout(status);
+		Result := this.asIStatementImpl.getTimeout(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15076,7 +15076,7 @@ end;
 procedure IStatementImpl_setTimeoutDispatcher(this: IStatement; status: IStatus; timeOut: Cardinal); cdecl;
 begin
 	try
-		IStatementImpl(this.FObject).setTimeout(status, timeOut);
+		this.asIStatementImpl.setTimeout(status, timeOut);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15085,7 +15085,7 @@ end;
 function IStatementImpl_createBatchDispatcher(this: IStatement; status: IStatus; inMetadata: IMessageMetadata; parLength: Cardinal; par: BytePtr): IBatch; cdecl;
 begin
 	try
-		Result := IStatementImpl(this.FObject).createBatch(status, inMetadata, parLength, par);
+		Result := this.asIStatementImpl.createBatch(status, inMetadata, parLength, par);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15135,7 +15135,7 @@ end;
 procedure IBatchImpl_addRefDispatcher(this: IBatch); cdecl;
 begin
 	try
-		IBatchImpl(this.FObject).addRef();
+		this.asIBatchImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15144,7 +15144,7 @@ end;
 function IBatchImpl_releaseDispatcher(this: IBatch): Integer; cdecl;
 begin
 	try
-		Result := IBatchImpl(this.FObject).release();
+		Result := this.asIBatchImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15153,7 +15153,7 @@ end;
 procedure IBatchImpl_addDispatcher(this: IBatch; status: IStatus; count: Cardinal; inBuffer: Pointer); cdecl;
 begin
 	try
-		IBatchImpl(this.FObject).add(status, count, inBuffer);
+		this.asIBatchImpl.add(status, count, inBuffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15162,7 +15162,7 @@ end;
 procedure IBatchImpl_addBlobDispatcher(this: IBatch; status: IStatus; length: Cardinal; inBuffer: Pointer; blobId: ISC_QUADPtr; parLength: Cardinal; par: BytePtr); cdecl;
 begin
 	try
-		IBatchImpl(this.FObject).addBlob(status, length, inBuffer, blobId, parLength, par);
+		this.asIBatchImpl.addBlob(status, length, inBuffer, blobId, parLength, par);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15171,7 +15171,7 @@ end;
 procedure IBatchImpl_appendBlobDataDispatcher(this: IBatch; status: IStatus; length: Cardinal; inBuffer: Pointer); cdecl;
 begin
 	try
-		IBatchImpl(this.FObject).appendBlobData(status, length, inBuffer);
+		this.asIBatchImpl.appendBlobData(status, length, inBuffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15180,7 +15180,7 @@ end;
 procedure IBatchImpl_addBlobStreamDispatcher(this: IBatch; status: IStatus; length: Cardinal; inBuffer: Pointer); cdecl;
 begin
 	try
-		IBatchImpl(this.FObject).addBlobStream(status, length, inBuffer);
+		this.asIBatchImpl.addBlobStream(status, length, inBuffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15189,7 +15189,7 @@ end;
 procedure IBatchImpl_registerBlobDispatcher(this: IBatch; status: IStatus; existingBlob: ISC_QUADPtr; blobId: ISC_QUADPtr); cdecl;
 begin
 	try
-		IBatchImpl(this.FObject).registerBlob(status, existingBlob, blobId);
+		this.asIBatchImpl.registerBlob(status, existingBlob, blobId);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15198,7 +15198,7 @@ end;
 function IBatchImpl_executeDispatcher(this: IBatch; status: IStatus; transaction: ITransaction): IBatchCompletionState; cdecl;
 begin
 	try
-		Result := IBatchImpl(this.FObject).execute(status, transaction);
+		Result := this.asIBatchImpl.execute(status, transaction);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15207,7 +15207,7 @@ end;
 procedure IBatchImpl_cancelDispatcher(this: IBatch; status: IStatus); cdecl;
 begin
 	try
-		IBatchImpl(this.FObject).cancel(status);
+		this.asIBatchImpl.cancel(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15216,7 +15216,7 @@ end;
 function IBatchImpl_getBlobAlignmentDispatcher(this: IBatch; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := IBatchImpl(this.FObject).getBlobAlignment(status);
+		Result := this.asIBatchImpl.getBlobAlignment(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15225,7 +15225,7 @@ end;
 function IBatchImpl_getMetadataDispatcher(this: IBatch; status: IStatus): IMessageMetadata; cdecl;
 begin
 	try
-		Result := IBatchImpl(this.FObject).getMetadata(status);
+		Result := this.asIBatchImpl.getMetadata(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15234,7 +15234,7 @@ end;
 procedure IBatchImpl_setDefaultBpbDispatcher(this: IBatch; status: IStatus; parLength: Cardinal; par: BytePtr); cdecl;
 begin
 	try
-		IBatchImpl(this.FObject).setDefaultBpb(status, parLength, par);
+		this.asIBatchImpl.setDefaultBpb(status, parLength, par);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15243,7 +15243,7 @@ end;
 procedure IBatchImpl_closeDispatcher(this: IBatch; status: IStatus); cdecl;
 begin
 	try
-		IBatchImpl(this.FObject).close(status);
+		this.asIBatchImpl.close(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15290,7 +15290,7 @@ end;
 procedure IBatchCompletionStateImpl_disposeDispatcher(this: IBatchCompletionState); cdecl;
 begin
 	try
-		IBatchCompletionStateImpl(this.FObject).dispose();
+		this.asIBatchCompletionStateImpl.dispose();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15299,7 +15299,7 @@ end;
 function IBatchCompletionStateImpl_getSizeDispatcher(this: IBatchCompletionState; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := IBatchCompletionStateImpl(this.FObject).getSize(status);
+		Result := this.asIBatchCompletionStateImpl.getSize(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15308,7 +15308,7 @@ end;
 function IBatchCompletionStateImpl_getStateDispatcher(this: IBatchCompletionState; status: IStatus; pos: Cardinal): Integer; cdecl;
 begin
 	try
-		Result := IBatchCompletionStateImpl(this.FObject).getState(status, pos);
+		Result := this.asIBatchCompletionStateImpl.getState(status, pos);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15317,7 +15317,7 @@ end;
 function IBatchCompletionStateImpl_findErrorDispatcher(this: IBatchCompletionState; status: IStatus; pos: Cardinal): Cardinal; cdecl;
 begin
 	try
-		Result := IBatchCompletionStateImpl(this.FObject).findError(status, pos);
+		Result := this.asIBatchCompletionStateImpl.findError(status, pos);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15326,7 +15326,7 @@ end;
 procedure IBatchCompletionStateImpl_getStatusDispatcher(this: IBatchCompletionState; status: IStatus; to_: IStatus; pos: Cardinal); cdecl;
 begin
 	try
-		IBatchCompletionStateImpl(this.FObject).getStatus(status, to_, pos);
+		this.asIBatchCompletionStateImpl.getStatus(status, to_, pos);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15365,7 +15365,7 @@ end;
 procedure IReplicatorImpl_addRefDispatcher(this: IReplicator); cdecl;
 begin
 	try
-		IReplicatorImpl(this.FObject).addRef();
+		this.asIReplicatorImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15374,7 +15374,7 @@ end;
 function IReplicatorImpl_releaseDispatcher(this: IReplicator): Integer; cdecl;
 begin
 	try
-		Result := IReplicatorImpl(this.FObject).release();
+		Result := this.asIReplicatorImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15383,7 +15383,7 @@ end;
 procedure IReplicatorImpl_processDispatcher(this: IReplicator; status: IStatus; length: Cardinal; data: BytePtr); cdecl;
 begin
 	try
-		IReplicatorImpl(this.FObject).process(status, length, data);
+		this.asIReplicatorImpl.process(status, length, data);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15392,7 +15392,7 @@ end;
 procedure IReplicatorImpl_closeDispatcher(this: IReplicator; status: IStatus); cdecl;
 begin
 	try
-		IReplicatorImpl(this.FObject).close(status);
+		this.asIReplicatorImpl.close(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15430,7 +15430,7 @@ end;
 procedure IRequestImpl_addRefDispatcher(this: IRequest); cdecl;
 begin
 	try
-		IRequestImpl(this.FObject).addRef();
+		this.asIRequestImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15439,7 +15439,7 @@ end;
 function IRequestImpl_releaseDispatcher(this: IRequest): Integer; cdecl;
 begin
 	try
-		Result := IRequestImpl(this.FObject).release();
+		Result := this.asIRequestImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15448,7 +15448,7 @@ end;
 procedure IRequestImpl_receiveDispatcher(this: IRequest; status: IStatus; level: Integer; msgType: Cardinal; length: Cardinal; message: Pointer); cdecl;
 begin
 	try
-		IRequestImpl(this.FObject).receive(status, level, msgType, length, message);
+		this.asIRequestImpl.receive(status, level, msgType, length, message);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15457,7 +15457,7 @@ end;
 procedure IRequestImpl_sendDispatcher(this: IRequest; status: IStatus; level: Integer; msgType: Cardinal; length: Cardinal; message: Pointer); cdecl;
 begin
 	try
-		IRequestImpl(this.FObject).send(status, level, msgType, length, message);
+		this.asIRequestImpl.send(status, level, msgType, length, message);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15466,7 +15466,7 @@ end;
 procedure IRequestImpl_getInfoDispatcher(this: IRequest; status: IStatus; level: Integer; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); cdecl;
 begin
 	try
-		IRequestImpl(this.FObject).getInfo(status, level, itemsLength, items, bufferLength, buffer);
+		this.asIRequestImpl.getInfo(status, level, itemsLength, items, bufferLength, buffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15475,7 +15475,7 @@ end;
 procedure IRequestImpl_startDispatcher(this: IRequest; status: IStatus; tra: ITransaction; level: Integer); cdecl;
 begin
 	try
-		IRequestImpl(this.FObject).start(status, tra, level);
+		this.asIRequestImpl.start(status, tra, level);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15484,7 +15484,7 @@ end;
 procedure IRequestImpl_startAndSendDispatcher(this: IRequest; status: IStatus; tra: ITransaction; level: Integer; msgType: Cardinal; length: Cardinal; message: Pointer); cdecl;
 begin
 	try
-		IRequestImpl(this.FObject).startAndSend(status, tra, level, msgType, length, message);
+		this.asIRequestImpl.startAndSend(status, tra, level, msgType, length, message);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15493,7 +15493,7 @@ end;
 procedure IRequestImpl_unwindDispatcher(this: IRequest; status: IStatus; level: Integer); cdecl;
 begin
 	try
-		IRequestImpl(this.FObject).unwind(status, level);
+		this.asIRequestImpl.unwind(status, level);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15502,7 +15502,7 @@ end;
 procedure IRequestImpl_freeDispatcher(this: IRequest; status: IStatus); cdecl;
 begin
 	try
-		IRequestImpl(this.FObject).free(status);
+		this.asIRequestImpl.free(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15545,7 +15545,7 @@ end;
 procedure IEventsImpl_addRefDispatcher(this: IEvents); cdecl;
 begin
 	try
-		IEventsImpl(this.FObject).addRef();
+		this.asIEventsImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15554,7 +15554,7 @@ end;
 function IEventsImpl_releaseDispatcher(this: IEvents): Integer; cdecl;
 begin
 	try
-		Result := IEventsImpl(this.FObject).release();
+		Result := this.asIEventsImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15563,7 +15563,7 @@ end;
 procedure IEventsImpl_cancelDispatcher(this: IEvents; status: IStatus); cdecl;
 begin
 	try
-		IEventsImpl(this.FObject).cancel(status);
+		this.asIEventsImpl.cancel(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15600,7 +15600,7 @@ end;
 procedure IAttachmentImpl_addRefDispatcher(this: IAttachment); cdecl;
 begin
 	try
-		IAttachmentImpl(this.FObject).addRef();
+		this.asIAttachmentImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15609,7 +15609,7 @@ end;
 function IAttachmentImpl_releaseDispatcher(this: IAttachment): Integer; cdecl;
 begin
 	try
-		Result := IAttachmentImpl(this.FObject).release();
+		Result := this.asIAttachmentImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15618,7 +15618,7 @@ end;
 procedure IAttachmentImpl_getInfoDispatcher(this: IAttachment; status: IStatus; itemsLength: Cardinal; items: BytePtr; bufferLength: Cardinal; buffer: BytePtr); cdecl;
 begin
 	try
-		IAttachmentImpl(this.FObject).getInfo(status, itemsLength, items, bufferLength, buffer);
+		this.asIAttachmentImpl.getInfo(status, itemsLength, items, bufferLength, buffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15627,7 +15627,7 @@ end;
 function IAttachmentImpl_startTransactionDispatcher(this: IAttachment; status: IStatus; tpbLength: Cardinal; tpb: BytePtr): ITransaction; cdecl;
 begin
 	try
-		Result := IAttachmentImpl(this.FObject).startTransaction(status, tpbLength, tpb);
+		Result := this.asIAttachmentImpl.startTransaction(status, tpbLength, tpb);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15636,7 +15636,7 @@ end;
 function IAttachmentImpl_reconnectTransactionDispatcher(this: IAttachment; status: IStatus; length: Cardinal; id: BytePtr): ITransaction; cdecl;
 begin
 	try
-		Result := IAttachmentImpl(this.FObject).reconnectTransaction(status, length, id);
+		Result := this.asIAttachmentImpl.reconnectTransaction(status, length, id);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15645,7 +15645,7 @@ end;
 function IAttachmentImpl_compileRequestDispatcher(this: IAttachment; status: IStatus; blrLength: Cardinal; blr: BytePtr): IRequest; cdecl;
 begin
 	try
-		Result := IAttachmentImpl(this.FObject).compileRequest(status, blrLength, blr);
+		Result := this.asIAttachmentImpl.compileRequest(status, blrLength, blr);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15654,7 +15654,7 @@ end;
 procedure IAttachmentImpl_transactRequestDispatcher(this: IAttachment; status: IStatus; transaction: ITransaction; blrLength: Cardinal; blr: BytePtr; inMsgLength: Cardinal; inMsg: BytePtr; outMsgLength: Cardinal; outMsg: BytePtr); cdecl;
 begin
 	try
-		IAttachmentImpl(this.FObject).transactRequest(status, transaction, blrLength, blr, inMsgLength, inMsg, outMsgLength, outMsg);
+		this.asIAttachmentImpl.transactRequest(status, transaction, blrLength, blr, inMsgLength, inMsg, outMsgLength, outMsg);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15663,7 +15663,7 @@ end;
 function IAttachmentImpl_createBlobDispatcher(this: IAttachment; status: IStatus; transaction: ITransaction; id: ISC_QUADPtr; bpbLength: Cardinal; bpb: BytePtr): IBlob; cdecl;
 begin
 	try
-		Result := IAttachmentImpl(this.FObject).createBlob(status, transaction, id, bpbLength, bpb);
+		Result := this.asIAttachmentImpl.createBlob(status, transaction, id, bpbLength, bpb);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15672,7 +15672,7 @@ end;
 function IAttachmentImpl_openBlobDispatcher(this: IAttachment; status: IStatus; transaction: ITransaction; id: ISC_QUADPtr; bpbLength: Cardinal; bpb: BytePtr): IBlob; cdecl;
 begin
 	try
-		Result := IAttachmentImpl(this.FObject).openBlob(status, transaction, id, bpbLength, bpb);
+		Result := this.asIAttachmentImpl.openBlob(status, transaction, id, bpbLength, bpb);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15681,7 +15681,7 @@ end;
 function IAttachmentImpl_getSliceDispatcher(this: IAttachment; status: IStatus; transaction: ITransaction; id: ISC_QUADPtr; sdlLength: Cardinal; sdl: BytePtr; paramLength: Cardinal; param: BytePtr; sliceLength: Integer; slice: BytePtr): Integer; cdecl;
 begin
 	try
-		Result := IAttachmentImpl(this.FObject).getSlice(status, transaction, id, sdlLength, sdl, paramLength, param, sliceLength, slice);
+		Result := this.asIAttachmentImpl.getSlice(status, transaction, id, sdlLength, sdl, paramLength, param, sliceLength, slice);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15690,7 +15690,7 @@ end;
 procedure IAttachmentImpl_putSliceDispatcher(this: IAttachment; status: IStatus; transaction: ITransaction; id: ISC_QUADPtr; sdlLength: Cardinal; sdl: BytePtr; paramLength: Cardinal; param: BytePtr; sliceLength: Integer; slice: BytePtr); cdecl;
 begin
 	try
-		IAttachmentImpl(this.FObject).putSlice(status, transaction, id, sdlLength, sdl, paramLength, param, sliceLength, slice);
+		this.asIAttachmentImpl.putSlice(status, transaction, id, sdlLength, sdl, paramLength, param, sliceLength, slice);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15699,7 +15699,7 @@ end;
 procedure IAttachmentImpl_executeDynDispatcher(this: IAttachment; status: IStatus; transaction: ITransaction; length: Cardinal; dyn: BytePtr); cdecl;
 begin
 	try
-		IAttachmentImpl(this.FObject).executeDyn(status, transaction, length, dyn);
+		this.asIAttachmentImpl.executeDyn(status, transaction, length, dyn);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15708,7 +15708,7 @@ end;
 function IAttachmentImpl_prepareDispatcher(this: IAttachment; status: IStatus; tra: ITransaction; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; flags: Cardinal): IStatement; cdecl;
 begin
 	try
-		Result := IAttachmentImpl(this.FObject).prepare(status, tra, stmtLength, sqlStmt, dialect, flags);
+		Result := this.asIAttachmentImpl.prepare(status, tra, stmtLength, sqlStmt, dialect, flags);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15717,7 +15717,7 @@ end;
 function IAttachmentImpl_executeDispatcher(this: IAttachment; status: IStatus; transaction: ITransaction; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: IMessageMetadata; inBuffer: Pointer; outMetadata: IMessageMetadata; outBuffer: Pointer): ITransaction; cdecl;
 begin
 	try
-		Result := IAttachmentImpl(this.FObject).execute(status, transaction, stmtLength, sqlStmt, dialect, inMetadata, inBuffer, outMetadata, outBuffer);
+		Result := this.asIAttachmentImpl.execute(status, transaction, stmtLength, sqlStmt, dialect, inMetadata, inBuffer, outMetadata, outBuffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15726,7 +15726,7 @@ end;
 function IAttachmentImpl_openCursorDispatcher(this: IAttachment; status: IStatus; transaction: ITransaction; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: IMessageMetadata; inBuffer: Pointer; outMetadata: IMessageMetadata; cursorName: PAnsiChar; cursorFlags: Cardinal): IResultSet; cdecl;
 begin
 	try
-		Result := IAttachmentImpl(this.FObject).openCursor(status, transaction, stmtLength, sqlStmt, dialect, inMetadata, inBuffer, outMetadata, cursorName, cursorFlags);
+		Result := this.asIAttachmentImpl.openCursor(status, transaction, stmtLength, sqlStmt, dialect, inMetadata, inBuffer, outMetadata, cursorName, cursorFlags);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15735,7 +15735,7 @@ end;
 function IAttachmentImpl_queEventsDispatcher(this: IAttachment; status: IStatus; callback: IEventCallback; length: Cardinal; events: BytePtr): IEvents; cdecl;
 begin
 	try
-		Result := IAttachmentImpl(this.FObject).queEvents(status, callback, length, events);
+		Result := this.asIAttachmentImpl.queEvents(status, callback, length, events);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15744,7 +15744,7 @@ end;
 procedure IAttachmentImpl_cancelOperationDispatcher(this: IAttachment; status: IStatus; option: Integer); cdecl;
 begin
 	try
-		IAttachmentImpl(this.FObject).cancelOperation(status, option);
+		this.asIAttachmentImpl.cancelOperation(status, option);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15753,7 +15753,7 @@ end;
 procedure IAttachmentImpl_pingDispatcher(this: IAttachment; status: IStatus); cdecl;
 begin
 	try
-		IAttachmentImpl(this.FObject).ping(status);
+		this.asIAttachmentImpl.ping(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15762,7 +15762,7 @@ end;
 procedure IAttachmentImpl_detachDispatcher(this: IAttachment; status: IStatus); cdecl;
 begin
 	try
-		IAttachmentImpl(this.FObject).detach(status);
+		this.asIAttachmentImpl.detach(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15771,7 +15771,7 @@ end;
 procedure IAttachmentImpl_dropDatabaseDispatcher(this: IAttachment; status: IStatus); cdecl;
 begin
 	try
-		IAttachmentImpl(this.FObject).dropDatabase(status);
+		this.asIAttachmentImpl.dropDatabase(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15780,7 +15780,7 @@ end;
 function IAttachmentImpl_getIdleTimeoutDispatcher(this: IAttachment; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := IAttachmentImpl(this.FObject).getIdleTimeout(status);
+		Result := this.asIAttachmentImpl.getIdleTimeout(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15789,7 +15789,7 @@ end;
 procedure IAttachmentImpl_setIdleTimeoutDispatcher(this: IAttachment; status: IStatus; timeOut: Cardinal); cdecl;
 begin
 	try
-		IAttachmentImpl(this.FObject).setIdleTimeout(status, timeOut);
+		this.asIAttachmentImpl.setIdleTimeout(status, timeOut);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15798,7 +15798,7 @@ end;
 function IAttachmentImpl_getStatementTimeoutDispatcher(this: IAttachment; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := IAttachmentImpl(this.FObject).getStatementTimeout(status);
+		Result := this.asIAttachmentImpl.getStatementTimeout(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15807,7 +15807,7 @@ end;
 procedure IAttachmentImpl_setStatementTimeoutDispatcher(this: IAttachment; status: IStatus; timeOut: Cardinal); cdecl;
 begin
 	try
-		IAttachmentImpl(this.FObject).setStatementTimeout(status, timeOut);
+		this.asIAttachmentImpl.setStatementTimeout(status, timeOut);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15816,7 +15816,7 @@ end;
 function IAttachmentImpl_createBatchDispatcher(this: IAttachment; status: IStatus; transaction: ITransaction; stmtLength: Cardinal; sqlStmt: PAnsiChar; dialect: Cardinal; inMetadata: IMessageMetadata; parLength: Cardinal; par: BytePtr): IBatch; cdecl;
 begin
 	try
-		Result := IAttachmentImpl(this.FObject).createBatch(status, transaction, stmtLength, sqlStmt, dialect, inMetadata, parLength, par);
+		Result := this.asIAttachmentImpl.createBatch(status, transaction, stmtLength, sqlStmt, dialect, inMetadata, parLength, par);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15825,7 +15825,7 @@ end;
 function IAttachmentImpl_createReplicatorDispatcher(this: IAttachment; status: IStatus): IReplicator; cdecl;
 begin
 	try
-		Result := IAttachmentImpl(this.FObject).createReplicator(status);
+		Result := this.asIAttachmentImpl.createReplicator(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15885,7 +15885,7 @@ end;
 procedure IServiceImpl_addRefDispatcher(this: IService); cdecl;
 begin
 	try
-		IServiceImpl(this.FObject).addRef();
+		this.asIServiceImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15894,7 +15894,7 @@ end;
 function IServiceImpl_releaseDispatcher(this: IService): Integer; cdecl;
 begin
 	try
-		Result := IServiceImpl(this.FObject).release();
+		Result := this.asIServiceImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15903,7 +15903,7 @@ end;
 procedure IServiceImpl_detachDispatcher(this: IService; status: IStatus); cdecl;
 begin
 	try
-		IServiceImpl(this.FObject).detach(status);
+		this.asIServiceImpl.detach(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15912,7 +15912,7 @@ end;
 procedure IServiceImpl_queryDispatcher(this: IService; status: IStatus; sendLength: Cardinal; sendItems: BytePtr; receiveLength: Cardinal; receiveItems: BytePtr; bufferLength: Cardinal; buffer: BytePtr); cdecl;
 begin
 	try
-		IServiceImpl(this.FObject).query(status, sendLength, sendItems, receiveLength, receiveItems, bufferLength, buffer);
+		this.asIServiceImpl.query(status, sendLength, sendItems, receiveLength, receiveItems, bufferLength, buffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15921,7 +15921,7 @@ end;
 procedure IServiceImpl_startDispatcher(this: IService; status: IStatus; spbLength: Cardinal; spb: BytePtr); cdecl;
 begin
 	try
-		IServiceImpl(this.FObject).start(status, spbLength, spb);
+		this.asIServiceImpl.start(status, spbLength, spb);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -15960,7 +15960,7 @@ end;
 procedure IProviderImpl_addRefDispatcher(this: IProvider); cdecl;
 begin
 	try
-		IProviderImpl(this.FObject).addRef();
+		this.asIProviderImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15969,7 +15969,7 @@ end;
 function IProviderImpl_releaseDispatcher(this: IProvider): Integer; cdecl;
 begin
 	try
-		Result := IProviderImpl(this.FObject).release();
+		Result := this.asIProviderImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15978,7 +15978,7 @@ end;
 procedure IProviderImpl_setOwnerDispatcher(this: IProvider; r: IReferenceCounted); cdecl;
 begin
 	try
-		IProviderImpl(this.FObject).setOwner(r);
+		this.asIProviderImpl.setOwner(r);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15987,7 +15987,7 @@ end;
 function IProviderImpl_getOwnerDispatcher(this: IProvider): IReferenceCounted; cdecl;
 begin
 	try
-		Result := IProviderImpl(this.FObject).getOwner();
+		Result := this.asIProviderImpl.getOwner();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -15996,7 +15996,7 @@ end;
 function IProviderImpl_attachDatabaseDispatcher(this: IProvider; status: IStatus; fileName: PAnsiChar; dpbLength: Cardinal; dpb: BytePtr): IAttachment; cdecl;
 begin
 	try
-		Result := IProviderImpl(this.FObject).attachDatabase(status, fileName, dpbLength, dpb);
+		Result := this.asIProviderImpl.attachDatabase(status, fileName, dpbLength, dpb);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16005,7 +16005,7 @@ end;
 function IProviderImpl_createDatabaseDispatcher(this: IProvider; status: IStatus; fileName: PAnsiChar; dpbLength: Cardinal; dpb: BytePtr): IAttachment; cdecl;
 begin
 	try
-		Result := IProviderImpl(this.FObject).createDatabase(status, fileName, dpbLength, dpb);
+		Result := this.asIProviderImpl.createDatabase(status, fileName, dpbLength, dpb);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16014,7 +16014,7 @@ end;
 function IProviderImpl_attachServiceManagerDispatcher(this: IProvider; status: IStatus; service: PAnsiChar; spbLength: Cardinal; spb: BytePtr): IService; cdecl;
 begin
 	try
-		Result := IProviderImpl(this.FObject).attachServiceManager(status, service, spbLength, spb);
+		Result := this.asIProviderImpl.attachServiceManager(status, service, spbLength, spb);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16023,7 +16023,7 @@ end;
 procedure IProviderImpl_shutdownDispatcher(this: IProvider; status: IStatus; timeout: Cardinal; reason: Integer); cdecl;
 begin
 	try
-		IProviderImpl(this.FObject).shutdown(status, timeout, reason);
+		this.asIProviderImpl.shutdown(status, timeout, reason);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16032,7 +16032,7 @@ end;
 procedure IProviderImpl_setDbCryptCallbackDispatcher(this: IProvider; status: IStatus; cryptCallback: ICryptKeyCallback); cdecl;
 begin
 	try
-		IProviderImpl(this.FObject).setDbCryptCallback(status, cryptCallback);
+		this.asIProviderImpl.setDbCryptCallback(status, cryptCallback);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16075,7 +16075,7 @@ end;
 procedure IDtcStartImpl_disposeDispatcher(this: IDtcStart); cdecl;
 begin
 	try
-		IDtcStartImpl(this.FObject).dispose();
+		this.asIDtcStartImpl.dispose();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16084,7 +16084,7 @@ end;
 procedure IDtcStartImpl_addAttachmentDispatcher(this: IDtcStart; status: IStatus; att: IAttachment); cdecl;
 begin
 	try
-		IDtcStartImpl(this.FObject).addAttachment(status, att);
+		this.asIDtcStartImpl.addAttachment(status, att);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16093,7 +16093,7 @@ end;
 procedure IDtcStartImpl_addWithTpbDispatcher(this: IDtcStart; status: IStatus; att: IAttachment; length: Cardinal; tpb: BytePtr); cdecl;
 begin
 	try
-		IDtcStartImpl(this.FObject).addWithTpb(status, att, length, tpb);
+		this.asIDtcStartImpl.addWithTpb(status, att, length, tpb);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16102,7 +16102,7 @@ end;
 function IDtcStartImpl_startDispatcher(this: IDtcStart; status: IStatus): ITransaction; cdecl;
 begin
 	try
-		Result := IDtcStartImpl(this.FObject).start(status);
+		Result := this.asIDtcStartImpl.start(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16140,7 +16140,7 @@ end;
 function IDtcImpl_joinDispatcher(this: IDtc; status: IStatus; one: ITransaction; two: ITransaction): ITransaction; cdecl;
 begin
 	try
-		Result := IDtcImpl(this.FObject).join(status, one, two);
+		Result := this.asIDtcImpl.join(status, one, two);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16149,7 +16149,7 @@ end;
 function IDtcImpl_startBuilderDispatcher(this: IDtc; status: IStatus): IDtcStart; cdecl;
 begin
 	try
-		Result := IDtcImpl(this.FObject).startBuilder(status);
+		Result := this.asIDtcImpl.startBuilder(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16185,7 +16185,7 @@ end;
 procedure IAuthImpl_addRefDispatcher(this: IAuth); cdecl;
 begin
 	try
-		IAuthImpl(this.FObject).addRef();
+		this.asIAuthImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16194,7 +16194,7 @@ end;
 function IAuthImpl_releaseDispatcher(this: IAuth): Integer; cdecl;
 begin
 	try
-		Result := IAuthImpl(this.FObject).release();
+		Result := this.asIAuthImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16203,7 +16203,7 @@ end;
 procedure IAuthImpl_setOwnerDispatcher(this: IAuth; r: IReferenceCounted); cdecl;
 begin
 	try
-		IAuthImpl(this.FObject).setOwner(r);
+		this.asIAuthImpl.setOwner(r);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16212,7 +16212,7 @@ end;
 function IAuthImpl_getOwnerDispatcher(this: IAuth): IReferenceCounted; cdecl;
 begin
 	try
-		Result := IAuthImpl(this.FObject).getOwner();
+		Result := this.asIAuthImpl.getOwner();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16252,7 +16252,7 @@ end;
 procedure IWriterImpl_resetDispatcher(this: IWriter); cdecl;
 begin
 	try
-		IWriterImpl(this.FObject).reset();
+		this.asIWriterImpl.reset();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16261,7 +16261,7 @@ end;
 procedure IWriterImpl_addDispatcher(this: IWriter; status: IStatus; name: PAnsiChar); cdecl;
 begin
 	try
-		IWriterImpl(this.FObject).add(status, name);
+		this.asIWriterImpl.add(status, name);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16270,7 +16270,7 @@ end;
 procedure IWriterImpl_setTypeDispatcher(this: IWriter; status: IStatus; value: PAnsiChar); cdecl;
 begin
 	try
-		IWriterImpl(this.FObject).setType(status, value);
+		this.asIWriterImpl.setType(status, value);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16279,7 +16279,7 @@ end;
 procedure IWriterImpl_setDbDispatcher(this: IWriter; status: IStatus; value: PAnsiChar); cdecl;
 begin
 	try
-		IWriterImpl(this.FObject).setDb(status, value);
+		this.asIWriterImpl.setDb(status, value);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16317,7 +16317,7 @@ end;
 function IServerBlockImpl_getLoginDispatcher(this: IServerBlock): PAnsiChar; cdecl;
 begin
 	try
-		Result := IServerBlockImpl(this.FObject).getLogin();
+		Result := this.asIServerBlockImpl.getLogin();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16326,7 +16326,7 @@ end;
 function IServerBlockImpl_getDataDispatcher(this: IServerBlock; length: CardinalPtr): BytePtr; cdecl;
 begin
 	try
-		Result := IServerBlockImpl(this.FObject).getData(length);
+		Result := this.asIServerBlockImpl.getData(length);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16335,7 +16335,7 @@ end;
 procedure IServerBlockImpl_putDataDispatcher(this: IServerBlock; status: IStatus; length: Cardinal; data: Pointer); cdecl;
 begin
 	try
-		IServerBlockImpl(this.FObject).putData(status, length, data);
+		this.asIServerBlockImpl.putData(status, length, data);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16344,7 +16344,7 @@ end;
 function IServerBlockImpl_newKeyDispatcher(this: IServerBlock; status: IStatus): ICryptKey; cdecl;
 begin
 	try
-		Result := IServerBlockImpl(this.FObject).newKey(status);
+		Result := this.asIServerBlockImpl.newKey(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16382,7 +16382,7 @@ end;
 procedure IClientBlockImpl_addRefDispatcher(this: IClientBlock); cdecl;
 begin
 	try
-		IClientBlockImpl(this.FObject).addRef();
+		this.asIClientBlockImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16391,7 +16391,7 @@ end;
 function IClientBlockImpl_releaseDispatcher(this: IClientBlock): Integer; cdecl;
 begin
 	try
-		Result := IClientBlockImpl(this.FObject).release();
+		Result := this.asIClientBlockImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16400,7 +16400,7 @@ end;
 function IClientBlockImpl_getLoginDispatcher(this: IClientBlock): PAnsiChar; cdecl;
 begin
 	try
-		Result := IClientBlockImpl(this.FObject).getLogin();
+		Result := this.asIClientBlockImpl.getLogin();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16409,7 +16409,7 @@ end;
 function IClientBlockImpl_getPasswordDispatcher(this: IClientBlock): PAnsiChar; cdecl;
 begin
 	try
-		Result := IClientBlockImpl(this.FObject).getPassword();
+		Result := this.asIClientBlockImpl.getPassword();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16418,7 +16418,7 @@ end;
 function IClientBlockImpl_getDataDispatcher(this: IClientBlock; length: CardinalPtr): BytePtr; cdecl;
 begin
 	try
-		Result := IClientBlockImpl(this.FObject).getData(length);
+		Result := this.asIClientBlockImpl.getData(length);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16427,7 +16427,7 @@ end;
 procedure IClientBlockImpl_putDataDispatcher(this: IClientBlock; status: IStatus; length: Cardinal; data: Pointer); cdecl;
 begin
 	try
-		IClientBlockImpl(this.FObject).putData(status, length, data);
+		this.asIClientBlockImpl.putData(status, length, data);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16436,7 +16436,7 @@ end;
 function IClientBlockImpl_newKeyDispatcher(this: IClientBlock; status: IStatus): ICryptKey; cdecl;
 begin
 	try
-		Result := IClientBlockImpl(this.FObject).newKey(status);
+		Result := this.asIClientBlockImpl.newKey(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16445,7 +16445,7 @@ end;
 function IClientBlockImpl_getAuthBlockDispatcher(this: IClientBlock; status: IStatus): IAuthBlock; cdecl;
 begin
 	try
-		Result := IClientBlockImpl(this.FObject).getAuthBlock(status);
+		Result := this.asIClientBlockImpl.getAuthBlock(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16487,7 +16487,7 @@ end;
 procedure IServerImpl_addRefDispatcher(this: IServer); cdecl;
 begin
 	try
-		IServerImpl(this.FObject).addRef();
+		this.asIServerImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16496,7 +16496,7 @@ end;
 function IServerImpl_releaseDispatcher(this: IServer): Integer; cdecl;
 begin
 	try
-		Result := IServerImpl(this.FObject).release();
+		Result := this.asIServerImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16505,7 +16505,7 @@ end;
 procedure IServerImpl_setOwnerDispatcher(this: IServer; r: IReferenceCounted); cdecl;
 begin
 	try
-		IServerImpl(this.FObject).setOwner(r);
+		this.asIServerImpl.setOwner(r);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16514,7 +16514,7 @@ end;
 function IServerImpl_getOwnerDispatcher(this: IServer): IReferenceCounted; cdecl;
 begin
 	try
-		Result := IServerImpl(this.FObject).getOwner();
+		Result := this.asIServerImpl.getOwner();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16523,7 +16523,7 @@ end;
 function IServerImpl_authenticateDispatcher(this: IServer; status: IStatus; sBlock: IServerBlock; writerInterface: IWriter): Integer; cdecl;
 begin
 	try
-		Result := IServerImpl(this.FObject).authenticate(status, sBlock, writerInterface);
+		Result := this.asIServerImpl.authenticate(status, sBlock, writerInterface);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16532,7 +16532,7 @@ end;
 procedure IServerImpl_setDbCryptCallbackDispatcher(this: IServer; status: IStatus; cryptCallback: ICryptKeyCallback); cdecl;
 begin
 	try
-		IServerImpl(this.FObject).setDbCryptCallback(status, cryptCallback);
+		this.asIServerImpl.setDbCryptCallback(status, cryptCallback);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16572,7 +16572,7 @@ end;
 procedure IClientImpl_addRefDispatcher(this: IClient); cdecl;
 begin
 	try
-		IClientImpl(this.FObject).addRef();
+		this.asIClientImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16581,7 +16581,7 @@ end;
 function IClientImpl_releaseDispatcher(this: IClient): Integer; cdecl;
 begin
 	try
-		Result := IClientImpl(this.FObject).release();
+		Result := this.asIClientImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16590,7 +16590,7 @@ end;
 procedure IClientImpl_setOwnerDispatcher(this: IClient; r: IReferenceCounted); cdecl;
 begin
 	try
-		IClientImpl(this.FObject).setOwner(r);
+		this.asIClientImpl.setOwner(r);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16599,7 +16599,7 @@ end;
 function IClientImpl_getOwnerDispatcher(this: IClient): IReferenceCounted; cdecl;
 begin
 	try
-		Result := IClientImpl(this.FObject).getOwner();
+		Result := this.asIClientImpl.getOwner();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16608,7 +16608,7 @@ end;
 function IClientImpl_authenticateDispatcher(this: IClient; status: IStatus; cBlock: IClientBlock): Integer; cdecl;
 begin
 	try
-		Result := IClientImpl(this.FObject).authenticate(status, cBlock);
+		Result := this.asIClientImpl.authenticate(status, cBlock);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16647,7 +16647,7 @@ end;
 function IUserFieldImpl_enteredDispatcher(this: IUserField): Integer; cdecl;
 begin
 	try
-		Result := IUserFieldImpl(this.FObject).entered();
+		Result := this.asIUserFieldImpl.entered();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16656,7 +16656,7 @@ end;
 function IUserFieldImpl_specifiedDispatcher(this: IUserField): Integer; cdecl;
 begin
 	try
-		Result := IUserFieldImpl(this.FObject).specified();
+		Result := this.asIUserFieldImpl.specified();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16665,7 +16665,7 @@ end;
 procedure IUserFieldImpl_setEnteredDispatcher(this: IUserField; status: IStatus; newValue: Integer); cdecl;
 begin
 	try
-		IUserFieldImpl(this.FObject).setEntered(status, newValue);
+		this.asIUserFieldImpl.setEntered(status, newValue);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16704,7 +16704,7 @@ end;
 function ICharUserFieldImpl_enteredDispatcher(this: ICharUserField): Integer; cdecl;
 begin
 	try
-		Result := ICharUserFieldImpl(this.FObject).entered();
+		Result := this.asICharUserFieldImpl.entered();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16713,7 +16713,7 @@ end;
 function ICharUserFieldImpl_specifiedDispatcher(this: ICharUserField): Integer; cdecl;
 begin
 	try
-		Result := ICharUserFieldImpl(this.FObject).specified();
+		Result := this.asICharUserFieldImpl.specified();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16722,7 +16722,7 @@ end;
 procedure ICharUserFieldImpl_setEnteredDispatcher(this: ICharUserField; status: IStatus; newValue: Integer); cdecl;
 begin
 	try
-		ICharUserFieldImpl(this.FObject).setEntered(status, newValue);
+		this.asICharUserFieldImpl.setEntered(status, newValue);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16731,7 +16731,7 @@ end;
 function ICharUserFieldImpl_getDispatcher(this: ICharUserField): PAnsiChar; cdecl;
 begin
 	try
-		Result := ICharUserFieldImpl(this.FObject).get();
+		Result := this.asICharUserFieldImpl.get();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16740,7 +16740,7 @@ end;
 procedure ICharUserFieldImpl_set_Dispatcher(this: ICharUserField; status: IStatus; newValue: PAnsiChar); cdecl;
 begin
 	try
-		ICharUserFieldImpl(this.FObject).set_(status, newValue);
+		this.asICharUserFieldImpl.set_(status, newValue);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16779,7 +16779,7 @@ end;
 function IIntUserFieldImpl_enteredDispatcher(this: IIntUserField): Integer; cdecl;
 begin
 	try
-		Result := IIntUserFieldImpl(this.FObject).entered();
+		Result := this.asIIntUserFieldImpl.entered();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16788,7 +16788,7 @@ end;
 function IIntUserFieldImpl_specifiedDispatcher(this: IIntUserField): Integer; cdecl;
 begin
 	try
-		Result := IIntUserFieldImpl(this.FObject).specified();
+		Result := this.asIIntUserFieldImpl.specified();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16797,7 +16797,7 @@ end;
 procedure IIntUserFieldImpl_setEnteredDispatcher(this: IIntUserField; status: IStatus; newValue: Integer); cdecl;
 begin
 	try
-		IIntUserFieldImpl(this.FObject).setEntered(status, newValue);
+		this.asIIntUserFieldImpl.setEntered(status, newValue);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16806,7 +16806,7 @@ end;
 function IIntUserFieldImpl_getDispatcher(this: IIntUserField): Integer; cdecl;
 begin
 	try
-		Result := IIntUserFieldImpl(this.FObject).get();
+		Result := this.asIIntUserFieldImpl.get();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16815,7 +16815,7 @@ end;
 procedure IIntUserFieldImpl_set_Dispatcher(this: IIntUserField; status: IStatus; newValue: Integer); cdecl;
 begin
 	try
-		IIntUserFieldImpl(this.FObject).set_(status, newValue);
+		this.asIIntUserFieldImpl.set_(status, newValue);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16854,7 +16854,7 @@ end;
 function IUserImpl_operationDispatcher(this: IUser): Cardinal; cdecl;
 begin
 	try
-		Result := IUserImpl(this.FObject).operation();
+		Result := this.asIUserImpl.operation();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16863,7 +16863,7 @@ end;
 function IUserImpl_userNameDispatcher(this: IUser): ICharUserField; cdecl;
 begin
 	try
-		Result := IUserImpl(this.FObject).userName();
+		Result := this.asIUserImpl.userName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16872,7 +16872,7 @@ end;
 function IUserImpl_passwordDispatcher(this: IUser): ICharUserField; cdecl;
 begin
 	try
-		Result := IUserImpl(this.FObject).password();
+		Result := this.asIUserImpl.password();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16881,7 +16881,7 @@ end;
 function IUserImpl_firstNameDispatcher(this: IUser): ICharUserField; cdecl;
 begin
 	try
-		Result := IUserImpl(this.FObject).firstName();
+		Result := this.asIUserImpl.firstName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16890,7 +16890,7 @@ end;
 function IUserImpl_lastNameDispatcher(this: IUser): ICharUserField; cdecl;
 begin
 	try
-		Result := IUserImpl(this.FObject).lastName();
+		Result := this.asIUserImpl.lastName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16899,7 +16899,7 @@ end;
 function IUserImpl_middleNameDispatcher(this: IUser): ICharUserField; cdecl;
 begin
 	try
-		Result := IUserImpl(this.FObject).middleName();
+		Result := this.asIUserImpl.middleName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16908,7 +16908,7 @@ end;
 function IUserImpl_commentDispatcher(this: IUser): ICharUserField; cdecl;
 begin
 	try
-		Result := IUserImpl(this.FObject).comment();
+		Result := this.asIUserImpl.comment();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16917,7 +16917,7 @@ end;
 function IUserImpl_attributesDispatcher(this: IUser): ICharUserField; cdecl;
 begin
 	try
-		Result := IUserImpl(this.FObject).attributes();
+		Result := this.asIUserImpl.attributes();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16926,7 +16926,7 @@ end;
 function IUserImpl_activeDispatcher(this: IUser): IIntUserField; cdecl;
 begin
 	try
-		Result := IUserImpl(this.FObject).active();
+		Result := this.asIUserImpl.active();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16935,7 +16935,7 @@ end;
 function IUserImpl_adminDispatcher(this: IUser): IIntUserField; cdecl;
 begin
 	try
-		Result := IUserImpl(this.FObject).admin();
+		Result := this.asIUserImpl.admin();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -16944,7 +16944,7 @@ end;
 procedure IUserImpl_clearDispatcher(this: IUser; status: IStatus); cdecl;
 begin
 	try
-		IUserImpl(this.FObject).clear(status);
+		this.asIUserImpl.clear(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -16989,7 +16989,7 @@ end;
 procedure IListUsersImpl_listDispatcher(this: IListUsers; status: IStatus; user: IUser); cdecl;
 begin
 	try
-		IListUsersImpl(this.FObject).list(status, user);
+		this.asIListUsersImpl.list(status, user);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17024,7 +17024,7 @@ end;
 function ILogonInfoImpl_nameDispatcher(this: ILogonInfo): PAnsiChar; cdecl;
 begin
 	try
-		Result := ILogonInfoImpl(this.FObject).name();
+		Result := this.asILogonInfoImpl.name();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17033,7 +17033,7 @@ end;
 function ILogonInfoImpl_roleDispatcher(this: ILogonInfo): PAnsiChar; cdecl;
 begin
 	try
-		Result := ILogonInfoImpl(this.FObject).role();
+		Result := this.asILogonInfoImpl.role();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17042,7 +17042,7 @@ end;
 function ILogonInfoImpl_networkProtocolDispatcher(this: ILogonInfo): PAnsiChar; cdecl;
 begin
 	try
-		Result := ILogonInfoImpl(this.FObject).networkProtocol();
+		Result := this.asILogonInfoImpl.networkProtocol();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17051,7 +17051,7 @@ end;
 function ILogonInfoImpl_remoteAddressDispatcher(this: ILogonInfo): PAnsiChar; cdecl;
 begin
 	try
-		Result := ILogonInfoImpl(this.FObject).remoteAddress();
+		Result := this.asILogonInfoImpl.remoteAddress();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17060,7 +17060,7 @@ end;
 function ILogonInfoImpl_authBlockDispatcher(this: ILogonInfo; length: CardinalPtr): BytePtr; cdecl;
 begin
 	try
-		Result := ILogonInfoImpl(this.FObject).authBlock(length);
+		Result := this.asILogonInfoImpl.authBlock(length);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17069,7 +17069,7 @@ end;
 function ILogonInfoImpl_attachmentDispatcher(this: ILogonInfo; status: IStatus): IAttachment; cdecl;
 begin
 	try
-		Result := ILogonInfoImpl(this.FObject).attachment(status);
+		Result := this.asILogonInfoImpl.attachment(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17078,7 +17078,7 @@ end;
 function ILogonInfoImpl_transactionDispatcher(this: ILogonInfo; status: IStatus): ITransaction; cdecl;
 begin
 	try
-		Result := ILogonInfoImpl(this.FObject).transaction(status);
+		Result := this.asILogonInfoImpl.transaction(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17119,7 +17119,7 @@ end;
 procedure IManagementImpl_addRefDispatcher(this: IManagement); cdecl;
 begin
 	try
-		IManagementImpl(this.FObject).addRef();
+		this.asIManagementImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17128,7 +17128,7 @@ end;
 function IManagementImpl_releaseDispatcher(this: IManagement): Integer; cdecl;
 begin
 	try
-		Result := IManagementImpl(this.FObject).release();
+		Result := this.asIManagementImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17137,7 +17137,7 @@ end;
 procedure IManagementImpl_setOwnerDispatcher(this: IManagement; r: IReferenceCounted); cdecl;
 begin
 	try
-		IManagementImpl(this.FObject).setOwner(r);
+		this.asIManagementImpl.setOwner(r);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17146,7 +17146,7 @@ end;
 function IManagementImpl_getOwnerDispatcher(this: IManagement): IReferenceCounted; cdecl;
 begin
 	try
-		Result := IManagementImpl(this.FObject).getOwner();
+		Result := this.asIManagementImpl.getOwner();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17155,7 +17155,7 @@ end;
 procedure IManagementImpl_startDispatcher(this: IManagement; status: IStatus; logonInfo: ILogonInfo); cdecl;
 begin
 	try
-		IManagementImpl(this.FObject).start(status, logonInfo);
+		this.asIManagementImpl.start(status, logonInfo);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17164,7 +17164,7 @@ end;
 function IManagementImpl_executeDispatcher(this: IManagement; status: IStatus; user: IUser; callback: IListUsers): Integer; cdecl;
 begin
 	try
-		Result := IManagementImpl(this.FObject).execute(status, user, callback);
+		Result := this.asIManagementImpl.execute(status, user, callback);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17173,7 +17173,7 @@ end;
 procedure IManagementImpl_commitDispatcher(this: IManagement; status: IStatus); cdecl;
 begin
 	try
-		IManagementImpl(this.FObject).commit(status);
+		this.asIManagementImpl.commit(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17182,7 +17182,7 @@ end;
 procedure IManagementImpl_rollbackDispatcher(this: IManagement; status: IStatus); cdecl;
 begin
 	try
-		IManagementImpl(this.FObject).rollback(status);
+		this.asIManagementImpl.rollback(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17224,7 +17224,7 @@ end;
 function IAuthBlockImpl_getTypeDispatcher(this: IAuthBlock): PAnsiChar; cdecl;
 begin
 	try
-		Result := IAuthBlockImpl(this.FObject).getType();
+		Result := this.asIAuthBlockImpl.getType();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17233,7 +17233,7 @@ end;
 function IAuthBlockImpl_getNameDispatcher(this: IAuthBlock): PAnsiChar; cdecl;
 begin
 	try
-		Result := IAuthBlockImpl(this.FObject).getName();
+		Result := this.asIAuthBlockImpl.getName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17242,7 +17242,7 @@ end;
 function IAuthBlockImpl_getPluginDispatcher(this: IAuthBlock): PAnsiChar; cdecl;
 begin
 	try
-		Result := IAuthBlockImpl(this.FObject).getPlugin();
+		Result := this.asIAuthBlockImpl.getPlugin();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17251,7 +17251,7 @@ end;
 function IAuthBlockImpl_getSecurityDbDispatcher(this: IAuthBlock): PAnsiChar; cdecl;
 begin
 	try
-		Result := IAuthBlockImpl(this.FObject).getSecurityDb();
+		Result := this.asIAuthBlockImpl.getSecurityDb();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17260,7 +17260,7 @@ end;
 function IAuthBlockImpl_getOriginalPluginDispatcher(this: IAuthBlock): PAnsiChar; cdecl;
 begin
 	try
-		Result := IAuthBlockImpl(this.FObject).getOriginalPlugin();
+		Result := this.asIAuthBlockImpl.getOriginalPlugin();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17269,7 +17269,7 @@ end;
 function IAuthBlockImpl_nextDispatcher(this: IAuthBlock; status: IStatus): Boolean; cdecl;
 begin
 	try
-		Result := IAuthBlockImpl(this.FObject).next(status);
+		Result := this.asIAuthBlockImpl.next(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17278,7 +17278,7 @@ end;
 function IAuthBlockImpl_firstDispatcher(this: IAuthBlock; status: IStatus): Boolean; cdecl;
 begin
 	try
-		Result := IAuthBlockImpl(this.FObject).first(status);
+		Result := this.asIAuthBlockImpl.first(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17319,7 +17319,7 @@ end;
 procedure IWireCryptPluginImpl_addRefDispatcher(this: IWireCryptPlugin); cdecl;
 begin
 	try
-		IWireCryptPluginImpl(this.FObject).addRef();
+		this.asIWireCryptPluginImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17328,7 +17328,7 @@ end;
 function IWireCryptPluginImpl_releaseDispatcher(this: IWireCryptPlugin): Integer; cdecl;
 begin
 	try
-		Result := IWireCryptPluginImpl(this.FObject).release();
+		Result := this.asIWireCryptPluginImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17337,7 +17337,7 @@ end;
 procedure IWireCryptPluginImpl_setOwnerDispatcher(this: IWireCryptPlugin; r: IReferenceCounted); cdecl;
 begin
 	try
-		IWireCryptPluginImpl(this.FObject).setOwner(r);
+		this.asIWireCryptPluginImpl.setOwner(r);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17346,7 +17346,7 @@ end;
 function IWireCryptPluginImpl_getOwnerDispatcher(this: IWireCryptPlugin): IReferenceCounted; cdecl;
 begin
 	try
-		Result := IWireCryptPluginImpl(this.FObject).getOwner();
+		Result := this.asIWireCryptPluginImpl.getOwner();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17355,7 +17355,7 @@ end;
 function IWireCryptPluginImpl_getKnownTypesDispatcher(this: IWireCryptPlugin; status: IStatus): PAnsiChar; cdecl;
 begin
 	try
-		Result := IWireCryptPluginImpl(this.FObject).getKnownTypes(status);
+		Result := this.asIWireCryptPluginImpl.getKnownTypes(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17364,7 +17364,7 @@ end;
 procedure IWireCryptPluginImpl_setKeyDispatcher(this: IWireCryptPlugin; status: IStatus; key: ICryptKey); cdecl;
 begin
 	try
-		IWireCryptPluginImpl(this.FObject).setKey(status, key);
+		this.asIWireCryptPluginImpl.setKey(status, key);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17373,7 +17373,7 @@ end;
 procedure IWireCryptPluginImpl_encryptDispatcher(this: IWireCryptPlugin; status: IStatus; length: Cardinal; from: Pointer; to_: Pointer); cdecl;
 begin
 	try
-		IWireCryptPluginImpl(this.FObject).encrypt(status, length, from, to_);
+		this.asIWireCryptPluginImpl.encrypt(status, length, from, to_);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17382,7 +17382,7 @@ end;
 procedure IWireCryptPluginImpl_decryptDispatcher(this: IWireCryptPlugin; status: IStatus; length: Cardinal; from: Pointer; to_: Pointer); cdecl;
 begin
 	try
-		IWireCryptPluginImpl(this.FObject).decrypt(status, length, from, to_);
+		this.asIWireCryptPluginImpl.decrypt(status, length, from, to_);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17391,7 +17391,7 @@ end;
 function IWireCryptPluginImpl_getSpecificDataDispatcher(this: IWireCryptPlugin; status: IStatus; keyType: PAnsiChar; length: CardinalPtr): BytePtr; cdecl;
 begin
 	try
-		Result := IWireCryptPluginImpl(this.FObject).getSpecificData(status, keyType, length);
+		Result := this.asIWireCryptPluginImpl.getSpecificData(status, keyType, length);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17400,7 +17400,7 @@ end;
 procedure IWireCryptPluginImpl_setSpecificDataDispatcher(this: IWireCryptPlugin; status: IStatus; keyType: PAnsiChar; length: Cardinal; data: BytePtr); cdecl;
 begin
 	try
-		IWireCryptPluginImpl(this.FObject).setSpecificData(status, keyType, length, data);
+		this.asIWireCryptPluginImpl.setSpecificData(status, keyType, length, data);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17444,7 +17444,7 @@ end;
 function ICryptKeyCallbackImpl_callbackDispatcher(this: ICryptKeyCallback; dataLength: Cardinal; data: Pointer; bufferLength: Cardinal; buffer: Pointer): Cardinal; cdecl;
 begin
 	try
-		Result := ICryptKeyCallbackImpl(this.FObject).callback(dataLength, data, bufferLength, buffer);
+		Result := this.asICryptKeyCallbackImpl.callback(dataLength, data, bufferLength, buffer);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17479,7 +17479,7 @@ end;
 procedure IKeyHolderPluginImpl_addRefDispatcher(this: IKeyHolderPlugin); cdecl;
 begin
 	try
-		IKeyHolderPluginImpl(this.FObject).addRef();
+		this.asIKeyHolderPluginImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17488,7 +17488,7 @@ end;
 function IKeyHolderPluginImpl_releaseDispatcher(this: IKeyHolderPlugin): Integer; cdecl;
 begin
 	try
-		Result := IKeyHolderPluginImpl(this.FObject).release();
+		Result := this.asIKeyHolderPluginImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17497,7 +17497,7 @@ end;
 procedure IKeyHolderPluginImpl_setOwnerDispatcher(this: IKeyHolderPlugin; r: IReferenceCounted); cdecl;
 begin
 	try
-		IKeyHolderPluginImpl(this.FObject).setOwner(r);
+		this.asIKeyHolderPluginImpl.setOwner(r);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17506,7 +17506,7 @@ end;
 function IKeyHolderPluginImpl_getOwnerDispatcher(this: IKeyHolderPlugin): IReferenceCounted; cdecl;
 begin
 	try
-		Result := IKeyHolderPluginImpl(this.FObject).getOwner();
+		Result := this.asIKeyHolderPluginImpl.getOwner();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17515,7 +17515,7 @@ end;
 function IKeyHolderPluginImpl_keyCallbackDispatcher(this: IKeyHolderPlugin; status: IStatus; callback: ICryptKeyCallback): Integer; cdecl;
 begin
 	try
-		Result := IKeyHolderPluginImpl(this.FObject).keyCallback(status, callback);
+		Result := this.asIKeyHolderPluginImpl.keyCallback(status, callback);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17524,7 +17524,7 @@ end;
 function IKeyHolderPluginImpl_keyHandleDispatcher(this: IKeyHolderPlugin; status: IStatus; keyName: PAnsiChar): ICryptKeyCallback; cdecl;
 begin
 	try
-		Result := IKeyHolderPluginImpl(this.FObject).keyHandle(status, keyName);
+		Result := this.asIKeyHolderPluginImpl.keyHandle(status, keyName);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17533,7 +17533,7 @@ end;
 function IKeyHolderPluginImpl_useOnlyOwnKeysDispatcher(this: IKeyHolderPlugin; status: IStatus): Boolean; cdecl;
 begin
 	try
-		Result := IKeyHolderPluginImpl(this.FObject).useOnlyOwnKeys(status);
+		Result := this.asIKeyHolderPluginImpl.useOnlyOwnKeys(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17542,7 +17542,7 @@ end;
 function IKeyHolderPluginImpl_chainHandleDispatcher(this: IKeyHolderPlugin; status: IStatus): ICryptKeyCallback; cdecl;
 begin
 	try
-		Result := IKeyHolderPluginImpl(this.FObject).chainHandle(status);
+		Result := this.asIKeyHolderPluginImpl.chainHandle(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17584,7 +17584,7 @@ end;
 procedure IDbCryptInfoImpl_addRefDispatcher(this: IDbCryptInfo); cdecl;
 begin
 	try
-		IDbCryptInfoImpl(this.FObject).addRef();
+		this.asIDbCryptInfoImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17593,7 +17593,7 @@ end;
 function IDbCryptInfoImpl_releaseDispatcher(this: IDbCryptInfo): Integer; cdecl;
 begin
 	try
-		Result := IDbCryptInfoImpl(this.FObject).release();
+		Result := this.asIDbCryptInfoImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17602,7 +17602,7 @@ end;
 function IDbCryptInfoImpl_getDatabaseFullPathDispatcher(this: IDbCryptInfo; status: IStatus): PAnsiChar; cdecl;
 begin
 	try
-		Result := IDbCryptInfoImpl(this.FObject).getDatabaseFullPath(status);
+		Result := this.asIDbCryptInfoImpl.getDatabaseFullPath(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17639,7 +17639,7 @@ end;
 procedure IDbCryptPluginImpl_addRefDispatcher(this: IDbCryptPlugin); cdecl;
 begin
 	try
-		IDbCryptPluginImpl(this.FObject).addRef();
+		this.asIDbCryptPluginImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17648,7 +17648,7 @@ end;
 function IDbCryptPluginImpl_releaseDispatcher(this: IDbCryptPlugin): Integer; cdecl;
 begin
 	try
-		Result := IDbCryptPluginImpl(this.FObject).release();
+		Result := this.asIDbCryptPluginImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17657,7 +17657,7 @@ end;
 procedure IDbCryptPluginImpl_setOwnerDispatcher(this: IDbCryptPlugin; r: IReferenceCounted); cdecl;
 begin
 	try
-		IDbCryptPluginImpl(this.FObject).setOwner(r);
+		this.asIDbCryptPluginImpl.setOwner(r);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17666,7 +17666,7 @@ end;
 function IDbCryptPluginImpl_getOwnerDispatcher(this: IDbCryptPlugin): IReferenceCounted; cdecl;
 begin
 	try
-		Result := IDbCryptPluginImpl(this.FObject).getOwner();
+		Result := this.asIDbCryptPluginImpl.getOwner();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17675,7 +17675,7 @@ end;
 procedure IDbCryptPluginImpl_setKeyDispatcher(this: IDbCryptPlugin; status: IStatus; length: Cardinal; sources: IKeyHolderPlugin; keyName: PAnsiChar); cdecl;
 begin
 	try
-		IDbCryptPluginImpl(this.FObject).setKey(status, length, sources, keyName);
+		this.asIDbCryptPluginImpl.setKey(status, length, sources, keyName);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17684,7 +17684,7 @@ end;
 procedure IDbCryptPluginImpl_encryptDispatcher(this: IDbCryptPlugin; status: IStatus; length: Cardinal; from: Pointer; to_: Pointer); cdecl;
 begin
 	try
-		IDbCryptPluginImpl(this.FObject).encrypt(status, length, from, to_);
+		this.asIDbCryptPluginImpl.encrypt(status, length, from, to_);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17693,7 +17693,7 @@ end;
 procedure IDbCryptPluginImpl_decryptDispatcher(this: IDbCryptPlugin; status: IStatus; length: Cardinal; from: Pointer; to_: Pointer); cdecl;
 begin
 	try
-		IDbCryptPluginImpl(this.FObject).decrypt(status, length, from, to_);
+		this.asIDbCryptPluginImpl.decrypt(status, length, from, to_);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17702,7 +17702,7 @@ end;
 procedure IDbCryptPluginImpl_setInfoDispatcher(this: IDbCryptPlugin; status: IStatus; info: IDbCryptInfo); cdecl;
 begin
 	try
-		IDbCryptPluginImpl(this.FObject).setInfo(status, info);
+		this.asIDbCryptPluginImpl.setInfo(status, info);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17744,7 +17744,7 @@ end;
 function IExternalContextImpl_getMasterDispatcher(this: IExternalContext): IMaster; cdecl;
 begin
 	try
-		Result := IExternalContextImpl(this.FObject).getMaster();
+		Result := this.asIExternalContextImpl.getMaster();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17753,7 +17753,7 @@ end;
 function IExternalContextImpl_getEngineDispatcher(this: IExternalContext; status: IStatus): IExternalEngine; cdecl;
 begin
 	try
-		Result := IExternalContextImpl(this.FObject).getEngine(status);
+		Result := this.asIExternalContextImpl.getEngine(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17762,7 +17762,7 @@ end;
 function IExternalContextImpl_getAttachmentDispatcher(this: IExternalContext; status: IStatus): IAttachment; cdecl;
 begin
 	try
-		Result := IExternalContextImpl(this.FObject).getAttachment(status);
+		Result := this.asIExternalContextImpl.getAttachment(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17771,7 +17771,7 @@ end;
 function IExternalContextImpl_getTransactionDispatcher(this: IExternalContext; status: IStatus): ITransaction; cdecl;
 begin
 	try
-		Result := IExternalContextImpl(this.FObject).getTransaction(status);
+		Result := this.asIExternalContextImpl.getTransaction(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17780,7 +17780,7 @@ end;
 function IExternalContextImpl_getUserNameDispatcher(this: IExternalContext): PAnsiChar; cdecl;
 begin
 	try
-		Result := IExternalContextImpl(this.FObject).getUserName();
+		Result := this.asIExternalContextImpl.getUserName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17789,7 +17789,7 @@ end;
 function IExternalContextImpl_getDatabaseNameDispatcher(this: IExternalContext): PAnsiChar; cdecl;
 begin
 	try
-		Result := IExternalContextImpl(this.FObject).getDatabaseName();
+		Result := this.asIExternalContextImpl.getDatabaseName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17798,7 +17798,7 @@ end;
 function IExternalContextImpl_getClientCharSetDispatcher(this: IExternalContext): PAnsiChar; cdecl;
 begin
 	try
-		Result := IExternalContextImpl(this.FObject).getClientCharSet();
+		Result := this.asIExternalContextImpl.getClientCharSet();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17807,7 +17807,7 @@ end;
 function IExternalContextImpl_obtainInfoCodeDispatcher(this: IExternalContext): Integer; cdecl;
 begin
 	try
-		Result := IExternalContextImpl(this.FObject).obtainInfoCode();
+		Result := this.asIExternalContextImpl.obtainInfoCode();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17816,7 +17816,7 @@ end;
 function IExternalContextImpl_getInfoDispatcher(this: IExternalContext; code: Integer): Pointer; cdecl;
 begin
 	try
-		Result := IExternalContextImpl(this.FObject).getInfo(code);
+		Result := this.asIExternalContextImpl.getInfo(code);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17825,7 +17825,7 @@ end;
 function IExternalContextImpl_setInfoDispatcher(this: IExternalContext; code: Integer; value: Pointer): Pointer; cdecl;
 begin
 	try
-		Result := IExternalContextImpl(this.FObject).setInfo(code, value);
+		Result := this.asIExternalContextImpl.setInfo(code, value);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17869,7 +17869,7 @@ end;
 procedure IExternalResultSetImpl_disposeDispatcher(this: IExternalResultSet); cdecl;
 begin
 	try
-		IExternalResultSetImpl(this.FObject).dispose();
+		this.asIExternalResultSetImpl.dispose();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17878,7 +17878,7 @@ end;
 function IExternalResultSetImpl_fetchDispatcher(this: IExternalResultSet; status: IStatus): Boolean; cdecl;
 begin
 	try
-		Result := IExternalResultSetImpl(this.FObject).fetch(status);
+		Result := this.asIExternalResultSetImpl.fetch(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17914,7 +17914,7 @@ end;
 procedure IExternalFunctionImpl_disposeDispatcher(this: IExternalFunction); cdecl;
 begin
 	try
-		IExternalFunctionImpl(this.FObject).dispose();
+		this.asIExternalFunctionImpl.dispose();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17923,7 +17923,7 @@ end;
 procedure IExternalFunctionImpl_getCharSetDispatcher(this: IExternalFunction; status: IStatus; context: IExternalContext; name: PAnsiChar; nameSize: Cardinal); cdecl;
 begin
 	try
-		IExternalFunctionImpl(this.FObject).getCharSet(status, context, name, nameSize);
+		this.asIExternalFunctionImpl.getCharSet(status, context, name, nameSize);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17932,7 +17932,7 @@ end;
 procedure IExternalFunctionImpl_executeDispatcher(this: IExternalFunction; status: IStatus; context: IExternalContext; inMsg: Pointer; outMsg: Pointer); cdecl;
 begin
 	try
-		IExternalFunctionImpl(this.FObject).execute(status, context, inMsg, outMsg);
+		this.asIExternalFunctionImpl.execute(status, context, inMsg, outMsg);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17969,7 +17969,7 @@ end;
 procedure IExternalProcedureImpl_disposeDispatcher(this: IExternalProcedure); cdecl;
 begin
 	try
-		IExternalProcedureImpl(this.FObject).dispose();
+		this.asIExternalProcedureImpl.dispose();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -17978,7 +17978,7 @@ end;
 procedure IExternalProcedureImpl_getCharSetDispatcher(this: IExternalProcedure; status: IStatus; context: IExternalContext; name: PAnsiChar; nameSize: Cardinal); cdecl;
 begin
 	try
-		IExternalProcedureImpl(this.FObject).getCharSet(status, context, name, nameSize);
+		this.asIExternalProcedureImpl.getCharSet(status, context, name, nameSize);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -17987,7 +17987,7 @@ end;
 function IExternalProcedureImpl_openDispatcher(this: IExternalProcedure; status: IStatus; context: IExternalContext; inMsg: Pointer; outMsg: Pointer): IExternalResultSet; cdecl;
 begin
 	try
-		Result := IExternalProcedureImpl(this.FObject).open(status, context, inMsg, outMsg);
+		Result := this.asIExternalProcedureImpl.open(status, context, inMsg, outMsg);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18024,7 +18024,7 @@ end;
 procedure IExternalTriggerImpl_disposeDispatcher(this: IExternalTrigger); cdecl;
 begin
 	try
-		IExternalTriggerImpl(this.FObject).dispose();
+		this.asIExternalTriggerImpl.dispose();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18033,7 +18033,7 @@ end;
 procedure IExternalTriggerImpl_getCharSetDispatcher(this: IExternalTrigger; status: IStatus; context: IExternalContext; name: PAnsiChar; nameSize: Cardinal); cdecl;
 begin
 	try
-		IExternalTriggerImpl(this.FObject).getCharSet(status, context, name, nameSize);
+		this.asIExternalTriggerImpl.getCharSet(status, context, name, nameSize);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18042,7 +18042,7 @@ end;
 procedure IExternalTriggerImpl_executeDispatcher(this: IExternalTrigger; status: IStatus; context: IExternalContext; action: Cardinal; oldMsg: Pointer; newMsg: Pointer); cdecl;
 begin
 	try
-		IExternalTriggerImpl(this.FObject).execute(status, context, action, oldMsg, newMsg);
+		this.asIExternalTriggerImpl.execute(status, context, action, oldMsg, newMsg);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18079,7 +18079,7 @@ end;
 function IRoutineMetadataImpl_getPackageDispatcher(this: IRoutineMetadata; status: IStatus): PAnsiChar; cdecl;
 begin
 	try
-		Result := IRoutineMetadataImpl(this.FObject).getPackage(status);
+		Result := this.asIRoutineMetadataImpl.getPackage(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18088,7 +18088,7 @@ end;
 function IRoutineMetadataImpl_getNameDispatcher(this: IRoutineMetadata; status: IStatus): PAnsiChar; cdecl;
 begin
 	try
-		Result := IRoutineMetadataImpl(this.FObject).getName(status);
+		Result := this.asIRoutineMetadataImpl.getName(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18097,7 +18097,7 @@ end;
 function IRoutineMetadataImpl_getEntryPointDispatcher(this: IRoutineMetadata; status: IStatus): PAnsiChar; cdecl;
 begin
 	try
-		Result := IRoutineMetadataImpl(this.FObject).getEntryPoint(status);
+		Result := this.asIRoutineMetadataImpl.getEntryPoint(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18106,7 +18106,7 @@ end;
 function IRoutineMetadataImpl_getBodyDispatcher(this: IRoutineMetadata; status: IStatus): PAnsiChar; cdecl;
 begin
 	try
-		Result := IRoutineMetadataImpl(this.FObject).getBody(status);
+		Result := this.asIRoutineMetadataImpl.getBody(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18115,7 +18115,7 @@ end;
 function IRoutineMetadataImpl_getInputMetadataDispatcher(this: IRoutineMetadata; status: IStatus): IMessageMetadata; cdecl;
 begin
 	try
-		Result := IRoutineMetadataImpl(this.FObject).getInputMetadata(status);
+		Result := this.asIRoutineMetadataImpl.getInputMetadata(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18124,7 +18124,7 @@ end;
 function IRoutineMetadataImpl_getOutputMetadataDispatcher(this: IRoutineMetadata; status: IStatus): IMessageMetadata; cdecl;
 begin
 	try
-		Result := IRoutineMetadataImpl(this.FObject).getOutputMetadata(status);
+		Result := this.asIRoutineMetadataImpl.getOutputMetadata(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18133,7 +18133,7 @@ end;
 function IRoutineMetadataImpl_getTriggerMetadataDispatcher(this: IRoutineMetadata; status: IStatus): IMessageMetadata; cdecl;
 begin
 	try
-		Result := IRoutineMetadataImpl(this.FObject).getTriggerMetadata(status);
+		Result := this.asIRoutineMetadataImpl.getTriggerMetadata(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18142,7 +18142,7 @@ end;
 function IRoutineMetadataImpl_getTriggerTableDispatcher(this: IRoutineMetadata; status: IStatus): PAnsiChar; cdecl;
 begin
 	try
-		Result := IRoutineMetadataImpl(this.FObject).getTriggerTable(status);
+		Result := this.asIRoutineMetadataImpl.getTriggerTable(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18151,7 +18151,7 @@ end;
 function IRoutineMetadataImpl_getTriggerTypeDispatcher(this: IRoutineMetadata; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := IRoutineMetadataImpl(this.FObject).getTriggerType(status);
+		Result := this.asIRoutineMetadataImpl.getTriggerType(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18194,7 +18194,7 @@ end;
 procedure IExternalEngineImpl_addRefDispatcher(this: IExternalEngine); cdecl;
 begin
 	try
-		IExternalEngineImpl(this.FObject).addRef();
+		this.asIExternalEngineImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18203,7 +18203,7 @@ end;
 function IExternalEngineImpl_releaseDispatcher(this: IExternalEngine): Integer; cdecl;
 begin
 	try
-		Result := IExternalEngineImpl(this.FObject).release();
+		Result := this.asIExternalEngineImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18212,7 +18212,7 @@ end;
 procedure IExternalEngineImpl_setOwnerDispatcher(this: IExternalEngine; r: IReferenceCounted); cdecl;
 begin
 	try
-		IExternalEngineImpl(this.FObject).setOwner(r);
+		this.asIExternalEngineImpl.setOwner(r);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18221,7 +18221,7 @@ end;
 function IExternalEngineImpl_getOwnerDispatcher(this: IExternalEngine): IReferenceCounted; cdecl;
 begin
 	try
-		Result := IExternalEngineImpl(this.FObject).getOwner();
+		Result := this.asIExternalEngineImpl.getOwner();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18230,7 +18230,7 @@ end;
 procedure IExternalEngineImpl_openDispatcher(this: IExternalEngine; status: IStatus; context: IExternalContext; charSet: PAnsiChar; charSetSize: Cardinal); cdecl;
 begin
 	try
-		IExternalEngineImpl(this.FObject).open(status, context, charSet, charSetSize);
+		this.asIExternalEngineImpl.open(status, context, charSet, charSetSize);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18239,7 +18239,7 @@ end;
 procedure IExternalEngineImpl_openAttachmentDispatcher(this: IExternalEngine; status: IStatus; context: IExternalContext); cdecl;
 begin
 	try
-		IExternalEngineImpl(this.FObject).openAttachment(status, context);
+		this.asIExternalEngineImpl.openAttachment(status, context);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18248,7 +18248,7 @@ end;
 procedure IExternalEngineImpl_closeAttachmentDispatcher(this: IExternalEngine; status: IStatus; context: IExternalContext); cdecl;
 begin
 	try
-		IExternalEngineImpl(this.FObject).closeAttachment(status, context);
+		this.asIExternalEngineImpl.closeAttachment(status, context);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18257,7 +18257,7 @@ end;
 function IExternalEngineImpl_makeFunctionDispatcher(this: IExternalEngine; status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder): IExternalFunction; cdecl;
 begin
 	try
-		Result := IExternalEngineImpl(this.FObject).makeFunction(status, context, metadata, inBuilder, outBuilder);
+		Result := this.asIExternalEngineImpl.makeFunction(status, context, metadata, inBuilder, outBuilder);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18266,7 +18266,7 @@ end;
 function IExternalEngineImpl_makeProcedureDispatcher(this: IExternalEngine; status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder): IExternalProcedure; cdecl;
 begin
 	try
-		Result := IExternalEngineImpl(this.FObject).makeProcedure(status, context, metadata, inBuilder, outBuilder);
+		Result := this.asIExternalEngineImpl.makeProcedure(status, context, metadata, inBuilder, outBuilder);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18275,7 +18275,7 @@ end;
 function IExternalEngineImpl_makeTriggerDispatcher(this: IExternalEngine; status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; fieldsBuilder: IMetadataBuilder): IExternalTrigger; cdecl;
 begin
 	try
-		Result := IExternalEngineImpl(this.FObject).makeTrigger(status, context, metadata, fieldsBuilder);
+		Result := this.asIExternalEngineImpl.makeTrigger(status, context, metadata, fieldsBuilder);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18319,7 +18319,7 @@ end;
 procedure ITimerImpl_addRefDispatcher(this: ITimer); cdecl;
 begin
 	try
-		ITimerImpl(this.FObject).addRef();
+		this.asITimerImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18328,7 +18328,7 @@ end;
 function ITimerImpl_releaseDispatcher(this: ITimer): Integer; cdecl;
 begin
 	try
-		Result := ITimerImpl(this.FObject).release();
+		Result := this.asITimerImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18337,7 +18337,7 @@ end;
 procedure ITimerImpl_handlerDispatcher(this: ITimer); cdecl;
 begin
 	try
-		ITimerImpl(this.FObject).handler();
+		this.asITimerImpl.handler();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18374,7 +18374,7 @@ end;
 procedure ITimerControlImpl_startDispatcher(this: ITimerControl; status: IStatus; timer: ITimer; microSeconds: QWord); cdecl;
 begin
 	try
-		ITimerControlImpl(this.FObject).start(status, timer, microSeconds);
+		this.asITimerControlImpl.start(status, timer, microSeconds);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18383,7 +18383,7 @@ end;
 procedure ITimerControlImpl_stopDispatcher(this: ITimerControl; status: IStatus; timer: ITimer); cdecl;
 begin
 	try
-		ITimerControlImpl(this.FObject).stop(status, timer);
+		this.asITimerControlImpl.stop(status, timer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18419,7 +18419,7 @@ end;
 procedure IVersionCallbackImpl_callbackDispatcher(this: IVersionCallback; status: IStatus; text: PAnsiChar); cdecl;
 begin
 	try
-		IVersionCallbackImpl(this.FObject).callback(status, text);
+		this.asIVersionCallbackImpl.callback(status, text);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18454,7 +18454,7 @@ end;
 procedure IUtilImpl_getFbVersionDispatcher(this: IUtil; status: IStatus; att: IAttachment; callback: IVersionCallback); cdecl;
 begin
 	try
-		IUtilImpl(this.FObject).getFbVersion(status, att, callback);
+		this.asIUtilImpl.getFbVersion(status, att, callback);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18463,7 +18463,7 @@ end;
 procedure IUtilImpl_loadBlobDispatcher(this: IUtil; status: IStatus; blobId: ISC_QUADPtr; att: IAttachment; tra: ITransaction; file_: PAnsiChar; txt: Boolean); cdecl;
 begin
 	try
-		IUtilImpl(this.FObject).loadBlob(status, blobId, att, tra, file_, txt);
+		this.asIUtilImpl.loadBlob(status, blobId, att, tra, file_, txt);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18472,7 +18472,7 @@ end;
 procedure IUtilImpl_dumpBlobDispatcher(this: IUtil; status: IStatus; blobId: ISC_QUADPtr; att: IAttachment; tra: ITransaction; file_: PAnsiChar; txt: Boolean); cdecl;
 begin
 	try
-		IUtilImpl(this.FObject).dumpBlob(status, blobId, att, tra, file_, txt);
+		this.asIUtilImpl.dumpBlob(status, blobId, att, tra, file_, txt);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18481,7 +18481,7 @@ end;
 procedure IUtilImpl_getPerfCountersDispatcher(this: IUtil; status: IStatus; att: IAttachment; countersSet: PAnsiChar; counters: Int64Ptr); cdecl;
 begin
 	try
-		IUtilImpl(this.FObject).getPerfCounters(status, att, countersSet, counters);
+		this.asIUtilImpl.getPerfCounters(status, att, countersSet, counters);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18490,7 +18490,7 @@ end;
 function IUtilImpl_executeCreateDatabaseDispatcher(this: IUtil; status: IStatus; stmtLength: Cardinal; creatDBstatement: PAnsiChar; dialect: Cardinal; stmtIsCreateDb: BooleanPtr): IAttachment; cdecl;
 begin
 	try
-		Result := IUtilImpl(this.FObject).executeCreateDatabase(status, stmtLength, creatDBstatement, dialect, stmtIsCreateDb);
+		Result := this.asIUtilImpl.executeCreateDatabase(status, stmtLength, creatDBstatement, dialect, stmtIsCreateDb);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18499,7 +18499,7 @@ end;
 procedure IUtilImpl_decodeDateDispatcher(this: IUtil; date: ISC_DATE; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr); cdecl;
 begin
 	try
-		IUtilImpl(this.FObject).decodeDate(date, year, month, day);
+		this.asIUtilImpl.decodeDate(date, year, month, day);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18508,7 +18508,7 @@ end;
 procedure IUtilImpl_decodeTimeDispatcher(this: IUtil; time: ISC_TIME; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr); cdecl;
 begin
 	try
-		IUtilImpl(this.FObject).decodeTime(time, hours, minutes, seconds, fractions);
+		this.asIUtilImpl.decodeTime(time, hours, minutes, seconds, fractions);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18517,7 +18517,7 @@ end;
 function IUtilImpl_encodeDateDispatcher(this: IUtil; year: Cardinal; month: Cardinal; day: Cardinal): ISC_DATE; cdecl;
 begin
 	try
-		Result := IUtilImpl(this.FObject).encodeDate(year, month, day);
+		Result := this.asIUtilImpl.encodeDate(year, month, day);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18526,7 +18526,7 @@ end;
 function IUtilImpl_encodeTimeDispatcher(this: IUtil; hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal): ISC_TIME; cdecl;
 begin
 	try
-		Result := IUtilImpl(this.FObject).encodeTime(hours, minutes, seconds, fractions);
+		Result := this.asIUtilImpl.encodeTime(hours, minutes, seconds, fractions);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18535,7 +18535,7 @@ end;
 function IUtilImpl_formatStatusDispatcher(this: IUtil; buffer: PAnsiChar; bufferSize: Cardinal; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := IUtilImpl(this.FObject).formatStatus(buffer, bufferSize, status);
+		Result := this.asIUtilImpl.formatStatus(buffer, bufferSize, status);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18544,7 +18544,7 @@ end;
 function IUtilImpl_getClientVersionDispatcher(this: IUtil): Cardinal; cdecl;
 begin
 	try
-		Result := IUtilImpl(this.FObject).getClientVersion();
+		Result := this.asIUtilImpl.getClientVersion();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18553,7 +18553,7 @@ end;
 function IUtilImpl_getXpbBuilderDispatcher(this: IUtil; status: IStatus; kind: Cardinal; buf: BytePtr; len: Cardinal): IXpbBuilder; cdecl;
 begin
 	try
-		Result := IUtilImpl(this.FObject).getXpbBuilder(status, kind, buf, len);
+		Result := this.asIUtilImpl.getXpbBuilder(status, kind, buf, len);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18562,7 +18562,7 @@ end;
 function IUtilImpl_setOffsetsDispatcher(this: IUtil; status: IStatus; metadata: IMessageMetadata; callback: IOffsetsCallback): Cardinal; cdecl;
 begin
 	try
-		Result := IUtilImpl(this.FObject).setOffsets(status, metadata, callback);
+		Result := this.asIUtilImpl.setOffsets(status, metadata, callback);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18571,7 +18571,7 @@ end;
 function IUtilImpl_getDecFloat16Dispatcher(this: IUtil; status: IStatus): IDecFloat16; cdecl;
 begin
 	try
-		Result := IUtilImpl(this.FObject).getDecFloat16(status);
+		Result := this.asIUtilImpl.getDecFloat16(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18580,7 +18580,7 @@ end;
 function IUtilImpl_getDecFloat34Dispatcher(this: IUtil; status: IStatus): IDecFloat34; cdecl;
 begin
 	try
-		Result := IUtilImpl(this.FObject).getDecFloat34(status);
+		Result := this.asIUtilImpl.getDecFloat34(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18589,7 +18589,7 @@ end;
 procedure IUtilImpl_decodeTimeTzDispatcher(this: IUtil; status: IStatus; timeTz: ISC_TIME_TZPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar); cdecl;
 begin
 	try
-		IUtilImpl(this.FObject).decodeTimeTz(status, timeTz, hours, minutes, seconds, fractions, timeZoneBufferLength, timeZoneBuffer);
+		this.asIUtilImpl.decodeTimeTz(status, timeTz, hours, minutes, seconds, fractions, timeZoneBufferLength, timeZoneBuffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18598,7 +18598,7 @@ end;
 procedure IUtilImpl_decodeTimeStampTzDispatcher(this: IUtil; status: IStatus; timeStampTz: ISC_TIMESTAMP_TZPtr; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar); cdecl;
 begin
 	try
-		IUtilImpl(this.FObject).decodeTimeStampTz(status, timeStampTz, year, month, day, hours, minutes, seconds, fractions, timeZoneBufferLength, timeZoneBuffer);
+		this.asIUtilImpl.decodeTimeStampTz(status, timeStampTz, year, month, day, hours, minutes, seconds, fractions, timeZoneBufferLength, timeZoneBuffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18607,7 +18607,7 @@ end;
 procedure IUtilImpl_encodeTimeTzDispatcher(this: IUtil; status: IStatus; timeTz: ISC_TIME_TZPtr; hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal; timeZone: PAnsiChar); cdecl;
 begin
 	try
-		IUtilImpl(this.FObject).encodeTimeTz(status, timeTz, hours, minutes, seconds, fractions, timeZone);
+		this.asIUtilImpl.encodeTimeTz(status, timeTz, hours, minutes, seconds, fractions, timeZone);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18616,7 +18616,7 @@ end;
 procedure IUtilImpl_encodeTimeStampTzDispatcher(this: IUtil; status: IStatus; timeStampTz: ISC_TIMESTAMP_TZPtr; year: Cardinal; month: Cardinal; day: Cardinal; hours: Cardinal; minutes: Cardinal; seconds: Cardinal; fractions: Cardinal; timeZone: PAnsiChar); cdecl;
 begin
 	try
-		IUtilImpl(this.FObject).encodeTimeStampTz(status, timeStampTz, year, month, day, hours, minutes, seconds, fractions, timeZone);
+		this.asIUtilImpl.encodeTimeStampTz(status, timeStampTz, year, month, day, hours, minutes, seconds, fractions, timeZone);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18625,7 +18625,7 @@ end;
 function IUtilImpl_getInt128Dispatcher(this: IUtil; status: IStatus): IInt128; cdecl;
 begin
 	try
-		Result := IUtilImpl(this.FObject).getInt128(status);
+		Result := this.asIUtilImpl.getInt128(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18634,7 +18634,7 @@ end;
 procedure IUtilImpl_decodeTimeTzExDispatcher(this: IUtil; status: IStatus; timeTz: ISC_TIME_TZ_EXPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar); cdecl;
 begin
 	try
-		IUtilImpl(this.FObject).decodeTimeTzEx(status, timeTz, hours, minutes, seconds, fractions, timeZoneBufferLength, timeZoneBuffer);
+		this.asIUtilImpl.decodeTimeTzEx(status, timeTz, hours, minutes, seconds, fractions, timeZoneBufferLength, timeZoneBuffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18643,7 +18643,7 @@ end;
 procedure IUtilImpl_decodeTimeStampTzExDispatcher(this: IUtil; status: IStatus; timeStampTz: ISC_TIMESTAMP_TZ_EXPtr; year: CardinalPtr; month: CardinalPtr; day: CardinalPtr; hours: CardinalPtr; minutes: CardinalPtr; seconds: CardinalPtr; fractions: CardinalPtr; timeZoneBufferLength: Cardinal; timeZoneBuffer: PAnsiChar); cdecl;
 begin
 	try
-		IUtilImpl(this.FObject).decodeTimeStampTzEx(status, timeStampTz, year, month, day, hours, minutes, seconds, fractions, timeZoneBufferLength, timeZoneBuffer);
+		this.asIUtilImpl.decodeTimeStampTzEx(status, timeStampTz, year, month, day, hours, minutes, seconds, fractions, timeZoneBufferLength, timeZoneBuffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18699,7 +18699,7 @@ end;
 procedure IOffsetsCallbackImpl_setOffsetDispatcher(this: IOffsetsCallback; status: IStatus; index: Cardinal; offset: Cardinal; nullOffset: Cardinal); cdecl;
 begin
 	try
-		IOffsetsCallbackImpl(this.FObject).setOffset(status, index, offset, nullOffset);
+		this.asIOffsetsCallbackImpl.setOffset(status, index, offset, nullOffset);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18734,7 +18734,7 @@ end;
 procedure IXpbBuilderImpl_disposeDispatcher(this: IXpbBuilder); cdecl;
 begin
 	try
-		IXpbBuilderImpl(this.FObject).dispose();
+		this.asIXpbBuilderImpl.dispose();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18743,7 +18743,7 @@ end;
 procedure IXpbBuilderImpl_clearDispatcher(this: IXpbBuilder; status: IStatus); cdecl;
 begin
 	try
-		IXpbBuilderImpl(this.FObject).clear(status);
+		this.asIXpbBuilderImpl.clear(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18752,7 +18752,7 @@ end;
 procedure IXpbBuilderImpl_removeCurrentDispatcher(this: IXpbBuilder; status: IStatus); cdecl;
 begin
 	try
-		IXpbBuilderImpl(this.FObject).removeCurrent(status);
+		this.asIXpbBuilderImpl.removeCurrent(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18761,7 +18761,7 @@ end;
 procedure IXpbBuilderImpl_insertIntDispatcher(this: IXpbBuilder; status: IStatus; tag: Byte; value: Integer); cdecl;
 begin
 	try
-		IXpbBuilderImpl(this.FObject).insertInt(status, tag, value);
+		this.asIXpbBuilderImpl.insertInt(status, tag, value);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18770,7 +18770,7 @@ end;
 procedure IXpbBuilderImpl_insertBigIntDispatcher(this: IXpbBuilder; status: IStatus; tag: Byte; value: Int64); cdecl;
 begin
 	try
-		IXpbBuilderImpl(this.FObject).insertBigInt(status, tag, value);
+		this.asIXpbBuilderImpl.insertBigInt(status, tag, value);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18779,7 +18779,7 @@ end;
 procedure IXpbBuilderImpl_insertBytesDispatcher(this: IXpbBuilder; status: IStatus; tag: Byte; bytes: Pointer; length: Cardinal); cdecl;
 begin
 	try
-		IXpbBuilderImpl(this.FObject).insertBytes(status, tag, bytes, length);
+		this.asIXpbBuilderImpl.insertBytes(status, tag, bytes, length);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18788,7 +18788,7 @@ end;
 procedure IXpbBuilderImpl_insertStringDispatcher(this: IXpbBuilder; status: IStatus; tag: Byte; str: PAnsiChar); cdecl;
 begin
 	try
-		IXpbBuilderImpl(this.FObject).insertString(status, tag, str);
+		this.asIXpbBuilderImpl.insertString(status, tag, str);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18797,7 +18797,7 @@ end;
 procedure IXpbBuilderImpl_insertTagDispatcher(this: IXpbBuilder; status: IStatus; tag: Byte); cdecl;
 begin
 	try
-		IXpbBuilderImpl(this.FObject).insertTag(status, tag);
+		this.asIXpbBuilderImpl.insertTag(status, tag);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18806,7 +18806,7 @@ end;
 function IXpbBuilderImpl_isEofDispatcher(this: IXpbBuilder; status: IStatus): Boolean; cdecl;
 begin
 	try
-		Result := IXpbBuilderImpl(this.FObject).isEof(status);
+		Result := this.asIXpbBuilderImpl.isEof(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18815,7 +18815,7 @@ end;
 procedure IXpbBuilderImpl_moveNextDispatcher(this: IXpbBuilder; status: IStatus); cdecl;
 begin
 	try
-		IXpbBuilderImpl(this.FObject).moveNext(status);
+		this.asIXpbBuilderImpl.moveNext(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18824,7 +18824,7 @@ end;
 procedure IXpbBuilderImpl_rewindDispatcher(this: IXpbBuilder; status: IStatus); cdecl;
 begin
 	try
-		IXpbBuilderImpl(this.FObject).rewind(status);
+		this.asIXpbBuilderImpl.rewind(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18833,7 +18833,7 @@ end;
 function IXpbBuilderImpl_findFirstDispatcher(this: IXpbBuilder; status: IStatus; tag: Byte): Boolean; cdecl;
 begin
 	try
-		Result := IXpbBuilderImpl(this.FObject).findFirst(status, tag);
+		Result := this.asIXpbBuilderImpl.findFirst(status, tag);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18842,7 +18842,7 @@ end;
 function IXpbBuilderImpl_findNextDispatcher(this: IXpbBuilder; status: IStatus): Boolean; cdecl;
 begin
 	try
-		Result := IXpbBuilderImpl(this.FObject).findNext(status);
+		Result := this.asIXpbBuilderImpl.findNext(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18851,7 +18851,7 @@ end;
 function IXpbBuilderImpl_getTagDispatcher(this: IXpbBuilder; status: IStatus): Byte; cdecl;
 begin
 	try
-		Result := IXpbBuilderImpl(this.FObject).getTag(status);
+		Result := this.asIXpbBuilderImpl.getTag(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18860,7 +18860,7 @@ end;
 function IXpbBuilderImpl_getLengthDispatcher(this: IXpbBuilder; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := IXpbBuilderImpl(this.FObject).getLength(status);
+		Result := this.asIXpbBuilderImpl.getLength(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18869,7 +18869,7 @@ end;
 function IXpbBuilderImpl_getIntDispatcher(this: IXpbBuilder; status: IStatus): Integer; cdecl;
 begin
 	try
-		Result := IXpbBuilderImpl(this.FObject).getInt(status);
+		Result := this.asIXpbBuilderImpl.getInt(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18878,7 +18878,7 @@ end;
 function IXpbBuilderImpl_getBigIntDispatcher(this: IXpbBuilder; status: IStatus): Int64; cdecl;
 begin
 	try
-		Result := IXpbBuilderImpl(this.FObject).getBigInt(status);
+		Result := this.asIXpbBuilderImpl.getBigInt(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18887,7 +18887,7 @@ end;
 function IXpbBuilderImpl_getStringDispatcher(this: IXpbBuilder; status: IStatus): PAnsiChar; cdecl;
 begin
 	try
-		Result := IXpbBuilderImpl(this.FObject).getString(status);
+		Result := this.asIXpbBuilderImpl.getString(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18896,7 +18896,7 @@ end;
 function IXpbBuilderImpl_getBytesDispatcher(this: IXpbBuilder; status: IStatus): BytePtr; cdecl;
 begin
 	try
-		Result := IXpbBuilderImpl(this.FObject).getBytes(status);
+		Result := this.asIXpbBuilderImpl.getBytes(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18905,7 +18905,7 @@ end;
 function IXpbBuilderImpl_getBufferLengthDispatcher(this: IXpbBuilder; status: IStatus): Cardinal; cdecl;
 begin
 	try
-		Result := IXpbBuilderImpl(this.FObject).getBufferLength(status);
+		Result := this.asIXpbBuilderImpl.getBufferLength(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18914,7 +18914,7 @@ end;
 function IXpbBuilderImpl_getBufferDispatcher(this: IXpbBuilder; status: IStatus): BytePtr; cdecl;
 begin
 	try
-		Result := IXpbBuilderImpl(this.FObject).getBuffer(status);
+		Result := this.asIXpbBuilderImpl.getBuffer(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -18969,7 +18969,7 @@ end;
 function ITraceConnectionImpl_getKindDispatcher(this: ITraceConnection): Cardinal; cdecl;
 begin
 	try
-		Result := ITraceConnectionImpl(this.FObject).getKind();
+		Result := this.asITraceConnectionImpl.getKind();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18978,7 +18978,7 @@ end;
 function ITraceConnectionImpl_getProcessIDDispatcher(this: ITraceConnection): Integer; cdecl;
 begin
 	try
-		Result := ITraceConnectionImpl(this.FObject).getProcessID();
+		Result := this.asITraceConnectionImpl.getProcessID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18987,7 +18987,7 @@ end;
 function ITraceConnectionImpl_getUserNameDispatcher(this: ITraceConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceConnectionImpl(this.FObject).getUserName();
+		Result := this.asITraceConnectionImpl.getUserName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -18996,7 +18996,7 @@ end;
 function ITraceConnectionImpl_getRoleNameDispatcher(this: ITraceConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceConnectionImpl(this.FObject).getRoleName();
+		Result := this.asITraceConnectionImpl.getRoleName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19005,7 +19005,7 @@ end;
 function ITraceConnectionImpl_getCharSetDispatcher(this: ITraceConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceConnectionImpl(this.FObject).getCharSet();
+		Result := this.asITraceConnectionImpl.getCharSet();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19014,7 +19014,7 @@ end;
 function ITraceConnectionImpl_getRemoteProtocolDispatcher(this: ITraceConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceConnectionImpl(this.FObject).getRemoteProtocol();
+		Result := this.asITraceConnectionImpl.getRemoteProtocol();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19023,7 +19023,7 @@ end;
 function ITraceConnectionImpl_getRemoteAddressDispatcher(this: ITraceConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceConnectionImpl(this.FObject).getRemoteAddress();
+		Result := this.asITraceConnectionImpl.getRemoteAddress();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19032,7 +19032,7 @@ end;
 function ITraceConnectionImpl_getRemoteProcessIDDispatcher(this: ITraceConnection): Integer; cdecl;
 begin
 	try
-		Result := ITraceConnectionImpl(this.FObject).getRemoteProcessID();
+		Result := this.asITraceConnectionImpl.getRemoteProcessID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19041,7 +19041,7 @@ end;
 function ITraceConnectionImpl_getRemoteProcessNameDispatcher(this: ITraceConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceConnectionImpl(this.FObject).getRemoteProcessName();
+		Result := this.asITraceConnectionImpl.getRemoteProcessName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19086,7 +19086,7 @@ end;
 function ITraceDatabaseConnectionImpl_getKindDispatcher(this: ITraceDatabaseConnection): Cardinal; cdecl;
 begin
 	try
-		Result := ITraceDatabaseConnectionImpl(this.FObject).getKind();
+		Result := this.asITraceDatabaseConnectionImpl.getKind();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19095,7 +19095,7 @@ end;
 function ITraceDatabaseConnectionImpl_getProcessIDDispatcher(this: ITraceDatabaseConnection): Integer; cdecl;
 begin
 	try
-		Result := ITraceDatabaseConnectionImpl(this.FObject).getProcessID();
+		Result := this.asITraceDatabaseConnectionImpl.getProcessID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19104,7 +19104,7 @@ end;
 function ITraceDatabaseConnectionImpl_getUserNameDispatcher(this: ITraceDatabaseConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceDatabaseConnectionImpl(this.FObject).getUserName();
+		Result := this.asITraceDatabaseConnectionImpl.getUserName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19113,7 +19113,7 @@ end;
 function ITraceDatabaseConnectionImpl_getRoleNameDispatcher(this: ITraceDatabaseConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceDatabaseConnectionImpl(this.FObject).getRoleName();
+		Result := this.asITraceDatabaseConnectionImpl.getRoleName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19122,7 +19122,7 @@ end;
 function ITraceDatabaseConnectionImpl_getCharSetDispatcher(this: ITraceDatabaseConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceDatabaseConnectionImpl(this.FObject).getCharSet();
+		Result := this.asITraceDatabaseConnectionImpl.getCharSet();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19131,7 +19131,7 @@ end;
 function ITraceDatabaseConnectionImpl_getRemoteProtocolDispatcher(this: ITraceDatabaseConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceDatabaseConnectionImpl(this.FObject).getRemoteProtocol();
+		Result := this.asITraceDatabaseConnectionImpl.getRemoteProtocol();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19140,7 +19140,7 @@ end;
 function ITraceDatabaseConnectionImpl_getRemoteAddressDispatcher(this: ITraceDatabaseConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceDatabaseConnectionImpl(this.FObject).getRemoteAddress();
+		Result := this.asITraceDatabaseConnectionImpl.getRemoteAddress();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19149,7 +19149,7 @@ end;
 function ITraceDatabaseConnectionImpl_getRemoteProcessIDDispatcher(this: ITraceDatabaseConnection): Integer; cdecl;
 begin
 	try
-		Result := ITraceDatabaseConnectionImpl(this.FObject).getRemoteProcessID();
+		Result := this.asITraceDatabaseConnectionImpl.getRemoteProcessID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19158,7 +19158,7 @@ end;
 function ITraceDatabaseConnectionImpl_getRemoteProcessNameDispatcher(this: ITraceDatabaseConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceDatabaseConnectionImpl(this.FObject).getRemoteProcessName();
+		Result := this.asITraceDatabaseConnectionImpl.getRemoteProcessName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19167,7 +19167,7 @@ end;
 function ITraceDatabaseConnectionImpl_getConnectionIDDispatcher(this: ITraceDatabaseConnection): Int64; cdecl;
 begin
 	try
-		Result := ITraceDatabaseConnectionImpl(this.FObject).getConnectionID();
+		Result := this.asITraceDatabaseConnectionImpl.getConnectionID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19176,7 +19176,7 @@ end;
 function ITraceDatabaseConnectionImpl_getDatabaseNameDispatcher(this: ITraceDatabaseConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceDatabaseConnectionImpl(this.FObject).getDatabaseName();
+		Result := this.asITraceDatabaseConnectionImpl.getDatabaseName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19221,7 +19221,7 @@ end;
 function ITraceTransactionImpl_getTransactionIDDispatcher(this: ITraceTransaction): Int64; cdecl;
 begin
 	try
-		Result := ITraceTransactionImpl(this.FObject).getTransactionID();
+		Result := this.asITraceTransactionImpl.getTransactionID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19230,7 +19230,7 @@ end;
 function ITraceTransactionImpl_getReadOnlyDispatcher(this: ITraceTransaction): Boolean; cdecl;
 begin
 	try
-		Result := ITraceTransactionImpl(this.FObject).getReadOnly();
+		Result := this.asITraceTransactionImpl.getReadOnly();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19239,7 +19239,7 @@ end;
 function ITraceTransactionImpl_getWaitDispatcher(this: ITraceTransaction): Integer; cdecl;
 begin
 	try
-		Result := ITraceTransactionImpl(this.FObject).getWait();
+		Result := this.asITraceTransactionImpl.getWait();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19248,7 +19248,7 @@ end;
 function ITraceTransactionImpl_getIsolationDispatcher(this: ITraceTransaction): Cardinal; cdecl;
 begin
 	try
-		Result := ITraceTransactionImpl(this.FObject).getIsolation();
+		Result := this.asITraceTransactionImpl.getIsolation();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19257,7 +19257,7 @@ end;
 function ITraceTransactionImpl_getPerfDispatcher(this: ITraceTransaction): PerformanceInfoPtr; cdecl;
 begin
 	try
-		Result := ITraceTransactionImpl(this.FObject).getPerf();
+		Result := this.asITraceTransactionImpl.getPerf();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19266,7 +19266,7 @@ end;
 function ITraceTransactionImpl_getInitialIDDispatcher(this: ITraceTransaction): Int64; cdecl;
 begin
 	try
-		Result := ITraceTransactionImpl(this.FObject).getInitialID();
+		Result := this.asITraceTransactionImpl.getInitialID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19275,7 +19275,7 @@ end;
 function ITraceTransactionImpl_getPreviousIDDispatcher(this: ITraceTransaction): Int64; cdecl;
 begin
 	try
-		Result := ITraceTransactionImpl(this.FObject).getPreviousID();
+		Result := this.asITraceTransactionImpl.getPreviousID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19316,7 +19316,7 @@ end;
 function ITraceParamsImpl_getCountDispatcher(this: ITraceParams): Cardinal; cdecl;
 begin
 	try
-		Result := ITraceParamsImpl(this.FObject).getCount();
+		Result := this.asITraceParamsImpl.getCount();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19325,7 +19325,7 @@ end;
 function ITraceParamsImpl_getParamDispatcher(this: ITraceParams; idx: Cardinal): dscPtr; cdecl;
 begin
 	try
-		Result := ITraceParamsImpl(this.FObject).getParam(idx);
+		Result := this.asITraceParamsImpl.getParam(idx);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19334,7 +19334,7 @@ end;
 function ITraceParamsImpl_getTextUTF8Dispatcher(this: ITraceParams; status: IStatus; idx: Cardinal): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceParamsImpl(this.FObject).getTextUTF8(status, idx);
+		Result := this.asITraceParamsImpl.getTextUTF8(status, idx);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -19371,7 +19371,7 @@ end;
 function ITraceStatementImpl_getStmtIDDispatcher(this: ITraceStatement): Int64; cdecl;
 begin
 	try
-		Result := ITraceStatementImpl(this.FObject).getStmtID();
+		Result := this.asITraceStatementImpl.getStmtID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19380,7 +19380,7 @@ end;
 function ITraceStatementImpl_getPerfDispatcher(this: ITraceStatement): PerformanceInfoPtr; cdecl;
 begin
 	try
-		Result := ITraceStatementImpl(this.FObject).getPerf();
+		Result := this.asITraceStatementImpl.getPerf();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19418,7 +19418,7 @@ end;
 function ITraceSQLStatementImpl_getStmtIDDispatcher(this: ITraceSQLStatement): Int64; cdecl;
 begin
 	try
-		Result := ITraceSQLStatementImpl(this.FObject).getStmtID();
+		Result := this.asITraceSQLStatementImpl.getStmtID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19427,7 +19427,7 @@ end;
 function ITraceSQLStatementImpl_getPerfDispatcher(this: ITraceSQLStatement): PerformanceInfoPtr; cdecl;
 begin
 	try
-		Result := ITraceSQLStatementImpl(this.FObject).getPerf();
+		Result := this.asITraceSQLStatementImpl.getPerf();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19436,7 +19436,7 @@ end;
 function ITraceSQLStatementImpl_getTextDispatcher(this: ITraceSQLStatement): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceSQLStatementImpl(this.FObject).getText();
+		Result := this.asITraceSQLStatementImpl.getText();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19445,7 +19445,7 @@ end;
 function ITraceSQLStatementImpl_getPlanDispatcher(this: ITraceSQLStatement): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceSQLStatementImpl(this.FObject).getPlan();
+		Result := this.asITraceSQLStatementImpl.getPlan();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19454,7 +19454,7 @@ end;
 function ITraceSQLStatementImpl_getInputsDispatcher(this: ITraceSQLStatement): ITraceParams; cdecl;
 begin
 	try
-		Result := ITraceSQLStatementImpl(this.FObject).getInputs();
+		Result := this.asITraceSQLStatementImpl.getInputs();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19463,7 +19463,7 @@ end;
 function ITraceSQLStatementImpl_getTextUTF8Dispatcher(this: ITraceSQLStatement): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceSQLStatementImpl(this.FObject).getTextUTF8();
+		Result := this.asITraceSQLStatementImpl.getTextUTF8();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19472,7 +19472,7 @@ end;
 function ITraceSQLStatementImpl_getExplainedPlanDispatcher(this: ITraceSQLStatement): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceSQLStatementImpl(this.FObject).getExplainedPlan();
+		Result := this.asITraceSQLStatementImpl.getExplainedPlan();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19513,7 +19513,7 @@ end;
 function ITraceBLRStatementImpl_getStmtIDDispatcher(this: ITraceBLRStatement): Int64; cdecl;
 begin
 	try
-		Result := ITraceBLRStatementImpl(this.FObject).getStmtID();
+		Result := this.asITraceBLRStatementImpl.getStmtID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19522,7 +19522,7 @@ end;
 function ITraceBLRStatementImpl_getPerfDispatcher(this: ITraceBLRStatement): PerformanceInfoPtr; cdecl;
 begin
 	try
-		Result := ITraceBLRStatementImpl(this.FObject).getPerf();
+		Result := this.asITraceBLRStatementImpl.getPerf();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19531,7 +19531,7 @@ end;
 function ITraceBLRStatementImpl_getDataDispatcher(this: ITraceBLRStatement): BytePtr; cdecl;
 begin
 	try
-		Result := ITraceBLRStatementImpl(this.FObject).getData();
+		Result := this.asITraceBLRStatementImpl.getData();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19540,7 +19540,7 @@ end;
 function ITraceBLRStatementImpl_getDataLengthDispatcher(this: ITraceBLRStatement): Cardinal; cdecl;
 begin
 	try
-		Result := ITraceBLRStatementImpl(this.FObject).getDataLength();
+		Result := this.asITraceBLRStatementImpl.getDataLength();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19549,7 +19549,7 @@ end;
 function ITraceBLRStatementImpl_getTextDispatcher(this: ITraceBLRStatement): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceBLRStatementImpl(this.FObject).getText();
+		Result := this.asITraceBLRStatementImpl.getText();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19588,7 +19588,7 @@ end;
 function ITraceDYNRequestImpl_getDataDispatcher(this: ITraceDYNRequest): BytePtr; cdecl;
 begin
 	try
-		Result := ITraceDYNRequestImpl(this.FObject).getData();
+		Result := this.asITraceDYNRequestImpl.getData();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19597,7 +19597,7 @@ end;
 function ITraceDYNRequestImpl_getDataLengthDispatcher(this: ITraceDYNRequest): Cardinal; cdecl;
 begin
 	try
-		Result := ITraceDYNRequestImpl(this.FObject).getDataLength();
+		Result := this.asITraceDYNRequestImpl.getDataLength();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19606,7 +19606,7 @@ end;
 function ITraceDYNRequestImpl_getTextDispatcher(this: ITraceDYNRequest): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceDYNRequestImpl(this.FObject).getText();
+		Result := this.asITraceDYNRequestImpl.getText();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19643,7 +19643,7 @@ end;
 function ITraceContextVariableImpl_getNameSpaceDispatcher(this: ITraceContextVariable): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceContextVariableImpl(this.FObject).getNameSpace();
+		Result := this.asITraceContextVariableImpl.getNameSpace();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19652,7 +19652,7 @@ end;
 function ITraceContextVariableImpl_getVarNameDispatcher(this: ITraceContextVariable): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceContextVariableImpl(this.FObject).getVarName();
+		Result := this.asITraceContextVariableImpl.getVarName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19661,7 +19661,7 @@ end;
 function ITraceContextVariableImpl_getVarValueDispatcher(this: ITraceContextVariable): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceContextVariableImpl(this.FObject).getVarValue();
+		Result := this.asITraceContextVariableImpl.getVarValue();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19698,7 +19698,7 @@ end;
 function ITraceProcedureImpl_getProcNameDispatcher(this: ITraceProcedure): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceProcedureImpl(this.FObject).getProcName();
+		Result := this.asITraceProcedureImpl.getProcName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19707,7 +19707,7 @@ end;
 function ITraceProcedureImpl_getInputsDispatcher(this: ITraceProcedure): ITraceParams; cdecl;
 begin
 	try
-		Result := ITraceProcedureImpl(this.FObject).getInputs();
+		Result := this.asITraceProcedureImpl.getInputs();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19716,7 +19716,7 @@ end;
 function ITraceProcedureImpl_getPerfDispatcher(this: ITraceProcedure): PerformanceInfoPtr; cdecl;
 begin
 	try
-		Result := ITraceProcedureImpl(this.FObject).getPerf();
+		Result := this.asITraceProcedureImpl.getPerf();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19753,7 +19753,7 @@ end;
 function ITraceFunctionImpl_getFuncNameDispatcher(this: ITraceFunction): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceFunctionImpl(this.FObject).getFuncName();
+		Result := this.asITraceFunctionImpl.getFuncName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19762,7 +19762,7 @@ end;
 function ITraceFunctionImpl_getInputsDispatcher(this: ITraceFunction): ITraceParams; cdecl;
 begin
 	try
-		Result := ITraceFunctionImpl(this.FObject).getInputs();
+		Result := this.asITraceFunctionImpl.getInputs();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19771,7 +19771,7 @@ end;
 function ITraceFunctionImpl_getResultDispatcher(this: ITraceFunction): ITraceParams; cdecl;
 begin
 	try
-		Result := ITraceFunctionImpl(this.FObject).getResult();
+		Result := this.asITraceFunctionImpl.getResult();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19780,7 +19780,7 @@ end;
 function ITraceFunctionImpl_getPerfDispatcher(this: ITraceFunction): PerformanceInfoPtr; cdecl;
 begin
 	try
-		Result := ITraceFunctionImpl(this.FObject).getPerf();
+		Result := this.asITraceFunctionImpl.getPerf();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19818,7 +19818,7 @@ end;
 function ITraceTriggerImpl_getTriggerNameDispatcher(this: ITraceTrigger): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceTriggerImpl(this.FObject).getTriggerName();
+		Result := this.asITraceTriggerImpl.getTriggerName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19827,7 +19827,7 @@ end;
 function ITraceTriggerImpl_getRelationNameDispatcher(this: ITraceTrigger): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceTriggerImpl(this.FObject).getRelationName();
+		Result := this.asITraceTriggerImpl.getRelationName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19836,7 +19836,7 @@ end;
 function ITraceTriggerImpl_getActionDispatcher(this: ITraceTrigger): Integer; cdecl;
 begin
 	try
-		Result := ITraceTriggerImpl(this.FObject).getAction();
+		Result := this.asITraceTriggerImpl.getAction();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19845,7 +19845,7 @@ end;
 function ITraceTriggerImpl_getWhichDispatcher(this: ITraceTrigger): Integer; cdecl;
 begin
 	try
-		Result := ITraceTriggerImpl(this.FObject).getWhich();
+		Result := this.asITraceTriggerImpl.getWhich();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19854,7 +19854,7 @@ end;
 function ITraceTriggerImpl_getPerfDispatcher(this: ITraceTrigger): PerformanceInfoPtr; cdecl;
 begin
 	try
-		Result := ITraceTriggerImpl(this.FObject).getPerf();
+		Result := this.asITraceTriggerImpl.getPerf();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19893,7 +19893,7 @@ end;
 function ITraceServiceConnectionImpl_getKindDispatcher(this: ITraceServiceConnection): Cardinal; cdecl;
 begin
 	try
-		Result := ITraceServiceConnectionImpl(this.FObject).getKind();
+		Result := this.asITraceServiceConnectionImpl.getKind();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19902,7 +19902,7 @@ end;
 function ITraceServiceConnectionImpl_getProcessIDDispatcher(this: ITraceServiceConnection): Integer; cdecl;
 begin
 	try
-		Result := ITraceServiceConnectionImpl(this.FObject).getProcessID();
+		Result := this.asITraceServiceConnectionImpl.getProcessID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19911,7 +19911,7 @@ end;
 function ITraceServiceConnectionImpl_getUserNameDispatcher(this: ITraceServiceConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceServiceConnectionImpl(this.FObject).getUserName();
+		Result := this.asITraceServiceConnectionImpl.getUserName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19920,7 +19920,7 @@ end;
 function ITraceServiceConnectionImpl_getRoleNameDispatcher(this: ITraceServiceConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceServiceConnectionImpl(this.FObject).getRoleName();
+		Result := this.asITraceServiceConnectionImpl.getRoleName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19929,7 +19929,7 @@ end;
 function ITraceServiceConnectionImpl_getCharSetDispatcher(this: ITraceServiceConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceServiceConnectionImpl(this.FObject).getCharSet();
+		Result := this.asITraceServiceConnectionImpl.getCharSet();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19938,7 +19938,7 @@ end;
 function ITraceServiceConnectionImpl_getRemoteProtocolDispatcher(this: ITraceServiceConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceServiceConnectionImpl(this.FObject).getRemoteProtocol();
+		Result := this.asITraceServiceConnectionImpl.getRemoteProtocol();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19947,7 +19947,7 @@ end;
 function ITraceServiceConnectionImpl_getRemoteAddressDispatcher(this: ITraceServiceConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceServiceConnectionImpl(this.FObject).getRemoteAddress();
+		Result := this.asITraceServiceConnectionImpl.getRemoteAddress();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19956,7 +19956,7 @@ end;
 function ITraceServiceConnectionImpl_getRemoteProcessIDDispatcher(this: ITraceServiceConnection): Integer; cdecl;
 begin
 	try
-		Result := ITraceServiceConnectionImpl(this.FObject).getRemoteProcessID();
+		Result := this.asITraceServiceConnectionImpl.getRemoteProcessID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19965,7 +19965,7 @@ end;
 function ITraceServiceConnectionImpl_getRemoteProcessNameDispatcher(this: ITraceServiceConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceServiceConnectionImpl(this.FObject).getRemoteProcessName();
+		Result := this.asITraceServiceConnectionImpl.getRemoteProcessName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19974,7 +19974,7 @@ end;
 function ITraceServiceConnectionImpl_getServiceIDDispatcher(this: ITraceServiceConnection): Pointer; cdecl;
 begin
 	try
-		Result := ITraceServiceConnectionImpl(this.FObject).getServiceID();
+		Result := this.asITraceServiceConnectionImpl.getServiceID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19983,7 +19983,7 @@ end;
 function ITraceServiceConnectionImpl_getServiceMgrDispatcher(this: ITraceServiceConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceServiceConnectionImpl(this.FObject).getServiceMgr();
+		Result := this.asITraceServiceConnectionImpl.getServiceMgr();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -19992,7 +19992,7 @@ end;
 function ITraceServiceConnectionImpl_getServiceNameDispatcher(this: ITraceServiceConnection): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceServiceConnectionImpl(this.FObject).getServiceName();
+		Result := this.asITraceServiceConnectionImpl.getServiceName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20038,7 +20038,7 @@ end;
 function ITraceStatusVectorImpl_hasErrorDispatcher(this: ITraceStatusVector): Boolean; cdecl;
 begin
 	try
-		Result := ITraceStatusVectorImpl(this.FObject).hasError();
+		Result := this.asITraceStatusVectorImpl.hasError();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20047,7 +20047,7 @@ end;
 function ITraceStatusVectorImpl_hasWarningDispatcher(this: ITraceStatusVector): Boolean; cdecl;
 begin
 	try
-		Result := ITraceStatusVectorImpl(this.FObject).hasWarning();
+		Result := this.asITraceStatusVectorImpl.hasWarning();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20056,7 +20056,7 @@ end;
 function ITraceStatusVectorImpl_getStatusDispatcher(this: ITraceStatusVector): IStatus; cdecl;
 begin
 	try
-		Result := ITraceStatusVectorImpl(this.FObject).getStatus();
+		Result := this.asITraceStatusVectorImpl.getStatus();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20065,7 +20065,7 @@ end;
 function ITraceStatusVectorImpl_getTextDispatcher(this: ITraceStatusVector): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceStatusVectorImpl(this.FObject).getText();
+		Result := this.asITraceStatusVectorImpl.getText();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20103,7 +20103,7 @@ end;
 function ITraceSweepInfoImpl_getOITDispatcher(this: ITraceSweepInfo): Int64; cdecl;
 begin
 	try
-		Result := ITraceSweepInfoImpl(this.FObject).getOIT();
+		Result := this.asITraceSweepInfoImpl.getOIT();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20112,7 +20112,7 @@ end;
 function ITraceSweepInfoImpl_getOSTDispatcher(this: ITraceSweepInfo): Int64; cdecl;
 begin
 	try
-		Result := ITraceSweepInfoImpl(this.FObject).getOST();
+		Result := this.asITraceSweepInfoImpl.getOST();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20121,7 +20121,7 @@ end;
 function ITraceSweepInfoImpl_getOATDispatcher(this: ITraceSweepInfo): Int64; cdecl;
 begin
 	try
-		Result := ITraceSweepInfoImpl(this.FObject).getOAT();
+		Result := this.asITraceSweepInfoImpl.getOAT();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20130,7 +20130,7 @@ end;
 function ITraceSweepInfoImpl_getNextDispatcher(this: ITraceSweepInfo): Int64; cdecl;
 begin
 	try
-		Result := ITraceSweepInfoImpl(this.FObject).getNext();
+		Result := this.asITraceSweepInfoImpl.getNext();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20139,7 +20139,7 @@ end;
 function ITraceSweepInfoImpl_getPerfDispatcher(this: ITraceSweepInfo): PerformanceInfoPtr; cdecl;
 begin
 	try
-		Result := ITraceSweepInfoImpl(this.FObject).getPerf();
+		Result := this.asITraceSweepInfoImpl.getPerf();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20178,7 +20178,7 @@ end;
 procedure ITraceLogWriterImpl_addRefDispatcher(this: ITraceLogWriter); cdecl;
 begin
 	try
-		ITraceLogWriterImpl(this.FObject).addRef();
+		this.asITraceLogWriterImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20187,7 +20187,7 @@ end;
 function ITraceLogWriterImpl_releaseDispatcher(this: ITraceLogWriter): Integer; cdecl;
 begin
 	try
-		Result := ITraceLogWriterImpl(this.FObject).release();
+		Result := this.asITraceLogWriterImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20196,7 +20196,7 @@ end;
 function ITraceLogWriterImpl_writeDispatcher(this: ITraceLogWriter; buf: Pointer; size: Cardinal): Cardinal; cdecl;
 begin
 	try
-		Result := ITraceLogWriterImpl(this.FObject).write(buf, size);
+		Result := this.asITraceLogWriterImpl.write(buf, size);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20205,7 +20205,7 @@ end;
 function ITraceLogWriterImpl_write_sDispatcher(this: ITraceLogWriter; status: IStatus; buf: Pointer; size: Cardinal): Cardinal; cdecl;
 begin
 	try
-		Result := ITraceLogWriterImpl(this.FObject).write_s(status, buf, size);
+		Result := this.asITraceLogWriterImpl.write_s(status, buf, size);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -20243,7 +20243,7 @@ end;
 function ITraceInitInfoImpl_getConfigTextDispatcher(this: ITraceInitInfo): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceInitInfoImpl(this.FObject).getConfigText();
+		Result := this.asITraceInitInfoImpl.getConfigText();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20252,7 +20252,7 @@ end;
 function ITraceInitInfoImpl_getTraceSessionIDDispatcher(this: ITraceInitInfo): Integer; cdecl;
 begin
 	try
-		Result := ITraceInitInfoImpl(this.FObject).getTraceSessionID();
+		Result := this.asITraceInitInfoImpl.getTraceSessionID();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20261,7 +20261,7 @@ end;
 function ITraceInitInfoImpl_getTraceSessionNameDispatcher(this: ITraceInitInfo): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceInitInfoImpl(this.FObject).getTraceSessionName();
+		Result := this.asITraceInitInfoImpl.getTraceSessionName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20270,7 +20270,7 @@ end;
 function ITraceInitInfoImpl_getFirebirdRootDirectoryDispatcher(this: ITraceInitInfo): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceInitInfoImpl(this.FObject).getFirebirdRootDirectory();
+		Result := this.asITraceInitInfoImpl.getFirebirdRootDirectory();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20279,7 +20279,7 @@ end;
 function ITraceInitInfoImpl_getDatabaseNameDispatcher(this: ITraceInitInfo): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITraceInitInfoImpl(this.FObject).getDatabaseName();
+		Result := this.asITraceInitInfoImpl.getDatabaseName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20288,7 +20288,7 @@ end;
 function ITraceInitInfoImpl_getConnectionDispatcher(this: ITraceInitInfo): ITraceDatabaseConnection; cdecl;
 begin
 	try
-		Result := ITraceInitInfoImpl(this.FObject).getConnection();
+		Result := this.asITraceInitInfoImpl.getConnection();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20297,7 +20297,7 @@ end;
 function ITraceInitInfoImpl_getLogWriterDispatcher(this: ITraceInitInfo): ITraceLogWriter; cdecl;
 begin
 	try
-		Result := ITraceInitInfoImpl(this.FObject).getLogWriter();
+		Result := this.asITraceInitInfoImpl.getLogWriter();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20338,7 +20338,7 @@ end;
 procedure ITracePluginImpl_addRefDispatcher(this: ITracePlugin); cdecl;
 begin
 	try
-		ITracePluginImpl(this.FObject).addRef();
+		this.asITracePluginImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20347,7 +20347,7 @@ end;
 function ITracePluginImpl_releaseDispatcher(this: ITracePlugin): Integer; cdecl;
 begin
 	try
-		Result := ITracePluginImpl(this.FObject).release();
+		Result := this.asITracePluginImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20356,7 +20356,7 @@ end;
 function ITracePluginImpl_trace_get_errorDispatcher(this: ITracePlugin): PAnsiChar; cdecl;
 begin
 	try
-		Result := ITracePluginImpl(this.FObject).trace_get_error();
+		Result := this.asITracePluginImpl.trace_get_error();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20365,7 +20365,7 @@ end;
 function ITracePluginImpl_trace_attachDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; create_db: Boolean; att_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := ITracePluginImpl(this.FObject).trace_attach(connection, create_db, att_result);
+		Result := this.asITracePluginImpl.trace_attach(connection, create_db, att_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20374,7 +20374,7 @@ end;
 function ITracePluginImpl_trace_detachDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; drop_db: Boolean): Boolean; cdecl;
 begin
 	try
-		Result := ITracePluginImpl(this.FObject).trace_detach(connection, drop_db);
+		Result := this.asITracePluginImpl.trace_detach(connection, drop_db);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20383,7 +20383,7 @@ end;
 function ITracePluginImpl_trace_transaction_startDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; tpb_length: Cardinal; tpb: BytePtr; tra_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := ITracePluginImpl(this.FObject).trace_transaction_start(connection, transaction, tpb_length, tpb, tra_result);
+		Result := this.asITracePluginImpl.trace_transaction_start(connection, transaction, tpb_length, tpb, tra_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20392,7 +20392,7 @@ end;
 function ITracePluginImpl_trace_transaction_endDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; commit: Boolean; retain_context: Boolean; tra_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := ITracePluginImpl(this.FObject).trace_transaction_end(connection, transaction, commit, retain_context, tra_result);
+		Result := this.asITracePluginImpl.trace_transaction_end(connection, transaction, commit, retain_context, tra_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20401,7 +20401,7 @@ end;
 function ITracePluginImpl_trace_proc_executeDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; procedure_: ITraceProcedure; started: Boolean; proc_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := ITracePluginImpl(this.FObject).trace_proc_execute(connection, transaction, procedure_, started, proc_result);
+		Result := this.asITracePluginImpl.trace_proc_execute(connection, transaction, procedure_, started, proc_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20410,7 +20410,7 @@ end;
 function ITracePluginImpl_trace_trigger_executeDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; trigger: ITraceTrigger; started: Boolean; trig_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := ITracePluginImpl(this.FObject).trace_trigger_execute(connection, transaction, trigger, started, trig_result);
+		Result := this.asITracePluginImpl.trace_trigger_execute(connection, transaction, trigger, started, trig_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20419,7 +20419,7 @@ end;
 function ITracePluginImpl_trace_set_contextDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; variable: ITraceContextVariable): Boolean; cdecl;
 begin
 	try
-		Result := ITracePluginImpl(this.FObject).trace_set_context(connection, transaction, variable);
+		Result := this.asITracePluginImpl.trace_set_context(connection, transaction, variable);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20428,7 +20428,7 @@ end;
 function ITracePluginImpl_trace_dsql_prepareDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; statement: ITraceSQLStatement; time_millis: Int64; req_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := ITracePluginImpl(this.FObject).trace_dsql_prepare(connection, transaction, statement, time_millis, req_result);
+		Result := this.asITracePluginImpl.trace_dsql_prepare(connection, transaction, statement, time_millis, req_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20437,7 +20437,7 @@ end;
 function ITracePluginImpl_trace_dsql_freeDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; statement: ITraceSQLStatement; option: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := ITracePluginImpl(this.FObject).trace_dsql_free(connection, statement, option);
+		Result := this.asITracePluginImpl.trace_dsql_free(connection, statement, option);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20446,7 +20446,7 @@ end;
 function ITracePluginImpl_trace_dsql_executeDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; statement: ITraceSQLStatement; started: Boolean; req_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := ITracePluginImpl(this.FObject).trace_dsql_execute(connection, transaction, statement, started, req_result);
+		Result := this.asITracePluginImpl.trace_dsql_execute(connection, transaction, statement, started, req_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20455,7 +20455,7 @@ end;
 function ITracePluginImpl_trace_blr_compileDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; statement: ITraceBLRStatement; time_millis: Int64; req_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := ITracePluginImpl(this.FObject).trace_blr_compile(connection, transaction, statement, time_millis, req_result);
+		Result := this.asITracePluginImpl.trace_blr_compile(connection, transaction, statement, time_millis, req_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20464,7 +20464,7 @@ end;
 function ITracePluginImpl_trace_blr_executeDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; statement: ITraceBLRStatement; req_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := ITracePluginImpl(this.FObject).trace_blr_execute(connection, transaction, statement, req_result);
+		Result := this.asITracePluginImpl.trace_blr_execute(connection, transaction, statement, req_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20473,7 +20473,7 @@ end;
 function ITracePluginImpl_trace_dyn_executeDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; request: ITraceDYNRequest; time_millis: Int64; req_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := ITracePluginImpl(this.FObject).trace_dyn_execute(connection, transaction, request, time_millis, req_result);
+		Result := this.asITracePluginImpl.trace_dyn_execute(connection, transaction, request, time_millis, req_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20482,7 +20482,7 @@ end;
 function ITracePluginImpl_trace_service_attachDispatcher(this: ITracePlugin; service: ITraceServiceConnection; att_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := ITracePluginImpl(this.FObject).trace_service_attach(service, att_result);
+		Result := this.asITracePluginImpl.trace_service_attach(service, att_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20491,7 +20491,7 @@ end;
 function ITracePluginImpl_trace_service_startDispatcher(this: ITracePlugin; service: ITraceServiceConnection; switches_length: Cardinal; switches: PAnsiChar; start_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := ITracePluginImpl(this.FObject).trace_service_start(service, switches_length, switches, start_result);
+		Result := this.asITracePluginImpl.trace_service_start(service, switches_length, switches, start_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20500,7 +20500,7 @@ end;
 function ITracePluginImpl_trace_service_queryDispatcher(this: ITracePlugin; service: ITraceServiceConnection; send_item_length: Cardinal; send_items: BytePtr; recv_item_length: Cardinal; recv_items: BytePtr; query_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := ITracePluginImpl(this.FObject).trace_service_query(service, send_item_length, send_items, recv_item_length, recv_items, query_result);
+		Result := this.asITracePluginImpl.trace_service_query(service, send_item_length, send_items, recv_item_length, recv_items, query_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20509,7 +20509,7 @@ end;
 function ITracePluginImpl_trace_service_detachDispatcher(this: ITracePlugin; service: ITraceServiceConnection; detach_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := ITracePluginImpl(this.FObject).trace_service_detach(service, detach_result);
+		Result := this.asITracePluginImpl.trace_service_detach(service, detach_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20518,7 +20518,7 @@ end;
 function ITracePluginImpl_trace_event_errorDispatcher(this: ITracePlugin; connection: ITraceConnection; status: ITraceStatusVector; function_: PAnsiChar): Boolean; cdecl;
 begin
 	try
-		Result := ITracePluginImpl(this.FObject).trace_event_error(connection, status, function_);
+		Result := this.asITracePluginImpl.trace_event_error(connection, status, function_);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20527,7 +20527,7 @@ end;
 function ITracePluginImpl_trace_event_sweepDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; sweep: ITraceSweepInfo; sweep_state: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := ITracePluginImpl(this.FObject).trace_event_sweep(connection, sweep, sweep_state);
+		Result := this.asITracePluginImpl.trace_event_sweep(connection, sweep, sweep_state);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20536,7 +20536,7 @@ end;
 function ITracePluginImpl_trace_func_executeDispatcher(this: ITracePlugin; connection: ITraceDatabaseConnection; transaction: ITraceTransaction; function_: ITraceFunction; started: Boolean; func_result: Cardinal): Boolean; cdecl;
 begin
 	try
-		Result := ITracePluginImpl(this.FObject).trace_func_execute(connection, transaction, function_, started, func_result);
+		Result := this.asITracePluginImpl.trace_func_execute(connection, transaction, function_, started, func_result);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20593,7 +20593,7 @@ end;
 procedure ITraceFactoryImpl_addRefDispatcher(this: ITraceFactory); cdecl;
 begin
 	try
-		ITraceFactoryImpl(this.FObject).addRef();
+		this.asITraceFactoryImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20602,7 +20602,7 @@ end;
 function ITraceFactoryImpl_releaseDispatcher(this: ITraceFactory): Integer; cdecl;
 begin
 	try
-		Result := ITraceFactoryImpl(this.FObject).release();
+		Result := this.asITraceFactoryImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20611,7 +20611,7 @@ end;
 procedure ITraceFactoryImpl_setOwnerDispatcher(this: ITraceFactory; r: IReferenceCounted); cdecl;
 begin
 	try
-		ITraceFactoryImpl(this.FObject).setOwner(r);
+		this.asITraceFactoryImpl.setOwner(r);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20620,7 +20620,7 @@ end;
 function ITraceFactoryImpl_getOwnerDispatcher(this: ITraceFactory): IReferenceCounted; cdecl;
 begin
 	try
-		Result := ITraceFactoryImpl(this.FObject).getOwner();
+		Result := this.asITraceFactoryImpl.getOwner();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20629,7 +20629,7 @@ end;
 function ITraceFactoryImpl_trace_needsDispatcher(this: ITraceFactory): QWord; cdecl;
 begin
 	try
-		Result := ITraceFactoryImpl(this.FObject).trace_needs();
+		Result := this.asITraceFactoryImpl.trace_needs();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20638,7 +20638,7 @@ end;
 function ITraceFactoryImpl_trace_createDispatcher(this: ITraceFactory; status: IStatus; init_info: ITraceInitInfo): ITracePlugin; cdecl;
 begin
 	try
-		Result := ITraceFactoryImpl(this.FObject).trace_create(status, init_info);
+		Result := this.asITraceFactoryImpl.trace_create(status, init_info);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -20678,7 +20678,7 @@ end;
 procedure IUdrFunctionFactoryImpl_disposeDispatcher(this: IUdrFunctionFactory); cdecl;
 begin
 	try
-		IUdrFunctionFactoryImpl(this.FObject).dispose();
+		this.asIUdrFunctionFactoryImpl.dispose();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20687,7 +20687,7 @@ end;
 procedure IUdrFunctionFactoryImpl_setupDispatcher(this: IUdrFunctionFactory; status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder); cdecl;
 begin
 	try
-		IUdrFunctionFactoryImpl(this.FObject).setup(status, context, metadata, inBuilder, outBuilder);
+		this.asIUdrFunctionFactoryImpl.setup(status, context, metadata, inBuilder, outBuilder);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -20696,7 +20696,7 @@ end;
 function IUdrFunctionFactoryImpl_newItemDispatcher(this: IUdrFunctionFactory; status: IStatus; context: IExternalContext; metadata: IRoutineMetadata): IExternalFunction; cdecl;
 begin
 	try
-		Result := IUdrFunctionFactoryImpl(this.FObject).newItem(status, context, metadata);
+		Result := this.asIUdrFunctionFactoryImpl.newItem(status, context, metadata);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -20733,7 +20733,7 @@ end;
 procedure IUdrProcedureFactoryImpl_disposeDispatcher(this: IUdrProcedureFactory); cdecl;
 begin
 	try
-		IUdrProcedureFactoryImpl(this.FObject).dispose();
+		this.asIUdrProcedureFactoryImpl.dispose();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20742,7 +20742,7 @@ end;
 procedure IUdrProcedureFactoryImpl_setupDispatcher(this: IUdrProcedureFactory; status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; inBuilder: IMetadataBuilder; outBuilder: IMetadataBuilder); cdecl;
 begin
 	try
-		IUdrProcedureFactoryImpl(this.FObject).setup(status, context, metadata, inBuilder, outBuilder);
+		this.asIUdrProcedureFactoryImpl.setup(status, context, metadata, inBuilder, outBuilder);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -20751,7 +20751,7 @@ end;
 function IUdrProcedureFactoryImpl_newItemDispatcher(this: IUdrProcedureFactory; status: IStatus; context: IExternalContext; metadata: IRoutineMetadata): IExternalProcedure; cdecl;
 begin
 	try
-		Result := IUdrProcedureFactoryImpl(this.FObject).newItem(status, context, metadata);
+		Result := this.asIUdrProcedureFactoryImpl.newItem(status, context, metadata);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -20788,7 +20788,7 @@ end;
 procedure IUdrTriggerFactoryImpl_disposeDispatcher(this: IUdrTriggerFactory); cdecl;
 begin
 	try
-		IUdrTriggerFactoryImpl(this.FObject).dispose();
+		this.asIUdrTriggerFactoryImpl.dispose();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20797,7 +20797,7 @@ end;
 procedure IUdrTriggerFactoryImpl_setupDispatcher(this: IUdrTriggerFactory; status: IStatus; context: IExternalContext; metadata: IRoutineMetadata; fieldsBuilder: IMetadataBuilder); cdecl;
 begin
 	try
-		IUdrTriggerFactoryImpl(this.FObject).setup(status, context, metadata, fieldsBuilder);
+		this.asIUdrTriggerFactoryImpl.setup(status, context, metadata, fieldsBuilder);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -20806,7 +20806,7 @@ end;
 function IUdrTriggerFactoryImpl_newItemDispatcher(this: IUdrTriggerFactory; status: IStatus; context: IExternalContext; metadata: IRoutineMetadata): IExternalTrigger; cdecl;
 begin
 	try
-		Result := IUdrTriggerFactoryImpl(this.FObject).newItem(status, context, metadata);
+		Result := this.asIUdrTriggerFactoryImpl.newItem(status, context, metadata);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -20843,7 +20843,7 @@ end;
 function IUdrPluginImpl_getMasterDispatcher(this: IUdrPlugin): IMaster; cdecl;
 begin
 	try
-		Result := IUdrPluginImpl(this.FObject).getMaster();
+		Result := this.asIUdrPluginImpl.getMaster();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20852,7 +20852,7 @@ end;
 procedure IUdrPluginImpl_registerFunctionDispatcher(this: IUdrPlugin; status: IStatus; name: PAnsiChar; factory: IUdrFunctionFactory); cdecl;
 begin
 	try
-		IUdrPluginImpl(this.FObject).registerFunction(status, name, factory);
+		this.asIUdrPluginImpl.registerFunction(status, name, factory);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -20861,7 +20861,7 @@ end;
 procedure IUdrPluginImpl_registerProcedureDispatcher(this: IUdrPlugin; status: IStatus; name: PAnsiChar; factory: IUdrProcedureFactory); cdecl;
 begin
 	try
-		IUdrPluginImpl(this.FObject).registerProcedure(status, name, factory);
+		this.asIUdrPluginImpl.registerProcedure(status, name, factory);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -20870,7 +20870,7 @@ end;
 procedure IUdrPluginImpl_registerTriggerDispatcher(this: IUdrPlugin; status: IStatus; name: PAnsiChar; factory: IUdrTriggerFactory); cdecl;
 begin
 	try
-		IUdrPluginImpl(this.FObject).registerTrigger(status, name, factory);
+		this.asIUdrPluginImpl.registerTrigger(status, name, factory);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -20908,7 +20908,7 @@ end;
 procedure IDecFloat16Impl_toBcdDispatcher(this: IDecFloat16; from: FB_DEC16Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr); cdecl;
 begin
 	try
-		IDecFloat16Impl(this.FObject).toBcd(from, sign, bcd, exp);
+		this.asIDecFloat16Impl.toBcd(from, sign, bcd, exp);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20917,7 +20917,7 @@ end;
 procedure IDecFloat16Impl_toStringDispatcher(this: IDecFloat16; status: IStatus; from: FB_DEC16Ptr; bufferLength: Cardinal; buffer: PAnsiChar); cdecl;
 begin
 	try
-		IDecFloat16Impl(this.FObject).toString(status, from, bufferLength, buffer);
+		this.asIDecFloat16Impl.toString(status, from, bufferLength, buffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -20926,7 +20926,7 @@ end;
 procedure IDecFloat16Impl_fromBcdDispatcher(this: IDecFloat16; sign: Integer; bcd: BytePtr; exp: Integer; to_: FB_DEC16Ptr); cdecl;
 begin
 	try
-		IDecFloat16Impl(this.FObject).fromBcd(sign, bcd, exp, to_);
+		this.asIDecFloat16Impl.fromBcd(sign, bcd, exp, to_);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20935,7 +20935,7 @@ end;
 procedure IDecFloat16Impl_fromStringDispatcher(this: IDecFloat16; status: IStatus; from: PAnsiChar; to_: FB_DEC16Ptr); cdecl;
 begin
 	try
-		IDecFloat16Impl(this.FObject).fromString(status, from, to_);
+		this.asIDecFloat16Impl.fromString(status, from, to_);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -20973,7 +20973,7 @@ end;
 procedure IDecFloat34Impl_toBcdDispatcher(this: IDecFloat34; from: FB_DEC34Ptr; sign: IntegerPtr; bcd: BytePtr; exp: IntegerPtr); cdecl;
 begin
 	try
-		IDecFloat34Impl(this.FObject).toBcd(from, sign, bcd, exp);
+		this.asIDecFloat34Impl.toBcd(from, sign, bcd, exp);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -20982,7 +20982,7 @@ end;
 procedure IDecFloat34Impl_toStringDispatcher(this: IDecFloat34; status: IStatus; from: FB_DEC34Ptr; bufferLength: Cardinal; buffer: PAnsiChar); cdecl;
 begin
 	try
-		IDecFloat34Impl(this.FObject).toString(status, from, bufferLength, buffer);
+		this.asIDecFloat34Impl.toString(status, from, bufferLength, buffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -20991,7 +20991,7 @@ end;
 procedure IDecFloat34Impl_fromBcdDispatcher(this: IDecFloat34; sign: Integer; bcd: BytePtr; exp: Integer; to_: FB_DEC34Ptr); cdecl;
 begin
 	try
-		IDecFloat34Impl(this.FObject).fromBcd(sign, bcd, exp, to_);
+		this.asIDecFloat34Impl.fromBcd(sign, bcd, exp, to_);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -21000,7 +21000,7 @@ end;
 procedure IDecFloat34Impl_fromStringDispatcher(this: IDecFloat34; status: IStatus; from: PAnsiChar; to_: FB_DEC34Ptr); cdecl;
 begin
 	try
-		IDecFloat34Impl(this.FObject).fromString(status, from, to_);
+		this.asIDecFloat34Impl.fromString(status, from, to_);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -21038,7 +21038,7 @@ end;
 procedure IInt128Impl_toStringDispatcher(this: IInt128; status: IStatus; from: FB_I128Ptr; scale: Integer; bufferLength: Cardinal; buffer: PAnsiChar); cdecl;
 begin
 	try
-		IInt128Impl(this.FObject).toString(status, from, scale, bufferLength, buffer);
+		this.asIInt128Impl.toString(status, from, scale, bufferLength, buffer);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -21047,7 +21047,7 @@ end;
 procedure IInt128Impl_fromStringDispatcher(this: IInt128; status: IStatus; scale: Integer; from: PAnsiChar; to_: FB_I128Ptr); cdecl;
 begin
 	try
-		IInt128Impl(this.FObject).fromString(status, scale, from, to_);
+		this.asIInt128Impl.fromString(status, scale, from, to_);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -21083,7 +21083,7 @@ end;
 function IReplicatedFieldImpl_getNameDispatcher(this: IReplicatedField): PAnsiChar; cdecl;
 begin
 	try
-		Result := IReplicatedFieldImpl(this.FObject).getName();
+		Result := this.asIReplicatedFieldImpl.getName();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -21092,7 +21092,7 @@ end;
 function IReplicatedFieldImpl_getTypeDispatcher(this: IReplicatedField): Cardinal; cdecl;
 begin
 	try
-		Result := IReplicatedFieldImpl(this.FObject).getType();
+		Result := this.asIReplicatedFieldImpl.getType();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -21101,7 +21101,7 @@ end;
 function IReplicatedFieldImpl_getSubTypeDispatcher(this: IReplicatedField): Integer; cdecl;
 begin
 	try
-		Result := IReplicatedFieldImpl(this.FObject).getSubType();
+		Result := this.asIReplicatedFieldImpl.getSubType();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -21110,7 +21110,7 @@ end;
 function IReplicatedFieldImpl_getScaleDispatcher(this: IReplicatedField): Integer; cdecl;
 begin
 	try
-		Result := IReplicatedFieldImpl(this.FObject).getScale();
+		Result := this.asIReplicatedFieldImpl.getScale();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -21119,7 +21119,7 @@ end;
 function IReplicatedFieldImpl_getLengthDispatcher(this: IReplicatedField): Cardinal; cdecl;
 begin
 	try
-		Result := IReplicatedFieldImpl(this.FObject).getLength();
+		Result := this.asIReplicatedFieldImpl.getLength();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -21128,7 +21128,7 @@ end;
 function IReplicatedFieldImpl_getCharSetDispatcher(this: IReplicatedField): Cardinal; cdecl;
 begin
 	try
-		Result := IReplicatedFieldImpl(this.FObject).getCharSet();
+		Result := this.asIReplicatedFieldImpl.getCharSet();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -21137,7 +21137,7 @@ end;
 function IReplicatedFieldImpl_getDataDispatcher(this: IReplicatedField): Pointer; cdecl;
 begin
 	try
-		Result := IReplicatedFieldImpl(this.FObject).getData();
+		Result := this.asIReplicatedFieldImpl.getData();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -21178,7 +21178,7 @@ end;
 function IReplicatedRecordImpl_getCountDispatcher(this: IReplicatedRecord): Cardinal; cdecl;
 begin
 	try
-		Result := IReplicatedRecordImpl(this.FObject).getCount();
+		Result := this.asIReplicatedRecordImpl.getCount();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -21187,7 +21187,7 @@ end;
 function IReplicatedRecordImpl_getFieldDispatcher(this: IReplicatedRecord; index: Cardinal): IReplicatedField; cdecl;
 begin
 	try
-		Result := IReplicatedRecordImpl(this.FObject).getField(index);
+		Result := this.asIReplicatedRecordImpl.getField(index);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -21196,7 +21196,7 @@ end;
 function IReplicatedRecordImpl_getRawLengthDispatcher(this: IReplicatedRecord): Cardinal; cdecl;
 begin
 	try
-		Result := IReplicatedRecordImpl(this.FObject).getRawLength();
+		Result := this.asIReplicatedRecordImpl.getRawLength();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -21205,7 +21205,7 @@ end;
 function IReplicatedRecordImpl_getRawDataDispatcher(this: IReplicatedRecord): BytePtr; cdecl;
 begin
 	try
-		Result := IReplicatedRecordImpl(this.FObject).getRawData();
+		Result := this.asIReplicatedRecordImpl.getRawData();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -21243,7 +21243,7 @@ end;
 procedure IReplicatedTransactionImpl_disposeDispatcher(this: IReplicatedTransaction); cdecl;
 begin
 	try
-		IReplicatedTransactionImpl(this.FObject).dispose();
+		this.asIReplicatedTransactionImpl.dispose();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -21252,7 +21252,7 @@ end;
 procedure IReplicatedTransactionImpl_prepareDispatcher(this: IReplicatedTransaction; status: IStatus); cdecl;
 begin
 	try
-		IReplicatedTransactionImpl(this.FObject).prepare(status);
+		this.asIReplicatedTransactionImpl.prepare(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -21261,7 +21261,7 @@ end;
 procedure IReplicatedTransactionImpl_commitDispatcher(this: IReplicatedTransaction; status: IStatus); cdecl;
 begin
 	try
-		IReplicatedTransactionImpl(this.FObject).commit(status);
+		this.asIReplicatedTransactionImpl.commit(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -21270,7 +21270,7 @@ end;
 procedure IReplicatedTransactionImpl_rollbackDispatcher(this: IReplicatedTransaction; status: IStatus); cdecl;
 begin
 	try
-		IReplicatedTransactionImpl(this.FObject).rollback(status);
+		this.asIReplicatedTransactionImpl.rollback(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -21279,7 +21279,7 @@ end;
 procedure IReplicatedTransactionImpl_startSavepointDispatcher(this: IReplicatedTransaction; status: IStatus); cdecl;
 begin
 	try
-		IReplicatedTransactionImpl(this.FObject).startSavepoint(status);
+		this.asIReplicatedTransactionImpl.startSavepoint(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -21288,7 +21288,7 @@ end;
 procedure IReplicatedTransactionImpl_releaseSavepointDispatcher(this: IReplicatedTransaction; status: IStatus); cdecl;
 begin
 	try
-		IReplicatedTransactionImpl(this.FObject).releaseSavepoint(status);
+		this.asIReplicatedTransactionImpl.releaseSavepoint(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -21297,7 +21297,7 @@ end;
 procedure IReplicatedTransactionImpl_rollbackSavepointDispatcher(this: IReplicatedTransaction; status: IStatus); cdecl;
 begin
 	try
-		IReplicatedTransactionImpl(this.FObject).rollbackSavepoint(status);
+		this.asIReplicatedTransactionImpl.rollbackSavepoint(status);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -21306,7 +21306,7 @@ end;
 procedure IReplicatedTransactionImpl_insertRecordDispatcher(this: IReplicatedTransaction; status: IStatus; name: PAnsiChar; record_: IReplicatedRecord); cdecl;
 begin
 	try
-		IReplicatedTransactionImpl(this.FObject).insertRecord(status, name, record_);
+		this.asIReplicatedTransactionImpl.insertRecord(status, name, record_);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -21315,7 +21315,7 @@ end;
 procedure IReplicatedTransactionImpl_updateRecordDispatcher(this: IReplicatedTransaction; status: IStatus; name: PAnsiChar; orgRecord: IReplicatedRecord; newRecord: IReplicatedRecord); cdecl;
 begin
 	try
-		IReplicatedTransactionImpl(this.FObject).updateRecord(status, name, orgRecord, newRecord);
+		this.asIReplicatedTransactionImpl.updateRecord(status, name, orgRecord, newRecord);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -21324,7 +21324,7 @@ end;
 procedure IReplicatedTransactionImpl_deleteRecordDispatcher(this: IReplicatedTransaction; status: IStatus; name: PAnsiChar; record_: IReplicatedRecord); cdecl;
 begin
 	try
-		IReplicatedTransactionImpl(this.FObject).deleteRecord(status, name, record_);
+		this.asIReplicatedTransactionImpl.deleteRecord(status, name, record_);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -21333,7 +21333,7 @@ end;
 procedure IReplicatedTransactionImpl_executeSqlDispatcher(this: IReplicatedTransaction; status: IStatus; sql: PAnsiChar); cdecl;
 begin
 	try
-		IReplicatedTransactionImpl(this.FObject).executeSql(status, sql);
+		this.asIReplicatedTransactionImpl.executeSql(status, sql);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -21342,7 +21342,7 @@ end;
 procedure IReplicatedTransactionImpl_executeSqlIntlDispatcher(this: IReplicatedTransaction; status: IStatus; charset: Cardinal; sql: PAnsiChar); cdecl;
 begin
 	try
-		IReplicatedTransactionImpl(this.FObject).executeSqlIntl(status, charset, sql);
+		this.asIReplicatedTransactionImpl.executeSqlIntl(status, charset, sql);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -21388,7 +21388,7 @@ end;
 procedure IReplicatedSessionImpl_addRefDispatcher(this: IReplicatedSession); cdecl;
 begin
 	try
-		IReplicatedSessionImpl(this.FObject).addRef();
+		this.asIReplicatedSessionImpl.addRef();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -21397,7 +21397,7 @@ end;
 function IReplicatedSessionImpl_releaseDispatcher(this: IReplicatedSession): Integer; cdecl;
 begin
 	try
-		Result := IReplicatedSessionImpl(this.FObject).release();
+		Result := this.asIReplicatedSessionImpl.release();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -21406,7 +21406,7 @@ end;
 procedure IReplicatedSessionImpl_setOwnerDispatcher(this: IReplicatedSession; r: IReferenceCounted); cdecl;
 begin
 	try
-		IReplicatedSessionImpl(this.FObject).setOwner(r);
+		this.asIReplicatedSessionImpl.setOwner(r);
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -21415,7 +21415,7 @@ end;
 function IReplicatedSessionImpl_getOwnerDispatcher(this: IReplicatedSession): IReferenceCounted; cdecl;
 begin
 	try
-		Result := IReplicatedSessionImpl(this.FObject).getOwner();
+		Result := this.asIReplicatedSessionImpl.getOwner();
 	except
 		on e: Exception do FbException.catchException(nil, e);
 	end
@@ -21424,7 +21424,7 @@ end;
 function IReplicatedSessionImpl_initDispatcher(this: IReplicatedSession; status: IStatus; attachment: IAttachment): Boolean; cdecl;
 begin
 	try
-		Result := IReplicatedSessionImpl(this.FObject).init(status, attachment);
+		Result := this.asIReplicatedSessionImpl.init(status, attachment);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -21433,7 +21433,7 @@ end;
 function IReplicatedSessionImpl_startTransactionDispatcher(this: IReplicatedSession; status: IStatus; transaction: ITransaction; number: Int64): IReplicatedTransaction; cdecl;
 begin
 	try
-		Result := IReplicatedSessionImpl(this.FObject).startTransaction(status, transaction, number);
+		Result := this.asIReplicatedSessionImpl.startTransaction(status, transaction, number);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -21442,7 +21442,7 @@ end;
 procedure IReplicatedSessionImpl_cleanupTransactionDispatcher(this: IReplicatedSession; status: IStatus; number: Int64); cdecl;
 begin
 	try
-		IReplicatedSessionImpl(this.FObject).cleanupTransaction(status, number);
+		this.asIReplicatedSessionImpl.cleanupTransaction(status, number);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
@@ -21451,7 +21451,7 @@ end;
 procedure IReplicatedSessionImpl_setSequenceDispatcher(this: IReplicatedSession; status: IStatus; name: PAnsiChar; value: Int64); cdecl;
 begin
 	try
-		IReplicatedSessionImpl(this.FObject).setSequence(status, name, value);
+		this.asIReplicatedSessionImpl.setSequence(status, name, value);
 	except
 		on e: Exception do FbException.catchException(status, e);
 	end
