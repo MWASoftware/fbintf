@@ -31,7 +31,7 @@ unit FB30Statement;
 
 {$IFDEF FPC}
 {$mode delphi}
-{$ConnectionCodePage UTF8}
+{$CodePage UTF8}
 {$interfaces COM}
 {$ENDIF}
 
@@ -74,7 +74,7 @@ unit FB30Statement;
 interface
 
 uses
-  Classes, SysUtils, Firebird, IB,  FBStatement, FB30ClientAPI, FB30Transaction,
+  Classes, SysUtils, FirebirdOOAPI, IB,  FBStatement, FB30ClientAPI, FB30Transaction,
   FB30Attachment{$ifdef WINDOWS}, Windows{$endif},IBExternals, FBSQLData, FBOutputBlock, FBActivityMonitor;
 
 type
@@ -133,7 +133,7 @@ type
   public
     constructor Create(aParent: TIBXSQLDA; aIndex: integer);
     procedure Changed; override;
-    procedure InitColumnMetaData(aMetaData: Firebird.IMessageMetadata);
+    procedure InitColumnMetaData(aMetaData: FirebirdOOAPI.IMessageMetadata);
     procedure ColumnSQLDataInit;
     procedure RowChange; override;
     procedure FreeSQLData;
@@ -152,7 +152,7 @@ type
   private
     FCount: Integer; {Columns in use - may be less than inherited columns}
     FSize: Integer;  {Number of TIBXSQLVARs in column list}
-    FMetaData: Firebird.IMessageMetadata;
+    FMetaData: FirebirdOOAPI.IMessageMetadata;
     FTransactionSeqNo: integer;
     function GetConnectionCodePage: TSystemCodePage;
  protected
@@ -174,7 +174,7 @@ type
     procedure Changed; virtual;
     function CheckStatementStatus(Request: TStatementStatus): boolean; override;
     function ColumnsInUseCount: integer; override;
-    function GetMetaData: Firebird.IMessageMetadata; virtual;
+    function GetMetaData: FirebirdOOAPI.IMessageMetadata; virtual;
     procedure Initialize; override;
     function StateChanged(var ChangeSeqNo: integer): boolean; override;
     function CanChangeMetaData: boolean; override;
@@ -187,7 +187,7 @@ type
 
   TIBXINPUTSQLDA = class(TIBXSQLDA)
   private
-    FCurMetaData: Firebird.IMessageMetadata;
+    FCurMetaData: FirebirdOOAPI.IMessageMetadata;
     procedure FreeCurMetaData;
     function GetMessageBuffer: PByte;
     function GetModified: Boolean;
@@ -200,9 +200,9 @@ type
     constructor Create(aStatement: TFB30Statement); overload;
     constructor Create(api: IFirebirdAPI); overload;
     destructor Destroy; override;
-    procedure Bind(aMetaData: Firebird.IMessageMetadata);
+    procedure Bind(aMetaData: FirebirdOOAPI.IMessageMetadata);
     procedure Changed; override;
-    function GetMetaData: Firebird.IMessageMetadata; override;
+    function GetMetaData: FirebirdOOAPI.IMessageMetadata; override;
     procedure ReInitialise;
     function IsInputDataArea: boolean; override;
     property MessageBuffer: PByte read GetMessageBuffer;
@@ -217,7 +217,7 @@ type
   protected
     function GetTransaction: ITransaction; override;
   public
-    procedure Bind(aMetaData: Firebird.IMessageMetadata);
+    procedure Bind(aMetaData: FirebirdOOAPI.IMessageMetadata);
     procedure GetData(index: integer; var aIsNull: boolean; var len: short;
       var data: PByte); override;
     function IsInputDataArea: boolean; override;
@@ -252,7 +252,7 @@ type
 
   TBatchCompletion = class(TInterfaceOwner,IBatchCompletion)
   private
-    FCompletionState: Firebird.IBatchCompletionState;
+    FCompletionState: FirebirdOOAPI.IBatchCompletionState;
     FConnectionCodePage: TSystemCodePage;
     FFirebird30ClientAPI: TFB30ClientAPI;
     FStatus: IStatus;
@@ -275,14 +275,14 @@ type
 
   TFB30Statement = class(TFBStatement,IStatement)
   private
-    FStatementIntf: Firebird.IStatement;
+    FStatementIntf: FirebirdOOAPI.IStatement;
     FFirebird30ClientAPI: TFB30ClientAPI;
     FSQLParams: TIBXINPUTSQLDA;
     FSQLRecord: TIBXOUTPUTSQLDA;
-    FResultSet: Firebird.IResultSet;
+    FResultSet: FirebirdOOAPI.IResultSet;
     FCursorSeqNo: integer;
     FCursor: AnsiString;
-    FBatch: Firebird.IBatch;
+    FBatch: FirebirdOOAPI.IBatch;
     FBatchCompletion: IBatchCompletion;
     FBatchRowCount: integer;
     FBatchBufferSize: integer;
@@ -309,7 +309,7 @@ type
       CaseSensitiveParams: boolean=false; CursorName: AnsiString='');
     destructor Destroy; override;
     function Fetch(FetchType: TFetchType; PosOrOffset: integer=0): boolean;
-    property StatementIntf: Firebird.IStatement read FStatementIntf;
+    property StatementIntf: FirebirdOOAPI.IStatement read FStatementIntf;
     property SQLParams: TIBXINPUTSQLDA read FSQLParams;
     property SQLRecord: TIBXOUTPUTSQLDA read FSQLRecord;
 
@@ -378,7 +378,7 @@ begin
     for i := 0 to upcount - 1 do
     begin
       state := FCompletionState.getState(StatusIntf,i);
-      if state = Firebird.IBatchCompletionState.EXECUTE_FAILED then
+      if state = FirebirdOOAPI.IBatchCompletionStateImpl.EXECUTE_FAILED then
       begin
         RowNo := i+1;
         FCompletionState.getStatus(StatusIntf,(FStatus as TFB30Status).GetStatus,i);
@@ -408,10 +408,10 @@ begin
     state := FCompletionState.getState(StatusIntf,updateNo);
     Check4DataBaseError(ConnectionCodePage);
     case state of
-      Firebird.IBatchCompletionState.EXECUTE_FAILED:
+      FirebirdOOAPI.IBatchCompletionStateImpl.EXECUTE_FAILED:
         Result := bcExecuteFailed;
 
-      Firebird.IBatchCompletionState.SUCCESS_NO_INFO:
+      FirebirdOOAPI.IBatchCompletionStateImpl.SUCCESS_NO_INFO:
         Result := bcSuccessNoInfo;
 
      else
@@ -421,7 +421,7 @@ begin
 end;
 
 function TBatchCompletion.getStatusMessage(updateNo: cardinal): AnsiString;
-var status: Firebird.IStatus;
+var status: FirebirdOOAPI.IStatus;
 begin
   with FFirebird30ClientAPI do
   begin
@@ -445,7 +445,7 @@ begin
     for i := 0 to upcount -1  do
     begin
       state := FCompletionState.getState(StatusIntf,i);
-      if state = Firebird.IBatchCompletionState.EXECUTE_FAILED then
+      if state = FirebirdOOAPI.IBatchCompletionStateImpl.EXECUTE_FAILED then
           break;
       Inc(Result);
     end;
@@ -460,7 +460,7 @@ begin
   TIBXSQLDA(Parent).Changed;
 end;
 
-procedure TIBXSQLVAR.InitColumnMetaData(aMetaData: Firebird.IMessageMetadata);
+procedure TIBXSQLVAR.InitColumnMetaData(aMetaData: FirebirdOOAPI.IMessageMetadata);
 begin
   with FFirebird30ClientAPI do
   begin
@@ -522,7 +522,10 @@ end;
 
 function TIBXSQLVAR.GetConnectionCodePage: TSystemCodePage;
 begin
-  Result := FStatement.ConnectionCodePage;
+  if FStatement = nil then
+    Result := CP_NONE
+  else
+    Result := FStatement.ConnectionCodePage;
 end;
 
 function TIBXSQLVAR.CanChangeSQLType: boolean;
@@ -541,7 +544,7 @@ begin
 end;
 
 function TIBXSQLVAR.GetAliasName: AnsiString;
-var metadata: Firebird.IMessageMetadata;
+var metadata: FirebirdOOAPI.IMessageMetadata;
 begin
   metadata := TIBXSQLDA(Parent).GetMetaData;
   try
@@ -561,7 +564,7 @@ begin
 end;
 
 function TIBXSQLVAR.GetOwnerName: AnsiString;
-var metadata: Firebird.IMessageMetadata;
+var metadata: FirebirdOOAPI.IMessageMetadata;
 begin
   metadata := TIBXSQLDA(Parent).GetMetaData;
   try
@@ -919,7 +922,7 @@ begin
   Result := FMessageBuffer;
 end;
 
-function TIBXINPUTSQLDA.GetMetaData: Firebird.IMessageMetadata;
+function TIBXINPUTSQLDA.GetMetaData: FirebirdOOAPI.IMessageMetadata;
 begin
   BuildMetadata;
   Result := FCurMetaData;
@@ -934,7 +937,7 @@ begin
 end;
 
 procedure TIBXINPUTSQLDA.BuildMetadata;
-var Builder: Firebird.IMetadataBuilder;
+var Builder: FirebirdOOAPI.IMetadataBuilder;
     i: integer;
     version: NativeInt;
 begin
@@ -947,7 +950,7 @@ begin
       for i := 0 to Count - 1 do
       with TIBXSQLVar(Column[i]) do
       begin
-        version := Builder.vtable.version;
+        version := Builder.vTable.version;
         if version >= 4 then
         {Firebird 4 or later}
         begin
@@ -1064,7 +1067,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TIBXINPUTSQLDA.Bind(aMetaData: Firebird.IMessageMetadata);
+procedure TIBXINPUTSQLDA.Bind(aMetaData: FirebirdOOAPI.IMessageMetadata);
 var i: integer;
 begin
   FMetaData := aMetaData;
@@ -1119,7 +1122,7 @@ begin
     Result := inherited GetTransaction;
 end;
 
-procedure TIBXOUTPUTSQLDA.Bind(aMetaData: Firebird.IMessageMetadata);
+procedure TIBXOUTPUTSQLDA.Bind(aMetaData: FirebirdOOAPI.IMessageMetadata);
 var i: integer;
     MsgLen: cardinal;
 begin
@@ -1285,7 +1288,7 @@ begin
   FMsgLength := 0;
 end;
 
-function TIBXSQLDA.GetMetaData: Firebird.IMessageMetadata;
+function TIBXSQLDA.GetMetaData: FirebirdOOAPI.IMessageMetadata;
 begin
   Result := FMetadata;
   if Result <> nil then
@@ -1294,7 +1297,10 @@ end;
 
 function TIBXSQLDA.GetConnectionCodePage: TSystemCodePage;
 begin
-  Result := Statement.ConnectionCodePage;
+  if Statement = nil then
+    Result := CP_NONE
+  else
+    Result := Statement.ConnectionCodePage;
 end;
 
 function TIBXSQLDA.GetTransactionSeqNo: integer;
@@ -1375,7 +1381,7 @@ end;
 
 procedure TFB30Statement.InternalPrepare(CursorName: AnsiString);
 var GUID : TGUID;
-    metadata: Firebird.IMessageMetadata;
+    metadata: FirebirdOOAPI.IMessageMetadata;
     sql: AnsiString;
 begin
   if FPrepared then
@@ -1410,7 +1416,7 @@ begin
                           Length(sql),
                           PAnsiChar(sql),
                           FSQLDialect,
-                          Firebird.IStatement.PREPARE_PREFETCH_METADATA);
+                          FirebirdOOAPI.IStatementImpl.PREPARE_PREFETCH_METADATA);
       Check4DataBaseError(ConnectionCodePage);
       FSQLStatementType := TIBSQLStatementTypes(FStatementIntf.getType(StatusIntf));
       Check4DataBaseError(ConnectionCodePage);
@@ -1488,8 +1494,8 @@ end;
 
 function TFB30Statement.InternalExecute(aTransaction: ITransaction): IResults;
 
-  procedure ExecuteQuery(outMetaData: Firebird.IMessageMetaData=nil; outBuffer: pointer=nil);
-  var inMetadata: Firebird.IMessageMetaData;
+  procedure ExecuteQuery(outMetaData: FirebirdOOAPI.IMessageMetaData; outBuffer: pointer=nil);
+  var inMetadata: FirebirdOOAPI.IMessageMetaData;
   begin
     with FFirebird30ClientAPI do
     begin
@@ -1512,7 +1518,7 @@ function TFB30Statement.InternalExecute(aTransaction: ITransaction): IResults;
   end;
 
 var Cursor: IResultSet;
-    outMetadata: Firebird.IMessageMetaData;
+    outMetadata: FirebirdOOAPI.IMessageMetaData;
 
 begin
   Result := nil;
@@ -1521,6 +1527,7 @@ begin
   FEOF := false;
   FSingleResults := false;
   FStatisticsAvailable := false;
+  outMetadata := nil;
   if IsInBatchMode then
     IBerror(ibxeInBatchMode,[]);
   CheckTransaction(aTransaction);
@@ -1561,7 +1568,7 @@ begin
       end;
 
       else
-        ExecuteQuery;
+        ExecuteQuery(outMetaData);
       end;
     end;
   finally
@@ -1579,7 +1586,7 @@ function TFB30Statement.InternalOpenCursor(aTransaction: ITransaction;
   Scrollable: boolean): IResultSet;
 var flags: cardinal;
     inMetadata,
-    outMetadata: Firebird.IMessageMetadata;
+    outMetadata: FirebirdOOAPI.IMessageMetadata;
 begin
   flags := 0;
   if (FSQLStatementType <> SQLSelect) and not (stHasCursor in getFlags) then
@@ -1596,7 +1603,7 @@ begin
     IBError(ibxeInterfaceOutofDate,[nil]);
 
  if Scrollable then
-   flags := Firebird.IStatement.CURSOR_TYPE_SCROLLABLE;
+   flags := FirebirdOOAPI.IStatementImpl.CURSOR_TYPE_SCROLLABLE;
 
  with FFirebird30ClientAPI do
  begin
@@ -1752,7 +1759,7 @@ begin
   if not FOpen then
     IBError(ibxeSQLClosed, [nil]);
 
-  with FFirebird30ClientAPI do
+  with FFirebird30ClientAPI, FirebirdOOAPI.IStatusImpl do
   begin
     case FetchType of
     ftNext:
@@ -1762,7 +1769,7 @@ begin
         { Go to the next record... }
         fetchResult := FResultSet.fetchNext(StatusIntf,FSQLRecord.MessageBuffer);
         Check4DataBaseError(ConnectionCodePage);
-        if fetchResult = Firebird.IStatus.RESULT_NO_DATA then
+        if fetchResult = RESULT_NO_DATA then
         begin
           FBOF := false;
           FEOF := true;
@@ -1777,7 +1784,7 @@ begin
         { Go to the next record... }
         fetchResult := FResultSet.fetchPrior(StatusIntf,FSQLRecord.MessageBuffer);
         Check4DataBaseError(ConnectionCodePage);
-        if fetchResult = Firebird.IStatus.RESULT_NO_DATA then
+        if fetchResult = RESULT_NO_DATA then
         begin
           FBOF := true;
           FEOF := false;
@@ -1810,7 +1817,7 @@ begin
       end;
     end;
 
-    if fetchResult <> Firebird.IStatus.RESULT_OK then
+    if fetchResult <> RESULT_OK then
       exit; {result = false}
 
     {Result OK}
@@ -1903,7 +1910,7 @@ end;
 
 procedure TFB30Statement.AddToBatch;
 var BatchPB: TXPBParameterBlock;
-    inMetadata: Firebird.IMessageMetadata;
+    inMetadata: FirebirdOOAPI.IMessageMetadata;
 
 const SixteenMB = 16 * 1024 * 1024;
       MB256 = 256* 1024 *1024;
@@ -1920,7 +1927,7 @@ begin
       if FBatch = nil then
       begin
         {Start Batch}
-        BatchPB := TXPBParameterBlock.Create(FFirebird30ClientAPI,Firebird.IXpbBuilder.BATCH);
+        BatchPB := TXPBParameterBlock.Create(FFirebird30ClientAPI,FirebirdOOAPI.IXpbBuilderImpl.BATCH);
         with FFirebird30ClientAPI do
         try
           if FBatchRowLimit = maxint then
@@ -1934,8 +1941,8 @@ begin
             if FBatchBufferSize > MB256 {assumed limit} then
               IBError(ibxeBatchBufferSizeTooBig,[FBatchBufferSize]);
           end;
-          BatchPB.insertInt(Firebird.IBatch.TAG_RECORD_COUNTS,1);
-          BatchPB.insertInt(Firebird.IBatch.TAG_BUFFER_BYTES_SIZE,FBatchBufferSize);
+          BatchPB.insertInt(FirebirdOOAPI.IBatchImpl.TAG_RECORD_COUNTS,1);
+          BatchPB.insertInt(FirebirdOOAPI.IBatchImpl.TAG_BUFFER_BYTES_SIZE,FBatchBufferSize);
           FBatch := FStatementIntf.createBatch(StatusIntf,
                                                inMetadata,
                                                BatchPB.getDataLength,
@@ -1979,7 +1986,7 @@ begin
     raise EIBInterbaseError.Create(status,ConnectionCodePage);
 end;
 
-var cs: Firebird.IBatchCompletionState;
+var cs: FirebirdOOAPI.IBatchCompletionState;
 
 begin
   Result := nil;
@@ -2031,11 +2038,11 @@ begin
     flags := FStatementIntf.getFlags(StatusIntf);
     Check4DataBaseError(ConnectionCodePage);
   end;
-  if flags and Firebird.IStatement.FLAG_HAS_CURSOR <> 0 then
+  if flags and FirebirdOOAPI.IStatementImpl.FLAG_HAS_CURSOR <> 0 then
     Result := Result + [stHasCursor];
-  if flags and Firebird.IStatement.FLAG_REPEAT_EXECUTE <> 0 then
+  if flags and FirebirdOOAPI.IStatementImpl.FLAG_REPEAT_EXECUTE <> 0 then
     Result := Result + [stRepeatExecute];
-  if flags and Firebird.IStatement.CURSOR_TYPE_SCROLLABLE <> 0 then
+  if flags and FirebirdOOAPI.IStatementImpl.CURSOR_TYPE_SCROLLABLE <> 0 then
     Result := Result + [stScrollable];
 end;
 

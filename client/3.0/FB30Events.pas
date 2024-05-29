@@ -39,7 +39,7 @@ unit FB30Events;
 interface
 
 uses
-  {$IFDEF WINDOWS}Windows, {$ENDIF} Classes, SysUtils, Firebird, IB, FB30ClientAPI, FB30Attachment,
+  {$IFDEF WINDOWS}Windows, {$ENDIF} Classes, SysUtils, FirebirdOOAPI, IB, FB30ClientAPI, FB30Attachment,
   syncobjs, FBEvents;
 
 type
@@ -47,7 +47,7 @@ type
 
   { TEventhandlerInterface }
 
-  TEventhandlerInterface = class(Firebird.IEventCallbackImpl)
+  TEventhandlerInterface = class(FirebirdOOAPI.IEventCallbackImpl)
   private
     FOwner: TFB30Events;
     FName: AnsiString;
@@ -73,9 +73,9 @@ type
 
   TFB30Events = class(TFBEvents,IEvents)
   private
-    FAttachmentIntf: Firebird.IAttachment;
+    FAttachmentIntf: FirebirdOOAPI.IAttachment;
     FEventHandlerThread: TObject;
-    FEventsIntf: Firebird.IEvents;
+    FEventsIntf: FirebirdOOAPI.IEvents;
     FAsyncEventCallback: TEventhandlerInterface;
     FSyncEventCallback: TEventhandlerInterface;
     FFirebird30ClientAPI: TFB30ClientAPI;
@@ -277,7 +277,7 @@ begin
     with FFirebird30ClientAPI do
     begin
       FEventsIntf := FAttachmentIntf.queEvents(
-                                StatusIntf,EventCallBack,
+                                StatusIntf,EventCallBack.asIEventCallBack,
                                 FEventBufferLen, BytePtr(FEventBuffer));
       Check4DataBaseError(ConnectionCodePage);
     end;

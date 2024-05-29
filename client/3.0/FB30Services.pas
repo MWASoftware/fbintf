@@ -37,7 +37,7 @@ unit FB30Services;
 interface
 
 uses
-  Classes, SysUtils, Firebird, IB, FB30ClientAPI, FBParamBlock, FBOutputBlock,
+  Classes, SysUtils, FirebirdOOAPI, IB, FB30ClientAPI, FBParamBlock, FBOutputBlock,
     FBServices;
 
 type
@@ -47,7 +47,7 @@ type
 
   TFB30ServiceManager = class(TFBServiceManager,IServiceManager)
   private
-    FServiceIntf: Firebird.IService;
+    FServiceIntf: FirebirdOOAPI.IService;
     FFirebird30ClientAPI: TFB30ClientAPI;
     procedure CheckActive;
     procedure CheckInactive;
@@ -55,7 +55,7 @@ type
     procedure InternalAttach(ConnectString: AnsiString); override;
   public
     constructor Create(api: TFB30ClientAPI; ServerName: AnsiString; Protocol: TProtocol; SPB: ISPB; Port: AnsiString = '');
-    property ServiceIntf: Firebird.IService read FServiceIntf;
+    property ServiceIntf: FirebirdOOAPI.IService read FServiceIntf;
 
   public
     {IServiceManager}

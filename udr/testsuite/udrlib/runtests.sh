@@ -2,12 +2,12 @@
 usage()
 {
   echo "Run UDR tests"
-  echo "runtests.sh  [-3] [-4] "
+  echo "runtests.sh  [-3] [-4] [-5]"
 }
 
 BUILD=
 #Parse Parameters
-TEMP=`getopt h34db:f: "$@"`
+TEMP=`getopt h345db:f:p: "$@"`
 FB="4.0.1"
 if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
 
@@ -17,11 +17,15 @@ while true ; do
         case "$1" in
         -h)     usage; exit 1;;
 
-        \-3) 	FB="3.0.5"; shift 1;;
+        \-3) 	FB="3.0.10"; shift 1;;
 
-        \-4) 	FB="4.0.1"; shift 1;;
+        \-4) 	FB="4.0.4"; shift 1;;
+        
+	\-5) 	FB="5.0.0"; shift 1;;
 
 	-d)	FB="master"; shift 1;;
+	
+	-p) export FPCDIR=/usr/lib/fpc/$2; shift 2;;	
 
 	-f)	FB=$2; shift 2;;
         
@@ -31,6 +35,10 @@ while true ; do
         
         esac
 done
+
+if [ -n "$FPCDIR" ]  && [ -d "$FPCDIR" ]; then
+  export FPC=$FPCDIR/ppcx64
+fi
 
 export FIREBIRD=/opt/firebird/$FB
 echo "FIREBIRD=$FIREBIRD"

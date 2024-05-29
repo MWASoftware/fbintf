@@ -37,7 +37,7 @@ unit FB30ClientAPI;
 interface
 
 uses
-  Classes, SysUtils, FBClientAPI, Firebird, IB, IBExternals, FmtBCD, FBClientLib,
+  Classes, SysUtils, FBClientAPI, FirebirdOOAPI, IB, IBExternals, FmtBCD, FBClientLib,
   FBActivityMonitor;
 
 type
@@ -45,12 +45,12 @@ type
 
   TFB30Status = class(TFBStatus,IStatus)
   protected
-    FStatus: Firebird.IStatus;
+    FStatus: FirebirdOOAPI.IStatus;
     FDirty: boolean;
     function GetIBMessage(CodePage: TSystemCodePage): AnsiString; override;
   public
     constructor Create(aOwner: TFBClientAPI; prefix: AnsiString=''); overload;
-    constructor Create(aOwner: TFBClientAPI; aStatus: Firebird.IStatus); overload;
+    constructor Create(aOwner: TFBClientAPI; aStatus: FirebirdOOAPI.IStatus); overload;
     constructor Copy(src: TFB30Status);
     destructor Destroy; override;
     function Clone: IStatus; override;
@@ -58,22 +58,19 @@ type
     procedure FreeHandle;
     function InErrorState: boolean; override;
     function Warning: boolean;
-    function GetStatus: Firebird.IStatus;
+    function GetStatus: FirebirdOOAPI.IStatus;
     function StatusVector: PStatusVector; override;
     property Dirty: boolean read FDirty;
   end;
-
-  Tfb_get_master_interface = function: IMaster;
-                              {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
   { TFB30ClientAPI }
 
   TFB30ClientAPI = class(TFBClientAPI,IFirebirdAPI,IFBIMasterProvider)
   private
-    FMaster: Firebird.IMaster;
-    FUtil: Firebird.IUtil;
-    FProvider: Firebird.IProvider;
-    FConfigManager: Firebird.IConfigManager;
+    FMaster: FirebirdOOAPI.IMaster;
+    FUtil: FirebirdOOAPI.IUtil;
+    FProvider: FirebirdOOAPI.IProvider;
+    FConfigManager: FirebirdOOAPI.IConfigManager;
     FStatus: TFB30Status;
     FIsEmbeddedServer: boolean;
     FStatusIntf: IStatus;   {Keep a reference to the interface - automatic destroy
@@ -82,13 +79,13 @@ type
     procedure CheckPlugins;
   public
     constructor Create(aFBLibrary: TFBLibrary); overload;
-    constructor Create(aMaster: Firebird.IMaster); overload;
+    constructor Create(aMaster: FirebirdOOAPI.IMaster); overload;
     destructor Destroy; override;
 
-    function StatusIntf: Firebird.IStatus;
+    function StatusIntf: FirebirdOOAPI.IStatus;
     procedure Check4DataBaseError(CodePage: TSystemCodePage=cp_acp); overload;
-    procedure Check4DataBaseError(st: Firebird.IStatus; CodePage: TSystemCodePage=cp_acp); overload;
-    function FormatStatus(Status: Firebird.IStatus;
+    procedure Check4DataBaseError(st: FirebirdOOAPI.IStatus; CodePage: TSystemCodePage=cp_acp); overload;
+    function FormatStatus(Status: FirebirdOOAPI.IStatus;
       ConnectionCodePage: TSystemCodePage): AnsiString;
     function InErrorState: boolean;
     function LoadInterface: boolean; override;
@@ -134,10 +131,9 @@ type
 
     {Firebird 3 API}
     function HasMasterIntf: boolean;
-    function GetIMaster: TObject;
 
     {IFBIMasterProvider}
-    function GetIMasterIntf: Firebird.IMaster;
+    function GetIMasterIntf: FirebirdOOAPI.IMaster;
 
     {Encode/Decode}
     procedure SQLEncodeDate(aDate: TDateTime; bufptr: PByte); override;
@@ -155,9 +151,9 @@ type
     procedure StrToInt128(scale: integer; aValue: AnsiString; bufptr: PByte); override;
 
     {Firebird Interfaces}
-    property MasterIntf: Firebird.IMaster read FMaster;
-    property UtilIntf: Firebird.IUtil read FUtil;
-    property ProviderIntf: Firebird.IProvider read FProvider;
+    property MasterIntf: FirebirdOOAPI.IMaster read FMaster;
+    property UtilIntf: FirebirdOOAPI.IUtil read FUtil;
+    property ProviderIntf: FirebirdOOAPI.IProvider read FProvider;
 
   end;
 
@@ -165,7 +161,7 @@ type
 
   TXPBParameterBlock = class(TFBInterfacedObject)
   private
-    FBuilder: Firebird.IXpbBuilder;
+    FBuilder: FirebirdOOAPI.IXpbBuilder;
     FFirebird30ClientAPI: TFB30ClientAPI;
   public
     constructor Create(api: TFB30ClientAPI; kind: cardinal);
@@ -173,7 +169,7 @@ type
     function getBuffer: PByte;
     function getDataLength: cardinal;
     procedure insertInt(tag: Byte; value: Integer);
-    property Builder: Firebird.IXpbBuilder read FBuilder;
+    property Builder: FirebirdOOAPI.IXpbBuilder read FBuilder;
   public
     procedure PrintBuf;
   end;
@@ -255,7 +251,7 @@ end;
 { TFB30StatusObject }
 
 threadvar
-  PerThreadFirebirdStatusIntf: Firebird.IStatus;
+  PerThreadFirebirdStatusIntf: FirebirdOOAPI.IStatus;
   StatusIntfRefCount: integer;
 
 { TFB30Status }
@@ -274,7 +270,7 @@ begin
   end;
 end;
 
-constructor TFB30Status.Create(aOwner: TFBClientAPI; aStatus: Firebird.IStatus);
+constructor TFB30Status.Create(aOwner: TFBClientAPI; aStatus: FirebirdOOAPI.IStatus);
 begin
   inherited Create(aOwner);
   FStatus := aStatus.clone;
@@ -326,7 +322,7 @@ end;
 
 function TFB30Status.InErrorState: boolean;
 begin
-  with GetStatus do
+  with GetStatus^ do
     Result := ((getState and STATE_ERRORS) <> 0);
   if Result then
     FDirty := true;
@@ -334,13 +330,13 @@ end;
 
 function TFB30Status.Warning: boolean;
 begin
-  with GetStatus do
+  with GetStatus^ do
     Result := ((getState and STATE_WARNINGS) <> 0);
   if Result then
     FDirty := true;
 end;
 
-function TFB30Status.GetStatus: Firebird.IStatus;
+function TFB30Status.GetStatus: FirebirdOOAPI.IStatus;
 begin
   if FStatus <> nil then
     Result := FStatus
@@ -364,7 +360,7 @@ end;
 { TFB30ClientAPI }
 
 procedure TFB30ClientAPI.CheckPlugins;
-var FBConf: Firebird.IFirebirdConf;
+var FBConf: FirebirdOOAPI.IFirebirdConf;
     Plugins: AnsiString;
     PluginsList: TStringList;
 begin
@@ -381,7 +377,8 @@ begin
   try
     PluginsList.CommaText := Plugins;
     FIsEmbeddedServer := (PluginsList.IndexOf('Engine12') <> -1) or {Firebird 3}
-                         (PluginsList.IndexOf('Engine13') <> -1); {Firebird 4}
+                         (PluginsList.IndexOf('Engine13') <> -1) or {Firebird 4}
+                         (PluginsList.IndexOf('Engine14') <> -1);   {Firebird 5}
   finally
     PluginsList.Free;
   end;
@@ -390,9 +387,9 @@ end;
 function TFB30ClientAPI.Firebird4orLater: boolean;
 begin
   Result :=  (GetClientMajor > 4) or (
-    (GetClientMajor = 4) and (UtilIntf.vtable.version >= 4)
-    and (UtilIntf.vtable.version <> 21) {ignore FB4 Beta1}
-    and (UtilIntf.vtable.version <> 24)) {ignore FB4 Beta2}
+    (GetClientMajor = 4) and (UtilIntf.vTable.version >= 4)
+    and (UtilIntf.vTable.version <> 21) {ignore FB4 Beta1}
+    and (UtilIntf.vTable.version <> 24)) {ignore FB4 Beta2}
 end;
 
 {$IFDEF UNIX}
@@ -428,7 +425,7 @@ begin
   if assigned(fb_shutdown) then
   begin
     FStatus.FreeHandle;
-    if assigned(FProvider) then
+    if FProvider <> nil then
     begin
       FProvider.release;
       FProvider := nil;
@@ -449,7 +446,7 @@ begin
   FStatusIntf := FStatus;
 end;
 
-constructor TFB30ClientAPI.Create(aMaster: Firebird.IMaster);
+constructor TFB30ClientAPI.Create(aMaster: FirebirdOOAPI.IMaster);
 begin
   inherited Create(nil);
   FMaster := aMaster;
@@ -467,12 +464,12 @@ end;
 destructor TFB30ClientAPI.Destroy;
 begin
   FStatus.FreeHandle;
-  if assigned(FProvider) then
+  if FProvider <> nil then
     FProvider.release;
   inherited Destroy;
 end;
 
-function TFB30ClientAPI.StatusIntf: Firebird.IStatus;
+function TFB30ClientAPI.StatusIntf: FirebirdOOAPI.IStatus;
 begin
   Result := FStatus.GetStatus;
   Result.Init;
@@ -484,7 +481,7 @@ begin
     raise EIBInterBaseError.Create(GetStatus,CodePage);
 end;
 
-procedure TFB30ClientAPI.Check4DataBaseError(st: Firebird.IStatus;
+procedure TFB30ClientAPI.Check4DataBaseError(st: FirebirdOOAPI.IStatus;
   CodePage: TSystemCodePage);
 var aStatus: IStatus;
 begin
@@ -493,7 +490,7 @@ begin
     raise EIBInterBaseError.Create(aStatus,CodePage);
 end;
 
-function TFB30ClientAPI.FormatStatus(Status: Firebird.IStatus;
+function TFB30ClientAPI.FormatStatus(Status: FirebirdOOAPI.IStatus;
   ConnectionCodePage: TSystemCodePage): AnsiString;
 var local_buffer: array[0..IBHugeLocalBufferLength - 1] of AnsiChar;
     CodePage: TSystemCodePage;
@@ -593,12 +590,7 @@ begin
   Result := MasterIntf <> nil;
 end;
 
-function TFB30ClientAPI.GetIMaster: TObject;
-begin
-  Result := FMaster;
-end;
-
-function TFB30ClientAPI.GetIMasterIntf: Firebird.IMaster;
+function TFB30ClientAPI.GetIMasterIntf: FirebirdOOAPI.IMaster;
 begin
   Result := FMaster;
 end;
@@ -812,10 +804,12 @@ end;
 
 procedure TFB30ClientAPI.StrToInt128(scale: integer; aValue: AnsiString;
   bufptr: PByte);
+var int128: IInt128;
 begin
   inherited StrToInt128(scale,aValue,bufPtr);
 
-  UtilIntf.getInt128(StatusIntf).fromString(StatusIntf,scale,PAnsiChar(aValue),FB_I128Ptr(bufptr));
+  int128 := UtilIntf.getInt128(StatusIntf);
+  int128.fromString(StatusIntf,scale,PAnsiChar(aValue),FB_I128Ptr(bufptr));
   Check4DatabaseError;
 end;
 
@@ -824,10 +818,12 @@ function TFB30ClientAPI.Int128ToStr(bufptr: PByte; scale: integer
 const
   bufLength = 64;
 var Buffer: array[ 0.. bufLength] of AnsiChar;
+   int128: IInt128;
 begin
   Result := inherited Int128ToStr(bufPtr,scale);
 
-  UtilIntf.getInt128(StatusIntf).toString(StatusIntf,FB_I128Ptr(bufptr),scale,buflength,PAnsiChar(@Buffer));
+  int128 := UtilIntf.getInt128(StatusIntf);
+  int128.toString(StatusIntf,FB_I128Ptr(bufptr),scale,buflength,PAnsiChar(@Buffer));
   Check4DatabaseError;
   Result := strpas(PAnsiChar(@Buffer));
 end;

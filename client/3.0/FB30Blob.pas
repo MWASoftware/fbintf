@@ -37,7 +37,7 @@ unit FB30Blob;
 interface
 
 uses
-  Classes, SysUtils, Firebird, IB, IBHeader, IBExternals, FBClientAPI, FB30ClientAPI, FB30Attachment,
+  Classes, SysUtils, FirebirdOOAPI, IB, IBHeader, IBExternals, FBClientAPI, FB30ClientAPI, FB30Attachment,
   FBTransaction, FB30Transaction,  FBBlob, FBOutputBlock;
 
 type
@@ -65,7 +65,7 @@ type
 
   TFB30Blob = class(TFBBlob,IBlob)
   private
-    FBlobIntf: Firebird.IBlob;
+    FBlobIntf: FirebirdOOAPI.IBlob;
     FEOB: boolean;
     FFirebird30ClientAPI: TFB30ClientAPI;
   protected
@@ -82,7 +82,7 @@ type
                        SubType: integer; CharSetID: cardinal; BPB: IBPB); overload;
     constructor Create(Attachment: TFB30Attachment; Transaction: TFBTransaction;
                        MetaData: IBlobMetaData; BlobID: TISC_QUAD; BPB: IBPB); overload;
-    property BlobIntf: Firebird.IBlob read FBlobIntf;
+    property BlobIntf: FirebirdOOAPI.IBlob read FBlobIntf;
 
   {IBlob}
   public
@@ -302,22 +302,25 @@ begin
     Exit;
 
   LocalBuffer := PAnsiChar(@Buffer);
-  repeat
-    localCount := Min(Count,MaxuShort);
-    with FFirebird30ClientAPI do
-      returnCode := FBlobIntf.getSegment(StatusIntf,localCount, LocalBuffer, @BytesRead);
-    SignalActivity;
-    Inc(LocalBuffer,BytesRead);
-    Inc(Result,BytesRead);
-    Dec(Count,BytesRead);
-  until ((returncode <> Firebird.IStatus.Result_OK) and (returnCode <> Firebird.IStatus.Result_SEGMENT)) or (Count = 0);
+  with FirebirdOOAPI.IStatusImpl do
+  begin
+    repeat
+      localCount := Min(Count,MaxuShort);
+      with FFirebird30ClientAPI do
+        returnCode := FBlobIntf.getSegment(StatusIntf,localCount, LocalBuffer, @BytesRead);
+      SignalActivity;
+      Inc(LocalBuffer,BytesRead);
+      Inc(Result,BytesRead);
+      Dec(Count,BytesRead);
+    until ((returncode <> Result_OK) and (returnCode <> Result_SEGMENT)) or (Count = 0);
 
-  FEOB := returnCode = Firebird.IStatus.RESULT_NO_DATA;
-  ClearStringCache;
-  if (returnCode <> Firebird.IStatus.Result_OK) and
-     (returnCode <> Firebird.IStatus.Result_SEGMENT) and
-     (returnCode <> Firebird.IStatus.RESULT_NO_DATA) then
-     raise EIBInterBaseError.Create(FFirebird30ClientAPI.GetStatus,ConnectionCodePage);
+    FEOB := returnCode = RESULT_NO_DATA;
+    ClearStringCache;
+    if (returnCode <> Result_OK) and
+       (returnCode <> Result_SEGMENT) and
+       (returnCode <> RESULT_NO_DATA) then
+       raise EIBInterBaseError.Create(FFirebird30ClientAPI.GetStatus,ConnectionCodePage);
+  end;
 end;
 
 function TFB30Blob.Write(const Buffer; Count: Longint): Longint;

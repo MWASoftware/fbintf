@@ -65,10 +65,10 @@ contains
   FB30Events in 'client\3.0\FB30Events.pas',
   FB30Services in 'client\3.0\FB30Services.pas',
   FB30Statement in 'client\3.0\FB30Statement.pas',
-  Firebird in 'client\3.0\firebird\Firebird.pas',
   FBMessages in 'client\FBMessages.pas',
   FB30TimeZoneServices in 'client\3.0\FB30TimeZoneServices.pas',
   FBClientLib in 'client\FBClientLib.pas',
-  FBNumeric in 'client\FBNumeric.pas';
+  FBNumeric in 'client\FBNumeric.pas',
+  FirebirdOOAPI in 'client\3.0\firebird\FirebirdOOAPI.pas';
 
 end.

@@ -38,25 +38,12 @@ unit FB30Array;
 interface
 
 uses
-  Classes, SysUtils, Firebird, IB, FBArray, IBHeader, FB30Attachment, FBClientAPI,
+  Classes, SysUtils, FirebirdOOAPI, IB, FBArray, IBHeader, FB30Attachment, FBClientAPI,
   FB30Transaction, FBParamBlock, FB30ClientAPI;
 
 type
 
-  ISDLItem = interface(IParameterBlockItem)
-    ['{a34b6064-5ae9-4fc1-85c3-f145f069b607}']
-    procedure addByte(aValue: byte);
-    procedure addShortInt(aValue: ShortInt);
-    procedure addShortInteger(aValue: integer);
-    procedure SetAsShortInteger(aValue: integer);
-    procedure SetAsTinyInteger(aValue: integer);
-  end;
-
-  ISDL = interface(IParameterBlock<ISDLItem>)
-    ['{52ae1f5f-657b-4b14-81aa-7b3658454f4c}']
-  end;
-
-  { TFB30ArrayMetaData }
+   { TFB30ArrayMetaData }
 
   TFB30ArrayMetaData = class(TFBArrayMetaData,IArrayMetaData)
   private
@@ -75,8 +62,8 @@ type
 
   TFB30Array = class(TFBArray,IArray)
   private
-    FAttachmentIntf: Firebird.IAttachment;
-    FTransactionIntf: Firebird.ITransaction;
+    FAttachmentIntf: FirebirdOOAPI.IAttachment;
+    FTransactionIntf: FirebirdOOAPI.ITransaction;
     FFirebird30ClientAPI: TFB30ClientAPI;
     FSDL: ISDL;
     procedure GenerateSDL;

@@ -51,7 +51,7 @@ unit Test1;
 interface
 
 uses
-  Classes, SysUtils, TestApplication, FBTestApp, IB;
+  Classes, SysUtils, TestApplication, FBTestApp, FirebirdOOAPI, IB;
 
 type
 
@@ -61,6 +61,7 @@ type
   private
     procedure DoQuery(Attachment: IAttachment);
     procedure GetFBVersion(Attachment: IAttachment);
+    procedure TestIsImplementationObject;
   public
     function TestTitle: AnsiString; override;
     procedure RunTest(CharSet: AnsiString; SQLDialect: integer); override;
@@ -103,6 +104,41 @@ begin
       writeln(OutFile,Version[i]);
   finally
     Version.Free;
+  end;
+end;
+
+type
+TVersionCallback = class(FirebirdOOAPI.IVersionCallbackImpl)
+public
+  procedure callback(status: FirebirdOOAPI.IStatus; text: PAnsiChar); override;
+end;
+
+{ TVersionCallback }
+
+procedure TVersionCallback.callback(status : FirebirdOOAPI.IStatus; text : PAnsiChar
+);
+begin
+end;
+
+procedure TTest1.TestIsImplementationObject;
+var impl: FirebirdOOAPI.IVersionCallbackImpl;
+    intf: FirebirdOOAPI.IVersionCallback;
+    TestObj:  TVersionCallback;
+begin
+  if not FirebirdAPI.HasMasterIntf then Exit; {Only if OOAPI available}
+  writeln(OutFile,'Test Firebird coercion of implementation object from interface');
+  TestObj := TVersionCallback.Create;
+  try
+    intf := TestObj.asIVersionCallback;
+    if intf.isIVersionCallbackImpl then
+    begin
+      impl := intf.asIVersionCallbackImpl;
+      writeln(OutFile,'Success: returned object is a ',impl.ClassName)
+    end
+    else
+      writeln(OutFile,'isIVersionCallbackImpl failed');
+  finally
+    TestObj.Free;
   end;
 end;
 
@@ -181,6 +217,8 @@ begin
 
   {Querying Database}
   DoQuery(Attachment);
+
+  TestIsImplementationObject;
 
   writeln(OutFile,'Dropping Database');
   Attachment.DropDatabase;

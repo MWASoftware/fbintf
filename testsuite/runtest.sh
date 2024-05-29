@@ -37,8 +37,10 @@ if [ -x testsuite ]; then
     diff FB2reference.log testout.log >diff.log
   elif grep 'ODS Major Version = 12' testout.log >/dev/null; then
     diff FB3reference.log testout.log >diff.log
-  else
+  elif grep 'ODS Major Version = 13' testout.log >/dev/null && grep 'ODS Minor Version = 0' testout.log >/dev/null; then
     diff FB4reference.log testout.log >diff.log
+  else
+    diff FB5reference.log testout.log >diff.log
   fi
   cat diff.log 
 else

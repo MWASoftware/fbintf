@@ -41,7 +41,7 @@ unit FBUDRIntf;
 interface
 
 uses
-  Classes, SysUtils, Firebird, IB, IBExternals;
+  Classes, SysUtils, FirebirdOOAPI, IB, IBExternals;
 
 type
     {The IFBUDRExternalContext interface provides the Firebird IExternalContext
@@ -60,7 +60,7 @@ type
     function setInfo(code: Integer; value: Pointer): Pointer;
     function cloneAttachment: IAttachment;
     function GetServiceManager: IServiceManager;
-    function getStatus: Firebird.IStatus;
+    function getStatus: FirebirdOOAPI.IStatus;
     procedure CheckStatus;
     function HasConfigFile: boolean;
     function ReadConfigString(Section, Ident, DefaultValue: AnsiString): AnsiString;
