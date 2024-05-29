@@ -6,7 +6,7 @@ libc=y
 options= -MObjFPC -Scghi -Cg -Cr -O1 -g -gl -gh -l -vewnhibq -dUseCThreads -dFIREBIRD3APIONLY
 
 unittargetdir=testunits/$(CPU_TARGET)-$(OS_TARGET)
-includedir=$(FBINTFROOT)/client/include 
+includedir=$(FBINTFROOT)/client/3.0/firebird  $(FBINTFROOT)/client/include 
 unitdir=$(FBINTFROOT)/client $(FBINTFROOT)/client/3.0/firebird  . $(FBINTFROOT)/client/3.0 $(FBINTFROOT)/udr/source $(FBINTFROOT)/udr/testbed $(FBINTFROOT) $(FBINTFROOT)/udr/testsuite/udrlib 
 
 [target]
