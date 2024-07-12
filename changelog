@@ -1,4 +1,4 @@
-FBINTF Change Log  version          (1.4-2 Build 15740) Wed, 29 May 2024 15:47:44 +0100
+FBINTF Change Log  version          (1.4-2 Build 15827) Thu, 20 Jun 2024 16:09:20 +0100
 
 1. IBUtils.FormatTimeZoneOffset A zero offset now includes a preceding '+' sign.
 
