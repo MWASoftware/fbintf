@@ -1607,17 +1607,11 @@ begin
 
  with FFirebird30ClientAPI do
  begin
-   if FCollectStatistics then
-   begin
-     UtilIntf.getPerfCounters(StatusIntf,
-                             (GetAttachment as TFB30Attachment).AttachmentIntf,
-                              ISQL_COUNTERS, @FBeforeStats);
-     Check4DataBaseError(ConnectionCodePage);
-   end;
-
    inMetadata := FSQLParams.GetMetaData;
    outMetadata := FSQLRecord.GetMetaData;
    try
+     if FCollectStatistics then
+       SavePerfStats(FBeforeStats);
      FResultSet := FStatementIntf.openCursor(StatusIntf,
                           (aTransaction as TFB30Transaction).TransactionIntf,
                           inMetaData,
@@ -1633,13 +1627,7 @@ begin
    end;
 
    if FCollectStatistics then
-   begin
-     UtilIntf.getPerfCounters(StatusIntf,
-                             (GetAttachment as TFB30Attachment).AttachmentIntf,
-                             ISQL_COUNTERS,@FAfterStats);
-     Check4DataBaseError(ConnectionCodePage);
-     FStatisticsAvailable := true;
-   end;
+     FStatisticsAvailable := SavePerfStats(FAfterStats);
  end;
  Inc(FCursorSeqNo);
  FSingleResults := false;
