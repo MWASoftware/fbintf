@@ -1,5 +1,11 @@
 FBINTF Change Log  version          (1.4-2 Build 15853) Fri, 12 Jul 2024 13:41:21 +0100
 
+1. Time with Time Zone: when a ISQLParam is set to a variant value and the value is
+   and array comprising a TDateTime and a Time Zone String. The first element
+   may now be NULL. This sets the param value to null.
+
+FBINTF Change Log  version          (1.4-2 Build 15853) Fri, 12 Jul 2024 13:41:21 +0100
+
 1. IBUtils.FormatTimeZoneOffset A zero offset now includes a preceding '+' sign.
 
 2. TFBStatement.DoJournaling now exits immediately if journaling is not active. The

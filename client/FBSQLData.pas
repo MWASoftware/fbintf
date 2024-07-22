@@ -2089,7 +2089,12 @@ begin
     IsNull := True
   else
   if VarIsArray(Value) then {must be datetime plus timezone}
-    SetAsDateTime(Value[0],AnsiString(Value[1]))
+  begin
+    if VarType(Value[0]) in [varEmpty, varNull] then
+      IsNull := true
+    else
+      SetAsDateTime(Value[0],AnsiString(Value[1]))
+  end
   else case VarType(Value) of
     varEmpty, varNull:
       IsNull := True;
