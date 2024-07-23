@@ -6,6 +6,7 @@ function TFBLibrary.LoadIBLibrary: boolean;
     Result := NilHandle;
     for i := 0 to LibNames.Count - 1 do
     begin
+//      writeln('Trying ', LibraryPath + LibNames[i]);
       Result := LoadLibrary(LibraryPath + LibNames[i]);
       if Result <> NilHandle then
       begin

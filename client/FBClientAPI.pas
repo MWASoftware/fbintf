@@ -296,7 +296,8 @@ end;
 
 procedure TFBLibrary.FreeFBLibrary;
 begin
-  (FFirebirdAPI as TFBClientAPI).FBShutdown;
+  if FFirebirdAPI <> nil then
+    (FFirebirdAPI as TFBClientAPI).FBShutdown;
   if FIBLibrary <> NilHandle then
     FreeLibrary(FIBLibrary);
   FIBLibrary := NilHandle;
