@@ -45,7 +45,7 @@ if [ -n "$BUILD" ]; then
   FB="4"
 fi
 
-export FIREBIRD=/opt/firebird/$FB$BUILD
+export FIREBIRD=/opt/firebirdVersions/$FB$BUILD
 echo "FIREBIRD=$FIREBIRD"
 
 if [ -n "$FPCDIR" ]  && [ -d "$FPCDIR" ]; then
