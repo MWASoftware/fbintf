@@ -4,11 +4,11 @@ by the Firebird Client library. This interface is documented in the file
 
 FirebirdOOAPI.pas has been generated from the interface specification contained 
 in FirebirdInterface.idl. This describes the API as a set of interfaces, not 
-dissimilar to Pascal interfaces, and which comprises, for interface, a set of 
+dissimilar to Pascal interfaces, and which comprises, for each interface, a set of 
 functions and procedures (methods); most interfaces also inherit from a super 
 class.
 
-A utility program "cloop" (https://github.com/asfernandes/cloop) is used to 
+A utility program "cloop" (https://github.com/MWASoftware/cloop.FPC3.3.1Update) is used to 
 process the interface description and generate language bindings for both the 
 provider and the user of the interfaces. For the Firebird client library, cloop 
 generates a set of C++ bindings. It may also generate Pascal bindings for use 
@@ -16,7 +16,7 @@ with Delphi and Free Pascal.
 
 Common to all language bindings is the idea that each call to an interface is 
 made using a pointer to a memory block comprising a null pointer followed by a 
-pointer to a method table (the vTable). a method table comprises a Null pointer 
+pointer to a method table (the vTable), where a method table comprises a Null pointer 
 followed by an integer version number and pointers to each of the interface's 
 methods as defined by the interface description (idl file). This approach is 
 intended to map on to a typical object data structure in a programming 
@@ -28,7 +28,8 @@ For example, the Firebird Interface includes an interface called "IMaster". A
 pointer to the IMaster memory block is returned by the Firebird client 
 library's exported entry point fb_get_master_interface. This memory block is 
 provided by the client library's implementation of IMaster. The IMaster methods 
-are typically concerned with access to other interfaces. 
+are typically concerned with access to other interfaces.
+ 
 IMaster.getUtilInterface returns a pointer to the IUtil interface memory block, 
 and so on. When calling IMaster.getUtilInterface the caller provides the 
 pointer to the IMaster memory block thus giving context to the call and 
@@ -80,7 +81,7 @@ described below).
 ===========
 
 The Pascal OOAPI interface has had to be radically redesigned. This is because, 
-in their infinite wisdom, the Free Pascal devs saw fit,with FPC 3.3.1 and 
+in their infinite wisdom, the Free Pascal devs saw fit, with FPC 3.3.1 and 
 later, to change the layout of an object instance. The change is to insert a 
 new (system) field after the vmt pointer and before each of the object's 
 variables. This is for use with the TMonitor class.  While similar 
@@ -95,7 +96,7 @@ at compile time. The large initialization and finalization structures that were
 previously required, have now been removed. The unit should thus be smaller and 
 faster to load.
 
-However, the actual interfaces and now less elegant. They are also implemented 
+However, the actual interfaces are now less elegant. They are also implemented 
 as "records" with the extended record type allowing each such record to 
 comprise the null pointer, vTable pointer and the interface's methods. However, 
 there is no longer any means to inherit from one interface to another and hence 
