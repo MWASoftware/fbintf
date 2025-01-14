@@ -47,7 +47,7 @@ doupdate ()
 	  fi
 	done
 	
-	git commit -a -m "Tagging Revision $TAG" --amend
+	git commit -a -m "Tagging Revision $TAG" 
 	git tag -f R$TAG -m "Tagging Revision $V1.$V2.$V3.$REVISION"
 }
 if [ -n "`ps ax|grep libreoffice|grep -v grep`" ]; then
