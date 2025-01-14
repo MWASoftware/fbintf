@@ -1,10 +1,13 @@
-FBINTF Change Log  version          (1.4-3 Build 15853) Fri, 12 Jul 2024 13:41:21 +0100
+FBINTF Change Log  version          (1.4-3 Build 1233) Tue, 14 Jan 2025 14:47:27 +0000
 
 1. Time with Time Zone: when a ISQLParam is set to a variant value and the value is
    and array comprising a TDateTime and a Time Zone String. The first element
    may now be NULL. This sets the param value to null.
 
 2. Avoid object is nil error if Firebird Library fails to load.
+
+3. fbude and fbusrtestbed packages now include description and licence
+info.
 
 FBINTF Change Log  version          (1.4-2 Build 15853) Fri, 12 Jul 2024 13:41:21 +0100
 

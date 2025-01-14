@@ -17,14 +17,6 @@ doupdate ()
 	V2=`echo "$VERSION"|sed 's/\([0-9]\+\)\.\([0-9]\+\)-\([0-9]\+\)/\2/'`
 	V3=`echo "$VERSION"|sed 's/\([0-9]\+\)\.\([0-9]\+\)-\([0-9]\+\)/\3/'`
 	TAG=$V1-$V2-$V3
-	git tag R$TAG -m "Tagging Revision $V1.$V2.$V3.$REVISION"
-
-	if [ -f runtime/nongui/IBVersion.pas ]; then
-	sed -i "s/IBX_MAJOR.*/IBX_MAJOR = $V1;/
-		s/IBX_MINOR.*/IBX_MINOR = $V2;/
-		s/IBX_RELEASE.*/IBX_RELEASE = $V3;/
-		s/IBX_VERSION.*/IBX_VERSION = '$V1.$V2.$V3';/" runtime/nongui/IBVersion.pas
-	fi
 
 	if [ -f IB.pas ]; then
 	sed -i "s/FBIntf_Major.*/FBIntf_Major = $V1;/
@@ -51,13 +43,12 @@ doupdate ()
 	  if [ ! -f "$PDF" ] || [ "$DOC" -nt "$PDF" ]; then
 	    OUTDIR=`dirname "$DOC"`
 	    libreoffice --invisible --convert-to pdf --outdir "$OUTDIR" "$DOC"
-	    svn add "$PDF" >/dev/null 2>&1
+	    git add "$PDF" >/dev/null 2>&1
 	  fi
 	done
 	
-	svn commit -m "Tagging Revision $TAG"
-	svn rm $TAGURL -m "Removing out of date tag" >/dev/null 2>&1
-	svn copy $URL $TAGURL -m "Tag Created for Revision $TAG"
+	git commit -a -m "Tagging Revision $TAG" --amend
+	git tag -f R$TAG -m "Tagging Revision $V1.$V2.$V3.$REVISION"
 }
 if [ -n "`ps ax|grep libreoffice|grep -v grep`" ]; then
   echo "libreoffice is running. Please terminate all instances of libreoffice before running this script"

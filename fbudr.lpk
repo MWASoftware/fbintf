@@ -4,6 +4,7 @@
     <Name Value="fbudr"/>
     <Type Value="RunTimeOnly"/>
     <AddToProjectUsesSection Value="True"/>
+    <Author Value="MWA Software"/>
     <CompilerOptions>
       <Version Value="11"/>
       <SearchPaths>
@@ -16,6 +17,50 @@
         </Debugging>
       </Linking>
     </CompilerOptions>
+    <Description Value="The fbudr package provides support for writing your own Firebird User Defined Routines (UDRs) in Pascal while making full use of MWA&apos;s Firebird Pascal API. It is available for both Free Pascal and Delphi.
+
+UDRs are implemented in a user provided software library (Windows DLL or Linux shared object) that must be installed on a Firebird Server prior to use. Each UDR has also to be declared as an external function, procedure or trigger in the schema of each database that uses the UDR.
+
+UDRs built with this package support:
+
+    • UDR Functions, Execute Procedures Select Procedures and Triggers.
+    • Full use of the fbintf package (MWA&apos;s Pascal Firebird API).
+    • Access to input and output parameters by name or position and as Pascal native types
+    • Exception handling including use of the Firebird status vector to report exceptions to clients. 
+    • A per UDR library log file (by default written to &lt;firebird root directory>/&lt;module name>.log)
+    • Detailed and configurable logging for library debugging
+    • User write to log support (see the IFBExternalContext interface).
+    • A per UDR library configuration file in ini file format (by default the UDR library looks for its configuration file in &lt;firebird root directory>/plugins/udr/&lt;module name>.conf). Log options may be configured statically or via the configuration file.
+    • User sections and configuration parameters supported via the IFBExternalContext interface
+"/>
+    <License Value=" *  Firebird Interface (fbintf). The fbintf components provide a set of
+ *  Pascal language bindings for the Firebird API. Although predominantly
+ *  a new development they include source code taken from IBX and may be
+ *  considered a derived product. This software thus also includes the copyright
+ *  notice and license conditions from IBX.
+ *
+ *  Except for those parts dervied from IBX, contents of this file are subject
+ *  to the Initial Developer&apos;s Public License Version 1.0 (the &quot;License&quot;); you
+ *  may not use this file except in compliance with the License. You may obtain a
+ *  copy of the License here:
+ *
+ *    http://www.firebirdsql.org/index.php?op=doc&amp;id=idpl
+ *
+ *  Software distributed under the License is distributed on an &quot;AS
+ *  IS&quot; basis, WITHOUT WARRANTY OF ANY KIND, either express or
+ *  implied. See the License for the specific language governing rights
+ *  and limitations under the License.
+ *
+ *  The Initial Developer of the Original Code is Tony Whyman.
+ *
+ *  The Original Code is (C) 2016 Tony Whyman, MWA Software
+ *  (http://www.mwasoftware.co.uk).
+ *
+ *  All Rights Reserved.
+ *
+ *  Contributor(s): ______________________________________.
+ *    "/>
+    <Version Major="1" Minor="4" Release = "3" Build="1233" />
     <Files Count="4">
       <Item1>
         <Filename Value="udr/source/FBUDRController.pas"/>
