@@ -1,4 +1,4 @@
-FBINTF Change Log  version          (1.4-4 Build 1237) Wed, 15 Jan 2025 16:45:52 +0000
+FBINTF Change Log  version          (1.4-4 Build 1235) Thu, 16 Jan 2025 09:41:10 +0000
 
 1. FB30Blob. Removed unnecessary Firebird.IAttachment.release from close and cancel methods
    when operation does not result in an error.
