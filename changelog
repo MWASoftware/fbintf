@@ -1,3 +1,12 @@
+FBINTF Change Log  version          (1.4-4 Build 1237) Wed, 15 Jan 2025 16:45:52 +0000
+
+1. FB30Blob. Removed unnecessary Firebird.IAttachment.release from close and cancel methods
+   when operation does not result in an error.
+
+2. FB30Attachment. Review of Firebird.IAttachment addref/release methods. Specifically,
+   addref is no longer called after attach to existing database and hence release no
+   longer called after detach or dropdatabase.
+
 FBINTF Change Log  version          (1.4-3 Build 1233) Tue, 14 Jan 2025 14:47:27 +0000
 
 1. Time with Time Zone: when a ISQLParam is set to a variant value and the value is

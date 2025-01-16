@@ -55,6 +55,7 @@ type
     procedure SetUseRemoteICU(aValue: boolean);
   protected
     procedure CheckHandle; override;
+    procedure ClearCachedInfo; override;
     function GetAttachment: IAttachment; override;
   public
     constructor Create(api: TFB30ClientAPI; DatabaseName: AnsiString; aDPB: IDPB;
@@ -74,7 +75,7 @@ type
     procedure Connect;
     procedure Disconnect(Force: boolean=false); override;
     function IsConnected: boolean; override;
-    procedure DropDatabase;
+    procedure DropDatabase; override;
     function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion; aName: AnsiString=''): ITransaction; override;
     function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionCompletion; aName: AnsiString=''): ITransaction; override;
     procedure ExecImmediate(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer); override;
@@ -178,9 +179,7 @@ begin
     FAttachmentIntf.release;
   except {ignore - forced release}
   end;
-  FOwnsAttachmentHandle := false;
   ClearCachedInfo;
-  FTimeZoneServices := nil;
   FAttachmentIntf := AValue;
   if FAttachmentIntf <> nil then
     FAttachmentIntf.AddRef;
@@ -190,6 +189,13 @@ procedure TFB30Attachment.CheckHandle;
 begin
   if FAttachmentIntf = nil then
     IBError(ibxeDatabaseClosed,[nil]);
+end;
+
+procedure TFB30Attachment.ClearCachedInfo;
+begin
+  inherited ClearCachedInfo;
+  FOwnsAttachmentHandle := false;
+  FTimeZoneServices := nil;
 end;
 
 function TFB30Attachment.GetAttachment: IAttachment;
@@ -243,7 +249,7 @@ begin
         Connect;
       end
       else
-        AttachmentIntf := Intf;
+        FAttachmentIntf := Intf;
       FOwnsAttachmentHandle:= true;
     end;
   end;
@@ -265,7 +271,7 @@ begin
     if InErrorState then
       Exit;
   end;
-  AttachmentIntf := Intf;
+  FAttachmentIntf := Intf;
   FOwnsAttachmentHandle:= true;
   ExtractConnectString(sql,FDatabaseName);
   DPBFromCreateSQL(sql);
@@ -301,7 +307,8 @@ begin
     if FRaiseExceptionOnConnectError then Check4DataBaseError;
     if not InErrorState then
     begin
-      AttachmentIntf := Intf;
+      AttachmentIntf := nil;  {ensure release of existing handle}
+      FAttachmentIntf := Intf;
       FOwnsAttachmentHandle := true;
     end;
   end;
@@ -318,8 +325,10 @@ begin
       FAttachmentIntf.Detach(StatusIntf);
       if not Force and InErrorState then
         IBDataBaseError;
-    end;
-    AttachmentIntf := nil;
+    end
+    else
+      FAttachmentIntf.release();
+    FAttachmentIntf := nil;
   end;
   inherited Disconnect(Force);
 end;
@@ -342,7 +351,7 @@ begin
       FAttachmentIntf.dropDatabase(StatusIntf);
       Check4DataBaseError;
     end;
-    AttachmentIntf := nil;
+    FAttachmentIntf := nil;
   end;
 end;
 

@@ -208,10 +208,15 @@ begin
   with FFirebird30ClientAPI do
   begin
     FBlobIntf.close(StatusIntf);
+    if not InErrorState then
+      FBlobIntf:= nil; // close released intf
     if not Force then Check4DataBaseError(ConnectionCodePage);
   end;
-  FBlobIntf.release;
-  FBlobIntf := nil;
+  if Assigned(FBlobIntf) then
+  begin
+    FBlobIntf.release;
+    FBlobIntf := nil;
+  end;
 end;
 
 procedure TFB30Blob.InternalCancel(Force: boolean);
@@ -221,10 +226,15 @@ begin
   with FFirebird30ClientAPI do
   begin
     FBlobIntf.cancel(StatusIntf);
+    if not InErrorState then
+      FBlobIntf:= nil; // cancel released intf
     if not Force then Check4DataBaseError(ConnectionCodePage);
   end;
-  FBlobIntf.release;
-  FBlobIntf := nil;
+  if Assigned(FBlobIntf) then
+  begin
+    FBlobIntf.release;
+    FBlobIntf := nil;
+  end;
 end;
 
 constructor TFB30Blob.Create(Attachment: TFB30Attachment; Transaction: TFB30Transaction;

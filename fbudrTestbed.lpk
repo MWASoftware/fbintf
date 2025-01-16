@@ -40,7 +40,7 @@
  *
  *  Contributor(s): ______________________________________.
  *    "/>
-    <Version Major="1" Minor="4" Release = "3" Build="1233" />
+    <Version Major="1" Minor="4" Release = "4" Build="1237" />
     <Files Count="1">
       <Item1>
         <Filename Value="udr/testbed/FBUdrPlugin.pas"/>

@@ -65,7 +65,7 @@ type
     procedure Connect;
     procedure Disconnect(Force: boolean=false); override;
     function IsConnected: boolean; override;
-    procedure DropDatabase;
+    procedure DropDatabase; override;
     function StartTransaction(TPB: array of byte; DefaultCompletion: TTransactionCompletion; aName: AnsiString): ITransaction; override;
     function StartTransaction(TPB: ITPB; DefaultCompletion: TTransactionCompletion; aName: AnsiString): ITransaction; override;
     procedure ExecImmediate(transaction: ITransaction; sql: AnsiString; aSQLDialect: integer); override;
@@ -228,6 +228,7 @@ begin
         IBDatabaseError;
     FHandle := nil;
   end;
+  inherited;
 end;
 
 function TFB25Attachment.StartTransaction(TPB: array of byte;

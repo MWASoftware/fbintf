@@ -165,7 +165,7 @@ type
     constructor Create(api: TFBClientAPI; DatabaseName: AnsiString; DPB: IDPB;
       RaiseExceptionOnConnectError: boolean);
     procedure CheckHandle; virtual; abstract;
-    procedure ClearCachedInfo;
+    procedure ClearCachedInfo; virtual;
     function GenerateCreateDatabaseSQL(DatabaseName: AnsiString; aDPB: IDPB): AnsiString;
     function GetDBInfo(ReqBuffer: PByte; ReqBufLen: integer): IDBInformation; virtual; abstract;
     function IsConnected: boolean; virtual; abstract;
@@ -177,6 +177,7 @@ type
   public
     destructor Destroy; override;
     procedure Disconnect(Force: boolean); override;
+    procedure DropDatabase; virtual;
     procedure IBDataBaseError;
     function getFirebirdAPI: IFirebirdAPI;
     function getDPB: IDPB;
@@ -1177,6 +1178,11 @@ end;
 procedure TFBAttachment.Disconnect(Force: boolean);
 begin
   inherited Disconnect(Force);
+  ClearCachedInfo;
+end;
+
+procedure TFBAttachment.DropDatabase;
+begin
   ClearCachedInfo;
 end;
 

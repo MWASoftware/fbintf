@@ -40,7 +40,7 @@ if [ -n "$FPCDIR" ]  && [ -d "$FPCDIR" ]; then
   export FPC=$FPCDIR/ppcx64
 fi
 
-export FIREBIRD=/opt/firebird/$FB
+export FIREBIRD=/opt/firebirdVersions/$FB
 echo "FIREBIRD=$FIREBIRD"
 export LD_LIBRARY_PATH=$FIREBIRD/lib
 export FBINTFROOT=../../..
@@ -67,7 +67,7 @@ else
     echo "Compilation failed"	  
     exit 1
   fi
-  cp libfbudrtests.so $FIREBIRD/plugins/udr
+  sudo cp libfbudrtests.so $FIREBIRD/plugins/udr
   PID=`ps ax|grep $FB/bin/fbguard|grep -v grep|awk '{print $1;}'`
   if [ -n "$PID" ]; then
     sudo kill -TERM $PID
