@@ -74,3 +74,6 @@ modules/
 **/backup
 **/units
 
+#Lazarus local files
+*.lps
+

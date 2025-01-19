@@ -118,7 +118,6 @@ begin
     FTransactionIntf  := (attachment as TFB30Attachment).AttachmentIntf.startTransaction(StatusIntf,
              (FTPB as TTPB).getDataLength,BytePtr((FTPB as TTPB).getBuffer));
     Check4DataBaseError;
-    FTransactionIntf.addRef();
   end;
   SignalActivity;
 end;
@@ -147,7 +146,6 @@ begin
 
     FTransactionIntf := DtcStart.start(StatusIntf);
     Check4DataBaseError(ConnectionCodePage);
-    FTransactionIntf.addRef();
     SignalActivity;
   end;
 end;
@@ -164,7 +162,9 @@ begin
         Result := trCommitFailed
       else
        raise EIBInterBaseError.Create(GetStatus,ConnectionCodePage);
-    end;
+    end
+    else
+      FTransactionIntf := nil;
   end;
   SignalActivity;
   FreeHandle(Force);
@@ -192,7 +192,9 @@ begin
         Result := trRollbackFailed
       else
        raise EIBInterBaseError.Create(GetStatus,ConnectionCodePage);
-    end;
+    end
+    else
+      FTransactionIntf := nil;
   end;
   SignalActivity;
   FreeHandle(Force);
