@@ -250,9 +250,9 @@ begin
       FEventsIntf.Cancel(StatusIntf);
       if not Force then
         Check4DataBaseError(ConnectionCodePage);
+      FEventsIntf := nil;
     end;
     FInWaitState := false;
-    ReleaseIntf;
     inherited CancelEvents(Force);
   finally
     FCriticalSection.Leave
@@ -291,7 +291,11 @@ end;
 procedure TFB30Events.ReleaseIntf;
 begin
   if FEventsIntf <> nil then
-    FEventsIntf.release;
+  {$IFDEF EVENTDEBUG}
+  writeln('Release event = ',FEventsIntf.release);
+  {$ELSE}
+  FEventsIntf.release;
+  {$ENDIF}
   FEventsIntf := nil;
 end;
 
