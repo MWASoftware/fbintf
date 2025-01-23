@@ -37,7 +37,7 @@ jobs:
         set -xeuo pipefail
         sudo bash -c '
           apt-get update
-          apt-get -y install lazarus firebird
+          apt-get -y install lazarus firebird3.0-server
         ' >/dev/null
         instantfpc -Fu/usr/lib/lazarus/*/components/lazutils \
           -B '.github/workflows/make.pas'
