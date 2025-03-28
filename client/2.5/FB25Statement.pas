@@ -907,6 +907,7 @@ begin
     TIBXSQLVAR(Column[i]).Free;
   SetLength(FColumnList,0);
   FSize := 0;
+  FCount := 0;
 end;
 
 function TIBXSQLDA.GetStatement: IStatement;
@@ -1222,6 +1223,11 @@ begin
     FHandle := nil;
     FCursor := '';
     FPrepared := false;
+    FProcessedSQL := '';
+    if FSQLParams <> nil then
+      FSQLParams.FreeXSQLDA;
+    if FSQLRecord <> nil then
+      FSQLRecord.FreeXSQLDA;
   end;
 end;
 

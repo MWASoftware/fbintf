@@ -1664,6 +1664,11 @@ begin
     FPrepared := false;
   end;
   FCursor := '';
+  FProcessedSQL := '';
+  if FSQLParams <> nil then
+    FSQLParams.FreeXSQLDA;
+  if FSQLRecord <> nil then
+    FSQLRecord.FreeXSQLDA;
 end;
 
 procedure TFB30Statement.InternalClose(Force: boolean);

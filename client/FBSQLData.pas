@@ -2467,6 +2467,7 @@ var b: IBlob;
     aScale: integer;
 begin
   CheckActive;
+  Clear;
   if IsNullable then
     IsNull := False;
   with FFirebirdClientAPI do
@@ -2588,8 +2589,57 @@ begin
 end;
 
 procedure TSQLParam.Clear;
+const
+      EmptyQuad: TISC_QUAD = (gds_quad_high:0;gds_quad_low:0);
 begin
-  IsNull := true;
+  {Restores the original SQL Type - if it was changed}
+  if CanChangeMetaData then
+    FIBXSQLVar.SetSQLType(getColMetadata.GetSQLType);
+  if IsNullable then
+    IsNull := true
+  else
+  case SQLTYPE of
+  SQL_BOOLEAN:
+      AsBoolean := false;
+
+  SQL_BLOB,
+  SQL_ARRAY,
+  SQL_QUAD:
+    AsQuad := EmptyQuad;
+
+  SQL_VARYING,
+  SQL_TEXT:
+    FIBXSQLVar.SetString('');
+
+  SQL_SHORT,
+  SQL_LONG,
+  SQL_INT64,
+  SQL_DEC_FIXED,
+  SQL_DEC16,
+  SQL_DEC34,
+  SQL_INT128,
+  SQL_D_FLOAT,
+  SQL_DOUBLE,
+  SQL_FLOAT:
+    SetAsNumeric(IntToNumeric(0));
+
+  SQL_TIMESTAMP:
+        SetAsDateTime(0);
+
+  SQL_TYPE_DATE:
+        SetAsDate(0);
+
+  SQL_TYPE_TIME:
+        SetAsTime(0);
+
+  SQL_TIMESTAMP_TZ,
+  SQL_TIMESTAMP_TZ_EX:
+        SetAsDateTime(0,'');
+
+  SQL_TIME_TZ,
+  SQL_TIME_TZ_EX:
+        SetAsTime(0,0,'');
+  end;
 end;
 
 function TSQLParam.CanChangeMetaData: boolean;

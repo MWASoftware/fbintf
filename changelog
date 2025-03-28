@@ -1,3 +1,13 @@
+FBINTF Change Log  version          (1.4-5 Build 1238) Mon, 20 Jan 2025 11:45:29 +0000
+
+1. TSQLParam.Clear now resets the SQL Type (if it was changed when setting the param)
+   and re-initialises the underlying data structure.
+
+2. TSQLParam.InternalSetString now clears the param before setting the value (also see above).
+
+3. When IStatement.Prepare is executed the underlying data structures are freed and then
+   re-created thus ensuring that there are no "left overs" from a previous use.
+
 FBINTF Change Log  version          (1.4-4 Build 1238) Mon, 20 Jan 2025 11:45:29 +0000
 
 1. FB30Blob. Removed unnecessary Firebird.IAttachment.release from close and cancel methods
