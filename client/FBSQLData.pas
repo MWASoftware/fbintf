@@ -309,7 +309,7 @@ type
     function GetDataLength: cardinal; virtual; abstract; {current field length}
     function GetSize: cardinal; virtual; abstract; {field length as given by metadata}
     function GetDefaultTextSQLType: cardinal; virtual; abstract;
-    procedure InternalSetSQLType(aValue: cardinal); virtual; abstract;
+    procedure InternalSetSQLType(aValue: cardinal; aSubType: integer); virtual; abstract;
     procedure InternalSetScale(aValue: integer); virtual; abstract;
     procedure InternalSetDataLength(len: cardinal); virtual; abstract;
     procedure SetIsNull(Value: Boolean); virtual; abstract;
@@ -317,7 +317,7 @@ type
     procedure SetSQLData(AValue: PByte; len: cardinal); virtual; abstract;
     procedure SetScale(aValue: integer);
     procedure SetDataLength(len: cardinal);
-    procedure SetSQLType(aValue: cardinal);
+    procedure SetSQLType(aValue: cardinal; aSubType: integer);
     procedure SetCharSetID(aValue: cardinal); virtual; abstract;
     procedure SetMetaSize(aValue: cardinal); virtual;
   public
@@ -346,7 +346,7 @@ type
     property Name: AnsiString read FName write SetName;
     property CharSetID: cardinal read GetCharSetID write SetCharSetID;
     property CodePage: TSystemCodePage read GetCodePage;
-    property SQLType: cardinal read GetSQLType write SetSQLType;
+    property SQLType: cardinal read GetSQLType;
     property SQLSubtype: integer read GetSubtype;
     property SQLData: PByte read GetSQLData;
     property DataLength: cardinal read GetDataLength write SetDataLength;
@@ -823,14 +823,14 @@ begin
   InternalSetDataLength(len);
 end;
 
-procedure TSQLVarData.SetSQLType(aValue: cardinal);
+procedure TSQLVarData.SetSQLType(aValue: cardinal; aSubType: integer);
 begin
   if aValue = SQLType then
     Exit;
   if not CanChangeMetaData then
     IBError(ibxeSQLTypeUnchangeable,[TSQLDataItem.GetSQLTypeName(SQLType),
                                           TSQLDataItem.GetSQLTypeName(aValue)]);
-  InternalSetSQLType(aValue);
+  InternalSetSQLType(aValue,aSubType);
 end;
 
 procedure TSQLVarData.SetMetaSize(aValue: cardinal);
@@ -870,9 +870,14 @@ begin
 
   FVarString := aValue;
   if SQLType = SQL_BLOB then
-    SetMetaSize(GetAttachment.GetInlineBlobLimit);
+  begin
+    if GetDefaultTextSQLType = SQL_TEXT then
+      SetMetaSize(Length(aValue)*GetCharSetWidth)
+    else
+      SetMetaSize(Length(aValue))
+  end;
   if CanChangeMetaData then
-    SQLType := GetDefaultTextSQLType;
+    SetSQLType(GetDefaultTextSQLType,0);
   Scale := 0;
   if  (SQLType <> SQL_VARYING) and (SQLType <> SQL_TEXT) then
     IBError(ibxeUnableTosetaTextType,[Index,Name,TSQLDataItem.GetSQLTypeName(SQLType)]);
@@ -2482,6 +2487,10 @@ begin
       IBError(ibxeInvalidDataConversion,[nil]);
 
   SQL_BLOB:
+    if (FIBXSQLVar.GetDefaultTextSQLType = SQL_TEXT) and
+         (Length(Value) * GetCharSetWidth < GetAttachment.GetInlineBlobLimit)  then
+      DoSetString
+    else
     if Length(Value) < GetAttachment.GetInlineBlobLimit then
       DoSetString
     else
@@ -2585,7 +2594,7 @@ end;
 procedure TSQLParam.SetSQLType(aValue: cardinal);
 begin
   CheckActive;
-  FIBXSQLVAR.SQLType := aValue;
+  FIBXSQLVAR.SetSQLType(aValue,0);
 end;
 
 procedure TSQLParam.Clear;
@@ -2594,7 +2603,15 @@ const
 begin
   {Restores the original SQL Type - if it was changed}
   if CanChangeMetaData then
-    FIBXSQLVar.SetSQLType(getColMetadata.GetSQLType);
+  begin
+    FIBXSQLVar.SetSQLType(getColMetadata.GetSQLType,getColMetadata.getSubtype);
+    case SQLType of
+    SQL_BLOB,
+    SQL_ARRAY,
+    SQL_QUAD:
+      FIBXSQLVar.SetMetaSize(sizeof(TISC_QUAD));
+    end;
+  end;
   if IsNullable then
     IsNull := true
   else

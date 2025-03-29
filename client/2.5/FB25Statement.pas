@@ -151,7 +151,7 @@ type
     procedure SetSQLData(AValue: PByte; len: cardinal); override;
     procedure InternalSetScale(aValue: integer); override;
     procedure InternalSetDataLength(len: cardinal); override;
-    procedure InternalSetSQLType(aValue: cardinal); override;
+    procedure InternalSetSQLType(aValue: cardinal; aSubType: integer); override;
     procedure SetCharSetID(aValue: cardinal); override;
   public
     constructor Create(aParent: TIBXSQLDA; aIndex: integer);
@@ -165,7 +165,7 @@ type
     procedure Initialize; override;
 
     property Statement: TFB25Statement read FStatement;
-    property SQLType: cardinal read GetSQLType write SetSQLType;
+    property SQLType: cardinal read GetSQLType;
   end;
 
   TIBXINPUTSQLDA = class;
@@ -560,12 +560,14 @@ begin
   Changed;
 end;
 
-procedure TIBXSQLVAR.InternalSetSQLType(aValue: cardinal);
+procedure TIBXSQLVAR.InternalSetSQLType(aValue: cardinal; aSubType: integer);
 var tmpCharSetID: cardinal;
 begin
   tmpCharSetID := GetCharSetID;
   FXSQLVAR^.sqltype := aValue or (FXSQLVAR^.sqltype and 1);
-  SetCharSetID(tmpCharSetID); {Needed when changing Blob to SQL_VARYING/SQL_TEXT}
+  if aValue = SQL_BLOB then
+    FXSQLVAR^.sqlsubtype := aSubType;
+  SetCharSetID(tmpCharSetID); {Needed when changing Blob to SQL_VARYING/SQL_TEXT and vice versa}
   Changed;
 end;
 
@@ -577,7 +579,13 @@ begin
     SQL_VARYING, SQL_TEXT:
         FXSQLVAR^.sqlsubtype := (aValue and $FF) or (FXSQLVAR^.sqlsubtype and not $FF);
 
-    SQL_BLOB,
+    SQL_BLOB:
+      if (SQLSubType = 1)  then
+        {see http://firebirdsql.org/rlsnotesh/rlsnotes210.html}
+        FXSQLVAR^.sqlscale := (aValue and $FF) or (FXSQLVAR^.sqlscale and not $FF)
+      else
+        IBError(ibxeInvalidDataConversion,[nil]);
+
     SQL_ARRAY:
       IBError(ibxeInvalidDataConversion,[nil]);
     end;

@@ -1,12 +1,17 @@
 FBINTF Change Log  version          (1.4-5 Build 1238) Mon, 20 Jan 2025 11:45:29 +0000
 
 1. TSQLParam.Clear now resets the SQL Type (if it was changed when setting the param)
-   and re-initialises the underlying data structure.
+   and zeroes the data if not nullable - otherwise parameter value is null.
 
 2. TSQLParam.InternalSetString now clears the param before setting the value (also see above).
 
 3. When IStatement.Prepare is executed the underlying data structures are freed and then
    re-created thus ensuring that there are no "left overs" from a previous use.
+
+4. Test Plan updated (Test 6) to include test for Blob text string optimisation i.e. shorter
+   strings transferred as inline text rather than as separate blobs.
+
+5. Blob string optimisation for SQL_TEXT now takes into account char set width.
 
 FBINTF Change Log  version          (1.4-4 Build 1238) Mon, 20 Jan 2025 11:45:29 +0000
 

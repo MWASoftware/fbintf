@@ -127,7 +127,7 @@ type
      procedure SetIsNullable(Value: Boolean);  override;
      procedure InternalSetScale(aValue: integer); override;
      procedure InternalSetDataLength(len: cardinal); override;
-     procedure InternalSetSQLType(aValue: cardinal); override;
+     procedure InternalSetSQLType(aValue: cardinal; aSubType: integer); override;
      procedure SetCharSetID(aValue: cardinal); override;
      procedure SetMetaSize(aValue: cardinal); override;
   public
@@ -713,9 +713,11 @@ begin
   Changed;
 end;
 
-procedure TIBXSQLVAR.InternalSetSQLType(aValue: cardinal);
+procedure TIBXSQLVAR.InternalSetSQLType(aValue: cardinal; aSubType: integer);
 begin
   FSQLType := aValue;
+  if aValue = SQL_BLOB then
+    FSQLSubType := aSubType;
   Changed;
 end;
 
