@@ -1,9 +1,10 @@
 FBINTF Change Log  version          (1.4-5 Build 1238) Mon, 20 Jan 2025 11:45:29 +0000
 
 1. TSQLParam.Clear now resets the SQL Type (if it was changed when setting the param)
-   and zeroes the data if not nullable - otherwise parameter value is null.
+   and zeroes the data if not nullable - otherwise parameter value is set to null.
 
 2. TSQLParam.InternalSetString now clears the param before setting the value (also see above).
+   This avoids problems arising from re-using a prepared query and Blob text string optimisation.
 
 3. When IStatement.Prepare is executed the underlying data structures are freed and then
    re-created thus ensuring that there are no "left overs" from a previous use.

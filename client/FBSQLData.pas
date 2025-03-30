@@ -871,10 +871,10 @@ begin
   FVarString := aValue;
   if SQLType = SQL_BLOB then
   begin
-    if GetDefaultTextSQLType = SQL_TEXT then
+    if (GetDefaultTextSQLType = SQL_TEXT) and not GetStatement.HasBatchMode then
       SetMetaSize(Length(aValue)*GetCharSetWidth)
     else
-      SetMetaSize(Length(aValue))
+      SetMetaSize(GetAttachment.GetInlineBlobLimit) {Otherwise batch mode can be limited by first string assigned to var}
   end;
   if CanChangeMetaData then
     SetSQLType(GetDefaultTextSQLType,0);

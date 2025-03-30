@@ -3,10 +3,10 @@ Copyright MWA Software 2016-2021
 
 Starting Tests
 Client API Version = 3.0
-Firebird Environment Variable = /opt/firebird/3.0.10
-Firebird Bin Directory = /opt/firebird/3.0.10/bin
-Firebird Conf Directory = /opt/firebird/3.0.10/
-Firebird Client Library Path = /opt/firebird/3.0.10/lib/libfbclient.so
+Firebird Environment Variable = /opt/firebirdVersions/3.0.10
+Firebird Bin Directory = /opt/firebirdVersions/3.0.10/bin
+Firebird Conf Directory = /opt/firebirdVersions/3.0.10/
+Firebird Client Library Path = /opt/firebirdVersions/3.0.10/lib/libfbclient.so
 Running Test 1: Create and Drop a Database
 Creating a Database with empty parameters
 Create Database fails (as expected): Engine Code: 335544344
@@ -23,7 +23,7 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 12
 DB ODS Minor Version = 0
 User Authentication Method = Srp
-Firebird Library Path = /opt/firebird/3.0.10/lib/libfbclient.so
+Firebird Library Path = /opt/firebirdVersions/3.0.10/lib/libfbclient.so
 DB Client Implementation Version = 3.0
 DPB: Item Count = 3
   isc_dpb_user_name = SYSDBA
@@ -45,7 +45,7 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 12
 DB ODS Minor Version = 0
 User Authentication Method = Srp
-Firebird Library Path = /opt/firebird/3.0.10/lib/libfbclient.so
+Firebird Library Path = /opt/firebirdVersions/3.0.10/lib/libfbclient.so
 DB Client Implementation Version = 3.0
 Dropping Database
 DPB: Item Count = 4
@@ -66,7 +66,7 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 12
 DB ODS Minor Version = 0
 User Authentication Method = Srp
-Firebird Library Path = /opt/firebird/3.0.10/lib/libfbclient.so
+Firebird Library Path = /opt/firebirdVersions/3.0.10/lib/libfbclient.so
 DB Client Implementation Version = 3.0
 RDB$DESCRIPTION = 
 RDB$RELATION_ID = 128
@@ -319,7 +319,7 @@ DB Remote Protocol = TCPv4
 DB ODS Major Version = 12
 DB ODS Minor Version = 0
 User Authentication Method = Srp
-Firebird Library Path = /opt/firebird/3.0.10/lib/libfbclient.so
+Firebird Library Path = /opt/firebirdVersions/3.0.10/lib/libfbclient.so
 DB Client Implementation Version = 3.0
 Do Fetch Next:
 EMP_NO = 2
@@ -572,7 +572,7 @@ DB Remote Protocol =
 DB ODS Major Version = 12
 DB ODS Minor Version = 0
 User Authentication Method = User name in DPB
-Firebird Library Path = /opt/firebird/3.0.10/lib/libfbclient.so
+Firebird Library Path = /opt/firebirdVersions/3.0.10/lib/libfbclient.so
 DB Client Implementation Version = 3.0
 Do Fetch Next:
 EMP_NO = 2
@@ -655,13 +655,13 @@ Running Test 3: ad hoc queries
 Opening inet://localhost/employee
 Database Open
 Employee Count = 42
-Transaction ID = 1467
+Transaction ID = 2325
 Transaction is Read/Write
 Transaction Database Path = inet://localhost/employee
-Transaction ID = 1467
-Oldest Interesting = 1465
-Oldest Action = 1466
-Oldest Snapshot = 1466
+Transaction ID = 2325
+Oldest Interesting = 2323
+Oldest Action = 2324
+Oldest Snapshot = 2324
 Oldest Interesting = 0
 Employee Count = 41
 Employee Count = 42
@@ -693,10 +693,10 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 19,490,704
+Current memory = 19,491,568
 Delta memory = 4,480
-Max memory = 19,548,704
-Elapsed time= 0.001 sec
+Max memory = 19,542,320
+Elapsed time= 0.000 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
@@ -1407,6 +1407,81 @@ The fair Ophelia.-Nymph, in thy orisons
 Be all my sins remembered
 
 
+Test text blob optimisation - short text followed by long
+Params after prepare
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+Value = 0
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = 
+Scale = 0
+Charset id = 4
+Nullable
+Size = 8
+
+Params after setting values
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+Value = 3
+
+SQLType =SQL_VARYING
+sub type = 1
+Field Name = 
+Scale = 0
+Charset id = 4
+Nullable
+Size = 320
+Value = The Quick Brown Fox Jumps over the Lazy Dog
+
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+Value = 4
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = 
+Scale = 0
+Charset id = 4
+Nullable
+Size = 8
+Value = O Romeo, Romeo, wherefore art thou Romeo? Deny thy father and refuse thy name. Or if thou wilt not, be but sworn my love And I’ll no longer be a Capulet.‘Tis but thy name that is my enemy: Thou art thyself, though not a Montague. What’s Montague? It is nor hand nor foot Nor arm nor face nor any other part Belonging to a man. O be some other name. What’s in a name? That which we call a rose By any other name would smell as sweet; So Romeo would, were he not Romeo call’d, Retain that dear perfection which he owes Without that title. Romeo, doff thy name ,And for that name, which is no part of thee, Take all myself.
+
+Text Blob Optimisation Results
+ROWID = 3
+FIXEDPOINT = NULL
+FLOATINGPOINT = NULL
+TITLE = NULL
+BLOBDATA (Charset Id = 4 Codepage = 65001)
+
+The Quick Brown Fox Jumps over the Lazy Dog
+ROWID = 4
+FIXEDPOINT = NULL
+FLOATINGPOINT = NULL
+TITLE = NULL
+BLOBDATA (Charset Id = 4 Codepage = 65001)
+
+O Romeo, Romeo, wherefore art thou Romeo? Deny thy father and refuse thy name. Or if thou wilt not, be but sworn my love And I’ll no longer be a Capulet.‘Tis but thy name that is my enemy: Thou art thyself, though not a Montague. What’s Montague? It is nor hand nor foot Nor arm nor face nor any other part Belonging to a man. O be some other name. What’s in a name? That which we call a rose By any other name would smell as sweet; So Romeo would, were he not Romeo call’d, Retain that dear perfection which he owes Without that title. Romeo, doff thy name ,And for that name, which is no part of thee, Take all myself.
+
 Testing Blob as stored proc parameter
 Metadata
 SQLType =SQL_BLOB
@@ -1885,6 +1960,81 @@ And lose the name of action.-Soft you now,
 The fair Ophelia.-Nymph, in thy orisons
 Be all my sins remembered
 
+
+Test text blob optimisation - short text followed by long
+Params after prepare
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+Value = 0
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = 
+Scale = 0
+Charset id = 53
+Nullable
+Size = 8
+
+Params after setting values
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+Value = 3
+
+SQLType =SQL_VARYING
+sub type = 1
+Field Name = 
+Scale = 0
+Charset id = 53
+Nullable
+Size = 80
+Value = The Quick Brown Fox Jumps over the Lazy Dog
+
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+Value = 4
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = 
+Scale = 0
+Charset id = 53
+Nullable
+Size = 8
+Value = O Romeo, Romeo, wherefore art thou Romeo? Deny thy father and refuse thy name. Or if thou wilt not, be but sworn my love And I’ll no longer be a Capulet.‘Tis but thy name that is my enemy: Thou art thyself, though not a Montague. What’s Montague? It is nor hand nor foot Nor arm nor face nor any other part Belonging to a man. O be some other name. What’s in a name? That which we call a rose By any other name would smell as sweet; So Romeo would, were he not Romeo call’d, Retain that dear perfection which he owes Without that title. Romeo, doff thy name ,And for that name, which is no part of thee, Take all myself.
+
+Text Blob Optimisation Results
+ROWID = 3
+FIXEDPOINT = NULL
+FLOATINGPOINT = NULL
+TITLE = NULL
+BLOBDATA (Charset Id = 53 Codepage = 1252)
+
+The Quick Brown Fox Jumps over the Lazy Dog
+ROWID = 4
+FIXEDPOINT = NULL
+FLOATINGPOINT = NULL
+TITLE = NULL
+BLOBDATA (Charset Id = 53 Codepage = 1252)
+
+O Romeo, Romeo, wherefore art thou Romeo? Deny thy father and refuse thy name. Or if thou wilt not, be but sworn my love And I’ll no longer be a Capulet.‘Tis but thy name that is my enemy: Thou art thyself, though not a Montague. What’s Montague? It is nor hand nor foot Nor arm nor face nor any other part Belonging to a man. O be some other name. What’s in a name? That which we call a rose By any other name would smell as sweet; So Romeo would, were he not Romeo call’d, Retain that dear perfection which he owes Without that title. Romeo, doff thy name ,And for that name, which is no part of thee, Take all myself.
 
 Testing Blob as stored proc parameter
 Metadata
@@ -2365,6 +2515,81 @@ The fair Ophelia.-Nymph, in thy orisons
 Be all my sins remembered
 
 
+Test text blob optimisation - short text followed by long
+Params after prepare
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+Value = 0
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = 
+Scale = 0
+Charset id = 4
+Nullable
+Size = 8
+
+Params after setting values
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+Value = 3
+
+SQLType =SQL_VARYING
+sub type = 1
+Field Name = 
+Scale = 0
+Charset id = 4
+Nullable
+Size = 320
+Value = The Quick Brown Fox Jumps over the Lazy Dog
+
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+Value = 4
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = 
+Scale = 0
+Charset id = 4
+Nullable
+Size = 8
+Value = O Romeo, Romeo, wherefore art thou Romeo? Deny thy father and refuse thy name. Or if thou wilt not, be but sworn my love And I’ll no longer be a Capulet.‘Tis but thy name that is my enemy: Thou art thyself, though not a Montague. What’s Montague? It is nor hand nor foot Nor arm nor face nor any other part Belonging to a man. O be some other name. What’s in a name? That which we call a rose By any other name would smell as sweet; So Romeo would, were he not Romeo call’d, Retain that dear perfection which he owes Without that title. Romeo, doff thy name ,And for that name, which is no part of thee, Take all myself.
+
+Text Blob Optimisation Results
+ROWID = 3
+FIXEDPOINT = NULL
+FLOATINGPOINT = NULL
+TITLE = NULL
+BLOBDATA (Charset Id = 4 Codepage = 65001)
+
+The Quick Brown Fox Jumps over the Lazy Dog
+ROWID = 4
+FIXEDPOINT = NULL
+FLOATINGPOINT = NULL
+TITLE = NULL
+BLOBDATA (Charset Id = 4 Codepage = 65001)
+
+O Romeo, Romeo, wherefore art thou Romeo? Deny thy father and refuse thy name. Or if thou wilt not, be but sworn my love And I’ll no longer be a Capulet.‘Tis but thy name that is my enemy: Thou art thyself, though not a Montague. What’s Montague? It is nor hand nor foot Nor arm nor face nor any other part Belonging to a man. O be some other name. What’s in a name? That which we call a rose By any other name would smell as sweet; So Romeo would, were he not Romeo call’d, Retain that dear perfection which he owes Without that title. Romeo, doff thy name ,And for that name, which is no part of thee, Take all myself.
+
 Testing Blob as stored proc parameter
 Metadata
 SQLType =SQL_BLOB
@@ -2834,7 +3059,7 @@ MYARRAY = Array: (0,-1: A50) (0,0: A51) (0,1: A52) (0,2: A53) (0,3: A54) (0,4: A
 
 ------------------------------------------------------
 Running Test 9: Database Information tests
-Database ID = 4 FB = /opt/firebird/3.0.10/examples/empbuild/employee.fdb SN = zeus
+Database ID = 4 FB = /opt/firebirdVersions/3.0.10/examples/empbuild/employee.fdb SN = zeus
 Pages =307
 Base Level = 13,4,0,3,
 Implementation = 11,7,0,3,65,1,65,
@@ -2847,9 +3072,9 @@ Database is Read/Write
 Database Created: 07/6/2022 12:50:29
 Pages Used = 298
 Pages Free = 9
-Server Memory = 18918224
+Server Memory = 18918256
 Forced Writes  = 1
-Max Memory  = 18949568
+Max Memory  = 18949600
 Num Buffers  = 2048
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
@@ -2933,8 +3158,8 @@ Server Version = LI-V3.0.10.33601 Firebird 3.0
 Implementation = Firebird/Linux/AMD/Intel/x64
 
 Lock Directory = /tmp/firebird/
-Message File = /opt/firebird/3.0.10/
-Security File = /opt/firebird/3.0.10/security3.fdb
+Message File = /opt/firebirdVersions/3.0.10/
+Security File = /opt/firebirdVersions/3.0.10/security3.fdb
 
 DB Attachments
 No. of Attachments = 0
@@ -3946,12 +4171,12 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 11
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2024/05/23 12:30:11.5610
+IBX$CREATED = 2025/03/30 11:13:39.3790
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 13
 IBX$OLDTRANSACTIONID = 12
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2024/05/23 12:30:11.5970
+IBX$CREATED = 2025/03/30 11:13:39.4060
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)
