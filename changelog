@@ -1,4 +1,4 @@
-FBINTF Change Log  version          (1.4-5 Build 1238) Mon, 20 Jan 2025 11:45:29 +0000
+FBINTF Change Log  version          (1.4-5 Build 1242) Sun, 30 Mar 2025 11:20:17 +0100
 
 1. TSQLParam.Clear now resets the SQL Type (if it was changed when setting the param)
    and zeroes the data if not nullable - otherwise parameter value is set to null.
