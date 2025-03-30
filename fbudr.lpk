@@ -60,7 +60,7 @@ UDRs built with this package support:
  *
  *  Contributor(s): ______________________________________.
  *    "/>
-    <Version Major="1" Minor="4" Release = "4" Build="1238" />
+    <Version Major="1" Minor="4" Release = "5" Build="1242" />
     <Files Count="4">
       <Item1>
         <Filename Value="udr/source/FBUDRController.pas"/>
