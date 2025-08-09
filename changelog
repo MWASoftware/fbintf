@@ -1,3 +1,14 @@
+FBINTF Change Log  version          (1.4-6 Build 1241) Sat, 9 Aug 2025 12:48:01 +0100
+
+1. In Firebird 4 or later, large fixed point real numbers (e.g. NUMERIC(34,4)) are supported 
+   using 128 bit integers approprately scaled. In FBIntf, numbers this large are handled using 
+   the BCD data type. FBIntf uses the Firebird client library to convert a BCD (expressed as a 
+   formatted string) to Firebird's internal record format and vice versa. It has been reported 
+   that there can be a mis-match between the decimal separator used by the Firebird Client Library 
+   and that used by FBIntf, resulting in either a range error or a missing decimal point. In 
+   order to avoid this problem, the FBIntf large integer handling has been updated to remove any 
+   dependency on the decimal separator used by the Firebird Client Library.
+
 FBINTF Change Log  version          (1.4-5 Build 1242) Sun, 30 Mar 2025 11:20:17 +0100
 
 1. TSQLParam.Clear now resets the SQL Type (if it was changed when setting the param)
