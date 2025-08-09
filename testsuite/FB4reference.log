@@ -656,13 +656,13 @@ Running Test 3: ad hoc queries
 Opening inet://localhost/employee
 Database Open
 Employee Count = 42
-Transaction ID = 6752
+Transaction ID = 7146
 Transaction is Read/Write
 Transaction Database Path = inet://localhost/employee
-Transaction ID = 6752
-Oldest Interesting = 6750
-Oldest Action = 6751
-Oldest Snapshot = 6751
+Transaction ID = 7146
+Oldest Interesting = 7144
+Oldest Action = 7145
+Oldest Snapshot = 7145
 Oldest Snapshot Number = 2
 Lock Timeout = 0
 Transaction Access = isc_info_tra_readwrite
@@ -704,7 +704,7 @@ Elapsed time= 0.001 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
-Writes = 0
+Writes = 1
 Fetches = 3
 Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
 Relation Name = EMPLOYEE
@@ -4662,12 +4662,12 @@ BigNumber = 1234561234567.123456
   Special = 0
   Places = 6
   Digits = 12 34 56 12 34 56 71 23 45 60 
-BiggerNumber = 11123456123456123456123456123456.1235
+BiggerNumber = 11123456123456123456123456123456.1234
   Precision = 36
   Sign = 0
   Special = 0
   Places = 4
-  Digits = 11 12 34 56 12 34 56 12 34 56 12 34 56 12 34 56 12 35 
+  Digits = 11 12 34 56 12 34 56 12 34 56 12 34 56 12 34 56 12 34 
 BigInteger = Null
 
 RowID = 4
@@ -5390,12 +5390,12 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 11
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2025/03/30 11:16:25.0400
+IBX$CREATED = 2025/08/09 11:29:31.0750
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 13
 IBX$OLDTRANSACTIONID = 12
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2025/03/30 11:16:25.0670
+IBX$CREATED = 2025/08/09 11:29:31.0930
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)

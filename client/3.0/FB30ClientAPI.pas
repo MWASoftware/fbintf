@@ -805,11 +805,49 @@ end;
 procedure TFB30ClientAPI.StrToInt128(scale: integer; aValue: AnsiString;
   bufptr: PByte);
 var int128: IInt128;
+    index: integer;
+    dp: integer;
+    TruncateBy: integer;
 begin
   inherited StrToInt128(scale,aValue,bufPtr);
 
   int128 := UtilIntf.getInt128(StatusIntf);
-  int128.fromString(StatusIntf,scale,PAnsiChar(aValue),FB_I128Ptr(bufptr));
+
+  {Unable to trust that the Firebird Client Library using the
+   decimal separator defined for the locale. Thus we remove it
+   and adjust the decimal string appropriately.}
+
+  {$IF declared(DefaultFormatSettings)}
+  with DefaultFormatSettings do
+  {$ELSE}
+  {$IF declared(FormatSettings)}
+  with FormatSettings do
+  {$IFEND}
+  {$IFEND}
+  index := Pos(DecimalSeparator,aValue);
+  if index > 0 then
+  begin
+    dp := Length(aValue) - index; {Number of decimal places}
+    system.Delete(aValue,index,1);{remove decimal separator}
+    if dp > -scale then
+    begin
+      {Truncate to remove any dp greater than field scale}
+      TruncateBy :=  dp + scale;
+      system.Delete(aValue,Length(aValue) - TruncateBy +1,TruncateBy);
+    end
+    else
+    while dp < -scale do
+    {Add trailing zeroes to align with field scale}
+    begin
+      aValue := aValue + '0';
+      Inc(dp);
+    end;
+  end;
+  {Note 'fromstring' is independent of the actual field scale. Thus we can
+   set a scale of zero provided the number of "decimal places" in the string
+   matches the field scale.}
+
+  int128.fromString(StatusIntf,0,PAnsiChar(aValue),FB_I128Ptr(bufptr));
   Check4DatabaseError;
 end;
 
@@ -823,9 +861,32 @@ begin
   Result := inherited Int128ToStr(bufPtr,scale);
 
   int128 := UtilIntf.getInt128(StatusIntf);
-  int128.toString(StatusIntf,FB_I128Ptr(bufptr),scale,buflength,PAnsiChar(@Buffer));
+
+  {Unable to trust that the Firebird Client Library using the
+   decimal separator defined for the locale. Thus we
+   set the scale to zero to avoid decimal separator formatting issues}
+
+  int128.toString(StatusIntf,FB_I128Ptr(bufptr),0,buflength,PAnsiChar(@Buffer));
   Check4DatabaseError;
   Result := strpas(PAnsiChar(@Buffer));
+
+  {Now insert decimal separator from current locale as given by the field scale}
+  if scale < 0 then
+  begin
+    {if string is shorter than the field scale left pad with zeroes}
+    while Length(Result) + scale < 1 do
+      Result := '0' + Result;
+
+    {Insert locale's decimal separator in position given by field scale}
+    {$IF declared(DefaultFormatSettings)}
+    with DefaultFormatSettings do
+    {$ELSE}
+    {$IF declared(FormatSettings)}
+    with FormatSettings do
+    {$IFEND}
+    {$IFEND}
+    system.insert(DecimalSeparator,Result,Length(Result) + scale + 1);
+  end;
 end;
 
 function TFB30ClientAPI.HasLocalTZDB: boolean;

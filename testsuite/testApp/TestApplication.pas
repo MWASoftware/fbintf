@@ -1604,6 +1604,7 @@ begin
     ShortDateFormat := 'dd/m/yyyy';
     LongTimeFormat := 'HH:MM:SS';
     DateSeparator := '/';
+    DecimalSeparator := '.';
   end;
 end;
 

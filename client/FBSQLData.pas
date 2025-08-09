@@ -1762,10 +1762,10 @@ begin
     Result := Length(GetTimeFormatStr)+ 6;
   else
     Result := 0;
-  end;end;
+  end;
+end;
 
 function TSQLDataItem.GetAsBCD: tBCD;
-
 begin
   CheckActive;
   if IsNull then
@@ -1784,8 +1784,8 @@ begin
 
   SQL_DEC_FIXED,
   SQL_INT128:
-    with FFirebirdClientAPI do
-      Result := StrToBCD(Int128ToStr(SQLData,scale));
+      with FFirebirdClientAPI do
+        Result := StrToBCD(Int128ToStr(SQLData,scale));
   else
     if not CurrToBCD(GetAsCurrency,Result) then
       IBError(ibxeBadBCDConversion,[]);
