@@ -269,7 +269,11 @@ begin
       P^ := Length(s);
       Inc(P);
       Move(s[1],P^,Length(s));
-      Inc(P,Length(s)+sizeof(Long));
+      Inc(P,Length(s));
+      EncodeInteger(1,sizeof(long),P);  {Initialise event count to 1 - see InterBase/Firebird APIGuide
+                                         chapter 11, section "Determining which events occurred with isc_event_counts( )"
+                                         first "note".}
+      Inc(P,sizeof(long));
       FEventCounts[i].EventName := s;
     end;
   end;
@@ -387,7 +391,8 @@ begin
     FEventCounts[i].Count := new_count - initial_count;
     if FEventCounts[i].Count > 0 then
       Result := true;
-  //  writeln('Event Count[',i,'] = ',FEventCounts[i].Count);
+//   writeln('New Count = ',new_count,' Initial Count = ',initial_count);
+//   writeln('Event Count[',i,'] = ',FEventCounts[i].Count, ' Result = ',Result);
   end;
   Move(FResultBuffer^,FEventBuffer^,FEventBufferLen);
 end;

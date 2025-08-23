@@ -1,3 +1,10 @@
+FBINTF Change Log  version          (1.4-7 Build 1241) Sat, 9 Aug 2025 12:48:01 +0100
+
+1. Initialise all EventBuffer counts to one in TFBEvents.CreateEventBlock. This avoids the
+   "feature" where a spurious all event counts = 1 event is reported when the event
+   handler is initialised. See InterBase/Firebird APIGuide chapter 11, section
+   "Determining which events occurred with isc_event_counts( )" first "note".
+
 FBINTF Change Log  version          (1.4-6 Build 1241) Sat, 9 Aug 2025 12:48:01 +0100
 
 1. In Firebird 4 or later, large fixed point real numbers (e.g. NUMERIC(34,4)) are supported 
