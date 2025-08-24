@@ -537,12 +537,12 @@ Running Test 3: ad hoc queries
 Opening localhost:employee
 Database Open
 Employee Count = 42
-Transaction ID = 8971
+Transaction ID = 9232
 Transaction is Read/Write
-Transaction ID = 8971
-Oldest Interesting = 8355
-Oldest Action = 8970
-Oldest Snapshot = 8970
+Transaction ID = 9232
+Oldest Interesting = 9230
+Oldest Action = 9231
+Oldest Snapshot = 9231
 Oldest Interesting = 0
 Employee Count = 41
 Employee Count = 42
@@ -574,9 +574,9 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 948,688
+Current memory = 948,520
 Delta memory = 1,288
-Max memory = 992,632
+Max memory = 992,480
 Elapsed time= 0.001 sec
 Cpu = 0.000 sec
 Buffers = 75
@@ -3001,8 +3001,6 @@ Page Size = 4096
 Running Test 10: Event Handling
 Call Async Wait
 Async Wait Called
-Event Signalled
-First Event - usually ignored
 Signal Event
 Event Signalled
 Event Counts: TESTEVENT, Count = 1
@@ -4047,12 +4045,12 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 9
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2025/03/30 11:15:02.9190
+IBX$CREATED = 2025/08/24 11:40:47.4440
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 11
 IBX$OLDTRANSACTIONID = 10
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2025/03/30 11:15:02.9440
+IBX$CREATED = 2025/08/24 11:40:47.4690
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)

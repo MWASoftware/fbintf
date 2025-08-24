@@ -97,16 +97,8 @@ begin
   CheckSynchronize;
   if FEventSignalled then
   begin
-    writeln(OutFile,'First Event - usually ignored');
-    FEventSignalled := false;
-    EventHandler.AsyncWaitForEvent(EventReport);
-    sleep(100);
-    CheckSynchronize;
-    if FEventSignalled then
-    begin
-      writeln(OutFile,'Unexpected Event 1');
-      Exit;
-    end;
+    writeln(OutFile,'Unexpected Event 1');
+    Exit;
   end;
   writeln(OutFile,'Signal Event');
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency],sqlEvent);

@@ -656,13 +656,13 @@ Running Test 3: ad hoc queries
 Opening inet://localhost/employee
 Database Open
 Employee Count = 42
-Transaction ID = 7146
+Transaction ID = 7279
 Transaction is Read/Write
 Transaction Database Path = inet://localhost/employee
-Transaction ID = 7146
-Oldest Interesting = 7144
-Oldest Action = 7145
-Oldest Snapshot = 7145
+Transaction ID = 7279
+Oldest Interesting = 7277
+Oldest Action = 7278
+Oldest Snapshot = 7278
 Oldest Snapshot Number = 2
 Lock Timeout = 0
 Transaction Access = isc_info_tra_readwrite
@@ -704,7 +704,7 @@ Elapsed time= 0.001 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
-Writes = 1
+Writes = 0
 Fetches = 3
 Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
 Relation Name = EMPLOYEE
@@ -3134,16 +3134,17 @@ Page Size = 8192
 Running Test 10: Event Handling
 Call Async Wait
 Async Wait Called
-Event Signalled
-First Event - usually ignored
 Signal Event
+Event Signalled
 Event Counts: TESTEVENT, Count = 1
 Two more events
 Call Async Wait
 Async Wait Called
 Event Signalled
-Signal Event
+Deferred Events Caught
 Event Counts: TESTEVENT, Count = 2
+Signal Event
+Event Counts: TESTEVENT, Count = 1
 Async Wait: Test Cancel
 Event Signalled
 Async Wait Called
@@ -3151,7 +3152,7 @@ Event Cancelled
 Time Out - Cancel Worked!
 Sync wait
 Event Signalled
-Event Counts: TESTEVENT, Count = 2
+Event Counts: TESTEVENT, Count = 1
 
 
 ------------------------------------------------------
@@ -5390,12 +5391,12 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 11
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2025/08/09 11:29:31.0750
+IBX$CREATED = 2025/08/24 11:45:20.5350
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 13
 IBX$OLDTRANSACTIONID = 12
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2025/08/09 11:29:31.0930
+IBX$CREATED = 2025/08/24 11:45:20.5700
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)

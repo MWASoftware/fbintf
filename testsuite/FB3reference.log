@@ -655,13 +655,13 @@ Running Test 3: ad hoc queries
 Opening inet://localhost/employee
 Database Open
 Employee Count = 42
-Transaction ID = 2325
+Transaction ID = 2497
 Transaction is Read/Write
 Transaction Database Path = inet://localhost/employee
-Transaction ID = 2325
-Oldest Interesting = 2323
-Oldest Action = 2324
-Oldest Snapshot = 2324
+Transaction ID = 2497
+Oldest Interesting = 2495
+Oldest Action = 2496
+Oldest Snapshot = 2496
 Oldest Interesting = 0
 Employee Count = 41
 Employee Count = 42
@@ -3124,8 +3124,6 @@ Page Size = 8192
 Running Test 10: Event Handling
 Call Async Wait
 Async Wait Called
-Event Signalled
-First Event - usually ignored
 Signal Event
 Event Signalled
 Event Counts: TESTEVENT, Count = 1
@@ -4171,12 +4169,12 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 11
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2025/03/30 11:13:39.3790
+IBX$CREATED = 2025/08/24 11:42:41.2900
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 13
 IBX$OLDTRANSACTIONID = 12
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2025/03/30 11:13:39.4060
+IBX$CREATED = 2025/08/24 11:42:41.3170
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)
