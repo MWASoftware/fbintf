@@ -1,4 +1,4 @@
-FBINTF Change Log  version          (1.4-7 Build 1241) Sat, 9 Aug 2025 12:48:01 +0100
+FBINTF Change Log  version          (1.4-7 Build 1244) Sun, 24 Aug 2025 11:50:01 +0100
 
 1. Initialise all EventBuffer counts to one in TFBEvents.CreateEventBlock. This avoids the
    "feature" where a spurious all event counts = 1 event is reported when the event
