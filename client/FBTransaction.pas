@@ -151,6 +151,11 @@ type
   TTPBItem = class(TParamBlockItem,ITPBItem)
   public
     function getParamTypeName: AnsiString; override;
+    {$IFDEF FPC}
+    procedure ITPBItem.SetAsInteger = SetAsInteger1;
+    {$ELSE}
+    procedure SetAsInteger(aValue: integer);
+    {$ENDIF}
   end;
 
   { TTPB }
@@ -539,6 +544,13 @@ function TTPBItem.getParamTypeName: AnsiString;
 begin
   Result :=  TPBPrefix + TPBConstantNames[getParamType];
 end;
+
+{$IFNDEF FPC}
+procedure TTPBItem.SetAsInteger(aValue: integer);
+begin
+  SetAsInteger1(aValue);
+end;
+{$ENDIF}
 
 
 {TTPB}

@@ -76,8 +76,14 @@ var Transaction: ITransaction;
     Statement: IStatement;
     ResultSet: IResultSet;
     i: integer;
+    TPB: ITPB;
 begin
-    Transaction := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taCommit);
+    TPB := FirebirdAPI.AllocateTPB;
+    TPB.Add(isc_tpb_read);
+    TPB.Add(isc_tpb_concurrency);
+    TPB.Add(isc_tpb_lock_timeout).AsInteger := 1;
+    PrintTPB(TPB);
+    Transaction := Attachment.StartTransaction(TPB,taCommit);
     Statement := Attachment.Prepare(Transaction,'Select * from RDB$Database',3);
     ResultSet := Statement.OpenCursor;
     ResultSet.SetRetainInterfaces(true);

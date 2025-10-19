@@ -68,6 +68,11 @@ DB ODS Minor Version = 1
 User Authentication Method = Srp256
 Firebird Library Path = /opt/firebirdVersions/5.0.0/lib/libfbclient.so
 DB Client Implementation Version = 5.0
+TPB: Item Count = 3
+  isc_tpb_read
+  isc_tpb_concurrency
+  isc_tpb_lock_timeout = 1
+
 RDB$DESCRIPTION = 
 RDB$RELATION_ID = 128
 RDB$SECURITY_CLASS = SQL$453
@@ -715,13 +720,13 @@ Running Test 3: ad hoc queries
 Opening inet://localhost/employee
 Database Open
 Employee Count = 42
-Transaction ID = 2855
+Transaction ID = 2964
 Transaction is Read/Write
 Transaction Database Path = inet://localhost/employee
-Transaction ID = 2855
-Oldest Interesting = 2853
-Oldest Action = 2854
-Oldest Snapshot = 2854
+Transaction ID = 2964
+Oldest Interesting = 2962
+Oldest Action = 2963
+Oldest Snapshot = 2963
 Oldest Snapshot Number = 2
 Lock Timeout = 0
 Transaction Access = isc_info_tra_readwrite
@@ -757,8 +762,8 @@ SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
 Current memory = 19,417,504
-Delta memory = 8,528
-Max memory = 19,430,992
+Delta memory = 2,528
+Max memory = 19,443,952
 Elapsed time= 0.001 sec
 Cpu = 0.000 sec
 Buffers = 2048
@@ -5450,12 +5455,12 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 11
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2025/08/24 11:47:03.2050
+IBX$CREATED = 2025/10/19 16:04:55.0790
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 13
 IBX$OLDTRANSACTIONID = 12
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2025/08/24 11:47:03.2320
+IBX$CREATED = 2025/10/19 16:04:55.0900
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)

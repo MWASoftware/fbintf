@@ -68,6 +68,11 @@ DB ODS Minor Version = 0
 User Authentication Method = Srp
 Firebird Library Path = /opt/firebirdVersions/3.0.10/lib/libfbclient.so
 DB Client Implementation Version = 3.0
+TPB: Item Count = 3
+  isc_tpb_read
+  isc_tpb_concurrency
+  isc_tpb_lock_timeout = 1
+
 RDB$DESCRIPTION = 
 RDB$RELATION_ID = 128
 RDB$SECURITY_CLASS = SQL$364
@@ -655,13 +660,13 @@ Running Test 3: ad hoc queries
 Opening inet://localhost/employee
 Database Open
 Employee Count = 42
-Transaction ID = 2497
+Transaction ID = 2749
 Transaction is Read/Write
 Transaction Database Path = inet://localhost/employee
-Transaction ID = 2497
-Oldest Interesting = 2495
-Oldest Action = 2496
-Oldest Snapshot = 2496
+Transaction ID = 2749
+Oldest Interesting = 2747
+Oldest Action = 2748
+Oldest Snapshot = 2748
 Oldest Interesting = 0
 Employee Count = 41
 Employee Count = 42
@@ -700,7 +705,7 @@ Elapsed time= 0.000 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
-Writes = 0
+Writes = 1
 Fetches = 3
 Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
 Relation Name = EMPLOYEE
@@ -4169,12 +4174,12 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 11
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2025/08/24 11:42:41.2900
+IBX$CREATED = 2025/10/19 16:03:41.2690
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 13
 IBX$OLDTRANSACTIONID = 12
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2025/08/24 11:42:41.3170
+IBX$CREATED = 2025/10/19 16:03:41.2810
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)
