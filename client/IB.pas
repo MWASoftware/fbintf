@@ -1293,6 +1293,8 @@ type
 
   ISPBItem = interface(IParameterBlockItemWithTypeName)
     ['{5d08ae2b-4519-41bd-8b40-97cd451c3f6a}']
+    procedure SetAsLongString(aValue: AnsiString);
+    property AsLongString: AnsiString read GetAsString write SetAsLongString;
   end;
 
   ISPB = interface(IParameterBlockWithTypeNames<ISPBItem>)

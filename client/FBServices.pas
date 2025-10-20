@@ -81,6 +81,11 @@ type
   public
    function getParamTypeName: AnsiString; override;
    class function LookupParamTypeName(ParamType: byte): AnsiString;
+   {$IFDEF FPC}
+   procedure ISPBItem.SetAsLongString = SetAsString2;
+   {$ELSE}
+   procedure SetAsLongString(aValue: AnsiString);
+   {$ENDIF}
   end;
 
  { TSPB }
@@ -151,6 +156,13 @@ begin
       break;
     end;
 end;
+
+{$IFNDEF FPC}
+procedure TSPBItem.SetAsLongString(aValue: AnsiString);
+begin
+  SetAsString2(aValue);
+end;
+{$ENDIF
 
 { TFBServiceManager }
 

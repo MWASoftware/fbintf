@@ -296,6 +296,11 @@ type
   TDPBItem = class(TParamBlockItem,IDPBItem)
   public
    function getParamTypeName: AnsiString; override;
+   {$IFDEF FPC}
+   procedure IDPBItem.SetAsInteger = SetAsInteger1;
+   {$ELSE}
+   procedure SetAsInteger(aValue: integer);
+   {$ENDIF}
   end;
 
   { TDPB }
@@ -1727,6 +1732,13 @@ function TDPBItem.getParamTypeName: AnsiString;
 begin
   Result := DPBPrefix + DPBConstantNames[getParamType];
 end;
+
+{$IFNDEF FPC}
+procedure TDPBItem.SetAsInteger(aValue: integer);
+begin
+  SetAsInteger1(aValue);
+end;
+{$ENDIF}
 
 { TDPB }
 
