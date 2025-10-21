@@ -140,7 +140,7 @@ begin
       ':DEPT_NO, :JOB_CODE, :JOB_GRADE, :JOB_COUNTRY, :SALARY)',3);
   with Statement.GetSQLParams do
   begin
-    ByName('EMP_NO').AsInteger := 150;
+    ByName('EMP_NO').AsInteger := 500;
     ByName('FIRST_NAME').AsString := 'John';
     ByName('LAST_NAME').AsString := 'Doe';
     ByName('PHONE_EXT').AsString := '';
@@ -154,7 +154,7 @@ begin
   Statement.AddToBatch;
   with Statement.GetSQLParams do
   begin
-    ByName('EMP_NO').AsInteger := 151;
+    ByName('EMP_NO').AsInteger := 501;
     ByName('FIRST_NAME').AsString := 'Jane';
     ByName('LAST_NAME').AsString := 'Doe';
     ByName('PHONE_EXT').AsString := '';
@@ -168,7 +168,7 @@ begin
   Statement.AddToBatch;
   with Statement.GetSQLParams do
   begin
-    ByName('EMP_NO').AsInteger := 152;
+    ByName('EMP_NO').AsInteger := 502;
     ByName('FIRST_NAME').AsString := 'John';
     ByName('LAST_NAME').AsString := 'SmithAndJonesFamily1';  //Longest Name
     ByName('PHONE_EXT').AsString := '';
@@ -183,7 +183,7 @@ begin
   BC := Statement.ExecuteBatch;
   WriteAffectedRows(Statement);
   WriteBatchCompletion(BC);
-  Statement := Attachment.Prepare(Transaction,'Select * from EMPLOYEE Where EMP_NO >= 150',3);
+  Statement := Attachment.Prepare(Transaction,'Select * from EMPLOYEE Where EMP_NO >= 500');
   writeln(Outfile,'Rows after insert');
   ReportResults(Statement);
   Transaction.Rollback;
@@ -196,7 +196,7 @@ begin
       ':DEPT_NO, :JOB_CODE, :JOB_GRADE, :JOB_COUNTRY, :SALARY)',3);
   with Statement.GetSQLParams do
   begin
-    ByName('EMP_NO').AsInteger := 150;
+    ByName('EMP_NO').AsInteger := 500;
     ByName('FIRST_NAME').AsString := 'John';
     ByName('LAST_NAME').AsString := 'Doe';
     ByName('PHONE_EXT').AsString := '';
@@ -210,7 +210,7 @@ begin
   Statement.AddToBatch;
   with Statement.GetSQLParams do
   begin
-    ByName('EMP_NO').AsInteger := 151;
+    ByName('EMP_NO').AsInteger := 501;
     ByName('FIRST_NAME').AsString := 'Jane';
     ByName('LAST_NAME').AsString := 'Doe';
     ByName('PHONE_EXT').AsString := '';
@@ -232,7 +232,7 @@ begin
       ':DEPT_NO, :JOB_CODE, :JOB_GRADE, :JOB_COUNTRY, :SALARY)',3);
   with Statement.GetSQLParams do
   begin
-    ByName('EMP_NO').AsInteger := 150;
+    ByName('EMP_NO').AsInteger := 500;
     ByName('FIRST_NAME').AsString := 'John';
     ByName('LAST_NAME').AsString := 'Doe';
     ByName('PHONE_EXT').AsString := '';
@@ -246,7 +246,7 @@ begin
   Statement.AddToBatch;
   with Statement.GetSQLParams do
   begin
-    ByName('EMP_NO').AsInteger := 151;
+    ByName('EMP_NO').AsInteger := 501;
     ByName('FIRST_NAME').AsString := 'Jane';
     ByName('LAST_NAME').AsString := 'Doe';
     ByName('PHONE_EXT').AsString := '';
@@ -260,7 +260,7 @@ begin
   Statement.AddToBatch;
   with Statement.GetSQLParams do
   begin
-    ByName('EMP_NO').AsInteger := 152;
+    ByName('EMP_NO').AsInteger := 502;
     ByName('FIRST_NAME').AsString := 'John';
     ByName('LAST_NAME').AsString := 'SmithAndJonesFamily1';  //Longest Name
     ByName('PHONE_EXT').AsString := '';
@@ -274,7 +274,7 @@ begin
   BC := Statement.ExecuteBatch;
   WriteAffectedRows(Statement);
   WriteBatchCompletion(BC);
-  Statement := Attachment.Prepare(Transaction,'Select * from EMPLOYEE Where EMP_NO >= 150',3);
+  Statement := Attachment.Prepare(Transaction,'Select * from EMPLOYEE Where EMP_NO >= 500');
   writeln(Outfile,'Rows after insert');
   ReportResults(Statement);
   Transaction.Rollback;
@@ -421,7 +421,7 @@ begin
         ':DEPT_NO, :JOB_CODE, :JOB_GRADE, :JOB_COUNTRY, :SALARY)',3);
     with Statement.GetSQLParams do
     begin
-      ByName('EMP_NO').AsInteger := 150;
+      ByName('EMP_NO').AsInteger := 500;
       ByName('FIRST_NAME').AsString := 'John';
       ByName('LAST_NAME').AsString := 'Doe';
       ByName('PHONE_EXT').AsString := '';
@@ -435,7 +435,7 @@ begin
     Statement.AddToBatch;
     with Statement.GetSQLParams do
     begin
-      ByName('EMP_NO').AsInteger := 150; {duplicate key}
+      ByName('EMP_NO').AsInteger := 500; {duplicate key}
       ByName('FIRST_NAME').AsString := 'Jane';
       ByName('LAST_NAME').AsString := 'Doe';
       ByName('PHONE_EXT').AsString := '';
@@ -449,7 +449,7 @@ begin
     Statement.AddToBatch;
     with Statement.GetSQLParams do
     begin
-      ByName('EMP_NO').AsInteger := 152;
+      ByName('EMP_NO').AsInteger := 502 ;
       ByName('FIRST_NAME').AsString := 'John';
       ByName('LAST_NAME').AsString := 'SmithAndJonesFamily1';  //Longest Name
       ByName('PHONE_EXT').AsString := '';
