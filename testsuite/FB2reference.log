@@ -542,12 +542,12 @@ Running Test 3: ad hoc queries
 Opening localhost:employee
 Database Open
 Employee Count = 42
-Transaction ID = 9316
+Transaction ID = 9400
 Transaction is Read/Write
-Transaction ID = 9316
+Transaction ID = 9400
 Oldest Interesting = 9246
-Oldest Action = 9315
-Oldest Snapshot = 9315
+Oldest Action = 9399
+Oldest Snapshot = 9399
 Oldest Interesting = 0
 Employee Count = 41
 Employee Count = 42
@@ -579,10 +579,10 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
-Current memory = 948,544
+Current memory = 948,560
 Delta memory = 1,288
-Max memory = 992,480
-Elapsed time= 0.001 sec
+Max memory = 992,504
+Elapsed time= 0.000 sec
 Cpu = 0.000 sec
 Buffers = 75
 Reads = 0
@@ -723,7 +723,7 @@ Charset id = 0
 Nullable
 Size = 37
 
-EMP_NO = 150
+EMP_NO = 500
 FIRST_NAME = John
 LAST_NAME = Doe
 PHONE_EXT = 
@@ -736,7 +736,7 @@ SALARY = 41,000.89
 FULL_NAME = Doe, John
 
 Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
-EMP_NO = 151
+EMP_NO = 501
 FIRST_NAME = Major
 LAST_NAME = Major
 PHONE_EXT = 
@@ -753,7 +753,7 @@ Select Count = 1 InsertCount = 0 UpdateCount = 0 DeleteCount = 1
 Select Count = 1 InsertCount = 0 UpdateCount = 0 DeleteCount = 1
 Inserting
 Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
-EMP_NO = 150
+EMP_NO = 500
 FIRST_NAME = Jane
 LAST_NAME = Doe
 PHONE_EXT = NULL
@@ -770,7 +770,7 @@ Updating
 Select Count = 1 InsertCount = 0 UpdateCount = 0 DeleteCount = 0
 Prepare Query again
 
-EMP_NO = 150
+EMP_NO = 500
 FIRST_NAME = Jayne's
 LAST_NAME = Doe
 PHONE_EXT = NULL
@@ -4050,12 +4050,12 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 9
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2025/10/19 16:03:06.2260
+IBX$CREATED = 2025/10/21 14:44:22.8560
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 11
 IBX$OLDTRANSACTIONID = 10
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2025/10/19 16:03:06.2370
+IBX$CREATED = 2025/10/21 14:44:22.8670
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)

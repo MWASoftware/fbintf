@@ -1,3 +1,20 @@
+FBINTF Change Log  version          (1.4-8 Build 1244) Tue, 21 Oct 2025 14:45:00 +0100
+
+1. Delphi project files updated for Win64 settings and to build package (.bpl and .dcp)
+   files into default location.
+
+2. Define ITPB.SetInteger as a single byte length integer (TLV encoding).
+
+3. Defaulted IDPBItem.SetAsInteger to SetAsInteger1.
+
+4. Added SetAsLongString to ISPBItem (Ansi strings with a 2 byte length count)
+
+5. Fix issue in time zone services where Ptr to word used instead of ptr to cardinal.
+
+6. Windows test scripts updated for FB5.
+
+7. Tests 4, 5 and 19: temp employee no. updated to avoid conflicts with FB5 example database.
+
 FBINTF Change Log  version          (1.4-7 Build 1244) Sun, 24 Aug 2025 11:50:01 +0100
 
 1. Initialise all EventBuffer counts to one in TFBEvents.CreateEventBlock. This avoids the
