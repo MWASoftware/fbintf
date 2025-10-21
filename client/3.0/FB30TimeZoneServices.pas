@@ -590,15 +590,18 @@ end;
 
 function TFB30TimeZoneServices.DecodeGMTTimestampTZ(bufptr: PISC_TIMESTAMP_TZ
   ): TDateTime;
-var Yr, Mn, Dy: word;
-    Hr, Mt, S: word;
+var Yr, Mn, Dy: cardinal;
+    Hr, Mt, S: cardinal;
     DMs: cardinal;
 begin
   with FFirebird30ClientAPI do
   begin
     UtilIntf.DecodeDate(bufptr^.utc_timestamp.timestamp_date,@Yr, @Mn, @Dy);
     UtilIntf.DecodeTime(bufptr^.utc_timestamp.timestamp_time,@Hr, @Mt, @S, @DMs);
-    Result := EncodeDate(Yr, Mn, Dy) + FBEncodeTime(Hr,Mt,S,DMs);
+    if Yr = 0 then
+      Result := 0
+    else
+      Result := EncodeDate(Yr, Mn, Dy) + FBEncodeTime(Hr,Mt,S,DMs);
   end
 end;
 

@@ -28,20 +28,13 @@
     </PublishOptions>
     <RunParams>
       <local>
-        <CommandLineParams Value="-t 1"/>
+        <CommandLineParams Value="-t 17 -X"/>
       </local>
-      <environment>
-        <UserOverrides Count="3">
-          <Variable0 Name="PROMPT_AT_END" Value="YES"/>
-          <Variable1 Name="FIREBIRD" Value="/opt/firebirdVersions/4.0.4"/>
-          <Variable2 Name="LD_LIBRARY_PATH" Value="/opt/firebirdVersions/4.0.4/lib"/>
-        </UserOverrides>
-      </environment>
       <FormatVersion Value="2"/>
       <Modes Count="1">
         <Mode0 Name="default">
           <local>
-            <CommandLineParams Value="-t 1"/>
+            <CommandLineParams Value="-t 17 -X"/>
           </local>
           <environment>
             <UserOverrides Count="3">

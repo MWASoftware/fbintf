@@ -114,7 +114,7 @@ begin
       ':DEPT_NO, :JOB_CODE, :JOB_GRADE, :JOB_COUNTRY, :SALARY)',3);
   with Statement.GetSQLParams do
   begin
-    ByName('EMP_NO').AsInteger := 150;
+    ByName('EMP_NO').AsInteger := 500;
     ByName('FIRST_NAME').AsString := 'John';
     ByName('LAST_NAME').AsString := 'Doe';
     ByName('PHONE_EXT').AsString := '';
@@ -131,7 +131,7 @@ begin
   Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
   writeln(OutFile,'Relation Name = ',Statement.Metadata.GetUniqueRelationName);
   PrintMetaData(Statement.GetMetaData);
-  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 150;
+  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 500;
   ReportResults(Statement);
 
   {Now repeat but with a non-unique parameter name}
@@ -141,7 +141,7 @@ begin
       ':DEPT_NO, :JOB_CODE, :JOB_GRADE, :JOB_COUNTRY, :SALARY)',3);
   with Statement.GetSQLParams do
   begin
-    ByName('EMP_NO').AsInteger := 151;
+    ByName('EMP_NO').AsInteger := 501;
     ByName('FIRST_NAME').AsString := 'Major';
     ByName('PHONE_EXT').AsString := '';
     ByName('HIRE_DATE').AsString :=  '2015-4-1';
@@ -155,15 +155,15 @@ begin
   WriteAffectedRows(Statement);
 
   Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
-  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 151;
+  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 501;
   ReportResults(Statement);
 
   writeln(OutFile,'Now Delete the rows');
   Statement := Attachment.Prepare(Transaction,'Delete From Employee Where EMP_NO = ?',3);
-  Statement.GetSQLParams[0].AsInteger := 150;
+  Statement.GetSQLParams[0].AsInteger := 500;
   Statement.Execute;
   WriteAffectedRows(Statement);
-  Statement.GetSQLParams[0].AsInteger := 151;
+  Statement.GetSQLParams[0].AsInteger := 501;
   Statement.Execute;
   WriteAffectedRows(Statement);
 
@@ -174,7 +174,7 @@ begin
       ':DEPT_NO, :JOB_CODE, :JOB_GRADE, :JOB_COUNTRY, :SALARY)',3);
   with Statement.GetSQLParams do
   begin
-    ByName('EMP_NO').AsInteger := 150;
+    ByName('EMP_NO').AsInteger := 500;
     ByName('FIRST_NAME').AsString := 'Jane';
     ByName('LAST_NAME').AsString := 'Doe';
     ByName('PHONE_EXT').Clear;
@@ -190,14 +190,14 @@ begin
   WriteAffectedRows(Statement);
 
   Statement := Attachment.PrepareWithNamedParameters(Transaction,'Select * from EMPLOYEE Where EMP_NO = :EMP_NO',3);
-  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 150;
+  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 500;
   ReportResults(Statement);
 
   writeln(OutFile,'Employee Count = ', Attachment.OpenCursorAtStart(Transaction,
          'Select count(*) from EMPLOYEE',3)[0].AsInteger);
 
   Statement2 := Attachment.PrepareWithNamedParameters(Transaction,'Update EMPLOYEE Set FIRST_NAME = ''Jayne''''s'' Where EMP_NO = :EMP_NO',3);
-  Statement2.GetSQLParams.ByName('EMP_NO').AsInteger := 150;
+  Statement2.GetSQLParams.ByName('EMP_NO').AsInteger := 500;
   writeln(OutFile,'Updating');
   Statement2.Execute;
   WriteAffectedRows(Statement);
@@ -205,7 +205,7 @@ begin
   writeln(OutFile,'Prepare Query again');
   writeln(OutFile);
   Statement.Prepare;
-  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 150;
+  Statement.GetSQLParams.ByName('EMP_NO').AsInteger := 500;
   ReportResults(Statement);
 
   Transaction2 := Attachment.StartTransaction([isc_tpb_read,isc_tpb_nowait,isc_tpb_concurrency],taRollback);
