@@ -922,6 +922,7 @@ var
   j, j_len: Integer;
   st: AnsiString;
   sBaseName: AnsiString;
+  sExt: AnsiString;
 begin
   RowChange;
 
@@ -929,6 +930,7 @@ begin
     that they are all upper case only and disambiguated.
    }
 
+   st := '';
    if not Parent.IsInputDataArea then
    begin
      st := Space2Underscore(SafeAnsiUpperCase(AliasName));
@@ -949,11 +951,12 @@ begin
      while FindVarByName(st,Index-1) <> nil do
      begin
           Inc(j);
-          j_len := Length(IntToStr(j));
+          sExt := IntToStr(j);
+          j_len := Length(sExt);
           if j_len + Length(sBaseName) > 31 then
-             st := system.Copy(sBaseName, 1, 31 - j_len) + IntToStr(j)
+             st := system.Copy(sBaseName, 1, 31 - j_len) + sExt
           else
-             st := sBaseName + IntToStr(j);
+             st := sBaseName + sExt;
      end;
 
      Name := st;

@@ -28,13 +28,13 @@
     </PublishOptions>
     <RunParams>
       <local>
-        <CommandLineParams Value="-t 17 -X"/>
+        <CommandLineParams Value="-t 10 -X"/>
       </local>
       <FormatVersion Value="2"/>
       <Modes Count="1">
         <Mode0 Name="default">
           <local>
-            <CommandLineParams Value="-t 17 -X"/>
+            <CommandLineParams Value="-t 10 -X"/>
           </local>
           <environment>
             <UserOverrides Count="3">

@@ -2085,13 +2085,8 @@ end;
 function PCharToAnsiString(buff: PAnsiChar; CodePage: TSystemCodePage
   ): AnsiString;
 var s: RawByteString;
-    ix: integer;
-    Len: integer;
 begin
-  Len := strlen(buff);
-  SetLength(s,Len);
-  if Len > 0 then
-    Move(buff^,s[1],Len);
+  SetString(s,buff,strlen(buff));
   SetCodePage(s,CodePage,false);
   if CodePage = CP_UTF8 then
     {Make sure no invalid UTF8 Characters}

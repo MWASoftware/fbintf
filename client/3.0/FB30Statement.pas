@@ -550,7 +550,7 @@ begin
   try
     with FFirebird30ClientAPI do
     begin
-      result := PCharToAnsiString(metaData.getAlias(StatusIntf,Index),ConnectionCodePage);
+      Result := PCharToAnsiString(metaData.getAlias(StatusIntf,Index),ConnectionCodePage);
       Check4DataBaseError(ConnectionCodePage);
     end;
   finally
