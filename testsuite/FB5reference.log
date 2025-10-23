@@ -720,13 +720,13 @@ Running Test 3: ad hoc queries
 Opening inet://localhost/employee
 Database Open
 Employee Count = 42
-Transaction ID = 3074
+Transaction ID = 3459
 Transaction is Read/Write
 Transaction Database Path = inet://localhost/employee
-Transaction ID = 3074
-Oldest Interesting = 3072
-Oldest Action = 3073
-Oldest Snapshot = 3073
+Transaction ID = 3459
+Oldest Interesting = 3457
+Oldest Action = 3458
+Oldest Snapshot = 3458
 Oldest Snapshot Number = 2
 Lock Timeout = 0
 Transaction Access = isc_info_tra_readwrite
@@ -3624,7 +3624,7 @@ Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6
 Exception returned: Engine Code: 335544517
 exception 1
 -CHARSETTEST
--Some German Special Characters like ???????
+-Some German Special Characters like ÖÄÜöäüß
 -At procedure 'DOEXCEPTION' line: 1, col: 39
 Connection Character Set WIN1252
 ROWID = 1
@@ -5036,7 +5036,7 @@ JOB_COUNTRY = England
 JOB_TITLE = Chief Tester
 MIN_SALARY = 21,000.00
 MAX_SALARY = 24,000.99
-JOB_REQUIREMENT (Charset Id = 0 Codepage = 65535)
+JOB_REQUIREMENT (Charset Id = 0 Codepage = 0)
 
 The quick brown fox jumped over the lazy dog
 LANGUAGE_REQ = Array: (1: Eng) (2: ) (3: ) (4: ) (5: ) 
@@ -5047,7 +5047,7 @@ JOB_COUNTRY = England
 JOB_TITLE = Deputy Tester
 MIN_SALARY = 21,000.00
 MAX_SALARY = 24,000.99
-JOB_REQUIREMENT (Charset Id = 0 Codepage = 65535)
+JOB_REQUIREMENT (Charset Id = 0 Codepage = 0)
 
 The quick brown fox jumped over the running dog
 LANGUAGE_REQ = Array: (1: Eng) (2: Fra) (3: ) (4: ) (5: ) 
@@ -5068,7 +5068,7 @@ JOB_COUNTRY = England
 JOB_TITLE = Chief Tester
 MIN_SALARY = 21,000.00
 MAX_SALARY = 24,000.99
-JOB_REQUIREMENT (Charset Id = 0 Codepage = 65535)
+JOB_REQUIREMENT (Charset Id = 0 Codepage = 0)
 
 The quick brown fox jumped over the lazy dog
 LANGUAGE_REQ = Array: (1: Eng) (2: ) (3: ) (4: ) (5: ) 
@@ -5079,7 +5079,7 @@ JOB_COUNTRY = England
 JOB_TITLE = Deputy Tester
 MIN_SALARY = 21,000.00
 MAX_SALARY = 24,000.99
-JOB_REQUIREMENT (Charset Id = 0 Codepage = 65535)
+JOB_REQUIREMENT (Charset Id = 0 Codepage = 0)
 
 The quick brown fox jumped over the running dog
 LANGUAGE_REQ = Array: (1: Eng) (2: Fra) (3: ) (4: ) (5: ) 
@@ -5455,12 +5455,12 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 11
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2025/10/21 14:41:21.7050
+IBX$CREATED = 2025/10/23 15:07:14.9760
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 13
 IBX$OLDTRANSACTIONID = 12
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2025/10/21 14:41:21.7160
+IBX$CREATED = 2025/10/23 15:07:14.9870
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)

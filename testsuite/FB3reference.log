@@ -660,13 +660,13 @@ Running Test 3: ad hoc queries
 Opening inet://localhost/employee
 Database Open
 Employee Count = 42
-Transaction ID = 2841
+Transaction ID = 2887
 Transaction is Read/Write
 Transaction Database Path = inet://localhost/employee
-Transaction ID = 2841
-Oldest Interesting = 2839
-Oldest Action = 2840
-Oldest Snapshot = 2840
+Transaction ID = 2887
+Oldest Interesting = 2885
+Oldest Action = 2886
+Oldest Snapshot = 2886
 Oldest Interesting = 0
 Employee Count = 41
 Employee Count = 42
@@ -701,7 +701,7 @@ FULL_NAME = Johnson, Leslie
 Current memory = 19,491,568
 Delta memory = 4,480
 Max memory = 19,542,320
-Elapsed time= 0.000 sec
+Elapsed time= 0.001 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
@@ -3555,7 +3555,7 @@ Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6
 Exception returned: Engine Code: 335544517
 exception 1
 -CHARSETTEST
--Some German Special Characters like ???????
+-Some German Special Characters like ÖÄÜöäüß
 -At procedure 'DOEXCEPTION' line: 1, col: 39
 Connection Character Set WIN1252
 ROWID = 1
@@ -4174,12 +4174,12 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 11
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2025/10/21 14:43:53.8840
+IBX$CREATED = 2025/10/23 15:09:58.0350
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 13
 IBX$OLDTRANSACTIONID = 12
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2025/10/21 14:43:53.8950
+IBX$CREATED = 2025/10/23 15:09:58.0470
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)

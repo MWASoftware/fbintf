@@ -809,7 +809,8 @@ function DecodeTimeZoneOffset(TZOffset: AnsiString; var dstOffset: integer): boo
 function StripLeadingZeros(Value: AnsiString): AnsiString;
 function StringToHex(octetString: string; MaxLineLength: integer=0): string; overload;
 procedure StringToHex(octetString: string; TextOut: TStrings; MaxLineLength: integer=0); overload;
-function PCharToAnsiString(buff: PAnsiChar; CodePage: TSystemCodePage): AnsiString;
+function PCharToAnsiString(buff: PAnsiChar; CodePage: TSystemCodePage): AnsiString; overload;
+function PCharToAnsiString(buff: PAnsiChar; CodePage: TSystemCodePage; str_len: integer): AnsiString; overload;
 procedure FixUTF8(var s: RawByteString);
 function GuessCodePage(s: PAnsiChar; ConnectionCodePage: TSystemCodePage): TSystemCodePage;
 function FBGetSystemCodePage: TSystemCodePage;
@@ -2084,9 +2085,15 @@ end;
 
 function PCharToAnsiString(buff: PAnsiChar; CodePage: TSystemCodePage
   ): AnsiString;
+begin
+  Result := PCharToAnsiString(buff,CodePage,strlen(buff));
+end;
+
+function PCharToAnsiString(buff: PAnsiChar; CodePage: TSystemCodePage;
+  str_len: integer): AnsiString;
 var s: RawByteString;
 begin
-  SetString(s,buff,strlen(buff));
+  SetString(s,buff,str_len);
   SetCodePage(s,CodePage,false);
   if CodePage = CP_UTF8 then
     {Make sure no invalid UTF8 Characters}

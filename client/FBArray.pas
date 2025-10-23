@@ -344,11 +344,7 @@ begin
       Result := rs;
     end;
   SQL_TEXT:
-    begin
-      SetString(rs,PAnsiChar(FBufPtr),GetDataLength);
-      SetCodePage(rs,GetCodePage,false);
-      Result := rs;
-    end
+      Result := PCharToAnsiString(PAnsiChar(FBufPtr),GetDataLength);
   else
     Result := inherited GetAsString;
   end;

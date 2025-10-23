@@ -1,4 +1,4 @@
-FBINTF Change Log  version          (1.4-8 Build 1244) Tue, 21 Oct 2025 14:45:00 +0100
+FBINTF Change Log  version          (1.4-8 Build 1259) Thu, 23 Oct 2025 15:14:44 +0100
 
 1. Delphi project files updated for Win64 settings and to build package (.bpl and .dcp)
    files into default location.
@@ -14,6 +14,9 @@ FBINTF Change Log  version          (1.4-8 Build 1244) Tue, 21 Oct 2025 14:45:00
 6. Windows test scripts updated for FB5.
 
 7. Tests 4, 5 and 19: temp employee no. updated to avoid conflicts with FB5 example database.
+
+8. Changed codepage for charset 0 to CP_ACP. This is to avoid problems with CP_NONE on Windows
+   Hosts. See https://gitlab.com/freepascal.org/fpc/source/-/issues/41464.
 
 FBINTF Change Log  version          (1.4-7 Build 1244) Sun, 24 Aug 2025 11:50:01 +0100
 

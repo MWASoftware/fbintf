@@ -347,8 +347,12 @@ const
   sqlCleanUpSession = 'Delete From ' + sJournalTableName + ' Where IBX$SessionID = ?';
 
 const
+    {Need to avoid CP_NONE codepage (Windows only)
+    See https://gitlab.com/freepascal.org/fpc/source/-/issues/41464
+    Hence CharSetID is CP_ACP rather than CP_NONE}
+
   CharSetMap: array [0..69] of TCharsetMap = (
-  (CharsetID: 0; CharSetName: 'NONE'; CharSetWidth: 1; CodePage: CP_NONE; AllowReverseLookup: true),
+  (CharsetID: 0; CharSetName: 'NONE'; CharSetWidth: 1; CodePage: CP_ACP; AllowReverseLookup: true),
   (CharsetID: 1; CharSetName: 'OCTETS'; CharSetWidth: 1; CodePage: CP_NONE; AllowReverseLookup: true),
   (CharsetID: 2; CharSetName: 'ASCII'; CharSetWidth: 1; CodePage: CP_ASCII; AllowReverseLookup: true),
   (CharsetID: 3; CharSetName: 'UNICODE_FSS'; CharSetWidth: 3; CodePage: CP_UTF8; AllowReverseLookup: false),
@@ -367,7 +371,7 @@ const
   (CharsetID: 16; CharSetName: 'DOS858'; CharSetWidth: 1; CodePage: 858; AllowReverseLookup: true),
   (CharsetID: 17; CharSetName: 'DOS862'; CharSetWidth: 1; CodePage: 862; AllowReverseLookup: true),
   (CharsetID: 18; CharSetName: 'DOS864'; CharSetWidth: 1; CodePage: 864; AllowReverseLookup: true),
-  (CharsetID: 19; CharSetName: 'NEXT'; CharSetWidth: 1; CodePage: CP_NONE; AllowReverseLookup: true),
+  (CharsetID: 19; CharSetName: 'NEXT'; CharSetWidth: 1; CodePage: CP_ACP; AllowReverseLookup: true),
   (CharsetID: 20; CharSetName: 'Unknown'; CharSetWidth: 0; CodePage: CP_NONE; AllowReverseLookup: true),
   (CharsetID: 21; CharSetName: 'ISO8859_1'; CharSetWidth: 1; CodePage: 28591; AllowReverseLookup: true),
   (CharsetID: 22; CharSetName: 'ISO8859_2'; CharSetWidth: 1; CodePage: 28592; AllowReverseLookup: true),

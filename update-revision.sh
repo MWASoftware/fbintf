@@ -18,7 +18,7 @@ doupdate ()
 	V3=`echo "$VERSION"|sed 's/\([0-9]\+\)\.\([0-9]\+\)-\([0-9]\+\)/\3/'`
 	TAG=$V1-$V2-$V3
 
-	if [ -f IB.pas ]; then
+	if [ -f client/IB.pas ]; then
 	sed -i "s/FBIntf_Major.*/FBIntf_Major = $V1;/
 		s/FBIntf_Minor.*/FBIntf_Minor = $V2;/
 		s/FBIntf_Release.*/FBIntf_Release = $V3;/

@@ -661,13 +661,13 @@ Running Test 3: ad hoc queries
 Opening inet://localhost/employee
 Database Open
 Employee Count = 42
-Transaction ID = 7632
+Transaction ID = 8048
 Transaction is Read/Write
 Transaction Database Path = inet://localhost/employee
-Transaction ID = 7632
-Oldest Interesting = 7630
-Oldest Action = 7631
-Oldest Snapshot = 7631
+Transaction ID = 8048
+Oldest Interesting = 8046
+Oldest Action = 8047
+Oldest Snapshot = 8047
 Oldest Snapshot Number = 2
 Lock Timeout = 0
 Transaction Access = isc_info_tra_readwrite
@@ -705,7 +705,7 @@ FULL_NAME = Johnson, Leslie
 Current memory = 19,766,528
 Delta memory = 4,464
 Max memory = 19,812,320
-Elapsed time= 0.001 sec
+Elapsed time= 0.000 sec
 Cpu = 0.000 sec
 Buffers = 2048
 Reads = 0
@@ -3565,7 +3565,7 @@ Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6
 Exception returned: Engine Code: 335544517
 exception 1
 -CHARSETTEST
--Some German Special Characters like ???????
+-Some German Special Characters like ÖÄÜöäüß
 -At procedure 'DOEXCEPTION' line: 1, col: 39
 Connection Character Set WIN1252
 ROWID = 1
@@ -4977,7 +4977,7 @@ JOB_COUNTRY = England
 JOB_TITLE = Chief Tester
 MIN_SALARY = 21,000.00
 MAX_SALARY = 24,000.99
-JOB_REQUIREMENT (Charset Id = 0 Codepage = 65535)
+JOB_REQUIREMENT (Charset Id = 0 Codepage = 0)
 
 The quick brown fox jumped over the lazy dog
 LANGUAGE_REQ = Array: (1: Eng) (2: ) (3: ) (4: ) (5: ) 
@@ -4988,7 +4988,7 @@ JOB_COUNTRY = England
 JOB_TITLE = Deputy Tester
 MIN_SALARY = 21,000.00
 MAX_SALARY = 24,000.99
-JOB_REQUIREMENT (Charset Id = 0 Codepage = 65535)
+JOB_REQUIREMENT (Charset Id = 0 Codepage = 0)
 
 The quick brown fox jumped over the running dog
 LANGUAGE_REQ = Array: (1: Eng) (2: Fra) (3: ) (4: ) (5: ) 
@@ -5009,7 +5009,7 @@ JOB_COUNTRY = England
 JOB_TITLE = Chief Tester
 MIN_SALARY = 21,000.00
 MAX_SALARY = 24,000.99
-JOB_REQUIREMENT (Charset Id = 0 Codepage = 65535)
+JOB_REQUIREMENT (Charset Id = 0 Codepage = 0)
 
 The quick brown fox jumped over the lazy dog
 LANGUAGE_REQ = Array: (1: Eng) (2: ) (3: ) (4: ) (5: ) 
@@ -5020,7 +5020,7 @@ JOB_COUNTRY = England
 JOB_TITLE = Deputy Tester
 MIN_SALARY = 21,000.00
 MAX_SALARY = 24,000.99
-JOB_REQUIREMENT (Charset Id = 0 Codepage = 65535)
+JOB_REQUIREMENT (Charset Id = 0 Codepage = 0)
 
 The quick brown fox jumped over the running dog
 LANGUAGE_REQ = Array: (1: Eng) (2: Fra) (3: ) (4: ) (5: ) 
@@ -5396,12 +5396,12 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 11
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2025/10/21 14:43:06.7380
+IBX$CREATED = 2025/10/23 15:09:15.1780
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 13
 IBX$OLDTRANSACTIONID = 12
 IBX$USER = SYSDBA (Charset Id = 4 Codepage = 65001)
-IBX$CREATED = 2025/10/21 14:43:06.7490
+IBX$CREATED = 2025/10/23 15:09:15.1890
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)

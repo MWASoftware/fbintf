@@ -920,9 +920,9 @@ procedure TSQLVarData.Initialize;
 
 var
   j, j_len: Integer;
-  st: AnsiString;
+  st: RawByteString;
   sBaseName: AnsiString;
-  sExt: AnsiString;
+  sExt: RawByteString;
 begin
   RowChange;
 
@@ -930,10 +930,10 @@ begin
     that they are all upper case only and disambiguated.
    }
 
-   st := '';
    if not Parent.IsInputDataArea then
    begin
      st := Space2Underscore(SafeAnsiUpperCase(AliasName));
+
      if st = '' then
      begin
        sBaseName := 'F_'; {do not localize}
@@ -1549,7 +1549,6 @@ function TSQLDataItem.GetAsString: AnsiString;
 var
   sz: PByte;
   str_len: Integer;
-  rs: RawByteString;
   aTimeZone: AnsiString;
   aDateTime: TDateTime;
   dstOffset: smallint;
@@ -1580,9 +1579,7 @@ begin
           str_len := DecodeInteger(sz, 2);
           Inc(sz, 2);
         end;
-        SetString(rs, PAnsiChar(sz), str_len);
-        SetCodePage(rs,GetCodePage,false);
-        Result := rs;
+        Result := PCharToAnsiString(PAnsiChar(sz), GetCodePage, str_len);
       end;
 
       SQL_TYPE_DATE:
@@ -2686,16 +2683,13 @@ begin
 end;
 
 function TSQLParam.GetAsString: AnsiString;
-var rs: RawByteString;
 begin
   Result := '';
   if (SQLType = SQL_VARYING) and not IsNull then
   {SQLData points to start of string - default is to length word}
   begin
     CheckActive;
-    SetString(rs,PAnsiChar(SQLData),DataLength);
-    SetCodePage(rs,GetCodePage,false);
-    Result := rs;
+    Result := PCharToAnsiString(PAnsiChar(SQLData),GetCodePage,DataLength);
   end
   else
     Result := inherited GetAsString;

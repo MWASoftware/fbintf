@@ -56,6 +56,7 @@ type
   private
     FAttachmentIntf: IAttachment;
     FConnectionCodePage: TSystemCodePage;
+    FDefaultCodePage: TSystemCodePage;
     FFirebirdClientAPI: TFBClientAPI;
   protected
     FTransactionIntf: ITransaction;
@@ -106,6 +107,7 @@ type
     property SQLDialect: integer read FSQLDialect;
     property FirebirdClientAPI: TFBClientAPI read FFirebirdClientAPI;
     property ConnectionCodePage: TSystemCodePage read FConnectionCodePage;
+    property DefaultCodePage: TSystemCodePage read FDefaultCodePage;
 
   public
     function GetSQLParams: ISQLParams; virtual; abstract;
@@ -218,6 +220,9 @@ begin
   FBatchRowLimit := DefaultBatchRowLimit;
   FStaleReferenceChecks := true;
   FConnectionCodePage := Attachment.GetCodePage;
+  if not (Attachment.HasDefaultCharSet and
+    Attachment.CharSetID2CodePage(Attachment.GetDefaultCharSetID,FDefaultCodePage)) then
+     FDefaultCodePage := FConnectionCodePage;
 end;
 
 constructor TFBStatement.CreateWithParameterNames(Attachment: IAttachment;
