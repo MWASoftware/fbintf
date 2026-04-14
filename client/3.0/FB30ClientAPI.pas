@@ -875,7 +875,10 @@ begin
   begin
     {if string is shorter than the field scale left pad with zeroes}
     while Length(Result) + scale < 1 do
-      Result := '0' + Result;
+      if (Length(Result) > 0) and (Result[1] = '-') then
+        system.insert('0',Result,2)
+      else
+        Result := '0' + Result;
 
     {Insert locale's decimal separator in position given by field scale}
     {$IF declared(DefaultFormatSettings)}

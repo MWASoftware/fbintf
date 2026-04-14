@@ -22,7 +22,7 @@ doupdate ()
 	sed -i "s/FBIntf_Major.*/FBIntf_Major = $V1;/
 		s/FBIntf_Minor.*/FBIntf_Minor = $V2;/
 		s/FBIntf_Release.*/FBIntf_Release = $V3;/
-		s/FBIntf_Version.*/FBIntf_Version = '$V1.$V2.$V3';/" IB.pas
+		s/FBIntf_Version.*/FBIntf_Version = '$V1.$V2.$V3';/" client/IB.pas
 	fi
 
 	for PKG in `find . -name '*.lpk' -print`; do

@@ -1,3 +1,7 @@
+FBINTF Change Log  version          (1.4-9 Build 1258) Tue, 14 Apr 2026 09:54:02 +0100
+
+1. Fixed exception with small negative BCD numbers (0 > x > -0.1) on database read.
+
 FBINTF Change Log  version          (1.4-8 Build 1259) Thu, 23 Oct 2025 15:14:44 +0100
 
 1. Delphi project files updated for Win64 settings and to build package (.bpl and .dcp)

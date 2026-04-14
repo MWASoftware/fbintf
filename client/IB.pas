@@ -135,8 +135,8 @@ const
   {Interface version information}
   FBIntf_Major = 1;
   FBIntf_Minor = 4;
-  FBIntf_Release = 8;
-  FBIntf_Version = '1.4.8';
+  FBIntf_Release = 9;
+  FBIntf_Version = '1.4.9';
 
 const
   {DPB, TPB and SPB Parameter Block Name Prefixes}

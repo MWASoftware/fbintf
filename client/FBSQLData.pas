@@ -920,9 +920,9 @@ procedure TSQLVarData.Initialize;
 
 var
   j, j_len: Integer;
-  st: RawByteString;
+  st: AnsiString;
   sBaseName: AnsiString;
-  sExt: RawByteString;
+  sExt: AnsiString;
 begin
   RowChange;
 
