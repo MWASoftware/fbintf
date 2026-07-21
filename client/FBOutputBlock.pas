@@ -1064,6 +1064,14 @@ begin
     fb_info_conn_flags:
       FItems[index] := AddIntegerItem(P);
 
+    {transaction markers can be 4 or 8 bytes (48-bit transaction ids),
+     so they are added as variable length integers}
+    isc_info_oldest_transaction,
+    isc_info_oldest_active,
+    isc_info_oldest_snapshot,
+    isc_info_next_transaction:
+      FItems[index] := AddIntegerItem(P,dtInteger);
+
     isc_info_implementation,
     isc_info_base_level:
       FItems[index] := AddBytesItem(P);
