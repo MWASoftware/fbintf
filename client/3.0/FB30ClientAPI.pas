@@ -710,7 +710,7 @@ var DecFloat16: IDecFloat16;
 begin
   inherited SQLDecFloatEncode(aValue, SQLType, bufptr);
   sign := (aValue.SignSpecialPlaces and $80) shr 7;
-  exp := -(aValue.SignSpecialPlaces and $2f);
+  exp := -(aValue.SignSpecialPlaces and $3f);
 
   case SQLType of
   SQL_DEC16:
@@ -797,7 +797,7 @@ begin
   else
     IBError(ibxeInvalidDataConversion,[]);
   end;
-  Result.SignSpecialPlaces :=  (-exp and $2f);
+  Result.SignSpecialPlaces :=  (-exp and $3f);
   if sign <> 0 then
     Result.SignSpecialPlaces := Result.SignSpecialPlaces or $80;
 end;
