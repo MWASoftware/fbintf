@@ -421,6 +421,9 @@
     isc_spb_bkp_skip_data = 8;    
     isc_spb_bkp_stat = 15;    
     isc_spb_bkp_keyholder = 16;    
+    {Firebird 5: number of parallel workers for backup and restore. Values
+     from firebird/impl/consts_pub.h.}
+    isc_spb_bkp_parallel_workers = 21;    
     isc_spb_bkp_keyname = 17;    
     isc_spb_bkp_crypt = 18;    
     isc_spb_bkp_include_data = 19;    
@@ -519,6 +522,9 @@
     isc_spb_rpr_ignore_checksum = $20;    
     isc_spb_rpr_kill_shadows = $40;    
     isc_spb_rpr_full = $80;    
+    {Firebird 5: upgrade the on-disk structure in place, as gfix -upgrade does.
+     Value from firebird/impl/consts_pub.h.}
+    isc_spb_rpr_upgrade_db = $1000;    
     isc_spb_rpr_icu = $0800;    
   {****************************************
    * Parameters for isc_action_svc_restore *
@@ -532,6 +538,7 @@
     isc_spb_res_fix_fss_data = 13;    
     isc_spb_res_fix_fss_metadata = 14;    
     isc_spb_res_keyholder = isc_spb_bkp_keyholder;    
+    isc_spb_res_parallel_workers = isc_spb_bkp_parallel_workers;    
     isc_spb_res_keyname = isc_spb_bkp_keyname;    
     isc_spb_res_crypt = isc_spb_bkp_crypt;    
     isc_spb_res_stat = isc_spb_bkp_stat;    
