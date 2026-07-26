@@ -330,7 +330,17 @@ procedure TFBTransaction.DoDefaultTransactionEnd(Force: boolean);
 var i: integer;
     intf: IUnknown;
     user: ITransactionUser;
+    SelfRef: ITransaction;
 begin
+  {A transaction user's TransactionEnding may release the last interface
+   reference to this transaction, which would free it while this method is
+   still running and leave the Commit/Rollback below operating on a destroyed
+   object. TFB30TimeZoneServices does exactly that: it starts an internal
+   transaction for the time zone lookups, registers itself on it, and clears
+   its own reference in TransactionEnding. Nothing else holds one - the
+   interface list stores raw object pointers, not counted references - so the
+   object went away mid-call. Hold a reference for the duration.}
+  SelfRef := self;
   if InTransaction and not FForeignHandle then
   begin
     for i := 0 to InterfaceCount - 1 do
