@@ -522,6 +522,9 @@
     isc_spb_rpr_ignore_checksum = $20;    
     isc_spb_rpr_kill_shadows = $40;    
     isc_spb_rpr_full = $80;    
+    {Firebird 5: upgrade the on-disk structure in place, as gfix -upgrade does.
+     Value from firebird/impl/consts_pub.h.}
+    isc_spb_rpr_upgrade_db = $1000;    
     isc_spb_rpr_icu = $0800;    
   {****************************************
    * Parameters for isc_action_svc_restore *
