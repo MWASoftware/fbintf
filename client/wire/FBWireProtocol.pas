@@ -148,6 +148,7 @@ type
     FKeyClumplets: TBytes;         {accumulated server key advertisements}
     FCryptPlugin: AnsiString;      {active wire encryption plugin, '' = none}
     FConnected: boolean;
+    FMaxProtocol: cardinal;
     procedure SendUserIdentification(aWireCrypt: TWireCryptOption);
     procedure DoAuthHandshake(aWireCrypt: TWireCryptOption);
     function ComputeProof(const aData: TBytes; const aPluginName: AnsiString): AnsiString;
@@ -244,6 +245,10 @@ type
     procedure Ping;
 
     property ProtocolVersion: cardinal read FProtocolVersion;
+    {caps the highest protocol version offered to the server. Defaults to
+     MaxSupportedProtocol; lower it to exercise or force an older dialect
+     of the protocol.}
+    property MaxProtocol: cardinal read FMaxProtocol write FMaxProtocol;
     property Connected: boolean read FConnected;
     property AuthData: AnsiString read FAuthData;
     property AuthPluginName: AnsiString read FAuthPluginName;
@@ -358,6 +363,7 @@ begin
   inherited Create;
   FTransport := TFBWireTransport.Create;
   FXDR := TXDRStream.Create(FTransport);
+  FMaxProtocol := MaxSupportedProtocol;
 end;
 
 destructor TFBWireConnection.Destroy;
@@ -472,6 +478,7 @@ const
     PROTOCOL_VERSION13, PROTOCOL_VERSION14, PROTOCOL_VERSION15,
     PROTOCOL_VERSION16, PROTOCOL_VERSION17);
 var i: integer;
+    offered: integer;
 begin
   Disconnect;
   FUser := aUser;
@@ -494,10 +501,17 @@ begin
     FXDR.WriteInt32(CONNECT_VERSION3);
     FXDR.WriteInt32(arch_generic);
     FXDR.WriteString(aDatabasePath);
-    FXDR.WriteInt32(Length(OfferedProtocols));
+    offered := 0;
+    for i := 0 to High(OfferedProtocols) do
+      if OfferedProtocols[i] <= FMaxProtocol then
+        Inc(offered);
+    if offered = 0 then
+      raise EFBWireError.Create('No protocol version left to offer');
+    FXDR.WriteInt32(offered);
     SendUserIdentification(aWireCrypt);
     for i := 0 to High(OfferedProtocols) do
     begin
+      if OfferedProtocols[i] > FMaxProtocol then continue;
       FXDR.WriteUInt32(OfferedProtocols[i]);
       FXDR.WriteInt32(arch_generic);
       FXDR.WriteInt32(0);                  {min type}

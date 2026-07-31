@@ -39,6 +39,27 @@ failing obscurely:
 * transactions spanning several attachments (needs a two phase commit
   coordinator)
 
+## Verified protocol versions
+
+Against a Firebird 6.0 server, capping `TFBWireConnection.MaxProtocol` at
+each level in turn (`testsuite/WireTest.pas` does the same for the version
+it negotiates by default):
+
+| Offered up to | Negotiated | Encryption | Result |
+|---|---|---|---|
+| 13 | — | — | rejected with `isc_miss_wirecrypt` |
+| 14 | 14 | `Arc4` | attach, ping and detach |
+| 15 | 15 | `Arc4` | attach, ping and detach |
+| 16 | 16 | `ChaCha64` | attach, ping and detach |
+| 17 | 17 | `ChaCha64` | attach, ping and detach |
+
+Protocol 13 has no wire encryption, so a server configured with
+`WireCrypt = Required` (the default from Firebird 4 on) refuses it. It is
+still offered because a Firebird 3 server, or one configured with
+`WireCrypt = Enabled`, accepts it. `ChaCha` and `ChaCha64` need the
+initialisation vector the server only sends from protocol 16, which is why
+14 and 15 fall back to `Arc4`.
+
 ## Layout
 
 | Unit | Contents |

@@ -331,6 +331,8 @@ begin
           (C.AuthPluginName = sSrpPluginName) or
           (C.AuthPluginName = sSrp256PluginName),
           'plugin ' + C.AuthPluginName);
+    Check('wire encryption was negotiated',C.CryptPlugin <> '',
+          'the server may have WireCrypt disabled');
     if C.CryptPlugin = '' then
       writeln('        protocol ',C.ProtocolVersion,', ',C.AuthPluginName,
               ', no wire encryption')
@@ -339,6 +341,43 @@ begin
               ', ',C.CryptPlugin,' wire encryption');
   finally
     C.Free;
+  end;
+end;
+
+procedure TestProtocolNegotiation;
+const Caps: array[0..3] of cardinal = (PROTOCOL_VERSION14,PROTOCOL_VERSION15,
+                                       PROTOCOL_VERSION16,PROTOCOL_VERSION17);
+var C: TFBWireConnection;
+    host, dbname: AnsiString;
+    p, i: integer;
+begin
+  writeln('Protocol negotiation');
+  host := 'localhost';
+  dbname := DatabaseName;
+  p := Pos(':',DatabaseName);
+  if p > 2 then
+  begin
+    host := Copy(DatabaseName,1,p-1);
+    dbname := Copy(DatabaseName,p+1,MaxInt);
+  end;
+  for i := 0 to High(Caps) do
+  begin
+    C := TFBWireConnection.Create;
+    try
+      try
+        C.MaxProtocol := Caps[i];
+        C.ConnectTo(host,3050,dbname,UserName,Password);
+        Check(Format('protocol %d negotiated',[Caps[i] and FB_PROTOCOL_MASK]),
+              C.ProtocolVersion = (Caps[i] and FB_PROTOCOL_MASK),
+              'got ' + IntToStr(C.ProtocolVersion));
+      except
+        on E: Exception do
+          {an old server simply may not know this version}
+          writeln('  SKIP  protocol ',Caps[i] and FB_PROTOCOL_MASK,': ',E.Message);
+      end;
+    finally
+      C.Free;
+    end;
   end;
 end;
 
@@ -574,6 +613,7 @@ begin
   TestSRP;
   TestMessageLayout;
   TestProtocol;
+  TestProtocolNegotiation;
 
   if OpenTestDatabase then
   try
