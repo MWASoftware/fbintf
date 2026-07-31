@@ -14,7 +14,9 @@ uses
   FBSQLData, FB30ClientAPI, FB30Attachment, FB30Transaction, FBTransaction, 
   FB30Blob, FB30Array, FB30Statement, FB30Events, FB30Services, FBEvents, 
   FBBlob, FBAttachment, FBStatement, FBServices, FBClientLib, FBNumeric, 
-  FB30TimeZoneServices, IBHeader, FirebirdOOAPI;
+  FB30TimeZoneServices, IBHeader, FirebirdOOAPI, 
+  FBWireBigInt, FBWireCrypto, FBWireSRP, FBWireStream, FBWireConst, FBWireMessage, FBWireDescribe, FBWireProtocol, FBWireClientAPI, FBWireAttachment, FBWireTransaction, FBWireStatement, FBWireBlob
+  ;
 
 implementation
 
