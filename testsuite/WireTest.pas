@@ -377,8 +377,13 @@ begin
       try
         C.MaxProtocol := Caps[i];
         C.ConnectTo(host,port,dbname,UserName,Password);
-        Check(Format('protocol %d negotiated',[Caps[i] and FB_PROTOCOL_MASK]),
-              C.ProtocolVersion = (Caps[i] and FB_PROTOCOL_MASK),
+        {the server settles on the highest version it also knows, so an
+         older server correctly negotiates below the cap: Firebird 3 tops
+         out at 15 however high the offer goes}
+        Check(Format('offering up to protocol %d negotiates %d',
+                     [Caps[i] and FB_PROTOCOL_MASK,C.ProtocolVersion]),
+              (C.ProtocolVersion >= 13) and
+              (C.ProtocolVersion <= (Caps[i] and FB_PROTOCOL_MASK)),
               'got ' + IntToStr(C.ProtocolVersion));
       except
         on E: Exception do

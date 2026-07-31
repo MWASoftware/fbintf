@@ -208,9 +208,13 @@ begin
       begin
         EnsureIndex;
         fmt^[index].SQLSubType := ReadInt(len);
-        {for CHAR and VARCHAR the reported subtype is the character set id
-         and isc_info_sql_length is the byte length in that character set}
-        if fmt^[index].SQLType in [SQL_TEXT,SQL_VARYING] then
+        {For CHAR and VARCHAR the reported subtype is the character set id
+         and isc_info_sql_length is the byte length in that character set.
+         Written as comparisons rather than a set test: the SQL type codes
+         are far outside the 0..255 a Pascal set can hold, so "in" would
+         silently compare truncated values.}
+        if (fmt^[index].SQLType = SQL_TEXT) or
+           (fmt^[index].SQLType = SQL_VARYING) then
           fmt^[index].CharSetID := cardinal(fmt^[index].SQLSubType);
       end;
     isc_info_sql_scale:
