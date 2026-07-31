@@ -24,7 +24,7 @@ older than the server.
 8. [Error reporting](#error-reporting)
 9. [Testing](#testing)
 10. [Continuous integration](#continuous-integration)
-11. [Limitations and future work](#limitations-and-future-work)
+11. [Roadmap](#roadmap)
 
 ---
 
@@ -470,21 +470,169 @@ version settled on.
 
 ---
 
-## Limitations and future work
+## Roadmap
 
-In rough order of usefulness:
+The provider is complete enough for ordinary work: connect, transactions,
+DSQL, every data type, blobs. What follows is what is left, in the order it
+is worth doing, with what each piece actually needs. Nothing here is
+speculative; each item names the operations involved and the fbintf
+machinery that already exists to support it.
 
-1. **Events.** The largest missing piece. Needs `op_connect_request`, a
-   second socket and a listener thread. `FBEvents.CreateEventBlock` already
-   builds the event block in exactly the form `op_que_events` carries.
-2. **Services.** The packet exchanges are implemented in `FBWireProtocol`
-   already; what is missing is the `IServiceManager` wrapper and the SPB
-   plumbing.
-3. **A Delphi transport.** Everything above `FBWireStream` is compiler
-   neutral.
-4. **Arrays**, **batches** and **scrollable cursors**, in that order.
-5. **Compression.** `pflag_compress` is understood but never requested; it
-   would need zlib on the client side.
-6. **Message text.** A reader for `firebird.msg`, or a generated table of
-   the common codes, would close the one visible gap against the stock
-   providers.
+| # | Milestone | Needs | Protocol |
+|---|---|---|---|
+| 1 | Run the existing test suite against this provider | a provider switch in `TTestApplication` | — |
+| 2 | Events | `op_connect_request`, a second socket, a listener thread | 13 |
+| 3 | Services | the `IServiceManager` wrapper over exchanges that already exist | 13 |
+| 4 | A Delphi transport | a `TFBWireTransport` over Winsock and Posix sockets | — |
+| 5 | Array columns | `op_get_slice`, `op_put_slice`, SDL generation | 13 |
+| 6 | Statement timeouts and cancellation | `op_cancel`, the P16 timeout field | 12, 16 |
+| 7 | Scrollable cursors | `op_fetch_scroll` | 18 |
+| 8 | The batch API | the `op_batch_*` family | 16 |
+| 9 | Inline blobs | `op_inline_blob` | 19 |
+| 10 | Firebird 6 protocol 20 | schema search path, named arguments | 20 |
+| 11 | Wire compression | zlib either side of the cipher | 13 |
+| 12 | Engine message text | a `firebird.msg` reader or a generated table | — |
+
+### 1. Run the existing test suite against this provider
+
+The cheapest large win, and it should come first because everything after
+it benefits. `testsuite/` already contains twenty two test programs that
+exercise the API far more thoroughly than `WireTest` does, and they are
+written against the interfaces, not against a provider. They obtain the API
+from one place:
+
+```pascal
+function TTestApplication.GetFirebirdAPI: IFirebirdAPI;   {TestApplication.pas}
+begin
+  if FFirebirdAPI = nil then
+    FFirebirdAPI := IB.FirebirdAPI;
+  ...
+```
+
+A command line switch that assigns `WireFirebirdAPI` there instead would run
+all of them over the wire. Expect failures at first: the suite covers
+events, services and arrays, which this provider reports as unsupported, so
+the work is partly to add a way of marking those as expected skips. That
+same run is the acceptance criterion for milestones 2, 3 and 5.
+
+### 2. Events
+
+The largest missing feature and the one users will notice. Firebird
+delivers events on a **second** connection: the client sends
+`op_connect_request` with `P_REQ_async`, the server answers with a
+`sockaddr` naming a port, and the client opens a second socket to it. Event
+notifications then arrive on that socket as `op_event` packets,
+asynchronously, while the main connection carries on.
+
+What exists already: `FBEvents.CreateEventBlock` builds the event block in
+exactly the form `op_que_events` carries, and `TFBEvents` implements the
+counting and the callback dispatch. What is needed is the auxiliary
+connection, a listener thread, and the three exchanges `op_que_events`,
+`op_event` and `op_cancel_events`. `TFBWireConnection` deliberately keeps
+its transport separate from its protocol logic so a second transport can be
+driven by a second thread without sharing buffers.
+
+The one subtlety worth flagging: the address in the response is the address
+the **server** knows about, which behind NAT is not reachable. The stock
+client keeps the port and reuses the address it already connected to.
+
+### 3. Services
+
+`op_service_attach`, `op_service_detach`, `op_service_start` and
+`op_service_info` are already implemented in `FBWireProtocol` and unused.
+What is missing is the `IServiceManager` layer: a `TFBWireServiceManager`
+over `TFBServiceManager`, which needs `InternalAttach`, `Detach` and
+`Query`, plus `AllocateSPB` returning the existing `TSPB`. `FBOutputBlock`
+already parses the responses. This is a small, well bounded piece of work
+that would bring backup, restore, statistics and user management to a
+client with no library installed — arguably the most useful thing this
+provider could offer an operations team.
+
+### 4. A Delphi transport
+
+Everything above `FBWireStream` is compiler neutral and already compiles
+under `{$mode delphi}`. Only the transport binds FPC's `sockets` and
+`ssockets`. A Delphi implementation needs `TFBWireTransport` reimplemented
+over `Winapi.WinSock2` and `Posix.SysSocket` behind the same four methods
+(`ConnectTo`, `Disconnect`, `ReadBytes`, `WriteBytes`), after which the
+units can be added to `fbintf.dpk`. The cipher and XDR layers do not change.
+
+### 5. Array columns
+
+`op_get_slice` and `op_put_slice` carry an SDL (slice description language)
+program describing the slice wanted. `FBArray` already implements the whole
+element addressing, conversion and metadata layer, and `FB30Array` shows
+how the SDL block is built. The wire provider needs to generate the SDL and
+marshal the slice buffer.
+
+### 6. Statement timeouts and cancellation
+
+`op_cancel` (protocol 12) is sent out of band while an operation is
+running and makes it fail with `isc_cancelled`; it is what
+`fb_cancel_operation` does. The per statement timeout field is already
+written in `op_execute` for protocol 16 and later, currently always zero, so
+exposing `IStatement`'s timeout is a small change. Cancellation needs care:
+the packet has no response, and it has to be written from another thread
+while the first is blocked in `ReadBytes`.
+
+### 7. Scrollable cursors
+
+`op_fetch_scroll` (protocol 18) carries a fetch direction and position, so
+`FetchPrior`, `FetchFirst`, `FetchLast`, `FetchAbsolute` and `FetchRelative`
+become implementable. The row cache in `TWireCursorState` has to be
+invalidated on any non sequential fetch, and `TFBWireStatement` must offer
+`HasScollableCursors` truthfully once the negotiated protocol is 18 or
+better.
+
+### 8. The batch API
+
+`op_batch_create`, `op_batch_msg`, `op_batch_exec`, `op_batch_rls` and
+`op_batch_cs` (protocol 16) support `IBatch`. Messages are packed into a
+stream, each padded to an eight byte boundary, and the completion state
+comes back as update counts plus per row status vectors. `TFBStatement`
+already has the batch entry points defaulting to unsupported, and
+`TBatchCompletion` in the 3.0 provider shows the shape of the result.
+
+### 9. Inline blobs
+
+Protocol 19 lets the server push small blobs with the row that references
+them, in `op_inline_blob` packets, saving a round trip each. The client
+declares the size it will accept in `op_execute`. `ReadOperation` already
+has to skip unsolicited packets, so this fits naturally: cache the blob
+against its identifier and have `TFBWireBlob` check the cache before
+opening.
+
+### 10. Firebird 6 and protocol 20
+
+Protocol 20 adds SQL schemas and named arguments. It needs a schema search
+path in the DPB (`isc_dpb_search_path`), a different describe item list, and
+an extra flags field in `op_prepare_statement`. The client currently offers
+up to 17 and Firebird 6 negotiates down happily, so this is about gaining
+the new features rather than about compatibility.
+
+### 11. Wire compression
+
+`pflag_compress` is understood in the accept but never requested. Turning it
+on means running zlib over the byte stream underneath the cipher, which the
+transport is already structured for: compression would be another filter in
+the same position as `TWireCipher`, applied in the opposite order.
+
+### 12. Engine message text
+
+The one visible difference from the stock providers. Two ways to close it:
+read `firebird.msg` when a copy happens to be available, or generate a
+Pascal table of the common `isc_*` codes and their format strings from
+`msgs.sql` at build time. The second keeps the no dependencies property and
+is a few hundred kilobytes of generated source.
+
+### Not planned
+
+* **`Legacy_Auth`.** It produces no session key, so it cannot satisfy a
+  server requiring encryption, and modern servers disable it by default.
+  The DES `crypt(3)` implementation it needs is not worth carrying.
+* **`Win_SSPI` / trusted authentication.** Windows specific and awkward to
+  test in CI.
+* **Protocols below 13.** Firebird 2.5 and earlier need the pre
+  authentication plugin handshake and a different message encoding, and are
+  out of support.
+

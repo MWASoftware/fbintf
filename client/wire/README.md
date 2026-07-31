@@ -27,7 +27,8 @@ Working and tested against a live server (see *Testing* below):
 * information calls for the database, transaction, statement and blob
 
 Not implemented yet, and reported as `ibxeNotSupported` rather than
-failing obscurely:
+failing obscurely (see the roadmap in doc/WireProtocol.md for what each
+would take):
 
 * events (these need the auxiliary connection set up with
   `op_connect_request` and a listener thread)
