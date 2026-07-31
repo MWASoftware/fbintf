@@ -39,19 +39,28 @@ failing obscurely:
 * transactions spanning several attachments (needs a two phase commit
   coordinator)
 
-## Verified protocol versions
+## Verified servers
 
-Against a Firebird 6.0 server, capping `TFBWireConnection.MaxProtocol` at
-each level in turn (`testsuite/WireTest.pas` does the same for the version
-it negotiates by default):
+Run locally with `testsuite/WireTest.pas`. Firebird 3 and 4 are covered by
+the CI matrix instead: their container images are published for amd64 only,
+so they cannot run on the arm64 machine this was developed on.
 
-| Offered up to | Negotiated | Encryption | Result |
-|---|---|---|---|
-| 13 | — | — | rejected with `isc_miss_wirecrypt` |
-| 14 | 14 | `Arc4` | attach, ping and detach |
-| 15 | 15 | `Arc4` | attach, ping and detach |
-| 16 | 16 | `ChaCha64` | attach, ping and detach |
-| 17 | 17 | `ChaCha64` | attach, ping and detach |
+| Server | WireCrypt | Negotiated | Encryption | Result |
+|---|---|---|---|---|
+| 6.0.0 (LI-T6.0.0.2076) | Required | 17 | `ChaCha64` | 81 tests, 0 failures |
+| 5.0.4 (container) | Enabled | 17 | `ChaCha64` | 81 tests, 0 failures |
+| 5.0.4 (container) | Required | 17 | `ChaCha64` | 81 tests, 0 failures |
+| 4.x, 3.x | both | — | — | see the CI matrix |
+
+Capping `TFBWireConnection.MaxProtocol` in turn, against both servers:
+
+| Offered up to | Negotiated | Encryption |
+|---|---|---|
+| 13 | refused with `isc_miss_wirecrypt` when the server requires encryption | — |
+| 14 | 14 | `Arc4` |
+| 15 | 15 | `Arc4` |
+| 16 | 16 | `ChaCha64` |
+| 17 | 17 | `ChaCha64` |
 
 Protocol 13 has no wire encryption, so a server configured with
 `WireCrypt = Required` (the default from Firebird 4 on) refuses it. It is
@@ -59,6 +68,16 @@ still offered because a Firebird 3 server, or one configured with
 `WireCrypt = Enabled`, accepts it. `ChaCha` and `ChaCha64` need the
 initialisation vector the server only sends from protocol 16, which is why
 14 and 15 fall back to `Arc4`.
+
+## A note on dropping a table you have read
+
+An attachment that has read a table keeps an interest in it that outlives
+the transaction, and Firebird 5 then refuses `drop table` on that same
+attachment with `isc_no_meta_update`. This is not a property of this
+client: the stock fbclient provider fails in exactly the same place with
+exactly the same code, and a second attachment issuing the drop blocks
+rather than succeeding. `WireTest` therefore treats dropping its test
+table as best effort and drops it at the start of the next run instead.
 
 ## Layout
 

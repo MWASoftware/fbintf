@@ -20,12 +20,14 @@
  *
  *  Contributor(s): ______________________________________.
  *
- *  Usage:  WireTest [<database> [<user> [<password>]]]
+ *  Usage:  WireTest [<database> [<user> [<password> [<scratch database>]]]]
  *          defaults to localhost:employee SYSDBA masterkey
  *
  *  The cryptographic tests need no server. The remaining tests need a
  *  Firebird 3.0 or later server and a database the user may create tables
- *  in.
+ *  in. If a scratch database is named as well then creating and dropping a
+ *  database is tested too; it must be a path the server may write to and
+ *  must not already exist.
 *)
 program WireTest;
 
@@ -33,7 +35,7 @@ program WireTest;
 
 uses
   {$IFDEF UNIX}cthreads,{$ENDIF}
-  SysUtils, Classes, IB,
+  SysUtils, Classes, IB, IBUtils,
   FBWireBigInt, FBWireCrypto, FBWireSRP, FBWireStream, FBWireConst,
   FBWireMessage, FBWireDescribe, FBWireProtocol, FBWireClientAPI;
 
@@ -43,6 +45,7 @@ var
   DatabaseName: AnsiString = 'localhost:employee';
   UserName: AnsiString = 'SYSDBA';
   Password: AnsiString = 'masterkey';
+  ScratchDatabase: AnsiString = '';
 
 procedure Check(const aTest: AnsiString; aCondition: boolean;
   const aDetail: AnsiString = '');
@@ -58,6 +61,8 @@ begin
     else
       writeln('  FAIL  ',aTest);
   end;
+  {flushed so that the log is complete even if the next call raises}
+  Flush(Output);
 end;
 
 procedure CheckEquals(const aTest, aGot, aWanted: AnsiString);
@@ -291,28 +296,40 @@ end;
 
 {---------------------------------------------------------------------------}
 
+{splits the connect string into the parts the raw protocol layer needs}
+procedure SplitConnectString(const aConnectString: AnsiString;
+  out aHost, aDatabase: AnsiString; out aPort: integer);
+var aProtocol: TProtocolAll;
+    aPortText: AnsiString;
+begin
+  aHost := 'localhost';
+  aDatabase := aConnectString;
+  aPort := 3050;
+  aPortText := '';
+  if ParseConnectString(aConnectString,aHost,aDatabase,aProtocol,aPortText) then
+  begin
+    if aPortText <> '' then
+      aPort := StrToIntDef(aPortText,3050);
+    if aHost = '' then
+      aHost := 'localhost';
+  end;
+end;
+
 function ConnectToServer(out Connection: TFBWireConnection): boolean;
 var host, dbname: AnsiString;
-    p: integer;
+    port: integer;
 begin
   Result := false;
   Connection := nil;
-  host := 'localhost';
-  dbname := DatabaseName;
-  p := Pos(':',DatabaseName);
-  if (p > 2) then  {avoid treating a drive letter as a host}
-  begin
-    host := Copy(DatabaseName,1,p-1);
-    dbname := Copy(DatabaseName,p+1,MaxInt);
-  end;
+  SplitConnectString(DatabaseName,host,dbname,port);
   Connection := TFBWireConnection.Create;
   try
-    Connection.ConnectTo(host,3050,dbname,UserName,Password);
+    Connection.ConnectTo(host,port,dbname,UserName,Password);
     Result := true;
   except
     on E: Exception do
     begin
-      writeln('  SKIP  no server at ',host,': ',E.Message);
+      writeln('  SKIP  no server at ',host,':',port,' - ',E.Message);
       FreeAndNil(Connection);
     end;
   end;
@@ -349,24 +366,17 @@ const Caps: array[0..3] of cardinal = (PROTOCOL_VERSION14,PROTOCOL_VERSION15,
                                        PROTOCOL_VERSION16,PROTOCOL_VERSION17);
 var C: TFBWireConnection;
     host, dbname: AnsiString;
-    p, i: integer;
+    port, i: integer;
 begin
   writeln('Protocol negotiation');
-  host := 'localhost';
-  dbname := DatabaseName;
-  p := Pos(':',DatabaseName);
-  if p > 2 then
-  begin
-    host := Copy(DatabaseName,1,p-1);
-    dbname := Copy(DatabaseName,p+1,MaxInt);
-  end;
+  SplitConnectString(DatabaseName,host,dbname,port);
   for i := 0 to High(Caps) do
   begin
     C := TFBWireConnection.Create;
     try
       try
         C.MaxProtocol := Caps[i];
-        C.ConnectTo(host,3050,dbname,UserName,Password);
+        C.ConnectTo(host,port,dbname,UserName,Password);
         Check(Format('protocol %d negotiated',[Caps[i] and FB_PROTOCOL_MASK]),
               C.ProtocolVersion = (Caps[i] and FB_PROTOCOL_MASK),
               'got ' + IntToStr(C.ProtocolVersion));
@@ -403,6 +413,61 @@ begin
     on E: Exception do
       writeln('  SKIP  cannot attach to ',DatabaseName,': ',E.Message);
   end;
+end;
+
+procedure TestCreateDatabase;
+var DPB: IDPB;
+    Scratch: IAttachment;
+    Tr: ITransaction;
+    RS: IResultSet;
+begin
+  writeln('Provider: create and drop database');
+  if ScratchDatabase = '' then
+  begin
+    writeln('  SKIP  no scratch database named on the command line');
+    Exit;
+  end;
+  DPB := API.AllocateDPB;
+  DPB.Add(isc_dpb_user_name).AsString := UserName;
+  DPB.Add(isc_dpb_password).AsString := Password;
+  DPB.Add(isc_dpb_lc_ctype).AsString := 'UTF8';
+  DPB.Add(isc_dpb_set_db_SQL_dialect).AsByte := 3;
+  DPB.Add(isc_dpb_page_size).AsInteger := 8192;
+
+  Scratch := API.CreateDatabase(ScratchDatabase,DPB);
+  Check('database created',(Scratch <> nil) and Scratch.IsConnected);
+  if Scratch = nil then Exit;
+  Check('the new database has a current ODS',Scratch.GetODSMajorVersion >= 11,
+        'ODS ' + IntToStr(Scratch.GetODSMajorVersion));
+
+  Tr := Scratch.StartTransaction([isc_tpb_read_committed,isc_tpb_rec_version,
+          isc_tpb_nowait,isc_tpb_write],taCommit);
+  Scratch.ExecImmediate(Tr,'create table SCRATCH (ID integer not null primary key)');
+  Tr.Commit;
+  Tr := Scratch.StartTransaction([isc_tpb_read_committed,isc_tpb_rec_version,
+          isc_tpb_nowait,isc_tpb_write],taCommit);
+  RS := Scratch.OpenCursorAtStart(Tr,
+          'select count(*) from RDB$RELATIONS where RDB$RELATION_NAME = ''SCRATCH''');
+  Check('a table can be created in the new database',RS[0].AsInteger = 1);
+  RS.Close;
+  RS := nil;
+  Tr.Commit;
+  Tr := nil;
+
+  Scratch.DropDatabase;
+  Check('database dropped',not Scratch.IsConnected);
+  Scratch := nil;
+
+  {the database must now be gone}
+  Scratch := nil;
+  try
+    Scratch := API.OpenDatabase(ScratchDatabase,DPB,false);
+  except
+    on E: Exception do Scratch := nil;
+  end;
+  Check('a dropped database can no longer be attached',
+        (Scratch = nil) or not Scratch.IsConnected);
+  Scratch := nil;
 end;
 
 procedure TestProviderQueries;
@@ -545,6 +610,8 @@ begin
           'select count(*) from ' + TestTable);
   Check('three rows inserted',RS[0].AsInteger = 3,
         'got ' + IntToStr(RS[0].AsInteger));
+  RS.Close;
+  RS := nil;
 
   RS := Attachment.OpenCursorAtStart(Tr,
           'select ID,NAME,FLAG,AMOUNT from ' + TestTable + ' order by ID');
@@ -558,6 +625,7 @@ begin
   Check('second row is null',RS.FetchNext and RS.ByName('NAME').IsNull);
   Check('third row has flag true',RS.FetchNext and RS.ByName('FLAG').AsBoolean);
   RS.Close;
+  RS := nil;
 
   {a blob larger than one segment}
   BlobText := '';
@@ -580,6 +648,10 @@ begin
   ReadBack := RS[0].AsString;
   Check('blob round trips byte for byte',ReadBack = BlobText,
         Format('wrote %d bytes, read %d',[Length(BlobText),Length(ReadBack)]));
+  RS.Close;
+  RS := nil;
+  Blob := nil;
+  S := nil;
   Tr.Commit;
 
   {rollback must undo the delete}
@@ -592,9 +664,30 @@ begin
   RS := Attachment.OpenCursorAtStart(Tr,'select count(*) from ' + TestTable);
   Check('rollback undid the delete',RS[0].AsInteger = 3,
         'got ' + IntToStr(RS[0].AsInteger));
-  Attachment.ExecImmediate(Tr,'drop table ' + TestTable);
+  RS.Close;
+  RS := nil;
   Tr.Commit;
-  Check('table dropped',not Attachment.HasTable(TestTable));
+
+  {Cleanup only. An attachment that has read a table keeps an interest in
+   it that outlives the transaction, and Firebird 5 then refuses to drop
+   the table on that attachment - the stock fbclient provider behaves
+   identically here, so this is a property of the server and not of the
+   wire client. The next run drops the table before creating it, so
+   failing here leaves nothing behind.}
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  try
+    Attachment.ExecImmediate(Tr,'drop table ' + TestTable);
+    Tr.Commit;
+    writeln('  note  test table dropped');
+  except
+    on E: Exception do
+    begin
+      Tr.Rollback;
+      writeln('  note  the server would not drop the test table yet: ',
+              E.Message);
+    end;
+  end;
 end;
 
 {---------------------------------------------------------------------------}
@@ -603,6 +696,7 @@ begin
   if ParamCount >= 1 then DatabaseName := ParamStr(1);
   if ParamCount >= 2 then UserName := ParamStr(2);
   if ParamCount >= 3 then Password := ParamStr(3);
+  if ParamCount >= 4 then ScratchDatabase := ParamStr(4);
 
   writeln('fbintf pure Pascal wire protocol test');
   writeln('database: ',DatabaseName,'  user: ',UserName);
@@ -620,6 +714,7 @@ begin
     TestProviderQueries;
     TestProviderDataTypes;
     TestProviderUpdates;
+    TestCreateDatabase;
   finally
     Attachment.Disconnect;
     Attachment := nil;

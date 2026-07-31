@@ -176,7 +176,9 @@ end;
 
 procedure TFBWireTransport.ConnectTo(const aHost: AnsiString; aPort: integer;
   aTimeout: integer);
+{$IF declared(TCP_NODELAY) and declared(IPPROTO_TCP)}
 var NoDelay: integer;
+{$IFEND}
 begin
   Disconnect;
   {$IFDEF FPC}
@@ -184,9 +186,13 @@ begin
     FSocket := TInetSocket.Create(aHost,aPort);
     if aTimeout > 0 then
       FSocket.IOTimeout := aTimeout;
-    {disable Nagle - the protocol is request/response}
+    {disable Nagle: the protocol is strictly request/response, so waiting
+     to coalesce a packet only adds latency. Not every platform unit
+     declares the option, and it is only an optimisation.}
+    {$IF declared(TCP_NODELAY) and declared(IPPROTO_TCP)}
     NoDelay := 1;
     fpsetsockopt(FSocket.Handle,IPPROTO_TCP,TCP_NODELAY,@NoDelay,SizeOf(NoDelay));
+    {$IFEND}
   except
     on E: Exception do
       raise EFBWireError.Create(
