@@ -419,14 +419,19 @@ still exits 0, which is what the offline CI job relies on.
 
 | Server | WireCrypt | Negotiated | Encryption | Result |
 |---|---|---|---|---|
-| 6.0.0 (LI-T6.0.0.2076) | Required | 17 | `ChaCha64` | 81 tests, 0 failures |
-| 5.0.4 (container) | Enabled | 17 | `ChaCha64` | 81 tests, 0 failures |
-| 5.0.4 (container) | Required | 17 | `ChaCha64` | 81 tests, 0 failures |
-| no server | — | — | — | 36 tests, 0 failures, live sections skipped |
+| 6.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 81 tests, 0 failures |
+| 6.0.0 (local, LI-T6.0.0.2076) | Required | 17 | `ChaCha64` | 81 tests, 0 failures |
+| 5.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 81 tests, 0 failures |
+| 5.0.4 (local container) | Enabled, Required | 17 | `ChaCha64` | 81 tests, 0 failures |
+| 4.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 81 tests, 0 failures |
+| 3.0 (CI container) | Enabled | 15 | `Arc4` | 81 tests, 0 failures |
+| no server | — | — | — | 36 tests, live sections skipped |
 
-Firebird 3 and 4 are covered by CI: their container images are published
-for amd64 only and could not run on the arm64 machine this was developed
-on.
+Firebird 3 settles on protocol 15 with Arc4: it is the newest protocol that
+server knows, and it predates the ChaCha plugins. Everything else in the
+suite behaves identically there.
+
+The container rows come from the CI matrix; the rest were run locally.
 
 ### Dropping a table you have just read
 

@@ -41,16 +41,22 @@ failing obscurely:
 
 ## Verified servers
 
-Run locally with `testsuite/WireTest.pas`. Firebird 3 and 4 are covered by
-the CI matrix instead: their container images are published for amd64 only,
-so they cannot run on the arm64 machine this was developed on.
+Every row below was measured with `testsuite/WireTest.pas`, in CI for the
+container rows and locally for the others.
 
 | Server | WireCrypt | Negotiated | Encryption | Result |
 |---|---|---|---|---|
-| 6.0.0 (LI-T6.0.0.2076) | Required | 17 | `ChaCha64` | 81 tests, 0 failures |
-| 5.0.4 (container) | Enabled | 17 | `ChaCha64` | 81 tests, 0 failures |
-| 5.0.4 (container) | Required | 17 | `ChaCha64` | 81 tests, 0 failures |
-| 4.x, 3.x | both | — | — | see the CI matrix |
+| 6.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 81 tests, 0 failures |
+| 6.0.0 (local, LI-T6.0.0.2076) | Required | 17 | `ChaCha64` | 81 tests, 0 failures |
+| 5.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 81 tests, 0 failures |
+| 5.0.4 (local container) | Enabled, Required | 17 | `ChaCha64` | 81 tests, 0 failures |
+| 4.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 81 tests, 0 failures |
+| 3.0 (CI container) | Enabled | 15 | `Arc4` | 81 tests, 0 failures |
+| no server | — | — | — | 36 tests, live sections skipped |
+
+Firebird 3 settles on protocol 15 with Arc4: it is the newest protocol that
+server knows, and it predates the ChaCha plugins. Everything else in the
+suite behaves identically there.
 
 Capping `TFBWireConnection.MaxProtocol` in turn, against both servers:
 
