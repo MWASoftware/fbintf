@@ -1,7 +1,46 @@
 # Design: The batch API over the wire protocol
 
-Roadmap milestone 8 (`doc/WireProtocol.md`). This document is the
-implementation plan; no code changes are included.
+Roadmap milestone 8 (`doc/WireProtocol.md`).
+
+**Status: implemented** — `TFBWireConnection.BatchCreate/Msg/RegBlob/
+Exec/Release/Cancel`, `TWireBatchCompletion`, and the `TFBWireStatement`
+overrides, with Tests 19 and 20 passing over the wire and a WireTest
+batch section (151 tests). The design held in outline; the findings
+that reshaped its details:
+
+* Batch messages do **not** travel as an eight byte padded counted
+  blob: `xdr_packed_message` is byte for byte the ordinary row message
+  encoding (null bitmap + values), so `XDREncodeMessage` served
+  unchanged. The eight byte alignment governs the server's buffer
+  spacing and the client's buffer accounting only.
+* `op_batch_create`'s message length field must be computed with the
+  server's `PARSE_msg_format` rules from our BLR (`EngineMessageLength`)
+  - the client's private buffer layout is laid out differently and its
+  size is rejected. The `IBatch` parameter block is a *wide* tagged
+  clumplet buffer: four byte lengths, not the DPB's one byte form.
+* Phase 2 was partially needed after all: the engine translates every
+  non null, non zero blob id in a batch message through a registration
+  map and consumes the entry, so pre-existing blob ids (Test 19's
+  pattern) must be registered with `op_batch_regblob` once per row -
+  exactly what `TFB30Statement`'s message packer does with
+  `registerBlob`. Array ids pass through untouched, so
+  `op_batch_set_bpb`/`op_batch_blob_stream` remain unimplemented (no
+  fbintf surface reaches them).
+* `TAG_MULTIERROR` is not set, matching the 3.0 provider: a batch stops
+  at its first failing row and the completion reports it.
+* The deepest change was not in the batch code: the wire statement's
+  default text type moved from `SQL_TEXT` to `SQL_VARYING`, as the
+  fbclient providers answer. The `SQL_TEXT` default re-sized the
+  parameter format on every string assignment - fatal once
+  `op_batch_create` has frozen the BLR - and its blank padding leaked
+  into stored values. The switch exposed and fixed two latent accessor
+  bugs (a varying *parameter's* `SQLData` must point at the characters
+  while a *column's* points at the length prefix - `TSQLParam` relies
+  on the distinction), and `CanChangeMetaData` now answers false while
+  a batch is open, refusing mid batch type changes with the same error
+  the 3.0 provider raises. The suite's parameter metadata and value
+  output now matches the fbclient reference logs where it previously
+  diverged (blank padded CHAR echoes, padded `INCLEAR` hex dumps).
 
 ## Goal
 

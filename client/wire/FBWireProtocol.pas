@@ -75,6 +75,13 @@ type
   end;
   TWireStatusVector = array of TWireStatusItem;
 
+const
+  {row states in a batch completion - IBatchCompletionState}
+  BATCH_EXECUTE_FAILED  = -1;
+  BATCH_SUCCESS_NO_INFO = -2;
+
+type
+
   { TWireCursorState: per cursor fetch bookkeeping.
 
     The server answers an op_fetch requesting N rows with a sequence of
@@ -90,6 +97,16 @@ type
     Rows: array of TBytes;  {decoded rows not yet consumed}
     NextRow: integer;
     EndOfCursor: boolean;
+  end;
+
+  { TWireBatchCS : decoded op_batch_cs - the batch completion state.
+    States[i] is the row's update count, or BATCH_EXECUTE_FAILED /
+    BATCH_SUCCESS_NO_INFO; StatusVectors[i] is non empty for rows whose
+    failure came with a status vector. }
+
+  TWireBatchCS = record
+    States: array of integer;
+    StatusVectors: array of TWireStatusVector;
   end;
 
   { TWireResponse : decoded op_response }
@@ -277,6 +294,30 @@ type
     procedure ServiceStart(aSvcHandle: integer; const aItems: TBytes);
     function ServiceQuery(aSvcHandle: integer; const aSendItems, aRecvItems: TBytes;
                         aBufferLength: integer): TBytes;
+
+    {--- batches (protocol 16) ---}
+    {op_batch_create: opens a batch on the statement. aMsgLen is
+     EngineMessageLength(aFormat) - the server validates it against the
+     format it parses from the BLR - and aPB the IBatch parameter block
+     (a wide tagged clumplet buffer)}
+    procedure BatchCreate(aStmtHandle: integer;
+                        const aFormat: TWireMessageFormat; aMsgLen: cardinal;
+                        const aPB: TBytes);
+    {op_batch_msg: sends aRows messages, each encoded exactly as a row
+     message (xdr_packed_message is the regular message encoding)}
+    procedure BatchMsg(aStmtHandle: integer;
+                        const aFormat: TWireMessageFormat;
+                        const aRows: array of TBytes);
+    {op_batch_regblob: registers an existing blob id for use in batch
+     messages. The engine translates every non null, non zero blob id in
+     a batch message through its registration map - and consumes the
+     entry - so an id must be registered once for each row that carries
+     it (the 3.0 provider does the same through IBatch.registerBlob).}
+    procedure BatchRegBlob(aStmtHandle: integer; aExistingID, aBatchID: Int64);
+    {op_batch_exec: runs the batch and parses the op_batch_cs reply}
+    function BatchExec(aStmtHandle, aTrHandle: integer): TWireBatchCS;
+    procedure BatchRelease(aStmtHandle: integer);
+    procedure BatchCancel(aStmtHandle: integer);
 
     {--- misc ---}
     procedure Ping;
@@ -1638,6 +1679,131 @@ begin
   FXDR.WriteInt32(aBufferLength);
   FXDR.Flush;
   Result := ReceiveAndCheckResponse.Data;
+end;
+
+{--- batches (protocol 16) ---}
+
+procedure TFBWireConnection.BatchCreate(aStmtHandle: integer;
+  const aFormat: TWireMessageFormat; aMsgLen: cardinal; const aPB: TBytes);
+var blr: TBytes;
+begin
+  if FProtocolVersion < (PROTOCOL_VERSION16 and FB_PROTOCOL_MASK) then
+    raise EFBWireError.Create('the batch operations need protocol 16 or later');
+  FXDR.WriteInt32(op_batch_create);
+  FXDR.WriteInt32(aStmtHandle);
+  blr := BuildMessageBlr(aFormat);
+  FXDR.WriteString(blr);
+  FXDR.WriteUInt32(aMsgLen);
+  FXDR.WriteString(aPB);
+  FXDR.Flush;
+  ReceiveAndCheckResponse;
+end;
+
+procedure TFBWireConnection.BatchMsg(aStmtHandle: integer;
+  const aFormat: TWireMessageFormat; const aRows: array of TBytes);
+var i: integer;
+begin
+  FXDR.WriteInt32(op_batch_msg);
+  FXDR.WriteInt32(aStmtHandle);
+  FXDR.WriteUInt32(Length(aRows));
+  for i := 0 to High(aRows) do
+    XDREncodeMessage(FXDR,aFormat,@aRows[i][0]);
+  FXDR.Flush;
+  ReceiveAndCheckResponse;
+end;
+
+procedure TFBWireConnection.BatchRegBlob(aStmtHandle: integer;
+  aExistingID, aBatchID: Int64);
+begin
+  FXDR.WriteInt32(op_batch_regblob);
+  FXDR.WriteInt32(aStmtHandle);
+  FXDR.WriteInt64(aExistingID);
+  FXDR.WriteInt64(aBatchID);
+  FXDR.Flush;
+  ReceiveAndCheckResponse;
+end;
+
+function TFBWireConnection.BatchExec(aStmtHandle, aTrHandle: integer): TWireBatchCS;
+var op: integer;
+    R: TWireResponse;
+    recCount, updates, vectors, errors: cardinal;
+    i: cardinal;
+    pos: cardinal;
+begin
+  SetLength(Result.States,0);
+  SetLength(Result.StatusVectors,0);
+  FXDR.WriteInt32(op_batch_exec);
+  FXDR.WriteInt32(aStmtHandle);
+  FXDR.WriteInt32(aTrHandle);
+  FXDR.Flush;
+  op := ReadOperation;
+  if op = op_response then
+  begin
+    {an error before execution}
+    R := ReadResponseBody;
+    CheckResponse(R);
+    raise EFBWireError.Create('Unexpected op_response to op_batch_exec');
+  end;
+  if op <> op_batch_cs then
+    raise EFBWireError.CreateFmt('Unexpected operation %d in batch_exec response',[op]);
+
+  FXDR.ReadInt32;                 {statement handle}
+  recCount := FXDR.ReadUInt32;
+  updates := FXDR.ReadUInt32;
+  vectors := FXDR.ReadUInt32;
+  errors := FXDR.ReadUInt32;
+
+  {with no update vector every row processed reports "success, no info"}
+  if updates = 0 then
+  begin
+    SetLength(Result.States,recCount);
+    for i := 1 to recCount do
+      Result.States[i-1] := BATCH_SUCCESS_NO_INFO;
+  end
+  else
+  begin
+    SetLength(Result.States,updates);
+    for i := 1 to updates do
+      Result.States[i-1] := FXDR.ReadInt32;
+  end;
+  SetLength(Result.StatusVectors,Length(Result.States));
+
+  {failed rows with a status vector}
+  for i := 1 to vectors do
+  begin
+    pos := FXDR.ReadUInt32;
+    if pos < cardinal(Length(Result.States)) then
+    begin
+      Result.States[pos] := BATCH_EXECUTE_FAILED;
+      Result.StatusVectors[pos] := ReadStatusVector;
+    end
+    else
+      ReadStatusVector;  {out of range - consume and discard}
+  end;
+
+  {failed rows reported without a vector}
+  for i := 1 to errors do
+  begin
+    pos := FXDR.ReadUInt32;
+    if pos < cardinal(Length(Result.States)) then
+      Result.States[pos] := BATCH_EXECUTE_FAILED;
+  end;
+end;
+
+procedure TFBWireConnection.BatchRelease(aStmtHandle: integer);
+begin
+  FXDR.WriteInt32(op_batch_rls);
+  FXDR.WriteInt32(aStmtHandle);
+  FXDR.Flush;
+  ReceiveAndCheckResponse;
+end;
+
+procedure TFBWireConnection.BatchCancel(aStmtHandle: integer);
+begin
+  FXDR.WriteInt32(op_batch_cancel);
+  FXDR.WriteInt32(aStmtHandle);
+  FXDR.Flush;
+  ReceiveAndCheckResponse;
 end;
 
 {--- misc ---}

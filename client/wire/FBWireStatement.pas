@@ -133,6 +133,25 @@ type
     property Statement: TFBWireStatement read FStatement;
   end;
 
+  { TWireBatchCompletion - IBatchCompletion over a decoded op_batch_cs.
+    Semantics follow the 3.0 provider's TBatchCompletion. }
+
+  TWireBatchCompletion = class(TFBInterfacedObject,IBatchCompletion)
+  private
+    FWireAPI: TFBWireClientAPI;
+    FConnectionCodePage: TSystemCodePage;
+    FCS: TWireBatchCS;
+  public
+    constructor Create(api: TFBWireClientAPI; const aCS: TWireBatchCS;
+                aConnectionCodePage: TSystemCodePage);
+    {IBatchCompletion}
+    function getErrorStatus(var RowNo: integer; var status: IStatus): boolean;
+    function getTotalProcessed: cardinal;
+    function getState(updateNo: cardinal): TBatchCompletionState;
+    function getStatusMessage(updateNo: cardinal): AnsiString;
+    function getUpdated: integer;
+  end;
+
   { TWireResultSet }
 
   TWireResultSet = class(TResults,IResultSet)
@@ -168,10 +187,19 @@ type
     FCursorName: AnsiString;
     FCursorSeqNo: integer;
     FScrollable: boolean;
+    FBatchActive: boolean;
+    FBatchRows: array of TBytes;    {accumulated messages, our buffer layout}
+    FBatchRowCount: integer;
+    FBatchBufferSize: integer;
+    FBatchBufferUsed: integer;
+    FBatchCompletion: IBatchCompletion;
     function GetConnection: TFBWireConnection;
     function GetTransactionHandle: integer;
+    procedure CheckBatchModeAvailable;
+    procedure ReleaseBatch(SendCancel: boolean);
   protected
     procedure CheckHandle; override;
+    procedure CheckChangeBatchRowLimit; override;
     function GetStatementIntf: IStatement; override;
     procedure GetDsqlInfo(info_request: byte; buffer: ISQLInfoResults); override;
     procedure InternalPrepare(CursorName: AnsiString = ''); override;
@@ -199,6 +227,13 @@ type
     function GetFlags: TStatementFlags; override;
     {needs protocol 16 - the p_sqldata_timeout field of op_execute}
     procedure SetStatementTimeout(aMilliseconds: cardinal); override;
+    {IBatch support - needs protocol 16 (the op_batch_* family)}
+    function HasBatchMode: boolean; override;
+    function IsInBatchMode: boolean; override;
+    procedure AddToBatch; override;
+    function ExecuteBatch(aTransaction: ITransaction): IBatchCompletion; override;
+    procedure CancelBatch; override;
+    function GetBatchCompletion: IBatchCompletion; override;
     function CreateBlob(column: TColumnMetaData): IBlob; override;
     function CreateArray(column: TColumnMetaData): IArray; override;
     function GetPlan: AnsiString;
@@ -305,13 +340,20 @@ end;
 function TWireSQLVarData.GetSQLData: PByte;
 begin
   Result := BufferBase + GetVar^.DataOffset;
+  {an input parameter's SQLData points at the characters, not the two
+   byte length prefix: TSQLParam.GetAsString and friends rely on it, as
+   with the fbclient providers whose parameter SQLData holds a bare
+   string. Output columns keep the prefixed form, which is what
+   TSQLDataItem.GetAsString expects for a column.}
+  if FOwner.FIsInput and (GetSQLType = SQL_VARYING) then
+    Inc(Result,2);
 end;
 
 function TWireSQLVarData.GetDataLength: cardinal;
 begin
   {for VARYING the current length is the two byte prefix}
   if GetSQLType = SQL_VARYING then
-    Result := PWord(GetSQLData)^
+    Result := PWord(BufferBase + GetVar^.DataOffset)^
   else
     Result := GetVar^.DataSize;
 end;
@@ -323,7 +365,13 @@ end;
 
 function TWireSQLVarData.GetDefaultTextSQLType: cardinal;
 begin
-  Result := SQL_TEXT;
+  {SQL_VARYING, as the fbclient providers answer: a varying parameter
+   keeps its described maximum size when values of different lengths are
+   assigned, so the message format stays stable - which the batch API
+   depends on, because op_batch_create fixes the BLR for every message
+   in the batch. (The original wire provider answered SQL_TEXT, whose
+   per value resizing re-laid out the format on every assignment.)}
+  Result := SQL_VARYING;
 end;
 
 procedure TWireSQLVarData.InternalSetSQLType(aValue: cardinal; aSubType: integer);
@@ -351,7 +399,7 @@ begin
       GetVar^.DataSize := len;
       FOwner.RelayoutBuffer;
     end;
-    PWord(GetSQLData)^ := len;
+    PWord(BufferBase + GetVar^.DataOffset)^ := len;
   end
   else
   begin
@@ -394,7 +442,7 @@ var p: PByte;
 begin
   if len > GetVar^.BufferSize then
     IBError(ibxeStringOverflow,[len,GetVar^.BufferSize]);
-  p := GetSQLData;
+  p := BufferBase + GetVar^.DataOffset;  {the raw slot, prefix included}
   case GetSQLType of
   SQL_VARYING:
     begin
@@ -611,8 +659,10 @@ begin
   {the client owns the parameter message format: the BLR sent with
    op_execute describes whatever the format records now say, and the
    server coerces. RelayoutBuffer keeps the buffer consistent with any
-   change.}
-  Result := FIsInput;
+   change. The exception is an open batch: op_batch_create froze the BLR
+   for every message in it, so the format must not drift - as with the
+   3.0 provider, changing a parameter's type mid batch is refused.}
+  Result := FIsInput and not FStatement.IsInBatchMode;
 end;
 
 procedure TWireSQLDataArea.RelayoutBuffer;
@@ -640,6 +690,85 @@ begin
       Move(OldBuffer[OldFormat[i].DataOffset],FBuffer[FFormat[i].DataOffset],n);
     if Length(OldBuffer) > 0 then
       Move(OldBuffer[OldFormat[i].NullOffset],FBuffer[FFormat[i].NullOffset],4);
+  end;
+end;
+
+{ TWireBatchCompletion }
+
+constructor TWireBatchCompletion.Create(api: TFBWireClientAPI;
+  const aCS: TWireBatchCS; aConnectionCodePage: TSystemCodePage);
+begin
+  inherited Create;
+  FWireAPI := api;
+  FCS := aCS;
+  FConnectionCodePage := aConnectionCodePage;
+end;
+
+function TWireBatchCompletion.getErrorStatus(var RowNo: integer;
+  var status: IStatus): boolean;
+var i: integer;
+    aStatus: TFBWireStatus;
+begin
+  Result := false;
+  RowNo := -1;
+  for i := 0 to Length(FCS.States) - 1 do
+    if FCS.States[i] = BATCH_EXECUTE_FAILED then
+    begin
+      RowNo := i + 1;
+      aStatus := TFBWireStatus.Create(FWireAPI);
+      status := aStatus;  {the interface reference owns it}
+      if Length(FCS.StatusVectors[i]) > 0 then
+        aStatus.SetFromWireStatus(FCS.StatusVectors[i])
+      else
+        aStatus.SetError(isc_random,'Batch execution failed with no status vector');
+      Result := true;
+      break;
+    end;
+end;
+
+function TWireBatchCompletion.getTotalProcessed: cardinal;
+begin
+  Result := Length(FCS.States);
+end;
+
+function TWireBatchCompletion.getState(updateNo: cardinal): TBatchCompletionState;
+begin
+  {the same mapping as the 3.0 provider: a real update count also answers
+   bcNoMoreErrors}
+  Result := bcNoMoreErrors;
+  if updateNo < cardinal(Length(FCS.States)) then
+    case FCS.States[updateNo] of
+    BATCH_EXECUTE_FAILED:
+      Result := bcExecuteFailed;
+    BATCH_SUCCESS_NO_INFO:
+      Result := bcSuccessNoInfo;
+    end;
+end;
+
+function TWireBatchCompletion.getStatusMessage(updateNo: cardinal): AnsiString;
+var aStatus: TFBWireStatus;
+    intf: IStatus;
+begin
+  Result := '';
+  if (updateNo < cardinal(Length(FCS.StatusVectors))) and
+     (Length(FCS.StatusVectors[updateNo]) > 0) then
+  begin
+    aStatus := TFBWireStatus.Create(FWireAPI);
+    intf := aStatus;
+    aStatus.SetFromWireStatus(FCS.StatusVectors[updateNo]);
+    Result := aStatus.GetMessage(FConnectionCodePage);
+  end;
+end;
+
+function TWireBatchCompletion.getUpdated: integer;
+var i: integer;
+begin
+  Result := 0;
+  for i := 0 to Length(FCS.States) - 1 do
+  begin
+    if FCS.States[i] = BATCH_EXECUTE_FAILED then
+      break;
+    Inc(Result);
   end;
 end;
 
@@ -1068,6 +1197,213 @@ begin
      (Connection.ProtocolVersion < (PROTOCOL_VERSION16 and FB_PROTOCOL_MASK)) then
     IBError(ibxeNotSupported,[nil]);
   FStatementTimeout := aMilliseconds;
+end;
+
+function TFBWireStatement.HasBatchMode: boolean;
+begin
+  Result := GetAttachment.HasBatchMode;
+end;
+
+function TFBWireStatement.IsInBatchMode: boolean;
+begin
+  Result := FBatchActive;
+end;
+
+procedure TFBWireStatement.CheckChangeBatchRowLimit;
+begin
+  if IsInBatchMode then
+    IBError(ibxeInBatchMode,[nil]);
+end;
+
+procedure TFBWireStatement.CheckBatchModeAvailable;
+begin
+  if not HasBatchMode then
+    IBError(ibxeBatchModeNotSupported,[nil]);
+  case SQLStatementType of
+  SQLInsert,
+  SQLUpdate: {OK};
+  else
+     IBError(ibxeInvalidBatchQuery,[GetSQLStatementTypeName]);
+  end;
+end;
+
+procedure TFBWireStatement.ReleaseBatch(SendCancel: boolean);
+begin
+  if not FBatchActive then Exit;
+  try
+    if SendCancel then
+      Connection.BatchCancel(FHandle)
+    else
+      Connection.BatchRelease(FHandle);
+  except
+    on E: Exception do WireIBError(FWireAPI,E);
+  end;
+  FBatchActive := false;
+  SetLength(FBatchRows,0);
+  FBatchRowCount := 0;
+  FBatchBufferUsed := 0;
+end;
+
+procedure TFBWireStatement.AddToBatch;
+const SixteenMB = 16 * 1024 * 1024;
+      MB256 = 256 * 1024 * 1024;
+var alignedLen: cardinal;
+    row: TBytes;
+    PB: TBytes;
+    i: integer;
+    blobId: Int64;
+
+  procedure AddIntClumplet(var aPB: TBytes; aTag: byte; aValue: integer);
+  var n: integer;
+  begin
+    {the IBatch PB is a wide tagged clumplet buffer: each clumplet is a
+     tag byte, a four byte little endian length, then the data}
+    n := Length(aPB);
+    SetLength(aPB,n + 9);
+    aPB[n] := aTag;
+    aPB[n+1] := 4;
+    aPB[n+2] := 0;
+    aPB[n+3] := 0;
+    aPB[n+4] := 0;
+    aPB[n+5] := aValue and $FF;
+    aPB[n+6] := (aValue shr 8) and $FF;
+    aPB[n+7] := (aValue shr 16) and $FF;
+    aPB[n+8] := (aValue shr 24) and $FF;
+  end;
+
+begin
+  FBatchCompletion := nil;
+  if not FPrepared then
+    InternalPrepare;
+  CheckHandle;
+  CheckBatchModeAvailable;
+  alignedLen := AlignTo(EngineMessageLength(FSQLParams.Format),8);
+  if not FBatchActive then
+  begin
+    {the same buffer sizing rule as the 3.0 provider, so behaviour
+     matches across providers}
+    if FBatchRowLimit = maxint then
+      FBatchBufferSize := MB256
+    else
+    begin
+      FBatchBufferSize := FBatchRowLimit * integer(alignedLen);
+      if FBatchBufferSize < SixteenMB then
+        FBatchBufferSize := SixteenMB;
+      if FBatchBufferSize > MB256 then
+        IBError(ibxeBatchBufferSizeTooBig,[FBatchBufferSize]);
+    end;
+    {the IBatch parameter block: a wide tagged clumplet buffer}
+    SetLength(PB,1);
+    PB[0] := 1; {IBatch::VERSION1}
+    AddIntClumplet(PB,2 {TAG_RECORD_COUNTS},1);
+    AddIntClumplet(PB,3 {TAG_BUFFER_BYTES_SIZE},FBatchBufferSize);
+    try
+      Connection.BatchCreate(FHandle,FSQLParams.Format,
+        EngineMessageLength(FSQLParams.Format),PB);
+    except
+      on E: Exception do WireIBError(FWireAPI,E);
+    end;
+    FBatchActive := true;
+    SetLength(FBatchRows,0);
+    FBatchRowCount := 0;
+    FBatchBufferUsed := 0;
+  end;
+
+  Inc(FBatchRowCount);
+  Inc(FBatchBufferUsed,alignedLen);
+  if FBatchBufferUsed > FBatchBufferSize then
+    raise EIBBatchBufferOverflow.Create(Ord(ibxeBatchRowBufferOverflow),
+                            Format(GetErrorMessage(ibxeBatchRowBufferOverflow),
+                            [FBatchRowCount,FBatchBufferSize]));
+
+  {snapshot the message: the caller reuses the parameter buffer for the
+   next row}
+  row := system.copy(FSQLParams.Buffer,0,Length(FSQLParams.Buffer));
+  SetLength(FBatchRows,FBatchRowCount);
+  FBatchRows[FBatchRowCount-1] := row;
+
+  {register the row's blob ids: the engine translates every non null,
+   non zero blob id in a batch message through its registration map and
+   consumes the entry, so this happens once per row - as the 3.0
+   provider does in its message packer}
+  with FSQLParams do
+  for i := 0 to Length(Format) - 1 do
+    if (Format[i].SQLType = SQL_BLOB) and
+       (PInteger(@row[Format[i].NullOffset])^ = 0) then
+    begin
+      blobId := WireQuadToInt64(@row[Format[i].DataOffset]);
+      if blobId <> 0 then
+      try
+        Connection.BatchRegBlob(FHandle,blobId,blobId);
+      except
+        on E: Exception do WireIBError(FWireAPI,E);
+      end;
+    end;
+end;
+
+function TFBWireStatement.ExecuteBatch(aTransaction: ITransaction
+  ): IBatchCompletion;
+
+  procedure Check4BatchCompletionError(bc: IBatchCompletion);
+  var status: IStatus;
+      RowNo: integer;
+  begin
+    status := nil;
+    {Raise an exception if there was an error reported in the completion}
+    if (bc <> nil) and bc.getErrorStatus(RowNo,status) then
+      raise EIBInterbaseError.Create(status,ConnectionCodePage);
+  end;
+
+const RowsPerMsgPacket = 500;
+var trHandle: integer;
+    CS: TWireBatchCS;
+    i, chunk: integer;
+begin
+  Result := nil;
+  if not FBatchActive then
+    IBError(ibxeNotInBatchMode,[]);
+
+  if aTransaction = nil then
+    trHandle := (FTransactionIntf as TObject as TFBWireTransaction).Handle
+  else
+    trHandle := (aTransaction as TObject as TFBWireTransaction).Handle;
+
+  try
+    i := 0;
+    while i < FBatchRowCount do
+    begin
+      chunk := FBatchRowCount - i;
+      if chunk > RowsPerMsgPacket then
+        chunk := RowsPerMsgPacket;
+      Connection.BatchMsg(FHandle,FSQLParams.Format,
+        system.copy(FBatchRows,i,chunk));
+      Inc(i,chunk);
+    end;
+    CS := Connection.BatchExec(FHandle,trHandle);
+  except
+    on E: Exception do
+    begin
+      ReleaseBatch(true);
+      WireIBError(FWireAPI,E);
+    end;
+  end;
+  FBatchCompletion := TWireBatchCompletion.Create(FWireAPI,CS,ConnectionCodePage);
+  ReleaseBatch(false);
+  Inc(FChangeSeqNo);
+  Check4BatchCompletionError(FBatchCompletion);
+  Result := FBatchCompletion;
+end;
+
+procedure TFBWireStatement.CancelBatch;
+begin
+  if not FBatchActive then
+    IBError(ibxeNotInBatchMode,[]);
+  ReleaseBatch(true);
+end;
+
+function TFBWireStatement.GetBatchCompletion: IBatchCompletion;
+begin
+  Result := FBatchCompletion;
 end;
 
 function TFBWireStatement.CreateBlob(column: TColumnMetaData): IBlob;

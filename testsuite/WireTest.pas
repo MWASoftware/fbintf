@@ -292,6 +292,14 @@ begin
   Check('the low word occupies the last four bytes of a quad',
         PCardinal(@quad[4])^ = $55667788);
   Check('quad round trips',WireQuadToInt64(@quad[0]) = $1122334455667788);
+
+  {the batch message length must follow the server's PARSE_msg_format
+   rules, with a two byte null indicator after each value:
+   short(2)@0 + null(2)@2, varying(10+2)@4 + null(2)@16,
+   int64(8)@24 (eight byte aligned) + null(2)@32 = 34}
+  Check('engine message length follows the server''s layout rules',
+        EngineMessageLength(fmt) = 34,
+        'got ' + IntToStr(EngineMessageLength(fmt)));
 end;
 
 {---------------------------------------------------------------------------}
@@ -954,6 +962,123 @@ begin
   end;
 end;
 
+procedure TestBatch;
+const TestTable = 'FBINTF_WIRE_BATCH';
+var Tr: ITransaction;
+    S: IStatement;
+    RS: IResultSet;
+    BC: IBatchCompletion;
+    i, RowNo: integer;
+    status: IStatus;
+begin
+  writeln('Provider: the batch API');
+  if not Attachment.HasBatchMode then
+  begin
+    writeln('  SKIP  batches need protocol 16 or later');
+    Exit;
+  end;
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  try
+    Attachment.ExecImmediate(Tr,'drop table ' + TestTable);
+    Tr.Commit;
+    Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+            isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  except
+    {the table did not exist}
+    Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+            isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  end;
+  Attachment.ExecImmediate(Tr,'create table ' + TestTable +
+    ' (ID integer not null primary key, NAME varchar(30))');
+  Tr.Commit;
+
+  {a clean thousand row batch}
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  S := Attachment.Prepare(Tr,'insert into ' + TestTable +
+        ' (ID,NAME) values (?,?)');
+  for i := 1 to 1000 do
+  begin
+    S.SQLParams[0].AsInteger := i;
+    S.SQLParams[1].AsString := 'row ' + IntToStr(i);
+    S.AddToBatch;
+  end;
+  Check('statement is in batch mode',S.IsInBatchMode);
+  BC := S.ExecuteBatch(nil);
+  Check('batch mode ends with the execute',not S.IsInBatchMode);
+  Check('a thousand rows processed',BC.getTotalProcessed = 1000,
+        'got ' + IntToStr(BC.getTotalProcessed));
+  Check('a thousand rows updated',BC.getUpdated = 1000,
+        'got ' + IntToStr(BC.getUpdated));
+  Tr.Commit;
+
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  RS := Attachment.OpenCursorAtStart(Tr,'select count(*) from ' + TestTable);
+  Check('a thousand rows arrived',RS[0].AsInteger = 1000,
+        'got ' + IntToStr(RS[0].AsInteger));
+  RS.Close;
+  RS := nil;
+
+  {a batch that fails mid way: row 500 repeats key 499}
+  S := Attachment.Prepare(Tr,'insert into ' + TestTable +
+        ' (ID,NAME) values (?,?)');
+  for i := 1 to 1000 do
+  begin
+    if i = 500 then
+      S.SQLParams[0].AsInteger := 1499 {a duplicate of an earlier row}
+    else
+      S.SQLParams[0].AsInteger := 1000 + i;
+    S.SQLParams[1].AsString := 'second run row ' + IntToStr(i);
+    S.AddToBatch;
+    if i = 500 then
+      S.SQLParams[0].AsInteger := 1000 + i; {leave the next rows valid}
+  end;
+  BC := nil;
+  try
+    BC := S.ExecuteBatch(nil);
+    Check('the failing batch raised',false,'no exception');
+  except
+    on E: EIBInterBaseError do
+      Check('duplicate key reported',E.IBErrorCode = isc_unique_key_violation,
+            Format('error=%d %s',[E.IBErrorCode,E.Message]));
+  end;
+  BC := S.GetBatchCompletion;
+  Check('completion available after the error',BC <> nil);
+  if BC <> nil then
+  begin
+    Check('processing stopped at the failing row',
+          BC.getTotalProcessed = 500,'got ' + IntToStr(BC.getTotalProcessed));
+    Check('the rows before the failure were applied',
+          BC.getUpdated = 499,'got ' + IntToStr(BC.getUpdated));
+    Check('the failing row reports bcExecuteFailed',
+          BC.getState(499) = bcExecuteFailed);
+    status := nil;
+    Check('getErrorStatus finds the failure',BC.getErrorStatus(RowNo,status));
+    Check('the failure is in row 500',RowNo = 500,'got ' + IntToStr(RowNo));
+    Check('the error status carries the duplicate key code',
+          (status <> nil) and (status.GetIBErrorCode = isc_unique_key_violation));
+  end;
+  Tr.Rollback;
+
+  {cleanup - see the note in TestProviderUpdates}
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  try
+    Attachment.ExecImmediate(Tr,'drop table ' + TestTable);
+    Tr.Commit;
+    writeln('  note  batch test table dropped');
+  except
+    on E: Exception do
+    begin
+      Tr.Rollback;
+      writeln('  note  the server would not drop the batch test table yet: ',
+              E.Message);
+    end;
+  end;
+end;
+
 type
   { TCancelVictim - runs the slow query so the main thread can cancel it }
 
@@ -1201,6 +1326,7 @@ begin
     TestProviderUpdates;
     TestArrays;
     TestScrollableCursors;
+    TestBatch;
     TestCancellation;
     TestStatementTimeout;
     TestEvents;

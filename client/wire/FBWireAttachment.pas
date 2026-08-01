@@ -553,8 +553,9 @@ end;
 
 function TFBWireAttachment.HasBatchMode: boolean;
 begin
-  {the batch operations of protocol 16 are not implemented yet}
-  Result := false;
+  {op_batch_create and friends need protocol 16}
+  Result := (FConnection <> nil) and
+            (FConnection.ProtocolVersion >= (PROTOCOL_VERSION16 and FB_PROTOCOL_MASK));
 end;
 
 function TFBWireAttachment.HasArraySupport: boolean;
