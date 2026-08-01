@@ -49,6 +49,13 @@ uses
   Classes, SysUtils, syncobjs
   {$IFDEF FPC}
   , sockets, ssockets, zbase, zdeflate, zinflate
+  {$ELSE}
+  {$IFDEF MSWINDOWS}
+  , Winapi.Windows, Winapi.Winsock2
+  {$ELSE}
+  , Posix.Base, Posix.SysSocket, Posix.SysTime, Posix.NetinetIn,
+    Posix.NetinetTcp, Posix.NetDB, Posix.Unistd
+  {$ENDIF}
   {$ENDIF}
   ;
 
@@ -75,6 +82,12 @@ type
   private
     {$IFDEF FPC}
     FSocket: TInetSocket;
+    {$ELSE}
+    {$IFDEF MSWINDOWS}
+    FSocket: TSocket;
+    {$ELSE}
+    FSocket: integer;   {a POSIX file descriptor}
+    {$ENDIF}
     {$ENDIF}
     FConnected: boolean;
     FSendCipher: TWireCipher;
@@ -192,11 +205,52 @@ begin
   Result := (4 - (aLen and 3)) and 3;
 end;
 
+{$IFNDEF FPC}
+const
+  {$IFDEF MSWINDOWS}
+  InvalidWireSocket = TSocket(INVALID_SOCKET);
+  {$ELSE}
+  InvalidWireSocket = -1;
+  {$ENDIF}
+
+{the last socket error as text, for EFBWireError messages}
+function WireSocketError: string;
+begin
+  {$IFDEF MSWINDOWS}
+  Result := SysErrorMessage(WSAGetLastError);
+  {$ELSE}
+  Result := SysErrorMessage(GetLastError);
+  {$ENDIF}
+end;
+
+{$IFDEF MSWINDOWS}
+var
+  WSAInitialised: boolean = false;
+
+{winsock needs a one time WSAStartup per process. Never unloaded: the
+ provider has process lifetime and WSACleanup on unit finalisation is a
+ known source of shutdown ordering faults.}
+procedure EnsureWinsock;
+var WSAData: TWSAData;
+begin
+  if not WSAInitialised then
+  begin
+    if WSAStartup($0202,WSAData) <> 0 then
+      raise EFBWireError.Create('Unable to initialise winsock: ' + WireSocketError);
+    WSAInitialised := true;
+  end;
+end;
+{$ENDIF}
+{$ENDIF}
+
 { TFBWireTransport }
 
 constructor TFBWireTransport.Create;
 begin
   inherited Create;
+  {$IFNDEF FPC}
+  FSocket := InvalidWireSocket;
+  {$ENDIF}
   SetLength(FRecvBuffer,DefaultRecvBufferSize);
   SetLength(FSendBuffer,DefaultSendBufferSize);
   FRecvPos := 0;
@@ -214,6 +268,7 @@ begin
   inherited Destroy;
 end;
 
+{$IFDEF FPC}
 procedure TFBWireTransport.ConnectTo(const aHost: AnsiString; aPort: integer;
   aTimeout: integer);
 {$IF declared(TCP_NODELAY) and declared(IPPROTO_TCP)}
@@ -221,7 +276,6 @@ var NoDelay: integer;
 {$IFEND}
 begin
   Disconnect;
-  {$IFDEF FPC}
   try
     FSocket := TInetSocket.Create(aHost,aPort);
     if aTimeout > 0 then
@@ -239,11 +293,100 @@ begin
         Format('Unable to connect to server "%s" port %d: %s',
         [aHost,aPort,E.Message]));
   end;
+  FConnected := true;
+end;
+{$ELSE}
+procedure TFBWireTransport.ConnectTo(const aHost: AnsiString; aPort: integer;
+  aTimeout: integer);
+var
+  {$IFDEF MSWINDOWS}
+  Hints: ADDRINFOA;
+  AddrList, Addr: PADDRINFOA;
+  TimeoutValue: DWORD;
   {$ELSE}
-  raise Exception.Create('Wire protocol transport is not implemented for this compiler');
+  Hints: addrinfo;
+  AddrList, Addr: Paddrinfo;
+  TimeoutValue: timeval;
+  {$ENDIF}
+  PortStr: AnsiString;
+  NoDelay: integer;
+
+  procedure ConnectError(const aDetail: string);
+  begin
+    raise EFBWireError.Create(
+      Format('Unable to connect to server "%s" port %d: %s',
+      [aHost,aPort,aDetail]));
+  end;
+
+begin
+  Disconnect;
+  {$IFDEF MSWINDOWS}
+  EnsureWinsock;
+  {$ENDIF}
+  FillChar(Hints,SizeOf(Hints),0);
+  Hints.ai_family := AF_UNSPEC;
+  Hints.ai_socktype := SOCK_STREAM;
+  Hints.ai_protocol := IPPROTO_TCP;
+  PortStr := AnsiString(IntToStr(aPort));
+  AddrList := nil;
+  {$IFDEF MSWINDOWS}
+  if (getaddrinfo(PAnsiChar(aHost),PAnsiChar(PortStr),@Hints,AddrList) <> 0) or
+     (AddrList = nil) then
+  {$ELSE}
+  if (getaddrinfo(MarshaledAString(PAnsiChar(aHost)),
+                  MarshaledAString(PAnsiChar(PortStr)),Hints,AddrList) <> 0) or
+     (AddrList = nil) then
+  {$ENDIF}
+    ConnectError('host name lookup failed');
+  try
+    {an IPv4 result if there is one, matching the FPC branch's resolver}
+    Addr := AddrList;
+    while (Addr <> nil) and (Addr.ai_family <> AF_INET) do
+      Addr := Addr.ai_next;
+    if Addr = nil then
+      Addr := AddrList;
+    FSocket := socket(Addr.ai_family,Addr.ai_socktype,Addr.ai_protocol);
+    if FSocket = InvalidWireSocket then
+      ConnectError(WireSocketError);
+    {$IFDEF MSWINDOWS}
+    if connect(FSocket,Addr.ai_addr,integer(Addr.ai_addrlen)) <> 0 then
+    {$ELSE}
+    if connect(FSocket,Addr.ai_addr^,socklen_t(Addr.ai_addrlen)) <> 0 then
+    {$ENDIF}
+    begin
+      Disconnect;
+      ConnectError(WireSocketError);
+    end;
+  finally
+    {$IFDEF MSWINDOWS}
+    freeaddrinfo(AddrList);
+    {$ELSE}
+    freeaddrinfo(AddrList^);
+    {$ENDIF}
+  end;
+  if aTimeout > 0 then
+  begin
+    {$IFDEF MSWINDOWS}
+    TimeoutValue := DWORD(aTimeout);
+    setsockopt(FSocket,SOL_SOCKET,SO_RCVTIMEO,PAnsiChar(@TimeoutValue),SizeOf(TimeoutValue));
+    setsockopt(FSocket,SOL_SOCKET,SO_SNDTIMEO,PAnsiChar(@TimeoutValue),SizeOf(TimeoutValue));
+    {$ELSE}
+    TimeoutValue.tv_sec := aTimeout div 1000;
+    TimeoutValue.tv_usec := (aTimeout mod 1000) * 1000;
+    setsockopt(FSocket,SOL_SOCKET,SO_RCVTIMEO,@TimeoutValue,SizeOf(TimeoutValue));
+    setsockopt(FSocket,SOL_SOCKET,SO_SNDTIMEO,@TimeoutValue,SizeOf(TimeoutValue));
+    {$ENDIF}
+  end;
+  {disable Nagle, as in the FPC branch}
+  NoDelay := 1;
+  {$IFDEF MSWINDOWS}
+  setsockopt(FSocket,IPPROTO_TCP,TCP_NODELAY,PAnsiChar(@NoDelay),SizeOf(NoDelay));
+  {$ELSE}
+  setsockopt(FSocket,IPPROTO_TCP,TCP_NODELAY,@NoDelay,SizeOf(NoDelay));
   {$ENDIF}
   FConnected := true;
 end;
+{$ENDIF}
 
 procedure TFBWireTransport.Disconnect;
 begin
@@ -254,6 +397,18 @@ begin
   begin
     deflateEnd(FDeflateStream);
     inflateEnd(FInflateStream);
+  end;
+  {$ELSE}
+  if FSocket <> InvalidWireSocket then
+  begin
+    {$IFDEF MSWINDOWS}
+    shutdown(FSocket,SD_BOTH);
+    closesocket(FSocket);
+    {$ELSE}
+    shutdown(FSocket,SHUT_RDWR);
+    __close(FSocket);
+    {$ENDIF}
+    FSocket := InvalidWireSocket;
   end;
   {$ENDIF}
   FCompressed := false;
@@ -325,6 +480,13 @@ begin
   {$IFDEF FPC}
   if FSocket <> nil then
     fpshutdown(FSocket.Handle,2 {SHUT_RDWR});
+  {$ELSE}
+  if FSocket <> InvalidWireSocket then
+    {$IFDEF MSWINDOWS}
+    shutdown(FSocket,SD_BOTH);
+    {$ELSE}
+    shutdown(FSocket,SHUT_RDWR);
+    {$ENDIF}
   {$ENDIF}
 end;
 
@@ -378,7 +540,7 @@ begin
   {$IFDEF FPC}
   got := FSocket.Read(FRecvBuffer[0],Length(FRecvBuffer));
   {$ELSE}
-  got := 0;
+  got := integer(recv(FSocket,FRecvBuffer[0],Length(FRecvBuffer),0));
   {$ENDIF}
   if got <= 0 then
   begin
@@ -432,10 +594,13 @@ var written, total: integer;
 begin
   total := 0;
   p := @aData;
-  {$IFDEF FPC}
   while total < aLen do
   begin
+    {$IFDEF FPC}
     written := FSocket.Write((p + total)^,aLen - total);
+    {$ELSE}
+    written := integer(send(FSocket,(p + total)^,aLen - total,0));
+    {$ENDIF}
     if written <= 0 then
     begin
       Disconnect;
@@ -443,7 +608,6 @@ begin
     end;
     Inc(total,written);
   end;
-  {$ENDIF}
 end;
 
 procedure TFBWireTransport.Flush;

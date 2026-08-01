@@ -146,9 +146,11 @@ than failing in a confusing way:
 |---|---|
 | Multi database transactions | a two phase commit coordinator |
 
-Delphi is not supported yet either: the transport is written against the
-FPC socket units. Everything above the transport is compiler neutral, so a
-Delphi transport is the only missing piece.
+Delphi support is present but so far unverified: the transport carries
+Delphi branches over `Winapi.Winsock2` and the `Posix.*` socket units and
+the wire units are listed in `fbintf.dpk`, but no Delphi toolchain has
+compiled or run them yet (CI is FPC only). Wire compression stays FPC
+only for now - `EnableCompression` reports it cleanly under Delphi.
 
 ---
 
@@ -529,7 +531,7 @@ machinery that already exists to support it.
 | 1 | Run the existing test suite against this provider — **done** | `testsuite -a wire` runs all twenty two programs | — |
 | 2 | Events — **done** | `FBWireEvents` implements `IEvents` over the auxiliary connection | 13 |
 | 3 | Services — **done** | `FBWireServices` implements the `IServiceManager` wrapper | 13 |
-| 4 | A Delphi transport | a `TFBWireTransport` over Winsock and Posix sockets | — |
+| 4 | A Delphi transport — **written, unverified** | Delphi branches in `TFBWireTransport`; needs a Delphi compile and live run | — |
 | 5 | Array columns — **done** | `FBWireArray` over `op_get_slice`/`op_put_slice`, shared SDL generator | 13 |
 | 6 | Statement timeouts and cancellation — **done** | `CancelOperation`/`SetStatementTimeout` on all providers | 12, 16 |
 | 7 | Scrollable cursors — **done** | `op_fetch_scroll`, protocol raised to 18 | 18 |
@@ -650,14 +652,26 @@ it. Detach and reattach of a service manager was the first code path to
 reconnect, which is how it surfaced; `Disconnect` now discards both
 ciphers.
 
-### 4. A Delphi transport
+### 4. A Delphi transport — written, unverified
 
-Everything above `FBWireStream` is compiler neutral and already compiles
-under `{$mode delphi}`. Only the transport binds FPC's `sockets` and
-`ssockets`. A Delphi implementation needs `TFBWireTransport` reimplemented
-over `Winapi.WinSock2` and `Posix.SysSocket` behind the same four methods
-(`ConnectTo`, `Disconnect`, `ReadBytes`, `WriteBytes`), after which the
-units can be added to `fbintf.dpk`. The cipher and XDR layers do not change.
+`TFBWireTransport` now branches per compiler inside the same four
+methods: the Delphi side connects with `getaddrinfo` (an IPv4 result
+preferred, matching the FPC resolver), sets `TCP_NODELAY` and the
+`SO_RCVTIMEO`/`SO_SNDTIMEO` timeouts from the same `aTimeout` parameter,
+and reads and writes with `recv`/`send` - `Winapi.Winsock2` on Windows
+(with a one time `WSAStartup` behind a unit variable) and the `Posix.*`
+units elsewhere. The wire units are listed in `fbintf.dpk` and
+`fbintf.dproj`. The cipher and XDR layers did not change, and the FPC
+branch is untouched.
+
+Unverified: neither this host nor CI has a Delphi toolchain, so the new
+branches have never been compiled, let alone run. Expect a first-compile
+pass (typed `@`, unit scope names, `AnsiString` code pages) and then the
+acceptance run from `doc/roadmap/04-delphi-transport.md`: the offline
+`WireTest` sections plus one live `WireCrypt = Required` connection.
+Wire compression is still FPC only (paszlib); under Delphi
+`EnableCompression` raises a clear error and everything else works
+uncompressed.
 
 ### 5. Array columns — done
 
