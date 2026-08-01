@@ -25,15 +25,23 @@ Working and tested against a live server (see *Testing* below):
   `BOOLEAN` and the time zone types
 * blobs: create, open, read and write segments, close, cancel
 * information calls for the database, transaction, statement and blob
+* events: `IEvents` with asynchronous and synchronous waits, delivered on
+  the `op_connect_request` auxiliary connection by a listener thread
+* `DECFLOAT(16)`/`DECFLOAT(34)` conversions through the provider's own
+  IEEE 754 densely packed decimal codec
+* `execute procedure` and `insert/update ... returning` singleton results
+* named parameters, parameter type coercion, create database from a SQL
+  statement, reconnection of a disconnected attachment
+
+The whole fbintf test suite (twenty two test programs) runs over this
+provider with `testsuite/runtest.sh -a wire` and is compared against
+`testsuite/FBWirereference.log`; CI runs it against Firebird 6 on every
+change.
 
 Not implemented yet, and reported as `ibxeNotSupported` rather than
 failing obscurely (see the roadmap in doc/WireProtocol.md for what each
 would take):
 
-* events (these need the auxiliary connection set up with
-  `op_connect_request` and a listener thread)
-* the services API (`op_service_attach` and friends are implemented in
-  `FBWireProtocol` but not yet surfaced as `IServiceManager`)
 * array columns (`op_get_slice` / `op_put_slice` with SDL descriptions)
 * the batch API of protocol 16
 * scrollable cursors (`op_fetch_scroll`, protocol 18)
@@ -47,12 +55,12 @@ container rows and locally for the others.
 
 | Server | WireCrypt | Negotiated | Encryption | Result |
 |---|---|---|---|---|
-| 6.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 81 tests, 0 failures |
-| 6.0.0 (local, LI-T6.0.0.2076) | Required | 17 | `ChaCha64` | 81 tests, 0 failures |
-| 5.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 81 tests, 0 failures |
-| 5.0.4 (local container) | Enabled, Required | 17 | `ChaCha64` | 81 tests, 0 failures |
-| 4.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 81 tests, 0 failures |
-| 3.0 (CI container) | Enabled | 15 | `Arc4` | 81 tests, 0 failures |
+| 6.0 (CI container) | Enabled, Required | 20 | `ChaCha64` | 178 tests, 0 failures |
+| 6.0.0 (local, LI-T6.0.0.2076) | Required | 20 | `ChaCha64` | 178 tests, 0 failures |
+| 5.0 (CI container) | Enabled, Required | 19 | `ChaCha64` | 178 tests, 0 failures |
+| 5.0.4 (local container) | Enabled, Required | 19 | `ChaCha64` | 178 tests, 0 failures |
+| 4.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 178 tests, 0 failures |
+| 3.0 (CI container) | Enabled | 15 | `Arc4` | 178 tests, 0 failures |
 | no server | — | — | — | 36 tests, live sections skipped |
 
 Firebird 3 settles on protocol 15 with Arc4: it is the newest protocol that

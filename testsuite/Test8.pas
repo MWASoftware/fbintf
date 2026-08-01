@@ -138,6 +138,12 @@ begin
   DPB.Add(isc_dpb_lc_ctype).setAsString(CharSet);
   DPB.Add(isc_dpb_set_db_SQL_dialect).setAsByte(SQLDialect);
   Attachment := FirebirdAPI.CreateDatabase(Owner.GetNewDatabaseName,DPB);
+  if not Attachment.HasArraySupport then
+  begin
+    writeln(OutFile,'Skipping test - arrays are not supported by this provider');
+    Attachment.DropDatabase;
+    Exit;
+  end;
   Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable);
   UpdateDatabase(Attachment);
 
