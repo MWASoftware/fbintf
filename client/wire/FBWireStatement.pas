@@ -191,6 +191,8 @@ type
     function FetchNextRow: boolean;
     function GetSQLParams: ISQLParams; override;
     function GetMetaData: IMetaData; override;
+    {needs protocol 16 - the p_sqldata_timeout field of op_execute}
+    procedure SetStatementTimeout(aMilliseconds: cardinal); override;
     function CreateBlob(column: TColumnMetaData): IBlob; override;
     function CreateArray(column: TColumnMetaData): IArray; override;
     function GetPlan: AnsiString;
@@ -857,7 +859,8 @@ begin
        connection}
       Connection.ExecuteStatement2(FHandle,
         (FTransactionIntf as TObject as TFBWireTransaction).Handle,
-        FSQLParams.Format,paramPtr,FSQLRecord.Format,outPtr);
+        FSQLParams.Format,paramPtr,FSQLRecord.Format,outPtr,
+        FStatementTimeout);
       FSingleResults := true;
       FSQLRecord.RowChange;
       Result := TResults.Create(FSQLRecord);
@@ -865,7 +868,7 @@ begin
     else
       Connection.ExecuteStatement(FHandle,
         (FTransactionIntf as TObject as TFBWireTransaction).Handle,
-        FSQLParams.Format,paramPtr);
+        FSQLParams.Format,paramPtr,FStatementTimeout);
   except
     on E: Exception do WireIBError(FWireAPI,E);
   end;
@@ -890,7 +893,7 @@ begin
   try
     Connection.ExecuteStatement(FHandle,
       (aTransaction as TObject as TFBWireTransaction).Handle,
-      FSQLParams.Format,paramPtr);
+      FSQLParams.Format,paramPtr,FStatementTimeout);
   except
     on E: Exception do WireIBError(FWireAPI,E);
   end;
@@ -1000,6 +1003,14 @@ begin
     InternalPrepare;
   CheckHandle;
   Result := TMetaData.Create(FSQLRecord);
+end;
+
+procedure TFBWireStatement.SetStatementTimeout(aMilliseconds: cardinal);
+begin
+  if (aMilliseconds <> 0) and
+     (Connection.ProtocolVersion < (PROTOCOL_VERSION16 and FB_PROTOCOL_MASK)) then
+    IBError(ibxeNotSupported,[nil]);
+  FStatementTimeout := aMilliseconds;
 end;
 
 function TFBWireStatement.CreateBlob(column: TColumnMetaData): IBlob;

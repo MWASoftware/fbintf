@@ -864,6 +864,14 @@ type
     {Stale Reference Check}
     procedure SetStaleReferenceChecks(Enable:boolean); {default true}
     function GetStaleReferenceChecks: boolean;
+    {Statement timeout in milliseconds, zero (the default) for none. When
+     it expires the statement fails with isc_cancelled, carrying
+     isc_req_stmt_timeout as the secondary status code (see
+     thread_db::checkCancelState in the Firebird sources). Needs a
+     Firebird 4 or later client library, or wire protocol 16 or later:
+     otherwise setting a non zero value raises ibxeNotSupported.}
+    procedure SetStatementTimeout(aMilliseconds: cardinal);
+    function GetStatementTimeout: cardinal;
 
     property MetaData: IMetaData read GetMetaData;
     property SQLParams: ISQLParams read GetSQLParams;
@@ -1251,6 +1259,12 @@ type
     function HasTable(aTableName: AnsiString): boolean;  {case sensitive}
     function HasFunction(aFunctionName: AnsiString): boolean; {case sensitive}
     function HasProcedure(aProcName: AnsiString): boolean; {case sensitive}
+
+    {Operation Cancellation - the fb_cancel_operation family. Called from
+     a different thread to the one blocked in an operation on this
+     attachment; that operation then fails with isc_cancelled. aKind is
+     one of the fb_cancel_* constants.}
+    procedure CancelOperation(aKind: integer = fb_cancel_raise);
 
     {Character Sets}
     function GetCharSetID: integer; {connection character set}

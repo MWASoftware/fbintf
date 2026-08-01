@@ -199,12 +199,16 @@ type
     function PrepareStatement(aTrHandle, aStmtHandle: integer;
                         aDialect: integer; const sql: AnsiString;
                         const aInfoItems: TBytes; aBufferLength: integer): TBytes;
+    {aTimeout is the statement timeout in milliseconds (0 = none), carried
+     in the p_sqldata_timeout field from protocol 16}
     procedure ExecuteStatement(aStmtHandle, aTrHandle: integer;
-                        const aParamFormat: TWireMessageFormat; aParamBuffer: PByte);
+                        const aParamFormat: TWireMessageFormat; aParamBuffer: PByte;
+                        aTimeout: cardinal = 0);
     {op_execute2 for singleton results (execute procedure/returning)}
     procedure ExecuteStatement2(aStmtHandle, aTrHandle: integer;
                         const aParamFormat: TWireMessageFormat; aParamBuffer: PByte;
-                        const aOutFormat: TWireMessageFormat; aOutBuffer: PByte);
+                        const aOutFormat: TWireMessageFormat; aOutBuffer: PByte;
+                        aTimeout: cardinal = 0);
     {fetches the next row into aOutBuffer, requesting a new batch of
      aFetchCount rows from the server when needed. Returns false when the
      cursor is exhausted. aState must be zero initialised before the first
@@ -264,6 +268,12 @@ type
 
     {--- misc ---}
     procedure Ping;
+    {op_cancel: sent out of band, typically from a different thread while
+     this connection's owner is blocked reading an operation's response.
+     There is no response packet: the cancelled operation itself fails
+     with isc_cancelled on the normal path. aKind is one of the
+     fb_cancel_* constants.}
+    procedure SendCancel(aKind: integer);
 
     property ProtocolVersion: cardinal read FProtocolVersion;
     {caps the highest protocol version offered to the server. Defaults to
@@ -1112,7 +1122,8 @@ begin
 end;
 
 procedure TFBWireConnection.ExecuteStatement(aStmtHandle, aTrHandle: integer;
-  const aParamFormat: TWireMessageFormat; aParamBuffer: PByte);
+  const aParamFormat: TWireMessageFormat; aParamBuffer: PByte;
+  aTimeout: cardinal);
 var blr: TBytes;
 begin
   FXDR.WriteInt32(op_execute);
@@ -1133,14 +1144,15 @@ begin
     FXDR.WriteInt32(0);
   end;
   if FProtocolVersion >= (PROTOCOL_VERSION16 and FB_PROTOCOL_MASK) then
-    FXDR.WriteInt32(0);   {p_sqldata_timeout}
+    FXDR.WriteUInt32(aTimeout);   {p_sqldata_timeout}
   FXDR.Flush;
   ReceiveAndCheckResponse;
 end;
 
 procedure TFBWireConnection.ExecuteStatement2(aStmtHandle, aTrHandle: integer;
   const aParamFormat: TWireMessageFormat; aParamBuffer: PByte;
-  const aOutFormat: TWireMessageFormat; aOutBuffer: PByte);
+  const aOutFormat: TWireMessageFormat; aOutBuffer: PByte;
+  aTimeout: cardinal);
 var blr: TBytes;
     op: integer;
     messages: integer;
@@ -1167,7 +1179,7 @@ begin
   FXDR.WriteString(blr);
   FXDR.WriteInt32(0);   {out message number}
   if FProtocolVersion >= (PROTOCOL_VERSION16 and FB_PROTOCOL_MASK) then
-    FXDR.WriteInt32(0); {p_sqldata_timeout}
+    FXDR.WriteUInt32(aTimeout); {p_sqldata_timeout}
   FXDR.Flush;
 
   op := ReadOperation;
@@ -1543,6 +1555,22 @@ begin
   FXDR.WriteInt32(op_ping);
   FXDR.Flush;
   ReceiveAndCheckResponse;
+end;
+
+procedure TFBWireConnection.SendCancel(aKind: integer);
+var pkt: array[0..7] of byte;
+begin
+  {assembled by hand and sent through SendDirect rather than the shared
+   XDR buffer: the whole point is that another thread may be mid exchange}
+  pkt[0] := (op_cancel shr 24) and $FF;
+  pkt[1] := (op_cancel shr 16) and $FF;
+  pkt[2] := (op_cancel shr 8) and $FF;
+  pkt[3] := op_cancel and $FF;
+  pkt[4] := (aKind shr 24) and $FF;
+  pkt[5] := (aKind shr 16) and $FF;
+  pkt[6] := (aKind shr 8) and $FF;
+  pkt[7] := aKind and $FF;
+  FTransport.SendDirect(pkt,8);
 end;
 
 end.

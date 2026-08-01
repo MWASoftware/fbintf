@@ -1,7 +1,32 @@
 # Design: Statement timeouts and operation cancellation
 
-Roadmap milestone 6 (`doc/WireProtocol.md`). This document is the
-implementation plan; no code changes are included.
+Roadmap milestone 6 (`doc/WireProtocol.md`).
+
+**Status: implemented** — `IAttachment.CancelOperation` and
+`IStatement.SetStatementTimeout`/`GetStatementTimeout` added to the
+public interfaces and implemented by all three providers as designed
+(2.5 via `fb_cancel_operation` when exported, timeouts always
+`ibxeNotSupported`; 3.0 via `cancelOperation`/`setTimeout` with the
+Firebird 4 client guard; wire natively). WireTest gained a cancellation
+section (worker thread runs a bounded PSQL busy loop, the main thread
+cancels, `isc_cancelled` asserted) and a timeout section — 118 tests.
+The full suite output is unchanged, confirming a zero timeout produces
+byte identical packets. Findings against the plan:
+
+* An expired timeout does **not** arrive as `isc_sql_timeout` (no such
+  code): the server cancels the request, so the primary status is
+  `isc_cancelled` with `isc_req_stmt_timeout` as the secondary gds code
+  (`thread_db::checkCancelState` in the Firebird sources). Tests must
+  assert on `isc_cancelled`; with the wire provider the secondary code
+  is not yet visible at the API surface (milestone 12 territory).
+* The send lock alone was not enough for `op_cancel`: the normal path
+  assembles packets across many buffered writes, so a lock at
+  `WriteBytes` granularity cannot keep a cancel out of the middle of a
+  packet under assembly. `op_cancel` therefore bypasses the shared send
+  buffer entirely (`TFBWireTransport.SendDirect`) and the lock covers
+  cipher application plus the socket write in both `SendDirect` and
+  `Flush`. The stream cipher stays consistent because bytes are always
+  enciphered in the order they reach the wire.
 
 ## Goal
 

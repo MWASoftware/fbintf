@@ -133,6 +133,9 @@ type
     function HasArraySupport: boolean; override;
     function HasEventSupport: boolean; override;
     function HasScollableCursors: boolean;
+    {op_cancel, sent out of band on the main connection - see
+     TFBWireConnection.SendCancel for the threading rules}
+    procedure CancelOperation(aKind: integer = fb_cancel_raise); override;
     procedure getFBVersion(version: TStrings);
   end;
 
@@ -567,6 +570,16 @@ end;
 function TFBWireAttachment.HasScollableCursors: boolean;
 begin
   Result := false;
+end;
+
+procedure TFBWireAttachment.CancelOperation(aKind: integer);
+begin
+  CheckHandle;
+  try
+    FConnection.SendCancel(aKind);
+  except
+    on E: Exception do WireIBError(FWireAPI,E);
+  end;
 end;
 
 procedure TFBWireAttachment.getFBVersion(version: TStrings);

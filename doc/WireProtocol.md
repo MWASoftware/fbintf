@@ -117,6 +117,9 @@ Working and covered by the test suite:
   the `op_connect_request` auxiliary connection by a listener thread
 * array columns: `IArray` and `IArrayMetaData` over `op_get_slice` and
   `op_put_slice`, with the SDL generator shared with the 3.0 provider
+* operation cancellation (`IAttachment.CancelOperation` - `op_cancel`
+  sent out of band from another thread) and statement timeouts
+  (`IStatement.SetStatementTimeout` - the protocol 16 timeout field)
 
 Deliberately not implemented yet. These raise `ibxeNotSupported` rather
 than failing in a confusing way:
@@ -447,12 +450,12 @@ apply `runtest.sh`'s normalisation, and commit it.
 
 | Server | WireCrypt | Negotiated | Encryption | Result |
 |---|---|---|---|---|
-| 6.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 112 tests, 0 failures |
-| 6.0.0 (local, LI-T6.0.0.2076) | Required | 17 | `ChaCha64` | 112 tests, 0 failures |
-| 5.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 112 tests, 0 failures |
-| 5.0.4 (local container) | Enabled, Required | 17 | `ChaCha64` | 112 tests, 0 failures |
-| 4.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 112 tests, 0 failures |
-| 3.0 (CI container) | Enabled | 15 | `Arc4` | 112 tests, 0 failures |
+| 6.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 118 tests, 0 failures |
+| 6.0.0 (local, LI-T6.0.0.2076) | Required | 17 | `ChaCha64` | 118 tests, 0 failures |
+| 5.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 118 tests, 0 failures |
+| 5.0.4 (local container) | Enabled, Required | 17 | `ChaCha64` | 118 tests, 0 failures |
+| 4.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 118 tests, 0 failures |
+| 3.0 (CI container) | Enabled | 15 | `Arc4` | 118 tests, 0 failures |
 | no server | — | — | — | 36 tests, live sections skipped |
 
 Firebird 3 settles on protocol 15 with Arc4: it is the newest protocol that
@@ -513,7 +516,7 @@ machinery that already exists to support it.
 | 3 | Services | the `IServiceManager` wrapper over exchanges that already exist | 13 |
 | 4 | A Delphi transport | a `TFBWireTransport` over Winsock and Posix sockets | — |
 | 5 | Array columns — **done** | `FBWireArray` over `op_get_slice`/`op_put_slice`, shared SDL generator | 13 |
-| 6 | Statement timeouts and cancellation | `op_cancel`, the P16 timeout field | 12, 16 |
+| 6 | Statement timeouts and cancellation — **done** | `CancelOperation`/`SetStatementTimeout` on all providers | 12, 16 |
 | 7 | Scrollable cursors | `op_fetch_scroll` | 18 |
 | 8 | The batch API | the `op_batch_*` family | 16 |
 | 9 | Inline blobs | `op_inline_blob` | 19 |
@@ -666,15 +669,31 @@ symptom in the reference log as a NULL blob. Fixed with a destructor and
 a `SetCount` that frees on shrink; the suite output now matches the
 fbclient providers on that line.
 
-### 6. Statement timeouts and cancellation
+### 6. Statement timeouts and cancellation — done
 
-`op_cancel` (protocol 12) is sent out of band while an operation is
-running and makes it fail with `isc_cancelled`; it is what
-`fb_cancel_operation` does. The per statement timeout field is already
-written in `op_execute` for protocol 16 and later, currently always zero, so
-exposing `IStatement`'s timeout is a small change. Cancellation needs care:
-the packet has no response, and it has to be written from another thread
-while the first is blocked in `ReadBytes`.
+Both halves were interface additions to fbintf, not just wire changes:
+`IAttachment.CancelOperation(aKind)` and
+`IStatement.SetStatementTimeout`/`GetStatementTimeout` are new, and all
+three providers implement them - 2.5 through `fb_cancel_operation`
+(when the loaded library exports it), 3.0 through
+`IAttachment::cancelOperation` and `IStatement::setTimeout` (timeouts
+need a Firebird 4 client), and the wire provider natively.
+
+On the wire, `op_cancel` has no response packet and is sent from a
+different thread while the owner is blocked reading: it bypasses the
+shared send buffer through `TFBWireTransport.SendDirect`, whose lock
+serialises the cipher and socket write against `Flush` - the stream
+cipher stays consistent because bytes are enciphered in wire order. The
+timeout travels in the `p_sqldata_timeout` field of
+`op_execute`/`op_execute2` (protocol 16); below protocol 16 a non zero
+timeout raises `ibxeNotSupported` rather than being silently dropped.
+
+One correction to the plan: an expired timeout does not arrive as its
+own error code. The server cancels the request, so the primary status
+is `isc_cancelled` with `isc_req_stmt_timeout` as the secondary code
+(`thread_db::checkCancelState`). `op_cancel` also does not unblock a
+client whose server has gone away - that is the socket timeout's job
+(`ConnectTo` accepts one).
 
 ### 7. Scrollable cursors
 
