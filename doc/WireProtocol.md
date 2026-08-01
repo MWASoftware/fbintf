@@ -113,15 +113,17 @@ Working and covered by the test suite:
   `DECFLOAT(34)`, `BOOLEAN` and the time zone types
 * blobs: create, open, segmented read and write, close, cancel
 * information calls for the database, transaction, statement and blob
+* events: `IEvents` with asynchronous and synchronous waits, delivered on
+  the `op_connect_request` auxiliary connection by a listener thread
+* array columns: `IArray` and `IArrayMetaData` over `op_get_slice` and
+  `op_put_slice`, with the SDL generator shared with the 3.0 provider
 
 Deliberately not implemented yet. These raise `ibxeNotSupported` rather
 than failing in a confusing way:
 
 | Feature | What it needs |
 |---|---|
-| Events | the auxiliary connection from `op_connect_request` plus a listener thread |
 | Services | `op_service_*` exist in `FBWireProtocol`; the `IServiceManager` wrapper does not |
-| Array columns | `op_get_slice` / `op_put_slice` and SDL descriptions |
 | Batches | the protocol 16 `op_batch_*` family |
 | Scrollable cursors | `op_fetch_scroll`, protocol 18 |
 | Multi database transactions | a two phase commit coordinator |
@@ -415,16 +417,42 @@ Then, if a server answers:
 With no server reachable the live sections report `SKIP` and the process
 still exits 0, which is what the offline CI job relies on.
 
+### The full fbintf test suite
+
+`WireTest` is the unit layer. The integration layer is the ordinary
+fbintf test suite - all twenty two programs - run over this provider:
+
+```bash
+testsuite/runtest.sh -a wire
+```
+
+The `-a wire` (`--api wire`) switch makes `TTestApplication` obtain the
+API from `WireFirebirdAPI` instead of `IB.FirebirdAPI`; nothing else in
+the suite changes. The output is compared against
+`testsuite/FBWirereference.log` after normalising the run dependent
+values (transaction ids, page counters, journal timestamps) on both
+sides of the diff. Tests for events, arrays and other unimplemented
+features skip with a fixed message so the comparison stays exact.
+
+The reference log is the CI environment's own output: Firebird 6
+(ODS 14, protocol 17) in a container, the employee example database
+restored from `testsuite/employee.gbk`, an x86_64 runner. Float to text
+rendering differs in the last digit between CPU architectures, so a log
+produced elsewhere (for example on ARM) shows a handful of known
+differences. To regenerate the reference after an intended output
+change, download the `wire-suite-testout` artifact from the CI run,
+apply `runtest.sh`'s normalisation, and commit it.
+
 ### Measured results
 
 | Server | WireCrypt | Negotiated | Encryption | Result |
 |---|---|---|---|---|
-| 6.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 81 tests, 0 failures |
-| 6.0.0 (local, LI-T6.0.0.2076) | Required | 17 | `ChaCha64` | 81 tests, 0 failures |
-| 5.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 81 tests, 0 failures |
-| 5.0.4 (local container) | Enabled, Required | 17 | `ChaCha64` | 81 tests, 0 failures |
-| 4.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 81 tests, 0 failures |
-| 3.0 (CI container) | Enabled | 15 | `Arc4` | 81 tests, 0 failures |
+| 6.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 112 tests, 0 failures |
+| 6.0.0 (local, LI-T6.0.0.2076) | Required | 17 | `ChaCha64` | 112 tests, 0 failures |
+| 5.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 112 tests, 0 failures |
+| 5.0.4 (local container) | Enabled, Required | 17 | `ChaCha64` | 112 tests, 0 failures |
+| 4.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 112 tests, 0 failures |
+| 3.0 (CI container) | Enabled | 15 | `Arc4` | 112 tests, 0 failures |
 | no server | — | — | — | 36 tests, live sections skipped |
 
 Firebird 3 settles on protocol 15 with Arc4: it is the newest protocol that
@@ -480,11 +508,11 @@ machinery that already exists to support it.
 
 | # | Milestone | Needs | Protocol |
 |---|---|---|---|
-| 1 | Run the existing test suite against this provider | a provider switch in `TTestApplication` | — |
-| 2 | Events | `op_connect_request`, a second socket, a listener thread | 13 |
+| 1 | Run the existing test suite against this provider — **done** | `testsuite -a wire` runs all twenty two programs | — |
+| 2 | Events — **done** | `FBWireEvents` implements `IEvents` over the auxiliary connection | 13 |
 | 3 | Services | the `IServiceManager` wrapper over exchanges that already exist | 13 |
 | 4 | A Delphi transport | a `TFBWireTransport` over Winsock and Posix sockets | — |
-| 5 | Array columns | `op_get_slice`, `op_put_slice`, SDL generation | 13 |
+| 5 | Array columns — **done** | `FBWireArray` over `op_get_slice`/`op_put_slice`, shared SDL generator | 13 |
 | 6 | Statement timeouts and cancellation | `op_cancel`, the P16 timeout field | 12, 16 |
 | 7 | Scrollable cursors | `op_fetch_scroll` | 18 |
 | 8 | The batch API | the `op_batch_*` family | 16 |
@@ -493,48 +521,96 @@ machinery that already exists to support it.
 | 11 | Wire compression | zlib either side of the cipher | 13 |
 | 12 | Engine message text | a `firebird.msg` reader or a generated table | — |
 
-### 1. Run the existing test suite against this provider
+### 1. Run the existing test suite against this provider — done
 
-The cheapest large win, and it should come first because everything after
-it benefits. `testsuite/` already contains twenty two test programs that
-exercise the API far more thoroughly than `WireTest` does, and they are
-written against the interfaces, not against a provider. They obtain the API
-from one place:
+`testsuite -a wire` (or `runtest.sh -a wire`) runs all twenty two test
+programs over this provider, and the output is compared line by line
+against `testsuite/FBWirereference.log` with the run dependent values
+(transaction ids, page counts, journal timestamps) normalised on both
+sides. The CI workflow runs the suite against a Firebird 6 container and
+fails on any difference from the reference log. Tests for features the
+provider does not implement skip with a fixed message, guarded by the new
+`IAttachment.HasArraySupport` and `HasEventSupport` capability checks
+alongside the existing ones; those skip lines shrinking is how milestones
+2 and 5 showed up in the log.
 
-```pascal
-function TTestApplication.GetFirebirdAPI: IFirebirdAPI;   {TestApplication.pas}
-begin
-  if FFirebirdAPI = nil then
-    FFirebirdAPI := IB.FirebirdAPI;
-  ...
-```
+The prediction that this was the cheapest large win was right for the
+wrong reasons: the suite immediately found seven real defects that
+`WireTest` could not see, several in code paths that had simply never
+been executed. The fixes that came out of the first run:
 
-A command line switch that assigns `WireFirebirdAPI` there instead would run
-all of them over the wire. Expect failures at first: the suite covers
-events, services and arrays, which this provider reports as unsupported, so
-the work is partly to add a way of marking those as expected skips. That
-same run is the acceptance criterion for milestones 2, 3 and 5.
+* **SRP broke inside the suite binary only** — the account name upper
+  casing used `AnsiUpperCase`, and with `fpwidestring` installed (which
+  the suite loads) that returns the string with a trailing `#0` included
+  in its length, poisoning the proof hashes. ASCII `UpperCase` is both
+  safe and what the engine does.
+* **`op_execute2` had its statement and transaction handles swapped** at
+  the call site, killing the connection on any `execute procedure` or
+  `insert ... returning` — the exchange had never been exercised.
+* **`Execute` returned nil for `update/insert ... returning`**: Firebird
+  5 and later describe those as select statements (cursor + one row),
+  older servers as `SQLExecProcedure` (`op_execute2` singleton); both
+  paths are now implemented.
+* **Named parameters lost their names**: the bind after prepare
+  overwrote the preprocessor's `:name` assignments with the describe
+  response's empty names.
+* **Parameter metadata was immutable**: assigning a value of a different
+  type to a parameter (`AsInteger` on a `SMALLINT`, a string to a blob)
+  now changes the message format and relays out the buffer, as the other
+  providers allow — the client owns the BLR it sends.
+* **`DECFLOAT` values decoded to garbage**: the provider inherited the
+  base class codec, which has no implementation. It now carries its own
+  IEEE 754 densely packed decimal encoder and decoder, verified against
+  the server in both directions.
+* **Blob metadata from table and column names** (`GetBlobMetaData`) never
+  looked the column up, so blob subtypes were wrong; it now runs the same
+  system table query as the 3.0 provider.
 
-### 2. Events
+The suite also drove smaller fixes: create database from a SQL statement
+now extracts the file spec locally (the stock providers delegate that
+preparse to `fbclient`), a nil DPB no longer crashes, the DPB sent with
+the attach is now a verbatim clumplet copy rather than a re-encoded one,
+and the transport discards its session ciphers on disconnect so that the
+same connection object can reconnect (also found independently by the
+services milestone).
 
-The largest missing feature and the one users will notice. Firebird
-delivers events on a **second** connection: the client sends
-`op_connect_request` with `P_REQ_async`, the server answers with a
-`sockaddr` naming a port, and the client opens a second socket to it. Event
-notifications then arrive on that socket as `op_event` packets,
-asynchronously, while the main connection carries on.
+### 2. Events — done
 
-What exists already: `FBEvents.CreateEventBlock` builds the event block in
-exactly the form `op_que_events` carries, and `TFBEvents` implements the
-counting and the callback dispatch. What is needed is the auxiliary
-connection, a listener thread, and the three exchanges `op_que_events`,
-`op_event` and `op_cancel_events`. `TFBWireConnection` deliberately keeps
-its transport separate from its protocol logic so a second transport can be
-driven by a second thread without sharing buffers.
+Implemented by `client/wire/FBWireEvents.pas`. One auxiliary connection
+and one listener thread per attachment, created on the first
+`GetEventHandler` call, serve all its `IEvents` instances; interest is
+registered with `op_que_events` on the main connection and notifications
+are dispatched by event id. `TFBEvents` supplied the event block, the
+count diffing and the callback dispatch exactly as anticipated; the wire
+side is the three exchanges plus the second transport.
 
-The one subtlety worth flagging: the address in the response is the address
-the **server** knows about, which behind NAT is not reachable. The stock
-client keeps the port and reuses the address it already connected to.
+Findings from the implementation, beyond the NAT point the plan already
+flagged (only the port of the returned address is usable - the client
+reuses the host it connected to):
+
+* **Each `op_que_events` must carry a fresh event id.** An interest is
+  one shot, and re-arming under the same id is accepted by the server
+  but not honoured immediately: counts accumulated while nobody waited
+  were only delivered when the *next* event fired, one delivery late.
+  The stock client increments its id on every queue, and doing the same
+  made deferred delivery immediate.
+* The auxiliary connection carries no handshake, no authentication and
+  no encryption - the server associates it with the session by the
+  accept, and it only ever delivers `op_event` (and `op_dummy`) packets.
+* **The auxiliary port must be reachable.** By default the server opens
+  a random port for it, which a container that only publishes 3050, or a
+  firewall, silently blocks - the CI containers demonstrated this by
+  hanging in the connect. Set `RemoteAuxPort` in `firebird.conf` to pin
+  it and publish or allow that port; the CI workflow pins it to 3051.
+  This applies to any Firebird client, not just this one.
+* The event handler is called from the listener thread, exactly as the
+  2.5 provider calls its handler from an AST thread, so a handler must
+  not call back into the same attachment from that thread; `Synchronize`
+  or `Queue` the work first. The test suite's Test 10 shows the pattern.
+* One deliberate difference from the stock providers: events posted
+  while interest was cancelled are included in the counts of the next
+  wait (the stock bookkeeping can drop them). The wire reference log
+  records this in Test 10's final count.
 
 ### 3. Services
 
@@ -557,13 +633,38 @@ over `Winapi.WinSock2` and `Posix.SysSocket` behind the same four methods
 (`ConnectTo`, `Disconnect`, `ReadBytes`, `WriteBytes`), after which the
 units can be added to `fbintf.dpk`. The cipher and XDR layers do not change.
 
-### 5. Array columns
+### 5. Array columns — done
 
-`op_get_slice` and `op_put_slice` carry an SDL (slice description language)
-program describing the slice wanted. `FBArray` already implements the whole
-element addressing, conversion and metadata layer, and `FB30Array` shows
-how the SDL block is built. The wire provider needs to generate the SDL and
-marshal the slice buffer.
+Implemented by `client/wire/FBWireArray.pas`. `TFBWireArray` subclasses
+`FBArray`'s element addressing and conversion layer and implements the two
+provider methods over `TFBWireConnection.GetSlice`/`PutSlice`
+(`op_get_slice`/`op_put_slice`); `TFBWireArrayMetaData` fills the array
+descriptor with the same system table query the 3.0 provider uses, run
+over the wire like any other statement. The SDL generator moved from
+`FB30Array` into the shared, compiler neutral `FBSDL` unit, so both
+providers emit identical SDL.
+
+The slice data on the wire is XDR, element by element, following
+`xdr_slice`/`xdr_datum` driven by the SDL element descriptor
+(`FBWireMessage.XDREncodeSlice`/`XDRDecodeSlice`). Two things the sources
+reveal that the isc API hides: the slice length fields count in the
+*descriptor's* element length units (`sdl_desc` in `src/common/sdl.cpp`),
+which for a `CHAR(n)` element is `n` while fbintf's client buffer spaces
+elements at `n+1`; and `blr_varying` maps to a **`dtype_cstring`**
+element - a count followed by the bytes - which is exactly the zero
+terminated layout `FBArray` keeps in its buffer, so the "curious" varchar
+array format the IBPP comment in `FBArray.pas` describes is simply the
+SDL's view of the column.
+
+Finding the arrays also flushed out a provider wide leak: the wire
+statement's `TWireSQLDataArea` never freed its column variables (the 3.0
+provider frees them in `FreeXSQLDA`), which pinned every blob, array and
+SDL block a statement had touched - and, through the blobs' transaction
+references, kept transactions alive so that their `taCommit` default
+completion never ran. Test 6's execute procedure result had recorded the
+symptom in the reference log as a NULL blob. Fixed with a destructor and
+a `SetCount` that frees on shrink; the suite output now matches the
+fbclient providers on that line.
 
 ### 6. Statement timeouts and cancellation
 
