@@ -175,6 +175,7 @@ type
     FCryptPlugin: AnsiString;      {active wire encryption plugin, '' = none}
     FConnected: boolean;
     FMaxProtocol: cardinal;
+    FCompression: boolean;
     FOnInlineBlob: TInlineBlobHandler;
     procedure ReadInlineBlob;
     procedure SendUserIdentification(aWireCrypt: TWireCryptOption);
@@ -346,6 +347,11 @@ type
      MaxSupportedProtocol; lower it to exercise or force an older dialect
      of the protocol.}
     property MaxProtocol: cardinal read FMaxProtocol write FMaxProtocol;
+    {requests zlib wire compression in the connect (pflag_compress).
+     Effective only when the server also has WireCompression enabled -
+     the accept reports the outcome, visible as Transport.Compressed.
+     Set before ConnectTo; default false.}
+    property Compression: boolean read FCompression write FCompression;
     property Connected: boolean read FConnected;
     {sink for op_inline_blob packets; unset, they are read and discarded}
     property OnInlineBlob: TInlineBlobHandler read FOnInlineBlob write FOnInlineBlob;
@@ -627,7 +633,11 @@ begin
       FXDR.WriteUInt32(OfferedProtocols[i]);
       FXDR.WriteInt32(arch_generic);
       FXDR.WriteInt32(0);                  {min type}
-      FXDR.WriteInt32(ptype_batch_send);   {max type - avoid lazy semantics}
+      if FCompression then
+        {max type - avoid lazy semantics, ask for zlib compression}
+        FXDR.WriteInt32(ptype_batch_send or pflag_compress)
+      else
+        FXDR.WriteInt32(ptype_batch_send); {max type - avoid lazy semantics}
       FXDR.WriteInt32((i + 1) * 2);        {preference weight}
     end;
     FXDR.Flush;
@@ -706,6 +716,7 @@ var op: integer;
     contPlugin, contList: AnsiString;
     sentPluginList: boolean;
     isCondAccept: boolean;
+    compressAccepted: boolean;
 begin
   sentPluginList := true; {already sent in op_connect}
   repeat
@@ -730,7 +741,10 @@ begin
         aVersion := FXDR.ReadUInt32;
         aArch := FXDR.ReadUInt32;
         aType := FXDR.ReadUInt32;
-        {shorts are sign extended on the wire: mask down}
+        {shorts are sign extended on the wire: mask down. The compression
+         flag rides above the type bits and must be caught before the
+         mask discards it.}
+        compressAccepted := (aType and pflag_compress) <> 0;
         FProtocolVersion := aVersion and FB_PROTOCOL_MASK;
         FAcceptType := aType and ptype_mask;
         if aArch <> arch_generic then
@@ -741,6 +755,10 @@ begin
             [FProtocolVersion]);
         if op = op_accept then
         begin
+          {the accept packet ends here: everything after it is deflated
+           when both sides asked for compression}
+          if compressAccepted then
+            FTransport.EnableCompression;
           FAuthComplete := true;
           break;
         end;
@@ -750,6 +768,10 @@ begin
         authenticated := FXDR.ReadInt32;
         acptKeys := FXDR.ReadString;
         AppendKeyClumplets(acptKeys);
+        {the accept packet has now been read in full - the server
+         compresses from the next packet on, and so do we}
+        if compressAccepted then
+          FTransport.EnableCompression;
         if authenticated = 1 then
         begin
           FAuthComplete := true;

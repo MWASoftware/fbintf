@@ -48,7 +48,7 @@ interface
 uses
   Classes, SysUtils, syncobjs
   {$IFDEF FPC}
-  , sockets, ssockets
+  , sockets, ssockets, zbase, zdeflate, zinflate
   {$ENDIF}
   ;
 
@@ -88,8 +88,20 @@ type
      SendDirect - see SendDirect}
     FSendLock: TCriticalSection;
     FPacketsSent: cardinal;
+    {zlib wire compression (pflag_compress): one stream per direction
+     for the whole session, sitting between the packet layer and the
+     cipher - compress then encrypt on send, decrypt then inflate on
+     receive}
+    FCompressed: boolean;
+    {$IFDEF FPC}
+    FDeflateStream: z_stream;
+    FInflateStream: z_stream;
+    {$ENDIF}
+    FRawRecvBuffer: TBytes;   {decrypted deflate stream, not yet inflated}
     procedure FillRecvBuffer;
     procedure WriteToSocket(const aData; aLen: integer);
+    {deflates and sends aData - caller holds FSendLock}
+    procedure CompressAndSend(const aData; aLen: integer);
   public
     constructor Create;
     destructor Destroy; override;
@@ -124,6 +136,11 @@ type
      consumed server packet.}
     procedure EnableRecvCipher(aRecvCipher: TWireCipher);
     procedure EnableSendCipher(aSendCipher: TWireCipher);
+    {switches on zlib wire compression - called once, immediately after
+     the accept packet that carried pflag_compress has been read in
+     full: everything after it travels deflated on both directions}
+    procedure EnableCompression;
+    property Compressed: boolean read FCompressed;
     property Connected: boolean read FConnected;
     {counts socket writes (Flush and SendDirect) - a request/response
      round trip is one flush, so tests can assert that an operation
@@ -233,7 +250,13 @@ begin
   {$IFDEF FPC}
   if FSocket <> nil then
     FreeAndNil(FSocket);
+  if FCompressed then
+  begin
+    deflateEnd(FDeflateStream);
+    inflateEnd(FInflateStream);
+  end;
   {$ENDIF}
+  FCompressed := false;
   FConnected := false;
   FRecvPos := 0;
   FRecvLimit := 0;
@@ -243,6 +266,59 @@ begin
   if FSendCipher <> nil then FreeAndNil(FSendCipher);
   if FRecvCipher <> nil then FreeAndNil(FRecvCipher);
 end;
+
+procedure TFBWireTransport.EnableCompression;
+begin
+  {$IFDEF FPC}
+  if FCompressed then Exit;
+  FillChar(FDeflateStream,SizeOf(FDeflateStream),0);
+  if deflateInit(FDeflateStream,Z_DEFAULT_COMPRESSION) <> Z_OK then
+    raise EFBWireError.Create('Unable to initialise wire compression (deflate)');
+  FillChar(FInflateStream,SizeOf(FInflateStream),0);
+  if inflateInit(FInflateStream) <> Z_OK then
+  begin
+    deflateEnd(FDeflateStream);
+    raise EFBWireError.Create('Unable to initialise wire compression (inflate)');
+  end;
+  SetLength(FRawRecvBuffer,DefaultRecvBufferSize);
+  FInflateStream.next_in := nil;
+  FInflateStream.avail_in := 0;
+  FCompressed := true;
+  {$ELSE}
+  raise EFBWireError.Create('Wire compression is not implemented for this compiler');
+  {$ENDIF}
+end;
+
+procedure TFBWireTransport.CompressAndSend(const aData; aLen: integer);
+{$IFDEF FPC}
+var chunk: array[0..16383] of byte;
+    produced: integer;
+    rc: integer;
+begin
+  {one Z_SYNC_FLUSH per packet: the peer must see complete packets
+   promptly or the request/response protocol deadlocks}
+  FDeflateStream.next_in := @aData;
+  FDeflateStream.avail_in := aLen;
+  repeat
+    FDeflateStream.next_out := @chunk[0];
+    FDeflateStream.avail_out := SizeOf(chunk);
+    rc := deflate(FDeflateStream,Z_SYNC_FLUSH);
+    if (rc <> Z_OK) and (rc <> Z_BUF_ERROR) then
+      raise EFBWireError.CreateFmt('Wire compression failed (deflate: %d)',[rc]);
+    produced := SizeOf(chunk) - integer(FDeflateStream.avail_out);
+    if produced > 0 then
+    begin
+      if FSendCipher <> nil then
+        FSendCipher.Process(chunk[0],produced);
+      WriteToSocket(chunk[0],produced);
+    end;
+    {a sync flush is complete when deflate leaves room in the output}
+  until (FDeflateStream.avail_in = 0) and (FDeflateStream.avail_out > 0);
+end;
+{$ELSE}
+begin
+end;
+{$ENDIF}
 
 procedure TFBWireTransport.Abort;
 begin
@@ -254,11 +330,51 @@ end;
 
 procedure TFBWireTransport.FillRecvBuffer;
 var got: integer;
+    {$IFDEF FPC}
+    produced: integer;
+    rc: integer;
+    {$ENDIF}
 begin
   if not FConnected then
     raise EFBWireError.Create('Wire transport is not connected');
   FRecvPos := 0;
   FRecvLimit := 0;
+
+  {$IFDEF FPC}
+  if FCompressed then
+  begin
+    {socket -> decrypt -> inflate -> FRecvBuffer. The inflate stream may
+     hold unconsumed input from the previous read; only refill from the
+     socket when it is exhausted and no output could be produced.}
+    repeat
+      if FInflateStream.avail_in = 0 then
+      begin
+        got := FSocket.Read(FRawRecvBuffer[0],Length(FRawRecvBuffer));
+        if got <= 0 then
+        begin
+          Disconnect;
+          raise EFBWireError.Create('Connection lost to database server');
+        end;
+        if FRecvCipher <> nil then
+          FRecvCipher.Process(FRawRecvBuffer[0],got);
+        FInflateStream.next_in := @FRawRecvBuffer[0];
+        FInflateStream.avail_in := got;
+      end;
+      FInflateStream.next_out := @FRecvBuffer[0];
+      FInflateStream.avail_out := Length(FRecvBuffer);
+      rc := inflate(FInflateStream,Z_NO_FLUSH);
+      if (rc <> Z_OK) and (rc <> Z_BUF_ERROR) and (rc <> Z_STREAM_END) then
+      begin
+        Disconnect;
+        raise EFBWireError.CreateFmt('Wire compression failed (inflate: %d)',[rc]);
+      end;
+      produced := Length(FRecvBuffer) - integer(FInflateStream.avail_out);
+    until produced > 0;
+    FRecvLimit := produced;
+    Exit;
+  end;
+  {$ENDIF}
+
   {$IFDEF FPC}
   got := FSocket.Read(FRecvBuffer[0],Length(FRecvBuffer));
   {$ELSE}
@@ -337,9 +453,14 @@ begin
     raise EFBWireError.Create('Wire transport is not connected');
   FSendLock.Enter;
   try
-    if FSendCipher <> nil then
-      FSendCipher.Process(FSendBuffer[0],FSendPos);
-    WriteToSocket(FSendBuffer[0],FSendPos);
+    if FCompressed then
+      CompressAndSend(FSendBuffer[0],FSendPos)
+    else
+    begin
+      if FSendCipher <> nil then
+        FSendCipher.Process(FSendBuffer[0],FSendPos);
+      WriteToSocket(FSendBuffer[0],FSendPos);
+    end;
     FSendPos := 0;
     Inc(FPacketsSent);
   finally
@@ -356,9 +477,16 @@ begin
   Move(aData,buf[0],aLen);
   FSendLock.Enter;
   try
-    if FSendCipher <> nil then
-      FSendCipher.Process(buf[0],aLen);
-    WriteToSocket(buf[0],aLen);
+    if FCompressed then
+      {the peer inflates one continuous stream: an out of band packet
+       must travel through the same deflate state}
+      CompressAndSend(buf[0],aLen)
+    else
+    begin
+      if FSendCipher <> nil then
+        FSendCipher.Process(buf[0],aLen);
+      WriteToSocket(buf[0],aLen);
+    end;
     Inc(FPacketsSent);
   finally
     FSendLock.Leave;
@@ -368,10 +496,18 @@ end;
 function TFBWireTransport.HasBufferedData: boolean;
 begin
   Result := FRecvPos < FRecvLimit;
+  {$IFDEF FPC}
+  {deflate stream bytes already received but not yet inflated also count}
+  if not Result and FCompressed then
+    Result := FInflateStream.avail_in > 0;
+  {$ENDIF}
 end;
 
 procedure TFBWireTransport.EnableRecvCipher(aRecvCipher: TWireCipher);
 begin
+  {HasBufferedData covers both the plaintext buffer and, with
+   compression active, deflate stream bytes not yet inflated - either
+   would straddle the cipher changeover}
   if HasBufferedData then
     raise EFBWireError.Create(
       'Cannot enable wire encryption: unread data in receive buffer');

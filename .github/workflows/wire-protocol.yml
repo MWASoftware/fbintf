@@ -29,7 +29,7 @@ env:
 
 jobs:
   server:
-    name: FB ${{ matrix.firebird }} / WireCrypt ${{ matrix.wirecrypt }}
+    name: FB ${{ matrix.firebird }} / WireCrypt ${{ matrix.wirecrypt }}${{ matrix.wirecompression == 'true' && ' / Compressed' || '' }}
     runs-on: ubuntu-latest
 
     strategy:
@@ -37,6 +37,7 @@ jobs:
       matrix:
         firebird: ['3', '4', '5', '6']
         wirecrypt: ['Enabled', 'Required']
+        wirecompression: ['false']
         include:
           - firebird: '3'
             image: 'firebirdsql/firebird:3'
@@ -52,6 +53,16 @@ jobs:
           - firebird: '6'
             image: 'firebirdsql/firebird:6-snapshot'
             expected: '20'
+          # One compression row: the zlib pipeline is protocol version
+          # independent, so a single server exercises it. WireTest's
+          # compression section negotiates it explicitly. Naming a
+          # different value for the wirecompression axis makes this a new
+          # combination rather than extending the existing FB 5 row.
+          - firebird: '5'
+            wirecrypt: 'Enabled'
+            wirecompression: 'true'
+            image: 'firebirdsql/firebird:5'
+            expected: '19'
         exclude:
           # Protocol 13, the only one Firebird 3 offers without encryption
           # support, cannot satisfy WireCrypt = Required. The combination is
@@ -71,6 +82,7 @@ jobs:
             -e FIREBIRD_CONF_AuthServer="Srp256;Srp;Legacy_Auth" \
             -e FIREBIRD_CONF_DatabaseAccess="Full" \
             -e FIREBIRD_CONF_RemoteAuxPort="3051" \
+            -e FIREBIRD_CONF_WireCompression="${{ matrix.wirecompression || 'false' }}" \
             -p 3050:3050 \
             -p 3051:3051 \
             "${{ matrix.image }}"
@@ -228,6 +240,7 @@ jobs:
             -e FIREBIRD_CONF_AuthServer="Srp256;Srp;Legacy_Auth" \
             -e FIREBIRD_CONF_DatabaseAccess="Full" \
             -e FIREBIRD_CONF_RemoteAuxPort="3051" \
+            -e FIREBIRD_CONF_WireCompression="${{ matrix.wirecompression || 'false' }}" \
             -v /tmp/fbintf-testsuite:/tmp/fbintf-testsuite \
             -p 3050:3050 \
             -p 3051:3051 \

@@ -964,6 +964,91 @@ begin
   end;
 end;
 
+procedure TestWireCompression;
+var DPB: IDPB;
+    Att2: IAttachment;
+    Tr: ITransaction;
+    RS: IResultSet;
+    B: IBlob;
+    Text, ReadBack: AnsiString;
+    i: integer;
+begin
+  writeln('Provider: wire compression');
+  DPB := API.AllocateDPB;
+  DPB.Add(isc_dpb_user_name).AsString := UserName;
+  DPB.Add(isc_dpb_password).AsString := Password;
+  DPB.Add(isc_dpb_lc_ctype).AsString := 'UTF8';
+  DPB.Add(isc_dpb_config).AsString := 'WireCompression=true';
+  Att2 := API.OpenDatabase(DatabaseName,DPB);
+  try
+    if not (Att2 as TObject as TFBWireAttachment).Connection.Transport.Compressed then
+    begin
+      writeln('  SKIP  the server did not accept compression',
+              ' (WireCompression is off in firebird.conf)');
+      Exit;
+    end;
+    Check('compression negotiated',true);
+
+    {work the stream in both directions: a bulk query and a blob round
+     trip; the deflate/inflate pipeline must be byte faithful}
+    Tr := Att2.StartTransaction([isc_tpb_read_committed,
+            isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+    RS := Att2.OpenCursorAtStart(Tr,
+            'select count(*) from RDB$RELATIONS');
+    Check('a query answers over the compressed stream',RS[0].AsInteger > 0);
+    RS.Close;
+    RS := nil;
+
+    Text := '';
+    for i := 1 to 300 do
+      Text := Text + 'Compressed round trip line ' + IntToStr(i) + '.' +
+              LineEnding;
+    try
+      Att2.ExecImmediate(Tr,'drop table FBINTF_WIRE_ZTEST');
+      Tr.Commit;
+      Tr := Att2.StartTransaction([isc_tpb_read_committed,
+              isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+    except
+      Tr := Att2.StartTransaction([isc_tpb_read_committed,
+              isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+    end;
+    Att2.ExecImmediate(Tr,
+      'create table FBINTF_WIRE_ZTEST (ID integer primary key, NOTES blob sub_type 1)');
+    Tr.Commit;
+    Tr := Att2.StartTransaction([isc_tpb_read_committed,
+            isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+    B := Att2.CreateBlob(Tr,'FBINTF_WIRE_ZTEST','NOTES');
+    B.SetAsString(Text);
+    B.Close;
+    with Att2.Prepare(Tr,'insert into FBINTF_WIRE_ZTEST values (1,?)') do
+    begin
+      SQLParams[0].AsBlob := B;
+      Execute;
+    end;
+    Tr.Commit;
+    Tr := Att2.StartTransaction([isc_tpb_read_committed,
+            isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+    RS := Att2.OpenCursorAtStart(Tr,
+            'select NOTES from FBINTF_WIRE_ZTEST where ID = 1');
+    ReadBack := RS[0].AsString;
+    Check('a blob round trips through the compressed stream',
+          ReadBack = Text,
+          Format('wrote %d read %d',[Length(Text),Length(ReadBack)]));
+    RS.Close;
+    RS := nil;
+    B := nil;
+    try
+      Att2.ExecImmediate(Tr,'drop table FBINTF_WIRE_ZTEST');
+      Tr.Commit;
+    except
+      Tr.Rollback;
+    end;
+  finally
+    Att2.Disconnect;
+    Att2 := nil;
+  end;
+end;
+
 procedure TestSchemas;
 const S1 = 'FBINTF_WIRE_S1';
       S2 = 'FBINTF_WIRE_S2';
@@ -1559,6 +1644,7 @@ begin
     TestProviderUpdates;
     TestArrays;
     TestScrollableCursors;
+    TestWireCompression;
     TestSchemas;
     TestInlineBlobs;
     TestBatch;
