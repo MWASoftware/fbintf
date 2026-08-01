@@ -234,6 +234,17 @@ type
     procedure CloseBlob(aBlobHandle: integer);
     procedure CancelBlob(aBlobHandle: integer);
 
+    {--- events ---}
+    {op_connect_request with P_REQ_async: asks the server to open the
+     auxiliary port that delivers op_event packets. Returns the TCP port
+     number. Only the port of the returned address is usable: the address
+     itself is the server's own view of itself, which behind NAT is not
+     reachable, so the caller connects to the host it already knows (the
+     stock client does the same - see aux_connect in inet.cpp).}
+    function ConnectRequest(aDbHandle: integer): integer;
+    procedure QueEvents(aDbHandle: integer; const aEPB: TBytes; aEventID: integer);
+    procedure CancelEvents(aDbHandle, aEventID: integer);
+
     {--- services ---}
     function ServiceAttach(const aServiceName: AnsiString; SPB: TBytes): integer;
     procedure ServiceDetach(aSvcHandle: integer);
@@ -1374,6 +1385,46 @@ procedure TFBWireConnection.CancelBlob(aBlobHandle: integer);
 begin
   FXDR.WriteInt32(op_cancel_blob);
   FXDR.WriteInt32(aBlobHandle);
+  FXDR.Flush;
+  ReceiveAndCheckResponse;
+end;
+
+{--- events ---}
+
+function TFBWireConnection.ConnectRequest(aDbHandle: integer): integer;
+var R: TWireResponse;
+begin
+  FXDR.WriteInt32(op_connect_request);
+  FXDR.WriteInt32(P_REQ_async);
+  FXDR.WriteInt32(aDbHandle);
+  FXDR.WriteInt32(0);            {p_req_partner}
+  FXDR.Flush;
+  R := ReceiveAndCheckResponse;
+  {the response data is the server's sockaddr. The port is a big endian
+   16 bit value at offset 2 for both AF_INET and AF_INET6.}
+  if Length(R.Data) < 4 then
+    raise EFBWireError.Create('op_connect_request returned no address');
+  Result := (integer(R.Data[2]) shl 8) or R.Data[3];
+end;
+
+procedure TFBWireConnection.QueEvents(aDbHandle: integer; const aEPB: TBytes;
+  aEventID: integer);
+begin
+  FXDR.WriteInt32(op_que_events);
+  FXDR.WriteInt32(aDbHandle);
+  FXDR.WriteString(aEPB);
+  FXDR.WriteInt32(0);            {p_event_ast - parsed but ignored}
+  FXDR.WriteInt32(0);            {p_event_arg - ditto}
+  FXDR.WriteInt32(aEventID);
+  FXDR.Flush;
+  ReceiveAndCheckResponse;
+end;
+
+procedure TFBWireConnection.CancelEvents(aDbHandle, aEventID: integer);
+begin
+  FXDR.WriteInt32(op_cancel_events);
+  FXDR.WriteInt32(aDbHandle);
+  FXDR.WriteInt32(aEventID);
   FXDR.Flush;
   ReceiveAndCheckResponse;
 end;
