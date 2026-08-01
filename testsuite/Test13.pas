@@ -168,9 +168,18 @@ begin
   UpdateDatabase(Attachment2);
   QueryDatabase(Attachment2);
 
-  Transaction := FirebirdAPI.StartTransaction(
-                   [Attachment,Attachment2],
-                   [isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency], taCommit);
+  try
+    Transaction := FirebirdAPI.StartTransaction(
+                     [Attachment,Attachment2],
+                     [isc_tpb_write,isc_tpb_nowait,isc_tpb_concurrency], taCommit);
+  except on E: EIBClientError do
+    begin
+      writeln(OutFile,'Skipping test - multi database transactions are not supported by this provider');
+      Attachment.DropDatabase;
+      Attachment2.DropDatabase;
+      Exit;
+    end;
+  end;
 
   ModifyDatabase1(Attachment,Transaction);
   ModifyDatabase2(Attachment2,Transaction);

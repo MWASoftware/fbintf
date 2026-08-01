@@ -215,6 +215,10 @@ begin
   FRecvPos := 0;
   FRecvLimit := 0;
   FSendPos := 0;
+  {the ciphers belong to the session that has just ended - a reconnect
+   starts in clear and negotiates its own}
+  if FSendCipher <> nil then FreeAndNil(FSendCipher);
+  if FRecvCipher <> nil then FreeAndNil(FRecvCipher);
 end;
 
 procedure TFBWireTransport.FillRecvBuffer;
