@@ -38,7 +38,7 @@ uses
   SysUtils, Classes, IB, IBUtils, IBErrorCodes,
   FBWireBigInt, FBWireCrypto, FBWireSRP, FBWireStream, FBWireConst,
   FBWireMessage, FBWireDescribe, FBWireProtocol, FBWireClientAPI,
-  FBWireAttachment, FBWireStatement, FBAttachment;
+  FBWireAttachment, FBWireStatement, FBWireMessages, FBAttachment;
 
 var
   TestsRun: integer = 0;
@@ -964,6 +964,43 @@ begin
   end;
 end;
 
+procedure TestEngineMessages;
+var fmt: AnsiString;
+    status: TWireStatusVector;
+begin
+  writeln('Engine message table');
+  Check('a plain message is found',
+        FindEngineMessage(335544351,fmt) and
+        (fmt = 'unsuccessful metadata update'),
+        'got "' + fmt + '"');
+  Check('a parameterised message is found',
+        FindEngineMessage(335544343,fmt) and
+        (fmt = 'invalid request BLR at offset @1'),
+        'got "' + fmt + '"');
+  Check('an unknown code is not found',
+        not FindEngineMessage(999,fmt));
+
+  {format a two item vector the way fb_interpret would}
+  SetLength(status,4);
+  status[0].Kind := 1; {isc_arg_gds}
+  status[0].IntValue := 335544665; {unique_key_violation}
+  status[1].Kind := 2; {isc_arg_string}
+  status[1].StrValue := '"INTEG_27"';
+  status[2].Kind := 2;
+  status[2].StrValue := '"PUBLIC"."EMPLOYEE"';
+  status[3].Kind := 1;
+  status[3].IntValue := 335545072; {"Problematic key value is @1"}
+  SetLength(status,5);
+  status[4].Kind := 2;
+  status[4].StrValue := '("EMP_NO" = 500)';
+  Check('arguments substitute into the placeholders',
+        FormatWireStatus(status) =
+          'violation of PRIMARY or UNIQUE KEY constraint "INTEG_27" on table "PUBLIC"."EMPLOYEE"'
+          + LineEnding +
+          '-Problematic key value is ("EMP_NO" = 500)',
+        FormatWireStatus(status));
+end;
+
 procedure TestWireCompression;
 var DPB: IDPB;
     Att2: IAttachment;
@@ -1636,6 +1673,7 @@ begin
   TestMessageLayout;
   TestProtocol;
   TestProtocolNegotiation;
+  TestEngineMessages;
 
   if OpenTestDatabase then
   try

@@ -133,6 +133,9 @@ Working and covered by the test suite:
   `isc_dpb_config` item of `WireCompression=true` and effective when the
   server also enables it - deflate below the cipher, one stream per
   direction
+* engine error message text without `firebird.msg`: a generated table of
+  the message format strings, so status vectors read as `fb_interpret`
+  renders them, SQLCODE line included
 
 Deliberately not implemented yet. These raise `ibxeNotSupported` rather
 than failing in a confusing way:
@@ -461,12 +464,12 @@ apply `runtest.sh`'s normalisation, and commit it.
 
 | Server | WireCrypt | Negotiated | Encryption | Result |
 |---|---|---|---|---|
-| 6.0 (CI container) | Enabled, Required | 20 | `ChaCha64` | 167 tests, 0 failures |
-| 6.0.0 (local, LI-T6.0.0.2076) | Required | 20 | `ChaCha64` | 167 tests, 0 failures |
-| 5.0 (CI container) | Enabled, Required | 19 | `ChaCha64` | 167 tests, 0 failures |
-| 5.0.4 (local container) | Enabled, Required | 19 | `ChaCha64` | 167 tests, 0 failures |
-| 4.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 167 tests, 0 failures |
-| 3.0 (CI container) | Enabled | 15 | `Arc4` | 167 tests, 0 failures |
+| 6.0 (CI container) | Enabled, Required | 20 | `ChaCha64` | 171 tests, 0 failures |
+| 6.0.0 (local, LI-T6.0.0.2076) | Required | 20 | `ChaCha64` | 171 tests, 0 failures |
+| 5.0 (CI container) | Enabled, Required | 19 | `ChaCha64` | 171 tests, 0 failures |
+| 5.0.4 (local container) | Enabled, Required | 19 | `ChaCha64` | 171 tests, 0 failures |
+| 4.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 171 tests, 0 failures |
+| 3.0 (CI container) | Enabled | 15 | `Arc4` | 171 tests, 0 failures |
 | no server | — | — | — | 36 tests, live sections skipped |
 
 Firebird 3 settles on protocol 15 with Arc4: it is the newest protocol that
@@ -533,7 +536,7 @@ machinery that already exists to support it.
 | 9 | Inline blobs — **done** | `op_inline_blob`, protocol raised to 19 | 19 |
 | 10 | Firebird 6 protocol 20 — **done** | offer raised to 20, `isc_dpb_search_path`, schema aware describe | 20 |
 | 11 | Wire compression — **done** | `pflag_compress`, zlib beneath the cipher | 13 |
-| 12 | Engine message text | a `firebird.msg` reader or a generated table | — |
+| 12 | Engine message text — **done** | the generated `FBWireMessages` table | — |
 
 ### 1. Run the existing test suite against this provider — done
 
@@ -833,13 +836,32 @@ which the unchanged suite reference log proves; FPC's pure Pascal
 `paszlib` supplies zlib, so the no-external-dependencies property
 survives.
 
-### 12. Engine message text
+### 12. Engine message text — done
 
-The one visible difference from the stock providers. Two ways to close it:
-read `firebird.msg` when a copy happens to be available, or generate a
-Pascal table of the common `isc_*` codes and their format strings from
-`msgs.sql` at build time. The second keeps the no dependencies property and
-is a few hundred kilobytes of generated source.
+The generated table route: `generate_messages.py` reads the message
+headers of a pinned Firebird tree (`src/include/firebird/impl/msg` -
+the modern replacement for `messages2.sql`) and emits
+`FBWireMessages.pas`, committed alongside it: 1682 messages for the
+facilities a server round trip can produce (JRD, DSQL, DYN, SQLERR,
+SQLWARN), each with its format string and its SQLCODE. Roughly 200KB
+of binary, and the provider's no-dependencies property survives.
+
+`FormatWireStatus` renders a decoded status vector the way
+`fb_interpret` does - each `isc_arg_gds` item's format string with its
+`@1..@n` arguments substituted, interpreted items verbatim, successive
+items joined with a `-` continuation - and is the single formatter
+behind `EIBInterBaseError` messages and the protocol level exception.
+The status object also answers `Getsqlcode` (the `gds__sqlcode` rules:
+an `isc_sqlerr` item's number argument wins, else the first item's
+mapping) and the per SQLCODE interpretation line (`isc_sql_interprete`'s
+facility 13/14 lookup), so the full fbclient error shape - SQLCODE
+line, SQL message, engine code, message text - now appears over the
+wire. Two behavioural gaps this exposed are also closed: prepare errors
+name the offending statement (` When Executing: ...`) and the stale
+reference checks raise `ibxeInterfaceOutofDate` exactly as the 3.0
+provider does. Error output is now identical to `fbclient` on the same
+server, apart from sections a test skips for the wire provider by
+design.
 
 ### Not planned
 

@@ -110,6 +110,9 @@ type
     FIsInput: boolean;
     FFormat: TWireMessageFormat;
     FBuffer: TBytes;
+    FTransactionSeqNo: integer;  {the transaction generation the area was
+                                  prepared or executed under - stale
+                                  reference checks compare against it}
   protected
     function GetStatement: IStatement; override;
     function GetPrepareSeqNo: integer; override;
@@ -948,13 +951,25 @@ begin
     FSQLStatementType := TIBSQLStatementTypes(FStatementInfo.StatementType);
     FSQLParams.Bind(FStatementInfo.InputFormat,FStatementInfo.InputBufferSize);
     FSQLRecord.Bind(FStatementInfo.OutputFormat,FStatementInfo.OutputBufferSize);
+    FSQLParams.FTransactionSeqNo :=
+      (FTransactionIntf as TObject as TFBTransaction).TransactionSeqNo;
+    FSQLRecord.FTransactionSeqNo := FSQLParams.FTransactionSeqNo;
     if FCursorName <> '' then
       Connection.SetCursorName(FHandle,FCursorName);
   except
     on E: Exception do
     begin
       FPrepared := false;
-      WireIBError(FWireAPI,E);
+      try
+        WireIBError(FWireAPI,E);
+      except
+        on E2: EIBInterBaseError do
+        begin
+          {name the statement in the error, as the other providers do}
+          E2.Message := E2.Message + sSQLErrorSeparator + FSQL;
+          raise;
+        end;
+      end;
     end;
   end;
   FPrepared := true;
@@ -972,6 +987,11 @@ begin
   if not FPrepared then
     InternalPrepare;
   CheckHandle;
+  if FStaleReferenceChecks and (FSQLParams.FTransactionSeqNo <
+       (FTransactionIntf as TObject as TFBTransaction).TransactionSeqNo) then
+    IBError(ibxeInterfaceOutofDate,[nil]);
+  FSQLRecord.FTransactionSeqNo :=
+    (FTransactionIntf as TObject as TFBTransaction).TransactionSeqNo;
   FBOF := false;
   FEOF := false;
   FSingleResults := false;
@@ -1036,6 +1056,11 @@ begin
   if not FPrepared then
     InternalPrepare;
   CheckHandle;
+  if FStaleReferenceChecks and (FSQLParams.FTransactionSeqNo <
+       (FTransactionIntf as TObject as TFBTransaction).TransactionSeqNo) then
+    IBError(ibxeInterfaceOutofDate,[nil]);
+  FSQLRecord.FTransactionSeqNo :=
+    (aTransaction as TObject as TFBTransaction).TransactionSeqNo;
   if FSQLRecord.Count = 0 then
     IBError(ibxeIsASelectStatement,[nil]);
   paramPtr := nil;

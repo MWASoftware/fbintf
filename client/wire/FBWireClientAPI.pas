@@ -70,12 +70,21 @@ type
   TFBWireStatus = class(TFBStatus,IStatus)
   private
     FStatusVector: TStatusVector;
+    FWireStatus: TWireStatusVector;  {the decoded vector, argument
+                                      structure intact, for formatting}
     FMessage: AnsiString;
   protected
     function GetIBMessage(CodePage: TSystemCodePage): AnsiString; override;
   public
     constructor Create(aOwner: TFBClientAPI; prefix: AnsiString = '');
     constructor Copy(src: TFBWireStatus);
+    {SQLCODE support without the client library: the generated message
+     table carries each engine code's SQLCODE and the per SQLCODE texts
+     (facility 13 at 1000+sqlcode, facility 14 for warnings) - the same
+     lookups isc_sqlcode and isc_sql_interprete perform}
+    function SQLCodeSupported: boolean; override;
+    function Getsqlcode: TStatusCode; override;
+    function GetSQLMessage(CodePage: TSystemCodePage): Ansistring; override;
     function StatusVector: PStatusVector; override;
     function Clone: IStatus; override;
     function InErrorState: boolean; override;
@@ -165,7 +174,7 @@ function ParamBlockToBytes(aBlock: IUnknown): TBytes;
 implementation
 
 uses FBMessages, IBErrorCodes, FBParamBlock, FBAttachment, FBTransaction,
-  IBUtils, FBWireAttachment;
+  IBUtils, FBWireAttachment, FBWireMessages;
 
 const
   {days between the Delphi TDateTime zero (1899-12-30) and the Firebird
@@ -231,6 +240,7 @@ constructor TFBWireStatus.Copy(src: TFBWireStatus);
 begin
   inherited Copy(src);
   FStatusVector := src.FStatusVector;
+  FWireStatus := system.copy(src.FWireStatus);
   FMessage := src.FMessage;
 end;
 
@@ -240,15 +250,80 @@ begin
   FStatusVector[0] := isc_arg_gds;
   FStatusVector[1] := 0;
   FStatusVector[2] := isc_arg_end;
+  SetLength(FWireStatus,0);
   FMessage := '';
+end;
+
+function TFBWireStatus.SQLCodeSupported: boolean;
+begin
+  Result := true;
+end;
+
+function TFBWireStatus.Getsqlcode: TStatusCode;
+var i: integer;
+    sqlcode: integer;
+begin
+  {the gds__sqlcode rules: an isc_sqlerr item anywhere in the vector
+   carries the SQLCODE as its number argument and wins outright;
+   otherwise the first item's own mapping decides, -999 by default}
+  for i := 0 to Length(FWireStatus) - 1 do
+    if (FWireStatus[i].Kind = isc_arg_gds) and
+       (FWireStatus[i].IntValue = isc_sqlerr) and
+       (i + 1 < Length(FWireStatus)) and
+       (FWireStatus[i+1].Kind = isc_arg_number) then
+      Exit(FWireStatus[i+1].IntValue);
+  Result := -999; {generic SQL Code}
+  for i := 0 to Length(FWireStatus) - 1 do
+    if (FWireStatus[i].Kind = isc_arg_gds) and (FWireStatus[i].IntValue <> 0) then
+    begin
+      sqlcode := EngineMessageSQLCode(cardinal(FWireStatus[i].IntValue));
+      if sqlcode <> NoSQLCode then
+        Result := sqlcode;
+      break; {only the first item's mapping counts}
+    end;
+end;
+
+function TFBWireStatus.GetSQLMessage(CodePage: TSystemCodePage): Ansistring;
+var sqlcode: integer;
+    fmt: AnsiString;
+    code: cardinal;
+    i: integer;
+begin
+  {what isc_sql_interprete answers: facility 13 message 1000+sqlcode for
+   errors, facility 14 message sqlcode for warnings}
+  Result := '';
+  sqlcode := Getsqlcode;
+  if sqlcode < 0 then
+    code := cardinal($14000000) or (13 shl 16) or cardinal(1000 + sqlcode)
+  else
+    code := cardinal($14000000) or (14 shl 16) or cardinal(sqlcode);
+  if FindEngineMessage(code,fmt) then
+  begin
+    {the per SQLCODE texts carry no useful arguments here - strip any
+     placeholders, as isc_sql_interprete substitutes empties}
+    i := 1;
+    while i <= Length(fmt) do
+    begin
+      if (fmt[i] = '@') and (i < Length(fmt)) and (fmt[i+1] in ['1'..'9']) then
+        Inc(i,2)
+      else
+      begin
+        Result := Result + fmt[i];
+        Inc(i);
+      end;
+    end;
+  end;
 end;
 
 function TFBWireStatus.GetIBMessage(CodePage: TSystemCodePage): AnsiString;
 begin
-  {The engine sends interpreted message text with most errors. When it does
-   not, all we can offer is the error code itself: firebird.msg belongs to
-   the client library which this provider deliberately does not use.}
-  Result := FMessage;
+  {formatted from the decoded vector and the generated message table -
+   the same text fb_interpret produces from firebird.msg, without the
+   file. SetError stores its text in FMessage instead.}
+  if Length(FWireStatus) > 0 then
+    Result := FormatWireStatus(FWireStatus)
+  else
+    Result := FMessage;
   if Result = '' then
     Result := Format('Firebird Error Code: %d',[FStatusVector[1]]);
 end;
@@ -272,8 +347,10 @@ procedure TFBWireStatus.SetFromWireStatus(const aStatus: TWireStatusVector);
 var i, v: integer;
 begin
   Clear;
+  {keep the decoded vector: GetIBMessage formats it the way fb_interpret
+   would, from the generated message table}
+  FWireStatus := system.copy(aStatus);
   v := 0;
-  FMessage := '';
   for i := 0 to Length(aStatus) - 1 do
   begin
     {leave room for the isc_arg_end terminator}
@@ -285,14 +362,6 @@ begin
         FStatusVector[v] := aStatus[i].Kind;
         FStatusVector[v+1] := NativeInt(aStatus[i].IntValue);
         Inc(v,2);
-      end;
-    isc_arg_string, isc_arg_interpreted, isc_arg_sql_state:
-      begin
-        {the string must outlive this call - the status vector holds a
-         pointer to it, so keep it in FMessage}
-        if FMessage <> '' then
-          FMessage := FMessage + LineEnding + '-';
-        FMessage := FMessage + aStatus[i].StrValue;
       end;
     end;
   end;
@@ -306,6 +375,7 @@ begin
   FStatusVector[0] := isc_arg_gds;
   FStatusVector[1] := aErrorCode;
   FStatusVector[2] := isc_arg_end;
+  SetLength(FWireStatus,0);
   FMessage := aMessage;
 end;
 
