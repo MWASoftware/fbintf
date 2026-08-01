@@ -10,7 +10,7 @@ Creating a Database with empty parameters
 Create Database fails (as expected): Engine Code: 0
 Firebird Error Code: 0
 Creating a Database using an SQL Statement
-Database ID = 3 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = d3b2afa28347
+Database ID = 3 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = 81c2762b4b7a
 SQL Dialect = 3
 DB Connect String = inet://localhost//tmp/fbintf-testsuite/testsuite1.fdb
 DB Charset ID = 0
@@ -48,7 +48,7 @@ DPB: Item Count = 4
   isc_dpb_set_db_sql_dialect = 3
 
 Creating a Database with a DPD
-Database ID = 3 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = d3b2afa28347
+Database ID = 3 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = 81c2762b4b7a
 ODS major = 14
 ODS minor = 0
 Attachment ID = 3
@@ -2771,7 +2771,7 @@ MYARRAY = Array: (0,-1: A50) (0,0: A51) (0,1: A52) (0,2: A53) (0,3: A54) (0,4: A
 
 ------------------------------------------------------
 Running Test 9: Database Information tests
-Database ID = 3 FB = /tmp/fbintf-testsuite/employee.fdb SN = d3b2afa28347
+Database ID = 3 FB = /tmp/fbintf-testsuite/employee.fdb SN = 81c2762b4b7a
 Pages =401
 Base Level = 13,3,0,
 Implementation = 11,5,0,2,66,
@@ -2781,7 +2781,7 @@ ODS major = 14
 Page Size = 8192
 Version = 1: LI-T6.3.0.2105 Firebird 6.0 1d25527
 Database is Read/Write
-Database Created: 01/8/2026 18:19:47
+Database Created: 01/8/2026 18:47:36
 Pages Used = 388
 Pages Free = 13
 Server Memory = 19488400
@@ -2871,6 +2871,64 @@ Event Counts: TESTEVENT, Count = 2
 
 ------------------------------------------------------
 Running Test 11: Services API
+SPB: Item Count = 2
+  user_name = SYSDBA
+  password = masterkey
+
+Service Manager Version = 2
+Server Version = LI-T6.0.0.2105 Firebird 6.0 1d25527
+Implementation = Firebird/Linux/AMD/Intel/x64
+
+Lock Directory = /tmp/firebird/
+Message File = /opt/firebird/
+Security File = /opt/firebird/security6.fdb
+
+DB Attachments
+No. of Attachments = 0
+Databases In Use = 0
+
+Sec. Database User
+User Name = SYSDBA
+First Name = 
+Middle Name = 
+Last Name = 
+User ID = 0
+Group ID = 0
+
+
+Licence Info: Engine Code: 335544378
+feature is not supported
+-feature is not supported
+
+Licence Mask Info: Engine Code: 335544378
+feature is not supported
+
+Capabilities = 6
+
+
+Get Limbo transactions
+
+Limbo Transactions
+
+
+Local Backup
+
+
+
+Local Backup Complete
+
+Local Restore
+
+
+
+
+
+
+Local Restore Complete
+
+Open Database Check
+Database OK
+Database Dropped
 
 
 ------------------------------------------------------
@@ -3378,6 +3436,21 @@ COUNTER = 42
 New Transaction before Open Cursor
 COUNTER = 42
 
+Invalid Server Name Test
+Error Handled: SQLCODE: -999
+Firebird error
+Engine Code: 335544721
+Unable to connect to server "unknown" port 3050: Host name resolution for "unknown" failed
+Invalid User Name Test
+Error Handled: SQLCODE: -902
+Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Engine Code: 335544472
+Your user name and password are not defined. Ask your database administrator to set up a Firebird login
+Invalid password Test
+Error Handled: SQLCODE: -999
+Firebird error
+Engine Code: 335544721
+Unsupported authentication plugin "Legacy_Auth"
 
 
 ------------------------------------------------------
@@ -4325,12 +4398,12 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 9
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA
-IBX$CREATED = 2026/08/01 18:20:53.7310
+IBX$CREATED = 2026/08/01 18:48:46.8540
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 11
 IBX$OLDTRANSACTIONID = 10
 IBX$USER = SYSDBA
-IBX$CREATED = 2026/08/01 18:20:53.7410
+IBX$CREATED = 2026/08/01 18:48:46.8610
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)

@@ -55,6 +55,7 @@ if [ -x testsuite ]; then
         -e 's|^Database Created: .*|Database Created: yyyy/mm/dd hh:mm:ss|' \
         -e 's|^Version = 1: .*|Version = 1: server version string|' \
         -e 's|^Implementation = .*|Implementation = implementation codes|' \
+        -e 's|^Server Version = .*|Server Version = server version string|' \
         -e 's|^RDB$SECURITY_CLASS = .*|RDB$SECURITY_CLASS = SQL$nnn|' \
         "$1"
   }
