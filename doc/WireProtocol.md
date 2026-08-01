@@ -659,8 +659,12 @@ SDL's view of the column.
 Finding the arrays also flushed out a provider wide leak: the wire
 statement's `TWireSQLDataArea` never freed its column variables (the 3.0
 provider frees them in `FreeXSQLDA`), which pinned every blob, array and
-SDL block a statement had touched. Fixed with a destructor and a
-`SetCount` that frees on shrink.
+SDL block a statement had touched - and, through the blobs' transaction
+references, kept transactions alive so that their `taCommit` default
+completion never ran. Test 6's execute procedure result had recorded the
+symptom in the reference log as a NULL blob. Fixed with a destructor and
+a `SetCount` that frees on shrink; the suite output now matches the
+fbclient providers on that line.
 
 ### 6. Statement timeouts and cancellation
 

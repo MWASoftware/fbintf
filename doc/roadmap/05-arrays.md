@@ -32,6 +32,14 @@ acceptance. The design below held, with these findings:
   on shrink; Test 4's leak report dropped from 273 unfreed blocks to 33
   and Test 7's from 834 to 229, the remainder shared with the fbclient
   providers.
+* The leak was not only memory: a leaked column variable holds its
+  `IBlob`, and a blob holds its `ITransaction`, so any transaction a
+  blob had passed through was never released and its `taCommit` default
+  completion never ran. Test 6's execute procedure section had baked
+  the symptom into the wire reference log as `BLOBDATA = NULL` — the
+  procedure, running in a later transaction, correctly saw data that
+  had never been committed. With the fix the output matches the
+  fbclient providers' reference logs.
 
 ## Goal
 
