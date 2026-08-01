@@ -70,7 +70,9 @@ jobs:
             -e FIREBIRD_CONF_WireCrypt="${{ matrix.wirecrypt }}" \
             -e FIREBIRD_CONF_AuthServer="Srp256;Srp;Legacy_Auth" \
             -e FIREBIRD_CONF_DatabaseAccess="Full" \
+            -e FIREBIRD_CONF_RemoteAuxPort="3051" \
             -p 3050:3050 \
+            -p 3051:3051 \
             "${{ matrix.image }}"
 
           echo "Waiting for the server to accept connections"
@@ -225,8 +227,10 @@ jobs:
             -e FIREBIRD_CONF_WireCrypt="Enabled" \
             -e FIREBIRD_CONF_AuthServer="Srp256;Srp;Legacy_Auth" \
             -e FIREBIRD_CONF_DatabaseAccess="Full" \
+            -e FIREBIRD_CONF_RemoteAuxPort="3051" \
             -v /tmp/fbintf-testsuite:/tmp/fbintf-testsuite \
             -p 3050:3050 \
+            -p 3051:3051 \
             firebirdsql/firebird:6-snapshot
           echo "Waiting for the server to accept connections"
           ready=false

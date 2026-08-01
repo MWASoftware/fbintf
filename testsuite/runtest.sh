@@ -48,6 +48,14 @@ if [ -x testsuite ]; then
         -e 's|^Reads  = [0-9][0-9]*|Reads  = nnnn|' \
         -e 's|^Writes  = [0-9][0-9]*|Writes  = nnnn|' \
         -e 's|^Page Writes  = [0-9][0-9]*|Page Writes  = nnnn|' \
+        -e 's|^Count = [0-9][0-9]*|Count = nnnn|' \
+        -e 's|^Pages =[0-9][0-9]*|Pages =nnnn|' \
+        -e 's|^Server Memory = [0-9][0-9]*|Server Memory = nnnn|' \
+        -e 's|^Max Memory  = [0-9][0-9]*|Max Memory  = nnnn|' \
+        -e 's|^Database Created: .*|Database Created: yyyy/mm/dd hh:mm:ss|' \
+        -e 's|^Version = 1: .*|Version = 1: server version string|' \
+        -e 's|^Implementation = .*|Implementation = implementation codes|' \
+        -e 's|^RDB$SECURITY_CLASS = .*|RDB$SECURITY_CLASS = SQL$nnn|' \
         "$1"
   }
   if grep 'Provider = pure Pascal wire protocol' testout.log >/dev/null; then

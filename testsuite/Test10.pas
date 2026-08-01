@@ -107,6 +107,8 @@ begin
     Sleep(50);
     CheckSynchronize;
   end;
+  Sleep(50);
+  CheckSynchronize; {ensure the event report is printed first}
   ShowEventCounts(EventHandler);
   FEventSignalled := false;
 
@@ -121,8 +123,18 @@ begin
   writeln(OutFile,'Call Async Wait');
   EventHandler.AsyncWaitForEvent(EventReport);
   writeln(OutFile,'Async Wait Called');
-  sleep(500);
-  CheckSynchronize;
+  {the deferred delivery is immediate in protocol terms but its arrival
+   time depends on the machine: poll with a generous limit so that a
+   loaded test host does not turn it into a missed event}
+  WaitCount := 0;
+  while not FEventSignalled and (WaitCount < 5000) do
+  begin
+    Sleep(50);
+    CheckSynchronize;
+    Inc(WaitCount,50);
+  end;
+  Sleep(50);
+  CheckSynchronize; {ensure the event report is printed first}
   if FEventSignalled then
   begin
     writeln(OutFile,'Deferred Events Caught');
@@ -142,6 +154,16 @@ begin
   FEventSignalled := false;
   writeln(OutFile,'Async Wait: Test Cancel');
   EventHandler.AsyncWaitForEvent(EventReport);
+  {allow the immediate delivery to be reported before continuing, so that
+   the output order is deterministic even on a loaded test host}
+  WaitCount := 0;
+  while not FEventSignalled and (WaitCount < 5000) do
+  begin
+    Sleep(50);
+    CheckSynchronize;
+    Inc(WaitCount,50);
+  end;
+  Sleep(50);
   CheckSynchronize;
   writeln(OutFile,'Async Wait Called');
   EventHandler.Cancel;
