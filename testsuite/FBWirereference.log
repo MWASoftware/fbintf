@@ -10,7 +10,7 @@ Creating a Database with empty parameters
 Create Database fails (as expected): Engine Code: 0
 Firebird Error Code: 0
 Creating a Database using an SQL Statement
-Database ID = 3 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = 9bd44453cb08
+Database ID = 3 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = bc3ec55b7e3d
 SQL Dialect = 3
 DB Connect String = inet://localhost//tmp/fbintf-testsuite/testsuite1.fdb
 DB Charset ID = 0
@@ -27,7 +27,7 @@ DPB: Item Count = 3
   isc_dpb_set_db_sql_dialect = 3
 
 Firebird Server Version Info
-Firebird wire protocol version 19, Srp256 authentication, ChaCha64 wire encryption
+Firebird wire protocol version 20, Srp256 authentication, ChaCha64 wire encryption
 
 Dropping Database
 Creating a Database with a DPD
@@ -48,7 +48,7 @@ DPB: Item Count = 4
   isc_dpb_set_db_sql_dialect = 3
 
 Creating a Database with a DPD
-Database ID = 3 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = 9bd44453cb08
+Database ID = 3 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = bc3ec55b7e3d
 ODS major = 14
 ODS minor = 0
 Attachment ID = 3
@@ -414,7 +414,7 @@ Constrained Employee Count = 3
 Running Test 4: Update, Insert and Delete Queries
 Opening inet://localhost/employee
 Database Open
-Firebird wire protocol version 19, Srp256 authentication, ChaCha64 wire encryption
+Firebird wire protocol version 20, Srp256 authentication, ChaCha64 wire encryption
 Select Count = 1 InsertCount = 0 UpdateCount = 1 DeleteCount = 0
 EMP_NO = 8
 FIRST_NAME = Leslie
@@ -2771,7 +2771,7 @@ MYARRAY = Array: (0,-1: A50) (0,0: A51) (0,1: A52) (0,2: A53) (0,3: A54) (0,4: A
 
 ------------------------------------------------------
 Running Test 9: Database Information tests
-Database ID = 3 FB = /tmp/fbintf-testsuite/employee.fdb SN = 9bd44453cb08
+Database ID = 3 FB = /tmp/fbintf-testsuite/employee.fdb SN = bc3ec55b7e3d
 Pages =401
 Base Level = 13,3,0,
 Implementation = 11,5,0,2,66,
@@ -2781,7 +2781,7 @@ ODS major = 14
 Page Size = 8192
 Version = 1: LI-T6.3.0.2105 Firebird 6.0 1d25527
 Database is Read/Write
-Database Created: 01/8/2026 15:48:15
+Database Created: 01/8/2026 16:48:42
 Pages Used = 388
 Pages Free = 13
 Server Memory = 19488400
@@ -3360,7 +3360,7 @@ COUNTER = 42
 
 ------------------------------------------------------
 Running Test 17: Date/Time tests and Firebird 4 extensions
- FBVersion = Firebird wire protocol version 19, Srp256 authentication, ChaCha64 wire encryption
+ FBVersion = Firebird wire protocol version 20, Srp256 authentication, ChaCha64 wire encryption
 Has Local TZ DB = FALSE
 
 Testdata
@@ -3444,7 +3444,7 @@ Skipping Firebird 4 and later test part - time zone services are not supported b
 
 ------------------------------------------------------
 Running Test 18: Firebird 4 Decfloat extensions
- FBVersion = Firebird wire protocol version 19, Srp256 authentication, ChaCha64 wire encryption
+ FBVersion = Firebird wire protocol version 20, Srp256 authentication, ChaCha64 wire encryption
 
 FB4 Testdata_DECFloat
 
@@ -3713,7 +3713,7 @@ BigNumber Array: (0: 0) (1: 0) (2: 0) (3: 0) (4: 0) (5: 0) (6: 0) (7: 0) (8: 0) 
 Running Test 19: Batch Update and Insert Queries
 Opening inet://localhost/employee
 Database Open
-Firebird wire protocol version 19, Srp256 authentication, ChaCha64 wire encryption
+Firebird wire protocol version 20, Srp256 authentication, ChaCha64 wire encryption
 Rows before update
 EMP_NO = 2
 FIRST_NAME = Robert
@@ -3964,7 +3964,7 @@ Row 2 State = bcExecuteFailed Msg = Engine Code: 335544665
 
 ------------------------------------------------------
 Running Test 20: Stress Test IBatch interface
- FBVersion = Firebird wire protocol version 19, Srp256 authentication, ChaCha64 wire encryption
+ FBVersion = Firebird wire protocol version 20, Srp256 authentication, ChaCha64 wire encryption
 10000 rows added
 20000 rows added
 30000 rows added
@@ -4301,12 +4301,12 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 9
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA
-IBX$CREATED = 2026/08/01 15:49:22.0610
+IBX$CREATED = 2026/08/01 16:51:12.7700
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 11
 IBX$OLDTRANSACTIONID = 10
 IBX$USER = SYSDBA
-IBX$CREATED = 2026/08/01 15:49:22.0690
+IBX$CREATED = 2026/08/01 16:51:12.9590
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)
