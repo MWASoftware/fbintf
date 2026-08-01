@@ -10,7 +10,7 @@ Creating a Database with empty parameters
 Create Database fails (as expected): Engine Code: 0
 Firebird Error Code: 0
 Creating a Database using an SQL Statement
-Database ID = 3 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = c81b9803da3d
+Database ID = 3 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = 1243258ab623
 SQL Dialect = 3
 DB Connect String = inet://localhost//tmp/fbintf-testsuite/testsuite1.fdb
 DB Charset ID = 0
@@ -27,7 +27,7 @@ DPB: Item Count = 3
   isc_dpb_set_db_sql_dialect = 3
 
 Firebird Server Version Info
-Firebird wire protocol version 17, Srp256 authentication, ChaCha64 wire encryption
+Firebird wire protocol version 18, Srp256 authentication, ChaCha64 wire encryption
 
 Dropping Database
 Creating a Database with a DPD
@@ -48,7 +48,7 @@ DPB: Item Count = 4
   isc_dpb_set_db_sql_dialect = 3
 
 Creating a Database with a DPD
-Database ID = 3 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = c81b9803da3d
+Database ID = 3 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = 1243258ab623
 ODS major = 14
 ODS minor = 0
 Attachment ID = 3
@@ -304,6 +304,90 @@ JOB_COUNTRY = USA
 SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
+Scollable Cursors
+DB Connect String = inet://localhost/employee
+DB Charset ID = 4
+DB SQL Dialect = 3
+DB Remote Protocol = TCPv4
+DB ODS Major Version = 14
+DB ODS Minor Version = 0
+User Authentication Method = Srp256
+Firebird Library Path = none (wire protocol provider)
+DB Client Implementation Version = 5.0
+Do Fetch Next:
+EMP_NO = 2
+FIRST_NAME = Robert
+LAST_NAME = Nelson
+PHONE_EXT = 250
+HIRE_DATE = 1988/12/28 00:00:00.0000
+DEPT_NO = 600
+JOB_CODE = VP
+JOB_GRADE = 2
+JOB_COUNTRY = USA
+SALARY = 105,900.00
+FULL_NAME = Nelson, Robert
+Do Fetch Last:
+EMP_NO = 145
+FIRST_NAME = Mark
+LAST_NAME = Guckenheimer
+PHONE_EXT = 221
+HIRE_DATE = 1994/05/02 00:00:00.0000
+DEPT_NO = 622
+JOB_CODE = Eng
+JOB_GRADE = 5
+JOB_COUNTRY = USA
+SALARY = 32,000.00
+FULL_NAME = Guckenheimer, Mark
+Do Fetch Prior:
+EMP_NO = 144
+FIRST_NAME = John
+LAST_NAME = Montgomery
+PHONE_EXT = 820
+HIRE_DATE = 1994/03/30 00:00:00.0000
+DEPT_NO = 672
+JOB_CODE = Eng
+JOB_GRADE = 5
+JOB_COUNTRY = USA
+SALARY = 35,000.00
+FULL_NAME = Montgomery, John
+Do Fetch First:
+EMP_NO = 2
+FIRST_NAME = Robert
+LAST_NAME = Nelson
+PHONE_EXT = 250
+HIRE_DATE = 1988/12/28 00:00:00.0000
+DEPT_NO = 600
+JOB_CODE = VP
+JOB_GRADE = 2
+JOB_COUNTRY = USA
+SALARY = 105,900.00
+FULL_NAME = Nelson, Robert
+Do Fetch Abs 8 :
+EMP_NO = 14
+FIRST_NAME = Stewart
+LAST_NAME = Hall
+PHONE_EXT = 227
+HIRE_DATE = 1990/06/04 00:00:00.0000
+DEPT_NO = 900
+JOB_CODE = Finan
+JOB_GRADE = 3
+JOB_COUNTRY = USA
+SALARY = 69,482.63
+FULL_NAME = Hall, Stewart
+Do Fetch Relative -2 :
+EMP_NO = 11
+FIRST_NAME = K. J.
+LAST_NAME = Weston
+PHONE_EXT = 34
+HIRE_DATE = 1990/01/17 00:00:00.0000
+DEPT_NO = 130
+JOB_CODE = SRep
+JOB_GRADE = 4
+JOB_COUNTRY = USA
+SALARY = 86,292.94
+FULL_NAME = Weston, K. J.
+Do Fetch beyond EOF :
+Fetch returned false
 Now open the employee database as a local database
 Skipping local database test - not supported by provider
 
@@ -313,7 +397,7 @@ Running Test 3: ad hoc queries
 Opening inet://localhost/employee
 Database Open
 Employee Count = 42
-Transaction ID = 59
+Transaction ID = 61
 Transaction is Read/Write
 Transaction Database Path = employee
 Transaction ID = 0
@@ -330,7 +414,7 @@ Constrained Employee Count = 3
 Running Test 4: Update, Insert and Delete Queries
 Opening inet://localhost/employee
 Database Open
-Firebird wire protocol version 17, Srp256 authentication, ChaCha64 wire encryption
+Firebird wire protocol version 18, Srp256 authentication, ChaCha64 wire encryption
 Select Count = 1 InsertCount = 0 UpdateCount = 1 DeleteCount = 0
 EMP_NO = 8
 FIRST_NAME = Leslie
@@ -2687,7 +2771,7 @@ MYARRAY = Array: (0,-1: A50) (0,0: A51) (0,1: A52) (0,2: A53) (0,3: A54) (0,4: A
 
 ------------------------------------------------------
 Running Test 9: Database Information tests
-Database ID = 3 FB = /tmp/fbintf-testsuite/employee.fdb SN = c81b9803da3d
+Database ID = 3 FB = /tmp/fbintf-testsuite/employee.fdb SN = 1243258ab623
 Pages =401
 Base Level = 13,3,0,
 Implementation = 11,5,0,2,66,
@@ -2697,7 +2781,7 @@ ODS major = 14
 Page Size = 8192
 Version = 1: LI-T6.3.0.2105 Firebird 6.0 1d25527
 Database is Read/Write
-Database Created: 01/8/2026 10:43:49
+Database Created: 01/8/2026 14:10:13
 Pages Used = 388
 Pages Free = 13
 Server Memory = 19488400
@@ -3276,7 +3360,7 @@ COUNTER = 42
 
 ------------------------------------------------------
 Running Test 17: Date/Time tests and Firebird 4 extensions
- FBVersion = Firebird wire protocol version 17, Srp256 authentication, ChaCha64 wire encryption
+ FBVersion = Firebird wire protocol version 18, Srp256 authentication, ChaCha64 wire encryption
 Has Local TZ DB = FALSE
 
 Testdata
@@ -3360,7 +3444,7 @@ Skipping Firebird 4 and later test part - time zone services are not supported b
 
 ------------------------------------------------------
 Running Test 18: Firebird 4 Decfloat extensions
- FBVersion = Firebird wire protocol version 17, Srp256 authentication, ChaCha64 wire encryption
+ FBVersion = Firebird wire protocol version 18, Srp256 authentication, ChaCha64 wire encryption
 
 FB4 Testdata_DECFloat
 
@@ -3633,7 +3717,7 @@ Skipping test for Firebird 4 and later
 
 ------------------------------------------------------
 Running Test 20: Stress Test IBatch interface
- FBVersion = Firebird wire protocol version 17, Srp256 authentication, ChaCha64 wire encryption
+ FBVersion = Firebird wire protocol version 18, Srp256 authentication, ChaCha64 wire encryption
 Skipping test - batch mode is not supported by this provider
 
 
@@ -3945,12 +4029,12 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 9
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA
-IBX$CREATED = 2026/08/01 10:45:01.4040
+IBX$CREATED = 2026/08/01 14:11:20.8830
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 11
 IBX$OLDTRANSACTIONID = 10
 IBX$USER = SYSDBA
-IBX$CREATED = 2026/08/01 10:45:01.4130
+IBX$CREATED = 2026/08/01 14:11:20.8920
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)
