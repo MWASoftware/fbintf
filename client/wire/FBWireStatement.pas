@@ -225,6 +225,11 @@ type
     function GetSQLParams: ISQLParams; override;
     function GetMetaData: IMetaData; override;
     function GetFlags: TStatementFlags; override;
+    {the schema name a protocol 20 server reported for an output column,
+     empty on older protocols. fbintf has no schema surface on
+     IColumnMetaData yet, so callers that need it reach it through the
+     class - as the tests do.}
+    function ColumnSchemaName(aIndex: integer): AnsiString;
     {needs protocol 16 - the p_sqldata_timeout field of op_execute}
     procedure SetStatementTimeout(aMilliseconds: cardinal); override;
     {IBatch support - needs protocol 16 (the op_batch_* family)}
@@ -928,11 +933,15 @@ begin
       if FProcessedSQL = '' then
         ProcessSQL(FSQL,FGenerateParamNames,FProcessedSQL);
       response := Connection.PrepareStatement(GetTransactionHandle,FHandle,
-                    FSQLDialect,FProcessedSQL,DescribeItems,DefaultBufferSize);
+                    FSQLDialect,FProcessedSQL,
+                    DescribeItems(Connection.ProtocolVersion >= (PROTOCOL_VERSION20 and FB_PROTOCOL_MASK)),
+                    DefaultBufferSize);
     end
     else
       response := Connection.PrepareStatement(GetTransactionHandle,FHandle,
-                    FSQLDialect,FSQL,DescribeItems,DefaultBufferSize);
+                    FSQLDialect,FSQL,
+                    DescribeItems(Connection.ProtocolVersion >= (PROTOCOL_VERSION20 and FB_PROTOCOL_MASK)),
+                    DefaultBufferSize);
     FStatementInfo := ParsePrepareResponse(response);
     if FStatementInfo.Truncated then
       IBError(ibxeInfoBufferTypeError,[nil]);
@@ -1182,6 +1191,13 @@ begin
     InternalPrepare;
   CheckHandle;
   Result := TMetaData.Create(FSQLRecord);
+end;
+
+function TFBWireStatement.ColumnSchemaName(aIndex: integer): AnsiString;
+begin
+  Result := '';
+  if (aIndex >= 0) and (aIndex < Length(FSQLRecord.Format)) then
+    Result := FSQLRecord.Format[aIndex].SchemaName;
 end;
 
 function TFBWireStatement.GetFlags: TStatementFlags;

@@ -134,6 +134,15 @@
     isc_dpb_decfloat_round = 94;    
     isc_dpb_decfloat_traps = 95;    
     isc_dpb_clear_map = 96;    
+    isc_dpb_upgrade_db = 97;    
+    isc_dpb_parallel_workers = 100;    
+    isc_dpb_worker_attach = 101;    
+    isc_dpb_owner = 102;    
+    isc_dpb_max_blob_cache_size = 103;    
+    isc_dpb_max_inline_blob_size = 104;    
+    isc_dpb_search_path = 105;    
+    isc_dpb_blr_request_search_path = 106;    
+    isc_dpb_gbak_restore_has_schema = 107;    
   {************************************************ }
   { clumplet tags used inside isc_dpb_address_path  }
   {						 and isc_spb_address_path  }

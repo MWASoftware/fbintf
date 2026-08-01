@@ -99,7 +99,7 @@ protocol, and is how the version matrix below was measured.
 
 Working and covered by the test suite:
 
-* the connection handshake with protocol negotiation, versions 13 to 19
+* the connection handshake with protocol negotiation, versions 13 to 20
 * `Srp256` and `Srp` authentication, in both the `op_cond_accept` flow
   (authentication must finish before attaching) and the `op_accept_data`
   flow (the proof travels in the DPB with the attach)
@@ -127,6 +127,8 @@ Working and covered by the test suite:
   columns
 * inline blobs on protocol 19 servers: small blobs pushed with the rows
   that reference them are opened and read with no further wire traffic
+* protocol 20 with Firebird 6: the schema search path travels in the DPB
+  (`isc_dpb_search_path`) and the describe reports each column's schema
 
 Deliberately not implemented yet. These raise `ibxeNotSupported` rather
 than failing in a confusing way:
@@ -455,12 +457,12 @@ apply `runtest.sh`'s normalisation, and commit it.
 
 | Server | WireCrypt | Negotiated | Encryption | Result |
 |---|---|---|---|---|
-| 6.0 (CI container) | Enabled, Required | 19 | `ChaCha64` | 158 tests, 0 failures |
-| 6.0.0 (local, LI-T6.0.0.2076) | Required | 19 | `ChaCha64` | 158 tests, 0 failures |
-| 5.0 (CI container) | Enabled, Required | 19 | `ChaCha64` | 158 tests, 0 failures |
-| 5.0.4 (local container) | Enabled, Required | 19 | `ChaCha64` | 158 tests, 0 failures |
-| 4.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 158 tests, 0 failures |
-| 3.0 (CI container) | Enabled | 15 | `Arc4` | 158 tests, 0 failures |
+| 6.0 (CI container) | Enabled, Required | 20 | `ChaCha64` | 164 tests, 0 failures |
+| 6.0.0 (local, LI-T6.0.0.2076) | Required | 20 | `ChaCha64` | 164 tests, 0 failures |
+| 5.0 (CI container) | Enabled, Required | 19 | `ChaCha64` | 164 tests, 0 failures |
+| 5.0.4 (local container) | Enabled, Required | 19 | `ChaCha64` | 164 tests, 0 failures |
+| 4.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 164 tests, 0 failures |
+| 3.0 (CI container) | Enabled | 15 | `Arc4` | 164 tests, 0 failures |
 | no server | — | — | — | 36 tests, live sections skipped |
 
 Firebird 3 settles on protocol 15 with Arc4: it is the newest protocol that
@@ -525,7 +527,7 @@ machinery that already exists to support it.
 | 7 | Scrollable cursors — **done** | `op_fetch_scroll`, protocol raised to 18 | 18 |
 | 8 | The batch API — **done** | `op_batch_create/msg/regblob/exec/cs/rls` | 16 |
 | 9 | Inline blobs — **done** | `op_inline_blob`, protocol raised to 19 | 19 |
-| 10 | Firebird 6 protocol 20 | schema search path, named arguments | 20 |
+| 10 | Firebird 6 protocol 20 — **done** | offer raised to 20, `isc_dpb_search_path`, schema aware describe | 20 |
 | 11 | Wire compression | zlib either side of the cipher | 13 |
 | 12 | Engine message text | a `firebird.msg` reader or a generated table | — |
 
@@ -779,13 +781,28 @@ traffic, which WireTest proves with a packet counter on the transport.
 The whole feature is transparent: the suite output is byte identical
 apart from the negotiated version in `getFBVersion`.
 
-### 10. Firebird 6 and protocol 20
+### 10. Firebird 6 and protocol 20 — done
 
-Protocol 20 adds SQL schemas and named arguments. It needs a schema search
-path in the DPB (`isc_dpb_search_path`), a different describe item list, and
-an extra flags field in `op_prepare_statement`. The client currently offers
-up to 17 and Firebird 6 negotiates down happily, so this is about gaining
-the new features rather than about compatibility.
+The offer now goes to 20, which Firebird 6 accepts (Firebird 5.0.3
+stays on 19). The field audit found protocol 20 adds exactly one thing
+to the packets this client sends: a flags word at the end of
+`op_prepare_statement` and `op_exec_immediate` (`p_sqlst_flags`,
+written as zero - the engine's special prepare flags are not exposed).
+Everything else is opt-in: the schema search path travels as an
+ordinary DPB item (`isc_dpb_search_path`, added to the constants with
+the rest of the Firebird 6 DPB tags), and the describe item list gains
+`isc_info_sql_relation_schema` on protocol 20 connections, parsed into
+the column format's schema name. fbintf has no schema member on
+`IColumnMetaData` yet, so the name is stored rather than surfaced - the
+tests reach it through `TFBWireStatement.ColumnSchemaName`, and an
+interface member can follow whenever fbintf grows one.
+
+Named arguments turned out to be a SQL level feature (calling
+procedures with `name => value`), not a describe change: nothing to do
+on the wire. The suite output is byte identical apart from the
+negotiated version string, and the WireTest schema section proves the
+search path resolves unqualified names, a qualified name bypasses it,
+and the described schema arrives per column.
 
 ### 11. Wire compression
 
