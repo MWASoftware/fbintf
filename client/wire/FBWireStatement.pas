@@ -167,6 +167,7 @@ type
     FCursorState: TWireCursorState;
     FCursorName: AnsiString;
     FCursorSeqNo: integer;
+    FScrollable: boolean;
     function GetConnection: TFBWireConnection;
     function GetTransactionHandle: integer;
   protected
@@ -189,8 +190,13 @@ type
                 CaseSensitiveParams: boolean = false; CursorName: AnsiString = '');
     destructor Destroy; override;
     function FetchNextRow: boolean;
+    {a positioned fetch on a scrollable cursor (protocol 18) - aDirection
+     is one of the fetch_* constants, aPosition the absolute row number or
+     relative offset}
+    function FetchScroll(aDirection: integer; aPosition: integer): boolean;
     function GetSQLParams: ISQLParams; override;
     function GetMetaData: IMetaData; override;
+    function GetFlags: TStatementFlags; override;
     {needs protocol 16 - the p_sqldata_timeout field of op_execute}
     procedure SetStatementTimeout(aMilliseconds: cardinal); override;
     function CreateBlob(column: TColumnMetaData): IBlob; override;
@@ -655,33 +661,37 @@ end;
 
 function TWireResultSet.FetchPrior: boolean;
 begin
-  {scrollable cursors need protocol 18 and op_fetch_scroll}
-  IBError(ibxeNotSupported,[nil]);
-  Result := false;
+  Result := FResults.Statement.FetchScroll(fetch_prior,0);
+  if Result then
+    FResults.RowChange;
 end;
 
 function TWireResultSet.FetchFirst: boolean;
 begin
-  IBError(ibxeNotSupported,[nil]);
-  Result := false;
+  Result := FResults.Statement.FetchScroll(fetch_first,0);
+  if Result then
+    FResults.RowChange;
 end;
 
 function TWireResultSet.FetchLast: boolean;
 begin
-  IBError(ibxeNotSupported,[nil]);
-  Result := false;
+  Result := FResults.Statement.FetchScroll(fetch_last,0);
+  if Result then
+    FResults.RowChange;
 end;
 
 function TWireResultSet.FetchAbsolute(position: Integer): boolean;
 begin
-  IBError(ibxeNotSupported,[nil]);
-  Result := false;
+  Result := FResults.Statement.FetchScroll(fetch_absolute,position);
+  if Result then
+    FResults.RowChange;
 end;
 
 function TWireResultSet.FetchRelative(offset: Integer): boolean;
 begin
-  IBError(ibxeNotSupported,[nil]);
-  Result := false;
+  Result := FResults.Statement.FetchScroll(fetch_relative,offset);
+  if Result then
+    FResults.RowChange;
 end;
 
 function TWireResultSet.GetCursorName: AnsiString;
@@ -841,7 +851,7 @@ begin
     Exit;
   end;
 
-  FillChar(FCursorState,SizeOf(FCursorState),0);
+  ResetCursorState(FCursorState);
 
   paramPtr := nil;
   if Length(FSQLParams.Buffer) > 0 then
@@ -878,9 +888,11 @@ end;
 function TFBWireStatement.InternalOpenCursor(aTransaction: ITransaction;
   Scrollable: boolean): IResultSet;
 var paramPtr: PByte;
+    cursorFlags: cardinal;
 begin
-  if Scrollable then
+  if Scrollable and not GetAttachment.HasScollableCursors then
     IBError(ibxeNotSupported,[nil]);
+  FScrollable := Scrollable;
   CheckTransaction(aTransaction);
   if not FPrepared then
     InternalPrepare;
@@ -890,14 +902,17 @@ begin
   paramPtr := nil;
   if Length(FSQLParams.Buffer) > 0 then
     paramPtr := @FSQLParams.Buffer[0];
+  cursorFlags := 0;
+  if Scrollable then
+    cursorFlags := CURSOR_TYPE_SCROLLABLE;
   try
     Connection.ExecuteStatement(FHandle,
       (aTransaction as TObject as TFBWireTransaction).Handle,
-      FSQLParams.Format,paramPtr,FStatementTimeout);
+      FSQLParams.Format,paramPtr,FStatementTimeout,cursorFlags);
   except
     on E: Exception do WireIBError(FWireAPI,E);
   end;
-  FillChar(FCursorState,SizeOf(FCursorState),0);
+  ResetCursorState(FCursorState);
   FOpen := true;
   FBOF := true;
   FEOF := false;
@@ -926,6 +941,39 @@ begin
     FEOF := true;
 end;
 
+function TFBWireStatement.FetchScroll(aDirection: integer;
+  aPosition: integer): boolean;
+begin
+  Result := false;
+  if not FOpen then
+    IBError(ibxeSQLClosed,[nil]);
+  if not FScrollable then
+    IBError(ibxeNotSupported,[nil]);
+  if (aDirection = fetch_prior) and FBOF then
+    IBError(ibxeBOF,[nil]);
+  try
+    Result := Connection.FetchRowScroll(FHandle,FSQLRecord.Format,
+                @FSQLRecord.Buffer[0],aDirection,aPosition,FCursorState);
+  except
+    on E: Exception do WireIBError(FWireAPI,E);
+  end;
+  if Result then
+  begin
+    {the same flag semantics as TFB30Statement.Fetch: success clears both
+     markers; prior falling off the top sets BOF; a failed positioned
+     fetch leaves the flags as they were}
+    FBOF := false;
+    FEOF := false;
+    Inc(FChangeSeqNo);
+  end
+  else
+  if aDirection = fetch_prior then
+  begin
+    FBOF := true;
+    FEOF := false;
+  end;
+end;
+
 procedure TFBWireStatement.InternalClose(Force: boolean);
 begin
   if not Connection.Connected then
@@ -946,7 +994,7 @@ begin
   FOpen := false;
   FEOF := true;
   FBOF := false;
-  FillChar(FCursorState,SizeOf(FCursorState),0);
+  ResetCursorState(FCursorState);
   FExecTransactionIntf := nil;
   Inc(FChangeSeqNo);
 end;
@@ -1003,6 +1051,15 @@ begin
     InternalPrepare;
   CheckHandle;
   Result := TMetaData.Create(FSQLRecord);
+end;
+
+function TFBWireStatement.GetFlags: TStatementFlags;
+begin
+  Result := [];
+  if FSQLStatementType in [SQLSelect, SQLSelectForUpdate] then
+    Result := Result + [stHasCursor];
+  if FScrollable then
+    Result := Result + [stScrollable];
 end;
 
 procedure TFBWireStatement.SetStatementTimeout(aMilliseconds: cardinal);

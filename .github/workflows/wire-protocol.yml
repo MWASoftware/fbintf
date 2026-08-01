@@ -48,10 +48,10 @@ jobs:
             expected: '17'
           - firebird: '5'
             image: 'firebirdsql/firebird:5'
-            expected: '17'
+            expected: '18'
           - firebird: '6'
             image: 'firebirdsql/firebird:6-snapshot'
-            expected: '17'
+            expected: '18'
         exclude:
           # Protocol 13, the only one Firebird 3 offers without encryption
           # support, cannot satisfy WireCrypt = Required. The combination is
