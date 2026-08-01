@@ -122,6 +122,9 @@ Working and covered by the test suite:
   (`IStatement.SetStatementTimeout` - the protocol 16 timeout field)
 * scrollable cursors on protocol 18 servers: the five positioned fetches
   of `IResultSet` over `op_fetch_scroll`
+* the batch API on protocol 16 servers: `AddToBatch`/`ExecuteBatch`/
+  `CancelBatch` with per row completion, including blob and array
+  columns
 
 Deliberately not implemented yet. These raise `ibxeNotSupported` rather
 than failing in a confusing way:
@@ -129,7 +132,6 @@ than failing in a confusing way:
 | Feature | What it needs |
 |---|---|
 | Services | `op_service_*` exist in `FBWireProtocol`; the `IServiceManager` wrapper does not |
-| Batches | the protocol 16 `op_batch_*` family |
 | Multi database transactions | a two phase commit coordinator |
 
 Delphi is not supported yet either: the transport is written against the
@@ -451,12 +453,12 @@ apply `runtest.sh`'s normalisation, and commit it.
 
 | Server | WireCrypt | Negotiated | Encryption | Result |
 |---|---|---|---|---|
-| 6.0 (CI container) | Enabled, Required | 18 | `ChaCha64` | 137 tests, 0 failures |
-| 6.0.0 (local, LI-T6.0.0.2076) | Required | 18 | `ChaCha64` | 137 tests, 0 failures |
-| 5.0 (CI container) | Enabled, Required | 18 | `ChaCha64` | 137 tests, 0 failures |
-| 5.0.4 (local container) | Enabled, Required | 18 | `ChaCha64` | 137 tests, 0 failures |
-| 4.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 137 tests, 0 failures |
-| 3.0 (CI container) | Enabled | 15 | `Arc4` | 137 tests, 0 failures |
+| 6.0 (CI container) | Enabled, Required | 18 | `ChaCha64` | 151 tests, 0 failures |
+| 6.0.0 (local, LI-T6.0.0.2076) | Required | 18 | `ChaCha64` | 151 tests, 0 failures |
+| 5.0 (CI container) | Enabled, Required | 18 | `ChaCha64` | 151 tests, 0 failures |
+| 5.0.4 (local container) | Enabled, Required | 18 | `ChaCha64` | 151 tests, 0 failures |
+| 4.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 151 tests, 0 failures |
+| 3.0 (CI container) | Enabled | 15 | `Arc4` | 151 tests, 0 failures |
 | no server | — | — | — | 36 tests, live sections skipped |
 
 Firebird 3 settles on protocol 15 with Arc4: it is the newest protocol that
@@ -519,7 +521,7 @@ machinery that already exists to support it.
 | 5 | Array columns — **done** | `FBWireArray` over `op_get_slice`/`op_put_slice`, shared SDL generator | 13 |
 | 6 | Statement timeouts and cancellation — **done** | `CancelOperation`/`SetStatementTimeout` on all providers | 12, 16 |
 | 7 | Scrollable cursors — **done** | `op_fetch_scroll`, protocol raised to 18 | 18 |
-| 8 | The batch API | the `op_batch_*` family | 16 |
+| 8 | The batch API — **done** | `op_batch_create/msg/regblob/exec/cs/rls` | 16 |
 | 9 | Inline blobs | `op_inline_blob` | 19 |
 | 10 | Firebird 6 protocol 20 | schema search path, named arguments | 20 |
 | 11 | Wire compression | zlib either side of the cipher | 13 |
@@ -720,14 +722,36 @@ sets BOF, and a failed positioned fetch leaves the flags alone.
 scrollable section runs against Firebird 5 and 6 and skips on older
 servers.
 
-### 8. The batch API
+### 8. The batch API — done
 
-`op_batch_create`, `op_batch_msg`, `op_batch_exec`, `op_batch_rls` and
-`op_batch_cs` (protocol 16) support `IBatch`. Messages are packed into a
-stream, each padded to an eight byte boundary, and the completion state
-comes back as update counts plus per row status vectors. `TFBStatement`
-already has the batch entry points defaulting to unsupported, and
-`TBatchCompletion` in the 3.0 provider shows the shape of the result.
+Rows accumulate client side and `ExecuteBatch` plays them to the server
+as `op_batch_create` (the statement's BLR, the message length and an
+`IBatch` parameter block), `op_batch_msg` packets of up to five hundred
+messages, and `op_batch_exec`, whose `op_batch_cs` reply carries the per
+row update counts and status vectors that `TWireBatchCompletion`
+reports. `op_batch_rls`/`op_batch_cancel` end the batch either way. Two
+details the sources settle: batch messages travel in exactly the row
+message encoding (`xdr_packed_message` is the null bitmap format - the
+eight byte alignment applies to the server's buffers, not the wire), and
+the message length field must be computed by the server's own
+`PARSE_msg_format` rules (`EngineMessageLength`), not from the client's
+private buffer layout. Blob ids in batched rows must be registered with
+`op_batch_regblob` once per row - the engine translates each id through
+a registration map and consumes the entry - which is what the 3.0
+provider's `registerBlob` call does; array ids pass through untouched.
+
+The milestone also forced a provider wide correction: the wire
+statement's parameters now answer `SQL_VARYING` as their default text
+type, as the fbclient providers do. The original `SQL_TEXT` choice
+re-sized the parameter format on every string assignment, which a batch
+cannot tolerate (the BLR is frozen at `op_batch_create`), and its blank
+padded values leaked into stored data. With varying parameters the
+suite's parameter metadata and value output now matches the fbclient
+reference logs line for line, two latent accessor bugs were fixed along
+the way (a parameter's `SQLData` points at the characters, not the
+length prefix), and `CanChangeMetaData` answers false while a batch is
+open, so a mid batch type change is refused exactly as the 3.0 provider
+refuses it.
 
 ### 9. Inline blobs
 

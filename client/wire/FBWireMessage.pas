@@ -81,6 +81,16 @@ function ComputeMessageLayout(var aFormat: TWireMessageFormat): cardinal;
 {the buffer length of an already laid out format}
 function MessageBufferSize(const aFormat: TWireMessageFormat): cardinal;
 
+{the message length as the server computes it from our BLR - the
+ PARSE_msg_format algorithm of src/remote/parser.cpp, with each value
+ followed by its two byte null indicator. op_batch_create's message
+ length field must be exactly this value: the server validates it against
+ the format it parses from the BLR.}
+function EngineMessageLength(const aFormat: TWireMessageFormat): cardinal;
+
+{rounds aValue up to a multiple of aAlignment (a power of two)}
+function AlignTo(aValue, aAlignment: cardinal): cardinal;
+
 {BLR describing the message, as sent to the server}
 function BuildMessageBlr(const aFormat: TWireMessageFormat): TBytes;
 
@@ -259,6 +269,84 @@ begin
     Result := 0
   else
     Result := aFormat[High(aFormat)].NullOffset + 4;
+end;
+
+function EngineMessageLength(const aFormat: TWireMessageFormat): cardinal;
+var i: integer;
+    offset: cardinal;
+    size, align: cardinal;
+begin
+  offset := 0;
+  for i := 0 to Length(aFormat) - 1 do
+  begin
+    {sizes and alignments per PARSE_msg_format and jrd/align.h - these are
+     the server's rules, not the layout of our own message buffer}
+    case aFormat[i].SQLType of
+    SQL_TEXT:
+      begin
+        size := aFormat[i].DataSize;
+        align := 1;
+      end;
+    SQL_VARYING:
+      begin
+        size := aFormat[i].DataSize + 2;
+        align := 2;
+      end;
+    SQL_SHORT:
+      begin
+        size := 2;
+        align := 2;
+      end;
+    SQL_LONG, SQL_FLOAT, SQL_TYPE_DATE, SQL_TYPE_TIME:
+      begin
+        size := 4;
+        align := 4;
+      end;
+    SQL_DOUBLE, SQL_D_FLOAT, SQL_INT64, SQL_DEC16:
+      begin
+        size := 8;
+        align := 8;
+      end;
+    SQL_TIMESTAMP:
+      begin
+        size := 8;
+        align := 4;
+      end;
+    SQL_BLOB, SQL_ARRAY, SQL_QUAD:
+      begin
+        size := 8;
+        align := 4;
+      end;
+    SQL_BOOLEAN:
+      begin
+        size := 1;
+        align := 1;
+      end;
+    SQL_DEC34, SQL_INT128:
+      begin
+        size := 16;
+        align := 8;
+      end;
+    SQL_TIME_TZ, SQL_TIME_TZ_EX:
+      begin
+        size := 8;
+        align := 4;
+      end;
+    SQL_TIMESTAMP_TZ, SQL_TIMESTAMP_TZ_EX:
+      begin
+        size := 12;
+        align := 4;
+      end;
+    else
+      IBError(ibxeInvalidDataConversion,[nil]);
+    end;
+    offset := AlignTo(offset,align);
+    Inc(offset,size);
+    {the null indicator short that BuildMessageBlr emits after each value}
+    offset := AlignTo(offset,2);
+    Inc(offset,2);
+  end;
+  Result := offset;
 end;
 
 function BuildMessageBlr(const aFormat: TWireMessageFormat): TBytes;
