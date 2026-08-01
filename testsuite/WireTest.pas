@@ -35,7 +35,7 @@ program WireTest;
 
 uses
   {$IFDEF UNIX}cthreads,{$ENDIF}
-  SysUtils, Classes, IB, IBUtils,
+  SysUtils, Classes, IB, IBUtils, IBErrorCodes,
   FBWireBigInt, FBWireCrypto, FBWireSRP, FBWireStream, FBWireConst,
   FBWireMessage, FBWireDescribe, FBWireProtocol, FBWireClientAPI;
 
@@ -847,6 +847,114 @@ begin
   end;
 end;
 
+const
+  {a PSQL busy loop: slow enough to cancel or time out reliably, but
+   bounded, so a failure to interrupt it cannot hang the test}
+  sqlSlowQuery = 'execute block returns (n bigint) as ' +
+                 'begin n = 0; while (n < 200000000) do n = n + 1; suspend; end';
+
+type
+  { TCancelVictim - runs the slow query so the main thread can cancel it }
+
+  TCancelVictim = class(TThread)
+  public
+    ErrorCode: Int64;
+    Completed: boolean;
+    Started: boolean;
+    procedure Execute; override;
+  end;
+
+procedure TCancelVictim.Execute;
+var Tr: ITransaction;
+begin
+  ErrorCode := 0;
+  try
+    Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+            isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+    Started := true;
+    Attachment.OpenCursorAtStart(Tr,sqlSlowQuery);
+    Completed := true;
+  except
+    on E: EIBInterBaseError do
+      ErrorCode := E.IBErrorCode;
+    on E: Exception do
+      ErrorCode := -1;
+  end;
+end;
+
+procedure TestCancellation;
+var Victim: TCancelVictim;
+    i: integer;
+begin
+  writeln('Provider: operation cancellation');
+  Victim := TCancelVictim.Create(true);
+  try
+    Victim.Start;
+    {give the query time to reach the server}
+    i := 0;
+    while not Victim.Started and (i < 5000) do
+    begin
+      Sleep(10);
+      Inc(i,10);
+    end;
+    Sleep(300);
+    Attachment.CancelOperation(fb_cancel_raise);
+    {the victim now fails with isc_cancelled - wait for it, bounded by
+     the query's own worst case run time}
+    i := 0;
+    while not Victim.Finished and (i < 120000) do
+    begin
+      Sleep(50);
+      Inc(i,50);
+    end;
+    Check('victim thread finished',Victim.Finished);
+    Check('cancelled promptly',i < 30000,Format('took %d ms',[i]));
+    Check('victim failed with isc_cancelled',
+          Victim.ErrorCode = isc_cancelled,
+          Format('completed=%s error=%d',
+                 [BoolToStr(Victim.Completed,true),Victim.ErrorCode]));
+  finally
+    Victim.WaitFor;
+    Victim.Free;
+  end;
+end;
+
+procedure TestStatementTimeout;
+var Tr: ITransaction;
+    S: IStatement;
+begin
+  writeln('Provider: statement timeout');
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  S := Attachment.Prepare(Tr,sqlSlowQuery);
+  try
+    S.SetStatementTimeout(250);
+  except
+    on E: EIBClientError do
+    begin
+      writeln('  SKIP  statement timeouts need protocol 16 or later');
+      Exit;
+    end;
+  end;
+  Check('timeout value read back',S.GetStatementTimeout = 250);
+  try
+    S.OpenCursor.FetchNext;
+    Check('timeout fired',false,'the slow query ran to completion');
+  except
+    on E: EIBInterBaseError do
+      {an expired timeout cancels the request: the primary status code is
+       isc_cancelled with isc_req_stmt_timeout as the secondary. Nothing
+       else cancels in this test, so isc_cancelled here is the timeout.}
+      Check('timeout cancelled the statement',
+            E.IBErrorCode = isc_cancelled,
+            Format('error=%d %s',[E.IBErrorCode,E.Message]));
+  end;
+  {the statement stays usable: a fresh execute with no timeout succeeds}
+  S := Attachment.Prepare(Tr,'select 1 from rdb$database');
+  Check('connection still usable after timeout',
+        S.OpenCursor.FetchNext);
+end;
+
 type
   { TEventCatcher - a TEventHandler needs an object method }
 
@@ -991,6 +1099,8 @@ begin
     TestProviderDataTypes;
     TestProviderUpdates;
     TestArrays;
+    TestCancellation;
+    TestStatementTimeout;
     TestEvents;
     TestCreateDatabase;
   finally

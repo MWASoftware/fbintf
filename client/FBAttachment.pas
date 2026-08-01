@@ -269,6 +269,7 @@ type
     function HasTable(aTableName: AnsiString): boolean;
     function HasFunction(aFunctionName: AnsiString): boolean;
     function HasProcedure(aProcName: AnsiString): boolean;
+    procedure CancelOperation(aKind: integer = fb_cancel_raise); virtual;
 
   public
     {Character Sets}
@@ -1558,6 +1559,11 @@ end;
 function TFBAttachment.HasArraySupport: boolean;
 begin
   Result := true;
+end;
+
+procedure TFBAttachment.CancelOperation(aKind: integer);
+begin
+  IBError(ibxeNotSupported,[nil]);
 end;
 
 function TFBAttachment.HasEventSupport: boolean;

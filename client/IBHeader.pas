@@ -435,6 +435,11 @@ Tisc_detach_database = function (status_vector            : PISC_STATUS;
                                  db_handle                : PISC_DB_HANDLE): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
 
+Tfb_cancel_operation = function (status_vector            : PISC_STATUS;
+                                 db_handle                : PISC_DB_HANDLE;
+                                 option                   : UShort): ISC_STATUS;
+                                {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
+
 Tisc_drop_database = function   (status_vector            : PISC_STATUS;
                                  db_handle                : PISC_DB_HANDLE): ISC_STATUS;
                                 {$IFDEF WINDOWS} stdcall; {$ELSE} cdecl; {$ENDIF}
