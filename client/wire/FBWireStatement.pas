@@ -65,6 +65,7 @@ type
     FOwner: TWireSQLDataArea;
     FBlob: IBlob;
     FBlobMetaData: IBlobMetaData;
+    FArrayMetaData: IArrayMetaData;
     function GetVar: PWireSQLVarRec;
     function BufferBase: PByte;
   protected
@@ -85,6 +86,7 @@ type
     procedure InternalSetSQLType(aValue: cardinal; aSubType: integer); override;
     procedure InternalSetScale(aValue: integer); override;
     procedure InternalSetDataLength(len: cardinal); override;
+    procedure SetMetaSize(aValue: cardinal); override;
     procedure SetIsNull(Value: Boolean); override;
     procedure SetIsNullable(Value: Boolean); override;
     procedure SetSQLData(AValue: PByte; len: cardinal); override;
@@ -115,6 +117,7 @@ type
     procedure SetCount(aValue: integer); override;
   public
     constructor Create(aStatement: TFBWireStatement; aIsInput: boolean);
+    destructor Destroy; override;
     {rebuilds the column list from a describe response}
     procedure Bind(const aFormat: TWireMessageFormat; aBufferSize: cardinal);
     function IsInputDataArea: boolean; override;
@@ -122,6 +125,9 @@ type
     function StateChanged(var ChangeSeqNo: integer): boolean; override;
     function CanChangeMetaData: boolean; override;
     procedure ClearBuffer;
+    {recomputes the buffer layout after a parameter's metadata has been
+     changed, relocating values already written}
+    procedure RelayoutBuffer;
     property Format: TWireMessageFormat read FFormat;
     property Buffer: TBytes read FBuffer;
     property Statement: TFBWireStatement read FStatement;
@@ -161,6 +167,7 @@ type
     FCursorState: TWireCursorState;
     FCursorName: AnsiString;
     FCursorSeqNo: integer;
+    FScrollable: boolean;
     function GetConnection: TFBWireConnection;
     function GetTransactionHandle: integer;
   protected
@@ -183,8 +190,15 @@ type
                 CaseSensitiveParams: boolean = false; CursorName: AnsiString = '');
     destructor Destroy; override;
     function FetchNextRow: boolean;
+    {a positioned fetch on a scrollable cursor (protocol 18) - aDirection
+     is one of the fetch_* constants, aPosition the absolute row number or
+     relative offset}
+    function FetchScroll(aDirection: integer; aPosition: integer): boolean;
     function GetSQLParams: ISQLParams; override;
     function GetMetaData: IMetaData; override;
+    function GetFlags: TStatementFlags; override;
+    {needs protocol 16 - the p_sqldata_timeout field of op_execute}
+    procedure SetStatementTimeout(aMilliseconds: cardinal); override;
     function CreateBlob(column: TColumnMetaData): IBlob; override;
     function CreateArray(column: TColumnMetaData): IArray; override;
     function GetPlan: AnsiString;
@@ -198,7 +212,7 @@ type
 implementation
 
 uses FBMessages, IBErrorCodes, FBWireAttachment, FBWireTransaction, FBWireBlob,
-  FBWireConst, IBUtils;
+  FBWireArray, FBWireConst, IBUtils;
 
 { TWireSQLVarData }
 
@@ -314,8 +328,11 @@ end;
 
 procedure TWireSQLVarData.InternalSetSQLType(aValue: cardinal; aSubType: integer);
 begin
+  if (GetVar^.SQLType = aValue) and (GetVar^.SQLSubType = aSubType) then
+    Exit;
   GetVar^.SQLType := aValue;
   GetVar^.SQLSubType := aSubType;
+  FOwner.RelayoutBuffer;
 end;
 
 procedure TWireSQLVarData.InternalSetScale(aValue: integer);
@@ -326,9 +343,33 @@ end;
 procedure TWireSQLVarData.InternalSetDataLength(len: cardinal);
 begin
   if GetSQLType = SQL_VARYING then
-    PWord(GetSQLData)^ := len
+  begin
+    {a longer value than the described maximum needs a bigger slot: grow
+     the declared size and relay out - the BLR describes the new size}
+    if len > GetVar^.DataSize then
+    begin
+      GetVar^.DataSize := len;
+      FOwner.RelayoutBuffer;
+    end;
+    PWord(GetSQLData)^ := len;
+  end
   else
+  begin
+    if GetVar^.DataSize = len then Exit;
     GetVar^.DataSize := len;
+    FOwner.RelayoutBuffer;
+  end;
+end;
+
+procedure TWireSQLVarData.SetMetaSize(aValue: cardinal);
+begin
+  {called before a type change (e.g. a string value assigned to a blob
+   parameter becomes SQL_TEXT) so that the new slot is large enough}
+  if aValue > GetVar^.DataSize then
+  begin
+    GetVar^.DataSize := aValue;
+    FOwner.RelayoutBuffer;
+  end;
 end;
 
 procedure TWireSQLVarData.SetIsNull(Value: Boolean);
@@ -393,8 +434,20 @@ end;
 
 function TWireSQLVarData.GetAsArray: IArray;
 begin
-  IBError(ibxeNotSupported,[nil]);
-  Result := nil;
+  if GetSQLType <> SQL_ARRAY then
+    IBError(ibxeInvalidDataConversion,[nil]);
+
+  if GetIsNull then
+    Result := nil
+  else
+  begin
+    if FArrayIntf = nil then
+      FArrayIntf := TFBWireArray.Create(
+                      FStatement.GetAttachment as TFBWireAttachment,
+                      FStatement.GetTransaction as TObject as TFBWireTransaction,
+                      GetArrayMetaData,PISC_QUAD(GetSQLData)^);
+    Result := FArrayIntf;
+  end;
 end;
 
 function TWireSQLVarData.GetAsBlob(Blob_ID: TISC_QUAD; BPB: IBPB): IBlob;
@@ -419,8 +472,14 @@ end;
 
 function TWireSQLVarData.GetArrayMetaData: IArrayMetaData;
 begin
-  IBError(ibxeNotSupported,[nil]);
-  Result := nil;
+  if GetSQLType <> SQL_ARRAY then
+    IBError(ibxeInvalidDataConversion,[nil]);
+  if FArrayMetaData = nil then
+    FArrayMetaData := TFBWireArrayMetaData.Create(
+      (FStatement.GetAttachment as TFBWireAttachment) as IAttachment,
+      FStatement.GetTransaction,
+      GetRelationName,GetFieldName);
+  Result := FArrayMetaData;
 end;
 
 function TWireSQLVarData.GetBlobMetaData: IBlobMetaData;
@@ -451,6 +510,12 @@ begin
   FIsInput := aIsInput;
 end;
 
+destructor TWireSQLDataArea.Destroy;
+begin
+  SetCount(0);
+  inherited Destroy;
+end;
+
 function TWireSQLDataArea.GetStatement: IStatement;
 begin
   Result := FStatement;
@@ -470,6 +535,8 @@ procedure TWireSQLDataArea.SetCount(aValue: integer);
 var i, oldCount: integer;
 begin
   oldCount := Length(FColumnList);
+  for i := aValue to oldCount - 1 do
+    FColumnList[i].Free;
   SetLength(FColumnList,aValue);
   for i := oldCount to aValue - 1 do
     FColumnList[i] := TWireSQLVarData.Create(self,i);
@@ -485,7 +552,15 @@ begin
   SetCount(Length(FFormat));
   for i := 0 to Length(FFormat) - 1 do
   begin
-    FColumnList[i].Name := FFormat[i].AliasName;
+    {input parameters keep the names assigned by the SQL preprocessor
+     (":name" parameters) - the describe response has no names for them
+     and would wipe them}
+    if not FIsInput then
+      FColumnList[i].Name := FFormat[i].AliasName
+    else
+      {snapshot the described metadata: TSQLParam.Clear restores a
+       parameter to it after the type has been changed}
+      FColumnList[i].SaveMetaData;
     FColumnList[i].Initialize;
   end;
   SetUniqueRelationName;
@@ -533,8 +608,39 @@ end;
 
 function TWireSQLDataArea.CanChangeMetaData: boolean;
 begin
-  {the message format is fixed by the prepare}
-  Result := false;
+  {the client owns the parameter message format: the BLR sent with
+   op_execute describes whatever the format records now say, and the
+   server coerces. RelayoutBuffer keeps the buffer consistent with any
+   change.}
+  Result := FIsInput;
+end;
+
+procedure TWireSQLDataArea.RelayoutBuffer;
+var OldFormat: TWireMessageFormat;
+    OldBuffer: TBytes;
+    i: integer;
+    n: cardinal;
+begin
+  if not FIsInput then Exit;
+  {keep the old layout so that values already written can be relocated}
+  SetLength(OldFormat,Length(FFormat));
+  for i := 0 to High(FFormat) do
+    OldFormat[i] := FFormat[i];
+  OldBuffer := system.copy(FBuffer);
+  ComputeMessageLayout(FFormat);
+  SetLength(FBuffer,MessageBufferSize(FFormat));
+  if Length(FBuffer) > 0 then
+    FillChar(FBuffer[0],Length(FBuffer),0);
+  for i := 0 to High(FFormat) do
+  begin
+    n := OldFormat[i].BufferSize;
+    if n > FFormat[i].BufferSize then
+      n := FFormat[i].BufferSize;
+    if (n > 0) and (Length(OldBuffer) > 0) then
+      Move(OldBuffer[OldFormat[i].DataOffset],FBuffer[FFormat[i].DataOffset],n);
+    if Length(OldBuffer) > 0 then
+      Move(OldBuffer[OldFormat[i].NullOffset],FBuffer[FFormat[i].NullOffset],4);
+  end;
 end;
 
 { TWireResultSet }
@@ -555,33 +661,37 @@ end;
 
 function TWireResultSet.FetchPrior: boolean;
 begin
-  {scrollable cursors need protocol 18 and op_fetch_scroll}
-  IBError(ibxeNotSupported,[nil]);
-  Result := false;
+  Result := FResults.Statement.FetchScroll(fetch_prior,0);
+  if Result then
+    FResults.RowChange;
 end;
 
 function TWireResultSet.FetchFirst: boolean;
 begin
-  IBError(ibxeNotSupported,[nil]);
-  Result := false;
+  Result := FResults.Statement.FetchScroll(fetch_first,0);
+  if Result then
+    FResults.RowChange;
 end;
 
 function TWireResultSet.FetchLast: boolean;
 begin
-  IBError(ibxeNotSupported,[nil]);
-  Result := false;
+  Result := FResults.Statement.FetchScroll(fetch_last,0);
+  if Result then
+    FResults.RowChange;
 end;
 
 function TWireResultSet.FetchAbsolute(position: Integer): boolean;
 begin
-  IBError(ibxeNotSupported,[nil]);
-  Result := false;
+  Result := FResults.Statement.FetchScroll(fetch_absolute,position);
+  if Result then
+    FResults.RowChange;
 end;
 
 function TWireResultSet.FetchRelative(offset: Integer): boolean;
 begin
-  IBError(ibxeNotSupported,[nil]);
-  Result := false;
+  Result := FResults.Statement.FetchScroll(fetch_relative,offset);
+  if Result then
+    FResults.RowChange;
 end;
 
 function TWireResultSet.GetCursorName: AnsiString;
@@ -717,6 +827,7 @@ end;
 
 function TFBWireStatement.InternalExecute(Transaction: ITransaction): IResults;
 var paramPtr, outPtr: PByte;
+    Cursor: IResultSet;
 begin
   Result := nil;
   CheckTransaction(Transaction);
@@ -726,7 +837,21 @@ begin
   FBOF := false;
   FEOF := false;
   FSingleResults := false;
-  FillChar(FCursorState,SizeOf(FCursorState),0);
+
+  if (FSQLStatementType = SQLSelect) and (FSQLRecord.Count > 0) then
+  begin
+    {Firebird 5 and later describe update/insert ... returning as a select
+     statement answering a single row - open the cursor and fetch it}
+    Cursor := InternalOpenCursor(Transaction,false);
+    if not Cursor.IsEof then
+      Cursor.FetchNext;
+    Result := Cursor;
+    FSingleResults := true;
+    Inc(FChangeSeqNo);
+    Exit;
+  end;
+
+  ResetCursorState(FCursorState);
 
   paramPtr := nil;
   if Length(FSQLParams.Buffer) > 0 then
@@ -735,11 +860,17 @@ begin
   if Length(FSQLRecord.Buffer) > 0 then
     outPtr := @FSQLRecord.Buffer[0];
   try
-    if (FSQLStatementType = SQLExecProcedure) and (FSQLRecord.Count > 0) then
+    if FSQLRecord.Count > 0 then
     begin
-      {a singleton result comes back with the execute}
-      Connection.ExecuteStatement2((FTransactionIntf as TObject as TFBWireTransaction).Handle,
-        FHandle,FSQLParams.Format,paramPtr,FSQLRecord.Format,outPtr);
+      {a statement with an output message - execute procedure, or
+       insert/update/delete ... returning - answers a singleton result
+       with the execute, so op_execute2 must be used: the server expects
+       to send the row and a plain op_execute desynchronises the
+       connection}
+      Connection.ExecuteStatement2(FHandle,
+        (FTransactionIntf as TObject as TFBWireTransaction).Handle,
+        FSQLParams.Format,paramPtr,FSQLRecord.Format,outPtr,
+        FStatementTimeout);
       FSingleResults := true;
       FSQLRecord.RowChange;
       Result := TResults.Create(FSQLRecord);
@@ -747,7 +878,7 @@ begin
     else
       Connection.ExecuteStatement(FHandle,
         (FTransactionIntf as TObject as TFBWireTransaction).Handle,
-        FSQLParams.Format,paramPtr);
+        FSQLParams.Format,paramPtr,FStatementTimeout);
   except
     on E: Exception do WireIBError(FWireAPI,E);
   end;
@@ -757,9 +888,11 @@ end;
 function TFBWireStatement.InternalOpenCursor(aTransaction: ITransaction;
   Scrollable: boolean): IResultSet;
 var paramPtr: PByte;
+    cursorFlags: cardinal;
 begin
-  if Scrollable then
+  if Scrollable and not GetAttachment.HasScollableCursors then
     IBError(ibxeNotSupported,[nil]);
+  FScrollable := Scrollable;
   CheckTransaction(aTransaction);
   if not FPrepared then
     InternalPrepare;
@@ -769,14 +902,17 @@ begin
   paramPtr := nil;
   if Length(FSQLParams.Buffer) > 0 then
     paramPtr := @FSQLParams.Buffer[0];
+  cursorFlags := 0;
+  if Scrollable then
+    cursorFlags := CURSOR_TYPE_SCROLLABLE;
   try
     Connection.ExecuteStatement(FHandle,
       (aTransaction as TObject as TFBWireTransaction).Handle,
-      FSQLParams.Format,paramPtr);
+      FSQLParams.Format,paramPtr,FStatementTimeout,cursorFlags);
   except
     on E: Exception do WireIBError(FWireAPI,E);
   end;
-  FillChar(FCursorState,SizeOf(FCursorState),0);
+  ResetCursorState(FCursorState);
   FOpen := true;
   FBOF := true;
   FEOF := false;
@@ -805,6 +941,39 @@ begin
     FEOF := true;
 end;
 
+function TFBWireStatement.FetchScroll(aDirection: integer;
+  aPosition: integer): boolean;
+begin
+  Result := false;
+  if not FOpen then
+    IBError(ibxeSQLClosed,[nil]);
+  if not FScrollable then
+    IBError(ibxeNotSupported,[nil]);
+  if (aDirection = fetch_prior) and FBOF then
+    IBError(ibxeBOF,[nil]);
+  try
+    Result := Connection.FetchRowScroll(FHandle,FSQLRecord.Format,
+                @FSQLRecord.Buffer[0],aDirection,aPosition,FCursorState);
+  except
+    on E: Exception do WireIBError(FWireAPI,E);
+  end;
+  if Result then
+  begin
+    {the same flag semantics as TFB30Statement.Fetch: success clears both
+     markers; prior falling off the top sets BOF; a failed positioned
+     fetch leaves the flags as they were}
+    FBOF := false;
+    FEOF := false;
+    Inc(FChangeSeqNo);
+  end
+  else
+  if aDirection = fetch_prior then
+  begin
+    FBOF := true;
+    FEOF := false;
+  end;
+end;
+
 procedure TFBWireStatement.InternalClose(Force: boolean);
 begin
   if not Connection.Connected then
@@ -825,7 +994,7 @@ begin
   FOpen := false;
   FEOF := true;
   FBOF := false;
-  FillChar(FCursorState,SizeOf(FCursorState),0);
+  ResetCursorState(FCursorState);
   FExecTransactionIntf := nil;
   Inc(FChangeSeqNo);
 end;
@@ -884,6 +1053,23 @@ begin
   Result := TMetaData.Create(FSQLRecord);
 end;
 
+function TFBWireStatement.GetFlags: TStatementFlags;
+begin
+  Result := [];
+  if FSQLStatementType in [SQLSelect, SQLSelectForUpdate] then
+    Result := Result + [stHasCursor];
+  if FScrollable then
+    Result := Result + [stScrollable];
+end;
+
+procedure TFBWireStatement.SetStatementTimeout(aMilliseconds: cardinal);
+begin
+  if (aMilliseconds <> 0) and
+     (Connection.ProtocolVersion < (PROTOCOL_VERSION16 and FB_PROTOCOL_MASK)) then
+    IBError(ibxeNotSupported,[nil]);
+  FStatementTimeout := aMilliseconds;
+end;
+
 function TFBWireStatement.CreateBlob(column: TColumnMetaData): IBlob;
 begin
   if column.SQLType <> SQL_BLOB then
@@ -894,8 +1080,11 @@ end;
 
 function TFBWireStatement.CreateArray(column: TColumnMetaData): IArray;
 begin
-  IBError(ibxeNotSupported,[nil]);
-  Result := nil;
+  if assigned(column) and (column.SQLType <> SQL_ARRAY) then
+    IBError(ibxeNotAnArray,[nil]);
+  Result := TFBWireArray.Create(GetAttachment as TFBWireAttachment,
+              GetTransaction as TObject as TFBWireTransaction,
+              column.GetArrayMetaData);
 end;
 
 function TFBWireStatement.GetPlan: AnsiString;
