@@ -91,6 +91,9 @@ type
     function GetArrayMetaData(Transaction: ITransaction; tableName, columnName: AnsiString): IArrayMetaData; override;
     procedure getFBVersion(version: TStrings);
     function HasScollableCursors: boolean;
+    {fb_cancel_operation - raises ibxeNotSupported when the loaded
+     library does not export it}
+    procedure CancelOperation(aKind: integer = fb_cancel_raise); override;
   end;
 
 implementation
@@ -357,6 +360,18 @@ end;
 function TFB25Attachment.HasScollableCursors: boolean;
 begin
   Result := false;
+end;
+
+procedure TFB25Attachment.CancelOperation(aKind: integer);
+begin
+  CheckHandle;
+  with FFirebird25ClientAPI do
+  begin
+    if not assigned(fb_cancel_operation) then
+      IBError(ibxeNotSupported,[nil]);
+    if fb_cancel_operation(StatusVector,@FHandle,aKind) > 0 then
+      IBDataBaseError;
+  end;
 end;
 
 end.

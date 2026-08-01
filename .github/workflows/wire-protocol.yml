@@ -1,0 +1,324 @@
+name: Wire protocol client
+
+# Exercises the pure Pascal wire protocol client (client/wire) against every
+# supported Firebird major version. The client needs no fbclient library, so
+# the server runs in a container and the test reaches it over TCP only:
+# nothing Firebird related is installed on the runner itself.
+
+on:
+  push:
+    branches: [ main, 'pure-pascal-wire-protocol' ]
+    paths:
+      - 'client/**'
+      - 'testsuite/**'
+      - '.github/workflows/wire-protocol.yml'
+  pull_request:
+    paths:
+      - 'client/**'
+      - 'testsuite/**'
+      - '.github/workflows/wire-protocol.yml'
+  workflow_dispatch:
+
+env:
+  FB_USER: SYSDBA
+  FB_PASSWORD: masterkey
+  # Server side paths. The client never opens these itself: it asks the
+  # server to, so they are resolved inside the container.
+  FB_DATABASE: /tmp/wiretest.fdb
+  FB_SCRATCH: /tmp/wirescratch.fdb
+
+jobs:
+  server:
+    name: FB ${{ matrix.firebird }} / WireCrypt ${{ matrix.wirecrypt }}${{ matrix.wirecompression == 'true' && ' / Compressed' || '' }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        firebird: ['3', '4', '5', '6']
+        wirecrypt: ['Enabled', 'Required']
+        wirecompression: ['false']
+        include:
+          - firebird: '3'
+            image: 'firebirdsql/firebird:3'
+            # Firebird 3 tops out at protocol 15 and has no ChaCha plugin,
+            # so the connection settles on Arc4.
+            expected: '15'
+          - firebird: '4'
+            image: 'firebirdsql/firebird:4'
+            expected: '17'
+          - firebird: '5'
+            image: 'firebirdsql/firebird:5'
+            expected: '19'
+          - firebird: '6'
+            image: 'firebirdsql/firebird:6-snapshot'
+            expected: '20'
+          # One compression row: the zlib pipeline is protocol version
+          # independent, so a single server exercises it. WireTest's
+          # compression section negotiates it explicitly. Naming a
+          # different value for the wirecompression axis makes this a new
+          # combination rather than extending the existing FB 5 row.
+          - firebird: '5'
+            wirecrypt: 'Enabled'
+            wirecompression: 'true'
+            image: 'firebirdsql/firebird:5'
+            expected: '19'
+        exclude:
+          # Protocol 13, the only one Firebird 3 offers without encryption
+          # support, cannot satisfy WireCrypt = Required. The combination is
+          # covered by the newer versions.
+          - firebird: '3'
+            wirecrypt: 'Required'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start Firebird ${{ matrix.firebird }}
+        run: |
+          docker run -d \
+            --name firebird \
+            -e FIREBIRD_ROOT_PASSWORD="${FB_PASSWORD}" \
+            -e FIREBIRD_CONF_WireCrypt="${{ matrix.wirecrypt }}" \
+            -e FIREBIRD_CONF_AuthServer="Srp256;Srp;Legacy_Auth" \
+            -e FIREBIRD_CONF_DatabaseAccess="Full" \
+            -e FIREBIRD_CONF_RemoteAuxPort="3051" \
+            -e FIREBIRD_CONF_WireCompression="${{ matrix.wirecompression || 'false' }}" \
+            -p 3050:3050 \
+            -p 3051:3051 \
+            "${{ matrix.image }}"
+
+          echo "Waiting for the server to accept connections"
+          ready=false
+          for i in $(seq 1 45); do
+            if docker exec firebird /opt/firebird/bin/isql \
+                 -user "${FB_USER}" -password "${FB_PASSWORD}" -z 2>&1 \
+                 | grep -q "ISQL Version"; then
+              ready=true
+              break
+            fi
+            sleep 2
+          done
+          if [ "$ready" != true ]; then
+            echo "::error::Firebird did not become ready"
+            docker logs firebird
+            exit 1
+          fi
+          docker exec firebird /opt/firebird/bin/isql \
+            -user "${FB_USER}" -password "${FB_PASSWORD}" -z 2>&1 | head -1
+
+      - name: Create the test database
+        run: |
+          docker exec -i firebird /opt/firebird/bin/isql \
+            -user "${FB_USER}" -password "${FB_PASSWORD}" -q <<SQL
+          create database '${FB_DATABASE}' page_size 8192 default character set UTF8;
+          create table SANITY (ID integer not null primary key, NAME varchar(30));
+          insert into SANITY values (1, 'first');
+          commit;
+          quit;
+          SQL
+          # The scratch database must not exist: the test creates and drops it.
+          docker exec firebird rm -f "${FB_SCRATCH}" || true
+
+      - name: Install Free Pascal
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fpc
+          echo "compiler: $(fpc -iV), target: $(fpc -iTO)-$(fpc -iTP)"
+
+      - name: Build the package
+        run: |
+          mkdir -p build
+          fpc -Fuclient -Fuclient/2.5 -Fuclient/3.0 -Fuclient/3.0/firebird \
+              -Fuclient/wire -Ficlient/include -FEbuild -B fbintf.pas
+
+      - name: Build the test
+        run: |
+          fpc -Fuclient -Fuclient/2.5 -Fuclient/3.0 -Fuclient/3.0/firebird \
+              -Fuclient/wire -Ficlient/include -FEbuild -B \
+              testsuite/WireTest.pas
+
+      - name: Run the test
+        shell: bash
+        run: |
+          set -o pipefail
+          ./build/WireTest "localhost:${FB_DATABASE}" \
+                           "${FB_USER}" "${FB_PASSWORD}" \
+                           "localhost:${FB_SCRATCH}" | tee build/wiretest.log
+
+      - name: Summarise
+        if: always()
+        run: |
+          {
+            echo "### Firebird ${{ matrix.firebird }}, WireCrypt ${{ matrix.wirecrypt }}"
+            echo
+            if [ -f build/wiretest.log ]; then
+              echo '```'
+              grep -E "^ *protocol [0-9]+|^[0-9]+ tests" build/wiretest.log || true
+              echo '```'
+              echo
+              echo "Protocol expected to reach ${{ matrix.expected }} on this server."
+              echo
+              if grep -q "FAIL" build/wiretest.log; then
+                echo "Failures:"
+                echo '```'
+                grep "FAIL" build/wiretest.log
+                echo '```'
+              fi
+            else
+              echo "The test produced no output."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Firebird log on failure
+        if: failure()
+        run: |
+          echo "===== firebird.log ====="
+          docker exec firebird sh -c 'cat $(find / -name firebird.log 2>/dev/null | head -1)' \
+            2>/dev/null | tail -n 200 || echo "(no firebird.log found)"
+          echo "===== container ====="
+          docker ps -a
+          docker logs firebird --tail 100
+
+  offline:
+    # The parts that need no server: arbitrary precision arithmetic, the
+    # hashes and ciphers against their published vectors, the SRP exchange
+    # against a fixed reference exchange, and the message layout. Running
+    # them separately keeps a compiler or arithmetic regression from being
+    # reported as a server problem, and covers Windows where no Firebird
+    # container is available.
+    name: Offline tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Free Pascal
+        uses: gcarreno/setup-lazarus@v3
+        with:
+          lazarus-version: 'stable'
+
+      - name: Show the compiler version
+        shell: bash
+        run: fpc -iV
+
+      - name: Build and run the offline tests
+        shell: bash
+        run: |
+          mkdir -p build
+          fpc -Fuclient -Fuclient/2.5 -Fuclient/3.0 -Fuclient/3.0/firebird \
+              -Fuclient/wire -Ficlient/include -FEbuild -B \
+              testsuite/WireTest.pas
+          # Nothing listens on port 3051, so every section that needs a
+          # server reports SKIP straight away and the rest still runs.
+          ./build/WireTest "localhost/3051:/nonexistent.fdb" SYSDBA masterkey
+
+  suite:
+    # The full fbintf test suite - all twenty two test programs - run over
+    # the wire protocol provider and compared line by line against
+    # testsuite/FBWirereference.log. The suite needs the employee example
+    # database, which the container images do not ship, so it is restored
+    # from the checked in backup. The reference log was produced against
+    # Firebird 6 (ODS 14, protocol 17), so this job runs that server.
+    name: Full test suite over the wire (FB 6)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start Firebird 6
+        run: |
+          mkdir -p /tmp/fbintf-testsuite
+          chmod 777 /tmp/fbintf-testsuite
+          docker run -d \
+            --name firebird \
+            -e FIREBIRD_ROOT_PASSWORD="${FB_PASSWORD}" \
+            -e FIREBIRD_CONF_WireCrypt="Enabled" \
+            -e FIREBIRD_CONF_AuthServer="Srp256;Srp;Legacy_Auth" \
+            -e FIREBIRD_CONF_DatabaseAccess="Full" \
+            -e FIREBIRD_CONF_RemoteAuxPort="3051" \
+            -e FIREBIRD_CONF_WireCompression="${{ matrix.wirecompression || 'false' }}" \
+            -v /tmp/fbintf-testsuite:/tmp/fbintf-testsuite \
+            -p 3050:3050 \
+            -p 3051:3051 \
+            firebirdsql/firebird:6-snapshot
+          echo "Waiting for the server to accept connections"
+          ready=false
+          for i in $(seq 1 45); do
+            if docker exec firebird /opt/firebird/bin/isql \
+                 -user "${FB_USER}" -password "${FB_PASSWORD}" -z 2>&1 \
+                 | grep -q "ISQL Version"; then
+              ready=true
+              break
+            fi
+            sleep 2
+          done
+          if [ "$ready" != true ]; then
+            echo "::error::Firebird did not become ready"
+            docker logs firebird
+            exit 1
+          fi
+
+      - name: Restore the employee example database
+        run: |
+          docker cp testsuite/employee.gbk firebird:/tmp/employee.gbk
+          docker exec firebird /opt/firebird/bin/gbak -c \
+            -user "${FB_USER}" -password "${FB_PASSWORD}" \
+            /tmp/employee.gbk /tmp/fbintf-testsuite/employee.fdb
+          docker exec firebird sh -c \
+            'echo "employee = /tmp/fbintf-testsuite/employee.fdb" >> /opt/firebird/databases.conf'
+          docker exec firebird /opt/firebird/bin/isql \
+            -user "${FB_USER}" -password "${FB_PASSWORD}" \
+            -q localhost:employee <<'SQL'
+          select count(*) from EMPLOYEE;
+          quit;
+          SQL
+
+      - name: Install Free Pascal
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fpc
+          echo "compiler: $(fpc -iV), target: $(fpc -iTO)-$(fpc -iTP)"
+
+      - name: Run the test suite over the wire provider
+        run: |
+          testsuite/runtest.sh -a wire
+
+      - name: Check the reference log comparison
+        run: |
+          # runtest.sh always exits 0: the outcome is the diff, and the log
+          # must show a completed run for the diff to mean anything
+          if ! grep -aq "Test Suite Ends" testsuite/testout.log; then
+            echo "::error::The test suite did not run to completion"
+            tail -50 testsuite/testout.log || true
+            exit 1
+          fi
+          if [ -s testsuite/diff.log ]; then
+            echo "::error::The suite output differs from FBWirereference.log"
+            cat testsuite/diff.log
+            exit 1
+          fi
+          echo "The suite output matches the reference log"
+          {
+            echo "### Full test suite over the wire"
+            echo
+            echo "All twenty two test programs match \`FBWirereference.log\`."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the test output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wire-suite-testout
+          path: |
+            testsuite/testout.log
+            testsuite/diff.log
+          if-no-files-found: ignore
+
+      - name: Server diagnostics on failure
+        if: failure()
+        run: |
+          docker logs firebird --tail 100
