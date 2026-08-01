@@ -1,7 +1,24 @@
 # Design: Running the existing test suite against the wire provider
 
-Roadmap milestone 1 (`doc/WireProtocol.md`). This document is the
-implementation plan; no code changes are included.
+Roadmap milestone 1 (`doc/WireProtocol.md`).
+
+**Status: implemented** — `testsuite -a wire` runs all twenty two
+programs over the wire provider; `runtest.sh -a wire` diffs the output
+against `testsuite/FBWirereference.log` (run dependent values normalised
+on both sides), and a CI job runs the suite against a Firebird 6
+container with the employee database restored from
+`testsuite/employee.gbk`, failing on any diff. The harness fixes and
+skip guards below landed as planned, with `HasArraySupport` and
+`HasEventSupport` added to `IAttachment` for the capability checks.
+
+The milestone's real value turned out to be the seven wire provider
+defects the suite exposed on its first run — SRP account upper casing
+broken under `fpwidestring`, swapped handles in the never-exercised
+`op_execute2`, missing `returning` singleton support, named parameter
+names wiped by the bind, immutable parameter metadata, a `DECFLOAT`
+codec that had no implementation at all, and blob metadata lookups that
+never queried the system tables. `doc/WireProtocol.md`'s roadmap section
+records the details.
 
 ## Goal
 

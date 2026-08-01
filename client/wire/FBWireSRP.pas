@@ -208,7 +208,13 @@ var B, u, x, gx, kgx, diff, ux, aux, S: TBigInt;
   end;
 
 begin
-  upperUser := AnsiUpperCase(aUser);
+  {ASCII upper casing only. AnsiUpperCase delegates to the installed
+   widestring manager, and fpwidestring's implementation returns the
+   string with a trailing #0 included in its length - that byte would
+   enter the SRP hashes and every proof would fail. The engine upper
+   cases the account name with ASCII rules, so UpperCase is also the
+   correct transformation, not just the safe one.}
+  upperUser := UpperCase(aUser);
   B := TBigInt.FromHex(aServerKeyHex);
   if TBigInt.Compare(TBigInt.Modulus(B,FN),TBigInt.FromCardinal(2)) < 0 then
     raise EBigIntError.Create('SRP: illegal server public key');

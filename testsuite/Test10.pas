@@ -201,6 +201,12 @@ begin
   DPB.Add(isc_dpb_lc_ctype).setAsString(CharSet);
   DPB.Find(isc_dpb_password).setAsString(Owner.GetPassword);
   Attachment := FirebirdAPI.OpenDatabase(Owner.GetEmployeeDatabaseName,DPB);
+  if not Attachment.HasEventSupport then
+  begin
+    writeln(OutFile,'Skipping test - events are not supported by this provider');
+    Attachment.Disconnect;
+    Exit;
+  end;
   EventsTest(Attachment);
   Attachment.Disconnect;
 end;

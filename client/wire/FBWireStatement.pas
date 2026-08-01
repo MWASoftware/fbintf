@@ -85,6 +85,7 @@ type
     procedure InternalSetSQLType(aValue: cardinal; aSubType: integer); override;
     procedure InternalSetScale(aValue: integer); override;
     procedure InternalSetDataLength(len: cardinal); override;
+    procedure SetMetaSize(aValue: cardinal); override;
     procedure SetIsNull(Value: Boolean); override;
     procedure SetIsNullable(Value: Boolean); override;
     procedure SetSQLData(AValue: PByte; len: cardinal); override;
@@ -122,6 +123,9 @@ type
     function StateChanged(var ChangeSeqNo: integer): boolean; override;
     function CanChangeMetaData: boolean; override;
     procedure ClearBuffer;
+    {recomputes the buffer layout after a parameter's metadata has been
+     changed, relocating values already written}
+    procedure RelayoutBuffer;
     property Format: TWireMessageFormat read FFormat;
     property Buffer: TBytes read FBuffer;
     property Statement: TFBWireStatement read FStatement;
@@ -314,8 +318,11 @@ end;
 
 procedure TWireSQLVarData.InternalSetSQLType(aValue: cardinal; aSubType: integer);
 begin
+  if (GetVar^.SQLType = aValue) and (GetVar^.SQLSubType = aSubType) then
+    Exit;
   GetVar^.SQLType := aValue;
   GetVar^.SQLSubType := aSubType;
+  FOwner.RelayoutBuffer;
 end;
 
 procedure TWireSQLVarData.InternalSetScale(aValue: integer);
@@ -326,9 +333,33 @@ end;
 procedure TWireSQLVarData.InternalSetDataLength(len: cardinal);
 begin
   if GetSQLType = SQL_VARYING then
-    PWord(GetSQLData)^ := len
+  begin
+    {a longer value than the described maximum needs a bigger slot: grow
+     the declared size and relay out - the BLR describes the new size}
+    if len > GetVar^.DataSize then
+    begin
+      GetVar^.DataSize := len;
+      FOwner.RelayoutBuffer;
+    end;
+    PWord(GetSQLData)^ := len;
+  end
   else
+  begin
+    if GetVar^.DataSize = len then Exit;
     GetVar^.DataSize := len;
+    FOwner.RelayoutBuffer;
+  end;
+end;
+
+procedure TWireSQLVarData.SetMetaSize(aValue: cardinal);
+begin
+  {called before a type change (e.g. a string value assigned to a blob
+   parameter becomes SQL_TEXT) so that the new slot is large enough}
+  if aValue > GetVar^.DataSize then
+  begin
+    GetVar^.DataSize := aValue;
+    FOwner.RelayoutBuffer;
+  end;
 end;
 
 procedure TWireSQLVarData.SetIsNull(Value: Boolean);
@@ -485,7 +516,15 @@ begin
   SetCount(Length(FFormat));
   for i := 0 to Length(FFormat) - 1 do
   begin
-    FColumnList[i].Name := FFormat[i].AliasName;
+    {input parameters keep the names assigned by the SQL preprocessor
+     (":name" parameters) - the describe response has no names for them
+     and would wipe them}
+    if not FIsInput then
+      FColumnList[i].Name := FFormat[i].AliasName
+    else
+      {snapshot the described metadata: TSQLParam.Clear restores a
+       parameter to it after the type has been changed}
+      FColumnList[i].SaveMetaData;
     FColumnList[i].Initialize;
   end;
   SetUniqueRelationName;
@@ -533,8 +572,39 @@ end;
 
 function TWireSQLDataArea.CanChangeMetaData: boolean;
 begin
-  {the message format is fixed by the prepare}
-  Result := false;
+  {the client owns the parameter message format: the BLR sent with
+   op_execute describes whatever the format records now say, and the
+   server coerces. RelayoutBuffer keeps the buffer consistent with any
+   change.}
+  Result := FIsInput;
+end;
+
+procedure TWireSQLDataArea.RelayoutBuffer;
+var OldFormat: TWireMessageFormat;
+    OldBuffer: TBytes;
+    i: integer;
+    n: cardinal;
+begin
+  if not FIsInput then Exit;
+  {keep the old layout so that values already written can be relocated}
+  SetLength(OldFormat,Length(FFormat));
+  for i := 0 to High(FFormat) do
+    OldFormat[i] := FFormat[i];
+  OldBuffer := system.copy(FBuffer);
+  ComputeMessageLayout(FFormat);
+  SetLength(FBuffer,MessageBufferSize(FFormat));
+  if Length(FBuffer) > 0 then
+    FillChar(FBuffer[0],Length(FBuffer),0);
+  for i := 0 to High(FFormat) do
+  begin
+    n := OldFormat[i].BufferSize;
+    if n > FFormat[i].BufferSize then
+      n := FFormat[i].BufferSize;
+    if (n > 0) and (Length(OldBuffer) > 0) then
+      Move(OldBuffer[OldFormat[i].DataOffset],FBuffer[FFormat[i].DataOffset],n);
+    if Length(OldBuffer) > 0 then
+      Move(OldBuffer[OldFormat[i].NullOffset],FBuffer[FFormat[i].NullOffset],4);
+  end;
 end;
 
 { TWireResultSet }
@@ -717,6 +787,7 @@ end;
 
 function TFBWireStatement.InternalExecute(Transaction: ITransaction): IResults;
 var paramPtr, outPtr: PByte;
+    Cursor: IResultSet;
 begin
   Result := nil;
   CheckTransaction(Transaction);
@@ -726,6 +797,20 @@ begin
   FBOF := false;
   FEOF := false;
   FSingleResults := false;
+
+  if (FSQLStatementType = SQLSelect) and (FSQLRecord.Count > 0) then
+  begin
+    {Firebird 5 and later describe update/insert ... returning as a select
+     statement answering a single row - open the cursor and fetch it}
+    Cursor := InternalOpenCursor(Transaction,false);
+    if not Cursor.IsEof then
+      Cursor.FetchNext;
+    Result := Cursor;
+    FSingleResults := true;
+    Inc(FChangeSeqNo);
+    Exit;
+  end;
+
   FillChar(FCursorState,SizeOf(FCursorState),0);
 
   paramPtr := nil;
@@ -735,11 +820,16 @@ begin
   if Length(FSQLRecord.Buffer) > 0 then
     outPtr := @FSQLRecord.Buffer[0];
   try
-    if (FSQLStatementType = SQLExecProcedure) and (FSQLRecord.Count > 0) then
+    if FSQLRecord.Count > 0 then
     begin
-      {a singleton result comes back with the execute}
-      Connection.ExecuteStatement2((FTransactionIntf as TObject as TFBWireTransaction).Handle,
-        FHandle,FSQLParams.Format,paramPtr,FSQLRecord.Format,outPtr);
+      {a statement with an output message - execute procedure, or
+       insert/update/delete ... returning - answers a singleton result
+       with the execute, so op_execute2 must be used: the server expects
+       to send the row and a plain op_execute desynchronises the
+       connection}
+      Connection.ExecuteStatement2(FHandle,
+        (FTransactionIntf as TObject as TFBWireTransaction).Handle,
+        FSQLParams.Format,paramPtr,FSQLRecord.Format,outPtr);
       FSingleResults := true;
       FSQLRecord.RowChange;
       Result := TResults.Create(FSQLRecord);

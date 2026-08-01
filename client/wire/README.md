@@ -25,6 +25,16 @@ Working and tested against a live server (see *Testing* below):
   `BOOLEAN` and the time zone types
 * blobs: create, open, read and write segments, close, cancel
 * information calls for the database, transaction, statement and blob
+* `DECFLOAT(16)`/`DECFLOAT(34)` conversions through the provider's own
+  IEEE 754 densely packed decimal codec
+* `execute procedure` and `insert/update ... returning` singleton results
+* named parameters, parameter type coercion, create database from a SQL
+  statement, reconnection of a disconnected attachment
+
+The whole fbintf test suite (twenty two test programs) runs over this
+provider with `testsuite/runtest.sh -a wire` and is compared against
+`testsuite/FBWirereference.log`; CI runs it against Firebird 6 on every
+change.
 
 Not implemented yet, and reported as `ibxeNotSupported` rather than
 failing obscurely (see the roadmap in doc/WireProtocol.md for what each
