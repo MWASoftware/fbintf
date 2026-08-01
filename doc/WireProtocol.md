@@ -136,13 +136,14 @@ Working and covered by the test suite:
 * engine error message text without `firebird.msg`: a generated table of
   the message format strings, so status vectors read as `fb_interpret`
   renders them, SQLCODE line included
+* services: `IServiceManager` over its own connection, with the same SRP
+  authentication and wire encryption as a database attach
 
 Deliberately not implemented yet. These raise `ibxeNotSupported` rather
 than failing in a confusing way:
 
 | Feature | What it needs |
 |---|---|
-| Services | `op_service_*` exist in `FBWireProtocol`; the `IServiceManager` wrapper does not |
 | Multi database transactions | a two phase commit coordinator |
 
 Delphi is not supported yet either: the transport is written against the
@@ -464,12 +465,12 @@ apply `runtest.sh`'s normalisation, and commit it.
 
 | Server | WireCrypt | Negotiated | Encryption | Result |
 |---|---|---|---|---|
-| 6.0 (CI container) | Enabled, Required | 20 | `ChaCha64` | 171 tests, 0 failures |
-| 6.0.0 (local, LI-T6.0.0.2076) | Required | 20 | `ChaCha64` | 171 tests, 0 failures |
-| 5.0 (CI container) | Enabled, Required | 19 | `ChaCha64` | 171 tests, 0 failures |
-| 5.0.4 (local container) | Enabled, Required | 19 | `ChaCha64` | 171 tests, 0 failures |
-| 4.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 171 tests, 0 failures |
-| 3.0 (CI container) | Enabled | 15 | `Arc4` | 171 tests, 0 failures |
+| 6.0 (CI container) | Enabled, Required | 20 | `ChaCha64` | 178 tests, 0 failures |
+| 6.0.0 (local, LI-T6.0.0.2076) | Required | 20 | `ChaCha64` | 178 tests, 0 failures |
+| 5.0 (CI container) | Enabled, Required | 19 | `ChaCha64` | 178 tests, 0 failures |
+| 5.0.4 (local container) | Enabled, Required | 19 | `ChaCha64` | 178 tests, 0 failures |
+| 4.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 178 tests, 0 failures |
+| 3.0 (CI container) | Enabled | 15 | `Arc4` | 178 tests, 0 failures |
 | no server | — | — | — | 36 tests, live sections skipped |
 
 Firebird 3 settles on protocol 15 with Arc4: it is the newest protocol that
@@ -527,7 +528,7 @@ machinery that already exists to support it.
 |---|---|---|---|
 | 1 | Run the existing test suite against this provider — **done** | `testsuite -a wire` runs all twenty two programs | — |
 | 2 | Events — **done** | `FBWireEvents` implements `IEvents` over the auxiliary connection | 13 |
-| 3 | Services | the `IServiceManager` wrapper over exchanges that already exist | 13 |
+| 3 | Services — **done** | `FBWireServices` implements the `IServiceManager` wrapper | 13 |
 | 4 | A Delphi transport | a `TFBWireTransport` over Winsock and Posix sockets | — |
 | 5 | Array columns — **done** | `FBWireArray` over `op_get_slice`/`op_put_slice`, shared SDL generator | 13 |
 | 6 | Statement timeouts and cancellation — **done** | `CancelOperation`/`SetStatementTimeout` on all providers | 12, 16 |
@@ -629,17 +630,25 @@ reuses the host it connected to):
   wait (the stock bookkeeping can drop them). The wire reference log
   records this in Test 10's final count.
 
-### 3. Services
+### 3. Services — done
 
-`op_service_attach`, `op_service_detach`, `op_service_start` and
-`op_service_info` are already implemented in `FBWireProtocol` and unused.
-What is missing is the `IServiceManager` layer: a `TFBWireServiceManager`
-over `TFBServiceManager`, which needs `InternalAttach`, `Detach` and
-`Query`, plus `AllocateSPB` returning the existing `TSPB`. `FBOutputBlock`
-already parses the responses. This is a small, well bounded piece of work
-that would bring backup, restore, statistics and user management to a
-client with no library installed — arguably the most useful thing this
-provider could offer an operations team.
+Implemented by `client/wire/FBWireServices.pas`: `TFBWireServiceManager`
+over `TFBServiceManager`, driving the `op_service_*` exchanges that were
+already present in `FBWireProtocol`. A service session is its own
+connection, authenticated with SRP and encrypted when negotiated exactly
+like a database attach; the password is consumed by the SRP exchange and
+stripped from the SPB, with the proof travelling as
+`isc_spb_specific_auth_data` when the server asked for it in the attach.
+`AllocateSPB` returns the shared `TSPB` and `FBOutputBlock` parses the
+responses, as anticipated.
+
+One find from the implementation is recorded here for the next reconnect
+path: `TFBWireTransport.Disconnect` used to leave the session ciphers
+installed, so any reconnect on the same connection object sent its
+handshake through the previous session's cipher and the server dropped
+it. Detach and reattach of a service manager was the first code path to
+reconnect, which is how it surfaced; `Disconnect` now discards both
+ciphers.
 
 ### 4. A Delphi transport
 

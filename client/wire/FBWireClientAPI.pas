@@ -174,7 +174,7 @@ function ParamBlockToBytes(aBlock: IUnknown): TBytes;
 implementation
 
 uses FBMessages, IBErrorCodes, FBParamBlock, FBAttachment, FBTransaction,
-  IBUtils, FBWireAttachment, FBWireMessages;
+  IBUtils, FBServices, FBWireAttachment, FBWireServices, FBWireMessages;
 
 const
   {days between the Delphi TDateTime zero (1899-12-30) and the Firebird
@@ -806,28 +806,24 @@ end;
 
 function TFBWireClientAPI.HasServiceAPI: boolean;
 begin
-  {the service manager is not yet implemented by this provider}
-  Result := false;
+  Result := true;
 end;
 
 function TFBWireClientAPI.AllocateSPB: ISPB;
 begin
-  IBError(ibxeNotSupported,[nil]);
-  Result := nil;
+  Result := TSPB.Create(self);
 end;
 
 function TFBWireClientAPI.GetServiceManager(ServerName: AnsiString;
   Protocol: TProtocol; SPB: ISPB): IServiceManager;
 begin
-  IBError(ibxeNotSupported,[nil]);
-  Result := nil;
+  Result := GetServiceManager(ServerName,'',Protocol,SPB);
 end;
 
 function TFBWireClientAPI.GetServiceManager(ServerName: AnsiString;
   Port: AnsiString; Protocol: TProtocol; SPB: ISPB): IServiceManager;
 begin
-  IBError(ibxeNotSupported,[nil]);
-  Result := nil;
+  Result := TFBWireServiceManager.Create(self,ServerName,Protocol,SPB,Port);
 end;
 
 function TFBWireClientAPI.GetStatus: IStatus;
