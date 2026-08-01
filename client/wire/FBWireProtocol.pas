@@ -199,12 +199,16 @@ type
     function PrepareStatement(aTrHandle, aStmtHandle: integer;
                         aDialect: integer; const sql: AnsiString;
                         const aInfoItems: TBytes; aBufferLength: integer): TBytes;
+    {aTimeout is the statement timeout in milliseconds (0 = none), carried
+     in the p_sqldata_timeout field from protocol 16}
     procedure ExecuteStatement(aStmtHandle, aTrHandle: integer;
-                        const aParamFormat: TWireMessageFormat; aParamBuffer: PByte);
+                        const aParamFormat: TWireMessageFormat; aParamBuffer: PByte;
+                        aTimeout: cardinal = 0);
     {op_execute2 for singleton results (execute procedure/returning)}
     procedure ExecuteStatement2(aStmtHandle, aTrHandle: integer;
                         const aParamFormat: TWireMessageFormat; aParamBuffer: PByte;
-                        const aOutFormat: TWireMessageFormat; aOutBuffer: PByte);
+                        const aOutFormat: TWireMessageFormat; aOutBuffer: PByte;
+                        aTimeout: cardinal = 0);
     {fetches the next row into aOutBuffer, requesting a new batch of
      aFetchCount rows from the server when needed. Returns false when the
      cursor is exhausted. aState must be zero initialised before the first
@@ -234,6 +238,27 @@ type
     procedure CloseBlob(aBlobHandle: integer);
     procedure CancelBlob(aBlobHandle: integer);
 
+    {--- array slices ---}
+    {op_get_slice: reads the slice of aArrayID into aBuffer as described
+     by aLayout. Returns the slice length reported by the server (in dsc
+     length units - see SliceElementDscLength).}
+    function GetSlice(aTrHandle: integer; aArrayID: Int64; const SDL: TBytes;
+                        const aLayout: TWireSliceLayout; aBuffer: PByte): integer;
+    {op_put_slice: writes the slice and returns the (possibly new) array id}
+    function PutSlice(aTrHandle: integer; aArrayID: Int64; const SDL: TBytes;
+                        const aLayout: TWireSliceLayout; aBuffer: PByte): Int64;
+
+    {--- events ---}
+    {op_connect_request with P_REQ_async: asks the server to open the
+     auxiliary port that delivers op_event packets. Returns the TCP port
+     number. Only the port of the returned address is usable: the address
+     itself is the server's own view of itself, which behind NAT is not
+     reachable, so the caller connects to the host it already knows (the
+     stock client does the same - see aux_connect in inet.cpp).}
+    function ConnectRequest(aDbHandle: integer): integer;
+    procedure QueEvents(aDbHandle: integer; const aEPB: TBytes; aEventID: integer);
+    procedure CancelEvents(aDbHandle, aEventID: integer);
+
     {--- services ---}
     function ServiceAttach(const aServiceName: AnsiString; SPB: TBytes): integer;
     procedure ServiceDetach(aSvcHandle: integer);
@@ -243,6 +268,12 @@ type
 
     {--- misc ---}
     procedure Ping;
+    {op_cancel: sent out of band, typically from a different thread while
+     this connection's owner is blocked reading an operation's response.
+     There is no response packet: the cancelled operation itself fails
+     with isc_cancelled on the normal path. aKind is one of the
+     fb_cancel_* constants.}
+    procedure SendCancel(aKind: integer);
 
     property ProtocolVersion: cardinal read FProtocolVersion;
     {caps the highest protocol version offered to the server. Defaults to
@@ -1091,7 +1122,8 @@ begin
 end;
 
 procedure TFBWireConnection.ExecuteStatement(aStmtHandle, aTrHandle: integer;
-  const aParamFormat: TWireMessageFormat; aParamBuffer: PByte);
+  const aParamFormat: TWireMessageFormat; aParamBuffer: PByte;
+  aTimeout: cardinal);
 var blr: TBytes;
 begin
   FXDR.WriteInt32(op_execute);
@@ -1112,14 +1144,15 @@ begin
     FXDR.WriteInt32(0);
   end;
   if FProtocolVersion >= (PROTOCOL_VERSION16 and FB_PROTOCOL_MASK) then
-    FXDR.WriteInt32(0);   {p_sqldata_timeout}
+    FXDR.WriteUInt32(aTimeout);   {p_sqldata_timeout}
   FXDR.Flush;
   ReceiveAndCheckResponse;
 end;
 
 procedure TFBWireConnection.ExecuteStatement2(aStmtHandle, aTrHandle: integer;
   const aParamFormat: TWireMessageFormat; aParamBuffer: PByte;
-  const aOutFormat: TWireMessageFormat; aOutBuffer: PByte);
+  const aOutFormat: TWireMessageFormat; aOutBuffer: PByte;
+  aTimeout: cardinal);
 var blr: TBytes;
     op: integer;
     messages: integer;
@@ -1146,7 +1179,7 @@ begin
   FXDR.WriteString(blr);
   FXDR.WriteInt32(0);   {out message number}
   if FProtocolVersion >= (PROTOCOL_VERSION16 and FB_PROTOCOL_MASK) then
-    FXDR.WriteInt32(0); {p_sqldata_timeout}
+    FXDR.WriteUInt32(aTimeout); {p_sqldata_timeout}
   FXDR.Flush;
 
   op := ReadOperation;
@@ -1378,6 +1411,99 @@ begin
   ReceiveAndCheckResponse;
 end;
 
+{--- array slices ---}
+
+{Both packets are P_SLC: transaction, array id quad, slice length, the
+ SDL, a (here always empty) parameter vector, then the slice data - which
+ for the request side of op_get_slice is just a zero length. The reply to
+ op_get_slice is op_slice; op_put_slice gets a normal op_response with the
+ array id in ObjectID. See op_get_slice/op_put_slice in
+ src/remote/protocol.cpp.}
+
+function TFBWireConnection.GetSlice(aTrHandle: integer; aArrayID: Int64;
+  const SDL: TBytes; const aLayout: TWireSliceLayout; aBuffer: PByte): integer;
+var op: integer;
+    R: TWireResponse;
+    wireLen: cardinal;
+begin
+  FXDR.WriteInt32(op_get_slice);
+  FXDR.WriteInt32(aTrHandle);
+  FXDR.WriteInt64(aArrayID);
+  FXDR.WriteInt32(SliceLength(aLayout));
+  FXDR.WriteString(SDL);
+  FXDR.WriteInt32(0);              {p_slc_parameters: no longs}
+  FXDR.WriteInt32(0);              {slice data: none on a get request}
+  FXDR.Flush;
+  op := ReadOperation;
+  if op = op_response then
+  begin
+    {an error - a success op_response here would be a protocol violation}
+    R := ReadResponseBody;
+    CheckResponse(R);
+    raise EFBWireError.Create('Unexpected op_response to op_get_slice');
+  end;
+  if op <> op_slice then
+    raise EFBWireError.CreateFmt('Unexpected operation %d in get_slice response',[op]);
+  Result := FXDR.ReadInt32;        {p_slr_length}
+  wireLen := FXDR.ReadUInt32;      {lstr_length}
+  XDRDecodeSlice(FXDR,aLayout,aBuffer,wireLen);
+end;
+
+function TFBWireConnection.PutSlice(aTrHandle: integer; aArrayID: Int64;
+  const SDL: TBytes; const aLayout: TWireSliceLayout; aBuffer: PByte): Int64;
+begin
+  FXDR.WriteInt32(op_put_slice);
+  FXDR.WriteInt32(aTrHandle);
+  FXDR.WriteInt64(aArrayID);
+  FXDR.WriteInt32(SliceLength(aLayout));
+  FXDR.WriteString(SDL);
+  FXDR.WriteInt32(0);              {p_slc_parameters: no longs}
+  FXDR.WriteInt32(SliceLength(aLayout));  {lstr_length prefix of the data}
+  XDREncodeSlice(FXDR,aLayout,aBuffer);
+  FXDR.Flush;
+  Result := ReceiveAndCheckResponse.ObjectID;
+end;
+
+{--- events ---}
+
+function TFBWireConnection.ConnectRequest(aDbHandle: integer): integer;
+var R: TWireResponse;
+begin
+  FXDR.WriteInt32(op_connect_request);
+  FXDR.WriteInt32(P_REQ_async);
+  FXDR.WriteInt32(aDbHandle);
+  FXDR.WriteInt32(0);            {p_req_partner}
+  FXDR.Flush;
+  R := ReceiveAndCheckResponse;
+  {the response data is the server's sockaddr. The port is a big endian
+   16 bit value at offset 2 for both AF_INET and AF_INET6.}
+  if Length(R.Data) < 4 then
+    raise EFBWireError.Create('op_connect_request returned no address');
+  Result := (integer(R.Data[2]) shl 8) or R.Data[3];
+end;
+
+procedure TFBWireConnection.QueEvents(aDbHandle: integer; const aEPB: TBytes;
+  aEventID: integer);
+begin
+  FXDR.WriteInt32(op_que_events);
+  FXDR.WriteInt32(aDbHandle);
+  FXDR.WriteString(aEPB);
+  FXDR.WriteInt32(0);            {p_event_ast - parsed but ignored}
+  FXDR.WriteInt32(0);            {p_event_arg - ditto}
+  FXDR.WriteInt32(aEventID);
+  FXDR.Flush;
+  ReceiveAndCheckResponse;
+end;
+
+procedure TFBWireConnection.CancelEvents(aDbHandle, aEventID: integer);
+begin
+  FXDR.WriteInt32(op_cancel_events);
+  FXDR.WriteInt32(aDbHandle);
+  FXDR.WriteInt32(aEventID);
+  FXDR.Flush;
+  ReceiveAndCheckResponse;
+end;
+
 {--- services ---}
 
 function TFBWireConnection.ServiceAttach(const aServiceName: AnsiString;
@@ -1429,6 +1555,22 @@ begin
   FXDR.WriteInt32(op_ping);
   FXDR.Flush;
   ReceiveAndCheckResponse;
+end;
+
+procedure TFBWireConnection.SendCancel(aKind: integer);
+var pkt: array[0..7] of byte;
+begin
+  {assembled by hand and sent through SendDirect rather than the shared
+   XDR buffer: the whole point is that another thread may be mid exchange}
+  pkt[0] := (op_cancel shr 24) and $FF;
+  pkt[1] := (op_cancel shr 16) and $FF;
+  pkt[2] := (op_cancel shr 8) and $FF;
+  pkt[3] := op_cancel and $FF;
+  pkt[4] := (aKind shr 24) and $FF;
+  pkt[5] := (aKind shr 16) and $FF;
+  pkt[6] := (aKind shr 8) and $FF;
+  pkt[7] := aKind and $FF;
+  FTransport.SendDirect(pkt,8);
 end;
 
 end.
