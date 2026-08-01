@@ -430,10 +430,16 @@ the suite changes. The output is compared against
 `testsuite/FBWirereference.log` after normalising the run dependent
 values (transaction ids, page counters, journal timestamps) on both
 sides of the diff. Tests for events, arrays and other unimplemented
-features skip with a fixed message so the comparison stays exact. The
-reference log was produced against Firebird 6 (ODS 14, protocol 17),
-and the CI suite job runs that server; the employee example database it
-needs is restored from `testsuite/employee.gbk`.
+features skip with a fixed message so the comparison stays exact.
+
+The reference log is the CI environment's own output: Firebird 6
+(ODS 14, protocol 17) in a container, the employee example database
+restored from `testsuite/employee.gbk`, an x86_64 runner. Float to text
+rendering differs in the last digit between CPU architectures, so a log
+produced elsewhere (for example on ARM) shows a handful of known
+differences. To regenerate the reference after an intended output
+change, download the `wire-suite-testout` artifact from the CI run,
+apply `runtest.sh`'s normalisation, and commit it.
 
 ### Measured results
 
