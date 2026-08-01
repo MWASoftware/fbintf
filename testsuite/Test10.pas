@@ -142,6 +142,9 @@ begin
   FEventSignalled := false;
   writeln(OutFile,'Async Wait: Test Cancel');
   EventHandler.AsyncWaitForEvent(EventReport);
+  {allow any immediate delivery to be reported before continuing, so that
+   the output order is deterministic}
+  sleep(500);
   CheckSynchronize;
   writeln(OutFile,'Async Wait Called');
   EventHandler.Cancel;

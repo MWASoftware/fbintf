@@ -90,6 +90,9 @@ type
     destructor Destroy; override;
     procedure ConnectTo(const aHost: AnsiString; aPort: integer; aTimeout: integer = 0);
     procedure Disconnect;
+    {shuts the socket down without closing it, so that a read blocked in
+     another thread returns. The reader then calls Disconnect.}
+    procedure Abort;
     {read exactly aLen bytes (blocking)}
     procedure ReadBytes(var aData; aLen: integer);
     {queue bytes for sending}
@@ -219,6 +222,14 @@ begin
    starts in clear and negotiates its own}
   if FSendCipher <> nil then FreeAndNil(FSendCipher);
   if FRecvCipher <> nil then FreeAndNil(FRecvCipher);
+end;
+
+procedure TFBWireTransport.Abort;
+begin
+  {$IFDEF FPC}
+  if FSocket <> nil then
+    fpshutdown(FSocket.Handle,2 {SHUT_RDWR});
+  {$ENDIF}
 end;
 
 procedure TFBWireTransport.FillRecvBuffer;

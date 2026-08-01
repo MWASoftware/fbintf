@@ -1,7 +1,23 @@
 # Design: Events over the wire protocol
 
-Roadmap milestone 2 (`doc/WireProtocol.md`). This document is the
-implementation plan; no code changes are included.
+Roadmap milestone 2 (`doc/WireProtocol.md`).
+
+**Status: implemented** — `client/wire/FBWireEvents.pas`, with a WireTest
+events section and the suite's Test 10 as acceptance (its output over the
+wire matches the stock provider reference, recorded in
+`FBWirereference.log`). The design below held, with three findings:
+
+* Each `op_que_events` needs a **fresh event id** (the stock client
+  increments per queue). Re-arming under the same id is accepted but the
+  deferred counts are only delivered when the next event fires — one
+  delivery late.
+* The `TFBWireEventManager` object (one per attachment) owns the
+  auxiliary transport and listener thread, as designed; the transport
+  gained an `Abort` method (socket shutdown) so the listener's blocking
+  read can be released from another thread on disconnect.
+* Events posted while interest was cancelled are counted on the next
+  wait; the stock providers can drop them. Recorded as a deliberate
+  difference.
 
 ## Goal
 

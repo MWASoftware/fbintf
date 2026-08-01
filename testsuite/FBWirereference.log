@@ -2258,7 +2258,27 @@ Page Size = 8192
 
 ------------------------------------------------------
 Running Test 10: Event Handling
-Skipping test - events are not supported by this provider
+Call Async Wait
+Async Wait Called
+Signal Event
+Event Signalled
+Event Counts: TESTEVENT, Count = 1
+Two more events
+Call Async Wait
+Async Wait Called
+Event Signalled
+Deferred Events Caught
+Event Counts: TESTEVENT, Count = 2
+Signal Event
+Event Counts: TESTEVENT, Count = 1
+Async Wait: Test Cancel
+Event Signalled
+Async Wait Called
+Event Cancelled
+Time Out - Cancel Worked!
+Sync wait
+Event Signalled
+Event Counts: TESTEVENT, Count = 2
 
 
 ------------------------------------------------------

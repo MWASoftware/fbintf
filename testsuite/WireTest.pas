@@ -695,6 +695,112 @@ begin
   end;
 end;
 
+type
+  { TEventCatcher - a TEventHandler needs an object method }
+
+  TEventCatcher = class
+  public
+    Signalled: boolean;
+    Counts: TEventCounts;
+    procedure HandleEvent(Sender: IEvents);
+  end;
+
+procedure TEventCatcher.HandleEvent(Sender: IEvents);
+begin
+  Counts := Sender.ExtractEventCounts;
+  Signalled := true;
+end;
+
+procedure TestEvents;
+const
+  sqlPostEvent = 'execute block as begin post_event ''WIRETEST_EVENT''; end';
+var Catcher: TEventCatcher;
+    EventHandler: IEvents;
+    Tr: ITransaction;
+    i: integer;
+
+  function WaitForSignal(aTimeoutMS: integer): boolean;
+  var waited: integer;
+  begin
+    waited := 0;
+    while not Catcher.Signalled and (waited < aTimeoutMS) do
+    begin
+      Sleep(50);
+      Inc(waited,50);
+    end;
+    Result := Catcher.Signalled;
+  end;
+
+  procedure PostEvent;
+  begin
+    Tr := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,
+            isc_tpb_concurrency],taCommit);
+    Attachment.ExecImmediate(Tr,sqlPostEvent);
+    Tr.Commit;
+  end;
+
+begin
+  writeln('Provider: events');
+  Catcher := TEventCatcher.Create;
+  try
+    EventHandler := Attachment.GetEventHandler('WIRETEST_EVENT');
+    Check('event handler obtained',EventHandler <> nil);
+
+    {the first wait establishes the baseline: whether it fires immediately
+     depends on the event's history, so absorb it}
+    Catcher.Signalled := false;
+    EventHandler.AsyncWaitForEvent(Catcher.HandleEvent);
+    WaitForSignal(1000);
+    if Catcher.Signalled then
+    begin
+      Catcher.Signalled := false;
+      EventHandler.AsyncWaitForEvent(Catcher.HandleEvent);
+      Sleep(200);
+    end;
+
+    {a posted event must now be delivered}
+    PostEvent;
+    Check('posted event was delivered',WaitForSignal(5000));
+    Check('event name reported',
+          (Length(Catcher.Counts) = 1) and
+          (Catcher.Counts[0].EventName = 'WIRETEST_EVENT'));
+    if Length(Catcher.Counts) = 1 then
+      Check('event count is positive',Catcher.Counts[0].Count > 0,
+            'got ' + IntToStr(Catcher.Counts[0].Count));
+
+    {events posted while nobody waits are delivered on the next wait}
+    Catcher.Signalled := false;
+    PostEvent;
+    PostEvent;
+    Sleep(300);
+    Check('no delivery without a wait',not Catcher.Signalled);
+    EventHandler.AsyncWaitForEvent(Catcher.HandleEvent);
+    Check('deferred events were caught',WaitForSignal(5000));
+    if Length(Catcher.Counts) = 1 then
+      Check('both deferred events counted',Catcher.Counts[0].Count = 2,
+            'got ' + IntToStr(Catcher.Counts[0].Count));
+
+    {cancel must stop delivery}
+    Catcher.Signalled := false;
+    EventHandler.AsyncWaitForEvent(Catcher.HandleEvent);
+    Sleep(200);
+    Catcher.Signalled := false;   {absorb any baseline delivery}
+    EventHandler.Cancel;
+    PostEvent;
+    i := 0;
+    while not Catcher.Signalled and (i < 1000) do
+    begin
+      Sleep(50);
+      Inc(i,50);
+    end;
+    Check('no delivery after cancel',not Catcher.Signalled);
+
+    EventHandler := nil;
+  finally
+    Catcher.Free;
+  end;
+end;
+
 {---------------------------------------------------------------------------}
 
 begin
@@ -719,6 +825,7 @@ begin
     TestProviderQueries;
     TestProviderDataTypes;
     TestProviderUpdates;
+    TestEvents;
     TestCreateDatabase;
   finally
     Attachment.Disconnect;
