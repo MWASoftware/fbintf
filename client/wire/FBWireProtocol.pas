@@ -234,6 +234,16 @@ type
     procedure CloseBlob(aBlobHandle: integer);
     procedure CancelBlob(aBlobHandle: integer);
 
+    {--- array slices ---}
+    {op_get_slice: reads the slice of aArrayID into aBuffer as described
+     by aLayout. Returns the slice length reported by the server (in dsc
+     length units - see SliceElementDscLength).}
+    function GetSlice(aTrHandle: integer; aArrayID: Int64; const SDL: TBytes;
+                        const aLayout: TWireSliceLayout; aBuffer: PByte): integer;
+    {op_put_slice: writes the slice and returns the (possibly new) array id}
+    function PutSlice(aTrHandle: integer; aArrayID: Int64; const SDL: TBytes;
+                        const aLayout: TWireSliceLayout; aBuffer: PByte): Int64;
+
     {--- events ---}
     {op_connect_request with P_REQ_async: asks the server to open the
      auxiliary port that delivers op_event packets. Returns the TCP port
@@ -1387,6 +1397,59 @@ begin
   FXDR.WriteInt32(aBlobHandle);
   FXDR.Flush;
   ReceiveAndCheckResponse;
+end;
+
+{--- array slices ---}
+
+{Both packets are P_SLC: transaction, array id quad, slice length, the
+ SDL, a (here always empty) parameter vector, then the slice data - which
+ for the request side of op_get_slice is just a zero length. The reply to
+ op_get_slice is op_slice; op_put_slice gets a normal op_response with the
+ array id in ObjectID. See op_get_slice/op_put_slice in
+ src/remote/protocol.cpp.}
+
+function TFBWireConnection.GetSlice(aTrHandle: integer; aArrayID: Int64;
+  const SDL: TBytes; const aLayout: TWireSliceLayout; aBuffer: PByte): integer;
+var op: integer;
+    R: TWireResponse;
+    wireLen: cardinal;
+begin
+  FXDR.WriteInt32(op_get_slice);
+  FXDR.WriteInt32(aTrHandle);
+  FXDR.WriteInt64(aArrayID);
+  FXDR.WriteInt32(SliceLength(aLayout));
+  FXDR.WriteString(SDL);
+  FXDR.WriteInt32(0);              {p_slc_parameters: no longs}
+  FXDR.WriteInt32(0);              {slice data: none on a get request}
+  FXDR.Flush;
+  op := ReadOperation;
+  if op = op_response then
+  begin
+    {an error - a success op_response here would be a protocol violation}
+    R := ReadResponseBody;
+    CheckResponse(R);
+    raise EFBWireError.Create('Unexpected op_response to op_get_slice');
+  end;
+  if op <> op_slice then
+    raise EFBWireError.CreateFmt('Unexpected operation %d in get_slice response',[op]);
+  Result := FXDR.ReadInt32;        {p_slr_length}
+  wireLen := FXDR.ReadUInt32;      {lstr_length}
+  XDRDecodeSlice(FXDR,aLayout,aBuffer,wireLen);
+end;
+
+function TFBWireConnection.PutSlice(aTrHandle: integer; aArrayID: Int64;
+  const SDL: TBytes; const aLayout: TWireSliceLayout; aBuffer: PByte): Int64;
+begin
+  FXDR.WriteInt32(op_put_slice);
+  FXDR.WriteInt32(aTrHandle);
+  FXDR.WriteInt64(aArrayID);
+  FXDR.WriteInt32(SliceLength(aLayout));
+  FXDR.WriteString(SDL);
+  FXDR.WriteInt32(0);              {p_slc_parameters: no longs}
+  FXDR.WriteInt32(SliceLength(aLayout));  {lstr_length prefix of the data}
+  XDREncodeSlice(FXDR,aLayout,aBuffer);
+  FXDR.Flush;
+  Result := ReceiveAndCheckResponse.ObjectID;
 end;
 
 {--- events ---}

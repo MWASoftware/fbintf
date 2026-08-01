@@ -39,7 +39,7 @@ interface
 
 uses
   Classes, SysUtils, FirebirdOOAPI, IB, FBArray, IBHeader, FB30Attachment, FBClientAPI,
-  FB30Transaction, FBParamBlock, FB30ClientAPI;
+  FB30Transaction, FBParamBlock, FB30ClientAPI, FBSDL;
 
 type
 
@@ -66,7 +66,6 @@ type
     FTransactionIntf: FirebirdOOAPI.ITransaction;
     FFirebird30ClientAPI: TFB30ClientAPI;
     FSDL: ISDL;
-    procedure GenerateSDL;
   protected
     procedure AllocateBuffer; override;
     procedure InternalGetSlice; override;
@@ -76,14 +75,10 @@ type
     constructor Create(aAttachment: TFB30Attachment; aTransaction: TFB30Transaction; aField: IArrayMetaData; ArrayID: TISC_QUAD); overload;
   end;
 
-  TSDLItem = class(TParamBlockItem,ISDLItem);
-
-  { TSDLBlock }
-
-  TSDLBlock = class (TCustomParamBlock<TSDLItem,ISDLItem>, ISDL)
-  public
-    constructor Create(api: TFBClientAPI);
-  end;
+  {The SDL generator now lives in FBSDL so that the wire protocol provider
+   can share it - these aliases keep existing references compiling}
+  TSDLItem = FBSDL.TSDLItem;
+  TSDLBlock = FBSDL.TSDLBlock;
 
 implementation
 
@@ -182,74 +177,12 @@ end;
 
 { TFB30Array }
 
-procedure TFB30Array.GenerateSDL;
-
-  procedure AddVarInteger(aValue: integer);
-  begin
-    if (aValue >= -128) and (aValue <= 127) then
-      FSDL.Add(isc_sdl_tiny_integer).SetAsTinyInteger(aValue)
-    else
-    if (aValue >= -32768) and (aValue <= 32767) then
-      FSDL.Add(isc_sdl_short_integer).SetAsShortInteger(aValue)
-    else
-      FSDL.Add(isc_sdl_long_integer).SetAsInteger(aValue);
-  end;
-
-var i: integer;
-    SDLItem: ISDLItem;
-begin
-  FSDL := TSDLBlock.Create(FFirebird30ClientAPI);
-  with GetArrayDesc^ do
-  {The following is based on gen_SDL from Firebird src/dsql/array.cpp}
-  begin
-    SDLItem := FSDL.Add(isc_sdl_struct);
-    SDLItem.SetAsByte(array_desc_dtype);
-
-    case array_desc_dtype of
-    blr_short,blr_long,
-    blr_int64,blr_quad,
-    blr_int128:
-        SDLItem.AddShortInt(array_desc_scale);
-
-    blr_text,blr_cstring, blr_varying:
-        SDLItem.addShortInteger(array_desc_length);
-    end;
-
-    FSDL.Add(isc_sdl_relation).SetAsString(array_desc_relation_name);
-    FSDL.Add(isc_sdl_field).SetAsString(array_desc_field_name);
-
-    for i := 0 to array_desc_dimensions - 1 do
-    begin
-      if array_desc_bounds[i].array_bound_lower = 1 then
-        FSDL.Add(isc_sdl_do1).SetAsTinyInteger(i)
-      else
-      begin
-        FSDL.Add(isc_sdl_do2).SetAsTinyInteger(i);
-        AddVarInteger(array_desc_bounds[i].array_bound_lower);
-      end;
-      AddVarInteger(array_desc_bounds[i].array_bound_upper);
-    end;
-
-    SDLItem := FSDL.Add(isc_sdl_element);
-    SDLItem.AddByte(1);
-    SDLItem := FSDL.Add(isc_sdl_scalar);
-    SDLItem.AddByte(0);
-    SDLItem.AddByte(array_desc_dimensions);
-    for i := 0 to array_desc_dimensions - 1 do
-    begin
-      SDLItem := FSDL.Add(isc_sdl_variable);
-      SDLItem.AddByte(i);
-    end;
-    FSDL.Add(isc_sdl_eoc);
-  end;
-end;
-
 procedure TFB30Array.AllocateBuffer;
 
 begin
   inherited AllocateBuffer;
   {Now set up the SDL}
-  GenerateSDL;
+  FSDL := GenerateSDL(FFirebird30ClientAPI,GetArrayDesc);
 end;
 
 procedure TFB30Array.InternalGetSlice;
@@ -300,15 +233,6 @@ begin
   FAttachmentIntf := aAttachment.AttachmentIntf;
   FTransactionIntf := aTransaction.TransactionIntf;
   FFirebird30ClientAPI := aAttachment.Firebird30ClientAPI;
-end;
-
-{ TSDLBlock }
-
-constructor TSDLBlock.Create(api: TFBClientAPI);
-begin
-  inherited Create(api);
-  FDataLength := 1;
-  FBuffer^ := isc_sdl_version1;
 end;
 
 end.

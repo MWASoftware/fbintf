@@ -112,7 +112,7 @@ type
     function OpenBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData;
                 BlobID: TISC_QUAD; BPB: IBPB = nil): IBlob; overload; override;
 
-    {Arrays - not implemented by this provider}
+    {Arrays}
     function OpenArray(transaction: ITransaction; ArrayMetaData: IArrayMetaData;
                 ArrayID: TISC_QUAD): IArray; overload; override;
     function CreateArray(transaction: ITransaction;
@@ -138,8 +138,8 @@ type
 
 implementation
 
-uses FBMessages, IBErrorCodes, IBUtils, FBWireTransaction, FBWireStatement,
-  FBWireBlob, FBWireStream, FBWireEvents;
+uses FBMessages, IBUtils, FBWireTransaction, FBWireStatement,
+  FBWireBlob, FBWireArray, FBWireStream, FBWireEvents;
 
 { TFBWireAttachment }
 
@@ -475,25 +475,25 @@ end;
 function TFBWireAttachment.OpenArray(transaction: ITransaction;
   ArrayMetaData: IArrayMetaData; ArrayID: TISC_QUAD): IArray;
 begin
-  {array slices need op_get_slice and an SDL description - not yet
-   implemented by this provider}
-  IBError(ibxeNotSupported,[nil]);
-  Result := nil;
+  CheckHandle;
+  Result := TFBWireArray.Create(self,transaction as TFBWireTransaction,
+                                ArrayMetaData,ArrayID);
 end;
 
 function TFBWireAttachment.CreateArray(transaction: ITransaction;
   ArrayMetaData: IArrayMetaData): IArray;
 begin
-  IBError(ibxeNotSupported,[nil]);
-  Result := nil;
+  CheckHandle;
+  Result := TFBWireArray.Create(self,transaction as TFBWireTransaction,
+                                ArrayMetaData);
 end;
 
 function TFBWireAttachment.CreateArrayMetaData(SQLType: cardinal;
   tableName: AnsiString; columnName: AnsiString; Scale: integer; size: cardinal;
   aCharSetID: cardinal; dimensions: cardinal; bounds: TArrayBounds): IArrayMetaData;
 begin
-  IBError(ibxeNotSupported,[nil]);
-  Result := nil;
+  Result := TFBWireArrayMetaData.Create(self,SQLType,tableName,ColumnName,
+                                        Scale,size,aCharSetID,dimensions,bounds);
 end;
 
 function TFBWireAttachment.GetBlobMetaData(Transaction: ITransaction;
@@ -508,8 +508,8 @@ end;
 function TFBWireAttachment.GetArrayMetaData(Transaction: ITransaction;
   tableName, columnName: AnsiString): IArrayMetaData;
 begin
-  IBError(ibxeNotSupported,[nil]);
-  Result := nil;
+  CheckHandle;
+  Result := TFBWireArrayMetaData.Create(self,Transaction,tableName,columnName);
 end;
 
 function TFBWireAttachment.GetDBInfo(ReqBuffer: PByte; ReqBufLen: integer): IDBInformation;
@@ -556,8 +556,7 @@ end;
 
 function TFBWireAttachment.HasArraySupport: boolean;
 begin
-  {op_get_slice/op_put_slice and SDL generation are not implemented yet}
-  Result := false;
+  Result := true;
 end;
 
 function TFBWireAttachment.HasEventSupport: boolean;

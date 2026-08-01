@@ -695,6 +695,158 @@ begin
   end;
 end;
 
+procedure TestArrays;
+const TestTable = 'FBINTF_WIRE_ARTEST';
+      Names: array[0..3] of AnsiString =
+        ('','first','ends at sixteen!','àéîõü');
+var Tr: ITransaction;
+    S: IStatement;
+    RS: IResultSet;
+    ar: IArray;
+    i, j: integer;
+begin
+  writeln('Provider: array columns');
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  try
+    Attachment.ExecImmediate(Tr,'drop table ' + TestTable);
+    Tr.Commit;
+    Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+            isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  except
+    {the table did not exist}
+    Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+            isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  end;
+
+  Attachment.ExecImmediate(Tr,'create table ' + TestTable +
+    ' (ID integer not null primary key,' +
+    '  INTS integer [1:4],' +
+    '  STRS varchar(16) [0:3],' +
+    '  GRID double precision [1:2,1:3])');
+  Tr.Commit;
+  Check('array table created',Attachment.HasTable(TestTable));
+
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  Attachment.ExecImmediate(Tr,'insert into ' + TestTable + ' (ID) values (1)');
+
+  {write the integer array}
+  ar := Attachment.CreateArray(Tr,TestTable,'INTS');
+  Check('integer array metadata: 1 dimension',ar.GetDimensions = 1);
+  Check('integer array metadata: bounds 1:4',
+        (ar.GetBounds[0].LowerBound = 1) and (ar.GetBounds[0].UpperBound = 4));
+  for i := 1 to 4 do
+    ar.SetAsInteger([i],i * 10);
+  S := Attachment.Prepare(Tr,'update ' + TestTable +
+        ' set INTS = ? where ID = 1');
+  S.SQLParams[0].AsArray := ar;
+  S.Execute;
+
+  {write the varchar array, including an empty and a full width element}
+  ar := Attachment.CreateArray(Tr,TestTable,'STRS');
+  for i := 0 to 3 do
+    ar.SetAsString([i],Names[i]);
+  S := Attachment.Prepare(Tr,'update ' + TestTable +
+        ' set STRS = ? where ID = 1');
+  S.SQLParams[0].AsArray := ar;
+  S.Execute;
+
+  {write the two dimensional array}
+  ar := Attachment.CreateArray(Tr,TestTable,'GRID');
+  Check('grid metadata: 2 dimensions',ar.GetDimensions = 2);
+  for i := 1 to 2 do
+    for j := 1 to 3 do
+      ar.SetAsDouble([i,j],i * 10 + j + 0.25);
+  S := Attachment.Prepare(Tr,'update ' + TestTable +
+        ' set GRID = ? where ID = 1');
+  S.SQLParams[0].AsArray := ar;
+  S.Execute;
+  S := nil;
+  ar := nil;
+  Tr.Commit;
+
+  {read everything back in a new transaction}
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  RS := Attachment.OpenCursorAtStart(Tr,
+          'select INTS,STRS,GRID from ' + TestTable + ' where ID = 1');
+
+  ar := RS[0].AsArray;
+  Check('integer array read back',ar <> nil);
+  if ar <> nil then
+    for i := 1 to 4 do
+      Check(Format('INTS[%d] element',[i]),ar.GetAsInteger([i]) = i * 10,
+            'got ' + IntToStr(ar.GetAsInteger([i])));
+
+  ar := RS[1].AsArray;
+  Check('varchar array read back',ar <> nil);
+  if ar <> nil then
+    for i := 0 to 3 do
+      Check(Format('STRS[%d] element',[i]),ar.GetAsString([i]) = Names[i],
+            'got "' + ar.GetAsString([i]) + '"');
+
+  ar := RS[2].AsArray;
+  Check('two dimensional array read back',ar <> nil);
+  if ar <> nil then
+    for i := 1 to 2 do
+      for j := 1 to 3 do
+        Check(Format('GRID[%d,%d] element',[i,j]),
+              Abs(ar.GetAsDouble([i,j]) - (i * 10 + j + 0.25)) < 1E-9,
+              FloatToStr(ar.GetAsDouble([i,j])));
+  ar := nil;
+  RS.Close;
+  RS := nil;
+
+  {update a single element through the read/modify/write cycle. The slice
+   must be read before a lone element is changed: as with the fbclient
+   providers, writing to an unloaded array sends the buffer as it stands.}
+  RS := Attachment.OpenCursorAtStart(Tr,
+          'select INTS from ' + TestTable + ' where ID = 1');
+  ar := RS[0].AsArray;
+  ar.PreLoad;
+  ar.SetAsInteger([2],1000);
+  S := Attachment.Prepare(Tr,'update ' + TestTable +
+        ' set INTS = ? where ID = 1');
+  S.SQLParams[0].AsArray := ar;
+  S.Execute;
+  S := nil;
+  ar := nil;
+  RS.Close;
+  RS := nil;
+  Tr.Commit;
+
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  RS := Attachment.OpenCursorAtStart(Tr,
+          'select INTS from ' + TestTable + ' where ID = 1');
+  ar := RS[0].AsArray;
+  Check('modified element read back',ar.GetAsInteger([2]) = 1000,
+        'got ' + IntToStr(ar.GetAsInteger([2])));
+  Check('neighbouring element untouched',ar.GetAsInteger([1]) = 10,
+        'got ' + IntToStr(ar.GetAsInteger([1])));
+  ar := nil;
+  RS.Close;
+  RS := nil;
+  Tr.Commit;
+
+  {cleanup - see the note in TestProviderUpdates}
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  try
+    Attachment.ExecImmediate(Tr,'drop table ' + TestTable);
+    Tr.Commit;
+    writeln('  note  array test table dropped');
+  except
+    on E: Exception do
+    begin
+      Tr.Rollback;
+      writeln('  note  the server would not drop the array test table yet: ',
+              E.Message);
+    end;
+  end;
+end;
+
 type
   { TEventCatcher - a TEventHandler needs an object method }
 
@@ -838,6 +990,7 @@ begin
     TestProviderQueries;
     TestProviderDataTypes;
     TestProviderUpdates;
+    TestArrays;
     TestEvents;
     TestCreateDatabase;
   finally
