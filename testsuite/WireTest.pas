@@ -37,7 +37,8 @@ uses
   {$IFDEF UNIX}cthreads,{$ENDIF}
   SysUtils, Classes, IB, IBUtils, IBErrorCodes,
   FBWireBigInt, FBWireCrypto, FBWireSRP, FBWireStream, FBWireConst,
-  FBWireMessage, FBWireDescribe, FBWireProtocol, FBWireClientAPI;
+  FBWireMessage, FBWireDescribe, FBWireProtocol, FBWireClientAPI,
+  FBWireAttachment, FBAttachment;
 
 var
   TestsRun: integer = 0;
@@ -962,6 +963,138 @@ begin
   end;
 end;
 
+procedure TestInlineBlobs;
+const TestTable = 'FBINTF_WIRE_INLINE';
+var Tr: ITransaction;
+    S: IStatement;
+    RS: IResultSet;
+    B: IBlob;
+    Small, Large, ReadBack: AnsiString;
+    i: integer;
+    Sent: cardinal;
+
+  function PacketsSent: cardinal;
+  begin
+    Result := (Attachment as TObject as TFBWireAttachment).
+                Connection.Transport.PacketsSent;
+  end;
+
+begin
+  writeln('Provider: inline blobs');
+  if (Attachment as TObject as TFBWireAttachment).Connection.ProtocolVersion <
+       (PROTOCOL_VERSION19 and FB_PROTOCOL_MASK) then
+  begin
+    writeln('  SKIP  inline blobs need protocol 19 or later');
+    Exit;
+  end;
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  try
+    Attachment.ExecImmediate(Tr,'drop table ' + TestTable);
+    Tr.Commit;
+    Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+            isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  except
+    {the table did not exist}
+    Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+            isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  end;
+  Attachment.ExecImmediate(Tr,'create table ' + TestTable +
+    ' (ID integer not null primary key, NOTES blob sub_type 1)');
+  Tr.Commit;
+
+  Small := 'A small blob that fits the inline limit with room to spare';
+  Large := '';
+  for i := 1 to 500 do
+    Large := Large + 'A large blob that must not travel inline, line ' +
+             IntToStr(i) + '.' + LineEnding;
+  Check('the large blob exceeds the limit',
+        Length(Large) > Attachment.GetInlineBlobLimit,
+        'limit ' + IntToStr(Attachment.GetInlineBlobLimit));
+
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  S := Attachment.Prepare(Tr,'insert into ' + TestTable +
+        ' (ID,NOTES) values (?,?)');
+  S.SQLParams[0].AsInteger := 1;
+  B := Attachment.CreateBlob(Tr,TestTable,'NOTES');
+  B.SetAsString(Small);
+  B.Close;
+  S.SQLParams[1].AsBlob := B;
+  S.Execute;
+  S.SQLParams[0].AsInteger := 2;
+  B := Attachment.CreateBlob(Tr,TestTable,'NOTES');
+  B.SetAsString(Large);
+  B.Close;
+  S.SQLParams[1].AsBlob := B;
+  S.Execute;
+  S := nil;
+  B := nil;
+  Tr.Commit;
+
+  {the small blob must be served from the cache: opening and reading it
+   after the fetch causes no wire traffic at all}
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_read],taCommit);
+  RS := Attachment.OpenCursorAtStart(Tr,
+          'select NOTES from ' + TestTable + ' where ID = 1');
+  Sent := PacketsSent;
+  ReadBack := RS[0].AsString;
+  Check('a small blob is served inline - no round trip',
+        PacketsSent = Sent,
+        Format('%d extra packets',[PacketsSent - Sent]));
+  Check('the inline copy is intact',ReadBack = Small);
+  RS.Close;
+  RS := nil;
+
+  {the large blob fell back to the classic exchanges}
+  RS := Attachment.OpenCursorAtStart(Tr,
+          'select NOTES from ' + TestTable + ' where ID = 2');
+  Sent := PacketsSent;
+  ReadBack := RS[0].AsString;
+  Check('a large blob still opens the classic way',PacketsSent > Sent);
+  Check('the large blob is intact',ReadBack = Large,
+        Format('wrote %d read %d',[Length(Large),Length(ReadBack)]));
+  RS.Close;
+  RS := nil;
+  Tr.Commit;
+
+  {opting out: with the limit at zero nothing arrives inline}
+  Attachment.SetInlineBlobLimit(0);
+  try
+    Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+            isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_read],taCommit);
+    RS := Attachment.OpenCursorAtStart(Tr,
+            'select NOTES from ' + TestTable + ' where ID = 1');
+    Sent := PacketsSent;
+    ReadBack := RS[0].AsString;
+    Check('with a zero limit the blob opens the classic way',
+          PacketsSent > Sent);
+    Check('and reads back intact',ReadBack = Small);
+    RS.Close;
+    RS := nil;
+    Tr.Commit;
+  finally
+    Attachment.SetInlineBlobLimit(DefaultMaxInlineBlobLimit);
+  end;
+
+  {cleanup - see the note in TestProviderUpdates}
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  try
+    Attachment.ExecImmediate(Tr,'drop table ' + TestTable);
+    Tr.Commit;
+    writeln('  note  inline blob test table dropped');
+  except
+    on E: Exception do
+    begin
+      Tr.Rollback;
+      writeln('  note  the server would not drop the inline blob test table yet: ',
+              E.Message);
+    end;
+  end;
+end;
+
 procedure TestBatch;
 const TestTable = 'FBINTF_WIRE_BATCH';
 var Tr: ITransaction;
@@ -1326,6 +1459,7 @@ begin
     TestProviderUpdates;
     TestArrays;
     TestScrollableCursors;
+    TestInlineBlobs;
     TestBatch;
     TestCancellation;
     TestStatementTimeout;

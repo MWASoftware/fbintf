@@ -999,7 +999,7 @@ begin
       Connection.ExecuteStatement2(FHandle,
         (FTransactionIntf as TObject as TFBWireTransaction).Handle,
         FSQLParams.Format,paramPtr,FSQLRecord.Format,outPtr,
-        FStatementTimeout);
+        FStatementTimeout,cardinal(GetAttachment.GetInlineBlobLimit));
       FSingleResults := true;
       FSQLRecord.RowChange;
       Result := TResults.Create(FSQLRecord);
@@ -1007,7 +1007,8 @@ begin
     else
       Connection.ExecuteStatement(FHandle,
         (FTransactionIntf as TObject as TFBWireTransaction).Handle,
-        FSQLParams.Format,paramPtr,FStatementTimeout);
+        FSQLParams.Format,paramPtr,FStatementTimeout,0,
+        cardinal(GetAttachment.GetInlineBlobLimit));
   except
     on E: Exception do WireIBError(FWireAPI,E);
   end;
@@ -1037,7 +1038,8 @@ begin
   try
     Connection.ExecuteStatement(FHandle,
       (aTransaction as TObject as TFBWireTransaction).Handle,
-      FSQLParams.Format,paramPtr,FStatementTimeout,cursorFlags);
+      FSQLParams.Format,paramPtr,FStatementTimeout,cursorFlags,
+      cardinal(GetAttachment.GetInlineBlobLimit));
   except
     on E: Exception do WireIBError(FWireAPI,E);
   end;

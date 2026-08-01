@@ -44,16 +44,28 @@ uses
 type
   { TFBWireAttachment }
 
+  {a blob pushed by the server with op_inline_blob, waiting to be opened}
+  TWireInlineBlob = record
+    TrHandle: integer;
+    BlobID: Int64;
+    Info: TBytes;
+    Data: TBytes;
+  end;
+
   TFBWireAttachment = class(TFBAttachment,IAttachment,IActivityMonitor)
   private
     FWireAPI: TFBWireClientAPI;
     FConnection: TFBWireConnection;
+    FInlineBlobs: array of TWireInlineBlob;
+    FInlineBlobBytes: integer;
     FHandle: integer;
     FIsConnected: boolean;
     FHost: AnsiString;
     FPort: integer;
     FRemoteDatabaseName: AnsiString;
     FEventManager: TObject;  {TFBWireEventManager - typed in FBWireEvents}
+    procedure HandleInlineBlob(aTrHandle: integer; aBlobID: Int64;
+                        const aInfo, aData: TBytes);
     procedure ParseDatabaseName(const aDatabaseName: AnsiString);
     procedure ShutdownEventManager;
     {opens the TCP connection, authenticates and returns the DPB to send
@@ -72,6 +84,14 @@ type
                 aSQLDialect: integer; RaiseExceptionOnError: boolean); overload;
     destructor Destroy; override;
     function GetDBInfo(ReqBuffer: PByte; ReqBufLen: integer): IDBInformation; override;
+
+    {inline blob cache (protocol 19). TakeInlineBlob extracts and removes
+     the entry - the server sends each id once and the engine consumes
+     registrations the same way}
+    function TakeInlineBlob(aTrHandle: integer; aBlobID: Int64;
+                        var aInfo, aData: TBytes): boolean;
+    {forgets a transaction's cached blobs - called when it ends}
+    procedure DropInlineBlobs(aTrHandle: integer);
 
     property Connection: TFBWireConnection read FConnection;
     property Handle: integer read FHandle;
@@ -242,6 +262,7 @@ begin
   FWireAPI := api;
   inherited Create(api,DatabaseName,aDPB,RaiseExceptionOnConnectError);
   FConnection := TFBWireConnection.Create;
+  FConnection.OnInlineBlob := HandleInlineBlob;
   ParseDatabaseName(DatabaseName);
   Connect;
 end;
@@ -252,6 +273,7 @@ begin
   FWireAPI := api;
   inherited Create(api,DatabaseName,aDPB,RaiseExceptionOnError);
   FConnection := TFBWireConnection.Create;
+  FConnection.OnInlineBlob := HandleInlineBlob;
   ParseDatabaseName(DatabaseName);
   CreateDatabaseFromDPB(RaiseExceptionOnError);
 end;
@@ -304,6 +326,7 @@ begin
   FDatabaseName := ExtractCreateDBFileSpec(sql);
   FWireAPI := api;
   FConnection := TFBWireConnection.Create;
+  FConnection.OnInlineBlob := HandleInlineBlob;
   ParseDatabaseName(FDatabaseName);
   CreateDatabaseFromDPB(RaiseExceptionOnError);
 end;
@@ -348,9 +371,67 @@ begin
     ClearCachedInfo;
 end;
 
+const
+  {the inline blob cache is bounded: beyond this the server's pushes are
+   dropped and the blobs open the classic way - a round trip, never an
+   error}
+  InlineBlobCacheLimit = 16 * 1024 * 1024;
+
+procedure TFBWireAttachment.HandleInlineBlob(aTrHandle: integer;
+  aBlobID: Int64; const aInfo, aData: TBytes);
+var n: integer;
+begin
+  if FInlineBlobBytes + Length(aData) > InlineBlobCacheLimit then
+    Exit;
+  n := Length(FInlineBlobs);
+  SetLength(FInlineBlobs,n+1);
+  FInlineBlobs[n].TrHandle := aTrHandle;
+  FInlineBlobs[n].BlobID := aBlobID;
+  FInlineBlobs[n].Info := aInfo;
+  FInlineBlobs[n].Data := aData;
+  Inc(FInlineBlobBytes,Length(aData));
+end;
+
+function TFBWireAttachment.TakeInlineBlob(aTrHandle: integer; aBlobID: Int64;
+  var aInfo, aData: TBytes): boolean;
+var i, j: integer;
+begin
+  Result := false;
+  for i := 0 to Length(FInlineBlobs) - 1 do
+    if (FInlineBlobs[i].TrHandle = aTrHandle) and
+       (FInlineBlobs[i].BlobID = aBlobID) then
+    begin
+      aInfo := FInlineBlobs[i].Info;
+      aData := FInlineBlobs[i].Data;
+      Dec(FInlineBlobBytes,Length(FInlineBlobs[i].Data));
+      for j := i + 1 to Length(FInlineBlobs) - 1 do
+        FInlineBlobs[j-1] := FInlineBlobs[j];
+      SetLength(FInlineBlobs,Length(FInlineBlobs)-1);
+      Exit(true);
+    end;
+end;
+
+procedure TFBWireAttachment.DropInlineBlobs(aTrHandle: integer);
+var i, n: integer;
+begin
+  n := 0;
+  for i := 0 to Length(FInlineBlobs) - 1 do
+    if FInlineBlobs[i].TrHandle <> aTrHandle then
+    begin
+      if n <> i then
+        FInlineBlobs[n] := FInlineBlobs[i];
+      Inc(n);
+    end
+    else
+      Dec(FInlineBlobBytes,Length(FInlineBlobs[i].Data));
+  SetLength(FInlineBlobs,n);
+end;
+
 procedure TFBWireAttachment.Disconnect(Force: boolean);
 begin
   if not FIsConnected then Exit;
+  SetLength(FInlineBlobs,0);
+  FInlineBlobBytes := 0;
   ShutdownEventManager;
   EndAllTransactions;
   try

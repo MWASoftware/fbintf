@@ -99,7 +99,7 @@ protocol, and is how the version matrix below was measured.
 
 Working and covered by the test suite:
 
-* the connection handshake with protocol negotiation, versions 13 to 18
+* the connection handshake with protocol negotiation, versions 13 to 19
 * `Srp256` and `Srp` authentication, in both the `op_cond_accept` flow
   (authentication must finish before attaching) and the `op_accept_data`
   flow (the proof travels in the DPB with the attach)
@@ -125,6 +125,8 @@ Working and covered by the test suite:
 * the batch API on protocol 16 servers: `AddToBatch`/`ExecuteBatch`/
   `CancelBatch` with per row completion, including blob and array
   columns
+* inline blobs on protocol 19 servers: small blobs pushed with the rows
+  that reference them are opened and read with no further wire traffic
 
 Deliberately not implemented yet. These raise `ibxeNotSupported` rather
 than failing in a confusing way:
@@ -453,12 +455,12 @@ apply `runtest.sh`'s normalisation, and commit it.
 
 | Server | WireCrypt | Negotiated | Encryption | Result |
 |---|---|---|---|---|
-| 6.0 (CI container) | Enabled, Required | 18 | `ChaCha64` | 151 tests, 0 failures |
-| 6.0.0 (local, LI-T6.0.0.2076) | Required | 18 | `ChaCha64` | 151 tests, 0 failures |
-| 5.0 (CI container) | Enabled, Required | 18 | `ChaCha64` | 151 tests, 0 failures |
-| 5.0.4 (local container) | Enabled, Required | 18 | `ChaCha64` | 151 tests, 0 failures |
-| 4.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 151 tests, 0 failures |
-| 3.0 (CI container) | Enabled | 15 | `Arc4` | 151 tests, 0 failures |
+| 6.0 (CI container) | Enabled, Required | 19 | `ChaCha64` | 158 tests, 0 failures |
+| 6.0.0 (local, LI-T6.0.0.2076) | Required | 19 | `ChaCha64` | 158 tests, 0 failures |
+| 5.0 (CI container) | Enabled, Required | 19 | `ChaCha64` | 158 tests, 0 failures |
+| 5.0.4 (local container) | Enabled, Required | 19 | `ChaCha64` | 158 tests, 0 failures |
+| 4.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 158 tests, 0 failures |
+| 3.0 (CI container) | Enabled | 15 | `Arc4` | 158 tests, 0 failures |
 | no server | — | — | — | 36 tests, live sections skipped |
 
 Firebird 3 settles on protocol 15 with Arc4: it is the newest protocol that
@@ -522,7 +524,7 @@ machinery that already exists to support it.
 | 6 | Statement timeouts and cancellation — **done** | `CancelOperation`/`SetStatementTimeout` on all providers | 12, 16 |
 | 7 | Scrollable cursors — **done** | `op_fetch_scroll`, protocol raised to 18 | 18 |
 | 8 | The batch API — **done** | `op_batch_create/msg/regblob/exec/cs/rls` | 16 |
-| 9 | Inline blobs | `op_inline_blob` | 19 |
+| 9 | Inline blobs — **done** | `op_inline_blob`, protocol raised to 19 | 19 |
 | 10 | Firebird 6 protocol 20 | schema search path, named arguments | 20 |
 | 11 | Wire compression | zlib either side of the cipher | 13 |
 | 12 | Engine message text | a `firebird.msg` reader or a generated table | — |
@@ -753,14 +755,29 @@ length prefix), and `CanChangeMetaData` answers false while a batch is
 open, so a mid batch type change is refused exactly as the 3.0 provider
 refuses it.
 
-### 9. Inline blobs
+### 9. Inline blobs — done
 
-Protocol 19 lets the server push small blobs with the row that references
-them, in `op_inline_blob` packets, saving a round trip each. The client
-declares the size it will accept in `op_execute`. `ReadOperation` already
-has to skip unsolicited packets, so this fits naturally: cache the blob
-against its identifier and have `TFBWireBlob` check the cache before
-opening.
+The protocol offer now goes to 19, and `op_execute`/`op_execute2` carry
+the inline blob size limit the client will accept - taken from the
+existing `IAttachment.GetInlineBlobLimit` (default 8KB, settable, zero
+opts out). A protocol 19 server pushes each qualifying blob as an
+`op_inline_blob` packet ahead of the row that references it: transaction
+handle, blob id, the standard blob info response, and the whole blob as
+one segmented stream - the same two byte length prefixed form
+`op_get_segment` returns.
+
+`ReadOperation` intercepts the packets - the same interception point
+that already skips `op_dummy` and `op_response_piggyback` - and hands
+them to the attachment through a callback, keeping the protocol unit
+free of provider types. The attachment caches them (16MB cap; beyond it
+pushes are dropped and the blob opens the classic way - a round trip,
+never an error), keyed by transaction handle and blob id, with entries
+consumed on open and a transaction's entries discarded when it ends.
+`TFBWireBlob` consults the cache before sending `op_open_blob2`: on a
+hit the open, the reads and `GetInfo` all happen without any wire
+traffic, which WireTest proves with a packet counter on the transport.
+The whole feature is transparent: the suite output is byte identical
+apart from the negotiated version in `getFBVersion`.
 
 ### 10. Firebird 6 and protocol 20
 

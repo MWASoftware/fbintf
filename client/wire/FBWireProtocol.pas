@@ -26,7 +26,7 @@
 unit FBWireProtocol;
 
 { The wire protocol engine: connection handshake with protocol negotiation
-  (protocols 13..18, i.e. Firebird 3.0 up to and including Firebird 6;
+  (protocols 13..19, i.e. Firebird 3.0 up to and including Firebird 6;
   older servers negotiate down), Srp/Srp256 authentication, optional wire
   encryption (Arc4, ChaCha, ChaCha64) and the request/response packet
   exchanges for attachments, transactions, DSQL statements, blobs,
@@ -54,9 +54,10 @@ uses
 
 const
   {highest protocol version this client implements. Firebird 3 accepts up
-   to 15, Firebird 4 up to 17, Firebird 5 and 6 accept 18 (op_fetch_scroll
-   and the op_execute cursor flags word).}
-  MaxSupportedProtocol = PROTOCOL_VERSION18;
+   to 15, Firebird 4 up to 17, Firebird 5 accepts 18 (op_fetch_scroll and
+   the op_execute cursor flags word), Firebird 5.0.3 and 6 accept 19
+   (op_inline_blob and the op_execute inline blob size limit).}
+  MaxSupportedProtocol = PROTOCOL_VERSION19;
   INVALID_OBJECT = $FFFF;
 
   {key advertisement clumplet tags (see plugins/crypt in protocol.cpp)}
@@ -67,6 +68,12 @@ const
 
 type
   TWireCryptOption = (wcDisabled, wcEnabled, wcRequired);
+
+  {receives an op_inline_blob pushed by a protocol 19 server: the blob id
+   under that transaction, its info response buffer and the segmented
+   data stream. Installed by the attachment - see TFBWireAttachment.}
+  TInlineBlobHandler = procedure(aTrHandle: integer; aBlobID: Int64;
+                        const aInfo, aData: TBytes) of object;
 
   TWireStatusItem = record
     Kind: integer;      {isc_arg_gds etc}
@@ -167,6 +174,8 @@ type
     FCryptPlugin: AnsiString;      {active wire encryption plugin, '' = none}
     FConnected: boolean;
     FMaxProtocol: cardinal;
+    FOnInlineBlob: TInlineBlobHandler;
+    procedure ReadInlineBlob;
     procedure SendUserIdentification(aWireCrypt: TWireCryptOption);
     procedure DoAuthHandshake(aWireCrypt: TWireCryptOption);
     function ComputeProof(const aData: TBytes; const aPluginName: AnsiString): AnsiString;
@@ -220,15 +229,18 @@ type
     {aTimeout is the statement timeout in milliseconds (0 = none), carried
      in the p_sqldata_timeout field from protocol 16. aCursorFlags is the
      protocol 18 cursor flags word - CURSOR_TYPE_SCROLLABLE requests a
-     scrollable cursor.}
+     scrollable cursor. aInlineBlobLimit is the protocol 19 inline blob
+     size limit: blobs whose segmented size fits are pushed with the rows
+     as op_inline_blob packets; zero asks for none.}
     procedure ExecuteStatement(aStmtHandle, aTrHandle: integer;
                         const aParamFormat: TWireMessageFormat; aParamBuffer: PByte;
-                        aTimeout: cardinal = 0; aCursorFlags: cardinal = 0);
+                        aTimeout: cardinal = 0; aCursorFlags: cardinal = 0;
+                        aInlineBlobLimit: cardinal = 0);
     {op_execute2 for singleton results (execute procedure/returning)}
     procedure ExecuteStatement2(aStmtHandle, aTrHandle: integer;
                         const aParamFormat: TWireMessageFormat; aParamBuffer: PByte;
                         const aOutFormat: TWireMessageFormat; aOutBuffer: PByte;
-                        aTimeout: cardinal = 0);
+                        aTimeout: cardinal = 0; aInlineBlobLimit: cardinal = 0);
     {fetches the next row into aOutBuffer, requesting a new batch of
      aFetchCount rows from the server when needed. Returns false when the
      cursor is exhausted. aState must be zero initialised before the first
@@ -334,6 +346,8 @@ type
      of the protocol.}
     property MaxProtocol: cardinal read FMaxProtocol write FMaxProtocol;
     property Connected: boolean read FConnected;
+    {sink for op_inline_blob packets; unset, they are read and discarded}
+    property OnInlineBlob: TInlineBlobHandler read FOnInlineBlob write FOnInlineBlob;
     property AuthData: AnsiString read FAuthData;
     property AuthPluginName: AnsiString read FAuthPluginName;
     property CryptPlugin: AnsiString read FCryptPlugin;
@@ -570,9 +584,10 @@ procedure TFBWireConnection.ConnectTo(const aHost: AnsiString; aPort: integer;
   const aDatabasePath, aUser, aPassword: AnsiString;
   aWireCrypt: TWireCryptOption; aTimeout: integer);
 const
-  OfferedProtocols: array[0..5] of cardinal = (
+  OfferedProtocols: array[0..6] of cardinal = (
     PROTOCOL_VERSION13, PROTOCOL_VERSION14, PROTOCOL_VERSION15,
-    PROTOCOL_VERSION16, PROTOCOL_VERSION17, PROTOCOL_VERSION18);
+    PROTOCOL_VERSION16, PROTOCOL_VERSION17, PROTOCOL_VERSION18,
+    PROTOCOL_VERSION19);
 var i: integer;
     offered: integer;
 begin
@@ -1003,8 +1018,29 @@ begin
       ReadResponseBody;
       continue;
     end;
+    if Result = op_inline_blob then
+    begin
+      {a protocol 19 server pushes small blobs ahead of the rows that
+       reference them - cache and carry on with whatever the caller was
+       actually waiting for}
+      ReadInlineBlob;
+      continue;
+    end;
     break;
   until false;
+end;
+
+procedure TFBWireConnection.ReadInlineBlob;
+var aTrHandle: integer;
+    aBlobID: Int64;
+    info, data: TBytes;
+begin
+  aTrHandle := FXDR.ReadInt32;
+  aBlobID := FXDR.ReadInt64;
+  info := FXDR.ReadString;
+  data := FXDR.ReadString;   {the segmented stream, as one counted blob}
+  if assigned(FOnInlineBlob) then
+    FOnInlineBlob(aTrHandle,aBlobID,info,data);
 end;
 
 function TFBWireConnection.ReadStatusVector: TWireStatusVector;
@@ -1188,7 +1224,7 @@ end;
 
 procedure TFBWireConnection.ExecuteStatement(aStmtHandle, aTrHandle: integer;
   const aParamFormat: TWireMessageFormat; aParamBuffer: PByte;
-  aTimeout: cardinal; aCursorFlags: cardinal);
+  aTimeout: cardinal; aCursorFlags: cardinal; aInlineBlobLimit: cardinal);
 var blr: TBytes;
 begin
   FXDR.WriteInt32(op_execute);
@@ -1212,6 +1248,8 @@ begin
     FXDR.WriteUInt32(aTimeout);   {p_sqldata_timeout}
   if FProtocolVersion >= (PROTOCOL_VERSION18 and FB_PROTOCOL_MASK) then
     FXDR.WriteUInt32(aCursorFlags); {p_sqldata_cursor_flags}
+  if FProtocolVersion >= (PROTOCOL_VERSION19 and FB_PROTOCOL_MASK) then
+    FXDR.WriteUInt32(aInlineBlobLimit); {p_sqldata_inline_blob_size}
   FXDR.Flush;
   ReceiveAndCheckResponse;
 end;
@@ -1219,7 +1257,7 @@ end;
 procedure TFBWireConnection.ExecuteStatement2(aStmtHandle, aTrHandle: integer;
   const aParamFormat: TWireMessageFormat; aParamBuffer: PByte;
   const aOutFormat: TWireMessageFormat; aOutBuffer: PByte;
-  aTimeout: cardinal);
+  aTimeout: cardinal; aInlineBlobLimit: cardinal);
 var blr: TBytes;
     op: integer;
     messages: integer;
@@ -1249,6 +1287,8 @@ begin
     FXDR.WriteUInt32(aTimeout); {p_sqldata_timeout}
   if FProtocolVersion >= (PROTOCOL_VERSION18 and FB_PROTOCOL_MASK) then
     FXDR.WriteUInt32(0); {p_sqldata_cursor_flags - a singleton has no cursor}
+  if FProtocolVersion >= (PROTOCOL_VERSION19 and FB_PROTOCOL_MASK) then
+    FXDR.WriteUInt32(aInlineBlobLimit); {p_sqldata_inline_blob_size}
   FXDR.Flush;
 
   op := ReadOperation;
