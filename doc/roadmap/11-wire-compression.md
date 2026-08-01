@@ -1,7 +1,40 @@
 # Design: Wire compression
 
-Roadmap milestone 11 (`doc/WireProtocol.md`). This document is the
-implementation plan; no code changes are included.
+Roadmap milestone 11 (`doc/WireProtocol.md`).
+
+**Status: implemented** — `pflag_compress` is offered on request, the
+accept's flag is captured before the `ptype_mask` masking discards it,
+and the transport gained the two stage pipeline (deflate below the
+cipher on send, inflate above it on receive; one zlib stream per
+direction, `Z_SYNC_FLUSH` per packet). WireTest gained a compression
+section (167 tests) that negotiates it on a second attachment and round
+trips a bulk query and a blob; the CI matrix gained a dedicated
+`WireCompression = true` row on Firebird 5. Notes against the plan:
+
+* The user surface ended up even smaller than a property: the wire
+  attachment reads `WireCompression=true` from an `isc_dpb_config` DPB
+  item - the same knob the stock client honours - so application code
+  is provider portable. `TFBWireConnection.Compression` exists for the
+  protocol-level API.
+* `op_cancel` was the subtle case the plan missed: `SendDirect` must
+  route through the same deflate stream, not around it - the peer
+  inflates one continuous stream and raw bytes would corrupt it. Both
+  senders share the deflate state under the existing send lock.
+* Compression starts after the accept *packet*, not the accept *op*:
+  an `op_accept_data`/`op_cond_accept` packet carries the auth payload
+  after the type word, all still clear; the deflate streams switch on
+  once that packet has been read in full. The remaining handshake
+  (`op_cont_auth`, `op_crypt`) is compressed, and the cipher changeover
+  logic needed no change because the cipher stayed against the socket.
+* The receive rework kept `ReadBytes`/`FRecvPos`/`FRecvLimit` untouched
+  by adding a second buffer for the not yet inflated stream inside
+  `FillRecvBuffer` only; the compression-off path is the previous code
+  verbatim, and the suite reference log needed no regeneration - the
+  first milestone since the test suite one to leave it untouched.
+* FPC's `paszlib` (pure Pascal zlib) interoperates with the server's
+  zlib as the format demands; the local Firebird 6 snapshot accepted
+  compression out of the box and every WireTest section passed over
+  the compressed, encrypted stream.
 
 ## Goal
 

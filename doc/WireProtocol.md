@@ -129,6 +129,10 @@ Working and covered by the test suite:
   that reference them are opened and read with no further wire traffic
 * protocol 20 with Firebird 6: the schema search path travels in the DPB
   (`isc_dpb_search_path`) and the describe reports each column's schema
+* zlib wire compression, requested per attachment with an
+  `isc_dpb_config` item of `WireCompression=true` and effective when the
+  server also enables it - deflate below the cipher, one stream per
+  direction
 
 Deliberately not implemented yet. These raise `ibxeNotSupported` rather
 than failing in a confusing way:
@@ -457,12 +461,12 @@ apply `runtest.sh`'s normalisation, and commit it.
 
 | Server | WireCrypt | Negotiated | Encryption | Result |
 |---|---|---|---|---|
-| 6.0 (CI container) | Enabled, Required | 20 | `ChaCha64` | 164 tests, 0 failures |
-| 6.0.0 (local, LI-T6.0.0.2076) | Required | 20 | `ChaCha64` | 164 tests, 0 failures |
-| 5.0 (CI container) | Enabled, Required | 19 | `ChaCha64` | 164 tests, 0 failures |
-| 5.0.4 (local container) | Enabled, Required | 19 | `ChaCha64` | 164 tests, 0 failures |
-| 4.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 164 tests, 0 failures |
-| 3.0 (CI container) | Enabled | 15 | `Arc4` | 164 tests, 0 failures |
+| 6.0 (CI container) | Enabled, Required | 20 | `ChaCha64` | 167 tests, 0 failures |
+| 6.0.0 (local, LI-T6.0.0.2076) | Required | 20 | `ChaCha64` | 167 tests, 0 failures |
+| 5.0 (CI container) | Enabled, Required | 19 | `ChaCha64` | 167 tests, 0 failures |
+| 5.0.4 (local container) | Enabled, Required | 19 | `ChaCha64` | 167 tests, 0 failures |
+| 4.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 167 tests, 0 failures |
+| 3.0 (CI container) | Enabled | 15 | `Arc4` | 167 tests, 0 failures |
 | no server | — | — | — | 36 tests, live sections skipped |
 
 Firebird 3 settles on protocol 15 with Arc4: it is the newest protocol that
@@ -528,7 +532,7 @@ machinery that already exists to support it.
 | 8 | The batch API — **done** | `op_batch_create/msg/regblob/exec/cs/rls` | 16 |
 | 9 | Inline blobs — **done** | `op_inline_blob`, protocol raised to 19 | 19 |
 | 10 | Firebird 6 protocol 20 — **done** | offer raised to 20, `isc_dpb_search_path`, schema aware describe | 20 |
-| 11 | Wire compression | zlib either side of the cipher | 13 |
+| 11 | Wire compression — **done** | `pflag_compress`, zlib beneath the cipher | 13 |
 | 12 | Engine message text | a `firebird.msg` reader or a generated table | — |
 
 ### 1. Run the existing test suite against this provider — done
@@ -804,12 +808,30 @@ negotiated version string, and the WireTest schema section proves the
 search path resolves unqualified names, a qualified name bypasses it,
 and the described schema arrives per column.
 
-### 11. Wire compression
+### 11. Wire compression — done
 
-`pflag_compress` is understood in the accept but never requested. Turning it
-on means running zlib over the byte stream underneath the cipher, which the
-transport is already structured for: compression would be another filter in
-the same position as `TWireCipher`, applied in the opposite order.
+Requested per attachment with an `isc_dpb_config` item of
+`WireCompression=true` - the same knob the stock client reads - and
+effective when the server also enables it: `pflag_compress` rides on
+each offered protocol entry's max type field and the accept echoes it,
+captured before the `ptype_mask` masking that used to discard it.
+Compression is a property of the byte stream, not of packets: one zlib
+stream per direction for the life of the session, started immediately
+after the accept packet (which itself travels clear), with a
+`Z_SYNC_FLUSH` per packet flush so complete packets reach the peer
+promptly.
+
+The pipeline order keeps the cipher against the socket: deflate then
+encrypt on send, decrypt then inflate on receive, so the later
+`op_crypt` changeover works unchanged. `op_cancel`'s out of band packet
+travels through the same deflate state - the peer inflates one
+continuous stream, so raw bytes must never bypass it.
+`HasBufferedData` counts deflate stream bytes received but not yet
+inflated, which keeps the cipher changeover guard and event polling
+honest. The compression-off path is byte for byte the previous code,
+which the unchanged suite reference log proves; FPC's pure Pascal
+`paszlib` supplies zlib, so the no-external-dependencies property
+survives.
 
 ### 12. Engine message text
 

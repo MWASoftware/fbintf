@@ -195,9 +195,34 @@ end;
 
 function TFBWireAttachment.ConnectAndPrepareDPB: TBytes;
 var aUser, aPassword: AnsiString;
-    UserItem, PasswordItem: IDPBItem;
+    UserItem, PasswordItem, ConfigItem: IDPBItem;
     raw: TBytes;
     i, itemLen, outLen: integer;
+
+  {reads WireCompression from an isc_dpb_config item, as the stock
+   client does: the config text is also forwarded to the server}
+  function WantsCompression(const aConfig: AnsiString): boolean;
+  var Lines: TStringList;
+      j: integer;
+      key, value: AnsiString;
+  begin
+    Result := false;
+    Lines := TStringList.Create;
+    try
+      Lines.Text := aConfig;
+      for j := 0 to Lines.Count - 1 do
+      begin
+        if Pos('=',Lines[j]) = 0 then continue;
+        key := Trim(system.copy(Lines[j],1,Pos('=',Lines[j])-1));
+        value := Trim(system.copy(Lines[j],Pos('=',Lines[j])+1,MaxInt));
+        if SameText(key,'WireCompression') then
+          Result := SameText(value,'true') or (value = '1') or
+                    SameText(value,'yes');
+      end;
+    finally
+      Lines.Free;
+    end;
+  end;
 
   procedure AddClumplet(aTag: byte; const aValue: AnsiString);
   var j: integer;
@@ -220,6 +245,9 @@ begin
     PasswordItem := DPB.Find(isc_dpb_password);
     if PasswordItem <> nil then
       aPassword := PasswordItem.AsString;
+    ConfigItem := DPB.Find(isc_dpb_config);
+    if ConfigItem <> nil then
+      FConnection.Compression := WantsCompression(ConfigItem.AsString);
   end;
 
   FConnection.ConnectTo(FHost,FPort,FRemoteDatabaseName,aUser,aPassword);
