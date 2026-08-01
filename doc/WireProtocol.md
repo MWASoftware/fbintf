@@ -99,7 +99,7 @@ protocol, and is how the version matrix below was measured.
 
 Working and covered by the test suite:
 
-* the connection handshake with protocol negotiation, versions 13 to 17
+* the connection handshake with protocol negotiation, versions 13 to 18
 * `Srp256` and `Srp` authentication, in both the `op_cond_accept` flow
   (authentication must finish before attaching) and the `op_accept_data`
   flow (the proof travels in the DPB with the attach)
@@ -120,6 +120,8 @@ Working and covered by the test suite:
 * operation cancellation (`IAttachment.CancelOperation` - `op_cancel`
   sent out of band from another thread) and statement timeouts
   (`IStatement.SetStatementTimeout` - the protocol 16 timeout field)
+* scrollable cursors on protocol 18 servers: the five positioned fetches
+  of `IResultSet` over `op_fetch_scroll`
 
 Deliberately not implemented yet. These raise `ibxeNotSupported` rather
 than failing in a confusing way:
@@ -128,7 +130,6 @@ than failing in a confusing way:
 |---|---|
 | Services | `op_service_*` exist in `FBWireProtocol`; the `IServiceManager` wrapper does not |
 | Batches | the protocol 16 `op_batch_*` family |
-| Scrollable cursors | `op_fetch_scroll`, protocol 18 |
 | Multi database transactions | a two phase commit coordinator |
 
 Delphi is not supported yet either: the transport is written against the
@@ -450,12 +451,12 @@ apply `runtest.sh`'s normalisation, and commit it.
 
 | Server | WireCrypt | Negotiated | Encryption | Result |
 |---|---|---|---|---|
-| 6.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 118 tests, 0 failures |
-| 6.0.0 (local, LI-T6.0.0.2076) | Required | 17 | `ChaCha64` | 118 tests, 0 failures |
-| 5.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 118 tests, 0 failures |
-| 5.0.4 (local container) | Enabled, Required | 17 | `ChaCha64` | 118 tests, 0 failures |
-| 4.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 118 tests, 0 failures |
-| 3.0 (CI container) | Enabled | 15 | `Arc4` | 118 tests, 0 failures |
+| 6.0 (CI container) | Enabled, Required | 18 | `ChaCha64` | 137 tests, 0 failures |
+| 6.0.0 (local, LI-T6.0.0.2076) | Required | 18 | `ChaCha64` | 137 tests, 0 failures |
+| 5.0 (CI container) | Enabled, Required | 18 | `ChaCha64` | 137 tests, 0 failures |
+| 5.0.4 (local container) | Enabled, Required | 18 | `ChaCha64` | 137 tests, 0 failures |
+| 4.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 137 tests, 0 failures |
+| 3.0 (CI container) | Enabled | 15 | `Arc4` | 137 tests, 0 failures |
 | no server | — | — | — | 36 tests, live sections skipped |
 
 Firebird 3 settles on protocol 15 with Arc4: it is the newest protocol that
@@ -517,7 +518,7 @@ machinery that already exists to support it.
 | 4 | A Delphi transport | a `TFBWireTransport` over Winsock and Posix sockets | — |
 | 5 | Array columns — **done** | `FBWireArray` over `op_get_slice`/`op_put_slice`, shared SDL generator | 13 |
 | 6 | Statement timeouts and cancellation — **done** | `CancelOperation`/`SetStatementTimeout` on all providers | 12, 16 |
-| 7 | Scrollable cursors | `op_fetch_scroll` | 18 |
+| 7 | Scrollable cursors — **done** | `op_fetch_scroll`, protocol raised to 18 | 18 |
 | 8 | The batch API | the `op_batch_*` family | 16 |
 | 9 | Inline blobs | `op_inline_blob` | 19 |
 | 10 | Firebird 6 protocol 20 | schema search path, named arguments | 20 |
@@ -695,14 +696,29 @@ is `isc_cancelled` with `isc_req_stmt_timeout` as the secondary code
 client whose server has gone away - that is the socket timeout's job
 (`ConnectTo` accepts one).
 
-### 7. Scrollable cursors
+### 7. Scrollable cursors — done
 
-`op_fetch_scroll` (protocol 18) carries a fetch direction and position, so
-`FetchPrior`, `FetchFirst`, `FetchLast`, `FetchAbsolute` and `FetchRelative`
-become implementable. The row cache in `TWireCursorState` has to be
-invalidated on any non sequential fetch, and `TFBWireStatement` must offer
-`HasScollableCursors` truthfully once the negotiated protocol is 18 or
-better.
+The protocol offer now goes up to 18, which Firebird 5 and 6 accept
+(Firebird 4 stays on 17, Firebird 3 on 15). At 18 every
+`op_execute`/`op_execute2` carries a cursor flags word after the timeout
+field; a cursor opened with `IStatement.OpenCursor(true)` sets
+`CURSOR_TYPE_SCROLLABLE` in it, and the five positioned fetches of
+`IResultSet` then travel as `op_fetch_scroll` - `op_fetch` plus a
+direction and a position, answered by the same `op_fetch_response`
+sequence.
+
+A positioned fetch requests a single row and first discards the client's
+read ahead cache: those rows describe a cursor position the scroll
+abandons (the server, symmetrically, discards its own prefetch and
+repositions when the fetch direction changes - `rem_port::fetch` in
+`src/remote/server/server.cpp`). Sequential fetches keep their batched
+read ahead, and one that follows a scroll simply starts a fresh batch
+from the new position. BOF/EOF bookkeeping follows
+`TFB30Statement.Fetch`: success clears both, `FetchPrior` off the top
+sets BOF, and a failed positioned fetch leaves the flags alone.
+`HasScollableCursors` answers protocol >= 18, so the suite's Test 2
+scrollable section runs against Firebird 5 and 6 and skips on older
+servers.
 
 ### 8. The batch API
 

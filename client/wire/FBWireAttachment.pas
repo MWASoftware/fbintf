@@ -569,7 +569,9 @@ end;
 
 function TFBWireAttachment.HasScollableCursors: boolean;
 begin
-  Result := false;
+  {op_fetch_scroll needs protocol 18}
+  Result := (FConnection <> nil) and
+            (FConnection.ProtocolVersion >= (PROTOCOL_VERSION18 and FB_PROTOCOL_MASK));
 end;
 
 procedure TFBWireAttachment.CancelOperation(aKind: integer);

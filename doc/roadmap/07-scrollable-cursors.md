@@ -1,7 +1,37 @@
 # Design: Scrollable cursors over the wire protocol
 
-Roadmap milestone 7 (`doc/WireProtocol.md`). This document is the
-implementation plan; no code changes are included.
+Roadmap milestone 7 (`doc/WireProtocol.md`).
+
+**Status: implemented** — the offer now goes to protocol 18,
+`TFBWireConnection.FetchRowScroll` carries the positioned fetches, and
+the five `IResultSet` methods plus `GetFlags`/`HasScollableCursors`
+answer truthfully. WireTest gained a scroll section (137 tests) and the
+negotiation test extends to 18; the suite's Test 2 scrollable section
+now runs against protocol 18 servers. The design held, with these
+notes:
+
+* Protocol 18 changes more than the two new operations: **every**
+  `op_execute`/`op_execute2` gains a cursor flags word after the
+  timeout field (`p_sqldata_cursor_flags`), written as zero for
+  non scrollable cursors and singletons.
+* The server keeps its own prefetch cache and discards it when the
+  fetch direction or position changes, repositioning the engine cursor
+  as needed (`rem_port::fetch`); the client's obligations are only to
+  drop its read ahead rows on a scroll and to fetch one row per
+  positioned request - the server forces single row batches for every
+  direction except next/prior anyway.
+* The `FillChar` reset of `TWireCursorState` leaked the managed `Rows`
+  array as predicted; all three sites now use a `ResetCursorState`
+  helper.
+* BOF/EOF semantics are copied from `TFB30Statement.Fetch`: success
+  clears both flags, `FetchPrior` off the top sets BOF (and raises
+  `ibxeBOF` if already there), a failed `First`/`Last`/`Absolute`/
+  `Relative` leaves the flags untouched, and a sequential fetch after a
+  scroll starts a fresh batch from the new position.
+* The CI matrix expectation for Firebird 5 and 6 moves from protocol 17
+  to 18, and the suite reference log is regenerated (the negotiated
+  version appears in `getFBVersion` output, and Test 2's scrollable
+  section output is new).
 
 ## Goal
 

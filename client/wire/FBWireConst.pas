@@ -205,6 +205,18 @@ const
   fb_cancel_raise         = 3;
   fb_cancel_abort         = 4;
 
+  {op_fetch_scroll directions - P_FETCH in protocol.h}
+  fetch_next              = 0;
+  fetch_prior             = 1;
+  fetch_first             = 2;
+  fetch_last              = 3;
+  fetch_absolute          = 4;
+  fetch_relative          = 5;
+
+  {p_sqldata_cursor_flags (protocol 18) - matches
+   IStatement::CURSOR_TYPE_SCROLLABLE}
+  CURSOR_TYPE_SCROLLABLE  = 1;
+
   {op_connect_request types (for event aux connections)}
   P_REQ_async             = 1;
 

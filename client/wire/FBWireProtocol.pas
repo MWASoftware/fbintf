@@ -26,8 +26,8 @@
 unit FBWireProtocol;
 
 { The wire protocol engine: connection handshake with protocol negotiation
-  (protocols 13..17, i.e. Firebird 3.0 up to and including Firebird 6
-  servers which negotiate down), Srp/Srp256 authentication, optional wire
+  (protocols 13..18, i.e. Firebird 3.0 up to and including Firebird 6;
+  older servers negotiate down), Srp/Srp256 authentication, optional wire
   encryption (Arc4, ChaCha, ChaCha64) and the request/response packet
   exchanges for attachments, transactions, DSQL statements, blobs,
   information calls and services.
@@ -54,8 +54,9 @@ uses
 
 const
   {highest protocol version this client implements. Firebird 3 accepts up
-   to 15, Firebird 4 up to 17, Firebird 5/6 negotiate down to 17.}
-  MaxSupportedProtocol = PROTOCOL_VERSION17;
+   to 15, Firebird 4 up to 17, Firebird 5 and 6 accept 18 (op_fetch_scroll
+   and the op_execute cursor flags word).}
+  MaxSupportedProtocol = PROTOCOL_VERSION18;
   INVALID_OBJECT = $FFFF;
 
   {key advertisement clumplet tags (see plugins/crypt in protocol.cpp)}
@@ -200,10 +201,12 @@ type
                         aDialect: integer; const sql: AnsiString;
                         const aInfoItems: TBytes; aBufferLength: integer): TBytes;
     {aTimeout is the statement timeout in milliseconds (0 = none), carried
-     in the p_sqldata_timeout field from protocol 16}
+     in the p_sqldata_timeout field from protocol 16. aCursorFlags is the
+     protocol 18 cursor flags word - CURSOR_TYPE_SCROLLABLE requests a
+     scrollable cursor.}
     procedure ExecuteStatement(aStmtHandle, aTrHandle: integer;
                         const aParamFormat: TWireMessageFormat; aParamBuffer: PByte;
-                        aTimeout: cardinal = 0);
+                        aTimeout: cardinal = 0; aCursorFlags: cardinal = 0);
     {op_execute2 for singleton results (execute procedure/returning)}
     procedure ExecuteStatement2(aStmtHandle, aTrHandle: integer;
                         const aParamFormat: TWireMessageFormat; aParamBuffer: PByte;
@@ -216,6 +219,15 @@ type
     function FetchRow(aStmtHandle: integer;
                         const aOutFormat: TWireMessageFormat; aOutBuffer: PByte;
                         aFetchCount: integer; var aState: TWireCursorState): boolean;
+    {op_fetch_scroll (protocol 18): a positioned fetch on a scrollable
+     cursor. Discards any read ahead rows in aState first - they describe
+     a cursor position the scroll abandons - and requests a single row:
+     the server disables prefetch for every direction except next/prior
+     anyway. Returns false when there is no row in that direction.}
+    function FetchRowScroll(aStmtHandle: integer;
+                        const aOutFormat: TWireMessageFormat; aOutBuffer: PByte;
+                        aDirection: integer; aPosition: integer;
+                        var aState: TWireCursorState): boolean;
     procedure FreeStatement(aStmtHandle: integer; aOption: integer);
     procedure SetCursorName(aStmtHandle: integer; const aName: AnsiString);
     procedure ExecImmediate(aTrHandle, aDbHandle: integer; aDialect: integer;
@@ -291,6 +303,11 @@ type
     property Transport: TFBWireTransport read FTransport;
   end;
 
+{empties a cursor state, releasing the cached rows. Use this rather than
+ FillChar: the record holds a managed dynamic array which a FillChar
+ reset would leak.}
+procedure ResetCursorState(var aState: TWireCursorState);
+
 implementation
 
 uses IBErrorCodes;
@@ -306,6 +323,13 @@ const
   isc_arg_win32        = 17;
   isc_arg_warning      = 18;
   isc_arg_sql_state    = 19;
+
+procedure ResetCursorState(var aState: TWireCursorState);
+begin
+  SetLength(aState.Rows,0);
+  aState.NextRow := 0;
+  aState.EndOfCursor := false;
+end;
 
 { TWireResponse }
 
@@ -505,9 +529,9 @@ procedure TFBWireConnection.ConnectTo(const aHost: AnsiString; aPort: integer;
   const aDatabasePath, aUser, aPassword: AnsiString;
   aWireCrypt: TWireCryptOption; aTimeout: integer);
 const
-  OfferedProtocols: array[0..4] of cardinal = (
+  OfferedProtocols: array[0..5] of cardinal = (
     PROTOCOL_VERSION13, PROTOCOL_VERSION14, PROTOCOL_VERSION15,
-    PROTOCOL_VERSION16, PROTOCOL_VERSION17);
+    PROTOCOL_VERSION16, PROTOCOL_VERSION17, PROTOCOL_VERSION18);
 var i: integer;
     offered: integer;
 begin
@@ -1123,7 +1147,7 @@ end;
 
 procedure TFBWireConnection.ExecuteStatement(aStmtHandle, aTrHandle: integer;
   const aParamFormat: TWireMessageFormat; aParamBuffer: PByte;
-  aTimeout: cardinal);
+  aTimeout: cardinal; aCursorFlags: cardinal);
 var blr: TBytes;
 begin
   FXDR.WriteInt32(op_execute);
@@ -1145,6 +1169,8 @@ begin
   end;
   if FProtocolVersion >= (PROTOCOL_VERSION16 and FB_PROTOCOL_MASK) then
     FXDR.WriteUInt32(aTimeout);   {p_sqldata_timeout}
+  if FProtocolVersion >= (PROTOCOL_VERSION18 and FB_PROTOCOL_MASK) then
+    FXDR.WriteUInt32(aCursorFlags); {p_sqldata_cursor_flags}
   FXDR.Flush;
   ReceiveAndCheckResponse;
 end;
@@ -1180,6 +1206,8 @@ begin
   FXDR.WriteInt32(0);   {out message number}
   if FProtocolVersion >= (PROTOCOL_VERSION16 and FB_PROTOCOL_MASK) then
     FXDR.WriteUInt32(aTimeout); {p_sqldata_timeout}
+  if FProtocolVersion >= (PROTOCOL_VERSION18 and FB_PROTOCOL_MASK) then
+    FXDR.WriteUInt32(0); {p_sqldata_cursor_flags - a singleton has no cursor}
   FXDR.Flush;
 
   op := ReadOperation;
@@ -1274,6 +1302,70 @@ begin
   Move(aState.Rows[0][0],aOutBuffer^,Length(aState.Rows[0]));
   aState.NextRow := 1;
   Result := true;
+end;
+
+function TFBWireConnection.FetchRowScroll(aStmtHandle: integer;
+  const aOutFormat: TWireMessageFormat; aOutBuffer: PByte;
+  aDirection: integer; aPosition: integer;
+  var aState: TWireCursorState): boolean;
+var op: integer;
+    status, messages: integer;
+    blr: TBytes;
+    R: TWireResponse;
+    rowSize: cardinal;
+    row: TBytes;
+begin
+  Result := false;
+  if FProtocolVersion < (PROTOCOL_VERSION18 and FB_PROTOCOL_MASK) then
+    raise EFBWireError.Create('op_fetch_scroll needs protocol 18 or later');
+
+  {any rows read ahead describe the cursor position this scroll abandons}
+  ResetCursorState(aState);
+  rowSize := MessageBufferSize(aOutFormat);
+
+  FXDR.WriteInt32(op_fetch_scroll);
+  FXDR.WriteInt32(aStmtHandle);
+  blr := BuildMessageBlr(aOutFormat);
+  FXDR.WriteString(blr);
+  FXDR.WriteInt32(0);            {message number}
+  FXDR.WriteInt32(1);            {one row - no read ahead on a scroll}
+  FXDR.WriteInt32(aDirection);
+  FXDR.WriteInt32(aPosition);
+  FXDR.Flush;
+
+  {drain the batch exactly as FetchRow does - the server terminates it
+   with a packet whose message count is zero, status 100 meaning no row
+   in the requested direction}
+  repeat
+    op := ReadOperation;
+    if op = op_response then
+    begin
+      {an error terminated the fetch}
+      R := ReadResponseBody;
+      CheckResponse(R);
+      break;
+    end;
+    if op <> op_fetch_response then
+      raise EFBWireError.CreateFmt('Unexpected operation %d in fetch response',[op]);
+    status := FXDR.ReadInt32;
+    messages := FXDR.ReadInt32;
+    if messages = 0 then
+      break;
+    SetLength(row,rowSize);
+    if rowSize > 0 then
+      FillChar(row[0],rowSize,0);
+    XDRDecodeMessage(FXDR,aOutFormat,@row[0]);
+    if not Result then
+    begin
+      Move(row[0],aOutBuffer^,Length(row));
+      Result := true;
+    end;
+    row := nil;
+  until false;
+  {status 100 - no row in the requested direction - needs no bookkeeping:
+   the state was reset above and any following sequential fetch starts a
+   fresh batch. The cursor itself sits at BOF or EOF, which the statement
+   layer tracks.}
 end;
 
 procedure TFBWireConnection.FreeStatement(aStmtHandle: integer; aOption: integer);
