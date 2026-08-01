@@ -1246,6 +1246,8 @@ type
     function HasDecFloatSupport: boolean;
     function HasBatchMode: boolean;
     function HasScollableCursors: boolean;
+    function HasArraySupport: boolean;
+    function HasEventSupport: boolean;
     function HasTable(aTableName: AnsiString): boolean;  {case sensitive}
     function HasFunction(aFunctionName: AnsiString): boolean; {case sensitive}
     function HasProcedure(aProcName: AnsiString): boolean; {case sensitive}

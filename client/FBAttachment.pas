@@ -264,6 +264,8 @@ type
     function GetInlineBlobLimit: integer;
     procedure SetInlineBlobLimit(limit: integer);
     function HasBatchMode: boolean; virtual;
+    function HasArraySupport: boolean; virtual;
+    function HasEventSupport: boolean; virtual;
     function HasTable(aTableName: AnsiString): boolean;
     function HasFunction(aFunctionName: AnsiString): boolean;
     function HasProcedure(aProcName: AnsiString): boolean;
@@ -1551,6 +1553,16 @@ end;
 function TFBAttachment.HasBatchMode: boolean;
 begin
   Result := false;
+end;
+
+function TFBAttachment.HasArraySupport: boolean;
+begin
+  Result := true;
+end;
+
+function TFBAttachment.HasEventSupport: boolean;
+begin
+  Result := true;
 end;
 
 function TFBAttachment.HasTable(aTableName: AnsiString): boolean;

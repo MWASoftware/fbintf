@@ -415,6 +415,32 @@ Then, if a server answers:
 With no server reachable the live sections report `SKIP` and the process
 still exits 0, which is what the offline CI job relies on.
 
+### The full fbintf test suite
+
+`WireTest` is the unit layer. The integration layer is the ordinary
+fbintf test suite - all twenty two programs - run over this provider:
+
+```bash
+testsuite/runtest.sh -a wire
+```
+
+The `-a wire` (`--api wire`) switch makes `TTestApplication` obtain the
+API from `WireFirebirdAPI` instead of `IB.FirebirdAPI`; nothing else in
+the suite changes. The output is compared against
+`testsuite/FBWirereference.log` after normalising the run dependent
+values (transaction ids, page counters, journal timestamps) on both
+sides of the diff. Tests for events, arrays and other unimplemented
+features skip with a fixed message so the comparison stays exact.
+
+The reference log is the CI environment's own output: Firebird 6
+(ODS 14, protocol 17) in a container, the employee example database
+restored from `testsuite/employee.gbk`, an x86_64 runner. Float to text
+rendering differs in the last digit between CPU architectures, so a log
+produced elsewhere (for example on ARM) shows a handful of known
+differences. To regenerate the reference after an intended output
+change, download the `wire-suite-testout` artifact from the CI run,
+apply `runtest.sh`'s normalisation, and commit it.
+
 ### Measured results
 
 | Server | WireCrypt | Negotiated | Encryption | Result |
@@ -480,7 +506,7 @@ machinery that already exists to support it.
 
 | # | Milestone | Needs | Protocol |
 |---|---|---|---|
-| 1 | Run the existing test suite against this provider | a provider switch in `TTestApplication` | — |
+| 1 | Run the existing test suite against this provider — **done** | `testsuite -a wire` runs all twenty two programs | — |
 | 2 | Events | `op_connect_request`, a second socket, a listener thread | 13 |
 | 3 | Services | the `IServiceManager` wrapper over exchanges that already exist | 13 |
 | 4 | A Delphi transport | a `TFBWireTransport` over Winsock and Posix sockets | — |
@@ -493,27 +519,58 @@ machinery that already exists to support it.
 | 11 | Wire compression | zlib either side of the cipher | 13 |
 | 12 | Engine message text | a `firebird.msg` reader or a generated table | — |
 
-### 1. Run the existing test suite against this provider
+### 1. Run the existing test suite against this provider — done
 
-The cheapest large win, and it should come first because everything after
-it benefits. `testsuite/` already contains twenty two test programs that
-exercise the API far more thoroughly than `WireTest` does, and they are
-written against the interfaces, not against a provider. They obtain the API
-from one place:
+`testsuite -a wire` (or `runtest.sh -a wire`) runs all twenty two test
+programs over this provider, and the output is compared line by line
+against `testsuite/FBWirereference.log` with the run dependent values
+(transaction ids, page counts, journal timestamps) normalised on both
+sides. The CI workflow runs the suite against a Firebird 6 container and
+fails on any difference from the reference log. Tests for features the
+provider does not implement skip with a fixed message, guarded by the new
+`IAttachment.HasArraySupport` and `HasEventSupport` capability checks
+alongside the existing ones; those skip lines shrinking is how milestones
+2 and 5 will show up in the log.
 
-```pascal
-function TTestApplication.GetFirebirdAPI: IFirebirdAPI;   {TestApplication.pas}
-begin
-  if FFirebirdAPI = nil then
-    FFirebirdAPI := IB.FirebirdAPI;
-  ...
-```
+The prediction that this was the cheapest large win was right for the
+wrong reasons: the suite immediately found seven real defects that
+`WireTest` could not see, several in code paths that had simply never
+been executed. The fixes that came out of the first run:
 
-A command line switch that assigns `WireFirebirdAPI` there instead would run
-all of them over the wire. Expect failures at first: the suite covers
-events, services and arrays, which this provider reports as unsupported, so
-the work is partly to add a way of marking those as expected skips. That
-same run is the acceptance criterion for milestones 2, 3 and 5.
+* **SRP broke inside the suite binary only** — the account name upper
+  casing used `AnsiUpperCase`, and with `fpwidestring` installed (which
+  the suite loads) that returns the string with a trailing `#0` included
+  in its length, poisoning the proof hashes. ASCII `UpperCase` is both
+  safe and what the engine does.
+* **`op_execute2` had its statement and transaction handles swapped** at
+  the call site, killing the connection on any `execute procedure` or
+  `insert ... returning` — the exchange had never been exercised.
+* **`Execute` returned nil for `update/insert ... returning`**: Firebird
+  5 and later describe those as select statements (cursor + one row),
+  older servers as `SQLExecProcedure` (`op_execute2` singleton); both
+  paths are now implemented.
+* **Named parameters lost their names**: the bind after prepare
+  overwrote the preprocessor's `:name` assignments with the describe
+  response's empty names.
+* **Parameter metadata was immutable**: assigning a value of a different
+  type to a parameter (`AsInteger` on a `SMALLINT`, a string to a blob)
+  now changes the message format and relays out the buffer, as the other
+  providers allow — the client owns the BLR it sends.
+* **`DECFLOAT` values decoded to garbage**: the provider inherited the
+  base class codec, which has no implementation. It now carries its own
+  IEEE 754 densely packed decimal encoder and decoder, verified against
+  the server in both directions.
+* **Blob metadata from table and column names** (`GetBlobMetaData`) never
+  looked the column up, so blob subtypes were wrong; it now runs the same
+  system table query as the 3.0 provider.
+
+The suite also drove smaller fixes: create database from a SQL statement
+now extracts the file spec locally (the stock providers delegate that
+preparse to `fbclient`), a nil DPB no longer crashes, the DPB sent with
+the attach is now a verbatim clumplet copy rather than a re-encoded one,
+and the transport discards its session ciphers on disconnect so that the
+same connection object can reconnect (also found independently by the
+services milestone).
 
 ### 2. Events
 

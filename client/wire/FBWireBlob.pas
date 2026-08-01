@@ -47,13 +47,18 @@ type
   TFBWireBlobMetaData = class(TFBBlobMetaData,IBlobMetaData)
   private
     FAttachmentIntf: IAttachment;
+    FTransactionIntf: ITransaction;
   protected
     function Attachment: IAttachment; override;
     procedure NeedFullMetadata; override;
   public
+    {aSubTypeKnown is true when the caller supplies the definitive subtype
+     and character set (statement metadata); false makes NeedFullMetadata
+     look the column up in the system tables}
     constructor Create(aAttachment: TObject; aTransaction: TObject;
                 aRelationName, aColumnName: AnsiString;
-                aSubType: integer; aCharSetID: cardinal);
+                aSubType: integer; aCharSetID: cardinal;
+                aSubTypeKnown: boolean = true);
   end;
 
   { TFBWireBlob }
@@ -92,24 +97,35 @@ type
 
 implementation
 
-uses FBMessages, IBErrorCodes, FBWireAttachment, FBWireTransaction, FBWireConst;
+uses FBMessages, IBErrorCodes, IBHeader, FBWireAttachment, FBWireTransaction,
+  FBWireConst;
 
 const
   MaxSegmentSize = 32000;
+
+  {the same system table lookup the 3.0 provider uses}
+  sLookupBlobMetaData = 'Select F.RDB$FIELD_SUB_TYPE, F.RDB$SEGMENT_LENGTH, F.RDB$CHARACTER_SET_ID, F.RDB$FIELD_TYPE '+
+    'From RDB$FIELDS F JOIN RDB$RELATION_FIELDS R On R.RDB$FIELD_SOURCE = F.RDB$FIELD_NAME '+
+  'Where Trim(R.RDB$RELATION_NAME) = Upper(Trim(?)) and Trim(R.RDB$FIELD_NAME) = Upper(Trim(?)) ' +
+  'UNION '+
+  'Select F.RDB$FIELD_SUB_TYPE, F.RDB$SEGMENT_LENGTH, F.RDB$CHARACTER_SET_ID, F.RDB$FIELD_TYPE '+
+    'From RDB$FIELDS F JOIN RDB$PROCEDURE_PARAMETERS P On P.RDB$FIELD_SOURCE = F.RDB$FIELD_NAME '+
+    'Where Trim(P.RDB$PROCEDURE_NAME) = Upper(Trim(?)) and Trim(P.RDB$PARAMETER_NAME) = Upper(Trim(?)) ';
 
 { TFBWireBlobMetaData }
 
 constructor TFBWireBlobMetaData.Create(aAttachment: TObject;
   aTransaction: TObject; aRelationName, aColumnName: AnsiString;
-  aSubType: integer; aCharSetID: cardinal);
+  aSubType: integer; aCharSetID: cardinal; aSubTypeKnown: boolean);
 begin
   inherited Create(aTransaction as TFBWireTransaction,aRelationName,aColumnName);
   FAttachmentIntf := (aAttachment as TFBWireAttachment) as IAttachment;
+  FTransactionIntf := (aTransaction as TFBWireTransaction) as ITransaction;
   FSubType := aSubType;
   FCharSetID := aCharSetID;
   FSegmentSize := MaxSegmentSize;
-  FHasSubType := true;
-  FUnconfirmedCharacterSet := false;
+  FHasSubType := aSubTypeKnown;
+  FUnconfirmedCharacterSet := not aSubTypeKnown;
 end;
 
 function TFBWireBlobMetaData.Attachment: IAttachment;
@@ -118,9 +134,36 @@ begin
 end;
 
 procedure TFBWireBlobMetaData.NeedFullMetadata;
+var RS: IResultSet;
 begin
-  {The relation, column, subtype and character set are all supplied by the
-   statement metadata, so there is nothing further to fetch.}
+  {When created from statement metadata the subtype and character set are
+   already definitive. Otherwise the column is looked up in the system
+   tables, exactly as the 3.0 provider does.}
+  if FHasSubType then Exit;
+  FSegmentSize := 80;
+  if (GetColumnName <> '') and (GetRelationName <> '') then
+  begin
+    RS := FAttachmentIntf.OpenCursor(FTransactionIntf,sLookupBlobMetaData,
+            [GetRelationName,GetColumnName,GetRelationName,GetColumnName]);
+    if RS.FetchNext then
+    begin
+      if RS[3].AsInteger <> blr_blob then
+        IBError(ibxeInvalidBlobMetaData,[nil]);
+      FSubType := RS[0].AsInteger;
+      FSegmentSize := RS[1].AsInteger;
+      if FUnconfirmedCharacterSet then
+        FCharSetID := RS[2].AsInteger;
+    end
+    else
+      IBError(ibxeInvalidBlobMetaData,[nil]);
+    RS.Close;
+  end;
+  if FUnconfirmedCharacterSet and (FCharSetID > 1) and
+     FAttachmentIntf.HasDefaultCharSet then
+  begin
+    FCharSetID := FAttachmentIntf.GetDefaultCharSetID;
+    FUnconfirmedCharacterSet := false;
+  end;
   FHasSubType := true;
 end;
 

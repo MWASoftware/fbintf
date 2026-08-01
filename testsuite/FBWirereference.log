@@ -1,0 +1,3449 @@
+Firebird API Test Suite
+Copyright MWA Software 2016-2021
+
+Starting Tests
+Client API Version = 5.0
+Firebird Environment Variable = 
+Provider = pure Pascal wire protocol, no client library
+Running Test 1: Create and Drop a Database
+Creating a Database with empty parameters
+Create Database fails (as expected): Engine Code: 0
+Firebird Error Code: 0
+Creating a Database using an SQL Statement
+Database ID = n FB = dbpath SN = hostname
+SQL Dialect = 3
+DB Connect String = inet://localhost//tmp/fbintf-testsuite/testsuite1.fdb
+DB Charset ID = 0
+DB SQL Dialect = 3
+DB Remote Protocol = TCPv4
+DB ODS Major Version = 14
+DB ODS Minor Version = 0
+User Authentication Method = Srp256
+Firebird Library Path = none (wire protocol provider)
+DB Client Implementation Version = 5.0
+DPB: Item Count = 3
+  isc_dpb_user_name = SYSDBA
+  isc_dpb_password = masterkey
+  isc_dpb_set_db_sql_dialect = 3
+
+Firebird Server Version Info
+Firebird wire protocol version 17, Srp256 authentication, ChaCha64 wire encryption
+
+Dropping Database
+Creating a Database with a DPD
+DB Connect String = inet://localhost//tmp/fbintf-testsuite/testsuite1.fdb
+DB Charset ID = 4
+DB SQL Dialect = 3
+DB Remote Protocol = TCPv4
+DB ODS Major Version = 14
+DB ODS Minor Version = 0
+User Authentication Method = Srp256
+Firebird Library Path = none (wire protocol provider)
+DB Client Implementation Version = 5.0
+Dropping Database
+DPB: Item Count = 4
+  isc_dpb_user_name = SYSDBA
+  isc_dpb_password = masterkey
+  isc_dpb_lc_ctype = UTF8
+  isc_dpb_set_db_sql_dialect = 3
+
+Creating a Database with a DPD
+Database ID = n FB = dbpath SN = hostname
+ODS major = 14
+ODS minor = 0
+Attachment ID = 3
+DB Connect String = inet://localhost//tmp/fbintf-testsuite/testsuite1.fdb
+DB Charset ID = 4
+DB SQL Dialect = 3
+DB Remote Protocol = TCPv4
+DB ODS Major Version = 14
+DB ODS Minor Version = 0
+User Authentication Method = Srp256
+Firebird Library Path = none (wire protocol provider)
+DB Client Implementation Version = 5.0
+TPB: Item Count = 3
+  isc_tpb_read
+  isc_tpb_concurrency
+  isc_tpb_lock_timeout = 1
+
+RDB$DESCRIPTION = 
+RDB$RELATION_ID = 0
+RDB$SECURITY_CLASS = SQL$nnn
+RDB$CHARACTER_SET_NAME = NONE
+RDB$LINGER = 
+RDB$SQL_SECURITY = 
+RDB$CHARACTER_SET_SCHEMA_NAME = SYSTEM
+Dropping Database
+
+
+------------------------------------------------------
+Running Test 2: Open the employee database and run a query
+Open Database fails Engine Code: 335544721
+Unsupported authentication plugin "Legacy_Auth"
+Opening inet://localhost/employee
+Database Open, SQL Dialect = 3
+TPB: Item Count = 3
+  isc_tpb_read
+  isc_tpb_nowait
+  isc_tpb_concurrency
+
+Metadata
+SQLType =SQL_SHORT
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = EMP_NO
+Alias Name = EMP_NO
+Field Name = EMP_NO
+Scale = 0
+Charset id = 0
+Not Null
+Size = 2
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = FIRST_NAME
+Alias Name = FIRST_NAME
+Field Name = FIRST_NAME
+Scale = 0
+Charset id = 0
+Not Null
+Size = 15
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = LAST_NAME
+Alias Name = LAST_NAME
+Field Name = LAST_NAME
+Scale = 0
+Charset id = 0
+Not Null
+Size = 20
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = PHONE_EXT
+Alias Name = PHONE_EXT
+Field Name = PHONE_EXT
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_TIMESTAMP
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = HIRE_DATE
+Alias Name = HIRE_DATE
+Field Name = HIRE_DATE
+Scale = 0
+Charset id = 0
+Not Null
+Size = 8
+
+SQLType =SQL_TEXT
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = DEPT_NO
+Alias Name = DEPT_NO
+Field Name = DEPT_NO
+Scale = 0
+Charset id = 0
+Not Null
+Size = 3
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = JOB_CODE
+Alias Name = JOB_CODE
+Field Name = JOB_CODE
+Scale = 0
+Charset id = 0
+Not Null
+Size = 5
+
+SQLType =SQL_SHORT
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = JOB_GRADE
+Alias Name = JOB_GRADE
+Field Name = JOB_GRADE
+Scale = 0
+Charset id = 0
+Not Null
+Size = 2
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = JOB_COUNTRY
+Alias Name = JOB_COUNTRY
+Field Name = JOB_COUNTRY
+Scale = 0
+Charset id = 0
+Not Null
+Size = 15
+
+SQLType =SQL_INT64
+sub type = 1
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = SALARY
+Alias Name = SALARY
+Field Name = SALARY
+Scale = -2
+Charset id = 0
+Not Null
+Size = 8
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = FULL_NAME
+Alias Name = FULL_NAME
+Field Name = FULL_NAME
+Scale = 0
+Charset id = 0
+Nullable
+Size = 37
+
+Plan = PLAN ("PUBLIC"."EMPLOYEE" NATURAL)
+-- SQL style inline comment
+/* this is a comment */ Select First 3 * from EMPLOYEE
+
+EMP_NO = 2
+FIRST_NAME = Robert
+LAST_NAME = Nelson
+PHONE_EXT = 250
+HIRE_DATE = 1988/12/28 00:00:00.0000
+DEPT_NO = 600
+JOB_CODE = VP
+JOB_GRADE = 2
+JOB_COUNTRY = USA
+SALARY = 105,900.00
+FULL_NAME = Nelson, Robert
+EMP_NO = 4
+FIRST_NAME = Bruce
+LAST_NAME = Young
+PHONE_EXT = 233
+HIRE_DATE = 1988/12/28 00:00:00.0000
+DEPT_NO = 621
+JOB_CODE = Eng
+JOB_GRADE = 2
+JOB_COUNTRY = USA
+SALARY = 97,500.00
+FULL_NAME = Young, Bruce
+EMP_NO = 5
+FIRST_NAME = Kim
+LAST_NAME = Lambert
+PHONE_EXT = 22
+HIRE_DATE = 1989/02/06 00:00:00.0000
+DEPT_NO = 130
+JOB_CODE = Eng
+JOB_GRADE = 2
+JOB_COUNTRY = USA
+SALARY = 102,750.00
+FULL_NAME = Lambert, Kim
+
+Select * from EMPLOYEE Where EMP_NO = ?
+SQL Params
+SQLType =SQL_SHORT
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 2
+
+EMP_NO = 8
+FIRST_NAME = Leslie
+LAST_NAME = Johnson
+PHONE_EXT = 410
+HIRE_DATE = 1989/04/05 00:00:00.0000
+DEPT_NO = 180
+JOB_CODE = Mktg
+JOB_GRADE = 3
+JOB_COUNTRY = USA
+SALARY = 64,635.00
+FULL_NAME = Johnson, Leslie
+
+With param names
+Select * from EMPLOYEE Where EMP_NO = :EMP_NO
+SQL Params
+SQLType =SQL_SHORT
+sub type = 0
+Field Name = EMP_NO
+Scale = 0
+Charset id = 0
+Nullable
+Size = 2
+
+Results for Cursor: Test Cursor
+EMP_NO = 8
+FIRST_NAME = Leslie
+LAST_NAME = Johnson
+PHONE_EXT = 410
+HIRE_DATE = 1989/04/05 00:00:00.0000
+DEPT_NO = 180
+JOB_CODE = Mktg
+JOB_GRADE = 3
+JOB_COUNTRY = USA
+SALARY = 64,635.00
+FULL_NAME = Johnson, Leslie
+
+Now open the employee database as a local database
+Skipping local database test - not supported by provider
+
+
+------------------------------------------------------
+Running Test 3: ad hoc queries
+Opening inet://localhost/employee
+Database Open
+Employee Count = 42
+Transaction ID = nnnn
+Transaction is Read/Write
+Transaction Database Path = employee
+Transaction ID = nnnn
+Employee Count = 41
+Employee Count = 42
+Employee Count = 41
+Employee Count = 42
+Constrained Employee Count = 3
+"Johnson" Employee Count = 2
+"Yanowski" Employee Count = 1
+
+
+------------------------------------------------------
+Running Test 4: Update, Insert and Delete Queries
+Opening inet://localhost/employee
+Database Open
+Firebird wire protocol version 17, Srp256 authentication, ChaCha64 wire encryption
+Select Count = 1 InsertCount = 0 UpdateCount = 1 DeleteCount = 0
+EMP_NO = 8
+FIRST_NAME = Leslie
+LAST_NAME = Johnson
+PHONE_EXT = 410
+HIRE_DATE = 1989/04/05 00:00:00.0000
+DEPT_NO = 180
+JOB_CODE = Mktg
+JOB_GRADE = 3
+JOB_COUNTRY = USA
+SALARY = 64,635.00
+FULL_NAME = Johnson, Leslie
+
+Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
+Relation Name = EMPLOYEE
+Metadata
+SQLType =SQL_SHORT
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = EMP_NO
+Alias Name = EMP_NO
+Field Name = EMP_NO
+Scale = 0
+Charset id = 0
+Not Null
+Size = 2
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = FIRST_NAME
+Alias Name = FIRST_NAME
+Field Name = FIRST_NAME
+Scale = 0
+Charset id = 0
+Not Null
+Size = 15
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = LAST_NAME
+Alias Name = LAST_NAME
+Field Name = LAST_NAME
+Scale = 0
+Charset id = 0
+Not Null
+Size = 20
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = PHONE_EXT
+Alias Name = PHONE_EXT
+Field Name = PHONE_EXT
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_TIMESTAMP
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = HIRE_DATE
+Alias Name = HIRE_DATE
+Field Name = HIRE_DATE
+Scale = 0
+Charset id = 0
+Not Null
+Size = 8
+
+SQLType =SQL_TEXT
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = DEPT_NO
+Alias Name = DEPT_NO
+Field Name = DEPT_NO
+Scale = 0
+Charset id = 0
+Not Null
+Size = 3
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = JOB_CODE
+Alias Name = JOB_CODE
+Field Name = JOB_CODE
+Scale = 0
+Charset id = 0
+Not Null
+Size = 5
+
+SQLType =SQL_SHORT
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = JOB_GRADE
+Alias Name = JOB_GRADE
+Field Name = JOB_GRADE
+Scale = 0
+Charset id = 0
+Not Null
+Size = 2
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = JOB_COUNTRY
+Alias Name = JOB_COUNTRY
+Field Name = JOB_COUNTRY
+Scale = 0
+Charset id = 0
+Not Null
+Size = 15
+
+SQLType =SQL_INT64
+sub type = 1
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = SALARY
+Alias Name = SALARY
+Field Name = SALARY
+Scale = -2
+Charset id = 0
+Not Null
+Size = 8
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = EMPLOYEE
+Owner = SYSDBA
+Column Name = FULL_NAME
+Alias Name = FULL_NAME
+Field Name = FULL_NAME
+Scale = 0
+Charset id = 0
+Nullable
+Size = 37
+
+EMP_NO = 500
+FIRST_NAME = John
+LAST_NAME = Doe
+PHONE_EXT = 
+HIRE_DATE = 2015/04/01 00:00:00.0000
+DEPT_NO = 600
+JOB_CODE = Eng
+JOB_GRADE = 4
+JOB_COUNTRY = England
+SALARY = 41,000.89
+FULL_NAME = Doe                 , John
+
+Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
+EMP_NO = 501
+FIRST_NAME = Major
+LAST_NAME = Major
+PHONE_EXT = 
+HIRE_DATE = 2015/04/01 00:00:00.0000
+DEPT_NO = 600
+JOB_CODE = Eng
+JOB_GRADE = 4
+JOB_COUNTRY = England
+SALARY = 40,000.59
+FULL_NAME = Major               , Major
+
+Now Delete the rows
+Select Count = 1 InsertCount = 0 UpdateCount = 0 DeleteCount = 1
+Select Count = 1 InsertCount = 0 UpdateCount = 0 DeleteCount = 1
+Inserting
+Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
+EMP_NO = 500
+FIRST_NAME = Jane
+LAST_NAME = Doe
+PHONE_EXT = NULL
+HIRE_DATE = 2015/04/01 00:00:00.0000
+DEPT_NO = 600
+JOB_CODE = Eng
+JOB_GRADE = 4
+JOB_COUNTRY = England
+SALARY = 41,000.89
+FULL_NAME = Doe                 , Jane
+
+Employee Count = 43
+Updating
+Select Count = 1 InsertCount = 0 UpdateCount = 0 DeleteCount = 0
+Prepare Query again
+
+EMP_NO = 500
+FIRST_NAME = Jayne's
+LAST_NAME = Doe
+PHONE_EXT = NULL
+HIRE_DATE = 2015/04/01 00:00:00.0000
+DEPT_NO = 600
+JOB_CODE = Eng
+JOB_GRADE = 4
+JOB_COUNTRY = England
+SALARY = 41,000.89
+FULL_NAME = Doe                 , Jayne's
+
+Prepare Query again with a different transaction
+
+EMP_NO = 8
+FIRST_NAME = Leslie
+LAST_NAME = Johnson
+PHONE_EXT = 410
+HIRE_DATE = 1989/04/05 00:00:00.0000
+DEPT_NO = 180
+JOB_CODE = Mktg
+JOB_GRADE = 3
+JOB_COUNTRY = USA
+SALARY = 64,635.00
+FULL_NAME = Johnson, Leslie
+
+Open Cursor with a different transaction
+
+EMP_NO = 8
+FIRST_NAME = Leslie
+LAST_NAME = Johnson
+PHONE_EXT = 410
+HIRE_DATE = 1989/04/05 00:00:00.0000
+DEPT_NO = 180
+JOB_CODE = Mktg
+JOB_GRADE = 3
+JOB_COUNTRY = USA
+SALARY = 64,635.00
+FULL_NAME = Johnson, Leslie
+Same Statement - updated params
+EMP_NO = 9
+FIRST_NAME = Phil
+LAST_NAME = Forest
+PHONE_EXT = 229
+HIRE_DATE = 1989/04/17 00:00:00.0000
+DEPT_NO = 622
+JOB_CODE = Mngr
+JOB_GRADE = 3
+JOB_COUNTRY = USA
+SALARY = 75,060.00
+FULL_NAME = Forest, Phil
+
+Test using Execute Block
+Select Count = 1 InsertCount = 0 UpdateCount = 1 DeleteCount = 0
+EMP_NO = 8
+FIRST_NAME = Leslie
+LAST_NAME = Johnson
+PHONE_EXT = 410
+HIRE_DATE = 2015/01/31 00:00:00.0000
+DEPT_NO = 180
+JOB_CODE = Mktg
+JOB_GRADE = 3
+JOB_COUNTRY = USA
+SALARY = 64,635.00
+FULL_NAME = Johnson, Leslie
+
+
+
+------------------------------------------------------
+Running Test 5: Update Returning and Activity Check
+Opening inet://localhost/employee
+Database Open
+Database Closed
+Database Open
+Select Count = 1 InsertCount = 0 UpdateCount = 1 DeleteCount = 0
+Last Name = Johnson
+EMP_NO = 8
+FIRST_NAME = Leslie
+LAST_NAME = Johnson
+PHONE_EXT = 410
+HIRE_DATE = 2016/01/31 00:00:00.0000
+DEPT_NO = 180
+JOB_CODE = Mktg
+JOB_GRADE = 3
+JOB_COUNTRY = USA
+SALARY = 64,635.00
+FULL_NAME = Johnson, Leslie
+
+Inserting
+Full Name = Doe                 , John           
+Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
+Database Activity = FALSE
+Transaction Activity = FALSE
+Database Activity = FALSE
+Transaction Activity = FALSE
+Employee Count = 43
+Database Activity = FALSE
+Transaction Activity = FALSE
+Transaction Active
+Transaction inactive
+
+
+------------------------------------------------------
+Running Test 6: Blob Handling
+Metadata
+SQLType =SQL_TEXT
+sub type = 4
+Table = RDB$CHARACTER_SETS
+Owner = SYSDBA
+Column Name = RDB$CHARACTER_SET_NAME
+Alias Name = RDB$CHARACTER_SET_NAME
+Field Name = RDB$CHARACTER_SET_NAME
+Scale = 0
+Charset id = 4
+Nullable
+Size = 252
+
+SQLType =SQL_SHORT
+sub type = 0
+Table = RDB$CHARACTER_SETS
+Owner = SYSDBA
+Column Name = RDB$CHARACTER_SET_ID
+Alias Name = RDB$CHARACTER_SET_ID
+Field Name = RDB$CHARACTER_SET_ID
+Scale = 0
+Charset id = 0
+Nullable
+Size = 2
+
+RDB$CHARACTER_SET_NAME = NONE (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 0
+RDB$CHARACTER_SET_NAME = OCTETS (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 1
+RDB$CHARACTER_SET_NAME = ASCII (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 2
+RDB$CHARACTER_SET_NAME = UNICODE_FSS (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 3
+RDB$CHARACTER_SET_NAME = UTF8 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 4
+RDB$CHARACTER_SET_NAME = SJIS_0208 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 5
+RDB$CHARACTER_SET_NAME = EUCJ_0208 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 6
+RDB$CHARACTER_SET_NAME = DOS737 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 9
+RDB$CHARACTER_SET_NAME = DOS437 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 10
+RDB$CHARACTER_SET_NAME = DOS850 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 11
+RDB$CHARACTER_SET_NAME = DOS865 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 12
+RDB$CHARACTER_SET_NAME = DOS860 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 13
+RDB$CHARACTER_SET_NAME = DOS863 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 14
+RDB$CHARACTER_SET_NAME = DOS775 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 15
+RDB$CHARACTER_SET_NAME = DOS858 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 16
+RDB$CHARACTER_SET_NAME = DOS862 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 17
+RDB$CHARACTER_SET_NAME = DOS864 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 18
+RDB$CHARACTER_SET_NAME = NEXT (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 19
+RDB$CHARACTER_SET_NAME = ISO8859_1 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 21
+RDB$CHARACTER_SET_NAME = ISO8859_2 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 22
+RDB$CHARACTER_SET_NAME = ISO8859_3 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 23
+RDB$CHARACTER_SET_NAME = ISO8859_4 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 34
+RDB$CHARACTER_SET_NAME = ISO8859_5 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 35
+RDB$CHARACTER_SET_NAME = ISO8859_6 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 36
+RDB$CHARACTER_SET_NAME = ISO8859_7 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 37
+RDB$CHARACTER_SET_NAME = ISO8859_8 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 38
+RDB$CHARACTER_SET_NAME = ISO8859_9 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 39
+RDB$CHARACTER_SET_NAME = ISO8859_13 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 40
+RDB$CHARACTER_SET_NAME = KSC_5601 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 44
+RDB$CHARACTER_SET_NAME = DOS852 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 45
+RDB$CHARACTER_SET_NAME = DOS857 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 46
+RDB$CHARACTER_SET_NAME = DOS861 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 47
+RDB$CHARACTER_SET_NAME = DOS866 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 48
+RDB$CHARACTER_SET_NAME = DOS869 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 49
+RDB$CHARACTER_SET_NAME = CYRL (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 50
+RDB$CHARACTER_SET_NAME = WIN1250 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 51
+RDB$CHARACTER_SET_NAME = WIN1251 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 52
+RDB$CHARACTER_SET_NAME = WIN1252 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 53
+RDB$CHARACTER_SET_NAME = WIN1253 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 54
+RDB$CHARACTER_SET_NAME = WIN1254 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 55
+RDB$CHARACTER_SET_NAME = BIG_5 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 56
+RDB$CHARACTER_SET_NAME = GB_2312 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 57
+RDB$CHARACTER_SET_NAME = WIN1255 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 58
+RDB$CHARACTER_SET_NAME = WIN1256 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 59
+RDB$CHARACTER_SET_NAME = WIN1257 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 60
+RDB$CHARACTER_SET_NAME = KOI8R (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 63
+RDB$CHARACTER_SET_NAME = KOI8U (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 64
+RDB$CHARACTER_SET_NAME = WIN1258 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 65
+RDB$CHARACTER_SET_NAME = TIS620 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 66
+RDB$CHARACTER_SET_NAME = GBK (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 67
+RDB$CHARACTER_SET_NAME = CP943C (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 68
+RDB$CHARACTER_SET_NAME = GB18030 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 69
+
+Metadata
+SQLType =SQL_LONG
+sub type = 0
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = ROWID
+Alias Name = ROWID
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+
+SQLType =SQL_LONG
+sub type = 2
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = FIXEDPOINT
+Alias Name = FIXEDPOINT
+Field Name = FIXEDPOINT
+Scale = -2
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_DOUBLE
+sub type = 0
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = FLOATINGPOINT
+Alias Name = FLOATINGPOINT
+Field Name = FLOATINGPOINT
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+SQLType =SQL_VARYING
+sub type = 4
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = TITLE
+Alias Name = TITLE
+Field Name = TITLE
+Scale = 0
+Charset id = 4
+Nullable
+Size = 128
+
+SQLType =SQL_BLOB
+sub type = 1
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = BLOBDATA
+Alias Name = BLOBDATA
+Field Name = BLOBDATA
+Scale = 4
+Charset id = 0
+Nullable
+Size = 8
+
+Blob Meta Data
+SQL SubType =1
+Table = TESTDATA
+Column = BLOBDATA
+CharSetID = 0
+Segment Size = 32000
+
+
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_VARYING
+sub type = 4
+Field Name = TITLE
+Scale = 0
+Charset id = 4
+Nullable
+Size = 128
+
+SQLType =SQL_LONG
+sub type = 2
+Field Name = FP
+Scale = -2
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_DOUBLE
+sub type = 0
+Field Name = DP
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+ROWID = 1
+FIXEDPOINT = 20.28
+FLOATINGPOINT = 3.14
+TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
+BLOBDATA = NULL
+
+SQL Params
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = 
+Scale = 4
+Charset id = 0
+Nullable
+Size = 8
+
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+ROWID = 1
+FIXEDPOINT = 20.28
+FLOATINGPOINT = 3.14
+TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
+BLOBDATA (Charset Id = 0 Codepage = 0)
+
+To be or not to be-that is the question:
+Whether 'tis nobler in the mind to suffer
+The slings and arrows of outrageous fortune,
+Or to take arms against a sea of troubles,
+And, by opposing, end them. To die, to sleep-
+No more-and by a sleep to say we end
+The heartache and the thousand natural shocks
+That flesh is heir to-'tis a consummation
+Devoutly to be wished. To die, to sleep-
+To sleep, perchance to dream. Aye, there's the rub,
+For in that sleep of death what dreams may come,
+When we have shuffled off this mortal coil,
+Must give us pause. There's the respect
+That makes calamity of so long life.
+For who would bear the whips and scorns of time,
+Th' oppressor's wrong, the proud man's contumely, 
+The pangs of despised love, the law’s delay, 
+The insolence of office, and the spurns
+That patient merit of the unworthy takes,
+When he himself might his quietus make
+With a bare bodkin? Who would fardels bear, 
+To grunt and sweat under a weary life,
+But that the dread of something after death,
+The undiscovered country from whose bourn
+No traveler returns, puzzles the will
+And makes us rather bear those ills we have
+Than fly to others that we know not of?
+Thus conscience does make cowards of us all,
+And thus the native hue of resolution
+Is sicklied o'er with the pale cast of thought,
+And enterprises of great pitch and moment, 
+With this regard their currents turn awry, 
+And lose the name of action.-Soft you now,
+The fair Ophelia.-Nymph, in thy orisons
+Be all my sins remembered
+
+
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_VARYING
+sub type = 4
+Field Name = TITLE
+Scale = 0
+Charset id = 4
+Nullable
+Size = 128
+
+SQLType =SQL_LONG
+sub type = 2
+Field Name = FP
+Scale = -2
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_DOUBLE
+sub type = 0
+Field Name = DP
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+ROWID = 1
+FIXEDPOINT = 20.28
+FLOATINGPOINT = 3.14
+TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
+BLOBDATA (Charset Id = 0 Codepage = 0)
+
+To be or not to be-that is the question:
+Whether 'tis nobler in the mind to suffer
+The slings and arrows of outrageous fortune,
+Or to take arms against a sea of troubles,
+And, by opposing, end them. To die, to sleep-
+No more-and by a sleep to say we end
+The heartache and the thousand natural shocks
+That flesh is heir to-'tis a consummation
+Devoutly to be wished. To die, to sleep-
+To sleep, perchance to dream. Aye, there's the rub,
+For in that sleep of death what dreams may come,
+When we have shuffled off this mortal coil,
+Must give us pause. There's the respect
+That makes calamity of so long life.
+For who would bear the whips and scorns of time,
+Th' oppressor's wrong, the proud man's contumely, 
+The pangs of despised love, the law’s delay, 
+The insolence of office, and the spurns
+That patient merit of the unworthy takes,
+When he himself might his quietus make
+With a bare bodkin? Who would fardels bear, 
+To grunt and sweat under a weary life,
+But that the dread of something after death,
+The undiscovered country from whose bourn
+No traveler returns, puzzles the will
+And makes us rather bear those ills we have
+Than fly to others that we know not of?
+Thus conscience does make cowards of us all,
+And thus the native hue of resolution
+Is sicklied o'er with the pale cast of thought,
+And enterprises of great pitch and moment, 
+With this regard their currents turn awry, 
+And lose the name of action.-Soft you now,
+The fair Ophelia.-Nymph, in thy orisons
+Be all my sins remembered
+
+ROWID = 2
+FIXEDPOINT = NULL
+FLOATINGPOINT = NULL
+TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
+BLOBDATA (Charset Id = 0 Codepage = 0)
+
+To be or not to be-that is the question:
+Whether 'tis nobler in the mind to suffer
+The slings and arrows of outrageous fortune,
+Or to take arms against a sea of troubles,
+And, by opposing, end them. To die, to sleep-
+No more-and by a sleep to say we end
+The heartache and the thousand natural shocks
+That flesh is heir to-'tis a consummation
+Devoutly to be wished. To die, to sleep-
+To sleep, perchance to dream. Aye, there's the rub,
+For in that sleep of death what dreams may come,
+When we have shuffled off this mortal coil,
+Must give us pause. There's the respect
+That makes calamity of so long life.
+For who would bear the whips and scorns of time,
+Th' oppressor's wrong, the proud man's contumely, 
+The pangs of despised love, the law’s delay, 
+The insolence of office, and the spurns
+That patient merit of the unworthy takes,
+When he himself might his quietus make
+With a bare bodkin? Who would fardels bear, 
+To grunt and sweat under a weary life,
+But that the dread of something after death,
+The undiscovered country from whose bourn
+No traveler returns, puzzles the will
+And makes us rather bear those ills we have
+Than fly to others that we know not of?
+Thus conscience does make cowards of us all,
+And thus the native hue of resolution
+Is sicklied o'er with the pale cast of thought,
+And enterprises of great pitch and moment, 
+With this regard their currents turn awry, 
+And lose the name of action.-Soft you now,
+The fair Ophelia.-Nymph, in thy orisons
+Be all my sins remembered
+
+
+Test text blob optimisation - short text followed by long
+Params after prepare
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = 
+Scale = 4
+Charset id = 0
+Nullable
+Size = 8
+
+Params after setting values
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+Value = 3
+
+SQLType =SQL_TEXT
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 43
+Value = The Quick Brown Fox Jumps over the Lazy Dog
+
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+Value = 4
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+Value = O Romeo, Romeo, wherefore art thou Romeo? Deny thy father and refuse thy name. Or if thou wilt not, be but sworn my love And I’ll no longer be a Capulet.‘Tis but thy name that is my enemy: Thou art thyself, though not a Montague. What’s Montague? It is nor hand nor foot Nor arm nor face nor any other part Belonging to a man. O be some other name. What’s in a name? That which we call a rose By any other name would smell as sweet; So Romeo would, were he not Romeo call’d, Retain that dear perfection which he owes Without that title. Romeo, doff thy name ,And for that name, which is no part of thee, Take all myself.
+
+Text Blob Optimisation Results
+ROWID = 3
+FIXEDPOINT = NULL
+FLOATINGPOINT = NULL
+TITLE = NULL
+BLOBDATA (Charset Id = 0 Codepage = 0)
+
+The Quick Brown Fox Jumps over the Lazy Dog
+ROWID = 4
+FIXEDPOINT = NULL
+FLOATINGPOINT = NULL
+TITLE = NULL
+BLOBDATA (Charset Id = 0 Codepage = 0)
+
+O Romeo, Romeo, wherefore art thou Romeo? Deny thy father and refuse thy name. Or if thou wilt not, be but sworn my love And I’ll no longer be a Capulet.‘Tis but thy name that is my enemy: Thou art thyself, though not a Montague. What’s Montague? It is nor hand nor foot Nor arm nor face nor any other part Belonging to a man. O be some other name. What’s in a name? That which we call a rose By any other name would smell as sweet; So Romeo would, were he not Romeo call’d, Retain that dear perfection which he owes Without that title. Romeo, doff thy name ,And for that name, which is no part of thee, Take all myself.
+
+Testing Blob as stored proc parameter
+Metadata
+SQLType =SQL_BLOB
+sub type = 1
+Table = TESTPROC
+Owner = SYSDBA
+Column Name = BLOBDATA
+Alias Name = BLOBDATA
+Field Name = BLOBDATA
+Scale = 4
+Charset id = 0
+Nullable
+Size = 8
+
+Blob Meta Data
+SQL SubType =1
+Table = TESTPROC
+Column = BLOBDATA
+CharSetID = 0
+Segment Size = 32000
+
+
+BLOBDATA = NULL
+Metadata
+SQLType =SQL_TEXT
+sub type = 53
+Table = RDB$CHARACTER_SETS
+Owner = SYSDBA
+Column Name = RDB$CHARACTER_SET_NAME
+Alias Name = RDB$CHARACTER_SET_NAME
+Field Name = RDB$CHARACTER_SET_NAME
+Scale = 0
+Charset id = 53
+Nullable
+Size = 63
+
+SQLType =SQL_SHORT
+sub type = 0
+Table = RDB$CHARACTER_SETS
+Owner = SYSDBA
+Column Name = RDB$CHARACTER_SET_ID
+Alias Name = RDB$CHARACTER_SET_ID
+Field Name = RDB$CHARACTER_SET_ID
+Scale = 0
+Charset id = 0
+Nullable
+Size = 2
+
+RDB$CHARACTER_SET_NAME = NONE (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 0
+RDB$CHARACTER_SET_NAME = OCTETS (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 1
+RDB$CHARACTER_SET_NAME = ASCII (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 2
+RDB$CHARACTER_SET_NAME = UNICODE_FSS (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 3
+RDB$CHARACTER_SET_NAME = UTF8 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 4
+RDB$CHARACTER_SET_NAME = SJIS_0208 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 5
+RDB$CHARACTER_SET_NAME = EUCJ_0208 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 6
+RDB$CHARACTER_SET_NAME = DOS737 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 9
+RDB$CHARACTER_SET_NAME = DOS437 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 10
+RDB$CHARACTER_SET_NAME = DOS850 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 11
+RDB$CHARACTER_SET_NAME = DOS865 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 12
+RDB$CHARACTER_SET_NAME = DOS860 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 13
+RDB$CHARACTER_SET_NAME = DOS863 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 14
+RDB$CHARACTER_SET_NAME = DOS775 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 15
+RDB$CHARACTER_SET_NAME = DOS858 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 16
+RDB$CHARACTER_SET_NAME = DOS862 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 17
+RDB$CHARACTER_SET_NAME = DOS864 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 18
+RDB$CHARACTER_SET_NAME = NEXT (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 19
+RDB$CHARACTER_SET_NAME = ISO8859_1 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 21
+RDB$CHARACTER_SET_NAME = ISO8859_2 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 22
+RDB$CHARACTER_SET_NAME = ISO8859_3 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 23
+RDB$CHARACTER_SET_NAME = ISO8859_4 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 34
+RDB$CHARACTER_SET_NAME = ISO8859_5 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 35
+RDB$CHARACTER_SET_NAME = ISO8859_6 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 36
+RDB$CHARACTER_SET_NAME = ISO8859_7 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 37
+RDB$CHARACTER_SET_NAME = ISO8859_8 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 38
+RDB$CHARACTER_SET_NAME = ISO8859_9 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 39
+RDB$CHARACTER_SET_NAME = ISO8859_13 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 40
+RDB$CHARACTER_SET_NAME = KSC_5601 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 44
+RDB$CHARACTER_SET_NAME = DOS852 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 45
+RDB$CHARACTER_SET_NAME = DOS857 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 46
+RDB$CHARACTER_SET_NAME = DOS861 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 47
+RDB$CHARACTER_SET_NAME = DOS866 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 48
+RDB$CHARACTER_SET_NAME = DOS869 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 49
+RDB$CHARACTER_SET_NAME = CYRL (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 50
+RDB$CHARACTER_SET_NAME = WIN1250 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 51
+RDB$CHARACTER_SET_NAME = WIN1251 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 52
+RDB$CHARACTER_SET_NAME = WIN1252 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 53
+RDB$CHARACTER_SET_NAME = WIN1253 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 54
+RDB$CHARACTER_SET_NAME = WIN1254 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 55
+RDB$CHARACTER_SET_NAME = BIG_5 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 56
+RDB$CHARACTER_SET_NAME = GB_2312 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 57
+RDB$CHARACTER_SET_NAME = WIN1255 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 58
+RDB$CHARACTER_SET_NAME = WIN1256 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 59
+RDB$CHARACTER_SET_NAME = WIN1257 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 60
+RDB$CHARACTER_SET_NAME = KOI8R (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 63
+RDB$CHARACTER_SET_NAME = KOI8U (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 64
+RDB$CHARACTER_SET_NAME = WIN1258 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 65
+RDB$CHARACTER_SET_NAME = TIS620 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 66
+RDB$CHARACTER_SET_NAME = GBK (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 67
+RDB$CHARACTER_SET_NAME = CP943C (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 68
+RDB$CHARACTER_SET_NAME = GB18030 (Charset Id = 53 Codepage = 1252)
+RDB$CHARACTER_SET_ID = 69
+
+Metadata
+SQLType =SQL_LONG
+sub type = 0
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = ROWID
+Alias Name = ROWID
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+
+SQLType =SQL_LONG
+sub type = 2
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = FIXEDPOINT
+Alias Name = FIXEDPOINT
+Field Name = FIXEDPOINT
+Scale = -2
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_DOUBLE
+sub type = 0
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = FLOATINGPOINT
+Alias Name = FLOATINGPOINT
+Field Name = FLOATINGPOINT
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+SQLType =SQL_VARYING
+sub type = 53
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = TITLE
+Alias Name = TITLE
+Field Name = TITLE
+Scale = 0
+Charset id = 53
+Nullable
+Size = 32
+
+SQLType =SQL_BLOB
+sub type = 1
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = BLOBDATA
+Alias Name = BLOBDATA
+Field Name = BLOBDATA
+Scale = 53
+Charset id = 0
+Nullable
+Size = 8
+
+Blob Meta Data
+SQL SubType =1
+Table = TESTDATA
+Column = BLOBDATA
+CharSetID = 0
+Segment Size = 32000
+
+
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_VARYING
+sub type = 53
+Field Name = TITLE
+Scale = 0
+Charset id = 53
+Nullable
+Size = 32
+
+SQLType =SQL_LONG
+sub type = 2
+Field Name = FP
+Scale = -2
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_DOUBLE
+sub type = 0
+Field Name = DP
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+ROWID = 1
+FIXEDPOINT = 20.28
+FLOATINGPOINT = 3.14
+TITLE = Blob Test ©€ (Charset Id = 53 Codepage = 1252)
+BLOBDATA = NULL
+
+SQL Params
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = 
+Scale = 53
+Charset id = 0
+Nullable
+Size = 8
+
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+ROWID = 1
+FIXEDPOINT = 20.28
+FLOATINGPOINT = 3.14
+TITLE = Blob Test ©€ (Charset Id = 53 Codepage = 1252)
+BLOBDATA (Charset Id = 0 Codepage = 0)
+
+To be or not to be-that is the question:
+Whether 'tis nobler in the mind to suffer
+The slings and arrows of outrageous fortune,
+Or to take arms against a sea of troubles,
+And, by opposing, end them. To die, to sleep-
+No more-and by a sleep to say we end
+The heartache and the thousand natural shocks
+That flesh is heir to-'tis a consummation
+Devoutly to be wished. To die, to sleep-
+To sleep, perchance to dream. Aye, there's the rub,
+For in that sleep of death what dreams may come,
+When we have shuffled off this mortal coil,
+Must give us pause. There's the respect
+That makes calamity of so long life.
+For who would bear the whips and scorns of time,
+Th' oppressor's wrong, the proud man's contumely, 
+The pangs of despised love, the law’s delay, 
+The insolence of office, and the spurns
+That patient merit of the unworthy takes,
+When he himself might his quietus make
+With a bare bodkin? Who would fardels bear, 
+To grunt and sweat under a weary life,
+But that the dread of something after death,
+The undiscovered country from whose bourn
+No traveler returns, puzzles the will
+And makes us rather bear those ills we have
+Than fly to others that we know not of?
+Thus conscience does make cowards of us all,
+And thus the native hue of resolution
+Is sicklied o'er with the pale cast of thought,
+And enterprises of great pitch and moment, 
+With this regard their currents turn awry, 
+And lose the name of action.-Soft you now,
+The fair Ophelia.-Nymph, in thy orisons
+Be all my sins remembered
+
+
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_VARYING
+sub type = 53
+Field Name = TITLE
+Scale = 0
+Charset id = 53
+Nullable
+Size = 32
+
+SQLType =SQL_LONG
+sub type = 2
+Field Name = FP
+Scale = -2
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_DOUBLE
+sub type = 0
+Field Name = DP
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+ROWID = 1
+FIXEDPOINT = 20.28
+FLOATINGPOINT = 3.14
+TITLE = Blob Test ©€ (Charset Id = 53 Codepage = 1252)
+BLOBDATA (Charset Id = 0 Codepage = 0)
+
+To be or not to be-that is the question:
+Whether 'tis nobler in the mind to suffer
+The slings and arrows of outrageous fortune,
+Or to take arms against a sea of troubles,
+And, by opposing, end them. To die, to sleep-
+No more-and by a sleep to say we end
+The heartache and the thousand natural shocks
+That flesh is heir to-'tis a consummation
+Devoutly to be wished. To die, to sleep-
+To sleep, perchance to dream. Aye, there's the rub,
+For in that sleep of death what dreams may come,
+When we have shuffled off this mortal coil,
+Must give us pause. There's the respect
+That makes calamity of so long life.
+For who would bear the whips and scorns of time,
+Th' oppressor's wrong, the proud man's contumely, 
+The pangs of despised love, the law’s delay, 
+The insolence of office, and the spurns
+That patient merit of the unworthy takes,
+When he himself might his quietus make
+With a bare bodkin? Who would fardels bear, 
+To grunt and sweat under a weary life,
+But that the dread of something after death,
+The undiscovered country from whose bourn
+No traveler returns, puzzles the will
+And makes us rather bear those ills we have
+Than fly to others that we know not of?
+Thus conscience does make cowards of us all,
+And thus the native hue of resolution
+Is sicklied o'er with the pale cast of thought,
+And enterprises of great pitch and moment, 
+With this regard their currents turn awry, 
+And lose the name of action.-Soft you now,
+The fair Ophelia.-Nymph, in thy orisons
+Be all my sins remembered
+
+ROWID = 2
+FIXEDPOINT = NULL
+FLOATINGPOINT = NULL
+TITLE = Blob Test ©€ (Charset Id = 53 Codepage = 1252)
+BLOBDATA (Charset Id = 0 Codepage = 0)
+
+To be or not to be-that is the question:
+Whether 'tis nobler in the mind to suffer
+The slings and arrows of outrageous fortune,
+Or to take arms against a sea of troubles,
+And, by opposing, end them. To die, to sleep-
+No more-and by a sleep to say we end
+The heartache and the thousand natural shocks
+That flesh is heir to-'tis a consummation
+Devoutly to be wished. To die, to sleep-
+To sleep, perchance to dream. Aye, there's the rub,
+For in that sleep of death what dreams may come,
+When we have shuffled off this mortal coil,
+Must give us pause. There's the respect
+That makes calamity of so long life.
+For who would bear the whips and scorns of time,
+Th' oppressor's wrong, the proud man's contumely, 
+The pangs of despised love, the law’s delay, 
+The insolence of office, and the spurns
+That patient merit of the unworthy takes,
+When he himself might his quietus make
+With a bare bodkin? Who would fardels bear, 
+To grunt and sweat under a weary life,
+But that the dread of something after death,
+The undiscovered country from whose bourn
+No traveler returns, puzzles the will
+And makes us rather bear those ills we have
+Than fly to others that we know not of?
+Thus conscience does make cowards of us all,
+And thus the native hue of resolution
+Is sicklied o'er with the pale cast of thought,
+And enterprises of great pitch and moment, 
+With this regard their currents turn awry, 
+And lose the name of action.-Soft you now,
+The fair Ophelia.-Nymph, in thy orisons
+Be all my sins remembered
+
+
+Test text blob optimisation - short text followed by long
+Params after prepare
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = 
+Scale = 53
+Charset id = 0
+Nullable
+Size = 8
+
+Params after setting values
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+Value = 3
+
+SQLType =SQL_TEXT
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 43
+Value = The Quick Brown Fox Jumps over the Lazy Dog
+
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+Value = 4
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+Value = O Romeo, Romeo, wherefore art thou Romeo? Deny thy father and refuse thy name. Or if thou wilt not, be but sworn my love And I’ll no longer be a Capulet.‘Tis but thy name that is my enemy: Thou art thyself, though not a Montague. What’s Montague? It is nor hand nor foot Nor arm nor face nor any other part Belonging to a man. O be some other name. What’s in a name? That which we call a rose By any other name would smell as sweet; So Romeo would, were he not Romeo call’d, Retain that dear perfection which he owes Without that title. Romeo, doff thy name ,And for that name, which is no part of thee, Take all myself.
+
+Text Blob Optimisation Results
+ROWID = 3
+FIXEDPOINT = NULL
+FLOATINGPOINT = NULL
+TITLE = NULL
+BLOBDATA (Charset Id = 0 Codepage = 0)
+
+The Quick Brown Fox Jumps over the Lazy Dog
+ROWID = 4
+FIXEDPOINT = NULL
+FLOATINGPOINT = NULL
+TITLE = NULL
+BLOBDATA (Charset Id = 0 Codepage = 0)
+
+O Romeo, Romeo, wherefore art thou Romeo? Deny thy father and refuse thy name. Or if thou wilt not, be but sworn my love And I’ll no longer be a Capulet.‘Tis but thy name that is my enemy: Thou art thyself, though not a Montague. What’s Montague? It is nor hand nor foot Nor arm nor face nor any other part Belonging to a man. O be some other name. What’s in a name? That which we call a rose By any other name would smell as sweet; So Romeo would, were he not Romeo call’d, Retain that dear perfection which he owes Without that title. Romeo, doff thy name ,And for that name, which is no part of thee, Take all myself.
+
+Testing Blob as stored proc parameter
+Metadata
+SQLType =SQL_BLOB
+sub type = 1
+Table = TESTPROC
+Owner = SYSDBA
+Column Name = BLOBDATA
+Alias Name = BLOBDATA
+Field Name = BLOBDATA
+Scale = 53
+Charset id = 0
+Nullable
+Size = 8
+
+Blob Meta Data
+SQL SubType =1
+Table = TESTPROC
+Column = BLOBDATA
+CharSetID = 0
+Segment Size = 32000
+
+
+BLOBDATA = NULL
+Metadata
+SQLType =SQL_TEXT
+sub type = 4
+Table = RDB$CHARACTER_SETS
+Owner = SYSDBA
+Column Name = RDB$CHARACTER_SET_NAME
+Alias Name = RDB$CHARACTER_SET_NAME
+Field Name = RDB$CHARACTER_SET_NAME
+Scale = 0
+Charset id = 4
+Nullable
+Size = 252
+
+SQLType =SQL_SHORT
+sub type = 0
+Table = RDB$CHARACTER_SETS
+Owner = SYSDBA
+Column Name = RDB$CHARACTER_SET_ID
+Alias Name = RDB$CHARACTER_SET_ID
+Field Name = RDB$CHARACTER_SET_ID
+Scale = 0
+Charset id = 0
+Nullable
+Size = 2
+
+RDB$CHARACTER_SET_NAME = NONE (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 0
+RDB$CHARACTER_SET_NAME = OCTETS (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 1
+RDB$CHARACTER_SET_NAME = ASCII (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 2
+RDB$CHARACTER_SET_NAME = UNICODE_FSS (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 3
+RDB$CHARACTER_SET_NAME = UTF8 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 4
+RDB$CHARACTER_SET_NAME = SJIS_0208 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 5
+RDB$CHARACTER_SET_NAME = EUCJ_0208 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 6
+RDB$CHARACTER_SET_NAME = DOS737 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 9
+RDB$CHARACTER_SET_NAME = DOS437 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 10
+RDB$CHARACTER_SET_NAME = DOS850 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 11
+RDB$CHARACTER_SET_NAME = DOS865 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 12
+RDB$CHARACTER_SET_NAME = DOS860 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 13
+RDB$CHARACTER_SET_NAME = DOS863 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 14
+RDB$CHARACTER_SET_NAME = DOS775 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 15
+RDB$CHARACTER_SET_NAME = DOS858 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 16
+RDB$CHARACTER_SET_NAME = DOS862 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 17
+RDB$CHARACTER_SET_NAME = DOS864 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 18
+RDB$CHARACTER_SET_NAME = NEXT (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 19
+RDB$CHARACTER_SET_NAME = ISO8859_1 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 21
+RDB$CHARACTER_SET_NAME = ISO8859_2 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 22
+RDB$CHARACTER_SET_NAME = ISO8859_3 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 23
+RDB$CHARACTER_SET_NAME = ISO8859_4 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 34
+RDB$CHARACTER_SET_NAME = ISO8859_5 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 35
+RDB$CHARACTER_SET_NAME = ISO8859_6 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 36
+RDB$CHARACTER_SET_NAME = ISO8859_7 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 37
+RDB$CHARACTER_SET_NAME = ISO8859_8 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 38
+RDB$CHARACTER_SET_NAME = ISO8859_9 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 39
+RDB$CHARACTER_SET_NAME = ISO8859_13 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 40
+RDB$CHARACTER_SET_NAME = KSC_5601 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 44
+RDB$CHARACTER_SET_NAME = DOS852 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 45
+RDB$CHARACTER_SET_NAME = DOS857 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 46
+RDB$CHARACTER_SET_NAME = DOS861 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 47
+RDB$CHARACTER_SET_NAME = DOS866 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 48
+RDB$CHARACTER_SET_NAME = DOS869 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 49
+RDB$CHARACTER_SET_NAME = CYRL (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 50
+RDB$CHARACTER_SET_NAME = WIN1250 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 51
+RDB$CHARACTER_SET_NAME = WIN1251 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 52
+RDB$CHARACTER_SET_NAME = WIN1252 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 53
+RDB$CHARACTER_SET_NAME = WIN1253 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 54
+RDB$CHARACTER_SET_NAME = WIN1254 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 55
+RDB$CHARACTER_SET_NAME = BIG_5 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 56
+RDB$CHARACTER_SET_NAME = GB_2312 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 57
+RDB$CHARACTER_SET_NAME = WIN1255 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 58
+RDB$CHARACTER_SET_NAME = WIN1256 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 59
+RDB$CHARACTER_SET_NAME = WIN1257 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 60
+RDB$CHARACTER_SET_NAME = KOI8R (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 63
+RDB$CHARACTER_SET_NAME = KOI8U (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 64
+RDB$CHARACTER_SET_NAME = WIN1258 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 65
+RDB$CHARACTER_SET_NAME = TIS620 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 66
+RDB$CHARACTER_SET_NAME = GBK (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 67
+RDB$CHARACTER_SET_NAME = CP943C (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 68
+RDB$CHARACTER_SET_NAME = GB18030 (Charset Id = 4 Codepage = 65001)
+RDB$CHARACTER_SET_ID = 69
+
+Metadata
+SQLType =SQL_LONG
+sub type = 0
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = ROWID
+Alias Name = ROWID
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+
+SQLType =SQL_LONG
+sub type = 2
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = FIXEDPOINT
+Alias Name = FIXEDPOINT
+Field Name = FIXEDPOINT
+Scale = -2
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_DOUBLE
+sub type = 0
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = FLOATINGPOINT
+Alias Name = FLOATINGPOINT
+Field Name = FLOATINGPOINT
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+SQLType =SQL_VARYING
+sub type = 4
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = TITLE
+Alias Name = TITLE
+Field Name = TITLE
+Scale = 0
+Charset id = 4
+Nullable
+Size = 128
+
+SQLType =SQL_BLOB
+sub type = 1
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = BLOBDATA
+Alias Name = BLOBDATA
+Field Name = BLOBDATA
+Scale = 4
+Charset id = 0
+Nullable
+Size = 8
+
+Blob Meta Data
+SQL SubType =1
+Table = TESTDATA
+Column = BLOBDATA
+CharSetID = 0
+Segment Size = 32000
+
+
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_VARYING
+sub type = 4
+Field Name = TITLE
+Scale = 0
+Charset id = 4
+Nullable
+Size = 128
+
+SQLType =SQL_LONG
+sub type = 2
+Field Name = FP
+Scale = -2
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_DOUBLE
+sub type = 0
+Field Name = DP
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+ROWID = 1
+FIXEDPOINT = 20.28
+FLOATINGPOINT = 3.14
+TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
+BLOBDATA = NULL
+
+SQL Params
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = 
+Scale = 4
+Charset id = 0
+Nullable
+Size = 8
+
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+ROWID = 1
+FIXEDPOINT = 20.28
+FLOATINGPOINT = 3.14
+TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
+BLOBDATA (Charset Id = 0 Codepage = 0)
+
+To be or not to be-that is the question:
+Whether 'tis nobler in the mind to suffer
+The slings and arrows of outrageous fortune,
+Or to take arms against a sea of troubles,
+And, by opposing, end them. To die, to sleep-
+No more-and by a sleep to say we end
+The heartache and the thousand natural shocks
+That flesh is heir to-'tis a consummation
+Devoutly to be wished. To die, to sleep-
+To sleep, perchance to dream. Aye, there's the rub,
+For in that sleep of death what dreams may come,
+When we have shuffled off this mortal coil,
+Must give us pause. There's the respect
+That makes calamity of so long life.
+For who would bear the whips and scorns of time,
+Th' oppressor's wrong, the proud man's contumely, 
+The pangs of despised love, the law’s delay, 
+The insolence of office, and the spurns
+That patient merit of the unworthy takes,
+When he himself might his quietus make
+With a bare bodkin? Who would fardels bear, 
+To grunt and sweat under a weary life,
+But that the dread of something after death,
+The undiscovered country from whose bourn
+No traveler returns, puzzles the will
+And makes us rather bear those ills we have
+Than fly to others that we know not of?
+Thus conscience does make cowards of us all,
+And thus the native hue of resolution
+Is sicklied o'er with the pale cast of thought,
+And enterprises of great pitch and moment, 
+With this regard their currents turn awry, 
+And lose the name of action.-Soft you now,
+The fair Ophelia.-Nymph, in thy orisons
+Be all my sins remembered
+
+
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_VARYING
+sub type = 4
+Field Name = TITLE
+Scale = 0
+Charset id = 4
+Nullable
+Size = 128
+
+SQLType =SQL_LONG
+sub type = 2
+Field Name = FP
+Scale = -2
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_DOUBLE
+sub type = 0
+Field Name = DP
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+ROWID = 1
+FIXEDPOINT = 20.28
+FLOATINGPOINT = 3.14
+TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
+BLOBDATA (Charset Id = 0 Codepage = 0)
+
+To be or not to be-that is the question:
+Whether 'tis nobler in the mind to suffer
+The slings and arrows of outrageous fortune,
+Or to take arms against a sea of troubles,
+And, by opposing, end them. To die, to sleep-
+No more-and by a sleep to say we end
+The heartache and the thousand natural shocks
+That flesh is heir to-'tis a consummation
+Devoutly to be wished. To die, to sleep-
+To sleep, perchance to dream. Aye, there's the rub,
+For in that sleep of death what dreams may come,
+When we have shuffled off this mortal coil,
+Must give us pause. There's the respect
+That makes calamity of so long life.
+For who would bear the whips and scorns of time,
+Th' oppressor's wrong, the proud man's contumely, 
+The pangs of despised love, the law’s delay, 
+The insolence of office, and the spurns
+That patient merit of the unworthy takes,
+When he himself might his quietus make
+With a bare bodkin? Who would fardels bear, 
+To grunt and sweat under a weary life,
+But that the dread of something after death,
+The undiscovered country from whose bourn
+No traveler returns, puzzles the will
+And makes us rather bear those ills we have
+Than fly to others that we know not of?
+Thus conscience does make cowards of us all,
+And thus the native hue of resolution
+Is sicklied o'er with the pale cast of thought,
+And enterprises of great pitch and moment, 
+With this regard their currents turn awry, 
+And lose the name of action.-Soft you now,
+The fair Ophelia.-Nymph, in thy orisons
+Be all my sins remembered
+
+ROWID = 2
+FIXEDPOINT = NULL
+FLOATINGPOINT = NULL
+TITLE = Blob Test ©€ (Charset Id = 4 Codepage = 65001)
+BLOBDATA (Charset Id = 0 Codepage = 0)
+
+To be or not to be-that is the question:
+Whether 'tis nobler in the mind to suffer
+The slings and arrows of outrageous fortune,
+Or to take arms against a sea of troubles,
+And, by opposing, end them. To die, to sleep-
+No more-and by a sleep to say we end
+The heartache and the thousand natural shocks
+That flesh is heir to-'tis a consummation
+Devoutly to be wished. To die, to sleep-
+To sleep, perchance to dream. Aye, there's the rub,
+For in that sleep of death what dreams may come,
+When we have shuffled off this mortal coil,
+Must give us pause. There's the respect
+That makes calamity of so long life.
+For who would bear the whips and scorns of time,
+Th' oppressor's wrong, the proud man's contumely, 
+The pangs of despised love, the law’s delay, 
+The insolence of office, and the spurns
+That patient merit of the unworthy takes,
+When he himself might his quietus make
+With a bare bodkin? Who would fardels bear, 
+To grunt and sweat under a weary life,
+But that the dread of something after death,
+The undiscovered country from whose bourn
+No traveler returns, puzzles the will
+And makes us rather bear those ills we have
+Than fly to others that we know not of?
+Thus conscience does make cowards of us all,
+And thus the native hue of resolution
+Is sicklied o'er with the pale cast of thought,
+And enterprises of great pitch and moment, 
+With this regard their currents turn awry, 
+And lose the name of action.-Soft you now,
+The fair Ophelia.-Nymph, in thy orisons
+Be all my sins remembered
+
+
+Test text blob optimisation - short text followed by long
+Params after prepare
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = 
+Scale = 4
+Charset id = 0
+Nullable
+Size = 8
+
+Params after setting values
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+Value = 3
+
+SQLType =SQL_TEXT
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 43
+Value = The Quick Brown Fox Jumps over the Lazy Dog
+
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+Value = 4
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+Value = O Romeo, Romeo, wherefore art thou Romeo? Deny thy father and refuse thy name. Or if thou wilt not, be but sworn my love And I’ll no longer be a Capulet.‘Tis but thy name that is my enemy: Thou art thyself, though not a Montague. What’s Montague? It is nor hand nor foot Nor arm nor face nor any other part Belonging to a man. O be some other name. What’s in a name? That which we call a rose By any other name would smell as sweet; So Romeo would, were he not Romeo call’d, Retain that dear perfection which he owes Without that title. Romeo, doff thy name ,And for that name, which is no part of thee, Take all myself.
+
+Text Blob Optimisation Results
+ROWID = 3
+FIXEDPOINT = NULL
+FLOATINGPOINT = NULL
+TITLE = NULL
+BLOBDATA (Charset Id = 0 Codepage = 0)
+
+The Quick Brown Fox Jumps over the Lazy Dog
+ROWID = 4
+FIXEDPOINT = NULL
+FLOATINGPOINT = NULL
+TITLE = NULL
+BLOBDATA (Charset Id = 0 Codepage = 0)
+
+O Romeo, Romeo, wherefore art thou Romeo? Deny thy father and refuse thy name. Or if thou wilt not, be but sworn my love And I’ll no longer be a Capulet.‘Tis but thy name that is my enemy: Thou art thyself, though not a Montague. What’s Montague? It is nor hand nor foot Nor arm nor face nor any other part Belonging to a man. O be some other name. What’s in a name? That which we call a rose By any other name would smell as sweet; So Romeo would, were he not Romeo call’d, Retain that dear perfection which he owes Without that title. Romeo, doff thy name ,And for that name, which is no part of thee, Take all myself.
+
+Testing Blob as stored proc parameter
+Metadata
+SQLType =SQL_BLOB
+sub type = 1
+Table = TESTPROC
+Owner = SYSDBA
+Column Name = BLOBDATA
+Alias Name = BLOBDATA
+Field Name = BLOBDATA
+Scale = 4
+Charset id = 0
+Nullable
+Size = 8
+
+Blob Meta Data
+SQL SubType =1
+Table = TESTPROC
+Column = BLOBDATA
+CharSetID = 0
+Segment Size = 32000
+
+
+BLOBDATA = NULL
+
+
+------------------------------------------------------
+Running Test 7: Create and read back an Array
+Skipping test - arrays are not supported by this provider
+
+
+------------------------------------------------------
+Running Test 8: Create and read back an Array with 2 dimensions
+Skipping test - arrays are not supported by this provider
+
+
+------------------------------------------------------
+Running Test 9: Database Information tests
+Database ID = n FB = dbpath SN = hostname
+Pages =nnnn
+Base Level = 13,3,0,
+Implementation = implementation codes
+Reserved = 0
+ODS minor = 0
+ODS major = 14
+Page Size = 8192
+Version = 1: server version string
+Database is Read/Write
+Database Created: yyyy/mm/dd hh:mm:ss
+Pages Used = nnnn
+Pages Free = nnnn
+Server Memory = nnnn
+Forced Writes  = 1
+Max Memory  = nnnn
+Num Buffers  = 2048
+Sweep Interval  = 20000
+Logged in Users: SYSDBA,
+Active Transaction Count = 0
+Fetches  = nnnn
+Writes  = nnnn
+Reads  = nnnn
+Page Writes  = nnnn
+Record Version Removals Operation Counts
+
+Deletes Operation Counts
+
+Expunge Count Operation Counts
+
+Insert Count Operation Counts
+
+Purge Count Countites Operation Counts
+
+Indexed Reads Count Operation Counts
+Table ID = 6
+Count = nnnn
+Table ID = 9
+Count = nnnn
+Table ID = 11
+Count = nnnn
+Table ID = 18
+Count = nnnn
+Table ID = 28
+Count = nnnn
+Table ID = 29
+Count = nnnn
+Table ID = 31
+Count = nnnn
+Table ID = 56
+Count = nnnn
+
+Sequential Table Scans Operation Counts
+Table ID = 0
+Count = nnnn
+Table ID = 1
+Count = nnnn
+Table ID = 4
+Count = nnnn
+Table ID = 6
+Count = nnnn
+Table ID = 11
+Count = nnnn
+Table ID = 29
+Count = nnnn
+Table ID = 56
+Count = nnnn
+
+Update Count Operation Counts
+
+Page Size = 8192
+
+
+------------------------------------------------------
+Running Test 10: Event Handling
+Skipping test - events are not supported by this provider
+
+
+------------------------------------------------------
+Running Test 11: Services API
+
+
+------------------------------------------------------
+Running Test 12: Character Sets
+Transliteration Tests
+Default System Code Page = 65001
+Actual System Code Page = 65001
+Input String = WIN1252 Characters ÖÄÜöäüß, Character Set = 65001 Hex Values:
+57 49 4E 31 32 35 32 20 43 68 61 72 61 63 74 65 72 73 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
+Code Page = 1252
+57 49 4E 31 32 35 32 20 43 68 61 72 61 63 74 65 72 73 20 D6 C4 DC F6 E4 FC DF 
+Back to UTF8
+Code Page = 65001
+WIN1252 Characters ÖÄÜöäüß
+57 49 4E 31 32 35 32 20 43 68 61 72 61 63 74 65 72 73 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
+ANSI(1252) to ANSI(1251) Test
+Input String = Я Écoute moi, Character Set = 65001 Hex Values:
+D0 AF 20 C3 89 63 6F 75 74 65 20 6D 6F 69 
+After conversion to 1251
+Code Page = 1251
+DF 20 3F 63 6F 75 74 65 20 6D 6F 69 
+Now Transliterate to WIN1252
+Code Page = 1252
+3F 20 3F 63 6F 75 74 65 20 6D 6F 69 
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_VARYING
+sub type = 4
+Field Name = TITLE
+Scale = 0
+Charset id = 4
+Nullable
+Size = 128
+
+SQLType =SQL_VARYING
+sub type = 4
+Field Name = NOTES
+Scale = 0
+Charset id = 4
+Nullable
+Size = 256
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = BLOBDATA
+Scale = 4
+Charset id = 0
+Nullable
+Size = 8
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = BLOBDATA2
+Scale = 4
+Charset id = 0
+Nullable
+Size = 8
+
+SQLType =SQL_VARYING
+sub type = 1
+Field Name = INCLEAR
+Scale = 0
+Charset id = 1
+Nullable
+Size = 16
+
+SQLType =SQL_TEXT
+sub type = 4
+Field Name = FIXEDWIDTH
+Scale = 0
+Charset id = 4
+Nullable
+Size = 16
+
+Show Param Values
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+Value = 1
+
+SQLType =SQL_TEXT
+sub type = 0
+Field Name = TITLE
+Scale = 0
+Charset id = 4
+Nullable
+Size = 128
+Value = Blob Test ©€                    
+
+SQLType =SQL_TEXT
+sub type = 0
+Field Name = NOTES
+Scale = 0
+Charset id = 4
+Nullable
+Size = 256
+Value = Écoute moi                                                      
+
+SQLType =SQL_TEXT
+sub type = 0
+Field Name = BLOBDATA
+Scale = 0
+Charset id = 0
+Nullable
+Size = 50
+Value = Some German Special Characters like ÖÄÜöäüß
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = BLOBDATA2
+Scale = 4
+Charset id = 0
+Nullable
+Size = 8
+Value = Some German Special Characters like ÖÄÜöäüß
+
+SQLType =SQL_TEXT
+sub type = 0
+Field Name = INCLEAR
+Scale = 0
+Charset id = 1
+Nullable
+Size = 16
+1 54 65 73 74 D C3 20 20 20 20 20 20 20 20 20 
+
+SQLType =SQL_TEXT
+sub type = 4
+Field Name = FIXEDWIDTH
+Scale = 0
+Charset id = 4
+Nullable
+Size = 16
+Value = É   
+
+Connection Character Set UTF8
+
+Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
+Exception returned: Engine Code: 335544517
+"PUBLIC"."CHARSETTEST"
+-Some German Special Characters like ÖÄÜöäüß
+-At procedure "PUBLIC"."DOEXCEPTION" line: 1, col: 39
+Connection Character Set NONE
+ROWID = 1
+TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage = 65001)
+NOTES = C9 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 1045 Codepage = 65535)
+BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 0 Codepage = 0)
+BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 0 Codepage = 0)
+INCLEAR = 1 54 65 73 74 D C3 20 20 20 20 20 20 20 20 20  (Charset Id = 1 Codepage = 65535)
+FIXEDWIDTH = C3 89  (Charset Id = 4 Codepage = 65001)
+
+Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
+Exception returned: Engine Code: 335544517
+"PUBLIC"."CHARSETTEST"
+-Some German Special Characters like ÖÄÜöäüß
+-At procedure "PUBLIC"."DOEXCEPTION" line: 1, col: 39
+Connection Character Set WIN1252
+ROWID = 1
+TITLE = 42 6C 6F 62 20 54 65 73 74 20 A9 80  (Charset Id = 53 Codepage = 1252)
+NOTES = C9 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 53 Codepage = 1252)
+BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 0 Codepage = 0)
+BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 0 Codepage = 0)
+INCLEAR = 1 54 65 73 74 D C3 20 20 20 20 20 20 20 20 20  (Charset Id = 1 Codepage = 65535)
+FIXEDWIDTH = C9  (Charset Id = 53 Codepage = 1252)
+
+Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
+Exception returned: Engine Code: 335544517
+"PUBLIC"."CHARSETTEST"
+-Some German Special Characters like �������
+-At procedure "PUBLIC"."DOEXCEPTION" line: 1, col: 39
+Recreate Database with WIN1252 as the connection character set
+Query Database with UTF8, NONE and WIN1252 connections
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_VARYING
+sub type = 4
+Field Name = TITLE
+Scale = 0
+Charset id = 4
+Nullable
+Size = 128
+
+SQLType =SQL_VARYING
+sub type = 4
+Field Name = NOTES
+Scale = 0
+Charset id = 4
+Nullable
+Size = 256
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = BLOBDATA
+Scale = 4
+Charset id = 0
+Nullable
+Size = 8
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = BLOBDATA2
+Scale = 4
+Charset id = 0
+Nullable
+Size = 8
+
+SQLType =SQL_VARYING
+sub type = 1
+Field Name = INCLEAR
+Scale = 0
+Charset id = 1
+Nullable
+Size = 16
+
+SQLType =SQL_TEXT
+sub type = 4
+Field Name = FIXEDWIDTH
+Scale = 0
+Charset id = 4
+Nullable
+Size = 16
+
+Show Param Values
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+Value = 1
+
+SQLType =SQL_TEXT
+sub type = 0
+Field Name = TITLE
+Scale = 0
+Charset id = 4
+Nullable
+Size = 128
+Value = Blob Test ©€                    
+
+SQLType =SQL_TEXT
+sub type = 0
+Field Name = NOTES
+Scale = 0
+Charset id = 4
+Nullable
+Size = 256
+Value = Écoute moi                                                      
+
+SQLType =SQL_TEXT
+sub type = 0
+Field Name = BLOBDATA
+Scale = 0
+Charset id = 0
+Nullable
+Size = 50
+Value = Some German Special Characters like ÖÄÜöäüß
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = BLOBDATA2
+Scale = 4
+Charset id = 0
+Nullable
+Size = 8
+Value = Some German Special Characters like ÖÄÜöäüß
+
+SQLType =SQL_TEXT
+sub type = 0
+Field Name = INCLEAR
+Scale = 0
+Charset id = 1
+Nullable
+Size = 16
+1 54 65 73 74 D C3 20 20 20 20 20 20 20 20 20 
+
+SQLType =SQL_TEXT
+sub type = 4
+Field Name = FIXEDWIDTH
+Scale = 0
+Charset id = 4
+Nullable
+Size = 16
+Value = É   
+
+Connection Character Set UTF8
+
+Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
+Exception returned: Engine Code: 335544517
+"PUBLIC"."CHARSETTEST"
+-Some German Special Characters like ÖÄÜöäüß
+-At procedure "PUBLIC"."DOEXCEPTION" line: 1, col: 39
+Connection Character Set NONE
+ROWID = 1
+TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage = 65001)
+NOTES = C9 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 1045 Codepage = 65535)
+BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 0 Codepage = 0)
+BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 0 Codepage = 0)
+INCLEAR = 1 54 65 73 74 D C3 20 20 20 20 20 20 20 20 20  (Charset Id = 1 Codepage = 65535)
+FIXEDWIDTH = C3 89  (Charset Id = 4 Codepage = 65001)
+
+Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
+Exception returned: Engine Code: 335544517
+"PUBLIC"."CHARSETTEST"
+-Some German Special Characters like ÖÄÜöäüß
+-At procedure "PUBLIC"."DOEXCEPTION" line: 1, col: 39
+Connection Character Set WIN1252
+ROWID = 1
+TITLE = 42 6C 6F 62 20 54 65 73 74 20 A9 80  (Charset Id = 53 Codepage = 1252)
+NOTES = C9 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 53 Codepage = 1252)
+BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 0 Codepage = 0)
+BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 0 Codepage = 0)
+INCLEAR = 1 54 65 73 74 D C3 20 20 20 20 20 20 20 20 20  (Charset Id = 1 Codepage = 65535)
+FIXEDWIDTH = C9  (Charset Id = 53 Codepage = 1252)
+
+Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
+Exception returned: Engine Code: 335544517
+"PUBLIC"."CHARSETTEST"
+-Some German Special Characters like �������
+-At procedure "PUBLIC"."DOEXCEPTION" line: 1, col: 39
+
+
+------------------------------------------------------
+Running Test 13: Transaction over two databases
+Init Database 1
+ROWID = 1
+TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage = 65001)
+NOTES = C3 89 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 4 Codepage = 65001)
+BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 0 Codepage = 0)
+BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 0 Codepage = 0)
+INCLEAR = 1 54 65 73 74 D C3 20 20 20 20 20 20 20 20 20  (Charset Id = 1 Codepage = 65535)
+
+Init Database 2
+ROWID = 1
+TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage = 65001)
+NOTES = C3 89 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 4 Codepage = 65001)
+BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 0 Codepage = 0)
+BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 0 Codepage = 0)
+INCLEAR = 1 54 65 73 74 D C3 20 20 20 20 20 20 20 20 20  (Charset Id = 1 Codepage = 65535)
+
+Skipping test - multi database transactions are not supported by this provider
+
+
+------------------------------------------------------
+Running Test 14: Non select procedures
+Default Character set Name = NONE
+Metadata
+SQLType =SQL_LONG
+sub type = 0
+Table = SHOWDATA
+Owner = SYSDBA
+Column Name = ROWID
+Alias Name = ROWID
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_VARYING
+sub type = 0
+Table = SHOWDATA
+Owner = SYSDBA
+Column Name = TITLE
+Alias Name = TITLE
+Field Name = TITLE
+Scale = 0
+Charset id = 0
+Nullable
+Size = 32
+
+ROWID = 1
+TITLE = Testing
+
+Repeat with a different execute transaction
+
+ROWID = 1
+TITLE = Testing
+
+Repeat with a original transaction
+
+ROWID = 1
+TITLE = Testing
+
+
+------------------------------------------------------
+Running Test 15: Blob Handling and BPBs
+
+Testdata
+
+ROWID = 1
+TITLE = Blob Test (Charset Id = 4 Codepage = 65001)
+BLOBDATA = (blob), Length = 92514
+
+ROWID = 2
+TITLE = Blob Test with binary string (Charset Id = 4 Codepage = 65001)
+BLOBDATA = (blob), Length = 13
+0 9 A C9 63 6F 75 74 65 20 6D 6F 69 
+
+Testdata 2
+
+ROWID = 1
+TITLE = Blob Test (Charset Id = 4 Codepage = 65001)
+BLOBDATA (Charset Id = 0 Codepage = 0)
+
+Écoute moi
+
+
+
+------------------------------------------------------
+Running Test 16: Error handling
+Invalid Database Name Test
+Error Handled: Engine Code: 335544344
+open
+-Malformed Name
+-No such file or directory
+Invalid User Name Test
+Error Handled: Engine Code: 335544472
+Firebird Error Code: 335544472
+Invalid password Test
+Error Handled: Engine Code: 335544721
+Unsupported authentication plugin "Legacy_Auth"
+Invalid Prepare SQL Test
+Error Handled: Engine Code: 335544569
+"UNKNOWN_DATE"
+Invalid Open Cursor SQL Test
+Error Handled: Engine Code: 335544569
+"X"
+Transaction not started Test
+Error Handled: Transaction is not active
+Invalid Param SQL Type Test
+Error Handled: Field "EMP_NO" not found
+Case sensitive Param SQL  Test
+Error Handled: Field "EMP_NO" not found
+Stale Reference Check
+First test correct usage
+COUNTER = 42
+
+New Transaction before param set
+COUNTER = 42
+
+New Transaction before Open Cursor
+COUNTER = 42
+
+Stop Stale Reference Checks
+New Transaction before param set
+COUNTER = 42
+
+New Transaction before Open Cursor
+COUNTER = 42
+
+
+
+------------------------------------------------------
+Running Test 17: Date/Time tests and Firebird 4 extensions
+ FBVersion = Firebird wire protocol version 17, Srp256 authentication, ChaCha64 wire encryption
+Has Local TZ DB = FALSE
+
+Testdata
+
+Metadata
+SQLType =SQL_LONG
+sub type = 0
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = ROWID
+Alias Name = ROWID
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+
+SQLType =SQL_TYPE_DATE
+sub type = 0
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = DATECOL
+Alias Name = DATECOL
+Field Name = DATECOL
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_TYPE_TIME
+sub type = 0
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = TIMECOL
+Alias Name = TIMECOL
+Field Name = TIMECOL
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_TIMESTAMP
+sub type = 0
+Table = TESTDATA
+Owner = SYSDBA
+Column Name = TIMESTAMPCOL
+Alias Name = TIMESTAMPCOL
+Field Name = TIMESTAMPCOL
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+ROWID = 1
+DATECOL = 2019/04/01
+TIMECOL = 11:31:05.0001
+TIMESTAMPCOL = 2016/02/29 22:02:35.0001
+ROWID = 2
+DATECOL = 1939/09/03
+TIMECOL = 15:40:00.0002
+TIMESTAMPCOL = 1918/11/11 11:11:00.0000
+ROWID = 3
+DATECOL = 1066/10/14
+TIMECOL = 23:59:59.9994
+TIMESTAMPCOL = 1918/11/11 11:11:00.0000
+ROWID = 4
+DATECOL = 1815/06/18
+TIMECOL = 00:01:40.1115
+TIMESTAMPCOL = 1945/05/08 22:10:00.0010
+
+
+Testdata - second pass
+
+1, 01/4/2019, 11:31:05, 29/2/2016 22:02:35
+2, 03/9/1939, 15:40:00.000, 11/11/1918 11:11:00
+3, 14/10/1066, 23:59:59.999, 11/11/1918 11:11:00
+4, 18/6/1815, 00:01:40.112, 08/5/1945 22:10:00
+Sys Time = 1945, 5, 8, 2, 22, 10, 0, 1
+Skipping Firebird 4 and later test part - time zone services are not supported by this provider
+
+
+------------------------------------------------------
+Running Test 18: Firebird 4 Decfloat extensions
+ FBVersion = Firebird wire protocol version 17, Srp256 authentication, ChaCha64 wire encryption
+
+FB4 Testdata_DECFloat
+
+Metadata
+SQLType =SQL_LONG
+sub type = 0
+Table = FB4TESTDATA_DECFLOAT
+Owner = SYSDBA
+Column Name = ROWID
+Alias Name = ROWID
+Field Name = ROWID
+Scale = 0
+Charset id = 0
+Not Null
+Size = 4
+
+SQLType =SQL_DEC16
+sub type = 0
+Table = FB4TESTDATA_DECFLOAT
+Owner = SYSDBA
+Column Name = FLOAT16
+Alias Name = FLOAT16
+Field Name = FLOAT16
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+SQLType =SQL_DEC34
+sub type = 0
+Table = FB4TESTDATA_DECFLOAT
+Owner = SYSDBA
+Column Name = FLOAT34
+Alias Name = FLOAT34
+Field Name = FLOAT34
+Scale = 0
+Charset id = 0
+Nullable
+Size = 16
+
+SQLType =SQL_INT128
+sub type = 1
+Table = FB4TESTDATA_DECFLOAT
+Owner = SYSDBA
+Column Name = BIGNUMBER
+Alias Name = BIGNUMBER
+Field Name = BIGNUMBER
+Scale = -6
+Charset id = 0
+Nullable
+Size = 16
+
+SQLType =SQL_INT128
+sub type = 1
+Table = FB4TESTDATA_DECFLOAT
+Owner = SYSDBA
+Column Name = BIGGERNUMBER
+Alias Name = BIGGERNUMBER
+Field Name = BIGGERNUMBER
+Scale = -4
+Charset id = 0
+Nullable
+Size = 16
+
+SQLType =SQL_INT128
+sub type = 0
+Table = FB4TESTDATA_DECFLOAT
+Owner = SYSDBA
+Column Name = BIGINTEGER
+Alias Name = BIGINTEGER
+Field Name = BIGINTEGER
+Scale = 0
+Charset id = 0
+Nullable
+Size = 16
+
+RowID = 1
+Float16 = 64000000000.01
+  Precision = 13
+  Sign = 0
+  Special = 0
+  Places = 2
+  Digits = 64 00 00 00 00 00 10 
+Float34 = 123456789123456789.12345678
+  Precision = 26
+  Sign = 0
+  Special = 0
+  Places = 8
+  Digits = 12 34 56 78 91 23 45 67 89 12 34 56 78 
+BigNumber = 
+  Precision = 0
+  Sign = 0
+  Special = 0
+  Places = 0
+  Digits = 
+BigInteger = 
+  Precision = 0
+  Sign = 0
+  Special = 0
+  Places = 0
+  Digits = 
+
+RowID = 2
+Float16 = -64000000000.01
+  Precision = 13
+  Sign = 1
+  Special = 0
+  Places = 2
+  Digits = 64 00 00 00 00 00 10 
+Float34 = -123456789123456789.12345678
+  Precision = 26
+  Sign = 1
+  Special = 0
+  Places = 8
+  Digits = 12 34 56 78 91 23 45 67 89 12 34 56 78 
+BigNumber = 
+  Precision = 0
+  Sign = 0
+  Special = 0
+  Places = 0
+  Digits = 
+BigInteger = Null
+
+RowID = 3
+Float16 = 64100000000.011
+  Precision = 14
+  Sign = 0
+  Special = 0
+  Places = 3
+  Digits = 64 10 00 00 00 00 11 
+Float34 = 12345678912.1200
+  Precision = 15
+  Sign = 0
+  Special = 0
+  Places = 4
+  Digits = 12 34 56 78 91 21 20 00 
+BigNumber = 
+  Precision = 0
+  Sign = 0
+  Special = 0
+  Places = 0
+  Digits = 
+BiggerNumber = 
+  Precision = 0
+  Sign = 0
+  Special = 0
+  Places = 0
+  Digits = 
+BigInteger = Null
+
+RowID = 4
+Float16 = 0
+  Precision = 0
+  Sign = 0
+  Special = 0
+  Places = 0
+  Digits = 
+Float34 = -1
+  Precision = 1
+  Sign = 1
+  Special = 0
+  Places = 0
+  Digits = 10 
+BigNumber = 
+  Precision = 0
+  Sign = 0
+  Special = 0
+  Places = 0
+  Digits = 
+BiggerNumber = 
+  Precision = 0
+  Sign = 0
+  Special = 0
+  Places = 0
+  Digits = 
+BigInteger = Null
+
+Skipping array test - arrays are not supported by this provider
+
+
+------------------------------------------------------
+Running Test 19: Batch Update and Insert Queries
+Opening inet://localhost/employee
+Skipping test for Firebird 4 and later
+
+
+------------------------------------------------------
+Running Test 20: Stress Test IBatch interface
+ FBVersion = Firebird wire protocol version 17, Srp256 authentication, ChaCha64 wire encryption
+Skipping test - batch mode is not supported by this provider
+
+
+------------------------------------------------------
+Running Test 21: Exercise setting and getting of numeric data types
+1234.567 parsed to 1234567 scale = -3
+As Float =  1.2345670000000000E+003
+-765.4321 parsed to -7654321 scale = -4
+As Float = -7.6543209999999999E+002
+0.1 parsed to 1 scale = -1
+As Float =  1.0000000000000001E-001
+0.01 parsed to 1 scale = -2
+As Float =  1.0000000000000000E-002
++123 parsed to 123 scale = 0
+As Float =  1.2300000000000000E+002
+1.23456E308 parsed to 123456 scale = 303
+As Float =  1.2345600000000001E+308
+-1.2e-02 parsed to -12 scale = -3
+As Float = -1.2000000000000000E-002
+10. parsed to 10 scale = 0
+As Float =  1.0000000000000000E+001
+.12 parsed to 12 scale = -2
+As Float =  1.2000000000000000E-001
+0.12 parsed to 12 scale = -2
+As Float =  1.2000000000000000E-001
+Parsing of 1.2E1.2 failed
+Parsing of 1,000 failed
+Parsing of 1e1e1 failed
+Parsing of 1.2+3 failed
+Validating Numeric Interface - IFBNumeric
+Value from Currency = 9999.1235
+Raw Value = 99991235 Scale = -4
+Value from Currency(rescaled) = 9999.12
+Raw Value = 999912 Scale = -2
+Value from Double = 9999.12345678
+Raw Value = 999912345678 Scale = -8
+Value from Integer = 9223372036854775807
+Raw Value = 9223372036854775807 Scale = 0
+Value from string = 9223372036854775807
+Raw Value = 9223372036854775807 Scale = 0
+Value from string = 9999.12345678
+Raw Value = 999912345678 Scale = -8
+Value from string = -0.12
+Raw Value = -12 Scale = -3
+Value from BCD = 9999.12345678
+Raw Value = 999912345678 Scale = -8
+Value from Raw Data = 9999123.456780
+Raw Value = 9999123456780 Scale = -6
+Numeric Operations
+Add 2.23 + 24.12345 = 26.35345
+Add Double 2.23 + 24.12645 = 26.35645
+Add integer 2.23 + 2412345 = 2412347.23
+Subtract 2.23 - 24.12345 = -21.89345
+Subtract Double 24.12645 - 2.23 = -21.89645
+Subtract integer 24123.45 - 223 = -23900.45
+Multiply 2.23 * 24.12345 = 53.7952935
+Multiply Double 24.12645 * 2.23 = 53.8019835
+Multiply integer 241.2345 * 223 = 53795.2935
+Divide 24.12345 / 2.23 = 10.81769
+Divide Double 2.23 / 24.12645 = 0.09
+Divide integer 241.2345 / 223 = 1.0818
+Compare 2.23, -24.12345 = 1
+Compare integer 2.23, 3 = -1
+Compare Double 2.23, 2.23 = 0
+Negate 24.12345 = -24.12345
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_INT64
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+SQLType =SQL_INT64
+sub type = 1
+Field Name = 
+Scale = -4
+Charset id = 0
+Nullable
+Size = 8
+
+SQLType =SQL_DOUBLE
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+SQLType =SQL_INT64
+sub type = 1
+Field Name = 
+Scale = -6
+Charset id = 0
+Nullable
+Size = 8
+
+Expected Error - String overflow. String Length 5 exceeds permitted maximum (4)
+Expected Error - Engine Code: 335544334
+#x01#x00#x00#x00
+Test Numeric Type
+ROWID = 1
+ITYPE = 101
+I64TYPE = 9223372036854775807
+CURRTYPE = 10,000.12340000
+DTYPE = 9,999.12345678
+FIXEDPOINT = 1,234,567,890.12345700
+ROWID = 2
+ITYPE = -32457
+I64TYPE = -9223372036854775808
+CURRTYPE = 1,000,001.12000000
+DTYPE = 1.7E308
+FIXEDPOINT = -1,234,567,890.12345700
+ROWID = 3
+ITYPE = 0
+I64TYPE = 0
+CURRTYPE = .00000000
+DTYPE = .00000000
+FIXEDPOINT = .00000000
+ROWID = 4
+ITYPE = 1
+I64TYPE = 10
+CURRTYPE = .02300000
+DTYPE = .00110000
+FIXEDPOINT = 233.45600000
+ROWID = 7
+ITYPE = 1
+I64TYPE = 1234567
+CURRTYPE = .02300000
+DTYPE = .00110000
+FIXEDPOINT = 1,234.25000000
+
+
+
+------------------------------------------------------
+Running Test 22: Journalling
+Start Journaling. Session ID = 0
+1234.567 parsed to 1234567 scale = -3
+As Float =  1.2345670000000000E+003
+-765.4321 parsed to -7654321 scale = -4
+As Float = -7.6543209999999999E+002
+0.1 parsed to 1 scale = -1
+As Float =  1.0000000000000001E-001
+0.01 parsed to 1 scale = -2
+As Float =  1.0000000000000000E-002
++123 parsed to 123 scale = 0
+As Float =  1.2300000000000000E+002
+1.23456E308 parsed to 123456 scale = 303
+As Float =  1.2345600000000001E+308
+-1.2e-02 parsed to -12 scale = -3
+As Float = -1.2000000000000000E-002
+10. parsed to 10 scale = 0
+As Float =  1.0000000000000000E+001
+.12 parsed to 12 scale = -2
+As Float =  1.2000000000000000E-001
+0.12 parsed to 12 scale = -2
+As Float =  1.2000000000000000E-001
+Parsing of 1.2E1.2 failed
+Parsing of 1,000 failed
+Parsing of 1e1e1 failed
+Parsing of 1.2+3 failed
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_INT64
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+SQLType =SQL_INT64
+sub type = 1
+Field Name = 
+Scale = -4
+Charset id = 0
+Nullable
+Size = 8
+
+SQLType =SQL_DOUBLE
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+SQLType =SQL_INT64
+sub type = 1
+Field Name = 
+Scale = -6
+Charset id = 0
+Nullable
+Size = 8
+
+
+Text Tests
+SQL Params
+SQLType =SQL_LONG
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 4
+
+SQLType =SQL_VARYING
+sub type = 0
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 256
+
+SQLType =SQL_BLOB
+sub type = 1
+Field Name = 
+Scale = 0
+Charset id = 0
+Nullable
+Size = 8
+
+
+Binary Blob Tests
+
+Array Test
+Skipping array test - arrays are not supported by this provider
+ROWID = 1
+ITYPE = 101
+I64TYPE = 9223372036854775807
+CURRTYPE = 10,000.12340000
+DTYPE = 9,999.12345678
+FIXEDPOINT = 1,234,567,890.12345700
+STR = NULL
+TEXTBLOB = NULL
+OTHERBLOB = NULL
+MYARRAY = NULL
+ROWID = 2
+ITYPE = -32457
+I64TYPE = -9223372036854775808
+CURRTYPE = 1,000,001.12000000
+DTYPE = 1.7E308
+FIXEDPOINT = -1,234,567,890.12345700
+STR = NULL
+TEXTBLOB = NULL
+OTHERBLOB = NULL
+MYARRAY = NULL
+ROWID = 4
+ITYPE = 1
+I64TYPE = 10
+CURRTYPE = .02300000
+DTYPE = .00110000
+FIXEDPOINT = 233.45600000
+STR = NULL
+TEXTBLOB = NULL
+OTHERBLOB = NULL
+MYARRAY = NULL
+
+Journal Table
+IBX$SESSIONID = 1
+IBX$TRANSACTIONID = 9
+IBX$OLDTRANSACTIONID = NULL
+IBX$USER = SYSDBA
+IBX$CREATED = yyyy/mm/dd hh:mm:ss.zzzz
+IBX$SESSIONID = 1
+IBX$TRANSACTIONID = 11
+IBX$OLDTRANSACTIONID = 10
+IBX$USER = SYSDBA
+IBX$CREATED = yyyy/mm/dd hh:mm:ss.zzzz
+
+Journal Entries
+Journal Entry = jeTransStart(Transaction Start)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 3
+Session ID = 1
+Transaction ID = nnnn
+Transaction Name = "Transaction_29_1"
+TPB: Item Count = 3
+  isc_tpb_write
+  isc_tpb_nowait
+  isc_tpb_concurrency
+
+Default Completion = TACommit
+
+Journal Entry = jeQuery(Query)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 3
+Session ID = 1
+Transaction ID = nnnn
+Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(1,101,9223372036854775807,10000.1234,9999.12345678,1234567890.12346)
+
+Journal Entry = jeQuery(Query)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 3
+Session ID = 1
+Transaction ID = nnnn
+Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(2,-32457,-9223372036854775808,1000001.12,1.7E308,-1234567890.12346)
+
+Journal Entry = jeTransCommitRet(Commit Retaining)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 3
+Session ID = 1
+Transaction ID = nnnn
+Old TransactionID = 9
+
+Journal Entry = jeQuery(Query)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 3
+Session ID = 1
+Transaction ID = nnnn
+Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(3,0,0,0,0,0)
+
+Journal Entry = jeTransRollbackRet(Rollback Retaining)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 3
+Session ID = 1
+Transaction ID = nnnn
+Old TransactionID = 10
+
+Journal Entry = jeQuery(Query)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 3
+Session ID = 1
+Transaction ID = nnnn
+Query = Insert into TestData(RowID,iType,i64Type,CurrType,dType,FixedPoint) Values(4,1,10,0.023,0.0011,233.456)
+
+Journal Entry = jeTransStart(Transaction Start)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 3
+Session ID = 1
+Transaction ID = nnnn
+Transaction Name = "Transaction_29_2"
+TPB: Item Count = 3
+  isc_tpb_write
+  isc_tpb_nowait
+  isc_tpb_concurrency
+
+Default Completion = TARollback
+
+Journal Entry = jeTransCommit(Commit)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 3
+Session ID = 1
+Transaction ID = nnnn
+
+Journal Entry = jeQuery(Query)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 3
+Session ID = 1
+Transaction ID = nnnn
+Query = Insert into TestData(RowID, Str, TextBlob) Values(5,'It''s the quick brown fox jumps over the lazy dog                                                                                                                                                                                                                ','To be or not to be-that is the question:
+Whether ''tis nobler in the mind to suffer
+The slings and arrows of outrageous fortune,
+Or to take arms against a sea of troubles,
+And, by opposing, end them. To die, to sleep-
+No more-and by a sleep to say we end
+The heartache and the thousand natural shocks
+That flesh is heir to-''tis a consummation
+Devoutly to be wished. To die, to sleep-
+To sleep, perchance to dream. Aye, there''s the rub,
+For in that sleep of death what dreams may come,
+When we have shuffled off this mortal coil,
+Must give us pause. There''s the respect
+That makes calamity of so long life.
+For who would bear the whips and scorns of time,
+Th'' oppressor''s wrong, the proud man''s contumely, 
+The pangs of despised love, the law’s delay, 
+The insolence of office, and the spurns
+That patient merit of the unworthy takes,
+When he himself might his quietus make
+With a bare bodkin? Who would fardels bear, 
+To grunt and sweat under a weary life,
+But that the dread of something after death,
+The undiscovered country from whose bourn
+No traveler returns, puzzles the will
+And makes us rather bear those ills we have
+Than fly to others that we know not of?
+Thus conscience does make cowards of us all,
+And thus the native hue of resolution
+Is sicklied o''er with the pale cast of thought,
+And enterprises of great pitch and moment, 
+With this regard their currents turn awry, 
+And lose the name of action.-Soft you now,
+The fair Ophelia.-Nymph, in thy orisons
+Be all my sins remembered
+')
+
+Journal Entry = jeQuery(Query)
+Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
+Attachment ID = 3
+Session ID = 1
+Transaction ID = nnnn
+Query = Insert into TestData(RowID,OtherBlob) Values (6,<blob subtype="0">
+FFD8FFE000104A46494600010101004800480000FFE11E0545786966000049492A00080000000C00
+0E010200200000009E0000000F01020014000000BE0000001001020008000000D200000012010300
+01000000010000001A01050001000000DA000000
+</blob>
+)
+
+
+
+------------------------------------------------------
+Test Suite Ends
