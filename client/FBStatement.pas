@@ -81,6 +81,7 @@ type
     FAfterStats: TPerfStatistics;
     FCaseSensitiveParams: boolean;
     FBatchRowLimit: integer;
+    FStatementTimeout: cardinal;  {milliseconds, 0 = none}
     procedure CheckChangeBatchRowLimit; virtual;
     procedure CheckHandle; virtual; abstract;
     procedure CheckTransaction(aTransaction: ITransaction);
@@ -152,6 +153,10 @@ type
     {Stale Reference Check}
     procedure SetStaleReferenceChecks(Enable:boolean); {default true}
     function GetStaleReferenceChecks: boolean;
+    {Statement timeout - the base implementation rejects a non zero
+     timeout; providers that can honour one override}
+    procedure SetStatementTimeout(aMilliseconds: cardinal); virtual;
+    function GetStatementTimeout: cardinal;
   public
     property ChangeSeqNo: integer read FChangeSeqNo;
     property SQLParams: ISQLParams read GetSQLParams;
@@ -416,6 +421,18 @@ end;
 function TFBStatement.GetStaleReferenceChecks: boolean;
 begin
   Result := FStaleReferenceChecks;
+end;
+
+procedure TFBStatement.SetStatementTimeout(aMilliseconds: cardinal);
+begin
+  if aMilliseconds <> 0 then
+    IBError(ibxeNotSupported,[nil]);
+  FStatementTimeout := 0;
+end;
+
+function TFBStatement.GetStatementTimeout: cardinal;
+begin
+  Result := FStatementTimeout;
 end;
 
 function TFBStatement.OpenCursor(aTransaction: ITransaction): IResultSet;

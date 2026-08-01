@@ -205,6 +205,9 @@ begin
     if (FirebirdAPI.GetClientMajor < 4) or (Attachment.GetODSMajorVersion < 13) then
       writeln(OutFile,'Skipping test for Firebird 4 and later')
     else
+    if not Attachment.HasBatchMode then
+      writeln(OutFile,'Skipping test - batch mode is not supported by this provider')
+    else
     begin
       Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable);
       try
