@@ -115,6 +115,8 @@ Working and covered by the test suite:
 * information calls for the database, transaction, statement and blob
 * events: `IEvents` with asynchronous and synchronous waits, delivered on
   the `op_connect_request` auxiliary connection by a listener thread
+* array columns: `IArray` and `IArrayMetaData` over `op_get_slice` and
+  `op_put_slice`, with the SDL generator shared with the 3.0 provider
 
 Deliberately not implemented yet. These raise `ibxeNotSupported` rather
 than failing in a confusing way:
@@ -122,7 +124,6 @@ than failing in a confusing way:
 | Feature | What it needs |
 |---|---|
 | Services | `op_service_*` exist in `FBWireProtocol`; the `IServiceManager` wrapper does not |
-| Array columns | `op_get_slice` / `op_put_slice` and SDL descriptions |
 | Batches | the protocol 16 `op_batch_*` family |
 | Scrollable cursors | `op_fetch_scroll`, protocol 18 |
 | Multi database transactions | a two phase commit coordinator |
@@ -446,12 +447,12 @@ apply `runtest.sh`'s normalisation, and commit it.
 
 | Server | WireCrypt | Negotiated | Encryption | Result |
 |---|---|---|---|---|
-| 6.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 89 tests, 0 failures |
-| 6.0.0 (local, LI-T6.0.0.2076) | Required | 17 | `ChaCha64` | 89 tests, 0 failures |
-| 5.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 89 tests, 0 failures |
-| 5.0.4 (local container) | Enabled, Required | 17 | `ChaCha64` | 89 tests, 0 failures |
-| 4.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 89 tests, 0 failures |
-| 3.0 (CI container) | Enabled | 15 | `Arc4` | 89 tests, 0 failures |
+| 6.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 112 tests, 0 failures |
+| 6.0.0 (local, LI-T6.0.0.2076) | Required | 17 | `ChaCha64` | 112 tests, 0 failures |
+| 5.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 112 tests, 0 failures |
+| 5.0.4 (local container) | Enabled, Required | 17 | `ChaCha64` | 112 tests, 0 failures |
+| 4.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 112 tests, 0 failures |
+| 3.0 (CI container) | Enabled | 15 | `Arc4` | 112 tests, 0 failures |
 | no server | — | — | — | 36 tests, live sections skipped |
 
 Firebird 3 settles on protocol 15 with Arc4: it is the newest protocol that
@@ -511,7 +512,7 @@ machinery that already exists to support it.
 | 2 | Events — **done** | `FBWireEvents` implements `IEvents` over the auxiliary connection | 13 |
 | 3 | Services | the `IServiceManager` wrapper over exchanges that already exist | 13 |
 | 4 | A Delphi transport | a `TFBWireTransport` over Winsock and Posix sockets | — |
-| 5 | Array columns | `op_get_slice`, `op_put_slice`, SDL generation | 13 |
+| 5 | Array columns — **done** | `FBWireArray` over `op_get_slice`/`op_put_slice`, shared SDL generator | 13 |
 | 6 | Statement timeouts and cancellation | `op_cancel`, the P16 timeout field | 12, 16 |
 | 7 | Scrollable cursors | `op_fetch_scroll` | 18 |
 | 8 | The batch API | the `op_batch_*` family | 16 |
@@ -531,7 +532,7 @@ fails on any difference from the reference log. Tests for features the
 provider does not implement skip with a fixed message, guarded by the new
 `IAttachment.HasArraySupport` and `HasEventSupport` capability checks
 alongside the existing ones; those skip lines shrinking is how milestones
-2 and 5 will show up in the log.
+2 and 5 showed up in the log.
 
 The prediction that this was the cheapest large win was right for the
 wrong reasons: the suite immediately found seven real defects that
@@ -632,13 +633,34 @@ over `Winapi.WinSock2` and `Posix.SysSocket` behind the same four methods
 (`ConnectTo`, `Disconnect`, `ReadBytes`, `WriteBytes`), after which the
 units can be added to `fbintf.dpk`. The cipher and XDR layers do not change.
 
-### 5. Array columns
+### 5. Array columns — done
 
-`op_get_slice` and `op_put_slice` carry an SDL (slice description language)
-program describing the slice wanted. `FBArray` already implements the whole
-element addressing, conversion and metadata layer, and `FB30Array` shows
-how the SDL block is built. The wire provider needs to generate the SDL and
-marshal the slice buffer.
+Implemented by `client/wire/FBWireArray.pas`. `TFBWireArray` subclasses
+`FBArray`'s element addressing and conversion layer and implements the two
+provider methods over `TFBWireConnection.GetSlice`/`PutSlice`
+(`op_get_slice`/`op_put_slice`); `TFBWireArrayMetaData` fills the array
+descriptor with the same system table query the 3.0 provider uses, run
+over the wire like any other statement. The SDL generator moved from
+`FB30Array` into the shared, compiler neutral `FBSDL` unit, so both
+providers emit identical SDL.
+
+The slice data on the wire is XDR, element by element, following
+`xdr_slice`/`xdr_datum` driven by the SDL element descriptor
+(`FBWireMessage.XDREncodeSlice`/`XDRDecodeSlice`). Two things the sources
+reveal that the isc API hides: the slice length fields count in the
+*descriptor's* element length units (`sdl_desc` in `src/common/sdl.cpp`),
+which for a `CHAR(n)` element is `n` while fbintf's client buffer spaces
+elements at `n+1`; and `blr_varying` maps to a **`dtype_cstring`**
+element - a count followed by the bytes - which is exactly the zero
+terminated layout `FBArray` keeps in its buffer, so the "curious" varchar
+array format the IBPP comment in `FBArray.pas` describes is simply the
+SDL's view of the column.
+
+Finding the arrays also flushed out a provider wide leak: the wire
+statement's `TWireSQLDataArea` never freed its column variables (the 3.0
+provider frees them in `FreeXSQLDA`), which pinned every blob, array and
+SDL block a statement had touched. Fixed with a destructor and a
+`SetCount` that frees on shrink.
 
 ### 6. Statement timeouts and cancellation
 

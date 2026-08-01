@@ -65,6 +65,7 @@ type
     FOwner: TWireSQLDataArea;
     FBlob: IBlob;
     FBlobMetaData: IBlobMetaData;
+    FArrayMetaData: IArrayMetaData;
     function GetVar: PWireSQLVarRec;
     function BufferBase: PByte;
   protected
@@ -116,6 +117,7 @@ type
     procedure SetCount(aValue: integer); override;
   public
     constructor Create(aStatement: TFBWireStatement; aIsInput: boolean);
+    destructor Destroy; override;
     {rebuilds the column list from a describe response}
     procedure Bind(const aFormat: TWireMessageFormat; aBufferSize: cardinal);
     function IsInputDataArea: boolean; override;
@@ -202,7 +204,7 @@ type
 implementation
 
 uses FBMessages, IBErrorCodes, FBWireAttachment, FBWireTransaction, FBWireBlob,
-  FBWireConst, IBUtils;
+  FBWireArray, FBWireConst, IBUtils;
 
 { TWireSQLVarData }
 
@@ -424,8 +426,20 @@ end;
 
 function TWireSQLVarData.GetAsArray: IArray;
 begin
-  IBError(ibxeNotSupported,[nil]);
-  Result := nil;
+  if GetSQLType <> SQL_ARRAY then
+    IBError(ibxeInvalidDataConversion,[nil]);
+
+  if GetIsNull then
+    Result := nil
+  else
+  begin
+    if FArrayIntf = nil then
+      FArrayIntf := TFBWireArray.Create(
+                      FStatement.GetAttachment as TFBWireAttachment,
+                      FStatement.GetTransaction as TObject as TFBWireTransaction,
+                      GetArrayMetaData,PISC_QUAD(GetSQLData)^);
+    Result := FArrayIntf;
+  end;
 end;
 
 function TWireSQLVarData.GetAsBlob(Blob_ID: TISC_QUAD; BPB: IBPB): IBlob;
@@ -450,8 +464,14 @@ end;
 
 function TWireSQLVarData.GetArrayMetaData: IArrayMetaData;
 begin
-  IBError(ibxeNotSupported,[nil]);
-  Result := nil;
+  if GetSQLType <> SQL_ARRAY then
+    IBError(ibxeInvalidDataConversion,[nil]);
+  if FArrayMetaData = nil then
+    FArrayMetaData := TFBWireArrayMetaData.Create(
+      (FStatement.GetAttachment as TFBWireAttachment) as IAttachment,
+      FStatement.GetTransaction,
+      GetRelationName,GetFieldName);
+  Result := FArrayMetaData;
 end;
 
 function TWireSQLVarData.GetBlobMetaData: IBlobMetaData;
@@ -482,6 +502,12 @@ begin
   FIsInput := aIsInput;
 end;
 
+destructor TWireSQLDataArea.Destroy;
+begin
+  SetCount(0);
+  inherited Destroy;
+end;
+
 function TWireSQLDataArea.GetStatement: IStatement;
 begin
   Result := FStatement;
@@ -501,6 +527,8 @@ procedure TWireSQLDataArea.SetCount(aValue: integer);
 var i, oldCount: integer;
 begin
   oldCount := Length(FColumnList);
+  for i := aValue to oldCount - 1 do
+    FColumnList[i].Free;
   SetLength(FColumnList,aValue);
   for i := oldCount to aValue - 1 do
     FColumnList[i] := TWireSQLVarData.Create(self,i);
@@ -984,8 +1012,11 @@ end;
 
 function TFBWireStatement.CreateArray(column: TColumnMetaData): IArray;
 begin
-  IBError(ibxeNotSupported,[nil]);
-  Result := nil;
+  if assigned(column) and (column.SQLType <> SQL_ARRAY) then
+    IBError(ibxeNotAnArray,[nil]);
+  Result := TFBWireArray.Create(GetAttachment as TFBWireAttachment,
+              GetTransaction as TObject as TFBWireTransaction,
+              column.GetArrayMetaData);
 end;
 
 function TFBWireStatement.GetPlan: AnsiString;

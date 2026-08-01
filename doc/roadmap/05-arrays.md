@@ -1,7 +1,37 @@
 # Design: Array columns over the wire protocol
 
-Roadmap milestone 5 (`doc/WireProtocol.md`). This document is the
-implementation plan; no code changes are included.
+Roadmap milestone 5 (`doc/WireProtocol.md`).
+
+**Status: implemented** — `client/wire/FBWireArray.pas`, with the SDL
+generator moved to the shared `client/FBSDL.pas` as the refactoring note
+below proposed, a WireTest arrays section (integer, varchar and a two
+dimensional double array, element by element read back in a new
+transaction), and the suite's array tests (7, 8, 17, 18, 19, 22) as
+acceptance. The design below held, with these findings:
+
+* The protocol detail the plan called "the same bytes" is subtler than
+  the isc API shows: `blr_varying` maps to a **`dtype_cstring`** element
+  descriptor (`sdl_desc` in `src/common/sdl.cpp`), so a varchar element
+  travels as a count plus bytes and sits in the buffer as a zero
+  terminated string in an `n+2` chunk - exactly the layout `FBArray`
+  already keeps, explaining the "curious" format the IBPP comment
+  describes. No `vary` struct is involved anywhere.
+* The `p_slc_length`/`lstr_length` fields count in descriptor length
+  units (`n` for `CHAR(n)`, `n+2` for `VARCHAR(n)`, the type's size
+  otherwise), not in wire bytes: each element is then XDR encoded
+  exactly as row values are. `FBWireMessage` gained
+  `XDREncodeSlice`/`XDRDecodeSlice` for this, keyed by blr dtype.
+* fbintf spaces `CHAR(n)` array elements at `n+1` bytes while the wire
+  (and the engine) use `n`; the wire codec converts between the strides,
+  so multi element char arrays work over the wire.
+* Hunting a leak of the new SDL blocks uncovered a provider wide bug
+  present since milestone 1: `TWireSQLDataArea` never freed its column
+  variables (the 3.0 provider frees them in `FreeXSQLDA`), so every
+  statement leaked its variables and pinned whatever blobs and arrays
+  they referenced. Fixed with a destructor and a `SetCount` that frees
+  on shrink; Test 4's leak report dropped from 273 unfreed blocks to 33
+  and Test 7's from 834 to 229, the remainder shared with the fbclient
+  providers.
 
 ## Goal
 
