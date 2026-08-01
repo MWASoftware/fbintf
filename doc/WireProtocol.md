@@ -113,13 +113,14 @@ Working and covered by the test suite:
   `DECFLOAT(34)`, `BOOLEAN` and the time zone types
 * blobs: create, open, segmented read and write, close, cancel
 * information calls for the database, transaction, statement and blob
+* events: `IEvents` with asynchronous and synchronous waits, delivered on
+  the `op_connect_request` auxiliary connection by a listener thread
 
 Deliberately not implemented yet. These raise `ibxeNotSupported` rather
 than failing in a confusing way:
 
 | Feature | What it needs |
 |---|---|
-| Events | the auxiliary connection from `op_connect_request` plus a listener thread |
 | Services | `op_service_*` exist in `FBWireProtocol`; the `IServiceManager` wrapper does not |
 | Array columns | `op_get_slice` / `op_put_slice` and SDL descriptions |
 | Batches | the protocol 16 `op_batch_*` family |
@@ -445,12 +446,12 @@ apply `runtest.sh`'s normalisation, and commit it.
 
 | Server | WireCrypt | Negotiated | Encryption | Result |
 |---|---|---|---|---|
-| 6.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 81 tests, 0 failures |
-| 6.0.0 (local, LI-T6.0.0.2076) | Required | 17 | `ChaCha64` | 81 tests, 0 failures |
-| 5.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 81 tests, 0 failures |
-| 5.0.4 (local container) | Enabled, Required | 17 | `ChaCha64` | 81 tests, 0 failures |
-| 4.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 81 tests, 0 failures |
-| 3.0 (CI container) | Enabled | 15 | `Arc4` | 81 tests, 0 failures |
+| 6.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 89 tests, 0 failures |
+| 6.0.0 (local, LI-T6.0.0.2076) | Required | 17 | `ChaCha64` | 89 tests, 0 failures |
+| 5.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 89 tests, 0 failures |
+| 5.0.4 (local container) | Enabled, Required | 17 | `ChaCha64` | 89 tests, 0 failures |
+| 4.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 89 tests, 0 failures |
+| 3.0 (CI container) | Enabled | 15 | `Arc4` | 89 tests, 0 failures |
 | no server | — | — | — | 36 tests, live sections skipped |
 
 Firebird 3 settles on protocol 15 with Arc4: it is the newest protocol that
@@ -507,7 +508,7 @@ machinery that already exists to support it.
 | # | Milestone | Needs | Protocol |
 |---|---|---|---|
 | 1 | Run the existing test suite against this provider — **done** | `testsuite -a wire` runs all twenty two programs | — |
-| 2 | Events | `op_connect_request`, a second socket, a listener thread | 13 |
+| 2 | Events — **done** | `FBWireEvents` implements `IEvents` over the auxiliary connection | 13 |
 | 3 | Services | the `IServiceManager` wrapper over exchanges that already exist | 13 |
 | 4 | A Delphi transport | a `TFBWireTransport` over Winsock and Posix sockets | — |
 | 5 | Array columns | `op_get_slice`, `op_put_slice`, SDL generation | 13 |
@@ -572,26 +573,43 @@ and the transport discards its session ciphers on disconnect so that the
 same connection object can reconnect (also found independently by the
 services milestone).
 
-### 2. Events
+### 2. Events — done
 
-The largest missing feature and the one users will notice. Firebird
-delivers events on a **second** connection: the client sends
-`op_connect_request` with `P_REQ_async`, the server answers with a
-`sockaddr` naming a port, and the client opens a second socket to it. Event
-notifications then arrive on that socket as `op_event` packets,
-asynchronously, while the main connection carries on.
+Implemented by `client/wire/FBWireEvents.pas`. One auxiliary connection
+and one listener thread per attachment, created on the first
+`GetEventHandler` call, serve all its `IEvents` instances; interest is
+registered with `op_que_events` on the main connection and notifications
+are dispatched by event id. `TFBEvents` supplied the event block, the
+count diffing and the callback dispatch exactly as anticipated; the wire
+side is the three exchanges plus the second transport.
 
-What exists already: `FBEvents.CreateEventBlock` builds the event block in
-exactly the form `op_que_events` carries, and `TFBEvents` implements the
-counting and the callback dispatch. What is needed is the auxiliary
-connection, a listener thread, and the three exchanges `op_que_events`,
-`op_event` and `op_cancel_events`. `TFBWireConnection` deliberately keeps
-its transport separate from its protocol logic so a second transport can be
-driven by a second thread without sharing buffers.
+Findings from the implementation, beyond the NAT point the plan already
+flagged (only the port of the returned address is usable - the client
+reuses the host it connected to):
 
-The one subtlety worth flagging: the address in the response is the address
-the **server** knows about, which behind NAT is not reachable. The stock
-client keeps the port and reuses the address it already connected to.
+* **Each `op_que_events` must carry a fresh event id.** An interest is
+  one shot, and re-arming under the same id is accepted by the server
+  but not honoured immediately: counts accumulated while nobody waited
+  were only delivered when the *next* event fired, one delivery late.
+  The stock client increments its id on every queue, and doing the same
+  made deferred delivery immediate.
+* The auxiliary connection carries no handshake, no authentication and
+  no encryption - the server associates it with the session by the
+  accept, and it only ever delivers `op_event` (and `op_dummy`) packets.
+* **The auxiliary port must be reachable.** By default the server opens
+  a random port for it, which a container that only publishes 3050, or a
+  firewall, silently blocks - the CI containers demonstrated this by
+  hanging in the connect. Set `RemoteAuxPort` in `firebird.conf` to pin
+  it and publish or allow that port; the CI workflow pins it to 3051.
+  This applies to any Firebird client, not just this one.
+* The event handler is called from the listener thread, exactly as the
+  2.5 provider calls its handler from an AST thread, so a handler must
+  not call back into the same attachment from that thread; `Synchronize`
+  or `Queue` the work first. The test suite's Test 10 shows the pattern.
+* One deliberate difference from the stock providers: events posted
+  while interest was cancelled are included in the counts of the next
+  wait (the stock bookkeeping can drop them). The wire reference log
+  records this in Test 10's final count.
 
 ### 3. Services
 

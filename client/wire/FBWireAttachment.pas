@@ -53,7 +53,9 @@ type
     FHost: AnsiString;
     FPort: integer;
     FRemoteDatabaseName: AnsiString;
+    FEventManager: TObject;  {TFBWireEventManager - typed in FBWireEvents}
     procedure ParseDatabaseName(const aDatabaseName: AnsiString);
+    procedure ShutdownEventManager;
     {opens the TCP connection, authenticates and returns the DPB to send
      with op_attach/op_create (the authentication proof is added to it)}
     function ConnectAndPrepareDPB: TBytes;
@@ -74,6 +76,8 @@ type
     property Connection: TFBWireConnection read FConnection;
     property Handle: integer read FHandle;
     property WireAPI: TFBWireClientAPI read FWireAPI;
+    property Host: AnsiString read FHost;
+    property Port: integer read FPort;
 
   public
     {IAttachment}
@@ -95,8 +99,9 @@ type
                 CaseSensitiveParams: boolean = false;
                 CursorName: AnsiString = ''): IStatement; override;
 
-    {Events - not implemented by this provider: they need the auxiliary
-     connection established with op_connect_request}
+    {Events - delivered on the auxiliary connection established with
+     op_connect_request. The connection and its listener thread are
+     created on the first call and shared by all IEvents instances.}
     function GetEventHandler(Events: TStrings): IEvents; override;
 
     {Blobs}
@@ -134,7 +139,7 @@ type
 implementation
 
 uses FBMessages, IBErrorCodes, IBUtils, FBWireTransaction, FBWireStatement,
-  FBWireBlob, FBWireStream;
+  FBWireBlob, FBWireStream, FBWireEvents;
 
 { TFBWireAttachment }
 
@@ -302,6 +307,7 @@ end;
 
 destructor TFBWireAttachment.Destroy;
 begin
+  ShutdownEventManager;
   inherited Destroy;
   if FConnection <> nil then
     FConnection.Free;
@@ -342,6 +348,7 @@ end;
 procedure TFBWireAttachment.Disconnect(Force: boolean);
 begin
   if not FIsConnected then Exit;
+  ShutdownEventManager;
   EndAllTransactions;
   try
     FConnection.DetachDatabase(FHandle);
@@ -368,6 +375,7 @@ end;
 procedure TFBWireAttachment.DropDatabase;
 begin
   CheckHandle;
+  ShutdownEventManager;
   EndAllTransactions;
   try
     FConnection.DropDatabase(FHandle);
@@ -424,10 +432,19 @@ end;
 
 function TFBWireAttachment.GetEventHandler(Events: TStrings): IEvents;
 begin
-  {events require a second TCP connection negotiated with
-   op_connect_request - not yet implemented}
-  IBError(ibxeNotSupported,[nil]);
-  Result := nil;
+  CheckHandle;
+  if FEventManager = nil then
+    FEventManager := TFBWireEventManager.Create(self);
+  Result := TFBWireEvents.Create(self,TFBWireEventManager(FEventManager),Events);
+end;
+
+procedure TFBWireAttachment.ShutdownEventManager;
+begin
+  if FEventManager <> nil then
+  begin
+    FEventManager.Free;
+    FEventManager := nil;
+  end;
 end;
 
 function TFBWireAttachment.CreateBlob(transaction: ITransaction;
@@ -545,9 +562,7 @@ end;
 
 function TFBWireAttachment.HasEventSupport: boolean;
 begin
-  {events need the op_connect_request auxiliary connection - not
-   implemented yet}
-  Result := false;
+  Result := true;
 end;
 
 function TFBWireAttachment.HasScollableCursors: boolean;
