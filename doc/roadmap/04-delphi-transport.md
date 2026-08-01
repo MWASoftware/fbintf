@@ -1,7 +1,19 @@
 # Design: A Delphi transport for the wire provider
 
-Roadmap milestone 4 (`doc/WireProtocol.md`). This document is the
-implementation plan; no code changes are included.
+Roadmap milestone 4 (`doc/WireProtocol.md`).
+
+**Status: written, unverified** — the Delphi branches exist in
+`FBWireStream.pas` (`Winapi.Winsock2` on Windows behind a one time
+`WSAStartup`, the `Posix.*` units elsewhere; `getaddrinfo` with an IPv4
+result preferred, `TCP_NODELAY`, `SO_RCVTIMEO`/`SO_SNDTIMEO` from
+`aTimeout`, `recv`/`send`, graceful `shutdown` in `Disconnect`) and the
+wire units are listed in `fbintf.dpk`/`fbintf.dproj`. Deviations from
+the plan below: wire compression (milestone 11, paszlib) stays FPC only
+— `EnableCompression` raises a clear error under Delphi — and the
+`WireTest` Delphi project file has not been created. **No Delphi
+toolchain exists on this host or in CI, so none of it has been compiled
+or run**; the verification section below is still the outstanding work,
+including the expected first-compile strictness pass.
 
 ## Goal
 
