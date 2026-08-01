@@ -55,12 +55,12 @@ container rows and locally for the others.
 
 | Server | WireCrypt | Negotiated | Encryption | Result |
 |---|---|---|---|---|
-| 6.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 89 tests, 0 failures |
-| 6.0.0 (local, LI-T6.0.0.2076) | Required | 17 | `ChaCha64` | 89 tests, 0 failures |
-| 5.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 89 tests, 0 failures |
-| 5.0.4 (local container) | Enabled, Required | 17 | `ChaCha64` | 89 tests, 0 failures |
-| 4.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 89 tests, 0 failures |
-| 3.0 (CI container) | Enabled | 15 | `Arc4` | 89 tests, 0 failures |
+| 6.0 (CI container) | Enabled, Required | 20 | `ChaCha64` | 178 tests, 0 failures |
+| 6.0.0 (local, LI-T6.0.0.2076) | Required | 20 | `ChaCha64` | 178 tests, 0 failures |
+| 5.0 (CI container) | Enabled, Required | 19 | `ChaCha64` | 178 tests, 0 failures |
+| 5.0.4 (local container) | Enabled, Required | 19 | `ChaCha64` | 178 tests, 0 failures |
+| 4.0 (CI container) | Enabled, Required | 17 | `ChaCha64` | 178 tests, 0 failures |
+| 3.0 (CI container) | Enabled | 15 | `Arc4` | 178 tests, 0 failures |
 | no server | — | — | — | 36 tests, live sections skipped |
 
 Firebird 3 settles on protocol 15 with Arc4: it is the newest protocol that
