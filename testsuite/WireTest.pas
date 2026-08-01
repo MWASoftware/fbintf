@@ -855,13 +855,15 @@ const
                  'begin n = 0; while (n < 200000000) do n = n + 1; suspend; end';
 
 procedure TestScrollableCursors;
+const TestTable = 'FBINTF_WIRE_SCROLL';
 var Tr: ITransaction;
     S: IStatement;
     RS: IResultSet;
+    i: integer;
 
-  function EmpNo: integer;
+  function ID: integer;
   begin
-    Result := RS.ByName('EMP_NO').AsInteger;
+    Result := RS.ByName('ID').AsInteger;
   end;
 
 begin
@@ -872,45 +874,84 @@ begin
     Exit;
   end;
   Tr := Attachment.StartTransaction([isc_tpb_read_committed,
-          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_read],taCommit);
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  try
+    Attachment.ExecImmediate(Tr,'drop table ' + TestTable);
+    Tr.Commit;
+    Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+            isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  except
+    {the table did not exist}
+    Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+            isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  end;
+  Attachment.ExecImmediate(Tr,'create table ' + TestTable +
+    ' (ID integer not null primary key)');
+  Tr.Commit;
+
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  S := Attachment.Prepare(Tr,'insert into ' + TestTable + ' (ID) values (?)');
+  for i := 1 to 10 do
+  begin
+    S.SQLParams[0].AsInteger := i;
+    S.Execute;
+  end;
+
   S := Attachment.Prepare(Tr,
-         'select EMP_NO from EMPLOYEE order by EMP_NO');
+         'select ID from ' + TestTable + ' order by ID');
   RS := S.OpenCursor(true);
   Check('scrollable statement reports stScrollable',
         stScrollable in S.GetFlags);
 
   Check('fetch next finds the first row',RS.FetchNext);
-  Check('first row is EMP_NO 2',EmpNo = 2,'got ' + IntToStr(EmpNo));
+  Check('first row is 1',ID = 1,'got ' + IntToStr(ID));
 
   Check('fetch last finds a row',RS.FetchLast);
-  Check('last row is EMP_NO 145',EmpNo = 145,'got ' + IntToStr(EmpNo));
+  Check('last row is 10',ID = 10,'got ' + IntToStr(ID));
 
   Check('fetch prior steps back',RS.FetchPrior);
-  Check('prior of last is EMP_NO 144',EmpNo = 144,'got ' + IntToStr(EmpNo));
+  Check('prior of last is 9',ID = 9,'got ' + IntToStr(ID));
 
   Check('fetch absolute 3 positions',RS.FetchAbsolute(3));
-  Check('third row is EMP_NO 5',EmpNo = 5,'got ' + IntToStr(EmpNo));
+  Check('third row is 3',ID = 3,'got ' + IntToStr(ID));
 
   Check('fetch relative -1 steps back',RS.FetchRelative(-1));
-  Check('second row is EMP_NO 4',EmpNo = 4,'got ' + IntToStr(EmpNo));
+  Check('second row is 2',ID = 2,'got ' + IntToStr(ID));
 
   Check('fetch first rewinds',RS.FetchFirst);
-  Check('first row again EMP_NO 2',EmpNo = 2,'got ' + IntToStr(EmpNo));
+  Check('first row again is 1',ID = 1,'got ' + IntToStr(ID));
 
   Check('fetch absolute beyond the end returns false',
         not RS.FetchAbsolute(1000));
   {and the cursor is still usable afterwards}
   Check('cursor survives the failed fetch',RS.FetchFirst);
-  Check('and still delivers EMP_NO 2',EmpNo = 2,'got ' + IntToStr(EmpNo));
+  Check('and still delivers row 1',ID = 1,'got ' + IntToStr(ID));
 
   {sequential fetch after scrolling continues from the cursor position}
   Check('fetch next after first',RS.FetchNext);
-  Check('second row is EMP_NO 4',EmpNo = 4,'got ' + IntToStr(EmpNo));
+  Check('second row is 2 again',ID = 2,'got ' + IntToStr(ID));
 
   RS.Close;
   RS := nil;
   S := nil;
   Tr.Commit;
+
+  {cleanup - see the note in TestProviderUpdates}
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  try
+    Attachment.ExecImmediate(Tr,'drop table ' + TestTable);
+    Tr.Commit;
+    writeln('  note  scroll test table dropped');
+  except
+    on E: Exception do
+    begin
+      Tr.Rollback;
+      writeln('  note  the server would not drop the scroll test table yet: ',
+              E.Message);
+    end;
+  end;
 end;
 
 type
