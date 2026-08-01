@@ -53,7 +53,9 @@ type
     FHost: AnsiString;
     FPort: integer;
     FRemoteDatabaseName: AnsiString;
+    FEventManager: TObject;  {TFBWireEventManager - typed in FBWireEvents}
     procedure ParseDatabaseName(const aDatabaseName: AnsiString);
+    procedure ShutdownEventManager;
     {opens the TCP connection, authenticates and returns the DPB to send
      with op_attach/op_create (the authentication proof is added to it)}
     function ConnectAndPrepareDPB: TBytes;
@@ -74,6 +76,8 @@ type
     property Connection: TFBWireConnection read FConnection;
     property Handle: integer read FHandle;
     property WireAPI: TFBWireClientAPI read FWireAPI;
+    property Host: AnsiString read FHost;
+    property Port: integer read FPort;
 
   public
     {IAttachment}
@@ -95,8 +99,9 @@ type
                 CaseSensitiveParams: boolean = false;
                 CursorName: AnsiString = ''): IStatement; override;
 
-    {Events - not implemented by this provider: they need the auxiliary
-     connection established with op_connect_request}
+    {Events - delivered on the auxiliary connection established with
+     op_connect_request. The connection and its listener thread are
+     created on the first call and shared by all IEvents instances.}
     function GetEventHandler(Events: TStrings): IEvents; override;
 
     {Blobs}
@@ -107,7 +112,7 @@ type
     function OpenBlob(transaction: ITransaction; BlobMetaData: IBlobMetaData;
                 BlobID: TISC_QUAD; BPB: IBPB = nil): IBlob; overload; override;
 
-    {Arrays - not implemented by this provider}
+    {Arrays}
     function OpenArray(transaction: ITransaction; ArrayMetaData: IArrayMetaData;
                 ArrayID: TISC_QUAD): IArray; overload; override;
     function CreateArray(transaction: ITransaction;
@@ -125,14 +130,19 @@ type
     function HasDecFloatSupport: boolean; override;
     function HasTimeZoneSupport: boolean; override;
     function HasBatchMode: boolean; override;
+    function HasArraySupport: boolean; override;
+    function HasEventSupport: boolean; override;
     function HasScollableCursors: boolean;
+    {op_cancel, sent out of band on the main connection - see
+     TFBWireConnection.SendCancel for the threading rules}
+    procedure CancelOperation(aKind: integer = fb_cancel_raise); override;
     procedure getFBVersion(version: TStrings);
   end;
 
 implementation
 
-uses FBMessages, IBErrorCodes, IBUtils, FBWireTransaction, FBWireStatement,
-  FBWireBlob, FBWireStream;
+uses FBMessages, IBUtils, FBWireTransaction, FBWireStatement,
+  FBWireBlob, FBWireArray, FBWireStream, FBWireEvents;
 
 { TFBWireAttachment }
 
@@ -165,46 +175,65 @@ end;
 
 function TFBWireAttachment.ConnectAndPrepareDPB: TBytes;
 var aUser, aPassword: AnsiString;
-    UserItem, PasswordItem, Item, NewItem: IDPBItem;
-    NewDPB: IDPB;
-    i: integer;
+    UserItem, PasswordItem: IDPBItem;
+    raw: TBytes;
+    i, itemLen, outLen: integer;
+
+  procedure AddClumplet(aTag: byte; const aValue: AnsiString);
+  var j: integer;
+  begin
+    Result[outLen] := aTag;
+    Result[outLen+1] := Length(aValue);
+    for j := 1 to Length(aValue) do
+      Result[outLen+1+j] := byte(aValue[j]);
+    Inc(outLen,2 + Length(aValue));
+  end;
+
 begin
   aUser := '';
   aPassword := '';
-  UserItem := DPB.Find(isc_dpb_user_name);
-  if UserItem <> nil then
-    aUser := UserItem.AsString;
-  PasswordItem := DPB.Find(isc_dpb_password);
-  if PasswordItem <> nil then
-    aPassword := PasswordItem.AsString;
+  if DPB <> nil then
+  begin
+    UserItem := DPB.Find(isc_dpb_user_name);
+    if UserItem <> nil then
+      aUser := UserItem.AsString;
+    PasswordItem := DPB.Find(isc_dpb_password);
+    if PasswordItem <> nil then
+      aPassword := PasswordItem.AsString;
+  end;
 
   FConnection.ConnectTo(FHost,FPort,FRemoteDatabaseName,aUser,aPassword);
 
   {The plain text password must not travel to the server: SRP has already
-   proved knowledge of it. Rebuild the DPB without the password, adding the
-   authentication proof where the server asked for it in the attach (the
-   op_accept_data flow).}
-  NewDPB := TDPB.Create(FWireAPI);
-  for i := 0 to DPB.Count - 1 do
+   proved knowledge of it. Copy the DPB clumplets verbatim - preserving
+   whatever encoding each item was built with - minus the password items,
+   adding the authentication proof where the server asked for it in the
+   attach (the op_accept_data flow).}
+  raw := ParamBlockToBytes(DPB);
+  SetLength(Result,Length(raw) + 1 +
+            Length(FConnection.AuthData) + Length(FConnection.AuthPluginName) + 4);
+  outLen := 0;
+  Result[outLen] := isc_dpb_version1;
+  Inc(outLen);
+  i := 1;  {skip the version byte of the source, when there is one}
+  while i + 1 < Length(raw) do
   begin
-    Item := DPB.Items[i];
-    if Item.getParamType in [isc_dpb_password,isc_dpb_password_enc] then
-      continue;
-    NewItem := NewDPB.Add(Item.getParamType);
-    if Item.getParamType in [isc_dpb_sql_dialect,isc_dpb_num_buffers,
-                             isc_dpb_dbkey_scope,isc_dpb_force_write,
-                             isc_dpb_no_reserve,isc_dpb_page_size] then
-      NewItem.SetAsInteger(Item.AsInteger)
-    else
-      NewItem.SetAsString(Item.AsString);
+    itemLen := raw[i+1];
+    if i + 2 + itemLen > Length(raw) then
+      break;
+    if not (raw[i] in [isc_dpb_password,isc_dpb_password_enc]) then
+    begin
+      Move(raw[i],Result[outLen],2 + itemLen);
+      Inc(outLen,2 + itemLen);
+    end;
+    Inc(i,2 + itemLen);
   end;
   if FConnection.AuthData <> '' then
   begin
-    NewDPB.Add(isc_dpb_specific_auth_data).AsString := FConnection.AuthData;
-    NewDPB.Add(isc_dpb_auth_plugin_name).AsString := FConnection.AuthPluginName;
+    AddClumplet(isc_dpb_specific_auth_data,FConnection.AuthData);
+    AddClumplet(isc_dpb_auth_plugin_name,FConnection.AuthPluginName);
   end;
-
-  Result := ParamBlockToBytes(NewDPB);
+  SetLength(Result,outLen);
 end;
 
 constructor TFBWireAttachment.Create(api: TFBWireClientAPI;
@@ -247,24 +276,41 @@ end;
 
 constructor TFBWireAttachment.CreateDatabase(api: TFBWireClientAPI;
   sql: AnsiString; aSQLDialect: integer; RaiseExceptionOnError: boolean);
+
+  {The stock providers pass the whole create statement to the client
+   library, which preparses the file spec out of it. Here that preparse
+   must be done locally: the file spec is the first quoted string after
+   CREATE DATABASE/SCHEMA.}
+  function ExtractCreateDBFileSpec(const aSQL: AnsiString): AnsiString;
+  var p1, p2: integer;
+  begin
+    Result := '';
+    p1 := Pos('''',aSQL);
+    if p1 = 0 then Exit;
+    p2 := p1 + 1;
+    while (p2 <= Length(aSQL)) and (aSQL[p2] <> '''') do
+      Inc(p2);
+    if p2 > Length(aSQL) then Exit;
+    Result := system.copy(aSQL,p1+1,p2-p1-1);
+  end;
+
 var aDPB: IDPB;
-    DatabaseName: AnsiString;
 begin
   {the DPB and the database name are derived from the create statement}
   aDPB := TDPB.Create(api);
-  DatabaseName := '';
-  {the base class parses the create statement into FDPB and FDatabaseName}
   inherited Create(api,'',aDPB,RaiseExceptionOnError);
+  {DPBFromCreateSQL fills the DPB from the USER/PASSWORD clauses}
   DPBFromCreateSQL(sql);
-  DatabaseName := FDatabaseName;
+  FDatabaseName := ExtractCreateDBFileSpec(sql);
   FWireAPI := api;
   FConnection := TFBWireConnection.Create;
-  ParseDatabaseName(DatabaseName);
+  ParseDatabaseName(FDatabaseName);
   CreateDatabaseFromDPB(RaiseExceptionOnError);
 end;
 
 destructor TFBWireAttachment.Destroy;
 begin
+  ShutdownEventManager;
   inherited Destroy;
   if FConnection <> nil then
     FConnection.Free;
@@ -305,6 +351,7 @@ end;
 procedure TFBWireAttachment.Disconnect(Force: boolean);
 begin
   if not FIsConnected then Exit;
+  ShutdownEventManager;
   EndAllTransactions;
   try
     FConnection.DetachDatabase(FHandle);
@@ -331,6 +378,7 @@ end;
 procedure TFBWireAttachment.DropDatabase;
 begin
   CheckHandle;
+  ShutdownEventManager;
   EndAllTransactions;
   try
     FConnection.DropDatabase(FHandle);
@@ -387,10 +435,19 @@ end;
 
 function TFBWireAttachment.GetEventHandler(Events: TStrings): IEvents;
 begin
-  {events require a second TCP connection negotiated with
-   op_connect_request - not yet implemented}
-  IBError(ibxeNotSupported,[nil]);
-  Result := nil;
+  CheckHandle;
+  if FEventManager = nil then
+    FEventManager := TFBWireEventManager.Create(self);
+  Result := TFBWireEvents.Create(self,TFBWireEventManager(FEventManager),Events);
+end;
+
+procedure TFBWireAttachment.ShutdownEventManager;
+begin
+  if FEventManager <> nil then
+  begin
+    FEventManager.Free;
+    FEventManager := nil;
+  end;
 end;
 
 function TFBWireAttachment.CreateBlob(transaction: ITransaction;
@@ -421,25 +478,25 @@ end;
 function TFBWireAttachment.OpenArray(transaction: ITransaction;
   ArrayMetaData: IArrayMetaData; ArrayID: TISC_QUAD): IArray;
 begin
-  {array slices need op_get_slice and an SDL description - not yet
-   implemented by this provider}
-  IBError(ibxeNotSupported,[nil]);
-  Result := nil;
+  CheckHandle;
+  Result := TFBWireArray.Create(self,transaction as TFBWireTransaction,
+                                ArrayMetaData,ArrayID);
 end;
 
 function TFBWireAttachment.CreateArray(transaction: ITransaction;
   ArrayMetaData: IArrayMetaData): IArray;
 begin
-  IBError(ibxeNotSupported,[nil]);
-  Result := nil;
+  CheckHandle;
+  Result := TFBWireArray.Create(self,transaction as TFBWireTransaction,
+                                ArrayMetaData);
 end;
 
 function TFBWireAttachment.CreateArrayMetaData(SQLType: cardinal;
   tableName: AnsiString; columnName: AnsiString; Scale: integer; size: cardinal;
   aCharSetID: cardinal; dimensions: cardinal; bounds: TArrayBounds): IArrayMetaData;
 begin
-  IBError(ibxeNotSupported,[nil]);
-  Result := nil;
+  Result := TFBWireArrayMetaData.Create(self,SQLType,tableName,ColumnName,
+                                        Scale,size,aCharSetID,dimensions,bounds);
 end;
 
 function TFBWireAttachment.GetBlobMetaData(Transaction: ITransaction;
@@ -447,15 +504,15 @@ function TFBWireAttachment.GetBlobMetaData(Transaction: ITransaction;
 begin
   CheckHandle;
   Result := TFBWireBlobMetaData.Create(self,Transaction as TFBWireTransaction,
-                                       tableName,columnName,0,0);
+                                       tableName,columnName,0,0,false);
 
 end;
 
 function TFBWireAttachment.GetArrayMetaData(Transaction: ITransaction;
   tableName, columnName: AnsiString): IArrayMetaData;
 begin
-  IBError(ibxeNotSupported,[nil]);
-  Result := nil;
+  CheckHandle;
+  Result := TFBWireArrayMetaData.Create(self,Transaction,tableName,columnName);
 end;
 
 function TFBWireAttachment.GetDBInfo(ReqBuffer: PByte; ReqBufLen: integer): IDBInformation;
@@ -496,13 +553,36 @@ end;
 
 function TFBWireAttachment.HasBatchMode: boolean;
 begin
-  {the batch operations of protocol 16 are not implemented yet}
-  Result := false;
+  {op_batch_create and friends need protocol 16}
+  Result := (FConnection <> nil) and
+            (FConnection.ProtocolVersion >= (PROTOCOL_VERSION16 and FB_PROTOCOL_MASK));
+end;
+
+function TFBWireAttachment.HasArraySupport: boolean;
+begin
+  Result := true;
+end;
+
+function TFBWireAttachment.HasEventSupport: boolean;
+begin
+  Result := true;
 end;
 
 function TFBWireAttachment.HasScollableCursors: boolean;
 begin
-  Result := false;
+  {op_fetch_scroll needs protocol 18}
+  Result := (FConnection <> nil) and
+            (FConnection.ProtocolVersion >= (PROTOCOL_VERSION18 and FB_PROTOCOL_MASK));
+end;
+
+procedure TFBWireAttachment.CancelOperation(aKind: integer);
+begin
+  CheckHandle;
+  try
+    FConnection.SendCancel(aKind);
+  except
+    on E: Exception do WireIBError(FWireAPI,E);
+  end;
 end;
 
 procedure TFBWireAttachment.getFBVersion(version: TStrings);

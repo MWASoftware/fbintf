@@ -26,8 +26,8 @@
 unit FBWireProtocol;
 
 { The wire protocol engine: connection handshake with protocol negotiation
-  (protocols 13..17, i.e. Firebird 3.0 up to and including Firebird 6
-  servers which negotiate down), Srp/Srp256 authentication, optional wire
+  (protocols 13..18, i.e. Firebird 3.0 up to and including Firebird 6;
+  older servers negotiate down), Srp/Srp256 authentication, optional wire
   encryption (Arc4, ChaCha, ChaCha64) and the request/response packet
   exchanges for attachments, transactions, DSQL statements, blobs,
   information calls and services.
@@ -54,8 +54,9 @@ uses
 
 const
   {highest protocol version this client implements. Firebird 3 accepts up
-   to 15, Firebird 4 up to 17, Firebird 5/6 negotiate down to 17.}
-  MaxSupportedProtocol = PROTOCOL_VERSION17;
+   to 15, Firebird 4 up to 17, Firebird 5 and 6 accept 18 (op_fetch_scroll
+   and the op_execute cursor flags word).}
+  MaxSupportedProtocol = PROTOCOL_VERSION18;
   INVALID_OBJECT = $FFFF;
 
   {key advertisement clumplet tags (see plugins/crypt in protocol.cpp)}
@@ -74,6 +75,13 @@ type
   end;
   TWireStatusVector = array of TWireStatusItem;
 
+const
+  {row states in a batch completion - IBatchCompletionState}
+  BATCH_EXECUTE_FAILED  = -1;
+  BATCH_SUCCESS_NO_INFO = -2;
+
+type
+
   { TWireCursorState: per cursor fetch bookkeeping.
 
     The server answers an op_fetch requesting N rows with a sequence of
@@ -89,6 +97,16 @@ type
     Rows: array of TBytes;  {decoded rows not yet consumed}
     NextRow: integer;
     EndOfCursor: boolean;
+  end;
+
+  { TWireBatchCS : decoded op_batch_cs - the batch completion state.
+    States[i] is the row's update count, or BATCH_EXECUTE_FAILED /
+    BATCH_SUCCESS_NO_INFO; StatusVectors[i] is non empty for rows whose
+    failure came with a status vector. }
+
+  TWireBatchCS = record
+    States: array of integer;
+    StatusVectors: array of TWireStatusVector;
   end;
 
   { TWireResponse : decoded op_response }
@@ -199,12 +217,18 @@ type
     function PrepareStatement(aTrHandle, aStmtHandle: integer;
                         aDialect: integer; const sql: AnsiString;
                         const aInfoItems: TBytes; aBufferLength: integer): TBytes;
+    {aTimeout is the statement timeout in milliseconds (0 = none), carried
+     in the p_sqldata_timeout field from protocol 16. aCursorFlags is the
+     protocol 18 cursor flags word - CURSOR_TYPE_SCROLLABLE requests a
+     scrollable cursor.}
     procedure ExecuteStatement(aStmtHandle, aTrHandle: integer;
-                        const aParamFormat: TWireMessageFormat; aParamBuffer: PByte);
+                        const aParamFormat: TWireMessageFormat; aParamBuffer: PByte;
+                        aTimeout: cardinal = 0; aCursorFlags: cardinal = 0);
     {op_execute2 for singleton results (execute procedure/returning)}
     procedure ExecuteStatement2(aStmtHandle, aTrHandle: integer;
                         const aParamFormat: TWireMessageFormat; aParamBuffer: PByte;
-                        const aOutFormat: TWireMessageFormat; aOutBuffer: PByte);
+                        const aOutFormat: TWireMessageFormat; aOutBuffer: PByte;
+                        aTimeout: cardinal = 0);
     {fetches the next row into aOutBuffer, requesting a new batch of
      aFetchCount rows from the server when needed. Returns false when the
      cursor is exhausted. aState must be zero initialised before the first
@@ -212,6 +236,15 @@ type
     function FetchRow(aStmtHandle: integer;
                         const aOutFormat: TWireMessageFormat; aOutBuffer: PByte;
                         aFetchCount: integer; var aState: TWireCursorState): boolean;
+    {op_fetch_scroll (protocol 18): a positioned fetch on a scrollable
+     cursor. Discards any read ahead rows in aState first - they describe
+     a cursor position the scroll abandons - and requests a single row:
+     the server disables prefetch for every direction except next/prior
+     anyway. Returns false when there is no row in that direction.}
+    function FetchRowScroll(aStmtHandle: integer;
+                        const aOutFormat: TWireMessageFormat; aOutBuffer: PByte;
+                        aDirection: integer; aPosition: integer;
+                        var aState: TWireCursorState): boolean;
     procedure FreeStatement(aStmtHandle: integer; aOption: integer);
     procedure SetCursorName(aStmtHandle: integer; const aName: AnsiString);
     procedure ExecImmediate(aTrHandle, aDbHandle: integer; aDialect: integer;
@@ -234,6 +267,27 @@ type
     procedure CloseBlob(aBlobHandle: integer);
     procedure CancelBlob(aBlobHandle: integer);
 
+    {--- array slices ---}
+    {op_get_slice: reads the slice of aArrayID into aBuffer as described
+     by aLayout. Returns the slice length reported by the server (in dsc
+     length units - see SliceElementDscLength).}
+    function GetSlice(aTrHandle: integer; aArrayID: Int64; const SDL: TBytes;
+                        const aLayout: TWireSliceLayout; aBuffer: PByte): integer;
+    {op_put_slice: writes the slice and returns the (possibly new) array id}
+    function PutSlice(aTrHandle: integer; aArrayID: Int64; const SDL: TBytes;
+                        const aLayout: TWireSliceLayout; aBuffer: PByte): Int64;
+
+    {--- events ---}
+    {op_connect_request with P_REQ_async: asks the server to open the
+     auxiliary port that delivers op_event packets. Returns the TCP port
+     number. Only the port of the returned address is usable: the address
+     itself is the server's own view of itself, which behind NAT is not
+     reachable, so the caller connects to the host it already knows (the
+     stock client does the same - see aux_connect in inet.cpp).}
+    function ConnectRequest(aDbHandle: integer): integer;
+    procedure QueEvents(aDbHandle: integer; const aEPB: TBytes; aEventID: integer);
+    procedure CancelEvents(aDbHandle, aEventID: integer);
+
     {--- services ---}
     function ServiceAttach(const aServiceName: AnsiString; SPB: TBytes): integer;
     procedure ServiceDetach(aSvcHandle: integer);
@@ -241,8 +295,38 @@ type
     function ServiceQuery(aSvcHandle: integer; const aSendItems, aRecvItems: TBytes;
                         aBufferLength: integer): TBytes;
 
+    {--- batches (protocol 16) ---}
+    {op_batch_create: opens a batch on the statement. aMsgLen is
+     EngineMessageLength(aFormat) - the server validates it against the
+     format it parses from the BLR - and aPB the IBatch parameter block
+     (a wide tagged clumplet buffer)}
+    procedure BatchCreate(aStmtHandle: integer;
+                        const aFormat: TWireMessageFormat; aMsgLen: cardinal;
+                        const aPB: TBytes);
+    {op_batch_msg: sends aRows messages, each encoded exactly as a row
+     message (xdr_packed_message is the regular message encoding)}
+    procedure BatchMsg(aStmtHandle: integer;
+                        const aFormat: TWireMessageFormat;
+                        const aRows: array of TBytes);
+    {op_batch_regblob: registers an existing blob id for use in batch
+     messages. The engine translates every non null, non zero blob id in
+     a batch message through its registration map - and consumes the
+     entry - so an id must be registered once for each row that carries
+     it (the 3.0 provider does the same through IBatch.registerBlob).}
+    procedure BatchRegBlob(aStmtHandle: integer; aExistingID, aBatchID: Int64);
+    {op_batch_exec: runs the batch and parses the op_batch_cs reply}
+    function BatchExec(aStmtHandle, aTrHandle: integer): TWireBatchCS;
+    procedure BatchRelease(aStmtHandle: integer);
+    procedure BatchCancel(aStmtHandle: integer);
+
     {--- misc ---}
     procedure Ping;
+    {op_cancel: sent out of band, typically from a different thread while
+     this connection's owner is blocked reading an operation's response.
+     There is no response packet: the cancelled operation itself fails
+     with isc_cancelled on the normal path. aKind is one of the
+     fb_cancel_* constants.}
+    procedure SendCancel(aKind: integer);
 
     property ProtocolVersion: cardinal read FProtocolVersion;
     {caps the highest protocol version offered to the server. Defaults to
@@ -260,6 +344,11 @@ type
     property Transport: TFBWireTransport read FTransport;
   end;
 
+{empties a cursor state, releasing the cached rows. Use this rather than
+ FillChar: the record holds a managed dynamic array which a FillChar
+ reset would leak.}
+procedure ResetCursorState(var aState: TWireCursorState);
+
 implementation
 
 uses IBErrorCodes;
@@ -275,6 +364,13 @@ const
   isc_arg_win32        = 17;
   isc_arg_warning      = 18;
   isc_arg_sql_state    = 19;
+
+procedure ResetCursorState(var aState: TWireCursorState);
+begin
+  SetLength(aState.Rows,0);
+  aState.NextRow := 0;
+  aState.EndOfCursor := false;
+end;
 
 { TWireResponse }
 
@@ -474,9 +570,9 @@ procedure TFBWireConnection.ConnectTo(const aHost: AnsiString; aPort: integer;
   const aDatabasePath, aUser, aPassword: AnsiString;
   aWireCrypt: TWireCryptOption; aTimeout: integer);
 const
-  OfferedProtocols: array[0..4] of cardinal = (
+  OfferedProtocols: array[0..5] of cardinal = (
     PROTOCOL_VERSION13, PROTOCOL_VERSION14, PROTOCOL_VERSION15,
-    PROTOCOL_VERSION16, PROTOCOL_VERSION17);
+    PROTOCOL_VERSION16, PROTOCOL_VERSION17, PROTOCOL_VERSION18);
 var i: integer;
     offered: integer;
 begin
@@ -1091,7 +1187,8 @@ begin
 end;
 
 procedure TFBWireConnection.ExecuteStatement(aStmtHandle, aTrHandle: integer;
-  const aParamFormat: TWireMessageFormat; aParamBuffer: PByte);
+  const aParamFormat: TWireMessageFormat; aParamBuffer: PByte;
+  aTimeout: cardinal; aCursorFlags: cardinal);
 var blr: TBytes;
 begin
   FXDR.WriteInt32(op_execute);
@@ -1112,14 +1209,17 @@ begin
     FXDR.WriteInt32(0);
   end;
   if FProtocolVersion >= (PROTOCOL_VERSION16 and FB_PROTOCOL_MASK) then
-    FXDR.WriteInt32(0);   {p_sqldata_timeout}
+    FXDR.WriteUInt32(aTimeout);   {p_sqldata_timeout}
+  if FProtocolVersion >= (PROTOCOL_VERSION18 and FB_PROTOCOL_MASK) then
+    FXDR.WriteUInt32(aCursorFlags); {p_sqldata_cursor_flags}
   FXDR.Flush;
   ReceiveAndCheckResponse;
 end;
 
 procedure TFBWireConnection.ExecuteStatement2(aStmtHandle, aTrHandle: integer;
   const aParamFormat: TWireMessageFormat; aParamBuffer: PByte;
-  const aOutFormat: TWireMessageFormat; aOutBuffer: PByte);
+  const aOutFormat: TWireMessageFormat; aOutBuffer: PByte;
+  aTimeout: cardinal);
 var blr: TBytes;
     op: integer;
     messages: integer;
@@ -1146,7 +1246,9 @@ begin
   FXDR.WriteString(blr);
   FXDR.WriteInt32(0);   {out message number}
   if FProtocolVersion >= (PROTOCOL_VERSION16 and FB_PROTOCOL_MASK) then
-    FXDR.WriteInt32(0); {p_sqldata_timeout}
+    FXDR.WriteUInt32(aTimeout); {p_sqldata_timeout}
+  if FProtocolVersion >= (PROTOCOL_VERSION18 and FB_PROTOCOL_MASK) then
+    FXDR.WriteUInt32(0); {p_sqldata_cursor_flags - a singleton has no cursor}
   FXDR.Flush;
 
   op := ReadOperation;
@@ -1241,6 +1343,70 @@ begin
   Move(aState.Rows[0][0],aOutBuffer^,Length(aState.Rows[0]));
   aState.NextRow := 1;
   Result := true;
+end;
+
+function TFBWireConnection.FetchRowScroll(aStmtHandle: integer;
+  const aOutFormat: TWireMessageFormat; aOutBuffer: PByte;
+  aDirection: integer; aPosition: integer;
+  var aState: TWireCursorState): boolean;
+var op: integer;
+    status, messages: integer;
+    blr: TBytes;
+    R: TWireResponse;
+    rowSize: cardinal;
+    row: TBytes;
+begin
+  Result := false;
+  if FProtocolVersion < (PROTOCOL_VERSION18 and FB_PROTOCOL_MASK) then
+    raise EFBWireError.Create('op_fetch_scroll needs protocol 18 or later');
+
+  {any rows read ahead describe the cursor position this scroll abandons}
+  ResetCursorState(aState);
+  rowSize := MessageBufferSize(aOutFormat);
+
+  FXDR.WriteInt32(op_fetch_scroll);
+  FXDR.WriteInt32(aStmtHandle);
+  blr := BuildMessageBlr(aOutFormat);
+  FXDR.WriteString(blr);
+  FXDR.WriteInt32(0);            {message number}
+  FXDR.WriteInt32(1);            {one row - no read ahead on a scroll}
+  FXDR.WriteInt32(aDirection);
+  FXDR.WriteInt32(aPosition);
+  FXDR.Flush;
+
+  {drain the batch exactly as FetchRow does - the server terminates it
+   with a packet whose message count is zero, status 100 meaning no row
+   in the requested direction}
+  repeat
+    op := ReadOperation;
+    if op = op_response then
+    begin
+      {an error terminated the fetch}
+      R := ReadResponseBody;
+      CheckResponse(R);
+      break;
+    end;
+    if op <> op_fetch_response then
+      raise EFBWireError.CreateFmt('Unexpected operation %d in fetch response',[op]);
+    status := FXDR.ReadInt32;
+    messages := FXDR.ReadInt32;
+    if messages = 0 then
+      break;
+    SetLength(row,rowSize);
+    if rowSize > 0 then
+      FillChar(row[0],rowSize,0);
+    XDRDecodeMessage(FXDR,aOutFormat,@row[0]);
+    if not Result then
+    begin
+      Move(row[0],aOutBuffer^,Length(row));
+      Result := true;
+    end;
+    row := nil;
+  until false;
+  {status 100 - no row in the requested direction - needs no bookkeeping:
+   the state was reset above and any following sequential fetch starts a
+   fresh batch. The cursor itself sits at BOF or EOF, which the statement
+   layer tracks.}
 end;
 
 procedure TFBWireConnection.FreeStatement(aStmtHandle: integer; aOption: integer);
@@ -1378,6 +1544,99 @@ begin
   ReceiveAndCheckResponse;
 end;
 
+{--- array slices ---}
+
+{Both packets are P_SLC: transaction, array id quad, slice length, the
+ SDL, a (here always empty) parameter vector, then the slice data - which
+ for the request side of op_get_slice is just a zero length. The reply to
+ op_get_slice is op_slice; op_put_slice gets a normal op_response with the
+ array id in ObjectID. See op_get_slice/op_put_slice in
+ src/remote/protocol.cpp.}
+
+function TFBWireConnection.GetSlice(aTrHandle: integer; aArrayID: Int64;
+  const SDL: TBytes; const aLayout: TWireSliceLayout; aBuffer: PByte): integer;
+var op: integer;
+    R: TWireResponse;
+    wireLen: cardinal;
+begin
+  FXDR.WriteInt32(op_get_slice);
+  FXDR.WriteInt32(aTrHandle);
+  FXDR.WriteInt64(aArrayID);
+  FXDR.WriteInt32(SliceLength(aLayout));
+  FXDR.WriteString(SDL);
+  FXDR.WriteInt32(0);              {p_slc_parameters: no longs}
+  FXDR.WriteInt32(0);              {slice data: none on a get request}
+  FXDR.Flush;
+  op := ReadOperation;
+  if op = op_response then
+  begin
+    {an error - a success op_response here would be a protocol violation}
+    R := ReadResponseBody;
+    CheckResponse(R);
+    raise EFBWireError.Create('Unexpected op_response to op_get_slice');
+  end;
+  if op <> op_slice then
+    raise EFBWireError.CreateFmt('Unexpected operation %d in get_slice response',[op]);
+  Result := FXDR.ReadInt32;        {p_slr_length}
+  wireLen := FXDR.ReadUInt32;      {lstr_length}
+  XDRDecodeSlice(FXDR,aLayout,aBuffer,wireLen);
+end;
+
+function TFBWireConnection.PutSlice(aTrHandle: integer; aArrayID: Int64;
+  const SDL: TBytes; const aLayout: TWireSliceLayout; aBuffer: PByte): Int64;
+begin
+  FXDR.WriteInt32(op_put_slice);
+  FXDR.WriteInt32(aTrHandle);
+  FXDR.WriteInt64(aArrayID);
+  FXDR.WriteInt32(SliceLength(aLayout));
+  FXDR.WriteString(SDL);
+  FXDR.WriteInt32(0);              {p_slc_parameters: no longs}
+  FXDR.WriteInt32(SliceLength(aLayout));  {lstr_length prefix of the data}
+  XDREncodeSlice(FXDR,aLayout,aBuffer);
+  FXDR.Flush;
+  Result := ReceiveAndCheckResponse.ObjectID;
+end;
+
+{--- events ---}
+
+function TFBWireConnection.ConnectRequest(aDbHandle: integer): integer;
+var R: TWireResponse;
+begin
+  FXDR.WriteInt32(op_connect_request);
+  FXDR.WriteInt32(P_REQ_async);
+  FXDR.WriteInt32(aDbHandle);
+  FXDR.WriteInt32(0);            {p_req_partner}
+  FXDR.Flush;
+  R := ReceiveAndCheckResponse;
+  {the response data is the server's sockaddr. The port is a big endian
+   16 bit value at offset 2 for both AF_INET and AF_INET6.}
+  if Length(R.Data) < 4 then
+    raise EFBWireError.Create('op_connect_request returned no address');
+  Result := (integer(R.Data[2]) shl 8) or R.Data[3];
+end;
+
+procedure TFBWireConnection.QueEvents(aDbHandle: integer; const aEPB: TBytes;
+  aEventID: integer);
+begin
+  FXDR.WriteInt32(op_que_events);
+  FXDR.WriteInt32(aDbHandle);
+  FXDR.WriteString(aEPB);
+  FXDR.WriteInt32(0);            {p_event_ast - parsed but ignored}
+  FXDR.WriteInt32(0);            {p_event_arg - ditto}
+  FXDR.WriteInt32(aEventID);
+  FXDR.Flush;
+  ReceiveAndCheckResponse;
+end;
+
+procedure TFBWireConnection.CancelEvents(aDbHandle, aEventID: integer);
+begin
+  FXDR.WriteInt32(op_cancel_events);
+  FXDR.WriteInt32(aDbHandle);
+  FXDR.WriteInt32(aEventID);
+  FXDR.Flush;
+  ReceiveAndCheckResponse;
+end;
+
 {--- services ---}
 
 function TFBWireConnection.ServiceAttach(const aServiceName: AnsiString;
@@ -1422,6 +1681,131 @@ begin
   Result := ReceiveAndCheckResponse.Data;
 end;
 
+{--- batches (protocol 16) ---}
+
+procedure TFBWireConnection.BatchCreate(aStmtHandle: integer;
+  const aFormat: TWireMessageFormat; aMsgLen: cardinal; const aPB: TBytes);
+var blr: TBytes;
+begin
+  if FProtocolVersion < (PROTOCOL_VERSION16 and FB_PROTOCOL_MASK) then
+    raise EFBWireError.Create('the batch operations need protocol 16 or later');
+  FXDR.WriteInt32(op_batch_create);
+  FXDR.WriteInt32(aStmtHandle);
+  blr := BuildMessageBlr(aFormat);
+  FXDR.WriteString(blr);
+  FXDR.WriteUInt32(aMsgLen);
+  FXDR.WriteString(aPB);
+  FXDR.Flush;
+  ReceiveAndCheckResponse;
+end;
+
+procedure TFBWireConnection.BatchMsg(aStmtHandle: integer;
+  const aFormat: TWireMessageFormat; const aRows: array of TBytes);
+var i: integer;
+begin
+  FXDR.WriteInt32(op_batch_msg);
+  FXDR.WriteInt32(aStmtHandle);
+  FXDR.WriteUInt32(Length(aRows));
+  for i := 0 to High(aRows) do
+    XDREncodeMessage(FXDR,aFormat,@aRows[i][0]);
+  FXDR.Flush;
+  ReceiveAndCheckResponse;
+end;
+
+procedure TFBWireConnection.BatchRegBlob(aStmtHandle: integer;
+  aExistingID, aBatchID: Int64);
+begin
+  FXDR.WriteInt32(op_batch_regblob);
+  FXDR.WriteInt32(aStmtHandle);
+  FXDR.WriteInt64(aExistingID);
+  FXDR.WriteInt64(aBatchID);
+  FXDR.Flush;
+  ReceiveAndCheckResponse;
+end;
+
+function TFBWireConnection.BatchExec(aStmtHandle, aTrHandle: integer): TWireBatchCS;
+var op: integer;
+    R: TWireResponse;
+    recCount, updates, vectors, errors: cardinal;
+    i: cardinal;
+    pos: cardinal;
+begin
+  SetLength(Result.States,0);
+  SetLength(Result.StatusVectors,0);
+  FXDR.WriteInt32(op_batch_exec);
+  FXDR.WriteInt32(aStmtHandle);
+  FXDR.WriteInt32(aTrHandle);
+  FXDR.Flush;
+  op := ReadOperation;
+  if op = op_response then
+  begin
+    {an error before execution}
+    R := ReadResponseBody;
+    CheckResponse(R);
+    raise EFBWireError.Create('Unexpected op_response to op_batch_exec');
+  end;
+  if op <> op_batch_cs then
+    raise EFBWireError.CreateFmt('Unexpected operation %d in batch_exec response',[op]);
+
+  FXDR.ReadInt32;                 {statement handle}
+  recCount := FXDR.ReadUInt32;
+  updates := FXDR.ReadUInt32;
+  vectors := FXDR.ReadUInt32;
+  errors := FXDR.ReadUInt32;
+
+  {with no update vector every row processed reports "success, no info"}
+  if updates = 0 then
+  begin
+    SetLength(Result.States,recCount);
+    for i := 1 to recCount do
+      Result.States[i-1] := BATCH_SUCCESS_NO_INFO;
+  end
+  else
+  begin
+    SetLength(Result.States,updates);
+    for i := 1 to updates do
+      Result.States[i-1] := FXDR.ReadInt32;
+  end;
+  SetLength(Result.StatusVectors,Length(Result.States));
+
+  {failed rows with a status vector}
+  for i := 1 to vectors do
+  begin
+    pos := FXDR.ReadUInt32;
+    if pos < cardinal(Length(Result.States)) then
+    begin
+      Result.States[pos] := BATCH_EXECUTE_FAILED;
+      Result.StatusVectors[pos] := ReadStatusVector;
+    end
+    else
+      ReadStatusVector;  {out of range - consume and discard}
+  end;
+
+  {failed rows reported without a vector}
+  for i := 1 to errors do
+  begin
+    pos := FXDR.ReadUInt32;
+    if pos < cardinal(Length(Result.States)) then
+      Result.States[pos] := BATCH_EXECUTE_FAILED;
+  end;
+end;
+
+procedure TFBWireConnection.BatchRelease(aStmtHandle: integer);
+begin
+  FXDR.WriteInt32(op_batch_rls);
+  FXDR.WriteInt32(aStmtHandle);
+  FXDR.Flush;
+  ReceiveAndCheckResponse;
+end;
+
+procedure TFBWireConnection.BatchCancel(aStmtHandle: integer);
+begin
+  FXDR.WriteInt32(op_batch_cancel);
+  FXDR.WriteInt32(aStmtHandle);
+  FXDR.Flush;
+  ReceiveAndCheckResponse;
+end;
+
 {--- misc ---}
 
 procedure TFBWireConnection.Ping;
@@ -1429,6 +1813,22 @@ begin
   FXDR.WriteInt32(op_ping);
   FXDR.Flush;
   ReceiveAndCheckResponse;
+end;
+
+procedure TFBWireConnection.SendCancel(aKind: integer);
+var pkt: array[0..7] of byte;
+begin
+  {assembled by hand and sent through SendDirect rather than the shared
+   XDR buffer: the whole point is that another thread may be mid exchange}
+  pkt[0] := (op_cancel shr 24) and $FF;
+  pkt[1] := (op_cancel shr 16) and $FF;
+  pkt[2] := (op_cancel shr 8) and $FF;
+  pkt[3] := op_cancel and $FF;
+  pkt[4] := (aKind shr 24) and $FF;
+  pkt[5] := (aKind shr 16) and $FF;
+  pkt[6] := (aKind shr 8) and $FF;
+  pkt[7] := aKind and $FF;
+  FTransport.SendDirect(pkt,8);
 end;
 
 end.

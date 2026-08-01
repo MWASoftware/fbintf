@@ -81,6 +81,16 @@ function ComputeMessageLayout(var aFormat: TWireMessageFormat): cardinal;
 {the buffer length of an already laid out format}
 function MessageBufferSize(const aFormat: TWireMessageFormat): cardinal;
 
+{the message length as the server computes it from our BLR - the
+ PARSE_msg_format algorithm of src/remote/parser.cpp, with each value
+ followed by its two byte null indicator. op_batch_create's message
+ length field must be exactly this value: the server validates it against
+ the format it parses from the BLR.}
+function EngineMessageLength(const aFormat: TWireMessageFormat): cardinal;
+
+{rounds aValue up to a multiple of aAlignment (a power of two)}
+function AlignTo(aValue, aAlignment: cardinal): cardinal;
+
 {BLR describing the message, as sent to the server}
 function BuildMessageBlr(const aFormat: TWireMessageFormat): TBytes;
 
@@ -92,6 +102,39 @@ procedure XDREncodeMessage(XDR: TXDRStream; const aFormat: TWireMessageFormat;
 {reads a message from the XDR stream into the flat buffer}
 procedure XDRDecodeMessage(XDR: TXDRStream; const aFormat: TWireMessageFormat;
                             aBuffer: PByte);
+
+type
+  { TWireSliceLayout: how the elements of an array slice are arranged in
+    the local buffer and encoded on the wire (op_get_slice/op_put_slice).
+    The local buffer uses the layout TFBArray.AllocateBuffer establishes;
+    the wire uses xdr_slice/xdr_datum (src/remote/protocol.cpp and
+    src/common/xdr.cpp) driven by the SDL element descriptor. }
+
+  TWireSliceLayout = record
+    Dtype: byte;             {blr type from the array descriptor}
+    ElementLength: cardinal; {array_desc_length: the byte length of a text
+                              or varying element - unused for other types}
+    BufferStride: cardinal;  {spacing of the elements in the local buffer}
+    Count: cardinal;         {number of elements in the slice}
+  end;
+
+{the element length as the server computes it from the SDL (sdl_desc in
+ src/common/sdl.cpp). The slice length fields of the packet count in these
+ units: length = elements * SliceElementDscLength.}
+function SliceElementDscLength(const aLayout: TWireSliceLayout): cardinal;
+
+{the p_slc_length/lstr_length value for the full slice}
+function SliceLength(const aLayout: TWireSliceLayout): cardinal;
+
+{writes the slice elements to the XDR stream - the lstr_length prefix is
+ the caller's job}
+procedure XDREncodeSlice(XDR: TXDRStream; const aLayout: TWireSliceLayout;
+                            aBuffer: PByte);
+
+{reads a slice of aWireLength (in dsc length units, as received in
+ lstr_length) into the local buffer}
+procedure XDRDecodeSlice(XDR: TXDRStream; const aLayout: TWireSliceLayout;
+                            aBuffer: PByte; aWireLength: cardinal);
 
 {Blob and array identifiers are ISC_QUADs: the high word is stored first,
  which is not the memory layout of an Int64 on a little endian machine.
@@ -226,6 +269,84 @@ begin
     Result := 0
   else
     Result := aFormat[High(aFormat)].NullOffset + 4;
+end;
+
+function EngineMessageLength(const aFormat: TWireMessageFormat): cardinal;
+var i: integer;
+    offset: cardinal;
+    size, align: cardinal;
+begin
+  offset := 0;
+  for i := 0 to Length(aFormat) - 1 do
+  begin
+    {sizes and alignments per PARSE_msg_format and jrd/align.h - these are
+     the server's rules, not the layout of our own message buffer}
+    case aFormat[i].SQLType of
+    SQL_TEXT:
+      begin
+        size := aFormat[i].DataSize;
+        align := 1;
+      end;
+    SQL_VARYING:
+      begin
+        size := aFormat[i].DataSize + 2;
+        align := 2;
+      end;
+    SQL_SHORT:
+      begin
+        size := 2;
+        align := 2;
+      end;
+    SQL_LONG, SQL_FLOAT, SQL_TYPE_DATE, SQL_TYPE_TIME:
+      begin
+        size := 4;
+        align := 4;
+      end;
+    SQL_DOUBLE, SQL_D_FLOAT, SQL_INT64, SQL_DEC16:
+      begin
+        size := 8;
+        align := 8;
+      end;
+    SQL_TIMESTAMP:
+      begin
+        size := 8;
+        align := 4;
+      end;
+    SQL_BLOB, SQL_ARRAY, SQL_QUAD:
+      begin
+        size := 8;
+        align := 4;
+      end;
+    SQL_BOOLEAN:
+      begin
+        size := 1;
+        align := 1;
+      end;
+    SQL_DEC34, SQL_INT128:
+      begin
+        size := 16;
+        align := 8;
+      end;
+    SQL_TIME_TZ, SQL_TIME_TZ_EX:
+      begin
+        size := 8;
+        align := 4;
+      end;
+    SQL_TIMESTAMP_TZ, SQL_TIMESTAMP_TZ_EX:
+      begin
+        size := 12;
+        align := 4;
+      end;
+    else
+      IBError(ibxeInvalidDataConversion,[nil]);
+    end;
+    offset := AlignTo(offset,align);
+    Inc(offset,size);
+    {the null indicator short that BuildMessageBlr emits after each value}
+    offset := AlignTo(offset,2);
+    Inc(offset,2);
+  end;
+  Result := offset;
 end;
 
 function BuildMessageBlr(const aFormat: TWireMessageFormat): TBytes;
@@ -564,6 +685,220 @@ begin
         PSmallInt(p+10)^ := SmallInt(XDR.ReadInt32);
       end;
     SQL_NULL: {no data} ;
+    else
+      IBError(ibxeInvalidDataConversion,[nil]);
+    end;
+  end;
+end;
+
+function SliceElementDscLength(const aLayout: TWireSliceLayout): cardinal;
+begin
+  case aLayout.Dtype of
+  blr_text, blr_text2:
+    Result := aLayout.ElementLength;
+  blr_varying, blr_varying2:
+    {blr_varying maps to a dtype_cstring element of the declared length
+     plus room for a two byte count - see sdl_desc}
+    Result := aLayout.ElementLength + 2;
+  blr_short:
+    Result := 2;
+  blr_long, blr_sql_date, blr_sql_time, blr_float:
+    Result := 4;
+  blr_int64, blr_quad, blr_blob_id, blr_double, blr_d_float,
+  blr_timestamp, blr_dec64, blr_sql_time_tz:
+    Result := 8;
+  blr_ex_time_tz:
+    Result := 8;
+  blr_timestamp_tz, blr_ex_timestamp_tz:
+    Result := 12;
+  blr_dec128, blr_int128:
+    Result := 16;
+  blr_bool:
+    Result := 1;
+  else
+    IBError(ibxeInvalidDataConversion,[nil]);
+  end;
+end;
+
+function SliceLength(const aLayout: TWireSliceLayout): cardinal;
+begin
+  Result := aLayout.Count * SliceElementDscLength(aLayout);
+end;
+
+{The encodings below follow xdr_datum for the descriptor sdl_desc derives
+ from the SDL: notably a varying element travels in dtype_cstring form - a
+ count followed by the characters - matching the zero terminated layout of
+ the local buffer, not the counted layout used in messages.}
+
+procedure XDREncodeSlice(XDR: TXDRStream; const aLayout: TWireSliceLayout;
+  aBuffer: PByte);
+var i: cardinal;
+    p: PByte;
+    n: cardinal;
+    opaque: TBytes;
+begin
+  if aLayout.Count = 0 then Exit;
+  for i := 0 to aLayout.Count - 1 do
+  begin
+    p := aBuffer + i * aLayout.BufferStride;
+    case aLayout.Dtype of
+    blr_text, blr_text2:
+      begin
+        SetLength(opaque,aLayout.ElementLength);
+        if Length(opaque) > 0 then
+          Move(p^,opaque[0],Length(opaque));
+        XDR.WriteOpaque(opaque);
+      end;
+    blr_varying, blr_varying2:
+      begin
+        n := 0;
+        while (n < aLayout.ElementLength) and ((p + n)^ <> 0) do
+          Inc(n);
+        XDR.WriteInt32(n);
+        SetLength(opaque,n);
+        if n > 0 then
+          Move(p^,opaque[0],n);
+        XDR.WriteOpaque(opaque);
+      end;
+    blr_short:
+      XDR.WriteInt32(PSmallInt(p)^);
+    blr_long, blr_sql_date:
+      XDR.WriteInt32(PInteger(p)^);
+    blr_sql_time:
+      XDR.WriteUInt32(PCardinal(p)^);
+    blr_float:
+      XDR.WriteUInt32(PCardinal(p)^);  {IEEE bits}
+    blr_int64, blr_quad, blr_blob_id, blr_double, blr_d_float, blr_dec64:
+      XDR.WriteInt64(PInt64(p)^);
+    blr_timestamp:
+      begin
+        XDR.WriteInt32(PInteger(p)^);
+        XDR.WriteUInt32(PCardinal(p+4)^);
+      end;
+    blr_sql_time_tz:
+      begin
+        XDR.WriteUInt32(PCardinal(p)^);
+        XDR.WriteInt32(PWord(p+4)^);
+      end;
+    blr_timestamp_tz:
+      begin
+        XDR.WriteInt32(PInteger(p)^);
+        XDR.WriteUInt32(PCardinal(p+4)^);
+        XDR.WriteInt32(PWord(p+8)^);
+      end;
+    blr_ex_time_tz:
+      begin
+        XDR.WriteUInt32(PCardinal(p)^);
+        XDR.WriteInt32(PWord(p+4)^);
+        XDR.WriteInt32(PSmallInt(p+6)^);
+      end;
+    blr_ex_timestamp_tz:
+      begin
+        XDR.WriteInt32(PInteger(p)^);
+        XDR.WriteUInt32(PCardinal(p+4)^);
+        XDR.WriteInt32(PWord(p+8)^);
+        XDR.WriteInt32(PSmallInt(p+10)^);
+      end;
+    blr_dec128, blr_int128:
+      begin
+        {two hypers, high part first}
+        XDR.WriteInt64(PInt64(p+8)^);
+        XDR.WriteInt64(PInt64(p)^);
+      end;
+    blr_bool:
+      begin
+        SetLength(opaque,1);
+        opaque[0] := p^;
+        XDR.WriteOpaque(opaque);
+      end;
+    else
+      IBError(ibxeInvalidDataConversion,[nil]);
+    end;
+  end;
+end;
+
+procedure XDRDecodeSlice(XDR: TXDRStream; const aLayout: TWireSliceLayout;
+  aBuffer: PByte; aWireLength: cardinal);
+var i, aCount: cardinal;
+    p: PByte;
+    n: cardinal;
+    opaque: TBytes;
+begin
+  aCount := aWireLength div SliceElementDscLength(aLayout);
+  if aCount > aLayout.Count then
+    aCount := aLayout.Count;
+  if aCount = 0 then Exit;
+  for i := 0 to aCount - 1 do
+  begin
+    p := aBuffer + i * aLayout.BufferStride;
+    case aLayout.Dtype of
+    blr_text, blr_text2:
+      begin
+        opaque := XDR.ReadOpaque(aLayout.ElementLength);
+        if Length(opaque) > 0 then
+          Move(opaque[0],p^,Length(opaque));
+      end;
+    blr_varying, blr_varying2:
+      begin
+        n := XDR.ReadUInt32;
+        if n > aLayout.ElementLength + 1 then
+          n := aLayout.ElementLength + 1;
+        opaque := XDR.ReadOpaque(n);
+        if n > aLayout.ElementLength then
+          n := aLayout.ElementLength;
+        if n > 0 then
+          Move(opaque[0],p^,n);
+        (p + n)^ := 0;
+      end;
+    blr_short:
+      PSmallInt(p)^ := XDR.ReadInt32;
+    blr_long, blr_sql_date:
+      PInteger(p)^ := XDR.ReadInt32;
+    blr_sql_time:
+      PCardinal(p)^ := XDR.ReadUInt32;
+    blr_float:
+      PCardinal(p)^ := XDR.ReadUInt32;
+    blr_int64, blr_quad, blr_blob_id, blr_double, blr_d_float, blr_dec64:
+      PInt64(p)^ := XDR.ReadInt64;
+    blr_timestamp:
+      begin
+        PInteger(p)^ := XDR.ReadInt32;
+        PCardinal(p+4)^ := XDR.ReadUInt32;
+      end;
+    blr_sql_time_tz:
+      begin
+        PCardinal(p)^ := XDR.ReadUInt32;
+        PWord(p+4)^ := word(XDR.ReadInt32);
+      end;
+    blr_timestamp_tz:
+      begin
+        PInteger(p)^ := XDR.ReadInt32;
+        PCardinal(p+4)^ := XDR.ReadUInt32;
+        PWord(p+8)^ := word(XDR.ReadInt32);
+      end;
+    blr_ex_time_tz:
+      begin
+        PCardinal(p)^ := XDR.ReadUInt32;
+        PWord(p+4)^ := word(XDR.ReadInt32);
+        PSmallInt(p+6)^ := SmallInt(XDR.ReadInt32);
+      end;
+    blr_ex_timestamp_tz:
+      begin
+        PInteger(p)^ := XDR.ReadInt32;
+        PCardinal(p+4)^ := XDR.ReadUInt32;
+        PWord(p+8)^ := word(XDR.ReadInt32);
+        PSmallInt(p+10)^ := SmallInt(XDR.ReadInt32);
+      end;
+    blr_dec128, blr_int128:
+      begin
+        PInt64(p+8)^ := XDR.ReadInt64;
+        PInt64(p)^ := XDR.ReadInt64;
+      end;
+    blr_bool:
+      begin
+        opaque := XDR.ReadOpaque(1);
+        p^ := opaque[0];
+      end;
     else
       IBError(ibxeInvalidDataConversion,[nil]);
     end;
