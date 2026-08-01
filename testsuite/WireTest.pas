@@ -695,6 +695,78 @@ begin
   end;
 end;
 
+procedure TestServices;
+var SPB: ISPB;
+    Service: IServiceManager;
+    Req: ISRB;
+    Results: IServiceQueryResults;
+    host, dbname: AnsiString;
+    port: integer;
+    i, statLines: integer;
+    serverVersion, serverImplementation, line: AnsiString;
+begin
+  writeln('Provider: services');
+  SplitConnectString(DatabaseName,host,dbname,port);
+
+  SPB := API.AllocateSPB;
+  SPB.Add(isc_spb_user_name).AsString := UserName;
+  SPB.Add(isc_spb_password).AsString := Password;
+  Service := API.GetServiceManager(host,IntToStr(port),TCP,SPB);
+  Check('service manager attached',(Service <> nil) and Service.IsAttached);
+  if (Service = nil) or not Service.IsAttached then Exit;
+
+  {information query}
+  Req := Service.AllocateSRB;
+  Req.Add(isc_info_svc_server_version);
+  Req.Add(isc_info_svc_implementation);
+  Results := Service.Query(Req);
+  serverVersion := '';
+  serverImplementation := '';
+  if Results <> nil then
+    for i := 0 to Results.Count - 1 do
+      case Results[i].getItemType of
+      isc_info_svc_server_version:
+        serverVersion := Results[i].AsString;
+      isc_info_svc_implementation:
+        serverImplementation := Results[i].AsString;
+      end;
+  Check('the server version was returned',serverVersion <> '');
+  Check('the server implementation was returned',serverImplementation <> '');
+  if serverVersion <> '' then
+    writeln('        server version: ',serverVersion);
+
+  {detach and reattach - the suite relies on this working}
+  Service.Detach;
+  Check('service manager detached',not Service.IsAttached);
+  Service.Attach;
+  Check('service manager reattached',Service.IsAttached);
+
+  {run a service: header page statistics on the test database}
+  Req := Service.AllocateSRB;
+  Req.Add(isc_action_svc_db_stats);
+  Req.Add(isc_spb_dbname).SetAsString(dbname);
+  Req.Add(isc_spb_options).SetAsInteger(isc_spb_sts_hdr_pages);
+  Check('header page statistics service started',Service.Start(Req));
+
+  statLines := 0;
+  repeat
+    Req := Service.AllocateSRB;
+    Req.Add(isc_info_svc_line);
+    Results := Service.Query(Req);
+    line := '';
+    if (Results <> nil) and (Results.Count > 0) and
+       (Results[0].getItemType = isc_info_svc_line) then
+      line := Results[0].AsString;
+    if line <> '' then
+      Inc(statLines);
+  until line = '';
+  Check('statistics output was returned',statLines > 0,
+        'got ' + IntToStr(statLines) + ' lines');
+
+  Service.Detach;
+  Service := nil;
+end;
+
 {---------------------------------------------------------------------------}
 
 begin
@@ -719,6 +791,7 @@ begin
     TestProviderQueries;
     TestProviderDataTypes;
     TestProviderUpdates;
+    TestServices;
     TestCreateDatabase;
   finally
     Attachment.Disconnect;

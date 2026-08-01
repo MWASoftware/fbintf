@@ -25,6 +25,8 @@ Working and tested against a live server (see *Testing* below):
   `BOOLEAN` and the time zone types
 * blobs: create, open, read and write segments, close, cancel
 * information calls for the database, transaction, statement and blob
+* the services API: `IServiceManager` over its own authenticated and
+  optionally encrypted connection (attach, detach, start, query)
 
 Not implemented yet, and reported as `ibxeNotSupported` rather than
 failing obscurely (see the roadmap in doc/WireProtocol.md for what each
@@ -32,8 +34,6 @@ would take):
 
 * events (these need the auxiliary connection set up with
   `op_connect_request` and a listener thread)
-* the services API (`op_service_attach` and friends are implemented in
-  `FBWireProtocol` but not yet surfaced as `IServiceManager`)
 * array columns (`op_get_slice` / `op_put_slice` with SDL descriptions)
 * the batch API of protocol 16
 * scrollable cursors (`op_fetch_scroll`, protocol 18)
@@ -99,7 +99,7 @@ table as best effort and drops it at the start of the next run instead.
 | `FBWireDescribe` | `isc_info_sql` describe response parser |
 | `FBWireProtocol` | the connection: handshake and all packet exchanges |
 | `FBWireClientAPI` | `IFirebirdAPI` for the provider |
-| `FBWireAttachment`, `FBWireTransaction`, `FBWireStatement`, `FBWireBlob` | the rest of the fbintf provider |
+| `FBWireAttachment`, `FBWireTransaction`, `FBWireStatement`, `FBWireBlob`, `FBWireServices` | the rest of the fbintf provider |
 
 `FBWireProtocol` is usable on its own if you want to speak the protocol
 without the fbintf object model; the remaining units adapt it to

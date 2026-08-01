@@ -113,6 +113,8 @@ Working and covered by the test suite:
   `DECFLOAT(34)`, `BOOLEAN` and the time zone types
 * blobs: create, open, segmented read and write, close, cancel
 * information calls for the database, transaction, statement and blob
+* services: `IServiceManager` over its own connection, with the same SRP
+  authentication and wire encryption as a database attach
 
 Deliberately not implemented yet. These raise `ibxeNotSupported` rather
 than failing in a confusing way:
@@ -120,7 +122,6 @@ than failing in a confusing way:
 | Feature | What it needs |
 |---|---|
 | Events | the auxiliary connection from `op_connect_request` plus a listener thread |
-| Services | `op_service_*` exist in `FBWireProtocol`; the `IServiceManager` wrapper does not |
 | Array columns | `op_get_slice` / `op_put_slice` and SDL descriptions |
 | Batches | the protocol 16 `op_batch_*` family |
 | Scrollable cursors | `op_fetch_scroll`, protocol 18 |
@@ -141,7 +142,7 @@ Delphi transport is the only missing piece.
     ┌─────────────────────────────────────────────────────────┐
     │ FBWireClientAPI  IFirebirdAPI, status, date/time codecs │
     │ FBWireAttachment FBWireTransaction FBWireStatement      │
-    │ FBWireBlob                                              │  provider
+    │ FBWireBlob FBWireServices                               │  provider
     └─────────────────────────────────────────────────────────┘
         │  handles, message buffers
         ▼
@@ -172,7 +173,7 @@ Delphi transport is the only missing piece.
 | `FBWireDescribe` | parser for the `isc_info_sql_*` describe response |
 | `FBWireProtocol` | `TFBWireConnection`: the handshake and one method per packet exchange |
 | `FBWireClientAPI` | `IFirebirdAPI`, the status object, the date and time codecs |
-| `FBWireAttachment` `FBWireTransaction` `FBWireStatement` `FBWireBlob` | the provider proper |
+| `FBWireAttachment` `FBWireTransaction` `FBWireStatement` `FBWireBlob` `FBWireServices` | the provider proper |
 
 `FBWireProtocol` is usable on its own if you want to speak the protocol
 without the fbintf object model:
@@ -410,6 +411,7 @@ Then, if a server answers:
    actually negotiated when the offer is capped at 14, 15, 16 and 17.
 6. **Provider** — queries and parameters, every data type, insert, update,
    null handling, accented text, blob round trips, transaction rollback,
+   services (version query, detach and reattach, header page statistics),
    and create and drop database.
 
 With no server reachable the live sections report `SKIP` and the process
@@ -482,7 +484,7 @@ machinery that already exists to support it.
 |---|---|---|---|
 | 1 | Run the existing test suite against this provider | a provider switch in `TTestApplication` | — |
 | 2 | Events | `op_connect_request`, a second socket, a listener thread | 13 |
-| 3 | Services | the `IServiceManager` wrapper over exchanges that already exist | 13 |
+| 3 | Services — **done** | `FBWireServices` implements the `IServiceManager` wrapper | 13 |
 | 4 | A Delphi transport | a `TFBWireTransport` over Winsock and Posix sockets | — |
 | 5 | Array columns | `op_get_slice`, `op_put_slice`, SDL generation | 13 |
 | 6 | Statement timeouts and cancellation | `op_cancel`, the P16 timeout field | 12, 16 |
@@ -536,17 +538,25 @@ The one subtlety worth flagging: the address in the response is the address
 the **server** knows about, which behind NAT is not reachable. The stock
 client keeps the port and reuses the address it already connected to.
 
-### 3. Services
+### 3. Services — done
 
-`op_service_attach`, `op_service_detach`, `op_service_start` and
-`op_service_info` are already implemented in `FBWireProtocol` and unused.
-What is missing is the `IServiceManager` layer: a `TFBWireServiceManager`
-over `TFBServiceManager`, which needs `InternalAttach`, `Detach` and
-`Query`, plus `AllocateSPB` returning the existing `TSPB`. `FBOutputBlock`
-already parses the responses. This is a small, well bounded piece of work
-that would bring backup, restore, statistics and user management to a
-client with no library installed — arguably the most useful thing this
-provider could offer an operations team.
+Implemented by `client/wire/FBWireServices.pas`: `TFBWireServiceManager`
+over `TFBServiceManager`, driving the `op_service_*` exchanges that were
+already present in `FBWireProtocol`. A service session is its own
+connection, authenticated with SRP and encrypted when negotiated exactly
+like a database attach; the password is consumed by the SRP exchange and
+stripped from the SPB, with the proof travelling as
+`isc_spb_specific_auth_data` when the server asked for it in the attach.
+`AllocateSPB` returns the shared `TSPB` and `FBOutputBlock` parses the
+responses, as anticipated.
+
+One find from the implementation is recorded here for the next reconnect
+path: `TFBWireTransport.Disconnect` used to leave the session ciphers
+installed, so any reconnect on the same connection object sent its
+handshake through the previous session's cipher and the server dropped
+it. Detach and reattach of a service manager was the first code path to
+reconnect, which is how it surfaced; `Disconnect` now discards both
+ciphers.
 
 ### 4. A Delphi transport
 

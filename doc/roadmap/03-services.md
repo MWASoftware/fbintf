@@ -1,7 +1,20 @@
 # Design: Services over the wire protocol
 
-Roadmap milestone 3 (`doc/WireProtocol.md`). This document is the
-implementation plan; no code changes are included.
+Roadmap milestone 3 (`doc/WireProtocol.md`).
+
+**Status: implemented** — `client/wire/FBWireServices.pas`, with a
+services section in `WireTest`. Two deviations from the plan below, both
+discovered by the implementation:
+
+* The `p_cnct_operation` nuance turned out to be a non-issue: the field
+  is vestigial (the stock client sends `op_attach` for service
+  connections too, and the server ignores it), verified against Firebird
+  5 and 6. `ConnectTo` is unchanged.
+* Detach-and-reattach exposed a latent transport bug unrelated to
+  services: `TFBWireTransport.Disconnect` left the session ciphers
+  installed, so any reconnect on the same connection object sent its
+  cleartext handshake through the dead session's cipher and the server
+  dropped the connection. `Disconnect` now discards both ciphers.
 
 ## Goal
 
@@ -59,10 +72,10 @@ following `TFB25ServiceManager` (the handle-based model), with a
 * `InternalAttach(ConnectString)` — parse host and port with the same
   `IBUtils` machinery the attachment uses, create a `TFBWireConnection`,
   `ConnectTo` it, then `ServiceAttach('service_mgr', ParamBlockToBytes(FSPB))`
-  and keep the returned handle. One nuance: the initial `op_connect` for a
-  service session should carry `op_service_attach` as its
-  `p_cnct_operation` where the current code always sends `op_attach`; the
-  operation value becomes a parameter of `ConnectTo`.
+  and keep the returned handle. (The plan originally called for sending
+  `op_service_attach` as the `op_connect` packet's `p_cnct_operation`;
+  see the status note above — the field is vestigial and `ConnectTo` is
+  unchanged.)
 * `Detach(Force)` — `ServiceDetach(handle)`, then `Disconnect`; swallow
   errors when `Force`.
 * `IsAttached` — connection assigned and handle valid.

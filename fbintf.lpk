@@ -52,7 +52,7 @@ Two interface implementations are provided. One is for the new Firebird 3 Client
  *  Contributor(s): ______________________________________.
  *    "/>
     <Version Major="1" Minor="4" Release = "9" Build="1258" />
-    <Files Count="51">
+    <Files Count="52">
       <Item1>
         <Filename Value="client/IB.pas"/>
         <UnitName Value="IB"/>
@@ -258,6 +258,10 @@ Two interface implementations are provided. One is for the new Firebird 3 Client
         <Filename Value="client/wire/FBWireBlob.pas"/>
         <UnitName Value="FBWireBlob"/>
       </Item51>
+      <Item52>
+        <Filename Value="client/wire/FBWireServices.pas"/>
+        <UnitName Value="FBWireServices"/>
+      </Item52>
     </Files>
     <CompatibilityMode Value="True"/>
     <RequiredPkgs Count="1">
