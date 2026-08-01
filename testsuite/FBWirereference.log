@@ -10,7 +10,7 @@ Creating a Database with empty parameters
 Create Database fails (as expected): Engine Code: 0
 Firebird Error Code: 0
 Creating a Database using an SQL Statement
-Database ID = 3 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = bc3ec55b7e3d
+Database ID = 3 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = d3b2afa28347
 SQL Dialect = 3
 DB Connect String = inet://localhost//tmp/fbintf-testsuite/testsuite1.fdb
 DB Charset ID = 0
@@ -48,7 +48,7 @@ DPB: Item Count = 4
   isc_dpb_set_db_sql_dialect = 3
 
 Creating a Database with a DPD
-Database ID = 3 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = bc3ec55b7e3d
+Database ID = 3 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = d3b2afa28347
 ODS major = 14
 ODS minor = 0
 Attachment ID = 3
@@ -2771,7 +2771,7 @@ MYARRAY = Array: (0,-1: A50) (0,0: A51) (0,1: A52) (0,2: A53) (0,3: A54) (0,4: A
 
 ------------------------------------------------------
 Running Test 9: Database Information tests
-Database ID = 3 FB = /tmp/fbintf-testsuite/employee.fdb SN = bc3ec55b7e3d
+Database ID = 3 FB = /tmp/fbintf-testsuite/employee.fdb SN = d3b2afa28347
 Pages =401
 Base Level = 13,3,0,
 Implementation = 11,5,0,2,66,
@@ -2781,7 +2781,7 @@ ODS major = 14
 Page Size = 8192
 Version = 1: LI-T6.3.0.2105 Firebird 6.0 1d25527
 Database is Read/Write
-Database Created: 01/8/2026 16:48:42
+Database Created: 01/8/2026 18:19:47
 Pages Used = 388
 Pages Free = 13
 Server Memory = 19488400
@@ -3028,7 +3028,8 @@ FIXEDWIDTH = C3 89  (Charset Id = 4 Codepage = 65001)
 
 Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
 Exception returned: Engine Code: 335544517
-"PUBLIC"."CHARSETTEST"
+exception 1
+-"PUBLIC"."CHARSETTEST"
 -Some German Special Characters like ÖÄÜöäüß
 -At procedure "PUBLIC"."DOEXCEPTION" line: 1, col: 39
 Connection Character Set NONE
@@ -3042,7 +3043,8 @@ FIXEDWIDTH = C3 89  (Charset Id = 4 Codepage = 65001)
 
 Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
 Exception returned: Engine Code: 335544517
-"PUBLIC"."CHARSETTEST"
+exception 1
+-"PUBLIC"."CHARSETTEST"
 -Some German Special Characters like ÖÄÜöäüß
 -At procedure "PUBLIC"."DOEXCEPTION" line: 1, col: 39
 Connection Character Set WIN1252
@@ -3056,7 +3058,8 @@ FIXEDWIDTH = C9  (Charset Id = 53 Codepage = 1252)
 
 Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
 Exception returned: Engine Code: 335544517
-"PUBLIC"."CHARSETTEST"
+exception 1
+-"PUBLIC"."CHARSETTEST"
 -Some German Special Characters like �������
 -At procedure "PUBLIC"."DOEXCEPTION" line: 1, col: 39
 Recreate Database with WIN1252 as the connection character set
@@ -3194,7 +3197,8 @@ FIXEDWIDTH = C3 89  (Charset Id = 4 Codepage = 65001)
 
 Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
 Exception returned: Engine Code: 335544517
-"PUBLIC"."CHARSETTEST"
+exception 1
+-"PUBLIC"."CHARSETTEST"
 -Some German Special Characters like ÖÄÜöäüß
 -At procedure "PUBLIC"."DOEXCEPTION" line: 1, col: 39
 Connection Character Set NONE
@@ -3208,7 +3212,8 @@ FIXEDWIDTH = C3 89  (Charset Id = 4 Codepage = 65001)
 
 Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
 Exception returned: Engine Code: 335544517
-"PUBLIC"."CHARSETTEST"
+exception 1
+-"PUBLIC"."CHARSETTEST"
 -Some German Special Characters like ÖÄÜöäüß
 -At procedure "PUBLIC"."DOEXCEPTION" line: 1, col: 39
 Connection Character Set WIN1252
@@ -3222,7 +3227,8 @@ FIXEDWIDTH = C9  (Charset Id = 53 Codepage = 1252)
 
 Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
 Exception returned: Engine Code: 335544517
-"PUBLIC"."CHARSETTEST"
+exception 1
+-"PUBLIC"."CHARSETTEST"
 -Some German Special Characters like �������
 -At procedure "PUBLIC"."DOEXCEPTION" line: 1, col: 39
 
@@ -3317,22 +3323,40 @@ BLOBDATA (Charset Id = 0 Codepage = 0)
 ------------------------------------------------------
 Running Test 16: Error handling
 Invalid Database Name Test
-Error Handled: Engine Code: 335544344
-open
--Malformed Name
+Error Handled: SQLCODE: -902
+Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Engine Code: 335544344
+I/O error during "open" operation for file "Malformed Name"
+-Error while trying to open file
 -No such file or directory
 Invalid User Name Test
-Error Handled: Engine Code: 335544472
-Firebird Error Code: 335544472
+Error Handled: SQLCODE: -902
+Unsuccessful execution caused by a system error that precludes successful execution of subsequent statements
+Engine Code: 335544472
+Your user name and password are not defined. Ask your database administrator to set up a Firebird login
 Invalid password Test
-Error Handled: Engine Code: 335544721
+Error Handled: SQLCODE: -999
+Firebird error
+Engine Code: 335544721
 Unsupported authentication plugin "Legacy_Auth"
 Invalid Prepare SQL Test
-Error Handled: Engine Code: 335544569
-"UNKNOWN_DATE"
+Error Handled: SQLCODE: -206
+Column does not belong to referenced table
+Engine Code: 335544569
+Dynamic SQL Error
+-SQL error code = -206
+-Column unknown
+-"UNKNOWN_DATE"
+-At line 1, column 21 When Executing: Update Employee Set Unknown_Date = ? Where EMP_NO = ?
 Invalid Open Cursor SQL Test
-Error Handled: Engine Code: 335544569
-"X"
+Error Handled: SQLCODE: -206
+Column does not belong to referenced table
+Engine Code: 335544569
+Dynamic SQL Error
+-SQL error code = -206
+-Column unknown
+-"X"
+-At line 1, column 8 When Executing: Select X,count(*) As Counter from EMPLOYEE
 Transaction not started Test
 Error Handled: Transaction is not active
 Invalid Param SQL Type Test
@@ -3344,11 +3368,9 @@ First test correct usage
 COUNTER = 42
 
 New Transaction before param set
-COUNTER = 42
-
+Error Handled: This interface is no longer up-to-date
 New Transaction before Open Cursor
-COUNTER = 42
-
+Error Handled: This interface is no longer up-to-date
 Stop Stale Reference Checks
 New Transaction before param set
 COUNTER = 42
@@ -3948,18 +3970,16 @@ Test Error Handling - Update returning should fail
 Error reported (as expected) when defering update returning query: This query type (SQL_Select) cannot be batched
 Error handling when Insert rows - duplicate key
 Error reported when inserting: Engine Code: 335544665
-"INTEG_27"
--"PUBLIC"."EMPLOYEE"
--("EMP_NO" = 500)
+violation of PRIMARY or UNIQUE KEY constraint "INTEG_27" on table "PUBLIC"."EMPLOYEE"
+-Problematic key value is ("EMP_NO" = 500)
 Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
 Batch Completion Info
 Total rows processed = 2
 Updated Records = 1
 Row 1 State = bcNoMoreErrors Msg = 
 Row 2 State = bcExecuteFailed Msg = Engine Code: 335544665
-"INTEG_27"
--"PUBLIC"."EMPLOYEE"
--("EMP_NO" = 500)
+violation of PRIMARY or UNIQUE KEY constraint "INTEG_27" on table "PUBLIC"."EMPLOYEE"
+-Problematic key value is ("EMP_NO" = 500)
 
 
 ------------------------------------------------------
@@ -4103,10 +4123,14 @@ Charset id = 0
 Nullable
 Size = 8
 
-Expected Error - Engine Code: 335544334
-1,00
-Expected Error - Engine Code: 335544334
-1,00
+Expected Error - SQLCODE: -413
+Overflow occurred during data type conversion.
+Engine Code: 335544334
+conversion error from string "1,00"
+Expected Error - SQLCODE: -413
+Overflow occurred during data type conversion.
+Engine Code: 335544334
+conversion error from string "1,00"
 Test Numeric Type
 ROWID = 1
 ITYPE = 101
@@ -4301,12 +4325,12 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 9
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA
-IBX$CREATED = 2026/08/01 16:51:12.7700
+IBX$CREATED = 2026/08/01 18:20:53.7310
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 11
 IBX$OLDTRANSACTIONID = 10
 IBX$USER = SYSDBA
-IBX$CREATED = 2026/08/01 16:51:12.9590
+IBX$CREATED = 2026/08/01 18:20:53.7410
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)
