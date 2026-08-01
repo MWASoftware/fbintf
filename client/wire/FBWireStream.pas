@@ -87,6 +87,7 @@ type
     {serialises cipher application and the socket write between Flush and
      SendDirect - see SendDirect}
     FSendLock: TCriticalSection;
+    FPacketsSent: cardinal;
     procedure FillRecvBuffer;
     procedure WriteToSocket(const aData; aLen: integer);
   public
@@ -124,6 +125,10 @@ type
     procedure EnableRecvCipher(aRecvCipher: TWireCipher);
     procedure EnableSendCipher(aSendCipher: TWireCipher);
     property Connected: boolean read FConnected;
+    {counts socket writes (Flush and SendDirect) - a request/response
+     round trip is one flush, so tests can assert that an operation
+     caused no wire traffic}
+    property PacketsSent: cardinal read FPacketsSent;
   end;
 
   { TXDRStream: XDR encode/decode over a TFBWireTransport }
@@ -336,6 +341,7 @@ begin
       FSendCipher.Process(FSendBuffer[0],FSendPos);
     WriteToSocket(FSendBuffer[0],FSendPos);
     FSendPos := 0;
+    Inc(FPacketsSent);
   finally
     FSendLock.Leave;
   end;
@@ -353,6 +359,7 @@ begin
     if FSendCipher <> nil then
       FSendCipher.Process(buf[0],aLen);
     WriteToSocket(buf[0],aLen);
+    Inc(FPacketsSent);
   finally
     FSendLock.Leave;
   end;

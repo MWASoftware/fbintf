@@ -69,6 +69,9 @@ type
     FWireAttachment: TObject;
     FHandle: integer;
     FHasHandle: boolean;
+    FInline: boolean;           {served from the inline blob cache - no
+                                 server side handle exists}
+    FInlineInfo: TBytes;        {the pushed blob info response}
     FEOB: boolean;              {end of blob seen while reading}
     FReadBuffer: TBytes;        {segment data not yet consumed by Read}
     FReadPos: integer;
@@ -205,8 +208,40 @@ end;
 
 procedure TFBWireBlob.InternalOpen(const aBlobID: TISC_QUAD);
 var id: Int64;
+    data: TBytes;
+    pos, segLen, outLen: integer;
 begin
   id := (Int64(aBlobID.gds_quad_high) shl 32) or Int64(cardinal(aBlobID.gds_quad_low));
+
+  {a protocol 19 server may have pushed this blob with the row that
+   references it. On a hit the open is free of wire traffic: the
+   segmented stream is unpacked here and Read serves it from the buffer.}
+  if (FWireAttachment as TFBWireAttachment).TakeInlineBlob(
+       GetTransactionHandle,id,FInlineInfo,data) then
+  begin
+    SetLength(FReadBuffer,Length(data));
+    pos := 0;
+    outLen := 0;
+    while pos + 2 <= Length(data) do
+    begin
+      segLen := data[pos] or (data[pos+1] shl 8);
+      Inc(pos,2);
+      if pos + segLen > Length(data) then
+        segLen := Length(data) - pos;
+      if segLen > 0 then
+      begin
+        Move(data[pos],FReadBuffer[outLen],segLen);
+        Inc(outLen,segLen);
+        Inc(pos,segLen);
+      end;
+    end;
+    SetLength(FReadBuffer,outLen);
+    FReadPos := 0;
+    FEOB := true;
+    FInline := true;
+    Exit;
+  end;
+
   try
     FHandle := GetConnection.OpenBlob(GetTransactionHandle,BPBBytes,id);
     FHasHandle := true;
@@ -233,7 +268,7 @@ end;
 
 procedure TFBWireBlob.CheckReadable;
 begin
-  if not FHasHandle then
+  if not (FHasHandle or FInline) then
     IBError(ibxeBlobCannotBeRead,[nil]);
 end;
 
@@ -253,6 +288,17 @@ var items, resp: TBytes;
     i, len: integer;
 begin
   CheckReadable;
+  if FInline then
+  begin
+    {the server pushed the info with the blob: num_segments, max_segment,
+     total_length and type - the items every fbintf caller asks for}
+    len := Length(FInlineInfo);
+    if len > (Response as TBlobInfo).getBufSize then
+      len := (Response as TBlobInfo).getBufSize;
+    if len > 0 then
+      Move(FInlineInfo[0],(Response as TBlobInfo).Buffer^,len);
+    Exit;
+  end;
   SetLength(items,Length(Request));
   for i := 0 to High(Request) do
     items[i] := Request[i];
@@ -271,6 +317,12 @@ end;
 
 procedure TFBWireBlob.InternalClose(Force: boolean);
 begin
+  if FInline then
+  begin
+    {nothing exists server side}
+    FInline := false;
+    Exit;
+  end;
   if not FHasHandle then Exit;
   if not GetConnection.Connected then
   begin
@@ -288,6 +340,11 @@ end;
 
 procedure TFBWireBlob.InternalCancel(Force: boolean);
 begin
+  if FInline then
+  begin
+    FInline := false;
+    Exit;
+  end;
   if not FHasHandle then Exit;
   if not GetConnection.Connected then
   begin

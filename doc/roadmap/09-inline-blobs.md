@@ -1,7 +1,33 @@
 # Design: Inline blobs (protocol 19)
 
-Roadmap milestone 9 (`doc/WireProtocol.md`). This document is the
-implementation plan; no code changes are included.
+Roadmap milestone 9 (`doc/WireProtocol.md`).
+
+**Status: implemented** — the offer goes to protocol 19, `ReadOperation`
+intercepts `op_inline_blob` into a per attachment cache, and
+`TFBWireBlob` serves opens from it. WireTest gained an inline blob
+section (158 tests) whose packet counter on the transport proves a
+cached open causes no wire traffic, with fallbacks covered for
+over-limit blobs and an opted out (zero) limit. The design held; the
+notes:
+
+* The announce field is only the one `p_sqldata_inline_blob_size` word:
+  the cursor flags the plan grouped with it had already arrived with
+  protocol 18. The value comes from the existing
+  `IAttachment.GetInlineBlobLimit` (default 8KB, capped 32KB) - no new
+  surface needed, and `SetInlineBlobLimit(0)` is the opt out.
+* The pushed data is the segmented stream - the same two byte length
+  prefixed form `op_get_segment` returns - so the blob's `Read` path
+  reuses the unpacking, and the pushed info buffer carries exactly the
+  four items (`num_segments`, `max_segment`, `total_length`, `type`)
+  every fbintf `GetInfo` caller asks for, so it is served verbatim.
+* An inline id is single use on both sides: the cache consumes the
+  entry on open, mirroring the server sending each id once.
+* Cache entries die with their transaction (commit, rollback and both
+  retaining forms), and the 16MB cap simply drops further pushes - the
+  classic open is always correct.
+* Transparency held exactly: the full suite diff against the previous
+  reference is the negotiated version string, 18 to 19, and nothing
+  else.
 
 ## Goal
 
