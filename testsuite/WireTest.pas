@@ -38,7 +38,7 @@ uses
   SysUtils, Classes, IB, IBUtils, IBErrorCodes,
   FBWireBigInt, FBWireCrypto, FBWireSRP, FBWireStream, FBWireConst,
   FBWireMessage, FBWireDescribe, FBWireProtocol, FBWireClientAPI,
-  FBWireAttachment, FBAttachment;
+  FBWireAttachment, FBWireStatement, FBAttachment;
 
 var
   TestsRun: integer = 0;
@@ -371,9 +371,10 @@ begin
 end;
 
 procedure TestProtocolNegotiation;
-const Caps: array[0..4] of cardinal = (PROTOCOL_VERSION14,PROTOCOL_VERSION15,
+const Caps: array[0..6] of cardinal = (PROTOCOL_VERSION14,PROTOCOL_VERSION15,
                                        PROTOCOL_VERSION16,PROTOCOL_VERSION17,
-                                       PROTOCOL_VERSION18);
+                                       PROTOCOL_VERSION18,PROTOCOL_VERSION19,
+                                       PROTOCOL_VERSION20);
 var C: TFBWireConnection;
     host, dbname: AnsiString;
     port, i: integer;
@@ -963,6 +964,105 @@ begin
   end;
 end;
 
+procedure TestSchemas;
+const S1 = 'FBINTF_WIRE_S1';
+      S2 = 'FBINTF_WIRE_S2';
+var Tr: ITransaction;
+    S: IStatement;
+    RS: IResultSet;
+    Att2: IAttachment;
+    DPB: IDPB;
+
+  procedure QuietExec(aAtt: IAttachment; const sql: AnsiString);
+  var T: ITransaction;
+  begin
+    T := aAtt.StartTransaction([isc_tpb_read_committed,
+           isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+    try
+      aAtt.ExecImmediate(T,sql);
+      T.Commit;
+    except
+      T.Rollback;
+    end;
+  end;
+
+begin
+  writeln('Provider: SQL schemas');
+  if (Attachment as TObject as TFBWireAttachment).Connection.ProtocolVersion <
+       (PROTOCOL_VERSION20 and FB_PROTOCOL_MASK) then
+  begin
+    writeln('  SKIP  SQL schemas need protocol 20 or later');
+    Exit;
+  end;
+
+  QuietExec(Attachment,'drop table ' + S1 + '.SCHEMATEST');
+  QuietExec(Attachment,'drop table ' + S2 + '.SCHEMATEST');
+  QuietExec(Attachment,'drop schema ' + S1);
+  QuietExec(Attachment,'drop schema ' + S2);
+
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  Attachment.ExecImmediate(Tr,'create schema ' + S1);
+  Attachment.ExecImmediate(Tr,'create schema ' + S2);
+  Tr.Commit;
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  Attachment.ExecImmediate(Tr,'create table ' + S1 +
+    '.SCHEMATEST (ID integer not null primary key)');
+  Attachment.ExecImmediate(Tr,'create table ' + S2 +
+    '.SCHEMATEST (ID integer not null primary key)');
+  Tr.Commit;
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  Attachment.ExecImmediate(Tr,'insert into ' + S1 + '.SCHEMATEST values (1)');
+  Attachment.ExecImmediate(Tr,'insert into ' + S2 + '.SCHEMATEST values (2)');
+  Tr.Commit;
+
+  {a second attachment whose search path names the second schema: the
+   unqualified table name must resolve there}
+  DPB := API.AllocateDPB;
+  DPB.Add(isc_dpb_user_name).AsString := UserName;
+  DPB.Add(isc_dpb_password).AsString := Password;
+  DPB.Add(isc_dpb_lc_ctype).AsString := 'UTF8';
+  DPB.Add(isc_dpb_search_path).AsString := S2 + ', PUBLIC';
+  Att2 := API.OpenDatabase(DatabaseName,DPB);
+  try
+    Tr := Att2.StartTransaction([isc_tpb_read_committed,
+            isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_read],taCommit);
+    S := Att2.Prepare(Tr,'select ID from SCHEMATEST');
+    RS := S.OpenCursor;
+    Check('search path resolves the unqualified name',RS.FetchNext);
+    Check('to the schema the path names',RS[0].AsInteger = 2,
+          'got ' + IntToStr(RS[0].AsInteger));
+    Check('the describe carries the schema name',
+          (S as TObject as TFBWireStatement).ColumnSchemaName(0) = S2,
+          'got "' + (S as TObject as TFBWireStatement).ColumnSchemaName(0) + '"');
+    RS.Close;
+    RS := nil;
+    S := nil;
+    Tr.Commit;
+  finally
+    Att2.Disconnect;
+    Att2 := nil;
+  end;
+
+  {and the first schema still answers when qualified}
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_read],taCommit);
+  RS := Attachment.OpenCursorAtStart(Tr,
+          'select ID from ' + S1 + '.SCHEMATEST');
+  Check('a qualified name bypasses the search path',RS[0].AsInteger = 1);
+  RS.Close;
+  RS := nil;
+  Tr.Commit;
+
+  QuietExec(Attachment,'drop table ' + S1 + '.SCHEMATEST');
+  QuietExec(Attachment,'drop table ' + S2 + '.SCHEMATEST');
+  QuietExec(Attachment,'drop schema ' + S1);
+  QuietExec(Attachment,'drop schema ' + S2);
+  writeln('  note  schema test objects dropped');
+end;
+
 procedure TestInlineBlobs;
 const TestTable = 'FBINTF_WIRE_INLINE';
 var Tr: ITransaction;
@@ -1459,6 +1559,7 @@ begin
     TestProviderUpdates;
     TestArrays;
     TestScrollableCursors;
+    TestSchemas;
     TestInlineBlobs;
     TestBatch;
     TestCancellation;

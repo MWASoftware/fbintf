@@ -1,7 +1,33 @@
 # Design: Firebird 6 and protocol 20
 
-Roadmap milestone 10 (`doc/WireProtocol.md`). This document is the
-implementation plan; no code changes are included.
+Roadmap milestone 10 (`doc/WireProtocol.md`).
+
+**Status: implemented** — the offer goes to protocol 20, WireTest gains
+a schema section (164 tests) and the negotiation test runs the full
+14..20 ladder. Findings against the plan:
+
+* The field audit found exactly one unconditional packet change at 20:
+  `p_sqlst_flags`, a flags word at the end of both
+  `op_prepare_statement` **and** `op_exec_immediate` (they share the
+  XDR block; the plan only named the prepare). Written as zero.
+* Named arguments are a SQL level feature (`name => value` in calls),
+  not a describe item - there is nothing to request or parse for them
+  on the wire.
+* The describe gains `isc_info_sql_relation_schema` (33), requested
+  only from protocol 20 connections and parsed into the column format.
+  `ParsePrepareResponse` already skipped unknown items with their
+  length, so no hardening was needed - the defensive property the plan
+  asked to verify was there.
+* The 3.0 provider surfaces no schema name (fbintf's `IColumnMetaData`
+  has no such member and the bundled `FirebirdOOAPI` predates one), so
+  there was nothing to match: the wire stores the name and exposes it
+  through `TFBWireStatement.ColumnSchemaName` for the tests, leaving
+  the interface question to fbintf as a whole.
+* `isc_dpb_search_path` went in alongside the other Firebird 6 DPB
+  tags (97..107), with the DPB name table extended to match, and works
+  through the ordinary `DPB.Add(...).AsString` route - proven by the
+  WireTest section attaching with a search path and reading the
+  expected table.
 
 ## Goal
 

@@ -441,6 +441,7 @@
     isc_info_sql_stmt_blob_align = 30;    
     isc_info_sql_exec_path_blr_bytes = 31;    
     isc_info_sql_exec_path_blr_text = 32;    
+    isc_info_sql_relation_schema = 33;    
   {******************************* }
   { SQL information return values  }
   {******************************* }

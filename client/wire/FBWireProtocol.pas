@@ -55,9 +55,10 @@ uses
 const
   {highest protocol version this client implements. Firebird 3 accepts up
    to 15, Firebird 4 up to 17, Firebird 5 accepts 18 (op_fetch_scroll and
-   the op_execute cursor flags word), Firebird 5.0.3 and 6 accept 19
-   (op_inline_blob and the op_execute inline blob size limit).}
-  MaxSupportedProtocol = PROTOCOL_VERSION19;
+   the op_execute cursor flags word), Firebird 5.0.3 accepts 19
+   (op_inline_blob and the op_execute inline blob size limit), Firebird 6
+   accepts 20 (SQL schemas and the prepare flags word).}
+  MaxSupportedProtocol = PROTOCOL_VERSION20;
   INVALID_OBJECT = $FFFF;
 
   {key advertisement clumplet tags (see plugins/crypt in protocol.cpp)}
@@ -584,10 +585,10 @@ procedure TFBWireConnection.ConnectTo(const aHost: AnsiString; aPort: integer;
   const aDatabasePath, aUser, aPassword: AnsiString;
   aWireCrypt: TWireCryptOption; aTimeout: integer);
 const
-  OfferedProtocols: array[0..6] of cardinal = (
+  OfferedProtocols: array[0..7] of cardinal = (
     PROTOCOL_VERSION13, PROTOCOL_VERSION14, PROTOCOL_VERSION15,
     PROTOCOL_VERSION16, PROTOCOL_VERSION17, PROTOCOL_VERSION18,
-    PROTOCOL_VERSION19);
+    PROTOCOL_VERSION19, PROTOCOL_VERSION20);
 var i: integer;
     offered: integer;
 begin
@@ -1218,6 +1219,8 @@ begin
   FXDR.WriteString(sql);
   FXDR.WriteString(aInfoItems);
   FXDR.WriteInt32(aBufferLength);
+  if FProtocolVersion >= (PROTOCOL_VERSION20 and FB_PROTOCOL_MASK) then
+    FXDR.WriteInt32(0);        {p_sqlst_flags - no special prepare flags}
   FXDR.Flush;
   Result := ReceiveAndCheckResponse.Data;
 end;
@@ -1479,6 +1482,8 @@ begin
   FXDR.WriteString(sql);
   FXDR.WriteString('');        {items}
   FXDR.WriteInt32(0);          {buffer length}
+  if FProtocolVersion >= (PROTOCOL_VERSION20 and FB_PROTOCOL_MASK) then
+    FXDR.WriteInt32(0);        {p_sqlst_flags}
   FXDR.Flush;
   ReceiveAndCheckResponse;
 end;

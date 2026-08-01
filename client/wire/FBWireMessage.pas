@@ -64,6 +64,7 @@ type
     AliasName: AnsiString;
     FieldName: AnsiString;
     RelationName: AnsiString;
+    SchemaName: AnsiString;  {protocol 20 servers name the schema}
     OwnerName: AnsiString;
     Nullable: boolean;
     {computed layout in the message buffer}
