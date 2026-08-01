@@ -596,6 +596,12 @@ reuses the host it connected to):
 * The auxiliary connection carries no handshake, no authentication and
   no encryption - the server associates it with the session by the
   accept, and it only ever delivers `op_event` (and `op_dummy`) packets.
+* **The auxiliary port must be reachable.** By default the server opens
+  a random port for it, which a container that only publishes 3050, or a
+  firewall, silently blocks - the CI containers demonstrated this by
+  hanging in the connect. Set `RemoteAuxPort` in `firebird.conf` to pin
+  it and publish or allow that port; the CI workflow pins it to 3051.
+  This applies to any Firebird client, not just this one.
 * The event handler is called from the listener thread, exactly as the
   2.5 provider calls its handler from an AST thread, so a handler must
   not call back into the same attachment from that thread; `Synchronize`

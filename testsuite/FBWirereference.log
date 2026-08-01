@@ -68,7 +68,7 @@ TPB: Item Count = 3
 
 RDB$DESCRIPTION = 
 RDB$RELATION_ID = 0
-RDB$SECURITY_CLASS = SQL$DATABASE
+RDB$SECURITY_CLASS = SQL$nnn
 RDB$CHARACTER_SET_NAME = NONE
 RDB$LINGER = 
 RDB$SQL_SECURITY = 
@@ -2184,21 +2184,21 @@ Skipping test - arrays are not supported by this provider
 ------------------------------------------------------
 Running Test 9: Database Information tests
 Database ID = n FB = dbpath SN = hostname
-Pages =401
+Pages =nnnn
 Base Level = 13,3,0,
-Implementation = 11,5,0,2,66,
+Implementation = implementation codes
 Reserved = 0
 ODS minor = 0
 ODS major = 14
 Page Size = 8192
-Version = 1: LI-T6.3.0.2101 Firebird 6.0 f0b0d0c
+Version = 1: server version string
 Database is Read/Write
-Database Created: 01/8/2026 07:42:40
+Database Created: yyyy/mm/dd hh:mm:ss
 Pages Used = nnnn
 Pages Free = nnnn
-Server Memory = 19531040
+Server Memory = nnnn
 Forced Writes  = 1
-Max Memory  = 19564704
+Max Memory  = nnnn
 Num Buffers  = 2048
 Sweep Interval  = 20000
 Logged in Users: SYSDBA,
@@ -2219,37 +2219,37 @@ Purge Count Countites Operation Counts
 
 Indexed Reads Count Operation Counts
 Table ID = 6
-Count = 84
+Count = nnnn
 Table ID = 9
-Count = 1
+Count = nnnn
 Table ID = 11
-Count = 1
+Count = nnnn
 Table ID = 18
-Count = 1508
+Count = nnnn
 Table ID = 28
-Count = 9
+Count = nnnn
 Table ID = 29
-Count = 1
+Count = nnnn
 Table ID = 31
-Count = 1
+Count = nnnn
 Table ID = 56
-Count = 94
+Count = nnnn
 
 Sequential Table Scans Operation Counts
 Table ID = 0
-Count = 102
+Count = nnnn
 Table ID = 1
-Count = 85
+Count = nnnn
 Table ID = 4
-Count = 4692
+Count = nnnn
 Table ID = 6
-Count = 2414
+Count = nnnn
 Table ID = 11
-Count = 1192
+Count = nnnn
 Table ID = 29
-Count = 596
+Count = nnnn
 Table ID = 56
-Count = 166
+Count = nnnn
 
 Update Count Operation Counts
 

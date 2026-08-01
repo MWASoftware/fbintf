@@ -743,7 +743,20 @@ begin
   writeln('Provider: events');
   Catcher := TEventCatcher.Create;
   try
-    EventHandler := Attachment.GetEventHandler('WIRETEST_EVENT');
+    try
+      EventHandler := Attachment.GetEventHandler('WIRETEST_EVENT');
+    except on E: Exception do
+      begin
+        {events need the server's auxiliary port to be reachable. In a
+         container or behind a firewall that means pinning it with
+         RemoteAuxPort in firebird.conf and opening it - without that the
+         rest of the suite is still worth running}
+        writeln('  SKIP  events: the auxiliary port is not reachable (',
+                E.Message,')');
+        writeln('        set RemoteAuxPort in firebird.conf and open that port');
+        Exit;
+      end;
+    end;
     Check('event handler obtained',EventHandler <> nil);
 
     {the first wait establishes the baseline: whether it fires immediately
