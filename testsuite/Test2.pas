@@ -175,6 +175,13 @@ begin
   end;
   Attachment.Disconnect;
   writeln(OutFile,'Now open the employee database as a local database');
+  if FirebirdAPI.GetFBLibrary = nil then
+  begin
+    {a wire protocol provider has no embedded mode - a local attach cannot
+     authenticate without a password}
+    writeln(OutFile,'Skipping local database test - not supported by provider');
+    Exit;
+  end;
   DPB := FirebirdAPI.AllocateDPB;
   DPB.Add(isc_dpb_lc_ctype).setAsString(CharSet);
   DPB.Add(isc_dpb_user_name).setAsString(Owner.GetUserName);

@@ -46,7 +46,7 @@ unit FBWireStream;
 interface
 
 uses
-  Classes, SysUtils
+  Classes, SysUtils, syncobjs
   {$IFDEF FPC}
   , sockets, ssockets
   {$ENDIF}
@@ -84,18 +84,35 @@ type
     FRecvLimit: integer;    {end of valid data}
     FSendBuffer: TBytes;
     FSendPos: integer;
+    {serialises cipher application and the socket write between Flush and
+     SendDirect - see SendDirect}
+    FSendLock: TCriticalSection;
+    FPacketsSent: cardinal;
     procedure FillRecvBuffer;
+    procedure WriteToSocket(const aData; aLen: integer);
   public
     constructor Create;
     destructor Destroy; override;
     procedure ConnectTo(const aHost: AnsiString; aPort: integer; aTimeout: integer = 0);
     procedure Disconnect;
+    {shuts the socket down without closing it, so that a read blocked in
+     another thread returns. The reader then calls Disconnect.}
+    procedure Abort;
     {read exactly aLen bytes (blocking)}
     procedure ReadBytes(var aData; aLen: integer);
     {queue bytes for sending}
     procedure WriteBytes(const aData; aLen: integer);
     {send all queued bytes}
     procedure Flush;
+    {writes a complete packet to the socket immediately, bypassing the
+     send buffer. This is for op_cancel: safe to call from a different
+     thread to the one that owns the connection, even while that thread
+     is blocked in ReadBytes. The send lock serialises the cipher and the
+     socket write against Flush, and the stream cipher stays consistent
+     because bytes are enciphered in the order they reach the wire. Any
+     packet the owner has assembled but not yet flushed simply follows
+     this one, which the protocol permits between packets.}
+    procedure SendDirect(const aData; aLen: integer);
     {true if unread data is buffered locally (does not poll the socket)}
     function HasBufferedData: boolean;
     {switch on wire encryption. Transport takes ownership of the ciphers.
@@ -108,6 +125,10 @@ type
     procedure EnableRecvCipher(aRecvCipher: TWireCipher);
     procedure EnableSendCipher(aSendCipher: TWireCipher);
     property Connected: boolean read FConnected;
+    {counts socket writes (Flush and SendDirect) - a request/response
+     round trip is one flush, so tests can assert that an operation
+     caused no wire traffic}
+    property PacketsSent: cardinal read FPacketsSent;
   end;
 
   { TXDRStream: XDR encode/decode over a TFBWireTransport }
@@ -164,6 +185,7 @@ begin
   FRecvPos := 0;
   FRecvLimit := 0;
   FSendPos := 0;
+  FSendLock := TCriticalSection.Create;
 end;
 
 destructor TFBWireTransport.Destroy;
@@ -171,6 +193,7 @@ begin
   Disconnect;
   if FSendCipher <> nil then FSendCipher.Free;
   if FRecvCipher <> nil then FRecvCipher.Free;
+  FSendLock.Free;
   inherited Destroy;
 end;
 
@@ -215,6 +238,18 @@ begin
   FRecvPos := 0;
   FRecvLimit := 0;
   FSendPos := 0;
+  {the ciphers belong to the session that has just ended - a reconnect
+   starts in clear and negotiates its own}
+  if FSendCipher <> nil then FreeAndNil(FSendCipher);
+  if FRecvCipher <> nil then FreeAndNil(FRecvCipher);
+end;
+
+procedure TFBWireTransport.Abort;
+begin
+  {$IFDEF FPC}
+  if FSocket <> nil then
+    fpshutdown(FSocket.Handle,2 {SHUT_RDWR});
+  {$ENDIF}
 end;
 
 procedure TFBWireTransport.FillRecvBuffer;
@@ -275,19 +310,16 @@ begin
   end;
 end;
 
-procedure TFBWireTransport.Flush;
+procedure TFBWireTransport.WriteToSocket(const aData; aLen: integer);
 var written, total: integer;
+    p: PByte;
 begin
-  if FSendPos = 0 then Exit;
-  if not FConnected then
-    raise EFBWireError.Create('Wire transport is not connected');
-  if FSendCipher <> nil then
-    FSendCipher.Process(FSendBuffer[0],FSendPos);
   total := 0;
+  p := @aData;
   {$IFDEF FPC}
-  while total < FSendPos do
+  while total < aLen do
   begin
-    written := FSocket.Write(FSendBuffer[total],FSendPos - total);
+    written := FSocket.Write((p + total)^,aLen - total);
     if written <= 0 then
     begin
       Disconnect;
@@ -296,7 +328,41 @@ begin
     Inc(total,written);
   end;
   {$ENDIF}
-  FSendPos := 0;
+end;
+
+procedure TFBWireTransport.Flush;
+begin
+  if FSendPos = 0 then Exit;
+  if not FConnected then
+    raise EFBWireError.Create('Wire transport is not connected');
+  FSendLock.Enter;
+  try
+    if FSendCipher <> nil then
+      FSendCipher.Process(FSendBuffer[0],FSendPos);
+    WriteToSocket(FSendBuffer[0],FSendPos);
+    FSendPos := 0;
+    Inc(FPacketsSent);
+  finally
+    FSendLock.Leave;
+  end;
+end;
+
+procedure TFBWireTransport.SendDirect(const aData; aLen: integer);
+var buf: TBytes;
+begin
+  if not FConnected then
+    raise EFBWireError.Create('Wire transport is not connected');
+  SetLength(buf,aLen);
+  Move(aData,buf[0],aLen);
+  FSendLock.Enter;
+  try
+    if FSendCipher <> nil then
+      FSendCipher.Process(buf[0],aLen);
+    WriteToSocket(buf[0],aLen);
+    Inc(FPacketsSent);
+  finally
+    FSendLock.Leave;
+  end;
 end;
 
 function TFBWireTransport.HasBufferedData: boolean;

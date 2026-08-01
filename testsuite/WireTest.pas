@@ -35,9 +35,10 @@ program WireTest;
 
 uses
   {$IFDEF UNIX}cthreads,{$ENDIF}
-  SysUtils, Classes, IB, IBUtils,
+  SysUtils, Classes, IB, IBUtils, IBErrorCodes,
   FBWireBigInt, FBWireCrypto, FBWireSRP, FBWireStream, FBWireConst,
-  FBWireMessage, FBWireDescribe, FBWireProtocol, FBWireClientAPI;
+  FBWireMessage, FBWireDescribe, FBWireProtocol, FBWireClientAPI,
+  FBWireAttachment, FBAttachment;
 
 var
   TestsRun: integer = 0;
@@ -292,6 +293,14 @@ begin
   Check('the low word occupies the last four bytes of a quad',
         PCardinal(@quad[4])^ = $55667788);
   Check('quad round trips',WireQuadToInt64(@quad[0]) = $1122334455667788);
+
+  {the batch message length must follow the server's PARSE_msg_format
+   rules, with a two byte null indicator after each value:
+   short(2)@0 + null(2)@2, varying(10+2)@4 + null(2)@16,
+   int64(8)@24 (eight byte aligned) + null(2)@32 = 34}
+  Check('engine message length follows the server''s layout rules',
+        EngineMessageLength(fmt) = 34,
+        'got ' + IntToStr(EngineMessageLength(fmt)));
 end;
 
 {---------------------------------------------------------------------------}
@@ -362,8 +371,9 @@ begin
 end;
 
 procedure TestProtocolNegotiation;
-const Caps: array[0..3] of cardinal = (PROTOCOL_VERSION14,PROTOCOL_VERSION15,
-                                       PROTOCOL_VERSION16,PROTOCOL_VERSION17);
+const Caps: array[0..4] of cardinal = (PROTOCOL_VERSION14,PROTOCOL_VERSION15,
+                                       PROTOCOL_VERSION16,PROTOCOL_VERSION17,
+                                       PROTOCOL_VERSION18);
 var C: TFBWireConnection;
     host, dbname: AnsiString;
     port, i: integer;
@@ -695,6 +705,734 @@ begin
   end;
 end;
 
+procedure TestArrays;
+const TestTable = 'FBINTF_WIRE_ARTEST';
+      Names: array[0..3] of AnsiString =
+        ('','first','ends at sixteen!','àéîõü');
+var Tr: ITransaction;
+    S: IStatement;
+    RS: IResultSet;
+    ar: IArray;
+    i, j: integer;
+begin
+  writeln('Provider: array columns');
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  try
+    Attachment.ExecImmediate(Tr,'drop table ' + TestTable);
+    Tr.Commit;
+    Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+            isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  except
+    {the table did not exist}
+    Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+            isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  end;
+
+  Attachment.ExecImmediate(Tr,'create table ' + TestTable +
+    ' (ID integer not null primary key,' +
+    '  INTS integer [1:4],' +
+    '  STRS varchar(16) [0:3],' +
+    '  GRID double precision [1:2,1:3])');
+  Tr.Commit;
+  Check('array table created',Attachment.HasTable(TestTable));
+
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  Attachment.ExecImmediate(Tr,'insert into ' + TestTable + ' (ID) values (1)');
+
+  {write the integer array}
+  ar := Attachment.CreateArray(Tr,TestTable,'INTS');
+  Check('integer array metadata: 1 dimension',ar.GetDimensions = 1);
+  Check('integer array metadata: bounds 1:4',
+        (ar.GetBounds[0].LowerBound = 1) and (ar.GetBounds[0].UpperBound = 4));
+  for i := 1 to 4 do
+    ar.SetAsInteger([i],i * 10);
+  S := Attachment.Prepare(Tr,'update ' + TestTable +
+        ' set INTS = ? where ID = 1');
+  S.SQLParams[0].AsArray := ar;
+  S.Execute;
+
+  {write the varchar array, including an empty and a full width element}
+  ar := Attachment.CreateArray(Tr,TestTable,'STRS');
+  for i := 0 to 3 do
+    ar.SetAsString([i],Names[i]);
+  S := Attachment.Prepare(Tr,'update ' + TestTable +
+        ' set STRS = ? where ID = 1');
+  S.SQLParams[0].AsArray := ar;
+  S.Execute;
+
+  {write the two dimensional array}
+  ar := Attachment.CreateArray(Tr,TestTable,'GRID');
+  Check('grid metadata: 2 dimensions',ar.GetDimensions = 2);
+  for i := 1 to 2 do
+    for j := 1 to 3 do
+      ar.SetAsDouble([i,j],i * 10 + j + 0.25);
+  S := Attachment.Prepare(Tr,'update ' + TestTable +
+        ' set GRID = ? where ID = 1');
+  S.SQLParams[0].AsArray := ar;
+  S.Execute;
+  S := nil;
+  ar := nil;
+  Tr.Commit;
+
+  {read everything back in a new transaction}
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  RS := Attachment.OpenCursorAtStart(Tr,
+          'select INTS,STRS,GRID from ' + TestTable + ' where ID = 1');
+
+  ar := RS[0].AsArray;
+  Check('integer array read back',ar <> nil);
+  if ar <> nil then
+    for i := 1 to 4 do
+      Check(Format('INTS[%d] element',[i]),ar.GetAsInteger([i]) = i * 10,
+            'got ' + IntToStr(ar.GetAsInteger([i])));
+
+  ar := RS[1].AsArray;
+  Check('varchar array read back',ar <> nil);
+  if ar <> nil then
+    for i := 0 to 3 do
+      Check(Format('STRS[%d] element',[i]),ar.GetAsString([i]) = Names[i],
+            'got "' + ar.GetAsString([i]) + '"');
+
+  ar := RS[2].AsArray;
+  Check('two dimensional array read back',ar <> nil);
+  if ar <> nil then
+    for i := 1 to 2 do
+      for j := 1 to 3 do
+        Check(Format('GRID[%d,%d] element',[i,j]),
+              Abs(ar.GetAsDouble([i,j]) - (i * 10 + j + 0.25)) < 1E-9,
+              FloatToStr(ar.GetAsDouble([i,j])));
+  ar := nil;
+  RS.Close;
+  RS := nil;
+
+  {update a single element through the read/modify/write cycle. The slice
+   must be read before a lone element is changed: as with the fbclient
+   providers, writing to an unloaded array sends the buffer as it stands.}
+  RS := Attachment.OpenCursorAtStart(Tr,
+          'select INTS from ' + TestTable + ' where ID = 1');
+  ar := RS[0].AsArray;
+  ar.PreLoad;
+  ar.SetAsInteger([2],1000);
+  S := Attachment.Prepare(Tr,'update ' + TestTable +
+        ' set INTS = ? where ID = 1');
+  S.SQLParams[0].AsArray := ar;
+  S.Execute;
+  S := nil;
+  ar := nil;
+  RS.Close;
+  RS := nil;
+  Tr.Commit;
+
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  RS := Attachment.OpenCursorAtStart(Tr,
+          'select INTS from ' + TestTable + ' where ID = 1');
+  ar := RS[0].AsArray;
+  Check('modified element read back',ar.GetAsInteger([2]) = 1000,
+        'got ' + IntToStr(ar.GetAsInteger([2])));
+  Check('neighbouring element untouched',ar.GetAsInteger([1]) = 10,
+        'got ' + IntToStr(ar.GetAsInteger([1])));
+  ar := nil;
+  RS.Close;
+  RS := nil;
+  Tr.Commit;
+
+  {cleanup - see the note in TestProviderUpdates}
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  try
+    Attachment.ExecImmediate(Tr,'drop table ' + TestTable);
+    Tr.Commit;
+    writeln('  note  array test table dropped');
+  except
+    on E: Exception do
+    begin
+      Tr.Rollback;
+      writeln('  note  the server would not drop the array test table yet: ',
+              E.Message);
+    end;
+  end;
+end;
+
+const
+  {a PSQL busy loop: slow enough to cancel or time out reliably, but
+   bounded, so a failure to interrupt it cannot hang the test}
+  sqlSlowQuery = 'execute block returns (n bigint) as ' +
+                 'begin n = 0; while (n < 200000000) do n = n + 1; suspend; end';
+
+procedure TestScrollableCursors;
+const TestTable = 'FBINTF_WIRE_SCROLL';
+var Tr: ITransaction;
+    S: IStatement;
+    RS: IResultSet;
+    i: integer;
+
+  function ID: integer;
+  begin
+    Result := RS.ByName('ID').AsInteger;
+  end;
+
+begin
+  writeln('Provider: scrollable cursors');
+  if not Attachment.HasScollableCursors then
+  begin
+    writeln('  SKIP  scrollable cursors need protocol 18 or later');
+    Exit;
+  end;
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  try
+    Attachment.ExecImmediate(Tr,'drop table ' + TestTable);
+    Tr.Commit;
+    Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+            isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  except
+    {the table did not exist}
+    Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+            isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  end;
+  Attachment.ExecImmediate(Tr,'create table ' + TestTable +
+    ' (ID integer not null primary key)');
+  Tr.Commit;
+
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  S := Attachment.Prepare(Tr,'insert into ' + TestTable + ' (ID) values (?)');
+  for i := 1 to 10 do
+  begin
+    S.SQLParams[0].AsInteger := i;
+    S.Execute;
+  end;
+
+  S := Attachment.Prepare(Tr,
+         'select ID from ' + TestTable + ' order by ID');
+  RS := S.OpenCursor(true);
+  Check('scrollable statement reports stScrollable',
+        stScrollable in S.GetFlags);
+
+  Check('fetch next finds the first row',RS.FetchNext);
+  Check('first row is 1',ID = 1,'got ' + IntToStr(ID));
+
+  Check('fetch last finds a row',RS.FetchLast);
+  Check('last row is 10',ID = 10,'got ' + IntToStr(ID));
+
+  Check('fetch prior steps back',RS.FetchPrior);
+  Check('prior of last is 9',ID = 9,'got ' + IntToStr(ID));
+
+  Check('fetch absolute 3 positions',RS.FetchAbsolute(3));
+  Check('third row is 3',ID = 3,'got ' + IntToStr(ID));
+
+  Check('fetch relative -1 steps back',RS.FetchRelative(-1));
+  Check('second row is 2',ID = 2,'got ' + IntToStr(ID));
+
+  Check('fetch first rewinds',RS.FetchFirst);
+  Check('first row again is 1',ID = 1,'got ' + IntToStr(ID));
+
+  Check('fetch absolute beyond the end returns false',
+        not RS.FetchAbsolute(1000));
+  {and the cursor is still usable afterwards}
+  Check('cursor survives the failed fetch',RS.FetchFirst);
+  Check('and still delivers row 1',ID = 1,'got ' + IntToStr(ID));
+
+  {sequential fetch after scrolling continues from the cursor position}
+  Check('fetch next after first',RS.FetchNext);
+  Check('second row is 2 again',ID = 2,'got ' + IntToStr(ID));
+
+  RS.Close;
+  RS := nil;
+  S := nil;
+  Tr.Commit;
+
+  {cleanup - see the note in TestProviderUpdates}
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  try
+    Attachment.ExecImmediate(Tr,'drop table ' + TestTable);
+    Tr.Commit;
+    writeln('  note  scroll test table dropped');
+  except
+    on E: Exception do
+    begin
+      Tr.Rollback;
+      writeln('  note  the server would not drop the scroll test table yet: ',
+              E.Message);
+    end;
+  end;
+end;
+
+procedure TestInlineBlobs;
+const TestTable = 'FBINTF_WIRE_INLINE';
+var Tr: ITransaction;
+    S: IStatement;
+    RS: IResultSet;
+    B: IBlob;
+    Small, Large, ReadBack: AnsiString;
+    i: integer;
+    Sent: cardinal;
+
+  function PacketsSent: cardinal;
+  begin
+    Result := (Attachment as TObject as TFBWireAttachment).
+                Connection.Transport.PacketsSent;
+  end;
+
+begin
+  writeln('Provider: inline blobs');
+  if (Attachment as TObject as TFBWireAttachment).Connection.ProtocolVersion <
+       (PROTOCOL_VERSION19 and FB_PROTOCOL_MASK) then
+  begin
+    writeln('  SKIP  inline blobs need protocol 19 or later');
+    Exit;
+  end;
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  try
+    Attachment.ExecImmediate(Tr,'drop table ' + TestTable);
+    Tr.Commit;
+    Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+            isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  except
+    {the table did not exist}
+    Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+            isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  end;
+  Attachment.ExecImmediate(Tr,'create table ' + TestTable +
+    ' (ID integer not null primary key, NOTES blob sub_type 1)');
+  Tr.Commit;
+
+  Small := 'A small blob that fits the inline limit with room to spare';
+  Large := '';
+  for i := 1 to 500 do
+    Large := Large + 'A large blob that must not travel inline, line ' +
+             IntToStr(i) + '.' + LineEnding;
+  Check('the large blob exceeds the limit',
+        Length(Large) > Attachment.GetInlineBlobLimit,
+        'limit ' + IntToStr(Attachment.GetInlineBlobLimit));
+
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  S := Attachment.Prepare(Tr,'insert into ' + TestTable +
+        ' (ID,NOTES) values (?,?)');
+  S.SQLParams[0].AsInteger := 1;
+  B := Attachment.CreateBlob(Tr,TestTable,'NOTES');
+  B.SetAsString(Small);
+  B.Close;
+  S.SQLParams[1].AsBlob := B;
+  S.Execute;
+  S.SQLParams[0].AsInteger := 2;
+  B := Attachment.CreateBlob(Tr,TestTable,'NOTES');
+  B.SetAsString(Large);
+  B.Close;
+  S.SQLParams[1].AsBlob := B;
+  S.Execute;
+  S := nil;
+  B := nil;
+  Tr.Commit;
+
+  {the small blob must be served from the cache: opening and reading it
+   after the fetch causes no wire traffic at all}
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_read],taCommit);
+  RS := Attachment.OpenCursorAtStart(Tr,
+          'select NOTES from ' + TestTable + ' where ID = 1');
+  Sent := PacketsSent;
+  ReadBack := RS[0].AsString;
+  Check('a small blob is served inline - no round trip',
+        PacketsSent = Sent,
+        Format('%d extra packets',[PacketsSent - Sent]));
+  Check('the inline copy is intact',ReadBack = Small);
+  RS.Close;
+  RS := nil;
+
+  {the large blob fell back to the classic exchanges}
+  RS := Attachment.OpenCursorAtStart(Tr,
+          'select NOTES from ' + TestTable + ' where ID = 2');
+  Sent := PacketsSent;
+  ReadBack := RS[0].AsString;
+  Check('a large blob still opens the classic way',PacketsSent > Sent);
+  Check('the large blob is intact',ReadBack = Large,
+        Format('wrote %d read %d',[Length(Large),Length(ReadBack)]));
+  RS.Close;
+  RS := nil;
+  Tr.Commit;
+
+  {opting out: with the limit at zero nothing arrives inline}
+  Attachment.SetInlineBlobLimit(0);
+  try
+    Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+            isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_read],taCommit);
+    RS := Attachment.OpenCursorAtStart(Tr,
+            'select NOTES from ' + TestTable + ' where ID = 1');
+    Sent := PacketsSent;
+    ReadBack := RS[0].AsString;
+    Check('with a zero limit the blob opens the classic way',
+          PacketsSent > Sent);
+    Check('and reads back intact',ReadBack = Small);
+    RS.Close;
+    RS := nil;
+    Tr.Commit;
+  finally
+    Attachment.SetInlineBlobLimit(DefaultMaxInlineBlobLimit);
+  end;
+
+  {cleanup - see the note in TestProviderUpdates}
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  try
+    Attachment.ExecImmediate(Tr,'drop table ' + TestTable);
+    Tr.Commit;
+    writeln('  note  inline blob test table dropped');
+  except
+    on E: Exception do
+    begin
+      Tr.Rollback;
+      writeln('  note  the server would not drop the inline blob test table yet: ',
+              E.Message);
+    end;
+  end;
+end;
+
+procedure TestBatch;
+const TestTable = 'FBINTF_WIRE_BATCH';
+var Tr: ITransaction;
+    S: IStatement;
+    RS: IResultSet;
+    BC: IBatchCompletion;
+    i, RowNo: integer;
+    status: IStatus;
+begin
+  writeln('Provider: the batch API');
+  if not Attachment.HasBatchMode then
+  begin
+    writeln('  SKIP  batches need protocol 16 or later');
+    Exit;
+  end;
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  try
+    Attachment.ExecImmediate(Tr,'drop table ' + TestTable);
+    Tr.Commit;
+    Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+            isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  except
+    {the table did not exist}
+    Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+            isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  end;
+  Attachment.ExecImmediate(Tr,'create table ' + TestTable +
+    ' (ID integer not null primary key, NAME varchar(30))');
+  Tr.Commit;
+
+  {a clean thousand row batch}
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  S := Attachment.Prepare(Tr,'insert into ' + TestTable +
+        ' (ID,NAME) values (?,?)');
+  for i := 1 to 1000 do
+  begin
+    S.SQLParams[0].AsInteger := i;
+    S.SQLParams[1].AsString := 'row ' + IntToStr(i);
+    S.AddToBatch;
+  end;
+  Check('statement is in batch mode',S.IsInBatchMode);
+  BC := S.ExecuteBatch(nil);
+  Check('batch mode ends with the execute',not S.IsInBatchMode);
+  Check('a thousand rows processed',BC.getTotalProcessed = 1000,
+        'got ' + IntToStr(BC.getTotalProcessed));
+  Check('a thousand rows updated',BC.getUpdated = 1000,
+        'got ' + IntToStr(BC.getUpdated));
+  Tr.Commit;
+
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  RS := Attachment.OpenCursorAtStart(Tr,'select count(*) from ' + TestTable);
+  Check('a thousand rows arrived',RS[0].AsInteger = 1000,
+        'got ' + IntToStr(RS[0].AsInteger));
+  RS.Close;
+  RS := nil;
+
+  {a batch that fails mid way: row 500 repeats key 499}
+  S := Attachment.Prepare(Tr,'insert into ' + TestTable +
+        ' (ID,NAME) values (?,?)');
+  for i := 1 to 1000 do
+  begin
+    if i = 500 then
+      S.SQLParams[0].AsInteger := 1499 {a duplicate of an earlier row}
+    else
+      S.SQLParams[0].AsInteger := 1000 + i;
+    S.SQLParams[1].AsString := 'second run row ' + IntToStr(i);
+    S.AddToBatch;
+    if i = 500 then
+      S.SQLParams[0].AsInteger := 1000 + i; {leave the next rows valid}
+  end;
+  BC := nil;
+  try
+    BC := S.ExecuteBatch(nil);
+    Check('the failing batch raised',false,'no exception');
+  except
+    on E: EIBInterBaseError do
+      Check('duplicate key reported',E.IBErrorCode = isc_unique_key_violation,
+            Format('error=%d %s',[E.IBErrorCode,E.Message]));
+  end;
+  BC := S.GetBatchCompletion;
+  Check('completion available after the error',BC <> nil);
+  if BC <> nil then
+  begin
+    Check('processing stopped at the failing row',
+          BC.getTotalProcessed = 500,'got ' + IntToStr(BC.getTotalProcessed));
+    Check('the rows before the failure were applied',
+          BC.getUpdated = 499,'got ' + IntToStr(BC.getUpdated));
+    Check('the failing row reports bcExecuteFailed',
+          BC.getState(499) = bcExecuteFailed);
+    status := nil;
+    Check('getErrorStatus finds the failure',BC.getErrorStatus(RowNo,status));
+    Check('the failure is in row 500',RowNo = 500,'got ' + IntToStr(RowNo));
+    Check('the error status carries the duplicate key code',
+          (status <> nil) and (status.GetIBErrorCode = isc_unique_key_violation));
+  end;
+  Tr.Rollback;
+
+  {cleanup - see the note in TestProviderUpdates}
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  try
+    Attachment.ExecImmediate(Tr,'drop table ' + TestTable);
+    Tr.Commit;
+    writeln('  note  batch test table dropped');
+  except
+    on E: Exception do
+    begin
+      Tr.Rollback;
+      writeln('  note  the server would not drop the batch test table yet: ',
+              E.Message);
+    end;
+  end;
+end;
+
+type
+  { TCancelVictim - runs the slow query so the main thread can cancel it }
+
+  TCancelVictim = class(TThread)
+  public
+    ErrorCode: Int64;
+    Completed: boolean;
+    Started: boolean;
+    procedure Execute; override;
+  end;
+
+procedure TCancelVictim.Execute;
+var Tr: ITransaction;
+begin
+  ErrorCode := 0;
+  try
+    Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+            isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+    Started := true;
+    Attachment.OpenCursorAtStart(Tr,sqlSlowQuery);
+    Completed := true;
+  except
+    on E: EIBInterBaseError do
+      ErrorCode := E.IBErrorCode;
+    on E: Exception do
+      ErrorCode := -1;
+  end;
+end;
+
+procedure TestCancellation;
+var Victim: TCancelVictim;
+    i: integer;
+begin
+  writeln('Provider: operation cancellation');
+  Victim := TCancelVictim.Create(true);
+  try
+    Victim.Start;
+    {give the query time to reach the server}
+    i := 0;
+    while not Victim.Started and (i < 5000) do
+    begin
+      Sleep(10);
+      Inc(i,10);
+    end;
+    Sleep(300);
+    Attachment.CancelOperation(fb_cancel_raise);
+    {the victim now fails with isc_cancelled - wait for it, bounded by
+     the query's own worst case run time}
+    i := 0;
+    while not Victim.Finished and (i < 120000) do
+    begin
+      Sleep(50);
+      Inc(i,50);
+    end;
+    Check('victim thread finished',Victim.Finished);
+    Check('cancelled promptly',i < 30000,Format('took %d ms',[i]));
+    Check('victim failed with isc_cancelled',
+          Victim.ErrorCode = isc_cancelled,
+          Format('completed=%s error=%d',
+                 [BoolToStr(Victim.Completed,true),Victim.ErrorCode]));
+  finally
+    Victim.WaitFor;
+    Victim.Free;
+  end;
+end;
+
+procedure TestStatementTimeout;
+var Tr: ITransaction;
+    S: IStatement;
+begin
+  writeln('Provider: statement timeout');
+  Tr := Attachment.StartTransaction([isc_tpb_read_committed,
+          isc_tpb_rec_version,isc_tpb_nowait,isc_tpb_write],taCommit);
+  S := Attachment.Prepare(Tr,sqlSlowQuery);
+  try
+    S.SetStatementTimeout(250);
+  except
+    on E: EIBClientError do
+    begin
+      writeln('  SKIP  statement timeouts need protocol 16 or later');
+      Exit;
+    end;
+  end;
+  Check('timeout value read back',S.GetStatementTimeout = 250);
+  try
+    S.OpenCursor.FetchNext;
+    Check('timeout fired',false,'the slow query ran to completion');
+  except
+    on E: EIBInterBaseError do
+      {an expired timeout cancels the request: the primary status code is
+       isc_cancelled with isc_req_stmt_timeout as the secondary. Nothing
+       else cancels in this test, so isc_cancelled here is the timeout.}
+      Check('timeout cancelled the statement',
+            E.IBErrorCode = isc_cancelled,
+            Format('error=%d %s',[E.IBErrorCode,E.Message]));
+  end;
+  {the statement stays usable: a fresh execute with no timeout succeeds}
+  S := Attachment.Prepare(Tr,'select 1 from rdb$database');
+  Check('connection still usable after timeout',
+        S.OpenCursor.FetchNext);
+end;
+
+type
+  { TEventCatcher - a TEventHandler needs an object method }
+
+  TEventCatcher = class
+  public
+    Signalled: boolean;
+    Counts: TEventCounts;
+    procedure HandleEvent(Sender: IEvents);
+  end;
+
+procedure TEventCatcher.HandleEvent(Sender: IEvents);
+begin
+  Counts := Sender.ExtractEventCounts;
+  Signalled := true;
+end;
+
+procedure TestEvents;
+const
+  sqlPostEvent = 'execute block as begin post_event ''WIRETEST_EVENT''; end';
+var Catcher: TEventCatcher;
+    EventHandler: IEvents;
+    Tr: ITransaction;
+    i: integer;
+
+  function WaitForSignal(aTimeoutMS: integer): boolean;
+  var waited: integer;
+  begin
+    waited := 0;
+    while not Catcher.Signalled and (waited < aTimeoutMS) do
+    begin
+      Sleep(50);
+      Inc(waited,50);
+    end;
+    Result := Catcher.Signalled;
+  end;
+
+  procedure PostEvent;
+  begin
+    Tr := Attachment.StartTransaction([isc_tpb_write,isc_tpb_nowait,
+            isc_tpb_concurrency],taCommit);
+    Attachment.ExecImmediate(Tr,sqlPostEvent);
+    Tr.Commit;
+  end;
+
+begin
+  writeln('Provider: events');
+  Catcher := TEventCatcher.Create;
+  try
+    try
+      EventHandler := Attachment.GetEventHandler('WIRETEST_EVENT');
+    except on E: Exception do
+      begin
+        {events need the server's auxiliary port to be reachable. In a
+         container or behind a firewall that means pinning it with
+         RemoteAuxPort in firebird.conf and opening it - without that the
+         rest of the suite is still worth running}
+        writeln('  SKIP  events: the auxiliary port is not reachable (',
+                E.Message,')');
+        writeln('        set RemoteAuxPort in firebird.conf and open that port');
+        Exit;
+      end;
+    end;
+    Check('event handler obtained',EventHandler <> nil);
+
+    {the first wait establishes the baseline: whether it fires immediately
+     depends on the event's history, so absorb it}
+    Catcher.Signalled := false;
+    EventHandler.AsyncWaitForEvent(Catcher.HandleEvent);
+    WaitForSignal(1000);
+    if Catcher.Signalled then
+    begin
+      Catcher.Signalled := false;
+      EventHandler.AsyncWaitForEvent(Catcher.HandleEvent);
+      Sleep(200);
+    end;
+
+    {a posted event must now be delivered}
+    PostEvent;
+    Check('posted event was delivered',WaitForSignal(5000));
+    Check('event name reported',
+          (Length(Catcher.Counts) = 1) and
+          (Catcher.Counts[0].EventName = 'WIRETEST_EVENT'));
+    if Length(Catcher.Counts) = 1 then
+      Check('event count is positive',Catcher.Counts[0].Count > 0,
+            'got ' + IntToStr(Catcher.Counts[0].Count));
+
+    {events posted while nobody waits are delivered on the next wait}
+    Catcher.Signalled := false;
+    PostEvent;
+    PostEvent;
+    Sleep(300);
+    Check('no delivery without a wait',not Catcher.Signalled);
+    EventHandler.AsyncWaitForEvent(Catcher.HandleEvent);
+    Check('deferred events were caught',WaitForSignal(5000));
+    if Length(Catcher.Counts) = 1 then
+      Check('both deferred events counted',Catcher.Counts[0].Count = 2,
+            'got ' + IntToStr(Catcher.Counts[0].Count));
+
+    {cancel must stop delivery}
+    Catcher.Signalled := false;
+    EventHandler.AsyncWaitForEvent(Catcher.HandleEvent);
+    Sleep(200);
+    Catcher.Signalled := false;   {absorb any baseline delivery}
+    EventHandler.Cancel;
+    PostEvent;
+    i := 0;
+    while not Catcher.Signalled and (i < 1000) do
+    begin
+      Sleep(50);
+      Inc(i,50);
+    end;
+    Check('no delivery after cancel',not Catcher.Signalled);
+
+    EventHandler := nil;
+  finally
+    Catcher.Free;
+  end;
+end;
+
 {---------------------------------------------------------------------------}
 
 begin
@@ -719,6 +1457,13 @@ begin
     TestProviderQueries;
     TestProviderDataTypes;
     TestProviderUpdates;
+    TestArrays;
+    TestScrollableCursors;
+    TestInlineBlobs;
+    TestBatch;
+    TestCancellation;
+    TestStatementTimeout;
+    TestEvents;
     TestCreateDatabase;
   finally
     Attachment.Disconnect;

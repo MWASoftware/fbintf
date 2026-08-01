@@ -50,6 +50,9 @@ type
     FHandle: integer;
     FInTransaction: boolean;
     function GetConnection: TFBWireConnection;
+    {forgets this transaction's inline blob cache entries in every
+     attachment - the ids die with the transaction}
+    procedure DropInlineBlobs;
   protected
     function GetActivityIntf(att: IAttachment): IActivityMonitor; override;
     function GetTrInfo(ReqBuffer: PByte; ReqBufLen: integer): ITrInformation; override;
@@ -88,6 +91,14 @@ begin
   if GetAttachmentCount = 0 then
     IBError(ibxeNotInTransaction,[nil]);
   Result := (GetAttachment(0) as IAttachment as TObject as TFBWireAttachment).Connection;
+end;
+
+procedure TFBWireTransaction.DropInlineBlobs;
+var i: integer;
+begin
+  for i := 0 to GetAttachmentCount - 1 do
+    (GetAttachment(i) as IAttachment as TObject as TFBWireAttachment).
+      DropInlineBlobs(FHandle);
 end;
 
 function TFBWireTransaction.GetActivityIntf(att: IAttachment): IActivityMonitor;
@@ -152,6 +163,7 @@ begin
     FHandle := 0;
     Exit;
   end;
+  DropInlineBlobs;
   try
     Connection.Commit(FHandle);
   except
@@ -171,6 +183,9 @@ end;
 procedure TFBWireTransaction.InternalCommitRetaining;
 begin
   CheckHandle;
+  {retaining keeps the transaction handle but a commit still invalidates
+   temporary blob ids}
+  DropInlineBlobs;
   try
     Connection.CommitRetaining(FHandle);
   except
@@ -190,6 +205,7 @@ begin
     FHandle := 0;
     Exit;
   end;
+  DropInlineBlobs;
   try
     Connection.Rollback(FHandle);
   except
@@ -209,6 +225,7 @@ end;
 procedure TFBWireTransaction.InternalRollbackRetaining;
 begin
   CheckHandle;
+  DropInlineBlobs;
   try
     Connection.RollbackRetaining(FHandle);
   except

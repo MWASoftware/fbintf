@@ -10,12 +10,12 @@ on:
     branches: [ main, 'pure-pascal-wire-protocol' ]
     paths:
       - 'client/**'
-      - 'testsuite/WireTest.pas'
+      - 'testsuite/**'
       - '.github/workflows/wire-protocol.yml'
   pull_request:
     paths:
       - 'client/**'
-      - 'testsuite/WireTest.pas'
+      - 'testsuite/**'
       - '.github/workflows/wire-protocol.yml'
   workflow_dispatch:
 
@@ -48,10 +48,10 @@ jobs:
             expected: '17'
           - firebird: '5'
             image: 'firebirdsql/firebird:5'
-            expected: '17'
+            expected: '19'
           - firebird: '6'
             image: 'firebirdsql/firebird:6-snapshot'
-            expected: '17'
+            expected: '19'
         exclude:
           # Protocol 13, the only one Firebird 3 offers without encryption
           # support, cannot satisfy WireCrypt = Required. The combination is
@@ -70,7 +70,9 @@ jobs:
             -e FIREBIRD_CONF_WireCrypt="${{ matrix.wirecrypt }}" \
             -e FIREBIRD_CONF_AuthServer="Srp256;Srp;Legacy_Auth" \
             -e FIREBIRD_CONF_DatabaseAccess="Full" \
+            -e FIREBIRD_CONF_RemoteAuxPort="3051" \
             -p 3050:3050 \
+            -p 3051:3051 \
             "${{ matrix.image }}"
 
           echo "Waiting for the server to accept connections"
@@ -201,3 +203,109 @@ jobs:
           # Nothing listens on port 3051, so every section that needs a
           # server reports SKIP straight away and the rest still runs.
           ./build/WireTest "localhost/3051:/nonexistent.fdb" SYSDBA masterkey
+
+  suite:
+    # The full fbintf test suite - all twenty two test programs - run over
+    # the wire protocol provider and compared line by line against
+    # testsuite/FBWirereference.log. The suite needs the employee example
+    # database, which the container images do not ship, so it is restored
+    # from the checked in backup. The reference log was produced against
+    # Firebird 6 (ODS 14, protocol 17), so this job runs that server.
+    name: Full test suite over the wire (FB 6)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start Firebird 6
+        run: |
+          mkdir -p /tmp/fbintf-testsuite
+          chmod 777 /tmp/fbintf-testsuite
+          docker run -d \
+            --name firebird \
+            -e FIREBIRD_ROOT_PASSWORD="${FB_PASSWORD}" \
+            -e FIREBIRD_CONF_WireCrypt="Enabled" \
+            -e FIREBIRD_CONF_AuthServer="Srp256;Srp;Legacy_Auth" \
+            -e FIREBIRD_CONF_DatabaseAccess="Full" \
+            -e FIREBIRD_CONF_RemoteAuxPort="3051" \
+            -v /tmp/fbintf-testsuite:/tmp/fbintf-testsuite \
+            -p 3050:3050 \
+            -p 3051:3051 \
+            firebirdsql/firebird:6-snapshot
+          echo "Waiting for the server to accept connections"
+          ready=false
+          for i in $(seq 1 45); do
+            if docker exec firebird /opt/firebird/bin/isql \
+                 -user "${FB_USER}" -password "${FB_PASSWORD}" -z 2>&1 \
+                 | grep -q "ISQL Version"; then
+              ready=true
+              break
+            fi
+            sleep 2
+          done
+          if [ "$ready" != true ]; then
+            echo "::error::Firebird did not become ready"
+            docker logs firebird
+            exit 1
+          fi
+
+      - name: Restore the employee example database
+        run: |
+          docker cp testsuite/employee.gbk firebird:/tmp/employee.gbk
+          docker exec firebird /opt/firebird/bin/gbak -c \
+            -user "${FB_USER}" -password "${FB_PASSWORD}" \
+            /tmp/employee.gbk /tmp/fbintf-testsuite/employee.fdb
+          docker exec firebird sh -c \
+            'echo "employee = /tmp/fbintf-testsuite/employee.fdb" >> /opt/firebird/databases.conf'
+          docker exec firebird /opt/firebird/bin/isql \
+            -user "${FB_USER}" -password "${FB_PASSWORD}" \
+            -q localhost:employee <<'SQL'
+          select count(*) from EMPLOYEE;
+          quit;
+          SQL
+
+      - name: Install Free Pascal
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fpc
+          echo "compiler: $(fpc -iV), target: $(fpc -iTO)-$(fpc -iTP)"
+
+      - name: Run the test suite over the wire provider
+        run: |
+          testsuite/runtest.sh -a wire
+
+      - name: Check the reference log comparison
+        run: |
+          # runtest.sh always exits 0: the outcome is the diff, and the log
+          # must show a completed run for the diff to mean anything
+          if ! grep -aq "Test Suite Ends" testsuite/testout.log; then
+            echo "::error::The test suite did not run to completion"
+            tail -50 testsuite/testout.log || true
+            exit 1
+          fi
+          if [ -s testsuite/diff.log ]; then
+            echo "::error::The suite output differs from FBWirereference.log"
+            cat testsuite/diff.log
+            exit 1
+          fi
+          echo "The suite output matches the reference log"
+          {
+            echo "### Full test suite over the wire"
+            echo
+            echo "All twenty two test programs match \`FBWirereference.log\`."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the test output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wire-suite-testout
+          path: |
+            testsuite/testout.log
+            testsuite/diff.log
+          if-no-files-found: ignore
+
+      - name: Server diagnostics on failure
+        if: failure()
+        run: |
+          docker logs firebird --tail 100
