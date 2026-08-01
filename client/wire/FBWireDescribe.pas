@@ -53,7 +53,9 @@ type
   end;
 
 {the standard describe item list sent with op_prepare_statement}
-function DescribeItems: TBytes;
+{aIncludeSchema adds the protocol 20 per column schema name item - only
+ ask a server that knows it}
+function DescribeItems(aIncludeSchema: boolean = false): TBytes;
 
 function ParsePrepareResponse(const aBuffer: TBytes): TWireStatementInfo;
 
@@ -67,35 +69,66 @@ implementation
 {the isc_info_* and isc_info_sql_* constants come from IB.pas which
  includes inf_pub.inc}
 
-function DescribeItems: TBytes;
+function DescribeItems(aIncludeSchema: boolean): TBytes;
 begin
-  Result := TBytes.Create(
-    isc_info_sql_stmt_type,
-    isc_info_sql_select,
-    isc_info_sql_describe_vars,
-    isc_info_sql_sqlda_seq,
-    isc_info_sql_type,
-    isc_info_sql_sub_type,
-    isc_info_sql_scale,
-    isc_info_sql_length,
-    isc_info_sql_field,
-    isc_info_sql_relation,
-    isc_info_sql_owner,
-    isc_info_sql_alias,
-    isc_info_sql_describe_end,
-    isc_info_sql_bind,
-    isc_info_sql_describe_vars,
-    isc_info_sql_sqlda_seq,
-    isc_info_sql_type,
-    isc_info_sql_sub_type,
-    isc_info_sql_scale,
-    isc_info_sql_length,
-    isc_info_sql_field,
-    isc_info_sql_relation,
-    isc_info_sql_owner,
-    isc_info_sql_alias,
-    isc_info_sql_describe_end,
-    isc_info_end);
+  if aIncludeSchema then
+    Result := TBytes.Create(
+      isc_info_sql_stmt_type,
+      isc_info_sql_select,
+      isc_info_sql_describe_vars,
+      isc_info_sql_sqlda_seq,
+      isc_info_sql_type,
+      isc_info_sql_sub_type,
+      isc_info_sql_scale,
+      isc_info_sql_length,
+      isc_info_sql_field,
+      isc_info_sql_relation,
+      isc_info_sql_relation_schema,
+      isc_info_sql_owner,
+      isc_info_sql_alias,
+      isc_info_sql_describe_end,
+      isc_info_sql_bind,
+      isc_info_sql_describe_vars,
+      isc_info_sql_sqlda_seq,
+      isc_info_sql_type,
+      isc_info_sql_sub_type,
+      isc_info_sql_scale,
+      isc_info_sql_length,
+      isc_info_sql_field,
+      isc_info_sql_relation,
+      isc_info_sql_relation_schema,
+      isc_info_sql_owner,
+      isc_info_sql_alias,
+      isc_info_sql_describe_end,
+      isc_info_end)
+  else
+    Result := TBytes.Create(
+      isc_info_sql_stmt_type,
+      isc_info_sql_select,
+      isc_info_sql_describe_vars,
+      isc_info_sql_sqlda_seq,
+      isc_info_sql_type,
+      isc_info_sql_sub_type,
+      isc_info_sql_scale,
+      isc_info_sql_length,
+      isc_info_sql_field,
+      isc_info_sql_relation,
+      isc_info_sql_owner,
+      isc_info_sql_alias,
+      isc_info_sql_describe_end,
+      isc_info_sql_bind,
+      isc_info_sql_describe_vars,
+      isc_info_sql_sqlda_seq,
+      isc_info_sql_type,
+      isc_info_sql_sub_type,
+      isc_info_sql_scale,
+      isc_info_sql_length,
+      isc_info_sql_field,
+      isc_info_sql_relation,
+      isc_info_sql_owner,
+      isc_info_sql_alias,
+      isc_info_sql_describe_end,
+      isc_info_end);
 end;
 
 function ParsePrepareResponse(const aBuffer: TBytes): TWireStatementInfo;
@@ -236,6 +269,11 @@ begin
       begin
         EnsureIndex;
         fmt^[index].RelationName := ReadStr(len);
+      end;
+    isc_info_sql_relation_schema:
+      begin
+        EnsureIndex;
+        fmt^[index].SchemaName := ReadStr(len);
       end;
     isc_info_sql_owner:
       begin
