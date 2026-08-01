@@ -370,9 +370,16 @@ type
  reset would leak.}
 procedure ResetCursorState(var aState: TWireCursorState);
 
+{formats a decoded status vector the way fb_interpret does: each
+ isc_arg_gds item's message text - from the generated FBWireMessages
+ table, with its @1..@n arguments substituted - or the server's
+ interpreted text, successive items joined with a "-" continuation
+ line. Codes the table does not know fall back to the numeric form.}
+function FormatWireStatus(const aStatus: TWireStatusVector): AnsiString;
+
 implementation
 
-uses IBErrorCodes;
+uses IBErrorCodes, FBWireMessages;
 
 const
   isc_arg_end          = 0;
@@ -391,6 +398,90 @@ begin
   SetLength(aState.Rows,0);
   aState.NextRow := 0;
   aState.EndOfCursor := false;
+end;
+
+function FormatWireStatus(const aStatus: TWireStatusVector): AnsiString;
+var i, argNo: integer;
+    part, fmt: AnsiString;
+    args: array of AnsiString;
+
+  procedure AddPart(const aPart: AnsiString);
+  begin
+    if Result = '' then
+      Result := aPart
+    else
+      Result := Result + LineEnding + '-' + aPart;
+  end;
+
+  function Substitute(const aFormat: AnsiString): AnsiString;
+  var j, n: integer;
+  begin
+    Result := '';
+    j := 1;
+    while j <= Length(aFormat) do
+    begin
+      if (aFormat[j] = '@') and (j < Length(aFormat)) and
+         (aFormat[j+1] in ['1'..'9']) then
+      begin
+        n := ord(aFormat[j+1]) - ord('0');
+        if n <= Length(args) then
+          Result := Result + args[n-1];
+        Inc(j,2);
+      end
+      else
+      begin
+        Result := Result + aFormat[j];
+        Inc(j);
+      end;
+    end;
+  end;
+
+begin
+  Result := '';
+  i := 0;
+  while i < Length(aStatus) do
+  begin
+    case aStatus[i].Kind of
+    isc_arg_gds, isc_arg_warning:
+      begin
+        if aStatus[i].IntValue = 0 then
+        begin
+          Inc(i);
+          continue;
+        end;
+        {gather the item's arguments: the string and number items that
+         follow it}
+        SetLength(args,0);
+        argNo := i + 1;
+        while (argNo < Length(aStatus)) and
+              (aStatus[argNo].Kind in [isc_arg_string,isc_arg_number]) do
+        begin
+          SetLength(args,Length(args)+1);
+          if aStatus[argNo].Kind = isc_arg_number then
+            args[High(args)] := IntToStr(aStatus[argNo].IntValue)
+          else
+            args[High(args)] := aStatus[argNo].StrValue;
+          Inc(argNo);
+        end;
+        if FindEngineMessage(cardinal(aStatus[i].IntValue),fmt) then
+          part := Substitute(fmt)
+        else
+          part := Format('Firebird Error Code: %d',[aStatus[i].IntValue]);
+        AddPart(part);
+        i := argNo;
+      end;
+    isc_arg_interpreted:
+      begin
+        AddPart(aStatus[i].StrValue);
+        Inc(i);
+      end;
+    else
+      {sql state and anything else contribute nothing to the text}
+      Inc(i);
+    end;
+  end;
+  if Result = '' then
+    Result := 'Firebird error';
 end;
 
 { TWireResponse }
@@ -413,26 +504,9 @@ end;
 { EFBWireProtocolError }
 
 constructor EFBWireProtocolError.CreateFromStatus(const aStatus: TWireStatusVector);
-var msg: AnsiString;
-    i: integer;
 begin
   FStatus := aStatus;
-  msg := '';
-  for i := 0 to Length(aStatus) - 1 do
-    case aStatus[i].Kind of
-    isc_arg_string, isc_arg_interpreted:
-      begin
-        if msg <> '' then
-          msg := msg + LineEnding + '-';
-        msg := msg + aStatus[i].StrValue;
-      end;
-    isc_arg_gds:
-      if (msg = '') and (aStatus[i].IntValue <> 0) then
-        msg := Format('Engine Code: %d',[aStatus[i].IntValue]);
-    end;
-  if msg = '' then
-    msg := 'Firebird error';
-  inherited Create(msg);
+  inherited Create(FormatWireStatus(aStatus));
 end;
 
 { TRC4WireCipher }

@@ -1,7 +1,39 @@
 # Design: Engine message text without firebird.msg
 
-Roadmap milestone 12 (`doc/WireProtocol.md`). This document is the
-implementation plan; no code changes are included.
+Roadmap milestone 12 (`doc/WireProtocol.md`).
+
+**Status: implemented** — `generate_messages.py` + the committed
+`FBWireMessages.pas` (1682 messages, ~200KB of binary), the
+`FormatWireStatus` formatter shared by `EIBInterBaseError` and the
+protocol exception, and offline WireTest assertions (171 tests).
+Findings against the plan:
+
+* The message source is no longer `messages2.sql`: modern Firebird
+  keeps the message database in `src/include/firebird/impl/msg/*.h` as
+  `FB_IMPL_MSG` entries - facility, number, symbol, SQLCODE, SQLSTATE
+  and text in one place, which also let the table carry each code's
+  SQLCODE for free.
+* JRD, DSQL and DYN were not enough: the `At line @1, column @2`
+  companion of every DSQL error lives in facility 13 (SQLERR), which
+  also holds the per SQLCODE interpretation texts that
+  `isc_sql_interprete` looks up at `1000 + sqlcode` (facility 14 for
+  warnings). With those two facilities included, the wire status object
+  implements `Getsqlcode` (the `gds__sqlcode` rules: an `isc_sqlerr`
+  item's number argument wins outright, else the first item's mapping)
+  and `GetSQLMessage` client side, so the full fbclient error shape -
+  SQLCODE line and all - appears, not just the message text. The base
+  class's SQLCODE methods became virtual to allow it.
+* Parity testing against the 3.0 provider on the same server exposed
+  two behavioural gaps beyond message text, both closed: prepare errors
+  now append ` When Executing: <sql>` as the other providers do, and
+  the stale reference checks (`ibxeInterfaceOutofDate` when a prepared
+  statement is used across a transaction restart) were missing from the
+  wire statement entirely.
+* Test 16's error output is now identical to fbclient on the same
+  server, except the invalid-server-name section the test skips for the
+  wire provider by design. The suite reference log is regenerated: its
+  numeric `Engine Code:` fallbacks give way to the real text
+  everywhere.
 
 ## Goal
 
