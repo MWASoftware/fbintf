@@ -10,7 +10,7 @@ Creating a Database with empty parameters
 Create Database fails (as expected): Engine Code: 0
 Firebird Error Code: 0
 Creating a Database using an SQL Statement
-Database ID = 3 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = 1243258ab623
+Database ID = 3 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = d28565153997
 SQL Dialect = 3
 DB Connect String = inet://localhost//tmp/fbintf-testsuite/testsuite1.fdb
 DB Charset ID = 0
@@ -48,7 +48,7 @@ DPB: Item Count = 4
   isc_dpb_set_db_sql_dialect = 3
 
 Creating a Database with a DPD
-Database ID = 3 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = 1243258ab623
+Database ID = 3 FB = /tmp/fbintf-testsuite/testsuite1.fdb SN = d28565153997
 ODS major = 14
 ODS minor = 0
 Attachment ID = 3
@@ -573,7 +573,7 @@ JOB_CODE = Eng
 JOB_GRADE = 4
 JOB_COUNTRY = England
 SALARY = 41,000.89
-FULL_NAME = Doe                 , John
+FULL_NAME = Doe, John
 
 Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
 EMP_NO = 501
@@ -586,7 +586,7 @@ JOB_CODE = Eng
 JOB_GRADE = 4
 JOB_COUNTRY = England
 SALARY = 40,000.59
-FULL_NAME = Major               , Major
+FULL_NAME = Major, Major
 
 Now Delete the rows
 Select Count = 1 InsertCount = 0 UpdateCount = 0 DeleteCount = 1
@@ -603,7 +603,7 @@ JOB_CODE = Eng
 JOB_GRADE = 4
 JOB_COUNTRY = England
 SALARY = 41,000.89
-FULL_NAME = Doe                 , Jane
+FULL_NAME = Doe, Jane
 
 Employee Count = 43
 Updating
@@ -620,7 +620,7 @@ JOB_CODE = Eng
 JOB_GRADE = 4
 JOB_COUNTRY = England
 SALARY = 41,000.89
-FULL_NAME = Doe                 , Jayne's
+FULL_NAME = Doe, Jayne's
 
 Prepare Query again with a different transaction
 
@@ -699,7 +699,7 @@ SALARY = 64,635.00
 FULL_NAME = Johnson, Leslie
 
 Inserting
-Full Name = Doe                 , John           
+Full Name = Doe, John
 Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
 Database Activity = FALSE
 Transaction Activity = FALSE
@@ -1160,13 +1160,13 @@ Nullable
 Size = 4
 Value = 3
 
-SQLType =SQL_TEXT
+SQLType =SQL_VARYING
 sub type = 0
 Field Name = 
 Scale = 0
 Charset id = 0
 Nullable
-Size = 43
+Size = 80
 Value = The Quick Brown Fox Jumps over the Lazy Dog
 
 SQL Params
@@ -1710,13 +1710,13 @@ Nullable
 Size = 4
 Value = 3
 
-SQLType =SQL_TEXT
+SQLType =SQL_VARYING
 sub type = 0
 Field Name = 
 Scale = 0
 Charset id = 0
 Nullable
-Size = 43
+Size = 80
 Value = The Quick Brown Fox Jumps over the Lazy Dog
 
 SQL Params
@@ -2260,13 +2260,13 @@ Nullable
 Size = 4
 Value = 3
 
-SQLType =SQL_TEXT
+SQLType =SQL_VARYING
 sub type = 0
 Field Name = 
 Scale = 0
 Charset id = 0
 Nullable
-Size = 43
+Size = 80
 Value = The Quick Brown Fox Jumps over the Lazy Dog
 
 SQL Params
@@ -2771,7 +2771,7 @@ MYARRAY = Array: (0,-1: A50) (0,0: A51) (0,1: A52) (0,2: A53) (0,3: A54) (0,4: A
 
 ------------------------------------------------------
 Running Test 9: Database Information tests
-Database ID = 3 FB = /tmp/fbintf-testsuite/employee.fdb SN = 1243258ab623
+Database ID = 3 FB = /tmp/fbintf-testsuite/employee.fdb SN = d28565153997
 Pages =401
 Base Level = 13,3,0,
 Implementation = 11,5,0,2,66,
@@ -2781,7 +2781,7 @@ ODS major = 14
 Page Size = 8192
 Version = 1: LI-T6.3.0.2105 Firebird 6.0 1d25527
 Database is Read/Write
-Database Created: 01/8/2026 14:10:13
+Database Created: 01/8/2026 15:27:45
 Pages Used = 388
 Pages Free = 13
 Server Memory = 19488400
@@ -2963,31 +2963,31 @@ Nullable
 Size = 4
 Value = 1
 
-SQLType =SQL_TEXT
-sub type = 0
+SQLType =SQL_VARYING
+sub type = 4
 Field Name = TITLE
 Scale = 0
 Charset id = 4
 Nullable
 Size = 128
-Value = Blob Test ©€                    
+Value = Blob Test ©€
 
-SQLType =SQL_TEXT
-sub type = 0
+SQLType =SQL_VARYING
+sub type = 4
 Field Name = NOTES
 Scale = 0
 Charset id = 4
 Nullable
 Size = 256
-Value = Écoute moi                                                      
+Value = Écoute moi
 
-SQLType =SQL_TEXT
+SQLType =SQL_VARYING
 sub type = 0
 Field Name = BLOBDATA
 Scale = 0
 Charset id = 0
 Nullable
-Size = 50
+Size = 8192
 Value = Some German Special Characters like ÖÄÜöäüß
 
 SQLType =SQL_BLOB
@@ -2999,23 +2999,23 @@ Nullable
 Size = 8
 Value = Some German Special Characters like ÖÄÜöäüß
 
-SQLType =SQL_TEXT
-sub type = 0
+SQLType =SQL_VARYING
+sub type = 1
 Field Name = INCLEAR
 Scale = 0
 Charset id = 1
 Nullable
 Size = 16
-1 54 65 73 74 D C3 20 20 20 20 20 20 20 20 20 
+1 54 65 73 74 D C3 
 
-SQLType =SQL_TEXT
-sub type = 4
+SQLType =SQL_VARYING
+sub type = 0
 Field Name = FIXEDWIDTH
 Scale = 0
 Charset id = 4
 Nullable
 Size = 16
-Value = É   
+Value = É
 
 Connection Character Set UTF8
 ROWID = 1
@@ -3023,7 +3023,7 @@ TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage =
 NOTES = C3 89 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 4 Codepage = 65001)
 BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 0 Codepage = 0)
 BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 0 Codepage = 0)
-INCLEAR = 1 54 65 73 74 D C3 20 20 20 20 20 20 20 20 20  (Charset Id = 1 Codepage = 65535)
+INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
 FIXEDWIDTH = C3 89  (Charset Id = 4 Codepage = 65001)
 
 Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
@@ -3037,7 +3037,7 @@ TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage =
 NOTES = C9 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 1045 Codepage = 65535)
 BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 0 Codepage = 0)
 BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 0 Codepage = 0)
-INCLEAR = 1 54 65 73 74 D C3 20 20 20 20 20 20 20 20 20  (Charset Id = 1 Codepage = 65535)
+INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
 FIXEDWIDTH = C3 89  (Charset Id = 4 Codepage = 65001)
 
 Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
@@ -3051,7 +3051,7 @@ TITLE = 42 6C 6F 62 20 54 65 73 74 20 A9 80  (Charset Id = 53 Codepage = 1252)
 NOTES = C9 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 53 Codepage = 1252)
 BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 0 Codepage = 0)
 BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 0 Codepage = 0)
-INCLEAR = 1 54 65 73 74 D C3 20 20 20 20 20 20 20 20 20  (Charset Id = 1 Codepage = 65535)
+INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
 FIXEDWIDTH = C9  (Charset Id = 53 Codepage = 1252)
 
 Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
@@ -3129,31 +3129,31 @@ Nullable
 Size = 4
 Value = 1
 
-SQLType =SQL_TEXT
-sub type = 0
+SQLType =SQL_VARYING
+sub type = 4
 Field Name = TITLE
 Scale = 0
 Charset id = 4
 Nullable
 Size = 128
-Value = Blob Test ©€                    
+Value = Blob Test ©€
 
-SQLType =SQL_TEXT
-sub type = 0
+SQLType =SQL_VARYING
+sub type = 4
 Field Name = NOTES
 Scale = 0
 Charset id = 4
 Nullable
 Size = 256
-Value = Écoute moi                                                      
+Value = Écoute moi
 
-SQLType =SQL_TEXT
+SQLType =SQL_VARYING
 sub type = 0
 Field Name = BLOBDATA
 Scale = 0
 Charset id = 0
 Nullable
-Size = 50
+Size = 8192
 Value = Some German Special Characters like ÖÄÜöäüß
 
 SQLType =SQL_BLOB
@@ -3165,23 +3165,23 @@ Nullable
 Size = 8
 Value = Some German Special Characters like ÖÄÜöäüß
 
-SQLType =SQL_TEXT
-sub type = 0
+SQLType =SQL_VARYING
+sub type = 1
 Field Name = INCLEAR
 Scale = 0
 Charset id = 1
 Nullable
 Size = 16
-1 54 65 73 74 D C3 20 20 20 20 20 20 20 20 20 
+1 54 65 73 74 D C3 
 
-SQLType =SQL_TEXT
-sub type = 4
+SQLType =SQL_VARYING
+sub type = 0
 Field Name = FIXEDWIDTH
 Scale = 0
 Charset id = 4
 Nullable
 Size = 16
-Value = É   
+Value = É
 
 Connection Character Set UTF8
 ROWID = 1
@@ -3189,7 +3189,7 @@ TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage =
 NOTES = C3 89 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 4 Codepage = 65001)
 BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 0 Codepage = 0)
 BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 0 Codepage = 0)
-INCLEAR = 1 54 65 73 74 D C3 20 20 20 20 20 20 20 20 20  (Charset Id = 1 Codepage = 65535)
+INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
 FIXEDWIDTH = C3 89  (Charset Id = 4 Codepage = 65001)
 
 Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
@@ -3203,7 +3203,7 @@ TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage =
 NOTES = C9 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 1045 Codepage = 65535)
 BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 0 Codepage = 0)
 BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 0 Codepage = 0)
-INCLEAR = 1 54 65 73 74 D C3 20 20 20 20 20 20 20 20 20  (Charset Id = 1 Codepage = 65535)
+INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
 FIXEDWIDTH = C3 89  (Charset Id = 4 Codepage = 65001)
 
 Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
@@ -3217,7 +3217,7 @@ TITLE = 42 6C 6F 62 20 54 65 73 74 20 A9 80  (Charset Id = 53 Codepage = 1252)
 NOTES = C9 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 53 Codepage = 1252)
 BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 0 Codepage = 0)
 BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 0 Codepage = 0)
-INCLEAR = 1 54 65 73 74 D C3 20 20 20 20 20 20 20 20 20  (Charset Id = 1 Codepage = 65535)
+INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
 FIXEDWIDTH = C9  (Charset Id = 53 Codepage = 1252)
 
 Test Exception Message = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F 
@@ -3235,7 +3235,7 @@ TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage =
 NOTES = C3 89 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 4 Codepage = 65001)
 BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 0 Codepage = 0)
 BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 0 Codepage = 0)
-INCLEAR = 1 54 65 73 74 D C3 20 20 20 20 20 20 20 20 20  (Charset Id = 1 Codepage = 65535)
+INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
 
 Init Database 2
 ROWID = 1
@@ -3243,7 +3243,7 @@ TITLE = 42 6C 6F 62 20 54 65 73 74 20 C2 A9 E2 82 AC  (Charset Id = 4 Codepage =
 NOTES = C3 89 63 6F 75 74 65 20 6D 6F 69  (Charset Id = 4 Codepage = 65001)
 BLOBDATA = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 0 Codepage = 0)
 BLOBDATA2 = 53 6F 6D 65 20 47 65 72 6D 61 6E 20 53 70 65 63 69 61 6C 20 43 68 61 72 61 63 74 65 72 73 20 6C 69 6B 65 20 C3 96 C3 84 C3 9C C3 B6 C3 A4 C3 BC C3 9F  (Charset Id = 0 Codepage = 0)
-INCLEAR = 1 54 65 73 74 D C3 20 20 20 20 20 20 20 20 20  (Charset Id = 1 Codepage = 65535)
+INCLEAR = 1 54 65 73 74 D C3  (Charset Id = 1 Codepage = 65535)
 
 Skipping test - multi database transactions are not supported by this provider
 
@@ -3712,13 +3712,284 @@ BigNumber Array: (0: 0) (1: 0) (2: 0) (3: 0) (4: 0) (5: 0) (6: 0) (7: 0) (8: 0) 
 ------------------------------------------------------
 Running Test 19: Batch Update and Insert Queries
 Opening inet://localhost/employee
-Skipping test for Firebird 4 and later
+Database Open
+Firebird wire protocol version 18, Srp256 authentication, ChaCha64 wire encryption
+Rows before update
+EMP_NO = 2
+FIRST_NAME = Robert
+LAST_NAME = Nelson
+PHONE_EXT = 250
+HIRE_DATE = 1988/12/28 00:00:00.0000
+DEPT_NO = 600
+JOB_CODE = VP
+JOB_GRADE = 2
+JOB_COUNTRY = USA
+SALARY = 105,900.00
+FULL_NAME = Nelson, Robert
+EMP_NO = 8
+FIRST_NAME = Leslie
+LAST_NAME = Johnson
+PHONE_EXT = 410
+HIRE_DATE = 1989/04/05 00:00:00.0000
+DEPT_NO = 180
+JOB_CODE = Mktg
+JOB_GRADE = 3
+JOB_COUNTRY = USA
+SALARY = 64,635.00
+FULL_NAME = Johnson, Leslie
+
+Select Count = 2 InsertCount = 0 UpdateCount = 2 DeleteCount = 0
+Batch Completion Info
+Total rows processed = 2
+Updated Records = 2
+Row 1 State = bcNoMoreErrors Msg = 
+Row 2 State = bcNoMoreErrors Msg = 
+Rows after update
+EMP_NO = 2
+FIRST_NAME = Robert
+LAST_NAME = Nelson
+PHONE_EXT = 250
+HIRE_DATE = 2018/05/28 00:00:00.0000
+DEPT_NO = 600
+JOB_CODE = VP
+JOB_GRADE = 2
+JOB_COUNTRY = USA
+SALARY = 105,900.00
+FULL_NAME = Nelson, Robert
+EMP_NO = 8
+FIRST_NAME = Leslie
+LAST_NAME = Johnson
+PHONE_EXT = 410
+HIRE_DATE = 2016/01/31 00:00:00.0000
+DEPT_NO = 180
+JOB_CODE = Mktg
+JOB_GRADE = 3
+JOB_COUNTRY = USA
+SALARY = 64,635.00
+FULL_NAME = Johnson, Leslie
+
+
+Repeat but with a last dummy row that is ignored
+Select Count = 2 InsertCount = 0 UpdateCount = 2 DeleteCount = 0
+Batch Completion Info
+Total rows processed = 2
+Updated Records = 2
+Row 1 State = bcNoMoreErrors Msg = 
+Row 2 State = bcNoMoreErrors Msg = 
+Rows after update
+EMP_NO = 2
+FIRST_NAME = Robert
+LAST_NAME = Nelson
+PHONE_EXT = 250
+HIRE_DATE = 2018/05/28 00:00:00.0000
+DEPT_NO = 600
+JOB_CODE = VP
+JOB_GRADE = 2
+JOB_COUNTRY = USA
+SALARY = 105,900.00
+FULL_NAME = Nelson, Robert
+EMP_NO = 8
+FIRST_NAME = Leslie
+LAST_NAME = Johnson
+PHONE_EXT = 410
+HIRE_DATE = 2016/01/31 00:00:00.0000
+DEPT_NO = 180
+JOB_CODE = Mktg
+JOB_GRADE = 3
+JOB_COUNTRY = USA
+SALARY = 64,635.00
+FULL_NAME = Johnson, Leslie
+
+
+Insert rows
+Select Count = 0 InsertCount = 3 UpdateCount = 0 DeleteCount = 0
+Batch Completion Info
+Total rows processed = 3
+Updated Records = 3
+Row 1 State = bcNoMoreErrors Msg = 
+Row 2 State = bcNoMoreErrors Msg = 
+Row 3 State = bcNoMoreErrors Msg = 
+Rows after insert
+EMP_NO = 500
+FIRST_NAME = John
+LAST_NAME = Doe
+PHONE_EXT = 
+HIRE_DATE = 2015/04/01 00:00:00.0000
+DEPT_NO = 600
+JOB_CODE = Eng
+JOB_GRADE = 4
+JOB_COUNTRY = England
+SALARY = 41,000.89
+FULL_NAME = Doe, John
+EMP_NO = 501
+FIRST_NAME = Jane
+LAST_NAME = Doe
+PHONE_EXT = 
+HIRE_DATE = 2015/04/02 00:00:00.0000
+DEPT_NO = 600
+JOB_CODE = Eng
+JOB_GRADE = 4
+JOB_COUNTRY = England
+SALARY = 42,000.89
+FULL_NAME = Doe, Jane
+EMP_NO = 502
+FIRST_NAME = John
+LAST_NAME = SmithAndJonesFamily1
+PHONE_EXT = 
+HIRE_DATE = 2015/04/03 00:00:00.0000
+DEPT_NO = 600
+JOB_CODE = Eng
+JOB_GRADE = 4
+JOB_COUNTRY = England
+SALARY = 41,000.99
+FULL_NAME = SmithAndJonesFamily1, John
+
+
+Insert rows - and then cancel
+Cancel Batch - note - next step will fail with a duplicate key if cancel fails
+
+Insert rows - ignore last row
+Select Count = 0 InsertCount = 2 UpdateCount = 0 DeleteCount = 0
+Batch Completion Info
+Total rows processed = 2
+Updated Records = 2
+Row 1 State = bcNoMoreErrors Msg = 
+Row 2 State = bcNoMoreErrors Msg = 
+Rows after insert
+EMP_NO = 500
+FIRST_NAME = John
+LAST_NAME = Doe
+PHONE_EXT = 
+HIRE_DATE = 2015/04/01 00:00:00.0000
+DEPT_NO = 600
+JOB_CODE = Eng
+JOB_GRADE = 4
+JOB_COUNTRY = England
+SALARY = 41,000.89
+FULL_NAME = Doe, John
+EMP_NO = 501
+FIRST_NAME = Jane
+LAST_NAME = Doe
+PHONE_EXT = 
+HIRE_DATE = 2015/04/02 00:00:00.0000
+DEPT_NO = 600
+JOB_CODE = Eng
+JOB_GRADE = 4
+JOB_COUNTRY = England
+SALARY = 42,000.89
+FULL_NAME = Doe, Jane
+
+Insert with inline blob
+Select Count = 0 InsertCount = 2 UpdateCount = 0 DeleteCount = 0
+Batch Completion Info
+Total rows processed = 2
+Updated Records = 2
+Row 1 State = bcNoMoreErrors Msg = 
+Row 2 State = bcNoMoreErrors Msg = 
+Rows after insert
+JOB_CODE = ABC
+JOB_GRADE = 3
+JOB_COUNTRY = England
+JOB_TITLE = Chief Tester
+MIN_SALARY = 21,000.00
+MAX_SALARY = 24,000.99
+JOB_REQUIREMENT (Charset Id = 0 Codepage = 0)
+
+The quick brown fox jumped over the lazy dog
+LANGUAGE_REQ = Array: (1: Eng) (2: ) (3: ) (4: ) (5: ) 
+
+JOB_CODE = DEF
+JOB_GRADE = 3
+JOB_COUNTRY = England
+JOB_TITLE = Deputy Tester
+MIN_SALARY = 21,000.00
+MAX_SALARY = 24,000.99
+JOB_REQUIREMENT (Charset Id = 0 Codepage = 0)
+
+The quick brown fox jumped over the running dog
+LANGUAGE_REQ = Array: (1: Eng) (2: Fra) (3: ) (4: ) (5: ) 
+
+
+
+Insert with explicit blob
+Select Count = 0 InsertCount = 2 UpdateCount = 0 DeleteCount = 0
+Batch Completion Info
+Total rows processed = 2
+Updated Records = 2
+Row 1 State = bcNoMoreErrors Msg = 
+Row 2 State = bcNoMoreErrors Msg = 
+Rows after insert
+JOB_CODE = ABC
+JOB_GRADE = 3
+JOB_COUNTRY = England
+JOB_TITLE = Chief Tester
+MIN_SALARY = 21,000.00
+MAX_SALARY = 24,000.99
+JOB_REQUIREMENT (Charset Id = 0 Codepage = 0)
+
+The quick brown fox jumped over the lazy dog
+LANGUAGE_REQ = Array: (1: Eng) (2: ) (3: ) (4: ) (5: ) 
+
+JOB_CODE = DEF
+JOB_GRADE = 3
+JOB_COUNTRY = England
+JOB_TITLE = Deputy Tester
+MIN_SALARY = 21,000.00
+MAX_SALARY = 24,000.99
+JOB_REQUIREMENT (Charset Id = 0 Codepage = 0)
+
+The quick brown fox jumped over the running dog
+LANGUAGE_REQ = Array: (1: Eng) (2: Fra) (3: ) (4: ) (5: ) 
+
+
+Test Error Handling
+Error reported (as expected) when changing param type: Param[0] "": Unable to change from a SQL_TIMESTAMP to a string type
+Test Error Handling - Update returning should fail
+Error reported (as expected) when defering update returning query: This query type (SQL_Select) cannot be batched
+Error handling when Insert rows - duplicate key
+Error reported when inserting: Engine Code: 335544665
+"INTEG_27"
+-"PUBLIC"."EMPLOYEE"
+-("EMP_NO" = 500)
+Select Count = 0 InsertCount = 1 UpdateCount = 0 DeleteCount = 0
+Batch Completion Info
+Total rows processed = 2
+Updated Records = 1
+Row 1 State = bcNoMoreErrors Msg = 
+Row 2 State = bcExecuteFailed Msg = Engine Code: 335544665
+"INTEG_27"
+-"PUBLIC"."EMPLOYEE"
+-("EMP_NO" = 500)
 
 
 ------------------------------------------------------
 Running Test 20: Stress Test IBatch interface
  FBVersion = Firebird wire protocol version 18, Srp256 authentication, ChaCha64 wire encryption
-Skipping test - batch mode is not supported by this provider
+10000 rows added
+20000 rows added
+30000 rows added
+40000 rows added
+50000 rows added
+Batch Execute
+Intermediate Apply Batch on row 50001
+Batch Completion Info
+Total rows processed = 50000
+Updated Rows = 50000
+Row 50000 State = bcNoMoreErrors Msg = 
+60000 rows added
+70000 rows added
+80000 rows added
+90000 rows added
+100000 rows added
+Batch Execute
+Batch Completion Info
+Total rows processed = 50000
+Updated Rows = 50000
+Row 50000 State = bcNoMoreErrors Msg = 
+Rows in Dataset = 100000
+ Message Hash = 2014887b8ad27fbb20893a22d6e39f26
+ Message Hash = 2014887b8ad27fbb20893a22d6e39f26
+Test Completed Successfully
 
 
 ------------------------------------------------------
@@ -3832,9 +4103,10 @@ Charset id = 0
 Nullable
 Size = 8
 
-Expected Error - String overflow. String Length 5 exceeds permitted maximum (4)
 Expected Error - Engine Code: 335544334
-#x01#x00#x00#x00
+1,00
+Expected Error - Engine Code: 335544334
+1,00
 Test Numeric Type
 ROWID = 1
 ITYPE = 101
@@ -4029,12 +4301,12 @@ IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 9
 IBX$OLDTRANSACTIONID = NULL
 IBX$USER = SYSDBA
-IBX$CREATED = 2026/08/01 14:11:20.8830
+IBX$CREATED = 2026/08/01 15:28:53.2680
 IBX$SESSIONID = 1
 IBX$TRANSACTIONID = 11
 IBX$OLDTRANSACTIONID = 10
 IBX$USER = SYSDBA
-IBX$CREATED = 2026/08/01 14:11:20.8920
+IBX$CREATED = 2026/08/01 15:28:53.2770
 
 Journal Entries
 Journal Entry = jeTransStart(Transaction Start)
@@ -4116,7 +4388,7 @@ Timestamp = yyyy/mm/dd hh:mm:ss.zzzz
 Attachment ID = 3
 Session ID = 1
 Transaction ID = 12
-Query = Insert into TestData(RowID, Str, TextBlob) Values(5,'It''s the quick brown fox jumps over the lazy dog                                                                                                                                                                                                                ','To be or not to be-that is the question:
+Query = Insert into TestData(RowID, Str, TextBlob) Values(5,'It''s the quick brown fox jumps over the lazy dog','To be or not to be-that is the question:
 Whether ''tis nobler in the mind to suffer
 The slings and arrows of outrageous fortune,
 Or to take arms against a sea of troubles,
