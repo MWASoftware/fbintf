@@ -301,6 +301,7 @@ type
     procedure FreeHandle; override;
     procedure InternalClose(Force: boolean); override;
     function SavePerfStats(var Stats: TPerfStatistics): boolean;
+    procedure ApplyStatementTimeout;
   public
     constructor Create(Attachment: TFB30Attachment; Transaction: ITransaction;
       sql: AnsiString; aSQLDialect: integer; CursorName: AnsiString='');
@@ -325,6 +326,8 @@ type
     procedure SetRetainInterfaces(aValue: boolean); override;
     function IsInBatchMode: boolean; override;
     function HasBatchMode: boolean; override;
+    {needs a Firebird 4 or later client library}
+    procedure SetStatementTimeout(aMilliseconds: cardinal); override;
     procedure AddToBatch; override;
     function ExecuteBatch(aTransaction: ITransaction
       ): IBatchCompletion; override;
@@ -1502,6 +1505,7 @@ function TFB30Statement.InternalExecute(aTransaction: ITransaction): IResults;
     with FFirebird30ClientAPI do
     begin
       SavePerfStats(FBeforeStats);
+      ApplyStatementTimeout;
       inMetadata := FSQLParams.GetMetaData;
       try
         FStatementIntf.execute(StatusIntf,
@@ -1609,6 +1613,7 @@ begin
 
  with FFirebird30ClientAPI do
  begin
+   ApplyStatementTimeout;
    inMetadata := FSQLParams.GetMetaData;
    outMetadata := FSQLRecord.GetMetaData;
    try
@@ -1901,6 +1906,23 @@ end;
 function TFB30Statement.HasBatchMode: boolean;
 begin
   Result := GetAttachment.HasBatchMode;
+end;
+
+procedure TFB30Statement.SetStatementTimeout(aMilliseconds: cardinal);
+begin
+  if (aMilliseconds <> 0) and not FFirebird30ClientAPI.Firebird4orLater then
+    IBError(ibxeNotSupported,[nil]);
+  FStatementTimeout := aMilliseconds;
+end;
+
+procedure TFB30Statement.ApplyStatementTimeout;
+begin
+  if FStatementTimeout = 0 then Exit;
+  with FFirebird30ClientAPI do
+  begin
+    FStatementIntf.setTimeout(StatusIntf,FStatementTimeout);
+    Check4DataBaseError(ConnectionCodePage);
+  end;
 end;
 
 procedure TFB30Statement.AddToBatch;

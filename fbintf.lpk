@@ -7,7 +7,7 @@
       <Version Value="11"/>
       <SearchPaths>
         <IncludeFiles Value="client/3.0/firebird;client/include;include"/>
-        <OtherUnitFiles Value="client;client/3.0/firebird;client/2.5;.;client/3.0"/>
+        <OtherUnitFiles Value="client;client/3.0/firebird;client/2.5;.;client/3.0;client/wire"/>
         <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <CodeGeneration>
@@ -52,7 +52,7 @@ Two interface implementations are provided. One is for the new Firebird 3 Client
  *  Contributor(s): ______________________________________.
  *    "/>
     <Version Major="1" Minor="4" Release = "9" Build="1258" />
-    <Files Count="38">
+    <Files Count="56">
       <Item1>
         <Filename Value="client/IB.pas"/>
         <UnitName Value="IB"/>
@@ -206,6 +206,79 @@ Two interface implementations are provided. One is for the new Firebird 3 Client
         <Filename Value="client/3.0/firebird/FirebirdOOAPI.pas"/>
         <UnitName Value="FirebirdOOAPI"/>
       </Item38>
+      <Item39>
+        <Filename Value="client/wire/FBWireBigInt.pas"/>
+        <UnitName Value="FBWireBigInt"/>
+      </Item39>
+      <Item40>
+        <Filename Value="client/wire/FBWireCrypto.pas"/>
+        <UnitName Value="FBWireCrypto"/>
+      </Item40>
+      <Item41>
+        <Filename Value="client/wire/FBWireSRP.pas"/>
+        <UnitName Value="FBWireSRP"/>
+      </Item41>
+      <Item42>
+        <Filename Value="client/wire/FBWireStream.pas"/>
+        <UnitName Value="FBWireStream"/>
+      </Item42>
+      <Item43>
+        <Filename Value="client/wire/FBWireConst.pas"/>
+        <UnitName Value="FBWireConst"/>
+      </Item43>
+      <Item44>
+        <Filename Value="client/wire/FBWireMessage.pas"/>
+        <UnitName Value="FBWireMessage"/>
+      </Item44>
+      <Item45>
+        <Filename Value="client/wire/FBWireDescribe.pas"/>
+        <UnitName Value="FBWireDescribe"/>
+      </Item45>
+      <Item46>
+        <Filename Value="client/wire/FBWireProtocol.pas"/>
+        <UnitName Value="FBWireProtocol"/>
+      </Item46>
+      <Item47>
+        <Filename Value="client/wire/FBWireClientAPI.pas"/>
+        <UnitName Value="FBWireClientAPI"/>
+      </Item47>
+      <Item48>
+        <Filename Value="client/wire/FBWireAttachment.pas"/>
+        <UnitName Value="FBWireAttachment"/>
+      </Item48>
+      <Item49>
+        <Filename Value="client/wire/FBWireTransaction.pas"/>
+        <UnitName Value="FBWireTransaction"/>
+      </Item49>
+      <Item50>
+        <Filename Value="client/wire/FBWireStatement.pas"/>
+        <UnitName Value="FBWireStatement"/>
+      </Item50>
+      <Item51>
+        <Filename Value="client/wire/FBWireBlob.pas"/>
+        <UnitName Value="FBWireBlob"/>
+      </Item51>
+      <Item52>
+        <Filename Value="client/wire/FBWireEvents.pas"/>
+        <UnitName Value="FBWireEvents"/>
+      </Item52>
+      <Item53>
+        <Filename Value="client/FBSDL.pas"/>
+        <AddToUsesPkgSection Value="False"/>
+        <UnitName Value="FBSDL"/>
+      </Item53>
+      <Item54>
+        <Filename Value="client/wire/FBWireArray.pas"/>
+        <UnitName Value="FBWireArray"/>
+      </Item54>
+      <Item55>
+        <Filename Value="client/wire/FBWireMessages.pas"/>
+        <UnitName Value="FBWireMessages"/>
+      </Item55>
+      <Item56>
+        <Filename Value="client/wire/FBWireServices.pas"/>
+        <UnitName Value="FBWireServices"/>
+      </Item56>
     </Files>
     <CompatibilityMode Value="True"/>
     <RequiredPkgs Count="1">

@@ -41,7 +41,7 @@ unit TestApplication;
 interface
 
 uses
-  Classes, SysUtils, {$IFDEF FPC}CustApp,{$ENDIF} FirebirdOOAPI, IB, IBUtils, FmtBCD, FBClientLib;
+  Classes, SysUtils, {$IFDEF FPC}CustApp, FBWireClientAPI,{$ENDIF} FirebirdOOAPI, IB, IBUtils, FmtBCD, FBClientLib;
 
 {$IF not defined(LineEnding)}
 const
@@ -156,6 +156,7 @@ type
     FPortNo: AnsiString;
     FCreateObjectsDone: boolean;
     FQuiet: boolean;
+    FProviderName: AnsiString;
     procedure CleanUp;
     function GetFirebirdAPI: IFirebirdAPI;
     function GetIndexByTestID(aTestID: AnsiString): integer;
@@ -169,6 +170,7 @@ type
     procedure SetServerName(AValue: AnsiString);
     procedure SetPortNum(aValue: AnsiString);
     procedure SetTestOption(aValue: AnsiString);
+    procedure SetProviderName(aValue: AnsiString);
   protected
     {$IFDEF FPC}
     function GetShortOptions: AnsiString; virtual;
@@ -703,7 +705,10 @@ begin
  writeln(outfile,'DB ODS Major Version = ',Attachment.GetODSMajorVersion);
  writeln(outfile,'DB ODS Minor Version = ',Attachment.GetODSMinorVersion);
  writeln(outfile,'User Authentication Method = ',Attachment.GetAuthenticationMethod);
- writeln(outfile,'Firebird Library Path = ',Attachment.getFirebirdAPI.GetFBLibrary.GetLibraryFilePath);
+ if Attachment.getFirebirdAPI.GetFBLibrary <> nil then
+   writeln(outfile,'Firebird Library Path = ',Attachment.getFirebirdAPI.GetFBLibrary.GetLibraryFilePath)
+ else
+   writeln(outfile,'Firebird Library Path = none (wire protocol provider)');
  writeln(outfile,'DB Client Implementation Version = ',Attachment.getFirebirdAPI.GetImplementationVersion);
 end;
 
@@ -1157,7 +1162,13 @@ function TTestApplication.GetFirebirdAPI: IFirebirdAPI;
 begin
   if FFirebirdAPI = nil then
   begin
-    FFirebirdAPI := IB.FirebirdAPI;
+    {$IFDEF FPC}
+    if CompareText(FProviderName,'wire') = 0 then
+      {the pure Pascal wire protocol provider - loads no client library}
+      FFirebirdAPI := WireFirebirdAPI
+    else
+    {$ENDIF}
+      FFirebirdAPI := IB.FirebirdAPI;
     FFirebirdAPI.GetStatus.SetIBDataBaseErrorMessages([ShowIBMessage]);;
   end;
   Result := FFirebirdAPI;
@@ -1320,16 +1331,31 @@ begin
   FTestOption := AValue;
 end;
 
+procedure TTestApplication.SetProviderName(aValue: AnsiString);
+begin
+  if FFirebirdAPI <> nil then
+    raise Exception.Create('The provider must be selected before the API is first used');
+  {$IFDEF FPC}
+  if (aValue <> '') and (CompareText(aValue,'wire') <> 0) and
+     (CompareText(aValue,'default') <> 0) then
+    raise Exception.CreateFmt('Unknown provider "%s" - use "wire" or "default"',[aValue]);
+  {$ELSE}
+  if (aValue <> '') and (CompareText(aValue,'default') <> 0) then
+    raise Exception.CreateFmt('Unknown provider "%s" - only "default" is available with this compiler',[aValue]);
+  {$ENDIF}
+  FProviderName := aValue;
+end;
+
 {$IFDEF FPC}
 function TTestApplication.GetShortOptions: AnsiString;
 begin
-  Result := 'htupensbolrSPXOq';
+  Result := 'htupensbolrSPXOqa';
 end;
 
 function TTestApplication.GetLongOptions: AnsiString;
 begin
   Result := 'help test user passwd employeedb newdbname secondnewdbname backupfile '+
-            'outfile fbclientlibrary server stats port prompt TestOption quiet';
+            'outfile fbclientlibrary server stats port prompt TestOption quiet api';
 end;
 
 procedure TTestApplication.GetParams(var DoPrompt: boolean; var TestID: string);
@@ -1377,6 +1403,9 @@ begin
 
   if HasOption('l','fbclientlibrary') then
     SetClientLibraryPath(GetOptionValue('l'));
+
+  if HasOption('a','api') then
+    SetProviderName(GetOptionValue('a'));
 
   if HasOption('r','server') then
     SetServerName(GetOptionValue('r'));
@@ -1461,6 +1490,9 @@ begin
   if GetCmdLineValue('l',aValue) or GetCmdLineValue('fbclientlibrary',aValue) then
       SetClientLibraryPath(aValue);
 
+  if GetCmdLineValue('a',aValue) or GetCmdLineValue('api',aValue) then
+      SetProviderName(aValue);
+
   if GetCmdLineValue('o',aValue) or GetCmdLineValue('outfile',aValue) then
   begin
     system.Assign(outFile,aValue);
@@ -1519,7 +1551,11 @@ begin
       writeln(OutFile,'Firebird Bin Directory = ', getDirectory(DIR_BIN));
       writeln(OutFile,'Firebird Conf Directory = ', getDirectory(DIR_CONF));
     end;
-    writeln(OutFile,'Firebird Client Library Path = ',FirebirdAPI.GetFBLibrary.GetLibraryFilePath);
+    {the wire protocol provider loads no client library}
+    if FirebirdAPI.GetFBLibrary <> nil then
+      writeln(OutFile,'Firebird Client Library Path = ',FirebirdAPI.GetFBLibrary.GetLibraryFilePath)
+    else
+      writeln(OutFile,'Provider = pure Pascal wire protocol, no client library');
   end;
 
   try

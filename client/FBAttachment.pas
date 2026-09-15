@@ -264,9 +264,12 @@ type
     function GetInlineBlobLimit: integer;
     procedure SetInlineBlobLimit(limit: integer);
     function HasBatchMode: boolean; virtual;
+    function HasArraySupport: boolean; virtual;
+    function HasEventSupport: boolean; virtual;
     function HasTable(aTableName: AnsiString): boolean;
     function HasFunction(aFunctionName: AnsiString): boolean;
     function HasProcedure(aProcName: AnsiString): boolean;
+    procedure CancelOperation(aKind: integer = fb_cancel_raise); virtual;
 
   public
     {Character Sets}
@@ -425,7 +428,7 @@ const
 );
 
 const
-  isc_dpb_last_dpb_constant = isc_dpb_decfloat_traps;
+  isc_dpb_last_dpb_constant = isc_dpb_gbak_restore_has_schema;
 
   DPBConstantNames: array[1..isc_dpb_last_dpb_constant] of string = (
     'cdd_pathname',
@@ -522,7 +525,19 @@ const
     'set_db_replica',
     'set_bind',
     'decfloat_round',
-    'decfloat_traps'
+    'decfloat_traps',
+    'clear_map',
+    'upgrade_db',
+    'dpb_98',   {unassigned}
+    'dpb_99',   {unassigned}
+    'parallel_workers',
+    'worker_attach',
+    'owner',
+    'max_blob_cache_size',
+    'max_inline_blob_size',
+    'search_path',
+    'blr_request_search_path',
+    'gbak_restore_has_schema'
     );
 
 type
@@ -1551,6 +1566,21 @@ end;
 function TFBAttachment.HasBatchMode: boolean;
 begin
   Result := false;
+end;
+
+function TFBAttachment.HasArraySupport: boolean;
+begin
+  Result := true;
+end;
+
+procedure TFBAttachment.CancelOperation(aKind: integer);
+begin
+  IBError(ibxeNotSupported,[nil]);
+end;
+
+function TFBAttachment.HasEventSupport: boolean;
+begin
+  Result := true;
 end;
 
 function TFBAttachment.HasTable(aTableName: AnsiString): boolean;

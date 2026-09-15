@@ -119,11 +119,11 @@ type
   private
     FIBDataBaseErrorMessages: TIBDataBaseErrorMessages;
     FPrefix: AnsiString;
-    function SQLCodeSupported: boolean;
   protected
     FOwner: TFBClientAPI;
+    function SQLCodeSupported: boolean; virtual;
     function GetIBMessage(CodePage: TSystemCodePage): Ansistring; virtual; abstract;
-    function GetSQLMessage(CodePage: TSystemCodePage): Ansistring;
+    function GetSQLMessage(CodePage: TSystemCodePage): Ansistring; virtual;
   public
     constructor Create(aOwner: TFBClientAPI; prefix: AnsiString='');
     constructor Copy(src: TFBStatus);
@@ -133,7 +133,7 @@ type
     {IStatus}
     function InErrorState: boolean; virtual; abstract;
     function GetIBErrorCode: TStatusCode;
-    function Getsqlcode: TStatusCode;
+    function Getsqlcode: TStatusCode; virtual;
     function GetMessage(CodePage: TSystemCodePage): AnsiString;
     function CheckStatusVector(ErrorCodes: array of TFBStatusCode): Boolean;
     function GetIBDataBaseErrorMessages: TIBDataBaseErrorMessages;

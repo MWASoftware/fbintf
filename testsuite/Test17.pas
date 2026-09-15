@@ -69,6 +69,7 @@ type
   TTest17 = class(TFBTestBase)
   private
     FOnDate: TDateTime; //used for Time with Time Zone conversions
+    function HasTimeZoneServices(Attachment: IAttachment): boolean;
     procedure TestArrayTZDataTypes(Attachment: IAttachment);
     procedure TestFBTimezoneSettings(Attachment: IAttachment);
     procedure UpdateDatabase(Attachment: IAttachment);
@@ -116,6 +117,16 @@ const
 
 
 { TTest17 }
+
+function TTest17.HasTimeZoneServices(Attachment: IAttachment): boolean;
+begin
+  Result := true;
+  try
+    Attachment.GetTimeZoneServices;
+  except on E: EIBClientError do
+    Result := false;
+  end;
+end;
 
 procedure TTest17.TestArrayTZDataTypes(Attachment: IAttachment);
 var Transaction: ITransaction;
@@ -423,6 +434,9 @@ begin
 
   if (FirebirdAPI.GetClientMajor < 4) or (Attachment.GetODSMajorVersion < 13) then
     writeln(OutFile,'Skipping Firebird 4 and later test part')
+  else
+  if not HasTimeZoneServices(Attachment) then
+    writeln(OutFile,'Skipping Firebird 4 and later test part - time zone services are not supported by this provider')
   else
   begin
     writeln(OutFile);

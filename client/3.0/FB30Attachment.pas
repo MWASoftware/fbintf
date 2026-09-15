@@ -108,6 +108,7 @@ type
     function HasDecFloatSupport: boolean; override;
     function HasBatchMode: boolean; override;
     function HasScollableCursors: boolean;
+    procedure CancelOperation(aKind: integer = fb_cancel_raise); override;
 
     {Time Zone Support}
     function GetTimeZoneServices: ITimeZoneServices; override;
@@ -498,6 +499,16 @@ end;
 function TFB30Attachment.HasScollableCursors: boolean;
 begin
   Result := (GetODSMajorVersion >= 12);
+end;
+
+procedure TFB30Attachment.CancelOperation(aKind: integer);
+begin
+  CheckHandle;
+  with FFirebird30ClientAPI do
+  begin
+    FAttachmentIntf.cancelOperation(StatusIntf,aKind);
+    Check4DataBaseError;
+  end;
 end;
 
 function TFB30Attachment.GetTimeZoneServices: ITimeZoneServices;

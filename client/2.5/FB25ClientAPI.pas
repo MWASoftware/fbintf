@@ -113,6 +113,9 @@ type
     {fbclient API}
     BLOB_get: TBLOB_get;
     BLOB_put: TBLOB_put;
+    {nil when the loaded library does not export it (fb_cancel_operation
+     arrived with Firebird 2.5)}
+    fb_cancel_operation: Tfb_cancel_operation;
     isc_wait_for_event: Tisc_wait_for_event;
     isc_vax_integer: Tisc_vax_integer;
     isc_blob_info: Tisc_blob_info;
@@ -383,6 +386,12 @@ begin
   Result := inherited LoadInterface;
   BLOB_get := GetProcAddr('BLOB_get'); {do not localize}
   BLOB_put := GetProcAddr('BLOB_put'); {do not localize}
+  try
+    fb_cancel_operation := GetProcAddr('fb_cancel_operation'); {do not localize}
+  except
+    {a pre 2.5 or InterBase library - CancelOperation reports not supported}
+    fb_cancel_operation := nil;
+  end;
   isc_wait_for_event := GetProcAddr('isc_wait_for_event'); {do not localize}
   isc_vax_integer := GetProcAddr('isc_vax_integer'); {do not localize}
   isc_blob_info := GetProcAddr('isc_blob_info'); {do not localize}

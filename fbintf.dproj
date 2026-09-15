@@ -188,6 +188,24 @@
         <DCCReference Include="client\FBClientLib.pas"/>
         <DCCReference Include="client\FBNumeric.pas"/>
         <DCCReference Include="client\3.0\firebird\FirebirdOOAPI.pas"/>
+        <DCCReference Include="client\FBSDL.pas"/>
+        <DCCReference Include="client\wire\FBWireBigInt.pas"/>
+        <DCCReference Include="client\wire\FBWireCrypto.pas"/>
+        <DCCReference Include="client\wire\FBWireSRP.pas"/>
+        <DCCReference Include="client\wire\FBWireConst.pas"/>
+        <DCCReference Include="client\wire\FBWireStream.pas"/>
+        <DCCReference Include="client\wire\FBWireMessage.pas"/>
+        <DCCReference Include="client\wire\FBWireDescribe.pas"/>
+        <DCCReference Include="client\wire\FBWireProtocol.pas"/>
+        <DCCReference Include="client\wire\FBWireClientAPI.pas"/>
+        <DCCReference Include="client\wire\FBWireAttachment.pas"/>
+        <DCCReference Include="client\wire\FBWireTransaction.pas"/>
+        <DCCReference Include="client\wire\FBWireStatement.pas"/>
+        <DCCReference Include="client\wire\FBWireBlob.pas"/>
+        <DCCReference Include="client\wire\FBWireEvents.pas"/>
+        <DCCReference Include="client\wire\FBWireArray.pas"/>
+        <DCCReference Include="client\wire\FBWireServices.pas"/>
+        <DCCReference Include="client\wire\FBWireMessages.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

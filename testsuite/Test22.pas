@@ -160,6 +160,11 @@ begin
   Statement.Execute;
   writeln(OutFile);
   writeln(OutFile,'Array Test');
+  if not Attachment.HasArraySupport then
+  begin
+    writeln(OutFile,'Skipping array test - arrays are not supported by this provider');
+    Exit;
+  end;
   Statement := Attachment.Prepare(Transaction,sqlInsertArray);
   ar := Attachment.CreateArray(Transaction,'TestData','MyArray');
   j := 100;

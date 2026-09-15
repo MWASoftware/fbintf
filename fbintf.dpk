@@ -69,6 +69,24 @@ contains
   FB30TimeZoneServices in 'client\3.0\FB30TimeZoneServices.pas',
   FBClientLib in 'client\FBClientLib.pas',
   FBNumeric in 'client\FBNumeric.pas',
-  FirebirdOOAPI in 'client\3.0\firebird\FirebirdOOAPI.pas';
+  FirebirdOOAPI in 'client\3.0\firebird\FirebirdOOAPI.pas',
+  FBSDL in 'client\FBSDL.pas',
+  FBWireBigInt in 'client\wire\FBWireBigInt.pas',
+  FBWireCrypto in 'client\wire\FBWireCrypto.pas',
+  FBWireSRP in 'client\wire\FBWireSRP.pas',
+  FBWireConst in 'client\wire\FBWireConst.pas',
+  FBWireStream in 'client\wire\FBWireStream.pas',
+  FBWireMessage in 'client\wire\FBWireMessage.pas',
+  FBWireDescribe in 'client\wire\FBWireDescribe.pas',
+  FBWireProtocol in 'client\wire\FBWireProtocol.pas',
+  FBWireClientAPI in 'client\wire\FBWireClientAPI.pas',
+  FBWireAttachment in 'client\wire\FBWireAttachment.pas',
+  FBWireTransaction in 'client\wire\FBWireTransaction.pas',
+  FBWireStatement in 'client\wire\FBWireStatement.pas',
+  FBWireBlob in 'client\wire\FBWireBlob.pas',
+  FBWireEvents in 'client\wire\FBWireEvents.pas',
+  FBWireArray in 'client\wire\FBWireArray.pas',
+  FBWireServices in 'client\wire\FBWireServices.pas',
+  FBWireMessages in 'client\wire\FBWireMessages.pas';
 
 end.

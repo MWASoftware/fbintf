@@ -285,7 +285,10 @@ begin
     Attachment.ExecImmediate([isc_tpb_write,isc_tpb_wait,isc_tpb_consistency],sqlCreateTable);
     UpdateDatabase4_DECFloat(Attachment);
     QueryDatabase4_DECFloat(Attachment);
-    ArrayTest(Attachment);
+    if Attachment.HasArraySupport then
+      ArrayTest(Attachment)
+    else
+      writeln(OutFile,'Skipping array test - arrays are not supported by this provider');
   end;
   Attachment.DropDatabase;
 end;
